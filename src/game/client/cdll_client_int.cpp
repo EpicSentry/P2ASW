@@ -1216,9 +1216,10 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CGlobalVarsBase *pGloba
 	s_GaussianRandomStream.AttachToStream( random );
 
 	g_pcv_ThreadMode = g_pCVar->FindVar( "host_thread_mode" );
-
-
-
+		
+#if defined( PORTAL2 )
+	engine->EnablePaintmapRender();
+#endif
 
 	COM_TimestampedLog( "InitGameSystems" );
 
