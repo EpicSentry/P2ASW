@@ -163,6 +163,83 @@ $Project "Server (Portal 2)"
 				$File	"$SRCDIR\game\shared\portal\weapon_portalgun_shared.cpp"
 				$File	"$SRCDIR\game\shared\portal\weapon_portalgun_shared.h"
 			}
+			$Folder "Paint"
+				{
+				
+					// shared
+					$File	"$SRCDIR\game\shared\portal2\paint\paintable_entity.h"
+					$File	"$SRCDIR\game\shared\portal2\paint\prop_paint_power_user.h"
+					$File	"$SRCDIR\game\shared\portal2\paint\player_pickup_paint_power_user.h"
+					$File	"$SRCDIR\game\shared\portal2\paint\paint_color_manager.h"
+					$File	"$SRCDIR\game\shared\portal2\paint\paint_color_manager.cpp"
+					$File	"$SRCDIR\game\shared\portal2\paint\paint_power_user_interface.h"
+					$File	"$SRCDIR\game\shared\portal2\paint\paint_power_user_interface.cpp"
+					$File	"$SRCDIR\game\shared\portal2\paint\paint_power_user.h"
+					$File	"$SRCDIR\game\shared\portal2\paint\paint_power_info.h"
+					$File	"$SRCDIR\game\shared\portal2\paint\paint_power_info.cpp"
+					$File	"$SRCDIR\game\shared\portal2\paint\stick_partner.h"
+					$File	"$SRCDIR\game\shared\portal2\paint\stick_partner.cpp"
+					$File	"$SRCDIR\game\shared\portal2\paint\paint_blobs_shared.h"
+					$File	"$SRCDIR\game\shared\portal2\paint\paint_blobs_shared.cpp"
+					$File	"$SRCDIR\game\shared\portal2\paint\paint_stream_manager.h"
+					$File	"$SRCDIR\game\shared\portal2\paint\paint_stream_manager.cpp"
+					$File	"$SRCDIR\game\shared\portal2\paint\paint_sprayer_shared.h"
+					$File	"$SRCDIR\game\shared\portal2\paint\paint_sprayer_shared.cpp"
+					$File	"$SRCDIR\game\shared\portal2\paint\paint_cleanser_manager.h"
+					$File	"$SRCDIR\game\shared\portal2\paint\paint_cleanser_manager.cpp"
+					$File	"$SRCDIR\game\shared\portal2\paint\weapon_paintgun_shared.h"
+					$File	"$SRCDIR\game\shared\portal2\paint\weapon_paintgun_shared.cpp"
+					$File	"$SRCDIR\game\shared\portal2\paint\paint_stream_shared.h"
+					$File	"$SRCDIR\game\shared\portal2\paint\paint_stream_shared.cpp"
+					$File	"$SRCDIR\game\shared\portal2\paint\paint_saverestore.h"
+					$File	"$SRCDIR\game\shared\portal2\paint\paint_saverestore.cpp"
+					
+					// server
+					$File	"portal2\paint\paint_database.h"
+					$File	"portal2\paint\paint_database.cpp"
+					$File	"portal2\paint\paint_sprayer.h"
+					$File	"portal2\paint\paint_sprayer.cpp"
+					$File	"portal2\paint\trigger_paint_cleanser.h"
+					$File	"portal2\paint\trigger_paint_cleanser.cpp"
+					$File	"portal2\paint\weapon_paintgun.h"
+					$File	"portal2\paint\weapon_paintgun.cpp"
+					$File	"portal2\paint\paint_swap_guns.h"
+					$File	"portal2\paint\paint_swap_guns.cpp"
+					$File	"portal2\paint\item_paint_power_pickup.cpp"
+					$File	"portal2\paint\prop_paint_bomb.h"
+					$File	"portal2\paint\prop_paint_bomb.cpp"
+					$File	"portal2\paint\paint_bot_temp.h"
+					$File	"portal2\paint\paint_bot_temp.cpp"
+					$File	"portal2\paint\prop_physics_paintable.cpp"
+					$File	"portal2\paint\cpaintblob.h"
+					$File	"portal2\paint\cpaintblob.cpp"
+					$File	"portal2\paint\paint_stream.h"
+					$File	"portal2\paint\paint_stream.cpp"
+					$File	"portal2\paint\paint_sphere.h"
+					$File	"portal2\paint\paint_sphere.cpp"
+					
+					$Folder	"Additional Public Header Files"
+					{
+						$File	"$SRCDIR\public\meshutils\mesh.h"
+					}
+
+					$File	"$SRCDIR\meshutils\atlas.cpp"
+					$File	"$SRCDIR\meshutils\clipmesh.cpp"
+					$File	"$SRCDIR\meshutils\convexhull.cpp"
+					$File	"$SRCDIR\meshutils\mesh.cpp"
+					$File	"$SRCDIR\meshutils\simplify.cpp"
+					$File	"$SRCDIR\meshutils\uvparam.cpp"
+					$File	"$SRCDIR\meshutils\vertexops.cpp"
+					
+					$Folder	"Additional Link Libraries"
+					{
+					//	$Lib	"$LIBPUBLIC\meshutils"
+						$Lib	"$LIBCOMMON\fileextd"	[$WIN32 && !$NO_CEG]
+					}
+				}
+				
+				$File	"portal2\portal_playerlocaldata.cpp"
+				$File	"portal2\portal_playerlocaldata.h"
 		}
 	}
 }
