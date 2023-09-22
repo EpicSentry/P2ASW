@@ -153,8 +153,8 @@ $Project "Server (Portal 2)"
 
 			$Folder	"Weapons"
 			{
-				$File	"$SRCDIR\game\server\portal\weapon_physcannon.cpp"
-				$File	"$SRCDIR\game\server\portal\weapon_physcannon.h"
+				//$File	"$SRCDIR\game\server\portal\weapon_physcannon.cpp"
+				//$File	"$SRCDIR\game\server\portal\weapon_physcannon.h"
 				$File	"$SRCDIR\game\shared\portal\weapon_portalbase.cpp"
 				$File	"$SRCDIR\game\shared\portal\weapon_portalbase.h"
 				$File	"$SRCDIR\game\shared\portal\weapon_portalbasecombatweapon.cpp"
