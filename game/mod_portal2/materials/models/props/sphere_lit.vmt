@@ -1,0 +1,10 @@
+"vertexlitgeneric"
+{
+	"$baseTexture" "models\props/sphere_lit"
+	"$envmap" "env_cubemap"
+//	"$basealphaenvmapmask" 1
+	"$surfaceprop" "Metal_Box"
+	"$selfillum" 1
+	"$envmaptint" "[ 0.2 0.2 0.4]"
+
+
