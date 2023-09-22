@@ -152,3 +152,4 @@ game/platform
 
 Debug_*
 Release_*
+!src/common/debug_dll_check.cpp
