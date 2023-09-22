@@ -4,7 +4,7 @@
 //
 //===========================================================================//
 #include "cbase.h"
-#include "mesh.h"
+#include "meshutils/mesh.h"
 #include "tier1/utlbuffer.h"
 #include "tier1/utlhash.h"
 

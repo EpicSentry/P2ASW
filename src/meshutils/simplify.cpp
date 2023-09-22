@@ -5,7 +5,7 @@
 //===========================================================================//
 #include "cbase.h"
 #include "mathlib/vector.h"
-#include "simplify.h"
+#include "meshutils/simplify.h"
 #include "tier1/utlpriorityqueue.h"
 #include "mathlib/cholesky.h"
 #include "tier1/utlhash.h"

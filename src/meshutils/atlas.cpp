@@ -5,7 +5,7 @@
 //===========================================================================//
 #include "cbase.h"
 #include "cbase.h"
-#include "mesh.h"
+#include "meshutils/mesh.h"
 
 class CPackNode
 {

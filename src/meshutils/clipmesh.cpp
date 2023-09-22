@@ -4,7 +4,7 @@
 //
 //===========================================================================//
 #include "cbase.h"
-#include "mesh.h"
+#include "meshutils/mesh.h"
 #include "tier1/utlbuffer.h"
 
 void ClipTriangle( float *pBackOut, float *pFrontOut, int *pNumBackOut, int *pNumFrontOut, int nStrideFloats, 

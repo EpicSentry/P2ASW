@@ -4,7 +4,7 @@
 //
 //==================================================================================================
 #include "cbase.h"
-#include "mesh.h"
+#include "meshutils/mesh.h"
 #include "tier1/mempool.h"
 #include "utlintrusivelist.h"
 #include "mathlib/ssemath.h"

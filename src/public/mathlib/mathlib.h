@@ -17,6 +17,14 @@
 #ifndef ALIGN8_POST
 #define ALIGN8_POST
 #endif
+
+enum Sides
+{
+	OR_SIDE_FRONT	=	1,
+	OR_SIDE_BACK	=	2,
+	OR_SIDE_ON		=	4,
+};
+
 // plane_t structure
 // !!! if this is changed, it must be changed in asm code too !!!
 // FIXME: does the asm code even exist anymore?
@@ -144,6 +152,8 @@ struct matrix3x4_t
 			}
 		}
 	}
+	
+	inline void TransformPlane( const cplane_t &inPlane, cplane_t &outPlane ) const;
 
 	float *operator[]( int i )				{ Assert(( i >= 0 ) && ( i < 3 )); return m_flMatVal[i]; }
 	const float *operator[]( int i ) const	{ Assert(( i >= 0 ) && ( i < 3 )); return m_flMatVal[i]; }
@@ -152,6 +162,8 @@ struct matrix3x4_t
 
 	float m_flMatVal[3][4];
 };
+
+//extern void MatrixTransformPlane( const matrix3x4_t &src, const cplane_t &inPlane, cplane_t &outPlane );
 
 class ALIGN16 matrix3x4a_t : public matrix3x4_t
 {
@@ -255,7 +267,7 @@ inline void VectorNegate(vec_t *a)
 }
 
 
-//#define VectorMaximum(a)		( MAX( (a)[0], MAX( (a)[1], (a)[2] ) ) )
+//#define VectorMaximum(a)		( max( (a)[0], max( (a)[1], (a)[2] ) ) )
 #define Vector2Clear(x)			{(x)[0]=(x)[1]=0;}
 #define Vector2Negate(x)		{(x)[0]=-((x)[0]);(x)[1]=-((x)[1]);}
 #define Vector2Copy(a,b)		{(b)[0]=(a)[0];(b)[1]=(a)[1];}
@@ -1768,6 +1780,8 @@ bool AnglesAreEqual( float a, float b, float tolerance = 0.0f );
 void RotationDeltaAxisAngle( const QAngle &srcAngles, const QAngle &destAngles, Vector &deltaAxis, float &deltaAngle );
 void RotationDelta( const QAngle &srcAngles, const QAngle &destAngles, QAngle *out );
 
+typedef __m128 fltx4;
+
 //-----------------------------------------------------------------------------
 // Clips a line segment such that only the portion in the positive half-space
 // of the plane remains.  If the segment is entirely clipped, the vectors
@@ -1781,7 +1795,9 @@ void ClipLineSegmentToPlane( const Vector &vNormal, const Vector &vPlanePoint, V
 
 void ComputeTrianglePlane( const Vector& v1, const Vector& v2, const Vector& v3, Vector& normal, float& intercept );
 int PolyFromPlane( Vector *outVerts, const Vector& normal, float dist, float fHalfScale = 9000.0f );
+void PolyFromPlane_SIMD( fltx4 *pOutVerts, const fltx4 & plane, float fHalfScale = 9000.0f );
 int ClipPolyToPlane( Vector *inVerts, int vertCount, Vector *outVerts, const Vector& normal, float dist, float fOnPlaneEpsilon = 0.1f );
+int ClipPolyToPlane_SIMD( fltx4 *pInVerts, int vertCount, fltx4 *pOutVerts, const fltx4& plane, float fOnPlaneEpsilon = 0.1f );
 int ClipPolyToPlane_Precise( double *inVerts, int vertCount, double *outVerts, const double *normal, double dist, double fOnPlaneEpsilon = 0.1 );
 float TetrahedronVolume( const Vector &p0, const Vector &p1, const Vector &p2, const Vector &p3 );
 float TriangleArea( const Vector &p0, const Vector &p1, const Vector &p2 );

@@ -319,7 +319,28 @@ void Vector3DMultiplyTranspose( const VMatrix& src1, const Vector& src2, Vector&
 void Vector4DMultiplyTranspose( const VMatrix& src1, const Vector4D& src2, Vector4D& dst );
 
 // Transform a plane
-void MatrixTransformPlane( const VMatrix &src, const cplane_t &inPlane, cplane_t &outPlane );
+inline void MatrixTransformPlane( const VMatrix &src, const cplane_t &inPlane, cplane_t &outPlane )
+{
+	// What we want to do is the following:
+	// 1) transform the normal into the new space.
+	// 2) Determine a point on the old plane given by plane dist * plane normal
+	// 3) Transform that point into the new space
+	// 4) Plane dist = DotProduct( new normal, new point )
+
+	// An optimized version, which works if the plane is orthogonal.
+	// 1) Transform the normal into the new space
+	// 2) Realize that transforming the old plane point into the new space
+	// is given by [ d * n'x + Tx, d * n'y + Ty, d * n'z + Tz ]
+	// where d = old plane dist, n' = transformed normal, Tn = translational component of transform
+	// 3) Compute the new plane dist using the dot product of the normal result of #2
+
+	// For a correct result, this should be an inverse-transpose matrix
+	// but that only matters if there are nonuniform scale or skew factors in this matrix.
+	Vector vTrans;
+	Vector3DMultiply( src, inPlane.normal, outPlane.normal );
+	outPlane.dist = inPlane.dist * DotProduct( outPlane.normal, outPlane.normal );
+	outPlane.dist += DotProduct( outPlane.normal, src.GetTranslation(vTrans) );
+}
 
 // Transform a plane that has an axis-aligned normal
 void MatrixTransformAxisAlignedPlane( const VMatrix &src, int nDim, float flSign, float flDist, cplane_t &outPlane );
@@ -438,7 +459,6 @@ inline VMatrix::VMatrix(
 		m30, m31, m32, m33
 		);
 }
-
 
 inline VMatrix::VMatrix( const matrix3x4_t& matrix3x4 )
 {

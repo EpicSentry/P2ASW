@@ -4,7 +4,7 @@
 //
 //===========================================================================//
 #include "cbase.h"
-#include "mesh.h"
+#include "meshutils/mesh.h"
 
 void CopyVertex( float *pOut, const float *pIn, int nFloats )
 {
