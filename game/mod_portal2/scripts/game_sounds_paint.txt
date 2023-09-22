@@ -1,0 +1,352 @@
+"WeightedCube.JumpPowerActivateShort"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_75db"
+	"volume"		"0.65"
+	"rndwave"
+	{
+		"wave"		"physics/paint/phys_bouncy_cube_sm_01.wav"
+		"wave"		"physics/paint/phys_bouncy_cube_sm_01.wav"
+		"wave"		"physics/paint/phys_bouncy_cube_sm_01.wav"
+		"wave"		"physics/paint/phys_bouncy_cube_sm_01.wav"
+	}
+}
+
+"WeightedCube.JumpPowerActivateLong"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_80db"
+	"volume"		"0.70"
+	"rndwave"
+	{
+		"wave"		"physics/paint/phys_bouncy_cube_lg_01.wav"
+		"wave"		"physics/paint/phys_bouncy_cube_lg_02.wav"
+		"wave"		"physics/paint/phys_bouncy_cube_lg_03.wav"
+		"wave"		"physics/paint/phys_bouncy_cube_lg_04.wav"
+	}
+}
+
+"PaintBomb.Splat"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_85dB"
+	"wave"		")physics/paint/phys_paint_bomb_01.wav"
+}
+
+"Turret.JumpPowerActivateShort"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.50"
+	"rndwave"
+	{
+		"wave"		"physics/paint/phys_bouncy_cube_sm_01.wav"
+		"wave"		"physics/paint/phys_bouncy_cube_sm_01.wav"
+		"wave"		"physics/paint/phys_bouncy_cube_sm_01.wav"
+		"wave"		"physics/paint/phys_bouncy_cube_sm_01.wav"
+	}
+}
+
+"Turret.JumpPowerActivateLong"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.50"
+	"rndwave"
+	{
+		"wave"		"physics/paint/phys_bouncy_cube_lg_01.wav"
+		"wave"		"physics/paint/phys_bouncy_cube_lg_02.wav"
+		"wave"		"physics/paint/phys_bouncy_cube_lg_03.wav"
+		"wave"		"physics/paint/phys_bouncy_cube_lg_04.wav"
+	}
+}
+
+"PaintBlob.ImpactLoop"	
+{
+	"channel"	"CHAN_WEAPON"
+	"soundlevel"	"SNDLVL_95dB"
+	"volume"	"1.0"
+	"pitch"			"80"
+	"wave"		"physics/paint/paint_blob_splat_lp_01.wav"
+}
+
+"PaintBlob.Impact"
+{
+	"soundlevel"		"SNDLVL_75dB"
+	"volume"		"0.7, 0.75"
+	"pitch"			"90, 110"
+	"rndwave"
+	{
+		"wave"	")physics/paint/paint_blob_splat_01.wav"
+		"wave"	")physics/paint/paint_blob_splat_02.wav"
+		"wave"	")physics/paint/paint_blob_splat_04.wav"
+		"wave"	")physics/paint/paint_blob_splat_05.wav"
+		"wave"	")physics/paint/paint_blob_splat_06.wav"
+		"wave"	")physics/paint/paint_blob_splat_07.wav"
+		"wave"	")physics/paint/paint_blob_splat_08.wav"
+		"wave"	")physics/paint/paint_blob_splat_09.wav"
+		"wave"	")physics/paint/paint_blob_splat_10.wav"
+		"wave"	")physics/paint/paint_blob_splat_11.wav"
+		"wave"	")physics/paint/paint_blob_splat_12.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"input_max_entries" "15.000000"
+				"match_entry" "PaintBlob.Impact"
+			}
+			
+			"block_entries"
+			{
+				"input_duration" "0.04" //in seconds
+				"match_entry" "PaintBlob.Impact" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"PaintBlob.ImpactDrip"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_75dB"
+	"volume"		"0.55, 0.7"
+	"pitch"			"145, 155"
+	"rndwave"
+	{
+		"wave"	")physics/paint/paint_blob_splat_01.wav"
+		"wave"	")physics/paint/paint_blob_splat_02.wav"
+		"wave"	")physics/paint/paint_blob_splat_04.wav"
+		"wave"	")physics/paint/paint_blob_splat_05.wav"
+		"wave"	")physics/paint/paint_blob_splat_06.wav"
+		"wave"	")physics/paint/paint_blob_splat_07.wav"
+		"wave"	")physics/paint/paint_blob_splat_08.wav"
+		"wave"	")physics/paint/paint_blob_splat_09.wav"
+		"wave"	")physics/paint/paint_blob_splat_10.wav"
+		// "wave"	")physics/paint/paint_blob_splat_11.wav"
+		// "wave"	")physics/paint/paint_blob_splat_12.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"input_max_entries" "15.000000"
+				"match_entry" "PaintBlob.ImpactDrip"
+			}
+			
+			"block_entries"
+			{
+				"input_duration" "0.03" //in seconds
+				"match_entry" "PaintBlob.ImpactDrip" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+		
+		"update_stack"
+		{
+			"import_stack"	"p2_offset_start_level_based"
+			
+			"delay_trigger"
+			{
+				"input2" "0.1" //Elapsed time in seconds goes here.
+			}
+			
+			"delay_trigger_2"
+			{
+				"input2" "0.5" //Elapsed time in seconds goes here.
+			}
+				
+			"level_specific_check"
+			{
+				"input_execute" "1.0" //enable map checking here
+				"map_name" "sp_a3_end" //your map name here		
+			}	
+			
+			"pos_specific_check"
+			{
+				"input2"	"-2288.0" //Replace with val you want to check against		
+			}
+			
+			"triggered_sound"
+			{
+				"entry_name" "PaintBlob.Impact" //Replace with the sound you want to play.
+			}
+			
+			"triggered_sound_2"
+			{
+				"entry_name" "PaintBlob.Impact" //Replace with the sound you want to play.
+			}
+		}
+	}
+}
+
+"PaintBlob.Inception"
+{
+	"soundlevel"		"SNDLVL_90dB"
+	"volume"		"0.4, 0.5"
+	"pitch"			"90, 110"
+	"rndwave"
+	{
+		"wave"	")physics/paint/paint_blob_inception_01.wav"
+		"wave"	")physics/paint/paint_blob_inception_02.wav"
+		"wave"	")physics/paint/paint_blob_inception_03.wav"
+		"wave"	")physics/paint/paint_blob_inception_04.wav"
+		// "wave"	"physics/paint/paint_blob_inception_05.wav"
+		// "wave"	"physics/paint/paint_blob_inception_06.wav"
+		// "wave"	"physics/paint/paint_blob_inception_07.wav"
+		// "wave"	"physics/paint/paint_blob_inception_08.wav"
+		// "wave"	"physics/paint/paint_blob_inception_09.wav"
+		// "wave"	"physics/paint/paint_blob_inception_10.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"input_max_entries" "2.000000"
+				"match_entry" "PaintBlob.Inception"
+			}
+		}
+	}
+}
+
+"Paint.Drip"
+{
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		"0.85, 0.95"
+	"pitch"			"90, 110"
+	"rndwave"
+	{
+		"wave"	")physics/paint/paint_trickle_01.wav"
+		"wave"	")physics/paint/paint_trickle_02.wav"
+		"wave"	")physics/paint/paint_trickle_03.wav"
+		"wave"	")physics/paint/paint_trickle_04.wav"
+		"wave"	")physics/paint/paint_trickle_05.wav"
+		"wave"	")physics/paint/paint_trickle_06.wav"
+		"wave"	")physics/paint/paint_trickle_07.wav"
+		"wave"	")physics/paint/paint_trickle_08.wav"
+		// "wave"	")physics/paint/paint_trickle_09.wav"
+	}
+
+	//"soundentry_version" "2"
+
+	//"operator_stacks"
+	//{
+		//"start_stack"
+		//{
+			//"import_stack" 	"P2_poly_limiting_start"
+
+			//"limit_sound"
+			//{
+				//"input_max_entries" "3.000000"
+				//"match_entry" "Paint.Drip"
+				//"match_substring"	"false"
+			//}
+		//}
+	//}
+}
+
+"Paint.HeavyFlow"
+{
+	"soundlevel"		"SNDLVL_90dB"
+	"volume"		"1.00"
+	"pitch"			"85"
+	"wave"	"physics/paint/paint_nozzle_waterfall_short_lp.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"input_max_entries" "3.000000"
+				"match_entry" "Paint.HeavyFlow"
+			}
+		}
+		
+		"update_stack"
+		{
+			"import_stack"	"p2_update_default"
+
+			"volume_fade_in"
+			{
+				"input_max" "0.25" //fade in time
+			}			
+			
+			"volume_fade_out"
+			{
+				"input_max" "1.5" //fade out time
+			}
+		}
+	}
+}
+
+"Paint.MediumFlow"
+{
+	"soundlevel"		"SNDLVL_80dB"
+	"volume"		"0.7"
+	"wave"	"physics/paint/paint_nozzle_waterfall_short_lp.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"input_max_entries" "3.000000"
+				"match_entry" "Paint.MediumFlow"
+			}
+		}
+		
+		"update_stack"
+		{
+			"import_stack"	"p2_update_default"
+
+			"volume_fade_in"
+			{
+				"input_max" "0.25" //fade in time
+			}			
+			
+			"volume_fade_out"
+			{
+				"input_max" "1.5" //fade out time
+			}
+		}
+	}
+}
+
+"Paint.MegaSplat"
+{
+	"soundlevel"		"SNDLVL_100dB"
+	"volume"		"1.0"
+	"wave"	"physics/paint/paint_jump_polarity_splat.wav"
+}

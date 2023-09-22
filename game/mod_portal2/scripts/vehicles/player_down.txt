@@ -1,0 +1,9 @@
+"vehicle_view"
+{
+	"clamp" "1"
+	"yawmin"	"-40"
+	"yawmax"	"40"
+	"pitchmin"	"-35"
+	"pitchmax"	"35"
+	"fov"		"50"
+}

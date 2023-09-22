@@ -1,0 +1,198 @@
+"HudChat.Message"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_NONE"
+	"volume"		"0.80"
+	"wave"		"common/talk.wav"
+}
+
+"Player.DenyWeaponSelection"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_NONE"
+	"volume"		"0.32"
+	"wave"		"common/wpn_denyselect.wav"
+}
+
+"Player.WeaponSelected"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_NONE"
+	"volume"		"0.32"
+	"wave"		"common/wpn_select.wav"
+}
+
+"Player.WeaponSelectionMoveSlot"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_NONE"
+	"volume"		"0.32"
+	"wave"		"common/wpn_moveselect.wav"
+}
+
+"Player.WeaponSelectionOpen"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_NONE"
+	"volume"		"0.32"
+	"wave"		"common/wpn_hudon.wav"
+}
+
+"Player.WeaponSelectionClose"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_NONE"
+	"volume"		"0.32"
+	"wave"		"common/wpn_hudoff.wav"
+}
+
+"SprayCan.Paint"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player/sprayer.wav"
+}
+
+"GameUI.StartupSound"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_NONE"
+	"wave"		"ui/startup_02_01.wav"
+}
+
+"GameUI.ButtonClickSound"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_NONE"
+	"wave"		"ui/test.wav"
+}
+
+"GameUI.ButtonNextSound"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_NONE"
+	"wave"		"ui/next.wav"
+}
+
+"GameUI.ButtonBackSound"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_NONE"
+	"wave"		"ui/back.wav"
+}
+
+"GameUI.ButtonHomeSound"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_NONE"
+	"wave"		"ui/clickback_02_01.wav"
+}
+
+"GameUI.ButtonItemSelectedSound"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_NONE"
+	"wave"		"ui/clickback_02_01.wav"
+}
+
+"GameUI.ButtonMoveSound"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_NONE"
+	"wave"		"ui/move.wav"
+}
+
+"GameUI.UiCoopHudActivate"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NONE"
+	"volume"	"0.9"
+	"wave"		"ui\ui_coop_hud_activate_01.wav"
+}
+
+"GameUI.UiCoopHudClick"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NONE"
+	"volume"	"0.9"
+	"rndwave"
+	{
+		"wave"		"ui\ui_coop_hud_click_01.wav"
+		"wave"		"ui\ui_coop_hud_click_02.wav"
+	}
+}
+
+"GameUI.UiCoopHudClickLow"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NONE"
+	"volume"	"0.9"
+	"pitch"		"90"
+	"rndwave"
+	{
+		"wave"		"ui\ui_coop_hud_click_01.wav"
+		"wave"		"ui\ui_coop_hud_click_02.wav"
+	}
+}
+
+"GameUI.UiCoopHudClickHigh"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NONE"
+	"volume"	"0.9"
+	"pitch"		"125"
+	"rndwave"
+	{
+		"wave"		"ui\ui_coop_hud_click_01.wav"
+		"wave"		"ui\ui_coop_hud_click_02.wav"
+	}
+}
+
+"GameUI.UiCoopHudDeactivate"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NONE"
+	"volume"	"0.9"
+	"wave"		"ui\ui_coop_hud_deactivate_01.wav"
+}
+
+"GameUI.UiCoopHudFocus"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NONE"
+	"volume"	"0.9"
+	"rndwave"
+	{
+		"wave"		"ui\ui_coop_hud_focus_01.wav"
+		"wave"		"ui\ui_coop_hud_focus_02.wav"
+	}
+}
+
+"GameUI.UiCoopHudUnfocus"
+{
+	"channel"	"CHAN_AUTO"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"	"0.9"
+	"wave"		"ui\ui_coop_hud_unfocus_01.wav"
+}
+
+
+"Instructor.LessonStart"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel" 		"SNDLVL_NORM"
+	"pitch"			"PITCH_NORM"
+	"volume"		"0.75"
+
+	"wave"			"#ui\beepclear.wav"
+}
+
+"Instructor.ImportantLessonStart"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel" 		"SNDLVL_NORM"
+	"pitch"			"PITCH_NORM"
+	"volume"		"0.75"
+
+	"wave"			"#ui\beep22.wav"
+}

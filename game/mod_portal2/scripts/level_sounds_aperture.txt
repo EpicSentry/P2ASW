@@ -1,0 +1,62 @@
+"Lift.Start"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_TALKING"
+	"volume"		"VOL_NORM"
+	"pitch"		"PITCH_NORM"
+	"wave"		")plats/platform_start_lp_01.wav"
+}
+
+"Lift.Stop"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_TALKING"
+	"volume"		"VOL_NORM"
+	"pitch"		"PITCH_NORM"
+	"wave"		"labs/lifts/lift_stop.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack"	"P2_null_player_start" //Play an entry other than the called one!
+			
+			"play_entry"
+			{
+				"entry_name" "World.PlatformStop" //Replace with the sound you want to play.
+			}
+			
+		}
+	}
+}
+
+"BTS4.Breakable.Glass"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"	"SNDLVL_95dB"
+	"volume"		"0.0"
+	"rndwave"
+	{
+		"wave"		"common/null.wav"
+		//"wave"		"physics/glass/glass_largesheet_break1.wav"
+		//"wave"		"physics/glass/glass_largesheet_break2.wav"
+		//"wave"		"physics/glass/glass_largesheet_break3.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack"	"P2_null_player_start"
+			
+			"play_entry"
+			{
+				"entry_name" "ScriptedSequence.BTSGlassBreak" //Replace with the sound you want to play.
+			}
+		}
+	}
+}

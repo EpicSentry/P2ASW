@@ -1,0 +1,39 @@
+
+// strider footsteps are heard practically everywhere in map
+
+"NPC_Chicken.Clucks"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.0"
+	"soundlevel"	"SNDLVL_80dB"
+	"pitch"	"100"
+	"rndwave"
+	{
+	"wave"	"npc/chicken/clucks1.wav"
+	"wave"	"npc/chicken/clucks2.wav"
+	"wave"	"npc/chicken/clucks3.wav"
+	"wave"	"npc/chicken/clucks4.wav"
+	"wave"	"npc/chicken/clucks5.wav"
+	}
+}
+
+
+"NPC_Chicken.Squawk"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.0"
+	"soundlevel"	"SNDLVL_100dB"
+	"pitch"	"100"
+	"wave"	"npc/chicken/squawk1.wav"
+}
+
+"NPC_Chicken.Startle"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.0"
+	"soundlevel"	"SNDLVL_100dB"
+	"pitch"	"100"
+	"wave"	"npc/chicken/startle1.wav"
+}
+
+

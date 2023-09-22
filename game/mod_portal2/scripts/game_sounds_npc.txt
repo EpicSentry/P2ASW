@@ -1,0 +1,1551 @@
+"Sphere.BlipSmall"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.80"
+	"rndwave"
+	{
+		"wave"		"npc/sphere/sphere_blips_sm_01.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_02.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_03.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_04.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_05.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_06.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_07.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_08.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_09.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_10.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_11.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_12.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_13.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_14.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_15.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_16.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_17.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_18.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_19.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_20.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_21.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_22.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_23.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_24.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_25.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_26.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_27.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_28.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_29.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_30.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_31.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_32.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_33.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_34.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_35.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_36.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_37.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_38.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_39.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_40.wav"
+		"wave"		"npc/sphere/sphere_blips_sm_41.wav"
+	}
+}
+
+"Sphere.BlipMedium"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.80"
+	"rndwave"
+	{
+		"wave"		"npc/sphere/sphere_blips_md_01.wav"
+		"wave"		"npc/sphere/sphere_blips_md_02.wav"
+		"wave"		"npc/sphere/sphere_blips_md_03.wav"
+		"wave"		"npc/sphere/sphere_blips_md_04.wav"
+		"wave"		"npc/sphere/sphere_blips_md_05.wav"
+		"wave"		"npc/sphere/sphere_blips_md_06.wav"
+		"wave"		"npc/sphere/sphere_blips_md_07.wav"
+		"wave"		"npc/sphere/sphere_blips_md_08.wav"
+		"wave"		"npc/sphere/sphere_blips_md_09.wav"
+		"wave"		"npc/sphere/sphere_blips_md_10.wav"
+		"wave"		"npc/sphere/sphere_blips_md_11.wav"
+		"wave"		"npc/sphere/sphere_blips_md_12.wav"
+		"wave"		"npc/sphere/sphere_blips_md_13.wav"
+		"wave"		"npc/sphere/sphere_blips_md_14.wav"
+		"wave"		"npc/sphere/sphere_blips_md_15.wav"
+		"wave"		"npc/sphere/sphere_blips_md_16.wav"
+		"wave"		"npc/sphere/sphere_blips_md_17.wav"
+		"wave"		"npc/sphere/sphere_blips_md_18.wav"
+		"wave"		"npc/sphere/sphere_blips_md_19.wav"
+		"wave"		"npc/sphere/sphere_blips_md_20.wav"
+		"wave"		"npc/sphere/sphere_blips_md_21.wav"
+		"wave"		"npc/sphere/sphere_blips_md_22.wav"
+	}
+}
+
+"Sphere.BlipLarge"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.80"
+	"rndwave"
+	{
+		"wave"		"npc/sphere/sphere_blips_lg_01.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_02.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_03.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_04.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_05.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_06.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_07.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_08.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_09.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_10.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_11.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_12.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_13.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_14.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_15.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_16.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_17.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_18.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_19.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_20.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_21.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_22.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_23.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_24.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_25.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_26.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_27.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_28.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_29.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_30.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_31.wav"
+		"wave"		"npc/sphere/sphere_blips_lg_32.wav"
+	}
+}
+
+"Sphere.Blink"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.40,0.50"
+	"pitch"		"95,103"
+	"rndwave"
+	{
+		"wave"		")npc\sphere\personality_sphere_blink_01.wav"
+		"wave"		")npc\sphere\personality_sphere_blink_02.wav"
+		"wave"		")npc\sphere\personality_sphere_blink_03.wav"
+		"wave"		")npc\sphere\personality_sphere_blink_04.wav"
+		"wave"		")npc\sphere\personality_sphere_blink_05.wav"
+		"wave"		")npc\sphere\personality_sphere_blink_06.wav"
+		"wave"		")npc\sphere\personality_sphere_blink_07.wav"
+	}
+}
+
+"Sphere.BlinkQuiet"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.25,0.35"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		")npc\sphere\personality_sphere_blink_01.wav"
+		"wave"		")npc\sphere\personality_sphere_blink_02.wav"
+		"wave"		")npc\sphere\personality_sphere_blink_03.wav"
+		"wave"		")npc\sphere\personality_sphere_blink_04.wav"
+		"wave"		")npc\sphere\personality_sphere_blink_05.wav"
+		"wave"		")npc\sphere\personality_sphere_blink_06.wav"
+		"wave"		")npc\sphere\personality_sphere_blink_07.wav"
+	}
+}
+
+"Sphere.RailTravelStart"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.50"
+	"wave"		")npc\sphere\sphere_rail_start_01.wav"
+}
+
+"Sphere.RailTravelStop"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.50"
+	"wave"		")npc\sphere\sphere_rail_stop_01.wav"
+}
+
+"Sphere.RailTravelMove"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.80"
+	"pitch"		"75"
+	"wave"		")npc\sphere\sphere_rail_travel_lp_01.wav"
+}
+
+"Sphere.SphereHack"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"	"SNDLVL_NORM"
+	"volume"		"0.80"
+	"wave"			"npc\sphere\sphere_hack_01.wav"
+}
+
+"Sphere.SphereHackLp"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"	"SNDLVL_NORM"
+	"volume"		"0.80"
+	"wave"			"npc\sphere\sphere_hack_lp_01.wav"
+}
+	
+"Sphere.AttachToRail"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"	"SNDLVL_70db"
+	"volume"		".5"
+	"wave"			"npc\sphere\sphere_attach.wav"
+}
+
+"Sphere.DisappearIntoCeiling"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"	"SNDLVL_NORM"
+	"volume"		"1.0"
+	"wave"			"npc\sphere\sphere_door_retreat.wav"
+}
+
+"Turret.ScanForTarget"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"	"SNDLVL_NORM"
+	"volume"		"1.0"
+	"wave"			"npc/turret_floor/ping.wav"
+}
+
+"Turret.SwapSensor"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"	"SNDLVL_NORM"
+	"volume"		"1.0"
+	"rndwave"
+	{
+		"wave"			"world/robot_parts/robot_mtl_synth_arm_up_04.wav"
+		"wave"			"world/robot_parts/robot_mtl_synth_arm_up_01.wav"
+	}
+}
+
+"Nanobot.Chatter1"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"	"SNDLVL_NORM"
+	"volume"		"0.8"
+	"wave"			"npc/nanobot/nanobot01.wav"
+}
+
+"SphereFoley.EyePop"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_75dB"
+	"volume"		"0.6,0.65"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_eye_pop_01.wav"
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_eye_pop_02.wav"
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "SphereFoley.EyePop"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" ".05" //in seconds
+				"match_entry" "SphereFoley.EyePop" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"SphereFoley.EyeRotateLong"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_eye_rotate_long_01.wav"
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_eye_rotate_long_02.wav"
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "SphereFoley.EyeRotateLong"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" ".05" //in seconds
+				"match_entry" "SphereFoley.EyeRotateLong" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"SphereFoley.EyeRotateShort"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_eye_rotate_short_01.wav"
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_eye_rotate_short_02.wav"
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "SphereFoley.EyeRotateShort"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" ".05" //in seconds
+				"match_entry" "SphereFoley.EyeRotateShort" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"SphereFoley.EyeRotateShortBlanks"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_eye_rotate_short_01.wav"
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_eye_rotate_short_02.wav"
+		"wave"		"common/NULL.WAV"
+		"wave"		"common/NULL.WAV"
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "SphereFoley.EyeRotateShort"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" ".05" //in seconds
+				"match_entry" "SphereFoley.EyeRotateShort" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"SphereFoley.FrontBackRotateLong"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_front_back_rotate_long_01.wav"
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_front_back_rotate_long_02.wav"
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "SphereFoley.FrontBackRotateLong"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" ".05" //in seconds
+				"match_entry" "SphereFoley.FrontBackRotateLong" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"SphereFoley.LowAccent"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_65dB"
+	"volume"		"0.25,0.3"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_low_accent_01.wav"
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_low_accent_02.wav"
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_low_accent_03.wav"
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_low_accent_04.wav"
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_low_accent_05.wav"
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_low_accent_06.wav"
+	}
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "SphereFoley.LowAccent"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" ".05" //in seconds
+				"match_entry" "SphereFoley.LowAccent" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"SphereFoley.LowAccentBlanks"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_65dB"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_low_accent_01.wav"
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_low_accent_02.wav"
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_low_accent_03.wav"
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_low_accent_04.wav"
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_low_accent_05.wav"
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_low_accent_06.wav"
+	}
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+			"import_stack"	"P2_null_start"
+		
+			"get_random_null"
+			{
+				"input_execute" "1.0"	
+			}
+			
+			"percent_null"
+			{
+				"input1" "0.40" // This is the percentage chance to play a null
+			}
+
+			"block_start"
+			{	
+				"input_execute" "@percent_null.output"
+			}
+
+			"limit_sound"
+			{
+				"match_entry" "SphereFoley.LowAccent"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" ".05" //in seconds
+				"match_entry" "SphereFoley.LowAccent" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"SphereFoley.Malfunction"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_malfunction_01.wav"
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_malfunction_02.wav"
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "SphereFoley.Malfunction"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" ".05" //in seconds
+				"match_entry" "SphereFoley.Malfunction" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"SphereFoley.MalfunctionBlanks"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_malfunction_01.wav"
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_malfunction_02.wav"
+		"wave"		"common/NULL.WAV"
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "SphereFoley.Malfunction"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" ".05" //in seconds
+				"match_entry" "SphereFoley.Malfunction" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"SphereFoley.NodLong"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_nod_long_01.wav"
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_nod_long_02.wav"
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_nod_long_03.wav"
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_nod_long_04.wav"
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "SphereFoley.NodLong"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" ".05" //in seconds
+				"match_entry" "SphereFoley.NodLong" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"SphereFoley.NodShort"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_nod_short_01.wav"
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_nod_short_02.wav"
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_nod_short_03.wav"
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_nod_short_04.wav"
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_nod_short_05.wav"
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "SphereFoley.NodShort"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" ".05" //in seconds
+				"match_entry" "SphereFoley.NodShort" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"SphereFoley.NodShortBlanks"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_nod_short_01.wav"
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_nod_short_02.wav"
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_nod_short_03.wav"
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_nod_short_04.wav"
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_nod_short_05.wav"
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+			"import_stack"	"P2_null_start"
+		
+			"get_random_null"
+			{
+				"input_execute" "1.0"	
+			}
+			
+			"percent_null"
+			{
+				"input1" "0.333" // This is the percentage chance to play a null
+			}
+
+			"block_start"
+			{	
+				"input_execute" "@percent_null.output"
+			}
+
+			"limit_sound"
+			{
+				"match_entry" "SphereFoley.NodShort"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" ".05" //in seconds
+				"match_entry" "SphereFoley.NodShort" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"SphereFoley.ShimmyLong"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_shimmy_long_01.wav"
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_shimmy_long_02.wav"
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "SphereFoley.ShimmyLong"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" ".05" //in seconds
+				"match_entry" "SphereFoley.ShimmyLong" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"SphereFoley.ShimmyMedium"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_shimmy_med_01.wav"
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_shimmy_med_02.wav"
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "SphereFoley.ShimmyMedium"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" ".05" //in seconds
+				"match_entry" "SphereFoley.ShimmyMedium" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"SphereFoley.ShimmyMediumBlanks"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_shimmy_med_01.wav"
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_shimmy_med_02.wav"
+		"wave"		"common/NULL.WAV"
+	}
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "SphereFoley.ShimmyMediumBlanks"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" ".05" //in seconds
+				"match_entry" "SphereFoley.ShimmyMediumBlanks" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"SphereFoley.TwitchShort"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_twitch_short_01.wav"
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_twitch_short_02.wav"
+		"wave"		")npc/wheatley_foley/sphere_foley_ruff_twitch_short_03.wav"
+		"wave"		"common/NULL.WAV"
+	}
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "SphereFoley.TwitchShort"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" ".05" //in seconds
+				"match_entry" "SphereFoley.TwitchShort" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"SphereFoley.TwitchShortBlanks"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_twitch_short_01.wav"
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_twitch_short_02.wav"
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_twitch_short_03.wav"
+		"wave"		"common/NULL.WAV"
+		"wave"		"common/NULL.WAV"
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "SphereFoley.TwitchShortBlanks"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" ".05" //in seconds
+				"match_entry" "SphereFoley.TwitchShortBlanks" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"SphereFoley.TwitchShortBlanksIdle"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_twitch_short_01.wav"
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_twitch_short_02.wav"
+		"wave"		"npc/wheatley_foley/sphere_foley_ruff_twitch_short_03.wav"
+		
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+			"import_stack"	"P2_null_start"
+		
+			"get_random_null"
+			{
+				"input_execute" "1.0"	
+			}
+			
+			"percent_null"
+			{
+				"input1" "0.55" // This is the percentage chance to play a null
+			}
+
+			"block_start"
+			{	
+				"input_execute" "@percent_null.output"
+			}
+
+			"limit_sound"
+			{
+				"match_entry" "SphereFoley.TwitchShortBlanks"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" ".05" //in seconds
+				"match_entry" "SphereFoley.TwitchShortBlanks" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"SphereFoley.BrainDamageClankLg"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.65,0.7"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		")npc/wheatley_foley/sphere_braindamage_clank_lg_01.wav"
+		"wave"		")npc/wheatley_foley/sphere_braindamage_clank_lg_02.wav"
+		"wave"		")npc/wheatley_foley/sphere_braindamage_clank_lg_03.wav"
+		"wave"		")npc/wheatley_foley/sphere_braindamage_clank_lg_04.wav"
+		"wave"		")npc/wheatley_foley/sphere_braindamage_clank_lg_05.wav"
+
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "SphereFoley.BrainDamageClankLg"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" ".05" //in seconds
+				"match_entry" "SphereFoley.BrainDamageClankLg" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"SphereFoley.BrainDamageClankSm"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		")npc/wheatley_foley/sphere_braindamage_clank_sm_01.wav"
+		"wave"		")npc/wheatley_foley/sphere_braindamage_clank_sm_02.wav"
+		"wave"		")npc/wheatley_foley/sphere_braindamage_clank_sm_03.wav"
+		"wave"		")npc/wheatley_foley/sphere_braindamage_clank_sm_04.wav"
+		"wave"		")npc/wheatley_foley/sphere_braindamage_clank_sm_05.wav"
+
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "SphereFoley.BrainDamageClankSm"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" ".05" //in seconds
+				"match_entry" "SphereFoley.BrainDamageClankSm" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"SphereFoley.BrainDamageClankSmQuiet"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		")npc/wheatley_foley/sphere_braindamage_clank_sm_01.wav"
+		"wave"		")npc/wheatley_foley/sphere_braindamage_clank_sm_02.wav"
+		"wave"		")npc/wheatley_foley/sphere_braindamage_clank_sm_03.wav"
+		"wave"		")npc/wheatley_foley/sphere_braindamage_clank_sm_04.wav"
+		"wave"		")npc/wheatley_foley/sphere_braindamage_clank_sm_05.wav"
+
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "SphereFoley.BrainDamageClankSm"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" ".05" //in seconds
+				"match_entry" "SphereFoley.BrainDamageClankSm" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"SphereFoley.Spark"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_80dB"
+	"volume"		"0.70,0.8"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		")player\coop_electric\coop_bot_spark_01.wav"
+		"wave"		")player\coop_electric\coop_bot_spark_02.wav"
+		"wave"		")player\coop_electric\coop_bot_spark_03.wav"
+		"wave"		")player\coop_electric\coop_bot_spark_04.wav"
+		"wave"		")player\coop_electric\coop_bot_spark_05.wav"
+		"wave"		")player\coop_electric\coop_bot_spark_06.wav"
+		"wave"		")player\coop_electric\coop_bot_spark_07.wav"
+		"wave"		")player\coop_electric\coop_bot_spark_08.wav"
+		"wave"		")player\coop_electric\coop_bot_spark_09.wav"
+		"wave"		")player\coop_electric\coop_bot_spark_10.wav"
+		"wave"		")player\coop_electric\coop_bot_spark_11.wav"
+		"wave"		")player\coop_electric\coop_bot_spark_12.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+
+"MonsterBox.Chitter"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_75db"
+	"volume"		"0.75,1.0"
+	"pitch"		"100,115"
+	"rndwave"
+	{
+		"wave"		")npc/box_monster/box_monster_chitter_01.wav"
+		"wave"		")npc/box_monster/box_monster_chitter_02.wav"
+		"wave"		")npc/box_monster/box_monster_chitter_03.wav"
+		"wave"		")npc/box_monster/box_monster_chitter_04.wav"
+		"wave"		")npc/box_monster/box_monster_chitter_05.wav"
+		"wave"		")npc/box_monster/box_monster_chitter_06.wav"
+		"wave"		")npc/box_monster/box_monster_chitter_07.wav"
+		"wave"		")npc/box_monster/box_monster_chitter_08.wav"
+		"wave"		")npc/box_monster/box_monster_chitter_09.wav"
+		"wave"		")npc/box_monster/box_monster_chitter_10.wav"
+		"wave"		")npc/box_monster/box_monster_chitter_11.wav"
+		"wave"		")npc/box_monster/box_monster_chitter_12.wav"
+		"wave"		")npc/box_monster/box_monster_chitter_13.wav"
+		"wave"		")npc/box_monster/box_monster_chitter_14.wav"
+		"wave"		")npc/box_monster/box_monster_chitter_15.wav"
+		"wave"		")npc/box_monster/box_monster_chitter_16.wav"
+		"wave"		")npc/box_monster/box_monster_chitter_17.wav"
+		"wave"		")npc/box_monster/box_monster_chitter_18.wav"
+		"wave"		")npc/box_monster/box_monster_chitter_19.wav"
+		"wave"		")npc/box_monster/box_monster_chitter_20.wav"
+	}
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "MonsterBox.Chitter"
+				"input_max_entries" "0.000000"
+				"match_substring" "false"
+				"match_entity" "true"
+			}	
+			
+			"get_random"
+			{
+				"input_execute" "1.0"
+				"input_min" "0.5"
+				"input_max" "1.5"		
+			}
+						
+			"block_entries"
+			{
+				"input_duration" "@get_random.output" //in seconds
+				"match_entry" "MonsterBox.Chitter" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"MonsterBox.Footstep"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_65db"
+	"volume"		"0.45,0.65"
+	"pitch"		"80,95"
+	"rndwave"
+	{
+		"wave"		")npc/box_monster/box_monster_fs_01.wav"
+		"wave"		")npc/box_monster/box_monster_fs_02.wav"
+		"wave"		")npc/box_monster/box_monster_fs_03.wav"
+		"wave"		")npc/box_monster/box_monster_fs_04.wav"
+		"wave"		")npc/box_monster/box_monster_fs_05.wav"
+		"wave"		")npc/box_monster/box_monster_fs_06.wav"
+		"wave"		")npc/box_monster/box_monster_fs_07.wav"
+	}
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+
+			"limit_boxes"
+			{
+				"operator" "sys_stop_entries"
+				"input_execute"	"1.0"
+				"match_entry" "MonsterBox.Footstep"
+				"input_max_entries" "7.000000"
+				"match_substring" "false"
+				"match_channel" "false"
+				"match_entity" "false"
+			}	
+		
+			"block_leg_entries"
+			{
+				"operator" "sys_block_entries"
+				"input_active" "1.0"	
+				"input_duration" "0.2"
+				"match_substring" "false"
+				"match_entry" "MonsterBox.Footstep" //The sound entry to use
+				"match_channel" "false"
+				"match_entity" "false"
+			}
+			
+			"import_stack" 	"P2_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "MonsterBox.Footstep"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+				"match_entity" "true"
+			}	
+		}
+	}
+}
+
+"MonsterBox.LegJump"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_65db"
+	"volume"		"0.65,0.7"
+	"pitch"		"95,115"
+	"rndwave"
+	{
+		"wave"		")npc/box_monster/box_monster_leg_kick_01.wav"
+		"wave"		")npc/box_monster/box_monster_leg_kick_02.wav"
+		"wave"		")npc/box_monster/box_monster_leg_kick_03.wav"
+		"wave"		")npc/box_monster/box_monster_leg_kick_04.wav"
+	}
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+
+			"limit_boxes"
+			{
+				"operator" "sys_stop_entries"
+				"match_entry" "MonsterBox.LegJump"
+				"input_max_entries" "3.000000"
+				"match_substring" "false"
+				"match_entity" "false"
+			}
+			
+			"import_stack" 	"P2_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "MonsterBox.LegJump"
+				"input_max_entries" "0.000000"
+				"match_substring" "false"
+				"match_entity" "true"
+			}	
+		}
+	}
+}
+
+"MonsterBox.Retract"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_65db"
+	"volume"		"1.0"
+	"pitch"		"95,115"
+	"rndwave"
+	{
+		"wave"		")npc/box_monster/box_monster_retract_01.wav"
+		"wave"		")npc/box_monster/box_monster_retract_02.wav"
+		"wave"		")npc/box_monster/box_monster_retract_03.wav"
+	}
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "MonsterBox.Retract"
+				"input_max_entries" "0.000000"
+				"match_substring" "false"
+				"match_entity" "true"
+			}	
+		}
+	}
+}
+
+"BirdBirdBird.FlyAway"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_105db"
+	"volume"		"1.0"
+	"pitch"		"95,110"
+	"rndwave"
+	{
+		"wave"		")npc/birdbirdbird/birdbirdbird_aways_01.wav"
+		"wave"		")npc/birdbirdbird/birdbirdbird_aways_02.wav"
+		"wave"		")npc/birdbirdbird/birdbirdbird_aways_03.wav"
+		"wave"		")npc/birdbirdbird/birdbirdbird_aways_04.wav"
+	}
+	
+	"soundentry_version" "2"
+}
+
+"BirdBirdBird.Idles"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_105db"
+	"volume"		"1.0"
+	"pitch"		"95,110"
+	"rndwave"
+	{
+		"wave"		")npc/birdbirdbird/birdbirdbird_idle_01.wav"
+		"wave"		")npc/birdbirdbird/birdbirdbird_idle_02.wav"
+		"wave"		")npc/birdbirdbird/birdbirdbird_idle_03.wav"
+		"wave"		")npc/birdbirdbird/birdbirdbird_idle_04.wav"
+		"wave"		")npc/birdbirdbird/birdbirdbird_idle_05.wav"
+	}
+	
+	"soundentry_version" "2"
+}
+
+"BirdBirdBird.Twosies"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_105db"
+	"volume"		"1.0"
+	"pitch"		"95,110"
+	"rndwave"
+	{
+		"wave"		")npc/birdbirdbird/birdbirdbird_twosies_01.wav"
+		"wave"		")npc/birdbirdbird/birdbirdbird_twosies_02.wav"
+		"wave"		")npc/birdbirdbird/birdbirdbird_twosies_03.wav"
+	}
+	
+	"soundentry_version" "2"
+}
+
+"BirdBirdBird.Threesies"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_105db"
+	"volume"		"1.0"
+	"pitch"		"95,110"
+	"rndwave"
+	{
+		"wave"		")npc/birdbirdbird/birdbirdbird_threesies_01.wav"
+		"wave"		")npc/birdbirdbird/birdbirdbird_threesies_02.wav"
+		"wave"		")npc/birdbirdbird/birdbirdbird_threesies_03.wav"
+		"wave"		")npc/birdbirdbird/birdbirdbird_threesies_04.wav"
+		"wave"		")npc/birdbirdbird/birdbirdbird_threesies_05.wav"
+	}
+	
+	"soundentry_version" "2"
+}
+
+"BirdBirdBird.Foursies"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_105db"
+	"volume"		"1.0"
+	"pitch"		"95,110"
+	"rndwave"
+	{
+		"wave"		")npc/birdbirdbird/birdbirdbird_foursies_01.wav"
+		"wave"		")npc/birdbirdbird/birdbirdbird_foursies_02.wav"
+		"wave"		")npc/birdbirdbird/birdbirdbird_foursies_03.wav"
+		"wave"		")npc/birdbirdbird/birdbirdbird_foursies_04.wav"
+		"wave"		")npc/birdbirdbird/birdbirdbird_foursies_05.wav"
+	}
+	
+	"soundentry_version" "2"
+}
+
+"BirdBirdBird.BeakAttack"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.65"
+	"pitch"		"98,100"
+	"rndwave"
+	{
+		"wave"		")physics/metal/metal_grenade_impact_hard1.wav"
+		"wave"		")physics/metal/metal_grenade_impact_hard2.wav"
+		"wave"		")physics/metal/metal_grenade_impact_hard3.wav"
+	}
+}
+
+"Sphere.FiringPowerup"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150db"
+	"volume"		"0.8"
+	"pitch"		"98,100"
+	"rndwave"
+	{
+		"wave"		")weapons/wheatley/sphere_firing_powerup_01.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "ReducedDuckingXxl"
+			}
+		}
+	}
+}
+
+"Sphere.CorruptAttach"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150db"
+	"volume"		"1.0"
+	"pitch"		"98,100"
+	"rndwave"
+	{
+		"wave"		"npc/sphere/corrupt_core_attach_01.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "ReducedDuckingXxl"
+			}
+		}
+	}
+}
+
+"Bird.WingFlap"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_60dB"
+	"volume"		"0.95, 1.0"
+	"pitch"			"95, 105"
+	"rndwave"
+	{
+		"wave"		"npc\birdbirdbird\bird_flap_01.wav"
+		"wave"		"npc\birdbirdbird\bird_flap_02.wav"
+		"wave"		"npc\birdbirdbird\bird_flap_03.wav"
+		"wave"		"npc\birdbirdbird\bird_flap_04.wav"
+		"wave"		"npc\birdbirdbird\bird_flap_05.wav"
+		"wave"		"npc\birdbirdbird\bird_flap_06.wav"
+		"wave"		"npc\birdbirdbird\bird_flap_07.wav"
+		"wave"		"npc\birdbirdbird\bird_flap_08.wav"
+		"wave"		"npc\birdbirdbird\bird_flap_09.wav"
+	}
+}
+
+"Bird.PotatoPeck"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.3, 0.35"
+	"pitch"			"135, 140"
+	"rndwave"
+	{
+		"wave"		")physics\flesh\flesh_impact_bullet1.wav"
+		"wave"		")physics\flesh\flesh_impact_bullet2.wav"
+		"wave"		")physics\flesh\flesh_impact_bullet3.wav"
+		"wave"		")physics\flesh\flesh_impact_bullet4.wav"
+	}
+}
+
+"World.GladosPotatoZap"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NONE"
+	"volume"		"0.9"
+	"pitch"		"100"
+	"wave"		"playonce\scripted_sequences\glados_potados_shock.wav"
+}
+
+"World.GladosPotatoPowerup"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NONE"
+	"volume"		"0.9"
+	"pitch"		"100"
+	"wave"		"playonce\scripted_sequences\glados_potato_powerup.wav"
+}

@@ -1,0 +1,61 @@
+"TestChamber_BTS.Generator"
+{
+	"dsp"	"1"
+
+	"playlooping"
+	{
+		"volume"	"0.65"	
+		"wave"	"ambient/props/electric/amb_bts_generator_lp_01.wav"
+		"pitch"		"100"
+		"attenuation"	"0"
+	}
+}
+
+"TestChamber_BTS.Comb"
+{
+	"dsp"	"1"
+
+	"playlooping"
+	{
+		"volume"	"0.65"	
+		"wave"	"ambient/synth/amb_bts_spring_comb_lp_01.wav"
+		"pitch"		"100"
+		"attenuation"	"0"
+	}
+}
+
+"TestChamber_BTS.Crystal"
+{
+	"dsp"	"1"
+
+	"playlooping"
+	{
+		"volume"	"0.65"	
+		"wave"	"ambient/synth/amb_bts_crystal_lp_01.wav"
+		"pitch"		"100"
+		"attenuation"	"0"
+	}
+}
+
+"TestChamber_BTS.Drone"
+{
+	"dsp"	"1"
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_BTS.Crystal"
+		"volume" "1"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_BTS.Comb"
+		"volume" "1"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_BTS.Generator"
+		"volume" "1"
+	}
+}

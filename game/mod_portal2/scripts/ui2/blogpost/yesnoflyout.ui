@@ -1,0 +1,36 @@
+
+
+--
+-- DECLARATION
+--
+
+this:baseclass( "base/flyout" );
+
+this:add(
+	"yes",
+	"base/flyoutbutton",
+	{
+		text = "#Yes";
+		left = this.margin;
+		top = this.margin;
+	}
+);
+
+this:add(
+	"no",
+	"base/flyoutbutton",
+	{
+		text = "#No";
+		left = this.margin;
+		top = this.yes.bottom + this.itemgap;
+	}
+);
+
+focus:updown( { this.yes.hitarea, this.no.hitarea } );
+
+this:out( "width",
+	this.margin + math:max( this.yes.right, this.no.right ) + this.margin );
+
+this:out( "height",
+	this.no.bottom + this.margin );
+

@@ -1,0 +1,466 @@
+
+//-----------------------------------------------------------------------
+// Player Rules for Ballbot
+// Team taunt rules listed first, then solo taunt rules
+//-----------------------------------------------------------------------
+#include "talker/response_criteria.txt"
+criterion "IsBallbot" "is_ballbot" 1 required
+
+//-----------------------------------------------------------------------
+// Team Gesture HighFive
+//-----------------------------------------------------------------------
+
+response "BallbotHighFive_Initiate"
+{
+	scene "scenes/player/ballbot/taunt_highFive_initiate.vcd"  then self teamtaunt_idle foo:0 0.0
+}
+rule BallbotTeamGestureHighFive_Initiate
+{
+	criteria IsBallbot ConceptTaunt NoTauntPartner TauntForceHighFive
+	response BallbotHighFive_Initiate
+}
+
+response "BallbotHighFive_Idle"
+{
+	scene "scenes/player/ballbot/taunt_highFive_idle.vcd"  then self teamtaunt_noshow foo:0 0.0
+}
+rule BallbotTeamGestureHighFive_Idle
+{
+	criteria IsBallbot ConceptTeamTauntIdle TauntForceHighFive
+	response BallbotHighFive_Idle
+}
+
+response "BallbotHighFive_NoShow"
+{
+	scene "scenes/player/ballbot/taunt_highFive_noShow.vcd"
+}
+rule BallbotTeamGestureHighFive_NoShow
+{
+	criteria IsBallbot ConceptTeamTauntNoShow NoTauntPartner TauntForceHighFive
+	response BallbotHighFive_NoShow
+}
+
+response "BallbotHighFive_Success"
+{
+	scene "scenes/player/ballbot/taunt_highFive_success.vcd"
+}
+rule BallbotTeamGestureHighFive_Success
+{
+	criteria IsBallbot ConceptTaunt HasTauntPartner TauntForceHighFive
+	response BallbotHighFive_Success
+}
+
+
+//-----------------------------------------------------------------------
+// Team Gesture Teamhug
+//-----------------------------------------------------------------------
+
+response "BallbotTeamhug_Initiate"
+{
+	scene "scenes/player/ballbot/taunt_Teamhug_initiate.vcd"  then self teamtaunt_idle foo:0 0.0
+}
+rule BallbotTeamGestureTeamhug_Initiate
+{
+	criteria IsBallbot ConceptTaunt NoTauntPartner TauntForceTeamhug
+	response BallbotTeamhug_Initiate
+}
+
+response "BallbotTeamhug_Idle"
+{
+	scene "scenes/player/ballbot/taunt_Teamhug_idle.vcd"  then self teamtaunt_noshow foo:0 0.0
+}
+rule BallbotTeamGestureTeamhug_Idle
+{
+	criteria IsBallbot ConceptTeamTauntIdle TauntForceTeamhug
+	response BallbotTeamhug_Idle
+}
+
+response "BallbotTeamhug_NoShow"
+{
+	scene "scenes/player/ballbot/taunt_Teamhug_noShow.vcd"
+}
+rule BallbotTeamGestureTeamhug_NoShow
+{
+	criteria IsBallbot ConceptTeamTauntNoShow NoTauntPartner TauntForceTeamhug
+	response BallbotTeamhug_NoShow
+}
+
+response "BallbotTeamhug_Success"
+{
+	scene "scenes/player/ballbot/taunt_Teamhug_success.vcd"
+}
+rule BallbotTeamGestureTeamhug_Success
+{
+	criteria IsBallbot ConceptTaunt HasTauntPartner TauntForceTeamhug
+	response BallbotTeamhug_Success
+}
+
+
+
+//-----------------------------------------------------------------------
+// Team Gesture Teamtease
+//-----------------------------------------------------------------------
+
+// Grabber
+response "BallbotTeamBallTease_Success"
+{
+	scene "scenes/player/ballbot/taunt_teamballtease.vcd"
+}
+rule BallbotTeamGestureTeamBallTease_Success
+{
+	criteria IsBallbot ConceptTaunt HasTauntPartner TauntForceTeamBallTease
+	response BallbotTeamBallTease_Success
+}
+
+// Grabbed
+response "BallbotTeamEggTease_Success"
+{
+	scene "scenes/player/ballbot/taunt_teameggtease.vcd"
+}
+rule BallbotTeamGestureTeamEggTease_Success
+{
+	criteria IsBallbot ConceptTaunt HasTauntPartner TauntForceTeamEggTease
+	response BallbotTeamEggTease_Success
+}
+
+//This animation is only playing the start of the taunt by ballbot but then stops becuase other player is too far away
+response "BallbotTeamBallTeaseFail"
+{
+	scene "scenes/player/ballbot/taunt_teamballteasefail.vcd"
+}
+rule BallbotGestureTeamBallTeaseFail
+{
+	criteria IsBallbot ConceptTaunt TauntForceTeamTease
+	response BallbotTeamBallTeaseFail
+}
+
+
+//-----------------------------------------------------------------------
+// Team Gesture Rock Paper Scissors
+//-----------------------------------------------------------------------
+
+response "BallbotRPS_Initiate"
+{
+	scene "scenes/player/ballbot/taunt_rps_initiate.vcd"  then self teamtaunt_idle foo:0 0.0
+}
+rule BallbotTeamGestureRPS_Initiate
+{
+	criteria IsBallbot ConceptTaunt NoTauntPartner TauntForceRPS
+	response BallbotRPS_Initiate
+}
+
+response "BallbotRPS_Idle"
+{
+	scene "scenes/player/ballbot/taunt_rps_idle.vcd"  then self teamtaunt_noshow foo:0 0.0
+}
+rule BallbotTeamGestureRPS_Idle
+{
+	criteria IsBallbot ConceptTeamTauntIdle TauntForceRPS
+	response BallbotRPS_Idle
+}
+
+response "BallbotRPS_NoShow"
+{
+	scene "scenes/player/ballbot/taunt_RPS_noShow.vcd"
+}
+rule BallbotTeamGestureRPS_NoShow
+{
+	criteria IsBallbot ConceptTeamTauntNoShow NoTauntPartner TauntForceRPS
+	response BallbotRPS_NoShow
+}
+
+// RPS Result 1
+response "BallbotRPS_Success1"
+{
+	scene "scenes/player/ballbot/taunt_rps_ballwin_rock.vcd"
+}
+rule BallbotTeamGestureRPS_Success1
+{
+	criteria IsBallbot ConceptTaunt HasTauntPartner TauntForceRPS RPSResult1
+	response BallbotRPS_Success1
+}
+
+// RPS Result 2
+response "BallbotRPS_Success2"
+{
+	scene "scenes/player/ballbot/taunt_rps_ballwin_paper.vcd"
+}
+rule BallbotTeamGestureRPS_Success2
+{
+	criteria IsBallbot ConceptTaunt HasTauntPartner TauntForceRPS RPSResult2
+	response BallbotRPS_Success2
+}
+
+// RPS Result 3
+response "BallbotRPS_Success3"
+{
+	scene "scenes/player/ballbot/taunt_rps_balllose_paper.vcd"
+}
+rule BallbotTeamGestureRPS_Success3
+{
+	criteria IsBallbot ConceptTaunt HasTauntPartner TauntForceRPS RPSResult3
+	response BallbotRPS_Success3
+}
+
+// RPS Result 4
+response "BallbotRPS_Success4"
+{
+	scene "scenes/player/ballbot/taunt_rps_balllose_rock.vcd"
+}
+rule BallbotTeamGestureRPS_Success4
+{
+	criteria IsBallbot ConceptTaunt HasTauntPartner TauntForceRPS RPSResult4
+	response BallbotRPS_Success4
+}
+
+// RPS Result 5
+response "BallbotRPS_Success5"
+{
+	scene "scenes/player/ballbot/taunt_rps_balllose_scissors.vcd"
+}
+rule BallbotTeamGestureRPS_Success5
+{
+	criteria IsBallbot ConceptTaunt HasTauntPartner TauntForceRPS RPSResult5
+	response BallbotRPS_Success5
+}
+
+
+//-----------------------------------------------------------------------
+// Gesture Laugh
+//-----------------------------------------------------------------------
+
+response "BallbotLaugh"
+{
+	scene "scenes/player/ballbot/taunt_laugh.vcd"
+}
+
+rule BallbotGestureLaugh
+{
+	criteria IsBallbot ConceptTaunt TauntForceLaugh
+	response BallbotLaugh
+}
+
+
+
+
+
+
+//-----------------------------------------------------------------------
+// Gesture SmallWave
+//-----------------------------------------------------------------------
+
+response "BallbotSmallWave"
+{
+	scene "scenes/player/ballbot/taunt_noGun_small_Wave.vcd"
+}
+
+rule BallbotGestureSmallWave
+{
+	criteria IsBallbot ConceptTaunt TauntForceSmallWave MidPartner NoPortalGun
+	response BallbotSmallWave
+}
+
+//-----------------------------------------------------------------------
+// Gesture Portalgun SmallWave
+//-----------------------------------------------------------------------
+
+response "BallbotPortalgunSmallWave"
+{
+	scene "scenes/player/ballbot/taunt_portalgun_small_Wave.vcd"
+}
+
+rule BallbotGesturePortalgunSmallWave
+{
+	criteria IsBallbot ConceptTaunt TauntForceSmallWave MidPartner HasPortalGun
+	response BallbotPortalgunSmallWave
+}
+
+
+//-----------------------------------------------------------------------
+// Gesture BigWave
+//-----------------------------------------------------------------------
+
+response "BallbotBigWave"
+{
+	scene "scenes/player/ballbot/taunt_big_Wave.vcd"
+}
+
+rule BallbotGestureBigWave
+{
+	criteria IsBallbot ConceptTaunt TauntForceSmallWave FarPartner
+	response BallbotBigWave
+}
+
+//-----------------------------------------------------------------------
+// Gesture Robot Dance
+//-----------------------------------------------------------------------
+
+response "BallbotRobotDance"
+{
+	scene "scenes/player/ballbot/taunt_robot_arm_ripple.vcd"
+}
+
+rule BallbotGestureRobotDance
+{
+	criteria IsBallbot ConceptTaunt TauntForceRobotDance
+	response BallbotRobotDance
+}
+
+
+//-----------------------------------------------------------------------
+// Gesture Trick Fire
+//-----------------------------------------------------------------------
+
+response "BallbotTrickFire"
+{
+	scene "scenes/player/ballbot/taunt_trickfire_handstand.vcd"
+}
+
+rule BallbotGestureTrickFire
+{
+	criteria IsBallbot ConceptTaunt TauntForceTrickFire
+	response BallbotTrickFire
+}
+
+
+
+
+
+
+//-----------------------------------------------------------------------
+// Back flip - 
+// this covers all air taunts, currently played randomly and equally
+// Air taunts are triggered instantly when the taunt key is pressed, no radial menu selection
+//-----------------------------------------------------------------------
+
+response "BallbotBackFlip"
+{
+	scene "scenes/player/ballbot/taunt_somersault.vcd"
+	scene "scenes/player/ballbot/taunt_cannonball.vcd"
+}
+
+rule BallbotBackFlip
+{
+	criteria IsBallbot ConceptTaunt InAir TauntForceNone
+	response BallbotBackFlip
+}
+
+//-----------------------------------------------------------------------
+// Gesture ThumbsUp
+//-----------------------------------------------------------------------
+
+response "BallbotThumbsup"
+{
+	scene "scenes/player/ballbot/taunt_thumbsup.vcd"
+}
+
+rule BallbotGestureThumbsUp
+{
+	criteria IsBallbot ConceptTaunt TauntForceThumbsUp
+	response BallbotThumbsUp
+}
+
+//-----------------------------------------------------------------------
+// Gesture Dance
+//-----------------------------------------------------------------------
+
+response "BallbotDance"
+{
+	scene "scenes/player/ballbot/taunt_danceSpin.vcd"
+}
+
+rule BallbotGestureDance
+{
+	criteria IsBallbot ConceptTaunt TauntForceDance
+	response BallbotDance
+}
+
+//-----------------------------------------------------------------------
+// Gesture FistPump
+//-----------------------------------------------------------------------
+
+response "BallbotFistPump"
+{
+	scene "scenes/player/ballbot/taunt_yes_fistPump.vcd"
+}
+
+rule BallbotGestureFistPump
+{
+	criteria IsBallbot ConceptTaunt TauntForceFistPump
+	response BallbotFistPump
+}
+
+//-----------------------------------------------------------------------
+// Gesture Shrug
+//-----------------------------------------------------------------------
+
+response "BallbotShrug"
+{
+	scene "scenes/player/ballbot/taunt_Shrug.vcd"
+}
+
+rule BallbotGestureShrug
+{
+	criteria IsBallbot ConceptTaunt TauntForceShrug
+	response BallbotShrug
+}
+
+//-----------------------------------------------------------------------
+// Gesture Facepalm
+//-----------------------------------------------------------------------
+
+response "BallbotFacepalm"
+{
+	scene "scenes/player/ballbot/taunt_Facepalm.vcd"
+}
+
+rule BallbotGestureFacepalm
+{
+	criteria IsBallbot ConceptTaunt TauntForceFacepalm
+	response BallbotFacepalm
+}
+
+//-----------------------------------------------------------------------
+// Gesture basketball1
+//-----------------------------------------------------------------------
+
+response "BallbotBasketball1"
+{
+	scene "scenes/player/ballbot/taunt_basketball1.vcd"
+}
+
+rule BallbotGestureBasketball1
+{
+	criteria IsBallbot ConceptTaunt TauntForceBasketball1
+	response BallbotBasketball1
+}
+
+//-----------------------------------------------------------------------
+// Gesture basketball2
+//-----------------------------------------------------------------------
+
+response "BallbotBasketball2"
+{
+	scene "scenes/player/ballbot/taunt_basketball2.vcd"
+}
+
+rule BallbotGestureBasketball2
+{
+	criteria IsBallbot ConceptTaunt TauntForceBasketball2
+	response BallbotBasketball2
+}
+
+//-----------------------------------------------------------------------
+// Gesture headspin
+//-----------------------------------------------------------------------
+
+response "Ballbotheadspin"
+{
+	scene "scenes/player/ballbot/taunt_headspin.vcd"
+}
+
+rule BallbotGestureheadspin
+{
+	criteria IsBallbot ConceptTaunt TauntForceheadspin
+	response Ballbotheadspin
+}

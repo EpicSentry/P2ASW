@@ -1,0 +1,904 @@
+//
+// sp_a1_intro1
+//
+"music.sp_intro_01.01_awake"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"1.0"
+
+	"wave"	"*music/sp_a1_intro1_b1.wav"
+	// "wave" "common/null.wav"
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+		}
+	}
+}
+"music.sp_intro_01.02_restasis"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"1.0"
+
+	"wave"	"*music/sp_a1_intro1_b2a.wav"
+//	"wave" "common/null.wav"
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"play_entry"
+			{
+				"operator" "sys_start_entry"
+				"input_start" "1"	
+				"entry_name" "music.sp_a1_intro1_b2b"
+			}
+		}
+		
+		"update_stack"
+		{			
+			"import_stack" 	"update_music_stereo"
+			"volume_fade_out"
+			{
+				"input_max" "5"
+			}
+		}
+	}
+}
+"music.sp_a1_intro1_b2b"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"1.0"
+
+	"wave"	"*music/sp_a1_intro1_b2b.wav"
+//	"wave" "common/null.wav"
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{			
+			"import_stack" 	"update_music_stereo"
+		}
+	}
+}
+
+"music.sp_intro_01.03_door"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"0.6"
+
+	"wave"	"*music/sp_a1_intro1_b2a.wav"
+//	"wave" "common/null.wav"
+	
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			
+			"block_start"
+			{	
+				"operator" "sys_output"
+				"input_float" "1"
+				"output" "block_start"
+			}
+			"stop_entries"
+			{
+				"operator" "sys_stop_entries"
+				"match_entry" "music.sp_intro_01.02_restasis"
+				"input_max_entries" "0.000000"
+				"match_entity" "false"
+				"match_substring" "false"
+			}
+		}
+	}
+}
+"music.sp_intro_01.04_yes"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NORM"
+	"volume"		"1.0"
+
+	"wave" "common/null.wav"
+
+}
+"music.sp_intro_01.05_apple"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+//	"volume"		"0.35"
+	"volume"		"1.0"
+
+
+	"wave"		"*playonce\scripted_sequences\mstr\sp_a1_intro1_b1.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			
+// 			// need this for mixlayer field to work, fix this
+// 			"set_mixlayer_vol_wheatley"
+// 			{
+// 				"operator" "sys_mixlayer"
+// 				"mixlayer" "wheatleyVOLayer"
+// 				"mixgroup" "wheatleyVO"
+// 				"field" "volume"
+// 				"input" "0.0"
+// 			}
+			"stop_entry"
+			{
+				"input_execute" "1"	
+				"operator" "sys_stop_entries"
+				"input_max_entries" "0.000000"
+				"match_entity" "false"
+				"match_substring" "true"
+				"match_entry" "sphere03"
+			}
+
+		}
+		"update_stack"
+		{
+			"import_stack" "update_simple_quad"
+			"speakers_limit"
+			{
+				"center"       "1.0"
+			}
+			"mixer"
+			{
+				"mixgroup" "mstr"
+			}
+		}
+// 		"stop_stack"
+// 		{
+// 			"set_mixlayer_solo_wheatley"
+// 			{
+// 				"operator" "sys_mixlayer"
+// 				"mixlayer" "wheatleyVOLayer"
+// 				"mixgroup" "wheatleyVO"
+// 				"field" "volume"
+// 				"input" "1.0"
+// 			}
+// 		}
+	}
+}
+"music.sp_intro_01.06_chambertop"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"0.9"
+
+	"wave"	"*music/sp_intro_01_06_chambertop.wav"
+	// "wave" "common/null.wav"
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{			
+			"import_stack" 	"update_music_stereo"
+			"volume_fade_out"
+			{
+				"input_max" "1.5"
+			}
+		}
+	}
+}
+
+"music.sp_intro_01.07_chamberinside"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"0.7"
+
+	"wave"	"*music/sp_intro_01_07_chamberinside.wav"
+		//"wave" "common/null.wav"
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			
+			"import_stack" "start_default"
+			"stop_entries"
+			{
+				"match_entry" "music"
+				"input_max_entries" "0.000000"
+				"match_substring" "true"	
+			}
+			"delay_output"
+			{
+				"operator" "sys_output"
+				"input_float" "0.5"
+				"output" "delay"
+			}
+
+		}
+
+		"update_stack"
+		{
+			
+			"import_stack" 	"update_music_stereo"
+		}
+	}
+}
+
+"music.sp_intro_01.08_chamberexit"
+{
+
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"1.0"
+
+	"wave"	"*music/sp_intro_01_08_chamberexit.wav"
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{			
+			"import_stack" 	"update_music_stereo"
+			"volume_fade_in"
+			{
+				"input_max" "5.0"
+				"input_map_min" "0.5"
+			}
+			"volume_fade_out"
+			{
+				"input_max" "3.5"
+			}
+		}
+	}
+
+}
+"music.sp_intro_01.09_videokiosk"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"1.0"
+
+	"wave"	"*music/aperture_logo_bells_01_01.wav"
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_default"
+		}
+	}
+}
+
+//
+// sp_intro_02
+//
+"music.sp_intro_02.01_space"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_110dB"
+	"volume"		"0.15"
+
+	"wave"	"*music/sp_intro_02_lb1-1.wav"
+
+	"soundentry_version" "2"
+
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_spatial"
+
+			"volume_fade_out"
+			{
+				"input_max" "2.0"
+			}
+			"speakers_spatialize"
+			{
+				"input_radius"  "300000"
+			}
+		}
+	}
+}
+"music.sp_intro_02.02_portal1"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_110dB"
+	"volume"		"0.2"
+
+	"wave"	"*music/sp_intro_02_lx2-1.wav"
+
+	"soundentry_version" "2"
+
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			
+			"import_stack" "start_default"
+			"stop_entries"
+			{
+				"match_entry" "sp_intro_02.02_portal1"
+				"input_max_entries" "0.000000"
+				"match_substring" "true"	
+			}
+		}
+
+		"update_stack"
+		{
+			"import_stack" 	"update_music_spatial"
+			"volume_fade_out"
+			{
+				"input_max" "2.0"
+			}
+		}
+	}
+}
+"music.sp_intro_02.03_portal2"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_110dB"
+	"volume"		"0.2"
+
+	"wave"	"*music/sp_intro_02_lx3-1.wav"
+
+	"soundentry_version" "2"
+
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			
+			"import_stack" "start_default"
+			"stop_entries"
+			{
+				"match_entry" "sp_intro_02.03_portal2"
+				"input_max_entries" "0.000000"
+				"match_substring" "true"	
+			}
+		}
+
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+			"volume_fade_out"
+			{
+				"input_max" "2.0"
+			}
+		}
+	}
+}
+"music.sp_intro_02.04_portal3"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_110dB"
+	"volume"		"0.2"
+
+	"wave"	"*music/sp_intro_02_lx1-1.wav"
+
+	"soundentry_version" "2"
+
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			
+			"import_stack" "start_default"
+			"stop_entries"
+			{
+				"match_entry" "sp_intro_02.04_portal3"
+				"input_max_entries" "0.000000"
+				"match_substring" "true"	
+			}
+		}
+
+		"update_stack"
+		{
+			"import_stack" 	"update_music_spatial"
+			"volume_fade_out"
+			{
+				"input_max" "2.0"
+			}
+		}
+	}
+}
+
+//
+// sp_intro_03
+//
+"music.sp_a1_intro3_b1"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_80dB"
+	"volume"		"0.6"
+
+	"wave"	"*music/sp_a1_intro3_b1.wav"
+		//"wave"			"common/null.wav"
+
+	"soundentry_version" "2"
+
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			
+			// need this for mixlayer field to work, fix this
+			"set_mixlayer_vol_wheatley"
+			{
+				"operator" "sys_mixlayer"
+				"mixlayer" "wheatleyVOLayer"
+				"mixgroup" "Music"
+				"field" "volume"
+				"input" "1.0"
+			}
+			"set_mixlayer_solo_wheatley"
+			{
+				"operator" "sys_mixlayer"
+				"mixlayer" "wheatleyVOLayer"
+				"mixgroup" "Music"
+				"field" "solo"
+				"input" "0.35"
+			}
+			"play_entry"
+			{
+				"operator" "sys_start_entry"
+				"input_start" "1"	
+				"entry_name" "music.sp_intro_03.02_ratman_x1"
+			}
+		}
+
+		"update_stack"
+		{
+			"import_stack" 	"update_music_spatial"
+			"position_array"
+			{
+				"input_entry_count" "1"
+				"input_position_0[0]"   "-14.194955"
+				"input_position_0[1]"   "1967.216187"
+				"input_position_0[2]"   "-363.780548"
+			}
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+
+			"speakers_spatialize"
+			{
+				"input_radius"  "800"
+			}
+		}
+		"stop_stack"
+		{
+			"set_mixlayer_solo_wheatley"
+			{
+				"operator" "sys_mixlayer"
+				"mixlayer" "wheatleyVOLayer"
+				"mixgroup" "Music"
+				"field" "solo"
+				"input" "0.0"
+			}
+		}
+	}
+}
+"music.sp_a1_intro3_x1"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"1.0"
+
+
+	"wave"	"common/null.wav"
+
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+
+		}
+	}
+}
+"music.sp_a1_intro3_x2"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"1.0"
+
+
+	"wave"	"common/null.wav"
+
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+
+		}
+	}
+}
+
+"music.sp_intro_03.02_ratman_x1"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_50dB"
+	"volume"		"0.75"
+
+	"wave"	"*music/sp_a1_intro3_r1.wav"
+
+	"soundentry_version" "2"
+
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_spatial"
+
+			"position_array"
+			{
+				"input_entry_count" "8"
+
+// facing the direction you came this starst at 7:00 to your rear left
+// glados with scientists around
+// -154.834717 1840.473877 -349.514069;
+
+				"input_position_0[0]"   "-154.834717"
+				"input_position_0[1]"   "1840.473877"
+				"input_position_0[2]"   "-349.514069"
+
+// choking guy next to woman with arms up
+// setpos -108.195152 1973.634155 -355.316040;
+
+				"input_position_1[0]"   "-108.195152"
+				"input_position_1[1]"   "1973.634155"
+				"input_position_1[2]"   "-355.316040"
+
+// women with arms up on left, cc center, 
+// choking guys up top, guy with orange squiggle head on right
+//setpos_exact -37.185528 2022.694336 -423.968750;
+// setpos_exact -31.046303 2023.553101 -423.968750;
+				"input_position_2[0]"   "-37.185528"
+				"input_position_2[1]"   "2022.694336"
+				"input_position_2[2]"   "-423.968750"
+
+//  chell, glados and cake
+// setpos 165.045212 2128.248779 -353.317566;
+				"input_position_3[0]"   "165.045212"
+				"input_position_3[1]"   "2128.248779"
+				"input_position_3[2]"   "-353.317566"
+
+// holding companion cube "cc"
+//setpos 212.621826 2073.203369 -354.553833;
+				"input_position_4[0]"   "212.621826"
+				"input_position_4[1]"   "2073.203369"
+				"input_position_4[2]"   "-354.553833"
+
+// dead glados
+// 266.384583 1916.567383 -348.177612;
+
+				"input_position_5[0]"   "266.384583"
+				"input_position_5[1]"   "1916.567383"
+				"input_position_5[2]"   "-348.177612"
+
+// chell with arms up, portal over head,  celebrating glados defeeat
+// setpos 270.677826 1871.997437 -354.846283;
+				"input_position_6[0]"   "270.677826"
+				"input_position_6[1]"   "1871.997437"
+				"input_position_6[2]"   "-354.846283"
+
+// beautiful orange painting of chell
+//  179.060257 1796.247925 -357.307190;
+				"input_position_7[0]"   "179.060257"
+				"input_position_7[1]"   "1796.247925"
+				"input_position_7[2]"   "-357.307190"
+			}
+
+			"speakers_spatialize"
+			{
+				"input_radius"  "20"
+			}
+		}
+	}
+}
+
+//
+// sp_intro_05
+//
+"music.sp_a1_intro5.01_b1"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_75dB"
+	"volume"		"1.0"
+
+	"wave"	"music/sp_a1_intro5_b1.wav"
+
+	"soundentry_version" "2"
+
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_spatial"
+
+			"volume_fade_in"
+			{
+				"input_map_min" "0.4"
+				"input_max" "3.0"
+			}
+
+			"speakers_spatialize"
+			{
+				"input_radius"  "1000"
+			}
+		}
+	}
+}
+
+//
+// sp_a1_intro6
+//
+"music.sp_a1_intro6"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"0.75"
+
+	"wave"	"music/sp_a1_intro6.wav"
+
+	"soundentry_version" "2"
+
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+			"volume_fade_out"
+			{
+				"input_max" "5.0"
+			}
+		}
+	}
+}
+
+//
+// sp_a1_intro7
+//
+"music.sp_a1_intro7_b1"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"0.75"
+
+// 	"wave"			"npc/xray/beep.wav"
+	"wave"			"common/null.wav"
+
+	"soundentry_version" "2"
+
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+			"volume_fade_out"
+			{
+				"input_max" "5.0"
+			}
+		}
+	}
+}
+"music.sp_a1_intro7_b2"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"0.75"
+
+// 	"wave"			"npc/xray/beep.wav"
+	"wave"			"common/null.wav"
+
+	"soundentry_version" "2"
+
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+			"volume_fade_out"
+			{
+				"input_max" "5.0"
+			}
+		}
+	}
+}
+"music.sp_a1_intro7_r1"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"0.75"
+
+// 	"wave"			"npc/xray/beep.wav"
+	"wave"			"common/null.wav"
+
+	"soundentry_version" "2"
+
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+			"volume_fade_out"
+			{
+				"input_max" "5.0"
+			}
+		}
+	}
+}
+
+//
+// sp_glados_01
+//
+"music.sp_glados_01.01_newplace"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"0.37"
+
+	"wave"	"*music/sp_a1_wakeup_b1.wav"
+
+	"soundentry_version" "2"
+
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			
+			"import_stack" "start_default"
+			"stop_entries"
+			{
+				"match_entry" "music"
+				"input_max_entries" "0.000000"
+				"match_substring" "true"	
+			}
+		}
+
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+			"volume_fade_in"
+			{
+				"input_max" "6.0"
+			}
+			"volume_fade_out"
+			{
+				"input_max" "1.0"
+			}
+
+		}
+	}
+}
+"music.sp_glados_01.02_pieceofwork"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"0.6"
+
+	"wave"	"*music/sp_a1_wakeup_b2.wav"
+
+	"soundentry_version" "2"
+
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			
+			"import_stack" "start_default"
+			"stop_entries"
+			{
+				"match_entry" "music"
+				"input_max_entries" "0.000000"
+				"match_substring" "true"	
+			}
+		}
+
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+			"volume_fade_in"
+			{
+				"input_max" "0.5"
+			}
+			"volume_fade_out"
+			{
+				"input_max" "5.0"
+			}
+		}
+	}
+}
+
+"music.sp_glados_01.03_breakers"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"0.85"
+
+	"wave"	"*music/sp_glados_01_03_awakes.wav"
+
+	"soundentry_version" "2"
+
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"set_mixlayer_solo_glados"
+			{
+				"operator" "sys_mixlayer"
+				"mixlayer" "gladosVOLayer"
+				"mixgroup" "Music"
+				"field" "solo"
+				"input" "0.4"
+			}
+			"set_mixlayer_solo_wheatley"
+			{
+				"operator" "sys_mixlayer"
+				"mixlayer" "wheatleyVOLayer"
+				"mixgroup" "Music"
+				"field" "solo"
+				"input" "0.35"
+			}
+		}
+
+		"update_stack"
+		{
+			
+			"import_stack" 	"update_music_stereo"
+
+		}
+		"stop_stack"
+		{
+			"set_mixlayer_solo_glados"
+			{
+				"operator" "sys_mixlayer"
+				"mixlayer" "gladosVOLayer"
+				"mixgroup" "Music"
+				"field" "solo"
+				"input" "0.0"
+			}
+			"set_mixlayer_solo_wheatley"
+			{
+				"operator" "sys_mixlayer"
+				"mixlayer" "wheatleyVOLayer"
+				"mixgroup" "Music"
+				"field" "solo"
+				"input" "0.0"
+			}
+		}
+	}
+}
+

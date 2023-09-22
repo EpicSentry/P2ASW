@@ -1,0 +1,9 @@
+weapon_manifest
+{
+	// portal2
+	// "file"		"scripts/weapon_camera.txt"
+	// "file"		"scripts/weapon_placement.txt"
+
+	// portal
+	"file"		"scripts/weapon_portalgun.txt"
+}

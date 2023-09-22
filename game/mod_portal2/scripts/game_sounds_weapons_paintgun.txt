@@ -1,0 +1,26 @@
+"Paintgun.FireLoop"	
+{
+	"channel"	"CHAN_WEAPON"
+	"soundlevel"	"SNDLVL_95dB"
+	"volume"	"1.0"
+	"pitch"			"80"
+	"wave"		")weapons/weaponizer/water_high_pressure.wav"
+}
+
+"Paintgun.FireStart"
+{
+	"channel"	"CHAN_ITEM"
+	"soundlevel"	"SNDLVL_95dB"
+	"volume"	"1.0"
+	"pitch"			"80"
+	"wave"		")weapons/weaponizer/water_high_pressure_start.wav"
+}
+
+"Paintgun.FireLoop"	
+{
+	"channel"	"CHAN_WEAPON"
+	"soundlevel"	"SNDLVL_95dB"
+	"volume"	"1.0"
+	"pitch"			"80"
+	"wave"		")weapons/weaponizer/water_low_pressure.wav"
+}

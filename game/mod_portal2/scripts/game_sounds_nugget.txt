@@ -1,0 +1,17 @@
+"Nugget.Spawn"
+{
+	"channel"	"CHAN_ITEM"
+	"volume"	"0.4"
+	"soundlevel"  "SNDLVL_75dB"
+
+	"wave"	"items/nugget_spawn1.wav"
+}
+
+"Nugget.Touch"
+{
+	"channel"	"CHAN_ITEM"
+	"volume"	"1"
+	"soundlevel"  "SNDLVL_75dB"
+
+	"wave"	"items/nugget_touch1.wav"
+}

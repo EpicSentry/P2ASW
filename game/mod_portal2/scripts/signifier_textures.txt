@@ -1,0 +1,196 @@
+"sprites/640_hud"
+{
+	TextureData
+	{
+		"icon_look"
+		{
+				"file"		"vgui/hud/commands/generic_look"
+				"x"			"0"
+				"y"			"0"
+				"width"		"128"
+				"height"	"128"
+		}
+
+		"icon_death_blue"
+		{
+				"file"		"vgui/hud/gameinstructor_iconsheet3"
+				"x"			"0"
+				"y"			"0"
+				"width"		"192"
+				"height"	"192"
+		}
+
+		"icon_death_orange"
+		{
+				"file"		"vgui/hud/gameinstructor_iconsheet3"
+				"x"			"192"
+				"y"			"0"
+				"width"		"192"
+				"height"	"192"
+		}
+		
+		"icon_move_here"
+		{
+				"file"		"vgui/hud/commands/move_here"
+				"x"			"0"
+				"y"			"0"
+				"width"		"128"
+				"height"	"128"
+		}
+		
+		"icon_countdown"
+		{
+				"file"		"vgui/hud/commands/countdown"
+				"x"			"0"
+				"y"			"0"
+				"width"		"128"
+				"height"	"128"
+		}
+		"icon_countdown_3"
+		{
+				"file"		"vgui/hud/commands/countdown_3"
+				"x"			"0"
+				"y"			"0"
+				"width"		"128"
+				"height"	"128"
+		}
+		"icon_countdown_2"
+		{
+				"file"		"vgui/hud/commands/countdown_2"
+				"x"			"0"
+				"y"			"0"
+				"width"		"128"
+				"height"	"128"
+		}
+		"icon_countdown_1"
+		{
+				"file"		"vgui/hud/commands/countdown_1"
+				"x"			"0"
+				"y"			"0"
+				"width"		"128"
+				"height"	"128"
+		}
+		"icon_countdown_go"
+		{
+				"file"		"vgui/hud/commands/countdown_go"
+				"x"			"0"
+				"y"			"0"
+				"width"		"128"
+				"height"	"128"
+		}
+
+		"icon_box_pickup"
+		{
+				"file"		"vgui/hud/commands/box_pickup"
+				"x"			"0"
+				"y"			"0"
+				"width"		"128"
+				"height"	"128"
+		}
+		
+		"icon_box_drop"
+		{
+				"file"		"vgui/hud/commands/box_drop"
+				"x"			"0"
+				"y"			"0"
+				"width"		"128"
+				"height"	"128"
+		}
+		
+		"icon_portal_place_floor"
+		{
+				"file"		"vgui/hud/commands/portal_place_floor"
+				"x"			"0"
+				"y"			"0"
+				"width"		"128"
+				"height"	"128"
+		}
+
+		"icon_portal_place_wall"
+		{
+				"file"		"vgui/hud/commands/portal_place_wall"
+				"x"			"0"
+				"y"			"0"
+				"width"		"128"
+				"height"	"128"
+		}
+		"icon_portal_enter_floor"
+		{
+				"file"		"vgui/hud/commands/portal_enter_floor"
+				"x"			"0"
+				"y"			"0"
+				"width"		"128"
+				"height"	"128"
+		}
+
+		"icon_portal_enter_wall"
+		{
+				"file"		"vgui/hud/commands/portal_enter_wall"
+				"x"			"0"
+				"y"			"0"
+				"width"		"128"
+				"height"	"128"
+		}
+		
+		"icon_portal_exit_wall"
+		{
+				"file"		"vgui/hud/commands/portal_exit_wall"
+				"x"			"0"
+				"y"			"0"
+				"width"		"128"
+				"height"	"128"
+		}
+
+		"icon_portal_exit_floor"
+		{
+				"file"		"vgui/hud/commands/portal_exit_floor"
+				"x"			"0"
+				"y"			"0"
+				"width"		"128"
+				"height"	"128"
+		}
+
+		"icon_portal_move"
+		{
+				"file"		"vgui/hud/commands/portal_move"
+				"x"			"0"
+				"y"			"0"
+				"width"		"128"
+				"height"	"128"
+		}
+
+		"icon_slime_no_drink"
+		{
+				"file"		"vgui/hud/commands/slime_no_drink"
+				"x"			"0"
+				"y"			"0"
+				"width"		"128"
+				"height"	"128"
+		}
+		
+		"icon_button_press"
+		{
+				"file"		"vgui/hud/commands/button_press"
+				"x"			"0"
+				"y"			"0"
+				"width"		"128"
+				"height"	"128"
+		}
+		"icon_turret_warning"
+		{
+				"file"		"vgui/hud/commands/turret_warning"
+				"x"			"0"
+				"y"			"0"
+				"width"		"128"
+				"height"	"128"
+		}
+		"icon_button_tall_press"
+		{
+				"file"		"vgui/hud/commands/button_tall_press"
+				"x"			"0"
+				"y"			"0"
+				"width"		"128"
+				"height"	"128"
+		}
+	}	
+}

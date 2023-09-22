@@ -1,0 +1,79 @@
+//-----------------------------------------------------------------------
+// Common Player Response Criterion
+//-----------------------------------------------------------------------
+
+response "NullResponse"
+
+criterion "ConceptTaunt" "concept" "TLK_PLAYER_TAUNT" required
+criterion "FacingPartner" "facing_partner" 1 required
+criterion "NearPartner" "dist_to_partner" "<=64" required
+criterion "MidPartner" "dist_to_partner" "<=512" required
+criterion "FarPartner" "dist_to_partner" ">512" required
+criterion "InAir" "in_air" 1 required
+criterion "OnButton" "ground_entity" "prop_floor_button" required
+criterion "LookingAtCamera" "look_entity" "npc_security_camera" required
+
+criterion "ConceptTeamTauntIdle" "Concept" "teamtaunt_idle" required
+criterion "ConceptTeamTauntNoShow" "Concept" "teamtaunt_noshow" required
+criterion "HasTauntPartner" "taunt_partner" 1 required
+criterion "NoTauntPartner" "taunt_partner" "!=1" required
+criterion "NoPortalGun" "no_portalgun" 1 required
+criterion "HasPortalGun" "no_portalgun" "!=1" required
+
+criterion "TauntForceNone" "force_taunt" "empty" required
+criterion "TauntForceHighFive" "force_taunt" "highFive" required
+criterion "TauntForceLaugh" "force_taunt" "laugh" required
+
+
+criterion "TauntForceRobotDance" "force_taunt" "robotDance" required
+
+criterion "TauntForceSmallWave" "force_taunt" "smallWave" required
+
+criterion "TauntForceTrickFire" "force_taunt" "TrickFire" required
+
+criterion "TauntForceBigWave" "force_taunt" "BigWave" required
+
+criterion "TauntForceTeamhug" "force_taunt" "Teamhug" required
+
+criterion "TauntForceThumbsUp" "force_taunt" "thumbsup" required
+
+criterion "TauntForceDance" "force_taunt" "dance" required
+
+criterion "TauntForceFistPump" "force_taunt" "fistPump" required
+
+criterion "TauntForceShrug" "force_taunt" "shrug" required
+
+criterion "TauntForceFacePalm" "force_taunt" "FacePalm" required
+
+criterion "TauntForceBasketball1" "force_taunt" "basketball1" required
+
+criterion "TauntForceBasketball2" "force_taunt" "basketball2" required
+
+criterion "TauntForcesitspin" "force_taunt" "sitspin" required
+
+criterion "TauntForceselfspin" "force_taunt" "selfspin" required
+
+criterion "TauntForceSpinjump" "force_taunt" "Spinjump" required
+
+criterion "TauntForceheadspin" "force_taunt" "headspin" required
+
+criterion "TauntForcepretzelwave" "force_taunt" "pretzelwave" required
+
+criterion "TauntForceTeamTease" "force_taunt" "TeamTease" required
+criterion "TauntForceTeamBallTease" "force_taunt" "TeamBallTease" required
+criterion "TauntForceTeamEggTease" "force_taunt" "TeamEggTease" required
+
+criterion "TauntForceRPS" "force_taunt" "rps" required
+criterion "RPSResult1" "rps_outcome" 0 required
+criterion "RPSResult2" "rps_outcome" 1 required
+criterion "RPSResult3" "rps_outcome" 2 required
+criterion "RPSResult4" "rps_outcome" 3 required
+criterion "RPSResult5" "rps_outcome" 4 required
+
+criterion "RandomLessThan25" "randomnum<" "25" required
+criterion "RandomLessThan50" "randomnum<" "50" required
+criterion "RandomLessThan75" "randomnum<" "75" required
+
+criterion "RandomMoreThan25" "randomnum>=" "25" required
+criterion "RandomMoreThan50" "randomnum>=" "50" required
+criterion "RandomMoreThan75" "randomnum>=" "75" required

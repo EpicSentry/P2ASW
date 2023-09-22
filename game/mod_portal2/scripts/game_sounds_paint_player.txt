@@ -1,0 +1,254 @@
+"Player.JumpPowerUse"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_80dB"
+	"volume"		"1.0"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player/paint/player_bounce_jump_paint_01.wav"
+		"wave"		"player/paint/player_bounce_jump_paint_02.wav"
+		"wave"		"player/paint/player_bounce_jump_paint_03.wav"
+	}
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "Player.JumpPowerUse"
+				"input_max_entries" "2.000000"
+				"match_substring" "false"
+			}
+		}
+		
+		"update_stack"
+		{
+			"import_stack" "update_default"
+			"import_stack" "update_trigger_layer_til_time" 
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+
+			"speakers_limit"
+			{
+				"center"       "0.0"	
+			}
+			
+			"output_mixlayer_trigger"
+			{
+				"execute_once" "1"
+				"operator" "sys_output"
+				"input_float" "1"
+				"output" "mixlayer_trigger"
+			}
+			
+			"utltt_trigger_time"
+			{
+				"input2" "0.4"
+			}
+		}
+	}
+}
+
+"Player.EnterSpeedPaint"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.25"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+	
+	"wave"		"player/paint/player_enter_speed_paint.wav"
+	"wave"		"player/paint/player_enter_speed_paint_01.wav"
+	"wave"		"player/paint/player_enter_speed_paint_02.wav"
+	"wave"		"player/paint/player_enter_speed_paint_03.wav"
+	"wave"		"player/paint/player_enter_speed_paint_01.wav"
+	"wave"		"player/paint/player_enter_speed_paint_02.wav"
+	"wave"		"player/paint/player_enter_speed_paint_03.wav"
+	
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "SpeedPaint"
+				"input_max_entries" "1.000000"
+				"match_substring" "true"
+			}
+		}
+	}
+}
+
+"Player.ExitSpeedPaint"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.25"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+	
+	"wave"		"player/paint/player_exit_speed_paint.wav"
+	"wave"		"player/paint/player_exit_speed_paint_01.wav"
+	"wave"		"player/paint/player_exit_speed_paint_02.wav"
+	"wave"		"player/paint/player_exit_speed_paint_03.wav"
+	"wave"		"player/paint/player_exit_speed_paint_01.wav"
+	"wave"		"player/paint/player_exit_speed_paint_02.wav"
+	"wave"		"player/paint/player_exit_speed_paint_03.wav"
+	
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "SpeedPaint"
+				"input_max_entries" "1.000000"
+				"match_substring" "true"
+			}
+		}
+	}
+}
+
+"Player.EnterStickPaint"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.35"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player/paint/player_enter_stick_paint_01.wav"
+		"wave"		"player/paint/player_enter_stick_paint_02.wav"
+		"wave"		"player/paint/player_enter_stick_paint_03.wav"
+	}
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "StickPaint"
+				"input_max_entries" "1.000000"
+				"match_substring" "true"
+			}
+		}
+	}
+}
+
+"Player.ExitStickPaint"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.35"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player/paint/player_exit_stick_paint_01.wav"
+		"wave"		"player/paint/player_exit_stick_paint_02.wav"
+		"wave"		"player/paint/player_exit_stick_paint_03.wav"
+	}
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "StickPaint"
+				"input_max_entries" "1.000000"
+				"match_substring" "true"
+			}
+		}
+	}
+}
+
+"Player.EnterBouncePaint"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.55"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player/paint/player_enter_jump_paint_01.wav"
+		"wave"		"player/paint/player_enter_jump_paint_02.wav"
+		"wave"		"player/paint/player_enter_jump_paint_03.wav"
+	}
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "BouncePaint"
+				"input_max_entries" "1.000000"
+				"match_substring" "true"
+			}
+		}
+	}
+}
+
+"Player.ExitBouncePaint"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.55"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player/paint/player_exit_jump_paint_01.wav"
+		"wave"		"player/paint/player_exit_jump_paint_02.wav"
+		"wave"		"player/paint/player_exit_jump_paint_03.wav"
+	}
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "BouncePaint"
+				"input_max_entries" "1.000000"
+				"match_substring" "true"
+			}
+		}
+	}
+}
+

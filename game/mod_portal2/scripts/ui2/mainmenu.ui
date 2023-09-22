@@ -1,0 +1,58 @@
+
+
+--
+-- DECLARATION
+--
+
+this:baseclass( "" );
+
+this:in( "spacing", css.mainmenu.spacing );
+
+this:add(
+	"btnCampaign",
+	"base/basebutton",
+	{
+		top = this.ycenter;
+		right = this.xcenter;
+		text = "#Campaign";
+		OnCommand = "OnCommand_Campaign";
+	}
+);
+
+this:add(
+	"btnVersus",
+	"base/basebutton",
+	{
+		top = this.btnCampaign.bottom + this.spacing;
+		left = this.btnCampaign.left;
+		text = "#Versus";
+		OnCommand = "OnCommand_Versus";
+	}
+);
+
+this:add(
+	"btnQuit",
+	"base/basebutton",
+	{
+		top = this.btnVersus.bottom + this.spacing;
+		left = this.btnVersus.left;
+		text = "#Quit";
+		OnCommand = "OnCommand_Quit";
+	}
+);
+
+--
+-- SCRIPTS
+--
+
+function OnCommand_Campaign( this, params )
+	print( "Campaign" )
+end
+
+function OnCommand_Versus( this, params )
+	print( "Versus" )
+end
+
+function OnCommand_Quit( this, params )
+	print( "QUIT" )
+end

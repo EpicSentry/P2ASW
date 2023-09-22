@@ -1,0 +1,259 @@
+"Error"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_NONE"
+	"wave"		"error.wav"
+}
+
+"General.BurningFlesh"
+{
+	"channel"		"CHAN_WEAPON"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.45"
+	"wave"		"npc/headcrab/headcrab_burning_loop2.wav"
+}
+
+"General.BurningObject"
+{
+	"channel"		"CHAN_WEAPON"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"ambient/fire/fire_small_loop2.wav"
+}
+
+"General.StopBurning"
+{
+	"channel"		"CHAN_WEAPON"
+	"soundlevel"		"SNDLVL_NORM"
+	"rndwave"
+	{
+		"wave"		"ambient/fire/fire_small_loop_edit_01.wav"
+		"wave"		"ambient/fire/fire_small_loop_edit_02.wav"
+		"wave"		"ambient/fire/fire_small_loop_edit_03.wav"
+	}
+}
+
+"Hud.Hint"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_NONE"
+	"wave"		"ui/hint.wav"
+}
+
+"AI_BaseNPC.BodyDrop_Heavy"
+{
+	"channel"		"CHAN_BODY"
+	"soundlevel"		"SNDLVL_NORM"
+	"pitch"		"90"
+	"rndwave"
+	{
+		"wave"		"physics/flesh/flesh_impact_hard1.wav"
+		"wave"		"physics/flesh/flesh_impact_hard2.wav"
+		"wave"		"physics/flesh/flesh_impact_hard3.wav"
+		"wave"		"physics/flesh/flesh_impact_hard4.wav"
+		"wave"		"physics/flesh/flesh_impact_hard5.wav"
+		"wave"		"physics/flesh/flesh_impact_hard6.wav"
+	}
+}
+
+"AI_BaseNPC.BodyDrop_Light"
+{
+	"channel"		"CHAN_BODY"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.90"
+	"pitch"		"105"
+	"rndwave"
+	{
+		"wave"		"physics/flesh/flesh_impact_hard1.wav"
+		"wave"		"physics/flesh/flesh_impact_hard2.wav"
+		"wave"		"physics/flesh/flesh_impact_hard3.wav"
+		"wave"		"physics/flesh/flesh_impact_hard4.wav"
+		"wave"		"physics/flesh/flesh_impact_hard5.wav"
+		"wave"		"physics/flesh/flesh_impact_hard6.wav"
+	}
+}
+
+"AI_BaseNPC.SwishSound"
+{
+	"channel"		"CHAN_BODY"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"npc/zombie/claw_miss2.wav"
+}
+
+"AI_BaseNPC.SentenceStop"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_IDLE"
+	"wave"		"common/null.wav"
+}
+
+"BaseCombatCharacter.CorpseGib"
+{
+	"channel"		"CHAN_WEAPON"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"physics/flesh/flesh_squishy_impact_hard2.wav"
+}
+
+"BaseCombatCharacter.StopWeaponSounds"
+{
+	"channel"		"CHAN_WEAPON"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"common/null.wav"
+}
+
+"BaseCombatCharacter.AmmoPickup"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"items/ammo_pickup.wav"
+}
+
+"BaseCombatWeapon.WeaponDrop"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.80"
+	"pitch"		"95,110"
+	"rndwave"
+	{
+		"wave"		"physics/metal/weapon_impact_hard1.wav"
+		"wave"		"physics/metal/weapon_impact_hard2.wav"
+		"wave"		"physics/metal/weapon_impact_hard3.wav"
+	}
+}
+
+"BaseCombatWeapon.WeaponMaterialize"
+{
+	"channel"		"CHAN_WEAPON"
+	"soundlevel"		"SNDLVL_NORM"
+	"pitch"		"150"
+	"wave"		"items/suitchargeok1.wav"
+}
+
+"FX_RicochetSound.Ricochet"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_TALKING"
+	"volume"		"0.50,0.60"
+	"pitch"		"90,110"
+	"rndwave"
+	{
+		"wave"		"weapons/fx/rics/ric1.wav"
+		"wave"		"weapons/fx/rics/ric2.wav"
+		"wave"		"weapons/fx/rics/ric3.wav"
+		"wave"		"weapons/fx/rics/ric4.wav"
+		"wave"		"weapons/fx/rics/ric5.wav"
+	}
+}
+
+"BaseExplosionEffect.Sound"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_GUNFIRE"
+	"rndwave"
+	{
+		"wave"		"props/explosions/explo_generic_med_01.wav"
+		"wave"		"props/explosions/explo_generic_med_02.wav"
+		"wave"		"props/explosions/explo_generic_med_03.wav"
+		"wave"		"props/explosions/explo_generic_med_04.wav"
+		"wave"		"props/explosions/explo_generic_med_05.wav"
+		"wave"		"props/explosions/explo_generic_med_06.wav"
+	}
+}
+
+"Explo.Distant"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_GUNFIRE"
+	"rndwave"
+	{
+		"wave"		"props/explosions/explo_distant_med_01.wav"
+		"wave"		"props/explosions/explo_distant_med_02.wav"
+		"wave"		"props/explosions/explo_distant_med_03.wav"
+		"wave"		"props/explosions/explo_distant_med_04.wav"
+		"wave"		"props/explosions/explo_distant_med_05.wav"
+		"wave"		"props/explosions/explo_distant_med_06.wav"
+	}
+}
+
+"Explo.SemiDistant01"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_GUNFIRE"
+	"wave"		"props/explosions/a4_semi_distant_explosion_01.wav"
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+			
+			"mixer"
+			{
+				"mixgroup" "xLoud"
+			}
+		}
+	}
+}
+
+"Explo.SemiDistant02"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_GUNFIRE"
+	"wave"		"props/explosions/a4_semi_distant_explosion_02.wav"
+		
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+			
+			"mixer"
+			{
+				"mixgroup" "xLoud"
+			}
+		}
+	}
+}
+
+"Splash.SplashSound"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.75"
+	"pitch"		"90,100"
+	"rndwave"
+	{
+		"wave"		"ambient/water/water_spray1.wav"
+		"wave"		"ambient/water/water_spray2.wav"
+		"wave"		"ambient/water/water_spray3.wav"
+	}
+}
+
+"PropaneTank.Burst"
+{
+	"channel"		"CHAN_WEAPON"
+	"soundlevel"		"SNDLVL_90dB"
+	"pitch"		"95,105"
+	"wave"		"ambient/fire/gascan_ignite1.wav"
+}
+
+"Default.Null"
+{
+	"channel"		"CHAN_BODY"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"common/null.wav"
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_null_start" //don't try to play wave			
+		}
+	}
+}
+

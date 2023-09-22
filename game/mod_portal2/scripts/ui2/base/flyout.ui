@@ -1,0 +1,90 @@
+
+
+--
+-- DECLARATION
+--
+
+this:baseclass( "" );
+
+this:in( "margin", css.flyout.margin );
+this:in( "itemgap", css.flyout.itemgap );
+
+this:event( "Show" );
+this:event( "Hide" );
+
+this:in( "animFadeIn", types:anim );
+this:in( "animFadeOut", types:anim );
+
+this:in( "default", types:control );
+
+this:in( "color", types:color );
+
+this:state( "colorAnim", types:anim );
+this.baseclass.color.a = this.color.a * this.colorAnim.value;
+
+this:out( "width", 0 );
+this:out( "height", 0 );
+
+this:add(
+	"topline",
+	"$texture",
+	{
+		left = 0;
+		right = this.width;
+		top = 0;
+		texture = "textures/horzline";
+	}
+);
+
+this:add(
+	"bottomline",
+	"$texture",
+	{
+		left = 0;
+		right = this.width;
+		bottom = this.height;
+		texture = "textures/horzline";
+	}
+);
+
+this:add(
+	"leftline",
+	"$texture",
+	{
+		left = 0;
+		top = 0;
+		bottom = this.height;
+		texture = "textures/vertline";
+	}
+);
+
+--
+-- SCRIPTS
+--
+
+function Show( this, params )
+	this.animFadeIn:start()
+	this.colorAnim = this.animFadeIn
+	
+	this.visible = true
+	this.enabled = true
+	
+	if ( this.default ) then
+		focus:push( this.default )
+	end
+end
+
+function Hide( this, params )
+	this.animFadeOut.OnFinished = "OnFadeOutFinished"
+	this.animFadeOut:start()
+	this.colorAnim = this.animFadeOut
+
+	this.enabled = false
+	
+	focus:pop( this )
+end
+
+function OnFadeOutFinished( this, params )
+	this.visible = false
+end
+

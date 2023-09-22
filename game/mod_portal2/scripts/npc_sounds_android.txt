@@ -1,0 +1,47 @@
+"NPC_Android.Squash"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"1.0"
+	"soundlevel"	"SNDLVL_80dB"
+	"pitch"	"100"
+	"rndwave"
+	{
+	"wave"	"npc/zombie/squish1.wav"
+	"wave"	"npc/zombie/squish2.wav"
+	"wave"	"npc/zombie/squish3.wav"
+	}
+}
+
+"NPC_Android.Servo"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"1.0"
+	"soundlevel"	"SNDLVL_60dB"
+	"pitch"	"100"
+	"rndwave"
+	{
+	"wave"	"npc/android/servo15.wav"
+	"wave"	"npc/android/servo16.wav"
+	}
+}
+
+"NPC_Android.Pain"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.0"
+	"soundlevel"	"SNDLVL_80dB"
+	"pitch"	"100"
+	"rndwave"
+	{
+	"wave"	"npc/oBot/Generalpainsounds07.wav"
+	"wave"	"npc/oBot/Generalpainsounds08.wav"
+	"wave"	"npc/oBot/Generalpainsounds09.wav"
+	"wave"	"npc/oBot/Generalpainsounds10.wav"
+	"wave"	"npc/oBot/Generalpainsounds11.wav"
+	"wave"	"npc/oBot/Generalpainsounds18.wav"
+	"wave"	"npc/oBot/Generalpainsounds27.wav"
+	}
+}
+
+
+

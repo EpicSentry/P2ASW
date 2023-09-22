@@ -1,0 +1,21 @@
+"vista_generic"
+{
+	"version" 1
+	"id"	2
+	"onetoten"
+	{
+		"text"		"Please rate your enjoyment of this section."
+		"labelatone"	"Not enjoyable"
+		"labelatten"	"Greatly enjoyable"
+	}
+
+	"essay"	
+	{
+		"text"		"Please describe what was happening in this area [OPTIONAL]"
+	}
+
+	"essay"	
+	{
+		"text"		"Please put any additional comments on this area here [OPTIONAL]"
+	}
+}

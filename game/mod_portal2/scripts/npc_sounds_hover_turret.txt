@@ -1,0 +1,102 @@
+// HOVER TURRET
+
+"NPC_HoverTurret.Snap"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.85"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"			"props/mousetrap_snap.wav"
+}
+
+"NPC_HoverTurret.TalkActive"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"VOL_NORM"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_85dB"
+
+	"rndwave"
+	{
+		"wave"			"npc/hover_turret/Generalsurprisesounds02.wav"
+		"wave"			"npc/hover_turret/incombat04.wav"
+		"wave"			"npc/hover_turret/itemconv2a03.wav"
+		"wave"			"npc/hover_turret/Machine01Intro01.wav"
+		"wave"			"npc/hover_turret/Misc07.wav"
+		"wave"			"npc/hover_turret/Misc11.wav"
+		"wave"			"npc/hover_turret/Misc17.wav"
+		"wave"			"npc/hover_turret/Misc30.wav"
+		"wave"			"npc/hover_turret/Misc44.wav"
+		"wave"			"npc/hover_turret/Misc51.wav"
+		"wave"			"npc/hover_turret/Signs07.wav"
+	}	
+}
+
+"NPC_HoverTurret.TalkSearch"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"VOL_NORM"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_85dB"
+
+	"rndwave"
+	{
+		"wave"			"npc/hover_turret/Directions04.wav"
+		"wave"			"npc/hover_turret/GeneralFrustrationSounds01.wav"
+		"wave"			"npc/hover_turret/GeneralFrustrationSounds04.wav"
+		"wave"			"npc/hover_turret/item_desk02.wav"
+		"wave"			"npc/hover_turret/itemconv1a04.wav"
+		"wave"			"npc/hover_turret/Misc22.wav"
+		"wave"			"npc/hover_turret/Misc24.wav"
+		"wave"			"npc/hover_turret/Misc36.wav"
+		"wave"			"npc/hover_turret/Misc42.wav"
+		"wave"			"npc/hover_turret/Misc72.wav"
+		"wave"			"npc/hover_turret/toofar01.wav"
+		"wave"			"npc/hover_turret/Unplant04.wav"
+	}
+}
+
+"NPC_HoverTurret.TalkPickup"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"VOL_NORM"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_85dB"
+
+	"rndwave"
+	{
+		"wave"			"npc/hover_turret/Generalpainsounds05.wav"
+		"wave"			"npc/hover_turret/Generalpainsounds23.wav"
+		"wave"			"npc/hover_turret/Generalpainsounds27.wav"
+		"wave"			"npc/hover_turret/Generalpainsounds26.wav"
+		"wave"			"npc/hover_turret/hatresponses04.wav"
+		"wave"			"npc/hover_turret/Misc16.wav"
+		"wave"			"npc/hover_turret/No01.wav"
+		"wave"			"npc/hover_turret/upgradestation28.wav"
+	}
+}
+
+"NPC_HoverTurret.TalkDissolved"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"VOL_NORM"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_85dB"
+
+	"rndwave"
+	{
+		"wave"			"npc/hover_turret/HealInstructions06.wav"
+		"wave"			"npc/hover_turret/itemconv5a06.wav"
+		"wave"			"npc/hover_turret/Misc19.wav"
+		"wave"			"npc/hover_turret/Misc34.wav"
+		"wave"			"npc/hover_turret/Misc66.wav"
+		"wave"			"npc/hover_turret/Plant01.wav"
+		"wave"			"npc/hover_turret/UpgradeFinal_finaldebate16.wav"
+	}
+}

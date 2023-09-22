@@ -1,0 +1,115 @@
+// sample animation script
+//
+//
+// commands:
+//	Animate <panel name> <variable> <target value> <interpolator> <start time> <duration>
+//		variables:
+//			FgColor
+//			BgColor
+//			Position
+//			Size
+//			Blur		(hud panels only)
+//			TextColor	(hud panels only)
+//			Ammo2Color	(hud panels only)
+//			Alpha		(hud weapon selection only)
+//			SelectionAlpha  (hud weapon selection only)
+//			TextScan	(hud weapon selection only)
+//
+//		interpolator:
+//			Linear
+//			Accel - starts moving slow, ends fast
+//			Deaccel - starts moving fast, ends slow
+//
+//	RunEvent <event name> <start time>
+//		starts another even running at the specified time
+//
+//	StopEvent <event name> <start time>
+//		stops another event that is current running at the specified time
+//
+//	StopAnimation <panel name> <variable> <start time>
+//		stops all animations refering to the specified variable in the specified panel
+//
+//	StopPanelAnimations <panel name> <start time>
+//		stops all active animations operating on the specified panel
+//
+//
+// Useful game console commands:
+//	cl_Animationinfo <hudelement name> or <panelname> 
+//		displays all the animatable variables for the hud element
+//
+
+
+event LevelInit
+{
+}
+
+
+event TestMovement
+{
+	Animate HudHealth	Position	"256 120"	Linear	0.0		2.0
+	Animate HudHealth	Size		"128 24"	Linear	0.0		1.5
+}
+
+event HintMessageShow
+{
+	StopPanelAnimations HudHintDisplay	0.0
+
+	Animate HudHintDisplay HintSize	"1"		Deaccel 0.0	0.3
+	Animate HudHintDisplay FgColor	"FgColor" 	Linear 0.4      0.4
+
+	// flash text
+	Animate HudHintDisplay FgColor	"FgColor" 	Linear 1.5 0.01
+	Animate HudHintDisplay FgColor	"255 220 0 255" Linear 2.0 0.2
+	Animate HudHintDisplay FgColor	"FgColor" 	Linear 2.2 0.2
+	Animate HudHintDisplay FgColor	"255 220 0 255" Linear 3.0 0.2
+	Animate HudHintDisplay FgColor	"FgColor" 	Linear 3.2 0.2
+
+	// hide the panel after a while	
+	Animate HudHintDisplay FgColor	"255 220 0 0"   Linear  10.0 	0.2
+	Animate HudHintDisplay HintSize	"0"		Deaccel 10.2	0.3
+}
+
+
+event HintMessageHide
+{
+	Animate HudHintDisplay FgColor	"255 220 0 0"   Linear  0.0 	0.2
+	Animate HudHintDisplay HintSize	"0"		Deaccel 0.2	0.3
+}
+
+event KeyHintMessageShow
+{
+	StopPanelAnimations HudHintKeyDisplay	0.0
+
+	// show the hints
+	Animate HudHintKeyDisplay Alpha	255 Linear 0.0 0.5
+
+	// flash text
+	Animate HudHintKeyDisplay FgColor	"FgColor" 	Linear 0.0 0.01
+	Animate HudHintKeyDisplay FgColor	"255 220 0 255" Linear 0.5 0.2
+	Animate HudHintKeyDisplay FgColor	"FgColor" 	Linear 0.7 0.2
+	Animate HudHintKeyDisplay FgColor	"255 220 0 255" Linear 1.5 0.2
+	Animate HudHintKeyDisplay FgColor	"FgColor" 	Linear 1.7 0.2
+
+	// hide the panel after a while	
+	Animate HudHintKeyDisplay Alpha	0 Linear 12.0 1.0
+}
+
+event KeyHintMessageHide
+{
+	Animate HudHintKeyDisplay Alpha	0 Linear 0.0 0.5
+}
+
+
+// Commentary hud element
+event ShowCommentary
+{
+	StopEvent	HideCommentary 0.0
+	Animate 	HudCommentary 	Alpha	255 Linear 0.0 0.5
+}
+
+event HideCommentary
+{
+	StopEvent	ShowCommentary 0.0
+	Animate 	HudCommentary 	Alpha	0 Linear 0.0 0.5
+}
+

@@ -1,0 +1,23 @@
+
+
+--
+-- DECLARATION
+--
+
+this:baseclass( "base/basebutton" );
+
+this:in( "margin", css.flyoutbutton.margin );
+
+this.label:update( {
+	font = css.flyoutbutton.font;
+	color = css.flyoutbutton.color;
+} )
+
+
+--
+-- Scripts
+--
+
+function OnCommand( this, params )
+	this.parent.Hide:execute()
+end
