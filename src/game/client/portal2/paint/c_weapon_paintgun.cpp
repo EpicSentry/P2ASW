@@ -447,7 +447,8 @@ void C_WeaponPaintGun::SetPaintPower( PaintPowerType type )
 	if( HasPaintPower( type ) )
 	{
 		SetSubType( type );
-		::inputm->MakeWeaponSelection( this );
+		//::inputm->MakeWeaponSelection( this );
+		::input->MakeWeaponSelection( this );
 #if 0
 		IGameEvent *event = gameeventmanager->CreateEvent( "player_changed_colors" );
 		if ( event )

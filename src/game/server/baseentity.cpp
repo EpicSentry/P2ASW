@@ -375,6 +375,8 @@ static float const cellEpsilon = 0.001f;
 //---------------------------------------------------------
 void CBaseEntity::InputRemovePaint(inputdata_t &inputdata)
 {
+	// TODO: RemovePaint isn't an engine function, so we need to set the paint power of the entity to NO_POWER instead.
+	/*
 	if (engine->HasPaintMap() && IsBSPModel())
 	{
 		engine->RemovePaint(GetModel());
@@ -385,6 +387,7 @@ void CBaseEntity::InputRemovePaint(inputdata_t &inputdata)
 		WRITE_EHANDLE(this);
 		MessageEnd();
 	}
+	*/
 }
 
 
@@ -666,6 +669,8 @@ IMPLEMENT_SERVERCLASS_ST_NOBASE( CBaseEntity, DT_BaseEntity )
 	SendPropInt( SENDINFO(m_bSimulatedEveryTick),		1, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO(m_bAnimatedEveryTick),		1, SPROP_UNSIGNED ),
 	SendPropBool( SENDINFO( m_bAlternateSorting )),
+	
+	SendPropBool( SENDINFO( m_bIsUnPaintable )),
 
 	// Fading
 	SendPropFloat( SENDINFO( m_fadeMinDist ),			0, SPROP_NOSCALE ),
@@ -769,7 +774,9 @@ CBaseEntity::CBaseEntity( bool bServerOnly )
 
 	m_pEvent = NULL;
 
-
+#ifdef PORTAL2
+	m_bIsUnPaintable = false;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -2633,7 +2640,14 @@ int CBaseEntity::ObjectCaps( void )
 #endif
 }
 
-
+#if defined ( PORTAL2 )
+void CBaseEntity::UpdateObjectCapsCache( void )
+{
+	// Send the first six bits of the object caps to the client
+	// those should be the +use logic capabilities
+	m_iObjectCapsCache = 0x0000003f & ObjectCaps();
+}
+#endif
 
 void CBaseEntity::StartTouch( CBaseEntity *pOther )
 {

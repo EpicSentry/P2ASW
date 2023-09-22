@@ -25,6 +25,11 @@
 #include "xbox/xboxstubs.h"
 #endif
 
+// IVEngineClient doesn't have a HasPaintMap() function, so we need a macro.
+#ifdef CLIENT_DLL
+#define HASPAINTMAP true // FIXME: How do we make this accurate?
+#endif
+
 //-----------------------------------------------------------------------------
 // forward declarations
 //-----------------------------------------------------------------------------
@@ -70,11 +75,6 @@ namespace vgui
 	// this is the only handle to a panel that is valid across dll boundaries
 	typedef unsigned int VPANEL;
 }
-
-// IVEngineClient doesn't have a HasPaintMap() function, so we need a macro.
-#ifdef CLIENT_DLL
-#define HASPAINTMAP true // FIXME: How do we make this accurate?
-#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: This data structure is filled in by the engine when the client .dll requests information about
@@ -651,32 +651,14 @@ public:
 	//	pKeyValues	- key values to be serialized and sent to server
 	//				  the pointer is deleted inside the function: pKeyValues->deleteThis()
 	virtual void ServerCmdKeyValues( KeyValues *pKeyValues ) = 0;
-
-
-
-	//hello! my name is source engine. i am a stupid unreliable horrible to work with pile of ancient abandonware! i love to ruin developers' days and make them waste their already limited time!
-
-
-
 	// Tells the engine what and where to paint
 	virtual void PaintSurface( const model_t *model, const Vector& position, const Color& color, float radius ) = 0;
-	virtual void PaintAllSurfaces(BYTE color) = 0;
 	// Enable paint in the engine for project Paint
 	virtual void EnablePaintmapRender() = 0;
 	virtual void TracePaintSurface( const model_t *model, const Vector& position, float radius, CUtlVector<Color>& surfColors ) = 0;
-	//virtual void RemoveAllPaint() = 0; !!!!!CRASH! DONT UNCOMMENT!!!!!
-	// dont ask me how i know... whole damn day wasted on this fucking function, debugger is useless in source.
-	// Returns true if the surface paint colors changed
-	virtual bool SpherePaintSurface(const model_t *pModel, const Vector& vPosition, BYTE color, float flSphereRadius, float flPaintCoatPercent) = 0;
+	virtual void RemoveAllPaint() = 0;
 
-	//virtual void SphereTracePaintSurface(const model_t *pModel, const Vector& vPosition, const Vector& vContactNormal, float flSphereRadius, CUtlVector<BYTE>& surfColor) = 0; //CRASH!!!!!
-
-	// Tells the engine to allocate paint surfaces
-	//virtual bool HasPaintMap() = 0; //CRASH FUCK YOU
-
-	//virtual void RemovePaint(const model_t* pModel) = 0; CRASH
-	
-	//virtual bool IsActiveApp() = 0; CRASH
+	virtual bool IsActiveApp() = 0;
 
 	// is this client running inside the same process as an active server?
 	virtual bool IsClientLocalToActiveServer() = 0;

@@ -586,6 +586,10 @@ public:
 	int								GetFlags( void ) const;
 	void							ClearFlags();
 
+#ifdef PORTAL2
+	bool m_bIsUnPaintable;
+#endif
+
 	void							SetDistanceFade( float flMinDist, float flMaxDist );
 	void							SetGlobalFadeScale( float flFadeScale );
 	float							GetMinFadeDist( ) const;

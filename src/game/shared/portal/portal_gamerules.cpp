@@ -22,7 +22,7 @@
 	#include "portal_player.h"
 	#include "globalstate.h"
 	#include "ai_basenpc.h"
-	#include "portal/weapon_physcannon.h"
+	#include "player_pickup_controller.h"
 	#include "props.h"		// For props flags used in making the portal weight box
 	#include "datacache/imdlcache.h"	// For precaching box model
 #endif
@@ -1321,3 +1321,76 @@ CAmmoDef *GetAmmoDef()
 
 	return &def;
 }
+
+// Copied from hl2_gamerules.cpp
+#ifdef GAME_DLL
+	
+	//-----------------------------------------------------------------------------
+	// Purpose: MULTIPLAYER BODY QUE HANDLING
+	//-----------------------------------------------------------------------------
+	class CCorpse : public CBaseAnimating
+	{
+	public:
+		DECLARE_CLASS( CCorpse, CBaseAnimating );
+		DECLARE_SERVERCLASS();
+
+		virtual int ObjectCaps( void ) { return FCAP_DONT_SAVE; }	
+
+	public:
+		CNetworkVar( int, m_nReferencePlayer );
+	};
+
+	IMPLEMENT_SERVERCLASS_ST(CCorpse, DT_Corpse)
+		SendPropInt( SENDINFO(m_nReferencePlayer), 10, SPROP_UNSIGNED )
+	END_SEND_TABLE()
+
+	LINK_ENTITY_TO_CLASS( bodyque, CCorpse );
+
+
+	CCorpse		*g_pBodyQueueHead;
+
+	void InitBodyQue(void)
+	{
+		CCorpse *pEntity = ( CCorpse * )CreateEntityByName( "bodyque" );
+		pEntity->AddEFlags( EFL_KEEP_ON_RECREATE_ENTITIES );
+		g_pBodyQueueHead = pEntity;
+		CCorpse *p = g_pBodyQueueHead;
+		
+		// Reserve 3 more slots for dead bodies
+		for ( int i = 0; i < 3; i++ )
+		{
+			CCorpse *next = ( CCorpse * )CreateEntityByName( "bodyque" );
+			next->AddEFlags( EFL_KEEP_ON_RECREATE_ENTITIES );
+			p->SetOwnerEntity( next );
+			p = next;
+		}
+		
+		p->SetOwnerEntity( g_pBodyQueueHead );
+	}
+	
+	//-----------------------------------------------------------------------------
+	// Purpose: make a body que entry for the given ent so the ent can be respawned elsewhere
+	// GLOBALS ASSUMED SET:  g_eoBodyQueueHead
+	//-----------------------------------------------------------------------------
+	void CopyToBodyQue( CBaseAnimating *pCorpse ) 
+	{
+		if ( pCorpse->IsEffectActive( EF_NODRAW ) )
+			return;
+
+		CCorpse *pHead	= g_pBodyQueueHead;
+
+		pHead->CopyAnimationDataFrom( pCorpse );
+
+		pHead->SetMoveType( MOVETYPE_FLYGRAVITY );
+		pHead->SetAbsVelocity( pCorpse->GetAbsVelocity() );
+		pHead->ClearFlags();
+		pHead->m_nReferencePlayer	= ENTINDEX( pCorpse );
+
+		pHead->SetLocalAngles( pCorpse->GetAbsAngles() );
+		UTIL_SetOrigin(pHead, pCorpse->GetAbsOrigin());
+
+		UTIL_SetSize(pHead, pCorpse->WorldAlignMins(), pCorpse->WorldAlignMaxs());
+		g_pBodyQueueHead = (CCorpse *)pHead->GetOwnerEntity();
+	}
+
+#endif

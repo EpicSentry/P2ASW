@@ -10,10 +10,12 @@
 #pragma once
 #endif
 
+#include "player_pickup.h"
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-class C_BreakableProp : public C_BaseAnimating
+class C_BreakableProp : public C_BaseAnimating, public CDefaultPlayerPickupVPhysics
 {
 	typedef C_BaseAnimating BaseClass;
 public:
@@ -26,9 +28,18 @@ public:
 		return true;
 	};
 
+	//IPlayerPickupVPhysics
+	virtual bool HasPreferredCarryAnglesForPlayer( CBasePlayer *pPlayer );
+	virtual QAngle PreferredCarryAngles( void );
+
 	// Copy fade from another breakable prop
 	void CopyFadeFrom( C_BreakableProp *pSource );
 	virtual void OnDataChanged( DataUpdateType_t type );
+	
+	const QAngle &GetNetworkedPreferredPlayerCarryAngles( void ) { return m_qPreferredPlayerCarryAngles; }
+
+protected:
+	QAngle m_qPreferredPlayerCarryAngles;
 
 private:
 	bool m_bClientPhysics;

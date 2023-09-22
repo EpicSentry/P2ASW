@@ -38,6 +38,8 @@ $Project "Client (Portal 2)"
 
 		$Folder	"HL2 DLL"
 		{
+			$File	"hl2\c_basehlplayer.cpp"
+			$File	"hl2\c_basehlplayer.h"
 			$File	"hl2\c_prop_combine_ball.cpp"
 			$File	"hl2\c_prop_combine_ball.h"
 			$File	"hl2\c_te_concussiveexplosion.cpp"
@@ -45,6 +47,10 @@ $Project "Client (Portal 2)"
 			$File	"death.cpp"
 			$File	"hl2\fx_hl2_impacts.cpp"
 			$File	"hl2\fx_hl2_tracers.cpp"
+			$File	"hl2\c_hl2_playerlocaldata.cpp"
+			$File	"hl2\c_hl2_playerlocaldata.h"
+			$File	"hl2\c_corpse.cpp"
+			$File	"hl2\c_corpse.h"
 		}
 		
 		$Folder	"Multiplayer"
@@ -58,6 +64,10 @@ $Project "Client (Portal 2)"
 		
 		$Folder "Portal 2"
 		{
+			$File "portal2/c_prop_floor_button.cpp"
+			$File "portal2/c_prop_weightedcube.cpp"
+			$File "portal2/c_prop_weightedcube.h"
+				
 			$File	"portal2\c_portal2_lesson.cpp"
 			$File	"portal2\c_sdk_jukebox.cpp"
 			$File	"portal2\portal2_input.cpp"
@@ -259,6 +269,13 @@ $Project "Client (Portal 2)"
 			$File	"portal\vgui_portal_stats_display_screen.cpp"
 			$File	"portal\vgui_neurotoxin_countdown_screen.cpp"
 
+			$File	"portal\c_func_noportal_volume.cpp"
+			$File	"portal\c_func_noportal_volume.h"
+			$File	"portal\c_func_portal_bumper.cpp"
+			$File	"portal\c_func_portal_bumper.h"
+			$File	"portal\c_trigger_portal_cleanser.cpp"
+			$File	"portal\c_trigger_portal_cleanser.h"
+			
 			$Folder	"Weapons"
 			{
 				$File	"portal\c_weapon_physcannon.cpp"

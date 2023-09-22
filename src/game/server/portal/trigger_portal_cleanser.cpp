@@ -9,36 +9,33 @@
 
 #include "cbase.h"
 #include "triggers.h"
-#include "trigger_portal_cleanser.h"
 #include "portal_player.h"
 #include "weapon_portalgun.h"
 #include "prop_portal_shared.h"
 #include "portal_shareddefs.h"
 #include "physobj.h"
-#include "portal/weapon_physcannon.h"
+#include "player_pickup_controller.h"
 #include "model_types.h"
 #include "rumble_shared.h"
+#include "trigger_portal_cleanser.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-static char *g_pszPortalNonCleansable[] = 
-{ 
-	"func_door", 
-	"func_door_rotating", 
-	"prop_door_rotating",
-	"func_tracktrain",
-	"env_ghostanimating",
-	"physicsshadowclone",
-	"prop_energy_ball",
-	NULL,
-};
 
-//-----------------------------------------------------------------------------
-// Purpose: Removes anything that touches it. If the trigger has a targetname,
-//			firing it will toggle state.
-//-----------------------------------------------------------------------------
+BEGIN_DATADESC( CTriggerPortalCleanser )
 
+DEFINE_KEYFIELD(m_bVisible, FIELD_BOOLEAN, "Visible"),
+
+// Outputs
+DEFINE_OUTPUT( m_OnDissolve, "OnDissolve" ),
+DEFINE_OUTPUT( m_OnFizzle, "OnFizzle" ),
+DEFINE_OUTPUT( m_OnDissolveBox, "OnDissolveBox" ),
+
+END_DATADESC()
+
+
+LINK_ENTITY_TO_CLASS( trigger_portal_cleanser, CTriggerPortalCleanser );
 
 
 //-----------------------------------------------------------------------------
@@ -48,6 +45,11 @@ void CTriggerPortalCleanser::Spawn( void )
 {	
 	BaseClass::Spawn();
 	InitTrigger();
+
+	if (m_bVisible)
+	{
+		RemoveEffects(EF_NODRAW);
+	}
 }
 
 // Creates a base entity with model/physics matching the parameter ent.
@@ -143,7 +145,16 @@ void CTriggerPortalCleanser::Touch( CBaseEntity *pOther )
 
 				if ( bFizzledPortal )
 				{
-					pPortalgun->SendWeaponAnim( ACT_VM_FIZZLE );
+#ifdef BLUEPORTALS
+					// Don't change the animation if the player is holding something through a fizzler.
+					// This needs to be added in for the anti-fizzle cube in BP. ~reep.
+					CBaseEntity *pHeldObject = GetPlayerHeldEntity(pPlayer);
+					if (!pHeldObject) {
+						pPortalgun->SendWeaponAnim(ACT_VM_FIZZLE);
+					}
+#else
+					pPortalgun->SendWeaponAnim(ACT_VM_FIZZLE);
+#endif
 					pPortalgun->SetLastFiredPortal( 0 );
 					m_OnFizzle.FireOutput( pOther, this );
 					pPlayer->RumbleEffect( RUMBLE_RPG_MISSILE, 0, RUMBLE_FLAG_RESTART );
@@ -235,5 +246,87 @@ void CTriggerPortalCleanser::Touch( CBaseEntity *pOther )
 		}
 
 		m_OnDissolve.FireOutput( pOther, this );
+	}
+}
+
+
+void CTriggerPortalCleanser::FizzleBaseAnimating( CBaseEntity *pActivator, CBaseEntity *pEntity )
+{
+
+	Assert( pEntity );
+	Assert( pEntity->GetBaseAnimating() );
+
+	CBaseAnimating *pBaseAnimating = pEntity->GetBaseAnimating();
+
+	if ( pBaseAnimating && !pBaseAnimating->IsDissolving() )
+	{
+		int i = 0;
+
+		while ( g_pszPortalNonCleansable[ i ] )
+		{
+			if ( FClassnameIs( pBaseAnimating, g_pszPortalNonCleansable[ i ] ) )
+			{
+				// Don't dissolve non cleansable objects
+				return;
+			}
+
+			++i;
+		}
+
+		Vector vOldVel;
+		AngularImpulse vOldAng;
+		pBaseAnimating->GetVelocity( &vOldVel, &vOldAng );
+
+		IPhysicsObject* pOldPhys = pBaseAnimating->VPhysicsGetObject();
+
+		if ( pOldPhys && ( pOldPhys->GetGameFlags() & FVPHYSICS_PLAYER_HELD ) )
+		{
+			CPortal_Player *pPlayer = (CPortal_Player *)GetPlayerHoldingEntity( pBaseAnimating );
+			if( pPlayer )
+			{
+				// Modify the velocity for held objects so it gets away from the player
+				pPlayer->ForceDropOfCarriedPhysObjects( pBaseAnimating );
+
+				pPlayer->GetAbsVelocity();
+				vOldVel = pPlayer->GetAbsVelocity() + Vector( pPlayer->EyeDirection2D().x * 4.0f, pPlayer->EyeDirection2D().y * 4.0f, -32.0f );
+			}
+		}
+
+		// Swap object with an disolving physics model to avoid touch logic
+		CBaseEntity *pDisolvingObj = ConvertToSimpleProp( pBaseAnimating );
+		if ( pDisolvingObj )
+		{
+			// Remove old prop, transfer name and children to the new simple prop
+			pDisolvingObj->SetName( pBaseAnimating->GetEntityName() );
+			UTIL_TransferPoseParameters( pBaseAnimating, pDisolvingObj );
+			TransferChildren( pBaseAnimating, pDisolvingObj );
+			pDisolvingObj->SetCollisionGroup( COLLISION_GROUP_INTERACTIVE_DEBRIS );
+			pBaseAnimating->AddSolidFlags( FSOLID_NOT_SOLID );
+			pBaseAnimating->AddEffects( EF_NODRAW );
+
+			IPhysicsObject* pPhys = pDisolvingObj->VPhysicsGetObject();
+			if ( pPhys )
+			{
+				pPhys->EnableGravity( false );
+
+				Vector vVel = vOldVel;
+				AngularImpulse vAng = vOldAng;
+
+				// Disolving hurts, damp and blur the motion a little
+				vVel *= 0.5f;
+				vAng.z += 20.0f;
+
+				pPhys->SetVelocity( &vVel, &vAng );
+			}
+
+			pBaseAnimating->AddFlag( FL_DISSOLVING );
+			UTIL_Remove( pBaseAnimating );
+		}
+		
+		CBaseAnimating *pDisolvingAnimating = dynamic_cast<CBaseAnimating*>( pDisolvingObj );
+		if ( pDisolvingAnimating ) 
+		{
+			pDisolvingAnimating->Dissolve( "", gpGlobals->curtime, false, ENTITY_DISSOLVE_NORMAL );
+		}
 	}
 }

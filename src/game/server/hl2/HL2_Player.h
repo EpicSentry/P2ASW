@@ -12,14 +12,16 @@
 #include "hl2_playerlocaldata.h"
 #include "simtimer.h"
 #include "soundenvelope.h"
+#ifdef HL2_PLAYERANIMSTATE
+#include "hl2_playeranimstate.h"
+#endif
+#include "multiplayer/basenetworkedplayer.h"
 
 class CAI_Squad;
 class CPropCombineBall;
 
 extern int TrainSpeed(int iSpeed, int iMax);
-#ifndef PORTAL2_DLL
 extern void CopyToBodyQue( CBaseAnimating *pCorpse );
-#endif
 
 #define ARMOR_DECAY_TIME 3.5f
 
@@ -75,10 +77,10 @@ public:
 //=============================================================================
 // >> HL2_PLAYER
 //=============================================================================
-class CHL2_Player : public CBasePlayer
+class CHL2_Player : public CBaseNetworkedPlayer
 {
 public:
-	DECLARE_CLASS( CHL2_Player, CBasePlayer );
+	DECLARE_CLASS( CHL2_Player, CBaseNetworkedPlayer);
 
 	CHL2_Player();
 	~CHL2_Player( void );
@@ -92,11 +94,7 @@ public:
 	DECLARE_SERVERCLASS();
 	DECLARE_DATADESC();
 
-#ifndef PORTAL2_DLL
-	virtual void		CreateCorpse(void) { CopyToBodyQue(this); };
-#else
-	virtual void		CreateCorpse( void ) { };
-#endif
+	virtual void		CreateCorpse( void ) { CopyToBodyQue( this ); };
 
 	virtual void		Precache( void );
 	virtual void		Spawn(void);
@@ -186,9 +184,9 @@ public:
 	bool IsZooming( void );
 	void CheckSuitZoom( void );
 
-	virtual void				FlashlightTurnOn( void );
-	virtual void				FlashlightTurnOff( void );
-	virtual CBaseEntity	*CHL2_Player::GetHeldObject( void );
+	virtual bool				FlashlightTurnOn( bool );
+	virtual void				FlashlightTurnOff( bool );
+	virtual CBaseEntity*		GetHeldObject( void );
 
 	// Walking
 	void StartWalking( void );
@@ -326,12 +324,21 @@ private:
 	CNetworkVar( bool, m_fIsSprinting );
 	CNetworkVarForDerived( bool, m_fIsWalking );
 
+#ifdef HL2_PLAYERANIMSTATE
+	CNetworkQAngle(m_angEyeAngles);
+	CHL2PlayerAnimState*   m_PlayerAnimState;
+	void DoAnimationEvent(PlayerAnimEvent_t event, int nData);
+	virtual void SetAnimation(PLAYER_ANIM playerAnim);
+	void SetupBones(matrix3x4_t *pBoneToWorld, int boneMask);
+#endif
+
 protected:	// Jeep: Portal_Player needs access to this variable to overload PlayerUse for picking up objects through portals
+	bool				m_bPlayUseDenySound;		// Signaled by PlayerUse, but can be unset by HL2 ladder code...
+
+protected:
 	// This player's HL2 specific data that should only be replicated to 
 	//  the player and not to other players.
 	CNetworkVarEmbedded( CHL2PlayerLocalData, m_HL2Local );
-
-	bool				m_bPlayUseDenySound;		// Signaled by PlayerUse, but can be unset by HL2 ladder code...
 
 private:
 

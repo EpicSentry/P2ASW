@@ -12,6 +12,11 @@
 #include "ivieweffects.h"
 #include "shake.h"
 #include "precache_register.h"
+
+#ifdef PORTAL2
+#include "paint/paint_stream_manager.h"
+#endif
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -57,6 +62,11 @@ BEGIN_RECV_TABLE( C_World, DT_World )
 	RecvPropString(RECVINFO(m_iszDetailSpriteMaterial)),
 	RecvPropInt(RECVINFO(m_bColdWorld)),
 	RecvPropInt(RECVINFO(m_iTimeOfDay)),
+	
+#ifdef PORTAL2
+	RecvPropInt(RECVINFO(m_nMaxBlobCount)),
+#endif
+
 END_RECV_TABLE()
 
 
@@ -118,6 +128,10 @@ void C_World::OnDataChanged( DataUpdateType_t updateType )
 		engine->SetOcclusionParameters( params );
 
 		modelinfo->SetLevelScreenFadeRange( m_flMinPropScreenSpaceWidth, m_flMaxPropScreenSpaceWidth );
+		
+#ifdef PORTAL2
+		PaintStreamManager.AllocatePaintBlobPool( m_nMaxBlobCount );
+#endif
 	}
 }
 

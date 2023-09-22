@@ -14,7 +14,7 @@
 #include "in_buttons.h"
 #include "portal_gamerules.h"
 #include "weapon_portalgun.h"
-#include "portal\weapon_physcannon.h"
+#include "player_pickup_controller.h"
 #include "KeyValues.h"
 #include "team.h"
 #include "eventqueue.h"
@@ -42,7 +42,7 @@ extern CBaseEntity	*g_pLastSpawn;
 
 extern void respawn(CBaseEntity *pEdict, bool fCopyCorpse);
 
-static CTEPlayerAnimEvent g_TEPlayerAnimEvent( "PlayerAnimEvent" );
+//static CTEPlayerAnimEvent g_TEPlayerAnimEvent( "PlayerAnimEvent" );
 
 PRECACHE_REGISTER_BEGIN(GLOBAL, PortalPlayerModelPrecache)
 PRECACHE(MODEL, "models/player/chell/player.mdl");
@@ -136,6 +136,9 @@ SendPropEHandle( SENDINFO( m_hSurroundingLiquidPortal ) ),
 
 SendPropExclude( "DT_BaseAnimating", "m_flPoseParameter" ),
 
+SendPropFloat( SENDINFO( m_flHullHeight ) ),
+SendPropFloat( SENDINFO( m_flMotionBlurAmount ) ),
+
 END_SEND_TABLE()
 
 BEGIN_DATADESC( CPortal_Player )
@@ -156,9 +159,6 @@ BEGIN_DATADESC( CPortal_Player )
 	DEFINE_FIELD( m_bIsRegenerating, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_fNeuroToxinDamageTime, FIELD_TIME ),
 	DEFINE_FIELD( m_hPortalEnvironment, FIELD_EHANDLE ),
-	DEFINE_FIELD( m_flExpressionLoopTime, FIELD_TIME ),
-	DEFINE_FIELD( m_iszExpressionScene, FIELD_STRING ),
-	DEFINE_FIELD( m_hExpressionSceneEnt, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_vecTotalBulletForce, FIELD_VECTOR ),
 	DEFINE_FIELD( m_bSilentDropAndPickup, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_hRagdoll, FIELD_EHANDLE ),
@@ -169,10 +169,8 @@ BEGIN_DATADESC( CPortal_Player )
 	DEFINE_FIELD( m_matLastPortalled, FIELD_VMATRIX_WORLDSPACE ),
 	DEFINE_FIELD( m_vWorldSpaceCenterHolder, FIELD_POSITION_VECTOR ),
 	DEFINE_FIELD( m_hSurroundingLiquidPortal, FIELD_EHANDLE ),
-	//DEFINE_FIELD ( m_PlayerAnimState, CPortalPlayerAnimState ),
-	//DEFINE_FIELD ( m_StatsThisLevel, PortalPlayerStatistics_t ),
-
-	DEFINE_EMBEDDEDBYREF( m_pExpresser ),
+	DEFINE_FIELD( m_flHullHeight, FIELD_FLOAT ),
+	DEFINE_FIELD( m_flMotionBlurAmount, FIELD_FLOAT ),
 
 END_DATADESC()
 
@@ -205,10 +203,17 @@ extern float IntervalDistance( float x, float x0, float x1 );
 #pragma warning( disable : 4355 )
 
 CPortal_Player::CPortal_Player()
+	: m_vInputVector( 0.0f, 0.0f, 0.0f ),
+	m_flCachedJumpPowerTime( -FLT_MAX ),
+	m_flSpeedDecelerationTime( 0.0f ),
+	m_flPredictedJumpTime( 0.f ),
+	m_bWantsToSwapGuns( false ),
+	m_bSendSwapProximityFailEvent( false ),
+	m_flMotionBlurAmount( -1.0f ),
+	m_bIsFullyConnected( false )
 {
 
 	m_PlayerAnimState = CreatePortalPlayerAnimState( this );
-	CreateExpresser();
 
 	UseClientSideAnimation();
 
@@ -226,10 +231,6 @@ CPortal_Player::CPortal_Player()
 	m_bPitchReorientation = false;
 
 	m_bSilentDropAndPickup = false;
-
-	m_iszExpressionScene = NULL_STRING;
-	m_hExpressionSceneEnt = NULL;
-	m_flExpressionLoopTime = 0.0f;
 }
 
 CPortal_Player::~CPortal_Player( void )
@@ -421,10 +422,6 @@ void CPortal_Player::NotifySystemEvent(CBaseEntity *pNotify, notify_system_event
 void CPortal_Player::OnRestore( void )
 {
 	BaseClass::OnRestore();
-	if ( m_pExpresser )
-	{
-		m_pExpresser->SetOuter ( this );
-	}
 }
 
 //bool CPortal_Player::StartObserverMode( int mode )
@@ -497,61 +494,6 @@ bool CPortal_Player::Weapon_Switch( CBaseCombatWeapon *pWeapon, int viewmodelind
 	return bRet;
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CPortal_Player::UpdateExpression( void )
-{
-	if ( !m_pExpresser )
-		return;
-
-	int iConcept = CONCEPT_CHELL_IDLE;
-	if ( GetHealth() <= 0 )
-	{
-		iConcept = CONCEPT_CHELL_DEAD;
-	}
-
-	GetExpresser()->SetOuter( this );
-
-	ClearExpression();
-	AI_Response result; 
-	FindResponse(result, CAI_Concept(g_pszChellConcepts[iConcept]));
-
-	if ( result.IsEmpty() )
-	{
-		m_flExpressionLoopTime = gpGlobals->curtime + RandomFloat(30,40);
-		return;
-	}
-
-	char szScene[ MAX_PATH ];
-	result.GetResponse( szScene, sizeof( szScene ) );
-
-	// Ignore updates that choose the same scene
-	if ( m_iszExpressionScene != NULL_STRING && stricmp( STRING(m_iszExpressionScene), szScene ) == 0 )
-		return;
-
-	if ( m_hExpressionSceneEnt )
-	{
-		ClearExpression();
-	}
-
-	m_iszExpressionScene = AllocPooledString( szScene );
-	float flDuration = InstancedScriptedScene( this, szScene, &m_hExpressionSceneEnt, 0.0, true, NULL );
-	m_flExpressionLoopTime = gpGlobals->curtime + flDuration;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CPortal_Player::ClearExpression( void )
-{
-	if ( m_hExpressionSceneEnt != NULL )
-	{ 
-		StopScriptedScene( this, m_hExpressionSceneEnt );
-	}
-	m_flExpressionLoopTime = gpGlobals->curtime;
-}
-
 
 void CPortal_Player::PreThink( void )
 {
@@ -618,16 +560,6 @@ void CPortal_Player::PostThink( void )
 	UpdateWooshSounds();
 
 	m_PlayerAnimState->Update( m_angEyeAngles[YAW], m_angEyeAngles[PITCH] );
-
-	if ( IsAlive() && m_flExpressionLoopTime >= 0 && gpGlobals->curtime > m_flExpressionLoopTime )
-	{
-		// Random expressions need to be cleared, because they don't loop. So if we
-		// pick the same one again, we want to restart it.
-		ClearExpression();
-		m_iszExpressionScene = NULL_STRING;
-		UpdateExpression();
-	}
-
 	UpdateSecondsTaken();
 
 	// Try to fix the player if they're stuck
@@ -890,7 +822,7 @@ bool CPortal_Player::WantsLagCompensationOnEntity( const CBasePlayer *pPlayer, c
 
 void CPortal_Player::DoAnimationEvent( PlayerAnimEvent_t event, int nData )
 {
-	BaseClass::DoAnimationEvent(event, nData);
+	m_PlayerAnimState->DoAnimationEvent( event, nData );
 }
 
 //-----------------------------------------------------------------------------
@@ -972,16 +904,6 @@ void CPortal_Player::SetAnimation( PLAYER_ANIM playerAnim )
 }
 
 //-----------------------------------------------------------------------------
-
-CAI_Expresser *CPortal_Player::GetExpresser() 
-{ 
-	if ( m_pExpresser )
-	{
-		m_pExpresser->Connect(this);
-	}
-	return m_pExpresser; 
-}
-
 
 extern int	gEvilImpulse101;
 //-----------------------------------------------------------------------------
@@ -1661,8 +1583,6 @@ void CPortal_Player::Event_Killed( const CTakeDamageInfo &info )
 	//else
 	//	m_hObserverTarget.Set( NULL );
 
-	UpdateExpression();
-
 	// Note: since we're dead, it won't draw us on the client, but we don't set EF_NODRAW
 	// because we still want to transmit to the clients in our PVS.
 	CreateRagdollEntity( info );
@@ -2256,4 +2176,23 @@ CON_COMMAND( startneurotoxins, "Starts the nerve gas timer." )
 
 	if( pPlayer )
 		pPlayer->SetNeuroToxinDamageTime( fCoundownTime );
+}
+
+void CPortal_Player::InitVCollision( const Vector &vecAbsOrigin, const Vector &vecAbsVelocity )
+{
+	/*
+	// Cleanup any old vphysics stuff.
+	VPhysicsDestroyObject();
+
+	// in turbo physics players dont have a physics shadow
+	if ( sv_turbophysics.GetBool() )
+		return;
+
+	CPhysCollide *pModel = PhysCreateBbox( GetStandHullMins(), GetStandHullMaxs() );
+	CPhysCollide *pCrouchModel = PhysCreateBbox( GetDuckHullMins(), GetDuckHullMaxs() );
+
+	SetupVPhysicsShadow( vecAbsOrigin, vecAbsVelocity, pModel, "player_stand", pCrouchModel, "player_crouch" );
+	*/
+
+	BaseClass::InitVCollision( vecAbsOrigin, vecAbsVelocity );
 }

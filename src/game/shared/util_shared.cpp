@@ -15,8 +15,10 @@
 #include "checksum_crc.h"
 #include "particle_parse.h"
 #include "KeyValues.h"
-#include "baseentity_shared.h"
 #include "icommandline.h"
+#include "mathlib/mathlib.h"
+#include "mathlib/ssemath.h"
+
 
 #ifdef CLIENT_DLL
 	#include "clientleafsystem.h"
@@ -33,139 +35,6 @@ bool NPC_CheckBrushExclude( CBaseEntity *pEntity, CBaseEntity *pBrush );
 
 ConVar r_visualizetraces( "r_visualizetraces", "0", FCVAR_CHEAT );
 ConVar developer("developer", "0", FCVAR_RELEASE, "Set developer message level" ); // developer mode
-
-// paint convars
-ConVar sv_paint_detection_sphere_radius( "sv_paint_detection_sphere_radius", "16.f", FCVAR_REPLICATED | FCVAR_CHEAT, "The radius of the query sphere used to find the color of a light map at a contact point in world space." );
-// FIXME: Bring this back for DLC2
-//ConVar reflect_paint_vertical_snap( "reflect_paint_vertical_snap", "1", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
-
-//PAINT functions
-bool UTIL_IsPaintableSurface( const csurface_t& surface )
-{
-//	static const unsigned short CEG_SURF_NO_PAINT_FLAG = CEG_GET_CONSTANT_VALUE( SurfNoPaintFlag );
-	return !(surface.flags & FL_UNPAINTABLE);
-}
-
-float UTIL_PaintBrushEntity(CBaseEntity* pBrushEntity, const Vector& contactPoint, PaintPowerType power, float flPaintRadius, float flAlphaPercent)
-{
-	if (!pBrushEntity)
-	{
-		// HACK HACK: Fix it for real Bank! :)
-		return 0.0f;
-	}
-
-	if (!pBrushEntity->IsBSPModel())
-	{
-		return 0.0f;
-	}
-
-	Vector vEntitySpaceContactPoint;
-	pBrushEntity->WorldToEntitySpace(contactPoint, &vEntitySpaceContactPoint);
-
-	if (!engine->SpherePaintSurface(pBrushEntity->GetModel(), vEntitySpaceContactPoint, power, flPaintRadius, flAlphaPercent))
-		return 0.0f;
-	return flPaintRadius;
-}
-#ifdef GAME_DLL
-PaintPowerType UTIL_Paint_TracePower(CBaseEntity* pBrushEntity, const Vector& contactPoint, const Vector& vContactNormal)
-{
-	if (!pBrushEntity->IsBSPModel())
-	{
-		return NO_POWER;
-	}
-
-	CUtlVector<BYTE> color;
-
-	// Transform contact point from world to entity space
-	Vector vEntitySpaceContactPoint;
-	pBrushEntity->WorldToEntitySpace(contactPoint, &vEntitySpaceContactPoint);
-
-	// transform contact normal
-	Vector vTransformedContactNormal;
-	VectorRotate(vContactNormal, -pBrushEntity->GetAbsAngles(), vTransformedContactNormal);
-
-	engine->SphereTracePaintSurface(pBrushEntity->GetModel(), vEntitySpaceContactPoint, vTransformedContactNormal, sv_paint_detection_sphere_radius.GetFloat(), color);
-
-	return MapColorToPower(color);
-}
-#endif
-#ifdef GAME_DLL
-bool UTIL_Paint_Reflect(const trace_t& tr, Vector& vStart, Vector& vDir, PaintPowerType reflectPower )
-
-{
-	reflectPower = REFLECT_POWER;
-
-	// check for reflect paint
-	if (engine->HasPaintMap() && tr.m_pEnt && tr.m_pEnt->IsBSPModel())
-	{
-		PaintPowerType power = UTIL_Paint_TracePower(tr.m_pEnt, tr.endpos, tr.plane.normal);
-		if (power == reflectPower)
-		{
-			Vector vecIn = tr.endpos - tr.startpos;
-			if (DotProduct(vecIn.Normalized(), tr.plane.normal) > -0.99f)
-			{
-				Vector vecReflect = vecIn - 2 * DotProduct(vecIn, tr.plane.normal) * tr.plane.normal;
-
-				vStart = tr.endpos;
-				vDir = vecReflect.Normalized();
-
-				// FIXME: Bring this back for DLC2
-				//if ( reflect_paint_vertical_snap.GetBool() )
-				{
-					float flDot = DotProduct(tr.plane.normal, Vector(0.f, 0.f, 1.f));
-
-					if (vDir.z > 0.1 && flDot > 0 && flDot < 1)
-					{
-						vDir = Vector(0.f, 0.f, 1.f);
-					}
-					else if (vDir.z < -0.1f && flDot > 0 && flDot < 1)
-					{
-						vDir = Vector(0.f, 0.f, -1.f);
-					}
-				}
-
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-#endif
-#ifdef GAME_DLL
-bool CBrushEntityList::EnumEntity(IHandleEntity *pHandleEntity)
-{
-	if (!pHandleEntity)
-		return true;
-
-	CBaseEntity *pEntity = gEntList.GetBaseEntity(pHandleEntity->GetRefEHandle());
-	if (!pEntity)
-		return true;
-
-	if (pEntity->IsBSPModel())
-	{
-		m_BrushEntitiesToPaint.AddToTail(pEntity);
-	}
-
-	return true;
-}
-#endif
-
-void UTIL_FindBrushEntitiesInSphere(CBrushEntityList& brushEnum, const Vector& vCenter, float flRadius)
-{
-	Vector vExtents = flRadius * Vector(1.f, 1.f, 1.f);
-	enginetrace->EnumerateEntities(vCenter - vExtents, vCenter + vExtents, &brushEnum);
-}
-
-void ExpandAABB(Vector& boxMin, Vector& boxMax, const Vector& sweepVector)
-{
-	for (unsigned i = 0; i < 3; ++i)
-	{
-		boxMin[i] += sweepVector[i] < 0 ? sweepVector[i] : 0;
-		boxMax[i] += sweepVector[i] > 0 ? sweepVector[i] : 0;
-	}
-}
-//END paint functions
 
 #ifdef DETECT_TRACE_SPIKES
 float g_TraceSpikeTolerance = 0.25;
@@ -482,6 +351,22 @@ bool CTraceFilterNoNPCsOrPlayer::ShouldHitEntity( IHandleEntity *pHandleEntity, 
 }
 
 //-----------------------------------------------------------------------------
+// Purpose: Trace filter that doesn't hit players
+//-----------------------------------------------------------------------------
+bool CTraceFilterNoPlayers::ShouldHitEntity( IHandleEntity *pHandleEntity, int contentsMask )
+{
+	if ( CTraceFilterSimple::ShouldHitEntity( pHandleEntity, contentsMask ) )
+	{
+		CBaseEntity *pEntity = EntityFromEntityHandle( pHandleEntity );
+		if ( !pEntity )
+			return NULL;
+
+		return !pEntity->IsPlayer();
+	}
+	return false;
+}
+
+//-----------------------------------------------------------------------------
 // Trace filter that skips two entities
 //-----------------------------------------------------------------------------
 CTraceFilterSkipTwoEntities::CTraceFilterSkipTwoEntities( const IHandleEntity *passentity, const IHandleEntity *passentity2, int collisionGroup ) :
@@ -784,7 +669,7 @@ void UTIL_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, const Ve
 #ifdef PORTAL
 	UTIL_Portal_TraceEntity(pEntity, vecAbsStart, vecAbsEnd, mask, &traceFilter, ptr);
 #else
-	enginetrace->SweepCollideable(pCollision, vecAbsStart, vecAbsEnd, pCollision->GetCollisionAngles(), mask, &traceFilter, ptr);
+	enginetrace->SweepCollideable( pCollision, vecAbsStart, vecAbsEnd, pCollision->GetCollisionAngles(), mask, &traceFilter, ptr );
 #endif
 }
 
@@ -803,7 +688,7 @@ void UTIL_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, const Ve
 #ifdef PORTAL
 	UTIL_Portal_TraceEntity(pEntity, vecAbsStart, vecAbsEnd, mask, &traceFilter, ptr);
 #else
-	enginetrace->SweepCollideable(pCollision, vecAbsStart, vecAbsEnd, pCollision->GetCollisionAngles(), mask, &traceFilter, ptr);
+	enginetrace->SweepCollideable( pCollision, vecAbsStart, vecAbsEnd, pCollision->GetCollisionAngles(), mask, &traceFilter, ptr );
 #endif
 }
 
@@ -820,7 +705,7 @@ void UTIL_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, const Ve
 #ifdef PORTAL
 	UTIL_Portal_TraceEntity(pEntity, vecAbsStart, vecAbsEnd, mask, pFilter, ptr);
 #else
-	enginetrace->SweepCollideable(pCollision, vecAbsStart, vecAbsEnd, pCollision->GetCollisionAngles(), mask, pFilter, ptr);
+	enginetrace->SweepCollideable( pCollision, vecAbsStart, vecAbsEnd, pCollision->GetCollisionAngles(), mask, pFilter, ptr );
 #endif
 }
 
@@ -2157,3 +2042,178 @@ int UTIL_EntitiesAlongRay( const Ray_t &ray, CFlaggedEntitiesEnum *pEnum )
 #endif
 	return pEnum->GetCount();
 }
+
+// Should be in mathlib, but whatever
+
+int ClipPolyToPlane_SIMD( fltx4 *pInVerts, int nVertCount, fltx4 *pOutVerts, const fltx4& plane, float fOnPlaneEpsilon )
+{
+	vec_t	*dists = (vec_t *)stackalloc( sizeof(vec_t) * nVertCount * 4 ); //4* nVertCount should cover all cases
+	uint8	*sides = (uint8 *)stackalloc( sizeof(uint8) * nVertCount * 4 );
+	int		i;
+
+/*
+ * It seems something could be done here... Especially in relation with the code below i, i + 1, etc...
+	fltx4 f4OnPlaneEpsilonP = ReplicateX4( fOnPlaneEpsilon );
+	fltx4 f4OnPlaneEpsilonM = -f4OnPlaneEpsilonP;
+	Also we could store the full fltx4 instead of a single float. It would avoid doing a SubFloat() here,
+	and a ReplicateX4() later. Trading off potential LHS against L2 cache misses?
+*/
+	// determine sides for each point
+	int nAllSides = 0;
+	fltx4 f4Dist = SplatWSIMD( plane );
+	for ( i = 0; i < nVertCount; i++ )
+	{
+		// dot = DotProduct( pInVerts[i], normal) - dist;
+		fltx4 dot = Dot3SIMD( pInVerts[i], plane );
+		dot = SubSIMD( dot, f4Dist );
+		float fDot = SubFloat( dot, 0 );
+		dists[i] = fDot;
+		// Look how to update sides with a branch-less version
+		int nSide = OR_SIDE_ON;
+		if ( fDot > fOnPlaneEpsilon )
+		{
+			nSide = OR_SIDE_FRONT;
+		}
+		else if ( fDot < -fOnPlaneEpsilon )
+		{
+			nSide = OR_SIDE_BACK;
+		}
+		sides[i] = nSide;
+		nAllSides |= nSide;
+	}
+	sides[i] = sides[0];
+	dists[i] = dists[0];
+
+	// Shortcuts (either completely clipped or not clipped at all)
+	if ( ( nAllSides & OR_SIDE_FRONT ) == 0 )
+	{
+		return 0;	// Completely clipped
+	}
+
+	if ( ( nAllSides & OR_SIDE_BACK ) == 0 )
+	{
+		// Not clipped at all, copy to output verts
+		Assert ( i == nVertCount );
+		int nIndex = 0;
+		while ( i >= 4 )
+		{
+			pOutVerts[nIndex] = pInVerts[nIndex];
+			pOutVerts[nIndex + 1] = pInVerts[nIndex + 1];
+			pOutVerts[nIndex + 2] = pInVerts[nIndex + 2];
+			pOutVerts[nIndex + 3] = pInVerts[nIndex + 3];
+			nIndex += 4;
+			i -= 4;
+		}
+		while ( i > 0 )
+		{
+			pOutVerts[nIndex] = pInVerts[nIndex];
+			++nIndex;
+			--i;
+		}
+		return nVertCount;
+	}
+
+	fltx4 f4one = Four_Ones;
+	fltx4 f4MOne = -f4one;
+
+	fltx4 f4OneMask = (fltx4)CmpEqSIMD( plane, f4one );
+	fltx4 f4mOneMask = (fltx4)CmpEqSIMD( plane, f4MOne );
+	fltx4 f4AllMask = OrSIMD( f4OneMask, f4mOneMask );					// 0xffffffff where normal was 1 or -1, 0 otherwise
+	f4OneMask = AndSIMD( f4OneMask, f4Dist );							// Dist where normal.* was 1
+	f4mOneMask = AndSIMD( f4mOneMask, -f4Dist );						// -Dist where normal.* was -1
+	fltx4 f4AllValue = OrSIMD( f4OneMask, f4mOneMask );					// Dist and -Dist where normal.* was 1 and -1
+	// f4AllMask and f4AllValue will be used together (to override the default calculation).
+
+	int nOutCount = 0;
+	for ( i = 0; i < nVertCount; i++ )
+	{
+		const fltx4& p1 = pInVerts[i];
+
+		if (sides[i] == OR_SIDE_ON)
+		{
+			pOutVerts[nOutCount++] = p1;
+			continue;
+		}
+
+		if (sides[i] == OR_SIDE_FRONT)
+		{
+			pOutVerts[nOutCount++] = p1;
+		}
+
+		if (sides[i+1] == OR_SIDE_ON || sides[i+1] == sides[i])
+			continue;
+
+		// generate a split point
+		fltx4& p2 = pInVerts[(i+1)%nVertCount];
+
+		float fDot = dists[i] / (dists[i]-dists[i+1]);
+		fltx4 f4Dot = ReplicateX4( fDot );
+
+		// mid[j] = v1[j] + dot*(v2[j]-v1[j]);		- For j=0...2
+		fltx4 f4Result = MaddSIMD( f4Dot, SubSIMD( p2, p1) , p1);
+		// If normal.* is 1, it should be dist, if -1, it should be -dist, otherwise it should be mid[j] = v1[j] + dot*(v2[j]-v1[j]);
+		fltx4 mid = MaskedAssign( (fltx4)f4AllMask, f4AllValue, f4Result );
+		pOutVerts[nOutCount++] = mid;
+	}
+
+	return nOutCount;
+}
+
+
+// Returns void as it was impossible for the function to returns anything other than 4.
+// Any absolute of a floating value will always return a number greater than -16384. That test seemed bogus.
+void PolyFromPlane_SIMD( fltx4 *pOutVerts, const fltx4 & plane, float fHalfScale )
+{
+	// So we need to find the biggest component of all three,
+	// And depending of the value, we need to build a unit vector along something that is not the major axis.
+
+	fltx4 f4Abs = AbsSIMD( plane );
+	fltx4 x = SplatXSIMD( f4Abs );
+	fltx4 y = SplatYSIMD( f4Abs );
+	fltx4 z = SplatZSIMD( f4Abs );
+	fltx4 max = MaxSIMD( x, y );
+	max = MaxSIMD( max, z );
+
+	// Simplify the code, if Z is the biggest component, we will use 1 0 0.
+	// If X or Y are the biggest, we will use 0 0 1.
+	fltx4 fIsMax = CmpEqSIMD( max, f4Abs );		// isMax will be set for the components that are the max
+	fltx4 fIsZMax = SplatZSIMD( (fltx4)fIsMax );	// 0 if Z is not the max, 0xffffffff is Z is the max
+	// And depending if Z is max or not, we are going to select one unit vector or the other
+	fltx4 vup = MaskedAssign( (fltx4)fIsZMax, g_SIMD_Identity[0], g_SIMD_Identity[2] );
+
+	fltx4 normal = SetWToZeroSIMD( plane );
+	fltx4 dist = SplatWSIMD( plane );
+
+	// Remove the component of this vector along the normal
+	fltx4 v = Dot3SIMD( vup, normal );
+	vup = MaddSIMD( -v, normal, vup);
+	// Make it a unit (perpendicular)
+	vup = Normalized3SIMD( vup );
+
+	// Center of the poly is at normal * dist
+	fltx4 org = MulSIMD( dist, normal );
+	// Calculate the third orthonormal basis vector for our plane space (this one and vup are in the plane)
+	fltx4 vright = CrossProductSIMD( vup, normal);
+
+	// Make the plane's basis vectors big (these are the half-sides of the polygon we're making)
+	fltx4 f4HalfScale = ReplicateX4( fHalfScale );
+	vup = MulSIMD( f4HalfScale, vup );
+	vright = MulSIMD( f4HalfScale, vright );
+
+	// Move diagonally away from org to create the corner verts
+	fltx4 vleft = SubSIMD( org, vright );
+	vright = AddSIMD( org, vright );
+
+	pOutVerts[0] = AddSIMD( vleft, vup );		// left + up
+	pOutVerts[1] = AddSIMD( vright, vup );		// right + up
+	pOutVerts[2] = SubSIMD( vright, vup );		// right + down
+	pOutVerts[3] = SubSIMD( vleft, vup );		// left + down
+}
+
+const fltx4 g_SIMD_Identity[4] =
+{
+	{ 1.0, 0, 0, 0 }, { 0, 1.0, 0, 0 }, { 0, 0, 1.0, 0 }, { 0, 0, 0, 1.0 }
+};
+
+
+#include "meshutils/mesh.h"

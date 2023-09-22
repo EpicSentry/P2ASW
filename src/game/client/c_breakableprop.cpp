@@ -18,6 +18,7 @@
 #include "tier0/memdbgon.h"
 
 IMPLEMENT_CLIENTCLASS_DT(C_BreakableProp, DT_BreakableProp, CBreakableProp)
+	RecvPropQAngles( RECVINFO( m_qPreferredPlayerCarryAngles ) ),
 	RecvPropBool( RECVINFO( m_bClientPhysics ) ),
 END_RECV_TABLE()
 
@@ -47,5 +48,16 @@ void C_BreakableProp::OnDataChanged( DataUpdateType_t type )
 		bool bCreate = (type == DATA_UPDATE_CREATED) ? true : false;
 		VPhysicsShadowDataChanged(bCreate, this);
 	}
+}
+
+//IPlayerPickupVPhysics
+bool C_BreakableProp::HasPreferredCarryAnglesForPlayer( CBasePlayer *pPlayer )
+{
+	return (m_qPreferredPlayerCarryAngles.x < FLT_MAX);
+}
+
+QAngle C_BreakableProp::PreferredCarryAngles( void )
+{
+	return (m_qPreferredPlayerCarryAngles.x < FLT_MAX) ? m_qPreferredPlayerCarryAngles : vec3_angle;
 }
 

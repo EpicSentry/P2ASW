@@ -31,6 +31,13 @@
 ConVar sv_player_trace_through_portals("sv_player_trace_through_portals", "1", FCVAR_REPLICATED | FCVAR_CHEAT, "Causes player movement traces to trace through portals." );
 ConVar sv_player_funnel_into_portals("sv_player_funnel_into_portals", "1", FCVAR_REPLICATED | FCVAR_ARCHIVE | FCVAR_ARCHIVE_XBOX, "Causes the player to auto correct toward the center of floor portals." ); 
 
+// Convars for paint powerups
+ConVar sv_speed_normal("sv_speed_normal", "175.f", FCVAR_REPLICATED | FCVAR_CHEAT, "For tweaking the normal speed when off speed paint.");
+ConVar sv_speed_paint_max("sv_speed_paint_max", "800.0f", FCVAR_REPLICATED | FCVAR_CHEAT, "For tweaking the max speed for speed paint.");
+ConVar sv_speed_paint_side_move_factor("sv_speed_paint_side_move_factor", "0.5f", FCVAR_REPLICATED | FCVAR_CHEAT);
+ConVar speed_funnelling_enabled("speed_funnelling_enabled", "1", FCVAR_REPLICATED, "Toggle whether the player is funneled into portals while running on speed paint.");
+ConVar sv_paintairacceleration("sv_paintairacceleration", "5.0f", FCVAR_REPLICATED | FCVAR_CHEAT, "Air acceleration in Paint");
+
 class CReservePlayerSpot;
 
 #define PORTAL_FUNNEL_AMOUNT 6.0f

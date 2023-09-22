@@ -12,7 +12,7 @@
 #pragma once
 #endif
 
-
+#include "cbase.h"
 #include "dt_recv.h"
 
 #include "hl2/hl_movedata.h"

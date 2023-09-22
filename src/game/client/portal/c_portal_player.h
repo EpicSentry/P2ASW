@@ -10,20 +10,33 @@
 #pragma once
 
 #include "portal_playeranimstate.h"
-#include "multiplayer/basenetworkedplayer_cl.h"
+#include "c_basehlplayer.h"
 #include "portal_player_shared.h"
 #include "c_prop_portal.h"
 #include "weapon_portalbase.h"
 #include "c_func_liquidportal.h"
 #include "colorcorrectionmgr.h"
+#include "paint/paint_power_user.h"
+#include "paint/paintable_entity.h"
+#include "c_portal_playerlocaldata.h"
+#include "portal_shareddefs.h"
+
+struct PaintPowerChoiceCriteria_t;
+
+enum PortalScreenSpaceEffect
+{
+	PAINT_SCREEN_SPACE_EFFECT,
+
+	PORTAL_SCREEN_SPACE_EFFECT_COUNT
+};
 
 //=============================================================================
 // >> Portal_Player
 //=============================================================================
-class C_Portal_Player : public C_BaseNetworkedPlayer
+class C_Portal_Player : public PaintPowerUser< CPaintableEntity< C_BaseHLPlayer > >
 {
 public:
-	DECLARE_CLASS( C_Portal_Player, C_BaseNetworkedPlayer);
+	DECLARE_CLASS( C_Portal_Player, PaintPowerUser< CPaintableEntity< C_BaseHLPlayer > > );
 
 	DECLARE_CLIENTCLASS();
 	DECLARE_PREDICTABLE();
@@ -84,8 +97,7 @@ public:
 
 	virtual Vector			EyePosition();
 	Vector					EyeFootPosition( const QAngle &qEyeAngles );//interpolates between eyes and feet based on view angle roll
-	inline Vector			EyeFootPosition( void ) { return EyeFootPosition( EyeAngles() ); }; 
-	Vector GetPaintGunShootPosition();
+	inline Vector			EyeFootPosition( void ) { return EyeFootPosition( EyeAngles() ); };
 	void					PlayerPortalled( C_Prop_Portal *pEnteredPortal );
 
 	virtual void	CalcView( Vector &eyeOrigin, QAngle &eyeAngles, float &zNear, float &zFar, float &fov );
@@ -113,6 +125,8 @@ public:
 
 	Activity TranslateActivity( Activity baseAct, bool *pRequired = NULL );
 	CWeaponPortalBase* GetActivePortalWeapon() const;
+	
+	float GetMotionBlurAmount(void) { return m_flMotionBlurAmount; }
 
 private:
 
@@ -190,14 +204,164 @@ private:
 
 	bool	m_bPortalledMessagePending; //Player portalled. It's easier to wait until we get a OnDataChanged() event or a CalcView() before we do anything about it. Otherwise bits and pieces can get undone
 	VMatrix m_PendingPortalMatrix;
+	
+	// we need to interpolate hull height to maintain the world space center
+	float m_flHullHeight;
+	CInterpolatedVar< float > m_iv_flHullHeight;
+
+public: // PAINT SPECIFIC
+	static bool RenderLocalScreenSpaceEffect( PortalScreenSpaceEffect effect, IMatRenderContext *pRenderContext, int x, int y, int w, int h );
+	
+	Vector GetPaintGunShootPosition();
+	
+	bool IsPressingJumpKey() const;
+	bool IsHoldingJumpKey() const;
+	bool IsTryingToSuperJump( const PaintPowerInfo_t* pInfo = NULL ) const;
+	void SetJumpedThisFrame( bool jumped );
+	bool JumpedThisFrame() const;
+	void SetBouncedThisFrame( bool bounced );
+	bool BouncedThisFrame() const;
+	InAirState GetInAirState() const;
+	
+	bool WantsToSwapGuns( void );
+	void SetWantsToSwapGuns( bool bWantsToSwap );
+	
+	virtual PaintPowerType GetPaintPowerAtPoint( const Vector& worldContactPt ) const;
+	virtual void Paint( PaintPowerType type, const Vector& worldContactPt );
+	virtual void CleansePaint();
+	
+	const Vector& GetInputVector() const;
+	void SetInputVector( const Vector& vInput );
+
+	virtual bool RenderScreenSpaceEffect( PortalScreenSpaceEffect effect, IMatRenderContext *pRenderContext, int x, int y, int w, int h );
+
+	bool ScreenSpacePaintEffectIsActive() const;
+	void SetScreenSpacePaintEffectColors( IMaterialVar* pColor1, IMaterialVar* pColor2 ) const;
+
+	void Reorient( QAngle& viewAngles );
+	float GetReorientationProgress() const;
+	bool IsDoneReorienting() const;
+	
+	virtual const Vector GetPlayerMins() const;
+	virtual const Vector GetPlayerMaxs() const;
+	const Vector& GetHullMins() const;
+	const Vector& GetHullMaxs() const;
+	const Vector& GetStandHullMins() const;
+	const Vector& GetStandHullMaxs() const;
+	const Vector& GetDuckHullMins() const;
+	const Vector& GetDuckHullMaxs() const;
+
+	float GetHullHeight() const;
+	float GetHullWidth() const;
+	float GetStandHullHeight() const;
+	float GetStandHullWidth() const;
+	float GetDuckHullHeight() const;
+	float GetDuckHullWidth() const;
+	
+	virtual void UpdateCollisionBounds();
+
+	// stick camera
+	void RotateUpVector( Vector& vForward, Vector& vUp );
+	void SnapCamera( StickCameraState nCameraState, bool bLookingInBadDirection );
+	//void PostTeleportationCameraFixup( const CProp_Portal *pEnteredPortal );
+	
+	StickCameraState GetStickCameraState() const;
+	void SetQuaternionPunch( const Quaternion& qPunch );
+	void DecayQuaternionPunch();
+	
+	using BaseClass::AddSurfacePaintPowerInfo;
+	void AddSurfacePaintPowerInfo( const BrushContact& contact, char const* context = 0 );
+	void AddSurfacePaintPowerInfo( const trace_t& trace, char const* context = 0 );
+	
+	void SetEyeOffset( const Vector& vOldOrigin, const Vector& vNewOrigin );
+	
+	void SetHullHeight( float flHeight );
+	
+	void OnBounced( float fTimeOffset = 0.0f );
+	
+	virtual void ChooseActivePaintPowers( PaintPowerInfoVector& activePowers );
+
+private: // PAINT SPECIFIC
+	void DecayEyeOffset();
+	
+	// Find all the contacts
+	void DeterminePaintContacts();
+	void PredictPaintContacts( const Vector& contactBoxMin,
+								const Vector& contactBoxMax,
+								const Vector& traceBoxMin,
+								const Vector& traceBoxMax,
+								float lookAheadTime,
+								char const* context );
+	void ChooseBestPaintPowersInRange( PaintPowerChoiceResultArray& bestPowers,
+										PaintPowerConstIter begin,
+										PaintPowerConstIter end,
+										const PaintPowerChoiceCriteria_t& info ) const;
+	
+	// Paint Power User Implementation
+	virtual PaintPowerState ActivateSpeedPower( PaintPowerInfo_t& powerInfo );
+	virtual PaintPowerState UseSpeedPower( PaintPowerInfo_t& powerInfo );
+	virtual PaintPowerState DeactivateSpeedPower( PaintPowerInfo_t& powerInfo );
+
+	virtual PaintPowerState ActivateBouncePower( PaintPowerInfo_t& powerInfo );
+	virtual PaintPowerState UseBouncePower( PaintPowerInfo_t& powerInfo );
+	virtual PaintPowerState DeactivateBouncePower( PaintPowerInfo_t& powerInfo );
+	
+	void PlayPaintSounds( const PaintPowerChoiceResultArray& touchedPowers );
+	void UpdatePaintedPower();
+	void UpdateAirInputScaleFadeIn();
+	void UpdateInAirState();
+	void CachePaintPowerChoiceResults( const PaintPowerChoiceResultArray& choiceInfo );
+	bool LateSuperJumpIsValid() const;
+	void RecomputeBoundsForOrientation();
+	void TryToChangeCollisionBounds( const Vector& newStandHullMin,
+		const Vector& newStandHullMax,
+		const Vector& newDuckHullMin,
+		const Vector& newDuckHullMax );
+	
+	float SpeedPaintAcceleration( float flDefaultMaxSpeed,
+		float flSpeed,
+		float flWishCos,
+		float flWishDirSpeed ) const;
+	
+	bool RenderScreenSpacePaintEffect( IMatRenderContext *pRenderContext );
+	void InvalidatePaintEffects();
+
+	float m_flCachedJumpPowerTime;
+	bool CheckToUseBouncePower( PaintPowerInfo_t& info );
+
+	float m_flSpeedDecelerationTime;
+	float m_flPredictedJumpTime;
+	Vector m_vInputVector;
+	CountdownTimer m_PaintScreenEffectCooldownTimer;
+
+	float m_flUsePostTeleportationBoxTime;
+	bool m_bJumpWasPressedWhenForced;	// The jump button was actually pressed when ForceDuckThisFrame() was called
+	float m_flTimeSinceLastTouchedPower[3];
+
+	// PAINT POWER STATE
+	PaintPowerInfo_t m_CachedJumpPower;
+	CUtlReference< CNewParticleEffect > m_PaintScreenSpaceEffect;
+	
+	// Paint power debug
+	void DrawJumpHelperDebug( PaintPowerConstIter begin, PaintPowerConstIter end, float duration, bool noDepthTest, const PaintPowerInfo_t* pSelected ) const;
+
+	bool m_bWantsToSwapGuns;
 
 public:
+	const C_PortalPlayerLocalData& GetPortalPlayerLocalData() const;
+
 	bool	m_bPitchReorientation;
 	float	m_fReorientationRate;
 	bool	m_bEyePositionIsTransformedByPortal; //when the eye and body positions are not on the same side of a portal
 
 	CHandle<C_Prop_Portal>	m_hPortalEnvironment; //a portal whose environment the player is currently in, should be invalid most of the time
 	CHandle<C_Func_LiquidPortal>	m_hSurroundingLiquidPortal; //a liquid portal whose volume the player is standing in
+
+protected:
+	C_PortalPlayerLocalData		m_PortalLocal;
+
+	float m_flMotionBlurAmount;
+
 };
 
 inline C_Portal_Player *ToPortalPlayer( CBaseEntity *pEntity )

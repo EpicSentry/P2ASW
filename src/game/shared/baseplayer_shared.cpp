@@ -88,12 +88,7 @@ bool UseHWMorphModels()
 	return false;
 #endif
 }
-// Paintable player ConVars
-ConVar player_can_use_painted_power("player_can_use_painted_power", "0", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Allow/disallow players to be painted.");
-ConVar player_loses_painted_power_over_time("player_loses_painted_power_over_time", "1", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "The player should lose the power after having it for player_paint_effects_duration.");
-ConVar player_paint_effects_duration("player_paint_effects_duration", "4.0f", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Amount of time player maintains her power after being painted.");
-ConVar player_paint_effects_enabled("player_paint_effects_enabled", "1", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Display the visual effects of being painted.");
-ConVar player_paint_screen_effect_restart_delay("player_paint_screen_effect_restart_delay", "0.5f", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Time to wait between particle system restarts when the player gets painted multiple times in rapid succession.");
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 // Output : float

@@ -15,6 +15,28 @@
 #include "cegclientwrapper.h"
 #include "paint/paint_power_info.h"
 
+const float STEEP_SLOPE = 0.7;
+char const* const PORTAL_PREDICTED_CONTEXT = "Portal Predicted Powers";
+
+//-----------------------------------------------------------------------------
+// Purpose: Computes a local matrix for the player clamped to valid carry ranges
+//-----------------------------------------------------------------------------
+// when looking level, hold bottom of object 8 inches below eye level
+#define PLAYER_HOLD_LEVEL_EYES	-8
+
+// when looking down, hold bottom of object 0 inches from feet
+#define PLAYER_HOLD_DOWN_FEET	2
+
+// when looking up, hold bottom of object 24 inches above eye level
+#define PLAYER_HOLD_UP_EYES		24
+
+// use a +/-30 degree range for the entire range of motion of pitch
+#define PLAYER_LOOK_PITCH_RANGE	30
+
+// player can reach down 2ft below his feet (otherwise he'll hold the object above the bottom)
+#define PLAYER_REACH_DOWN_DISTANCE	24
+
+
 //=============================================================================
 // Paint Power Choice
 //=============================================================================
@@ -45,6 +67,29 @@ typedef CUtlVectorFixed< PaintPowerChoiceResult_t, PAINT_POWER_TYPE_COUNT_PLUS_N
 
 void ExpandAABB(Vector& boxMin, Vector& boxMax, const Vector& sweepVector);
 
+struct BrushContact
+{
+	Vector point;
+	Vector normal;
+	CBaseEntity* pBrushEntity;
+	bool isOnThinSurface;
+
+	void Initialize( const Vector& contactPt,
+					 const Vector& normal,
+					 CBaseEntity* pBrushEntity,
+					 bool onThinSurface );
+	void Initialize( const fltx4& contactPt,
+		const fltx4& normal,
+		CBaseEntity* pBrushEntity,
+		bool onThinSurface );
+};
+
+typedef CUtlVector<BrushContact> ContactVector;
+typedef CUtlVector<cplane_t> CollisionPlaneVector;
+void ComputeAABBContactsWithBrushEntity( ContactVector& contacts, const Vector& boxOrigin, const Vector& boxMin, const Vector& boxMax, CBaseEntity* pBrushEntity, int contentsMask = CONTENTS_BRUSH_PAINT );
+void ComputeAABBContactsWithBrushEntity( ContactVector& contacts, const cplane_t *pClipPlanes, int iClipPlaneCount, const Vector& boxOrigin, const Vector& boxMin, const Vector& boxMax, CBaseEntity* pBrushEntity, int contentsMask = CONTENTS_BRUSH_PAINT );
+
+
 enum
 {
 	PLAYER_SOUNDS_CITIZEN = 0,
@@ -72,6 +117,18 @@ struct CachedPaintPowerChoiceResult
 		surfaceEntity = NULL;
 		wasValid = false;
 		wasIgnored = false;
+	}
+};
+
+struct StringCompare_t
+{
+	StringCompare_t( char const* str ) : m_str( str ) {}
+
+	char const* const m_str;
+
+	inline bool operator()( char const* str ) const
+	{
+		return V_strcmp( m_str, str ) == 0;
 	}
 };
 

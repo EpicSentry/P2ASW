@@ -7,7 +7,7 @@
 #include "cbase.h"
 #include "npc_turret_floor.h"
 #include "portal_player.h"
-#include "weapon_physcannon.h"
+#include "player_pickup_controller.h"
 #include "basehlcombatweapon_shared.h"
 #include "ammodef.h"
 #include "ai_senses.h"

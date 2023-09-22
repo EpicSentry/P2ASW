@@ -24,6 +24,11 @@
 #include "engine/iserverplugin.h"
 #include "tier1/bitbuf.h"
 
+// IVEngineClient doesn't have a HasPaintMap() function, so we need a macro.
+#ifdef GAME_DLL
+#define HASPAINTMAP true//engine->HasPaintMap()
+#endif
+
 //-----------------------------------------------------------------------------
 // forward declarations
 //-----------------------------------------------------------------------------
@@ -79,11 +84,6 @@ struct bbox_t
 	Vector mins;
 	Vector maxs;
 };
-
-// IVEngineClient doesn't have a HasPaintMap() function, so we need a macro.
-#ifdef GAME_DLL
-#define HASPAINTMAP engine->HasPaintMap()
-#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: Interface the engine exposes to the game DLL
@@ -435,18 +435,9 @@ public:
 
 	// Tells the engine to allocate paint surfaces
 	virtual bool HasPaintMap() = 0;
-
-	// Returns true if the surface paint colors changed
-	virtual bool SpherePaintSurface(const model_t *pModel, const Vector& vPosition, BYTE color, float flSphereRadius, float flPaintCoatPercent) = 0;
-
-	virtual void SphereTracePaintSurface(const model_t *pModel, const Vector& vPosition, const Vector& vContactNormal, float flSphereRadius, CUtlVector<BYTE>& surfColor) = 0;
+	virtual void PaintSurface( const model_t *model, const Vector& position, const Color& color, float radius ) = 0;
+	virtual void TracePaintSurface( const model_t *model, const Vector& position, float radius, CUtlVector<Color>& surfColor ) = 0;
 	virtual void RemoveAllPaint() = 0;
-	virtual void PaintAllSurfaces(BYTE color) = 0;
-	virtual void RemovePaint(const model_t* pModel) = 0;
-
-	virtual void GetPaintmapDataRLE(CUtlVector<uint32> &data) = 0;
-	virtual void LoadPaintmapDataRLE(const CUtlVector< uint32 > &data) = 0;
-	virtual void SendPaintmapDataToClient(edict_t *pPlayerEdict) = 0;
 
 	// Send a client command keyvalues
 	// keyvalues are deleted inside the function

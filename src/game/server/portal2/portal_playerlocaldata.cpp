@@ -14,6 +14,7 @@
 #include "tier0/memdbgon.h"
 
 BEGIN_SEND_TABLE_NOBASE( CPortalPlayerLocalData, DT_PortalLocal ) // Purpose: Not done (Line 16)
+/*
     SendPropBool(&g_SendProps_191[1], "m_bShowingViewFinder", 4, 1);
     SendPropFloat(&g_SendProps_191[2], "m_flAirControlSupressionTime", 8, 4, 32, 0, 0.0, -121121.12, SendProxy_FloatToFloat, 0x80u);
     SendPropInt(&v1, "m_nLocatorEntityIndices", 12, 4, -1, 0, 0, 0x80u);
@@ -63,77 +64,59 @@ BEGIN_SEND_TABLE_NOBASE( CPortalPlayerLocalData, DT_PortalLocal ) // Purpose: No
     SendPropFloat(&g_SendProps_191[34], "m_fBouncedTime", 404, 4, 32, 0, 0.0, -121121.12, SendProxy_FloatToFloat, 0x80u);
 
     SendPropBool(&g_SendProps_191[35], "m_bPreventedCrouchJumpThisFrame", 408, 1);
+	*/
 END_SEND_TABLE()
 
 BEGIN_SIMPLE_DATADESC( CPortalPlayerLocalData ) // Purpose: Not done (Line 68)
-    // TODO: 35 in here
-END_DATADESC()
 
+DEFINE_FIELD( m_nStickCameraState, FIELD_INTEGER ),
+DEFINE_FIELD( m_InAirState, FIELD_INTEGER ),
+DEFINE_FIELD( m_PaintedPowerType, FIELD_INTEGER ),
+DEFINE_FIELD( m_nLocatorEntityIndices, FIELD_INTEGER ),
 
+DEFINE_FIELD( m_bShowingViewFinder, FIELD_BOOLEAN ),
+DEFINE_FIELD( m_bPlacingPhoto, FIELD_BOOLEAN ),
+DEFINE_FIELD( m_bDoneStickInterp, FIELD_BOOLEAN ),
+DEFINE_FIELD( m_bDoneCorrectPitch, FIELD_BOOLEAN ),
+DEFINE_FIELD( m_bAttemptHullResize, FIELD_BOOLEAN ),
+DEFINE_FIELD( m_bJumpedThisFrame, FIELD_BOOLEAN ),
+DEFINE_FIELD( m_bBouncedThisFrame, FIELD_BOOLEAN ),
+DEFINE_FIELD( m_bDuckedInAir, FIELD_BOOLEAN ),
+DEFINE_FIELD( m_bZoomedIn, FIELD_BOOLEAN ),
+DEFINE_FIELD( m_bPreventedCrouchJumpThisFrame, FIELD_BOOLEAN ),
 
+DEFINE_FIELD( m_flAirControlSupressionTime, FIELD_FLOAT ),
+DEFINE_FIELD( m_flAirInputScale, FIELD_FLOAT ),
+DEFINE_FIELD( m_flCurrentStickTime, FIELD_FLOAT ),
+DEFINE_FIELD( m_fBouncedTime, FIELD_FLOAT ),
 
+DEFINE_FIELD( m_StickNormal, FIELD_VECTOR ),
+DEFINE_FIELD( m_OldStickNormal, FIELD_VECTOR ),
+DEFINE_FIELD( m_vPreUpdateVelocity, FIELD_VECTOR ),
+DEFINE_FIELD( m_Up, FIELD_VECTOR ),
+DEFINE_FIELD( m_vStickRotationAxis, FIELD_VECTOR ),
+DEFINE_FIELD( m_StandHullMin, FIELD_VECTOR ),
+DEFINE_FIELD( m_StandHullMax, FIELD_VECTOR ),
+DEFINE_FIELD( m_DuckHullMin, FIELD_VECTOR ),
+DEFINE_FIELD( m_DuckHullMax, FIELD_VECTOR ),
+DEFINE_FIELD( m_CachedStandHullMinAttempt, FIELD_VECTOR ),
+DEFINE_FIELD( m_CachedStandHullMaxAttempt, FIELD_VECTOR ),
+DEFINE_FIELD( m_CachedDuckHullMinAttempt, FIELD_VECTOR ),
+DEFINE_FIELD( m_CachedDuckHullMaxAttempt, FIELD_VECTOR ),
+DEFINE_FIELD( m_vLocalUp, FIELD_VECTOR ),
+DEFINE_FIELD( m_vEyeOffset, FIELD_VECTOR ),
 
+DEFINE_FIELD( m_qQuaternionPunch, FIELD_VECTOR ),
 
+DEFINE_FIELD( m_hTractorBeam, FIELD_EHANDLE ),
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-BEGIN_SEND_TABLE_NOBASE( PortalPlayerStatistics_t, DT_PortalPlayerStatistics ) // Purpose: Completely restored (Line 119)
-    SendPropInt( SENDINFO( iNumPortalsPlaced ) );
-    SendPropInt( SENDINFO( iNumStepsTaken ) );
-    SendPropFloat( SENDINFO( fNumSecondsTaken ) );
-    SendPropFloat( SENDINFO( fDistanceTaken ) );
-END_SEND_TABLE()
-
-BEGIN_SIMPLE_DATADESC( PortalPlayerStatistics_t ) // Purpose: Completely restored (Line 126)
-    DEFINE_FIELD( iNumPortalsPlaced, FIELD_INTEGER ),
-    DEFINE_FIELD( iNumStepsTaken, FIELD_INTEGER ),
-    DEFINE_FIELD( fNumSecondsTaken, FIELD_FLOAT ),
-    DEFINE_FIELD( fDistanceTaken, FIELD_FLOAT ),
 END_DATADESC()
 
 Vector DEFAULT_SURFACE_NORMAL( 0.0, 0.0, 1.0 ); // Used only in the constructor below
 
 CPortalPlayerLocalData::CPortalPlayerLocalData() // Purpose: Not done. This is the HL2 local data code for reference
 { // Line 136
+	/*
 	m_flSuitPower = 0.0;
 	m_bZooming = false;
 	m_bWeaponLowered = false;
@@ -141,6 +124,8 @@ CPortalPlayerLocalData::CPortalPlayerLocalData() // Purpose: Not done. This is t
 	m_hLadder.Set(NULL);
 	m_vecAutoAimPoint.GetForModify().Init();
 	m_bDisplayReticle = false;
+	*/
+
 #ifdef HL2_EPISODIC
 	m_flFlashBattery = 0.0f;
 #endif

@@ -11,9 +11,11 @@
 
 class CPortal_Player;
 
+#include "player_pickup_controller.h"
 #include "player.h"
 #include "portal_playeranimstate.h"
-#include "multiplayer/basenetworkedplayer.h"
+#include "hl2_playerlocaldata.h"
+#include "hl2_player.h"
 #include "simtimer.h"
 #include "soundenvelope.h"
 #include "portal_player_shared.h"
@@ -22,6 +24,11 @@ class CPortal_Player;
 #include "in_buttons.h"
 #include "func_liquidportal.h"
 #include "ai_speech.h"			// For expresser host
+#include "paint/paint_power_user.h"
+#include "paint/paintable_entity.h"
+#include "portal_playerlocaldata.h"
+#include "materialsystem/imaterialsystem.h"
+#include "materialsystem/imaterialvar.h"
 
 struct PortalPlayerStatistics_t
 {
@@ -30,13 +37,15 @@ struct PortalPlayerStatistics_t
 	float fNumSecondsTaken;
 };
 
+
+
 //=============================================================================
 // >> Portal_Player
 //=============================================================================
-class CPortal_Player : public CBaseNetworkedPlayer
+class CPortal_Player : public PaintPowerUser< CPaintableEntity< CHL2_Player > >
 {
 public:
-	DECLARE_CLASS( CPortal_Player, CBaseNetworkedPlayer);
+	DECLARE_CLASS( CPortal_Player, PaintPowerUser< CPaintableEntity< CHL2_Player > > );
 
 	CPortal_Player();
 	~CPortal_Player( void );
@@ -72,8 +81,6 @@ public:
 	Activity TranslateTeamActivity( Activity ActToTranslate );
 
 	virtual void SetAnimation( PLAYER_ANIM playerAnim );
-
-	virtual CAI_Expresser* GetExpresser( void );
 
 	virtual void PlayerRunCommand(CUserCmd *ucmd, IMoveHelper *moveHelper);
 
@@ -127,9 +134,6 @@ public:
 
 	void SetPlayerModel( void );
 	
-	void UpdateExpression ( void );
-	void ClearExpression ( void );
-	
 	int	  GetPlayerModelType( void ) { return m_iPlayerSoundType; }
 
 	void ForceDuckThisFrame( void );
@@ -172,10 +176,26 @@ public:
 
 	// Tracks our ragdoll entity.
 	CNetworkHandle( CBaseEntity, m_hRagdoll );	// networked entity handle
+	
+	void	SetMotionBlurAmount( float flAmt ) { m_flMotionBlurAmount = flAmt; }
+	
+	const CPortalPlayerLocalData& GetPortalPlayerLocalData() const;
+	
+	CGrabController m_GrabController;
 
-	Vector GetPaintGunShootPosition();
+	CGrabController &GetGrabController()
+	{
+		return m_GrabController;
+	}
+
+
+protected:
+
+	CNetworkVarEmbedded( CPortalPlayerLocalData, m_PortalLocal );
 		
 private:
+
+	CNetworkVar( float,  m_flMotionBlurAmount );
 
 	CSoundPatch		*m_pWooshSound;
 
@@ -206,14 +226,149 @@ private:
 	QAngle						m_qPrePortalledViewAngles;
 	bool						m_bFixEyeAnglesFromPortalling;
 	VMatrix						m_matLastPortalled;
-	CAI_Expresser				*m_pExpresser;
-	string_t					m_iszExpressionScene;
-	EHANDLE						m_hExpressionSceneEnt;
-	float						m_flExpressionLoopTime;
 
 	
 
 	mutable Vector m_vWorldSpaceCenterHolder; //WorldSpaceCenter() returns a reference, need an actual value somewhere
+	
+public: // PAINT SPECIFIC
+
+	Vector GetPaintGunShootPosition();
+	
+	bool IsPressingJumpKey() const;
+	bool IsHoldingJumpKey() const;
+	bool IsTryingToSuperJump( const PaintPowerInfo_t* pInfo = NULL ) const;
+	void SetJumpedThisFrame( bool jumped );
+	bool JumpedThisFrame() const;
+	void SetBouncedThisFrame( bool bounced );
+	bool BouncedThisFrame() const;
+	InAirState GetInAirState() const;
+	
+	bool WantsToSwapGuns( void );
+	void SetWantsToSwapGuns( bool bWantsToSwap );
+
+	virtual PaintPowerType GetPaintPowerAtPoint( const Vector& worldContactPt ) const;
+	virtual void Paint( PaintPowerType type, const Vector& worldContactPt );
+	virtual void CleansePaint();
+
+	void Reorient( QAngle& viewAngles );
+	float GetReorientationProgress() const;
+	bool IsDoneReorienting() const;
+	
+	virtual const Vector GetPlayerMins() const;
+	virtual const Vector GetPlayerMaxs() const;
+	const Vector& GetHullMins() const;
+	const Vector& GetHullMaxs() const;
+	const Vector& GetStandHullMins() const;
+	const Vector& GetStandHullMaxs() const;
+	const Vector& GetDuckHullMins() const;
+	const Vector& GetDuckHullMaxs() const;
+
+	float GetHullHeight() const;
+	float GetHullWidth() const;
+	float GetStandHullHeight() const;
+	float GetStandHullWidth() const;
+	float GetDuckHullHeight() const;
+	float GetDuckHullWidth() const;
+	
+	virtual void UpdateCollisionBounds();
+	virtual void InitVCollision( const Vector &vecAbsOrigin, const Vector &vecAbsVelocity );
+	
+	const Vector& GetInputVector() const;
+	void SetInputVector( const Vector& vInput );
+
+	// stick camera
+	void RotateUpVector( Vector& vForward, Vector& vUp );
+	void SnapCamera( StickCameraState nCameraState, bool bLookingInBadDirection );
+	//void PostTeleportationCameraFixup( const CProp_Portal *pEnteredPortal );
+
+	StickCameraState GetStickCameraState() const;
+	void SetQuaternionPunch( const Quaternion& qPunch );
+	void DecayQuaternionPunch();
+	
+	using BaseClass::AddSurfacePaintPowerInfo;
+	void AddSurfacePaintPowerInfo( const BrushContact& contact, char const* context = 0 );
+	void AddSurfacePaintPowerInfo( const trace_t& trace, char const* context = 0 );
+	
+	void SetEyeOffset( const Vector& vOldOrigin, const Vector& vNewOrigin );
+	
+	void SetHullHeight( float flHeight );
+	
+	void OnBounced( float fTimeOffset = 0.0f );
+	
+	virtual void ChooseActivePaintPowers( PaintPowerInfoVector& activePowers );
+	
+	bool IsFullyConnected() { return m_bIsFullyConnected; }
+
+private: // PAINT SPECIFIC
+
+	void DecayEyeOffset();
+	
+	// Find all the contacts
+	void DeterminePaintContacts();
+	void PredictPaintContacts( const Vector& contactBoxMin,
+								const Vector& contactBoxMax,
+								const Vector& traceBoxMin,
+								const Vector& traceBoxMax,
+								float lookAheadTime,
+								char const* context );
+	void ChooseBestPaintPowersInRange( PaintPowerChoiceResultArray& bestPowers,
+										PaintPowerConstIter begin,
+										PaintPowerConstIter end,
+										const PaintPowerChoiceCriteria_t& info ) const;
+	
+	// Paint Power User Implementation
+	virtual PaintPowerState ActivateSpeedPower( PaintPowerInfo_t& powerInfo );
+	virtual PaintPowerState UseSpeedPower( PaintPowerInfo_t& powerInfo );
+	virtual PaintPowerState DeactivateSpeedPower( PaintPowerInfo_t& powerInfo );
+
+	virtual PaintPowerState ActivateBouncePower( PaintPowerInfo_t& powerInfo );
+	virtual PaintPowerState UseBouncePower( PaintPowerInfo_t& powerInfo );
+	virtual PaintPowerState DeactivateBouncePower( PaintPowerInfo_t& powerInfo );
+	
+	void PlayPaintSounds( const PaintPowerChoiceResultArray& touchedPowers );
+	void UpdatePaintedPower();
+	void UpdateAirInputScaleFadeIn();
+	void UpdateInAirState();
+	void CachePaintPowerChoiceResults( const PaintPowerChoiceResultArray& choiceInfo );
+	bool LateSuperJumpIsValid() const;
+	void RecomputeBoundsForOrientation();
+	void TryToChangeCollisionBounds( const Vector& newStandHullMin,
+		const Vector& newStandHullMax,
+		const Vector& newDuckHullMin,
+		const Vector& newDuckHullMax );
+	
+	float SpeedPaintAcceleration( float flDefaultMaxSpeed,
+		float flSpeed,
+		float flWishCos,
+		float flWishDirSpeed ) const;
+	
+	bool CheckToUseBouncePower( PaintPowerInfo_t& info );
+	
+	// PAINT POWER STATE
+	PaintPowerInfo_t m_CachedJumpPower;
+	Vector m_vInputVector;
+	float m_flCachedJumpPowerTime;
+	float m_flUsePostTeleportationBoxTime;
+	float m_flSpeedDecelerationTime;
+	float m_flPredictedJumpTime;
+	bool m_bJumpWasPressedWhenForced;	// The jump button was actually pressed when ForceDuckThisFrame() was called
+	int m_nBounceCount;	// Number of bounces in a row without touching the ground
+	float m_LastGroundBouncePlaneDistance;
+	float m_flLastSuppressedBounceTime;
+	float m_flTimeSinceLastTouchedPower[3];
+	int m_nPortalsEnteredInAirFlags;
+	int m_nAirTauntCount;
+		
+	CNetworkVar( float, m_flHullHeight );
+	//Swapping guns
+	CNetworkVar( bool, m_bWantsToSwapGuns );
+	bool m_bSendSwapProximityFailEvent;
+	
+	// Paint power debug
+	void DrawJumpHelperDebug( PaintPowerConstIter begin, PaintPowerConstIter end, float duration, bool noDepthTest, const PaintPowerInfo_t* pSelected ) const;
+
+	bool m_bIsFullyConnected;
 
 
 

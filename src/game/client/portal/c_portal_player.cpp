@@ -22,6 +22,7 @@
 #include "portal_shareddefs.h"
 #include "ivieweffects.h"		// for screenshake
 #include "prop_portal_shared.h"
+#include "materialsystem/imaterialvar.h"
 
 
 // Don't alias here
@@ -245,6 +246,10 @@ RecvPropEHandle( RECVINFO( m_pHeldObjectPortal ) ),
 RecvPropBool( RECVINFO( m_bPitchReorientation ) ),
 RecvPropEHandle( RECVINFO( m_hPortalEnvironment ) ),
 RecvPropEHandle( RECVINFO( m_hSurroundingLiquidPortal ) ),
+
+RecvPropFloat( RECVINFO( m_flMotionBlurAmount ) ),
+
+RecvPropFloat( RECVINFO( m_flHullHeight ) ),
 END_RECV_TABLE()
 
 
@@ -261,7 +266,8 @@ extern bool g_bUpsideDown;
 void SpawnBlood (Vector vecSpot, const Vector &vecDir, int bloodColor, float flDamage);
 
 C_Portal_Player::C_Portal_Player()
-: m_iv_angEyeAngles( "C_Portal_Player::m_iv_angEyeAngles" )
+: m_iv_angEyeAngles( "C_Portal_Player::m_iv_angEyeAngles" ),
+	m_flMotionBlurAmount( -1.0f )
 {
 	m_PlayerAnimState = CreatePortalPlayerAnimState( this );
 
@@ -1543,3 +1549,111 @@ bool LocalPlayerIsCloseToPortal( void )
 	return C_Portal_Player::GetLocalPlayer()->IsCloseToPortal();
 }
 
+
+bool C_Portal_Player::RenderLocalScreenSpaceEffect( PortalScreenSpaceEffect effect, IMatRenderContext *pRenderContext, int x, int y, int w, int h )
+{
+	C_Portal_Player *pLocalPlayer = C_Portal_Player::GetLocalPlayer();
+	if( pLocalPlayer )
+	{
+		return pLocalPlayer->RenderScreenSpaceEffect( effect, pRenderContext, x, y, w, h );
+	}
+
+	return false;
+}
+
+static void SetRenderTargetAndViewPort(ITexture *rt)
+{
+	CMatRenderContextPtr pRenderContext( materials );
+	pRenderContext->SetRenderTarget(rt);
+	if ( rt )
+	{
+		pRenderContext->Viewport(0,0,rt->GetActualWidth(),rt->GetActualHeight());
+	}
+}
+
+bool C_Portal_Player::ScreenSpacePaintEffectIsActive() const
+{
+	// The reference is valid and the referenced particle system is also valid
+	return m_PaintScreenSpaceEffect.IsValid() && m_PaintScreenSpaceEffect->IsValid();
+}
+
+void C_Portal_Player::SetScreenSpacePaintEffectColors( IMaterialVar* pColor1, IMaterialVar* pColor2 ) const
+{
+	const Color visualColor = MapPowerToVisualColor( m_PortalLocal.m_PaintedPowerType );
+	Vector vColor1( visualColor.r(), visualColor.g(), visualColor.b() );
+	Vector vColor2 = vColor1;
+	for( unsigned i = 0; i < 3; ++i )
+	{
+		vColor2[i] = clamp( vColor2[i] - 15.0f, 0, 255 );
+	}
+
+	vColor1.NormalizeInPlace();
+	vColor2.NormalizeInPlace();
+
+	pColor1->SetVecValue( vColor1.x, vColor1.y, vColor1.z );
+	pColor2->SetVecValue( vColor2.x, vColor2.y, vColor2.z );
+}
+
+
+bool C_Portal_Player::RenderScreenSpacePaintEffect( IMatRenderContext *pRenderContext )
+{
+	if( ScreenSpacePaintEffectIsActive() )
+	{
+		pRenderContext->PushRenderTargetAndViewport();
+		ITexture* pDestRenderTarget = materials->FindTexture( "_rt_SmallFB1", TEXTURE_GROUP_RENDER_TARGET );
+		SetRenderTargetAndViewPort( pDestRenderTarget );
+		pRenderContext->ClearColor4ub( 128, 128, 0, 0 );
+		pRenderContext->ClearBuffers( true, false, false );
+		RenderableInstance_t instance;
+		instance.m_nAlpha = 255;
+		m_PaintScreenSpaceEffect->DrawModel( 1, instance );
+
+		/*
+		if( IsGameConsole() )
+		{
+			pRenderContext->CopyRenderTargetToTextureEx( pDestRenderTarget, 0, NULL, NULL );
+		}
+		*/
+
+		pRenderContext->PopRenderTargetAndViewport();
+
+		return true;
+	}
+
+	return false;
+}
+
+void C_Portal_Player::InvalidatePaintEffects()
+{
+	// Remove paint screen space effect
+	if( m_PaintScreenSpaceEffect.IsValid() )
+	{
+		m_PaintScreenSpaceEffect->StopEmission();
+		STEAMWORKS_TESTSECRETALWAYS();
+		m_PaintScreenSpaceEffect = NULL;
+	}
+
+	// commenting out the 3rd person drop effect
+	/*
+	// Remove paint drip effect
+	if( m_PaintDripEffect.IsValid() )
+	{
+		m_PaintDripEffect->StopEmission();
+		m_PaintDripEffect = NULL;
+	}
+	*/
+}
+
+
+bool C_Portal_Player::RenderScreenSpaceEffect( PortalScreenSpaceEffect effect, IMatRenderContext *pRenderContext, int x, int y, int w, int h )
+{
+	bool result = false;
+	switch( effect )
+	{
+	case PAINT_SCREEN_SPACE_EFFECT:
+		result = RenderScreenSpacePaintEffect( pRenderContext );
+		break;
+	}
+
+	return result;
+}

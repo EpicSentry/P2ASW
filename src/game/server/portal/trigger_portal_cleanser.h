@@ -1,24 +1,37 @@
 #ifndef TRIGGER_PORTAL_CLEANSER_H
 #define TRIGGER_PORTAL_CLEANSER_H
-#include "cbase.h"
-#include "triggers.h"
-#include "portal_player.h"
-#include "weapon_portalgun.h"
-#include "prop_portal_shared.h"
-#include "portal_shareddefs.h"
-#include "physobj.h"
-#include "portal/weapon_physcannon.h"
-#include "model_types.h"
-#include "rumble_shared.h"
 
+#include "cbase.h"
+
+static char *g_pszPortalNonCleansable[] = 
+{ 
+	"func_door", 
+	"func_door_rotating", 
+	"prop_door_rotating",
+	"func_tracktrain",
+	"env_ghostanimating",
+	"physicsshadowclone",
+	"prop_energy_ball",
+	NULL,
+};
+
+//-----------------------------------------------------------------------------
+// Purpose: Removes anything that touches it. If the trigger has a targetname,
+//			firing it will toggle state.
+//-----------------------------------------------------------------------------
 class CTriggerPortalCleanser : public CBaseTrigger
 {
 public:
-	DECLARE_CLASS(CTriggerPortalCleanser, CBaseTrigger);
+	DECLARE_CLASS( CTriggerPortalCleanser, CBaseTrigger );
 
-	void Spawn(void);
-	void Touch(CBaseEntity *pOther);
+	void Spawn( void );
+	void Touch( CBaseEntity *pOther );
 
+	//Use CBaseEntity for now
+	static void FizzleBaseAnimating( CBaseEntity *pActivator, CBaseEntity *pEntity );
+
+	bool m_bVisible;
+	
 	DECLARE_DATADESC();
 
 	// Outputs
@@ -27,15 +40,4 @@ public:
 	COutputEvent m_OnDissolveBox;
 };
 
-BEGIN_DATADESC(CTriggerPortalCleanser)
-
-// Outputs
-DEFINE_OUTPUT(m_OnDissolve, "OnDissolve"),
-DEFINE_OUTPUT(m_OnFizzle, "OnFizzle"),
-DEFINE_OUTPUT(m_OnDissolveBox, "OnDissolveBox"),
-
-END_DATADESC()
-
-
-LINK_ENTITY_TO_CLASS(trigger_portal_cleanser, CTriggerPortalCleanser);
-#endif // ifndef TRIGGER_PORTAL_CLEANSER_H
+#endif

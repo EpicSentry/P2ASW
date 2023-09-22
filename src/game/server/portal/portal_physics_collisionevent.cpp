@@ -11,7 +11,7 @@
 #include "prop_combine_ball.h"
 #include "prop_portal.h"
 #include "portal_player.h"
-#include "portal/weapon_physcannon.h" //grab controller
+#include "player_pickup_controller.h" //grab controller
 
 
 int CPortal_CollisionEvent::ShouldCollide( IPhysicsObject *pObj0, IPhysicsObject *pObj1, void *pGameData0, void *pGameData1 )
@@ -216,9 +216,6 @@ int CPortal_CollisionEvent::ShouldSolvePenetration( IPhysicsObject *pObj0, IPhys
 		if( pHoldingPlayer )
 		{
 			CGrabController *pGrabController = GetGrabControllerForPlayer( pHoldingPlayer );
-
-			if ( !pGrabController )
-				pGrabController = GetGrabControllerForPhysCannon( pHoldingPlayer->GetActiveWeapon() );
 
 			Assert( pGrabController );
 			if( pGrabController )

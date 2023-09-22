@@ -14,7 +14,7 @@
 #include "paintable_entity.h"
 
 #if !defined( CLIENT_DLL ) && defined( PORTAL2 )
-#include "portal/weapon_physcannon.h"
+#include "player_pickup_controller.h"
 #endif
 
 #ifdef PORTAL2

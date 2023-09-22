@@ -60,6 +60,7 @@
 #define	CONTENTS_MONSTERCLIP	0x20000
 
 // currents can be added to any other contents, and may be mixed
+#define	CONTENTS_BRUSH_PAINT	0x40000 // CONTENTS_CURRENT_0
 #define	CONTENTS_CURRENT_0		0x40000
 #define	CONTENTS_CURRENT_90		0x80000
 #define	CONTENTS_CURRENT_180	0x100000

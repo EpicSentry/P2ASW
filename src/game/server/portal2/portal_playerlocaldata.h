@@ -36,53 +36,53 @@ public:
     CNetworkVar( float, m_flSlowTimeMaximum );
 #endif // USE_SLOWTIME
 
-    CNetworkVar( bool, m_bShowingViewFinder );
-    CNetworkVar( float, m_flAirControlSupressionTime );
-    CNetworkArray( int, m_nLocatorEntityIndices, 16 ); // TODO: Is there a #define used here for 16?
-    CNetworkVar( bool, m_bPlacingPhoto );
+	StickCameraState m_nStickCameraState;
+	InAirState m_InAirState;
+	PaintPowerType m_PaintedPowerType;
 
-    CachedPaintPowerChoiceResult m_CachedPaintPowerChoiceResults[PAINT_POWER_TYPE_COUNT]; // SAR tells us this is PAINT_POWER_TYPE_COUNT gg mlugg
+	int m_nLocatorEntityIndices;
 
-    CNetworkVector( m_StickNormal );
-    CNetworkVector( m_OldStickNormal );
-    CNetworkVector( m_vPreUpdateVelocity );
-    CNetworkVector( m_Up );
-    CNetworkVector( m_vStickRotationAxis );
-    CNetworkVector( m_StandHullMin );
-    CNetworkVector( m_StandHullMax );
-    CNetworkVector( m_DuckHullMin );
-    CNetworkVector( m_DuckHullMax );
-    CNetworkVector( m_CachedStandHullMinAttempt );
-    CNetworkVector( m_CachedStandHullMaxAttempt );
-    CNetworkVector( m_CachedDuckHullMinAttempt );
-    CNetworkVector( m_CachedDuckHullMaxAttempt );
-    CNetworkVector( m_vLocalUp );
-    CNetworkVector( m_vEyeOffset );
-    CNetworkQAngle( m_qQuaternionPunch );
-    CNetworkVar( PaintPowerType, m_PaintedPowerType );
-    CNetworkVarEmbedded( CountdownTimer, m_PaintedPowerTimer );
-    CNetworkVar( float, m_flAirInputScale );
-    CNetworkVar( float, m_flCurrentStickTime );
+	bool m_bShowingViewFinder;
+	bool m_bPlacingPhoto;
+	bool m_bDoneStickInterp;
+	bool m_bDoneCorrectPitch;
+	bool m_bAttemptHullResize;
+	bool m_bJumpedThisFrame;
+	bool m_bBouncedThisFrame;
+	bool m_bDuckedInAir;
+	bool m_bZoomedIn;
+	bool m_bPreventedCrouchJumpThisFrame;
 
-    CNetworkVar( StickCameraState, m_nStickCameraState );
+	float m_flAirControlSupressionTime;
+	float m_flAirInputScale;
+	float m_flCurrentStickTime;
+	float m_fBouncedTime;
 
-    CNetworkVar( InAirState, m_InAirState );
+	CountdownTimer m_PaintedPowerTimer;
+	CachedPaintPowerChoiceResult m_CachedPaintPowerChoiceResults[PAINT_POWER_TYPE_COUNT];
+	
+	Vector m_StickNormal;
+	Vector m_OldStickNormal;
+	Vector m_vPreUpdateVelocity;
+	Vector m_Up;
+	Vector m_vStickRotationAxis;
 
-    CNetworkVar( bool, m_bDoneStickInterp );
-    CNetworkVar( bool, m_bDoneCorrectPitch );
-    CNetworkVar( bool, m_bAttemptHullResize );
+	Vector m_StandHullMin;
+	Vector m_StandHullMax;
+	Vector m_DuckHullMin;
+	Vector m_DuckHullMax;
+	Vector m_CachedStandHullMinAttempt;
+	Vector m_CachedStandHullMaxAttempt;
+	Vector m_CachedDuckHullMinAttempt;
+	Vector m_CachedDuckHullMaxAttempt;
 
-    CNetworkVar( bool, m_bJumpedThisFrame );
-    CNetworkVar( bool, m_bBouncedThisFrame );
-    CNetworkVar( bool, m_bDuckedInAir );
+	Vector m_vLocalUp;
+	Vector m_vEyeOffset;
 
-    // Tractor beam related data
-    CNetworkHandle( CTrigger_TractorBeam, m_hTractorBeam );
+	QAngle m_qQuaternionPunch;
+	
+	EHANDLE m_hTractorBeam; // Was probably CHandle<> instead
     int m_nTractorBeamCount;
-
-    CNetworkVar( bool, m_bZoomedIn );
-    CNetworkVar( float, m_fBouncedTime );
-    CNetworkVar( bool, m_bPreventedCrouchJumpThisFrame );
 };
 
 EXTERN_SEND_TABLE(DT_PortalLocal);

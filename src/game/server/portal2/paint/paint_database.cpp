@@ -16,7 +16,7 @@
 #include "weapon_paintgun.h"
 //#include "projectedwallentity.h"
 #include "portal_player.h"
-#include "prop_weighted_cube.h"
+#include "prop_weightedcube.h"
 #endif
 #include "cegclientwrapper.h"
 

@@ -22,7 +22,7 @@
 #include "world.h"
 #include "portal_player.h" //TODO: Move any portal mod specific code to callback functions or something
 #include "physicsshadowclone.h"
-#include "portal/weapon_physcannon.h"
+#include "player_pickup_controller.h"
 #include "player_pickup.h"
 #include "isaverestore.h"
 #include "hierarchy.h"

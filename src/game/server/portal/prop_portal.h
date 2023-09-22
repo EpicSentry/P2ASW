@@ -126,6 +126,8 @@ public:
 
 	virtual void			PortalSimulator_TookOwnershipOfEntity( CBaseEntity *pEntity );
 	virtual void			PortalSimulator_ReleasedOwnershipOfEntity( CBaseEntity *pEntity );
+	
+	bool					IsFloorPortal(float fThreshold = 0.8f) const;
 
 private:
 	unsigned char			m_iLinkageGroupID; //a group ID specifying which portals this one can possibly link to

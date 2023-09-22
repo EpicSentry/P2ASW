@@ -30,7 +30,7 @@ private:
 	int idleDownSequenceId;
 };
 
-LINK_ENTITY_TO_CLASS(prop_under_floor_button, CPropFloorButtonUnder);
+//LINK_ENTITY_TO_CLASS(prop_under_floor_button, CPropFloorButtonUnder);
 
 BEGIN_DATADESC(CPropFloorButtonUnder)
 DEFINE_THINKFUNC(CPropFloorButtonBase::TouchThink),

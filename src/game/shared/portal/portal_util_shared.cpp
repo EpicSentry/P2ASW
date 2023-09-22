@@ -21,15 +21,15 @@
 	#include "c_portal_player.h"
 #endif
 #include "PortalSimulation.h"
-
-#ifdef DYNAMIC_BOUNDS
-ConVar portal_half_width("portal_half_width", "32", FCVAR_REPLICATED);
-ConVar portal_half_height("portal_half_height", "54", FCVAR_REPLICATED);
-#endif
+#include "paint/paint_color_manager.h"
+#include "CegClientWrapper.h"
 
 bool g_bAllowForcePortalTrace = false;
 bool g_bForcePortalTrace = false;
 bool g_bBulletPortalTrace = false;
+// paint convars
+ConVar sv_paint_detection_sphere_radius( "sv_paint_detection_sphere_radius", "16.f", FCVAR_REPLICATED | FCVAR_CHEAT, "The radius of the query sphere used to find the color of a light map at a contact point in world space." );
+
 
 ConVar sv_portal_trace_vs_world ("sv_portal_trace_vs_world", "1", FCVAR_REPLICATED | FCVAR_CHEAT, "Use traces against portal environment world geometry" );
 ConVar sv_portal_trace_vs_displacements ("sv_portal_trace_vs_displacements", "1", FCVAR_REPLICATED | FCVAR_CHEAT, "Use traces against portal environment displacement geometry" );
@@ -178,6 +178,10 @@ void UTIL_Portal_Trace_Filter( CTraceFilterSimpleClassnameList *traceFilterPorta
 	traceFilterPortalShot->AddClassnameToIgnore( "simple_physics_brush" );
 	traceFilterPortalShot->AddClassnameToIgnore( "prop_ragdoll" );
 	traceFilterPortalShot->AddClassnameToIgnore( "prop_glados_core" );
+#ifdef PORTAL2
+	traceFilterPortalShot->AddClassnameToIgnore("npc_wheatley_core");
+	traceFilterPortalShot->AddClassnameToIgnore("prop_weighted_cube");
+#endif
 }
 
 
@@ -299,7 +303,6 @@ CProp_Portal* UTIL_Portal_TraceRay_Beam( const Ray_t &ray, unsigned int fMask, I
 	return pIntersectedPortal;
 }
 
-
 bool UTIL_Portal_Trace_Beam( const CBeam *pBeam, Vector &vecStart, Vector &vecEnd, Vector &vecIntersectionStart, Vector &vecIntersectionEnd, ITraceFilter *pTraceFilter )
 {
 	vecStart = pBeam->GetAbsStartPos();
@@ -366,7 +369,6 @@ void UTIL_Portal_TraceRay_With( const CProp_Portal *pPortal, const Ray_t &ray, u
 	}
 	else
 	{		
-
 		trace_t RealTrace;
 		enginetrace->TraceRay( ray, fMask, pTraceFilter, &RealTrace );
 
@@ -1689,6 +1691,30 @@ bool UTIL_Portal_EntityIsInPortalHole( const CProp_Portal *pPortal, CBaseEntity 
 		vPortalRight, PORTAL_HALF_WIDTH + 1.0f, vPortalUp, PORTAL_HALF_HEIGHT + 1.0f );
 }
 
+const Vector UTIL_ProjectPointOntoPlane( const Vector& point, const cplane_t& plane )
+{
+	return point - (DotProduct( point, plane.normal ) - plane.dist) * plane.normal;
+}
+
+bool UTIL_PointIsNearPortal( const Vector& point, const CProp_Portal* pPortal2D, float planeDist, float radiusReduction )
+{
+	AssertMsg( pPortal2D != NULL, "Null pointers are bad, and you should feel bad." );
+
+	const cplane_t& portalPlane = pPortal2D->m_plane_Origin;
+	Vector transformedPt, origin;
+	pPortal2D->WorldToEntitySpace( point, &transformedPt );
+	pPortal2D->WorldToEntitySpace( UTIL_ProjectPointOntoPlane( pPortal2D->WorldSpaceCenter(), portalPlane ), &origin );
+
+	AssertMsg( PORTAL_HALF_WIDTH > radiusReduction && PORTAL_HALF_HEIGHT > radiusReduction, "Reduction of the box is too high." );
+	const float halfWidth = PORTAL_HALF_WIDTH - radiusReduction;
+	const float halfHeight = PORTAL_HALF_HEIGHT - radiusReduction;
+	const Vector boxMin( origin[0] - planeDist, origin[1] - halfWidth, origin[2] - halfHeight );
+	const Vector boxMax( origin[0] + planeDist, origin[1] + halfWidth, origin[2] + halfHeight );
+
+	return (transformedPt[0] >= boxMin[0] && transformedPt[0] <= boxMax[0]) &&
+		   (transformedPt[1] >= boxMin[1] && transformedPt[1] <= boxMax[1]) &&
+		   (transformedPt[2] >= boxMin[2] && transformedPt[2] <= boxMax[2]);
+}
 
 #ifdef CLIENT_DLL
 void UTIL_TransformInterpolatedAngle( CInterpolatedVar< QAngle > &qInterped, matrix3x4_t matTransform, bool bSkipNewest )
@@ -1773,4 +1799,243 @@ void CC_Debug_FixMyPosition( void )
 }
 
 static ConCommand debug_fixmyposition("debug_fixmyposition", CC_Debug_FixMyPosition, "Runs FindsClosestPassableSpace() on player.", FCVAR_CHEAT );
+#endif
+
+
+CEG_NOINLINE bool UTIL_IsPaintableSurface( const csurface_t& surface )
+{
+	// What the fuck?
+	/*
+	CEG_GCV_PRE();
+	static const unsigned short CEG_SURF_NO_PAINT_FLAG = CEG_GET_CONSTANT_VALUE( SurfNoPaintFlag );
+	CEG_GCV_POST();
+	return !( surface.flags & CEG_SURF_NO_PAINT_FLAG );
+	*/
+	return true;
+}
+
+
+
+float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoint, PaintPowerType power, float flPaintRadius, float flAlphaPercent )
+{
+	if ( !pBrushEntity )
+	{
+		// HACK HACK: Fix it for real Bank! :)
+		return 0.0f;
+	}
+
+	if ( !pBrushEntity->IsBSPModel() )
+	{
+		return 0.0f;
+	}
+
+	Vector vEntitySpaceContactPoint;
+	pBrushEntity->WorldToEntitySpace( contactPoint, &vEntitySpaceContactPoint );
+
+	// Doesn't exist in Alien Swarm engine
+	//if ( !engine->SpherePaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, power, flPaintRadius, flAlphaPercent ) )
+	//	return 0.0f;
+
+	//CUtlVector<Color> color;
+
+	Msg("power: %i\n", power);
+
+	Color preColor = MapPowerToColor(power);
+	
+	Color color = preColor;
+
+	//engine->TracePaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, flPaintRadius, color );
+	
+	// We need to run this twice to make sure we have 2 color values.
+	engine->PaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, color, sv_paint_detection_sphere_radius.GetFloat() );
+#ifdef GAME_DLL
+	Warning("(server)Pre Painted Color: %i %i %i %i\n", preColor.r(), preColor.b(), preColor.g(), preColor.a());
+	Warning("(server)Post Painted Color: %i %i %i %i\n", color.r(), preColor.b(), color.g(), color.a());
+#else
+	Warning("(client)Pre Painted Color: %i %i %i %i\n", preColor.r(), preColor.b(), preColor.g(), preColor.a());
+	Warning("(client)Post Painted Color: %i %i %i %i\n", color.r(), preColor.b(), color.g(), color.a());
+#endif
+	//if (color == preColor)
+	//	return 0.0f;
+	return flPaintRadius;
+}
+
+
+PaintPowerType UTIL_Paint_TracePower( CBaseEntity* pBrushEntity, const Vector& contactPoint, const Vector& vContactNormal )
+{
+	if ( !pBrushEntity->IsBSPModel() )
+	{
+		return NO_POWER;
+	}
+
+	CUtlVector<Color> color;
+	//Color color;
+
+	// Transform contact point from world to entity space
+	Vector vEntitySpaceContactPoint;
+	pBrushEntity->WorldToEntitySpace( contactPoint, &vEntitySpaceContactPoint );
+
+	// transform contact normal
+	Vector vTransformedContactNormal;
+	VectorRotate( vContactNormal, -pBrushEntity->GetAbsAngles(), vTransformedContactNormal );
+
+	// Doesn't exist in Alien Swarm engine
+	//engine->SphereTracePaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, vTransformedContactNormal, sv_paint_detection_sphere_radius.GetFloat(), color );
+	
+	engine->TracePaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, sv_paint_detection_sphere_radius.GetFloat(), color );
+	//engine->PaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, color, sv_paint_detection_sphere_radius.GetFloat() );
+	
+	Msg("color.Count(): %i\n", color.Count() );
+
+	// We really need to get these power colors
+	for (int i = 0; i < color.Count(); ++i)
+	{
+		//Color tColor = color;
+		Color tColor = color.Element(i);
+#ifdef GAME_DLL
+		Msg("(server)tColor: %i %i %i %i\n", tColor.r(), tColor.g(), tColor.b(), tColor.a());
+#else
+		Msg("(client)tColor: %i %i %i %i\n", tColor.r(), tColor.g(), tColor.b(), tColor.a());
+#endif
+	}
+
+
+
+	if ( &color.Element( 0 ) != NULL)
+		return MapColorToPower( color.Element(0) );
+	
+	return NO_POWER;
+
+}
+
+
+bool UTIL_Paint_Reflect( const trace_t& tr, Vector& vStart, Vector& vDir, PaintPowerType reflectPower /* = REFLECT_POWER */ )
+{
+	// check for reflect paint
+	if ( HASPAINTMAP && tr.m_pEnt && tr.m_pEnt->IsBSPModel() )
+	{
+		PaintPowerType power = UTIL_Paint_TracePower( tr.m_pEnt, tr.endpos, tr.plane.normal );
+		if ( power == reflectPower )
+		{
+			Vector vecIn = tr.endpos - tr.startpos;
+			if ( DotProduct( vecIn.Normalized(), tr.plane.normal ) > -0.99f )
+			{
+				Vector vecReflect = vecIn - 2 * DotProduct( vecIn, tr.plane.normal ) * tr.plane.normal;
+
+				vStart = tr.endpos;
+				vDir = vecReflect.Normalized();
+
+				// FIXME: Bring this back for DLC2
+				//if ( reflect_paint_vertical_snap.GetBool() )
+				{
+					float flDot = DotProduct( tr.plane.normal, Vector(0.f,0.f,1.f) );
+
+					if ( vDir.z > 0.1 && flDot > 0 && flDot < 1  )
+					{
+						vDir = Vector( 0.f, 0.f, 1.f );
+					}
+					else if( vDir.z < -0.1f && flDot > 0 && flDot < 1 )
+					{
+						vDir = Vector( 0.f, 0.f, -1.f );
+					}
+				}
+
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+bool IsIn180( float f )
+{
+	return f >= 0.f && f <= 180.f;
+}
+
+bool IsInNeg180( float f )
+{
+	return f < 0.f && f >= -180.f;
+}
+
+
+float DistTo180( float f )
+{
+	if ( IsIn180( f ) )
+	{
+		return 180.f - f;
+	}
+	else if ( IsInNeg180( f ) )
+	{
+		return -180 - f;
+	}
+	else
+	{
+		Assert("We are out of bound [-180,180]");
+		return 0.f;
+	}
+}
+
+
+void UTIL_NormalizedAngleDiff( const QAngle& start, const QAngle& end, QAngle* result )
+{
+	if ( result )
+	{
+		QAngle angles;
+		for ( int i=0; i<3; ++i )
+		{
+			float a = start[ i ];
+			float b = end[ i ];
+
+			float distAto180 = DistTo180( a );
+			float distBto180 = DistTo180( b );
+
+			bool bUse180 = ( fabs( distAto180 ) + fabs( distBto180 ) ) < ( fabs( a ) + fabs( b ) );
+			bool bDiffSign = Sign( a ) * Sign( b ) < 0;
+
+			if ( bDiffSign )
+			{
+				if ( bUse180 )
+				{
+					angles[ i ] = distBto180 - distAto180;
+				}
+				else
+				{
+					angles[ i ] = a - b;
+				}
+			}
+			else
+			{
+				angles[ i ] = a - b;
+			}
+		}
+		
+		*result = -angles;
+	}
+}
+
+#ifdef GAME_DLL
+bool CBrushEntityList::EnumEntity( IHandleEntity *pHandleEntity )
+{
+	if ( !pHandleEntity )
+		return true;
+
+	CBaseEntity *pEntity = gEntList.GetBaseEntity( pHandleEntity->GetRefEHandle() );
+	if ( !pEntity )
+		return true;
+
+	if ( pEntity->IsBSPModel() )
+	{
+		m_BrushEntitiesToPaint.AddToTail( pEntity );
+	}
+
+	return true;
+}
+
+
+void UTIL_FindBrushEntitiesInSphere( CBrushEntityList& brushEnum, const Vector& vCenter, float flRadius )
+{
+	Vector vExtents = flRadius * Vector( 1.f, 1.f, 1.f );
+	enginetrace->EnumerateEntities( vCenter - vExtents, vCenter + vExtents, &brushEnum );
+}
 #endif

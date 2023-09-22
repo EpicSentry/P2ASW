@@ -111,6 +111,7 @@ public:
 	void Event_PlayerJump( const Vector &ptStartPosition, const Vector &vStartVelocity );
 	void Event_PlayerUsed( const Vector &ptTraceStart, const Vector &vTraceDelta, CBaseEntity *pUsedEntity );
 	void Event_PlayerStuck( CPortal_Player *pPlayer );
+	void Event_CubeSpawn() {}
 
 	virtual bool StatTrackingEnabledForMod( void ) { return true; }
 	virtual bool UserPlayedAllTheMaps( void );

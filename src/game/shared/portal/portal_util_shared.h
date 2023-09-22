@@ -10,12 +10,8 @@
 #pragma once
 #endif
 
-#ifdef DYNAMIC_BOUNDS
-extern ConVar portal_half_width;
-extern ConVar portal_half_height;
-#endif
-
 #include "engine/IEngineTrace.h"
+#include "paint/paint_color_manager.h"
 
 extern bool g_bBulletPortalTrace;
 
@@ -23,7 +19,8 @@ extern bool g_bBulletPortalTrace;
 	#include "client_class.h"
 	#include "interpolatedvar.h"
 	class C_Prop_Portal;
-	typedef C_Prop_Portal CProp_Portal;
+	//typedef C_Prop_Portal CProp_Portal;
+	#define CProp_Portal C_Prop_Portal
 	class C_Beam;
 	typedef C_Beam CBeam;
 #else
@@ -103,6 +100,36 @@ void UTIL_TransformInterpolatedPosition( CInterpolatedVar< Vector > &vInterped, 
 #endif
 
 bool UTIL_Portal_EntityIsInPortalHole( const CProp_Portal *pPortal, CBaseEntity *pEntity );
+
+
+// PAINT
+bool UTIL_IsPaintableSurface( const csurface_t& surface );
+
+float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoint, PaintPowerType power, float flPaintRadius, float flAlphaPercent );
+PaintPowerType UTIL_Paint_TracePower( CBaseEntity* pBrushEntity, const Vector& contactPoint, const Vector& vContactNormal );
+
+// output start point and reflect dir
+bool UTIL_Paint_Reflect( const trace_t& tr, Vector& vStart, Vector& vDir, PaintPowerType reflectPower = REFLECT_POWER );
+
+// mainly use for stick camera
+void UTIL_NormalizedAngleDiff( const QAngle& start, const QAngle& end, QAngle* result );
+
+#ifdef GAME_DLL
+
+class CBrushEntityList : public IEntityEnumerator
+{
+public:
+	virtual bool EnumEntity( IHandleEntity *pHandleEntity );
+
+	CUtlVectorFixedGrowable< CBaseEntity*, 32 > m_BrushEntitiesToPaint;
+};
+
+void UTIL_FindBrushEntitiesInSphere( CBrushEntityList& brushEnum, const Vector& vCenter, float flRadius );
+
+#endif
+
+extern const Vector UTIL_ProjectPointOntoPlane( const Vector& point, const cplane_t& plane );
+bool UTIL_PointIsNearPortal( const Vector& point, const CProp_Portal* pPortal2D, float planeDist, float radiusReduction = 0.0f );
 
 #endif //#ifndef PORTAL_UTIL_SHARED_H
 

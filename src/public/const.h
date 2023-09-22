@@ -264,7 +264,11 @@ enum
 										// the parent is not in the PVS.
 	EF_ITEM_BLINK			= 0x100,	// blink an item so that the user notices it.
 	EF_PARENT_ANIMATES		= 0x200,	// always assume that the parent entity is animating
-	EF_MAX_BITS = 10
+	EF_NOSHADOWDEPTH		= 0x300,	// Receive projected shadows, but don't cast them
+	EF_NOFLASHLIGHT			= 0x400,	// Cast projected shadows, but don't receive them
+	EF_SHADOWDEPTH_NOCACHE = 0x800,
+	EF_MARKED_FOR_FAST_REFLECTION = 0x1000,	// marks an entity for reflection rendering when using $reflectonlymarkedentities material variable
+	EF_MAX_BITS = 14
 };
 
 #define EF_PARITY_BITS	3
@@ -385,14 +389,15 @@ enum Collision_Group_t
 	COLLISION_GROUP_PUSHAWAY,		// Nonsolid on client and server, pushaway in player code
 
 	COLLISION_GROUP_NPC_ACTOR,		// Used so NPCs in scripts ignore the player.
-	COLLISION_GROUP_NPC_SCRIPTED,	// USed for NPCs in scripts that should not collide with each other
-	// Used* not USed random valve developer
+	COLLISION_GROUP_NPC_SCRIPTED,	// Used for NPCs in scripts that should not collide with each other
 	COLLISION_GROUP_PZ_CLIP,
 
-	//PORTAL2
-	COLLISION_GROUP_WEIGHTED_CUBE,
-
-	//PORTAL2 END
+#ifdef PORTAL2
+	COLLISION_GROUP_CAMERA_SOLID,		// Solid only to the camera's test trace
+	COLLISION_GROUP_PLACEMENT_SOLID,	// Solid only to the placement tool's test trace
+	COLLISION_GROUP_PLAYER_HELD,		// Held objects that shouldn't collide with players
+	COLLISION_GROUP_WEIGHTED_CUBE,		// Cubes need a collision group that acts roughly like COLLISION_GROUP_NONE but doesn't collide with debris or interactive
+#endif // PORTAL2
 
 	COLLISION_GROUP_DEBRIS_BLOCK_PROJECTILE, // Only collides with bullets
 

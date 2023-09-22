@@ -60,6 +60,10 @@ public:
 
 private:
 	char	m_iszDetailSpriteMaterial[MAX_DETAIL_SPRITE_MATERIAL_NAME_LENGTH];
+	
+#ifdef PORTAL2
+	int		m_nMaxBlobCount;
+#endif
 };
 
 inline float C_World::GetWaveHeight() const

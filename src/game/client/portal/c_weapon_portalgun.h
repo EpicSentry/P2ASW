@@ -11,6 +11,7 @@
 #pragma once
 #endif
 
+#define CWeaponPortalgun C_WeaponPortalgun
 
 #include "weapon_portalbasecombatweapon.h"
 

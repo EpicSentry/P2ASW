@@ -57,7 +57,18 @@
 #endif
 #define BINK_ENABLED_FOR_X360
 
-
+#if defined( _MSC_VER )
+#define OVERRIDE override
+// warning C4481: nonstandard extension used: override specifier 'override'
+#pragma warning(disable : 4481)
+#elif defined( __clang__ )
+#define OVERRIDE override
+// warning: 'override' keyword is a C++11 extension [-Wc++11-extensions]
+// Disabling this warning is less intrusive than enabling C++11 extensions
+#pragma GCC diagnostic ignored "-Wc++11-extensions"
+#else
+#define OVERRIDE
+#endif
 
 // Deprecating, infavor of IsX360() which will revert to IsXbox()
 // after confidence of xbox 1 code flush
@@ -1599,6 +1610,19 @@ int	_V_stricmp_NegativeForUnequal	  ( const char *s1, const char *s2 );
 #define stricmp(s1,s2) _V_stricmp(s1, s2)
 #define strcmpi(s1,s2) _V_stricmp(s1, s2)
 #define strnicmp V_strncasecmp 
+#endif
+
+// Portable alternative to __alignof
+template<class T> struct AlignOf_t { AlignOf_t(){} AlignOf_t & operator=(const AlignOf_t &) { return *this; } byte b; T t; };
+
+// !!! NOTE: if you get a compile error here, you are using VALIGNOF on an abstract type :NOTE !!!
+#define VALIGNOF_PORTABLE( type ) ( sizeof( AlignOf_t<type> ) - sizeof( type ) )
+
+#if defined( COMPILER_GCC ) || defined( COMPILER_MSVC )
+#define VALIGNOF( type ) __alignof( type )
+#define VALIGNOF_TEMPLATE_SAFE( type ) VALIGNOF_PORTABLE( type )
+#else
+#error "PORT: Code only tested with MSVC! Must validate with new compiler, and use built-in keyword if available."
 #endif
 
 #endif /* PLATFORM_H */

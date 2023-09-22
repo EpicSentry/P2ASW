@@ -7,7 +7,7 @@
 //=============================================================================//
 #include "cbase.h"
 #include "player_pickup.h"
-
+#include "player_pickup_controller.h"
 
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -26,8 +26,12 @@ void Pickup_ForcePlayerToDropThisObject( CBaseEntity *pTarget )
 
 	if ( pPhysics->GetGameFlags() & FVPHYSICS_PLAYER_HELD )
 	{
-		CBasePlayer *pPlayer = UTIL_GetLocalPlayer();
-		pPlayer->ForceDropOfCarriedPhysObjects( pTarget );
+		// TODO: Update this because it only works in singleplayer
+#ifdef GAME_DLL
+		CBasePlayer *pPlayer = GetPlayerHoldingEntity( pTarget );
+		if ( pPlayer )
+			pPlayer->ForceDropOfCarriedPhysObjects( pTarget );
+#endif
 	}
 }
 
@@ -49,7 +53,7 @@ void Pickup_OnPhysGunPickup( CBaseEntity *pPickedUpObject, CBasePlayer *pPlayer,
 	{
 		pPickup->OnPhysGunPickup( pPlayer, reason );
 	}
-
+#ifdef GAME_DLL
 	// send phys gun pickup item event, but only in single player
 	if ( !g_pGameRules->IsMultiplayer() )
 	{
@@ -60,6 +64,7 @@ void Pickup_OnPhysGunPickup( CBaseEntity *pPickedUpObject, CBasePlayer *pPlayer,
 			gameeventmanager->FireEvent( event );
 		}
 	}
+#endif
 }
 
 bool Pickup_OnAttemptPhysGunPickup( CBaseEntity *pPickedUpObject, CBasePlayer *pPlayer, PhysGunPickup_t reason )

@@ -574,8 +574,13 @@ public:
 
 	// capabilities
 	virtual int	ObjectCaps( void );
-
-
+	
+#if defined ( PORTAL2 )
+	// For portal 2, the use traces are on the client so
+	// we network down entities current use capabilities for validity checking.
+	CNetworkVar( int,			m_iObjectCapsCache );
+	void		UpdateObjectCapsCache();
+#endif 
 
 	// Verifies that the data description is valid in debug builds.
 	#ifdef _DEBUG
@@ -1312,6 +1317,10 @@ public:
 	void					ToggleFlag( int flagToToggle );
 	int						GetFlags( void ) const;
 	void					ClearFlags( void );
+	
+#ifdef PORTAL2
+	CNetworkVar( bool, m_bIsUnPaintable );
+#endif
 
 	// Sets the local position from a transform
 	void					SetLocalTransform( const matrix3x4_t &localTransform );

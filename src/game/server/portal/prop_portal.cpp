@@ -8,7 +8,7 @@
 #include "cbase.h"
 #include "prop_portal.h"
 #include "portal_player.h"
-#include "portal/weapon_physcannon.h"
+#include "player_pickup_controller.h"
 #include "physics_npc_solver.h"
 #include "envmicrophone.h"
 #include "env_speaker.h"
@@ -2310,3 +2310,8 @@ const CUtlVector<CProp_Portal *> *CProp_Portal::GetPortalLinkageGroup( unsigned 
 
 
 
+
+bool CProp_Portal::IsFloorPortal(float fThreshold) const
+{
+	return m_PortalSimulator.m_DataAccess.Placement.vForward.z > fThreshold;
+}

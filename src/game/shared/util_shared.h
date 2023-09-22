@@ -24,8 +24,6 @@
 
 #ifdef PORTAL
 #include "portal_util_shared.h"
-//#include "paint/paint_enum.h"
-#include "paint/paint_color_manager.h"
 #endif
 
 //-----------------------------------------------------------------------------
@@ -74,31 +72,6 @@ QAngle	SharedRandomAngle( const char *sharedname, float minVal, float maxVal, in
 //-----------------------------------------------------------------------------
 bool PassServerEntityFilter( const IHandleEntity *pTouch, const IHandleEntity *pPass );
 bool StandardFilterRules( IHandleEntity *pHandleEntity, int fContentsMask );
-
-// PAINT
-abstract_class ICountedPartitionEnumerator : public IPartitionEnumerator
-{
-public:
-	virtual int GetCount() const = 0;
-};
-
-bool UTIL_IsPaintableSurface(const csurface_t& surface);
-
-float UTIL_PaintBrushEntity(CBaseEntity* pBrushEntity, const Vector& contactPoint, PaintPowerType power, float flPaintRadius, float flAlphaPercent);
-PaintPowerType UTIL_Paint_TracePower(CBaseEntity* pBrushEntity, const Vector& contactPoint, const Vector& vContactNormal);
-
-// output start point and reflect dir
-bool UTIL_Paint_Reflect(const trace_t& tr, Vector& vStart, Vector& vDir, PaintPowerType reflectPower = REFLECT_POWER);
-
-class CBrushEntityList : public IEntityEnumerator
-{
-public:
-	virtual bool EnumEntity(IHandleEntity *pHandleEntity);
-
-	CUtlVectorFixedGrowable< CBaseEntity*, 32 > m_BrushEntitiesToPaint;
-};
-
-void UTIL_FindBrushEntitiesInSphere(CBrushEntityList& brushEnum, const Vector& vCenter, float flRadius);
 
 
 //-----------------------------------------------------------------------------
@@ -233,6 +206,17 @@ public:
 	virtual bool ShouldHitEntity( IHandleEntity *pHandleEntity, int contentsMask );
 };
 
+class CTraceFilterNoPlayers : public CTraceFilterSimple
+{
+public:
+	CTraceFilterNoPlayers( const IHandleEntity *passentity = NULL, int collisionGroup = COLLISION_GROUP_NONE )
+		: CTraceFilterSimple( passentity, collisionGroup )
+	{
+	}
+
+	virtual bool ShouldHitEntity( IHandleEntity *pHandleEntity, int contentsMask );
+};
+
 //-----------------------------------------------------------------------------
 // Purpose: Custom trace filter used for NPC LOS traces
 //-----------------------------------------------------------------------------
@@ -289,17 +273,6 @@ private:
 	ITraceFilter	*m_pTraceFilter2;
 };
 
-class CTraceFilterNoPlayers : public CTraceFilterSimple
-{
-public:
-	CTraceFilterNoPlayers(const IHandleEntity *passentity = NULL, int collisionGroup = COLLISION_GROUP_NONE)
-		: CTraceFilterSimple(passentity, collisionGroup)
-	{
-	}
-
-	virtual bool ShouldHitEntity(IHandleEntity *pHandleEntity, int contentsMask);
-};
-
 // helper
 void DebugDrawLine( const Vector& vecAbsStart, const Vector& vecAbsEnd, int r, int g, int b, bool test, float duration );
 
@@ -347,11 +320,11 @@ inline void UTIL_TraceLine( const Vector& vecAbsStart, const Vector& vecAbsEnd, 
 		{
 			ReportExpensiveTrace( false );
 			BeginDetectTraceSpike();
-			Ray_t ray;
-			ray.Init( vecAbsStart, vecAbsEnd );
-			CTraceFilterSimple traceFilter( ignore, collisionGroup );
+			Ray_t ray2;
+			ray2.Init( vecAbsStart, vecAbsEnd );
+			CTraceFilterSimple traceFilter2( ignore, collisionGroup );
 
-			enginetrace->TraceRay( ray, mask, &traceFilter, ptr );
+			enginetrace->TraceRay( ray2, mask, &traceFilter2, ptr );
 			EndDetectTraceSpike();
 			if ( DidTraceSpike() )
 			{
@@ -378,10 +351,10 @@ inline void UTIL_TraceLine( const Vector& vecAbsStart, const Vector& vecAbsEnd, 
 		if ( DidTraceSpike() ) // Opimizer will remove this block
 		{
 			BeginDetectTraceSpike();
-			Ray_t ray;
-			ray.Init( vecAbsStart, vecAbsEnd );
+			Ray_t ray2;
+			ray2.Init( vecAbsStart, vecAbsEnd );
 
-			enginetrace->TraceRay( ray, mask, pFilter, ptr );
+			enginetrace->TraceRay( ray2, mask, pFilter, ptr );
 			EndDetectTraceSpike();
 
 			if ( DidTraceSpike() )
@@ -411,11 +384,11 @@ inline void UTIL_TraceHull( const Vector &vecAbsStart, const Vector &vecAbsEnd, 
 		if ( DidTraceSpike() ) // Opimizer will remove this block
 		{
 			BeginDetectTraceSpike();
-			Ray_t ray;
-			ray.Init( vecAbsStart, vecAbsEnd, hullMin, hullMax );
-			CTraceFilterSimple traceFilter( ignore, collisionGroup );
+			Ray_t ray2;
+			ray2.Init( vecAbsStart, vecAbsEnd, hullMin, hullMax );
+			CTraceFilterSimple traceFilter2( ignore, collisionGroup );
 
-			enginetrace->TraceRay( ray, mask, &traceFilter, ptr );
+			enginetrace->TraceRay( ray2, mask, &traceFilter2, ptr );
 			EndDetectTraceSpike();
 
 			if ( DidTraceSpike() )
@@ -443,10 +416,10 @@ inline void UTIL_TraceHull( const Vector &vecAbsStart, const Vector &vecAbsEnd, 
 		if ( DidTraceSpike() ) // Opimizer will remove this block
 		{
 			BeginDetectTraceSpike();
-			Ray_t ray;
-			ray.Init( vecAbsStart, vecAbsEnd, hullMin, hullMax );
+			Ray_t ray2;
+			ray2.Init( vecAbsStart, vecAbsEnd, hullMin, hullMax );
 
-			enginetrace->TraceRay( ray, mask, pFilter, ptr );
+			enginetrace->TraceRay( ray2, mask, pFilter, ptr );
 
 			EndDetectTraceSpike();
 			if( DidTraceSpike() )

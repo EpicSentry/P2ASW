@@ -257,6 +257,7 @@ private:
 	CNetworkVar( bool, m_noGhostCollision );
 	bool					m_bUsePuntSound;
 protected:
+	CNetworkQAngle( m_qPreferredPlayerCarryAngles );
 	CNetworkVar( bool, m_bClientPhysics );
 };
 
@@ -431,7 +432,10 @@ private:
 
 protected:
 	CNetworkVar( bool, m_bAwake );
-
+	
+#ifdef PORTAL2
+	bool		m_bAllowPortalFunnel;
+#endif // PORTAL2
 
 };
 

@@ -518,7 +518,6 @@ private:
 	//set when a held entity is penetrating another through a portal. Needed for special fixes
 	EHANDLE			m_PenetratedEntity;
 
-	friend class CWeaponPhysCannon;
 	friend void GetSavedParamsForCarriedPhysObject( CGrabController *pGrabController, IPhysicsObject *pObject, float *pSavedMassOut, float *pSavedRotationalDampingOut );
 };
 
