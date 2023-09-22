@@ -5,5 +5,9 @@ P2ASW is a free and open source project aiming to recreate most of Portal 2's en
 
 ## Contributing
 Anyone is free to contribute to the project!
+todo
+## Building
 
-## placeholder
+## Installing/Running the mod
+http://store.steampowered.com/app/620/
+
