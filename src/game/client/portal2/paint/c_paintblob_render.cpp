@@ -15,7 +15,7 @@
 #include "vgui_int.h"
 #include "gamerules.h"
 #include "igamesystem.h"
-#include "paint_stream_shared.h"
+#include "paint/paint_stream_shared.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"

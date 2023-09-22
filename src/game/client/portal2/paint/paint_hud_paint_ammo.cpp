@@ -11,7 +11,7 @@
 #include <vgui/ivgui.h>
 #include <vgui/isurface.h>
 
-#include "paint_color_manager.h"
+#include "paint/paint_color_manager.h"
 #include "c_weapon_paintgun.h"
 //#include "weapon_paintgun_shared.h"
 

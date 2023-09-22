@@ -8,8 +8,8 @@
 #include "vstdlib/jobthread.h"
 #include "c_paintblob_render.h"
 #include "model_types.h"
-#include "paint_stream_shared.h"
-#include "paint_stream_manager.h"
+#include "paint/paint_stream_shared.h"
+#include "paint/paint_stream_manager.h"
 #include "videocfg/videocfg.h"
 #include "CegClientWrapper.h"
 

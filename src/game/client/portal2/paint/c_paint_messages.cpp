@@ -8,10 +8,10 @@
 #include "cbase.h"
 #include "igamesystem.h"
 #include "hud_macros.h" //HOOK_MESSAGE
-#include "paint_color_manager.h"
+#include "paint/paint_color_manager.h"
 #include "c_world.h"
-#include "paint_sprayer_shared.h"
-#include "paintable_entity.h"
+#include "paint/paint_sprayer_shared.h"
+#include "paint/paintable_entity.h"
 #include "cdll_int.h"
 #ifdef PORTAL2
 #include "c_weapon_paintgun.h"
@@ -95,7 +95,7 @@ void __MsgFunc_RemoveAllPaint( bf_read &msg )
 {
 	//if( !engine->IsClientLocalToActiveServer() )
 	{
-		engine->RemoveAllPaint();
+		//engine->RemoveAllPaint();
 	}
 }
 

@@ -4,7 +4,7 @@
 #include "cbase.h"
 
 #include "c_trigger_paint_cleanser.h"
-#include "paint_cleanser_manager.h"
+#include "paint/paint_cleanser_manager.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"

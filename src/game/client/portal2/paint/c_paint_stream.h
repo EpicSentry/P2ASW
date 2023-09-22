@@ -6,7 +6,7 @@
 #ifndef C_PAINT_STREAM_H
 #define C_PAINT_STREAM_H
 
-#include "paint_sprayer_shared.h"
+#include "paint/paint_sprayer_shared.h"
 
 typedef float TimeStamp;
 

@@ -8,7 +8,7 @@
 
 #define MAX_BLOB_RENDERABLES 32
 
-#include "paint_blobs_shared.h"
+#include "paint/paint_blobs_shared.h"
 
 class C_PaintBlobRenderable;
 

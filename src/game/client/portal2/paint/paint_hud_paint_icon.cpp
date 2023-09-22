@@ -12,7 +12,7 @@
 
 #include "portal_player_shared.h"
 #include "c_portal_player.h"
-#include "paint_color_manager.h"
+#include "paint/paint_color_manager.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
