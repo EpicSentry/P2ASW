@@ -1,0 +1,36 @@
+//////////////////////////Selection Screen//////////////////////////////
+
+"SwarmSelectionScreen.ScaryBackground"
+//All sorts of weird mechanic and organic sounds on top of a low hum - a scary background ;)
+{
+	"dsp"	"25"
+
+
+	"playlooping"
+	{
+		"volume"	"0.65"
+		"pitch"		"80"
+		"wave"		"ambient/levels/citadel/citadel_drone_loop4.wav"
+	}
+
+
+	"playrandom"
+	{
+		"time"		"3,24"
+		"volume"	"0.25,0.9"
+		"pitch"		"80,100"
+		"soundlevel"	"0"
+		"rndwave"
+		{
+			"wave"	"swarm/swarmambient/chainlink2.wav"
+			"wave"	"swarm/swarmambient/selectionscreenspooky.wav"
+			"wave"	"swarm/swarmambient/strangesounds1.wav"
+			"wave"	"swarm/swarmambient/strangesounds4.wav"
+			"wave"	"swarm/swarmambient/strangesounds5.wav"
+			"wave"	"swarm/swarmambient/strangesounds6.wav"
+			"wave"	"swarm/swarmambient/strangesounds8.wav"
+			"wave"	"swarm/swarmambient/strangesounds9.wav"	
+		}
+	}
+}
+

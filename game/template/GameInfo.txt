@@ -1,0 +1,26 @@
+"GameInfo"
+{
+	"game"		"ASW Scratch"
+	"title"		"    "	// asw - leave this blank as we have a texture logo
+	"type"		"multiplayer_only"
+	GameData	"swarm.fgd"
+	InstancePath "tilegen/instances/"
+	
+	SupportsDX8     0
+	
+	"FileSystem"
+	{
+		"SteamAppId"	"630"
+		"ToolsAppId"	"211"
+		
+		"SearchPaths"
+		{
+			"Game"	"|gameinfo_path|."
+			"Game"	"D:\Steam\SteamApps\common\Alien Swarm\swarm"
+			"Game"	"swarm_tempcontent"
+			"Game"	"D:\Steam\SteamApps\common\Alien Swarm\swarm_base"
+			"Game"	"D:\Steam\SteamApps\common\Portal 2\portal2"
+			"Game"	"platform"
+		}
+	}
+}

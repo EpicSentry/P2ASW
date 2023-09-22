@@ -1,0 +1,68 @@
+//--------------------------------------------------------
+//
+// This file contains all the scripted lessons used by 
+// the game instructor.
+//
+//
+// PRIORITY LEVELS
+//
+// MARINE
+// 150	dead... switch your dude
+// 145  disturbance triggered
+// 140	infested (self)
+// 135	infested (other)
+// 130	extinguish
+// 125	scanner
+// 123	dive
+// 120	boss battle
+// 115	friendly fire
+// 110	button usage
+// 105	door welding
+// 100	heal self
+// 95	heal other
+// 90	presumed combat
+// 85	clip usage
+// 80	offhand
+// 75	switch weapon
+// 70-73build sentry
+// 65	pick up item
+// 60	get weapon/ammo
+// 55	ammo bag
+// 50	melee attack
+// 45	shoot
+// 35	map/general
+// 30	movement
+// 20	reload
+//
+// NOTE: Zero (0) priority lessons are NOT affected by, but NEVER affect priority
+// 00	notice panic button, notice finale radio, explain disturbance, open/close door, failed to take pills, get money/health/power
+//
+// INSTANCE TYPES
+//
+// 0 = multiple lessons of same type can be open at once
+// 1 = only one of each lesson type can be open at once
+// 2 = replace lesson of the same type and "replace_key" at a fixed amount "fixed_instances_max"
+// 3 = only one instance will display at a time (but all instances will be open)
+//
+//
+// FLAGS (use these to build an integer)
+//
+// 0x00000000 LOCATOR_ICON_FX_NONE
+// 0x00000001 LOCATOR_ICON_FX_PULSE_SLOW
+// 0x00000002 LOCATOR_ICON_FX_PULSE_FAST
+// 0x00000004 LOCATOR_ICON_FX_PULSE_URGENT
+// 0x00000008 LOCATOR_ICON_FX_ALPHA_SLOW
+// 0x00000010 LOCATOR_ICON_FX_ALPHA_FAST
+// 0x00000020 LOCATOR_ICON_FX_ALPHA_URGENT
+// 0x00000040 LOCATOR_ICON_FX_SHAKE_NARROW
+// 0x00000080 LOCATOR_ICON_FX_SHAKE_WIDE
+// 0x00000100 LOCATOR_ICON_FX_STATIC
+// 0x00000200 LOCATOR_ICON_FX_NO_OFFSCREEN
+// 0x00000400 LOCATOR_ICON_FX_FORCE_CAPTION
+// 0x00000800 LOCATOR_ICON_FX_FADE_OUT
+// 0x00001000 LOCATOR_ICON_FX_FADE_IN
+//
+// 
+// CAPTION COLOR - supply a string in the format "rrr,ggg,bbb"  ex. "255,255,255" for white
+//
+//--------------------------------------------------------

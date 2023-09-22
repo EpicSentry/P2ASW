@@ -1,0 +1,45 @@
+map: default
+	vbsp:   -alldetail
+	vvis:	-radius_override 5000
+	vrad:	-textureshadows -StaticPropPolys -StaticPropLighting -hdr 
+
+map: ASI-Jac1-LandingBay_01
+	vbsp:	-alldetail
+	vvis:	-radius_override 5000
+	vrad:	-textureshadows -StaticPropPolys -StaticPropLighting -hdr 
+
+map: ASI-Jac1-LandingBay_02
+	vbsp:	-alldetail
+	vvis:	-radius_override 5000
+	vrad:	-textureshadows -StaticPropPolys -StaticPropLighting -hdr 
+
+map: ASI-Jac2-Deima
+	vbsp:   -alldetail
+	vvis:	-radius_override 5000
+	vrad:	-textureshadows -StaticPropPolys -StaticPropLighting -hdr 
+
+map: ASI-Jac3-Rydberg
+	vbsp:   -alldetail
+	vvis:	-radius_override 5000
+	vrad:	-textureshadows -StaticPropPolys -StaticPropLighting -hdr 
+
+map: asi-jac4-residential
+	vbsp:   -alldetail
+	vvis:	-radius_override 1500
+	vrad:	-textureshadows -StaticPropPolys -StaticPropLighting -hdr 
+
+map: ASI-Jac6-SewerJunction
+	vbsp:   -alldetail
+	vvis:	-radius_override 2000
+	vrad:	-textureshadows -StaticPropPolys -StaticPropLighting -hdr 
+
+map: ASI-Jac7-TimorStation
+	vbsp:   -alldetail
+	vvis:	-radius_override 5000
+	vrad:	-textureshadows -StaticPropPolys -StaticPropLighting -hdr 
+
+map: ASI-Jac1-LandingBay_pract
+	vbsp:   -alldetail
+	vvis:	-radius_override 5000
+	vrad:	-textureshadows -StaticPropPolys -StaticPropLighting -hdr 
+

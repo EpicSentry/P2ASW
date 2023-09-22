@@ -1,0 +1,25 @@
+GAME
+{
+    // PDA belongs to Juan Rosale
+    
+    // inbox
+    
+	"MailFrom1"	"From: Vincent Baker"
+	"MailDate1"	"Date: 12/18/52"
+	"MailSubject1"	"Subject: All work and no fun"
+	"MailBody1A"	"Hey Junito, looks like Campbell wants us to do extra time.  Has he got you searching Sector 12-18 too?"
+
+    "MailFrom2"	"From: Vincent Baker"
+	"MailDate2"	"Date: 12/18/52"
+	"MailSubject2"	"Subject: Re:Re: All work and no fun."
+	"MailBody2A"	"Juan,"
+	"MailBody2B"	"Ahhah! You and Steve?  That surely beats getting stoned.  Oh well.  Goddamn blizzard's coming our way anyway."
+
+    // sent mail
+    
+	"MailFrom3"	"To: Vincent Baker"
+	"MailDate3"	"Date: 12/18/52"
+	"MailSubject3"	"Subject: Re: All work and no fun."
+	"MailBody3A"	"Vinc,"
+	"MailBody3B"	"Nah, he wants me and Steve to search 30-35.  Wanna trade?"	
+}

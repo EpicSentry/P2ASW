@@ -1,0 +1,3 @@
+// HALF-LIFE 2 SPEECH SYSTEM SENTENCES.
+// Do not use TABS.  Separate sentence-names from wave definitions with single spaces only.
+// Sounds prefixed by "Q_" will be queued up for a while and played as soon as the NPC is allowed to speak

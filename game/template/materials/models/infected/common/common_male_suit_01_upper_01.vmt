@@ -1,0 +1,10 @@
+patch
+{
+include "materials/models/infected/common/common_infected_shared.vmt"
+insert
+{
+$baseTexture "models\infected\common/common_male_suit_01_upper_01"
+$allowdiffusemodulation 1
+$blendtintbybasealpha 1
+}
+}

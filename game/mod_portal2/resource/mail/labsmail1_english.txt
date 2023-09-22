@@ -1,0 +1,12 @@
+GAME
+{
+    // PDA belongs to Helen Young
+    
+	"MailFrom1"	"From: Shaun Ming "
+	"MailDate1"	"Date: 12/22/52"
+	"MailSubject1"	"Subject: Progress"
+	"MailBody1A"	"Dear Helen,"
+	"MailBody1B"	"I'm on the verge of one of the biggest discoveries of the last 200 years.  I've been analyzing the genetic code of those organic samples we found.  The data I've gathered supports my theory of how the alien lifeform is able to grow and reproduce so quickly.  I believe the catalyst for rapid tissue generation is warm living flesh!"
+	"MailBody1C"	"I'd like you to be here to see this.  I know you'd appreciate it.  I'll try to get you SynTek clearance for the labs.  See you soon."
+	"MailBody1D"	"Shaun"
+}

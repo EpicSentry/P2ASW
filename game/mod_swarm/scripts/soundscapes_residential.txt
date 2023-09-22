@@ -1,0 +1,279 @@
+//////////////////////////Residential//////////////////////////////
+
+
+"res.spawn"
+{
+
+	"dsp" "1"
+
+	"playsoundscape"
+	{
+		"name" "Indoors.Ambience2"
+		"volume" "0.8"
+	}
+	
+	"playsoundscape"
+	{
+		"name" "interior2.DistantCritters"
+		"volume" "0.7"
+	}
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"55"
+		"wave"		"scapes/3D/lights_flicker.wav"
+		"origin"	"338.000000, -9997.656250, 21.093750;"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"110"
+		"wave"		"scapes/3D/computer_spatial_amb_loop.wav"
+		"origin"	"567.125000, -7876.250000, -28.437500;"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_lo.end"
+		"volume" ".65"
+	}
+
+}
+
+
+"res.interior01"
+{
+	"dsp" "1"
+	"playsoundscape"
+	{
+		"name" "Indoors.Ambience2"
+		"volume" "0.8"
+	}
+	"playsoundscape"
+	{
+		"name" "interior2.DistantCritters"
+		"volume" "0.7"
+	}
+
+	"playlooping"
+	{
+		"volume"	".5"
+		"pitch"		"100"
+		"wave"		"scapes/3D/computer_roomtone_small.wav"
+		"origin"	"-1384.531250, -7946.593750, -35.500000;"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_lo.end"
+		"volume" ".65"
+	}
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"100"
+		"wave"		"scapes/3D/water_drip_loop.wav"
+		"origin"	"-1664.281250, -7547.156250, -65.156250;"
+		"soundlevel" 	"SNDLVL_85dB"
+	}
+
+}
+
+
+"res.mall01"
+{
+	"dsp" "1"
+	"playsoundscape"
+	{
+		"name" "Indoors.Ambience6"
+		"volume" "0.8"
+	}
+	
+	"playsoundscape"
+	{
+		"name" "interior2.DistantCritters"
+		"volume" "0.7"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"120"
+		"wave"		"scapes/3D/fluorescent_lights_loop.wav"
+		"origin"	"-760.468750, -5442.812500, 17.687500;"
+		"soundlevel" 	"SNDLVL_85dB"
+	}
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"100"
+		"wave"		"scapes/3D/water_drip_loop.wav"
+		"origin"	"-1664.281250, -7547.156250, -65.156250;"
+		"soundlevel" 	"SNDLVL_85dB"
+	}
+
+	"playlooping"
+	{
+		"volume"	".65"
+		"pitch"		"100"
+		"wave"		"scapes/3D/AS_MallMusic.wav"
+		"origin"	"-1786.781250, -4185.531250, 489.500000;"
+		"soundlevel" 	"SNDLVL_90dB"
+	}
+
+}
+
+"res.ducts01"
+{
+	"dsp" "2"
+	"playsoundscape"
+	{
+		"name" "Indoors.Ambience3"
+		"volume" "0.8"
+	}
+	"playsoundscape"
+	{
+		"name" "interior2.DistantCritters"
+		"volume" "0.7"
+	}
+
+	"playlooping"
+	{
+		"volume"	".98"
+		"pitch"		"100"
+		"wave"		"scapes/3D/water_drip_loop.wav"
+		"origin"	"2380.468750, -3684.468750, -22.781250;"
+		"soundlevel" 	"SNDLVL_85dB"
+	}
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"80"
+		"wave"		"scapes/3D/water_drip_loop.wav"
+		"origin"	"2247.343750, -5673.687500, -21.500000;"
+		"soundlevel" 	"SNDLVL_85dB"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_sewer.ambient"
+		"volume" ".67"
+	}
+
+}
+
+"res.interior03"
+{
+	"dsp" "1"
+	"playsoundscape"
+	{
+		"name" "Indoors.Ambience2"
+		"volume" "0.8"
+	}
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"85"
+		"wave"		"scapes/3D/computer_spatial_amb_loop.wav"
+		"origin"	"-420.312500, -3184.906250, -15.312500;"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_abstract.interior"
+		"volume" ".75"
+	}
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"120"
+		"wave"		"scapes/3D/fluorescent_lights_loop.wav"
+		"origin"	"-760.468750, -5442.812500, 17.687500;"
+		"soundlevel" 	"SNDLVL_85dB"
+	}
+
+	"playlooping"
+	{
+		"volume"	".65"
+		"pitch"		"100"
+		"wave"		"scapes/3D/AS_MallMusic.wav"
+		"origin"	"-1786.781250, -4185.531250, 489.500000;"
+		"soundlevel" 	"SNDLVL_90dB"
+	}
+
+}
+
+"res.interior02"
+{
+	"dsp" "1"
+	"playsoundscape"
+	{
+		"name" "Indoors.Ambience6"
+		"volume" "0.8"
+	}
+	"playsoundscape"
+	{
+		"name" "interior2.DistantCritters"
+		"volume" "0.7"
+	}
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"100"
+		"wave"		"scapes/3D/pipes_active_loop.wav"
+		"origin"	"-2033.781250, -2061.250000, 93.718750;"
+		"soundlevel" 	"SNDLVL_85dB"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_abstract.interior"
+		"volume" ".75"
+	}
+
+	"playlooping"
+	{
+		"volume"	".65"
+		"pitch"		"100"
+		"wave"		"scapes/3D/AS_MallMusic.wav"
+		"origin"	"-1786.781250, -4185.531250, 489.500000;"
+		"soundlevel" 	"SNDLVL_90dB"
+	}
+
+}
+
+"res.interior04"
+{
+	"dsp" "1"
+	"playsoundscape"
+	{
+		"name" "Indoors.Ambience5"
+		"volume" "1.0"
+	}
+	"playsoundscape"
+	{
+		"name" "interior2.DistantCritters"
+		"volume" "0.7"
+	}
+
+	"playlooping"
+	{
+		"volume"	".8"
+		"pitch"		"100"
+		"wave"		"scapes/3D/vendingmachinehum_loop.wav"
+		"origin"	"276.250000, -5360.406250, -33.937500;"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+}

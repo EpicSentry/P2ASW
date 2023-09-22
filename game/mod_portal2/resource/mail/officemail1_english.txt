@@ -1,0 +1,18 @@
+GAME
+{
+    // PDA belongs to Lt Cain
+    
+	"MailFrom1"	"From: Shaun Ming"
+	"MailDate1"	"Date: 12/21/52"
+	"MailSubject1"	"Subject: Tests"
+	"MailBody1A"	"Lt. Cain,"
+	"MailBody1B"	"A cat?  Won't do.  Too small."
+	"MailBody1C"	"S. Ming"
+
+	"MailFrom2"	"From: Shaun Ming"
+	"MailDate2"	"Date: 12/22/52"
+	"MailSubject2"	"Subject: Tests 2"
+	"MailBody2A"	"Lt. Cain,"
+	"MailBody2B"	"This should work.  I might need more.  Would that be a problem?  I hope I don't have to emphasize the importance of my examinations."
+	"MailBody2C"	"S. Ming"
+}

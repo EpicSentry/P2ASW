@@ -1,0 +1,168 @@
+//-----------------------------------------------------------------------------
+//	SERVER_PORTAL2.VPC
+//
+//	Project Script
+//-----------------------------------------------------------------------------
+
+$Macro SRCDIR		"..\.."
+$Macro GAMENAME 	"mod_portal2"
+
+$Include "$SRCDIR\game\server\server_base.vpc"
+
+$Configuration
+{
+	$Compiler
+	{
+		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\game\shared\portal;$SRCDIR\game\shared\portal2;.\hl2;.\episodic;$SRCDIR\game\shared\multiplayer;$SRCDIR\game\shared\hl2;$SRCDIR\game\shared\portal;.\portal;.\portal2"
+		$PreprocessorDefinitions		"$BASE;PORTAL;USES_SAVERESTORE;SWARM_DLL;PORTAL2;PORTAL2_DLL"
+	}
+}
+
+$Project "Server (Portal 2)"
+{
+	$Folder	"Source Files"
+	{
+		$File	"ai_eventresponse.cpp"
+		$File	"ai_eventresponse.h"
+		$File	"ai_relationship.cpp"
+		$File	"base_gameinterface.cpp"
+		$File	"basegrenade_concussion.cpp"
+		$File	"basegrenade_contact.cpp"
+		$File	"basegrenade_timed.cpp"
+		$File	"EntityFlame.h"
+		$File	"hl2\Func_Monitor.cpp"
+		$File	"GrenadeThrown.cpp"
+		$File	"GrenadeThrown.h"
+		$File	"logic_achievement.cpp"
+		$File	"monstermaker.cpp"
+		$File	"monstermaker.h"
+		$File	"physics_bone_follower.h"
+		$File	"$SRCDIR\game\shared\ragdoll_shared.h"
+		$File	"$SRCDIR\game\shared\solidsetdefaults.h"
+		$File	"team_spawnpoint.cpp"
+		$File	"team_spawnpoint.h"
+		$File	"$SRCDIR\game\shared\touchlink.h"
+		$File	"vehicle_choreo_generic.cpp"
+		$File	"$SRCDIR\game\shared\vehicle_choreo_generic_shared.h"
+		$File	"$SRCDIR\game\shared\weapon_parse_default.cpp"
+		$File	"env_speaker.cpp"
+
+		$Folder	"HL2 DLL"
+		{
+			$File	"hl2\info_darknessmode_lightsource.cpp"
+			$File	"hl2\npc_turret_ceiling.cpp"
+			$File	"hl2\npc_turret_floor.cpp"
+			$File	"hl2\npc_turret_ground.cpp"
+			$File	"hl2\prop_combine_ball.cpp"
+			$File	"hl2\prop_combine_ball.h"
+		}
+		
+		$Folder	"Portal 2"
+		{
+			$File	"portal2\npc_personality_core.cpp"
+			$File	"portal2\npc_wheatley_boss.cpp"
+			$File	"portal2\player_pickup_controller.cpp"
+			$File	"portal2\prop_button.cpp"
+			$File	"portal2\prop_button_base.cpp"
+			$File	"portal2\prop_floor_button.cpp"
+			$File	"portal2\prop_floor_button_base.cpp"
+			$File	"portal2\prop_floor_button_under.cpp"
+			$File	"portal2\prop_testchamber_door.cpp"
+			$File	"portal2\prop_under_button.cpp"
+			$File	"portal2\prop_weighted_cube.cpp"
+			$File	"portal2\portal2_eventlog.cpp"
+			$File	"portal2\portal2_gamemove.cpp"
+			
+			$File	"$SRCDIR\game\shared\predicted_viewmodel.cpp"
+		}
+		
+		$Folder	"Multiplayer"
+		{
+			$File	"multiplayer\basenetworkedplayer.cpp"
+			$File	"multiplayer\basenetworkedragdoll.cpp"
+			$File	"$SRCDIR\game\shared\multiplayer\basenetworkedplayer_gamemove.cpp"
+			$File	"$SRCDIR\game\shared\multiplayer\basenetworkedplayer_shared.cpp"
+			$File	"$SRCDIR\game\shared\multiplayer\multiplayer_animstate.cpp"
+		}
+
+		$Folder	"Portal"
+		{
+			$File	"$SRCDIR\game\shared\portal\achievements_portal.cpp"
+			$File	"portal\cbaseanimatingprojectile.cpp"
+			$File	"portal\cbaseanimatingprojectile.h"
+			$File	"portal\env_lightrail_endpoint.cpp"
+			$File	"$SRCDIR\game\shared\portal\env_lightrail_endpoint_shared.h"
+			$File	"portal\env_portal_credits.cpp"
+			$File	"portal\env_portal_path_track.cpp"
+			$File	"$SRCDIR\game\shared\portal\env_portal_path_track_shared.h"
+			$File	"portal\func_liquidportal.cpp"
+			$File	"portal\func_liquidportal.h"
+			$File	"portal\func_noportal_volume.cpp"
+			$File	"portal\func_noportal_volume.h"
+			$File	"portal\func_portal_bumper.cpp"
+			$File	"portal\func_portal_detector.cpp"
+			$File	"portal\func_portal_detector.h"
+			$File	"portal\func_portal_orientation.cpp"
+			$File	"portal\func_portal_orientation.h"
+			$File	"$SRCDIR\game\shared\Multiplayer\multiplayer_animstate.cpp"
+			$File	"$SRCDIR\game\shared\Multiplayer\multiplayer_animstate.h"
+			$File	"portal\neurotoxin_countdown.cpp"
+			$File	"portal\npc_portal_turret_floor.cpp"
+			$File	"portal\npc_portal_turret_ground.cpp"
+			$File	"portal\npc_security_camera.cpp"
+			$File	"portal\PhysicsCloneArea.cpp"
+			$File	"portal\physicsshadowclone.cpp"
+			$File	"portal\physicsshadowclone.h"
+			$File	"portal\portal_client.cpp"
+			$File	"$SRCDIR\game\shared\portal\portal_collideable_enumerator.cpp"
+			$File	"$SRCDIR\game\shared\portal\portal_collideable_enumerator.h"
+			$File	"portal\Portal_CustomStatsVisualizer.cpp"
+			$File	"$SRCDIR\game\shared\portal\portal_gamemovement.cpp"
+			$File	"$SRCDIR\game\shared\portal\portal_gamerules.cpp"
+			$File	"$SRCDIR\game\shared\portal\portal_gamerules.h"
+			$File	"portal\portal_gamestats.cpp"
+			$File	"portal\portal_gamestats.h"
+			$File	"portal\portal_physics_collisionevent.cpp"
+			$File	"portal\portal_physics_collisionevent.h"
+			$File	"portal\portal_placement.cpp"
+			$File	"portal\portal_placement.h"
+			$File	"portal\portal_player.cpp"
+			$File	"portal\portal_player.h"
+			$File	"$SRCDIR\game\shared\portal\portal_player_shared.cpp"
+			$File	"$SRCDIR\game\shared\portal\portal_player_shared.h"
+			$File	"$SRCDIR\game\shared\portal\portal_playeranimstate.cpp"
+			$File	"$SRCDIR\game\shared\portal\portal_playeranimstate.h"
+			$File	"$SRCDIR\game\shared\portal\portal_shareddefs.cpp"
+			$File	"$SRCDIR\game\shared\portal\portal_shareddefs.h"
+			$File	"$SRCDIR\game\shared\portal\portal_usermessages.cpp"
+			$File	"$SRCDIR\game\shared\portal\portal_util_shared.cpp"
+			$File	"$SRCDIR\game\shared\portal\portal_util_shared.h"
+			$File	"$SRCDIR\game\shared\portal\PortalSimulation.cpp"
+			$File	"$SRCDIR\game\shared\portal\PortalSimulation.h"
+			$File	"portal\prop_energy_ball.cpp"
+			$File	"portal\prop_glados_core.cpp"
+			$File	"portal\prop_portal.cpp"
+			$File	"portal\prop_portal.h"
+			$File	"portal\prop_portal_stats_display.cpp"
+			$File	"$SRCDIR\game\shared\portal\prop_portal_shared.cpp"
+			$File	"$SRCDIR\game\shared\portal\prop_portal_shared.h"
+			$File	"portal\prop_telescopic_arm.cpp"
+			$File	"$SRCDIR\game\shared\portal\StaticCollisionPolyhedronCache.cpp"
+			$File	"$SRCDIR\game\shared\portal\StaticCollisionPolyhedronCache.h"
+			$File	"portal\trigger_portal_cleanser.cpp"
+
+			$Folder	"Weapons"
+			{
+				$File	"$SRCDIR\game\server\portal\weapon_physcannon.cpp"
+				$File	"$SRCDIR\game\server\portal\weapon_physcannon.h"
+				$File	"$SRCDIR\game\shared\portal\weapon_portalbase.cpp"
+				$File	"$SRCDIR\game\shared\portal\weapon_portalbase.h"
+				$File	"$SRCDIR\game\shared\portal\weapon_portalbasecombatweapon.cpp"
+				$File	"portal\weapon_portalgun.cpp"
+				$File	"portal\weapon_portalgun.h"
+				$File	"$SRCDIR\game\shared\portal\weapon_portalgun_shared.cpp"
+				$File	"$SRCDIR\game\shared\portal\weapon_portalgun_shared.h"
+			}
+		}
+	}
+}

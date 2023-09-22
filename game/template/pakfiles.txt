@@ -1,0 +1,17 @@
+scripts\HudLayout.res
+scripts\mod_textures.txt
+scripts\mod_lessons.txt
+scripts\game_sounds_manifest.txt
+scripts\game_sounds_ambient_generic.txt
+scripts\game_sounds_header.txt
+scripts\game_sounds_items.txt
+scripts\game_sounds_physics.txt
+scripts\game_sounds_player.txt
+scripts\game_sounds_ui.txt
+scripts\game_sounds_vehicles.txt
+scripts\game_sounds_weapons.txt
+scripts\game_sounds_world.txt
+resource\ui\basemodui\campaignflyout.res
+resource\ui\basemodui\gamesettings.res
+resource\ui\basemodui\ingamemainmenu.res
+resource\ui\basemodui\mainmenu.res

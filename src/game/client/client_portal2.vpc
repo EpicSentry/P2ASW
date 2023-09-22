@@ -1,0 +1,283 @@
+//-----------------------------------------------------------------------------
+//	CLIENT_PORTAL2.VPC
+//
+//	Project Script
+//-----------------------------------------------------------------------------
+
+$Macro SRCDIR		"..\.."
+$Macro GAMENAME 	"mod_portal2"
+
+$Include "$SRCDIR\game\client\client_base.vpc"
+
+$Configuration
+{
+	$Compiler
+	{
+		$AdditionalIncludeDirectories	".\hl2;.\hl2\elements;.\portal;.\portal2;.\portal\vgui;.\portal2\gameui;.\portal2\vgui;$SRCDIR\game\shared\hl2;$SRCDIR\game\shared\multiplayer;$SRCDIR\game\shared\portal;$SRCDIR\game\shared\portal2;$BASE"
+		$PreprocessorDefinitions		"$BASE;PORTAL;SWARM_DLL;PORTAL2;PORTAL2_DLL;GAMEUI_EMBEDDED;GAMEUI_EXPORTS"
+	}
+}
+
+$Project "Client (Portal 2)"
+{
+	$Folder	"Source Files"
+	{
+		$File	"c_team_objectiveresource.cpp"
+		$File	"c_team_objectiveresource.h"
+		
+		$File	"$SRCDIR\common\language.cpp"
+		{
+			$Configuration
+			{
+				$Compiler
+				{
+					$Create/UsePrecompiledHeader	"Not Using Precompiled Headers"
+				}
+			}
+		}
+
+		$Folder	"HL2 DLL"
+		{
+			$File	"hl2\c_prop_combine_ball.cpp"
+			$File	"hl2\c_prop_combine_ball.h"
+			$File	"hl2\c_te_concussiveexplosion.cpp"
+			$File	"hl2\c_te_flare.cpp"
+			$File	"death.cpp"
+			$File	"hl2\fx_hl2_impacts.cpp"
+			$File	"hl2\fx_hl2_tracers.cpp"
+		}
+		
+		$Folder	"Multiplayer"
+		{
+			$File	"multiplayer\basenetworkedplayer_cl.cpp"
+			$File	"multiplayer\basenetworkedragdoll_cl.cpp"
+			$File	"$SRCDIR\game\shared\multiplayer\basenetworkedplayer_gamemove.cpp"
+			$File	"$SRCDIR\game\shared\multiplayer\basenetworkedplayer_shared.cpp"
+			$File	"$SRCDIR\game\shared\multiplayer\multiplayer_animstate.cpp"
+		}
+		
+		$Folder "Portal 2"
+		{
+			$File	"portal2\c_portal2_lesson.cpp"
+			$File	"portal2\c_sdk_jukebox.cpp"
+			$File	"portal2\portal2_input.cpp"
+			$File	"portal2\portal2_prediction.cpp"
+			$File	"portal2\vgui_rootpanel_portal2.cpp"
+			$File	"$SRCDIR\game\shared\predicted_viewmodel.cpp"
+		
+			$Folder	"VGUI"
+			{
+				$File	"portal2\vgui\nb_button.cpp"
+				$File	"portal2\vgui\nb_header_footer.cpp"
+				$File	"portal2\vgui\nb_horiz_list.cpp"
+				$File	"portal2\vgui\nb_select_level_entry.cpp"
+				$File	"portal2\vgui\nb_select_level_panel.cpp"
+				$File	"portal2\vgui\sdk_hud_chat.cpp"
+				$File	"portal2\vgui\sdk_loading_panel.cpp"
+				$File	"portal2\vgui\sdk_logo_panel.cpp"
+				$File	"portal2\vgui\sdk_vgui_music_importer.cpp"
+			}
+
+			$Folder	"GameUI"
+			{
+				$File	"portal2\gameui\backgroundmenubutton.cpp" \
+						"portal2\gameui\basesavegamedialog.cpp" \
+						"portal2\gameui\bitmapimagepanel.cpp" \
+						"portal2\gameui\commandcheckbutton.cpp" \
+						"portal2\gameui\contentcontroldialog.cpp" \
+						"portal2\gameui\createmultiplayergamebotpage.cpp" \
+						"portal2\gameui\createmultiplayergamedialog.cpp" \
+						"portal2\gameui\createmultiplayergamegameplaypage.cpp" \
+						"portal2\gameui\createmultiplayergameserverpage.cpp" \
+						"portal2\gameui\customtabexplanationdialog.cpp" \
+						"portal2\gameui\cvarnegatecheckbutton.cpp" \
+						"portal2\gameui\cvarslider.cpp" \
+						"portal2\gameui\cvartextentry.cpp" \
+						"portal2\gameui\cvartogglecheckbutton.cpp" \
+						"portal2\gameui\gameconsole.cpp" \
+						"portal2\gameui\gameconsoledialog.cpp" \
+						"portal2\gameui\gameui_interface.cpp" \
+						"portal2\gameui\gameui_util.cpp" \
+						"portal2\gameui\keytogglecheckbutton.cpp" \
+						"portal2\gameui\labeledcommandcombobox.cpp" \
+						"portal2\gameui\loadingdialog.cpp" \
+						"portal2\gameui\loadingtippanel.cpp" \
+						"portal2\gameui\logofile.cpp" \
+						"portal2\gameui\modinfo.cpp" \
+						"portal2\gameui\mousemessageforwardingpanel.cpp" \
+						"portal2\gameui\multiplayeradvanceddialog.cpp" \
+						"portal2\gameui\optionsdialog.cpp" \
+						"portal2\gameui\optionssubaudio.cpp" \
+						"portal2\gameui\optionssubdifficulty.cpp" \
+						"portal2\gameui\optionssubgame.cpp" \
+						"portal2\gameui\optionssubkeyboard.cpp" \
+						"portal2\gameui\optionssubmouse.cpp" \
+						"portal2\gameui\optionssubmultiplayer.cpp" \
+						"portal2\gameui\optionssubportal.cpp" \
+						"portal2\gameui\optionssubvideo.cpp" \
+						"portal2\gameui\optionssubvoice.cpp" \
+						"portal2\gameui\panellistpanel.cpp" \
+						"portal2\gameui\playerlistdialog.cpp" \
+						"portal2\gameui\rungameengine.cpp" \
+						"portal2\gameui\scriptobject.cpp" \
+						"portal2\gameui\portal2\basemodframe.cpp" \
+						"portal2\gameui\portal2\basemodpanel.cpp" \
+						"portal2\gameui\portal2\gamemodes.cpp" \
+						"portal2\gameui\portal2\uiavatarimage.cpp" \
+						"portal2\gameui\portal2\uigamedata.cpp" \
+						"portal2\gameui\portal2\uigamedata_invite.cpp" \
+						"portal2\gameui\portal2\uigamedata_storage.cpp" \
+						"portal2\gameui\portal2\vachievements.cpp" \
+						"portal2\gameui\portal2\vaddonassociation.cpp" \
+						"portal2\gameui\portal2\vaddons.cpp" \
+						"portal2\gameui\portal2\vattractscreen.cpp" \
+						"portal2\gameui\portal2\vaudio.cpp" \
+						"portal2\gameui\portal2\vaudiovideo.cpp" \
+						"portal2\gameui\portal2\vcloud.cpp" \
+						"portal2\gameui\portal2\vcontrolleroptions.cpp" \
+						"portal2\gameui\portal2\vcontrolleroptionsbuttons.cpp" \
+						"portal2\gameui\portal2\vcontrolleroptionssticks.cpp" \
+						"portal2\gameui\portal2\vcustomcampaigns.cpp" \
+						"portal2\gameui\portal2\vdownloadcampaign.cpp" \
+						"portal2\gameui\portal2\vdownloads.cpp" \
+						"portal2\gameui\portal2\vdropdownmenu.cpp" \
+						"portal2\gameui\portal2\vflyoutmenu.cpp" \
+						"portal2\gameui\portal2\vfooterpanel.cpp" \
+						"portal2\gameui\portal2\vfoundgames.cpp" \
+						"portal2\gameui\portal2\vfoundgroupgames.cpp" \
+						"portal2\gameui\portal2\vfoundpublicgames.cpp" \
+						"portal2\gameui\portal2\vgamelobby.cpp" \
+						"portal2\gameui\portal2\vgamelobbychat.cpp" \
+						"portal2\gameui\portal2\vgameoptions.cpp" \
+						"portal2\gameui\portal2\vgamesettings.cpp" \
+						"portal2\gameui\portal2\vgenericconfirmation.cpp" \
+						"portal2\gameui\portal2\vgenericpanellist.cpp" \
+						"portal2\gameui\portal2\vgenericwaitscreen.cpp" \
+						"portal2\gameui\portal2\vgetlegacydata.cpp" \
+						"portal2\gameui\portal2\vhybridbutton.cpp" \
+						"portal2\gameui\portal2\vingamechapterselect.cpp" \
+						"portal2\gameui\portal2\vingamedifficultyselect.cpp" \
+						"portal2\gameui\portal2\vingamekickplayerlist.cpp" \
+						"portal2\gameui\portal2\vingamemainmenu.cpp" \
+						"portal2\gameui\portal2\vjukebox.cpp" \
+						"portal2\gameui\portal2\vkeyboard.cpp" \
+						"portal2\gameui\portal2\vkeyboardmouse.cpp" \
+						"portal2\gameui\portal2\vleaderboard.cpp" \
+						"portal2\gameui\portal2\vloadingprogress.cpp" \
+						"portal2\gameui\portal2\vmainmenu.cpp" \
+						"portal2\gameui\portal2\vmenubackground.cpp" \
+						"portal2\gameui\portal2\vmultiplayer.cpp" \
+						"portal2\gameui\portal2\voptions.cpp" \
+						"portal2\gameui\portal2\vpasswordentry.cpp" \
+						"portal2\gameui\portal2\vquickjoin.cpp" \
+						"portal2\gameui\portal2\vquickjoingroups.cpp" \
+						"portal2\gameui\portal2\vsignindialog.cpp" \
+						"portal2\gameui\portal2\vslidercontrol.cpp" \
+						"portal2\gameui\portal2\vspinnercontrol.cpp" \
+						"portal2\gameui\portal2\vsteamcloudconfirmation.cpp" \
+						"portal2\gameui\portal2\vtransitionscreen.cpp" \
+						"portal2\gameui\portal2\vvideo.cpp" \
+						"portal2\gameui\portal2\vvoteoptions.cpp" \
+						"portal2\gameui\sys_utils.cpp" \
+						"portal2\gameui\textentrybox.cpp" \
+						"portal2\gameui\urlbutton.cpp" \
+						"portal2\gameui\vcontrolslistpanel.cpp" \
+						"portal2\gameui\vguisystemmoduleloader.cpp"
+				{
+					$Configuration
+					{
+						$Compiler
+						{
+							$Create/UsePrecompiledHeader	"Not Using Precompiled Headers"
+						}
+					}
+				}
+			}
+		}
+
+		$Folder	"Portal"
+		{
+			$File	"$SRCDIR\game\shared\portal\achievements_portal.cpp"
+			$File	"portal\c_env_lightraill_endpoint.cpp"
+			$File	"portal\c_env_portal_path_track.cpp"
+			$File	"portal\c_func_liquidportal.cpp"
+			$File	"portal\c_func_liquidportal.h"
+			$File	"portal\c_neurotoxin_countdown.cpp"
+			$File	"portal\c_neurotoxin_countdown.h"
+			$File	"portal\c_npc_portal_turret_floor.cpp"
+			$File	"portal\c_npc_rocket_turret.cpp"
+			$File	"portal\c_portal_player.cpp"
+			$File	"portal\c_portal_player.h"
+			$File	"portal\C_PortalGhostRenderable.cpp"
+			$File	"portal\C_PortalGhostRenderable.h"
+			$File	"portal\c_prop_energy_ball.cpp"
+			$File	"portal\c_prop_portal.cpp"
+			$File	"portal\c_prop_portal.h"
+			$File	"portal\c_prop_portal_stats_display.cpp"
+			$File	"portal\c_prop_portal_stats_display.h"
+			$File	"portal\clientmode_portal.cpp"
+			$File	"portal\clientmode_portal.h"
+			$File	"$SRCDIR\game\shared\portal\env_lightrail_endpoint_shared.h"
+			$File	"$SRCDIR\game\shared\portal\env_portal_path_track_shared.h"
+			$File	"portal\fx_portal.cpp"
+			$File	"portal\hud_quickinfo.cpp"
+			$File	"portal\MaterialProxy_Portal_PickAlphaMask.cpp"
+			$File	"portal\materialproxy_portalstatic.cpp"
+			$File	"$SRCDIR\game\shared\Multiplayer\multiplayer_animstate.cpp"
+			$File	"$SRCDIR\game\shared\Multiplayer\multiplayer_animstate.h"
+			$File	"$SRCDIR\game\shared\portal\portal_collideable_enumerator.cpp"
+			$File	"$SRCDIR\game\shared\portal\portal_collideable_enumerator.h"
+			$File	"portal\portal_credits.cpp"
+			$File	"portal\Portal_DynamicMeshRenderingUtils.cpp"
+			$File	"portal\Portal_DynamicMeshRenderingUtils.h"
+			$File	"$SRCDIR\game\shared\portal\portal_gamemovement.cpp"
+			$File	"$SRCDIR\game\shared\portal\portal_gamerules.cpp"
+			$File	"$SRCDIR\game\shared\portal\portal_gamerules.h"
+			$File	"portal\portal_hud_crosshair.cpp"
+			$File	"portal\portal_hud_crosshair.h"
+			$File	"$SRCDIR\game\shared\portal\portal_player_shared.cpp"
+			$File	"$SRCDIR\game\shared\portal\portal_player_shared.h"
+			$File	"$SRCDIR\game\shared\portal\portal_playeranimstate.cpp"
+			$File	"$SRCDIR\game\shared\portal\portal_playeranimstate.h"
+			$File	"portal\portal_render_targets.cpp"
+			$File	"portal\portal_render_targets.h"
+			$File	"$SRCDIR\game\shared\portal\portal_shareddefs.cpp"
+			$File	"$SRCDIR\game\shared\portal\portal_shareddefs.h"
+			$File	"$SRCDIR\game\shared\portal\portal_usermessages.cpp"
+			$File	"$SRCDIR\game\shared\portal\portal_util_shared.cpp"
+			$File	"$SRCDIR\game\shared\portal\portal_util_shared.h"
+			$File	"$SRCDIR\game\shared\portal\prop_portal_shared.cpp"
+			$File	"$SRCDIR\game\shared\portal\prop_portal_shared.h"
+			$File	"$SRCDIR\game\shared\portal\PortalSimulation.cpp"
+			$File	"$SRCDIR\game\shared\portal\PortalSimulation.h"
+			$File	"$SRCDIR\game\shared\portal\StaticCollisionPolyhedronCache.cpp"
+			$File	"$SRCDIR\game\shared\portal\StaticCollisionPolyhedronCache.h"
+			$File	"portal\PortalRender.cpp"
+			$File	"portal\PortalRender.h"
+			$File	"portal\portalrenderable_flatbasic.cpp"
+			$File	"portal\portalrenderable_flatbasic.h"
+			$File	"portal\vgui_portal_stats_display_screen.cpp"
+			$File	"portal\vgui_neurotoxin_countdown_screen.cpp"
+
+			$Folder	"Weapons"
+			{
+				$File	"portal\c_weapon_physcannon.cpp"
+				$File	"portal\c_weapon_portalgun.cpp"
+				$File	"portal\c_weapon_portalgun.h"
+				$File	"$SRCDIR\game\shared\portal\weapon_portalbase.cpp"
+				$File	"$SRCDIR\game\shared\portal\weapon_portalbase.h"
+				$File	"$SRCDIR\game\shared\portal\weapon_portalbasecombatweapon.cpp"
+				$File	"$SRCDIR\game\shared\portal\weapon_portalbasecombatweapon.h"
+				$File	"$SRCDIR\game\shared\portal\weapon_portalgun_shared.cpp"
+				$File	"$SRCDIR\game\shared\portal\weapon_portalgun_shared.h"
+			}
+		}
+	}
+	
+	
+	$Folder	"Link Libraries"
+	{
+		$Lib "$LIBCOMMON\jpeglib"
+		$Lib "$LIBPUBLIC\vpklib"
+	}
+}

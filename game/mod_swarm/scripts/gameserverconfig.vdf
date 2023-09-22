@@ -1,0 +1,24 @@
+// ALIEN SWARM DEDICATED SERVER CONFIGURATION SPECIFICATION FOR GUI
+"GameServerConfig"
+{
+	"asw_default_campaign"
+	{
+		"name"	"Default Campaign"
+		"type"	"string"
+	}
+	"asw_vote_kick_fraction"
+	{
+		"name" "Kick Vote Fraction"
+		"type" "string"
+	}
+	"asw_vote_leader_fraction"
+	{
+		"name" "Leader Vote Fraction"
+		"type" "string"
+	}
+	"asw_vote_map_fraction"
+	{
+		"name" "Map Vote Fraction"
+		"type" "string"
+	}
+}

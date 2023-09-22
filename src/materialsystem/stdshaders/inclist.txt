@@ -1,0 +1,12 @@
+fxctmp9_tmp\Bloom_ps20.inc
+fxctmp9_tmp\Bloom_ps20b.inc
+fxctmp9_tmp\screenspaceeffect_vs20.inc
+fxctmp9_tmp\portal_ps20.inc
+fxctmp9_tmp\portal_ps20b.inc
+fxctmp9_tmp\portal_vs20.inc
+fxctmp9_tmp\portalstaticoverlay_ps20.inc
+fxctmp9_tmp\portalstaticoverlay_ps20b.inc
+fxctmp9_tmp\portalstaticoverlay_vs20.inc
+fxctmp9_tmp\portal_refract_vs20.inc
+fxctmp9_tmp\portal_refract_ps20.inc
+fxctmp9_tmp\portal_refract_ps20b.inc

@@ -1,0 +1,11 @@
+GAME
+{
+    // spam
+	"MailFrom1" "From: John Doe"
+	"MailSubject1"	"WAKE UP!!!"
+	"MailDate1"	"Date: 12/25/52"
+	"MailBody1A"	"Hello free people,"
+	"MailBody1B"	"Before I came to People's Law, I slaved underground for SynTek on some dirtclod in the Outer Rim.  We never questioned the hours, or checked the labor laws; hell, we didn't even know such laws existed.  We were too tired to ask the right questions, and too worried about losing our jobs.  You know if you quit, they're under no obligation to get you off the rock...or to house and feed you.  It's even worse if you're fired."
+	"MailBody1C"	"But six months ago I stumbled across People's Law.  They informed me of my rights and helped me get out of my contract with SynTek.  They got me a transfer back to the Core Systems, where we all belong.  Hey:  Even when you know you're doing the right thing, it's still damn scary doing it.  But it's a lot less frightening with People's Law working by your side. You've got nothing to lose but your fear of making a move.  Contact (+2369992634980)"
+	"MailBody1D"	"Disclaimer:  People's Law breakaway deals are fully binding and non-refundable under IA law.  Working conditions of replacement placement cannot be guaranteed."
+}

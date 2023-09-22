@@ -1,0 +1,28 @@
+GAME
+{
+    // PDA belongs to Brad Campbell
+    // inbox
+    
+	"MailFrom1"	"From: Laura Callen"
+	"MailDate1"	"Date: 12/18/52"
+	"MailSubject1"	"Subject: Re: Cargo shipping"
+	"MailBody1A"	"Hey Brad,"
+	"MailBody1B"	"This is strange.  I've searched our transport logs but there's nothing filed under 'Delivery 4903877'."
+	"MailBody1C"	"I suggest you hold onto the cargo until I've traced the mail back.  It was sent from somewhere within the main complex.  Shouldn't be too hard to find out who forwarded you that order."
+	"MailBody1D"	"Talk to you later.  Take care."
+
+	"MailFrom2"	"From: Laura Callen"
+	"MailDate2"	"Date: 12/18/52"
+	"MailSubject2"	"Subject: Re:Re: Cargo Shipping"
+	"MailBody2A"	"Brad, looks like Cain is the sender.  I asked him about it and he denied everything.  He said anyone could've used that computer, which is true enough, but does not clear him in my eyes."
+	"MailBody2B"	"I want you to inspect those containers before they leave the cargo bay."
+
+    // sent mail
+	"MailFrom3"	"To: Laura Callen"
+	"MailDate3"	"Date: 12/18/52"
+	"MailSubject3"	"Subject: Re: Eggs"
+	"MailBody3A"    "Laura,"
+	"MailBody3B"	"Things are getting even weirder around here.  After your mail I headed back to where we left the eggs.  The shells were broken and they were empty."
+	"MailBody3C"	"We have decided to search Outpost 17 in groups of two and see if we anything unusual turns up.  Extra manpower would be appreciated."
+	"MailBody3D"	"I think we're safe in assuming there's something suspicious going on. Shipping live cargo to Earth goes under IA restriction #77-C.  Nobody could do that by mistake."
+}

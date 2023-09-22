@@ -1,0 +1,372 @@
+//////////////////////////Rydberg//////////////////////////////
+///////////////////////////////////////////////////////////////
+
+//Utility interior scapes
+
+//////////////
+//////////////
+
+
+
+"util_lo.end"
+{
+
+	
+	"playrandom"
+	{
+		"time"		"9,21"
+		"volume"	".95,1"
+		"pitch"		"96,105"
+		"position"	"random"
+
+		"rndwave"
+		{
+			"wave"	"scapes/2d/random_amb/random_lo_end_01.wav"
+			"wave"	"scapes/2d/random_amb/random_lo_end_02.wav"
+			"wave"	"scapes/2d/random_amb/random_lo_end_03.wav"
+			"wave"	"scapes/2d/random_amb/random_lo_end_04.wav"
+			"wave"	"scapes/2d/random_amb/random_lo_end_05.wav"
+			"wave"	"scapes/2d/random_amb/random_lo_end_06.wav"
+			"wave"	"scapes/2d/random_amb/random_lo_end_07.wav"
+			"wave"	"scapes/2d/random_amb/random_lo_end_08.wav"
+			"wave"	"scapes/2d/random_amb/random_lo_end_09.wav"
+			"wave"	"scapes/2d/random_amb/random_lo_end_10.wav"
+			"wave"	"scapes/2d/random_amb/random_lo_end_11.wav"
+			"wave"	"scapes/2d/random_amb/random_lo_end_12.wav"
+			"wave"	"scapes/2d/random_amb/random_lo_end_13.wav"
+			"wave"	"scapes/2d/random_amb/random_lo_end_14.wav"
+			"wave"	"scapes/2d/random_amb/random_lo_end_15.wav"
+		}
+
+	}
+
+}
+
+"util_verb.machinery"
+{
+
+	
+	"playrandom"
+	{
+		"time"		"8,15"
+		"volume"	".76,1"
+		"pitch"		"68,105"
+		"position"	"random"
+
+		"rndwave"
+		{
+			"wave"	"scapes/2d/random_amb/random_machinery_01.wav"
+			"wave"	"scapes/2d/random_amb/random_machinery_02.wav"
+			"wave"	"scapes/2d/random_amb/random_machinery_03.wav"
+			"wave"	"scapes/2d/random_amb/random_machinery_04.wav"			
+			"wave"	"scapes/2d/random_amb/random_machinery_05.wav"
+			"wave"	"scapes/2d/random_amb/random_machinery_06.wav"
+			"wave"	"scapes/2d/random_amb/random_machinery_07.wav"
+			"wave"	"scapes/2d/random_amb/random_machinery_08.wav"
+
+		}
+
+	}
+
+}
+
+
+
+
+////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////
+
+
+
+
+
+"interior.generators"
+{
+	"dsp"	"4"
+	"dsp_volume" "1.0"
+	"fadetime" "3"
+	
+	"playsoundscape"
+	{
+		"name" "util_metal.rattles"
+		"volume" ".4"
+	}
+	
+	"playsoundscape"
+	{
+		"name" "interior2.DistantCritters"
+		"volume" "0.7"
+	}
+	
+	"playlooping"
+	{
+		"volume"	".7"
+		"soundlevel"	"0"
+		"pitch"		"100"
+		"wave"		"scapes/2D/interior1/gen_room_02_loop.wav"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_interior.bursts"
+		"volume" ".4"
+	}
+
+	
+}
+
+
+"rydberg.interior01"
+{
+
+	//"fadetime" "2"
+
+
+
+	"playlooping"
+	{
+		"volume"	".5"
+		"soundlevel"	"0"
+		"pitch"		"100"
+		"wave"		"scapes/2D/interior1/gen_room_02_loop.wav"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_interior.bursts"
+		"volume" ".4"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_abstract.interior"
+		"volume" ".55"
+	}
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"104"
+		"wave"		"scapes/3D/steam_loop_01.wav"
+		"origin"	"-2989.031250, -6225.25000,0 594.812500;"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+
+
+}
+
+
+"rydberg.interior02"
+{
+
+	//"fadetime" "2"
+
+	"playlooping"
+	{
+		"volume"	"1.0"
+		"soundlevel"	"0"
+		"pitch"		"100"
+		"wave"		"scapes/2D/interior1/pipesroom_amb_loop.wav"
+	}
+	
+	"playlooping"
+	{
+		"volume"	".5"
+		"soundlevel"	"0"
+		"pitch"		"100"
+		"wave"		"scapes/2D/interior1/gen_room_02_loop.wav"
+	}
+
+	"playlooping"
+	{
+		"volume"	".97"
+		"pitch"		"100"
+		"wave"		"scapes/3D/pipes_active_loop.wav"
+		"origin"	"-492.156250, -2396.187500, 635.468750;"
+		"soundlevel" 	"SNDLVL_85dB"
+	}
+
+		"playlooping"
+	{
+		"volume"	".99"
+		"pitch"		"100"
+		"wave"		"scapes/3D/pipe_burst_loop.wav"
+		"origin"	"-2224.812500, -3819.156250, 687.500000;"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+
+
+	"playsoundscape"
+	{
+		"name" "util_interior.bursts"
+		"volume" ".4"
+	}
+
+	
+	"playsoundscape"
+	{
+		"name" "util_abstract.interior"
+		"volume" ".55"
+	}
+
+
+}
+
+
+"rydberg.interior.big.1"
+{
+
+	"fadetime" "5"
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"100"
+		"wave"		"scapes/2D/interior1/pipesroom_amb_loop.wav"
+	}
+
+	"playlooping"
+	{
+		"volume"	".89"
+		"pitch"		"100"
+		"wave"		"scapes/3D/steam_loop_01.wav"
+		"origin"	"304.750000, -2149.812500, 351.343750;"
+		"soundlevel" 	"SNDLVL_70dB"
+	}
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"30"
+		"wave"		"scapes/3D/steam_loop_01.wav"
+		"origin"	"-447.593750, -1333.343750, 375.843750;"
+		"soundlevel" 	"SNDLVL_85dB"
+	}
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"85"
+		"wave"		"scapes/3D/pipes_active_loop.wav"
+		"origin"	"-1136.812500, -168.843750, 557.562500;"
+		"soundlevel" 	"SNDLVL_85dB"
+	}
+	
+	"playlooping"
+	{
+		"volume"	".97"
+		"pitch"		"100"
+		"wave"		"scapes/3D/pipes_active_loop.wav"
+		"origin"	"-492.156250, -2396.187500, 635.468750;"
+		"soundlevel" 	"SNDLVL_85dB"
+	}
+
+
+	"playsoundscape"
+	{
+		"name" "util_interior.bursts"
+		"volume" ".5"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_lo.end"
+		"volume" "1"
+	}
+	"playsoundscape"
+	{
+		"name" "util_abstract.interior"
+		"volume" ".77"
+	}
+
+
+}
+
+
+"reactor.int"
+{
+
+	//"fadetime" "1"
+
+
+	"playlooping"
+	{
+		"volume"	".53"
+		"pitch"		"100"
+		"wave"		"(scapes/2D/interior1/reactor_room_loop.wav"
+		"position"	"random"
+	}
+
+
+	"playsoundscape"
+	{
+		"name" "util_interior.bursts"
+		"volume" ".4"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_abstract.interior"
+		"volume" ".5"
+	}
+
+
+	
+}
+
+
+
+
+"landing.exterior"
+{
+
+	"fadetime" "1"
+
+
+	"playsoundscape"
+	{
+		"name" "outside.spawn"
+		"volume" "1"
+	}
+	
+}
+
+
+
+"rydberg.interior.elevators"
+{
+
+	//"fadetime" "1"
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"100"
+		"wave"		"scapes/2D/interior1/pipesroom_amb_loop.wav"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_lo.end"
+		"volume" "1"
+	}
+	"playsoundscape"
+	{
+		"name" "util_verb.machinery"
+		"volume" "1"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_metal.moans"
+		"volume" ".8"
+	}
+
+
+
+}
+
+
+

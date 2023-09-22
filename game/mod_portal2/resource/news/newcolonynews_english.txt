@@ -1,0 +1,8 @@
+GAME
+{
+	"Headline"	"SynTek Establish New Mining Colony"
+	"HeadlineDate"	"12/15/52"
+	"Paragraph1"	"The SynTek Megacorporation today reported establishment of a new deep space mining colony on the outer edges of the SX-2833-87P cluster.  They also announced immediate shipment of a civilian fleet of workers to the planet."
+	"Paragraph2"	"Demonstrations continue outside the SynTek Headquarters on the Tokyo York Island, Earth, over perceived working conditions on the colonies and low pay, allegations SynTek deny strongly."
+	"Paragraph3"	"SynTek Stock rose 5 points with the news of the new colony."
+}

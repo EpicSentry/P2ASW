@@ -1,0 +1,60 @@
+// sounds used by ASI from HL2
+
+"d3_citadel.pod_move"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.500000"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_80dB"
+
+	"wave"			"plats/skylift_move.wav"
+}
+
+"d3_citadel.pod_stop"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.500000"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_80dB"
+
+	"wave"			"plats/skylift_stop.wav"
+}
+
+"d1_town.LargeFireLoop"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.850000"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_80dB"
+
+	"wave"			"ambient/fire/fire_big_loop1.wav"
+}
+
+"d1_town.GasJet"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.800000"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_80dB"
+
+	"wave"			"ambient/gas/cannister_loop.wav"
+}
+
+"d1_town.CarHit"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"1.000000"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_130dB"
+
+	"rndwave"
+	{
+		"wave"	"ambient/materials/cartrap_explode_impact1.wav"
+		"wave"	"ambient/materials/cartrap_explode_impact2.wav"
+	}
+}

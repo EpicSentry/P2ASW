@@ -1,0 +1,212 @@
+//-----------------------------------------------------------------------------
+//	CLIENT_TEMPLATE.VPC
+//
+//	Project Script
+//-----------------------------------------------------------------------------
+
+$Macro SRCDIR		"..\.."
+$Macro GAMENAME 	"template"
+
+$Include "$SRCDIR\game\client\client_base.vpc"
+
+$Configuration
+{
+	$Compiler
+	{
+		$AdditionalIncludeDirectories	"$BASE;.\hl2;.\template;.\template\vgui;$SRCDIR\game\client\template\gameui;..\statemachine;$SRCDIR\game\shared\multiplayer;$SRCDIR\game\shared\template"
+		$PreprocessorDefinitions		"$BASE;SWARM_DLL;TEMPLATE_DLL;GAMEUI_EMBEDDED;GAMEUI_EXPORTS"
+	}
+}
+
+$Project "Client (Template)"
+{
+	$Folder "Source Files"
+	{
+		-$File	"$SRCDIR\game\shared\weapon_parse_default.cpp"
+		-$File	"hud_animationinfo.cpp"
+		-$File	"hud_crosshair.cpp"
+		-$File	"hud_hintdisplay.cpp"
+		-$File	"hud_weapon.cpp"
+		-$File	"hud_vehicle.cpp"
+	}
+
+	$Folder	"Source Files"
+	{
+		$File	"hud_crosshair.cpp"
+		
+		$File	"$SRCDIR\common\language.cpp"
+		{
+			$Configuration
+			{
+				$Compiler
+				{
+					$Create/UsePrecompiledHeader	"Not Using Precompiled Headers"
+				}
+			}
+		}
+		
+		
+			$Folder "Template"
+			{
+				$File	"$SRCDIR\game\shared\template\sdk_fx_shared.cpp"
+				$File	"$SRCDIR\game\shared\template\sdk_gamemovement.cpp"
+				$File	"$SRCDIR\game\shared\template\sdk_gamerules.cpp"
+				$File	"$SRCDIR\game\shared\template\sdk_playeranimstate.cpp"
+				$File	"$SRCDIR\game\shared\template\sdk_player_shared.cpp"
+				$File	"$SRCDIR\game\shared\template\sdk_usermessages.cpp"
+				$File	"$SRCDIR\game\shared\template\sdk_weapon_parse.cpp"
+				$File	"$SRCDIR\game\shared\template\weapon_mp5.cpp"
+				$File	"$SRCDIR\game\shared\template\weapon_pistol.cpp"
+				$File	"$SRCDIR\game\shared\template\weapon_sdkbase.cpp"
+				$File	"template\clientmode_sdk.cpp"
+				$File	"template\c_sdk_jukebox.cpp"
+				$File	"template\c_sdk_lesson.cpp"
+				$File	"template\c_sdk_player.cpp"
+
+				$File	"template\sdk_fx_impacts.cpp"
+				$File	"template\sdk_fx_tracers.cpp"
+				$File	"template\sdk_fx_weaponfx.cpp"
+				$File	"template\sdk_input.cpp"
+				$File	"template\sdk_prediction.cpp"
+
+				$Folder	"VGUI"
+				{
+					$File	"template\vgui\nb_button.cpp"
+					$File	"template\vgui\nb_header_footer.cpp"
+					$File	"template\vgui\nb_horiz_list.cpp"
+					$File	"template\vgui\nb_select_level_entry.cpp"
+					$File	"template\vgui\nb_select_level_panel.cpp"
+					$File	"template\vgui\sdk_hud_ammo.cpp"
+					$File	"template\vgui\sdk_hud_chat.cpp"
+					$File	"template\vgui\sdk_hud_health.cpp"
+					$File	"template\vgui\sdk_hud_weaponselection.cpp"
+					$File	"template\vgui\sdk_loading_panel.cpp"
+					$File	"template\vgui\sdk_logo_panel.cpp"
+					$File	"template\vgui\sdk_vgui_music_importer.cpp"
+					$File	"template\vgui_rootpanel_sdk.cpp"
+				}
+
+				$Folder	"GameUI"
+				{
+					$File	"template\gameui\backgroundmenubutton.cpp" \
+		    				"template\gameui\basesavegamedialog.cpp" \
+		    				"template\gameui\bitmapimagepanel.cpp" \
+		    				"template\gameui\commandcheckbutton.cpp" \
+		    				"template\gameui\contentcontroldialog.cpp" \
+		    				"template\gameui\createmultiplayergamebotpage.cpp" \
+		    				"template\gameui\createmultiplayergamedialog.cpp" \
+		    				"template\gameui\createmultiplayergamegameplaypage.cpp" \
+		    				"template\gameui\createmultiplayergameserverpage.cpp" \
+		    				"template\gameui\customtabexplanationdialog.cpp" \
+		    				"template\gameui\cvarnegatecheckbutton.cpp" \
+		    				"template\gameui\cvarslider.cpp" \
+		    				"template\gameui\cvartextentry.cpp" \
+		    				"template\gameui\cvartogglecheckbutton.cpp" \
+		    				"template\gameui\gameconsole.cpp" \
+		    				"template\gameui\gameconsoledialog.cpp" \
+		    				"template\gameui\gameui_interface.cpp" \
+		    				"template\gameui\gameui_util.cpp" \
+		    				"template\gameui\keytogglecheckbutton.cpp" \
+		    				"template\gameui\labeledcommandcombobox.cpp" \
+		    				"template\gameui\loadingdialog.cpp" \
+		    				"template\gameui\loadingtippanel.cpp" \
+		    				"template\gameui\logofile.cpp" \
+		    				"template\gameui\modinfo.cpp" \
+		    				"template\gameui\mousemessageforwardingpanel.cpp" \
+		    				"template\gameui\multiplayeradvanceddialog.cpp" \
+		    				"template\gameui\optionsdialog.cpp" \
+		    				"template\gameui\optionssubaudio.cpp" \
+		    				"template\gameui\optionssubdifficulty.cpp" \
+		    				"template\gameui\optionssubgame.cpp" \
+		    				"template\gameui\optionssubkeyboard.cpp" \
+		    				"template\gameui\optionssubmouse.cpp" \
+		    				"template\gameui\optionssubmultiplayer.cpp" \
+		    				"template\gameui\optionssubportal.cpp" \
+		    				"template\gameui\optionssubvideo.cpp" \
+		    				"template\gameui\optionssubvoice.cpp" \
+		    				"template\gameui\panellistpanel.cpp" \
+		    				"template\gameui\playerlistdialog.cpp" \
+		    				"template\gameui\rungameengine.cpp" \
+		    				"template\gameui\scriptobject.cpp" \
+		    				"template\gameui\template\basemodframe.cpp" \
+		    				"template\gameui\template\basemodpanel.cpp" \
+		    				"template\gameui\template\gamemodes.cpp" \
+		    				"template\gameui\template\uiavatarimage.cpp" \
+		    				"template\gameui\template\uigamedata.cpp" \
+		    				"template\gameui\template\uigamedata_invite.cpp" \
+		    				"template\gameui\template\uigamedata_storage.cpp" \
+		    				"template\gameui\template\vachievements.cpp" \
+		    				"template\gameui\template\vaddonassociation.cpp" \
+		    				"template\gameui\template\vaddons.cpp" \
+		    				"template\gameui\template\vattractscreen.cpp" \
+		    				"template\gameui\template\vaudio.cpp" \
+		    				"template\gameui\template\vaudiovideo.cpp" \
+		    				"template\gameui\template\vcloud.cpp" \
+		    				"template\gameui\template\vcontrolleroptions.cpp" \
+		    				"template\gameui\template\vcontrolleroptionsbuttons.cpp" \
+		    				"template\gameui\template\vcontrolleroptionssticks.cpp" \
+		    				"template\gameui\template\vcustomcampaigns.cpp" \
+		    				"template\gameui\template\vdownloadcampaign.cpp" \
+		    				"template\gameui\template\vdownloads.cpp" \
+		    				"template\gameui\template\vdropdownmenu.cpp" \
+		    				"template\gameui\template\vflyoutmenu.cpp" \
+		    				"template\gameui\template\vfooterpanel.cpp" \
+		    				"template\gameui\template\vfoundgames.cpp" \
+		    				"template\gameui\template\vfoundgroupgames.cpp" \
+		    				"template\gameui\template\vfoundpublicgames.cpp" \
+		    				"template\gameui\template\vgamelobby.cpp" \
+		    				"template\gameui\template\vgamelobbychat.cpp" \
+		    				"template\gameui\template\vgameoptions.cpp" \
+		    				"template\gameui\template\vgamesettings.cpp" \
+		    				"template\gameui\template\vgenericconfirmation.cpp" \
+		    				"template\gameui\template\vgenericpanellist.cpp" \
+		    				"template\gameui\template\vgenericwaitscreen.cpp" \
+		    				"template\gameui\template\vgetlegacydata.cpp" \
+		    				"template\gameui\template\vhybridbutton.cpp" \
+		    				"template\gameui\template\vingamechapterselect.cpp" \
+		    				"template\gameui\template\vingamedifficultyselect.cpp" \
+		    				"template\gameui\template\vingamekickplayerlist.cpp" \
+		    				"template\gameui\template\vingamemainmenu.cpp" \
+		    				"template\gameui\template\vjukebox.cpp" \
+		    				"template\gameui\template\vkeyboard.cpp" \
+		    				"template\gameui\template\vkeyboardmouse.cpp" \
+		    				"template\gameui\template\vleaderboard.cpp" \
+		    				"template\gameui\template\vloadingprogress.cpp" \
+		    				"template\gameui\template\vmainmenu.cpp" \
+		    				"template\gameui\template\vmenubackground.cpp" \
+		    				"template\gameui\template\vmultiplayer.cpp" \
+		    				"template\gameui\template\voptions.cpp" \
+		    				"template\gameui\template\vpasswordentry.cpp" \
+		    				"template\gameui\template\vquickjoin.cpp" \
+		    				"template\gameui\template\vquickjoingroups.cpp" \
+		    				"template\gameui\template\vsignindialog.cpp" \
+		    				"template\gameui\template\vslidercontrol.cpp" \
+		    				"template\gameui\template\vspinnercontrol.cpp" \
+		    				"template\gameui\template\vsteamcloudconfirmation.cpp" \
+		    				"template\gameui\template\vtransitionscreen.cpp" \
+		    				"template\gameui\template\vvideo.cpp" \
+		    				"template\gameui\template\vvoteoptions.cpp" \
+		    				"template\gameui\sys_utils.cpp" \
+		    				"template\gameui\textentrybox.cpp" \
+		    				"template\gameui\urlbutton.cpp" \
+		    				"template\gameui\vcontrolslistpanel.cpp" \
+		    				"template\gameui\vguisystemmoduleloader.cpp"
+					{
+						$Configuration
+						{
+							$Compiler
+							{
+								$Create/UsePrecompiledHeader	"Not Using Precompiled Headers"
+							}
+						}
+					}
+				}
+			}
+	}
+
+	$Folder	"Link Libraries"
+	{
+		$Lib "$LIBCOMMON\jpeglib"
+		$Lib "$LIBPUBLIC\vpklib"
+	}
+}

@@ -1,0 +1,315 @@
+//////////////////////////Rydberg_Lab//////////////////////////////
+
+"interior1.Base"
+{
+
+	"playlooping"
+	{
+		"volume"	"1.0"
+		"pitch"		"95, 105"
+		"soundlevel"	"0"
+		"wave"		"scapes/2D/interior1/base.wav"
+	}
+}
+
+"interior1.Start"
+{
+	"dsp"     "2"
+	
+	
+	"playsoundscape"
+	{
+		"name"	"interior1.Base"
+		"volume" "0.8"
+	}
+}
+
+
+"interior1.CorridorSmall"
+{
+	"dsp"     "2"
+	
+	
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"pitch"		"95,105"
+		"soundlevel"	"0"
+		"wave"		"scapes/2D/interior1/base_alt.wav"
+	}
+}
+
+"interior1.CorridorBig"
+{
+	"dsp"     "3"
+	
+	"playsoundscape"
+	{
+		"name"	"interior1.Base"
+		"volume" "0.6"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"pitch"		"95,105"
+		"soundlevel"	"0"
+		"wave"		"scapes/2D/interior1/base_alt.wav"
+	}
+}
+
+"interior1.RoomMed"
+{
+	"dsp"     "3"
+	
+	"playsoundscape"
+	{
+		"name"	"interior1.Base"
+		"volume" "0.6"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"pitch"		"95,105"
+		"soundlevel"	"0"
+		"wave"		"scapes/2D/interior1/room_close.wav"
+	}
+}
+
+"interior1.RoomBig"
+{
+	"dsp"     "4"
+	
+	"playsoundscape"
+	{
+		"name"	"interior1.Base"
+		"volume" "0.8"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"pitch"		"95,105"
+		"soundlevel"	"0"
+		"wave"		"scapes/2D/interior1/room_wide.wav"
+	}
+}
+
+"interior1.ObjMed"
+{
+	"dsp"     "3"
+	
+	"playsoundscape"
+	{
+		"name"	"interior1.Base"
+		"volume" "0.6"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"pitch"		"95,105"
+		"soundlevel"	"0"
+		"wave"		"scapes/2D/interior1/room_large_wide.wav"
+	}
+}
+
+"interior1.ObjBig"
+{
+	"dsp"     "4"
+	
+	"playsoundscape"
+	{
+		"name"	"interior1.Base"
+		"volume" "0.8"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"pitch"		"95,105"
+		"soundlevel"	"0"
+		"wave"		"scapes/2D/interior1/room_large_close.wav"
+	}
+}
+
+///////////////////////////////////////////////////////////////
+
+
+
+
+
+/////////////////////////////////////////////////////////////
+
+
+"interior2.Base"
+{
+
+	//"fadetime" ".5"
+	"playlooping"
+	{
+		"volume"	"1.0"
+		"soundlevel"	"0"
+		"pitch"		"95, 105"
+		"wave"		"scapes/2D/interior2/base.wav"
+	}
+}
+
+"interior2.SmallA"
+{
+	"dsp"	"2"
+	//"fadetime" ".5"
+	
+	"playsoundscape"
+	{
+	"name" "interior2.Base"
+	"volume" ".5"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"soundlevel"	"0"
+		"pitch"		"100"
+		"wave"		"scapes/2D/interior2/interiorA_spread.wav"
+	}
+}
+
+"interior2.SmallB"
+{
+	"dsp"	"2"
+
+	"playlooping"
+	{
+		"volume"	"1.0"
+		"soundlevel"	"0"
+		"pitch"		"100"
+		"wave"		"scapes/2D/interior2/base_spread.wav"
+	}
+}
+
+"interior2.MedA"
+{
+	"dsp"	"3"
+
+
+	"playsoundscape"
+	{
+	"name" "interior2.Base"
+	"volume" "0.8"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"soundlevel"	"0"
+		"pitch"		"100"
+		"wave"		"scapes/2D/interior2/interiorA.wav"
+	}
+}
+
+"interior2.MedB"
+{
+	"dsp"	"3"
+	//"fadetime" "1"
+
+	"playsoundscape"
+	{
+	"name" "interior2.Base"
+	"volume" "0.8"
+	}
+}
+
+"interior2.LargeA"
+{
+	"dsp"	"4"
+
+	"playsoundscape"
+	{
+	"name" "interior2.Base"
+	"volume" "1"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.9"
+		"soundlevel"	"0"
+		"pitch"		"90"
+		"wave"		"scapes/2D/interior2/interiorC.wav"
+	}
+}
+
+"interior2.Ambiguous"
+{
+	"dsp"	"4"
+	//"fadetime" "1"
+
+	
+	"playsoundscape"
+	{
+	"name" "interior2.Base"
+	"volume" "0.8"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"soundlevel"	"0"
+		"pitch"		"100"
+		"wave"		"scapes/2D/interior2/interiorD.wav"
+	}
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"100"
+		"wave"		"scapes/3D/water_drip_loop.wav"
+		"origin"	"-6563.937500, -3725.843750, 887.781250;"
+		"soundlevel" 	"SNDLVL_85dB"
+	}
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"105"
+		"wave"		"scapes/3D/water_drip_loop.wav"
+		"origin"	"-7381.687500, -3246.843750, 889.968750;"
+		"soundlevel" 	"SNDLVL_85dB"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"100"
+		"wave"		"scapes/3D/pipe_burst_loop.wav"
+		"origin"	"-6302.031250, -5218.000000, 1006.937500;"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+}
+
+
+
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+
+"interior2.DistantCritters"
+{
+	"playrandom"
+	{
+		"time"		"9,18"
+		"volume"	"0.33, 0.66"
+		"soundlevel"	"0"
+		"pitch"		"90,110"
+		"position" "random"
+		"rndwave"
+		{
+			"wave"	"scapes/2D/interior2/vox_wet01.wav"
+			"wave"	"scapes/2D/interior2/vox_wet02.wav"
+			"wave"	"scapes/2D/interior2/vox_wet03.wav"
+		}
+	}
+}
+
+
+//////////////////////////////////////////////////////////	

@@ -1,0 +1,226 @@
+//////////////////////////Sewers//////////////////////////////
+
+
+
+
+"util_sewer.ambient"
+{
+
+	
+	"playrandom"
+	{
+		"time"		"3,15"
+		"volume"	".85,1"
+		"pitch"		"95,105"
+		"position"	"random"
+
+		"rndwave"
+		{
+			"wave"	"scapes/2D/random_amb/ASW_sewer_rand01.wav"
+			"wave"	"scapes/2D/random_amb/ASW_sewer_rand02.wav"
+			"wave"	"scapes/2D/random_amb/ASW_sewer_rand03.wav"
+			"wave"	"scapes/2D/random_amb/ASW_sewer_rand04.wav"
+			"wave"	"scapes/2D/random_amb/ASW_sewer_rand05.wav"
+			"wave"	"scapes/2D/random_amb/ASW_sewer_rand06.wav"
+			"wave"	"scapes/2D/random_amb/ASW_sewer_rand07.wav"
+			"wave"	"scapes/2D/random_amb/ASW_sewer_rand08.wav"
+			"wave"	"scapes/2D/random_amb/ASW_sewer_rand09.wav"
+			"wave"	"scapes/2D/random_amb/ASW_sewer_rand10.wav"
+			"wave"	"scapes/2D/random_amb/ASW_sewer_rand11.wav"
+			"wave"	"scapes/2D/random_amb/ASW_sewer_rand12.wav"
+			"wave"	"scapes/2D/random_amb/ASW_sewer_rand13.wav"
+		}
+
+	}
+}
+
+
+
+
+
+"Sewers.conduit"
+//Corridor sound for inside the sewer conduit
+{
+	"dsp"	"7"
+
+
+	"playlooping"
+	{
+		"volume"	".98"
+		"pitch"		"100"
+		"wave"		"scapes/2D/interior1/ASW_sewer_amb01.wav"
+		
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_lo.end"
+		"volume" "1"
+	}
+
+	
+
+	"playsoundscape"
+	{
+		"name" "util_sewer.ambient"
+		"volume" "1"
+	}
+
+}
+
+"Sewers.open"
+// sound for open sewer area
+{
+	"dsp"	"7"
+
+
+	"playlooping"
+	{
+		"volume"	".93"
+		"pitch"		"100"
+		"wave"		"scapes/2D/interior1/GeneratorRoomLarge_Amb.wav"
+	}
+
+
+	"playlooping"
+	{
+		"volume"	".75"
+		"pitch"		"100"
+		"wave"		"scapes/2D/interior1/ASW_sewer_amb01.wav"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_metal.rattles"
+		"volume" "1"
+	}
+
+	
+
+	"playsoundscape"
+	{
+		"name" "util_sewer.ambient"
+		"volume" "1"
+	}
+
+	"playlooping"
+	{
+		"volume"	".97"
+		"pitch"		"100"
+		"wave"		"scapes/3D/pipes_active_loop.wav"
+		"origin"	"100.000000, -2878.843750, -598.781250;"
+		"soundlevel" 	"SNDLVL_85dB"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.4"
+		"pitch"		"85"
+		"wave"		"scapes/3D/large_fan_loop.wav"
+		"origin"	"1259.437500, -3076.156250, -504.000000;"
+		"soundlevel" 	"SNDLVL_90dB"
+	}
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"100"
+		"wave"		"scapes/3D/water_drips_water.wav"
+		"origin"	"1312.281250, -2815.937500, -653.406250;"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"110"
+		"wave"		"scapes/3D/water_drips_water.wav"
+		"origin"	"-1079.937500, -3084.125000, -647.500000;"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+}
+
+"Sewers.open2"
+// sound for 2nd open sewer area
+{
+	"dsp"	"7"
+
+
+	"playlooping"
+	{
+		"volume"	".80"
+		"pitch"		"100"
+		"wave"		"scapes/2D/interior1/GeneratorRoomLarge_Amb.wav"
+	}
+
+
+	"playlooping"
+	{
+		"volume"	".98"
+		"pitch"		"100"
+		"wave"		"scapes/2D/interior1/ASW_sewer_amb02.wav"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_metal.rattles"
+		"volume" "1"
+	}
+
+	
+
+	"playsoundscape"
+	{
+		"name" "util_sewer.ambient"
+		"volume" "1"
+	}
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"100"
+		"wave"		"scapes/3D/water_drips_water.wav"
+		"origin"	"365.437500, -1847.875000, -648.687500;"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+
+	"playlooping"
+	{
+		"volume"	".7"
+		"pitch"		"130"
+		"wave"		"scapes/3D/water_drips_water.wav"
+		"origin"	" 641.437500, -171.562500, -632.125000;"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+
+
+}
+
+"Sewers.platforms"
+// sound for 2nd platform sewer area
+{
+	"dsp"	"7"
+
+	
+	"playsoundscape"
+	{
+		"name" "interior2.Pits"
+		"volume" "1"
+	}
+
+	
+
+	"playsoundscape"
+	{
+		"name" "util_sewer.ambient"
+		"volume" "1"
+	}
+
+	"playlooping"
+	{
+		"volume"	".86"
+		"pitch"		"100"
+		"wave"		"scapes/2D/interior1/ASW_sewer_amb01.wav"
+	}
+}
+

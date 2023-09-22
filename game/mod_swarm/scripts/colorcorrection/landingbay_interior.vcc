@@ -1,0 +1,35 @@
+<!-- dmx encoding keyvalues2 1 format dmx 1 -->
+"DmeColorCorrectionOperatorList"
+{
+	"id" "elementid" "1340d074-2c51-476b-adc3-63a74c3866e6"
+	"operators" "element_array" 
+	[
+		"CDmeColorCorrectionColorBalanceOp"
+		{
+			"id" "elementid" "d22bbd02-37aa-49de-95bb-0e6c01b96283"
+			"blendFactor" "float" "1"
+			"cyanRedBalance" "float_array" 
+			[
+				"2",
+				"18",
+				"-2"
+			]
+			"enabled" "bool" "1"
+			"magentaGreenBalance" "float_array" 
+			[
+				"0",
+				"0",
+				"0"
+			]
+			"name" "string" "Balance"
+			"preserveLuminosity" "bool" "1"
+			"yellowBlueBalance" "float_array" 
+			[
+				"15",
+				"-7",
+				"-19"
+			]
+		}
+	]
+}
+

@@ -1,0 +1,408 @@
+//////////////////////////Industrial//////////////////////////////
+
+"Industrial.Ambience1"
+//Various undefinable distant machine sounds on top of a low pulsating hum
+{
+	"dsp"	"7"
+
+
+	"playlooping"
+	{
+		"volume"	"0.75"
+		"pitch"		"100"
+		"wave"		"swarm/swarmambient/industrialambience1.wav"
+	}
+
+
+
+	"playrandom"
+	{
+		"time"		"3,18"
+		"volume"	"0.25,0.7"
+		"pitch"		"80,100"
+		"soundlevel"	"0"
+		"rndwave"
+		{
+			
+			"wave"	"swarm/swarmambient/machine1.wav"
+			"wave"	"swarm/swarmambient/strangesounds8.wav"
+			"wave"	"swarm/swarmambient/machine3.wav"
+			"wave"	"swarm/swarmambient/strangesounds12.wav"
+			
+			
+		}
+	}
+}
+
+
+"Industrial.Ambience2"
+//Similar to Industrial.Ambience1
+{
+	"dsp"	"7"
+
+
+	"playlooping"
+	{
+		"volume"	"0.65"
+		"pitch"		"100"
+		"wave"		"swarm/swarmambient/industrialambience1.wav"
+	}
+
+
+
+	"playrandom"
+	{
+		"time"		"3,18"
+		"volume"	"0.25,0.8"
+		"pitch"		"80,100"
+		"soundlevel"	"0"
+		"rndwave"
+		{
+			
+			"wave"	"swarm/swarmambient/machinemoan.wav"
+			"wave"	"swarm/swarmambient/strangesounds1.wav"
+			"wave"	"swarm/swarmambient/steamrelease.wav"
+		
+			
+			
+		}
+	}
+}
+
+
+"Industrial.Ambience3"
+//Distant muffled metal sound mixed with a low horn-like sound on top of a mid hum
+{
+	"dsp"	"7"
+
+
+	"playlooping"
+	{
+		"volume"	"0.65"
+		"pitch"		"100"
+		"wave"		"swarm/swarmambient/industrialambience3.wav"
+	}
+
+
+
+	"playrandom"
+	{
+		"time"		"3,15"
+		"volume"	"0.25,0.8"
+		"pitch"		"100,100"
+		"soundlevel"	"0"
+		"rndwave"
+		{
+			
+			"wave"	"swarm/swarmambient/strangesounds13.wav"
+			"wave"	"swarm/swarmambient/strangesounds13b.wav"
+			
+		
+			
+			
+		}
+	}
+}
+
+
+"Industrial.Ambience4"
+//Distant undefinable "growling" machines on top of a huge steam pumping sound - almost organic-like 
+{
+	"dsp"	"7"
+
+
+	"playlooping"
+	{
+		"volume"	"0.5"
+		"pitch"		"70"
+		"wave"		"swarm/swarmambient/industrialambience4.wav"
+	}
+
+
+
+	"playrandom"
+	{
+		"time"		"3,15"
+		"volume"	"0.25,0.8"
+		"pitch"		"100,100"
+		"soundlevel"	"0"
+		"rndwave"
+		{
+			
+			"wave"	"swarm/swarmambient/strangesounds2.wav"
+			"wave"	"swarm/swarmambient/strangesounds10.wav"
+			"wave"	"swarm/swarmambient/strangesounds14.wav"
+			
+			
+			
+		
+			
+			
+		}
+	}
+}
+
+
+"Industrial.Ambience5"
+//Big machine switching on/off in the distant mixed with "working metal" sounds on top of a low hum
+{
+	"dsp"	"7"
+
+
+	"playlooping"
+	{
+		"volume"	"0.5"
+		"pitch"		"130"
+		"wave"		"swarm/swarmambient/industrialambience5.wav"
+	}
+
+
+
+	"playrandom"
+	{
+		"time"		"3,20"
+		"volume"	"0.35,0.9"
+		"pitch"		"70,100"
+		"soundlevel"	"0"
+		"rndwave"
+		{
+			
+			"wave"	"ambient/materials/metal_stress5.wav"
+			"wave"	"ambient/materials/metal5.wav"
+			"wave"	"ambient/materials/shipgroan1.wav"
+			
+			
+			
+		
+			
+			
+		}
+	}
+}
+
+
+"Industrial.Ambience6"
+//Various crystal-like sounds with different pitch mixed with a spooky low moan/growl - almost cathedral-like mood
+{
+	"dsp"	"7"
+
+
+	"playlooping"
+	{
+		"volume"	"0.5"
+		"pitch"		"100"
+		"wave"		"swarm/swarmambient/industrialambience5.wav"
+	}
+
+
+
+	"playrandom"
+	{
+		"time"		"2,16"
+		"volume"	"0.4,0.7"
+		"pitch"		"10,100"
+		"soundlevel"	"0"
+		"rndwave"
+		{
+			
+			
+			"wave"	"ambient/materials/metal4.wav"
+			"wave"	"swarm/swarmambient/strangesounds12.wav"
+			
+			
+			
+		
+			
+			
+		}
+	}
+}
+
+
+"Industrial.Ambience7"
+//Working metal mixed with some weird sniffing sound on top of a low hum - sounds a bit like in a submarine
+{
+	"dsp"	"7"
+
+
+	"playlooping"
+	{
+		"volume"	"0.5"
+		"pitch"		"170"
+		"wave"		"swarm/swarmambient/industrialambience1.wav"
+	}
+
+
+
+	"playrandom"
+	{
+		"time"		"2,16"
+		"volume"	"0.4,0.7"
+		"pitch"		"40,100"
+		"soundlevel"	"0"
+		"rndwave"
+		{
+			
+			
+			"wave"	"ambient/materials/creaking.wav"
+			"wave"	"vehicles/crane/crane_creak3.wav"
+			"wave"	"swarm/swarmambient/strangesounds15.wav"
+			"wave"	"swarm/swarmambient/strangesounds16.wav"
+			
+			
+			
+		
+			
+			
+		}
+	}
+}
+
+
+"Industrial.Ambience8"
+//Working metal mixed on top of a low pumping machine 
+{
+	"dsp"	"7"
+
+
+	"playlooping"
+	{
+		"volume"	"0.55"
+		"pitch"		"100"
+		"wave"		"swarm/swarmambient/indoorambience4.wav"
+	}
+
+
+
+	"playrandom"
+	{
+		"time"		"5,16"
+		"volume"	"0.15,0.3"
+		"pitch"		"80,100"
+		"soundlevel"	"0"
+		"rndwave"
+		{
+			
+			
+			"wave"	"swarm/swarmambient/metalcreaking.wav"
+			"wave"	"swarm/swarmambient/metalcreaking2.wav"
+			"wave"	"swarm/swarmambient/metalcreaking3.wav"
+			
+			
+			
+		
+			
+			
+		}
+	}
+}
+
+
+
+
+"Industrial.Ambience9"
+//Loud open hall with machine noises mixed with muffled running water
+{
+	"dsp"	"7"
+
+
+	"playlooping"
+	{
+		"volume"	"0.6"
+		"pitch"		"100"
+		"wave"		"swarm/swarmambient/industrialambience6.wav"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.4"
+		"pitch"		"140"
+		"wave"		"ambient/water/underwater.wav"
+	}
+
+
+
+	
+}
+
+
+
+"Industrial.Ambience10"
+//Some machines, a low hum and toxic slime ambient loop
+{
+	"dsp"	"7"
+
+
+	"playlooping"
+	{
+		"volume"	"1.0"
+		"pitch"		"100"
+		"wave"		"swarm/swarmambient/industrialambience1.wav"
+	}
+
+	"playlooping"
+	{
+		"volume"	"1.0"
+		"pitch"		"40"
+		"wave"		"ambient/levels/canals/toxic_slime_loop1.wav"
+	}
+
+
+
+	"playrandom"
+	{
+		"time"		"3,18"
+		"volume"	"0.25,0.7"
+		"pitch"		"80,100"
+		"soundlevel"	"0"
+		"rndwave"
+		{
+			
+			"wave"	"swarm/swarmambient/machine1.wav"
+			"wave"	"swarm/swarmambient/strangesounds8.wav"
+			
+			
+			
+		}
+	}
+}
+
+
+"Industrial.Ambience11"
+//Various undefinable distant machine sounds, mixed with human sounds (distant talking, screaming, fighting)
+{
+	"dsp"	"7"
+
+
+	"playlooping"
+	{
+		"volume"	"0.75"
+		"pitch"		"100"
+		"wave"		"swarm/swarmambient/industrialambience1.wav"
+	}
+
+
+
+	"playrandom"
+	{
+		"time"		"3,18"
+		"volume"	"0.25,0.7"
+		"pitch"		"80,100"
+		"soundlevel"	"0"
+		"rndwave"
+		{
+			
+			"wave"	"swarm/swarmambient/machine1.wav"
+			"wave"	"swarm/swarmambient/strangesounds20.wav"
+			"wave"	"swarm/swarmambient/machine3.wav"
+			"wave"	"swarm/swarmambient/strangesounds21.wav"
+			"wave"	"swarm/swarmambient/strangesounds23.wav"
+			
+			
+		}
+	}
+}
+
+
+
+

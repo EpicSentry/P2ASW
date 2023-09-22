@@ -1,0 +1,2032 @@
+"vegas.FirstBloodStart0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_takingbetsonfirstblood.wav"
+}
+
+"vegas.FirstBloodWin0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_hahafortunefavoursvegastoday.wav"
+}
+
+"vegas.FirstBloodWin1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_ladyluckisonmyside.wav"
+}
+
+"vegas.SynUpSpotted0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_synupcolaanyonehaveanycreds.wav"
+}
+
+"vegas.MedicComplainReply0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_iwasntexactlyplanningonit.wav"
+}
+
+"vegas.TequilaReplySarge0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_aahman.wav"
+}
+
+"vegas.TequilaReplyJaeger0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_screwthatimstickingwithtequila.wav"
+}
+
+"vegas.TequilaReplyWildcat0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_hellyeah.wav"
+}
+
+"vegas.TequilaReplyWolfe0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_yougotitwolfe.wav"
+}
+
+"vegas.TequilaReplyFaith0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_whocaresnoonelivesforever.wav"
+}
+
+"vegas.TequilaReplyBastille0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_okbutyouremissingoutamigo.wav"
+}
+
+"vegas.TequilaStart0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_icoulddowithsometequilarightaboutnow.wav"
+}
+
+"vegas.TequilaStart1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_whosupforsometequila.wav"
+}
+
+"vegas.InjuredSelection0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_allbetsareoff2.wav"
+}
+
+"vegas.InjuredSelection1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_dontworry.wav"
+}
+
+"vegas.InjuredSelection2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_istillgotanaceupmysleeve.wav"
+}
+
+"vegas.InjuredSelection3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_justmyluck.wav"
+}
+
+"vegas.InjuredSelection4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_what2.wav"
+}
+
+"vegas.SeriousInjuryReply0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_ahmanishouldhavestayedinmexicantown.wav"
+}
+
+"vegas.StillBreathingReply0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_whydoialwaysgetthecrazyones.wav"
+}
+
+"vegas.Use0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_igotya.wav"
+}
+
+"vegas.Use1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_imonit.wav"
+}
+
+"vegas.Use2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_onit.wav"
+}
+
+"vegas.Use3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_si1.wav"
+}
+
+"vegas.Use4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_si2.wav"
+}
+
+"vegas.Use5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_yessir.wav"
+}
+
+"vegas.Idle0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_4to1ehiliketheseodds.wav"
+}
+
+"vegas.Idle1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_alrightwhosupforagameofblackjack.wav"
+}
+
+"vegas.Idle2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_anyongotadeckocards.wav"
+}
+
+"vegas.Idle3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_cantwaittogetoffthisrockandbacktothetables.wav"
+}
+
+"vegas.Idle4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_icouldbewatchingtheracesrightnow.wav"
+}
+
+"vegas.Idle5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_ifiwereabettingmanidsaytheworstisyettocome.wav"
+}
+
+"vegas.Idle6"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_whistle1.wav"
+}
+
+"vegas.Idle7"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_whistle2.wav"
+}
+
+"vegas.Idle8"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_whosupforsometequila.wav"
+}
+
+"vegas.Idle9"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_youguysliketogambleweshouldplaysometime.wav"
+}
+
+"vegas.FF0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_checkyourtarget.wav"
+}
+
+"vegas.FF1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_mexican-cussing.wav"
+}
+
+"vegas.FF2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_watchit.wav"
+}
+
+"vegas.FiringAtAlien0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_contact.wav"
+}
+
+"vegas.FiringAtAlien1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_die.wav"
+}
+
+"vegas.FiringAtAlien2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_eatthis1.wav"
+}
+
+"vegas.FiringAtAlien3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_incoming.wav"
+}
+
+"vegas.FollowMe0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_gogogo2.wav"
+}
+
+"vegas.FollowMe1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_gogogo3.wav"
+}
+
+"vegas.FollowMe2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_letsmove3.wav"
+}
+
+"vegas.FollowMe3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_timetorollthedicecompadre-mexianstuff.wav"
+}
+
+"vegas.HoldPosition0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_holdposition.wav"
+}
+
+"vegas.HoldPosition1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_securethisarea.wav"
+}
+
+"vegas.HoldPosition2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_stayhere.wav"
+}
+
+"vegas.NeedAmmo0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_ineedsomeammo.wav"
+}
+
+"vegas.NeedAmmo1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_needammo2.wav"
+}
+
+"vegas.NoAmmo0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_imoutofammo.wav"
+}
+
+"vegas.NoAmmo1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_noammo.wav"
+}
+
+"vegas.Medic0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_medic.wav"
+}
+
+"vegas.Medic1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_needamedic.wav"
+}
+
+"vegas.Reloading0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_lockandload.wav"
+}
+
+"vegas.Reloading1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_mexican-reload.wav"
+}
+
+"vegas.Reloading2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_reload.wav"
+}
+
+"vegas.Reloading3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_reloadcoverme.wav"
+}
+
+"vegas.Reloading4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_reloading.wav"
+}
+
+"vegas.SentryInPlace0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_letshopethisllholdthemoff.wav"
+}
+
+"vegas.SentryInPlace1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_sentryassembled.wav"
+}
+
+"vegas.SentryInPlace2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_sentryinplace.wav"
+}
+
+"vegas.SentryInPlace3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_sentryinplace2.wav"
+}
+
+"vegas.SentryInPlace4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_sentryonline.wav"
+}
+
+"vegas.SentryInPlace5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_sentryonline3.wav"
+}
+
+"vegas.Ammo0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_ammo4.wav"
+}
+
+"vegas.Medkit0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_medkit2.wav"
+}
+
+"vegas.Thanks0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_gracias.wav"
+}
+
+"vegas.Thanks1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_muchosgracias.wav"
+}
+
+"vegas.Thanks2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_thanks.wav"
+}
+
+"vegas.Question0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_huh.wav"
+}
+
+"vegas.Question1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_que.wav"
+}
+
+"vegas.Question2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_what.wav"
+}
+
+"vegas.Question3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_whatisit.wav"
+}
+
+"vegas.CallSarge0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_heysarge.wav"
+}
+
+"vegas.CallSarge1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_sarge.wav"
+}
+
+"vegas.CallJaeger0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_heyjaeger.wav"
+}
+
+"vegas.CallJaeger1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_jaeger.wav"
+}
+
+"vegas.CallWildcat0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_heywildcat.wav"
+}
+
+"vegas.CallWildcat1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_wildcat.wav"
+}
+
+"vegas.CallWolfe0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_heywolfe.wav"
+}
+
+"vegas.CallWolfe1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_wolfe.wav"
+}
+
+"vegas.CallFaith0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_faith.wav"
+}
+
+"vegas.CallFaith1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_heyfaith.wav"
+}
+
+"vegas.CallBastille0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_bastille.wav"
+}
+
+"vegas.CallBastille1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_heybastille.wav"
+}
+
+"vegas.CallCrash0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_crash.wav"
+}
+
+"vegas.CallCrash1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_heycrash.wav"
+}
+
+"vegas.CallFlynn0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_flynn.wav"
+}
+
+"vegas.CallFlynn1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_heyflynn.wav"
+}
+
+"vegas.SuppliesAmmo0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_moreammojustwhatweneed.wav"
+}
+
+"vegas.Supplies0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_hahasupplies2.wav"
+}
+
+"vegas.HoldingPosition0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_coveringarea.wav"
+}
+
+"vegas.HoldingPosition1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_holdingposition.wav"
+}
+
+"vegas.HoldingPosition2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_inposition.wav"
+}
+
+"vegas.HoldingPosition3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_securingarea.wav"
+}
+
+"vegas.HoldingPosition4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_theyllneedanarmytogetpastme.wav"
+}
+
+"vegas.HoldingNorth0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_coveringnorth.wav"
+}
+
+"vegas.HoldingNorth1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_coveringnorthside.wav"
+}
+
+"vegas.HoldingNorth2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_northsidecovered.wav"
+}
+
+"vegas.HoldingNorth3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_northsideinposition.wav"
+}
+
+"vegas.HoldingSouth0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_coveringsouth.wav"
+}
+
+"vegas.HoldingSouth1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_coveringsouthside.wav"
+}
+
+"vegas.HoldingSouth2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_southsideinposition.wav"
+}
+
+"vegas.HoldingEast0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_coveringeast.wav"
+}
+
+"vegas.HoldingEast1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_coveringeastside.wav"
+}
+
+"vegas.HoldingEast2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_eastsideinposition.wav"
+}
+
+"vegas.HoldingWest0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_coveringwest.wav"
+}
+
+"vegas.HoldingWest1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_coveringwestside.wav"
+}
+
+"vegas.HoldingWest2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_westsideinposition.wav"
+}
+
+"vegas.GotPoint0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_illtakepoint.wav"
+}
+
+"vegas.GotPoint1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_vegastakingpoint.wav"
+}
+
+"vegas.GotRear0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_illcovertheback.wav"
+}
+
+"vegas.GotRear1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_ivegotyourback.wav"
+}
+
+"vegas.RequestSealDoor0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_quicksealthedoor.wav"
+}
+
+"vegas.RequestSealDoor1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_sealitupiwannagetoffthisrockalive.wav"
+}
+
+"vegas.RequestSealDoor2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_sealitupwedontwantthosethingsgettinginhere.wav"
+}
+
+"vegas.RequestCutDoor0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_comeonopenit.wav"
+}
+
+"vegas.RequestCutDoor1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_cutitopen.wav"
+}
+
+"vegas.RequestCutDoor2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_getthedooropen.wav"
+}
+
+"vegas.RequestShootDoor0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_blastitopen.wav"
+}
+
+"vegas.RequestShootDoor1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_shootitdown.wav"
+}
+
+"vegas.RequestShootDoor2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_shootitopen.wav"
+}
+
+"vegas.CuttingDoor0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_illhaveitopeninnotime.wav"
+}
+
+"vegas.CuttingDoor1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_rogerthatcuttingdoor.wav"
+}
+
+"vegas.CuttingDoor2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_vegascuttingdoor.wav"
+}
+
+"vegas.SealingDoor0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_sealingdoorniceandtight.wav"
+}
+
+"vegas.SealingDoor1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_securingdoor.wav"
+}
+
+"vegas.SealingDoor2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_vegassealingdoor.wav"
+}
+
+"vegas.Biomass0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_aliengoothehighlightofanyinfestedcolonyburnit.wav"
+}
+
+"vegas.Biomass1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_biomassmanihatethisshitburnit.wav"
+}
+
+"vegas.Biomass2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_biomassmanihatethisstuffwheresthedamnflamer.wav"
+}
+
+"vegas.Biomass3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_bleaghswarmbiomassanyonegotaflamer.wav"
+}
+
+"vegas.Biomass4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_hmmblarghswarmbiomassanyonegotaflamer.wav"
+}
+
+"vegas.Biomass5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_swarmbiomassanyonegotaflamer2.wav"
+}
+
+"vegas.Biomass6"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_urghmoregooletssetitonfire.wav"
+}
+
+"vegas.Biomass7"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_urghswarmbiomasswherestheflamer.wav"
+}
+
+"vegas.TimeToLeave0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_objectivescompleteletshittheslots.wav"
+}
+
+"vegas.TimeToLeave1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_sweettequilahereicome.wav"
+}
+
+"vegas.WatchOut0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_lookout.wav"
+}
+
+"vegas.WatchOut1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_there.wav"
+}
+
+"vegas.WatchOut2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_watchout.wav"
+}
+
+
+
+"vegas.Shieldbug1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_holyshit.wav"
+}
+
+"vegas.Shieldbug2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_madrededios.wav"
+}
+
+"vegas.Shieldbug3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_shitashieldbug.wav"
+}
+
+"vegas.ShieldbugHint0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_theyrevulnerablefrombehind.wav"
+}
+
+"vegas.ShieldbugHint1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_usegrenades.wav"
+}
+
+"vegas.ShieldbugHint2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_whosgonnagetbehindit.wav"
+}
+
+"vegas.Parasite0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_lookoutparasite.wav"
+}
+
+
+"vegas.Parasite2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_site2.wav"
+}
+
+"vegas.Parasite3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_site3.wav"
+}
+
+"vegas.BeenInfested0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_aahgetitoffme.wav"
+}
+
+"vegas.BeenInfested1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_aahitsonme.wav"
+}
+
+"vegas.BeenInfested2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_getitoffgetitoff.wav"
+}
+
+
+"vegas.BeenInfested4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_helpmegetthisthingoff.wav"
+}
+
+"vegas.SwarmEggs0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_carefulleggs.wav"
+}
+
+"vegas.SwarmEggs1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_eggs.wav"
+}
+
+"vegas.SwarmEggs2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_watchoutswarmeggs.wav"
+}
+
+"vegas.Grenade0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_clear.wav"
+}
+
+"vegas.Grenade1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_eatthis2.wav"
+}
+
+"vegas.Grenade2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_fireinthehole.wav"
+}
+
+"vegas.Grenade3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_grenade.wav"
+}
+
+"vegas.AlienTooClose0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_getitoff.wav"
+}
+
+"vegas.AlienTooClose1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_hostileonme.wav"
+}
+
+"vegas.AlienTooClose2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_killit.wav"
+}
+
+"vegas.AlienTooClose3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_onme.wav"
+}
+
+"vegas.MadFiring0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_adiosmuchachos.wav"
+}
+
+
+
+"vegas.MadFiring2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_ohyouwannaplayrough.wav"
+}
+
+"vegas.MadFiring3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_youthinkyoucantakeme.wav"
+}
+
+
+"vegas.BreachedDoor0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_hostilesbreachedthedoor.wav"
+}
+
+"vegas.BreachedDoor1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_theybrokeitdown.wav"
+}
+
+"vegas.BreachedDoor2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_theyrethroughthedoor.wav"
+}
+
+"vegas.MarineDown0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_marinedown.wav"
+}
+
+"vegas.MarineDown1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_welostone.wav"
+}
+
+"vegas.SmallPain0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_pain1.wav"
+}
+
+"vegas.SmallPain1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_pain2.wav"
+}
+
+"vegas.SmallPain2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_pain3.wav"
+}
+
+"vegas.LargePain0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_heavypain1.wav"
+}
+
+"vegas.LargePain1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_heavypain2.wav"
+}
+
+"vegas.Dead0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_death1.wav"
+}
+
+"vegas.Dead1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_death2.wav"
+}
+
+"vegas.OnFire0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_aahputmeoutputmeoutaah.wav"
+}
+
+"vegas.OnFire1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_onfire1.wav"
+}
+
+"vegas.StartedHack0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_ahhfinallysomethingworthmytime.wav"
+}
+
+"vegas.StartedHack1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_illbeininnotime2.wav"
+}
+
+"vegas.StartedHack2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_illbeininnotimehaha.wav"
+}
+
+"vegas.StartedHack3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_okletsmakethisbabyplaymygame.wav"
+}
+
+"vegas.StartedHack4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_startinghack.wav"
+}
+
+"vegas.StartedHack5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_startinghackcoverme2.wav"
+}
+
+"vegas.StartedLongHack0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_ahhfinallysomethingworthmytime.wav"
+}
+
+"vegas.StartedLongHack1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_covermethislltakeawhile.wav"
+}
+
+"vegas.StartedLongHack2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_covermethislltakeawhile2.wav"
+}
+
+"vegas.StartedLongHack3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_hmmcomplicatedyougotmybackright.wav"
+}
+
+"vegas.StartedLongHack4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_okletsmakethisbabyplaymygame.wav"
+}
+
+"vegas.StartedLongHack5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_startinghack.wav"
+}
+
+"vegas.StartedLongHack6"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_startinghackcoverme2.wav"
+}
+
+"vegas.StartedLongHack7"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_watchmybackok2.wav"
+}
+
+"vegas.HalfwayHack0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_hackat50percent3.wav"
+}
+
+"vegas.HalfwayHack1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_halfwaythere.wav"
+}
+
+"vegas.HalfwayHack2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_halfwaythrough.wav"
+}
+
+"vegas.FinishedHack0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_hackcompletewhatdidiwin.wav"
+}
+
+"vegas.FinishedHack1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_hahaimin.wav"
+}
+
+"vegas.FinishedHack2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_okwhowantstoreadsomecorporatemail.wav"
+}
+
+"vegas.FinishedHack3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_success.wav"
+}
+
+"vegas.FinishedHack4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_tooeasy.wav"
+}
+
+"vegas.FinishedHackButton0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_hackcompletewhatdidiwin.wav"
+}
+
+"vegas.FinishedHackButton1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_success.wav"
+}
+
+"vegas.FinishedHackButton2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_tooeasy.wav"
+}
+
+"vegas.ScannerMultiple0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_lotsofsignalsallaround.wav"
+}
+
+"vegas.ScannerMultiple1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_lotsofsignalsallaround4.wav"
+}
+
+"vegas.ScannerMultiple2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_multiplesignalsallaround2.wav"
+}
+
+"vegas.ScannerMultiple3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_theyreallaroundus3.wav"
+}
+
+"vegas.ScannerMultiple4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_theyrecomingfromallaround4.wav"
+}
+
+"vegas.ActivateStims0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_activatestims.wav"
+}
+
+"vegas.ActivateStims1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_hitthestims.wav"
+}
+
+"vegas.ActivateStims2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_stimnow.wav"
+}
+
+"vegas.Compliments0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_goodjobamigo.wav"
+}
+
+"vegas.Compliments1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_impressive.wav"
+}
+
+"vegas.Compliments2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_niceoneamigo.wav"
+}
+
+"vegas.Impatience0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_clockistickingamigo.wav"
+}
+
+"vegas.Selection0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_ready.wav"
+}
+
+"vegas.Selection1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_wannaplayalittlegame.wav"
+}
+
+"vegas.Selection2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\vegas\vegas_whatdoyouwant.wav"
+}
+

@@ -1,0 +1,2699 @@
+"wolfe.WolfeBest0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_yougotnochanceitaughtyoueverything.wav"
+}
+
+"wolfe.WolfeBest1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_yougotnochancerememberitaughtyoueverything6.wav"
+}
+
+"wolfe.WolfeBest2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_youknowimyoureherocat.wav"
+}
+
+"wolfe.WolfeBestReply0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_bringiton.wav"
+}
+
+"wolfe.WolfeBestReply1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_bringitonkittycat.wav"
+}
+
+"wolfe.WolfeBestReply2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_nowthatsoundslikeachallenge.wav"
+}
+
+"wolfe.WolfeBestReply3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_ohnowitson.wav"
+}
+
+"wolfe.WolfeBestReply4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_ohohnowitson.wav"
+}
+
+"wolfe.WolfeBestReply5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_ohyeahbringiton.wav"
+}
+
+"wolfe.WolfeBestReply6"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_soundslikeachallenge.wav"
+}
+
+"wolfe.WolfeBestReply7"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_thatsoundslikeachallenge.wav"
+}
+
+"wolfe.WolfeBestReply8"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_wellthatsoundslikeachallenge.wav"
+}
+
+"wolfe.MedicComplainReply0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_isthatatrickquestion.wav"
+}
+
+"wolfe.MedicComplainReply1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_thatsatrickquestion.wav"
+}
+
+"wolfe.TequilaReply0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_hmmandwhiskeyforme.wav"
+}
+
+"wolfe.TequilaReply1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_yeahandwhiskeyforme2.wav"
+}
+
+"wolfe.InjuredSelection0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_inj_1.wav"
+}
+
+"wolfe.InjuredSelection1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_inj_2.wav"
+}
+
+"wolfe.InjuredSelection2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_inj_3.wav"
+}
+
+"wolfe.InjuredSelection3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_itstimetohitemwhereithurtsmostallover.wav"
+}
+
+"wolfe.SeriousInjuryReply0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_nowayyougottabekidding.wav"
+}
+
+
+
+"wolfe.Autogun0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_dancebugsdancerunwhileyoucan.wav"
+}
+
+"wolfe.Autogun1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_eatitupsuckers.wav"
+}
+
+"wolfe.Autogun2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_righthereimrighthere.wav"
+}
+
+"wolfe.AutogunReply0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_killemall.wav"
+}
+
+"wolfe.AutogunReply1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_killemkillemall.wav"
+}
+
+"wolfe.AutogunReply2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_righton.wav"
+}
+
+"wolfe.AutogunReply3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_righton3.wav"
+}
+
+"wolfe.Use0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_hpy_1.wav"
+}
+
+"wolfe.Use1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_okay.wav"
+}
+
+"wolfe.Use2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_use_1.wav"
+}
+
+"wolfe.Use3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_use_2.wav"
+}
+
+"wolfe.Use4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_use_3.wav"
+}
+
+"wolfe.Use5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_use_4.wav"
+}
+
+"wolfe.Use6"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_yeah.wav"
+}
+
+"wolfe.Use7"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_yeah2.wav"
+}
+
+"wolfe.Idle0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_dontgettoocloseigotathingforcollateraldamage4.wav"
+}
+
+"wolfe.Idle1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_idl_1.wav"
+}
+
+"wolfe.Idle2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_idl_2.wav"
+}
+
+"wolfe.Idle3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_idl_3.wav"
+}
+
+"wolfe.Idle4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_rememberyoudonthurtemifyoudonthitem.wav"
+}
+
+"wolfe.Idle5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_theresonlyonewaytosolvethisandithinkimgonnaenjoyit2.wav"
+}
+
+"wolfe.Idle6"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_thisisgettingmorefunbytheminute.wav"
+}
+
+"wolfe.Idle7"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_thisisgettingmorefuneverysecond.wav"
+}
+
+"wolfe.Idle8"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_youdonthurtemifyoudonthitem.wav"
+}
+
+"wolfe.FF0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_ffr_1.wav"
+}
+
+"wolfe.FiringAtAlien0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_fir_1.wav"
+}
+
+"wolfe.FiringAtAlien1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_fir_2.wav"
+}
+
+"wolfe.FiringAtAlien2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_fir_3.wav"
+}
+
+"wolfe.FollowMe0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_fol_1.wav"
+}
+
+"wolfe.FollowMe1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_fol_2.wav"
+}
+
+"wolfe.HoldPosition0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_hol_1.wav"
+}
+
+"wolfe.HoldPosition1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_hol_2.wav"
+}
+
+"wolfe.HoldPosition2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_hol_3.wav"
+}
+
+"wolfe.NeedAmmo0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_amo_1.wav"
+}
+
+"wolfe.NoAmmo0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_amo_1.wav"
+}
+
+"wolfe.NoAmmo1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_amo_2.wav"
+}
+
+"wolfe.Medic0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_med_1.wav"
+}
+
+"wolfe.WildcatKillReplyAhead0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_con_1_1.wav"
+}
+
+"wolfe.WildcatKillReplyAhead1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_con_1_2.wav"
+}
+
+"wolfe.WildcatKillReplyBehind0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_con_2_1.wav"
+}
+
+"wolfe.WildcatKillReplyBehind1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_con_2_2.wav"
+}
+
+"wolfe.WildcatKillReplyBehind2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_con_2_3.wav"
+}
+
+"wolfe.WolfeKillStart0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_con_3_1.wav"
+}
+
+"wolfe.WolfeKillStart1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_con_3_2.wav"
+}
+
+"wolfe.WolfeKillReplyAhead0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_con_5_1.wav"
+}
+
+"wolfe.WolfeKillReplyBehind0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_con_4_1.wav"
+}
+
+"wolfe.WolfeKillReplyBehind1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_con_4_2.wav"
+}
+
+"wolfe.Misc0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_covermybackcrash.wav"
+}
+
+"wolfe.Misc1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_covermybackflynn3.wav"
+}
+
+"wolfe.Misc2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_wildcatcovermyback.wav"
+}
+
+"wolfe.Misc3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_yousavedmylife.wav"
+}
+
+"wolfe.Reloading0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_rel_2.wav"
+}
+
+"wolfe.Reloading1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_rel_3.wav"
+}
+
+"wolfe.Reloading2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_rel_4.wav"
+}
+
+"wolfe.SentryInPlace0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_snt_2.wav"
+}
+
+"wolfe.SentryInPlace1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_snt_3.wav"
+}
+
+"wolfe.Ammo0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_ammo01.wav"
+}
+
+"wolfe.Medkit0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_getthatmedkit.wav"
+}
+
+"wolfe.Medkit1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_medkit.wav"
+}
+
+"wolfe.Medkit2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_theresamedkit.wav"
+}
+
+"wolfe.Thanks0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_heythanks2.wav"
+}
+
+"wolfe.Thanks1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_honestlythankyou.wav"
+}
+
+"wolfe.Thanks2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_thank6.wav"
+}
+
+"wolfe.Thanks3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_thankstoyou.wav"
+}
+
+"wolfe.Thanks4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_thankyou3.wav"
+}
+
+"wolfe.Thanks5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_yeahthanks.wav"
+}
+
+"wolfe.Question0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_hmm4.wav"
+}
+
+"wolfe.Question1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_hmm5.wav"
+}
+
+"wolfe.Question2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_hmm9.wav"
+}
+
+"wolfe.Question3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_what.wav"
+}
+
+"wolfe.Question4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_what11.wav"
+}
+
+"wolfe.Question5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_what2.wav"
+}
+
+"wolfe.Question6"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_what5.wav"
+}
+
+"wolfe.Question7"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_whatisit2.wav"
+}
+
+"wolfe.Question8"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_whatnow.wav"
+}
+
+"wolfe.Question9"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_whatsgoingon.wav"
+}
+
+"wolfe.CallSarge0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_heysarge.wav"
+}
+
+"wolfe.CallSarge1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_sarge3.wav"
+}
+
+"wolfe.CallSarge2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_wheressarge.wav"
+}
+
+"wolfe.CallSarge3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_wheressarge2.wav"
+}
+
+"wolfe.CallJaeger0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_heyjaeger6.wav"
+}
+
+"wolfe.CallJaeger1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_jaeger6.wav"
+}
+
+"wolfe.CallJaeger2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_wheresjaeger.wav"
+}
+
+"wolfe.CallWildcat0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_heycat2.wav"
+}
+
+"wolfe.CallWildcat1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_heywildcat3.wav"
+}
+
+"wolfe.CallWildcat2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_oiwildcat.wav"
+}
+
+"wolfe.CallWildcat3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_whereareyouwildcat.wav"
+}
+
+"wolfe.CallWildcat4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_whereswildcat2.wav"
+}
+
+"wolfe.CallWildcat5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_wildcat.wav"
+}
+
+"wolfe.CallFaith0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_faith.wav"
+}
+
+"wolfe.CallFaith1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_heyfaith.wav"
+}
+
+"wolfe.CallFaith2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_oifaith.wav"
+}
+
+"wolfe.CallFaith3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_wheresfaith.wav"
+}
+
+"wolfe.CallBastille0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_bastille.wav"
+}
+
+"wolfe.CallBastille1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_bastille15.wav"
+}
+
+"wolfe.CallBastille2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_heybastille7.wav"
+}
+
+"wolfe.CallBastille3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_oibastille.wav"
+}
+
+"wolfe.CallBastille4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_wheresbastille.wav"
+}
+
+"wolfe.CallCrash0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_crash.wav"
+}
+
+"wolfe.CallCrash1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_heycrash1.wav"
+}
+
+"wolfe.CallFlynn0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_flynn4.wav"
+}
+
+"wolfe.CallFlynn1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_heyflynn2.wav"
+}
+
+"wolfe.CallFlynn2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_wheresflynn2.wav"
+}
+
+"wolfe.CallVegas0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_heyvegas16.wav"
+}
+
+"wolfe.CallVegas1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_vegas.wav"
+}
+
+"wolfe.Supplies0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_ahasupplies11.wav"
+}
+
+"wolfe.Supplies1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_ahasupplies15.wav"
+}
+
+"wolfe.Supplies2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_heyguyssuppliesjustwhatweneed.wav"
+}
+
+"wolfe.Supplies3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_moreammojustwhatweneed.wav"
+}
+
+"wolfe.HoldingPosition0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_coveringarea.wav"
+}
+
+"wolfe.HoldingPosition1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_holdingposition.wav"
+}
+
+"wolfe.HoldingPosition2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_iminplace.wav"
+}
+
+"wolfe.HoldingPosition3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_inposition.wav"
+}
+
+"wolfe.HoldingPosition4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_nothingsgettingpastme.wav"
+}
+
+"wolfe.HoldingPosition5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_securingarea.wav"
+}
+
+"wolfe.HoldingNorth0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_coveringnorth.wav"
+}
+
+"wolfe.HoldingNorth1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_coveringnorthside.wav"
+}
+
+"wolfe.HoldingNorth2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_igotnorthside.wav"
+}
+
+"wolfe.HoldingNorth3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_northsideinplace.wav"
+}
+
+"wolfe.HoldingNorth4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_northsideismine.wav"
+}
+
+"wolfe.HoldingNorth5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_northsidestandingto.wav"
+}
+
+"wolfe.HoldingSouth0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_coveringsouth.wav"
+}
+
+"wolfe.HoldingSouth1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_coveringsouthside.wav"
+}
+
+"wolfe.HoldingSouth2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_igotsouthside.wav"
+}
+
+"wolfe.HoldingSouth3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_southsideinplace.wav"
+}
+
+"wolfe.HoldingSouth4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_southsideismine.wav"
+}
+
+"wolfe.HoldingSouth5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_southsidestandingto.wav"
+}
+
+"wolfe.HoldingEast0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_coveringeast.wav"
+}
+
+"wolfe.HoldingEast1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_coveringeastside.wav"
+}
+
+"wolfe.HoldingEast2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_eastsideinplace.wav"
+}
+
+"wolfe.HoldingEast3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_eastsideismine.wav"
+}
+
+"wolfe.HoldingEast4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_eastsidestandingto.wav"
+}
+
+"wolfe.HoldingEast5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_goteastside.wav"
+}
+
+"wolfe.HoldingWest0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_coveringwest.wav"
+}
+
+"wolfe.HoldingWest1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_coveringwestside.wav"
+}
+
+"wolfe.HoldingWest2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_igotthewestside.wav"
+}
+
+"wolfe.HoldingWest3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_westsideinplace.wav"
+}
+
+"wolfe.HoldingWest4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_westsideismine.wav"
+}
+
+"wolfe.HoldingWest5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_westsidestandingto.wav"
+}
+
+"wolfe.GotPoint0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_igotpoint.wav"
+}
+
+"wolfe.GotPoint1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_illtakepoint.wav"
+}
+
+"wolfe.GotPoint2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_wolfetakingpoint.wav"
+}
+
+"wolfe.GotRear0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_igottheback.wav"
+}
+
+"wolfe.GotRear1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_illcovertheback.wav"
+}
+
+"wolfe.GotRear2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_wolfetakingrearguard.wav"
+}
+
+"wolfe.RequestSealDoor0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_quicksealthedoor.wav"
+}
+
+"wolfe.RequestSealDoor1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_sealitup.wav"
+}
+
+"wolfe.RequestSealDoor2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_sealitupwedontwantthosethingsgettinginhere.wav"
+}
+
+"wolfe.RequestSealDoor3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_securethedoor.wav"
+}
+
+"wolfe.RequestCutDoor0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_cutitopen.wav"
+}
+
+"wolfe.RequestCutDoor1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_getthedooropen2.wav"
+}
+
+"wolfe.RequestCutDoor2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_whatreyouwaitingforgetitopen.wav"
+}
+
+"wolfe.RequestShootDoor0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_blastitopen.wav"
+}
+
+"wolfe.RequestShootDoor1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_ohyeahletsblastthisdoortohell.wav"
+}
+
+"wolfe.RequestShootDoor2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_okletsblastthisdoortohell.wav"
+}
+
+"wolfe.RequestShootDoor3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_shootitopen.wav"
+}
+
+"wolfe.CuttingDoor0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_illhaveitopeninnotime.wav"
+}
+
+"wolfe.CuttingDoor1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_rogercuttingdoor.wav"
+}
+
+"wolfe.CuttingDoor2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_rogerthatcuttingdoor.wav"
+}
+
+"wolfe.CuttingDoor3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_wolfecuttingdoor.wav"
+}
+
+"wolfe.SealingDoor0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_oksealingdoor.wav"
+}
+
+"wolfe.SealingDoor1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_sealingdoorniceandtight.wav"
+}
+
+"wolfe.SealingDoor2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_securingdoor.wav"
+}
+
+"wolfe.SealingDoor3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_wolfesealingdoor.wav"
+}
+
+"wolfe.Biomass0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_biomassmanihatethisshit.wav"
+}
+
+"wolfe.Biomass1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_heytheressomeofthatgooeystuffhere2.wav"
+}
+
+"wolfe.Biomass2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_swarmbiomassburnitall.wav"
+}
+
+"wolfe.Biomass3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_urghswarmbiomassburnit2.wav"
+}
+
+"wolfe.Biomass4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_wegotsomealiengoohere.wav"
+}
+
+"wolfe.TimeToLeave0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_jobsdonetimetoskedaddle2.wav"
+}
+
+"wolfe.TimeToLeave1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_okayletsgetoutofhere2.wav"
+}
+
+"wolfe.TimeToLeave2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_ourjobhereisdone.wav"
+}
+
+"wolfe.TimeToLeave3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_timetomoveonout.wav"
+}
+
+"wolfe.TimeToLeave4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_wohatimetowavethisplacegoodbye.wav"
+}
+
+"wolfe.TimeToLeave5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_woohootimetowavethisplacegoodbye.wav"
+}
+
+"wolfe.TimeToLeave6"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_yeahletsgetouttahere.wav"
+}
+
+"wolfe.TimeToLeave7"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_yeahtimetowavethisplacegoodbye.wav"
+}
+
+"wolfe.WatchOut0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_lookout3.wav"
+}
+
+"wolfe.WatchOut1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_there.wav"
+}
+
+"wolfe.WatchOut2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_watchout.wav"
+}
+
+"wolfe.Shieldbug0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_ashieldbug.wav"
+}
+
+"wolfe.Shieldbug1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_holyshit.wav"
+}
+
+"wolfe.Shieldbug2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_itsashieldbug.wav"
+}
+
+"wolfe.Shieldbug3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_shitashieldbug.wav"
+}
+
+
+
+"wolfe.ShieldbugHint0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_getbehindit2.wav"
+}
+
+"wolfe.ShieldbugHint1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_getbehinditquick.wav"
+}
+
+"wolfe.ShieldbugHint2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_shootitintheback.wav"
+}
+
+"wolfe.ShieldbugHint3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_someonegrenadeit.wav"
+}
+
+"wolfe.Parasite0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_lookoutparasite1.wav"
+}
+
+"wolfe.Parasite1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_parasite1.wav"
+}
+
+"wolfe.Parasite2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_parasite7.wav"
+}
+
+"wolfe.Parasite3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_shitaparasite.wav"
+}
+
+"wolfe.Parasite4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_watchoutaparasite.wav"
+}
+
+"wolfe.BeenInfested0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_arggetitoffme.wav"
+}
+
+
+
+"wolfe.BeenInfested2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_arghitsonme.wav"
+}
+
+"wolfe.BeenInfested3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_arritsonme.wav"
+}
+
+"wolfe.BeenInfested4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_gahgetitoffgetitoffofme.wav"
+}
+
+"wolfe.BeenInfested5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_getitoffgetitoff.wav"
+}
+
+"wolfe.BeenInfested6"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_getitoffgetitoff2.wav"
+}
+
+
+
+"wolfe.BeenInfested8"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_huarrgetitoffme.wav"
+}
+
+"wolfe.BeenInfested9"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_huarritsonme.wav"
+}
+
+"wolfe.BeenInfested10"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_yarritsonme.wav"
+}
+
+"wolfe.SwarmEggs0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_swarmeggs2.wav"
+}
+
+"wolfe.SwarmEggs1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_swarmeggswatchyourself.wav"
+}
+
+"wolfe.SwarmEggs2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_watchoutswarmeggs.wav"
+}
+
+"wolfe.Grenade0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_clear.wav"
+}
+
+"wolfe.Grenade1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_clear2.wav"
+}
+
+"wolfe.Grenade2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_eatthis.wav"
+}
+
+"wolfe.Grenade3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_eatthis2.wav"
+}
+
+"wolfe.Grenade4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_fireinthehole.wav"
+}
+
+"wolfe.Grenade5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_grenade2.wav"
+}
+
+"wolfe.AlienTooClose0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_getitoff.wav"
+}
+
+"wolfe.AlienTooClose1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_hostileonme.wav"
+}
+
+"wolfe.AlienTooClose2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_killit3.wav"
+}
+
+"wolfe.AlienTooClose3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_onme.wav"
+}
+
+"wolfe.AlienTooClose4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_onmeonme.wav"
+}
+
+"wolfe.MadFiring0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_comeongetapieceofme2.wav"
+}
+
+"wolfe.MadFiring1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_hahyouwantsomeofthis.wav"
+}
+
+"wolfe.MadFiring2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_hurfyouwantsomeyeahyouwantsomeofthis.wav"
+}
+
+"wolfe.MadFiring3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_ohrightsayhellotomyfriend3.wav"
+}
+
+"wolfe.MadFiring4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_sayhellotomyfriend.wav"
+}
+
+"wolfe.MadFiring5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_whowantssomemorehahah.wav"
+}
+
+"wolfe.MadFiring6"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_yeahahahyouwantsomeofthisyouwantsome.wav"
+}
+
+"wolfe.MadFiring7"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_yeahahyouwantsomeofthis.wav"
+}
+
+"wolfe.MadFiring8"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_yeahhahhyouwantsomeofthat.wav"
+}
+
+"wolfe.MadFiring9"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_yeahhahhyouwantsomeofthis.wav"
+}
+
+"wolfe.MadFiring10"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_yeahsayhellotomyfriend.wav"
+}
+
+"wolfe.MadFiring11"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_yehahahayouwantsome.wav"
+}
+
+"wolfe.BreachedDoor0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_hostilesthroughthedoor.wav"
+}
+
+"wolfe.BreachedDoor1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_theybrokeitdown2.wav"
+}
+
+"wolfe.BreachedDoor2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_theyrethroughthedoor.wav"
+}
+
+"wolfe.BreachedDoor3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_theyvebreachedthedoor.wav"
+}
+
+"wolfe.MarineDown0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_bahmarinedown.wav"
+}
+
+"wolfe.MarineDown1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_gahmarinedown2.wav"
+}
+
+"wolfe.MarineDown2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_marinedown.wav"
+}
+
+"wolfe.SmallPain0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_pain1.wav"
+}
+
+"wolfe.SmallPain1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_pain10.wav"
+}
+
+"wolfe.SmallPain2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_pain11.wav"
+}
+
+"wolfe.SmallPain3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_pain12.wav"
+}
+
+"wolfe.SmallPain4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_pain2.wav"
+}
+
+"wolfe.SmallPain5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_pain3.wav"
+}
+
+"wolfe.SmallPain6"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_pain4.wav"
+}
+
+"wolfe.SmallPain7"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_pain5.wav"
+}
+
+"wolfe.SmallPain8"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_pain6.wav"
+}
+
+"wolfe.SmallPain9"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_pain7.wav"
+}
+
+"wolfe.SmallPain10"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_pain8.wav"
+}
+
+"wolfe.SmallPain11"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_pain9.wav"
+}
+
+"wolfe.LargePain0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_heavypain1.wav"
+}
+
+"wolfe.LargePain1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_heavypain2.wav"
+}
+
+"wolfe.LargePain2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_heavypain3.wav"
+}
+
+"wolfe.LargePain3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_heavypain4.wav"
+}
+
+"wolfe.LargePain4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_heavypain5.wav"
+}
+
+"wolfe.Dead0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_death1.wav"
+}
+
+"wolfe.Dead1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_death2.wav"
+}
+
+"wolfe.Dead2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_death3.wav"
+}
+
+"wolfe.Dead3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_death4.wav"
+}
+
+"wolfe.Dead4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_death5.wav"
+}
+
+"wolfe.Dead5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_death7.wav"
+}
+
+"wolfe.Dead6"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_death8.wav"
+}
+
+"wolfe.OnFire0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_onfire.wav"
+}
+
+"wolfe.OnFire1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_onfire2.wav"
+}
+
+"wolfe.ActivateStims0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_activatestims.wav"
+}
+
+"wolfe.ActivateStims1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_activatethestims.wav"
+}
+
+"wolfe.ActivateStims2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_gimmesomestimaction.wav"
+}
+
+"wolfe.ActivateStims3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_hitthestimpacks.wav"
+}
+
+"wolfe.ActivateStims4"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_hitthestims3.wav"
+}
+
+"wolfe.ActivateStims5"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_stims2.wav"
+}
+
+"wolfe.ActivateStims6"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_stimsnow.wav"
+}
+
+"wolfe.ComplimentsWildcat0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_cmp_1.wav"
+}
+
+"wolfe.ComplimentsWildcat1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_cmp_2.wav"
+}
+
+"wolfe.ComplimentsWildcat2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_cmp_3.wav"
+}
+
+"wolfe.ComplimentsWildcat3"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_goodshotwildcat.wav"
+}
+
+"wolfe.Impatience0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_dontmindmejustdyingofoldagehere.wav"
+}
+
+"wolfe.Impatience1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_heydontmindmejustdyingofoldagehere.wav"
+}
+
+"wolfe.Impatience2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_mandontmakemewaitallday.wav"
+}
+
+"wolfe.Selection0"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_sel_1.wav"
+}
+
+"wolfe.Selection1"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_sel_2.wav"
+}
+
+"wolfe.Selection2"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"	"1.00"
+	"pitch"	"PITCH_NORM"
+	"soundlevel"	"SNDLVL_95dB"
+	"wave"   "vo\wolfe\wolfe_sel_3.wav"
+}
+

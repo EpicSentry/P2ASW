@@ -1,0 +1,193 @@
+// These Sound Mixers are referenced by name from Soundscapes, and are used to provide
+// custom volume control over various sound categories, called 'mix groups'
+
+// LIMITS: 
+//		up to 64 unique mix groups
+//		up to 76 group rules entries
+//		up to 32 sound mixers
+//		all strings are limited to 31 characters!
+
+// NOTE2: at runtime, you can display the classname of the sound source by
+// setting snd_showclassname 1 in the console.
+
+// NOTE3: main character dialog during critical scenes is ducked using a separate code path which, when
+// active, temporarilly disables mixer ducking (prevent double ducking).  
+// Lower priority sounds are ducked by higher priority sounds, if "is ducked" is enabled. 
+// Only sounds with "causes ducking" enabled can cause a lower priority sound to be ducked.
+
+"MixGroups"
+{
+	// NOTE: order these from least general to most general
+
+//							directory or .wav	classname																Causes  Duck to  Ducker
+//	group name				name substring		substring	chan			sndlvl_min	sndlvl_max	priority Is Ducked	Ducking	Percent	 Threshold
+//  ---------				------------------	---------	-----------		----------	----------	-------- --------	-------	-------	 ---------
+	
+	"Nuke"					"timor/warhead"		""			""				""			""			"62"		"0"		"0"		"100"	"40"
+	"Command"				"command"			""			""				""			""			"61"		"0"		"0"		"100"	"40"
+	"Briefing"				"briefing_main"		""			""				""			""			"60"		"0"		"1"		"100"	"40"
+	"Shell"					"music/solo"		""			""				""			""			"60"		"0"		"1"		"100"	"40"
+	"VO"					"vo/"				""			""				""			""			"60"		"0"		"1"		"100"	"60"
+	"voip"					"?VoiceSfx"			""			""				""			""			"50"		"0"		"0"		"100"	"40"
+	"UI"					"interface"			"_Player"	""				""			""			"50"		"0"		"0"		"100"	"40"
+	"UI2"					"ui/menu"			"_Player"	""				""			""			"50"		"0"		"0"		"100"	"40"	
+	
+	"Player_Damage"			"2D/damage"			""			""				""			""			"60"		"0"		"1"		"100"	"40"
+	"Damage"				"3D/damage"			""			""				""			""			"60"		"0"		"1"		"100"	"90"
+	
+	"AmbientLoud"			"ambient/animation"	""			""				""			""			"55"		"0"		"0"		"100"	"40"
+	"Explosions"			"explosions"		""			""				""			""			"50"		"0"		"1"		"100"	"40"
+
+	"Player_Weapons"		"weapons/2D"		""			""				""			""			"50"		"1"		"1"		"90"	"100"
+	
+	"AlienVocBig"			"aliens/voc"		""			""				"90"		""			"50"		"1"		"1"		"90"	"90"
+	"AlienVoc"				"aliens/voc"		""			""				""			"89"		"50"		"1"		"1"		"90"	"90"
+	"AlienPhysics"			"aliens/impact"		""			""				""			""			"50"		"0"		"0"		"90"	"90"
+	"Weapons"				"weapons"			""			""				""			""			"50"		"1"		"0"		"90"	"90"
+	
+	"TimorMusic"			"/timor_battle"		""			""				""			""			"45"		"0"		"1"		"100"	"40"
+	"Music"					"music/"			""			""				""			""			"45"		"0"		"1"		"100"	"40"
+	"Soundscapes"			"scapes/"			""			""				""			""			"40"		"1"		"0"		"75"	"60"
+	"Physics"				"physics"			""			""				""			""			"40"		"1"		"0"		"75"	"40"
+	"Ambient"				"ambient"			""			""				""			""			"40"		"1"		"0"		"75"	"40"
+	
+	"Quiet"					""					""			""				"1"			"50"		"30"		"1"		"0"		"75"	"40"
+	"Medium"				""					""			""				"51"		"90"		"30"		"1"		"0"		"75"	"40"
+	"Loud"					""					""			""				"91"		"100"		"30"		"1"		"0"		"80"	"40"
+	"VeryLoud"				""					""			""				"101"		"149"		"50"		"0"		"0"		"100"	"40"
+	"SuperLoud"				""					""			""				"150"		""			"50"		"0"		"0"		"100"	"40"
+
+	"All"					""					""			""				""			""			"30"		"1"		"0"		"80"	"40"
+}
+
+
+//----------------------------------------------------------------
+// Sound Mixers, referenced in Soundscapes via "SOUNDMIXER" "name"
+// New Sound Mixers may be created by level designers or sound engineer.
+//----------------------------------------------------------------
+
+// This is the default mix for the game.
+// The mix value of a sound will be set to the value referenced by the 
+// least general group found that includes the sound. (top to bottom search of grouprules)
+
+"SoundMixers"
+{
+	"Default_Mix"
+	{
+
+	//	group name				mix value
+	//  --------				---------
+		"voip"					"0.8"
+		"Briefing"				"0.6"
+		"UI"					"0.4"
+		"UI2"					"0.4"
+		"Shell"					"0.6"
+		"Command"				"0.7"
+		"VO"					"0.8"
+		"Nuke"					"1.0"
+		"Explosions"			"1.8"
+		"Player_Damage"			"0.9"
+		"Damage"				"0.8"
+		"AmbientLoud"			"0.6"
+		"Player_Weapons"		"0.7"
+		
+		"AlienVocBig"			"1.0"
+		"AlienVoc"				"0.7"
+		"AlienPhysics"			"0.8"
+		
+		"Weapons"				"0.8"
+		"Physics"				"0.5"
+	
+		"Ambient"				"0.5"
+		"TimorMusic"			"1.0"
+		"Music"					"0.6"
+		"Soundscapes"			"0.5"		
+		
+			
+		"All"					"0.5"
+	}
+}
+
+"MixLayers"
+{
+	"BoomLayer"
+	{
+		//grp,			vol, lvl, dsp, solo, mute
+		"Explosions"	1.0  1.0  1.5  0.0   0.0
+		"Ambient"		0.7  1.0  1.0  0.0   0.0
+		"Soundscapes"	0.7  1.0  1.0  0.0   0.0
+		"Physics"		1.0  0.9  1.0  0.0   0.0
+	}
+	"VOG"
+	{
+		//grp,		vol, lvl, dsp, solo, mute
+		"Command"	1.0  0.0  0.0  1.0   0.0
+		"VO"		0.0  0.0  0.0  0.0   0.0
+	}
+	"AlienBigVo"
+	{
+		//grp,		vol, lvl, dsp, solo, mute
+		"AlienVoc"	0.7  0.8  1.0  0.0   0.0
+		//"Weapons"	0.7  0.8  1.0  0.0   0.0
+	}
+	"Briefing"
+	{
+		//grp,		vol, lvl, dsp, solo, mute
+		"VO"		0.6  0.0  0.0  1.0   0.0
+		"UI"		1.0  0.0  0.0  1.0   0.0
+		"UI2"		1.0  0.0  0.0  1.0   0.0
+		"voip"		1.0  1.0  0.0  1.0   0.0
+		"Briefing"	1.0  0.0  0.0  1.0   0.0
+	}
+	"UI_underscore"
+	{
+		//grp,		vol, lvl, dsp, solo, mute
+		"UI"		1.0  0.0  0.0  1.0   0.0
+		"UI2"		1.0  0.0  0.0  1.0   0.0
+		"voip"		1.0  0.0  0.0  1.0   0.0
+		"Shell"		1.0  0.0  0.0  1.0   0.0
+		"Nuke"		1.0  0.0  0.0  1.0   0.0
+		"Command"	0.0  0.0  0.0  0.0   0.0
+	}
+	"Nuke"
+	{
+		//grp,		vol, lvl, dsp, solo, mute
+		"Nuke"		1.0  1.0  1.0  1.0   0.0
+		"UI"		1.0  0.0  0.0  1.0   0.0
+		"UI2"		1.0  0.0  0.0  1.0   0.0
+		"voip"		1.0  0.0  0.0  1.0   0.0
+		"Shell"		1.0  0.0  0.0  1.0   0.0
+		"Command"	0.0  0.0  0.0  0.0   0.0
+	}
+	"Music"
+	{
+		//grp,		vol, lvl, dsp, solo, mute
+		"Weapons"	1.0  0.9  1.0  0.0   0.0
+		"VO"		1.25 1.5  1.5  0.0   0.0
+	}
+	"TimorMusic"
+	{
+		//grp,				vol, lvl, dsp, solo, mute
+		"Weapons"			1.0  0.9  1.0  0.0   0.0
+		"Soundscapes"		0.5  1.0  1.0  0.0   0.0
+		"Ambient"			0.5  1.0  1.0  0.0   0.0
+		"Player_Weapons"	0.9  1.0  1.0  0.0   0.0
+		"VO"				1.25 1.5  1.5  0.0   0.0
+	}
+}
+
+"LayerTriggers"
+{
+ // layer,			grp-trgger,		thrshld,   amnt,  attack, decay
+  "BoomLayer"		"Explosions"	"1.0"     "1.0"   "0.0"   "2.0"
+  "VOG"				"Command"		"0.4"     "0.3"   "0.5"   "0.1"
+  "AlienBigVo"		"AlienVocBig"	"0.4"     "1.0"   "0.5"   "0.1"
+  "Briefing"		"Briefing"		"0.1"     "1.0"   "0.1"   "0.0"
+  "UI_underscore"	"Shell"			"0.1"     "1.0"   "7.5"   "1.0"
+  "Nuke"			"Nuke"			"0.1"     "1.0"   "2.0"   "0.0"
+  "Music"			"Music"			"0.5"     "1.0"   "5.0"   "0.1"
+  "TimorMusic"		"TimorMusic"	"1.0"     "1.0"   "10.0"  "0.1"
+}
+
+
+

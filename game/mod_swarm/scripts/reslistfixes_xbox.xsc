@@ -1,0 +1,10 @@
+//
+// RESLISTFIXES_XBOX.XSC
+//
+// Prevent or load specific resources
+// Syntax: <-/+> <resourcepath>
+// - Removes
+// + Adds
+//
+
+

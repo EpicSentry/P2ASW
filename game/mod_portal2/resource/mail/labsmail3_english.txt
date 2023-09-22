@@ -1,0 +1,19 @@
+GAME
+{
+    // PDA belongs to Rivera
+    
+    // inbox
+    
+	"MailFrom1"	"From: Laura Callen"
+	"MailDate1"	"Date: 12/23/52"
+	"MailSubject1"	"Subject: Email transfer"
+	"MailBody1A"	"Mr. Rivera,"
+	"MailBody1B"	"I asked you two days ago about the problems I've been having.  You said you'd look into it.  I've yet to receive an update. Why is this is taking so long?"
+	"MailBody1C"	"L. Callen"
+	
+	"MailFrom2"	"From: John Cain"
+	"MailDate2"	"Date: 12/24/52"
+	"MailSubject2"	"Subject: Re: Callen getting suspicious"
+	"MailBody2A"	"Rivera:  Ignore Callen and get out of her way.  Forward me any and all mail she sent to the IA."
+	"MailBody2B"	"Lt. Cain, SynTek Security."
+}

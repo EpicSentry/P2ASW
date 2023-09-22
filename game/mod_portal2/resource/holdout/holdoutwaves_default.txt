@@ -1,0 +1,126 @@
+"WAVE"
+{
+	"Name"						"Intro"
+	"EnvironmentModifiers"		"0"
+	"Resupply"					"1"
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"5"
+		"SpawnDelay"		"0.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"Spawn_Left_Group"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"5"
+		"SpawnDelay"		"5.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"Spawn_Right_Group"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"15"
+		"SpawnDelay"		"10.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"Spawn_Front_Group"
+		"Modifiers"			"0"
+	}
+}
+"WAVE"
+{
+	"Name"						"Drone Swarm"
+	"EnvironmentModifiers"		"0"
+	"Resupply"					"1"
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"10"
+		"SpawnDelay"		"0.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"Spawn_Left_Group"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"10"
+		"SpawnDelay"		"3.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"Spawn_Right_Group"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"10"
+		"SpawnDelay"		"6.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"Spawn_Front_Group"
+		"Modifiers"			"0"
+	}
+}
+"WAVE"
+{
+	"Name"						"Ranger Attack"
+	"EnvironmentModifiers"		"0"
+	"Resupply"					"1"
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"3"
+		"SpawnDelay"		"0.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"Spawn_Left_Group"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"3"
+		"SpawnDelay"		"0.5"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"Spawn_Right_Group"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"3"
+		"SpawnDelay"		"1.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"Spawn_Front_Group"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"3"
+		"SpawnDelay"		"0.2"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"Spawn_Left_Group"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"3"
+		"SpawnDelay"		"0.7"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"Spawn_Right_Group"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"3"
+		"SpawnDelay"		"1.1"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"Spawn_Front_Group"
+		"Modifiers"			"0"
+	}
+}

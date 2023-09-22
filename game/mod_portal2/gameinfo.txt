@@ -1,0 +1,23 @@
+"GameInfo"
+{
+	"game"		"Portal 2 (ASW) - RELEASE"
+	"title"		"    "	// asw - leave this blank as we have a texture logo
+	"type"		"multiplayer_only"
+	GameData	"swarm.fgd"
+	InstancePath "tilegen/instances/"
+	
+	SupportsDX8     0
+	
+	"FileSystem"
+	{
+		"SteamAppId"	"630"
+		"ToolsAppId"	"211"
+		
+		"SearchPaths"
+		{
+			"Game"	"|gameinfo_path|."
+			"Game"	"D:\steamlibrary\SteamApps\common\Portal 2\portal2"
+			"Game"	"platform"
+		}
+	}
+}

@@ -1,0 +1,84 @@
+particles_manifest
+{
+	"file"		"!particles/debug.pcf"
+	"file"		"particles/fire_01.pcf"	
+	"file"		"particles/error.pcf"
+	"file"		"particles/burning_fx.pcf"
+	"file"		"particles/weapon_fx_hl2.pcf"
+	"file"		"particles/water_impact.pcf"
+	"file"		"particles/tracer_fx.pcf"
+	"file"		"particles/rain_fx.pcf"
+	"file"		"particles/impact_fx.pcf"
+
+	// Portal 1 particles
+	"file"		"particles/blood_impact.pcf"
+	"file"		"particles/portal_projectile.pcf"
+	"file"		"particles/portalgun.pcf"
+	"file"		"particles/cleansers.pcf"
+	"file"		"particles/fire_01_portal.pcf"
+	"file"		"particles/tubes.pcf"
+	"file"		"particles/environment.pcf"
+	
+	// PORTED P1 PARTICLES
+	"file"		"particles/original_portal_projectile.pcf"
+	"file"		"particles/original_portalgun.pcf"
+	"file"		"particles/original_portals.pcf"
+
+	// Portal 2 particles
+	"file"		"particles/portals.pcf"
+	"file"		"particles/portal2_coop_ping_effect.pcf"
+	"file"		"particles/laser_relay_effects.pcf"
+	"file"		"particles/projected_wall.pcf"
+	"file"		"particles/dust_fx.pcf"
+	"file"		"particles/drip_fx.pcf"
+	"file"		"particles/tractor_beam_fx.pcf"
+	"file"		"particles/robot_fx.pcf"
+	"file"		"particles/spark_fx.pcf"
+	"file"		"particles/exploding_futbol.pcf"
+	"file"		"!particles/portalgun.pcf"
+
+	// tempcontent
+	"file"		"particles/confetti.pcf"
+	"file"		"particles/environmental_fx.pcf"
+	"file"		"particles/paint_fizzler.pcf"
+	"file"		"particles/paint_splats_fx.pcf"
+	"file"		"particles/player_paint_effects.pcf"
+	"file"		"particles/paint_bomb_fx.pcf"
+	"file"		"particles/flashlight_fx.pcf"
+
+	// scenes
+	"file"		"particles/scene_fx.pcf"
+	"file"		"particles/laser_relay_2.pcf"
+
+	// BR
+	"file"		"particles/br_train_effects.pcf"	
+
+	// Unused
+		"file"		"particles/airvents.pcf"
+
+		"file"		"particles/chicken.pcf"
+		"file"		"particles/clouds.pcf"
+		"file"		"particles/electriccharge.pcf"
+		"file"		"particles/electriczap.pcf"
+		"file"		"particles/fizzler.pcf"
+		"file"		"particles/geyser.pcf"
+		"file"		"particles/glados.pcf"
+		"file"		"particles/paint_gun_fx.pcf"
+		"file"		"particles/paint_spray_fx.pcf"
+		"file"		"particles/water_leaks.pcf"
+		"file"		"particles/zombie.pcf"
+		
+	"file"		"particles/error.pcf"
+	"file"		"particles/antlion_blood.pcf"
+	"file"		"particles/blood_impact.pcf"
+	"file"		"particles/water_impact.pcf"
+	"file"		"particles/fire_01.pcf"
+	"file"		"particles/burning_fx.pcf"
+	"file"		"particles/combineball.pcf"
+	"file"		"particles/vortigaunt_fx.pcf"
+	"file"		"particles/rocket_fx.pcf"
+	"file"		"particles/weapon_fx_hl2.pcf"
+	"file"		"particles/tracer_fx.pcf"
+	"file"		"particles/rain_fx.pcf"
+	"file"		"particles/impact_fx.pcf"
+}	

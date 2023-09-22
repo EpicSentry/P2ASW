@@ -1,0 +1,8 @@
+// ENV_PORTAL_LASER_SHARED_H
+
+#ifndef ENV_PORTAL_LASER_SHARED_H
+#define ENV_PORTAL_LASER_SHARED_H
+
+extern bool bLaserHittingPortal;
+
+#endif ENV_PORTAL_LASER_SHARED_H

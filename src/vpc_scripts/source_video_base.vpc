@@ -1,0 +1,7 @@
+$Configuration
+{
+	$Compiler
+	{
+		$PreprocessorDefinitions		"$BASE;BINK_VIDEO;AVI_VIDEO;WMV_VIDEO"
+	}
+}

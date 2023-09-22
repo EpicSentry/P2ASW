@@ -1,0 +1,9 @@
+GAME
+{
+	"Headline"	"IAF marines missing at Moonspire"
+	"HeadlineDate"	"12/19/52"
+	"Paragraph1"	"150 IAF marines are still missing after the latest Swarm attack near the colony Moonspire on Antheon Prime, according to a senior IAF officer at a recent news conference held aboard the USS Endurance."
+	"Paragraph2"	"An infantry division of 208 marines was attacked by the Swarm two days ago, while searching the remains of an outpost for possible civilian survivors."
+	"Paragraph3"	"'There is an ongoing effort to find the missing marines,' said General C. Morrison, 'we received a distress signal at around 0200, but the whereabouts of Company 212 is still unknown at this time.'"
+	"Paragraph4"	"'This is a black day for the IAF, but we must fight on,' said Morrison."
+}

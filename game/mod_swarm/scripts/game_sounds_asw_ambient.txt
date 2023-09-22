@@ -1,0 +1,120 @@
+// =========================
+// ALIEN SWARM Ambient SOUNDS
+// =========================
+
+
+"ASWBarrel.Explode"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_140db"
+	"pitch"			"80, 100"
+
+	"rndwave"
+	{
+		"wave"			"^explosions\barrelExplode01.wav"
+		"wave"			"^explosions\barrelExplode02.wav"
+	}
+}
+
+"fire_large"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"VOL_NORM"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"			"ambient/fire/large_loop.wav"
+}
+
+"Ambient.CoolingTankPiston"
+{
+	"channel"	"CHAN_STATIC"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_85dB"
+	
+	"wave"	"swarm\swarmambient\CoolingTankPiston.wav"
+}
+
+"landingBay.Fireball"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_140dB"
+
+	"wave"			"@explosions\landingBay\fireball.wav"
+}
+
+"landingBay.whoosh"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.8"
+	"soundlevel"	"SNDLVL_110dB"
+
+	"wave"			"@explosions\landingBay\fireballWhoosh.wav"
+}
+
+"ASW_Explosion.Explosion_Default"
+{
+	"channel"		"CHAN_WEAPON"
+	"soundlevel"	"SNDLVL_140dB"
+	"pitch"			"80, 90"
+	
+	"rndwave"
+	{
+		"wave"			"^explosions\barrelExplode01.wav"
+		"wave"			"^explosions\barrelExplode02.wav"
+	}
+}
+
+"ASW_Explosion.Explosion_Glass"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_100dB"
+	"volume"		"0.8, 1.0"
+	"pitch"			"90,115"
+	
+	"rndwave"
+	{
+		"wave"			")explosions\landingBay\glassExp01.wav"
+		"wave"			")explosions\landingBay\glassExp02.wav"
+		"wave"			")explosions\landingBay\glassExp03.wav"
+		"wave"			")explosions\landingBay\glassExp04.wav"
+		"wave"			")explosions\landingBay\glassExp05.wav"
+	}
+}
+
+
+"ASW_Lightning.strike"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"1"
+	"soundlevel"  		"SNDLVL_NONE"
+	"pitch"			"90,110"
+	"rndwave"
+	{
+		"wave"	"scapes/2D/random_amb/Lightning_Strike_01.wav"
+		"wave"	"scapes/2D/random_amb/Lightning_Strike_02.wav"
+		"wave"	"scapes/2D/random_amb/Lightning_Strike_03.wav"
+		"wave"	"scapes/2D/random_amb/Lightning_Strike_04.wav"
+	}
+}
+
+
+"ASW_Thunder"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"1"
+	"soundlevel"  		"SNDLVL_NONE"
+	"pitch"			"90,110"
+	"rndwave"
+	{
+		"wave"	"scapes/2D/random_amb/thunder_rumble_01.wav"
+		"wave"	"scapes/2D/random_amb/thunder_rumble_02.wav"
+		"wave"	"scapes/2D/random_amb/thunder_rumble_03.wav"
+		"wave"	"scapes/2D/random_amb/thunder_rumble_04.wav"
+	}
+}

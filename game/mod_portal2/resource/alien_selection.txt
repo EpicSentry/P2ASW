@@ -1,0 +1,1102 @@
+"SpawnSet"
+{
+	"Name"	"Set01"
+	"MinDifficulty"	"1"
+	"MaxDifficulty"	"1"
+	"FeederChance"	"0.15"
+	"MinEncounters"	"5"
+	"MaxEncounters"	"5"
+	"MinSpawnsPerEncounter"	"8"
+	"MaxSpawnsPerEncounter"	"16"
+	"FIXED"
+	{
+		"SelectionWeight"	"1"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"1"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"3"
+			"Elite Chance"	"0"
+			"UseSpawners"	"1"
+		}
+	}
+	"HORDE"
+	{
+		"SelectionWeight"	"0.1"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"HORDE"
+	{
+		"SelectionWeight"	"0.9"
+		"NPC"
+		{
+			"AlienClass"	"asw_parasite_defanged"
+			"MinPerSpawn"	"4"
+			"MaxPerSpawn"	"5"
+			"Elite Chance"	"0"
+		}
+	}
+	"BOSS"
+	{
+		"SelectionWeight"	"1"
+		"NPC"
+		{
+			"AlienClass"	"asw_meatbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"1"
+		}
+	}
+}
+"SpawnSet"
+{
+	"Name"	"Set02"
+	"MinDifficulty"	"2"
+	"MaxDifficulty"	"2"
+	"FeederChance"	"0.15"
+	"MinEncounters"	"5"
+	"MaxEncounters"	"5"
+	"MinSpawnsPerEncounter"	"8"
+	"MaxSpawnsPerEncounter"	"16"
+	"FIXED"
+	{
+		"SelectionWeight"	"0.5"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"FIXED"
+	{
+		"SelectionWeight"	"0.08"
+		"NPC"
+		{
+			"AlienClass"	"asw_meatbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.5"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"2"
+			"MaxPerSpawn"	"3"
+			"Elite Chance"	"0"
+			"UseSpawners"	"1"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.08"
+		"NPC"
+		{
+			"AlienClass"	"asw_meatbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"3"
+			"Elite Chance"	"0"
+		}
+		"NPC"
+		{
+			"AlienClass"	"asw_boomer_mini"
+			"MinPerSpawn"	"0"
+			"MaxPerSpawn"	"2"
+			"Elite Chance"	"0"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.08"
+		"NPC"
+		{
+			"AlienClass"	"asw_meatbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"2"
+			"Elite Chance"	"0"
+		}
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"2"
+			"MaxPerSpawn"	"3"
+			"Elite Chance"	"0"
+		}
+	}
+	"HORDE"
+	{
+		"SelectionWeight"	"0.1"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"HORDE"
+	{
+		"SelectionWeight"	"0.9"
+		"NPC"
+		{
+			"AlienClass"	"asw_parasite_defanged"
+			"MinPerSpawn"	"4"
+			"MaxPerSpawn"	"5"
+			"Elite Chance"	"0"
+		}
+	}
+	"BOSS"
+	{
+		"SelectionWeight"	"1"
+		"NPC"
+		{
+			"AlienClass"	"asw_meatbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"1"
+		}
+	}
+}
+"SpawnSet"
+{
+	"Name"	"Set03"
+	"MinDifficulty"	"3"
+	"MaxDifficulty"	"3"
+	"FeederChance"	"0.15"
+	"MinEncounters"	"5"
+	"MaxEncounters"	"5"
+	"MinSpawnsPerEncounter"	"8"
+	"MaxSpawnsPerEncounter"	"16"
+	"FIXED"
+	{
+		"SelectionWeight"	"0.5"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"FIXED"
+	{
+		"SelectionWeight"	"0.05"
+		"NPC"
+		{
+			"AlienClass"	"asw_meatbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"FIXED"
+	{
+		"SelectionWeight"	"0.025"
+		"NPC"
+		{
+			"AlienClass"	"asw_mortarbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"FIXED"
+	{
+		"SelectionWeight"	"0.1"
+		"NPC"
+		{
+			"AlienClass"	"asw_shaman"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.5"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"2"
+			"MaxPerSpawn"	"3"
+			"Elite Chance"	"0"
+			"UseSpawners"	"1"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.05"
+		"NPC"
+		{
+			"AlienClass"	"asw_boomer_mini"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"3"
+			"Elite Chance"	"0"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.05"
+		"NPC"
+		{
+			"AlienClass"	"asw_meatbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"2"
+			"Elite Chance"	"0"
+		}
+		"NPC"
+		{
+			"AlienClass"	"asw_shaman"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"2"
+			"Elite Chance"	"0"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.05"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"2"
+			"MaxPerSpawn"	"3"
+			"Elite Chance"	"0"
+		}
+		"NPC"
+		{
+			"AlienClass"	"asw_shaman"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"HORDE"
+	{
+		"SelectionWeight"	"0.1"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"4"
+			"MaxPerSpawn"	"5"
+			"Elite Chance"	"0"
+		}
+	}
+	"HORDE"
+	{
+		"SelectionWeight"	"0.9"
+		"NPC"
+		{
+			"AlienClass"	"asw_parasite_defanged"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"BOSS"
+	{
+		"SelectionWeight"	"1"
+		"NPC"
+		{
+			"AlienClass"	"asw_meatbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"1"
+		}
+	}
+}
+"SpawnSet"
+{
+	"Name"	"Set04"
+	"MinDifficulty"	"4"
+	"MaxDifficulty"	"4"
+	"FeederChance"	"0.25"
+	"MinEncounters"	"5"
+	"MaxEncounters"	"5"
+	"MinSpawnsPerEncounter"	"8"
+	"MaxSpawnsPerEncounter"	"16"
+	"FIXED"
+	{
+		"SelectionWeight"	"0.58"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"FIXED"
+	{
+		"SelectionWeight"	"0.1"
+		"NPC"
+		{
+			"AlienClass"	"asw_meatbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"FIXED"
+	{
+		"SelectionWeight"	"0.05"
+		"NPC"
+		{
+			"AlienClass"	"asw_mortarbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"FIXED"
+	{
+		"SelectionWeight"	"0.25"
+		"NPC"
+		{
+			"AlienClass"	"asw_shaman"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.58"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"2"
+			"MaxPerSpawn"	"3"
+			"Elite Chance"	"0"
+			"UseSpawners"	"1"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.05"
+		"NPC"
+		{
+			"AlienClass"	"asw_meatbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"2"
+			"Elite Chance"	"0"
+		}
+		"NPC"
+		{
+			"AlienClass"	"asw_shaman"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"2"
+			"Elite Chance"	"0"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.025"
+		"NPC"
+		{
+			"AlienClass"	"asw_mortarbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"2"
+			"Elite Chance"	"0"
+			"UseSpawners"	"1"
+		}
+	}
+	"HORDE"
+	{
+		"SelectionWeight"	"0.1"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"HORDE"
+	{
+		"SelectionWeight"	"0.9"
+		"NPC"
+		{
+			"AlienClass"	"asw_parasite_defanged"
+			"MinPerSpawn"	"4"
+			"MaxPerSpawn"	"5"
+			"Elite Chance"	"0"
+		}
+	}
+	"BOSS"
+	{
+		"SelectionWeight"	"1"
+		"NPC"
+		{
+			"AlienClass"	"asw_shieldbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"1"
+		}
+	}
+}
+"SpawnSet"
+{
+	"Name"	"Set05"
+	"MinDifficulty"	"5"
+	"MaxDifficulty"	"5"
+	"FeederChance"	"0.25"
+	"MinEncounters"	"5"
+	"MaxEncounters"	"5"
+	"MinSpawnsPerEncounter"	"8"
+	"MaxSpawnsPerEncounter"	"16"
+	"FIXED"
+	{
+		"SelectionWeight"	"0.58"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"FIXED"
+	{
+		"SelectionWeight"	"0.2"
+		"NPC"
+		{
+			"AlienClass"	"asw_meatbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"FIXED"
+	{
+		"SelectionWeight"	"0.1"
+		"NPC"
+		{
+			"AlienClass"	"asw_mortarbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"FIXED"
+	{
+		"SelectionWeight"	"0.15"
+		"NPC"
+		{
+			"AlienClass"	"asw_boomer"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"FIXED"
+	{
+		"SelectionWeight"	"0.25"
+		"NPC"
+		{
+			"AlienClass"	"asw_shaman"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.58"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"2"
+			"MaxPerSpawn"	"3"
+			"Elite Chance"	"0"
+			"UseSpawners"	"1"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.05"
+		"NPC"
+		{
+			"AlienClass"	"asw_meatbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"2"
+			"Elite Chance"	"0"
+		}
+		"NPC"
+		{
+			"AlienClass"	"asw_shaman"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"2"
+			"Elite Chance"	"0"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.025"
+		"NPC"
+		{
+			"AlienClass"	"asw_mortarbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"2"
+			"Elite Chance"	"0"
+			"UseSpawners"	"1"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.025"
+		"NPC"
+		{
+			"AlienClass"	"asw_mortarbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+		"NPC"
+		{
+			"AlienClass"	"asw_meatbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"HORDE"
+	{
+		"SelectionWeight"	"0.1"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"HORDE"
+	{
+		"SelectionWeight"	"0.9"
+		"NPC"
+		{
+			"AlienClass"	"asw_parasite_defanged"
+			"MinPerSpawn"	"4"
+			"MaxPerSpawn"	"5"
+			"Elite Chance"	"0"
+		}
+	}
+	"BOSS"
+	{
+		"SelectionWeight"	"1"
+		"NPC"
+		{
+			"AlienClass"	"asw_shieldbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"1"
+		}
+	}
+}
+"SpawnSet"
+{
+	"Name"	"Set06"
+	"MinDifficulty"	"6"
+	"MaxDifficulty"	"6"
+	"FeederChance"	"0.15"
+	"MinEncounters"	"5"
+	"MaxEncounters"	"5"
+	"MinSpawnsPerEncounter"	"8"
+	"MaxSpawnsPerEncounter"	"16"
+	"FIXED"
+	{
+		"SelectionWeight"	"0.5"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"FIXED"
+	{
+		"SelectionWeight"	"0.05"
+		"NPC"
+		{
+			"AlienClass"	"asw_meatbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"FIXED"
+	{
+		"SelectionWeight"	"0.025"
+		"NPC"
+		{
+			"AlienClass"	"asw_mortarbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"FIXED"
+	{
+		"SelectionWeight"	"0.025"
+		"NPC"
+		{
+			"AlienClass"	"asw_boomer"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"FIXED"
+	{
+		"SelectionWeight"	"0.2"
+		"NPC"
+		{
+			"AlienClass"	"asw_shaman"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.58"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"2"
+			"MaxPerSpawn"	"3"
+			"Elite Chance"	"0"
+			"UseSpawners"	"1"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.05"
+		"NPC"
+		{
+			"AlienClass"	"asw_meatbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"2"
+			"Elite Chance"	"0"
+		}
+		"NPC"
+		{
+			"AlienClass"	"asw_shaman"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"2"
+			"Elite Chance"	"0"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.025"
+		"NPC"
+		{
+			"AlienClass"	"asw_mortarbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"2"
+			"Elite Chance"	"0"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.025"
+		"NPC"
+		{
+			"AlienClass"	"asw_boomer"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+		"NPC"
+		{
+			"AlienClass"	"asw_meatbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"HORDE"
+	{
+		"SelectionWeight"	"0.1"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"HORDE"
+	{
+		"SelectionWeight"	"0.9"
+		"NPC"
+		{
+			"AlienClass"	"asw_parasite_defanged"
+			"MinPerSpawn"	"4"
+			"MaxPerSpawn"	"5"
+			"Elite Chance"	"0"
+		}
+	}
+	"BOSS"
+	{
+		"SelectionWeight"	"1"
+		"NPC"
+		{
+			"AlienClass"	"asw_shieldbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"1"
+		}
+	}
+}
+"SpawnSet"
+{
+	"Name"	"set_ai_test_01"
+	"MinDifficulty"	"1"
+	"MaxDifficulty"	"1"
+	"FeederChance"	"0.15"
+	"MinEncounters"	"0"
+	"MaxEncounters"	"0"
+	"MinSpawnsPerEncounter"	"8"
+	"MaxSpawnsPerEncounter"	"16"
+	"FIXED"
+	{
+		"SelectionWeight"	"1"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"FIXED"
+	{
+		"SelectionWeight"	"0.2"
+		"NPC"
+		{
+			"AlienClass"	"asw_ranger"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"1"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"3"
+			"Elite Chance"	"0"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.2"
+		"NPC"
+		{
+			"AlienClass"	"asw_ranger"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"HORDE"
+	{
+		"SelectionWeight"	"1"
+		"NPC"
+		{
+			"AlienClass"	"asw_parasite_defanged"
+			"MinPerSpawn"	"4"
+			"MaxPerSpawn"	"5"
+			"Elite Chance"	"0"
+		}
+	}
+	"BOSS"
+	{
+		"SelectionWeight"	"1"
+		"NPC"
+		{
+			"AlienClass"	"asw_ranger"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"1"
+		}
+	}
+}
+"SpawnSet"
+{
+	"Name"	"set_ai_test_02"
+	"MinDifficulty"	"1"
+	"MaxDifficulty"	"1"
+	"FeederChance"	"0.15"
+	"MinEncounters"	"0"
+	"MaxEncounters"	"0"
+	"MinSpawnsPerEncounter"	"8"
+	"MaxSpawnsPerEncounter"	"16"
+	"FIXED"
+	{
+		"SelectionWeight"	"0.8"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"FIXED"
+	{
+		"SelectionWeight"	"0.05"
+		"NPC"
+		{
+			"AlienClass"	"asw_meatbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"FIXED"
+	{
+		"SelectionWeight"	"0.8"
+		"NPC"
+		{
+			"AlienClass"	"asw_ranger"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.8"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"3"
+			"Elite Chance"	"0"
+			"UseSpawners"	"1"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.04"
+		"NPC"
+		{
+			"AlienClass"	"asw_meatbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.8"
+		"NPC"
+		{
+			"AlienClass"	"asw_ranger"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"HORDE"
+	{
+		"SelectionWeight"	"1"
+		"NPC"
+		{
+			"AlienClass"	"asw_parasite_defanged"
+			"MinPerSpawn"	"4"
+			"MaxPerSpawn"	"5"
+			"Elite Chance"	"0"
+		}
+	}
+	"BOSS"
+	{
+		"SelectionWeight"	"1"
+		"NPC"
+		{
+			"AlienClass"	"asw_meatbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"1"
+		}
+	}
+}
+"SpawnSet"
+{
+	"Name"	"set_ai_test_03"
+	"MinDifficulty"	"1"
+	"MaxDifficulty"	"1"
+	"FeederChance"	"0.15"
+	"MinEncounters"	"0"
+	"MaxEncounters"	"0"
+	"MinSpawnsPerEncounter"	"8"
+	"MaxSpawnsPerEncounter"	"16"
+	"FIXED"
+	{
+		"SelectionWeight"	"1"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"FIXED"
+	{
+		"SelectionWeight"	"0.1"
+		"NPC"
+		{
+			"AlienClass"	"asw_meatbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"FIXED"
+	{
+		"SelectionWeight"	"0.8"
+		"NPC"
+		{
+			"AlienClass"	"asw_ranger"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"FIXED"
+	{
+		"SelectionWeight"	"0.4"
+		"NPC"
+		{
+			"AlienClass"	"asw_boomer"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"1"
+		"NPC"
+		{
+			"AlienClass"	"asw_drone"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"3"
+			"Elite Chance"	"0"
+			"UseSpawners"	"1"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.03"
+		"NPC"
+		{
+			"AlienClass"	"asw_meatbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.6"
+		"NPC"
+		{
+			"AlienClass"	"asw_ranger"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"WANDERER"
+	{
+		"SelectionWeight"	"0.4"
+		"NPC"
+		{
+			"AlienClass"	"asw_boomer"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"0"
+		}
+	}
+	"HORDE"
+	{
+		"SelectionWeight"	"1"
+		"NPC"
+		{
+			"AlienClass"	"asw_parasite_defanged"
+			"MinPerSpawn"	"4"
+			"MaxPerSpawn"	"5"
+			"Elite Chance"	"0"
+		}
+	}
+	"BOSS"
+	{
+		"SelectionWeight"	"1"
+		"NPC"
+		{
+			"AlienClass"	"asw_mortarbug"
+			"MinPerSpawn"	"1"
+			"MaxPerSpawn"	"1"
+			"Elite Chance"	"1"
+		}
+	}
+}

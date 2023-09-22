@@ -1,0 +1,127 @@
+"ASW_Door.Door1Open"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.8"
+	"soundlevel"	"SNDLVL_75dB"
+	"wave"	"swarm/doors/door1open.wav" 
+}
+
+"ASW_Door.Door1Close"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.8"
+	"soundlevel"	"SNDLVL_75dB"
+	"wave"	"swarm/doors/door1close.wav" 
+}
+
+"ASW_Door.Door1StopClose"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.8"
+	"soundlevel"	"SNDLVL_75dB"
+	"wave"	"swarm/doors/door1stopclose.wav" 
+}
+
+"ASW_Door.Door2Open"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.8"
+	"soundlevel"	"SNDLVL_75dB"
+	"wave"	"swarm/doors/door2open.wav" 
+}
+
+"ASW_Door.Door2Close"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.8"
+	"soundlevel"	"SNDLVL_75dB"
+	"wave"	"swarm/doors/door2close.wav" 
+}
+
+"ASW_Door.Door2StopClose"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.8"
+	"soundlevel"	"SNDLVL_75dB"
+	"wave"	"swarm/doors/door2stopclose.wav" 
+}
+
+"ASW_Door.Door3Open"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.8"
+	"soundlevel"	"SNDLVL_75dB"
+	"wave"	"swarm/doors/door3open.wav" 
+}
+
+"ASW_Door.Door3Close"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.8"
+	"soundlevel"	"SNDLVL_75dB"
+	"wave"	"swarm/doors/door3close.wav" 
+}
+
+"ASW_Door.Door3StopClose"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.8"
+	"soundlevel"	"SNDLVL_75dB"
+	"wave"	"swarm/doors/door3stopclose.wav" 
+}
+
+"ASW_Door.BulkheadMoving"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.8"
+	"soundlevel"	"SNDLVL_75dB"
+	"wave"	"swarm/doors/bulkheadstartandloop.wav" 
+}
+
+"ASW_Door.BulkheadStop"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.8"
+	"soundlevel"	"SNDLVL_75dB"
+	"wave"	"swarm/doors/bulkheadstop.wav" 
+}
+
+"ASW_Door.Dented"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.8"
+	"soundlevel"	"SNDLVL_75dB"
+	"wave"	"null.wav" 
+}
+
+"ASW_Door.MeleeHit"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7, 0.9"
+	"soundlevel"	"SNDLVL_90dB"
+	"pitch"			"90, 120"
+	"rndwave"
+	{
+		"wave"	"physics\3D\damage\door01.wav" 
+		"wave"	"physics\3D\damage\door02.wav" 
+		"wave"	"physics\3D\damage\door03.wav" 
+		"wave"	"physics\3D\damage\door04.wav" 
+				
+	}
+}
+
+"ASW_Door.MeleeDown"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_100dB"
+	"wave"			")explosions\door_down.wav"
+}
+
+"ASW_Door.LandongBayDoor01Open"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.8"
+	"soundlevel"	"SNDLVL_85dB"
+	"wave"			"ambient/animation/LandingBayDoor_Open.wav" 
+}

@@ -1,0 +1,8 @@
+patch
+{
+include "materials/models/infected/common/common_infected_shared.vmt"
+insert
+{
+$baseTexture "models\infected\common/common_male_black_head_02"
+}
+}

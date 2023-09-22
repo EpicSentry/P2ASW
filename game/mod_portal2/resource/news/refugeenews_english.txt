@@ -1,0 +1,9 @@
+GAME
+{
+	"Headline"	"Refugees flow into S-N5 constellation"
+	"HeadlineDate"	"12/18/52"
+	"Paragraph1"	"Scattered groups of refugees continue to arrive at the S-N5 constellation on the outskirts of Paradise space.  Survivors have been arriving at the system ever since Swarm attacks destroyed a number of independant colonies last month."
+	"Paragraph2"	"It is believed the attacks originated from the Anhaven Ruins, but many analysts are concerned that the Swarm attacks have reached so deep into Alliance space.  'This could be the precursor to a larger attack which may even reach the Core Systems,' says Dr McArthur, a noted analyst of Swarm movements."
+	"Paragraph3"	"An officer from Paradise Supplies has requested IA support for dealing with the refugees, but has generously offered them all Paradise work contracts within the colonies."
+	"Paragraph4"	""
+}

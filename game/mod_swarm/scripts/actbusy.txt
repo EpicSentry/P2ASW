@@ -1,0 +1,35 @@
+// "act busy name"			This is the name that a mapmaker must specify in the hint node.
+// { 
+//		"busy_anim" 		"Activity Name".
+//		"entry_anim"		"Activity Name"
+//		"exit_anim"			"Activity Name"
+//		"busy_sequence"		"Sequence Name". If specified, this is used over the activity name. Specify it in the hint node.
+//		"entry_sequence" 	"Sequence Name". If specified, this is used over the entry anim.
+//		"exit_sequence" 	"Sequence Name". If specified, this is used over the exit anim.
+//		"busy_sound"		"Sound Name". If specified, the NPC will play this sound when it plays the busy anim/seq. Can be a GameSound name or a response rules concept.
+//		"entry_sound"		"Sound Name". If specified, the NPC will play this sound when it plays the entry anim/seq. Can be a GameSound name or a response rules concept.
+//		"exit_sound"		"Sound Name". If specified, the NPC will play this sound when it plays the exit anim/seq. Can be a GameSound name or a response rules concept.
+//		"min_time"			"Minimum time to spend in this busy anim"
+//		"max_time"			"Maximum time to spend in this busy anim"	0 = only stop when interrupted by external event
+//		"interrupts"		One of:
+//							"BA_INT_NONE"		break out only when time runs out. No external influence will break me out.
+//							"BA_INT_DANGER"		break out of this anim only if threatened
+//							"BA_INT_PLAYER"		break out of this anim if I can see the player, or I'm threatened
+//							"BA_INT_AMBUSH"		break out if I see an enemy in my forward view cone.
+//							"BA_INT_COMBAT"		break out of this anim if combat occurs in my line of sight (bullet hits, grenades, etc), -OR- the max time is reached
+// }
+//
+// 
+"ActBusy.txt"
+{
+	// ASW
+	"Drone_Eat_Corpse"
+	{
+		"busy_sequence"		"feast_loop"
+		"exit_sequence" 	"feast_alert"
+		"min_time"		"0"
+		"max_time"		"0"
+		"interrupts"		"BA_INT_AMBUSH"
+	}
+}
+

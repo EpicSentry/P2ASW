@@ -1,0 +1,11 @@
+GAME
+{
+    // PDA belongs to Lt Cain
+    
+	"MailFrom1"	"From: Laura Callen"
+	"MailDate1"	"Date: 12/24/52"
+	"MailSubject1"	"Subject: This is it"
+	"MailBody1A"	"Martial law?"
+	"MailBody1B"	"It's too late for that."
+	"MailBody1C"	"We need serious intervention, or we're going to lose this facility."
+}

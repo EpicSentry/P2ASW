@@ -1,0 +1,88 @@
+<!-- dmx encoding keyvalues2 1 format dmx 1 -->
+"DmeColorCorrectionOperatorList"
+{
+	"id" "elementid" "b3cee1fb-896f-4ac0-8462-a01bc86b6dd9"
+	"operators" "element_array" 
+	[
+		"CDmeColorCorrectionColorBalanceOp"
+		{
+			"id" "elementid" "d72fedff-1305-4f15-be7e-be97952b3046"
+			"blendFactor" "float" "1"
+			"cyanRedBalance" "float_array" 
+			[
+				"0",
+				"100",
+				"24"
+			]
+			"enabled" "bool" "1"
+			"magentaGreenBalance" "float_array" 
+			[
+				"0",
+				"-10",
+				"31"
+			]
+			"name" "string" "Balance"
+			"preserveLuminosity" "bool" "1"
+			"yellowBlueBalance" "float_array" 
+			[
+				"5",
+				"7",
+				"9"
+			]
+		},
+		"CDmeColorCorrectionSelectedHSVOp"
+		{
+			"id" "elementid" "832683b7-ed5c-4dc3-99d3-849f04a81e60"
+			"blendFactor" "float" "1"
+			"colorize" "bool" "1"
+			"deltaHSV" "vector3" "90 0.6705882549 0"
+			"enabled" "bool" "0"
+			"fuzziness" "float" "0"
+			"invertSelection" "bool" "0"
+			"name" "string" "HSV"
+			"selectedHSVs" "vector3_array" 
+			[
+			]
+			"selectedRGBs" "vector3_array" 
+			[
+			]
+			"selectionMethod" "int" "1"
+			"tolerance" "float" "0.2000000179"
+		},
+		"CDmeColorCorrectionLevelsOp"
+		{
+			"id" "elementid" "550ccf68-5fb2-402d-b273-1a6b8bb1f518"
+			"blendFactor" "float" "0.4039216042"
+			"channelMask" "int" "7"
+			"enabled" "bool" "1"
+			"maxInputLevel" "float" "1"
+			"maxOutputLevel" "float" "1"
+			"midInputLevel" "float" "0.4117647409"
+			"minInputLevel" "float" "0.1098039299"
+			"minOutputLevel" "float" "0"
+			"name" "string" "Levels"
+		},
+		"CDmeColorCorrectionSelectedHSVOp"
+		{
+			"id" "elementid" "05b5adf5-3c8f-4e03-85b2-3aa51943d69d"
+			"blendFactor" "float" "1"
+			"colorize" "bool" "0"
+			"deltaHSV" "vector3" "-360 0 -0.1137254983"
+			"enabled" "bool" "1"
+			"fuzziness" "float" "0"
+			"invertSelection" "bool" "1"
+			"name" "string" "HSV"
+			"selectedHSVs" "vector3_array" 
+			[
+				"354.3999938965 0.8333333731 0.3529411852"
+			]
+			"selectedRGBs" "vector3_array" 
+			[
+				"0.3529411852 0.0588235334 0.0862745121"
+			]
+			"selectionMethod" "int" "1"
+			"tolerance" "float" "0.7490196228"
+		}
+	]
+}
+

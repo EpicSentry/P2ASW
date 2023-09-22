@@ -1,0 +1,31 @@
+GAME
+{
+    // PDA belongs to SysAdmin
+    
+    // inbox
+    
+	"MailFrom1"	"From: Phil Ryan"
+	"MailDate1"	"Date: 12/20/52"
+	"MailSubject1"	"Subject: Spam!"
+	"MailBody1A"	"Mr. Rivera,"
+	"MailBody1B"	"I think I speak on behalf of everyone around here.  Can you PLEASE do something about the spam?  Update the inbox filters or whatever, I assume you know best, but for God's sake do something!  A nickel for every piece of crap I've received in the last month and I'd be set for life."
+	"MailBody1C"	"Phil Ryan."
+	
+	"MailFrom2"	"From: Dr. Miller"
+	"MailSubject2"	"Fwd: Ph4rm4 4 U"
+	"MailDate2"	"Date: 12/12/52"
+	"MailBody2A"	"Get all the good stuff legally over SynNet!!"
+	"MailBody2B"	"Isoth4m1ne 23 for only 99$/package, all incl."
+	"MailBody2C"	"Interstellar shipping available."
+	"MailBody2D"	"Is0tham1ne 23 will make you feel fresh, strong and rested for an entire working day!!  Your supervisors are taking it--why shouldn't you?"
+
+    // sent mail
+
+	"MailFrom3"	"To: Phil Ryan"
+	"MailDate3"	"Date: 12/20/52"
+	"MailSubject3"	"Subject: Re: Spam!"
+	"MailBody3A"	"Dear Mr,"
+	"MailBody3B"	"Thank you for your mail and your interest in the company.  We have carefully studied your request, and as soon as one of our agents is available he will be assigned to the issue.  Do not reply to this email.  We will be in touch with you as soon as possible."
+	"MailBody3C"	"SynTek Management/Sys. Admin."
+	"MailBody3D"	"Rivera, C."	
+}

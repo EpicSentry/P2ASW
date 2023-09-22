@@ -1,0 +1,18 @@
+GAME
+{
+    // PDA belongs to Laura
+    
+	"MailFrom1"	"From: Brad Campbell"
+	"MailDate1"	"Date: 12/18/52"
+	"MailSubject1"	"Subject: Re:Re: Eggs"
+	"MailBody1A"    "Laura,"
+	"MailBody1B"	"Two of my men are unreachable.  One group reported strange noises when searching Sector 24.  Could've been anything.  This place is falling to pieces."
+	"MailBody1C"	"What about those extra men?"
+
+	"MailFrom2"	"From: Brad Campbell"
+	"MailDate2"	"Date: 12/20/52"
+	"MailSubject2"	"Subject: Need Help"
+	"MailBody2A"	"Cortez, Jones and Stefani are dead.  Limbs missing. Jones looks as if his legs got caught in a meatgrinder.  Cain and some of his men arrived this morning, real pushy, asking about Delivery 4903877."
+	"MailBody2B"	"They told us to stay behind until they'd searched the area for the other missing personnel.  I tapped a security terminals, watched them loading up the cargo vessel with those containers.  Needless to say, they didn't come back."
+	"MailBody2C"	"We'll never be able to make it back to the main complex without a ride.  Must be 50 degrees below out there.  WTH is going on?!?"
+}

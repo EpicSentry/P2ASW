@@ -1,0 +1,24 @@
+GAME
+{
+    // PDA belongs to Lt Cain
+    
+    // inbox
+    
+	"MailFrom1"	"From: Shaun Ming"
+	"MailDate1"	"Date: 12/21/52"
+	"MailSubject1"	"Subject: Breakthrough"
+	"MailBody1A"	"Lt. Cain,"
+	"MailBody1B"	"Big breakthrough today.  I've managed to isolate and decode large bits of the genetic blueprint of the alien lifeform.  This creature is astounding, I've never seen anything like it.  I've also learned a lot about the alien lifecycle.  Now for the unpleasant part:"
+	"MailBody1C"	"I need you to get everyone out of the laboratories except the scientists who work under me.  No one should be allowed to enter Deck 2.  In order to test my assumptions on how the Swarm reach maturity, I need something alive.  I believe it would have to be at least the size of a dog to satisfy their appetites.  Can I count on you?"
+	"MailBody1D"	"S. Ming"
+
+    // sent mail
+    
+	"MailFrom3"	"To: Shaun Ming"
+	"MailDate3" "Date: 12/21/52"
+	"MailSubject3"	"Subject: Re: Breakthrough"
+	"MailBody3A"	"Mr Ming,"
+	"MailBody3B"	"1) As good as done."
+	"MailBody3C"	"2) I'll see what I can do."
+	"MailBody3D"	"Lt. Cain, SynTek Security."
+}

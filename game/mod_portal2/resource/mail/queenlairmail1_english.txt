@@ -1,0 +1,11 @@
+GAME
+{
+    // PDA belongs to Helen Young
+    
+	"MailFrom1"	"From: Brian Howe"
+	"MailDate1"	"Date: 12/24/52"
+	"MailSubject1"	"Subject: Re: Going to the labs"
+	"MailBody1A"	"Sorry I couldn't contact you earlier.  We found a tunnel those things are using to spread out all over the colony.  We rigged an old warhead.  We're gonna try to seal off the tunnel with the blast."
+	"MailBody1B"	"We also got some alarming mails from Laura Callen.  I can't imagine how bad it must be up there.  Helen, for Christ's sake, stay away from the labs!  Lock yourself in until I get back to the main complex."
+	"MailBody1C"	"Brian"
+}

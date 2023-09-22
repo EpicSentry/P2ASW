@@ -1,0 +1,77 @@
+"Resource/UI/NB_Select_Marine_Entry.res"
+{
+	"Entry"
+	{
+		"fieldName"		"Entry"
+		"wide"		"118"
+		"tall"		"116"
+		"ControlName"		"Panel"
+		"zpos"		"5"
+	}
+	"ClassImage"
+	{
+		"fieldName"		"ClassImage"
+		"xpos"		"9"
+		"ypos"		"6"
+		"wide"		"22"
+		"tall"		"22"
+		"ControlName"		"ImagePanel"
+		"scaleImage"		"1"
+	}
+	"ClassLabel"
+	{
+		"fieldName"		"ClassLabel"
+		"xpos"		"36"
+		"ypos"		"7"
+		"wide"		"70"
+		"tall"		"10"
+		"font"		"DefaultSmall"
+		"labelText"		"ClassLabel"
+		"textAlignment"		"west"
+		"ControlName"		"Label"
+		"fgcolor_override"		"255 255 255 255"
+	}
+	"NameLabel"
+	{
+		"fieldName"		"NameLabel"
+		"xpos"		"36"
+		"ypos"		"15"
+		"wide"		"70"
+		"tall"		"10"
+		"zpos"		"5"
+		"font"		"DefaultSmall"
+		"labelText"		"NameLabel"
+		"textAlignment"		"west"
+		"ControlName"		"Label"
+// 		"pin_to_sibling"		"ClassLabel"
+// 		"pin_corner_to_sibling"		"0"
+// 		"pin_to_sibling_corner"		"2"
+		"fgcolor_override"		"83 148 192 255"
+	}
+	"PortraitImage"
+	{
+		"fieldName"		"PortraitImage"
+		"xpos"		"22"
+		"ypos"		"30"
+		"wide"		"70"
+		"tall"		"70"
+		"zpos"		"4"
+		"ControlName"		"CNB_Button"
+		"scaleImage"		"1"
+	}
+	"PlayerNameLabel"
+	{
+		"fieldName"		"PlayerNameLabel"
+		"xpos"		"12"
+		"ypos"		"100"
+		"wide"		"90"
+		"tall"		"11"
+		"zpos"		"20"
+		"font"		"Default"
+		"labelText"		"PlayerNameLabel"
+		"textAlignment"		"center"
+		"ControlName"		"Label"
+		"fgcolor_override"		"83 148 192 255"
+		"bgcolor_override"		"255 0 0 0"
+	}
+}

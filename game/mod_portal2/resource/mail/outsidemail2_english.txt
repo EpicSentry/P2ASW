@@ -1,0 +1,12 @@
+GAME
+{
+    // PDA belongs to Brian
+    
+	"MailFrom1"	"From: Helen Young"
+	"MailDate1"	"Date: 12/22/52"
+	"MailSubject1"	"Subject: No work"
+	"MailBody1A"	"Hey Brian,"
+	"MailBody1B"	"We keep missing each other."
+	"MailBody1C"	"Did you hear about the contamination?  They sealed off the labs indefinitely.  Only Ming has access. Armed security guards are stationed at the elevators."
+	"MailBody1D"	"Love, Helen.  PS: Kate's cat has gone missing again."
+}

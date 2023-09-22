@@ -1,0 +1,48 @@
+//-----------------------------------------------------------------------------
+//	SERVER_TEMPLATE.VPC
+//
+//	Project Script
+//-----------------------------------------------------------------------------
+
+$Macro SRCDIR		"..\.."
+$Macro GAMENAME 	"template"
+
+$Include "$SRCDIR\game\server\server_base.vpc"
+
+$Configuration
+{
+	$Compiler
+	{
+		$AdditionalIncludeDirectories	"$BASE;.\hl2;$SRCDIR\game\shared\hl2;.\template;$SRCDIR\game\shared\multiplayer;$SRCDIR\game\shared\template"
+		$PreprocessorDefinitions		"$BASE;SWARM_DLL;"
+	}
+}
+
+$Project "Server (Template)"
+{
+	$Folder	"Source Files"
+	{
+		$Folder "Template"
+		{
+			$File	"$SRCDIR\game\shared\template\sdk_fx_shared.cpp"
+			$File	"$SRCDIR\game\shared\template\sdk_gamemovement.cpp"
+			$File	"$SRCDIR\game\shared\template\sdk_gamerules.cpp"
+			$File	"$SRCDIR\game\shared\template\sdk_playeranimstate.cpp"
+			$File	"$SRCDIR\game\shared\template\sdk_player_shared.cpp"
+			$File	"$SRCDIR\game\shared\template\sdk_shareddefs.cpp"
+			$File	"$SRCDIR\game\shared\template\sdk_usermessages.cpp"
+			$File	"$SRCDIR\game\shared\template\sdk_weapon_parse.cpp"
+			$File	"$SRCDIR\game\shared\template\weapon_mp5.cpp"
+			$File	"$SRCDIR\game\shared\template\weapon_pistol.cpp"
+			$File	"$SRCDIR\game\shared\template\weapon_sdkbase.cpp"
+
+			$File	"template\npc_infected.cpp"
+			$File	"template\sdk_bot_temp.cpp"
+			$File	"template\sdk_eventlog.cpp"
+			$File	"template\sdk_client.cpp"
+			$File	"template\sdk_gameinterface.cpp"
+			$File	"template\sdk_player.cpp"
+			$File	"template\sdk_playermove.cpp"
+		}
+	}
+}

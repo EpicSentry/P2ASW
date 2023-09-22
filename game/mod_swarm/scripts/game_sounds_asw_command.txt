@@ -1,0 +1,574 @@
+"Command.co_m1_ob1"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m1_ob1.wav"
+}
+
+"Command.co_m1_ob2"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.00"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m1_ob2.wav"
+}
+
+"Command.co_m1_ob3"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.00"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m1_ob3.wav"
+}
+
+
+"Command.co_m1_ob4"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.00"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m1_ob4.wav"
+}
+
+"Command.co_m1_ob5"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.00"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m1_ob5.wav"
+}
+
+"Command.co_m1_ob6"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.00"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m1_ob6.wav"
+}
+
+"Command.co_m1_ob7"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.00"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m1_ob7.wav"
+}
+
+"Command.co_m1_ob8"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.00"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m1_ob8.wav"
+}
+
+"Command.co_m2_ob1"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m2_ob1.wav"
+}
+"Command.co_m2_ob2"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m2_ob2.wav"
+}
+"Command.co_m2_ob3"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m2_ob3.wav"
+}
+"Command.co_m2_ob4"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m2_ob4.wav"
+}
+"Command.co_m2_ob5"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m2_ob5.wav"
+}
+"Command.co_m2_ob6"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m2_ob6.wav"
+}
+
+"Command.co_m2_ob7"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m2_ob7.wav"
+}
+
+"Command.co_m2_ob8"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m2_ob8.wav"
+}
+
+
+"Command.co_m3_ob1"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m3_ob1.wav"
+}
+
+
+"Command.co_m3_ob2"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m3_ob2.wav"
+}
+
+"Command.co_m3_ob3"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m3_ob3.wav"
+}
+
+"Command.co_m4_ob1"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m4_ob1.wav"
+}
+
+"Command.co_m4_ob2"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m4_ob2.wav"
+}
+
+"Command.co_m4_ob3"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m4_ob3.wav"
+}
+
+"Command.co_m4_ob4"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m4_ob4.wav"
+}
+
+"Command.co_m4_ob5"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m4_ob5.wav"
+}
+
+
+"Command.co_m5_ob1"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m5_ob1.wav"
+}
+
+"Command.co_m5_ob2"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m5_ob2.wav"
+}
+
+"Command.co_m5_ob3"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m5_ob3.wav"
+}
+
+"Command.co_m5_ob4"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m5_ob4.wav"
+}
+
+"Command.co_m5_ob5"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m5_ob5.wav"
+}
+
+"Command.co_m6_ob1"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob1.wav"
+}
+
+"Command.co_m6_ob2"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob2.wav"
+}
+
+"Command.co_m6_ob3"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob3.wav"
+}
+
+"Command.co_m6_ob4"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob4.wav"
+}
+
+"Command.co_m6_ob5"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob5.wav"
+}
+
+"Command.co_m6_ob6"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob6.wav"
+}
+
+"Command.co_m6_ob7"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob7.wav"
+}
+
+"Command.co_m6_ob8"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob8.wav"
+}
+
+"Command.co_m6_ob9"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob9.wav"
+}
+
+"Command.co_m6_ob10"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob10.wav"
+}
+
+"Command.co_m6_ob11"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob11.wav"
+}
+
+"Command.co_m6_ob12"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob12.wav"
+}
+
+"Command.co_m6_ob13"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob13.wav"
+}
+
+"Command.co_m6_ob14"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob14.wav"
+}
+
+"Command.co_m6_ob15"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob15.wav"
+}
+
+"Command.co_m6_ob16"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob16.wav"
+}
+
+"Command.co_m6_ob17"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob17.wav"
+}
+
+"Command.co_m6_ob18"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob18.wav"
+}
+
+"Command.co_m6_ob19"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob19.wav"
+}
+
+"Command.co_m6_ob20"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob20.wav"
+}
+
+"Command.co_m6_ob21"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob21.wav"
+}
+
+"Command.co_m6_ob22"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob22.wav"
+}
+
+"Command.co_m6_ob23"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob23.wav"
+}
+
+
+"Command.co_m6_ob24"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob24.wav"
+}
+
+"Command.co_m6_ob25"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob25.wav"
+}
+
+
+"Command.co_m6_ob26"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob26.wav"
+}
+
+"Command.co_m6_ob27"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_m6_ob27.wav"
+}
+
+
+"Command.co_hold_ob1"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_hold_ob1.wav"
+}
+
+
+"Command.co_hold_ob2"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_hold_ob2.wav"
+}
+
+
+
+
+"Command.co_hold_ob3"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_hold_ob3.wav"
+}
+
+
+
+
+"Command.co_hold_ob4"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_hold_ob4.wav"
+}
+
+
+
+"Command.co_debriefing_ob1"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_debriefing_ob1.wav"
+}
+
+
+"Command.co_debriefing_ob2"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_debriefing_ob2.wav"
+}
+
+"Command.co_debriefing_ob3"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_debriefing_ob3.wav"
+}
+
+"Command.co_debriefing_ob4"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_debriefing_ob4.wav"
+}
+
+"Command.co_debriefing_ob5"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_debriefing_ob5.wav"
+}
+
+"Command.co_debriefing_ob6"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_debriefing_ob6.wav"
+}
+
+"Command.co_debriefing_ob7"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_debriefing_ob7.wav"
+}
+
+"Command.co_debriefing_ob8"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_debriefing_ob8.wav"
+}
+
+"Command.co_debriefing_ob9"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_debriefing_ob9.wav"
+}
+
+"Command.co_debriefing_ob10"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+	"wave"			"*#vo\command\co_debriefing_ob10.wav"
+}
+
+
+

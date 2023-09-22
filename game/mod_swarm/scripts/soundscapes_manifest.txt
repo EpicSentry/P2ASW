@@ -1,0 +1,21 @@
+soundscales_manifest
+{
+	"file"		"scripts/soundscapes.txt"
+
+	// List additional soundscape files here
+
+	"file"		"scripts/soundscapes_selection_screen.txt"
+	"file"		"scripts/soundscapes_sewers.txt"
+	"file"		"scripts/soundscapes_sewers_v2.txt"
+	"file"		"scripts/soundscapes_industrial.txt"
+	"file"		"scripts/soundscapes_infested.txt"
+	"file"		"scripts/soundscapes_deima.txt"
+	"file"		"scripts/soundscapes_TimorStation.txt"
+	"file"		"scripts/soundscapes_landingbay.txt"
+	"file"		"scripts/soundscapes_rydberg.txt"
+	"file"		"scripts/soundscapes_tutorial.txt"
+	"file"		"scripts/soundscapes_indoors.txt"
+	"file"		"scripts/soundscapes_residential.txt"
+	"file"		"scripts/soundscapes_mine.txt"
+	"file"		"scripts/soundscapes_outside.txt"
+}

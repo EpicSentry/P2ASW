@@ -1,0 +1,76 @@
+// sample animation script
+//
+//
+// commands:
+//	Animate <panel name> <variable> <target value> <interpolator> <start time> <duration>
+//		variables:
+//			FgColor
+//			BgColor
+//			Position
+//			Size
+//			Blur		(hud panels only)
+//			TextColor	(hud panels only)
+//			Ammo2Color	(hud panels only)
+//			Alpha		(hud weapon selection only)
+//			SelectionAlpha  (hud weapon selection only)
+//			TextScan	(hud weapon selection only)
+//
+//		interpolator:
+//			Linear
+//			Accel - starts moving slow, ends fast
+//			Deaccel - starts moving fast, ends slow
+//			Spline - simple ease in/out curve
+//			Pulse - < freq > over the duration, the value is pulsed (cosine) freq times ending at the dest value (assuming freq is integral)
+//			Flicker - < randomness factor 0.0 to 1.0 > over duration, each frame if random # is less than factor, use end value, otherwise use prev value
+//
+//	RunEvent <event name> <start time>
+//		starts another even running at the specified time
+//
+//	StopEvent <event name> <start time>
+//		stops another event that is current running at the specified time
+//
+//	StopAnimation <panel name> <variable> <start time>
+//		stops all animations refering to the specified variable in the specified panel
+//
+//	StopPanelAnimations <panel name> <start time>
+//		stops all active animations operating on the specified panel
+//
+//  SetFont <panel name> <fontparameter> <fontname from scheme> <set time> 
+//
+//	SetTexture <panel name> <textureidname> <texturefilename> <set time>
+//
+//  SetString <panel name> <string varname> <stringvalue> <set time>
+
+
+// =================================================
+// Holdout mode animations
+// =================================================
+event WaveAnnounce
+{
+	Animate WaveAnnounceLabel Position "150 0" Deaccel 0.0 0.3
+	Animate WaveAnnounceLabel FgColor "255 255 255 255" Linear 0.0 0.3
+	Animate WaveAnnounceLabel BgColor "0 0 0 128" Linear 0.0 0.3
+	Animate WaveAnnounceLabel Position "50 0" Accel 4.0 0.4
+	Animate WaveAnnounceLabel FgColor "255 255 255 0" Linear 4.0 0.4
+	Animate WaveAnnounceLabel BgColor "0 0 0 0" Linear 4.0 0.4
+}
+
+event GetReady
+{
+	Animate GetReadyLabel Position "165 30" Deaccel 0.4 0.3
+	Animate GetReadyLabel FgColor "255 255 255 255" Linear 0.4 0.3
+	Animate GetReadyLabel BgColor "0 0 0 128" Linear 0.4 0.3
+	Animate GetReadyLabel Position "50 30" Accel 4.0 0.4
+	Animate GetReadyLabel FgColor "255 255 255 0" Linear 4.0 0.4
+	Animate GetReadyLabel BgColor "0 0 0 0" Linear 4.0 0.4
+}
+
+event WaveComplete
+{
+	Animate WaveCompleteLabel Position "225 0" Deaccel 0.0 0.3
+	Animate WaveCompleteLabel FgColor "255 255 255 255" Linear 0.0 0.3
+	Animate WaveCompleteLabel BgColor "0 0 0 128" Linear 0.0 0.3
+	Animate WaveCompleteLabel Position "50 0" Accel 5.0 0.4
+	Animate WaveCompleteLabel FgColor "255 255 255 0" Linear 5.0 0.4
+	Animate WaveCompleteLabel BgColor "0 0 0 0" Linear 5.0 0.4
+}

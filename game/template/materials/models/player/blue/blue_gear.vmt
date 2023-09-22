@@ -1,0 +1,13 @@
+"VertexLitGeneric"
+{
+	"$basetexture"	"models\player\blue\blue_gear"
+	"$bumpmap" "models\player\blue\blue_gear_normal"	
+	"$phong" "1"
+
+//	"$phongexponent" "5"
+	"$phongboost" "1"	
+	"$phongfresnelranges"	"[1 2 6]"
+//	"$halflambert" "1"
+	"$phongexponenttexture" "models\player\blue\blue_gear_exp"
+//	"$phongalbedotint" "1"								
+}

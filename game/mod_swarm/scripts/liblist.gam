@@ -1,0 +1,5 @@
+// Valve Game Info file
+//  These are key/value pairs.  Certain mods will use different settings.
+//
+game "Infested"
+hlversion "1000"

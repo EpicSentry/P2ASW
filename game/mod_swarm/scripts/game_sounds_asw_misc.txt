@@ -1,0 +1,1104 @@
+// =========================
+// ALIEN SWARM MISC SOUNDS
+// =========================
+
+"Misc.MainUI"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"rndwave"
+	{
+		"wave"	"*#ui\breathing01.wav"
+		"wave"	"*#ui\breathing02.wav"
+		"wave"	"*#ui\breathing03.wav"
+	}
+}
+
+"Misc.BloodhoundHover"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.5"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_85dB"
+	
+	"wave"	"ambient\vehicle\bloodhoundEngine.wav"
+}
+
+"Misc.BloodhoundHoverLFE"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.75"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_90dB"
+	
+	"wave"	"ambient\vehicle\bloodhoundLFE.wav"
+}
+
+
+"Misc.BloodhoundDrop"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+	
+	"wave"	"ambient\vehicle\bloodhound_drop.wav"
+}
+
+"Misc.Heartbeat"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.5"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"rndwave"
+	{
+		"wave"	"swarm\gameeffects\heartbeat1.wav"
+		"wave"	"swarm\gameeffects\heartbeat2.wav"
+	}
+}
+
+"Misc.Geiger"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_85dB"
+	
+	"wave"	"swarm\gameeffects\geiger.wav"
+}
+
+
+"Marine.DeathBeep"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_85dB"
+	
+	"wave"	"swarm\gameeffects\MarineDeathBeep.wav"
+}
+
+
+
+"ASWComputer.Loop"
+{
+	"channel"	"CHAN_ITEM"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\SynTekComputerLoop.wav"
+}
+
+
+"ASWComputer.Startup"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\SynTekStartUp.wav"
+}
+
+"ASWComputer.ColumnTick"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\movehackingstrip.wav"
+}
+
+"ASWComputer.MenuButton"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	
+	"wave"	"ambient\computer\SynTekComputerMenuButton.wav"
+}
+
+"ASWComputer.NumberAligned"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	
+	"wave"	"ambient\computer\SyntekComputerNumberAligned.wav"
+}
+
+"ASWComputer.MenuBack"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\SynTekComputerMenuBack.wav"
+}
+
+"ASWComputer.Mouseover"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\SynTekComputerMouseover.wav"
+}
+
+"ASWComputer.AccessDenied"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\SynTekComputerAccessDenied.wav"
+}
+
+"ASWComputer.StartedHacking"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\SynTekComputerHackStart.wav"
+}
+
+"ASWComputer.HackComplete"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\SynTekComputerHackComplete.wav"
+}
+
+"ASWComputer.Downloading"
+{
+	"channel"	"CHAN_STATIC"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\SynTekComputerDownloading.wav"
+}
+
+"ASWComputer.AccessDeniedBiohazard1"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\AccessDeniedBiohazard1.wav"
+}
+
+"ASWComputer.AccessDeniedBiohazard1"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\AccessDeniedBiohazard2.wav"
+}
+
+"ASWComputer.alarm"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\alarm.wav"
+}
+
+"ASWComputer.AtmosphericReport"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\AtmosphericReport.wav"
+}
+
+"ASWComputer.AwaitingSubsystemAlignment"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\AwaitingSubsystemAlignment.wav"
+}
+
+"ASWComputer.BiohazardDetected2"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\BiohazardDetected2.wav"
+}
+
+"ASWComputer.DownloadComplete"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\DownloadComplete.wav"
+}
+
+"ASWComputer.Mail"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\Mail.wav"
+}
+
+"ASWComputer.News"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\News.wav"
+}
+
+"ASWComputer.Override"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\Override.wav"
+}
+
+"ASWComputer.PlantStatus"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\PlantStatus.wav"
+}
+
+"ASWComputer.QuarantineInEffect2"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\QuarantineInEffect2.wav"
+}
+
+"ASWComputer.ReactorOnline"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\ReactorOnline.wav"
+}
+
+"ASWComputer.RemoteTurret"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\RemoteTurret.wav"
+}
+
+"ASWComputer.SecurityCamera"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\SecurityCamera.wav"
+}
+
+"ASWComputer.Stocks"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\Stocks.wav"
+}
+
+"ASWComputer.CriticalData"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\CriticalData.wav"
+}
+
+"ASWComputer.TimeOut"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\TimeOut.wav"
+}
+
+"ASWComputer.SyntekPDA"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\SyntekPDA.wav"
+}
+
+"ASWComputer.SyntekPersonalDigitalAssistant"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\SyntekPersonalDigitalAssistant.wav"
+}
+
+
+//--------
+
+"ASWButtonPanel.TileTurn"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	
+	"wave"	"ambient\computer\SelectDoorTile.wav"
+}
+
+"ASWButtonPanel.TileLit"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	
+	"wave"	"ambient\computer\DoorTileLightUp.wav"
+}
+
+"ASWButtonPanel.WireActive"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\DoorWireUnlocked.wav"
+}
+
+"ASWScanner.Idle1"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.2"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"swarm\gameeffects\HeatScannerIdle.wav"
+}
+
+"ASWScanner.Idle2"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.2"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"swarm\gameeffects\HeatScannerIdle2.wav"
+}
+
+"ASWScanner.Idle3"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.2"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"swarm\gameeffects\HeatScannerIdle3.wav"
+}
+
+"ASWScanner.Idle4"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.2"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"swarm\gameeffects\HeatScannerIdle4.wav"
+}
+
+"ASWScanner.Idle5"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.2"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"swarm\gameeffects\HeatScannerIdle5.wav"
+}
+
+"ASWScanner.Idle6"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.2"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"swarm\gameeffects\HeatScannerIdle6.wav"
+}
+
+"ASWScanner.Idle7"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.2"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"swarm\gameeffects\HeatScannerIdle7.wav"
+}
+
+"ASWScanner.Idle8"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.2"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"swarm\gameeffects\HeatScannerIdle8.wav"
+}
+
+"ASWScanner.Idle9"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.2"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"swarm\gameeffects\HeatScannerIdle9.wav"
+}
+
+"ASWScanner.Idle10"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.2"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"swarm\gameeffects\HeatScannerIdle10.wav"
+}
+
+"ASWScanner.Idle11"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.2"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"swarm\gameeffects\HeatScannerIdle11.wav"
+}
+
+"ASWScanner.Idle12"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.2"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"swarm\gameeffects\HeatScannerIdle12.wav"
+}
+
+"ASWScanner.Idle13"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.2"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"swarm\gameeffects\HeatScannerIdle13.wav"
+}
+
+"ASWScanner.Warning1"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.5"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"swarm\gameeffects\HeatScannerWarning.wav"
+}
+
+"ASWScanner.Warning2"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.5"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"swarm\gameeffects\HeatScannerWarning2.wav"
+}
+
+"ASWScanner.Warning3"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.5"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"swarm\gameeffects\HeatScannerWarning3.wav"
+}
+
+"ASWScanner.Warning4"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.5"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"swarm\gameeffects\HeatScannerWarning4.wav"
+}
+
+"ASWScanner.Warning5"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.5"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"swarm\gameeffects\HeatScannerWarning5.wav"
+}
+
+"ASWScanner.Warning6"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.5"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"swarm\gameeffects\HeatScannerWarning6.wav"
+}
+
+"ASWScanner.Warning7"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.5"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"swarm\gameeffects\HeatScannerWarning7.wav"
+}
+
+"ASWScanner.Warning8"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.5"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"swarm\gameeffects\HeatScannerWarning8.wav"
+}
+
+"ASWScanner.Warning9"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.5"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"swarm\gameeffects\HeatScannerWarning9.wav"
+}
+
+"ASWScanner.Drawing"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.9"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\DoorTileLightUp.wav"
+}
+
+
+"ASWCountdown.WarningWarheadPathBlocked2"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"	"ambient\computer\WarningWarheadPathBlocked2.wav"
+}
+
+"ASWCountdown.Countdown60"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"vo\command\Countdown60.wav"
+}
+
+"ASWCountdown.Countdown30"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"vo\command\Countdown30.wav"
+}
+
+"ASWCountdown.Countdown10"
+{
+	"channel"	"CHAN_VOICE"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"vo\command\Countdown10.wav"
+}
+
+
+"ASWGoo.GooLoop"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"90, 110"
+
+	"soundlevel"	"SNDLVL_85dB"
+
+	"wave"	"aliens\voc\biomass\alive_loop.wav"
+}
+
+"ASWGoo.GooScream"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+
+	"soundlevel"	"SNDLVL_85dB"
+
+	"wave"	"aliens\voc\biomass\death.wav"
+}
+
+"ASWGoo.GooDissolve"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"0.7, 1.0"
+
+	"soundlevel"	"SNDLVL_80dB"
+	
+	"rndwave"
+	{
+		"wave"	"aliens\impacts\shared\spray01.wav"
+		"wave"	"aliens\impacts\shared\spray02.wav"
+		"wave"	"aliens\impacts\shared\spray03.wav"
+	}
+}
+
+"ASWFire.AcidBurn"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"1.0"
+	"pitch"		"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		 "swarm/gameeffects/acidburn.wav" 
+}
+
+
+"ASWFire.BurningFlesh"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.45"
+	"pitch"		"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		 "ambient/fire/fire_small_loop2.wav" 
+}
+
+"ASWFire.BurningObject"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"VOL_NORM"
+	"pitch"		"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		 "ambient/fire/fire_small_loop2.wav" 
+}
+
+"ASWFire.StopBurning"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"VOL_NORM"
+	"pitch"		"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		 "null.wav" 
+}
+
+"ASWInterface.AreaBrackets"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"swarm\interface\areabrackets.wav"
+}
+
+"ASWInterface.AreaBracketsLoop"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"swarm\interface\areabracketsloop.wav"
+}
+
+"ASWInterface.Button3"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"swarm\interface\buttonclick3.wav"
+}
+
+"ASWInterface.Button4"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"swarm\interface\buttonclick4.wav"
+}
+
+"ASWInterface.Button5"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"swarm\interface\buttonclick5.wav"
+}
+
+"ASWInterface.ClearDisplay"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"swarm\interface\cleardisplay.wav"
+}
+
+"ASWInterface.MissionBoxes"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"swarm\interface\missionboxes.wav"
+}
+
+"ASWInterface.ObjectiveSlide"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"swarm\interface\objectiveslide.wav"
+}
+
+"ASWInterface.SelectWeapon"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"music\solo\select_weapon.wav"
+}
+
+"ASWInterface.SelectWeaponSlot"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"swarm\interface\select_weapon_slot.wav"
+}
+
+"ASWInterface.startmission"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"swarm\interface\StartMission.wav"
+}
+
+"ASWInterface.StartMission2"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"swarm\interface\startmission2.wav"
+}
+
+"ASWInterface.TabClick"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"swarm\interface\tabclick1.wav"
+}
+
+"ASWInterface.TabClick2"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"swarm\interface\tabclick2.wav"
+}
+
+"ASWInterface.Teletype2"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"swarm\interface\teletypeblip2.wav"
+}
+
+"ASWInterface.Teletype3"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"swarm\interface\teletypeblip3.wav"
+}
+
+"ASWInterface.TooltipBox"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"swarm\interface\tooltipbox.wav"
+}
+
+"ASWInterface.SkillUpgrade"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"swarm\interface\upgrade.wav"
+}
+
+"ASWInterface.SkillUpgrade2"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"swarm\interface\upgrade2.wav"
+}
+
+"ASWInterface.WeaponSlideOff"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"swarm\interface\weapon_slide_off.wav"
+}
+
+"ASWInterface.WeaponSlideOn"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"swarm\interface\weapon_slide_on.wav"
+}
+
+
+"MouseMenu.rollover"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel" 	"SNDLVL_NORM"
+	"pitch"			"PITCH_NORM"
+
+	"wave"		"UI/buttonrollover.wav"
+}
+
+"MouseMenu.abort"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel" 	"SNDLVL_NORM"
+	"pitch"			"PITCH_NORM"
+
+	"wave"		"UI/buttonclickrelease.wav"
+}
+
+"ASW_XP.LevelUp"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"1.0"
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"		"#UI/menu_LevelUp.wav"
+}

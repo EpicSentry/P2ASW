@@ -1,0 +1,208 @@
+//////////////////////////Deima//////////////////////////////
+
+//// Utility random scapes
+
+
+
+
+"util_ext.windgusts"
+{
+
+	
+	"playrandom"
+	{
+		"time"		"12,25"
+		"volume"	"0.55,0.95"
+		"pitch"		"90,105"
+		"position"	"random"
+
+		"rndwave"
+		{
+			"wave"	"scapes/2d/random_amb/Gust_01.wav"
+			"wave"	"scapes/2d/random_amb/Gust_02.wav"
+			"wave"	"scapes/2d/random_amb/Gust_03.wav"
+			"wave"	"scapes/2d/random_amb/Gust_04.wav"
+		}
+
+	}
+
+}
+
+
+
+"util_metal.rattles"
+{
+
+	
+	"playrandom"
+	{
+		"time"		"10,20"
+		"volume"	".55,.95"
+		"pitch"		"60,105"
+		"position"	"random"
+
+		"rndwave"
+		{
+			"wave"	"scapes/2d/random_amb/metalrattle_01.wav"
+			"wave"	"scapes/2d/random_amb/metalrattle_02.wav"
+			"wave"	"scapes/2d/random_amb/metalrattle_03.wav"
+			"wave"	"scapes/2d/random_amb/metalrattle_04.wav"
+		}
+
+	}
+
+}
+
+"util_abstract.ambient"
+{
+
+	
+	"playrandom"
+	{
+		"time"		"10,28"
+		"volume"	".85,.99"
+		"pitch"		"90,105"
+		"position"	"random"
+
+		"rndwave"
+		{
+			"wave"	"scapes/2d/random_amb/RandomAbAmb_01.wav"
+			"wave"	"scapes/2d/random_amb/RandomAbAmb_02.wav"
+			"wave"	"scapes/2d/random_amb/RandomAbAmb_03.wav"
+			"wave"	"scapes/2d/random_amb/RandomAbAmb_09.wav"
+			"wave"	"scapes/2d/random_amb/RandomAbAmb_10.wav"
+			"wave"	"scapes/2d/random_amb/RandomAbAmb_11.wav"
+		}
+
+	}
+
+}
+
+
+
+
+
+/////////////////////
+/////////////////////
+
+"outside.spawn"
+{
+
+	
+	"dsp"	"1"
+	//"fadetime" ".5"
+
+	"playsoundscape"
+	{
+		"name"	"util_ext.windgusts"
+		"volume" "0.4"
+	}
+
+	"playsoundscape" 
+	{
+		"name"	"util_abstract.ambient"
+		"volume" "1"
+	}
+
+	"playlooping"
+	{
+		"volume"	".8"
+		"pitch"		"100"
+		"wave"		"(scapes/2D/exterior1/icy_wind02.wav"
+		"position"	"random"
+	}
+}
+
+"outside.bridge"
+{
+
+	
+	//"dsp"	".5"
+
+	"playsoundscape"
+	{
+		"name"	"util_ext.windgusts"
+		"volume" "0.45"
+	}
+
+	"playsoundscape"
+	{
+		"name"	"util_abstract.ambient"
+		"volume" "1"
+	}
+
+	"playsoundscape"
+	{
+		"name"	"util_metal.rattles"
+		"volume" "0.85"
+	}	
+
+	"playlooping"
+	{
+		"volume"	".78"
+		"pitch"		"73"
+		"wave"		"(scapes/2D/exterior1/icy_wind02.wav"
+		"position"	"random"
+	}
+
+	"playlooping"
+	{
+		"volume"	".76"
+		"pitch"		"85"
+		"wave"		"scapes/3D/large_fan_loop.wav"
+		"origin"	" 1335.781250, 5435.312500, 43.000000;"
+		"soundlevel" 	"SNDLVL_85dB"
+	}
+}
+
+
+"interior.small"
+{
+
+	
+	"dsp"	"3"
+	//"fadetime" ".5"
+
+
+	"playlooping"
+	{
+		"volume"	".8"
+		"pitch"		"100"
+		"wave"		"(scapes/2D/interior2/interiorC.wav"
+		"position"	"random"
+	}
+	"playlooping"
+	{
+		"volume"	".25"
+		"pitch"		"110"
+		"wave"		"(scapes/2D/exterior1/icy_wind02.wav"
+		"position"	"random"
+	}
+}
+
+
+
+
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+
+"interior2.DistantCritters"
+{
+	"playrandom"
+	{
+		"time"		"9,18"
+		"volume"	"0.33, 0.66"
+		"soundlevel"	"0"
+		"pitch"		"90,110"
+		"position" "random"
+		"rndwave"
+		{
+			"wave"	"scapes/2D/interior2/vox_wet01.wav"
+			"wave"	"scapes/2D/interior2/vox_wet02.wav"
+			"wave"	"scapes/2D/interior2/vox_wet03.wav"
+		}
+	}
+}
+
+
+//////////////////////////////////////////////////////////	

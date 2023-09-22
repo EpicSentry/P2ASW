@@ -1,0 +1,121 @@
+"ASW_Zombie.Pain"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"0.95"
+	"pitch"			"95, 104"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"rndwave"
+	{
+		"wave"	"swarm/civvyz/Growl1.wav"
+		"wave"	"swarm/civvyz/Gurgle1.wav"
+		"wave"	"swarm/civvyz/Gurgle3.wav"
+	}
+}
+
+"ASW_Zombie.Alert"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"0.95"
+	"pitch"			"95, 104"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"rndwave"
+	{
+		"wave"	"swarm/civvyz/spot1.wav"		
+	}
+}
+
+"ASW_Zombie.Idle"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"0.75"
+	"pitch"		"92, 105"
+
+	"soundlevel"	"SNDLVL_65db"
+
+	"rndwave"
+	{
+		"wave"	"swarm/civvyz/Idle1.wav"
+		"wave"	"swarm/civvyz/Idle2.wav"
+		"wave"	"swarm/civvyz/Idle3.wav"
+		"wave"	"swarm/civvyz/Idle4.wav"
+	}
+}
+
+"ASW_Zombie.Die"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"0.95"
+	"pitch"			"95, 105"
+
+	"soundlevel"	"SNDLVL_NORM"
+	"rndwave"
+	{
+		"wave"	"swarm/civvyz/Gurgle2.wav"
+		"wave"	"swarm/civvyz/Gurgle4.wav"
+		"wave"	"swarm/civvyz/Gurgle5.wav"		
+	}
+}
+
+"ASW_Zombie.Attack"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"0.600"
+	"pitch"			"95, 105"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"rndwave"
+	{
+		"wave"	"swarm/civvyz/Attack1.wav"
+		"wave"	"swarm/civvyz/Attack2.wav"
+		"wave"	"swarm/civvyz/Attack3.wav"
+	}
+}
+ 
+ "ASW_Zombie.Moan1"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"0.95"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"			"swarm/civvyz/OnFire.wav"
+}
+
+ "ASW_Zombie.Moan2"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"0.95"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"			"swarm/civvyz/OnFire2.wav"
+}
+
+ "ASW_Zombie.Moan3"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"0.95"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"			"swarm/civvyz/OnFire.wav"
+}
+
+ "ASW_Zombie.Moan4"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"0.95"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"			"swarm/civvyz/OnFire2.wav"
+}
