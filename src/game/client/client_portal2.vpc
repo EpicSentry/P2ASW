@@ -51,6 +51,7 @@ $Project "Client (Portal 2)"
 			$File	"hl2\c_hl2_playerlocaldata.h"
 			$File	"hl2\c_corpse.cpp"
 			$File	"hl2\c_corpse.h"
+			$File	"hl2\c_func_tankmortar.cpp"
 		}
 		
 		$Folder	"Multiplayer"
