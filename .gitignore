@@ -151,3 +151,4 @@ game/platform
 Debug_*
 Release_*
 !src/common/debug_dll_check.cpp
+!game/mod_portal2/pak01_dir.vpk
