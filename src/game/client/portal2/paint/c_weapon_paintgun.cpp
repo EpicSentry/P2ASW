@@ -534,7 +534,7 @@ static void NextPaint()
 	}
 }
 // FIXME: Bring this back for DLC2
-//static ConCommand nextpaint( "nextpaint", NextPaint );
+static ConCommand nextpaint( "nextpaint", NextPaint );
 
 
 static void PrevPaint()
@@ -550,7 +550,7 @@ static void PrevPaint()
 	}
 }
 // FIXME: Bring this back for DLC2
-//static ConCommand prevpaint( "prevpaint", PrevPaint );
+static ConCommand prevpaint( "prevpaint", PrevPaint );
 
 
 static void ChangePaintTo( const CCommand& args )
@@ -580,4 +580,4 @@ static void ChangePaintTo( const CCommand& args )
 	}*/
 }
 // FIXME: Bring this back for DLC2
-//static ConCommand changepaintto("changepaintto", ChangePaintTo );
+static ConCommand changepaintto("changepaintto", ChangePaintTo );
