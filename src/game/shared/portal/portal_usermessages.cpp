@@ -43,7 +43,15 @@ void RegisterUserMessages()
 	usermessages->Register( "CreditsPortalMsg", 1 );
 	usermessages->Register( "LogoTimeMsg", 4 );
 	usermessages->Register( "AchievementEvent", -1 );
-
+	
+	// Paint messages
+	usermessages->Register( "PaintWorld", -1 );
+	usermessages->Register( "PaintEntity", sizeof( long ) + sizeof( uint8 ) + sizeof( Vector ) );
+	usermessages->Register( "ChangePaintColor", sizeof( long ) + sizeof( uint8 ) );
+	usermessages->Register( "PaintBombExplode", sizeof( Vector ) + sizeof( uint8 ) + sizeof( uint8 ) + sizeof( BYTE ) );
+	usermessages->Register( "RemoveAllPaint", 0 );
+	usermessages->Register( "PaintAllSurfaces", sizeof( BYTE ) );
+	usermessages->Register( "RemovePaint", sizeof( long ) );
 
 	//new stuff for portal
 	usermessages->Register( "EntityPortalled", sizeof( long ) + sizeof( long ) + sizeof( Vector ) + sizeof( QAngle ) ); //something got teleported through a portal

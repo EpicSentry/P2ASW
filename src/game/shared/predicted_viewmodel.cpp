@@ -53,7 +53,7 @@ void CPredictedViewModel::CalcViewModelLag( Vector& origin, QAngle& angles, QAng
 {
 #ifdef CLIENT_DLL
 	float interp = cl_wpn_sway_interp.GetFloat();
-	if ( !interp )
+	if ( !interp /*|| m_bShouldIgnoreOffsetAndAccuracy */ )
 		return;
 
 	if ( prediction->InPrediction() && !prediction->IsFirstTimePredicted() )
@@ -68,7 +68,7 @@ void CPredictedViewModel::CalcViewModelLag( Vector& origin, QAngle& angles, QAng
 	
 	// Add an entry to the history.
 	m_vLagAngles = angles;
-	m_LagAnglesHistory.NoteChanged( gpGlobals->curtime, interp, false );
+	m_LagAnglesHistory.NoteChanged( gpGlobals->curtime, gpGlobals->curtime, interp, false );
 	
 	// Interpolate back 100ms.
 	m_LagAnglesHistory.Interpolate( gpGlobals->curtime, interp );
@@ -79,9 +79,16 @@ void CPredictedViewModel::CalcViewModelLag( Vector& origin, QAngle& angles, QAng
 	AngleVectors( -angleDiff, &vLaggedForward, 0, 0 );
 	Vector vForwardDiff = Vector(1,0,0) - vLaggedForward;
 
+	//if ( ShouldFlipModel() )
+	//	right = -right;
+
 	// Now offset the origin using that.
 	vForwardDiff *= cl_wpn_sway_scale.GetFloat();
 	m_vPredictedOffset = forward*vForwardDiff.x + right*-vForwardDiff.y + up*vForwardDiff.z;
-	origin += m_vPredictedOffset;
+
+	// reduce offset as viewmodel angle approaches nearly vertical
+	float flMult = clamp( abs(DotProduct(up, Vector(0,0,1))) - 0.02f, 0, 1 );
+
+	origin += (m_vPredictedOffset * flMult);
 #endif
 }

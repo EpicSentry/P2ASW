@@ -12,6 +12,8 @@
 #pragma once
 #endif
 
+#define FINDING_PORTAL_CRASH 0
+
 #include "cbase.h"
 
 #ifdef CLIENT_DLL

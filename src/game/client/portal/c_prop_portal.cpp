@@ -43,6 +43,8 @@
 
 LINK_ENTITY_TO_CLASS( prop_portal, C_Prop_Portal );
 
+#undef CProp_Portal
+
 IMPLEMENT_CLIENTCLASS_DT( C_Prop_Portal, DT_Prop_Portal, CProp_Portal )
 	RecvPropEHandle( RECVINFO(m_hLinkedPortal) ),
 	RecvPropBool( RECVINFO(m_bActivated) ),
@@ -494,7 +496,7 @@ void C_Prop_Portal::UpdateOnRemove( void )
 	}
 
 	g_pPortalRender->RemovePortal( this );
-
+	
 	BaseClass::UpdateOnRemove();
 }
 
@@ -508,10 +510,10 @@ void C_Prop_Portal::OnNewParticleEffect( const char *pszParticleName, CNewPartic
 		int iPortalCount = CProp_Portal_Shared::AllPortals.Count();
 		if( iPortalCount != 0 )
 		{
-			CProp_Portal **pPortals = CProp_Portal_Shared::AllPortals.Base();
+			C_Prop_Portal **pPortals = CProp_Portal_Shared::AllPortals.Base();
 			for( int i = 0; i != iPortalCount; ++i )
 			{
-				CProp_Portal *pTempPortal = pPortals[i];
+				C_Prop_Portal *pTempPortal = pPortals[i];
 				if ( pTempPortal != this && pTempPortal->m_bActivated )
 				{
 					Vector vPosition = pTempPortal->GetAbsOrigin();

@@ -13,6 +13,7 @@
 
 #include "baseanimating.h"
 #include "PortalSimulation.h"
+#include "prop_portal_shared.h"
 
 // FIX ME
 #include "portal_shareddefs.h"
@@ -59,7 +60,7 @@ public:
 	cplane_t m_plane_Origin; //a portal plane on the entity origin
 
 	CPhysicsCloneArea		*m_pAttachedCloningArea;
-	
+
 	bool	IsPortal2() const;
 	void	SetIsPortal2( bool bIsPortal2 );
 	const VMatrix& MatrixThisToLinked() const;

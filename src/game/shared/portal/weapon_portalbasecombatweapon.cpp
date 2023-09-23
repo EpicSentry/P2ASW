@@ -232,66 +232,74 @@ float CBasePortalCombatWeapon::CalcViewmodelBob( void )
 	static	float bobtime;
 	static	float lastbobtime;
 	float	cycle;
-	
-	CBasePlayer *player = ToBasePlayer( GetOwner() );
+
+	CBasePlayer *player = ToBasePlayer(GetOwner());
 	//Assert( player );
 
 	//NOTENOTE: For now, let this cycle continue when in the air, because it snaps badly without it
 
-	if ( ( !gpGlobals->frametime ) || ( player == NULL ) )
+	if ((!gpGlobals->frametime) || (player == NULL))
 	{
 		//NOTENOTE: We don't use this return value in our case (need to restructure the calculation function setup!)
 		return 0.0f;// just use old value
 	}
 
+	// Note: we use paint code for this so when player move on speed paint, gun bob faster (Bank)
 	//Find the speed of the player
-	float speed = player->GetLocalVelocity().Length2D();
+	float speed = player->GetLocalVelocity().Length();
 
-	//FIXME: This maximum speed value must come from the server.
-	//		 MaxSpeed() is not sufficient for dealing with sprinting - jdw
+	speed = clamp(speed, -player->MaxSpeed(), player->MaxSpeed());
 
-	speed = clamp( speed, -player_normspeed.GetFloat(), player_normspeed.GetFloat());
+	float bob_offset = RemapVal(speed, 0, player->MaxSpeed(), 0.0f, 1.0f);
 
-	float bob_offset = RemapVal( speed, 0, player_normspeed.GetFloat(), 0.0f, 1.0f );
-	
-	bobtime += ( gpGlobals->curtime - lastbobtime ) * bob_offset;
+	////Find the speed of the player
+	//float speed = player->GetLocalVelocity().Length2D();
+
+	////FIXME: This maximum speed value must come from the server.
+	////		 MaxSpeed() is not sufficient for dealing with sprinting - jdw
+
+	//speed = clamp( speed, -320, 320 );
+
+	//float bob_offset = RemapVal( speed, 0, 320, 0.0f, 1.0f );
+
+	bobtime += (gpGlobals->curtime - lastbobtime) * bob_offset;
 	lastbobtime = gpGlobals->curtime;
 
 	//Calculate the vertical bob
-	cycle = bobtime - (int)(bobtime/HL2_BOB_CYCLE_MAX)*HL2_BOB_CYCLE_MAX;
+	cycle = bobtime - (int)(bobtime / HL2_BOB_CYCLE_MAX)*HL2_BOB_CYCLE_MAX;
 	cycle /= HL2_BOB_CYCLE_MAX;
 
-	if ( cycle < HL2_BOB_UP )
+	if (cycle < HL2_BOB_UP)
 	{
 		cycle = M_PI * cycle / HL2_BOB_UP;
 	}
 	else
 	{
-		cycle = M_PI + M_PI*(cycle-HL2_BOB_UP)/(1.0 - HL2_BOB_UP);
+		cycle = M_PI + M_PI*(cycle - HL2_BOB_UP) / (1.0 - HL2_BOB_UP);
 	}
-	
+
 	g_verticalBob = speed*0.005f;
 	g_verticalBob = g_verticalBob*0.3 + g_verticalBob*0.7*sin(cycle);
 
-	g_verticalBob = clamp( g_verticalBob, -7.0f, 4.0f );
+	g_verticalBob = clamp(g_verticalBob, -7.0f, 4.0f);
 
 	//Calculate the lateral bob
-	cycle = bobtime - (int)(bobtime/HL2_BOB_CYCLE_MAX*2)*HL2_BOB_CYCLE_MAX*2;
-	cycle /= HL2_BOB_CYCLE_MAX*2;
+	cycle = bobtime - (int)(bobtime / HL2_BOB_CYCLE_MAX * 2)*HL2_BOB_CYCLE_MAX * 2;
+	cycle /= HL2_BOB_CYCLE_MAX * 2;
 
-	if ( cycle < HL2_BOB_UP )
+	if (cycle < HL2_BOB_UP)
 	{
 		cycle = M_PI * cycle / HL2_BOB_UP;
 	}
 	else
 	{
-		cycle = M_PI + M_PI*(cycle-HL2_BOB_UP)/(1.0 - HL2_BOB_UP);
+		cycle = M_PI + M_PI*(cycle - HL2_BOB_UP) / (1.0 - HL2_BOB_UP);
 	}
 
 	g_lateralBob = speed*0.005f;
 	g_lateralBob = g_lateralBob*0.3 + g_lateralBob*0.7*sin(cycle);
-	g_lateralBob = clamp( g_lateralBob, -7.0f, 4.0f );
-	
+	g_lateralBob = clamp(g_lateralBob, -7.0f, 4.0f);
+
 	//NOTENOTE: We don't use this return value in our case (need to restructure the calculation function setup!)
 	return 0.0f;
 }
@@ -304,16 +312,22 @@ float CBasePortalCombatWeapon::CalcViewmodelBob( void )
 //-----------------------------------------------------------------------------
 void CBasePortalCombatWeapon::AddViewmodelBob( CBaseViewModel *viewmodel, Vector &origin, QAngle &angles )
 {
-	Vector    forward, right, up;
+	Vector	forward, right, up;
 	AngleVectors(angles, &forward, &right, &up);
 
 	CalcViewmodelBob();
+
+
+	// Note: we need to use paint code for gun bob so the gun bobs correctly when player sticks on walls (Bank)
+	C_Portal_Player *pPortalPlayer = ToPortalPlayer(GetOwner());
+	if (!pPortalPlayer)
+		return;
 
 	// Apply bob, but scaled down to 40%
 	VectorMA(origin, g_verticalBob * 0.1f, forward, origin);
 
 	// Z bob a bit more
-	origin += g_verticalBob * 0.1f;
+	origin += g_verticalBob * 0.1f * pPortalPlayer->GetPortalPlayerLocalData().m_Up;
 
 	//move left and right
 	VectorMA(origin, g_lateralBob * 0.8f, right, origin);
@@ -340,6 +354,20 @@ void CBasePortalCombatWeapon::AddViewmodelBob( CBaseViewModel *viewmodel, Vector
 	forward = rotMatrix * forward;
 
 	VectorAngles(forward, up, angles);
+
+	//// Apply bob, but scaled down to 40%
+	//VectorMA( origin, g_verticalBob * 0.1f, forward, origin );
+	//
+	//// Z bob a bit more
+	//origin[2] += g_verticalBob * 0.1f;
+	//
+	//// bob the angles
+	//angles[ ROLL ]	+= g_verticalBob * 0.5f;
+	//angles[ PITCH ]	-= g_verticalBob * 0.4f;
+
+	//angles[ YAW ]	-= g_lateralBob  * 0.3f;
+
+	//VectorMA( origin, g_lateralBob * 0.8f, right, origin );
 }
 
 //-----------------------------------------------------------------------------

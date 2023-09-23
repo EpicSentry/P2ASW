@@ -16,7 +16,7 @@
 		"SearchPaths"
 		{
 			"Game"	"|gameinfo_path|."
-			"Game"	"D:\steamlibrary\SteamApps\common\Portal 2\portal2"
+			"Game"	"|all_source_engine_paths|../Portal 2/portal2"
 			"Game"	"platform"
 		}
 	}
