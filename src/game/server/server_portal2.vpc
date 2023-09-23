@@ -57,6 +57,12 @@ $Project "Server (Portal 2)"
 			$File	"hl2\prop_combine_ball.h"
 			$File	"hl2\hl2_playerlocaldata.cpp"
 			$File	"hl2\hl2_playerlocaldata.h"
+			$File	"hl2\ai_behavior_functank.cpp"
+			$File	"hl2\ai_behavior_functank.h"
+			$File	"hl2\func_tank.cpp"
+			$File	"hl2\func_tank.h"
+			$File	"hl2\grenade_beam.cpp"
+			$File	"hl2\grenade_beam.h"
 		}
 		
 		$Folder	"Portal 2"
