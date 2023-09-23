@@ -1,103 +1,128 @@
+﻿//===== Copyright � 1996-2005, Valve Corporation, All rights reserved. ======//
+//
+//  Purpose: (IDA Pro + 2014 dev leak PDB = this file made from scratch)
+//
+//============================================================================//
+
 #include "cbase.h"
-#include "mapentities.h" // Include this for the engine function
+#include "baseentity.h"
+#include "eventqueue.h"
 
-// This file is mostly useless, its just here so the vscripts valve uses think this entity is valid and will use it for the changelevel rather than the 5 second longer normal transition it falls back to.
+// memdbgon must be the last include file in a .cpp file!!!
+#include "tier0/memdbgon.h"
 
-class CPointChangeLevel : public CPointEntity
+#define PORTAL2_LANDMARK_NAME "__p2_landmark" // Custom define name
+
+//-----------------------------------------------------------------------------
+// Purpose: Sets the exact location in the world for transitioning maps and is referenced via targetname
+//-----------------------------------------------------------------------------
+class CInfoLandmark : public CPointEntity
 {
 public:
-	DECLARE_CLASS(CPointChangeLevel, CPointEntity);
-	DECLARE_DATADESC();
+    DECLARE_CLASS( CInfoLandmark, CPointEntity );
 
-	void Spawn() override;
-	void Think() override;
-	void InputChangeLevel(inputdata_t &inputData);
-
-private:
-	string_t m_szNextMapName; // Store the next map's name
-	bool m_bStopChecking;
-
-	void TeleportPlayerToLandmark(CBaseEntity* pLandmark); // Function to teleport player to the landmark
+    virtual void Activate();
 };
 
-LINK_ENTITY_TO_CLASS(point_changelevel, CPointChangeLevel);
+//-----------------------------------------------------------------------------
+// Purpose: Completely restored
+//-----------------------------------------------------------------------------
+void CInfoLandmark::Activate()
+{
+    BaseClass::Activate();
+    SetName( AllocPooledString( PORTAL2_LANDMARK_NAME ) ); // Line 33
+}
 
-BEGIN_DATADESC(CPointChangeLevel)
-// Input function mapping
-DEFINE_INPUTFUNC(FIELD_STRING, "ChangeLevel", InputChangeLevel),
+//-----------------------------------------------------------------------------
+// Purpose: A simple class to prepare maps to change to new levels in Portal 2
+//-----------------------------------------------------------------------------
+class CPointChangelevel : public CPointEntity
+{
+public:
+    DECLARE_CLASS( CPointChangelevel, CPointEntity );
+    DECLARE_DATADESC();
+private:
+    void InputChangeLevel( inputdata_t &inputdata );
+    void InputChangeLevelPostFade( inputdata_t &inputdata );
+
+    COutputEvent m_OnChangeLevel;
+};
+
+static char st_szOriginMap[ 32 ]; // cchMapNameMost?
+static char st_szDestinationMap[ 32 ]; // cchMapNameMost?
+
+ConVar sv_transition_fade_time( "sv_transition_fade_time", "0.5", FCVAR_DEVELOPMENTONLY );
+
+LINK_ENTITY_TO_CLASS( info_landmark_entry, CInfoLandmark ); // Valve goes by classname to differentiate between the two possible landmark types
+LINK_ENTITY_TO_CLASS( info_landmark_exit, CInfoLandmark );  // See CChangeLevel::BuildChangeLevelList for the implementation
+
+BEGIN_DATADESC( CPointChangelevel ) // Line 59
+
+    DEFINE_INPUTFUNC( FIELD_STRING, "ChangeLevel", InputChangeLevel ),
+    DEFINE_INPUTFUNC( FIELD_STRING, "ChangeLevelPostFade", InputChangeLevelPostFade ),
+
+    DEFINE_OUTPUT( m_OnChangeLevel, "OnChangeLevel" )
+
 END_DATADESC()
 
-void CPointChangeLevel::Spawn()
-{
-	m_bStopChecking = false;
-	SetNextThink(gpGlobals->curtime + 0.1f);
+LINK_ENTITY_TO_CLASS( point_changelevel, CPointChangelevel );
+
+//-----------------------------------------------------------------------------
+// Purpose: Completely restored
+//-----------------------------------------------------------------------------
+void CPointChangelevel::InputChangeLevel( inputdata_t &inputdata )
+{ // Line 74
+
+
+    float flFadeTime = sv_transition_fade_time.GetFloat(); // Line 77
+
+    CReliableBroadcastRecipientFilter allplayers;
+
+    UserMessageBegin( allplayers, "TransitionFade" ); // Line 81
+        WRITE_FLOAT( flFadeTime );
+    MessageEnd(); // Line 83
+
+    // Add the event to queue
+    g_EventQueue.AddEvent( this, "ChangeLevelPostFade", inputdata.value, flFadeTime, inputdata.pActivator, inputdata.pCaller, inputdata.nOutputID ); // Line 86
 }
 
-void CPointChangeLevel::Think()
-{
-	// This code was commented as when the player died this would accidentally teleport them to the start box rather than the elevator after the map was reloaded
 
-	// Check if we need to teleport and if we should stop checking
-	if (!m_bStopChecking)
-	{
-		// Search for the info_landmark_entry entity
-		CBaseEntity* pLandmark = gEntList.FindEntityByClassname(nullptr, "info_landmark_entry");
+//-----------------------------------------------------------------------------
+// Purpose: Completely restored
+// Input  : *pActivator - 
+//			*pCaller - 
+//			useType - 
+//			value - 
+//-----------------------------------------------------------------------------
+void CPointChangelevel::InputChangeLevelPostFade( inputdata_t &inputdata )
+{ // Line 98
+    // Fire entity output
+    m_OnChangeLevel.FireOutput( inputdata.pActivator, this ); // Line 100
 
-		if (pLandmark)
-		{
-			// Found the landmark, set flags
-			m_bStopChecking = true;
-			//Msg("Teleporting to entry landmark pos\n");
+    // Update our map info
+    Q_strncpy( st_szOriginMap, STRING( gpGlobals->mapname ), sizeof( st_szOriginMap ) ); // Line 103
+    Q_strncpy( st_szDestinationMap, inputdata.value.String(), sizeof( st_szDestinationMap ) );
 
-			// Call the teleport function and pass the landmark entity
-			//TeleportPlayerToLandmark(pLandmark);
-		}
-		else
-		{
-			// Landmark not found or multiple found, print message and stop checking
-			//Warning("Could not find info_landmark_entry or multiple found. Stopping checks.\n");
-			m_bStopChecking = true;
-		}
-	}
-	BaseClass::Think();
-	SetNextThink(gpGlobals->curtime + 0.1f);
+    // Fire the base game logic now
+    GameRules()->OnBeginChangeLevel( st_szDestinationMap, NULL ); // Line 107
+    engine->ChangeLevel( st_szDestinationMap, PORTAL2_LANDMARK_NAME ); // Line 108
 }
 
-void CPointChangeLevel::InputChangeLevel(inputdata_t &inputData)
-{
-	// Retrieve the next map's name from the input
-	const char* nextMapName = inputData.value.String();
 
-	// Convert to string_t
-	m_szNextMapName = AllocPooledString(nextMapName);
-
-	// Print the next map name to the console
-	//Warning("Initiating transition to map %s\n", STRING(m_szNextMapName));
-
-	// Trigger a changelevel to the specified map
-	engine->ChangeLevel(STRING(m_szNextMapName), nullptr);
+//-----------------------------------------------------------------------------
+// Purpose: Funcs for triggers.cpp
+//-----------------------------------------------------------------------------
+const char *ChangeLevel_DestinationMapName( void ) // Purpose: Completely restored
+{ // Line 116
+    return st_szDestinationMap; // Line 117
 }
 
-void CPointChangeLevel::TeleportPlayerToLandmark(CBaseEntity* pLandmark)
-{
-	// Check if the landmark entity is valid
-	if (!pLandmark)
-	{
-		Warning("Invalid landmark entity. Aborting\n");
-		return;
-	}
+const char *ChangeLevel_OriginMapName( void ) // Purpose: Completely restored
+{ // Line 121
+    return st_szOriginMap; // Line 122
+}
 
-	// Loop through all players and find the one you want to teleport
-	for (int i = 1; i <= gpGlobals->maxClients; i++)
-	{
-		CBasePlayer* pPlayer = UTIL_PlayerByIndex(i);
-
-		// Check if this player is connected and valid
-		if (pPlayer && pPlayer->IsConnected())
-		{
-			// Teleport the player to the landmark's position
-			pPlayer->SetAbsOrigin(pLandmark->GetAbsOrigin());
-			//Msg("point_changelevel tasks done\n");
-		}
-	}
+const char *ChangeLevel_GetLandmarkName( void ) // Purpose: Completely restored
+{ // Line 126
+    return PORTAL2_LANDMARK_NAME; // Line 127
 }

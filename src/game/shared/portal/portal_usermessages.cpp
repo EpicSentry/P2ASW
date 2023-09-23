@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright (c) 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -27,6 +27,7 @@ void RegisterUserMessages()
 	usermessages->Register( "ItemPickup", -1 );
 	usermessages->Register( "ShowMenu", -1 );
 	usermessages->Register( "Shake", 13 );
+	usermessages->Register( "Tilt", 22 );
 	usermessages->Register( "Fade", 10 );
 	usermessages->Register( "VGUIMenu", -1 );	// Show VGUI menu
 	usermessages->Register( "Rumble", 3 );	// Send a rumble to a controller
@@ -35,15 +36,38 @@ void RegisterUserMessages()
 	usermessages->Register( "VoiceMask", VOICE_MAX_PLAYERS_DW*4 * 2 + 1 );
 	usermessages->Register( "RequestState", 0 );
 	usermessages->Register( "CloseCaption", -1 ); // Show a caption (by string id number)(duration in 10th of a second)
+	usermessages->Register( "CloseCaptionDirect", -1 ); // Show a forced caption (by string id number)(duration in 10th of a second)
 	usermessages->Register( "HintText", -1 );	// Displays hint text display
 	usermessages->Register( "KeyHintText", -1 );	// Displays hint text display
 	usermessages->Register( "SquadMemberDied", 0 );
 	usermessages->Register( "AmmoDenied", 2 );
 	usermessages->Register( "CreditsMsg", 1 );
-	usermessages->Register( "CreditsPortalMsg", 1 );
 	usermessages->Register( "LogoTimeMsg", 4 );
 	usermessages->Register( "AchievementEvent", -1 );
+	usermessages->Register( "UpdateJalopyRadar", -1 );
+	usermessages->Register( "CurrentTimescale", 4 );	// Send one float for the new timescale
+	usermessages->Register( "DesiredTimescale", 13 );	// Send timescale and some blending vars
+
+	//new stuff for portal
+	usermessages->Register( "CreditsPortalMsg", 1 );
 	
+#ifdef PORTAL2
+	usermessages->Register( "InventoryFlash", sizeof( float ) + 1 );
+	usermessages->Register( "IndicatorFlash", sizeof( float ) + 1 );
+	usermessages->Register( "ControlHelperAnimate", 2 );
+	usermessages->Register( "TakePhoto", sizeof( long ) + sizeof( uint8 ) );
+	usermessages->Register( "Flash", sizeof( float ) + sizeof( Vector ) );
+	usermessages->Register( "HudPingIndicator", sizeof( Vector ) );
+	usermessages->Register( "OpenRadialMenu", -1 );
+	usermessages->Register( "AddLocator", -1 );
+	usermessages->Register( "MPMapCompleted", sizeof( char ) + sizeof( char ) );
+	usermessages->Register( "MPMapIncomplete", sizeof( char ) + sizeof( char ) );
+	usermessages->Register( "MPMapCompletedData", -1 );
+	usermessages->Register( "MPTauntEarned", -1 );
+	usermessages->Register( "MPTauntUnlocked", -1 );
+	usermessages->Register( "MPTauntLocked", -1 );
+	usermessages->Register( "MPAllTauntsLocked", -1 );
+
 	// Portal effects
 	usermessages->Register( "PortalFX_Surface", -1 );
 
@@ -56,7 +80,22 @@ void RegisterUserMessages()
 	usermessages->Register( "PaintAllSurfaces", sizeof( BYTE ) );
 	usermessages->Register( "RemovePaint", sizeof( long ) );
 
+	usermessages->Register( "StartSurvey", sizeof( long ) );
+	usermessages->Register( "ApplyHitBoxDamageEffect", sizeof( long ) + sizeof( uint8 ) + sizeof( uint8 ) );
+	usermessages->Register( "SetMixLayerTriggerFactor", -1 );
+	usermessages->Register( "TransitionFade", sizeof( float ) );
+
+	usermessages->Register( "ScoreboardTempUpdate", sizeof( long ) + sizeof( long ) );
+	usermessages->Register( "ChallengeModeCheatSession", -1 );
+	usermessages->Register( "ChallengeModeCloseAllUI", -1 );
+
+	// FIXME: Bring this back for DLC2
+	//usermessages->Register( "MPVSGameStart", sizeof( char ) );
+	//usermessages->Register( "MPVSGameOver", sizeof( BYTE ) );
+	//usermessages->Register( "MPVSRoundEnd", sizeof( BYTE ) );
+
 	//new stuff for portal
 	usermessages->Register( "EntityPortalled", sizeof( long ) + sizeof( long ) + sizeof( Vector ) + sizeof( QAngle ) ); //something got teleported through a portal
 	usermessages->Register( "KillCam", -1 );	
+#endif // PORTAL2
 }

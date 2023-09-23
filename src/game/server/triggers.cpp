@@ -34,12 +34,19 @@
 #include "ai_behavior_lead.h"
 #include "gameinterface.h"
 #include "fmtstr.h"
+#if defined ( PORTAL2 )
+#include "portal_player.h"
+#endif
 
 #ifdef HL2_DLL
 #include "hl2_player.h"
 #endif
 
-
+#ifdef PORTAL2
+extern const char *ChangeLevel_DestinationMapName( void );
+extern const char *ChangeLevel_OriginMapName( void );
+extern const char *ChangeLevel_GetLandmarkName( void );
+#endif // PORTAL2
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -1293,7 +1300,13 @@ void CTriggerVolume::Activate( void )
 {
 	BaseClass::Activate();
 
-
+#ifdef PORTAL2
+	// For simplicity, we always share the name of the landmarks
+	if ( m_iName.Get() == NULL_STRING )
+	{
+		SetName( AllocPooledString( ChangeLevel_GetLandmarkName() ) );
+	}
+#endif // PORTAL2
 }
 
 #define SF_CHANGELEVEL_NOTOUCH		0x0002
@@ -1873,7 +1886,30 @@ int CChangeLevel::InTransitionVolume( CBaseEntity *pEntity, const char *pVolumeN
 //------------------------------------------------------------------------------
 int CChangeLevel::BuildChangeLevelList( levellist_t *pLevelList, int maxList )
 {
+#ifdef PORTAL2
 
+	// Get our origin and destination names
+	const char *lpszDestMapName = ChangeLevel_DestinationMapName();
+	const char *lpszOriginMapName = ChangeLevel_OriginMapName();
+
+	// If these names are valid, we're opting into the streamlined level transition system
+	if ( lpszOriginMapName != NULL && lpszOriginMapName[0] != NULL && lpszDestMapName != NULL && lpszDestMapName[0] != NULL )
+	{
+		// Because this is called symmetrically on both sides of the transition, we need to infer from the names which side we're on
+		bool bAtDestination = !Q_stricmp( STRING(gpGlobals->mapname), lpszDestMapName );
+
+		// Find a landmark on this end of the transition to refer to
+		CBaseEntity *pentLandmark = gEntList.FindEntityByClassname( NULL, (bAtDestination) ? "info_landmark_entry" : "info_landmark_exit" );
+		if ( pentLandmark )
+		{
+			// Landmarks are all named the same thing, we only allow one entry and one exit per level
+			const char *lpszLandmarkName = ChangeLevel_GetLandmarkName();
+			if ( AddTransitionToList( pLevelList, 0, (bAtDestination) ? lpszOriginMapName : lpszDestMapName, lpszLandmarkName, pentLandmark->edict() ) )
+				return 1; // Only one way to go
+		}
+	}
+
+#endif
 
 	int nCount = 0;
 	CBaseEntity *pentChangelevel = gEntList.FindEntityByClassname( NULL, "trigger_changelevel" );
@@ -2196,9 +2232,10 @@ public:
 BEGIN_DATADESC( CTriggerPush )
 	DEFINE_KEYFIELD( m_vecPushDir, FIELD_VECTOR, "pushdir" ),
 	DEFINE_KEYFIELD( m_flAlternateTicksFix, FIELD_FLOAT, "alternateticksfix" ),
-
+#ifdef PORTAL2
+	DEFINE_KEYFIELD( m_flSpeed, FIELD_FLOAT, "pushspeed" ),
+#endif //PORTAL2
 	//DEFINE_FIELD( m_flPushSpeed, FIELD_FLOAT ),
-	DEFINE_KEYFIELD(m_flSpeed, FIELD_FLOAT, "pushspeed"), //P2ASW Change
 
 	DEFINE_INPUTFUNC( FIELD_VECTOR, "SetPushDirection", InputSetPushDirection ),
 END_DATADESC()
@@ -2236,25 +2273,28 @@ void CTriggerPush::Activate()
 {
 	// Fix problems with triggers pushing too hard under sv_alternateticks.
 	// This is somewhat hacky, but it's simple and we're really close to shipping.
-	if ( ( m_flAlternateTicksFix != 0 ) && IsSimulatingOnAlternateTicks() )
+	if ((m_flAlternateTicksFix != 0) && IsSimulatingOnAlternateTicks())
 	{
 		m_flPushSpeed = m_flSpeed * m_flAlternateTicksFix;
 	}
 	else
 	{
 		m_flPushSpeed = m_flSpeed;
+
+#ifdef PORTAL2
+		//
+		// DIRTY HACK TO FOLLOW
+		// 
+		// If alternateticks is disabled, our trigger_push values are too low
+		// because the single player game was tuned	with alternateticks on for the most part.
+		//
+		if (gpGlobals->maxClients == 1 && !IsSimulatingOnAlternateTicks())
+		{
+			m_flPushSpeed *= 2.0f;
+		}
+#endif // PORTAL 2
 	}
-	//
-	// DIRTY HACK TO FOLLOW
-	// 
-	// If alternateticks is disabled, our trigger_push values are too low
-	// because the single player game was tuned	with alternateticks on for the most part.
-	//
-	if (gpGlobals->maxClients == 1 && !IsSimulatingOnAlternateTicks())
-	{
-		m_flPushSpeed *= 2.0f;
-	}
-	
+
 	BaseClass::Activate();
 }
 
