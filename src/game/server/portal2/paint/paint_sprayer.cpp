@@ -129,11 +129,13 @@ CPaintSprayer::~CPaintSprayer( void )
 
 void CPaintSprayer::Precache( void )
 {
-	PrecacheParticleSystem( "paint_splat_bounce_01" );
 	// FIXME: Bring back for DLC2
 	//PrecacheParticleSystem( "paint_splat_reflect_01" );
-	PrecacheParticleSystem( "paint_splat_speed_01" );
-	PrecacheParticleSystem( "paint_splat_erase_01" );
+	PrecacheParticleSystem("paint_splat_bounce_01");
+	PrecacheParticleSystem("paint_splat_stick_01");
+	PrecacheParticleSystem("paint_splat_speed_01");
+	PrecacheParticleSystem("paint_splat_erase_01");
+	PrecacheParticleSystem("paint_splat_stick_01");
 
 	PrecacheScriptSound( "Paintblob.Inception" );
 	PrecacheScriptSound( "Paintblob.Impact" );
