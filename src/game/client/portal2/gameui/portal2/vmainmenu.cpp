@@ -1286,8 +1286,6 @@ void MainMenu::AcceptVersusSoftLockCallback()
 
 void MainMenu::OpenChapterSelect()
 {
-	// NOTE: I'm commenting this out quickly because CNB_Select_Chapter_Panel is an external var or something. - Wonderland_War
-	/*
 	vgui::Panel *pPanel = new CNB_Select_Chapter_Panel(nullptr, "Select_Chapter_Panel");
 	if (pPanel)
 	{
@@ -1295,7 +1293,6 @@ void MainMenu::OpenChapterSelect()
 		pPanel->SetVisible(true);
 		pPanel->InvalidateLayout(true, true);
 	}
-	*/
 }
 
 
