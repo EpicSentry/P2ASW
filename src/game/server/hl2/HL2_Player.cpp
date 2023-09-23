@@ -55,6 +55,10 @@
 #include "bone_setup.h" //animstate implementation
 #endif
 
+#ifdef PORTAL2
+#include "portal_player.h"
+#endif
+
 #ifdef HL2_EPISODIC
 //#include "npc_alyx_episodic.h"
 #endif
@@ -3763,7 +3767,18 @@ void CHL2_Player::ItemPostFrame()
 	if ( m_bPlayUseDenySound )
 	{
 		m_bPlayUseDenySound = false;
+#ifndef PORTAL2
 		EmitSound( "HL2Player.UseDeny" );
+#else
+		if( static_cast<CPortal_Player*>(this)->GetActivePortalWeapon() )
+		{
+			EmitSound( "PortalPlayer.UseDeny" );
+		}
+		else
+		{
+			EmitSound( "PortalPlayer.UseDenyNoGun" );
+		}
+#endif
 	}
 }
 

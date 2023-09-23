@@ -89,20 +89,96 @@ typedef CUtlVector<cplane_t> CollisionPlaneVector;
 void ComputeAABBContactsWithBrushEntity( ContactVector& contacts, const Vector& boxOrigin, const Vector& boxMin, const Vector& boxMax, CBaseEntity* pBrushEntity, int contentsMask = CONTENTS_BRUSH_PAINT );
 void ComputeAABBContactsWithBrushEntity( ContactVector& contacts, const cplane_t *pClipPlanes, int iClipPlaneCount, const Vector& boxOrigin, const Vector& boxMin, const Vector& boxMax, CBaseEntity* pBrushEntity, int contentsMask = CONTENTS_BRUSH_PAINT );
 
+#define PERMANENT_CONDITION		-1
 
+// Player conditions for animations
 enum
 {
-	PLAYER_SOUNDS_CITIZEN = 0,
-	PLAYER_SOUNDS_COMBINESOLDIER,
-	PLAYER_SOUNDS_METROPOLICE,
-	PLAYER_SOUNDS_MAX,
+	PORTAL_COND_TAUNTING = 0,
+	PORTAL_COND_POINTING,
+	PORTAL_COND_DROWNING,
+	PORTAL_COND_DEATH_CRUSH,
+	PORTAL_COND_DEATH_GIB,
+	PORTAL_COND_LAST
 };
 
-enum 
+class CPortalPlayerShared
 {
-	CONCEPT_CHELL_IDLE,
-	CONCEPT_CHELL_DEAD,
+public:
+
+	// Client specific.
+#ifdef CLIENT_DLL
+
+	friend class C_Portal_Player;
+	typedef C_Portal_Player OuterClass;
+	DECLARE_PREDICTABLE();
+
+	// Server specific.
+#else
+
+	friend class CPortal_Player;
+	typedef CPortal_Player OuterClass;
+
+#endif
+
+	DECLARE_EMBEDDED_NETWORKVAR()
+	DECLARE_CLASS_NOBASE( CPortalPlayerShared );
+
+	// Initialization.
+	CPortalPlayerShared();
+	void Init( OuterClass *pOuter );
+
+	// Condition (PORTAL_COND_*)
+	int		GetCond() const						{ return m_nPlayerCond; }
+	void	SetCond( int nCond )				{ m_nPlayerCond = nCond; }
+	void	AddCond( int nCond, float flDuration = PERMANENT_CONDITION );
+	void	RemoveCond( int nCond );
+	bool	InCond( int nCond );
+	void	RemoveAllCond();
+	void	OnConditionAdded( int nCond );
+	void	OnConditionRemoved( int nCond );
+	void	ConditionThink( void );
+	float	GetConditionDuration( int nCond );
+
+	void	ConditionGameRulesThink( void );
+	void	DebugPrintConditions( void );
+
+	bool	IsLoadoutUnavailable( void ) { return m_bLoadoutUnavailable; }
+	void	SetLoadoutUnavailable( bool bUnavailable ) { m_bLoadoutUnavailable = bUnavailable; }
+
+#ifdef CLIENT_DLL
+	// This class only receives calls for these from C_TFPlayer, not
+	// natively from the networking system
+	virtual void OnPreDataChanged( void );
+	virtual void OnDataChanged( void );
+
+	// check the newly networked conditions for changes
+	void	UpdateConditions( void );
+
+#endif
+
+private:
+	// Vars that are networked.
+	CNetworkVar( int, m_nPlayerCond );			// Player condition flags.
+	CNetworkVar( bool, m_bLoadoutUnavailable );
+	float m_flCondExpireTimeLeft[PORTAL_COND_LAST];		// Time until each condition expires
+
+	// Vars that are not networked.
+	OuterClass			*m_pOuter;					// C_TFPlayer or CTFPlayer (client/server).
+
+	int	m_nOldConditions;
+
+#ifdef GAME_DLL
+	float	m_flNextCritUpdate;
+	// FIXME: CUtlVector<CTFDamageEvent> m_DamageEvents;
+
+	float	m_flTauntRemoveTime;
+
+	// store damage info, so we can kill the player with this damage after crush animation is done
+	CTakeDamageInfo m_damageInfo;
+#endif
 };
+
 
 struct CachedPaintPowerChoiceResult
 {

@@ -476,6 +476,8 @@ $Project
 				"hud_lcd.cpp"										\
 				"in_mouse.cpp"										\
 				"rendertexture.cpp"									
+				
+				//$File	"$SRCDIR\common\CegClientWrapper.cpp"
 				{
 					$Configuration
 					{
@@ -486,6 +488,7 @@ $Project
 					}
 				}
 
+		
 		$Folder	"Precompiled Header"
 		{
 			$File "stdafx.cpp"

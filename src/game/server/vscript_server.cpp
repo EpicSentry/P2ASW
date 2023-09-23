@@ -260,6 +260,13 @@ static const char *GetMapName()
 	return STRING( gpGlobals->mapname );
 }
 
+extern ConVar	loopsingleplayermaps;
+
+static bool LoopSinglePlayerMaps()
+{
+	return loopsingleplayermaps.GetBool();
+}
+
 static const char *DoUniqueString( const char *pszBase )
 {
 	static char szBuf[512];
@@ -457,6 +464,8 @@ bool VScriptServerInit()
 
 				ScriptRegisterFunction( g_pScriptVM, SendToConsole, "Send a string to the console as a command" );
 				ScriptRegisterFunction( g_pScriptVM, GetMapName, "Get the name of the map.");
+				ScriptRegisterFunction( g_pScriptVM, LoopSinglePlayerMaps, "Run the single player maps in a continuous loop.");
+
 				ScriptRegisterFunctionNamed( g_pScriptVM, ScriptTraceLine, "TraceLine", "given 2 points & ent to ignore, return fraction along line that hits world or models" );
 
 				ScriptRegisterFunction( g_pScriptVM, Time, "Get the current server time" );

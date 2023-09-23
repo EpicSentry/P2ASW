@@ -584,8 +584,6 @@ BEGIN_RECV_TABLE_NOBASE(C_BaseEntity, DT_BaseEntity)
 	RecvPropInt		( RECVINFO( m_bSimulatedEveryTick ), 0, RecvProxy_InterpolationAmountChanged ),
 	RecvPropInt		( RECVINFO( m_bAnimatedEveryTick ), 0, RecvProxy_InterpolationAmountChanged ),
 	RecvPropBool	( RECVINFO( m_bAlternateSorting ) ),
-	
-	RecvPropBool( RECVINFO( m_bIsUnPaintable )),
 
 	RecvPropFloat( RECVINFO( m_fadeMinDist ) ), 
 	RecvPropFloat( RECVINFO( m_fadeMaxDist ) ), 
@@ -1093,10 +1091,6 @@ C_BaseEntity::C_BaseEntity() :
 	m_spawnflags = 0;
 
 	m_flCreateTime = 0.0f;
-
-#ifdef PORTAL2
-	m_bIsUnPaintable = false;
-#endif
 }
 
 

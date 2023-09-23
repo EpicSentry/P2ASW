@@ -35,7 +35,7 @@ ConVar cl_portalgun_beam_size ("cl_portalgun_beam_size", "0.04", FCVAR_CLIENTDLL
 PRECACHE_REGISTER_BEGIN( GLOBAL, PrecacheEffectPortalgun )
 PRECACHE( MATERIAL, PORTALGUN_BEAM_SPRITE )
 PRECACHE( MATERIAL, PORTALGUN_BEAM_SPRITE_NOZ )
-PRECACHE( MATERIAL, PORTALGUN_GLOW_SPRITE )
+//PRECACHE( MATERIAL, PORTALGUN_GLOW_SPRITE )
 PRECACHE( MATERIAL, PORTALGUN_ENDCAP_SPRITE )
 PRECACHE( MATERIAL, PORTALGUN_GRAV_ACTIVE_GLOW )
 PRECACHE( MATERIAL, PORTALGUN_PORTAL1_FIRED_LAST_GLOW )
@@ -335,11 +335,11 @@ void C_WeaponPortalgun::StartEffects( void )
 		m_Parameters[i].SetColor( Vector( 255, 128, 0 ) );
 		m_Parameters[i].SetVisible( false );
 
-		if ( m_Parameters[i].SetMaterial( PORTALGUN_GLOW_SPRITE ) == false )
+		/*if ( m_Parameters[i].SetMaterial( PORTALGUN_GLOW_SPRITE ) == false )
 		{
 			// This means the texture was not found
 			Assert( 0 );
-		}
+		}*/
 	}
 
 	//Create the world glow sprites
@@ -355,12 +355,12 @@ void C_WeaponPortalgun::StartEffects( void )
 		m_Parameters[i].SetAttachment( pModelWorld->LookupAttachment( attachNamesGlow[i-PORTALGUN_GLOW1_WORLD] ) );
 		m_Parameters[i].SetColor( Vector( 255, 128, 0 ) );
 		m_Parameters[i].SetVisible( false );
-
+		/*
 		if ( m_Parameters[i].SetMaterial( PORTALGUN_GLOW_SPRITE ) == false )
 		{
 			// This means the texture was not found
 			Assert( 0 );
-		}
+		}*/
 	}
 
 	// ------------------------------------------

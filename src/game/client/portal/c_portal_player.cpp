@@ -23,7 +23,10 @@
 #include "ivieweffects.h"		// for screenshake
 #include "prop_portal_shared.h"
 #include "materialsystem/imaterialvar.h"
+#include "cdll_bounded_cvars.h"
+#include "prediction.h"
 
+#include "dt_utlvector_recv.h"
 
 // Don't alias here
 #if defined( CPortal_Player )
@@ -233,6 +236,37 @@ void C_PortalRagdoll::OnDataChanged( DataUpdateType_t type )
 }
 
 
+// specific to the local player
+BEGIN_RECV_TABLE_NOBASE( C_Portal_Player, DT_PortalLocalPlayerExclusive )
+	RecvPropVectorXY( RECVINFO_NAME( m_vecNetworkOrigin, m_vecOrigin ), 0, C_BasePlayer::RecvProxy_LocalOriginXY ),
+	RecvPropFloat( RECVINFO_NAME( m_vecNetworkOrigin[2], m_vecOrigin[2] ), 0, C_BasePlayer::RecvProxy_LocalOriginZ ),
+	RecvPropVector( RECVINFO( m_vecViewOffset ) ),
+
+	// FIXME: - Wonderland_War
+	/*
+	RecvPropQAngles( RECVINFO( m_vecCarriedObjectAngles ) ),
+	RecvPropVector( RECVINFO( m_vecCarriedObject_CurPosToTargetPos )  ),
+	RecvPropQAngles( RECVINFO( m_vecCarriedObject_CurAngToTargetAng ) ),
+
+	RecvPropUtlVector( RECVINFO_UTLVECTOR( m_EntityPortalledNetworkMessages ), C_Portal_Player::MAX_ENTITY_PORTALLED_NETWORK_MESSAGES, RecvPropDataTable(NULL, 0, 0, &REFERENCE_RECV_TABLE( DT_EntityPortalledNetworkMessage ) ) ),
+	RecvPropInt( RECVINFO( m_iEntityPortalledNetworkMessageCount ) ),
+	*/
+END_RECV_TABLE()
+
+// all players except the local player
+BEGIN_RECV_TABLE_NOBASE( C_Portal_Player, DT_PortalNonLocalPlayerExclusive )
+	RecvPropVectorXY( RECVINFO_NAME( m_vecNetworkOrigin, m_vecOrigin ), 0, C_BasePlayer::RecvProxy_NonLocalCellOriginXY ),
+	RecvPropFloat( RECVINFO_NAME( m_vecNetworkOrigin[2], m_vecOrigin[2] ), 0, C_BasePlayer::RecvProxy_NonLocalCellOriginZ ),
+	RecvPropFloat( RECVINFO( m_vecViewOffset[0] ) ),
+	RecvPropFloat( RECVINFO( m_vecViewOffset[1] ) ),
+	RecvPropFloat( RECVINFO( m_vecViewOffset[2] ) ),
+END_RECV_TABLE()
+
+
+BEGIN_RECV_TABLE_NOBASE( CPortalPlayerShared, DT_PortalPlayerShared )
+	RecvPropInt( RECVINFO( m_nPlayerCond ) ),
+END_RECV_TABLE()
+
 LINK_ENTITY_TO_CLASS( player, C_Portal_Player );
 
 IMPLEMENT_CLIENTCLASS_DT(C_Portal_Player, DT_Portal_Player, CPortal_Player)
@@ -240,12 +274,13 @@ RecvPropFloat( RECVINFO( m_angEyeAngles[0] ) ),
 RecvPropFloat( RECVINFO( m_angEyeAngles[1] ) ),
 RecvPropEHandle( RECVINFO( m_hRagdoll ) ),
 RecvPropInt( RECVINFO( m_iSpawnInterpCounter ) ),
-RecvPropInt( RECVINFO( m_iPlayerSoundType ) ),
 RecvPropBool( RECVINFO( m_bHeldObjectOnOppositeSideOfPortal ) ),
 RecvPropEHandle( RECVINFO( m_pHeldObjectPortal ) ),
 RecvPropBool( RECVINFO( m_bPitchReorientation ) ),
 RecvPropEHandle( RECVINFO( m_hPortalEnvironment ) ),
 RecvPropEHandle( RECVINFO( m_hSurroundingLiquidPortal ) ),
+
+RecvPropDataTable( RECVINFO_DT( m_Shared ), 0, &REFERENCE_RECV_TABLE( DT_PortalPlayerShared ) ),
 
 RecvPropFloat( RECVINFO( m_flMotionBlurAmount ) ),
 
@@ -267,6 +302,12 @@ void SpawnBlood (Vector vecSpot, const Vector &vecDir, int bloodColor, float flD
 
 C_Portal_Player::C_Portal_Player()
 : m_iv_angEyeAngles( "C_Portal_Player::m_iv_angEyeAngles" ),
+	m_vInputVector( 0.0f, 0.0f, 0.0f ),
+	m_flCachedJumpPowerTime( -FLT_MAX ),
+	m_flSpeedDecelerationTime( 0.0f ),
+	m_bJumpWasPressedWhenForced( false ),
+	m_flPredictedJumpTime( 0.f ),
+	m_bWantsToSwapGuns( false ),
 	m_flMotionBlurAmount( -1.0f )
 {
 	m_PlayerAnimState = CreatePortalPlayerAnimState( this );
@@ -520,69 +561,7 @@ void C_Portal_Player::ClientThink( void )
 	HandleSpeedChanges();
 
 	FixTeleportationRoll();
-
-	//QAngle vAbsAngles = EyeAngles();
-
-	// Look at the thing that killed you
-	//if ( !IsAlive() )
-	//{
-	//	C_BaseEntity *pEntity1 = g_eKillTarget1.Get();
-	//	C_BaseEntity *pEntity2 = g_eKillTarget2.Get();
-
-	//	if ( pEntity2 && pEntity1 )
-	//	{
-	//		//engine->GetViewAngles( vAbsAngles );
-
-	//		Vector vLook = pEntity1->GetAbsOrigin() - pEntity2->GetAbsOrigin();
-	//		VectorNormalize( vLook );
-
-	//		QAngle qLook;
-	//		VectorAngles( vLook, qLook );
-
-	//		if ( qLook[PITCH] > 180.0f )
-	//		{
-	//			qLook[PITCH] -= 360.0f;
-	//		}
-
-	//		if ( vAbsAngles[YAW] < 0.0f )
-	//		{
-	//			vAbsAngles[YAW] += 360.0f;
-	//		}
-
-	//		if ( vAbsAngles[PITCH] < qLook[PITCH] )
-	//		{
-	//			vAbsAngles[PITCH] += gpGlobals->frametime * 120.0f;
-	//			if ( vAbsAngles[PITCH] > qLook[PITCH] )
-	//				vAbsAngles[PITCH] = qLook[PITCH];
-	//		}
-	//		else if ( vAbsAngles[PITCH] > qLook[PITCH] )
-	//		{
-	//			vAbsAngles[PITCH] -= gpGlobals->frametime * 120.0f;
-	//			if ( vAbsAngles[PITCH] < qLook[PITCH] )
-	//				vAbsAngles[PITCH] = qLook[PITCH];
-	//		}
-
-	//		if ( vAbsAngles[YAW] < qLook[YAW] )
-	//		{
-	//			vAbsAngles[YAW] += gpGlobals->frametime * 240.0f;
-	//			if ( vAbsAngles[YAW] > qLook[YAW] )
-	//				vAbsAngles[YAW] = qLook[YAW];
-	//		}
-	//		else if ( vAbsAngles[YAW] > qLook[YAW] )
-	//		{
-	//			vAbsAngles[YAW] -= gpGlobals->frametime * 240.0f;
-	//			if ( vAbsAngles[YAW] < qLook[YAW] )
-	//				vAbsAngles[YAW] = qLook[YAW];
-	//		}
-
-	//		if ( vAbsAngles[YAW] > 180.0f )
-	//		{
-	//			vAbsAngles[YAW] -= 360.0f;
-	//		}
-
-	//		engine->SetViewAngles( vAbsAngles );
-	//	}
-	//}
+	
 
 	// If dead, fade in death CC lookup
 	if ( m_CCDeathHandle != INVALID_CLIENT_CCHANDLE )
@@ -600,6 +579,11 @@ void C_Portal_Player::ClientThink( void )
 			m_flDeathCCWeight = 0.0f;
 		}
 		g_pColorCorrectionMgr->SetColorCorrectionWeight( m_CCDeathHandle, m_flDeathCCWeight );
+	}
+	
+	if( !cl_predict->GetInt() )
+	{
+		UpdatePaintedPower();
 	}
 
 	UpdateIDTarget();
@@ -859,6 +843,13 @@ void C_Portal_Player::PreThink( void )
 	SetLocalAngles( vTempAngles );
 
 	BaseClass::PreThink();
+	
+	// Cache the velocity before impact
+	if( HASPAINTMAP )
+		m_PortalLocal.m_vPreUpdateVelocity = GetAbsVelocity();
+
+	// Update the painted power
+	UpdatePaintedPower();
 
 	HandleSpeedChanges();
 }
@@ -1354,6 +1345,11 @@ void C_Portal_Player::CalcView( Vector &eyeOrigin, QAngle &eyeAngles, float &zNe
 		{
 			eyeOrigin = trace.endpos;
 		}
+		
+		// in multiplayer we want to make sure we get the screenshakes and stuff
+		if ( GameRules()->IsMultiplayer() )
+			CalcPortalView( eyeOrigin, eyeAngles );
+
 	}
 	else
 	{
@@ -1408,12 +1404,28 @@ void C_Portal_Player::SetViewAngles( const QAngle& ang )
 
 void C_Portal_Player::CalcPortalView( Vector &eyeOrigin, QAngle &eyeAngles )
 {
+	if ( !prediction->InPrediction() )
+	{
+		// FIXME: Move into prediction
+		view->DriftPitch();
+	}
+
 	//although we already ran CalcPlayerView which already did these copies, they also fudge these numbers in ways we don't like, so recopy
 	VectorCopy( EyePosition(), eyeOrigin );
 	VectorCopy( EyeAngles(), eyeAngles );
+	
+	VectorAdd( eyeAngles, m_Local.m_vecPunchAngle, eyeAngles );
 
-	//Re-apply the screenshake (we just stomped it)
-	GetViewEffects()->ApplyShake( eyeOrigin, eyeAngles, 1.0 );
+	if ( !prediction->InPrediction() )
+	{
+		GetViewEffects()->CalcShake();
+		GetViewEffects()->ApplyShake( eyeOrigin, eyeAngles, 1.0 );
+	}
+
+	if( !prediction->InPrediction() )
+	{
+		SmoothViewOnStairs( eyeOrigin );
+	}
 
 	C_Prop_Portal *pPortal = m_hPortalEnvironment.Get();
 	assert( pPortal );

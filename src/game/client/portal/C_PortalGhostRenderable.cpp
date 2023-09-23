@@ -11,6 +11,8 @@
 #include "c_portal_player.h"
 #include "model_types.h"
 
+ConVar portal_ghosts_disable( "portal_ghosts_disable", "0", 0, "Disables rendering of ghosted objects in portal environments" );
+
 C_PortalGhostRenderable::C_PortalGhostRenderable( C_Prop_Portal *pOwningPortal, C_BaseEntity *pGhostSource, bool isTransparent, const VMatrix &matGhostTransform, float *pSharedRenderClipPlane, bool bLocalPlayer )
 : m_pGhostedRenderable( pGhostSource ), 
 	m_matGhostTransform( matGhostTransform ), 
@@ -19,19 +21,24 @@ C_PortalGhostRenderable::C_PortalGhostRenderable( C_Prop_Portal *pOwningPortal, 
 	m_pOwningPortal( pOwningPortal )
 {
 	m_bSourceIsBaseAnimating = (dynamic_cast<C_BaseAnimating *>(pGhostSource) != NULL);
+	
+	RenderWithViewModels( pGhostSource->IsRenderingWithViewModels() );
 
 	cl_entitylist->AddNonNetworkableEntity( GetIClientUnknown() );
-
+	/*
 	if (isTransparent)
 		g_pClientLeafSystem->AddRenderable( this, false, RENDERABLE_IS_TRANSLUCENT, RENDERABLE_MODEL_ENTITY );
 	else
-		g_pClientLeafSystem->AddRenderable( this, false, RENDERABLE_IS_OPAQUE, RENDERABLE_MODEL_ENTITY );
+		g_pClientLeafSystem->AddRenderable( this, false, RENDERABLE_IS_OPAQUE, RENDERABLE_MODEL_ENTITY );*/
+
+	g_pClientLeafSystem->DisableCachedRenderBounds( RenderHandle(), true );
 }
 
 C_PortalGhostRenderable::~C_PortalGhostRenderable( void )
 {
+	AddEFlags( EFL_KILLME );
 	m_pGhostedRenderable = NULL;
-	g_pClientLeafSystem->RemoveRenderable( RenderHandle() );
+	//g_pClientLeafSystem->RemoveRenderable( RenderHandle() );
 	cl_entitylist->RemoveEntity( GetIClientUnknown()->GetRefEHandle() );
 
 	DestroyModelInstance();
@@ -224,6 +231,7 @@ bool C_PortalGhostRenderable::GetAttachmentVelocity( int number, Vector &originV
 	}
 	return false;
 }
+
 
 
 int C_PortalGhostRenderable::DrawModel( int flags, const RenderableInstance_t& instance )

@@ -19,6 +19,7 @@
 #include "ai_basenpc.h"
 #include "portal_gamestats.h"
 #include "util.h"
+#include "explode.h"
 #endif
 #include "movevars_shared.h"
 #include "portal_player_shared.h"
@@ -157,6 +158,8 @@ const float PORTAL_PLANE_IGNORE_EPSILON = 17.0f;
 
 extern ConVar sv_speed_normal;
 extern ConVar sv_speed_paint_max;
+extern ConVar portal_tauntcam_dist;
+ConVar portal_deathcam_dist( "portal_deathcam_dist", "128", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY | FCVAR_REPLICATED );
 
 ConVar sv_contact_region_thickness( "sv_contact_region_thickness", "0.2f", FCVAR_REPLICATED | FCVAR_CHEAT, "The thickness of a contact region (how much the box expands)." );
 ConVar sv_clip_contacts_to_portals( "sv_clip_contacts_to_portals", "0", FCVAR_REPLICATED | FCVAR_CHEAT, "Enable/Disable clipping contact regions to portal planes." );
@@ -2874,11 +2877,15 @@ void CPortal_Player::CleansePaint()
 
 void CPortal_Player::Paint( PaintPowerType type, const Vector& worldContactPt )
 {
-#ifdef GAME_DLL
-	Msg("(server)paint!!\n");
-#else
-	Msg("(client)paint!!\n");
-#endif
+	if ( type != NO_POWER )
+	{
+		Assert(0);
+	#ifdef GAME_DLL
+		Msg("(server)paint!!\n");
+	#else
+		Msg("(client)paint!!\n");
+	#endif
+	}
 
 	if( player_can_use_painted_power.GetBool() || player_paint_effects_enabled.GetBool() )
 	{
@@ -2912,6 +2919,7 @@ void CPortal_Player::Paint( PaintPowerType type, const Vector& worldContactPt )
 
 		if( player_can_use_painted_power.GetBool() )
 			BaseClass::Paint( type, worldContactPt );
+
 		m_PortalLocal.m_PaintedPowerType = type;
 		m_PortalLocal.m_PaintedPowerTimer.Start( player_paint_effects_duration.GetFloat() );
 	}
@@ -3086,3 +3094,485 @@ void CPortal_Player::DrawJumpHelperDebug( PaintPowerConstIter begin, PaintPowerC
 		DrawPaintPowerContactInfo( powerInfo, (i == pSelected) ? selectedColor : ( IsBouncePower( powerInfo ) ? bounceColor : otherColor ), duration, noDepthTest );
 	}
 }
+
+
+void CPortal_Player::UpdatePaintedPower()
+{
+#ifndef CLIENT_DLL
+
+	if( player_loses_painted_power_over_time.GetBool() &&
+		m_PortalLocal.m_PaintedPowerTimer.IsElapsed() )
+	{
+		CleansePaint();
+	}
+
+#else	// elif defined( CLIENT_DLL )
+
+	// If there's still time remaining
+	if( !m_PortalLocal.m_PaintedPowerTimer.IsElapsed() )
+	{
+		// Update paint screen effect if this player is in any split screen view
+		//FOR_EACH_VALID_SPLITSCREEN_PLAYER( nSlot )
+		{
+			if( C_BasePlayer::GetLocalPlayer( engine->GetActiveSplitScreenPlayerSlot() ) == this && !m_PaintScreenSpaceEffect.IsValid() )
+			{
+				MDLCACHE_CRITICAL_SECTION();
+				m_PaintScreenSpaceEffect = ParticleProp()->Create( PAINT_SCREEN_EFFECT, PATTACH_CUSTOMORIGIN );
+				if( m_PaintScreenSpaceEffect.IsValid() )
+				{
+					// Make sure the particle system isn't automatically drawn with the viewmodel
+					m_PaintScreenSpaceEffect->m_pDef->SetDrawThroughLeafSystem( false );
+					m_PaintScreenSpaceEffect->m_pDef->m_nMaxParticles = 512;
+
+					// Set the control points
+					ParticleProp()->AddControlPoint( m_PaintScreenSpaceEffect, 1, this, PATTACH_CUSTOMORIGIN );
+					m_PaintScreenSpaceEffect->SetControlPoint( 0, GetAbsOrigin() );
+					m_PaintScreenSpaceEffect->SetControlPoint( 1, GetAbsOrigin() );
+					m_PaintScreenSpaceEffect->SetControlPointEntity( 0, this );
+					m_PaintScreenSpaceEffect->SetControlPointEntity( 1, this );
+				}
+
+				// Only do this once
+				//break;
+			}
+		}
+
+		// commenting out the 3rd person drop effect
+		/*
+		// Update paint drip effect
+		if( m_PaintDripEffect.IsValid() )
+		{
+			m_PaintDripEffect->SetNeedsBBoxUpdate( true );
+			m_PaintDripEffect->SetSortOrigin( GetAbsOrigin() );
+		}
+		else
+		{
+			MDLCACHE_CRITICAL_SECTION();
+			m_PaintDripEffect = ParticleProp()->Create( PAINT_DRIP_EFFECT, PATTACH_ABSORIGIN_FOLLOW );
+			if( m_PaintDripEffect.IsValid() )
+			{
+				ParticleProp()->AddControlPoint( m_PaintDripEffect, 1, this, PATTACH_ABSORIGIN_FOLLOW );
+				m_PaintDripEffect->SetControlPoint( 0, GetAbsOrigin() );
+				m_PaintDripEffect->SetControlPoint( 1, GetAbsOrigin() );
+				m_PaintDripEffect->SetControlPointEntity( 0, this );
+				m_PaintDripEffect->SetControlPointEntity( 1, this );
+			}
+		}
+		*/
+	}
+	// The painted power wore off
+	else
+	{
+		InvalidatePaintEffects();
+	}
+
+#endif	// ifndef CLIENT_DLL
+}
+
+
+#ifdef CLIENT_DLL
+BEGIN_PREDICTION_DATA_NO_BASE( CPortalPlayerShared )
+	DEFINE_PRED_FIELD( m_nPlayerCond, FIELD_INTEGER, FTYPEDESC_INSENDTABLE ),
+END_PREDICTION_DATA()
+#endif // CLIENT_DLL
+
+CPortalPlayerShared::CPortalPlayerShared()
+{
+}
+
+void CPortalPlayerShared::Init( CPortal_Player *pPlayer )
+{
+	m_pOuter = pPlayer;
+	m_bLoadoutUnavailable = false;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Add a condition and duration
+// duration of PERMANENT_CONDITION means infinite duration
+//-----------------------------------------------------------------------------
+void CPortalPlayerShared::AddCond( int nCond, float flDuration /* = PERMANENT_CONDITION */ )
+{
+	Assert( nCond >= 0 && nCond < PORTAL_COND_LAST );
+	m_nPlayerCond |= (1<<nCond);
+	m_flCondExpireTimeLeft[nCond] = flDuration;
+	OnConditionAdded( nCond );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Forcibly remove a condition
+//-----------------------------------------------------------------------------
+void CPortalPlayerShared::RemoveCond( int nCond )
+{
+	Assert( nCond >= 0 && nCond < PORTAL_COND_LAST );
+
+	m_nPlayerCond &= ~(1<<nCond);
+	m_flCondExpireTimeLeft[nCond] = 0;
+
+	OnConditionRemoved( nCond );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+bool CPortalPlayerShared::InCond( int nCond )
+{
+	Assert( nCond >= 0 && nCond < PORTAL_COND_LAST );
+
+	return ( ( m_nPlayerCond & (1<<nCond) ) != 0 );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+float CPortalPlayerShared::GetConditionDuration( int nCond )
+{
+	Assert( nCond >= 0 && nCond < PORTAL_COND_LAST );
+
+	if ( InCond( nCond ) )
+	{
+		return m_flCondExpireTimeLeft[nCond];
+	}
+
+	return 0.0f;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CPortalPlayerShared::DebugPrintConditions( void )
+{
+	const char *szDll;
+#ifndef CLIENT_DLL
+	szDll = "Server";
+#else
+	szDll = "Client";
+#endif
+
+	Msg( "( %s ) Conditions for player ( %d )\n", szDll, m_pOuter->entindex() );
+
+	int i;
+	int iNumFound = 0;
+	for ( i=0;i<PORTAL_COND_LAST;i++ )
+	{
+		if ( m_nPlayerCond & (1<<i) )
+		{
+			if ( m_flCondExpireTimeLeft[i] == PERMANENT_CONDITION )
+			{
+				Msg( "( %s ) Condition %d - ( permanent cond )\n", szDll, i );
+			}
+			else
+			{
+				Msg( "( %s ) Condition %d - ( %.1f left )\n", szDll, i, m_flCondExpireTimeLeft[i] );
+			}
+
+			iNumFound++;
+		}
+	}
+
+	if ( iNumFound == 0 )
+	{
+		Msg( "( %s ) No active conditions\n", szDll );
+	}
+}
+
+#ifdef CLIENT_DLL
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CPortalPlayerShared::OnPreDataChanged( void )
+{
+	m_nOldConditions = m_nPlayerCond;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CPortalPlayerShared::OnDataChanged( void )
+{
+	// Update conditions from last network change
+	if ( m_nOldConditions != m_nPlayerCond )
+	{
+		UpdateConditions();
+
+		m_nOldConditions = m_nPlayerCond;
+	}	
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: check the newly networked conditions for changes
+//-----------------------------------------------------------------------------
+void CPortalPlayerShared::UpdateConditions( void )
+{
+	int nCondChanged = m_nPlayerCond ^ m_nOldConditions;
+	int nCondAdded = nCondChanged & m_nPlayerCond;
+	int nCondRemoved = nCondChanged & m_nOldConditions;
+
+	int i;
+	for ( i=0;i<PORTAL_COND_LAST;i++ )
+	{
+		if ( nCondAdded & (1<<i) )
+		{
+			OnConditionAdded( i );
+		}
+		else if ( nCondRemoved & (1<<i) )
+		{
+			OnConditionRemoved( i );
+		}
+	}
+}
+
+#endif // CLIENT_DLL
+
+//-----------------------------------------------------------------------------
+// Purpose: Remove any conditions affecting players
+//-----------------------------------------------------------------------------
+void CPortalPlayerShared::RemoveAllCond()
+{
+	int i;
+	for ( i=0;i<PORTAL_COND_LAST;i++ )
+	{
+		if ( m_nPlayerCond & (1<<i) )
+		{
+			RemoveCond( i );
+		}
+	}
+
+	// Now remove all the rest
+	m_nPlayerCond = 0;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Called on both client and server. Server when we add the bit,
+// and client when it receives the new cond bits and finds one added
+//-----------------------------------------------------------------------------
+void CPortalPlayerShared::OnConditionAdded( int nCond )
+{
+	float flDuration = 0.0f;
+
+	switch( nCond )
+	{
+	case PORTAL_COND_TAUNTING:
+		{
+			// The reason m_bTauntRemoteView isn't evaluated here is because it is evaluated at the start of a normal taunt only in StartTaunt()
+			// None of the other conditions go through the start taunt function when they are set
+			// a good thing to do would be to make all conditions that make IsTaunting() true, go through the same code path
+		}
+		break;
+	case PORTAL_COND_DEATH_GIB:
+		{
+			if ( m_pOuter )
+			{
+				flDuration = 3.5f; // change this to animation length
+				m_pOuter->m_fTauntCameraDistance = portal_deathcam_dist.GetFloat();
+
+				// if the player is not already taunting, set the remote view to false so when we die, we don't get residual data (because it's only evaluated at the start of a normal taunt on the server)
+				if ( !InCond( PORTAL_COND_TAUNTING ) )
+				{
+					m_pOuter->m_bTauntRemoteView = false;
+				}
+			}
+		}
+		break;
+	case PORTAL_COND_DEATH_CRUSH:
+		{
+			if ( m_pOuter )
+			{
+				m_pOuter->DoAnimationEvent( PLAYERANIMEVENT_CUSTOM_GESTURE, ACT_MP_DEATH_CRUSH );
+				flDuration = 3.0f; // change this to animation length
+				m_pOuter->m_fTauntCameraDistance = portal_deathcam_dist.GetFloat();
+
+				// if the player is not already taunting, set the remote view to false so when we die, we don't get residual data (because it's only evaluated at the start of a normal taunt on the server)
+				if ( !InCond( PORTAL_COND_TAUNTING ) )
+				{
+					m_pOuter->m_bTauntRemoteView = false;
+				}
+			}
+		}
+		break;
+	case PORTAL_COND_DROWNING:
+		{
+			if ( m_pOuter )
+			{
+				// if the player is not already taunting, set the remote view to false so when we die, we don't get residual data (because it's only evaluated at the start of a normal taunt on the server)
+				if ( !InCond( PORTAL_COND_TAUNTING ) )
+				{
+					m_pOuter->m_bTauntRemoteView = false;
+				}
+
+				m_pOuter->DoAnimationEvent( PLAYERANIMEVENT_CUSTOM_GESTURE, ACT_MP_DROWNING_PRIMARY );
+				flDuration = 3.5f; // change this to animation length
+				m_pOuter->m_fTauntCameraDistance = portal_deathcam_dist.GetFloat();
+			}
+		}
+		break;
+	case PORTAL_COND_POINTING:
+		{
+			m_pOuter->DoAnimationEvent( PLAYERANIMEVENT_CUSTOM_GESTURE, ACT_MP_GESTURE_VC_FINGERPOINT_PRIMARY );
+		}
+		break;
+	default:
+		break;
+	}
+	
+#ifdef GAME_DLL
+	// assign how long the taunt should last manually
+	if ( flDuration > 0.0f )
+	{
+		m_flTauntRemoveTime = gpGlobals->curtime + flDuration;
+	}
+#endif
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Called on both client and server. Server when we remove the bit,
+// and client when it receives the new cond bits and finds one removed
+//-----------------------------------------------------------------------------
+void CPortalPlayerShared::OnConditionRemoved( int nCond )
+{
+	switch( nCond )
+	{
+	case PORTAL_COND_TAUNTING:
+		{
+			if ( m_pOuter )
+			{
+#ifdef GAME_DLL
+				if ( m_pOuter->m_hRemoteTauntCamera.Get() )
+				{
+					//m_pOuter->m_hRemoteTauntCamera.Get()->TauntedByPlayerFinished( m_pOuter );
+					m_pOuter->m_hRemoteTauntCamera = NULL;
+				}
+#endif
+				// UNDONE: Do NOT set to false after removing the taunt condition!
+				// We still need to have this state true when it turns off the taunt camera on the client!
+				//m_bTauntRemoteView = false;
+			}
+		}
+		break;
+	case PORTAL_COND_DROWNING:
+		{
+			if ( m_pOuter )
+			{
+#ifdef GAME_DLL
+				if ( m_pOuter->m_hRemoteTauntCamera.Get() )
+				{
+					//m_pOuter->m_hRemoteTauntCamera.Get()->TauntedByPlayerFinished( m_pOuter );
+					m_pOuter->m_hRemoteTauntCamera = NULL;
+				}
+#endif
+
+				m_pOuter->m_bTauntRemoteView = false;
+			}	
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Runs SERVER SIDE only Condition Think
+// If a player needs something to be updated no matter what do it here (invul, etc).
+//-----------------------------------------------------------------------------
+void CPortalPlayerShared::ConditionGameRulesThink( void )
+{
+#ifdef GAME_DLL
+	int i;
+	for ( i=0;i<PORTAL_COND_LAST;i++ )
+	{
+		if ( m_nPlayerCond & (1<<i) )
+		{
+			// Ignore permanent conditions
+			if ( m_flCondExpireTimeLeft[i] != PERMANENT_CONDITION )
+			{
+				float flReduction = gpGlobals->frametime;
+
+				m_flCondExpireTimeLeft[i] = MAX( m_flCondExpireTimeLeft[i] - flReduction, 0 );
+
+				if ( m_flCondExpireTimeLeft[i] == 0 )
+				{
+					RemoveCond( i );
+				}
+			}
+		}
+	}
+
+	// Taunt
+	if ( InCond( PORTAL_COND_TAUNTING ) )
+	{
+		if ( gpGlobals->curtime > m_flTauntRemoveTime )
+		{
+			RemoveCond( PORTAL_COND_TAUNTING );
+			m_pOuter->SetTeamTauntState( TEAM_TAUNT_NONE );
+
+			// HEY JEEP: Should this be at the start or end of a taunt? Could do remove time / 2 to be more fair?
+			// Increment the air taunt count if the player has no ground entity
+			if ( m_pOuter->GetGroundEntity() == NULL )
+			{
+				m_pOuter->m_nAirTauntCount++;
+				// Award 'With Style' if they reach two air taunts without getting a ground entity set.
+				if ( m_pOuter->m_nAirTauntCount >= 2 )
+				{
+					UTIL_RecordAchievementEvent( "ACH.WITH_STYLE", m_pOuter );
+				}
+			}
+		}
+	}
+
+	if ( GameRules()->IsMultiplayer() )
+	{
+		// Death Crush
+		if ( InCond( PORTAL_COND_DEATH_CRUSH ) )
+		{
+			if ( gpGlobals->curtime > m_flTauntRemoveTime )
+			{	
+
+			// Add GetRandomChunkModel and then we can use this. - Wonderland_War
+#if 0
+				Vector vecOrigin = m_pOuter->GetAbsOrigin();
+				CPVSFilter filter( vecOrigin );
+				for ( int i = 0; i < 4; i++ )
+				{
+					Vector gibVelocity = RandomVector(-100,100);
+					int iModelIndex = modelinfo->GetModelIndex( g_PropDataSystem.GetRandomChunkModel( "MetalChunks" ) );
+					float flPropLifeTime = 20.f;
+					te->BreakModel( filter, 0.0, vecOrigin, m_pOuter->GetAbsAngles(), Vector(40,40,40), gibVelocity, iModelIndex, 150, 4, flPropLifeTime, BREAK_METAL );
+				}
+#endif
+				ExplosionCreate( m_pOuter->WorldSpaceCenter(), vec3_angle, m_pOuter, 500, 300.f, 
+					SF_ENVEXPLOSION_NODAMAGE | SF_ENVEXPLOSION_NOSPARKS | SF_ENVEXPLOSION_NODLIGHTS|
+					SF_ENVEXPLOSION_NOSMOKE  | SF_ENVEXPLOSION_NOFIREBALLSMOKE, 0 );
+				RemoveCond( PORTAL_COND_DEATH_CRUSH );
+			}
+		}
+
+		// Death Gib
+		if ( InCond( PORTAL_COND_DEATH_GIB ) )
+		{
+			if ( gpGlobals->curtime > m_flTauntRemoveTime )
+			{	
+				RemoveCond( PORTAL_COND_DEATH_GIB );
+			}
+		}
+		if ( InCond( PORTAL_COND_DROWNING ) )
+		{
+			if ( gpGlobals->curtime > m_flTauntRemoveTime )
+			{	
+				RemoveCond( PORTAL_COND_DROWNING );
+			}
+		}
+	}
+#endif
+}
+
+#ifdef GAME_DLL
+void CPortal_Player::SetTeamTauntState( int nTeamTauntState )
+{
+	if ( m_nTeamTauntState == nTeamTauntState )
+		return;
+
+	m_nTeamTauntState = nTeamTauntState;
+}
+#endif

@@ -23,6 +23,7 @@
 #include "PortalSimulation.h"
 #include "paint/paint_color_manager.h"
 #include "CegClientWrapper.h"
+#include "portal_mp_gamerules.h"
 
 bool g_bAllowForcePortalTrace = false;
 bool g_bForcePortalTrace = false;
@@ -146,26 +147,35 @@ const matrix3x4_t* CTransformedCollideable::GetRootParentToWorldTransform() cons
 	return &m_ReferencedVars.m_matRootParentToWorldTransform;
 }
 
-Color UTIL_Portal_Color( int iPortal )
+#if defined ( CLIENT_DLL )
+static const Color s_defaultPortalColors[2] = { Color( 64, 160, 255, 255 ), Color( 255, 160, 32, 255 ) };
+
+Color UTIL_Portal_Color( int iPortal, int iTeamNumber /*= 0*/ )
 {
 	switch ( iPortal )
 	{
 		case 0:
 			// GRAVITY BEAM
 			return Color( 242, 202, 167, 255 );
-
 		case 1:
-			// PORTAL 1
 			return Color( 64, 160, 255, 255 );
-
 		case 2:
-			// PORTAL 2
-			return Color( 255, 160, 32, 255 );
+			return Color(255, 160, 32, 255);
+		break;
 	}
 
+	Assert( 0 );
 	return Color( 255, 255, 255, 255 );
 }
 
+Color UTIL_Portal_Color_Particles( int iPortal, int iTeamNumber /*= 0*/ )
+{
+	if ( GameRules()->IsMultiplayer() && !((CPortalMPGameRules *)g_pGameRules)->Is2GunsCoOp() )
+		return UTIL_Portal_Color( iPortal, iTeamNumber );
+	else
+		return (iPortal - 1)?( Color( 233, 78, 2, 255 ) ):( Color( 0, 60, 255, 255 ) );
+}
+#endif
 void UTIL_Portal_Trace_Filter( CTraceFilterSimpleClassnameList *traceFilterPortalShot )
 {
 	traceFilterPortalShot->AddClassnameToIgnore( "prop_physics" );

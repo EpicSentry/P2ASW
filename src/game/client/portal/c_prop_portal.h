@@ -80,7 +80,10 @@ public:
 	CPortalSimulator		m_PortalSimulator;
 
 	virtual C_BaseEntity *	PortalRenderable_GetPairedEntity( void ) { return this; };
-
+	
+	void					DoFizzleEffect( int iEffect, bool bDelayedPos = true ); //display cool visual effect	
+	void					CreateFizzleEffect( C_BaseEntity *pOwner, int iEffect, Vector vecOrigin, QAngle qAngles, int nTeam, int nPortalNum );
+	
 private:
 
 	CUtlVector<EHANDLE>		m_hGhostingEntities;

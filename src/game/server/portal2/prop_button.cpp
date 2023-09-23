@@ -184,9 +184,8 @@ void CPropButton::Spawn( void )
 	SetModel( GetButtonModelName() );
 
 	//Buttons are unpaintable
-	//AddFlag( FL_UNPAINTABLE );
-	m_bIsUnPaintable = true;
-	
+	AddFlag( FL_UNPAINTABLE );
+
 	LookUpAnimationSequences();
 
 	m_flGoalTime = 0;

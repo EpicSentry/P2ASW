@@ -6,6 +6,7 @@
 
 #include "cbase.h"
 #include "weapon_portalbasecombatweapon.h"
+#include "in_buttons.h"
 
 #include "portal_player_shared.h"
 
@@ -37,17 +38,21 @@ BEGIN_DATADESC( CBasePortalCombatWeapon )
 	DEFINE_FIELD( m_bLowered,			FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_flRaiseTime,		FIELD_TIME ),
 	DEFINE_FIELD( m_flHolsterTime,		FIELD_TIME ),
+	DEFINE_FIELD( m_flNextRepeatPrimaryAttack,		FIELD_TIME ),
+	DEFINE_FIELD( m_flNextRepeatSecondaryAttack,	FIELD_TIME ),
 
 END_DATADESC()
 
-#endif
+#else
 
 BEGIN_PREDICTION_DATA( CBasePortalCombatWeapon )
+	DEFINE_FIELD( m_flNextRepeatPrimaryAttack, FIELD_TIME ),
+	DEFINE_FIELD( m_flNextRepeatSecondaryAttack, FIELD_TIME ),
 END_PREDICTION_DATA()
 
-#ifndef PORTAL2_DLL
-extern ConVar sk_auto_reload_time;
 #endif
+
+ConVar sk_auto_reload_time( "sk_auto_reload_time", "3", FCVAR_REPLICATED );
 
 CBasePortalCombatWeapon::CBasePortalCombatWeapon( void )
 {
@@ -68,7 +73,7 @@ void CBasePortalCombatWeapon::ItemHolsterFrame( void )
 	// We can't be active
 	if ( GetOwner()->GetActiveWeapon() == this )
 		return;
-#ifndef PORTAL2_DLL
+
 	// If it's been longer than three seconds, reload
 	if ( ( gpGlobals->curtime - m_flHolsterTime ) > sk_auto_reload_time.GetFloat() )
 	{
@@ -76,7 +81,57 @@ void CBasePortalCombatWeapon::ItemHolsterFrame( void )
 		FinishReload();
 		m_flHolsterTime = gpGlobals->curtime;
 	}
-#endif
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Handle firing
+//-----------------------------------------------------------------------------
+void CBasePortalCombatWeapon::ItemPostFrame( void )
+{
+	CPortal_Player *pOwner = ToPortalPlayer( GetOwner() );
+	if ( pOwner == NULL )
+		return;
+
+	// Primary attack
+	if ( pOwner->m_nButtons & IN_ATTACK && ( m_flNextPrimaryAttack <= gpGlobals->curtime ) )
+	{
+		if ( pOwner->GetWaterLevel() == 3 && m_bFiresUnderwater == false )
+		{
+			// This weapon doesn't fire underwater
+			WeaponSound(EMPTY);
+			m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->curtime + 0.2;
+			return;
+		}
+
+		// If they're still holding down the button, wait for the next fire time
+		if ( ( pOwner->m_afButtonLast & IN_ATTACK ) && ( m_flNextRepeatPrimaryAttack > gpGlobals->curtime ) )
+			return;
+
+		PrimaryAttack();
+		return;
+	}
+
+	// Secondary attack
+	if ( pOwner->m_nButtons & IN_ATTACK2 && ( m_flNextSecondaryAttack <= gpGlobals->curtime ) )
+	{
+		if ( pOwner->GetWaterLevel() == 3 )
+		{
+			// This weapon doesn't fire underwater
+			WeaponSound( EMPTY );
+			m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->curtime + 0.2;
+			return;
+		}
+
+		// If they're still holding down the button, wait for the next fire time
+		if ( ( pOwner->m_afButtonLast & IN_ATTACK2 ) && ( m_flNextRepeatSecondaryAttack > gpGlobals->curtime ) )
+			return;
+
+		// Attack!
+		SecondaryAttack();
+		return;
+	}
+
+	WeaponIdle();
 }
 
 bool CBasePortalCombatWeapon::CanLower()

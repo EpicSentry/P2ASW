@@ -843,6 +843,9 @@ void C_BasePlayer::PostDataUpdate( DataUpdateType_t updateType )
 		m_bBonePolishSetup = false;
 	}
 #endif
+	
+	m_fLastUpdateServerTime = engine->GetLastTimeStamp();
+
 }
 
 //-----------------------------------------------------------------------------
@@ -2552,6 +2555,11 @@ float C_BasePlayer::GetMinFOV()	const
 float C_BasePlayer::GetFinalPredictedTime() const
 {
 	return ( m_nFinalPredictedTick * TICK_INTERVAL );
+}
+
+float C_BasePlayer::PredictedServerTime() const
+{
+	return m_fLastUpdateServerTime + ((m_nTickBase - m_nLastUpdateTickBase) * TICK_INTERVAL);
 }
 
 void C_BasePlayer::NotePredictionError( const Vector &vDelta )

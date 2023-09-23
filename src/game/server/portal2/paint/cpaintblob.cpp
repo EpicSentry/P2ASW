@@ -8,6 +8,7 @@
 #include "cpaintblob.h"
 #include "paint_database.h"
 #include "physics_prop_ragdoll.h"
+#include "world.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -18,6 +19,7 @@ ConVar paintblob_applies_impulse( "paintblob_applies_impulse", "0", FCVAR_DEVELO
 
 CPaintBlob::CPaintBlob() : m_pPaintingEntity(NULL), m_ID( 0 )
 {
+	GetWorldEntity()->PrecacheModel( BLOB_MODEL );
 }
 
 

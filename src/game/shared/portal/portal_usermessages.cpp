@@ -44,6 +44,9 @@ void RegisterUserMessages()
 	usermessages->Register( "LogoTimeMsg", 4 );
 	usermessages->Register( "AchievementEvent", -1 );
 	
+	// Portal effects
+	usermessages->Register( "PortalFX_Surface", -1 );
+
 	// Paint messages
 	usermessages->Register( "PaintWorld", -1 );
 	usermessages->Register( "PaintEntity", sizeof( long ) + sizeof( uint8 ) + sizeof( Vector ) );

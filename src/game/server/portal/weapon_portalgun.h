@@ -59,7 +59,7 @@ public:
 	virtual void UpdateOnRemove( void );
 	void Spawn( void );
 	virtual void Activate();
-	void DoEffectBlast( bool bPortal2, int iPlacedBy, const Vector &ptStart, const Vector &ptFinalPos, const QAngle &qStartAngles, float fDelay );
+	void DoEffectBlast( bool bPortal2, int iPlacedBy, const Vector &ptStart, const Vector &ptFinalPos, const QAngle &qStartAngles );
 	virtual void OnPickedUp( CBaseCombatCharacter *pNewOwner );
 
 	virtual bool ShouldDrawCrosshair( void );
@@ -77,8 +77,8 @@ public:
 
 	void SetCanFirePortal1( bool bCanFire = true );
 	void SetCanFirePortal2( bool bCanFire = true );
-	float CanFirePortal1( void ) { return m_bCanFirePortal1; }
-	float CanFirePortal2( void ) { return m_bCanFirePortal2; }
+	bool CanFirePortal1( void ) { return m_bCanFirePortal1; }
+	bool CanFirePortal2( void ) { return m_bCanFirePortal2; }
 
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
@@ -112,6 +112,9 @@ public:
 
 	int GetWeaponID( void ) const { return WEAPON_PORTALGUN; }
 
+	void SetPotatosOnPortalgun( bool bPotatos );
+	
+	void PostAttack( void );
 protected:
 
 	void	StartEffects( void );	// Initialize all sprites and beams

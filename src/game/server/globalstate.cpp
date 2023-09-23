@@ -184,6 +184,23 @@ void GlobalEntity_EnableStateUpdates( bool bEnable )
 	gGlobalState.EnableStateUpdates( bEnable );
 }
 
+void GlobalEntity_SetFlags( int globalIndex, int flags )
+{
+	// Flags are stored in counter var
+	gGlobalState.SetCounter( globalIndex, flags );
+}
+
+void GlobalEntity_AddFlags( int globalIndex, int flags )
+{
+	// Flags are stored in counter var
+	gGlobalState.SetCounter( globalIndex, gGlobalState.GetCounter( globalIndex ) | flags );
+}
+
+void GlobalEntity_RemoveFlags( int globalIndex, int flags )
+{
+	// Flags are stored in counter var
+	gGlobalState.SetCounter( globalIndex, gGlobalState.GetCounter( globalIndex ) & ~flags );
+}
 
 void GlobalEntity_SetMap( int globalIndex, string_t mapname )
 {
@@ -207,6 +224,12 @@ GLOBALESTATE GlobalEntity_GetState( int globalIndex )
 
 int GlobalEntity_GetCounter( int globalIndex )
 {
+	return gGlobalState.GetCounter( globalIndex );
+}
+
+int GlobalEntity_GetFlags( int globalIndex )
+{
+	// Flags are stored in counter var
 	return gGlobalState.GetCounter( globalIndex );
 }
 

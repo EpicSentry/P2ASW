@@ -194,7 +194,7 @@ void CPropFloorButton::Spawn( void )
 	SetSkin( button_off_skin );
 
 	//Buttons are unpaintable
-	m_bIsUnPaintable = true;
+	AddFlag( FL_UNPAINTABLE );
 
 	CreateVPhysics();
 

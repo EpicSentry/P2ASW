@@ -16,6 +16,7 @@
 #if defined( CLIENT_DLL )
 	#include "c_portal_player.h"
 	#include "c_rumble.h"
+	#include "c_basedoor.h"
 #else
 	#include "portal_player.h"
 	#include "env_player_surface_trigger.h"
@@ -37,6 +38,12 @@ ConVar sv_speed_paint_max("sv_speed_paint_max", "800.0f", FCVAR_REPLICATED | FCV
 ConVar sv_speed_paint_side_move_factor("sv_speed_paint_side_move_factor", "0.5f", FCVAR_REPLICATED | FCVAR_CHEAT);
 ConVar speed_funnelling_enabled("speed_funnelling_enabled", "1", FCVAR_REPLICATED, "Toggle whether the player is funneled into portals while running on speed paint.");
 ConVar sv_paintairacceleration("sv_paintairacceleration", "5.0f", FCVAR_REPLICATED | FCVAR_CHEAT, "Air acceleration in Paint");
+
+ConVar sv_portal_new_player_trace( "sv_portal_new_player_trace", "1", FCVAR_REPLICATED | FCVAR_CHEAT );
+
+#if defined( CLIENT_DLL )
+ConVar cl_vertical_elevator_fix( "cl_vertical_elevator_fix", "1" );
+#endif
 
 class CReservePlayerSpot;
 
@@ -66,7 +73,7 @@ static inline CBaseEntity *TranslateGroundEntity( CBaseEntity *pGroundEntity )
 //-----------------------------------------------------------------------------
 // Purpose: Portal specific movement code
 //-----------------------------------------------------------------------------
-class CPortalGameMovement : public CNetworkedPlayerMovement
+class CPortalGameMovement : public CGameMovement
 {
 	typedef CGameMovement BaseClass;
 public:
@@ -79,9 +86,12 @@ public:
 	virtual bool CheckJumpButton( void );
 
 	void FunnelIntoPortal( CProp_Portal *pPortal, Vector &wishdir );
-
-	virtual void AirAccelerate( Vector& wishdir, float wishspeed, float accel );
+	
 	virtual void AirMove( void );
+	virtual void AirAccelerate( Vector& wishdir, float wishspeed, float accel );
+	
+	// Only used by players.  Moves along the ground when player is a MOVETYPE_WALK.
+	//virtual void	WalkMove();
 
 	virtual void PlayerRoughLandingEffects( float fvol );
 
@@ -99,11 +109,126 @@ public:
 
 	virtual void SetGroundEntity( trace_t *pm );
 
-private:
+protected:
+	
+	// Handle MOVETYPE_WALK.
 
+	//virtual void	FullWalkMove();
+
+private:
+	
+#if defined( CLIENT_DLL )
+	void ClientVerticalElevatorFixes( CBasePlayer *pPlayer, CMoveData *pMove );
+#endif
+
+	// Stick is done by changing gravity direction because it's easier to think about that way.
+	// Gravity direction is always the negation of the player's stick normal.
+	Vector m_vGravityDirection;	
 
 	CPortal_Player	*GetPortalPlayer();
 };
+
+#if defined( CLIENT_DLL )
+void CPortalGameMovement::ClientVerticalElevatorFixes( CBasePlayer *pPlayer, CMoveData *pMove )
+{
+	//find root move parent of our ground entity
+	CBaseEntity *pRootMoveParent = pPlayer->GetGroundEntity();
+	while( pRootMoveParent )
+	{
+		C_BaseEntity *pTestParent = pRootMoveParent->GetMoveParent();
+		if( !pTestParent )
+			break;
+
+		pRootMoveParent = pTestParent;
+	}
+
+	//if it's a C_BaseToggle (func_movelinear / func_door) then enable prediction if it chooses to
+	bool bRootMoveParentIsLinearMovingBaseToggle = false;
+	bool bAdjustedRootZ = false;
+	if( pRootMoveParent && !pRootMoveParent->IsWorld() )
+	{
+		C_BaseToggle *pPredictableGroundEntity = dynamic_cast<C_BaseToggle *>(pRootMoveParent);
+		if( pPredictableGroundEntity && (pPredictableGroundEntity->m_movementType == MOVE_TOGGLE_LINEAR) )
+		{
+			bRootMoveParentIsLinearMovingBaseToggle = true;
+			if( !pPredictableGroundEntity->GetPredictable() )
+			{
+				pPredictableGroundEntity->SetPredictionEligible( true );
+				pPredictableGroundEntity->m_hPredictionOwner = pPlayer;
+			}
+			else if( cl_vertical_elevator_fix.GetBool() )
+			{
+				Vector vNewOrigin = pPredictableGroundEntity->PredictPosition( player->PredictedServerTime() + TICK_INTERVAL );
+				if( (vNewOrigin - pPredictableGroundEntity->GetLocalOrigin()).LengthSqr() > 0.01f )
+				{
+					bAdjustedRootZ = (vNewOrigin.z != pPredictableGroundEntity->GetLocalOrigin().z);
+					pPredictableGroundEntity->SetLocalOrigin( vNewOrigin );
+
+					//invalidate abs transforms for upcoming traces
+					C_BaseEntity *pParent = pPlayer->GetGroundEntity();
+					while( pParent )
+					{
+						pParent->AddEFlags( EFL_DIRTY_ABSTRANSFORM );
+						pParent = pParent->GetMoveParent();
+					}
+				}
+			}
+		}
+	}
+
+	//re-seat player on vertical elevators
+	if( bRootMoveParentIsLinearMovingBaseToggle && 
+		cl_vertical_elevator_fix.GetBool() && 
+		bAdjustedRootZ )
+	{
+		trace_t trElevator;
+		TracePlayerBBox( pMove->GetAbsOrigin(), pMove->GetAbsOrigin() - Vector( 0.0f, 0.0f, GetPlayerMaxs().z ), MASK_PLAYERSOLID, COLLISION_GROUP_PLAYER_MOVEMENT, trElevator );
+
+		if( trElevator.startsolid )
+		{
+			//started in solid, and we think it's an elevator. Pop up the player if at all possible
+
+			//trace up, ignoring the ground entity hierarchy
+			Ray_t playerRay;
+			playerRay.Init( pMove->GetAbsOrigin(), pMove->GetAbsOrigin() + Vector( 0.0f, 0.0f, GetPlayerMaxs().z ), GetPlayerMins(), GetPlayerMaxs() );
+
+			CTraceFilterSimpleList ignoreGroundEntityHeirarchy( COLLISION_GROUP_PLAYER_MOVEMENT );
+			{
+				ignoreGroundEntityHeirarchy.AddEntityToIgnore( pPlayer );
+				C_BaseEntity *pParent = pPlayer->GetGroundEntity();
+				while( pParent )
+				{
+					ignoreGroundEntityHeirarchy.AddEntityToIgnore( pParent );
+					pParent = pParent->GetMoveParent();
+				}
+			}
+
+			
+
+			enginetrace->TraceRay( playerRay, MASK_PLAYERSOLID, &ignoreGroundEntityHeirarchy, &trElevator );
+			if( !trElevator.startsolid ) //success
+			{
+				//now trace back down
+				Vector vStart = trElevator.endpos;
+				TracePlayerBBox( vStart, pMove->GetAbsOrigin(), MASK_PLAYERSOLID, COLLISION_GROUP_PLAYER_MOVEMENT, trElevator );
+				if( !trElevator.startsolid &&
+					(trElevator.m_pEnt == pPlayer->GetGroundEntity()) )
+				{
+					//if we landed back on the ground entity, call it good
+					pMove->SetAbsOrigin( trElevator.endpos );
+					pPlayer->SetNetworkOrigin( trElevator.endpos ); //paint code loads from network origin after handling paint powers
+				}
+			}
+		}
+		else if( (trElevator.endpos.z < pMove->GetAbsOrigin().z) && (trElevator.m_pEnt == pPlayer->GetGroundEntity()) )
+		{
+			//re-seat on ground entity
+			pMove->SetAbsOrigin( trElevator.endpos );
+			pPlayer->SetNetworkOrigin( trElevator.endpos ); //paint code loads from network origin after handling paint powers
+		}
+	}
+}
+#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -144,6 +269,10 @@ void CPortalGameMovement::ProcessMovement( CBasePlayer *pPlayer, CMoveData *pMov
 	player = pPlayer;
 	mv = pMove;
 	mv->m_flMaxSpeed = sv_maxspeed.GetFloat();
+	
+#if defined( CLIENT_DLL )
+	ClientVerticalElevatorFixes( pPlayer, pMove ); //fixup vertical elevator discrepancies between client and server as best we can
+#endif
 	
 	m_bInPortalEnv = (((CPortal_Player *)pPlayer)->m_hPortalEnvironment != NULL);
 
@@ -757,3 +886,343 @@ IGameMovement *g_pGameMovement = ( IGameMovement * )&g_GameMovement;
 
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CGameMovement, IGameMovement,INTERFACENAME_GAMEMOVEMENT, g_GameMovement );
 
+// We'll fix this later
+#if 0
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CPortalGameMovement::WalkMove()
+{
+	Vector wishvel;
+	float spd;
+	float fmove, smove;
+	Vector wishdir;
+	float wishspeed;
+
+	Vector dest;
+	trace_t pm;
+	Vector forward, right, up;
+
+	AngleVectors (mv->m_vecViewAngles, &forward, &right, &up);  // Determine movement angles
+
+	CBaseEntity *pOldGround = player->GetGroundEntity();
+
+	// Copy movement amounts
+	fmove = mv->m_flForwardMove;
+	smove = mv->m_flSideMove;
+
+	// Keep movement vectors in our plane of movement
+	forward -= m_vGravityDirection * DotProduct( forward, m_vGravityDirection );
+	VectorNormalize( forward );
+
+	right -= m_vGravityDirection * DotProduct( right, m_vGravityDirection );
+	VectorNormalize( right );
+
+	// Determine velocity
+	wishvel = fmove * forward + smove * right;
+
+	// Don't let them stand on the edge of vertical bridges
+	bool shouldShovePlayer = false;
+	float wishVelShoveDampenFactor = 0;
+	Vector shoveVector = vec3_origin;
+	CProjectedWallEntity *pProjectedWall = dynamic_cast< CProjectedWallEntity* >( pOldGround );
+	if ( pProjectedWall )
+	{
+		Vector vBridgeUp = pProjectedWall->Up();
+		if ( vBridgeUp.z > -0.4f && vBridgeUp.z < 0.4f )
+		{
+			wishVelShoveDampenFactor = 0.25f;	// Weaken their manual control
+			shoveVector = vBridgeUp * 150.f;	// Shove!
+			shouldShovePlayer = true;
+		}
+	}
+
+	// Don't let players stand on top of each other
+	if( pOldGround && pOldGround->IsPlayer() )
+	{
+		wishVelShoveDampenFactor = 0.25f;
+		shoveVector = player->GetAbsOrigin() - pOldGround->GetAbsOrigin();
+		shoveVector.z = 0.0f;
+		if( shoveVector.IsZeroFast() )
+			shoveVector = player->Forward();
+
+		shoveVector.NormalizeInPlace();
+		shoveVector *= 150.0f;
+		shouldShovePlayer = true;
+	}
+
+	if( shouldShovePlayer )
+	{
+		wishvel *= wishVelShoveDampenFactor;	// Weaken their manual control
+		wishvel += shoveVector;					// Shove!
+	}
+
+	// Restrict wishvel to plane of movement
+	wishvel -= m_vGravityDirection * DotProduct( wishvel, m_vGravityDirection );
+
+	// Try funnelling
+	if( sv_player_funnel_into_portals.GetBool() && speed_funnelling_enabled.GetBool() )
+	{
+		wishvel += PortalFunnel( wishvel );
+	}
+
+	VectorCopy (wishvel, wishdir);   // Determine maginitude of speed of move
+	wishspeed = VectorNormalize(wishdir);
+
+	//
+	// Clamp to server defined max speed
+	//
+	if ((wishspeed != 0.0f) && (wishspeed > mv->m_flMaxSpeed))
+	{
+		VectorScale (wishvel, mv->m_flMaxSpeed/wishspeed, wishvel);
+		wishspeed = mv->m_flMaxSpeed;
+	}
+
+	// Set pmove velocity
+	Accelerate ( wishdir, wishspeed, sv_accelerate.GetFloat() );
+
+	// Add in any base velocity to the current velocity.
+	VectorAdd (mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity );
+
+	spd = VectorLength( mv->m_vecVelocity );
+
+	if ( spd < 1.0f )
+	{
+		mv->m_vecVelocity.Init();
+		// Now pull the base velocity back out.   Base velocity is set if you are on a moving object, like a conveyor (or maybe another monster?)
+		VectorSubtract( mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity );
+		return;
+	}
+
+	// first try just moving to the destination	
+	dest = mv->GetAbsOrigin() + ( mv->m_vecVelocity * gpGlobals->frametime );
+
+	// first try moving directly to the next spot
+	TracePlayerBBox( mv->GetAbsOrigin(), dest, PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, pm );
+
+	// If we made it all the way, then copy trace end as new player position.
+	mv->m_outWishVel += wishdir * wishspeed;
+
+	if ( pm.fraction == 1 )
+	{
+		mv->SetAbsOrigin( pm.endpos );
+		// Now pull the base velocity back out.   Base velocity is set if you are on a moving object, like a conveyor (or maybe another monster?)
+		VectorSubtract( mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity );
+
+		StayOnGround();
+		return;
+	}
+
+	// Don't walk up stairs if not on ground.
+	if ( pOldGround == NULL && player->GetWaterLevel()  == 0 )
+	{
+		// Now pull the base velocity back out.   Base velocity is set if you are on a moving object, like a conveyor (or maybe another monster?)
+		VectorSubtract( mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity );
+		return;
+	}
+
+	// If we are jumping out of water, don't do anything more.
+	if ( player->m_flWaterJumpTime )         
+	{
+		// Now pull the base velocity back out.   Base velocity is set if you are on a moving object, like a conveyor (or maybe another monster?)
+		VectorSubtract( mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity );
+		return;
+	}
+
+	// See if we collided with a ramp
+	if( DotProduct( pm.plane.normal, -m_vGravityDirection ) > CRITICAL_SLOPE )
+	{
+		// Compute normalized forward direction in tangent plane
+		const Vector vWishDirection = mv->m_vecVelocity.Normalized();
+		const Vector vTangentRight = CrossProduct( vWishDirection, pm.plane.normal );
+		const Vector vNormTangentForward = CrossProduct( pm.plane.normal, vTangentRight ).Normalized();
+
+		// Move up the ramp
+		float fSpeed = mv->m_vecVelocity.Length();
+		Vector vEndPos = player->GetAbsOrigin() + (mv->m_vecVelocity * pm.fraction + vNormTangentForward * (1.0 - pm.fraction) * fSpeed) * gpGlobals->frametime;
+		
+		//above code has the distinct possibility of placing the player inside a wall. Not quite sure why it works so well most of the time. Add some error checking
+		if( sv_portal_new_player_trace.GetBool() )
+		{
+			trace_t rampTrace;
+			TracePlayerBBox( vEndPos, vEndPos, PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, rampTrace );
+
+			if( !rampTrace.startsolid )
+			{
+				mv->SetAbsOrigin( vEndPos );
+			}
+			else
+			{
+				StepMove( dest, pm );
+			}
+		}
+		else
+		{
+			mv->SetAbsOrigin( vEndPos );
+		}
+	}
+	else
+	{
+		StepMove( dest, pm );
+	}
+
+#if defined GAME_DLL
+	RANDOM_CEG_TEST_SECRET();
+#endif
+
+	// Now pull the base velocity back out.   Base velocity is set if you are on a moving object, like a conveyor (or maybe another monster?)
+	VectorSubtract( mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity );
+
+	StayOnGround();
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CPortalGameMovement::FullWalkMove()
+{
+	if ( !CheckWater() ) 
+	{
+		StartGravity();
+	}
+
+	// If we are leaping out of the water, just update the counters.
+	if (player->m_flWaterJumpTime)
+	{
+		WaterJump();
+		TryPlayerMove( 0, 0 );
+		// See if we are still in water?
+		CheckWater();
+		return;
+	}
+
+	// If we are swimming in the water, see if we are nudging against a place we can jump up out
+	//  of, and, if so, start out jump.  Otherwise, if we are not moving up, then reset jump timer to 0
+	if ( player->GetWaterLevel() >= WL_Waist ) 
+	{
+		// don't let player jump off the water in coop
+		if ( !GameRules()->IsMultiplayer() )
+		{
+			if ( player->GetWaterLevel() == WL_Waist )
+			{
+				CheckWaterJump();
+			}
+
+			// If we are falling again, then we must not trying to jump out of water any more.
+			if ( DotProduct( mv->m_vecVelocity, m_vGravityDirection) > 0.f && 
+				player->m_flWaterJumpTime )
+			{
+				player->m_flWaterJumpTime = 0;
+			}
+
+			// Was jump button pressed?
+			if (mv->m_nButtons & IN_JUMP)
+			{
+				CheckJumpButton();
+			}
+			else
+			{
+				mv->m_nOldButtons &= ~IN_JUMP;
+			}
+		}
+		else
+		{
+			CPortal_Player *pPortalPlayer = static_cast< CPortal_Player* >( player );
+			if ( !pPortalPlayer->m_Shared.InCond( PORTAL_COND_DROWNING ) )
+			{
+				pPortalPlayer->m_Shared.AddCond( PORTAL_COND_DROWNING );
+			}
+		}
+
+		// Perform regular water movement
+		WaterMove();
+
+		// Redetermine position vars
+		CategorizePosition();
+
+		// If we are on ground, no downward velocity.
+		if ( player->GetGroundEntity() != NULL )
+		{
+			mv->m_vecVelocity.z = 0;
+		}
+	}
+	else
+		// Not fully underwater
+	{
+		// Was jump button pressed?
+		if (mv->m_nButtons & IN_JUMP)
+		{
+			CheckJumpButton();
+		}
+		else
+		{
+			mv->m_nOldButtons &= ~IN_JUMP;
+		}
+
+		// Fricion is handled before we add in any base velocity. That way, if we are on a conveyor, 
+		//  we don't slow when standing still, relative to the conveyor.
+		if (player->GetGroundEntity() != NULL)
+		{
+			mv->m_vecVelocity -= m_vGravityDirection * DotProduct( mv->m_vecVelocity, m_vGravityDirection );
+			player->m_Local.m_flFallVelocity = 0.0f;
+			Friction();
+		}
+
+		// Make sure velocity is valid.
+		CheckVelocity();
+
+		CPortal_Player *pPortalPlayer = static_cast< CPortal_Player* >( player );
+		if ( pPortalPlayer->m_PortalLocal.m_hTractorBeam.Get() )
+		{
+			TBeamMove();
+		}
+		else
+		{
+			Vector vecVel = mv->m_vecVelocity;
+
+			if ( player->GetGroundEntity() != NULL )
+			{
+				WalkMove();
+			}
+			else
+			{
+#if defined CLIENT_DLL
+				RANDOM_CEG_TEST_SECRET();
+#endif
+				AirMove();  // Take into account movement when in air.
+			}
+
+			CheckWallImpact( vecVel );
+		}
+
+		// Set final flags.
+		CategorizePosition();
+
+		// Make sure velocity is valid.
+		CheckVelocity();
+
+		// Add any remaining gravitational component.
+		if ( !CheckWater() )
+		{
+			FinishGravity();
+		}
+
+		// If we are on ground, no downward velocity.
+		if ( player->GetGroundEntity() != NULL )
+		{
+			mv->m_vecVelocity -= m_vGravityDirection * DotProduct( mv->m_vecVelocity, m_vGravityDirection );
+		}
+		CheckFalling();
+	}
+
+	if  ( ( m_nOldWaterLevel == WL_NotInWater && player->GetWaterLevel() != WL_NotInWater ) ||
+		( m_nOldWaterLevel != WL_NotInWater && player->GetWaterLevel() == WL_NotInWater ) )
+	{
+		PlaySwimSound();
+#if !defined( CLIENT_DLL )
+		player->Splash();
+#endif
+	}
+}
+#endif

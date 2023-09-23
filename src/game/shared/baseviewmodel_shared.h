@@ -147,7 +147,11 @@ private:
 	CBaseViewModel( const CBaseViewModel & ); // not defined, not accessible
 
 #endif
-
+	
+#ifdef PORTAL2
+	// We need to always transition because we handle our transition volumes in a different manner
+	virtual int				ObjectCaps( void ) { return BaseClass::ObjectCaps() | FCAP_FORCE_TRANSITION; }
+#endif // PORTAL2
 
 
 private:

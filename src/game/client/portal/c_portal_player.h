@@ -128,6 +128,17 @@ public:
 	
 	float GetMotionBlurAmount(void) { return m_flMotionBlurAmount; }
 
+	bool				m_bPingDisabled;
+	bool				m_bTauntDisabled;
+	bool				m_bTauntRemoteView;
+	Vector				m_vecRemoteViewOrigin;
+	QAngle				m_vecRemoteViewAngles;
+	float				m_fTauntCameraDistance;
+
+	float				m_fTeamTauntStartTime;
+	int					m_nOldTeamTauntState;
+	int					m_nTeamTauntState;
+
 private:
 
 	C_Portal_Player( const C_Portal_Player & );
@@ -163,8 +174,6 @@ private:
 
 	int	  m_iSpawnInterpCounter;
 	int	  m_iSpawnInterpCounterCache;
-
-	int	  m_iPlayerSoundType;
 
 	bool  m_bHeldObjectOnOppositeSideOfPortal;
 	CProp_Portal *m_pHeldObjectPortal;
@@ -204,7 +213,7 @@ private:
 
 	bool	m_bPortalledMessagePending; //Player portalled. It's easier to wait until we get a OnDataChanged() event or a CalcView() before we do anything about it. Otherwise bits and pieces can get undone
 	VMatrix m_PendingPortalMatrix;
-	
+		
 	// we need to interpolate hull height to maintain the world space center
 	float m_flHullHeight;
 	CInterpolatedVar< float > m_iv_flHullHeight;
@@ -348,6 +357,8 @@ private: // PAINT SPECIFIC
 	bool m_bWantsToSwapGuns;
 
 public:
+	CPortalPlayerShared	m_Shared;
+
 	const C_PortalPlayerLocalData& GetPortalPlayerLocalData() const;
 
 	bool	m_bPitchReorientation;

@@ -31,7 +31,9 @@ class CBasePortalCombatWeapon : public CWeaponPortalBase
 	DECLARE_CLASS( CBasePortalCombatWeapon, CWeaponPortalBase );
 public:
 	DECLARE_NETWORKCLASS();
+#ifdef CLIENT_DLL
 	DECLARE_PREDICTABLE();
+#endif
 
 	CBasePortalCombatWeapon();
 
@@ -54,12 +56,16 @@ public:
 	static const	WeaponProficiencyInfo_t *GetDefaultProficiencyValues();
 
 	virtual void	ItemHolsterFrame( void );
+	virtual void	ItemPostFrame( void );
 
 protected:
 
 	bool			m_bLowered;			// Whether the viewmodel is raised or lowered
 	float			m_flRaiseTime;		// If lowered, the time we should raise the viewmodel
 	float			m_flHolsterTime;	// When the weapon was holstered
+	
+	float			m_flNextRepeatPrimaryAttack; 
+	float			m_flNextRepeatSecondaryAttack; 
 
 private:
 	

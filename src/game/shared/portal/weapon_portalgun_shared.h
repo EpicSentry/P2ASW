@@ -22,7 +22,7 @@
 
 #define PORTALGUN_BEAM_SPRITE "sprites/grav_beam.vmt"
 #define PORTALGUN_BEAM_SPRITE_NOZ "sprites/grav_beam_noz.vmt"
-#define PORTALGUN_GLOW_SPRITE "sprites/glow04_noz"
+//#define PORTALGUN_GLOW_SPRITE "sprites/glow04_noz"
 #define PORTALGUN_ENDCAP_SPRITE "sprites/grav_flare"
 #define PORTALGUN_GRAV_ACTIVE_GLOW "sprites/grav_light"
 #define PORTALGUN_PORTAL1_FIRED_LAST_GLOW "sprites/bluelight"

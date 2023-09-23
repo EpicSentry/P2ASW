@@ -342,6 +342,11 @@ public:
 
 	float					GetTimeBase( void ) const;
 	float					GetFinalPredictedTime() const;
+	float					PredictedServerTime() const;
+
+	float					m_fLastUpdateServerTime;
+	int						m_nLastUpdateTickBase;
+	int						m_nLastUpdateServerTickCount;
 
 	bool					IsInVGuiInputMode() const;
 	bool					IsInViewModelVGuiInputMode() const;

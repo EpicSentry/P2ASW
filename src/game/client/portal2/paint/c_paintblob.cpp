@@ -10,13 +10,12 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-#define BLOB_MODEL "models/props/sphere.mdl"
-
 C_PaintBlob::C_PaintBlob()
 {
 	m_pRenderable = new C_PaintBlobRenderable( this );
 		
 	//cl_entitylist->AddNonNetworkableEntity( m_pRenderable->GetIClientUnknown() );
+	//m_pRenderable->PrecacheModel( BLOB_MODEL );
 	m_pRenderable->InitializeAsClientEntity( BLOB_MODEL, false );
 	m_pRenderable->Spawn();
 }

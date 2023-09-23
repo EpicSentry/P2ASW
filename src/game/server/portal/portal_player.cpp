@@ -13,7 +13,9 @@
 #include "predicted_viewmodel.h"
 #include "in_buttons.h"
 #include "portal_gamerules.h"
+#include "portal_mp_gamerules.h"
 #include "weapon_portalgun.h"
+#include "paint/weapon_paintgun.h"
 #include "player_pickup_controller.h"
 #include "KeyValues.h"
 #include "team.h"
@@ -33,6 +35,7 @@
 #include "soundenvelope.h"
 #include "ai_speech.h"		// For expressors, vcd playing
 #include "sceneentity.h"	// has the VCD precache function
+#include "sendprop_priorities.h"
 
 // Max mass the player can lift with +use
 #define PORTAL_PLAYER_MAX_LIFT_MASS 85
@@ -47,6 +50,13 @@ extern void respawn(CBaseEntity *pEdict, bool fCopyCorpse);
 PRECACHE_REGISTER_BEGIN(GLOBAL, PortalPlayerModelPrecache)
 PRECACHE(MODEL, "models/player/chell/player.mdl");
 PRECACHE_REGISTER_END()
+
+ConVar mp_server_player_team( "mp_server_player_team", "0", FCVAR_DEVELOPMENTONLY );
+ConVar mp_wait_for_other_player_timeout( "mp_wait_for_other_player_timeout", "100", FCVAR_CHEAT, "Maximum time that we wait in the transition loading screen for the other player." );
+ConVar mp_wait_for_other_player_notconnecting_timeout( "mp_wait_for_other_player_notconnecting_timeout", "10", FCVAR_CHEAT, "Maximum time that we wait in the transition loading screen after we fully loaded for partner to start loading." );
+ConVar mp_dev_wait_for_other_player( "mp_dev_wait_for_other_player", "1", FCVAR_DEVELOPMENTONLY, "Force waiting for the other player." );
+
+extern void PaintPowerPickup( int colorIndex, CBasePlayer *pPlayer );
 
 //=================================================================================
 //
@@ -103,6 +113,40 @@ END_DATADESC()
 
 
 
+extern void SendProxy_Origin( const SendProp *pProp, const void *pStruct, const void *pData, DVariant *pOut, int iElement, int objectID );
+
+// specific to the local player
+BEGIN_SEND_TABLE_NOBASE( CPortal_Player, DT_PortalLocalPlayerExclusive )
+	// send a hi-res origin and view offset to the local player for use in prediction
+	SendPropVectorXY(SENDINFO(m_vecOrigin),               -1, SPROP_NOSCALE, 0.0f, HIGH_DEFAULT, SendProxy_OriginXY, SENDPROP_LOCALPLAYER_ORIGINXY_PRIORITY ),
+	SendPropFloat   (SENDINFO_VECTORELEM(m_vecOrigin, 2), -1, SPROP_NOSCALE, 0.0f, HIGH_DEFAULT, SendProxy_OriginZ, SENDPROP_LOCALPLAYER_ORIGINZ_PRIORITY ),
+	SendPropVector	(SENDINFO(m_vecViewOffset), -1, SPROP_NOSCALE, 0.0f, HIGH_DEFAULT ),
+
+	// FIXME: - Wonderland_War
+	/*
+	SendPropQAngles( SENDINFO( m_vecCarriedObjectAngles ) ),
+	SendPropVector( SENDINFO( m_vecCarriedObject_CurPosToTargetPos )  ),
+	SendPropQAngles( SENDINFO( m_vecCarriedObject_CurAngToTargetAng ) ),
+	//a message buffer for entity teleportations that's guaranteed to be in sync with the post-teleport updates for said entities
+	SendPropUtlVector( SENDINFO_UTLVECTOR( m_EntityPortalledNetworkMessages ), CPortal_Player::MAX_ENTITY_PORTALLED_NETWORK_MESSAGES, SendPropDataTable( NULL, 0, &REFERENCE_SEND_TABLE( DT_EntityPortalledNetworkMessage ) ) ),
+	SendPropInt( SENDINFO( m_iEntityPortalledNetworkMessageCount ) ),
+	*/
+END_SEND_TABLE()
+
+// all players except the local player
+BEGIN_SEND_TABLE_NOBASE( CPortal_Player, DT_PortalNonLocalPlayerExclusive )
+	// send a lo-res origin and view offset to other players
+	// send a lo-res origin to other players
+	SendPropVectorXY( SENDINFO( m_vecOrigin ), 				 CELL_BASEENTITY_ORIGIN_CELL_BITS, SPROP_CELL_COORD_LOWPRECISION, 0.0f, HIGH_DEFAULT, CBaseEntity::SendProxy_CellOriginXY, SENDPROP_NONLOCALPLAYER_ORIGINXY_PRIORITY ),
+	SendPropFloat   ( SENDINFO_VECTORELEM( m_vecOrigin, 2 ), CELL_BASEENTITY_ORIGIN_CELL_BITS, SPROP_CELL_COORD_LOWPRECISION, 0.0f, HIGH_DEFAULT, CBaseEntity::SendProxy_CellOriginZ, SENDPROP_NONLOCALPLAYER_ORIGINZ_PRIORITY ),
+	SendPropFloat	(SENDINFO_VECTORELEM(m_vecViewOffset, 0), 10, SPROP_CHANGES_OFTEN, -128.0, 128.0f),
+	SendPropFloat	(SENDINFO_VECTORELEM(m_vecViewOffset, 1), 10, SPROP_CHANGES_OFTEN, -128.0, 128.0f),
+	SendPropFloat	(SENDINFO_VECTORELEM(m_vecViewOffset, 2), 10, SPROP_CHANGES_OFTEN, -128.0, 128.0f),
+END_SEND_TABLE()
+
+BEGIN_SEND_TABLE_NOBASE( CPortalPlayerShared, DT_PortalPlayerShared )
+	SendPropInt( SENDINFO( m_nPlayerCond ), PORTAL_COND_LAST, (SPROP_UNSIGNED|SPROP_CHANGES_OFTEN) ),
+END_SEND_TABLE()
 
 
 LINK_ENTITY_TO_CLASS( player, CPortal_Player );
@@ -127,7 +171,6 @@ SendPropAngle( SENDINFO_VECTORELEM(m_angEyeAngles, 0), 11, SPROP_CHANGES_OFTEN )
 SendPropAngle( SENDINFO_VECTORELEM(m_angEyeAngles, 1), 11, SPROP_CHANGES_OFTEN ),
 SendPropEHandle( SENDINFO( m_hRagdoll ) ),
 SendPropInt( SENDINFO( m_iSpawnInterpCounter), 4 ),
-SendPropInt( SENDINFO( m_iPlayerSoundType), 3 ),
 SendPropBool( SENDINFO( m_bHeldObjectOnOppositeSideOfPortal) ),
 SendPropEHandle( SENDINFO( m_pHeldObjectPortal ) ),
 SendPropBool( SENDINFO( m_bPitchReorientation ) ),
@@ -135,6 +178,9 @@ SendPropEHandle( SENDINFO( m_hPortalEnvironment ) ),
 SendPropEHandle( SENDINFO( m_hSurroundingLiquidPortal ) ),
 
 SendPropExclude( "DT_BaseAnimating", "m_flPoseParameter" ),
+
+// Shared info
+SendPropDataTable( SENDINFO_DT( m_Shared ), &REFERENCE_SEND_TABLE( DT_PortalPlayerShared ) ),
 
 SendPropFloat( SENDINFO( m_flHullHeight ) ),
 SendPropFloat( SENDINFO( m_flMotionBlurAmount ) ),
@@ -163,7 +209,6 @@ BEGIN_DATADESC( CPortal_Player )
 	DEFINE_FIELD( m_bSilentDropAndPickup, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_hRagdoll, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_angEyeAngles, FIELD_VECTOR ),
-	DEFINE_FIELD( m_iPlayerSoundType, FIELD_INTEGER ),
 	DEFINE_FIELD( m_qPrePortalledViewAngles, FIELD_VECTOR ),
 	DEFINE_FIELD( m_bFixEyeAnglesFromPortalling, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_matLastPortalled, FIELD_VMATRIX_WORLDSPACE ),
@@ -206,12 +251,16 @@ CPortal_Player::CPortal_Player()
 	: m_vInputVector( 0.0f, 0.0f, 0.0f ),
 	m_flCachedJumpPowerTime( -FLT_MAX ),
 	m_flSpeedDecelerationTime( 0.0f ),
+	m_bJumpWasPressedWhenForced( false ),
 	m_flPredictedJumpTime( 0.f ),
 	m_bWantsToSwapGuns( false ),
 	m_bSendSwapProximityFailEvent( false ),
 	m_flMotionBlurAmount( -1.0f ),
 	m_bIsFullyConnected( false )
 {
+	// Taunt code
+	m_Shared.Init(this);
+	m_Shared.m_flTauntRemoveTime = 0.0f;
 
 	m_PlayerAnimState = CreatePortalPlayerAnimState( this );
 
@@ -261,12 +310,22 @@ void CPortal_Player::Precache( void )
 
 	PrecacheScriptSound( "PortalPlayer.Woosh" );
 	PrecacheScriptSound( "PortalPlayer.FallRecover" );
+	
+	PrecacheScriptSound( "PortalPlayer.ObjectUse" );
+	PrecacheScriptSound( "PortalPlayer.UseDeny" );
+
+	PrecacheScriptSound( "PortalPlayer.ObjectUseNoGun" );
+	PrecacheScriptSound( "PortalPlayer.UseDenyNoGun" );
 
 	PrecacheModel ( "sprites/glow01.vmt" );
 
 	//Precache Citizen models
 	PrecacheModel( g_pszPlayerModel );
 	PrecacheModel( g_pszChellModel );
+	
+	// paint effect
+	PrecacheParticleSystem( "boomer_vomit_screeneffect" );
+	PrecacheParticleSystem( "boomer_vomit_survivor" );
 
 	PrecacheScriptSound( "NPC_Citizen.die" );
 }
@@ -483,7 +542,6 @@ void CPortal_Player::SetPlayerModel( void )
 	}
 
 	SetModel( szModelName );
-	m_iPlayerSoundType = PLAYER_SOUNDS_CITIZEN;
 }
 
 
@@ -520,6 +578,13 @@ void CPortal_Player::PreThink( void )
 	m_vecTotalBulletForce = vec3_origin;
 
 	SetLocalAngles( vOldAngles );
+	
+	// Cache the velocity before impact
+	if( HASPAINTMAP )
+		m_PortalLocal.m_vPreUpdateVelocity = GetAbsVelocity();
+	
+	// Update the painted power
+	UpdatePaintedPower();
 }
 
 void CPortal_Player::PostThink( void )
@@ -1390,8 +1455,15 @@ void CPortal_Player::PlayerUse( void )
 			// Signal that we want to play the deny sound, unless the user is +USEing on a ladder!
 			// The sound is emitted in ItemPostFrame, since that occurs after GameMovement::ProcessMove which
 			// lets the ladder code unset this flag.
-			// TODO(Preston): Do a little portalgun wiggle :3
-			//m_bPlayUseDenySound = true;
+			
+			// This will play the "wiggle" animation
+			if ( GetActiveWeapon() && FClassnameIs( GetActiveWeapon(), "weapon_portalgun" ) )
+			{
+				GetActiveWeapon()->SendWeaponAnim( ACT_VM_FIZZLE );
+			}
+
+			// NOTE: Keep this because Portal 2 does have a use deny sound even if you're not holding the portalgun
+			m_bPlayUseDenySound = true;
 		}
 	}
 
@@ -2025,8 +2097,6 @@ void CPortal_Player::SetupVisibility( CBaseEntity *pViewEntity, unsigned char *p
 }
 
 
-#ifdef PORTAL_MP
-
 CBaseEntity* CPortal_Player::EntSelectSpawnPoint( void )
 {
 	CBaseEntity *pSpot = NULL;
@@ -2126,26 +2196,56 @@ ReturnSpot:
 	return pSpot;
 }
 
+static int s_CoopTeamAssignments[MAX_PLAYERS] = { 0 };
+
 void CPortal_Player::PickTeam( void )
 {
-	//picks lowest or random
-	CTeam *pCombine = g_Teams[TEAM_COMBINE];
-	CTeam *pRebels = g_Teams[TEAM_REBELS];
-	if ( pCombine->GetNumPlayers() > pRebels->GetNumPlayers() )
+	int iIndex = ENTINDEX( this ) - 1;
+	if( g_pGameRules->IsCoOp() && (s_CoopTeamAssignments[iIndex] != 0) )
 	{
-		ChangeTeam( TEAM_REBELS );
+		ChangeTeam( s_CoopTeamAssignments[iIndex] );
+		return;
 	}
-	else if ( pCombine->GetNumPlayers() < pRebels->GetNumPlayers() )
+
+	//picks lowest or random
+	CTeam *pRed = g_Teams[TEAM_RED];
+	CTeam *pBlue = g_Teams[TEAM_BLUE];
+
+	if ( pRed->GetNumPlayers() > pBlue->GetNumPlayers() )
 	{
-		ChangeTeam( TEAM_COMBINE );
+		ChangeTeam( TEAM_BLUE );
+	}
+	else if ( pRed->GetNumPlayers() < pBlue->GetNumPlayers() )
+	{
+		ChangeTeam( TEAM_RED );
 	}
 	else
 	{
-		ChangeTeam( random->RandomInt( TEAM_COMBINE, TEAM_REBELS ) );
+		if ( mp_server_player_team.GetInt() == 0 )
+		{
+			ChangeTeam( TEAM_BLUE );
+		}
+		else if ( mp_server_player_team.GetInt() == 1 )
+		{
+			ChangeTeam( TEAM_RED );
+		}
+		else
+		{
+			ChangeTeam( random->RandomInt( TEAM_RED, TEAM_BLUE ) );
+		}
+	}
+
+
+	if( g_pGameRules->IsCoOp() )
+	{
+		s_CoopTeamAssignments[iIndex] = GetTeamNumber();
 	}
 }
 
-#endif
+void CPortal_Player::ClientDisconnected( edict_t *pPlayer )
+{
+	s_CoopTeamAssignments[ENTINDEX( pPlayer ) - 1] = 0;
+}
 
 CON_COMMAND( displayportalplayerstats, "Displays current level stats for portals placed, steps taken, and seconds taken." )
 {
@@ -2195,4 +2295,109 @@ void CPortal_Player::InitVCollision( const Vector &vecAbsOrigin, const Vector &v
 	*/
 
 	BaseClass::InitVCollision( vecAbsOrigin, vecAbsVelocity );
+}
+
+
+void CPortal_Player::GivePlayerPaintGun( bool bActivatePaintPowers, bool bSwitchTo )
+{
+	CBaseCombatWeapon *pWeapon = Weapon_OwnsThisType( "weapon_paintgun", 0 );
+	CWeaponPaintGun *pPaintGun = NULL;
+
+	//If the player already has a paint gun
+	if( pWeapon )
+	{
+		pPaintGun = static_cast<CWeaponPaintGun*>( pWeapon );
+	}
+	else //Give the player a paint gun
+	{
+		pPaintGun = (CWeaponPaintGun*)CreateEntityByName( "weapon_paintgun" );
+		if ( pPaintGun )
+		{
+			DispatchSpawn( pPaintGun );
+
+			if ( !pPaintGun->IsMarkedForDeletion() )
+			{
+				Weapon_Equip( pPaintGun );
+			}
+		}
+	}
+
+	//Activate all the paint powers if needed
+	if( pPaintGun && bActivatePaintPowers )
+	{
+		pPaintGun->ActivatePaint(BOUNCE_POWER);
+		pPaintGun->ActivatePaint(SPEED_POWER);
+		//pPaintGun->ActivatePaint(REFLECT_POWER);
+		pPaintGun->ActivatePaint(PORTAL_POWER);
+		PaintPowerPickup( BOUNCE_POWER, this );
+		PaintPowerPickup( SPEED_POWER, this );
+		//PaintPowerPickup( REFLECT_POWER, this );
+		PaintPowerPickup( PORTAL_POWER, this );
+	}
+
+	//Switch to the paint gun
+	if( pPaintGun && bSwitchTo )
+	{
+		Weapon_Switch( pPaintGun );
+	}
+}
+
+
+void CPortal_Player::GivePlayerPortalGun( bool bUpgraded, bool bSwitchTo )
+{
+	CBaseCombatWeapon *pWeapon = Weapon_OwnsThisType( "weapon_portalgun", 0 );
+	CWeaponPortalgun *pPortalGun = NULL;
+
+	//If the player already has a portal gun
+	if( pWeapon )
+	{
+		pPortalGun = static_cast<CWeaponPortalgun*>( pWeapon );
+	}
+	else //Give the player a portal gun
+	{
+		pPortalGun = (CWeaponPortalgun*)CreateEntityByName( "weapon_portalgun" );
+		if ( pPortalGun )
+		{
+			pPortalGun->SetLocalOrigin( GetLocalOrigin() );
+			pPortalGun->AddSpawnFlags( SF_NORESPAWN );
+			pPortalGun->SetSubType( 0 );
+
+			DispatchSpawn( pPortalGun );
+
+			if ( !pPortalGun->IsMarkedForDeletion() )
+			{
+				pPortalGun->SetCanFirePortal1();
+
+				//Upgrade the portal gun if needed
+				if( bUpgraded )
+				{
+					pPortalGun->SetCanFirePortal2();
+				}
+
+				//pPortalGun->Touch( this );
+				Weapon_Equip( pPortalGun );
+			}
+		}
+	}
+
+	//Switch to the portal gun
+	if( pPortalGun && bSwitchTo )
+	{
+		Weapon_Switch( pPortalGun );
+	}
+}
+
+CON_COMMAND(give_portalgun, "gives the command user a portalgun")
+{
+	CPortal_Player *pPlayer = static_cast<CPortal_Player*>( UTIL_GetCommandClient() );
+
+	pPlayer->GivePlayerPortalGun( false, true );
+
+}
+
+CON_COMMAND(give_paintgun, "Equips the player with a single portal portalgun.")
+{
+	CPortal_Player *pPlayer = static_cast<CPortal_Player*>( UTIL_GetCommandClient() );
+
+	pPlayer->GivePlayerPaintGun( true, true );
 }

@@ -99,7 +99,7 @@ void CPaintDatabase::AddPaint( CBaseEntity* pPaintedEntity, const Vector& vecPai
 		m_PaintThisFrame.AddToTail( data );
 	}
 	// Not the world
-	else if( !pPaintedEntity->m_bIsUnPaintable ) //If this entity is not flagged as unpaintable
+	else if ( !( pPaintedEntity->GetFlags() & FL_UNPAINTABLE ) ) //If this entity is not flagged as unpaintable
 	{
 		/*
 #ifdef PORTAL2
@@ -121,20 +121,22 @@ void CPaintDatabase::AddPaint( CBaseEntity* pPaintedEntity, const Vector& vecPai
 
 void CPaintDatabase::PaintEntity( CBaseEntity *pPaintedEntity, PaintPowerType newPowerType, const Vector &vecPosition )
 {
-	//CEG_GCV_PRE();
-	static const PaintPowerType CEG_NO_POWER = NO_POWER;//(PaintPowerType)CEG_GET_CONSTANT_VALUE( PaintNoPower );
-	//CEG_GCV_POST();
+	CEG_GCV_PRE();
+	static const PaintPowerType CEG_NO_POWER = NO_POWER//(PaintPowerType)CEG_GET_CONSTANT_VALUE( PaintNoPower );
+	CEG_GCV_POST();
 
 	//Get the current color of the painted entity
 	IPaintableEntity* pPaintableEntity = dynamic_cast< IPaintableEntity* >( pPaintedEntity );
 	PaintPowerType paintedPowerType = CEG_NO_POWER;
 	if( pPaintableEntity )
 	{
+		Msg("pPaintableEntity\n");
 		paintedPowerType = pPaintableEntity->GetPaintPowerAtPoint( vecPosition );
 
 		// Client player's need to handle getting painted
 		if( pPaintedEntity->IsPlayer() )
 		{
+			Msg("pPaintedEntity->IsPlayer()\n");
 			CBroadcastRecipientFilter filter;
 			filter.MakeReliable();
 			UserMessageBegin( filter, "PaintEntity" );

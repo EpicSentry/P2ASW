@@ -719,7 +719,9 @@ static void ClampPhysicsVelocity(IPhysicsObject *pPhys, float linearLimit, float
 
 void CGrabController::DetachEntity(bool bClearVelocity)
 {
+#ifdef GAME_DLL
 	Assert(!PhysIsInCallback());
+#endif
 	CBaseEntity *pEntity = GetAttached();
 	if (pEntity)
 	{

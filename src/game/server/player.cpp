@@ -3149,7 +3149,7 @@ void CBasePlayer::AdjustPlayerTimeBase( int simulation_ticks )
 	// Start in the past so that we get to the sv.time that we'll hit at the end of the
 	//  frame, just as we process the final command
 	
-	if ( gpGlobals->maxClients == 1 )
+	if ( !m_bPredictionEnabled || (gpGlobals->maxClients == 1) )
 	{
 		// set TickBase so that player simulation tick matches gpGlobals->tickcount after
 		// all commands have been executed

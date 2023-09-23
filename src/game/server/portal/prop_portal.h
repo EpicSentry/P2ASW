@@ -53,6 +53,8 @@ public:
 	Vector		m_vDelayedPosition;
 	QAngle		m_qDelayedAngles;
 	int			m_iDelayedFailure;
+	Vector		m_vOldPosition;
+	QAngle		m_qOldAngles;
 	EHANDLE		m_hPlacedBy;
 
 	COutputEvent m_OnPlacedSuccessfully;		// Output in hammer for when this portal was successfully placed (not attempted and fizzed).
@@ -95,6 +97,7 @@ public:
 
 	void					ResetModel( void ); //sets the model and bounding box
 	void					DoFizzleEffect( int iEffect, bool bDelayedPos = true ); //display cool visual effect
+	void					CreatePortalEffect( CBasePlayer* pPlayer, int iEffect, Vector vecOrigin, QAngle qAngles, int nTeam, int nPortalNum );
 	void					Fizzle( void ); //go inactive
 	void					PunchPenetratingPlayer( CBaseEntity *pPlayer ); // adds outward force to player intersecting the portal plane
 	void					PunchAllPenetratingPlayers( void ); // adds outward force to player intersecting the portal plane

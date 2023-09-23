@@ -8,6 +8,8 @@
 
 #include "paint_color_manager.h"
 
+#define BLOB_MODEL "models/props/sphere.mdl"
+
 enum BlobTraceResult
 {
 	BLOB_TRACE_HIT_NOTHING = 0,

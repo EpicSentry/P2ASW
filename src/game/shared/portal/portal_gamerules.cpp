@@ -25,6 +25,7 @@
 	#include "player_pickup_controller.h"
 	#include "props.h"		// For props flags used in making the portal weight box
 	#include "datacache/imdlcache.h"	// For precaching box model
+	#include "weapon_portalgun.h"
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -180,18 +181,6 @@ static bool IsMultiplayerFunction()
 bool CPortalGameRules::IsMultiplayer()
 {
 	return IsMultiplayerFunction();
-}
-
-static bool LoopSinglePlayerMaps()
-{
-	return false;
-}
-
-void CPortalGameRules::RegisterScriptFunctions(void)
-{
-	ScriptRegisterFunctionNamed(g_pScriptVM, IsMultiplayerFunction, "IsMultiplayer", "Get if we are multiplayer or not.");
-	ScriptRegisterFunction(g_pScriptVM, LoopSinglePlayerMaps, "Should we loop SP maps? I don't even know what this does.");
-	//ScriptRegisterFunction(g_pScriptVM, DoIncludeScript, "Execute a script (internal)");
 }
 
 #ifdef CLIENT_DLL //{
@@ -1392,5 +1381,154 @@ CAmmoDef *GetAmmoDef()
 		UTIL_SetSize(pHead, pCorpse->WorldAlignMins(), pCorpse->WorldAlignMaxs());
 		g_pBodyQueueHead = (CCorpse *)pHead->GetOwnerEntity();
 	}
+	
+#if !defined ( CLIENT_DLL )
+static bool ScriptIsMultiplayer( void )
+{
+	return false;//g_pGameRules->IsMultiplayer();
+}
+
+static bool TryDLC1InstalledOrCatch( void )
+{
+	return true;
+}
+/*
+extern float GetPlayerSilenceDuration( int nPlayer );
+extern int GetOrangePlayerIndex( void );
+extern int GetBluePlayerIndex( void );
+extern int GetCoopSectionIndex( void );
+extern int GetCoopBranchLevelIndex( int nBranch );
+extern int GetHighestActiveBranch( void );
+extern void AddBranchLevelName( int nBranch, const char *pchName );
+extern void MarkMapComplete( const char *pchName );
+extern bool IsLevelComplete( int nBranch, int nLevel );
+extern bool IsPlayerLevelComplete( int nPlayer, int nBranch, int nLevel );
+extern void AddCoopCreditsName( const char *pchName );
+*/
+bool ScriptSteamShowURL( const char *pURL )
+{
+#if !defined(NO_STEAM)
+	if ( steamapicontext && steamapicontext->SteamFriends() &&
+		steamapicontext->SteamUtils() && steamapicontext->SteamUtils()->IsOverlayEnabled() )
+	{
+		steamapicontext->SteamFriends()->ActivateGameOverlayToWebPage( pURL );
+		return true;
+	}
+#endif
+
+	return false;
+}
+
+void ScriptShowHudMessageAll( const char *pMsg, float flHoldTime )
+{
+	hudtextparms_t tTextParam = {0};
+	tTextParam.x			= -1;
+	tTextParam.y			= -1;
+	tTextParam.effect		= 0;
+	tTextParam.r1			= 255;
+	tTextParam.g1			= 255;
+	tTextParam.b1			= 255;
+	tTextParam.a1			= 255;
+	tTextParam.r2			= 255;
+	tTextParam.g2			= 255;
+	tTextParam.b2			= 255;
+	tTextParam.a2			= 255;
+	tTextParam.fadeinTime	= 0;
+	tTextParam.fadeoutTime	= 0;
+	tTextParam.holdTime		= flHoldTime;
+	tTextParam.fxTime		= 0;
+	tTextParam.channel		= 1;
+	UTIL_HudMessageAll( tTextParam, pMsg );
+}
+
+void GivePlayerPortalgun( void )
+{
+	for ( int i = 1 ; i <= gpGlobals->maxClients ; i++ )
+	{
+		CPortal_Player *pPlayer = ToPortalPlayer( UTIL_PlayerByIndex( i ) );
+		if ( pPlayer )
+		{
+			pPlayer->GivePlayerPortalGun( false, true );
+		}
+	}
+}
+
+void UpgradePlayerPortalgun( void )
+{
+	for ( int i = 1 ; i <= gpGlobals->maxClients ; i++ )
+	{
+		CPortal_Player *pPlayer = ToPortalPlayer( UTIL_PlayerByIndex( i ) );
+		if ( pPlayer )
+		{
+			CWeaponPortalgun *pPortalGun = static_cast< CWeaponPortalgun* >( pPlayer->Weapon_OwnsThisType( "weapon_portalgun" ) );
+			if ( pPortalGun )
+			{
+				pPortalGun->SetCanFirePortal1();
+				pPortalGun->SetCanFirePortal2();
+			}
+			else
+			{
+				DevMsg( "Portalgun upgrade failed! Player not holding a portalgun.\n");
+			}
+		}
+	}
+}
+
+void UpgradePlayerPotatogun( void )
+{
+	for ( int i = 1 ; i <= gpGlobals->maxClients ; i++ )
+	{
+		CPortal_Player *pPlayer = ToPortalPlayer( UTIL_PlayerByIndex( i ) );
+		if ( pPlayer )
+		{
+			CWeaponPortalgun *pPortalGun = static_cast< CWeaponPortalgun* >( pPlayer->Weapon_OwnsThisType( "weapon_portalgun" ) );
+			if ( pPortalGun )
+			{
+				pPortalGun->SetCanFirePortal1();
+				pPortalGun->SetCanFirePortal2();
+				pPortalGun->SetPotatosOnPortalgun( true );
+			}
+			else
+			{
+				DevMsg( "Potatogun upgrade failed! Player not holding a portalgun.\n");
+			}
+		}
+	}
+}
+
+
+HSCRIPT GetPlayer( void )
+{
+	return ToHScript( UTIL_GetLocalPlayer() );	
+}
+	
+void CPortalGameRules::RegisterScriptFunctions(void)
+{
+	ScriptRegisterFunctionNamed( g_pScriptVM, ScriptIsMultiplayer, "IsMultiplayer", "Is this a multiplayer game?" );
+/*
+	ScriptRegisterFunction( g_pScriptVM, GetPlayerSilenceDuration, "Time that the specified player has been silent on the mic." );
+	ScriptRegisterFunction( g_pScriptVM, GetOrangePlayerIndex, "Player index of the orange player." );
+	ScriptRegisterFunction( g_pScriptVM, GetBluePlayerIndex, "Player index of the blue player." );
+	ScriptRegisterFunction( g_pScriptVM, GetCoopSectionIndex, "Section that the coop players have selected to load." );
+	ScriptRegisterFunction( g_pScriptVM, GetCoopBranchLevelIndex, "Given the 'branch' argument, returns the current chosen level." );
+	ScriptRegisterFunction( g_pScriptVM, GetHighestActiveBranch, "Returns which branches should be available in the hub." );
+	ScriptRegisterFunction( g_pScriptVM, AddBranchLevelName, "Adds a level to the specified branche's list." );
+	ScriptRegisterFunction( g_pScriptVM, MarkMapComplete, "Marks a maps a complete for both players." );
+	ScriptRegisterFunction( g_pScriptVM, IsLevelComplete, "Returns true if the level in the specified branch is completed by either player." );
+	ScriptRegisterFunction( g_pScriptVM, IsPlayerLevelComplete, "Returns true if the level in the specified branch is completed by a specific player." );
+	ScriptRegisterFunction( g_pScriptVM, GetPlayer, "Returns the player (SP Only)." );
+	//ScriptRegisterFunction( g_pScriptVM, PrecacheMovie, "Precaches a named movie. Only valid to call within the entity's 'Precache' function called on mapspawn." );
+	ScriptRegisterFunction( g_pScriptVM, AddCoopCreditsName, "Adds a name to the coop credit's list." );
+*/
+	ScriptRegisterFunction( g_pScriptVM, ScriptSteamShowURL, "Bring up the steam overlay and shows the specified URL.  (Full address with protocol type is required, e.g. http://www.steamgames.com/)" );
+	ScriptRegisterFunction( g_pScriptVM, ScriptShowHudMessageAll, "Show center print text message." );
+	ScriptRegisterFunction( g_pScriptVM, GivePlayerPortalgun, "Give player the portalgun." );
+	ScriptRegisterFunction( g_pScriptVM, UpgradePlayerPortalgun, "Give player the portalgun." );
+	ScriptRegisterFunction( g_pScriptVM, UpgradePlayerPotatogun, "Give player the portalgun." );
+	ScriptRegisterFunction( g_pScriptVM, TryDLC1InstalledOrCatch, "Tests if the DLC1 is installed for Try/Catch blocks." );
+	//g_pScriptVM->RegisterInstance( &PlayerVoiceListener(), "PlayerVoiceListener" );
+}
+
+#endif
 
 #endif

@@ -18,7 +18,6 @@ typedef	int32	INT32;
 typedef	uint32	DWORD32;
 typedef	uint64	DWORD64;
 
-
 #define CEG_GET_CONSTANT_VALUE_AVOID_CEG( fn_name )			fn_name()	// makes it easy for us to turn off CEG checks if one of the CEG'ed functions has a bigger impact on perf than expected
 
 // To disable CEG in your build for one or more modules, add "/NO_CEG" to your VPC parameters

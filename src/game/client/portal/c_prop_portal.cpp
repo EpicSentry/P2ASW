@@ -22,6 +22,8 @@
 #include "rendertexture.h"
 #include "prop_portal_shared.h"
 #include "particles_new.h"
+#include "c_user_message_register.h"
+#include "prediction.h"
 
 #include "C_Portal_Player.h"
 
@@ -166,12 +168,44 @@ void __MsgFunc_EntityPortalled(bf_read &msg)
 
 static ConVar portal_demohack( "portal_demohack", "0", FCVAR_ARCHIVE, "Do the demo_legacy_rollback setting to help during demo playback of going through portals." );
 
+
+void __MsgFunc_PortalFX_Surface(bf_read &msg)
+{
+	int iPortalEnt = msg.ReadShort();		
+	C_Prop_Portal *pPortal= dynamic_cast<C_Prop_Portal*>( ClientEntityList().GetEnt( iPortalEnt ) );
+
+	if( !pPortal )
+	{
+		Warning("!!! Failed to find portal %d !!!\n", iPortalEnt );
+		return;
+	}
+
+	int iOwnerEnt = msg.ReadShort();		
+	C_BaseEntity *pOwner = ClientEntityList().GetEnt( iOwnerEnt );
+
+	int nTeam = msg.ReadByte();
+	int nPortalNum = msg.ReadByte();
+	int nEffect = msg.ReadByte();
+
+	Vector vecOrigin;
+	msg.ReadBitVec3Coord( vecOrigin );
+
+	QAngle qAngle;
+	msg.ReadBitAngles( qAngle );
+
+	pPortal->CreateFizzleEffect( pOwner, nEffect, vecOrigin, qAngle, nTeam, nPortalNum );
+}
+
+USER_MESSAGE_REGISTER( PortalFX_Surface );
+
 class C_PortalInitHelper : public CAutoGameSystem
 {
 	virtual bool Init()
 	{
 		//HOOK_MESSAGE( PlayerPortalled );
 		HOOK_MESSAGE( EntityPortalled );
+		HOOK_MESSAGE( PortalFX_Surface );
+		
 		if ( portal_demohack.GetBool() )
 		{
 			ConVarRef demo_legacy_rollback_ref( "demo_legacy_rollback" );
@@ -182,7 +216,6 @@ class C_PortalInitHelper : public CAutoGameSystem
 	}
 };
 static C_PortalInitHelper s_PortalInitHelper;
-
 
 
 C_Prop_Portal::C_Prop_Portal( void )
@@ -958,4 +991,98 @@ void C_Prop_Portal::SetIsPortal2( bool bValue )
 bool C_Prop_Portal::IsActivedAndLinked( void ) const
 {
 	return ( m_bActivated && m_hLinkedPortal.Get() != NULL );
+}
+
+void C_Prop_Portal::CreateFizzleEffect( C_BaseEntity *pOwner, int iEffect, Vector vecOrigin, QAngle qAngles, int nTeam, int nPortalNum )
+{
+#if 1
+	Color color = UTIL_Portal_Color_Particles( nPortalNum, nTeam );
+
+	Vector vColor;
+	vColor.x = color.r();
+	vColor.y = color.g();
+	vColor.z = color.b();
+
+	CUtlReference<CNewParticleEffect> pEffect;
+	if ( !pOwner )
+		return;
+
+	bool bCreated = false;
+
+	switch ( iEffect )
+	{
+	case PORTAL_FIZZLE_SUCCESS:
+		{
+			//pEffect = CNewParticleEffect::CreateOrAggregate( NULL, "portal_success", vecOrigin, NULL );
+			pEffect = CNewParticleEffect::Create( NULL, "portal_success" );
+			bCreated = true;
+		}
+		break;
+
+	case PORTAL_FIZZLE_BAD_SURFACE:
+		{
+			//pEffect = CNewParticleEffect::CreateOrAggregate( NULL, "portal_badsurface", vecOrigin, NULL );
+			pEffect = CNewParticleEffect::Create( NULL, "portal_badsurface" );
+		}
+		break;
+
+	case PORTAL_FIZZLE_CLOSE:
+		{
+			//pEffect = CNewParticleEffect::CreateOrAggregate( NULL, "portal_close", vecOrigin, NULL );
+			pEffect = CNewParticleEffect::Create( NULL, "portal_close" );
+		}
+		break;
+	}
+
+	if ( pEffect )
+	{
+		pEffect->SetControlPoint( 0, vecOrigin );
+
+		Vector vecForward, vecRight, vecUp;
+		AngleVectors( qAngles, &vecForward, &vecRight, &vecUp );
+		pEffect->SetControlPointOrientation( 0, vecForward, vecRight, vecUp );
+
+		pEffect->SetControlPoint( 2, vColor );
+	}
+
+	if ( bCreated )
+	{
+		//Color rgbaColor = Color( vColor.x, vColor.y, vColor.z, 255 );
+		//CreateAttachedParticles( &rgbaColor );
+	}
+#endif
+}
+
+
+void C_Prop_Portal::DoFizzleEffect( int iEffect, bool bDelayedPos /*= true*/ )
+{
+#if 1
+	if( prediction->InPrediction() && !prediction->IsFirstTimePredicted() )
+		return; //early out if we're repeatedly creating particles. Creates way too many particles.
+
+#if 0
+	Vector vecOrigin = ( ( bDelayedPos ) ? ( m_vDelayedPosition ) : ( GetAbsOrigin() ) );
+	QAngle qAngles = ( ( bDelayedPos ) ? ( m_qDelayedAngles ) : ( GetAbsAngles() ) );
+#else
+	Vector vecOrigin = ( ( bDelayedPos ) ? ( vec3_origin ) : ( GetAbsOrigin() ) );
+	QAngle qAngles = ( ( bDelayedPos ) ? ( vec3_angle ) : ( GetAbsAngles() ) );
+#endif
+
+	Vector vForward, vUp;
+	AngleVectors( qAngles, &vForward, &vUp, NULL );
+	vecOrigin = vecOrigin + vForward * 1.0f;
+
+	int nPortalNum = m_bIsPortal2 ? 2 : 1;
+	int nTeam = GetTeamNumber();
+
+	if ( iEffect != PORTAL_FIZZLE_SUCCESS && iEffect != PORTAL_FIZZLE_CLOSE )
+		iEffect = PORTAL_FIZZLE_BAD_SURFACE;
+
+	C_BasePlayer *pPlayer = GetPredictionOwner();
+	if ( pPlayer )
+		nTeam = pPlayer->GetTeamNumber();
+
+	VectorAngles( vUp, vForward, qAngles );
+	CreateFizzleEffect( pPlayer, iEffect, vecOrigin, qAngles, nTeam, nPortalNum );
+#endif
 }

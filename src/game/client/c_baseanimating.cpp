@@ -2915,7 +2915,7 @@ bool C_BaseAnimating::SetupBones( matrix3x4a_t *pBoneToWorldOut, int nMaxBones, 
 			AddFlag( EFL_SETTING_UP_BONES );
 
 // NOTE: For model scaling, we need to opt out of IK because it will mark the bones as already being calculated
-#if defined( INFESTED )
+#if defined( PORTAL2 ) || defined( INFESTED ) || defined( CSTRIKE15 )
 			// only allocate an ik block if the npc can use it
 			if ( !m_pIk && hdr->numikchains() > 0 && !(m_EntClientFlags & ENTCLIENTFLAG_DONTUSEIK) )
 				m_pIk = new CIKContext;
@@ -3143,6 +3143,29 @@ void C_BaseAnimating::InvalidateBoneCaches()
 
 ConVar r_drawothermodels( "r_drawothermodels", "1", FCVAR_CHEAT, "0=Off, 1=Normal, 2=Wireframe" );
 
+
+bool C_BaseAnimating::UpdateBlending( int flags, const RenderableInstance_t &instance )
+{
+	if ( flags & STUDIO_RENDER )
+	{
+		// Determine blending amount and tell engine
+		float blend = (float)( instance.m_nAlpha / 255.0f );
+
+		// Totally gone
+		if ( blend <= 0.0f )
+			return false;
+
+		// Tell engine
+		render->SetBlend( blend );
+
+		float color[3];
+		GetColorModulation( color );
+		render->SetColorModulation(	color );
+	}
+
+	return true;
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: Draws the object
 // Input  : flags - 
@@ -3152,6 +3175,16 @@ int C_BaseAnimating::DrawModel( int flags, const RenderableInstance_t &instance 
 	VPROF_BUDGET( "C_BaseAnimating::DrawModel", VPROF_BUDGETGROUP_MODEL_RENDERING );
 	if ( !m_bReadyToDraw )
 		return 0;
+	
+#if defined ( PORTAL2 )
+	if ( IsRenderingWithViewModels() )
+	{
+		if ( !UpdateBlending( flags, instance ) )
+		{
+			return 0;
+		}
+	}
+#endif
 
 	int drawn = 0;
 

@@ -28,6 +28,12 @@ public:
 
 	void AddPlayerSpeakTime( int nPlayerIndex );
 	void AddPlayerSpeakTime( CBasePlayer *pPlayer );
+	
+	float GetPlayerLastSpeechTime( int nPlayerIndex );
+	float GetPlayerLastSpeechTime( CBasePlayer *pPlayer );
+
+	float GetPlayerSilenceDuration( int nPlayerIndex );
+	float GetPlayerSilenceDuration( CBasePlayer *pPlayer );
 
 	float GetPlayerSpeechDuration( int nPlayerIndex );
 	float GetPlayerSpeechDuration( CBasePlayer *pPlayer );

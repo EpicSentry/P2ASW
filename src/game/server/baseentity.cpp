@@ -669,8 +669,6 @@ IMPLEMENT_SERVERCLASS_ST_NOBASE( CBaseEntity, DT_BaseEntity )
 	SendPropInt( SENDINFO(m_bSimulatedEveryTick),		1, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO(m_bAnimatedEveryTick),		1, SPROP_UNSIGNED ),
 	SendPropBool( SENDINFO( m_bAlternateSorting )),
-	
-	SendPropBool( SENDINFO( m_bIsUnPaintable )),
 
 	// Fading
 	SendPropFloat( SENDINFO( m_fadeMinDist ),			0, SPROP_NOSCALE ),
@@ -773,10 +771,6 @@ CBaseEntity::CBaseEntity( bool bServerOnly )
 	m_flCreateTime = 0.0f;
 
 	m_pEvent = NULL;
-
-#ifdef PORTAL2
-	m_bIsUnPaintable = false;
-#endif
 }
 
 //-----------------------------------------------------------------------------

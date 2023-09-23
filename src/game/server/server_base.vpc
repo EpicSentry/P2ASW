@@ -732,6 +732,8 @@ $Project
 				"$SRCDIR\public\stringregistry.cpp"					\
 				"$SRCDIR\public\studio.cpp"							\
 				"GameStats_BasicStatsFunctions.cpp"
+		
+		//$File	"$SRCDIR\common\CegClientWrapper.cpp"
 		{
 			$Configuration
 			{

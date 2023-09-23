@@ -41,6 +41,8 @@
 //#include "Portal_PhysicsEnvironmentMgr.h"
 #endif
 
+#include "CegClientWrapper.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -3047,6 +3049,42 @@ bool UTIL_IsGroundLevel( float radius, const Vector &position, float hullHeight,
 
 	return true;
 }
+
+void UTIL_SendClientCommandKVToPlayer( KeyValues *pKV, CBasePlayer *pPlayer )
+{
+	KeyValues::AutoDelete autodelete( pKV );
+	if ( pPlayer )
+	{
+		engine->ClientCommandKeyValues( pPlayer->edict(), pKV->MakeCopy() );
+	}
+	else
+	{
+		// On server, send to all players
+		for (int i = 1; i <= gpGlobals->maxClients; i++ )
+		{
+			CBasePlayer *pPlayer = UTIL_PlayerByIndex( i );
+			if ( pPlayer )
+			{
+				engine->ClientCommandKeyValues( pPlayer->edict(), pKV->MakeCopy() );
+			}
+		}
+	}
+}
+
+CEG_NOINLINE void UTIL_RecordAchievementEvent( const char *pszAchievementname, CBasePlayer *pPlayer /*= NULL*/ )
+{
+	bool bIsWriteStat = ( strchr( pszAchievementname, '@' ) || strchr( pszAchievementname, '[' ) || strchr( pszAchievementname, '(' ) ); // Achievements cannot have @[( symbols in names - it's a stat
+	KeyValues *pKV; 
+	if ( bIsWriteStat )
+		pKV = new KeyValues( "write_stats", pszAchievementname, 1 );
+	else
+		pKV = new KeyValues( "write_awards", pszAchievementname, 1 );
+
+	UTIL_SendClientCommandKVToPlayer( pKV, pPlayer );
+}
+
+CEG_PROTECT_FUNCTION( UTIL_RecordAchievementEvent );
+
 //=============================================================================
 //
 // Tests!

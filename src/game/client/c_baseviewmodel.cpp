@@ -281,6 +281,9 @@ int C_BaseViewModel::DrawModel( int flags, const RenderableInstance_t &instance 
 {
 	if ( !m_bReadyToDraw )
 		return 0;
+	
+	if ( !UpdateBlending( flags, instance ) )
+		return 0;
 
 	if ( flags & STUDIO_RENDER )
 	{

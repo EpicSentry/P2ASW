@@ -38,8 +38,15 @@ extern IFileSystem *filesystem;
 	#include "env_player_surface_trigger.h"
 	static ConVar dispcoll_drawplane( "dispcoll_drawplane", "0" );
 #endif
+	
+#if defined ( PORTAL2 ) &&  !defined ( CLIENT_DLL )
+#include "portal_player.h"
+#endif 
 
-ConVar enabledoublejump("portal2_doublejump", "1", FCVAR_REPLICATED | FCVAR_ARCHIVE, "Enables doublejump and slide");
+// Double jumping doesn't seem necessary - Wonderland_War
+#if 0
+ConVar portal2_doublejump("portal2_doublejump", "1", FCVAR_REPLICATED | FCVAR_ARCHIVE, "Enables doublejump and slide");
+#endif
 
 // tickcount currently isn't set during prediction, although gpGlobals->curtime and
 // gpGlobals->frametime are. We should probably set tickcount (to player->m_nTickBase),
@@ -2592,7 +2599,8 @@ bool CGameMovement::CheckJumpButton( void )
 	// No more effect
 	if (player->GetGroundEntity() == NULL)
 	{
-		if (enabledoublejump.GetBool() && !player->hasDoubleJumped)
+#if 0
+		if (portal2_doublejump.GetBool() && !player->hasDoubleJumped)
 		{
 			//dunno why i need this, but without it diving is janky so i need it
 			player->m_Local.m_bInDuckJump = false;
@@ -2600,7 +2608,9 @@ bool CGameMovement::CheckJumpButton( void )
 			player->SetMoveType(MOVETYPE_WALK);
 			player->hasDoubleJumped = true;
 		}
-		//mv->m_nOldButtons |= IN_JUMP;
+#else
+		mv->m_nOldButtons |= IN_JUMP;
+#endif
 		return true;
 	}
 
@@ -2712,9 +2722,12 @@ bool CGameMovement::CheckJumpButton( void )
 
 	mv->m_outJumpVel.z += mv->m_vecVelocity[2] - startz;
 	mv->m_outStepHeight += 0.15f;
-
-
+		
+#if !defined( PORTAL2 )
 	bool bSetDuckJump = (gpGlobals->maxClients == 1); //most games we only set duck jump if the game is single player
+#else
+	const bool bSetDuckJump = true; //in portal 2, do it for both single and multiplayer
+#endif
 
 
 	// Set jump time.
@@ -4622,6 +4635,17 @@ void CGameMovement::Duck( void )
 						trace_t trace;
 						if ( CanUnDuckJump( trace ) )
 						{
+#if defined ( PORTAL2 ) &&  !defined ( CLIENT_DLL )
+							if ( EntityFromEntityHandle( mv->m_nPlayerHandle.Get() ) )
+							{
+								CPortal_Player *pPortalPlayer = (CPortal_Player*)EntityFromEntityHandle( mv->m_nPlayerHandle.Get() );
+								if ( pPortalPlayer && pPortalPlayer->m_hPortalEnvironment.Get() )
+								{
+									Warning( "--===Portal player unduckedjumped near a portal! This could cause the trajectory to go screwy===--\n" );
+								}
+							}
+							
+#endif 
 
 							FinishUnDuckJump( trace );
 							player->m_Local.m_nDuckJumpTimeMsecs = (int)( ( (float)GAMEMOVEMENT_TIME_TO_UNDUCK_MSECS * ( 1.0f - trace.fraction ) ) + (float)GAMEMOVEMENT_TIME_TO_UNDUCK_MSECS_INV );

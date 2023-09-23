@@ -115,7 +115,6 @@ static CPhysCollide *ConvertPolyhedronsToCollideable( CPolyhedron **pPolyhedrons
 
 #ifndef CLIENT_DLL
 static void UpdateShadowClonesPortalSimulationFlags( const CBaseEntity *pSourceEntity, unsigned int iFlags, int iSourceFlags );
-static bool g_bPlayerIsInSimulator = false;
 #endif
 
 static CUtlVector<CPortalSimulator *> s_PortalSimulators;
@@ -1104,11 +1103,6 @@ void CPortalSimulator::MarkAsOwned( CBaseEntity *pEntity )
 	m_InternalData.Simulation.Dynamic.EntFlags[iEntIndex] |= PSEF_OWNS_ENTITY;
 	s_OwnedEntityMap[iEntIndex] = this;
 	m_InternalData.Simulation.Dynamic.OwnedEntities.AddToTail( pEntity );
-
-	if ( pEntity->IsPlayer() )
-	{
-		g_bPlayerIsInSimulator = true;
-	}
 }
 
 void CPortalSimulator::MarkAsReleased( CBaseEntity *pEntity )
@@ -1130,12 +1124,6 @@ void CPortalSimulator::MarkAsReleased( CBaseEntity *pEntity )
 		}
 	}
 	Assert( i >= 0 );
-
-
-	if ( pEntity->IsPlayer() )
-	{
-		g_bPlayerIsInSimulator = false;
-	}
 }
 
 
@@ -2448,23 +2436,21 @@ void CPortalSimulator::PrePhysFrame( void )
 
 void CPortalSimulator::PostPhysFrame( void )
 {
-	if ( g_bPlayerIsInSimulator )
+	for( int i = 1; i <= gpGlobals->maxClients; ++i )
 	{
-		for (int8 i = 0; i < gpGlobals->maxClients; i++)
+		CPortal_Player* pPlayer = (CPortal_Player *)UTIL_PlayerByIndex( i );
+		if( pPlayer )
 		{
-			CPortal_Player* pPlayer = dynamic_cast<CPortal_Player*>(UTIL_PlayerByIndex(i));
-			if (!pPlayer)
-				return;
 			CProp_Portal* pTouchedPortal = pPlayer->m_hPortalEnvironment.Get();
-			CPortalSimulator* pSim = GetSimulatorThatOwnsEntity(pPlayer);
-			if (pTouchedPortal && pSim && (pTouchedPortal->m_PortalSimulator.GetPortalSimulatorGUID() != pSim->GetPortalSimulatorGUID()))
+			CPortalSimulator* pSim = GetSimulatorThatOwnsEntity( pPlayer );
+			if ( pTouchedPortal && pSim && (pTouchedPortal->m_PortalSimulator.GetPortalSimulatorGUID() != pSim->GetPortalSimulatorGUID()) )
 			{
-				Warning("Player is simulated in a physics environment but isn't touching a portal! Can't teleport, but can fall through portal hole. Returning player to main environment.\n");
-				ADD_DEBUG_HISTORY(HISTORY_PLAYER_DAMAGE, UTIL_VarArgs("Player in PortalSimulator but not touching a portal, removing from sim at : %f\n", gpGlobals->curtime));
-
-				if (pSim)
+				Warning ( "Player is simulated in a physics environment but isn't touching a portal! Can't teleport, but can fall through portal hole. Returning player to main environment.\n" );
+				ADD_DEBUG_HISTORY( HISTORY_PLAYER_DAMAGE, UTIL_VarArgs( "Player in PortalSimulator but not touching a portal, removing from sim at : %f\n",  gpGlobals->curtime ) );
+				
+				if ( pSim )
 				{
-					pSim->ReleaseOwnershipOfEntity(pPlayer, false);
+					pSim->ReleaseOwnershipOfEntity( pPlayer, false );
 				}
 			}
 		}

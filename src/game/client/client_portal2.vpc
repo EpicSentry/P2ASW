@@ -15,6 +15,12 @@ $Configuration
 	{
 		$AdditionalIncludeDirectories	".\hl2;.\hl2\elements;.\portal;.\portal2;.\portal\vgui;.\portal2\gameui;.\portal2\vgui;$SRCDIR\game\shared\hl2;$SRCDIR\game\shared\multiplayer;$SRCDIR\game\shared\portal;$SRCDIR\game\shared\portal2;$BASE"
 		$PreprocessorDefinitions		"$BASE;PORTAL;SWARM_DLL;PORTAL2;PORTAL2_DLL;GAMEUI_EMBEDDED;GAMEUI_EXPORTS"
+		$PreprocessorDefinitions		"$BASE;USE_CEG"								[ $WIN32 && !$NO_CEG ]
+	}
+	
+	$Linker
+	{
+		$AdditionalDependencies			"$BASE $LIBCOMMON\ceglib.lib"				[ $WIN32 && !$NO_CEG ]
 	}
 }
 
@@ -52,6 +58,12 @@ $Project "Client (Portal 2)"
 			$File	"hl2\c_corpse.cpp"
 			$File	"hl2\c_corpse.h"
 			$File	"hl2\c_func_tankmortar.cpp"
+			
+			// Portal 2's client vpc still has these files, so I suppose we should do the same.
+			$File	"$SRCDIR\game\shared\hl2\hl_gamemovement.cpp"
+			$File	"$SRCDIR\game\shared\hl2\hl_gamemovement.h"
+			$File	"hl2\hl_in_main.cpp"
+			$File	"hl2\hl_prediction.cpp"
 		}
 		
 		$Folder	"Multiplayer"
@@ -71,8 +83,6 @@ $Project "Client (Portal 2)"
 				
 			$File	"portal2\c_portal2_lesson.cpp"
 			$File	"portal2\c_sdk_jukebox.cpp"
-			$File	"portal2\portal2_input.cpp"
-			$File	"portal2\portal2_prediction.cpp"
 			$File	"portal2\vgui_rootpanel_portal2.cpp"
 			$File	"$SRCDIR\game\shared\predicted_viewmodel.cpp"
 		
@@ -244,6 +254,8 @@ $Project "Client (Portal 2)"
 			$File	"$SRCDIR\game\shared\portal\portal_gamemovement.cpp"
 			$File	"$SRCDIR\game\shared\portal\portal_gamerules.cpp"
 			$File	"$SRCDIR\game\shared\portal\portal_gamerules.h"
+			$File	"$SRCDIR\game\shared\portal\portal_mp_gamerules.cpp"
+			$File	"$SRCDIR\game\shared\portal\portal_mp_gamerules.h"
 			$File	"portal\portal_hud_crosshair.cpp"
 			$File	"portal\portal_hud_crosshair.h"
 			$File	"$SRCDIR\game\shared\portal\portal_player_shared.cpp"

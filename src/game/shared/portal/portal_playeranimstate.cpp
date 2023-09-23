@@ -208,6 +208,77 @@ void CPortalPlayerAnimState::Teleport( const Vector *pNewOrigin, const QAngle *p
 bool CPortalPlayerAnimState::HandleMoving( Activity &idealActivity )
 {
 	float flSpeed = GetOuterXYSpeed();
+	CPortal_Player *pPortalPlayer = GetPortalPlayer();
+
+	bool bOnGround = ( pPortalPlayer->GetFlags() & FL_ONGROUND );
+	if ( bOnGround == false )
+	{
+#if 0
+		if ( m_bWasInTractorBeam || m_bBridgeRemovedFromUnder )
+		{
+			idealActivity = ACT_MP_LONG_FALL;
+		}
+		else
+#endif
+		{
+			idealActivity = ACT_MP_AIRWALK;
+		}
+
+		m_bInAirWalk = true;
+	}
+	else
+	{
+		CEG_GCV_PRE();
+		//static const int CEG_SPEED_POWER = CEG_GET_CONSTANT_VALUE( PaintSpeedPower );
+		static const int CEG_SPEED_POWER = SPEED_POWER;
+		CEG_GCV_POST();
+		bool bHasSpeedPower = pPortalPlayer->GetPaintPower( CEG_SPEED_POWER ).m_State == ACTIVE_PAINT_POWER;
+
+#ifdef CLIENT_DLL
+		if ( HASPAINTMAP && !bHasSpeedPower && !pPortalPlayer->IsLocalPlayer() )
+		{
+			// FIXME: Is this doing extra work in splitscreen?
+			// Non-local players don't update paint powers on the client because this has to happen in gamemovement!
+			// Quickly figure out if speed paint should be active
+			CPortal_Player::PaintPowerInfoVector activePowers;
+			pPortalPlayer->ChooseActivePaintPowers( activePowers );
+
+			PaintPowerConstRange activeRange = GetConstRange( activePowers );
+			for( PaintPowerConstIter i = activeRange.first; i != activeRange.second; ++i )
+			{
+				const PaintPowerInfo_t &newPower = *i;
+				if ( newPower.m_PaintPowerType == CEG_SPEED_POWER )
+				{
+					bHasSpeedPower = true;
+				}
+			}
+
+			// Clear the surface information
+			// NOTE: Calling this after Activating/Using/Deactivating paint powers makes sticky boxes not very sticky
+			//		 and that's why I moved it back over here. -Brett
+			pPortalPlayer->ClearSurfacePaintPowerInfo();
+		}
+#endif
+
+		if ( flSpeed > MOVING_MINIMUM_SPEED && bHasSpeedPower )
+		{
+			idealActivity = ACT_MP_RUN_SPEEDPAINT;
+		}
+		else if ( flSpeed > MOVING_MINIMUM_SPEED )
+		{
+			m_flHoldDeployedPoseUntilTime = 0.0;
+			idealActivity = ACT_MP_RUN;
+		}
+		else if ( m_flHoldDeployedPoseUntilTime > gpGlobals->curtime )
+		{
+			// Unless we move, hold the deployed pose for a number of seconds after being deployed
+			idealActivity = ACT_MP_DEPLOYED_IDLE;
+		}
+		else
+		{
+			return BaseClass::HandleMoving( idealActivity );
+		}
+	}
 
 	// If we move, cancel the deployed anim hold
 	if ( flSpeed > MOVING_MINIMUM_SPEED )

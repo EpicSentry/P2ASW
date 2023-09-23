@@ -620,6 +620,8 @@ protected:
 
 	// True if bone setup should latch bones for demo polish subsystem
 	bool							m_bBonePolishSetup;
+	
+	virtual bool UpdateBlending( int flags, const RenderableInstance_t &instance );
 
 	CBoneMergeCache					*m_pBoneMergeCache;	// This caches the strcmp lookups that it has to do
 														// when merg

@@ -22,7 +22,10 @@
 #include "physicsshadowclone.h"
 #include "particle_parse.h"
 #include "info_placement_helper.h"
+#include "rumble_shared.h"
 
+ConVar portalgun_fire_delay ( "portalgun_fire_delay", "0.20", FCVAR_CHEAT|FCVAR_REPLICATED );
+ConVar portalgun_held_button_fire_delay ( "portalgun_held_button_fire_fire_delay", "0.50", FCVAR_CHEAT|FCVAR_REPLICATED );
 
 #define BLAST_SPEED_NON_PLAYER 1000.0f
 #define BLAST_SPEED 3000.0f
@@ -171,12 +174,11 @@ void CWeaponPortalgun::StopLoopingSounds()
 	BaseClass::StopLoopingSounds();
 }
 
-void CWeaponPortalgun::DoEffectBlast( bool bPortal2, int iPlacedBy, const Vector &ptStart, const Vector &ptFinalPos, const QAngle &qStartAngles, float fDelay )
+void CWeaponPortalgun::DoEffectBlast( bool bPortal2, int iPlacedBy, const Vector &ptStart, const Vector &ptFinalPos, const QAngle &qStartAngles )
 {
 	CEffectData	fxData;
 	fxData.m_vOrigin = ptStart;
 	fxData.m_vStart = ptFinalPos;
-	fxData.m_flScale = gpGlobals->curtime + fDelay;
 	fxData.m_vAngles = qStartAngles;
 	fxData.m_nColor = ( ( bPortal2 ) ? ( 2 ) : ( 1 ) );
 	fxData.m_nDamageType = iPlacedBy;
@@ -376,6 +378,7 @@ float CWeaponPortalgun::TraceFirePortal( bool bPortal2, const Vector &vTraceStar
 		if ( vDirection.Dot( vPortalForward ) < 0.01f )
 		{
 			// If shooting out of the world, fizzle
+#if 0
 			if ( !bTest )
 			{
 				CProp_Portal *pPortal = CProp_Portal::FindPortal( m_iPortalLinkageGroupID, bPortal2, true );
@@ -391,7 +394,7 @@ float CWeaponPortalgun::TraceFirePortal( bool bPortal2, const Vector &vTraceStar
 
 				return PORTAL_ANALOG_SUCCESS_NEAR;
 			}
-
+#endif
 			UTIL_TraceLine( vTraceStart - vDirection * 16.0f, vTraceStart + (vDirection * m_fMaxRange1), MASK_SHOT_PORTAL, &traceFilterPortalShot, &tr );
 
 			return PORTAL_ANALOG_SUCCESS_OVERLAP_LINKED;
@@ -654,16 +657,26 @@ float CWeaponPortalgun::FirePortal( bool bPortal2, Vector *pVector /*= 0*/, bool
 		// If it was a failure, put the effect at exactly where the player shot instead of where the portal bumped to
 		if ( fPlacementSuccess < 0.5f )
 			vFinalPosition = tr.endpos;
+		else
+		{
+			// OldPosition remains old until we've done all effects and movement
+			// but don't update it unless it was a successful portal placement
+			pPortal->m_vOldPosition = tr.endpos;
+			VectorAngles( tr.plane.normal, pPortal->m_qOldAngles );
+
+		}
 
 		pPortal->PlacePortal( vFinalPosition, qFinalAngles, fPlacementSuccess, true );
 
-		float fDelay = vTracerOrigin.DistTo( tr.endpos ) / ( ( bPlayer ) ? ( BLAST_SPEED ) : ( BLAST_SPEED_NON_PLAYER ) );
-
 		QAngle qFireAngles;
 		VectorAngles( vDirection, qFireAngles );
-		DoEffectBlast( pPortal->m_bIsPortal2, ePlacedBy, vTracerOrigin, vFinalPosition, qFireAngles, fDelay );
-
-		pPortal->SetContextThink( &CProp_Portal::DelayedPlacementThink, gpGlobals->curtime + fDelay, s_pDelayedPlacementContext ); 
+		DoEffectBlast( pPortal->m_bIsPortal2, ePlacedBy, vTracerOrigin, vFinalPosition, qFireAngles );
+		
+#if defined( GAME_DLL )
+	// FIXME: Without the delay, this code doesn't make much sense now -- jdw
+	//pPortal->SetContextThink( &CProp_Portal::DelayedPlacementThink, gpGlobals->curtime, CProp_Portal::s_szDelayedPlacementThinkContext );
+	pPortal->DelayedPlacementThink();
+#endif
 		pPortal->m_vDelayedPosition = vFinalPosition;
 		pPortal->m_hPlacedBy = this;
 	}
@@ -727,20 +740,7 @@ void CWeaponPortalgun::DoEffectNone( void )
 void CC_UpgradePortalGun( void )
 {
 	CPortal_Player *pPlayer = ToPortalPlayer( UTIL_GetCommandClient() );
-	if (pPlayer == NULL)
-	{
-		pPlayer = NULL;
-		while ((pPlayer = (CPortal_Player*)gEntList.FindEntityByClassname(pPlayer, "player")) != NULL)
-		{
-			CWeaponPortalgun *pPortalGun = static_cast<CWeaponPortalgun*>(pPlayer->Weapon_OwnsThisType("weapon_portalgun"));
-			if (pPortalGun)
-			{
-				pPortalGun->SetCanFirePortal1();
-				pPortalGun->SetCanFirePortal2();
-			}
-		}
-		return;
-	}
+
 	CWeaponPortalgun *pPortalGun = static_cast<CWeaponPortalgun*>(pPlayer->Weapon_OwnsThisType("weapon_portalgun"));
 	if (pPortalGun)
 	{
@@ -751,35 +751,20 @@ void CC_UpgradePortalGun( void )
 
 static ConCommand upgrade_portal("upgrade_portalgun", CC_UpgradePortalGun, "Equips the player with a single portal portalgun. Use twice for a dual portal portalgun.\n\tArguments:   	none ", FCVAR_CHEAT);
 
-
-
-void CC_UpgradePortalPotatoGun(void)
+void CC_UpgradePotatoGun( void )
 {
-	CPortal_Player *pPlayer = ToPortalPlayer(UTIL_GetCommandClient());
-	if (pPlayer == NULL)
-	{
-		pPlayer = NULL;
-		while ((pPlayer = (CPortal_Player*)gEntList.FindEntityByClassname(pPlayer, "player")) != NULL)
-		{
-			CWeaponPortalgun *pPortalGun = static_cast<CWeaponPortalgun*>(pPlayer->Weapon_OwnsThisType("weapon_portalgun"));
-			if (pPortalGun)
-			{
-				pPortalGun->SetCanFirePortal1();
-				pPortalGun->SetCanFirePortal2();
-			}
-		}
-		return;
-	}
+	CPortal_Player *pPlayer = ToPortalPlayer( UTIL_GetCommandClient() );
+
 	CWeaponPortalgun *pPortalGun = static_cast<CWeaponPortalgun*>(pPlayer->Weapon_OwnsThisType("weapon_portalgun"));
 	if (pPortalGun)
 	{
 		pPortalGun->SetCanFirePortal1();
 		pPortalGun->SetCanFirePortal2();
+		pPortalGun->SetPotatosOnPortalgun( true );
 	}
 }
 
-static ConCommand upgrade_potato("upgrade_potatogun", CC_UpgradePortalPotatoGun, "Equips the player with a single portal portalgun with the glados potato. Use twice for a dual portal portalgun.\n\tArguments:   	none ", FCVAR_CHEAT);
-
+static ConCommand upgrade_potato("upgrade_potatogun", CC_UpgradePotatoGun, "Upgrades to the portalgun to the dual portalgun with potatos attached\n\tArguments:   	none ", FCVAR_CHEAT);
 
 static void change_portalgun_linkage_id_f( const CCommand &args )
 {
@@ -810,3 +795,82 @@ static void change_portalgun_linkage_id_f( const CCommand &args )
 }
 
 ConCommand change_portalgun_linkage_id( "change_portalgun_linkage_id", change_portalgun_linkage_id_f, "Changes the portal linkage ID for the portal gun held by the commanding player.", FCVAR_CHEAT );
+
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CWeaponPortalgun::SetPotatosOnPortalgun( bool bPotatos )
+{
+	// TODO
+}
+
+
+void CWeaponPortalgun::PostAttack( void )
+{
+	// Only the player fires this way so we can cast
+	CPortal_Player *pPlayer = ToPortalPlayer( GetOwner() );
+	if ( pPlayer == NULL )
+		return;
+
+#if defined( GAME_DLL ) //TODO: client version would probably be a good idea
+	pPlayer->RumbleEffect( RUMBLE_PORTALGUN_LEFT, 0, RUMBLE_FLAGS_NONE );
+#endif
+
+
+//	int nSplitScreenSlot = pPlayer->GetSplitScreenPlayerSlot();
+	CBaseAnimating *pModelView =  pPlayer->GetViewModel();
+
+#if defined( CLIENT_DLL )
+	if ( !prediction->InPrediction() || prediction->IsFirstTimePredicted() )
+#endif
+	{
+		// FIXME: - Wonderland_War
+		/*
+		if ( ( pPlayer->IsSplitScreenPlayer() || pPlayer->HasAttachedSplitScreenPlayers() ) && nSplitScreenSlot != -1 )
+		{
+#if defined( CLIENT_DLL )
+			if ( pModelView )
+			{
+				CUtlReference<CNewParticleEffect> m_hPortalGunMuzzle = pModelView->ParticleProp()->Create( "portalgun_muzzleflash_FP", PATTACH_POINT_FOLLOW, "muzzle" );
+				m_hPortalGunMuzzle->SetDrawOnlyForSplitScreenUser( nSplitScreenSlot );
+				m_hPortalGunMuzzle = NULL;
+			}
+			DispatchParticleEffect( "portalgun_muzzleflash", PATTACH_POINT_FOLLOW, this, "muzzle");
+#endif
+		}
+		else*/
+		{
+			if ( pModelView )
+				DispatchParticleEffect( "portalgun_muzzleflash_FP", PATTACH_POINT_FOLLOW, pModelView, "muzzle" );
+			DispatchParticleEffect( "portalgun_muzzleflash", PATTACH_POINT_FOLLOW, this, "muzzle");
+		}
+	}
+
+	float flFireDelay = portalgun_fire_delay.GetFloat();
+
+#if USE_SLOWTIME
+	if ( pPlayer->IsSlowingTime() )
+	{
+		flFireDelay *= slowtime_speed.GetFloat();
+	}
+	else
+#endif // USE_SLOWTIME
+	{
+		QAngle qPunch;
+		qPunch.x = SharedRandomFloat( "CWeaponPortalgun::PrimaryAttack() ViewPunchX", -1, -0.5f );
+		qPunch.y = SharedRandomFloat( "CWeaponPortalgun::PrimaryAttack() ViewPunchY", -1, 1 );
+		qPunch.z = 0.0f;
+		pPlayer->ViewPunch( qPunch );
+	}
+
+	// Don't fire again too quickly
+	m_flNextPrimaryAttack = gpGlobals->curtime + flFireDelay;
+	m_flNextSecondaryAttack = gpGlobals->curtime + flFireDelay;
+
+	// Held-button repeat fires get a different delay
+	m_flNextRepeatPrimaryAttack = gpGlobals->curtime + portalgun_held_button_fire_delay.GetFloat();
+	m_flNextRepeatSecondaryAttack = gpGlobals->curtime + portalgun_held_button_fire_delay.GetFloat();
+	// player "shoot" animation
+	pPlayer->SetAnimation( PLAYER_ATTACK1 );
+}

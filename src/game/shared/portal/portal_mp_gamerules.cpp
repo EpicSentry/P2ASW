@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright (c) 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: The Half-Life 2 game rules, such as the relationship tables and ammo
 //			damage cvars.
@@ -6,64 +6,168 @@
 // $NoKeywords: $
 //=============================================================================//
 #include "cbase.h"
-#include "portal_gamerules.h"
+#include "portal_mp_gamerules.h"
 #include "viewport_panel_names.h"
 #include "gameeventdefs.h"
 #include <KeyValues.h>
 #include "ammodef.h"
+#include "tier1/fmtstr.h"
 #include "hl2_shareddefs.h"
+#include "portal_shareddefs.h"
+#include "matchmaking/imatchframework.h"
+#include "matchmaking/mm_helpers.h"
+
+#ifndef CLIENT_DLL
+#include "player_voice_listener.h"
+#endif // CLIENT_DLL
 
 #ifdef CLIENT_DLL
-#include "c_portal_player.h"
+
+	#include "c_portal_player.h"
+	#include "c_user_message_register.h"
+	// TODO: Add these files! - Wonderland_War
+/*
+	#include "c_keyvalue_saver.h"
+	#include "radialmenu_taunt.h"
+	#include "c_portal_mp_stats.h"
+	*/
 #else
 
-#include "eventqueue.h"
-#include "player.h"
-#include "gamerules.h"
-#include "game.h"
-#include "items.h"
-#include "entitylist.h"
-#include "mapentities.h"
-#include "in_buttons.h"
-#include <ctype.h>
-#include "voice_gamemgr.h"
-#include "iscorer.h"
-#include "portal_player.h"
-//#include "weapon_hl2mpbasehlmpcombatweapon.h"
-#include "team.h"
-#include "voice_gamemgr.h"
+	#include "eventqueue.h"
+	#include "player.h"
+	#include "gamerules.h"
+	#include "game.h"
+	#include "items.h"
+	#include "entitylist.h"
+	#include "mapentities.h"
+	#include "in_buttons.h"
+	#include <ctype.h>
+	#include "voice_gamemgr.h"
+	#include "iscorer.h"
+	#include "portal_player.h"
+	#include "team.h"
+	#include "voice_gamemgr.h"
+	#include "globalstate.h"
+	//#include "portal_mp_stats.h"
+	//#include "portal_ui_controller.h"
+
+#endif	// CLIENT_DLL
+
+#ifndef CLIENT_DLL
+
+	extern void respawn(CBaseEntity *pEdict, bool fCopyCorpse);
+
+	ConVar sv_hl2mp_weapon_respawn_time( "sv_hl2mp_weapon_respawn_time", "20", FCVAR_GAMEDLL | FCVAR_NOTIFY );
+	ConVar sv_hl2mp_item_respawn_time( "sv_hl2mp_item_respawn_time", "30", FCVAR_GAMEDLL | FCVAR_NOTIFY );
+	ConVar sv_report_client_settings("sv_report_client_settings", "0", FCVAR_GAMEDLL | FCVAR_NOTIFY );
+
+	extern ConVar mp_dev_wait_for_other_player;
+	extern ConVar mp_chattime;
+
+	#define WEAPON_MAX_DISTANCE_FROM_SPAWN 64
+
+#endif // #ifndef CLIENT_DLL
+
+#ifdef CLIENT_DLL
+	extern ConVar locator_lerp_rest;
+	extern ConVar locator_start_at_crosshair;
+	extern ConVar locator_topdown_style;
+	extern ConVar locator_background_style;
+	extern ConVar locator_background_color;
+	extern ConVar locator_background_thickness_x;
+	extern ConVar locator_background_thickness_y;
+	extern ConVar locator_target_offset_x;
+	extern ConVar locator_target_offset_y;
+	extern ConVar locator_background_shift_x;
+	extern ConVar locator_background_shift_y;
+	extern ConVar locator_background_border_color;
+	extern ConVar locator_icon_min_size_non_ss;
+	extern ConVar locator_icon_max_size_non_ss;
+	ConVar voice_icons_use_particles("voice_icons_use_particles", "1");
+#endif // CLIENT_DLL
 
 
-extern void respawn(CBaseEntity *pEdict, bool fCopyCorpse);
+#define PropStringArrayArrayElement( _sendOrRecv, _structName, _arrayName, _firstElementNum, _secondElementNum, _secondArraySize, _stringSize ) \
+	_sendOrRecv##PropString( #_arrayName"["#_firstElementNum"]["#_secondElementNum"]", offsetof( _structName, _arrayName ) + _firstElementNum * _secondArraySize * _stringSize + _secondElementNum * _stringSize, _stringSize )
 
+#define PropStringArrayArray( _arrayName, _sendOrRecv, _outterNum, _innerNum ) \
+	PropStringArrayArrayElement( _sendOrRecv, CPortalMPGameRules, _arrayName, _outterNum, _innerNum, MAX_PORTAL2_COOP_LEVELS_PER_BRANCH, MAX_PORTAL2_COOP_LEVEL_NAME_SIZE )
 
-ConVar sv_hl2mp_weapon_respawn_time( "sv_hl2mp_weapon_respawn_time", "20", FCVAR_GAMEDLL | FCVAR_NOTIFY );
-ConVar sv_hl2mp_item_respawn_time( "sv_hl2mp_item_respawn_time", "30", FCVAR_GAMEDLL | FCVAR_NOTIFY );
-ConVar mp_restartgame( "mp_restartgame", "0", 0, "If non-zero, game will restart in the specified number of seconds" );
-ConVar sv_report_client_settings("sv_report_client_settings", "0", FCVAR_GAMEDLL | FCVAR_NOTIFY );
+#define PropStringArrayArrayInnerList( _arrayName, _sendOrRecv, _outterNum ) \
+	PropStringArrayArray( _arrayName, _sendOrRecv, _outterNum, 0 ), \
+	PropStringArrayArray( _arrayName, _sendOrRecv, _outterNum, 1 ), \
+	PropStringArrayArray( _arrayName, _sendOrRecv, _outterNum, 2 ), \
+	PropStringArrayArray( _arrayName, _sendOrRecv, _outterNum, 3 ), \
+	PropStringArrayArray( _arrayName, _sendOrRecv, _outterNum, 4 ), \
+	PropStringArrayArray( _arrayName, _sendOrRecv, _outterNum, 5 ), \
+	PropStringArrayArray( _arrayName, _sendOrRecv, _outterNum, 6 ), \
+	PropStringArrayArray( _arrayName, _sendOrRecv, _outterNum, 7 ), \
+	PropStringArrayArray( _arrayName, _sendOrRecv, _outterNum, 8 ), \
+	PropStringArrayArray( _arrayName, _sendOrRecv, _outterNum, 9 ), \
+	PropStringArrayArray( _arrayName, _sendOrRecv, _outterNum, 10 ), \
+	PropStringArrayArray( _arrayName, _sendOrRecv, _outterNum, 11 ), \
+	PropStringArrayArray( _arrayName, _sendOrRecv, _outterNum, 12 ), \
+	PropStringArrayArray( _arrayName, _sendOrRecv, _outterNum, 13 ), \
+	PropStringArrayArray( _arrayName, _sendOrRecv, _outterNum, 14 ), \
+	PropStringArrayArray( _arrayName, _sendOrRecv, _outterNum, 15 )
 
-extern ConVar mp_chattime;
+#define PropStringArrayArrayOuterList( _arrayName, _sendOrRecv ) \
+	PropStringArrayArrayInnerList( _arrayName, _sendOrRecv, 0 ), \
+	PropStringArrayArrayInnerList( _arrayName, _sendOrRecv, 1 ), \
+	PropStringArrayArrayInnerList( _arrayName, _sendOrRecv, 2 ), \
+	PropStringArrayArrayInnerList( _arrayName, _sendOrRecv, 3 ), \
+	PropStringArrayArrayInnerList( _arrayName, _sendOrRecv, 4 ), \
+	PropStringArrayArrayInnerList( _arrayName, _sendOrRecv, 5 )
 
-#define WEAPON_MAX_DISTANCE_FROM_SPAWN 64
+#define RecvPropStringArrayArray( _arrayName ) PropStringArrayArrayOuterList( _arrayName, Recv )
 
-#endif
-
+#define SendPropStringArrayArray( _arrayName ) PropStringArrayArrayOuterList( _arrayName, Send )
 
 REGISTER_GAMERULES_CLASS( CPortalMPGameRules );
 
 BEGIN_NETWORK_TABLE_NOBASE( CPortalMPGameRules, DT_PortalMPGameRules )
 
 #ifdef CLIENT_DLL
-RecvPropBool( RECVINFO( m_bTeamPlayEnabled ) ),
+	RecvPropBool( RECVINFO( m_bTeamPlayEnabled ) ),
+	RecvPropInt( RECVINFO( m_nCoopSectionIndex ) ),
+	RecvPropArray3( RECVINFO_ARRAY( m_nCoopBranchIndex ), RecvPropInt( RECVINFO( m_nCoopBranchIndex[0] ) ) ),
+	RecvPropInt( RECVINFO( m_nSelectedDLCCourse ) ),
+	RecvPropInt( RECVINFO( m_nNumPortalsPlaced ) ),
+	RecvPropBool( RECVINFO( m_bMapNamesLoaded ) ),
+	RecvPropStringArrayArray( m_szLevelNames ),
+	RecvPropArray3( RECVINFO_ARRAY( m_nLevelCount ), RecvPropInt( RECVINFO( m_nLevelCount[0] ) ) ),
+	// CREDITS
+	RecvPropString( RECVINFO( m_szCoopCreditsNameSingle ) ),
+	RecvPropString( RECVINFO( m_szCoopCreditsJobTitle ) ),
+	RecvPropInt( RECVINFO( m_nCoopCreditsIndex ) ),
+	RecvPropBool( RECVINFO( m_bCoopCreditsLoaded ) ),
+	RecvPropInt( RECVINFO( m_nCoopCreditsState ) ),
+	RecvPropInt( RECVINFO( m_nCoopCreditsScanState ) ),
+	RecvPropBool( RECVINFO( m_bCoopFadeCreditsState ) ),
 #else
-SendPropBool( SENDINFO( m_bTeamPlayEnabled ) ),
+	SendPropBool( SENDINFO( m_bTeamPlayEnabled ) ),
+	SendPropInt( SENDINFO( m_nCoopSectionIndex ) ),
+	SendPropArray3( SENDINFO_ARRAY3( m_nCoopBranchIndex ), SendPropInt( SENDINFO_ARRAY( m_nCoopBranchIndex ) ) ),
+	SendPropInt( SENDINFO( m_nSelectedDLCCourse ) ),
+	SendPropInt( SENDINFO( m_nNumPortalsPlaced ) ),
+	SendPropBool( SENDINFO( m_bMapNamesLoaded ) ),
+	SendPropStringArrayArray( m_szLevelNames ),
+	SendPropArray3( SENDINFO_ARRAY3( m_nLevelCount ), SendPropInt( SENDINFO_ARRAY( m_nLevelCount ) ) ),
+	// CREDITS
+	SendPropString( SENDINFO( m_szCoopCreditsNameSingle ) ),
+	SendPropString( SENDINFO( m_szCoopCreditsJobTitle ) ),
+	SendPropInt( SENDINFO( m_nCoopCreditsIndex ) ),
+	SendPropBool( SENDINFO( m_bCoopCreditsLoaded ) ),
+	SendPropInt( SENDINFO( m_nCoopCreditsState ) ),
+	SendPropInt( SENDINFO( m_nCoopCreditsScanState ) ),
+	SendPropBool( SENDINFO( m_bCoopFadeCreditsState ) ),
 #endif
 
 END_NETWORK_TABLE()
 
 
-LINK_ENTITY_TO_CLASS( portalmp_gamerules, CPortalMPGameRulesProxy );
 IMPLEMENT_NETWORKCLASS_ALIASED( PortalMPGameRulesProxy, DT_PortalMPGameRulesProxy )
+LINK_ENTITY_TO_CLASS( portalmp_gamerules, CPortalMPGameRulesProxy );
 
 static PortalMPViewVectors g_PortalMPViewVectors(
 	Vector( 0, 0, 64 ),       //VEC_VIEW (m_vView) 
@@ -78,7 +182,7 @@ static PortalMPViewVectors g_PortalMPViewVectors(
 	Vector(-10, -10, -10 ),	  //VEC_OBS_HULL_MIN	(m_vObsHullMin)
 	Vector( 10,  10,  10 ),	  //VEC_OBS_HULL_MAX	(m_vObsHullMax)
 
-	Vector( 0, 0, 14 ),		  //VEC_DEAD_VIEWHEIGHT (m_vDeadViewHeight)
+	Vector( 0, 0, 60 ),		  //VEC_DEAD_VIEWHEIGHT (m_vDeadViewHeight) // previously 14
 
 	Vector(-16, -16, 0 ),	  //VEC_CROUCH_TRACE_MIN (m_vCrouchTraceMin)
 	Vector( 16,  16,  60 )	  //VEC_CROUCH_TRACE_MAX (m_vCrouchTraceMax)
@@ -127,6 +231,10 @@ static const char *s_PreserveEnts[] =
 		"", // END Marker
 };
 
+CPortalMPGameRules *g_pPortalMPGameRules = NULL;
+
+ConVar cm_is_current_community_map_coop( "cm_is_current_community_map_coop", "0", FCVAR_HIDDEN | FCVAR_REPLICATED );
+
 
 
 #ifdef CLIENT_DLL
@@ -153,20 +261,49 @@ SendPropDataTable( "portalmp_gamerules_data", 0, &REFERENCE_SEND_TABLE( DT_Porta
 END_SEND_TABLE()
 #endif
 
-#ifndef CLIENT_DLL
+#if defined ( GAME_DLL )
+BEGIN_DATADESC( CPortalMPGameRulesProxy )
+	// Inputs.
+	DEFINE_INPUTFUNC( FIELD_INTEGER, "AddRedTeamScore", InputAddRedTeamScore ),
+	DEFINE_INPUTFUNC( FIELD_INTEGER, "AddBlueTeamScore", InputAddBlueTeamScore ),
+END_DATADESC()
 
-class CVoiceGameMgrHelper : public IVoiceGameMgrHelper
+
+// TEMP: This sucks long term... probably want some class to handle all team effecting operations.
+void UTIL_Portal2MP_AddTeamScore( int iTeamNum, int iScoreIncrement )
 {
-public:
-	virtual bool		CanPlayerHearPlayer( CBasePlayer *pListener, CBasePlayer *pTalker )
+	bool bSuccess = false;
+	if ( g_Teams.IsValidIndex( iTeamNum ) )
 	{
-		return ( pListener->GetTeamNumber() == pTalker->GetTeamNumber() );
-	}
-};
-CVoiceGameMgrHelper g_VoiceGameMgrHelper;
-IVoiceGameMgrHelper *g_pVoiceGameMgrHelper = &g_VoiceGameMgrHelper;
+		CTeam *pTeam = g_Teams[ iTeamNum ];
 
-#endif
+		if ( pTeam )
+		{
+			pTeam->AddScore( iScoreIncrement );
+			bSuccess = true;
+		}
+	}
+	if ( !bSuccess )
+	{
+		Warning( "AddTeamScore failed to add score. Invalid team index?\n" );
+		Assert ( 0 );
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void CPortalMPGameRulesProxy::InputAddRedTeamScore( inputdata_t &inputdata )
+{
+	UTIL_Portal2MP_AddTeamScore( TEAM_RED, inputdata.value.Int() );
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void CPortalMPGameRulesProxy::InputAddBlueTeamScore( inputdata_t &inputdata )
+{
+	UTIL_Portal2MP_AddTeamScore( TEAM_BLUE, inputdata.value.Int() );
+}
+#endif // GAME_DLL
 
 // NOTE: the indices here must match TEAM_TERRORIST, TEAM_CT, TEAM_SPECTATOR, etc.
 char *sTeamNames[] =
@@ -177,8 +314,10 @@ char *sTeamNames[] =
 		"Rebels",
 };
 
+
 CPortalMPGameRules::CPortalMPGameRules()
 {
+	g_pPortalMPGameRules = this;
 #ifndef CLIENT_DLL
 	// Create the team managers
 	for ( int i = 0; i < ARRAYSIZE( sTeamNames ); i++ )
@@ -199,8 +338,131 @@ CPortalMPGameRules::CPortalMPGameRules()
 	m_bCompleteReset = false;
 	m_bHeardAllPlayersReady = false;
 	m_bAwaitingReadyRestart = false;
+	m_bGladosJustBlewUp = false;
+
+	m_fNextDLCSelectTime = 0.0f;
+	m_nCoopSectionIndex = 0;
+	for (int i=0; i<MAX_PORTAL2_COOP_BRANCHES; i++)
+	{
+		m_nCoopBranchIndex.Set( i, 1 );
+	}
+	m_nSelectedDLCCourse = 0;
+	m_nNumPortalsPlaced = 0;
+
+	/// ????
+	{
+		g_pCVar->FindVar( "sv_maxreplay" )->SetValue( "1.5" );
+
+		//Set health regeneration to enabled
+		if ( !GlobalEntity_IsInTable( "player_regenerates_health" ) )
+		{
+			GlobalEntity_Add( MAKE_STRING("player_regenerates_health"), gpGlobals->mapname, GLOBAL_ON );
+		}
+		else
+		{
+			GlobalEntity_SetState( MAKE_STRING("player_regenerates_health"), GLOBAL_ON );
+		}
+
+		if ( !GlobalEntity_IsInTable( "player_blue_deaths" ) )
+		{
+			GlobalEntity_Add( MAKE_STRING( "player_blue_deaths" ), gpGlobals->mapname, GLOBAL_ON );
+			GlobalEntity_SetCounter( MAKE_STRING( "player_blue_deaths" ), 0 );
+		}
+
+		if ( !GlobalEntity_IsInTable( "player_orange_deaths" ) )
+		{
+			GlobalEntity_Add( MAKE_STRING( "player_orange_deaths" ), gpGlobals->mapname, GLOBAL_ON );
+			GlobalEntity_SetCounter( MAKE_STRING( "player_orange_deaths" ), 0 );
+		}
+
+		// Need a bunch of flags for Chet to hold global state per session
+		if ( !GlobalEntity_IsInTable( "glados_spoken_flags0" ) )
+		{
+			GlobalEntity_Add( MAKE_STRING( "glados_spoken_flags0" ), gpGlobals->mapname, GLOBAL_ON );
+			GlobalEntity_SetFlags( MAKE_STRING( "glados_spoken_flags0" ), 0 );
+		}
+
+		if ( !GlobalEntity_IsInTable( "glados_spoken_flags1" ) )
+		{
+			GlobalEntity_Add( MAKE_STRING( "glados_spoken_flags1" ), gpGlobals->mapname, GLOBAL_ON );
+			GlobalEntity_SetFlags( MAKE_STRING( "glados_spoken_flags1" ), 0 );
+		}
+
+		if ( !GlobalEntity_IsInTable( "glados_spoken_flags2" ) )
+		{
+			GlobalEntity_Add( MAKE_STRING( "glados_spoken_flags2" ), gpGlobals->mapname, GLOBAL_ON );
+			GlobalEntity_SetFlags( MAKE_STRING( "glados_spoken_flags2" ), 0 );
+		}
+
+		if ( !GlobalEntity_IsInTable( "glados_spoken_flags3" ) )
+		{
+			GlobalEntity_Add( MAKE_STRING( "glados_spoken_flags3" ), gpGlobals->mapname, GLOBAL_ON );
+			GlobalEntity_SetFlags( MAKE_STRING( "glados_spoken_flags3" ), 0 );
+		}
+
+		if ( !GlobalEntity_IsInTable( "current_branch" ) )
+		{
+			GlobalEntity_Add( MAKE_STRING( "current_branch"), gpGlobals->mapname, GLOBAL_ON );
+			GlobalEntity_SetCounter( MAKE_STRING( "current_branch" ), 0 );
+		}
+
+		if ( !GlobalEntity_IsInTable( "levels_completed_this_branch" ) )
+		{
+			GlobalEntity_Add( MAKE_STRING( "levels_completed_this_branch"), gpGlobals->mapname, GLOBAL_ON );
+			GlobalEntity_SetCounter( MAKE_STRING( "levels_completed_this_branch" ), 0 );
+		}
+
+		if ( !GlobalEntity_IsInTable( "came_from_last_dlc_map" ) )
+		{
+			GlobalEntity_Add( MAKE_STRING( "came_from_last_dlc_map"), gpGlobals->mapname, GLOBAL_ON );
+			GlobalEntity_SetFlags( MAKE_STRING( "came_from_last_dlc_map" ), 0 );
+		}
+
+		if ( !GlobalEntity_IsInTable( "have_seen_dlc_tubes_reveal" ) )
+		{
+			GlobalEntity_Add( MAKE_STRING( "have_seen_dlc_tubes_reveal"), gpGlobals->mapname, GLOBAL_ON );
+			GlobalEntity_SetFlags( MAKE_STRING( "have_seen_dlc_tubes_reveal" ), 0 );
+		}
+	}
+
+	m_bDataReceived[ 0 ] = m_bDataReceived[ 1 ] = false;
+
+	m_nRPSWinCount[ 0 ] = m_nRPSWinCount[ 1 ] = 0;
+
+	static ConVarRef flashlightbrightness( "r_flashlightbrightness" );
+	if ( flashlightbrightness.IsValid() )
+	{
+		// All MP maps use this brightness and we can't set it in the map because there's no cheating in MP!
+		flashlightbrightness.SetValue( 0.25f );
+	}
+
+
+#else
+	locator_lerp_rest.SetValue( 0.0f );
+	locator_start_at_crosshair.SetValue( 1 );
+	locator_topdown_style.SetValue( 0 );
+	locator_background_style.SetValue( 0 );
+	locator_background_color.SetValue( "0 0 0 128");
+	locator_target_offset_x.SetValue( 0 );
+	locator_target_offset_y.SetValue( 0 );
+	locator_background_thickness_x.SetValue( 12 );
+	locator_background_thickness_y.SetValue( 12 );
+	locator_background_shift_x.SetValue( 0 );
+	locator_background_shift_y.SetValue( 0 );
+	locator_background_border_color.SetValue( "32 32 32 64" );
+	locator_icon_min_size_non_ss.SetValue( 1.0f );
+	locator_icon_max_size_non_ss.SetValue( 1.15f );
+
+	voice_icons_use_particles.SetValue( 1 );
 
 #endif
+
+	m_bMapNamesLoaded = false;
+	m_bCoopCreditsLoaded = false;
+	m_nCoopCreditsState = LIST_NAMES;
+	m_nCoopCreditsScanState = 0;
+	m_bCoopFadeCreditsState = false;
+	memset( m_bLevelCompletions, 0, sizeof( m_bLevelCompletions ) );
 }
 
 const CViewVectors* CPortalMPGameRules::GetViewVectors()const
@@ -213,8 +475,84 @@ const PortalMPViewVectors* CPortalMPGameRules::GetPortalMPViewVectors()const
 	return &g_PortalMPViewVectors;
 }
 
+void CPortalMPGameRules::LevelInitPreEntity()
+{
+	m_bIsCoopInMapName = (V_stristr( MapName(), "coop" ) != NULL);
+	m_bIs2GunsInMapName = (V_stristr( MapName(), "2guns" ) != NULL);
+	m_bIsVSInMapName = (V_stristr( MapName(), "vs" ) != NULL);
+
+#ifdef GAME_DLL
+	m_nRPSWinCount[ 0 ] = m_nRPSWinCount[ 1 ] = 0;
+	m_bGladosJustBlewUp = false;
+
+	// FIXME: - Wonderland_War
+	//CPortalMPStats *pStats = GetPortalMPStats();
+	//if ( pStats )
+	//{
+	//	pStats->ClearPerMapStats();
+	//}
+
+	static ConVarRef flashlightbrightness( "r_flashlightbrightness" );
+	if ( flashlightbrightness.IsValid() )
+	{
+		// All MP maps use this brightness and we can't set it in the map because there's no cheating in MP!
+		flashlightbrightness.SetValue( 0.25f );
+	}
+
+	if ( IsLobbyMap() )
+	{
+		// For achievement STAYING_ALIVE:
+		// reset number of levels completed when coming to the lobby
+		GlobalEntity_SetCounter( MAKE_STRING( "levels_completed_this_branch" ), 0 );
+		GlobalEntity_SetCounter( MAKE_STRING( "current_branch" ), -1 );
+	}
+
+#else
+
+	m_bIsClientCrossplayingPCvsPC = IsPC() && !ClientIsCrossplayingWithConsole();
+
+#endif
+}
+
+bool CPortalMPGameRules::IsCoOp( void )
+{
+	static ConVarRef coop_ref( "coop" );
+	return m_bIsCoopInMapName || coop_ref.GetBool() || IsCommunityCoop();
+}
+
+
+bool CPortalMPGameRules::Is2GunsCoOp( void )
+{
+	return m_bIs2GunsInMapName;
+}
+
+bool CPortalMPGameRules::IsVS( void )
+{
+	return m_bIsVSInMapName;
+}
+
+
+#ifdef CLIENT_DLL
+bool CPortalMPGameRules::IsChallengeMode()
+{
+	CBasePlayer* pPlayer = UTIL_PlayerByIndex( 1 );
+	if ( pPlayer )
+		return pPlayer->GetBonusChallenge() != 0;
+
+	return false;
+}
+#endif
+
+
 CPortalMPGameRules::~CPortalMPGameRules( void )
 {
+#ifdef CLIENT_DLL
+	// TODO: ADD C_KeyValueSaver
+	//KeyValueSaver().WriteDirtyKeyValues( PORTAL2_MP_SAVE_FILE );
+#endif
+
+	g_pPortalMPGameRules = NULL;
+
 #ifndef CLIENT_DLL
 	// Note, don't delete each team since they are in the gEntList and will 
 	// automatically be deleted from there, instead.
@@ -235,6 +573,12 @@ void CPortalMPGameRules::CreateStandardEntities( void )
 #endif
 		CBaseEntity::Create( "portalmp_gamerules", vec3_origin, vec3_angle );
 	Assert( pEnt );
+	
+	// Create stats entities
+
+	// FIXME: - Wonderland_War
+	//CPortalMPStats::InitPortalMPStats();
+
 #endif
 }
 
@@ -261,6 +605,30 @@ float CPortalMPGameRules::FlWeaponRespawnTime( CBaseCombatWeapon *pWeapon )
 }
 
 
+//Runs think for all player's conditions
+//Need to do this here instead of the player so players that crash still run their important thinks
+void CPortalMPGameRules::RunPlayerConditionThink( void )
+{
+	for ( int i = 1 ; i <= gpGlobals->maxClients ; i++ )
+	{
+		CPortal_Player *pPlayer = ToPortalPlayer( UTIL_PlayerByIndex( i ) );
+
+		if ( pPlayer )
+		{
+			pPlayer->m_Shared.ConditionGameRulesThink();
+		}
+	}
+}
+
+void CPortalMPGameRules::FrameUpdatePostEntityThink( void )
+{
+	RunPlayerConditionThink();
+
+#ifndef CLIENT_DLL
+	BaseClass::FrameUpdatePostEntityThink();
+#endif
+}
+
 bool CPortalMPGameRules::IsIntermission( void )
 {
 #ifndef CLIENT_DLL
@@ -282,83 +650,8 @@ void CPortalMPGameRules::PlayerKilled( CBasePlayer *pVictim, const CTakeDamageIn
 
 void CPortalMPGameRules::Think( void )
 {
-
 #ifndef CLIENT_DLL
-
 	CGameRules::Think();
-
-	if ( g_fGameOver )   // someone else quit the game already
-	{
-		// check to see if we should change levels now
-		if ( m_flIntermissionEndTime < gpGlobals->curtime )
-		{
-			ChangeLevel(); // intermission is over
-		}
-
-		return;
-	}
-
-	//	float flTimeLimit = mp_timelimit.GetFloat() * 60;
-	float flFragLimit = fraglimit.GetFloat();
-
-	if ( GetMapRemainingTime() < 0 )
-	{
-		GoToIntermission();
-		return;
-	}
-
-	if ( flFragLimit )
-	{
-		if( IsTeamplay() == true )
-		{
-			CTeam *pCombine = g_Teams[TEAM_COMBINE];
-			CTeam *pRebels = g_Teams[TEAM_REBELS];
-
-			if ( pCombine->GetScore() >= flFragLimit || pRebels->GetScore() >= flFragLimit )
-			{
-				GoToIntermission();
-				return;
-			}
-		}
-		else
-		{
-			// check if any player is over the frag limit
-			for ( int i = 1; i <= gpGlobals->maxClients; i++ )
-			{
-				CBasePlayer *pPlayer = UTIL_PlayerByIndex( i );
-
-				if ( pPlayer && pPlayer->FragCount() >= flFragLimit )
-				{
-					GoToIntermission();
-					return;
-				}
-			}
-		}
-	}
-
-	if ( gpGlobals->curtime > m_tmNextPeriodicThink )
-	{		
-		CheckAllPlayersReady();
-		CheckRestartGame();
-		m_tmNextPeriodicThink = gpGlobals->curtime + 1.0;
-	}
-
-	if ( m_flRestartGameTime > 0.0f && m_flRestartGameTime <= gpGlobals->curtime )
-	{
-		RestartGame();
-	}
-
-	if( m_bAwaitingReadyRestart && m_bHeardAllPlayersReady )
-	{
-		UTIL_ClientPrintAll( HUD_PRINTCENTER, "All players ready. Game will restart in 5 seconds" );
-		UTIL_ClientPrintAll( HUD_PRINTCONSOLE, "All players ready. Game will restart in 5 seconds" );
-
-		m_flRestartGameTime = gpGlobals->curtime + 5;
-		m_bAwaitingReadyRestart = false;
-	}
-
-	ManageObjectRelocation();
-
 #endif
 }
 
@@ -434,7 +727,7 @@ float CPortalMPGameRules::FlWeaponTryRespawn( CBaseCombatWeapon *pWeapon )
 //=========================================================
 Vector CPortalMPGameRules::VecWeaponRespawnSpot( CBaseCombatWeapon *pWeapon )
 {
-#pragma message( __FILE__ "(" __LINE__AS_STRING ") : warning custom: Disabled weapon respawn location code" )
+//#pragma message( __FILE__ "(" __LINE__AS_STRING ") : warning custom: Disabled weapon respawn location code" )
 #if 0
 #ifndef CLIENT_DLL
 	CWeaponHL2MPBase *pHL2Weapon = dynamic_cast< CWeaponHL2MPBase*>( pWeapon );
@@ -465,7 +758,7 @@ bool GetObjectsOriginalParameters( CBaseEntity *pObject, Vector &vOriginalOrigin
 {
 	if ( CItem *pItem = IsManagedObjectAnItem( pObject ) )
 	{
-#pragma message( __FILE__ "(" __LINE__AS_STRING ") : warning custom: Disabled rest time code" )
+//#pragma message( __FILE__ "(" __LINE__AS_STRING ") : warning custom: Disabled rest time code" )
 #if 0
 		if ( pItem->m_flNextResetCheckTime > gpGlobals->curtime )
 			return false;
@@ -626,29 +919,6 @@ int CPortalMPGameRules::WeaponShouldRespawn( CBaseCombatWeapon *pWeapon )
 	return GR_WEAPON_RESPAWN_YES;
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Player has just left the game
-//-----------------------------------------------------------------------------
-void CPortalMPGameRules::ClientDisconnected( edict_t *pClient )
-{
-#ifndef CLIENT_DLL
-	// Msg( "CLIENT DISCONNECTED, REMOVING FROM TEAM.\n" );
-
-	CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance( pClient );
-	if ( pPlayer )
-	{
-		// Remove the player from his team
-		if ( pPlayer->GetTeam() )
-		{
-			pPlayer->GetTeam()->RemovePlayer( pPlayer );
-		}
-	}
-
-	BaseClass::ClientDisconnected( pClient );
-
-#endif
-}
-
 
 //=========================================================
 // Deathnotice. 
@@ -745,6 +1015,19 @@ void CPortalMPGameRules::DeathNotice( CBasePlayer *pVictim, const CTakeDamageInf
 		event->SetInt( "priority", 7 );
 		gameeventmanager->FireEvent( event );
 	}
+
+	bool bIsBlue = pVictim->GetTeamNumber() == TEAM_BLUE;
+
+	if ( bIsBlue )
+	{
+		GlobalEntity_AddToCounter( MAKE_STRING( "player_blue_deaths" ), 1 );
+		engine->ClientCommand( pVictim->edict(), "signify death_blue -1 0 %.2f %.2f %.2f 0 0 1", pVictim->GetAbsOrigin().x, pVictim->GetAbsOrigin().y, pVictim->GetAbsOrigin().z + 32.0f );
+	}
+	else
+	{
+		GlobalEntity_AddToCounter( MAKE_STRING( "player_orange_deaths" ), 1 );
+		engine->ClientCommand( pVictim->edict(), "signify death_orange -1 0 %.2f %.2f %.2f 0 0 1", pVictim->GetAbsOrigin().x, pVictim->GetAbsOrigin().y, pVictim->GetAbsOrigin().z + 32.0f );
+	}
 #endif
 
 }
@@ -752,60 +1035,6 @@ void CPortalMPGameRules::DeathNotice( CBasePlayer *pVictim, const CTakeDamageInf
 void CPortalMPGameRules::ClientSettingsChanged( CBasePlayer *pPlayer )
 {
 #ifndef CLIENT_DLL
-
-	CPortal_Player *pPortalPlayer = ToPortalPlayer( pPlayer );
-	//CHL2MP_Player *pHL2Player = ToHL2MPPlayer( pPlayer );
-
-	if ( pPortalPlayer == NULL )
-		return;
-
-	const char *pCurrentModel = modelinfo->GetModelName( pPlayer->GetModel() );
-	const char *szModelName = engine->GetClientConVarValue( engine->IndexOfEdict( pPlayer->edict() ), "cl_playermodel" );
-
-	//If we're different.
-	if ( stricmp( szModelName, pCurrentModel ) )
-	{
-		//Too soon, set the cvar back to what it was.
-		//Note: this will make this function be called again
-		//but since our models will match it'll just skip this whole dealio.
-#pragma message( __FILE__ "(" __LINE__AS_STRING ") : warning custom: Disabled model change code" )
-#if 0
-		if ( pPortalPlayer->GetNextModelChangeTime() >= gpGlobals->curtime )
-		{
-			char szReturnString[512];
-
-			Q_snprintf( szReturnString, sizeof (szReturnString ), "cl_playermodel %s\n", pCurrentModel );
-			engine->ClientCommand ( pPlayer->edict(), szReturnString );
-
-			Q_snprintf( szReturnString, sizeof( szReturnString ), "Please wait %d more seconds before trying to switch.\n", (int)(pPlayer->GetNextModelChangeTime() - gpGlobals->curtime) );
-			ClientPrint( pPlayer, HUD_PRINTTALK, szReturnString );
-			return;
-		}
-#endif
-
-		if ( PortalMPGameRules()->IsTeamplay() == false )
-		{
-			pPortalPlayer->SetPlayerModel();
-
-			const char *pszCurrentModelName = modelinfo->GetModelName( pPlayer->GetModel() );
-
-			char szReturnString[128];
-			Q_snprintf( szReturnString, sizeof( szReturnString ), "Your player model is: %s\n", pszCurrentModelName );
-
-			ClientPrint( pPlayer, HUD_PRINTTALK, szReturnString );
-		}
-		else
-		{
-			if ( Q_stristr( szModelName, "models/human") )
-			{
-				pPlayer->ChangeTeam( TEAM_REBELS );
-			}
-			else
-			{
-				pPlayer->ChangeTeam( TEAM_COMBINE );
-			}
-		}
-	}
 	if ( sv_report_client_settings.GetInt() == 1 )
 	{
 		UTIL_LogPrintf( "\"%s\" cl_cmdrate = \"%s\"\n", pPlayer->GetPlayerName(), engine->GetClientConVarValue( pPlayer->entindex(), "cl_cmdrate" ));
@@ -835,7 +1064,7 @@ int CPortalMPGameRules::PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *p
 
 const char *CPortalMPGameRules::GetGameDescription( void )
 {
-	return "PMP Test";
+	return "Portal 2 Coop";
 } 
 
 
@@ -857,6 +1086,9 @@ float CPortalMPGameRules::GetMapRemainingTime()
 //-----------------------------------------------------------------------------
 void CPortalMPGameRules::Precache( void )
 {
+#ifndef CLIENT_DLL
+	BaseClass::Precache();
+#endif
 	CBaseEntity::PrecacheScriptSound( "AlyxEmp.Charge" );
 }
 
@@ -865,7 +1097,7 @@ bool CPortalMPGameRules::ShouldCollide( int collisionGroup0, int collisionGroup1
 	if ( collisionGroup0 > collisionGroup1 )
 	{
 		// swap so that lowest is always first
-		swap(collisionGroup0,collisionGroup1);
+		V_swap(collisionGroup0,collisionGroup1);
 	}
 
 	if ( (collisionGroup0 == COLLISION_GROUP_PLAYER || collisionGroup0 == COLLISION_GROUP_PLAYER_MOVEMENT) &&
@@ -874,12 +1106,169 @@ bool CPortalMPGameRules::ShouldCollide( int collisionGroup0, int collisionGroup1
 		return false;
 	}
 
+	// Cubes shouldn't collide with debris but should otherwise act like COLLISION_GROUP_NONE
+	if( collisionGroup1 == COLLISION_GROUP_WEIGHTED_CUBE && collisionGroup0 == COLLISION_GROUP_DEBRIS )
+		return false;
+
+	if( collisionGroup0 == COLLISION_GROUP_WEIGHTED_CUBE )
+		collisionGroup0 = COLLISION_GROUP_NONE;
+
+	if( collisionGroup1 == COLLISION_GROUP_WEIGHTED_CUBE )
+		collisionGroup1 = COLLISION_GROUP_NONE;
+
 	return BaseClass::ShouldCollide( collisionGroup0, collisionGroup1 ); 
 
 }
 
+#if !defined ( CLIENT_DLL )
+const char *CPortalMPGameRules::GetChatPrefix( bool bTeamOnly, CBasePlayer *pPlayer )
+{
+	return "";
+}
+#endif
+
 bool CPortalMPGameRules::ClientCommand( CBaseEntity *pEdict, const CCommand &args )
 {
+	const char *pcmd = args[0];
+	if ( FStrEq( pcmd, "lobby_select_day" ) )
+	{
+		if ( args.ArgC() < 2 )
+			return true;
+
+		int nDay = atoi( args[1] );
+//		Msg("Selecting day %d\n", nDay );
+
+		m_nCoopSectionIndex = nDay;
+		return true;
+	}
+	else if ( FStrEq( pcmd, "coop_set_credits_jobtitle" ) )
+	{
+		if ( args.ArgC() < 2 )
+			return true;
+
+		//int nIndex = atoi( args[1] );
+		V_strcpy( m_szCoopCreditsJobTitle.GetForModify(), args[1] );
+		return true;
+	}
+	else if ( FStrEq( pcmd, "coop_set_credits_index" ) )
+	{
+		if ( args.ArgC() < 3 )
+			return true;
+
+		int nIndex = atoi( args[1] );
+		int nScan = atoi( args[2] );
+		//Msg("Selecting index %d\n", nIndex );
+		//Msg("Scanning type %d\n", nScan );
+		if ( nIndex < m_szCoopCreditsNames.Count() )
+		{
+			V_strcpy( m_szCoopCreditsNameSingle.GetForModify(), m_szCoopCreditsNames[ nIndex ] );
+			m_nCoopCreditsIndex = nIndex;
+		}
+		m_nCoopCreditsScanState = nScan;
+		return true;
+	}
+	else if ( FStrEq( pcmd, "coop_set_credits_state" ) )
+	{
+		if ( args.ArgC() < 2 )
+			return true;
+
+		int nIndex = atoi( args[1] );
+		//Msg("Setting credits state to %d\n", nIndex );
+		m_nCoopCreditsState = nIndex;
+		m_bCoopFadeCreditsState = !m_bCoopFadeCreditsState;
+		return true;
+	}
+	else if ( FStrEq( pcmd, "coop_lobby_select_level" ) )
+	{
+		if ( args.ArgC() < 3 )
+		{
+			Msg("Not enough arguments for coop_lobby_select_level.  Format should be: coop_lobby_select_level <branch#> <level#>\n" );
+			return true;
+		}
+
+		int nBranch = atoi( args[1] );
+		nBranch--;
+		if ( nBranch < 0 || nBranch >= MAX_PORTAL2_COOP_BRANCHES )
+		{
+			Msg("Branch argument is out of range for coop_lobby_select_level.  It needs to be a positive number less than %d.\n", MAX_PORTAL2_COOP_BRANCHES );
+			return true;
+		}
+		int nLevel = atoi( args[2] );
+		int nSkipRequirement = atoi( args[3] );
+
+		// Start at the back an loop toward the start
+		int nMaxLevel;
+		for ( nMaxLevel = MAX_PORTAL2_COOP_LEVELS_PER_BRANCH - 1; nMaxLevel >= 0; --nMaxLevel )
+		{
+			// Not a valid level, keep going
+			if ( m_szLevelNames[ nBranch ][ nMaxLevel ][ 0 ] == '\0' )
+				continue;
+
+			// First valid level? We're done if skipping requirement
+			if ( nSkipRequirement )
+				break;
+
+			// First completed level for either player? This is the max
+			if ( m_bLevelCompletions[ 0 ][ nBranch ][ nMaxLevel ] || m_bLevelCompletions[ 1 ][ nBranch ][ nMaxLevel ] )
+				break;
+		}
+
+		// Scoot back up to the last level not completed by either player
+		nMaxLevel++;
+
+		nLevel = MIN( nLevel, MIN( nMaxLevel + 1, m_nLevelCount[ nBranch ] ) );
+
+		m_nCoopBranchIndex.Set( nBranch, nLevel );
+		//Msg("Selecting branch %d, level %d\n", nBranch+1, nLevel );
+
+#ifdef GAME_DLL
+		if ( !IsLobbyMap() )
+		{
+			if ( nLevel >= 0 )
+			{
+				if ( PortalMPGameRules()->IsPlayerLevelInBranchComplete( 0, nBranch, nLevel ) && PortalMPGameRules()->IsPlayerLevelInBranchComplete( 1, nBranch, nLevel ) )
+				{
+					IGameEvent *event = gameeventmanager->CreateEvent( "map_already_completed" );
+					if ( event )
+					{
+						gameeventmanager->FireEvent( event );
+					}
+				}
+			}
+
+			int nCurrentBranch = GlobalEntity_GetCounter( MAKE_STRING( "current_branch" ) );
+			if ( nCurrentBranch != ( nBranch + 1 ) || nLevel <= 1 )
+			{
+				// For achievement STAYING_ALIVE:
+				// Reset both players' death counts and level tracking on day change.
+				GlobalEntity_SetCounter( MAKE_STRING( "player_blue_deaths" ), 0 );
+				GlobalEntity_SetCounter( MAKE_STRING( "player_orange_deaths" ), 0 );
+
+				GlobalEntity_SetCounter( MAKE_STRING( "levels_completed_this_branch" ), 0 );
+				GlobalEntity_SetCounter( MAKE_STRING( "current_branch" ), ( nBranch + 1 ) );
+			}
+		}
+#endif
+
+		return true;
+	}
+	else if ( FStrEq( pcmd, "coop_lobby_select_course" ) )
+	{
+		if ( args.ArgC() < 2 )
+		{
+			Msg("Not enough arguments for coop_lobby_select_course.  Format should be: coop_lobby_select_course <increment/decrement#>\n" );
+			return true;
+		}
+
+		// HACK HACK: For some reason this command is fired 3 times every time I press the button
+		// The commands above have this same problem, but they aren't relative
+		if ( m_fNextDLCSelectTime < gpGlobals->curtime )
+		{
+			m_fNextDLCSelectTime = gpGlobals->curtime + 0.01f;
+
+			m_nSelectedDLCCourse += atoi( args[ 1 ] );
+		}
+	}
 
 #ifndef CLIENT_DLL
 	if( BaseClass::ClientCommand( pEdict, args ) )
@@ -906,47 +1295,6 @@ bool CPortalMPGameRules::ClientCommand( CBaseEntity *pEdict, const CCommand &arg
 #define BULLET_IMPULSE(grains, ftpersec)	((ftpersec)*12*BULLET_MASS_GRAINS_TO_KG(grains)*BULLET_IMPULSE_EXAGGERATION)
 
 
-CAmmoDef *GetAmmoDef()
-{
-	static CAmmoDef def;
-	static bool bInitted = false;
-
-	if ( !bInitted )
-	{
-		bInitted = true;
-
-		def.AddAmmoType("AR2",				DMG_BULLET,					TRACER_LINE_AND_WHIZ,	"sk_plr_dmg_ar2",			"sk_npc_dmg_ar2",			"sk_max_ar2",			BULLET_IMPULSE(200, 1225), 0 );
-		def.AddAmmoType("AlyxGun",			DMG_BULLET,					TRACER_LINE,			"sk_plr_dmg_alyxgun",		"sk_npc_dmg_alyxgun",		"sk_max_alyxgun",		BULLET_IMPULSE(200, 1225), 0 );
-		def.AddAmmoType("Pistol",			DMG_BULLET,					TRACER_LINE_AND_WHIZ,	"sk_plr_dmg_pistol",		"sk_npc_dmg_pistol",		"sk_max_pistol",		BULLET_IMPULSE(200, 1225), 0 );
-		def.AddAmmoType("SMG1",				DMG_BULLET,					TRACER_LINE_AND_WHIZ,	"sk_plr_dmg_smg1",			"sk_npc_dmg_smg1",			"sk_max_smg1",			BULLET_IMPULSE(200, 1225), 0 );
-		def.AddAmmoType("357",				DMG_BULLET,					TRACER_LINE_AND_WHIZ,	"sk_plr_dmg_357",			"sk_npc_dmg_357",			"sk_max_357",			BULLET_IMPULSE(800, 5000), 0 );
-		def.AddAmmoType("XBowBolt",			DMG_BULLET,					TRACER_LINE,			"sk_plr_dmg_crossbow",		"sk_npc_dmg_crossbow",		"sk_max_crossbow",		BULLET_IMPULSE(800, 8000), 0 );
-
-		def.AddAmmoType("Buckshot",			DMG_BULLET | DMG_BUCKSHOT,	TRACER_LINE,			"sk_plr_dmg_buckshot",		"sk_npc_dmg_buckshot",		"sk_max_buckshot",		BULLET_IMPULSE(400, 1200), 0 );
-		def.AddAmmoType("RPG_Round",		DMG_BURN,					TRACER_NONE,			"sk_plr_dmg_rpg_round",		"sk_npc_dmg_rpg_round",		"sk_max_rpg_round",		0, 0 );
-		def.AddAmmoType("SMG1_Grenade",		DMG_BURN,					TRACER_NONE,			"sk_plr_dmg_smg1_grenade",	"sk_npc_dmg_smg1_grenade",	"sk_max_smg1_grenade",	0, 0 );
-		def.AddAmmoType("SniperRound",		DMG_BULLET | DMG_SNIPER,	TRACER_NONE,			"sk_plr_dmg_sniper_round",	"sk_npc_dmg_sniper_round",	"sk_max_sniper_round",	BULLET_IMPULSE(650, 6000), 0 );
-		def.AddAmmoType("SniperPenetratedRound", DMG_BULLET | DMG_SNIPER, TRACER_NONE,			"sk_dmg_sniper_penetrate_plr", "sk_dmg_sniper_penetrate_npc", "sk_max_sniper_round", BULLET_IMPULSE(150, 6000), 0 );
-		def.AddAmmoType("Grenade",			DMG_BURN,					TRACER_NONE,			"sk_plr_dmg_grenade",		"sk_npc_dmg_grenade",		"sk_max_grenade",		0, 0);
-		def.AddAmmoType("Thumper",			DMG_SONIC,					TRACER_NONE,			10, 10, 2, 0, 0 );
-		def.AddAmmoType("Gravity",			DMG_CLUB,					TRACER_NONE,			0,	0, 8, 0, 0 );
-		def.AddAmmoType("Battery",			DMG_CLUB,					TRACER_NONE,			NULL, NULL, NULL, 0, 0 );
-		def.AddAmmoType("GaussEnergy",		DMG_SHOCK,					TRACER_NONE,			"sk_jeep_gauss_damage",		"sk_jeep_gauss_damage", "sk_max_gauss_round", BULLET_IMPULSE(650, 8000), 0 ); // hit like a 10kg weight at 400 in/s
-		def.AddAmmoType("CombineCannon",	DMG_BULLET,					TRACER_LINE,			"sk_npc_dmg_gunship_to_plr", "sk_npc_dmg_gunship", NULL, 1.5 * 750 * 12, 0 ); // hit like a 1.5kg weight at 750 ft/s
-		def.AddAmmoType("AirboatGun",		DMG_AIRBOAT,				TRACER_LINE,			"sk_plr_dmg_airboat",		"sk_npc_dmg_airboat",		NULL,					BULLET_IMPULSE(10, 600), 0 );
-		def.AddAmmoType("StriderMinigun",	DMG_BULLET,					TRACER_LINE,			5, 5, 15, 1.0 * 750 * 12, AMMO_FORCE_DROP_IF_CARRIED ); // hit like a 1.0kg weight at 750 ft/s
-		def.AddAmmoType("HelicopterGun",	DMG_BULLET,					TRACER_LINE_AND_WHIZ,	"sk_npc_dmg_helicopter_to_plr", "sk_npc_dmg_helicopter",	"sk_max_smg1",	BULLET_IMPULSE(400, 1225), AMMO_FORCE_DROP_IF_CARRIED | AMMO_INTERPRET_PLRDAMAGE_AS_DAMAGE_TO_PLAYER );
-		def.AddAmmoType("AR2AltFire",		DMG_DISSOLVE,				TRACER_NONE,			0, 0, "sk_max_ar2_altfire", 0, 0 );
-#ifdef HL2_EPISODIC
-		def.AddAmmoType("Hopwire",			DMG_BLAST,					TRACER_NONE,			"sk_plr_dmg_grenade",		"sk_npc_dmg_grenade",		"sk_max_hopwire",		0, 0);
-		def.AddAmmoType("HunterGun",		DMG_BULLET,					TRACER_LINE,			"sk_hunter_dmg",			"sk_hunter_dmg",			"sk_hunter_max_round",	BULLET_IMPULSE(200, 1225), 0 );
-		def.AddAmmoType("CombineHeavyCannon",	DMG_BLAST,				TRACER_LINE,			40,	40, NULL, 1.5 * 750 * 12, AMMO_FORCE_DROP_IF_CARRIED ); // hit like a 100 kg weight at 750 ft/s
-#endif // HL2_EPISODIC
-	}
-
-	return &def;
-}
-
 #ifdef CLIENT_DLL
 
 ConVar cl_autowepswitch(
@@ -963,7 +1311,7 @@ bool CPortalMPGameRules::FShouldSwitchWeapon( CBasePlayer *pPlayer, CBaseCombatW
 	if ( pPlayer->GetActiveWeapon() && pPlayer->IsNetClient() )
 	{
 		// Player has an active item, so let's check cl_autowepswitch.
-		const char *cl_autowepswitch = engine->GetClientConVarValue( engine->IndexOfEdict( pPlayer->edict() ), "cl_autowepswitch" );
+		const char *cl_autowepswitch = engine->GetClientConVarValue( pPlayer->entindex(), "cl_autowepswitch" );
 		if ( cl_autowepswitch && atoi( cl_autowepswitch ) <= 0 )
 		{
 			return false;
@@ -976,6 +1324,85 @@ bool CPortalMPGameRules::FShouldSwitchWeapon( CBasePlayer *pPlayer, CBaseCombatW
 #endif
 
 #ifndef CLIENT_DLL
+
+void CPortalMPGameRules::PlayerSpawn( CBasePlayer *pPlayer )
+{
+	bool		addDefault;
+	CBaseEntity	*pWeaponEntity = NULL;
+
+	//don't equip the suit
+	//pPlayer->EquipSuit();
+
+	addDefault = true;
+
+	while ( (pWeaponEntity = gEntList.FindEntityByClassname( pWeaponEntity, "game_player_equip" )) != NULL)
+	{
+		pWeaponEntity->Touch( pPlayer );
+		addDefault = false;
+	}
+}
+
+bool CPortalMPGameRules::FPlayerCanRespawn( CBasePlayer *pPlayer )
+{
+	if ( m_bGladosJustBlewUp == true )
+		return false;
+
+	return true;
+}
+
+void CPortalMPGameRules::ClientCommandKeyValues( edict_t *pEntity, KeyValues *pKeyValues )
+{
+	if ( !pKeyValues || !pEntity || !pEntity->GetIServerEntity() )
+		return;
+
+	CPortal_Player *pPlayer = assert_cast< CPortal_Player* >( pEntity->GetIServerEntity()->GetBaseEntity() );
+	if ( !pPlayer )
+		return;
+
+	char const *szCommand = pKeyValues->GetName();
+
+	if ( FStrEq( szCommand, "read_stats" ) )
+	{
+		int nPlayer = pPlayer->GetTeamNumber() == TEAM_BLUE ? 0 : 1;
+		m_bDataReceived[ nPlayer ] = true;
+
+		int nStrLen = V_strlen( "MP.complete." );
+		for ( KeyValues *kvValue = pKeyValues->GetFirstValue(); kvValue; kvValue = kvValue->GetNextValue() )
+		{
+			char const *pchName = kvValue->GetName();
+
+			if ( StringHasPrefix( pchName, "MP.complete." ) )
+			{
+				pchName += nStrLen;
+			}
+			else
+			{
+				continue;
+			}
+
+			// Request key values for all the levels
+			if ( kvValue->GetInt( "" ) != 0 )
+			{
+				SetMapCompleteSimple( nPlayer, pchName, kvValue->GetInt() != 0 );
+			}
+		}
+
+		if ( ( m_bDataReceived[ 0 ] && m_bDataReceived[ 1 ] ) || (!mp_dev_wait_for_other_player.GetBool() || (IsLocalSplitScreen() && IsCreditsMap()) ) || IsCommunityCoopHub() )
+		{
+			SendAllMapCompleteData();
+
+			StartPlayerTransitionThinks();
+		}
+	}
+	else if ( FStrEq( szCommand, "read_awards" ) )
+	{
+		// TODO
+	}
+	else if ( FStrEq( szCommand, "read_leaderboard" ) )
+	{
+		KeyValuesDumpAsDevMsg( pKeyValues, 1 );
+	}
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: Damage (applied per second) value of the npc_laser_turret
@@ -1041,6 +1468,165 @@ float CPortalMPGameRules::GetRocketTurretDamage( void )
 	}
 }
 
+float CPortalMPGameRules::FlPlayerFallDamage( CBasePlayer *pPlayer )
+{
+	// No fall damage in Portal!
+	return 0.0f;
+}
+
+// Stealing a chunk of HL2 Gamerules for portal2 coop
+// This is just to make turrets shoot at the players under multiplayer to
+// facilitate an experiment... We might need our own separate gamerules for coop depending
+// on what the game ends up being like.
+void CPortalMPGameRules::InitDefaultAIRelationships()
+{
+	int i,j;
+
+	//  Allocate memory for default relationships
+	CBaseCombatCharacter::AllocateDefaultRelationships();
+
+	// --------------------------------------------------------------
+	// First initialize table so we can report missing relationships
+	// --------------------------------------------------------------
+	int iNumClasses = GameRules() ? GameRules()->NumEntityClasses() : LAST_SHARED_ENTITY_CLASS;
+	for (i=0;i<iNumClasses;i++)
+	{
+		for (j=0;j<iNumClasses;j++)
+		{
+			// By default all relationships are neutral of priority zero
+			CBaseCombatCharacter::SetDefaultRelationship( (Class_T)i, (Class_T)j, D_NU, 0 );
+		}
+	}
+
+	// ------------------------------------------------------------
+	//	> CLASS_COMBINE
+	// ------------------------------------------------------------
+	CBaseCombatCharacter::SetDefaultRelationship(CLASS_COMBINE,			CLASS_NONE,				D_NU, 0);			
+	CBaseCombatCharacter::SetDefaultRelationship(CLASS_COMBINE,			CLASS_PLAYER,			D_HT, 0);			
+
+}
+
+void CPortalMPGameRules::SetMapCompleteData( int nPlayer )
+{
+	if ( m_bDataReceived[ nPlayer ] )
+	{
+		// Already got data for this player! Don't ask for it again
+		return;
+	}
+
+	// Get the player
+	CPortal_Player *pPlayer = NULL;
+
+	for( int i = 1; i <= gpGlobals->maxClients; ++i )
+	{
+		CPortal_Player *pPlayerTemp = ToPortalPlayer( UTIL_PlayerByIndex( i ) );
+
+		//If the other player does not exist or if the other player is the local player
+		if ( pPlayerTemp == NULL )
+			continue;
+
+		if ( pPlayerTemp->GetTeamNumber() == ( nPlayer == 0 ? TEAM_BLUE : TEAM_RED ) )
+		{
+			pPlayer = pPlayerTemp;
+			break;
+		}
+	}
+
+	if ( !pPlayer )
+		return;
+
+	// Request key values for all the levels
+	KeyValues *kvClientRequest = new KeyValues( "read_stats" );
+
+	for ( int nBranch = 0; nBranch < MAX_PORTAL2_COOP_BRANCHES; ++nBranch )
+	{
+		for ( int nLevel = 0; nLevel < MAX_PORTAL2_COOP_LEVELS_PER_BRANCH; ++nLevel )
+		{
+			if ( m_szLevelNames[ nBranch ][ nLevel ][ 0 ] == '\0' )
+				continue;
+
+			kvClientRequest->SetInt( CFmtStr( "MP.complete.%s", m_szLevelNames[ nBranch ][ nLevel ] ), 0 );
+		}
+	}
+
+	engine->ClientCommandKeyValues( pPlayer->edict(), kvClientRequest );
+}
+
+void CPortalMPGameRules::StartPlayerTransitionThinks( void )
+{
+	// FIXME: - Wonderland_War
+	/*
+	// Turn off video for all players once they've all connected
+	for( int i = 1; i <= gpGlobals->maxClients; ++i )
+	{
+		CBasePlayer *pToPlayer = UTIL_PlayerByIndex( i );
+		if ( pToPlayer )
+		{
+			// Respawn other players who were waiting
+			pToPlayer->SetThink( &CPortal_Player::PlayerTransitionCompleteThink );
+			pToPlayer->SetNextThink( gpGlobals->curtime + 1.0f );
+
+			if ( !pToPlayer->HasAttachedSplitScreenPlayers() && !pToPlayer->IsSplitScreenPlayer() )
+			{
+				CBasePlayer *pOtherPlayer = UTIL_OtherPlayer( pToPlayer );
+				if ( pOtherPlayer )
+				{
+					pOtherPlayer->AddPictureInPicturePlayer( pToPlayer );
+					pToPlayer->AddPictureInPicturePlayer( pOtherPlayer );
+				}
+			}
+			else if ( IsPC() && ( pToPlayer->HasAttachedSplitScreenPlayers() || pToPlayer->IsSplitScreenPlayer() ) )
+			{
+				SetAllMapsComplete();
+			}
+		}
+	}
+
+	ResetAllPlayersStats();
+	g_portal_ui_controller.OnLevelStart();
+	*/
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Player has just left the game
+//-----------------------------------------------------------------------------
+void CPortalMPGameRules::ClientDisconnected( edict_t *pClient )
+{
+	// Msg( "CLIENT DISCONNECTED, REMOVING FROM TEAM.\n" );
+	CPortal_Player::ClientDisconnected( pClient );
+
+	CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance( pClient );
+	if ( pPlayer )
+	{
+		// Remove the player from his team
+		if ( pPlayer->GetTeam() )
+		{
+			pPlayer->GetTeam()->RemovePlayer( pPlayer );
+		}
+	}
+
+	bool bIsSSCredits = (IsLocalSplitScreen() && IsCreditsMap());
+
+	if ( ( m_bDataReceived[ 0 ] && m_bDataReceived[ 1 ] && mp_dev_wait_for_other_player.GetBool() && !bIsSSCredits ) || IsCommunityCoop() )
+	{
+		for ( int i = 1; i <= MAX_PLAYERS; i++ )
+		{
+			CPortal_Player *pOtherPlayer = static_cast<CPortal_Player *>(UTIL_PlayerByIndex( i ));
+			if ( !pOtherPlayer )
+				continue;
+
+			if ( pOtherPlayer == pPlayer )
+				continue;
+
+			DevMsg( "Client disconnected and we're left with no partner!\n" );
+			engine->ClientCommand( pOtherPlayer->edict(), "disconnect \"Partner disconnected\"" );
+		}
+	}
+
+	BaseClass::ClientDisconnected( pClient );
+}
+
 
 bool FindInList( const char **pStrings, const char *pToFind );
 
@@ -1074,7 +1660,7 @@ void CPortalMPGameRules::RestartGame()
 		}
 		pPlayer->RemoveAllItems( true );
 		respawn( pPlayer, false );
-#pragma message( __FILE__ "(" __LINE__AS_STRING ") : warning custom: Disabled player reset" )
+//#pragma message( __FILE__ "(" __LINE__AS_STRING ") : warning custom: Disabled player reset" )
 #if 0
 		pPlayer->Reset();
 #endif
@@ -1082,18 +1668,20 @@ void CPortalMPGameRules::RestartGame()
 
 	// Respawn entities (glass, doors, etc..)
 
-	CTeam *pRebels = GetGlobalTeam( TEAM_REBELS );
-	CTeam *pCombine = GetGlobalTeam( TEAM_COMBINE );
+	CTeam *pBlue = GetGlobalTeam( TEAM_BLUE );
+	CTeam *pRed = GetGlobalTeam( TEAM_RED );
 
-	if ( pRebels )
+	if ( pBlue )
 	{
-		pRebels->SetScore( 0 );
+		pBlue->SetScore( 0 );
 	}
 
-	if ( pCombine )
+	if ( pRed )
 	{
-		pCombine->SetScore( 0 );
+		pRed->SetScore( 0 );
 	}
+
+	m_nNumPortalsPlaced = 0;
 
 	m_flIntermissionEndTime = 0;
 	m_flRestartGameTime = 0.0;		
@@ -1109,6 +1697,20 @@ void CPortalMPGameRules::RestartGame()
 
 		gameeventmanager->FireEvent( event );
 	}
+}
+
+// Utility function
+bool FindInList( const char **pStrings, const char *pToFind )
+{
+	int i = 0;
+	while ( pStrings[i][0] != 0 )
+	{
+		if ( Q_stricmp( pStrings[i], pToFind ) == 0 )
+			return true;
+		i++;
+	}
+
+	return false;
 }
 
 void CPortalMPGameRules::CleanUpMap()
@@ -1145,7 +1747,7 @@ void CPortalMPGameRules::CleanUpMap()
 	// could kill respawning CTs
 	g_EventQueue.Clear();
 
-#pragma message( __FILE__ "(" __LINE__AS_STRING ") : warning custom: Disabled entity parsing" )
+//#pragma message( __FILE__ "(" __LINE__AS_STRING ") : warning custom: Disabled entity parsing" )
 #if 0
 	// Now reload the map entities.
 	class CHL2MPMapEntityFilter : public IMapEntityFilter
@@ -1184,7 +1786,7 @@ void CPortalMPGameRules::CleanUpMap()
 				CMapEntityRef &ref = g_MapEntityRefs[m_iIterator];
 				m_iIterator = g_MapEntityRefs.Next( m_iIterator );	// Seek to the next entity.
 
-				if ( ref.m_iEdict == -1 || engine->PEntityOfEntIndex( ref.m_iEdict ) )
+				if ( ref.m_iEdict == -1 || INDEXENT( ref.m_iEdict ) )
 				{
 					// Doh! The entity was delete and its slot was reused.
 					// Just use any old edict slot. This case sucks because we lose the baseline.
@@ -1234,7 +1836,7 @@ void CPortalMPGameRules::CheckRestartGame( void )
 		mp_restartgame.SetValue( 0 );
 	}
 
-#pragma message( __FILE__ "(" __LINE__AS_STRING ") : warning custom: Disabled ready restart" )
+//#pragma message( __FILE__ "(" __LINE__AS_STRING ") : warning custom: Disabled ready restart" )
 #if 0
 	if( mp_readyrestart.GetBool() )
 	{
@@ -1265,7 +1867,7 @@ void CPortalMPGameRules::CheckRestartGame( void )
 
 void CPortalMPGameRules::CheckAllPlayersReady( void )
 {
-#pragma message( __FILE__ "(" __LINE__AS_STRING ") : warning custom: Disabled ready restart" )
+//#pragma message( __FILE__ "(" __LINE__AS_STRING ") : warning custom: Disabled ready restart" )
 #if 0
 	for (int i = 1; i <= gpGlobals->maxClients; i++ )
 	{
@@ -1280,4 +1882,1208 @@ void CPortalMPGameRules::CheckAllPlayersReady( void )
 	m_bHeardAllPlayersReady = true;
 }
 
+void CPortalMPGameRules::AddBranchLevel( int nBranch, const char *pchName )
+{
+	if ( V_strcmp( pchName, "CLEAR ALL" ) == 0 )
+	{
+		for ( int i = 0; i < MAX_PORTAL2_COOP_BRANCHES; ++i )
+		{
+			m_nLevelCount.Set( i, 0 );
+		}
+
+		m_bMapNamesLoaded = false;
+
+		return;
+	}
+
+	if ( nBranch < 0 || nBranch >= MAX_PORTAL2_COOP_BRANCHES )
+		return;
+
+	if ( m_nLevelCount[ nBranch ] >= MAX_PORTAL2_COOP_LEVELS_PER_BRANCH )
+		return;
+
+	V_strcpy( m_szLevelNames[ nBranch ][ m_nLevelCount[ nBranch ] ], pchName );
+	m_nLevelCount.Set( nBranch, m_nLevelCount[ nBranch ] + 1 );
+	NetworkStateChanged();
+
+	m_bMapNamesLoaded = true;
+}
+
+void CPortalMPGameRules::SaveMPStats( void )
+{
+	// Mark it in storage
+	for( int i = 1; i <= gpGlobals->maxClients; ++i )
+	{
+		CPortal_Player *pPlayerTemp = ToPortalPlayer( UTIL_PlayerByIndex( i ) );
+
+		if ( pPlayerTemp == NULL )
+			continue;
+
+		// FIXME: - Wonderland_War
+		/*
+		if ( GetPortalMPStats() )
+		{
+			GetPortalMPStats()->SaveStats( pPlayerTemp );
+		}
+		*/
+	}
+}
+
+void CPortalMPGameRules::AddCreditsName( const char *pchName )
+{
+	if ( V_strcmp( pchName, "CLEAR ALL" ) == 0 )
+	{
+		m_bCoopCreditsLoaded = false;
+		m_nCoopCreditsIndex = -1;
+		return;
+	}
+
+	m_szCoopCreditsNames.AddToTail( CUtlString( pchName ) );
+	NetworkStateChanged();
+
+	m_bCoopCreditsLoaded = true;
+}
+
+void CPortalMPGameRules::SetAllMapsComplete( bool bComplete /*= true*/, int nPlayer /*= -1*/ )
+{
+	for ( int nBranch = 0; nBranch < MAX_PORTAL2_COOP_BRANCHES; ++nBranch )
+	{
+		SetBranchComplete( nBranch, bComplete );
+	}
+
+	// Also mark first level in storage
+	for( int i = 1; i <= gpGlobals->maxClients; ++i )
+	{
+		CPortal_Player *pPlayerTemp = ToPortalPlayer( UTIL_PlayerByIndex( i ) );
+
+		if ( pPlayerTemp == NULL )
+			continue;
+
+		if ( nPlayer != -1 && ( nPlayer == 0 && pPlayerTemp->GetTeamNumber() != TEAM_BLUE || 
+								nPlayer == 1 && pPlayerTemp->GetTeamNumber() != TEAM_RED ) )
+		{
+			continue;
+		}
+
+		// We have to build these key values for each player because they are destroyed in ClientCommandKeyValues
+		KeyValues *kvClientRequest = new KeyValues( "write_stats" );
+		kvClientRequest->SetInt( "MP.complete.mp_coop_start", bComplete ? 1 : 0 );
+
+		engine->ClientCommandKeyValues( pPlayerTemp->edict(), kvClientRequest );
+	}
+}
+
+void CPortalMPGameRules::SetBranchComplete( int nBranch, bool bComplete /*= true*/ )
+{
+	if ( nBranch < 0 || nBranch >= MAX_PORTAL2_COOP_BRANCHES )
+		return;
+
+	for ( int nLevel = 0; nLevel < m_nLevelCount[ nBranch ]; ++nLevel )
+	{
+		if ( ( bComplete && ( !m_bLevelCompletions[ 0 ][ nBranch ][ nLevel ] || !m_bLevelCompletions[ 1 ][ nBranch ][ nLevel ] ) ) || 
+			( !bComplete && ( m_bLevelCompletions[ 0 ][ nBranch ][ nLevel ] || m_bLevelCompletions[ 1 ][ nBranch ][ nLevel ] ) ) )
+		{
+			// One of the players hasn't completed it
+			CReliableBroadcastRecipientFilter player;
+			player.AddAllPlayers();
+
+			UserMessageBegin( player, bComplete ? "MPMapCompleted" : "MPMapIncomplete" );
+				WRITE_CHAR( nBranch );
+				WRITE_CHAR( nLevel );
+			MessageEnd();
+
+			m_bLevelCompletions[ 0 ][ nBranch ][ nLevel ] = bComplete;
+			m_bLevelCompletions[ 1 ][ nBranch ][ nLevel ] = bComplete;
+		}
+	}
+
+	// TODO unlock taunts per branch here
+	switch ( nBranch )
+	{
+	case 0:
+		break;
+	case 1:
+		break;
+	case 2:
+		break;
+	case 3:
+		break;
+	case 4:
+		break;
+	}
+
+	// Mark it in storage
+	for( int i = 1; i <= gpGlobals->maxClients; ++i )
+	{
+		CPortal_Player *pPlayerTemp = ToPortalPlayer( UTIL_PlayerByIndex( i ) );
+
+		if ( pPlayerTemp == NULL )
+			continue;
+
+		// We have to build these key values for each player because they are destroyed in ClientCommandKeyValues
+		KeyValues *kvClientRequest = new KeyValues( "write_stats" );
+		for ( int nLevel = 0; nLevel < m_nLevelCount[ nBranch ]; ++nLevel )
+		{
+			kvClientRequest->SetInt( CFmtStr( "MP.complete.%s", m_szLevelNames[ nBranch ][ nLevel ] ), bComplete ? 1 : 0 );
+		}
+
+		engine->ClientCommandKeyValues( pPlayerTemp->edict(), kvClientRequest );
+	}
+}
+
+void CPortalMPGameRules::SetMapComplete( const char *pchName, bool bComplete /*= true*/ )
+{
+	// Mark it in storage
+	for( int i = 1; i <= gpGlobals->maxClients; ++i )
+	{
+		CPortal_Player *pPlayerTemp = ToPortalPlayer( UTIL_PlayerByIndex( i ) );
+
+		if ( pPlayerTemp == NULL )
+			continue;
+		// FIXME: - Wonderland_War
+		/*
+		// tell the gamestats to send off our per map stats data 	
+		if ( GetPortalMPStats() )
+		{
+			GetPortalMPStats()->SavePerMapStats( pPlayerTemp, pchName );
+#if !defined ( CLIENT_DLL ) && !defined( _GAMECONSOLE ) && !defined( NO_STEAM )
+			GetPortalMPStats()->SubmitOGSEndOfMapStatsForPlayer( pPlayerTemp, pchName );
+#endif
+		}
+		*/
+
+		// We have to build these key values for each player because they are destroyed in ClientCommandKeyValues
+		KeyValues *kvClientRequest = new KeyValues( "write_stats" );
+		kvClientRequest->SetInt( CFmtStr( "MP.complete.%s", pchName ), bComplete ? 1 : 0 );
+
+		engine->ClientCommandKeyValues( pPlayerTemp->edict(), kvClientRequest );
+	}
+
+	// FIXME: - Wonderland_War
+	//GetPortalMPStats()->IncrementMapsCompleted();
+
+	// Mark it in memory
+	for ( int nBranch = 0; nBranch < MAX_PORTAL2_COOP_BRANCHES; ++nBranch )
+	{
+		for ( int nLevel = 0; nLevel < m_nLevelCount[ nBranch ]; ++nLevel )
+		{
+			if ( V_strcmp( m_szLevelNames[ nBranch ][ nLevel ], pchName ) == 0 )
+			{
+				// One of the players hasn't completed it
+				if ( ( bComplete && ( !m_bLevelCompletions[ 0 ][ nBranch ][ nLevel ] || !m_bLevelCompletions[ 1 ][ nBranch ][ nLevel ] ) ) || 
+					 ( !bComplete && ( m_bLevelCompletions[ 0 ][ nBranch ][ nLevel ] || m_bLevelCompletions[ 1 ][ nBranch ][ nLevel ] ) ) )
+				{
+					CReliableBroadcastRecipientFilter player;
+					player.AddAllPlayers();
+
+					UserMessageBegin( player, bComplete ? "MPMapCompleted" : "MPMapIncomplete" );
+						WRITE_CHAR( nBranch );
+						WRITE_CHAR( nLevel );
+					MessageEnd();
+
+					m_bLevelCompletions[ 0 ][ nBranch ][ nLevel ] = bComplete;
+					m_bLevelCompletions[ 1 ][ nBranch ][ nLevel ] = bComplete;
+				}
+
+				// Increment our number of completed levels so far in the current run of the branch.
+				GlobalEntity_AddToCounter( MAKE_STRING( "levels_completed_this_branch" ), 1 );
+
+				return;
+			}
+		}
+	}
+}
+
+void CPortalMPGameRules::SetMapCompleteSimple( int nPlayer, const char *pchName, bool bComplete )
+{
+	for ( int nBranch = 0; nBranch < MAX_PORTAL2_COOP_BRANCHES; ++nBranch )
+	{
+		for ( int nLevel = 0; nLevel < m_nLevelCount[ nBranch ]; ++nLevel )
+		{
+			if ( V_strcmp( m_szLevelNames[ nBranch ][ nLevel ], pchName ) == 0 )
+			{
+				m_bLevelCompletions[ nPlayer ][ nBranch ][ nLevel ] = bComplete;
+				return;
+			}
+		}
+	}
+}
+
+void CPortalMPGameRules::SendAllMapCompleteData( void )
+{
+	CReliableBroadcastRecipientFilter player;
+	player.AddAllPlayers();
+
+	const int nNumBits = 2 * MAX_PORTAL2_COOP_BRANCHES * MAX_PORTAL2_COOP_LEVELS_PER_BRANCH;
+
+	byte buff[ sizeof( byte ) * 8 + nNumBits / ( sizeof( byte ) * 8 ) ];
+	memset( buff, 0, sizeof(buff) );
+
+	byte *pCurrent = buff;
+	int nMask = 0x01;
+
+	for ( int nPlayer = 0; nPlayer < 2; ++nPlayer )
+	{
+		for ( int nBranch = 0; nBranch < MAX_PORTAL2_COOP_BRANCHES; ++nBranch )
+		{
+			for ( int nLevel = 0; nLevel < MAX_PORTAL2_COOP_LEVELS_PER_BRANCH; ++nLevel )
+			{
+				if ( m_bLevelCompletions[ nPlayer ][ nBranch ][ nLevel ] )
+				{
+					*pCurrent |= nMask;
+				}
+
+				nMask <<= 1;
+
+				if ( nMask >= 0x0100 )
+				{
+					pCurrent++;
+					nMask = 0x01;
+				}
+			}
+		}
+	}
+
+	UserMessageBegin( player, "MPMapCompletedData" );
+		WRITE_BITS( buff, nNumBits );
+	MessageEnd();
+}
+
+bool CPortalMPGameRules::SupressSpawnPortalgun( int nTeam )
+{
+	// Using globals for this is risky because it would carry across levels
+	// Using level names isn't possible because the player might die after picking up a portal gun partway through
+	// So level designers just place an info target with this name and delete it once the player gets a gun
+	if ( nTeam == TEAM_BLUE )
+	{
+		return gEntList.FindEntityByName( NULL, "supress_blue_portalgun_spawn" ) != NULL;
+	}
+	else if ( nTeam == TEAM_RED )
+	{
+		return gEntList.FindEntityByName( NULL, "supress_orange_portalgun_spawn" ) != NULL;
+	}
+
+	return false;
+}
+
+
+CEG_NOINLINE void CPortalMPGameRules::PlayerWinRPS( CBasePlayer* pWinnerPlayer )
+{
+	bool bIsBlueTeam = ( pWinnerPlayer->GetTeamNumber() == TEAM_BLUE );
+	int nWinnerSlot = bIsBlueTeam ? 0 : 1;
+	int nLoserSlot = bIsBlueTeam ? 1 : 0;
+
+#if defined CLIENT_DLL
+	CEG_PROTECT_MEMBER_FUNCTION( CPortalMPGameRules_PlayerWinRPS );
+#endif
+
+	++m_nRPSWinCount[ nWinnerSlot ];
+	m_nRPSWinCount[ nLoserSlot ] = 0;
+
+	if ( m_nRPSWinCount[ nWinnerSlot ] == 3 )
+	{
+		UTIL_RecordAchievementEvent( "ACH.ROCK_CRUSHES_ROBOT", pWinnerPlayer );
+	}
+}
+
+#endif // #ifndef CLIENT_DLL
+
+
+int CPortalMPGameRules::GetActiveBranches( void )
+{
+	bool bEverythingComplete = true;
+
+	int nActiveBranches = 1;	// The first one is always active
+
+	// HACK HACK: We don't care about anything after course 5! Completing maps in the dlc shouldn't affect how the rest unlock!!!
+	const int nMaxBranchesWeCareAbout = 5; //MAX_PORTAL2_COOP_BRANCHES;
+
+	for ( int nBranch = 0; nBranch < nMaxBranchesWeCareAbout; ++nBranch )
+	{
+		if ( m_nLevelCount[ nBranch ] > 1 )	// Don't include branches that only have 1 map (credits)... they don't count
+		{
+			bool bAnyComplete = false;
+			bool bAllComplete = true;
+
+			for ( int nLevel = 0; nLevel < m_nLevelCount[ nBranch ]; ++nLevel )
+			{
+				if ( !m_bLevelCompletions[ 0 ][ nBranch ][ nLevel ] && !m_bLevelCompletions[ 1 ][ nBranch ][ nLevel ] )
+				{
+					bAllComplete = false;
+					bEverythingComplete = false;
+				}
+
+				if ( m_bLevelCompletions[ 0 ][ nBranch ][ nLevel ] || m_bLevelCompletions[ 1 ][ nBranch ][ nLevel ] )
+				{
+					bAnyComplete = true;
+				}
+
+				if ( !bAllComplete && bAnyComplete )
+				{
+					// We're not going to learn anything else by checking the remaining levels in this branch
+					break;
+				}
+			}
+
+			if ( bAllComplete )
+			{
+				// This one and the next one are active
+				nActiveBranches = nBranch + 2;
+			}
+			else if ( bAnyComplete )
+			{
+				// This one is active
+				nActiveBranches = nBranch + 1;
+			}
+		}
+	}
+
+	if ( bEverythingComplete )
+	{
+		nActiveBranches++;
+	}
+
+	//DevMsg( "\n============\nNUM ACTIVE BRANCHES %i\n============\n", nActiveBranches );
+
+	return nActiveBranches;
+}
+
+int CPortalMPGameRules::GetSelectedDLCCourse( void )
+{
+	return m_nSelectedDLCCourse;
+}
+
+bool CPortalMPGameRules::IsAnyLevelComplete( void )
+{
+	for ( int nBranch = 0; nBranch < MAX_PORTAL2_COOP_BRANCHES; ++nBranch )
+	{
+		for ( int nLevel = 0; nLevel < MAX_PORTAL2_COOP_LEVELS_PER_BRANCH; ++nLevel )
+		{
+			if ( m_szLevelNames[ nBranch ][ nLevel ][ 0 ] == '\0' )
+				continue;
+
+			if ( m_bLevelCompletions[ 0 ][ nBranch ][ nLevel ] || m_bLevelCompletions[ 1 ][ nBranch ][ nLevel ] )
+			{
+				// If any level is completed, return true
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+bool CPortalMPGameRules::IsFullBranchComplete( int nBranch )
+{
+	bool bAllComplete = true;
+
+	for ( int nLevel = 0; nLevel < m_nLevelCount[ nBranch ]; ++nLevel )
+	{
+		if ( !m_bLevelCompletions[ 0 ][ nBranch ][ nLevel ] && !m_bLevelCompletions[ 1 ][ nBranch ][ nLevel ] )
+		{
+			bAllComplete = false;
+			break;
+		}
+	}
+
+	return bAllComplete;
+}
+
+bool CPortalMPGameRules::IsPlayerFullBranchComplete( int nPlayer, int nBranch )
+{
+	bool bAllComplete = true;
+
+	for ( int nLevel = 0; nLevel < m_nLevelCount[ nBranch ]; ++nLevel )
+	{
+		if ( !m_bLevelCompletions[ nPlayer ][ nBranch ][ nLevel ] )
+		{
+			bAllComplete = false;
+			break;
+		}
+	}
+
+	return bAllComplete;
+}
+
+#ifndef CLIENT_DLL
+int CPortalMPGameRules::GetLevelsCompletedThisBranch( void )
+{
+	return GlobalEntity_GetCounter( MAKE_STRING( "levels_completed_this_branch" ) );
+}
+#endif
+
+bool CPortalMPGameRules::IsLevelInBranchComplete( int nBranch, int nLevel )
+{ 
+	if ( nLevel < 0 || nLevel >= MAX_PORTAL2_COOP_LEVELS_PER_BRANCH ||
+		 nBranch < 0 || nBranch >= MAX_PORTAL2_COOP_BRANCHES )
+		return true;
+
+	return m_bLevelCompletions[ 0 ][ nBranch ][ nLevel ] || m_bLevelCompletions[ 1 ][ nBranch ][ nLevel ]; 
+}
+
+void CPortalMPGameRules::SetMapComplete( int nPlayer, int nBranch, int nLevel, bool bComplete /*= true*/ )
+{
+	m_bLevelCompletions[ nPlayer ][ nBranch ][ nLevel ] = bComplete;
+}
+
+bool CPortalMPGameRules::IsLobbyMap( void )
+{
+#ifdef CLIENT_DLL
+	return StringHasPrefix( engine->GetLevelNameShort(), "mp_coop_lobby" );
+#else
+	return StringHasPrefix( gpGlobals->mapname.ToCStr(), "mp_coop_lobby" );
+#endif
+}
+
+bool CPortalMPGameRules::IsStartMap( void )
+{
+#ifdef CLIENT_DLL
+	return V_strcmp( engine->GetLevelNameShort(), "mp_coop_start" ) == 0;
+#else
+	return V_strcmp( gpGlobals->mapname.ToCStr(), "mp_coop_start" ) == 0;
+#endif
+}
+
+bool CPortalMPGameRules::IsCreditsMap( void )
+{
+#ifdef CLIENT_DLL
+	return V_strcmp( engine->GetLevelNameShort(), "mp_coop_credits" ) == 0;
+#else
+	return V_strcmp( gpGlobals->mapname.ToCStr(), "mp_coop_credits" ) == 0;
+#endif
+}
+
+bool CPortalMPGameRules::IsCommunityCoopHub( void )
+{
+#ifdef CLIENT_DLL
+	return V_strcmp( engine->GetLevelNameShort(), "mp_coop_community_hub" ) == 0;
+#else
+	return V_strcmp( gpGlobals->mapname.ToCStr(), "mp_coop_community_hub" ) == 0;
+#endif
+}
+
+bool CPortalMPGameRules::IsCommunityCoop( void )
+{
+	return cm_is_current_community_map_coop.GetBool();
+}
+
+#ifdef CLIENT_DLL
+
+static void __MsgFunc_MPMapCompleted( bf_read &msg )
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return;
+
+	int nBranch = msg.ReadChar();
+	int nLevel = msg.ReadChar();
+
+	// Both players
+	pRules->SetMapComplete( 0, nBranch, nLevel );
+	pRules->SetMapComplete( 1, nBranch, nLevel );
+}
+USER_MESSAGE_REGISTER( MPMapCompleted );
+
+static void __MsgFunc_MPMapIncomplete( bf_read &msg )
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return;
+
+	int nBranch = msg.ReadChar();
+	int nLevel = msg.ReadChar();
+
+	// Both players
+	pRules->SetMapComplete( 0, nBranch, nLevel, false );
+	pRules->SetMapComplete( 1, nBranch, nLevel, false );
+}
+USER_MESSAGE_REGISTER( MPMapIncomplete );
+
+static void __MsgFunc_MPMapCompletedData( bf_read &msg )
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return;
+
+	const int nNumBits = 2 * MAX_PORTAL2_COOP_BRANCHES * MAX_PORTAL2_COOP_LEVELS_PER_BRANCH;
+
+	byte buff[ sizeof( byte ) * 8 + nNumBits / ( sizeof( byte ) * 8 ) ];
+	memset( buff, 0, sizeof(buff) );
+
+	msg.ReadBits( buff, nNumBits );
+
+	byte *pCurrent = buff;
+	int nMask = 0x01;
+
+	for ( int nPlayer = 0; nPlayer < 2; ++nPlayer )
+	{
+		for ( int nBranch = 0; nBranch < MAX_PORTAL2_COOP_BRANCHES; ++nBranch )
+		{
+			for ( int nLevel = 0; nLevel < MAX_PORTAL2_COOP_LEVELS_PER_BRANCH; ++nLevel )
+			{
+				if ( ( *pCurrent & nMask ) != 0 )
+				{
+					pRules->SetMapComplete( nPlayer, nBranch, nLevel );
+				}
+
+				nMask <<= 1;
+
+				if ( nMask >= 0x0100 )
+				{
+					pCurrent++;
+					nMask = 0x01;
+				}
+			}
+		}
+	}
+}
+USER_MESSAGE_REGISTER( MPMapCompletedData );
+
+
+void CPortalMPGameRules::LoadMapCompleteData( void )
+{
+	// FIXME: - Wonderland_War
+#if 0
+	if ( !m_bMapNamesLoaded )
+		return;
+
+	CPortal_Player *pLocalPlayer = CPortal_Player::GetLocalPlayer();
+
+	int nPlayer = 0;
+	if ( pLocalPlayer )
+	{
+		nPlayer = pLocalPlayer->GetTeamNumber() == TEAM_BLUE ? 0 : 1;
+	}
+
+	char szCommand[ 32 ];
+	V_snprintf( szCommand, sizeof( szCommand ), "level_complete_data %i", nPlayer );
+
+	IPlayerLocal *pPlayer = g_pMatchFramework->GetMatchSystem()->GetPlayerManager()->GetLocalPlayer( XBX_GetActiveUserId() );
+	if ( !pPlayer )
+	{
+		// We don't support multiple logins on this platform! Just use the primary player
+		pPlayer = g_pMatchFramework->GetMatchSystem()->GetPlayerManager()->GetLocalPlayer( XBX_GetUserId( 0 ) );
+
+		if ( !pPlayer )
+		{
+			// Let the server know that we at least attempted to load completion data on the client for this player
+			engine->ClientCmd( szCommand );
+			return;
+		}
+	}
+
+	TitleDataFieldsDescription_t const *fields = g_pMatchFramework->GetMatchTitle()->DescribeTitleDataStorage();
+
+	// Process completed maps:
+	{
+		for ( int nBranch = 0; nBranch < MAX_PORTAL2_COOP_BRANCHES; ++nBranch )
+		{
+			for ( int nLevel = 0; nLevel < MAX_PORTAL2_COOP_LEVELS_PER_BRANCH; ++nLevel )
+			{
+				if ( m_szLevelNames[ nBranch ][ nLevel ][ 0 ] == '\0' )
+					continue;
+
+				// FIXME: - Wonderland_War
+				/*
+				CFmtStr tdKey( "MP.complete.%s", m_szLevelNames[ nBranch ][ nLevel ] );
+				TitleDataFieldsDescription_t const *fdKey = TitleDataFieldsDescriptionFindByString( fields, tdKey );
+				int nComplete = 0;
+				if ( fdKey )
+				{
+					nComplete = TitleDataFieldsDescriptionGetBit( fdKey, pPlayer ) ? 1 : 0;
+				}
+				else
+				{
+					Warning( "CPortalMPGameRules::LoadMapCompleteData failed to load %s\n", tdKey.Access() );
+				}
+
+				m_bLevelCompletions[ nPlayer ][ nBranch ][ nLevel ] = ( nComplete != 0 );
+				*/
+			}
+		}
+	}
+
+	// Let the server know that we loaded completion data on the client for this player
+	engine->ClientCmd( szCommand );
+#endif
+}
+
+static void __MsgFunc_MPTauntEarned( bf_read &msg )
+{
+	// FIXME: - Wonderland_War
+	/*
+	char szTaunt[ 32 ];
+	msg.ReadString( szTaunt, sizeof( szTaunt ) );
+	bool bAwardSilently = !!msg.ReadByte();
+
+	GetClientMenuManagerTaunt().SetTauntOwned( szTaunt, bAwardSilently );
+
+	//if ( bAwardSilently )
+	//	DevMsg( "Awarding %s, but doing it silently.\n", szTaunt );
+
+	// Send event for everything but small wave
+	if ( V_strcmp( szTaunt, "smallWave" ) != 0 )
+	{
+		IGameEvent *event = gameeventmanager->CreateEvent( "gesture_earned" );
+		if ( event )
+		{
+			event->SetInt( "userid", C_BasePlayer::GetLocalPlayer()->GetUserID() );
+			event->SetBool( "teamtaunt", GetClientMenuManagerTaunt().IsTauntTeam( szTaunt ) );
+
+			gameeventmanager->FireEventClientSide( event );
+		}
+	}
+	*/
+}
+USER_MESSAGE_REGISTER( MPTauntEarned );
+
+static void __MsgFunc_MPTauntLocked( bf_read &msg )
+{
+	char szTaunt[ 32 ];
+	msg.ReadString( szTaunt, sizeof( szTaunt ) );
+
+	// FIXME: - Wonderland_War
+	//GetClientMenuManagerTaunt().SetTauntLocked( szTaunt );
+}
+USER_MESSAGE_REGISTER( MPTauntLocked );
+
+static void __MsgFunc_MPAllTauntsLocked( bf_read& /*msg*/ )
+{
+	// FIXME: - Wonderland_War
+	//GetClientMenuManagerTaunt().SetAllTauntsLocked();
+}
+USER_MESSAGE_REGISTER( MPAllTauntsLocked );
+
+#endif // #ifdef CLIENT_DLL
+
+///////////////////////////////////////////////////////////////////////
+// Portal multiplayer specific global vscript functions
+///////////////////////////////////////////////////////////////////////
+
+void CC_DumpCompletionData( const CCommand &args )
+{
+	if ( !PortalMPGameRules() )
+		return;
+
+#if !defined ( CLIENT_DLL )
+	DevMsg( "Dump Server Completion Data\n");
+#else
+	DevMsg( "Dump Client Completion Data\n");
+#endif
+
+	DevMsg( "B\tL\tP1\tP2\n");
+
+	for ( int nBranch = 0; nBranch < MAX_PORTAL2_COOP_BRANCHES; ++nBranch )
+	{
+		DevMsg( "------------\n");
+		for ( int nLevel = 0; nLevel < MAX_PORTAL2_COOP_LEVELS_PER_BRANCH; ++nLevel )
+		{
+			DevMsg( "%i\t%i\t%i\t%i\n", nBranch, nLevel, 
+					( PortalMPGameRules()->IsPlayerLevelInBranchComplete( 0, nBranch, nLevel ) ? 1 : 0 ),
+					( PortalMPGameRules()->IsPlayerLevelInBranchComplete( 1, nBranch, nLevel ) ? 1 : 0 ) );
+		}
+	}
+
+	DevMsg( "------------\n\n");
+}
+ConCommand mp_dump_completion_data( 
+#if !defined ( CLIENT_DLL )
+								   "mp_dump_server_completion_data", 
+#else
+								   "mp_dump_client_completion_data", 
+#endif
+								   CC_DumpCompletionData, "Prints player completion data for all maps.", 0 );
+
+#if !defined ( CLIENT_DLL )
+
+void CC_EarnTaunt( const CCommand &args )
+{
+	bool bAwardSilently = false;
+	const char *pNewTaunt = "new"; 
+	if ( args.ArgC() >= 2 )
+	{
+		pNewTaunt = args[ 1 ];
+	}
+	if ( args.ArgC() >= 3 )
+	{
+		int nSilent = Q_atoi( args[ 2 ] );
+		if ( nSilent >= 1 )
+		{
+			bAwardSilently = true;
+			//DevMsg( "Awarding taunt %s silently ------------\n", pNewTaunt);
+		}
+	}
+
+	CReliableBroadcastRecipientFilter player;
+	player.AddAllPlayers();
+
+	UserMessageBegin( player, "MPTauntEarned" );
+		WRITE_STRING( pNewTaunt );
+		WRITE_BOOL( bAwardSilently );
+	MessageEnd();
+}
+ConCommand mp_earn_taunt( "mp_earn_taunt", CC_EarnTaunt, "Unlocks, owns, and puts a taunt in the gesture wheel.", 0 );
+
+void CC_LockTaunt( const CCommand &args )
+{
+	if ( args.ArgC() < 2 )
+	{
+		return;
+	}
+
+	CReliableBroadcastRecipientFilter player;
+	player.AddAllPlayers();
+
+	UserMessageBegin( player, "MPTauntLocked" );
+		WRITE_STRING( args[ 1 ] );
+	MessageEnd();
+}
+ConCommand mp_lock_taunt( "mp_lock_taunt", CC_LockTaunt, "Locks a taunt and removes it from the gesture wheel.", 0 );
+
+void CC_LockAllTaunts( const CCommand &args )
+{
+	CReliableBroadcastRecipientFilter player;
+	player.AddAllPlayers();
+
+	UserMessageBegin( player, "MPAllTauntsLocked" );
+	MessageEnd();
+}
+ConCommand mp_lock_all_taunts( "mp_lock_all_taunts", CC_LockAllTaunts, "Locks all available taunts and removes them from the gesture wheel.", 0 );
+
+/*
+void CC_MP_Gib_All_Bots( void )
+{
+	if ( !GameRules()->IsMultiplayer() )
+	{
+		Warning( "This command only works in multiplayer coop." );
+		return;
+	}
+
+	for ( int i = 1 ; i <= gpGlobals->maxClients ; i++ )
+	{
+		CPortal_Player *pPlayer = ToPortalPlayer( UTIL_PlayerByIndex( i ) );
+
+		if ( pPlayer && pPlayer->IsAlive() )
+		{
+			pPlayer->TakeDamage( CTakeDamageInfo( pPlayer, pPlayer, 1000, DMG_CRUSH ) );
+		}
+	}
+}
+
+// TODO: make this a cheat once the maps all use the script function call
+static ConCommand mp_gib_all_bots("mp_gib_all_bots", CC_MP_Gib_All_Bots, "Kills all bots doing CRUSH damage which kills them.", 0 );
+*/
+
+static bool ScriptIsMultiplayer( void )
+{
+	return true; //g_pGameRules->IsMultiplayer();
+}
+
+float GetPlayerSilenceDuration( int nPlayer )
+{
+	return PlayerVoiceListener().GetPlayerSilenceDuration( nPlayer );
+}
+
+int GetTeamPlayerByIndex( int nTeamNum )
+{
+	CTeam *pTeam = GetGlobalTeam( nTeamNum );
+	Assert( pTeam );
+	if ( pTeam == NULL )
+		return -1;
+
+	for ( int i = 0; i < pTeam->GetNumPlayers(); i++ )
+	{
+		CBasePlayer *player = pTeam->GetPlayer( i );
+		if ( player == NULL )
+			continue;
+
+		return player->entindex();
+	}
+
+	return -1;
+}
+
+int GetOrangePlayerIndex( void )
+{
+	return GetTeamPlayerByIndex( TEAM_RED );
+}
+
+int GetBluePlayerIndex( void )
+{
+	return GetTeamPlayerByIndex( TEAM_BLUE );
+}
+
+int GetCoopSectionIndex( void )
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return 0;
+
+	return pRules->GetCoopSection();
+}
+
+int GetCoopBranchLevelIndex( int nBranch )
+{
+	//int nBranch = 0;
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return 0;
+
+	return pRules->GetCoopBranchLevel( nBranch - 1 );
+}
+
+int GetHighestActiveBranch( void )
+{
+	//int nBranch = 0;
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return 0;
+
+	return pRules->GetActiveBranches();
+}
+
+void AddBranchLevelName( int nBranch, const char *pchName )
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return;
+
+	pRules->AddBranchLevel( nBranch - 1, pchName );
+}
+
+void SaveMPStatsData( void )
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return;
+
+	pRules->SaveMPStats();
+}
+
+void MarkMapComplete( const char *pchName )
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return;
+
+	pRules->SetMapComplete( pchName );
+}
+
+bool IsBranchComplete( int nBranch )
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return 0;
+
+	return pRules->IsFullBranchComplete( nBranch );
+}
+
+bool IsPlayerBranchComplete( int nPlayer, int nBranch )
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return 0;
+
+	return pRules->IsPlayerFullBranchComplete( nPlayer, nBranch );
+}
+
+int CoopGetLevelsCompletedThisBranch()
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return 0;
+
+	return pRules->GetLevelsCompletedThisBranch();
+}
+
+int CoopGetBranchTotalLevelCount( int nBranch )
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return 0;
+
+	return pRules->GetBranchTotalLevelCount( nBranch );
+}
+
+bool IsLevelComplete( int nBranch, int nLevel )
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return 0;
+
+	return pRules->IsLevelInBranchComplete( nBranch, nLevel );
+}
+
+bool IsPlayerLevelComplete( int nPlayer, int nBranch, int nLevel )
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return 0;
+
+	return pRules->IsPlayerLevelInBranchComplete( nPlayer, nBranch, nLevel );
+}
+
+void AddCoopCreditsName( const char *pchName )
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return;
+
+	pRules->AddCreditsName( pchName );
+}
+
+int GetPlayerDeathCount( int nPlayer )
+{
+	return ( nPlayer == 1 ? GlobalEntity_GetCounter( MAKE_STRING( "player_orange_deaths" ) ) : GlobalEntity_GetCounter( MAKE_STRING( "player_blue_deaths" ) ) );
+}
+
+int GetGladosSpokenFlags( int nBatch )
+{
+	if ( nBatch < 0 || nBatch >= 4 )
+	{
+		DevWarning( "GetGLaDOSSpoteFlags out of range!\n" );
+		return 0;
+	}
+
+	char szName[ 32 ];
+	V_snprintf( szName, sizeof( szName ), "glados_spoken_flags%i", nBatch );
+	return GlobalEntity_GetFlags( MAKE_STRING( szName ) );
+}
+
+void AddGladosSpokenFlags( int nBatch, int nFlags )
+{
+	if ( nBatch < 0 || nBatch >= 4 )
+	{
+		DevWarning( "AddGLaDOSSpoteFlags out of range!\n" );
+		return;
+	}
+
+	char szName[ 32 ];
+	V_snprintf( szName, sizeof( szName ), "glados_spoken_flags%i", nBatch );
+	GlobalEntity_AddFlags( MAKE_STRING( szName ), nFlags );
+}
+
+bool IsLocalSplitScreen( void )
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return 0;
+
+	CPortal_Player *pPlayer = NULL;
+
+	for( int i = 1; i <= gpGlobals->maxClients; ++i )
+	{
+		pPlayer = ToPortalPlayer( UTIL_PlayerByIndex( i ) );
+
+		//If the other player does not exist or if the other player is the local player
+		if ( pPlayer )
+			return pPlayer->GetSplitScreenPlayers().Count() > 0;
+	}
+
+	return 0;
+}
+
+int GetNumPlayersConnected( void )
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return 0;
+
+	CPortal_Player *pPlayer = NULL;
+
+	int nNum = 0;
+	for( int i = 1; i <= gpGlobals->maxClients; ++i )
+	{
+		pPlayer = ToPortalPlayer( UTIL_PlayerByIndex( i ) );
+
+		//count this player
+		if ( pPlayer )
+			nNum++;
+	}
+
+	return nNum;
+}
+
+void CoopGladosBlowUpBots( void )
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+	{
+		Warning( "This command only works in multiplayer coop." );
+		return;
+	}
+
+	for ( int i = 1 ; i <= gpGlobals->maxClients ; i++ )
+	{
+		CPortal_Player *pPlayer = ToPortalPlayer( UTIL_PlayerByIndex( i ) );
+
+		if ( pPlayer && pPlayer->IsAlive() )
+		{
+			pPlayer->TakeDamage( CTakeDamageInfo( pPlayer, pPlayer, 1000, DMG_CRUSH ) );
+		}
+	}
+
+	pRules->SetGladosJustBlewUpBots();
+}
+
+int CoopGetNumPortalsPlaced( void )
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return 0;
+
+	return pRules->GetNumPortalsPlaced();
+}
+
+void CoopSetMapRunTime( float flRunLength )
+{
+	// FIXME: - Wonderland_War
+	/*
+	CPortalMPStats *pStats = GetPortalMPStats();
+	if ( pStats )
+	{
+		pStats->SetTimeToCompleteMap( flRunLength );
+	}
+	*/
+}
+
+void NotifySpeedRunSuccess( int iRunLength, const char* mapname )
+{
+	KeyValues *kvNotifySpeedRunCoop = new KeyValues( "OnSpeedRunCoopEvent" );
+	kvNotifySpeedRunCoop->SetString( "map", mapname );
+	UTIL_SendClientCommandKVToPlayer( kvNotifySpeedRunCoop );
+}
+
+void CoopSetCameFromLastDLCMap( bool bComingFromLastDLCMap )
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return;
+	
+	if( bComingFromLastDLCMap )
+		GlobalEntity_SetFlags( "came_from_last_dlc_map", 1 );
+	else
+		GlobalEntity_SetFlags( "came_from_last_dlc_map", 0 );
+}
+
+bool GetCameFromLastDLCMap()
+{
+
+	if( (GlobalEntity_GetFlags( "came_from_last_dlc_map" ) & 1) != 0 )
+		return true;
+
+	return false;
+}
+
+void SetHaveSeenDLCTubesReveal( void )
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return;
+	
+	GlobalEntity_SetFlags( "have_seen_dlc_tubes_reveal", 1 );
+}
+
+bool GetHaveSeenDLCTubesReveal()
+{
+	if( (GlobalEntity_GetFlags( "have_seen_dlc_tubes_reveal" ) & 1) != 0 )
+		return true;
+
+	 return false;
+}
+
+void CC_MarkAllMapsComplete( const CCommand &args )
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return;
+
+	pRules->SetAllMapsComplete();
+
+	DevMsg( "All Maps Unlocked!\n" );
+}
+ConCommand mp_mark_all_maps_complete( "mp_mark_all_maps_complete", CC_MarkAllMapsComplete, "Marks all levels as complete in the save file.", 0 );
+
+void CC_MarkAllMapsIncomplete( const CCommand &args )
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return;
+
+	pRules->SetAllMapsComplete( false );
+
+	DevMsg( "All Maps Locked!\n" );
+}
+ConCommand mp_mark_all_maps_incomplete( "mp_mark_all_maps_incomplete", CC_MarkAllMapsIncomplete, "Marks all levels as incomplete in the save file.", 0 );
+
+void CC_MarkBranchComplete( const CCommand &args )
+{
+	CPortalMPGameRules *pRules = PortalMPGameRules();
+	if ( !pRules )
+		return;
+
+	if ( args.ArgC() <= 1 )
+		return;
+
+	pRules->SetBranchComplete( atoi(args[ 1 ]), true );
+
+	DevMsg( "Branch Unlocked!\n" );
+}
+ConCommand mp_mark_course_complete( "mp_mark_course_complete", CC_MarkBranchComplete, "Marks all levels in a branch as complete in the save file.", 0 );
+
+void CPortalMPGameRules::RegisterScriptFunctions( void )
+{
+	ScriptRegisterFunctionNamed( g_pScriptVM, ScriptIsMultiplayer, "IsMultiplayer", "Is this a multiplayer game?" );
+	ScriptRegisterFunction( g_pScriptVM, GetPlayerSilenceDuration, "Time that the specified player has been silent on the mic." );
+	ScriptRegisterFunction( g_pScriptVM, GetOrangePlayerIndex, "Player index of the orange player." );
+	ScriptRegisterFunction( g_pScriptVM, GetBluePlayerIndex, "Player index of the blue player." );
+	ScriptRegisterFunction( g_pScriptVM, GetCoopSectionIndex, "Section that the coop players have selected to load." );
+	ScriptRegisterFunction( g_pScriptVM, GetCoopBranchLevelIndex, "Given the 'branch' argument, returns the current chosen level." );
+	ScriptRegisterFunction( g_pScriptVM, GetHighestActiveBranch, "Returns which branches should be available in the hub." );
+	ScriptRegisterFunction( g_pScriptVM, AddBranchLevelName, "Adds a level to the specified branche's list." );
+	ScriptRegisterFunction( g_pScriptVM, SaveMPStatsData, "Save the multiplayer stats for the score board." );
+	ScriptRegisterFunction( g_pScriptVM, MarkMapComplete, "Marks a maps a complete for both players." );
+	ScriptRegisterFunction( g_pScriptVM, IsBranchComplete, "Returns true if every level in the branch has been completed by either." );
+	ScriptRegisterFunction( g_pScriptVM, IsPlayerBranchComplete, "Returns true if every level in the branch has been completed by the specified player." );
+	ScriptRegisterFunction( g_pScriptVM, IsLevelComplete, "Returns true if the level in the specified branch is completed by either player." );
+	ScriptRegisterFunction( g_pScriptVM, IsPlayerLevelComplete, "Returns true if the level in the specified branch is completed by a specific player." );
+	ScriptRegisterFunction( g_pScriptVM, GetPlayerDeathCount, "Returns the number of times that a specific player has died in the session." );
+	ScriptRegisterFunction( g_pScriptVM, GetGladosSpokenFlags, "Returns bit flags for specific lines that we want to track per session." );
+	ScriptRegisterFunction( g_pScriptVM, AddGladosSpokenFlags, "Adds bit flags for specific lines that we want to track per session." );
+	ScriptRegisterFunction( g_pScriptVM, IsLocalSplitScreen, "Are these players playing in Splitscreen?" );
+	ScriptRegisterFunction( g_pScriptVM, GetNumPlayersConnected, "Returns how many players are connected" );
+	ScriptRegisterFunction( g_pScriptVM, AddCoopCreditsName, "Adds a name to the coop credit's list." );
+	ScriptRegisterFunction( g_pScriptVM, CoopGladosBlowUpBots, "Call this to blow up both robots and prevent respawning!" );
+	ScriptRegisterFunction( g_pScriptVM, CoopGetNumPortalsPlaced, "Returns the number of portals the players have placed so far." );
+	ScriptRegisterFunction( g_pScriptVM, CoopGetLevelsCompletedThisBranch, "Returns the number of levels the players have completed in their run of the current branch." );
+	ScriptRegisterFunction( g_pScriptVM, CoopGetBranchTotalLevelCount, "Returns the number of levels in the current branch." );
+	ScriptRegisterFunction( g_pScriptVM, NotifySpeedRunSuccess, "Tells the client that a successful speed run has been completed." );
+	ScriptRegisterFunction( g_pScriptVM, CoopSetMapRunTime, "Sets the time to complete a coop map from spawn to completing the puzzle." );
+	ScriptRegisterFunction( g_pScriptVM, CoopSetCameFromLastDLCMap, "Set whether we came from the last coop DLC map or not" );
+	ScriptRegisterFunction( g_pScriptVM, GetCameFromLastDLCMap, "Returns true if coming from the last DLC coop map." );
+	ScriptRegisterFunction( g_pScriptVM, SetHaveSeenDLCTubesReveal, "Set that we have seen the DLC tubes reveal this session." );
+	ScriptRegisterFunction( g_pScriptVM, GetHaveSeenDLCTubesReveal, "Get whether we have seen the DLC tubes reveal this session." );
+	g_pScriptVM->RegisterInstance( &PlayerVoiceListener(), "PlayerVoiceListener" );
+}
+#endif // !CLIENT_DLL
+
+#ifdef CLIENT_DLL
+bool ClientIsCrossplayingWithConsole( void )
+{
+	IMatchSession *pSession = g_pMatchFramework->GetMatchSession();
+	if ( !pSession )
+		return false;
+
+	KeyValues *kvSettings = pSession->GetSessionSettings();
+	int numMachines = kvSettings->GetInt( "members/numMachines" );
+	for ( int iMachine = 0; iMachine < numMachines; ++ iMachine )
+	{
+		uint64 uiFlags = kvSettings->GetUint64( CFmtStr( "members/machine%d/flags", iMachine ) );
+		static const uint64 kFlagMachinePS3 = 1ull;
+		if ( uiFlags & kFlagMachinePS3 )
+			return true;
+	}
+
+	return false;
+}
 #endif

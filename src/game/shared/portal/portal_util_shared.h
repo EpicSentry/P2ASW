@@ -27,8 +27,12 @@ extern bool g_bBulletPortalTrace;
 	class CProp_Portal;
 	class CBeam;
 #endif
-
-Color UTIL_Portal_Color( int iPortal );
+	
+	
+#if defined ( CLIENT_DLL )
+Color UTIL_Portal_Color( int iPortal, int iTeamNumber = 0 );
+Color UTIL_Portal_Color_Particles( int iPortal, int iTeamNumber = 0 );
+#endif
 
 void UTIL_Portal_Trace_Filter( class CTraceFilterSimpleClassnameList *traceFilterPortalShot );
 

@@ -2173,8 +2173,11 @@ void CCollisionEvent::UpdateDamageEvents(void)
 			}
 		}
 #endif
-
-
+		
+#ifdef PORTAL2
+		if ( event.pEntity->IsPlayer() )
+			continue;
+#endif // PORTAL2
 
 		event.pEntity->TakeDamage(event.info);
 		int iEntBits2 = event.pEntity->IsAlive() ? 0x0001 : 0;
@@ -2581,6 +2584,11 @@ void PhysCollisionSound(CBaseEntity *pEntity, IPhysicsObject *pPhysObject, int c
 {
 	if (deltaTime < 0.05f || speed < 70.0f)
 		return;
+	
+#if defined ( PORTAL2 )
+	if ( pPhysObject->GetGameFlags() & FVPHYSICS_PLAYER_HELD )
+		return;
+#endif
 
 	float volume = speed * speed * (1.0f / (320.0f*320.0f));	// max volume at 320 in/s
 	if (volume > 1.0f)
@@ -2642,7 +2650,12 @@ void PhysCollisionWarpEffect(gamevcollisionevent_t *pEvent, surfacedata_t *phit)
 
 void PhysCollisionDust(gamevcollisionevent_t *pEvent, surfacedata_t *phit)
 {
-
+	
+#if defined ( PORTAL2 )
+	if ( ( pEvent->pObjects[0]->GetGameFlags() & FVPHYSICS_PLAYER_HELD ) ||  
+		 ( pEvent->pObjects[1]->GetGameFlags() & FVPHYSICS_PLAYER_HELD ) )
+		return;
+#endif
 	switch (phit->game.material)
 	{
 	case CHAR_TEX_SAND:

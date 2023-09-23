@@ -38,6 +38,14 @@ public:
 	void InputLowerWeapon( inputdata_t &inputdata );
 	void InputSetLocatorTargetEntity( inputdata_t &inputdata );
 #endif // HL2_EPISODIC
+	
+#ifdef PORTAL2
+	void InputAddPotatosToPortalgun( inputdata_t& inputdata );
+	void InputRemovePotatosFromPortalgun( inputdata_t& inputdata );
+	
+	void InputPaintPlayerWithPortalPaint( inputdata_t &inputdata );
+	void InputSetMotionBlurAmount( inputdata_t &inputdata );
+#endif
 
 	void InputRequestPlayerHealth( inputdata_t &inputdata );
 	void InputSetPlayerHealth( inputdata_t &inputdata );

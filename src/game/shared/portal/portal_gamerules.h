@@ -54,9 +54,9 @@ public:
 #ifndef CLIENT_DLL
 	virtual bool	ShouldAutoAim( CBasePlayer *pPlayer, edict_t *target );
 	virtual float	GetAutoAimScale( CBasePlayer *pPlayer );
+	virtual void	RegisterScriptFunctions(void);
 #endif
 
-	virtual void RegisterScriptFunctions(void);
 
 #ifdef CLIENT_DLL
 	virtual bool IsBonusChallengeTimeBased( void );

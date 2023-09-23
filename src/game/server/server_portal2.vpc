@@ -15,6 +15,12 @@ $Configuration
 	{
 		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\game\shared\portal;$SRCDIR\game\shared\portal2;.\hl2;.\episodic;$SRCDIR\game\shared\multiplayer;$SRCDIR\game\shared\hl2;$SRCDIR\game\shared\portal;.\portal;.\portal2"
 		$PreprocessorDefinitions		"$BASE;PORTAL;USES_SAVERESTORE;SWARM_DLL;PORTAL2;PORTAL2_DLL"
+		$PreprocessorDefinitions		"$BASE;USE_CEG"								[ $WIN32 && !$NO_CEG ]
+	}
+	
+	$Linker	[$WIN32 && !$NO_CEG]
+	{
+		$AdditionalDependencies			"$BASE $LIBCOMMON\ceglib.lib"
 	}
 }
 
@@ -63,6 +69,8 @@ $Project "Server (Portal 2)"
 			$File	"hl2\func_tank.h"
 			$File	"hl2\grenade_beam.cpp"
 			$File	"hl2\grenade_beam.h"
+			
+			$File	"hl2\hl_playermove.cpp"
 		}
 		
 		$Folder	"Portal 2"
@@ -81,7 +89,6 @@ $Project "Server (Portal 2)"
 				$File "portal2/prop_weightedcube.cpp"
 				$File "portal2/prop_weightedcube.h"
 			$File	"portal2\portal2_eventlog.cpp"
-			$File	"portal2\portal2_gamemove.cpp"
 			
 			$File	"$SRCDIR\game\shared\predicted_viewmodel.cpp"
 		}
@@ -130,6 +137,8 @@ $Project "Server (Portal 2)"
 			$File	"$SRCDIR\game\shared\portal\portal_gamemovement.cpp"
 			$File	"$SRCDIR\game\shared\portal\portal_gamerules.cpp"
 			$File	"$SRCDIR\game\shared\portal\portal_gamerules.h"
+			$File	"$SRCDIR\game\shared\portal\portal_mp_gamerules.cpp"
+			$File	"$SRCDIR\game\shared\portal\portal_mp_gamerules.h"
 			$File	"portal\portal_gamestats.cpp"
 			$File	"portal\portal_gamestats.h"
 			$File	"portal\portal_physics_collisionevent.cpp"

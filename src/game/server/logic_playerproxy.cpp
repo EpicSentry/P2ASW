@@ -12,6 +12,11 @@
 #include "hl2_player.h"
 #endif // HL2_EPISODIC
 
+#ifdef PORTAL2
+#include "portal/portal_player.h"
+#include "weapon_portalgun_shared.h"
+#endif
+
 LINK_ENTITY_TO_CLASS( logic_playerproxy, CLogicPlayerProxy);
 
 BEGIN_DATADESC( CLogicPlayerProxy )
@@ -22,6 +27,13 @@ DEFINE_OUTPUT( m_PlayerDied,				"PlayerDied" ),
 DEFINE_FIELD( m_hPlayer, FIELD_EHANDLE ),
 
 
+#ifdef PORTAL2
+DEFINE_INPUTFUNC( FIELD_VOID,				"AddPotatosToPortalgun", InputAddPotatosToPortalgun ),
+DEFINE_INPUTFUNC( FIELD_VOID,				"RemovePotatosFromPortalgun", InputRemovePotatosFromPortalgun ),
+
+DEFINE_INPUTFUNC( FIELD_VOID,				"PaintPlayerWithPortalPaint", InputPaintPlayerWithPortalPaint ),
+DEFINE_INPUTFUNC( FIELD_FLOAT,				"SetMotionBlurAmount", InputSetMotionBlurAmount ),
+#endif
 
 // HL2 / Episodic
 #if defined HL2_EPISODIC
@@ -178,3 +190,56 @@ void CLogicPlayerProxy::InputDisableCappedPhysicsDamage( inputdata_t &inputdata 
 }
 
 #endif // HL2_EPISODIC
+
+
+#ifdef PORTAL2
+void CLogicPlayerProxy::InputAddPotatosToPortalgun(inputdata_t& inputdata)
+{
+	CBasePlayer* pPlayer = ToBasePlayer( m_hPlayer.Get() );
+	if ( pPlayer == NULL )
+		return;
+
+	CWeaponPortalgun *pPortalgun = (CWeaponPortalgun*)pPlayer->GetActiveWeapon();
+	
+	Assert( pPortalgun );
+	if ( !pPortalgun )
+		return;
+
+	pPortalgun->SetPotatosOnPortalgun( true );
+}
+
+void CLogicPlayerProxy::InputRemovePotatosFromPortalgun(inputdata_t& inputdata)
+{
+	CBasePlayer* pPlayer = ToBasePlayer( m_hPlayer.Get() );
+	if ( pPlayer == NULL )
+		return;
+
+	CWeaponPortalgun *pPortalgun = (CWeaponPortalgun*)pPlayer->GetActiveWeapon();
+	
+	Assert( pPortalgun );
+	if ( !pPortalgun )
+		return;
+
+	pPortalgun->SetPotatosOnPortalgun( false );
+}
+
+void CLogicPlayerProxy::InputPaintPlayerWithPortalPaint( inputdata_t &/*inputdata*/ )
+{
+	CPortal_Player* pPlayer = ToPortalPlayer(m_hPlayer.Get());
+	if( pPlayer != NULL )
+		pPlayer->Paint( PORTAL_POWER, vec3_origin );
+}
+
+void CLogicPlayerProxy::InputSetMotionBlurAmount( inputdata_t &inputdata )
+{
+	if ( GameRules() && GameRules()->IsMultiplayer() == false )
+	{
+		CPortal_Player* pPlayer = ToPortalPlayer(m_hPlayer.Get());
+		if( pPlayer != NULL )
+		{
+			pPlayer->SetMotionBlurAmount( inputdata.value.Float() );
+		}
+	}
+}
+
+#endif

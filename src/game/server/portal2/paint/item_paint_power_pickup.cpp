@@ -70,7 +70,7 @@ void CPaintPowerPickup::Spawn( void )
 	BaseClass::Spawn();
 
 	//Paint pickups are unpaintable
-	m_bIsUnPaintable = true;
+	AddFlag( FL_UNPAINTABLE );
 
 	// Destroy VPhysics so players can't move this pickup.  We want them stationary
 	VPhysicsDestroyObject();

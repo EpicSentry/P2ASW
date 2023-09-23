@@ -68,6 +68,8 @@ BEGIN_DATADESC( CProp_Portal )
 	DEFINE_FIELD( m_vDelayedPosition,	FIELD_VECTOR ),
 	DEFINE_FIELD( m_qDelayedAngles,		FIELD_VECTOR ),
 	DEFINE_FIELD( m_iDelayedFailure,	FIELD_INTEGER ),
+	DEFINE_FIELD( m_vOldPosition,		FIELD_VECTOR ),
+	DEFINE_FIELD( m_qOldAngles,			FIELD_VECTOR ),
 	DEFINE_FIELD( m_hPlacedBy,			FIELD_EHANDLE ),
 
 	// DEFINE_FIELD( m_plane_Origin, cplane_t ),
@@ -203,7 +205,7 @@ void CProp_Portal::Precache( void )
 
 	PrecacheModel( "models/portals/portal1.mdl" );
 	PrecacheModel( "models/portals/portal2.mdl" );
-
+	/*
 	PrecacheParticleSystem( "portal_1_particles" );
 	PrecacheParticleSystem( "portal_2_particles" );
 	PrecacheParticleSystem( "portal_1_edge" );
@@ -224,7 +226,12 @@ void CProp_Portal::Precache( void )
 	PrecacheParticleSystem( "portal_2_near" );
 	PrecacheParticleSystem( "portal_1_success" );
 	PrecacheParticleSystem( "portal_2_success" );
-
+	*/
+	PrecacheParticleSystem( "portal_edge" );
+	PrecacheParticleSystem( "portal_edge_reverse" );
+	PrecacheParticleSystem( "portal_close" );
+	PrecacheParticleSystem( "portal_badsurface" );
+	PrecacheParticleSystem( "portal_success" );
 	BaseClass::Precache();
 }
 
@@ -457,11 +464,11 @@ void CProp_Portal::ResetModel( void )
 
 void CProp_Portal::DoFizzleEffect( int iEffect, bool bDelayedPos /*= true*/ )
 {
-	m_vAudioOrigin = ( ( bDelayedPos ) ? ( m_vDelayedPosition ) : ( GetAbsOrigin() ) );
+	m_vAudioOrigin = ( ( bDelayedPos ) ? ( m_vDelayedPosition ) : ( m_vOldPosition ) );
 
 	CEffectData	fxData;
 
-	fxData.m_vAngles = ( ( bDelayedPos ) ? ( m_qDelayedAngles ) : ( GetAbsAngles() ) );
+	fxData.m_vAngles = ( ( bDelayedPos ) ? ( m_qDelayedAngles ) : ( m_qOldAngles ) );
 
 	Vector vForward, vUp;
 	AngleVectors( fxData.m_vAngles, &vForward, &vUp, NULL );
@@ -476,28 +483,37 @@ void CProp_Portal::DoFizzleEffect( int iEffect, bool bDelayedPos /*= true*/ )
 	ep.m_flVolume = 1.0f;
 	ep.m_pOrigin = &m_vAudioOrigin;
 
+	int nTeam = GetTeamNumber();
+	int nPortalNum = m_bIsPortal2 ? 2 : 1;
+
 	// Rumble effects on the firing player (if one exists)
 	CWeaponPortalgun *pPortalGun = dynamic_cast<CWeaponPortalgun*>( m_hPlacedBy.Get() );
+	CBasePlayer* pPlayer = NULL;
 
-	if ( pPortalGun && (iEffect != PORTAL_FIZZLE_CLOSE ) 
-				    && (iEffect != PORTAL_FIZZLE_SUCCESS )
-				    && (iEffect != PORTAL_FIZZLE_NONE )		)
+	if ( pPortalGun	)
 	{
-		CBasePlayer* pPlayer = (CBasePlayer*)pPortalGun->GetOwner();
+		pPlayer = (CBasePlayer*)pPortalGun->GetOwner();
 		if ( pPlayer )
 		{
-			pPlayer->RumbleEffect( RUMBLE_PORTAL_PLACEMENT_FAILURE, 0, RUMBLE_FLAGS_NONE );
+			if ( iEffect != PORTAL_FIZZLE_CLOSE && 
+				 iEffect != PORTAL_FIZZLE_SUCCESS && 
+				 iEffect != PORTAL_FIZZLE_NONE )
+			{
+				pPlayer->RumbleEffect( RUMBLE_PORTAL_PLACEMENT_FAILURE, 0, RUMBLE_FLAGS_NONE );
+			}
+
+			nTeam = pPlayer->GetTeamNumber();
 		}
 	}
-	
+
 	// Pick a fizzle effect
 	switch ( iEffect )
 	{
 		case PORTAL_FIZZLE_CANT_FIT:
 			//DispatchEffect( "PortalFizzleCantFit", fxData );
-			//ep.m_pSoundName = "Portal.fizzle_invalid_surface";
+			ep.m_pSoundName = "Portal.fizzle_invalid_surface";
 			VectorAngles( vUp, vForward, fxData.m_vAngles );
-			DispatchParticleEffect( ( ( m_bIsPortal2 ) ? ( "portal_2_nofit" ) : ( "portal_1_nofit" ) ), fxData.m_vOrigin, fxData.m_vAngles, this );
+			CreatePortalEffect( pPlayer, PORTAL_FIZZLE_BAD_SURFACE, fxData.m_vOrigin, fxData.m_vAngles, nTeam, nPortalNum );
 			break;
 
 		case PORTAL_FIZZLE_OVERLAPPED_LINKED:
@@ -512,7 +528,7 @@ void CProp_Portal::DoFizzleEffect( int iEffect, bool bDelayedPos /*= true*/ )
 
 			//DispatchEffect( "PortalFizzleOverlappedLinked", fxData );
 			VectorAngles( vUp, vForward, fxData.m_vAngles );
-			DispatchParticleEffect( ( ( m_bIsPortal2 ) ? ( "portal_2_overlap" ) : ( "portal_1_overlap" ) ), fxData.m_vOrigin, fxData.m_vAngles, this );
+			CreatePortalEffect( pPlayer, PORTAL_FIZZLE_BAD_SURFACE, fxData.m_vOrigin, fxData.m_vAngles, nTeam, nPortalNum );
 			ep.m_pSoundName = "Portal.fizzle_invalid_surface";
 			break;
 		}
@@ -520,35 +536,35 @@ void CProp_Portal::DoFizzleEffect( int iEffect, bool bDelayedPos /*= true*/ )
 		case PORTAL_FIZZLE_BAD_VOLUME:
 			//DispatchEffect( "PortalFizzleBadVolume", fxData );
 			VectorAngles( vUp, vForward, fxData.m_vAngles );
-			DispatchParticleEffect( ( ( m_bIsPortal2 ) ? ( "portal_2_badvolume" ) : ( "portal_1_badvolume" ) ), fxData.m_vOrigin, fxData.m_vAngles );
+			CreatePortalEffect( pPlayer, PORTAL_FIZZLE_BAD_SURFACE, fxData.m_vOrigin, fxData.m_vAngles, nTeam, nPortalNum );
 			ep.m_pSoundName = "Portal.fizzle_invalid_surface";
 			break;
 
 		case PORTAL_FIZZLE_BAD_SURFACE:
 			//DispatchEffect( "PortalFizzleBadSurface", fxData );
 			VectorAngles( vUp, vForward, fxData.m_vAngles );
-			DispatchParticleEffect( ( ( m_bIsPortal2 ) ? ( "portal_2_badsurface" ) : ( "portal_1_badsurface" ) ), fxData.m_vOrigin, fxData.m_vAngles );
+			CreatePortalEffect( pPlayer, PORTAL_FIZZLE_BAD_SURFACE, fxData.m_vOrigin, fxData.m_vAngles, nTeam, nPortalNum );
 			ep.m_pSoundName = "Portal.fizzle_invalid_surface";
 			break;
 
 		case PORTAL_FIZZLE_KILLED:
 			//DispatchEffect( "PortalFizzleKilled", fxData );
 			VectorAngles( vUp, vForward, fxData.m_vAngles );
-			DispatchParticleEffect( ( ( m_bIsPortal2 ) ? ( "portal_2_close" ) : ( "portal_1_close" ) ), fxData.m_vOrigin, fxData.m_vAngles );
+			CreatePortalEffect( pPlayer, PORTAL_FIZZLE_CLOSE, fxData.m_vOrigin, fxData.m_vAngles, nTeam, nPortalNum );
 			ep.m_pSoundName = "Portal.fizzle_moved";
 			break;
 
 		case PORTAL_FIZZLE_CLEANSER:
 			//DispatchEffect( "PortalFizzleCleanser", fxData );
 			VectorAngles( vUp, vForward, fxData.m_vAngles );
-			DispatchParticleEffect( ( ( m_bIsPortal2 ) ? ( "portal_2_cleanser" ) : ( "portal_1_cleanser" ) ), fxData.m_vOrigin, fxData.m_vAngles, this );
+			CreatePortalEffect( pPlayer, PORTAL_FIZZLE_BAD_SURFACE, fxData.m_vOrigin, fxData.m_vAngles, nTeam, nPortalNum );
 			ep.m_pSoundName = "Portal.fizzle_invalid_surface";
 			break;
 
 		case PORTAL_FIZZLE_CLOSE:
 			//DispatchEffect( "PortalFizzleKilled", fxData );
 			VectorAngles( vUp, vForward, fxData.m_vAngles );
-			DispatchParticleEffect( ( ( m_bIsPortal2 ) ? ( "portal_2_close" ) : ( "portal_1_close" ) ), fxData.m_vOrigin, fxData.m_vAngles );
+			CreatePortalEffect( pPlayer, PORTAL_FIZZLE_CLOSE, fxData.m_vOrigin, fxData.m_vAngles, nTeam, nPortalNum );
 			ep.m_pSoundName = ( ( m_bIsPortal2 ) ? ( "Portal.close_red" ) : ( "Portal.close_blue" ) );
 			break;
 
@@ -571,7 +587,7 @@ void CProp_Portal::DoFizzleEffect( int iEffect, bool bDelayedPos /*= true*/ )
 			//DispatchEffect( "PortalFizzleNear", fxData );
 			AngleVectors( fxData.m_vAngles, &vForward, &vUp, NULL );
 			VectorAngles( vUp, vForward, fxData.m_vAngles );
-			DispatchParticleEffect( ( ( m_bIsPortal2 ) ? ( "portal_2_near" ) : ( "portal_1_near" ) ), fxData.m_vOrigin, fxData.m_vAngles );
+			CreatePortalEffect( pPlayer, PORTAL_FIZZLE_BAD_SURFACE, fxData.m_vOrigin, fxData.m_vAngles, nTeam, nPortalNum );
 			ep.m_pSoundName = "Portal.fizzle_invalid_surface";
 			break;
 		}
@@ -595,14 +611,14 @@ void CProp_Portal::DoFizzleEffect( int iEffect, bool bDelayedPos /*= true*/ )
 			//DispatchEffect( "PortalFizzleNear", fxData );
 			AngleVectors( fxData.m_vAngles, &vForward, &vUp, NULL );
 			VectorAngles( vUp, vForward, fxData.m_vAngles );
-			DispatchParticleEffect( ( ( m_bIsPortal2 ) ? ( "portal_2_near" ) : ( "portal_1_near" ) ), fxData.m_vOrigin, fxData.m_vAngles );
+			CreatePortalEffect( pPlayer, PORTAL_FIZZLE_BAD_SURFACE, fxData.m_vOrigin, fxData.m_vAngles, nTeam, nPortalNum );
 			ep.m_pSoundName = "Portal.fizzle_invalid_surface";
 			break;
 		}
 
 		case PORTAL_FIZZLE_SUCCESS:
 			VectorAngles( vUp, vForward, fxData.m_vAngles );
-			DispatchParticleEffect( ( ( m_bIsPortal2 ) ? ( "portal_2_success" ) : ( "portal_1_success" ) ), fxData.m_vOrigin, fxData.m_vAngles );
+			CreatePortalEffect( pPlayer, PORTAL_FIZZLE_SUCCESS, fxData.m_vOrigin, fxData.m_vAngles, nTeam, nPortalNum );
 			// Don't make a sound!
 			return;
 
@@ -612,6 +628,35 @@ void CProp_Portal::DoFizzleEffect( int iEffect, bool bDelayedPos /*= true*/ )
 	}
 
 	EmitSound( filter, SOUND_FROM_WORLD, ep );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Create the portal effect
+//-----------------------------------------------------------------------------
+void CProp_Portal::CreatePortalEffect( CBasePlayer* pPlayer, int iEffect, Vector vecOrigin, QAngle qAngles, int nTeam, int nPortalNum )
+{
+	if ( !pPlayer || iEffect == PORTAL_FIZZLE_NONE )
+		return;
+
+	CBroadcastRecipientFilter filter;
+	filter.MakeReliable();
+
+	// remove the player who shot it because we handle this in 
+	// the client code and don't need to send a message
+	if ( pPlayer->m_bPredictionEnabled )
+	{
+		filter.RemoveRecipient( pPlayer );
+	}
+
+	UserMessageBegin( filter, "PortalFX_Surface" );
+	WRITE_SHORT( entindex() );
+	WRITE_SHORT( pPlayer->entindex() );
+	WRITE_BYTE( nTeam );
+	WRITE_BYTE( nPortalNum );
+	WRITE_BYTE( iEffect );
+	WRITE_VEC3COORD( vecOrigin );
+	WRITE_ANGLES( qAngles );
+	MessageEnd();
 }
 
 //-----------------------------------------------------------------------------
@@ -888,7 +933,11 @@ bool CProp_Portal::ShouldTeleportTouchingEntity( CBaseEntity *pOther )
 	if(m_PortalSimulator.m_DataAccess.Placement.PortalPlane.m_Normal.Dot( ptOtherCenter ) < m_PortalSimulator.m_DataAccess.Placement.PortalPlane.m_Dist)
 	{
 		//entity wants to go further into the plane
+
+		
+
 		if( m_PortalSimulator.EntityIsInPortalHole( pOther ) )
+			//if ( UTIL_Portal_EntityIsInPortalHole( this, pOther ) )
 		{
 #ifdef _DEBUG
 			static int iAntiRecurse = 0;

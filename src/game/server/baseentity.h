@@ -1317,10 +1317,7 @@ public:
 	void					ToggleFlag( int flagToToggle );
 	int						GetFlags( void ) const;
 	void					ClearFlags( void );
-	
-#ifdef PORTAL2
-	CNetworkVar( bool, m_bIsUnPaintable );
-#endif
+
 
 	// Sets the local position from a transform
 	void					SetLocalTransform( const matrix3x4_t &localTransform );

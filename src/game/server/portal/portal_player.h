@@ -37,8 +37,6 @@ struct PortalPlayerStatistics_t
 	float fNumSecondsTaken;
 };
 
-
-
 //=============================================================================
 // >> Portal_Player
 //=============================================================================
@@ -133,8 +131,6 @@ public:
 	void ResetAnimation( void );
 
 	void SetPlayerModel( void );
-	
-	int	  GetPlayerModelType( void ) { return m_iPlayerSoundType; }
 
 	void ForceDuckThisFrame( void );
 	void UnDuck ( void );
@@ -187,11 +183,33 @@ public:
 	{
 		return m_GrabController;
 	}
-
+	
+	void GivePlayerPaintGun( bool bActivatePaintPowers, bool bSwitchTo );
+	void GivePlayerPortalGun( bool bUpgraded, bool bSwitchTo );
+	
+	
+	CNetworkVar( bool, m_bPingDisabled );
+	CNetworkVar( bool, m_bTauntDisabled );
+	CNetworkVar( bool, m_bTauntRemoteView );
+	bool m_bTauntRemoteViewFOVFixup;
+	CNetworkVector( m_vecRemoteViewOrigin );
+	CNetworkQAngle( m_vecRemoteViewAngles );
+	CNetworkVar( float, m_fTauntCameraDistance );
+	CNetworkVar( int, m_nTeamTauntState );
+	CNetworkVector( m_vTauntPosition );
+	CNetworkQAngle( m_vTauntAngles );
+	CNetworkQAngle( m_vPreTauntAngles );
+	int m_nAirTauntCount;
+	
+	void	SetTeamTauntState( int nTeamTauntState );
+	
+	EHANDLE m_hRemoteTauntCamera; // Change back to CHandle<> once we get the include ready
+	//CHandle< CNPC_SecurityCamera > m_hRemoteTauntCamera;
 
 protected:
 
 	CNetworkVarEmbedded( CPortalPlayerLocalData, m_PortalLocal );
+	
 		
 private:
 
@@ -205,7 +223,6 @@ private:
 
 	int m_iLastWeaponFireUsercmd;
 	CNetworkVar( int, m_iSpawnInterpCounter );
-	CNetworkVar( int, m_iPlayerSoundType );
 
 	CNetworkVar( bool, m_bHeldObjectOnOppositeSideOfPortal );
 	CNetworkHandle( CProp_Portal, m_pHeldObjectPortal );	// networked entity handle
@@ -227,7 +244,6 @@ private:
 	bool						m_bFixEyeAnglesFromPortalling;
 	VMatrix						m_matLastPortalled;
 
-	
 
 	mutable Vector m_vWorldSpaceCenterHolder; //WorldSpaceCenter() returns a reference, need an actual value somewhere
 	
@@ -299,6 +315,10 @@ public: // PAINT SPECIFIC
 	virtual void ChooseActivePaintPowers( PaintPowerInfoVector& activePowers );
 	
 	bool IsFullyConnected() { return m_bIsFullyConnected; }
+	
+	
+	// Anim state code
+	CNetworkVarEmbedded( CPortalPlayerShared, m_Shared );
 
 private: // PAINT SPECIFIC
 
@@ -358,7 +378,6 @@ private: // PAINT SPECIFIC
 	float m_flLastSuppressedBounceTime;
 	float m_flTimeSinceLastTouchedPower[3];
 	int m_nPortalsEnteredInAirFlags;
-	int m_nAirTauntCount;
 		
 	CNetworkVar( float, m_flHullHeight );
 	//Swapping guns
@@ -380,12 +399,11 @@ public:
 
 	friend class CProp_Portal;
 
-
-#ifdef PORTAL_MP
 public:
 	virtual CBaseEntity* EntSelectSpawnPoint( void );
 	void PickTeam( void );
-#endif
+	static void ClientDisconnected( edict_t *pPlayer );
+
 };
 
 inline CPortal_Player *ToPortalPlayer( CBaseEntity *pEntity )

@@ -26,7 +26,7 @@
 
 // IVEngineClient doesn't have a HasPaintMap() function, so we need a macro.
 #ifdef GAME_DLL
-#define HASPAINTMAP true//engine->HasPaintMap()
+#define HASPAINTMAP engine->HasPaintMap()
 #endif
 
 //-----------------------------------------------------------------------------

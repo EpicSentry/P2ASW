@@ -619,6 +619,9 @@ void UTIL_MessageText( CBasePlayer *player, const char *text, Color color = Colo
 void UTIL_ResetMessageTextAll( void );												// Reset clients' HudMessagePanel
 void UTIL_ResetMessageText( CBasePlayer *player );									// Reset a client's HudMessagePanel
 
+void UTIL_SendClientCommandKVToPlayer( KeyValues *pKV, CBasePlayer *pPlayer = NULL );
+void UTIL_RecordAchievementEvent( const char *pszAchievementname, CBasePlayer *pPlayer = NULL );
+
 //--------------------------------------------------------------------------------------------------------
 /**
  * Return true if ground is fairly level within the given radius around an entity

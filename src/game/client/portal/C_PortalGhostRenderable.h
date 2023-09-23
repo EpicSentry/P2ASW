@@ -41,8 +41,8 @@ public:
 	// Data accessors
 	virtual Vector const&			GetRenderOrigin( void );
 	virtual QAngle const&			GetRenderAngles( void );
-	virtual bool					ShouldDraw( void ) { return true; }
-
+	virtual bool					ShouldDraw( void ) { return !IsEffectActive( EF_NODRAW ); }
+	
 	// Call this to get the current bone transforms for the model.
 	// currentTime parameter will affect interpolation
 	// nMaxBones specifies how many matrices pBoneToWorldOut can hold. (Should be greater than or

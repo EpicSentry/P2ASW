@@ -15,6 +15,16 @@
 //#define DISABLE_DEBUG_HISTORY	
 
 #ifdef CLIENT_DLL
+	// CEG interface functions:
+	#define ALLOW_TEXTCHAT_FLAG			0xAD1A
+	DWORD InitHudAllowTextChatFlag( void );
+
+	#define ALLOW_PROPER_TINT_FLAG		0x8E3C
+	DWORD InitUiAllowProperTintFlag( void );
+
+#endif
+
+#ifdef CLIENT_DLL
 
 	#include "c_baseentity.h"
 	
