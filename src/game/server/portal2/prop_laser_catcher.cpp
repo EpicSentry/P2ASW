@@ -148,13 +148,14 @@ void CPropLaserCatcher::CheckLaserHitCatcher()
 
 	while (pLaser)
 	{
+		/* Todo: reimplement this with new catcher code
 		if (pLaser->IsLaserHittingCatcher() || pLaser->IsLaserHittingPortalCatcher())
 		{
 			// If the main beam or the through-portal beam of any laser is hitting the catcher, trigger the appropriate output.
 			OnPowered();
 			return; // Return if any laser is hitting the catcher to avoid checking the rest.
 		}
-
+		*/
 		// Get the next laser entity in the map
 		pLaser = dynamic_cast<CEnvPortalLaser*>(gEntList.FindEntityByClassname(pLaser, "env_portal_laser"));
 	}
@@ -165,13 +166,14 @@ void CPropLaserCatcher::CheckLaserHitCatcher()
 
 	while (pCube)
 	{
+		/* Todo: reimplement this with new cube code
 		if (pCube->IsCubeLaserHittingCatcher())
 		{
 			// If the cube's laser is hitting the catcher, trigger the appropriate output.
 			OnPowered();
 			return; // Return if the cube's laser is hitting the catcher.
 		}
-
+		*/
 		// Get the next cube entity in the map
 		pCube = dynamic_cast<CPropWeightedCube*>(gEntList.FindEntityByClassname(pCube, "prop_weighted_cube"));
 	}

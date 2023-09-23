@@ -28,7 +28,6 @@ public:
 	virtual void OnCommand( const char *command );
 
 	void UpdateLevelList();
-	void LevelSelected( const char *pLevelName );
 	
 	// == MANAGED_MEMBER_POINTERS_START: Do not edit by hand ==
 	CNB_Header_Footer	*m_pHeaderFooter;

@@ -105,16 +105,3 @@ void CNB_Select_Chapter_Panel::OnCommand( const char *command )
 	}
 	BaseClass::OnCommand( command );
 }
-
-void CNB_Select_Chapter_Panel::LevelSelected( const char *pLevelName )
-{
-	if ( !pLevelName || pLevelName[0] == 0 )
-		return;
-
-	// pass selected mission name up to vgamesettings
-	char buffer[ 256 ];
-	Q_snprintf( buffer, sizeof( buffer ), "cmd_level_selected_%s", pLevelName );
-	GetParent()->OnCommand( buffer );
-
-	MarkForDeletion();
-}
