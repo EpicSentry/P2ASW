@@ -47,7 +47,7 @@ public:
 				{ 
 					local ent = Entities.FindByName( null, name );
 					EntityGroup.append( ent );
-					if ( ent != null )
+					if ( ent != 0 )
 					{
 						ent.ValidateScriptScope();
 						ent.GetScriptScope().EntityGroup <- EntityGroup;
@@ -242,6 +242,305 @@ void CLogicCompareInteger::InputCompareValues( inputdata_t &inputdata )
 	// true! all values equal
 	m_OnEqual.FireOutput( inputdata.pActivator, this );
 }
+
+#ifdef PORTAL2
+//-----------------------------------------------------------------------------
+// Purpose: Manages two sets of values and can fire outputs based on the state of those values
+//			
+//-----------------------------------------------------------------------------
+class CLogicCoopManager : public CLogicalEntity
+{
+public:
+	DECLARE_CLASS( CLogicCoopManager, CLogicalEntity );
+
+	// outputs
+	COutputEvent m_OnChangeToAllTrue;
+	COutputEvent m_OnChangeToAnyTrue;
+	COutputEvent m_OnChangeToAllFalse;
+	COutputEvent m_OnChangeToAnyFalse;
+
+	// data
+	bool m_bDefaultPlayerStateA;
+	bool m_bDefaultPlayerStateB;
+
+	bool m_bPrevPlayerStateA;
+	bool m_bPrevPlayerStateB;
+	bool m_bPlayerStateA;
+	bool m_bPlayerStateB;
+
+	DECLARE_DATADESC();
+
+	void CompareValues( void );
+
+	// Input handlers
+	void InputSetStateATrue( inputdata_t &inputdata );
+	void InputSetStateAFalse( inputdata_t &inputdata );
+	void InputToggleStateA( inputdata_t &inputdata );
+	void InputSetStateBTrue( inputdata_t &inputdata );
+	void InputSetStateBFalse( inputdata_t &inputdata );
+	void InputToggleStateB( inputdata_t &inputdata );
+
+};
+
+
+LINK_ENTITY_TO_CLASS( logic_coop_manager, CLogicCoopManager );
+
+
+BEGIN_DATADESC( CLogicCoopManager )
+
+DEFINE_OUTPUT( m_OnChangeToAllTrue, "OnChangeToAllTrue" ),
+DEFINE_OUTPUT( m_OnChangeToAnyTrue, "OnChangeToAnyTrue" ),
+DEFINE_OUTPUT( m_OnChangeToAllFalse, "OnChangeToAllFalse" ),
+DEFINE_OUTPUT( m_OnChangeToAnyFalse, "OnChangeToAnyFalse" ),
+
+DEFINE_KEYFIELD( m_bPlayerStateA, FIELD_BOOLEAN, "DefaultPlayerStateA" ),
+DEFINE_KEYFIELD( m_bPlayerStateB, FIELD_BOOLEAN, "DefaultPlayerStateB" ),
+
+DEFINE_INPUTFUNC( FIELD_INPUT, "SetStateATrue", InputSetStateATrue ),
+DEFINE_INPUTFUNC( FIELD_INPUT, "SetStateAFalse", InputSetStateAFalse ),
+DEFINE_INPUTFUNC( FIELD_INPUT, "ToggleStateA", InputToggleStateA ),
+DEFINE_INPUTFUNC( FIELD_INPUT, "SetStateBTrue", InputSetStateBTrue ),
+DEFINE_INPUTFUNC( FIELD_INPUT, "SetStateBFalse", InputSetStateBFalse ),
+DEFINE_INPUTFUNC( FIELD_INPUT, "ToggleStateB", InputToggleStateB ),
+
+
+END_DATADESC()
+
+
+//-----------------------------------------------------------------------------
+void CLogicCoopManager::InputSetStateATrue( inputdata_t &inputdata )
+{
+	m_bPrevPlayerStateA = m_bPlayerStateA;
+	m_bPrevPlayerStateB = m_bPlayerStateB;
+	m_bPlayerStateA = true;
+	CompareValues();
+}
+
+//-----------------------------------------------------------------------------
+void CLogicCoopManager::InputSetStateAFalse( inputdata_t &inputdata )
+{
+	m_bPrevPlayerStateA = m_bPlayerStateA;
+	m_bPrevPlayerStateB = m_bPlayerStateB;
+	m_bPlayerStateA = false;
+	CompareValues();
+}
+
+//-----------------------------------------------------------------------------
+void CLogicCoopManager::InputToggleStateA( inputdata_t &inputdata )
+{
+	m_bPrevPlayerStateA = m_bPlayerStateA;
+	m_bPrevPlayerStateB = m_bPlayerStateB;
+	m_bPlayerStateA = !m_bPlayerStateA;
+	CompareValues();
+}
+
+//-----------------------------------------------------------------------------
+void CLogicCoopManager::InputSetStateBTrue( inputdata_t &inputdata )
+{
+	m_bPrevPlayerStateB = m_bPlayerStateB;
+	m_bPrevPlayerStateA = m_bPlayerStateA;
+	m_bPlayerStateB = true;
+	CompareValues();
+}
+
+//-----------------------------------------------------------------------------
+void CLogicCoopManager::InputSetStateBFalse( inputdata_t &inputdata )
+{
+	m_bPrevPlayerStateA = m_bPlayerStateA;
+	m_bPrevPlayerStateB = m_bPlayerStateB;
+	m_bPlayerStateB = false;
+	CompareValues();
+}
+
+//-----------------------------------------------------------------------------
+void CLogicCoopManager::InputToggleStateB( inputdata_t &inputdata )
+{
+	m_bPrevPlayerStateA = m_bPlayerStateA;
+	m_bPrevPlayerStateB = m_bPlayerStateB;
+	m_bPlayerStateB = !m_bPlayerStateB;
+	CompareValues();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: compares the values (currently happens on all inputs)
+//-----------------------------------------------------------------------------
+void CLogicCoopManager::CompareValues( void )
+{
+	// check if something has changed
+	if (m_bPrevPlayerStateA != m_bPlayerStateA || m_bPrevPlayerStateB != m_bPlayerStateB ) 
+	{
+		// both values are true and they just changed with this input
+		if ( m_bPlayerStateA == m_bPlayerStateB )
+		{
+			if ( m_bPlayerStateA == true )
+				m_OnChangeToAllTrue.FireOutput( this, this );
+			else if ( m_bPlayerStateA == false )
+				m_OnChangeToAllFalse.FireOutput( this, this );
+
+		}
+		else if ( m_bPlayerStateA != m_bPlayerStateB )
+		{
+			// only fire the output if they become dissimilar for the first time 
+			if ( ( m_bPlayerStateA == true  && m_bPrevPlayerStateA != true ) || m_bPlayerStateB == true  && m_bPrevPlayerStateB != true )
+				m_OnChangeToAnyTrue.FireOutput( this, this );
+			else if ( ( m_bPlayerStateA == false && m_bPrevPlayerStateA != false ) || ( m_bPlayerStateB == false && m_bPrevPlayerStateB != false ) )
+				m_OnChangeToAnyFalse.FireOutput( this, this );
+		}
+	}
+}
+#endif // PORTAL2
+
+class CLogicRegisterActivator : public CLogicalEntity
+{
+public:
+	DECLARE_CLASS( CLogicRegisterActivator, CLogicalEntity );
+
+	CLogicRegisterActivator();
+
+	// Input handlers
+	void InputEnable( inputdata_t &inputdata );
+	void InputDisable( inputdata_t &inputdata );
+	void InputToggle( inputdata_t &inputdata );
+
+	void InputRegisterEntity( inputdata_t &inputdata );
+
+	void InputFireRegisteredAsActivator1( inputdata_t &inputdata );
+	void InputFireRegisteredAsActivator2( inputdata_t &inputdata );
+	void InputFireRegisteredAsActivator3( inputdata_t &inputdata );
+	void InputFireRegisteredAsActivator4( inputdata_t &inputdata );
+
+	DECLARE_DATADESC();
+
+	// Outputs
+	COutputEvent m_OnRegisteredActivate1;
+	COutputEvent m_OnRegisteredActivate2;
+	COutputEvent m_OnRegisteredActivate3;
+	COutputEvent m_OnRegisteredActivate4;
+	
+private:
+
+	bool m_bDisabled;
+	EHANDLE	m_hRegisteredEntity;
+};
+
+//-----------------------------------------------------------------------------
+// Purpose: Stores an entity and uses it later for certain actions
+//-----------------------------------------------------------------------------
+
+LINK_ENTITY_TO_CLASS(logic_register_activator, CLogicRegisterActivator);
+
+BEGIN_DATADESC( CLogicRegisterActivator )
+
+	DEFINE_KEYFIELD(m_bDisabled, FIELD_BOOLEAN, "StartDisabled"),
+
+	DEFINE_FIELD( m_hRegisteredEntity, FIELD_EHANDLE ),
+
+	// Inputs
+	DEFINE_INPUTFUNC(FIELD_VOID, "Enable", InputEnable),
+	DEFINE_INPUTFUNC(FIELD_VOID, "Disable", InputDisable),
+	DEFINE_INPUTFUNC(FIELD_VOID, "Toggle", InputToggle),
+
+	DEFINE_INPUTFUNC(FIELD_VOID, "FireRegisteredAsActivator1", InputFireRegisteredAsActivator1),
+	DEFINE_INPUTFUNC(FIELD_VOID, "FireRegisteredAsActivator2", InputFireRegisteredAsActivator2),
+	DEFINE_INPUTFUNC(FIELD_VOID, "FireRegisteredAsActivator3", InputFireRegisteredAsActivator3),
+	DEFINE_INPUTFUNC(FIELD_VOID, "FireRegisteredAsActivator4", InputFireRegisteredAsActivator4),
+
+	DEFINE_INPUTFUNC(FIELD_STRING, "RegisterEntity", InputRegisterEntity),
+
+	// Outputs
+	DEFINE_OUTPUT(m_OnRegisteredActivate1, "OnRegisteredActivate1"),
+	DEFINE_OUTPUT(m_OnRegisteredActivate2, "OnRegisteredActivate2"),
+	DEFINE_OUTPUT(m_OnRegisteredActivate3, "OnRegisteredActivate3"),
+	DEFINE_OUTPUT(m_OnRegisteredActivate4, "OnRegisteredActivate4"),
+END_DATADESC()
+
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Constructor.
+//-----------------------------------------------------------------------------
+CLogicRegisterActivator::CLogicRegisterActivator(void)
+{
+}
+
+//------------------------------------------------------------------------------
+// Purpose: Register an entity - can use it later as an activator
+//------------------------------------------------------------------------------
+void CLogicRegisterActivator::InputRegisterEntity( inputdata_t &inputdata )
+{
+	m_hRegisteredEntity = gEntList.FindEntityByName( NULL, inputdata.value.String(), this, inputdata.pActivator, inputdata.pCaller );
+}
+
+//------------------------------------------------------------------------------
+// Purpose: Turns entitiy on, allowing it to fire outputs.
+//------------------------------------------------------------------------------
+void CLogicRegisterActivator::InputEnable( inputdata_t &inputdata )
+{
+	m_bDisabled = false;
+}
+
+//------------------------------------------------------------------------------
+// Purpose: Turns entity off, preventing it from firing outputs.
+//------------------------------------------------------------------------------
+void CLogicRegisterActivator::InputDisable( inputdata_t &inputdata )
+{ 
+	m_bDisabled = true;
+}
+
+
+//------------------------------------------------------------------------------
+// Purpose: Toggles the enabled/disabled state of the entity.
+//------------------------------------------------------------------------------
+void CLogicRegisterActivator::InputToggle( inputdata_t &inputdata )
+{ 
+	m_bDisabled = !m_bDisabled;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Input handler that triggers the messages.
+//-----------------------------------------------------------------------------
+void CLogicRegisterActivator::InputFireRegisteredAsActivator1( inputdata_t &inputdata )
+{
+	if (!m_bDisabled && m_hRegisteredEntity)
+	{
+		m_OnRegisteredActivate1.FireOutput( m_hRegisteredEntity.Get(), this );
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Input handler that triggers the messages.
+//-----------------------------------------------------------------------------
+void CLogicRegisterActivator::InputFireRegisteredAsActivator2( inputdata_t &inputdata )
+{
+	if (!m_bDisabled && m_hRegisteredEntity)
+	{
+		m_OnRegisteredActivate2.FireOutput( m_hRegisteredEntity.Get(), this );
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Input handler that triggers the messages.
+//-----------------------------------------------------------------------------
+void CLogicRegisterActivator::InputFireRegisteredAsActivator3( inputdata_t &inputdata )
+{
+	if (!m_bDisabled && m_hRegisteredEntity)
+	{
+		m_OnRegisteredActivate3.FireOutput( m_hRegisteredEntity.Get(), this );
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Input handler that triggers the messages.
+//-----------------------------------------------------------------------------
+void CLogicRegisterActivator::InputFireRegisteredAsActivator4( inputdata_t &inputdata )
+{
+	if (!m_bDisabled && m_hRegisteredEntity)
+	{
+		m_OnRegisteredActivate4.FireOutput( m_hRegisteredEntity.Get(), this );
+	}
+}
+
 
 
 //-----------------------------------------------------------------------------
@@ -1328,6 +1627,7 @@ void CMultiSource::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 
 	// CONSIDER: a Use input to the multisource always toggles.  Could check useType for ON/OFF/TOGGLE
 
+	Assert(i > 0);
 	m_rgTriggered[i-1] ^= 1;
 
 	// 
@@ -1437,6 +1737,8 @@ private:
 	void InputMultiply( inputdata_t &inputdata );
 	void InputSetValue( inputdata_t &inputdata );
 	void InputSetValueNoFire( inputdata_t &inputdata );
+	void InputSetMaxValueNoFire( inputdata_t &inputdata );
+	void InputSetMinValueNoFire( inputdata_t &inputdata );
 	void InputSubtract( inputdata_t &inputdata );
 	void InputSetHitMax( inputdata_t &inputdata );
 	void InputSetHitMin( inputdata_t &inputdata );
@@ -1475,6 +1777,8 @@ BEGIN_DATADESC( CMathCounter )
 	DEFINE_INPUTFUNC(FIELD_FLOAT, "Multiply", InputMultiply),
 	DEFINE_INPUTFUNC(FIELD_FLOAT, "SetValue", InputSetValue),
 	DEFINE_INPUTFUNC(FIELD_FLOAT, "SetValueNoFire", InputSetValueNoFire),
+	DEFINE_INPUTFUNC(FIELD_FLOAT, "SetMaxValueNoFire", InputSetMaxValueNoFire),
+	DEFINE_INPUTFUNC(FIELD_FLOAT, "SetMinValueNoFire", InputSetMinValueNoFire),
 	DEFINE_INPUTFUNC(FIELD_FLOAT, "Subtract", InputSubtract),
 	DEFINE_INPUTFUNC(FIELD_FLOAT, "SetHitMax", InputSetHitMax),
 	DEFINE_INPUTFUNC(FIELD_FLOAT, "SetHitMin", InputSetHitMin),
@@ -1701,6 +2005,65 @@ void CMathCounter::InputSetValueNoFire( inputdata_t &inputdata )
 
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Input handler for updating the MAX value.
+// Input  : Float value to set.
+//-----------------------------------------------------------------------------
+void CMathCounter::InputSetMaxValueNoFire( inputdata_t &inputdata )
+{
+	if( m_bDisabled )
+	{
+		DevMsg("Math Counter %s ignoring SETMAXVALUENOFIRE because it is disabled\n", GetDebugName() );
+		return;
+	}
+
+	float flNewValue = inputdata.value.Float();
+	if ( flNewValue < m_flMin )
+	{
+		DevMsg("Math Counter %s ignoring SETMAXVALUENOFIRE because the value is less than the Minimum Value!\n", GetDebugName() );
+		return;
+	}
+
+	m_flMax = flNewValue;
+
+	float flCurValue = m_OutValue.Get();
+	if (( m_flMin != 0 ) || (m_flMax != 0 ))
+	{
+		flCurValue = clamp(flCurValue, m_flMin, m_flMax);
+	}
+
+	m_OutValue.Init( flCurValue );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Input handler for updating the MAX value.
+// Input  : Float value to set.
+//-----------------------------------------------------------------------------
+void CMathCounter::InputSetMinValueNoFire( inputdata_t &inputdata )
+{
+	if( m_bDisabled )
+	{
+		DevMsg("Math Counter %s ignoring SETMINVALUENOFIRE because it is disabled\n", GetDebugName() );
+		return;
+	}
+
+	float flNewValue = inputdata.value.Float();
+	if ( flNewValue > m_flMax )
+	{
+		DevMsg("Math Counter %s ignoring SETMINVALUENOFIRE because the value is greater than the Maximum Value!\n", GetDebugName() );
+		return;
+	}
+
+	m_flMin = flNewValue;
+
+	float flCurValue = m_OutValue.Get();
+	if (( m_flMin != 0 ) || (m_flMax != 0 ))
+	{
+		flCurValue = clamp(flCurValue, m_flMin, m_flMax);
+	}
+
+	m_OutValue.Init( flCurValue );
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: Input handler for subtracting from the current value.
@@ -2443,6 +2806,9 @@ void CLogicAutosave::InputSave( inputdata_t &inputdata )
 void CLogicAutosave::InputSaveDangerous( inputdata_t &inputdata )
 {
 	CBasePlayer *pPlayer = UTIL_PlayerByIndex( 1 );
+
+	if ( !pPlayer ) 
+		return;
 
 	if ( g_ServerGameDLL.m_fAutoSaveDangerousTime != 0.0f && g_ServerGameDLL.m_fAutoSaveDangerousTime >= gpGlobals->curtime )
 	{
