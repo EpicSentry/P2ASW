@@ -2335,33 +2335,33 @@ void CPortal_Player::SetupVisibility( CBaseEntity *pViewEntity, unsigned char *p
 	PortalSetupVisibility( this, area, pvs, pvssize );
 }
 
+extern CBaseEntity *GetCoopSpawnLocation( int iTeam ); //in info_coop_spawn.cpp
 
 CBaseEntity* CPortal_Player::EntSelectSpawnPoint( void )
 {
+	if ( !g_pGameRules->IsMultiplayer() )
+	{
+		return BaseClass::EntSelectSpawnPoint();
+	}
+
+	if( g_pGameRules->IsCoOp() )
+	{
+		switch( GetTeamNumber() )
+		{
+		case TEAM_UNASSIGNED:
+		//case TEAM_SPECTATOR:
+			PickTeam();
+		}
+
+		CBaseEntity *pSpawnLocation = GetCoopSpawnLocation( GetTeamNumber() );
+		Msg("TEAM NUMBER: %i\n", this->GetTeamNumber());
+		if( pSpawnLocation )
+			return pSpawnLocation;
+	}
+
 	CBaseEntity *pSpot = NULL;
 	CBaseEntity *pLastSpawnPoint = g_pLastSpawn;
-	edict_t		*player = edict();
 	const char *pSpawnpointName = "info_player_start";
-
-	/*if ( HL2MPRules()->IsTeamplay() == true )
-	{
-	if ( GetTeamNumber() == TEAM_COMBINE )
-	{
-	pSpawnpointName = "info_player_combine";
-	pLastSpawnPoint = g_pLastCombineSpawn;
-	}
-	else if ( GetTeamNumber() == TEAM_REBELS )
-	{
-	pSpawnpointName = "info_player_rebel";
-	pLastSpawnPoint = g_pLastRebelSpawn;
-	}
-
-	if ( gEntList.FindEntityByClassname( NULL, pSpawnpointName ) == NULL )
-	{
-	pSpawnpointName = "info_player_deathmatch";
-	pLastSpawnPoint = g_pLastSpawn;
-	}
-	}*/
 
 	pSpot = pLastSpawnPoint;
 	// Randomize the start spot
@@ -2372,7 +2372,7 @@ CBaseEntity* CPortal_Player::EntSelectSpawnPoint( void )
 
 	CBaseEntity *pFirstSpot = pSpot;
 
-	do 
+	do
 	{
 		if ( pSpot )
 		{
@@ -2393,7 +2393,9 @@ CBaseEntity* CPortal_Player::EntSelectSpawnPoint( void )
 		pSpot = gEntList.FindEntityByClassname( pSpot, pSpawnpointName );
 	} while ( pSpot != pFirstSpot ); // loop if we're not back to the start
 
+#if 0
 	// we haven't found a place to spawn yet,  so kill any guy at the first spawn point and spawn there
+	edict_t		*player = edict();
 	if ( pSpot )
 	{
 		CBaseEntity *ent = NULL;
@@ -2405,6 +2407,7 @@ CBaseEntity* CPortal_Player::EntSelectSpawnPoint( void )
 		}
 		goto ReturnSpot;
 	}
+#endif // 0
 
 	if ( !pSpot  )
 	{
@@ -2415,18 +2418,6 @@ CBaseEntity* CPortal_Player::EntSelectSpawnPoint( void )
 	}
 
 ReturnSpot:
-
-	/*if ( HL2MPRules()->IsTeamplay() == true )
-	{
-	if ( GetTeamNumber() == TEAM_COMBINE )
-	{
-	g_pLastCombineSpawn = pSpot;
-	}
-	else if ( GetTeamNumber() == TEAM_REBELS ) 
-	{
-	g_pLastRebelSpawn = pSpot;
-	}
-	}*/
 
 	g_pLastSpawn = pSpot;
 
