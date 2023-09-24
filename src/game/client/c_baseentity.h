@@ -1157,6 +1157,10 @@ public:
 	static void						PrefetchSound( const char *name );
 	void							Remove( ); // UTIL_Remove( this );
 
+#ifdef PORTAL2
+	const char						*GetSignifierName( void );
+#endif // PORTAL2
+
 
 
 public:
@@ -1673,8 +1677,10 @@ private:
 	EHANDLE							m_hGroundEntity;
 
 	char							m_iName[MAX_PATH];
-
-
+	
+#ifdef PORTAL2
+	char							m_iSignifierName[MAX_PATH];
+#endif // PORTAL2
 
 public:
 	// Object model index
@@ -2618,7 +2624,12 @@ inline const char *C_BaseEntity::GetEntityName()
 	return m_iName; 
 }
 
-
+#ifdef PORTAL2
+inline const char *C_BaseEntity::GetSignifierName()
+{
+	return m_iSignifierName;
+}
+#endif // PORTAL2
 
 class CAbsQueryScopeGuard
 {

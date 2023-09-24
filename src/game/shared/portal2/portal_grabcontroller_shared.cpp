@@ -1300,7 +1300,6 @@ bool CPlayerPickupController::Shutdown( bool bThrown )
 
 	if ( pOwner )
 	{
-		Msg("Shutdown Player Pickup!\n");
 		pOwner->SetUseEntity( NULL );
 		if ( !pOwner->m_bSilentDropAndPickup )
 		{
@@ -1759,7 +1758,7 @@ bool CGrabController::UpdateObject( CBasePlayer *pPlayer, float flError, bool bI
 
 
 	float flTraceDist = distance * tr.fraction;
-	Msg("flTraceDist %f", flTraceDist);
+	//Msg("flTraceDist %f", flTraceDist);
 	if ( flTraceDist < radius )
 		flTraceDist = radius;
 

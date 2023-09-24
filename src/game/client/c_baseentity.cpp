@@ -565,8 +565,10 @@ BEGIN_RECV_TABLE_NOBASE(C_BaseEntity, DT_BaseEntity)
 	RecvPropInt( RECVINFO( m_iParentAttachment ) ),
 
 	RecvPropString( RECVINFO( m_iName ) ),
-
-
+	
+#if defined ( PORTAL2 )
+	RecvPropString( RECVINFO( m_iSignifierName ) ),
+#endif
 
 	RecvPropInt( "movetype", 0, SIZEOF_IGNORE, 0, RecvProxy_MoveType ),
 	RecvPropInt( "movecollide", 0, SIZEOF_IGNORE, 0, RecvProxy_MoveCollide ),

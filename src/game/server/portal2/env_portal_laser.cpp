@@ -9,13 +9,13 @@
 
 
 // constants
-const int CEnvPortalLaser::FLOOR_TURRET_PORTAL_EYE_ATTACHMENT = 1;
-const float CEnvPortalLaser::FLOOR_TURRET_PORTAL_LASER_RANGE = 8192;
-const char* CEnvPortalLaser::LASER_ATTACHMENT_NAME = "laser_attachment";
-const float CEnvPortalLaser::FLOOR_TURRET_PORTAL_END_POINT_PULSE_SCALE = 4.0f;
-const int CEnvPortalLaser::FLOOR_TURRET_PORTAL_LASER_ATTACHMENT = 1;
+const int CPortalLaser::FLOOR_TURRET_PORTAL_EYE_ATTACHMENT = 1;
+const float CPortalLaser::FLOOR_TURRET_PORTAL_LASER_RANGE = 8192;
+const char* CPortalLaser::LASER_ATTACHMENT_NAME = "laser_attachment";
+const float CPortalLaser::FLOOR_TURRET_PORTAL_END_POINT_PULSE_SCALE = 4.0f;
+const int CPortalLaser::FLOOR_TURRET_PORTAL_LASER_ATTACHMENT = 1;
 
-BEGIN_DATADESC(CEnvPortalLaser)
+BEGIN_DATADESC(CPortalLaser)
 DEFINE_KEYFIELD(m_modelName, FIELD_STRING, "model"),
 DEFINE_KEYFIELD(m_bStartOff, FIELD_BOOLEAN, "StartState"),
 DEFINE_INPUTFUNC(FIELD_VOID, "TurnOn", InputTurnOn),
@@ -24,7 +24,7 @@ DEFINE_INPUTFUNC(FIELD_VOID, "Toggle", InputToggle),
 //DEFINE_FIELD(m_bIsHittingPortal, FIELD_BOOLEAN),
 END_DATADESC()
 /*
-IMPLEMENT_SERVERCLASS_ST(CEnvPortalLaser, DT_EnvPortalLaser)
+IMPLEMENT_SERVERCLASS_ST(CPortalLaser, DT_EnvPortalLaser)
 
 SendPropBool(SENDINFO(m_bIsHittingPortal)),
 SendPropVector(SENDINFO(v_vHitPos)),
@@ -34,9 +34,7 @@ SendPropVector(SENDINFO(vecNetMuzzleDir)),
 END_SEND_TABLE()
 */
 
-CHandle<CBeam> m_hCubeBeam;
-
-void CEnvPortalLaser::Think()
+void CPortalLaser::Think()
 {
 	// Schedule the next think
 	SetNextThink(gpGlobals->curtime + 0.1f);
@@ -62,7 +60,7 @@ void RotateVector(Vector& vec, const QAngle& angles) {
 }
 
 float m_flLastDamageTime = 0.0f;
-void CEnvPortalLaser::UpdateLaser()
+void CPortalLaser::UpdateLaser()
 {
 	Vector vecOrigin = GetAbsOrigin(); 
 	QAngle angMuzzleDir;
@@ -206,7 +204,7 @@ void CEnvPortalLaser::UpdateLaser()
 	g_pEffects->Sparks(vEndPoint, 2, 2, &vecMuzzleDir);
 }
 
-void CEnvPortalLaser::DoTraceFromPortal(CProp_Portal* pRemotePortal)
+void CPortalLaser::DoTraceFromPortal(CProp_Portal* pRemotePortal)
 {
 	if (!pRemotePortal)
 		return;
@@ -284,7 +282,7 @@ void CEnvPortalLaser::DoTraceFromPortal(CProp_Portal* pRemotePortal)
 }
 
 
-void CEnvPortalLaser::Spawn(void)
+void CPortalLaser::Spawn(void)
 {
 	//Msg("Laser Init\n");
 	Precache();
@@ -314,13 +312,13 @@ void CEnvPortalLaser::Spawn(void)
 	}
 
 
-	SetThink(&CEnvPortalLaser::Think);
+	SetThink(&CPortalLaser::Think);
 	SetNextThink(gpGlobals->curtime + 0.1f);
 
 	BaseClass::Spawn();
 }
 
-void CEnvPortalLaser::Precache(void)
+void CPortalLaser::Precache(void)
 {
 	Msg("Laser Precache\n");
 	// Precache the model using the stored model path
@@ -328,7 +326,7 @@ void CEnvPortalLaser::Precache(void)
 	PrecacheModel("models/props/laser_emitter_center.mdl");
 }
 
-void CEnvPortalLaser::LaserOff(void)
+void CPortalLaser::LaserOff(void)
 {
 	m_bLaserOn = false;
 	Msg("Laser Deactivating\n");
@@ -338,7 +336,7 @@ void CEnvPortalLaser::LaserOff(void)
 	}
 }
 //start laseron
-void CEnvPortalLaser::LaserOn(void)
+void CPortalLaser::LaserOn(void)
 {
 	m_bLaserOn = true;
 	Msg("Laser Activating\n");
@@ -424,19 +422,19 @@ void CEnvPortalLaser::LaserOn(void)
 //Hammer entity options
 //this section controls the numerous values this entity can have in hammer
 //----------------------------------------------------------------------------
-void CEnvPortalLaser::InputTurnOn(inputdata_t& inputData)
+void CPortalLaser::InputTurnOn(inputdata_t& inputData)
 {
 	if (!m_bLaserOn)
 		LaserOn();
 }
 
-void CEnvPortalLaser::InputTurnOff(inputdata_t& inputData)
+void CPortalLaser::InputTurnOff(inputdata_t& inputData)
 {
 	if (m_bLaserOn)
 		LaserOff();
 }
 
-void CEnvPortalLaser::InputToggle(inputdata_t& inputData)
+void CPortalLaser::InputToggle(inputdata_t& inputData)
 {
 	if (m_bLaserOn)
 		LaserOff();
@@ -445,24 +443,24 @@ void CEnvPortalLaser::InputToggle(inputdata_t& inputData)
 }
 
 // Misc
-float CEnvPortalLaser::LaserEndPointSize(void)
+float CPortalLaser::LaserEndPointSize(void)
 {
 	return ((MAX(0.0f, sinf(gpGlobals->curtime * M_PI + m_fPulseOffset))) * FLOOR_TURRET_PORTAL_END_POINT_PULSE_SCALE + 3.0f) * 1.5f;
 }
 
-bool CEnvPortalLaser::IsLaserHittingCube()
+bool CPortalLaser::IsLaserHittingCube()
 {
 	return m_bIsLaserHittingCube;
 }
 
-bool CEnvPortalLaser::IsLaserHittingCatcher()
+bool CPortalLaser::IsLaserHittingCatcher()
 {
 	return m_bIsLaserHittingCatcher;
 }
 
-bool CEnvPortalLaser::IsLaserHittingPortalCatcher()
+bool CPortalLaser::IsLaserHittingPortalCatcher()
 {
 	return m_bIsLaserHittingPortalCatcher;
 }
 
-LINK_ENTITY_TO_CLASS(env_portal_laser, CEnvPortalLaser);
+LINK_ENTITY_TO_CLASS(env_portal_laser, CPortalLaser);

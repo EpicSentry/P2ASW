@@ -1,58 +1,14 @@
 #include "cbase.h"
 #include "env_portal_laser.h"
+#include "point_laser_target.h"
 #include "particle_parse.h"
 #include "prop_weighted_cube.h"
 
-class CPropLaserCatcher : public CBaseAnimating
-{
-	DECLARE_CLASS(CPropLaserCatcher, CBaseAnimating);
-public:
-	DECLARE_DATADESC();
-
-	// Constructor
-	CPropLaserCatcher();
-
-	// Precache the resources used by the entity
-	void Precache() override;
-
-	// Initialize the entity
-	void Spawn() override;
-
-	void CheckLaserHitCatcher();
-
-	void Think();
-
-	void OnPowered();
-
-	void OnUnpowered();
-
-	// Add more member functions and variables as needed.
-
-private:
-	// Member variable to store the model path
-	string_t m_iszModel;
-
-	// Member variable to store the skin type
-	int m_iSkinType;
-
-	// Outputs
-	COutputEvent m_OnPowered;
-	COutputEvent m_OnUnpowered;
-	bool m_bHasFiredPowered;
-	bool m_bHasFiredUnpowered;
-
-	bool m_bIsActive;
-
-	CSoundPatch *m_pPowerOnSound;
-	CSoundPatch *m_pPowerLoopSound;
-	CSoundPatch *m_pPowerOffSound;
-};
-
 // Link the entity to the class name in Hammer
-LINK_ENTITY_TO_CLASS(prop_laser_catcher, CPropLaserCatcher);
+LINK_ENTITY_TO_CLASS(prop_laser_catcher, CLaserCatcher);
 
 // Start of the data description for the entity
-BEGIN_DATADESC(CPropLaserCatcher)
+BEGIN_DATADESC(CLaserCatcher)
 
 
 // Define the "model" keyvalue property
@@ -64,7 +20,7 @@ DEFINE_OUTPUT(m_OnPowered, "OnPowered"),
 DEFINE_OUTPUT(m_OnUnpowered, "OnUnpowered"),
 END_DATADESC()
 
-CPropLaserCatcher::CPropLaserCatcher()
+CLaserCatcher::CLaserCatcher()
 {
 	// Set the default model path if the "model" property is not set
 	if (m_iszModel == NULL_STRING)
@@ -79,7 +35,7 @@ CPropLaserCatcher::CPropLaserCatcher()
 	}
 }
 
-void CPropLaserCatcher::Precache()
+void CLaserCatcher::Precache()
 {
 	// Precache the model resource
 	//PrecacheModel("models/props/laser_catcher_center.mdl"); // Add the custom model here
@@ -92,7 +48,7 @@ void CPropLaserCatcher::Precache()
 	PrecacheParticleSystem("laser_relay_powered");
 }
 
-void CPropLaserCatcher::Spawn()
+void CLaserCatcher::Spawn()
 {
 	// Add entity spawning code here, such as model setting, physics properties, etc.
 	Precache();
@@ -121,11 +77,11 @@ void CPropLaserCatcher::Spawn()
 	}
 
 	//Begin checking for the laser
-	SetThink(&CPropLaserCatcher::Think);
+	SetThink(&CLaserCatcher::Think);
 	SetNextThink(gpGlobals->curtime + 0.1f);
 }
 
-void CPropLaserCatcher::Think()
+void CLaserCatcher::Think()
 {
 	// Call the function to check if the main beam is hitting the cube.
 	CheckLaserHitCatcher();
@@ -140,11 +96,11 @@ void CPropLaserCatcher::Think()
 	SetNextThink(gpGlobals->curtime + 0.1f);
 }
 
-void CPropLaserCatcher::CheckLaserHitCatcher()
+void CLaserCatcher::CheckLaserHitCatcher()
 {
 	// Find the first env_portal_laser entity in the map
-	CEnvPortalLaser* pLaser = nullptr;
-	pLaser = dynamic_cast<CEnvPortalLaser*>(gEntList.FindEntityByClassname(pLaser, "env_portal_laser")); // Separate the assignment from the condition
+	CPortalLaser* pLaser = NULL;
+	pLaser = dynamic_cast<CPortalLaser*>(gEntList.FindEntityByClassname(pLaser, "env_portal_laser")); // Separate the assignment from the condition
 
 	while (pLaser)
 	{
@@ -157,11 +113,11 @@ void CPropLaserCatcher::CheckLaserHitCatcher()
 		}
 		*/
 		// Get the next laser entity in the map
-		pLaser = dynamic_cast<CEnvPortalLaser*>(gEntList.FindEntityByClassname(pLaser, "env_portal_laser"));
+		pLaser = dynamic_cast<CPortalLaser*>(gEntList.FindEntityByClassname(pLaser, "env_portal_laser"));
 	}
 
 	// Find the first prop_weighted_cube entity with the specified model
-	CPropWeightedCube* pCube = nullptr;
+	CPropWeightedCube* pCube = NULL;
 	pCube = dynamic_cast<CPropWeightedCube*>(gEntList.FindEntityByClassname(pCube, "prop_weighted_cube")); // Separate the assignment from the condition
 
 	while (pCube)
@@ -184,7 +140,7 @@ void CPropLaserCatcher::CheckLaserHitCatcher()
 
 
 
-void CPropLaserCatcher::OnPowered()
+void CLaserCatcher::OnPowered()
 {
 	//Msg("OnPowered called\n");
 	// Check if the m_bHasFiredPowered is false, if so run the below code
@@ -204,11 +160,11 @@ void CPropLaserCatcher::OnPowered()
 		EmitSound("prop_laser_catcher.poweron");
 		EmitSound("prop_laser_catcher.powerloop");
 		// Dispatch particle effect
-		DispatchParticleEffect("laser_relay_powered", PATTACH_POINT_FOLLOW, this, "particle_emitter", false, -1, nullptr);
+		DispatchParticleEffect("laser_relay_powered", PATTACH_POINT_FOLLOW, this, "particle_emitter", false, -1, NULL);
 	}
 }
 
-void CPropLaserCatcher::OnUnpowered()
+void CLaserCatcher::OnUnpowered()
 {
 	//Msg("OnUnpowered called\n");
 	// Check if m_bHasFiredUnpowered is false, if so run the below code

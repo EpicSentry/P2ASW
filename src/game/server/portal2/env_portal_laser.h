@@ -5,10 +5,10 @@
 #include "beam_shared.h"
 #include "baseanimating.h"
 
-class CEnvPortalLaser : public CBaseAnimating // Inherit from CBaseAnimating for proper studio model support
+class CPortalLaser : public CBaseAnimating // Inherit from CBaseAnimating for proper studio model support
 {
 public:
-	DECLARE_CLASS(CEnvPortalLaser, CBaseAnimating);
+	DECLARE_CLASS(CPortalLaser, CBaseAnimating);
 	DECLARE_DATADESC();
 	//DECLARE_SERVERCLASS();
 
@@ -63,6 +63,9 @@ private:
 	static const float FLOOR_TURRET_PORTAL_END_POINT_PULSE_SCALE;
 	// Cube instances
 	string_t m_cubeUniqueID;
+	
+	CHandle<CBeam> m_hCubeBeam;
+
 };
 
 #endif // ENV_PORTAL_LASER_H

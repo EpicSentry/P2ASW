@@ -838,9 +838,12 @@ bool IsHeadTrackingEnabled();
 // If this is defined, all of the scopeguard objects are NULL'd out to reduce overhead
 // #define SPLIT_SCREEN_STUBS
 
-
+// We may need splitscreen support in coop for personal testing - Wonderland_War
+#if defined ( PORTAL2 )
+	#define MAX_SPLITSCREEN_PLAYERS 2
+#else
 	#define MAX_SPLITSCREEN_PLAYERS 1
-
+#endif
 
 inline bool IsSplitScreenSupported()
 {

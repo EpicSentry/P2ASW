@@ -32,6 +32,8 @@ int ScreenTransform( const Vector& point, Vector& screen );
 
 extern ConVar r_updaterefracttexture;
 extern int g_viewscene_refractUpdateFrame;
+extern int g_nCurrentPortalRender;
+extern int g_nRefractUpdatePortalRender;
 extern bool g_bAllowMultipleRefractUpdatesPerScenePerFrame;
 bool DrawingShadowDepthView( void );
 
@@ -44,7 +46,11 @@ inline void UpdateRefractTexture( int x, int y, int w, int h, bool bForceUpdate 
 
 	CMatRenderContextPtr pRenderContext( materials );
 	ITexture *pTexture = GetPowerOfTwoFrameBufferTexture();
-	if ( IsPC() || bForceUpdate || g_bAllowMultipleRefractUpdatesPerScenePerFrame || (gpGlobals->framecount != g_viewscene_refractUpdateFrame) )
+#ifdef PORTAL2
+	if ( IsPC() || bForceUpdate || g_bAllowMultipleRefractUpdatesPerScenePerFrame || ( gpGlobals->framecount != g_viewscene_refractUpdateFrame ) || ( g_nRefractUpdatePortalRender != g_nCurrentPortalRender ) )
+#else
+	if ( IsPC() || bForceUpdate || g_bAllowMultipleRefractUpdatesPerScenePerFrame || ( gpGlobals->framecount != g_viewscene_refractUpdateFrame ) )
+#endif
 	{
 		// forced or only once per frame 
 		Rect_t rect;
@@ -53,6 +59,10 @@ inline void UpdateRefractTexture( int x, int y, int w, int h, bool bForceUpdate 
 		rect.width = w;
 		rect.height = h;
 		pRenderContext->CopyRenderTargetToTextureEx( pTexture, 0, &rect, NULL );
+		
+#ifdef PORTAL2
+		g_nRefractUpdatePortalRender = g_nCurrentPortalRender;
+#endif
 
 		g_viewscene_refractUpdateFrame = gpGlobals->framecount;
 	}
