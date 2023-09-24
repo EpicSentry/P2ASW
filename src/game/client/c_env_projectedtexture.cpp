@@ -1,4 +1,4 @@
-//====== Copyright © 1996-2003, Valve Corporation, All rights reserved. =======
+//====== Copyright Â© 1996-2003, Valve Corporation, All rights reserved. =======
 //
 // Purpose: 
 //
@@ -45,6 +45,7 @@ IMPLEMENT_CLIENTCLASS_DT(C_EnvProjectedTexture, DT_EnvProjectedTexture, CEnvProj
 		RecvPropInt(RECVINFO(m_nShadowQuality)),
 		RecvPropFloat(RECVINFO(m_flProjectionSize)),
 		RecvPropFloat(RECVINFO(m_flRotation)),
+		RecvPropInt(RECVINFO(m_iStyle)),
 END_RECV_TABLE()
 
 C_EnvProjectedTexture *C_EnvProjectedTexture::Create()
