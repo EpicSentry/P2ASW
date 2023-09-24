@@ -79,6 +79,7 @@ IMPLEMENT_SERVERCLASS_ST(CEnvProjectedTexture, DT_EnvProjectedTexture)
 		SendPropInt(SENDINFO(m_nShadowQuality), 1, SPROP_UNSIGNED),  // Just one bit for now
 		SendPropFloat(SENDINFO(m_flProjectionSize)),
 		SendPropFloat(SENDINFO(m_flRotation)),
+		SendPropInt( SENDINFO( m_iStyle ) ),
 END_SEND_TABLE()
 
 //-----------------------------------------------------------------------------
