@@ -278,6 +278,17 @@ extern ConVar sv_turbophysics;
 
 extern float IntervalDistance( float x, float x0, float x1 );
 
+//----------------------------------------------------
+// Clear UI for both clients - useful on transitions
+//----------------------------------------------------
+void ClearClientUI()
+{
+	CReliableBroadcastRecipientFilter filter;
+	filter.AddAllPlayers();
+	UserMessageBegin( filter, "ChallengeModeCloseAllUI" );
+	MessageEnd();
+}
+
 //disable 'this' : used in base member initializer list
 #pragma warning( disable : 4355 )
 
@@ -518,9 +529,49 @@ void CPortal_Player::NotifySystemEvent(CBaseEntity *pNotify, notify_system_event
 	BaseClass::NotifySystemEvent( pNotify, eventType, params );
 }
 
+void CPortal_Player::OnSave( IEntitySaveUtils *pUtils )
+{
+	char const *pchSaveFile = engine->GetSaveFileName();
+	bool bIsQuicksave = V_stricmp( pchSaveFile, "SAVE\\quick.sav" ) == 0;
+	bool bIsAutosave = V_stricmp( pchSaveFile, "SAVE\\autosave.sav" ) == 0 || V_stricmp( pchSaveFile, "SAVE\\autosavedangerous.sav" ) == 0;
+	if ( bIsAutosave || bIsQuicksave )
+	{
+		IGameEvent *event = gameeventmanager->CreateEvent( bIsQuicksave ? "quicksave" : "autosave" );
+		if ( event )
+		{
+			gameeventmanager->FireEvent( event );
+		}
+	}
+
+	BaseClass::OnSave( pUtils );
+}
+
 void CPortal_Player::OnRestore( void )
 {
 	BaseClass::OnRestore();
+	// HACK: Designers have added the ability to override the type of grabcontroller...
+	// these changes go across transitions if somebody forgets to change it back to default
+	// and are generating bugs. By request, we're reverting the state to default after
+	// each level transition in case some entity io fails to change it back.
+	if ( gpGlobals->eLoadType == MapLoad_Transition )
+	{
+		SetForcedGrabControllerType( FORCE_GRAB_CONTROLLER_DEFAULT );
+	}
+
+	// Saving is not allowed and they loaded from a save.  Kill the player to prevent
+	// bogus score in challenge mode.
+
+	if ( GetBonusChallenge() != 0 )
+	{
+		// Make sure god mode is off
+		RemoveFlag( FL_GODMODE );
+		// Murder
+		CTakeDamageInfo info(NULL, this, FLT_MAX, 0 );
+		TakeDamage( info );
+
+		// Force cheats on to make sure their score won't get recorded
+		sv_cheats->SetValue( true );
+	}
 }
 
 //bool CPortal_Player::StartObserverMode( int mode )
@@ -1608,12 +1659,336 @@ void CPortal_Player::PlayerRunCommand(CUserCmd *ucmd, IMoveHelper *moveHelper)
 	BaseClass::PlayerRunCommand( ucmd, moveHelper );
 }
 
-
+//-----------------------------------------------------------------------------
+// Purpose: Deal with command coming in from the client-side (TODO: Uncomment the intermediate code when they are implemented) - Nano
+//-----------------------------------------------------------------------------
 bool CPortal_Player::ClientCommand( const CCommand &args )
 {
-	if ( FStrEq( args[0], "spectate" ) )
+	const char *pcmd = args[0];
+	if ( FStrEq( pcmd, "taunt" ) )
 	{
-		// do nothing.
+		if ( args.ArgC() > 1 )
+		{
+			//Taunt( args[1] );
+		}
+		else
+		{
+			//Taunt();
+		}
+		return true;
+	}
+	else if ( FStrEq( pcmd, "taunt_auto" ) )
+	{
+		if ( args.ArgC() > 1 )
+		{
+			//Taunt( args[1], true );
+		}
+
+		return true;
+	}
+	else if ( FStrEq( pcmd, "spectate" ) )
+	{
+		if( CommandLine()->FindParm( "-allowspectators" ) == NULL )
+		{
+			// do nothing
+			return true;
+		}
+	}
+	else if ( FStrEq( pcmd, "end_movie" ) )
+	{
+		if ( args.ArgC() == 2 )
+		{
+			const char *target = STRING( AllocPooledString( args[1] ) );
+			const char *action = "__MovieFinished";
+			variant_t value;
+
+			g_EventQueue.AddEvent( target, action, value, 0, this, this );
+		}
+	}
+	else if ( FStrEq( pcmd, "signify" ) )
+	{
+		// Verify our argument count
+		if ( args.ArgC() != 10 )
+		{
+			Assert(args.ArgC() != 10);
+			Msg("Ill-formed signify command from client!\n");
+			return true;
+		}
+
+		// Now, pull the pieces out of the string
+		const char *lpszCommand = args[1];
+		int nIndex = V_atoi( args[2] );
+
+		float fDelay = V_atof( args[3] );
+
+		Vector vPosition;
+		vPosition.x = V_atof( args[4] );
+		vPosition.y = V_atof( args[5] );
+		vPosition.z = V_atof( args[6] );
+
+		Vector vNormal;
+		vNormal.x = V_atof( args[7] );
+		vNormal.y = V_atof( args[8] );
+		vNormal.z = V_atof( args[9] );
+
+		// Now send the message on to the client
+		CReliableBroadcastRecipientFilter player;
+		player.AddAllPlayers();
+
+		if ( fDelay <= 0.0f )
+		{
+			player.RemoveRecipient( this );	// Remove us because we already predicted the results
+		}
+
+		CBaseEntity *pTargetEnt = ( nIndex != -1 ) ? UTIL_EntityByIndex( nIndex ) : NULL;
+
+		UserMessageBegin( player, "AddLocator" );
+			WRITE_SHORT( entindex() );
+			WRITE_EHANDLE( pTargetEnt );
+			WRITE_FLOAT( gpGlobals->curtime + fDelay );
+			WRITE_VEC3COORD( vPosition );
+			WRITE_VEC3NORMAL( vNormal );
+			WRITE_STRING( lpszCommand );
+		MessageEnd();
+
+		IGameEvent *event = gameeventmanager->CreateEvent( "portal_player_ping" );
+		if ( event )
+		{
+			Vector vecSpot = vPosition;
+			if ( pTargetEnt )
+				vecSpot = pTargetEnt->GetAbsOrigin();
+
+			event->SetInt("userid", GetUserID() );
+			event->SetFloat("ping_x", vecSpot.x );
+			event->SetFloat("ping_y", vecSpot.y );
+			event->SetFloat("ping_z", vecSpot.z );
+			gameeventmanager->FireEvent( event );
+		}
+
+		// Denote that we're pointing
+		m_Shared.AddCond( PORTAL_COND_POINTING, 1.0f );
+
+		return true;
+	}
+	else if ( StringHasPrefix( pcmd, "CoopPingTool" ) )
+	{
+		CBaseEntity *pEntity = gEntList.FindEntityByName( NULL, "@glados" );
+		if ( pEntity )
+		{
+			if ( StringHasPrefix( args.GetCommandString(), "CoopPingTool (" ) )
+			{
+				pEntity->RunScript( args.GetCommandString(), "PingToolCommand" );
+			}
+		}
+		return true;
+	}
+	else if ( FStrEq( pcmd, "survey_done" ) )
+	{
+		//int nIndex = V_atoi( args[1] );
+		//CPointSurvey *pPointSurveyEnt = ( nIndex != -1 ) ? (CPointSurvey*)UTIL_EntityByIndex( nIndex ) : NULL;
+		//if ( pPointSurveyEnt )
+		//{
+		//	pPointSurveyEnt->OnSurveyCompleted();
+		//}
+		return true;
+	}
+	else if ( FStrEq( pcmd, "load_recent_checkpoint" ) )
+	{
+		if ( !PortalMPGameRules() )
+		{
+			//RespawnPlayer();
+		}
+	}
+	else if ( FStrEq( pcmd, "pre_go_to_hub" ) )
+	{
+		// Play transition video
+		for( int i = 1; i <= gpGlobals->maxClients; ++i )
+		{
+			CBasePlayer *pToPlayer = UTIL_PlayerByIndex( i );
+			if ( pToPlayer && !pToPlayer->IsSplitScreenPlayer() )
+			{
+				engine->ClientCommand( pToPlayer->edict(), "stopvideos" );
+				engine->ClientCommand( pToPlayer->edict(), "playvideo_end_level_transition coop_bots_load 1" );
+			}
+		}
+
+		return true;
+	}
+	else if ( FStrEq( pcmd, "go_to_hub" ) )
+	{
+		if ( PortalMPGameRules() )
+		{
+			PortalMPGameRules()->SaveMPStats();
+		}
+
+		bool bBothPlayersHaveDLC = true;
+
+		//if ( IsGameConsole() )
+		//{
+		//	IMatchSession *pIMatchSession = g_pMatchFramework->GetMatchSession();
+		//	if ( pIMatchSession )
+		//	{
+		//		KeyValues *pFullSettings = pIMatchSession->GetSessionSettings();
+		//		if ( pFullSettings )
+		//		{
+		//			if ( !( ( pFullSettings->GetUint64( "members/machine0/dlcmask" ) & PORTAL2_DLCID_RETAIL_DLC1 ) &&
+		//				( XBX_GetNumGameUsers() > 1 ||
+		//				( pFullSettings->GetUint64( "members/machine1/dlcmask" ) & PORTAL2_DLCID_RETAIL_DLC1 ) ) ) )
+		//			{
+		//				bBothPlayersHaveDLC = false;
+		//			}
+		//		}
+		//	}
+		//}
+
+		// clear out any outstanding UI for both players
+		ClearClientUI();
+
+		if ( bBothPlayersHaveDLC )
+		{
+			// They have the DLC!
+			engine->ChangeLevel( "mp_coop_lobby_3", NULL );
+		}
+		else
+		{
+			// One is missing the DLC! Go to the old hub
+			engine->ChangeLevel( "mp_coop_lobby_2", NULL );
+		}
+		return true;
+	}
+	else if ( FStrEq( pcmd, "mp_restart_level" ) )
+	{
+		if ( PortalMPGameRules() )
+		{
+			PortalMPGameRules()->SaveMPStats();
+		}
+
+		// clear out any outstanding UI for both players
+		ClearClientUI();
+		engine->ChangeLevel( gpGlobals->mapname.ToCStr(), NULL );
+	}
+	else if ( FStrEq( pcmd, "mp_select_level" ) )
+	{
+		if ( PortalMPGameRules() )
+		{
+			PortalMPGameRules()->SaveMPStats();
+		}
+
+		if ( args.ArgC() > 1 )
+		{
+			// clear out any outstanding UI for both players
+			ClearClientUI();
+			engine->ChangeLevel( args[1], NULL );
+		}
+
+	}
+	else if ( FStrEq( pcmd, "restart_level" ) )
+	{
+		//sv_bonus_challenge.SetValue( GetBonusChallenge() );
+#if !defined( _GAMECONSOLE )
+		//g_Portal2ResearchDataTracker.Event_PlayerGaveUp();
+#endif // !defined( _GAMECONSOLE )
+
+		// clear out any outstanding UI for both players
+		ClearClientUI();
+		engine->ChangeLevel( gpGlobals->mapname.ToCStr(), NULL );
+	}
+	else if ( FStrEq( pcmd, "erase_mp_progress" ) )
+	{
+		if ( PortalMPGameRules() )
+		{
+			PortalMPGameRules()->SetAllMapsComplete( false, atoi(args[1]) );
+		}
+		return true;
+	}
+	else if ( FStrEq( pcmd, "transition_map" ) )
+	{
+		CBaseEntity *pEntity = gEntList.FindEntityByName( NULL, "@transition_script" );
+		if ( !pEntity )
+		{
+			pEntity = gEntList.FindEntityByName( NULL, "script_check_finish_game" );	// Final level in coop
+			if ( !pEntity )
+			{
+				CBaseEntity *pTempEntity = gEntList.FindEntityByClassname( NULL, "logic_script" );
+				while ( pTempEntity )
+				{
+					if ( V_stristr( pTempEntity->GetEntityName().ToCStr(), "transition_script" ) )	// DLC levels
+					{
+						pEntity = pTempEntity;
+						break;
+					}
+					pTempEntity = gEntList.FindEntityByClassname( pTempEntity, "logic_script" );
+				}
+			}
+		}
+
+		// clear out any outstanding UI for both players
+		ClearClientUI();
+
+		if ( pEntity )
+		{
+			pEntity->RunScript( "RealTransitionFromMap()" );
+		}
+	}
+	else if ( FStrEq( pcmd, "select_map" ) )
+	{
+		// get the map to run
+		if ( args.ArgC() > 1 )
+		{
+			// clear out any outstanding UI for both players
+			ClearClientUI();
+
+			const char *pMapName = args[1];
+			//sv_bonus_challenge.SetValue( GetBonusChallenge() );
+			engine->ChangeLevel( pMapName, NULL );
+		}
+
+	}
+	else if ( FStrEq( pcmd, "pre_go_to_calibration" ) )
+	{
+		// Play transition video
+		for( int i = 1; i <= gpGlobals->maxClients; ++i )
+		{
+			CBasePlayer *pToPlayer = UTIL_PlayerByIndex( i );
+			if ( pToPlayer && !pToPlayer->IsSplitScreenPlayer() )
+			{
+				engine->ClientCommand( pToPlayer->edict(), "stopvideos" );
+				engine->ClientCommand( pToPlayer->edict(), "playvideo_end_level_transition coop_bots_load_wave 1" );
+			}
+		}
+		return true;
+	}
+	else if ( FStrEq( pcmd, "go_to_calibration" ) )
+	{
+		if ( PortalMPGameRules() )
+		{
+			PortalMPGameRules()->SaveMPStats();
+		}
+
+		// clear out any outstanding UI for both players
+		ClearClientUI();
+
+		engine->ChangeLevel( "mp_coop_start", NULL );
+		return true;
+	}
+	else if ( FStrEq( pcmd, "level_complete_data" ) )
+	{
+		CPortalMPGameRules *pRules = PortalMPGameRules();
+		if ( pRules )
+		{
+			pRules->SetMapCompleteData( atoi(args[1]) );
+		}
+
+		return true;
+	}
+	else if ( FStrEq( pcmd, "mp_stats_data" ) )
+	{
+		//CPortalMPStats *pStats = GetPortalMPStats();
+		//if ( pStats )
+		//{
+		//	pStats->SetStats( atoi(args[1]), atoi(args[2]), atoi(args[3]), atoi(args[4]) );
+		//}
+
 		return true;
 	}
 

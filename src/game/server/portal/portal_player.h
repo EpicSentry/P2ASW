@@ -127,6 +127,8 @@ public:
 	virtual void PlayStepSound( Vector &vecOrigin, surfacedata_t *psurface, float fvol, bool force );
 	virtual void UpdateOnRemove( void );
 
+	virtual void OnSave( IEntitySaveUtils *pUtils ); 
+
 	virtual void SetupVisibility( CBaseEntity *pViewEntity, unsigned char *pvs, int pvssize );
 	virtual void UpdatePortalViewAreaBits( unsigned char *pvs, int pvssize );
 	virtual void ItemPostFrame( void );
