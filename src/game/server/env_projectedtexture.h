@@ -18,6 +18,7 @@ public:
 	DECLARE_SERVERCLASS();
 
 	CEnvProjectedTexture();
+	void Spawn();
 	bool KeyValue( const char *szKeyName, const char *szValue );
 	virtual bool GetKeyValue( const char *szKeyName, char *szValue, int iMaxLen );
 
@@ -42,12 +43,17 @@ public:
 	void InitialThink( void );
 
 	//Portal 2
+	void InputSetLightStyle(inputdata_t& inputdata);
+	void InputSetPattern(inputdata_t& inputdata);
 	void InputSetNearZ(inputdata_t &inputdata);
 	void InputSetFarZ(inputdata_t &inputdata);
 
 	CNetworkHandle( CBaseEntity, m_hTargetEntity );
 
 //private:
+	void EnforceSingleProjectionRules(bool bWarnOnEnforcement = false);
+	int		m_iDefaultStyle;
+	string_t m_iszPattern;
 
 	CNetworkVar( bool, m_bState );
 	CNetworkVar( bool, m_bAlwaysUpdate );
@@ -68,6 +74,7 @@ public:
 	CNetworkVar( int, m_nShadowQuality );
 	CNetworkVar( float, m_flProjectionSize );
 	CNetworkVar( float, m_flRotation );
+	CNetworkVar(int, m_iStyle);
 
 };
 
