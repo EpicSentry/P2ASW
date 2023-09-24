@@ -86,45 +86,43 @@ void C_PortalBlast::Init( bool bIsPortal2, PortalPlacedByType ePlacedBy, const V
 
 void C_PortalBlast::ClientThink( void )
 {
-	float fT = m_ptAimPoint.x;
+	float x = m_ptAimPoint.x;
 	
 	//if ( m_fCreationTime == 0.0f && m_fDeathTime == 0.0f )
-	if ( fT == 0.0 && m_ptAimPoint.y == 0.0 )
+	if ( x == 0.0 && m_ptAimPoint.y == 0.0 )
 	{
 		// Die!
 		Remove();
 		return;
 	}
 
-	//fT = ( gpGlobals->curtime - m_fCreationTime ) / ( m_fDeathTime - m_fCreationTime );
-	fT = ( gpGlobals->curtime - fT ) / ( m_ptAimPoint.y - fT );
+	//float fT = ( gpGlobals->curtime - m_fCreationTime ) / ( m_fDeathTime - m_fCreationTime );
+	float fT = ( gpGlobals->curtime - x ) / ( m_ptAimPoint.y - x );
 	
-	if ( 0.0 <= fT )
-	{
-		if ( fT >= 1.0f )
-		{
-			// Ready to die! But we want one more frame in the final position
-			SetAbsOrigin( m_ptCreationPoint );
-
-			m_ptAimPoint.x = 0.0;
-			m_ptAimPoint.y = 0.0;
-			return;
-		}
-	}
-	else
+	if ( fT < 0.0 )
 	{
 		fT = 0.0;
-	}
 
-	float flTargetHelper = 1.0f - fT;
+Spot:
+		float flTargetHelper = 1.0f - fT;
 
-	// Set the interpolated position
-	Vector vTarget; //= m_ptAimPoint * flTargetHelper + m_ptDeathPoint * fT;
-	vTarget.x = m_ptAimPoint.x * flTargetHelper + m_ptDeathPoint.x + flTargetHelper + fT * m_ptCreationPoint.x * fT;
-	vTarget.y = m_ptAimPoint.y * flTargetHelper + m_ptCreationPoint.y * fT + (m_ptDeathPoint.y * flTargetHelper) * fT;
-	vTarget.z = m_ptAimPoint.z * flTargetHelper + m_ptDeathPoint.z * flTargetHelper + (m_ptCreationPoint.z * fT) * fT;
+		// Set the interpolated position
+		Vector vTarget; //= m_ptAimPoint * flTargetHelper + m_ptDeathPoint * fT;
+		vTarget.x = ( m_CalcAbsoluteVelocityMutex.GetOwnerId() * (1.0 - fT) ) + (m_ptDeathPoint.x * (1.0 - fT) ) + (fT * m_ptCreationPoint.x);
+		vTarget.y = ( m_CalcAbsoluteVelocityMutex.GetDepth() * (1.0 - fT)) + ((m_ptCreationPoint.y * fT) + (m_ptDeathPoint.y * (1.0 - fT)) * fT);
+		vTarget.z = ( IsBlurred() * (1.0 - fT)) + (((m_ptDeathPoint.z * (1.0 - fT)) + (m_ptCreationPoint.z * fT)) * fT);
 	
-	SetAbsOrigin( m_ptCreationPoint * flTargetHelper + vTarget * fT );
+		SetAbsOrigin( m_ptCreationPoint * flTargetHelper + vTarget * fT );
+		return;
+	}
+	if ( fT <= 1.0 && fT < 1.0 )
+		goto Spot;
+		
+	// Ready to die! But we want one more frame in the final position
+	SetAbsOrigin( m_ptCreationPoint );
+
+	m_ptAimPoint.x = 0.0;
+	m_ptAimPoint.y = 0.0;
 	
 }
 
