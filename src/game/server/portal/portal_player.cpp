@@ -37,6 +37,7 @@
 #include "sceneentity.h"	// has the VCD precache function
 #include "sendprop_priorities.h"
 #include "prop_weightedcube.h"
+#include "portal2_research_data_tracker.h"
 
 // Max mass the player can lift with +use
 #define PORTAL_PLAYER_MAX_LIFT_MASS 85
@@ -1895,7 +1896,7 @@ bool CPortal_Player::ClientCommand( const CCommand &args )
 	{
 		//sv_bonus_challenge.SetValue( GetBonusChallenge() );
 #if !defined( _GAMECONSOLE )
-		//g_Portal2ResearchDataTracker.Event_PlayerGaveUp();
+		g_Portal2ResearchDataTracker.Event_PlayerGaveUp();
 #endif // !defined( _GAMECONSOLE )
 
 		// clear out any outstanding UI for both players
