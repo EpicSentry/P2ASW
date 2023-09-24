@@ -80,6 +80,8 @@ $Project "Client (Portal 2)"
 			$File "portal2/c_prop_floor_button.cpp"
 			$File "portal2/c_prop_weightedcube.cpp"
 			$File "portal2/c_prop_weightedcube.h"
+			$File "portal2/c_fizzler_effects.cpp"
+			$File "portal2/c_fizzler_effects.h"
 				
 			$File	"portal2\c_portal2_lesson.cpp"
 			$File	"portal2\c_sdk_jukebox.cpp"
