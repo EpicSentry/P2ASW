@@ -398,9 +398,11 @@ void ComputeAABBContactsWithBrushEntity_SIMD( ContactVector& contacts, const cpl
 	//typedef BrushSideInfo_t* BrushSideInfoIterator;
 	// Get the collision model index of the brush entity
 	AssertMsg( pBrushEntity->IsBSPModel(), "Your brush entity is not a brush entity." );
+#ifdef DEBUG
 	ICollideable* pCollideable = enginetrace->GetCollideable( pBrushEntity );
 	const int cmodelIndex = pCollideable->GetCollisionModelIndex() - 1;
 	AssertMsg( !pBrushEntity->IsWorld() || cmodelIndex == 0, "World collision model index should be 0." );
+#endif
 	const matrix3x4_t& entityToWorld = pBrushEntity->EntityToWorldTransform();
 
 	// The query box must be in local space for non-world brush entities
