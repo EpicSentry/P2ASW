@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -80,6 +80,7 @@ private:
 	IMaterial	*m_pMaterial;
 	float		m_flProjectionSize;
 	float		m_flRotation;
+	int		m_iStyle;
 
 	Vector	m_vecExtentsMin;
 	Vector	m_vecExtentsMax;
