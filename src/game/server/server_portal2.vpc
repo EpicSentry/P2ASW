@@ -97,6 +97,8 @@ $Project "Server (Portal 2)"
 				$File "portal2/info_placement_helper.h"
 				$File "portal2/trigger_catapult.cpp"
 				$File "portal2/trigger_catapult.h"
+				$File "portal2\trigger_playerteam.cpp"
+				$File "portal2\trigger_ping_detector.cpp"
 				$File "portal2/prop_laser_catcher.cpp"
 				$File "$SRCDIR\game\shared\portal2\trigger_catapult_shared.cpp"
 
