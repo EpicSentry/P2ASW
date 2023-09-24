@@ -9,11 +9,26 @@
 
 #if defined( CLIENT_DLL )
 
+#ifdef HL2_DLL
 #include "c_basehlplayer.h"
 #define CHL2_Player C_BaseHLPlayer
+#elif defined ( PORTAL2 )
+
+#include "c_portal_player.h"
+#define CHL2_Player C_Portal_Player
+
+#endif
 #else
 
+#ifdef HL2_DLL
 #include "hl2_player.h"
+
+#elif defined ( PORTAL2 )
+
+#include "portal_player.h"
+#define CHL2_Player CPortal_Player
+
+#endif
 
 #endif
 
@@ -96,12 +111,16 @@ inline CHL2_Player	*CHL2GameMovement::GetHL2Player()
 //-----------------------------------------------------------------------------
 inline LadderMove_t *CHL2GameMovement::GetLadderMove()
 {
+#ifndef PORTAL2
 	CHL2_Player *p = GetHL2Player();
 	if ( !p )
 	{
 		return NULL;
 	}
 	return p->GetLadderMove();
+#else
+	return NULL;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -110,6 +129,7 @@ inline LadderMove_t *CHL2GameMovement::GetLadderMove()
 //-----------------------------------------------------------------------------
 inline void CHL2GameMovement::SetLadder( CFuncLadder *ladder )
 {
+#ifndef PORTAL2
 	CFuncLadder* oldLadder = GetLadder();
 
 	if ( !ladder && oldLadder )
@@ -119,6 +139,7 @@ inline void CHL2GameMovement::SetLadder( CFuncLadder *ladder )
 
 
 	GetHL2Player()->m_HL2Local.m_hLadder.Set( ladder );
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -127,5 +148,9 @@ inline void CHL2GameMovement::SetLadder( CFuncLadder *ladder )
 //-----------------------------------------------------------------------------
 inline CFuncLadder *CHL2GameMovement::GetLadder()
 {
+#ifdef HL2_DLL
 	return static_cast<CFuncLadder*>( static_cast<CBaseEntity *>( GetHL2Player()->m_HL2Local.m_hLadder.Get() ) );
+#elif PORTAL2
+	return NULL;
+#endif
 }

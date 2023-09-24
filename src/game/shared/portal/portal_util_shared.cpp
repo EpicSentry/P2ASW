@@ -1884,6 +1884,21 @@ CBasePlayer* UTIL_OtherPlayer( CBasePlayer const* pPlayer )
 	return NULL;
 }
 
+#ifdef GAME_DLL
+
+CBasePlayer* UTIL_OtherConnectedPlayer( CBasePlayer const* pPlayer )
+{
+	CBasePlayer *pOtherPlayer = UTIL_OtherPlayer( pPlayer );
+	if ( pOtherPlayer && pOtherPlayer->IsConnected() )
+	{
+		return pOtherPlayer;
+	}
+
+	return NULL;
+}
+
+#endif
+
 CEG_NOINLINE bool UTIL_IsPaintableSurface( const csurface_t& surface )
 {
 	// What the fuck?

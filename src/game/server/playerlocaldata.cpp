@@ -168,7 +168,7 @@ BEGIN_SIMPLE_DATADESC( CPlayerLocalData )
 	DEFINE_EMBEDDED( m_skybox3d ),
 	DEFINE_EMBEDDED( m_fog ),
 	DEFINE_EMBEDDED( m_audio ),
-	
+
 	// "Why don't we save this field, grandpa?"
 	//
 	// "You see Billy, trigger_vphysics_motion uses vPhysics to touch the player,
@@ -177,6 +177,7 @@ BEGIN_SIMPLE_DATADESC( CPlayerLocalData )
 	// aren't saved and restored, if the we save before EndTouch is called, it
 	// will never be called after we load."
 	//DEFINE_FIELD( m_bSlowMovement, FIELD_BOOLEAN ),
+	//DEFINE_FIELD( m_fTBeamEndTime, FIELD_FLOAT ),
 
 END_DATADESC()
 
@@ -194,6 +195,9 @@ CPlayerLocalData::CPlayerLocalData()
 	m_audio.entIndex = 0;
 	m_pOldSkyCamera = NULL;
 	m_bDrawViewmodel = true;
+
+	m_bSlowMovement = false;
+	m_fTBeamEndTime = 0.0f;
 }
 
 static Vector GetPlayerViewPosition( CBasePlayer *pl )

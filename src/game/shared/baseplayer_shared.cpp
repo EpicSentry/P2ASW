@@ -2081,6 +2081,8 @@ void CBasePlayer::AddSplitScreenPlayer( CBasePlayer *pOther )
 	{
 		m_hSplitScreenPlayers.AddToTail( h );
 	}
+	
+	UpdateSplitScreenAndPictureInPicturePlayerList();
 }
 
 void CBasePlayer::RemoveSplitScreenPlayer( CBasePlayer *pOther )
@@ -2088,6 +2090,8 @@ void CBasePlayer::RemoveSplitScreenPlayer( CBasePlayer *pOther )
 	CHandle< CBasePlayer > h;
 	h = pOther;
 	m_hSplitScreenPlayers.FindAndRemove( h );
+
+	UpdateSplitScreenAndPictureInPicturePlayerList();
 }
 
 CUtlVector< CHandle< CBasePlayer > > &CBasePlayer::GetSplitScreenPlayers()
@@ -2098,6 +2102,53 @@ CUtlVector< CHandle< CBasePlayer > > &CBasePlayer::GetSplitScreenPlayers()
 bool CBasePlayer::HasAttachedSplitScreenPlayers() const
 {
 	return ( m_hSplitScreenPlayers.Count() > 0 );
+}
+
+void CBasePlayer::AddPictureInPicturePlayer( CBasePlayer *pOther )
+{
+	CHandle< CBasePlayer > h;
+	h = pOther;
+	if ( m_hPipPlayers.Find( h ) == m_hPipPlayers.InvalidIndex() )
+	{
+		m_hPipPlayers.AddToTail( h );
+	}
+
+	UpdateSplitScreenAndPictureInPicturePlayerList();
+}
+
+void CBasePlayer::RemovePictureInPicturePlayer( CBasePlayer *pOther )
+{
+	CHandle< CBasePlayer > h;
+	h = pOther;
+	m_hPipPlayers.FindAndRemove( h );
+
+	UpdateSplitScreenAndPictureInPicturePlayerList();
+}
+
+CUtlVector< CHandle< CBasePlayer > > &CBasePlayer::GetSplitScreenAndPictureInPicturePlayers()
+{
+	return m_hSplitScreenAndPipPlayers;
+}
+
+CUtlVector< CHandle< CBasePlayer > >& CBasePlayer::GetPictureInPicturePlayers( void )
+{
+	return m_hPipPlayers;
+}
+
+void CBasePlayer::UpdateSplitScreenAndPictureInPicturePlayerList()
+{
+	// Make m_hSplitScreenAndPipPlayers the union of m_hSplitScreenPlayers and m_hPipPlayers
+	m_hSplitScreenAndPipPlayers.RemoveAll();
+	m_hSplitScreenAndPipPlayers.AddVectorToTail( m_hSplitScreenPlayers );
+
+	for ( int i = 0; i < m_hPipPlayers.Count(); i++ )
+	{
+		CHandle< CBasePlayer > h = m_hPipPlayers[i];
+		if ( m_hSplitScreenAndPipPlayers.Find( h ) == m_hSplitScreenAndPipPlayers.InvalidIndex() )
+		{
+			m_hSplitScreenAndPipPlayers.AddToTail( h );
+		}
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -2242,3 +2293,8 @@ float CBasePlayer::GetHeldObjectMass( IPhysicsObject *pHeldObject )
 }
 
 #endif
+
+float CBasePlayer::GetAirTime( void )
+{
+	return m_flTimeLastTouchedGround == 0.0f ? 0.0f : gpGlobals->curtime - m_flTimeLastTouchedGround;
+}

@@ -489,6 +489,13 @@ void		UTIL_DecalTrace( trace_t *pTrace, char const *decalName );
 bool		UTIL_IsSpaceEmpty( CBaseEntity *pMainEnt, const Vector &vMin, const Vector &vMax );
 bool		UTIL_IsSpaceEmpty( CBaseEntity *pMainEnt, const Vector &vMin, const Vector &vMax, unsigned int mask, ITraceFilter *pFilter );
 
+// Search for water transition along a vertical line
+float UTIL_WaterLevel( const Vector &position, float minz, float maxz );
+
+// Like UTIL_WaterLevel, but *way* less expensive.
+// I didn't replace UTIL_WaterLevel everywhere to avoid breaking anything.
+float UTIL_FindWaterSurface( const Vector &position, float minz, float maxz );
+
 void		UTIL_StringToVector( float *pVector, const char *pString );
 void		UTIL_StringToFloatArray( float *pVector, int count, const char *pString );
 

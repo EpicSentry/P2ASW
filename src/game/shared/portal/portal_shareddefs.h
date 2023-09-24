@@ -105,6 +105,12 @@ enum TeamTauntState_t
 	TEAM_TAUNT_STATE_TOTAL
 };
 
+#define PORTAL2_PROMO_SKINS		( 1 << 0 )
+#define PORTAL2_PROMO_HELMETS	( 1 << 1 )
+#define PORTAL2_PROMO_ANTENNA	( 1 << 2 )
+
+extern int g_nPortal2PromoFlags;
+
 extern char *g_ppszPortalPassThroughMaterials[];
 
 #endif // PORTAL_SHAREDDEFS_H

@@ -402,6 +402,8 @@ C_BasePlayer::C_BasePlayer() : m_iv_vecViewOffset( "C_BasePlayer::m_iv_vecViewOf
 
 	m_bResampleWaterSurface = true;
 	
+	m_flTimeLastTouchedGround = 0.0f;
+
 	ResetObserverMode();
 
 	m_vecPredictionError.Init();
@@ -1388,6 +1390,15 @@ int C_BasePlayer::DrawModel( int flags, const RenderableInstance_t &instance )
 	return BaseClass::DrawModel( flags, instance );
 }
 
+bool C_BasePlayer::ShouldSuppressForSplitScreenPlayer( int nSlot )
+{
+	if ( BaseClass::ShouldSuppressForSplitScreenPlayer( nSlot ) )
+		return true;
+
+	PlayerRenderMode_t nMode = GetPlayerRenderMode( nSlot );
+	return ( nMode == PLAYER_RENDER_FIRSTPERSON );
+}
+
 //-----------------------------------------------------------------------------
 // Computes the render mode for this player
 //-----------------------------------------------------------------------------
@@ -1947,6 +1958,11 @@ void C_BasePlayer::PreThink( void )
 		m_Local.m_flFallVelocity = -GetAbsVelocity().z;
 	}
 #endif
+	
+	if ( GetGroundEntity() )
+	{
+		m_flTimeLastTouchedGround = gpGlobals->curtime;
+	}
 }
 
 void C_BasePlayer::PostThink( void )
@@ -2006,6 +2022,7 @@ void C_BasePlayer::GetToolRecordingState( KeyValues *msg )
 	float flZFar = view->GetZFar();
 	CalcView( state.m_vecEyePosition, state.m_vecEyeAngles, flZNear, flZFar, state.m_flFOV );
 	state.m_bThirdPerson = !engine->IsPaused() && ::input->CAM_IsThirdPerson();
+	state.m_bPlayerEyeIsPortalled = false;
 
 	// this is a straight copy from ClientModeShared::OverrideView,
 	// When that method is removed in favor of rolling it into CalcView,

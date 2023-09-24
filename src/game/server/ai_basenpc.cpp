@@ -10972,6 +10972,8 @@ BEGIN_SIMPLE_DATADESC( ScriptedNPCInteraction_t )
 	DEFINE_FIELD( vecRelativeOrigin,			FIELD_VECTOR	),
 	DEFINE_FIELD( angRelativeAngles,			FIELD_VECTOR	),
 	DEFINE_FIELD( vecRelativeVelocity,			FIELD_VECTOR	),
+	DEFINE_FIELD( flCameraDistance,				FIELD_FLOAT		),
+	DEFINE_FIELD( angCameraAngles,				FIELD_VECTOR	),
 	DEFINE_FIELD( flDelay,						FIELD_FLOAT		),
 	DEFINE_FIELD( flDistSqr,					FIELD_FLOAT		),
 	DEFINE_FIELD( iszMyWeapon,					FIELD_STRING	),
@@ -12188,11 +12190,11 @@ bool CAI_BaseNPC::CineCleanup()
 
 //-----------------------------------------------------------------------------
 
-void CAI_BaseNPC::Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity )
+void CAI_BaseNPC::Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity, bool bUseSlowHighAccuracyContacts )
 {
 	CleanupScriptsOnTeleport( false );
 
-	BaseClass::Teleport( newPosition, newAngles, newVelocity );
+	BaseClass::Teleport( newPosition, newAngles, newVelocity, bUseSlowHighAccuracyContacts );
 
 	CheckPVSCondition();
 }

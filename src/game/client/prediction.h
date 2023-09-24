@@ -54,6 +54,7 @@ public:
 
 	virtual bool	InPrediction( void ) const;
 	virtual bool	IsFirstTimePredicted( void ) const;
+	virtual int		GetLastAcknowledgedCommandNumber( void ) const;
 
 #if !defined( NO_ENTITY_PREDICTION )
 	virtual int		GetIncomingPacketNumber( void ) const;
@@ -160,6 +161,7 @@ private:
 			m_nServerCommandsAcknowledged = 0;
 			m_bPreviousAckHadErrors = false;
 			m_flIdealPitch = 0.0f;
+			m_nLastCommandAcknowledged = 0;
 
 		}
 
@@ -168,6 +170,7 @@ private:
 		int				m_nServerCommandsAcknowledged;
 		int				m_bPreviousAckHadErrors;
 		float			m_flIdealPitch;
+		int				m_nLastCommandAcknowledged;
 	};
 
 	Split_t				m_Split[ MAX_SPLITSCREEN_PLAYERS ];

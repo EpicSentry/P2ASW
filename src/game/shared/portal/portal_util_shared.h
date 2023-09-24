@@ -136,6 +136,10 @@ void UTIL_Portal_ComputeMatrix( CPortal_Base2D *pLocalPortal, CPortal_Base2D *pR
 CBasePlayer* UTIL_OtherPlayer( CBasePlayer const* pPlayer );
 
 #ifdef GAME_DLL
+CBasePlayer* UTIL_OtherConnectedPlayer( CBasePlayer const* pPlayer );
+#endif
+
+#ifdef GAME_DLL
 
 class CBrushEntityList : public IEntityEnumerator
 {

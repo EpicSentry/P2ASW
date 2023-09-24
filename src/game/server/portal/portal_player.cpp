@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright (c) 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose:		Player for Portal.
 //
@@ -7,6 +7,7 @@
 #include "cbase.h"
 #include "portal_player.h"
 #include "globalstate.h"
+#include "game_timescale_shared.h"
 #include "trains.h"
 #include "game.h"
 #include "portal_player_shared.h"
@@ -15,8 +16,7 @@
 #include "portal_gamerules.h"
 #include "portal_mp_gamerules.h"
 #include "weapon_portalgun.h"
-#include "paint/weapon_paintgun.h"
-#include "player_pickup_controller.h"
+#include "portal/weapon_physcannon.h"
 #include "KeyValues.h"
 #include "team.h"
 #include "eventqueue.h"
@@ -33,27 +33,102 @@
 #include "physicsshadowclone.h"
 #include "physics_prop_ragdoll.h"
 #include "soundenvelope.h"
+#include "ai_baseactor.h"		// For expressors, vcd playing
 #include "ai_speech.h"		// For expressors, vcd playing
 #include "sceneentity.h"	// has the VCD precache function
-#include "sendprop_priorities.h"
+#include "gamemovement.h"
+#include "particle_parse.h"	// for dispatching particle effects
+#include "collisionutils.h"
+#include "mp_shareddefs.h"
+#include "prop_portal_shared.h"
+#include "world.h"
+#include "paint/weapon_paintgun.h"
+#include "paint/paint_swap_guns.h"
+#include "info_camera_link.h"
 #include "prop_weightedcube.h"
+<<<<<<< Updated upstream
 #include "portal2_research_data_tracker.h"
 #include "dt_utlvector_send.h"
+=======
+#include "props.h"
+#include "sendprop_priorities.h"
+#include "env_portal_laser.h"
+#include "npc_portal_turret_floor.h"
+#include "dt_utlvector_send.h"
+#include "inetchannelinfo.h"
+#include "trigger_catapult.h"
+#include "portal_gamestats.h"
+#include "matchmaking/imatchframework.h"
+//#include "matchmaking/portal2/imatchext_portal2.h"
+#include "portal2_research_data_tracker.h"
+#include "pvs_extender.h"
+>>>>>>> Stashed changes
 
-// Max mass the player can lift with +use
-#define PORTAL_PLAYER_MAX_LIFT_MASS 85
-#define PORTAL_PLAYER_MAX_LIFT_SIZE 128
+// undefined
+//{
+
+#define ChallengePlayersReady()
+
+//}
+
+
+// TODO:
+#if 0
+#include "portal_ui_controller.h"
+#include "portal_mp_stats.h"
+#include "pointsurvey.h"
+#endif
+
+#if !defined(NO_STEAM) && !defined(_PS3)
+//#include "gc_serversystem.h"
+#endif
+
+#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR )
+//	#include "econ_gcmessages.h"
+#endif //!defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR )
+
+#define PORTAL_RESPAWN_DELAY	1.0f	// Seconds
+
+#define PORTAL_WALK_SPEED	175
+
+#define CATCHPATNERNOTCONNECTING_THINK_CONTEXT			"CatchPatnerNotConnectingThinkContext"
+
+//HACKHACK: Keep track of which player has which gun between levels
+int g_iPortalGunPlayerTeam = TEAM_BLUE;
 
 extern CBaseEntity	*g_pLastSpawn;
 
 extern void respawn(CBaseEntity *pEdict, bool fCopyCorpse);
 
-//static CTEPlayerAnimEvent g_TEPlayerAnimEvent( "PlayerAnimEvent" );
+#if USE_SLOWTIME
+ConVar slowtime_regen_per_second( "slowtime_regen_per_second", "4" );
+ConVar slowtime_max( "slowtime_max", "8", FCVAR_REPLICATED );
+ConVar slowtime_must_refill( "slowtime_must_refill", "0" );
+ConVar slowtime_speed( "slowtime_speed", "0.1", FCVAR_REPLICATED );
+#endif // USE_SLOWTIME
 
-PRECACHE_REGISTER_BEGIN(GLOBAL, PortalPlayerModelPrecache)
-PRECACHE(MODEL, "models/player/chell/player.mdl");
-PRECACHE_REGISTER_END()
+ConVar playtest_random_death( "playtest_random_death", "0", FCVAR_NONE );
+float flNextDeathTime = 0.0f; // Used by the random death system to randomly kill a player to death
 
+ConVar sv_portal_coop_ping_cooldown_time( "sv_portal_coop_ping_cooldown_time", "0.25", FCVAR_CHEAT, "Time (in seconds) between coop pings", true, 0.1f, false, 60.0f );
+ConVar sv_portal_coop_ping_indicator_show_to_all_players( "sv_portal_coop_ping_indicator_show_to_all_players", "0" );
+extern ConVar sv_player_funnel_gimme_dot;
+ConVar sv_zoom_stop_movement_threashold("sv_zoom_stop_movement_threashold", "4.0", FCVAR_REPLICATED, "Move command amount before breaking player out of toggle zoom." );
+ConVar sv_zoom_stop_time_threashold("sv_zoom_stop_time_threashold", "5.0", FCVAR_REPLICATED, "Time amount before breaking player out of toggle zoom." );
+extern ConVar sv_player_funnel_into_portals;
+
+#define sv_can_carry_both_guns		0	//ConVar sv_can_carry_both_guns("sv_can_carry_both_guns", "0", FCVAR_REPLICATED | FCVAR_CHEAT);
+#define sv_can_swap_guns			1	//ConVar sv_can_swap_guns("sv_can_swap_guns", "1", FCVAR_REPLICATED | FCVAR_CHEAT);
+#define sv_can_swap_guns_anytime	1	//ConVar sv_can_swap_guns_anytime( "sv_can_swap_guns_anytime", "1", FCVAR_CHEAT );
+
+static ConVar portal_tauntcam_dist( "portal_tauntcam_dist", "75", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
+ConVar sp_fade_and_force_respawn( "sp_fade_and_force_respawn", "1", FCVAR_CHEAT );
+
+ConVar mp_taunt_item( "mp_taunt_item", "", FCVAR_DEVELOPMENTONLY | FCVAR_REPLICATED, "Temporary for testing what will happen when a taunt item is in inventory." );
+
+extern ConVar mp_should_gib_bots;
+extern ConVar breakable_disable_gib_limit;
+extern ConVar breakable_multiplayer;
 ConVar mp_server_player_team( "mp_server_player_team", "0", FCVAR_DEVELOPMENTONLY );
 ConVar mp_wait_for_other_player_timeout( "mp_wait_for_other_player_timeout", "100", FCVAR_CHEAT, "Maximum time that we wait in the transition loading screen for the other player." );
 ConVar mp_wait_for_other_player_notconnecting_timeout( "mp_wait_for_other_player_notconnecting_timeout", "10", FCVAR_CHEAT, "Maximum time that we wait in the transition loading screen after we fully loaded for partner to start loading." );
@@ -64,14 +139,73 @@ extern ConVar sv_post_teleportation_box_time;
 extern ConVar sv_press_jump_to_bounce;
 extern ConVar sv_use_trace_duration;
 
-ConVar sv_portal_coop_ping_cooldown_time( "sv_portal_coop_ping_cooldown_time", "0.25", FCVAR_CHEAT, "Time (in seconds) between coop pings", true, 0.1f, false, 60.0f );
-ConVar sv_portal_coop_ping_indicator_show_to_all_players( "sv_portal_coop_ping_indicator_show_to_all_players", "0" );
-extern ConVar sv_player_funnel_gimme_dot;
-ConVar sv_zoom_stop_movement_threashold("sv_zoom_stop_movement_threashold", "4.0", FCVAR_REPLICATED, "Move command amount before breaking player out of toggle zoom." );
-ConVar sv_zoom_stop_time_threashold("sv_zoom_stop_time_threashold", "5.0", FCVAR_REPLICATED, "Time amount before breaking player out of toggle zoom." );
-extern ConVar sv_player_funnel_into_portals;
+extern ConVar sv_bonus_challenge;
+
+extern ConVar ai_debug_dyninteractions;
 
 extern void PaintPowerPickup( int colorIndex, CBasePlayer *pPlayer );
+
+
+#define COOP_PING_DECAL_NAME "overlays/coop_ping_decal"
+#define COOP_PING_SOUNDSCRIPT_NAME "Player.Coop_Ping"
+#define COOP_PING_PARTICLE_NAME "command_target_ping"
+
+#define TLK_PLAYER_KILLED "TLK_PLAYER_KILLED"
+#define TLK_PLAYER_SHOT "TLK_PLAYER_SHOT"
+#define TLK_PLAYER_BURNED "TLK_PLAYER_BURNED"
+
+#define ALLOWED_TEAM_TAUNT_Z_DIST 30.f
+
+// FIXME: Used for temp damage scaling -- jdw
+//extern ConVar sk_dmg_take_scale1;
+ConVar sk_dmg_take_scale1("sk_dmg_take_scale1", "1", FCVAR_REPLICATED);
+
+
+const char *g_pszBallBotHelmetModel = "models/player/ballbot/ballbot_cage.mdl";
+const char *g_pszEggBotHelmetModel = "models/player/eggbot/eggbot_cage.mdl";
+
+const char *g_pszBallBotAntennaModel = "models/player/ballbot/ballbot_flag.mdl";
+const char *g_pszEggBotAntennaModel = "models/player/eggbot/eggbot_flag.mdl";
+
+
+// -------------------------------------------------------------------------------- //
+// Player animation event. Sent to the client when a player fires, jumps, reloads, etc..
+// -------------------------------------------------------------------------------- //
+
+class CTEPlayerAnimEvent : public CBaseTempEntity
+{
+public:
+	DECLARE_CLASS( CTEPlayerAnimEvent, CBaseTempEntity );
+	DECLARE_SERVERCLASS();
+
+	CTEPlayerAnimEvent( const char *name ) : CBaseTempEntity( name )
+	{
+	}
+
+	CNetworkHandle( CBasePlayer, m_hPlayer );
+	CNetworkVar( int, m_iEvent );
+	CNetworkVar( int, m_nData );
+};
+
+IMPLEMENT_SERVERCLASS_ST_NOBASE( CTEPlayerAnimEvent, DT_TEPlayerAnimEvent )
+SendPropEHandle( SENDINFO( m_hPlayer ) ),
+SendPropInt( SENDINFO( m_iEvent ), Q_log2( PLAYERANIMEVENT_COUNT ) + 1, SPROP_UNSIGNED ),
+SendPropInt( SENDINFO( m_nData ), 32 ),
+END_SEND_TABLE()
+
+static CTEPlayerAnimEvent g_TEPlayerAnimEvent( "PlayerAnimEvent" );
+
+void TE_PlayerAnimEvent( CBasePlayer *pPlayer, PlayerAnimEvent_t event, int nData )
+{
+	CPVSFilter filter( (const Vector&)pPlayer->EyePosition() );
+
+	g_TEPlayerAnimEvent.m_hPlayer = pPlayer;
+	g_TEPlayerAnimEvent.m_iEvent = event;
+	g_TEPlayerAnimEvent.m_nData = nData;
+	g_TEPlayerAnimEvent.Create( filter, 0 );
+}
+
+
 
 //=================================================================================
 //
@@ -101,7 +235,7 @@ public:
 	// In case the client has the player entity, we transmit the player index.
 	// In case the client doesn't have it, we transmit the player's model index, origin, and angles
 	// so they can create a ragdoll in the right place.
-	CNetworkHandle( CBaseEntity, m_hPlayer );	// networked entity handle 
+	CNetworkHandle( CBaseEntity, m_hPlayer );	// networked entity handle
 	CNetworkVector( m_vecRagdollVelocity );
 	CNetworkVector( m_vecRagdollOrigin );
 };
@@ -126,6 +260,7 @@ BEGIN_DATADESC( CPortalRagdoll )
 
 END_DATADESC()
 
+
 CEntityPortalledNetworkMessage::CEntityPortalledNetworkMessage( void )
 {
 	m_hEntity = NULL;
@@ -143,7 +278,6 @@ BEGIN_SEND_TABLE_NOBASE( CEntityPortalledNetworkMessage, DT_EntityPortalledNetwo
 		SendPropInt( SENDINFO_NOCHECK(m_iMessageCount) ),
 END_SEND_TABLE()
 
-
 extern void SendProxy_Origin( const SendProp *pProp, const void *pStruct, const void *pData, DVariant *pOut, int iElement, int objectID );
 
 // specific to the local player
@@ -153,15 +287,12 @@ BEGIN_SEND_TABLE_NOBASE( CPortal_Player, DT_PortalLocalPlayerExclusive )
 	SendPropFloat   (SENDINFO_VECTORELEM(m_vecOrigin, 2), -1, SPROP_NOSCALE, 0.0f, HIGH_DEFAULT, SendProxy_OriginZ, SENDPROP_LOCALPLAYER_ORIGINZ_PRIORITY ),
 	SendPropVector	(SENDINFO(m_vecViewOffset), -1, SPROP_NOSCALE, 0.0f, HIGH_DEFAULT ),
 
-	// FIXME: - Wonderland_War
-	
 	SendPropQAngles( SENDINFO( m_vecCarriedObjectAngles ) ),
 	SendPropVector( SENDINFO( m_vecCarriedObject_CurPosToTargetPos )  ),
 	SendPropQAngles( SENDINFO( m_vecCarriedObject_CurAngToTargetAng ) ),
 	//a message buffer for entity teleportations that's guaranteed to be in sync with the post-teleport updates for said entities
 	SendPropUtlVector( SENDINFO_UTLVECTOR( m_EntityPortalledNetworkMessages ), CPortal_Player::MAX_ENTITY_PORTALLED_NETWORK_MESSAGES, SendPropDataTable( NULL, 0, &REFERENCE_SEND_TABLE( DT_EntityPortalledNetworkMessage ) ) ),
 	SendPropInt( SENDINFO( m_iEntityPortalledNetworkMessageCount ) ),
-	
 END_SEND_TABLE()
 
 // all players except the local player
@@ -179,14 +310,21 @@ BEGIN_SEND_TABLE_NOBASE( CPortalPlayerShared, DT_PortalPlayerShared )
 	SendPropInt( SENDINFO( m_nPlayerCond ), PORTAL_COND_LAST, (SPROP_UNSIGNED|SPROP_CHANGES_OFTEN) ),
 END_SEND_TABLE()
 
-
 LINK_ENTITY_TO_CLASS( player, CPortal_Player );
 
 IMPLEMENT_SERVERCLASS_ST(CPortal_Player, DT_Portal_Player)
-	SendPropExclude( "DT_BaseAnimating", "m_flPlaybackRate" ),	
+
+	SendPropExclude( "DT_BaseEntity", "m_vecOrigin" ),
+	SendPropExclude( "DT_LocalPlayerExclusive", "m_vecViewOffset[0]" ),
+	SendPropExclude( "DT_LocalPlayerExclusive", "m_vecViewOffset[1]" ),
+	SendPropExclude( "DT_LocalPlayerExclusive", "m_vecViewOffset[2]" ),
+
+#ifdef PORTAL_PLAYER_PREDICTION
+	SendPropExclude( "DT_BaseAnimating", "m_flPlaybackRate" ),
 	SendPropExclude( "DT_BaseAnimating", "m_nSequence" ),
 	SendPropExclude( "DT_BaseAnimating", "m_nNewSequenceParity" ),
 	SendPropExclude( "DT_BaseAnimating", "m_nResetEventsParity" ),
+	SendPropExclude( "DT_BaseAnimating", "m_flPoseParameter" ),
 	SendPropExclude( "DT_BaseEntity", "m_angRotation" ),
 	SendPropExclude( "DT_BaseAnimatingOverlay", "overlay_vars" ),
 	SendPropExclude( "DT_BaseFlex", "m_viewtarget" ),
@@ -194,33 +332,56 @@ IMPLEMENT_SERVERCLASS_ST(CPortal_Player, DT_Portal_Player)
 	SendPropExclude( "DT_BaseFlex", "m_blinktoggle" ),
 
 	// portal_playeranimstate and clientside animation takes care of these on the client
-	SendPropExclude( "DT_ServerAnimationData" , "m_flCycle" ),	
+	SendPropExclude( "DT_ServerAnimationData" , "m_flCycle" ),
 	SendPropExclude( "DT_AnimTimeMustBeFirst" , "m_flAnimTime" ),
+#endif // PORTAL_PLAYER_PREDICTION
 
-
+	SendPropDataTable(SENDINFO_DT(m_PortalLocal), &REFERENCE_SEND_TABLE(DT_PortalLocal), SendProxy_SendLocalDataTable),
 	SendPropAngle( SENDINFO_VECTORELEM(m_angEyeAngles, 0), 11, SPROP_CHANGES_OFTEN ),
 	SendPropAngle( SENDINFO_VECTORELEM(m_angEyeAngles, 1), 11, SPROP_CHANGES_OFTEN ),
 	SendPropEHandle( SENDINFO( m_hRagdoll ) ),
 	SendPropInt( SENDINFO( m_iSpawnInterpCounter), 4 ),
+	SendPropInt( SENDINFO( m_iPlayerSoundType), 3 ),
 	SendPropBool( SENDINFO( m_bHeldObjectOnOppositeSideOfPortal) ),
-	SendPropEHandle( SENDINFO( m_hHeldObjectPortal ) ),
 	SendPropBool( SENDINFO( m_bPitchReorientation ) ),
 	SendPropEHandle( SENDINFO( m_hPortalEnvironment ) ),
-	SendPropEHandle( SENDINFO( m_hSurroundingLiquidPortal ) ),
+	SendPropBool( SENDINFO( m_bIsHoldingSomething ) ),
+	SendPropBool( SENDINFO( m_bPingDisabled ) ),
+	SendPropBool( SENDINFO( m_bTauntDisabled ) ),
+	SendPropBool( SENDINFO( m_bTauntRemoteView ) ),
+	SendPropVector( SENDINFO( m_vecRemoteViewOrigin ) ),
+	SendPropVector( SENDINFO( m_vecRemoteViewAngles ) ),
+	SendPropFloat( SENDINFO( m_fTauntCameraDistance ) ),
+	SendPropInt( SENDINFO( m_nTeamTauntState ) ),
+	SendPropVector( SENDINFO( m_vTauntPosition ) ),
+	SendPropQAngles( SENDINFO( m_vTauntAngles ) ),
+	SendPropQAngles( SENDINFO( m_vPreTauntAngles ) ),
+	SendPropBool( SENDINFO( m_bTrickFire ) ),
+	SendPropEHandle( SENDINFO( m_hTauntPartnerInRange ) ),
+	SendPropString( SENDINFO( m_szTauntForce ) ),
+	SendPropBool( SENDINFO( m_bUseVMGrab ) ),
+	SendPropBool( SENDINFO( m_bUsingVMGrabState ) ),
+	SendPropEHandle( SENDINFO( m_hAttachedObject ) ),
+	SendPropEHandle( SENDINFO( m_hHeldObjectPortal ) ),
+	SendPropFloat( SENDINFO( m_flMotionBlurAmount ) ),
 
-	SendPropExclude( "DT_BaseAnimating", "m_flPoseParameter" ),
+	// Data that only gets sent to the local player
+	SendPropDataTable( "portallocaldata", 0, &REFERENCE_SEND_TABLE(DT_PortalLocalPlayerExclusive), SendProxy_SendLocalDataTable ),
+
+	// Data that gets sent to all other players
+	SendPropDataTable( "portalnonlocaldata", 0, &REFERENCE_SEND_TABLE(DT_PortalNonLocalPlayerExclusive), SendProxy_SendNonLocalDataTable ),
+
+	SendPropBool( SENDINFO( m_bWantsToSwapGuns ) ),
+
+	SendPropBool( SENDINFO( m_bPotatos ) ),
 
 	// Shared info
 	SendPropDataTable( SENDINFO_DT( m_Shared ), &REFERENCE_SEND_TABLE( DT_PortalPlayerShared ) ),
 
 	SendPropFloat( SENDINFO( m_flHullHeight ) ),
-	SendPropFloat( SENDINFO( m_flMotionBlurAmount ) ),
+	SendPropBool( SENDINFO( m_iSpawnCounter ) ),
 
-	SendPropBool( SENDINFO( m_bUseVMGrab ) ),
-	SendPropBool( SENDINFO( m_bUsingVMGrabState ) ),
-	SendPropBool( SENDINFO( m_bIsHoldingSomething ) ),
-	SendPropEHandle( SENDINFO( m_hAttachedObject ) ),
-	SendPropEHandle( SENDINFO( m_hHeldObjectPortal ) ),
+	//SendPropDataTable( SENDINFO_DT( m_StatsThisLevel ), &REFERENCE_SEND_TABLE(DT_PortalPlayerStatistics), SendProxy_SendLocalDataTable ),
 
 END_SEND_TABLE()
 
@@ -233,27 +394,43 @@ BEGIN_DATADESC( CPortal_Player )
 	DEFINE_FIELD( m_hHeldObjectPortal, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_bIntersectingPortalPlane, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_bStuckOnPortalCollisionObject, FIELD_BOOLEAN ),
-	DEFINE_FIELD( m_fTimeLastHurt, FIELD_TIME ),
-	DEFINE_FIELD( m_StatsThisLevel.iNumPortalsPlaced, FIELD_INTEGER ),
-	DEFINE_FIELD( m_StatsThisLevel.iNumStepsTaken, FIELD_INTEGER ),
-	DEFINE_FIELD( m_StatsThisLevel.fNumSecondsTaken, FIELD_FLOAT ),
 	DEFINE_FIELD( m_fTimeLastNumSecondsUpdate, FIELD_TIME ),
 	DEFINE_FIELD( m_iNumCamerasDetatched, FIELD_INTEGER ),
 	DEFINE_FIELD( m_bPitchReorientation, FIELD_BOOLEAN ),
-	DEFINE_FIELD( m_bIsRegenerating, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_fNeuroToxinDamageTime, FIELD_TIME ),
 	DEFINE_FIELD( m_hPortalEnvironment, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_vecTotalBulletForce, FIELD_VECTOR ),
 	DEFINE_FIELD( m_bSilentDropAndPickup, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_hRagdoll, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_angEyeAngles, FIELD_VECTOR ),
-	DEFINE_FIELD( m_qPrePortalledViewAngles, FIELD_VECTOR ),
-	DEFINE_FIELD( m_bFixEyeAnglesFromPortalling, FIELD_BOOLEAN ),
-	DEFINE_FIELD( m_matLastPortalled, FIELD_VMATRIX_WORLDSPACE ),
+	DEFINE_FIELD( m_iPlayerSoundType, FIELD_INTEGER ),
 	DEFINE_FIELD( m_vWorldSpaceCenterHolder, FIELD_POSITION_VECTOR ),
-	DEFINE_FIELD( m_hSurroundingLiquidPortal, FIELD_EHANDLE ),
-	DEFINE_FIELD( m_flHullHeight, FIELD_FLOAT ),
+	//DEFINE_FIELD( m_hRemoteTauntCamera, FIELD_EHANDLE ),
+	DEFINE_FIELD( m_flLastPingTime, FIELD_FLOAT ),
+	DEFINE_FIELD( m_bClientCheckPVSDirty, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_flUseKeyCooldownTime, FIELD_TIME ),
+	DEFINE_FIELD( m_bIsHoldingSomething, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_iLastWeaponFireUsercmd, FIELD_INTEGER ),
+	DEFINE_FIELD( m_iSpawnInterpCounter, FIELD_INTEGER ),
+	DEFINE_FIELD( m_bPingDisabled, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_bTauntDisabled, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_bTauntRemoteView, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_bTauntRemoteViewFOVFixup, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_vecRemoteViewOrigin, FIELD_POSITION_VECTOR ),
+	DEFINE_FIELD( m_vecRemoteViewAngles, FIELD_VECTOR ),
+	DEFINE_FIELD( m_fTauntCameraDistance, FIELD_FLOAT ),
+	DEFINE_FIELD( m_nTeamTauntState, FIELD_INTEGER ),
+	DEFINE_FIELD( m_vTauntPosition, FIELD_POSITION_VECTOR ),
+	DEFINE_FIELD( m_vTauntAngles, FIELD_VECTOR ),
+	DEFINE_FIELD( m_vPreTauntAngles, FIELD_VECTOR ),
+	DEFINE_FIELD( m_bTrickFire, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_hTauntPartnerInRange, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_flMotionBlurAmount, FIELD_FLOAT ),
+	DEFINE_AUTO_ARRAY( m_szTauntForce, FIELD_CHARACTER ),
+#if USE_SLOWTIME
+	DEFINE_FIELD( m_bHasPlayedSlowTimeStopSound, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_pSlowTimeColorFX, FIELD_CLASSPTR ),
+#endif // USE_SLOWTIME
 	DEFINE_FIELD( m_hGrabbedEntity, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_hPortalThroughWhichGrabOccured, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_bForcingDrop, FIELD_BOOLEAN ),
@@ -263,23 +440,90 @@ BEGIN_DATADESC( CPortal_Player )
 	DEFINE_FIELD( m_flAutoGrabLockOutTime, FIELD_TIME ),
 	DEFINE_FIELD( m_hAttachedObject, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_ForcedGrabController, FIELD_INTEGER ),
-	DEFINE_FIELD( m_flUseKeyCooldownTime, FIELD_TIME ),
-	
+
+	DEFINE_FIELD( m_flTimeLastTouchedGround, FIELD_TIME ),
+	DEFINE_FIELD( m_nPortalsEnteredInAirFlags, FIELD_INTEGER ),
+	DEFINE_FIELD( m_nAirTauntCount, FIELD_INTEGER ),
+	DEFINE_FIELD( m_nWheatleyMonitorDestructionCount, FIELD_INTEGER ),
+	DEFINE_FIELD( m_bPotatos, FIELD_BOOLEAN ),
+
+	DEFINE_FIELD( m_PlayerGunType, FIELD_INTEGER ),
+	DEFINE_FIELD( m_bSpawnFromDeath, FIELD_BOOLEAN ),
+
+	DEFINE_FIELD( m_flHullHeight, FIELD_FLOAT ),
+
+	DEFINE_FIELD( m_bWasDroppedByOtherPlayerWhileTaunting, FIELD_BOOLEAN ),
+
 	DEFINE_EMBEDDED( m_PortalLocal ),
-	
+
+	//DEFINE_FIELD ( m_PlayerAnimState, CPortalPlayerAnimState ),
+	DEFINE_EMBEDDED( m_StatsThisLevel ),
+	//DEFINE_FIELD( m_bPlayUseDenySound, FIELD_BOOLEAN ),
+
+	DEFINE_THINKFUNC( PlayerTransitionCompleteThink ),
+	DEFINE_THINKFUNC( PlayerCatchPatnerNotConnectingThink ),
+
 END_DATADESC()
 
-BEGIN_ENT_SCRIPTDESC( CPortal_Player, CBasePlayer , "Player" )
-	//DEFINE_SCRIPTFUNC( IncWheatleyMonitorDestructionCount, "Set number of wheatley monitors destroyed by the player." )
-	//DEFINE_SCRIPTFUNC( GetWheatleyMonitorDestructionCount, "Get number of wheatley monitors destroyed by the player." )
+BEGIN_ENT_SCRIPTDESC( CPortal_Player, CBaseMultiplayerPlayer , "Player" )
+	DEFINE_SCRIPTFUNC( IncWheatleyMonitorDestructionCount, "Set number of wheatley monitors destroyed by the player." )
+	DEFINE_SCRIPTFUNC( GetWheatleyMonitorDestructionCount, "Get number of wheatley monitors destroyed by the player." )
 	DEFINE_SCRIPTFUNC( TurnOffPotatos, "Turns Off the Potatos material light" )
 	DEFINE_SCRIPTFUNC( TurnOnPotatos, "Turns On the Potatos material light" )
 END_SCRIPTDESC();
 
-extern ConVar sv_regeneration_wait_time;
+extern const char *g_pszPlayerModel;
 
-const char *g_pszChellModel = "models/player/chell/player.mdl";
-const char *g_pszPlayerModel = g_pszChellModel;
+const char* g_pszPlayerAnimations = "models/player_animations.mdl";
+const char* g_pszBallBotAnimations = "models/ballbot_animations.mdl";
+const char* g_pszEggBotAnimations = "models/eggbot_animations.mdl";
+
+
+class CPortalPlayerModelPrecacher : public CBaseResourcePrecacher
+{
+public:
+	CPortalPlayerModelPrecacher() : CBaseResourcePrecacher( GLOBAL, "CPortalPlayerModelPrecacher" ) {}
+
+	virtual void Cache( IPrecacheHandler *pPrecacheHandler, bool bPrecache, ResourceList_t hResourceList, bool bIgnoreConditionals )
+	{
+		bool bIsMultiplayer;
+		if( bPrecache )
+		{
+			bIsMultiplayer = g_pGameRules ? g_pGameRules->IsMultiplayer() : (Q_strnicmp( gpGlobals->mapname.ToCStr(), "mp", 2 ) == 0); //either gamerules says it's multiplayer, or the map name implies it
+			m_bPreCacheWasMultiplayer = bIsMultiplayer;
+		}
+		else
+		{
+			bIsMultiplayer = m_bPreCacheWasMultiplayer;
+		}
+
+		if( bIsMultiplayer || bIgnoreConditionals )
+		{
+			int iModelIndex;
+			pPrecacheHandler->CacheResource( MODEL, GetBallBotModel(), bPrecache, hResourceList, &iModelIndex );
+			pPrecacheHandler->CacheResource( MODEL, g_pszBallBotAnimations, bPrecache, hResourceList, NULL );
+			PrecacheGibsForModel( iModelIndex );
+
+			pPrecacheHandler->CacheResource( MODEL, GetEggBotModel(), bPrecache, hResourceList, &iModelIndex );
+			pPrecacheHandler->CacheResource( MODEL, g_pszEggBotAnimations, bPrecache, hResourceList, NULL );
+			PrecacheGibsForModel( iModelIndex );
+
+			pPrecacheHandler->CacheResource( MODEL, g_pszBallBotHelmetModel, bPrecache, hResourceList, NULL );
+			pPrecacheHandler->CacheResource( MODEL, g_pszEggBotHelmetModel, bPrecache, hResourceList, NULL );
+			pPrecacheHandler->CacheResource( MODEL, g_pszBallBotAntennaModel, bPrecache, hResourceList, NULL );
+			pPrecacheHandler->CacheResource( MODEL, g_pszEggBotAntennaModel, bPrecache, hResourceList, NULL );
+		}
+
+		if( !bIsMultiplayer || bIgnoreConditionals )
+		{
+			pPrecacheHandler->CacheResource( MODEL, g_pszPlayerModel, bPrecache, hResourceList, NULL );
+			pPrecacheHandler->CacheResource( MODEL, g_pszPlayerAnimations, bPrecache, hResourceList, NULL );
+		}
+	}
+
+	bool m_bPreCacheWasMultiplayer; //just being a little paranoid that precaches and uncaches sync up consistently
+};
+CPortalPlayerModelPrecacher s_PortalModelPrecacher;
 
 
 #define MAX_COMBINE_MODELS 4
@@ -319,16 +563,26 @@ CPortal_Player::CPortal_Player()
 	: m_vInputVector( 0.0f, 0.0f, 0.0f ),
 	m_flCachedJumpPowerTime( -FLT_MAX ),
 	m_flSpeedDecelerationTime( 0.0f ),
-	m_bJumpWasPressedWhenForced( false ),
 	m_flPredictedJumpTime( 0.f ),
+	m_flUsePostTeleportationBoxTime( 0.0f ),
+	m_bJumpWasPressedWhenForced( false ),
 	m_bWantsToSwapGuns( false ),
 	m_bSendSwapProximityFailEvent( false ),
-	m_flMotionBlurAmount( -1.0f ),
+	m_PlayerGunType( PLAYER_NO_GUN ),
+	m_bSpawnFromDeath( false ),
+	m_nBounceCount( 0 ),
+	m_LastGroundBouncePlaneDistance( 0.0f ),
+	m_flLastSuppressedBounceTime( 0 ),
 	m_bIsFullyConnected( false ),
-	m_pGrabSound( NULL )
+	m_pGrabSound( NULL ),
+	m_nAirTauntCount( 0 ),
+	m_nWheatleyMonitorDestructionCount( 0 ),
+	m_bPotatos( true ),
+	m_flMotionBlurAmount( -1.0f ),
+	m_bIsBendy( false )
 {
 	// Taunt code
-	m_Shared.Init(this);
+	m_Shared.Init( this );
 	m_Shared.m_flTauntRemoveTime = 0.0f;
 
 	m_PlayerAnimState = CreatePortalPlayerAnimState( this );
@@ -342,48 +596,177 @@ CPortal_Player::CPortal_Player()
 	m_iSpawnInterpCounter = 0;
 
 	m_bHeldObjectOnOppositeSideOfPortal = false;
-	m_hHeldObjectPortal = NULL;
 
 	m_bIntersectingPortalPlane = false;
 
 	m_bPitchReorientation = false;
 
 	m_bSilentDropAndPickup = false;
-	
+
+	m_bClientCheckPVSDirty = false;
+
+	m_flUseKeyCooldownTime = 0.0f;
+	m_hGrabbedEntity = NULL;
+	m_flLastPingTime = 0.0f;
+	m_hPortalThroughWhichGrabOccured = NULL;
+
+	m_ForcedGrabController = FORCE_GRAB_CONTROLLER_DEFAULT;
+
+#if USE_SLOWTIME
+	m_bHasPlayedSlowTimeStopSound = true;
+#endif // USE_SLOWTIME
+
 	m_flImplicitVerticalStepSpeed = 0.0f;
 
 	m_flTimeSinceLastTouchedPower[0] = FLT_MAX;
 	m_flTimeSinceLastTouchedPower[1] = FLT_MAX;
 	m_flTimeSinceLastTouchedPower[2] = FLT_MAX;
-	
+
 	m_flHullHeight = GetHullHeight();
-	
+
 	m_EntityPortalledNetworkMessages.SetCount( MAX_ENTITY_PORTALLED_NETWORK_MESSAGES );
+	m_PlayerGunTypeWhenDead = PLAYER_NO_GUN;
 
-	m_ForcedGrabController = FORCE_GRAB_CONTROLLER_DEFAULT;
-	m_hGrabbedEntity = NULL;
-
-	m_flUseKeyCooldownTime = 0.0f;
+	m_bReadyForDLCItemUpdates = false;
 }
 
 CPortal_Player::~CPortal_Player( void )
 {
+#ifdef PORTAL2
+	if ( GameRules() && GameRules()->IsMultiplayer() && !IsSplitScreenPlayer() )
+	{
+		CPortal_Player *pOtherPlayer = ToPortalPlayer( UTIL_OtherPlayer( this ) );
+		if ( pOtherPlayer )
+		{
+			pOtherPlayer->RemovePictureInPicturePlayer( this );
+		}
+	}
+#endif
+
 	ClearSceneEvents( NULL, true );
 
 	if ( m_PlayerAnimState )
 		m_PlayerAnimState->Release();
 
-	CPortalRagdoll *pRagdoll = dynamic_cast<CPortalRagdoll*>( m_hRagdoll.Get() );	
+	CPortalRagdoll *pRagdoll = dynamic_cast<CPortalRagdoll*>( m_hRagdoll.Get() );
 	if( pRagdoll )
 	{
 		UTIL_Remove( pRagdoll );
 	}
 }
 
+CEG_NOINLINE CPortal_Player *CPortal_Player::CreatePlayer( const char *className, edict_t *ed )
+{
+	CPortal_Player::s_PlayerEdict = ed;
+	return (CPortal_Player*)CreateEntityByName( className );
+}
+
+CEG_PROTECT_STATIC_MEMBER_FUNCTION( CPortal_Player_CreatePlayer, CPortal_Player::CreatePlayer );
+
 void CPortal_Player::UpdateOnRemove( void )
 {
+#if USE_SLOWTIME
+	if ( m_pSlowTimeColorFX )
+	{
+		UTIL_Remove( m_pSlowTimeColorFX );
+		m_pSlowTimeColorFX = NULL;
+	}
+#endif // USE_SLOWTIME
+
+#if !defined(NO_STEAM) && !defined( NO_STEAM_GAMECOORDINATOR ) && 0
+	m_Inventory.RemoveListener( this );
+#endif
+
 	BaseClass::UpdateOnRemove();
 }
+
+
+#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR ) && 0
+
+//-----------------------------------------------------------------------------
+// Purpose: Request this player's inventories from the steam backend
+//-----------------------------------------------------------------------------
+void CPortal_Player::UpdateInventory( bool bInit )
+{
+	if ( IsFakeClient() )
+		return;
+
+	if ( bInit )
+	{
+		if ( steamgameserverapicontext->SteamGameServer() )
+		{
+			CSteamID steamIDForPlayer;
+			if ( GetSteamID( &steamIDForPlayer ) )
+			{
+				PortalInventoryManager()->SteamRequestInventory( &m_Inventory, steamIDForPlayer, this );
+			}
+		}
+	}
+
+	// If we have an SOCache, we've got a connection to the GC
+	bool bInvalid = true;
+	if ( m_Inventory.GetSOC() )
+	{
+		bInvalid = m_Inventory.GetSOC()->BIsInitialized() == false;
+	}
+	m_Shared.SetLoadoutUnavailable( bInvalid );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Steam has just notified us that the player changed his inventory
+//-----------------------------------------------------------------------------
+void CPortal_Player::InventoryUpdated( CPlayerInventory *pInventory )
+{
+	m_Shared.SetLoadoutUnavailable( false );
+
+	// Make sure we're wearing the right skin.
+	SetPlayerModel();
+
+	if ( m_bReadyForDLCItemUpdates )
+	{
+		bool bMultiplayer = g_pGameRules->IsMultiplayer();
+		bool bIs2GunsMap = ( V_stristr( gpGlobals->mapname.ToCStr(), "2guns" ) != NULL ) || ( GlobalEntity_GetState( "paintgun_map" ) == GLOBAL_ON );
+		if ( !bMultiplayer || !bIs2GunsMap )
+		{
+			GiveDefaultItems();
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Requests that the GC confirm that this player is supposed to have
+//			an SO cache on this gameserver and send it again if so.
+//-----------------------------------------------------------------------------
+void CPortal_Player::VerifySOCache()
+{
+	if ( IsFakeClient() )
+		return;
+
+	CSteamID steamIDForPlayer;
+	GetSteamID( &steamIDForPlayer );
+
+	if( steamIDForPlayer.BIndividualAccount() )
+	{
+		// if we didn't find an inventory ask the GC to refresh us
+		GCSDK::CGCMsg<MsgGCVerifyCacheSubscription_t> msgVerifyCache( k_EMsgGCVerifyCacheSubscription );
+		msgVerifyCache.Body().m_ulSteamID = steamIDForPlayer.ConvertToUint64();
+		GCClientSystem()->BSendMessage( msgVerifyCache );
+	}
+	else
+	{
+		Msg( "Cannot verify load for invalid steam ID %s\n", steamIDForPlayer.Render() );
+	}
+}
+
+CEconItemView *CPortal_Player::GetItemInLoadoutSlot( int iLoadoutSlot )
+{
+	// Portal players just instantly equip things.
+	int iBot = ( GetTeamNumber() == TEAM_BLUE ) ? P2BOT_ATLAS : P2BOT_PBODY;
+	return m_Inventory.GetItemInLoadout( iBot, iLoadoutSlot );
+}
+
+#endif //!defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR )
+
 
 void CPortal_Player::Precache( void )
 {
@@ -394,23 +777,63 @@ void CPortal_Player::Precache( void )
 
 	PrecacheScriptSound( "PortalPlayer.Woosh" );
 	PrecacheScriptSound( "PortalPlayer.FallRecover" );
-	
+
 	PrecacheScriptSound( "PortalPlayer.ObjectUse" );
 	PrecacheScriptSound( "PortalPlayer.UseDeny" );
 
 	PrecacheScriptSound( "PortalPlayer.ObjectUseNoGun" );
 	PrecacheScriptSound( "PortalPlayer.UseDenyNoGun" );
 
-	PrecacheModel ( "sprites/glow01.vmt" );
+	PrecacheScriptSound( "JumpLand.HighVelocityImpactCeiling" );
+	PrecacheScriptSound( "JumpLand.HighVelocityImpact" );
 
-	//Precache Citizen models
-	PrecacheModel( g_pszPlayerModel );
-	PrecacheModel( g_pszChellModel );
-	
+#if USE_SLOWTIME
+	// Slow time
+	PrecacheScriptSound( "Player.SlowTime_Start" );
+	PrecacheScriptSound( "Player.SlowTime_Loop" );
+	PrecacheScriptSound( "Player.SlowTime_Stop" );
+#endif // USE_SLOWTIME
+
+	// Precache based on our game type
+	if ( GameRules()->IsMultiplayer() )
+	{
+		PrecacheParticleSystem( COOP_PING_PARTICLE_NAME );
+		PrecacheParticleSystem( "command_target_ping_just_arrows" );
+		PrecacheParticleSystem( "robot_point_beam" );
+		PrecacheScriptSound( COOP_PING_SOUNDSCRIPT_NAME );
+		UTIL_PrecacheDecal( COOP_PING_DECAL_NAME );
+
+		// Player models
+		PrecacheModel( GetBallBotModel() );
+		PrecacheModel( g_pszBallBotAnimations );
+		PrecacheModel( GetEggBotModel() );
+		PrecacheModel( g_pszEggBotAnimations );
+
+		PrecacheScriptSound( "CoopBot.WallSlam" );
+		PrecacheScriptSound( "CoopBot.Explode_Gib" );
+		PrecacheScriptSound( "CoopBot.CoopBotBulletImpact" );
+
+		int iModelIndex = PrecacheModel( GetBallBotModel() );
+		PrecacheGibsForModel( iModelIndex );
+
+		iModelIndex = PrecacheModel( GetEggBotModel() );
+		PrecacheGibsForModel( iModelIndex );
+
+		PrecacheModel( g_pszBallBotHelmetModel );
+		PrecacheModel( g_pszEggBotHelmetModel );
+		PrecacheModel( g_pszBallBotAntennaModel );
+		PrecacheModel( g_pszEggBotAntennaModel );
+	}
+	else
+	{
+		PrecacheModel( g_pszPlayerModel );
+		PrecacheModel( g_pszPlayerAnimations );
+	}
+
 	// paint effect
 	PrecacheParticleSystem( "boomer_vomit_screeneffect" );
 	PrecacheParticleSystem( "boomer_vomit_survivor" );
-	
+
 	// paint sound
 	PrecacheScriptSound( "Player.JumpPowerUse" );
 	PrecacheScriptSound( "Player.EnterBouncePaint" );
@@ -420,7 +843,7 @@ void CPortal_Player::Precache( void )
 	PrecacheScriptSound( "Player.EnterStickPaint" );
 	PrecacheScriptSound( "Player.ExitStickPaint" );
 
-	PrecacheScriptSound( "NPC_Citizen.die" );
+	PrecacheParticleSystem( "electrical_arc_01" );
 }
 
 void CPortal_Player::CreateSounds()
@@ -451,40 +874,6 @@ void CPortal_Player::StopLoopingSounds()
 
 void CPortal_Player::GiveAllItems( void )
 {
-	EquipSuit();
-
-	CBasePlayer::GiveAmmo( 255,	"Pistol");
-	CBasePlayer::GiveAmmo( 32,	"357" );
-
-	CBasePlayer::GiveAmmo( 255,	"AR2" );
-	CBasePlayer::GiveAmmo( 3,	"AR2AltFire" );
-	CBasePlayer::GiveAmmo( 255,	"SMG1");
-	CBasePlayer::GiveAmmo( 3,	"smg1_grenade");
-
-	CBasePlayer::GiveAmmo( 255,	"Buckshot");
-	CBasePlayer::GiveAmmo( 16,	"XBowBolt" );
-
-	CBasePlayer::GiveAmmo( 3,	"rpg_round");
-	CBasePlayer::GiveAmmo( 6,	"grenade" );
-
-	GiveNamedItem( "weapon_crowbar" );
-	GiveNamedItem( "weapon_physcannon" );
-
-	GiveNamedItem( "weapon_pistol" );
-	GiveNamedItem( "weapon_357" );
-
-	GiveNamedItem( "weapon_smg1" );
-	GiveNamedItem( "weapon_ar2" );
-
-	GiveNamedItem( "weapon_shotgun" );
-	GiveNamedItem( "weapon_crossbow" );
-
-	GiveNamedItem( "weapon_rpg" );
-	GiveNamedItem( "weapon_frag" );
-
-	GiveNamedItem( "weapon_bugbait" );
-
-	//GiveNamedItem( "weapon_physcannon" );
 	CWeaponPortalgun *pPortalGun = static_cast<CWeaponPortalgun*>( GiveNamedItem( "weapon_portalgun" ) );
 
 	if ( !pPortalGun )
@@ -501,10 +890,82 @@ void CPortal_Player::GiveAllItems( void )
 
 void CPortal_Player::GiveDefaultItems( void )
 {
-	castable_string_t st( "suit_no_sprint" );
-	GlobalEntity_SetState( st, GLOBAL_OFF );
-}
+	if ( GameRules()->IsMultiplayer() )
+	{
+		if ( PortalMPGameRules() && !PortalMPGameRules()->SupressSpawnPortalgun( GetTeamNumber() ) )
+		{
+			// Give the player an upgraded portal gun.
+			if ( !Weapon_OwnsThisType("weapon_portalgun", 0) )
+			{
+				CWeaponPortalgun *pPortalGun = (CWeaponPortalgun *)CreateEntityByName("weapon_portalgun");
+				if ( pPortalGun != NULL )
+				{
+					pPortalGun->SetLocalOrigin( GetLocalOrigin() );
+					pPortalGun->AddSpawnFlags( SF_NORESPAWN );
+					pPortalGun->SetSubType( 0 );
 
+					DispatchSpawn( pPortalGun );
+
+					if ( !pPortalGun->IsMarkedForDeletion() )
+					{
+						pPortalGun->SetCanFirePortal1();
+						pPortalGun->SetCanFirePortal2();
+
+						Weapon_Equip( pPortalGun );
+					}
+				}
+			}
+		}
+
+		if ( g_nPortal2PromoFlags & PORTAL2_PROMO_HELMETS )
+		{
+			// Don't give me a rollcage if I have a hat equipped
+			bool bHasHeadgearEquipped = false;
+
+#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR ) && 0
+ 			CEconItemView *pItem = GetItemInLoadoutSlot( LOADOUT_POSITION_HEAD );
+ 			bHasHeadgearEquipped = ( pItem && pItem->IsValid() );
+#endif
+
+ 			if ( !bHasHeadgearEquipped )
+			{
+				GivePlayerWearable( GetTeamNumber() == TEAM_BLUE ? "weapon_promo_helmet_ball" : "weapon_promo_helmet_egg" );
+			}
+			else
+			{
+				RemovePlayerWearable( GetTeamNumber() == TEAM_BLUE ? "weapon_promo_helmet_ball" : "weapon_promo_helmet_egg" );
+			}
+		}
+
+		if ( g_nPortal2PromoFlags & PORTAL2_PROMO_ANTENNA )
+		{
+			bool bHasFlagEquipped = false;
+
+#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR ) && 0
+			// Don't give me an antenna if I have a flag equipped
+ 			CEconItemView *pItem = GetItemInLoadoutSlot( LOADOUT_POSITION_MISC );
+ 			if ( pItem && pItem->IsValid() )
+ 			{
+ 				if ( pItem->GetStaticData() && pItem->GetStaticData()->GetItemTypeName() )
+ 				{
+ 					bHasFlagEquipped = Q_stricmp( pItem->GetStaticData()->GetItemTypeName(), "#P2_WearableType_Flag" ) == 0;
+ 				}
+ 			}
+#endif
+
+ 			if ( !bHasFlagEquipped )
+			{
+				GivePlayerWearable( GetTeamNumber() == TEAM_BLUE ? "weapon_promo_antenna_ball" : "weapon_promo_antenna_egg" );
+			}
+			else
+			{
+				RemovePlayerWearable( GetTeamNumber() == TEAM_BLUE ? "weapon_promo_antenna_ball" : "weapon_promo_antenna_egg" );
+			}
+		}
+	}
+
+	m_bReadyForDLCItemUpdates = true;
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: Sets  specific defaults.
@@ -512,9 +973,35 @@ void CPortal_Player::GiveDefaultItems( void )
 void CPortal_Player::Spawn(void)
 {
 	Precache();
+
+	if( g_pGameRules->IsMultiplayer() )
+	{
+		switch( GetTeamNumber() )
+		{
+		case TEAM_UNASSIGNED:
+		//case TEAM_SPECTATOR:
+			PickTeam();
+		}
+	}
+
 	SetPlayerModel();
 
 	BaseClass::Spawn();
+
+#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR ) && 0
+	// Check the make sure we have our inventory each time we spawn
+	UpdateInventory( false );
+
+	if( m_Shared.IsLoadoutUnavailable() )
+	{
+		VerifySOCache();
+	}
+#endif
+
+	// For the ratings, we don't need to bleed -- jdw
+	// WE AINT GOT TIME TO BLEEED - mtw
+	// Needed in Spawn for MP and Activate for SP
+	SetBloodColor( DONT_BLEED );
 
 	CreateSounds();
 
@@ -524,7 +1011,7 @@ void CPortal_Player::Spawn(void)
 	RemoveEffects( EF_NODRAW );
 	StopObserverMode();
 
-	GiveDefaultItems();
+	//GiveDefaultItems();
 
 	m_nRenderFX = kRenderNormal;
 
@@ -541,23 +1028,194 @@ void CPortal_Player::Spawn(void)
 	m_Local.m_bDucked = false;
 
 	SetPlayerUnderwater(false);
-	
+
+	SetMaxSpeed( PORTAL_WALK_SPEED );
+
+#if USE_SLOWTIME
+
+	m_pSlowTimeColorFX = CreateEntityByName( "color_correction" );
+	if ( m_pSlowTimeColorFX )
+	{
+		m_pSlowTimeColorFX->KeyValue( "filename", "scripts/colorcorrection/fling_color.raw" );
+		m_pSlowTimeColorFX->KeyValue( "StartDisabled", "1" );
+		m_pSlowTimeColorFX->KeyValue( "fadeInDuration", "0.05" );
+		m_pSlowTimeColorFX->KeyValue( "fadeOutDuration", "0.1" );
+		m_pSlowTimeColorFX->KeyValue( "minfalloff", "0.0" );
+		m_pSlowTimeColorFX->KeyValue( "maxfalloff", "0.0" );
+		m_pSlowTimeColorFX->KeyValue( "maxWeight", "1.0" );
+		m_pSlowTimeColorFX->SetAbsOrigin( GetAbsOrigin() );
+		m_pSlowTimeColorFX->SetParent( this );
+		DispatchSpawn( m_pSlowTimeColorFX );
+		m_pSlowTimeColorFX->Activate();
+	}
+
+#endif // USE_SLOWTIME
+
+	SetMaxSpeed( sv_speed_normal.GetFloat() );
+
 	m_vPrevGroundNormal = Vector(0,0,1);
 	m_PortalLocal.m_PaintedPowerTimer.Invalidate();
 
-#ifdef PORTAL_MP
-	PickTeam();
-#endif
-	RecomputeBoundsForOrientation();
+	GivePortalPlayerItems();
+
+	// Clear out taunt state on respawn
+	m_bTauntRemoteView = false;
+	m_hRemoteTauntCamera = NULL;
+	m_nTeamTauntState = TEAM_TAUNT_NONE;
+	m_bTrickFire = false;
+	m_hTauntPartnerInRange = NULL;
+
+	m_iSpawnCounter = !m_iSpawnCounter;
+
+	// clear animation state
+	m_PlayerAnimState->ClearAnimationState();
+
+	if ( GameRules() && GameRules()->IsMultiplayer() )
+	{
+		bool bIsBlue = GetTeamNumber() == TEAM_BLUE;
+		if ( IsFullyConnected() )
+		{
+			if ( bIsBlue )
+			{
+				IGameEvent * event = gameeventmanager->CreateEvent( "player_spawn_blue" );
+				if ( event )
+				{
+					gameeventmanager->FireEvent( event );
+				}
+			}
+			else
+			{
+				IGameEvent * event = gameeventmanager->CreateEvent( "player_spawn_orange" );
+				if ( event )
+				{
+					gameeventmanager->FireEvent( event );
+				}
+			}
+		}
+		else if ( !PortalMPGameRules()->IsPlayerDataReceived( 0 ) || !PortalMPGameRules()->IsPlayerDataReceived( 1 ) )
+		{
+			if ( !engine->GetSplitScreenPlayerAttachToEdict( 1 ) && !engine->GetSplitScreenPlayerAttachToEdict( 2 ) )
+			{
+				if ( bIsBlue )
+				{
+					engine->ClientCommand( edict(), "playvideo_end_level_transition coop_bluebot_load 1" );
+				}
+				else
+				{
+					engine->ClientCommand( edict(), "playvideo_end_level_transition coop_orangebot_load 1" );
+				}
+			}
+		}
+	}
+
+	// Want to render the player models in the world imposter views and water views.
+	AddEffects( EF_MARKED_FOR_FAST_REFLECTION );
+	AddEffects( EF_SHADOWDEPTH_NOCACHE );
+
+	// reset was dropped state
+	m_bWasDroppedByOtherPlayerWhileTaunting = false;
+
+	// Reset bounce count
+	m_nBounceCount = 0;
+	m_LastGroundBouncePlaneDistance = 0.0f;
+
+	// remove conds and reset PIP
+	m_Shared.RemoveAllCond();
 
 	// init prev position
 	m_vPrevPosition = GetAbsOrigin();
+
+#if !defined( _GAMECONSOLE )
+	g_Portal2ResearchDataTracker.SetPlayerName( this );
+#endif // !defined( _GAMECONSOLE ) && !defined( NO_STEAM )
 }
 
 void CPortal_Player::Activate( void )
 {
 	BaseClass::Activate();
+
+	// For the ratings, we don't need to bleed -- jdw
+	// WE AINT GOT TIME TO BLEEED - mtw
+	// Needed in Spawn for MP and Activate for SP
+	SetBloodColor( DONT_BLEED );
+
 	m_fTimeLastNumSecondsUpdate = gpGlobals->curtime;
+
+	SetMaxSpeed( sv_speed_normal.GetFloat() );
+
+	// Turn off PIP for all players as a new level starts
+	for( int i = 1; i <= gpGlobals->maxClients; ++i )
+	{
+		CBasePlayer *pToPlayer = UTIL_PlayerByIndex( i );
+		if ( pToPlayer )
+		{
+			engine->ClientCommand( pToPlayer->edict(), "-remote_view" );
+		}
+	}
+
+	if ( GetModelPtr() )
+	{
+		ParseScriptedInteractions();
+	}
+
+	// Let's kill the player!
+	if ( playtest_random_death.GetBool() )
+	{
+		flNextDeathTime = gpGlobals->curtime + random->RandomFloat( 0.5f*60.0f, 2*60.0f );
+	}
+}
+
+void CPortal_Player::OnFullyConnected()
+{
+	// Don't worry about waiting for the other player in dev 0
+	if ( GameRules()->IsMultiplayer() )
+	{
+		// Waiting for the other player
+		m_takedamage = DAMAGE_NO;
+		pl.deadflag = true;
+		m_lifeState = LIFE_DEAD;
+		SetMoveType( MOVETYPE_NONE );
+
+		// Set any splitscreen players associated as waiting too
+		Assert( GetSplitScreenPlayers().Count() == 0 || GetSplitScreenPlayers().Count() == 1 );
+
+		// Respawn
+		SetThink( &CPortal_Player::PlayerTransitionCompleteThink );
+		SetNextThink( gpGlobals->curtime + 1.0f );
+
+		if ( !PortalMPGameRules()->IsPlayerDataReceived( 0 ) || !PortalMPGameRules()->IsPlayerDataReceived( 1 ) )
+		{
+			bool bIsCommunityCoopHub = PortalMPGameRules()->IsCommunityCoopHub();
+			float flOtherPlayerTimeout = bIsCommunityCoopHub ? 0.0f : mp_wait_for_other_player_timeout.GetFloat();
+			float flNotConnectingTimeout = bIsCommunityCoopHub ? 0.0f : mp_wait_for_other_player_notconnecting_timeout.GetFloat();
+			// Timeout and spawn eventually if the other player doesn't connect
+			SetNextThink( gpGlobals->curtime + flOtherPlayerTimeout );	// Wait 40 seconds for other players to connect
+
+			SetContextThink( &CPortal_Player::PlayerCatchPatnerNotConnectingThink, gpGlobals->curtime + flNotConnectingTimeout, CATCHPATNERNOTCONNECTING_THINK_CONTEXT );
+		}
+
+		// Self is not in this list. With 1 splitscreen partner this list has 1 player
+		for ( int i = 0; i < GetSplitScreenPlayers().Count(); ++i )
+		{
+			CPortal_Player *pPlayer = static_cast< CPortal_Player* >( GetSplitScreenPlayers()[ i ].Get() );
+			if ( pPlayer )
+			{
+				pPlayer->OnFullyConnected();
+			}
+		}
+	}
+	else
+	{
+		// Single player just needs to shut down the transition video
+		const char *szVideoCommand = "stopvideos_fadeout";
+		char szClientCmd[256];
+		Q_snprintf( szClientCmd, sizeof(szClientCmd), "%s %f\n", szVideoCommand, 1.5f );
+		engine->ClientCommand( edict(), szClientCmd );
+
+		ChallengePlayersReady();
+	}
+
+	m_bIsFullyConnected = true;
 }
 
 void CPortal_Player::NotifySystemEvent(CBaseEntity *pNotify, notify_system_event_t eventType, const notify_system_event_params_t &params )
@@ -630,17 +1288,260 @@ void CPortal_Player::OnRestore( void )
 //	return false;
 //}
 
-bool CPortal_Player::ValidatePlayerModel( const char *pModel )
+void CPortal_Player::ClearScriptedInteractions( void )
 {
-	if ( !Q_stricmp( g_pszPlayerModel, pModel ) )
+	m_ScriptedInteractions.RemoveAll();
+}
+
+void CPortal_Player::ParseScriptedInteractions( void )
+{
+	// Already parsed them?
+	if ( m_ScriptedInteractions.Count() )
+		return;
+
+	// Parse the model's key values and find any dynamic interactions
+	KeyValues *modelKeyValues = new KeyValues("");
+	CUtlBuffer buf( 1024, 0, CUtlBuffer::TEXT_BUFFER );
+	KeyValues::AutoDelete autodelete_key( modelKeyValues );
+
+	if (! modelinfo->GetModelKeyValue( GetModel(), buf ))
+		return;
+
+	if ( modelKeyValues->LoadFromBuffer( modelinfo->GetModelName( GetModel() ), buf ) )
 	{
-		return true;
+		// Do we have a dynamic interactions section?
+		KeyValues *pkvInteractions = modelKeyValues->FindKey("dynamic_interactions");
+		if ( pkvInteractions )
+		{
+			KeyValues *pkvNode = pkvInteractions->GetFirstSubKey();
+			while ( pkvNode )
+			{
+				ScriptedNPCInteraction_t sInteraction;
+				sInteraction.iszInteractionName = AllocPooledString( pkvNode->GetName() );
+
+				// Trigger method
+				const char *pszKeyString = pkvNode->GetString( "trigger", NULL );
+				if ( pszKeyString )
+				{
+					if ( !Q_strncmp( pszKeyString, "auto_in_combat", 14) )
+					{
+						sInteraction.iTriggerMethod = SNPCINT_AUTOMATIC_IN_COMBAT;
+					}
+				}
+
+				// Loop Break trigger method
+				pszKeyString = pkvNode->GetString( "loop_break_trigger", NULL );
+				if ( pszKeyString )
+				{
+					char szTrigger[256];
+					Q_strncpy( szTrigger, pszKeyString, sizeof(szTrigger) );
+					char *pszParam = strtok( szTrigger, " " );
+					while (pszParam)
+					{
+						if ( !Q_strncmp( pszParam, "on_damage", 9) )
+						{
+							sInteraction.iLoopBreakTriggerMethod |= SNPCINT_LOOPBREAK_ON_DAMAGE;
+						}
+						if ( !Q_strncmp( pszParam, "on_flashlight_illum", 19) )
+						{
+							sInteraction.iLoopBreakTriggerMethod |= SNPCINT_LOOPBREAK_ON_FLASHLIGHT_ILLUM;
+						}
+
+						pszParam = strtok(NULL," ");
+					}
+				}
+
+				// Origin
+				pszKeyString = pkvNode->GetString( "origin_relative", "0 0 0" );
+				UTIL_StringToVector( sInteraction.vecRelativeOrigin.Base(), pszKeyString );
+
+				// Angles
+				pszKeyString = pkvNode->GetString( "angles_relative", NULL );
+				if ( pszKeyString )
+				{
+					sInteraction.iFlags |= SCNPC_FLAG_TEST_OTHER_ANGLES;
+					UTIL_StringToVector( sInteraction.angRelativeAngles.Base(), pszKeyString );
+				}
+
+				// Velocity
+				pszKeyString = pkvNode->GetString( "velocity_relative", NULL );
+				if ( pszKeyString )
+				{
+					sInteraction.iFlags |= SCNPC_FLAG_TEST_OTHER_VELOCITY;
+					UTIL_StringToVector( sInteraction.vecRelativeVelocity.Base(), pszKeyString );
+				}
+
+				// Camera Distance
+				sInteraction.flCameraDistance = pkvNode->GetFloat( "distance_camera", portal_tauntcam_dist.GetFloat() );
+
+				// Camera Angles
+				pszKeyString = pkvNode->GetString( "angles_camera", NULL );
+				if ( pszKeyString )
+				{
+					UTIL_StringToVector( sInteraction.angCameraAngles.Base(), pszKeyString );
+				}
+				else
+				{
+					sInteraction.angCameraAngles[ PITCH ] = 20.0f;
+					sInteraction.angCameraAngles[ YAW ] = 160.0f;
+					sInteraction.angCameraAngles[ ROLL ] = 0.0f;
+				}
+
+				// Entry Sequence
+				pszKeyString = pkvNode->GetString( "entry_sequence", NULL );
+				if ( pszKeyString )
+				{
+					sInteraction.sPhases[SNPCINT_ENTRY].iszSequence = AllocPooledString( pszKeyString );
+				}
+				// Entry Activity
+				pszKeyString = pkvNode->GetString( "entry_activity", NULL );
+				if ( pszKeyString )
+				{
+					sInteraction.sPhases[SNPCINT_ENTRY].iActivity = ACT_INVALID;
+					DevWarning( "Activities not supported for player scripted sequences." );
+				}
+
+				// Sequence
+				pszKeyString = pkvNode->GetString( "sequence", NULL );
+				if ( pszKeyString )
+				{
+					sInteraction.sPhases[SNPCINT_SEQUENCE].iszSequence = AllocPooledString( pszKeyString );
+				}
+
+				// Activity
+				pszKeyString = pkvNode->GetString( "activity", NULL );
+				if ( pszKeyString )
+				{
+					sInteraction.sPhases[SNPCINT_SEQUENCE].iActivity = ACT_INVALID;
+					DevWarning( "Activities not supported for player scripted sequences." );
+				}
+
+				// Exit Sequence
+				pszKeyString = pkvNode->GetString( "exit_sequence", NULL );
+				if ( pszKeyString )
+				{
+					sInteraction.sPhases[SNPCINT_EXIT].iszSequence = AllocPooledString( pszKeyString );
+				}
+				// Exit Activity
+				pszKeyString = pkvNode->GetString( "exit_activity", NULL );
+				if ( pszKeyString )
+				{
+					sInteraction.sPhases[SNPCINT_EXIT].iActivity = ACT_INVALID;
+					DevWarning( "Activities not supported for player scripted sequences." );
+				}
+
+				// Delay
+				sInteraction.flDelay = pkvNode->GetFloat( "delay", 10.0 );
+
+				// Delta
+				sInteraction.flDistSqr = pkvNode->GetFloat( "origin_max_delta", (DSS_MAX_DIST * DSS_MAX_DIST) );
+
+				// Loop?
+				if ( pkvNode->GetFloat( "loop_in_action", 0 ) )
+				{
+					sInteraction.iFlags |= SCNPC_FLAG_LOOP_IN_ACTION;
+				}
+
+				// Fixup position?
+				pszKeyString = pkvNode->GetString( "dont_teleport_at_end", NULL );
+				if ( pszKeyString )
+				{
+					if ( !Q_stricmp( pszKeyString, "me" ) || !Q_stricmp( pszKeyString, "both" ) )
+					{
+						sInteraction.iFlags |= SCNPC_FLAG_DONT_TELEPORT_AT_END_ME;
+					}
+					else if ( !Q_stricmp( pszKeyString, "them" ) || !Q_stricmp( pszKeyString, "both" ) )
+					{
+						sInteraction.iFlags |= SCNPC_FLAG_DONT_TELEPORT_AT_END_THEM;
+					}
+				}
+
+				// Needs a weapon?
+				pszKeyString = pkvNode->GetString( "needs_weapon", NULL );
+				if ( pszKeyString )
+				{
+					if ( !Q_strncmp( pszKeyString, "ME", 2 ) )
+					{
+						sInteraction.iFlags |= SCNPC_FLAG_NEEDS_WEAPON_ME;
+					}
+					else if ( !Q_strncmp( pszKeyString, "THEM", 4 ) )
+					{
+						sInteraction.iFlags |= SCNPC_FLAG_NEEDS_WEAPON_THEM;
+					}
+					else if ( !Q_strncmp( pszKeyString, "BOTH", 4 ) )
+					{
+						sInteraction.iFlags |= SCNPC_FLAG_NEEDS_WEAPON_ME;
+						sInteraction.iFlags |= SCNPC_FLAG_NEEDS_WEAPON_THEM;
+					}
+				}
+
+				// Specific weapon types
+				pszKeyString = pkvNode->GetString( "weapon_mine", NULL );
+				if ( pszKeyString )
+				{
+					sInteraction.iFlags |= SCNPC_FLAG_NEEDS_WEAPON_ME;
+					sInteraction.iszMyWeapon = AllocPooledString( pszKeyString );
+				}
+				pszKeyString = pkvNode->GetString( "weapon_theirs", NULL );
+				if ( pszKeyString )
+				{
+					sInteraction.iFlags |= SCNPC_FLAG_NEEDS_WEAPON_THEM;
+					sInteraction.iszTheirWeapon = AllocPooledString( pszKeyString );
+				}
+
+				// Add it to the list
+				AddScriptedInteraction( &sInteraction );
+
+				// Move to next interaction
+				pkvNode = pkvNode->GetNextKey();
+			}
+		}
+	}
+}
+
+void CPortal_Player::AddScriptedInteraction( ScriptedNPCInteraction_t *pInteraction )
+{
+	int nNewIndex = m_ScriptedInteractions.AddToTail();
+
+	if ( ai_debug_dyninteractions.GetBool() )
+	{
+		Msg("%s(%s): Added dynamic interaction: %s\n", GetClassname(), GetDebugName(), STRING(pInteraction->iszInteractionName) );
 	}
 
-	if ( !Q_stricmp( g_pszChellModel, pModel ) )
-	{
+	// Copy the interaction over
+	ScriptedNPCInteraction_t *pNewInt = &(m_ScriptedInteractions[nNewIndex]);
+	memcpy( pNewInt, pInteraction, sizeof(ScriptedNPCInteraction_t) );
+
+	// Calculate the local to world matrix
+	m_ScriptedInteractions[nNewIndex].matDesiredLocalToWorld.SetupMatrixOrgAngles( pInteraction->vecRelativeOrigin, pInteraction->angRelativeAngles );
+}
+
+void CPortal_Player::FireConcept( const char *pConcept )
+{
+	// Since the player doesn't really speak we are just shortcutting this and having the sphere speak these lines directly.
+	CAI_BaseActor *pSphere = dynamic_cast<CAI_BaseActor*>( gEntList.FindEntityByClassname( NULL, "npc_personality_core" ) );
+
+	if ( pSphere == NULL )
+		return;
+
+	pSphere->Speak( pConcept );
+}
+
+void CPortal_Player::SetTeamTauntState( int nTeamTauntState )
+{
+	if ( m_nTeamTauntState == nTeamTauntState )
+		return;
+
+	m_nTeamTauntState = nTeamTauntState;
+}
+
+bool CPortal_Player::ValidatePlayerModel( const char *pModel )
+{
+	if ( !Q_stricmp( GetPlayerModelName(), pModel ) )
 		return true;
-	}
+
+	if ( !Q_stricmp( g_pszPlayerModel, pModel ) )
+		return true;
 
 	return false;
 }
@@ -650,9 +1551,7 @@ void CPortal_Player::SetPlayerModel( void )
 	const char *szModelName = NULL;
 	const char *pszCurrentModelName = modelinfo->GetModelName( GetModel());
 
-	// TODO(Preston): Fix me!
-	//szModelName = engine->GetClientConVarValue( engine->IndexOfEdict( edict() ), "cl_playermodel" );
-	szModelName = g_pszChellModel;
+	szModelName = engine->GetClientConVarValue( entindex(), "cl_playermodel" );
 
 	if ( ValidatePlayerModel( szModelName ) == false )
 	{
@@ -660,7 +1559,7 @@ void CPortal_Player::SetPlayerModel( void )
 
 		if ( ValidatePlayerModel( pszCurrentModelName ) == false )
 		{
-			pszCurrentModelName = g_pszPlayerModel;
+			pszCurrentModelName = GetPlayerModelName();
 		}
 
 		Q_snprintf( szReturnString, sizeof (szReturnString ), "cl_playermodel %s\n", pszCurrentModelName );
@@ -673,7 +1572,7 @@ void CPortal_Player::SetPlayerModel( void )
 
 	if ( modelIndex == -1 )
 	{
-		szModelName = g_pszPlayerModel;
+		szModelName = GetPlayerModelName();
 
 		char szReturnString[512];
 
@@ -681,7 +1580,26 @@ void CPortal_Player::SetPlayerModel( void )
 		engine->ClientCommand ( edict(), szReturnString );
 	}
 
-	SetModel( szModelName );
+	bool allowPrecache = CBaseEntity::IsPrecacheAllowed();
+	CBaseEntity::SetAllowPrecache( true );
+	PrecacheModel( GetPlayerModelName() );
+	CBaseEntity::SetAllowPrecache( allowPrecache );
+
+	SetModel( GetPlayerModelName() );
+
+	if ( GameRules()->IsMultiplayer() )
+	{
+		if ( g_nPortal2PromoFlags & PORTAL2_PROMO_SKINS )
+		{
+			m_nSkin = 1;
+		}
+		else
+		{
+			m_nSkin = 0;
+		}
+	}
+
+	m_iPlayerSoundType.Set( PLAYER_SOUNDS_CITIZEN );
 }
 
 
@@ -693,6 +1611,268 @@ bool CPortal_Player::Weapon_Switch( CBaseCombatWeapon *pWeapon, int viewmodelind
 }
 
 
+//-----------------------------------------------------------------------------
+// Purpose: Play a one-shot scene
+// Input  :
+// Output :
+//-----------------------------------------------------------------------------
+float CPortal_Player::PlayScene( const char *pszScene, float flDelay, AI_Response *response, IRecipientFilter *filter )
+{
+	MDLCACHE_CRITICAL_SECTION();
+
+	float flDuration = InstancedScriptedScene( this, pszScene, NULL, flDelay, false, response, true, filter );
+	m_Shared.m_flTauntRemoveTime = gpGlobals->curtime + flDuration + 0.5f;
+	m_Shared.AddCond( PORTAL_COND_TAUNTING );
+
+	if ( V_strstr( pszScene, "_idle" ) != NULL )
+	{
+		if ( m_nTeamTauntState < TEAM_TAUNT_NEED_PARTNER )
+		{
+			SetTeamTauntState( TEAM_TAUNT_NEED_PARTNER );
+		}
+	}
+	// TODO: Implement CPortalMPStats
+#if 0
+	// Fire off achievements for any taunts and keep track of the number of times we do it
+	if ( GameRules()->IsMultiplayer() )
+	{
+		CPortalMPStats *pStats = GetPortalMPStats();
+		if ( response && response->m_szMatchingRule && pStats )
+		{
+			bool bHelmetOpener = false;
+
+			// These match the exact name of the rule we want to fire achievements based on minus ballbot/eggbot prefix
+			if ( V_strstr( response->m_szMatchingRule, "teamgesturehighfive_success") != NULL )
+			{
+				UTIL_RecordAchievementEvent( "ACH.TAUNTS[1]", this );
+				pStats->IncrementPlayerTauntsUsedMap( this, TAUNT_HIGHFIVE );
+			}
+			else if ( V_strstr( response->m_szMatchingRule, "gesturesmallwave") != NULL ||
+					V_strstr( response->m_szMatchingRule, "gestureportalgunsmallwave") != NULL )
+			{
+				UTIL_RecordAchievementEvent( "ACH.TAUNTS[2]", this );
+				pStats->IncrementPlayerTauntsUsedMap( this, TAUNT_WAVE );
+			}
+			else if ( V_strstr( response->m_szMatchingRule, "teamgesturerps_success") != NULL )
+			{
+				UTIL_RecordAchievementEvent( "ACH.TAUNTS[3]", this );
+				pStats->IncrementPlayerTauntsUsedMap( this, TAUNT_RPS );
+			}
+			else if ( V_strstr( response->m_szMatchingRule, "gesturelaugh") != NULL )
+			{
+				UTIL_RecordAchievementEvent( "ACH.TAUNTS[4]", this );
+				pStats->IncrementPlayerTauntsUsedMap( this, TAUNT_LAUGH );
+			}
+			else if ( V_strstr( response->m_szMatchingRule, "gesturerobotdance") != NULL )
+			{
+				UTIL_RecordAchievementEvent( "ACH.TAUNTS[5]", this );
+				pStats->IncrementPlayerTauntsUsedMap( this, TAUNT_ROBOTDANCE );
+			}
+			else if ( V_strstr( response->m_szMatchingRule, "teamgestureteamhug_success") != NULL )
+			{
+				UTIL_RecordAchievementEvent( "ACH.TAUNTS[7]", this );
+				pStats->IncrementPlayerTauntsUsedMap( this, TAUNT_HUG );
+			}
+			else if ( V_strstr( response->m_szMatchingRule, "gesturetrickfire") != NULL )
+			{
+				UTIL_RecordAchievementEvent( "ACH.TAUNTS[8]", this );
+				m_bTrickFire = true;
+				pStats->IncrementPlayerTauntsUsedMap( this, TAUNT_TRICKFIRE );
+			}
+			else if ( V_strstr( response->m_szMatchingRule, "gesturebasketball") != NULL )
+			{
+				if ( GetTeamNumber() == TEAM_BLUE )
+				{
+					bHelmetOpener = true;
+				}
+			}
+			else
+			{
+				bool bEggTease = ( V_strstr( response->m_szMatchingRule, "teamgestureteameggtease_success") != NULL );
+				bool bBallTease = ( V_strstr( response->m_szMatchingRule, "teamgestureteamballtease_success") != NULL );
+				if ( bEggTease || bBallTease )
+				{
+					UTIL_RecordAchievementEvent( "ACH.TAUNTS[6]", this );
+					pStats->IncrementPlayerTauntsUsedMap( this, TAUNT_CORETEASE );
+
+					if ( bEggTease && GetTeamNumber() == TEAM_BLUE )
+					{
+						bHelmetOpener = true;
+					}
+				}
+			}
+
+			if ( bHelmetOpener )
+			{
+				CBaseCombatWeapon *pWeapon = Weapon_OwnsThisType( "weapon_promo_helmet_ball", 0 );
+				if ( pWeapon )
+				{
+					pWeapon->ResetSequence( pWeapon->LookupSequence( "taunt_teamEggTease" ) );
+				}
+			}
+		}
+
+		if ( ( V_strstr( pszScene, "rps") != NULL ) && ( V_strstr( pszScene, "win") != NULL ) )
+		{
+			PortalMPGameRules()->PlayerWinRPS( this );
+		}
+	}
+#endif
+
+	return flDuration;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+#if USE_SLOWTIME
+
+void CPortal_Player::StartSlowingTime( float flDuration )
+{
+	if( g_pGameRules->IsMultiplayer() )
+		return; //no slow time in multiplayer
+
+
+	IGameEvent *event = gameeventmanager->CreateEvent( "slowtime" );
+	if ( event )
+	{
+		gameeventmanager->FireEvent( event );
+	}
+
+	// Start up our sounds
+	EmitSound( "Player.SlowTime_Start" );
+	EmitSound( "Player.SlowTime_Loop" );
+	m_bHasPlayedSlowTimeStopSound = false;
+
+	m_PortalLocal.m_bSlowingTime = true;
+
+	// Make sure we start at out max if we're already higher
+	if ( m_PortalLocal.m_flSlowTimeMaximum != flDuration  )
+	{
+		m_PortalLocal.m_flSlowTimeMaximum = ( flDuration > 0.0f ) ? flDuration : slowtime_max.GetFloat();
+		m_PortalLocal.m_flSlowTimeRemaining  = m_PortalLocal.m_flSlowTimeMaximum;
+	}
+
+	GameTimescale()->SetCurrentTimescale( slowtime_speed.GetFloat() );
+
+	SetFOV( this, 70.0f, 0.05f );
+
+	/*
+	if ( m_pSlowTimeColorFX )
+	{
+		variant_t emptyVariant;
+		m_pSlowTimeColorFX->AcceptInput( "Enable", this, this, emptyVariant, USE_TOGGLE );
+	}
+	*/
+
+	// Reset our fire times
+	CWeaponPortalgun *pPortalGun = dynamic_cast<CWeaponPortalgun*>( GetActiveWeapon() );
+	if ( pPortalGun )
+	{
+		pPortalGun->ResetRefireTime();
+	}
+
+	FirePlayerProxyOutput( "OnStartSlowingTime", variant_t(), this, this );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CPortal_Player::StopSlowingTime( void )
+{
+	m_PortalLocal.m_bSlowingTime = false;
+
+	GameTimescale()->SetDesiredTimescale( 1.0f );
+
+	SetFOV( this, 0.0f, 0.5f );
+
+	/*
+	if ( m_pSlowTimeColorFX )
+	{
+		variant_t emptyVariant;
+		m_pSlowTimeColorFX->AcceptInput( "Disable", this, this, emptyVariant, USE_TOGGLE );
+	}
+	*/
+
+	// Stop our looping sound
+	StopSound( entindex(), CHAN_STATIC, "Player.SlowTime_Loop" );
+	m_bHasPlayedSlowTimeStopSound = true;
+
+	FirePlayerProxyOutput( "OnStopSlowingTime", variant_t(), this, this );
+}
+
+#endif // USE_SLOWTIME
+
+void CPortal_Player::ShowViewFinder( void )
+{
+	if( !g_pGameRules->IsMultiplayer() )
+		return;
+
+	m_PortalLocal.m_bShowingViewFinder = true;
+}
+
+void CPortal_Player::HideViewFinder( void )
+{
+	m_PortalLocal.m_bShowingViewFinder = false;
+}
+
+void CPortal_Player::PlayCoopPingEffect( void )
+{
+	Vector vecForward;
+	AngleVectors( EyeAngles(), &vecForward );
+	// Hit anything they can 'see' thats directly down their crosshair
+	trace_t tr;
+	Ray_t ray;
+	ray.Init( EyePosition(), EyePosition() + vecForward*MAX_COORD_FLOAT );
+	bool bPortalBulletTrace = g_bBulletPortalTrace;
+	g_bBulletPortalTrace = true;
+
+	CTraceFilterSimpleClassnameList traceFilter( this, COLLISION_GROUP_NONE );
+	traceFilter.AddClassnameToIgnore( "projected_wall_entity" );
+	traceFilter.AddClassnameToIgnore( "player" );
+	UTIL_Portal_TraceRay( ray, MASK_OPAQUE_AND_NPCS, &traceFilter, &tr );
+	g_bBulletPortalTrace = bPortalBulletTrace;
+	if ( tr.DidHit() )
+	{
+		IGameEvent *event = gameeventmanager->CreateEvent( "portal_player_ping" );
+
+		if ( event )
+		{
+			event->SetInt("userid", GetUserID() );
+			event->SetFloat("ping_x", tr.endpos.x );
+			event->SetFloat("ping_y", tr.endpos.y );
+			event->SetFloat("ping_z", tr.endpos.z );
+			gameeventmanager->FireEvent( event );
+		}
+
+		CDisablePredictionFiltering filter(true);
+		DispatchParticleEffect( COOP_PING_PARTICLE_NAME, tr.endpos, vec3_angle );
+		EmitSound( COOP_PING_SOUNDSCRIPT_NAME );
+		UTIL_DecalTrace( &tr, "Portal2.CoopPingDecal" );
+
+		CReliableBroadcastRecipientFilter allplayers;
+		if ( sv_portal_coop_ping_indicator_show_to_all_players.GetBool() == false )
+		{
+			allplayers.RemoveRecipient( this );
+		}
+		UserMessageBegin( allplayers, "HudPingIndicator" );
+			WRITE_FLOAT( tr.endpos.x );
+			WRITE_FLOAT( tr.endpos.y );
+			WRITE_FLOAT( tr.endpos.z );
+		MessageEnd();
+	}
+	else
+	{
+		Warning( "Attempted to ping for player, but trace failed to hit anything.\n" );
+	}
+
+	// Note this in the player proxy
+	FirePlayerProxyOutput( "OnCoopPing", variant_t(), this, this );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 void CPortal_Player::PreThink( void )
 {
 	QAngle vOldAngles = GetLocalAngles();
@@ -706,7 +1886,17 @@ void CPortal_Player::PreThink( void )
 	}
 
 	SetLocalAngles( vTempAngles );
-	
+
+	// Let's kill the player!
+	if ( playtest_random_death.GetBool() )
+	{
+		if ( flNextDeathTime < gpGlobals->curtime )
+		{
+			TakeDamage( CTakeDamageInfo( this, this, NULL, Vector(0,0,100), WorldSpaceCenter(), 1000.0f, DMG_CLUB ) );
+			flNextDeathTime = gpGlobals->curtime + random->RandomFloat( 0.5f*60.0f, 2*60.0f );
+		}
+	}
+
 	// Decay the air control
 	if ( IsSuppressingAirControl() )
 	{
@@ -717,13 +1907,30 @@ void CPortal_Player::PreThink( void )
 		}
 	}
 
+	if ( m_Local.m_bSlowMovement && m_Local.m_fTBeamEndTime != 0.0f && gpGlobals->curtime > m_Local.m_fTBeamEndTime + 1.0f )
+	{
+		m_Local.m_bSlowMovement = false;
+		SetGravity( 1.0f );
+
+		if ( VPhysicsGetObject() )
+		{
+			VPhysicsGetObject()->EnableGravity( true );
+		}
+	}
+
 	BaseClass::PreThink();
 
 	if( (m_afButtonPressed & IN_JUMP) )
 	{
-		Jump();	
+		Jump();
+		FirePlayerProxyOutput( "OnJump", variant_t(), this, this );
 	}
-	
+
+	if( (m_afButtonPressed & IN_DUCK) )
+	{
+		FirePlayerProxyOutput( "OnDuck", variant_t(), this, this );
+	}
+
 	if ( m_afButtonPressed & IN_GRENADE1 )
 	{
 		if ( !m_PortalLocal.m_bZoomedIn )
@@ -750,17 +1957,127 @@ void CPortal_Player::PreThink( void )
 		}
 	}
 
+#if USE_SLOWTIME
+	// Update slow time
+	if ( m_PortalLocal.m_bSlowingTime )
+	{
+		float flDrainAmount = ( gpGlobals->frametime / 0.1f );
+		m_PortalLocal.m_flSlowTimeRemaining = clamp( m_PortalLocal.m_flSlowTimeRemaining - flDrainAmount, 0.0f, slowtime_max.GetFloat() );
+
+		if ( m_bHasPlayedSlowTimeStopSound == false )
+		{
+			if ( m_PortalLocal.m_flSlowTimeRemaining < 1.5f )
+			{
+				EmitSound( "Player.SlowTime_Stop" );
+				m_bHasPlayedSlowTimeStopSound = true;
+			}
+		}
+
+		if ( m_PortalLocal.m_flSlowTimeRemaining <= 0.0f )
+		{
+			StopSlowingTime();
+		}
+	}
+	else
+	{
+		m_PortalLocal.m_flSlowTimeRemaining = clamp( m_PortalLocal.m_flSlowTimeRemaining + ( gpGlobals->frametime * slowtime_regen_per_second.GetFloat() ), 0.0f, m_PortalLocal.m_flSlowTimeMaximum );
+	}
+
+	// Modulate time!
+	if ( GlobalEntity_GetState( "slowtime_disabled" ) != GLOBAL_ON )
+	{
+		if ( m_afButtonPressed & IN_SLOWTIME )
+		{
+			if ( m_PortalLocal.m_bSlowingTime )
+			{
+				// Turn the effect off
+				StopSlowingTime();
+			}
+			else
+			{
+				if ( slowtime_must_refill.GetBool() == false  || m_PortalLocal.m_flSlowTimeRemaining >= slowtime_max.GetFloat() )
+				{
+					StartSlowingTime( slowtime_max.GetFloat() );
+				}
+				else
+				{
+					EmitSound( "PortalPlayer.UseDeny" );
+				}
+			}
+		}
+	}
+
+#endif // USE_SLOWTIME
+
+	if ( GameRules()->IsMultiplayer() )
+	{
+		// Send a ping
+		if ( m_afButtonPressed & IN_COOP_PING )
+		{
+			if ( ( m_flLastPingTime + sv_portal_coop_ping_cooldown_time.GetFloat() ) < gpGlobals->curtime )
+			{
+				PlayCoopPingEffect();
+				m_flLastPingTime = gpGlobals->curtime;
+			}
+		}
+
+		m_bPingDisabled = ( GetTeamNumber() == TEAM_BLUE && GlobalEntity_GetState( "no_pinging_blue" ) == GLOBAL_ON ||
+							GetTeamNumber() == TEAM_RED && GlobalEntity_GetState( "no_pinging_orange" ) == GLOBAL_ON );
+
+		m_bTauntDisabled = ( GetTeamNumber() == TEAM_BLUE && GlobalEntity_GetState( "no_taunting_blue" ) == GLOBAL_ON ||
+							 GetTeamNumber() == TEAM_RED && GlobalEntity_GetState( "no_taunting_orange" ) == GLOBAL_ON );
+
+		if ( !m_bTauntDisabled )
+		{
+			CBaseEntity *pGround = GetGroundEntity();
+			if ( pGround && !pGround->GetAbsVelocity().IsZero() )
+			{
+				m_bTauntDisabled = true;
+			}
+		}
+
+		bool bHasPartnerInRange = false;
+
+		if ( !m_bTauntDisabled )
+		{
+			CPortal_Player *pOtherPlayer = ToPortalPlayer( UTIL_OtherConnectedPlayer( this ) );
+			if ( pOtherPlayer )
+			{
+				if ( pOtherPlayer->m_nTeamTauntState == TEAM_TAUNT_NEED_PARTNER )
+				{
+					Vector vInitiatorPos, vAcceptorPos;
+					QAngle angInitiatorAng, angAcceptorAng;
+					bHasPartnerInRange = ValidateTeamTaunt( pOtherPlayer, vInitiatorPos, angInitiatorAng, vAcceptorPos, angAcceptorAng );
+				}
+
+				if ( bHasPartnerInRange )
+				{
+					m_hTauntPartnerInRange = pOtherPlayer;
+				}
+			}
+		}
+
+		if ( !bHasPartnerInRange )
+		{
+			m_hTauntPartnerInRange = NULL;
+		}
+	}
+
+	if ( GetGroundEntity() )
+	{
+		m_nPortalsEnteredInAirFlags = 0;
+	}
 	UpdateVMGrab( m_hAttachedObject );
 
 	//Reset bullet force accumulator, only lasts one frame
 	m_vecTotalBulletForce = vec3_origin;
 
 	SetLocalAngles( vOldAngles );
-	
+
 	// Cache the velocity before impact
 	if( HASPAINTMAP )
 		m_PortalLocal.m_vPreUpdateVelocity = GetAbsVelocity();
-	
+
 	// Update the painted power
 	UpdatePaintedPower();
 
@@ -779,7 +2096,7 @@ void CPortal_Player::PreThink( void )
 		m_bTauntRemoteViewFOVFixup = false;
 		SetFOV( this, 0, 0.0f, 0 );
 	}
-	
+
 	if( m_hAttachedObject && !m_pGrabSound )
 	{
 		CSoundEnvelopeController& controller = CSoundEnvelopeController::GetController();
@@ -798,67 +2115,25 @@ void CPortal_Player::PreThink( void )
 	}
 }
 
-void CPortal_Player::PostThink( void )
-{
-	BaseClass::PostThink();
-
-	// Store the eye angles pitch so the client can compute its animation state correctly.
-	m_angEyeAngles = EyeAngles();
-
-	QAngle angles = GetLocalAngles();
-	angles[PITCH] = 0;
-	SetLocalAngles( angles );
-
-	// Regenerate heath after 3 seconds
-	if ( IsAlive() && GetHealth() < GetMaxHealth() )
-	{
-		// Color to overlay on the screen while the player is taking damage
-		color32 hurtScreenOverlay = {64,0,0,64};
-
-		if ( gpGlobals->curtime > m_fTimeLastHurt + sv_regeneration_wait_time.GetFloat() )
-		{
-			TakeHealth( 1, DMG_GENERIC );
-			m_bIsRegenerating = true;
-
-			if ( GetHealth() >= GetMaxHealth() )
-			{
-				m_bIsRegenerating = false;
-			}
-		}
-		else
-		{
-			m_bIsRegenerating = false;
-			UTIL_ScreenFade( this, hurtScreenOverlay, 1.0f, 0.1f, FFADE_IN|FFADE_PURGE );
-		}
-	}
-
-	UpdatePortalPlaneSounds();
-	UpdateWooshSounds();
-
-	m_PlayerAnimState->Update( m_angEyeAngles[YAW], m_angEyeAngles[PITCH] );
-	UpdateSecondsTaken();
-
-	// Try to fix the player if they're stuck
-	if ( m_bStuckOnPortalCollisionObject )
-	{
-		Vector vForward = ((CProp_Portal*)m_hPortalEnvironment.Get())->m_vPrevForward;
-		Vector vNewPos = GetAbsOrigin() + vForward * gpGlobals->frametime * -1000.0f;
-		Teleport( &vNewPos, NULL, &vForward );
-		m_bStuckOnPortalCollisionObject = false;
-	}
-	
-	// Try to update our crosshair
-	m_bIsHoldingSomething = IsHoldingEntity( NULL );
-	
-	IncrementDistanceTaken();
-
-}
-
-void CPortal_Player::PlayerDeathThink(void)
+void CPortal_Player::PlayerDeathThink( void )
 {
 	float flForward;
 
 	SetNextThink( gpGlobals->curtime + 0.1f );
+
+	// wait until the crush animation is over before we respawn the player
+	if ( m_Shared.InCond( PORTAL_COND_DEATH_CRUSH ) || m_Shared.InCond( PORTAL_COND_DEATH_GIB ) )
+	{
+		return;
+	}
+
+	if (m_lifeState == LIFE_DYING)
+	{
+		m_bSpawnFromDeath = true;
+	}
+
+	// Clear any painted powers
+	CleansePaint();
 
 	if (GetFlags() & FL_ONGROUND)
 	{
@@ -885,6 +2160,10 @@ void CPortal_Player::PlayerDeathThink(void)
 		PackDeadPlayerItems();
 	}
 
+	// We're not playing death animations right now-- no need to finish the cycle.
+	// If we add these to portal MP in the future, this block will let them finish before
+	// the player respawns.
+#if 0
 	if (GetModelIndex() && (!IsSequenceFinished()) && (m_lifeState == LIFE_DYING))
 	{
 		StudioFrameAdvance( );
@@ -893,13 +2172,14 @@ void CPortal_Player::PlayerDeathThink(void)
 		if ( m_iRespawnFrames < 60 )  // animations should be no longer than this
 			return;
 	}
+#endif
 
 	if (m_lifeState == LIFE_DYING)
 		m_lifeState = LIFE_DEAD;
 
 	StopAnimation();
 
-	AddEffects( EF_NOINTERP );
+	// AddEffects( EF_NOINTERP );
 	m_flPlaybackRate = 0.0;
 
 	int fAnyButtonDown = (m_nButtons & ~IN_SCORE);
@@ -910,10 +2190,30 @@ void CPortal_Player::PlayerDeathThink(void)
 		fAnyButtonDown &= ~IN_DUCK;
 	}
 
+	// Strip out zoom toggle
+	fAnyButtonDown &= ~IN_ZOOM;
+
+	if ( GameRules()->IsMultiplayer() == false && sp_fade_and_force_respawn.GetBool() )
+	{
+		const float flFadeAndResapwnTime = 3.0f;
+		color32 clr;
+		clr.r = clr.g = clr.b = 0;
+		clr.a = 255;
+		UTIL_ScreenFade( this, clr, flFadeAndResapwnTime, flFadeAndResapwnTime + 1.0f, FFADE_OUT | FFADE_STAYOUT );
+
+		if ( gpGlobals->curtime > m_flDeathTime + flFadeAndResapwnTime )
+		{
+			RespawnPlayer();
+			return;
+		}
+	}
+
+	bool bMultiplayerForceRespawn = ( g_pGameRules->IsMultiplayer() && forcerespawn.GetInt() > 0 );
+
 	// wait for all buttons released
 	if ( m_lifeState == LIFE_DEAD )
 	{
-		if ( fAnyButtonDown || gpGlobals->curtime < m_flDeathTime + DEATH_ANIMATION_TIME )
+		if ( ( fAnyButtonDown && !bMultiplayerForceRespawn ) || gpGlobals->curtime < m_flDeathTime + PORTAL_RESPAWN_DELAY )
 			return;
 
 		if ( g_pGameRules->FPlayerCanRespawn( this ) )
@@ -924,33 +2224,113 @@ void CPortal_Player::PlayerDeathThink(void)
 		return;
 	}
 
-	// if the player has been dead for one second longer than allowed by forcerespawn, 
-	// forcerespawn isn't on. Send the player off to an intermission camera until they 
+	// if the player has been dead for one second longer than allowed by forcerespawn,
+	// forcerespawn isn't on. Send the player off to an intermission camera until they
 	// choose to respawn.
-	if ( g_pGameRules->IsMultiplayer() && ( gpGlobals->curtime > (m_flDeathTime + DEATH_ANIMATION_TIME) ) && !IsObserver() )
+	if ( g_pGameRules->IsMultiplayer() && forcerespawn.GetInt() == 0 && gpGlobals->curtime > m_flDeathTime + DEATH_ANIMATION_TIME && !IsObserver() )
 	{
-		// go to dead camera. 
+		// go to dead camera.
 		StartObserverMode( m_iObserverLastMode );
 	}
 
-	// wait for any button down,  or mp_forcerespawn is set and the respawn time is up
-	if (!fAnyButtonDown 
-		&& !( g_pGameRules->IsMultiplayer() && forcerespawn.GetInt() > 0 && (gpGlobals->curtime > (m_flDeathTime + 5))) )
-		return;
+	// wait for any button down, or mp_forcerespawn is set and the respawn time is up
+	if ( ( fAnyButtonDown || bMultiplayerForceRespawn ) && gpGlobals->curtime >= m_flDeathTime + PORTAL_RESPAWN_DELAY )
+	{
+		RespawnPlayer();
+	}
+}
 
+void CPortal_Player::RespawnPlayer( void )
+{
 	m_nButtons = 0;
 	m_iRespawnFrames = 0;
 
+	// All condition should be removed
+	m_Shared.RemoveAllCond();
+	SetTeamTauntState( TEAM_TAUNT_NONE );
+
+	if ( GameRules()->IsMultiplayer() )
+	{
+		// if the player was dropped by the other player and fell into goo, give PARTNER_DROP Ach. to the other player
+		if ( m_bWasDroppedByOtherPlayerWhileTaunting && GetWaterLevel() != WL_NotInWater )
+		{
+			CPortal_Player *pOtherPlayer = ToPortalPlayer( UTIL_OtherConnectedPlayer( this ) );
+			if ( pOtherPlayer )
+			{
+				UTIL_RecordAchievementEvent( "ACH.PARTNER_DROP", pOtherPlayer );
+			}
+		}
+	}
+
 	//Msg( "Respawn\n");
 
-	respawn( this, !IsObserver() );// don't copy a corpse if we're in deathcam.
+	if ( PortalGameRules() && GetBonusChallenge() > 0 )
+	{
+		// Single player challenge needs to respawn this way so we don't lose the session
+		engine->ChangeLevel( gpGlobals->mapname.ToCStr(), NULL );
+	}
+	else
+	{
+		respawn( this, !IsObserver() );// don't copy a corpse if we're in deathcam.
+	}
+
 	SetNextThink( TICK_NEVER_THINK );
+}
+
+void CPortal_Player::PlayerTransitionCompleteThink( void )
+{
+	const char *szVideoCommand = "stop_transition_videos_fadeout";
+	char szClientCmd[256];
+	Q_snprintf( szClientCmd, sizeof(szClientCmd), "%s %f\n", szVideoCommand, 1.5f );
+	engine->ClientCommand( edict(), szClientCmd );
+
+	if ( mp_dev_wait_for_other_player.GetBool() && ( PortalMPGameRules() && !PortalMPGameRules()->IsCommunityCoopHub() ) )
+	{
+		// We wanted to wait for the other player
+		if ( PortalMPGameRules() && ( !PortalMPGameRules()->IsPlayerDataReceived( 0 ) || !PortalMPGameRules()->IsPlayerDataReceived( 1 ) ) )
+		{
+			// Both players haven't sent their data, shut it down!
+			DevMsg( "Player transitioned with no partner!\n" );
+			engine->ClientCommand( this->edict(), "disconnect \"Partner disconnected\"" );
+		}
+	}
+
+	ChallengePlayersReady();
+
+	// Respawn other players who were waiting
+	SetThink( &CBasePlayer::PlayerDeathThink );
+	SetNextThink( gpGlobals->curtime + 0.1f );
+
+	SetContextThink( NULL, 0, CATCHPATNERNOTCONNECTING_THINK_CONTEXT );
+}
+
+void CPortal_Player::PlayerCatchPatnerNotConnectingThink()
+{
+	int numValidNetChannels = 0;
+	for (int i = 1; i <= gpGlobals->maxClients; i++ )
+	{
+		INetChannelInfo *pNetChan = engine->GetPlayerNetInfo( i );
+		if ( !pNetChan )
+			continue;
+
+		++ numValidNetChannels;
+	}
+
+	if ( numValidNetChannels < 2 )
+	{
+		SetContextThink( NULL, 0, CATCHPATNERNOTCONNECTING_THINK_CONTEXT );
+		SetNextThink( gpGlobals->curtime + 0.1f );
+	}
+	else
+	{
+		SetContextThink( &CPortal_Player::PlayerCatchPatnerNotConnectingThink, gpGlobals->curtime + 1.0f, CATCHPATNERNOTCONNECTING_THINK_CONTEXT );
+	}
 }
 
 void CPortal_Player::UpdatePortalPlaneSounds( void )
 {
-	CProp_Portal *pPortal = m_hPortalEnvironment;
-	if ( pPortal && pPortal->m_bActivated )
+	CPortal_Base2D *pPortal = dynamic_cast<CProp_Portal *>(m_hPortalEnvironment.Get());
+	if ( pPortal && pPortal->IsActive() )
 	{
 		Vector vVelocity;
 		GetVelocity( &vVelocity, NULL );
@@ -1079,7 +2459,7 @@ bool CPortal_Player::WantsLagCompensationOnEntity( const CBasePlayer *pPlayer, c
 	const Vector &vMyOrigin = GetAbsOrigin();
 	const Vector &vHisOrigin = pPlayer->GetAbsOrigin();
 
-	// get max distance player could have moved within max lag compensation time, 
+	// get max distance player could have moved within max lag compensation time,
 	// multiply by 1.5 to to avoid "dead zones"  (sqrt(2) would be the exact value)
 	float maxDistance = 1.5 * pPlayer->MaxSpeed() * sv_maxunlag.GetFloat();
 
@@ -1105,13 +2485,14 @@ bool CPortal_Player::WantsLagCompensationOnEntity( const CBasePlayer *pPlayer, c
 void CPortal_Player::DoAnimationEvent( PlayerAnimEvent_t event, int nData )
 {
 	m_PlayerAnimState->DoAnimationEvent( event, nData );
+	TE_PlayerAnimEvent( this, event, nData );	// Send to any clients who can see this guy.
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Override setup bones so that is uses the render angles from
 //			the Portal animation state to setup the hitboxes.
 //-----------------------------------------------------------------------------
-void CPortal_Player::SetupBones( matrix3x4_t *pBoneToWorld, int boneMask )
+void CPortal_Player::SetupBones( matrix3x4a_t *pBoneToWorld, int boneMask )
 {
 	VPROF_BUDGET( "CBaseAnimating::SetupBones", VPROF_BUDGETGROUP_SERVER_ANIM );
 
@@ -1123,7 +2504,7 @@ void CPortal_Player::SetupBones( matrix3x4_t *pBoneToWorld, int boneMask )
 	CStudioHdr *pStudioHdr = GetModelPtr( );
 
 	Vector pos[MAXSTUDIOBONES];
-	Quaternion q[MAXSTUDIOBONES];
+	QuaternionAligned q[MAXSTUDIOBONES];
 
 	// Adjust hit boxes based on IK driven offset.
 	Vector adjOrigin = GetAbsOrigin() + Vector( 0, 0, m_flEstIkOffset );
@@ -1134,15 +2515,15 @@ void CPortal_Player::SetupBones( matrix3x4_t *pBoneToWorld, int boneMask )
 	{
 		m_iIKCounter++;
 		m_pIk->Init( pStudioHdr, GetAbsAngles(), adjOrigin, gpGlobals->curtime, m_iIKCounter, boneMask );
-		GetSkeleton( pStudioHdr, pos, (QuaternionAligned*)q, boneMask );
+		GetSkeleton( pStudioHdr, pos, q, boneMask );
 
-		m_pIk->UpdateTargets( pos, q, (matrix3x4a_t*)pBoneToWorld, boneComputed );
+		m_pIk->UpdateTargets( pos, q, pBoneToWorld, boneComputed );
 		CalculateIKLocks( gpGlobals->curtime );
-		m_pIk->SolveDependencies( pos, q, (matrix3x4a_t*)pBoneToWorld, boneComputed );
+		m_pIk->SolveDependencies( pos, q, pBoneToWorld, boneComputed );
 	}
 	else
 	{
-		GetSkeleton( pStudioHdr, pos, (QuaternionAligned*)q, boneMask );
+		GetSkeleton( pStudioHdr, pos, q, boneMask );
 	}
 
 	CBaseAnimating *pParent = dynamic_cast< CBaseAnimating* >( GetMoveParent() );
@@ -1152,29 +2533,29 @@ void CPortal_Player::SetupBones( matrix3x4_t *pBoneToWorld, int boneMask )
 		CBoneCache *pParentCache = pParent->GetBoneCache();
 		if ( pParentCache )
 		{
-			BuildMatricesWithBoneMerge( 
-				pStudioHdr, 
+			BuildMatricesWithBoneMerge(
+				pStudioHdr,
 				m_PlayerAnimState->GetRenderAngles(),
-				adjOrigin, 
-				pos, 
-				q, 
-				pBoneToWorld, 
-				pParent, 
+				adjOrigin,
+				pos,
+				q,
+				pBoneToWorld,
+				pParent,
 				pParentCache );
 
 			return;
 		}
 	}
 
-	Studio_BuildMatrices( 
-		pStudioHdr, 
+	Studio_BuildMatrices(
+		pStudioHdr,
 		m_PlayerAnimState->GetRenderAngles(),
-		adjOrigin, 
-		pos, 
-		q, 
+		adjOrigin,
+		pos,
+		q,
 		-1,
-		1.0f,
-		(matrix3x4a_t*)pBoneToWorld,
+		GetModelScale(), // Scaling
+		pBoneToWorld,
 		boneMask );
 }
 
@@ -1185,11 +2566,10 @@ void CPortal_Player::SetAnimation( PLAYER_ANIM playerAnim )
 	return;
 }
 
-//-----------------------------------------------------------------------------
-
 extern int	gEvilImpulse101;
+
 //-----------------------------------------------------------------------------
-// Purpose: Player reacts to bumping a weapon. 
+// Purpose: Player reacts to bumping a weapon.
 // Input  : pWeapon - the weapon that the player bumped into.
 // Output : Returns true if player picked up the weapon
 //-----------------------------------------------------------------------------
@@ -1220,7 +2600,7 @@ bool CPortal_Player::BumpWeapon( CBaseCombatWeapon *pWeapon )
 
 	bool bOwnsWeaponAlready = !!Weapon_OwnsThisType( pWeapon->GetClassname(), pWeapon->GetSubType());
 
-	if ( bOwnsWeaponAlready == true ) 
+	if ( bOwnsWeaponAlready == true )
 	{
 		// If we picked up a second portal gun set the bool to alow secondary fire
 		if ( pPickupPortalgun )
@@ -1250,6 +2630,42 @@ bool CPortal_Player::BumpWeapon( CBaseCombatWeapon *pWeapon )
 			return false;
 		}
 	}
+	else if ( pPickupPortalgun )
+	{
+		// HACK HACK: In Portal 2's incenerator the gun wasn't set correctly and they fired an upgrade_portalgun
+		// command to work around it. Now that cheat commands are protected correctly we need a way to give the
+		// player both portals without modifying the map. So lets just check if it's the incenerator map and fix
+		// it up. -Jeep
+		if ( V_strcmp( gpGlobals->mapname.ToCStr(), "sp_a2_intro" ) == 0 )
+		{
+			pPickupPortalgun->SetCanFirePortal1();
+			pPickupPortalgun->SetCanFirePortal2();
+		}
+
+		if ( pPickupPortalgun->CanFirePortal2() )
+		{
+			IGameEvent *event = gameeventmanager->CreateEvent( "portal_enabled" );
+			if ( event )
+			{
+				event->SetInt( "userid", GetUserID() );
+				event->SetBool( "leftportal", false );
+
+				gameeventmanager->FireEvent( event );
+			}
+		}
+
+		if ( pPickupPortalgun->CanFirePortal1() )
+		{
+			IGameEvent *event = gameeventmanager->CreateEvent( "portal_enabled" );
+			if ( event )
+			{
+				event->SetInt( "userid", GetUserID() );
+				event->SetBool( "leftportal", true );
+
+				gameeventmanager->FireEvent( event );
+			}
+		}
+	}
 
 	pWeapon->CheckRespawn();
 	Weapon_Equip( pWeapon );
@@ -1268,22 +2684,16 @@ void CPortal_Player::ShutdownUseEntity( void )
 	ShutdownPickupController( m_hUseEntity );
 }
 
-const Vector& CPortal_Player::WorldSpaceCenter( ) const
-{
-	m_vWorldSpaceCenterHolder = GetAbsOrigin();
-	m_vWorldSpaceCenterHolder.z += ( (IsDucked()) ? (VEC_DUCK_HULL_MAX.z) : (VEC_HULL_MAX.z) ) * 0.5f;
-	return m_vWorldSpaceCenterHolder;
-}
 
-void CPortal_Player::Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity )
+void CPortal_Player::Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity, bool bUseSlowHighAccuracyContacts )
 {
 	Vector oldOrigin = GetLocalOrigin();
 	QAngle oldAngles = GetLocalAngles();
-	BaseClass::Teleport( newPosition, newAngles, newVelocity );
+	BaseClass::Teleport( newPosition, newAngles, newVelocity, bUseSlowHighAccuracyContacts );
 	m_angEyeAngles = pl.v_angle;
 
 	m_PlayerAnimState->Teleport( newPosition, newAngles, this );
-	
+
 	m_flUsePostTeleportationBoxTime = sv_post_teleportation_box_time.GetFloat();
 
 	const PaintPowerInfo_t& speedPower = GetPaintPower( SPEED_POWER );
@@ -1298,200 +2708,6 @@ void CPortal_Player::Teleport( const Vector *newPosition, const QAngle *newAngle
 	}
 }
 
-void CPortal_Player::VPhysicsShadowUpdate( IPhysicsObject *pPhysics )
-{
-	if( m_hPortalEnvironment.Get() == NULL )
-		return BaseClass::VPhysicsShadowUpdate( pPhysics );
-
-
-	//below is mostly a cut/paste of existing CBasePlayer::VPhysicsShadowUpdate code with some minor tweaks to avoid getting stuck in stuff when in a portal environment
-	if ( sv_turbophysics.GetBool() )
-		return;
-
-	Vector newPosition;
-
-	bool physicsUpdated = m_pPhysicsController->GetShadowPosition( &newPosition, NULL ) > 0 ? true : false;
-
-	// UNDONE: If the player is penetrating, but the player's game collisions are not stuck, teleport the physics shadow to the game position
-	if ( pPhysics->GetGameFlags() & FVPHYSICS_PENETRATING )
-	{
-		CUtlVector<CBaseEntity *> list;
-		PhysGetListOfPenetratingEntities( this, list );
-		for ( int i = list.Count()-1; i >= 0; --i )
-		{
-			// filter out anything that isn't simulated by vphysics
-			// UNDONE: Filter out motion disabled objects?
-			if ( list[i]->GetMoveType() == MOVETYPE_VPHYSICS )
-			{
-				// I'm currently stuck inside a moving object, so allow vphysics to 
-				// apply velocity to the player in order to separate these objects
-				m_touchedPhysObject = true;
-			}
-		}
-	}
-
-	if ( m_pPhysicsController->IsInContact() || (m_afPhysicsFlags & PFLAG_VPHYSICS_MOTIONCONTROLLER) )
-	{
-		m_touchedPhysObject = true;
-	}
-
-	if ( IsFollowingPhysics() )
-	{
-		m_touchedPhysObject = true;
-	}
-
-	if ( GetMoveType() == MOVETYPE_NOCLIP )
-	{
-		m_oldOrigin = GetAbsOrigin();
-		return;
-	}
-
-	if ( phys_timescale.GetFloat() == 0.0f )
-	{
-		physicsUpdated = false;
-	}
-
-	if ( !physicsUpdated )
-		return;
-
-	IPhysicsObject *pPhysGround = GetGroundVPhysics();
-
-	Vector newVelocity;
-	pPhysics->GetPosition( &newPosition, 0 );
-	m_pPhysicsController->GetShadowVelocity( &newVelocity );
-
-
-
-	Vector tmp = GetAbsOrigin() - newPosition;
-	if ( !m_touchedPhysObject && !(GetFlags() & FL_ONGROUND) )
-	{
-		tmp.z *= 0.5f;	// don't care about z delta as much
-	}
-
-	float dist = tmp.LengthSqr();
-	float deltaV = (newVelocity - GetAbsVelocity()).LengthSqr();
-
-	float maxDistErrorSqr = VPHYS_MAX_DISTSQR;
-	float maxVelErrorSqr = VPHYS_MAX_VELSQR;
-	if ( IsRideablePhysics(pPhysGround) )
-	{
-		maxDistErrorSqr *= 0.25;
-		maxVelErrorSqr *= 0.25;
-	}
-
-	if ( dist >= maxDistErrorSqr || deltaV >= maxVelErrorSqr || (pPhysGround && !m_touchedPhysObject) )
-	{
-		if ( m_touchedPhysObject || pPhysGround )
-		{
-			// BUGBUG: Rewrite this code using fixed timestep
-			if ( deltaV >= maxVelErrorSqr )
-			{
-				Vector dir = GetAbsVelocity();
-				float len = VectorNormalize(dir);
-				float dot = DotProduct( newVelocity, dir );
-				if ( dot > len )
-				{
-					dot = len;
-				}
-				else if ( dot < -len )
-				{
-					dot = -len;
-				}
-
-				VectorMA( newVelocity, -dot, dir, newVelocity );
-
-				if ( m_afPhysicsFlags & PFLAG_VPHYSICS_MOTIONCONTROLLER )
-				{
-					float val = Lerp( 0.1f, len, dot );
-					VectorMA( newVelocity, val - len, dir, newVelocity );
-				}
-
-				if ( !IsRideablePhysics(pPhysGround) )
-				{
-					if ( !(m_afPhysicsFlags & PFLAG_VPHYSICS_MOTIONCONTROLLER ) && IsSimulatingOnAlternateTicks() )
-					{
-						newVelocity *= 0.5f;
-					}
-					ApplyAbsVelocityImpulse( newVelocity );
-				}
-			}
-
-			trace_t trace;
-			UTIL_TraceEntity( this, newPosition, newPosition, MASK_PLAYERSOLID, this, COLLISION_GROUP_PLAYER_MOVEMENT, &trace );
-			if ( !trace.allsolid && !trace.startsolid )
-			{
-				SetAbsOrigin( newPosition );
-			}
-		}
-		else
-		{
-			trace_t trace;
-
-			Ray_t ray;
-			ray.Init( GetAbsOrigin(), GetAbsOrigin(), WorldAlignMins(), WorldAlignMaxs() );
-
-			CTraceFilterSimple OriginalTraceFilter( this, COLLISION_GROUP_PLAYER_MOVEMENT );
-			CTraceFilterTranslateClones traceFilter( &OriginalTraceFilter );
-			UTIL_Portal_TraceRay_With( m_hPortalEnvironment, ray, MASK_PLAYERSOLID, &traceFilter, &trace );
-
-			// current position is not ok, fixup
-			if ( trace.allsolid || trace.startsolid )
-			{
-				//try again with new position
-				ray.Init( newPosition, newPosition, WorldAlignMins(), WorldAlignMaxs() );
-				UTIL_Portal_TraceRay_With( m_hPortalEnvironment, ray, MASK_PLAYERSOLID, &traceFilter, &trace );
-
-				if( trace.startsolid == false )
-				{
-					SetAbsOrigin( newPosition );
-				}
-				else
-				{
-					if( !FindClosestPassableSpace( this, newPosition - GetAbsOrigin(), MASK_PLAYERSOLID ) )
-					{
-						// Try moving the player closer to the center of the portal
-						CProp_Portal *pPortal = m_hPortalEnvironment.Get();
-						newPosition += ( pPortal->GetAbsOrigin() - WorldSpaceCenter() ) * 0.1f;
-						SetAbsOrigin( newPosition );
-
-						DevMsg( "Hurting the player for FindClosestPassableSpaceFailure!" );
-
-						// Deal 1 damage per frame... this will kill a player very fast, but allow for the above correction to fix some cases
-						CTakeDamageInfo info( this, this, vec3_origin, vec3_origin, 1, DMG_CRUSH );
-						OnTakeDamage( info );
-					}
-				}
-			}
-		}
-	}
-	else
-	{
-		if ( m_touchedPhysObject )
-		{
-			// check my position (physics object could have simulated into my position
-			// physics is not very far away, check my position
-			trace_t trace;
-			UTIL_TraceEntity( this, GetAbsOrigin(), GetAbsOrigin(),
-				MASK_PLAYERSOLID, this, COLLISION_GROUP_PLAYER_MOVEMENT, &trace );
-
-			// is current position ok?
-			if ( trace.allsolid || trace.startsolid )
-			{
-				// stuck????!?!?
-				//Msg("Stuck on %s\n", trace.m_pEnt->GetClassname());
-				SetAbsOrigin( newPosition );
-				UTIL_TraceEntity( this, GetAbsOrigin(), GetAbsOrigin(),
-					MASK_PLAYERSOLID, this, COLLISION_GROUP_PLAYER_MOVEMENT, &trace );
-				if ( trace.allsolid || trace.startsolid )
-				{
-					//Msg("Double Stuck\n");
-					SetAbsOrigin( m_oldOrigin );
-				}
-			}
-		}
-	}
-	m_oldOrigin = GetAbsOrigin();
-}
 
 bool CPortal_Player::UseFoundEntity( CBaseEntity *pUseEntity, bool bAutoGrab )
 {
@@ -1523,46 +2739,6 @@ bool CPortal_Player::UseFoundEntity( CBaseEntity *pUseEntity, bool bAutoGrab )
 
 	return usedSomething;
 }
-
-//bool CPortal_Player::StartReplayMode( float fDelay, float fDuration, int iEntity )
-//{
-//	if ( !BaseClass::StartReplayMode( fDelay, fDuration, 1 ) )
-//		return false;
-//
-//	CSingleUserRecipientFilter filter( this );
-//	filter.MakeReliable();
-//
-//	UserMessageBegin( filter, "KillCam" );
-//
-//	EHANDLE hPlayer = this;
-//
-//	if ( m_hObserverTarget.Get() )
-//	{
-//		WRITE_EHANDLE( m_hObserverTarget );	// first target
-//		WRITE_EHANDLE( hPlayer );	//second target
-//	}
-//	else
-//	{
-//		WRITE_EHANDLE( hPlayer );	// first target
-//		WRITE_EHANDLE( 0 );			//second target
-//	}
-//	MessageEnd();
-//
-//	return true;
-//}
-//
-//void CPortal_Player::StopReplayMode()
-//{
-//	BaseClass::StopReplayMode();
-//
-//	CSingleUserRecipientFilter filter( this );
-//	filter.MakeReliable();
-//
-//	UserMessageBegin( filter, "KillCam" );
-//	WRITE_EHANDLE( 0 );
-//	WRITE_EHANDLE( 0 );
-//	MessageEnd();
-//}
 
 void CPortal_Player::PlayerUse( void )
 {
@@ -1734,7 +2910,7 @@ void CPortal_Player::PlayerRunCommand(CUserCmd *ucmd, IMoveHelper *moveHelper)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Deal with command coming in from the client-side (TODO: Uncomment the intermediate code when they are implemented) - Nano
+// Purpose: Deal with command coming in from the client-side
 //-----------------------------------------------------------------------------
 bool CPortal_Player::ClientCommand( const CCommand &args )
 {
@@ -1743,11 +2919,11 @@ bool CPortal_Player::ClientCommand( const CCommand &args )
 	{
 		if ( args.ArgC() > 1 )
 		{
-			//Taunt( args[1] );
+			Taunt( args[1] );
 		}
 		else
 		{
-			//Taunt();
+			Taunt();
 		}
 		return true;
 	}
@@ -1755,7 +2931,7 @@ bool CPortal_Player::ClientCommand( const CCommand &args )
 	{
 		if ( args.ArgC() > 1 )
 		{
-			//Taunt( args[1], true );
+			Taunt( args[1], true );
 		}
 
 		return true;
@@ -1849,28 +3025,28 @@ bool CPortal_Player::ClientCommand( const CCommand &args )
 		CBaseEntity *pEntity = gEntList.FindEntityByName( NULL, "@glados" );
 		if ( pEntity )
 		{
-			if ( StringHasPrefix( args.GetCommandString(), "CoopPingTool (" ) )
-			{
-				pEntity->RunScript( args.GetCommandString(), "PingToolCommand" );
-			}
+			pEntity->RunScript( args.GetCommandString(), "PingToolCommand" );
 		}
 		return true;
 	}
+	// TODO: Add CPointSurvey
+#if 0
 	else if ( FStrEq( pcmd, "survey_done" ) )
 	{
-		//int nIndex = V_atoi( args[1] );
-		//CPointSurvey *pPointSurveyEnt = ( nIndex != -1 ) ? (CPointSurvey*)UTIL_EntityByIndex( nIndex ) : NULL;
-		//if ( pPointSurveyEnt )
-		//{
-		//	pPointSurveyEnt->OnSurveyCompleted();
-		//}
+		int nIndex = V_atoi( args[1] );
+		CPointSurvey *pPointSurveyEnt = ( nIndex != -1 ) ? (CPointSurvey*)UTIL_EntityByIndex( nIndex ) : NULL;
+		if ( pPointSurveyEnt )
+		{
+			pPointSurveyEnt->OnSurveyCompleted();
+		}
 		return true;
 	}
+#endif
 	else if ( FStrEq( pcmd, "load_recent_checkpoint" ) )
 	{
 		if ( !PortalMPGameRules() )
 		{
-			//RespawnPlayer();
+			RespawnPlayer();
 		}
 	}
 	else if ( FStrEq( pcmd, "pre_go_to_hub" ) )
@@ -1897,23 +3073,26 @@ bool CPortal_Player::ClientCommand( const CCommand &args )
 
 		bool bBothPlayersHaveDLC = true;
 
-		//if ( IsGameConsole() )
-		//{
-		//	IMatchSession *pIMatchSession = g_pMatchFramework->GetMatchSession();
-		//	if ( pIMatchSession )
-		//	{
-		//		KeyValues *pFullSettings = pIMatchSession->GetSessionSettings();
-		//		if ( pFullSettings )
-		//		{
-		//			if ( !( ( pFullSettings->GetUint64( "members/machine0/dlcmask" ) & PORTAL2_DLCID_RETAIL_DLC1 ) &&
-		//				( XBX_GetNumGameUsers() > 1 ||
-		//				( pFullSettings->GetUint64( "members/machine1/dlcmask" ) & PORTAL2_DLCID_RETAIL_DLC1 ) ) ) )
-		//			{
-		//				bBothPlayersHaveDLC = false;
-		//			}
-		//		}
-		//	}
-		//}
+		// What?
+#if 0
+		if ( IsGameConsole() )
+		{
+			IMatchSession *pIMatchSession = g_pMatchFramework->GetMatchSession();
+			if ( pIMatchSession )
+			{
+				KeyValues *pFullSettings = pIMatchSession->GetSessionSettings();
+				if ( pFullSettings )
+				{
+					if ( !( ( pFullSettings->GetUint64( "members/machine0/dlcmask" ) & PORTAL2_DLCID_RETAIL_DLC1 ) &&
+						( XBX_GetNumGameUsers() > 1 ||
+						( pFullSettings->GetUint64( "members/machine1/dlcmask" ) & PORTAL2_DLCID_RETAIL_DLC1 ) ) ) )
+					{
+						bBothPlayersHaveDLC = false;
+					}
+				}
+			}
+		}
+#endif
 
 		// clear out any outstanding UI for both players
 		ClearClientUI();
@@ -1958,7 +3137,7 @@ bool CPortal_Player::ClientCommand( const CCommand &args )
 	}
 	else if ( FStrEq( pcmd, "restart_level" ) )
 	{
-		//sv_bonus_challenge.SetValue( GetBonusChallenge() );
+		sv_bonus_challenge.SetValue( GetBonusChallenge() );
 #if !defined( _GAMECONSOLE )
 		g_Portal2ResearchDataTracker.Event_PlayerGaveUp();
 #endif // !defined( _GAMECONSOLE )
@@ -2013,7 +3192,7 @@ bool CPortal_Player::ClientCommand( const CCommand &args )
 			ClearClientUI();
 
 			const char *pMapName = args[1];
-			//sv_bonus_challenge.SetValue( GetBonusChallenge() );
+			sv_bonus_challenge.SetValue( GetBonusChallenge() );
 			engine->ChangeLevel( pMapName, NULL );
 		}
 
@@ -2055,20 +3234,56 @@ bool CPortal_Player::ClientCommand( const CCommand &args )
 
 		return true;
 	}
+	// TODO: Add CPortalMPStats
+#if 0
 	else if ( FStrEq( pcmd, "mp_stats_data" ) )
 	{
-		//CPortalMPStats *pStats = GetPortalMPStats();
-		//if ( pStats )
-		//{
-		//	pStats->SetStats( atoi(args[1]), atoi(args[2]), atoi(args[3]), atoi(args[4]) );
-		//}
+		CPortalMPStats *pStats = GetPortalMPStats();
+		if ( pStats )
+		{
+			pStats->SetStats( atoi(args[1]), atoi(args[2]), atoi(args[3]), atoi(args[4]) );
+		}
 
 		return true;
 	}
+#endif
 
 	return BaseClass::ClientCommand( args );
 }
 
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+int CPortal_Player::FlashlightIsOn( void )
+{
+	return IsEffectActive( EF_DIMLIGHT );
+}
+
+//-----------------------------------------------------------------------------
+// Cheats only, this is for helping developers choose lighting for scenes
+//-----------------------------------------------------------------------------
+bool CPortal_Player::FlashlightTurnOn( bool playSound /*= false*/ )
+{
+	if ( sv_cheats->GetBool() == false )
+		return false;
+
+	AddEffects( EF_DIMLIGHT );
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// Cheats only, this is for helping developers choose lighting for scenes
+//-----------------------------------------------------------------------------
+void CPortal_Player::FlashlightTurnOff( bool playSound /*= false*/ )
+{
+	if ( sv_cheats->GetBool() == false )
+		return;
+
+	RemoveEffects( EF_DIMLIGHT );
+}
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 void CPortal_Player::CheatImpulseCommands( int iImpulse )
 {
 	switch ( iImpulse )
@@ -2077,7 +3292,12 @@ void CPortal_Player::CheatImpulseCommands( int iImpulse )
 		{
 			if( sv_cheats->GetBool() )
 			{
-				GiveAllItems();
+				//GiveAllItems();
+				// FIXME: Bring this back for DLC2
+				//sv_can_carry_both_guns.SetValue( 1 );
+
+				//GivePlayerPaintGun( true, false );
+				GivePlayerPortalGun( true, true );
 			}
 		}
 		break;
@@ -2089,8 +3309,9 @@ void CPortal_Player::CheatImpulseCommands( int iImpulse )
 
 void CPortal_Player::CreateViewModel( int index /*=0*/ )
 {
-	BaseClass::CreateViewModel( index );
-	return;
+	if( !g_pGameRules->IsMultiplayer() )
+		return BaseClass::CreateViewModel( index );
+
 	Assert( index >= 0 && index < MAX_VIEWMODELS );
 
 	if ( GetViewModel( index ) )
@@ -2121,7 +3342,7 @@ void CPortal_Player::CreateRagdollEntity( const CTakeDamageInfo &info )
 		m_hRagdoll = NULL;
 	}
 
-#if PORTAL_HIDE_PLAYER_RAGDOLL
+#if defined PORTAL_HIDE_PLAYER_RAGDOLL
 	AddSolidFlags( FSOLID_NOT_SOLID );
 	AddEffects( EF_NODRAW | EF_NOSHADOW );
 	AddEFlags( EFL_NO_DISSOLVE );
@@ -2144,7 +3365,7 @@ void CPortal_Player::CreateRagdollEntity( const CTakeDamageInfo &info )
 	pRagdoll = dynamic_cast<CPortalRagdoll*>( CreateEntityByName( "portal_ragdoll" ) );
 	if ( pRagdoll )
 	{
-		
+
 
 		pRagdoll->m_hPlayer = this;
 		pRagdoll->m_vecRagdollOrigin = GetAbsOrigin();
@@ -2161,13 +3382,15 @@ void CPortal_Player::CreateRagdollEntity( const CTakeDamageInfo &info )
 		float fSequenceDuration = SequenceDuration( GetSequence() );
 		float fPreviousCycle = clamp(GetCycle()-( 0.1 * ( 1 / fSequenceDuration ) ),0.f,1.f);
 		float fCurCycle = GetCycle();
-		matrix3x4_t pBoneToWorld[MAXSTUDIOBONES], pBoneToWorldNext[MAXSTUDIOBONES];
-		SetupBones( pBoneToWorldNext, BONE_USED_BY_ANYTHING );
+
+		matrix3x4a_t bonetoworldnext[MAXSTUDIOBONES];
+		SetupBones( bonetoworldnext, BONE_USED_BY_ANYTHING );
 		SetCycle( fPreviousCycle );
-		SetupBones( pBoneToWorld, BONE_USED_BY_ANYTHING );
+		matrix3x4a_t bonetoworld[MAXSTUDIOBONES];
+		SetupBones( bonetoworld, BONE_USED_BY_ANYTHING );
 		SetCycle( fCurCycle );
 
-		pRagdoll->InitRagdoll( info.GetDamageForce(), m_nForceBone, info.GetDamagePosition(), pBoneToWorld, pBoneToWorldNext, 0.1f, COLLISION_GROUP_INTERACTIVE_DEBRIS, true );
+		//pRagdoll->InitRagdoll( info.GetDamageForce(), m_nForceBone, info.GetDamagePosition(), bonetoworld, bonetoworldnext, 0.1f, COLLISION_GROUP_INTERACTIVE_DEBRIS, true );
 		pRagdoll->SetMoveType( MOVETYPE_VPHYSICS );
 		pRagdoll->SetSolid( SOLID_VPHYSICS );
 		if ( IsDissolving() )
@@ -2194,7 +3417,10 @@ void CPortal_Player::CreateRagdollEntity( const CTakeDamageInfo &info )
 
 void CPortal_Player::Jump( void )
 {
+	#if !defined ( _GAMECONSOLE ) && !defined( NO_STEAM )
 	g_PortalGameStats.Event_PlayerJump( GetAbsOrigin(), GetAbsVelocity() );
+	#endif
+
 	BaseClass::Jump();
 }
 
@@ -2232,62 +3458,123 @@ bool CPortal_Player::IsZoomed( void )
 	return m_PortalLocal.m_bZoomedIn;
 }
 
-
 void CPortal_Player::Event_Killed( const CTakeDamageInfo &info )
 {
+	m_PlayerGunTypeWhenDead = m_PlayerGunType;
+
 	//update damage info with our accumulated physics force
 	CTakeDamageInfo subinfo = info;
 	subinfo.SetDamageForce( m_vecTotalBulletForce );
+
+	// if we're burned by a laser, but we haven't been told to gib, that means that we had fractional damage done to us
+	// and we died before it was caught in OnTakeDamage.  Gib them, plz.
+	if ( GameRules()->IsMultiplayer() && !m_Shared.InCond( PORTAL_COND_DROWNING ) )
+	{
+		if ( mp_should_gib_bots.GetBool() && !m_Shared.InCond( PORTAL_COND_DEATH_GIB ) )
+		{
+			m_Shared.AddCond( PORTAL_COND_DEATH_GIB );
+			m_Shared.m_damageInfo = info;
+			Break( info.GetAttacker(), info );
+		}
+	}
+
+#if !defined( _GAMECONSOLE ) && !defined( NO_STEAM ) && 0
+	g_PortalGameStats.Event_PlayerDeath( this );
+#endif
+
+#ifndef _GAMECONSOLE
+	g_Portal2ResearchDataTracker.IncrementDeath( this );
+#endif // !_GAMECONSOLE
+
+	m_bTauntRemoteView = false;
 
 	// show killer in death cam mode
 	// chopped down version of SetObserverTarget without the team check
 	//if( info.GetAttacker() )
 	//{
 	//	// set new target
-	//	m_hObserverTarget.Set( info.GetAttacker() ); 
+	//	m_hObserverTarget.Set( info.GetAttacker() );
 	//}
 	//else
 	//	m_hObserverTarget.Set( NULL );
 
-	// Note: since we're dead, it won't draw us on the client, but we don't set EF_NODRAW
-	// because we still want to transmit to the clients in our PVS.
+	// UpdateExpression();
+
+#if !defined PORTAL_HIDE_PLAYER_RAGDOLL
 	CreateRagdollEntity( info );
-
-	BaseClass::Event_Killed( subinfo );
-	
-	SetUseKeyCooldownTime( 3.0f );
-
-#if PORTAL_HIDE_PLAYER_RAGDOLL
+#else
 	// Fizzle all portals so they don't see the player disappear
 	int iPortalCount = CProp_Portal_Shared::AllPortals.Count();
 	CProp_Portal **pPortals = CProp_Portal_Shared::AllPortals.Base();
-	for( int i = 0; i != iPortalCount; ++i )
+	CWeaponPortalgun* pPortalgun = (CWeaponPortalgun*)GetActiveWeapon();
+	if( pPortalgun )
 	{
-		CProp_Portal *pTempPortal = pPortals[i];
-
-		if( pTempPortal && pTempPortal->m_bActivated )
+		for( int i = 0; i != iPortalCount; ++i )
 		{
-			pTempPortal->Fizzle();
+			CProp_Portal *pTempPortal = pPortals[i];
+			//HACKISH: Do this before the chain to base... basecombatcharacer will dump the weapon
+			// and then we won't know what linkage ID to fizzle. This is relevant in multiplayer,
+			// where we want only the dying player's portals to fizzle.
+			if( pTempPortal && ( pPortalgun->GetLinkageGroupID() == pTempPortal->GetLinkageGroup() ) )
+			{
+			//	pTempPortal->DeactivatePortalOnThink();
+			}
 		}
 	}
+
+	if ( GameRules()->IsMultiplayer() && mp_should_gib_bots.GetBool() )
+	{
+		for ( int i = 0; i < WeaponCount(); ++i )
+		{
+			// remove the weapon, we don't need it anymore and it shows up attached to the non visuble player in third person
+			CBaseCombatWeapon *pWeapon = GetWeapon( i );
+
+			if ( pWeapon == NULL )
+				continue;
+
+			UTIL_Remove( pWeapon );
+		}
+	}
+
 #endif // PORTAL_HIDE_PLAYER_RAGDOLL
 
-	if ( (info.GetDamageType() & DMG_DISSOLVE) && !(m_hRagdoll.Get()->GetEFlags() & EFL_NO_DISSOLVE) )
+	BaseClass::Event_Killed( subinfo );
+
+	SetUseKeyCooldownTime( 3.0f );
+
+	if ( (info.GetDamageType() & DMG_DISSOLVE) && ( m_hRagdoll.Get() ) && !(m_hRagdoll.Get()->GetEFlags() & EFL_NO_DISSOLVE) )
 	{
-		if ( m_hRagdoll )
-		{
-			m_hRagdoll->GetBaseAnimating()->Dissolve( NULL, gpGlobals->curtime, false, ENTITY_DISSOLVE_NORMAL );
-		}
+		m_hRagdoll->GetBaseAnimating()->Dissolve( NULL, gpGlobals->curtime, false, ENTITY_DISSOLVE_NORMAL );
 	}
 
 	m_lifeState = LIFE_DYING;
-	//StopZooming();
 
 	if ( GetObserverTarget() )
 	{
 		//StartReplayMode( 3, 3, GetObserverTarget()->entindex() );
 		//StartObserverMode( OBS_MODE_DEATHCAM );
 	}
+
+	if ( GameRules() && GameRules()->IsMultiplayer() )
+	{
+		CBaseEntity *pEntity = gEntList.FindEntityByName( NULL, "@glados" );
+		if ( pEntity )
+		{
+			char szScriptCommand[ 64 ];
+			V_snprintf( szScriptCommand, sizeof( szScriptCommand ), "BotDeath(%i,%i)", ( GetTeamNumber() == TEAM_BLUE ? 2 : 1 ), info.GetDamageType() );
+			pEntity->RunScript( szScriptCommand, "PlayerDied" );
+		}
+		// TODO: Add CPortalMPStats
+#if 0
+		CPortalMPStats *pStats = GetPortalMPStats();
+		if ( pStats )
+		{
+			pStats->IncrementPlayerDeathsMap( this );
+		}
+#endif
+	}
+
+	FireConcept( TLK_PLAYER_KILLED );
 }
 
 int CPortal_Player::OnTakeDamage( const CTakeDamageInfo &inputInfo )
@@ -2306,8 +3593,12 @@ int CPortal_Player::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 
 	bool bIsTurret = false;
 
-	if ( pAttacker && FClassnameIs( pAttacker, "npc_portal_turret_floor" ) )
+	if ( pAttacker && ( FClassnameIs( pAttacker, "npc_portal_turret_floor" ) ||
+						FClassnameIs( pAttacker, "npc_hover_turret" ) ) )
+	{
 		bIsTurret = true;
+		FireConcept( TLK_PLAYER_SHOT );
+	}
 
 	// Refuse damage from prop_glados_core.
 	if ( (pAttacker && FClassnameIs( pAttacker, "prop_glados_core" )) ||
@@ -2316,7 +3607,7 @@ int CPortal_Player::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 		inputInfoCopy.SetDamage(0.0f);
 	}
 
-	if ( bIsTurret && ( inputInfoCopy.GetDamageType() & DMG_BULLET ) )
+	if ( bIsTurret && ( inputInfoCopy.GetDamageType() & ( DMG_BULLET | DMG_ENERGYBEAM ) ) )
 	{
 		Vector vLateralForce = inputInfoCopy.GetDamageForce();
 		vLateralForce.z = 0.0f;
@@ -2336,10 +3627,38 @@ int CPortal_Player::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 		{
 			EmitSound( "PortalPlayer.BonkYelp" );
 		}
+
 	}
 	else if ( ( inputInfoCopy.GetDamageType() & DMG_SHOCK ) || ( inputInfoCopy.GetDamageType() & DMG_BURN ) )
 	{
-		EmitSound( "PortalPortal.PainYelp" );
+		EmitSound( "Player.PainSmall" );
+		FireConcept( TLK_PLAYER_BURNED );
+	}
+
+	// FIXME: This is a hold-over from old Portal behavior -- we should adjust the health to compensate! -- jdw
+	inputInfoCopy.ScaleDamage( sk_dmg_take_scale1.GetFloat() );
+
+	if ( inputInfoCopy.GetDamage() >= m_iHealth && GameRules()->IsMultiplayer() &&
+		!m_Shared.InCond( PORTAL_COND_DROWNING ) )  // don't gib after drowning
+	{
+		if ( bIsTurret || (mp_should_gib_bots.GetBool() && !m_Shared.InCond( PORTAL_COND_DEATH_GIB )) )
+		{
+			m_Shared.AddCond( PORTAL_COND_DEATH_GIB );
+			m_Shared.m_damageInfo = inputInfoCopy;
+			Break( pAttacker, inputInfo );
+		}
+		else if ( !mp_should_gib_bots.GetBool() && !m_Shared.InCond( PORTAL_COND_DEATH_CRUSH ) )
+		{
+			m_Shared.AddCond( PORTAL_COND_DEATH_CRUSH );
+			m_Shared.m_damageInfo = inputInfoCopy;
+		}
+	}
+
+	if ( bIsTurret )
+	{
+		#if !defined( _GAMECONSOLE ) && !defined( NO_STEAM ) && 0
+		g_PortalGameStats.Event_TurretDamage( inputInfoCopy.GetDamage() );
+		#endif
 	}
 
 	int ret = BaseClass::OnTakeDamage( inputInfoCopy );
@@ -2348,9 +3667,12 @@ int CPortal_Player::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 	// that gets translated correctly though portals.
 	m_DmgOrigin = inputInfo.GetDamagePosition();
 
-	if ( GetHealth() < 100 )
+	// check if we are drowning in goo
+	bool bGooDamage = ( inputInfoCopy.GetDamageType() & DMG_RADIATION ) > 0;
+	if ( !( GameRules()->IsMultiplayer() && ( bGooDamage || m_Shared.InCond( PORTAL_COND_DEATH_CRUSH ) ) ) )
 	{
-		m_fTimeLastHurt = gpGlobals->curtime;
+		// Play a flinch!
+		DoAnimationEvent( PLAYERANIMEVENT_FLINCH_CHEST, 0 );
 	}
 
 	return ret;
@@ -2376,7 +3698,7 @@ int CPortal_Player::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 		VectorNormalize( vecDir );
 	}
 
-	if ( info.GetInflictor() && (GetMoveType() == MOVETYPE_WALK) && 
+	if ( info.GetInflictor() && (GetMoveType() == MOVETYPE_WALK) &&
 		( !attacker->IsSolidFlagSet(FSOLID_TRIGGER)) )
 	{
 		Vector force = vecDir;// * -DamageForce( WorldAlignSize(), info.GetBaseDamage() );
@@ -2418,35 +3740,111 @@ int CPortal_Player::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 	return 1;
 }
 
-
-void CPortal_Player::ForceDuckThisFrame( void )
+void CPortal_Player::Break( CBaseEntity *pBreaker, const CTakeDamageInfo &info )
 {
-	if( m_Local.m_bDucked != true )
+	// don't ever break unless we're in multiplayer
+	if ( !GameRules()->IsMultiplayer() )
+		return;
+
+	// do a screen shake
+	UTIL_ScreenShake( GetAbsOrigin(), 7.0f, 100.0, 1.5, 500.0f, SHAKE_START, true );
+	EmitSound( "CoopBot.Explode_Gib" );
+
+	//m_takedamage = DAMAGE_NO;
+	//m_OnBreak.FireOutput( pBreaker, this );
+
+	Vector velocity;
+	AngularImpulse angVelocity;
+	IPhysicsObject *pPhysics = VPhysicsGetObject();
+
+	Vector origin;
+	QAngle angles;
+	//AddSolidFlags( FSOLID_NOT_SOLID );
+	if ( pPhysics )
 	{
-		//m_Local.m_bDucking = false;
-		m_Local.m_bDucked = true;
-		ForceButtons( IN_DUCK );
-		AddFlag( FL_DUCKING );
-		SetVCollisionState( GetAbsOrigin(), GetAbsVelocity(), VPHYS_CROUCH );
+		pPhysics->GetVelocity( &velocity, &angVelocity );
+		pPhysics->GetPosition( &origin, &angles );
+		pPhysics->RecheckCollisionFilter();
 	}
-}
-
-void CPortal_Player::UnDuck( void )
-{
-	if( m_Local.m_bDucked != false )
+	else
 	{
-		m_Local.m_bDucked = false;
-		UnforceButtons( IN_DUCK );
-		RemoveFlag( FL_DUCKING );
-		SetVCollisionState( GetAbsOrigin(), GetAbsVelocity(), VPHYS_WALK );
+		velocity = GetAbsVelocity();
+		QAngleToAngularImpulse( GetLocalAngularVelocity(), angVelocity );
+		origin = GetAbsOrigin();
+		angles = GetAbsAngles();
 	}
+
+	//PhysBreakSound( this, VPhysicsGetObject(), GetAbsOrigin() );
+
+	// Allow derived classes to emit special things
+	//OnBreak( velocity, angVelocity, pBreaker );
+
+	breakablepropparams_t params( origin, angles, velocity, angVelocity );
+	params.impactEnergyScale = m_impactEnergyScale;
+	params.defCollisionGroup = GetCollisionGroup();
+	if ( params.defCollisionGroup == COLLISION_GROUP_NONE )
+	{
+		// don't automatically make anything COLLISION_GROUP_NONE or it will
+		// collide with debris being ejected by breaking
+		params.defCollisionGroup = COLLISION_GROUP_INTERACTIVE;
+	}
+
+	params.defBurstScale = 100;
+	// in multiplayer spawn break models as clientside temp ents
+
+	CPASFilter filter( WorldSpaceCenter() );
+
+	//Vector velocity; velocity.Init();
+
+	if ( pPhysics )
+		pPhysics->GetVelocity( &velocity, NULL );
+
+	/*
+	switch ( GetMultiplayerBreakMode() )
+	{
+	case MULTIPLAYER_BREAK_DEFAULT:		// default is to break client-side
+	case MULTIPLAYER_BREAK_CLIENTSIDE:
+		te->PhysicsProp( filter, -1, GetModelIndex(), m_nSkin, GetAbsOrigin(), GetAbsAngles(), velocity, true, GetEffects() );
+		break;
+	case MULTIPLAYER_BREAK_SERVERSIDE:	// server-side break
+		if ( m_PerformanceMode != PM_NO_GIBS || breakable_disable_gib_limit.GetBool() )
+		{
+			PropBreakableCreateAll( GetModelIndex(), pPhysics, params, this, -1, ( m_PerformanceMode == PM_FULL_GIBS ), false );
+		}
+		break;
+	case MULTIPLAYER_BREAK_BOTH:	// pieces break from both dlls
+		te->PhysicsProp( filter, -1, GetModelIndex(), m_nSkin, GetAbsOrigin(), GetAbsAngles(), velocity, true, GetEffects() );
+		if ( m_PerformanceMode != PM_NO_GIBS || breakable_disable_gib_limit.GetBool() )
+		{
+			PropBreakableCreateAll( GetModelIndex(), pPhysics, params, this, -1, ( m_PerformanceMode == PM_FULL_GIBS ), false );
+		}
+		break;
+	}
+
+	// no damage/damage force? set a burst of 100 for some movement
+	else if ( m_PerformanceMode != PM_NO_GIBS || breakable_disable_gib_limit.GetBool() )
+	{
+		PropBreakableCreateAll( GetModelIndex(), pPhysics, params, this, -1, ( m_PerformanceMode == PM_FULL_GIBS ) );
+	}
+	*/
+
+	te->PhysicsProp( filter, -1, GetModelIndex(), m_nSkin, GetAbsOrigin(), GetAbsAngles(), velocity, true, GetEffects() );
+
+	//UTIL_Remove( this );
 }
 
+//
+//void CPortal_Player::UnDuck( void )
+//{
+//	if( m_Local.m_bDucked != false )
+//	{
+//		m_Local.m_bDucked = false;
+//		UnforceButtons( IN_DUCK );
+//		RemoveFlag( FL_DUCKING );
+//		SetVCollisionState( GetAbsOrigin(), GetAbsVelocity(), VPHYS_WALK );
+//	}
+//}
 
-void CPortal_Player::SetForcedGrabControllerType( ForcedGrabControllerType type )
-{
-	m_ForcedGrabController = type;
-}
 
 //--------------------------------------------------------------------------------------------------
 // Disable the use key for the specified time (in seconds)
@@ -2457,6 +3855,12 @@ void CPortal_Player::SetUseKeyCooldownTime( float flCooldownDuration )
 	Assert( flCooldownDuration < flMaxCooldownDuration );
 	flCooldownDuration = clamp ( flCooldownDuration, 0.0f, flMaxCooldownDuration );
 	m_flUseKeyCooldownTime = gpGlobals->curtime + flCooldownDuration;
+}
+
+
+void CPortal_Player::SetForcedGrabControllerType( ForcedGrabControllerType type )
+{
+	m_ForcedGrabController = type;
 }
 
 
@@ -2515,10 +3919,10 @@ void CPortal_Player::UpdateVMGrab( CBaseEntity *pEntity )
 						m_bUseVMGrab = false;
 						return;
 					}
+					// TODO: Fully implement laser code
+#if 0
 					else
 					{
-						// TODO: Add lasers and then add this code back.
-#if 0
 						// Check it's distance to each laser line so the depth renders properly when the laser is between the player and cube
 						for ( int i = 0; i < IPortalLaserAutoList::AutoList().Count(); ++i )
 						{
@@ -2540,8 +3944,8 @@ void CPortal_Player::UpdateVMGrab( CBaseEntity *pEntity )
 								}
 							}
 						}
-#endif
 					}
+#endif
 				}
 
 				// Multiplayer uses VM otherwise
@@ -2563,10 +3967,22 @@ void CPortal_Player::UpdateVMGrab( CBaseEntity *pEntity )
 	} //Switch forced grab controller
 }
 
-
-void CPortal_Player::IncrementPortalsPlaced( void )
+void CPortal_Player::IncrementPortalsPlaced( bool bSecondaryPortal )
 {
+	if ( bSecondaryPortal )
+	{
+		FirePlayerProxyOutput( "OnSecondaryPortalPlaced", variant_t(), this, this );
+	}
+	else
+	{
+		FirePlayerProxyOutput( "OnPrimaryPortalPlaced", variant_t(), this, this );
+	}
+
 	m_StatsThisLevel.iNumPortalsPlaced++;
+
+#if !defined( _GAMECONSOLE )
+	g_Portal2ResearchDataTracker.IncrementPortalFired( this );
+#endif // !defined( _GAMECONSOLE ) && !defined( NO_STEAM )
 
 	if ( m_iBonusChallenge == PORTAL_CHALLENGE_PORTALS )
 		SetBonusProgress( static_cast<int>( m_StatsThisLevel.iNumPortalsPlaced ) );
@@ -2575,10 +3991,22 @@ void CPortal_Player::IncrementPortalsPlaced( void )
 void CPortal_Player::IncrementStepsTaken( void )
 {
 	m_StatsThisLevel.iNumStepsTaken++;
+	// TODO: Add CPortalMPStats
+#if 0
+	if( GetPortalMPStats() )
+	{
+		GetPortalMPStats()->IncrementPlayerSteps( this );
+	}
+#endif
+
+#if !defined( _GAMECONSOLE )
+	g_Portal2ResearchDataTracker.IncrementStepsTaken( this );
+#endif // !defined( _GAMECONSOLE ) && !defined( NO_STEAM )
 
 	if ( m_iBonusChallenge == PORTAL_CHALLENGE_STEPS )
 		SetBonusProgress( static_cast<int>( m_StatsThisLevel.iNumStepsTaken ) );
 }
+
 
 void CPortal_Player::IncrementDistanceTaken( void )
 {
@@ -2619,6 +4047,7 @@ void CPortal_Player::ResetThisLevelStats( void )
 	m_StatsThisLevel.iNumPortalsPlaced = 0;
 	m_StatsThisLevel.iNumStepsTaken = 0;
 	m_StatsThisLevel.fNumSecondsTaken = 0.0f;
+	m_StatsThisLevel.fDistanceTaken = 0.0f;
 
 	if ( m_iBonusChallenge != PORTAL_CHALLENGE_NONE )
 		SetBonusProgress( 0 );
@@ -2634,11 +4063,11 @@ void CPortal_Player::UpdatePortalViewAreaBits( unsigned char *pvs, int pvssize )
 {
 	Assert ( pvs );
 
-	int iPortalCount = CProp_Portal_Shared::AllPortals.Count();
+	int iPortalCount = CPortal_Base2D_Shared::AllPortals.Count();
 	if( iPortalCount == 0 )
 		return;
 
-	CProp_Portal **pPortals = CProp_Portal_Shared::AllPortals.Base();
+	CPortal_Base2D **pPortals = CPortal_Base2D_Shared::AllPortals.Base();
 	int *portalArea = (int *)stackalloc( sizeof( int ) * iPortalCount );
 	bool *bUsePortalForVis = (bool *)stackalloc( sizeof( bool ) * iPortalCount );
 
@@ -2648,14 +4077,14 @@ void CPortal_Player::UpdatePortalViewAreaBits( unsigned char *pvs, int pvssize )
 	// setup area bits for these portals
 	for ( int i = 0; i < iPortalCount; ++i )
 	{
-		CProp_Portal* pLocalPortal = pPortals[ i ];
+		CPortal_Base2D* pLocalPortal = pPortals[ i ];
 		// Make sure this portal is active before adding it's location to the pvs
-		if ( pLocalPortal && pLocalPortal->m_bActivated )
+		if ( pLocalPortal && pLocalPortal->IsActive() )
 		{
-			CProp_Portal* pRemotePortal = pLocalPortal->m_hLinkedPortal.Get();
+			CPortal_Base2D* pRemotePortal = pLocalPortal->m_hLinkedPortal.Get();
 
 			// Make sure this portal's linked portal is in the PVS before we add what it can see
-			if ( pRemotePortal && pRemotePortal->m_bActivated && pRemotePortal->NetworkProp() && 
+			if ( pRemotePortal && pRemotePortal->IsActivedAndLinked() && pRemotePortal->NetworkProp() &&
 				pRemotePortal->NetworkProp()->IsInPVS( edict(), pvs, pvssize ) )
 			{
 				portalArea[ i ] = engine->GetArea( pPortals[ i ]->GetAbsOrigin() );
@@ -2685,67 +4114,17 @@ void CPortal_Player::UpdatePortalViewAreaBits( unsigned char *pvs, int pvssize )
 }
 
 
-//////////////////////////////////////////////////////////////////////////
-// AddPortalCornersToEnginePVS
-// Subroutine to wrap the adding of portal corners to the PVS which is called once for the setup of each portal.
-// input - pPortal: the portal we are viewing 'out of' which needs it's corners added to the PVS
-//////////////////////////////////////////////////////////////////////////
-void AddPortalCornersToEnginePVS( CProp_Portal* pPortal )
+//-----------------------------------------------------------------------------
+// Purpose: Recursive function to add any areas seen by portals in the pViewEnt's pvs (non-portal effected pvs) to the engine's fat pvs and networked area list.
+// Input  : *pViewEnt - The viewing ent. All portals in this entity's pvs will have their areas networked.
+//			area - area of the pViewEnt
+//			*pvs - pvs bytes passed from the engine
+//			pvssize - size of pvs in bytes
+//			vec_AreasNetworked - List of areas already marked to prevent 1->2->1 re-enterancy.
+//-----------------------------------------------------------------------------
+void PortalSetupVisibility( CBaseEntity *pViewEnt, const Vector &vViewOrigin, unsigned char *pvs, int pvssize )
 {
-	Assert ( pPortal );
-
-	if ( !pPortal )
-		return;
-
-	Vector vForward, vRight, vUp;
-	pPortal->GetVectors( &vForward, &vRight, &vUp );
-
-	// Center of the remote portal
-	Vector ptOrigin			= pPortal->GetAbsOrigin();
-
-	// Distance offsets to the different edges of the portal... Used in the placement checks
-	Vector vToTopEdge = vUp * ( PORTAL_HALF_HEIGHT - PORTAL_BUMP_FORGIVENESS );
-	Vector vToBottomEdge = -vToTopEdge;
-	Vector vToRightEdge = vRight * ( PORTAL_HALF_WIDTH - PORTAL_BUMP_FORGIVENESS );
-	Vector vToLeftEdge = -vToRightEdge;
-
-	// Distance to place PVS points away from portal, to avoid being in solid
-	Vector vForwardBump		= vForward * 1.0f;
-
-	// Add center and edges to the engine PVS
-	engine->AddOriginToPVS( ptOrigin + vForwardBump);
-	engine->AddOriginToPVS( ptOrigin + vToTopEdge + vToLeftEdge + vForwardBump );
-	engine->AddOriginToPVS( ptOrigin + vToTopEdge + vToRightEdge + vForwardBump );
-	engine->AddOriginToPVS( ptOrigin + vToBottomEdge + vToLeftEdge + vForwardBump );
-	engine->AddOriginToPVS( ptOrigin + vToBottomEdge + vToRightEdge + vForwardBump );
-}
-
-void PortalSetupVisibility( CBaseEntity *pPlayer, int area, unsigned char *pvs, int pvssize )
-{
-	int iPortalCount = CProp_Portal_Shared::AllPortals.Count();
-	if( iPortalCount == 0 )
-		return;
-
-	CProp_Portal **pPortals = CProp_Portal_Shared::AllPortals.Base();
-	for( int i = 0; i != iPortalCount; ++i )
-	{
-		CProp_Portal *pPortal = pPortals[i];
-
-		if ( pPortal && pPortal->m_bActivated )
-		{
-			if ( pPortal->NetworkProp()->IsInPVS( pPlayer->edict(), pvs, pvssize ) )
-			{
-				if ( engine->CheckAreasConnected( area, pPortal->NetworkProp()->AreaNum() ) )
-				{
-					CProp_Portal *pLinkedPortal = static_cast<CProp_Portal*>( pPortal->m_hLinkedPortal.Get() );
-					if ( pLinkedPortal )
-					{
-						AddPortalCornersToEnginePVS ( pLinkedPortal );
-					}
-				}
-			}
-		}
-	}
+	CPVS_Extender::ComputeExtendedPVS( pViewEnt, vViewOrigin, pvs, pvssize, 10 );
 }
 
 void CPortal_Player::SetupVisibility( CBaseEntity *pViewEntity, unsigned char *pvs, int pvssize )
@@ -2759,12 +4138,12 @@ void CPortal_Player::SetupVisibility( CBaseEntity *pViewEntity, unsigned char *p
 	// and use that as a vis origin instead.
 	if ( m_hPortalEnvironment )
 	{
-		CProp_Portal *pPortal = NULL, *pRemotePortal = NULL;
+		CPortal_Base2D *pPortal = NULL, *pRemotePortal = NULL;
 		pPortal = m_hPortalEnvironment;
 		pRemotePortal = pPortal->m_hLinkedPortal;
 
-		if ( pPortal && pRemotePortal && pPortal->m_bActivated && pRemotePortal->m_bActivated )
-		{		
+		if ( pPortal && pRemotePortal && pPortal->IsActive() && pRemotePortal->IsActive() )
+		{
 			Vector ptPortalCenter = pPortal->GetAbsOrigin();
 			Vector vPortalForward;
 			pPortal->GetVectors( &vPortalForward, NULL, NULL );
@@ -2783,12 +4162,523 @@ void CPortal_Player::SetupVisibility( CBaseEntity *pViewEntity, unsigned char *p
 				if ( !pViewEntity || pViewEntity->IsPlayer() )
 				{
 					area = engine->GetArea( eyeOrigin );
-				}	
+				}
 			}
 		}
 	}
 
-	PortalSetupVisibility( this, area, pvs, pvssize );
+	PointCameraSetupVisibility( this, area, pvs, pvssize );
+
+	PortalSetupVisibility( this, EyePosition(), pvs, pvssize );
+
+	if ( m_bClientCheckPVSDirty )
+	{
+		UTIL_SetClientCheckPVS( edict(), pvs, pvssize );
+		m_bClientCheckPVSDirty = false;
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+bool CPortal_Player::FindRemoteTauntViewpoint( Vector *pOriginOut, QAngle *pAnglesOut )
+{
+	const float flRadius = (38*12);
+	CBaseEntity *pRemoteViewer = gEntList.FindEntityByClassnameNearest( "npc_security_camera", EyePosition(), flRadius );
+	if ( pRemoteViewer == NULL )
+		return false;
+
+	CNPC_SecurityCamera *pNPC = assert_cast<CNPC_SecurityCamera *>(pRemoteViewer);
+	if ( pNPC == NULL || !pNPC->IsActive() )
+		return false;
+
+	if ( pOriginOut && pAnglesOut )
+	{
+		if ( !pNPC->GetAttachment( "lens", *pOriginOut, *pAnglesOut ) )
+			return false;
+
+		Vector vecCam = *pOriginOut;
+
+		// check if the camera is in line of sight
+		trace_t tr;
+		UTIL_TraceLine( vecCam, WorldSpaceCenter(), MASK_SHOT, pRemoteViewer, COLLISION_GROUP_NONE, &tr );
+		if ( tr.m_pEnt != this )
+			return false;
+
+		Vector vecDir;
+		VectorSubtract( WorldSpaceCenter(), vecCam, vecDir );
+		VectorNormalize( vecDir );
+		*pOriginOut = vecCam + (vecDir*32);
+		VectorAngles( vecDir, *pAnglesOut );
+
+		m_hRemoteTauntCamera = pNPC;
+		// TODO:
+		//pNPC->TauntedByPlayer( this );
+	}
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CPortal_Player::Taunt( const char *pchTauntForce /*=NULL*/, bool bAuto /*= false*/ )
+{
+	// This doesn't work in singleplayer
+	if ( g_pGameRules->IsMultiplayer() == false )
+		return;
+
+	// No taunting while holding stuff because it looks dumb, and if we drop that stuff it might get stuck behind walls
+	if ( IsHoldingEntity( NULL ) )
+		return;
+
+	if ( !bAuto && m_bTauntDisabled )
+	{
+		return;
+	}
+
+	bool bTeamAccept = ( pchTauntForce && V_strcmp( pchTauntForce, "team_accept" ) == 0 );
+	bool bTease = ( pchTauntForce && V_strcmp( pchTauntForce, "teamtease" ) == 0 );
+
+	// Don't re-taunt!
+	if ( m_Shared.InCond( PORTAL_COND_TAUNTING ) && !bTeamAccept )
+		return;
+
+	if ( m_nTeamTauntState == TEAM_TAUNT_SUCCESS )
+		return;
+
+	if ( !pchTauntForce )
+	{
+		m_szTauntForce.GetForModify()[ 0 ] = '\0';
+		SetTeamTauntState( TEAM_TAUNT_NONE );
+	}
+	else
+	{
+		// Don't hold objects while doing non air taunts
+		ForceDropOfCarriedPhysObjects( NULL );
+
+		if ( V_strcmp( pchTauntForce, "item" ) == 0 )
+		{
+#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR ) && 0
+			// FIXME: Use the item to decide what taunt to do
+			CEconItemView *pItem = GetItemInLoadoutSlot( LOADOUT_POSITION_GESTURE );
+			if ( pItem && pItem->IsValid() )
+			{
+				pchTauntForce = pItem->GetStaticData()->GetBrassModelOverride();
+			}
+			else
+#endif
+			{
+				pchTauntForce = mp_taunt_item.GetString();
+			}
+		}
+
+		if ( bTeamAccept || bTease )
+		{
+			CPortal_Player *pOtherPlayer = ToPortalPlayer( UTIL_OtherConnectedPlayer( this ) );
+			if ( pOtherPlayer )
+			{
+				if ( bTease )
+				{
+					if ( GetDistanceToEntity( pOtherPlayer ) < 150.0f )
+					{
+						V_strncpy( pOtherPlayer->m_szTauntForce.GetForModify(), GetTeamNumber() == TEAM_BLUE ? "TeamBallTease" : "TeamEggTease", PORTAL2_MP_TEAM_TAUNT_FORCE_LENGTH );
+						bTeamAccept = true;
+					}
+					else
+					{
+						V_strncpy( m_szTauntForce.GetForModify(), pchTauntForce, PORTAL2_MP_TEAM_TAUNT_FORCE_LENGTH );
+						SetTeamTauntState( TEAM_TAUNT_NONE );
+					}
+				}
+
+				if ( bTeamAccept )
+				{
+					// Copy their taunt
+					V_strncpy( m_szTauntForce.GetForModify(), pOtherPlayer->m_szTauntForce.Get(), PORTAL2_MP_TEAM_TAUNT_FORCE_LENGTH );
+
+					if ( PortalMPGameRules() )
+					{
+						PortalMPGameRules()->ShuffleRPSOutcome();
+					}
+
+					if ( SolveTeamTauntPositionAndAngles( pOtherPlayer ) )
+					{
+						SetTeamTauntState( TEAM_TAUNT_SUCCESS );
+
+						CBaseEntity *pEntity = gEntList.FindEntityByName( NULL, "@glados" );
+						if ( pEntity )
+						{
+							char szScriptCommand[ 64 ];
+							V_snprintf( szScriptCommand, sizeof( szScriptCommand ), "CoopBotAnimation(%i,\"%s\")", ( GetTeamNumber() == TEAM_BLUE ? 2 : 1 ), m_szTauntForce.Get() );
+							pEntity->RunScript( szScriptCommand, "BotAnimationCommand" );
+						}
+
+						// On server notify all players that team taunt happened
+						KeyValues *kvNotifyTaunt = new KeyValues( "OnCoopBotTaunt" );
+						kvNotifyTaunt->SetString( "taunt", m_szTauntForce.Get() );
+						UTIL_SendClientCommandKVToPlayer( kvNotifyTaunt );
+						// TODO:
+#if 0
+						// Track multiplayer stats for successful team taunts
+						if( GetPortalMPStats() )
+						{
+							GetPortalMPStats()->TeamTauntSuccess( pOtherPlayer->m_szTauntForce.Get() );
+						}
+#endif
+					}
+					else
+					{
+						// Final positions weren't valid
+						return;
+					}
+				}
+			}
+		}
+		else
+		{
+			V_strncpy( m_szTauntForce.GetForModify(), pchTauntForce, PORTAL2_MP_TEAM_TAUNT_FORCE_LENGTH );
+			SetTeamTauntState( TEAM_TAUNT_NONE );
+
+			CBaseEntity *pEntity = gEntList.FindEntityByName( NULL, "@glados" );
+			if ( pEntity )
+			{
+				char szScriptCommand[ 64 ];
+				V_snprintf( szScriptCommand, sizeof( szScriptCommand ), "CoopBotAnimation(%i,\"%s\")", ( GetTeamNumber() == TEAM_BLUE ? 2 : 1 ), m_szTauntForce.Get() );
+				pEntity->RunScript( szScriptCommand, "BotAnimationCommand" );
+			}
+		}
+	}
+
+#if !defined( _GAMECONSOLE ) && !defined( NO_STEAM ) && 0
+	// Record taunts used in gamestats (jeep says null means airtaunt)
+	g_PortalGameStats.Event_PlayerTaunt( this, pchTauntForce ? pchTauntForce : "airtaunt" );
+#endif //!defined( _GAMECONSOLE )
+
+	StartTaunt();
+}
+
+bool CPortal_Player::SolveTeamTauntPositionAndAngles( CPortal_Player *pInitiator )
+{
+	if ( ValidateTeamTaunt( pInitiator, pInitiator->m_vTauntPosition.GetForModify(), pInitiator->m_vTauntAngles.GetForModify(),
+										m_vTauntPosition.GetForModify(), m_vTauntAngles.GetForModify() ) )
+	{
+		// Start initiator's taunt
+		pInitiator->SetTeamTauntState( TEAM_TAUNT_SUCCESS );
+		pInitiator->StartTaunt();
+
+		return true;
+	}
+
+	return false;
+}
+
+
+bool CPortal_Player::ValidateTeamTaunt( CPortal_Player *pInitiator, Vector &vInitiatorPos, QAngle &angInitiatorAng, Vector &vAcceptorPos, QAngle &angAcceptorAng, bool bRecursed /*= false*/ )
+{
+	if ( !pInitiator )
+		return false;
+
+	if ( !pInitiator->GetGroundEntity() )
+		return false;
+
+	if ( !GetGroundEntity() )
+		return false;
+
+	if ( GetAbsOrigin().DistTo( pInitiator->GetAbsOrigin() ) > 250.0f )
+	{
+		return false;
+	}
+
+	// Don't validate this team taunt if the two bots' z position varies by too much, even if they are close.
+	float flDeltaZ = fabs( GetAbsOrigin().z - pInitiator->GetAbsOrigin().z );
+	if ( flDeltaZ > ALLOWED_TEAM_TAUNT_Z_DIST )
+	{
+		return false;
+	}
+
+	// Don't validate this team taunt if something solid is in the way.
+	trace_t wall_check_tr;
+	UTIL_TraceLine( WorldSpaceCenter(), pInitiator->WorldSpaceCenter(), MASK_PLAYERSOLID, this, COLLISION_GROUP_NONE, &wall_check_tr );
+	if ( wall_check_tr.fraction < 1.0f && wall_check_tr.m_pEnt != pInitiator )
+	{
+		return false;
+	}
+
+	bool bValid = true;
+
+	// Get the interaction params from ballbot
+	CUtlVector<ScriptedNPCInteraction_t> *pScriptedInteractions = NULL;
+	if ( GetTeamNumber() == TEAM_BLUE )
+	{
+		pScriptedInteractions = GetScriptedInteractions();
+	}
+	else
+	{
+		pScriptedInteractions = pInitiator->GetScriptedInteractions();
+	}
+
+	ScriptedNPCInteraction_t *pInteraction = NULL;
+	for ( int nInteraction = 0; nInteraction < pScriptedInteractions->Count(); nInteraction++ )
+	{
+		ScriptedNPCInteraction_t *pTempInteraction = &((*pScriptedInteractions)[ nInteraction ]);
+		if ( Q_stricmp( pTempInteraction->sPhases[SNPCINT_SEQUENCE].iszSequence.ToCStr(), pInitiator->m_szTauntForce.Get() ) == 0 )
+		{
+			pInteraction = pTempInteraction;
+			break;
+		}
+	}
+
+	// Reference forward is initiator to acceptor
+	Vector vForward = GetAbsOrigin() - pInitiator->GetAbsOrigin();
+	vForward.z = 0.0f;
+	VectorNormalize( vForward );
+
+	// Rotate initiator, leave him in position
+	QAngle angNew;
+	VectorAngles( vForward, angNew );
+	angInitiatorAng = angNew;
+	vInitiatorPos = pInitiator->GetAbsOrigin();
+
+	if ( !pInteraction )
+	{
+		// Couldn't find an interaction! Make them overlap so we know there's a bug!
+		VectorAngles( vForward, angNew );
+		angAcceptorAng = angNew;
+		vAcceptorPos = vInitiatorPos;
+	}
+	else
+	{
+		// Rot matrix for forward to initiator
+		matrix3x4_t matToInitiator;
+		AngleMatrix( angInitiatorAng, matToInitiator );
+
+		// Build acceptor taunt angles
+		Vector vRelativeForward;
+		QAngle ang = pInteraction->angRelativeAngles;
+		ang[ YAW ] *= -1.0f;
+
+		if ( GetTeamNumber() == TEAM_BLUE )
+		{
+			// Invert the angles
+			ang = -ang;
+		}
+		AngleVectors( ang, &vRelativeForward );
+
+		Vector vRelativeForwardOffset;
+		VectorTransform( vRelativeForward, matToInitiator, vRelativeForwardOffset );
+		VectorAngles( vRelativeForwardOffset, angAcceptorAng );
+
+		if ( GetTeamNumber() == TEAM_BLUE )
+		{
+			// Rot matrix for forward to acceptor
+			AngleMatrix( angAcceptorAng, matToInitiator );
+		}
+
+		// Build acceptor taunt position
+		Vector vAcceptorRelativeOriginOffset;
+		Vector vec = pInteraction->vecRelativeOrigin;
+		vec.y *= -1.0f;
+		VectorTransform( vec, matToInitiator, vAcceptorRelativeOriginOffset );
+
+		if ( GetTeamNumber() == TEAM_BLUE )
+		{
+			// Opposite offset
+			vAcceptorPos = vInitiatorPos - vAcceptorRelativeOriginOffset;
+		}
+		else
+		{
+			vAcceptorPos = vInitiatorPos + vAcceptorRelativeOriginOffset;
+		}
+
+		// Make sure position touches floor
+		trace_t tr;
+		CTraceFilterSkipTwoEntities filter( this, pInitiator );
+		Ray_t ray;
+		ray.Init( vAcceptorPos + Vector( 0.0f, 0.0f, 1.0f ), vAcceptorPos + Vector( 0.0f, 0.0f, -ALLOWED_TEAM_TAUNT_Z_DIST ), GetPlayerMins(), GetPlayerMaxs() );
+		UTIL_TraceRay( ray, MASK_PLAYERSOLID, &filter, &tr );
+
+		if ( tr.fraction == 1.f )
+			return false; // No ground beneath this target location, we would be floating in the air!
+
+		if ( tr.startsolid || tr.fraction <= 0.0f )
+		{
+			// Scoot it up if needed
+			ray.Init( vAcceptorPos + Vector( 0.0f, 0.0f, 50.0f ), vAcceptorPos, GetPlayerMins(), GetPlayerMaxs() );
+			UTIL_TraceRay( ray, MASK_PLAYERSOLID, &filter, &tr );
+
+			if ( tr.startsolid || tr.fraction <= 0.0f )
+			{
+				bValid = false;
+			}
+		}
+
+		if ( bValid )
+		{
+			vAcceptorPos = tr.endpos;
+
+			UTIL_TraceLine( vAcceptorPos + ( GetPlayerMins() + GetPlayerMaxs() ) * 0.5f, pInitiator->WorldSpaceCenter(), MASK_PLAYERSOLID, this, COLLISION_GROUP_NONE, &tr );
+
+			if ( tr.fraction < 1.0f && tr.m_pEnt != pInitiator )
+			{
+				bValid = false;
+			}
+		}
+	}
+
+	if ( !bValid && !bRecursed )
+	{
+		// Try the inversion where the initiator moves and the acceptor holds still
+		bValid = pInitiator->ValidateTeamTaunt( this, vAcceptorPos, angAcceptorAng, vInitiatorPos, angInitiatorAng, true );
+	}
+
+	return bValid;
+}
+
+void CPortal_Player::StartTaunt( void )
+{
+	CBaseEntity *pOldRemoteTauntCamera = m_hRemoteTauntCamera.Get();
+
+	char szResponse[AI_Response::MAX_RESPONSE_NAME];
+	if ( SpeakConceptIfAllowed( MP_CONCEPT_PLAYER_TAUNT, NULL, szResponse, AI_Response::MAX_RESPONSE_NAME ) )
+	{
+		// Get the duration of the scene.
+		float flDuration = GetSceneDuration( szResponse );
+
+		m_vPreTauntAngles = EyeAngles();
+
+		// See if there's a security camera around, and if so, use it as our viewing target
+		m_bTauntRemoteView = FindRemoteTauntViewpoint( &m_vecRemoteViewOrigin.GetForModify(), &m_vecRemoteViewAngles.GetForModify() );
+
+		if ( m_bTauntRemoteView )
+		{
+			// Go into camera view
+			m_bTauntRemoteViewFOVFixup = true;
+
+			if ( !pOldRemoteTauntCamera )
+			{
+				SetFOV( this, 125, 0.0f );	// previous value was 110
+				SetFOV( this, 105, 1.0f );	// previous value was 90
+			}
+
+			// let Glados know that the player is taunting a camera
+			CBaseEntity *pEntity = gEntList.FindEntityByName( NULL, "@glados" );
+			if ( pEntity )
+			{
+				int nTeam = GetTeamNumber();
+				pEntity->RunScript( UTIL_VarArgs( "PlayerTauntCamera(%i,\"%s\")", (nTeam == TEAM_BLUE) ? 2 : 1, m_szTauntForce.Get() ), "StartTaunt" );
+			}
+
+			UTIL_RecordAchievementEvent( UTIL_VarArgs( "ACH.TAUNT_CAMERA[%i]", PortalMPGameRules()->GetCoopSection() ), this );
+		}
+		else
+		{
+			// Taunt Defaults
+			m_fTauntCameraDistance = portal_tauntcam_dist.GetFloat();
+			m_vecRemoteViewAngles = QAngle( 20.0f, 160.0f, 0.0f );
+
+			if ( m_szTauntForce[ 0 ] != '\0' )
+			{
+				CUtlVector<ScriptedNPCInteraction_t> *pScriptedInteractions = GetScriptedInteractions();
+
+				for ( int nInteraction = 0; nInteraction < pScriptedInteractions->Count(); nInteraction++ )
+				{
+					ScriptedNPCInteraction_t *pInteraction = &((*pScriptedInteractions)[ nInteraction ]);
+					if ( Q_stricmp( pInteraction->sPhases[SNPCINT_SEQUENCE].iszSequence.ToCStr(), m_szTauntForce.Get() ) == 0 )
+					{
+						// Custom camera angles
+						m_fTauntCameraDistance = pInteraction->flCameraDistance;
+						m_vecRemoteViewAngles = pInteraction->angCameraAngles;
+						break;
+					}
+				}
+			}
+		}
+
+		IGameEvent *event = gameeventmanager->CreateEvent( "player_gesture" );
+		if ( event )
+		{
+			event->SetInt( "userid", GetUserID() );
+			event->SetBool( "air", false );
+
+			gameeventmanager->FireEvent( event );
+		}
+
+		m_Shared.m_flTauntRemoveTime = gpGlobals->curtime + flDuration + 0.5f;
+		m_Shared.AddCond( PORTAL_COND_TAUNTING );
+		
+		// TODO:
+#if 0
+		// Check for circumstances to award the 'You monster' achievement.
+		CBaseEntity* pEnt = NULL;
+		while ( ( pEnt = gEntList.FindEntityByClassname( pEnt, "npc_portal_turret_floor" ) ) != NULL )
+		{
+			if ( PointWithinViewAngle( EyePosition(), pEnt->WorldSpaceCenter(), EyeDirection3D(), 0.85f ) )
+			{
+				CNPC_Portal_FloorTurret *pTurret = (CNPC_Portal_FloorTurret*)pEnt;
+				Assert ( pTurret );
+				if ( pTurret && pTurret->IsProjectedWallBlockingTurretFromPlayer( this ) )
+				{
+					UTIL_RecordAchievementEvent( "ACH.YOU_MONSTER", this );
+				}
+			}
+		}
+#endif
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+bool CPortal_Player::IsHoldingEntity( CBaseEntity *pEnt )
+{
+	return PlayerPickupControllerIsHoldingEntity( m_hUseEntity, pEnt );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Queues up a use deny sound, played in ItemPostFrame.
+//-----------------------------------------------------------------------------
+void CPortal_Player::PlayUseDenySound()
+{
+	m_bPlayUseDenySound = true;
+}
+
+//---------------------------------------------------------
+// Purpose:
+//---------------------------------------------------------
+Vector CPortal_Player::EyeDirection2D( void )
+{
+	Vector vecReturn = EyeDirection3D();
+	vecReturn.z = 0;
+	vecReturn.AsVector2D().NormalizeInPlace();
+
+	return vecReturn;
+}
+
+//---------------------------------------------------------
+// Purpose:
+//---------------------------------------------------------
+Vector CPortal_Player::EyeDirection3D( void )
+{
+	Vector vecForward;
+	AngleVectors( EyeAngles(), &vecForward );
+	return vecForward;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+float CPortal_Player::GetHeldObjectMass( IPhysicsObject *pHeldObject )
+{
+	float mass = PlayerPickupGetHeldObjectMass( m_hUseEntity, pHeldObject );
+	/*
+	if ( mass == 0.0f )
+	{
+		mass = PhysCannonGetHeldObjectMass( GetActiveWeapon(), pHeldObject );
+	}
+	*/
+	return mass;
 }
 
 extern CBaseEntity *GetCoopSpawnLocation( int iTeam ); //in info_coop_spawn.cpp
@@ -2810,7 +4700,6 @@ CBaseEntity* CPortal_Player::EntSelectSpawnPoint( void )
 		}
 
 		CBaseEntity *pSpawnLocation = GetCoopSpawnLocation( GetTeamNumber() );
-		Msg("TEAM NUMBER: %i\n", this->GetTeamNumber());
 		if( pSpawnLocation )
 			return pSpawnLocation;
 	}
@@ -2882,6 +4771,7 @@ ReturnSpot:
 	return pSpot;
 }
 
+
 static int s_CoopTeamAssignments[MAX_PLAYERS] = { 0 };
 
 void CPortal_Player::PickTeam( void )
@@ -2932,6 +4822,32 @@ void CPortal_Player::ClientDisconnected( edict_t *pPlayer )
 {
 	s_CoopTeamAssignments[ENTINDEX( pPlayer ) - 1] = 0;
 }
+
+void CPortal_Player::ChangeTeam( int iTeamNum )
+{
+	BaseClass::ChangeTeam( iTeamNum );
+	if ( g_pGameRules->IsMultiplayer() == false )
+	{
+		SetName( MAKE_STRING( "player" ) );
+		return;
+	}
+
+	// Change our model at this point
+	if ( iTeamNum == TEAM_BLUE )
+	{
+		SetName( MAKE_STRING( "blue" ) );
+	}
+	else if ( iTeamNum == TEAM_RED )
+	{
+		SetName( MAKE_STRING( "red" ) );
+	}
+
+	SetPlayerModel();
+
+	ClearScriptedInteractions();
+	ParseScriptedInteractions();
+}
+
 
 void CPortal_Player::ApplyPortalTeleportation( const CPortal_Base2D *pEnteredPortal, CMoveData *pMove )
 {
@@ -3028,8 +4944,7 @@ void CPortal_Player::ApplyPortalTeleportation( const CPortal_Base2D *pEnteredPor
 
 	// Use a slightly expanded box to search for stick surfaces as the player leaves the portal.
 	m_flUsePostTeleportationBoxTime = sv_post_teleportation_box_time.GetFloat();
-
-	// FIXME: - Wonderland_War
+	// FIXME:
 #if 0
 	m_nPortalsEnteredInAirFlags |= pEnteredPortal->m_nPortalColor;
 
@@ -3088,36 +5003,374 @@ CON_COMMAND( startneurotoxins, "Starts the nerve gas timer." )
 		pPlayer->SetNeuroToxinDamageTime( fCoundownTime );
 }
 
-void CPortal_Player::InitVCollision( const Vector &vecAbsOrigin, const Vector &vecAbsVelocity )
+void CPortal_Player::InitialSpawn( void )
 {
-#if 0
-	// Cleanup any old vphysics stuff.
-	VPhysicsDestroyObject();
+	BaseClass::InitialSpawn();
 
-	// in turbo physics players dont have a physics shadow
-	if ( sv_turbophysics.GetBool() )
-		return;
+#if USE_SLOWTIME
+	// Reset our slow timers
+	m_PortalLocal.m_bSlowingTime = false;
+	m_PortalLocal.m_flSlowTimeRemaining = m_PortalLocal.m_flSlowTimeMaximum = slowtime_max.GetFloat();
+#endif // USE_SLOWTIME
 
-	CPhysCollide *pModel = PhysCreateBbox( GetStandHullMins(), GetStandHullMaxs() );
-	CPhysCollide *pCrouchModel = PhysCreateBbox( GetDuckHullMins(), GetDuckHullMaxs() );
+	m_bReadyForDLCItemUpdates = false;
 
-	SetupVPhysicsShadow( vecAbsOrigin, vecAbsVelocity, pModel, "player_stand", pCrouchModel, "player_crouch" );
-#else
-	BaseClass::InitVCollision( vecAbsOrigin, vecAbsVelocity );
+#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR ) && 0
+	UpdateInventory( true );
 #endif
-
 }
 
-void CPortal_Player::OnPlayerLanded()
+extern ConVar *sv_cheats;
+void CC_give_me_a_point( void )
 {
-#if 0
-	// make sure the player don't land on the floor at the bottom of the goo
-	if ( GetWaterLevel() == WL_NotInWater )
+	//static ConVarRef sv_cheatsref( "sv_cheats" );
+	if( sv_cheats->GetBool() )
 	{
-		m_bWasDroppedByOtherPlayerWhileTaunting = false;
+		UTIL_GetCommandClient()->IncrementFragCount( 1 );
 	}
-#endif
 }
+
+static ConCommand give_a_point( "give_me_a_point", CC_give_me_a_point, "Give yourself a point", 0 );
+
+#if USE_SLOWTIME
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+class CLogicPlayerSlowTime : public CLogicalEntity
+{
+public:
+	DECLARE_CLASS( CLogicPlayerSlowTime, CLogicalEntity );
+	DECLARE_DATADESC();
+
+private:
+
+	void InputStartSlowTime( inputdata_t &data )
+	{
+		CPortal_Player *pPlayer = (CPortal_Player *) UTIL_GetLocalPlayer();
+		if ( pPlayer )
+		{
+			pPlayer->StartSlowingTime( data.value.Float() );
+		}
+	}
+
+	void InputStopSlowTime( inputdata_t &data )
+	{
+		CPortal_Player *pPlayer = (CPortal_Player *) UTIL_GetLocalPlayer();
+		if ( pPlayer )
+		{
+			pPlayer->StopSlowingTime();
+		}
+	}
+};
+
+BEGIN_DATADESC( CLogicPlayerSlowTime )
+	DEFINE_INPUTFUNC( FIELD_FLOAT, "StartSlowingTime", InputStartSlowTime ),
+	DEFINE_INPUTFUNC( FIELD_VOID, "StopSlowingTime", InputStopSlowTime ),
+END_DATADESC()
+
+LINK_ENTITY_TO_CLASS( logic_player_slowtime, CLogicPlayerSlowTime );
+
+#endif // USE_SLOWTIME
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+class CLogicPlayerViewFinder : public CPointEntity
+{
+public:
+	DECLARE_CLASS( CLogicPlayerViewFinder, CPointEntity );
+	DECLARE_DATADESC();
+
+private:
+
+	void InputShowViewFinder( inputdata_t &data )
+	{
+		for ( int i = 1; i <= MAX_PLAYERS; i++ )
+		{
+			CPortal_Player *pPlayer = (CPortal_Player *) UTIL_PlayerByIndex( i );
+			if ( pPlayer )
+			{
+				pPlayer->ShowViewFinder();
+			}
+		}
+	}
+
+	void InputHideViewFinder( inputdata_t &data )
+	{
+		for ( int i = 1; i <= MAX_PLAYERS; i++ )
+		{
+			CPortal_Player *pPlayer = (CPortal_Player *) UTIL_PlayerByIndex( i );
+			if ( pPlayer )
+			{
+				pPlayer->HideViewFinder();
+			}
+		}
+	}
+};
+
+BEGIN_DATADESC( CLogicPlayerViewFinder )
+DEFINE_INPUTFUNC( FIELD_VOID, "ShowViewFinder", InputShowViewFinder ),
+DEFINE_INPUTFUNC( FIELD_VOID, "HideViewFinder", InputHideViewFinder ),
+END_DATADESC()
+
+LINK_ENTITY_TO_CLASS( env_player_viewfinder, CLogicPlayerViewFinder );
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CPortal_Player::ModifyOrAppendCriteria( AI_CriteriaSet& criteriaSet )
+{
+	BaseClass::ModifyOrAppendCriteria( criteriaSet );
+
+	// Determine if we're in the air
+	criteriaSet.AppendCriteria( "in_air", ( GetGroundEntity() == NULL || m_PortalLocal.m_hTractorBeam.Get() ) ? 1 : 0 );
+
+	// Determine if we're standing on something special
+	CBaseEntity *pGroundEnt = GetGroundEntity();
+	if ( pGroundEnt != NULL )
+	{
+		criteriaSet.AppendCriteria( "ground_entity", pGroundEnt->GetClassname() );
+	}
+
+	// Looking at various things
+	trace_t tr;
+	Vector vecOurForward;
+	EyeVectors( &vecOurForward, NULL, NULL );
+	UTIL_TraceLine( EyePosition(), EyePosition() + ( vecOurForward * MAX_TRACE_LENGTH ), MASK_SHOT, this, COLLISION_GROUP_NONE, &tr );
+
+	if ( tr.DidHitNonWorldEntity() )
+	{
+		criteriaSet.AppendCriteria( "look_entity", tr.m_pEnt->GetClassname() );
+	}
+
+	// We need to find the other player
+	CPortal_Player *pPartner = ToPortalPlayer( UTIL_OtherPlayer( this ) );
+
+	// Any criteria after this point require a partner!
+	if ( pPartner != NULL )
+	{
+		Vector vecPartnerForward;
+		pPartner->GetVectors( &vecPartnerForward, NULL, NULL );
+		vecOurForward.z = 0.0f;
+		vecPartnerForward.z = 0.0f;
+
+		float flDot = DotProduct( vecOurForward, vecPartnerForward );
+
+		bool bFacingPartner = ( flDot < -DOT_20DEGREE );
+		criteriaSet.AppendCriteria( "facing_partner", ( bFacingPartner ) ? 1 : 0 );
+
+		float flDistToPartner = ( GetAbsOrigin() - pPartner->GetAbsOrigin() ).Length();
+		criteriaSet.AppendCriteria( "dist_to_partner", flDistToPartner );
+	}
+	else
+	{
+		criteriaSet.AppendCriteria( "dist_to_partner", 0.0f );
+	}
+
+	criteriaSet.AppendCriteria( "rps_outcome", PortalMPGameRules() ? PortalMPGameRules()->GetRPSOutcome() : 0 );
+
+	if ( m_szTauntForce[ 0 ] == '\0' )
+	{
+		criteriaSet.AppendCriteria( "force_taunt", "empty" );
+	}
+	else
+	{
+		criteriaSet.AppendCriteria( "force_taunt", m_szTauntForce.Get() );
+	}
+
+	criteriaSet.AppendCriteria( "taunt_partner", ( m_nTeamTauntState == TEAM_TAUNT_SUCCESS ) ? 1 : 0 );
+
+	criteriaSet.AppendCriteria( "no_portalgun", ( !Weapon_OwnsThisType( "weapon_portalgun" ) ) ? 1 : 0 );
+
+	// Check for if the player is ballbot or eggbot
+	if ( g_pGameRules->IsMultiplayer() )
+	{
+		switch ( GetTeamNumber() )
+		{
+		case TEAM_RED:
+			criteriaSet.AppendCriteria( "is_eggbot", 1 );
+			break;
+		case TEAM_BLUE:
+			criteriaSet.AppendCriteria( "is_ballbot", 1 );
+			break;
+		}
+	}
+}
+
+ConVar portal_use_player_avoidance( "portal_use_player_avoidance", "0", FCVAR_REPLICATED );
+
+//-----------------------------------------------------------------------------
+// Purpose: Don't collide with other players, we'll just push away from them
+//-----------------------------------------------------------------------------
+bool CPortal_Player::ShouldCollide( int collisionGroup, int contentsMask ) const
+{
+	// Don't hit other players
+	if ( portal_use_player_avoidance.GetBool() && ( ( collisionGroup == COLLISION_GROUP_PLAYER || collisionGroup == COLLISION_GROUP_PLAYER_MOVEMENT ) ) )
+		return false;
+
+	return BaseClass::ShouldCollide( collisionGroup, contentsMask );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Change a player from blue to orange and vice versa
+//-----------------------------------------------------------------------------
+void PlayerSwitchTeams( void )
+{
+	// Find all players and swap them around
+	for ( int i = 1; i <= MAX_PLAYERS; i++ )
+	{
+		CPortal_Player *pPlayer = static_cast<CPortal_Player *>(UTIL_PlayerByIndex( i ));
+		if ( pPlayer )
+		{
+			if ( pPlayer->GetTeamNumber() == TEAM_RED )
+			{
+				pPlayer->ChangeTeam( TEAM_BLUE );
+			}
+			else
+			{
+				pPlayer->ChangeTeam( TEAM_RED );
+			}
+		}
+	}
+}
+
+// REMOVED FOR PORTAL2: ConCommand switch_teams( "switch_teams", PlayerSwitchTeams, "Change a player from blue to orange and vice versa.", FCVAR_NONE );
+
+
+//////////////////////////////////////////////////////////////////////////
+// PAINT SECTION
+//////////////////////////////////////////////////////////////////////////
+
+// This is a glorious hack to find free space when you've crouched into some solid space
+// Our crouching collisions do not work correctly for some reason and this is easier
+// than fixing the problem :(
+// Note: This is a nasty copy/paste job from player.cpp, which replaces VEC_DUCK_HULL_MIN/MAX
+//		 with the player's local hulls.
+CEG_NOINLINE void FixPlayerCrouchStuck( CPortal_Player *pPlayer )
+{
+	trace_t trace;
+
+	const Vector& duckHullMin = pPlayer->GetDuckHullMins();
+	const Vector& duckHullMax = pPlayer->GetDuckHullMaxs();
+
+	// Move up as many as 18 pixels if the player is stuck.
+	Vector org = pPlayer->GetAbsOrigin();;
+	for( int i = 0; i < 18; i++ )
+	{
+		UTIL_TraceHull( pPlayer->GetAbsOrigin(), pPlayer->GetAbsOrigin(),
+			duckHullMin, duckHullMax, MASK_PLAYERSOLID, pPlayer, COLLISION_GROUP_PLAYER_MOVEMENT, &trace );
+		if ( trace.startsolid )
+		{
+			Vector origin = pPlayer->GetAbsOrigin();
+			origin.z += 1.0f;
+			pPlayer->SetLocalOrigin( origin );
+		}
+		else
+			return;
+	}
+
+	pPlayer->SetAbsOrigin( org );
+
+	for( int i = 0; i < 18; i++ )
+	{
+		UTIL_TraceHull( pPlayer->GetAbsOrigin(), pPlayer->GetAbsOrigin(),
+			duckHullMin, duckHullMax, MASK_PLAYERSOLID, pPlayer, COLLISION_GROUP_PLAYER_MOVEMENT, &trace );
+		if ( trace.startsolid )
+		{
+			Vector origin = pPlayer->GetAbsOrigin();
+			origin.z -= 1.0f;
+			pPlayer->SetLocalOrigin( origin );
+		}
+		else
+			return;
+	}
+}
+
+CEG_PROTECT_FUNCTION( FixPlayerCrouchStuck );
+
+int CPortal_Player::Restore( IRestore &restore )
+{
+	int status = 0;
+	if( BaseClass::Restore( restore ) )
+	{
+		status = 1;
+
+		if( GetFlags() & FL_DUCKING )
+		{
+			// Use the crouch HACK
+			FixPlayerCrouchStuck( this );
+			UTIL_SetSize( this, GetDuckHullMins(), GetDuckHullMaxs() );
+			m_Local.m_bDucked = true;
+		}
+		else
+		{
+			m_Local.m_bDucked = false;
+			UTIL_SetSize( this, GetStandHullMins(), GetStandHullMaxs() );
+		}
+	}
+
+	return status;
+}
+
+void CPortal_Player::GivePortalPlayerItems( void )
+{
+	bool bSpawnWithPaintGun = false;
+	bool bSpawnWithPortalGun = false;
+
+	bool bMultiplayer = g_pGameRules->IsMultiplayer();
+
+	bool bHadPaintGunOnDeath = m_PlayerGunTypeWhenDead == PLAYER_PAINT_GUN;
+	bool bHadPortalGunOnDeath = m_PlayerGunTypeWhenDead == PLAYER_PORTAL_GUN;
+
+	bool bIs2GunsMap = ( V_stristr( gpGlobals->mapname.ToCStr(), "2guns" ) != NULL ) || ( GlobalEntity_GetState( "paintgun_map" ) == GLOBAL_ON );
+
+	//If this map has 2 guns in it
+	if( bMultiplayer && bIs2GunsMap )
+	{
+		//If the player should spawn with a paint gun in this map
+		if( bHadPaintGunOnDeath || //Spawn with paintgun in multiplayer if the player had paintgun on death
+			( !m_bSpawnFromDeath && m_PlayerGunType == PLAYER_PAINT_GUN ) || //Spawn with paintgun if player is not spawning from death and had paintgun
+			( m_PlayerGunType == PLAYER_NO_GUN && GetTeamNumber() != g_iPortalGunPlayerTeam ) ) //Red player gets paintgun if no gun is assigned
+		{
+			bSpawnWithPaintGun = true;
+		}
+		//Else If the player should spawn with a portal gun in this map
+		else if( bHadPortalGunOnDeath || //Spawn with portalgun in multiplayer if the player had portalgun on death
+			( !m_bSpawnFromDeath && m_PlayerGunType == PLAYER_PORTAL_GUN ) || //Spawn with portalgun if player is not spawning from death and had portalgun
+			( m_PlayerGunType == PLAYER_NO_GUN && GetTeamNumber() == g_iPortalGunPlayerTeam ) ) //Blue player gets portalgun
+		{
+			bSpawnWithPortalGun = true;
+		}
+	}
+	else
+	{
+		GiveDefaultItems();
+	}
+
+	//Check for the can carry both guns cheat
+	if( sv_can_carry_both_guns )
+	{
+		bSpawnWithPaintGun = true;
+		bSpawnWithPortalGun = true;
+	}
+
+	if( bSpawnWithPortalGun )
+	{
+		bool bSwitchToPortalGun = !bIs2GunsMap;
+
+		GivePlayerPortalGun( true, bSwitchToPortalGun );
+	}
+
+	if( bSpawnWithPaintGun )
+	{
+		GivePlayerPaintGun( false, false );
+	}
+
+	m_bSpawnFromDeath = false;
+	m_PlayerGunTypeWhenDead = PLAYER_NO_GUN;
+}
+
 
 void CPortal_Player::GivePlayerPaintGun( bool bActivatePaintPowers, bool bSwitchTo )
 {
@@ -3208,19 +5461,295 @@ void CPortal_Player::GivePlayerPortalGun( bool bUpgraded, bool bSwitchTo )
 	}
 }
 
-CON_COMMAND(give_portalgun, "gives the command user a portalgun")
+void CPortal_Player::RemovePlayerWearable( const char *pItemName )
 {
-	CPortal_Player *pPlayer = static_cast<CPortal_Player*>( UTIL_GetCommandClient() );
+	CBaseCombatWeapon *pWeapon = Weapon_OwnsThisType( pItemName, 0 );
+	if ( pWeapon )
+	{
+		if ( Weapon_Detach(pWeapon) )
+		{
+			UTIL_Remove( pWeapon );
+		}
+	}
+}
 
-	pPlayer->GivePlayerPortalGun( false, true );
+void CPortal_Player::GivePlayerWearable( const char *pItemName )
+{
+	CBaseCombatWeapon *pWeapon = Weapon_OwnsThisType( pItemName, 0 );
+
+	if ( !pWeapon )
+	{
+		pWeapon = (CBaseCombatWeapon *)CreateEntityByName( pItemName );
+
+		if ( pWeapon )
+		{
+			pWeapon->SetLocalOrigin( GetLocalOrigin() );
+			pWeapon->AddSpawnFlags( SF_NORESPAWN );
+			pWeapon->SetSubType( 0 );
+
+			DispatchSpawn( pWeapon );
+
+			if ( !pWeapon->IsMarkedForDeletion() )
+			{
+				Weapon_Equip( pWeapon );
+			}
+		}
+	}
+
+	if ( pWeapon )
+	{
+		// DON'T SWITCH TO THIS! We still draw it even when it's not the active weapon
+		//Weapon_Switch( pWeapon );
+		pWeapon->SetWeaponVisible( true );
+	}
+}
+
+void CPortal_Player::Weapon_Equip( CBaseCombatWeapon *pWeapon )
+{
+	if( pWeapon && FClassnameIs( pWeapon, "weapon_paintgun" ) )
+	{
+		m_PlayerGunType = PLAYER_PAINT_GUN;
+	}
+	else if( pWeapon && FClassnameIs( pWeapon, "weapon_portalgun" ) )
+	{
+		m_PlayerGunType = PLAYER_PORTAL_GUN;
+	}
+
+	//If the player is equipping the paint gun
+	//CWeaponPaintGun *pPaintGun = dynamic_cast<CWeaponPaintGun*>( pWeapon );
+	//if( pPaintGun )
+	//{
+	//	IGameEvent *event = gameeventmanager->CreateEvent( "equipped_paintgun" );
+	//	if ( event )
+	//	{
+	//		event->SetInt("userid", GetUserID() );
+
+	//		gameeventmanager->FireEvent( event );
+	//	}
+
+	//	m_PlayerGunType = PLAYER_PAINT_GUN;
+	//}
+
+	//// set portals owner here because picking up non trigger weapon doesn't call BumpWeapon
+	//CWeaponPortalgun *pPortalGun = dynamic_cast< CWeaponPortalgun* >( pWeapon );
+
+	////store old linkageID
+	//unsigned int linkageID = 0;
+	//if ( pPortalGun )
+	//{
+	//	linkageID = pPortalGun->m_iPortalLinkageGroupID;
+
+	//	m_PlayerGunType = PLAYER_PORTAL_GUN;
+	//}
+
+	BaseClass::Weapon_Equip( pWeapon );
+
+	//if ( pPortalGun )
+	//{
+	//	//reset the linkage ID because Weapon_Equip calls Deploy which changes the id
+	//	pPortalGun->m_iPortalLinkageGroupID = linkageID;
+
+	//	//Set the existing portals to have been fired by the new player holding the portal gun
+	//	CProp_Portal *pPortal1 = CProp_Portal::FindPortal( linkageID, false );
+	//	if( pPortal1 )
+	//	{
+	//		pPortal1->SetFiredByPlayer( this );
+	//	}
+
+	//	CProp_Portal *pPortal2 = CProp_Portal::FindPortal( linkageID, true );
+	//	if( pPortal2 )
+	//	{
+	//		pPortal2->SetFiredByPlayer( this );
+	//	}
+	//}
+}
+
+
+void CPortal_Player::SetWantsToSwapGuns( bool bWantsToSwap )
+{
+	m_bWantsToSwapGuns = bWantsToSwap;
+	m_bSendSwapProximityFailEvent = true;
+}
+
+
+void CPortal_Player::SwapThink()
+{
+	bool bIsMultiplayer = gpGlobals->maxClients > 1;
+	//Check if this player wants to swap guns
+	if( m_afButtonPressed & IN_ALT1 )
+	{
+		CBaseCombatWeapon *pPaintGun = Weapon_OwnsThisType( "weapon_paintgun" );
+		CBaseCombatWeapon *pPortalGun = Weapon_OwnsThisType( "weapon_portalgun" );
+		bool bHasBothGuns = !!pPaintGun && !!pPortalGun;
+		if( ( !bIsMultiplayer && bHasBothGuns ) || sv_can_carry_both_guns )
+		{
+			//engine->ClientCommand( edict(), "lastinv" );
+
+			if ( pPaintGun == GetActiveWeapon() )
+			{
+				Weapon_Switch( pPortalGun );
+			}
+			else
+			{
+				Weapon_Switch( pPaintGun );
+			}
+		}
+		else
+		{
+			if( bIsMultiplayer && sv_can_swap_guns_anytime )
+			{
+				IGameEvent *event = gameeventmanager->CreateEvent( "wants_to_swap_guns" );
+				if ( event )
+				{
+					event->SetInt( "userid", GetUserID() );
+
+					gameeventmanager->FireEvent( event );
+				}
+
+				SetWantsToSwapGuns( true );
+			}
+		}
+	}
+	else if( m_afButtonReleased & IN_ALT1 && bIsMultiplayer && !sv_can_carry_both_guns && sv_can_swap_guns_anytime )
+	{
+		IGameEvent *event = gameeventmanager->CreateEvent( "doesnt_want_to_swap_guns" );
+		if ( event )
+		{
+			event->SetInt( "userid", GetUserID() );
+
+			gameeventmanager->FireEvent( event );
+		}
+
+		SetWantsToSwapGuns( false );
+	}
+
+	bool bSwap = false;
+	if( WantsToSwapGuns() && sv_can_swap_guns )
+	{
+		CPortal_Player *pOtherPlayer = ToPortalPlayer( UTIL_OtherConnectedPlayer( this ) );
+		if( pOtherPlayer && pOtherPlayer->WantsToSwapGuns() )
+		{
+			if( sv_can_swap_guns_anytime )
+			{
+				//Check if the players are close enough to swap
+				bSwap = CheckSwapProximity( this, pOtherPlayer );
+			}
+			else
+			{
+				bSwap = true;
+			}
+
+			if( bSwap )
+			{
+				//Reset the wants to swap flag for both players
+				SetWantsToSwapGuns( false );
+				pOtherPlayer->SetWantsToSwapGuns( false );
+
+				SwapPaintAndPortalGuns( this, pOtherPlayer );
+
+				//Send the event that the players swapped guns
+				IGameEvent *event = gameeventmanager->CreateEvent( "swapped_guns" );
+				if ( event )
+				{
+					gameeventmanager->FireEvent( event );
+				}
+			}
+			else
+			{
+				//Check if the proximity check failed event should be send
+				//We only want to send this event the first time the proximity check fails
+				if( m_bSendSwapProximityFailEvent )
+				{
+					m_bSendSwapProximityFailEvent = false;
+
+					IGameEvent *event = gameeventmanager->CreateEvent( "swap_guns_proximity_fail" );
+					if( event )
+					{
+						gameeventmanager->FireEvent( event );
+					}
+				}
+			}
+		} //If other player wants to swap
+	} //If this player wants to swap
+
 
 }
 
-CON_COMMAND(give_paintgun, "Equips the player with a single portal portalgun.")
-{
-	CPortal_Player *pPlayer = static_cast<CPortal_Player*>( UTIL_GetCommandClient() );
 
-	pPlayer->GivePlayerPaintGun( true, true );
+Vector CPortal_Player::BodyTarget( const Vector &posSrc, bool bNoisy )
+{
+	if (bNoisy)
+	{
+		return WorldSpaceCenter() /*+ (GetViewOffset() * random->RandomFloat( 0.7, 1.0 ))*/;
+	}
+	else
+	{
+		return WorldSpaceCenter();
+	}
+}
+
+void CPortal_Player::SetFogController( CFogController *pFogController )
+{
+	BaseClass::SetFogController( pFogController );
+
+	// In portal multiplayer we need to for the master to be whatever the player was last set to
+	// so when they respawn they still obey the master
+	if ( GameRules() && GameRules()->IsMultiplayer() )
+	{
+		FogSystem()->SetMasterController( pFogController );
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+bool CPortal_Player::PlayGesture( const char *pGestureName )
+{
+	Activity nActivity = (Activity)LookupActivity( pGestureName );
+	if ( nActivity != ACT_INVALID )
+	{
+		DoAnimationEvent( PLAYERANIMEVENT_CUSTOM_GESTURE, nActivity );
+		return true;
+	}
+
+	int nSequence = LookupSequence( pGestureName );
+	if ( nSequence != -1 )
+	{
+		DoAnimationEvent( PLAYERANIMEVENT_CUSTOM_GESTURE_SEQUENCE, nSequence );
+		return true;
+	}
+
+	return false;
+}
+
+void CPortal_Player::InitVCollision( const Vector &vecAbsOrigin, const Vector &vecAbsVelocity )
+{
+#if 0
+	// Cleanup any old vphysics stuff.
+	VPhysicsDestroyObject();
+
+	// in turbo physics players dont have a physics shadow
+	if ( sv_turbophysics.GetBool() )
+		return;
+
+	CPhysCollide *pModel = PhysCreateBbox( GetStandHullMins(), GetStandHullMaxs() );
+	CPhysCollide *pCrouchModel = PhysCreateBbox( GetDuckHullMins(), GetDuckHullMaxs() );
+
+	SetupVPhysicsShadow( vecAbsOrigin, vecAbsVelocity, pModel, "player_stand", pCrouchModel, "player_crouch" );
+#else
+	BaseClass::InitVCollision( vecAbsOrigin, vecAbsVelocity );
+#endif
+}
+
+
+void CPortal_Player::OnPlayerLanded()
+{
+	// make sure the player don't land on the floor at the bottom of the goo
+	if ( GetWaterLevel() == WL_NotInWater )
+	{
+		m_bWasDroppedByOtherPlayerWhileTaunting = false;
+	}
 }
 
 void CPortal_Player::NetworkPortalTeleportation( CBaseEntity *pOther, CPortal_Base2D *pPortal, float fTime, bool bForcedDuck )
@@ -3237,3 +5766,24 @@ void CPortal_Player::NetworkPortalTeleportation( CBaseEntity *pOther, CPortal_Ba
 	//NetworkProp()->NetworkStateChanged( offsetof( CPortal_Player, m_EntityPortalledNetworkMessages ) );
 	NetworkProp()->NetworkStateChanged();
 }
+
+
+void cc_can_carry_both_guns( const CCommand &args )
+{
+	//sv_can_carry_both_guns.SetValue( args[1] );
+
+	//if ( sv_can_carry_both_guns.GetBool() )
+	{
+		for( int i = 1; i <= gpGlobals->maxClients; ++i )
+		{
+			CPortal_Player *pPlayer = ToPortalPlayer( UTIL_PlayerByIndex( i ) );
+			if ( pPlayer )
+			{
+				pPlayer->GivePlayerPaintGun( true, false );
+				pPlayer->GivePlayerPortalGun( true, true );
+			}
+		}
+	}
+}
+// FIXME: Bring this back for DLC2
+//ConCommand can_carry_both_guns( "can_carry_both_guns", cc_can_carry_both_guns );

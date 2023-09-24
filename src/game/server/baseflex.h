@@ -253,7 +253,7 @@ private:
 public:
 	void DoBodyLean( void );
 
-	virtual void Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity );
+	virtual void Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity, bool bUseSlowHighAccuracyContacts = false );
 
 
 #ifdef HL2_DLL

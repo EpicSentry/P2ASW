@@ -144,12 +144,12 @@ int CPropVehicle::Restore( IRestore &restore )
 //-----------------------------------------------------------------------------
 // Purpose: Tell the vehicle physics system whenever we teleport, so it can fixup the wheels.
 //-----------------------------------------------------------------------------
-void CPropVehicle::Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity )
+void CPropVehicle::Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity, bool bUseSlowHighAccuracyContacts )
 {
 	matrix3x4_t startMatrixInv;
 
 	MatrixInvert( EntityToWorldTransform(), startMatrixInv );
-	BaseClass::Teleport( newPosition, newAngles, newVelocity );
+	BaseClass::Teleport( newPosition, newAngles, newVelocity, bUseSlowHighAccuracyContacts );
 
 	// Calculate the relative transform of the teleport
 	matrix3x4_t xform;

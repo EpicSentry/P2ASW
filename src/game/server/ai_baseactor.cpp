@@ -720,11 +720,17 @@ void CAI_BaseActor::ClearHeadAdjustment()
 }
 
 
-void CAI_BaseActor::Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity )
+void CAI_BaseActor::Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity, bool bUseSlowHighAccuracyContacts )
 {
 	ClearHeadAdjustment();
+	
+	// HACK!! Using BaseClass isn't working for some reason, wtf??
+#if 0
+	BaseClass::Teleport( newPosition, newAngles, newVelocity, bUseSlowHighAccuracyContacts );
+#else
+	CAI_BaseNPC::Teleport( newPosition, newAngles, newVelocity, bUseSlowHighAccuracyContacts );
+#endif
 
-	BaseClass::Teleport( newPosition, newAngles, newVelocity );
 }
 
 

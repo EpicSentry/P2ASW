@@ -346,7 +346,7 @@ namespace ResponseRules
 		};
 
 
-	private:
+	public:
 		byte			m_Type;
 		char			m_szResponseName[ MAX_RESPONSE_NAME ];
 		char			m_szMatchingRule[ MAX_RULE_NAME ];

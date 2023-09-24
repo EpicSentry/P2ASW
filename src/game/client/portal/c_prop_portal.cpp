@@ -199,9 +199,6 @@ void RecieveEntityPortalledMessage( CHandle<C_BaseEntity> hEntity, CHandle<C_Por
 
 void ProcessPortalTeleportations( void )
 {
-
-	Msg("ProcessPortalTeleportations\n");
-
 	s_PortalTeleportationLogMutex.Lock();
 	for( int i = 0; i != s_PortalTeleportationLog.Count(); ++i )
 	{
@@ -260,7 +257,6 @@ class C_PortalInitHelper : public CAutoGameSystem
 	virtual bool Init()
 	{
 		//HOOK_MESSAGE( PlayerPortalled );
-		//HOOK_MESSAGE( EntityPortalled ); // Legacy
 		HOOK_MESSAGE( PortalFX_Surface );
 		
 		if ( portal_demohack.GetBool() )

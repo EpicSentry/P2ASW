@@ -14,6 +14,8 @@
 
 #define FINDING_PORTAL_CRASH 0
 
+#define CPortal_Base2D_Shared CProp_Portal_Shared
+
 #include "cbase.h"
 
 #ifdef CLIENT_DLL

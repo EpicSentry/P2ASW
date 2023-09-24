@@ -41,6 +41,9 @@ public:
 		m_iv_vecPunchAngle.Setup( &m_vecPunchAngle, LATCH_SIMULATION_VAR );
 		m_iv_vecPunchAngleVel.Setup( &m_vecPunchAngleVel, LATCH_SIMULATION_VAR );
 		m_flFOVRate = 0;
+
+		m_bSlowMovement = false;
+		m_fTBeamEndTime = 0.0f;
 	}
 
 	unsigned char			m_chAreaBits[MAX_AREA_STATE_BYTES];				// Area visibility flags.
@@ -89,6 +92,7 @@ public:
 	audioparams_t			m_audio;
 
 	bool					m_bSlowMovement;
+	float					m_fTBeamEndTime;
 
 };
 

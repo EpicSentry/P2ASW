@@ -9,11 +9,9 @@
 #define PORTAL_PLAYER_SHARED_H
 #pragma once
 
-#define PORTAL_PUSHAWAY_THINK_INTERVAL		(1.0f / 20.0f)
 #include "studio.h"
 #include "paint/paint_color_manager.h"
 #include "cegclientwrapper.h"
-#include "paint/paint_power_info.h"
 
 #define PORTAL_PUSHAWAY_THINK_INTERVAL		(1.0f / 20.0f)
 
@@ -21,27 +19,115 @@
 #define PORTAL_PLAYER_MAX_LIFT_MASS 85
 #define PORTAL_PLAYER_MAX_LIFT_SIZE 128
 
+#define PLAYERPORTALDEBUGSPEW 0
+
+const char *GetEggBotModel( bool bLowRes = false );
+const char *GetBallBotModel( bool bLowRes = false );
+
+class ISignifierTarget
+{
+public:
+	virtual bool	OverrideSignifierPosition( void ) = 0;
+	virtual bool	GetSignifierPosition( const Vector &vSource, Vector &vPositionOut, Vector &vNormalOut ) = 0;
+	virtual bool	GetSignifierDesignation( char *lpszBuffer, unsigned int nBufferSize ) = 0;
+	virtual bool	UseSelectionGlow( void ) = 0;
+};
+
+class CSignifierTarget : public ISignifierTarget
+{
+public:
+	virtual bool	UseSelectionGlow( void ) { return true; }
+	virtual bool	OverrideSignifierPosition( void ) { return false; }
+	virtual bool	GetSignifierPosition( const Vector &vSource, Vector &vPositionOut, Vector &vNormalOut ) { return false; }
+	virtual bool	GetSignifierDesignation( char *lpszBuffer, unsigned int nBufferSize )
+	{
+		V_memset( lpszBuffer, 0, nBufferSize );
+		return false;
+	}
+};
+
+enum
+{
+	PLAYER_SOUNDS_CITIZEN = 0,
+	PLAYER_SOUNDS_COMBINESOLDIER,
+	PLAYER_SOUNDS_METROPOLICE,
+	PLAYER_SOUNDS_MAX,
+};
+
+enum 
+{
+	CONCEPT_CHELL_IDLE,
+	CONCEPT_CHELL_DEAD,
+};
+
+const float PLAYER_HULL_REDUCTION = 0.70f;
+
+extern const char *g_pszChellConcepts[];
+int GetChellConceptIndexFromString( const char *pszConcept );
+extern ConVar sv_portal_coop_ping_hud_indicitator_duration;
+
+struct PaintPowerInfo_t;
+
 const float STEEP_SLOPE = 0.7;
 char const* const PORTAL_PREDICTED_CONTEXT = "Portal Predicted Powers";
 
-//-----------------------------------------------------------------------------
-// Purpose: Computes a local matrix for the player clamped to valid carry ranges
-//-----------------------------------------------------------------------------
-// when looking level, hold bottom of object 8 inches below eye level
-#define PLAYER_HOLD_LEVEL_EYES	-8
+enum JumpButtonPress
+{
+	JUMP_ON_TOUCH = 0,
+	PRESS_JUMP_TO_BOUNCE,
+	HOLD_JUMP_TO_BOUNCE,
+	TRAMPOLINE_BOUNCE
+};
 
-// when looking down, hold bottom of object 0 inches from feet
-#define PLAYER_HOLD_DOWN_FEET	2
+enum InAirState
+{
+	ON_GROUND,
+	IN_AIR_JUMPED,
+	IN_AIR_BOUNCED,
+	IN_AIR_FELL
+};
 
-// when looking up, hold bottom of object 24 inches above eye level
-#define PLAYER_HOLD_UP_EYES		24
+enum PaintSurfaceType
+{
+	FLOOR_SURFACE = 0,
+	WALL_SURFACE,
+	CEILING_SURFACE
+};
 
-// use a +/-30 degree range for the entire range of motion of pitch
-#define PLAYER_LOOK_PITCH_RANGE	30
+enum StickCameraState
+{
+	STICK_CAMERA_SURFACE_TRANSITION = 0,
+	STICK_CAMERA_ROLL_CORRECT,
+	STICK_CAMERA_PORTAL,
+	STICK_CAMERA_WALL_STICK_DEACTIVATE_TRANSITION,
+	STICK_CAMERA_SWITCH_TO_ABS_UP_MODE,
+	STICK_CAMERA_ABS_UP_MODE,
+	STICK_CAMERA_SWITCH_TO_LOCAL_UP,
+	STICK_CAMERA_SWITCH_TO_LOCAL_UP_LOOKING_UP,
+	STICK_CAMERA_LOCAL_UP_LOOKING_UP,
+	STICK_CAMERA_UPRIGHT
+};
 
-// player can reach down 2ft below his feet (otherwise he'll hold the object above the bottom)
-#define PLAYER_REACH_DOWN_DISTANCE	24
+enum StickCameraCorrectionMethod
+{
+	QUATERNION_CORRECT = 0,
+	ROTATE_UP,
+	SNAP_UP,
+	DO_NOTHING
+};
 
+//=============================================================================
+// Paint Power Helper Functions
+//=============================================================================
+const Vector ComputeBouncePostVelocityNoReflect( const Vector& preVelocity,
+												const Vector& normal,
+												const Vector& up );
+
+const Vector ComputeBouncePostVelocityReflection( const Vector& preVelocity,
+												 const Vector& normal,
+												 const Vector& localUp );
+
+void ExpandAABB( Vector& boxMin, Vector& boxMax, const Vector& sweepVector );
 
 //=============================================================================
 // Paint Power Choice
@@ -71,7 +157,26 @@ struct PaintPowerChoiceResult_t
 
 typedef CUtlVectorFixed< PaintPowerChoiceResult_t, PAINT_POWER_TYPE_COUNT_PLUS_NO_POWER > PaintPowerChoiceResultArray;
 
-void ExpandAABB(Vector& boxMin, Vector& boxMax, const Vector& sweepVector);
+struct CachedPaintPowerChoiceResult
+{
+	Vector surfaceNormal;
+	CBaseHandle surfaceEntity;
+	bool wasValid;
+	bool wasIgnored;
+
+	inline void Initialize()
+	{
+		surfaceNormal = Vector( 0, 0, 0 );
+		surfaceEntity = NULL;
+		wasValid = false;
+		wasIgnored = false;
+	}
+};
+
+//=============================================================================
+// Contact Determination (used for determining available paint powers)
+//=============================================================================
+const int ALL_CONTENT = 0xFFFFFFFF;
 
 struct BrushContact
 {
@@ -95,6 +200,32 @@ typedef CUtlVector<cplane_t> CollisionPlaneVector;
 void ComputeAABBContactsWithBrushEntity( ContactVector& contacts, const Vector& boxOrigin, const Vector& boxMin, const Vector& boxMax, CBaseEntity* pBrushEntity, int contentsMask = CONTENTS_BRUSH_PAINT );
 void ComputeAABBContactsWithBrushEntity( ContactVector& contacts, const cplane_t *pClipPlanes, int iClipPlaneCount, const Vector& boxOrigin, const Vector& boxMin, const Vector& boxMax, CBaseEntity* pBrushEntity, int contentsMask = CONTENTS_BRUSH_PAINT );
 
+#ifndef CLIENT_DLL
+class CPortal_Player;
+#else
+class C_Portal_Player;
+#define CPortal_Player C_Portal_Player
+#endif
+
+void TracePlayerBoxAgainstCollidables( trace_t& trace,
+									   const CPortal_Player* player,
+									   const Vector& startPos,
+									   const Vector& endPos,
+									   const Vector& boxLocalMin,
+									   const Vector& boxLocalMax );
+
+struct StringCompare_t
+{
+	StringCompare_t( char const* str ) : m_str( str ) {}
+
+	char const* const m_str;
+
+	inline bool operator()( char const* str ) const
+	{
+		return V_strcmp( m_str, str ) == 0;
+	}
+};
+
 #define PERMANENT_CONDITION		-1
 
 // Player conditions for animations
@@ -107,6 +238,7 @@ enum
 	PORTAL_COND_DEATH_GIB,
 	PORTAL_COND_LAST
 };
+
 
 class CPortalPlayerShared
 {
@@ -186,84 +318,25 @@ private:
 };
 
 
-struct CachedPaintPowerChoiceResult
+struct PortalPlayerStatistics_t
 {
-	Vector surfaceNormal;
-	CBaseHandle surfaceEntity;
-	bool wasValid;
-	bool wasIgnored;
+	DECLARE_CLASS_NOBASE( PortalPlayerStatistics_t );
+	DECLARE_EMBEDDED_NETWORKVAR();
 
-	inline void Initialize()
-	{
-		surfaceNormal = Vector(0, 0, 0);
-		surfaceEntity = NULL;
-		wasValid = false;
-		wasIgnored = false;
-	}
+#ifdef GAME_DLL
+	DECLARE_SIMPLE_DATADESC();
+#endif
+
+	CNetworkVar( int, iNumPortalsPlaced );
+	CNetworkVar( int, iNumStepsTaken );
+	CNetworkVar( float, fNumSecondsTaken );
+	CNetworkVar( float, fDistanceTaken );
 };
 
-struct StringCompare_t
-{
-	StringCompare_t( char const* str ) : m_str( str ) {}
-
-	char const* const m_str;
-
-	inline bool operator()( char const* str ) const
-	{
-		return V_strcmp( m_str, str ) == 0;
-	}
-};
-
-enum JumpButtonPress
-{
-	JUMP_ON_TOUCH = 0,
-	PRESS_JUMP_TO_BOUNCE,
-	HOLD_JUMP_TO_BOUNCE,
-	TRAMPOLINE_BOUNCE
-};
-
-enum InAirState
-{
-	ON_GROUND,
-	IN_AIR_JUMPED,
-	IN_AIR_BOUNCED,
-	IN_AIR_FELL
-};
-
-enum PaintSurfaceType
-{
-	FLOOR_SURFACE = 0,
-	WALL_SURFACE,
-	CEILING_SURFACE
-};
-
-enum StickCameraState
-{
-	STICK_CAMERA_SURFACE_TRANSITION = 0,
-	STICK_CAMERA_ROLL_CORRECT,
-	STICK_CAMERA_PORTAL,
-	STICK_CAMERA_WALL_STICK_DEACTIVATE_TRANSITION,
-	STICK_CAMERA_SWITCH_TO_ABS_UP_MODE,
-	STICK_CAMERA_ABS_UP_MODE,
-	STICK_CAMERA_SWITCH_TO_LOCAL_UP,
-	STICK_CAMERA_SWITCH_TO_LOCAL_UP_LOOKING_UP,
-	STICK_CAMERA_LOCAL_UP_LOOKING_UP,
-	STICK_CAMERA_UPRIGHT
-};
-
-enum StickCameraCorrectionMethod
-{
-	QUATERNION_CORRECT = 0,
-	ROTATE_UP,
-	SNAP_UP,
-	DO_NOTHING
-};
-
-extern const char *g_pszChellConcepts[];
-int GetChellConceptIndexFromString( const char *pszConcept );
 
 #if defined( CLIENT_DLL )
 #define CPortal_Player C_Portal_Player
+#define CPortalPlayerLocalData C_PortalPlayerLocalData
 #endif
 
 

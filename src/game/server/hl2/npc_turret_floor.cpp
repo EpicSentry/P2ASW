@@ -11,7 +11,7 @@
 #include "ai_memory.h"
 #include "engine/IEngineSound.h"
 #include "ammodef.h"
-#include "hl2/hl2_player.h"
+#include "portal_player.h"
 #include "soundenvelope.h"
 #include "physics_saverestore.h"
 #include "IEffects.h"

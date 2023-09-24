@@ -10,8 +10,9 @@
 #include "basemultiplayerplayer.h"
 #include "cdll_int.h"
 #include "gameinterface.h"
+#include "usermessages.h"
 
-ConVar sv_allchat("sv_allchat", "1", FCVAR_NOTIFY, "Players can receive all other players' text chat, no death restrictions");
+ConVar sv_allchat("sv_allchat", "1", FCVAR_NOTIFY, "Players can receive all other players' text chat, team restrictions apply");
 
 // NOTE: This has to be the last file included!
 #include "tier0/memdbgon.h"
@@ -35,6 +36,10 @@ CBaseMultiplayerPlayer::~CBaseMultiplayerPlayer()
 	m_pAchievementKV->deleteThis();
 	delete m_pExpresser;
 }
+
+BEGIN_ENT_SCRIPTDESC( CBaseMultiplayerPlayer, CBasePlayer, "Player" )
+END_SCRIPTDESC();
+
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -106,16 +111,16 @@ bool CBaseMultiplayerPlayer::SpeakConceptIfAllowed( int iConcept, const char *mo
 //-----------------------------------------------------------------------------
 bool CBaseMultiplayerPlayer::CanHearAndReadChatFrom( CBasePlayer *pPlayer )
 {
-	// can always hear the console unless we're ignoring all chat
+	// can always hear the console unless we're ignoring every chat
 	if ( !pPlayer )
-		return m_iIgnoreGlobalChat != CHAT_IGNORE_ALL;
+		return m_iIgnoreGlobalChat != CHAT_IGNORE_EVERYTHING;
 
 	// check if we're ignoring all chat
-	if ( m_iIgnoreGlobalChat == CHAT_IGNORE_ALL )
+	if ( m_iIgnoreGlobalChat == CHAT_IGNORE_BROADCAST_AND_TEAM )
 		return false;
 
 	// check if we're ignoring all but teammates
-	if ( m_iIgnoreGlobalChat == CHAT_IGNORE_TEAM && g_pGameRules->PlayerRelationship( this, pPlayer ) != GR_TEAMMATE )
+	if ( m_iIgnoreGlobalChat == CHAT_IGNORE_BROADCAST && g_pGameRules->PlayerRelationship( this, pPlayer ) != GR_TEAMMATE )
 		return false;
 
 	// can't hear dead players if we're alive
@@ -131,17 +136,20 @@ bool CBaseMultiplayerPlayer::ClientCommand( const CCommand &args )
 
 	if ( FStrEq( pcmd, "ignoremsg" ) )
 	{
-		m_iIgnoreGlobalChat = (m_iIgnoreGlobalChat + 1) % 3;
+		m_iIgnoreGlobalChat = (m_iIgnoreGlobalChat + 1) % 4;
 		switch( m_iIgnoreGlobalChat )
 		{
 		case CHAT_IGNORE_NONE:
 			ClientPrint( this, HUD_PRINTTALK, "#Accept_All_Messages" );
 			break;
-		case CHAT_IGNORE_ALL:
+		case CHAT_IGNORE_BROADCAST:
 			ClientPrint( this, HUD_PRINTTALK, "#Ignore_Broadcast_Messages" );
 			break;
-		case CHAT_IGNORE_TEAM:
+		case CHAT_IGNORE_BROADCAST_AND_TEAM:
 			ClientPrint( this, HUD_PRINTTALK, "#Ignore_Broadcast_Team_Messages" );
+			break;
+		case CHAT_IGNORE_EVERYTHING:
+			ClientPrint( this, HUD_PRINTTALK, "#Ignore_All_Messages" );
 			break;
 		default:
 			break;
@@ -182,15 +190,20 @@ void CBaseMultiplayerPlayer::Spawn( void )
 	BaseClass::Spawn();
 }
 
-void CBaseMultiplayerPlayer::AwardAchievement( int iAchievement )
+void CBaseMultiplayerPlayer::AwardAchievement( int iAchievement, int iCount )
 {
 	Assert( iAchievement >= 0 && iAchievement < 0xFFFF );		// must fit in short
-
+#if 0
 	CSingleUserRecipientFilter filter( this );
 
-	UserMessageBegin( filter, "AchievementEvent" );
-		WRITE_SHORT( iAchievement );
-	MessageEnd();
+	int userID = GetPlayerInfo()->GetUserID();
+
+	CCSUsrMsg_AchievementEvent msg;
+	msg.set_achievement( iAchievement );
+	msg.set_count( iCount );
+	msg.set_user_id( userID );
+	SendUserMessage( filter, CS_UM_AchievementEvent, msg );
+#endif
 }
 
 #ifdef _DEBUG
@@ -246,7 +259,9 @@ void CBaseMultiplayerPlayer::ResetPerLifeCounters( void )
 }
 
 
+#ifndef CSTRIKE_DLL
 ConVar tf_escort_score_rate( "tf_escort_score_rate", "1", FCVAR_CHEAT, "Score for escorting the train, in points per second" );
+#endif
 
 #define ESCORT_SCORE_CONTEXT		"AreaScoreContext"
 #define ESCORT_SCORE_INTERVAL		0.1
@@ -307,9 +322,9 @@ void CBaseMultiplayerPlayer::StopScoringEscortPoints( void )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-bool CBaseMultiplayerPlayer::GetSteamID( CSteamID *pID )
+bool CBaseMultiplayerPlayer::GetSteamID( CSteamID *pID ) const
 {
-	const CSteamID *pClientID = engine->GetClientSteamID( edict() );
+	const CSteamID *pClientID = engine->GetClientSteamID( const_cast<edict_t*>(edict()) );
 	if ( pClientID )
 	{
 		*pID = *pClientID;
@@ -322,7 +337,7 @@ bool CBaseMultiplayerPlayer::GetSteamID( CSteamID *pID )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-uint64 CBaseMultiplayerPlayer::GetSteamIDAsUInt64( void )
+uint64 CBaseMultiplayerPlayer::GetSteamIDAsUInt64( void ) const
 {
 	CSteamID steamIDForPlayer;
 	if ( GetSteamID( &steamIDForPlayer ) )

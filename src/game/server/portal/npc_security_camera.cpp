@@ -12,7 +12,7 @@
 #include "engine/IEngineSound.h"
 #include "ammodef.h"
 #include "Sprite.h"
-#include "hl2/hl2_player.h"
+#include "portal_player.h"
 #include "soundenvelope.h"
 #include "explode.h"
 #include "IEffects.h"
@@ -33,164 +33,7 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-#define	SECURITY_CAMERA_MODEL		"models/props/security_camera.mdl"
-#define SECURITY_CAMERA_BC_YAW		"aim_yaw"
-#define SECURITY_CAMERA_BC_PITCH	"aim_pitch"
-#define	SECURITY_CAMERA_RANGE		1500
-#define SECURITY_CAMERA_SPREAD		VECTOR_CONE_2DEGREES
-#define	SECURITY_CAMERA_MAX_WAIT	5
-#define	SECURITY_CAMERA_PING_TIME	1.0f	//LPB!!
 
-#define SECURITY_CAMERA_NUM_ROPES 2
-#define SECURITY_CAMERA_GLOW_SPRITE	"sprites/glow1.vmt"
-
-//Aiming variables
-#define	SECURITY_CAMERA_MAX_NOHARM_PERIOD	0.0f
-#define	SECURITY_CAMERA_MAX_GRACE_PERIOD	3.0f
-
-//Spawnflags
-#define SF_SECURITY_CAMERA_AUTOACTIVATE		0x00000020
-#define SF_SECURITY_CAMERA_STARTINACTIVE	0x00000040
-#define SF_SECURITY_CAMERA_NEVERRETIRE		0x00000080
-#define SF_SECURITY_CAMERA_OUT_OF_AMMO		0x00000100
-
-#define CAMERA_DESTROYED_SCENE_1			"scenes/general/generic_security_camera_destroyed-1.vcd"
-#define CAMERA_DESTROYED_SCENE_2			"scenes/general/generic_security_camera_destroyed-2.vcd"
-#define CAMERA_DESTROYED_SCENE_3			"scenes/general/generic_security_camera_destroyed-3.vcd"
-#define CAMERA_DESTROYED_SCENE_4			"scenes/general/generic_security_camera_destroyed-4.vcd"
-#define CAMERA_DESTROYED_SCENE_5			"scenes/general/generic_security_camera_destroyed-5.vcd"
-
-//Heights
-#define	SECURITY_CAMERA_YAW_SPEED	7.0f
-
-#define SECURITY_CAMERA_TOTAL_TO_KNOCK_DOWN 33
-
-//Turret states
-enum turretState_e
-{
-	TURRET_SEARCHING,
-	TURRET_AUTO_SEARCHING,
-	TURRET_ACTIVE,
-	TURRET_DEPLOYING,
-	TURRET_RETIRING,
-	TURRET_DEAD,
-};
-
-// Forces glados actor to play reaction scenes when player dismounts camera.
-void PlayDismountSounds( void );
-
-
-//
-// Security Camera
-//
-
-class CNPC_SecurityCamera : public CNPCBaseInteractive<CAI_BaseNPC>, public CDefaultPlayerPickupVPhysics
-{
-	DECLARE_CLASS( CNPC_SecurityCamera, CNPCBaseInteractive<CAI_BaseNPC> );
-public:
-	
-	CNPC_SecurityCamera( void );
-	~CNPC_SecurityCamera( void );
-
-	void			Precache( void );
-	virtual void	CreateSounds( void );
-	virtual void	StopLoopingSounds( void );
-	virtual void	Spawn( void );
-	virtual void	Activate( void );
-	bool			CreateVPhysics( void );
-	virtual void	UpdateOnRemove( void );
-	virtual void	NotifySystemEvent( CBaseEntity *pNotify, notify_system_event_t eventType, const notify_system_event_params_t &params );
-	virtual int		ObjectCaps( void );
-	void			Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-
-	// Think functions
-	void	Retire( void );
-	void	Deploy( void );
-	void	ActiveThink( void );
-	void	SearchThink( void );
-	void	DeathThink( void );
-
-	// Inputs
-	void	InputToggle( inputdata_t &inputdata );
-	void	InputEnable( inputdata_t &inputdata );
-	void	InputDisable( inputdata_t &inputdata );
-	void	InputRagdoll( inputdata_t &inputdata );
-
-	void	SetLastSightTime();
-
-	int		OnTakeDamage( const CTakeDamageInfo &inputInfo );
-	virtual void	PlayerPenetratingVPhysics( void );
-	bool	OnAttemptPhysGunPickup( CBasePlayer *pPhysGunUser, PhysGunPickup_t reason );
-
-	bool	ShouldSavePhysics() { return true; }
-
-	virtual bool CanBeAnEnemyOf( CBaseEntity *pEnemy );
-
-	Class_T	Classify( void ) 
-	{
-		if( m_bEnabled ) 
-			return CLASS_COMBINE;
-
-		return CLASS_NONE;
-	}
-	
-	bool	FVisible( CBaseEntity *pEntity, int traceMask = MASK_BLOCKLOS, CBaseEntity **ppBlocker = NULL );
-
-	Vector	EyeOffset( Activity nActivity ) 
-	{
-		Vector vForward;
-
-		GetVectors( &vForward, 0, 0 );
-
-		return vForward * 10.0f;
-	}
-
-	Vector	EyePosition( void )
-	{
-		return GetAbsOrigin() + EyeOffset(GetActivity());
-	}
-
-
-protected:
-	
-	bool	PreThink( turretState_e state );
-	void	Ping( void );	
-	void	Toggle( void );
-	void	Enable( void );
-	void	Disable( void );
-
-	void	RopesOn( void );
-	void	RopesOff( void );
-	void	EyeOn( void );
-	void	EyeOff( void );
-
-	bool	UpdateFacing( void );
-
-private:
-
-	CHandle<CRopeKeyframe>	m_hRopes[ SECURITY_CAMERA_NUM_ROPES ];
-	CHandle<CSprite>		m_hEyeGlow;
-
-	bool	m_bAutoStart;
-	bool	m_bActive;		//Denotes the turret is deployed and looking for targets
-	bool	m_bBlinkState;
-	bool	m_bEnabled;		//Denotes whether the turret is able to deploy or not
-	
-	float	m_flLastSight;
-	float	m_flPingTime;
-
-	QAngle	m_vecGoalAngles;
-	QAngle	m_vecCurrentAngles;
-	Vector	m_vNoisePos;
-	int		m_iTicksTillNextNoise;
-
-	CSoundPatch		*m_pMovementSound;
-
-	COutputEvent m_OnDeploy;
-	COutputEvent m_OnRetire;
-
-	DECLARE_DATADESC();
-};
 
 //Datatable
 BEGIN_DATADESC( CNPC_SecurityCamera )
@@ -458,7 +301,7 @@ bool CNPC_SecurityCamera::OnAttemptPhysGunPickup( CBasePlayer *pPhysGunUser, Phy
 //-----------------------------------------------------------------------------
 void CNPC_SecurityCamera::Retire( void )
 {
-	if ( PreThink( TURRET_RETIRING ) )
+	if ( PreThink( CAMERA_RETIRING ) )
 		return;
 
 	//Level out the turret
@@ -483,7 +326,7 @@ void CNPC_SecurityCamera::Retire( void )
 //-----------------------------------------------------------------------------
 void CNPC_SecurityCamera::Deploy( void )
 {
-	if ( PreThink( TURRET_DEPLOYING ) )
+	if ( PreThink( CAMERA_DEPLOYING ) )
 		return;
 
 	m_vecGoalAngles = GetAbsAngles();
@@ -631,7 +474,7 @@ bool CNPC_SecurityCamera::FVisible( CBaseEntity *pEntity, int traceMask, CBaseEn
 void CNPC_SecurityCamera::ActiveThink( void )
 {
 	//Allow descended classes a chance to do something before the think function
-	if ( PreThink( TURRET_ACTIVE ) )
+	if ( PreThink( CAMERA_ACTIVE ) )
 		return;
 
 	//Update our think time
@@ -790,7 +633,7 @@ void CNPC_SecurityCamera::ActiveThink( void )
 void CNPC_SecurityCamera::SearchThink( void )
 {
 	//Allow descended classes a chance to do something before the think function
-	if ( PreThink( TURRET_SEARCHING ) )
+	if ( PreThink( CAMERA_SEARCHING ) )
 		return;
 
 	SetNextThink( gpGlobals->curtime + 0.1f );
@@ -866,7 +709,7 @@ void CNPC_SecurityCamera::SearchThink( void )
 // Purpose: Allows a generic think function before the others are called
 // Input  : state - which state the turret is currently in
 //-----------------------------------------------------------------------------
-bool CNPC_SecurityCamera::PreThink( turretState_e state )
+bool CNPC_SecurityCamera::PreThink( cameraState_e state )
 {
 	CheckPVSCondition();
 
@@ -1059,7 +902,7 @@ void CNPC_SecurityCamera::InputRagdoll( inputdata_t &inputdata )
 //-----------------------------------------------------------------------------
 void CNPC_SecurityCamera::DeathThink( void )
 {
-	if ( PreThink( TURRET_DEAD ) )
+	if ( PreThink( CAMERA_DEAD ) )
 		return;
 
 	// Level out our angles

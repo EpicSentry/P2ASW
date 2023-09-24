@@ -926,7 +926,7 @@ bool CRagdollProp::TestCollision( const Ray_t &ray, unsigned int mask, trace_t& 
 }
 
 
-void CRagdollProp::Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity )
+void CRagdollProp::Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity, bool bUseSlowHighAccuracyContacts )
 {
 	// newAngles is a relative transform for the entity
 	// But a ragdoll entity has identity orientation by design
@@ -957,7 +957,7 @@ void CRagdollProp::Teleport( const Vector *newPosition, const QAngle *newAngles,
 	Vector obj0Pos;
 	QAngle obj0Angles;
 	MatrixAngles( obj0Target, obj0Angles, obj0Pos );
-	BaseClass::Teleport( &obj0Pos, &obj0Angles, newVelocity );
+	BaseClass::Teleport( &obj0Pos, &obj0Angles, newVelocity, bUseSlowHighAccuracyContacts );
 	
 	for ( int i = 1; i < m_ragdoll.listCount; i++ )
 	{

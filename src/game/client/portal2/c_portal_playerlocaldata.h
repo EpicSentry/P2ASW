@@ -13,6 +13,7 @@ public:
 	DECLARE_CLASS_NOBASE( C_PortalPlayerLocalData );
 	DECLARE_EMBEDDED_NETWORKVAR();
 	DECLARE_SIMPLE_DATADESC();
+	DECLARE_PREDICTABLE();
 
 	C_PortalPlayerLocalData();
 
@@ -60,6 +61,7 @@ public:
 	QAngle m_qQuaternionPunch;
 
 	EHANDLE m_hTractorBeam; // Was probably CHandle<> instead
+	int m_nTractorBeamCount;
 
 	// Client only
 
@@ -71,4 +73,7 @@ public:
 
 
 };
+
+EXTERN_RECV_TABLE(DT_PortalLocal);
+
 #endif //PORTAL_PLAYER_LOCAL_DATA_H

@@ -7,7 +7,11 @@
 #include "cbase.h"
 #include "prediction.h"
 #include "hl_movedata.h"
+#if HL2_CLIENT_DLL
 #include "c_basehlplayer.h"
+#elif PORTAL2
+#include "c_portal_player.h"
+#endif
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"

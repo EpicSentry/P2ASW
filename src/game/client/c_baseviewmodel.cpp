@@ -273,6 +273,44 @@ bool C_BaseViewModel::ShouldDraw()
 	}
 }
 
+bool C_BaseViewModel::ShouldSuppressForSplitScreenPlayer( int nSlot )
+{
+	if ( vm_draw_always.GetBool() )
+	{
+		if ( vm_draw_always.GetInt() == 1 )
+		{
+			return false;
+		}
+		return true;
+	}
+
+	if ( BaseClass::ShouldSuppressForSplitScreenPlayer( nSlot ) )
+	{
+		return true;
+	}
+	
+	C_BasePlayer *pLocalPlayer = C_BasePlayer::GetLocalPlayer( nSlot );
+	C_BasePlayer *pOwner = ToBasePlayer( GetOwner() );
+
+	// We supress viewing of the view model if we are not looking through the eyes of the player who owns that view model.
+	// We still need to call animation updates on this view model.
+	if ( pOwner == pLocalPlayer )
+	{
+		return false;
+	}
+
+	C_BasePlayer *pObserverTarget = ToBasePlayer( pLocalPlayer->GetObserverTarget() );
+
+	if ( pOwner == pObserverTarget )
+	{
+		// [msmith] We only ever want to draw viewmodels if the player who owns this split screen is in the OBS_MODE_IN_EYE observer mode for view models.
+		return ( OBS_MODE_IN_EYE != pLocalPlayer->GetObserverMode() );
+	}
+
+	return true;
+
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: Render the weapon. Draw the Viewmodel if the weapon's being carried
 //			by this player, otherwise draw the worldmodel.

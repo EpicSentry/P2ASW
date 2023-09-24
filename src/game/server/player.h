@@ -456,6 +456,8 @@ public:
 	virtual void			DeathSound( const CTakeDamageInfo &info );
 	const Vector &			GetMovementCollisionNormal( void ) const;	// return the normal of the surface we last collided with
 	const Vector &			GetGroundNormal( void ) const;
+	
+	virtual					void SetFogController( CFogController *pFogController );
 
 	// return the entity used for soundscape radius checks
 	virtual CBaseEntity		*GetSoundscapeListener();
@@ -644,6 +646,11 @@ public:
 	void					RemoveSplitScreenPlayer( CBasePlayer *pOther );
 	CUtlVector< CHandle< CBasePlayer > > &GetSplitScreenPlayers();
 	bool					HasAttachedSplitScreenPlayers() const;
+	
+	void					AddPictureInPicturePlayer( CBasePlayer *pOther );
+	void					RemovePictureInPicturePlayer( CBasePlayer *pOther );
+	CUtlVector< CHandle< CBasePlayer > >& GetSplitScreenAndPictureInPicturePlayers();
+	CUtlVector< CHandle< CBasePlayer > >& GetPictureInPicturePlayers( void );
 
 	// Returns true if team was changed
 	virtual bool			EnsureSplitScreenTeam();
@@ -936,6 +943,8 @@ protected:
 	bool	m_bPauseBonusProgress;
 	CNetworkVar( int, m_iBonusProgress );
 	CNetworkVar( int, m_iBonusChallenge );
+	
+	float m_flTimeLastTouchedGround;
 
 	int						m_lastDamageAmount;		// Last damage taken
 	float					m_fTimeLastHurt;
@@ -1152,7 +1161,6 @@ protected:
 	friend class CHL2GameMovement;
 	friend class CPortalGameMovement;
 	friend class CASW_MarineGameMovement;
-	friend class CPaintGameMovement;
 	
 	// Accessors for gamemovement
 	bool IsDucked( void ) const { return m_Local.m_bDucked; }
@@ -1246,6 +1254,14 @@ private:
 	CHandle< CBasePlayer > m_hSplitOwner;
 	// If we have any attached split users, this is the list of them
 	CUtlVector< CHandle< CBasePlayer > > m_hSplitScreenPlayers;
+	CUtlVector< CHandle< CBasePlayer > > m_hSplitScreenAndPipPlayers;
+	CUtlVector< CHandle< CBasePlayer > > m_hPipPlayers;
+	
+public:
+	float GetAirTime( void );
+	
+private:
+	void UpdateSplitScreenAndPictureInPicturePlayerList();
 
 private:
 	float	GetAutoaimScore( const Vector &eyePosition, const Vector &viewDir, const Vector &vecTarget, CBaseEntity *pTarget, float fScale, CBaseCombatWeapon *pActiveWeapon );

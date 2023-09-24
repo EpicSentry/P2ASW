@@ -37,6 +37,12 @@
 //	PLAYERANIMEVENT_COUNT
 //};
 
+enum PlayerAnimDamageStage_t
+{
+	DAMAGE_STAGE_NONE = 0,
+	DAMAGE_STAGE_FINAL = 3
+};
+
 // ------------------------------------------------------------------------------------------------ //
 // CPlayerAnimState declaration.
 // ------------------------------------------------------------------------------------------------ //
@@ -51,28 +57,52 @@ public:
 	~CPortalPlayerAnimState();
 
 	void InitPortal( CPortal_Player *pPlayer );
-	CPortal_Player *GetPortalPlayer( void )							{ return m_pPortalPlayer; }
+	CPortal_Player *GetPortalPlayer( void ) const { return m_pPortalPlayer; }
 
-	virtual void ClearAnimationState();
+	virtual void		ClearAnimationState();
 
-	virtual Activity TranslateActivity( Activity actDesired );
-
-	void	DoAnimationEvent( PlayerAnimEvent_t event, int nData = 0 );
+	virtual Activity	TranslateActivity( Activity actDesired );
+	virtual bool		SetupPoseParameters( CStudioHdr *pStudioHdr );
+	virtual void		DoAnimationEvent( PlayerAnimEvent_t event, int nData = 0 );
+	virtual void		Update( float eyeYaw, float eyePitch );
+	virtual Activity	CalcMainActivity();	
 
 	void    Teleport( const Vector *pNewOrigin, const QAngle *pNewAngles, CPortal_Player* pPlayer );
-	
+
 	void				TransformYAWs( const matrix3x4_t &matTransform );
 
-	bool	HandleMoving( Activity &idealActivity );
-	bool	HandleJumping( Activity &idealActivity );
-	bool	HandleDucking( Activity &idealActivity );
+	virtual bool	ShouldLongFall( void ) const;
+
+	virtual bool	HandleMoving( Activity &idealActivity );
+	virtual bool	HandleJumping( Activity &idealActivity );
+	virtual bool	HandleDucking( Activity &idealActivity );
+	virtual bool	HandleDying( Activity &idealActivity );
+
+	void BridgeRemovedFromUnder( void ) { m_bBridgeRemovedFromUnder = true; }
+
+	float		m_fNextBouncePredictTime;
+	float		m_fPrevBouncePredict;
 
 private:
+	bool HandleInAir( Activity &idealActivity );
+	bool HandleBouncing( Activity &idealActivity );
+	bool HandleTractorBeam( Activity &idealActivity );
+	bool HandleLanding();
+
+	void IncreaseDamageStage();
 	
 	CPortal_Player   *m_pPortalPlayer;
 	bool		m_bInAirWalk;
+	bool		m_bLanding;
 
+	Vector		m_vLastVelocity;
 	float		m_flHoldDeployedPoseUntilTime;
+	unsigned int m_nDamageStage;
+
+	// tractor beam
+	bool		m_bWasInTractorBeam;
+	bool		m_bFirstTractorBeamFrame;
+	bool		m_bBridgeRemovedFromUnder;
 };
 
 

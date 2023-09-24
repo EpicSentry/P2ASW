@@ -209,7 +209,7 @@ public:
 
 public:
 	//---------------------------------
-	virtual void			Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity );
+	virtual void			Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity, bool bUseSlowHighAccuracyContacts = false );
 	void					InvalidateBoneCache( void );
 
 	DECLARE_DATADESC();

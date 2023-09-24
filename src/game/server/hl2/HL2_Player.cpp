@@ -3766,19 +3766,8 @@ void CHL2_Player::ItemPostFrame()
 
 	if ( m_bPlayUseDenySound )
 	{
-		m_bPlayUseDenySound = false;
-#ifndef PORTAL2
+		m_bPlayUseDenySound = false
 		EmitSound( "HL2Player.UseDeny" );
-#else
-		if( static_cast<CPortal_Player*>(this)->GetActivePortalWeapon() )
-		{
-			EmitSound( "PortalPlayer.UseDeny" );
-		}
-		else
-		{
-			EmitSound( "PortalPlayer.UseDenyNoGun" );
-		}
-#endif
 	}
 }
 

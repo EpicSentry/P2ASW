@@ -95,6 +95,7 @@ public:
 	virtual void LevelInitPostEntity();
 	virtual void FireGameEvent( IGameEvent *pEvent );
 	CFogController *GetMasterFogController( void )			{ return m_hMasterController; }
+	void SetMasterController( CFogController *pFogController );
 
 private:
 

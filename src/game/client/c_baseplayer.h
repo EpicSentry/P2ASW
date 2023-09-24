@@ -250,6 +250,10 @@ public:
 	void						AddSplitScreenPlayer( C_BasePlayer *pOther );
 	void						RemoveSplitScreenPlayer( C_BasePlayer *pOther );
 	CUtlVector< CHandle< C_BasePlayer > > &GetSplitScreenPlayers();
+	void						AddPictureInPicturePlayer( C_BasePlayer *pOther );
+	void						RemovePictureInPicturePlayer( C_BasePlayer *pOther );
+	CUtlVector< CHandle< C_BasePlayer > >& GetSplitScreenAndPictureInPicturePlayers( void );
+	CUtlVector< CHandle< C_BasePlayer > >& GetPictureInPicturePlayers( void );
 
 	bool						IsSplitScreenPartner( C_BasePlayer *pPlayer );
 
@@ -321,6 +325,7 @@ public:
 
 	virtual bool				ShouldDraw();
 	virtual int					DrawModel( int flags, const RenderableInstance_t &instance );
+	virtual bool				ShouldSuppressForSplitScreenPlayer( int nSlot );
 
 	// Called when not in tactical mode. Allows view to be overriden for things like driving a tank.
 	virtual void				OverrideView( CViewSetup *pSetup );
@@ -696,6 +701,8 @@ protected:
 
 	// If we have any attached split users, this is the list of them
 	CUtlVector< CHandle< CBasePlayer > > m_hSplitScreenPlayers;
+	CUtlVector< CHandle< CBasePlayer > > m_hSplitScreenAndPipPlayers;
+	CUtlVector< CHandle< CBasePlayer > > m_hPipPlayers;
 	int						m_nSplitScreenSlot; //-1 == not a split player
 	CHandle< CBasePlayer > m_hSplitOwner;
 	bool					m_bIsLocalPlayer;
@@ -730,6 +737,15 @@ private:
 
 	// fog params
 	fogplayerparams_t		m_PlayerFog;
+	
+	float m_flTimeLastTouchedGround;
+
+public:
+	float GetAirTime( void );
+	
+private:
+	void UpdateSplitScreenAndPictureInPicturePlayerList();
+
 };
 
 EXTERN_RECV_TABLE(DT_BasePlayer);

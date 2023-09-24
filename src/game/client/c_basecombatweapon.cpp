@@ -348,6 +348,32 @@ bool C_BaseCombatWeapon::GetShootPosition( Vector &vOrigin, QAngle &vAngles )
 	return false;
 }
 
+bool C_BaseCombatWeapon::ShouldSuppressForSplitScreenPlayer( int nSlot )
+{
+	if ( BaseClass::ShouldSuppressForSplitScreenPlayer( nSlot ) )
+	{
+		return true;
+	}
+	
+	C_BaseCombatCharacter *pOwner = GetOwner();
+	
+	// If the owner of this weapon is not allowed to draw in this split screen slot, then don't draw the weapon either.
+	if ( pOwner && pOwner->ShouldSuppressForSplitScreenPlayer( nSlot ) )
+	{
+		return true;
+	}
+	
+	C_BasePlayer *pLocalPlayer = C_BasePlayer::GetLocalPlayer( nSlot );
+
+	// Carried by local player?
+	// Only draw the weapon if we're in some kind of 3rd person mode because the viewmodel will do that otherwise.
+	if ( pOwner == pLocalPlayer && !pLocalPlayer->ShouldDrawLocalPlayer() )
+	{
+		return true;
+	}
+	
+	return false;
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: 

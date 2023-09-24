@@ -404,6 +404,8 @@ struct ScriptedNPCInteraction_t
 	Vector		vecRelativeOrigin;			// (forward, right, up)
 	QAngle		angRelativeAngles;				
 	Vector		vecRelativeVelocity;		// Desired relative velocity of the other NPC
+	float		flCameraDistance;
+	QAngle		angCameraAngles;
 	float		flDelay;					// Delay before interaction can be used again
 	float		flDistSqr;					// Max distance sqr from the relative origin the NPC is allowed to be to trigger
 	string_t	iszMyWeapon;				// Classname of the weapon I'm holding, if any
@@ -1565,7 +1567,7 @@ public:
 	bool				ExitScriptedSequence();
 	bool				CineCleanup();
 
-	virtual void		Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity );
+	virtual void		Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity, bool bUseSlowHighAccuracyContacts = false );
 
 	// forces movement and sets a new schedule
 	virtual bool		ScheduledMoveToGoalEntity( int scheduleType, CBaseEntity *pGoalEntity, Activity movementActivity );

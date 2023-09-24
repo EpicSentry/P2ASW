@@ -18,10 +18,18 @@
 #include "vprof.h"
 #include "datacache/iresourceaccesscontrol.h"
 #include "tier2/tier2.h"
+#include "viewrender.h"
+
+#if defined( PORTAL )
+#include "c_portal_player.h"
+#endif
 
 // NOTE: This has to be the last file included!
 #include "tier0/memdbgon.h"
 
+#ifdef PORTAL
+#include "portalrender.h"
+#endif
 
 extern ConVar cl_particleeffect_aabb_buffer;
 extern ConVar cl_particles_show_bbox;
@@ -587,6 +595,18 @@ int CNewParticleEffect::DrawModel( int flags, const RenderableInstance_t &instan
 	if ( m_hOwner && m_hOwner->IsDormant() )
 		return 0;
 	
+	/*
+	int nViewRecursionLevel = 0;
+#ifdef PORTAL
+	nViewRecursionLevel = g_pPortalRender->GetViewRecursionLevel();
+	if ( m_pDef->GetMaxRecursionDepth() < nViewRecursionLevel )
+	{
+		//DevMsg( "---Aborted at Particle Portal Recursion Level : %d - Max : %d\n", g_pPortalRender->GetViewRecursionLevel(), m_pDef->GetMaxRecursionDepth() );
+		return 0;
+	}
+#endif
+	*/
+
 	// do distance cull check here. We do it here instead of in particles so we can easily only do
 	// it for root objects, not bothering to cull children individually
 	CMatRenderContextPtr pRenderContext( materials );

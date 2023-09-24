@@ -92,7 +92,7 @@ public:
 	void			VPhysicsUpdate( IPhysicsObject *pPhysics );
 	void			DrawDebugGeometryOverlays();
 	int				DrawDebugTextOverlays();
-	void			Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity );
+	void			Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity, bool bUseSlowHighAccuracyContacts );
 	virtual void	Think( void );
 	CFourWheelVehiclePhysics *GetPhysics( void ) { return &m_VehiclePhysics; }
 	CBasePlayer		*HasPhysicsAttacker( float dt );

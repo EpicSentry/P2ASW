@@ -2,6 +2,7 @@
 #define TRIGGER_PORTAL_CLEANSER_H
 
 #include "cbase.h"
+#include "triggers.h"
 
 static char *g_pszPortalNonCleansable[] = 
 { 

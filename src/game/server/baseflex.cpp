@@ -2232,9 +2232,9 @@ bool CBaseFlex::IsSuppressedFlexAnimation( CSceneEventInfo *info )
 // Purpose: Clear out body lean states that are invalidated with Teleport
 //-----------------------------------------------------------------------------
 
-void CBaseFlex::Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity )
+void CBaseFlex::Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity, bool bUseSlowHighAccuracyContacts )
 {
-	BaseClass::Teleport( newPosition, newAngles, newVelocity );
+	BaseClass::Teleport( newPosition, newAngles, newVelocity, bUseSlowHighAccuracyContacts );
 #ifdef HL2_DLL
 
 	// clear out Body Lean

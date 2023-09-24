@@ -244,7 +244,9 @@ void		UTIL_GetPlayerConnectionInfo( int playerIndex, int& ping, int &packetloss 
 void		UTIL_SetClientVisibilityPVS( edict_t *pClient, const unsigned char *pvs, int pvssize );
 bool		UTIL_ClientPVSIsExpanded();
 
-
+#if defined ( PORTAL )
+void		UTIL_SetClientCheckPVS( edict_t *pClient, const unsigned char *pvs, int pvssize );
+#endif
 
 edict_t		*UTIL_FindClientInPVS( edict_t *pEdict );
 edict_t		*UTIL_FindClientInVisibilityPVS( edict_t *pEdict );
@@ -353,13 +355,6 @@ void UTIL_PointAtNamedEntity( CBaseEntity *pEnt, string_t strTarget );
 
 // Copy the pose parameter values from one entity to the other
 bool UTIL_TransferPoseParameters( CBaseEntity *pSourceEntity, CBaseEntity *pDestEntity );
-
-// Search for water transition along a vertical line
-float UTIL_WaterLevel( const Vector &position, float minz, float maxz );
-
-// Like UTIL_WaterLevel, but *way* less expensive.
-// I didn't replace UTIL_WaterLevel everywhere to avoid breaking anything.
-float UTIL_FindWaterSurface( const Vector &position, float minz, float maxz );
 
 void UTIL_Bubbles( const Vector& mins, const Vector& maxs, int count );
 void UTIL_BubbleTrail( const Vector& from, const Vector& to, int count );

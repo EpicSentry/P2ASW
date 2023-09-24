@@ -50,8 +50,12 @@ int CHL2GameMovement::GetCheckInterval( IntervalType_t type )
 //-----------------------------------------------------------------------------
 bool CHL2GameMovement::IsForceMoveActive()
 {
+#ifndef PORTAL2
 	LadderMove_t *lm = GetLadderMove();
 	return lm->m_bForceLadderMove;
+#else
+	return false;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -59,10 +63,12 @@ bool CHL2GameMovement::IsForceMoveActive()
 //-----------------------------------------------------------------------------
 void CHL2GameMovement::SwallowUseKey()
 {
+#ifndef PORTAL2
 	mv->m_nOldButtons |= IN_USE;
 	player->m_afButtonPressed &= ~IN_USE;
 
 	GetHL2Player()->m_bPlayUseDenySound = false;
+#endif
 }
 
 #if !defined( CLIENT_DLL )
@@ -148,6 +154,7 @@ LINK_ENTITY_TO_CLASS( reserved_spot, CReservePlayerSpot );
 //-----------------------------------------------------------------------------
 void CHL2GameMovement::StartForcedMove( bool mounting, float transit_speed, const Vector& goalpos, CFuncLadder *ladder )
 {
+#ifndef PORTAL2
 	LadderMove_t* lm = GetLadderMove();
 	Assert( lm );
 	// Already active, just ignore
@@ -220,6 +227,7 @@ void CHL2GameMovement::StartForcedMove( bool mounting, float transit_speed, cons
 
 	// Debounce the use key
 	SwallowUseKey();
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -227,6 +235,7 @@ void CHL2GameMovement::StartForcedMove( bool mounting, float transit_speed, cons
 //-----------------------------------------------------------------------------
 bool CHL2GameMovement::ContinueForcedMove()
 {
+#ifndef PORTAL2
 	LadderMove_t* lm = GetLadderMove();
 	Assert( lm );
 	Assert( lm->m_bForceLadderMove );
@@ -279,6 +288,9 @@ bool CHL2GameMovement::ContinueForcedMove()
 
 	// Stil active
 	return lm->m_bForceLadderMove;
+#else
+	return false;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -299,6 +311,7 @@ bool CHL2GameMovement::OnLadder( trace_t &trace )
 //-----------------------------------------------------------------------------
 void CHL2GameMovement::Findladder( float maxdist, CFuncLadder **ppLadder, Vector& ladderOrigin, const CFuncLadder *skipLadder )
 {
+#ifndef PORTAL2
 	CFuncLadder *bestLadder = NULL;
 	float bestDist = MAX_COORD_INTEGER;
 	Vector bestOrigin;
@@ -379,7 +392,7 @@ void CHL2GameMovement::Findladder( float maxdist, CFuncLadder **ppLadder, Vector
 	// Return best ladder spot
 	*ppLadder = bestLadder;
 	ladderOrigin = bestOrigin;
-
+#endif
 }
 
 static bool NearbyDismountLessFunc( const NearbyDismount_t& lhs, const NearbyDismount_t& rhs )
@@ -887,6 +900,7 @@ bool CHL2GameMovement::CheckLadderAutoMount( CFuncLadder *ladder, const Vector& 
 //-----------------------------------------------------------------------------
 bool CHL2GameMovement::LadderMove( void )
 {
+#ifndef PORTAL2
 
 	if ( player->GetMoveType() == MOVETYPE_NOCLIP )
 	{
@@ -1115,7 +1129,7 @@ bool CHL2GameMovement::LadderMove( void )
 	{
 		mv->m_vecVelocity.Init();
 	}
-
+#endif
 	return true;
 }
 

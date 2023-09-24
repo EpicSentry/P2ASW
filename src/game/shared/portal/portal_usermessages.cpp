@@ -95,7 +95,6 @@ void RegisterUserMessages()
 	//usermessages->Register( "MPVSRoundEnd", sizeof( BYTE ) );
 
 	//new stuff for portal
-	//usermessages->Register( "EntityPortalled", sizeof( long ) + sizeof( long ) + sizeof( Vector ) + sizeof( QAngle ) ); //something got teleported through a portal
 	usermessages->Register( "KillCam", -1 );	
 #endif // PORTAL2
 }

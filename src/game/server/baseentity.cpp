@@ -659,8 +659,10 @@ IMPLEMENT_SERVERCLASS_ST_NOBASE( CBaseEntity, DT_BaseEntity )
 #endif
 
 	SendPropInt		( SENDINFO( m_iTextureFrameIndex ),		8, SPROP_UNSIGNED ),
-
-
+	
+#if defined ( PORTAL2 )
+	SendPropInt		( SENDINFO( m_iObjectCapsCache ),		6, SPROP_UNSIGNED ),
+#endif
 
 #if !defined( NO_ENTITY_PREDICTION ) && defined( USE_PREDICTABLEID )
 	SendPropEHandle (SENDINFO(m_hPlayerSimulationOwner)),
@@ -2287,7 +2289,9 @@ BEGIN_DATADESC_NO_BASE( CBaseEntity )
 
 //	DEFINE_FIELD( m_bSentLastFrame, FIELD_INTEGER ),
 
-
+#if defined ( PORTAL2 )
+	DEFINE_FIELD( m_iObjectCapsCache, FIELD_INTEGER ),
+#endif 
 
 	DEFINE_FIELD( m_hGroundEntity, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_flGroundChangeTime, FIELD_TIME ),
@@ -4959,14 +4963,26 @@ struct TeleportListEntry_t
 };
 
 
-static void TeleportEntity( CBaseEntity *pSourceEntity, TeleportListEntry_t &entry, const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity )
+static void TeleportEntity( CBaseEntity *pSourceEntity, TeleportListEntry_t &entry, const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity, bool bUseSlowHighAccuracyContacts )
 {
 	CBaseEntity *pTeleport = entry.pEntity;
 	Vector prevOrigin = entry.prevAbsOrigin;
 	QAngle prevAngles = entry.prevAbsAngles;
 
 	int nSolidFlags = pTeleport->GetSolidFlags();
-	pTeleport->AddSolidFlags( FSOLID_NOT_SOLID );
+	IPhysicsObject *pPhys = pTeleport->VPhysicsGetObject();
+	bool bEnablePhysCollision = false;
+	// by default we use a slow method that keeps contacts accurate.
+	// when desired it is possible to use a quicker method that trades off accuracy to save CPU
+	if ( pPhys && bUseSlowHighAccuracyContacts )
+	{
+		bEnablePhysCollision = pPhys->IsCollisionEnabled();
+		if ( bEnablePhysCollision )
+		{
+			pPhys->EnableCollisions( false );
+		}
+		pTeleport->AddSolidFlags( FSOLID_NOT_SOLID );
+	}
 
 	// I'm teleporting myself
 	if ( pSourceEntity == pTeleport )
@@ -4983,7 +4999,10 @@ static void TeleportEntity( CBaseEntity *pSourceEntity, TeleportListEntry_t &ent
 
 		if ( newVelocity )
 		{
-			pTeleport->SetAbsVelocity( *newVelocity );
+			if ( !pPhys || pTeleport->GetMoveType() != MOVETYPE_VPHYSICS )
+			{
+				pTeleport->SetAbsVelocity( *newVelocity );
+			}
 			pTeleport->SetBaseVelocity( vec3_origin );
 		}
 
@@ -4998,8 +5017,6 @@ static void TeleportEntity( CBaseEntity *pSourceEntity, TeleportListEntry_t &ent
 		// My parent is teleporting, just update my position & physics
 		pTeleport->CalcAbsolutePosition();
 	}
-	IPhysicsObject *pPhys = pTeleport->VPhysicsGetObject();
-	bool rotatePhysics = false;
 
 	// handle physics objects / shadows
 	if ( pPhys )
@@ -5012,19 +5029,29 @@ static void TeleportEntity( CBaseEntity *pSourceEntity, TeleportListEntry_t &ent
 		// don't rotate physics on players or bbox entities
 		if (pTeleport->IsPlayer() || pTeleport->GetSolid() == SOLID_BBOX )
 		{
-			rotAngles = &vec3_angle;
-		}
-		else
-		{
-			rotatePhysics = true;
+			if ( newAngles )
+			{
+				rotAngles = newAngles;
+			}
+			else
+			{
+				rotAngles = &vec3_angle;
+			}
 		}
 
-		pPhys->SetPosition( pTeleport->GetAbsOrigin(), *rotAngles, true );
+		pPhys->SetPosition( pTeleport->GetAbsOrigin(), *rotAngles, bUseSlowHighAccuracyContacts );
 	}
 
-	g_pNotify->ReportTeleportEvent( pTeleport, prevOrigin, prevAngles, rotatePhysics );
+	g_pNotify->ReportTeleportEvent( pTeleport, prevOrigin, prevAngles, true );
 
-	pTeleport->SetSolidFlags( nSolidFlags );
+	if ( pPhys && bUseSlowHighAccuracyContacts )
+	{
+		pTeleport->SetSolidFlags( nSolidFlags );
+		if ( bEnablePhysCollision )
+		{
+			pPhys->EnableCollisions( true );
+		}
+	}
 }
 
 
@@ -5055,7 +5082,7 @@ static void BuildTeleportList_r( CBaseEntity *pTeleport, CUtlVector<TeleportList
 
 
 static CUtlVector<CBaseEntity *> g_TeleportStack;
-void CBaseEntity::Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity )
+void CBaseEntity::Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity, bool bUseSlowHighAccuracyContacts )
 {
 	if ( g_TeleportStack.Find( this ) >= 0 )
 		return;
@@ -5067,12 +5094,7 @@ void CBaseEntity::Teleport( const Vector *newPosition, const QAngle *newAngles, 
 	int i;
 	for ( i = 0; i < teleportList.Count(); i++)
 	{
-		TeleportEntity( this, teleportList[i], newPosition, newAngles, newVelocity );
-	}
-
-	for (i = 0; i < teleportList.Count(); i++)
-	{
-		teleportList[i].pEntity->CollisionRulesChanged();
+		TeleportEntity( this, teleportList[i], newPosition, newAngles, newVelocity, bUseSlowHighAccuracyContacts );
 	}
 
 	Assert( g_TeleportStack[index] == this );

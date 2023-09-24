@@ -972,6 +972,10 @@ public:
 	inline	bool					IsVisible() const;
 	inline bool						IsVisibleToAnyPlayer() const;
 			void					UpdateVisibility();
+			
+	// Totally sucky, but I can't think of a better way of doing this
+	// without changing zillions of ShouldDraw calls.
+	virtual bool					ShouldSuppressForSplitScreenPlayer( int nSlot ) { return false; }
 	
 	// Returns true if the entity changes its position every frame on the server but it doesn't
 	// set animtime. In that case, the client returns true here so it copies the server time to
@@ -998,6 +1002,9 @@ public:
 	
 	virtual float					GetInterpolationAmount( int flags );
 	float							GetLastChangeTime( int flags );
+	
+	//Get the time we would pass as an input to our interpolators
+	float							GetEffectiveInterpolationCurTime( float currentTime );
 
 	// Interpolate the position for rendering
 	virtual bool					Interpolate( float currentTime );
@@ -1787,9 +1794,11 @@ public:
 	int								GetMaxCPULevel( ) const;
 	int								GetMinGPULevel( ) const;
 	int								GetMaxGPULevel( ) const;
+	
 
-
-
+#if defined ( PORTAL2 )
+	int								GetServerObjectCaps() { return m_iObjectCapsCache; }
+#endif	
 
 protected:
 	// FIXME: Should I move the functions handling these out of C_ClientEntity
@@ -1834,8 +1843,11 @@ protected:
 	virtual int						GetStudioBody( void ) { return 0; }
 	// call this in postdataupdate to detect hierarchy changes
 	bool							IsParentChanging();
-
-
+		
+#if defined ( PORTAL2 )
+	// Received caps from server. Using this for +use validity checking.
+	int								m_iObjectCapsCache;
+#endif
 
 private:
 	friend void OnRenderStart();

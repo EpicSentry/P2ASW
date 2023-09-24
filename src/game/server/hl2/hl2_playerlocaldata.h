@@ -47,7 +47,6 @@ public:
 
 	// Ladder related data
 	CNetworkVar( EHANDLE, m_hLadder );
-	LadderMove_t			m_LadderMove;
 };
 
 EXTERN_SEND_TABLE(DT_HL2Local);

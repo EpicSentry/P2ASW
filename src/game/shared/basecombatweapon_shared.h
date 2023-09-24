@@ -442,6 +442,7 @@ public:
 	// Returns the aiment render origin + angles
 	virtual int				DrawModel( int flags, const RenderableInstance_t &instance );
 	virtual bool			ShouldDraw( void );
+	virtual bool			ShouldSuppressForSplitScreenPlayer( int nSlot );
 	virtual bool			ShouldDrawPickup( void );
 	virtual void			HandleInput( void ) { return; };
 	virtual void			OverrideMouseInput( float *x, float *y ) { return; };

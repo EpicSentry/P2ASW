@@ -109,6 +109,7 @@ public:
 	virtual void			ApplyBoneMatrixTransform( matrix3x4_t& transform );
 
 	virtual bool			ShouldDraw();
+	virtual bool			ShouldSuppressForSplitScreenPlayer( int nSlot );
 	virtual int				DrawModel( int flags, const RenderableInstance_t &instance );
 	int						DrawOverriddenViewmodel( int flags, const RenderableInstance_t &instance );
 	virtual uint8			OverrideAlphaModulation( uint8 nAlpha );

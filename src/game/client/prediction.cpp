@@ -71,6 +71,11 @@ extern CMoveData *g_pMoveData;
 
 void COM_Log( char *pszFile, char *fmt, ...);
 
+#if defined( PORTAL )
+ConVar cl_predicted_movement_uses_uninterpolated_physics( "cl_predicted_movement_uses_uninterpolated_physics", "1" );
+extern void MoveUnpredictedPhysicsNearPlayerToNetworkedPosition( CBasePlayer *pPlayer );
+#endif
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -310,6 +315,7 @@ void CPrediction::OnReceivedUncompressedPacket( void )
 		Split_t &split = m_Split[ i ];
 		split.m_nCommandsPredicted = 0;
 		split.m_nServerCommandsAcknowledged = 0;
+		split.m_nLastCommandAcknowledged = 0;
 	}
 #endif
 }
@@ -562,6 +568,7 @@ void CPrediction::CheckPredictConvar()
 			Split_t &split = m_Split[ i ];
 			split.m_nCommandsPredicted = 0;
 			split.m_nServerCommandsAcknowledged = 0;
+			split.m_nLastCommandAcknowledged = 0;
 		}
 		m_nPreviousStartFrame = -1;
 	}
@@ -1625,14 +1632,14 @@ bool CPrediction::PerformPrediction( int nSlot, C_BasePlayer *localPlayer, bool 
 	int i = ComputeFirstCommandToExecute( nSlot, received_new_world_update, incoming_acknowledged, outgoing_command );
 
 	Assert( i >= 1 );
-
+	
 	// This is a hack to get the CTriggerAutoGameMovement auto duck triggers to correctly deal with prediction.
 	// Here we just untouch any triggers the player was touching (since we might have teleported the origin 
 	// backward from it's previous position) and then re-touch any triggers it's currently in
-
+#if !defined( PORTAL2 )	 //portal2 coop likes trigger touch behavior consistent with serverside trigger touch behavior
 	localPlayer->SetCheckUntouch( true );
 	localPlayer->PhysicsCheckForEntityUntouch();
-
+#endif
 	localPlayer->PhysicsTouchTriggers();
 
 	// undo interpolation changes for entities we stand on
@@ -1643,6 +1650,16 @@ bool CPrediction::PerformPrediction( int nSlot, C_BasePlayer *localPlayer, bool 
 		ground->MoveToLastReceivedPosition();
 		ground = ground->GetMoveParent();
 	}
+	
+#if defined( PORTAL )
+	if( cl_predicted_movement_uses_uninterpolated_physics.GetBool() )
+	{
+		//if we're going to treat physics objects as immovable solids on the client, they might as well be immovable solids in the place the server told us to put them
+		//otherwise interpolation effectively teleports it backwards without the need (or support) to push entities backwards with it.
+		//If you happen to be pushing a physics object, this will make movement traces freak out as we start in solid.
+		MoveUnpredictedPhysicsNearPlayerToNetworkedPosition( localPlayer );
+	}
+#endif
 
 	Split_t &split = m_Split[ nSlot ];
 
@@ -1763,6 +1780,8 @@ void CPrediction::_Update( int nSlot, bool received_new_world_update, bool valid
 	C_BasePlayer *localPlayer = C_BasePlayer::GetLocalPlayer( nSlot );
 	if ( !localPlayer )
 		return;
+	
+	m_Split[nSlot].m_nLastCommandAcknowledged = incoming_acknowledged;
 
 	// Always using current view angles no matter what
 	// NOTE: ViewAngles are always interpreted as being *relative* to the player
@@ -1840,6 +1859,19 @@ bool CPrediction::IsFirstTimePredicted( void ) const
 	return m_Split[ GET_ACTIVE_SPLITSCREEN_SLOT() ].m_bFirstTimePredicted;
 #else
 	return false;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: For verifying/fixing operations that don't save/load in a datatable very well
+// Output : Returns the how many commands the server has processed and sent results for
+//-----------------------------------------------------------------------------
+int CPrediction::GetLastAcknowledgedCommandNumber( void ) const
+{
+#if !defined( NO_ENTITY_PREDICTION )
+	return m_Split[ GET_ACTIVE_SPLITSCREEN_SLOT() ].m_nLastCommandAcknowledged;
+#else
+	return 0;
 #endif
 }
 

@@ -1728,9 +1728,9 @@ void CBaseAnimating::CalculateIKLocks( float currentTime )
 // Purpose: Clear out animation states that are invalidated with Teleport
 //-----------------------------------------------------------------------------
 
-void CBaseAnimating::Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity )
+void CBaseAnimating::Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity, bool bUseSlowHighAccuracyContacts )
 {
-	BaseClass::Teleport( newPosition, newAngles, newVelocity );
+	BaseClass::Teleport( newPosition, newAngles, newVelocity, bUseSlowHighAccuracyContacts );
 	if (m_pIk)
 	{
 		m_pIk->ClearTargets( );

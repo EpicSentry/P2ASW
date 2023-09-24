@@ -22,7 +22,7 @@
 #include "filters.h"
 #include "SpriteTrail.h"
 #include "decals.h"
-#include "hl2_player.h"
+#include "portal_player.h"
 #include "eventqueue.h"
 #include "physics_collisionevent.h"
 #include "GameStats.h"

@@ -168,6 +168,7 @@ private:
 class CSetActiveSplitScreenPlayerGuard : public CVGuiScreenSizeSplitScreenPlayerGuard
 {
 public:
+	CSetActiveSplitScreenPlayerGuard( char const *pchContext, int nLine );
 	CSetActiveSplitScreenPlayerGuard( char const *pchContext, int nLine, int slot, int nOldSlot, bool bSetVguiScreenSize );
 	CSetActiveSplitScreenPlayerGuard( char const *pchContext, int nLine, C_BaseEntity *pEntity, int nOldSlot, bool bSetVguiScreenSize );
 	~CSetActiveSplitScreenPlayerGuard();

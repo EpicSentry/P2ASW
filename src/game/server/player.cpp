@@ -630,6 +630,8 @@ CBasePlayer::CBasePlayer( )
 
 	m_hPostProcessCtrl.Set( NULL );
 	m_hColorCorrectionCtrl.Set( NULL );
+
+	m_flTimeLastTouchedGround = 0.0f;
 }
 
 CBasePlayer::~CBasePlayer( )
@@ -864,6 +866,11 @@ void CBasePlayer::DeathSound( const CTakeDamageInfo &info )
 	{
 		UTIL_EmitGroupnameSuit(edict(), "HEV_DEAD");
 	}
+}
+
+void CBasePlayer::SetFogController( CFogController *pFogController )
+{
+	m_PlayerFog.m_hCtrl.Set( pFogController );
 }
 
 // override takehealth
@@ -3728,6 +3735,15 @@ void CBasePlayer::PreThink(void)
 	if ( !( GetFlags() & FL_ONGROUND ) )
 	{
 		m_Local.m_flFallVelocity = -GetAbsVelocity().z;
+	}
+	
+	if ( GetGroundEntity() )
+	{
+		m_flTimeLastTouchedGround = gpGlobals->curtime;
+	}
+
+	{
+		m_flTimeLastTouchedGround = gpGlobals->curtime;
 	}
 
 #ifndef _XBOX

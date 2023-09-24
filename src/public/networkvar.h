@@ -493,7 +493,6 @@ private:
 	}
 };
 
-
 // Network vector wrapper.
 template< class Type, class Changer >
 class CNetworkQuaternionBase : public CNetworkVarBase< Type, Changer >
@@ -701,8 +700,9 @@ private:
 
 // Vectors + some convenient helper functions.
 #define CNetworkVector( name ) CNetworkVectorInternal( Vector, name, NetworkStateChanged )
+	
 #define CNetworkQAngle( name ) CNetworkVectorInternal( QAngle, name, NetworkStateChanged )
-
+	
 #define CNetworkVectorInternal( type, name, stateChangedFn ) \
 	NETWORK_VAR_START( type, name ) \
 	NETWORK_VAR_END( type, name, CNetworkVectorBase, stateChangedFn )

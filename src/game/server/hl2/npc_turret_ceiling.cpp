@@ -12,7 +12,7 @@
 #include "engine/IEngineSound.h"
 #include "ammodef.h"
 #include "Sprite.h"
-#include "hl2/hl2_player.h"
+#include "portal_player.h"
 #include "soundenvelope.h"
 #include "explode.h"
 #include "IEffects.h"

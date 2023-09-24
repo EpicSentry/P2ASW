@@ -970,6 +970,76 @@ bool UTIL_IsSpaceEmpty( CBaseEntity *pMainEnt, const Vector &vMin, const Vector 
 	return bClear;
 }
 
+
+float UTIL_WaterLevel( const Vector &position, float minz, float maxz )
+{
+	Vector midUp = position;
+	midUp.z = minz;
+
+	if ( !(UTIL_PointContents(midUp, MASK_WATER) & MASK_WATER) )
+		return minz;
+
+	midUp.z = maxz;
+	if ( UTIL_PointContents(midUp, MASK_WATER) & MASK_WATER )
+		return maxz;
+
+	float diff = maxz - minz;
+	while (diff > 1.0)
+	{
+		midUp.z = minz + diff/2.0;
+		if ( UTIL_PointContents(midUp, MASK_WATER) & MASK_WATER )
+		{
+			minz = midUp.z;
+		}
+		else
+		{
+			maxz = midUp.z;
+		}
+		diff = maxz - minz;
+	}
+
+	return midUp.z;
+}
+
+
+//-----------------------------------------------------------------------------
+// Like UTIL_WaterLevel, but *way* less expensive.
+// I didn't replace UTIL_WaterLevel everywhere to avoid breaking anything.
+//-----------------------------------------------------------------------------
+class CWaterTraceFilter : public CTraceFilter
+{
+public:
+	bool ShouldHitEntity( IHandleEntity *pHandleEntity, int contentsMask )
+	{
+		CBaseEntity *pCollide = EntityFromEntityHandle( pHandleEntity );
+
+		// Static prop case...
+		if ( !pCollide )
+			return false;
+
+		// Only impact water stuff...
+		if ( pCollide->GetSolidFlags() & FSOLID_VOLUME_CONTENTS )
+			return true;
+
+		return false;
+	}
+};
+
+float UTIL_FindWaterSurface( const Vector &position, float minz, float maxz )
+{
+	Vector vecStart, vecEnd;
+	vecStart.Init( position.x, position.y, maxz );
+	vecEnd.Init( position.x, position.y, minz );
+
+	Ray_t ray;
+	trace_t tr;
+	CWaterTraceFilter waterTraceFilter;
+	ray.Init( vecStart, vecEnd );
+	enginetrace->TraceRay( ray, MASK_WATER, &waterTraceFilter, &tr );
+
+	return tr.endpos.z;
+}
+
 void UTIL_StringToFloatArray( float *pVector, int count, const char *pString )
 {
 	char *pstr, *pfront, tempString[128];

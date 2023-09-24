@@ -1011,7 +1011,7 @@ public:
 
 	// change position, velocity, orientation instantly
 	// passing NULL means no change
-	virtual void			Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity );
+	virtual void			Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity, bool bUseSlowHighAccuracyContacts = false );
 	// notify that another entity (that you were watching) was teleported
 	virtual void			NotifySystemEvent( CBaseEntity *pNotify, notify_system_event_t eventType, const notify_system_event_params_t &params );
 

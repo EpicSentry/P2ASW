@@ -11,3 +11,5 @@ char *g_ppszPortalPassThroughMaterials[] =
 	"lights/light_orange001", 
 	NULL,
 };
+
+int g_nPortal2PromoFlags = 0;

@@ -10,6 +10,8 @@
 #pragma once
 #endif
 
+#if !defined ( PORTAL2 )
+
 // Shared header file for players
 #if defined( CLIENT_DLL )
 #define CHL2_Player C_BaseHLPlayer	//FIXME: Lovely naming job between server and client here...
@@ -17,5 +19,7 @@
 #else
 #include "hl2_player.h"
 #endif
+
+#endif // !defined ( PORTAL2 )
 
 #endif // HL2_PLAYER_SHARED_H

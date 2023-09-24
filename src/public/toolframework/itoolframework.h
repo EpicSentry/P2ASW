@@ -133,6 +133,7 @@ struct CameraRecordingState_t
 	float m_flFOV;
 	Vector m_vecEyePosition;
 	QAngle m_vecEyeAngles;
+	bool m_bPlayerEyeIsPortalled; //for portal. Need to reverse some portal recursion draw logic when the player eye and body straddle a portal
 };
 
 struct MonitorRecordingState_t

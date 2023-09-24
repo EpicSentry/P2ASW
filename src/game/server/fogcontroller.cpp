@@ -402,6 +402,11 @@ void CFogSystem::InitMasterController( void )
 	} while ( pFogController );
 }
 
+void CFogSystem::SetMasterController( CFogController *pFogController )
+{
+	m_hMasterController = pFogController;
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: On a multiplayer map restart, re-find the master controller.
 //-----------------------------------------------------------------------------

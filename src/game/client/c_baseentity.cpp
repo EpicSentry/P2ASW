@@ -576,7 +576,9 @@ BEGIN_RECV_TABLE_NOBASE(C_BaseEntity, DT_BaseEntity)
 	
 	RecvPropInt( RECVINFO ( m_iTextureFrameIndex ) ),
 	
-
+#if defined ( PORTAL2 )
+	RecvPropInt		( RECVINFO( m_iObjectCapsCache ) ),
+#endif
 	
 #if !defined( NO_ENTITY_PREDICTION ) && defined( USE_PREDICTABLEID )
 	RecvPropEHandle (RECVINFO(m_hPlayerSimulationOwner)),
@@ -1636,22 +1638,39 @@ void C_BaseEntity::UpdateVisibility()
 #endif
 
 	m_VisibilityBits.ClearAll();
-	int nBitsSet = 0;
 	
-	C_BasePlayer::SetRemoteSplitScreenPlayerViewsAreLocalPlayer( true );
-	IterateRemoteSplitScreenViewSlots_Push( true );
-	FOR_EACH_VALID_SPLITSCREEN_PLAYER( hh )
+	// NOTE: Do not reactivate this. We need to use ShouldSuppressForSplitScreenPlayer
+	// for make portals work. Make sure ShouldDraw always returns true
+	bool bDraw;
 	{
-		ACTIVE_SPLITSCREEN_PLAYER_GUARD( hh );
-		bool bDraw = ( ShouldDraw() && !IsDormant() && ( !ToolsEnabled() || IsEnabledInToolView() ) );
-		if ( bDraw )
+		CSetActiveSplitScreenPlayerGuard g( __FILE__, __LINE__ );
+		bDraw = ( ShouldDraw() && !IsDormant() && ( !ToolsEnabled() || IsEnabledInToolView() ) );
+	}
+	if ( bDraw )
+	{
+		bool bIsSplitScreenActive = engine->IsSplitScreenActive();
+		if ( !bIsSplitScreenActive )
 		{
-			m_VisibilityBits.Set( hh );
-			++nBitsSet;
+			C_BasePlayer::SetRemoteSplitScreenPlayerViewsAreLocalPlayer( true );
+			IterateRemoteSplitScreenViewSlots_Push( true );
+		}
+
+		FOR_EACH_VALID_SPLITSCREEN_PLAYER( hh )
+		{
+			bool bShouldSkip = ShouldSuppressForSplitScreenPlayer( hh );
+			if ( !bShouldSkip )
+			{
+				m_VisibilityBits.Set( hh );
+			}
+		}
+
+		if ( !bIsSplitScreenActive )
+		{
+			IterateRemoteSplitScreenViewSlots_Pop();
+			C_BasePlayer::SetRemoteSplitScreenPlayerViewsAreLocalPlayer( false );
 		}
 	}
-	IterateRemoteSplitScreenViewSlots_Pop();
-	C_BasePlayer::SetRemoteSplitScreenPlayerViewsAreLocalPlayer( false );
+
 
 #if MAX_SPLITSCREEN_PLAYERS > 1
 	if ( nPreviousValue != m_VisibilityBits.GetDWord( 0 ) )
@@ -1660,7 +1679,7 @@ void C_BaseEntity::UpdateVisibility()
 	}
 #endif
 
-	if ( nBitsSet > 0 )
+	if ( bDraw )
 	{
 		// add/update leafsystem
 		AddToLeafSystem();
@@ -3116,6 +3135,24 @@ void C_BaseEntity::OnLatchInterpolatedVariables( int flags )
 	{
 		AddToEntityList(ENTITY_LIST_INTERPOLATE);
 	}
+}
+
+float CBaseEntity::GetEffectiveInterpolationCurTime( float currentTime )
+{
+	if ( GetPredictable() || IsClientCreated() )
+	{
+		int slot = GetSplitUserPlayerPredictionSlot();
+		Assert( slot != -1 );
+		C_BasePlayer *localplayer = C_BasePlayer::GetLocalPlayer( slot );
+		if ( localplayer )
+		{
+			currentTime = localplayer->GetFinalPredictedTime();
+			currentTime -= TICK_INTERVAL;
+			currentTime += ( gpGlobals->interpolation_amount * TICK_INTERVAL );
+		}
+	}
+
+	return currentTime;
 }
 
 int CBaseEntity::BaseInterpolatePart1( float &currentTime, Vector &oldOrigin, QAngle &oldAngles, int &bNoMoreChanges )

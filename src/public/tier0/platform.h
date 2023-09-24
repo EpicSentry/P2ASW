@@ -210,6 +210,7 @@ typedef void * HINSTANCE;
 #else
 	#define IsPC()		true
 	#define IsConsole() false
+	#define IsGameConsole() 0
 #endif
 
 

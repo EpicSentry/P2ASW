@@ -315,6 +315,16 @@ bool g_bTextMode = false;
 static ConVar *g_pcv_ThreadMode = NULL;
 
 // implements ACTIVE_SPLITSCREEN_PLAYER_GUARD (cdll_client_int.h)
+CSetActiveSplitScreenPlayerGuard::CSetActiveSplitScreenPlayerGuard( char const *pchContext, int nLine ) :
+	CVGuiScreenSizeSplitScreenPlayerGuard( false, engine->GetActiveSplitScreenPlayerSlot(), engine->GetActiveSplitScreenPlayerSlot() )
+{
+	m_bChanged = true;
+	m_pchContext = pchContext;
+	m_nLine = nLine;
+	m_nSaveSlot = engine->SetActiveSplitScreenPlayerSlot( -1 );
+	m_bSaveGetLocalPlayerAllowed = engine->SetLocalPlayerIsResolvable( pchContext, nLine, false );
+}
+
 CSetActiveSplitScreenPlayerGuard::CSetActiveSplitScreenPlayerGuard( char const *pchContext, int nLine, int slot, int nOldSlot, bool bSetVguiScreenSize ) :
 	CVGuiScreenSizeSplitScreenPlayerGuard( bSetVguiScreenSize, slot, nOldSlot )
 {

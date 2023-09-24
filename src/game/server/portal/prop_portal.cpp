@@ -458,7 +458,7 @@ void CProp_Portal::DelayedPlacementThink( void )
 		CPortal_Player *pFiringPlayer = dynamic_cast<CPortal_Player *>( pPortalGun->GetOwner() );
 		if( pFiringPlayer )
 		{
-			pFiringPlayer->IncrementPortalsPlaced();
+			pFiringPlayer->IncrementPortalsPlaced( m_bIsPortal2 );
 
 			// Placement successful, fire the output
 			m_OnPlacedSuccessfully.FireOutput( pPortalGun, this );
@@ -1061,9 +1061,11 @@ void CProp_Portal::TeleportTouchingEntity( CBaseEntity *pOther )
 	if( bPlayer )
 	{
 		qOtherAngles = pOtherAsPlayer->EyeAngles();
+#if 0
 		pOtherAsPlayer->m_qPrePortalledViewAngles = qOtherAngles;
 		pOtherAsPlayer->m_bFixEyeAnglesFromPortalling = true;
 		pOtherAsPlayer->m_matLastPortalled = m_matrixThisToLinked;
+#endif
 		bNonPhysical = true;
 		//if( (fabs( RemotePortalDataAccess.Placement.vForward.z ) + fabs( LocalPortalDataAccess.Placement.vForward.z )) > 0.7071f ) //some combination of floor/ceiling
 		if( fabs( LocalPortalDataAccess.Placement.vForward.z ) > 0.0f )
@@ -1324,32 +1326,7 @@ void CProp_Portal::TeleportTouchingEntity( CBaseEntity *pOther )
 		m_hLinkedPortal.Get()->PhysicsMarkEntitiesAsTouching( pOther, Trace );
 	}
 
-#if 0
-	// Notify the entity that it's being teleported
-	// Tell the teleported entity of the portal it has just arrived at
-	notify_teleport_params_t paramsTeleport;
-	paramsTeleport.prevOrigin		= ptOtherOrigin;
-	paramsTeleport.prevAngles		= qOtherAngles;
-	paramsTeleport.physicsRotate	= true;
-	notify_system_event_params_t eventParams ( &paramsTeleport );
-	pOther->NotifySystemEvent( this, NOTIFY_EVENT_TELEPORT, eventParams );
-
-	//notify clients of the teleportation
-	{
-		CBroadcastRecipientFilter filter;
-		filter.MakeReliable();
-		UserMessageBegin( filter, "EntityPortalled" );
-		WRITE_EHANDLE( this );
-		WRITE_EHANDLE( pOther );
-		WRITE_FLOAT( ptNewOrigin.x );
-		WRITE_FLOAT( ptNewOrigin.y );
-		WRITE_FLOAT( ptNewOrigin.z );
-		WRITE_FLOAT( qNewAngles.x );
-		WRITE_FLOAT( qNewAngles.y );
-		WRITE_FLOAT( qNewAngles.z );
-		MessageEnd();
-	}
-#else
+#if 1
 
 	// Notify the entity that it's being teleported
 	// Tell the teleported entity of the portal it has just arrived at

@@ -87,8 +87,9 @@ public:
 	fogparams_t			m_fog;
 	// audio environment
 	CNetworkVarEmbedded( audioparams_t, m_audio );
-
+	
 	CNetworkVar( bool, m_bSlowMovement );
+	CNetworkVar( float, m_fTBeamEndTime );
 };
 
 EXTERN_SEND_TABLE(DT_Local);

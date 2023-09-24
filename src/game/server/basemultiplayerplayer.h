@@ -5,8 +5,9 @@
 #define BASEMULTIPLAYERPLAYER_H
 #pragma once
 
-#include "player.h"
 #include "ai_speech.h"
+
+class CBasePlayer;
 
 enum SpeechPriorityType
 {
@@ -22,6 +23,7 @@ class CBaseMultiplayerPlayer : public CAI_ExpresserHost<CBasePlayer>
 {
 
 	DECLARE_CLASS( CBaseMultiplayerPlayer, CAI_ExpresserHost<CBasePlayer> );
+	DECLARE_ENT_SCRIPTDESC();
 
 public:
 
@@ -42,7 +44,7 @@ public:
 
 	virtual void		Precache( void )
 	{
-#ifndef SWARM_DLL
+#if !defined( DOTA_DLL ) && !defined( PORTAL2 )
 		PrecacheParticleSystem( "achieved" );
 #endif
 
@@ -57,11 +59,12 @@ public:
 
 	virtual void OnAchievementEarned( int iAchievement ) {}
 
-	enum
+	enum ChatIgnore
 	{
 		CHAT_IGNORE_NONE = 0,
-		CHAT_IGNORE_ALL,
-		CHAT_IGNORE_TEAM,
+		CHAT_IGNORE_BROADCAST,
+		CHAT_IGNORE_BROADCAST_AND_TEAM,
+		CHAT_IGNORE_EVERYTHING,
 	};
 
 	int m_iIgnoreGlobalChat;
@@ -79,7 +82,7 @@ public:
 
 	virtual int	CalculateTeamBalanceScore( void );
 
-	void AwardAchievement( int iAchievement );
+	virtual void AwardAchievement( int iAchievement, int iCount = 1 );
 	int	GetPerLifeCounterKV( const char *name );
 	void SetPerLifeCounterKV( const char *name, int value );
 	void ResetPerLifeCounters( void );
@@ -97,8 +100,8 @@ public:
 #if !defined(NO_STEAM)
 	//----------------------------
 	// Steam handling
-	bool		GetSteamID( CSteamID *pID );
-	uint64		GetSteamIDAsUInt64( void );
+	bool		GetSteamID( CSteamID *pID ) const;
+	uint64		GetSteamIDAsUInt64( void ) const;
 #endif
 
 protected:
