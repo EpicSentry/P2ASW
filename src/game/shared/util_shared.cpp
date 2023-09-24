@@ -1453,6 +1453,215 @@ int UTIL_CountNumBitsSet( uint64 nVar )
 	return nNumBits;
 }
 
+bool UTIL_FindClosestPassableSpace( const Vector &vOriginalCenter, const Vector &vExtents, const Vector &vIndecisivePush, unsigned int iIterations, Vector &vCenterOut, int nAxisRestrictionFlags, FindClosestPassableSpace_TraceAdapter_t *pTraceAdapter )
+{
+	Assert( vExtents != vec3_origin );
+
+	trace_t traces[2];
+	Ray_t entRay;
+	entRay.m_Extents = vExtents;
+	entRay.m_IsRay = false;
+	entRay.m_IsSwept = true;
+	entRay.m_StartOffset = vec3_origin;
+
+	Vector vOriginalExtents = vExtents;
+	Vector vCenter = vOriginalCenter;
+	Vector vGrowSize = vExtents * (1.0f / (float)(iIterations + 1));
+	Vector vCurrentExtents = vExtents - vGrowSize;
+
+	int iLargestExtent = 0;
+	{
+		float fLargestExtent = vOriginalExtents[0];
+		for( int i = 1; i != 3; ++i )
+		{
+			if( vOriginalExtents[i] > fLargestExtent )
+			{
+				iLargestExtent = i;
+				fLargestExtent = vOriginalExtents[i];
+			}
+		}
+	}
+
+
+	Ray_t testRay;
+	testRay.m_Extents = vGrowSize;
+	testRay.m_IsRay = false;
+	testRay.m_IsSwept = true;
+	testRay.m_StartOffset = vec3_origin;
+
+	float fOriginalExtentDists[8]; //distance between extents
+	//generate distance lookup. We reference this by XOR'ing the indices of two extents to find the axis of difference
+	{
+		//Since the ratios of lengths never change, we're going to normalize these distances to a value so we can simply scale on each iteration
+		//We've picked the largest extent as the basis simply because it's nonzero
+		float fNormalizer = 1.0f / vOriginalExtents[iLargestExtent];
+				
+		float fXDiff = vOriginalExtents.x * 2.0f * fNormalizer;
+		float fXSqr = fXDiff * fXDiff;
+
+		float fYDiff = vOriginalExtents.y * 2.0f * fNormalizer;
+		float fYSqr = fYDiff * fYDiff;
+
+		float fZDiff = vOriginalExtents.z * 2.0f * fNormalizer;
+		float fZSqr = fZDiff * fZDiff;
+
+		fOriginalExtentDists[0] = 0.0f; //should never get hit
+		fOriginalExtentDists[1] = fXDiff; //line along x axis		
+		fOriginalExtentDists[2] = fYDiff; //line along y axis
+		fOriginalExtentDists[3] = sqrt( fXSqr + fYSqr ); //diagonal perpendicular to z-axis
+		fOriginalExtentDists[4] = fZDiff; //line along z axis
+		fOriginalExtentDists[5] = sqrt( fXSqr + fZSqr ); //diagonal perpendicular to y-axis
+		fOriginalExtentDists[6] = sqrt( fYSqr + fZSqr ); //diagonal perpendicular to x-axis
+		fOriginalExtentDists[7] = sqrt( fXSqr + fYSqr + fZSqr ); //diagonal on all axes
+	}
+
+	Vector ptExtents[8]; //ordering is going to be like 3 bits, where 0 is a min on the related axis, and 1 is a max on the same axis, axis order x y z
+	float fExtentsValidation[8]; //some points are more valid than others, and this is our measure
+
+	vCenter.z += 0.001f; //to satisfy m_IsSwept on first pass
+	
+	unsigned int iFailCount;
+	for( iFailCount = 0; iFailCount != iIterations; ++iFailCount )
+	{
+		//float fXDistribution[2] = { -vCurrentExtents.x, vCurrentExtents.x };
+		//float fYDistribution[3] = { -vCurrentExtents.y, 0.0f, vCurrentExtents.y };
+		//float fZDistribution[5] = { -vCurrentExtents.z, 0.0f, 0.0f, 0.0f, vCurrentExtents.z };
+
+		//hey look, they can overlap
+		float fExtentDistribution[6];
+		fExtentDistribution[ 0 ] = vCenter.z + ( ( ( nAxisRestrictionFlags & FL_AXIS_DIRECTION_NZ ) == 0 ) ? ( -vCurrentExtents.z ) : ( 0.0f ) );	// Z-
+		fExtentDistribution[ 1 ] = vCenter.x + ( ( ( nAxisRestrictionFlags & FL_AXIS_DIRECTION_NX ) == 0 ) ? ( -vCurrentExtents.x ) : ( 0.0f ) );	// X-
+		fExtentDistribution[ 2 ] = vCenter.x + ( ( ( nAxisRestrictionFlags & FL_AXIS_DIRECTION_X ) == 0 ) ? ( vCurrentExtents.x ) : ( 0.0f ) );		// X+
+		fExtentDistribution[ 3 ] = vCenter.y + ( ( ( nAxisRestrictionFlags & FL_AXIS_DIRECTION_NY ) == 0 ) ? ( -vCurrentExtents.y ) : ( 0.0f ) );	// Y-
+		fExtentDistribution[ 4 ] = vCenter.z + ( ( ( nAxisRestrictionFlags & FL_AXIS_DIRECTION_Z ) == 0 ) ? ( vCurrentExtents.z ) : ( 0.0f ) );		// Z+
+		fExtentDistribution[ 5 ] = vCenter.y + ( ( ( nAxisRestrictionFlags & FL_AXIS_DIRECTION_Y ) == 0 ) ? ( vCurrentExtents.y ) : ( 0.0f ) );		// Y+
+
+		float *pXDistribution = &fExtentDistribution[1];
+		float *pYDistribution = &fExtentDistribution[3];
+
+		bool bExtentInvalid[8];
+		float fExtentDists[8];
+		bool bAnyInvalid = false;
+		for( int i = 0; i != 8; ++i )
+		{
+			ptExtents[i].x = pXDistribution[i & (1<<0)]; //fExtentDistribution[(0 or 1) + 1]
+			ptExtents[i].y = pYDistribution[i & (1<<1)]; //fExtentDistribution[(0 or 2) + 3]
+			ptExtents[i].z = fExtentDistribution[i & (1<<2)]; //fExtentDistribution[(0 or 4)]
+
+			fExtentsValidation[i] = 0.0f;
+			bExtentInvalid[i] = pTraceAdapter->pPointOutsideWorldFunc( ptExtents[i], pTraceAdapter );
+			bAnyInvalid |= bExtentInvalid[i];
+			fExtentDists[i] = fOriginalExtentDists[i] * vExtents[iLargestExtent];
+		}
+
+		//trace from all extents to all other extents and rate the validity
+		{
+			unsigned int counters[2]; //I know it's weird, get over it
+			for( counters[0] = 0; counters[0] != 7; ++counters[0] )
+			{
+				for( counters[1] = counters[0] + 1; counters[1] != 8; ++counters[1] )
+				{
+					for( int i = 0; i != 2; ++i )
+					{
+						if( bExtentInvalid[counters[i]] )
+						{
+							traces[i].startsolid = true;
+							traces[i].fraction = 0.0f;
+						}
+						else
+						{
+							testRay.m_Start = ptExtents[counters[i]];
+							testRay.m_Delta = ptExtents[counters[1-i]] - ptExtents[counters[i]];
+							pTraceAdapter->pTraceFunc( testRay, &traces[i], pTraceAdapter );
+						}
+					}
+
+					float fDistance = fExtentDists[counters[0] ^ counters[1]];
+
+					for( int i = 0; i != 2; ++i )
+					{
+						if( (traces[i].fraction == 1.0f) && (traces[1-i].fraction != 1.0f) )
+						{
+							//One sided collision >_<
+							traces[i].startsolid = true;
+							traces[i].fraction = 0.0f;
+							break;
+						}
+					}
+
+					for( int i = 0; i != 2; ++i )
+					{
+						if( traces[i].startsolid )
+						{
+							bExtentInvalid[counters[i]] = true;
+							bAnyInvalid = true;
+						}
+						else
+						{
+							fExtentsValidation[counters[i]] += traces[i].fraction * fDistance;
+						}
+					}
+				}
+			}
+		}
+
+		//optimally we should do this check before tracing extents. But one sided collision is a bitch
+		if( !bAnyInvalid )
+		{
+			//try to trace back to the starting position (if we start in valid, the endpoint will be closer to the original center)
+			entRay.m_Start = vCenter;
+			entRay.m_Delta = vOriginalCenter - vCenter;
+
+			pTraceAdapter->pTraceFunc( entRay, &traces[0], pTraceAdapter );
+			if( traces[0].startsolid == false )
+			{
+				//damned one sided collision
+				vCenterOut = traces[0].endpos;
+				return !pTraceAdapter->pPointOutsideWorldFunc( vCenterOut, pTraceAdapter );
+			}
+		}
+
+		//find the direction to move based on the extent validity
+		{
+			Vector vNewOriginDirection( 0.0f, 0.0f, 0.0f );
+			float fTotalValidation = 0.0f;
+			for( int i = 0; i != 8; ++i )
+			{
+				if( !bExtentInvalid[i] )
+				{
+					vNewOriginDirection += (ptExtents[i] - vCenter) * fExtentsValidation[i];
+					fTotalValidation += fExtentsValidation[i];
+				}
+			}
+
+			if( fTotalValidation != 0.0f )
+			{
+				vCenter += (vNewOriginDirection / fTotalValidation);
+
+				//increase sizing
+				testRay.m_Extents += vGrowSize; //increase the ray size
+				vCurrentExtents -= vGrowSize; //while reducing the overall test region size (so outermost ray extents are the same)
+			}
+			else
+			{
+				//no point was valid, apply the indecisive vector
+				vCenter += vIndecisivePush;
+
+				//reset sizing
+				testRay.m_Extents = vGrowSize;
+				vCurrentExtents = vOriginalExtents - vGrowSize;
+			}
+		}
+	}
+
+	//Warning( "FindClosestPassableSpace() failure.\n" );
+
+	// X360TBD: Hits in portal devtest
+	//AssertMsg( IsGameConsole() || iFailCount != iIterations, "FindClosestPassableSpace() failure." );
+	vCenterOut = vOriginalCenter;
+	return false;
+}
+
 bool UTIL_FindClosestPassableSpace( const Vector &vOriginalCenter, const Vector &vExtents, const Vector &vIndecisivePush, ITraceFilter *pTraceFilter, unsigned int fMask, unsigned int iIterations, Vector &vCenterOut, int nAxisRestrictionFlags )
 {
 	Assert( vExtents != vec3_origin );

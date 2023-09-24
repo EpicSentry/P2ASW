@@ -138,12 +138,15 @@ void C_World::OnDataChanged( DataUpdateType_t updateType )
 // -----------------------------------------
 //	Sprite Index info
 // -----------------------------------------
+#if !defined( TF_DLL ) && !defined ( DOTA_DLL ) && !defined ( PORTAL2 )
 int		g_sModelIndexLaser;			// holds the index for the laser beam
 int		g_sModelIndexLaserDot;		// holds the index for the laser beam dot
 int		g_sModelIndexFireball;		// holds the index for the fireball
-int		g_sModelIndexSmoke;			// holds the index for the smoke cloud
 int		g_sModelIndexWExplosion;	// holds the index for the underwater explosion
 int		g_sModelIndexBubbles;		// holds the index for the bubbles model
+#endif 
+
+int		g_sModelIndexSmoke;			// holds the index for the smoke cloud
 int		g_sModelIndexBloodDrop;		// holds the sprite index for the initial blood
 int		g_sModelIndexBloodSpray;	// holds the sprite index for splattered blood
 
@@ -151,6 +154,7 @@ int		g_sModelIndexBloodSpray;	// holds the sprite index for splattered blood
 // Purpose: Precache global weapon resources
 //-----------------------------------------------------------------------------
 PRECACHE_REGISTER_BEGIN( GLOBAL, WeaponSprites )
+#if !defined( TF_DLL ) && !defined ( DOTA_DLL ) && !defined ( PORTAL2 )
 	PRECACHE_INDEX( MODEL, "sprites/zerogxplode.vmt", g_sModelIndexFireball )
 	PRECACHE_INDEX( MODEL, "sprites/WXplo1.vmt", g_sModelIndexWExplosion )
 	PRECACHE_INDEX( MODEL, "sprites/steam1.vmt", g_sModelIndexSmoke )
@@ -159,6 +163,7 @@ PRECACHE_REGISTER_BEGIN( GLOBAL, WeaponSprites )
 	PRECACHE_INDEX( MODEL, "sprites/blood.vmt", g_sModelIndexBloodDrop )
 	PRECACHE_INDEX( MODEL, "sprites/laserbeam.vmt", g_sModelIndexLaser )
 	PRECACHE_INDEX( MODEL, "sprites/laserdot.vmt", g_sModelIndexLaserDot )
+#endif
 PRECACHE_REGISTER_END()
 
 void W_Precache(void)

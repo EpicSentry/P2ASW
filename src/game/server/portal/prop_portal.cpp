@@ -36,6 +36,84 @@
 #include "tier0/memdbgon.h"
 
 
+ConVar sv_portal_unified_velocity( "sv_portal_unified_velocity", "1", FCVAR_CHEAT | FCVAR_REPLICATED, "An attempt at removing patchwork velocity tranformation in portals, moving to a unified approach." );
+//unify how we determine the velocity of objects when portalling them
+Vector Portal_FindUsefulVelocity( CBaseEntity *pOther )
+{
+	Vector vOtherVelocity;
+	IPhysicsObject *pOtherPhysObject = pOther->VPhysicsGetObject();
+	if( sv_portal_unified_velocity.GetBool() )
+	{
+		if( (pOther->GetMoveType() == MOVETYPE_VPHYSICS) && (pOtherPhysObject != NULL) )
+		{
+			pOtherPhysObject->GetVelocity( &vOtherVelocity, NULL );
+		}
+		else
+		{
+			vOtherVelocity = pOther->GetAbsVelocity();
+			if( pOtherPhysObject )
+			{
+				Vector vPhysVelocity;
+				pOtherPhysObject->GetVelocity( &vPhysVelocity, NULL );
+
+				if( vPhysVelocity.LengthSqr() > vOtherVelocity.LengthSqr() )
+				{
+					vOtherVelocity = vPhysVelocity;
+				}
+			}
+		}
+	}
+	else
+	{
+		if( pOther->GetMoveType() == MOVETYPE_VPHYSICS )
+		{
+			if( pOtherPhysObject && (pOtherPhysObject->GetShadowController() == NULL) )
+			{
+				pOtherPhysObject->GetVelocity( &vOtherVelocity, NULL );
+			}
+			else
+			{
+#if defined( GAME_DLL )
+				pOther->GetVelocity( &vOtherVelocity );
+#else
+				vOtherVelocity = pOther->GetAbsVelocity();
+#endif
+			}
+		}
+		else if ( pOther->IsPlayer() && pOther->VPhysicsGetObject() )
+		{
+			pOther->VPhysicsGetObject()->GetVelocity( &vOtherVelocity, NULL );
+
+			if ( vOtherVelocity == vec3_origin )
+			{
+				vOtherVelocity = pOther->GetAbsVelocity();
+			}
+		}
+		else
+		{
+#if defined( GAME_DLL )
+			pOther->GetVelocity( &vOtherVelocity );
+#else
+			vOtherVelocity = pOther->GetAbsVelocity();
+#endif
+		}
+
+		if( vOtherVelocity == vec3_origin )
+		{
+			// Recorded velocity is sometimes zero under pushed or teleported movement, or after position correction.
+			// In these circumstances, we want implicit velocity ((last pos - this pos) / timestep )
+			if ( pOtherPhysObject )
+			{
+				Vector vOtherImplicitVelocity;
+				pOtherPhysObject->GetImplicitVelocity( &vOtherImplicitVelocity, NULL );
+				vOtherVelocity += vOtherImplicitVelocity;
+			}
+		}
+	}
+
+	return vOtherVelocity;
+}
+
 #define MINIMUM_FLOOR_PORTAL_EXIT_VELOCITY 50.0f
 #define MINIMUM_FLOOR_TO_FLOOR_PORTAL_EXIT_VELOCITY 225.0f
 #define MINIMUM_FLOOR_PORTAL_EXIT_VELOCITY_PLAYER 300.0f
@@ -84,12 +162,17 @@ BEGIN_DATADESC( CProp_Portal )
 	DEFINE_THINKFUNC( DelayedPlacementThink ),
 	DEFINE_THINKFUNC( TestRestingSurfaceThink ),
 	DEFINE_THINKFUNC( FizzleThink ),
+	
 
 	DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SetActivatedState", InputSetActivatedState ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "Fizzle", InputFizzle ),
 	DEFINE_INPUTFUNC( FIELD_STRING, "NewLocation", InputNewLocation ),
 
 	DEFINE_OUTPUT( m_OnPlacedSuccessfully, "OnPlacedSuccessfully" ),
+	DEFINE_OUTPUT( m_OnEntityTeleportFromMe, "OnEntityTeleportFromMe" ),
+	DEFINE_OUTPUT( m_OnPlayerTeleportFromMe, "OnPlayerTeleportFromMe" ),
+	DEFINE_OUTPUT( m_OnEntityTeleportToMe, "OnEntityTeleportToMe" ),
+	DEFINE_OUTPUT( m_OnPlayerTeleportToMe, "OnPlayerTeleportToMe" ),
 
 END_DATADESC()
 
@@ -865,9 +948,16 @@ bool CProp_Portal::ShouldTeleportTouchingEntity( CBaseEntity *pOther )
 		}
 		return false;
 	}
+	
+	//Vector ptOtherOrigin = pOther->GetAbsOrigin();
+	Vector ptOtherCenter = pOther->WorldSpaceCenter();
+	Vector vOtherVelocity = Portal_FindUsefulVelocity( pOther );
+	vOtherVelocity -= GetAbsVelocity(); //subtract the portal's velocity if it's moving. It's all relative.
 
-	if( !CProp_Portal_Shared::IsEntityTeleportable( pOther ) )
+	if( vOtherVelocity.Dot( m_PortalSimulator.GetInternalData().Placement.vForward ) > 0.0f )
+	{
 		return false;
+	}
 	
 	if( m_hLinkedPortal.Get() == NULL )
 	{
@@ -883,64 +973,9 @@ bool CProp_Portal::ShouldTeleportTouchingEntity( CBaseEntity *pOther )
 		}
 		return false;
 	}
-
-	//Vector ptOtherOrigin = pOther->GetAbsOrigin();
-	Vector ptOtherCenter = pOther->WorldSpaceCenter();
-
-	IPhysicsObject *pOtherPhysObject = pOther->VPhysicsGetObject();
-
-	Vector vOtherVelocity;
-	//grab current velocity
-	{
-		if( sv_portal_new_velocity_check.GetBool() )
-		{
-			//we're assuming that physics velocity is the most reliable of all if the convar is true
-			if( pOtherPhysObject )
-			{
-				//pOtherPhysObject->GetImplicitVelocity( &vOtherVelocity, NULL );
-				pOtherPhysObject->GetVelocity( &vOtherVelocity, NULL );
-
-				if( vOtherVelocity == vec3_origin )
-				{
-					pOther->GetVelocity( &vOtherVelocity );
-				}
-			}
-			else
-			{
-				pOther->GetVelocity( &vOtherVelocity );
-			}
-		}
-		else
-		{
-			//old style of velocity grabbing, which uses implicit velocity as a last resort
-			if( pOther->GetMoveType() == MOVETYPE_VPHYSICS )
-			{
-				if( pOtherPhysObject && (pOtherPhysObject->GetShadowController() == NULL) )
-					pOtherPhysObject->GetVelocity( &vOtherVelocity, NULL );
-				else
-					pOther->GetVelocity( &vOtherVelocity );
-			}
-			else
-			{
-				pOther->GetVelocity( &vOtherVelocity );
-			}
-
-			if( vOtherVelocity == vec3_origin )
-			{
-				// Recorded velocity is sometimes zero under pushed or teleported movement, or after position correction.
-				// In these circumstances, we want implicit velocity ((last pos - this pos) / timestep )
-				if ( pOtherPhysObject )
-				{
-					Vector vOtherImplicitVelocity;
-					pOtherPhysObject->GetImplicitVelocity( &vOtherImplicitVelocity, NULL );
-					vOtherVelocity += vOtherImplicitVelocity;
-				}
-			}
-		}
-	}
-
+	
 	// Test for entity's center being past portal plane
-	if(m_PortalSimulator.m_DataAccess.Placement.PortalPlane.m_Normal.Dot( ptOtherCenter ) < m_PortalSimulator.m_DataAccess.Placement.PortalPlane.m_Dist)
+	if(m_PortalSimulator.GetInternalData().Placement.PortalPlane.m_Normal.Dot( ptOtherCenter ) < m_PortalSimulator.GetInternalData().Placement.PortalPlane.m_Dist)
 	{
 		//entity wants to go further into the plane
 
@@ -1001,6 +1036,7 @@ void CProp_Portal::TeleportTouchingEntity( CBaseEntity *pOther )
 		//NDebugOverlay::EntityBounds( pOther, 255, 0, 0, 128, 60.0f );
 		pOtherAsPlayer = (CPortal_Player *)pOther;
 		qPlayerEyeAngles = pOtherAsPlayer->pl.v_angle;
+		Warning( "PORTALLING PLAYER SHOULD BE DONE IN GAMEMOVEMENT\n" );
 	}
 	else
 	{
@@ -1015,46 +1051,11 @@ void CProp_Portal::TeleportTouchingEntity( CBaseEntity *pOther )
 	
 	QAngle qOtherAngles;
 	Vector vOtherVelocity;
+	vOtherVelocity = Portal_FindUsefulVelocity( pOther );
+	vOtherVelocity -= GetAbsVelocity(); //subtract the portal's velocity if it's moving. It's all relative.
 
-	//grab current velocity
-	{
-		IPhysicsObject *pOtherPhysObject = pOther->VPhysicsGetObject();
-		if( pOther->GetMoveType() == MOVETYPE_VPHYSICS )
-		{
-			if( pOtherPhysObject && (pOtherPhysObject->GetShadowController() == NULL) )
-				pOtherPhysObject->GetVelocity( &vOtherVelocity, NULL );
-			else
-				pOther->GetVelocity( &vOtherVelocity );
-		}
-		else if ( bPlayer && pOther->VPhysicsGetObject() )
-		{
-			pOther->VPhysicsGetObject()->GetVelocity( &vOtherVelocity, NULL );
-
-			if ( vOtherVelocity == vec3_origin )
-			{
-				vOtherVelocity = pOther->GetAbsVelocity();
-			}
-		}
-		else
-		{
-			pOther->GetVelocity( &vOtherVelocity );
-		}
-
-		if( vOtherVelocity == vec3_origin )
-		{
-			// Recorded velocity is sometimes zero under pushed or teleported movement, or after position correction.
-			// In these circumstances, we want implicit velocity ((last pos - this pos) / timestep )
-			if ( pOtherPhysObject )
-			{
-				Vector vOtherImplicitVelocity;
-				pOtherPhysObject->GetImplicitVelocity( &vOtherImplicitVelocity, NULL );
-				vOtherVelocity += vOtherImplicitVelocity;
-			}
-		}
-	}
-
-	const PS_InternalData_t &RemotePortalDataAccess = m_hLinkedPortal->m_PortalSimulator.m_DataAccess;
-	const PS_InternalData_t &LocalPortalDataAccess = m_PortalSimulator.m_DataAccess;
+	const PS_InternalData_t &RemotePortalDataAccess = m_hLinkedPortal->m_PortalSimulator.GetInternalData();
+	const PS_InternalData_t &LocalPortalDataAccess = m_PortalSimulator.GetInternalData();
 
 	
 	if( bPlayer )
@@ -1323,6 +1324,7 @@ void CProp_Portal::TeleportTouchingEntity( CBaseEntity *pOther )
 		m_hLinkedPortal.Get()->PhysicsMarkEntitiesAsTouching( pOther, Trace );
 	}
 
+#if 0
 	// Notify the entity that it's being teleported
 	// Tell the teleported entity of the portal it has just arrived at
 	notify_teleport_params_t paramsTeleport;
@@ -1347,6 +1349,28 @@ void CProp_Portal::TeleportTouchingEntity( CBaseEntity *pOther )
 		WRITE_FLOAT( qNewAngles.z );
 		MessageEnd();
 	}
+#else
+
+	// Notify the entity that it's being teleported
+	// Tell the teleported entity of the portal it has just arrived at
+	notify_teleport_params_t paramsTeleport;
+	paramsTeleport.prevOrigin		= ptOtherOrigin;
+	paramsTeleport.prevAngles		= qOtherAngles;
+	paramsTeleport.physicsRotate	= true;
+	notify_system_event_params_t eventParams ( &paramsTeleport );
+	pOther->NotifySystemEvent( this, NOTIFY_EVENT_TELEPORT, eventParams );
+
+	// Notify the portals to fire appropriate outputs
+	OnEntityTeleportedFromPortal( pOther );
+	if ( m_hLinkedPortal )
+	{
+		m_hLinkedPortal->OnEntityTeleportedToPortal( pOther );
+	}
+
+	//notify clients of the teleportation
+	EntityPortalled( this, pOther, ptNewOrigin, qNewAngles, false );
+
+#endif
 
 #ifdef _DEBUG
 	{
@@ -1553,8 +1577,8 @@ void CProp_Portal::EndTouch( CBaseEntity *pOther )
 	if( ShouldTeleportTouchingEntity( pOther ) ) //an object passed through the plane and all the way out of the touch box
 		TeleportTouchingEntity( pOther );
 	else if( pOther->IsPlayer() && //player
-			(m_PortalSimulator.m_DataAccess.Placement.vForward.z < -0.7071f) && //most likely falling out of the portal
-			(m_PortalSimulator.m_DataAccess.Placement.PortalPlane.m_Normal.Dot( pOther->WorldSpaceCenter() ) < m_PortalSimulator.m_DataAccess.Placement.PortalPlane.m_Dist) && //but behind the portal plane
+			(m_PortalSimulator.GetInternalData().Placement.vForward.z < -0.7071f) && //most likely falling out of the portal
+			(m_PortalSimulator.GetInternalData().Placement.PortalPlane.m_Normal.Dot( pOther->WorldSpaceCenter() ) < m_PortalSimulator.GetInternalData().Placement.PortalPlane.m_Dist) && //but behind the portal plane
 			(((CPortal_Player *)pOther)->m_Local.m_bInDuckJump) ) //while ducking
 	{
 		//player has pulled their feet up (moving their center instantaneously) while falling downward out of the portal, send them back (probably only for a frame)
@@ -1591,7 +1615,7 @@ bool CProp_Portal::SharedEnvironmentCheck( CBaseEntity *pEntity )
 	}
 
 	Vector ptCenter = pEntity->WorldSpaceCenter();
-	if( (ptCenter - m_PortalSimulator.m_DataAccess.Placement.ptCenter).LengthSqr() < (ptCenter - pOwningSimulator->m_DataAccess.Placement.ptCenter).LengthSqr() )
+	if( (ptCenter - m_PortalSimulator.GetInternalData().Placement.ptCenter).LengthSqr() < (ptCenter - pOwningSimulator->GetInternalData().Placement.ptCenter).LengthSqr() )
 		return true;
 
 	/*if( !m_hLinkedPortal->m_PortalSimulator.EntityIsInPortalHole( pEntity ) )
@@ -1599,7 +1623,7 @@ bool CProp_Portal::SharedEnvironmentCheck( CBaseEntity *pEntity )
 		Vector vOtherVelocity;
 		pEntity->GetVelocity( &vOtherVelocity );
 
-		if( vOtherVelocity.Dot( m_PortalSimulator.m_DataAccess.Placement.vForward ) < vOtherVelocity.Dot( m_hLinkedPortal->m_PortalSimulator.m_DataAccess.Placement.vForward ) )
+		if( vOtherVelocity.Dot( m_PortalSimulator.GetInternalData().Placement.vForward ) < vOtherVelocity.Dot( m_hLinkedPortal->m_PortalSimulator.GetInternalData().Placement.vForward ) )
 			return true; //entity is going towards this portal more than the other
 	}*/
 	return false;
@@ -1756,9 +1780,9 @@ void CProp_Portal::ForceEntityToFitInPortalWall( CBaseEntity *pEntity )
 		trace_t ShortestTrace;
 		ShortestTrace.fraction = 2.0f;
 
-		if( m_PortalSimulator.m_DataAccess.Simulation.Static.Wall.Local.Brushes.pCollideable )
+		if( m_PortalSimulator.GetInternalData().Simulation.Static.Wall.Local.Brushes.pCollideable )
 		{
-			physcollision->TraceBox( ray, m_PortalSimulator.m_DataAccess.Simulation.Static.Wall.Local.Brushes.pCollideable, vec3_origin, vec3_angle, &ShortestTrace );
+			physcollision->TraceBox( ray, m_PortalSimulator.GetInternalData().Simulation.Static.Wall.Local.Brushes.pCollideable, vec3_origin, vec3_angle, &ShortestTrace );
 		}
 
 		/*if( pEnvironment->LocalCollide.pWorldCollide )
@@ -2380,9 +2404,139 @@ const CUtlVector<CProp_Portal *> *CProp_Portal::GetPortalLinkageGroup( unsigned 
 }
 
 
-
-
-bool CProp_Portal::IsFloorPortal(float fThreshold) const
+void CProp_Portal::PreTeleportTouchingEntity( CBaseEntity *pOther )
 {
-	return m_PortalSimulator.m_DataAccess.Placement.vForward.z > fThreshold;
+	// FIXME:
+	/*
+	if( m_NotifyOnPortalled )
+		m_NotifyOnPortalled->OnPrePortalled( pOther, true );
+
+	CProp_Portal *pLinked = (CProp_Portal *)m_hLinkedPortal.Get();
+	if( pLinked->m_NotifyOnPortalled )
+		pLinked->m_NotifyOnPortalled->OnPrePortalled( pOther, false );
+
+	BaseClass::PreTeleportTouchingEntity( pOther );
+	*/
+}
+
+void CProp_Portal::PostTeleportTouchingEntity( CBaseEntity *pOther )
+{
+	// FIXME:
+	/*
+	if( m_NotifyOnPortalled )
+		m_NotifyOnPortalled->OnPostPortalled( pOther, true );
+
+	CProp_Portal *pLinked = (CProp_Portal *)m_hLinkedPortal.Get();
+	if( pLinked->m_NotifyOnPortalled )
+		pLinked->m_NotifyOnPortalled->OnPostPortalled( pOther, false );
+
+	BaseClass::PostTeleportTouchingEntity( pOther );
+	*/
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Tell all listeners about an event that just occurred 
+//-----------------------------------------------------------------------------
+void CProp_Portal::BroadcastPortalEvent( PortalEvent_t nEventType )
+{
+	/*
+	switch( nEventType )
+	{
+	case PORTALEVENT_MOVED:
+		Msg("[ Portal moved ]\n");
+		break;
+	
+	case PORTALEVENT_FIZZLE:
+		Msg("[ Portal fizzled ]\n");
+		break;
+	
+	case PORTALEVENT_LINKED:
+		Msg("[ Portal linked ]\n");
+		break;
+	}
+	*/
+
+	// FIXME:
+	/*
+	// We need to walk the list backwards because callers can remove themselves from our list as they're notified
+	for ( int i = m_PortalEventListeners.Count()-1; i >= 0; i-- )
+	{
+		if ( m_PortalEventListeners[i] == NULL )
+			continue;
+
+		m_PortalEventListeners[i]->NotifyPortalEvent( nEventType, this );
+	}
+	*/
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Add a listener to our collection
+//-----------------------------------------------------------------------------
+void CProp_Portal::AddPortalEventListener( EHANDLE hListener )
+{
+	// FIXME:
+	/*
+	// Don't multiply add
+	if ( m_PortalEventListeners.Find( hListener ) != m_PortalEventListeners.InvalidIndex() )
+		return;
+
+	m_PortalEventListeners.AddToTail( hListener );
+	*/
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Remove a listener to our collection
+//-----------------------------------------------------------------------------
+void CProp_Portal::RemovePortalEventListener( EHANDLE hListener )
+{
+	// FIXME:
+	//m_PortalEventListeners.FindAndFastRemove( hListener );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Notify this the supplied entity has teleported to this portal
+//-----------------------------------------------------------------------------
+void CProp_Portal::OnEntityTeleportedToPortal( CBaseEntity *pEntity )
+{
+	m_OnEntityTeleportToMe.FireOutput( this, this );
+	BroadcastPortalEvent( PORTALEVENT_ENTITY_TELEPORTED_TO );
+
+	if ( pEntity->IsPlayer() )
+	{
+		m_OnPlayerTeleportToMe.FireOutput( this, this );
+		BroadcastPortalEvent( PORTALEVENT_PLAYER_TELEPORTED_TO );
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Notify this the supplied entity has teleported from this portal
+//-----------------------------------------------------------------------------
+void CProp_Portal::OnEntityTeleportedFromPortal( CBaseEntity *pEntity )
+{
+	m_OnEntityTeleportFromMe.FireOutput( this, this );
+	BroadcastPortalEvent( PORTALEVENT_ENTITY_TELEPORTED_FROM );
+
+	if ( pEntity->IsPlayer() )
+	{
+		m_OnPlayerTeleportFromMe.FireOutput( this, this );
+		BroadcastPortalEvent( PORTALEVENT_PLAYER_TELEPORTED_FROM );
+	}
+}
+
+void EntityPortalled( CPortal_Base2D *pPortal, CBaseEntity *pOther, const Vector &vNewOrigin, const QAngle &qNewAngles, bool bForcedDuck )
+{
+	/*if( pOther->IsPlayer() )
+	{
+		Warning( "Server player portalled %f   %f %f %f   %f %f %f\n", gpGlobals->curtime, XYZ( vNewOrigin ), XYZ( ((CPortal_Player *)pOther)->pl.v_angle ) ); 
+	}*/
+
+	for( int i = 1; i <= gpGlobals->maxClients; ++i )
+	{
+		CPortal_Player *pPlayer = (CPortal_Player *)UTIL_PlayerByIndex( i );
+		if( pPlayer )
+		{
+			pPlayer->NetworkPortalTeleportation( pOther, pPortal, gpGlobals->curtime, bForcedDuck );
+		}
+	}
 }

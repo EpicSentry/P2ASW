@@ -540,7 +540,7 @@ void ComputeAABBContactsWithBrushEntity_SIMD( ContactVector& contacts, const cpl
 	// Do the test only once instead of for every contacts. This is debug code after all.
 	if( sv_debug_draw_contacts.GetInt() == 1 )
 	{
-		Msg("contacts.Count(): %i\n", contacts.Count());
+		//Msg("contacts.Count(): %i\n", contacts.Count());
 		for ( int i  = 0 ; i < contacts.Count() ; ++i )
 		{
 			const BrushContact & contact = contacts[i];
@@ -2221,6 +2221,13 @@ void CPortal_Player::TryToChangeCollisionBounds( const Vector& newStandHullMin,
 			m_PortalLocal.m_StandHullMax = newStandHullMax;
 			m_PortalLocal.m_DuckHullMin = newDuckHullMin;
 			m_PortalLocal.m_DuckHullMax = newDuckHullMax;
+			
+#if 0
+			Msg( "m_PortalLocal.m_StandHullMin: %f %f %f\n", m_PortalLocal.m_StandHullMin.x, m_PortalLocal.m_StandHullMin.y, m_PortalLocal.m_StandHullMin.z );
+			Msg( "m_PortalLocal.m_StandHullMax: %f %f %f\n", m_PortalLocal.m_StandHullMax.x, m_PortalLocal.m_StandHullMax.y, m_PortalLocal.m_StandHullMax.z );
+			Msg( "m_PortalLocal.m_DuckHullMin: %f %f %f\n", m_PortalLocal.m_DuckHullMin.x, m_PortalLocal.m_DuckHullMin.y, m_PortalLocal.m_DuckHullMin.z );
+			Msg( "m_PortalLocal.m_DuckHullMax: %f %f %f\n", m_PortalLocal.m_DuckHullMax.x, m_PortalLocal.m_DuckHullMax.y, m_PortalLocal.m_DuckHullMax.z );
+#endif
 
 			// Apply the changes to collision bounds
 			SetCollisionBounds( GetHullMins(), GetHullMaxs() );
@@ -2241,7 +2248,15 @@ void CPortal_Player::TryToChangeCollisionBounds( const Vector& newStandHullMin,
 			m_PortalLocal.m_CachedDuckHullMinAttempt = newDuckHullMin;
 			m_PortalLocal.m_CachedDuckHullMaxAttempt = newDuckHullMax;
 			m_PortalLocal.m_bAttemptHullResize = true;
+
+#if 0
+			Msg( "m_PortalLocal.m_CachedStandHullMinAttempt: %f %f %f\n", m_PortalLocal.m_CachedStandHullMinAttempt.x, m_PortalLocal.m_CachedStandHullMinAttempt.y, m_PortalLocal.m_CachedStandHullMinAttempt.z );
+			Msg( "m_PortalLocal.m_CachedStandHullMaxAttempt: %f %f %f\n", m_PortalLocal.m_CachedStandHullMaxAttempt.x, m_PortalLocal.m_CachedStandHullMaxAttempt.y, m_PortalLocal.m_CachedStandHullMaxAttempt.z );
+			Msg( "m_PortalLocal.m_CachedDuckHullMinAttempt: %f %f %f\n", m_PortalLocal.m_CachedDuckHullMinAttempt.x, m_PortalLocal.m_CachedDuckHullMinAttempt.y, m_PortalLocal.m_CachedDuckHullMinAttempt.z );
+			Msg( "m_PortalLocal.m_CachedDuckHullMaxAttempt: %f %f %f\n", m_PortalLocal.m_CachedDuckHullMaxAttempt.x, m_PortalLocal.m_CachedDuckHullMaxAttempt.y, m_PortalLocal.m_CachedDuckHullMaxAttempt.z );
+#endif
 		}
+
 	}
 }
 
@@ -3767,4 +3782,66 @@ void CPortal_Player::ForceDropOfCarriedPhysObjects( CBaseEntity *pOnlyIfHoldingT
 	ClearUseEntity();
 
 	m_bForcingDrop = false;
+}
+
+float CPortal_Player::GetImplicitVerticalStepSpeed() const
+{
+	return m_flImplicitVerticalStepSpeed;
+}
+
+
+void CPortal_Player::SetImplicitVerticalStepSpeed( float speed )
+{
+	Assert( !IS_NAN( speed ) );
+	m_flImplicitVerticalStepSpeed = speed;
+}
+
+void CPortal_Player::PostTeleportationCameraFixup( const CPortal_Base2D *pEnteredPortal )
+{
+	CPortal_Base2D *pExitPortal = pEnteredPortal->m_hLinkedPortal;
+	if( !pExitPortal )
+		return;
+
+	// Get transformed up
+	Vector vTransformedUp, vTransformedForward, vForward, vUp;
+	AngleVectors( pl.v_angle, &vForward, NULL, &vUp );
+
+	VectorRotate( m_PortalLocal.m_Up, pEnteredPortal->m_matrixThisToLinked.As3x4(), vTransformedUp );
+
+	const Vector vForwardCrossAbsUp = CrossProduct( vForward, ABS_UP );
+	const Vector vForwardCrossViewUp = CrossProduct( vForward, vUp );
+
+	// Dont bother if the vectors are the same (wall<->wall or ceiling<->floor portal)
+	if( CloseEnough( vTransformedUp, m_PortalLocal.m_Up ) == false )
+	{
+		bool bLookingInBadDirection = false;
+		const float flRightCrossNewRight = DotProduct( vForwardCrossAbsUp, vForwardCrossViewUp );
+		// Check if our up vector is more upside down than rightside up
+		if( flRightCrossNewRight < 0.f )
+		{
+			bLookingInBadDirection = true;
+		}
+
+		m_PortalLocal.m_Up = vTransformedUp;
+
+		// Let SnapCamera mess with our up vector
+		SnapCamera( STICK_CAMERA_PORTAL, bLookingInBadDirection );
+	}
+}
+
+void CPortal_Player::SetAirDuck( bool bDuckedInAir )
+{
+	m_PortalLocal.m_bDuckedInAir = bDuckedInAir;
+}
+
+
+const Vector& CPortal_Player::GetPrevGroundNormal() const
+{
+	return m_vPrevGroundNormal;
+}
+
+
+void CPortal_Player::SetPrevGroundNormal( const Vector& vPrevNormal )
+{
+	m_vPrevGroundNormal = vPrevNormal;
 }

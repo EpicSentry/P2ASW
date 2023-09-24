@@ -1771,8 +1771,8 @@ public:
 	virtual C_BaseEntity 			*GetShadowUseOtherEntity( void ) const;
 	virtual void					SetShadowUseOtherEntity( C_BaseEntity *pEntity );
 
-	CInterpolatedVar< QAngle >& GetRotationInterpolator();
-	CInterpolatedVar< Vector >& GetOriginInterpolator();
+	CDiscontinuousInterpolatedVar< QAngle >& GetRotationInterpolator();
+	CDiscontinuousInterpolatedVar< Vector >& GetOriginInterpolator();
 	virtual bool					AddRagdollToFadeQueue( void ) { return true; }
 
 	// Dirty bits
@@ -1977,8 +1977,8 @@ private:
 	QAngle							m_vecOldAngRotation;
 
 
-	CInterpolatedVar< Vector >		m_iv_vecOrigin;
-	CInterpolatedVar< QAngle >		m_iv_angRotation;
+	CDiscontinuousInterpolatedVar< Vector >		m_iv_vecOrigin;
+	CDiscontinuousInterpolatedVar< QAngle >		m_iv_angRotation;
 
 	// Specifies the entity-to-world transform
 	matrix3x4_t						m_rgflCoordinateFrame;

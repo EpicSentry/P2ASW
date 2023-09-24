@@ -30,6 +30,10 @@ public:
 	COutputEvent m_PlayerHasNoAmmo;
 	COutputEvent m_PlayerDied;
 
+	COutputEvent m_OnDuck;
+	COutputEvent m_OnUnDuck;
+	COutputEvent m_OnJump;
+
 	COutputInt m_RequestedPlayerHealth;
 
 #if defined HL2_EPISODIC

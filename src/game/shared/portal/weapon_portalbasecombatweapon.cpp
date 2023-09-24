@@ -134,6 +134,33 @@ void CBasePortalCombatWeapon::ItemPostFrame( void )
 	WeaponIdle();
 }
 
+ConVar sv_weapon_pickup_time_delay("sv_weapon_pickup_time_delay", "0.2f", FCVAR_REPLICATED | FCVAR_CHEAT);
+
+bool CBasePortalCombatWeapon::EnoughTimeSinceThrown()
+{
+	return gpGlobals->curtime - m_flThrowTime > sv_weapon_pickup_time_delay.GetFloat();
+}
+
+float CBasePortalCombatWeapon::GetThrowTime()
+{
+	return m_flThrowTime;
+}
+
+void CBasePortalCombatWeapon::Drop( const Vector& vecVelocity )
+{
+	// Store time when we threw the gun so we dont go and pick up the gun too soon
+	m_flThrowTime = gpGlobals->curtime;
+	m_pLastOwner = GetOwner();
+
+	BaseClass::Drop( vecVelocity );
+}
+
+CBaseEntity* CBasePortalCombatWeapon::GetLastOwner()
+{
+	return m_pLastOwner;
+}
+
+
 bool CBasePortalCombatWeapon::CanLower()
 {
 	if ( SelectWeightedSequence( ACT_VM_IDLE_LOWERED ) == ACTIVITY_NOT_AVAILABLE )

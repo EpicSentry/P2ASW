@@ -840,7 +840,8 @@ bool IsHeadTrackingEnabled();
 
 // We may need splitscreen support in coop for personal testing - Wonderland_War
 #if defined ( PORTAL2 )
-	#define MAX_SPLITSCREEN_PLAYERS 2
+	// FIXME: Change to 2 once we're ready, getting too many asserts with this set to 2.
+	#define MAX_SPLITSCREEN_PLAYERS 1
 #else
 	#define MAX_SPLITSCREEN_PLAYERS 1
 #endif

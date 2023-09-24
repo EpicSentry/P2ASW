@@ -275,6 +275,8 @@ public:
 #endif
 
 	virtual void				PhysicsSimulate( void );
+	void						SetPhysicsFlag( int nFlag, bool bSet );
+	bool						HasPhysicsFlag( unsigned int flag ) { return (m_afPhysicsFlags & flag) != 0; }
 	virtual unsigned int	PhysicsSolidMaskForEntity( void ) const { return MASK_PLAYERSOLID; }
 
 	// Prediction stuff
@@ -515,6 +517,8 @@ private:
 public:
 	EHANDLE					m_hZoomOwner;		// This is a pointer to the entity currently controlling the player's zoom
 private:
+
+	unsigned int			m_afPhysicsFlags;
 	EHANDLE					m_hVehicle;
 	typedef CHandle<C_BaseCombatWeapon> CBaseCombatWeaponHandle;
 	CBaseCombatWeaponHandle	m_hLastWeapon;
@@ -586,6 +590,7 @@ protected:
 	bool			m_bWasFreezeFraming; 
 	float			m_flDeathTime;		// last time player died
 
+	CDiscontinuousInterpolatedVar< Vector >	m_iv_vecViewOffset; // Needs to be protected for Portal 2
 
 private:
 	// Make sure no one calls this...
@@ -595,8 +600,6 @@ private:
 	// Vehicle stuff.
 	EHANDLE			m_hOldVehicle;
 	
-	CInterpolatedVar< Vector >	m_iv_vecViewOffset;
-
 	// Not replicated
 	Vector			m_vecWaterJumpVel;
 

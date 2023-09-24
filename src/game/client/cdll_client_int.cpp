@@ -109,9 +109,16 @@
 #include "gameui.h"
 #endif
 #ifdef GAMEUI_EMBEDDED
-
-#if defined( SWARM_DLL )
+#if defined( PORTAL2 )
+#ifdef GAMEUI_UISYSTEM2_ENABLED
+#include "gameui/basemodpanel.h"
+#else
+#include "portal2/gameui/portal2/basemodpanel.h"
+#endif
+#elif defined( SWARM_DLL )
 #include "swarm/gameui/swarm/basemodpanel.h"
+#elif defined( CSTRIKE15 )
+#include "cstrike15/gameui/basepanel.h"
 #else
 #error "GAMEUI_EMBEDDED"
 #endif
@@ -140,6 +147,17 @@
 
 #ifdef PORTAL
 #include "PortalRender.h"
+#endif
+
+#ifdef PORTAL2
+#include "portal_util_shared.h"
+#include "prop_portal_shared.h"
+//#include "c_keyvalue_saver.h"
+//#include "portal2/gameui/portal2/steamoverlay/isteamoverlaymgr.h"
+extern void ProcessPortalTeleportations( void );
+#if defined( PORTAL2_PUZZLEMAKER )
+#include "puzzlemaker/puzzlemaker.h"
+#endif // PORTAL2_PUZZLEMAKER
 #endif
 
 #include "tier1/UtlDict.h"
@@ -2835,6 +2853,9 @@ void CHLClient::FrameStageNotify( ClientFrameStage_t curStage )
 	case FRAME_NET_UPDATE_POSTDATAUPDATE_END:
 		{
 			VPROF( "CHLClient::FrameStageNotify FRAME_NET_UPDATE_POSTDATAUPDATE_END" );
+#if defined( PORTAL )
+			ProcessPortalTeleportations();
+#endif
 			PREDICTION_ENDTRACKVALUE();
 			// Let prediction copy off pristine data
 			prediction->PostEntityPacketReceived();

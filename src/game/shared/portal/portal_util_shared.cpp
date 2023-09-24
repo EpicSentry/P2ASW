@@ -585,9 +585,6 @@ CProp_Portal* UTIL_Portal_TraceRay( const Ray_t &ray, unsigned int fMask, const 
 //-----------------------------------------------------------------------------
 void UTIL_Portal_TraceRay( const CProp_Portal *pPortal, const Ray_t &ray, unsigned int fMask, ITraceFilter *pTraceFilter, trace_t *pTrace, bool bTraceHolyWall )
 {
-#ifdef CLIENT_DLL
-	Assert( (GameRules() == NULL) || GameRules()->IsMultiplayer() );
-#endif
 	Assert( pPortal->m_PortalSimulator.IsReadyToSimulate() ); //a trace shouldn't make it down this far if the portal is incapable of changing the results of the trace
 
 	CTraceFilterHitAll traceFilterHitAll;
@@ -622,17 +619,17 @@ void UTIL_Portal_TraceRay( const CProp_Portal *pPortal, const Ray_t &ray, unsign
 	{
 		//trace_t RealTrace;
 		//enginetrace->TraceRay( ray, fMask, pTraceFilter, &RealTrace );
-		if( portalSimulator.m_DataAccess.Simulation.Static.World.Brushes.pCollideable && sv_portal_trace_vs_world.GetBool() )
+		if( portalSimulator.GetInternalData().Simulation.Static.World.Brushes.pCollideable && sv_portal_trace_vs_world.GetBool() )
 		{
-			physcollision->TraceBox( ray, portalSimulator.m_DataAccess.Simulation.Static.World.Brushes.pCollideable, vec3_origin, vec3_angle, pTrace );
+			physcollision->TraceBox( ray, portalSimulator.GetInternalData().Simulation.Static.World.Brushes.pCollideable, vec3_origin, vec3_angle, pTrace );
 			bCopyBackBrushTraceData = true;
 		}
 
 		if( bTraceHolyWall )
 		{
-			if( portalSimulator.m_DataAccess.Simulation.Static.Wall.Local.Tube.pCollideable )
+			if( portalSimulator.GetInternalData().Simulation.Static.Wall.Local.Tube.pCollideable )
 			{
-				physcollision->TraceBox( ray, portalSimulator.m_DataAccess.Simulation.Static.Wall.Local.Tube.pCollideable, vec3_origin, vec3_angle, &TempTrace );
+				physcollision->TraceBox( ray, portalSimulator.GetInternalData().Simulation.Static.Wall.Local.Tube.pCollideable, vec3_origin, vec3_angle, &TempTrace );
 
 				if( (TempTrace.startsolid == false) && (TempTrace.fraction < pTrace->fraction) ) //never allow something to be stuck in the tube, it's more of a last-resort guide than a real collideable
 				{
@@ -641,9 +638,9 @@ void UTIL_Portal_TraceRay( const CProp_Portal *pPortal, const Ray_t &ray, unsign
 				}
 			}
 
-			if( portalSimulator.m_DataAccess.Simulation.Static.Wall.Local.Brushes.pCollideable )
+			if( portalSimulator.GetInternalData().Simulation.Static.Wall.Local.Brushes.pCollideable )
 			{
-				physcollision->TraceBox( ray, portalSimulator.m_DataAccess.Simulation.Static.Wall.Local.Brushes.pCollideable, vec3_origin, vec3_angle, &TempTrace );
+				physcollision->TraceBox( ray, portalSimulator.GetInternalData().Simulation.Static.Wall.Local.Brushes.pCollideable, vec3_origin, vec3_angle, &TempTrace );
 				if( (TempTrace.fraction < pTrace->fraction) )
 				{
 					*pTrace = TempTrace;
@@ -651,10 +648,10 @@ void UTIL_Portal_TraceRay( const CProp_Portal *pPortal, const Ray_t &ray, unsign
 				}
 			}
 
-			//if( portalSimulator.m_DataAccess.Simulation.Static.Wall.RemoteTransformedToLocal.Brushes.pCollideable && sv_portal_trace_vs_world.GetBool() )
-			if( bTraceTransformedGeometry && pLinkedPortalSimulator->m_DataAccess.Simulation.Static.World.Brushes.pCollideable )
+			//if( portalSimulator.GetInternalData().Simulation.Static.Wall.RemoteTransformedToLocal.Brushes.pCollideable && sv_portal_trace_vs_world.GetBool() )
+			if( bTraceTransformedGeometry && pLinkedPortalSimulator->GetInternalData().Simulation.Static.World.Brushes.pCollideable )
 			{
-				physcollision->TraceBox( ray, pLinkedPortalSimulator->m_DataAccess.Simulation.Static.World.Brushes.pCollideable, portalSimulator.m_DataAccess.Placement.ptaap_LinkedToThis.ptOriginTransform, portalSimulator.m_DataAccess.Placement.ptaap_LinkedToThis.qAngleTransform, &TempTrace );
+				physcollision->TraceBox( ray, pLinkedPortalSimulator->GetInternalData().Simulation.Static.World.Brushes.pCollideable, portalSimulator.GetInternalData().Placement.ptaap_LinkedToThis.ptOriginTransform, portalSimulator.GetInternalData().Placement.ptaap_LinkedToThis.qAngleTransform, &TempTrace );
 				if( (TempTrace.fraction < pTrace->fraction) )
 				{
 					*pTrace = TempTrace;
@@ -665,9 +662,9 @@ void UTIL_Portal_TraceRay( const CProp_Portal *pPortal, const Ray_t &ray, unsign
 
 		if( bCopyBackBrushTraceData )
 		{
-			pTrace->surface = portalSimulator.m_DataAccess.Simulation.Static.SurfaceProperties.surface;
-			pTrace->contents = portalSimulator.m_DataAccess.Simulation.Static.SurfaceProperties.contents;
-			pTrace->m_pEnt = portalSimulator.m_DataAccess.Simulation.Static.SurfaceProperties.pEntity;
+			pTrace->surface = portalSimulator.GetInternalData().Simulation.Static.SurfaceProperties.surface;
+			pTrace->contents = portalSimulator.GetInternalData().Simulation.Static.SurfaceProperties.contents;
+			pTrace->m_pEnt = portalSimulator.GetInternalData().Simulation.Static.SurfaceProperties.pEntity;
 
 			bCopyBackBrushTraceData = false;
 		}
@@ -705,10 +702,10 @@ void UTIL_Portal_TraceRay( const CProp_Portal *pPortal, const Ray_t &ray, unsign
 		{
 			//local clipped static props
 			{
-				int iLocalStaticCount = portalSimulator.m_DataAccess.Simulation.Static.World.StaticProps.ClippedRepresentations.Count();
-				if( iLocalStaticCount != 0 && portalSimulator.m_DataAccess.Simulation.Static.World.StaticProps.bCollisionExists )
+				int iLocalStaticCount = portalSimulator.GetInternalData().Simulation.Static.World.StaticProps.ClippedRepresentations.Count();
+				if( iLocalStaticCount != 0 && portalSimulator.GetInternalData().Simulation.Static.World.StaticProps.bCollisionExists )
 				{
-					const PS_SD_Static_World_StaticProps_ClippedProp_t *pCurrentProp = portalSimulator.m_DataAccess.Simulation.Static.World.StaticProps.ClippedRepresentations.Base();
+					const PS_SD_Static_World_StaticProps_ClippedProp_t *pCurrentProp = portalSimulator.GetInternalData().Simulation.Static.World.StaticProps.ClippedRepresentations.Base();
 					const PS_SD_Static_World_StaticProps_ClippedProp_t *pStop = pCurrentProp + iLocalStaticCount;
 					Vector vTransform = vec3_origin;
 					QAngle qTransform = vec3_angle;
@@ -740,13 +737,13 @@ void UTIL_Portal_TraceRay( const CProp_Portal *pPortal, const Ray_t &ray, unsign
 				//remote clipped static props transformed into our wall space
 				if( bTraceTransformedGeometry && (pTraceFilter->GetTraceType() != TRACE_WORLD_ONLY) && sv_portal_trace_vs_staticprops.GetBool() )
 				{
-					int iLocalStaticCount = pLinkedPortalSimulator->m_DataAccess.Simulation.Static.World.StaticProps.ClippedRepresentations.Count();
+					int iLocalStaticCount = pLinkedPortalSimulator->GetInternalData().Simulation.Static.World.StaticProps.ClippedRepresentations.Count();
 					if( iLocalStaticCount != 0 )
 					{
-						const PS_SD_Static_World_StaticProps_ClippedProp_t *pCurrentProp = pLinkedPortalSimulator->m_DataAccess.Simulation.Static.World.StaticProps.ClippedRepresentations.Base();
+						const PS_SD_Static_World_StaticProps_ClippedProp_t *pCurrentProp = pLinkedPortalSimulator->GetInternalData().Simulation.Static.World.StaticProps.ClippedRepresentations.Base();
 						const PS_SD_Static_World_StaticProps_ClippedProp_t *pStop = pCurrentProp + iLocalStaticCount;
-						Vector vTransform = portalSimulator.m_DataAccess.Placement.ptaap_LinkedToThis.ptOriginTransform;
-						QAngle qTransform = portalSimulator.m_DataAccess.Placement.ptaap_LinkedToThis.qAngleTransform;
+						Vector vTransform = portalSimulator.GetInternalData().Placement.ptaap_LinkedToThis.ptOriginTransform;
+						QAngle qTransform = portalSimulator.GetInternalData().Placement.ptaap_LinkedToThis.qAngleTransform;
 
 						do
 						{
@@ -786,9 +783,9 @@ void UTIL_Portal_TraceRay( const CProp_Portal *pPortal, const Ray_t &ray, unsign
 		// For all brush traces, use the 'portal backbrush' surface surface contents
 		// BUGBUG: Doing this is a great solution because brushes near a portal
 		// will have their contents and surface properties homogenized to the brush the portal ray hit.
-		pTrace->contents = portalSimulator.m_DataAccess.Simulation.Static.SurfaceProperties.contents;
-		pTrace->surface = portalSimulator.m_DataAccess.Simulation.Static.SurfaceProperties.surface;
-		pTrace->m_pEnt = portalSimulator.m_DataAccess.Simulation.Static.SurfaceProperties.pEntity;
+		pTrace->contents = portalSimulator.GetInternalData().Simulation.Static.SurfaceProperties.contents;
+		pTrace->surface = portalSimulator.GetInternalData().Simulation.Static.SurfaceProperties.surface;
+		pTrace->m_pEnt = portalSimulator.GetInternalData().Simulation.Static.SurfaceProperties.pEntity;
 	}
 }
 
@@ -825,9 +822,9 @@ void UTIL_PortalLinked_TraceRay( const CProp_Portal *pPortal, const Ray_t &ray, 
 		pTrace->fraction = 1.0f;
 		pTrace->fractionleftsolid = 0;
 
-		pTrace->contents = pPortal->m_PortalSimulator.m_DataAccess.Simulation.Static.SurfaceProperties.contents;
-		pTrace->surface  = pPortal->m_PortalSimulator.m_DataAccess.Simulation.Static.SurfaceProperties.surface;
-		pTrace->m_pEnt	 = pPortal->m_PortalSimulator.m_DataAccess.Simulation.Static.SurfaceProperties.pEntity;
+		pTrace->contents = pPortal->m_PortalSimulator.GetInternalData().Simulation.Static.SurfaceProperties.contents;
+		pTrace->surface  = pPortal->m_PortalSimulator.GetInternalData().Simulation.Static.SurfaceProperties.surface;
+		pTrace->m_pEnt	 = pPortal->m_PortalSimulator.GetInternalData().Simulation.Static.SurfaceProperties.pEntity;
 		return;
 	}
 	UTIL_Portal_TraceRay( pLinkedPortal, rayTransformed, fMask, pTraceFilter, pTrace, bTraceHolyWall );
@@ -929,13 +926,13 @@ void UTIL_Portal_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, c
 		// Hit the world
 		if ( pFilter->GetTraceType() != TRACE_ENTITIES_ONLY )
 		{	
-			if( pPortalSimulator->m_DataAccess.Simulation.Static.World.Brushes.pCollideable && 
+			if( pPortalSimulator->GetInternalData().Simulation.Static.World.Brushes.pCollideable && 
 				sv_portal_trace_vs_world.GetBool() )
 			{
 				//physcollision->TraceCollide( vecAbsStart, vecAbsEnd, pCollision, qCollisionAngles, 
-				//							pPortalSimulator->m_DataAccess.Simulation.Static.World.Brushes.pCollideable, vec3_origin, vec3_angle, &tempTrace );
+				//							pPortalSimulator->GetInternalData().Simulation.Static.World.Brushes.pCollideable, vec3_origin, vec3_angle, &tempTrace );
 				
-				physcollision->TraceBox( entRay, MASK_ALL, NULL, pPortalSimulator->m_DataAccess.Simulation.Static.World.Brushes.pCollideable, vec3_origin, vec3_angle, &tempTrace );
+				physcollision->TraceBox( entRay, MASK_ALL, NULL, pPortalSimulator->GetInternalData().Simulation.Static.World.Brushes.pCollideable, vec3_origin, vec3_angle, &tempTrace );
 
 				if ( tempTrace.startsolid || (tempTrace.fraction < pTrace->fraction) )
 				{
@@ -943,16 +940,16 @@ void UTIL_Portal_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, c
 				}
 			}
 
-			//if( pPortalSimulator->m_DataAccess.Simulation.Static.Wall.RemoteTransformedToLocal.Brushes.pCollideable &&
+			//if( pPortalSimulator->GetInternalData().Simulation.Static.Wall.RemoteTransformedToLocal.Brushes.pCollideable &&
 			if( pLinkedPortalSimulator &&
-				pLinkedPortalSimulator->m_DataAccess.Simulation.Static.World.Brushes.pCollideable &&
+				pLinkedPortalSimulator->GetInternalData().Simulation.Static.World.Brushes.pCollideable &&
 				sv_portal_trace_vs_world.GetBool() && 
 				sv_portal_trace_vs_holywall.GetBool() )
 			{
 				//physcollision->TraceCollide( vecAbsStart, vecAbsEnd, pCollision, qCollisionAngles,
-				//							pLinkedPortalSimulator->m_DataAccess.Simulation.Static.World.Brushes.pCollideable, pPortalSimulator->m_DataAccess.Placement.ptaap_LinkedToThis.ptOriginTransform, pPortalSimulator->m_DataAccess.Placement.ptaap_LinkedToThis.qAngleTransform, &tempTrace );
+				//							pLinkedPortalSimulator->GetInternalData().Simulation.Static.World.Brushes.pCollideable, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.ptOriginTransform, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.qAngleTransform, &tempTrace );
 
-				physcollision->TraceBox( entRay, MASK_ALL, NULL, pLinkedPortalSimulator->m_DataAccess.Simulation.Static.World.Brushes.pCollideable, pPortalSimulator->m_DataAccess.Placement.ptaap_LinkedToThis.ptOriginTransform, pPortalSimulator->m_DataAccess.Placement.ptaap_LinkedToThis.qAngleTransform, &tempTrace );
+				physcollision->TraceBox( entRay, MASK_ALL, NULL, pLinkedPortalSimulator->GetInternalData().Simulation.Static.World.Brushes.pCollideable, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.ptOriginTransform, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.qAngleTransform, &tempTrace );
 
 				if ( tempTrace.startsolid || (tempTrace.fraction < pTrace->fraction) )
 				{
@@ -960,13 +957,13 @@ void UTIL_Portal_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, c
 				}
 			}
 
-			if ( pPortalSimulator->m_DataAccess.Simulation.Static.Wall.Local.Brushes.pCollideable && 
+			if ( pPortalSimulator->GetInternalData().Simulation.Static.Wall.Local.Brushes.pCollideable && 
 				sv_portal_trace_vs_holywall.GetBool() )
 			{
 				//physcollision->TraceCollide( vecAbsStart, vecAbsEnd, pCollision, qCollisionAngles,
-				//							pPortalSimulator->m_DataAccess.Simulation.Static.Wall.Local.Brushes.pCollideable, vec3_origin, vec3_angle, &tempTrace );
+				//							pPortalSimulator->GetInternalData().Simulation.Static.Wall.Local.Brushes.pCollideable, vec3_origin, vec3_angle, &tempTrace );
 
-				physcollision->TraceBox( entRay, MASK_ALL, NULL, pPortalSimulator->m_DataAccess.Simulation.Static.Wall.Local.Brushes.pCollideable, vec3_origin, vec3_angle, &tempTrace );
+				physcollision->TraceBox( entRay, MASK_ALL, NULL, pPortalSimulator->GetInternalData().Simulation.Static.Wall.Local.Brushes.pCollideable, vec3_origin, vec3_angle, &tempTrace );
 
 				if ( tempTrace.startsolid || (tempTrace.fraction < pTrace->fraction) )
 				{
@@ -980,13 +977,13 @@ void UTIL_Portal_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, c
 				}
 			}
 
-			if ( pPortalSimulator->m_DataAccess.Simulation.Static.Wall.Local.Tube.pCollideable && 
+			if ( pPortalSimulator->GetInternalData().Simulation.Static.Wall.Local.Tube.pCollideable && 
 				sv_portal_trace_vs_holywall.GetBool() )
 			{
 				//physcollision->TraceCollide( vecAbsStart, vecAbsEnd, pCollision, qCollisionAngles,
-				//							pPortalSimulator->m_DataAccess.Simulation.Static.Wall.Local.Tube.pCollideable, vec3_origin, vec3_angle, &tempTrace );
+				//							pPortalSimulator->GetInternalData().Simulation.Static.Wall.Local.Tube.pCollideable, vec3_origin, vec3_angle, &tempTrace );
 
-				physcollision->TraceBox( entRay, MASK_ALL, NULL, pPortalSimulator->m_DataAccess.Simulation.Static.Wall.Local.Tube.pCollideable, vec3_origin, vec3_angle, &tempTrace );
+				physcollision->TraceBox( entRay, MASK_ALL, NULL, pPortalSimulator->GetInternalData().Simulation.Static.Wall.Local.Tube.pCollideable, vec3_origin, vec3_angle, &tempTrace );
 
 				if( (tempTrace.startsolid == false) && (tempTrace.fraction < pTrace->fraction) ) //never allow something to be stuck in the tube, it's more of a last-resort guide than a real collideable
 				{
@@ -999,9 +996,9 @@ void UTIL_Portal_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, c
 			// will have their contents and surface properties homogenized to the brush the portal ray hit.
 			if ( pTrace->startsolid || (pTrace->fraction < 1.0f) )
 			{
-				pTrace->surface = pPortalSimulator->m_DataAccess.Simulation.Static.SurfaceProperties.surface;
-				pTrace->contents = pPortalSimulator->m_DataAccess.Simulation.Static.SurfaceProperties.contents;
-				pTrace->m_pEnt = pPortalSimulator->m_DataAccess.Simulation.Static.SurfaceProperties.pEntity;
+				pTrace->surface = pPortalSimulator->GetInternalData().Simulation.Static.SurfaceProperties.surface;
+				pTrace->contents = pPortalSimulator->GetInternalData().Simulation.Static.SurfaceProperties.contents;
+				pTrace->m_pEnt = pPortalSimulator->GetInternalData().Simulation.Static.SurfaceProperties.pEntity;
 			}
 		}
 
@@ -1014,10 +1011,10 @@ void UTIL_Portal_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, c
 				
 				//local clipped static props
 				{
-					int iLocalStaticCount = pPortalSimulator->m_DataAccess.Simulation.Static.World.StaticProps.ClippedRepresentations.Count();
-					if( iLocalStaticCount != 0 && pPortalSimulator->m_DataAccess.Simulation.Static.World.StaticProps.bCollisionExists )
+					int iLocalStaticCount = pPortalSimulator->GetInternalData().Simulation.Static.World.StaticProps.ClippedRepresentations.Count();
+					if( iLocalStaticCount != 0 && pPortalSimulator->GetInternalData().Simulation.Static.World.StaticProps.bCollisionExists )
 					{
-						const PS_SD_Static_World_StaticProps_ClippedProp_t *pCurrentProp = pPortalSimulator->m_DataAccess.Simulation.Static.World.StaticProps.ClippedRepresentations.Base();
+						const PS_SD_Static_World_StaticProps_ClippedProp_t *pCurrentProp = pPortalSimulator->GetInternalData().Simulation.Static.World.StaticProps.ClippedRepresentations.Base();
 						const PS_SD_Static_World_StaticProps_ClippedProp_t *pStop = pCurrentProp + iLocalStaticCount;
 						Vector vTransform = vec3_origin;
 						QAngle qTransform = vec3_angle;
@@ -1059,8 +1056,8 @@ void UTIL_Portal_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, c
 						int iEntCount = pLinkedPortalSimulator->GetMoveableOwnedEntities( pEnts, 1024 );
 
 						CTransformedCollideable transformedCollideable;
-						transformedCollideable.m_matTransform = pLinkedPortalSimulator->m_DataAccess.Placement.matThisToLinked;
-						transformedCollideable.m_matInvTransform = pLinkedPortalSimulator->m_DataAccess.Placement.matLinkedToThis;
+						transformedCollideable.m_matTransform = pLinkedPortalSimulator->GetInternalData().Placement.matThisToLinked;
+						transformedCollideable.m_matInvTransform = pLinkedPortalSimulator->GetInternalData().Placement.matLinkedToThis;
 						for( int i = 0; i != iEntCount; ++i )
 						{
 							CBaseEntity *pRemoteEntity = pEnts[i];
@@ -1727,7 +1724,7 @@ bool UTIL_PointIsNearPortal( const Vector& point, const CProp_Portal* pPortal2D,
 }
 
 #ifdef CLIENT_DLL
-void UTIL_TransformInterpolatedAngle( CInterpolatedVar< QAngle > &qInterped, matrix3x4_t matTransform, bool bSkipNewest )
+void UTIL_TransformInterpolatedAngle( CInterpolatedVar< QAngle > &qInterped, matrix3x4_t matTransform, float fUpToTime )
 {
 	int iHead = qInterped.GetHead();
 	if( !qInterped.IsValidIndex( iHead ) )
@@ -1742,16 +1739,16 @@ void UTIL_TransformInterpolatedAngle( CInterpolatedVar< QAngle > &qInterped, mat
 	QAngle *pCurrent;
 	int iCurrent;
 
-	if( bSkipNewest )
-		iCurrent = qInterped.GetNext( iHead );
-	else
+	//if( bSkipNewest )
+	//	iCurrent = qInterped.GetNext( iHead );
+	//else
 		iCurrent = iHead;
 
 	while( (pCurrent = qInterped.GetHistoryValue( iCurrent, fTime )) != NULL )
 	{
 		Assert( (fTime <= fHeadTime) || (iCurrent == iHead) ); //asserting that head is always newest
-
-		if( fTime < gpGlobals->curtime )
+		
+		if( fTime < fUpToTime )
 			*pCurrent = TransformAnglesToWorldSpace( *pCurrent, matTransform );
 
 		iCurrent = qInterped.GetNext( iCurrent );
@@ -1759,10 +1756,10 @@ void UTIL_TransformInterpolatedAngle( CInterpolatedVar< QAngle > &qInterped, mat
 			break;
 	}
 
-	qInterped.Interpolate( gpGlobals->curtime );
+	//qInterped.Interpolate( gpGlobals->curtime );
 }
 
-void UTIL_TransformInterpolatedPosition( CInterpolatedVar< Vector > &vInterped, VMatrix matTransform, bool bSkipNewest )
+void UTIL_TransformInterpolatedPosition( CInterpolatedVar< Vector > &vInterped, const VMatrix& matTransform, float fUpToTime )
 {
 	int iHead = vInterped.GetHead();
 	if( !vInterped.IsValidIndex( iHead ) )
@@ -1777,24 +1774,28 @@ void UTIL_TransformInterpolatedPosition( CInterpolatedVar< Vector > &vInterped, 
 	Vector *pCurrent;
 	int iCurrent;
 
-	if( bSkipNewest )
-		iCurrent = vInterped.GetNext( iHead );
-	else
+	//if( bSkipNewest )
+	//	iCurrent = vInterped.GetNext( iHead );
+	//else
 		iCurrent = iHead;
 
 	while( (pCurrent = vInterped.GetHistoryValue( iCurrent, fTime )) != NULL )
 	{
 		Assert( (fTime <= fHeadTime) || (iCurrent == iHead) );
 
-		if( fTime < gpGlobals->curtime )
+		if( fTime < fUpToTime )
+		{
 			*pCurrent = matTransform * (*pCurrent);
+
+
+		}
 
 		iCurrent = vInterped.GetNext( iCurrent );
 		if( iCurrent == iHead )
 			break;
 	}
 
-	vInterped.Interpolate( gpGlobals->curtime );
+	//vInterped.Interpolate( gpGlobals->curtime );
 }
 #endif
 
@@ -2016,7 +2017,7 @@ PaintPowerType UTIL_Paint_TracePower( CBaseEntity* pBrushEntity, const Vector& c
 	
 	engine->TracePaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, sv_paint_detection_sphere_radius.GetFloat(), color );
 	
-	Msg("color.Count(): %i\n", color.Count() );
+	//Msg("color.Count(): %i\n", color.Count() );
 	
 	//if ( color.Count() != 0 && &color.Element( 0 ) != NULL )
 		//return MapColorToPower( color.Element(0) );
@@ -2158,3 +2159,147 @@ void UTIL_FindBrushEntitiesInSphere( CBrushEntityList& brushEnum, const Vector& 
 	enginetrace->EnumerateEntities( vCenter - vExtents, vCenter + vExtents, &brushEnum );
 }
 #endif
+
+struct FindClosestPassableSpace_TraceAdapter_Portal_t : public FindClosestPassableSpace_TraceAdapter_t
+{
+	const CPortal_Base2D *pPortal;
+};
+
+static void PortalTraceFunc( const Ray_t &ray, trace_t *pResult, FindClosestPassableSpace_TraceAdapter_t *pTraceAdapter )
+{
+	UTIL_Portal_TraceRay( ((FindClosestPassableSpace_TraceAdapter_Portal_t *)pTraceAdapter)->pPortal, ray, pTraceAdapter->fMask, pTraceAdapter->pTraceFilter, pResult, true );
+}
+
+struct FindClosestPassableSpace_TraceAdapter_Portal_StayInFront_t : FindClosestPassableSpace_TraceAdapter_Portal_t
+{
+	VPlane shiftedPlane;//we only want the center of the starting box to stay in front, not every trace. So we create a plane of solidity that is not necessarily coplanar with the portal quad
+	Vector vExtentSigns; //when testing planar distance we need to use the extent closest to the solidity plane, multiply the ray extents by these to get that point.
+};
+
+static bool PortalPointOutsideWorldFunc( const Vector &vTest, FindClosestPassableSpace_TraceAdapter_t *pTraceAdapter )
+{
+	trace_t tr;
+	Ray_t testRay;
+	testRay.Init( vTest, vTest );
+
+	CTraceFilterWorldOnly traceFilter;
+
+	UTIL_Portal_TraceRay( ((FindClosestPassableSpace_TraceAdapter_Portal_t *)pTraceAdapter)->pPortal, testRay, MASK_SOLID_BRUSHONLY, &traceFilter, &tr );
+	return tr.startsolid;
+}
+
+bool UTIL_FindClosestPassableSpace_InPortal( const CPortal_Base2D *pPortal, const Vector &vCenter, const Vector &vExtents, const Vector &vIndecisivePush, ITraceFilter *pTraceFilter, unsigned int fMask, unsigned int iIterations, Vector &vCenterOut )
+{
+	FindClosestPassableSpace_TraceAdapter_Portal_t adapter;
+	adapter.pTraceFunc = PortalTraceFunc;
+	adapter.pPointOutsideWorldFunc = PortalPointOutsideWorldFunc;
+	adapter.pTraceFilter = pTraceFilter;
+	adapter.fMask = fMask;
+
+	adapter.pPortal = pPortal;
+
+	return UTIL_FindClosestPassableSpace( vCenter, vExtents, vIndecisivePush, iIterations, vCenterOut, FL_AXIS_DIRECTION_NONE, &adapter );
+}
+
+static bool PortalPointOutsideWorldFunc_CenterMustStayInFront( const Vector &vTest, FindClosestPassableSpace_TraceAdapter_t *pTraceAdapter )
+{
+	const FindClosestPassableSpace_TraceAdapter_Portal_StayInFront_t *pCastedData = (const FindClosestPassableSpace_TraceAdapter_Portal_StayInFront_t *)pTraceAdapter;
+	if( pCastedData->shiftedPlane.DistTo( vTest ) < 0.0f )
+		return true;
+
+	return PortalPointOutsideWorldFunc( vTest, pTraceAdapter );
+}
+
+static const Ray_t *AdjustRayToPlane( const Ray_t &originalRay, Ray_t &alterableRay, const Vector &vExtentSigns, const VPlane &Plane, float &fDeltaScale )
+{
+	Vector vExtentShift;
+	vExtentShift.x = originalRay.m_Extents.x * vExtentSigns.x;
+	vExtentShift.y = originalRay.m_Extents.y * vExtentSigns.y;
+	vExtentShift.z = originalRay.m_Extents.z * vExtentSigns.z;
+	float fExtentShiftDist = Plane.m_Normal.Dot( vExtentShift );
+
+	if( (Plane.DistTo( originalRay.m_Start ) + fExtentShiftDist) < 0.0f )
+	{
+		//start solid
+		NULL;
+	}
+	else if( (Plane.DistTo( originalRay.m_Start + originalRay.m_Delta ) + fExtentShiftDist) < 0.0f )
+	{
+		//end will be behind shifted plane, shorten the delta now, then expand the results on the tail end
+		alterableRay = originalRay;
+
+		float fEndDist = (Plane.DistTo( originalRay.m_Start + originalRay.m_Delta ) + fExtentShiftDist);
+		float fDeltaLength = originalRay.m_Delta.Length();
+		Vector vDeltaNormalized = originalRay.m_Delta / fDeltaLength;
+		float fNewDeltaLength = fDeltaLength - (Plane.m_Normal.Dot( vDeltaNormalized ) * fEndDist);
+		alterableRay.m_Delta = vDeltaNormalized * fNewDeltaLength;
+
+		fDeltaScale = fNewDeltaLength / fDeltaLength;
+		return &alterableRay;
+	}
+	else
+	{
+		fDeltaScale = 1.0f;
+	}
+	return &originalRay;
+}
+
+static void PortalTraceFunc_CenterMustStayInFront( const Ray_t &ray, trace_t *pResult, FindClosestPassableSpace_TraceAdapter_t *pTraceAdapter )
+{
+	const FindClosestPassableSpace_TraceAdapter_Portal_StayInFront_t *pCastedData = (const FindClosestPassableSpace_TraceAdapter_Portal_StayInFront_t *)pTraceAdapter;
+	
+	float fDeltaScale;
+	Ray_t alterableRay;
+	const Ray_t *pUseRay = AdjustRayToPlane( ray, alterableRay, pCastedData->vExtentSigns, pCastedData->shiftedPlane, fDeltaScale );
+	if( pUseRay == NULL )
+	{
+		//start solid
+		UTIL_ClearTrace( *pResult );
+		pResult->startsolid = true;
+		pResult->fraction = 0.0f;
+		pResult->allsolid = true; //TODO: bother calculating if it leaves solid?
+		return;
+	}
+
+	UTIL_Portal_TraceRay( pCastedData->pPortal, *pUseRay, pTraceAdapter->fMask, pTraceAdapter->pTraceFilter, pResult, true );
+
+	if( pUseRay == &alterableRay )
+	{
+		//fixup any abnormalities from using a shortened ray
+		if( !pResult->DidHit() )
+		{
+			pResult->m_pEnt = (CPortal_Base2D *)pCastedData->pPortal;
+			pResult->plane	= pCastedData->pPortal->m_plane_Origin;
+			pResult->plane.dist = pCastedData->shiftedPlane.m_Dist;
+		}
+		
+		pResult->fraction *= fDeltaScale;
+		pResult->fractionleftsolid *= fDeltaScale;		
+	}
+}
+
+bool UTIL_FindClosestPassableSpace_InPortal_CenterMustStayInFront( const CPortal_Base2D *pPortal, const Vector &vCenter, const Vector &vExtents, const Vector &vIndecisivePush, ITraceFilter *pTraceFilter, unsigned int fMask, unsigned int iIterations, Vector &vCenterOut )
+{
+	FindClosestPassableSpace_TraceAdapter_Portal_StayInFront_t adapter;
+	adapter.pTraceFunc = PortalTraceFunc_CenterMustStayInFront;
+	adapter.pPointOutsideWorldFunc = PortalPointOutsideWorldFunc_CenterMustStayInFront;
+	adapter.pTraceFilter = pTraceFilter;
+	adapter.fMask = fMask;
+
+	adapter.pPortal = pPortal;
+
+	adapter.vExtentSigns.x = -Sign( pPortal->m_plane_Origin.normal.x );
+	adapter.vExtentSigns.y = -Sign( pPortal->m_plane_Origin.normal.y );
+	adapter.vExtentSigns.z = -Sign( pPortal->m_plane_Origin.normal.z );
+	
+	//when caclulating the shift plane, all we need to be sure of is that the most penetrating extent is coplanar with the shift plane when the center would be coplanar with the original plane
+	Vector vCoplanarExtent;
+	vCoplanarExtent.x = vExtents.x * adapter.vExtentSigns.x;
+	vCoplanarExtent.y = vExtents.y * adapter.vExtentSigns.y;
+	vCoplanarExtent.z = vExtents.z * adapter.vExtentSigns.z;
+
+	adapter.shiftedPlane.m_Normal = pPortal->m_plane_Origin.normal;
+	adapter.shiftedPlane.m_Dist = pPortal->m_plane_Origin.dist + (pPortal->m_plane_Origin.normal.Dot( vCoplanarExtent ) ); //the dot is known to be negative, shifting the plane back so the extent is coplanar with it.
+	
+	return UTIL_FindClosestPassableSpace( vCenter, vExtents, vIndecisivePush, iIterations, vCenterOut, FL_AXIS_DIRECTION_NONE, &adapter );
+}

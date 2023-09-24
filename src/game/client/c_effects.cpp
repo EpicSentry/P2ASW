@@ -68,6 +68,7 @@ ConVar r_RainDebugDuration( "r_RainDebugDuration", "0", FCVAR_CHEAT, "Shows rain
 
 //Precahce the effects
 PRECACHE_REGISTER_BEGIN( GLOBAL, PrecachePrecipitation )
+#ifndef PORTAL2
 	PRECACHE( MATERIAL, "particle/rain" )
 	PRECACHE( MATERIAL, "particle/snow" )
 	PRECACHE( PARTICLE_SYSTEM, "rain_storm" )
@@ -77,13 +78,14 @@ PRECACHE_REGISTER_BEGIN( GLOBAL, PrecachePrecipitation )
 	PRECACHE( PARTICLE_SYSTEM, "rain_outer" )
 	PRECACHE( PARTICLE_SYSTEM, "ash" )
 	PRECACHE( PARTICLE_SYSTEM, "ash_outer" )
-#ifdef INFESTED_DLL
-	PRECACHE( PARTICLE_SYSTEM, "asw_snow" )
-	PRECACHE( PARTICLE_SYSTEM, "asw_snow_outer" )
-#else
-	PRECACHE( PARTICLE_SYSTEM, "snow" )
-	PRECACHE( PARTICLE_SYSTEM, "snow_outer" )
-#endif
+	#ifdef INFESTED_DLL
+		PRECACHE( PARTICLE_SYSTEM, "asw_snow" )
+		PRECACHE( PARTICLE_SYSTEM, "asw_snow_outer" )
+	#else
+		PRECACHE( PARTICLE_SYSTEM, "snow" )
+		PRECACHE( PARTICLE_SYSTEM, "snow_outer" )
+	#endif
+#endif // !PORTAL2
 PRECACHE_REGISTER_END()
 
 CUtlVector< RayTracingEnvironment* > g_RayTraceEnvironments;

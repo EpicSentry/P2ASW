@@ -46,6 +46,10 @@ ConVar cl_skip_player_render_in_main_view("cl_skip_player_render_in_main_view", 
 ConVar cl_auto_taunt_pip( "cl_auto_taunt_pip", "1", FCVAR_ARCHIVE );
 
 extern ConVar sv_use_trace_duration;
+extern void RecieveEntityPortalledMessage( CHandle<C_BaseEntity> hEntity, CHandle<C_Portal_Base2D> hPortal, float fTime, bool bForcedDuck );
+extern ConVar player_held_object_collide_with_player;
+extern ConVar sv_player_funnel_into_portals;
+extern ConVar sv_player_funnel_gimme_dot;
 
 #define C_Portal_Base2D C_Prop_Portal
 
@@ -67,6 +71,11 @@ ConVar cl_taunt_finish_speed("cl_taunt_finish_speed", "0.8f", FCVAR_CHEAT);
 
 ConVar cl_reorient_in_air("cl_reorient_in_air", "1", FCVAR_ARCHIVE, "Allows the player to only reorient from being upside down while in the air." ); 
 
+ConVar mp_taunt_position_blend_rate( "mp_taunt_position_blend_rate", "4.0", FCVAR_CHEAT );
+ConVar mp_bot_fling_trail( "mp_bot_fling_trail", "0", FCVAR_CHEAT, "When bots reach a certain velocity in the air, they will show a trail behind them (0 = off, 1 = on, 2 = fun)" );
+ConVar mp_bot_fling_trail_kill_scaler( "mp_bot_fling_trail_kill_scaler", "0.01", FCVAR_CHEAT, "The scaler that determines how close to a portal a player has to be (when flinging towards it) before the trail turns off" );
+
+ConVar player_held_object_keep_out_of_camera("player_held_object_keep_out_of_camera", "1", FCVAR_CHEAT );
 
 //=================================================================================
 //
@@ -256,6 +265,13 @@ void C_PortalRagdoll::OnDataChanged( DataUpdateType_t type )
 	}
 }
 
+BEGIN_RECV_TABLE_NOBASE( C_EntityPortalledNetworkMessage, DT_EntityPortalledNetworkMessage )
+	RecvPropEHandle( RECVINFO_NAME( m_hEntity, m_hEntity ) ),
+	RecvPropEHandle( RECVINFO_NAME( m_hPortal, m_hPortal ) ),
+	RecvPropFloat( RECVINFO_NAME( m_fTime, m_fTime ) ),
+	RecvPropBool( RECVINFO_NAME( m_bForcedDuck, m_bForcedDuck ) ),
+	RecvPropInt( RECVINFO_NAME( m_iMessageCount, m_iMessageCount ) ),
+END_RECV_TABLE()
 
 // specific to the local player
 BEGIN_RECV_TABLE_NOBASE( C_Portal_Player, DT_PortalLocalPlayerExclusive )
@@ -264,14 +280,14 @@ BEGIN_RECV_TABLE_NOBASE( C_Portal_Player, DT_PortalLocalPlayerExclusive )
 	RecvPropVector( RECVINFO( m_vecViewOffset ) ),
 
 	// FIXME: - Wonderland_War
-	/*
+	
 	RecvPropQAngles( RECVINFO( m_vecCarriedObjectAngles ) ),
 	RecvPropVector( RECVINFO( m_vecCarriedObject_CurPosToTargetPos )  ),
 	RecvPropQAngles( RECVINFO( m_vecCarriedObject_CurAngToTargetAng ) ),
 
 	RecvPropUtlVector( RECVINFO_UTLVECTOR( m_EntityPortalledNetworkMessages ), C_Portal_Player::MAX_ENTITY_PORTALLED_NETWORK_MESSAGES, RecvPropDataTable(NULL, 0, 0, &REFERENCE_RECV_TABLE( DT_EntityPortalledNetworkMessage ) ) ),
 	RecvPropInt( RECVINFO( m_iEntityPortalledNetworkMessageCount ) ),
-	*/
+	
 END_RECV_TABLE()
 
 // all players except the local player
@@ -322,9 +338,38 @@ END_RECV_TABLE()
 
 
 BEGIN_PREDICTION_DATA( C_Portal_Player )
+//	DEFINE_PRED_TYPEDESCRIPTION( m_PortalLocal, C_PortalPlayerLocalData ),
+
+#ifdef PORTAL_PLAYER_PREDICTION
+	DEFINE_PRED_FIELD( m_nSkin, FIELD_INTEGER, FTYPEDESC_OVERRIDE | FTYPEDESC_PRIVATE ),
+	DEFINE_PRED_FIELD( m_nBody, FIELD_INTEGER, FTYPEDESC_OVERRIDE | FTYPEDESC_PRIVATE ),
+	DEFINE_PRED_FIELD( m_nSequence, FIELD_INTEGER, FTYPEDESC_OVERRIDE | FTYPEDESC_PRIVATE | FTYPEDESC_NOERRORCHECK ),
+	DEFINE_PRED_FIELD( m_flPlaybackRate, FIELD_FLOAT, FTYPEDESC_OVERRIDE | FTYPEDESC_PRIVATE | FTYPEDESC_NOERRORCHECK ),
+	DEFINE_PRED_FIELD( m_flCycle, FIELD_FLOAT, FTYPEDESC_OVERRIDE | FTYPEDESC_PRIVATE | FTYPEDESC_NOERRORCHECK ),
+	DEFINE_PRED_ARRAY_TOL( m_flEncodedController, FIELD_FLOAT, MAXSTUDIOBONECTRLS, FTYPEDESC_OVERRIDE | FTYPEDESC_PRIVATE, 0.02f ),
+	DEFINE_PRED_FIELD( m_nNewSequenceParity, FIELD_INTEGER, FTYPEDESC_OVERRIDE | FTYPEDESC_PRIVATE | FTYPEDESC_NOERRORCHECK ),
+	DEFINE_PRED_FIELD( m_nResetEventsParity, FIELD_INTEGER, FTYPEDESC_OVERRIDE | FTYPEDESC_PRIVATE | FTYPEDESC_NOERRORCHECK ),
+
+	DEFINE_PRED_FIELD( m_hPortalEnvironment, FIELD_EHANDLE, FTYPEDESC_NOERRORCHECK ),
+#endif // PORTAL_PLAYER_PREDICTION
+
+	// PAINT
+	DEFINE_PRED_TYPEDESCRIPTION( m_CachedJumpPower, PaintPowerInfo_t ),
+
+	DEFINE_PRED_FIELD( m_flCachedJumpPowerTime, FIELD_FLOAT, 0 ),
+	DEFINE_PRED_FIELD( m_bJumpWasPressedWhenForced, FIELD_BOOLEAN, 0 ),
+	DEFINE_PRED_FIELD( m_flSpeedDecelerationTime, FIELD_FLOAT, 0 ),
+	DEFINE_PRED_FIELD( m_flUsePostTeleportationBoxTime, FIELD_FLOAT, 0 ),
+
+	DEFINE_PRED_FIELD( m_flHullHeight, FIELD_FLOAT, 0 ),
+
+	DEFINE_FIELD( m_fLatestServerTeleport, FIELD_FLOAT ),
+	DEFINE_FIELD( m_matLatestServerTeleportationInverseMatrix, FIELD_VMATRIX ),
+
 END_PREDICTION_DATA()
 
 static ConVar cl_playermodel( "cl_playermodel", "none", FCVAR_USERINFO | FCVAR_ARCHIVE | FCVAR_SERVER_CAN_EXECUTE, "Default Player Model");
+extern ConVar sv_post_teleportation_box_time;
 
 extern bool g_bUpsideDown;
 
@@ -340,7 +385,6 @@ C_Portal_Player::C_Portal_Player()
 	m_iv_vecCarriedObject_CurAngToTargetAng_Interpolator( "C_BaseEntity::m_iv_vecCarriedObject_CurAngToTargetAng_Interpolator" ),
 	//m_iv_vEyeOffset( "C_Portal_Player::m_iv_vEyeOffset" ),
 
-	m_vInputVector( 0.0f, 0.0f, 0.0f ),
 	m_flCachedJumpPowerTime( -FLT_MAX ),
 	m_flSpeedDecelerationTime( 0.0f ),
 	m_bJumpWasPressedWhenForced( false ),
@@ -359,6 +403,14 @@ C_Portal_Player::C_Portal_Player()
 
 	m_bHeldObjectOnOppositeSideOfPortal = false;
 	m_hHeldObjectPortal = NULL;
+
+	m_vInputVector = vec3_origin;
+	m_flCachedJumpPowerTime = -FLT_MAX;
+	m_flUsePostTeleportationBoxTime = 0.0f;
+	m_flSpeedDecelerationTime = 0.0f;
+	m_flPredictedJumpTime = 0.f;
+	m_bJumpWasPressedWhenForced = false;
+	m_vPrevGroundNormal = vec3_origin;
 
 	m_bPitchReorientation = false;
 	m_fReorientationRate = 0.0f;
@@ -383,6 +435,10 @@ C_Portal_Player::C_Portal_Player()
 	m_hUseEntThroughPortal = NULL;
 	m_flAutoGrabLockOutTime = 0.0f;
 
+	m_flTimeSinceLastTouchedPower[0] = FLT_MAX;
+	m_flTimeSinceLastTouchedPower[1] = FLT_MAX;
+	m_flTimeSinceLastTouchedPower[2] = FLT_MAX;
+
 	m_bForcingDrop = false;
 	m_bUseVMGrab = false;
 	m_bUsingVMGrabState = false;
@@ -390,6 +446,9 @@ C_Portal_Player::C_Portal_Player()
 	m_bUseWasDown = false;
 
 	m_bForceFireNextPortal = false;
+
+	m_flImplicitVerticalStepSpeed = 0.0f;
+	m_flObjectOutOfEyeTransitionDT = 0.0f;
 
 }
 
@@ -401,6 +460,14 @@ C_Portal_Player::~C_Portal_Player( void )
 	}
 
 	g_pColorCorrectionMgr->RemoveColorCorrection( m_CCDeathHandle );
+}
+
+void C_Portal_Player::Spawn( void )
+{
+	BaseClass::Spawn();
+
+	RecomputeBoundsForOrientation();
+
 }
 
 int C_Portal_Player::GetIDTarget() const
@@ -1050,6 +1117,56 @@ void C_Portal_Player::ClientThink( void )
 	UpdateIDTarget();
 }
 
+void C_Portal_Player::MoveHeldObjectOutOfPlayerEyes( void )
+{
+	if ( player_held_object_keep_out_of_camera.GetBool() == false )
+		return;
+
+	// Not needed if we're not holding something
+	if ( m_hAttachedObject.Get() == NULL )
+		return;
+
+	C_BaseAnimating *pAnim = m_hAttachedObject.Get()->GetBaseAnimating();
+	if ( !pAnim )
+		return;
+
+	if ( IsUsingVMGrab() )
+	{
+		pAnim->DisableRenderOriginOverride();
+		return;
+	}
+
+	// HACK: This level does some odd toggling of vm mode/physics mode during
+	// a scene where this behavior isn't needed or desired.
+	if ( V_strcmp( "sp_a1_wakeup", engine->GetLevelNameShort() ) == 0 )
+		return;	
+
+	Assert ( player_held_object_collide_with_player.GetBool() == false );
+
+	Vector vLook, vRight, vUp;
+	GetVectors( &vLook, &vRight, &vUp );
+	Vector vToObject = m_hAttachedObject.Get()->GetAbsOrigin() - EyePosition();
+	float distSq = vToObject.LengthSqr();
+	const float flBufferZone = 10.0f; // start moving into safty earlier to avoid penetrating the eyeposition
+	float rad = m_hAttachedObject.Get()->BoundingRadius() + flBufferZone;
+	
+	// dt moves between 0 and transition time over time depending on proximity to the eyepos 
+	float dt = m_flObjectOutOfEyeTransitionDT;
+	const float flTransitionTime = 0.4;
+	dt += ( distSq < rad*rad ) ? gpGlobals->frametime : -gpGlobals->frametime;
+	dt = clamp( dt, 0.0f, flTransitionTime );
+	m_flObjectOutOfEyeTransitionDT = dt;
+
+	// Move between our hidden position and our real world position depending on our closeness
+	float t = RemapVal( dt, 0.0f, flTransitionTime, 0.0f, 1.0f );
+	Vector out;
+	Vector vGoalPos = EyePosition() - vUp*rad;// - vLook*rad;
+	Vector vMid		= EyePosition() - vUp*rad - 3.0f*vLook*rad;
+	Hermite_Spline( vMid, pAnim->GetAbsOrigin(), vGoalPos, t, out );
+	pAnim->SetRenderOriginOverride( out );
+}
+
+
 void C_Portal_Player::FixTeleportationRoll( void )
 {
 	if( IsInAVehicle() ) //HL2 compatibility fix. do absolutely nothing to the view in vehicles
@@ -1475,15 +1592,144 @@ IRagdoll* C_Portal_Player::GetRepresentativeRagdoll() const
 }
 
 
-void C_Portal_Player::PlayerPortalled( C_Prop_Portal *pEnteredPortal )
+void C_Portal_Player::PlayerPortalled( C_Portal_Base2D *pEnteredPortal, float fTime, bool bForcedDuck )
 {
-	if( pEnteredPortal )
+	//Warning( "C_Portal_Player::PlayerPortalled( %s ) ent:%i slot:%i\n", IsLocalPlayer() ? "local" : "nonlocal", entindex(), engine->GetActiveSplitScreenPlayerSlot() );
+#if ( PLAYERPORTALDEBUGSPEW == 1 )
+	Warning( "C_Portal_Player::PlayerPortalled( %f %f %f %i ) %i\n", fTime, engine->GetLastTimeStamp(), GetTimeBase(), prediction->GetLastAcknowledgedCommandNumber(), m_PredictedPortalTeleportations.Count() );
+#endif
+	ACTIVE_SPLITSCREEN_PLAYER_GUARD_ENT( this );
+
+	/*{
+		QAngle qEngineView;
+		engine->GetViewAngles( qEngineView );
+		Warning( "Client player portalled %f   %f %f %f\n\t%f %f %f   %f %f %f\n", gpGlobals->curtime, XYZ( GetNetworkOrigin() ), XYZ( pl.v_angle ), XYZ( qEngineView ) ); 
+	}*/
+
+	if ( pEnteredPortal )
 	{
+		C_Portal_Base2D *pRemotePortal = pEnteredPortal->m_hLinkedPortal;
+
 		m_bPortalledMessagePending = true;
 		m_PendingPortalMatrix = pEnteredPortal->MatrixThisToLinked();
 
-		if( IsLocalPlayer() )
+		if( IsLocalPlayer( this ) && pRemotePortal )
+		{
 			g_pPortalRender->EnteredPortal( pEnteredPortal );
+		}
+
+		if( !GetPredictable() )
+		{
+			//non-predicted case
+			ApplyUnpredictedPortalTeleportation( pEnteredPortal, fTime, bForcedDuck );
+		}
+		else
+		{
+			if( m_PredictedPortalTeleportations.Count() == 0 )
+			{
+				//surprise teleportation
+#if ( PLAYERPORTALDEBUGSPEW == 1 )
+				Warning( "C_Portal_Player::PlayerPortalled()  No predicted teleportations %f %f\n", gpGlobals->curtime, fTime );
+#endif
+				ApplyUnpredictedPortalTeleportation( pEnteredPortal, fTime, bForcedDuck );
+
+			}
+			else
+			{				
+				PredictedPortalTeleportation_t shouldBeThisTeleport = m_PredictedPortalTeleportations.Head();
+
+				if( pEnteredPortal != shouldBeThisTeleport.pEnteredPortal )
+				{
+					AssertMsg( false, "predicted teleportation through the wrong portal." ); //we don't have any test cases for this happening. So the logic is accordingly untested.
+					Warning( "C_Portal_Player::PlayerPortalled()  Mismatched head teleportation %f, %f %f\n", gpGlobals->curtime, shouldBeThisTeleport.flTime, fTime );
+					UnrollPredictedTeleportations( shouldBeThisTeleport.iCommandNumber );
+					ApplyUnpredictedPortalTeleportation( pEnteredPortal, fTime, bForcedDuck );
+				}
+				else
+				{
+#if ( PLAYERPORTALDEBUGSPEW == 1 )
+					Warning( "C_Portal_Player::PlayerPortalled()  Existing teleportation at %f correct, %f %f\n", m_PredictedPortalTeleportations[0].flTime, gpGlobals->curtime, fTime );
+#endif
+					m_PredictedPortalTeleportations.Remove( 0 );
+				}
+			}
+		}
+
+		if( pRemotePortal != NULL )
+		{
+			m_matLatestServerTeleportationInverseMatrix = pRemotePortal->MatrixThisToLinked();
+		}
+		else
+		{
+			m_matLatestServerTeleportationInverseMatrix.Identity();
+		}
+	}
+
+	m_fLatestServerTeleport = fTime;
+}
+
+void C_Portal_Player::CheckPlayerAboutToTouchPortal( void )
+{
+	// don't run this code unless we are in MP and are using the robots
+	if ( !GameRules()->IsMultiplayer() )
+		return;
+		
+	int iPortalCount = CProp_Portal_Shared::AllPortals.Count();
+	if( iPortalCount == 0 || m_bFlingTrailPrePortalled )
+		return;
+
+	float fFlingTrail = GetAbsVelocity().Length() - MIN_FLING_SPEED;
+	// if we aren't going at least fling speed, don't both with the code below
+	if ( fFlingTrail <= 0 )
+		return;
+
+	Vector vecVelocity = GetAbsVelocity();
+
+	Vector vMin, vMax;
+	CollisionProp()->WorldSpaceAABB( &vMin, &vMax );
+	Vector ptCenter = ( vMin + vMax ) * 0.5f;
+	Vector vExtents = ( vMax - vMin ) * 0.5f;
+	// bloat the player's bounding box check based on the speed and direction that he's travelling
+	float flScaler = mp_bot_fling_trail_kill_scaler.GetFloat();
+	for ( int i = 0; i < 3; ++i )
+	{
+		if ( vecVelocity[i] >= 0 )
+			vExtents[i] += vecVelocity[i] * flScaler;
+		else
+			vExtents[i] -= vecVelocity[i] * flScaler;
+	}
+
+	CPortal_Base2D **pPortals = CProp_Portal_Shared::AllPortals.Base();
+	for( int i = 0; i != iPortalCount; ++i )
+	{
+		CPortal_Base2D *pTempPortal = pPortals[i];
+		if( pTempPortal->IsActive() && 
+			(pTempPortal->m_hLinkedPortal.Get() != NULL) &&
+			UTIL_IsBoxIntersectingPortal( ptCenter, vExtents, pTempPortal )	)
+		{
+			Vector vecDirToPortal = ptCenter - pTempPortal->GetAbsOrigin();
+			VectorNormalize(vecDirToPortal);
+			Vector vecDirMotion = vecVelocity;
+			VectorNormalize(vecDirMotion);
+			float dot = DotProduct( vecDirToPortal, vecDirMotion );
+
+			// If the portal is behind our direction of movement, then we probably just came out of it
+			// IGNORE
+			if ( dot > 0.0f )
+				continue;
+			
+			// if we're flinging and we touched a portal
+			if ( m_FlingTrailEffect && !m_bFlingTrailPrePortalled && !m_bFlingTrailJustPortalled )
+			{
+				// stop the effect linger effect if it exists
+				m_FlingTrailEffect->SetOwner( NULL );
+				ParticleProp()->StopEmission( m_FlingTrailEffect, false, true, false );
+				m_FlingTrailEffect = NULL;
+				m_bFlingTrailActive = false;
+				m_bFlingTrailPrePortalled = true;
+				return;
+			}
+		}
 	}
 }
 
@@ -1586,6 +1832,22 @@ void C_Portal_Player::OnDataChanged( DataUpdateType_t type )
 		m_hOldAttachedObject = NULL;
 		m_flAutoGrabLockOutTime = gpGlobals->curtime;
 	}
+	
+	ACTIVE_SPLITSCREEN_PLAYER_GUARD_ENT( this );
+	if( GetPredictable() && (m_PredictedPortalTeleportations.Count() != 0) && (m_PredictedPortalTeleportations[0].fDeleteServerTimeStamp != -1.0f) )
+	{
+		//just because the server processed the message does not mean it also sent the teleportation temp ent
+		//Give that temporary entity some slack time to show up.
+		//We really should encode portal teleportation right into CBaseEntity to further clamp down the processing flow
+		if( (engine->GetLastTimeStamp() - m_PredictedPortalTeleportations[0].fDeleteServerTimeStamp) > (TICK_INTERVAL * 10) ) //give the server an extra 10 ticks to send out the teleportation message 
+		{
+			//The server has acknowledged that it processed the command that we predicted this happened on. But we didn't get a teleportation notification. It must not have happened on the server
+#if ( PLAYERPORTALDEBUGSPEW == 1 )
+			Warning( "======================OnDataChanged removing a teleportation that didn't happen!!!! %f %i -=- %f %f %i======================\n", m_PredictedPortalTeleportations[0].flTime, m_PredictedPortalTeleportations[0].iCommandNumber, GetTimeBase(), engine->GetLastTimeStamp(), prediction->GetLastAcknowledgedCommandNumber() );
+#endif
+			UnrollPredictedTeleportations( m_PredictedPortalTeleportations[0].iCommandNumber );
+		}
+	}
 }
 
 //CalcView() gets called between OnPreDataChanged() and OnDataChanged(), and these changes need to be known about in both before CalcView() gets called, and if CalcView() doesn't get called
@@ -1666,6 +1928,42 @@ void C_Portal_Player::PostDataUpdate( DataUpdateType_t updateType )
 	}
 
 	BaseClass::PostDataUpdate( updateType );
+
+	if ( updateType == DATA_UPDATE_CREATED )
+	{
+		SetNextClientThink( CLIENT_THINK_ALWAYS );
+		
+		if( g_pGameRules->IsMultiplayer() && !IsLocalPlayer() )
+		{
+			AddRemoteSplitScreenViewPlayer( this );
+		}
+	}
+	else
+	{
+		if( m_iEntityPortalledNetworkMessageCount != PreDataChanged_Backup.m_iEntityPortalledNetworkMessageCount )
+		{
+			Assert( IsLocalPlayer() ); //this data should never have been sent down the wire
+
+			if( IsLocalPlayer() && !IsSplitScreenPlayer() ) //this buffer is stored in each player entity and sent only to the owner player, therefore we will receive 2 copies in splitscreen. Discard second player's copy	
+			{				
+				uint32 iStopIndex = m_iEntityPortalledNetworkMessageCount%MAX_ENTITY_PORTALLED_NETWORK_MESSAGES;
+				Assert( m_EntityPortalledNetworkMessages[(m_iEntityPortalledNetworkMessageCount - 1)%MAX_ENTITY_PORTALLED_NETWORK_MESSAGES].m_iMessageCount == (m_iEntityPortalledNetworkMessageCount - 1) );
+				bool bOverFlowed = m_EntityPortalledNetworkMessages[PreDataChanged_Backup.m_iEntityPortalledNetworkMessageCount%MAX_ENTITY_PORTALLED_NETWORK_MESSAGES].m_iMessageCount != PreDataChanged_Backup.m_iEntityPortalledNetworkMessageCount;
+				AssertMsg( !bOverFlowed, "Entity teleportation message overflow, increase CPortal_Player::MAX_ENTITY_PORTALLED_NETWORK_MESSAGES" );
+
+				uint32 iIterator = (bOverFlowed ? m_iEntityPortalledNetworkMessageCount : //if overflowed, start from oldest entry in the buffer
+													PreDataChanged_Backup.m_iEntityPortalledNetworkMessageCount) //else, start from the first new entry
+													% MAX_ENTITY_PORTALLED_NETWORK_MESSAGES;
+				
+				do
+				{
+					C_EntityPortalledNetworkMessage &readFrom = m_EntityPortalledNetworkMessages[iIterator];
+					RecieveEntityPortalledMessage( readFrom.m_hEntity, readFrom.m_hPortal, readFrom.m_fTime, readFrom.m_bForcedDuck );
+					iIterator = (iIterator + 1) % MAX_ENTITY_PORTALLED_NETWORK_MESSAGES;
+				} while( iIterator != iStopIndex );
+			}
+		}
+	}
 }
 
 float C_Portal_Player::GetFOV( void )
@@ -2326,4 +2624,292 @@ void C_Portal_Player::ManageHeldObject()
 		GetGrabController().UpdateObject( this, 12 );
 		GetGrabController().ClientApproachTarget( this );
 	}
+}
+
+
+void C_Portal_Player::ApplyTransformToInterpolators( const VMatrix &matTransform, float fUpToTime, bool bIsRevertingPreviousTransform, bool bDuckForced )
+{	
+	Vector vOriginToCenter = (GetHullMaxs() + GetHullMins()) * 0.5f;
+	Vector vCenterToOrigin = -vOriginToCenter;
+	Vector vViewOffset = vec3_origin;
+	VMatrix matCenterTransform = matTransform, matEyeTransform;
+	Vector vOldEye = GetViewOffset();
+	Vector vNewEye = GetViewOffset();
+
+	if( bDuckForced )
+	{
+		// Going to be standing up
+		if( bIsRevertingPreviousTransform )
+		{
+			vNewEye = VEC_VIEW;
+			vViewOffset = VEC_VIEW - VEC_DUCK_VIEW;
+			vOriginToCenter = (GetDuckHullMins() + GetDuckHullMaxs()) * 0.5f;
+			vCenterToOrigin = -(GetStandHullMins() + GetStandHullMaxs()) * 0.5f;
+		}
+		// Going to be crouching
+		else
+		{
+			vNewEye = VEC_DUCK_VIEW;
+			vViewOffset = VEC_DUCK_VIEW - VEC_VIEW;
+			vOriginToCenter = (GetStandHullMins() + GetStandHullMaxs()) * 0.5f;
+			vCenterToOrigin = -(GetDuckHullMins() + GetDuckHullMaxs()) * 0.5f;
+		}
+
+		vOldEye = matTransform.ApplyRotation( vOldEye );
+		Vector vEyeOffset = vOldEye - vNewEye - vCenterToOrigin;
+		matEyeTransform = SetupMatrixTranslation(vEyeOffset);
+	}
+	else
+	{
+		vOldEye -= vOriginToCenter;
+		vOldEye = matTransform.ApplyRotation( vOldEye );
+		vOldEye += vOriginToCenter;
+
+		Vector vEyeOffset = vOldEye - vNewEye;
+		matEyeTransform = SetupMatrixTranslation(vEyeOffset);
+	}
+
+	// There's a 1-frame pop in multiplayer with lag when forced to duck.  WHAT THE FUCKKKKKKKKKKKKKKK
+
+	// Translate origin to center
+	matCenterTransform = matCenterTransform * SetupMatrixTranslation(vOriginToCenter);
+	// Translate center to origin
+	matCenterTransform = SetupMatrixTranslation( vCenterToOrigin ) * matCenterTransform;
+
+	VMatrix matViewOffset = SetupMatrixTranslation( vViewOffset );
+
+	if( bIsRevertingPreviousTransform )
+	{
+		GetOriginInterpolator().RemoveDiscontinuity( fUpToTime, &matCenterTransform.As3x4() );
+		GetRotationInterpolator().RemoveDiscontinuity( fUpToTime, &matCenterTransform.As3x4() );
+		m_iv_angEyeAngles.RemoveDiscontinuity( fUpToTime, &matCenterTransform.As3x4() );
+		m_iv_vecViewOffset.RemoveDiscontinuity( fUpToTime, &matViewOffset.As3x4() );
+		m_iv_vEyeOffset.RemoveDiscontinuity( fUpToTime, &matEyeTransform.As3x4() );
+	}
+	else
+	{
+		GetOriginInterpolator().InsertDiscontinuity( matCenterTransform.As3x4(), fUpToTime );
+		GetRotationInterpolator().InsertDiscontinuity( matCenterTransform.As3x4(), fUpToTime );
+		m_iv_angEyeAngles.InsertDiscontinuity( matCenterTransform.As3x4(), fUpToTime );
+		m_iv_vecViewOffset.InsertDiscontinuity( matViewOffset.As3x4(), fUpToTime );
+		m_iv_vEyeOffset.InsertDiscontinuity( matEyeTransform.As3x4(), fUpToTime );
+	}	
+
+	m_PlayerAnimState->TransformYAWs( matCenterTransform.As3x4() );
+	
+	AddEFlags( EFL_DIRTY_ABSTRANSFORM );
+}
+
+ConVar cl_resetportalledplayerinterp( "cl_resetportalledplayerinterp", "0" );
+
+void C_Portal_Player::ApplyUnpredictedPortalTeleportation( const C_Portal_Base2D *pEnteredPortal, float flTeleportationTime, bool bForcedDuck )
+{
+	ApplyTransformToInterpolators( pEnteredPortal->m_matrixThisToLinked, flTeleportationTime, false, bForcedDuck );
+
+	//Warning( "Applying teleportation view angle change %d, %f\n", m_PredictedPortalTeleportations.Count(), gpGlobals->curtime );
+
+	if( IsLocalPlayer() && (GET_ACTIVE_SPLITSCREEN_SLOT() == GetSplitScreenPlayerSlot()) )
+	{
+		//Warning( "C_Portal_Player::ApplyUnpredictedPortalTeleportation() ent:%i slot:%i\n", entindex(), engine->GetActiveSplitScreenPlayerSlot() );
+		matrix3x4_t matAngleTransformIn, matAngleTransformOut; //temps for angle transformation
+		{
+			QAngle qEngineAngles;
+			engine->GetViewAngles( qEngineAngles );
+			AngleMatrix( qEngineAngles, matAngleTransformIn );
+			ConcatTransforms( pEnteredPortal->m_matrixThisToLinked.As3x4(), matAngleTransformIn, matAngleTransformOut );
+			MatrixAngles( matAngleTransformOut, qEngineAngles );
+			engine->SetViewAngles( qEngineAngles );
+			pl.v_angle = qEngineAngles;
+		}
+	}
+
+	for ( int i = 0; i < MAX_VIEWMODELS; i++ )
+	{
+		CBaseViewModel *pViewModel = GetViewModel( i );
+		if ( !pViewModel )
+			continue;
+
+		pViewModel->m_vecLastFacing = pEnteredPortal->m_matrixThisToLinked.ApplyRotation( pViewModel->m_vecLastFacing );
+	}
+
+#if ( PLAYERPORTALDEBUGSPEW == 1 )
+	Warning( "C_Portal_Player::ApplyUnpredictedPortalTeleportation( %f )\n", flTeleportationTime/*gpGlobals->curtime*/ );
+#endif
+
+	PostTeleportationCameraFixup( pEnteredPortal );
+
+	if( IsToolRecording() )
+	{		
+		KeyValues *msg = new KeyValues( "entity_nointerp" );
+
+		// Post a message back to all IToolSystems
+		Assert( (int)GetToolHandle() != 0 );
+		ToolFramework_PostToolMessage( GetToolHandle(), msg );
+
+		msg->deleteThis();
+	}
+
+	// Use a slightly expanded box to search for stick surfaces as the player leaves the portal.
+	m_flUsePostTeleportationBoxTime = sv_post_teleportation_box_time.GetFloat();
+
+	SetOldPlayerZ( GetNetworkOrigin().z );
+}
+
+void C_Portal_Player::ApplyPredictedPortalTeleportation( C_Portal_Base2D *pEnteredPortal, CMoveData *pMove, bool bForcedDuck )
+{
+	if( pEnteredPortal->m_hLinkedPortal.Get() != NULL )
+	{
+		m_matLatestServerTeleportationInverseMatrix = pEnteredPortal->m_hLinkedPortal->MatrixThisToLinked();
+	}
+	else
+	{
+		m_matLatestServerTeleportationInverseMatrix.Identity();
+	}
+
+	m_fLatestServerTeleport = gpGlobals->curtime;
+	// FIXME:
+#if 0
+	C_PortalGhostRenderable *pGhost = pEnteredPortal->GetGhostRenderableForEntity( this );
+	if( !pGhost )
+	{
+		//high velocity edge case. Entity portalled before it ever created a clone. But will need one for the interpolated origin history
+		if( C_PortalGhostRenderable::ShouldCloneEntity( this, pEnteredPortal, false ) )
+		{
+			pGhost = C_PortalGhostRenderable::CreateGhostRenderable( this, pEnteredPortal );
+			Assert( !pEnteredPortal->m_hGhostingEntities.IsValidIndex( pEnteredPortal->m_hGhostingEntities.Find( this ) ) );
+			pEnteredPortal->m_hGhostingEntities.AddToTail( this );
+			Assert( pEnteredPortal->m_GhostRenderables.IsValidIndex( pEnteredPortal->m_GhostRenderables.Find( pGhost ) ) );
+			pGhost->PerFrameUpdate();
+		}
+	}
+
+	if( pGhost )
+	{
+		C_PortalGhostRenderable::CreateInversion( pGhost, pEnteredPortal, gpGlobals->curtime );
+	}
+#endif
+	//Warning( "C_Portal_Player::ApplyPredictedPortalTeleportation() ent:%i slot:%i\n", entindex(), engine->GetActiveSplitScreenPlayerSlot() );
+	ApplyTransformToInterpolators( pEnteredPortal->m_matrixThisToLinked, gpGlobals->curtime, false, bForcedDuck );
+
+	// straighten out velocity if going nearly straight up/down out of a floor/ceiling portal
+	{
+		const CPortal_Base2D *pOtherPortal = pEnteredPortal->m_hLinkedPortal.Get();
+		if( sv_player_funnel_into_portals.GetBool() && pOtherPortal )
+		{
+			// Make sure this portal is nearly facing straight up/down
+			const Vector vNormal = pOtherPortal->m_PortalSimulator.GetInternalData().Placement.vForward;
+			if( (1.f - fabs(vNormal.z)) < 0.001f )
+			{
+				const Vector vUp(0.f,0.f,1.f);
+				const Vector vVel = pMove->m_vecVelocity;
+				const float flVelDotUp = DotProduct( vVel.Normalized(), vUp );
+				// We're going mostly straight up/down
+				if( fabs( flVelDotUp ) > sv_player_funnel_gimme_dot.GetFloat() )
+				{
+					// Make us go exactly sraight up/down
+					pMove->m_vecVelocity = ( DotProduct(vUp, vVel) * vUp );
+				}
+			}
+		}
+	}
+
+	PostTeleportationCameraFixup( pEnteredPortal );
+
+	if( prediction->IsFirstTimePredicted() && IsToolRecording() )
+	{
+		KeyValues *msg = new KeyValues( "entity_nointerp" );
+		
+		// Post a message back to all IToolSystems
+		Assert( (int)GetToolHandle() != 0 );
+		ToolFramework_PostToolMessage( GetToolHandle(), msg );
+
+		msg->deleteThis();
+	}
+
+	// Use a slightly expanded box to search for stick surfaces as the player leaves the portal.
+	m_flUsePostTeleportationBoxTime = sv_post_teleportation_box_time.GetFloat();
+
+	if ( m_bFlingTrailPrePortalled )
+	{
+		m_bFlingTrailPrePortalled = false;
+		m_bFlingTrailJustPortalled = true;
+	}
+
+	SetOldPlayerZ( pMove->GetAbsOrigin().z );
+}
+
+void C_Portal_Player::UndoPredictedPortalTeleportation( const C_Portal_Base2D *pEnteredPortal, float fOriginallyAppliedTime, const VMatrix &matUndo, bool bForcedDuck )
+{
+	ApplyTransformToInterpolators( matUndo, fOriginallyAppliedTime, true, bForcedDuck );
+
+	// Don't use the expanded box to search for stick surfaces, since the player hasn't teleported yet.
+	m_flUsePostTeleportationBoxTime = 0.0f;
+
+	SetOldPlayerZ( GetNetworkOrigin().z );
+}
+
+void C_Portal_Player::UnrollPredictedTeleportations( int iCommandNumber )
+{
+	//roll back changes that aren't automatically restored when rolling back prediction time
+	//ACTIVE_SPLITSCREEN_PLAYER_GUARD( this );
+
+	if( (m_PredictedPortalTeleportations.Count() != 0) && (iCommandNumber <= m_PredictedPortalTeleportations.Tail().iCommandNumber) )
+	{
+		matrix3x4_t matAngleTransformIn, matAngleTransformOut; //temps for angle transformation
+
+		QAngle qEngineViewAngles;
+		engine->GetViewAngles( qEngineViewAngles );
+		//QAngle qVAngles = player->pl.v_angle;
+
+		//crap, re-predicting teleportations. This is fine for the CMoveData, but CUserCmd/engine view angles are temporally sensitive.
+		for( int i = m_PredictedPortalTeleportations.Count(); --i >= 0; )
+		{
+			if( iCommandNumber <= m_PredictedPortalTeleportations[i].iCommandNumber )
+			{
+				const VMatrix &matTransform = m_PredictedPortalTeleportations[i].matUnroll;
+				//undo the view transformation this previous (but future) teleportation applied to the view angles.
+				{
+					AngleMatrix( qEngineViewAngles, matAngleTransformIn );
+					ConcatTransforms( matTransform.As3x4(), matAngleTransformIn, matAngleTransformOut );
+					MatrixAngles( matAngleTransformOut, qEngineViewAngles );
+				}
+
+				/*{
+				AngleMatrix( qVAngles, matAngleTransformIn );
+				ConcatTransforms( matTransform.As3x4(), matAngleTransformIn, matAngleTransformOut );
+				MatrixAngles( matAngleTransformOut, qVAngles );
+				}*/
+
+				UndoPredictedPortalTeleportation( m_PredictedPortalTeleportations[i].pEnteredPortal, m_PredictedPortalTeleportations[i].flTime, matTransform, m_PredictedPortalTeleportations[i].bDuckForced );
+
+				// Hack? Squash camera values back to neutral.
+				m_PortalLocal.m_Up = Vector(0,0,1);
+				m_PortalLocal.m_qQuaternionPunch.Init(0,0,0);
+				m_PortalLocal.m_vEyeOffset = vec3_origin;
+
+#if ( PLAYERPORTALDEBUGSPEW == 1 )
+				Warning( "<--Rolling back predicted teleportation %d, %f %i %i\n", m_PredictedPortalTeleportations.Count(), m_PredictedPortalTeleportations[i].flTime, m_PredictedPortalTeleportations[i].iCommandNumber, iCommandNumber );
+#endif
+				m_PredictedPortalTeleportations.FastRemove( i );
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		if( IsLocalPlayer() )
+		{
+			engine->SetViewAngles( qEngineViewAngles );
+			//Warning( "C_Portal_Player::UnrollPredictedTeleportations() ent:%i slot:%i\n", entindex(), engine->GetActiveSplitScreenPlayerSlot() );
+		}
+		//player->pl.v_angle = qVAngles;
+	}
+}
+
+void C_Portal_Player::UnDuck( void )
+{
+#ifndef CLIENT_DLL
+	FirePlayerProxyOutput( "OnUnDuck", variant_t(), this, this );
+#endif
 }

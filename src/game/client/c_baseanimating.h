@@ -451,6 +451,10 @@ public:
 	void							DisableJiggleBones( void );
 
 	void							ScriptSetPoseParameter( const char *szName, float fValue );
+	
+	void							SetRenderOriginOverride( const Vector &vec );
+	void							DisableRenderOriginOverride( void );
+	bool							IsUsingRenderOriginOverride( void ) { return m_vecRenderOriginOverride != vec3_invalid; }
 
 protected:
 	// View models scale their attachment positions to account for FOV. To get the unmodified
@@ -659,6 +663,8 @@ private:
 
 	CUtlReference<CNewParticleEffect>	m_ejectBrassEffect;
 	int									m_iEjectBrassAttachment;
+
+	Vector							m_vecRenderOriginOverride;
 };
 
 enum 

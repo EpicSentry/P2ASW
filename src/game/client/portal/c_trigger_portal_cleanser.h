@@ -20,9 +20,6 @@
 #include "rumble_shared.h"
 #include "c_triggers.h"
 
-// memdbgon must be the last include file in a .cpp file!!!
-#include "tier0/memdbgon.h"
-
 static char *g_pszPortalNonCleansable[] = 
 { 
 	"func_door", 

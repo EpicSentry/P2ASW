@@ -60,6 +60,8 @@ public:
 	void	DoAnimationEvent( PlayerAnimEvent_t event, int nData = 0 );
 
 	void    Teleport( const Vector *pNewOrigin, const QAngle *pNewAngles, CPortal_Player* pPlayer );
+	
+	void				TransformYAWs( const matrix3x4_t &matTransform );
 
 	bool	HandleMoving( Activity &idealActivity );
 	bool	HandleJumping( Activity &idealActivity );

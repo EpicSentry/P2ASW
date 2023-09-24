@@ -197,8 +197,23 @@ void CPortalPlayerAnimState::Teleport( const Vector *pNewOrigin, const QAngle *p
 	}
 }
 
+void CPortalPlayerAnimState::TransformYAWs( const matrix3x4_t &matTransform )
+{
+	QAngle qOldAngles = vec3_angle;
+	QAngle qAngles;
 
+	qOldAngles[YAW] = m_flEyeYaw;
+	qAngles = TransformAnglesToWorldSpace( qOldAngles, matTransform );
+	m_flEyeYaw = qAngles[YAW];
 
+	qOldAngles[YAW] = m_flGoalFeetYaw;
+	qAngles = TransformAnglesToWorldSpace( qOldAngles, matTransform );
+	m_flGoalFeetYaw = qAngles[YAW];
+
+	qOldAngles[YAW] = m_flCurrentFeetYaw;
+	qAngles = TransformAnglesToWorldSpace( qOldAngles, matTransform );
+	m_flCurrentFeetYaw = qAngles[YAW];
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: 

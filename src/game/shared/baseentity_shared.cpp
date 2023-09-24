@@ -2552,7 +2552,7 @@ bool CBaseEntity::IsToolRecording() const
 }
 #endif
 
-#if defined( CLIENT_DLL ) 
+#if defined( CLIENT_DLL ) && !defined( PORTAL2 )
 #define FAST_TRIGGER_TOUCH
 extern void TouchTriggerPlayerMovement( C_BaseEntity *pEntity );
 #endif

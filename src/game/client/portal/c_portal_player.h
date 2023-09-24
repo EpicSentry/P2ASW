@@ -31,6 +31,18 @@ enum PortalScreenSpaceEffect
 	PORTAL_SCREEN_SPACE_EFFECT_COUNT
 };
 
+class C_EntityPortalledNetworkMessage : public CMemZeroOnNew
+{
+public:	
+	DECLARE_CLASS_NOBASE( C_EntityPortalledNetworkMessage );
+
+	CHandle<C_BaseEntity> m_hEntity;
+	CHandle<CPortal_Base2D> m_hPortal;
+	float m_fTime;
+	bool m_bForcedDuck;
+	uint32 m_iMessageCount;
+};
+
 //=============================================================================
 // >> Portal_Player
 //=============================================================================
@@ -42,10 +54,11 @@ public:
 	DECLARE_CLIENTCLASS();
 	DECLARE_PREDICTABLE();
 	DECLARE_INTERPOLATION();
-
-
+	
 	C_Portal_Player();
 	~C_Portal_Player( void );
+	
+	virtual void Spawn( void );
 
 	void ClientThink( void );
 	void FixTeleportationRoll( void );
@@ -103,7 +116,10 @@ public:
 	virtual Vector			EyePosition();
 	Vector					EyeFootPosition( const QAngle &qEyeAngles );//interpolates between eyes and feet based on view angle roll
 	inline Vector			EyeFootPosition( void ) { return EyeFootPosition( EyeAngles() ); };
-	void					PlayerPortalled( C_Prop_Portal *pEnteredPortal );
+	void					PlayerPortalled( C_Portal_Base2D *pEnteredPortal, float fTime, bool bForcedDuck );
+	void					CheckPlayerAboutToTouchPortal( void );
+	
+	void					ResetHeldObjectOutOfEyeTransitionDT( void ) { m_flObjectOutOfEyeTransitionDT = 0.0f; }
 
 	virtual void	CalcView( Vector &eyeOrigin, QAngle &eyeAngles, float &zNear, float &zFar, float &fov );
 	void			CalcPortalView( Vector &eyeOrigin, QAngle &eyeAngles );
@@ -118,6 +134,9 @@ public:
 	{
 		return ((PortalEyeInterpolation.m_bEyePositionIsInterpolating) || (m_hPortalEnvironment.Get() != NULL));	
 	} 
+	
+	void	SetAirControlSupressionTime( float flDuration ) { m_PortalLocal.m_flAirControlSupressionTime = flDuration; }
+	bool	IsSuppressingAirControl( void ) { return m_PortalLocal.m_flAirControlSupressionTime != 0.0f; }
 
 	void	HandleSpeedChanges( void );
 	void	UpdateLookAt( void );
@@ -154,7 +173,29 @@ public:
 	Activity TranslateActivity( Activity baseAct, bool *pRequired = NULL );
 	CWeaponPortalBase* GetActivePortalWeapon() const;
 	
+	struct PredictedPortalTeleportation_t 
+	{
+		float flTime;
+		C_Portal_Base2D *pEnteredPortal;
+		int iCommandNumber;
+		float fDeleteServerTimeStamp;
+		bool bDuckForced;
+		VMatrix matUnroll; //sometimes the portals move/fizzle between an apply and an unroll. Store the undo matrix ahead of time
+	};
+	CUtlVector<PredictedPortalTeleportation_t> m_PredictedPortalTeleportations;
+	
 	bool	IsHoldingSomething( void ) const { return m_bIsHoldingSomething; }
+
+	virtual void ApplyTransformToInterpolators( const VMatrix &matTransform, float fUpToTime, bool bIsRevertingPreviousTransform, bool bDuckForced );
+
+	//single player doesn't predict portal teleportations. This is the call you'll receive when we determine the server portalled us.
+	virtual void ApplyUnpredictedPortalTeleportation( const C_Portal_Base2D *pEnteredPortal, float flTeleportationTime, bool bForcedDuck );
+
+	//WARNING: predicted teleportations WILL need to be undone A LOT. Prediction rolls time forward and backward like mad. Optimally an apply then undo should revert to the starting state. But an easier and somewhat acceptable solution is to have an undo then (assumed) re-apply be a NOP.
+	virtual void ApplyPredictedPortalTeleportation( C_Portal_Base2D *pEnteredPortal, CMoveData *pMove, bool bForcedDuck );
+	virtual void UndoPredictedPortalTeleportation( const C_Portal_Base2D *pEnteredPortal, float fOriginallyAppliedTime, const VMatrix &matUndo, bool bDuckForced ); //fOriginallyAppliedTime is the value of gpGlobals->curtime when ApplyPredictedPortalTeleportation was called. Which will be in the future when this gets called
+
+	void UnrollPredictedTeleportations( int iCommandNumber ); //unroll all predicted teleportations at or after the target tick
 
 	float GetMotionBlurAmount(void) { return m_flMotionBlurAmount; }
 
@@ -196,7 +237,13 @@ public:
 	bool	IsRemoteViewTaunt( void ) { return false; } // FIXME!!
 
 private:
-	
+	CUtlVector<C_EntityPortalledNetworkMessage> m_EntityPortalledNetworkMessages;
+	enum 
+	{
+		MAX_ENTITY_PORTALLED_NETWORK_MESSAGES = 32,
+	};
+	uint32 m_iEntityPortalledNetworkMessageCount;
+
 	void AvoidPlayers( CUserCmd *pCmd );
 
 	C_Portal_Player( const C_Portal_Player & );
@@ -206,7 +253,7 @@ private:
 	CPortalPlayerAnimState *m_PlayerAnimState;
 
 	QAngle	m_angEyeAngles;
-	CInterpolatedVar< QAngle >	m_iv_angEyeAngles;
+	CDiscontinuousInterpolatedVar< QAngle >	m_iv_angEyeAngles;
 
 	virtual IRagdoll		*GetRepresentativeRagdoll() const;
 	EHANDLE	m_hRagdoll;
@@ -260,6 +307,7 @@ private:
 		CHandle<C_Func_LiquidPortal>	m_hSurroundingLiquidPortal;
 		//Vector					m_ptPlayerPosition;
 		QAngle					m_qEyeAngles;
+		uint32					m_iEntityPortalledNetworkMessageCount;
 	} PreDataChanged_Backup;
 
 	Vector	m_ptEyePosition_LastCalcView;
@@ -278,9 +326,11 @@ private:
 	float m_flHullHeight;
 	CInterpolatedVar< float > m_iv_flHullHeight;
 
-	//CDiscontinuousInterpolatedVar< Vector > m_iv_vEyeOffset;
+	CDiscontinuousInterpolatedVar< Vector > m_iv_vEyeOffset;
 
 	void ManageHeldObject();
+
+	void MoveHeldObjectOutOfPlayerEyes( void );
 
 public: // PAINT SPECIFIC
 	static bool RenderLocalScreenSpaceEffect( PortalScreenSpaceEffect effect, IMatRenderContext *pRenderContext, int x, int y, int w, int h );
@@ -308,6 +358,9 @@ public: // PAINT SPECIFIC
 	
 	const Vector& GetInputVector() const;
 	void SetInputVector( const Vector& vInput );
+	
+	const Vector& GetPrevGroundNormal() const;
+	void SetPrevGroundNormal( const Vector& vPrevNormal );
 
 	virtual bool RenderScreenSpaceEffect( PortalScreenSpaceEffect effect, IMatRenderContext *pRenderContext, int x, int y, int w, int h );
 
@@ -334,12 +387,15 @@ public: // PAINT SPECIFIC
 	float GetDuckHullHeight() const;
 	float GetDuckHullWidth() const;
 	
+	void SetAirDuck( bool bDuckedInAir );
+	void UnDuck();
+	
 	virtual void UpdateCollisionBounds();
 
 	// stick camera
 	void RotateUpVector( Vector& vForward, Vector& vUp );
 	void SnapCamera( StickCameraState nCameraState, bool bLookingInBadDirection );
-	//void PostTeleportationCameraFixup( const CProp_Portal *pEnteredPortal );
+	void PostTeleportationCameraFixup( const CPortal_Base2D *pEnteredPortal );
 	
 	StickCameraState GetStickCameraState() const;
 	void SetQuaternionPunch( const Quaternion& qPunch );
@@ -356,6 +412,8 @@ public: // PAINT SPECIFIC
 	void OnBounced( float fTimeOffset = 0.0f );
 	
 	virtual void ChooseActivePaintPowers( PaintPowerInfoVector& activePowers );
+	
+	void RecomputeBoundsForOrientation();
 
 private: // PAINT SPECIFIC
 	void DecayEyeOffset();
@@ -388,7 +446,6 @@ private: // PAINT SPECIFIC
 	void UpdateInAirState();
 	void CachePaintPowerChoiceResults( const PaintPowerChoiceResultArray& choiceInfo );
 	bool LateSuperJumpIsValid() const;
-	void RecomputeBoundsForOrientation();
 	void TryToChangeCollisionBounds( const Vector& newStandHullMin,
 		const Vector& newStandHullMax,
 		const Vector& newDuckHullMin,
@@ -422,11 +479,25 @@ private: // PAINT SPECIFIC
 	void DrawJumpHelperDebug( PaintPowerConstIter begin, PaintPowerConstIter end, float duration, bool noDepthTest, const PaintPowerInfo_t* pSelected ) const;
 
 	bool m_bWantsToSwapGuns;
+	
+	Vector m_vPrevGroundNormal;	// Our ground normal from the previous frame
 
 public:
 	CPortalPlayerShared	m_Shared;
+	
+	// Coop effects ( we need to add these ping pointers later )
+	//void CreatePingPointer( Vector vecDestintaion );
+	//void DestroyPingPointer( void );
+	CUtlReference< CNewParticleEffect >	m_FlingTrailEffect;		// the particle trail effect that shows behind bots in coop when they fling
+	CUtlReference< CNewParticleEffect >	m_PointLaser;		// the pointer that point for when the player does some pointing
+	bool m_bFlingTrailActive;
+	bool m_bFlingTrailJustPortalled;
+	bool m_bFlingTrailPrePortalled;
 
 	const C_PortalPlayerLocalData& GetPortalPlayerLocalData() const;
+	
+	float GetImplicitVerticalStepSpeed() const;
+	void SetImplicitVerticalStepSpeed( float speed );
 
 	bool	m_bPitchReorientation;
 	float	m_fReorientationRate;
@@ -454,6 +525,13 @@ protected:
 	CInterpolatedVar<QAngle> m_iv_vecCarriedObject_CurAngToTargetAng_Interpolator;
 	
 	void PollForUseEntity( CUserCmd *pCmd );
+	
+	float m_flImplicitVerticalStepSpeed;	// When moving with step code, the player has an implicit vertical
+											// velocity that keeps her on ramps, steps, etc. We need this to
+											// correctly transform her velocity when she teleports.
+	
+	float m_fLatestServerTeleport;
+	VMatrix m_matLatestServerTeleportationInverseMatrix;
 
 	EHANDLE m_hUseEntThroughPortal;
 	bool	m_bUseWasDown;
@@ -461,6 +539,7 @@ protected:
 	C_PortalPlayerLocalData		m_PortalLocal;
 
 	float m_flMotionBlurAmount;
+	float m_flObjectOutOfEyeTransitionDT;
 
 };
 

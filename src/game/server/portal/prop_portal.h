@@ -42,6 +42,11 @@ public:
 	CNetworkVar( bool, m_bIsPortal2 ); //For teleportation, this doesn't matter, but for drawing and moving, it matters
 	Vector	m_vPrevForward; //used for the indecisive push in find closest passable spaces when portal is moved
 
+	
+	void					BroadcastPortalEvent( PortalEvent_t nEventType );
+
+	CUtlVector<EHANDLE>		m_PortalEventListeners;			// Collection of entities (by handle) who wish to receive notification of portal events (fizzle, moved, etc)
+
 	bool	m_bSharedEnvironmentConfiguration; //this will be set by an instance of CPortal_Environment when two environments are in close proximity
 
 	EHANDLE	m_hMicrophone; //the microphone for teleporting sound
@@ -58,6 +63,10 @@ public:
 	EHANDLE		m_hPlacedBy;
 
 	COutputEvent m_OnPlacedSuccessfully;		// Output in hammer for when this portal was successfully placed (not attempted and fizzed).
+	COutputEvent m_OnEntityTeleportFromMe;
+	COutputEvent m_OnPlayerTeleportFromMe;
+	COutputEvent m_OnEntityTeleportToMe;
+	COutputEvent m_OnPlayerTeleportToMe;
 	
 	CPhysicsCloneArea		*m_pAttachedCloningArea;
 
@@ -85,6 +94,9 @@ public:
 	void					FizzleThink( void );
 
 	bool					IsActivedAndLinked( void ) const;
+	
+	bool					IsFloorPortal( float fThreshold = 0.8f ) const;
+	bool					IsCeilingPortal( float fThreshold = -0.8f ) const;
 
     void					WakeNearbyEntities( void ); //wakes all nearby entities in-case there's been a significant change in how they can rest near a portal
 
@@ -92,6 +104,9 @@ public:
 
 	void					PlacePortal( const Vector &vOrigin, const QAngle &qAngles, float fPlacementSuccess, bool bDelay = false );
 	void					NewLocation( const Vector &vOrigin, const QAngle &qAngles );
+	
+	virtual void			PreTeleportTouchingEntity( CBaseEntity *pOther );
+	virtual void			PostTeleportTouchingEntity( CBaseEntity *pOther );
 
 	void					ResetModel( void ); //sets the model and bounding box
 	void					DoFizzleEffect( int iEffect, bool bDelayedPos = true ); //display cool visual effect
@@ -129,12 +144,22 @@ public:
 	virtual void			PortalSimulator_TookOwnershipOfEntity( CBaseEntity *pEntity );
 	virtual void			PortalSimulator_ReleasedOwnershipOfEntity( CBaseEntity *pEntity );
 	
-	bool					IsFloorPortal(float fThreshold = 0.8f) const;
+	// Add or remove listeners
+	void					AddPortalEventListener( EHANDLE hListener );
+	void					RemovePortalEventListener( EHANDLE hListener );
+
+	void					OnEntityTeleportedToPortal( CBaseEntity *pEntity );
+	void					OnEntityTeleportedFromPortal( CBaseEntity *pEntity );
 	
 	float	GetHalfWidth( void ) { return PORTAL_HALF_WIDTH; }
 	float	GetHalfHeight( void ) { return PORTAL_HALF_HEIGHT; }
 
 	bool	IsActive( void )	{ return m_bActivated; }
+	
+	//FIXME:
+	//{
+		bool IsMobile( void ) { return false; }
+	//}
 	
 	CNetworkVector( m_ptOrigin );
 	Vector m_vForward, m_vUp, m_vRight;
@@ -157,6 +182,14 @@ public:
 	//find a portal with the designated attributes, or creates one with them, favors active portals over inactive
 	static CProp_Portal		*FindPortal( unsigned char iLinkageGroupID, bool bPortal2, bool bCreateIfNothingFound = false );
 	static const CUtlVector<CProp_Portal *> *GetPortalLinkageGroup( unsigned char iLinkageGroupID );
+	
+	//it shouldn't matter, but the convention should be that we query the exit portal for these values
+	virtual float			GetMinimumExitSpeed( bool bPlayer, bool bEntranceOnFloor, bool bExitOnFloor, const Vector &vEntityCenterAtExit, CBaseEntity *pEntity ); //return -FLT_MAX for no minimum
+	virtual float			GetMaximumExitSpeed( bool bPlayer, bool bEntranceOnFloor, bool bExitOnFloor, const Vector &vEntityCenterAtExit, CBaseEntity *pEntity ); //return FLT_MAX for no maximum
+
+	//does all the gruntwork of figuring out flooriness and calling the two above
+	static void				GetExitSpeedRange( CPortal_Base2D *pEntrancePortal, bool bPlayer, float &fExitMinimum, float &fExitMaximum, const Vector &vEntityCenterAtExit, CBaseEntity *pEntity );
+
 };
 
 
@@ -178,5 +211,6 @@ inline const VMatrix& CProp_Portal::MatrixThisToLinked() const
 	return m_matrixThisToLinked;
 }
 
+void EntityPortalled( CPortal_Base2D *pPortal, CBaseEntity *pOther, const Vector &vNewOrigin, const QAngle &qNewAngles, bool bForcedDuck );
 
 #endif //#ifndef PROP_PORTAL_H

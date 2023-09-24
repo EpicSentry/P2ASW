@@ -68,7 +68,7 @@ int CPortal_CollisionEvent::ShouldCollide( IPhysicsObject *pObj0, IPhysicsObject
 				CBaseEntity *pSource = pClone->GetClonedEntity();
 
 				CPortalSimulator *pSourceSimulator = CPortalSimulator::GetSimulatorThatOwnsEntity( pSource );
-				Assert( (pSimulators[i]->m_DataAccess.Simulation.Dynamic.EntFlags[pClone->entindex()] & PSEF_IS_IN_PORTAL_HOLE) == (pSourceSimulator->m_DataAccess.Simulation.Dynamic.EntFlags[pSource->entindex()] & PSEF_IS_IN_PORTAL_HOLE) );
+				Assert( (pSimulators[i]->GetInternalData().Simulation.Dynamic.EntFlags[pClone->entindex()] & PSEF_IS_IN_PORTAL_HOLE) == (pSourceSimulator->GetInternalData().Simulation.Dynamic.EntFlags[pSource->entindex()] & PSEF_IS_IN_PORTAL_HOLE) );
 			}
 		}
 #endif
@@ -89,7 +89,7 @@ int CPortal_CollisionEvent::ShouldCollide( IPhysicsObject *pObj0, IPhysicsObject
 								if(	pSimulators[i]->CreatedPhysicsObject( pPhysObjects[i], &objectSource ) && 
 									((objectSource == PSPOST_REMOTE_BRUSHES) || (objectSource == PSPOST_REMOTE_STATICPROPS)) )
 								{
-									if( (pSimulators[1-i]->m_DataAccess.Simulation.Dynamic.EntFlags[pEntities[1-i]->entindex()] & PSEF_IS_IN_PORTAL_HOLE) == 0 )
+									if( (pSimulators[1-i]->GetInternalData().Simulation.Dynamic.EntFlags[pEntities[1-i]->entindex()] & PSEF_IS_IN_PORTAL_HOLE) == 0 )
 										return 0; //require that the entity be in the portal hole before colliding with transformed geometry
 									//FIXME: The above requirement might fail horribly for transformed collision blocking the portal from the other side and fast moving objects
 								}	
@@ -100,8 +100,8 @@ int CPortal_CollisionEvent::ShouldCollide( IPhysicsObject *pObj0, IPhysicsObject
 				}
 				else if( bShadowClonesInvolved )
 				{
-					if( ((pSimulators[0]->m_DataAccess.Simulation.Dynamic.EntFlags[pEntities[0]->entindex()] | 
-						pSimulators[1]->m_DataAccess.Simulation.Dynamic.EntFlags[pEntities[1]->entindex()]) &
+					if( ((pSimulators[0]->GetInternalData().Simulation.Dynamic.EntFlags[pEntities[0]->entindex()] | 
+						pSimulators[1]->GetInternalData().Simulation.Dynamic.EntFlags[pEntities[1]->entindex()]) &
 						PSEF_IS_IN_PORTAL_HOLE) == 0 )
 					{
 						return 0; //neither entity was actually in the portal hole
@@ -150,7 +150,7 @@ int CPortal_CollisionEvent::ShouldCollide( IPhysicsObject *pObj0, IPhysicsObject
 					if( pSimulators[i] )
 					{
 						//entities in the physics environment only collide with statics created by the environment (handled above), entities in the same environment (also above), or entities that should be cloned from main to the same environment
-						if( (pSimulators[i]->m_DataAccess.Simulation.Dynamic.EntFlags[pEntities[1-i]->entindex()] & PSEF_CLONES_ENTITY_FROM_MAIN) == 0 ) //not cloned from main
+						if( (pSimulators[i]->GetInternalData().Simulation.Dynamic.EntFlags[pEntities[1-i]->entindex()] & PSEF_CLONES_ENTITY_FROM_MAIN) == 0 ) //not cloned from main
 							return 0;
 					}
 				}

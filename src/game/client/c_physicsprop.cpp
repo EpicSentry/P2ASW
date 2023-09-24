@@ -16,6 +16,10 @@
 #include "tier0/vprof.h"
 #include "ivrenderview.h"
 
+#if defined ( PORTAL2 )
+#include "portal2/portal_grabcontroller_shared.h"
+#endif
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 

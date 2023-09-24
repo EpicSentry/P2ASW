@@ -1794,12 +1794,12 @@ void C_BaseEntity::SetShadowUseOtherEntity( C_BaseEntity *pEntity )
 	m_ShadowDirUseOtherEntity = pEntity;
 }
 
-CInterpolatedVar< QAngle >& C_BaseEntity::GetRotationInterpolator()
+CDiscontinuousInterpolatedVar< QAngle >& C_BaseEntity::GetRotationInterpolator()
 {
 	return m_iv_angRotation;
 }
 
-CInterpolatedVar< Vector >& C_BaseEntity::GetOriginInterpolator()
+CDiscontinuousInterpolatedVar< Vector >& C_BaseEntity::GetOriginInterpolator()
 {
 	return m_iv_vecOrigin;
 }

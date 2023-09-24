@@ -33,6 +33,9 @@
 
 #if !defined( _X360 )
 // NOTE: Disable this for l4d2 in general!!!  It allocates 4mb of rendertargets and causes Release/Reallocation of rendertargets.
+// PORTAL2: Turning this off in the portal 2 branch because we don't use it and it appears to leak each mapload.
+// We don't currently expect to merge this code back to main so this may not matter, but if we do we'll have to resolve weeding this
+// out of portal2 builds.
 //#define FEATURE_SUBD_SUPPORT
 #endif
 

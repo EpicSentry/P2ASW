@@ -13,6 +13,8 @@
 #define PORTAL2_MP_SAVE_FILE "coop_data.txt"
 #define PORTAL2_MP_TEAM_TAUNT_FORCE_LENGTH 64
 
+#define PORTAL_PLAYER_PREDICTION
+
 #include "portal_util_shared.h"
 
 #ifdef DYNAMIC_BOUNDS
@@ -81,6 +83,17 @@ enum PortalChallengeType
 	PORTAL_CHALLENGE_TIME,
 
 	PORTAL_CHALLENGE_TOTAL
+};
+
+enum PortalEvent_t
+{
+	PORTALEVENT_LINKED,					// This portal has linked to another portal and opened
+	PORTALEVENT_FIZZLE,					// Portal has fizzled 
+	PORTALEVENT_MOVED,					// Portal has moved its position
+	PORTALEVENT_ENTITY_TELEPORTED_TO,	// Entity (player or not) has teleported to this portal
+	PORTALEVENT_ENTITY_TELEPORTED_FROM,	// Entity (player or not) has teleported away from this portal
+	PORTALEVENT_PLAYER_TELEPORTED_TO,	// Player has teleported to this portal
+	PORTALEVENT_PLAYER_TELEPORTED_FROM,	// Player has teleported away from this portal
 };
 
 enum TeamTauntState_t

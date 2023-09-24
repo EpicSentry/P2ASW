@@ -70,6 +70,16 @@ protected:
 private:
 	
 	CBasePortalCombatWeapon( const CBasePortalCombatWeapon & );
+	
+// throwing guns
+public:
+	float			GetThrowTime();
+	bool			EnoughTimeSinceThrown();
+	virtual void	Drop( const Vector &vecVelocity );
+	CBaseEntity*	GetLastOwner();
+private:
+	float			m_flThrowTime;
+	CBaseEntity*	m_pLastOwner;
 };
 
 #endif // WEAPON_BASEPORTALCOMBATWEAPON_SHARED_H

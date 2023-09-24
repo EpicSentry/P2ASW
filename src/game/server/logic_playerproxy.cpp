@@ -26,6 +26,10 @@ DEFINE_OUTPUT( m_RequestedPlayerHealth,		"PlayerHealth" ),
 DEFINE_OUTPUT( m_PlayerDied,				"PlayerDied" ),
 DEFINE_FIELD( m_hPlayer, FIELD_EHANDLE ),
 
+DEFINE_OUTPUT( m_OnJump,					"OnJump" ),
+DEFINE_OUTPUT( m_OnDuck,					"OnDuck" ),
+DEFINE_OUTPUT( m_OnUnDuck,					"OnUnDuck" ),
+
 
 #ifdef PORTAL2
 DEFINE_INPUTFUNC( FIELD_VOID,				"AddPotatosToPortalgun", InputAddPotatosToPortalgun ),

@@ -234,6 +234,8 @@ END_RECV_TABLE()
 		RecvPropFloat	(RECVINFO(m_flFOVTime)),
 		RecvPropInt		(RECVINFO(m_iDefaultFOV)),
 		RecvPropEHandle (RECVINFO(m_hZoomOwner)),
+		
+		RecvPropInt( RECVINFO(m_afPhysicsFlags) ),
 
 		RecvPropEHandle( RECVINFO(m_hVehicle) ),
 		RecvPropEHandle( RECVINFO(m_hUseEntity) ),
@@ -1833,9 +1835,13 @@ bool C_BasePlayer::ShouldDrawLocalPlayer()
 {
 	int nSlot = GetSplitScreenPlayerSlot();
 
-
-
 	ACTIVE_SPLITSCREEN_PLAYER_GUARD( nSlot );
+	
+#ifdef PORTAL2
+	if( !IsLocalSplitScreenPlayer( (nSlot == -1) ? GET_ACTIVE_SPLITSCREEN_SLOT() : nSlot ) ) //HACKHACK: shortcut, avoid going into input and getting a bunch of asserts if the splitscreen view is not a local player
+		return false;
+#endif
+
 	return input->CAM_IsThirdPerson() || ( ToolsEnabled() && ToolFramework_IsThirdPersonCamera() );
 }
 
@@ -2865,6 +2871,7 @@ bool C_BasePlayer::IsSplitScreenPlayer() const
 
 bool C_BasePlayer::ShouldRegenerateOriginFromCellBits() const
 {
+#if 0
 	// Don't use cell bits for local players.
 	// Assumes full update for local players!
 	int nSlot = GET_ACTIVE_SPLITSCREEN_SLOT();
@@ -2873,6 +2880,42 @@ bool C_BasePlayer::ShouldRegenerateOriginFromCellBits() const
 		return false;
 
 	return BaseClass::ShouldRegenerateOriginFromCellBits();
+#else
+	// Don't use cell bits for local players
+	if ( 
+#ifdef PORTAL2
+		// HACK: In Portal 2, when we start recording a demo, the player is removed and recreated.
+		//		 There's a brief window where there is no local player and the non-local data table
+		//		 is sent across for the newly created player, containing the cell origin. This is
+		//		 incorrectly interpreted and copied to the network origin. The new network origin
+		//		 is copied to the local origin, which, among other things, screws up the player's eye
+		//		 position until she moves enough for a network update to fix her position. During this
+		//		 brief time, if we correctly regenerate the origin from the cell bits we received, it
+		//		 prevents this problem. At this point, changing the portal player's network tables
+		//		 could have a significant impact on perf and require a PS3 fix to maintain crossplay
+		//		 compatibility, so this is less risky.
+		//		 - Ted Rivera (2/25/2011)
+		( C_BasePlayer::HasAnyLocalPlayer() ||
+			( !engine->IsPlayingDemo() &&		
+			  !engine->IsRecordingDemo() &&		
+			  !engine->IsPlayingTimeDemo() ) ) &&	
+#endif
+		 (IsLocalPlayer( this ) ||
+		  (!g_pGameRules->IsMultiplayer()) ) ) //SP load fails the IsLocalPlayer() test while creating the player. Resulting in a bad origin until you move
+	{
+		return false;
+	}
+
+	/*if ( g_pGameRules->IsMultiplayer() &&
+		(GetCreationTick() == gpGlobals->tickcount) &&
+		!C_BasePlayer::HasAnyLocalPlayer() &&
+		(engine->GetLocalPlayer() == index) )
+	{
+		return false;
+	}*/
+
+	return BaseClass::ShouldRegenerateOriginFromCellBits();
+#endif
 }
 
 

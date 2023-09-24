@@ -50,7 +50,12 @@
 #include "iclientmode.h"
 #include "vgui_int.h"
 
+#define DISABLERADIALMENU
 
+#if defined ( PORTAL2 ) && !defined( DISABLERADIALMENU )
+#include "radialmenu.h"
+//#include "vgui/portal_stats_panel.h"
+#endif // PORTAL2
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -221,7 +226,9 @@ void CBaseViewport::OnScreenSizeChanged(int iOldWide, int iOldTall)
 
 void CBaseViewport::CreateDefaultPanels( void )
 {
-
+#if defined ( PORTAL2 ) && !defined( DISABLERADIALMENU )
+	AddNewPanel( CreatePanelByName( PANEL_RADIAL_MENU ), "PANEL_RADIAL_MENU" );
+#endif // PORTAL2
 
 	AddNewPanel( CreatePanelByName( PANEL_SCOREBOARD ), "PANEL_SCOREBOARD" );
 	AddNewPanel( CreatePanelByName( PANEL_INFO ), "PANEL_INFO" );
@@ -280,6 +287,12 @@ IViewPortPanel* CBaseViewport::CreatePanelByName(const char *szPanelName)
 	{
 		newpanel = new CNavProgress( this );
 	}
+#if defined ( PORTAL2 ) && !defined( DISABLERADIALMENU )
+	else if ( Q_strcmp( PANEL_RADIAL_MENU, szPanelName ) == 0 )
+	{
+		newpanel = new CRadialMenuPanel( this );
+	}
+#endif // PORTAL2
 
 
 #endif // !XBOX

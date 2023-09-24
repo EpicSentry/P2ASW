@@ -37,7 +37,11 @@
 #include "sceneentity.h"	// has the VCD precache function
 #include "sendprop_priorities.h"
 #include "prop_weightedcube.h"
+<<<<<<< Updated upstream
 #include "portal2_research_data_tracker.h"
+=======
+#include "dt_utlvector_send.h"
+>>>>>>> Stashed changes
 
 // Max mass the player can lift with +use
 #define PORTAL_PLAYER_MAX_LIFT_MASS 85
@@ -57,6 +61,11 @@ ConVar mp_server_player_team( "mp_server_player_team", "0", FCVAR_DEVELOPMENTONL
 ConVar mp_wait_for_other_player_timeout( "mp_wait_for_other_player_timeout", "100", FCVAR_CHEAT, "Maximum time that we wait in the transition loading screen for the other player." );
 ConVar mp_wait_for_other_player_notconnecting_timeout( "mp_wait_for_other_player_notconnecting_timeout", "10", FCVAR_CHEAT, "Maximum time that we wait in the transition loading screen after we fully loaded for partner to start loading." );
 ConVar mp_dev_wait_for_other_player( "mp_dev_wait_for_other_player", "1", FCVAR_DEVELOPMENTONLY, "Force waiting for the other player." );
+
+extern ConVar sv_speed_normal;
+extern ConVar sv_post_teleportation_box_time;
+extern ConVar sv_press_jump_to_bounce;
+extern ConVar sv_use_trace_duration;
 
 ConVar sv_portal_coop_ping_cooldown_time( "sv_portal_coop_ping_cooldown_time", "0.25", FCVAR_CHEAT, "Time (in seconds) between coop pings", true, 0.1f, false, 60.0f );
 ConVar sv_portal_coop_ping_indicator_show_to_all_players( "sv_portal_coop_ping_indicator_show_to_all_players", "0" );
@@ -120,6 +129,22 @@ BEGIN_DATADESC( CPortalRagdoll )
 
 END_DATADESC()
 
+CEntityPortalledNetworkMessage::CEntityPortalledNetworkMessage( void )
+{
+	m_hEntity = NULL;
+	m_hPortal = NULL;
+	m_fTime = 0.0f;
+	m_bForcedDuck = false;
+	m_iMessageCount = 0;;
+}
+
+BEGIN_SEND_TABLE_NOBASE( CEntityPortalledNetworkMessage, DT_EntityPortalledNetworkMessage )
+		SendPropEHandle( SENDINFO_NOCHECK(m_hEntity) ),
+		SendPropEHandle( SENDINFO_NOCHECK(m_hPortal) ),
+		SendPropFloat( SENDINFO_NOCHECK(m_fTime), -1, SPROP_NOSCALE, 0.0f, HIGH_DEFAULT ),
+		SendPropBool( SENDINFO_NOCHECK(m_bForcedDuck) ),
+		SendPropInt( SENDINFO_NOCHECK(m_iMessageCount) ),
+END_SEND_TABLE()
 
 
 extern void SendProxy_Origin( const SendProp *pProp, const void *pStruct, const void *pData, DVariant *pOut, int iElement, int objectID );
@@ -132,14 +157,14 @@ BEGIN_SEND_TABLE_NOBASE( CPortal_Player, DT_PortalLocalPlayerExclusive )
 	SendPropVector	(SENDINFO(m_vecViewOffset), -1, SPROP_NOSCALE, 0.0f, HIGH_DEFAULT ),
 
 	// FIXME: - Wonderland_War
-	/*
+	
 	SendPropQAngles( SENDINFO( m_vecCarriedObjectAngles ) ),
 	SendPropVector( SENDINFO( m_vecCarriedObject_CurPosToTargetPos )  ),
 	SendPropQAngles( SENDINFO( m_vecCarriedObject_CurAngToTargetAng ) ),
 	//a message buffer for entity teleportations that's guaranteed to be in sync with the post-teleport updates for said entities
 	SendPropUtlVector( SENDINFO_UTLVECTOR( m_EntityPortalledNetworkMessages ), CPortal_Player::MAX_ENTITY_PORTALLED_NETWORK_MESSAGES, SendPropDataTable( NULL, 0, &REFERENCE_SEND_TABLE( DT_EntityPortalledNetworkMessage ) ) ),
 	SendPropInt( SENDINFO( m_iEntityPortalledNetworkMessageCount ) ),
-	*/
+	
 END_SEND_TABLE()
 
 // all players except the local player
@@ -327,6 +352,16 @@ CPortal_Player::CPortal_Player()
 	m_bPitchReorientation = false;
 
 	m_bSilentDropAndPickup = false;
+	
+	m_flImplicitVerticalStepSpeed = 0.0f;
+
+	m_flTimeSinceLastTouchedPower[0] = FLT_MAX;
+	m_flTimeSinceLastTouchedPower[1] = FLT_MAX;
+	m_flTimeSinceLastTouchedPower[2] = FLT_MAX;
+	
+	m_flHullHeight = GetHullHeight();
+	
+	m_EntityPortalledNetworkMessages.SetCount( MAX_ENTITY_PORTALLED_NETWORK_MESSAGES );
 
 	m_ForcedGrabController = FORCE_GRAB_CONTROLLER_DEFAULT;
 	m_hGrabbedEntity = NULL;
@@ -509,10 +544,17 @@ void CPortal_Player::Spawn(void)
 	m_Local.m_bDucked = false;
 
 	SetPlayerUnderwater(false);
+	
+	m_vPrevGroundNormal = Vector(0,0,1);
+	m_PortalLocal.m_PaintedPowerTimer.Invalidate();
 
 #ifdef PORTAL_MP
 	PickTeam();
 #endif
+	RecomputeBoundsForOrientation();
+
+	// init prev position
+	m_vPrevPosition = GetAbsOrigin();
 }
 
 void CPortal_Player::Activate( void )
@@ -667,6 +709,16 @@ void CPortal_Player::PreThink( void )
 	}
 
 	SetLocalAngles( vTempAngles );
+	
+	// Decay the air control
+	if ( IsSuppressingAirControl() )
+	{
+		m_PortalLocal.m_flAirControlSupressionTime -= 1000.0f * gpGlobals->frametime;
+		if ( m_PortalLocal.m_flAirControlSupressionTime < 0.0f )
+		{
+			m_PortalLocal.m_flAirControlSupressionTime = 0.0f;
+		}
+	}
 
 	BaseClass::PreThink();
 
@@ -800,6 +852,8 @@ void CPortal_Player::PostThink( void )
 	
 	// Try to update our crosshair
 	m_bIsHoldingSomething = IsHoldingEntity( NULL );
+	
+	IncrementDistanceTaken();
 
 }
 
@@ -1232,6 +1286,19 @@ void CPortal_Player::Teleport( const Vector *newPosition, const QAngle *newAngle
 	m_angEyeAngles = pl.v_angle;
 
 	m_PlayerAnimState->Teleport( newPosition, newAngles, this );
+	
+	m_flUsePostTeleportationBoxTime = sv_post_teleportation_box_time.GetFloat();
+
+	const PaintPowerInfo_t& speedPower = GetPaintPower( SPEED_POWER );
+	if( !IsInactivePower( speedPower ) )
+	{
+		m_PortalLocal.m_flAirInputScale = 0.0f;
+	}
+
+	if ( newPosition )
+	{
+		m_vPrevPosition = *newPosition;
+	}
 }
 
 void CPortal_Player::VPhysicsShadowUpdate( IPhysicsObject *pPhysics )
@@ -2516,6 +2583,13 @@ void CPortal_Player::IncrementStepsTaken( void )
 		SetBonusProgress( static_cast<int>( m_StatsThisLevel.iNumStepsTaken ) );
 }
 
+void CPortal_Player::IncrementDistanceTaken( void )
+{
+	m_StatsThisLevel.fDistanceTaken += VectorLength( GetAbsOrigin() - m_vPrevPosition );
+	m_vPrevPosition = GetAbsOrigin();
+}
+
+
 void CPortal_Player::UpdateSecondsTaken( void )
 {
 	float fSecondsSinceLastUpdate = ( gpGlobals->curtime - m_fTimeLastNumSecondsUpdate );
@@ -2862,6 +2936,130 @@ void CPortal_Player::ClientDisconnected( edict_t *pPlayer )
 	s_CoopTeamAssignments[ENTINDEX( pPlayer ) - 1] = 0;
 }
 
+void CPortal_Player::ApplyPortalTeleportation( const CPortal_Base2D *pEnteredPortal, CMoveData *pMove )
+{
+#if PLAYERPORTALDEBUGSPEW == 1
+	Warning( "SERVER CPortal_Player::ApplyPortalTeleportation( %f %i )\n", gpGlobals->curtime, m_pCurrentCommand->command_number );
+#endif
+
+	//catalog the pending transform
+	{
+		RecentPortalTransform_t temp;
+		temp.command_number = GetCurrentUserCommand()->command_number;
+		temp.Portal = pEnteredPortal;
+		temp.matTransform = pEnteredPortal->m_matrixThisToLinked.As3x4();
+
+		m_PendingPortalTransforms.AddToTail( temp );
+
+		//prune the pending transforms so it doesn't get ridiculously huge if the client stops responding while in an infinite fall or something
+		while( m_PendingPortalTransforms.Count() > 64 )
+		{
+			m_PendingPortalTransforms.Remove( 0 );
+		}
+	}
+
+	CBaseEntity *pHeldEntity = GetPlayerHeldEntity( this );
+	if ( pHeldEntity && !IsUsingVMGrab() )
+	{
+		ToggleHeldObjectOnOppositeSideOfPortal();
+		SetHeldObjectPortal( IsHeldObjectOnOppositeSideOfPortal() ? pEnteredPortal->m_hLinkedPortal.Get() : NULL );
+	}
+
+	//transform m_PlayerAnimState yaws
+	m_PlayerAnimState->TransformYAWs( pEnteredPortal->m_matrixThisToLinked.As3x4() );
+
+	for ( int i = 0; i < MAX_VIEWMODELS; i++ )
+	{
+		CBaseViewModel *pViewModel = GetViewModel( i );
+		if ( !pViewModel )
+			continue;
+
+		pViewModel->m_vecLastFacing = pEnteredPortal->m_matrixThisToLinked.ApplyRotation( pViewModel->m_vecLastFacing );
+	}
+
+	//physics transform
+	{
+		SetVCollisionState( pMove->GetAbsOrigin(), pMove->m_vecVelocity, IsDucked() ? VPHYS_CROUCH : VPHYS_WALK );
+	}
+
+	//transform local velocity
+	{
+		//Vector vTransformedLocalVelocity;
+		//VectorRotate( GetAbsVelocity(), pEnteredPortal->m_matrixThisToLinked.As3x4(), vTransformedLocalVelocity );
+		//SetAbsVelocity( vTransformedLocalVelocity );
+		SetAbsVelocity( pMove->m_vecVelocity );
+	}
+
+	//transform base velocity
+	{
+		Vector vTransformedBaseVelocity;
+		VectorRotate( GetBaseVelocity(), pEnteredPortal->m_matrixThisToLinked.As3x4(), vTransformedBaseVelocity );
+		SetBaseVelocity( vTransformedBaseVelocity );
+	}
+
+	//transform previous position
+	{
+		UTIL_Portal_PointTransform( pEnteredPortal->m_matrixThisToLinked, m_vPrevPosition, m_vPrevPosition );
+	}
+
+	CollisionRulesChanged();
+
+
+	// straighten out velocity if going nearly straight up/down out of a floor/ceiling portal
+	{
+		const CPortal_Base2D *pOtherPortal = pEnteredPortal->m_hLinkedPortal.Get();
+		if( sv_player_funnel_into_portals.GetBool() && pOtherPortal )
+		{
+			// Make sure this portal is nearly facing straight up/down
+			const Vector vNormal = pOtherPortal->m_PortalSimulator.GetInternalData().Placement.vForward;
+			if( (1.f - fabs(vNormal.z)) < 0.001f )
+			{
+				const Vector vUp(0.f,0.f,1.f);
+				const Vector vVel = pMove->m_vecVelocity;
+				const float flVelDotUp = DotProduct( vVel.Normalized(), vUp );
+				// We're going mostly straight up/down
+				if( fabs( flVelDotUp ) > sv_player_funnel_gimme_dot.GetFloat() )
+				{
+					// Make us go exactly sraight up/down
+					pMove->m_vecVelocity = ( DotProduct(vUp, vVel) * vUp );
+				}
+			}
+		}
+	}
+
+	PostTeleportationCameraFixup( pEnteredPortal );
+
+	// Use a slightly expanded box to search for stick surfaces as the player leaves the portal.
+	m_flUsePostTeleportationBoxTime = sv_post_teleportation_box_time.GetFloat();
+
+	// FIXME: - Wonderland_War
+#if 0
+	m_nPortalsEnteredInAirFlags |= pEnteredPortal->m_nPortalColor;
+
+	int nAllPortals = ( PORTAL_COLOR_FLAG_BLUE | PORTAL_COLOR_FLAG_PURPLE | PORTAL_COLOR_FLAG_ORANGE | PORTAL_COLOR_FLAG_RED );
+	if ( ( m_nPortalsEnteredInAirFlags & nAllPortals ) == nAllPortals )
+	{
+		UTIL_RecordAchievementEvent( "ACH.FOUR_PORTALS", this );
+	}
+
+#if !defined( _GAMECONSOLE ) && !defined( NO_STEAM )
+	g_PortalGameStats.Event_PortalTeleport( this );
+#endif
+
+	// Increment portal uses in MP stats
+	if( GetPortalMPStats() )
+	{
+		GetPortalMPStats()->IncrementPlayerPortalsTraveled( this );
+	}
+
+	const CUtlVector<ITriggerCatapultAutoList*>& catapults = CTriggerCatapult::AutoList();
+	for( int i = 0; i < catapults.Count(); ++i )
+	{
+		assert_cast<CTriggerCatapult*>( catapults[i] )->EndTouch( this );
+	}
+#endif
+}
+
 CON_COMMAND( displayportalplayerstats, "Displays current level stats for portals placed, steps taken, and seconds taken." )
 {
 	CPortal_Player *pPlayer = (CPortal_Player *)UTIL_GetCommandClient();
@@ -2895,7 +3093,7 @@ CON_COMMAND( startneurotoxins, "Starts the nerve gas timer." )
 
 void CPortal_Player::InitVCollision( const Vector &vecAbsOrigin, const Vector &vecAbsVelocity )
 {
-	/*
+#if 0
 	// Cleanup any old vphysics stuff.
 	VPhysicsDestroyObject();
 
@@ -2907,11 +3105,22 @@ void CPortal_Player::InitVCollision( const Vector &vecAbsOrigin, const Vector &v
 	CPhysCollide *pCrouchModel = PhysCreateBbox( GetDuckHullMins(), GetDuckHullMaxs() );
 
 	SetupVPhysicsShadow( vecAbsOrigin, vecAbsVelocity, pModel, "player_stand", pCrouchModel, "player_crouch" );
-	*/
-
+#else
 	BaseClass::InitVCollision( vecAbsOrigin, vecAbsVelocity );
+#endif
+
 }
 
+void CPortal_Player::OnPlayerLanded()
+{
+#if 0
+	// make sure the player don't land on the floor at the bottom of the goo
+	if ( GetWaterLevel() == WL_NotInWater )
+	{
+		m_bWasDroppedByOtherPlayerWhileTaunting = false;
+	}
+#endif
+}
 
 void CPortal_Player::GivePlayerPaintGun( bool bActivatePaintPowers, bool bSwitchTo )
 {
@@ -3015,4 +3224,19 @@ CON_COMMAND(give_paintgun, "Equips the player with a single portal portalgun.")
 	CPortal_Player *pPlayer = static_cast<CPortal_Player*>( UTIL_GetCommandClient() );
 
 	pPlayer->GivePlayerPaintGun( true, true );
+}
+
+void CPortal_Player::NetworkPortalTeleportation( CBaseEntity *pOther, CPortal_Base2D *pPortal, float fTime, bool bForcedDuck )
+{
+	CEntityPortalledNetworkMessage &writeTo = m_EntityPortalledNetworkMessages[m_iEntityPortalledNetworkMessageCount % MAX_ENTITY_PORTALLED_NETWORK_MESSAGES];
+
+	writeTo.m_hEntity = pOther;
+	writeTo.m_hPortal = pPortal;
+	writeTo.m_fTime = fTime;
+	writeTo.m_bForcedDuck = bForcedDuck;
+	writeTo.m_iMessageCount = m_iEntityPortalledNetworkMessageCount;
+	++m_iEntityPortalledNetworkMessageCount;
+
+	//NetworkProp()->NetworkStateChanged( offsetof( CPortal_Player, m_EntityPortalledNetworkMessages ) );
+	NetworkProp()->NetworkStateChanged();
 }

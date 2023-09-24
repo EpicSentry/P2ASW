@@ -79,6 +79,12 @@ public:
 
 	bool					IsActivedAndLinked( void ) const;
 	
+	bool					IsFloorPortal( float fThreshold = 0.8f ) const;
+	bool					IsCeilingPortal( float fThreshold = -0.8f ) const;
+
+	virtual void			PreTeleportTouchingEntity( CBaseEntity *pOther ) {};
+	virtual void			PostTeleportTouchingEntity( CBaseEntity *pOther ) {};
+
 	virtual void			PortalSimulator_TookOwnershipOfEntity( CBaseEntity *pEntity );
 	virtual void			PortalSimulator_ReleasedOwnershipOfEntity( CBaseEntity *pEntity );
 
@@ -95,6 +101,19 @@ public:
 	float	GetHalfHeight( void ) { return PORTAL_HALF_HEIGHT; }
 	
 	bool	IsActive( void )	{ return m_bActivated; }
+	
+	//FIXME:
+	//{
+		bool IsMobile( void ) { return false; }
+	//}
+		
+	//it shouldn't matter, but the convention should be that we query the exit portal for these values
+	virtual float			GetMinimumExitSpeed( bool bPlayer, bool bEntranceOnFloor, bool bExitOnFloor, const Vector &vEntityCenterAtExit, CBaseEntity *pEntity ); //return -FLT_MAX for no minimum
+	virtual float			GetMaximumExitSpeed( bool bPlayer, bool bEntranceOnFloor, bool bExitOnFloor, const Vector &vEntityCenterAtExit, CBaseEntity *pEntity ); //return FLT_MAX for no maximum
+
+	//does all the gruntwork of figuring out flooriness and calling the two above
+	static void				GetExitSpeedRange( CProp_Portal *pEntrancePortal, bool bPlayer, float &fExitMinimum, float &fExitMaximum, const Vector &vEntityCenterAtExit, CBaseEntity *pEntity );
+
 
 private:
 

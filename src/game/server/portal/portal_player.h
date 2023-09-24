@@ -35,6 +35,7 @@ struct PortalPlayerStatistics_t
 	int iNumPortalsPlaced;
 	int iNumStepsTaken;
 	float fNumSecondsTaken;
+	float fDistanceTaken;
 };
 
 enum ForcedGrabControllerType
@@ -42,6 +43,20 @@ enum ForcedGrabControllerType
 	FORCE_GRAB_CONTROLLER_DEFAULT = 0,
 	FORCE_GRAB_CONTROLLER_VM,
 	FORCE_GRAB_CONTROLLER_PHYSICS
+};
+
+class CEntityPortalledNetworkMessage
+{
+public:
+	DECLARE_CLASS_NOBASE( CEntityPortalledNetworkMessage );
+
+	CEntityPortalledNetworkMessage( void );
+
+	CHandle<CBaseEntity> m_hEntity;
+	CHandle<CPortal_Base2D> m_hPortal;
+	float m_fTime;
+	bool m_bForcedDuck;
+	uint32 m_iMessageCount;
 };
 
 //=============================================================================
@@ -205,6 +220,7 @@ public:
 
 	void IncrementPortalsPlaced( void );
 	void IncrementStepsTaken( void );
+	void IncrementDistanceTaken( void );
 	void UpdateSecondsTaken( void );
 	void ResetThisLevelStats( void );
 	int NumPortalsPlaced( void ) const { return m_StatsThisLevel.iNumPortalsPlaced; }
@@ -217,6 +233,8 @@ public:
 	int GetNumCamerasDetatched( void ) const { return m_iNumCamerasDetatched; }
 	
 	void SetIsHoldingObject( bool bSet ) { m_bIsHoldingSomething = bSet; }
+	
+	virtual void ApplyPortalTeleportation( const CPortal_Base2D *pEnteredPortal, CMoveData *pMove ); 
 
 	Vector m_vecTotalBulletForce;	//Accumulator for bullet force in a single frame
 
@@ -225,6 +243,12 @@ public:
 	// Tracks our ragdoll entity.
 	CNetworkHandle( CBaseEntity, m_hRagdoll );	// networked entity handle
 	
+	void SetAirControlSupressionTime( float flDuration ) { m_PortalLocal.m_flAirControlSupressionTime = flDuration; }
+	bool IsSuppressingAirControl( void ) { return m_PortalLocal.m_flAirControlSupressionTime != 0.0f; }
+
+	float GetImplicitVerticalStepSpeed() const;
+	void SetImplicitVerticalStepSpeed( float speed );
+
 	void	SetMotionBlurAmount( float flAmt ) { m_flMotionBlurAmount = flAmt; }
 	
 	const CPortalPlayerLocalData& GetPortalPlayerLocalData() const;
@@ -290,12 +314,17 @@ private:
 
 	PortalPlayerStatistics_t m_StatsThisLevel;
 	float m_fTimeLastNumSecondsUpdate;
+	Vector m_vPrevPosition;
 
 	int		m_iNumCamerasDetatched;
 	
 	float						m_flUseKeyCooldownTime;			// Disable use key until curtime >= this number
 	
 	CNetworkVar( bool, m_bIsHoldingSomething );
+	
+	float m_flImplicitVerticalStepSpeed;	// When moving with step code, the player has an implicit vertical
+											// velocity that keeps her on ramps, steps, etc. We need this to
+											// correctly transform her velocity when she teleports.
 
 	QAngle						m_qPrePortalledViewAngles;
 	bool						m_bFixEyeAnglesFromPortalling;
@@ -347,13 +376,15 @@ public: // PAINT SPECIFIC
 	virtual void UpdateCollisionBounds();
 	virtual void InitVCollision( const Vector &vecAbsOrigin, const Vector &vecAbsVelocity );
 	
+	void SetAirDuck( bool bDuckedInAir );
+	
 	const Vector& GetInputVector() const;
 	void SetInputVector( const Vector& vInput );
 
 	// stick camera
 	void RotateUpVector( Vector& vForward, Vector& vUp );
 	void SnapCamera( StickCameraState nCameraState, bool bLookingInBadDirection );
-	//void PostTeleportationCameraFixup( const CProp_Portal *pEnteredPortal );
+	void PostTeleportationCameraFixup( const CPortal_Base2D *pEnteredPortal );
 
 	StickCameraState GetStickCameraState() const;
 	void SetQuaternionPunch( const Quaternion& qPunch );
@@ -367,6 +398,10 @@ public: // PAINT SPECIFIC
 	
 	void SetHullHeight( float flHeight );
 	
+	void NetworkPortalTeleportation( CBaseEntity *pOther, CPortal_Base2D *pPortal, float fTime, bool bForcedDuck );
+	
+	const Vector& GetPrevGroundNormal() const;
+	void SetPrevGroundNormal( const Vector& vPrevNormal );
 	void OnBounced( float fTimeOffset = 0.0f );
 	
 	virtual void ChooseActivePaintPowers( PaintPowerInfoVector& activePowers );
@@ -375,6 +410,9 @@ public: // PAINT SPECIFIC
 
 	bool m_bPotatos;
 	
+	void ResetBounceCount() { m_nBounceCount = 0; }
+	void ResetAirTauntCount() { m_nAirTauntCount = 0; }
+
 	// Anim state code
 	CNetworkVarEmbedded( CPortalPlayerShared, m_Shared );
 	
@@ -454,9 +492,11 @@ private: // PAINT SPECIFIC
 	float m_flLastSuppressedBounceTime;
 	float m_flTimeSinceLastTouchedPower[3];
 	int m_nPortalsEnteredInAirFlags;
+	
+	Vector m_vPrevGroundNormal; // Our ground normal from the previous frame
 		
 	CNetworkVar( float, m_flHullHeight );
-	
+
 	struct RecentPortalTransform_t
 	{
 		int command_number;
@@ -478,6 +518,17 @@ private: // PAINT SPECIFIC
 
 
 public:
+	
+	
+	//encoding these messages directly in the player to ensure it's received in sync with the corresponding entity post-teleport update
+	//each player has their own copy of the buffer that is only sent to them
+	CUtlVector<CEntityPortalledNetworkMessage> m_EntityPortalledNetworkMessages;
+	enum
+	{
+		MAX_ENTITY_PORTALLED_NETWORK_MESSAGES = 32,
+	};
+
+	CNetworkVar( uint32, m_iEntityPortalledNetworkMessageCount ); //always ticks up by one per add
 
 	CNetworkVar( bool, m_bPitchReorientation );
 	CNetworkHandle( CProp_Portal, m_hPortalEnvironment ); //if the player is in a portal environment, this is the associated portal
@@ -487,6 +538,8 @@ public:
 	friend class CPortalGameMovement;
 
 	void PreventCrouchJump( CUserCmd* ucmd );
+	
+	void OnPlayerLanded();
 
 public:
 	virtual CBaseEntity* EntSelectSpawnPoint( void );

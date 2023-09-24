@@ -82,7 +82,16 @@ $Project "Client (Portal 2)"
 			$File "portal2/c_prop_weightedcube.h"
 			$File "portal2/c_fizzler_effects.cpp"
 			$File "portal2/c_fizzler_effects.h"
-				
+			// Radial Menu preparations for when we get to work on coop.
+			/*
+			$File "portal2/radialmenu.cpp"
+			$File "portal2/radialmenu.h"
+			$File "portal2/polygonbutton.cpp"
+			$File "portal2/polygonbutton.h"
+			$File "portal2/radialbutton.cpp"
+			$File "portal2/radialbutton.h"
+			*/
+			
 			$File	"portal2\c_portal2_lesson.cpp"
 			$File	"portal2\c_sdk_jukebox.cpp"
 			$File	"portal2\vgui_rootpanel_portal2.cpp"
@@ -101,6 +110,8 @@ $Project "Client (Portal 2)"
 				$File	"portal2\vgui\sdk_loading_panel.cpp"
 				$File	"portal2\vgui\sdk_logo_panel.cpp"
 				$File	"portal2\vgui\sdk_vgui_music_importer.cpp"
+				$file	"portal2\vgui\portal2_vgui_ingame_panel.cpp"
+				$file	"portal2\vgui\portal2_vgui_ingame_panel.h"
 			}
 
 			$Folder	"GameUI"
@@ -256,6 +267,7 @@ $Project "Client (Portal 2)"
 			$File	"portal\Portal_DynamicMeshRenderingUtils.cpp"
 			$File	"portal\Portal_DynamicMeshRenderingUtils.h"
 			$File	"$SRCDIR\game\shared\portal\portal_gamemovement.cpp"
+			$File	"$SRCDIR\game\shared\portal\portal_gamemovement.h"
 			$File	"$SRCDIR\game\shared\portal\portal_gamerules.cpp"
 			$File	"$SRCDIR\game\shared\portal\portal_gamerules.h"
 			$File	"$SRCDIR\game\shared\portal\portal_mp_gamerules.cpp"

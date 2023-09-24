@@ -3284,7 +3284,7 @@ void CPhysicsProp::VPhysicsUpdate( IPhysicsObject *pPhysics )
 						if ( ( vPropToPortal.z < -1024.0f) || (vPropToPortal.z >= 0.0f) )
 							continue;
 
-						Vector vPortalRight = pTempPortal->m_PortalSimulator.m_DataAccess.Placement.vRight;
+						Vector vPortalRight = pTempPortal->m_PortalSimulator.GetInternalData().Placement.vRight;
 						vPortalRight.z = 0.0f;						
 						VectorNormalize( vPortalRight );						
 
@@ -3294,7 +3294,7 @@ void CPhysicsProp::VPhysicsUpdate( IPhysicsObject *pPhysics )
 						if ( ( vPropToPortal.Dot( vPortalRight ) * vPortalRight ).LengthSqr() > fTestDist )
 							continue;
 
-						Vector vPortalUp = pTempPortal->m_PortalSimulator.m_DataAccess.Placement.vUp;
+						Vector vPortalUp = pTempPortal->m_PortalSimulator.GetInternalData().Placement.vUp;
 						vPortalUp.z = 0.0f;
 						VectorNormalize( vPortalUp );
 
@@ -3336,7 +3336,7 @@ void CPhysicsProp::VPhysicsUpdate( IPhysicsObject *pPhysics )
 						const float fMaxDeceleration = sv_props_funnel_into_portals_deceleration.GetFloat();
 						if( fMaxDeceleration > 0.0f )
 						{
-							const VPlane &portalPlane = pFunnelInto->m_PortalSimulator.m_DataAccess.Placement.PortalPlane;
+							const VPlane &portalPlane = pFunnelInto->m_PortalSimulator.GetInternalData().Placement.PortalPlane;
 							float fVelocityInPlaneDirection = portalPlane.m_Normal.Dot( vVelocity );
 							Vector vPlanarVelocity = (vVelocity - (portalPlane.m_Normal * fVelocityInPlaneDirection));
 							//to cancel all movement in the plane we would just subtract vPlanarVelocity. But we want to be pickier, and only cancel movement heading away from the portal

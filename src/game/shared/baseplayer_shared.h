@@ -74,6 +74,22 @@ enum stepsoundtimes_t
 	STEPSOUNDTIME_WATER_FOOT,
 };
 
+//
+// Player PHYSICS FLAGS bits
+//
+enum PlayerPhysFlag_e
+{
+	PFLAG_DIROVERRIDE	= ( 1<<0 ),		// override the player's directional control (trains, physics gun, etc.)
+	PFLAG_DUCKING		= ( 1<<1 ),		// In the process of ducking, but totally squatted yet
+	PFLAG_USING			= ( 1<<2 ),		// Using a continuous entity
+	PFLAG_OBSERVER		= ( 1<<3 ),		// player is locked in stationary cam mode. Spectators can move, observers can't.
+	PFLAG_VPHYSICS_MOTIONCONTROLLER = ( 1<<4 ),	// player is physically attached to a motion controller
+	PFLAG_GAMEPHYSICS_ROTPUSH = (1<<5), // game physics did a rotating push that we may want to override with vphysics
+
+	// If you add another flag here check that you aren't 
+	// overwriting phys flags in the HL2 of TF2 player classes
+};
+
 // Shared header file for players
 #if defined( CLIENT_DLL )
 #define CBasePlayer C_BasePlayer

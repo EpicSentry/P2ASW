@@ -57,6 +57,11 @@
 #include "npcevent.h"
 #include "replay_ragdoll.h"
 
+#if defined ( PORTAL2 )
+#include "c_portal_player.h"
+#include "portal2/portal_grabcontroller_shared.h"
+#endif
+
 #include "clientalphaproperty.h"
 
 #ifdef DEMOPOLISH_ENABLED
@@ -748,6 +753,7 @@ C_BaseAnimating::C_BaseAnimating() :
 	m_prevClientCycle = 0;
 	m_prevClientAnimTime = 0;
 	m_flOldModelScale = 0.0f;
+	m_vecRenderOriginOverride = vec3_invalid;
 
 	m_pJiggleBones = NULL;
 	m_isJiggleBonesEnabled = true;
@@ -1397,6 +1403,23 @@ void C_BaseAnimating::ScriptSetPoseParameter( const char *szName, float fValue )
 
 	int iPoseParam = LookupPoseParameter( pHdr, szName );
 	SetPoseParameter( pHdr, iPoseParam, fValue );
+}
+
+void C_BaseAnimating::SetRenderOriginOverride( const Vector &vec )
+{
+	if( m_vecRenderOriginOverride != vec )
+	{
+		InvalidateBoneCache();
+	}
+	m_vecRenderOriginOverride = vec;
+}
+void C_BaseAnimating::DisableRenderOriginOverride( void )
+{
+	if( m_vecRenderOriginOverride != vec3_invalid )
+	{
+		InvalidateBoneCache();
+	}
+	m_vecRenderOriginOverride = vec3_invalid;	
 }
 
 void C_BaseAnimating::GetCachedBoneMatrix( int boneIndex, matrix3x4_t &out )
@@ -4703,6 +4726,11 @@ const Vector& C_BaseAnimating::GetRenderOrigin( void )
 	if ( IsRagdoll() )
 	{
 		return m_pRagdoll->GetRagdollOrigin();
+	}
+	
+	if ( m_vecRenderOriginOverride != vec3_invalid )
+	{
+		return m_vecRenderOriginOverride;
 	}
 
 	return BaseClass::GetRenderOrigin();	

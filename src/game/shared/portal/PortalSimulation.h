@@ -16,6 +16,7 @@
 #include "const.h"
 #include "tier1/utlmap.h"
 #include "tier1/utlvector.h"
+#include "portal_shareddefs.h"
 
 #define PORTAL_SIMULATORS_EMBED_GUID //define this to embed a unique integer with each portal simulator for debugging purposes
 
@@ -99,15 +100,21 @@ struct PS_PlacementData_t //stuff useful for geometric operations
 	Vector vForward;
 	Vector vUp;
 	Vector vRight;
+	float fHalfWidth, fHalfHeight;
 	VPlane PortalPlane;
 	VMatrix matThisToLinked;
 	VMatrix matLinkedToThis;
 	PortalTransformAsAngledPosition_t ptaap_ThisToLinked;
 	PortalTransformAsAngledPosition_t ptaap_LinkedToThis;
 	CPhysCollide *pHoleShapeCollideable; //used to test if a collideable is in the hole, should NOT be collided against in general
+	CPhysCollide *pAABBAngleTransformCollideable; //used for player traces so we can slide into the portal gracefully if there's an angular difference such that our transformed AABB is in solid until the center reaches the plane
 	PS_PlacementData_t( void )
 	{
 		memset( this, 0, sizeof( PS_PlacementData_t ) );
+
+		// Hacks
+		fHalfHeight = PORTAL_HALF_HEIGHT;
+		fHalfWidth = PORTAL_HALF_WIDTH;
 	}
 };
 
@@ -458,7 +465,7 @@ protected:
 #endif
 
 public:
-	const PS_InternalData_t &m_DataAccess;
+	inline const PS_InternalData_t &GetInternalData() const;
 
 	friend class CPS_AutoGameSys_EntityListener;
 };
@@ -498,6 +505,10 @@ inline CPortalSimulator	*CPortalSimulator::GetLinkedPortalSimulator( void ) cons
 	return m_pLinkedPortal;
 }
 
+inline const PS_InternalData_t &CPortalSimulator::GetInternalData() const
+{
+	return m_InternalData;
+}
 
 #endif //#ifndef PORTALSIMULATION_H
 

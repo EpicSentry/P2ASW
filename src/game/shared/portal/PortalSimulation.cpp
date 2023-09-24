@@ -17,6 +17,7 @@
 #include "collisionutils.h"
 #include "tier1/callqueue.h"
 #include "ehandle.h"
+#include "cegclientwrapper.h"
 
 #ifndef CLIENT_DLL
 
@@ -77,6 +78,8 @@ void DumpActiveCollision( const CPortalSimulator *pPortalSimulator, const char *
 #define PORTAL_WALL_MIN_THICKNESS 0.1f
 #define PORTAL_POLYHEDRON_CUT_EPSILON (1.0f/1099511627776.0f) //    1 / (1<<40)
 #define PORTAL_WORLD_WALL_HALF_SEPARATION_AMOUNT 0.1f //separating the world collision from wall collision by a small amount gets rid of extremely thin erroneous collision at the separating plane
+#define PORTAL_HOLE_HALF_HEIGHT_MOD (0.1f)
+#define PORTAL_HOLE_HALF_WIDTH_MOD (0.1f)
 
 #ifdef DEBUG_PORTAL_COLLISION_ENVIRONMENTS
 static ConVar sv_dump_portalsimulator_collision( "sv_dump_portalsimulator_collision", "0", FCVAR_REPLICATED | FCVAR_CHEAT ); //whether to actually dump out the data now that the possibility exists
@@ -188,8 +191,7 @@ CPortalSimulator::CPortalSimulator( void )
 	m_bSharedCollisionConfiguration(false),
 	m_pLinkedPortal(NULL),
 	m_bInCrossLinkedFunction(false),
-	m_pCallbacks(&s_DummyPortalSimulatorCallback),
-	m_DataAccess(m_InternalData)
+	m_pCallbacks(&s_DummyPortalSimulatorCallback)
 {
 	s_PortalSimulators.AddToTail( this );
 
@@ -244,6 +246,9 @@ CPortalSimulator::~CPortalSimulator( void )
 
 	if( m_InternalData.Placement.pHoleShapeCollideable )
 		physcollision->DestroyCollide( m_InternalData.Placement.pHoleShapeCollideable );
+	
+	if( m_InternalData.Placement.pAABBAngleTransformCollideable )
+		physcollision->DestroyCollide( m_InternalData.Placement.pAABBAngleTransformCollideable );
 
 #ifndef CLIENT_DLL
 	if( m_InternalData.Simulation.hCollisionEntity )
@@ -359,6 +364,167 @@ void CPortalSimulator::MoveTo( const Vector &ptCenter, const QAngle &angles )
 		pPolyhedron->Release();
 		Assert( pConvex != NULL );
 		m_InternalData.Placement.pHoleShapeCollideable = physcollision->ConvertConvexToCollide( &pConvex, 1 );
+		
+		//create inverse hole collideable
+		{
+			if( m_InternalData.Placement.pAABBAngleTransformCollideable )
+				physcollision->DestroyCollide( m_InternalData.Placement.pAABBAngleTransformCollideable );
+
+			const float kCarveEpsilon = (1.0f / 512.0f);
+			//make thickness extra thin
+			fHolePlanes[(0*4) + 3] = m_InternalData.Placement.PortalPlane.m_Dist;
+			fHolePlanes[(1*4) + 3] = (-m_InternalData.Placement.PortalPlane.m_Dist) + 1.0f;
+
+			float fAABBTransformPlanes[6*4];
+			memcpy( fAABBTransformPlanes, fHolePlanes, sizeof( float ) * 6 * 4 );
+			fAABBTransformPlanes[(0*4) + 3] = m_InternalData.Placement.PortalPlane.m_Dist - (PORTAL_WORLD_WALL_HALF_SEPARATION_AMOUNT / 2.0f);
+			fAABBTransformPlanes[(1*4) + 3] = (-m_InternalData.Placement.PortalPlane.m_Dist) + (64.0f);
+
+			//set initial outer bounds super far away (supposed to represent an infinite plane with a finite solid)
+			const float kReallyFar = 1024.0f;
+			float fFarDists[4]; //mapping is meant to be (fFarDists[i] <-> fHolePlanes[((i+2)*4) + 3])
+			fFarDists[0] = m_InternalData.Placement.vUp.Dot( m_InternalData.Placement.ptCenter + (m_InternalData.Placement.vUp * kReallyFar) );
+			fFarDists[1] = -m_InternalData.Placement.vUp.Dot( m_InternalData.Placement.ptCenter - (m_InternalData.Placement.vUp * kReallyFar) );
+			fFarDists[2] = -m_InternalData.Placement.vRight.Dot( m_InternalData.Placement.ptCenter - (m_InternalData.Placement.vRight * kReallyFar) );
+			fFarDists[3] = m_InternalData.Placement.vRight.Dot( m_InternalData.Placement.ptCenter + (m_InternalData.Placement.vRight * kReallyFar) );
+
+#ifdef CLIENT_DLL
+			CEG_PROTECT_MEMBER_FUNCTION( CPortalSimulator_MovedOrResized );
+#endif
+
+			const float kInnerCarve = 0.1f;
+			float fInvHoleNearDists[4]; //mapping is meant to be (fInvHoleNearDists[i] <-> fHolePlanes[((i+2)*4) + 3])
+			fInvHoleNearDists[0] = m_InternalData.Placement.vUp.Dot( m_InternalData.Placement.ptCenter - (m_InternalData.Placement.vUp * (m_InternalData.Placement.fHalfHeight + kInnerCarve)) );
+			fInvHoleNearDists[1] = -m_InternalData.Placement.vUp.Dot( m_InternalData.Placement.ptCenter + (m_InternalData.Placement.vUp * (m_InternalData.Placement.fHalfHeight + kInnerCarve)) );
+			fInvHoleNearDists[2] = -m_InternalData.Placement.vRight.Dot( m_InternalData.Placement.ptCenter + (m_InternalData.Placement.vRight * (m_InternalData.Placement.fHalfWidth + kInnerCarve)) );
+			fInvHoleNearDists[3] = m_InternalData.Placement.vRight.Dot( m_InternalData.Placement.ptCenter - (m_InternalData.Placement.vRight * (m_InternalData.Placement.fHalfWidth + kInnerCarve)) );
+
+			const float kAABBInnerCarve = (PORTAL_HOLE_HALF_WIDTH_MOD + (1.0f/16.0f)) * 4.0f;//(-1.0f/1024.0f);
+			float fAABBTransformNearDists[4]; //mapping is meant to be (fAABBTransformNearDists[i] <-> fAABBTransformPlanes[((i+2)*4) + 3])
+			fAABBTransformNearDists[0] = m_InternalData.Placement.vUp.Dot( m_InternalData.Placement.ptCenter - (m_InternalData.Placement.vUp * (m_InternalData.Placement.fHalfHeight + kAABBInnerCarve)) );
+			fAABBTransformNearDists[1] = -m_InternalData.Placement.vUp.Dot( m_InternalData.Placement.ptCenter + (m_InternalData.Placement.vUp * (m_InternalData.Placement.fHalfHeight + kAABBInnerCarve)) );
+			fAABBTransformNearDists[2] = -m_InternalData.Placement.vRight.Dot( m_InternalData.Placement.ptCenter + (m_InternalData.Placement.vRight * (m_InternalData.Placement.fHalfWidth + kAABBInnerCarve)) );
+			fAABBTransformNearDists[3] = m_InternalData.Placement.vRight.Dot( m_InternalData.Placement.ptCenter - (m_InternalData.Placement.vRight * (m_InternalData.Placement.fHalfWidth + kAABBInnerCarve)) );
+
+			//left and right sections will be the sliver segments, top and bottom are roughly half the surface area of the entire collideable each
+			CPhysConvex *pInvHoleConvexes[4];
+			CPhysConvex *pAABBTransformConvexes[4];
+
+			//top section
+			{
+				fHolePlanes[(2*4) + 3] = fFarDists[0];
+				fHolePlanes[(3*4) + 3] = fInvHoleNearDists[1];
+				fHolePlanes[(4*4) + 3] = fFarDists[2];
+				fHolePlanes[(5*4) + 3] = fFarDists[3];
+
+				CPolyhedron *pPolyhedron = GeneratePolyhedronFromPlanes( fHolePlanes, 6, kCarveEpsilon, true );
+				Assert( pPolyhedron != NULL );
+				pInvHoleConvexes[0] = physcollision->ConvexFromConvexPolyhedron( *pPolyhedron );
+				pPolyhedron->Release();
+				Assert( pInvHoleConvexes[0] != NULL );
+
+
+
+				fAABBTransformPlanes[(2*4) + 3] = fFarDists[0];
+				fAABBTransformPlanes[(3*4) + 3] = fAABBTransformNearDists[1];
+				fAABBTransformPlanes[(4*4) + 3] = fFarDists[2];
+				fAABBTransformPlanes[(5*4) + 3] = fFarDists[3];
+
+				/*pPolyhedron = GeneratePolyhedronFromPlanes( fAABBTransformPlanes, 6, kCarveEpsilon, true );
+				Assert( pPolyhedron != NULL );
+				pAABBTransformConvexes[0] = physcollision->ConvexFromConvexPolyhedron( *pPolyhedron );
+				pPolyhedron->Release();
+				Assert( pAABBTransformConvexes[0] != NULL );*/
+			}
+
+			//bottom section
+			{
+				fHolePlanes[(2*4) + 3] = fInvHoleNearDists[0];
+				fHolePlanes[(3*4) + 3] = fFarDists[1];
+				//fHolePlanes[(4*4) + 3] = fFarDists[2]; //no change since top section
+				//fHolePlanes[(5*4) + 3] = fFarDists[3];
+
+				CPolyhedron *pPolyhedron = GeneratePolyhedronFromPlanes( fHolePlanes, 6, kCarveEpsilon, true );
+				Assert( pPolyhedron != NULL );
+				pInvHoleConvexes[1] = physcollision->ConvexFromConvexPolyhedron( *pPolyhedron );
+				pPolyhedron->Release();
+				Assert( pInvHoleConvexes[1] != NULL );
+
+				
+
+				fAABBTransformPlanes[(2*4) + 3] = fAABBTransformNearDists[0];
+				fAABBTransformPlanes[(3*4) + 3] = fFarDists[1];
+				//fAABBTransformPlanes[(4*4) + 3] = fFarDists[2]; //no change since top section
+				//fAABBTransformPlanes[(5*4) + 3] = fFarDists[3];
+
+				pPolyhedron = GeneratePolyhedronFromPlanes( fAABBTransformPlanes, 6, kCarveEpsilon, true );
+				Assert( pPolyhedron != NULL );
+				pAABBTransformConvexes[1] = physcollision->ConvexFromConvexPolyhedron( *pPolyhedron );
+				pPolyhedron->Release();
+				Assert( pAABBTransformConvexes[1] != NULL );
+			}
+
+			//left section
+			{
+				fHolePlanes[(2*4) + 3] = -fInvHoleNearDists[1]; //remap inward facing top/bottom near distances to outward facing ones
+				fHolePlanes[(3*4) + 3] = -fInvHoleNearDists[0];
+				//fHolePlanes[(4*4) + 3] = fFarDists[2];  //no change since bottom section
+				fHolePlanes[(5*4) + 3] = fInvHoleNearDists[3];
+
+				CPolyhedron *pPolyhedron = GeneratePolyhedronFromPlanes( fHolePlanes, 6, kCarveEpsilon, true );
+				Assert( pPolyhedron != NULL );
+				pInvHoleConvexes[2] = physcollision->ConvexFromConvexPolyhedron( *pPolyhedron );
+				pPolyhedron->Release();
+				Assert( pInvHoleConvexes[2] != NULL );
+
+
+				fAABBTransformPlanes[(2*4) + 3] = -fAABBTransformNearDists[1]; //remap inward facing top/bottom near distances to outward facing ones
+				fAABBTransformPlanes[(3*4) + 3] = -fAABBTransformNearDists[0];
+				//fAABBTransformPlanes[(4*4) + 3] = fFarDists[2];  //no change since bottom section
+				fAABBTransformPlanes[(5*4) + 3] = fAABBTransformNearDists[3];
+
+				/*pPolyhedron = GeneratePolyhedronFromPlanes( fAABBTransformPlanes, 6, kCarveEpsilon, true );
+				Assert( pPolyhedron != NULL );
+				pAABBTransformConvexes[2] = physcollision->ConvexFromConvexPolyhedron( *pPolyhedron );
+				pPolyhedron->Release();
+				Assert( pAABBTransformConvexes[2] != NULL );*/
+			}
+
+			//right section
+			{
+				//fHolePlanes[(2*4) + 3] = -fInvHoleNearDists[1]; //no change since left section
+				//fHolePlanes[(3*4) + 3] = -fInvHoleNearDists[0];
+				fHolePlanes[(4*4) + 3] = fInvHoleNearDists[2]; 
+				fHolePlanes[(5*4) + 3] = fFarDists[3];
+
+				CPolyhedron *pPolyhedron = GeneratePolyhedronFromPlanes( fHolePlanes, 6, kCarveEpsilon, true );
+				Assert( pPolyhedron != NULL );
+				pInvHoleConvexes[3] = physcollision->ConvexFromConvexPolyhedron( *pPolyhedron );
+				pPolyhedron->Release();
+				Assert( pInvHoleConvexes[3] != NULL );
+
+
+				//fAABBTransformPlanes[(2*4) + 3] = -fAABBTransformNearDists[1]; //no change since left section
+				//fAABBTransformPlanes[(3*4) + 3] = -fAABBTransformNearDists[0];
+				fAABBTransformPlanes[(4*4) + 3] = fAABBTransformNearDists[2]; 
+				fAABBTransformPlanes[(5*4) + 3] = fFarDists[3];
+
+				/*pPolyhedron = GeneratePolyhedronFromPlanes( fAABBTransformPlanes, 6, kCarveEpsilon, true );
+				Assert( pPolyhedron != NULL );
+				pAABBTransformConvexes[3] = physcollision->ConvexFromConvexPolyhedron( *pPolyhedron );
+				pPolyhedron->Release();
+				Assert( pAABBTransformConvexes[3] != NULL );*/
+			}
+
+			convertconvexparams_t params;
+			params.Defaults();
+			params.buildOptimizedTraceTables = true;
+			//params.bUseFastApproximateInertiaTensor = true;
+			//m_InternalData.Placement.pInvHoleShapeCollideable = physcollision->ConvertConvexToCollideParams( pInvHoleConvexes, 4, params );
+		
+			//m_InternalData.Placement.pAABBAngleTransformCollideable = physcollision->ConvertConvexToCollide( pAABBTransformConvexes, 4 );
+			m_InternalData.Placement.pAABBAngleTransformCollideable = physcollision->ConvertConvexToCollideParams( &pAABBTransformConvexes[1], 1, params );
+		}
 	}
 
 #ifndef CLIENT_DLL
@@ -2870,7 +3036,7 @@ void UpdateShadowClonesPortalSimulationFlags( const CBaseEntity *pSourceEntity, 
 		CPhysicsShadowClone *pClone = pClones->pClone;
 		CPortalSimulator *pCloneSimulator = CPortalSimulator::GetSimulatorThatOwnsEntity( pClone );
 
-		unsigned int *pFlags = (unsigned int *)&pCloneSimulator->m_DataAccess.Simulation.Dynamic.EntFlags[pClone->entindex()];
+		unsigned int *pFlags = (unsigned int *)&pCloneSimulator->GetInternalData().Simulation.Dynamic.EntFlags[pClone->entindex()];
 		*pFlags &= ~iFlags;
 		*pFlags |= iOrFlags;
 
@@ -3011,14 +3177,14 @@ IPhysicsObject *CPSCollisionEntity::VPhysicsGetObject( void )
 	if( m_pOwningSimulator == NULL )
 		return NULL;
 
-	if( m_pOwningSimulator->m_DataAccess.Simulation.Static.World.Brushes.pPhysicsObject != NULL )
-		return m_pOwningSimulator->m_DataAccess.Simulation.Static.World.Brushes.pPhysicsObject;
-	else if( m_pOwningSimulator->m_DataAccess.Simulation.Static.Wall.Local.Brushes.pPhysicsObject != NULL )
-		return m_pOwningSimulator->m_DataAccess.Simulation.Static.Wall.Local.Brushes.pPhysicsObject;
-	else if( m_pOwningSimulator->m_DataAccess.Simulation.Static.Wall.Local.Tube.pPhysicsObject != NULL )
-		return m_pOwningSimulator->m_DataAccess.Simulation.Static.Wall.Local.Brushes.pPhysicsObject;
-	else if( m_pOwningSimulator->m_DataAccess.Simulation.Static.Wall.RemoteTransformedToLocal.Brushes.pPhysicsObject != NULL )
-		return m_pOwningSimulator->m_DataAccess.Simulation.Static.Wall.RemoteTransformedToLocal.Brushes.pPhysicsObject;
+	if( m_pOwningSimulator->GetInternalData().Simulation.Static.World.Brushes.pPhysicsObject != NULL )
+		return m_pOwningSimulator->GetInternalData().Simulation.Static.World.Brushes.pPhysicsObject;
+	else if( m_pOwningSimulator->GetInternalData().Simulation.Static.Wall.Local.Brushes.pPhysicsObject != NULL )
+		return m_pOwningSimulator->GetInternalData().Simulation.Static.Wall.Local.Brushes.pPhysicsObject;
+	else if( m_pOwningSimulator->GetInternalData().Simulation.Static.Wall.Local.Tube.pPhysicsObject != NULL )
+		return m_pOwningSimulator->GetInternalData().Simulation.Static.Wall.Local.Brushes.pPhysicsObject;
+	else if( m_pOwningSimulator->GetInternalData().Simulation.Static.Wall.RemoteTransformedToLocal.Brushes.pPhysicsObject != NULL )
+		return m_pOwningSimulator->GetInternalData().Simulation.Static.Wall.RemoteTransformedToLocal.Brushes.pPhysicsObject;
 	else
 		return NULL;
 #else
@@ -3037,33 +3203,33 @@ int CPSCollisionEntity::VPhysicsGetObjectList( IPhysicsObject **pList, int listM
 
 	int iRetVal = 0;
 
-	if( m_pOwningSimulator->m_DataAccess.Simulation.Static.World.Brushes.pPhysicsObject != NULL )
+	if( m_pOwningSimulator->GetInternalData().Simulation.Static.World.Brushes.pPhysicsObject != NULL )
 	{
-		pList[iRetVal] = m_pOwningSimulator->m_DataAccess.Simulation.Static.World.Brushes.pPhysicsObject;
+		pList[iRetVal] = m_pOwningSimulator->GetInternalData().Simulation.Static.World.Brushes.pPhysicsObject;
 		++iRetVal;
 		if( iRetVal == listMax )
 			return iRetVal;
 	}
 
-	if( m_pOwningSimulator->m_DataAccess.Simulation.Static.Wall.Local.Brushes.pPhysicsObject != NULL )
+	if( m_pOwningSimulator->GetInternalData().Simulation.Static.Wall.Local.Brushes.pPhysicsObject != NULL )
 	{
-		pList[iRetVal] = m_pOwningSimulator->m_DataAccess.Simulation.Static.Wall.Local.Brushes.pPhysicsObject;
+		pList[iRetVal] = m_pOwningSimulator->GetInternalData().Simulation.Static.Wall.Local.Brushes.pPhysicsObject;
 		++iRetVal;
 		if( iRetVal == listMax )
 			return iRetVal;
 	}
 
-	if( m_pOwningSimulator->m_DataAccess.Simulation.Static.Wall.Local.Tube.pPhysicsObject != NULL )
+	if( m_pOwningSimulator->GetInternalData().Simulation.Static.Wall.Local.Tube.pPhysicsObject != NULL )
 	{
-		pList[iRetVal] = m_pOwningSimulator->m_DataAccess.Simulation.Static.Wall.Local.Tube.pPhysicsObject;
+		pList[iRetVal] = m_pOwningSimulator->GetInternalData().Simulation.Static.Wall.Local.Tube.pPhysicsObject;
 		++iRetVal;
 		if( iRetVal == listMax )
 			return iRetVal;
 	}
 
-	if( m_pOwningSimulator->m_DataAccess.Simulation.Static.Wall.RemoteTransformedToLocal.Brushes.pPhysicsObject != NULL )
+	if( m_pOwningSimulator->GetInternalData().Simulation.Static.Wall.RemoteTransformedToLocal.Brushes.pPhysicsObject != NULL )
 	{
-		pList[iRetVal] = m_pOwningSimulator->m_DataAccess.Simulation.Static.Wall.RemoteTransformedToLocal.Brushes.pPhysicsObject;
+		pList[iRetVal] = m_pOwningSimulator->GetInternalData().Simulation.Static.Wall.RemoteTransformedToLocal.Brushes.pPhysicsObject;
 		++iRetVal;
 		if( iRetVal == listMax )
 			return iRetVal;
@@ -3112,40 +3278,40 @@ void DumpActiveCollision( const CPortalSimulator *pPortalSimulator, const char *
 #define PSDAC_INTENSITY_REMOTEBRUSH 0.125f
 #define PSDAC_INTENSITY_REMOTEPROP 0.5f
 
-	if( pPortalSimulator->m_DataAccess.Simulation.Static.World.Brushes.pCollideable )
-		PortalSimulatorDumps_DumpCollideToGlView( pPortalSimulator->m_DataAccess.Simulation.Static.World.Brushes.pCollideable, vec3_origin, vec3_angle, PSDAC_INTENSITY_LOCALBRUSH, szFileName );
+	if( pPortalSimulator->GetInternalData().Simulation.Static.World.Brushes.pCollideable )
+		PortalSimulatorDumps_DumpCollideToGlView( pPortalSimulator->GetInternalData().Simulation.Static.World.Brushes.pCollideable, vec3_origin, vec3_angle, PSDAC_INTENSITY_LOCALBRUSH, szFileName );
 	
-	if( pPortalSimulator->m_DataAccess.Simulation.Static.World.StaticProps.bCollisionExists )
+	if( pPortalSimulator->GetInternalData().Simulation.Static.World.StaticProps.bCollisionExists )
 	{
-		for( int i = pPortalSimulator->m_DataAccess.Simulation.Static.World.StaticProps.ClippedRepresentations.Count(); --i >= 0; )
+		for( int i = pPortalSimulator->GetInternalData().Simulation.Static.World.StaticProps.ClippedRepresentations.Count(); --i >= 0; )
 		{
-			Assert( pPortalSimulator->m_DataAccess.Simulation.Static.World.StaticProps.ClippedRepresentations[i].pCollide );
-			PortalSimulatorDumps_DumpCollideToGlView( pPortalSimulator->m_DataAccess.Simulation.Static.World.StaticProps.ClippedRepresentations[i].pCollide, vec3_origin, vec3_angle, PSDAC_INTENSITY_LOCALPROP, szFileName );	
+			Assert( pPortalSimulator->GetInternalData().Simulation.Static.World.StaticProps.ClippedRepresentations[i].pCollide );
+			PortalSimulatorDumps_DumpCollideToGlView( pPortalSimulator->GetInternalData().Simulation.Static.World.StaticProps.ClippedRepresentations[i].pCollide, vec3_origin, vec3_angle, PSDAC_INTENSITY_LOCALPROP, szFileName );	
 		}
 	}
 
-	if( pPortalSimulator->m_DataAccess.Simulation.Static.Wall.Local.Brushes.pCollideable )
-		PortalSimulatorDumps_DumpCollideToGlView( pPortalSimulator->m_DataAccess.Simulation.Static.Wall.Local.Brushes.pCollideable, vec3_origin, vec3_angle, PSDAC_INTENSITY_LOCALBRUSH, szFileName );
+	if( pPortalSimulator->GetInternalData().Simulation.Static.Wall.Local.Brushes.pCollideable )
+		PortalSimulatorDumps_DumpCollideToGlView( pPortalSimulator->GetInternalData().Simulation.Static.Wall.Local.Brushes.pCollideable, vec3_origin, vec3_angle, PSDAC_INTENSITY_LOCALBRUSH, szFileName );
 
-	if( pPortalSimulator->m_DataAccess.Simulation.Static.Wall.Local.Tube.pCollideable )
-		PortalSimulatorDumps_DumpCollideToGlView( pPortalSimulator->m_DataAccess.Simulation.Static.Wall.Local.Tube.pCollideable, vec3_origin, vec3_angle, PSDAC_INTENSITY_LOCALBRUSH, szFileName );
+	if( pPortalSimulator->GetInternalData().Simulation.Static.Wall.Local.Tube.pCollideable )
+		PortalSimulatorDumps_DumpCollideToGlView( pPortalSimulator->GetInternalData().Simulation.Static.Wall.Local.Tube.pCollideable, vec3_origin, vec3_angle, PSDAC_INTENSITY_LOCALBRUSH, szFileName );
 
-	//if( pPortalSimulator->m_DataAccess.Simulation.Static.Wall.RemoteTransformedToLocal.Brushes.pCollideable )
-	//	PortalSimulatorDumps_DumpCollideToGlView( pPortalSimulator->m_DataAccess.Simulation.Static.Wall.RemoteTransformedToLocal.Brushes.pCollideable, vec3_origin, vec3_angle, PSDAC_INTENSITY_REMOTEBRUSH, szFileName );
+	//if( pPortalSimulator->GetInternalData().Simulation.Static.Wall.RemoteTransformedToLocal.Brushes.pCollideable )
+	//	PortalSimulatorDumps_DumpCollideToGlView( pPortalSimulator->GetInternalData().Simulation.Static.Wall.RemoteTransformedToLocal.Brushes.pCollideable, vec3_origin, vec3_angle, PSDAC_INTENSITY_REMOTEBRUSH, szFileName );
 	CPortalSimulator *pLinkedPortal = pPortalSimulator->GetLinkedPortalSimulator();
 	if( pLinkedPortal )
 	{
-		if( pLinkedPortal->m_DataAccess.Simulation.Static.World.Brushes.pCollideable )
-			PortalSimulatorDumps_DumpCollideToGlView( pLinkedPortal->m_DataAccess.Simulation.Static.World.Brushes.pCollideable, pPortalSimulator->m_DataAccess.Placement.ptaap_LinkedToThis.ptOriginTransform, pPortalSimulator->m_DataAccess.Placement.ptaap_LinkedToThis.qAngleTransform, PSDAC_INTENSITY_REMOTEBRUSH, szFileName );
+		if( pLinkedPortal->GetInternalData().Simulation.Static.World.Brushes.pCollideable )
+			PortalSimulatorDumps_DumpCollideToGlView( pLinkedPortal->GetInternalData().Simulation.Static.World.Brushes.pCollideable, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.ptOriginTransform, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.qAngleTransform, PSDAC_INTENSITY_REMOTEBRUSH, szFileName );
 
-		//for( int i = pPortalSimulator->m_DataAccess.Simulation.Static.Wall.RemoteTransformedToLocal.StaticProps.Collideables.Count(); --i >= 0; )
-		//	PortalSimulatorDumps_DumpCollideToGlView( pPortalSimulator->m_DataAccess.Simulation.Static.Wall.RemoteTransformedToLocal.StaticProps.Collideables[i], vec3_origin, vec3_angle, PSDAC_INTENSITY_REMOTEPROP, szFileName );	
-		if( pLinkedPortal->m_DataAccess.Simulation.Static.World.StaticProps.bCollisionExists )
+		//for( int i = pPortalSimulator->GetInternalData().Simulation.Static.Wall.RemoteTransformedToLocal.StaticProps.Collideables.Count(); --i >= 0; )
+		//	PortalSimulatorDumps_DumpCollideToGlView( pPortalSimulator->GetInternalData().Simulation.Static.Wall.RemoteTransformedToLocal.StaticProps.Collideables[i], vec3_origin, vec3_angle, PSDAC_INTENSITY_REMOTEPROP, szFileName );	
+		if( pLinkedPortal->GetInternalData().Simulation.Static.World.StaticProps.bCollisionExists )
 		{
-			for( int i = pLinkedPortal->m_DataAccess.Simulation.Static.World.StaticProps.ClippedRepresentations.Count(); --i >= 0; )
+			for( int i = pLinkedPortal->GetInternalData().Simulation.Static.World.StaticProps.ClippedRepresentations.Count(); --i >= 0; )
 			{
-				Assert( pLinkedPortal->m_DataAccess.Simulation.Static.World.StaticProps.ClippedRepresentations[i].pCollide );
-				PortalSimulatorDumps_DumpCollideToGlView( pLinkedPortal->m_DataAccess.Simulation.Static.World.StaticProps.ClippedRepresentations[i].pCollide, pPortalSimulator->m_DataAccess.Placement.ptaap_LinkedToThis.ptOriginTransform, pPortalSimulator->m_DataAccess.Placement.ptaap_LinkedToThis.qAngleTransform, PSDAC_INTENSITY_REMOTEPROP, szFileName );	
+				Assert( pLinkedPortal->GetInternalData().Simulation.Static.World.StaticProps.ClippedRepresentations[i].pCollide );
+				PortalSimulatorDumps_DumpCollideToGlView( pLinkedPortal->GetInternalData().Simulation.Static.World.StaticProps.ClippedRepresentations[i].pCollide, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.ptOriginTransform, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.qAngleTransform, PSDAC_INTENSITY_REMOTEPROP, szFileName );	
 			}
 		}
 	}
