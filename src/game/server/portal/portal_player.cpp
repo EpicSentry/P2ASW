@@ -46,10 +46,10 @@
 #include "paint/paint_swap_guns.h"
 #include "info_camera_link.h"
 #include "prop_weightedcube.h"
-<<<<<<< Updated upstream
+
 #include "portal2_research_data_tracker.h"
 #include "dt_utlvector_send.h"
-=======
+
 #include "props.h"
 #include "sendprop_priorities.h"
 #include "env_portal_laser.h"
@@ -62,7 +62,6 @@
 //#include "matchmaking/portal2/imatchext_portal2.h"
 #include "portal2_research_data_tracker.h"
 #include "pvs_extender.h"
->>>>>>> Stashed changes
 
 // undefined
 //{
