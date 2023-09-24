@@ -37,11 +37,8 @@
 #include "sceneentity.h"	// has the VCD precache function
 #include "sendprop_priorities.h"
 #include "prop_weightedcube.h"
-<<<<<<< Updated upstream
 #include "portal2_research_data_tracker.h"
-=======
 #include "dt_utlvector_send.h"
->>>>>>> Stashed changes
 
 // Max mass the player can lift with +use
 #define PORTAL_PLAYER_MAX_LIFT_MASS 85
