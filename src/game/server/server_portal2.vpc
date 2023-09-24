@@ -100,6 +100,7 @@ $Project "Server (Portal 2)"
 				$File "portal2\trigger_playerteam.cpp"
 				$File "portal2\trigger_ping_detector.cpp"
 				$File "portal2/prop_laser_catcher.cpp"
+				$File "portal2\prop_glass_futbol.cpp"
 				$File "$SRCDIR\game\shared\portal2\trigger_catapult_shared.cpp"
 
 			$File	"portal2\portal2_eventlog.cpp"
