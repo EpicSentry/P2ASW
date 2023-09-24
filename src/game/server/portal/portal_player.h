@@ -253,6 +253,10 @@ public:
 		
 	void TurnOffPotatos( void ) { m_bPotatos = false; }
 	void TurnOnPotatos( void ) { m_bPotatos = true; }
+	
+	// We should try to use this to get paint working for the player
+	// See: PropPaintPowerUser<BasePropType>::VPhysicsCollision
+	//virtual void VPhysicsCollision( int index, gamevcollisionevent_t *pEvent );
 
 protected:
 

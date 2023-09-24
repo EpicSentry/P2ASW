@@ -26,7 +26,7 @@ const char* const CPaintStreamManager::m_pPaintMaterialNames[PAINT_POWER_TYPE_CO
 	"paintblobs/blob_surface_stick", // FIXME: Bring this back for DLC2 "paintblobs/blob_surface_reflect",
 	"paintblobs/blob_surface_speed",
 	"paintblobs/blob_surface_portal",
-	"paintblobs/blob_surface_stick", // Stick power
+	//"paintblobs/blob_surface_stick", // Stick power
 	"paintblobs/blob_surface_erase",
 };
 
@@ -382,7 +382,7 @@ SplatParticlesForPaint_t paintSplatCallbacks[] =
 	{ REFLECT_POWER,"paint_splat_stick_01" }, // FIXME: Bring this back for DLC2 { REFLECT_POWER,"paint_splat_reflect_01" },
 	{ SPEED_POWER,	"paint_splat_speed_01" },
 	{ PORTAL_POWER,	"paint_splat_erase_01" },
-	{ STICK_POWER,	"paint_splat_stick_01" },
+	//{ STICK_POWER,	"paint_splat_stick_01" },
 	{ NO_POWER,		"paint_splat_erase_01" },
 };
 

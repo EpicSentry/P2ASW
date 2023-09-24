@@ -263,10 +263,6 @@ void CPortalGameMovement::ProcessMovement( CBasePlayer *pPlayer, CMoveData *pMov
 
 	float flStoreFrametime = gpGlobals->frametime;
 
-	//!!HACK HACK: Adrian - slow down all player movement by this factor.
-	//!!Blame Yahn for this one.
-	gpGlobals->frametime *= pPlayer->GetLaggedMovementValue();
-
 //	ResetGetPointContentsCache();
 
 	// Cropping movement speed scales mv->m_fForwardSpeed etc. globally
@@ -278,10 +274,42 @@ void CPortalGameMovement::ProcessMovement( CBasePlayer *pPlayer, CMoveData *pMov
 	mv = pMove;
 	mv->m_flMaxSpeed = sv_maxspeed.GetFloat();
 	
+	// Get the paint player
+	CPortal_Player *pPortalPlayer = GetPortalPlayer();
+
+	//!!HACK HACK: Adrian - slow down all player movement by this factor.
+	//!!Blame Yahn for this one.
+	gpGlobals->frametime *= pPlayer->GetLaggedMovementValue();
+	
 #if defined( CLIENT_DLL )
 	ClientVerticalElevatorFixes( pPlayer, pMove ); //fixup vertical elevator discrepancies between client and server as best we can
 #endif
 	
+	// Figure out move direction
+	const Vector& stickNormal = pPortalPlayer->GetPortalPlayerLocalData().m_StickNormal;
+	Vector vForward, vRight;
+	Vector vPlayerUp = pPortalPlayer->GetPortalPlayerLocalData().m_Up;
+	AngleVectors( mv->m_vecViewAngles, &vForward, &vRight, NULL );  // Determine movement angles
+
+	const Vector worldUp( 0, 0, 1 );
+	bool shouldProjectInputVectorsOntoGround = pPortalPlayer->GetGroundEntity() != NULL;
+
+	if( shouldProjectInputVectorsOntoGround )
+	{
+		vForward -= DotProduct( vForward, stickNormal ) * stickNormal;
+		vRight -= DotProduct( vRight, stickNormal ) * stickNormal;
+
+		vForward.NormalizeInPlace();
+		vRight.NormalizeInPlace();
+	}
+
+	Vector vWishVel = vForward*mv->m_flForwardMove + vRight*mv->m_flSideMove;
+	vWishVel -= vPlayerUp * DotProduct( vWishVel, vPlayerUp );
+	
+	// Figure out paint power
+	pPortalPlayer->SetInputVector( vWishVel );
+	pPortalPlayer->UpdatePaintPowers();
+
 	m_bInPortalEnv = (((CPortal_Player *)pPlayer)->m_hPortalEnvironment != NULL);
 
 	g_bAllowForcePortalTrace = m_bInPortalEnv;

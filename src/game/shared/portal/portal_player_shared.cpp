@@ -135,7 +135,8 @@ ConVar portal_deathcam_dist( "portal_deathcam_dist", "128", FCVAR_CHEAT | FCVAR_
 
 ConVar sv_contact_region_thickness( "sv_contact_region_thickness", "0.2f", FCVAR_REPLICATED | FCVAR_CHEAT, "The thickness of a contact region (how much the box expands)." );
 ConVar sv_clip_contacts_to_portals( "sv_clip_contacts_to_portals", "0", FCVAR_REPLICATED | FCVAR_CHEAT, "Enable/Disable clipping contact regions to portal planes." );
-ConVar sv_debug_draw_contacts( "sv_debug_draw_contacts", "0", FCVAR_REPLICATED | FCVAR_CHEAT, "0: Dont draw anything.  1: Draw contacts.  2: Draw colored contacts" );
+// NOTE: disable this when not needed
+ConVar sv_debug_draw_contacts( "sv_debug_draw_contacts", "1", FCVAR_REPLICATED | FCVAR_CHEAT, "0: Dont draw anything.  1: Draw contacts.  2: Draw colored contacts" );
 ConVar sv_post_teleportation_box_time( "sv_post_teleportation_box_time", ".0333333f", FCVAR_REPLICATED | FCVAR_CHEAT, "Time to use a slightly expanded box for contacts right after teleportation." );
 
 ConVar sv_enableholdrotation( "sv_enableholdrotation", "0", FCVAR_REPLICATED, "When enabled, hold attack2 to rotate held objects" );
@@ -374,6 +375,20 @@ const fltx4 ComputeCentroid_SIMD( const CMesh& volume )
 	return centroid;
 }
 
+void DebugDrawMesh( const CMesh& mesh )
+{
+	for ( int i = 0; i < mesh.TriangleCount(); ++i )
+	{
+		int i0 = mesh.m_pIndices[i*3 + 0];
+		int i1 = mesh.m_pIndices[i*3 + 1];
+		int i2 = mesh.m_pIndices[i*3 + 2];
+		NDebugOverlay::Triangle( ToVector( mesh.GetVertex(i0) ),
+			ToVector( mesh.GetVertex(i1) ),
+			ToVector( mesh.GetVertex(i2) ),
+			255, 0, 0, 128, true, 0 );
+
+	}
+}
 
 void ComputeAABBContactsWithBrushEntity_SIMD( ContactVector& contacts, const cplane_t *pClipPlanes, int iClipPlaneCount, const Vector& boxOrigin, const Vector& boxMin, const Vector& boxMax, CBaseEntity* pBrushEntity, int contentsMask)
 {
@@ -383,11 +398,9 @@ void ComputeAABBContactsWithBrushEntity_SIMD( ContactVector& contacts, const cpl
 	//typedef BrushSideInfo_t* BrushSideInfoIterator;
 	// Get the collision model index of the brush entity
 	AssertMsg( pBrushEntity->IsBSPModel(), "Your brush entity is not a brush entity." );
-#ifdef DEBUG
 	ICollideable* pCollideable = enginetrace->GetCollideable( pBrushEntity );
 	const int cmodelIndex = pCollideable->GetCollisionModelIndex() - 1;
 	AssertMsg( !pBrushEntity->IsWorld() || cmodelIndex == 0, "World collision model index should be 0." );
-#endif
 	const matrix3x4_t& entityToWorld = pBrushEntity->EntityToWorldTransform();
 
 	// The query box must be in local space for non-world brush entities
@@ -400,19 +413,15 @@ void ComputeAABBContactsWithBrushEntity_SIMD( ContactVector& contacts, const cpl
 
 	// Get the indices of all the colliding brushes
 	//BrushIndexVector brushIndices;
+	//CBrushQuery brushQuery;
 	CUtlVector<int> brushes;
 	enginetrace->GetBrushesInAABB( queryBoxMin, queryBoxMax, &brushes, contentsMask );
 
-	// A brush usually has 12 sides.
-	int probableBrushSides = ( brushes.Count() * 12 );
-
 	// Find the contact regions
 	//BrushSideInfoVector brushSides;
-
-	//BrushSideInfo_t *brushSides = (BrushSideInfo_t *)stackalloc( sizeof( BrushSideInfo_t ) * ( probableBrushSides ) );
-	CUtlVector<BrushSideInfo_t> brushSides;
+	CUtlVector<BrushSideInfo_t> brushSides; //= (CUtlVector<BrushSideInfo_t>)stackalloc( sizeof( CUtlVector<BrushSideInfo_t> ) * ( 12 * brushes.Count() ) );
 	//PlaneVector planes;
-	const int NUMBER_OF_FLTX4 = probableBrushSides + 6 /*bbox*/ + iClipPlaneCount;
+	const int NUMBER_OF_FLTX4 = ( 12 * brushes.Count() ) + 6 + iClipPlaneCount;//brushQuery.MaxBrushSides() + 6 /*bbox*/ + iClipPlaneCount;
 	fltx4 *planes = (fltx4 *)stackalloc( sizeof( fltx4 ) * ( NUMBER_OF_FLTX4 + 1 ) );		// +1 for VMX alignment
 	planes = (fltx4*)ALIGN_VALUE( (int)planes, sizeof(fltx4) );
 
@@ -424,7 +433,10 @@ void ComputeAABBContactsWithBrushEntity_SIMD( ContactVector& contacts, const cpl
 	{
 		// Get the brush side info
 		int iBrushContents;
-		int iNumBrushSides = enginetrace->GetBrushInfo( brushes[i], &brushSides, &iBrushContents );
+		int iNumBrushSides =  ( 12 * brushes.Count() ); // Most geometry has 12 sides
+		
+		enginetrace->GetBrushInfo(brushes[i], &brushSides, &iBrushContents);
+		
 		Assert( iNumBrushSides > 0 );
 		if( iNumBrushSides <= 0 )
 			continue;
@@ -446,12 +458,11 @@ void ComputeAABBContactsWithBrushEntity_SIMD( ContactVector& contacts, const cpl
 		// Transform the planes to world space
 		for( int sideIndex = 0; sideIndex < iNumBrushSides; ++sideIndex )
 		{
+			//cplane_t temp;
 			Vector4D temp;
-
-									
-			//MatrixTransformPlane( entityToWorld, brushSides[sideIndex].plane, temp );		// Could be optimized further here...
-			Vector4DMultiplyTranspose( entityToWorld, brushSides[sideIndex].plane, temp );
-			planes[sideIndex] = LoadUnalignedSIMD(&temp.AsVector3D());		// Read XYZ and dist of the plane
+			Vector4DMultiplyTranspose( entityToWorld, brushSides[sideIndex].plane, temp );		// Could be optimized further here...
+			//planes[sideIndex] = LoadUnalignedSIMD(&temp.normal);		// Read XYZ and dist of the plane
+			planes[sideIndex] = LoadUnalignedSIMD( &temp );		// Read XYZ and dist of the plane
 		}
 
 		int iPlaneCount = iNumBrushSides;
@@ -474,7 +485,7 @@ void ComputeAABBContactsWithBrushEntity_SIMD( ContactVector& contacts, const cpl
 		CMesh contactRegion;
 		PlaneIndexVector trianglePlaneIndices;
 		HullFromPlanes_SIMD( &contactRegion, &trianglePlaneIndices, planes, iPlaneCount );
-		//DebugDrawMesh( contactRegion );
+		DebugDrawMesh( contactRegion );
 
 		// If the contact region exists
 		if( contactRegion.m_nVertexCount > 0 )
@@ -527,6 +538,7 @@ void ComputeAABBContactsWithBrushEntity_SIMD( ContactVector& contacts, const cpl
 	// Do the test only once instead of for every contacts. This is debug code after all.
 	if( sv_debug_draw_contacts.GetInt() == 1 )
 	{
+		Msg("contacts.Count(): %i\n", contacts.Count());
 		for ( int i  = 0 ; i < contacts.Count() ; ++i )
 		{
 			const BrushContact & contact = contacts[i];
@@ -542,7 +554,7 @@ void ComputeAABBContactsWithBrushEntity( ContactVector& contacts, const cplane_t
 	if ( paint_compute_contacts_simd.GetBool() )
 	{
 		ComputeAABBContactsWithBrushEntity_SIMD( contacts, pClipPlanes, iClipPlaneCount, boxOrigin, boxMin, boxMax, pBrushEntity, contentsMask );
-#if _DEBUG & 0
+#if _DEBUG && 0
 		ContactVector fpuContacts;
 		ComputeAABBContactsWithBrushEntity_Old( fpuContacts, pClipPlanes, iClipPlaneCount, boxOrigin, boxMin, boxMax, pBrushEntity, contentsMask );
 
@@ -557,6 +569,10 @@ void ComputeAABBContactsWithBrushEntity( ContactVector& contacts, const cplane_t
 			Assert( contacts[i].isOnThinSurface == fpuContacts[i].isOnThinSurface );
 		}
 #endif
+	}
+	else
+	{
+	//	ComputeAABBContactsWithBrushEntity_Old( contacts, pClipPlanes, iClipPlaneCount, boxOrigin, boxMin, boxMax, pBrushEntity, contentsMask );
 	}
 }
 
@@ -2628,6 +2644,7 @@ InAirState CPortal_Player::GetInAirState() const
 	return m_PortalLocal.m_InAirState;
 }
 
+
 ConVar sv_paint_trigger_sound_delay( "sv_paint_trigger_sound_delay", "0.1f", FCVAR_REPLICATED );
 void CPortal_Player::PlayPaintSounds( const PaintPowerChoiceResultArray& touchedPowers )
 {
@@ -2704,9 +2721,11 @@ void CPortal_Player::ChooseActivePaintPowers( PaintPowerInfoVector& activePowers
 	PaintPowerChoiceCriteria_t choiceCriteria;
 	choiceCriteria.bInPortal = m_hPortalEnvironment != 0;
 
+
 	// If the player is touching anything
 	if( HasAnySurfacePaintPowerInfo() || LateSuperJumpIsValid() )
 	{
+		Msg("ChooseActivePaintPowers\n");
 		// Figure out colors/powers
 		MapSurfacesToPowers();
 

@@ -525,8 +525,8 @@ PaintPowerState PaintPowerUser<BaseEntityType>::ActivatePaintPower( PaintPowerIn
 		case SPEED_POWER:
 			return ActivateSpeedPower( power );
 
-		case STICK_POWER:
-			return ActivateNoPower( power );
+		//case STICK_POWER:
+		//	return ActivateNoPower( power );
 
 		case PORTAL_POWER:
 			return ActivateNoPower( power );
@@ -556,8 +556,8 @@ PaintPowerState PaintPowerUser<BaseEntityType>::UsePaintPower( PaintPowerInfo_t&
 		case SPEED_POWER:
 			return UseSpeedPower( power );
 			
-		case STICK_POWER:
-			return UseNoPower( power );
+		//case STICK_POWER:
+		//	return UseNoPower( power );
 
 		case PORTAL_POWER:
 			return UseNoPower( power );

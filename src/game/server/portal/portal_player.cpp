@@ -377,6 +377,15 @@ void CPortal_Player::Precache( void )
 	// paint effect
 	PrecacheParticleSystem( "boomer_vomit_screeneffect" );
 	PrecacheParticleSystem( "boomer_vomit_survivor" );
+	
+	// paint sound
+	PrecacheScriptSound( "Player.JumpPowerUse" );
+	PrecacheScriptSound( "Player.EnterBouncePaint" );
+	PrecacheScriptSound( "Player.ExitBouncePaint" );
+	PrecacheScriptSound( "Player.EnterSpeedPaint" );
+	PrecacheScriptSound( "Player.ExitSpeedPaint" );
+	PrecacheScriptSound( "Player.EnterStickPaint" );
+	PrecacheScriptSound( "Player.ExitStickPaint" );
 
 	PrecacheScriptSound( "NPC_Citizen.die" );
 }

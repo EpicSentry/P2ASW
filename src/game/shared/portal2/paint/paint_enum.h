@@ -14,7 +14,7 @@ enum PaintPowerType
 
 	// Add new powers here
 	PORTAL_POWER,	
-	STICK_POWER,
+	//STICK_POWER,
 
 	NO_POWER,
 	PAINT_POWER_TYPE_COUNT = NO_POWER,		// Note: Do not change this. We almost always

@@ -1917,9 +1917,9 @@ float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoi
 	//if ( !engine->SpherePaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, power, flPaintRadius, flAlphaPercent ) )
 	//	return 0.0f;
 
-	//CUtlVector<Color> color;
-
+#if 0
 	Msg("power: %i\n", power);
+#endif
 
 	Color preColor = MapPowerToColor(power);
 	
@@ -1929,6 +1929,8 @@ float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoi
 	
 	// We need to run this twice to make sure we have 2 color values.
 	engine->PaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, color, sv_paint_detection_sphere_radius.GetFloat() );
+
+#if 0
 #ifdef GAME_DLL
 	Warning("(server)Pre Painted Color: %i %i %i %i\n", preColor.r(), preColor.b(), preColor.g(), preColor.a());
 	Warning("(server)Post Painted Color: %i %i %i %i\n", color.r(), preColor.b(), color.g(), color.a());
@@ -1936,11 +1938,61 @@ float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoi
 	Warning("(client)Pre Painted Color: %i %i %i %i\n", preColor.r(), preColor.b(), preColor.g(), preColor.a());
 	Warning("(client)Post Painted Color: %i %i %i %i\n", color.r(), preColor.b(), color.g(), color.a());
 #endif
+#endif
 	//if (color == preColor)
 	//	return 0.0f;
 	return flPaintRadius;
 }
 
+Color GetAveragePaintColorFromVector( CUtlVector<Color> &color )
+{
+	if ( color.Count() == 0 )
+		return Color( 0, 0, 0, 0 );
+
+	int r = 0;
+	int g = 0;
+	int b = 0;
+	int a = 0;
+	
+	// We really need to get these power colors
+	for (int i = 0; i < color.Count(); ++i)
+	{
+		//Color tColor = color;
+		Color tColor = color.Element(i);
+#if 0
+#ifdef GAME_DLL
+		Msg("(server)tColor: %i %i %i %i\n", tColor.r(), tColor.g(), tColor.b(), tColor.a());
+#else
+		Msg("(client)tColor: %i %i %i %i\n", tColor.r(), tColor.g(), tColor.b(), tColor.a());
+#endif
+#endif
+		// Add up all values
+		r += tColor.r();
+		g += tColor.g();
+		b += tColor.b();
+		a += tColor.a();
+		
+	}
+
+	// Get the average
+	r = r / color.Count();
+	g = g / color.Count();
+	b = b / color.Count();
+	a = a / color.Count();
+
+	Assert( r >= 0 || r <= 255 );
+	Assert( b >= 0 || b <= 255 );
+	Assert( g >= 0 || g <= 255 );
+	Assert( a >= 0 || a <= 255 );
+#if 0
+#ifdef GAME_DLL
+	Msg("(server)Average Color: %i %i %i %i\n", r, g, b, a);
+#else
+	Msg("(client)Average Color: %i %i %i %i\n", r, g, b, a);
+#endif
+#endif
+	return Color( r, g, b, a );
+}
 
 PaintPowerType UTIL_Paint_TracePower( CBaseEntity* pBrushEntity, const Vector& contactPoint, const Vector& vContactNormal )
 {
@@ -1950,7 +2002,6 @@ PaintPowerType UTIL_Paint_TracePower( CBaseEntity* pBrushEntity, const Vector& c
 	}
 
 	CUtlVector<Color> color;
-	//Color color;
 
 	// Transform contact point from world to entity space
 	Vector vEntitySpaceContactPoint;
@@ -1964,26 +2015,15 @@ PaintPowerType UTIL_Paint_TracePower( CBaseEntity* pBrushEntity, const Vector& c
 	//engine->SphereTracePaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, vTransformedContactNormal, sv_paint_detection_sphere_radius.GetFloat(), color );
 	
 	engine->TracePaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, sv_paint_detection_sphere_radius.GetFloat(), color );
-	//engine->PaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, color, sv_paint_detection_sphere_radius.GetFloat() );
 	
 	Msg("color.Count(): %i\n", color.Count() );
+	
+	//if ( color.Count() != 0 && &color.Element( 0 ) != NULL )
+		//return MapColorToPower( color.Element(0) );
+	
+	//return NO_POWER;
 
-	// We really need to get these power colors
-	for (int i = 0; i < color.Count(); ++i)
-	{
-		//Color tColor = color;
-		Color tColor = color.Element(i);
-#ifdef GAME_DLL
-		Msg("(server)tColor: %i %i %i %i\n", tColor.r(), tColor.g(), tColor.b(), tColor.a());
-#else
-		Msg("(client)tColor: %i %i %i %i\n", tColor.r(), tColor.g(), tColor.b(), tColor.a());
-#endif
-	}
-	
-	if ( color.Count() != 0 && &color.Element( 0 ) != NULL )
-		return MapColorToPower( color.Element(0) );
-	
-	return NO_POWER;
+	return MapColorToPower( GetAveragePaintColorFromVector( color ) );
 
 }
 
