@@ -1,4 +1,4 @@
-//====== Copyright © 1996-2009, Valve Corporation, All rights reserved. =======
+//====== Copyright Â© 1996-2009, Valve Corporation, All rights reserved. =======
 //
 // Purpose: Projects a texture into the world (like the flashlight)
 //
@@ -7,6 +7,7 @@
 #include "cbase.h"
 #include "shareddefs.h"
 #include "env_projectedtexture.h"
+#include "world.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -50,8 +51,8 @@ DEFINE_INPUTFUNC(FIELD_FLOAT, "Ambient", InputSetAmbient),
 DEFINE_INPUTFUNC(FIELD_STRING, "SpotlightTexture", InputSetSpotlightTexture),
 DEFINE_THINKFUNC(InitialThink),
 // Portal 2
-//DEFINE_INPUTFUNC(FIELD_INTEGER, "SetLightStyle", InputSetLightStyle),
-//DEFINE_INPUTFUNC(FIELD_STRING, "SetPattern", InputSetPattern),
+DEFINE_INPUTFUNC(FIELD_INTEGER, "SetLightStyle", InputSetLightStyle),
+DEFINE_INPUTFUNC(FIELD_STRING, "SetPattern", InputSetPattern),
 DEFINE_INPUTFUNC(FIELD_FLOAT, "SetNearZ", InputSetNearZ),
 DEFINE_INPUTFUNC(FIELD_FLOAT, "SetFarZ", InputSetFarZ),
 
@@ -124,6 +125,28 @@ void UTIL_ColorStringToLinearFloatColor(Vector &color, const char *pString)
 	color.z = tmp[2] * (1.0f / 255.0f) * tmp[3];
 }
 
+void CEnvProjectedTexture::Spawn()
+{
+	m_bState = ((GetSpawnFlags() & ENV_PROJECTEDTEXTURE_STARTON) != 0);
+	m_bAlwaysUpdate = ((GetSpawnFlags() & ENV_PROJECTEDTEXTURE_ALWAYSUPDATE) != 0);
+
+	if (m_iStyle >= 32)
+	{
+		if (m_iszPattern == NULL_STRING && m_iDefaultStyle > 0)
+		{
+			m_iszPattern = MAKE_STRING(GetDefaultLightstyleString(m_iDefaultStyle));
+		}
+
+		if (m_bState == false)
+			engine->LightStyle(m_iStyle, "a");
+		else if (m_iszPattern != NULL_STRING)
+			engine->LightStyle(m_iStyle, (char*)STRING(m_iszPattern));
+		else
+			engine->LightStyle(m_iStyle, "m");
+	}
+	BaseClass::Spawn();
+}
+
 bool CEnvProjectedTexture::KeyValue(const char *szKeyName, const char *szValue)
 {
 	if (FStrEq(szKeyName, "lightcolor"))
@@ -165,6 +188,7 @@ bool CEnvProjectedTexture::GetKeyValue(const char *szKeyName, char *szValue, int
 
 void CEnvProjectedTexture::InputTurnOn(inputdata_t &inputdata)
 {
+	EnforceSingleProjectionRules(false);
 	m_bState = true;
 }
 
@@ -228,6 +252,17 @@ void CEnvProjectedTexture::InputSetSpotlightTexture(inputdata_t &inputdata)
 	Q_strcpy(m_SpotlightTextureName.GetForModify(), inputdata.value.String());
 }
 
+void CEnvProjectedTexture::InputSetLightStyle(inputdata_t& inputdata)
+{
+	m_iStyle = inputdata.value.Int();
+}
+
+void CEnvProjectedTexture::InputSetPattern(inputdata_t& inputdata)
+{
+	m_iszPattern = inputdata.value.StringID();
+	engine->LightStyle(m_iStyle, (char*)STRING(m_iszPattern));
+}
+
 void CEnvProjectedTexture::InputSetNearZ(inputdata_t &inputdata)
 {
 	m_flNearZ = inputdata.value.Float();
@@ -247,6 +282,9 @@ void CEnvProjectedTexture::Activate(void)
 	SetNextThink(gpGlobals->curtime + 0.1f);
 
 	BaseClass::Activate();
+	if (m_bState != false) {
+		EnforceSingleProjectionRules(true);
+	}
 }
 
 void CEnvProjectedTexture::InitialThink(void)
@@ -259,6 +297,18 @@ int CEnvProjectedTexture::UpdateTransmitState()
 	return SetTransmitState(FL_EDICT_ALWAYS);
 }
 
+void CEnvProjectedTexture::EnforceSingleProjectionRules(bool bWarnOnEnforcement)
+{
+	CEnvProjectedTexture* pEnvProjectedTexture = (CEnvProjectedTexture*)gEntList.FindEntityByClassname(NULL, "env_projectedtexture");
+	if (pEnvProjectedTexture != this) {
+		if (((bWarnOnEnforcement) && (pEnvProjectedTexture != false)) && (m_bState != false)) {
+			Warning("Warning: env_projected_texture (%s) forced off by (%s)\n", GetEntityNameAsCStr());
+		}
+		variant_t emptyVariant;
+		AcceptInput("TurnOff", NULL, NULL, emptyVariant, 0);
+	}
+	return;
+}
 
 // Console command for creating env_projectedtexture entities
 void CC_CreateFlashlight(const CCommand &args)
