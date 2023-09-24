@@ -43,6 +43,10 @@ public:
 	void InputAddPotatosToPortalgun( inputdata_t& inputdata );
 	void InputRemovePotatosFromPortalgun( inputdata_t& inputdata );
 	
+	void InputSetDropEnabled( inputdata_t &inputdata );
+	void InputForceVMGrabController( inputdata_t &inputdata );
+	void InputForcePhysicsGrabController( inputdata_t &inputdata );
+	void InputResetGrabControllerBehavior( inputdata_t &inputdata );
 	void InputPaintPlayerWithPortalPaint( inputdata_t &inputdata );
 	void InputSetMotionBlurAmount( inputdata_t &inputdata );
 #endif

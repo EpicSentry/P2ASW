@@ -25,6 +25,10 @@
 #include "c_basehlplayer.h"
 #endif
 
+#ifdef PORTAL2
+#include "c_portal_player.h"
+#endif
+
 #include "tier0/vprof.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -957,6 +961,11 @@ void CPrediction::RunCommand( C_BasePlayer *player, CUserCmd *ucmd, IMoveHelper 
 	Q_snprintf( sz, sizeof( sz ), "runcommand%04d", ucmd->command_number );
 	PREDICTION_TRACKVALUECHANGESCOPE( sz );
 #endif
+	
+#ifdef PORTAL2
+	assert_cast<CPortal_Player*>( player )->PreventCrouchJump( ucmd );
+#endif
+
 	StartCommand( player, ucmd );
 
 	// Set globals appropriately

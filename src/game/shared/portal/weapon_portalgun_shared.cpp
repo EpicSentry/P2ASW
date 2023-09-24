@@ -11,6 +11,14 @@
 #include "rumble_shared.h"
 
 #include "prop_portal_shared.h"
+#include "particle_parse.h"
+
+#ifdef CLIENT_DLL
+#include "prediction.h"
+#endif
+
+ConVar portalgun_fire_delay ( "portalgun_fire_delay", "0.20", FCVAR_CHEAT|FCVAR_REPLICATED );
+ConVar portalgun_held_button_fire_delay ( "portalgun_held_button_fire_fire_delay", "0.50", FCVAR_CHEAT|FCVAR_REPLICATED );
 
 #ifdef CLIENT_DLL
 	#define CWeaponPortalgun C_WeaponPortalgun
@@ -85,6 +93,13 @@ void CWeaponPortalgun::Precache()
 	PrecacheParticleSystem( "portal_2_projectile_stream_pedestal" );
 	PrecacheParticleSystem( "portal_1_charge" );
 	PrecacheParticleSystem( "portal_2_charge" );
+	
+	PrecacheParticleSystem( "portal_projectile_stream" );
+
+	PrecacheParticleSystem( "portalgun_muzzleflash_FP" );
+	PrecacheParticleSystem( "portalgun_muzzleflash" );
+	
+
 #endif
 }
 
@@ -240,6 +255,8 @@ void CWeaponPortalgun::PrimaryAttack( void )
 	pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
 	pPlayer->ViewPunch( QAngle( random->RandomFloat( -1, -0.5f ), random->RandomFloat( -1, 1 ), 0 ) );
+
+	PostAttack();
 }
 
 //-----------------------------------------------------------------------------
@@ -280,6 +297,8 @@ void CWeaponPortalgun::SecondaryAttack( void )
 	pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
 	pPlayer->ViewPunch( QAngle( random->RandomFloat( -1, -0.5f ), random->RandomFloat( -1, 1 ), 0 ) );
+
+	PostAttack();
 }
 
 void CWeaponPortalgun::DelayAttack( float fDelay )
@@ -457,4 +476,71 @@ void CWeaponPortalgun::UpdateOnRemove(void)
 {
 	DestroyEffects();
 	BaseClass::UpdateOnRemove();
+}
+
+void CWeaponPortalgun::PostAttack( void )
+{
+	// Only the player fires this way so we can cast
+	CPortal_Player *pPlayer = ToPortalPlayer( GetOwner() );
+	if ( pPlayer == NULL )
+		return;
+
+#if defined( GAME_DLL ) //TODO: client version would probably be a good idea
+	pPlayer->RumbleEffect( RUMBLE_PORTALGUN_LEFT, 0, RUMBLE_FLAGS_NONE );
+#endif
+
+
+	int nSplitScreenSlot = pPlayer->GetSplitScreenPlayerSlot();
+	CBaseAnimating *pModelView =  pPlayer->GetViewModel();
+
+#if defined( CLIENT_DLL )
+	if ( !prediction->InPrediction() || prediction->IsFirstTimePredicted() )
+#endif
+	{		
+		if ( ( pPlayer->IsSplitScreenPlayer() || pPlayer->HasAttachedSplitScreenPlayers() ) && nSplitScreenSlot != -1 )
+		{
+#if defined( CLIENT_DLL )
+			if ( pModelView )
+			{
+				CUtlReference<CNewParticleEffect> m_hPortalGunMuzzle = pModelView->ParticleProp()->Create( "portalgun_muzzleflash_FP", PATTACH_POINT_FOLLOW, "muzzle" );
+				m_hPortalGunMuzzle->SetDrawOnlyForSplitScreenUser( nSplitScreenSlot );
+				m_hPortalGunMuzzle = NULL;
+			}
+			DispatchParticleEffect( "portalgun_muzzleflash", PATTACH_POINT_FOLLOW, this, "muzzle");
+#endif
+		}
+		else
+		{
+			if ( pModelView )
+				DispatchParticleEffect( "portalgun_muzzleflash_FP", PATTACH_POINT_FOLLOW, pModelView, "muzzle" );
+			DispatchParticleEffect( "portalgun_muzzleflash", PATTACH_POINT_FOLLOW, this, "muzzle");
+		}
+	}
+
+	float flFireDelay = portalgun_fire_delay.GetFloat();
+
+#if USE_SLOWTIME
+	if ( pPlayer->IsSlowingTime() )
+	{
+		flFireDelay *= slowtime_speed.GetFloat();
+	}
+	else
+#endif // USE_SLOWTIME
+	{
+		QAngle qPunch;
+		qPunch.x = SharedRandomFloat( "CWeaponPortalgun::PrimaryAttack() ViewPunchX", -1, -0.5f );
+		qPunch.y = SharedRandomFloat( "CWeaponPortalgun::PrimaryAttack() ViewPunchY", -1, 1 );
+		qPunch.z = 0.0f;
+		pPlayer->ViewPunch( qPunch );
+	}
+
+	// Don't fire again too quickly
+	m_flNextPrimaryAttack = gpGlobals->curtime + flFireDelay;
+	m_flNextSecondaryAttack = gpGlobals->curtime + flFireDelay;
+
+	// Held-button repeat fires get a different delay
+	m_flNextRepeatPrimaryAttack = gpGlobals->curtime + portalgun_held_button_fire_delay.GetFloat();
+	m_flNextRepeatSecondaryAttack = gpGlobals->curtime + portalgun_held_button_fire_delay.GetFloat();
+	// player "shoot" animation
+	pPlayer->SetAnimation( PLAYER_ATTACK1 );
 }

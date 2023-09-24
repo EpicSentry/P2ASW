@@ -33,7 +33,7 @@
 #ifdef HL2_DLL
 #include "weapon_physcannon.h"
 #else
-#include "player_pickup_controller.h"
+#include "portal_grabcontroller_shared.h"
 #endif
 #include "script_intro.h"
 #include "effect_dispatch_data.h"

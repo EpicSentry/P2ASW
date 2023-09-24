@@ -11,7 +11,7 @@
 #include "physics_saverestore.h"
 #include "phys_controller.h"
 #include "prop_portal.h"
-#include "player_pickup_controller.h"
+#include "portal_grabcontroller_shared.h"
 #include "datacache/imdlcache.h"
 #include "prop_weightedcube.h"
 #include "portal_player.h"
@@ -1004,14 +1004,13 @@ void CPropWeightedCube::OnPhysGunPickup( CBasePlayer *pPhysGunUser, PhysGunPicku
 		{
 			m_pController->Enable( false );
 		}
-#if 0
+
 		CPortal_Player *pPlayer = ToPortalPlayer( pPhysGunUser );
 		if ( pPlayer )
 		{
 			// Force a cool-down on the +USE key after a successful grab
 			pPlayer->SetUseKeyCooldownTime( 0.5f );
 		}
-#endif
 	}
 
 	/*

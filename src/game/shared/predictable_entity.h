@@ -159,6 +159,22 @@ class SendTable;
 	};																		\
 	static C##localName##Foo g_C##localName##Foo;
 
+#define LINK_ENTITY_TO_CLASS_CLIENTONLY( localName, className )				\
+	static C_BaseEntity *C##className##Factory( void )						\
+	{																		\
+		return static_cast< C_BaseEntity * >( new className );				\
+	};																		\
+	class C##localName##Foo													\
+	{																		\
+	public:																	\
+		C##localName##Foo( void )											\
+		{																	\
+			GetClassMap().Add( #localName, #className, sizeof( className ),	\
+				&C##className##Factory );									\
+		}																	\
+	};																		\
+	static C##localName##Foo g_C##localName##Foo;
+
 #define BEGIN_NETWORK_TABLE( className, tableName ) BEGIN_RECV_TABLE( className, tableName )
 #define BEGIN_NETWORK_TABLE_NOBASE( className, tableName ) BEGIN_RECV_TABLE_NOBASE( className, tableName )
 

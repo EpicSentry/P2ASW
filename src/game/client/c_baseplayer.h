@@ -97,6 +97,10 @@ public:
 	virtual void	MakeTracer( const Vector &vecTracerSrc, const trace_t &tr, int iTracerType );
 
 	virtual void	GetToolRecordingState( KeyValues *msg );
+	
+#ifdef PORTAL2
+	bool			ClearUseEntity();
+#endif
 
 	void	SetAnimationExtension( const char *pExtension );
 
@@ -136,6 +140,12 @@ public:
 	virtual void	PlayerUse( void );
 	CBaseEntity		*FindUseEntity( void );
 	virtual bool	IsUseableEntity( CBaseEntity *pEntity, unsigned int requiredCaps );
+	
+#ifdef PORTAL2
+	virtual bool	CanPickupObject( CBaseEntity *pObject, float massLimit, float sizeLimit );
+	virtual float	GetHeldObjectMass( IPhysicsObject *pHeldObject );
+	virtual void	ForceDropOfCarriedPhysObjects(){};
+#endif
 
 	// Data handlers
 	virtual bool	IsPlayer( void ) const { return true; }
@@ -245,6 +255,7 @@ public:
 
 	bool						IsSplitScreenPlayer() const;
 	int							GetSplitScreenPlayerSlot();
+	bool						HasAttachedSplitScreenPlayers() const;
 
 	virtual IClientModelRenderable*	GetClientModelRenderable();
 	virtual bool				PreRender( int nSplitScreenPlayerSlot );
@@ -448,6 +459,8 @@ public:
 	static void RecvProxy_NonLocalCellOriginZ( const CRecvProxyData *pData, void *pStruct, void *pOut );
 
 	virtual bool ShouldRegenerateOriginFromCellBits() const;
+	
+	void SetUseEntity( CBaseEntity *pUseEntity );
 
 public:
 	int m_StuckLast;
@@ -511,8 +524,9 @@ private:
 public:
 	// For weapon prediction
 	bool					m_fOnTarget;		//Is the crosshair on a target?
+	
 
-
+	EHANDLE			m_hUseEntity;
 
 // END PREDICTION DATA COMPACTION
 public:
@@ -580,7 +594,6 @@ private:
 
 	// Vehicle stuff.
 	EHANDLE			m_hOldVehicle;
-	EHANDLE			m_hUseEntity;
 	
 	CInterpolatedVar< Vector >	m_iv_vecViewOffset;
 

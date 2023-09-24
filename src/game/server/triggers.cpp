@@ -3131,7 +3131,14 @@ void CTriggerCamera::Enable( void )
 			}
 		}
 	}
-
+	
+#if defined ( PORTAL2 )
+	CPortal_Player* pPortalPlayer = ToPortalPlayer( pPlayer );
+	if ( pPortalPlayer && pPortalPlayer->IsZoomed() )
+	{
+		pPortalPlayer->ZoomOut();
+	}
+#endif
 
 	m_nPlayerButtons = pPlayer->m_nButtons;
 

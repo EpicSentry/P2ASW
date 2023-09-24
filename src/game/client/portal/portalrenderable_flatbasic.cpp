@@ -22,6 +22,7 @@
 #include "view_scene.h"
 #include "materialsystem/imaterialvar.h"
 #include "tier0/vprof.h"
+#include "portal_util_shared.h"
 
 
 #define PORTALRENDERABLE_FLATBASIC_MINPIXELVIS 0.0f
@@ -709,11 +710,12 @@ bool CPortalRenderable_FlatBasic::ShouldUpdateDepthDoublerTexture( const CViewSe
 void CPortalRenderable_FlatBasic::HandlePortalPlaybackMessage( KeyValues *pKeyValues )
 {
 	int nLinkedPortalId = pKeyValues->GetInt( "linkedPortalId" );
-	m_fOpenAmount = pKeyValues->GetFloat( "openAmount" );
-	m_fStaticAmount = pKeyValues->GetFloat( "staticAmount" );
-	m_fSecondaryStaticAmount = pKeyValues->GetFloat( "secondaryStaticAmount" );
-	m_bIsPortal2 = pKeyValues->GetInt( "isPortal2" ) != 0;
 	m_pLinkedPortal = nLinkedPortalId >= 0 ? (CPortalRenderable_FlatBasic *)FindRecordedPortal( nLinkedPortalId ) : NULL;
+	if( m_pLinkedPortal )
+	{
+		m_pLinkedPortal->m_pLinkedPortal = this;
+	}
+	m_bIsPortal2 = pKeyValues->GetInt( "isPortal2" ) != 0;
 	matrix3x4_t *pMat = (matrix3x4_t*)pKeyValues->GetPtr( "portalToWorld" );
 
 	MatrixGetColumn( *pMat, 3, m_ptOrigin );
@@ -722,7 +724,10 @@ void CPortalRenderable_FlatBasic::HandlePortalPlaybackMessage( KeyValues *pKeyVa
 	MatrixGetColumn( *pMat, 2, m_vUp );
 	m_vRight *= -1.0f;
 
+	//SetHalfSizes( pKeyValues->GetFloat( "halfWidth", 0.0f ), pKeyValues->GetFloat( "halfHeight", 0.0f ) );
 	PortalMoved();
+
+	UTIL_Portal_ComputeMatrix( this, m_pLinkedPortal );
 }
 
 extern ConVar mat_wireframe;

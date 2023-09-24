@@ -595,7 +595,63 @@ void IN_Grenade2Up( const CCommand &args ) { KeyUp( &in_grenade2, args[1] ); }
 void IN_Grenade2Down( const CCommand &args ) { KeyDown( &in_grenade2, args[1] ); }
 void IN_XboxStub( const CCommand &args ) { /*do nothing*/ }
 
+#ifdef PORTAL2
 
+#if USE_SLOWTIME
+
+	// Slow-time
+	kbutton_t	in_slowtoggle;
+
+	void IN_SlowTimeUp( const CCommand &args ) { KeyUp( &in_slowtoggle, args[1] ); }
+	void IN_SlowTimeDown( const CCommand &args ) { KeyDown( &in_slowtoggle, args[1] ); }
+
+	static ConCommand startslowtime( "+slowtime", IN_SlowTimeDown );
+	static ConCommand endslowtime( "-slowtime", IN_SlowTimeUp );
+
+#endif // USE_SLOWTIME
+
+kbutton_t	in_remote_view_toggle;
+
+
+static bool g_bRemoteViewKeyWasUp = true;
+
+void IN_RemoteViewUp( const CCommand &args ) 
+{ 
+	g_bRemoteViewKeyWasUp = true;
+	KeyUp( &in_remote_view_toggle, args[1] ); 
+}
+void IN_RemoteViewDown( const CCommand &args ) 
+{
+	if ( g_bRemoteViewKeyWasUp )
+	{
+		g_bRemoteViewKeyWasUp = false;
+		IGameEvent * event = gameeventmanager->CreateEvent( "remote_view_activated" );
+		if ( event )
+		{
+			gameeventmanager->FireEvent( event );
+		}
+	}
+	KeyDown( &in_remote_view_toggle, args[1] ); 
+}
+
+static ConCommand startremoteview( "+remote_view", IN_RemoteViewDown );
+static ConCommand endremoteview( "-remote_view", IN_RemoteViewUp );
+
+extern bool g_bShowGhostedPortals;
+void IN_ShowPortalsUp( const CCommand &args ) { g_bShowGhostedPortals = false; }
+void IN_ShowPortalsDown( const CCommand &args ) { g_bShowGhostedPortals = true; }
+static ConCommand showportals( "+showportals", IN_ShowPortalsDown );
+static ConCommand hideportals( "-showportals", IN_ShowPortalsUp );
+
+kbutton_t	in_coop_ping;
+
+void IN_CoopPingUp( const CCommand &args) { KeyUp( &in_coop_ping, args[1] ); }
+void IN_CoopPingDown( const CCommand &args) { KeyDown( &in_coop_ping, args[1] ); }
+
+static ConCommand presscoopping( "+coop_ping", IN_CoopPingDown );
+static ConCommand unpresscoopping( "-coop_ping", IN_CoopPingUp );
+
+#endif // PORTAL2
 
 #ifdef INFESTED_DLL
 void IN_PrevAbilityUp( const CCommand &args ) { KeyUp( &in_prevability, args[1] ); }
@@ -1611,8 +1667,16 @@ int CInput::GetButtonBits( bool bResetState )
 	CalcButtonBits( nSlot, bits, IN_GRENADE1, ignore, &in_grenade1, bResetState );
 	CalcButtonBits( nSlot, bits, IN_GRENADE2, ignore, &in_grenade2, bResetState );
 	CalcButtonBits( nSlot, bits, IN_LOOKSPIN, ignore, &in_lookspin, bResetState );
+	
+#ifdef PORTAL2
 
+	#if USE_SLOWTIME
+		CalcButtonBits( nSlot, bits, IN_SLOWTIME, ignore, &in_slowtoggle, bResetState );
+	#endif // USE_SLOWTIME
 
+	CalcButtonBits( nSlot, bits, IN_COOP_PING, ignore, &in_coop_ping, bResetState );
+	CalcButtonBits( nSlot, bits, IN_REMOTE_VIEW, ignore, &in_remote_view_toggle, bResetState );
+#endif // PORTAL2
 
 #ifdef INFESTED_DLL
 	CalcButtonBits( nSlot, bits, IN_PREV_ABILITY, ignore, &in_prevability, bResetState );

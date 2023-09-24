@@ -4285,6 +4285,30 @@ void C_BaseEntity::SetLocalAngularVelocity( const QAngle &vecAngVelocity )
 }
 
 
+void C_BaseEntity::Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity )
+{
+	//TODO: Beef this up to work more like the server version.
+	Assert( GetPredictable() ); //does this even make sense unless we're predicting the teleportation?
+	int iEffects = GetEffects();
+	if( newPosition )
+	{
+		SetNetworkOrigin( *newPosition );
+		iEffects |= EF_NOINTERP;
+	}
+	if( newAngles )
+	{
+		SetNetworkAngles( *newAngles );
+		iEffects |= EF_NOINTERP;
+	}
+	if( newVelocity )
+	{
+		SetLocalVelocity( *newVelocity );
+		iEffects |= EF_NOINTERP;
+	}
+	SetEffects( iEffects );
+}
+
+
 //-----------------------------------------------------------------------------
 // Sets the local position from a transform
 //-----------------------------------------------------------------------------

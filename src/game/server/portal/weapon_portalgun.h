@@ -115,6 +115,9 @@ public:
 	void SetPotatosOnPortalgun( bool bPotatos );
 	
 	void PostAttack( void );
+
+	void UseDeny( void );
+
 protected:
 
 	void	StartEffects( void );	// Initialize all sprites and beams

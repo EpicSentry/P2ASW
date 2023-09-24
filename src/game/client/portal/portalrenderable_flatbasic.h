@@ -112,6 +112,7 @@ public:
 	CPortalRenderable_FlatBasic	*m_pLinkedPortal;
 	Vector			m_ptOrigin;
 	Vector			m_vForward, m_vUp, m_vRight;
+	QAngle			m_qAbsAngle;
 	float			m_fStaticAmount;
 	float			m_fSecondaryStaticAmount; // used to help kludge the end of our recursive rendering chain
 	float			m_fOpenAmount;	

@@ -8,9 +8,13 @@
 #include "cbase.h"
 #include "prop_portal_shared.h"
 #include "portal_shareddefs.h"
+#include "portal_player_shared.h"
 
 #ifdef CLIENT_DLL
 #include "c_basedoor.h"
+#include "c_portal_player.h"
+#else
+#include "portal_player.h"
 #endif
 
 CUtlVector<CProp_Portal *> CProp_Portal_Shared::AllPortals;
@@ -78,3 +82,16 @@ bool CProp_Portal_Shared::IsEntityTeleportable( CBaseEntity *pEntity )
 
 
 
+
+
+void CProp_Portal::PortalSimulator_TookOwnershipOfEntity( CBaseEntity *pEntity )
+{
+	if( pEntity->IsPlayer() )
+		((CPortal_Player *)pEntity)->m_hPortalEnvironment = this;
+}
+
+void CProp_Portal::PortalSimulator_ReleasedOwnershipOfEntity( CBaseEntity *pEntity )
+{
+	if( pEntity->IsPlayer() && (((CPortal_Player *)pEntity)->m_hPortalEnvironment.Get() == this) )
+		((CPortal_Player *)pEntity)->m_hPortalEnvironment = NULL;
+}

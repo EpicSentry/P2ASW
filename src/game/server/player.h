@@ -659,6 +659,7 @@ public:
 	void					AddSplitScreenPlayer( CBasePlayer *pOther );
 	void					RemoveSplitScreenPlayer( CBasePlayer *pOther );
 	CUtlVector< CHandle< CBasePlayer > > &GetSplitScreenPlayers();
+	bool					HasAttachedSplitScreenPlayers() const;
 
 	// Returns true if team was changed
 	virtual bool			EnsureSplitScreenTeam();
@@ -752,6 +753,8 @@ public:
 	void	SetAdditionalPVSOrigin( const Vector &vecOrigin );
 	void	SetCameraPVSOrigin( const Vector &vecOrigin );
 	void	SetMuzzleFlashTime( float flTime );
+	void	SetDropEnabled( bool bEnabled );
+	void	SetDuckEnabled( bool bEnabled );
 	void	SetUseEntity( CBaseEntity *pUseEntity );
 	virtual CBaseEntity* GetUseEntity( void );
 	virtual CBaseEntity* GetPotentialUseEntity( void );
@@ -929,7 +932,9 @@ protected:
 	Vector					m_vecAdditionalPVSOrigin; 
 	// Extra PVS origin if we are using a camera object
 	Vector					m_vecCameraPVSOrigin;
-
+	
+	bool					m_bDropEnabled;
+	bool					m_bDuckEnabled;
 	CNetworkHandle( CBaseEntity, m_hUseEntity );			// the player is currently controlling this entity because of +USE latched, NULL if no entity
 
 	int						m_iTrain;				// Train control position
@@ -1310,11 +1315,6 @@ inline void CBasePlayer::SetMuzzleFlashTime( float flTime )
 	m_flFlashTime = flTime; 
 }
 
-inline void CBasePlayer::SetUseEntity( CBaseEntity *pUseEntity ) 
-{ 
-	m_hUseEntity = pUseEntity; 
-}
-
 // Bot accessors...
 inline void CBasePlayer::SetTimeBase( float flTimeBase ) 
 { 
@@ -1399,6 +1399,16 @@ inline const CBasePlayer *ToBasePlayer( const CBaseEntity *pEntity )
 #else
 	return static_cast<const CBasePlayer *>( pEntity );
 #endif
+}
+
+inline void CBasePlayer::SetDropEnabled( bool bEnabled ) 
+{ 
+	m_bDropEnabled = bEnabled; 
+}
+
+inline void CBasePlayer::SetDuckEnabled( bool bEnabled ) 
+{ 
+	m_bDuckEnabled = bEnabled; 
 }
 
 

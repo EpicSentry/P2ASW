@@ -48,7 +48,12 @@ ConVar cl_vertical_elevator_fix( "cl_vertical_elevator_fix", "1" );
 class CReservePlayerSpot;
 
 #define PORTAL_FUNNEL_AMOUNT 6.0f
+#define	MAX_CLIP_PLANES	5
 
+#define CRITICAL_SLOPE 0.7f
+#define PLAYER_FLING_HELPER_MIN_SPEED 200.0f
+
+extern bool g_bMovementOptimizations;
 extern bool g_bAllowForcePortalTrace;
 extern bool g_bForcePortalTrace;
 
@@ -92,6 +97,9 @@ public:
 	
 	// Only used by players.  Moves along the ground when player is a MOVETYPE_WALK.
 	//virtual void	WalkMove();
+	
+	// The basic solid body movement clip that slides along multiple planes
+	virtual int		TryPlayerMove( Vector *pFirstDest = NULL, trace_t *pFirstTrace = NULL );
 
 	virtual void PlayerRoughLandingEffects( float fvol );
 
@@ -885,6 +893,272 @@ static CPortalGameMovement g_GameMovement;
 IGameMovement *g_pGameMovement = ( IGameMovement * )&g_GameMovement;
 
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CGameMovement, IGameMovement,INTERFACENAME_GAMEMOVEMENT, g_GameMovement );
+
+int CPortalGameMovement::TryPlayerMove( Vector *pFirstDest, trace_t *pFirstTrace )
+{
+	int			bumpcount, numbumps;
+	Vector		dir;
+	float		d;
+	int			numplanes;
+	Vector		planes[MAX_CLIP_PLANES];
+	Vector		primal_velocity, original_velocity;
+	Vector      new_velocity;
+	int			i, j;
+	trace_t	pm;
+	Vector		end;
+	float		time_left, allFraction;
+	int			blocked;		
+
+	numbumps  = 4;           // Bump up to four times
+
+	blocked   = 0;           // Assume not blocked
+	numplanes = 0;           //  and not sliding along any planes
+
+	VectorCopy (mv->m_vecVelocity, original_velocity);  // Store original velocity
+	VectorCopy (mv->m_vecVelocity, primal_velocity);
+
+	allFraction = 0;
+	time_left = gpGlobals->frametime;   // Total time for this movement operation.
+
+	new_velocity.Init();
+
+	for (bumpcount=0 ; bumpcount < numbumps; bumpcount++)
+	{
+		if ( mv->m_vecVelocity.Length() == 0.0 )
+			break;
+
+		// Assume we can move all the way from the current origin to the
+		//  end point.
+		VectorMA( mv->GetAbsOrigin(), time_left, mv->m_vecVelocity, end );
+
+		// See if we can make it from origin to end point.
+		if ( g_bMovementOptimizations )
+		{
+			// If their velocity Z is 0, then we can avoid an extra trace here during WalkMove.
+			if ( pFirstDest && ( end == *pFirstDest ) )
+			{
+				pm = *pFirstTrace;
+			}
+			else
+			{
+#if defined( PLAYER_GETTING_STUCK_TESTING )
+				trace_t foo;
+				TracePlayerBBox( mv->GetAbsOrigin(), mv->GetAbsOrigin(), PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, foo );
+				if ( foo.startsolid || foo.fraction != 1.0f )
+				{
+					Msg( "bah\n" );
+				}
+#endif
+				TracePlayerBBox( mv->GetAbsOrigin(), end, PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, pm );
+			}
+		}
+		else
+		{
+			TracePlayerBBox( mv->GetAbsOrigin(), end, PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, pm );
+		}
+
+		allFraction += pm.fraction;
+
+		// If we started in a solid object, or we were in solid space
+		//  the whole way, zero out our velocity and return that we
+		//  are blocked by floor and wall.
+		if (pm.allsolid)
+		{	
+			// entity is trapped in another solid
+			VectorCopy (vec3_origin, mv->m_vecVelocity);
+			return 4;
+		}
+
+		// If we moved some portion of the total distance, then
+		//  copy the end position into the pmove.origin and 
+		//  zero the plane counter.
+		if( pm.fraction > 0 )
+		{	
+
+			// NOTE: Disabled this in portal as we don't have displacement collisions and all traces are amplified greatly making each TracePlayerBBox() really expensive
+#if defined(RECHECK_TERRAIN_COLLISION_BUG)
+			if ( numbumps > 0 && pm.fraction == 1 )
+			{
+				// There's a precision issue with terrain tracing that can cause a swept box to successfully trace
+				// when the end position is stuck in the triangle.  Re-run the test with an uswept box to catch that
+				// case until the bug is fixed.
+				// If we detect getting stuck, don't allow the movement
+				trace_t stuck;
+				TracePlayerBBox( pm.endpos, pm.endpos, PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, stuck );
+				if ( stuck.startsolid || stuck.fraction != 1.0f )
+				{
+					//Msg( "Player will become stuck!!!\n" );
+					VectorCopy (vec3_origin, mv->m_vecVelocity);
+					break;
+				}
+			}
+#endif
+
+#if defined( PLAYER_GETTING_STUCK_TESTING )
+			trace_t foo;
+			TracePlayerBBox( pm.endpos, pm.endpos, PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, foo );
+			if ( foo.startsolid || foo.fraction != 1.0f )
+			{
+				Msg( "Player will become stuck!!!\n" );
+			}
+#endif
+			// actually covered some distance
+			mv->SetAbsOrigin( pm.endpos);
+			VectorCopy (mv->m_vecVelocity, original_velocity);
+			numplanes = 0;
+		}
+
+		// If we covered the entire distance, we are done
+		//  and can return.
+		if (pm.fraction == 1)
+		{
+			break;		// moved the entire distance
+		}
+
+		// Save entity that blocked us (since fraction was < 1.0)
+		//  for contact
+		// Add it if it's not already in the list!!!
+		MoveHelper( )->AddToTouched( pm, mv->m_vecVelocity );
+
+
+		if ( player->GetAbsVelocity().AsVector2D().Length() > 275.0f )
+		{
+			if ( pm.m_pEnt && pm.m_pEnt->GetMoveType() == MOVETYPE_VPHYSICS )
+			{
+				// Don't let the player auto grab something that they just ran in to
+				// They end up holding it, but with less momentum which is confusing.
+				CPortal_Player *pPortalPlayer = static_cast< CPortal_Player* >( player );
+				pPortalPlayer->m_flAutoGrabLockOutTime = gpGlobals->curtime;
+
+#ifdef CLIENT_DLL
+				STEAMWORKS_TESTSECRET();
+
+				if ( pm.m_pEnt == pPortalPlayer->m_hUseEntToSend.Get() )
+				{
+					pPortalPlayer->m_hUseEntToSend = NULL;
+				}
+#endif
+			}
+		}
+
+		// If the plane we hit has a normal whose dot product with the gravity direction is high
+		// then this is probably a floor relative to our orientation
+		if ( DotProduct( pm.plane.normal, m_vGravityDirection ) > CRITICAL_SLOPE )
+		{
+			blocked |= 1;		// floor
+		}
+		// If the plane's normal dotted with the gravity direction is 0 then it's a wall relative to our orientation
+		if ( DotProduct( pm.plane.normal, m_vGravityDirection ) == 0.f )
+		{
+			blocked |= 2;		// step / wall
+		}
+
+		// Reduce amount of m_flFrameTime left by total time left * fraction
+		//  that we covered.
+		time_left -= time_left * pm.fraction;
+
+		// Did we run out of planes to clip against?
+		if (numplanes >= MAX_CLIP_PLANES)
+		{	
+			// this shouldn't really happen
+			//  Stop our movement if so.
+			VectorCopy (vec3_origin, mv->m_vecVelocity);
+			//Con_DPrintf("Too many planes 4\n");
+
+			break;
+		}
+
+		// Set up next clipping plane
+		VectorCopy (pm.plane.normal, planes[numplanes]);
+		numplanes++;
+
+		// modify original_velocity so it parallels all of the clip planes
+		//
+
+		// reflect player velocity 
+		// Only give this a try for first impact plane because you can get yourself stuck in an acute corner by jumping in place
+		//  and pressing forward and nobody was really using this bounce/reflection feature anyway...
+		if ( numplanes == 1 &&
+			player->GetMoveType() == MOVETYPE_WALK &&
+			player->GetGroundEntity() == NULL )	
+		{
+			for ( i = 0; i < numplanes; i++ )
+			{
+				if ( DotProduct( planes[i], m_vGravityDirection ) > CRITICAL_SLOPE  )
+				{
+					// floor or slope
+					ClipVelocity( original_velocity, planes[i], new_velocity, 1 );
+					VectorCopy( new_velocity, original_velocity );
+				}
+				else
+				{
+					ClipVelocity( original_velocity, planes[i], new_velocity, 1.0 + sv_bounce.GetFloat() * (1 - player->m_surfaceFriction) );
+				}
+			}
+
+			VectorCopy( new_velocity, mv->m_vecVelocity );
+			VectorCopy( new_velocity, original_velocity );
+		}
+		else
+		{
+			for (i=0 ; i < numplanes ; i++)
+			{
+				ClipVelocity( original_velocity, planes[i], mv->m_vecVelocity, 1 );
+
+				for (j=0 ; j<numplanes ; j++)
+				{
+					if (j != i)
+					{
+						// Are we now moving against this plane?
+						if (mv->m_vecVelocity.Dot(planes[j]) < 0)
+							break;	// not ok
+					}
+				}
+
+				if (j == numplanes)  // Didn't have to clip, so we're ok
+					break;
+			}
+
+			// Did we go all the way through plane set
+			if (i != numplanes)
+			{	// go along this plane
+				// pmove.velocity is set in clipping call, no need to set again.
+				;  
+			}
+			else
+			{	// go along the crease
+				if (numplanes != 2)
+				{
+					VectorCopy (vec3_origin, mv->m_vecVelocity);
+					break;
+				}
+				CrossProduct (planes[0], planes[1], dir);
+				dir.NormalizeInPlace();
+				d = dir.Dot(mv->m_vecVelocity);
+				VectorScale (dir, d, mv->m_vecVelocity );
+			}
+
+			//
+			// if original velocity is against the original velocity, stop dead
+			// to avoid tiny occilations in sloping corners
+			//
+			d = mv->m_vecVelocity.Dot(primal_velocity);
+			if (d <= 0)
+			{
+				//Con_DPrintf("Back\n");
+				VectorCopy (vec3_origin, mv->m_vecVelocity);
+				break;
+			}
+		}
+	}
+
+	if ( allFraction == 0 )
+	{
+		VectorCopy (vec3_origin, mv->m_vecVelocity);
+	}
+
+	return blocked;
+}
 
 // We'll fix this later
 #if 0

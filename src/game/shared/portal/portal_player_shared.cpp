@@ -20,13 +20,16 @@
 #include "portal_gamestats.h"
 #include "util.h"
 #include "explode.h"
+#include "eventqueue.h"
 #endif
+#include "paint/weapon_paintgun_shared.h"
 #include "movevars_shared.h"
 #include "portal_player_shared.h"
 #include "in_buttons.h"
 #include "meshutils/mesh.h"
 #include "engine/IEngineSound.h"
 #include "SoundEmitterSystem/isoundemittersystembase.h"
+#include "player_pickup.h"
 
 //-----------------------------------------------------------------------------
 // Multiplies the vector by the transpose of the matrix
@@ -61,6 +64,7 @@ acttable_t	unarmedActtable[] =
 	{ ACT_HL2MP_JUMP,					ACT_HL2MP_JUMP_MELEE,					false },
 };
 
+#define TLK_PLAYER_PICKED_UP_ITEM "TLK_PLAYER_PICKED_UP_ITEM"
 const char *g_pszChellConcepts[] =
 {
 	"CONCEPT_CHELL_IDLE",
@@ -92,38 +96,6 @@ void TracePlayerBoxAgainstCollidables( trace_t& trace,
 	UTIL_ClearTrace( trace );
 	UTIL_Portal_TraceRay_With( player->m_hPortalEnvironment, ray, MASK_PLAYERSOLID, &traceFilter, &trace, true );
 }
-
-void ComputePlayerMatrix( CBasePlayer *pPlayer, matrix3x4_t &out )
-{
-	if ( !pPlayer )
-		return;
-
-	QAngle angles = pPlayer->EyeAngles();
-	Vector origin = pPlayer->EyePosition();
-	
-	// 0-360 / -180-180
-	//angles.x = init ? 0 : AngleDistance( angles.x, 0 );
-	//angles.x = clamp( angles.x, -PLAYER_LOOK_PITCH_RANGE, PLAYER_LOOK_PITCH_RANGE );
-	angles.x = 0;
-
-	float feet = pPlayer->GetAbsOrigin().z + pPlayer->WorldAlignMins().z;
-	float eyes = origin.z;
-	float zoffset = 0;
-	// moving up (negative pitch is up)
-	if ( angles.x < 0 )
-	{
-		zoffset = RemapVal( angles.x, 0, -PLAYER_LOOK_PITCH_RANGE, PLAYER_HOLD_LEVEL_EYES, PLAYER_HOLD_UP_EYES );
-	}
-	else
-	{
-		zoffset = RemapVal( angles.x, 0, PLAYER_LOOK_PITCH_RANGE, PLAYER_HOLD_LEVEL_EYES, PLAYER_HOLD_DOWN_FEET + (feet - eyes) );
-	}
-	origin.z += zoffset;
-	angles.x = 0;
-	AngleMatrix( angles, origin, out );
-}
-
-
 
 extern float IntervalDistance( float x, float x0, float x1 );
 
@@ -165,6 +137,10 @@ ConVar sv_contact_region_thickness( "sv_contact_region_thickness", "0.2f", FCVAR
 ConVar sv_clip_contacts_to_portals( "sv_clip_contacts_to_portals", "0", FCVAR_REPLICATED | FCVAR_CHEAT, "Enable/Disable clipping contact regions to portal planes." );
 ConVar sv_debug_draw_contacts( "sv_debug_draw_contacts", "0", FCVAR_REPLICATED | FCVAR_CHEAT, "0: Dont draw anything.  1: Draw contacts.  2: Draw colored contacts" );
 ConVar sv_post_teleportation_box_time( "sv_post_teleportation_box_time", ".0333333f", FCVAR_REPLICATED | FCVAR_CHEAT, "Time to use a slightly expanded box for contacts right after teleportation." );
+
+ConVar sv_enableholdrotation( "sv_enableholdrotation", "0", FCVAR_REPLICATED, "When enabled, hold attack2 to rotate held objects" );
+ConVar sv_player_use_cone_size( "sv_player_use_cone_size", "0.6", FCVAR_REPLICATED | FCVAR_CHEAT );
+ConVar sv_use_trace_duration( "sv_use_trace_duration", "0.5", FCVAR_REPLICATED | FCVAR_CHEAT );
 
 //bounce convars
 ConVar sv_bounce_paint_forward_velocity_bonus("sv_bounce_paint_forward_velocity_bonus", "0.375f", FCVAR_REPLICATED , "What percentage of forward velocity to add onto a ground bounce");
@@ -217,6 +193,10 @@ ConVar mp_should_gib_bots("mp_should_gib_bots", "1", FCVAR_REPLICATED | FCVAR_CH
 ConVar sv_debug_bounce_reflection("sv_debug_bounce_reflection", "0", FCVAR_REPLICATED  );
 ConVar sv_debug_bounce_reflection_time("sv_debug_bounce_reflection_time", "15.f", FCVAR_REPLICATED  );
 ConVar paint_compute_contacts_simd("paint_compute_contacts_simd", "1", FCVAR_REPLICATED , "Compute the contacts with paint in fast SIMD (1) or with slower FPU (0)." );
+
+ConVar prevent_crouch_jump("prevent_crouch_jump", "1", FCVAR_REPLICATED | FCVAR_CHEAT, "Enable/Disable crouch jump prevention.");
+
+extern ConVar player_held_object_use_view_model;
 
 char const* g_pszPredictedPowerIgnoreFilter[] =
 {
@@ -870,76 +850,192 @@ CWeaponPortalBase* CPortal_Player::GetActivePortalWeapon() const
 	}
 }
 
-CBaseEntity *CPortal_Player::FindUseEntity()
+
+//-----------------------------------------------------------------------------
+// Purpose: Overload for portal-- Our player can lift his own mass.
+// Input  : *pObject - The object to lift
+//			bLimitMassAndSize - check for mass/size limits
+//-----------------------------------------------------------------------------
+void CPortal_Player::PickupObject(CBaseEntity *pObject, bool bLimitMassAndSize )
+{
+	// can't pick up what you're standing on
+	if ( GetGroundEntity() == pObject )
+		return;
+
+
+	if ( bLimitMassAndSize == true )
+	{
+		if ( CBasePlayer::CanPickupObject( pObject, PORTAL_PLAYER_MAX_LIFT_MASS, PORTAL_PLAYER_MAX_LIFT_SIZE ) == false )
+			return;
+	}
+
+	// Can't be picked up if NPCs are on me
+	if ( pObject->HasNPCsOnIt() )
+		return;
+
+	PlayerPickupObject( this, pObject );
+
+#if !defined CLIENT_DLL 
+//	FireConcept( TLK_PLAYER_PICKED_UP_ITEM );
+#endif 
+}
+
+bool CPortal_Player::IsInvalidHandoff( CBaseEntity *pObject )
+{
+	CBasePlayer *pPlayer = GetPlayerHoldingEntity( pObject );
+	if ( !pPlayer || pPlayer == this )
+	{
+		// No one is holding it now or we are holding it, it's all good
+		return false;
+	}
+	else
+	{
+		// Make sure it has a clear shot to the holding player
+		trace_t tr;
+		UTIL_TraceLine( pObject->GetAbsOrigin(), pPlayer->EyePosition(), MASK_SOLID, pObject, COLLISION_GROUP_NONE, &tr );
+
+		if ( !tr.startsolid && ( tr.fraction >= 1.0f || tr.m_pEnt == pPlayer ) )
+		{
+			// Make sure it has a clear shot to the grabbing player
+			trace_t tr;
+			UTIL_TraceLine( pObject->GetAbsOrigin(), EyePosition(), MASK_SOLID, pObject, COLLISION_GROUP_NONE, &tr );
+
+			if ( !tr.startsolid && ( tr.fraction >= 1.0f || tr.m_pEnt == this ) )
+			{
+				return false;
+			}
+			else
+			{
+				// It's in solid or colliding with something other than the grabbing player
+				return true;
+			}
+		}
+		else
+		{
+			// It's in solid or colliding with something other than the holding player
+			return true;
+		}
+	}
+}
+
+
+// Calls FindUseEntity every tick for a period of time
+// I'm REALLY sorry about this. This will clean up quite a bit
+// once grab controllers are on the client.
+void CPortal_Player::PollForUseEntity( bool bBasicUse, CBaseEntity **ppUseEnt, CPortal_Base2D **ppUseThroughPortal )
+{
+	bool bTryGrab = false;
+
+	CBaseEntity *pSendEntity = NULL;
+
+#ifdef CLIENT_DLL
+	pSendEntity = m_hUseEntToSend.Get();
+#endif
+
+	if ( !m_bIsHoldingSomething && !pSendEntity && gpGlobals->curtime > m_flAutoGrabLockOutTime + 1.0f )
+	{
+		// We're not preventing new grabs... check the auto grab state
+
+		if ( bBasicUse || ( GameRules() && GameRules()->IsMultiplayer() && GetAbsVelocity().AsVector2D().Length() > 275.0f ) )
+		{
+			// They either just pressed used or are flying fast in multiplayer... mark this time to start auto grabbing
+			m_flUseKeyStartTime = gpGlobals->curtime;
+		}
+
+		// If they're currently autograbbing, try it out this frame
+		bTryGrab = ( gpGlobals->curtime < m_flUseKeyStartTime + sv_use_trace_duration.GetFloat() );
+	}
+
+	if ( bTryGrab )
+	{
+		// Trace for a use entity
+		CPortal_Base2D *pThroughPortal = NULL;
+		*ppUseEnt = FindUseEntity( &pThroughPortal );
+		*ppUseThroughPortal = pThroughPortal;
+
+		if ( *ppUseEnt )
+		{
+			bool bIsPhysics = ( (*ppUseEnt)->GetMoveType() == MOVETYPE_VPHYSICS );
+
+			if ( bIsPhysics || bBasicUse )
+			{
+				if ( bIsPhysics )
+				{
+					// Prevent redropping/regrabbing when mashing +use
+					m_flAutoGrabLockOutTime = gpGlobals->curtime;
+				}
+
+				// You need to be looking in it's general direction to auto grab it
+				Vector vObjectDir = (*ppUseEnt)->GetAbsOrigin() - EyePosition();
+				VectorNormalize( vObjectDir );
+
+				Vector vEyeForward;
+				EyeVectors( &vEyeForward );
+				if ( bBasicUse || vObjectDir.Dot( vEyeForward ) > 0.2f )
+				{
+					m_flUseKeyStartTime = -sv_use_trace_duration.GetFloat() - 1.0f;
+				}
+				else
+				{
+					// You're probably going to smack in to it, don't actually auto grab it
+					*ppUseEnt  = NULL;
+				}
+			}
+			else
+			{
+				// Don't autograb non-physics
+				*ppUseEnt  = NULL;
+			}
+		}
+	}
+}
+
+
+
+CBaseEntity *CPortal_Player::FindUseEntity( CPortal_Base2D **pThroughPortal )
 {
 	Vector forward, up;
 	EyeVectors( &forward, NULL, &up );
 
+	Vector vNetworkPosOffset = vec3_origin;
+#ifdef CLIENT_DLL
+	vNetworkPosOffset = GetNetworkOrigin() - GetAbsOrigin();
+#endif
+
 	trace_t tr;
 	// Search for objects in a sphere (tests for entities that are not solid, yet still useable)
-	Vector searchCenter = EyePosition();
+	Vector searchCenter = EyePosition() + vNetworkPosOffset;
 
 	// NOTE: Some debris objects are useable too, so hit those as well
 	// A button, etc. can be made out of clip brushes, make sure it's +useable via a traceline, too.
-	int useableContents = MASK_SOLID | CONTENTS_DEBRIS | CONTENTS_PLAYERCLIP;
+	// BUG 61818: Allowing pickup through playerclips because we'd like to be abled to drop through them.
+	int useableContents = MASK_SOLID | CONTENTS_DEBRIS /*| CONTENTS_PLAYERCLIP*/;
 
 	UTIL_TraceLine( searchCenter, searchCenter + forward * 1024, useableContents, this, COLLISION_GROUP_NONE, &tr );
 	// try the hit entity if there is one, or the ground entity if there isn't.
 	CBaseEntity *pNearest = NULL;
 	CBaseEntity *pObject = tr.m_pEnt;
 
-	// TODO: Removed because we no longer have ghost animatings. We may need similar code that clips rays against transformed objects.
-//#ifndef CLIENT_DLL
-//	// Check for ghost animatings (these aren't hit in the normal trace because they aren't solid)
-//	if ( !IsUseableEntity(pObject, 0) )
-//	{
-//		Ray_t rayGhostAnimating;
-//		rayGhostAnimating.Init( searchCenter, searchCenter + forward * 1024 );
-//
-//		CBaseEntity *list[1024];
-//		int nCount = UTIL_EntitiesAlongRay( list, 1024, rayGhostAnimating, 0 );
-//
-//		// Loop through all entities along the pick up ray
-//		for ( int i = 0; i < nCount; i++ )
-//		{
-//			CGhostAnimating *pGhostAnimating = dynamic_cast<CGhostAnimating*>( list[i] );
-//
-//			// If the entity is a ghost animating
-//			if( pGhostAnimating )
-//			{
-//				trace_t trGhostAnimating;
-//				enginetrace->ClipRayToEntity( rayGhostAnimating, MASK_ALL, pGhostAnimating, &trGhostAnimating );
-//
-//				if ( trGhostAnimating.fraction < tr.fraction )
-//				{
-//					// If we're not grabbing the clipped ghost
-//					VPlane plane = pGhostAnimating->GetLocalClipPlane();
-//					UTIL_Portal_PlaneTransform( pGhostAnimating->GetCloneTransform(), plane, plane );
-//					if ( plane.GetPointSide( trGhostAnimating.endpos ) != SIDE_FRONT )
-//					{
-//						tr = trGhostAnimating;
-//						pObject = tr.m_pEnt;
-//					}
-//				}
-//			}
-//		}
-//	}
-//#endif
-
+#if 1
 	int count = 0;
 	// UNDONE: Might be faster to just fold this range into the sphere query
-	const int NUM_TANGENTS = 7;
+	const int NUM_TANGENTS = 10;
 	while ( !IsUseableEntity(pObject, 0) && count < NUM_TANGENTS)
 	{
 		// trace a box at successive angles down
 		//							45 deg, 30 deg, 20 deg, 15 deg, 10 deg, -10, -15
-		const float tangents[NUM_TANGENTS] = { 1, 0.57735026919f, 0.3639702342f, 0.267949192431f, 0.1763269807f, -0.1763269807f, -0.267949192431f };
+		// then up (useful in portal when flying past a use target quickly)
+		//							-20 deg, -30 deg, -45 deg  
+		const float tangents[NUM_TANGENTS] = { 1, 0.57735026919f, 0.3639702342f, 0.267949192431f, 0.1763269807f, -0.1763269807f, -0.267949192431f,
+			-0.3639702342f, -0.57735026919f, -1 };
 		Vector down = forward - tangents[count]*up;
 		VectorNormalize(down);
 		UTIL_TraceHull( searchCenter, searchCenter + down * 72, -Vector(16,16,16), Vector(16,16,16), useableContents, this, COLLISION_GROUP_NONE, &tr );
 		pObject = tr.m_pEnt;
 		count++;
 	}
+#endif
+
 	float nearestDot = CONE_90_DEGREES;
 	if ( IsUseableEntity(pObject, 0) )
 	{
@@ -947,33 +1043,22 @@ CBaseEntity *CPortal_Player::FindUseEntity()
 		float centerZ = CollisionProp()->WorldSpaceCenter().z;
 		delta.z = IntervalDistance( tr.endpos.z, centerZ + CollisionProp()->OBBMins().z, centerZ + CollisionProp()->OBBMaxs().z );
 		float dist = delta.Length();
-		if ( dist < PLAYER_USE_RADIUS )
+		if ( dist < PLAYER_USE_RADIUS && !IsInvalidHandoff( pObject ) )
 		{
-#ifndef CLIENT_DLL
-
 			if ( sv_debug_player_use.GetBool() )
 			{
-				NDebugOverlay::Line( searchCenter, tr.endpos, 0, 255, 0, true, 30 );
-				NDebugOverlay::Cross3D( tr.endpos, 16, 0, 255, 0, true, 30 );
+				debugoverlay->AddLineOverlay( searchCenter, tr.endpos, 0, 255, 0, true, 30 );
+				//FIXME: Supposed to be a cross
+				Vector boxSize( 4,4,4 );
+				debugoverlay->AddBoxOverlay( tr.endpos, -boxSize, boxSize, vec3_angle, 255, 0, 0, 255, 30 );
 			}
-
-			if ( pObject->MyNPCPointer() && pObject->MyNPCPointer()->IsPlayerAlly( this ) )
-			{
-				// If about to select an NPC, do a more thorough check to ensure
-				// that we're selecting the right one from a group.
-				pObject = DoubleCheckUseNPC( pObject, searchCenter, forward );
-			}
-
-			g_PortalGameStats.Event_PlayerUsed( searchCenter, forward, pObject );
-#endif
 
 			return pObject;
 		}
 	}
 
-#ifndef CLIENT_DLL
 	CBaseEntity *pFoundByTrace = pObject;
-#endif
+
 
 	// check ground entity first
 	// if you've got a useable ground entity, then shrink the cone of this search to 45 degrees
@@ -1001,7 +1086,10 @@ CBaseEntity *CPortal_Player::FindUseEntity()
 		float dot = DotProduct( dir, forward );
 
 		// Need to be looking at the object more or less
-		if ( dot < 0.8 )
+		if ( dot < sv_player_use_cone_size.GetFloat() )
+			continue;
+
+		if ( IsInvalidHandoff( pObject ) )
 			continue;
 
 		if ( dot > nearestDot )
@@ -1019,46 +1107,52 @@ CBaseEntity *CPortal_Player::FindUseEntity()
 		}
 	}
 
-#ifndef CLIENT_DLL
-	if ( !pNearest )
-	{
-		// Haven't found anything near the player to use, nor any NPC's at distance.
-		// Check to see if the player is trying to select an NPC through a rail, fence, or other 'see-though' volume.
-		trace_t trAllies;
-		UTIL_TraceLine( searchCenter, searchCenter + forward * PLAYER_USE_RADIUS, MASK_OPAQUE_AND_NPCS, this, COLLISION_GROUP_NONE, &trAllies );
-
-		if ( trAllies.m_pEnt && IsUseableEntity( trAllies.m_pEnt, 0 ) && trAllies.m_pEnt->MyNPCPointer() && trAllies.m_pEnt->MyNPCPointer()->IsPlayerAlly( this ) )
-		{
-			// This is an NPC, take it!
-			pNearest = trAllies.m_pEnt;
-		}
-	}
-
-	if ( pNearest && pNearest->MyNPCPointer() && pNearest->MyNPCPointer()->IsPlayerAlly( this ) )
-	{
-		pNearest = DoubleCheckUseNPC( pNearest, searchCenter, forward );
-	}
-
 	if ( sv_debug_player_use.GetBool() )
 	{
 		if ( !pNearest )
 		{
-			NDebugOverlay::Line( searchCenter, tr.endpos, 255, 0, 0, true, 30 );
-			NDebugOverlay::Cross3D( tr.endpos, 16, 255, 0, 0, true, 30 );
+			debugoverlay->AddLineOverlay( searchCenter, tr.endpos, 0, 255, 0, true, 30 );
+			Vector boxSize( 4,4,4 );
+			debugoverlay->AddBoxOverlay( tr.endpos, -boxSize, boxSize, vec3_angle, 255, 0, 0, 255, 30 );
 		}
 		else if ( pNearest == pFoundByTrace )
 		{
-			NDebugOverlay::Line( searchCenter, tr.endpos, 0, 255, 0, true, 30 );
-			NDebugOverlay::Cross3D( tr.endpos, 16, 0, 255, 0, true, 30 );
+			debugoverlay->AddLineOverlay( searchCenter, tr.endpos, 0, 255, 0, true, 30 );
+			Vector boxSize( 4,4,4 );
+			debugoverlay->AddBoxOverlay( tr.endpos, -boxSize, boxSize, vec3_angle, 255, 0, 0, 255, 30 );
 		}
 		else
 		{
-			NDebugOverlay::Box( pNearest->WorldSpaceCenter(), Vector(-8, -8, -8), Vector(8, 8, 8), 0, 255, 0, true, 30 );
+			Vector boxSize( 8,8,8 );
+			debugoverlay->AddBoxOverlay( pNearest->WorldSpaceCenter(), -boxSize, boxSize, vec3_angle, 255, 0, 0, 255, 30 );
 		}
 	}
 
-	g_PortalGameStats.Event_PlayerUsed( searchCenter, forward, pNearest );
-#endif
+	if ( pNearest == NULL )
+	{
+		Vector forward;
+		EyeVectors( &forward, NULL, NULL );
+		Vector start = EyePosition();
+
+		Ray_t rayPortalTest;
+		rayPortalTest.Init( start, start + forward * PLAYER_USE_RADIUS );
+
+		float fMustBeCloserThan = 1.0f;
+		SetHeldObjectPortal( UTIL_Portal_FirstAlongRay( rayPortalTest, fMustBeCloserThan ) );
+
+		if ( GetHeldObjectPortal() )
+		{
+			pNearest = FindUseEntityThroughPortal();
+			if ( pNearest )
+			{
+				if ( pThroughPortal )
+				{
+					*pThroughPortal = GetHeldObjectPortal();
+				}
+			}
+		}
+	}
+
 
 	return pNearest;
 }
@@ -1068,7 +1162,7 @@ CBaseEntity* CPortal_Player::FindUseEntityThroughPortal( void )
 	Vector forward, up;
 	EyeVectors( &forward, NULL, &up );
 
-	CProp_Portal *pPortal = GetHeldObjectPortal();
+	CPortal_Base2D *pPortal = GetHeldObjectPortal();
 
 	trace_t tr;
 	// Search for objects in a sphere (tests for entities that are not solid, yet still useable)
@@ -1115,18 +1209,8 @@ CBaseEntity* CPortal_Player::FindUseEntityThroughPortal( void )
 		float centerZ = CollisionProp()->WorldSpaceCenter().z;
 		delta.z = IntervalDistance( tr.endpos.z, centerZ + CollisionProp()->OBBMins().z, centerZ + CollisionProp()->OBBMaxs().z );
 		float dist = delta.Length();
-		if ( dist < PLAYER_USE_RADIUS )
+		if ( dist < PLAYER_USE_RADIUS && !IsInvalidHandoff( pObject ) )
 		{
-#ifndef CLIENT_DLL
-
-			if ( pObject->MyNPCPointer() && pObject->MyNPCPointer()->IsPlayerAlly( this ) )
-			{
-				// If about to select an NPC, do a more thorough check to ensure
-				// that we're selecting the right one from a group.
-				pObject = DoubleCheckUseNPC( pObject, vTransformedSearchCenter, vTransformedForward );
-			}
-#endif
-
 			return pObject;
 		}
 	}
@@ -1160,6 +1244,9 @@ CBaseEntity* CPortal_Player::FindUseEntityThroughPortal( void )
 		if ( dot < 0.8 )
 			continue;
 
+		if ( IsInvalidHandoff( pObject ) )
+			continue;
+
 		if ( dot > nearestDot )
 		{
 			// Since this has purely been a radius search to this point, we now
@@ -1175,31 +1262,8 @@ CBaseEntity* CPortal_Player::FindUseEntityThroughPortal( void )
 		}
 	}
 
-#ifndef CLIENT_DLL
-	if ( !pNearest )
-	{
-		// Haven't found anything near the player to use, nor any NPC's at distance.
-		// Check to see if the player is trying to select an NPC through a rail, fence, or other 'see-though' volume.
-		trace_t trAllies;
-		UTIL_TraceLine( vTransformedSearchCenter, vTransformedSearchCenter + vTransformedForward * PLAYER_USE_RADIUS, MASK_OPAQUE_AND_NPCS, this, COLLISION_GROUP_NONE, &trAllies );
-
-		if ( trAllies.m_pEnt && IsUseableEntity( trAllies.m_pEnt, 0 ) && trAllies.m_pEnt->MyNPCPointer() && trAllies.m_pEnt->MyNPCPointer()->IsPlayerAlly( this ) )
-		{
-			// This is an NPC, take it!
-			pNearest = trAllies.m_pEnt;
-		}
-	}
-
-	if ( pNearest && pNearest->MyNPCPointer() && pNearest->MyNPCPointer()->IsPlayerAlly( this ) )
-	{
-		pNearest = DoubleCheckUseNPC( pNearest, vTransformedSearchCenter, vTransformedForward );
-	}
-
-#endif
-
 	return pNearest;
 }
-
 bool CPortal_Player::WantsToSwapGuns( void )
 {
 	return m_bWantsToSwapGuns;
@@ -2941,6 +3005,18 @@ bool CPortal_Player::LateSuperJumpIsValid() const
 		gpGlobals->curtime - m_flCachedJumpPowerTime < jump_helper_late_jump_max_time.GetFloat();
 }
 
+StickCameraState CPortal_Player::GetStickCameraState() const
+{
+	return m_PortalLocal.m_nStickCameraState;
+}
+
+
+Vector CPortal_Player::Weapon_ShootPosition()
+{
+	return EyePosition();
+}
+
+
 void CPortal_Player::ChooseBestPaintPowersInRange( PaintPowerChoiceResultArray& bestPowers,
 												 PaintPowerConstIter begin,
 												 PaintPowerConstIter end,
@@ -3576,3 +3652,98 @@ void CPortal_Player::SetTeamTauntState( int nTeamTauntState )
 	m_nTeamTauntState = nTeamTauntState;
 }
 #endif
+
+
+bool CPortal_Player::IsUsingVMGrab( void )
+{
+	return m_bUsingVMGrabState;
+}
+
+bool CPortal_Player::WantsVMGrab( void )
+{
+	if ( player_held_object_use_view_model.GetInt() >= 0 )
+	{
+		return player_held_object_use_view_model.GetBool();
+	}
+
+	return m_bUseVMGrab;
+}
+
+void CPortal_Player::UpdateAirInputScaleFadeIn()
+{
+	if( !IsInactivePower( GetPaintPower( BOUNCE_POWER ) ) )
+	{
+		const bool shouldReturnFullInput = IsDeactivatingPower( GetPaintPower( BOUNCE_POWER ) ) && GetGroundEntity() != NULL;
+		m_PortalLocal.m_flAirInputScale = shouldReturnFullInput ? 1.0f : clamp( m_PortalLocal.m_flAirInputScale + gpGlobals->frametime / BOUNCE_PAINT_INPUT_DAMP_TIME, 0.0f, 1.0f );
+	}
+	else if( !IsInactivePower( GetPaintPower( SPEED_POWER ) ) )
+	{
+		//const bool doneDeactivating = IsDeactivatingPower( GetPaintPower( SPEED_POWER ) ) && MaxSpeed() == sv_speed_normal.GetFloat() && GetGroundEntity() != NULL;
+		//m_PortalLocal.m_flAirInputScale = doneDeactivating ? 1.0f : clamp( m_PortalLocal.m_flAirInputScale + gpGlobals->frametime / SPEED_PAINT_AIR_INPUT_DAMP_TIME, 0.0f, 1.0f );
+
+		// HACK: For the playtest, if speed and only speed is not in the inactive state,
+		//		 the player has limited air control.
+		m_PortalLocal.m_flAirInputScale = GetGroundEntity() ? 1.0f : MIN_SPEED_PAINT_AIR_INPUT_START_DAMPING;
+	}
+	else
+	{
+		m_PortalLocal.m_flAirInputScale = 1.0f;
+	}
+
+	//float inputScale = m_PortalLocal.m_flAirInputScale;
+	//DevMsg( "Input Scale: %f\n", inputScale );
+}
+
+extern ConVar paintgun_ammo_type;
+void CPortal_Player::ItemPostFrame( void )
+{
+	if ( GetFlags() & FL_FROZEN )
+		return;
+
+	BaseClass::ItemPostFrame();
+	
+	CBaseCombatWeapon* pActiveWeapon = GetActiveWeapon();
+	if( m_hUseEntity != NULL &&
+		paintgun_ammo_type.GetInt() != PAINT_AMMO_NONE &&
+		pActiveWeapon != NULL &&
+		FClassnameIs( pActiveWeapon, "weapon_paintgun" ) )
+	{
+#ifdef CLIENT_DLL
+		// Predicting this weapon
+		if( pActiveWeapon->IsPredicted() )
+#endif
+		{
+			pActiveWeapon->ItemPostFrame( );
+		}
+	}
+}
+
+void CPortal_Player::PreventCrouchJump( CUserCmd* ucmd )
+{
+	if( prevent_crouch_jump.GetBool() && GetInAirState() == IN_AIR_JUMPED )
+	{
+		m_PortalLocal.m_bPreventedCrouchJumpThisFrame = (ucmd->buttons & IN_DUCK) != 0;
+		ucmd->buttons &= ~IN_DUCK;
+	}
+}
+
+void CPortal_Player::ForceDropOfCarriedPhysObjects( CBaseEntity *pOnlyIfHoldingThis )
+{
+	m_bHeldObjectOnOppositeSideOfPortal = false;
+
+#if !defined CLIENT_DLL 
+	if ( PhysIsInCallback() )
+	{
+		variant_t value;
+		g_EventQueue.AddEvent( this, "ForceDropPhysObjects", value, 0.01f, pOnlyIfHoldingThis, this );
+		return;
+	}
+#endif 
+
+	m_bForcingDrop = true;
+
+	// Drop any objects being handheld.
+	ClearUseEntity();
+
+	m_bForcingDrop = false;
+}

@@ -36,6 +36,7 @@
 #include "ai_speech.h"		// For expressors, vcd playing
 #include "sceneentity.h"	// has the VCD precache function
 #include "sendprop_priorities.h"
+#include "prop_weightedcube.h"
 
 // Max mass the player can lift with +use
 #define PORTAL_PLAYER_MAX_LIFT_MASS 85
@@ -55,6 +56,13 @@ ConVar mp_server_player_team( "mp_server_player_team", "0", FCVAR_DEVELOPMENTONL
 ConVar mp_wait_for_other_player_timeout( "mp_wait_for_other_player_timeout", "100", FCVAR_CHEAT, "Maximum time that we wait in the transition loading screen for the other player." );
 ConVar mp_wait_for_other_player_notconnecting_timeout( "mp_wait_for_other_player_notconnecting_timeout", "10", FCVAR_CHEAT, "Maximum time that we wait in the transition loading screen after we fully loaded for partner to start loading." );
 ConVar mp_dev_wait_for_other_player( "mp_dev_wait_for_other_player", "1", FCVAR_DEVELOPMENTONLY, "Force waiting for the other player." );
+
+ConVar sv_portal_coop_ping_cooldown_time( "sv_portal_coop_ping_cooldown_time", "0.25", FCVAR_CHEAT, "Time (in seconds) between coop pings", true, 0.1f, false, 60.0f );
+ConVar sv_portal_coop_ping_indicator_show_to_all_players( "sv_portal_coop_ping_indicator_show_to_all_players", "0" );
+extern ConVar sv_player_funnel_gimme_dot;
+ConVar sv_zoom_stop_movement_threashold("sv_zoom_stop_movement_threashold", "4.0", FCVAR_REPLICATED, "Move command amount before breaking player out of toggle zoom." );
+ConVar sv_zoom_stop_time_threashold("sv_zoom_stop_time_threashold", "5.0", FCVAR_REPLICATED, "Time amount before breaking player out of toggle zoom." );
+extern ConVar sv_player_funnel_into_portals;
 
 extern void PaintPowerPickup( int colorIndex, CBasePlayer *pPlayer );
 
@@ -152,47 +160,54 @@ END_SEND_TABLE()
 LINK_ENTITY_TO_CLASS( player, CPortal_Player );
 
 IMPLEMENT_SERVERCLASS_ST(CPortal_Player, DT_Portal_Player)
-SendPropExclude( "DT_BaseAnimating", "m_flPlaybackRate" ),	
-SendPropExclude( "DT_BaseAnimating", "m_nSequence" ),
-SendPropExclude( "DT_BaseAnimating", "m_nNewSequenceParity" ),
-SendPropExclude( "DT_BaseAnimating", "m_nResetEventsParity" ),
-SendPropExclude( "DT_BaseEntity", "m_angRotation" ),
-SendPropExclude( "DT_BaseAnimatingOverlay", "overlay_vars" ),
-SendPropExclude( "DT_BaseFlex", "m_viewtarget" ),
-SendPropExclude( "DT_BaseFlex", "m_flexWeight" ),
-SendPropExclude( "DT_BaseFlex", "m_blinktoggle" ),
+	SendPropExclude( "DT_BaseAnimating", "m_flPlaybackRate" ),	
+	SendPropExclude( "DT_BaseAnimating", "m_nSequence" ),
+	SendPropExclude( "DT_BaseAnimating", "m_nNewSequenceParity" ),
+	SendPropExclude( "DT_BaseAnimating", "m_nResetEventsParity" ),
+	SendPropExclude( "DT_BaseEntity", "m_angRotation" ),
+	SendPropExclude( "DT_BaseAnimatingOverlay", "overlay_vars" ),
+	SendPropExclude( "DT_BaseFlex", "m_viewtarget" ),
+	SendPropExclude( "DT_BaseFlex", "m_flexWeight" ),
+	SendPropExclude( "DT_BaseFlex", "m_blinktoggle" ),
 
-// portal_playeranimstate and clientside animation takes care of these on the client
-SendPropExclude( "DT_ServerAnimationData" , "m_flCycle" ),	
-SendPropExclude( "DT_AnimTimeMustBeFirst" , "m_flAnimTime" ),
+	// portal_playeranimstate and clientside animation takes care of these on the client
+	SendPropExclude( "DT_ServerAnimationData" , "m_flCycle" ),	
+	SendPropExclude( "DT_AnimTimeMustBeFirst" , "m_flAnimTime" ),
 
 
-SendPropAngle( SENDINFO_VECTORELEM(m_angEyeAngles, 0), 11, SPROP_CHANGES_OFTEN ),
-SendPropAngle( SENDINFO_VECTORELEM(m_angEyeAngles, 1), 11, SPROP_CHANGES_OFTEN ),
-SendPropEHandle( SENDINFO( m_hRagdoll ) ),
-SendPropInt( SENDINFO( m_iSpawnInterpCounter), 4 ),
-SendPropBool( SENDINFO( m_bHeldObjectOnOppositeSideOfPortal) ),
-SendPropEHandle( SENDINFO( m_pHeldObjectPortal ) ),
-SendPropBool( SENDINFO( m_bPitchReorientation ) ),
-SendPropEHandle( SENDINFO( m_hPortalEnvironment ) ),
-SendPropEHandle( SENDINFO( m_hSurroundingLiquidPortal ) ),
+	SendPropAngle( SENDINFO_VECTORELEM(m_angEyeAngles, 0), 11, SPROP_CHANGES_OFTEN ),
+	SendPropAngle( SENDINFO_VECTORELEM(m_angEyeAngles, 1), 11, SPROP_CHANGES_OFTEN ),
+	SendPropEHandle( SENDINFO( m_hRagdoll ) ),
+	SendPropInt( SENDINFO( m_iSpawnInterpCounter), 4 ),
+	SendPropBool( SENDINFO( m_bHeldObjectOnOppositeSideOfPortal) ),
+	SendPropEHandle( SENDINFO( m_hHeldObjectPortal ) ),
+	SendPropBool( SENDINFO( m_bPitchReorientation ) ),
+	SendPropEHandle( SENDINFO( m_hPortalEnvironment ) ),
+	SendPropEHandle( SENDINFO( m_hSurroundingLiquidPortal ) ),
 
-SendPropExclude( "DT_BaseAnimating", "m_flPoseParameter" ),
+	SendPropExclude( "DT_BaseAnimating", "m_flPoseParameter" ),
 
-// Shared info
-SendPropDataTable( SENDINFO_DT( m_Shared ), &REFERENCE_SEND_TABLE( DT_PortalPlayerShared ) ),
+	// Shared info
+	SendPropDataTable( SENDINFO_DT( m_Shared ), &REFERENCE_SEND_TABLE( DT_PortalPlayerShared ) ),
 
-SendPropFloat( SENDINFO( m_flHullHeight ) ),
-SendPropFloat( SENDINFO( m_flMotionBlurAmount ) ),
+	SendPropFloat( SENDINFO( m_flHullHeight ) ),
+	SendPropFloat( SENDINFO( m_flMotionBlurAmount ) ),
+
+	SendPropBool( SENDINFO( m_bUseVMGrab ) ),
+	SendPropBool( SENDINFO( m_bUsingVMGrabState ) ),
+	SendPropBool( SENDINFO( m_bIsHoldingSomething ) ),
+	SendPropEHandle( SENDINFO( m_hAttachedObject ) ),
+	SendPropEHandle( SENDINFO( m_hHeldObjectPortal ) ),
 
 END_SEND_TABLE()
 
 BEGIN_DATADESC( CPortal_Player )
 
 	DEFINE_SOUNDPATCH( m_pWooshSound ),
+	DEFINE_SOUNDPATCH( m_pGrabSound ),
 
 	DEFINE_FIELD( m_bHeldObjectOnOppositeSideOfPortal, FIELD_BOOLEAN ),
-	DEFINE_FIELD( m_pHeldObjectPortal, FIELD_EHANDLE ),
+	DEFINE_FIELD( m_hHeldObjectPortal, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_bIntersectingPortalPlane, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_bStuckOnPortalCollisionObject, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_fTimeLastHurt, FIELD_TIME ),
@@ -216,8 +231,27 @@ BEGIN_DATADESC( CPortal_Player )
 	DEFINE_FIELD( m_hSurroundingLiquidPortal, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_flHullHeight, FIELD_FLOAT ),
 	DEFINE_FIELD( m_flMotionBlurAmount, FIELD_FLOAT ),
-
+	DEFINE_FIELD( m_hGrabbedEntity, FIELD_EHANDLE ),
+	DEFINE_FIELD( m_hPortalThroughWhichGrabOccured, FIELD_EHANDLE ),
+	DEFINE_FIELD( m_bForcingDrop, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_bUseVMGrab, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_bUsingVMGrabState, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_flUseKeyStartTime, FIELD_TIME ),
+	DEFINE_FIELD( m_flAutoGrabLockOutTime, FIELD_TIME ),
+	DEFINE_FIELD( m_hAttachedObject, FIELD_EHANDLE ),
+	DEFINE_FIELD( m_ForcedGrabController, FIELD_INTEGER ),
+	DEFINE_FIELD( m_flUseKeyCooldownTime, FIELD_TIME ),
+	
+	DEFINE_EMBEDDED( m_PortalLocal ),
+	
 END_DATADESC()
+
+BEGIN_ENT_SCRIPTDESC( CPortal_Player, CBasePlayer , "Player" )
+	//DEFINE_SCRIPTFUNC( IncWheatleyMonitorDestructionCount, "Set number of wheatley monitors destroyed by the player." )
+	//DEFINE_SCRIPTFUNC( GetWheatleyMonitorDestructionCount, "Get number of wheatley monitors destroyed by the player." )
+	DEFINE_SCRIPTFUNC( TurnOffPotatos, "Turns Off the Potatos material light" )
+	DEFINE_SCRIPTFUNC( TurnOnPotatos, "Turns On the Potatos material light" )
+END_SCRIPTDESC();
 
 extern ConVar sv_regeneration_wait_time;
 
@@ -256,7 +290,8 @@ CPortal_Player::CPortal_Player()
 	m_bWantsToSwapGuns( false ),
 	m_bSendSwapProximityFailEvent( false ),
 	m_flMotionBlurAmount( -1.0f ),
-	m_bIsFullyConnected( false )
+	m_bIsFullyConnected( false ),
+	m_pGrabSound( NULL )
 {
 	// Taunt code
 	m_Shared.Init(this);
@@ -273,13 +308,18 @@ CPortal_Player::CPortal_Player()
 	m_iSpawnInterpCounter = 0;
 
 	m_bHeldObjectOnOppositeSideOfPortal = false;
-	m_pHeldObjectPortal = 0;
+	m_hHeldObjectPortal = NULL;
 
 	m_bIntersectingPortalPlane = false;
 
 	m_bPitchReorientation = false;
 
 	m_bSilentDropAndPickup = false;
+
+	m_ForcedGrabController = FORCE_GRAB_CONTROLLER_DEFAULT;
+	m_hGrabbedEntity = NULL;
+
+	m_flUseKeyCooldownTime = 0.0f;
 }
 
 CPortal_Player::~CPortal_Player( void )
@@ -573,6 +613,34 @@ void CPortal_Player::PreThink( void )
 	{
 		Jump();	
 	}
+	
+	if ( m_afButtonPressed & IN_GRENADE1 )
+	{
+		if ( !m_PortalLocal.m_bZoomedIn )
+		{
+			ZoomIn();
+		}
+	}
+	else if ( m_afButtonPressed & IN_GRENADE2 )
+	{
+		if ( m_PortalLocal.m_bZoomedIn )
+		{
+			ZoomOut();
+		}
+	}
+	else if ( m_afButtonPressed & IN_ZOOM )
+	{
+		if ( !m_PortalLocal.m_bZoomedIn )
+		{
+			ZoomIn();
+		}
+		else
+		{
+			ZoomOut();
+		}
+	}
+
+	UpdateVMGrab( m_hAttachedObject );
 
 	//Reset bullet force accumulator, only lasts one frame
 	m_vecTotalBulletForce = vec3_origin;
@@ -585,6 +653,39 @@ void CPortal_Player::PreThink( void )
 	
 	// Update the painted power
 	UpdatePaintedPower();
+
+	// Fade the input scale back in if we lost some
+	UpdateAirInputScaleFadeIn();
+
+	// Attempt to resize the hull if there's a pending hull resize
+	TryToChangeCollisionBounds( m_PortalLocal.m_CachedStandHullMinAttempt,
+								m_PortalLocal.m_CachedStandHullMaxAttempt,
+								m_PortalLocal.m_CachedDuckHullMinAttempt,
+								m_PortalLocal.m_CachedDuckHullMaxAttempt );
+
+	// reset remote view
+	if ( !m_Shared.InCond( PORTAL_COND_TAUNTING ) && m_bTauntRemoteViewFOVFixup )
+	{
+		m_bTauntRemoteViewFOVFixup = false;
+		SetFOV( this, 0, 0.0f, 0 );
+	}
+	
+	if( m_hAttachedObject && !m_pGrabSound )
+	{
+		CSoundEnvelopeController& controller = CSoundEnvelopeController::GetController();
+		CPASAttenuationFilter filter( this );
+		char const* soundName = GetActivePortalWeapon() ? "PortalPlayer.ObjectUse" : "PortalPlayer.ObjectUseNoGun";
+		m_pGrabSound = controller.SoundCreate( filter, entindex(), soundName );
+		controller.Play( m_pGrabSound, VOL_NORM, PITCH_NORM );
+	}
+
+	if( !m_hAttachedObject && m_pGrabSound )
+	{
+		CSoundEnvelopeController &controller = CSoundEnvelopeController::GetController();
+		controller.Shutdown( m_pGrabSound );
+		controller.SoundDestroy( m_pGrabSound );
+		m_pGrabSound = NULL;
+	}
 }
 
 void CPortal_Player::PostThink( void )
@@ -635,6 +736,10 @@ void CPortal_Player::PostThink( void )
 		Teleport( &vNewPos, NULL, &vForward );
 		m_bStuckOnPortalCollisionObject = false;
 	}
+	
+	// Try to update our crosshair
+	m_bIsHoldingSomething = IsHoldingEntity( NULL );
+
 }
 
 void CPortal_Player::PlayerDeathThink(void)
@@ -1263,28 +1368,21 @@ void CPortal_Player::VPhysicsShadowUpdate( IPhysicsObject *pPhysics )
 	m_oldOrigin = GetAbsOrigin();
 }
 
-bool CPortal_Player::UseFoundEntity( CBaseEntity *pUseEntity )
+bool CPortal_Player::UseFoundEntity( CBaseEntity *pUseEntity, bool bAutoGrab )
 {
 	bool usedSomething = false;
 
-	//!!!UNDONE: traceline here to prevent +USEing buttons through walls			
+	//!!!UNDONE: traceline here to prevent +USEing buttons through walls
 	int caps = pUseEntity->ObjectCaps();
 	variant_t emptyVariant;
 
-	if ( m_afButtonPressed & IN_USE )
-	{
-		// Robin: Don't play sounds for NPCs, because NPCs will allow respond with speech.
-		if ( !pUseEntity->MyNPCPointer() )
-		{
-			EmitSound( "HL2Player.Use" );
-		}
-	}
-
 	if ( ( (m_nButtons & IN_USE) && (caps & FCAP_CONTINUOUS_USE) ) ||
-		( (m_afButtonPressed & IN_USE) && (caps & (FCAP_IMPULSE_USE|FCAP_ONOFF_USE)) ) )
+		 ( ( (m_afButtonPressed & IN_USE) || bAutoGrab ) && (caps & (FCAP_IMPULSE_USE|FCAP_ONOFF_USE)) ) )
 	{
 		if ( caps & FCAP_CONTINUOUS_USE )
+		{
 			m_afPhysicsFlags |= PFLAG_USING;
+		}
 
 		pUseEntity->AcceptInput( "Use", this, this, emptyVariant, USE_TOGGLE );
 
@@ -1297,31 +1395,6 @@ bool CPortal_Player::UseFoundEntity( CBaseEntity *pUseEntity )
 
 		usedSomething = true;
 	}
-
-#if	HL2_SINGLE_PRIMARY_WEAPON_MODE
-
-	//Check for weapon pick-up
-	if ( m_afButtonPressed & IN_USE )
-	{
-		CBaseCombatWeapon *pWeapon = dynamic_cast<CBaseCombatWeapon *>(pUseEntity);
-
-		if ( ( pWeapon != NULL ) && ( Weapon_CanSwitchTo( pWeapon ) ) )
-		{
-			//Try to take ammo or swap the weapon
-			if ( Weapon_OwnsThisType( pWeapon->GetClassname(), pWeapon->GetSubType() ) )
-			{
-				Weapon_EquipAmmoOnly( pWeapon );
-			}
-			else
-			{
-				Weapon_DropSlot( pWeapon->GetSlot() );
-				Weapon_Equip( pWeapon );
-			}
-
-			usedSomething = true;
-		}
-	}
-#endif
 
 	return usedSomething;
 }
@@ -1368,131 +1441,168 @@ bool CPortal_Player::UseFoundEntity( CBaseEntity *pUseEntity )
 
 void CPortal_Player::PlayerUse( void )
 {
-	// Was use pressed or released?
-	if ( ! ((m_nButtons | m_afButtonPressed | m_afButtonReleased) & IN_USE) )
-		return;
+	CBaseEntity *pUseEnt = m_hGrabbedEntity.Get();
+	CPortal_Base2D *pUseThroughPortal = (CPortal_Base2D*)m_hPortalThroughWhichGrabOccured.Get();
 
-	if ( m_afButtonPressed & IN_USE )
+	if ( gpGlobals->curtime < m_flUseKeyCooldownTime )
+	{
+		return;
+	}
+
+	bool bUsePressed = (m_afButtonPressed & IN_USE) != 0;
+
+	if ( bUsePressed && m_hUseEntity )
 	{
 		// Currently using a latched entity?
-		if ( ClearUseEntity() )
+		if ( !ClearUseEntity() )
 		{
-			return;
+			m_bPlayUseDenySound = true;
 		}
 		else
 		{
-			if ( m_afPhysicsFlags & PFLAG_DIROVERRIDE )
-			{
-				m_afPhysicsFlags &= ~PFLAG_DIROVERRIDE;
-				m_iTrain = TRAIN_NEW|TRAIN_OFF;
-				return;
-			}
+			m_flAutoGrabLockOutTime = gpGlobals->curtime;
 		}
-
-		// Tracker 3926:  We can't +USE something if we're climbing a ladder
-		if ( GetMoveType() == MOVETYPE_LADDER )
-		{
-			return;
-		}
+		return;
 	}
 
-	CBaseEntity *pUseEntity = FindUseEntity();
-
-	bool usedSomething = false;
-
-	// Found an object
-	if ( pUseEntity )
+	if ( !pUseEnt )
 	{
-		SetHeldObjectOnOppositeSideOfPortal( false );
-
-		// TODO: Removed because we no longer have ghost animatings. May need to rework this code.
-		//// If we found a ghost animating then it needs to be held across a portal
-		//CGhostAnimating *pGhostAnimating = dynamic_cast<CGhostAnimating*>( pUseEntity );
-		//if ( pGhostAnimating )
-		//{
-		//	CProp_Portal *pPortal = NULL;
-
-		//	CPortalSimulator *pPortalSimulator = CPortalSimulator::GetSimulatorThatOwnsEntity( pGhostAnimating->GetSourceEntity() );
-
-		//	//HACKHACK: This assumes all portal simulators are a member of a prop_portal
-		//	pPortal = (CProp_Portal *)(((char *)pPortalSimulator) - ((int)&(((CProp_Portal *)0)->m_PortalSimulator)));
-		//	Assert( (&(pPortal->m_PortalSimulator)) == pPortalSimulator ); //doublechecking the hack
-
-		//	if ( pPortal )
-		//	{
-		//		SetHeldObjectPortal( pPortal->m_hLinkedPortal );
-		//		SetHeldObjectOnOppositeSideOfPortal( true );
-		//	}
-		//}
-		usedSomething = UseFoundEntity( pUseEntity );
+		PollForUseEntity( bUsePressed, &pUseEnt, &pUseThroughPortal );
 	}
-	else 
+
+	// Was use pressed or released?
+	if ( !bUsePressed && !pUseEnt )
 	{
-		Vector forward;
-		EyeVectors( &forward, NULL, NULL );
-		Vector start = EyePosition();
+		return;
+	}
 
-		Ray_t rayPortalTest;
-		rayPortalTest.Init( start, start + forward * PLAYER_USE_RADIUS );
+	// Only run the below if use is pressed and the client sent a grab entity
+	bool bUsedSomething = false;
+	if ( pUseEnt && m_hAttachedObject.Get() == NULL )
+	{
+		// Use the found entity, and skip the button down checks if we're forcing the grabbing of a client use entity
+		bUsedSomething = UseFoundEntity( pUseEnt, !bUsePressed );
 
-		float fMustBeCloserThan = 2.0f;
-
-		CProp_Portal *pPortal = UTIL_Portal_FirstAlongRay( rayPortalTest, fMustBeCloserThan );
-
-		if ( pPortal )
-		{
-			SetHeldObjectPortal( pPortal );
-			pUseEntity = FindUseEntityThroughPortal();
-		}
-
-		if ( pUseEntity )
+		if ( bUsedSomething && pUseThroughPortal )
 		{
 			SetHeldObjectOnOppositeSideOfPortal( true );
-			usedSomething = UseFoundEntity( pUseEntity );
+			SetHeldObjectPortal( pUseThroughPortal );
 		}
-		else if ( m_afButtonPressed & IN_USE )
+		else
 		{
-			// Signal that we want to play the deny sound, unless the user is +USEing on a ladder!
-			// The sound is emitted in ItemPostFrame, since that occurs after GameMovement::ProcessMove which
-			// lets the ladder code unset this flag.
-			
-			// This will play the "wiggle" animation
-			if ( GetActiveWeapon() && FClassnameIs( GetActiveWeapon(), "weapon_portalgun" ) )
-			{
-				GetActiveWeapon()->SendWeaponAnim( ACT_VM_FIZZLE );
-			}
+			SetHeldObjectOnOppositeSideOfPortal( false );
+			SetHeldObjectPortal( NULL );
+		}
 
-			// NOTE: Keep this because Portal 2 does have a use deny sound even if you're not holding the portalgun
-			m_bPlayUseDenySound = true;
+		// Debounce the use key
+		if ( bUsedSomething )
+		{
+			m_Local.m_nOldButtons |= IN_USE;
+			m_afButtonPressed &= ~IN_USE;
 		}
 	}
 
-	// Debounce the use key
-	if ( usedSomething && pUseEntity )
+	if ( bUsePressed && !bUsedSomething )
 	{
-		m_Local.m_nOldButtons |= IN_USE;
-		m_afButtonPressed &= ~IN_USE;
+		// No entity passed up with the use command, play deny sound
+		m_bPlayUseDenySound = true;
+
+		// Make the weapon "dry fire" to show we tried to +use
+		CWeaponPortalgun *pWeapon = dynamic_cast<CWeaponPortalgun *>(GetActivePortalWeapon());
+		if ( pWeapon )
+		{
+			pWeapon->UseDeny();
+		}
 	}
 }
 
+extern ConVar sv_enableholdrotation;
+ConVar sv_holdrotationsensitivity( "sv_holdrotationsensitivity", "0.1", FCVAR_ARCHIVE );
 void CPortal_Player::PlayerRunCommand(CUserCmd *ucmd, IMoveHelper *moveHelper)
 {
-	if( m_bFixEyeAnglesFromPortalling )
+	if ( sv_enableholdrotation.GetBool() && !IsUsingVMGrab() )
 	{
-		//the idea here is to handle the notion that the player has portalled, but they sent us an angle update before receiving that message.
-		//If we don't handle this here, we end up sending back their old angles which makes them hiccup their angles for a frame
-		float fOldAngleDiff = fabs( AngleDistance( ucmd->viewangles.x, m_qPrePortalledViewAngles.x ) );
-		fOldAngleDiff += fabs( AngleDistance( ucmd->viewangles.y, m_qPrePortalledViewAngles.y ) );
-		fOldAngleDiff += fabs( AngleDistance( ucmd->viewangles.z, m_qPrePortalledViewAngles.z ) );
+		if( (ucmd->buttons & IN_ATTACK2) && (GetPlayerHeldEntity( this ) != NULL) )
+		{
+			VectorCopy ( pl.v_angle, ucmd->viewangles );
+			float x, y;
+			if( abs( ucmd->mousedx ) > abs(ucmd->mousedy) )
+			{
+				x = ucmd->mousedx * sv_holdrotationsensitivity.GetFloat();
+				y = 0;
+			}
+			else
+			{
+				x = 0;
+				y = ucmd->mousedy * sv_holdrotationsensitivity.GetFloat();
+			}
+			RotatePlayerHeldObject( this, x, y, true );
+		}
+	}
 
-		float fCurrentAngleDiff = fabs( AngleDistance( ucmd->viewangles.x, pl.v_angle.x ) );
-		fCurrentAngleDiff += fabs( AngleDistance( ucmd->viewangles.y, pl.v_angle.y ) );
-		fCurrentAngleDiff += fabs( AngleDistance( ucmd->viewangles.z, pl.v_angle.z ) );
+	// Can't use stuff while dead
+	if ( IsDead() )
+	{
+		ucmd->buttons &= ~IN_USE;
+	}
 
-		if( fCurrentAngleDiff > fOldAngleDiff )
-			ucmd->viewangles = TransformAnglesToWorldSpace( ucmd->viewangles, m_matLastPortalled.As3x4() );
+	m_hGrabbedEntity = ucmd->player_held_entity > 0 ? CBaseEntity::Instance ( ucmd->player_held_entity ) : NULL;
+	m_hPortalThroughWhichGrabOccured = ucmd->held_entity_was_grabbed_through_portal > 0 ? CBaseEntity::Instance ( ucmd->held_entity_was_grabbed_through_portal ) : NULL;
 
-		m_bFixEyeAnglesFromPortalling = false;
+	//============================================================================
+	// Fix the eye angles after portalling. The client may have sent commands with
+	// the old view angles before it knew about the teleportation.
+
+	//sorry for crappy name, the client sent us a command, we acknowledged it, and they are now telling us the latest one they received an acknowledgement for in this brand new command
+	int iLastCommandAcknowledgementReceivedOnClientForThisCommand = ucmd->command_number - ucmd->command_acknowledgements_pending;
+	while( (m_PendingPortalTransforms.Count() > 0) && (iLastCommandAcknowledgementReceivedOnClientForThisCommand >= m_PendingPortalTransforms[0].command_number) )
+	{
+		m_PendingPortalTransforms.Remove( 0 );
+	}
+
+	// The server changed the angles, and the user command was created after the teleportation, but before the client knew they teleported. Need to fix up the angles into the new space
+	if( m_PendingPortalTransforms.Count() > ucmd->predictedPortalTeleportations )
+	{
+		matrix3x4_t matComputeFinalTransform[2];
+		int iFlip = 0;
+
+		//most common case will be exactly 1 transform
+		matComputeFinalTransform[0] = m_PendingPortalTransforms[ucmd->predictedPortalTeleportations].matTransform;
+
+		for( int i = ucmd->predictedPortalTeleportations + 1; i < m_PendingPortalTransforms.Count(); ++i )
+		{
+			ConcatTransforms( m_PendingPortalTransforms[i].matTransform, matComputeFinalTransform[iFlip], matComputeFinalTransform[1-iFlip] );
+			iFlip = 1 - iFlip;
+		}
+
+		//apply the final transform
+		matrix3x4_t matAngleTransformIn, matAngleTransformOut;
+		AngleMatrix( ucmd->viewangles, matAngleTransformIn );
+		ConcatTransforms( matComputeFinalTransform[iFlip], matAngleTransformIn, matAngleTransformOut );
+		MatrixAngles( matAngleTransformOut, ucmd->viewangles );
+	}
+
+	PreventCrouchJump( ucmd );
+
+	if ( m_PortalLocal.m_bZoomedIn )
+	{
+		if ( IsTaunting() )
+		{
+			// Pop out of zoom when I'm taunting
+			ZoomOut();
+		}
+		else
+		{
+			float fThreshold = sv_zoom_stop_movement_threashold.GetFloat();
+			if ( gpGlobals->curtime > GetFOVTime() + sv_zoom_stop_time_threashold.GetFloat() &&
+				 ( fabsf( ucmd->forwardmove ) > fThreshold ||  fabsf( ucmd->sidemove ) > fThreshold ) )
+			{
+				// After 5 seconds, moving while zoomed will pop you back out
+				// This is to fix people who accidentally switch into zoom mode, but don't know how to get back out...
+				// Should give plenty of time to players who want to move while zoomed
+				ZoomOut();
+			}
+		}
 	}
 
 	BaseClass::PlayerRunCommand( ucmd, moveHelper );
@@ -1639,6 +1749,41 @@ void CPortal_Player::Jump( void )
 	BaseClass::Jump();
 }
 
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CPortal_Player::ZoomIn()
+{
+	SetFOV( this, 45.0f, 0.15f );
+	m_PortalLocal.m_bZoomedIn = true;
+
+	IGameEvent * event = gameeventmanager->CreateEvent( "player_zoomed" );
+	if ( event )
+	{
+		event->SetInt( "userid", GetUserID() );
+		gameeventmanager->FireEvent( event );
+	}
+}
+
+void CPortal_Player::ZoomOut()
+{
+	SetFOV( this, 0.0f, 0.15f );
+	m_PortalLocal.m_bZoomedIn = false;
+
+	IGameEvent * event = gameeventmanager->CreateEvent( "player_unzoomed" );
+	if ( event )
+	{
+		event->SetInt( "userid", GetUserID() );
+		gameeventmanager->FireEvent( event );
+	}
+}
+
+bool CPortal_Player::IsZoomed( void )
+{
+	return m_PortalLocal.m_bZoomedIn;
+}
+
+
 void CPortal_Player::Event_Killed( const CTakeDamageInfo &info )
 {
 	//update damage info with our accumulated physics force
@@ -1660,6 +1805,8 @@ void CPortal_Player::Event_Killed( const CTakeDamageInfo &info )
 	CreateRagdollEntity( info );
 
 	BaseClass::Event_Killed( subinfo );
+	
+	SetUseKeyCooldownTime( 3.0f );
 
 #if PORTAL_HIDE_PLAYER_RAGDOLL
 	// Fizzle all portals so they don't see the player disappear
@@ -1846,35 +1993,127 @@ void CPortal_Player::UnDuck( void )
 	}
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Overload for portal-- Our player can lift his own mass.
-// Input  : *pObject - The object to lift
-//			bLimitMassAndSize - check for mass/size limits
-//-----------------------------------------------------------------------------
-void CPortal_Player::PickupObject(CBaseEntity *pObject, bool bLimitMassAndSize )
+
+void CPortal_Player::SetForcedGrabControllerType( ForcedGrabControllerType type )
 {
-	// can't pick up what you're standing on
-	if ( GetGroundEntity() == pObject )
+	m_ForcedGrabController = type;
+}
+
+//--------------------------------------------------------------------------------------------------
+// Disable the use key for the specified time (in seconds)
+//--------------------------------------------------------------------------------------------------
+void CPortal_Player::SetUseKeyCooldownTime( float flCooldownDuration )
+{
+	const float flMaxCooldownDuration = 120.0f;
+	Assert( flCooldownDuration < flMaxCooldownDuration );
+	flCooldownDuration = clamp ( flCooldownDuration, 0.0f, flMaxCooldownDuration );
+	m_flUseKeyCooldownTime = gpGlobals->curtime + flCooldownDuration;
+}
+
+
+void CPortal_Player::UpdateVMGrab( CBaseEntity *pEntity )
+{
+	if ( !pEntity )
 		return;
 
-	if ( bLimitMassAndSize == true )
+	switch( m_ForcedGrabController )
 	{
-		if ( CBasePlayer::CanPickupObject( pObject, PORTAL_PLAYER_MAX_LIFT_MASS, PORTAL_PLAYER_MAX_LIFT_SIZE ) == false )
-			return;
-	}
+	case FORCE_GRAB_CONTROLLER_VM:
+		{
+			m_bUseVMGrab = true;
+		}
+		break;
+	case FORCE_GRAB_CONTROLLER_PHYSICS:
+		{
+			m_bUseVMGrab = false;
+		}
+		break;
+	case FORCE_GRAB_CONTROLLER_DEFAULT:
+	default:
+		{
+#if 0	// Turning this off for now... the FOV differences cause a visual pop that people are bugging
+			// and we might not be getting that much for having it not collide while flinging.
+			if ( GetAbsVelocity().Length() > 350.0f )
+			{
+				// Going fast! Use VM
+				m_bUseVMGrab = true;
+				return;
+			}
+#endif
 
-	// Can't be picked up if NPCs are on me
-	if ( pObject->HasNPCsOnIt() )
-		return;
+			if ( FClassnameIs( pEntity, "npc_portal_turret_floor" ) )
+			{
+				// It's a turret, use physics
+				m_bUseVMGrab = false;
+				return;
+			}
 
-	PlayerPickupObject( this, pObject );
+			if ( GameRules() && GameRules()->IsMultiplayer() )
+			{
+				// In MP our reflective cubes need to go physics when touching or near a laser
+				if ( UTIL_IsReflectiveCube( pEntity ) ||  UTIL_IsSchrodinger( pEntity ) )
+				{
+					CPropWeightedCube *pCube = (CPropWeightedCube *)pEntity;
+					if ( pCube->HasLaser() )
+					{
+						// VMGrabController'd laser cubes that were grabbed through portals still think they are being
+						// held through portals.  Clear that out here, so when it comes time to ComputeError, we won't get
+						// a bogus error and force drop the cube.
+						SetHeldObjectOnOppositeSideOfPortal( false );
+						SetHeldObjectPortal( NULL );
+
+						// It's redirecting a laser, use physics
+						m_bUseVMGrab = false;
+						return;
+					}
+					else
+					{
+						// TODO: Add lasers and then add this code back.
+#if 0
+						// Check it's distance to each laser line so the depth renders properly when the laser is between the player and cube
+						for ( int i = 0; i < IPortalLaserAutoList::AutoList().Count(); ++i )
+						{
+							CPortalLaser *pLaser = static_cast< CPortalLaser* >( IPortalLaserAutoList::AutoList()[ i ] );
+							if ( pLaser )
+							{
+								Vector vClosest = pLaser->ClosestPointOnLineSegment( pCube->GetAbsOrigin() );
+								if ( vClosest.DistToSqr( pCube->GetAbsOrigin() ) < ( 80.0f * 80.0f ) )
+								{
+									// VMGrabController'd laser cubes that were grabbed through portals still think they are being
+									// held through portals.  Clear that out here, so when it comes time to ComputeError, we won't get
+									// a bogus error and force drop the cube.
+									SetHeldObjectOnOppositeSideOfPortal( false );
+									SetHeldObjectPortal( NULL );
+
+									// It's close to the laser
+									m_bUseVMGrab = false;
+									return;
+								}
+							}
+						}
+#endif
+					}
+				}
+
+				// Multiplayer uses VM otherwise
+				m_bUseVMGrab = true;
+				return;
+			}
+
+			if ( FClassnameIs( pEntity, "npc_personality_core" ) )
+			{
+				// It's a personality core, use VM mode
+				m_bUseVMGrab = true;
+				return;
+			}
+
+			m_bUseVMGrab = false;
+		}
+		break;
+
+	} //Switch forced grab controller
 }
 
-void CPortal_Player::ForceDropOfCarriedPhysObjects( CBaseEntity *pOnlyIfHoldingThis )
-{
-	m_bHeldObjectOnOppositeSideOfPortal = false;
-	BaseClass::ForceDropOfCarriedPhysObjects( pOnlyIfHoldingThis );
-}
 
 void CPortal_Player::IncrementPortalsPlaced( void )
 {

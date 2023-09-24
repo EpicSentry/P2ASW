@@ -14,7 +14,7 @@
 #include "prop_portal_shared.h"
 #include "portal_shareddefs.h"
 #include "physobj.h"
-#include "player_pickup_controller.h"
+#include "portal_grabcontroller_shared.h"
 #include "model_types.h"
 #include "rumble_shared.h"
 #include "trigger_portal_cleanser.h"

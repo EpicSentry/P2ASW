@@ -15,7 +15,7 @@
 #include "triggers.h"
 #include "CollisionUtils.h"
 #include "cbaseanimatingprojectile.h"
-#include "player_pickup_controller.h"
+#include "portal_grabcontroller_shared.h"
 #include "prop_portal_shared.h"
 #include "portal_placement.h"
 #include "weapon_portalgun_shared.h"
@@ -23,9 +23,6 @@
 #include "particle_parse.h"
 #include "info_placement_helper.h"
 #include "rumble_shared.h"
-
-ConVar portalgun_fire_delay ( "portalgun_fire_delay", "0.20", FCVAR_CHEAT|FCVAR_REPLICATED );
-ConVar portalgun_held_button_fire_delay ( "portalgun_held_button_fire_fire_delay", "0.50", FCVAR_CHEAT|FCVAR_REPLICATED );
 
 #define BLAST_SPEED_NON_PLAYER 1000.0f
 #define BLAST_SPEED 3000.0f
@@ -805,72 +802,11 @@ void CWeaponPortalgun::SetPotatosOnPortalgun( bool bPotatos )
 	// TODO
 }
 
-
-void CWeaponPortalgun::PostAttack( void )
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CWeaponPortalgun::UseDeny( void )
 {
-	// Only the player fires this way so we can cast
-	CPortal_Player *pPlayer = ToPortalPlayer( GetOwner() );
-	if ( pPlayer == NULL )
-		return;
-
-#if defined( GAME_DLL ) //TODO: client version would probably be a good idea
-	pPlayer->RumbleEffect( RUMBLE_PORTALGUN_LEFT, 0, RUMBLE_FLAGS_NONE );
-#endif
-
-
-//	int nSplitScreenSlot = pPlayer->GetSplitScreenPlayerSlot();
-	CBaseAnimating *pModelView =  pPlayer->GetViewModel();
-
-#if defined( CLIENT_DLL )
-	if ( !prediction->InPrediction() || prediction->IsFirstTimePredicted() )
-#endif
-	{
-		// FIXME: - Wonderland_War
-		/*
-		if ( ( pPlayer->IsSplitScreenPlayer() || pPlayer->HasAttachedSplitScreenPlayers() ) && nSplitScreenSlot != -1 )
-		{
-#if defined( CLIENT_DLL )
-			if ( pModelView )
-			{
-				CUtlReference<CNewParticleEffect> m_hPortalGunMuzzle = pModelView->ParticleProp()->Create( "portalgun_muzzleflash_FP", PATTACH_POINT_FOLLOW, "muzzle" );
-				m_hPortalGunMuzzle->SetDrawOnlyForSplitScreenUser( nSplitScreenSlot );
-				m_hPortalGunMuzzle = NULL;
-			}
-			DispatchParticleEffect( "portalgun_muzzleflash", PATTACH_POINT_FOLLOW, this, "muzzle");
-#endif
-		}
-		else*/
-		{
-			if ( pModelView )
-				DispatchParticleEffect( "portalgun_muzzleflash_FP", PATTACH_POINT_FOLLOW, pModelView, "muzzle" );
-			DispatchParticleEffect( "portalgun_muzzleflash", PATTACH_POINT_FOLLOW, this, "muzzle");
-		}
-	}
-
-	float flFireDelay = portalgun_fire_delay.GetFloat();
-
-#if USE_SLOWTIME
-	if ( pPlayer->IsSlowingTime() )
-	{
-		flFireDelay *= slowtime_speed.GetFloat();
-	}
-	else
-#endif // USE_SLOWTIME
-	{
-		QAngle qPunch;
-		qPunch.x = SharedRandomFloat( "CWeaponPortalgun::PrimaryAttack() ViewPunchX", -1, -0.5f );
-		qPunch.y = SharedRandomFloat( "CWeaponPortalgun::PrimaryAttack() ViewPunchY", -1, 1 );
-		qPunch.z = 0.0f;
-		pPlayer->ViewPunch( qPunch );
-	}
-
-	// Don't fire again too quickly
-	m_flNextPrimaryAttack = gpGlobals->curtime + flFireDelay;
-	m_flNextSecondaryAttack = gpGlobals->curtime + flFireDelay;
-
-	// Held-button repeat fires get a different delay
-	m_flNextRepeatPrimaryAttack = gpGlobals->curtime + portalgun_held_button_fire_delay.GetFloat();
-	m_flNextRepeatSecondaryAttack = gpGlobals->curtime + portalgun_held_button_fire_delay.GetFloat();
-	// player "shoot" animation
-	pPlayer->SetAnimation( PLAYER_ATTACK1 );
+	WeaponSound( EMPTY );
+	SendWeaponAnim( ACT_VM_DRYFIRE );
 }

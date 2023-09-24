@@ -16,6 +16,13 @@
 #include "player_pickup.h"
 #endif
 
+#ifdef GAME_DLL
+#define CPortal_Base2D CProp_Portal
+#else
+#define CPortal_Base2D C_Prop_Portal
+#define C_Portal_Base2D C_Prop_Portal
+#endif
+
 //#define DEBUG_SHADOW_CONTROLLER
 
 class CPortal_Player;

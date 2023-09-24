@@ -22,7 +22,7 @@
 	#include "portal_player.h"
 	#include "globalstate.h"
 	#include "ai_basenpc.h"
-	#include "player_pickup_controller.h"
+	#include "portal_grabcontroller_shared.h"
 	#include "props.h"		// For props flags used in making the portal weight box
 	#include "datacache/imdlcache.h"	// For precaching box model
 	#include "weapon_portalgun.h"
@@ -1505,7 +1505,8 @@ HSCRIPT GetPlayer( void )
 void CPortalGameRules::RegisterScriptFunctions(void)
 {
 	ScriptRegisterFunctionNamed( g_pScriptVM, ScriptIsMultiplayer, "IsMultiplayer", "Is this a multiplayer game?" );
-/*
+
+	/*
 	ScriptRegisterFunction( g_pScriptVM, GetPlayerSilenceDuration, "Time that the specified player has been silent on the mic." );
 	ScriptRegisterFunction( g_pScriptVM, GetOrangePlayerIndex, "Player index of the orange player." );
 	ScriptRegisterFunction( g_pScriptVM, GetBluePlayerIndex, "Player index of the blue player." );
@@ -1516,10 +1517,11 @@ void CPortalGameRules::RegisterScriptFunctions(void)
 	ScriptRegisterFunction( g_pScriptVM, MarkMapComplete, "Marks a maps a complete for both players." );
 	ScriptRegisterFunction( g_pScriptVM, IsLevelComplete, "Returns true if the level in the specified branch is completed by either player." );
 	ScriptRegisterFunction( g_pScriptVM, IsPlayerLevelComplete, "Returns true if the level in the specified branch is completed by a specific player." );
+	*/
 	ScriptRegisterFunction( g_pScriptVM, GetPlayer, "Returns the player (SP Only)." );
 	//ScriptRegisterFunction( g_pScriptVM, PrecacheMovie, "Precaches a named movie. Only valid to call within the entity's 'Precache' function called on mapspawn." );
-	ScriptRegisterFunction( g_pScriptVM, AddCoopCreditsName, "Adds a name to the coop credit's list." );
-*/
+	//ScriptRegisterFunction( g_pScriptVM, AddCoopCreditsName, "Adds a name to the coop credit's list." );
+
 	ScriptRegisterFunction( g_pScriptVM, ScriptSteamShowURL, "Bring up the steam overlay and shows the specified URL.  (Full address with protocol type is required, e.g. http://www.steamgames.com/)" );
 	ScriptRegisterFunction( g_pScriptVM, ScriptShowHudMessageAll, "Show center print text message." );
 	ScriptRegisterFunction( g_pScriptVM, GivePlayerPortalgun, "Give player the portalgun." );

@@ -19,7 +19,6 @@ ConVar paintblob_applies_impulse( "paintblob_applies_impulse", "0", FCVAR_DEVELO
 
 CPaintBlob::CPaintBlob() : m_pPaintingEntity(NULL), m_ID( 0 )
 {
-	GetWorldEntity()->PrecacheModel( BLOB_MODEL );
 }
 
 

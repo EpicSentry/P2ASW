@@ -26,23 +26,25 @@ typedef C_NPC_Portal_FloorTurret CNPC_Portal_FloorTurret;
 #include "npc_portal_turret_floor.h"
 #endif // CLIENT_DLL
 
+#define CPortal_Base2D_Shared CProp_Portal_Shared
+
 bool TestIntersectionVsHeldObjectCollide( CBaseEntity *pHeldObject, Vector vHeldObjectTestOrigin, CBaseEntity *pOther );
 
 ConVar g_debug_physcannon( "g_debug_physcannon", "0", FCVAR_REPLICATED | FCVAR_CHEAT );
 ConVar debug_viewmodel_grabcontroller( "debug_viewmodel_grabcontroller", "0", FCVAR_REPLICATED | FCVAR_CHEAT );
 ConVar physcannon_maxmass( "physcannon_maxmass", "250", FCVAR_REPLICATED | FCVAR_CHEAT );
-ConVar hide_gun_when_holding( "hide_gun_when_holding", "0", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
-ConVar player_held_object_offset_up_cube( "player_held_object_offset_up_cube", "-10", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "offest along the up axis for held objects.", true, -100.0f, true, 100.0f );
-ConVar player_held_object_offset_up_cube_vm( "player_held_object_offset_up_cube_vm", "-20", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "offest along the up axis for held objects.", true, -100.0f, true, 100.0f );
-ConVar player_held_object_offset_up_sphere( "player_held_object_offset_up_sphere", "-15", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "offest along the up axis for held objects.", true, -100.0f, true, 100.0f );
-ConVar player_held_object_look_down_adjustment( "player_held_object_look_down_adjustment", "20", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Moves the box forward when looking down (viewmodel held object only.", true, 0.0f, true, 100.0f );
-ConVar player_held_object_distance( "player_held_object_distance", "15", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Distance from player for held objects.", true, 0.0f, true, 100.0f );
-ConVar player_held_object_distance_vm( "player_held_object_distance_vm", "65", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Distance from player for held objects.", true, 0.0f, true, 160.0f );
-ConVar player_held_object_offset_up_turret_vm( "player_held_object_offset_up_turret_vm", "-20", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Offset for held turrets", true, -100.0f, true, 100.0f );
-ConVar player_held_object_distance_turret_vm( "player_held_object_distance_turret_vm", "100", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Offset for held turrets", true, 0.0f, true, 200.0f );
-ConVar player_held_object_min_distance( "player_held_object_min_distance", "50", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Minimum distance from player for held objects (used by viewmodel held objects).", true, 0.0f, true, 100.0f );
-ConVar player_hold_object_in_column( "player_hold_object_in_column", "1", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Hold object along a fixed column in front of player\n" );
-ConVar player_hold_column_max_size( "player_hold_column_max_size", "96", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Furthest distance an object can be when held in colmn mode." );
+ConVar hide_gun_when_holding( "hide_gun_when_holding", "0", FCVAR_REPLICATED  );
+ConVar player_held_object_offset_up_cube( "player_held_object_offset_up_cube", "-10", FCVAR_REPLICATED , "offest along the up axis for held objects.", true, -100.0f, true, 100.0f );
+ConVar player_held_object_offset_up_cube_vm( "player_held_object_offset_up_cube_vm", "-20", FCVAR_REPLICATED , "offest along the up axis for held objects.", true, -100.0f, true, 100.0f );
+ConVar player_held_object_offset_up_sphere( "player_held_object_offset_up_sphere", "-15", FCVAR_REPLICATED , "offest along the up axis for held objects.", true, -100.0f, true, 100.0f );
+ConVar player_held_object_look_down_adjustment( "player_held_object_look_down_adjustment", "20", FCVAR_REPLICATED , "Moves the box forward when looking down (viewmodel held object only.", true, 0.0f, true, 100.0f );
+ConVar player_held_object_distance( "player_held_object_distance", "15", FCVAR_REPLICATED , "Distance from player for held objects.", true, 0.0f, true, 100.0f );
+ConVar player_held_object_distance_vm( "player_held_object_distance_vm", "65", FCVAR_REPLICATED , "Distance from player for held objects.", true, 0.0f, true, 160.0f );
+ConVar player_held_object_offset_up_turret_vm( "player_held_object_offset_up_turret_vm", "-20", FCVAR_REPLICATED , "Offset for held turrets", true, -100.0f, true, 100.0f );
+ConVar player_held_object_distance_turret_vm( "player_held_object_distance_turret_vm", "100", FCVAR_REPLICATED , "Offset for held turrets", true, 0.0f, true, 200.0f );
+ConVar player_held_object_min_distance( "player_held_object_min_distance", "50", FCVAR_REPLICATED , "Minimum distance from player for held objects (used by viewmodel held objects).", true, 0.0f, true, 100.0f );
+ConVar player_hold_object_in_column( "player_hold_object_in_column", "1", FCVAR_REPLICATED , "Hold object along a fixed column in front of player\n" );
+ConVar player_hold_column_max_size( "player_hold_column_max_size", "96", FCVAR_REPLICATED , "Furthest distance an object can be when held in colmn mode." );
 ConVar player_held_object_max_knock_magnitude( "player_held_object_max_knock_magnitude", "30", FCVAR_REPLICATED | FCVAR_CHEAT, "For viewmodel grab controller, max velocity magnitude squared to apply to knocked objects." );
 ConVar player_held_object_max_throw_magnitude( "player_held_object_max_throw_magnitude", "60", FCVAR_REPLICATED | FCVAR_CHEAT, "For viewmodel grab controller, max velocity magnitude squared to apply to knocked objects." );
 
@@ -1298,6 +1300,7 @@ bool CPlayerPickupController::Shutdown( bool bThrown )
 
 	if ( pOwner )
 	{
+		Msg("Shutdown Player Pickup!\n");
 		pOwner->SetUseEntity( NULL );
 		if ( !pOwner->m_bSilentDropAndPickup )
 		{
@@ -1707,9 +1710,9 @@ bool CGrabController::UpdateObject( CBasePlayer *pPlayer, float flError, bool bI
 	float playerRadius = player2d.Length();
 
 	float radius = playerRadius + pEntity->BoundingRadius();
-
+	
 	float distance = GetObjectDistance() + radius;
-
+	
 	// Add the prop's distance offset
 	distance += m_flDistanceOffset;
 
@@ -1754,7 +1757,9 @@ bool CGrabController::UpdateObject( CBasePlayer *pPlayer, float flError, bool bI
 	}
 #endif
 
+
 	float flTraceDist = distance * tr.fraction;
+	Msg("flTraceDist %f", flTraceDist);
 	if ( flTraceDist < radius )
 		flTraceDist = radius;
 
@@ -2264,6 +2269,7 @@ void CGrabController::CheckPortalOscillation( CPortal_Base2D *pWentThroughPortal
 #if defined ( GAME_DLL )
 bool TestRayVsFuncClipVPhysics( const Ray_t& ray )
 {
+	/*
 	for( int i = 0; i != GetVPhysicsClipList().Count(); ++i )
 	{
 		VPhysicsClipEntry_t &checkEntry = GetVPhysicsClipList()[i];
@@ -2286,12 +2292,13 @@ bool TestRayVsFuncClipVPhysics( const Ray_t& ray )
 				return true;
 			}
 		}
-	}
+	}*/
 	return false;
 }
 
 bool TestHeldEntityVsFuncClipVPhysics( CBaseEntity* pEnt, Vector testOrg )
 {
+	/*
 	Assert ( pEnt );
 	if ( !pEnt )
 		return false;
@@ -2320,6 +2327,7 @@ bool TestHeldEntityVsFuncClipVPhysics( CBaseEntity* pEnt, Vector testOrg )
 			}
 		}
 	}
+	*/
 	return false;
 }
 #endif

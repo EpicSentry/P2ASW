@@ -80,7 +80,7 @@ void C_PortalBlast::Init( bool bIsPortal2, PortalPlacedByType ePlacedBy, const V
 	else
 		ParticleProp()->Create( ( ( bIsPortal2 ) ? ( "portal_2_projectile_stream_pedestal" ) : ( "portal_1_projectile_stream_pedestal" ) ), PATTACH_ABSORIGIN_FOLLOW );
 #else
-		ParticleProp()->Create( ( ( bIsPortal2 ) ? ( "portal_projectile_stream_pedestal" ) : ( "portal_projectile_stream_pedestal" ) ), PATTACH_ABSORIGIN_FOLLOW );
+		ParticleProp()->Create( ( ( bIsPortal2 ) ? ( "portal_projectile_stream" ) : ( "portal_projectile_stream" ) ), PATTACH_ABSORIGIN_FOLLOW );
 #endif
 }
 

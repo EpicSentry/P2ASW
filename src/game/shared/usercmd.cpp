@@ -254,7 +254,48 @@ void WriteUsercmd( bf_write *buf, const CUserCmd *to, const CUserCmd *from )
 		buf->WriteOneBit( 0 );
 	}
 #endif
+	
+#if defined ( PORTAL2 )
+	if ( to->player_held_entity != from->player_held_entity )
+	{
+		buf->WriteOneBit( 1 );
+		buf->WriteShort( to->player_held_entity );
+	}
+	else
+	{
+		buf->WriteOneBit( 0 );
+	}
 
+	if ( to->held_entity_was_grabbed_through_portal != from->held_entity_was_grabbed_through_portal )
+	{
+		buf->WriteOneBit( 1 );
+		buf->WriteShort( to->held_entity_was_grabbed_through_portal );
+	}
+	else
+	{
+		buf->WriteOneBit( 0 );
+	}
+
+	if( to->command_acknowledgements_pending != from->command_acknowledgements_pending )
+	{
+		buf->WriteOneBit( 1 );
+		buf->WriteShort( to->command_acknowledgements_pending );
+	}
+	else
+	{
+		buf->WriteOneBit( 0 );
+	}
+
+	if( to->predictedPortalTeleportations != from->predictedPortalTeleportations )
+	{
+		buf->WriteOneBit( 1 );
+		buf->WriteByte( to->predictedPortalTeleportations );
+	}
+	else
+	{
+		buf->WriteOneBit( 0 );
+	}
+#endif 
 
 
 	if ( IsHeadTrackingEnabled() )
@@ -424,7 +465,28 @@ void ReadUsercmd( bf_read *buf, CUserCmd *move, CUserCmd *from )
 		}
 	}
 #endif
+	
+#if defined ( PORTAL2 )
+	if ( buf->ReadOneBit() )
+	{
+		move->player_held_entity = buf->ReadShort();
+	}
 
+	if ( buf->ReadOneBit() )
+	{
+		move->held_entity_was_grabbed_through_portal = buf->ReadShort();
+	}
+
+	if ( buf->ReadOneBit() )
+	{
+		move->command_acknowledgements_pending = buf->ReadShort();
+	}
+
+	if ( buf->ReadOneBit() )
+	{
+		move->predictedPortalTeleportations = buf->ReadByte();
+	}
+#endif 
 
 
 	if ( IsHeadTrackingEnabled() )

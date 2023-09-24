@@ -58,9 +58,7 @@ public:
 	EHANDLE		m_hPlacedBy;
 
 	COutputEvent m_OnPlacedSuccessfully;		// Output in hammer for when this portal was successfully placed (not attempted and fizzed).
-
-	cplane_t m_plane_Origin; //a portal plane on the entity origin
-
+	
 	CPhysicsCloneArea		*m_pAttachedCloningArea;
 
 	bool	IsPortal2() const;
@@ -132,6 +130,16 @@ public:
 	virtual void			PortalSimulator_ReleasedOwnershipOfEntity( CBaseEntity *pEntity );
 	
 	bool					IsFloorPortal(float fThreshold = 0.8f) const;
+	
+	float	GetHalfWidth( void ) { return PORTAL_HALF_WIDTH; }
+	float	GetHalfHeight( void ) { return PORTAL_HALF_HEIGHT; }
+
+	bool	IsActive( void )	{ return m_bActivated; }
+	
+	CNetworkVector( m_ptOrigin );
+	Vector m_vForward, m_vUp, m_vRight;
+	CNetworkQAngle( m_qAbsAngle );
+	cplane_t m_plane_Origin; //a portal plane on the entity origin
 
 private:
 	unsigned char			m_iLinkageGroupID; //a group ID specifying which portals this one can possibly link to
@@ -141,6 +149,8 @@ private:
 	void					UpdateCorners( void );			// Updates the four corners of this portal on spawn and placement
 
 public:
+	CProp_Portal			*GetLinkedPortal( void ) { return m_hLinkedPortal; }
+
 	inline unsigned char	GetLinkageGroup( void ) const { return m_iLinkageGroupID; };
 	void					ChangeLinkageGroup( unsigned char iLinkageGroupID );
 

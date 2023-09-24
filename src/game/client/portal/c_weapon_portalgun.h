@@ -161,6 +161,8 @@ public:
 	void DryFire( void );
 	virtual float GetFireRate( void ) { return 0.7; };
 	void WeaponIdle( void );
+	
+	void PostAttack( void );
 
 protected:
 

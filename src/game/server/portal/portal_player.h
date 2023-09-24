@@ -11,7 +11,7 @@
 
 class CPortal_Player;
 
-#include "player_pickup_controller.h"
+#include "portal_grabcontroller_shared.h"
 #include "player.h"
 #include "portal_playeranimstate.h"
 #include "hl2_playerlocaldata.h"
@@ -37,6 +37,13 @@ struct PortalPlayerStatistics_t
 	float fNumSecondsTaken;
 };
 
+enum ForcedGrabControllerType
+{
+	FORCE_GRAB_CONTROLLER_DEFAULT = 0,
+	FORCE_GRAB_CONTROLLER_VM,
+	FORCE_GRAB_CONTROLLER_PHYSICS
+};
+
 //=============================================================================
 // >> Portal_Player
 //=============================================================================
@@ -56,6 +63,7 @@ public:
 
 	DECLARE_SERVERCLASS();
 	DECLARE_DATADESC();
+	DECLARE_ENT_SCRIPTDESC();
 
 	virtual void Precache( void );
 	virtual void CreateSounds( void );
@@ -90,6 +98,7 @@ public:
 	virtual bool WantsLagCompensationOnEntity( const CBasePlayer *pPlayer, const CUserCmd *pCmd, const CBitVec<MAX_EDICTS> *pEntityTransmitBits ) const;
 	virtual void FireBullets ( const FireBulletsInfo_t &info );
 	virtual bool Weapon_Switch( CBaseCombatWeapon *pWeapon, int viewmodelindex = 0);
+	virtual Vector Weapon_ShootPosition();
 	virtual bool BumpWeapon( CBaseCombatWeapon *pWeapon );
 	virtual void ShutdownUseEntity( void );
 
@@ -101,10 +110,16 @@ public:
 	//virtual void StopReplayMode();
  	virtual void Event_Killed( const CTakeDamageInfo &info );
 	virtual void Jump( void );
-
-	bool UseFoundEntity( CBaseEntity *pUseEntity );
-	CBaseEntity* FindUseEntity( void );
+	
+	bool UseFoundEntity( CBaseEntity *pUseEntity, bool bAutoGrab );
+	bool IsInvalidHandoff( CBaseEntity *pObject );
+	void PollForUseEntity( bool bBasicUse, CBaseEntity **ppUseEnt, CPortal_Base2D **ppUseThroughPortal );
+	CBaseEntity* FindUseEntity( CPortal_Base2D **pThroughPortal );
 	CBaseEntity* FindUseEntityThroughPortal( void );
+	
+	void ZoomIn( void );
+	void ZoomOut( void );
+	virtual bool IsZoomed( void );
 
 	virtual void PlayerUse( void );
 	//virtual bool StartObserverMode( int mode );
@@ -114,8 +129,12 @@ public:
 
 	virtual void SetupVisibility( CBaseEntity *pViewEntity, unsigned char *pvs, int pvssize );
 	virtual void UpdatePortalViewAreaBits( unsigned char *pvs, int pvssize );
+	virtual void ItemPostFrame( void );
 	
 	bool	ValidatePlayerModel( const char *pModel );
+	
+	bool	IsTaunting( void ) { return false; } // FIXME!!
+	bool	IsRemoteViewTaunt( void ) { return false; } // FIXME!!
 
 	QAngle GetAnimEyeAngles( void ) { return m_angEyeAngles.Get(); }
 
@@ -146,8 +165,37 @@ public:
 	void ToggleHeldObjectOnOppositeSideOfPortal( void ) { m_bHeldObjectOnOppositeSideOfPortal = !m_bHeldObjectOnOppositeSideOfPortal; }
 	void SetHeldObjectOnOppositeSideOfPortal( bool p_bHeldObjectOnOppositeSideOfPortal ) { m_bHeldObjectOnOppositeSideOfPortal = p_bHeldObjectOnOppositeSideOfPortal; }
 	bool IsHeldObjectOnOppositeSideOfPortal( void ) { return m_bHeldObjectOnOppositeSideOfPortal; }
-	CProp_Portal *GetHeldObjectPortal( void ) { return m_pHeldObjectPortal; }
-	void SetHeldObjectPortal( CProp_Portal *pPortal ) { m_pHeldObjectPortal = pPortal; }
+	CProp_Portal *GetHeldObjectPortal( void ) { return m_hHeldObjectPortal; }
+	void SetHeldObjectPortal( CProp_Portal *pPortal ) { m_hHeldObjectPortal = pPortal; }
+	void SetUsingVMGrabState( bool bState ) { m_bUsingVMGrabState = bState; }
+	bool IsUsingVMGrab( void );
+	bool WantsVMGrab( void );
+	void UpdateVMGrab( CBaseEntity *pEntity );
+	bool IsForcingDrop( void ) { return m_bForcingDrop; }
+
+	// This is set by the client when it picks something up
+	// and used to initiate server grab logic. If we actually pick something up
+	// it's held in 'm_hAttachedObject'. 
+	EHANDLE m_hGrabbedEntity;
+	EHANDLE m_hPortalThroughWhichGrabOccured;
+	bool m_bForcingDrop;
+	CNetworkVar( bool, m_bUseVMGrab );
+	CNetworkVar( bool, m_bUsingVMGrabState );
+	float m_flUseKeyStartTime;	// for long duration uses, record the initial keypress start time
+	float m_flAutoGrabLockOutTime;
+
+	void SetForcedGrabControllerType( ForcedGrabControllerType type );
+	ForcedGrabControllerType m_ForcedGrabController;
+	
+	// Object we're successfully holding we network down to the client
+	// for clientside simulation under multiplayer
+	CNetworkHandle( CBaseEntity, m_hAttachedObject );
+	CNetworkQAngle( m_vecCarriedObjectAngles );
+	//not simulating physics on the client, network down any inability the held object has in reaching it's target position/orientation
+	CNetworkVector( m_vecCarriedObject_CurPosToTargetPos );
+	CNetworkQAngle( m_vecCarriedObject_CurAngToTargetAng );
+	
+	void SetUseKeyCooldownTime( float flCooldownDuration );
 
 	void SetStuckOnPortalCollisionObject( void ) { m_bStuckOnPortalCollisionObject = true; }
 
@@ -165,6 +213,8 @@ public:
 
 	void IncNumCamerasDetatched( void ) { ++m_iNumCamerasDetatched; }
 	int GetNumCamerasDetatched( void ) const { return m_iNumCamerasDetatched; }
+	
+	void SetIsHoldingObject( bool bSet ) { m_bIsHoldingSomething = bSet; }
 
 	Vector m_vecTotalBulletForce;	//Accumulator for bullet force in a single frame
 
@@ -176,13 +226,6 @@ public:
 	void	SetMotionBlurAmount( float flAmt ) { m_flMotionBlurAmount = flAmt; }
 	
 	const CPortalPlayerLocalData& GetPortalPlayerLocalData() const;
-	
-	CGrabController m_GrabController;
-
-	CGrabController &GetGrabController()
-	{
-		return m_GrabController;
-	}
 	
 	void GivePlayerPaintGun( bool bActivatePaintPowers, bool bSwitchTo );
 	void GivePlayerPortalGun( bool bUpgraded, bool bSwitchTo );
@@ -205,6 +248,9 @@ public:
 	
 	EHANDLE m_hRemoteTauntCamera; // Change back to CHandle<> once we get the include ready
 	//CHandle< CNPC_SecurityCamera > m_hRemoteTauntCamera;
+		
+	void TurnOffPotatos( void ) { m_bPotatos = false; }
+	void TurnOnPotatos( void ) { m_bPotatos = true; }
 
 protected:
 
@@ -216,6 +262,7 @@ private:
 	CNetworkVar( float,  m_flMotionBlurAmount );
 
 	CSoundPatch		*m_pWooshSound;
+	CSoundPatch		*m_pGrabSound;
 
 	CNetworkQAngle( m_angEyeAngles );
 
@@ -225,7 +272,7 @@ private:
 	CNetworkVar( int, m_iSpawnInterpCounter );
 
 	CNetworkVar( bool, m_bHeldObjectOnOppositeSideOfPortal );
-	CNetworkHandle( CProp_Portal, m_pHeldObjectPortal );	// networked entity handle
+	CNetworkHandle( CProp_Portal, m_hHeldObjectPortal );	// networked entity handle
 
 	bool m_bIntersectingPortalPlane;
 	bool m_bStuckOnPortalCollisionObject;
@@ -239,6 +286,10 @@ private:
 	float m_fTimeLastNumSecondsUpdate;
 
 	int		m_iNumCamerasDetatched;
+	
+	float						m_flUseKeyCooldownTime;			// Disable use key until curtime >= this number
+	
+	CNetworkVar( bool, m_bIsHoldingSomething );
 
 	QAngle						m_qPrePortalledViewAngles;
 	bool						m_bFixEyeAnglesFromPortalling;
@@ -248,7 +299,7 @@ private:
 	mutable Vector m_vWorldSpaceCenterHolder; //WorldSpaceCenter() returns a reference, need an actual value somewhere
 	
 public: // PAINT SPECIFIC
-
+	
 	Vector GetPaintGunShootPosition();
 	
 	bool IsPressingJumpKey() const;
@@ -315,10 +366,29 @@ public: // PAINT SPECIFIC
 	virtual void ChooseActivePaintPowers( PaintPowerInfoVector& activePowers );
 	
 	bool IsFullyConnected() { return m_bIsFullyConnected; }
-	
+
+	bool m_bPotatos;
 	
 	// Anim state code
 	CNetworkVarEmbedded( CPortalPlayerShared, m_Shared );
+	
+	//variables we'd like to persist between instances of grab controllers
+	struct GrabControllerPersistentVars_t
+	{
+		CHandle<CProp_Portal> m_hOscillationWatch;
+		CHandle<CProp_Portal> m_hLookingThroughPortalLastUpdate;
+		Vector m_vLastTargetPosition;
+		bool m_bLastUpdateWasForcedPull;
+
+		void ResetOscillationWatch( void )
+		{
+			m_hOscillationWatch = NULL;
+			m_hLookingThroughPortalLastUpdate = NULL;
+			m_vLastTargetPosition.Init();
+			m_bLastUpdateWasForcedPull = false;
+		}
+	};
+	GrabControllerPersistentVars_t m_GrabControllerPersistentVars;
 
 private: // PAINT SPECIFIC
 
@@ -380,6 +450,16 @@ private: // PAINT SPECIFIC
 	int m_nPortalsEnteredInAirFlags;
 		
 	CNetworkVar( float, m_flHullHeight );
+	
+	struct RecentPortalTransform_t
+	{
+		int command_number;
+		CHandle<CPortal_Base2D> Portal;
+		matrix3x4_t matTransform;
+	};
+
+	CUtlVector<RecentPortalTransform_t> m_PendingPortalTransforms; //portal transforms we've sent to the client but they have not yet acknowledged, needed for some input fixup
+
 	//Swapping guns
 	CNetworkVar( bool, m_bWantsToSwapGuns );
 	bool m_bSendSwapProximityFailEvent;
@@ -398,6 +478,9 @@ public:
 	CNetworkHandle( CFunc_LiquidPortal, m_hSurroundingLiquidPortal ); //if the player is standing in a liquid portal, this will point to it
 
 	friend class CProp_Portal;
+	friend class CPortalGameMovement;
+
+	void PreventCrouchJump( CUserCmd* ucmd );
 
 public:
 	virtual CBaseEntity* EntSelectSpawnPoint( void );

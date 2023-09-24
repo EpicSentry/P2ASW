@@ -58,7 +58,14 @@ public:
 #if defined( HL2_DLL ) || defined( HL2_CLIENT_DLL )
 		entitygroundcontact.RemoveAll();
 #endif
+		
+#if defined ( PORTAL2 )
+		player_held_entity			= 0;
+		held_entity_was_grabbed_through_portal = 0;
 
+		command_acknowledgements_pending = 0;
+		predictedPortalTeleportations = 0;
+#endif // PORTAL2
 
 
 		// TrackIR
@@ -104,7 +111,13 @@ public:
 #if defined( HL2_DLL ) || defined( HL2_CLIENT_DLL )
 		entitygroundcontact			= src.entitygroundcontact;
 #endif
-
+		
+#if defined ( PORTAL2 )
+		player_held_entity			= src.player_held_entity;
+		held_entity_was_grabbed_through_portal = src.held_entity_was_grabbed_through_portal;
+		command_acknowledgements_pending = src.command_acknowledgements_pending;
+		predictedPortalTeleportations = src.predictedPortalTeleportations;
+#endif // PORTAL2
 
 
 		// TrackIR
@@ -156,7 +169,13 @@ public:
 #if defined( INFESTED_DLL )
 		CRC32_ProcessBuffer( &crc, &crosshairtrace, sizeof( crosshairtrace ) );
 #endif
-
+		
+#if defined ( PORTAL2 )
+		CRC32_ProcessBuffer( &crc, &player_held_entity, sizeof( player_held_entity ) );
+		CRC32_ProcessBuffer( &crc, &held_entity_was_grabbed_through_portal, sizeof( held_entity_was_grabbed_through_portal ) );
+		CRC32_ProcessBuffer( &crc, &command_acknowledgements_pending, sizeof( command_acknowledgements_pending ) );
+		CRC32_ProcessBuffer( &crc, &predictedPortalTeleportations, sizeof( predictedPortalTeleportations ) );
+#endif // PORTAL2
 
 
 #ifdef INFESTED_DLL
@@ -206,7 +225,18 @@ public:
 #if defined( HL2_DLL ) || defined( HL2_CLIENT_DLL )
 	CUtlVector< CEntityGroundContact > entitygroundcontact;
 #endif
+	
+#if defined ( PORTAL2 )
+	// Portal 2's grab code is on the client to support multiplayer
+	short player_held_entity;
+	// This one is temporary-- some server code needs to know if this trace 
+	// went through a portal. This should go away when we move the grabcontrollers
+	// down to the client as well.
+	short held_entity_was_grabbed_through_portal;
 
+	unsigned short command_acknowledgements_pending; //so we can properly sync portal teleportation angle changes. The server tells us the last command it acknowledged, now we also tell it how many acknowledgments we're waiting on (command_number - engine->GetLastAcknowledgedCommand())
+	uint8 predictedPortalTeleportations; //should probably enumerate which transforms we went through if we want perfect accuracy
+#endif // PORTAL2
 
 	// TrackIR
 	QAngle headangles;

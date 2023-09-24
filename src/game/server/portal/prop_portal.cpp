@@ -8,7 +8,7 @@
 #include "cbase.h"
 #include "prop_portal.h"
 #include "portal_player.h"
-#include "player_pickup_controller.h"
+#include "portal_grabcontroller_shared.h"
 #include "physics_npc_solver.h"
 #include "envmicrophone.h"
 #include "env_speaker.h"
@@ -97,6 +97,11 @@ IMPLEMENT_SERVERCLASS_ST( CProp_Portal, DT_Prop_Portal )
 	SendPropEHandle( SENDINFO(m_hLinkedPortal) ),
 	SendPropBool( SENDINFO(m_bActivated) ),
 	SendPropBool( SENDINFO(m_bIsPortal2) ),
+	
+	//if we're resting on another entity, we still need ultra-precise absolute coords. We should probably downgrade local origin/angles in favor of these
+	SendPropVector( SENDINFO(m_ptOrigin), -1,  SPROP_NOSCALE, 0.0f, HIGH_DEFAULT ),
+	SendPropVector( SENDINFO(m_qAbsAngle), -1, SPROP_NOSCALE, 0.0f, HIGH_DEFAULT ),
+
 END_SEND_TABLE()
 
 LINK_ENTITY_TO_CLASS( prop_portal, CProp_Portal );
@@ -232,6 +237,7 @@ void CProp_Portal::Precache( void )
 	PrecacheParticleSystem( "portal_close" );
 	PrecacheParticleSystem( "portal_badsurface" );
 	PrecacheParticleSystem( "portal_success" );
+
 	BaseClass::Precache();
 }
 
@@ -291,6 +297,10 @@ void CProp_Portal::Spawn( void )
 
 void CProp_Portal::OnRestore()
 {
+	m_ptOrigin = GetAbsOrigin();
+	m_qAbsAngle = GetAbsAngles();
+
+	UpdatePortalTeleportMatrix();
 	UpdateCorners();
 
 	Assert( m_pAttachedCloningArea == NULL );
@@ -319,8 +329,8 @@ bool CProp_Portal::TestCollision( const Ray_t &ray, unsigned int fContentsMask, 
 //-----------------------------------------------------------------------------
 void CProp_Portal::DelayedPlacementThink( void )
 {
-	Vector vOldOrigin = GetLocalOrigin();
-	QAngle qOldAngles = GetLocalAngles();
+	Vector vOldOrigin = m_ptOrigin; //GetLocalOrigin();
+	QAngle qOldAngles = m_qAbsAngle; //GetLocalAngles();
 
 	Vector vForward;
 	AngleVectors( m_qDelayedAngles, &vForward );
@@ -1568,18 +1578,6 @@ void CProp_Portal::EndTouch( CBaseEntity *pOther )
 #endif
 }
 
-void CProp_Portal::PortalSimulator_TookOwnershipOfEntity( CBaseEntity *pEntity )
-{
-	if( pEntity->IsPlayer() )
-		((CPortal_Player *)pEntity)->m_hPortalEnvironment = this;
-}
-
-void CProp_Portal::PortalSimulator_ReleasedOwnershipOfEntity( CBaseEntity *pEntity )
-{
-	if( pEntity->IsPlayer() && (((CPortal_Player *)pEntity)->m_hPortalEnvironment.Get() == this) )
-		((CPortal_Player *)pEntity)->m_hPortalEnvironment = NULL;
-}
-
 bool CProp_Portal::SharedEnvironmentCheck( CBaseEntity *pEntity )
 {
 	Assert( ((m_PortalSimulator.GetLinkedPortalSimulator() == NULL) && (m_hLinkedPortal.Get() == NULL)) || 
@@ -1813,11 +1811,46 @@ void CProp_Portal::ForceEntityToFitInPortalWall( CBaseEntity *pEntity )
 
 void CProp_Portal::UpdatePortalTeleportMatrix( void )
 {
-	ResetModel();
+	//copied from client to ensure the numbers match as closely as possible.
+	{		
+		ALIGN16 matrix3x4_t finalMatrix;
+		if( GetMoveParent() )
+		{
+			// Construct the entity-to-world matrix
+			// Start with making an entity-to-parent matrix
+			ALIGN16 matrix3x4_t matEntityToParent;
+			AngleMatrix( GetLocalAngles(), matEntityToParent );
+			MatrixSetColumn( GetLocalOrigin(), 3, matEntityToParent );
+
+			// concatenate with our parent's transform
+			ALIGN16 matrix3x4_t scratchMatrix;
+			ConcatTransforms( GetParentToWorldTransform( scratchMatrix ), matEntityToParent, finalMatrix );
+
+			MatrixGetColumn( finalMatrix, 0, m_vForward );
+			MatrixGetColumn( finalMatrix, 1, m_vRight );
+			MatrixGetColumn( finalMatrix, 2, m_vUp );
+			Vector vTempOrigin;
+			MatrixGetColumn( finalMatrix, 3, vTempOrigin );
+			m_ptOrigin = vTempOrigin;
+			m_vRight = -m_vRight;
+
+			QAngle qTempAngle;
+			MatrixAngles( finalMatrix, qTempAngle );
+			m_qAbsAngle = qTempAngle;
+		}
+		else
+		{
+			AngleMatrix( m_qAbsAngle, finalMatrix );
+			MatrixGetColumn( finalMatrix, 0, m_vForward );
+			MatrixGetColumn( finalMatrix, 1, m_vRight );
+			MatrixGetColumn( finalMatrix, 2, m_vUp );
+			m_vRight = -m_vRight;
+		}		
+	}
 
 	//setup our origin plane
-	GetVectors( &m_plane_Origin.normal, NULL, NULL );
-	m_plane_Origin.dist = m_plane_Origin.normal.Dot( GetAbsOrigin() );
+	m_plane_Origin.normal = m_vForward;
+	m_plane_Origin.dist = m_plane_Origin.normal.Dot( m_ptOrigin );
 	m_plane_Origin.signbits = SignbitsForPlane( &m_plane_Origin );
 
 	Vector vAbsNormal;
@@ -1860,20 +1893,7 @@ void CProp_Portal::UpdatePortalTeleportMatrix( void )
 		}
 	}
 
-
-
-	if ( m_hLinkedPortal != NULL )
-	{
-		CProp_Portal_Shared::UpdatePortalTransformationMatrix( EntityToWorldTransform(), m_hLinkedPortal->EntityToWorldTransform(), &m_matrixThisToLinked );
-
-		m_hLinkedPortal->ResetModel();
-		//update the remote portal
-		MatrixInverseTR( m_matrixThisToLinked, m_hLinkedPortal->m_matrixThisToLinked );
-	}
-	else
-	{
-		m_matrixThisToLinked.Identity(); //don't accidentally teleport objects to zero space
-	}
+	UTIL_Portal_ComputeMatrix( this, m_hLinkedPortal.Get() );
 }
 
 void CProp_Portal::UpdatePortalLinkage( void )
@@ -2010,10 +2030,8 @@ void CProp_Portal::UpdatePortalLinkage( void )
 			m_PortalSimulator.DetachFromLinked();
 			m_PortalSimulator.ReleaseAllEntityOwnership();
 		}
-
-		Vector ptCenter = GetAbsOrigin();
-		QAngle qAngles = GetAbsAngles();
-		m_PortalSimulator.MoveTo( ptCenter, qAngles );
+		
+		m_PortalSimulator.MoveTo( m_ptOrigin, m_qAbsAngle );
 
 		if( pLink )
 			m_PortalSimulator.AttachTo( &pLink->m_PortalSimulator );
@@ -2121,6 +2139,9 @@ void CProp_Portal::NewLocation( const Vector &vOrigin, const QAngle &qAngles )
 
 	Teleport( &vOrigin, &qAngles, 0 );
 
+	m_ptOrigin = vOrigin;
+	m_qAbsAngle = qAngles;
+
 	if ( m_hMicrophone )
 	{
 		CEnvMicrophone *pMicrophone = static_cast<CEnvMicrophone*>( m_hMicrophone.Get() );
@@ -2178,6 +2199,7 @@ void CProp_Portal::NewLocation( const Vector &vOrigin, const QAngle &qAngles )
 	{
 		EmitSound( "Portal.open_blue" );
 	}
+
 }
 
 void CProp_Portal::InputSetActivatedState( inputdata_t &inputdata )
@@ -2289,7 +2311,7 @@ void CProp_Portal::InputNewLocation( inputdata_t &inputdata )
 
 void CProp_Portal::UpdateCorners()
 {
-	Vector vOrigin = GetAbsOrigin();
+	Vector vOrigin = m_ptOrigin;
 	Vector vUp, vRight;
 	GetVectors( NULL, &vRight, &vUp );
 

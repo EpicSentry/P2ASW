@@ -15,6 +15,12 @@
 #include "cegclientwrapper.h"
 #include "paint/paint_power_info.h"
 
+#define PORTAL_PUSHAWAY_THINK_INTERVAL		(1.0f / 20.0f)
+
+// Max mass the player can lift with +use
+#define PORTAL_PLAYER_MAX_LIFT_MASS 85
+#define PORTAL_PLAYER_MAX_LIFT_SIZE 128
+
 const float STEEP_SLOPE = 0.7;
 char const* const PORTAL_PREDICTED_CONTEXT = "Portal Predicted Powers";
 

@@ -11,7 +11,7 @@
 #include "prop_combine_ball.h"
 #include "prop_portal.h"
 #include "portal_player.h"
-#include "player_pickup_controller.h" //grab controller
+#include "portal_grabcontroller_shared.h" //grab controller
 
 
 int CPortal_CollisionEvent::ShouldCollide( IPhysicsObject *pObj0, IPhysicsObject *pObj1, void *pGameData0, void *pGameData1 )

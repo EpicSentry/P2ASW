@@ -96,6 +96,7 @@ void PhysFrictionSound( CBaseEntity *pEntity, IPhysicsObject *pObject, float ene
 void PhysFrictionSound( CBaseEntity *pEntity, IPhysicsObject *pObject, const char *pSoundName, HSOUNDSCRIPTHANDLE& handle, float flVolume );
 void PhysCleanupFrictionSounds( CBaseEntity *pEntity );
 void PhysFrictionEffect( Vector &vecPos, Vector vecVel, float energy, int surfaceProps, int surfacePropsHit );
+float PhysGetEntityMass( CBaseEntity *pEntity );
 
 // Convenience routine
 // ORs gameFlags with the physics object's current game flags

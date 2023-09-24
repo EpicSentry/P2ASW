@@ -773,6 +773,7 @@ bool VGui_IsSplitScreen()
 	return g_nNumSplits >= 2;
 }
 
+bool g_bSuppressConfigSystemLevelDueToPIPTransitions;
 void VGui_OnSplitScreenStateChanged()
 {
 	CUtlVector< Panel * > list;
@@ -842,8 +843,17 @@ void VGui_OnSplitScreenStateChanged()
 
 		surface()->SetAbsPosForContext( i, x, y );
 	}
+	
+	// This is a hack to prevent changing the current system level during PIP mode transitions. Otherwise, on the next frame mat queue mode will be disabled for 
+	// a frame and then re-enabled, which causes various known rendering problems and a noticeable hitch.
+	// I would have loved to plumb this down in a cleaner way, but this function is a convar change callback.
+	if ( !g_bSuppressConfigSystemLevelDueToPIPTransitions )
+	{
+		ConfigureCurrentSystemLevel( );
+	}
 
-	ConfigureCurrentSystemLevel( );
+	//ConfigureCurrentSystemLevel( );
+	
 	IterateRemoteSplitScreenViewSlots_Pop();
 }
 

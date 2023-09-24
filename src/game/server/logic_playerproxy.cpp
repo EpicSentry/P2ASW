@@ -31,6 +31,10 @@ DEFINE_FIELD( m_hPlayer, FIELD_EHANDLE ),
 DEFINE_INPUTFUNC( FIELD_VOID,				"AddPotatosToPortalgun", InputAddPotatosToPortalgun ),
 DEFINE_INPUTFUNC( FIELD_VOID,				"RemovePotatosFromPortalgun", InputRemovePotatosFromPortalgun ),
 
+DEFINE_INPUTFUNC( FIELD_BOOLEAN,			"SetDropEnabled", InputSetDropEnabled ),
+DEFINE_INPUTFUNC( FIELD_VOID,				"ForceVMGrabController", InputForceVMGrabController ),
+DEFINE_INPUTFUNC( FIELD_VOID,				"ForcePhysicsGrabController", InputForcePhysicsGrabController ),
+DEFINE_INPUTFUNC( FIELD_VOID,				"ResetGrabControllerBehavior", InputResetGrabControllerBehavior ),
 DEFINE_INPUTFUNC( FIELD_VOID,				"PaintPlayerWithPortalPaint", InputPaintPlayerWithPortalPaint ),
 DEFINE_INPUTFUNC( FIELD_FLOAT,				"SetMotionBlurAmount", InputSetMotionBlurAmount ),
 #endif
@@ -193,9 +197,22 @@ void CLogicPlayerProxy::InputDisableCappedPhysicsDamage( inputdata_t &inputdata 
 
 
 #ifdef PORTAL2
+
+CPortal_Player* GetPortalPlayerFromProxy()
+{
+	if ( GameRules()->IsMultiplayer() )
+	{
+		Assert( 0 );
+		Warning( "Can't use logic player proxy in multiplayer!\n" );
+		return NULL;
+	}
+
+	return (CPortal_Player*)UTIL_PlayerByIndex( 1 );
+}
+
 void CLogicPlayerProxy::InputAddPotatosToPortalgun(inputdata_t& inputdata)
 {
-	CBasePlayer* pPlayer = ToBasePlayer( m_hPlayer.Get() );
+	CPortal_Player* pPlayer = GetPortalPlayerFromProxy();
 	if ( pPlayer == NULL )
 		return;
 
@@ -210,7 +227,7 @@ void CLogicPlayerProxy::InputAddPotatosToPortalgun(inputdata_t& inputdata)
 
 void CLogicPlayerProxy::InputRemovePotatosFromPortalgun(inputdata_t& inputdata)
 {
-	CBasePlayer* pPlayer = ToBasePlayer( m_hPlayer.Get() );
+	CPortal_Player* pPlayer = GetPortalPlayerFromProxy();
 	if ( pPlayer == NULL )
 		return;
 
@@ -223,9 +240,46 @@ void CLogicPlayerProxy::InputRemovePotatosFromPortalgun(inputdata_t& inputdata)
 	pPortalgun->SetPotatosOnPortalgun( false );
 }
 
+void CLogicPlayerProxy::InputSetDropEnabled( inputdata_t &inputdata )
+{
+	CPortal_Player* pPlayer = GetPortalPlayerFromProxy();
+	if( pPlayer == NULL )
+	{
+		return;
+	}
+	pPlayer->SetDropEnabled( inputdata.value.Bool() );
+}
+
+void SetForcedGrabController( ForcedGrabControllerType type )
+{
+	CPortal_Player* pPlayer = GetPortalPlayerFromProxy();
+	if( pPlayer == NULL )
+	{
+		return;
+	}
+
+	pPlayer->SetForcedGrabControllerType( type );
+}
+
+void CLogicPlayerProxy::InputForceVMGrabController( inputdata_t &inputdata )
+{
+	SetForcedGrabController( FORCE_GRAB_CONTROLLER_VM );
+}
+
+void CLogicPlayerProxy::InputForcePhysicsGrabController( inputdata_t &inputdata )
+{
+	SetForcedGrabController( FORCE_GRAB_CONTROLLER_PHYSICS );
+}
+
+
+void CLogicPlayerProxy::InputResetGrabControllerBehavior( inputdata_t &inputdata )
+{
+	SetForcedGrabController( FORCE_GRAB_CONTROLLER_DEFAULT );
+}
+
 void CLogicPlayerProxy::InputPaintPlayerWithPortalPaint( inputdata_t &/*inputdata*/ )
 {
-	CPortal_Player* pPlayer = ToPortalPlayer(m_hPlayer.Get());
+	CPortal_Player* pPlayer = GetPortalPlayerFromProxy();
 	if( pPlayer != NULL )
 		pPlayer->Paint( PORTAL_POWER, vec3_origin );
 }
@@ -234,7 +288,7 @@ void CLogicPlayerProxy::InputSetMotionBlurAmount( inputdata_t &inputdata )
 {
 	if ( GameRules() && GameRules()->IsMultiplayer() == false )
 	{
-		CPortal_Player* pPlayer = ToPortalPlayer(m_hPlayer.Get());
+		CPortal_Player* pPlayer = GetPortalPlayerFromProxy();
 		if( pPlayer != NULL )
 		{
 			pPlayer->SetMotionBlurAmount( inputdata.value.Float() );

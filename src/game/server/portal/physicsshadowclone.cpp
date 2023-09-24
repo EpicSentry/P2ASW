@@ -12,7 +12,7 @@
 #include "trains.h"
 #include "props.h"
 #include "model_types.h"
-#include "player_pickup_controller.h" //grab controllers
+#include "portal_grabcontroller_shared.h" //grab controllers
 
 #include "PortalSimulation.h"
 

@@ -25,13 +25,29 @@
 #include "materialsystem/imaterialvar.h"
 #include "cdll_bounded_cvars.h"
 #include "prediction.h"
+#include "in_main.h"
+#include "collisionutils.h"
+#include "input.h"
+#include "portal_util_shared.h"
 
+#include "c_weapon_portalgun.h"
 #include "dt_utlvector_recv.h"
 
 // Don't alias here
 #if defined( CPortal_Player )
 #undef CPortal_Player	
 #endif
+
+ConVar cl_portal_camera_orientation_max_speed("cl_portal_camera_orientation_max_speed", "375.0f" );
+ConVar cl_portal_camera_orientation_rate("cl_portal_camera_orientation_rate", "480.0f" );
+ConVar cl_portal_camera_orientation_rate_base("cl_portal_camera_orientation_rate_base", "45.0f" );
+ConVar cl_portal_camera_orientation_acceleration_rate("cl_portal_camera_orientation_acceleration_rate", "1000.0f" );
+ConVar cl_skip_player_render_in_main_view("cl_skip_player_render_in_main_view", "1", FCVAR_ARCHIVE );
+ConVar cl_auto_taunt_pip( "cl_auto_taunt_pip", "1", FCVAR_ARCHIVE );
+
+extern ConVar sv_use_trace_duration;
+
+#define C_Portal_Base2D C_Prop_Portal
 
 
 #define REORIENTATION_RATE 120.0f
@@ -43,6 +59,11 @@
 #define DEATH_CC_LOOKUP_FILENAME "materials/correction/cc_death.raw"
 #define DEATH_CC_FADE_SPEED 0.05f
 
+
+ConVar sv_zoom_stop_movement_threashold("sv_zoom_stop_movement_threashold", "4.0", FCVAR_REPLICATED, "Move command amount before breaking player out of toggle zoom." );
+ConVar sv_zoom_stop_time_threashold("sv_zoom_stop_time_threashold", "5.0", FCVAR_REPLICATED, "Time amount before breaking player out of toggle zoom." );
+ConVar cl_taunt_finish_rotate_cam("cl_taunt_finish_rotate_cam", "1", FCVAR_CHEAT);
+ConVar cl_taunt_finish_speed("cl_taunt_finish_speed", "0.8f", FCVAR_CHEAT);
 
 ConVar cl_reorient_in_air("cl_reorient_in_air", "1", FCVAR_ARCHIVE, "Allows the player to only reorient from being upside down while in the air." ); 
 
@@ -270,21 +291,33 @@ END_RECV_TABLE()
 LINK_ENTITY_TO_CLASS( player, C_Portal_Player );
 
 IMPLEMENT_CLIENTCLASS_DT(C_Portal_Player, DT_Portal_Player, CPortal_Player)
-RecvPropFloat( RECVINFO( m_angEyeAngles[0] ) ),
-RecvPropFloat( RECVINFO( m_angEyeAngles[1] ) ),
-RecvPropEHandle( RECVINFO( m_hRagdoll ) ),
-RecvPropInt( RECVINFO( m_iSpawnInterpCounter ) ),
-RecvPropBool( RECVINFO( m_bHeldObjectOnOppositeSideOfPortal ) ),
-RecvPropEHandle( RECVINFO( m_pHeldObjectPortal ) ),
-RecvPropBool( RECVINFO( m_bPitchReorientation ) ),
-RecvPropEHandle( RECVINFO( m_hPortalEnvironment ) ),
-RecvPropEHandle( RECVINFO( m_hSurroundingLiquidPortal ) ),
+	RecvPropFloat( RECVINFO( m_angEyeAngles[0] ) ),
+	RecvPropFloat( RECVINFO( m_angEyeAngles[1] ) ),
+	RecvPropEHandle( RECVINFO( m_hRagdoll ) ),
+	RecvPropInt( RECVINFO( m_iSpawnInterpCounter ) ),
+	RecvPropBool( RECVINFO( m_bHeldObjectOnOppositeSideOfPortal ) ),
+	RecvPropEHandle( RECVINFO( m_hHeldObjectPortal ) ),
+	RecvPropBool( RECVINFO( m_bPitchReorientation ) ),
+	RecvPropEHandle( RECVINFO( m_hPortalEnvironment ) ),
+	RecvPropEHandle( RECVINFO( m_hSurroundingLiquidPortal ) ),
+	RecvPropBool( RECVINFO( m_bIsHoldingSomething ) ),
+	RecvPropDataTable( "portallocaldata", 0, 0, &REFERENCE_RECV_TABLE(DT_PortalLocalPlayerExclusive) ),
+	RecvPropDataTable( "portalnonlocaldata", 0, 0, &REFERENCE_RECV_TABLE(DT_PortalNonLocalPlayerExclusive) ),
 
-RecvPropDataTable( RECVINFO_DT( m_Shared ), 0, &REFERENCE_RECV_TABLE( DT_PortalPlayerShared ) ),
+	RecvPropDataTable( RECVINFO_DT( m_Shared ), 0, &REFERENCE_RECV_TABLE( DT_PortalPlayerShared ) ),
 
-RecvPropFloat( RECVINFO( m_flMotionBlurAmount ) ),
+	RecvPropFloat( RECVINFO( m_flMotionBlurAmount ) ),
 
-RecvPropFloat( RECVINFO( m_flHullHeight ) ),
+	RecvPropFloat( RECVINFO( m_flHullHeight ) ),
+	
+	RecvPropBool( RECVINFO( m_bUseVMGrab ) ),
+	RecvPropBool( RECVINFO( m_bUsingVMGrabState ) ),
+	RecvPropEHandle( RECVINFO( m_hAttachedObject ) ),
+	RecvPropEHandle( RECVINFO( m_hHeldObjectPortal ) ),
+	RecvPropFloat( RECVINFO( m_flMotionBlurAmount ) ),
+
+	RecvPropBool( RECVINFO( m_bWantsToSwapGuns ) ),
+
 END_RECV_TABLE()
 
 
@@ -302,6 +335,11 @@ void SpawnBlood (Vector vecSpot, const Vector &vecDir, int bloodColor, float flD
 
 C_Portal_Player::C_Portal_Player()
 : m_iv_angEyeAngles( "C_Portal_Player::m_iv_angEyeAngles" ),
+	m_iv_flHullHeight( "C_Portal_Player::m_iv_flHullHeight" ),
+	m_iv_vecCarriedObject_CurPosToTargetPos_Interpolator( "C_BaseEntity::m_iv_vecCarriedObject_CurPosToTargetPos_Interpolator" ),
+	m_iv_vecCarriedObject_CurAngToTargetAng_Interpolator( "C_BaseEntity::m_iv_vecCarriedObject_CurAngToTargetAng_Interpolator" ),
+	//m_iv_vEyeOffset( "C_Portal_Player::m_iv_vEyeOffset" ),
+
 	m_vInputVector( 0.0f, 0.0f, 0.0f ),
 	m_flCachedJumpPowerTime( -FLT_MAX ),
 	m_flSpeedDecelerationTime( 0.0f ),
@@ -320,7 +358,7 @@ C_Portal_Player::C_Portal_Player()
 	m_flStartLookTime = 0.0f;
 
 	m_bHeldObjectOnOppositeSideOfPortal = false;
-	m_pHeldObjectPortal = 0;
+	m_hHeldObjectPortal = NULL;
 
 	m_bPitchReorientation = false;
 	m_fReorientationRate = 0.0f;
@@ -328,11 +366,31 @@ C_Portal_Player::C_Portal_Player()
 	m_angEyeAngles.Init();
 
 	AddVar( &m_angEyeAngles, &m_iv_angEyeAngles, LATCH_SIMULATION_VAR );
+	
+	m_iv_vecCarriedObject_CurPosToTargetPos_Interpolator.Setup( &m_vecCarriedObject_CurPosToTargetPos_Interpolated, INTERPOLATE_LINEAR_ONLY );
+	m_iv_vecCarriedObject_CurAngToTargetAng_Interpolator.Setup( &m_vecCarriedObject_CurAngToTargetAng_Interpolated, INTERPOLATE_LINEAR_ONLY );
 
 	m_EntClientFlags |= ENTCLIENTFLAG_DONTUSEIK;
 	m_blinkTimer.Invalidate();
 
 	m_CCDeathHandle = INVALID_CLIENT_CCHANDLE;
+
+	m_flUseKeyStartTime = -sv_use_trace_duration.GetFloat() - 1.0f;
+	m_nUseKeyEntFoundCommandNum = -1;
+	m_nUseKeyEntClearCommandNum = -1;
+	m_nLastRecivedCommandNum = -1;
+	m_hUseEntToSend = NULL;
+	m_hUseEntThroughPortal = NULL;
+	m_flAutoGrabLockOutTime = 0.0f;
+
+	m_bForcingDrop = false;
+	m_bUseVMGrab = false;
+	m_bUsingVMGrabState = false;
+
+	m_bUseWasDown = false;
+
+	m_bForceFireNextPortal = false;
+
 }
 
 C_Portal_Player::~C_Portal_Player( void )
@@ -550,6 +608,409 @@ void C_Portal_Player::UpdateLookAt( void )
 	m_viewtarget = m_vLookAtTarget = vCurLookTarget;
 }
 
+extern ConVar cl_enable_remote_splitscreen;
+extern ConVar sv_enableholdrotation;
+
+// When set to true, VGui_OnSplitScreenStateChanged will NOT change the current system level.
+extern bool g_bSuppressConfigSystemLevelDueToPIPTransitions;
+static ConVar cl_suppress_config_system_level_changes_on_pip_transitions( "cl_suppress_config_system_level_changes_on_pip_transitions", "1", FCVAR_DEVELOPMENTONLY );
+
+ConVar portal_use_player_avoidance( "portal_use_player_avoidance", "0", FCVAR_REPLICATED );
+ConVar portal_max_separation_force ( "portal_max_separation_force", "256", FCVAR_DEVELOPMENTONLY );
+
+extern ConVar cl_forwardspeed;
+extern ConVar cl_backspeed;
+extern ConVar cl_sidespeed;
+
+void C_Portal_Player::AvoidPlayers( CUserCmd *pCmd )
+{
+	// Don't test if the player doesn't exist or is dead.
+	if ( IsAlive() == false )
+		return;
+
+	// Up vector.
+	static Vector vecUp( 0.0f, 0.0f, 1.0f );
+
+	Vector vecPlayerCenter	= GetAbsOrigin();
+	Vector vecPlayerMin		= GetPlayerMins();
+	Vector vecPlayerMax		= GetPlayerMaxs();
+	float flZHeight = vecPlayerMax.z - vecPlayerMin.z;
+	vecPlayerCenter.z += 0.5f * flZHeight;
+	VectorAdd( vecPlayerMin, vecPlayerCenter, vecPlayerMin );
+	VectorAdd( vecPlayerMax, vecPlayerCenter, vecPlayerMax );
+
+	// Find an intersecting player or object.
+	int nAvoidPlayerCount = 0;
+	C_Portal_Player *pAvoidPlayerList[MAX_PLAYERS];
+
+	C_Portal_Player *pIntersectPlayer = NULL;
+	float flAvoidRadius = 0.0f;
+
+	Vector vecAvoidCenter, vecAvoidMin, vecAvoidMax;
+	// for ( int i = 0; i < pTeam->GetNumPlayers(); ++i )
+	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
+	{
+		// C_TFPlayer *pAvoidPlayer = static_cast< C_TFPlayer * >( pTeam->GetPlayer( i ) );
+		C_Portal_Player *pAvoidPlayer = static_cast< C_Portal_Player * >( UTIL_PlayerByIndex(i) );
+		if ( pAvoidPlayer == NULL )
+			continue;
+		
+		// Is the avoid player me?
+		if ( pAvoidPlayer == this )
+			continue;
+
+		// Save as list to check against for objects.
+		pAvoidPlayerList[nAvoidPlayerCount] = pAvoidPlayer;
+		++nAvoidPlayerCount;
+
+		// Check to see if the avoid player is dormant.
+		if ( pAvoidPlayer->IsDormant() )
+			continue;
+
+		// Is the avoid player solid?
+		if ( pAvoidPlayer->IsSolidFlagSet( FSOLID_NOT_SOLID ) )
+			continue;
+
+		Vector t1, t2;
+
+		vecAvoidCenter = pAvoidPlayer->GetAbsOrigin();
+		vecAvoidMin = pAvoidPlayer->GetPlayerMins();
+		vecAvoidMax = pAvoidPlayer->GetPlayerMaxs();
+		flZHeight = vecAvoidMax.z - vecAvoidMin.z;
+		vecAvoidCenter.z += 0.5f * flZHeight;
+		VectorAdd( vecAvoidMin, vecAvoidCenter, vecAvoidMin );
+		VectorAdd( vecAvoidMax, vecAvoidCenter, vecAvoidMax );
+
+		if ( IsBoxIntersectingBox( vecPlayerMin, vecPlayerMax, vecAvoidMin, vecAvoidMax ) )
+		{
+			// Need to avoid this player.
+			if ( !pIntersectPlayer )
+			{
+				pIntersectPlayer = pAvoidPlayer;
+				break;
+			}
+		}
+	}
+
+	// Anything to avoid?
+	if ( pIntersectPlayer == NULL )
+	{
+		// m_Shared.SetSeparation( false );
+		// m_Shared.SetSeparationVelocity( vec3_origin );
+		return;
+	}
+
+	// Calculate the push strength and direction.
+	Vector vecDelta;
+
+	// Avoid a player - they have precedence.
+	VectorSubtract( pIntersectPlayer->WorldSpaceCenter(), vecPlayerCenter, vecDelta );
+
+	Vector vRad = pIntersectPlayer->WorldAlignMaxs() - pIntersectPlayer->WorldAlignMins();
+	vRad.z = 0;
+
+	flAvoidRadius = vRad.Length();
+
+	float flPushStrength = RemapValClamped( vecDelta.Length(), flAvoidRadius, 0, 0, portal_max_separation_force.GetInt() );
+
+	// Check to see if we have enough push strength to make a difference.
+	if ( flPushStrength < 0.01f )
+		return;
+
+	Vector vecPush;
+	if ( GetAbsVelocity().Length2DSqr() > 0.1f )
+	{
+		Vector vecVelocity = GetAbsVelocity();
+		vecVelocity.z = 0.0f;
+		CrossProduct( vecUp, vecVelocity, vecPush );
+		VectorNormalize( vecPush );
+	}
+	else
+	{
+		// We are not moving, but we're still intersecting.
+		QAngle angView = pCmd->viewangles;
+		angView.x = 0.0f;
+		AngleVectors( angView, NULL, &vecPush, NULL );
+	}
+
+	// Move away from the other player/object.
+	Vector vecSeparationVelocity;
+	if ( vecDelta.Dot( vecPush ) < 0 )
+	{
+		vecSeparationVelocity = vecPush * flPushStrength;
+	}
+	else
+	{
+		vecSeparationVelocity = vecPush * -flPushStrength;
+	}
+
+	// Don't allow the max push speed to be greater than the max player speed.
+	float flMaxPlayerSpeed = MaxSpeed();
+	float flCropFraction = 1.33333333f;
+
+	if ( ( GetFlags() & FL_DUCKING ) && ( GetGroundEntity() != NULL ) )
+	{	
+		flMaxPlayerSpeed *= flCropFraction;
+	}	
+
+	float flMaxPlayerSpeedSqr = flMaxPlayerSpeed * flMaxPlayerSpeed;
+
+	if ( vecSeparationVelocity.LengthSqr() > flMaxPlayerSpeedSqr )
+	{
+		vecSeparationVelocity.NormalizeInPlace();
+		VectorScale( vecSeparationVelocity, flMaxPlayerSpeed, vecSeparationVelocity );
+	}
+
+	QAngle vAngles = pCmd->viewangles;
+	vAngles.x = 0;
+	Vector currentdir;
+	Vector rightdir;
+
+	AngleVectors( vAngles, &currentdir, &rightdir, NULL );
+
+	Vector vDirection = vecSeparationVelocity;
+
+	VectorNormalize( vDirection );
+
+	float fwd = currentdir.Dot( vDirection );
+	float rt = rightdir.Dot( vDirection );
+
+	float forward = fwd * flPushStrength;
+	float side = rt * flPushStrength;
+
+	//Msg( "fwd: %f - rt: %f - forward: %f - side: %f\n", fwd, rt, forward, side );
+
+	// m_Shared.SetSeparation( true );
+	// m_Shared.SetSeparationVelocity( vecSeparationVelocity );
+
+	pCmd->forwardmove	+= forward;
+	pCmd->sidemove		+= side;
+
+	// Clamp the move to within legal limits, preserving direction. This is a little
+	// complicated because we have different limits for forward, back, and side
+
+	//Msg( "PRECLAMP: forwardmove=%f, sidemove=%f\n", pCmd->forwardmove, pCmd->sidemove );
+
+	float flForwardScale = 1.0f;
+	if ( pCmd->forwardmove > fabs( cl_forwardspeed.GetFloat() ) )
+	{
+		flForwardScale = fabs( cl_forwardspeed.GetFloat() ) / pCmd->forwardmove;
+	}
+	else if ( pCmd->forwardmove < -fabs( cl_backspeed.GetFloat() ) )
+	{
+		flForwardScale = fabs( cl_backspeed.GetFloat() ) / fabs( pCmd->forwardmove );
+	}
+
+	float flSideScale = 1.0f;
+	if ( fabs( pCmd->sidemove ) > fabs( cl_sidespeed.GetFloat() ) )
+	{
+		flSideScale = fabs( cl_sidespeed.GetFloat() ) / fabs( pCmd->sidemove );
+	}
+
+	float flScale = MIN( flForwardScale, flSideScale );
+	pCmd->forwardmove *= flScale;
+	pCmd->sidemove *= flScale;
+
+	//Msg( "Pforwardmove=%f, sidemove=%f\n", pCmd->forwardmove, pCmd->sidemove );
+}
+
+bool C_Portal_Player::CreateMove( float flInputSampleTime, CUserCmd *pCmd )
+{
+	if ( sv_enableholdrotation.GetBool() && !IsUsingVMGrab() )
+	{
+		if( m_bIsHoldingSomething && (pCmd->buttons & IN_ATTACK2) )
+		{
+			//stomp view angle changes. When holding right click and holding something, we remap mouse movement to rotate the object instead of our view
+			pCmd->viewangles = m_vecOldViewAngles;
+			engine->SetViewAngles( m_vecOldViewAngles );
+		}
+	}
+
+	// if we are in coop and not split screen, do PIP if the remote_view button is pressed
+	if ( GameRules()->IsMultiplayer() && !( IsSplitScreenPlayer() || GetSplitScreenPlayers().Count() > 0 ) )
+	{
+		bool bOtherPlayerIsTaunting = false;
+		bool bIsOtherPlayerRemoteViewTaunt = false;
+
+		if ( cl_auto_taunt_pip.GetBool() )
+		{
+			C_Portal_Player *pOtherPlayer = ToPortalPlayer( UTIL_OtherPlayer( this ) );
+			if ( pOtherPlayer )
+			{
+				bOtherPlayerIsTaunting = pOtherPlayer->m_Shared.InCond( PORTAL_COND_TAUNTING );
+				bIsOtherPlayerRemoteViewTaunt = pOtherPlayer->IsRemoteViewTaunt();
+			}
+		}
+
+		bool bRemoteViewPressed = ( pCmd->buttons & IN_REMOTE_VIEW ) != 0;
+
+		bool bUsingPIP = m_nTeamTauntState < TEAM_TAUNT_HAS_PARTNER && 
+						 ( ( bOtherPlayerIsTaunting && !bIsOtherPlayerRemoteViewTaunt ) || ( !bOtherPlayerIsTaunting && bRemoteViewPressed ) );
+		
+		// Hack: Suppress changes of the current system level during this transition (see vgui_int.cpp, VGui_OnSplitScreenStateChanged()).
+		g_bSuppressConfigSystemLevelDueToPIPTransitions = cl_suppress_config_system_level_changes_on_pip_transitions.GetBool();
+				
+		cl_enable_remote_splitscreen.SetValue( bUsingPIP );
+
+		g_bSuppressConfigSystemLevelDueToPIPTransitions = false;
+	}
+
+	static QAngle angMoveAngle( 0.0f, 0.0f, 0.0f );
+
+	bool bNoTaunt = true;
+	if ( IsTaunting() )
+	{
+		pCmd->forwardmove = 0.0f;
+		pCmd->sidemove = 0.0f;
+		pCmd->upmove = 0.0f;
+		pCmd->buttons = 0;
+		pCmd->weaponselect = 0;
+
+		VectorCopy( angMoveAngle, pCmd->viewangles );
+
+		bNoTaunt = false;
+	}
+	else
+	{
+		VectorCopy( pCmd->viewangles, angMoveAngle );
+	}
+
+	if ( GetFOV() != GetDefaultFOV() )
+	{
+		if ( IsTaunting() )
+		{
+			// Pop out of zoom when I'm taunting
+			pCmd->buttons &= ~IN_ZOOM;
+			KeyUp( &in_zoom, NULL );
+		}
+		else if ( GetVehicle() != NULL )
+		{
+			pCmd->buttons &= ~IN_ZOOM;
+			KeyUp( &in_zoom, NULL );
+		}
+		else
+		{
+			float fThreshold = sv_zoom_stop_movement_threashold.GetFloat();
+			if ( gpGlobals->curtime > GetFOVTime() + sv_zoom_stop_time_threashold.GetFloat() && 
+				 ( fabsf( pCmd->forwardmove ) > fThreshold ||  fabsf( pCmd->sidemove ) > fThreshold ) )
+			{
+				// Pop out of the zoom if we're moving
+				pCmd->buttons &= ~IN_ZOOM;
+				KeyUp( &in_zoom, NULL );
+			}
+		}
+	}
+
+	// Bump away from other players
+	AvoidPlayers( pCmd );
+	
+	PollForUseEntity( pCmd );
+	m_bUseWasDown = (pCmd->buttons & IN_USE) != 0;
+
+	pCmd->player_held_entity = ( m_hUseEntToSend ) ? ( m_hUseEntToSend->entindex() ) : ( 0 );
+	pCmd->held_entity_was_grabbed_through_portal = ( m_hUseEntThroughPortal ) ? ( m_hUseEntThroughPortal->entindex() ) : ( 0 );
+	
+	//pCmd->command_acknowledgements_pending = pCmd->command_number - engine->GetLastAcknowledgedCommand(); // Engine function doesn't exist in Alien Swarm :(
+	pCmd->predictedPortalTeleportations = 0;
+	// FIXME!!!
+#if 0
+	for( int i = 0; i != m_PredictedPortalTeleportations.Count(); ++i )
+	{
+		if( m_PredictedPortalTeleportations[i].iCommandNumber > pCmd->command_number )
+			break;
+
+		++pCmd->predictedPortalTeleportations;
+	}
+#endif
+	if ( m_bForceFireNextPortal )
+	{
+		C_WeaponPortalgun *pPortalGun = dynamic_cast< C_WeaponPortalgun* >( GetActiveWeapon() );
+		if ( pPortalGun )
+		{
+			if ( pPortalGun->GetLastFiredPortal() == 1 )
+			{
+				pCmd->buttons |= IN_ATTACK2;
+			}
+			else
+			{
+				pCmd->buttons |= IN_ATTACK;
+			}
+		}
+
+		if ( pCmd->command_number != 0 )
+		{
+			m_bForceFireNextPortal = false;
+		}
+	}
+
+	BaseClass::CreateMove( flInputSampleTime, pCmd );
+	
+	return bNoTaunt;
+}
+
+// Calls FindUseEntity every tick for a period of time
+// I'm REALLY sorry about this. This will clean up quite a bit
+// once grab controllers are on the client.
+void C_Portal_Player::PollForUseEntity( CUserCmd *pCmd )
+{
+	// Record the last received non-zero command number. 
+	// Non-zero is a sloppy way of telling which CreateMoves came from ExtraMouseSample :/
+	if ( pCmd->command_number != 0 )
+	{
+		m_nLastRecivedCommandNum = pCmd->command_number;
+	}
+	else if ( m_nLastRecivedCommandNum == -1 )
+	{
+		// If we just constructed, don't run anything below during extra mouse samples
+		// until we've set m_nLastRecivedCommandNum to the correct command number from the engine
+		return;
+	}
+
+	// 82077: Polling for the use entity causes the vehicle view to cache at a time
+	// when the attachments are incorrect... We dont need use in a vehicle
+	// so this hack prevents that caching from happening and keeps the view smooth
+	// The only time we have a vehicle is during the ending sequence so this shouldn't be a big issue.
+	if ( IsX360() && GetVehicle() )
+		return;
+
+	// Get rid of the use ent if we've already sent the last one up to the server
+	if ( m_nLastRecivedCommandNum == m_nUseKeyEntClearCommandNum )	
+	{
+		m_hUseEntToSend = NULL;
+		m_hUseEntThroughPortal = NULL;
+		m_nUseKeyEntFoundCommandNum = -1;
+		m_nUseKeyEntClearCommandNum = -1;
+	}
+
+	bool bBasicUse = ( ( pCmd->buttons & IN_USE ) != 0 && m_bUseWasDown == false );
+
+	C_BaseEntity *pUseEnt = NULL;
+	C_Portal_Base2D *pUseThroughPortal = NULL;
+	PollForUseEntity( bBasicUse, &pUseEnt, &pUseThroughPortal );	// Call the shared poll logic in portal_player_shared
+
+	if ( pUseEnt )
+	{
+		m_hUseEntToSend = pUseEnt;
+		m_hUseEntThroughPortal = pUseThroughPortal;
+
+		m_flUseKeyStartTime = -sv_use_trace_duration.GetFloat() - 1.0f;
+		// Record the tick we found this, so we can invalidate the handle after it is sent
+		m_nUseKeyEntFoundCommandNum = m_nLastRecivedCommandNum;
+		// If we caught this during 'extra mouse sample' calls, clear on the cmd after next, otherwise clear next command.
+		m_nUseKeyEntClearCommandNum = m_nUseKeyEntFoundCommandNum + ((pCmd->command_number == 0) ? ( 2 ) : ( 1 ));
+	}
+	
+	// If we already found an ent this tick, fake a use key down so the server
+	// will treat this as a normal +use 
+	if ( m_nLastRecivedCommandNum < m_nUseKeyEntClearCommandNum && m_hUseEntToSend.Get() && 
+		 // HACK: don't do this behaviour through a portal for now (54969)
+		 // This will be really awkward to fix for real with grab controllers living on the server. 
+		 m_hUseEntThroughPortal.Get() == NULL )
+	{
+		pCmd->buttons |= IN_USE;
+	}
+}
+
 void C_Portal_Player::ClientThink( void )
 {
 	//PortalEyeInterpolation.m_bNeedToUpdateEyePosition = true;
@@ -764,9 +1225,33 @@ void C_Portal_Player::UpdateClientSideAnimation( void )
 
 void C_Portal_Player::DoAnimationEvent( PlayerAnimEvent_t event, int nData )
 {
+	if ( GetPredictable() && IsLocalPlayer( this ) )
+	{
+		if ( !prediction->IsFirstTimePredicted() )
+			return;
+	}
+
+	MDLCACHE_CRITICAL_SECTION();
 	m_PlayerAnimState->DoAnimationEvent( event, nData );
 }
 
+void C_Portal_Player::FireEvent( const Vector& origin, const QAngle& angles, int event, const char *options )
+{
+	switch( event )
+	{
+	case AE_WPN_PRIMARYATTACK:
+		{
+			if ( IsLocalPlayer() )
+			{
+				m_bForceFireNextPortal = true;
+			}
+			break;
+		}
+
+	default:
+		BaseClass::FireEvent( origin, angles,event, options );
+	}
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -850,8 +1335,20 @@ void C_Portal_Player::PreThink( void )
 
 	// Update the painted power
 	UpdatePaintedPower();
+	
+	// Fade the input scale back in if we lost some
+	UpdateAirInputScaleFadeIn();
+
+	// Attempt to resize the hull if there's a pending hull resize
+	TryToChangeCollisionBounds( m_PortalLocal.m_CachedStandHullMinAttempt,
+								m_PortalLocal.m_CachedStandHullMaxAttempt,
+								m_PortalLocal.m_CachedDuckHullMinAttempt,
+								m_PortalLocal.m_CachedDuckHullMaxAttempt );
+
 
 	HandleSpeedChanges();
+
+	FixPortalEnvironmentOwnership();
 }
 
 
@@ -1000,6 +1497,26 @@ void C_Portal_Player::OnPreDataChanged( DataUpdateType_t type )
 	BaseClass::OnPreDataChanged( type );
 }
 
+void C_Portal_Player::FixPortalEnvironmentOwnership( void )
+{
+	CPortalSimulator *pExistingSimulator = CPortalSimulator::GetSimulatorThatOwnsEntity( this );
+	CProp_Portal *pPortalEnvironment = m_hPortalEnvironment;
+	CPortalSimulator *pNewSimulator = pPortalEnvironment ? &pPortalEnvironment->m_PortalSimulator : NULL;
+	if( pExistingSimulator != pNewSimulator )
+	{
+		if( pExistingSimulator )
+		{
+			pExistingSimulator->ReleaseOwnershipOfEntity( this );
+		}
+
+		if( pNewSimulator )
+		{
+			pNewSimulator->TakeOwnershipOfEntity( this );
+		}
+	}
+}
+
+
 void C_Portal_Player::OnDataChanged( DataUpdateType_t type )
 {
 	BaseClass::OnDataChanged( type );
@@ -1047,6 +1564,28 @@ void C_Portal_Player::OnDataChanged( DataUpdateType_t type )
 	}
 
 	UpdateVisibility();
+	
+	// Set held objects to draw in the view model
+	if ( IsUsingVMGrab() && m_hAttachedObject.Get() && m_hOldAttachedObject == NULL )
+	{
+		m_hOldAttachedObject = m_hAttachedObject;
+		m_hAttachedObject.Get()->UpdateVisibility();
+
+		if ( GameRules()->IsMultiplayer() == false )
+		{
+			m_hAttachedObject.Get()->RenderWithViewModels( true );
+		}
+	}
+	else if ( ( !IsUsingVMGrab() || m_hAttachedObject.Get() == NULL ) && m_hOldAttachedObject.Get() )
+	{
+		if ( GameRules()->IsMultiplayer() == false )
+		{
+			m_hOldAttachedObject.Get()->RenderWithViewModels( false );
+		}
+		m_hOldAttachedObject.Get()->UpdateVisibility();
+		m_hOldAttachedObject = NULL;
+		m_flAutoGrabLockOutTime = gpGlobals->curtime;
+	}
 }
 
 //CalcView() gets called between OnPreDataChanged() and OnDataChanged(), and these changes need to be known about in both before CalcView() gets called, and if CalcView() doesn't get called
@@ -1158,30 +1697,6 @@ Vector C_Portal_Player::GetAutoaimVector( float flDelta )
 
 void C_Portal_Player::HandleSpeedChanges( void )
 {
-}
-
-void C_Portal_Player::ItemPreFrame( void )
-{
-	if ( GetFlags() & FL_FROZEN )
-		return;
-
-	// Disallow shooting while zooming
-	if ( m_nButtons & IN_ZOOM )
-	{
-		//FIXME: Held weapons like the grenade get sad when this happens
-		m_nButtons &= ~(IN_ATTACK|IN_ATTACK2);
-	}
-
-	BaseClass::ItemPreFrame();
-
-}
-
-void C_Portal_Player::ItemPostFrame( void )
-{
-	if ( GetFlags() & FL_FROZEN )
-		return;
-
-	BaseClass::ItemPostFrame();
 }
 
 C_BaseAnimating *C_Portal_Player::BecomeRagdollOnClient()
@@ -1654,4 +2169,161 @@ bool C_Portal_Player::RenderScreenSpaceEffect( PortalScreenSpaceEffect effect, I
 	}
 
 	return result;
+}
+
+void C_Portal_Player::ItemPreFrame( void )
+{
+	if ( GetFlags() & FL_FROZEN )
+		return;
+
+	BaseClass::ItemPreFrame();
+	ManageHeldObject();
+}
+
+// Only runs in MP. Creates a fake held object and uses a clientside grab controller
+// to move it so the held object looks responsive under lag conditions.
+void C_Portal_Player::ManageHeldObject()
+{
+	Assert ( GameRules()->IsMultiplayer() );
+
+
+	CBaseEntity *pPlayerAttached = m_hAttachedObject.Get();
+
+	//cleanup invalid clones.
+	{
+		if( (m_pHeldEntityClone != NULL) && 
+			((pPlayerAttached == NULL) || !IsUsingVMGrab() || (m_pHeldEntityClone->m_hOriginal != pPlayerAttached)) )
+		{
+			//cloning wrong entity or don't want a clone
+			if( GetGrabController().GetAttached() == m_pHeldEntityClone )
+			{
+				bool bOldForce = m_bForcingDrop;
+				m_bForcingDrop = true;
+				GetGrabController().DetachEntity( false );
+				m_bForcingDrop = bOldForce;
+			}
+			UTIL_Remove( m_pHeldEntityClone );
+			m_pHeldEntityClone = NULL;
+		}
+
+		if( (m_pHeldEntityThirdpersonClone != NULL) && 
+			((pPlayerAttached == NULL) || !IsUsingVMGrab() || (m_pHeldEntityThirdpersonClone->m_hOriginal != pPlayerAttached)) )
+		{
+			//cloning wrong entity or don't want a clone
+			if( GetGrabController().GetAttached() == m_pHeldEntityThirdpersonClone )
+			{
+				bool bOldForce = m_bForcingDrop;
+				m_bForcingDrop = true;
+				GetGrabController().DetachEntity( false );
+				m_bForcingDrop = bOldForce;
+			}
+			UTIL_Remove( m_pHeldEntityThirdpersonClone );
+			m_pHeldEntityThirdpersonClone = NULL;
+		}
+	}
+
+	//create clones if necessary
+	if( pPlayerAttached && IsUsingVMGrab() )
+	{
+		if( m_pHeldEntityClone == NULL )
+		{
+			m_pHeldEntityClone = new C_PlayerHeldObjectClone;
+			if ( m_pHeldEntityClone )
+			{
+				if( !m_pHeldEntityClone->InitClone( pPlayerAttached, this ) )
+				{
+					UTIL_Remove( m_pHeldEntityClone );
+					m_pHeldEntityClone = NULL;
+				}
+			}
+		}
+
+		if( m_pHeldEntityThirdpersonClone == NULL )
+		{
+			m_pHeldEntityThirdpersonClone = new C_PlayerHeldObjectClone;
+			if ( m_pHeldEntityThirdpersonClone )
+			{
+				if( !m_pHeldEntityThirdpersonClone->InitClone( pPlayerAttached, this, false, m_pHeldEntityClone ) )
+				{
+					UTIL_Remove( m_pHeldEntityThirdpersonClone );
+					m_pHeldEntityThirdpersonClone = NULL;
+				}
+			}
+		}
+	}
+
+
+	//ensure correct entity is attached
+	{
+		C_BaseEntity *pShouldBeAttached = NULL;
+
+		//figure out exactly what should be attached
+		if( pPlayerAttached )
+		{
+			pPlayerAttached->SetPredictionEligible( true ); //open the floodgates of possible predictability. 
+															//Not sure if there's a completely sane way to invert this operation for all possible cross sections of predictables and things you can pick up, so I simply wont.
+
+			if( IsUsingVMGrab() && m_pHeldEntityClone )
+			{
+				pShouldBeAttached = m_pHeldEntityClone;
+			}
+			else
+			{
+				pShouldBeAttached = pPlayerAttached;
+			}
+		}
+
+		//swap it in if necessary
+		if( GetGrabController().GetAttached() != pShouldBeAttached )
+		{
+			//clear out offset history
+			m_iv_vecCarriedObject_CurPosToTargetPos_Interpolator.ClearHistory();
+			m_iv_vecCarriedObject_CurAngToTargetAng_Interpolator.ClearHistory();
+
+			//release whatever the grab controller is attached to
+			if( GetGrabController().GetAttached() )
+			{
+				if( (GetGrabController().GetAttached() != pPlayerAttached) && (GetGrabController().GetAttached() != m_pHeldEntityClone) )
+				{
+					GetGrabController().DetachUnknownEntity(); //the entity it has is not something we gave to it (or our player attached object invalidated under our feet)
+				}
+				else
+				{
+					bool bOldForce = m_bForcingDrop;
+					m_bForcingDrop = true;
+					GetGrabController().DetachEntity( false ); //we know the entity it's holding on to is valid, detach normally
+					m_bForcingDrop = bOldForce;
+				}
+			}
+
+			//if something should be attached, attach it now
+			if( pShouldBeAttached )
+			{
+				GetGrabController().SetIgnorePitch( true );
+				GetGrabController().SetAngleAlignment( 0.866025403784 );
+				GetGrabController().AttachEntity( this, pShouldBeAttached, pShouldBeAttached->VPhysicsGetObject(), false, vec3_origin, false );
+			}
+		}
+	}
+
+	//only adding these on first-predicted frames to keep old results consistent, and ease into new changes
+	if( pPlayerAttached && (!prediction->InPrediction() || prediction->IsFirstTimePredicted()) )
+	{
+		m_iv_vecCarriedObject_CurPosToTargetPos_Interpolator.AddToHead( gpGlobals->curtime, &m_vecCarriedObject_CurPosToTargetPos, true );
+		m_iv_vecCarriedObject_CurAngToTargetAng_Interpolator.AddToHead( gpGlobals->curtime, &m_vecCarriedObject_CurAngToTargetAng, true );
+		
+		//need to interpolate these so they clear out old data. No direct access to clearing functions
+		m_iv_vecCarriedObject_CurPosToTargetPos_Interpolator.Interpolate( gpGlobals->curtime );
+		m_iv_vecCarriedObject_CurAngToTargetAng_Interpolator.Interpolate( gpGlobals->curtime );
+	}
+
+	//update the grab controller
+	if ( GetGrabController().GetAttached() )
+	{
+		m_iv_vecCarriedObject_CurPosToTargetPos_Interpolator.Interpolate( gpGlobals->curtime );
+		m_iv_vecCarriedObject_CurAngToTargetAng_Interpolator.Interpolate( gpGlobals->curtime );
+		GetGrabController().m_attachedAnglesPlayerSpace = m_vecCarriedObjectAngles;
+		GetGrabController().UpdateObject( this, 12 );
+		GetGrabController().ClientApproachTarget( this );
+	}
 }

@@ -89,5 +89,6 @@ void CInfoPlacementHelper::Spawn(void)
 
 void CInfoPlacementHelper::Activate(void)
 {
+	BaseClass::Activate();
 	//Called after all spawn functions are done
 }

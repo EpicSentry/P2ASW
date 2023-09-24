@@ -48,11 +48,33 @@ LINK_ENTITY_TO_CLASS( prop_portal, C_Prop_Portal );
 #undef CProp_Portal
 
 IMPLEMENT_CLIENTCLASS_DT( C_Prop_Portal, DT_Prop_Portal, CProp_Portal )
+	RecvPropVector( RECVINFO_NAME( m_vecNetworkOrigin, m_vecOrigin ) ),
+	RecvPropVector( RECVINFO_NAME( m_angNetworkAngles, m_angRotation ) ),
+
+	RecvPropVector( RECVINFO( m_ptOrigin ) ),
+	RecvPropVector( RECVINFO( m_qAbsAngle ) ),
+
 	RecvPropEHandle( RECVINFO(m_hLinkedPortal) ),
 	RecvPropBool( RECVINFO(m_bActivated) ),
 	RecvPropBool( RECVINFO(m_bIsPortal2) ),
 END_RECV_TABLE()
 
+BEGIN_PREDICTION_DATA( C_Prop_Portal )
+	DEFINE_PRED_FIELD( m_bActivated, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
+	//DEFINE_PRED_FIELD( m_bOldActivatedState, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
+	DEFINE_PRED_FIELD( m_hLinkedPortal, FIELD_EHANDLE, FTYPEDESC_INSENDTABLE ),
+	DEFINE_PRED_FIELD( m_ptOrigin, FIELD_VECTOR, FTYPEDESC_INSENDTABLE ),
+	DEFINE_PRED_FIELD( m_qAbsAngle, FIELD_VECTOR, FTYPEDESC_INSENDTABLE ),
+
+	//not actually networked fields. But we need them backed up and restored in the same way as the networked ones.	
+	DEFINE_FIELD( m_vForward, FIELD_VECTOR ),
+	DEFINE_FIELD( m_vRight, FIELD_VECTOR ),
+	DEFINE_FIELD( m_vUp, FIELD_VECTOR ),
+	DEFINE_FIELD( m_plane_Origin, FIELD_VECTOR4D ),
+	//DEFINE_FIELD( m_matrixThisToLinked, FIELD_VMATRIX ),
+END_PREDICTION_DATA()
+
+bool g_bShowGhostedPortals = false;
 
 void __MsgFunc_EntityPortalled(bf_read &msg)
 {
@@ -1013,23 +1035,20 @@ void C_Prop_Portal::CreateFizzleEffect( C_BaseEntity *pOwner, int iEffect, Vecto
 	{
 	case PORTAL_FIZZLE_SUCCESS:
 		{
-			//pEffect = CNewParticleEffect::CreateOrAggregate( NULL, "portal_success", vecOrigin, NULL );
-			pEffect = CNewParticleEffect::Create( NULL, "portal_success" );
+			pEffect = CNewParticleEffect::CreateOrAggregate( NULL, "portal_success", vecOrigin, NULL );
 			bCreated = true;
 		}
 		break;
 
 	case PORTAL_FIZZLE_BAD_SURFACE:
 		{
-			//pEffect = CNewParticleEffect::CreateOrAggregate( NULL, "portal_badsurface", vecOrigin, NULL );
-			pEffect = CNewParticleEffect::Create( NULL, "portal_badsurface" );
+			pEffect = CNewParticleEffect::CreateOrAggregate( NULL, "portal_badsurface", vecOrigin, NULL );
 		}
 		break;
 
 	case PORTAL_FIZZLE_CLOSE:
 		{
-			//pEffect = CNewParticleEffect::CreateOrAggregate( NULL, "portal_close", vecOrigin, NULL );
-			pEffect = CNewParticleEffect::Create( NULL, "portal_close" );
+			pEffect = CNewParticleEffect::CreateOrAggregate( NULL, "portal_close", vecOrigin, NULL );
 		}
 		break;
 	}

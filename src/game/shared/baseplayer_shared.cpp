@@ -19,6 +19,11 @@
 	#include "c_world.h"
 	#include "view.h"
 
+#ifdef PORTAL2
+	#include "c_physbox.h"
+	#include "c_physicsprop.h"
+#endif
+
 	#define CRecipientFilter C_RecipientFilter
 
 #else
@@ -31,8 +36,22 @@
 	#include "env_zoom.h"
 	#include "ammodef.h"
 
+#ifdef PORTAL2
+	#include "physobj.h"
+#endif
+
 	extern int TrainSpeed(int iSpeed, int iMax);
 	
+#endif
+
+#ifdef PORTAL2
+#include "portal_grabcontroller_shared.h"
+
+#ifdef CLIENT_DLL
+#define CPhysicsProp C_PhysicsProp
+#define CPhysBox C_PhysBox
+#endif
+
 #endif
 
 #include "in_buttons.h"
@@ -1816,6 +1835,8 @@ void CBasePlayer::SharedSpawn()
 
 	// dont let uninitialized value here hurt the player
 	m_Local.m_flFallVelocity = 0;
+	
+	m_hUseEntity = NULL;
 
 	SetBloodColor( BLOOD_COLOR_RED );
 }
@@ -2074,6 +2095,11 @@ CUtlVector< CHandle< CBasePlayer > > &CBasePlayer::GetSplitScreenPlayers()
 	return m_hSplitScreenPlayers;
 }
 
+bool CBasePlayer::HasAttachedSplitScreenPlayers() const
+{
+	return ( m_hSplitScreenPlayers.Count() > 0 );
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: Strips off IN_xxx flags from the player's input
 //-----------------------------------------------------------------------------
@@ -2094,3 +2120,125 @@ CBaseEntity* CBasePlayer::GetSoundscapeListener()
 {
 	return this;
 }
+
+void CBasePlayer::SetUseEntity( CBaseEntity *pUseEntity ) 
+{ 
+	m_hUseEntity = pUseEntity; 
+}
+
+#if defined( PORTAL2 ) || !defined( CLIENT_DLL )
+
+bool CBasePlayer::ClearUseEntity()
+{
+	if ( m_hUseEntity != NULL )
+	{
+
+#if !defined( CLIENT_DLL )
+		if( !m_bDropEnabled )
+		{
+			return false;
+		}
+#endif
+
+		// Stop controlling the train/object
+		// TODO: Send HUD Update
+#if defined ( PORTAL2 )
+		CPlayerPickupController *pPickup = (CPlayerPickupController*)GetUseEntity();
+		Assert( pPickup );
+		if ( pPickup )
+		{
+			if ( pPickup->UsePickupController( this, this, USE_OFF, 0 ) )
+			{
+				m_hUseEntity = NULL;
+				return true;
+			}
+		}
+#else
+		GetUseEntity()->Use( this, this, USE_OFF, 0 );
+#endif // PORTAL2
+	}
+
+	return false;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+bool CBasePlayer::CanPickupObject( CBaseEntity *pObject, float massLimit, float sizeLimit )
+{
+	// UNDONE: Make this virtual and move to HL2 player
+#if defined( HL2_DLL ) || defined( PORTAL2 )
+	//Must be valid
+	if ( pObject == NULL )
+		return false;
+
+	//Must move with physics
+	if ( pObject->GetMoveType() != MOVETYPE_VPHYSICS )
+		return false;
+
+	IPhysicsObject *pList[VPHYSICS_MAX_OBJECT_LIST_COUNT];
+	int count = pObject->VPhysicsGetObjectList( pList, ARRAYSIZE(pList) );
+
+	//Must have a physics object
+	if (!count)
+		return false;
+
+	float objectMass = 0;
+	bool checkEnable = false;
+	for ( int i = 0; i < count; i++ )
+	{
+		objectMass += pList[i]->GetMass();
+		if ( !pList[i]->IsMoveable() )
+		{
+			checkEnable = true;
+		}
+		if ( pList[i]->GetGameFlags() & FVPHYSICS_NO_PLAYER_PICKUP )
+			return false;
+		if ( pList[i]->IsHinged() )
+			return false;
+	}
+
+
+	//Msg( "Target mass: %f\n", pPhys->GetMass() );
+
+	//Must be under our threshold weight
+	if ( massLimit > 0 && objectMass > massLimit )
+		return false;
+
+	if ( checkEnable )
+	{
+		// Allow pickup of phys props that are motion enabled on player pickup
+		CPhysicsProp *pProp = dynamic_cast<CPhysicsProp*>(pObject);
+		CPhysBox *pBox = dynamic_cast<CPhysBox*>(pObject);
+		if ( !pProp && !pBox )
+			return false;
+
+#if !defined ( CLIENT_DLL )
+		if ( pProp && !(pProp->HasSpawnFlags( SF_PHYSPROP_ENABLE_ON_PHYSCANNON )) )
+			return false;
+
+		if ( pBox && !(pBox->HasSpawnFlags( SF_PHYSBOX_ENABLE_ON_PHYSCANNON )) )
+			return false;
+#endif 
+	}
+
+	if ( sizeLimit > 0 )
+	{
+		const Vector &size = pObject->CollisionProp()->OBBSize();
+		if ( size.x > sizeLimit || size.y > sizeLimit || size.z > sizeLimit )
+			return false;
+	}
+
+	return true;
+#else
+	return false;
+#endif
+}
+
+float CBasePlayer::GetHeldObjectMass( IPhysicsObject *pHeldObject )
+{
+	return 0;
+}
+
+#endif

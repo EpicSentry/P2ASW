@@ -51,8 +51,8 @@
 #define paintgun_blobs_min_streak_speed_dampen	4500.f	//ConVar paintgun_blobs_min_streak_speed_dampen( "paintgun_blobs_min_streak_speed_dampen", "4500.0f", FCVAR_REPLICATED | FCVAR_CHEAT );
 #define paintgun_blobs_max_streak_speed_dampen	5500.f	//ConVar paintgun_blobs_max_streak_speed_dampen( "paintgun_blobs_max_streak_speed_dampen", "5500.0f", FCVAR_REPLICATED | FCVAR_CHEAT );
 
-#define paintgun_max_ammo 60 //ConVar paintgun_max_ammo( "paintgun_max_ammo", "60", FCVAR_REPLICATED, "The maximum amount of paint ammo allowed." );
-#define paintgun_ammo_type 0 //ConVar paintgun_ammo_type( "paintgun_ammo_type", "0", FCVAR_REPLICATED, "Type of paint ammo. 0: No ammo, 1: Global ammo per-gun, 2: Ammo per-paint type" );
+ConVar paintgun_max_ammo( "paintgun_max_ammo", "60", FCVAR_REPLICATED, "The maximum amount of paint ammo allowed." );
+ConVar paintgun_ammo_type( "paintgun_ammo_type", "0", FCVAR_REPLICATED, "Type of paint ammo. 0: No ammo, 1: Global ammo per-gun, 2: Ammo per-paint type" );
 
 
 
@@ -86,7 +86,7 @@ void CWeaponPaintGun::ItemPostFrame()
 		return;
 
 	// The paint clearing secondary function can always be used
-	if( paintgun_ammo_type != PAINT_AMMO_NONE &&
+	if( paintgun_ammo_type.GetInt() != PAINT_AMMO_NONE &&
 		(pPlayer->m_nButtons & IN_ATTACK2) != 0 )
 	{
 		// Attack!
@@ -166,7 +166,7 @@ void CWeaponPaintGun::PrimaryAttack()
 
 void CWeaponPaintGun::SecondaryAttack()
 {
-	if( paintgun_ammo_type == PAINT_AMMO_NONE )
+	if( paintgun_ammo_type.GetInt() == PAINT_AMMO_NONE )
 	{
 #	ifdef CLIENT_DLL
 		StartHoseEffect();
@@ -356,7 +356,7 @@ PaintPowerType CWeaponPaintGun::GetCurrentPaint()
 bool CWeaponPaintGun::HasPaintAmmo( unsigned paintType ) const
 {
 	/*
-	switch( paintgun_ammo_type )
+	switch( paintgun_ammo_type.GetInt() )
 	{
 		case PAINT_AMMO_NONE:
 			return true;
@@ -377,7 +377,7 @@ bool CWeaponPaintGun::HasPaintAmmo( unsigned paintType ) const
 
 void CWeaponPaintGun::DecrementPaintAmmo( unsigned paintType )
 {
-	switch( paintgun_ammo_type )
+	switch( paintgun_ammo_type.GetInt() )
 	{
 		case PAINT_AMMO_GLOBAL:
 			--m_nPaintAmmo;
@@ -392,9 +392,9 @@ void CWeaponPaintGun::DecrementPaintAmmo( unsigned paintType )
 
 void CWeaponPaintGun::ResetAmmo()
 {
-	m_nPaintAmmo = paintgun_max_ammo;
+	m_nPaintAmmo = paintgun_max_ammo.GetInt();
 
-	const int maxAmmo = paintgun_max_ammo;
+	const int maxAmmo = paintgun_max_ammo.GetInt();
 	for( int i = 0; i < PAINT_POWER_TYPE_COUNT; ++i )
 	{
 		m_PaintAmmoPerType.Set( i, maxAmmo );

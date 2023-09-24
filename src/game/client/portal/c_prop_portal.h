@@ -18,15 +18,17 @@
 #include "viewrender.h"
 #include "PortalSimulation.h"
 #include "C_PortalGhostRenderable.h" 
+#include "portal_shareddefs.h"
 
 struct dlight_t;
 class C_DynamicLight;
 
-class C_Prop_Portal : public CPortalRenderable_FlatBasic
+class C_Prop_Portal : public CPortalRenderable_FlatBasic, public CPortalSimulatorEventCallbacks
 {
 public:
 	DECLARE_CLASS( C_Prop_Portal, CPortalRenderable_FlatBasic );
 	DECLARE_CLIENTCLASS();
+	DECLARE_PREDICTABLE();
 
 							C_Prop_Portal( void );
 	virtual					~C_Prop_Portal( void );
@@ -76,6 +78,9 @@ public:
 	void					SetIsPortal2( bool bValue );
 
 	bool					IsActivedAndLinked( void ) const;
+	
+	virtual void			PortalSimulator_TookOwnershipOfEntity( CBaseEntity *pEntity );
+	virtual void			PortalSimulator_ReleasedOwnershipOfEntity( CBaseEntity *pEntity );
 
 	CPortalSimulator		m_PortalSimulator;
 
@@ -84,6 +89,13 @@ public:
 	void					DoFizzleEffect( int iEffect, bool bDelayedPos = true ); //display cool visual effect	
 	void					CreateFizzleEffect( C_BaseEntity *pOwner, int iEffect, Vector vecOrigin, QAngle qAngles, int nTeam, int nPortalNum );
 	
+	CProp_Portal			*GetLinkedPortal( void ) { return m_hLinkedPortal; }
+	
+	float	GetHalfWidth( void ) { return PORTAL_HALF_WIDTH; }
+	float	GetHalfHeight( void ) { return PORTAL_HALF_HEIGHT; }
+	
+	bool	IsActive( void )	{ return m_bActivated; }
+
 private:
 
 	CUtlVector<EHANDLE>		m_hGhostingEntities;

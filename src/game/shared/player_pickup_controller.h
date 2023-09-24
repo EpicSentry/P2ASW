@@ -4,7 +4,7 @@
 //
 //=============================================================================//
 
-#ifndef WEAPON_PHYSCANNON_H
+#if !defined ( WEAPON_PHYSCANNON_H ) && 0
 #define WEAPON_PHYSCANNON_H
 #ifdef _WIN32
 #pragma once

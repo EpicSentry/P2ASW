@@ -1230,19 +1230,6 @@ void PhysGetMassCenterOverride(CBaseEntity *pEntity, vcollide_t *pCollide, solid
 	}
 }
 
-float PhysGetEntityMass(CBaseEntity *pEntity)
-{
-	IPhysicsObject *pList[VPHYSICS_MAX_OBJECT_LIST_COUNT];
-	int physCount = pEntity->VPhysicsGetObjectList(pList, ARRAYSIZE(pList));
-	float otherMass = 0;
-	for (int i = 0; i < physCount; i++)
-	{
-		otherMass += pList[i]->GetMass();
-	}
-
-	return otherMass;
-}
-
 
 typedef void(*EntityCallbackFunction) (CBaseEntity *pEntity);
 

@@ -14,7 +14,7 @@
 #include "paintable_entity.h"
 
 #if !defined( CLIENT_DLL ) && defined( PORTAL2 )
-#include "player_pickup_controller.h"
+#include "portal_grabcontroller_shared.h"
 #endif
 
 #ifdef PORTAL2

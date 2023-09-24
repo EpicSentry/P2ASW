@@ -22,10 +22,15 @@ extern bool g_bBulletPortalTrace;
 	//typedef C_Prop_Portal CProp_Portal;
 	#define CProp_Portal C_Prop_Portal
 	class C_Beam;
+	class CPortalRenderable_FlatBasic;
 	typedef C_Beam CBeam;
+	class C_BasePlayer;
+	typedef C_BasePlayer CBasePlayer;
 #else
 	class CProp_Portal;
+	#define CPortal_Base2D CProp_Portal
 	class CBeam;
+	class CBasePlayer;
 #endif
 	
 	
@@ -117,6 +122,14 @@ bool UTIL_Paint_Reflect( const trace_t& tr, Vector& vStart, Vector& vDir, PaintP
 
 // mainly use for stick camera
 void UTIL_NormalizedAngleDiff( const QAngle& start, const QAngle& end, QAngle* result );
+
+#if defined( CLIENT_DLL )
+void UTIL_Portal_ComputeMatrix( CPortalRenderable_FlatBasic *pLocalPortal, CPortalRenderable_FlatBasic *pRemotePortal );
+#else
+void UTIL_Portal_ComputeMatrix( CPortal_Base2D *pLocalPortal, CPortal_Base2D *pRemotePortal );
+#endif
+
+CBasePlayer* UTIL_OtherPlayer( CBasePlayer const* pPlayer );
 
 #ifdef GAME_DLL
 

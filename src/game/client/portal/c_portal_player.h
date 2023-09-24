@@ -20,6 +20,7 @@
 #include "paint/paintable_entity.h"
 #include "c_portal_playerlocaldata.h"
 #include "portal_shareddefs.h"
+#include "portal_grabcontroller_shared.h"
 
 struct PaintPowerChoiceCriteria_t;
 
@@ -63,6 +64,8 @@ public:
 
 	virtual void UpdateClientSideAnimation();
 	void DoAnimationEvent( PlayerAnimEvent_t event, int nData );
+	virtual void FireEvent( const Vector& origin, const QAngle& angles, int event, const char *options );
+
 	virtual int DrawModel( int flags, const RenderableInstance_t& instance );
 	virtual void AddEntity( void );
 
@@ -94,6 +97,8 @@ public:
 	virtual void			PlayStepSound( Vector &vecOrigin, surfacedata_t *psurface, float fvol, bool force );
 	virtual void			PreThink( void );
 	virtual void			DoImpactEffect( trace_t &tr, int nDamageType );
+	virtual bool			CreateMove( float flInputSampleTime, CUserCmd *pCmd );
+	virtual bool			IsZoomed( void )	{ return m_PortalLocal.m_bZoomedIn; }
 
 	virtual Vector			EyePosition();
 	Vector					EyeFootPosition( const QAngle &qEyeAngles );//interpolates between eyes and feet based on view angle roll
@@ -103,8 +108,10 @@ public:
 	virtual void	CalcView( Vector &eyeOrigin, QAngle &eyeAngles, float &zNear, float &zFar, float &fov );
 	void			CalcPortalView( Vector &eyeOrigin, QAngle &eyeAngles );
 	virtual void	CalcViewModelView( const Vector& eyeOrigin, const QAngle& eyeAngles);
-
-	CBaseEntity*	FindUseEntity( void );
+	
+	bool			IsInvalidHandoff( CBaseEntity *pObject );
+	void			PollForUseEntity( bool bBasicUse, CBaseEntity **ppUseEnt, CPortal_Base2D **ppUseThroughPortal );
+	CBaseEntity*	FindUseEntity( C_Portal_Base2D **pThroughPortal );
 	CBaseEntity*	FindUseEntityThroughPortal( void );
 
 	inline bool		IsCloseToPortal( void ) //it's usually a good idea to turn on draw hacks when this is true
@@ -121,11 +128,34 @@ public:
 	void ToggleHeldObjectOnOppositeSideOfPortal( void ) { m_bHeldObjectOnOppositeSideOfPortal = !m_bHeldObjectOnOppositeSideOfPortal; }
 	void SetHeldObjectOnOppositeSideOfPortal( bool p_bHeldObjectOnOppositeSideOfPortal ) { m_bHeldObjectOnOppositeSideOfPortal = p_bHeldObjectOnOppositeSideOfPortal; }
 	bool IsHeldObjectOnOppositeSideOfPortal( void ) { return m_bHeldObjectOnOppositeSideOfPortal; }
-	CProp_Portal *GetHeldObjectPortal( void ) { return m_pHeldObjectPortal; }
+	CProp_Portal *GetHeldObjectPortal( void ) { return m_hHeldObjectPortal; }
+
+	void SetHeldObjectPortal( CProp_Portal *pPortal ) { m_hHeldObjectPortal = pPortal; }
+	void SetUsingVMGrabState( bool bState ) { m_bUsingVMGrabState = bState; }
+	bool IsUsingVMGrab( void );
+	bool WantsVMGrab( void );
+	bool IsForcingDrop( void ) { return m_bForcingDrop; }
+	
+	EHANDLE m_hGrabbedEntity;
+	EHANDLE m_hPortalThroughWhichGrabOccured;
+	bool m_bSilentDropAndPickup;
+	void ForceDropOfCarriedPhysObjects( CBaseEntity *pOnlyIfHoldingThis );
+	void PickupObject(CBaseEntity *pObject, bool bLimitMassAndSize );
+	
+	bool m_bForceFireNextPortal;
+	
+	void PreventCrouchJump( CUserCmd* ucmd );
+
+	CGrabController &GetGrabController()
+	{
+		return m_GrabController;
+	}
 
 	Activity TranslateActivity( Activity baseAct, bool *pRequired = NULL );
 	CWeaponPortalBase* GetActivePortalWeapon() const;
 	
+	bool	IsHoldingSomething( void ) const { return m_bIsHoldingSomething; }
+
 	float GetMotionBlurAmount(void) { return m_flMotionBlurAmount; }
 
 	bool				m_bPingDisabled;
@@ -138,8 +168,36 @@ public:
 	float				m_fTeamTauntStartTime;
 	int					m_nOldTeamTauntState;
 	int					m_nTeamTauntState;
+	
+
+	float	m_flUseKeyStartTime;	// for long duration uses, record the initial keypress start time
+	int		m_nUseKeyEntFoundCommandNum;  // Kind of a hack... if we find a use ent, keep it around until it sends off to the server then clear
+	int		m_nUseKeyEntClearCommandNum;
+	int		m_nLastRecivedCommandNum;
+	EHANDLE m_hUseEntToSend;		// if we find a use ent during the extended polling, keep the handle
+	float	m_flAutoGrabLockOutTime;
+
+	bool m_bForcingDrop;
+	bool m_bUseVMGrab;
+	bool m_bUsingVMGrabState;
+
+	EHANDLE m_hAttachedObject;
+	EHANDLE m_hOldAttachedObject;
+
+	EHANDLE m_hPreDataChangedAttachedObject; // Ok, I just want to know if our attached object went null on this network update for some cleanup
+											 // but the 'OldAttachedObject' above somehow got intertwined in some VM mode toggle logic I don't want to unravel.
+											 // Adding yet another ehandle to the same entity so I can cleanly detect when the server has cleared our held 
+											 // object irrespective of what held mode we are in.
+
+	
+	CGrabController m_GrabController;
+	
+	bool	IsTaunting( void ) { return false; } // FIXME!!
+	bool	IsRemoteViewTaunt( void ) { return false; } // FIXME!!
 
 private:
+	
+	void AvoidPlayers( CUserCmd *pCmd );
 
 	C_Portal_Player( const C_Portal_Player & );
 
@@ -176,7 +234,7 @@ private:
 	int	  m_iSpawnInterpCounterCache;
 
 	bool  m_bHeldObjectOnOppositeSideOfPortal;
-	CProp_Portal *m_pHeldObjectPortal;
+	CProp_Portal *m_hHeldObjectPortal;
 
 	int	m_iForceNoDrawInPortalSurface; //only valid for one frame, used to temp disable drawing of the player model in a surface because of freaky artifacts
 
@@ -213,15 +271,24 @@ private:
 
 	bool	m_bPortalledMessagePending; //Player portalled. It's easier to wait until we get a OnDataChanged() event or a CalcView() before we do anything about it. Otherwise bits and pieces can get undone
 	VMatrix m_PendingPortalMatrix;
+
+	bool				m_bIsHoldingSomething;
 		
 	// we need to interpolate hull height to maintain the world space center
 	float m_flHullHeight;
 	CInterpolatedVar< float > m_iv_flHullHeight;
 
+	//CDiscontinuousInterpolatedVar< Vector > m_iv_vEyeOffset;
+
+	void ManageHeldObject();
+
 public: // PAINT SPECIFIC
 	static bool RenderLocalScreenSpaceEffect( PortalScreenSpaceEffect effect, IMatRenderContext *pRenderContext, int x, int y, int w, int h );
 	
+	virtual Vector Weapon_ShootPosition();
 	Vector GetPaintGunShootPosition();
+	
+	EHANDLE GetAttachedObject ( void ) { return m_hAttachedObject; }
 	
 	bool IsPressingJumpKey() const;
 	bool IsHoldingJumpKey() const;
@@ -366,9 +433,31 @@ public:
 	bool	m_bEyePositionIsTransformedByPortal; //when the eye and body positions are not on the same side of a portal
 
 	CHandle<C_Prop_Portal>	m_hPortalEnvironment; //a portal whose environment the player is currently in, should be invalid most of the time
+	
+	void FixPortalEnvironmentOwnership( void ); //if we run prediction, there are multiple cases where m_hPortalEnvironment != CPortalSimulator::GetSimulatorThatOwnsEntity( this ), and that's bad
+
 	CHandle<C_Func_LiquidPortal>	m_hSurroundingLiquidPortal; //a liquid portal whose volume the player is standing in
 
+	QAngle m_vecCarriedObjectAngles;
+	C_PlayerHeldObjectClone *m_pHeldEntityClone;
+	C_PlayerHeldObjectClone *m_pHeldEntityThirdpersonClone;
+	
+	Vector m_vecCarriedObject_CurPosToTargetPos;
+	QAngle m_vecCarriedObject_CurAngToTargetAng;
+
+	//this is where we'll ease into the networked value over time and avoid applying newly networked data to previously predicted frames
+	Vector m_vecCarriedObject_CurPosToTargetPos_Interpolated;
+	QAngle m_vecCarriedObject_CurAngToTargetAng_Interpolated;
+
 protected:
+	CInterpolatedVar<Vector> m_iv_vecCarriedObject_CurPosToTargetPos_Interpolator;
+	CInterpolatedVar<QAngle> m_iv_vecCarriedObject_CurAngToTargetAng_Interpolator;
+	
+	void PollForUseEntity( CUserCmd *pCmd );
+
+	EHANDLE m_hUseEntThroughPortal;
+	bool	m_bUseWasDown;
+
 	C_PortalPlayerLocalData		m_PortalLocal;
 
 	float m_flMotionBlurAmount;

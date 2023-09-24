@@ -8,6 +8,7 @@
 #include "cpaintblob.h"
 #include "paint/paint_stream_shared.h"
 #include "paint/paint_stream_manager.h"
+#include "world.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -46,6 +47,7 @@ CPaintStream::CPaintStream( void ) : m_nBlobCounter( 0 ),
 									m_nPaintType( NO_POWER ),
 									m_nMaxBlobCount( 0 )
 {
+	GetWorldEntity()->PrecacheModel(BLOB_MODEL);
 	m_vLightPosition = vec3_origin;
 }
 

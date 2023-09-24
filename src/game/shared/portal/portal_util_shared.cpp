@@ -1188,7 +1188,7 @@ void UTIL_Portal_Triangles( const Vector &ptPortalCenter, const QAngle &qPortalA
 
 void UTIL_Portal_Triangles( const CProp_Portal *pPortal, Vector pvTri1[ 3 ], Vector pvTri2[ 3 ] )
 {
-	UTIL_Portal_Triangles( pPortal->GetAbsOrigin(), pPortal->GetAbsAngles(), pvTri1, pvTri2 );
+	UTIL_Portal_Triangles( pPortal->m_ptOrigin, pPortal->m_qAbsAngle, pvTri1, pvTri2 );
 }
 
 float UTIL_Portal_DistanceThroughPortal( const CProp_Portal *pPortal, const Vector &vPoint1, const Vector &vPoint2 )
@@ -1344,8 +1344,8 @@ float UTIL_Portal_ShortestDistanceSqr( const Vector &vPoint1, const Vector &vPoi
 
 void UTIL_Portal_AABB( const CProp_Portal *pPortal, Vector &vMin, Vector &vMax )
 {
-	Vector vOrigin = pPortal->GetAbsOrigin();
-	QAngle qAngles = pPortal->GetAbsAngles();
+	Vector vOrigin = pPortal->m_ptOrigin;
+	QAngle qAngles = pPortal->m_qAbsAngle;
 
 	Vector vOBBForward;
 	Vector vOBBRight;
@@ -1418,7 +1418,7 @@ float UTIL_IntersectRayWithPortal( const Ray_t &ray, const CProp_Portal *pPortal
 
 bool UTIL_IntersectRayWithPortalOBB( const CProp_Portal *pPortal, const Ray_t &ray, trace_t *pTrace )
 {
-	return IntersectRayWithOBB( ray, pPortal->GetAbsOrigin(), pPortal->GetAbsAngles(), CProp_Portal_Shared::vLocalMins, CProp_Portal_Shared::vLocalMaxs, 0.0f, pTrace );
+	return IntersectRayWithOBB( ray, pPortal->m_ptOrigin, pPortal->m_qAbsAngle, CProp_Portal_Shared::vLocalMins, CProp_Portal_Shared::vLocalMaxs, 0.0f, pTrace );
 }
 
 bool UTIL_IntersectRayWithPortalOBBAsAABB( const CProp_Portal *pPortal, const Ray_t &ray, trace_t *pTrace )
@@ -1459,7 +1459,7 @@ bool UTIL_IsBoxIntersectingPortal( const Vector &vecBoxCenter, const Vector &vec
 	if( pPortal == NULL )
 		return false;
 
-	return UTIL_IsBoxIntersectingPortal( vecBoxCenter, vecBoxExtents, pPortal->GetAbsOrigin(), pPortal->GetAbsAngles(), flTolerance );
+	return UTIL_IsBoxIntersectingPortal( vecBoxCenter, vecBoxExtents, pPortal->m_ptOrigin, pPortal->m_qAbsAngle, flTolerance );
 }
 
 CProp_Portal *UTIL_IntersectEntityExtentsWithPortal( const CBaseEntity *pEntity )
@@ -1503,7 +1503,7 @@ void UTIL_Portal_NDebugOverlay( const Vector &ptPortalCenter, const QAngle &qPor
 void UTIL_Portal_NDebugOverlay( const CProp_Portal *pPortal, int r, int g, int b, int a, bool noDepthTest, float duration )
 {
 #ifndef CLIENT_DLL
-	UTIL_Portal_NDebugOverlay( pPortal->GetAbsOrigin(), pPortal->GetAbsAngles(), r, g, b, a, noDepthTest, duration );
+	UTIL_Portal_NDebugOverlay( pPortal->m_ptOrigin, pPortal->m_qAbsAngle, r, g, b, a, noDepthTest, duration );
 #endif //#ifndef CLIENT_DLL
 }
 
@@ -1811,6 +1811,77 @@ void CC_Debug_FixMyPosition( void )
 static ConCommand debug_fixmyposition("debug_fixmyposition", CC_Debug_FixMyPosition, "Runs FindsClosestPassableSpace() on player.", FCVAR_CHEAT );
 #endif
 
+//it turns out that using MatrixInverseTR() is theoretically correct. But we need to ensure that these matrices match exactly on the client/server. 
+//And computing inverses screws that up just enough (differences of ~0.00005 in the translation some times) to matter. So we compute each from scratch every time
+#if defined( CLIENT_DLL )
+void UTIL_Portal_ComputeMatrix_ForReal( CPortalRenderable_FlatBasic *pLocalPortal, CPortalRenderable_FlatBasic *pRemotePortal )
+#else
+void UTIL_Portal_ComputeMatrix_ForReal( CPortal_Base2D *pLocalPortal, CPortal_Base2D *pRemotePortal )
+#endif
+{
+	// FIXME:
+#ifdef GAME_DLL
+#define m_ptOrigin GetAbsOrigin()
+#endif
+	VMatrix worldToLocal_Rotated;
+	worldToLocal_Rotated.m[0][0] = -pLocalPortal->m_vForward.x;
+	worldToLocal_Rotated.m[0][1] = -pLocalPortal->m_vForward.y;
+	worldToLocal_Rotated.m[0][2] = -pLocalPortal->m_vForward.z;
+	worldToLocal_Rotated.m[0][3] = ((Vector)pLocalPortal->m_ptOrigin).Dot( pLocalPortal->m_vForward );
+
+	worldToLocal_Rotated.m[1][0] = pLocalPortal->m_vRight.x;
+	worldToLocal_Rotated.m[1][1] = pLocalPortal->m_vRight.y;
+	worldToLocal_Rotated.m[1][2] = pLocalPortal->m_vRight.z;
+	worldToLocal_Rotated.m[1][3] = -((Vector)pLocalPortal->m_ptOrigin).Dot( pLocalPortal->m_vRight );
+
+	worldToLocal_Rotated.m[2][0] = pLocalPortal->m_vUp.x;
+	worldToLocal_Rotated.m[2][1] = pLocalPortal->m_vUp.y;
+	worldToLocal_Rotated.m[2][2] = pLocalPortal->m_vUp.z;
+	worldToLocal_Rotated.m[2][3] = -((Vector)pLocalPortal->m_ptOrigin).Dot( pLocalPortal->m_vUp );		
+
+	worldToLocal_Rotated.m[3][0] = 0.0f;
+	worldToLocal_Rotated.m[3][1] = 0.0f;
+	worldToLocal_Rotated.m[3][2] = 0.0f;
+	worldToLocal_Rotated.m[3][3] = 1.0f;
+
+	VMatrix remoteToWorld( pRemotePortal->m_vForward, -pRemotePortal->m_vRight, pRemotePortal->m_vUp );
+	remoteToWorld.SetTranslation( pRemotePortal->m_ptOrigin );
+
+	//final
+	pLocalPortal->m_matrixThisToLinked = remoteToWorld * worldToLocal_Rotated;
+
+#undef m_ptOrigin
+}
+
+//MUST be a shared function to prevent floating point precision weirdness in the 100,000th decimal place between client/server that we're attributing to differing register usage.
+#if defined( CLIENT_DLL )
+void UTIL_Portal_ComputeMatrix( CPortalRenderable_FlatBasic *pLocalPortal, CPortalRenderable_FlatBasic *pRemotePortal )
+#else
+void UTIL_Portal_ComputeMatrix( CPortal_Base2D *pLocalPortal, CPortal_Base2D *pRemotePortal )
+#endif
+{
+	if ( pRemotePortal != NULL )
+	{
+		UTIL_Portal_ComputeMatrix_ForReal( pLocalPortal, pRemotePortal );
+		UTIL_Portal_ComputeMatrix_ForReal( pRemotePortal, pLocalPortal );
+	}
+	else
+	{
+		pLocalPortal->m_matrixThisToLinked.Identity(); //don't accidentally teleport objects to zero space
+	}
+}
+
+CBasePlayer* UTIL_OtherPlayer( CBasePlayer const* pPlayer )
+{
+	for( int i = 1; i <= gpGlobals->maxClients; ++i )
+	{
+		CBasePlayer* pOtherPlayer = UTIL_PlayerByIndex( i );
+		if ( pOtherPlayer != NULL && pOtherPlayer != pPlayer )
+			return pOtherPlayer;
+	}
+
+	return NULL;
+}
 
 CEG_NOINLINE bool UTIL_IsPaintableSurface( const csurface_t& surface )
 {
@@ -1908,10 +1979,8 @@ PaintPowerType UTIL_Paint_TracePower( CBaseEntity* pBrushEntity, const Vector& c
 		Msg("(client)tColor: %i %i %i %i\n", tColor.r(), tColor.g(), tColor.b(), tColor.a());
 #endif
 	}
-
-
-
-	if ( &color.Element( 0 ) != NULL)
+	
+	if ( color.Count() != 0 && &color.Element( 0 ) != NULL )
 		return MapColorToPower( color.Element(0) );
 	
 	return NO_POWER;

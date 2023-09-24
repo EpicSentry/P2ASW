@@ -38,7 +38,15 @@
 #define IN_GRENADE2		(1 << 24)	// grenade 2
 #define	IN_LOOKSPIN		(1 << 25)
 
+#ifdef PORTAL2
 
+#if USE_SLOWTIME
+	#define	IN_SLOWTIME		(1 << 26)
+#endif // USE_SLOWTIME
+
+#define	IN_COOP_PING	(1 << 27)	
+#define IN_REMOTE_VIEW	(1 << 28)
+#endif // PORTAL2
 
 #ifdef INFESTED_DLL
 #define IN_CURRENT_ABILITY (1 << 22)		// overloading BULLRUSH

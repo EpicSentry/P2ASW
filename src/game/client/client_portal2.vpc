@@ -358,6 +358,11 @@ $Project "Client (Portal 2)"
 					$File	"portal2\paint\c_paint_stream.h"
 					$File	"portal2\paint\c_paint_stream.cpp"
 					$File	"portal2\paint\paint_hud_paint_ammo.cpp"
+					
+					$File	"$SRCDIR\game\shared\portal2\portal_grabcontroller_shared.h"
+					$File	"$SRCDIR\game\shared\portal2\portal_grabcontroller_shared.cpp"
+					$File	"$SRCDIR\game\shared\portal2\player_pickup.h"
+					$File	"$SRCDIR\game\shared\portal2\player_pickup.cpp"
 
 					$File	"$SRCDIR\common\ps3\vjobutils.cpp"		[$PS3]
 					

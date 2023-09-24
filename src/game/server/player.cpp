@@ -75,7 +75,9 @@
 #include "logic_playerproxy.h"
 #include "fogvolume.h"
 
-
+#ifdef PORTAL2
+#include "portal_grabcontroller_shared.h"
+#endif
 
 #ifdef HL2_DLL
 #include "combine_mine.h"
@@ -271,7 +273,9 @@ BEGIN_DATADESC( CBasePlayer )
 
 	DEFINE_FIELD( m_vecAdditionalPVSOrigin, FIELD_POSITION_VECTOR ),
 	DEFINE_FIELD( m_vecCameraPVSOrigin, FIELD_POSITION_VECTOR ),
-
+	
+	DEFINE_FIELD( m_bDropEnabled, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_bDuckEnabled, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_hUseEntity, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_iTrain, FIELD_INTEGER ),
 	DEFINE_FIELD( m_iRespawnFrames, FIELD_FLOAT ),
@@ -2829,94 +2833,6 @@ bool CBasePlayer::IsUseableEntity( CBaseEntity *pEntity, unsigned int requiredCa
 	return false;
 }
 
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-bool CBasePlayer::CanPickupObject( CBaseEntity *pObject, float massLimit, float sizeLimit )
-{
-	// UNDONE: Make this virtual and move to HL2 player
-#if defined( HL2_DLL ) ||  defined( PORTAL )
-	//Must be valid
-	if ( pObject == NULL )
-		return false;
-
-
-	
-	//Must move with physics
-	if ( pObject->GetMoveType() != MOVETYPE_VPHYSICS )
-		return false;
-
-	IPhysicsObject *pList[VPHYSICS_MAX_OBJECT_LIST_COUNT];
-	int count = pObject->VPhysicsGetObjectList( pList, ARRAYSIZE(pList) );
-
-	//Must have a physics object
-	if (!count)
-		return false;
-
-	float objectMass = 0;
-	bool checkEnable = false;
-	for ( int i = 0; i < count; i++ )
-	{
-		objectMass += pList[i]->GetMass();
-		if ( !pList[i]->IsMoveable() )
-		{
-			checkEnable = true;
-		}
-		if ( pList[i]->GetGameFlags() & FVPHYSICS_NO_PLAYER_PICKUP )
-			return false;
-		if ( pList[i]->IsHinged() )
-			return false;
-	}
-
-
-	//Msg( "Target mass: %f\n", pPhys->GetMass() );
-
-	//Must be under our threshold weight
-	if ( massLimit > 0 && objectMass > massLimit )
-		return false;
-
-	if ( checkEnable )
-	{
-#ifdef HL2_DLL
-		// Allowing picking up of bouncebombs.
-		CBounceBomb *pBomb = dynamic_cast<CBounceBomb*>(pObject);
-		if( pBomb )
-			return true;
-#endif // HL2_DLL
-
-		// Allow pickup of phys props that are motion enabled on player pickup
-		CPhysicsProp *pProp = dynamic_cast<CPhysicsProp*>(pObject);
-		CPhysBox *pBox = dynamic_cast<CPhysBox*>(pObject);
-		if ( !pProp && !pBox )
-			return false;
-
-		if ( pProp && !(pProp->HasSpawnFlags( SF_PHYSPROP_ENABLE_ON_PHYSCANNON )) )
-			return false;
-
-		if ( pBox && !(pBox->HasSpawnFlags( SF_PHYSBOX_ENABLE_ON_PHYSCANNON )) )
-			return false;
-	}
-
-	if ( sizeLimit > 0 )
-	{
-		const Vector &size = pObject->CollisionProp()->OBBSize();
-		if ( size.x > sizeLimit || size.y > sizeLimit || size.z > sizeLimit )
-			return false;
-	}
-
-	return true;
-#else
-	return false;
-#endif
-}
-
-float CBasePlayer::GetHeldObjectMass( IPhysicsObject *pHeldObject )
-{
-	return 0;
-}
-
-
 //-----------------------------------------------------------------------------
 // Purpose:	Server side of jumping rules.  Most jumping logic is already
 //			handled in shared gamemovement code.  Put stuff here that should
@@ -4525,7 +4441,16 @@ void CBasePlayer::PostThink()
 #endif //#ifdef PORTAL	
 					) )
 				{  
+#if defined ( PORTAL2 )
+					CPlayerPickupController *pPickup = (CPlayerPickupController*)m_hUseEntity.Get();
+					Assert( pPickup );
+					if ( pPickup )
+					{
+						pPickup->UsePickupController( this, this, USE_SET, 2 );	// try fire the gun
+					}
+#else
 					m_hUseEntity->Use( this, this, USE_SET, 2 );	// try fire the gun
+#endif
 				}
 				else
 				{
@@ -5014,6 +4939,8 @@ void CBasePlayer::Spawn( void )
 
 	g_pGameRules->GetPlayerSpawnSpot( this );
 
+	m_bDuckEnabled = true;
+	m_bDropEnabled = true;
 	m_Local.m_bDucked = false;// This will persist over round restart if you hold duck otherwise. 
 	m_Local.m_bDucking = false;
     SetViewOffset( VEC_VIEW );
@@ -5305,13 +5232,19 @@ void CBasePlayer::OnRestore( void )
 	m_nVehicleViewSavedFrame = 0;
 
 	m_nBodyPitchPoseParam = LookupPoseParameter( "body_pitch" );
-
-	// HACK: (03/25/09) Then the player goes across a transition it doesn't spawn and register
-	// it's instance. We're hacking around this for now, but this will go away when we get around to 
-	// having entities cross transitions and keep their script state.
-	if ( !g_pGameRules->IsMultiplayer() && g_pScriptVM && (gpGlobals->eLoadType == MapLoad_Transition) )
+	
+	if ( gpGlobals->eLoadType == MapLoad_Transition )
 	{
-		g_pScriptVM->SetValue( "player", GetScriptInstance() );
+		// HACK: (03/25/09) Then the player goes across a transition it doesn't spawn and register
+		// it's instance. We're hacking around this for now, but this will go away when we get around to 
+		// having entities cross transitions and keep their script state.if( !g_pGameRules->IsMultiplayer() && g_pScriptVM )
+		{
+			g_pScriptVM->SetValue( "player", GetScriptInstance() );
+		}
+
+		// Don't persist drop state when we transition to a new level.
+		m_bDropEnabled = true;
+		m_bDuckEnabled = true;
 	}
 }
 
@@ -7592,20 +7525,6 @@ void CBasePlayer::UnlockPlayer( void )
 	RemoveFlag( FL_GODMODE | FL_FROZEN );
 	SetMoveType( MOVETYPE_WALK );
 	m_iPlayerLocked = false;
-}
-
-bool CBasePlayer::ClearUseEntity()
-{
-	if ( m_hUseEntity != NULL )
-	{
-		// Stop controlling the train/object
-		// TODO: Send HUD Update
-		m_hUseEntity->Use( this, this, USE_OFF, 0 );
-		m_hUseEntity = NULL;
-		return true;
-	}
-
-	return false;
 }
 
 CBaseEntity* CBasePlayer::GetUseEntity( void ) 

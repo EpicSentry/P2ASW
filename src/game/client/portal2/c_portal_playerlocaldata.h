@@ -14,6 +14,8 @@ public:
 	DECLARE_EMBEDDED_NETWORKVAR();
 	DECLARE_SIMPLE_DATADESC();
 
+	C_PortalPlayerLocalData();
+
 	StickCameraState m_nStickCameraState;
 	InAirState m_InAirState;
 	PaintPowerType m_PaintedPowerType;

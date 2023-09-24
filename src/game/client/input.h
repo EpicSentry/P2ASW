@@ -346,6 +346,7 @@ protected:
 
 extern kbutton_t in_strafe;
 extern kbutton_t in_speed;
+extern kbutton_t in_zoom;
 extern kbutton_t in_jlook;
 extern kbutton_t in_graph;  
 extern kbutton_t in_moveleft;
