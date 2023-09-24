@@ -37,6 +37,9 @@
 
 #define PANEL_SURVEY					"surveypanel"
 
+#ifdef PORTAL2
+#define PANEL_RADIAL_MENU "radialmenupanel"
+#endif // PORTAL2
 
 
 #endif // VIEWPORT_PANEL_NAMES_H

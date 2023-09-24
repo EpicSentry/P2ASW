@@ -23,6 +23,13 @@ ConVar r_depthoverlay( "r_depthoverlay", "0", FCVAR_CHEAT, "Replaces opaque obje
 
 
 int g_viewscene_refractUpdateFrame = 0;
+
+// an index which is incremented once per portal render
+int g_nCurrentPortalRender = 0;
+// the value of g_nCurrentPortalRender when we last updated the refract texture 
+// (basically, portal renders invalidate the refract texture)
+int g_nRefractUpdatePortalRender = 0;
+
 bool g_bAllowMultipleRefractUpdatesPerScenePerFrame = false;
 
 #if defined( _X360 )

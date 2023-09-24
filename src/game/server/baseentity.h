@@ -1652,6 +1652,10 @@ protected:
 
 	CNetworkVar( float, m_flShadowCastDistance );
 	float		m_flDesiredShadowCastDistance;
+	
+#ifdef PORTAL2
+	CNetworkVar( string_t, m_iSignifierName );
+#endif // PORTAL2
 
 	// Team handling
 	int			m_iInitialTeamNum;		// Team number of this entity's team read from file

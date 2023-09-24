@@ -663,6 +663,11 @@ bool CPortalRender::DrawPortalsUsingStencils(CViewRender *pViewRender)
 				pCurrentPortal->RenderPortalViewToBackBuffer(pViewRender, *pViewSetup);
 
 				m_PortalViewIDNodeChain[m_iViewRecursionLevel + 1] = NULL;
+				
+				// This value is incremented to signal that we need to re-copy the refract texture 
+				// because we've finished rendering a child portal and its translucent pass, and we're about
+				// to render the parent portal's translucent pass or another portal
+				++ g_nCurrentPortalRender;
 
 				CGlowOverlay::RestoreSkyOverlayData(m_iViewRecursionLevel);
 				memcpy((void *)pViewSetup, &ViewBackup, sizeof(CViewSetup));

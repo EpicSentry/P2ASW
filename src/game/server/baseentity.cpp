@@ -645,8 +645,10 @@ IMPLEMENT_SERVERCLASS_ST_NOBASE( CBaseEntity, DT_BaseEntity )
 	SendPropInt		(SENDINFO(m_iParentAttachment), NUM_PARENTATTACHMENT_BITS, SPROP_UNSIGNED),
 
 	SendPropStringT( SENDINFO( m_iName ) ),
-
-
+	
+#ifdef PORTAL2
+	SendPropStringT( SENDINFO( m_iSignifierName ) ),
+#endif // PORTAL2
 
 	SendPropInt		(SENDINFO_NAME( m_MoveType, movetype ), MOVETYPE_MAX_BITS, SPROP_UNSIGNED ),
 	SendPropInt		(SENDINFO_NAME( m_MoveCollide, movecollide ), MOVECOLLIDE_MAX_BITS, SPROP_UNSIGNED ),
@@ -771,6 +773,11 @@ CBaseEntity::CBaseEntity( bool bServerOnly )
 	m_flCreateTime = 0.0f;
 
 	m_pEvent = NULL;
+	
+#ifdef PORTAL2
+	m_iSignifierName = NULL_STRING;
+#endif // PORTAL2
+
 }
 
 //-----------------------------------------------------------------------------
@@ -986,8 +993,10 @@ CBaseEntity *CBaseEntity::GetFollowedEntity()
 void CBaseEntity::SetClassname( const char *className )
 {
 	m_iClassname = AllocPooledString( className );
-
-
+	
+#ifdef PORTAL2
+	m_iSignifierName = m_iClassname;
+#endif // PORTAL2
 }
 
 // position to shoot at
@@ -2255,7 +2264,10 @@ BEGIN_DATADESC_NO_BASE( CBaseEntity )
 	DEFINE_FIELD( m_iEFlags, FIELD_INTEGER ),
 
 	DEFINE_FIELD( m_iName, FIELD_STRING ),
-
+	
+#ifdef PORTAL2
+	DEFINE_FIELD( m_iSignifierName, FIELD_STRING ),
+#endif // PORTAL2
 
 
 	DEFINE_EMBEDDED( m_Collision ),

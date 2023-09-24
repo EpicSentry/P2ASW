@@ -42,6 +42,10 @@ public:
 
 	bool BeginPlayback( const char *pFilename );
 	void StopPlayback( void );
+	
+#if defined( PORTAL2 )
+	void EnablePartnerUI( bool bEnablePartnerUI );
+#endif
 
 	void SetBlackBackground( bool bBlack ){ m_bBlackBackground = bBlack; }
 	void SetAllowInterrupt( bool bAllowInterrupt ) { m_bAllowInterruption = bAllowInterrupt; }
@@ -69,6 +73,13 @@ protected:
 	int				m_nShutdownCount;
 
 	bool			m_bStarted;
+private:
+
+#if defined( PORTAL2 )
+	void			SetupPartnerInScience( bool bEnable );
+	void			SetPartnerInScienceAlpha( int alpha );
+#endif
+
 };
 
 
