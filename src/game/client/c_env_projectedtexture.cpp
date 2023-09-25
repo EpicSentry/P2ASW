@@ -16,6 +16,7 @@
 #include "texture_group_names.h"
 #include "tier0/icommandline.h"
 #include "c_portal_player.h"
+#include "c_baseentity.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -81,6 +82,7 @@ C_EnvProjectedTexture::C_EnvProjectedTexture(void)
 	m_LightHandle = CLIENTSHADOW_INVALID_HANDLE;
 	m_bForceUpdate = true;
 	m_pMaterial = NULL;
+	m_bIsCurrentlyProjected = false;
 	AddToEntityList(ENTITY_LIST_SIMULATE);
 }
 
@@ -104,6 +106,7 @@ void C_EnvProjectedTexture::ShutDownLightHandle(void)
 		}
 		m_LightHandle = CLIENTSHADOW_INVALID_HANDLE;
 	}
+	m_bIsCurrentlyProjected = false;
 }
 
 
@@ -156,6 +159,14 @@ void C_EnvProjectedTexture::OnDataChanged(DataUpdateType_t updateType)
 static ConVar asw_perf_wtf("asw_perf_wtf", "0", FCVAR_DEVELOPMENTONLY, "Disable updating of projected shadow textures from UpdateLight");
 void C_EnvProjectedTexture::UpdateLight(void)
 {
+	bool shouldUpdate = ShouldUpdate();
+	if (!shouldUpdate)
+	{
+		if (m_bIsCurrentlyProjected)
+			ShutDownLightHandle();
+		return;
+	}
+
 	VPROF("C_EnvProjectedTexture::UpdateLight");
 	bool bVisible = true;
 
@@ -419,6 +430,7 @@ void C_EnvProjectedTexture::UpdateLight(void)
 	g_pClientShadowMgr->SetFlashlightLightWorld(m_LightHandle, m_bLightWorld);
 
 	g_pClientShadowMgr->UpdateProjectedTexture(m_LightHandle, true);
+	m_bIsCurrentlyProjected = true;
 }
 
 bool C_EnvProjectedTexture::Simulate(void)
@@ -427,6 +439,28 @@ bool C_EnvProjectedTexture::Simulate(void)
 
 	BaseClass::Simulate();
 	return true;
+}
+
+bool C_EnvProjectedTexture::ShouldUpdate()
+{
+	int ActualCPULevel = GetActualCPULevel();
+	int m_nMinCPULevel = this->GetMinCPULevel();
+	if (!m_nMinCPULevel || m_nMinCPULevel - 1 <= ActualCPULevel)
+	{
+		int m_nMaxCPULevel = this->GetMaxCPULevel();
+		if (!m_nMaxCPULevel || m_nMaxCPULevel - 1 >= ActualCPULevel)
+		{
+			int GPULevel = GetGPULevel();
+			int m_nMinGPULevel = this->GetMinGPULevel();
+			if (!m_nMinGPULevel || m_nMinGPULevel - 1 <= GPULevel)
+			{
+				int m_nMaxGPULevel = this->GetMaxGPULevel();
+				if (!m_nMaxGPULevel || m_nMaxGPULevel - 1 >= GPULevel)
+					return true;
+			}
+		}
+	}
+	return false;
 }
 
 bool C_EnvProjectedTexture::IsBBoxVisible(Vector vecExtentsMin, Vector vecExtentsMax)

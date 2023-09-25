@@ -33,7 +33,7 @@ public:
 	void	ShutDownLightHandle( void );
 
 	virtual bool Simulate();
-
+	bool ShouldUpdate();
 	void	UpdateLight( void );
 
 	C_EnvProjectedTexture();
@@ -80,7 +80,8 @@ private:
 	IMaterial	*m_pMaterial;
 	float		m_flProjectionSize;
 	float		m_flRotation;
-	int		m_iStyle;
+	int			m_iStyle;
+	bool		m_bIsCurrentlyProjected;
 
 	Vector	m_vecExtentsMin;
 	Vector	m_vecExtentsMax;
