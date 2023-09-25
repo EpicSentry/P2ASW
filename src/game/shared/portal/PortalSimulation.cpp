@@ -3145,7 +3145,6 @@ void CPortalSimulator::CreatePolyhedrons( void )
 
 	//(Holy) Wall
 	{
-		Assert( m_InternalData.Simulation.Static.Wall.Local.Tube.Polyhedrons.Count() == 0 );
 		Assert( m_InternalData.Simulation.Static.Wall.Local.Brushes.Polyhedrons.Count() == 0 );
 
 		Vector vBackward = -m_InternalData.Placement.vForward;
@@ -3275,11 +3274,7 @@ void CPortalSimulator::CreatePolyhedrons( void )
 			fPlanes[(3*4) + 3] = vDown.Dot( m_InternalData.Placement.ptCenter + m_InternalData.Placement.vUp * PORTAL_HOLE_HALF_HEIGHT );
 			fPlanes[(4*4) + 3] = vLeft.Dot( m_InternalData.Placement.ptCenter + vLeft * (PORTAL_HOLE_HALF_WIDTH + PORTAL_WALL_MIN_THICKNESS) );
 			fPlanes[(5*4) + 3] = m_InternalData.Placement.vRight.Dot( m_InternalData.Placement.ptCenter + m_InternalData.Placement.vRight * (PORTAL_HOLE_HALF_WIDTH + PORTAL_WALL_MIN_THICKNESS) );
-
-			CPolyhedron *pTubePolyhedron = GeneratePolyhedronFromPlanes( fPlanes, 6, PORTAL_POLYHEDRON_CUT_EPSILON );
-			if( pTubePolyhedron )
-				m_InternalData.Simulation.Static.Wall.Local.Tube.Polyhedrons.AddToTail( pTubePolyhedron );
-
+			
 			//general hole cut
 			//fPlanes[(1*4) + 3] += 2000.0f;
 			fPlanes[(2*4) + 3] = m_InternalData.Placement.vUp.Dot( m_InternalData.Placement.ptCenter + m_InternalData.Placement.vUp * (PORTAL_WALL_FARDIST * 10.0f) );
@@ -3300,11 +3295,7 @@ void CPortalSimulator::CreatePolyhedrons( void )
 			fPlanes[(3*4) + 3] = vDown.Dot( m_InternalData.Placement.ptCenter + vDown * (PORTAL_HOLE_HALF_HEIGHT + PORTAL_WALL_MIN_THICKNESS) );
 			fPlanes[(4*4) + 3] = vLeft.Dot( m_InternalData.Placement.ptCenter + vLeft * (PORTAL_HOLE_HALF_WIDTH + PORTAL_WALL_MIN_THICKNESS) );
 			fPlanes[(5*4) + 3] = m_InternalData.Placement.vRight.Dot( m_InternalData.Placement.ptCenter + m_InternalData.Placement.vRight * (PORTAL_HOLE_HALF_WIDTH + PORTAL_WALL_MIN_THICKNESS) );
-
-			CPolyhedron *pTubePolyhedron = GeneratePolyhedronFromPlanes( fPlanes, 6, PORTAL_POLYHEDRON_CUT_EPSILON );
-			if( pTubePolyhedron )
-				m_InternalData.Simulation.Static.Wall.Local.Tube.Polyhedrons.AddToTail( pTubePolyhedron );
-
+			
 			//general hole cut
 			//fPlanes[(1*4) + 3] += 2000.0f;
 			fPlanes[(2*4) + 3] = m_InternalData.Placement.vUp.Dot( m_InternalData.Placement.ptCenter + (vDown * (PORTAL_HOLE_HALF_HEIGHT + PORTAL_WALL_MIN_THICKNESS)) );
@@ -3324,10 +3315,6 @@ void CPortalSimulator::CreatePolyhedrons( void )
 			fPlanes[(4*4) + 3] = vLeft.Dot( m_InternalData.Placement.ptCenter + (vLeft * (PORTAL_HOLE_HALF_WIDTH + PORTAL_WALL_MIN_THICKNESS)) );
 			fPlanes[(5*4) + 3] = m_InternalData.Placement.vRight.Dot( m_InternalData.Placement.ptCenter + (vLeft * PORTAL_HOLE_HALF_WIDTH) );
 
-			CPolyhedron *pTubePolyhedron = GeneratePolyhedronFromPlanes( fPlanes, 6, PORTAL_POLYHEDRON_CUT_EPSILON );
-			if( pTubePolyhedron )
-				m_InternalData.Simulation.Static.Wall.Local.Tube.Polyhedrons.AddToTail( pTubePolyhedron );
-
 			//general hole cut
 			//fPlanes[(1*4) + 3] += 2000.0f;
 			fPlanes[(2*4) + 3] = m_InternalData.Placement.vUp.Dot( m_InternalData.Placement.ptCenter + (m_InternalData.Placement.vUp * (PORTAL_HOLE_HALF_HEIGHT + PORTAL_WALL_MIN_THICKNESS)) );
@@ -3346,10 +3333,6 @@ void CPortalSimulator::CreatePolyhedrons( void )
 			fPlanes[(3*4) + 3] = vDown.Dot( m_InternalData.Placement.ptCenter + (vDown * (PORTAL_HOLE_HALF_HEIGHT)) );
 			fPlanes[(4*4) + 3] = vLeft.Dot( m_InternalData.Placement.ptCenter + m_InternalData.Placement.vRight * PORTAL_HOLE_HALF_WIDTH );
 			fPlanes[(5*4) + 3] = m_InternalData.Placement.vRight.Dot( m_InternalData.Placement.ptCenter + m_InternalData.Placement.vRight * (PORTAL_HOLE_HALF_WIDTH + PORTAL_WALL_MIN_THICKNESS) );
-
-			CPolyhedron *pTubePolyhedron = GeneratePolyhedronFromPlanes( fPlanes, 6, PORTAL_POLYHEDRON_CUT_EPSILON );
-			if( pTubePolyhedron )
-				m_InternalData.Simulation.Static.Wall.Local.Tube.Polyhedrons.AddToTail( pTubePolyhedron );
 
 			//general hole cut
 			//fPlanes[(1*4) + 3] += 2000.0f;
