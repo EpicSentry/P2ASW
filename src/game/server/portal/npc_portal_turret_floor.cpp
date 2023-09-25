@@ -389,7 +389,7 @@ bool CNPC_Portal_FloorTurret::PreThink( turretState_e state )
 	}
 
 	// New states are not supported by old turret code
-	if (m_bUsedAsActor && iNewState != TURRET_TIPPED && iNewState < TURRET_STATE_TOTAL )
+	if (!m_bUsedAsActor && iNewState != TURRET_TIPPED && iNewState < TURRET_STATE_TOTAL )
 		return BaseClass::PreThink( (turretState_e)iNewState );
 
 	return true;
