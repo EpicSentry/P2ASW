@@ -101,7 +101,7 @@ void CTriggerPortalCleanser::Touch( CBaseEntity *pOther )
 				{
 					CProp_Portal *pPortal = CProp_Portal::FindPortal( pPortalgun->m_iPortalLinkageGroupID, false );
 
-					if ( pPortal && pPortal->m_bActivated )
+					if ( pPortal && pPortal->IsActive() )
 					{
 						pPortal->DoFizzleEffect( PORTAL_FIZZLE_KILLED, false );
 						pPortal->Fizzle();
@@ -110,35 +110,19 @@ void CTriggerPortalCleanser::Touch( CBaseEntity *pOther )
 
 						bFizzledPortal = true;
 					}
-
-					// Cancel portals that are still mid flight
-					if ( pPortal && pPortal->GetNextThink( s_pDelayedPlacementContext ) > gpGlobals->curtime )
-					{
-						pPortal->SetContextThink( NULL, gpGlobals->curtime, s_pDelayedPlacementContext ); 
-						pPortalgun->m_fEffectsMaxSize2 = 50.0f;
-						bFizzledPortal = true;
-					}
 				}
 
 				if ( pPortalgun->CanFirePortal2() )
 				{
 					CProp_Portal *pPortal = CProp_Portal::FindPortal( pPortalgun->m_iPortalLinkageGroupID, true );
 
-					if ( pPortal && pPortal->m_bActivated )
+					if ( pPortal && pPortal->IsActive() )
 					{
 						pPortal->DoFizzleEffect( PORTAL_FIZZLE_KILLED, false );
 						pPortal->Fizzle();
 						// HACK HACK! Used to make the gun visually change when going through a cleanser!
 						pPortalgun->m_fEffectsMaxSize2 = 50.0f;
 
-						bFizzledPortal = true;
-					}
-					
-					// Cancel portals that are still mid flight
-					if ( pPortal && pPortal->GetNextThink( s_pDelayedPlacementContext ) > gpGlobals->curtime )
-					{
-						pPortal->SetContextThink( NULL, gpGlobals->curtime, s_pDelayedPlacementContext ); 
-						pPortalgun->m_fEffectsMaxSize2 = 50.0f;
 						bFizzledPortal = true;
 					}
 				}

@@ -22,8 +22,6 @@ static int g_iShadowCloneCount = 0;
 ConVar sv_debug_physicsshadowclones("sv_debug_physicsshadowclones", "0", FCVAR_REPLICATED );
 ConVar sv_use_shadow_clones( "sv_use_shadow_clones", "1", FCVAR_REPLICATED | FCVAR_CHEAT ); //should we create shadow clones?
 
-static void DrawDebugOverlayForShadowClone( CPhysicsShadowClone *pClone );
-
 LINK_ENTITY_TO_CLASS( physicsshadowclone, CPhysicsShadowClone );
 
 static CUtlVector<CPhysicsShadowClone *> s_ActiveShadowClones;
@@ -345,6 +343,9 @@ void CPhysicsShadowClone::FullSync( bool bAllowAssumedSync )
 		DrawDebugOverlayForShadowClone( this );
 }
 
+// this enables a fast/cheap version of teleporting that is less accurate WRT physics objects' contacts after small teleportations
+ConVar fast_teleport_enable("fast_teleport_enable", "1");
+
 void CPhysicsShadowClone::SyncEntity( bool bPullChanges )
 {
 	m_bShouldUpSync = false;
@@ -375,7 +376,7 @@ void CPhysicsShadowClone::SyncEntity( bool bPullChanges )
 	QAngle qAngles;
 
 	ptOrigin = pSource->GetAbsOrigin();
-	qAngles = pSource->GetAbsAngles();
+	qAngles = pSource->IsPlayer() ? vec3_angle : pSource->GetAbsAngles();
 	vVelocity = pSource->GetAbsVelocity();
 
 	if( !m_bShadowTransformIsIdentity )
@@ -389,9 +390,12 @@ void CPhysicsShadowClone::SyncEntity( bool bPullChanges )
 	//	pDest->SetGroundEntity( pSource->GetGroundEntity() );
 	//}
 
-	if( (ptOrigin != pDest->GetAbsOrigin()) || (qAngles != pDest->GetAbsAngles()) )
+	QAngle qDiff;
+	RotationDelta( pDest->GetAbsAngles(), qAngles, &qDiff );
+
+	if( (ptOrigin - pDest->GetAbsOrigin()).LengthSqr() > 0.0001f || qDiff.LengthSqr() > 0.0001f )
 	{
-		pDest->Teleport( &ptOrigin, &qAngles, NULL );
+		pDest->Teleport( &ptOrigin, &qAngles, NULL, !fast_teleport_enable.GetBool() );
 	}
 	
 	if( vVelocity != pDest->GetAbsVelocity() )
@@ -422,6 +426,9 @@ static void FullSyncPhysicsObject( IPhysicsObject *pSource, IPhysicsObject *pDes
 		if( pHoldingPlayer )
 		{
 			pGrabController = GetGrabControllerForPlayer( pHoldingPlayer );
+
+			//if ( !pGrabController )
+			//	pGrabController = GetGrabControllerForPhysCannon( pHoldingPlayer->GetActiveWeapon() );
 		}
 
 		AssertMsg( pGrabController, "Physics object is held, but we can't find the holding controller." );
@@ -436,10 +443,8 @@ static void FullSyncPhysicsObject( IPhysicsObject *pSource, IPhysicsObject *pDes
 		pDest->SetMaterialIndex( pSource->GetMaterialIndex() );
 		pDest->SetContents( pSource->GetContents() );
 
-		pDest->EnableCollisions( pSource->IsCollisionEnabled() );
-		pDest->EnableGravity( pSource->IsGravityEnabled() );
-		pDest->EnableDrag( pSource->IsDragEnabled() );
-		pDest->EnableMotion( pSource->IsMotionEnabled() );
+		// FIXME: Not in Swarm, Needs replacement?
+		//pDest->SyncWith( pSource );
 	}	
 
 	//Damping
@@ -460,43 +465,38 @@ static void FullSyncPhysicsObject( IPhysicsObject *pSource, IPhysicsObject *pDes
 	//stuff that we really care about
 	{
 		if( pGrabController )
+		{
 			pDest->SetMass( fSavedMass );
+		}
 		else
-			pDest->SetMass( pSource->GetMass() );
+		{
+			float flMass = pSource->GetMass();
+			if ( pDest->GetMass() != flMass )
+			{
+				pDest->SetMass( flMass );
+			}
+		}
 
-		Vector ptOrigin, vVelocity, vAngularVelocity, vInertia;
-		QAngle qAngles;
+		Vector vInertia;
+		Vector vVelocity, vAngularVelocity;
 
-		pSource->GetPosition( &ptOrigin, &qAngles );
 		pSource->GetVelocity( &vVelocity, &vAngularVelocity );
 		vInertia = pSource->GetInertia();
 
 		if( pTransform )
 		{
-#if 0
-			pDest->SetPositionMatrix( pTransform->As3x4(), true ); //works like we think?
-#else		
-			ptOrigin = (*pTransform) * ptOrigin;
-			qAngles = TransformAnglesToWorldSpace( qAngles, pTransform->As3x4() );
 			vVelocity = pTransform->ApplyRotation( vVelocity );
 			vAngularVelocity = pTransform->ApplyRotation( vAngularVelocity );
-#endif
 		}
 
 		//avoid oversetting variables (I think that even setting them to the same value they already are disrupts the delicate physics balance)
 		if( vInertia != pDest->GetInertia() )		
 			pDest->SetInertia( vInertia );
 
-		Vector ptDestOrigin, vDestVelocity, vDestAngularVelocity;
-		QAngle qDestAngles;
-		pDest->GetPosition( &ptDestOrigin, &qDestAngles );
-
-		if( (ptOrigin != ptDestOrigin) || (qAngles != qDestAngles) )
-			pDest->SetPosition( ptOrigin, qAngles, bTeleport );
-
 		//pDest->SetVelocityInstantaneous( &vec3_origin, &vec3_origin );
 		//pDest->Sleep();
 
+		Vector vDestVelocity, vDestAngularVelocity;
 		pDest->GetVelocity( &vDestVelocity, &vDestAngularVelocity );
 
 		if( (vVelocity != vDestVelocity) || (vAngularVelocity != vDestAngularVelocity) )
@@ -509,6 +509,27 @@ static void FullSyncPhysicsObject( IPhysicsObject *pSource, IPhysicsObject *pDes
 			{
 				//we don't need a shadow controller anymore
 				pDest->RemoveShadowController();
+			}
+			if ( bTeleport )
+			{
+				Vector ptOrigin;
+				QAngle qAngles;
+
+				pSource->GetPosition( &ptOrigin, &qAngles );
+
+				Vector ptDestOrigin;
+				QAngle qDestAngles;
+				pDest->GetPosition( &ptDestOrigin, &qDestAngles );
+				if( pTransform )
+				{
+					ptOrigin = (*pTransform) * ptOrigin;
+					qAngles = TransformAnglesToWorldSpace( qAngles, pTransform->As3x4() );
+				}
+
+				if( (ptOrigin != ptDestOrigin) || (qAngles != qDestAngles) )
+				{
+					pDest->SetPosition( ptOrigin, qAngles, bTeleport );
+				}
 			}
 		}
 		else
@@ -587,7 +608,16 @@ static void PartialSyncPhysicsObject( IPhysicsObject *pSource, IPhysicsObject *p
 	pDest->EnableCollisions( pSource->IsCollisionEnabled() );
 }
 
+IPhysicsObject *ClonePhysObject( IPhysicsObject *pSource, IPhysicsEnvironment *pDestEnvironment, void *pCloneGameData )
+{
+	unsigned int size = physenv->GetObjectSerializeSize(pSource);
+	byte *pBuffer = (byte *)stackalloc(size);
+	memset( pBuffer, 0, size );
 
+	physenv->SerializeObjectToBuffer( pSource, pBuffer, size ); //this should work across physics environments because the serializer doesn't write anything about itself to the template
+	
+	return pDestEnvironment->UnserializeObjectFromBuffer( pCloneGameData, pBuffer, size, false ); //unserializer has to be in the target environment
+}
 
 void CPhysicsShadowClone::FullSyncClonedPhysicsObjects( bool bTeleport )
 {
@@ -674,16 +704,10 @@ void CPhysicsShadowClone::FullSyncClonedPhysicsObjects( bool bTeleport )
 			unsigned int iOldGameFlags = pSource->GetGameFlags();
 			pSource->SetGameFlags( iOldGameFlags | FVPHYSICS_IS_SHADOWCLONE );
 
-			unsigned int size = physenv->GetObjectSerializeSize(pSource);
-			byte *pBuffer = (byte *)stackalloc(size);
-			memset( pBuffer, 0, size );
-
-			physenv->SerializeObjectToBuffer( pSource, pBuffer, size ); //this should work across physics environments because the serializer doesn't write anything about itself to the template
-			pSource->SetGameFlags( iOldGameFlags );
-			cloneLink.pClone = m_pOwnerPhysEnvironment->UnserializeObjectFromBuffer( this, pBuffer, size, false ); //unserializer has to be in the target environment
+			cloneLink.pClone = ClonePhysObject( pSource, m_pOwnerPhysEnvironment, this );
 			assert( cloneLink.pClone ); //there should be absolutely no case where we can't clone a valid existing physics object
 	
-			stackfree(pBuffer);
+			pSource->SetGameFlags( iOldGameFlags );
 		}
 
 		FullSyncPhysicsObject( cloneLink.pSource, cloneLink.pClone, pTransform, bTeleport );
@@ -773,6 +797,13 @@ int CPhysicsShadowClone::VPhysicsGetObjectList( IPhysicsObject **pList, int list
 
 void CPhysicsShadowClone::VPhysicsDestroyObject( void )
 {
+	SetMoveType( MOVETYPE_NONE );
+	SetSolid( SOLID_NONE );
+	SetSolidFlags( 0 );
+	SetCollisionGroup( COLLISION_GROUP_NONE );
+
+	CollisionRulesChanged();
+
 	VPhysicsSetObject( NULL );
 	
 	for( int i = m_CloneLinks.Count(); --i >= 0; )
@@ -781,11 +812,6 @@ void CPhysicsShadowClone::VPhysicsDestroyObject( void )
 		m_pOwnerPhysEnvironment->DestroyObject(	m_CloneLinks[i].pClone );
 	}
 	m_CloneLinks.RemoveAll();
-
-	SetMoveType( MOVETYPE_NONE );
-	SetSolid( SOLID_NONE );
-	SetSolidFlags( 0 );
-	SetCollisionGroup( COLLISION_GROUP_NONE );
 
 	BaseClass::VPhysicsDestroyObject();
 }
@@ -828,7 +854,7 @@ int	CPhysicsShadowClone::ObjectCaps( void )
 
 void CPhysicsShadowClone::SetCloneTransformationMatrix( const matrix3x4_t &sourceMatrix )
 {
-	m_matrixShadowTransform = sourceMatrix;
+	m_matrixShadowTransform.Init( sourceMatrix );
 	m_bShadowTransformIsIdentity = m_matrixShadowTransform.IsIdentity();
 
 	if( m_matrixShadowTransform.InverseGeneral( m_matrixShadowTransform_Inverse ) == false )
@@ -937,9 +963,6 @@ CPhysicsShadowClone *CPhysicsShadowClone::CreateShadowClone( IPhysicsEnvironment
 	if( pPhysics == NULL )
 		return NULL;
 
-	if( pPhysics->IsStatic() )
-		return NULL;
-
 	if( pClonedEntity->GetSolid() == SOLID_BSP )
 		return NULL;
 
@@ -977,7 +1000,7 @@ CPhysicsShadowClone *CPhysicsShadowClone::CreateShadowClone( IPhysicsEnvironment
 
 	if( pTransformationMatrix )
 	{
-		pClone->m_matrixShadowTransform = *pTransformationMatrix;
+		pClone->m_matrixShadowTransform.Init( *pTransformationMatrix );
 		pClone->m_bShadowTransformIsIdentity = pClone->m_matrixShadowTransform.IsIdentity();
 
 		if( !pClone->m_bShadowTransformIsIdentity )
@@ -1048,8 +1071,73 @@ CPhysicsShadowCloneLL *CPhysicsShadowClone::GetClonesOfEntity( const CBaseEntity
 }
 
 
+void CPhysicsShadowClone::DestroyClonedPhys( IPhysicsObject *pPhys )
+{
+	for( int i = m_CloneLinks.Count(); --i >= 0; )
+	{
+		if( pPhys == m_CloneLinks[i].pSource )
+		{
+			m_pOwnerPhysEnvironment->DestroyObject(	m_CloneLinks[i].pClone ); //also destroys shadow controller
+			m_CloneLinks.FastRemove( i );
+		}
+	}
+}
 
-static void DrawDebugOverlayForShadowClone( CPhysicsShadowClone *pClone )
+void CPhysicsShadowClone::DestroyClonedCollideable( CPhysCollide *pCollide )
+{
+	for( int i = m_CloneLinks.Count(); --i >= 0; )
+	{
+		if( pCollide == m_CloneLinks[i].pSource->GetCollide() )
+		{
+			m_pOwnerPhysEnvironment->DestroyObject(	m_CloneLinks[i].pClone ); //also destroys shadow controller
+			m_CloneLinks.FastRemove( i );
+		}
+	}
+}
+
+void CPhysicsShadowClone::NotifyDestroy( IPhysicsObject *pDestroyingPhys, CBaseEntity *pOwningEntity )
+{
+	if( pOwningEntity )
+	{
+		CPhysicsShadowCloneLL *pCloneLL = GetClonesOfEntity( pOwningEntity );
+		while( pCloneLL )
+		{
+			pCloneLL->pClone->DestroyClonedPhys( pDestroyingPhys );
+			pCloneLL = pCloneLL->pNext;
+		}
+	}
+	else
+	{
+		for( int i = 0; i != s_ActiveShadowClones.Count(); ++i )
+		{
+			s_ActiveShadowClones[i]->DestroyClonedPhys( pDestroyingPhys );
+		}
+	}
+}
+
+void CPhysicsShadowClone::NotifyDestroy( CPhysCollide *pDestroyingCollide, CBaseEntity *pOwningEntity )
+{
+	if( pOwningEntity )
+	{
+		CPhysicsShadowCloneLL *pCloneLL = GetClonesOfEntity( pOwningEntity );
+		while( pCloneLL )
+		{
+			pCloneLL->pClone->DestroyClonedCollideable( pDestroyingCollide );
+			pCloneLL = pCloneLL->pNext;
+		}
+	}
+	else
+	{
+		for( int i = 0; i != s_ActiveShadowClones.Count(); ++i )
+		{
+			s_ActiveShadowClones[i]->DestroyClonedCollideable( pDestroyingCollide );
+		}
+	}
+}
+
+
+
+void DrawDebugOverlayForShadowClone( CPhysicsShadowClone *pClone )
 {
 	unsigned char iColorIntensity = (pClone->IsInAssumedSyncState())?(127):(255);
 
@@ -1057,7 +1145,52 @@ static void DrawDebugOverlayForShadowClone( CPhysicsShadowClone *pClone )
 	int iGreen = iColorIntensity;
 	int iBlue = iColorIntensity;
 
-	NDebugOverlay::EntityBounds( pClone, iRed, iGreen, iBlue, (iColorIntensity>>2), 0.05f );
+	CPortalSimulator *pSimulator = CPortalSimulator::GetSimulatorThatOwnsEntity( pClone );
+	if( pSimulator )
+	{
+		Color debugColor = pSimulator->GetInternalData().Debugging.overlayColor;
+		iRed = debugColor.r();
+		iGreen = debugColor.g();
+		iBlue = debugColor.b();
+	}
+
+	for( int i = 0; i != pClone->m_CloneLinks.Count(); ++i )
+	{
+		IPhysicsObject *pPhys = pClone->m_CloneLinks[i].pClone;
+		if( pPhys )
+		{
+			const CPhysCollide *pCollide = pPhys->GetCollide();
+			if( pCollide )
+			{
+				Vector origin;
+				QAngle angles;
+				pPhys->GetPosition( &origin, &angles );
+				Vector *outVerts;
+				int vertCount = physcollision->CreateDebugMesh( pCollide, &outVerts );
+				int triCount = vertCount / 3;
+				int vert = 0;
+				VMatrix tmp = SetupMatrixOrgAngles( origin, angles );
+				int i;
+				for ( i = 0; i < vertCount; i++ )
+				{
+					outVerts[i] = tmp.VMul4x3( outVerts[i] );
+				}
+
+				for ( i = 0; i < triCount; i++ )
+				{
+					NDebugOverlay::Line( outVerts[vert], outVerts[vert + 1], iRed, iGreen, iBlue, true, 0.0f );
+					NDebugOverlay::Line( outVerts[vert + 1], outVerts[vert + 2], iRed, iGreen, iBlue, true, 0.0f );
+					NDebugOverlay::Line( outVerts[vert + 2], outVerts[vert], iRed, iGreen, iBlue, true, 0.0f );
+					vert += 3;
+				}
+				physcollision->DestroyDebugMesh( vertCount, outVerts );
+			}
+		}
+	}
+
+	
+
+	NDebugOverlay::EntityBounds( pClone, iRed, iGreen, iBlue, (iColorIntensity>>2), 0.0f );
 }
 
 
@@ -1067,7 +1200,7 @@ bool CTraceFilterTranslateClones::ShouldHitEntity( IHandleEntity *pEntity, int c
 	if( CPhysicsShadowClone::IsShadowClone( pEnt ) )
 	{
 		CBaseEntity *pClonedEntity = ((CPhysicsShadowClone *)pEnt)->GetClonedEntity();
-		CPortalSimulator *pSimulator = CPortalSimulator::GetSimulatorThatOwnsEntity( pClonedEntity );
+		CPortalSimulator *pSimulator = CPortalSimulator::GetSimulatorThatOwnsEntity( pEnt )->GetLinkedPortalSimulator();
 		if( pSimulator->GetInternalData().Simulation.Dynamic.EntFlags[pClonedEntity->entindex()] & PSEF_IS_IN_PORTAL_HOLE )
 			return m_pActualFilter->ShouldHitEntity( pClonedEntity, contentsMask );
 		else

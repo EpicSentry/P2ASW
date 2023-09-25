@@ -17,6 +17,8 @@
 #include "cbase.h"
 #include "c_triggers.h"
 
+#define CFuncNoPortalVolume C_FuncNoPortalVolume
+
 class C_FuncNoPortalVolume : public C_BaseTrigger
 {
 public:

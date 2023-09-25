@@ -28,6 +28,23 @@
 #define PORTAL_HALF_DEPTH 2.0f
 #define PORTAL_BUMP_FORGIVENESS 2.0f
 
+enum PortalPlacementResult_t
+{
+	// Success cases
+	PORTAL_PLACEMENT_SUCCESS,				// Placed exactly where shot
+	PORTAL_PLACEMENT_USED_HELPER,			// A placement helper positioned this portal
+	PORTAL_PLACEMENT_BUMPED,				// Placed but needed to move to fit
+	
+	// Fail cases
+	PORTAL_PLACEMENT_CANT_FIT,				// No space to fit
+	PORTAL_PLACEMENT_CLEANSER,				// Hit a cleanser
+	PORTAL_PLACEMENT_OVERLAP_LINKED,		// Hit a linked portal that cannot move
+	PORTAL_PLACEMENT_OVERLAP_PARTNER_PORTAL,// Hit a partner portal that cannot move
+	PORTAL_PLACEMENT_INVALID_VOLUME,		// Inside a "no portal" volume
+	PORTAL_PLACEMENT_INVALID_SURFACE,		// Hit a "no portal" surface
+	PORTAL_PLACEMENT_PASSTHROUGH_SURFACE,	// Error case (portal trace failed to hit anything)
+};
+
 #define PORTAL_ANALOG_SUCCESS_NO_BUMP 1.0f
 #define PORTAL_ANALOG_SUCCESS_BUMPED 0.3f
 #define PORTAL_ANALOG_SUCCESS_CANT_FIT 0.1f
@@ -59,7 +76,7 @@ enum PortalFizzleType_t
 };
 
 
-enum PortalPlacedByType
+enum PortalPlacedBy_t
 {
 	PORTAL_PLACED_BY_FIXED = 0,
 	PORTAL_PLACED_BY_PEDESTAL,
@@ -103,6 +120,13 @@ enum TeamTauntState_t
 	TEAM_TAUNT_HAS_PARTNER,
 	TEAM_TAUNT_SUCCESS,
 	TEAM_TAUNT_STATE_TOTAL
+};
+
+enum PortalSurfaceType_t
+{
+	PORTAL_SURFACE_PAINT = 0,
+	PORTAL_SURFACE_VALID = 1,
+	PORTAL_SURFACE_INVALID
 };
 
 #define PORTAL2_PROMO_SKINS		( 1 << 0 )

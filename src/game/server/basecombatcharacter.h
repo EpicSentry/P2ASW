@@ -152,15 +152,15 @@ public:
 	static void			ResetVisibilityCache( CBaseCombatCharacter *pBCC = NULL );
 
 #ifdef PORTAL
-	virtual	bool		FVisibleThroughPortal(const CProp_Portal *pPortal, CBaseEntity *pEntity, int traceMask = MASK_BLOCKLOS, CBaseEntity **ppBlocker = NULL);
+	virtual	bool		FVisibleThroughPortal(const CPortal_Base2D *pPortal, CBaseEntity *pEntity, int traceMask = MASK_BLOCKLOS, CBaseEntity **ppBlocker = NULL);
 #endif
 
 	virtual bool		FInViewCone( CBaseEntity *pEntity );
 	virtual bool		FInViewCone( const Vector &vecSpot );
 
 #ifdef PORTAL
-	virtual CProp_Portal*	FInViewConeThroughPortal(CBaseEntity *pEntity);
-	virtual CProp_Portal*	FInViewConeThroughPortal(const Vector &vecSpot);
+	virtual CPortal_Base2D*	FInViewConeThroughPortal(CBaseEntity *pEntity);
+	virtual CPortal_Base2D*	FInViewConeThroughPortal(const Vector &vecSpot);
 #endif
 
 	virtual bool		FInAimCone( CBaseEntity *pEntity );

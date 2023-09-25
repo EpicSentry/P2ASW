@@ -18,7 +18,7 @@ public:
 	virtual void LaserOff(void);
 	virtual void LaserOn(void);
 	virtual void UpdateLaser(void);
-	virtual void DoTraceFromPortal(CProp_Portal* pRemotePortal);
+	virtual void DoTraceFromPortal(CPortal_Base2D* pRemotePortal);
 	virtual float LaserEndPointSize(void);
 	void NotifyCubeLaserContact(CBaseEntity* pCube);
 	// Input functions

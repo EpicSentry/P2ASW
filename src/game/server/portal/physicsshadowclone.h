@@ -121,6 +121,16 @@ public:
 	static void FullSyncAllClones( void );
 
 	static CUtlVector<CPhysicsShadowClone *> const &g_ShadowCloneList;
+
+	friend void DrawDebugOverlayForShadowClone( CPhysicsShadowClone *pClone );
+
+	//only really necessary to call for entities that create custom collideables.
+	static void NotifyDestroy( IPhysicsObject *pDestroyingPhys, CBaseEntity *pOwningEntity = NULL ); //passing in the original owner entity just makes the search faster
+	static void NotifyDestroy( CPhysCollide *pDestroyingCollide, CBaseEntity *pOwningEntity = NULL ); //passing in the original owner entity just makes the search faster
+
+private:
+	void DestroyClonedPhys( IPhysicsObject *pPhys );
+	void DestroyClonedCollideable( CPhysCollide *pCollide );
 };
 
 

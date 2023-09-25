@@ -11,6 +11,7 @@
 
 #include "cbase.h"
 
+#define CFuncPortalBumper C_FuncPortalBumper
 
 // Spawnflags
 #define SF_START_INACTIVE			0x01

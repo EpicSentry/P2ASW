@@ -173,11 +173,11 @@ BEGIN_NETWORK_TABLE( C_WeaponPortalgun, DT_WeaponPortalgun )
 	RecvPropBool( RECVINFO( m_bCanFirePortal2 ) ),
 	RecvPropInt( RECVINFO( m_iLastFiredPortal ) ),
 	RecvPropBool( RECVINFO( m_bOpenProngs ) ),
-	RecvPropFloat( RECVINFO( m_fCanPlacePortal1OnThisSurface ) ),
-	RecvPropFloat( RECVINFO( m_fCanPlacePortal2OnThisSurface ) ),
 	RecvPropFloat( RECVINFO( m_fEffectsMaxSize1 ) ), // HACK HACK! Used to make the gun visually change when going through a cleanser!
 	RecvPropFloat( RECVINFO( m_fEffectsMaxSize2 ) ),
 	RecvPropInt( RECVINFO( m_EffectState ) ),
+	RecvPropEHandle( RECVINFO( m_hPrimaryPortal ) ),
+	RecvPropEHandle( RECVINFO( m_hSecondaryPortal ) ),
 END_NETWORK_TABLE()
 
 BEGIN_PREDICTION_DATA( C_WeaponPortalgun )
@@ -185,8 +185,6 @@ BEGIN_PREDICTION_DATA( C_WeaponPortalgun )
 	DEFINE_PRED_FIELD( m_bCanFirePortal2, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD( m_iLastFiredPortal, FIELD_INTEGER, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD( m_bOpenProngs, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
-	DEFINE_PRED_FIELD( m_fCanPlacePortal1OnThisSurface, FIELD_FLOAT, FTYPEDESC_INSENDTABLE ),
-	DEFINE_PRED_FIELD( m_fCanPlacePortal2OnThisSurface, FIELD_FLOAT, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD( m_EffectState,	FIELD_INTEGER,	FTYPEDESC_INSENDTABLE ),
 END_PREDICTION_DATA()
 

@@ -40,6 +40,7 @@ int VGUI_FindSlotForRootPanel( vgui::Panel *pRoot );
 void VGui_GetTrueScreenSize( int &w, int &h );
 void VGui_OnScreenSizeChanged();
 bool VGui_IsSplitScreen();
+bool VGui_IsSplitScreenPIP();
 
 void VGui_OnSplitScreenStateChanged();
 

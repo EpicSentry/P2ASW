@@ -296,7 +296,7 @@ CEG_NOINLINE void CreatePaintBombExplosion( PaintPowerType paintType, const Vect
 			}
 		}
 #ifdef PORTAL2
-		CProp_Portal *pPortal = UTIL_Portal_TraceRay( ray, MASK_SHOT, &filter, &tr );
+		CPortal_Base2D *pPortal = UTIL_Portal_TraceRay( ray, MASK_SHOT, &filter, &tr );
 		if ( tr.fraction < flCleanserFraction && tr.m_pEnt != NULL && pPortal == NULL )
 #else
 		if ( tr.fraction < flCleanserFraction && tr.m_pEnt != NULL )

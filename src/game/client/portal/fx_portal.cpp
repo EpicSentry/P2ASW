@@ -29,9 +29,9 @@ class C_PortalBlast : public C_BaseEntity
 
 public:
 
-	static void		Create( bool bIsPortal2, PortalPlacedByType ePlacedBy, const Vector &vStart, const Vector &vEnd, const QAngle &qAngles );
+	static void		Create( bool bIsPortal2, PortalPlacedBy_t ePlacedBy, const Vector &vStart, const Vector &vEnd, const QAngle &qAngles );
 
-	void			Init( bool bIsPortal2, PortalPlacedByType ePlacedBy, const Vector &vStart, const Vector &vEnd, const QAngle &qAngles );
+	void			Init( bool bIsPortal2, PortalPlacedBy_t ePlacedBy, const Vector &vStart, const Vector &vEnd, const QAngle &qAngles );
 
 	virtual void	ClientThink( void );
 
@@ -46,14 +46,14 @@ private:
 };
 
 
-void C_PortalBlast::Create( bool bIsPortal2, PortalPlacedByType ePlacedBy, const Vector &vStart, const Vector &vEnd, const QAngle &qAngles )
+void C_PortalBlast::Create( bool bIsPortal2, PortalPlacedBy_t ePlacedBy, const Vector &vStart, const Vector &vEnd, const QAngle &qAngles )
 {
 	C_PortalBlast *pPortalBlast = new C_PortalBlast;
 	pPortalBlast->Init( bIsPortal2, ePlacedBy, vStart, vEnd, qAngles );
 }
 
 
-void C_PortalBlast::Init( bool bIsPortal2, PortalPlacedByType ePlacedBy, const Vector &vStart, const Vector &vEnd, const QAngle &qAngles )
+void C_PortalBlast::Init( bool bIsPortal2, PortalPlacedBy_t ePlacedBy, const Vector &vStart, const Vector &vEnd, const QAngle &qAngles )
 {
 	ClientEntityList().AddNonNetworkableEntity( this );
 	ClientThinkList()->SetNextClientThink( GetClientHandle(), CLIENT_THINK_ALWAYS );
@@ -129,7 +129,7 @@ Spot:
 
 void PortalBlastCallback( const CEffectData & data )
 {
-	C_PortalBlast::Create( ( data.m_nColor == 1 ) ? ( false ) : ( true ), (PortalPlacedByType)data.m_nDamageType, data.m_vOrigin, data.m_vStart, data.m_vAngles );
+	C_PortalBlast::Create( ( data.m_nColor == 1 ) ? ( false ) : ( true ), (PortalPlacedBy_t)data.m_nDamageType, data.m_vOrigin, data.m_vStart, data.m_vAngles );
 }
 
 DECLARE_CLIENT_EFFECT( PortalBlast, PortalBlastCallback );

@@ -34,6 +34,8 @@ public:
 	bool m_bVisible;
 	
 	DECLARE_DATADESC();
+	
+	bool IsEnabled( void ) { return !m_bDisabled; }
 
 	// Outputs
 	COutputEvent m_OnDissolve;

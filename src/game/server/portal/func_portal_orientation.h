@@ -46,6 +46,6 @@ private:
 CFuncPortalOrientation* GetPortalOrientationVolumeList();
 
 // Upon portal placement, test for orientation changing volumes
-bool UTIL_TestForOrientationVolumes( QAngle& vecCurAngles, const Vector& vecCurOrigin, const CProp_Portal* pPortal );
+bool UTIL_TestForOrientationVolumes( QAngle& vecCurAngles, const Vector& vecCurOrigin, const CPortal_Base2D* pPortal );
 
 #endif //_FUNC_PORTAL_ORIENTATION_H_

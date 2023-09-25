@@ -7,14 +7,34 @@
 #include "portal_placement.h"
 #include "portal_shareddefs.h"
 #include "prop_portal_shared.h"
-#include "func_noportal_volume.h"
-#include "BasePropDoor.h"
 #include "collisionutils.h"
 #include "decals.h"
+#include "debugoverlay_shared.h"
+#include "portal_mp_gamerules.h"
+
+#if defined( GAME_DLL )
+#include "func_noportal_volume.h"
+#include "triggers.h"
+#include "func_portal_bumper.h"
 #include "physicsshadowclone.h"
+#include "trigger_portal_cleanser.h"
+#else
+#include "c_triggers.h"
+#include "c_func_noportal_volume.h"
+#include "c_func_portal_bumper.h"
+#include "c_trigger_portal_cleanser.h"
+#endif
+
+#include "cegclientwrapper.h"
 
 
-#define MAXIMUM_BUMP_DISTANCE ( ( PORTAL_HALF_WIDTH * 2.0f ) * ( PORTAL_HALF_WIDTH * 2.0f ) + ( PORTAL_HALF_HEIGHT * 2.0f ) * ( PORTAL_HALF_HEIGHT * 2.0f ) ) / 2.0f
+#include "paint/paint_color_manager.h"
+ConVar sv_portal_placement_on_paint("sv_portal_placement_on_paint", "1", FCVAR_REPLICATED | FCVAR_CHEAT, "Enable/Disable placing portal on painted surfaces");
+
+ConVar sv_portal_placement_never_fail("sv_portal_placement_never_fail", "0", FCVAR_REPLICATED | FCVAR_CHEAT );
+extern ConVar sv_allow_mobile_portals;
+
+#define MAXIMUM_BUMP_DISTANCE ( ( fHalfWidth * 2.0f ) * ( fHalfWidth * 2.0f ) + ( fHalfHeight * 2.0f ) * ( fHalfHeight * 2.0f ) ) / 2.0f
 
 
 struct CPortalCornerFitData
@@ -31,10 +51,8 @@ struct CPortalCornerFitData
 CUtlVector<CBaseEntity *> g_FuncBumpingEntityList;
 bool g_bBumpedByLinkedPortal;
 
-
-ConVar sv_portal_placement_debug ("sv_portal_placement_debug", "0", FCVAR_REPLICATED );
-ConVar sv_portal_placement_never_bump ("sv_portal_placement_never_bump", "0", FCVAR_REPLICATED | FCVAR_CHEAT );
-
+ConVar sv_portal_placement_debug("sv_portal_placement_debug", "0", FCVAR_REPLICATED );
+ConVar sv_portal_placement_never_bump("sv_portal_placement_never_bump", "0", FCVAR_REPLICATED | FCVAR_CHEAT );
 
 bool IsMaterialInList( const csurface_t &surface, char *g_ppszMaterials[] )
 {
@@ -55,20 +73,80 @@ bool IsMaterialInList( const csurface_t &surface, char *g_ppszMaterials[] )
 	return false;
 }
 
-bool IsNoPortalMaterial( const csurface_t &surface )
+// exposed here as non-constant so CEG can populate the value at DLL init time
+static int CEG_PORTAL_POWER = 0xffffffff; // no paint power until correctly initialized
+CEG_NOINLINE void InitPortalPaintPowerValue()
 {
-	if ( surface.flags & SURF_NOPORTAL )
-		return true;
+	CEG_GCV_PRE();
+	CEG_PORTAL_POWER = PORTAL_POWER//CEG_GET_CONSTANT_VALUE( PaintPortalPower );
+	CEG_GCV_POST();
+}
 
-	const surfacedata_t *pdata = physprops->GetSurfaceData( surface.surfaceProps );
-	if ( pdata->game.material == CHAR_TEX_GLASS )
-		return true;
+CEG_NOINLINE bool IsOnPortalPaint( const trace_t &tr )
+{
+	if ( sv_portal_placement_on_paint.GetBool() && tr.m_pEnt)
+	{
+		if ( !UTIL_IsPaintableSurface( tr.surface ) )
+			return false;
 
-	// Skipping all studio models
-	if ( StringHasPrefix( surface.name, "**studio**" ) )
-		return true;
+		PaintPowerType paintPower = NO_POWER;
+
+		//Trace for paint on the surface if it is the world
+		if( tr.m_pEnt->IsBSPModel() )
+		{
+			// enable portal placement on painted surface
+			paintPower = UTIL_Paint_TracePower( tr.m_pEnt, tr.endpos, tr.plane.normal );
+		}
+		else //For entities
+		{
+			if( FClassnameIs( tr.m_pEnt, "func_brush" ) )
+			{
+				paintPower = MapColorToPower( tr.m_pEnt->GetRenderColor() );
+			}
+		}
+
+		if( paintPower == CEG_PORTAL_POWER )
+		{
+			return true;
+		}
+	}
 
 	return false;
+}
+
+// exposed here as non-constant so CEG can populate the value at DLL init time
+static unsigned short CEG_SURF_NO_PORTAL_FLAG = 0xffff; // portals can't be placed until correctly initialized
+CEG_NOINLINE void InitSurfNoPortalFlag()
+{
+	CEG_GCV_PRE();
+	CEG_SURF_NO_PORTAL_FLAG = SURF_NOPORTAL;//CEG_GET_CONSTANT_VALUE( SurfNoPortalFlag );
+	CEG_GCV_POST();
+}
+
+CEG_NOINLINE PortalSurfaceType_t PortalSurfaceType( const trace_t& tr )
+{
+	//Note: this is for placing portal on paint
+	if ( IsOnPortalPaint( tr ) )
+		return PORTAL_SURFACE_PAINT;
+
+	if ( tr.surface.flags & CEG_SURF_NO_PORTAL_FLAG )
+		return PORTAL_SURFACE_INVALID;
+
+	const surfacedata_t *pdata = physprops->GetSurfaceData( tr.surface.surfaceProps );
+	if ( pdata->game.material == CHAR_TEX_GLASS )
+		return PORTAL_SURFACE_INVALID;
+
+	// Skipping all studio models
+	if ( StringHasPrefix( tr.surface.name, "**studio**" ) )
+		return PORTAL_SURFACE_INVALID;
+
+	return PORTAL_SURFACE_VALID;
+}
+
+
+bool IsNoPortalMaterial( const trace_t &tr )
+{
+	return PortalSurfaceType( tr ) == PORTAL_SURFACE_INVALID;
 }
 
 bool IsPassThroughMaterial( const csurface_t &surface )
@@ -99,7 +177,7 @@ void TracePortals( const CProp_Portal *pIgnorePortal, const Vector &vForward, co
 		for( int i = 0; i != iPortalCount; ++i )
 		{
 			CProp_Portal *pTempPortal = pPortals[i];
-			if( pTempPortal != pIgnorePortal && pTempPortal->m_bActivated )
+			if( pTempPortal != pIgnorePortal && pTempPortal->IsActive() )
 			{
 				Vector vOtherOrigin = pTempPortal->GetAbsOrigin();
 				QAngle qOtherAngles = pTempPortal->GetAbsAngles();
@@ -116,10 +194,22 @@ void TracePortals( const CProp_Portal *pIgnorePortal, const Vector &vForward, co
 				if ( trTemp.fraction < 1.0f && trTemp.fraction < tr.fraction )
 				{
 					tr = trTemp;
+					tr.m_pEnt = pTempPortal;
 				}
 			}
 		}
 	}
+}
+
+int AllEdictsAlongRay( CBaseEntity **pList, int listMax, const Ray_t &ray, int flagMask )
+{
+	CFlaggedEntitiesEnum rayEnum( pList, listMax, flagMask );
+#if defined( GAME_DLL )
+	partition->EnumerateElementsAlongRay( PARTITION_ENGINE_NON_STATIC_EDICTS, ray, false, &rayEnum );
+#else
+	partition->EnumerateElementsAlongRay( PARTITION_ALL_CLIENT_EDICTS, ray, false, &rayEnum );
+#endif
+	return rayEnum.GetCount();
 }
 
 bool TraceBumpingEntities( const Vector &vStart, const Vector &vEnd, trace_t &tr )
@@ -135,34 +225,49 @@ bool TraceBumpingEntities( const Vector &vStart, const Vector &vEnd, trace_t &tr
 	Ray_t ray;
 	ray.Init( vStart, vEnd );
 
-	int nCount = UTIL_EntitiesAlongRay( list, 1024, ray, 0 );
+	int nCount = AllEdictsAlongRay( list, 1024, ray, 0 );
 
 	for ( int i = 0; i < nCount; i++ )
 	{
+#if 0
+#if defined( GAME_DLL )
+		Warning( "TraceBumpingEntities(server) : %s\n", list[i]->m_iClassname );
+#else
+		Warning( "TraceBumpingEntities(client) : %s\n", list[i]->GetClassname() );
+#endif
+#endif
+
 		trace_t trTemp;
 		UTIL_ClearTrace( trTemp );
 
 		bool bSoftBumper = false;
 
-		if ( FClassnameIs( list[i], "func_portal_bumper" ) )
+		if ( dynamic_cast<CFuncPortalBumper*>( list[i] ) != NULL )
 		{
-			bSoftBumper = true;
-			enginetrace->ClipRayToEntity( ray, MASK_ALL, list[i], &trTemp );
-			if ( trTemp.startsolid )
+			if( ((CFuncPortalBumper *)list[i])->IsActive() )
 			{
-				trTemp.fraction = 1.0f;
+				bSoftBumper = true;
+				enginetrace->ClipRayToEntity( ray, MASK_ALL, list[i], &trTemp );
+				if ( trTemp.startsolid )
+				{
+					trTemp.fraction = 1.0f;
+				}
 			}
 		}
-		else if ( FClassnameIs( list[i], "trigger_portal_cleanser" ) )
+		else if ( dynamic_cast<CTriggerPortalCleanser*>( list[i] ) != NULL )
 		{
-			enginetrace->ClipRayToEntity( ray, MASK_ALL, list[i], &trTemp );
-			if ( trTemp.startsolid )
+			if( ((CTriggerPortalCleanser *)list[i])->IsEnabled() )
 			{
-				trTemp.fraction = 1.0f;
+				enginetrace->ClipRayToEntity( ray, MASK_ALL, list[i], &trTemp );
+				if ( trTemp.startsolid )
+				{
+					trTemp.fraction = 1.0f;
+				}
 			}
 		}
-		else if ( FClassnameIs( list[i], "func_noportal_volume" ) )
+		else if ( dynamic_cast<CFuncNoPortalVolume*>( list[i] ) != NULL )
 		{
+			trTemp.fraction = 1.0f;
 			if ( static_cast<CFuncNoPortalVolume*>( list[i] )->IsActive() )
 			{
 				enginetrace->ClipRayToEntity( ray, MASK_ALL, list[i], &trTemp );
@@ -175,13 +280,17 @@ bool TraceBumpingEntities( const Vector &vStart, const Vector &vEnd, trace_t &tr
 				trTemp.fraction = fLength / ray.m_Delta.Length();
 				trTemp.endpos = trTemp.startpos + vDelta * fLength;
 			}
-			else
-				trTemp.fraction = 1.0f;
 		}
-		else if( FClassnameIs( list[i], "prop_door_rotating" ) )
+#if defined( GAME_DLL )
+		else if ( FClassnameIs( list[i], "prop_door_rotating" ) )
+#else
+		else if ( FClassnameIs( list[i], "class C_PropDoorRotating" ) )
+#endif	
 		{
+
 			// Check more precise door collision
-			CBasePropDoor *pRotatingDoor = static_cast<CBasePropDoor *>( list[i] );
+			//CBasePropDoor *pRotatingDoor = static_cast<CBasePropDoor *>( list[i] );
+			CBaseEntity *pRotatingDoor = list[i];
 
 			pRotatingDoor->TestCollision( ray, 0, trTemp );
 		}
@@ -197,13 +306,13 @@ bool TraceBumpingEntities( const Vector &vStart, const Vector &vEnd, trace_t &tr
 	return bClosestIsSoftBumper;
 }
 
-bool TracePortalCorner( const CProp_Portal *pIgnorePortal, const Vector &vOrigin, const Vector &vCorner, const Vector &vForward, int iPlacedBy, ITraceFilter *pTraceFilterPortalShot, trace_t &tr, bool &bSoftBump )
+bool TracePortalCorner( const CProp_Portal *pIgnorePortal, const Vector &vOrigin, const Vector &vCorner, const Vector &vForward, PortalPlacedBy_t ePlacedBy, ITraceFilter *pTraceFilterPortalShot, trace_t &tr, bool &bSoftBump )
 {
 	Vector vOriginToCorner = vCorner - vOrigin;
 
 	// Check for surface edge
 	trace_t trSurfaceEdge;
-	UTIL_TraceLine( vOrigin - vForward, vCorner - vForward, MASK_SHOT_PORTAL, pTraceFilterPortalShot, &trSurfaceEdge );
+	UTIL_TraceLine( vOrigin - vForward, vCorner - vForward, MASK_SHOT_PORTAL|CONTENTS_WATER|CONTENTS_SLIME, pTraceFilterPortalShot, &trSurfaceEdge );
 
 	if ( trSurfaceEdge.startsolid )
 	{
@@ -245,7 +354,7 @@ bool TracePortalCorner( const CProp_Portal *pIgnorePortal, const Vector &vOrigin
 
 	// Check for enclosing wall
 	trace_t trEnclosingWall;
-	UTIL_TraceLine( vOrigin + vForward, vCorner + vForward, MASK_SOLID_BRUSHONLY|CONTENTS_MONSTER, pTraceFilterPortalShot, &trEnclosingWall );
+	UTIL_TraceLine( vOrigin + vForward, vCorner + vForward, MASK_SOLID_BRUSHONLY|CONTENTS_MONSTER|CONTENTS_WATER|CONTENTS_SLIME, pTraceFilterPortalShot, &trEnclosingWall );
 
 	if ( trSurfaceEdge.fraction < trEnclosingWall.fraction )
 	{
@@ -256,7 +365,7 @@ bool TracePortalCorner( const CProp_Portal *pIgnorePortal, const Vector &vOrigin
 	trace_t trPortal;
 	trace_t trBumpingEntity;
 
-	if ( iPlacedBy != PORTAL_PLACED_BY_FIXED )
+	if ( ePlacedBy != PORTAL_PLACED_BY_FIXED )
 		TracePortals( pIgnorePortal, vForward, vOrigin + vForward, vCorner + vForward, trPortal );
 	else
 		UTIL_ClearTrace( trPortal );
@@ -265,6 +374,93 @@ bool TracePortalCorner( const CProp_Portal *pIgnorePortal, const Vector &vOrigin
 
 	if ( trEnclosingWall.fraction >= 1.0f && trPortal.fraction >= 1.0f && trBumpingEntity.fraction >= 1.0f )
 	{
+		//check for a surface change between center and corner so we can bump when we partially overlap a non-portal surface		
+		trace_t cornerTrace;
+		UTIL_TraceLine( vCorner, vCorner - vForward, MASK_SHOT_PORTAL, pTraceFilterPortalShot, &cornerTrace );
+		if( cornerTrace.DidHit() && IsNoPortalMaterial( cornerTrace ) )
+		{
+			//a bump is in order, try to determine where we transition to the no portal material with a binary search
+			float fFullLength = vOriginToCorner.Length();
+			float fBadLength = fFullLength;
+			float fGoodLength = 0.0f;
+			Vector vOriginToCornerNormalized = vOriginToCorner.Normalized();
+			int iSearchCount = 0; //overwatch is soon. And I think this loop might have locked up once or twice without an absolute loop limit. Being safe for now.
+
+			const float kMaxDelta = 0.01f;
+
+			while( ((fBadLength - fGoodLength) >= kMaxDelta) && (iSearchCount < 100) )
+			{
+				AssertOnce( iSearchCount < 50 );
+				float fTestLength = (fBadLength + fGoodLength) * 0.5f;
+				Vector vTestSpot = vOrigin + (vOriginToCornerNormalized * fTestLength);
+				UTIL_TraceLine( vTestSpot, vTestSpot - vForward, MASK_SHOT_PORTAL, pTraceFilterPortalShot, &cornerTrace );
+				if( cornerTrace.DidHit() && !IsNoPortalMaterial( cornerTrace ) )
+				{
+					fGoodLength = fTestLength;
+				}
+				else
+				{
+					fBadLength = fTestLength;
+				}
+				++iSearchCount;
+			}
+
+			Vector vGoodSpot = vOrigin + (vOriginToCornerNormalized * fGoodLength);
+			Vector vBadSpot = vOrigin + (vOriginToCornerNormalized * fBadLength);
+
+			iSearchCount = 0;
+			Vector vImpactNormal( 0.0f, 0.0f, 0.0f );
+			//try spots at 4x the delta in a circular pattern to find the normal of impact
+			{
+				Vector vGoodDirection = vForward.Cross( vOriginToCornerNormalized );
+				Vector vTestSpot = vGoodSpot + (vGoodDirection * (kMaxDelta * 4.0f));
+				UTIL_TraceLine( vTestSpot, vTestSpot - vForward, MASK_SHOT_PORTAL, pTraceFilterPortalShot, &cornerTrace );
+				if( !(cornerTrace.DidHit() && !IsNoPortalMaterial( cornerTrace )) )
+				{
+					vGoodDirection = -vGoodDirection;
+				}
+
+				vTestSpot = vGoodSpot + (vGoodDirection * (kMaxDelta * 4.0f));
+				UTIL_TraceLine( vTestSpot, vTestSpot - vForward, MASK_SHOT_PORTAL, pTraceFilterPortalShot, &cornerTrace );
+				if( cornerTrace.DidHit() && !IsNoPortalMaterial( cornerTrace ) )
+				{
+					float fBadAngle = 0.0f;
+					float fGoodAngle = 90.0f; 
+					for( int i = 0; i != 10; ++i ) //we'd like a delta of less than 0.1 degrees. And the deltas are predictable. 90, 45, 22.5, 11.25, 5.625, 2.8125, 1.40625, 0.703125, 0.3515625, 0.17578125, 0.087890625
+					{
+						float fTestAngle = (fBadAngle + fGoodAngle) * 0.5f;
+						Vector vTestDirection = (cosf( fTestAngle ) * vOriginToCornerNormalized) + (sinf( fTestAngle ) * vGoodDirection);
+						vTestSpot = vGoodSpot + (vTestDirection * (kMaxDelta * 4.0f));
+						UTIL_TraceLine( vTestSpot, vTestSpot - vForward, MASK_SHOT_PORTAL, pTraceFilterPortalShot, &cornerTrace );
+						if( cornerTrace.DidHit() && !IsNoPortalMaterial( cornerTrace ) )
+						{
+							fGoodAngle = fTestAngle;
+						}
+						else
+						{
+							fBadAngle = fTestAngle;
+						}
+					}
+
+					vGoodDirection = (cosf( fGoodAngle ) * vOriginToCornerNormalized) + (sinf( fGoodAngle ) * vGoodDirection);
+					vImpactNormal = vForward.Cross( vGoodDirection );
+					if( vImpactNormal.Dot( vOriginToCornerNormalized ) > 0.0f )
+						vImpactNormal = -vImpactNormal;
+				}				
+			}
+			
+			tr = cornerTrace;
+			tr.startpos = vOrigin;
+			tr.endpos = vOrigin + (vOriginToCornerNormalized * fGoodLength);
+			tr.fraction = fGoodLength / fFullLength;
+			tr.fractionleftsolid = 1.0f;
+			tr.plane.normal = vImpactNormal; //.Init();// = -vOriginToCorner.Normalized();
+			tr.plane.dist = tr.plane.normal.Dot( tr.endpos );
+
+			return true;
+		}
+
+
 		UTIL_ClearTrace( tr );
 		return false;
 	}
@@ -274,11 +470,18 @@ bool TracePortalCorner( const CProp_Portal *pIgnorePortal, const Vector &vOrigin
 		tr = trEnclosingWall;
 		bSoftBump = false;
 	}
-	else if ( trPortal.fraction <= trEnclosingWall.fraction && trPortal.fraction <= trBumpingEntity.fraction )
+	else if ( trPortal.fraction <= trEnclosingWall.fraction && trPortal.fraction <= trBumpingEntity.fraction && !g_FuncBumpingEntityList.HasElement( trPortal.m_pEnt ) )
 	{
 		tr = trPortal;
-		g_bBumpedByLinkedPortal = true;
-		bSoftBump = false;
+
+		CProp_Portal *pBumpPortal = static_cast< CProp_Portal * >( trPortal.m_pEnt );
+		bool bBumpedByOwnPortal = pBumpPortal->GetFiredByPlayer() == pIgnorePortal->GetFiredByPlayer();
+		if ( bBumpedByOwnPortal )
+		{
+			g_bBumpedByLinkedPortal = true;			
+		}
+
+		bSoftBump = !bBumpedByOwnPortal;
 	}
 	else if ( !trBumpingEntity.startsolid && trBumpingEntity.fraction <= trEnclosingWall.fraction && trBumpingEntity.fraction <= trPortal.fraction )
 	{
@@ -401,7 +604,8 @@ Vector FindBumpVectorInCorner( const Vector &ptCorner1, const Vector &ptCorner2,
 
 bool FitPortalOnSurface( const CProp_Portal *pIgnorePortal, Vector &vOrigin, const Vector &vForward, const Vector &vRight, 
 						 const Vector &vTopEdge, const Vector &vBottomEdge, const Vector &vRightEdge, const Vector &vLeftEdge, 
-						 int iPlacedBy, ITraceFilter *pTraceFilterPortalShot, 
+						 PortalPlacedBy_t ePlacedBy, ITraceFilter *pTraceFilterPortalShot, 
+						 float fHalfWidth, float fHalfHeight,
 						 int iRecursions /*= 0*/, const CPortalCornerFitData *pPortalCornerFitData /*= 0*/, const int *p_piIntersectionIndex /*= 0*/, const int *piIntersectionCount /*= 0*/ )
 {
 	// Don't infinitely recurse
@@ -455,6 +659,9 @@ bool FitPortalOnSurface( const CProp_Portal *pIgnorePortal, Vector &vOrigin, con
 
 	int iOldIntersectionCount = iIntersectionCount;
 
+	Vector vNoNormalMin( 0, 0, 0 ), vNoNormalMax( 0, 0, 0 ), vNoNormalAdditive( 0, 0, 0 );
+	bool bNewIntersection[4] = { false };
+
 	// Find intersections from center to each corner
 	for ( int iIntersection = 0; iIntersection < 4; ++iIntersection )
 	{
@@ -465,34 +672,22 @@ bool FitPortalOnSurface( const CProp_Portal *pIgnorePortal, Vector &vOrigin, con
 			if ( !sFitData[ iIntersection ].bCornerIntersection )
 			{
 				// Test intersection of the current corner
-				sFitData[ iIntersection ].bCornerIntersection = TracePortalCorner( pIgnorePortal, vOrigin, pptCorner[ iIntersection ], vForward, iPlacedBy, pTraceFilterPortalShot, sFitData[ iIntersection ].trCornerTrace, sFitData[ iIntersection ].bSoftBump );
-
-				// If the intersection has no normal, ignore it
-				if ( sFitData[ iIntersection ].trCornerTrace.plane.normal.IsZero() )
-					sFitData[ iIntersection ].bCornerIntersection = false;
+				sFitData[ iIntersection ].bCornerIntersection = TracePortalCorner( pIgnorePortal, vOrigin, pptCorner[ iIntersection ], vForward, ePlacedBy, pTraceFilterPortalShot, sFitData[ iIntersection ].trCornerTrace, sFitData[ iIntersection ].bSoftBump );
 
 				// If it intersected
 				if ( sFitData[ iIntersection ].bCornerIntersection )
 				{
 					sFitData[ iIntersection ].ptIntersectionPoint = vOrigin + ( pptCorner[ iIntersection ] - vOrigin ) * sFitData[ iIntersection ].trCornerTrace.fraction;
-					VectorNormalize( sFitData[ iIntersection ].trCornerTrace.plane.normal );
-					sFitData[ iIntersection ].vIntersectionDirection = sFitData[ iIntersection ].trCornerTrace.plane.normal.Cross( vForward );
-					VectorNormalize( sFitData[ iIntersection ].vIntersectionDirection );
-					sFitData[ iIntersection ].vBumpDirection = vForward.Cross( sFitData[ iIntersection ].vIntersectionDirection );
-					VectorNormalize( sFitData[ iIntersection ].vBumpDirection );
-
-					piIntersectionIndex[ iIntersectionCount ] = iIntersection;
-
-					if ( sv_portal_placement_debug.GetBool() )
+					if ( sFitData[ iIntersection ].trCornerTrace.plane.normal.IsZero() )
 					{
-						for ( int iIntersection = 0; iIntersection < 4; ++iIntersection )
-						{
-							NDebugOverlay::Line( sFitData[ iIntersection ].ptIntersectionPoint - sFitData[ iIntersection ].vIntersectionDirection * 32.0f, 
-								sFitData[ iIntersection ].ptIntersectionPoint + sFitData[ iIntersection ].vIntersectionDirection * 32.0f, 
-								0, 0, 255, true, 0.5f );
-						}
+						Vector vPush = sFitData[ iIntersection ].ptIntersectionPoint - pptCorner[ iIntersection ];
+						vNoNormalMin = vNoNormalMin.Min( vPush );
+						vNoNormalMax = vNoNormalMax.Max( vPush );
+						vNoNormalAdditive += vPush;
 					}
 
+					bNewIntersection[iIntersection] = true;
+					piIntersectionIndex[ iIntersectionCount ] = iIntersection;
 					++iIntersectionCount;
 				}
 			}
@@ -500,6 +695,38 @@ bool FitPortalOnSurface( const CProp_Portal *pIgnorePortal, Vector &vOrigin, con
 			{
 				// We shouldn't be intersecting with any old corners
 				sFitData[ iIntersection ].trCornerTrace.fraction = 1.0f;
+			}
+		}
+	}
+
+	//clip the additive vector of pushes from intersections with no normal. We're going to give them all a shared normal that agrees
+	vNoNormalAdditive = vNoNormalAdditive.Min( vNoNormalMax );
+	vNoNormalAdditive = vNoNormalAdditive.Max( vNoNormalMin );
+	vNoNormalAdditive.NormalizeInPlace();
+
+	for ( int iIntersection = 0; iIntersection < 4; ++iIntersection )
+	{
+		if ( bNewIntersection[iIntersection] )
+		{
+			if ( sFitData[ iIntersection ].trCornerTrace.plane.normal.IsZero() )
+			{
+				sFitData[ iIntersection ].trCornerTrace.plane.normal = vNoNormalAdditive;
+				sFitData[ iIntersection ].trCornerTrace.plane.dist = vNoNormalAdditive.Dot( sFitData[ iIntersection ].ptIntersectionPoint );
+			}
+			VectorNormalize( sFitData[ iIntersection ].trCornerTrace.plane.normal );
+			sFitData[ iIntersection ].vIntersectionDirection = sFitData[ iIntersection ].trCornerTrace.plane.normal.Cross( vForward );
+			VectorNormalize( sFitData[ iIntersection ].vIntersectionDirection );
+			sFitData[ iIntersection ].vBumpDirection = vForward.Cross( sFitData[ iIntersection ].vIntersectionDirection );
+			VectorNormalize( sFitData[ iIntersection ].vBumpDirection );
+
+			if ( sv_portal_placement_debug.GetBool() )
+			{
+				for ( int iIntersection = 0; iIntersection < 4; ++iIntersection )
+				{
+					NDebugOverlay::Line( sFitData[ iIntersection ].ptIntersectionPoint - sFitData[ iIntersection ].vIntersectionDirection * 32.0f, 
+						sFitData[ iIntersection ].ptIntersectionPoint + sFitData[ iIntersection ].vIntersectionDirection * 32.0f, 
+						0, 0, 255, true, 0.5f );
+				}
 			}
 		}
 	}
@@ -538,7 +765,7 @@ bool FitPortalOnSurface( const CProp_Portal *pIgnorePortal, Vector &vOrigin, con
 
 			vOrigin += sFitData[ piIntersectionIndex[ 0 ] ].vBumpDirection * fBumpDistance;
 
-			return FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, iPlacedBy, pTraceFilterPortalShot, iRecursions + 1, sFitData, piIntersectionIndex, &iIntersectionCount );
+			return FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, ePlacedBy, pTraceFilterPortalShot, fHalfWidth, fHalfHeight, iRecursions + 1, sFitData, piIntersectionIndex, &iIntersectionCount );
 		}
 		break;
 
@@ -557,11 +784,11 @@ bool FitPortalOnSurface( const CProp_Portal *pIgnorePortal, Vector &vOrigin, con
 				// Check if perpendicular wall is near
 				trace_t trPerpWall1;
 				bool bSoftBump1;
-				bool bDir1 = TracePortalCorner( pIgnorePortal, vOrigin, vOrigin + sFitData[ piIntersectionIndex[ 0 ] ].vIntersectionDirection * PORTAL_HALF_WIDTH * 2.0f, vForward, iPlacedBy, pTraceFilterPortalShot, trPerpWall1, bSoftBump1 );
+				bool bDir1 = TracePortalCorner( pIgnorePortal, vOrigin, vOrigin + sFitData[ piIntersectionIndex[ 0 ] ].vIntersectionDirection * fHalfWidth * 2.0f, vForward, ePlacedBy, pTraceFilterPortalShot, trPerpWall1, bSoftBump1 );
 
 				trace_t trPerpWall2;
 				bool bSoftBump2;
-				bool bDir2 = TracePortalCorner( pIgnorePortal, vOrigin, vOrigin + sFitData[ piIntersectionIndex[ 0 ] ].vIntersectionDirection * -PORTAL_HALF_WIDTH * 2.0f, vForward, iPlacedBy, pTraceFilterPortalShot, trPerpWall2, bSoftBump2 );
+				bool bDir2 = TracePortalCorner( pIgnorePortal, vOrigin, vOrigin + sFitData[ piIntersectionIndex[ 0 ] ].vIntersectionDirection * -fHalfWidth * 2.0f, vForward, ePlacedBy, pTraceFilterPortalShot, trPerpWall2, bSoftBump2 );
 
 				// No fit if there's blocking walls on both sides it can't fit
 				if ( bDir1 && bDir2 )
@@ -583,11 +810,11 @@ bool FitPortalOnSurface( const CProp_Portal *pIgnorePortal, Vector &vOrigin, con
 				// Bump the portal
 				if ( bDir1 )
 				{
-					vOrigin += sFitData[ piIntersectionIndex[ 0 ] ].vIntersectionDirection * -PORTAL_HALF_WIDTH;
+					vOrigin += sFitData[ piIntersectionIndex[ 0 ] ].vIntersectionDirection * -fHalfWidth;
 				}
 				else
 				{
-					vOrigin += sFitData[ piIntersectionIndex[ 0 ] ].vIntersectionDirection * PORTAL_HALF_WIDTH;
+					vOrigin += sFitData[ piIntersectionIndex[ 0 ] ].vIntersectionDirection * fHalfWidth;
 				}
 
 				// Prepare data for recursion
@@ -595,7 +822,7 @@ bool FitPortalOnSurface( const CProp_Portal *pIgnorePortal, Vector &vOrigin, con
 				sFitData[ piIntersectionIndex[ 0 ] ].bCornerIntersection = false;
 				sFitData[ piIntersectionIndex[ 1 ] ].bCornerIntersection = false;
 
-				return FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, iPlacedBy, pTraceFilterPortalShot, iRecursions + 1, sFitData, piIntersectionIndex, &iIntersectionCount );	
+				return FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, ePlacedBy, pTraceFilterPortalShot, fHalfWidth, fHalfHeight, iRecursions + 1, sFitData, piIntersectionIndex, &iIntersectionCount );	
 			}
 
 			// If they are the same there's an easy way
@@ -628,7 +855,7 @@ bool FitPortalOnSurface( const CProp_Portal *pIgnorePortal, Vector &vOrigin, con
 					sFitData[ piIntersectionIndex[ 1 ] ].bCornerIntersection = false;
 					iIntersectionCount = 0;
 
-					return FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, iPlacedBy, pTraceFilterPortalShot, iRecursions + 1, sFitData, piIntersectionIndex, &iIntersectionCount );
+					return FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, ePlacedBy, pTraceFilterPortalShot, fHalfWidth, fHalfHeight, iRecursions + 1, sFitData, piIntersectionIndex, &iIntersectionCount );
 				}
 				else
 				{
@@ -641,7 +868,7 @@ bool FitPortalOnSurface( const CProp_Portal *pIgnorePortal, Vector &vOrigin, con
 					piIntersectionIndex[ 0 ] = piIntersectionIndex[ iLargestBump ];
 					iIntersectionCount = 1;
 
-					return FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, iPlacedBy, pTraceFilterPortalShot, iRecursions + 1, sFitData, piIntersectionIndex, &iIntersectionCount );
+					return FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, ePlacedBy, pTraceFilterPortalShot, fHalfWidth, fHalfHeight, iRecursions + 1, sFitData, piIntersectionIndex, &iIntersectionCount );
 				}
 			}
 
@@ -651,7 +878,7 @@ bool FitPortalOnSurface( const CProp_Portal *pIgnorePortal, Vector &vOrigin, con
 				sFitData[ piIntersectionIndex[ 0 ] ].vIntersectionDirection, sFitData[ piIntersectionIndex[ 1 ] ].vIntersectionDirection,
 				sFitData[ piIntersectionIndex[ 0 ] ].vBumpDirection, sFitData[ piIntersectionIndex[ 1 ] ].vBumpDirection );
 
-			return FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, iPlacedBy, pTraceFilterPortalShot, iRecursions + 1, sFitData, piIntersectionIndex, &iIntersectionCount );
+			return FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, ePlacedBy, pTraceFilterPortalShot, fHalfWidth, fHalfHeight, iRecursions + 1, sFitData, piIntersectionIndex, &iIntersectionCount );
 		}
 		break;
 
@@ -673,11 +900,11 @@ bool FitPortalOnSurface( const CProp_Portal *pIgnorePortal, Vector &vOrigin, con
 					// Check if perpendicular wall is near
 					trace_t trPerpWall1;
 					bool bSoftBump1;
-					bool bDir1 = TracePortalCorner( pIgnorePortal, vOrigin, vOrigin + sFitData[ piIntersectionIndex[ iDot ] ].vIntersectionDirection * PORTAL_HALF_WIDTH * 2.0f, vForward, iPlacedBy, pTraceFilterPortalShot, trPerpWall1, bSoftBump1 );
+					bool bDir1 = TracePortalCorner( pIgnorePortal, vOrigin, vOrigin + sFitData[ piIntersectionIndex[ iDot ] ].vIntersectionDirection * fHalfWidth * 2.0f, vForward, ePlacedBy, pTraceFilterPortalShot, trPerpWall1, bSoftBump1 );
 
 					trace_t trPerpWall2;
 					bool bSoftBump2;
-					bool bDir2 = TracePortalCorner( pIgnorePortal, vOrigin, vOrigin + sFitData[ piIntersectionIndex[ iDot ] ].vIntersectionDirection * -PORTAL_HALF_WIDTH * 2.0f, vForward, iPlacedBy, pTraceFilterPortalShot, trPerpWall2, bSoftBump2 );
+					bool bDir2 = TracePortalCorner( pIgnorePortal, vOrigin, vOrigin + sFitData[ piIntersectionIndex[ iDot ] ].vIntersectionDirection * -fHalfWidth * 2.0f, vForward, ePlacedBy, pTraceFilterPortalShot, trPerpWall2, bSoftBump2 );
 
 					// No fit if there's blocking walls on both sides it can't fit
 					if ( bDir1 && bDir2 )
@@ -699,11 +926,11 @@ bool FitPortalOnSurface( const CProp_Portal *pIgnorePortal, Vector &vOrigin, con
 					// Bump the portal
 					if ( bDir1 )
 					{
-						vOrigin += sFitData[ piIntersectionIndex[ iDot ] ].vIntersectionDirection * -PORTAL_HALF_WIDTH;
+						vOrigin += sFitData[ piIntersectionIndex[ iDot ] ].vIntersectionDirection * -fHalfWidth;
 					}
 					else
 					{
-						vOrigin += sFitData[ piIntersectionIndex[ iDot ] ].vIntersectionDirection * PORTAL_HALF_WIDTH;
+						vOrigin += sFitData[ piIntersectionIndex[ iDot ] ].vIntersectionDirection * fHalfWidth;
 					}
 
 					// Prepare data for recursion
@@ -712,7 +939,7 @@ bool FitPortalOnSurface( const CProp_Portal *pIgnorePortal, Vector &vOrigin, con
 					sFitData[ piIntersectionIndex[ 1 ] ].bCornerIntersection = false;
 					sFitData[ piIntersectionIndex[ 2 ] ].bCornerIntersection = false;
 
-					return FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, iPlacedBy, pTraceFilterPortalShot, iRecursions + 1, sFitData, piIntersectionIndex, &iIntersectionCount );
+					return FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, ePlacedBy, pTraceFilterPortalShot, fHalfWidth, fHalfHeight, iRecursions + 1, sFitData, piIntersectionIndex, &iIntersectionCount );
 				}
 				// Count similar intersections
 				else if ( fDot[ iDot ] > 0.99f )
@@ -743,7 +970,7 @@ bool FitPortalOnSurface( const CProp_Portal *pIgnorePortal, Vector &vOrigin, con
 						sFitData[ piIntersectionIndex[ 1 ] ].bCornerIntersection = false;
 						sFitData[ piIntersectionIndex[ 2 ] ].bCornerIntersection = false;
 
-						return FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, iPlacedBy, pTraceFilterPortalShot, iRecursions + 1, sFitData, piIntersectionIndex, &iIntersectionCount );
+						return FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, ePlacedBy, pTraceFilterPortalShot, fHalfWidth, fHalfHeight, iRecursions + 1, sFitData, piIntersectionIndex, &iIntersectionCount );
 					}
 					else
 					{
@@ -810,7 +1037,7 @@ bool FitPortalOnSurface( const CProp_Portal *pIgnorePortal, Vector &vOrigin, con
 					}
 				}
 
-				return FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, iPlacedBy, pTraceFilterPortalShot, iRecursions + 1, sFitData, piIntersectionIndex, &iIntersectionCount );
+				return FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, ePlacedBy, pTraceFilterPortalShot, fHalfWidth, fHalfHeight, iRecursions + 1, sFitData, piIntersectionIndex, &iIntersectionCount );
 			}
 
 			// Get info for which corners are diagonal from each other
@@ -883,7 +1110,7 @@ bool FitPortalOnSurface( const CProp_Portal *pIgnorePortal, Vector &vOrigin, con
 					sFitData[ piIntersectionIndex[ iIndex2 ] ].bCornerIntersection = false;
 					sFitData[ piIntersectionIndex[ iIndex3 ] ].bCornerIntersection = false;
 
-					return FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, iPlacedBy, pTraceFilterPortalShot, iRecursions + 1, sFitData, piIntersectionIndex, &iIntersectionCount );
+					return FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, ePlacedBy, pTraceFilterPortalShot, fHalfWidth, fHalfHeight, iRecursions + 1, sFitData, piIntersectionIndex, &iIntersectionCount );
 				}
 			}
 
@@ -896,7 +1123,7 @@ bool FitPortalOnSurface( const CProp_Portal *pIgnorePortal, Vector &vOrigin, con
 			iIntersectionCount = 0;
 			sFitData[ piIntersectionIndex[ iIndex3 ] ].bCornerIntersection = false;
 
-			return FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, iPlacedBy, pTraceFilterPortalShot, iRecursions + 1, sFitData, piIntersectionIndex, &iIntersectionCount );				
+			return FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, ePlacedBy, pTraceFilterPortalShot, fHalfWidth, fHalfHeight, iRecursions + 1, sFitData, piIntersectionIndex, &iIntersectionCount );				
 		}
 		break;
 
@@ -911,7 +1138,7 @@ bool FitPortalOnSurface( const CProp_Portal *pIgnorePortal, Vector &vOrigin, con
 				sFitData[ piIntersectionIndex[ 2 ] ].bCornerIntersection = false;
 				sFitData[ piIntersectionIndex[ 3 ] ].bCornerIntersection = false;
 
-				return FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, iPlacedBy, pTraceFilterPortalShot, iRecursions + 1, sFitData, piIntersectionIndex, &iIntersectionCount );
+				return FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, ePlacedBy, pTraceFilterPortalShot, fHalfWidth, fHalfHeight, iRecursions + 1, sFitData, piIntersectionIndex, &iIntersectionCount );
 			}
 			else
 			{
@@ -925,7 +1152,7 @@ bool FitPortalOnSurface( const CProp_Portal *pIgnorePortal, Vector &vOrigin, con
 	return true;
 }
 
-void FitPortalAroundOtherPortals( const CProp_Portal *pIgnorePortal, Vector &vOrigin, const Vector &vForward, const Vector &vRight, const Vector &vUp )
+void FitPortalAroundOtherPortals( const CProp_Portal *pIgnorePortal, Vector &vOrigin, const Vector &vForward, const Vector &vRight, const Vector &vUp, float fHalfWidth, float fHalfHeight )
 {
 	int iPortalCount = CProp_Portal_Shared::AllPortals.Count();
 	if( iPortalCount != 0 )
@@ -934,7 +1161,7 @@ void FitPortalAroundOtherPortals( const CProp_Portal *pIgnorePortal, Vector &vOr
 		for( int i = 0; i != iPortalCount; ++i )
 		{
 			CProp_Portal *pTempPortal = pPortals[i];
-			if( pTempPortal != pIgnorePortal && pTempPortal->m_bActivated )
+			if( pTempPortal != pIgnorePortal && pTempPortal->IsActive() )
 			{
 				Vector vOtherOrigin = pTempPortal->GetAbsOrigin();
 				QAngle qOtherAngles = pTempPortal->GetAbsAngles();
@@ -943,10 +1170,11 @@ void FitPortalAroundOtherPortals( const CProp_Portal *pIgnorePortal, Vector &vOr
 				AngleVectors( qOtherAngles, &vLinkedForward, NULL, NULL );
 
 				// If they're not on the same face then don't worry about overlap
-				if ( vForward.Dot( vLinkedForward ) < 0.95f )
+				if ( (vForward.Dot( vLinkedForward ) < 0.95f) || 
+					(fabs( vOrigin.Dot( vForward ) - vOtherOrigin.Dot( vLinkedForward ) ) > 1.0f) )
 					continue;
 
-				Vector vDiff = vOrigin - pTempPortal->GetLocalOrigin();
+				Vector vDiff = vOrigin - vOtherOrigin;
 
 				Vector vDiffProjRight = vDiff.Dot( vRight ) * vRight;
 				Vector vDiffProjUp = vDiff.Dot( vUp ) * vUp;
@@ -959,16 +1187,16 @@ void FitPortalAroundOtherPortals( const CProp_Portal *pIgnorePortal, Vector &vOr
 					vDiffProjRight = vRight;
 				}
 
-				if ( fProjUpLength < PORTAL_HALF_HEIGHT && fProjRightLength < PORTAL_HALF_WIDTH )
+				if ( fProjUpLength < (fHalfHeight * 2.0f) && fProjRightLength < (fHalfWidth * 2.0f) )
 				{
-					vOrigin += vDiffProjRight * ( PORTAL_HALF_WIDTH - fProjRightLength + 1.0f );
+					vOrigin += vDiffProjRight * ( (fHalfWidth * 2.0f) - fProjRightLength + 1.0f );
 				}
 			}
 		}
 	}
 }
 
-bool IsPortalIntersectingNoPortalVolume( const Vector &vOrigin, const QAngle &qAngles, const Vector &vForward )
+bool IsPortalIntersectingNoPortalVolume( const Vector &vOrigin, const QAngle &qAngles, const Vector &vForward, float fHalfWidth, float fHalfHeight )
 {
 	// Walk the no portal volume list, check each with box-box intersection
 	for ( CFuncNoPortalVolume *pNoPortalEnt = GetNoPortalVolumeList(); pNoPortalEnt != NULL; pNoPortalEnt = pNoPortalEnt->m_pNext )
@@ -991,12 +1219,12 @@ bool IsPortalIntersectingNoPortalVolume( const Vector &vOrigin, const QAngle &qA
 							   ( ( vForward.y > 0.5f || vForward.y < -0.5f ) ? ( 0.0f ) : ( -PORTAL_BUMP_FORGIVENESS ) ),
 							   ( ( vForward.z > 0.5f || vForward.z < -0.5f ) ? ( 0.0f ) : ( -PORTAL_BUMP_FORGIVENESS ) ) );
 
-		if ( UTIL_IsBoxIntersectingPortal( vBoxCenter, vBoxExtents, vOrigin, qAngles ) )
+		if ( UTIL_IsBoxIntersectingPortal( vBoxCenter, vBoxExtents, vOrigin, qAngles, fHalfWidth, fHalfHeight ) )
 		{
 			if ( sv_portal_placement_debug.GetBool() )
 			{
 				NDebugOverlay::Box( Vector( 0.0f, 0.0f, 0.0f ), vMin, vMax, 0, 255, 0, 128, 0.5f );
-				UTIL_Portal_NDebugOverlay( vOrigin, qAngles, 0, 0, 255, 128, false, 0.5f );
+				UTIL_Portal_NDebugOverlay( vOrigin, qAngles, fHalfWidth, fHalfHeight, 0, 0, 255, 128, false, 0.5f );
 
 				DevMsg( "Portal placed in no portal volume.\n" );
 			}
@@ -1009,15 +1237,17 @@ bool IsPortalIntersectingNoPortalVolume( const Vector &vOrigin, const QAngle &qA
 	return false;
 }
 
-bool IsPortalOverlappingOtherPortals( const CProp_Portal *pIgnorePortal, const Vector &vOrigin, const QAngle &qAngles, bool bFizzle /*= false*/ )
+PortalPlacementResult_t IsPortalOverlappingOtherPortals( const CProp_Portal *pIgnorePortal, const Vector &vOrigin, const QAngle &qAngles, float fHalfWidth, float fHalfHeight, 
+														 bool bFizzleAll /*= false*/, bool bFizzlePartnerPortals /*= false*/ )
 {
-	bool bOverlappedOtherPortal = false;
+	bool bOverlappedLinkedPortal = false;
+	bool bOverlappedPartnerPortal = false;
 
 	Vector vForward;
 	AngleVectors( qAngles, &vForward, NULL, NULL );
 
-	Vector vPortalOBBMin = CProp_Portal_Shared::vLocalMins + Vector( 1.0f, 1.0f, 1.0f );
-	Vector vPortalOBBMax = CProp_Portal_Shared::vLocalMaxs - Vector( 1.0f, 1.0f, 1.0f );
+	Vector vPortalOBBMin = Vector( 0.0f, -fHalfWidth, -fHalfHeight );
+	Vector vPortalOBBMax = Vector( 1.0f, fHalfWidth, fHalfHeight );
 
 	int iPortalCount = CProp_Portal_Shared::AllPortals.Count();
 	if( iPortalCount != 0 )
@@ -1026,10 +1256,12 @@ bool IsPortalOverlappingOtherPortals( const CProp_Portal *pIgnorePortal, const V
 		for( int i = 0; i != iPortalCount; ++i )
 		{
 			CProp_Portal *pTempPortal = pPortals[i];
-			if( pTempPortal != pIgnorePortal && pTempPortal->m_bActivated )
+			if( pTempPortal != pIgnorePortal && pTempPortal->IsActive() )
 			{
 				Vector vOtherOrigin = pTempPortal->GetAbsOrigin();
 				QAngle qOtherAngles = pTempPortal->GetAbsAngles();
+				Vector vOtherOBBMins = pTempPortal->GetLocalMins();
+				Vector vOtherOBBMaxs = pTempPortal->GetLocalMaxs();
 
 				Vector vLinkedForward;
 				AngleVectors( qOtherAngles, &vLinkedForward, NULL, NULL );
@@ -1039,35 +1271,58 @@ bool IsPortalOverlappingOtherPortals( const CProp_Portal *pIgnorePortal, const V
 					continue;
 
 				if ( IsOBBIntersectingOBB( vOrigin, qAngles, vPortalOBBMin, vPortalOBBMax, 
-										   vOtherOrigin, qOtherAngles, vPortalOBBMin, vPortalOBBMax, 0.0f ) )
+										   vOtherOrigin, qOtherAngles, vOtherOBBMins, vOtherOBBMaxs, 0.0f ) )
 				{
 					if ( sv_portal_placement_debug.GetBool() )
 					{
-						UTIL_Portal_NDebugOverlay( vOrigin, qAngles, 0, 0, 255, 128, false, 0.5f );
+						UTIL_Portal_NDebugOverlay( vOrigin, qAngles, fHalfWidth, fHalfHeight, 0, 0, 255, 128, false, 0.5f );
 						UTIL_Portal_NDebugOverlay( pTempPortal, 255, 0, 0, 128, false, 0.5f );
 
 						DevMsg( "Portal overlapped another portal.\n" );
 					}
 
-					if ( bFizzle )
+					bool bLinkedPortal = !GameRules()->IsMultiplayer() || (pTempPortal->GetFiredByPlayer() == pIgnorePortal->GetFiredByPlayer());
+
+					if ( bFizzleAll || ( !bLinkedPortal && bFizzlePartnerPortals ) )
 					{
 						pTempPortal->DoFizzleEffect( PORTAL_FIZZLE_KILLED, false );
 						pTempPortal->Fizzle();
-						bOverlappedOtherPortal = true;
+
+						if ( bLinkedPortal )
+						{
+							bOverlappedLinkedPortal = true;
+						}
+						else
+						{
+							bOverlappedPartnerPortal = true;
+						}
 					}
 					else
 					{
-						return true;
+						if ( bLinkedPortal )
+						{
+							return PORTAL_PLACEMENT_OVERLAP_LINKED;
+						}
+						else
+						{
+							bOverlappedPartnerPortal = true;
+						}
 					}
 				}
 			}
 		}
 	}
 
-	return bOverlappedOtherPortal;
+	if ( bOverlappedLinkedPortal )
+		return PORTAL_PLACEMENT_OVERLAP_LINKED;
+
+	if ( bOverlappedPartnerPortal )
+		return PORTAL_PLACEMENT_OVERLAP_PARTNER_PORTAL;
+
+	return PORTAL_PLACEMENT_SUCCESS;
 }
 
-bool IsPortalOnValidSurface( const Vector &vOrigin, const Vector &vForward, const Vector &vRight, const Vector &vUp, ITraceFilter *traceFilterPortalShot )
+bool IsPortalOnValidSurface( const Vector &vOrigin, const Vector &vForward, const Vector &vRight, const Vector &vUp, float fHalfWidth, float fHalfHeight, ITraceFilter *traceFilterPortalShot )
 {
 	trace_t tr;
 
@@ -1079,14 +1334,14 @@ bool IsPortalOnValidSurface( const Vector &vOrigin, const Vector &vForward, cons
 		if ( iCorner < 4 )
 		{
 			if ( iCorner / 2 == 0 )
-				ptCorner += vUp * ( PORTAL_HALF_HEIGHT - PORTAL_BUMP_FORGIVENESS * 1.1f ); //top
+				ptCorner += vUp * ( fHalfHeight - PORTAL_BUMP_FORGIVENESS * 1.1f ); //top
 			else
-				ptCorner += vUp * -( PORTAL_HALF_HEIGHT - PORTAL_BUMP_FORGIVENESS * 1.1f ); //bottom
+				ptCorner += vUp * -( fHalfHeight - PORTAL_BUMP_FORGIVENESS * 1.1f ); //bottom
 
 			if ( iCorner % 2 == 0 )
-				ptCorner += vRight * -( PORTAL_HALF_WIDTH - PORTAL_BUMP_FORGIVENESS * 1.1f ); //left
+				ptCorner += vRight * -( fHalfWidth - PORTAL_BUMP_FORGIVENESS * 1.1f ); //left
 			else
-				ptCorner += vRight * ( PORTAL_HALF_WIDTH - PORTAL_BUMP_FORGIVENESS * 1.1f ); //right
+				ptCorner += vRight * ( fHalfWidth - PORTAL_BUMP_FORGIVENESS * 1.1f ); //right
 		}
 
 		Ray_t ray;
@@ -1141,7 +1396,7 @@ bool IsPortalOnValidSurface( const Vector &vOrigin, const Vector &vForward, cons
 			return false;
 		}
 
-		if ( IsNoPortalMaterial( tr.surface ) )
+		if ( IsNoPortalMaterial( tr ) )
 		{
 			if ( sv_portal_placement_debug.GetBool() )
 			{
@@ -1155,7 +1410,7 @@ bool IsPortalOnValidSurface( const Vector &vOrigin, const Vector &vForward, cons
 	return true;
 }
 
-float VerifyPortalPlacement( const CProp_Portal *pIgnorePortal, Vector &vOrigin, QAngle &qAngles, int iPlacedBy, bool bTest /*= false*/ )
+PortalPlacementResult_t VerifyPortalPlacement( const CProp_Portal *pIgnorePortal, Vector &vOrigin, QAngle &qAngles, float fHalfWidth, float fHalfHeight, PortalPlacedBy_t ePlacedBy )
 {
 	Vector vOriginalOrigin = vOrigin;
 
@@ -1167,10 +1422,16 @@ float VerifyPortalPlacement( const CProp_Portal *pIgnorePortal, Vector &vOrigin,
 	VectorNormalize( vUp );
 
 	trace_t tr;
+#if defined( GAME_DLL )
 	CTraceFilterSimpleClassnameList baseFilter( pIgnorePortal, COLLISION_GROUP_NONE );
 	UTIL_Portal_Trace_Filter( &baseFilter );
 	baseFilter.AddClassnameToIgnore( "prop_portal" );
 	CTraceFilterTranslateClones traceFilterPortalShot( &baseFilter );
+#else
+	CTraceFilterSimpleClassnameList traceFilterPortalShot( pIgnorePortal, COLLISION_GROUP_NONE );
+	UTIL_Portal_Trace_Filter( &traceFilterPortalShot );
+	traceFilterPortalShot.AddClassnameToIgnore( "prop_portal" );
+#endif
 
 	// Check if center is on a surface
 	Ray_t ray;
@@ -1181,15 +1442,15 @@ float VerifyPortalPlacement( const CProp_Portal *pIgnorePortal, Vector &vOrigin,
 	{
 		if ( sv_portal_placement_debug.GetBool() )
 		{
-			UTIL_Portal_NDebugOverlay( vOrigin, qAngles, 0, 0, 255, 128, false, 0.5f );
+			UTIL_Portal_NDebugOverlay( vOrigin, qAngles, fHalfWidth, fHalfHeight, 0, 0, 255, 128, false, 0.5f );
 			DevMsg( "Portal center has no surface behind it.\n" );
 		}
 
-		return PORTAL_ANALOG_SUCCESS_INVALID_SURFACE;
+		return PORTAL_PLACEMENT_INVALID_SURFACE;
 	}
 
 	// Check if the surface is moving
-	Vector vVelocityCheck;
+	/*Vector vVelocityCheck;
 	AngularImpulse vAngularImpulseCheck;
 
 	IPhysicsObject *pPhysicsObject = tr.m_pEnt->VPhysicsGetObject();
@@ -1200,17 +1461,22 @@ float VerifyPortalPlacement( const CProp_Portal *pIgnorePortal, Vector &vOrigin,
 	}
 	else
 	{
+#if defined( GAME_DLL )
 		tr.m_pEnt->GetVelocity( &vVelocityCheck, &vAngularImpulseCheck );
-	}
+#else
+		vVelocityCheck = tr.m_pEnt->GetAbsVelocity();
+		vAngularImpulseCheck = vec3_origin; //TODO: Find client equivalent of server code above for angular impulse
+#endif
+	}*/
 
-	if ( vVelocityCheck != vec3_origin || vAngularImpulseCheck != vec3_origin )
+	if ( !sv_allow_mobile_portals.GetBool() && UTIL_IsEntityMovingOrRotating( tr.m_pEnt )/*(vVelocityCheck != vec3_origin || vAngularImpulseCheck != vec3_origin)*/ )
 	{
 		if ( sv_portal_placement_debug.GetBool() )
 		{
 			DevMsg( "Portal was on moving surface.\n" );
 		}
 
-		return PORTAL_ANALOG_SUCCESS_INVALID_SURFACE;
+		return PORTAL_PLACEMENT_INVALID_SURFACE;
 	}
 
 	// Check for invalid materials
@@ -1218,31 +1484,31 @@ float VerifyPortalPlacement( const CProp_Portal *pIgnorePortal, Vector &vOrigin,
 	{
 		if ( sv_portal_placement_debug.GetBool() )
 		{
-			UTIL_Portal_NDebugOverlay( vOrigin, qAngles, 0, 0, 255, 128, false, 0.5f );
+			UTIL_Portal_NDebugOverlay( vOrigin, qAngles, fHalfWidth, fHalfHeight, 0, 0, 255, 128, false, 0.5f );
 			DevMsg( "Portal placed on a pass through material.\n" );
 		}
 
-		return PORTAL_ANALOG_SUCCESS_PASSTHROUGH_SURFACE;
+		return PORTAL_PLACEMENT_PASSTHROUGH_SURFACE;
 	}
 
-	if ( IsNoPortalMaterial( tr.surface ) )
+	if ( IsNoPortalMaterial( tr ) )
 	{
 		if ( sv_portal_placement_debug.GetBool() )
 		{
-			UTIL_Portal_NDebugOverlay( vOrigin, qAngles, 0, 0, 255, 128, false, 0.5f );
+			UTIL_Portal_NDebugOverlay( vOrigin, qAngles, fHalfWidth, fHalfHeight, 0, 0, 255, 128, false, 0.5f );
 			DevMsg( "Portal placed on a no portal material.\n" );
 		}
 
-		return PORTAL_ANALOG_SUCCESS_INVALID_SURFACE;
+		return PORTAL_PLACEMENT_INVALID_SURFACE;
 	}
 
 	// Get pointer to liked portal if it might be in the way
 	g_bBumpedByLinkedPortal = false;
 
-	if ( iPlacedBy == PORTAL_PLACED_BY_PLAYER && !sv_portal_placement_never_bump.GetBool() )
+	if ( ePlacedBy == PORTAL_PLACED_BY_PLAYER && !sv_portal_placement_never_bump.GetBool() )
 	{
 		// Bump away from linked portal so it can be fit next to it
-		FitPortalAroundOtherPortals( pIgnorePortal, vOrigin, vForward, vRight, vUp );
+		FitPortalAroundOtherPortals( pIgnorePortal, vOrigin, vForward, vRight, vUp, fHalfWidth, fHalfHeight );
 	}
 
 	float fBumpDistance = 0.0f;
@@ -1252,25 +1518,25 @@ float VerifyPortalPlacement( const CProp_Portal *pIgnorePortal, Vector &vOrigin,
 		// Fit onto surface and auto bump
 		g_FuncBumpingEntityList.RemoveAll();
 
-		Vector vTopEdge = vUp * ( PORTAL_HALF_HEIGHT - PORTAL_BUMP_FORGIVENESS );
+		Vector vTopEdge = vUp * ( fHalfHeight - PORTAL_BUMP_FORGIVENESS );
 		Vector vBottomEdge = -vTopEdge;
-		Vector vRightEdge = vRight * ( PORTAL_HALF_WIDTH - PORTAL_BUMP_FORGIVENESS );
+		Vector vRightEdge = vRight * ( fHalfWidth - PORTAL_BUMP_FORGIVENESS );
 		Vector vLeftEdge = -vRightEdge;
 
-		if ( !FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, iPlacedBy, &traceFilterPortalShot ) )
+		if ( !FitPortalOnSurface( pIgnorePortal, vOrigin, vForward, vRight, vTopEdge, vBottomEdge, vRightEdge, vLeftEdge, ePlacedBy, &traceFilterPortalShot, fHalfWidth, fHalfHeight ) )
 		{
 			if ( g_bBumpedByLinkedPortal )
 			{
-				return PORTAL_ANALOG_SUCCESS_OVERLAP_LINKED;
+				return PORTAL_PLACEMENT_OVERLAP_LINKED;
 			}
 
 			if ( sv_portal_placement_debug.GetBool() )
 			{
-				UTIL_Portal_NDebugOverlay( vOrigin, qAngles, 0, 0, 255, 128, false, 0.5f );
+				UTIL_Portal_NDebugOverlay( vOrigin, qAngles, fHalfWidth, fHalfHeight, 0, 0, 255, 128, false, 0.5f );
 				DevMsg( "Portal was unable to fit on surface.\n" );
 			}
 
-			return PORTAL_ANALOG_SUCCESS_CANT_FIT;
+			return PORTAL_PLACEMENT_CANT_FIT;
 		}
 
 		// Check if it's moved too far from it's original location
@@ -1280,11 +1546,11 @@ float VerifyPortalPlacement( const CProp_Portal *pIgnorePortal, Vector &vOrigin,
 		{
 			if ( sv_portal_placement_debug.GetBool() )
 			{
-				UTIL_Portal_NDebugOverlay( vOrigin, qAngles, 0, 0, 255, 128, false, 0.5f );
+				UTIL_Portal_NDebugOverlay( vOrigin, qAngles, fHalfWidth, fHalfHeight, 0, 0, 255, 128, false, 0.5f );
 				DevMsg( "Portal adjusted too far from it's original location.\n" );
 			}
 
-			return PORTAL_ANALOG_SUCCESS_CANT_FIT;
+			return PORTAL_PLACEMENT_CANT_FIT;
 		}
 
 		//if we're less than a unit from floor, we're going to bump to match it exactly and help game movement code run smoothly
@@ -1292,46 +1558,106 @@ float VerifyPortalPlacement( const CProp_Portal *pIgnorePortal, Vector &vOrigin,
 		{
 			Vector vSmallForward = vForward * 0.05f;
 			trace_t FloorTrace;
-			UTIL_TraceLine( vOrigin + vSmallForward, vOrigin + vSmallForward - (vUp * (PORTAL_HALF_HEIGHT + 1.5f)), MASK_SOLID_BRUSHONLY, &traceFilterPortalShot, &FloorTrace );
+			UTIL_TraceLine( vOrigin + vSmallForward, vOrigin + vSmallForward - (vUp * (fHalfHeight + 1.5f)), MASK_SOLID_BRUSHONLY, &traceFilterPortalShot, &FloorTrace );
 			if( FloorTrace.fraction < 1.0f )
 			{
 				//we hit floor in that 1 extra unit, now doublecheck to make sure we didn't hit something else
 				trace_t FloorTrace_Verify;
-				UTIL_TraceLine( vOrigin + vSmallForward, vOrigin + vSmallForward - (vUp * (PORTAL_HALF_HEIGHT - 0.1f)), MASK_SOLID_BRUSHONLY, &traceFilterPortalShot, &FloorTrace_Verify );
+				UTIL_TraceLine( vOrigin + vSmallForward, vOrigin + vSmallForward - (vUp * (fHalfHeight - 0.1f)), MASK_SOLID_BRUSHONLY, &traceFilterPortalShot, &FloorTrace_Verify );
 				if( FloorTrace_Verify.fraction == 1.0f )
 				{
 					//if we're in here, we're definitely in a floor matching configuration, bump down to match the floor better
-					vOrigin = FloorTrace.endpos + (vUp * PORTAL_HALF_HEIGHT) - vSmallForward;// - vUp * PORTAL_WALL_MIN_THICKNESS;
+					vOrigin = FloorTrace.endpos + (vUp * fHalfHeight) - vSmallForward;// - vUp * PORTAL_WALL_MIN_THICKNESS;
 				}
 			}
 		}
 	}
 
 	// Fail if it's in a no portal volume
-	if ( IsPortalIntersectingNoPortalVolume( vOrigin, qAngles, vForward ) )
-	{
-		return PORTAL_ANALOG_SUCCESS_INVALID_VOLUME;
-	}
+	if ( IsPortalIntersectingNoPortalVolume( vOrigin, qAngles, vForward, fHalfWidth, fHalfHeight ) )
+		return PORTAL_PLACEMENT_INVALID_VOLUME;
 
 	// Fail if it's overlapping the linked portal
-	if ( bTest && IsPortalOverlappingOtherPortals( pIgnorePortal, vOrigin, qAngles ) )
-	{
-		return PORTAL_ANALOG_SUCCESS_OVERLAP_LINKED;
-	}
+	PortalPlacementResult_t ePortalOverlapResult = IsPortalOverlappingOtherPortals( pIgnorePortal, vOrigin, qAngles, fHalfWidth, fHalfHeight );
+	if ( ePortalOverlapResult != PORTAL_PLACEMENT_SUCCESS )
+		return ePortalOverlapResult;
 
 	// Fail if it's on a flagged surface material
-	if ( !IsPortalOnValidSurface( vOrigin, vForward, vRight, vUp, &traceFilterPortalShot ) )
+	if ( !IsPortalOnValidSurface( vOrigin, vForward, vRight, vUp, fHalfWidth, fHalfHeight, &traceFilterPortalShot ) )
 	{
 		if ( sv_portal_placement_debug.GetBool() )
 		{
-			UTIL_Portal_NDebugOverlay( vOrigin, qAngles, 0, 0, 255, 128, false, 0.5f );
+			UTIL_Portal_NDebugOverlay( vOrigin, qAngles, fHalfWidth, fHalfHeight, 0, 0, 255, 128, false, 0.5f );
 		}
-		return PORTAL_ANALOG_SUCCESS_INVALID_SURFACE;
+		return PORTAL_PLACEMENT_INVALID_SURFACE;
 	}
 
-	float fAnalogSuccessMultiplier = 1.0f - ( fBumpDistance / MAXIMUM_BUMP_DISTANCE );
-	fAnalogSuccessMultiplier *= fAnalogSuccessMultiplier;
-	fAnalogSuccessMultiplier *= fAnalogSuccessMultiplier;
+	// Is a floor being moved to another floor
+	if ( pIgnorePortal->IsFloorPortal() && vForward.z > 0.8f )
+	{
+		// Is it being moved close by
+		if ( pIgnorePortal->GetAbsOrigin().DistToSqr( vOrigin ) < ( fHalfWidth * fHalfWidth + fHalfHeight * fHalfHeight ) )
+		{
+			// Are there any players intersecting it?
+			for( int i = 1; i <= gpGlobals->maxClients; ++i )
+			{
+				CBasePlayer *pIntersectingPlayer = UTIL_PlayerByIndex( i );
+				if ( pIntersectingPlayer )
+				{
+					if ( pIgnorePortal->m_PortalSimulator.IsReadyToSimulate() )
+					{
+						if ( UTIL_Portal_EntityIsInPortalHole( pIgnorePortal, pIntersectingPlayer ) )
+						{
+							// Fail! This created the portal vert hop exploit
+							return PORTAL_PLACEMENT_OVERLAP_LINKED;
+						}
+					}
+				}
+			}
+		}
+	}
 
-	return fAnalogSuccessMultiplier * ( PORTAL_ANALOG_SUCCESS_NO_BUMP - PORTAL_ANALOG_SUCCESS_BUMPED ) + PORTAL_ANALOG_SUCCESS_BUMPED;
+	return PORTAL_PLACEMENT_BUMPED;
+}
+
+PortalPlacementResult_t VerifyPortalPlacementAndFizzleBlockingPortals( const CProp_Portal *pIgnorePortal, Vector &vOrigin, QAngle &qAngles, float fHalfWidth, float fHalfHeight, PortalPlacedBy_t ePlacedBy )
+{
+	PortalPlacementResult_t placementResult = VerifyPortalPlacement( pIgnorePortal, vOrigin, qAngles, fHalfWidth, fHalfHeight, ePlacedBy );
+	if ( ePlacedBy == PORTAL_PLACED_BY_FIXED && placementResult == PORTAL_PLACEMENT_OVERLAP_LINKED )
+	{
+		// overlapping another portal. Fizzle them and try again.
+		IsPortalOverlappingOtherPortals( pIgnorePortal, vOrigin, qAngles, fHalfWidth, fHalfHeight, true, false );
+		placementResult = VerifyPortalPlacement( pIgnorePortal, vOrigin, qAngles, fHalfWidth, fHalfHeight, ePlacedBy );
+	}
+	else if ( ePlacedBy == PORTAL_PLACED_BY_PLAYER && placementResult == PORTAL_PLACEMENT_OVERLAP_PARTNER_PORTAL )
+	{
+		CPortalMPGameRules *pRules = PortalMPGameRules();
+		if( pRules && pRules->IsVS() )
+		{
+			return placementResult;
+		}
+
+		// overlapping partner's portal. Fizzle them and try again.
+		IsPortalOverlappingOtherPortals( pIgnorePortal, vOrigin, qAngles, fHalfWidth, fHalfHeight, false, true );
+		placementResult = VerifyPortalPlacement( pIgnorePortal, vOrigin, qAngles, fHalfWidth, fHalfHeight, ePlacedBy );
+	}
+
+	return placementResult;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Breaks the granular placement result down into a binary "succeed/fail" state
+//-----------------------------------------------------------------------------
+bool PortalPlacementSucceeded( PortalPlacementResult_t eResult )
+{
+	switch ( eResult )
+	{
+	case PORTAL_PLACEMENT_SUCCESS:
+	case PORTAL_PLACEMENT_BUMPED:
+	case PORTAL_PLACEMENT_USED_HELPER:
+		return true;
+
+	default:
+		return false;
+	}
 }

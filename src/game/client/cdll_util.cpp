@@ -547,6 +547,11 @@ int UTIL_EntitiesInSphere( C_BaseEntity **pList, int listMax, const Vector &cent
 
 }
 
+int	UTIL_RenderablesInBox( C_BaseEntity** pList, int listMax, const Vector &mins, const Vector &maxs )
+{
+	return g_pClientLeafSystem->GetEntitiesInBox( pList, listMax, mins, maxs );
+}
+
 CEntitySphereQuery::CEntitySphereQuery( const Vector &center, float radius, int flagMask, int partitionMask )
 {
 	m_listIndex = 0;

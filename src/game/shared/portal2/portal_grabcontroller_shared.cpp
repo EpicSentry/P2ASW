@@ -26,8 +26,6 @@ typedef C_NPC_Portal_FloorTurret CNPC_Portal_FloorTurret;
 #include "npc_portal_turret_floor.h"
 #endif // CLIENT_DLL
 
-#define CPortal_Base2D_Shared CProp_Portal_Shared
-
 bool TestIntersectionVsHeldObjectCollide( CBaseEntity *pHeldObject, Vector vHeldObjectTestOrigin, CBaseEntity *pOther );
 
 ConVar g_debug_physcannon( "g_debug_physcannon", "0", FCVAR_REPLICATED | FCVAR_CHEAT );
@@ -2091,7 +2089,7 @@ void GetSavedParamsForCarriedPhysObject( CGrabController *pGrabController, IPhys
 }
 #endif // !CLIENT_DLL
 
-void UpdateGrabControllerTargetPosition( CBasePlayer *pPlayer, Vector *vPosition, QAngle *qAngles, bool bIsTeleport /*= true*/ )
+void UpdateGrabControllerTargetPosition( CBasePlayer *pPlayer, Vector *vPosition, QAngle *qAngles, bool bIsTeleport /*= false*/ )
 {
 	CGrabController *pGrabController = GetGrabControllerForPlayer( pPlayer );
 

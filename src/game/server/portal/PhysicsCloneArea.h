@@ -14,16 +14,17 @@
 
 #include "baseentity.h"
 
-class CProp_Portal;
+class CPortal_Base2D;
 class CPortalSimulator;
+
 
 class CPhysicsCloneArea : public CBaseEntity
 {
 public:
 	DECLARE_CLASS( CPhysicsCloneArea, CBaseEntity );
 
-	Vector		vLocalMins;
-	Vector		vLocalMaxs;
+	//static const Vector		vLocalMins;
+	//static const Vector		vLocalMaxs;
 
 	virtual void			StartTouch( CBaseEntity *pOther );
 	virtual void			Touch( CBaseEntity *pOther ); 
@@ -37,12 +38,20 @@ public:
 
 	void					CloneTouchingEntities( void );
 	void					CloneNearbyEntities( void );
-	static CPhysicsCloneArea *CreatePhysicsCloneArea( CProp_Portal *pFollowPortal );	
-private:
+	static CPhysicsCloneArea *CreatePhysicsCloneArea( CPortal_Base2D *pFollowPortal );	
 
-	CProp_Portal			*m_pAttachedPortal;
+	inline Vector			GetLocalMins( void ) const { return Vector( 3.0f, -m_fHalfWidth, -m_fHalfHeight ); }
+	inline Vector			GetLocalMaxs( void ) const { return Vector( m_fHalfDepth, m_fHalfWidth, m_fHalfHeight ); }
+
+	void					Resize( float fPortalHalfWidth, float fPortalHalfHeight );
+private:
+	
+	CPortal_Base2D			*m_pAttachedPortal;
 	CPortalSimulator		*m_pAttachedSimulator;
 	bool					m_bActive;
+
+	float					m_fHalfWidth, m_fHalfHeight, m_fHalfDepth;
+	static const float		s_fPhysicsCloneAreaScale;
 
 
 };

@@ -10,8 +10,9 @@
 #pragma once
 #endif
 
-
+#include "portal_shareddefs.h"
 #include "weapon_portalbasecombatweapon.h"
+#include "weapon_portalgun_shared.h"
 
 #include "prop_portal.h"
 
@@ -31,8 +32,6 @@ private:
 	CNetworkVar( bool,	m_bCanFirePortal2 );	// Is able to use secondary fire
 	CNetworkVar( int,	m_iLastFiredPortal );	// Which portal was placed last
 	CNetworkVar( bool,	m_bOpenProngs );		// Which portal was placed last
-	CNetworkVar( float,	m_fCanPlacePortal1OnThisSurface );	// Tells the gun if it can place on the surface it's pointing at
-	CNetworkVar( float,	m_fCanPlacePortal2OnThisSurface );	// Tells the gun if it can place on the surface it's pointing at
 
 public:
 	unsigned char GetLinkageGroupID() { return m_iPortalLinkageGroupID; }
@@ -59,12 +58,10 @@ public:
 	virtual void UpdateOnRemove( void );
 	void Spawn( void );
 	virtual void Activate();
-	void DoEffectBlast( bool bPortal2, int iPlacedBy, const Vector &ptStart, const Vector &ptFinalPos, const QAngle &qStartAngles );
+	void DoEffectBlast( CBaseEntity *pOwner, bool bPortal2, int iPlacedBy, const Vector &ptStart, const Vector &ptFinalPos, const QAngle &qStartAngles, float fDelay );
 	virtual void OnPickedUp( CBaseCombatCharacter *pNewOwner );
 
 	virtual bool ShouldDrawCrosshair( void );
-	float GetPortal1Placablity( void ) { return m_fCanPlacePortal1OnThisSurface; }
-	float GetPortal2Placablity( void ) { return m_fCanPlacePortal2OnThisSurface; }
 	void SetLastFiredPortal( int iLastFiredPortal ) { m_iLastFiredPortal = iLastFiredPortal; }
 	int GetLastFiredPortal( void ) { return m_iLastFiredPortal; }
 
@@ -77,8 +74,12 @@ public:
 
 	void SetCanFirePortal1( bool bCanFire = true );
 	void SetCanFirePortal2( bool bCanFire = true );
-	bool CanFirePortal1( void ) { return m_bCanFirePortal1; }
-	bool CanFirePortal2( void ) { return m_bCanFirePortal2; }
+	bool CanFirePortal1( void ) const;
+	bool CanFirePortal2( void ) const;
+
+	Activity GetPrimaryAttackActivity( void );
+
+	void ResetRefireTime( void );
 
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
@@ -89,16 +90,36 @@ public:
 	virtual void Think( void );
 
 	void OpenProngs( bool bOpenProngs );
+	
+	void FirePortal1( void );
+	void FirePortal2( void );
 
 	void InputChargePortal1( inputdata_t &inputdata );
 	void InputChargePortal2( inputdata_t &inputdata );
-	void FirePortal1( inputdata_t &inputdata );
-	void FirePortal2( inputdata_t &inputdata );
+	void InputFirePortal1( inputdata_t &inputdata );
+	void InputFirePortal2( inputdata_t &inputdata );
 	void FirePortalDirection1( inputdata_t &inputdata );
 	void FirePortalDirection2( inputdata_t &inputdata );
 
-	float TraceFirePortal( bool bPortal2, const Vector &vTraceStart, const Vector &vDirection, trace_t &tr, Vector &vFinalPosition, QAngle &qFinalAngles, int iPlacedBy, bool bTest = false );
-	float FirePortal( bool bPortal2, Vector *pVector = 0, bool bTest = false );
+	CNetworkHandle( CProp_Portal, m_hPrimaryPortal );
+	CNetworkHandle( CProp_Portal, m_hSecondaryPortal );
+
+	bool TraceFirePortal( const Vector &vTraceStart, const Vector &vDirection, bool bPortal2, PortalPlacedBy_t ePlacedBy, TracePortalPlacementInfo_t &placementInfo );
+	PortalPlacementResult_t FirePortal( bool bPortal2, Vector *pVector = 0 );
+
+	// FIXME:
+	//{
+	void PortalPlaced( void ) {}
+	void UpdatePortalAssociation( void ) {}
+	//}
+
+	bool  PortalTraceClippedByBlockers( ComplexPortalTrace_t *pTraceResults, int nNumResultSegments, const Vector &vecDirection, bool bIsSecondPortal, TracePortalPlacementInfo_t &placementInfo );
+	bool AttemptStealCoopPortal( TracePortalPlacementInfo_t &placementInfo );
+	bool AttemptSnapToPlacementHelper( CProp_Portal *pPortal, ComplexPortalTrace_t *pTraceResults, int nNumResultSegments, PortalPlacedBy_t ePlacedBy, TracePortalPlacementInfo_t &placementInfo );
+	CProp_Portal *GetAssociatedPortal( bool bPortal2 );
+
+	Vector m_vecOrangePortalPos;
+	Vector m_vecBluePortalPos;
 
 	CSoundPatch		*m_pMiniGravHoldSound;
 

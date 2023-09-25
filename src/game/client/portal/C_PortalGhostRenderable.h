@@ -15,16 +15,35 @@
 //#include "iclientrenderable.h"
 #include "c_baseanimating.h"
 
+#define DEBUG_GHOSTRENDERABLES 0
+
 class C_PortalGhostRenderable : public C_BaseAnimating//IClientRenderable, public IClientUnknown
 {
 public:
-	C_BaseEntity *m_pGhostedRenderable; //the renderable we're transforming and re-rendering
+	DECLARE_CLASS( C_PortalGhostRenderable, C_BaseAnimating );
+	CHandle<C_BaseEntity> m_hGhostedRenderable; //the renderable we're transforming and re-rendering
 	
 	VMatrix m_matGhostTransform;
 	float *m_pSharedRenderClipPlane; //shared by all portal ghost renderables within the same portal
-	bool m_bLocalPlayer; //special draw rules for the local player
+	float *m_pPortalExitRenderClipPlane; //special clip plane to use if the current view entrance is our owner portal (we're on the exit side)
+	CHandle< C_BasePlayer > m_hHoldingPlayer; //special draw rules for the local player
+	bool m_bPlayerHeldClone;
 	bool m_bSourceIsBaseAnimating;
-	C_Prop_Portal *m_pOwningPortal;
+	bool m_bCombatWeapon;
+	bool m_bCombatWeaponWorldClone; //not actually derived from C_BaseCombatWeapon, but shares some of the same hacks
+	C_Portal_Base2D *m_pOwningPortal;
+
+	float m_fRenderableRange[2];
+	float m_fNoTransformBeforeTime;
+	float m_fDisablePositionChecksUntilTime;
+
+#if( DEBUG_GHOSTRENDERABLES == 1 )
+	int m_iDebugColor[4];
+#endif
+
+	static bool ShouldCloneEntity( C_BaseEntity *pEntity, C_Portal_Base2D *pPortal, bool bUsePositionChecks );
+	static C_PortalGhostRenderable *CreateGhostRenderable( C_BaseEntity *pEntity, C_Portal_Base2D *pPortal );
+	static C_PortalGhostRenderable *CreateInversion( C_PortalGhostRenderable *pSrc, C_Portal_Base2D *pSourcePortal, float fTime );
 
 	struct
 	{
@@ -33,8 +52,9 @@ public:
 		matrix3x4_t matRenderableToWorldTransform;
 	} m_ReferencedReturns; //when returning a reference, it has to actually exist somewhere
 
-	C_PortalGhostRenderable(C_Prop_Portal *pOwningPortal, C_BaseEntity *pGhostSource, bool isTransparent, const VMatrix &matGhostTransform, float *pSharedRenderClipPlane, bool bLocalPlayer);
+	C_PortalGhostRenderable( C_Portal_Base2D *pOwningPortal, C_BaseEntity *pGhostSource, const VMatrix &matGhostTransform, float *pSharedRenderClipPlane, C_BasePlayer *pPlayer );
 	virtual ~C_PortalGhostRenderable( void );
+	virtual void UpdateOnRemove( void );
 
 	void PerFrameUpdate( void ); //called once per frame for misc updating
 
@@ -42,12 +62,16 @@ public:
 	virtual Vector const&			GetRenderOrigin( void );
 	virtual QAngle const&			GetRenderAngles( void );
 	virtual bool					ShouldDraw( void ) { return !IsEffectActive( EF_NODRAW ); }
-	
+
+	bool ShouldDrawForThisView( void );
+
 	// Call this to get the current bone transforms for the model.
 	// currentTime parameter will affect interpolation
 	// nMaxBones specifies how many matrices pBoneToWorldOut can hold. (Should be greater than or
 	// equal to studiohdr_t::numbones. Use MAXSTUDIOBONES to be safe.)
-	virtual bool	SetupBones( matrix3x4_t *pBoneToWorldOut, int nMaxBones, int boneMask, float currentTime );
+	virtual bool	SetupBones( matrix3x4a_t *pBoneToWorldOut, int nMaxBones, int boneMask, float currentTime );
+
+	virtual C_BaseAnimating *GetBoneSetupDependancy( void );
 
 	// Returns the bounds relative to the origin (render bounds)
 	virtual void	GetRenderBounds( Vector& mins, Vector& maxs );
@@ -72,12 +96,15 @@ public:
 	virtual bool GetAttachmentVelocity( int number, Vector &originVel, Quaternion &angleVel );
 
 	// Rendering clip plane, should be 4 floats, return value of NULL indicates a disabled render clip plane
-	virtual float *GetRenderClipPlane( void ) { return m_pSharedRenderClipPlane; };
+	virtual float *GetRenderClipPlane( void );
 
-	virtual int	DrawModel( int flags, const RenderableInstance_t& instance );
+	virtual IClientModelRenderable*	GetClientModelRenderable() { return NULL; }
+	virtual int	DrawModel( int flags, const RenderableInstance_t &instance );
 
 	// Get the model instance of the ghosted model so that decals will properly draw across portals
 	virtual ModelInstanceHandle_t GetModelInstance();
+
+	virtual void GetToolRecordingState( KeyValues *msg );
 
 
 
@@ -85,8 +112,8 @@ public:
 	//IClientRenderable - Trivial or redirection
 	//------------------------------------------
 	virtual IClientUnknown*			GetIClientUnknown() { return this; };
-	//virtual bool					IsTransparent( void );
-	//virtual bool					UsesPowerOfTwoFrameBufferTexture();
+	virtual RenderableTranslucencyType_t	ComputeTranslucencyType( void );
+	virtual int						GetRenderFlags();
 	//virtual ClientShadowHandle_t	GetShadowHandle() const { return m_hShadowHandle; };
 	//virtual ClientRenderHandle_t&	RenderHandle() { return m_hRenderHandle; };
 	//virtual const model_t*			GetModel( ) const;
@@ -98,7 +125,7 @@ public:
 	//virtual void					SetupWeights( void ) { NULL; };
 	//virtual void					DoAnimationEvents( void ) { NULL; }; //TODO: find out if there's something we should be doing with this
 	//virtual IPVSNotify*				GetPVSNotifyInterface() { return NULL; };
-	//virtual bool					ShouldReceiveProjectedTextures( int flags ) { return false; };//{ return m_pGhostedRenderable->ShouldReceiveProjectedTextures( flags ); };
+	virtual bool					ShouldReceiveProjectedTextures( int flags );// { return false; };//{ return m_pGhostedRenderable->ShouldReceiveProjectedTextures( flags ); };
 	//virtual bool					IsShadowDirty( ) { return m_bDirtyShadow; };
 	//virtual void					MarkShadowDirty( bool bDirty ) { m_bDirtyShadow = bDirty; };
 	//virtual IClientRenderable *		GetShadowParent() { return NULL; };
@@ -115,14 +142,6 @@ public:
 	//IHandleEntity
 	//virtual void					SetRefEHandle( const CBaseHandle &handle ) { m_RefEHandle = handle; };
 	//virtual const					CBaseHandle& GetRefEHandle() const { return m_RefEHandle; };
-
-	//IClientUnknown
-	virtual ICollideable*			GetCollideable() { return NULL; };
-	virtual IClientNetworkable*		GetClientNetworkable() { return NULL; };
-	virtual IClientRenderable*		GetClientRenderable() { return this; };
-	virtual IClientEntity*			GetIClientEntity() { return NULL; };
-	virtual C_BaseEntity*			GetBaseEntity() { return NULL; };
-	virtual IClientThinkable*		GetClientThinkable() { return NULL; };
 };
 
 #endif //#ifndef C_PORTALGHOSTRENDERABLE_H

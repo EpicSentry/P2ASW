@@ -443,8 +443,8 @@ void CWeaponPaintGun::SprayPaint( float flDeltaTime, int paintType )
 		UTIL_TraceRay( muzzleRay, MASK_SOLID, &traceFilter, &trace );
 
 		//Check if there is a portal between the player's eye and the muzzle of the paint gun
-		CProp_Portal *pInPortal = NULL;
-		CProp_Portal *pOutPortal = NULL;
+		CPortal_Base2D *pInPortal = NULL;
+		CPortal_Base2D *pOutPortal = NULL;
 		if( UTIL_DidTraceTouchPortals( muzzleRay, trace, &pInPortal, &pOutPortal ) )
 		{
 			Vector vecPortalForward;

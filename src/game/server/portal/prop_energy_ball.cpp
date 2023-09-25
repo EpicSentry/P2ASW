@@ -274,7 +274,7 @@ void CPropEnergyBall::NotifySystemEvent(CBaseEntity *pNotify, notify_system_even
 			}
 
 			// Record the new portal for the purposes of locking our movement
-			m_hTouchedPortal = pEnteredPortal->m_hLinkedPortal;
+			m_hTouchedPortal = assert_cast<CProp_Portal*>( pEnteredPortal->m_hLinkedPortal.Get() );
 		}
 		else
 		{

@@ -27,6 +27,12 @@ public:
 	virtual void PostSimulationFrame( void );
 	void PortalPostSimulationFrame( void );
 	void AddDamageEvent( CBaseEntity *pEntity, const CTakeDamageInfo &info, IPhysicsObject *pInflictorPhysics, bool bRestoreVelocity, const Vector &savedVel, const AngularImpulse &savedAngVel );
+
+	static void DisablePenetrationSolving_Push( bool bDisable );
+	static void DisablePenetrationSolving_Pop( void );
+
+	static void RemovePenetrationEvents( CBaseEntity *pOther );
+
 };
 
 #endif //#ifndef PORTAL_PHYSICS_COLLISIONEVENT_H

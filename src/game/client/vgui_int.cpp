@@ -773,6 +773,12 @@ bool VGui_IsSplitScreen()
 	return g_nNumSplits >= 2;
 }
 
+bool VGui_IsSplitScreenPIP()
+{
+	// FIXME:
+	return VGui_IsSplitScreen(); //&& g_nNumLocalSplits == ss_pipsplit.GetInt();
+}
+
 bool g_bSuppressConfigSystemLevelDueToPIPTransitions;
 void VGui_OnSplitScreenStateChanged()
 {

@@ -2222,7 +2222,7 @@ void CViewRenderBeams::DrawBeam( C_Beam* pbeam, const RenderableInstance_t &inst
 
 	CTraceFilterChain traceFilterChain(&traceFilter, pEntityBeamTraceFilter);
 
-	C_Prop_Portal *pPortal = UTIL_Portal_TraceRay_Beam(rayBeam, MASK_SHOT, &traceFilterChain, &fEndFraction);
+	C_Portal_Base2D *pPortal = UTIL_Portal_TraceRay_Beam(rayBeam, MASK_SHOT, &traceFilterChain, &fEndFraction);
 
 	// Get the point that we hit a portal or wall
 	Vector vEndPoint = rayBeam.m_Start + rayBeam.m_Delta * fEndFraction;

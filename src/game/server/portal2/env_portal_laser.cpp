@@ -163,8 +163,8 @@ void CPortalLaser::UpdateLaser()
 	UTIL_TraceLine(vecOrigin, vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE, MASK_SHOT, &masterTraceFilter, &trace);
 
 	// Check if the trace hits any portals
-	CProp_Portal* pLocalPortal = nullptr;
-	CProp_Portal* pRemotePortal = nullptr;
+	CPortal_Base2D* pLocalPortal = NULL;
+	CPortal_Base2D* pRemotePortal = NULL;
 	bool bHitPortal = UTIL_DidTraceTouchPortals(rayPath, trace, &pLocalPortal, &pRemotePortal);
 
 	if (UTIL_Portal_TraceRay_Beam(rayPath, MASK_SHOT, &masterTraceFilter, &fEndFraction))
@@ -181,12 +181,12 @@ void CPortalLaser::UpdateLaser()
 	// Handle portal hit, if any
 	if (bHitPortal)
 	{
-		if (pLocalPortal != nullptr)
+		if (pLocalPortal != NULL)
 		{
 			// Local portal, no need to do anything here
 		}
 
-		if (pRemotePortal != nullptr)
+		if (pRemotePortal != NULL)
 		{
 			//Msg("Remote Portal classname: %s\n", pRemotePortal->GetClassname());
 			DoTraceFromPortal(pRemotePortal); // Do the rest from another void
@@ -204,7 +204,7 @@ void CPortalLaser::UpdateLaser()
 	g_pEffects->Sparks(vEndPoint, 2, 2, &vecMuzzleDir);
 }
 
-void CPortalLaser::DoTraceFromPortal(CProp_Portal* pRemotePortal)
+void CPortalLaser::DoTraceFromPortal(CPortal_Base2D* pRemotePortal)
 {
 	if (!pRemotePortal)
 		return;

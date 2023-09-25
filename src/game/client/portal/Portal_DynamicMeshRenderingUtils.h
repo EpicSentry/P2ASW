@@ -27,6 +27,12 @@ void RenderPortalMeshConvexPolygon( PortalMeshPoint_t *pVerts, int iVertCount, c
 
 void Clip_And_Render_Convex_Polygon( PortalMeshPoint_t *pVerts, int iVertCount, const IMaterial *pMaterial, void *pBind );
 
+bool ClipPortalPolyToPlane( PortalMeshPoint_t *pInVerts, int nVertCount, 
+						   PortalMeshPoint_t *pFrontVerts, int *pFrontVertCount,
+						   const Vector& normal, float flDist );
+
+void ProjectPortalPolyToPlane( PortalMeshPoint_t *pInVerts, int nVertCount, 
+							  const Vector& normal, float flDist, const Vector &vCameraPos );
 
 #endif //#ifndef PORTAL_DYNAMICMESHRENDERINGUTILS_H
 

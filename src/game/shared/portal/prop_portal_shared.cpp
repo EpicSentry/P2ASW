@@ -8,92 +8,194 @@
 #include "cbase.h"
 #include "prop_portal_shared.h"
 #include "portal_shareddefs.h"
-#include "portal_player_shared.h"
+#include "portal_placement.h"
+#include "weapon_portalgun_shared.h"
 
-#ifdef CLIENT_DLL
-#include "c_basedoor.h"
-#include "c_portal_player.h"
+#if 0
+#if defined( GAME_DLL )
+#include "baseprojector.h"
 #else
-#include "portal_player.h"
+#include "c_baseprojectedentity.h"
+typedef C_BaseProjectedEntity CBaseProjectedEntity;
+#endif
 #endif
 
 CUtlVector<CProp_Portal *> CProp_Portal_Shared::AllPortals;
 
-const Vector CProp_Portal_Shared::vLocalMins( 0.0f, -PORTAL_HALF_WIDTH, -PORTAL_HALF_HEIGHT );
-const Vector CProp_Portal_Shared::vLocalMaxs( 64.0f, PORTAL_HALF_WIDTH, PORTAL_HALF_HEIGHT );
+extern ConVar sv_portal_placement_never_fail;
 
-void CProp_Portal_Shared::UpdatePortalTransformationMatrix( const matrix3x4_t &localToWorld, const matrix3x4_t &remoteToWorld, VMatrix *pMatrix )
+void CProp_Portal::PlacePortal( const Vector &vOrigin, const QAngle &qAngles, PortalPlacementResult_t eResult, bool bDelay /*= false*/ )
 {
-	VMatrix matPortal1ToWorldInv, matPortal2ToWorld, matRotation;
+	Vector vOldOrigin = GetLocalOrigin();
+	QAngle qOldAngles = GetLocalAngles();
 
-	//inverse of this
-	MatrixInverseTR( localToWorld, matPortal1ToWorldInv );
+	Vector vNewOrigin = vOrigin;
+	QAngle qNewAngles = qAngles;
 
-	//180 degree rotation about up
-	matRotation.Identity();
-	matRotation.m[0][0] = -1.0f;
-	matRotation.m[1][1] = -1.0f;
+#if !defined( PORTAL2 )
+	UTIL_TestForOrientationVolumes( qNewAngles, vNewOrigin, this );
+#endif // PORTAL2
 
-	//final
-	matPortal2ToWorld = remoteToWorld;	
-	*pMatrix = matPortal2ToWorld * matRotation * matPortal1ToWorldInv;
-}
-
-static char *g_pszPortalNonTeleportable[] = 
-{ 
-	"func_door", 
-	"func_door_rotating", 
-	"prop_door_rotating",
-	"func_tracktrain",
-	//"env_ghostanimating",
-	"physicsshadowclone"
-};
-
-bool CProp_Portal_Shared::IsEntityTeleportable( CBaseEntity *pEntity )
-{
-
-	do
+	if ( PortalPlacementSucceeded( eResult ) == false && sv_portal_placement_never_fail.GetBool() == false )
 	{
+		// Prepare fizzle
+		m_vDelayedPosition = vOrigin;
+		m_qDelayedAngles = qAngles;
 
-#ifdef CLIENT_DLL
-		//client
-	
-		if( dynamic_cast<C_BaseDoor *>(pEntity) != NULL )
-			return false;
-
-#else
-		//server
-		
-		for( int i = 0; i != ARRAYSIZE(g_pszPortalNonTeleportable); ++i )
+		// Translate the fizzle type
+		// FIXME: This can go away, we don't care about the fizzle type anymore -- jdw
+		switch( eResult )
 		{
-			if( FClassnameIs( pEntity, g_pszPortalNonTeleportable[i] ) )
-				return false;
+		case PORTAL_PLACEMENT_CANT_FIT:
+			m_iDelayedFailure = PORTAL_FIZZLE_CANT_FIT;
+			break;
+
+		case PORTAL_PLACEMENT_OVERLAP_LINKED:
+			m_iDelayedFailure = PORTAL_FIZZLE_OVERLAPPED_LINKED;
+			break;
+
+		case PORTAL_PLACEMENT_INVALID_VOLUME:
+			m_iDelayedFailure = PORTAL_FIZZLE_BAD_VOLUME;
+			break;
+
+		case PORTAL_PLACEMENT_INVALID_SURFACE:
+			m_iDelayedFailure = PORTAL_FIZZLE_BAD_SURFACE;
+			break;
+
+		case PORTAL_PLACEMENT_CLEANSER:
+			m_iDelayedFailure = PORTAL_FIZZLE_CLEANSER;
+			break;
+
+		default:
+		case PORTAL_PLACEMENT_PASSTHROUGH_SURFACE:
+			m_iDelayedFailure = PORTAL_FIZZLE_NONE;
+			break;
 		}
 
+		return;
+	}
+
+	m_vDelayedPosition = vNewOrigin;
+	m_qDelayedAngles = qNewAngles;
+	m_iDelayedFailure = PORTAL_FIZZLE_SUCCESS;
+
+	if ( bDelay == false )
+	{
+		NewLocation( vNewOrigin, qNewAngles );
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Runs when a fired portal shot reaches it's destination wall. Detects current placement valididty state.
+//-----------------------------------------------------------------------------
+void CProp_Portal::DelayedPlacementThink( void )
+{
+	Vector vOldOrigin = m_ptOrigin; //GetLocalOrigin();
+	QAngle qOldAngles = m_qAbsAngle; //GetLocalAngles();
+
+	Vector vForward;
+	AngleVectors( m_qDelayedAngles, &vForward );
+
+	// Check if something made the spot invalid mid flight
+	// Bad surface and near fizzle effects take priority
+	if ( m_iDelayedFailure != PORTAL_FIZZLE_BAD_SURFACE && m_iDelayedFailure != PORTAL_FIZZLE_NEAR_BLUE && m_iDelayedFailure != PORTAL_FIZZLE_NEAR_RED )
+	{
+		if ( IsPortalOverlappingOtherPortals( this, m_vDelayedPosition, m_qDelayedAngles, GetHalfWidth(), GetHalfHeight() ) )
+		{
+			m_iDelayedFailure = PORTAL_FIZZLE_OVERLAPPED_LINKED;
+		}
+		else if ( IsPortalIntersectingNoPortalVolume( m_vDelayedPosition, m_qDelayedAngles, vForward, GetHalfWidth(), GetHalfHeight() ) )
+		{
+#if defined GAME_DLL
+			RANDOM_CEG_TEST_SECRET_PERIOD( 29, 83 )
+#endif
+			m_iDelayedFailure = PORTAL_FIZZLE_BAD_VOLUME;
+		}
+	}
+
+	if ( sv_portal_placement_never_fail.GetBool() )
+	{
+		m_iDelayedFailure = PORTAL_FIZZLE_SUCCESS;
+	}
+
+	DoFizzleEffect( m_iDelayedFailure );
+
+	if ( m_iDelayedFailure != PORTAL_FIZZLE_SUCCESS )
+	{
+		// It didn't successfully place
+		return;
+	}
+
+	// Do effects at old location if it was active
+	if ( GetOldActiveState() )
+	{
+		DoFizzleEffect( PORTAL_FIZZLE_CLOSE, false );
+	}
+
+#if defined( GAME_DLL )
+	CWeaponPortalgun *pPortalGun = dynamic_cast<CWeaponPortalgun*>( m_hPlacedBy.Get() );
+
+	if( pPortalGun )
+	{
+		CPortal_Player *pFiringPlayer = dynamic_cast<CPortal_Player *>( pPortalGun->GetOwner() );
+		if( pFiringPlayer )
+		{
+			pFiringPlayer->IncrementPortalsPlaced( IsPortal2() );
+
+			// Placement successful, fire the output
+			m_OnPlacedSuccessfully.FireOutput( pPortalGun, this );
+
+		}
+	}
 #endif
 
-		Assert( pEntity != pEntity->GetMoveParent() );
-		pEntity = pEntity->GetMoveParent();
-	} while( pEntity );
+	// Move to new location
+	NewLocation( m_vDelayedPosition, m_qDelayedAngles );
+#if 0
+#if defined( GAME_DLL )
+	// Test for our surface moving out from behind us
+	SetContextThink( &CProp_Portal::TestRestingSurfaceThink, gpGlobals->curtime + 0.1f, s_szTestRestingSurfaceThinkContext );
+	
+	CBaseProjector::TestAllForProjectionChanges();
+#else
+	CBaseProjectedEntity::TestAllForProjectionChanges();
+#endif
+#endif
+}
 
-	return true;
+// default to sane-looking but incorrect portal height for CEG - Updated in constructor
+bool CProp_Portal::ms_DefaultPortalSizeInitialized = false; // for CEG protection
+float CProp_Portal::ms_DefaultPortalHalfWidth = DEFAULT_PORTAL_HALF_WIDTH;
+float CProp_Portal::ms_DefaultPortalHalfHeight = 0.25 * DEFAULT_PORTAL_HALF_HEIGHT;
+
+//NULL portal will return default width/height
+void CProp_Portal::GetPortalSize( float &fHalfWidth, float &fHalfHeight, CProp_Portal *pPortal )
+{
+	if( pPortal )
+	{
+		fHalfWidth = pPortal->GetHalfWidth();
+		fHalfHeight = pPortal->GetHalfHeight();
+	}
+	else
+	{
+		fHalfWidth = ms_DefaultPortalHalfWidth;
+		fHalfHeight = ms_DefaultPortalHalfHeight;
+	}
 }
 
 
 
-
-
-
-void CProp_Portal::PortalSimulator_TookOwnershipOfEntity( CBaseEntity *pEntity )
+void CProp_Portal::SetFiredByPlayer( CBasePlayer *pPlayer )
 {
-	if( pEntity->IsPlayer() )
-		((CPortal_Player *)pEntity)->m_hPortalEnvironment = this;
-}
-
-void CProp_Portal::PortalSimulator_ReleasedOwnershipOfEntity( CBaseEntity *pEntity )
-{
-	if( pEntity->IsPlayer() && (((CPortal_Player *)pEntity)->m_hPortalEnvironment.Get() == this) )
-		((CPortal_Player *)pEntity)->m_hPortalEnvironment = NULL;
+	m_hFiredByPlayer = pPlayer;
+	if( pPlayer )
+	{
+		SetPlayerSimulated( pPlayer );
+	}
+	else
+	{
+		UnsetPlayerSimulated();
+	}
 }
 
 extern ConVar sv_gravity;
@@ -161,8 +263,7 @@ float CProp_Portal::GetMinimumExitSpeed( bool bPlayer, bool bEntranceOnFloor, bo
 		}
 	}
 
-	return -FLT_MAX;
-	//return BaseClass::GetMinimumExitSpeed( bPlayer, bEntranceOnFloor, bExitOnFloor, vEntityCenterAtExit, pEntity );
+	return BaseClass::GetMinimumExitSpeed( bPlayer, bEntranceOnFloor, bExitOnFloor, vEntityCenterAtExit, pEntity );
 }
 
 float CProp_Portal::GetMaximumExitSpeed( bool bPlayer, bool bEntranceOnFloor, bool bExitOnFloor, const Vector &vEntityCenterAtExit, CBaseEntity *pEntity )
@@ -170,30 +271,3 @@ float CProp_Portal::GetMaximumExitSpeed( bool bPlayer, bool bEntranceOnFloor, bo
 	return 1000.0f;
 }
 
-void CProp_Portal::GetExitSpeedRange( CPortal_Base2D *pEntrancePortal, bool bPlayer, float &fExitMinimum, float &fExitMaximum, const Vector &vEntityCenterAtExit, CBaseEntity *pEntity )
-{
-	CPortal_Base2D *pExitPortal = pEntrancePortal ? pEntrancePortal->m_hLinkedPortal.Get() : NULL;
-	if( !pExitPortal )
-	{
-		fExitMinimum = -FLT_MAX;
-		fExitMaximum = FLT_MAX;
-		return;
-	}
-		
-	const float COS_PI_OVER_SIX = 0.86602540378443864676372317075294f; // cos( 30 degrees ) in radians
-	bool bEntranceOnFloor = pEntrancePortal->m_plane_Origin.normal.z > COS_PI_OVER_SIX;
-	bool bExitOnFloor = pExitPortal->m_plane_Origin.normal.z > COS_PI_OVER_SIX;
-
-	fExitMinimum = pExitPortal->GetMinimumExitSpeed( bPlayer, bEntranceOnFloor, bExitOnFloor, vEntityCenterAtExit, pEntity );
-	fExitMaximum = pExitPortal->GetMaximumExitSpeed( bPlayer, bEntranceOnFloor, bExitOnFloor, vEntityCenterAtExit, pEntity );
-}
-
-bool CProp_Portal::IsFloorPortal( float fThreshold ) const
-{
-	return m_PortalSimulator.GetInternalData().Placement.vForward.z > fThreshold;
-}
-
-bool CProp_Portal::IsCeilingPortal( float fThreshold ) const
-{
-	return m_PortalSimulator.GetInternalData().Placement.vForward.z < fThreshold;
-}

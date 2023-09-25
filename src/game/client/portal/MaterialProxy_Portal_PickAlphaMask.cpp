@@ -9,11 +9,10 @@
 #include "materialsystem/IMaterialVar.h"
 #include "materialsystem/IMaterial.h"
 #include "materialsystem/ITexture.h"
-#include "toolframework_client.h"
-#include "portalrenderable_flatbasic.h"
-#include "imaterialproxydict.h"
+#include "c_prop_portal.h"
 #include <KeyValues.h>
 
+#include "imaterialproxydict.h"
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -104,7 +103,7 @@ void CPortalPickAlphaMaskProxy::OnBind( void *pBind )
 
 	IClientRenderable *pRenderable = (IClientRenderable*)( pBind );
 
-	CPortalRenderable_FlatBasic *pFlatBasic = dynamic_cast<CPortalRenderable_FlatBasic*>( pRenderable );
+	C_Prop_Portal *pFlatBasic = dynamic_cast<C_Prop_Portal*>( pRenderable );
 
 	if ( !pFlatBasic )
 		return;
@@ -118,11 +117,6 @@ void CPortalPickAlphaMaskProxy::OnBind( void *pBind )
 		m_AlphaMaskTextureOutput->SetTextureValue( m_pOpeningTexture );
 		m_AlphaMaskTextureFrame->SetIntValue( pFlatBasic->m_fOpenAmount * m_pOpeningTexture->GetNumAnimationFrames() );
 	}
-
-	/*if ( ToolsEnabled() )
-	{
-		ToolFramework_RecordMaterialParams( GetMaterial() );
-	}*/
 }
 
-EXPOSE_MATERIAL_PROXY(CPortalPickAlphaMaskProxy, PortalPickAlphaMask);
+EXPOSE_MATERIAL_PROXY( CPortalPickAlphaMaskProxy, PortalPickAlphaMask );

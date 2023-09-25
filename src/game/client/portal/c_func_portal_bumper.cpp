@@ -10,6 +10,8 @@
 #include "cbase.h"
 #include "c_func_portal_bumper.h"
 
+#undef CFuncPortalBumper
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 

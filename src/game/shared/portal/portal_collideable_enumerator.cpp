@@ -11,7 +11,7 @@
 
 #define PORTAL_TELEPORTATION_PLANE_OFFSET 7.0f
 
-CPortalCollideableEnumerator::CPortalCollideableEnumerator( const CProp_Portal *pAssociatedPortal )
+CPortalCollideableEnumerator::CPortalCollideableEnumerator( const CPortal_Base2D *pAssociatedPortal )
 {
 	Assert( pAssociatedPortal );
 	m_hTestPortal = pAssociatedPortal;

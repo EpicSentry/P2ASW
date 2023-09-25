@@ -2883,21 +2883,21 @@ void CServerGameClients::ClientSettingsChanged( edict_t *pEdict )
 //-----------------------------------------------------------------------------
 int TestAreaPortalVisibilityThroughPortals(CFuncAreaPortalBase* pAreaPortal, edict_t *pViewEntity, unsigned char *pvs, int pvssize)
 {
-	int iPortalCount = CProp_Portal_Shared::AllPortals.Count();
+	int iPortalCount = CPortal_Base2D_Shared::AllPortals.Count();
 	if (iPortalCount == 0)
 		return 0;
 
-	CProp_Portal **pPortals = CProp_Portal_Shared::AllPortals.Base();
+	CPortal_Base2D **pPortals = CPortal_Base2D_Shared::AllPortals.Base();
 
 	for (int i = 0; i != iPortalCount; ++i)
 	{
-		CProp_Portal* pLocalPortal = pPortals[i];
-		if (pLocalPortal && pLocalPortal->m_bActivated)
+		CPortal_Base2D* pLocalPortal = pPortals[i];
+		if (pLocalPortal && pLocalPortal->IsActive())
 		{
-			CProp_Portal* pRemotePortal = pLocalPortal->m_hLinkedPortal.Get();
+			CPortal_Base2D* pRemotePortal = pLocalPortal->m_hLinkedPortal.Get();
 
 			// Make sure this portal's linked portal is in the PVS before we add what it can see
-			if (pRemotePortal && pRemotePortal->m_bActivated && pRemotePortal->NetworkProp() &&
+			if (pRemotePortal && pRemotePortal->IsActive() && pRemotePortal->NetworkProp() &&
 				pRemotePortal->NetworkProp()->IsInPVS(pViewEntity, pvs, pvssize))
 			{
 				bool bIsOpenOnClient = true;

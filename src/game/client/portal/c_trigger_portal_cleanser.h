@@ -20,6 +20,8 @@
 #include "rumble_shared.h"
 #include "c_triggers.h"
 
+#define CTriggerPortalCleanser C_TriggerPortalCleanser
+
 static char *g_pszPortalNonCleansable[] = 
 { 
 	"func_door", 
@@ -48,5 +50,8 @@ public:
 	void Touch( C_BaseEntity *pOther );
 
 	bool m_bDisabled;
+
+	bool IsEnabled( void ) { return !m_bDisabled; }
+
 };
 #endif

@@ -62,6 +62,7 @@ class CEntityMapData;
 class ConVar;
 class CClientAlphaProperty;
 struct CSoundParameters;
+class CCallQueue;
 
 typedef unsigned int			AimEntsListHandle_t;
 
@@ -1083,6 +1084,7 @@ public:
 	// Prediction stuff
 	/////////////////
 	void							CheckInitPredictable( const char *context );
+	void							CheckShutdownPredictable( const char *context );
 	virtual C_BasePlayer			*GetPredictionOwner( void );
 
 	void							AllocateIntermediateData( void );
@@ -1102,6 +1104,7 @@ public:
 	void							PreEntityPacketReceived( int commands_acknowledged );
 	void							PostEntityPacketReceived( void );
 	bool							PostNetworkDataReceived( int commands_acknowledged );
+	virtual void					HandlePredictionError( bool bErrorInThisEntity ); //we just processed a network update with errors, bErrorInThisEntity is false if the prediction errors were entirely in other entities and not this one
 	bool							GetPredictionEligible( void ) const;
 	void							SetPredictionEligible( bool canpredict );
 
@@ -1570,6 +1573,9 @@ public:
 	static void PreRenderEntities( int nSplitScreenPlayerSlot );
 	static void PurgeRemovedEntities();
 	static void SimulateEntities();
+	
+	//A queue that processes after we simulate all client entities. For operations that modify the simulate list (portal ghostrenderables)
+	static CCallQueue *				GetSimulateCallQueue( void );
 
 	// Bloat the culling bbox past the parent ent's bbox in local space if EF_BONEMERGE_FASTCULL is set.
 	virtual void BoneMergeFastCullBloat( Vector &localMins, Vector &localMaxs, const Vector &thisEntityMins, const Vector &thisEntityMaxs ) const;

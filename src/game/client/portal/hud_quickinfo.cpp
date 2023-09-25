@@ -215,8 +215,8 @@ void CHUDQuickInfo::Paint()
 
 	if ( pPortalgun )
 	{
-		bPortalPlacability[0] = pPortalgun->GetPortal1Placablity() > 0.5f;
-		bPortalPlacability[1] = pPortalgun->GetPortal2Placablity() > 0.5f;
+		//bPortalPlacability[0] = pPortalgun->GetPortal1Placablity() > 0.5f;
+		//bPortalPlacability[1] = pPortalgun->GetPortal2Placablity() > 0.5f;
 	}
 
 	if ( !hud_quickinfo.GetInt() || !pPortalgun || ( !pPortalgun->CanFirePortal1() && !pPortalgun->CanFirePortal2() ) )

@@ -675,7 +675,7 @@ void CNPC_Portal_FloorTurret::ActiveThink( void )
 	m_flDistToEnemy = VectorNormalize( vecDirToEnemy );
 
 	// If the enemy isn't in the normal fov, check the fov through portals
-	CProp_Portal *pPortal = NULL;
+	CPortal_Base2D *pPortal = NULL;
 	if ( pEnemy->IsAlive() )
 	{
 		pPortal = FInViewConeThroughPortal( pEnemy );
@@ -910,7 +910,7 @@ void CNPC_Portal_FloorTurret::SearchThink( void )
 		m_flDistToEnemy = VectorNormalize( vecDirToEnemy );
 
 		// If the enemy isn't in the normal fov, check the fov through portals
-		CProp_Portal *pPortal = NULL;
+		CPortal_Base2D *pPortal = NULL;
 		pPortal = FInViewConeThroughPortal( pEnemy );
 
 		if ( pPortal && FVisibleThroughPortal( pPortal, pEnemy ) )

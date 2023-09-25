@@ -13,6 +13,7 @@
 #include "materialsystem/ITexture.h"
 #include "hud_macros.h"
 #include "IGameSystem.h"
+#include "game_timescale_shared.h"
 #include "view.h"						// For MainViewOrigin()
 #include "clientleafsystem.h"			// For finding the leaves our portals are in
 #include "portal_render_targets.h"		// Access to static references to Portal-specific render textures
@@ -22,8 +23,13 @@
 #include "rendertexture.h"
 #include "prop_portal_shared.h"
 #include "particles_new.h"
-#include "c_user_message_register.h"
+#include "materialsystem/imaterialvar.h"
+#include "portal_mp_gamerules.h"
+#include "c_weapon_portalgun.h"
 #include "prediction.h"
+#include "particle_parse.h"
+#include "c_user_message_register.h"
+#include "c_world.h"
 
 #include "C_Portal_Player.h"
 
@@ -36,192 +42,113 @@
 
 #include "simple_keys.h"
 
+// FIXME:
+//#include "c_baseprojectedentity.h"
+#include "view_scene.h"
+
 #ifdef _DEBUG
 #include "filesystem.h"
 #endif
 
 #include "debugoverlay_shared.h"
 
+IMPLEMENT_CLIENTCLASS_DT( C_Prop_Portal, DT_Prop_Portal, CProp_Portal )
+	RecvPropEHandle( RECVINFO( m_hFiredByPlayer ) ),
+	RecvPropInt( RECVINFO( m_nPlacementAttemptParity ) ),
+END_RECV_TABLE()
 
 LINK_ENTITY_TO_CLASS( prop_portal, C_Prop_Portal );
 
-#undef CProp_Portal
-
-IMPLEMENT_CLIENTCLASS_DT( C_Prop_Portal, DT_Prop_Portal, CProp_Portal )
-	RecvPropVector( RECVINFO_NAME( m_vecNetworkOrigin, m_vecOrigin ) ),
-	RecvPropVector( RECVINFO_NAME( m_angNetworkAngles, m_angRotation ) ),
-
-	RecvPropVector( RECVINFO( m_ptOrigin ) ),
-	RecvPropVector( RECVINFO( m_qAbsAngle ) ),
-
-	RecvPropEHandle( RECVINFO(m_hLinkedPortal) ),
-	RecvPropBool( RECVINFO(m_bActivated) ),
-	RecvPropBool( RECVINFO(m_bIsPortal2) ),
-END_RECV_TABLE()
-
 BEGIN_PREDICTION_DATA( C_Prop_Portal )
-	DEFINE_PRED_FIELD( m_bActivated, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
-	//DEFINE_PRED_FIELD( m_bOldActivatedState, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
-	DEFINE_PRED_FIELD( m_hLinkedPortal, FIELD_EHANDLE, FTYPEDESC_INSENDTABLE ),
-	DEFINE_PRED_FIELD( m_ptOrigin, FIELD_VECTOR, FTYPEDESC_INSENDTABLE ),
-	DEFINE_PRED_FIELD( m_qAbsAngle, FIELD_VECTOR, FTYPEDESC_INSENDTABLE ),
-
-	//not actually networked fields. But we need them backed up and restored in the same way as the networked ones.	
-	DEFINE_FIELD( m_vForward, FIELD_VECTOR ),
-	DEFINE_FIELD( m_vRight, FIELD_VECTOR ),
-	DEFINE_FIELD( m_vUp, FIELD_VECTOR ),
-	DEFINE_FIELD( m_plane_Origin, FIELD_VECTOR4D ),
-	//DEFINE_FIELD( m_matrixThisToLinked, FIELD_VMATRIX ),
+	DEFINE_PRED_FIELD( m_nPlacementAttemptParity, FIELD_INTEGER, FTYPEDESC_INSENDTABLE ),
 END_PREDICTION_DATA()
 
 bool g_bShowGhostedPortals = false;
 
-
-ConVar cl_portal_teleportation_interpolation_fixup_method( "cl_portal_teleportation_interpolation_fixup_method", "1", 0, "0 = transform history only, 1 = insert discontinuity transform" );
-
-
-void EntityPortalledMessageHandler( C_BaseEntity *pEntity, C_Portal_Base2D *pPortal, float fTime, bool bForcedDuck )
-{
-
-	Msg("ENTITY PORTALLED\n");
-	Msg("ENTITY PORTALLED\n");
-	Msg("ENTITY PORTALLED\n");
-	Msg("ENTITY PORTALLED\n");
-	Msg("ENTITY PORTALLED\n");
-
-#if( PLAYERPORTALDEBUGSPEW == 1 )
-	Warning( "EntityPortalledMessageHandler() %f -=- %f %i======================\n", fTime, engine->GetLastTimeStamp(), prediction->GetLastAcknowledgedCommandNumber() );
+PRECACHE_REGISTER_BEGIN( GLOBAL, PrecacheBasicPropPortalDrawingMaterials )
+#if !defined( _GAMECONSOLE ) //XBox 360 is guaranteed to use stencil mode, and therefore doesn't need texture mode materials
+PRECACHE( MATERIAL, "models/portals/portal_1_dynamicmesh" )
+PRECACHE( MATERIAL, "models/portals/portal_2_dynamicmesh" )
+PRECACHE( MATERIAL, "models/portals/portal_1_renderfix_dynamicmesh" )
+PRECACHE( MATERIAL, "models/portals/portal_2_renderfix_dynamicmesh" )
 #endif
-	// FIXME:
-#if 0
-	C_PortalGhostRenderable *pGhost = pPortal->GetGhostRenderableForEntity( pEntity );
-	if( !pGhost )
-	{
-		//high velocity edge case. Entity portalled before it ever created a clone. But will need one for the interpolated origin history
-		if( C_PortalGhostRenderable::ShouldCloneEntity( pEntity, pPortal, false ) )
-		{
-			pGhost = C_PortalGhostRenderable::CreateGhostRenderable( pEntity, pPortal );
-			if( pGhost )
-			{
-				Assert( !pPortal->m_hGhostingEntities.IsValidIndex( pPortal->m_hGhostingEntities.Find( pEntity ) ) );
-				pPortal->m_hGhostingEntities.AddToTail( pEntity );
-				Assert( pPortal->m_GhostRenderables.IsValidIndex( pPortal->m_GhostRenderables.Find( pGhost ) ) );
-				pGhost->PerFrameUpdate();
-			}
-		}
-	}
+PRECACHE( MATERIAL, "models/portals/portal_depthdoubler" )
+PRECACHE( MATERIAL, "models/portals/portalstaticoverlay_1" )
+PRECACHE( MATERIAL, "models/portals/portalstaticoverlay_2" )
+PRECACHE( MATERIAL, "models/portals/portalstaticoverlay_tinted" )
+PRECACHE( MATERIAL, "models/portals/portal_stencil_hole" )
+PRECACHE( MATERIAL, "models/portals/portal_refract_1" )
+//PRECACHE( MATERIAL, "models/portals/portal_refract_2" )
+PRECACHE( MATERIAL, "models/portals/portalstaticoverlay_1_noz" )
+PRECACHE( MATERIAL, "models/portals/portalstaticoverlay_2_noz" )
+PRECACHE( MATERIAL, "models/portals/portalstaticoverlay_noz" )
+//PRECACHE( MATERIAL, "effects/flashlight001" ) //light transfers disabled indefinitely
+PRECACHE_REGISTER_END()
 
-	if( pGhost )
-	{
-		C_PortalGhostRenderable::CreateInversion( pGhost, pPortal, fTime );
-	}
-#endif
-	if( pEntity->IsPlayer() )
-	{
-		((C_Portal_Player *)pEntity)->PlayerPortalled( pPortal, fTime, bForcedDuck );
-		return;
-	}	
-
-	pEntity->AddEFlags( EFL_DIRTY_ABSTRANSFORM );
-
-	VMatrix matTransform = pPortal->MatrixThisToLinked();
-
-	CDiscontinuousInterpolatedVar< QAngle > &rotInterp = pEntity->GetRotationInterpolator();
-	CDiscontinuousInterpolatedVar< Vector > &posInterp = pEntity->GetOriginInterpolator();
-
-
-	if( cl_portal_teleportation_interpolation_fixup_method.GetInt() == 0 )
-	{
-		UTIL_TransformInterpolatedAngle( rotInterp, matTransform.As3x4(), fTime );
-		UTIL_TransformInterpolatedPosition( posInterp, matTransform, fTime );
-	}
-	else
-	{
-		rotInterp.InsertDiscontinuity( matTransform.As3x4(), fTime );
-		posInterp.InsertDiscontinuity( matTransform.As3x4(), fTime );
-	}
-
-	if ( pEntity->IsToolRecording() )
-	{
-		static EntityTeleportedRecordingState_t state;
-
-		KeyValues *msg = new KeyValues( "entity_teleported" );
-		msg->SetPtr( "state", &state );
-		state.m_bTeleported = true;
-		state.m_bViewOverride = false;
-		state.m_vecTo = pEntity->GetAbsOrigin();
-		state.m_qaTo = pEntity->GetAbsAngles();
-		state.m_teleportMatrix = matTransform.As3x4();
-
-		// Post a message back to all IToolSystems
-		Assert( (int)pEntity->GetToolHandle() != 0 );
-		ToolFramework_PostToolMessage( pEntity->GetToolHandle(), msg );
-
-		msg->deleteThis();
-	}
-	
-	C_Portal_Player* pPlayer = C_Portal_Player::GetLocalPortalPlayer();
-	if ( pPlayer && pEntity == pPlayer->GetAttachedObject() )
-	{
-		C_BaseAnimating *pAnim = pEntity->GetBaseAnimating();	
-		if ( pAnim && pAnim->IsUsingRenderOriginOverride() )
-		{
-			pPlayer->ResetHeldObjectOutOfEyeTransitionDT();
-		}
-	}
-}
-
-
-struct PortalTeleportationLogEntry_t
+class CAutoInitBasicPropPortalDrawingMaterials : public CAutoGameSystem
 {
-	CHandle<C_BaseEntity> hEntity;
-	CHandle<C_Portal_Base2D> hPortal;
-	float fTeleportTime;
-	bool bForcedDuck;
+public:
+	PropPortalRenderingMaterials_t m_Materials;
+	void LevelInitPreEntity()
+	{
+		m_Materials.m_PortalMaterials[0].Init( "models/portals/portal_1_dynamicmesh", TEXTURE_GROUP_CLIENT_EFFECTS );
+		m_Materials.m_PortalMaterials[1].Init( "models/portals/portal_2_dynamicmesh", TEXTURE_GROUP_CLIENT_EFFECTS );
+		m_Materials.m_PortalRenderFixMaterials[0].Init( "models/portals/portal_1_renderfix_dynamicmesh", TEXTURE_GROUP_CLIENT_EFFECTS );
+		m_Materials.m_PortalRenderFixMaterials[1].Init( "models/portals/portal_2_renderfix_dynamicmesh", TEXTURE_GROUP_CLIENT_EFFECTS );
+		m_Materials.m_PortalDepthDoubler.Init( "models/portals/portal_depthdoubler", TEXTURE_GROUP_CLIENT_EFFECTS );
+		m_Materials.m_PortalStaticOverlay[0].Init( "models/portals/portalstaticoverlay_1", TEXTURE_GROUP_CLIENT_EFFECTS );
+		m_Materials.m_PortalStaticOverlay[1].Init( "models/portals/portalstaticoverlay_2", TEXTURE_GROUP_CLIENT_EFFECTS );
+		m_Materials.m_PortalStaticOverlay_Tinted.Init( "models/portals/portalstaticoverlay_tinted", TEXTURE_GROUP_CLIENT_EFFECTS );
+		m_Materials.m_PortalStaticGhostedOverlay[0].Init( "models/portals/portalstaticoverlay_1_noz", TEXTURE_GROUP_CLIENT_EFFECTS );
+		m_Materials.m_PortalStaticGhostedOverlay[1].Init( "models/portals/portalstaticoverlay_2_noz", TEXTURE_GROUP_CLIENT_EFFECTS );
+		m_Materials.m_PortalStaticGhostedOverlay_Tinted.Init( "models/portals/portalstaticoverlay_noz", TEXTURE_GROUP_CLIENT_EFFECTS );
+		m_Materials.m_Portal_Stencil_Hole.Init( "models/portals/portal_stencil_hole", TEXTURE_GROUP_CLIENT_EFFECTS );
+		m_Materials.m_Portal_Refract.Init( "models/portals/portal_refract_1", TEXTURE_GROUP_CLIENT_EFFECTS );
+
+		m_Materials.m_nDepthDoubleViewMatrixVarCache = 0;
+		m_Materials.m_PortalDepthDoubler->FindVarFast( "$alternateviewmatrix", &m_Materials.m_nDepthDoubleViewMatrixVarCache ); // Warm cache
+
+		m_Materials.m_nStaticOverlayTintedColorGradientLightVarCache = 0;
+		m_Materials.m_PortalStaticOverlay_Tinted->FindVarFast( "$PortalColorGradientLight", &m_Materials.m_nStaticOverlayTintedColorGradientLightVarCache ); // Warm cache
+
+		IMaterialVar *pPortalCoopColorPlayerOnePortalOne = m_Materials.m_PortalStaticOverlay_Tinted->FindVar( "$PortalCoopColorPlayerOnePortalOne", NULL, false );
+		if ( pPortalCoopColorPlayerOnePortalOne )
+		{
+			pPortalCoopColorPlayerOnePortalOne->GetVecValue( &( m_Materials.m_coopPlayerPortalColors[0][0].x ), 3 );
+		}
+
+		IMaterialVar *pPortalCoopColorPlayerOnePortalTwo = m_Materials.m_PortalStaticOverlay_Tinted->FindVar( "$PortalCoopColorPlayerOnePortalTwo", NULL, false );
+		if ( pPortalCoopColorPlayerOnePortalTwo )
+		{
+			pPortalCoopColorPlayerOnePortalTwo->GetVecValue( &( m_Materials.m_coopPlayerPortalColors[0][1].x ), 3 );
+		}
+
+		IMaterialVar *pPortalCoopColorPlayerTwoPortalOne = m_Materials.m_PortalStaticOverlay_Tinted->FindVar( "$PortalCoopColorPlayerTwoPortalOne", NULL, false );
+		if ( pPortalCoopColorPlayerTwoPortalOne )
+		{
+			pPortalCoopColorPlayerTwoPortalOne->GetVecValue( &( m_Materials.m_coopPlayerPortalColors[1][0].x ), 3 );
+		}
+
+		IMaterialVar *pPortalCoopColorPlayerTwoPortalTwo = m_Materials.m_PortalStaticOverlay_Tinted->FindVar( "$PortalCoopColorPlayerTwoPortalTwo", NULL, false );
+		if ( pPortalCoopColorPlayerTwoPortalTwo )
+		{
+			pPortalCoopColorPlayerTwoPortalTwo->GetVecValue( &( m_Materials.m_coopPlayerPortalColors[1][1].x ), 3 );
+		}
+
+		m_Materials.m_singlePlayerPortalColors[0] = Vector( 64.0f/255.0f, 160.0f/255.0f, 1.0f );
+		m_Materials.m_singlePlayerPortalColors[1] = Vector( 1.0f, 160.0f/255.0f, 32.0f/255.0f );
+	}
 };
+static CAutoInitBasicPropPortalDrawingMaterials s_FlatBasicPortalDrawingMaterials;
 
-static CThreadFastMutex s_PortalTeleportationLogMutex;
-static CUtlVector<PortalTeleportationLogEntry_t> s_PortalTeleportationLog;
+PropPortalRenderingMaterials_t& C_Prop_Portal::m_Materials = s_FlatBasicPortalDrawingMaterials.m_Materials;
 
-void RecieveEntityPortalledMessage( CHandle<C_BaseEntity> hEntity, CHandle<C_Portal_Base2D> hPortal, float fTime, bool bForcedDuck )
-{
-	PortalTeleportationLogEntry_t temp;
-	temp.hEntity = hEntity;
-	temp.hPortal = hPortal;
-	temp.fTeleportTime = fTime;
-	temp.bForcedDuck = bForcedDuck;
+// Throttle portal "ghosting" rendering
+ConVar portal_draw_ghosting( "portal_draw_ghosting", "1", FCVAR_NONE );
 
-	s_PortalTeleportationLogMutex.Lock();
-	s_PortalTeleportationLog.AddToTail( temp );
-	s_PortalTeleportationLogMutex.Unlock();
-}
-
-
-void ProcessPortalTeleportations( void )
-{
-	s_PortalTeleportationLogMutex.Lock();
-	for( int i = 0; i != s_PortalTeleportationLog.Count(); ++i )
-	{
-		PortalTeleportationLogEntry_t &entry = s_PortalTeleportationLog[i];
-
-		C_Portal_Base2D *pPortal = entry.hPortal;
-		if( pPortal == NULL )
-			continue;
-
-		//grab other entity's EHANDLE
-		C_BaseEntity *pEntity = entry.hEntity;
-		if( pEntity == NULL )
-			continue;
-
-		EntityPortalledMessageHandler( pEntity, pPortal, entry.fTeleportTime, entry.bForcedDuck );
-	}
-	s_PortalTeleportationLog.RemoveAll();
-	s_PortalTeleportationLogMutex.Unlock();
-}
-
-
-static ConVar portal_demohack( "portal_demohack", "0", FCVAR_ARCHIVE, "Do the demo_legacy_rollback setting to help during demo playback of going through portals." );
-
+// Determines if portals should cast light through themselves when 
+ConVar portal_transmit_light( "portal_transmit_light", "0", FCVAR_CHEAT );
+extern ConVar use_server_portal_particles;
 
 void __MsgFunc_PortalFX_Surface(bf_read &msg)
 {
@@ -252,41 +179,31 @@ void __MsgFunc_PortalFX_Surface(bf_read &msg)
 
 USER_MESSAGE_REGISTER( PortalFX_Surface );
 
-class C_PortalInitHelper : public CAutoGameSystem
-{
-	virtual bool Init()
-	{
-		//HOOK_MESSAGE( PlayerPortalled );
-		HOOK_MESSAGE( PortalFX_Surface );
-		
-		if ( portal_demohack.GetBool() )
-		{
-			ConVarRef demo_legacy_rollback_ref( "demo_legacy_rollback" );
-			demo_legacy_rollback_ref.SetValue( false ); //Portal demos are wrong if the eyes rollback as far as regular demos
-		}
-		// However, there are probably bugs with this when jump ducking, etc.
-		return true;
-	}
-};
-static C_PortalInitHelper s_PortalInitHelper;
-
-
 C_Prop_Portal::C_Prop_Portal( void )
+:	m_fStaticAmount( 0.0f ),
+	m_fSecondaryStaticAmount( 0.0f ),
+	m_fOpenAmount( 0.0f )
 {
+	if( !ms_DefaultPortalSizeInitialized )
+	{
+		ms_DefaultPortalSizeInitialized = true; // for CEG protection
+
+		//CEG_GCV_PRE();
+		ms_DefaultPortalHalfHeight = DEFAULT_PORTAL_HALF_HEIGHT;// CEG_GET_CONSTANT_VALUE(DefaultPortalHalfHeight); // only protecting one to reduce the cost of first-portal check
+		//CEG_GCV_POST();
+	}
+	m_bIsPropPortal = true;	// Member of CPortalRenderable
 	TransformedLighting.m_LightShadowHandle = CLIENTSHADOW_INVALID_HANDLE;
 	CProp_Portal_Shared::AllPortals.AddToTail( this );
+	SetPredictionEligible( true );
 }
 
 C_Prop_Portal::~C_Prop_Portal( void )
 {
-	CProp_Portal_Shared::AllPortals.FindAndRemove( this );
-	g_pPortalRender->RemovePortal( this );
+	// Shut down our effect if we have it
+	DestroyAttachedParticles();
 
-	for( int i = m_GhostRenderables.Count(); --i >= 0; )
-	{
-		delete m_GhostRenderables[i];
-	}
-	m_GhostRenderables.RemoveAll();
+	CProp_Portal_Shared::AllPortals.FindAndRemove( this );
 }
 
 void C_Prop_Portal::Spawn( void )
@@ -295,6 +212,7 @@ void C_Prop_Portal::Spawn( void )
 	SetNextClientThink( CLIENT_THINK_ALWAYS );
 
 	m_matrixThisToLinked.Identity(); //don't accidentally teleport objects to zero space
+	m_hEffect = NULL;
 	BaseClass::Spawn();
 }
 
@@ -308,7 +226,7 @@ void C_Prop_Portal::ClientThink( void )
 	bool bDidAnything = false;
 	if( m_fStaticAmount > 0.0f )
 	{
-		m_fStaticAmount -= gpGlobals->absoluteframetime;
+		m_fStaticAmount -= gpGlobals->frametime;
 		if( m_fStaticAmount < 0.0f ) 
 			m_fStaticAmount = 0.0f;
 
@@ -316,7 +234,7 @@ void C_Prop_Portal::ClientThink( void )
 	}
 	if( m_fSecondaryStaticAmount > 0.0f )
 	{
-		m_fSecondaryStaticAmount -= gpGlobals->absoluteframetime;
+		m_fSecondaryStaticAmount -= gpGlobals->frametime;
 		if( m_fSecondaryStaticAmount < 0.0f ) 
 			m_fSecondaryStaticAmount = 0.0f;
 
@@ -325,265 +243,60 @@ void C_Prop_Portal::ClientThink( void )
 
 	if( m_fOpenAmount < 1.0f )
 	{
-		m_fOpenAmount += gpGlobals->absoluteframetime * 2.0f;
+		float flSlowdown = GameTimescale()->GetCurrentTimescale();
+		m_fOpenAmount += ( gpGlobals->frametime * ( 2.0f / flSlowdown ) );
 		if( m_fOpenAmount > 1.0f ) 
 			m_fOpenAmount = 1.0f;
 
 		bDidAnything = true;
 	}
 
+	// Speculative workaround for multiplayer bug where 
+	// active and linked portals have full static.
+	// No known repro, so as a hammer just think all the time.
+	// The above logic is pretty cheap, so this shouldn't be a big deal.
+	// Also, there really isn't any more than 4 of these entities at one time, 
+	// so the upper bound is pretty small.
+#if 0
 	if( bDidAnything == false )
 	{
 		SetNextClientThink( CLIENT_THINK_NEVER );
 	}
+#endif
 }
 
-bool C_Prop_Portal::Simulate()
-{
-	BaseClass::Simulate();
-
-	//clear list of ghosted entities from last frame, and clear the clipping planes we put on them
-	for( int i = m_hGhostingEntities.Count(); --i >= 0; )
-	{
-		C_BaseEntity *pEntity = m_hGhostingEntities[i].Get();
-
-		if( pEntity != NULL )
-			pEntity->m_bEnableRenderingClipPlane = false;
-	}
-	m_hGhostingEntities.RemoveAll();
-
-
-	if( !IsActivedAndLinked() )
-	{
-		//remove all ghost renderables
-		for( int i = m_GhostRenderables.Count(); --i >= 0; )
-		{
-			delete m_GhostRenderables[i];
-		}
-		
-		m_GhostRenderables.RemoveAll();
-
-		return true;
-	}
-
-
-
-	//Find objects that are intersecting the portal and mark them for later replication on the remote portal's side
-	C_Portal_Player *pLocalPlayer = C_Portal_Player::GetLocalPlayer();
-	C_BaseViewModel *pLocalPlayerViewModel = pLocalPlayer->GetViewModel();
-
-	CBaseEntity *pEntsNearPortal[1024];
-	int iEntsNearPortal = UTIL_EntitiesInSphere( pEntsNearPortal, 1024, GetNetworkOrigin(), PORTAL_HALF_HEIGHT, 0, PARTITION_CLIENT_NON_STATIC_EDICTS );
-
-	if( iEntsNearPortal != 0 )
-	{
-		float fClipPlane[4];
-		fClipPlane[0] = m_plane_Origin.normal.x;
-		fClipPlane[1] = m_plane_Origin.normal.y;
-		fClipPlane[2] = m_plane_Origin.normal.z;
-		fClipPlane[3] = m_plane_Origin.dist - 0.3f;
-
-		for( int i = 0; i != iEntsNearPortal; ++i )
-		{
-			CBaseEntity *pEntity = pEntsNearPortal[i];
-			Assert( pEntity != NULL );
-
-			bool bIsMovable = false;
-
-			C_BaseEntity *pMoveEntity = pEntity;
-			MoveType_t moveType = MOVETYPE_NONE;
-
-			//unmoveables and doors can never get halfway in the portal
-			while ( pMoveEntity )
-			{
-				moveType = pMoveEntity->GetMoveType();
-
-				if ( !( moveType == MOVETYPE_NONE || moveType == MOVETYPE_PUSH ) )
-				{
-					bIsMovable = true;
-					pMoveEntity = NULL;
-				}
-				else
-					pMoveEntity = pMoveEntity->GetMoveParent();
-			}
-
-			if ( !bIsMovable )
-				continue;
-
-			Assert( dynamic_cast<C_Prop_Portal *>(pEntity) == NULL ); //should have been killed with (pEntity->GetMoveType() == MOVETYPE_NONE) check. Infinite recursion is infinitely bad.
-
-			if( pEntity == pLocalPlayerViewModel )
-				continue; //avoid ghosting view models
-
-			bool bActivePlayerWeapon = false;
-
-			C_BaseCombatWeapon *pWeapon = dynamic_cast<C_BaseCombatWeapon*>( pEntity );
-			if ( pWeapon )
-			{
-				C_Portal_Player *pPortalPlayer = ToPortalPlayer( pWeapon->GetOwner() );
-				if ( pPortalPlayer ) 
-				{
-					if ( pPortalPlayer->GetActiveWeapon() != pWeapon )
-						continue; // don't ghost player owned non selected weapons
-					else
-						bActivePlayerWeapon = true;
-				}
-			}
-
-			Vector ptEntCenter = pEntity->WorldSpaceCenter();
-			if( bActivePlayerWeapon )
-				ptEntCenter = pWeapon->GetOwner()->WorldSpaceCenter();
-
-			if( (m_plane_Origin.normal.Dot( ptEntCenter ) - m_plane_Origin.dist) < -5.0f )
-				continue; //entity is behind the portal, most likely behind the wall the portal is placed on
-
-			if( !CProp_Portal_Shared::IsEntityTeleportable( pEntity ) )
-				continue;
-
-			if ( bActivePlayerWeapon )
-			{
-				if( !m_PortalSimulator.EntityHitBoxExtentIsInPortalHole( pWeapon->GetOwner() ) && 
-					!m_PortalSimulator.EntityHitBoxExtentIsInPortalHole( pWeapon ) )
-					continue;
-			}
-			else if( pEntity->IsPlayer() )
-			{
-				if( !m_PortalSimulator.EntityHitBoxExtentIsInPortalHole( (C_BaseAnimating*)pEntity ) )
-					continue;
-			}
-			else
-			{
-				if( !m_PortalSimulator.EntityIsInPortalHole( pEntity ) )
-					continue;
-			}
-
-			pEntity->m_bEnableRenderingClipPlane = true;
-			memcpy( pEntity->m_fRenderingClipPlane, fClipPlane, sizeof( float ) * 4 );
-
-			EHANDLE hEnt = pEntity;
-			m_hGhostingEntities.AddToTail( hEnt );
-		}
-	}
-
-	//now, fix up our list of ghosted renderables.
-	{
-		bool *bStillInUse = (bool *)stackalloc( sizeof( bool ) * (m_GhostRenderables.Count() + m_hGhostingEntities.Count()) );
-		memset( bStillInUse, 0, sizeof( bool ) * (m_GhostRenderables.Count() + m_hGhostingEntities.Count()) );
-
-		for( int i = m_hGhostingEntities.Count(); --i >= 0; )
-		{
-			C_BaseEntity *pRenderable = m_hGhostingEntities[i].Get();
-
-			int j;
-			for( j = m_GhostRenderables.Count(); --j >= 0; )
-			{
-				if( pRenderable == m_GhostRenderables[j]->m_pGhostedRenderable )
-				{
-					bStillInUse[j] = true;
-					m_GhostRenderables[j]->PerFrameUpdate();
-					break;
-				}
-			}
-			
-			if ( j >= 0 )
-				continue;
-
-			//newly added
-			C_BaseEntity *pEntity = m_hGhostingEntities[i];
-
-			bool bIsHeldWeapon = false;
-			C_BaseCombatWeapon *pWeapon = dynamic_cast<C_BaseCombatWeapon*>( pEntity );
-			if ( pWeapon && ToPortalPlayer( pWeapon->GetOwner() ) )
-				bIsHeldWeapon = true;
-
-			bool transparent = false;
-
-			if (GetRenderAlpha() != 255)
-				transparent = true;
-				
-			C_PortalGhostRenderable *pNewGhost = new C_PortalGhostRenderable( this,
-																				pRenderable, 
-																				transparent,
-																				m_matrixThisToLinked, 
-																				m_fGhostRenderablesClip,
-																				(pEntity == pLocalPlayer || bIsHeldWeapon) );
-			Assert( pNewGhost );
-
-			bStillInUse[ m_GhostRenderables.AddToTail( pNewGhost ) ] = true;
-			pNewGhost->PerFrameUpdate();
-
-			// HACK - I just copied the CClientTools::OnEntityCreated code here,
-			// since the ghosts aren't really entities - they don't have an entindex,
-			// they're not in the entitylist, and they get created during Simulate(),
-			// which isn't valid for real entities, since it changes the simulate list
-			// -jd
-			if ( ToolsEnabled() && clienttools->IsInRecordingMode() )
-			{
-				// Send deletion message to tool interface
-				KeyValues *kv = new KeyValues( "created" );
-				HTOOLHANDLE h = clienttools->AttachToEntity( pNewGhost );
-				ToolFramework_PostToolMessage( h, kv );
-
-				kv->deleteThis();
-			}
-		}
-
-		//remove unused ghosts
-		for ( int i = m_GhostRenderables.Count(); --i >= 0; )
-		{
-			if ( bStillInUse[i] )
-				continue;
-
-			// HACK - I just copied the CClientTools::OnEntityDeleted code here,
-			// since the ghosts aren't really entities - they don't have an entindex,
-			// they're not in the entitylist, and they get created during Simulate(),
-			// which isn't valid for real entities, since it changes the simulate list
-			// -jd
-			C_PortalGhostRenderable *pGhost = m_GhostRenderables[i];
-			if ( ToolsEnabled() )
-			{
-				HTOOLHANDLE handle = pGhost ? pGhost->GetToolHandle() : (HTOOLHANDLE)0;
-				if ( handle != (HTOOLHANDLE)0 )
-				{
-					if ( clienttools->IsInRecordingMode() )
-					{
-						// Send deletion message to tool interface
-						KeyValues *kv = new KeyValues( "deleted" );
-						ToolFramework_PostToolMessage( handle, kv );
-						kv->deleteThis();
-					}
-
-					clienttools->DetachFromEntity( pGhost );
-				}
-			}
-
-			delete pGhost;
-			m_GhostRenderables.FastRemove( i );
-		}
-	}
-
-	//ensure the shared clip plane is up to date
-	C_Prop_Portal *pLinkedPortal = m_hLinkedPortal.Get();
-
-	m_fGhostRenderablesClip[0] = pLinkedPortal->m_plane_Origin.normal.x;
-	m_fGhostRenderablesClip[1] = pLinkedPortal->m_plane_Origin.normal.y;
-	m_fGhostRenderablesClip[2] = pLinkedPortal->m_plane_Origin.normal.z;
-	m_fGhostRenderablesClip[3] = pLinkedPortal->m_plane_Origin.dist - 0.75f;
-
-	return true;
-}
 
 void C_Prop_Portal::UpdateOnRemove( void )
 {
+	/*
 	if( TransformedLighting.m_LightShadowHandle != CLIENTSHADOW_INVALID_HANDLE )
 	{
 		g_pClientShadowMgr->DestroyFlashlight( TransformedLighting.m_LightShadowHandle );
 		TransformedLighting.m_LightShadowHandle = CLIENTSHADOW_INVALID_HANDLE;
 	}
+	*/
 
-	g_pPortalRender->RemovePortal( this );
-	
+	// Kill any dlight we may have
+	if( TransformedLighting.m_pEntityLight )
+	{
+		TransformedLighting.m_pEntityLight->die = gpGlobals->curtime;
+		TransformedLighting.m_pEntityLight = NULL;
+	}
+
+	// Shut down our effect if we have it
+	DestroyAttachedParticles();
+
 	BaseClass::UpdateOnRemove();
+}
+
+void C_Prop_Portal::OnRestore( void )
+{
+	BaseClass::OnRestore();
+
+	if ( !m_hEffect && !m_hEffect.IsValid() && IsActive() )
+	{
+		CreateAttachedParticles();
+	}
 }
 
 void C_Prop_Portal::OnNewParticleEffect( const char *pszParticleName, CNewParticleEffect *pNewParticleEffect )
@@ -596,11 +309,11 @@ void C_Prop_Portal::OnNewParticleEffect( const char *pszParticleName, CNewPartic
 		int iPortalCount = CProp_Portal_Shared::AllPortals.Count();
 		if( iPortalCount != 0 )
 		{
-			C_Prop_Portal **pPortals = CProp_Portal_Shared::AllPortals.Base();
+			CProp_Portal **pPortals = CProp_Portal_Shared::AllPortals.Base();
 			for( int i = 0; i != iPortalCount; ++i )
 			{
-				C_Prop_Portal *pTempPortal = pPortals[i];
-				if ( pTempPortal != this && pTempPortal->m_bActivated )
+				CProp_Portal *pTempPortal = pPortals[i];
+				if ( pTempPortal != this && pTempPortal->IsActive() )
 				{
 					Vector vPosition = pTempPortal->GetAbsOrigin();
 
@@ -622,433 +335,8 @@ void C_Prop_Portal::OnNewParticleEffect( const char *pszParticleName, CNewPartic
 	}
 }
 
-void C_Prop_Portal::OnPreDataChanged( DataUpdateType_t updateType )
-{
-	//PreDataChanged.m_matrixThisToLinked = m_matrixThisToLinked;
-	PreDataChanged.m_bIsPortal2 = m_bIsPortal2;
-	PreDataChanged.m_bActivated = m_bActivated;
-	PreDataChanged.m_vOrigin = GetNetworkOrigin();
-	PreDataChanged.m_qAngles = GetNetworkAngles();
-	PreDataChanged.m_hLinkedTo = m_hLinkedPortal.Get();
-
-	BaseClass::OnPreDataChanged( updateType );
-}
-
-//ConVar r_portal_light_innerangle( "r_portal_light_innerangle", "90.0", FCVAR_CLIENTDLL );
-//ConVar r_portal_light_outerangle( "r_portal_light_outerangle", "90.0", FCVAR_CLIENTDLL );
-//ConVar r_portal_light_forward( "r_portal_light_forward", "0.0", FCVAR_CLIENTDLL );
-
-void C_Prop_Portal::OnDataChanged( DataUpdateType_t updateType )
-{
-	C_Prop_Portal *pRemote = m_hLinkedPortal;
-	m_pLinkedPortal = pRemote;
-	GetVectors( &m_vForward, &m_vRight, &m_vUp );
-	m_ptOrigin = GetNetworkOrigin();
-
-	bool bPortalMoved = ( (PreDataChanged.m_vOrigin != m_ptOrigin ) ||
-						(PreDataChanged.m_qAngles != GetNetworkAngles()) || 
-						(PreDataChanged.m_bActivated == false) ||
-						(PreDataChanged.m_bIsPortal2 != m_bIsPortal2) );
-
-	bool bNewLinkage = ( (PreDataChanged.m_hLinkedTo.Get() != m_hLinkedPortal.Get()) );
-	if( bNewLinkage )
-		m_PortalSimulator.DetachFromLinked(); //detach now so moves are theoretically faster
-
-	if( m_bActivated )
-	{
-		//generic stuff we'll need
-		Vector vRemoteUp, vRemoteRight, vRemoteForward, ptRemoteOrigin;
-		if( pRemote )
-		{
-			pRemote->GetVectors( &vRemoteForward, &vRemoteRight, &vRemoteUp );
-			ptRemoteOrigin = pRemote->GetNetworkOrigin();
-		}
-		g_pPortalRender->AddPortal( this ); //will know if we're already added and avoid adding twice
-		 
-		if( bPortalMoved )
-		{			
-			Vector ptForwardOrigin = m_ptOrigin + m_vForward;// * 3.0f;
-			Vector vScaledRight = m_vRight * (PORTAL_HALF_WIDTH * 0.95f);
-			Vector vScaledUp = m_vUp * (PORTAL_HALF_HEIGHT  * 0.95f);
-
-			m_PortalSimulator.MoveTo( GetNetworkOrigin(), GetNetworkAngles() );
-
-			//update our associated portal environment
-			//CPortal_PhysicsEnvironmentMgr::CreateEnvironment( this );
-
-			m_fOpenAmount = 0.0f;
-			//m_fStaticAmount = 1.0f; // This will cause the portal we are opening to show the static effect
-			SetNextClientThink( CLIENT_THINK_ALWAYS ); //we need this to help open up
-
-			//add static to the remote
-			if( pRemote )
-			{
-				pRemote->m_fStaticAmount = 1.0f; // This will cause the other portal to show the static effect
-				pRemote->SetNextClientThink( CLIENT_THINK_ALWAYS );
-			}
-
-			dlight_t *pFakeLight = NULL;
-			ClientShadowHandle_t ShadowHandle = CLIENTSHADOW_INVALID_HANDLE;
-			if( pRemote )
-			{
-				pFakeLight = pRemote->TransformedLighting.m_pEntityLight;
-				ShadowHandle = pRemote->TransformedLighting.m_LightShadowHandle;
-				AssertMsg( (ShadowHandle == CLIENTSHADOW_INVALID_HANDLE) || (TransformedLighting.m_LightShadowHandle == CLIENTSHADOW_INVALID_HANDLE), "Two shadow handles found, should only have one shared handle" );
-				AssertMsg( (pFakeLight == NULL) || (TransformedLighting.m_pEntityLight == NULL), "two lights found, should only have one shared light" );
-				pRemote->TransformedLighting.m_pEntityLight = NULL;
-				pRemote->TransformedLighting.m_LightShadowHandle = CLIENTSHADOW_INVALID_HANDLE;
-			}
-
-			if( TransformedLighting.m_pEntityLight )
-			{
-				pFakeLight = TransformedLighting.m_pEntityLight;
-				TransformedLighting.m_pEntityLight = NULL;
-			}
-
-			if( TransformedLighting.m_LightShadowHandle != CLIENTSHADOW_INVALID_HANDLE )
-			{
-				ShadowHandle = TransformedLighting.m_LightShadowHandle;
-				TransformedLighting.m_LightShadowHandle = CLIENTSHADOW_INVALID_HANDLE;
-			}
-
-			
-
-
-			if( pFakeLight != NULL )
-			{
-				//turn off the light so it doesn't interfere with absorbed light calculations
-				pFakeLight->color.r = 0;
-				pFakeLight->color.g = 0;
-				pFakeLight->color.b = 0;
-				pFakeLight->flags = DLIGHT_NO_WORLD_ILLUMINATION | DLIGHT_NO_MODEL_ILLUMINATION;
-				pFakeLight->radius = 0.0f;
-				render->TouchLight( pFakeLight );
-			}
-
-			if( pRemote ) //now, see if we need to fake light coming through a portal
-			{
-#if 0
-				Vector vLightAtRemotePortal( vec3_origin ), vLightAtLocalPortal( vec3_origin );
-
-				if( pRemote ) //get lighting at remote portal
-				{
-					engine->ComputeLighting( ptRemoteOrigin, NULL, false, vLightAtRemotePortal, NULL );
-				}
-
-				//now get lighting at the local portal
-				{
-					engine->ComputeLighting( ptOrigin, NULL, false, vLightAtLocalPortal, NULL );
-				}
-
-				//Vector vLightDiff = vLightAtLocalPortal - vLightAtRemotePortal;
-				//if( vLightDiff.Length() > 0.6f ) //a significant difference in lighting, remember that the light vectors are NOT normalized in length
-				{
-					//time to fake some light coming through the greater intensity portal to the lower intensity
-					
-					//are we transferring light from the local portal to the remote?
-					bool bLocalToRemote = (vLightAtLocalPortal.Length() > vLightAtRemotePortal.Length());					
-
-					Vector ptLightOrigin, vLightForward, vColor, vClampedColor;
-					float fColorScale;
-					{
-						if( bLocalToRemote )
-						{
-							vColor = vLightAtLocalPortal;
-							vLightForward = vRemoteForward;
-							ptLightOrigin = ptRemoteOrigin;
-						}
-						else
-						{
-							vColor = vLightAtRemotePortal;
-							vLightForward = vForward;
-							ptLightOrigin = ptOrigin;
-						}
-
-						//clamp color values
-						fColorScale = vColor.x;
-						if( vColor.y > fColorScale )
-							fColorScale = vColor.y;
-						if( vColor.z > fColorScale )
-							fColorScale = vColor.z;
-
-						if( fColorScale > 1.0f )
-							vClampedColor = vColor * (1.0f / fColorScale);
-						else
-							vClampedColor = vColor;
-						
-						/*if( vColor.x < 0.0f ) 
-							vColor.x = 0.0f;
-						if( vColor.x > 1.0f ) 
-							vColor.x = 1.0f;
-
-						if( vColor.y < 0.0f ) 
-							vColor.y = 0.0f;
-						if( vColor.y > 1.0f ) 
-							vColor.y = 1.0f;
-
-						if( vColor.z < 0.0f ) 
-							vColor.z = 0.0f;
-						if( vColor.z > 1.0f ) 
-							vColor.z = 1.0f;*/
-					}
-
-
-					if( pFakeLight == NULL )
-						pFakeLight = effects->CL_AllocElight( 0 ); //is there a difference between DLight and ELight when only lighting ents?
-
-					if( pFakeLight != NULL ) //be absolutely sure that light allocation hasn't failed
-					{
-						if( bLocalToRemote )
-						{
-							//local light is greater, fake at remote portal
-							pRemote->TransformedLighting.m_pEntityLight = pFakeLight;
-							pFakeLight->key = pRemote->index;							
-						}
-						else
-						{
-							//remote light is greater, fake at local portal
-							TransformedLighting.m_pEntityLight = pFakeLight;
-							pFakeLight->key = index;					
-						}
-
-						pFakeLight->die = gpGlobals->curtime + 1e10;
-						pFakeLight->flags = DLIGHT_NO_WORLD_ILLUMINATION;
-						pFakeLight->minlight = 0.0f;
-						pFakeLight->radius = 500.0f;
-						pFakeLight->m_InnerAngle = 0.0f; //r_portal_light_innerangle.GetFloat();
-						pFakeLight->m_OuterAngle = 120.0f; //r_portal_light_outerangle.GetFloat();
-						pFakeLight->style = 0;
-						
-						pFakeLight->origin = ptLightOrigin;
-						pFakeLight->m_Direction = vLightForward;
-
-						pFakeLight->color.r = vClampedColor.x * 255;
-						pFakeLight->color.g = vClampedColor.y * 255;
-						pFakeLight->color.b = vClampedColor.z * 255;
-						pFakeLight->color.exponent = ((signed int)(((*((unsigned int *)(&fColorScale))) & 0x7F800000) >> 23)) - 125; //strip the exponent from our maximum color
-						//if( pFakeLight->color.exponent < 4 )
-						//	pFakeLight->color.exponent = 4;
-
-						render->TouchLight( pFakeLight );
-					}
-
-					FlashlightState_t state;
-					{
-						state.m_NearZ = 4.0f;
-						state.m_FarZ = 500.0f;
-						state.m_nSpotlightTextureFrame = 0;
-						state.m_pSpotlightTexture = PortalDrawingMaterials::PortalLightTransfer_ShadowTexture;
-						state.m_fConstantAtten = 0.0f;
-						state.m_fLinearAtten = 500.0f;
-						state.m_fQuadraticAtten = 0.0f;			
-						state.m_fHorizontalFOVDegrees = 120.0f;
-						state.m_fVerticalFOVDegrees = 120.0f;
-
-						state.m_bEnableShadows = false;
-						state.m_vecLightOrigin = ptLightOrigin;
-
-						Vector vLightRight, vLightUp( 0.0f, 0.0f, 1.0f );
-						if( fabs( DotProduct( vLightUp, vLightForward ) ) > 0.99f )
-							vLightUp.Init( 0.0f, 1.0f, 0.0f );	// Don't want vLightUp and vLightForward to be parallel
-
-						CrossProduct( vLightUp, vLightForward, vLightRight );
-						VectorNormalize( vLightRight );
-						CrossProduct( vLightForward, vLightRight, vLightUp );
-						VectorNormalize( vLightUp );
-
-						BasisToQuaternion( vLightForward, vLightRight, vLightUp, state.m_quatOrientation );
-
-						state.m_Color[0] = vColor.x * 0.35f;
-						state.m_Color[1] = vColor.y * 0.35f;
-						state.m_Color[2] = vColor.z * 0.35f;
-						state.m_Color[3] = 1.0f;
-					}
-
-					if( ShadowHandle != CLIENTSHADOW_INVALID_HANDLE )
-					{
-						g_pClientShadowMgr->UpdateFlashlightState( ShadowHandle, state ); //simpler update for existing handle
-						g_pClientShadowMgr->UpdateProjectedTexture( ShadowHandle, true );
-					}
-
-					if( ShadowHandle == CLIENTSHADOW_INVALID_HANDLE )
-					{
-						ShadowHandle = g_pClientShadowMgr->CreateFlashlight( state );
-						if( ShadowHandle != CLIENTSHADOW_INVALID_HANDLE )
-							g_pClientShadowMgr->UpdateProjectedTexture( ShadowHandle, true );
-					}
-
-
-					if( bLocalToRemote )
-						pRemote->TransformedLighting.m_LightShadowHandle = ShadowHandle;				
-					else
-						TransformedLighting.m_LightShadowHandle = ShadowHandle;					
-				}
-#endif
-			}
-		}
-	}
-	else
-	{
-		g_pPortalRender->RemovePortal( this );
-
-		m_PortalSimulator.DetachFromLinked();
-
-		if( TransformedLighting.m_pEntityLight )
-		{
-			TransformedLighting.m_pEntityLight->die = gpGlobals->curtime;
-			TransformedLighting.m_pEntityLight = NULL;
-		}
-
-		if( TransformedLighting.m_LightShadowHandle != CLIENTSHADOW_INVALID_HANDLE )
-		{
-			g_pClientShadowMgr->DestroyFlashlight( TransformedLighting.m_LightShadowHandle );
-			TransformedLighting.m_LightShadowHandle = CLIENTSHADOW_INVALID_HANDLE;
-		}
-	}
-
-	if( (PreDataChanged.m_hLinkedTo.Get() != m_hLinkedPortal.Get()) && m_hLinkedPortal.Get() )
-		m_PortalSimulator.AttachTo( &m_hLinkedPortal.Get()->m_PortalSimulator );
-	
-
-	BaseClass::OnDataChanged( updateType );
-	
-	if( bNewLinkage || bPortalMoved )
-	{
-		PortalMoved(); //updates link matrix and internals
-	}
-
-	if ( bPortalMoved )
-	{
-		UpdateOriginPlane();
-	}
-
-	if( bPortalMoved || bNewLinkage )
-	{
-		UpdateGhostRenderables();
-		if( pRemote )
-			pRemote->UpdateGhostRenderables();
-	}
-}
-
-void C_Prop_Portal::UpdateGhostRenderables( void )
-{
-	//lastly, update all ghost renderables
-	for( int i = m_GhostRenderables.Count(); --i >= 0; )
-	{
-		m_GhostRenderables[i]->m_matGhostTransform = m_matrixThisToLinked;;
-	}
-}
-
-extern ConVar building_cubemaps;
-
-int C_Prop_Portal::DrawModel( int flags, const RenderableInstance_t& instance )
-{
-	// Don't draw in cube maps because it makes an ugly colored splotch
-	if( m_bActivated == false || building_cubemaps.GetBool() )
-		return 0;
-
-	int iRetVal = 0;
-
-	C_Prop_Portal *pLinkedPortal = m_hLinkedPortal.Get();
-
-	if ( pLinkedPortal == NULL )
-	{
-		SetNextClientThink( CLIENT_THINK_ALWAYS ); // we need this to help fade out
-	}
-
-	if ( !g_pPortalRender->ShouldUseStencilsToRenderPortals() )
-	{
-		DrawPortal();
-	}
-
-	if( WillUseDepthDoublerThisDraw() )
-		m_fSecondaryStaticAmount = 0.0f;
-
-	iRetVal = BaseClass::DrawModel( flags, instance );
-
-	return iRetVal;
-}
-
-
-//-----------------------------------------------------------------------------
-// Handle recording for the SFM
-//-----------------------------------------------------------------------------
-void C_Prop_Portal::GetToolRecordingState( KeyValues *msg )
-{
-	if ( !ToolsEnabled() )
-		return;
-
-	VPROF_BUDGET( "C_Prop_Portal::GetToolRecordingState", VPROF_BUDGETGROUP_TOOLS );
-	BaseClass::GetToolRecordingState( m_bActivated, msg );
-
-	if ( !m_bActivated )
-	{
-		BaseEntityRecordingState_t *pBaseEntity = (BaseEntityRecordingState_t*)msg->GetPtr( "baseentity" );
-		pBaseEntity->m_bVisible = false;
-	}
-}
-
-void C_Prop_Portal::UpdateOriginPlane( void )
-{
-	//setup our origin plane
-	GetVectors( &m_plane_Origin.normal, NULL, NULL );
-	m_plane_Origin.dist = m_plane_Origin.normal.Dot( GetAbsOrigin() );
-	m_plane_Origin.signbits = SignbitsForPlane( &m_plane_Origin );
-
-	Vector vAbsNormal;
-	vAbsNormal.x = fabs(m_plane_Origin.normal.x);
-	vAbsNormal.y = fabs(m_plane_Origin.normal.y);
-	vAbsNormal.z = fabs(m_plane_Origin.normal.z);
-
-	if( vAbsNormal.x > vAbsNormal.y )
-	{
-		if( vAbsNormal.x > vAbsNormal.z )
-		{
-			if( vAbsNormal.x > 0.999f )
-				m_plane_Origin.type = PLANE_X;
-			else
-				m_plane_Origin.type = PLANE_ANYX;
-		}
-		else
-		{
-			if( vAbsNormal.z > 0.999f )
-				m_plane_Origin.type = PLANE_Z;
-			else
-				m_plane_Origin.type = PLANE_ANYZ;
-		}
-	}
-	else
-	{
-		if( vAbsNormal.y > vAbsNormal.z )
-		{
-			if( vAbsNormal.y > 0.999f )
-				m_plane_Origin.type = PLANE_Y;
-			else
-				m_plane_Origin.type = PLANE_ANYY;
-		}
-		else
-		{
-			if( vAbsNormal.z > 0.999f )
-				m_plane_Origin.type = PLANE_Z;
-			else
-				m_plane_Origin.type = PLANE_ANYZ;
-		}
-	}
-}
-
-void C_Prop_Portal::SetIsPortal2( bool bValue )
-{
-	m_bIsPortal2 = bValue;
-}
-
-bool C_Prop_Portal::IsActivedAndLinked( void ) const
-{
-	return ( m_bActivated && m_hLinkedPortal.Get() != NULL );
-}
-
 void C_Prop_Portal::CreateFizzleEffect( C_BaseEntity *pOwner, int iEffect, Vector vecOrigin, QAngle qAngles, int nTeam, int nPortalNum )
 {
-#if 1
 	Color color = UTIL_Portal_Color_Particles( nPortalNum, nTeam );
 
 	Vector vColor;
@@ -1097,26 +385,744 @@ void C_Prop_Portal::CreateFizzleEffect( C_BaseEntity *pOwner, int iEffect, Vecto
 
 	if ( bCreated )
 	{
-		//Color rgbaColor = Color( vColor.x, vColor.y, vColor.z, 255 );
-		//CreateAttachedParticles( &rgbaColor );
+		Color rgbaColor = Color( vColor.x, vColor.y, vColor.z, 255 );
+		CreateAttachedParticles( &rgbaColor );
 	}
-#endif
+}
+
+
+void C_Prop_Portal::OnPortalMoved( void )
+{
+	if( IsActive() )
+	{
+		if( !IsMobile() )
+		{
+			if( !GetPredictable() || (prediction->InPrediction() && prediction->IsFirstTimePredicted()) )
+			{
+				m_fOpenAmount = 0.0f;
+				SetNextClientThink( CLIENT_THINK_ALWAYS ); //we need this to help open up
+				
+				C_Prop_Portal *pRemote = (C_Prop_Portal *)m_hLinkedPortal.Get();
+				//add static to the remote
+				if( pRemote )
+				{
+					pRemote->m_fStaticAmount = 1.0f; // This will cause the other portal to show the static effect
+					pRemote->SetNextClientThink( CLIENT_THINK_ALWAYS );
+				}
+			}
+		}
+
+		UpdateTransformedLighting();
+
+		//FIXME:
+		//C_BaseProjectedEntity::TestAllForProjectionChanges();
+	}
+
+	BaseClass::OnPortalMoved();
+}
+
+void C_Prop_Portal::OnActiveStateChanged( void )
+{
+	if( IsActive() )
+	{
+		// UpdateTransformedLighting();
+		if( !GetPredictable() || (prediction->InPrediction() && prediction->IsFirstTimePredicted()) )
+		{
+			m_fOpenAmount = 0.0f;
+			m_fStaticAmount = 1.0f;
+			SetNextClientThink( CLIENT_THINK_ALWAYS ); //we need this to help open up
+
+			C_Prop_Portal *pRemote = (C_Prop_Portal *)m_hLinkedPortal.Get();
+			//add static to the remote
+			if( pRemote )
+			{
+				pRemote->m_fStaticAmount = 1.0f; // This will cause the other portal to show the static effect
+				pRemote->SetNextClientThink( CLIENT_THINK_ALWAYS );
+			}
+		}
+	}
+	else
+	{
+		if( TransformedLighting.m_pEntityLight )
+		{
+			TransformedLighting.m_pEntityLight->die = gpGlobals->curtime;
+			TransformedLighting.m_pEntityLight = NULL;
+		}
+
+		// the portal closed
+		DestroyAttachedParticles();
+		DoFizzleEffect( PORTAL_FIZZLE_CLOSE, false );
+
+		/*
+		if( TransformedLighting.m_LightShadowHandle != CLIENTSHADOW_INVALID_HANDLE )
+		{
+			g_pClientShadowMgr->DestroyFlashlight( TransformedLighting.m_LightShadowHandle );
+			TransformedLighting.m_LightShadowHandle = CLIENTSHADOW_INVALID_HANDLE;
+		}
+		*/
+	}
+
+	BaseClass::OnActiveStateChanged();
+}
+
+
+void C_Prop_Portal::OnLinkageChanged( C_Portal_Base2D *pOldLinkage )
+{
+	if ( IsActive() )
+	{
+		CreateAttachedParticles();
+	}
+
+	if( m_hLinkedPortal.Get() != NULL )
+	{
+		UpdateTransformedLighting();
+	}
+	/*
+	else
+	{
+		if( TransformedLighting.m_pEntityLight )
+		{
+			TransformedLighting.m_pEntityLight->die = gpGlobals->curtime;
+			TransformedLighting.m_pEntityLight = NULL;
+		}
+
+		if( TransformedLighting.m_LightShadowHandle != CLIENTSHADOW_INVALID_HANDLE )
+		{
+			g_pClientShadowMgr->DestroyFlashlight( TransformedLighting.m_LightShadowHandle );
+			TransformedLighting.m_LightShadowHandle = CLIENTSHADOW_INVALID_HANDLE;
+		}
+	}
+	*/
+}
+
+void C_Prop_Portal::CreateAttachedParticles( Color *pColors /*= NULL*/ )
+{
+	DestroyAttachedParticles();
+
+	if ( !GameRules()->IsMultiplayer() && use_server_portal_particles.GetBool() )
+		return;
+
+	C_BaseAnimating::PushAllowBoneAccess( true, false, "portalparticles" );
+
+	// create a new effect for this portal
+	mdlcache->BeginLock();
+	m_hEffect = ParticleProp()->Create( m_bIsPortal2 ? "portal_edge_reverse" : "portal_edge", PATTACH_POINT_FOLLOW, "particles" );
+	mdlcache->EndLock();
+	if ( m_hEffect.IsValid() )
+	{
+		Color clrPortal;
+
+		if ( !pColors )
+		{
+			int nTeam = GetTeamNumber();
+			C_BasePlayer *pPlayer = GetPredictionOwner();
+			if ( pPlayer )
+			{
+				nTeam = pPlayer->GetTeamNumber();
+			}
+
+			clrPortal = UTIL_Portal_Color_Particles( (m_bIsPortal2)?(2):(1), nTeam );
+			pColors = &clrPortal;
+		}
+
+		const Vector vecPortalColor( ((float)pColors->r()), 
+									 ((float)pColors->g()), 
+									 ((float)pColors->b()) );
+		m_hEffect->SetControlPoint( 7, vecPortalColor );
+	}
+
+	C_BaseAnimating::PopBoneAccess( "portalparticles" );
+}
+
+void C_Prop_Portal::DestroyAttachedParticles( void )
+{
+	// If there's already a different stream particle effect, get rid of it.
+	// Shut down our effect if we have it
+	if ( m_hEffect && m_hEffect.IsValid() )
+	{
+		ParticleProp()->StopEmission( m_hEffect, false, true, false, true );
+		m_hEffect = NULL;
+	}
+}
+
+//ConVar r_portal_light_innerangle( "r_portal_light_innerangle", "90.0", FCVAR_CLIENTDLL );
+//ConVar r_portal_light_outerangle( "r_portal_light_outerangle", "90.0", FCVAR_CLIENTDLL );
+//ConVar r_portal_light_forward( "r_portal_light_forward", "0.0", FCVAR_CLIENTDLL );
+ConVar r_portal_use_dlights( "r_portal_use_dlights", "0", FCVAR_CLIENTDLL );
+
+void C_Prop_Portal::UpdateTransformedLighting( void )
+{
+	// C_Prop_Portal *pRemote = (C_Prop_Portal *)m_hLinkedPortal.Get();
+	
+	Vector ptForwardOrigin = m_ptOrigin + m_vForward;// * 3.0f;
+	Vector vScaledRight = m_vRight; //* (GetHalfWidth() * 0.95f);
+	Vector vScaledUp = m_vUp * (GetHalfHeight() * 0.95f);
+
+	dlight_t *pFakeLight = NULL;
+	// ClientShadowHandle_t ShadowHandle = CLIENTSHADOW_INVALID_HANDLE;
+	/*
+	if( pRemote )
+	{
+		pFakeLight = pRemote->TransformedLighting.m_pEntityLight;
+		// ShadowHandle = pRemote->TransformedLighting.m_LightShadowHandle;
+		// AssertMsg( (ShadowHandle == CLIENTSHADOW_INVALID_HANDLE) || (TransformedLighting.m_LightShadowHandle == CLIENTSHADOW_INVALID_HANDLE), "Two shadow handles found, should only have one shared handle" );
+		AssertMsg( (pFakeLight == NULL) || (TransformedLighting.m_pEntityLight == NULL), "two lights found, should only have one shared light" );
+		pRemote->TransformedLighting.m_pEntityLight = NULL;
+		// pRemote->TransformedLighting.m_LightShadowHandle = CLIENTSHADOW_INVALID_HANDLE;
+	}
+	*/
+
+	if( TransformedLighting.m_pEntityLight )
+	{
+		pFakeLight = TransformedLighting.m_pEntityLight;
+		TransformedLighting.m_pEntityLight = NULL;
+	}
+
+	/*
+	if( TransformedLighting.m_LightShadowHandle != CLIENTSHADOW_INVALID_HANDLE )
+	{
+		ShadowHandle = TransformedLighting.m_LightShadowHandle;
+		TransformedLighting.m_LightShadowHandle = CLIENTSHADOW_INVALID_HANDLE;
+	}
+	*/
+
+	/*
+	if( pFakeLight != NULL )
+	{
+		//turn off the light so it doesn't interfere with absorbed light calculations
+		pFakeLight->color.r = 0;
+		pFakeLight->color.g = 0;
+		pFakeLight->color.b = 0;
+		pFakeLight->flags = DLIGHT_NO_WORLD_ILLUMINATION | DLIGHT_NO_MODEL_ILLUMINATION;
+		pFakeLight->radius = 0.0f;
+		render->TouchLight( pFakeLight );
+	}
+	*/
+
+	// if ( pRemote /*&& portal_transmit_light.GetBool()*/ ) //now, see if we need to fake light coming through a portal
+	{			
+		/*
+		Vector vLightAtRemotePortal( vec3_origin ), vLightAtLocalPortal( vec3_origin );
+
+		if( pRemote ) //get lighting at remote portal
+		{
+			engine->ComputeLighting( pRemote->m_ptOrigin, NULL, false, vLightAtRemotePortal, NULL );
+		}
+
+		//now get lighting at the local portal
+		{
+			engine->ComputeLighting( m_ptOrigin, NULL, false, vLightAtLocalPortal, NULL );
+		}
+		*/
+
+		//Vector vLightDiff = vLightAtLocalPortal - vLightAtRemotePortal;
+		//if( vLightDiff.Length() > 0.6f ) //a significant difference in lighting, remember that the light vectors are NOT normalized in length
+		{
+			//time to fake some light coming through the greater intensity portal to the lower intensity
+			
+			//are we transferring light from the local portal to the remote?
+			Vector ptLightOrigin, vLightForward, vColor, vClampedColor;
+			float fColorScale;
+			{
+				int nTeam = GetTeamNumber();
+				C_BasePlayer *pPlayer = GetPredictionOwner();
+				if ( pPlayer )
+					nTeam = pPlayer->GetTeamNumber();
+
+				Color clrPortal = UTIL_Portal_Color( (m_bIsPortal2)?(2):(1), nTeam );
+				Vector vecPortalColor
+					(
+						(float)(clrPortal.r()) / 255.0f, 
+						(float)(clrPortal.g()) / 255.0f, 
+						(float)(clrPortal.b()) / 255.0f	
+					);
+
+				/*
+				if ( bLocalToRemote )
+				{
+					vColor = vecPortalColor;
+					vLightForward = pRemote->m_vForward;
+					ptLightOrigin = pRemote->m_ptOrigin;
+				}
+				else
+				*/
+				{
+					vColor = vecPortalColor;
+					vLightForward = m_vForward;
+					ptLightOrigin = m_ptOrigin;
+				}
+
+				//clamp color values
+				fColorScale = vColor.x;
+				if( vColor.y > fColorScale )
+					fColorScale = vColor.y;
+				if( vColor.z > fColorScale )
+					fColorScale = vColor.z;
+
+				if( fColorScale > 1.0f )
+					vClampedColor = vColor * (1.0f / fColorScale);
+				else
+					vClampedColor = vColor;
+				
+				/*if( vColor.x < 0.0f ) 
+					vColor.x = 0.0f;
+				if( vColor.x > 1.0f ) 
+					vColor.x = 1.0f;
+
+				if( vColor.y < 0.0f ) 
+					vColor.y = 0.0f;
+				if( vColor.y > 1.0f ) 
+					vColor.y = 1.0f;
+
+				if( vColor.z < 0.0f ) 
+					vColor.z = 0.0f;
+				if( vColor.z > 1.0f ) 
+					vColor.z = 1.0f;*/
+			}
+
+			// Turn on the dlight
+			if ( r_portal_use_dlights.GetBool() )
+			{
+				if( pFakeLight == NULL )
+					pFakeLight = effects->CL_AllocDlight( LIGHT_INDEX_TE_DYNAMIC + entindex() ); //is there a difference between DLight and ELight when only lighting ents?
+			}
+
+			if ( pFakeLight != NULL ) //be absolutely sure that light allocation hasn't failed
+			{
+				/*
+				if( bLocalToRemote )
+				{
+					//local light is greater, fake at remote portal
+					pRemote->TransformedLighting.m_pEntityLight = pFakeLight;
+					pFakeLight->key = pRemote->index;							
+				}
+				else
+				*/
+				{
+					//remote light is greater, fake at local portal
+					TransformedLighting.m_pEntityLight = pFakeLight;
+					pFakeLight->key = index;					
+				}
+
+				pFakeLight->die = gpGlobals->curtime + 1e10;
+				pFakeLight->flags = 0; // DLIGHT_NO_WORLD_ILLUMINATION;
+				pFakeLight->minlight = 0.0f;
+				pFakeLight->radius = 128.0f;
+				pFakeLight->m_InnerAngle = 0.0f; //r_portal_light_innerangle.GetFloat();
+				pFakeLight->m_OuterAngle = 120.0f; //r_portal_light_outerangle.GetFloat();
+				pFakeLight->style = 0;
+				
+				pFakeLight->origin = ptLightOrigin;
+				pFakeLight->m_Direction = vLightForward;
+
+				pFakeLight->color.r = vClampedColor.x * 255;
+				pFakeLight->color.g = vClampedColor.y * 255;
+				pFakeLight->color.b = vClampedColor.z * 255;
+				pFakeLight->color.exponent = 0.0f;
+
+				// pFakeLight->color.exponent = ((signed int)(((*((unsigned int *)(&fColorScale))) & 0x7F800000) >> 23)) - 125; //strip the exponent from our maximum color
+				
+				render->TouchLight( pFakeLight );
+			}
+
+			/*
+			FlashlightState_t state;
+			{
+				state.m_NearZ = 4.0f;
+				state.m_FarZ = 500.0f;
+				state.m_nSpotlightTextureFrame = 0;
+				state.m_pSpotlightTexture = materials->FindTexture( "effects/flashlight001", TEXTURE_GROUP_OTHER, false );
+				state.m_fConstantAtten = 0.0f;
+				state.m_fLinearAtten = 500.0f;
+				state.m_fQuadraticAtten = 0.0f;			
+				state.m_fHorizontalFOVDegrees = 140.0f;
+				state.m_fVerticalFOVDegrees = 140.0f;
+
+				state.m_flShadowSlopeScaleDepthBias = 16.0f;
+				state.m_flShadowDepthBias = 0.0005f;
+				state.m_nSpotlightTextureFrame = 0;
+
+				state.m_bEnableShadows = true;
+				state.m_vecLightOrigin = ptLightOrigin;
+
+				Vector vLightRight, vLightUp( 0.0f, 0.0f, 1.0f );
+				if( fabs( DotProduct( vLightUp, vLightForward ) ) > 0.99f )
+					vLightUp.Init( 0.0f, 1.0f, 0.0f );	// Don't want vLightUp and vLightForward to be parallel
+
+				CrossProduct( vLightUp, vLightForward, vLightRight );
+				VectorNormalize( vLightRight );
+				CrossProduct( vLightForward, vLightRight, vLightUp );
+				VectorNormalize( vLightUp );
+
+				BasisToQuaternion( vLightForward, vLightRight, vLightUp, state.m_quatOrientation );
+
+				state.m_Color[0] = vColor.x;// * 0.35f;
+				state.m_Color[1] = vColor.y;// * 0.35f;
+				state.m_Color[2] = vColor.z;// * 0.35f;
+				state.m_Color[3] = 1.0f;
+			}
+			*/
+
+			/*
+			if( ShadowHandle != CLIENTSHADOW_INVALID_HANDLE )
+			{
+				g_pClientShadowMgr->UpdateFlashlightState( ShadowHandle, state ); //simpler update for existing handle
+				g_pClientShadowMgr->UpdateProjectedTexture( ShadowHandle, true );
+			}
+
+			if( ShadowHandle == CLIENTSHADOW_INVALID_HANDLE )
+			{
+				ShadowHandle = g_pClientShadowMgr->CreateFlashlight( state );
+				if( ShadowHandle != CLIENTSHADOW_INVALID_HANDLE )
+					g_pClientShadowMgr->UpdateProjectedTexture( ShadowHandle, true );
+			}
+
+
+			if( bLocalToRemote )
+				pRemote->TransformedLighting.m_LightShadowHandle = ShadowHandle;				
+			else
+				TransformedLighting.m_LightShadowHandle = ShadowHandle;
+			*/
+		}
+	}
+}
+
+
+void C_Prop_Portal::DrawPreStencilMask( IMatRenderContext *pRenderContext )
+{
+	//draw the warpy effect if we're still opening up
+	if ( ( m_fOpenAmount > 0.0f ) && ( m_fOpenAmount < 1.0f ) )
+	{
+		DrawSimplePortalMesh( pRenderContext, m_Materials.m_Portal_Refract, 0.25f );
+	}
+}
+
+
+void C_Prop_Portal::DrawStencilMask( IMatRenderContext *pRenderContext )
+{
+	DrawSimplePortalMesh( pRenderContext, m_Materials.m_Portal_Stencil_Hole, 0.25f );
+	DrawRenderFixMesh( pRenderContext, g_pPortalRender->m_MaterialsAccess.m_WriteZ_Model );
+}
+
+void C_Prop_Portal::DrawDepthDoublerMesh( IMatRenderContext *pRenderContext, float fForwardOffsetModifier )
+{
+	if( CPortalRender::DepthDoublerPIPDisableCheck() )
+		return;
+
+	if ( m_Materials.m_PortalDepthDoubler.IsValid() )
+	{
+		IMaterialVar *pVar = m_Materials.m_PortalDepthDoubler->FindVarFast( "$alternateviewmatrix", &m_Materials.m_nDepthDoubleViewMatrixVarCache );
+		if ( pVar != NULL )
+		{
+			pVar->SetMatrixValue( m_InternallyMaintainedData.m_DepthDoublerTextureView[GET_ACTIVE_SPLITSCREEN_SLOT()] );
+		}
+	}
+
+	DrawSimplePortalMesh( pRenderContext, m_Materials.m_PortalDepthDoubler, fForwardOffsetModifier, 0.25f );
+}
+
+float C_Prop_Portal::GetPortalGhostAlpha( void ) const
+{
+	/*
+	// THIS CODE HAS MOVED TO THE SHADER (portalstaticoverlay VS)
+	// If we're facing away, always be full strength
+	float flDot = DotProduct( m_vForward, m_ptOrigin - CurrentViewOrigin() );
+	if ( flDot > 0.0f )
+		return 1.0f;
+
+	float flDistSqr = ( CurrentViewOrigin() - m_ptOrigin ).LengthSqr();
+	float flAlpha = RemapValClamped( flDistSqr, Square(10*12), Square(20*12), 0.0f, 1.0f );
+	*/
+
+	// Factor how "open" this portal is, but don't lerp in the visibility until the portal is 85% open...otherwise
+	//    the colored oval becomes visible before the portal's firey border is fully open.
+	float flOpenScalar = clamp( ( m_fOpenAmount - 0.85f ) / 0.15f, 0.0f, 1.0f );
+	return flOpenScalar;
+}
+
+void C_Prop_Portal::DrawPortalGhostLocations( IMatRenderContext *pRenderContext )
+{
+	// Allow this to be gated by a convar for recording
+	if ( portal_draw_ghosting.GetBool() == false )
+		return;
+
+	int iPortalCount = CProp_Portal_Shared::AllPortals.Count();
+	if( iPortalCount == 0 )
+		return;
+
+	CPortalRenderable *pExitView = g_pPortalRender->GetCurrentViewExitPortal();
+	C_Portal_Player *pPlayer = C_Portal_Player::GetLocalPlayer();
+	bool bCoop = g_pGameRules->IsMultiplayer() && PortalMPGameRules()->IsCoOp();
+
+	for( int i = 0; i != iPortalCount; ++i )
+	{
+		C_Prop_Portal *pPortal = CProp_Portal_Shared::AllPortals[i];
+		if( (pPortal != pExitView) && pPortal->IsActive() )
+		{
+			if( (pPortal->m_hFiredByPlayer.Get() != NULL) && (bCoop || (pPortal->m_hFiredByPlayer == pPlayer)) )
+			{
+				//portal is a candidate for drawing ghost outlines
+				if( GameRules()->IsMultiplayer() ) 
+				{
+					Color clrPortal = UTIL_Portal_Color( (pPortal->m_bIsPortal2)?(2):(1), pPortal->GetTeamNumber() );
+					const Vector vecPortalColor
+						(
+						(float)(clrPortal.r()) / 255.0f, 
+						(float)(clrPortal.g()) / 255.0f, 
+						(float)(clrPortal.b()) / 255.0f	
+						);
+					float flAlpha = pPortal->GetPortalGhostAlpha();
+					if ( flAlpha > 0.0f )
+					{
+						pPortal->DrawSimplePortalMesh( pRenderContext, m_Materials.m_PortalStaticGhostedOverlay_Tinted, 0.0f, flAlpha, &vecPortalColor );
+					}
+				}
+				else
+				{
+					float flAlpha = pPortal->GetPortalGhostAlpha();
+					if ( flAlpha > 0.0f )
+					{
+						pPortal->DrawSimplePortalMesh( pRenderContext, m_Materials.m_PortalStaticGhostedOverlay[((pPortal->m_bIsPortal2)?(1):(0))], 0.0f, flAlpha );
+					}
+				}
+			}
+		}
+	}
+}
+
+
+void C_Prop_Portal::BuildPortalGhostRenderInfo( const CUtlVector< CPortalRenderable* > &allPortals, 
+												CUtlVector< GhostPortalRenderInfo_t > &ghostPortalRenderInfosOut )
+{
+	Assert( ghostPortalRenderInfosOut.Count() == 0 );
+
+	C_Portal_Player *pPlayer = C_Portal_Player::GetLocalPlayer();
+	bool bIsMultiplayer = g_pGameRules->IsMultiplayer();
+	bool bCoop = bIsMultiplayer && PortalMPGameRules()->IsCoOp();
+
+	for( int i = 0; i < allPortals.Count(); i++ )
+	{
+		if ( allPortals[i]->IsPropPortal() )
+		{
+			C_Prop_Portal *pPortal = static_cast< C_Prop_Portal* >( allPortals[i] );
+
+			if ( pPortal->IsActive() &&
+				( pPortal->m_hFiredByPlayer.Get() != NULL ) &&
+				( bCoop || ( pPortal->m_hFiredByPlayer == pPlayer ) ) )
+			{
+				ghostPortalRenderInfosOut.AddToTail();
+				ghostPortalRenderInfosOut.Tail().m_pPortal = pPortal;
+				ghostPortalRenderInfosOut.Tail().m_nGhostPortalQuadIndex = i;
+				if ( bIsMultiplayer )
+				{
+					ghostPortalRenderInfosOut.Tail().m_pGhostMaterial = m_Materials.m_PortalStaticGhostedOverlay_Tinted;
+				}
+				else
+				{
+					ghostPortalRenderInfosOut.Tail().m_pGhostMaterial = m_Materials.m_PortalStaticGhostedOverlay[ pPortal->m_bIsPortal2 ? 1 : 0 ];
+				}
+			}
+		} // end if ( is prop_portal )
+	}	// end for ( each portal )
+}
+
+void C_Prop_Portal::DrawPortal( IMatRenderContext *pRenderContext )
+{
+	if( (view->GetDrawFlags() & DF_RENDER_REFLECTION) != 0 )
+		return;
+
+	if( WillUseDepthDoublerThisDraw() )
+		m_fSecondaryStaticAmount = 0.0f;
+
+
+	bool bUseAlternatePortalColors = GameRules()->IsMultiplayer() && !PortalMPGameRules()->Is2GunsCoOp(); //( m_hFiredByPlayer.Get() && ( m_hFiredByPlayer->GetTeamNumber() == TEAM_BLUE ) );
+
+	const IMaterial *pStaticOverlayMaterial = bUseAlternatePortalColors ? m_Materials.m_PortalStaticOverlay_Tinted : m_Materials.m_PortalStaticOverlay[((m_bIsPortal2)?(1):(0))];
+
+	if ( bUseAlternatePortalColors )
+	{
+		int nTeam = GetTeamNumber();
+		C_BasePlayer *pPlayer = GetPredictionOwner();
+		if ( pPlayer )
+			nTeam = pPlayer->GetTeamNumber();
+
+		Color clrPortal = UTIL_Portal_Color( (m_bIsPortal2)?(2):(1), nTeam );
+		const Vector vecPortalColor
+		(
+			(float)(clrPortal.r()) / 255.0f, 
+			(float)(clrPortal.g()) / 255.0f, 
+			(float)(clrPortal.b()) / 255.0f	
+		);
+
+		if ( m_Materials.m_PortalStaticOverlay_Tinted.IsValid() )
+		{
+			IMaterialVar *pVar = m_Materials.m_PortalStaticOverlay_Tinted->FindVarFast( "$PortalColorGradientLight", &m_Materials.m_nStaticOverlayTintedColorGradientLightVarCache );
+			if ( pVar != NULL )
+			{
+				pVar->SetVecValue( &vecPortalColor.x, 3 );
+			}
+		}
+	}
+
+	//stencil-based rendering
+	if( g_pPortalRender->IsRenderingPortal() == false ) //main view
+	{
+		if( m_pLinkedPortal == NULL ) //didn't pass through pre-stencil mask
+		{
+			if ( ( m_fOpenAmount > 0.0f ) && ( m_fOpenAmount < 1.0f ) )
+			{
+				DrawSimplePortalMesh( pRenderContext, m_Materials.m_Portal_Refract, 0.25f );
+			}
+		}
+
+		DrawSimplePortalMesh( pRenderContext, pStaticOverlayMaterial, 0.25f );
+		
+		// NOTE [BRJ 9/20/10]: This is almost certainly not necessary. Investigate if deletion is possible
+		DrawRenderFixMesh( pRenderContext, g_pPortalRender->m_MaterialsAccess.m_WriteZ_Model );
+	}
+	else if( g_pPortalRender->GetCurrentViewExitPortal() != this )
+	{
+		if( m_pLinkedPortal == NULL ) //didn't pass through pre-stencil mask
+		{
+			if ( ( m_fOpenAmount > 0.0f ) && ( m_fOpenAmount < 1.0f ) )
+			{
+				DrawSimplePortalMesh( pRenderContext, m_Materials.m_Portal_Refract, 0.25f );
+			}
+		}
+
+		if( (m_InternallyMaintainedData.m_bUsableDepthDoublerConfiguration) 
+			&& (g_pPortalRender->GetRemainingPortalViewDepth() == 0) 
+			&& (g_pPortalRender->GetViewRecursionLevel() > 1)
+			&& (g_pPortalRender->GetCurrentViewEntryPortal() == this) )
+		{
+			DrawDepthDoublerMesh( pRenderContext );
+		}
+		else
+		{
+			DrawSimplePortalMesh( pRenderContext, pStaticOverlayMaterial, 0.25f );
+		}
+	}
+}
+
+// TODO: Return the material instead, cache off material pointers?
+int C_Prop_Portal::BindPortalMaterial( IMatRenderContext *pRenderContext, int nPassIndex, bool *pAllowRingMeshOptimizationOut )
+{
+	VPROF_BUDGET( __FUNCTION__, "BindPortalMaterial" );
+
+	*pAllowRingMeshOptimizationOut = true;
+
+	if( (view->GetDrawFlags() & DF_RENDER_REFLECTION) != 0 )
+	{
+		return 0;
+	}
+
+	if( WillUseDepthDoublerThisDraw() )
+	{
+		m_fSecondaryStaticAmount = 0.0f;
+	}
+
+	bool bUseAlternatePortalColors = GameRules()->IsMultiplayer() && !PortalMPGameRules()->Is2GunsCoOp(); //( m_hFiredByPlayer.Get() && ( m_hFiredByPlayer->GetTeamNumber() == TEAM_BLUE ) );
+
+	IMaterial *pStaticOverlayMaterial = bUseAlternatePortalColors ? m_Materials.m_PortalStaticOverlay_Tinted : m_Materials.m_PortalStaticOverlay[ m_bIsPortal2 ? 1 : 0 ];
+
+	if ( bUseAlternatePortalColors )
+	{
+		int nTeam = GetTeamNumber();
+		C_BasePlayer *pPlayer = GetPredictionOwner();
+		if ( pPlayer )
+			nTeam = pPlayer->GetTeamNumber();
+
+		Color clrPortal = UTIL_Portal_Color( (m_bIsPortal2)?(2):(1), nTeam );
+		const Vector vecPortalColor
+			(
+			(float)(clrPortal.r()) / 255.0f, 
+			(float)(clrPortal.g()) / 255.0f, 
+			(float)(clrPortal.b()) / 255.0f	
+			);
+
+		if ( m_Materials.m_PortalStaticOverlay_Tinted.IsValid() )
+		{
+			IMaterialVar *pVar = m_Materials.m_PortalStaticOverlay_Tinted->FindVarFast( "$PortalColorGradientLight", &m_Materials.m_nStaticOverlayTintedColorGradientLightVarCache );
+			if ( pVar != NULL )
+			{
+				pVar->SetVecValue( &vecPortalColor.x, 3 );
+			}
+		}
+	}
+
+	//stencil-based rendering
+	if( g_pPortalRender->IsRenderingPortal() == false ) //main view
+	{
+		if( m_pLinkedPortal == NULL ) //didn't pass through pre-stencil mask
+		{
+			if ( IsPortalOpening() && ( nPassIndex == 0 ) )
+			{
+				pRenderContext->Bind( m_Materials.m_Portal_Refract, GetClientRenderable() );
+				UpdateFrontBufferTexturesForMaterial( m_Materials.m_Portal_Refract );
+				return 2;
+			}
+		}
+
+		pRenderContext->Bind( pStaticOverlayMaterial, GetClientRenderable() );
+		return 1;
+
+		// NOTE [BRJ 9/20/10]: This is almost certainly not necessary. Investigate if deletion is possible
+		//DrawRenderFixMesh( pRenderContext, g_pPortalRender->m_MaterialsAccess.m_WriteZ_Model );
+	}
+	else if( g_pPortalRender->GetCurrentViewExitPortal() != this )
+	{
+		if( m_pLinkedPortal == NULL ) //didn't pass through pre-stencil mask
+		{
+			if ( IsPortalOpening() && ( nPassIndex == 0 ) )
+			{
+				pRenderContext->Bind( m_Materials.m_Portal_Refract, GetClientRenderable() );
+				UpdateFrontBufferTexturesForMaterial( m_Materials.m_Portal_Refract );
+				return 2;
+			}
+		}
+
+		if( (m_InternallyMaintainedData.m_bUsableDepthDoublerConfiguration) 
+			&& (g_pPortalRender->GetRemainingPortalViewDepth() == 0) 
+			&& (g_pPortalRender->GetViewRecursionLevel() > 1)
+			&& (g_pPortalRender->GetCurrentViewEntryPortal() == this) )
+		{
+			if( CPortalRender::DepthDoublerPIPDisableCheck() )
+			{
+				// render a static portal instead of a broken depth doubler
+				pRenderContext->Bind( pStaticOverlayMaterial, GetClientRenderable() );
+				return 1;
+			}
+
+			if ( m_Materials.m_PortalDepthDoubler.IsValid() )
+			{
+				IMaterialVar *pVar = m_Materials.m_PortalDepthDoubler->FindVarFast( "$alternateviewmatrix", &m_Materials.m_nDepthDoubleViewMatrixVarCache );
+				if ( pVar != NULL )
+				{
+					pVar->SetMatrixValue( m_InternallyMaintainedData.m_DepthDoublerTextureView[GET_ACTIVE_SPLITSCREEN_SLOT()] );
+				}
+			}
+
+			pRenderContext->Bind( m_Materials.m_PortalDepthDoubler, GetClientRenderable() );
+			*pAllowRingMeshOptimizationOut = false;
+			return 1;
+		}
+		else
+		{
+			pRenderContext->Bind( pStaticOverlayMaterial, GetClientRenderable() );
+			return 1;
+		}
+	}
+	return 0;
 }
 
 
 void C_Prop_Portal::DoFizzleEffect( int iEffect, bool bDelayedPos /*= true*/ )
 {
-#if 1
 	if( prediction->InPrediction() && !prediction->IsFirstTimePredicted() )
 		return; //early out if we're repeatedly creating particles. Creates way too many particles.
 
-#if 0
 	Vector vecOrigin = ( ( bDelayedPos ) ? ( m_vDelayedPosition ) : ( GetAbsOrigin() ) );
 	QAngle qAngles = ( ( bDelayedPos ) ? ( m_qDelayedAngles ) : ( GetAbsAngles() ) );
-#else
-	Vector vecOrigin = ( ( bDelayedPos ) ? ( vec3_origin ) : ( GetAbsOrigin() ) );
-	QAngle qAngles = ( ( bDelayedPos ) ? ( vec3_angle ) : ( GetAbsAngles() ) );
-#endif
 
 	Vector vForward, vUp;
 	AngleVectors( qAngles, &vForward, &vUp, NULL );
@@ -1134,5 +1140,244 @@ void C_Prop_Portal::DoFizzleEffect( int iEffect, bool bDelayedPos /*= true*/ )
 
 	VectorAngles( vUp, vForward, qAngles );
 	CreateFizzleEffect( pPlayer, iEffect, vecOrigin, qAngles, nTeam, nPortalNum );
+}
+
+void C_Prop_Portal::Fizzle( void )
+{
+
+}
+
+float C_Prop_Portal::ComputeStaticAmountForRendering() const
+{
+	float flStaticAmount = m_fStaticAmount;
+
+	if ( !GetLinkedPortal() )
+	{
+		flStaticAmount = 1.0f;
+	}
+	if ( WillUseDepthDoublerThisDraw() )
+	{
+		if ( CPortalRender::DepthDoublerPIPDisableCheck() )
+		{
+			flStaticAmount = 1.0f;
+		}
+		else
+		{
+			flStaticAmount = 0.0f;
+		}
+	}
+	else if ( g_pPortalRender->GetRemainingPortalViewDepth() == 0 ) //end of the line, no more views
+	{
+		flStaticAmount = 1.0f;
+	}
+	else if ( (g_pPortalRender->GetRemainingPortalViewDepth() == 1) && (m_fSecondaryStaticAmount > flStaticAmount) ) //fading in from no views to another view (player just walked through it)
+	{
+		flStaticAmount = m_fSecondaryStaticAmount;
+	}
+	return flStaticAmount;
+}
+
+
+bool C_Prop_Portal::ShouldPredict( void )
+{
+	FOR_EACH_VALID_SPLITSCREEN_PLAYER( hh )
+	{
+		C_BasePlayer *pLocalPlayer = C_BasePlayer::GetLocalPlayer( hh );
+		if ( pLocalPlayer )
+		{
+			if ( m_hFiredByPlayer == pLocalPlayer )
+				return true;
+
+			CWeaponPortalgun *pPortalGun = dynamic_cast<CWeaponPortalgun*>( pLocalPlayer->Weapon_OwnsThisType( "weapon_portalgun" ) );
+			if ( pPortalGun && ((pPortalGun->GetAssociatedPortal( false ) == this) || (pPortalGun->GetAssociatedPortal( true ) == this)) )
+				return true;
+		}
+	}
+
+	return BaseClass::ShouldPredict();
+}
+
+C_BasePlayer *C_Prop_Portal::GetPredictionOwner( void )
+{
+	if ( m_hFiredByPlayer != NULL )
+		return (C_BasePlayer *)m_hFiredByPlayer.Get();
+
+	FOR_EACH_VALID_SPLITSCREEN_PLAYER( iSplitScreenSlot )
+	{
+		C_BasePlayer *pLocalPlayer = C_BasePlayer::GetLocalPlayer( iSplitScreenSlot );
+
+		if ( pLocalPlayer )
+		{
+			CWeaponPortalgun *pPortalGun = dynamic_cast<CWeaponPortalgun*>( pLocalPlayer->Weapon_OwnsThisType( "weapon_portalgun" ) );
+			if ( pPortalGun && ((pPortalGun->GetAssociatedPortal( false ) == this) || (pPortalGun->GetAssociatedPortal( true ) == this)) )
+			{
+				m_hFiredByPlayer = pLocalPlayer;	// probably portal_place made this portal don't keep doing this
+				return pLocalPlayer;
+			}
+		}
+	}
+
+	return NULL;
+}
+
+
+
+void C_Prop_Portal::HandlePredictionError( bool bErrorInThisEntity )
+{
+	BaseClass::HandlePredictionError( bErrorInThisEntity );
+	if( bErrorInThisEntity )
+	{
+		if( IsActive() )
+		{
+			if ( !m_hEffect || !m_hEffect.IsValid() )
+			{
+				CreateAttachedParticles();
+			}
+		}
+		else
+		{
+			DestroyAttachedParticles();
+		}
+	}
+}
+
+
+
+void C_Prop_Portal::GetToolRecordingState( KeyValues *msg )
+{
+	if ( !ToolsEnabled() )
+		return;
+
+	VPROF_BUDGET( "C_Prop_Portal::GetToolRecordingState", VPROF_BUDGETGROUP_TOOLS );
+
+	BaseClass::GetToolRecordingState( msg );
+	
+	{
+		PortalRecordingState_t dummyState;
+		PortalRecordingState_t *pState = (PortalRecordingState_t *)msg->GetPtr( "portal", &dummyState );
+		Assert( pState != &dummyState );
+		
+		pState->m_fOpenAmount = m_fOpenAmount;
+		pState->m_fStaticAmount = m_fStaticAmount;
+
+		pState->m_portalType = "Prop_Portal";
+	}
+
+	{
+#if 0
+		KeyValues *pKV = CIFM_EntityKeyValuesHandler_AutoRegister::FindOrCreateNonConformantKeyValues( msg );
+		pKV->SetString( CIFM_EntityKeyValuesHandler_AutoRegister::GetHandlerIDKeyString(), "C_Prop_Portal" );
+
+		pKV->SetInt( "entIndex", index );
+		pKV->SetInt( "teamNumber", GetTeamNumber() );
+#endif
+	}
+}
+
+// No IFM in Swarm
+#if 0
+class C_Prop_Portal_EntityKeyValuesHandler : public CIFM_EntityKeyValuesHandler_AutoRegister
+{
+public:
+	C_Prop_Portal_EntityKeyValuesHandler( void ) 
+		: CIFM_EntityKeyValuesHandler_AutoRegister( "C_Prop_Portal" )
+	{ }
+
+	virtual void HandleData_PreUpdate( void )
+	{
+		for( int i = 0; i != m_PlaybackPortals.Count(); ++i )
+		{
+			m_PlaybackPortals[i].bTouched = false;
+		}
+	}
+
+	virtual void HandleData_PostUpdate( void )
+	{
+		for( int i = m_PlaybackPortals.Count(); --i >= 0; )
+		{
+			if( !m_PlaybackPortals[i].bTouched )
+			{
+				m_PlaybackPortals.FastRemove( i );
+			}
+		}
+	}
+
+	virtual void HandleData( KeyValues *pKeyValues )
+	{
+		int iEntIndex = pKeyValues->GetInt( "entIndex", -1 );
+		Assert( iEntIndex != -1 );
+		if( iEntIndex == -1 )
+			return;
+
+		for( int i = 0; i != m_PlaybackPortals.Count(); ++i )
+		{
+			if( m_PlaybackPortals[i].iEntIndex == iEntIndex )
+			{
+				m_PlaybackPortals[i].iTeamNumber = pKeyValues->GetInt( "teamNumber", 0 );
+				m_PlaybackPortals[i].bTouched = true;
+				return;
+			}
+		}
+
+		//didn't exist, create it.
+		RecordedPortal_t temp;
+		temp.iEntIndex = iEntIndex;
+		temp.bTouched = true;
+		temp.iTeamNumber = pKeyValues->GetInt( "teamNumber", 0 );
+
+		m_PlaybackPortals.AddToTail( temp );
+		
+	}
+
+
+	virtual void HandleData_RemoveAll( void )
+	{
+		m_PlaybackPortals.RemoveAll();
+	}
+
+
+	struct RecordedPortal_t
+	{
+		bool bTouched;
+		int iEntIndex;
+		int iTeamNumber;
+	};
+
+	CUtlVector<RecordedPortal_t> m_PlaybackPortals;
+};
+
+
+static C_Prop_Portal_EntityKeyValuesHandler s_ProjectedWallEntityIFMHandler;
+
+#endif
+
+void C_Prop_Portal::HandlePortalPlaybackMessage( KeyValues *pKeyValues )
+{
+	BaseClass::HandlePortalPlaybackMessage( pKeyValues );
+
+	m_fOpenAmount = pKeyValues->GetFloat( "openAmount" );
+	m_fStaticAmount = pKeyValues->GetFloat( "staticAmount" );
+	
+	UpdateTeleportMatrix();
+
+
+#if 0
+	int iEntIndexint = pKeyValues->GetInt( "portalId" );
+	for( int i = 0; i != s_ProjectedWallEntityIFMHandler.m_PlaybackPortals.Count(); ++i )
+	{
+		if( iEntIndexint == s_ProjectedWallEntityIFMHandler.m_PlaybackPortals[i].iEntIndex )
+		{
+			m_iTeamNum = s_ProjectedWallEntityIFMHandler.m_PlaybackPortals[i].iTeamNumber;
+		}
+	}
 #endif
 }
+
+
+CPortalRenderable *CreateProp_Portal_Fn( void )
+{
+	return new C_Prop_Portal;
+}
+
+static CPortalRenderableCreator_AutoRegister CreateProp_Portal( "Prop_Portal", CreateProp_Portal_Fn );
+

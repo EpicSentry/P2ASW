@@ -15,10 +15,10 @@
 #include "ISpatialPartition.h"
 
 #ifdef CLIENT_DLL
-class C_Prop_Portal;
-typedef C_Prop_Portal CProp_Portal;
+class C_Portal_Base2D;
+#define CPortal_Base2D C_Portal_Base2D
 #else
-class CProp_Portal;
+class CPortal_Base2D;
 #endif
 
 //only enumerates entities in front of the associated portal and are solid (as in a player would get stuck in them)
@@ -32,7 +32,7 @@ private:
 public:
 	IHandleEntity *m_pHandles[1024];
 	int m_iHandleCount;
-	CPortalCollideableEnumerator( const CProp_Portal *pAssociatedPortal );
+	CPortalCollideableEnumerator( const CPortal_Base2D *pAssociatedPortal );
 	virtual IterationRetval_t EnumElement( IHandleEntity *pHandleEntity );
 };
 

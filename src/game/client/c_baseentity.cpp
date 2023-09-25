@@ -42,6 +42,7 @@
 #include "clientalphaproperty.h"
 #include "cellcoord.h"
 #include "gamestringpool.h"
+#include "tier1/callqueue.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -2994,6 +2995,26 @@ void C_BaseEntity::CheckInitPredictable( const char *context )
 }
 
 //-----------------------------------------------------------------------------
+// Purpose: See if a predictable should stop predicting
+// Input  : *context - 
+//-----------------------------------------------------------------------------
+void C_BaseEntity::CheckShutdownPredictable( const char *context )
+{
+	if ( IsClientCreated() )
+		return;
+
+	if ( !ShouldPredict() || 
+		!GetPredictionEligible() ||
+		(GetPredictionOwner() == NULL) )
+	{
+		if( IsIntermediateDataAllocated() )
+		{
+			ShutdownPredictable();
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: Return the player who will predict this entity
 //-----------------------------------------------------------------------------
 C_BasePlayer* C_BaseEntity::GetPredictionOwner()
@@ -4788,6 +4809,12 @@ bool C_BaseEntity::PostNetworkDataReceived( int commands_acknowledged )
 	return haderrors;
 }
 
+void C_BaseEntity::HandlePredictionError( bool bErrorInThisEntity )
+{
+
+}
+
+
 // Stuff implemented for weapon prediction code
 void C_BaseEntity::SetSize( const Vector &vecMin, const Vector &vecMax )
 {
@@ -6241,6 +6268,14 @@ int C_BaseEntity::GetCreationTick() const
 	return m_nCreationTick;
 }
 
+static CCallQueue s_SimulateEntitiesCallQueue;
+
+CCallQueue *C_BaseEntity::GetSimulateCallQueue( void )
+{
+	return &s_SimulateEntitiesCallQueue;
+}
+
+
 // static method
 void C_BaseEntity::SimulateEntities()
 {
@@ -6306,6 +6341,8 @@ void C_BaseEntity::SimulateEntities()
 		// Report only once per turn on.
 		report_cliententitysim.SetValue( 0 );
 	}
+
+	s_SimulateEntitiesCallQueue.CallQueued();
 
 	s_bImmediateRemovesAllowed = true;
 	PurgeRemovedEntities();

@@ -46,7 +46,7 @@ bool UTIL_TestForOrientationVolumes( QAngle& vecCurAngles, const Vector& vecCurO
 			continue;
 		}
 
-		if ( IsOBBIntersectingOBB( vecCurOrigin, vecCurAngles, CProp_Portal_Shared::vLocalMins, CProp_Portal_Shared::vLocalMaxs, 
+		if ( IsOBBIntersectingOBB( vecCurOrigin, vecCurAngles, pPortal->GetLocalMins(), pPortal->GetLocalMaxs(), 
 			pList->GetAbsOrigin(), pList->GetCollideable()->GetCollisionAngles(), pList->GetCollideable()->OBBMins(), pList->GetCollideable()->OBBMaxs() ) )
 		{
 			QAngle vecGoalAngles;
@@ -55,7 +55,7 @@ bool UTIL_TestForOrientationVolumes( QAngle& vecCurAngles, const Vector& vecCurO
 			{
 				// This feature requires a linked portal on a floor or ceiling. Bail without effecting
 				// the placement angles if we fail those requirements.
-				CProp_Portal* pLinked = pPortal->m_hLinkedPortal.Get();
+				CPortal_Base2D* pLinked = pPortal->m_hLinkedPortal.Get();
 				if ( !pLinked || !(AnglesAreEqual( vecCurAngles.x, -90.0f, 0.1f ) || AnglesAreEqual( vecCurAngles.x, 90.0f, 0.1f )) )
 					return false;
 
@@ -131,13 +131,13 @@ void CFuncPortalOrientation::OnActivate( void )
 		for( int i = 0; i != iPortalCount; ++i )
 		{
 			CProp_Portal *pTempPortal = pPortals[i];
-			if( IsOBBIntersectingOBB( pTempPortal->GetAbsOrigin(), pTempPortal->GetAbsAngles(), CProp_Portal_Shared::vLocalMins, CProp_Portal_Shared::vLocalMaxs, 
+			if( IsOBBIntersectingOBB( pTempPortal->GetAbsOrigin(), pTempPortal->GetAbsAngles(), pTempPortal->GetLocalMins(), pTempPortal->GetLocalMaxs(), 
 			GetAbsOrigin(), GetCollideable()->GetCollisionAngles(), GetCollideable()->OBBMins(), GetCollideable()->OBBMaxs() ) )
 			{
 				QAngle angNewAngles;
 				if ( m_bMatchLinkedAngles )
 				{
-					CProp_Portal* pLinked = pTempPortal->m_hLinkedPortal.Get();
+					CProp_Portal* pLinked = assert_cast<CProp_Portal*>( pTempPortal->m_hLinkedPortal.Get() );
 					if ( !pLinked )
 						return;
 
@@ -148,7 +148,7 @@ void CFuncPortalOrientation::OnActivate( void )
 					angNewAngles = m_vecAnglesToFace;
 				}
 
-				pTempPortal->PlacePortal( pTempPortal->GetAbsOrigin(), angNewAngles, PORTAL_ANALOG_SUCCESS_NO_BUMP );
+				pTempPortal->PlacePortal( pTempPortal->GetAbsOrigin(), angNewAngles, PORTAL_PLACEMENT_SUCCESS, false );
 			}
 		}
 	}

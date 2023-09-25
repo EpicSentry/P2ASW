@@ -210,7 +210,7 @@ bool CheckSwapProximity( CPortal_Player *pPlayer1, CPortal_Player *pPlayer2 )
 	CProp_Portal *pPortal1 = CProp_Portal::FindPortal( pPortalGun->GetLinkageGroupID(), false );
 	CProp_Portal *pPortal2 = CProp_Portal::FindPortal( pPortalGun->GetLinkageGroupID(), true );
 
-	if( pPortal1 && pPortal1->m_bActivated && pPortal2 && pPortal2->m_bActivated )
+	if( pPortal1 && pPortal1->IsActive() && pPortal2 && pPortal2->IsActive() )
 	{
 		//Check if the paint player is looking through a portal
 		Vector vecPortal1PaintGunPlayerDir = pPortal1->GetAbsOrigin() - vecPaintGunPlayerPos;

@@ -41,7 +41,10 @@ using ResponseRules::IResponseSystem;
 class IEntitySaveUtils;
 class CRecipientFilter;
 
-
+#ifdef PORTAL
+#include "portal_shareddefs.h"
+class CPortal_Base2D;
+#endif // PORTAL 
 
 typedef CHandle<CBaseEntity> EHANDLE;
 
@@ -1890,6 +1893,9 @@ public:
 	}
 
 public:
+#ifdef PORTAL
+	virtual void NotifyPortalEvent( PortalEvent_t nEventType, CPortal_Base2D *pNotifier ) { /*Do nothing*/ }
+#endif // PORTAL
 
 
 };

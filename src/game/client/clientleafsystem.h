@@ -292,6 +292,9 @@ public:
 
 	//Assuming the renderable would be in a properly built render list, generate a render list entry
 	virtual RenderGroup_t GenerateRenderListEntry( IClientRenderable *pRenderable, CClientRenderablesList::CEntry &entryOut ) = 0; 
+	
+	// Get renderable that render bound intersect with the query box
+	virtual int GetEntitiesInBox( C_BaseEntity **pEntityList, int listMax, const Vector& vWorldSpaceMins, const Vector& vWorldSpaceMaxs ) = 0;
 };
 
 

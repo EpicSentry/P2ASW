@@ -26,6 +26,7 @@
 #include "viewrender.h"
 #include "clientalphaproperty.h"
 #include "con_nprint.h"
+#include "collisionutils.h"
 //#include "tier0/miniprofiler.h" 
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -151,6 +152,9 @@ public:
 
 	//Assuming the renderable would be in a properly built render list, generate a render list entry
 	virtual RenderGroup_t GenerateRenderListEntry( IClientRenderable *pRenderable, CClientRenderablesList::CEntry &entryOut );
+	
+	// Get renderable that render bound intersect with the query box
+	virtual int GetEntitiesInBox( C_BaseEntity **pEntityList, int listMax, const Vector& vWorldSpaceMins, const Vector& vWorldSpaceMaxs );
 
 	// methods of ISpatialLeafEnumerator
 public:
@@ -2652,3 +2656,55 @@ RenderGroup_t CClientLeafSystem::GenerateRenderListEntry( IClientRenderable *pRe
 
 	return RENDER_GROUP_COUNT;
 }
+
+int CClientLeafSystem::GetEntitiesInBox( C_BaseEntity **pEntityList, int listMax, const Vector& vWorldSpaceMins, const Vector& vWorldSpaceMaxs )
+{
+	// NOTE: The render bounds here are relative to the renderable's coordinate system
+	Assert( vWorldSpaceMins.IsValid() && vWorldSpaceMaxs.IsValid() );
+	Assert( ThreadInMainThread() );
+
+	// Make use of m_ShadowEnum to avoid adding same entity to the list
+	++m_ShadowEnum;
+
+	// When we insert into the tree, increase the shadow enumerator
+	// to make sure each shadow is added exactly once to each renderable
+	unsigned short leafList[1024];
+	ISpatialQuery* pQuery = engine->GetBSPTreeQuery();
+	int leafCount = pQuery->ListLeavesInBox( vWorldSpaceMins, vWorldSpaceMaxs, leafList, ARRAYSIZE(leafList) );
+	int totalCount = 0;
+	for ( int i=0; i<leafCount; ++i )
+	{
+		unsigned short leaf = leafList[i];
+
+		// iterate over all elements in this leaf
+		unsigned short idx = m_RenderablesInLeaf.FirstElement(leaf);
+		for ( ; idx != m_RenderablesInLeaf.InvalidIndex(); idx = m_RenderablesInLeaf.NextElement( idx ) )
+		{
+			ClientRenderHandle_t handle = m_RenderablesInLeaf.Element(idx);
+			RenderableInfo_t &info = m_Renderables[ handle ];
+
+			// Add each shadow exactly once to each renderable
+			if (info.m_EnumCount != m_ShadowEnum)
+			{
+				info.m_EnumCount = m_ShadowEnum;
+			}
+			else
+			{
+				continue;
+			}
+
+			if ( IsBoxIntersectingBox( vWorldSpaceMins, vWorldSpaceMaxs, info.m_vecAbsMins, info.m_vecAbsMaxs ) )
+			{
+				C_BaseEntity *pEnt = m_Renderables[ handle ].m_pRenderable->GetIClientUnknown()->GetBaseEntity();
+				if ( pEnt )
+				{
+					pEntityList[totalCount] = pEnt;
+					++totalCount;
+				}
+			}
+		}
+	}
+
+	return totalCount;
+}
+

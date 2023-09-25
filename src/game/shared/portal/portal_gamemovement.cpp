@@ -17,8 +17,6 @@
 #include "portal_util_shared.h"
 //#include "iclient.h" // This causes a compile error
 
-#define CPortal_Base2D_Shared CProp_Portal_Shared
-
 #if defined( CLIENT_DLL )
 	#include "c_portal_player.h"
 	#include "c_rumble.h"

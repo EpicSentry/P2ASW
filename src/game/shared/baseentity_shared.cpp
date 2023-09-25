@@ -1778,7 +1778,7 @@ void CBaseEntity::FireBullets( const FireBulletsInfo_t &info )
 		vecEnd = info.m_vecSrc + vecDir * info.m_flDistance;
 
 #ifdef PORTAL
-		CProp_Portal *pShootThroughPortal = NULL;
+		CPortal_Base2D *pShootThroughPortal = NULL;
 		float fPortalFraction = 2.0f;
 #endif
 

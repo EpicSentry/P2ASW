@@ -506,7 +506,7 @@ void CNPC_SecurityCamera::ActiveThink( void )
 	Vector	vecDirToEnemy = vecMidEnemy - vecMid;	
 	float	flDistToEnemy = VectorNormalize( vecDirToEnemy );
 
-	CProp_Portal *pPortal = NULL;
+	CPortal_Base2D *pPortal = NULL;
 
 	if ( pEnemy->IsAlive() )
 	{
@@ -662,7 +662,7 @@ void CNPC_SecurityCamera::SearchThink( void )
 				}
 				else
 				{
-					CProp_Portal *pPortal = FInViewConeThroughPortal( pPlayer );
+					CPortal_Base2D *pPortal = FInViewConeThroughPortal( pPlayer );
 					if ( pPortal && FVisibleThroughPortal( pPortal, pPlayer ) )
 					{
 						pEnemy = pPlayer;

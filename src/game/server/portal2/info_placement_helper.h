@@ -1,3 +1,6 @@
+#ifndef INFO_PLACEMENT_HELPER_H
+#define INFO_PLACEMENT_HELPER_H
+
 //========= Copyright © 1996-2014, Valve Corporation, All rights reserved.=============//
 //
 //
@@ -44,3 +47,4 @@ private:
 	COutputEvent m_ObjectPlacedSize;
 
 };
+#endif // INFO_PLACEMENT_HELPER_H

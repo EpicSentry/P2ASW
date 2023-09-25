@@ -37,6 +37,8 @@ BEGIN_DATADESC( C_FuncNoPortalVolume )
 	
 END_DATADESC()
 
+#undef CFuncNoPortalVolume
+
 IMPLEMENT_CLIENTCLASS_DT( C_FuncNoPortalVolume, DT_FuncNoPortalVolume, CFuncNoPortalVolume)
 	RecvPropInt(RECVINFO(m_iListIndex)),
 	RecvPropInt(RECVINFO(m_spawnflags)),
@@ -83,7 +85,7 @@ void C_FuncNoPortalVolume::Spawn()
 void C_FuncNoPortalVolume::OnActivate( void )
 {
 	// We need to get predicted portalling to work first
-#if 0
+#if 1
 	if ( !GetCollideable() )
 		return;
 
@@ -95,7 +97,7 @@ void C_FuncNoPortalVolume::OnActivate( void )
 		{
 			CProp_Portal *pTempPortal = pPortals[i];
 			if( pTempPortal->IsActive() && 
-				IsOBBIntersectingOBB( pTempPortal->GetAbsOrigin(), pTempPortal->GetAbsAngles(), CProp_Portal_Shared::vLocalMins, CProp_Portal_Shared::vLocalMaxs, 
+				IsOBBIntersectingOBB( pTempPortal->GetAbsOrigin(), pTempPortal->GetAbsAngles(), pTempPortal->GetLocalMins(), pTempPortal->GetLocalMaxs(), 
 									  GetAbsOrigin(), GetCollideable()->GetCollisionAngles(), GetCollideable()->OBBMins(), GetCollideable()->OBBMaxs() ) )
 			{
 				pTempPortal->DoFizzleEffect( PORTAL_FIZZLE_KILLED, false );

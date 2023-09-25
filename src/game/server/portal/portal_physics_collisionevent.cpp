@@ -9,27 +9,47 @@
 #include "portal_physics_collisionevent.h"
 #include "physicsshadowclone.h"
 #include "prop_combine_ball.h"
-#include "prop_portal.h"
 #include "portal_player.h"
 #include "portal_grabcontroller_shared.h" //grab controller
 
+
+#define DEBUG_COLLISION_RULES 0
+
+#if (DEBUG_COLLISION_RULES == 1)
+ConVar sv_watchcollision_1( "sv_watchcollision_1", "-1" );
+ConVar sv_watchcollision_2( "sv_watchcollision_2", "-1" );
+#endif
 
 int CPortal_CollisionEvent::ShouldCollide( IPhysicsObject *pObj0, IPhysicsObject *pObj1, void *pGameData0, void *pGameData1 )
 {
 	if ( !pGameData0 || !pGameData1 )
 		return 1;
 
+#if (DEBUG_COLLISION_RULES == 1)
+	bool bBreak = false;
+	if( ((((CBaseEntity *)pGameData0)->entindex() == sv_watchcollision_1.GetInt()) || (((CBaseEntity *)pGameData0)->entindex() == sv_watchcollision_2.GetInt())) &&
+		((((CBaseEntity *)pGameData1)->entindex() == sv_watchcollision_1.GetInt()) || (((CBaseEntity *)pGameData1)->entindex() == sv_watchcollision_2.GetInt())) )
+	{
+		bBreak = true;
+	}
+#endif
+
+
 	AssertOnce( pObj0 && pObj1 );
-	bool bShadowClonesInvolved = ((pObj0->GetGameFlags() | pObj1->GetGameFlags()) & FVPHYSICS_IS_SHADOWCLONE) != 0;
+	uint nFlags0 = pObj0->GetGameFlags();
+	uint nFlags1 = pObj1->GetGameFlags();
+	uint nAllFlags = nFlags0 | nFlags1;
+
+	bool bShadowClonesInvolved = ( nAllFlags & FVPHYSICS_IS_SHADOWCLONE) != 0;
 
 	if( bShadowClonesInvolved )
 	{
 		//at least one shadow clone
 
-		if( (pObj0->GetGameFlags() & pObj1->GetGameFlags()) & FVPHYSICS_IS_SHADOWCLONE )
+		if( (nFlags0 & nFlags1) & FVPHYSICS_IS_SHADOWCLONE )
 			return 0; //both are shadow clones
 
-		if( (pObj0->GetGameFlags() | pObj1->GetGameFlags()) & FVPHYSICS_PLAYER_HELD )
+		if( nAllFlags & FVPHYSICS_PLAYER_HELD )
 		{
 			//at least one is held
 
@@ -48,16 +68,17 @@ int CPortal_CollisionEvent::ShouldCollide( IPhysicsObject *pObj0, IPhysicsObject
 	if( pGameData0 != pGameData1 )
 	{
 		//this code only decides what CAN'T collide due to portal environment differences, things that should collide will pass through here to deeper ShouldCollide() code
-		CBaseEntity *pEntities[2] = { (CBaseEntity *)pGameData0, (CBaseEntity *)pGameData1 };
-		IPhysicsObject *pPhysObjects[2] = { pObj0, pObj1 };
 		bool bStatic[2] = { pObj0->IsStatic(), pObj1->IsStatic() };
-		CPortalSimulator *pSimulators[2];
-		for( int i = 0; i != 2; ++i )
-			pSimulators[i] = CPortalSimulator::GetSimulatorThatOwnsEntity( pEntities[i] );
-
 		AssertOnce( (bStatic[0] && bStatic[1]) == false ); //hopefully the system doesn't even call in for this, they're both static and can't collide
 		if( bStatic[0] && bStatic[1] )
 			return 0;
+
+		CBaseEntity *pEntities[2] = { (CBaseEntity *)pGameData0, (CBaseEntity *)pGameData1 };
+		IPhysicsObject *pPhysObjects[2] = { pObj0, pObj1 };
+		CPortalSimulator *pSimulators[2];
+		pSimulators[0] = CPortalSimulator::GetSimulatorThatOwnsEntity( (CBaseEntity *)pGameData0 );
+		pSimulators[1] = CPortalSimulator::GetSimulatorThatOwnsEntity( (CBaseEntity *)pGameData1 );
+
 
 #ifdef _DEBUG
 		for( int i = 0; i != 2; ++i )
@@ -67,7 +88,7 @@ int CPortal_CollisionEvent::ShouldCollide( IPhysicsObject *pObj0, IPhysicsObject
 				CPhysicsShadowClone *pClone = (CPhysicsShadowClone *)pEntities[i];
 				CBaseEntity *pSource = pClone->GetClonedEntity();
 
-				CPortalSimulator *pSourceSimulator = CPortalSimulator::GetSimulatorThatOwnsEntity( pSource );
+				CPortalSimulator *pSourceSimulator = CPortalSimulator::GetSimulatorThatOwnsEntity( pClone )->GetLinkedPortalSimulator();
 				Assert( (pSimulators[i]->GetInternalData().Simulation.Dynamic.EntFlags[pClone->entindex()] & PSEF_IS_IN_PORTAL_HOLE) == (pSourceSimulator->GetInternalData().Simulation.Dynamic.EntFlags[pSource->entindex()] & PSEF_IS_IN_PORTAL_HOLE) );
 			}
 		}
@@ -133,8 +154,20 @@ int CPortal_CollisionEvent::ShouldCollide( IPhysicsObject *pObj0, IPhysicsObject
 						{
 							CPortalSimulator *pSimulator_Static = CPortalSimulator::GetSimulatorThatCreatedPhysicsObject( pPhysObjects[i] ); //might have been a static prop which would yield a new simulator
 														
-							if( pSimulator_Static && (pSimulator_Static != pSimulator_Entity) )
-								return 0; //static collideable is from a different simulator
+							if( pSimulator_Static )
+							{
+								if(pSimulator_Static != pSimulator_Entity)
+									return 0; //static collideable is from a different simulator
+							}
+							else if( pSimulator_Entity )
+							{
+								if( (pSimulator_Entity->GetInternalData().Simulation.Dynamic.EntFlags[pEntities[i]->entindex()] & PSEF_CLONES_ENTITY_FROM_MAIN) == 0 )
+								{
+									//entity is in a portal environment, static is not, static not cloned from main.
+									if( !pPhysObjects[i]->IsTrigger() ) //we should probably do this with triggers too. But it breaks tractor beams in devtest when the cube portals, too late in the ship cycle to chase the sweater thread without a good reason
+										return 0; 
+								}
+							}
 						}
 						break;
 					}
@@ -163,15 +196,35 @@ int CPortal_CollisionEvent::ShouldCollide( IPhysicsObject *pObj0, IPhysicsObject
 }
 
 
+static bool s_bPenetrationSolvingDisabled = false;
+static CUtlStack<bool> s_DisablePenetatrationSolving;
+
+void CPortal_CollisionEvent::DisablePenetrationSolving_Push( bool bDisable )
+{
+	s_DisablePenetatrationSolving.Push( bDisable );
+	s_bPenetrationSolvingDisabled = bDisable;
+}
+
+void CPortal_CollisionEvent::DisablePenetrationSolving_Pop( void )
+{
+	s_DisablePenetatrationSolving.Pop();
+	if( s_DisablePenetatrationSolving.Count() > 0 )
+	{
+		s_bPenetrationSolvingDisabled = s_DisablePenetatrationSolving.Top();
+	}
+	else
+	{
+		s_bPenetrationSolvingDisabled = false;
+	}
+}
 
 
 int CPortal_CollisionEvent::ShouldSolvePenetration( IPhysicsObject *pObj0, IPhysicsObject *pObj1, void *pGameData0, void *pGameData1, float dt )
 {
-	if( (pGameData0 == NULL) || (pGameData1 == NULL) )
+	if( s_bPenetrationSolvingDisabled )
 		return 0;
 
-	if( CPSCollisionEntity::IsPortalSimulatorCollisionEntity( (CBaseEntity *)pGameData0 ) ||
-		CPSCollisionEntity::IsPortalSimulatorCollisionEntity( (CBaseEntity *)pGameData1 ) )
+	if( (pGameData0 == NULL) || (pGameData1 == NULL) )
 		return 0;
 
 	// For portal, don't solve penetrations on combine balls
@@ -202,20 +255,27 @@ int CPortal_CollisionEvent::ShouldSolvePenetration( IPhysicsObject *pObj0, IPhys
 		}
 
 		//don't let players collide with objects they're holding, they get kinda messed up sometimes
-		if( pOther->IsPlayer() && (GetPlayerHeldEntity( (CBasePlayer *)pOther ) == pHeld) )
+		if( pOther->IsPlayer() && GetPlayerHeldEntity( (CBasePlayer *)pOther ) == pHeld )
+		{
 			return 0;
+		}
 
 		//held objects are clipping into other objects when travelling across a portal. We're close to ship, so this seems to be the
 		//most localized way to make a fix.
 		//Note that we're not actually going to change whether it should solve, we're just going to tack on some hacks
 		CPortal_Player *pHoldingPlayer = (CPortal_Player *)GetPlayerHoldingEntity( pHeld );
 		if( !pHoldingPlayer && CPhysicsShadowClone::IsShadowClone( pHeld ) )
+		{
 			pHoldingPlayer = (CPortal_Player *)GetPlayerHoldingEntity( ((CPhysicsShadowClone *)pHeld)->GetClonedEntity() );
+		}
 		
 		Assert( pHoldingPlayer );
-		if( pHoldingPlayer )
+		if ( pHoldingPlayer && !pHoldingPlayer->IsUsingVMGrab() )
 		{
 			CGrabController *pGrabController = GetGrabControllerForPlayer( pHoldingPlayer );
+
+			//if ( !pGrabController )
+			//	pGrabController = GetGrabControllerForPhysCannon( pHoldingPlayer->GetActiveWeapon() );
 
 			Assert( pGrabController );
 			if( pGrabController )
@@ -304,7 +364,7 @@ static void ModifyWeight_PreCollision( vcollisionevent_t *pEvent )
 		int j = 1-i;
 
 		// One is a combine ball, if the other is a movable brush, reduce the combine ball mass
-		if ( dynamic_cast<CPropCombineBall *>(pUnshadowedEntities[j]) != NULL && pUnshadowedEntities[i] != NULL )
+		if ( pUnshadowedEntities[i] != NULL && FClassnameIs( pUnshadowedEntities[j], "prop_combine_ball") )
 		{
 			if ( pUnshadowedEntities[i]->GetMoveType() == MOVETYPE_PUSH )
 			{
@@ -333,7 +393,7 @@ static void ModifyWeight_PreCollision( vcollisionevent_t *pEvent )
 		if( ( pUnshadowedObjects[i] && pUnshadowedObjects[i]->GetGameFlags() & FVPHYSICS_PLAYER_HELD ) )
 		{
 			int j = 1-i;
-			if( dynamic_cast<CPropCombineBall *>(pUnshadowedEntities[j]) != NULL )
+			if( FClassnameIs( pUnshadowedEntities[j], "prop_combine_ball") )
 			{			
 				// [j] is the combine ball, set mass low
 				// if the above ball vs brush entity check didn't already change the mass, change the mass
@@ -459,7 +519,10 @@ void CPortal_CollisionEvent::AddDamageEvent( CBaseEntity *pEntity, const CTakeDa
 	BaseClass::AddDamageEvent( pEntity, *pPassDownInfo, pInflictorPhysics, bRestoreVelocity, savedVel, savedAngVel );
 }
 
-
+void CPortal_CollisionEvent::RemovePenetrationEvents( CBaseEntity *pOther )
+{
+	// Please fix this function, it could lead to bad things if we do nothing.
+}
 
 
 

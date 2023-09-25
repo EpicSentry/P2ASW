@@ -3130,12 +3130,14 @@ void CViewRender::ViewDrawScene_PortalStencil(const CViewSetup &viewIn, ViewCust
 	pPrimaryWaterReflectionTexture.Init(GetWaterReflectionTexture());
 	CTextureReference pReplacementWaterReflectionTexture;
 	pReplacementWaterReflectionTexture.Init(portalrendertargets->GetWaterReflectionTextureForStencilDepth(iRecursionLevel));
+	//pReplacementWaterReflectionTexture.Init(GetWaterReflectionTexture());
 
 	//get references to refraction textures
 	CTextureReference pPrimaryWaterRefractionTexture;
 	pPrimaryWaterRefractionTexture.Init(GetWaterRefractionTexture());
 	CTextureReference pReplacementWaterRefractionTexture;
 	pReplacementWaterRefractionTexture.Init(portalrendertargets->GetWaterRefractionTextureForStencilDepth(iRecursionLevel));
+	//pReplacementWaterRefractionTexture.Init(GetWaterReflectionTexture());
 
 
 	//swap texture contents for the primary render targets with those we set aside for this recursion level
@@ -3561,10 +3563,6 @@ bool CViewRender::DrawOneMonitor( ITexture *pRenderTarget, int cameraNum, C_Poin
 
 void CViewRender::DrawMonitors( const CViewSetup &cameraView )
 {
-#ifdef PORTAL
-	g_pPortalRender->DrawPortalsToTextures(this, cameraView);
-#endif
-
 #ifdef USE_MONITORS
 
 	// Early out if no cameras
@@ -5406,7 +5404,7 @@ void CPortalSkyboxView::Draw()
 	//NOTE: doesn't magically map to VIEW_3DSKY at (0,0) like PORTAL_VIEWID maps to VIEW_MAIN
 	view_id_t iSkyBoxViewID = (view_id_t)g_pPortalRender->GetCurrentSkyboxViewId();
 
-	bool bInvokePreAndPostRender = (g_pPortalRender->ShouldUseStencilsToRenderPortals() == false);
+	bool bInvokePreAndPostRender = false;
 
 	DrawInternal(iSkyBoxViewID, bInvokePreAndPostRender, m_pRenderTarget);
 

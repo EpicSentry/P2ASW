@@ -92,6 +92,102 @@ int ClipPolyToPlane_LerpTexCoords( PortalMeshPoint_t *inVerts, int vertCount, Po
 	return outCount;
 }
 
+// Returns true if clipping took place.
+// Outputs two polygons: One for each side of the plane
+void ProjectPortalPolyToPlane( PortalMeshPoint_t *pInVerts, int nVertCount, 
+							   const Vector& normal, float flDist, const Vector &vCameraPos )
+{
+	for ( int i = 0; i < nVertCount; i++ )
+	{
+		// project point onto plane
+		Vector vDir( pInVerts[i].vWorldSpacePosition - vCameraPos );
+		float flT = ( flDist - DotProduct( vCameraPos, normal ) ) / DotProduct( vDir, normal );
+		pInVerts[i].vWorldSpacePosition = vCameraPos + flT * vDir;
+
+		/*
+		double dirx, diry, dirz;
+		dirx = pInVerts[i].vWorldSpacePosition.x - vCameraPos.x;
+		diry = pInVerts[i].vWorldSpacePosition.y - vCameraPos.y;
+		dirz = pInVerts[i].vWorldSpacePosition.z - vCameraPos.z;
+		double dot1 =  vCameraPos.x * normal.x + vCameraPos.y * normal.y + vCameraPos.z * normal.z;
+		double dot2 =  dirx * normal.x + diry * normal.y + dirz * normal.z;
+		double flT2 = ( double( flDist ) - dot1 ) / dot2;
+		pInVerts[i].vWorldSpacePosition.x = double( vCameraPos.x ) + flT2 * dirx;
+		pInVerts[i].vWorldSpacePosition.y = double( vCameraPos.y ) + flT2 * diry;
+		pInVerts[i].vWorldSpacePosition.z = double( vCameraPos.z ) + flT2 * dirz;
+		*/
+	}
+}
+
+// Clips a convex poly to a single plane
+bool ClipPortalPolyToPlane( PortalMeshPoint_t *pInVerts, int nVertCount, 
+						    PortalMeshPoint_t *pFrontVerts, int *pFrontVertCount,
+						    const Vector& normal, float flDist )
+{
+	if ( nVertCount < 3 )
+	{
+		*pFrontVertCount = 0;
+		return false;
+	}
+	
+	float *dists = (float *)stackalloc( sizeof(float) * nVertCount );
+	int *sides = (int *)stackalloc( sizeof(int) * nVertCount );
+	int count[2] = { 0, 0 };
+
+	// determine sides for each point
+	for ( int i = 0; i < nVertCount; i++ )
+	{
+		float dot = DotProduct( pInVerts[i].vWorldSpacePosition, normal) - flDist;
+		dists[i] = dot;
+		sides[i] = ( dot >= 0.0f ) ? SIDE_FRONT : SIDE_BACK;
+		count[ sides[i] ]++;
+	}
+
+	// no need to clip anything
+	if ( count[0] == 0 )
+	{
+		*pFrontVertCount = 0;
+		return false;
+	}
+
+	int	outCount1 = 0;
+	for ( int i = 0; i < nVertCount; i++ )
+	{
+		int i2 = ( i + 1 ) % nVertCount;
+
+		if ( sides[i] == SIDE_FRONT )
+		{
+			memcpy( &pFrontVerts[outCount1], &pInVerts[i], sizeof( PortalMeshPoint_t ) );
+			++outCount1;
+
+		}
+		if ( sides[i2] == sides[i] )
+		{
+			continue;
+		}
+
+		// generate a split point
+		float dot = dists[i] / ( dists[i] - dists[i2] );
+
+		Vector& p1 = pInVerts[i].vWorldSpacePosition;
+		Vector& p2 = pInVerts[i2].vWorldSpacePosition;
+		Vector midPt = p1 + dot * ( p2 - p1 );
+
+		Vector2D& uv1 = pInVerts[i].texCoord;
+		Vector2D& uv2 = pInVerts[i2].texCoord;
+		Vector2D midUv = uv1 + dot * ( uv2 - uv1 );
+
+		VectorCopy( midPt, pFrontVerts[outCount1].vWorldSpacePosition );
+		pFrontVerts[outCount1].texCoord = midUv;
+
+		++outCount1;
+	}
+
+	*pFrontVertCount = outCount1;
+	return true;
+}
+
+
 void RenderPortalMeshConvexPolygon( PortalMeshPoint_t *pVerts, int iVertCount, const IMaterial *pMaterial, void *pBind )
 {
 	CMatRenderContextPtr pRenderContext( materials );

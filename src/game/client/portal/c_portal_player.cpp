@@ -21,7 +21,7 @@
 #include "ScreenSpaceEffects.h"
 #include "portal_shareddefs.h"
 #include "ivieweffects.h"		// for screenshake
-#include "prop_portal_shared.h"
+#include "portal_base2d_shared.h"
 #include "input.h"
 #include "prediction.h"
 #include "choreoevent.h"
@@ -2059,8 +2059,7 @@ void C_Portal_Player::PlayerPortalled( C_Portal_Base2D *pEnteredPortal, float fT
 		if( IsLocalPlayer( this ) && pRemotePortal )
 		{
 			// We really need to use split screen code once we get that implemented
-			//g_pPortalRender->EnteredPortal( GetSplitScreenPlayerSlot( ), pEnteredPortal );
-			g_pPortalRender->EnteredPortal( pEnteredPortal );
+			g_pPortalRender->EnteredPortal( GetSplitScreenPlayerSlot( ), pEnteredPortal );
 		}
 
 		if( !GetPredictable() )

@@ -18,6 +18,9 @@
 #include "view_scene.h"
 #include "viewrender.h"
 #include "vprof.h"
+#include "toolframework_client.h"
+#include "vgui_int.h"
+#include "renderparm.h"
 
 PRECACHE_REGISTER_BEGIN(GLOBAL, PrecachePortalDrawingMaterials)
 PRECACHE(MATERIAL, "shadertest/wireframe")
@@ -32,6 +35,12 @@ static ConVar r_forcecheapwater("r_forcecheapwater", "0", FCVAR_CLIENTDLL | FCVA
 ConVar r_portal_use_stencils("r_portal_use_stencils", "1", FCVAR_CLIENTDLL, "Render portal views using stencils (if available)"); //draw portal views using stencil rendering
 ConVar r_portal_stencil_depth("r_portal_stencil_depth", "2", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "When using stencil views, this changes how many views within views we see");
 
+ConVar r_portal_fastpath( "r_portal_fastpath", "1", 0 );
+
+ConVar r_portal_fastpath_max_ghost_recursion( "r_portal_fastpath_max_ghost_recursion", "2", 0 );
+
+extern ConVar portal_draw_ghosting;
+
 //-----------------------------------------------------------------------------
 //
 // Portal rendering management class
@@ -40,30 +49,46 @@ ConVar r_portal_stencil_depth("r_portal_stencil_depth", "2", FCVAR_CLIENTDLL | F
 static CPortalRender s_PortalRender;
 CPortalRender* g_pPortalRender = &s_PortalRender;
 
+//CUtlVector<PortalRenderableCreationFunction_t> CPortalRender::m_PortalRenderableCreators;
+CPortalRenderableCreator_AutoRegister *CPortalRenderableCreator_AutoRegister::s_pRegisteredTypes = NULL;
 
 //-------------------------------------------
 //Portal View ID Node helpers
 //-------------------------------------------
-CUtlVector<int> s_iFreedViewIDs; //when a view id node gets freed, it's primary view id gets added here
-
-PortalViewIDNode_t *AllocPortalViewIDNode(int iChildLinkCount)
+PortalViewIDNode_t *AllocPortalViewIDNode( int iChildLinkCount, int nPortalIndex, int nTeam, int nParentID )
 {
 	PortalViewIDNode_t *pNode = new PortalViewIDNode_t; //for now we just new/delete
 
-	int iFreedIDsCount = s_iFreedViewIDs.Count();
-	if (iFreedIDsCount != 0)
+	// Generate a new view ID that is completely unique based upon which portal we are, and who our parent is.
+	// This only works for ~15 levels of recursion, after which, any other new IDs will alias with portals of previous levels because of overflow.
+	// This should be ok, since we limit ourselves to 11 levels of recursion.
+
+	if ( nParentID <= VIEW_ID_COUNT )
 	{
-		pNode->iPrimaryViewID = s_iFreedViewIDs.Tail();
-		s_iFreedViewIDs.FastRemove(iFreedIDsCount - 1);
+		// If we're one of the standard view, we should be view 0
+		Assert( nParentID == 0 );
+		nParentID = 0; // parentID should be 0, but just in case slam it to 0
 	}
 	else
 	{
-		static int iNewAllocationCounter = VIEW_ID_COUNT;
-		pNode->iPrimaryViewID = iNewAllocationCounter;
-		iNewAllocationCounter += 2; //2 to make room for skybox view ids
+		nParentID -= VIEW_ID_COUNT; // Bias and scale
+		nParentID /= 2; // Collapse to remove skybox IDs
 	}
+	
+	Assert( nTeam != 1 );
+	nTeam %= 2; // Get team id into the 0..1 range.  For single player the team id is 0... for multplayer it's 2 or 3 (TEAM_RED or TEAM_BLUE)
 
-	CMatRenderContextPtr pRenderContext(materials);
+	// Figure out the index to the first child of our parentID.
+	// Use a full quadtree numbering scheme.  First child node starts at 1.
+	int nFirstChild = nParentID * 4 + 1;
+	int nPortalID = nTeam * 2 + nPortalIndex; // 0..3 range
+	int nChildID = nFirstChild + nPortalID;
+	nChildID *= 2; // Space them out so that viewID + 1 is the skybox view
+	nChildID += VIEW_ID_COUNT; // Bias back into the VIEW_ID_COUNT range since we've reserved VIEW_ID_COUNT-1 view for primary viewIDs
+
+	pNode->iPrimaryViewID = nChildID;
+
+	CMatRenderContextPtr pRenderContext( materials );	
 #ifndef TEMP_DISABLE_PORTAL_VIS_QUERY
 	pNode->occlusionQueryHandle = pRenderContext->CreateOcclusionQueryObject();
 #endif
@@ -71,10 +96,10 @@ PortalViewIDNode_t *AllocPortalViewIDNode(int iChildLinkCount)
 	pNode->iWindowPixelsAtQueryTime = 0;
 	pNode->fScreenFilledByPortalSurfaceLastFrame_Normalized = -1.0f;
 
-	if (iChildLinkCount != 0)
+	if( iChildLinkCount != 0 )
 	{
-		pNode->ChildNodes.SetCount(iChildLinkCount);
-		memset(pNode->ChildNodes.Base(), NULL, sizeof(PortalViewIDNode_t *) * iChildLinkCount);
+		pNode->ChildNodes.SetCount( iChildLinkCount );
+		memset( pNode->ChildNodes.Base(), NULL, sizeof( PortalViewIDNode_t * ) * iChildLinkCount );
 	}
 
 	return pNode;
@@ -87,8 +112,6 @@ void FreePortalViewIDNode(PortalViewIDNode_t *pNode)
 		if (pNode->ChildNodes[i] != NULL)
 			FreePortalViewIDNode(pNode->ChildNodes[i]);
 	}
-
-	s_iFreedViewIDs.AddToTail(pNode->iPrimaryViewID);
 
 	CMatRenderContextPtr pRenderContext(materials);
 #ifndef TEMP_DISABLE_PORTAL_VIS_QUERY
@@ -393,71 +416,144 @@ void Recursive_InvalidatePortalPixelVis(PortalViewIDNode_t *pNode)
 	}
 }
 
+ConVar cl_useOldSwapPortalVisibilityCode( "cl_useoldswapportalvisibilitycode", "0" );
 //-----------------------------------------------------------------------------
 // Purpose: Preserves pixel visibility data when view id's are getting swapped around
 //-----------------------------------------------------------------------------
-void CPortalRender::EnteredPortal(CPortalRenderable *pEnteredPortal)
+void CPortalRender::EnteredPortal( int nPlayerSlot, CPortalRenderable *pEnteredPortal )
 {
 	CPortalRenderable *pExitPortal = pEnteredPortal->GetLinkedPortal();
-	Assert(pExitPortal != NULL);
+	Assert( pExitPortal != NULL );
 
-	if (pExitPortal == NULL)
+	if ( pExitPortal == NULL )
 		return;
 
-	int iNodeLinkCount = m_HeadPortalViewIDNode.ChildNodes.Count();
-
-	PortalViewIDNode_t *pNewHead = m_HeadPortalViewIDNode.ChildNodes[pEnteredPortal->m_iPortalViewIDNodeIndex];
-	m_HeadPortalViewIDNode.ChildNodes[pEnteredPortal->m_iPortalViewIDNodeIndex] = NULL;
-
-	//Create a new node that will preserve main's visibility. This new node will be linked to the new head node at the exit portal's index (imagine entering a portal walking backwards)
-	PortalViewIDNode_t *pExitPortalsNewNode = AllocPortalViewIDNode(iNodeLinkCount);
+	if ( cl_useOldSwapPortalVisibilityCode.GetInt() )
 	{
-		for (int i = 0; i != iNodeLinkCount; ++i)
+		// The following code doesn't seem to function as intended.  It adds an extra portal view id to the head of the exit portal's head and tries to transfer the visibility from
+		// the main views to it.  Then it tries to transfer the visibility from the entered portal view to the main view.  Unfortunately, this still doesn't give us valid
+		// visibility queries and we get query popping when passing through a portal and is overly complicated.  It also messes up the the nicely ordered viewIDs that reduce query results popping
+		// when view ids change (due to a new portal coming into view).
+	
+		int iNodeLinkCount = m_HeadPortalViewIDNode.ChildNodes.Count();
+
+		PortalViewIDNode_t *pNewHead = m_HeadPortalViewIDNode.ChildNodes[pEnteredPortal->m_iPortalViewIDNodeIndex];
+		m_HeadPortalViewIDNode.ChildNodes[pEnteredPortal->m_iPortalViewIDNodeIndex] = NULL;
+
+		//Create a new node that will preserve main's visibility. This new node will be linked to the new head node at the exit portal's index (imagine entering a portal walking backwards)
+		C_Prop_Portal *pPropPortal = static_cast<C_Prop_Portal*>( pExitPortal );
+		int nPortalIndex = pPropPortal->m_bIsPortal2 ? 1 : 0;
+		int nTeamIndex = pPropPortal->GetTeamNumber();
+		PortalViewIDNode_t *pExitPortalsNewNode = AllocPortalViewIDNode( iNodeLinkCount, nPortalIndex, nTeamIndex, VIEW_MAIN );
 		{
-			pExitPortalsNewNode->ChildNodes[i] = m_HeadPortalViewIDNode.ChildNodes[i];
-			m_HeadPortalViewIDNode.ChildNodes[i] = NULL;
+			for( int i = 0; i != iNodeLinkCount; ++i )
+			{
+				pExitPortalsNewNode->ChildNodes[i] = m_HeadPortalViewIDNode.ChildNodes[i];
+				m_HeadPortalViewIDNode.ChildNodes[i] = NULL;
+			}
+
+			PixelVisibility_ShiftVisibilityViews( nPlayerSlot, VIEW_MAIN, pExitPortalsNewNode->iPrimaryViewID );
+			PixelVisibility_ShiftVisibilityViews( nPlayerSlot, VIEW_3DSKY, pExitPortalsNewNode->iPrimaryViewID + 1 );
 		}
 
-		PixelVisibility_ShiftVisibilityViews(0, VIEW_MAIN, pExitPortalsNewNode->iPrimaryViewID);
-		PixelVisibility_ShiftVisibilityViews(0, VIEW_3DSKY, pExitPortalsNewNode->iPrimaryViewID + 1);
-	}
+		
 
-
-
-	if (pNewHead) //it's possible we entered a portal we couldn't see through
-	{
-		Assert(pNewHead->ChildNodes.Count() == m_HeadPortalViewIDNode.ChildNodes.Count());
-		Assert(pNewHead->ChildNodes[pExitPortal->m_iPortalViewIDNodeIndex] == NULL); //seeing out of an exit portal back into itself should be impossible
-
-		for (int i = 0; i != iNodeLinkCount; ++i)
+		if( pNewHead ) //it's possible we entered a portal we couldn't see through
 		{
-			m_HeadPortalViewIDNode.ChildNodes[i] = pNewHead->ChildNodes[i];
-			pNewHead->ChildNodes[i] = NULL; //going to be freeing the node in a minute, don't want to kill transplanted children
+			Assert( pNewHead->ChildNodes.Count() == m_HeadPortalViewIDNode.ChildNodes.Count() );
+			Assert( pNewHead->ChildNodes[pExitPortal->m_iPortalViewIDNodeIndex] == NULL ); //seeing out of an exit portal back into itself should be impossible
+
+			for( int i = 0; i != iNodeLinkCount; ++i )
+			{
+				m_HeadPortalViewIDNode.ChildNodes[i] = pNewHead->ChildNodes[i];
+				pNewHead->ChildNodes[i] = NULL; //going to be freeing the node in a minute, don't want to kill transplanted children
+			}
+
+			//Since the primary views will always be 0 and 1, we have to shift results instead of replacing the id's
+			PixelVisibility_ShiftVisibilityViews( nPlayerSlot, pNewHead->iPrimaryViewID, VIEW_MAIN );
+			PixelVisibility_ShiftVisibilityViews( nPlayerSlot, pNewHead->iPrimaryViewID + 1, VIEW_3DSKY );
+
+			FreePortalViewIDNode( pNewHead );
 		}
 
-		//Since the primary views will always be 0 and 1, we have to shift results instead of replacing the id's
-		PixelVisibility_ShiftVisibilityViews(0, pNewHead->iPrimaryViewID, VIEW_MAIN);
-		PixelVisibility_ShiftVisibilityViews(0, pNewHead->iPrimaryViewID + 1, VIEW_3DSKY);
-
-		FreePortalViewIDNode(pNewHead);
+		Assert( m_HeadPortalViewIDNode.ChildNodes[pExitPortal->m_iPortalViewIDNodeIndex] == NULL ); //asserted above in pNewHead code, but call me paranoid
+		m_HeadPortalViewIDNode.ChildNodes[pExitPortal->m_iPortalViewIDNodeIndex] = pExitPortalsNewNode;
 	}
+	else
+	{
+		// This code is much simpler, does essentially the same thing as the code above, and doesn't have to create a new view.  
+		// It still causes some popping, but doesn't create a new view or ID.
+		PortalViewIDNode_t *pEnteredView = m_HeadPortalViewIDNode.ChildNodes[ pEnteredPortal->m_iPortalViewIDNodeIndex ];
+		if ( pEnteredView )
+		{
+			C_Prop_Portal *pPropPortal = static_cast<C_Prop_Portal*>( pExitPortal );
+			int nToExitPortal = pPropPortal->m_bIsPortal2 ? 2 : -2;
+			int nExitPortalID = pEnteredView->iPrimaryViewID + nToExitPortal;
 
-	Assert(m_HeadPortalViewIDNode.ChildNodes[pExitPortal->m_iPortalViewIDNodeIndex] == NULL); //asserted above in pNewHead code, but call me paranoid
-	m_HeadPortalViewIDNode.ChildNodes[pExitPortal->m_iPortalViewIDNodeIndex] = pExitPortalsNewNode;
+			// Shift queries from the main view to the exit portal view... which is just 2 more or less than the current portal view
+			PixelVisibility_ShiftVisibilityViews( nPlayerSlot, VIEW_MAIN, nExitPortalID );
+			PixelVisibility_ShiftVisibilityViews( nPlayerSlot, VIEW_3DSKY, nExitPortalID + 1 );
+
+			// Shift visibility from the entered view to the main view
+			PixelVisibility_ShiftVisibilityViews( nPlayerSlot, pEnteredView->iPrimaryViewID, VIEW_MAIN );
+			PixelVisibility_ShiftVisibilityViews( nPlayerSlot, pEnteredView->iPrimaryViewID + 1, VIEW_3DSKY );
+		}
+	}
 
 	//Because pixel visibility is based off of *last* frame's visibility. We can get cases where a certain portal
 	//wasn't visible last frame, but is takes up most of the screen this frame.
 	//Set all portal pixel visibility to unknown visibility.
-	for (int i = m_HeadPortalViewIDNode.ChildNodes.Count(); --i >= 0; )
+	for( int i = m_HeadPortalViewIDNode.ChildNodes.Count(); --i >= 0; )
 	{
 		PortalViewIDNode_t *pChildNode = m_HeadPortalViewIDNode.ChildNodes[i];
-		if (pChildNode)
-			Recursive_InvalidatePortalPixelVis(pChildNode);
+		if( pChildNode )
+			Recursive_InvalidatePortalPixelVis( pChildNode );
 	}
 }
 
 
 
+ConVar r_portalstencildisable( "r_portalstencildisable", "0" );
+
+//-----------------------------------------------------------------------------------------------------------------------------------
+void CPortalRender::DrawPortalGhostLocations( IMatRenderContext *pRenderContext, IMesh *pPortalQuadMesh, const GhostPortalRenderInfo_t *pGhostPortalRenderInfos, int nPortalCount ) const
+{
+	VPROF_BUDGET( "PortalGhosts", "PortalGhosts" );
+
+	if( !ToolsEnabled() && 
+		portal_draw_ghosting.GetBool() &&
+		( r_portal_fastpath_max_ghost_recursion.GetInt() > m_iViewRecursionLevel ) )
+	{
+		if ( nPortalCount == 0 )
+		{
+			return;
+		}
+
+		pRenderContext->BeginPIXEvent( PIX_VALVE_ORANGE, "Portal Ghosts" );
+
+		const CPortalRenderable *pExitView = GetCurrentViewExitPortal();
+
+		pRenderContext->MatrixMode( MATERIAL_MODEL ); //just in case
+		pRenderContext->PushMatrix();
+		pRenderContext->LoadIdentity();
+
+		for ( int i = 0; i < nPortalCount; i++ )
+		{
+			if ( pGhostPortalRenderInfos[i].m_pPortal == pExitView )
+			{
+				continue;
+			}
+
+			pRenderContext->Bind( pGhostPortalRenderInfos[i].m_pGhostMaterial, pGhostPortalRenderInfos[i].m_pPortal->GetClientRenderable() );
+			pPortalQuadMesh->Draw( pGhostPortalRenderInfos[i].m_nGhostPortalQuadIndex * 6, 6 );
+		}
+
+		pRenderContext->MatrixMode( MATERIAL_MODEL );
+		pRenderContext->PopMatrix();
+
+		pRenderContext->EndPIXEvent();
+	}
+}
 
 
 bool CPortalRender::DrawPortalsUsingStencils(CViewRender *pViewRender)
@@ -474,6 +570,14 @@ bool CPortalRender::DrawPortalsUsingStencils(CViewRender *pViewRender)
 
 	if (((iDrawFlags & DF_CLIP_Z) != 0) && ((iDrawFlags & DF_CLIP_BELOW) == 0)) //clipping above the water height
 		return false;
+	
+	CMatRenderContextPtr pRenderContext(materials);
+
+	if ( m_iViewRecursionLevel == 0 )
+	{
+		m_portalGhostRenderInfos.RemoveAll();
+		C_Prop_Portal::BuildPortalGhostRenderInfo(m_AllPortals, m_portalGhostRenderInfos);
+	}
 
 	int iNumRenderablePortals = m_ActivePortals.Count();
 
@@ -521,7 +625,6 @@ bool CPortalRender::DrawPortalsUsingStencils(CViewRender *pViewRender)
 
 	m_iRemainingPortalViewDepth = (iMaxDepth - m_iViewRecursionLevel) - 1;
 
-	CMatRenderContextPtr pRenderContext(materials);
 	pRenderContext->Flush(true); //to prevent screwing up the last opaque object
 
 								 //queued mode makes us pass the barrier of just noticeable difference when using a previous frame's occlusion as a draw skip check
@@ -590,11 +693,16 @@ bool CPortalRender::DrawPortalsUsingStencils(CViewRender *pViewRender)
 			}
 			continue;
 		}
+		
+		Assert( m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes.Count() > pCurrentPortal->m_iPortalViewIDNodeIndex );
 
-		Assert(m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes.Count() > pCurrentPortal->m_iPortalViewIDNodeIndex);
-
-		if (m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pCurrentPortal->m_iPortalViewIDNodeIndex] == NULL)
-			m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pCurrentPortal->m_iPortalViewIDNodeIndex] = AllocPortalViewIDNode(m_HeadPortalViewIDNode.ChildNodes.Count());
+		if( m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pCurrentPortal->m_iPortalViewIDNodeIndex] == NULL )
+		{
+			C_Prop_Portal *pPropPortal = static_cast<C_Prop_Portal*>( pCurrentPortal );
+			int nPortalIndex = pPropPortal->m_bIsPortal2 ? 1 : 0;
+			int nTeamIndex = pPropPortal->GetTeamNumber();
+			m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pCurrentPortal->m_iPortalViewIDNodeIndex] = AllocPortalViewIDNode( m_HeadPortalViewIDNode.ChildNodes.Count(), nPortalIndex, nTeamIndex, CurrentViewID() );
+		}
 
 		PortalViewIDNode_t *pCurrentPortalViewNode = m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pCurrentPortal->m_iPortalViewIDNodeIndex];
 
@@ -814,11 +922,16 @@ void CPortalRender::DrawPortalsToTextures(CViewRender *pViewRender, const CViewS
 			}
 			continue;
 		}
+		
+		Assert( m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes.Count() > pCurrentPortal->m_iPortalViewIDNodeIndex );
 
-		Assert(m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes.Count() > pCurrentPortal->m_iPortalViewIDNodeIndex);
-
-		if (m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pCurrentPortal->m_iPortalViewIDNodeIndex] == NULL)
-			m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pCurrentPortal->m_iPortalViewIDNodeIndex] = AllocPortalViewIDNode(m_HeadPortalViewIDNode.ChildNodes.Count());
+		if( m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pCurrentPortal->m_iPortalViewIDNodeIndex] == NULL )
+		{
+			C_Prop_Portal *pPropPortal = static_cast<C_Prop_Portal*>( pCurrentPortal );
+			int nPortalIndex = pPropPortal->m_bIsPortal2 ? 1 : 0;
+			int nTeamIndex = pPropPortal->GetTeamNumber();
+			m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pCurrentPortal->m_iPortalViewIDNodeIndex] = AllocPortalViewIDNode( m_HeadPortalViewIDNode.ChildNodes.Count(), nPortalIndex, nTeamIndex, CurrentViewID() );
+		}
 
 		m_PortalViewIDNodeChain[m_iViewRecursionLevel + 1] = m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pCurrentPortal->m_iPortalViewIDNodeIndex];
 
@@ -1021,6 +1134,12 @@ void CPortalRender::UpdateDepthDoublerTexture(const CViewSetup &viewSetup)
 	}
 }
 
+bool CPortalRender::DepthDoublerPIPDisableCheck( void )
+{
+	int slot = GET_ACTIVE_SPLITSCREEN_SLOT();
+	return (slot != 0) && VGui_IsSplitScreenPIP();
+}
+
 
 //-----------------------------------------------------------------------------
 // Finds a recorded portal
@@ -1071,14 +1190,17 @@ void CPortalRender::HandlePortalPlaybackMessage(KeyValues *pKeyValues)
 		{
 			CPortalRenderable *pPortal = NULL;
 			const char *szType = pCurr->GetString("portalType", "flatBasic"); //"flatBasic" being the type commonly found in "Portal" mod
-																			  //search through registered creation functions for one that makes this type of portal
-			for (int i = m_PortalRenderableCreators.Count(); --i >= 0; )
+			//search through registered creation functions for one that makes this type of portal
+			const CPortalRenderableCreator_AutoRegister *pCreationFuncs = CPortalRenderableCreator_AutoRegister::s_pRegisteredTypes;
+			while( pCreationFuncs != NULL )
 			{
-				if (FStrEq(szType, m_PortalRenderableCreators[i].portalType.String()))
+				if( FStrEq( szType, pCreationFuncs->m_szPortalType ) )
 				{
-					pPortal = m_PortalRenderableCreators[i].creationFunc();
+					pPortal = pCreationFuncs->m_creationFunc();
 					break;
 				}
+
+				pCreationFuncs = pCreationFuncs->m_pNext;
 			}
 
 			if (pPortal == NULL)
@@ -1141,23 +1263,6 @@ void CPortalRender::HandlePortalPlaybackMessage(KeyValues *pKeyValues)
 	m_RecordedPortals[i].m_pActivePortal->PortalMoved();
 	m_RecordedPortals[i].m_pActivePortal->ComputeLinkMatrix();
 	}*/
-}
-
-
-void CPortalRender::AddPortalCreationFunc(const char *szPortalType, PortalRenderableCreationFunc creationFunc)
-{
-#ifdef _DEBUG
-	for (int i = m_PortalRenderableCreators.Count(); --i >= 0; )
-	{
-		AssertMsg(FStrEq(m_PortalRenderableCreators[i].portalType.String(), szPortalType) == false, "Multiple portal renderable creation functions for same type of portal renderable.");
-	}
-#endif
-
-	PortalRenderableCreationFunction_t temp;
-	temp.creationFunc = creationFunc;
-	temp.portalType.Set(szPortalType);
-
-	m_PortalRenderableCreators.AddToTail(temp);
 }
 
 bool Recursive_IsPortalViewID(PortalViewIDNode_t *pNode, view_id_t id)

@@ -8,15 +8,21 @@
 
 #include "cbase.h"
 #include "PhysicsCloneArea.h"
-#include "prop_portal.h"
-#include "portal_shareddefs.h"
+#include "portal_base2d.h"
 #include "collisionutils.h"
 #include "env_debughistory.h"
 
 LINK_ENTITY_TO_CLASS( physicsclonearea, CPhysicsCloneArea );
 
+const float CPhysicsCloneArea::s_fPhysicsCloneAreaScale = 4.0f;
+//#define PHYSICSCLONEAREASCALE 4.0f
 
-#define PHYSICSCLONEAREASCALE 4.0f
+/*const Vector CPhysicsCloneArea::vLocalMins( 3.0f, 
+										   -PORTAL_HALF_WIDTH * PHYSICSCLONEAREASCALE, 
+										   -PORTAL_HALF_HEIGHT * PHYSICSCLONEAREASCALE );
+const Vector CPhysicsCloneArea::vLocalMaxs( PORTAL_HALF_HEIGHT * PHYSICSCLONEAREASCALE,  //x is the forward which is fairly thin for portals, replacing with halfheight
+											PORTAL_HALF_WIDTH * PHYSICSCLONEAREASCALE,
+											PORTAL_HALF_HEIGHT * PHYSICSCLONEAREASCALE );*/
 
 extern ConVar sv_portal_debug_touch;
 
@@ -36,7 +42,7 @@ void CPhysicsCloneArea::StartTouch( CBaseEntity *pOther )
 	}
 #endif
 
-	m_pAttachedSimulator->StartCloningEntity( pOther );
+	m_pAttachedSimulator->StartCloningEntityFromMain( pOther );
 }
 
 void CPhysicsCloneArea::Touch( CBaseEntity *pOther )
@@ -64,19 +70,12 @@ void CPhysicsCloneArea::EndTouch( CBaseEntity *pOther )
 	}
 #endif
 
-	m_pAttachedSimulator->StopCloningEntity( pOther );
+	m_pAttachedSimulator->StopCloningEntityFromMain( pOther );
 }
 
 void CPhysicsCloneArea::Spawn( void )
 {
 	BaseClass::Spawn();
-
-	vLocalMins = Vector(3.0f,
-		-PORTAL_HALF_WIDTH * PHYSICSCLONEAREASCALE,
-		-PORTAL_HALF_HEIGHT * PHYSICSCLONEAREASCALE);
-	vLocalMaxs = Vector(PORTAL_HALF_HEIGHT * PHYSICSCLONEAREASCALE,  //x is the forward which is fairly thin for portals, replacing with halfheight
-		PORTAL_HALF_WIDTH * PHYSICSCLONEAREASCALE,
-		PORTAL_HALF_HEIGHT * PHYSICSCLONEAREASCALE);
 
 	Assert( m_pAttachedPortal );
 
@@ -87,7 +86,11 @@ void CPhysicsCloneArea::Spawn( void )
 	SetMoveType( MOVETYPE_NONE );
 	SetCollisionGroup( COLLISION_GROUP_PLAYER );
 
-	SetSize( vLocalMins, vLocalMaxs );
+	m_fHalfWidth = m_pAttachedPortal->GetHalfWidth() * s_fPhysicsCloneAreaScale;
+	m_fHalfHeight = m_pAttachedPortal->GetHalfHeight() * s_fPhysicsCloneAreaScale;
+	m_fHalfDepth = MAX( m_fHalfWidth, m_fHalfHeight );
+
+	SetSize( GetLocalMins(), GetLocalMaxs() );
 }
 
 void CPhysicsCloneArea::Activate( void )
@@ -124,9 +127,15 @@ void CPhysicsCloneArea::UpdatePosition( void )
 		}
 	}
 
+	//update size as well
+	m_fHalfWidth = m_pAttachedPortal->GetHalfWidth() * s_fPhysicsCloneAreaScale;
+	m_fHalfHeight = m_pAttachedPortal->GetHalfHeight() * s_fPhysicsCloneAreaScale;
+	m_fHalfDepth = MAX( m_fHalfWidth, m_fHalfHeight );
+	SetSize( GetLocalMins(), GetLocalMaxs() );
+
 	SetAbsOrigin( m_pAttachedPortal->GetAbsOrigin() );
 	SetAbsAngles( m_pAttachedPortal->GetAbsAngles() );
-	m_bActive = m_pAttachedPortal->m_bActivated;
+	m_bActive = m_pAttachedPortal->IsActive();
 
 	//NDebugOverlay::EntityBounds( this, 0, 0, 255, 25, 5.0f );
 
@@ -143,6 +152,9 @@ void CPhysicsCloneArea::CloneNearbyEntities( void )
 
 	Vector ptOrigin = GetAbsOrigin();
 	QAngle qAngles = GetAbsAngles();
+
+	Vector vLocalMins = GetLocalMins();
+	Vector vLocalMaxs = GetLocalMaxs();
 
 	Vector ptOBBStart = ptOrigin;
 	ptOBBStart += vForward * vLocalMins.x;
@@ -218,13 +230,13 @@ void CPhysicsCloneArea::CloneNearbyEntities( void )
 
 void CPhysicsCloneArea::CloneTouchingEntities( void )
 {
-	if( m_pAttachedPortal && m_pAttachedPortal->m_bActivated )
+	if( m_pAttachedPortal && m_pAttachedPortal->IsActive() )
 	{
 		touchlink_t *root = ( touchlink_t * )GetDataObject( TOUCHLINK );
 		if( root )
 		{
 			for( touchlink_t *link = root->nextLink; link != root; link = link->nextLink )
-				m_pAttachedSimulator->StartCloningEntity( link->entityTouched );
+				m_pAttachedSimulator->StartCloningEntityFromMain( link->entityTouched );
 		}
 	}
 }
@@ -233,7 +245,7 @@ void CPhysicsCloneArea::CloneTouchingEntities( void )
 
 
 
-CPhysicsCloneArea *CPhysicsCloneArea::CreatePhysicsCloneArea( CProp_Portal *pFollowPortal )
+CPhysicsCloneArea *CPhysicsCloneArea::CreatePhysicsCloneArea( CPortal_Base2D *pFollowPortal )
 {
 	if( !pFollowPortal )
 		return NULL;
@@ -248,5 +260,21 @@ CPhysicsCloneArea *CPhysicsCloneArea::CreatePhysicsCloneArea( CProp_Portal *pFol
 	pCloneArea->UpdatePosition();
 
 	return pCloneArea;
+}
+
+
+void CPhysicsCloneArea::Resize( float fPortalHalfWidth, float fPortalHalfHeight )
+{
+	fPortalHalfWidth *= s_fPhysicsCloneAreaScale;
+	fPortalHalfHeight *= s_fPhysicsCloneAreaScale;
+
+	if( (fPortalHalfWidth == m_fHalfWidth) && (fPortalHalfHeight == m_fHalfHeight) )
+		return;
+
+	m_fHalfWidth = fPortalHalfWidth;
+	m_fHalfHeight = fPortalHalfHeight;
+	m_fHalfDepth = MAX( m_fHalfWidth, m_fHalfHeight );
+	SetSize( GetLocalMins(), GetLocalMaxs() );
+	UpdatePosition();
 }
 

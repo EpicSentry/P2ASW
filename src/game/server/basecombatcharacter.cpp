@@ -426,7 +426,7 @@ void CBaseCombatCharacter::ResetVisibilityCache( CBaseCombatCharacter *pBCC )
 }
 
 #ifdef PORTAL
-bool CBaseCombatCharacter::FVisibleThroughPortal(const CProp_Portal *pPortal, CBaseEntity *pEntity, int traceMask, CBaseEntity **ppBlocker)
+bool CBaseCombatCharacter::FVisibleThroughPortal(const CPortal_Base2D *pPortal, CBaseEntity *pEntity, int traceMask, CBaseEntity **ppBlocker)
 {
 	VPROF("CBaseCombatCharacter::FVisible");
 
@@ -521,7 +521,7 @@ bool CBaseCombatCharacter::FInViewCone( const Vector &vecSpot )
 // the caller's forward view cone. The dot product is performed
 // in 2d, making the view cone infinitely tall. 
 //=========================================================
-CProp_Portal* CBaseCombatCharacter::FInViewConeThroughPortal(CBaseEntity *pEntity)
+CPortal_Base2D* CBaseCombatCharacter::FInViewConeThroughPortal(CBaseEntity *pEntity)
 {
 	return FInViewConeThroughPortal(pEntity->WorldSpaceCenter());
 }
@@ -531,7 +531,7 @@ CProp_Portal* CBaseCombatCharacter::FInViewConeThroughPortal(CBaseEntity *pEntit
 // the caller's forward view cone. The dot product is performed
 // in 2d, making the view cone infinitely tall. 
 //=========================================================
-CProp_Portal* CBaseCombatCharacter::FInViewConeThroughPortal(const Vector &vecSpot)
+CPortal_Base2D* CBaseCombatCharacter::FInViewConeThroughPortal(const Vector &vecSpot)
 {
 	int iPortalCount = CProp_Portal_Shared::AllPortals.Count();
 	if (iPortalCount == 0)
