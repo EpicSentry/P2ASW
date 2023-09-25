@@ -92,6 +92,7 @@ public:
 	virtual void	Precache( void );
 	virtual void	Spawn( void );
 	virtual void	Activate( void );
+	virtual void	OnRestore( void );
 	virtual void	UpdateOnRemove( void );
 	virtual int		OnTakeDamage( const CTakeDamageInfo &info );
 
@@ -107,6 +108,7 @@ public:
 	virtual void	Shoot( const Vector &vecSrc, const Vector &vecDirToEnemy, bool bStrict = false );
 	virtual void	SetEyeState( eyeState_t state );
 
+	virtual void    TryEmitSound(const char* soundname);
 	virtual bool	OnSide( void );
 
 	virtual float	GetAttackDamageScale( CBaseEntity *pVictim );
@@ -137,7 +139,12 @@ public:
 
 	// Inputs
 	void	InputFireBullet( inputdata_t &inputdata );
+	void	InputEnableGagging(inputdata_t& inputdata);
+	void	InputDisableGagging(inputdata_t& inputdata);
+	void	InputEnablePickup(inputdata_t& inputdata);
+	void	InputDisablePickup(inputdata_t& inputdata);
 
+	virtual void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 private:
 
 	CHandle<CRopeKeyframe>	m_hRopes[ PORTAL_FLOOR_TURRET_NUM_ROPES ];
@@ -149,6 +156,7 @@ private:
 	int		m_iBarrelAttachments[ 4 ];
 	bool	m_bShootWithBottomBarrels;
 	bool	m_bDamageForce;
+	bool	m_bPickupEnabled;
 
 	float	m_fSearchSpeed;
 	float	m_fMovingTargetThreashold;
@@ -157,6 +165,9 @@ private:
 	turretState_e	m_iLastState;
 	float			m_fNextTalk;
 	bool			m_bDelayTippedTalk;
+	bool			m_bUsedAsActor;
+	bool			m_bGagged;
+	bool			m_bUseSuperDamageScale;
 
 	string_t m_ModelName;
 
