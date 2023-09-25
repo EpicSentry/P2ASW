@@ -2260,7 +2260,7 @@ void CPortal_Player::ChooseActivePaintPowers( PaintPowerInfoVector& activePowers
 				paintedPowerQuery.AddToTail( paintedPower );
 			}
 		}
-
+		
 		// Choose the best surface to use the painted power on
 		PaintPowerChoiceResultArray bestPaintedPowers;
 		PaintPowerChoiceCriteria_t paintedChoiceCriteria = choiceCriteria;
@@ -2301,6 +2301,9 @@ void CPortal_Player::PlayPaintSounds( const PaintPowerChoiceResultArray& touched
 		"Player.EnterSpeedPaint",
 		"Player.ExitSpeedPaint"
 	};
+
+	Msg("GetPaintedPower(): %i\n", GetPaintedPower());
+	Msg("GetPaintPowerAtPoint(): %i\n", GetPaintPowerAtPoint( Vector() ));
 
 	CRecipientFilter filter;
 	filter.AddRecipient( this );
@@ -2577,9 +2580,13 @@ void CPortal_Player::DeterminePaintContacts()
 		PredictPaintContacts( contactBoxMin, contactBoxMax, traceBoxMin, traceBoxMax, jump_helper_look_ahead_time.GetFloat(), JUMP_HELPER_CONTEXT );
 	}
 #else
+	DeterminePaintContactsUnderFeet();
+#endif
+}
 
+void CPortal_Player::DeterminePaintContactsUnderFeet()
+{
 	CTraceFilterNoPlayers filter;
-
 	trace_t tr;
 	UTIL_TraceLine( GetAbsOrigin() + Vector( 0, 0, 1 ), GetAbsOrigin() - Vector( 0, 0, 1 ), MASK_SOLID, &filter, &tr );
 	
@@ -2589,8 +2596,19 @@ void CPortal_Player::DeterminePaintContacts()
 	//Trace for paint on the surface if it is the world
 	if( tr.m_pEnt->IsBSPModel() )
 	{
-		m_PortalLocal.m_PaintedPowerType = UTIL_Paint_TracePower( tr.m_pEnt, tr.endpos, tr.plane.normal );
-		Msg("m_PortalLocal.m_PaintedPowerType: %i\n", m_PortalLocal.m_PaintedPowerType);
+		PaintPowerType newPower = UTIL_Paint_TracePower( tr.m_pEnt, tr.endpos, tr.plane.normal );
+
+		m_PortalLocal.m_PaintedPowerType = newPower;
+		PaintPowerInfo_t powerInfo;
+			
+		powerInfo.m_PaintPowerType = newPower;
+		powerInfo.m_ContactPoint = tr.endpos;
+		powerInfo.m_SurfaceNormal = tr.plane.normal;
+
+		ForceSetPaintPower( powerInfo );
+
+		Paint( newPower, Vector() );
+
 	}
 	else
 	{
@@ -2605,8 +2623,6 @@ void CPortal_Player::DeterminePaintContacts()
 			m_PortalLocal.m_PaintedPowerType = NO_POWER;
 		}
 	}
-
-#endif
 }
 
 
@@ -2915,7 +2931,6 @@ void UpdatePaintZ( Vector &velocity, float inGravity )
 
 bool CPortal_Player::CheckToUseBouncePower( PaintPowerInfo_t& info )
 {	
-
 	// Crouching opts out of using bounce powers
 	const bool bIsCrouching = m_Local.m_bDucking || GetFlags() & FL_DUCKING || m_PortalLocal.m_bPreventedCrouchJumpThisFrame;
 	const bool bShouldJump = IsTryingToSuperJump( &info );

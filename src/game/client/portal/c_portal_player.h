@@ -571,6 +571,7 @@ private: // PAINT SPECIFIC
 
 	// Find all the contacts
 	void DeterminePaintContacts();
+	void DeterminePaintContactsUnderFeet(); // A hacky way to get the paint power since engine code is limiting us.
 	void PredictPaintContacts( const Vector& contactBoxMin,
 								const Vector& contactBoxMax,
 								const Vector& traceBoxMin,

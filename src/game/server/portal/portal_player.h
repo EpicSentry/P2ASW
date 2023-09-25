@@ -557,7 +557,7 @@ public: // PAINT SPECIFIC
 	void SetHullHeight( float flHeight );
 
 	virtual void ChooseActivePaintPowers( PaintPowerInfoVector& activePowers );
-
+	
 	bool IsFullyConnected() { return m_bIsFullyConnected; }
 	void OnFullyConnected();
 
@@ -570,6 +570,7 @@ private: // PAINT SPECIFIC
 
 	// Find all the contacts
 	void DeterminePaintContacts();
+	void DeterminePaintContactsUnderFeet(); // A hacky way to get the paint power since engine code is limiting us.
 	void PredictPaintContacts( const Vector& contactBoxMin,
 		const Vector& contactBoxMax,
 		const Vector& traceBoxMin,

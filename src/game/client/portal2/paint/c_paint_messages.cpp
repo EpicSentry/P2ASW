@@ -57,7 +57,6 @@ void __MsgFunc_PaintWorld( bf_read &msg )
 
 void __MsgFunc_PaintEntity( bf_read &msg )
 {
-	Msg("__MsgFunc_PaintEntity\n");
 	IPaintableEntity* pPaintableEnt = dynamic_cast< IPaintableEntity* >( UTIL_EntityFromUserMessageEHandle( msg.ReadLong() ) );
 	const PaintPowerType power = static_cast< PaintPowerType >( msg.ReadByte() );
 	Vector pos;
