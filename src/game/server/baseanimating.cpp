@@ -3568,8 +3568,9 @@ void CBaseAnimating::DoMuzzleFlash()
 // Purpose: 
 // Input  : scale - 
 //-----------------------------------------------------------------------------
-void CBaseAnimating::SetModelScale( float scale, float change_duration /*= 0.0f*/  )
+void CBaseAnimating::SetModelScale( float scale, float change_duration /*= 0.0f*/, ModelScaleType_t scaleType /*= HIERARCHICAL_MODEL_SCALE*/  )
 {
+	SetModelScaleType( scaleType );
 	if ( change_duration > 0.0f )
 	{
 		ModelScale *mvs = ( ModelScale * )CreateDataObject( MODELSCALE );

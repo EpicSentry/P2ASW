@@ -30,6 +30,12 @@
 #include "ndebugoverlay.h"
 #include "baseviewmodel.h"
 #include "in_buttons.h"
+
+	#if defined( PORTAL )
+		#include "portal_player.h"
+		#include "physicsshadowclone.h"
+	#endif
+
 #include "client.h"
 #include "team.h"
 #include "particle_smokegrenade.h"
@@ -8245,7 +8251,79 @@ void CBasePlayer::VPhysicsShadowUpdate( IPhysicsObject *pPhysics )
 		}
 		else
 		{
-			bCheckStuck = true;
+#if defined( PORTAL ) && defined( GAME_DLL ) && 1
+			CPortal_Player *pPortalPlayer = (CPortal_Player *)this;
+			CPortal_Base2D *pPortalEnvironment = pPortalPlayer->m_hPortalEnvironment.Get();
+			if( pPortalEnvironment != NULL )
+			{
+				trace_t trace;
+
+				Ray_t ray;
+				ray.Init( GetAbsOrigin(), GetAbsOrigin(), WorldAlignMins(), WorldAlignMaxs() );
+
+				CTraceFilterSimple OriginalTraceFilter( this, COLLISION_GROUP_PLAYER_MOVEMENT );
+				CTraceFilterTranslateClones traceFilter( &OriginalTraceFilter );
+
+				enginetrace->TraceRay( ray, MASK_PLAYERSOLID, &traceFilter, &trace );
+
+				if( trace.startsolid )
+				{
+					UTIL_Portal_TraceRay_With( pPortalEnvironment, ray, MASK_PLAYERSOLID, &traceFilter, &trace );
+
+					// current position is not ok, fixup
+					if ( trace.allsolid || trace.startsolid )
+					{
+						//try again with new position
+						ray.Init( newPosition, newPosition, WorldAlignMins(), WorldAlignMaxs() );
+						UTIL_Portal_TraceRay_With( pPortalEnvironment, ray, MASK_PLAYERSOLID, &traceFilter, &trace );
+
+						if( trace.startsolid == false )
+						{
+							SetAbsOrigin( newPosition );
+						}
+						else
+						{
+							Vector vNewCenter = vec3_origin;
+							Vector vExtents = (pPortalPlayer->GetHullMaxs() - pPortalPlayer->GetHullMins()) * 0.5f;
+							Vector vOriginToCenter = (pPortalPlayer->GetHullMaxs() + pPortalPlayer->GetHullMins()) * 0.5f;
+							
+							if( UTIL_FindClosestPassableSpace_InPortal_CenterMustStayInFront( pPortalEnvironment, GetAbsOrigin() + vOriginToCenter, vExtents, pPortalEnvironment->m_plane_Origin.normal, &traceFilter, MASK_PLAYERSOLID, 100, vNewCenter ) &&
+								(pPortalEnvironment->m_plane_Origin.normal.Dot( vNewCenter ) - pPortalEnvironment->m_plane_Origin.dist) >= 0.0f )
+							{
+								SetAbsOrigin( vNewCenter - vOriginToCenter );
+							}
+							else 
+							{
+								VPlane stayInFrontOfPlane;
+								stayInFrontOfPlane.m_Normal = pPortalEnvironment->m_plane_Origin.normal;
+								stayInFrontOfPlane.m_Dist = pPortalEnvironment->m_plane_Origin.dist;
+								if( !(UTIL_FindClosestPassableSpace_CenterMustStayInFrontOfPlane( GetAbsOrigin() + vOriginToCenter, vExtents, newPosition - GetAbsOrigin(), &traceFilter, MASK_PLAYERSOLID, 100, vNewCenter, stayInFrontOfPlane ) &&
+									(pPortalEnvironment->m_plane_Origin.normal.Dot( vNewCenter ) - pPortalEnvironment->m_plane_Origin.dist) >= 0.0f) )
+								{
+									// Try moving the player closer to the center of the portal
+									newPosition += ( pPortalEnvironment->GetAbsOrigin() - WorldSpaceCenter() ) * 0.1f;
+									SetAbsOrigin( newPosition );
+
+									DevMsg( "Hurting the player for FindClosestPassableSpaceFailure!\n" );
+
+									// Deal 1 damage per frame... this will kill a player very fast, but allow for the above correction to fix some cases
+									CTakeDamageInfo info( this, this, vec3_origin, vec3_origin, 1, DMG_CRUSH );
+									OnTakeDamage( info );
+								}
+								else
+								{
+									SetAbsOrigin( vNewCenter - vOriginToCenter );
+								}
+							}						
+						}
+					}
+				}
+			}
+			else
+#endif
+			{
+				bCheckStuck = true;
+			}
 		}
 	}
 	else

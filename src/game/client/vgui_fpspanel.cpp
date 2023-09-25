@@ -17,6 +17,11 @@
 #include "materialsystem/imaterialsystemhardwareconfig.h"
 #include "filesystem.h"
 #include "../common/xbox/xboxstubs.h"
+#ifdef PORTAL
+#include "c_prop_portal.h"
+#include "iextpropportallocator.h"
+#include "matchmaking/imatchframework.h"
+#endif
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -486,6 +491,40 @@ void CFPSPanel::Paint()
 												  vel.Length() );
 		}
 	}
+	#if defined ( PORTAL ) && 0
+	if ( uiAPCI )
+	{
+		static IPortalServerDllPropPortalLocator *s_pPortalLocator;
+		if ( !s_pPortalLocator )
+		{
+			if ( g_pMatchFramework )
+			{
+				s_pPortalLocator = ( IPortalServerDllPropPortalLocator * )
+					g_pMatchFramework->GetMatchExtensions()->GetRegisteredExtensionInterface( IEXTPROPPORTALLOCATOR_INTERFACE_NAME );
+			}
+		}
+		if ( s_pPortalLocator )
+		{
+			CUtlVector < IPortalServerDllPropPortalLocator::PortalInfo_t > arrPortals;
+			arrPortals.EnsureCapacity( 4 );
+			s_pPortalLocator->LocateAllPortals( arrPortals );
+
+			i++;
+			for ( int j = 0; j < arrPortals.Count(); ++ j )
+			{
+				IPortalServerDllPropPortalLocator::PortalInfo_t const &pi = arrPortals[j];
+				i++;
+				g_pMatSystemSurface->DrawColoredText( m_hFont, x, 2 + i * lineHeight, 
+					255, 255, 255, 255, 
+					"P %d %d %.02f %.02f %.02f %.02f %.02f %.02f", 
+					pi.iLinkageGroupId, pi.nPortal,
+					pi.vecOrigin.x, pi.vecOrigin.y, pi.vecOrigin.z,
+					pi.vecAngle.x, pi.vecAngle.y, pi.vecAngle.z
+					);
+			}
+		}
+	}
+	#endif
 
 	if ( m_nLinesNeeded != i )
 	{

@@ -41,14 +41,14 @@
 // left / right
 #define	YAW		1
 
-#ifdef PORTAL
-bool g_bUpsideDown = false; // Set when the player is upside down in Portal to invert the mouse.
-#endif //#ifdef PORTAL
-
 extern ConVar lookstrafe;
 extern ConVar cl_pitchdown;
 extern ConVar cl_pitchup;
 extern const ConVar *sv_cheats;
+
+#if defined PORTAL
+ConVar cl_mouselook_roll_compensation( "cl_mouselook_roll_compensation", "1", 0, "In Portal and Paint, if your view is being rolled, compensate for that. So mouse movements are always relative to the screen." );
+#endif
 
 class ConVar_m_pitch : public ConVar_ServerBounded
 {
@@ -428,17 +428,19 @@ void CInput::ApplyMouse( int nSlot, QAngle& viewangles, CUserCmd *cmd, float mou
 	//roll the view angles so roll is 0 (the HL2 assumed state) and mouse adjustments are relative to the screen.
 	//Assuming roll is unchanging, we want mouse left to translate to screen left at all times (same for right, up, and down)
 	
-
+#if defined PORTAL //Portal sometimes rolls the player and we want a understandable way of aiming. 
+	//we want mouse left to translate to screen left at all times (same for right, up, and down)
+	//So we'll be transforming mouse inputs by the roll value
+	Quaternion quatRoll;
+	Quaternion quatInverseRoll;
+	QAngle roll( 0.0f, 0.0f, viewangles[ ROLL ] );
+	QAngle invroll( 0.0f, 0.0f, -viewangles[ ROLL ] );
+	AngleQuaternion( roll, quatRoll );
+	AngleQuaternion( invroll, quatInverseRoll );
+#endif	
 
 	if ( !((in_strafe.GetPerUser( nSlot ).state & 1) || lookstrafe.GetInt()) )
 	{
-#ifdef PORTAL
-		if (g_bUpsideDown)
-		{
-			viewangles[YAW] += m_yaw.GetFloat() * mouse_x;
-		}
-		else
-#endif //#ifdef PORTAL
 		{
 			if (CAM_IsThirdPerson() && thirdperson_platformer.GetInt())
 			{
@@ -454,9 +456,27 @@ void CInput::ApplyMouse( int nSlot, QAngle& viewangles, CUserCmd *cmd, float mou
 			}
 			else
 			{
-				// Otherwize, use mouse to spin around vertical axis
+			// Otherwize, use mouse to spin around vertical axis
 
+#if defined PORTAL
+				if( cl_mouselook_roll_compensation.GetBool() ) //for portal, remap yaw/pitch adjustments to be relative to your current view roll so left/right on the mouse is left/right on the screen
+				{
+					QAngle qAngleTemp( 0.0f, -(m_yaw.GetFloat() * mouse_x), 0.0f );			
 
+					Quaternion quatTemp;
+					AngleQuaternion( qAngleTemp, quatTemp );
+
+					Quaternion qRollUndone[2];
+					QuaternionMult( quatTemp, quatInverseRoll, qRollUndone[0] );
+					QuaternionMult( quatRoll, qRollUndone[0], qRollUndone[1] );
+					QuaternionAngles( qRollUndone[1], qAngleTemp );
+
+					viewangles[0] += qAngleTemp[0];
+					viewangles[1] += qAngleTemp[1];
+					viewangles[2] += qAngleTemp[2];
+				}
+				else
+#endif
 				{
 					viewangles[YAW] -= m_yaw.GetFloat() * mouse_x;
 				}
@@ -474,13 +494,6 @@ void CInput::ApplyMouse( int nSlot, QAngle& viewangles, CUserCmd *cmd, float mou
 	//  to adjust view pitch.
 	if (!(in_strafe.GetPerUser( nSlot ).state & 1))
 	{
-#ifdef PORTAL
-		if (g_bUpsideDown)
-		{
-			viewangles[PITCH] -= m_pitch->GetFloat() * mouse_y;
-		}
-		else
-#endif //#ifdef PORTAL
 		{
 			if (CAM_IsThirdPerson() && thirdperson_platformer.GetInt())
 			{
@@ -496,6 +509,25 @@ void CInput::ApplyMouse( int nSlot, QAngle& viewangles, CUserCmd *cmd, float mou
 			}
 			else
 			{
+#if defined PORTAL
+				if( cl_mouselook_roll_compensation.GetBool() ) //for portal, remap yaw/pitch adjustments to be relative to your current view roll so left/right on the mouse is left/right on the screen
+				{
+					QAngle qAngleTemp( m_pitch->GetFloat() * mouse_y, 0.0f, 0.0f );
+
+					Quaternion quatTemp;
+					AngleQuaternion( qAngleTemp, quatTemp );
+
+					Quaternion qRollUndone[2];
+					QuaternionMult( quatTemp, quatInverseRoll, qRollUndone[0] );
+					QuaternionMult( quatRoll, qRollUndone[0], qRollUndone[1] );
+					QuaternionAngles( qRollUndone[1], qAngleTemp );
+
+					viewangles[0] += qAngleTemp[0];
+					viewangles[1] += qAngleTemp[1];
+					viewangles[2] += qAngleTemp[2];
+				}
+				else
+#endif
 
 				{
 					viewangles[PITCH] += m_pitch->GetFloat() * mouse_y;

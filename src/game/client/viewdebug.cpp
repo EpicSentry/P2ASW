@@ -520,6 +520,9 @@ static void OverlayColorRamp( bool bHalfSpace )
 }
 #endif
 
+#if defined( PORTAL )
+ConVar cl_debugoverlaysthroughportals( "cl_debugoverlaysthroughportals", "0" );
+#endif
 //-----------------------------------------------------------------------------
 // Draws all the debugging info
 //-----------------------------------------------------------------------------
@@ -529,9 +532,16 @@ void CDebugViewRender::Draw3DDebuggingInfo( const CViewSetup &view )
 
 	// Draw anything Foundry wants to.
 	FoundryHelpers_DrawAll();
-
+	
 	// Draw 3d overlays
+#if defined( PORTAL )
+	if( (g_pPortalRender->GetViewRecursionLevel() == 0) || cl_debugoverlaysthroughportals.GetBool() )
+	{
+		render->Draw3DDebugOverlays();
+	}
+#else
 	render->Draw3DDebugOverlays();
+#endif
 
 	// Draw the line file used for debugging leaks
 	render->DrawLineFile();

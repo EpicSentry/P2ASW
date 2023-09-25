@@ -190,6 +190,7 @@ void CCredits::Spawn( void )
 }
 
 
+#ifndef PORTAL
 
 static void CreditsDone_f( void )
 {
@@ -203,6 +204,7 @@ static void CreditsDone_f( void )
 
 static ConCommand creditsdone("creditsdone", CreditsDone_f );
 
+#endif // PORTAL
 
 
 extern ConVar sv_unlockedchapters;

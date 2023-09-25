@@ -18,8 +18,10 @@
 	#include "Util.h"
 	#include "NDebugOverlay.h"
 	#include "env_debughistory.h"
+	#include "world.h"
 #else
 	#include "c_portal_player.h"
+	#include "c_world.h"
 #endif
 #include "PortalSimulation.h"
 #include "paint/paint_color_manager.h"
@@ -158,10 +160,32 @@ Color UTIL_Portal_Color( int iPortal, int iTeamNumber /*= 0*/ )
 		case 0:
 			// GRAVITY BEAM
 			return Color( 242, 202, 167, 255 );
+
 		case 1:
-			return Color( 64, 160, 255, 255 );
 		case 2:
-			return Color(255, 160, 32, 255);
+		{
+			// PORTAL 1 or 2
+			if ( GameRules()->IsMultiplayer() && !((CPortalMPGameRules *)g_pGameRules)->Is2GunsCoOp() )
+			{
+				Assert( TEAM_BLUE == TEAM_RED + 1 );
+
+				if ( ( iTeamNumber == TEAM_RED ) || ( iTeamNumber == TEAM_BLUE ) )
+				{
+					const Vector &vColor = C_Prop_Portal::m_Materials.m_coopPlayerPortalColors[ 1 - ( iTeamNumber - TEAM_RED ) ][ iPortal - 1 ];
+					return Color( vColor[0] * 255, vColor[1] * 255, vColor[2] * 255 );
+				}
+				else
+				{
+					return s_defaultPortalColors[ iPortal - 1 ];
+				}
+			}
+			else
+			{
+				// Single player
+				const Vector &vColor = C_Prop_Portal::m_Materials.m_singlePlayerPortalColors[ iPortal - 1 ];
+				return Color( vColor[0] * 255, vColor[1] * 255, vColor[2] * 255 );
+			}
+		}
 		break;
 	}
 
@@ -229,6 +253,40 @@ CPortal_Base2D* UTIL_Portal_FirstAlongRay( const Ray_t &ray, float &fMustBeClose
 	}
 
 	return pIntersectedPortal;
+}
+
+static const Ray_t *AdjustRayToPlane( const Ray_t &originalRay, Ray_t &alterableRay, const Vector &vExtentSigns, const VPlane &Plane, float &fDeltaScale )
+{
+	Vector vExtentShift;
+	vExtentShift.x = originalRay.m_Extents.x * vExtentSigns.x;
+	vExtentShift.y = originalRay.m_Extents.y * vExtentSigns.y;
+	vExtentShift.z = originalRay.m_Extents.z * vExtentSigns.z;
+	float fExtentShiftDist = Plane.m_Normal.Dot( vExtentShift );
+
+	if( (Plane.DistTo( originalRay.m_Start ) + fExtentShiftDist) < 0.0f )
+	{
+		//start solid
+		NULL;
+	}
+	else if( (Plane.DistTo( originalRay.m_Start + originalRay.m_Delta ) + fExtentShiftDist) < 0.0f )
+	{
+		//end will be behind shifted plane, shorten the delta now, then expand the results on the tail end
+		alterableRay = originalRay;
+
+		float fEndDist = (Plane.DistTo( originalRay.m_Start + originalRay.m_Delta ) + fExtentShiftDist);
+		float fDeltaLength = originalRay.m_Delta.Length();
+		Vector vDeltaNormalized = originalRay.m_Delta / fDeltaLength;
+		float fNewDeltaLength = fDeltaLength - (Plane.m_Normal.Dot( vDeltaNormalized ) * fEndDist);
+		alterableRay.m_Delta = vDeltaNormalized * fNewDeltaLength;
+
+		fDeltaScale = fNewDeltaLength / fDeltaLength;
+		return &alterableRay;
+	}
+	else
+	{
+		fDeltaScale = 1.0f;
+	}
+	return &originalRay;
 }
 
 
@@ -1802,6 +1860,84 @@ bool UTIL_IsCollideableIntersectingPhysCollide( ICollideable *pCollideable, cons
 	return false;
 }
 
+struct FindClosestPassableSpace_TraceAdapter_Engine_StayInFront_t : FindClosestPassableSpace_TraceAdapter_t
+{
+	VPlane shiftedPlane;//we only want the center of the starting box to stay in front, not every trace. So we create a plane of solidity that is not necessarily coplanar with the portal quad
+	Vector vExtentSigns; //when testing planar distance we need to use the extent closest to the solidity plane, multiply the ray extents by these to get that point.
+};
+
+static void EngineTraceFunc_CenterMustStayInFront( const Ray_t &ray, trace_t *pResult, FindClosestPassableSpace_TraceAdapter_t *pTraceAdapter )
+{
+	const FindClosestPassableSpace_TraceAdapter_Engine_StayInFront_t *pCastedData = (const FindClosestPassableSpace_TraceAdapter_Engine_StayInFront_t *)pTraceAdapter;
+
+	float fDeltaScale;
+	Ray_t alterableRay;
+	const Ray_t *pUseRay = AdjustRayToPlane( ray, alterableRay, pCastedData->vExtentSigns, pCastedData->shiftedPlane, fDeltaScale );
+	if( pUseRay == NULL )
+	{
+		//start solid
+		UTIL_ClearTrace( *pResult );
+		pResult->startsolid = true;
+		pResult->fraction = 0.0f;
+		pResult->allsolid = true; //TODO: bother calculating if it leaves solid?
+		return;
+	}
+
+	enginetrace->TraceRay( *pUseRay, pTraceAdapter->fMask, pTraceAdapter->pTraceFilter, pResult );
+
+	if( pUseRay == &alterableRay )
+	{
+		//fixup any abnormalities from using a shortened ray
+		if( !pResult->DidHit() )
+		{
+#ifdef GAME_DLL
+			pResult->m_pEnt = GetWorldEntity();
+#else
+			pResult->m_pEnt = GetClientWorldEntity();
+#endif
+			pResult->plane.normal = pCastedData->shiftedPlane.m_Normal;
+			pResult->plane.dist = pCastedData->shiftedPlane.m_Dist;
+		}
+
+		pResult->fraction *= fDeltaScale;
+		pResult->fractionleftsolid *= fDeltaScale;		
+	}
+}
+
+static bool EnginePointOutsideWorldFunc_CenterMustStayInFront( const Vector &vTest, FindClosestPassableSpace_TraceAdapter_t *pTraceAdapter )
+{
+	const FindClosestPassableSpace_TraceAdapter_Engine_StayInFront_t *pCastedData = (const FindClosestPassableSpace_TraceAdapter_Engine_StayInFront_t *)pTraceAdapter;
+	if( pCastedData->shiftedPlane.DistTo( vTest ) < 0.0f )
+		return true;
+
+	return enginetrace->PointOutsideWorld( vTest );
+}
+
+bool UTIL_FindClosestPassableSpace_CenterMustStayInFrontOfPlane( const Vector &vCenter, const Vector &vExtents, const Vector &vIndecisivePush, ITraceFilter *pTraceFilter, unsigned int fMask, unsigned int iIterations, Vector &vCenterOut, const VPlane &stayInFrontOfPlane )
+{
+	FindClosestPassableSpace_TraceAdapter_Engine_StayInFront_t adapter;
+	adapter.pTraceFunc = EngineTraceFunc_CenterMustStayInFront;
+	adapter.pPointOutsideWorldFunc = EnginePointOutsideWorldFunc_CenterMustStayInFront;
+	adapter.pTraceFilter = pTraceFilter;
+	adapter.fMask = fMask;
+
+	adapter.vExtentSigns.x = -Sign( stayInFrontOfPlane.m_Normal.x );
+	adapter.vExtentSigns.y = -Sign( stayInFrontOfPlane.m_Normal.y );
+	adapter.vExtentSigns.z = -Sign( stayInFrontOfPlane.m_Normal.z );
+
+	//when caclulating the shift plane, all we need to be sure of is that the most penetrating extent is coplanar with the shift plane when the center would be coplanar with the original plane
+	Vector vCoplanarExtent;
+	vCoplanarExtent.x = vExtents.x * adapter.vExtentSigns.x;
+	vCoplanarExtent.y = vExtents.y * adapter.vExtentSigns.y;
+	vCoplanarExtent.z = vExtents.z * adapter.vExtentSigns.z;
+
+	adapter.shiftedPlane.m_Normal = stayInFrontOfPlane.m_Normal;
+	adapter.shiftedPlane.m_Dist = stayInFrontOfPlane.m_Dist + (stayInFrontOfPlane.m_Normal.Dot( vCoplanarExtent ) ); //the dot is known to be negative, shifting the plane back so the extent is coplanar with it.
+
+	return UTIL_FindClosestPassableSpace( vCenter, vExtents, vIndecisivePush, iIterations, vCenterOut, FL_AXIS_DIRECTION_NONE, &adapter );
+}
+
+
 bool FindClosestPassableSpace( CBaseEntity *pEntity, const Vector &vIndecisivePush, unsigned int fMask ) //assumes the object is already in a mostly passable space
 {
 	if ( sv_use_find_closest_passable_space.GetBool() == false )
@@ -2601,41 +2737,6 @@ static bool PortalPointOutsideWorldFunc_CenterMustStayInFront( const Vector &vTe
 
 	return PortalPointOutsideWorldFunc( vTest, pTraceAdapter );
 }
-
-static const Ray_t *AdjustRayToPlane( const Ray_t &originalRay, Ray_t &alterableRay, const Vector &vExtentSigns, const VPlane &Plane, float &fDeltaScale )
-{
-	Vector vExtentShift;
-	vExtentShift.x = originalRay.m_Extents.x * vExtentSigns.x;
-	vExtentShift.y = originalRay.m_Extents.y * vExtentSigns.y;
-	vExtentShift.z = originalRay.m_Extents.z * vExtentSigns.z;
-	float fExtentShiftDist = Plane.m_Normal.Dot( vExtentShift );
-
-	if( (Plane.DistTo( originalRay.m_Start ) + fExtentShiftDist) < 0.0f )
-	{
-		//start solid
-		NULL;
-	}
-	else if( (Plane.DistTo( originalRay.m_Start + originalRay.m_Delta ) + fExtentShiftDist) < 0.0f )
-	{
-		//end will be behind shifted plane, shorten the delta now, then expand the results on the tail end
-		alterableRay = originalRay;
-
-		float fEndDist = (Plane.DistTo( originalRay.m_Start + originalRay.m_Delta ) + fExtentShiftDist);
-		float fDeltaLength = originalRay.m_Delta.Length();
-		Vector vDeltaNormalized = originalRay.m_Delta / fDeltaLength;
-		float fNewDeltaLength = fDeltaLength - (Plane.m_Normal.Dot( vDeltaNormalized ) * fEndDist);
-		alterableRay.m_Delta = vDeltaNormalized * fNewDeltaLength;
-
-		fDeltaScale = fNewDeltaLength / fDeltaLength;
-		return &alterableRay;
-	}
-	else
-	{
-		fDeltaScale = 1.0f;
-	}
-	return &originalRay;
-}
-
 static void PortalTraceFunc_CenterMustStayInFront( const Ray_t &ray, trace_t *pResult, FindClosestPassableSpace_TraceAdapter_t *pTraceAdapter )
 {
 	const FindClosestPassableSpace_TraceAdapter_Portal_StayInFront_t *pCastedData = (const FindClosestPassableSpace_TraceAdapter_Portal_StayInFront_t *)pTraceAdapter;

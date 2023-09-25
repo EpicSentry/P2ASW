@@ -1099,7 +1099,9 @@ bool CServerGameDLL::LevelInit( const char *pMapName, char const *pMapEntities, 
 		{
 			engine->LoadAdjacentEnts( pOldLevel, pLandmarkName );
 		}
-
+#ifdef PORTAL
+		g_OneWayTransition = true;
+#endif
 		if ( g_OneWayTransition )
 		{
 			engine->ClearSaveDirAfterClientLoad();
@@ -3031,9 +3033,10 @@ void CServerGameClients::ClientSetupVisibility( edict_t *pViewEntity, edict_t *p
 
 #ifdef PORTAL
 		// If the client doesn't need this open, test if portals might need this area portal open
-		if (isOpen[iOutPortal] == 0)
+		if ( isOpen[iOutPortal] == 0 )
 		{
-			isOpen[iOutPortal] = TestAreaPortalVisibilityThroughPortals(pCur, pViewEntity, pvs, pvssize);
+			isOpen[iOutPortal] = TestAreaPortalVisibilityThroughPortals( pCur, pViewEntity, pvs, pvssize );
+			bIsOpenOnClient |= ( isOpen[iOutPortal] != 0 );
 		}
 #endif
 
@@ -3062,22 +3065,22 @@ void CServerGameClients::ClientSetupVisibility( edict_t *pViewEntity, edict_t *p
 
 	// Flush the remaining areaportal states.
 	engine->SetAreaPortalStates( portalNums, isOpen, iOutPortal );
-
+	
 	// Update the area bits that get sent to the client.
 	Assert( pPlayer );
 	if ( pPlayer )
 	{
 		pPlayer->m_Local.UpdateAreaBits( pPlayer, portalBits );
+	}
 
 #ifdef PORTAL 
-		// *After* the player's view has updated its area bits, add on any other areas seen by portals
-		CPortal_Player* pPortalPlayer = dynamic_cast<CPortal_Player*>(pPlayer);
-		if (pPortalPlayer)
-		{
-			pPortalPlayer->UpdatePortalViewAreaBits(pvs, pvssize);
-		}
-#endif //PORTAL
+	// *After* the player's view has updated its area bits, add on any other areas seen by portals
+	CPortal_Player* pPortalPlayer = dynamic_cast<CPortal_Player*>( pPlayer );
+	if ( pPortalPlayer )
+	{
+		pPortalPlayer->UpdatePortalViewAreaBits( pvs, pvssize );
 	}
+#endif //PORTAL
 }
 
 

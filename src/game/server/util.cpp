@@ -37,8 +37,7 @@
 #include "util.h"
 
 #ifdef PORTAL
-#include "PortalSimulation.h"
-//#include "Portal_PhysicsEnvironmentMgr.h"
+#include "portal_base2d_shared.h"
 #endif
 
 #include "CegClientWrapper.h"
@@ -2184,7 +2183,28 @@ static int UTIL_GetNewCheckClient( int check )
 		{
 			g_CheckClient.m_checkCluster = clusterIndex;
 			engine->GetPVSForCluster( clusterIndex, sizeof(g_CheckClient.m_checkPVS), g_CheckClient.m_checkPVS );
-
+			
+#if defined ( PORTAL )
+			// Add in any clusters seen by portals.
+			int iPortalCount = CPortal_Base2D_Shared::AllPortals.Count();
+			if( iPortalCount > 0 )
+			{
+				CPortal_Base2D **pPortals = CPortal_Base2D_Shared::AllPortals.Base();
+				for( int i = 0; i != iPortalCount; ++i )
+				{
+					CPortal_Base2D *pPortal = pPortals[i];
+					if ( pPortal && pPortal->IsActivedAndLinked() )
+					{
+						// add only portals visible in the new cluster the client check ent just moved into.
+						if ( pPortal->NetworkProp()->IsInPVS( ent, g_CheckClient.m_checkPVS	, sizeof( g_CheckClient.m_checkPVS ) ) )
+						{
+							// add what it can see to the check pvs
+							AddPortalVisibilityToPVS( pPortal, sizeof( g_CheckClient.m_checkPVS ), g_CheckClient.m_checkPVS );
+						}
+					}
+				}
+			}
+#endif // PORTAL 
 
 		}
 	}

@@ -23,6 +23,20 @@ ConVar cl_disable_water_render_targets( "cl_disable_water_render_targets", "0" )
 ITexture* CBaseClientRenderTargets::CreateWaterReflectionTexture( IMaterialSystem* pMaterialSystem, int iSize )
 {
 	iSize = CommandLine()->ParmValue( "-reflectionTextureSize", iSize );
+#if defined( PORTAL ) && 0
+	return pMaterialSystem->CreateNamedMultiRenderTargetTexture(
+		"_rt_WaterReflection",
+		iSize, iSize, RT_SIZE_NO_CHANGE,
+		pMaterialSystem->GetBackBufferFormat(), 
+
+		// Force separate depth buffer for recursive water reflection views, since using the default depth buffer
+		// will clear depth in the upper left hand <512,512> corner of the screen causing translucent renderables to
+		// render on top of closer geometry.
+		MATERIAL_RT_DEPTH_SEPARATE,
+		
+		TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT,
+		CREATERENDERTARGETFLAGS_HDR );
+#else
 	return pMaterialSystem->CreateNamedRenderTargetTextureEx2(
 		"_rt_WaterReflection",
 		iSize, iSize, RT_SIZE_PICMIP,
@@ -30,11 +44,30 @@ ITexture* CBaseClientRenderTargets::CreateWaterReflectionTexture( IMaterialSyste
 		MATERIAL_RT_DEPTH_SHARED, 
 		TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT,
 		CREATERENDERTARGETFLAGS_HDR );
+#endif
 }
 
 ITexture* CBaseClientRenderTargets::CreateWaterRefractionTexture( IMaterialSystem* pMaterialSystem, int iSize )
 {
 	iSize = CommandLine()->ParmValue( "-reflectionTextureSize", iSize );
+#if defined( PORTAL ) && 0
+	return pMaterialSystem->CreateNamedMultiRenderTargetTexture(
+		"_rt_WaterRefraction",
+		iSize, iSize, RT_SIZE_NO_CHANGE,
+		// This is different than reflection because it has to have alpha for fog factor.
+		IMAGE_FORMAT_RGBA8888, 
+		
+		// Force separate depth buffer for recursive water reflection views, since using the default depth buffer
+		// will clear depth in the upper left hand <512,512> corner of the screen causing translucent renderables to
+		// render on top of closer geometry.
+		//
+		// EDIT: on consoles it doesn't matter for Portal 2 because we never use refraction anyways...we always opt for cheaper translucent water.  Save memory instead.
+		// @TODO: get rid of this buffer entirely on consoles
+		IsGameConsole() ? MATERIAL_RT_DEPTH_SHARED : MATERIAL_RT_DEPTH_SEPARATE,
+
+		TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT,
+		CREATERENDERTARGETFLAGS_HDR );
+#else
 	return pMaterialSystem->CreateNamedRenderTargetTextureEx2(
 		"_rt_WaterRefraction",
 		iSize, iSize, RT_SIZE_PICMIP,
@@ -43,6 +76,7 @@ ITexture* CBaseClientRenderTargets::CreateWaterRefractionTexture( IMaterialSyste
 		MATERIAL_RT_DEPTH_SHARED, 
 		TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT,
 		CREATERENDERTARGETFLAGS_HDR );
+#endif
 }
 
 ITexture* CBaseClientRenderTargets::CreateCameraTexture( IMaterialSystem* pMaterialSystem, int iSize )

@@ -1518,6 +1518,18 @@ void CBreakableProp::OnPhysGunPickup( CBasePlayer *pPhysGunUser, PhysGunPickup_t
 	{
 		SetContextThink( &CBreakableProp::RampToDefaultFadeScale, gpGlobals->curtime + 2.0f, s_pFadeScaleThink );
 	}
+	
+#ifdef PORTAL
+	if ( reason == PICKED_UP_BY_CANNON || reason == PICKED_UP_BY_PLAYER )
+	{
+		// Steal from another player if they were holding the object
+		CBasePlayer* pOtherPlayer = GetPlayerHoldingEntity( this );
+		if ( pOtherPlayer )
+		{
+			pOtherPlayer->ForceDropOfCarriedPhysObjects();
+		}
+	}
+#endif
 
 	if( reason == PUNTED_BY_CANNON )
 	{
@@ -3276,24 +3288,24 @@ void CPhysicsProp::VPhysicsUpdate( IPhysicsObject *pPhysics )
 			Vector vPropOrigin;
 			pPhysics->GetPosition( &vPropOrigin, NULL );
 
-			int iPortalCount = CProp_Portal_Shared::AllPortals.Count();
+			int iPortalCount = CPortal_Base2D_Shared::AllPortals.Count();
 			if( iPortalCount != 0 )
 			{
-				CProp_Portal *pFunnelInto = NULL;
+				CPortal_Base2D *pFunnelInto = NULL;
 				Vector vPropToFunnelPortal;
 				float fClosestFunnelPortalDistSqr = FLT_MAX;
 
-				CProp_Portal **pPortals = CProp_Portal_Shared::AllPortals.Base();
+				CPortal_Base2D **pPortals = CPortal_Base2D_Shared::AllPortals.Base();
 				for( int i = 0; i != iPortalCount; ++i )
 				{
-					CProp_Portal *pTempPortal = pPortals[i];
+					CPortal_Base2D *pTempPortal = pPortals[i];
 					if( pTempPortal->IsActivedAndLinked() )
 					{
 						// Make sure it's a floor or ceiling portal
 						if ( !pTempPortal->IsFloorPortal() )
 							continue;
 
-						Vector vPropToPortal = pTempPortal->GetAbsOrigin() - vPropOrigin;
+						Vector vPropToPortal = pTempPortal->m_ptOrigin - vPropOrigin;
 
 						// make sure that the portal isn't too far away and we aren't past it.
 						if ( ( vPropToPortal.z < -1024.0f) || (vPropToPortal.z >= 0.0f) )
@@ -3303,7 +3315,7 @@ void CPhysicsProp::VPhysicsUpdate( IPhysicsObject *pPhysics )
 						vPortalRight.z = 0.0f;						
 						VectorNormalize( vPortalRight );						
 
-						float fTestDist = PORTAL_HALF_WIDTH * 1.5f;
+						float fTestDist = pTempPortal->GetHalfWidth() * 1.5f;
 						fTestDist *= fTestDist;
 						// Make sure we're in the 2D portal rectangle
 						if ( ( vPropToPortal.Dot( vPortalRight ) * vPortalRight ).LengthSqr() > fTestDist )
@@ -3313,7 +3325,7 @@ void CPhysicsProp::VPhysicsUpdate( IPhysicsObject *pPhysics )
 						vPortalUp.z = 0.0f;
 						VectorNormalize( vPortalUp );
 
-						fTestDist = PORTAL_HALF_HEIGHT * 1.5f;
+						fTestDist = pTempPortal->GetHalfHeight() * 1.5f;
 						fTestDist *= fTestDist;
 						if ( ( vPropToPortal.Dot( vPortalUp ) * vPortalUp ).LengthSqr() > fTestDist )
 							continue;

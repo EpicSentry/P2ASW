@@ -13,6 +13,7 @@
 #include "physics.h"
 #include "c_breakableprop.h"
 #include "view.h"
+#include "portal_grabcontroller_shared.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -61,3 +62,22 @@ QAngle C_BreakableProp::PreferredCarryAngles( void )
 	return (m_qPreferredPlayerCarryAngles.x < FLT_MAX) ? m_qPreferredPlayerCarryAngles : vec3_angle;
 }
 
+
+bool C_BreakableProp::ShouldPredict( void )
+{
+#ifdef PORTAL
+	C_BasePlayer *pPredOwner = GetPlayerHoldingEntity( this );
+	return (pPredOwner && pPredOwner->IsLocalPlayer()) ? true : BaseClass::ShouldPredict();
+#else
+	return false;
+#endif
+}
+
+C_BasePlayer *C_BreakableProp::GetPredictionOwner( void )
+{
+#ifdef PORTAL
+	return GetPlayerHoldingEntity( this );
+#else
+	return NULL;
+#endif
+}

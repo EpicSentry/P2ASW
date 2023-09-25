@@ -411,30 +411,6 @@ DEFINE_KEYFIELD( m_fFilterMass,	FIELD_FLOAT,	"filtermass" ),
 END_DATADESC()
 
 // ###################################################################
-//	> FilterPlayerHeld
-// ###################################################################
-class CFilterPlayerHeld : public CBaseFilter
-{
-	DECLARE_CLASS(CFilterPlayerHeld, CBaseFilter);
-	DECLARE_DATADESC();
-
-public:
-	bool PassesFilterImpl(CBaseEntity* pCaller, CBaseEntity* pEntity)
-	{
-		if ((pEntity->VPhysicsGetObject()->GetGameFlags() & FVPHYSICS_PLAYER_HELD) != 0) {
-			return true;
-		}
-		return false;
-	}
-};
-
-LINK_ENTITY_TO_CLASS(filter_player_held, CFilterPlayerHeld);
-
-BEGIN_DATADESC(CFilterPlayerHeld)
-END_DATADESC()
-
-
-// ###################################################################
 //	> FilterDamageType
 // ###################################################################
 class FilterDamageType : public CBaseFilter

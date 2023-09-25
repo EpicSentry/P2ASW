@@ -28,37 +28,7 @@ class CPortal_Player;
 // MIKETODO: this should use indexing instead of searching and strcmp()'ing all the time.
 bool IsAmmoType( int iAmmoType, const char *pAmmoName );
 
-typedef enum
-{
-	WEAPON_NONE = 0,
-
-	//Melee
-	WEAPON_CROWBAR,
-
-	//Special
-	WEAPON_PORTALGUN,
-	WEAPON_PHYSCANNON,
-
-	//Pistols
-	WEAPON_PISTOL,
-	WEAPON_357,	
-
-	//Machineguns
-	WEAPON_SMG,
-	WEAPON_AR2,
-
-	//Grenades
-	WEAPON_FRAG,
-	WEAPON_BUGBAIT,
-	
-	//Other
-	WEAPON_SHOTGUN,
-	WEAPON_CROSSBOW,
-	WEAPON_RPG,
-
-	//WEAPON_MAX,		// number of weapons weapon index
-
-} PortalWeaponID;
+#include "weapons_portal.h"
 
 class CWeaponPortalBase : public CBaseCombatWeapon
 {

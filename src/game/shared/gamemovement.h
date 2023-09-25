@@ -176,11 +176,13 @@ protected:
 	// 0x01 == floor
 	// 0x02 == step / wall
 	virtual int		ClipVelocity( Vector& in, Vector& normal, Vector& out, float overbounce );
-
+	
 	// If pmove.origin is in a solid position,
 	// try nudging slightly on all axis to
 	// allow for the cut precision of the net coordinates
-
+#ifdef PORTAL
+	virtual 
+#endif
 	int				CheckStuck( void );
 	
 	// Check if the point is in water.

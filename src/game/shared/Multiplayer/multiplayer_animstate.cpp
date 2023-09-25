@@ -22,6 +22,10 @@ ConVar anim_showmainactivity( "anim_showmainactivity", "0", FCVAR_CHEAT, "Show t
 #include "player.h"
 #endif
 
+#if defined( PORTAL ) && defined( CLIENT_DLL )
+#include "c_portal_player.h"
+#endif
+
 #define MOVING_MINIMUM_SPEED	0.5f
 
 ConVar anim_showstate( "anim_showstate", "-1", FCVAR_CHEAT | FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Show the (client) animation state for the specified entity (-1 for none)." );
@@ -1508,6 +1512,19 @@ void CMultiPlayerAnimState::ConvergeYawAngles( float flGoalYaw, float flYawRate,
 //-----------------------------------------------------------------------------
 const QAngle& CMultiPlayerAnimState::GetRenderAngles()
 {
+#if defined( PORTAL ) && defined( CLIENT_DLL )
+	C_Portal_Player *pPlayer = (C_Portal_Player *)GetBasePlayer();
+	
+	if( pPlayer )
+	{		
+		if( pPlayer->GetOriginInterpolator().GetInterpolatedTime( pPlayer->GetEffectiveInterpolationCurTime( gpGlobals->curtime ) ) < pPlayer->m_fLatestServerTeleport )
+		{
+			m_angRender_InterpHistory = TransformAnglesToWorldSpace( m_angRender, pPlayer->m_matLatestServerTeleportationInverseMatrix.As3x4() );
+			return m_angRender_InterpHistory;
+		}
+	}
+#endif
+
 	return m_angRender;
 }
 

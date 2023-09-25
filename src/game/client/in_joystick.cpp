@@ -609,8 +609,8 @@ void CInput::Joystick_Advanced( bool bSilent )
 			}
 		}
 	}
-
-#if defined( SWARM_DLL )
+	
+#if defined( SWARM_DLL ) || defined( PORTAL )
 	// If we have an xbox controller, load the cfg file if it hasn't been loaded.
 	ConVarRef var( "joy_xcontroller_found" );
 	if ( var.IsValid() && var.GetBool() && in_joystick.GetBool() )

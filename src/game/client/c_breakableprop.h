@@ -31,6 +31,10 @@ public:
 	//IPlayerPickupVPhysics
 	virtual bool HasPreferredCarryAnglesForPlayer( CBasePlayer *pPlayer );
 	virtual QAngle PreferredCarryAngles( void );
+	
+	virtual bool	ShouldPredict( void );
+	virtual C_BasePlayer *GetPredictionOwner( void );
+	virtual bool PredictionErrorShouldResetLatchedForAllPredictables( void ) { return false; }
 
 	// Copy fade from another breakable prop
 	void CopyFadeFrom( C_BreakableProp *pSource );

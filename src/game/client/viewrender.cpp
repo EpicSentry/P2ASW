@@ -946,8 +946,15 @@ void SetupCurrentView( const Vector &vecOrigin, const QAngle &angles, view_id_t 
 	modelinfo->SetViewScreenFadeRange( flScreenFadeMinSize, flScreenFadeMaxSize );
 
 	CMatRenderContextPtr pRenderContext( materials );
-
-	pRenderContext->SetIntRenderingParameter(INT_RENDERPARM_WRITE_DEPTH_TO_DESTALPHA, ((viewID == VIEW_MAIN) || (viewID == VIEW_3DSKY)) ? 1 : 0);
+	
+#ifdef PORTAL
+	if ( g_pPortalRender->GetViewRecursionLevel() == 0 )
+	{
+		pRenderContext->SetIntRenderingParameter( INT_RENDERPARM_WRITE_DEPTH_TO_DESTALPHA, ((viewID == VIEW_MAIN) || (viewID == VIEW_3DSKY)) ? 1 : 0 );
+	}
+#else
+	pRenderContext->SetIntRenderingParameter( INT_RENDERPARM_WRITE_DEPTH_TO_DESTALPHA, ((viewID == VIEW_MAIN) || (viewID == VIEW_3DSKY)) ? 1 : 0 );
+#endif
 
 	if ( bDrawWorldNormal )
 		pRenderContext->SetIntRenderingParameter( INT_RENDERPARM_ENABLE_FIXED_LIGHTING, ENABLE_FIXED_LIGHTING_OUTPUTNORMAL_AND_DEPTH );
@@ -1101,7 +1108,11 @@ void CViewRender::DrawRenderablesInList( CViewModelRenderablesList::RenderGroups
 		// Non-view models wanting to render in view model list...
 		if ( pRenderable->ShouldDraw() )
 		{
+#ifdef PORTAL
+			Assert( ( g_pPortalRender->GetViewRecursionLevel() > 0 ) || !IsSplitScreenSupported() || pRenderable->ShouldDrawForSplitScreenUser( nSlot ) );
+#else
 			Assert( !IsSplitScreenSupported() || pRenderable->ShouldDrawForSplitScreenUser( nSlot ) );
+#endif
 			m_pCurrentlyDrawingEntity = pRenderable->GetIClientUnknown()->GetBaseEntity();
 			pRenderable->DrawModel( STUDIO_RENDER | flags, renderGroups[i].m_InstanceData );
 		}
@@ -1117,9 +1128,9 @@ void CViewRender::DrawRenderablesInList( CViewModelRenderablesList::RenderGroups
 void CViewRender::DrawViewModels( const CViewSetup &view, bool drawViewmodel )
 {
 	VPROF( "CViewRender::DrawViewModel" );
-
+	
 #ifdef PORTAL //in portal, we'd like a copy of the front buffer without the gun in it for use with the depth doubler
-	g_pPortalRender->UpdateDepthDoublerTexture(view);
+	g_pPortalRender->UpdateDepthDoublerTexture( view );
 #endif
 
 	bool bShouldDrawPlayerViewModel = ShouldDrawViewModel( drawViewmodel );
@@ -2837,6 +2848,8 @@ void CViewRender::DetermineWaterRenderInfo( const VisibleFogVolumeInfo_t &fogVol
 	bool bForceExpensive = r_waterforceexpensive.GetBool();
 #endif
 	bool bForceReflectEntities = r_waterforcereflectentities.GetBool();
+	
+	bool bForceCheap = false;
 
 #ifdef PORTAL
 	switch (g_pPortalRender->ShouldForceCheaperWaterLevel())
@@ -2855,11 +2868,9 @@ void CViewRender::DetermineWaterRenderInfo( const VisibleFogVolumeInfo_t &fogVol
 		break;
 	};
 #endif
-
+	
 	// Determine if the water surface is opaque or not
 	info.m_bOpaqueWater = !pWaterMaterial->IsTranslucent();
-
-	bool bForceCheap = false;
 
 	// The material can override the default settings though
 	IMaterialVar *pForceCheapVar = pWaterMaterial->FindVar( "$forcecheap", NULL, false );
@@ -3054,10 +3065,10 @@ bool DoesViewPlaneIntersectWater( float waterZ, int leafWaterDataID )
 {
 	if ( leafWaterDataID == -1 )
 		return false;
-
+	
 #ifdef PORTAL //when rendering portal views point/plane intersections just don't cut it.
-	if (g_pPortalRender->GetViewRecursionLevel() != 0)
-		return g_pPortalRender->DoesExitPortalViewIntersectWaterPlane(waterZ, leafWaterDataID);
+	if( g_pPortalRender->GetViewRecursionLevel() != 0 )
+		return g_pPortalRender->DoesExitPortalViewIntersectWaterPlane( waterZ, leafWaterDataID );
 #endif
 
 	CMatRenderContextPtr pRenderContext( materials );
@@ -4290,8 +4301,13 @@ static inline void DrawOpaqueRenderable( IClientRenderable *pEnt, bool bTwoPass,
 {
 	ASSERT_LOCAL_PLAYER_RESOLVABLE();
 	float color[3];
-
+	
+#ifdef PORTAL
+	Assert( ( g_pPortalRender->GetViewRecursionLevel() > 0 ) || !IsSplitScreenSupported() || pEnt->ShouldDrawForSplitScreenUser( GET_ACTIVE_SPLITSCREEN_SLOT() ) );
+#else
 	Assert( !IsSplitScreenSupported() || pEnt->ShouldDrawForSplitScreenUser( GET_ACTIVE_SPLITSCREEN_SLOT() ) );
+#endif
+
 	Assert( (pEnt->GetIClientUnknown() == NULL) || (pEnt->GetIClientUnknown()->GetIClientEntity() == NULL) || (pEnt->GetIClientUnknown()->GetIClientEntity()->IsBlurred() == false) );
 	pEnt->GetColorModulation( color );
 	render->SetColorModulation(	color );
@@ -4613,8 +4629,12 @@ void CRendering3dView::DrawTranslucentWorldAndDetailPropsInLeaves( int iCurLeafI
 static inline void DrawTranslucentRenderable( IClientRenderable *pEnt, const RenderableInstance_t &instance, bool twoPass, bool bShadowDepth )
 {
 	ASSERT_LOCAL_PLAYER_RESOLVABLE();
-
+	
+#ifdef PORTAL
+	Assert( ( g_pPortalRender->GetViewRecursionLevel() > 0 ) || !IsSplitScreenSupported() || pEnt->ShouldDrawForSplitScreenUser( GET_ACTIVE_SPLITSCREEN_SLOT() ) );
+#else
 	Assert( !IsSplitScreenSupported() || pEnt->ShouldDrawForSplitScreenUser( GET_ACTIVE_SPLITSCREEN_SLOT() ) );
+#endif
 
 	// Renderable list building should already have caught this
 	Assert( instance.m_nAlpha > 0 );
@@ -4834,7 +4854,7 @@ void CRendering3dView::DrawTranslucentRenderables( bool bInSkybox, bool bShadowD
 {
 	const ClientWorldListInfo_t& info = *m_pWorldListInfo;
 
-#ifndef PORTAL
+#if !defined( PORTAL )
 	{
 		//opaques generally write depth, and translucents generally don't.
 		//So immediately after opaques are done is the best time to snap off the depth buffer to a texture.
@@ -5102,7 +5122,7 @@ int CRendering3dView::GetDrawFlags()
 void CRendering3dView::SetFogVolumeState( const VisibleFogVolumeInfo_t &fogInfo, bool bUseHeightFog )
 {
 	render->SetFogVolumeState( fogInfo.m_nVisibleFogVolume, bUseHeightFog );
-
+	
 #ifdef PORTAL
 
 	//the idea behind fog shifting is this...
@@ -5110,7 +5130,7 @@ void CRendering3dView::SetFogVolumeState( const VisibleFogVolumeInfo_t &fogInfo,
 	//But, when rendering to a portal view, there's a large space between the virtual camera and the portal exit surface.
 	//This space isn't supposed to exist, and therefore has none of the tiny particles that make up fog.
 	//So, we have to shift fog start/end out to align the distances with the portal exit surface instead of the virtual camera to eliminate fog simulation in the non-space
-	if (g_pPortalRender->GetViewRecursionLevel() == 0)
+	if( g_pPortalRender->GetViewRecursionLevel() == 0 )
 		return; //rendering one of the primary views, do nothing
 
 	g_pPortalRender->ShiftFogForExitPortalView();
@@ -5889,6 +5909,13 @@ void CBaseWorldView::DrawExecute( float waterHeight, view_id_t viewID, float wat
 	ITexture *pSaveFrameBufferCopyTexture = pRenderContext->GetFrameBufferCopyTexture( 0 );
 	pRenderContext->SetFrameBufferCopyTexture( GetPowerOfTwoFrameBufferTexture() );
 	pRenderContext.SafeRelease();
+	
+#if defined PORTAL && 0
+	if ( IsMainView( viewID ) )
+	{
+		g_pPortalRender->DrawEarlyZPortals( (CViewRender*)view );
+	}
+#endif // PORTAL
 
 	Begin360ZPass();
 	m_DrawFlags |= DF_SKIP_WORLD_DECALS_AND_OVERLAYS;
@@ -6115,7 +6142,13 @@ void CAboveWaterView::Setup( const CViewSetup &view, bool bDrawSkybox, const Vis
 	}
 
 	m_DrawFlags = DF_RENDER_ABOVEWATER | DF_DRAW_ENTITITES;
-	m_ClearFlags = VIEW_CLEAR_DEPTH;
+	
+#ifdef PORTAL
+	if ( g_pPortalRender->GetViewRecursionLevel() == 0 )
+#endif
+	{
+		m_ClearFlags = VIEW_CLEAR_DEPTH;
+	}
 
 #ifdef PORTAL
 	if (g_pPortalRender->ShouldObeyStencilForClears())
@@ -6382,7 +6415,12 @@ void CUnderWaterView::Setup( const CViewSetup &view, bool bDrawSkybox, const Vis
 	// render the world underwater
 	// Clear the color to get the appropriate underwater fog color
 	m_DrawFlags = DF_FUDGE_UP | DF_RENDER_UNDERWATER | DF_DRAW_ENTITITES;
-	m_ClearFlags = VIEW_CLEAR_DEPTH;
+#ifdef PORTAL
+	if ( g_pPortalRender->GetViewRecursionLevel() == 0 )
+#endif
+	{
+		m_ClearFlags = VIEW_CLEAR_DEPTH;
+	}
 
 	if( !m_bSoftwareUserClipPlane )
 	{

@@ -3382,8 +3382,11 @@ IClientModelRenderable*	C_BaseAnimating::GetClientModelRenderable()
 
 	if ( IsFollowingEntity() && !FindFollowedEntity() )
 		return NULL;
-
-
+	
+#ifdef PORTAL
+	if ( GetRenderClipPlane() != NULL )
+		return NULL;
+#endif
 
 	return this; 
 }
