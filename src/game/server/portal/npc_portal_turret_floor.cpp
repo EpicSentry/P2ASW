@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -37,8 +37,7 @@ const char *g_PortalTalkNames[ PORTAL_TURRET_STATE_TOTAL - TURRET_STATE_TOTAL ] 
 	"NPC_FloorTurret.TalkCollide",
 	"NPC_FloorTurret.TalkPickup",
 	"NPC_FloorTurret.TalkShotAt",
-	"NPC_FloorTurret.TalkDissolved",
-	"NPC_FloorTurret.TalkFlung"
+	"NPC_FloorTurret.TalkDissolved"
 };
 
 const char* GetTurretTalkName( int iState )
@@ -72,6 +71,9 @@ BEGIN_DATADESC( CNPC_Portal_FloorTurret )
 	DEFINE_KEYFIELD( m_bDamageForce, FIELD_BOOLEAN, "DamageForce" ),
 	DEFINE_KEYFIELD( m_ModelName, FIELD_STRING, "model"), //The custom model used *if unused is selected
 	DEFINE_KEYFIELD( m_nModelIndex, FIELD_SHORT, "modelindex"),
+	DEFINE_KEYFIELD( m_bUsedAsActor, FIELD_BOOLEAN, "UsedAsActor"),
+	DEFINE_KEYFIELD( m_bGagged, FIELD_BOOLEAN, "Gagged"),
+	DEFINE_KEYFIELD( m_bUseSuperDamageScale, FIELD_BOOLEAN, "UseSuperDamageScale"),
 
 	DEFINE_THINKFUNC( Retire ),
 	DEFINE_THINKFUNC( Deploy ),
@@ -86,6 +88,10 @@ BEGIN_DATADESC( CNPC_Portal_FloorTurret )
 
 	// Inputs
 	DEFINE_INPUTFUNC( FIELD_STRING, "FireBullet", InputFireBullet ),
+	DEFINE_INPUTFUNC( FIELD_VOID, "EnableGagging", InputEnableGagging),
+	DEFINE_INPUTFUNC( FIELD_VOID, "DisableGagging", InputDisableGagging),
+	DEFINE_INPUTFUNC( FIELD_VOID, "EnablePickup", InputEnablePickup),
+	DEFINE_INPUTFUNC( FIELD_VOID, "DisablePickup", InputDisablePickup),
 
 END_DATADESC()
 
@@ -103,7 +109,9 @@ CNPC_Portal_FloorTurret::CNPC_Portal_FloorTurret( void )
 	CNPC_FloorTurret::fMaxTipControllerVelocity = 100.0f * 100.0f;
 	CNPC_FloorTurret::fMaxTipControllerAngularVelocity = 30.0f * 30.0f;
 
+	m_bUseSuperDamageScale = false;
 	m_bDamageForce = true;
+	m_bPickupEnabled = true;
 }
 
 void CNPC_Portal_FloorTurret::Precache( void )
@@ -219,9 +227,19 @@ void CNPC_Portal_FloorTurret::Activate( void )
 	m_iBarrelAttachments[ 3 ] = LookupAttachment( "RT_Gun2_Muzzle" );
 }
 
+void CNPC_Portal_FloorTurret::OnRestore(void)
+{
+	BaseClass::OnRestore();
+	if (m_pPhysicsObject)
+	{
+		if (m_pPhysicsObject->IsAsleep())
+		m_pPhysicsObject->Wake();
+	}
+}
+
 void CNPC_Portal_FloorTurret::UpdateOnRemove( void )
 {
-	if ( IsDissolving() )
+	if ( IsDissolving() && !this->m_bGagged )
 		EmitSound( GetTurretTalkName( PORTAL_TURRET_DISSOLVED ) );
 
 	LaserOff();
@@ -239,7 +257,8 @@ int CNPC_Portal_FloorTurret::OnTakeDamage( const CTakeDamageInfo &info )
 	{
 		if ( gpGlobals->curtime > m_fNextTalk )
 		{
-			EmitSound( GetTurretTalkName( PORTAL_TURRET_SHOTAT ) );
+			if (!this->m_bGagged)
+				EmitSound( GetTurretTalkName( PORTAL_TURRET_SHOTAT ) );
 			m_fNextTalk = gpGlobals->curtime + 3.0f;
 		}
 	}
@@ -297,16 +316,6 @@ bool CNPC_Portal_FloorTurret::PreThink( turretState_e state )
 {
 	// Working 2 enums into one integer
 	int iNewState = state;
-
-	// If turret is flinged
-	Vector turretVelocity(0, 0, 0);
-
-	IPhysicsObject* turretPhy = VPhysicsGetObject();
-	turretPhy->GetVelocity(&turretVelocity, NULL);
-
-	if (turretVelocity.z > 450.0f)
-		EmitSound(GetTurretTalkName(PORTAL_TURRET_FLUNG));
-		m_fNextTalk = gpGlobals->curtime + 1.75f;
 
 	// If the turret is dissolving go to a special state
 	if ( IsDissolving() )
@@ -379,7 +388,7 @@ bool CNPC_Portal_FloorTurret::PreThink( turretState_e state )
 	}
 
 	// New states are not supported by old turret code
-	if ( iNewState != TURRET_TIPPED && iNewState < TURRET_STATE_TOTAL )
+	if (m_bUsedAsActor && iNewState != TURRET_TIPPED && iNewState < TURRET_STATE_TOTAL )
 		return BaseClass::PreThink( (turretState_e)iNewState );
 
 	return true;
@@ -478,7 +487,8 @@ void CNPC_Portal_FloorTurret::Shoot( const Vector &vecSrc, const Vector &vecDirT
 
 	if ( m_iLastState == TURRET_ACTIVE && gpGlobals->curtime > m_fNextTalk )
 	{
-		EmitSound( GetTurretTalkName( m_iLastState ) );
+		if (!this->m_bGagged)
+			EmitSound( GetTurretTalkName( m_iLastState ) );
 		m_fNextTalk = gpGlobals->curtime + 2.5f;
 	}
 }
@@ -559,6 +569,12 @@ void CNPC_Portal_FloorTurret::SetEyeState( eyeState_t state )
 	}
 }
 
+void CNPC_Portal_FloorTurret::TryEmitSound(const char* soundname)
+{
+	if (!this->m_bGagged)
+		CBaseEntity::EmitSound(soundname);
+}
+
 inline bool CNPC_Portal_FloorTurret::OnSide( void )
 {
 	if ( GetWaterLevel() > 0 )
@@ -586,6 +602,9 @@ float CNPC_Portal_FloorTurret::GetAttackDamageScale( CBaseEntity *pVictim )
 			return TURRET_FLOOR_DAMAGE_MULTIPLIER;
 		}
 	}
+
+	if (this->m_bUseSuperDamageScale)
+		return TURRET_FLOOR_DAMAGE_MULTIPLIER * 4.0;
 
 	return BaseClass::GetAttackDamageScale( pVictim );
 }
@@ -946,7 +965,8 @@ void CNPC_Portal_FloorTurret::SearchThink( void )
 
 		if ( gpGlobals->curtime > m_flNextActivateSoundTime )
 		{
-			EmitSound( "NPC_FloorTurret.Activate" );
+			if (!this->m_bGagged)
+				EmitSound( "NPC_FloorTurret.Activate" );
 			m_flNextActivateSoundTime = gpGlobals->curtime + 3.0;
 		}
 		return;
@@ -1052,13 +1072,19 @@ void CNPC_Portal_FloorTurret::TippedThink( void )
 			//If we're done moving to our desired facing, close up
 			if ( UpdateFacing() == false )
 			{
-				//Make any last death noises and anims
-				EmitSound( "NPC_FloorTurret.Die" );
-				EmitSound( GetTurretTalkName( PORTAL_TURRET_DISABLED ) );
+				if (!this->m_bGagged)
+				{
+					EmitSound("NPC_FloorTurret.Die");
+				}
+				if (!this->m_bGagged)
+				{
+					EmitSound(GetTurretTalkName(PORTAL_TURRET_DISABLED));
+				}
 				SpinDown();
 
 				SetActivity( (Activity) ACT_FLOOR_TURRET_CLOSE );
-				EmitSound( "NPC_FloorTurret.Retract" );
+				if (!this->m_bGagged)
+					EmitSound( "NPC_FloorTurret.Retract" );
 
 				CTakeDamageInfo	info;
 				info.SetDamage( 1 );
@@ -1181,17 +1207,28 @@ void CNPC_Portal_FloorTurret::SuppressThink( void )
 //-----------------------------------------------------------------------------
 // Purpose: The turret is not doing anything at all
 //-----------------------------------------------------------------------------
-void CNPC_Portal_FloorTurret::DisabledThink( void )
+void CNPC_Portal_FloorTurret::DisabledThink(void)
 {
+	float thinkTime;
+
 	LaserOff();
 	RopesOff();
 
-	SetNextThink( gpGlobals->curtime + 0.5 );
+	if (this->m_bUsedAsActor)
+	{
+		NPCThink();
+		thinkTime = gpGlobals->curtime + 0.1;
+	}
+	else
+	{
+		thinkTime = gpGlobals->curtime + 0.5;
+	}
+
+	SetNextThink(thinkTime);
 	if ( OnSide() )
 	{
 		m_OnTipped.FireOutput( this, this );
 		SetEyeState( TURRET_EYE_DEAD );
-		//SetCollisionGroup( COLLISION_GROUP_DEBRIS_TRIGGER );
 		SetThink( NULL );
 	}
 
@@ -1441,7 +1478,8 @@ void CNPC_Portal_FloorTurret::FireBullet( const char *pTargetName )
 		//Turn to face
 		UpdateFacing();
 
-		EmitSound( "NPC_FloorTurret.Alert" );
+		if(!this->m_bGagged)
+			EmitSound( "NPC_FloorTurret.Alert" );
 		SetThink( &CNPC_FloorTurret::SuppressThink );
 	}
 }
@@ -1452,4 +1490,32 @@ void CNPC_Portal_FloorTurret::FireBullet( const char *pTargetName )
 void CNPC_Portal_FloorTurret::InputFireBullet( inputdata_t &inputdata )
 {
 	FireBullet( inputdata.value.String() );
+}
+
+void CNPC_Portal_FloorTurret::InputEnableGagging(inputdata_t& inputdata)
+{
+	m_bGagged = true;
+}
+
+void CNPC_Portal_FloorTurret::InputDisableGagging(inputdata_t& inputdata)
+{
+	m_bGagged = false;
+}
+
+void CNPC_Portal_FloorTurret::InputEnablePickup(inputdata_t& inputdata)
+{
+	m_bPickupEnabled = true;
+}
+
+void CNPC_Portal_FloorTurret::InputDisablePickup(inputdata_t& inputdata)
+{
+	m_bPickupEnabled = false;
+}
+
+void CNPC_Portal_FloorTurret::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
+{
+	CBasePlayer* pPlayer = ToBasePlayer(pActivator);
+
+	if ( this->m_bPickupEnabled && pActivator)
+		pPlayer->PickupObject(this, false);
 }
