@@ -1901,8 +1901,25 @@ void CPortalSimulator::ReleaseAllEntityOwnership( void )
 		RemoveEntityFromPortalHole( pEntity ); //assume that whenever someone wants to release all entities, it's because the portal is going away
 		ReleaseOwnershipOfEntity( pEntity );
 	}
+	
+#if defined( GAME_DLL )
+#if 0
+	//HACK: should probably separate out these releases of cloned objects. But the calling pattern is identical to outside code for now and the leafy bits are a bit too leafy for this late of a change
+	int iReleaseClonedEnts = m_InternalData.Simulation.Dynamic.ShadowClones.ShouldCloneToRemotePortal.Count();
+	if( iReleaseClonedEnts != 0 )
+	{
+		CBaseEntity **pReleaseEnts = (CBaseEntity **)stackalloc( sizeof( CBaseEntity * ) * iReleaseClonedEnts );
+		memcpy( pReleaseEnts, m_InternalData.Simulation.Dynamic.ShadowClones.ShouldCloneToRemotePortal.Base(), sizeof( CBaseEntity * ) * iReleaseClonedEnts );
 
+		for( int i = iReleaseClonedEnts; --i >= 0; )
+		{
+			StopCloningEntityAcrossPortals( pReleaseEnts[i] );
+		}
+	}
+	Assert( m_InternalData.Simulation.Dynamic.ShadowClones.ShouldCloneToRemotePortal.Count() == 0 );
+#endif
 	Assert( (m_InternalData.Simulation.hCollisionEntity == NULL) || OwnsEntity(m_InternalData.Simulation.hCollisionEntity) );
+#endif
 }
 
 void CPortalSimulator::MarkAsOwned( CBaseEntity *pEntity )
