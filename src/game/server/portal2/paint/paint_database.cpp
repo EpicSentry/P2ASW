@@ -121,13 +121,9 @@ void CPaintDatabase::AddPaint( CBaseEntity* pPaintedEntity, const Vector& vecPai
 
 void CPaintDatabase::PaintEntity( CBaseEntity *pPaintedEntity, PaintPowerType newPowerType, const Vector &vecPosition )
 {
-	CEG_GCV_PRE();
-	static const PaintPowerType CEG_NO_POWER = NO_POWER//(PaintPowerType)CEG_GET_CONSTANT_VALUE( PaintNoPower );
-	CEG_GCV_POST();
-
 	//Get the current color of the painted entity
 	IPaintableEntity* pPaintableEntity = dynamic_cast< IPaintableEntity* >( pPaintedEntity );
-	PaintPowerType paintedPowerType = CEG_NO_POWER;
+	PaintPowerType paintedPowerType = NO_POWER;
 	if( pPaintableEntity )
 	{
 		Msg("pPaintableEntity\n");
@@ -156,15 +152,15 @@ void CPaintDatabase::PaintEntity( CBaseEntity *pPaintedEntity, PaintPowerType ne
 	}
 
 	//Check if the entity is already painted
-	const bool bPainted = paintedPowerType != CEG_NO_POWER;
+	const bool bPainted = paintedPowerType != NO_POWER;
 
 	//If the entity is painted and it is now being erased
-	if ( bPainted && newPowerType == CEG_NO_POWER )
+	if ( bPainted && newPowerType == NO_POWER )
 	{
 		RemovePaintedEntity( pPaintedEntity, true );
 	}
 	//Else if the entity is not painted and it is not being erased
-	else if ( !bPainted && newPowerType != CEG_NO_POWER )
+	else if ( !bPainted && newPowerType != NO_POWER )
 	{
 		//Add the painted entity to the paint database if it isn't already in there
 		if( FindPaintedEntity( pPaintedEntity ) == m_PaintedEntities.InvalidIndex() )

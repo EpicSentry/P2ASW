@@ -404,10 +404,6 @@ void C_GameInstructor::FireGameEvent( IGameEvent *event )
 	}
 	else if ( Q_strcmp( name, "player_death" ) == 0 )
 	{
-#if !defined(NO_STEAM) && defined(USE_CEG)
-		Steamworks_TestSecret(); 
-		Steamworks_SelfCheck(); 
-#endif
 		C_BasePlayer *pLocalPlayer = GetLocalPlayer();
 		if ( pLocalPlayer && pLocalPlayer == UTIL_PlayerByUserId( event->GetInt( "userid" ) ) )
 		{

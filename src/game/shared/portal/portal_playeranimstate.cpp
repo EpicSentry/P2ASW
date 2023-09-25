@@ -297,16 +297,13 @@ void CPortalPlayerAnimState::Update( float eyeYaw, float eyePitch )
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
-CEG_NOINLINE void CPortalPlayerAnimState::Teleport( const Vector *pNewOrigin, const QAngle *pNewAngles, CPortal_Player* pPlayer )
+void CPortalPlayerAnimState::Teleport( const Vector *pNewOrigin, const QAngle *pNewAngles, CPortal_Player* pPlayer )
 {
 	QAngle absangles = pPlayer->GetAbsAngles();
 	m_angRender = absangles;
 	m_angRender.x = m_angRender.z = 0.0f;
 	if ( pPlayer )
 	{
-#if defined GAME_DLL
-		CEG_PROTECT_MEMBER_FUNCTION( CPortalPlayerAnimState_Teleport );
-#endif
 		// Snap the yaw pose parameter lerping variables to face new angles.
 		m_flCurrentFeetYaw = m_flGoalFeetYaw = m_flEyeYaw = pPlayer->EyeAngles()[YAW];
 	}
@@ -372,10 +369,7 @@ bool CPortalPlayerAnimState::HandleMoving( Activity &idealActivity )
 	}
 	else
 	{
-		//CEG_GCV_PRE();
-		static const int CEG_SPEED_POWER = SPEED_POWER;//CEG_GET_CONSTANT_VALUE( PaintSpeedPower );
-		//CEG_GCV_POST();
-		bool bHasSpeedPower = pPortalPlayer->GetPaintPower( CEG_SPEED_POWER ).m_State == ACTIVE_PAINT_POWER;
+		bool bHasSpeedPower = pPortalPlayer->GetPaintPower( SPEED_POWER ).m_State == ACTIVE_PAINT_POWER;
 
 #ifdef CLIENT_DLL
 		if ( HASPAINTMAP && !bHasSpeedPower && !pPortalPlayer->IsLocalPlayer() )
@@ -390,7 +384,7 @@ bool CPortalPlayerAnimState::HandleMoving( Activity &idealActivity )
 			for( PaintPowerConstIter i = activeRange.first; i != activeRange.second; ++i )
 			{
 				const PaintPowerInfo_t &newPower = *i;
-				if ( newPower.m_PaintPowerType == CEG_SPEED_POWER )
+				if ( newPower.m_PaintPowerType == SPEED_POWER )
 				{
 					bHasSpeedPower = true;
 				}

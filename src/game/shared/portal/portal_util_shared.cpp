@@ -2284,16 +2284,9 @@ CBasePlayer* UTIL_OtherConnectedPlayer( CBasePlayer const* pPlayer )
 
 #endif
 
-CEG_NOINLINE bool UTIL_IsPaintableSurface( const csurface_t& surface )
+bool UTIL_IsPaintableSurface( const csurface_t& surface )
 {
-	// What the fuck?
-	/*
-	CEG_GCV_PRE();
-	static const unsigned short CEG_SURF_NO_PAINT_FLAG = CEG_GET_CONSTANT_VALUE( SurfNoPaintFlag );
-	CEG_GCV_POST();
-	return !( surface.flags & CEG_SURF_NO_PAINT_FLAG );
-	*/
-	return true;
+	return !( surface.flags & SURF_NOPAINT );
 }
 
 
@@ -2385,7 +2378,7 @@ Color GetAveragePaintColorFromVector( CUtlVector<Color> &color )
 	Assert( b >= 0 || b <= 255 );
 	Assert( g >= 0 || g <= 255 );
 	Assert( a >= 0 || a <= 255 );
-#if 0
+#if 1
 #ifdef GAME_DLL
 	Msg("(server)Average Color: %i %i %i %i\n", r, g, b, a);
 #else

@@ -650,13 +650,11 @@ CPortal_Player::~CPortal_Player( void )
 	}
 }
 
-CEG_NOINLINE CPortal_Player *CPortal_Player::CreatePlayer( const char *className, edict_t *ed )
+CPortal_Player *CPortal_Player::CreatePlayer( const char *className, edict_t *ed )
 {
 	CPortal_Player::s_PlayerEdict = ed;
 	return (CPortal_Player*)CreateEntityByName( className );
 }
-
-CEG_PROTECT_STATIC_MEMBER_FUNCTION( CPortal_Player_CreatePlayer, CPortal_Player::CreatePlayer );
 
 void CPortal_Player::UpdateOnRemove( void )
 {
@@ -5242,7 +5240,7 @@ void PlayerSwitchTeams( void )
 // than fixing the problem :(
 // Note: This is a nasty copy/paste job from player.cpp, which replaces VEC_DUCK_HULL_MIN/MAX
 //		 with the player's local hulls.
-CEG_NOINLINE void FixPlayerCrouchStuck( CPortal_Player *pPlayer )
+void FixPlayerCrouchStuck( CPortal_Player *pPlayer )
 {
 	trace_t trace;
 
@@ -5281,8 +5279,6 @@ CEG_NOINLINE void FixPlayerCrouchStuck( CPortal_Player *pPlayer )
 			return;
 	}
 }
-
-CEG_PROTECT_FUNCTION( FixPlayerCrouchStuck );
 
 int CPortal_Player::Restore( IRestore &restore )
 {

@@ -410,11 +410,7 @@ void CPortalSimulator::MoveTo( const Vector &ptCenter, const QAngle &angles )
 			fFarDists[1] = -m_InternalData.Placement.vUp.Dot( m_InternalData.Placement.ptCenter - (m_InternalData.Placement.vUp * kReallyFar) );
 			fFarDists[2] = -m_InternalData.Placement.vRight.Dot( m_InternalData.Placement.ptCenter - (m_InternalData.Placement.vRight * kReallyFar) );
 			fFarDists[3] = m_InternalData.Placement.vRight.Dot( m_InternalData.Placement.ptCenter + (m_InternalData.Placement.vRight * kReallyFar) );
-
-#ifdef CLIENT_DLL
-			CEG_PROTECT_MEMBER_FUNCTION( CPortalSimulator_MovedOrResized );
-#endif
-
+			
 			const float kInnerCarve = 0.1f;
 			float fInvHoleNearDists[4]; //mapping is meant to be (fInvHoleNearDists[i] <-> fHolePlanes[((i+2)*4) + 3])
 			fInvHoleNearDists[0] = m_InternalData.Placement.vUp.Dot( m_InternalData.Placement.ptCenter - (m_InternalData.Placement.vUp * (m_InternalData.Placement.fHalfHeight + kInnerCarve)) );
@@ -599,7 +595,7 @@ void CPortalSimulator::MoveTo( const Vector &ptCenter, const QAngle &angles )
 }
 
 
-CEG_NOINLINE void CPortalSimulator::MovedOrResized( const Vector &ptCenter, const QAngle &qAngles, float fHalfWidth, float fHalfHeight )
+void CPortalSimulator::MovedOrResized( const Vector &ptCenter, const QAngle &qAngles, float fHalfWidth, float fHalfHeight )
 {
 	if( (fHalfWidth == 0.0f) || (fHalfHeight == 0.0f) || !ptCenter.IsValid() )
 	{
@@ -739,11 +735,7 @@ CEG_NOINLINE void CPortalSimulator::MovedOrResized( const Vector &ptCenter, cons
 			fFarDists[1] = -m_InternalData.Placement.vUp.Dot( m_InternalData.Placement.ptCenter - (m_InternalData.Placement.vUp * kReallyFar) );
 			fFarDists[2] = -m_InternalData.Placement.vRight.Dot( m_InternalData.Placement.ptCenter - (m_InternalData.Placement.vRight * kReallyFar) );
 			fFarDists[3] = m_InternalData.Placement.vRight.Dot( m_InternalData.Placement.ptCenter + (m_InternalData.Placement.vRight * kReallyFar) );
-
-#ifdef CLIENT_DLL
-			CEG_PROTECT_MEMBER_FUNCTION( CPortalSimulator_MovedOrResized );
-#endif
-
+			
 			const float kInnerCarve = 0.1f;
 			float fInvHoleNearDists[4]; //mapping is meant to be (fInvHoleNearDists[i] <-> fHolePlanes[((i+2)*4) + 3])
 			fInvHoleNearDists[0] = m_InternalData.Placement.vUp.Dot( m_InternalData.Placement.ptCenter - (m_InternalData.Placement.vUp * (m_InternalData.Placement.fHalfHeight + kInnerCarve)) );

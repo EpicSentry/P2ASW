@@ -2671,12 +2671,10 @@ void C_Portal_Player::CreatePingPointer( Vector vecDestintaion )
 	}
 }
 
-CEG_NOINLINE void C_Portal_Player::DestroyPingPointer( void )
+void C_Portal_Player::DestroyPingPointer( void )
 {
 	if ( m_PointLaser )
 	{
-		CEG_PROTECT_MEMBER_FUNCTION( C_Portal_Player_DestroyPingPointer )
-
 		// stop the effect
 		m_PointLaser->StopEmission( false, true, false );
 		m_PointLaser = NULL;
@@ -3146,7 +3144,7 @@ static ConVar portal_deathcam_gib_pitch( "portal_deathcam_gib_pitch", "25.f", FC
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
-CEG_NOINLINE void C_Portal_Player::TurnOnTauntCam( void )
+void C_Portal_Player::TurnOnTauntCam( void )
 {
 	if ( !IsLocalPlayer( this ) )
 		return;
@@ -3180,8 +3178,6 @@ CEG_NOINLINE void C_Portal_Player::TurnOnTauntCam( void )
 		m_TauntCameraData.m_flLag = -1.0f;
 		m_TauntCameraData.m_vecHullMin.Init( -1.0f, -1.0f, -1.0f );
 		m_TauntCameraData.m_vecHullMax.Init( 1.0f, 1.0f, 1.0f );
-
-		CEG_PROTECT_MEMBER_FUNCTION( C_Portal_Player_TurnOnTauntCam )
 
 		QAngle vecCameraOffset( m_vecRemoteViewAngles.x, m_vecRemoteViewAngles.y, flDist );
 		input->CAM_ToThirdPerson();
@@ -3242,8 +3238,6 @@ void C_Portal_Player::TurnOffTauntCam( void )
 		return;
 
 	ACTIVE_SPLITSCREEN_PLAYER_GUARD_ENT( this );
-
-	CEG_PROTECT_MEMBER_FUNCTION( C_Portal_Player_TurnOffTauntCam )
 
 	if ( m_bTauntRemoteView )
 	{

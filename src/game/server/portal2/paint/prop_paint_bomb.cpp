@@ -230,7 +230,7 @@ void DispatchDryBombParticleEffect( const Vector& pos, PaintPowerType paintType,
 }
 
 
-CEG_NOINLINE void CreatePaintBombExplosion( PaintPowerType paintType, const Vector& vecExplosionPos, bool bSpawnBlobs )
+void CreatePaintBombExplosion( PaintPowerType paintType, const Vector& vecExplosionPos, bool bSpawnBlobs )
 {
 	//Only do the particle effect if not spawning blobs
 	if( !bSpawnBlobs )
@@ -342,8 +342,6 @@ CEG_NOINLINE void CreatePaintBombExplosion( PaintPowerType paintType, const Vect
 		}
 	}
 }
-
-CEG_PROTECT_FUNCTION( CreatePaintBombExplosion );
 
 void CPropPaintBomb::Event_Killed( const CTakeDamageInfo &info )
 {

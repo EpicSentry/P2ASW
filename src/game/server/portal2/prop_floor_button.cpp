@@ -301,7 +301,7 @@ const char *CPropFloorButton::GetButtonModelName()
 //-----------------------------------------------------------------------------
 // Purpose: Press the button
 //-----------------------------------------------------------------------------
-CEG_NOINLINE void CPropFloorButton::Press( CBaseEntity *pActivator )
+void CPropFloorButton::Press( CBaseEntity *pActivator )
 {
 	// play the down sequence
 	ResetSequence( m_DownSequence );
@@ -311,7 +311,6 @@ CEG_NOINLINE void CPropFloorButton::Press( CBaseEntity *pActivator )
 
 	// Change the skin
 	SetSkin( button_on_skin );
-	CEG_PROTECT_MEMBER_FUNCTION( CPropFloorButton_Press );
 
 	// call the function that fires the OnPressed output
 	OnPressed( pActivator );

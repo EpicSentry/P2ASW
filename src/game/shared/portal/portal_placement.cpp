@@ -73,16 +73,7 @@ bool IsMaterialInList( const csurface_t &surface, char *g_ppszMaterials[] )
 	return false;
 }
 
-// exposed here as non-constant so CEG can populate the value at DLL init time
-static int CEG_PORTAL_POWER = 0xffffffff; // no paint power until correctly initialized
-CEG_NOINLINE void InitPortalPaintPowerValue()
-{
-	CEG_GCV_PRE();
-	CEG_PORTAL_POWER = PORTAL_POWER//CEG_GET_CONSTANT_VALUE( PaintPortalPower );
-	CEG_GCV_POST();
-}
-
-CEG_NOINLINE bool IsOnPortalPaint( const trace_t &tr )
+bool IsOnPortalPaint( const trace_t &tr )
 {
 	if ( sv_portal_placement_on_paint.GetBool() && tr.m_pEnt)
 	{
@@ -105,7 +96,7 @@ CEG_NOINLINE bool IsOnPortalPaint( const trace_t &tr )
 			}
 		}
 
-		if( paintPower == CEG_PORTAL_POWER )
+		if( paintPower == PORTAL_POWER )
 		{
 			return true;
 		}
@@ -114,22 +105,13 @@ CEG_NOINLINE bool IsOnPortalPaint( const trace_t &tr )
 	return false;
 }
 
-// exposed here as non-constant so CEG can populate the value at DLL init time
-static unsigned short CEG_SURF_NO_PORTAL_FLAG = 0xffff; // portals can't be placed until correctly initialized
-CEG_NOINLINE void InitSurfNoPortalFlag()
-{
-	CEG_GCV_PRE();
-	CEG_SURF_NO_PORTAL_FLAG = SURF_NOPORTAL;//CEG_GET_CONSTANT_VALUE( SurfNoPortalFlag );
-	CEG_GCV_POST();
-}
-
-CEG_NOINLINE PortalSurfaceType_t PortalSurfaceType( const trace_t& tr )
+PortalSurfaceType_t PortalSurfaceType( const trace_t& tr )
 {
 	//Note: this is for placing portal on paint
 	if ( IsOnPortalPaint( tr ) )
 		return PORTAL_SURFACE_PAINT;
 
-	if ( tr.surface.flags & CEG_SURF_NO_PORTAL_FLAG )
+	if ( tr.surface.flags & SURF_NOPORTAL )
 		return PORTAL_SURFACE_INVALID;
 
 	const surfacedata_t *pdata = physprops->GetSurfaceData( tr.surface.surfaceProps );

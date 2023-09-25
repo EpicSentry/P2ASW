@@ -267,7 +267,7 @@ bool CCubeRotationController::Enabled( void )
 	return m_bEnabled;
 }
 
-CEG_NOINLINE CCubeRotationController * CCubeRotationController::CreateRotationController( CBaseEntity *pOwner )
+CCubeRotationController * CCubeRotationController::CreateRotationController( CBaseEntity *pOwner )
 {
 	if ( pOwner == NULL )
 		return NULL;
@@ -281,8 +281,6 @@ CEG_NOINLINE CCubeRotationController * CCubeRotationController::CreateRotationCo
 
 	return pController;
 }
-
-CEG_PROTECT_STATIC_MEMBER_FUNCTION( CCubeRotationController_CreateRotationController, CCubeRotationController::CreateRotationController );
 
 LINK_ENTITY_TO_CLASS( prop_weighted_cube, CPropWeightedCube );
 
@@ -355,7 +353,7 @@ CPropWeightedCube::CPropWeightedCube()
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-CEG_NOINLINE void CPropWeightedCube::Spawn( void )
+void CPropWeightedCube::Spawn( void )
 {
 	// Start out with nothing
 	m_vecCarryAngles.Init(0,0,0);
@@ -369,8 +367,6 @@ CEG_NOINLINE void CPropWeightedCube::Spawn( void )
 	m_bPickupDisabled = false;
 
 	SetCubeType();
-
-	CEG_PROTECT_VIRTUAL_FUNCTION( CPropWeightedCube_Spawn );
 
 	m_nBouncyMaterialIndex = physprops->GetSurfaceIndex( "WeightedCube_Bounce" );
 	SetInteraction( PROPINTER_PHYSGUN_ALLOW_OVERHEAD );

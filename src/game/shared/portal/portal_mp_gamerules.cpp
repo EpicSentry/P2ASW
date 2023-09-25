@@ -2167,16 +2167,12 @@ bool CPortalMPGameRules::SupressSpawnPortalgun( int nTeam )
 }
 
 
-CEG_NOINLINE void CPortalMPGameRules::PlayerWinRPS( CBasePlayer* pWinnerPlayer )
+void CPortalMPGameRules::PlayerWinRPS( CBasePlayer* pWinnerPlayer )
 {
 	bool bIsBlueTeam = ( pWinnerPlayer->GetTeamNumber() == TEAM_BLUE );
 	int nWinnerSlot = bIsBlueTeam ? 0 : 1;
 	int nLoserSlot = bIsBlueTeam ? 1 : 0;
-
-#if defined CLIENT_DLL
-	CEG_PROTECT_MEMBER_FUNCTION( CPortalMPGameRules_PlayerWinRPS );
-#endif
-
+	
 	++m_nRPSWinCount[ nWinnerSlot ];
 	m_nRPSWinCount[ nLoserSlot ] = 0;
 

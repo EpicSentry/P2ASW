@@ -3014,7 +3014,7 @@ void UTIL_SendClientCommandKVToPlayer( KeyValues *pKV, CBasePlayer *pPlayer )
 	}
 }
 
-CEG_NOINLINE void UTIL_RecordAchievementEvent( const char *pszAchievementname, CBasePlayer *pPlayer /*= NULL*/ )
+void UTIL_RecordAchievementEvent( const char *pszAchievementname, CBasePlayer *pPlayer /*= NULL*/ )
 {
 	bool bIsWriteStat = ( strchr( pszAchievementname, '@' ) || strchr( pszAchievementname, '[' ) || strchr( pszAchievementname, '(' ) ); // Achievements cannot have @[( symbols in names - it's a stat
 	KeyValues *pKV; 
@@ -3025,8 +3025,6 @@ CEG_NOINLINE void UTIL_RecordAchievementEvent( const char *pszAchievementname, C
 
 	UTIL_SendClientCommandKVToPlayer( pKV, pPlayer );
 }
-
-CEG_PROTECT_FUNCTION( UTIL_RecordAchievementEvent );
 
 //=============================================================================
 //
