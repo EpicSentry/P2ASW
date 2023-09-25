@@ -78,6 +78,7 @@ $Project "Client (Portal 2)"
 		$Folder "Portal 2"
 		{
 			$File "portal2/c_prop_floor_button.cpp"
+			//$File "portal2/c_prop_linked_portal_door.cpp"
 			$File "portal2/c_prop_weightedcube.cpp"
 			$File "portal2/c_prop_weightedcube.h"
 			$File "portal2/c_fizzler_effects.cpp"

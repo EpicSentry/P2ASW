@@ -13,6 +13,7 @@
 #include "rope_shared.h"
 #include "prop_portal_shared.h"
 #include "sprite.h"
+#include "paint/player_pickup_paint_power_user.h"
 
 
 #define SF_FLOOR_TURRET_AUTOACTIVATE		0x00000020
@@ -78,9 +79,9 @@ extern int ACT_FLOOR_TURRET_FIRE2;
 
 
 
-class CNPC_Portal_FloorTurret : public CNPC_FloorTurret
+class CNPC_Portal_FloorTurret : public PlayerPickupPaintPowerUser< CNPC_FloorTurret >
 {
-	DECLARE_CLASS( CNPC_Portal_FloorTurret, CNPC_FloorTurret );
+	DECLARE_CLASS( CNPC_Portal_FloorTurret, PlayerPickupPaintPowerUser< CNPC_FloorTurret > );
 	DECLARE_SERVERCLASS();
 	DECLARE_DATADESC();
 

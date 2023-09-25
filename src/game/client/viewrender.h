@@ -238,6 +238,10 @@ protected:
 	// Draws all opaque/translucent renderables in leaves that were rendered
 	void			DrawOpaqueRenderables( bool bShadowDepth );
 	void			DrawTranslucentRenderables( bool bInSkybox, bool bShadowDepth );
+	
+#if defined( PORTAL )
+	void			DrawRecursivePortalViews( void );
+#endif
 
 	// Renders all translucent entities in the render list
 	void			DrawTranslucentRenderablesNoWorld( bool bInSkybox );

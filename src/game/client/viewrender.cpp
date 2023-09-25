@@ -4756,6 +4756,65 @@ static void UpdateNecessaryRenderTargets( int nRenderFlags )
 	}
 }
 
+#ifdef PORTAL //if we're in the portal mod, we need to make a detour so we can render portal views using stencil areas
+void CRendering3dView::DrawRecursivePortalViews( void )
+{
+	if( ShouldDrawPortals() ) //no recursive stencil views during skybox rendering (although we might be drawing a skybox while already in a recursive stencil view)
+	{
+		int iDrawFlagsBackup = m_DrawFlags;
+
+		if( g_pPortalRender->DrawPortalsUsingStencils( (CViewRender *)m_pMainView ) )// @MULTICORE (toml 8/10/2006): remove this hack cast
+		{
+			m_DrawFlags = iDrawFlagsBackup;
+
+			//reset visibility
+			unsigned int iVisFlags = 0;
+			m_pMainView->SetupVis( *this, iVisFlags, m_pCustomVisibility );		
+
+			//recreate drawlists (since I can't find an easy way to backup the originals)
+			{
+				SafeRelease( m_pWorldRenderList );
+				SafeRelease( m_pWorldListInfo );
+				BuildWorldRenderLists( ((m_DrawFlags & DF_DRAW_ENTITITES) != 0), m_pCustomVisibility ? m_pCustomVisibility->m_iForceViewLeaf : -1 );
+
+				AssertMsg( m_DrawFlags & DF_DRAW_ENTITITES, "It shouldn't be possible to get here if this wasn't set, needs special case investigation" );
+			}
+
+			if( r_depthoverlay.GetBool() )
+			{
+				CMatRenderContextPtr pRenderContext( materials );
+				ITexture *pDepthTex = GetFullFrameDepthTexture();
+
+				if ( pDepthTex )
+				{
+					IMaterial *pMaterial = materials->FindMaterial( "debug/showz", TEXTURE_GROUP_OTHER, true );
+					IMaterialVar *BaseTextureVar = pMaterial->FindVar( "$basetexture", NULL, false );
+					IMaterialVar *pDepthInAlpha = NULL;
+					if( IsPC() )
+					{
+						pDepthInAlpha = pMaterial->FindVar( "$ALPHADEPTH", NULL, false );
+						pDepthInAlpha->SetIntValue( 1 );
+					}
+
+					BaseTextureVar->SetTextureValue( pDepthTex );
+
+					pRenderContext->OverrideDepthEnable( true, false ); //don't write to depth, or else we'll never see translucents
+					pRenderContext->DrawScreenSpaceQuad( pMaterial );
+					pRenderContext->OverrideDepthEnable( false, true );
+				}
+			}
+		}
+		// PS3 reads directly from the depth buffer alias texture, so we don't need to update the full-screen depth texture.
+		else if ( !IsPS3() )
+		{
+			//done recursing in, time to go back out and do translucents
+			CMatRenderContextPtr pRenderContext( materials );		
+			UpdateFullScreenDepthTexture();
+		}
+	}
+}
+#endif
+
 //-----------------------------------------------------------------------------
 // Renders all translucent world, entities, and detail objects in a particular set of leaves
 //-----------------------------------------------------------------------------
@@ -4766,41 +4825,7 @@ void CRendering3dView::DrawTranslucentRenderables( bool bInSkybox, bool bShadowD
 {
 	const ClientWorldListInfo_t& info = *m_pWorldListInfo;
 
-#ifdef PORTAL //if we're in the portal mod, we need to make a detour so we can render portal views using stencil areas
-	if (ShouldDrawPortals()) //no recursive stencil views during skybox rendering (although we might be drawing a skybox while already in a recursive stencil view)
-	{
-		int iDrawFlagsBackup = m_DrawFlags;
-
-		if (g_pPortalRender->DrawPortalsUsingStencils((CViewRender *)m_pMainView))// @MULTICORE (toml 8/10/2006): remove this hack cast
-		{
-			
-			m_DrawFlags = iDrawFlagsBackup;
-
-			//reset visibility
-			unsigned int iVisFlags = 0;
-			m_pMainView->SetupVis(*this, iVisFlags, m_pCustomVisibility);
-
-			//recreate drawlists (since I can't find an easy way to backup the originals)
-			{
-				
-				SafeRelease(m_pWorldRenderList);
-				SafeRelease(m_pWorldListInfo);
-				BuildWorldRenderLists(((m_DrawFlags & DF_DRAW_ENTITITES) != 0), m_pCustomVisibility ? m_pCustomVisibility->m_iForceViewLeaf : -1, false);
-
-				AssertMsg(m_DrawFlags & DF_DRAW_ENTITITES, "It shouldn't be possible to get here if this wasn't set, needs special case investigation");
-				//BuildRenderableRenderLists(CurrentViewID());
-			}
-		}
-		else
-		{
-			//done recursing in, time to go back out and do translucents
-			CMatRenderContextPtr pRenderContext(materials);
-
-			UpdateFullScreenDepthTexture();
-		}
-	}
-#else
-
+#ifndef PORTAL
 	{
 		//opaques generally write depth, and translucents generally don't.
 		//So immediately after opaques are done is the best time to snap off the depth buffer to a texture.
@@ -5266,6 +5291,10 @@ void CSkyboxView::DrawInternal( view_id_t iSkyBoxViewID, bool bInvokePreAndPostR
 
 	// Iterate over all leaves and render objects in those leaves
 	DrawOpaqueRenderables( false );
+	
+#if defined( PORTAL )
+	DrawRecursivePortalViews(); //Dave K: probably does nothing in this view, calling it anyway because it's contents were directly inside DrawTranslucentRenderables() a moment ago and I don't want to risk breaking anything
+#endif
 
 	// Iterate over all leaves and render objects in those leaves
 	DrawTranslucentRenderables( true, false );
@@ -5499,6 +5528,9 @@ void CShadowDepthView::Draw()
 	if ( m_bRenderFlashlightDepthTranslucents || r_flashlightdepth_drawtranslucents.GetBool() )
 	{
 		VPROF_BUDGET( "DrawTranslucentRenderables", VPROF_BUDGETGROUP_SHADOW_DEPTH_TEXTURING );
+#if defined( PORTAL )
+		DrawRecursivePortalViews(); //Dave K: probably does nothing in this view, calling it anyway because it's contents were directly inside DrawTranslucentRenderables() a moment ago and I don't want to risk breaking anything
+#endif
 		DrawTranslucentRenderables( false, true );
 	}
 
@@ -5827,6 +5859,9 @@ void CBaseWorldView::DrawExecute( float waterHeight, view_id_t viewID, float wat
 	{
 		if ( m_DrawFlags & DF_DRAW_ENTITITES )
 		{
+#if defined( PORTAL )
+			DrawRecursivePortalViews();
+#endif
 			DrawTranslucentRenderables( false, false );
 			DrawNoZBufferTranslucentRenderables();
 		}

@@ -708,6 +708,7 @@ bool CPortalRender::DrawPortalsUsingStencils(CViewRender *pViewRender)
 
 		// Step 0, Allow for special effects to happen before cutting a hole
 		{
+			pRenderContext->BeginPIXEvent( PIX_VALVE_ORANGE, "Portal_Step0" );
 			state.m_CompareFunc = SHADER_STENCILFUNC_EQUAL;
 			state.m_PassOp = SHADER_STENCILOP_KEEP;
 			state.m_FailOp = SHADER_STENCILOP_KEEP;
@@ -716,6 +717,7 @@ bool CPortalRender::DrawPortalsUsingStencils(CViewRender *pViewRender)
 			pRenderContext->SetStencilState(state);
 
 			pCurrentPortal->DrawPreStencilMask();
+			pRenderContext->EndPIXEvent();
 		}
 
 		//step 1, write out the stencil values (and colors if you want, but really not necessary)
@@ -737,6 +739,7 @@ bool CPortalRender::DrawPortalsUsingStencils(CViewRender *pViewRender)
 #ifndef TEMP_DISABLE_PORTAL_VIS_QUERY
 			pRenderContext->EndOcclusionQueryDrawing(pCurrentPortalViewNode->occlusionQueryHandle);
 #endif
+			pRenderContext->EndPIXEvent();
 		}
 
 		//see if we can skip the heavy lifting due to low visibility
@@ -750,6 +753,7 @@ bool CPortalRender::DrawPortalsUsingStencils(CViewRender *pViewRender)
 				pRenderContext->SetStencilState(state);
 
 				pRenderContext->ClearBuffersObeyStencil(false, true);
+				pRenderContext->EndPIXEvent();
 			}
 
 
