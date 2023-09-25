@@ -4459,7 +4459,8 @@ void CTriggerPlayerMovement::Spawn( void )
 
 
 	// Bugbait 19571:  Make CTriggerPlayerMovement for AutoDuck available on client for client side prediction
-	if ( HasSpawnFlags( SF_TRIGGER_AUTO_DUCK ) )
+	if ( HasSpawnFlags( SF_TRIGGER_AUTO_DUCK ) ||
+		 HasSpawnFlags( SF_TRIGGER_AUTO_WALK ) )
 	{
 		m_bClientSidePredicted = true;
 		SetTransmitState( FL_EDICT_PVSCHECK );
@@ -4482,6 +4483,11 @@ void CTriggerPlayerMovement::StartTouch( CBaseEntity *pOther )
 	if ( HasSpawnFlags( SF_TRIGGER_AUTO_DUCK ) )
 	{
 		pPlayer->ForceButtons( IN_DUCK );
+	}
+	
+	if ( HasSpawnFlags( SF_TRIGGER_AUTO_WALK ) )
+	{
+		pPlayer->ForceButtons( IN_SPEED );
 	}
 
 	// UNDONE: Currently this is the only operation this trigger can do
@@ -4506,10 +4512,81 @@ void CTriggerPlayerMovement::EndTouch( CBaseEntity *pOther )
 		pPlayer->UnforceButtons( IN_DUCK );
 	}
 
+	if ( HasSpawnFlags( SF_TRIGGER_AUTO_WALK ) )
+	{
+		pPlayer->UnforceButtons( IN_SPEED );
+	}
+
 	if ( HasSpawnFlags(SF_TRIGGER_MOVE_AUTODISABLE) )
 	{
 		pPlayer->m_Local.m_bAllowAutoMovement = true;
 	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Disables auto movement on players that touch it
+//-----------------------------------------------------------------------------
+class CTriggerSoundOperator : public CBaseTrigger
+{
+	DECLARE_CLASS( CTriggerSoundOperator, CBaseTrigger );
+	DECLARE_SERVERCLASS();
+public:
+
+	void Spawn( void );
+	void StartTouch( CBaseEntity *pOther );
+	void EndTouch( CBaseEntity *pOther );
+
+	DECLARE_DATADESC();
+
+protected:
+	CNetworkVar( int, m_nSoundOperator );
+};
+
+IMPLEMENT_SERVERCLASS_ST( CTriggerSoundOperator, DT_TriggerSoundOperator )
+	SendPropInt( SENDINFO( m_nSoundOperator ), -1, SPROP_NOSCALE )
+END_SEND_TABLE()
+
+BEGIN_DATADESC( CTriggerSoundOperator )
+	DEFINE_KEYFIELD( m_nSoundOperator, FIELD_INTEGER, "sosvar" )
+END_DATADESC()
+
+LINK_ENTITY_TO_CLASS( trigger_soundoperator, CTriggerSoundOperator );
+
+//-----------------------------------------------------------------------------
+// Purpose: Called when spawning, after keyvalues have been handled.
+//-----------------------------------------------------------------------------
+void CTriggerSoundOperator::Spawn( void )
+{
+	BaseClass::Spawn();
+	InitTrigger();
+	
+	m_bClientSidePredicted = true;
+	SetTransmitState( FL_EDICT_PVSCHECK );
+}
+
+
+// UNDONE: This will not support a player touching more than one of these
+// UNDONE: Do we care?  If so, ref count automovement in the player?
+void CTriggerSoundOperator::StartTouch( CBaseEntity *pOther )
+{
+	if ( !PassesTriggerFilters( pOther ) )
+		return;
+
+	CBasePlayer *pPlayer = ToBasePlayer( pOther );
+
+	if ( !pPlayer )
+		return;
+}
+
+void CTriggerSoundOperator::EndTouch( CBaseEntity *pOther )
+{
+	if ( !PassesTriggerFilters( pOther ) )
+		return;
+
+	CBasePlayer *pPlayer = ToBasePlayer( pOther );
+
+	if ( !pPlayer )
+		return;
 }
 
 //------------------------------------------------------------------------------

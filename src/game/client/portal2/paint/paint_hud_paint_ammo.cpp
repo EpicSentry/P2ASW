@@ -20,8 +20,8 @@
 
 
 // FIXME: Bring this back for DLC2
-#define paintgun_ammo_type 0 //extern ConVar paintgun_ammo_type;
-#define paintgun_max_ammo 60 //extern ConVar paintgun_max_ammo;
+extern ConVar paintgun_ammo_type;
+extern ConVar paintgun_max_ammo;
 
 ConVar cl_debug_paint_ammo_bar( "cl_debug_paint_ammo_bar", "0", FCVAR_CHEAT );
 
@@ -70,7 +70,7 @@ CHUDPaintAmmo::CHUDPaintAmmo( const char *pElementName )
 bool CHUDPaintAmmo::ShouldDraw( void )
 {
 
-	if( paintgun_ammo_type == 0 )
+	if( paintgun_ammo_type.GetInt() == 0 )
 	{
 			return false;
 	}
@@ -100,7 +100,7 @@ void CHUDPaintAmmo::OnTick( void )
 
 		if( pPaintGun )
 		{
-			float flAmmo = pPaintGun->GetPaintAmmo() / paintgun_max_ammo;
+			float flAmmo = pPaintGun->GetPaintAmmo() / paintgun_max_ammo.GetInt();
 
 			flAmmo = clamp( flAmmo, 0.0f, 1.0f );
 

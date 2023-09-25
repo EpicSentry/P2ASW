@@ -180,19 +180,22 @@ Color UTIL_Portal_Color_Particles( int iPortal, int iTeamNumber /*= 0*/ )
 void UTIL_Portal_Trace_Filter( CTraceFilterSimpleClassnameList *traceFilterPortalShot )
 {
 	traceFilterPortalShot->AddClassnameToIgnore( "prop_physics" );
+	traceFilterPortalShot->AddClassnameToIgnore( "prop_weighted_cube" );
+	traceFilterPortalShot->AddClassnameToIgnore( "prop_monster_box" );
 	traceFilterPortalShot->AddClassnameToIgnore( "func_physbox" );
 	traceFilterPortalShot->AddClassnameToIgnore( "npc_portal_turret_floor" );
 	traceFilterPortalShot->AddClassnameToIgnore( "prop_energy_ball" );
 	traceFilterPortalShot->AddClassnameToIgnore( "npc_security_camera" );
-	traceFilterPortalShot->AddClassnameToIgnore( "player" );
 	traceFilterPortalShot->AddClassnameToIgnore( "simple_physics_prop" );
 	traceFilterPortalShot->AddClassnameToIgnore( "simple_physics_brush" );
 	traceFilterPortalShot->AddClassnameToIgnore( "prop_ragdoll" );
 	traceFilterPortalShot->AddClassnameToIgnore( "prop_glados_core" );
-#ifdef PORTAL2
-	traceFilterPortalShot->AddClassnameToIgnore("npc_wheatley_core");
-	traceFilterPortalShot->AddClassnameToIgnore("prop_weighted_cube");
-#endif
+	traceFilterPortalShot->AddClassnameToIgnore( "player" );
+	traceFilterPortalShot->AddClassnameToIgnore( "Player" );
+	traceFilterPortalShot->AddClassnameToIgnore( "projected_wall_entity" );
+	traceFilterPortalShot->AddClassnameToIgnore( "prop_paint_bomb" );
+	traceFilterPortalShot->AddClassnameToIgnore( "prop_exploding_futbol" );
+	traceFilterPortalShot->AddClassnameToIgnore( "npc_personality_core" );
 }
 
 
@@ -806,9 +809,6 @@ void UTIL_Portal_TraceRay( const CPortal_Base2D *pPortal, const Ray_t &ray, unsi
 //-----------------------------------------------------------------------------
 void UTIL_PortalLinked_TraceRay( const CPortal_Base2D *pPortal, const Ray_t &ray, unsigned int fMask, ITraceFilter *pTraceFilter, trace_t *pTrace, bool bTraceHolyWall )
 {
-#ifdef CLIENT_DLL
-	Assert( (GameRules() == NULL) || GameRules()->IsMultiplayer() );
-#endif
 	// Transform the specified ray to the remote portal's space
 	Ray_t rayTransformed;
 	UTIL_Portal_RayTransform( pPortal->MatrixThisToLinked(), ray, rayTransformed );
@@ -923,7 +923,6 @@ void UTIL_Portal_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, c
 							 unsigned int mask, ITraceFilter *pFilter, trace_t *pTrace )
 {
 #ifdef CLIENT_DLL
-	Assert( (GameRules() == NULL) || GameRules()->IsMultiplayer() );
 	Assert( pEntity->IsPlayer() );
 
 	CPortalSimulator *pPortalSimulator = NULL;
@@ -2373,12 +2372,12 @@ Color GetAveragePaintColorFromVector( CUtlVector<Color> &color )
 	g = g / color.Count();
 	b = b / color.Count();
 	a = a / color.Count();
-
+	
 	Assert( r >= 0 || r <= 255 );
 	Assert( b >= 0 || b <= 255 );
 	Assert( g >= 0 || g <= 255 );
 	Assert( a >= 0 || a <= 255 );
-#if 1
+#if 0
 #ifdef GAME_DLL
 	Msg("(server)Average Color: %i %i %i %i\n", r, g, b, a);
 #else

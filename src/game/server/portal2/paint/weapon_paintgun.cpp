@@ -28,7 +28,7 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-#define paintgun_blobs_per_second	40.f//extern ConVar paintgun_blobs_per_second;
+extern ConVar paintgun_blobs_per_second;
 //extern ConVar max_paint;
 //extern ConVar sv_limit_paint;
 
@@ -136,7 +136,7 @@ void CWeaponPaintGun::Spawn()
 	//SetNextThink( gpGlobals->curtime );
 	SetContextThink( &CWeaponPaintGun::PaintGunThink, gpGlobals->curtime, PAINT_GUN_THINK_CONTEXT );
 
-	m_flAccumulatedTime = 1.0f/paintgun_blobs_per_second;
+	m_flAccumulatedTime = 1.0f/paintgun_blobs_per_second.GetFloat();
 	m_nBlobRandomSeed = 0;
 
 	CreatePaintStreams();
@@ -368,5 +368,4 @@ static void GiveAllPaintPowers()
 	}
 }
 
-// FIXME: Bring this back for DLC2
 static ConCommand giveallpaintpowers( "giveallpaintpowers", GiveAllPaintPowers );

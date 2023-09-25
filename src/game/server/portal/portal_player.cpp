@@ -112,9 +112,9 @@ ConVar sv_zoom_stop_movement_threashold("sv_zoom_stop_movement_threashold", "4.0
 ConVar sv_zoom_stop_time_threashold("sv_zoom_stop_time_threashold", "5.0", FCVAR_REPLICATED, "Time amount before breaking player out of toggle zoom." );
 extern ConVar sv_player_funnel_into_portals;
 
-#define sv_can_carry_both_guns		0	//ConVar sv_can_carry_both_guns("sv_can_carry_both_guns", "0", FCVAR_REPLICATED | FCVAR_CHEAT);
-#define sv_can_swap_guns			1	//ConVar sv_can_swap_guns("sv_can_swap_guns", "1", FCVAR_REPLICATED | FCVAR_CHEAT);
-#define sv_can_swap_guns_anytime	1	//ConVar sv_can_swap_guns_anytime( "sv_can_swap_guns_anytime", "1", FCVAR_CHEAT );
+ConVar sv_can_carry_both_guns("sv_can_carry_both_guns", "0", FCVAR_REPLICATED | FCVAR_CHEAT);
+ConVar sv_can_swap_guns("sv_can_swap_guns", "1", FCVAR_REPLICATED | FCVAR_CHEAT);
+ConVar sv_can_swap_guns_anytime( "sv_can_swap_guns_anytime", "1", FCVAR_CHEAT );
 
 static ConVar portal_tauntcam_dist( "portal_tauntcam_dist", "75", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
 ConVar sp_fade_and_force_respawn( "sp_fade_and_force_respawn", "1", FCVAR_CHEAT );
@@ -3286,8 +3286,7 @@ void CPortal_Player::CheatImpulseCommands( int iImpulse )
 			if( sv_cheats->GetBool() )
 			{
 				//GiveAllItems();
-				// FIXME: Bring this back for DLC2
-				//sv_can_carry_both_guns.SetValue( 1 );
+				sv_can_carry_both_guns.SetValue( 1 );
 
 				//GivePlayerPaintGun( true, false );
 				GivePlayerPortalGun( true, true );
@@ -5340,7 +5339,7 @@ void CPortal_Player::GivePortalPlayerItems( void )
 	}
 
 	//Check for the can carry both guns cheat
-	if( sv_can_carry_both_guns )
+	if( sv_can_carry_both_guns.GetBool() )
 	{
 		bSpawnWithPaintGun = true;
 		bSpawnWithPortalGun = true;
@@ -5572,7 +5571,7 @@ void CPortal_Player::SwapThink()
 		CBaseCombatWeapon *pPaintGun = Weapon_OwnsThisType( "weapon_paintgun" );
 		CBaseCombatWeapon *pPortalGun = Weapon_OwnsThisType( "weapon_portalgun" );
 		bool bHasBothGuns = !!pPaintGun && !!pPortalGun;
-		if( ( !bIsMultiplayer && bHasBothGuns ) || sv_can_carry_both_guns )
+		if( ( !bIsMultiplayer && bHasBothGuns ) || sv_can_carry_both_guns.GetBool() )
 		{
 			//engine->ClientCommand( edict(), "lastinv" );
 
@@ -5587,7 +5586,7 @@ void CPortal_Player::SwapThink()
 		}
 		else
 		{
-			if( bIsMultiplayer && sv_can_swap_guns_anytime )
+			if( bIsMultiplayer && sv_can_swap_guns_anytime.GetBool() )
 			{
 				IGameEvent *event = gameeventmanager->CreateEvent( "wants_to_swap_guns" );
 				if ( event )
@@ -5601,7 +5600,7 @@ void CPortal_Player::SwapThink()
 			}
 		}
 	}
-	else if( m_afButtonReleased & IN_ALT1 && bIsMultiplayer && !sv_can_carry_both_guns && sv_can_swap_guns_anytime )
+	else if( m_afButtonReleased & IN_ALT1 && bIsMultiplayer && !sv_can_carry_both_guns.GetBool() && sv_can_swap_guns_anytime.GetBool() )
 	{
 		IGameEvent *event = gameeventmanager->CreateEvent( "doesnt_want_to_swap_guns" );
 		if ( event )
@@ -5615,12 +5614,12 @@ void CPortal_Player::SwapThink()
 	}
 
 	bool bSwap = false;
-	if( WantsToSwapGuns() && sv_can_swap_guns )
+	if( WantsToSwapGuns() && sv_can_swap_guns.GetBool() )
 	{
 		CPortal_Player *pOtherPlayer = ToPortalPlayer( UTIL_OtherConnectedPlayer( this ) );
 		if( pOtherPlayer && pOtherPlayer->WantsToSwapGuns() )
 		{
-			if( sv_can_swap_guns_anytime )
+			if( sv_can_swap_guns_anytime.GetBool() )
 			{
 				//Check if the players are close enough to swap
 				bSwap = CheckSwapProximity( this, pOtherPlayer );
@@ -5776,5 +5775,5 @@ void cc_can_carry_both_guns( const CCommand &args )
 		}
 	}
 }
-// FIXME: Bring this back for DLC2
-//ConCommand can_carry_both_guns( "can_carry_both_guns", cc_can_carry_both_guns );
+
+ConCommand can_carry_both_guns( "can_carry_both_guns", cc_can_carry_both_guns );

@@ -32,6 +32,7 @@ LINK_ENTITY_TO_CLASS( env_sprite, CSprite );
 LINK_ENTITY_TO_CLASS( env_sprite_oriented, CSpriteOriented );
 #if !defined( CLIENT_DLL )
 LINK_ENTITY_TO_CLASS( env_glow, CSprite ); // For backwards compatibility, remove when no longer needed.
+LINK_ENTITY_TO_CLASS( env_sprite_clientside, CSprite );
 #endif
 
 #if !defined( CLIENT_DLL )
@@ -175,6 +176,9 @@ BEGIN_NETWORK_TABLE( CSprite, DT_Sprite )
 #endif
 END_NETWORK_TABLE()
 
+#ifdef CLIENT_DLL
+extern CUtlVector< CSprite * > g_ClientsideSprites;
+#endif // CLIENT_DLL
 
 CSprite::CSprite()
 {
@@ -186,6 +190,17 @@ CSprite::CSprite()
 	m_bDrawInPortalRender = true;
 #endif
 }
+
+CSprite::~CSprite()
+{
+#ifdef CLIENT_DLL
+	if ( m_bClientOnly )
+	{
+		g_ClientsideSprites.FindAndFastRemove( this );
+	}
+#endif // CLIENT_DLL
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -250,7 +265,15 @@ void CSprite::Spawn( void )
 	m_flStartScale = m_flDestScale = m_flSpriteScale;
 	m_nStartBrightness = m_nDestBrightness = m_nBrightness;
 #endif
-
+	
+#ifndef CLIENT_DLL
+	// Server has no use for client-only entities.
+	// Seems like a waste to create the entity, only to UTIL_Remove it on Spawn, but this pattern works safely...
+	if ( FClassnameIs( this, "env_sprite_clientside" ) )
+	{
+		UTIL_Remove( this );
+	}
+#endif // !CLIENT_DLL
 }
 
 

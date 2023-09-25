@@ -38,18 +38,18 @@
 #endif
 
 
-#define paintgun_blobs_spread_radius			0.f		//ConVar paintgun_blobs_spread_radius( "paintgun_blobs_spread_radius", "0.0f", FCVAR_REPLICATED | FCVAR_CHEAT, "The starting radius of the spread of the paint blobs from the gun" );
-#define paintgun_blobs_spread_angle				10.f	//ConVar paintgun_blobs_spread_angle( "paintgun_blobs_spread_angle", "10.0f", FCVAR_REPLICATED | FCVAR_CHEAT, "The spread (in degrees) of the paint blobs from the gun" );
-#define paintgun_blobs_per_second				40.f	//ConVar paintgun_blobs_per_second( "paintgun_blobs_per_second", "40.0f", FCVAR_REPLICATED | FCVAR_CHEAT, "Number of blobs shot out of the paint gun per second" );
-#define paintgun_blobs_min_speed				950.f	//ConVar paintgun_blobs_min_speed( "paintgun_blobs_min_speed", "950.0f", FCVAR_REPLICATED | FCVAR_CHEAT, "The min speed of the blobs shot out of the paint gun" );
-#define paintgun_blobs_max_speed				1050.f	//ConVar paintgun_blobs_max_speed( "paintgun_blobs_max_speed", "1050.0f", FCVAR_REPLICATED | FCVAR_CHEAT, "The max speed of the blobs shot out of the paint gun" );
-#define paintgun_shoot_position_trace_for_wall	1		//ConVar paintgun_shoot_position_trace_for_wall( "paintgun_shoot_position_trace_for_wall", "1", FCVAR_REPLICATED, "If the paint gun shooting position should test if it is inside a wall" );
+ConVar paintgun_blobs_spread_radius( "paintgun_blobs_spread_radius", "0.0f", FCVAR_REPLICATED | FCVAR_CHEAT, "The starting radius of the spread of the paint blobs from the gun" );
+ConVar paintgun_blobs_spread_angle( "paintgun_blobs_spread_angle", "10.0f", FCVAR_REPLICATED | FCVAR_CHEAT, "The spread (in degrees) of the paint blobs from the gun" );
+ConVar paintgun_blobs_per_second( "paintgun_blobs_per_second", "40.0f", FCVAR_REPLICATED | FCVAR_CHEAT, "Number of blobs shot out of the paint gun per second" );
+ConVar paintgun_blobs_min_speed( "paintgun_blobs_min_speed", "950.0f", FCVAR_REPLICATED | FCVAR_CHEAT, "The min speed of the blobs shot out of the paint gun" );
+ConVar paintgun_blobs_max_speed( "paintgun_blobs_max_speed", "1050.0f", FCVAR_REPLICATED | FCVAR_CHEAT, "The max speed of the blobs shot out of the paint gun" );
+ConVar paintgun_shoot_position_trace_for_wall( "paintgun_shoot_position_trace_for_wall", "1", FCVAR_REPLICATED, "If the paint gun shooting position should test if it is inside a wall" );
 
-#define paintgun_blobs_streak_percent			10.f	//ConVar paintgun_blobs_streak_percent( "paintgun_blobs_streak_percent", "10.0f", FCVAR_REPLICATED | FCVAR_CHEAT );
-#define paintgun_blobs_min_streak_time			0.1f	//ConVar paintgun_blobs_min_streak_time( "paintgun_blobs_min_streak_time", "0.1f", FCVAR_REPLICATED | FCVAR_CHEAT );
-#define paintgun_blobs_max_streak_time			0.5f	//ConVar paintgun_blobs_max_streak_time( "paintgun_blobs_max_streak_time", "0.5f", FCVAR_REPLICATED | FCVAR_CHEAT );
-#define paintgun_blobs_min_streak_speed_dampen	4500.f	//ConVar paintgun_blobs_min_streak_speed_dampen( "paintgun_blobs_min_streak_speed_dampen", "4500.0f", FCVAR_REPLICATED | FCVAR_CHEAT );
-#define paintgun_blobs_max_streak_speed_dampen	5500.f	//ConVar paintgun_blobs_max_streak_speed_dampen( "paintgun_blobs_max_streak_speed_dampen", "5500.0f", FCVAR_REPLICATED | FCVAR_CHEAT );
+ConVar paintgun_blobs_streak_percent( "paintgun_blobs_streak_percent", "10.0f", FCVAR_REPLICATED | FCVAR_CHEAT );
+ConVar paintgun_blobs_min_streak_time( "paintgun_blobs_min_streak_time", "0.1f", FCVAR_REPLICATED | FCVAR_CHEAT );
+ConVar paintgun_blobs_max_streak_time( "paintgun_blobs_max_streak_time", "0.5f", FCVAR_REPLICATED | FCVAR_CHEAT );
+ConVar paintgun_blobs_min_streak_speed_dampen( "paintgun_blobs_min_streak_speed_dampen", "4500.0f", FCVAR_REPLICATED | FCVAR_CHEAT );
+ConVar paintgun_blobs_max_streak_speed_dampen( "paintgun_blobs_max_streak_speed_dampen", "5500.0f", FCVAR_REPLICATED | FCVAR_CHEAT );
 
 ConVar paintgun_max_ammo( "paintgun_max_ammo", "60", FCVAR_REPLICATED, "The maximum amount of paint ammo allowed." );
 ConVar paintgun_ammo_type( "paintgun_ammo_type", "0", FCVAR_REPLICATED, "Type of paint ammo. 0: No ammo, 1: Global ammo per-gun, 2: Ammo per-paint type" );
@@ -233,7 +233,7 @@ void CWeaponPaintGun::WeaponIdle()
 #endif
 
 	m_bFiringPaint = m_bFiringErase = false;
-	m_flAccumulatedTime = 1.0f/paintgun_blobs_per_second;
+	m_flAccumulatedTime = 1.0f/paintgun_blobs_per_second.GetFloat();
 #ifdef CLIENT_DLL
 #endif
 
@@ -432,7 +432,7 @@ void CWeaponPaintGun::SprayPaint( float flDeltaTime, int paintType )
 	Vector vecForwardVelocity = vecVelocity.Normalized() * DotProduct( vecVelocity, vecAimDir );
 	Vector vecBlobFirePos = pOwner->GetPaintGunShootPosition();
 
-	if( paintgun_shoot_position_trace_for_wall )
+	if( paintgun_shoot_position_trace_for_wall.GetInt() )
 	{
 		// Because the muzzle is so long, it can stick through a wall if the player is right up against it.
 		// Make sure to adjust the shoot position in this condition by tracing a line between the eye point and the end of the muzzle.
@@ -467,7 +467,7 @@ void CWeaponPaintGun::SprayPaint( float flDeltaTime, int paintType )
 		//vecBlobFirePos = trace.endpos;
 	}
 
-	const float flBlobPerSecond = 1.0f/paintgun_blobs_per_second;
+	const float flBlobPerSecond = 1.0f/paintgun_blobs_per_second.GetFloat();
 	while ( m_flAccumulatedTime >= flBlobPerSecond && HasPaintAmmo( paintType ) )
 	{
 		m_flAccumulatedTime -= flBlobPerSecond;
@@ -476,15 +476,15 @@ void CWeaponPaintGun::SprayPaint( float flDeltaTime, int paintType )
 												vecForwardVelocity,
 												vecAimDir,
 												paintType,
-												paintgun_blobs_spread_radius,
-												paintgun_blobs_spread_angle,
-												paintgun_blobs_min_speed,
-												paintgun_blobs_max_speed,
-												paintgun_blobs_streak_percent,
-												paintgun_blobs_min_streak_time,
-												paintgun_blobs_max_streak_time,
-												paintgun_blobs_min_streak_speed_dampen,
-												paintgun_blobs_max_streak_speed_dampen,
+												paintgun_blobs_spread_radius.GetFloat(),
+												paintgun_blobs_spread_angle.GetFloat(),
+												paintgun_blobs_min_speed.GetFloat(),
+												paintgun_blobs_max_speed.GetFloat(),
+												paintgun_blobs_streak_percent.GetFloat(),
+												paintgun_blobs_min_streak_time.GetFloat(),
+												paintgun_blobs_max_streak_time.GetFloat(),
+												paintgun_blobs_min_streak_speed_dampen.GetFloat(),
+												paintgun_blobs_max_streak_speed_dampen.GetFloat(),
 												false,
 												false,
 												pPaintStream,

@@ -4615,15 +4615,15 @@ Vector CPortal_Player::EyePosition()
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-// FIXME: Bring this back for DLC2
-#define paintgun_ammo_type 0 //extern ConVar paintgun_ammo_type;
+
+extern ConVar paintgun_ammo_type;
 void CPortal_Player::ItemPostFrame()
 {
 	BaseClass::ItemPostFrame();
 
 	CBaseCombatWeapon* pActiveWeapon = GetActiveWeapon();
 	if( m_hUseEntity != NULL &&
-		paintgun_ammo_type != PAINT_AMMO_NONE &&
+		paintgun_ammo_type.GetInt() != PAINT_AMMO_NONE &&
 		pActiveWeapon != NULL &&
 		FClassnameIs( pActiveWeapon, "weapon_paintgun" ) )
 	{

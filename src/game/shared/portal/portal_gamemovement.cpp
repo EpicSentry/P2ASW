@@ -465,10 +465,6 @@ void CPortalGameMovement::ProcessMovement( CBasePlayer *pPlayer, CMoveData *pMov
 		const float maxSpeed = pPlayer->MaxSpeed();
 		mv->m_flClientMaxSpeed = mv->m_flMaxSpeed = maxSpeed;
 		
-#ifdef CLIENT_DLL
-		Msg("STEP\n");
-#endif
-
 		// Run the command.
 		PlayerMove();
 		HandlePortalling();

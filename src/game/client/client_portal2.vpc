@@ -83,6 +83,9 @@ $Project "Client (Portal 2)"
 			$File "portal2/c_prop_weightedcube.h"
 			$File "portal2/c_fizzler_effects.cpp"
 			$File "portal2/c_fizzler_effects.h"
+			//$File "portal2\c_trigger_tractorbeam.h"
+			//$File "portal2\c_trigger_tractorbeam.cpp"
+
 			// Radial Menu preparations for when we get to work on coop.
 			/*
 			$File "portal2/radialmenu.cpp"
@@ -97,6 +100,8 @@ $Project "Client (Portal 2)"
 			$File	"portal2\c_sdk_jukebox.cpp"
 			$File	"portal2\vgui_rootpanel_portal2.cpp"
 			$File	"$SRCDIR\game\shared\predicted_viewmodel.cpp"
+			
+			//$File	"$SRCDIR\game\shared\portal\trigger_tractorbeam_shared.cpp" // NOTE: Portal 2's Server VPC doesn't have this.
 		
 			$Folder	"VGUI"
 			{

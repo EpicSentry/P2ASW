@@ -14,7 +14,7 @@
 ConVar speed_paint_color( "speed_paint_color", "255 106 0 255", FCVAR_REPLICATED, "Color for speed paint" );
 ConVar bounce_paint_color( "bounce_paint_color", "0 165 255 255", FCVAR_REPLICATED, "Color for bounce paint" );
 // FIXME: Bring this back for DLC2
-//ConVar reflect_paint_color( "reflect_paint_color", "0 255 0 255", FCVAR_REPLICATED, "Color for reflect paint" );
+ConVar reflect_paint_color( "reflect_paint_color", "0 255 0 255", FCVAR_REPLICATED, "Color for reflect paint" );
 ConVar portal_paint_color( "portal_paint_color", "128 128 128 255", FCVAR_REPLICATED, "Color for portal paint");
 ConVar erase_color( "erase_color", "0 0 0 0", FCVAR_REPLICATED, "Color for erase" );
 ConVar erase_visual_color( "erase_visual_color", "255 255 255 255", FCVAR_REPLICATED, "Color for erase that is rendered" );
@@ -31,6 +31,11 @@ int ComputeColorDiff( const Color& colorA, const Color& colorB )
 
 PaintPowerType MapColorToPower( const Color& color )
 {
+	// HACK: NO_POWER paint for some reason doesn't
+	// actually change the color, but rather the alpha.
+	if ( color.a() == 0 )
+		return NO_POWER;
+
 	int result = NO_POWER;
 
 	int minDiff = ComputeColorDiff( color, MapPowerToColor(NO_POWER) );
@@ -95,7 +100,7 @@ Color MapPowerToColor( int paintPowerType )
 	case SPEED_POWER:
 		return speed_paint_color.GetColor();
 	case REFLECT_POWER:
-		return speed_paint_color.GetColor();// FIXME: Bring this back for DLC2 reflect_paint_color.GetColor();
+		return reflect_paint_color.GetColor();
 	case PORTAL_POWER:
 		return portal_paint_color.GetColor();
 	default:

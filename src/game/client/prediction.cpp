@@ -1092,10 +1092,6 @@ void CPrediction::RunCommand( C_BasePlayer *player, CUserCmd *ucmd, IMoveHelper 
 	{
 		Assert( g_pGameMovement );
 
-#ifdef DEBUG
-		Msg("ProcessMovement????");
-#endif
-
 		g_pGameMovement->ProcessMovement( player, g_pMoveData );
 	}
 	else

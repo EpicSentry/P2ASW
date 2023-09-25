@@ -381,6 +381,9 @@ void CC_UpgradePotatoGun( void )
 {
 	CPortal_Player *pPlayer = ToPortalPlayer( UTIL_GetCommandClient() );
 
+	if (!pPlayer)
+		return;
+
 	CWeaponPortalgun *pPortalGun = static_cast<CWeaponPortalgun*>(pPlayer->Weapon_OwnsThisType("weapon_portalgun"));
 	if (pPortalGun)
 	{

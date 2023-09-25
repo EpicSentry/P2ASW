@@ -34,6 +34,7 @@ enum
 // Spawnflags for CTriggerPlayerMovement
 const int SF_TRIGGER_MOVE_AUTODISABLE				= 0x080;	// Disable auto movement
 const int SF_TRIGGER_AUTO_DUCK						= 0x800;	// Duck automatically
+const int SF_TRIGGER_AUTO_WALK						= 0x1000;	// Walk automatically
 
 
 #endif // TRIGGERS_SHARED_H

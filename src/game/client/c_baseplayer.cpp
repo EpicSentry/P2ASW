@@ -370,9 +370,9 @@ BEGIN_PREDICTION_DATA( C_BasePlayer )
 
 END_PREDICTION_DATA()
 
-
+#ifndef PORTAL2
 LINK_ENTITY_TO_CLASS( player, C_BasePlayer );
-
+#endif
 
 // -------------------------------------------------------------------------------- //
 // Functions.

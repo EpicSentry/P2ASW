@@ -459,11 +459,10 @@ CON_COMMAND_F( ent_create_paint_bomb_speed, "Creates a paint bomb with the speed
 	CreatePaintBomb( SPEED_POWER );
 }
 
-// FIXME: Bring this back for DLC2
-//CON_COMMAND_F( ent_create_paint_bomb_reflect, "Creates a paint bomb with the reflect paint paint power", FCVAR_CHEAT )
-//{
-//	CreatePaintBomb( REFLECT_POWER );
-//}
+CON_COMMAND_F( ent_create_paint_bomb_reflect, "Creates a paint bomb with the reflect paint paint power", FCVAR_CHEAT )
+{
+	CreatePaintBomb( REFLECT_POWER );
+}
 
 CON_COMMAND_F( ent_create_paint_bomb_portal, "Creates a paint bomb with the portal paint paint power", FCVAR_CHEAT )
 {

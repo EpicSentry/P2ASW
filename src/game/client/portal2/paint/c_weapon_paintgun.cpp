@@ -20,9 +20,8 @@ ConVar cl_erase_stream_color( "cl_erase_stream_color", "255 255 255 0", FCVAR_CH
 ConVar draw_paint_particle_stream( "draw_paint_particle_stream", "0", FCVAR_CHEAT );
 
 //extern ConVar sv_limit_paint;
-// FIXME: Bring this back for DLC2
-#define paintgun_blobs_per_second	40.f//extern ConVar paintgun_blobs_per_second;
-#define paintgun_ammo_type 0 //extern ConVar paintgun_ammo_type;
+extern ConVar paintgun_blobs_per_second;
+extern ConVar paintgun_ammo_type;
 
 
 static void ChangePaintColor( PaintPowerType power )
@@ -105,7 +104,7 @@ void C_WeaponPaintGun::Spawn( void )
 	BaseClass::Spawn();
 
 	m_flLastThinkTime = gpGlobals->curtime;
-	m_flAccumulatedTime = 1.0f/paintgun_blobs_per_second;
+	m_flAccumulatedTime = 1.0f/paintgun_blobs_per_second.GetFloat();
 	m_nBlobRandomSeed = 0;
 
 	SetNextThink( CLIENT_THINK_ALWAYS );
@@ -513,7 +512,7 @@ void C_WeaponPaintGun::CyclePaintPower( bool bForward )
 
 int C_WeaponPaintGun::GetPaintAmmo() const
 {
-	if( paintgun_ammo_type == 2 && m_nCurrentColor >= 0 && m_nCurrentColor < PAINT_POWER_TYPE_COUNT)
+	if( paintgun_ammo_type.GetInt() == 2 && m_nCurrentColor >= 0 && m_nCurrentColor < PAINT_POWER_TYPE_COUNT)
 	{
 		return m_PaintAmmoPerType[m_nCurrentColor];
 	}
@@ -533,7 +532,7 @@ static void NextPaint()
 		pPaintGun->CyclePaintPower( true );
 	}
 }
-// FIXME: Bring this back for DLC2
+
 static ConCommand nextpaint( "nextpaint", NextPaint );
 
 
@@ -549,7 +548,7 @@ static void PrevPaint()
 		pPaintGun->CyclePaintPower( false );
 	}
 }
-// FIXME: Bring this back for DLC2
+
 static ConCommand prevpaint( "prevpaint", PrevPaint );
 
 
@@ -579,5 +578,5 @@ static void ChangePaintTo( const CCommand& args )
 		ChangePaintColor( REFLECT_POWER );
 	}*/
 }
-// FIXME: Bring this back for DLC2
+
 static ConCommand changepaintto("changepaintto", ChangePaintTo );

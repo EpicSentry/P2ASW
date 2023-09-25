@@ -23,4 +23,19 @@ public:
 	bool	m_bClientSidePredicted;
 };
 
+class C_BaseVPhysicsTrigger : public C_BaseEntity
+{
+	DECLARE_CLASS( C_BaseVPhysicsTrigger , C_BaseEntity );
+	DECLARE_CLIENTCLASS();
+
+public:
+
+	//virtual bool PassesTriggerFilters(C_BaseEntity *pOther);
+
+protected:
+	bool						m_bDisabled;
+	string_t					m_iFilterName;
+	//CHandle<class C_BaseFilter>	m_hFilter; //CBaseFilter is not networked yet. Only really care about m_bDisabled for this first pass.
+};
+
 #endif // C_TRIGGERS_H
