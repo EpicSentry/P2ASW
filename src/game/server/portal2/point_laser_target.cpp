@@ -42,7 +42,7 @@ Vector vLaserCatcherExtents( 11.0, 11.0, 11.0 );    // CLaserCatcher default ext
 Vector vRelayExtents( 10.0, 10.0, 17.0 );           // CLaserRelay default extent
 
 //-----------------------------------------------------------------------------
-// Purpose: Extremely close to being done, just need to fix vector logic in the middle
+// Purpose: Functionally completely restored
 //-----------------------------------------------------------------------------
 void CPortalLaserTarget::Spawn()
 { // Line 48
