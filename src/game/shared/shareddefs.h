@@ -830,7 +830,11 @@ enum
 #ifdef GAME_HAS_NO_USE_KEY
 #define COMMENTARY_BUTTONS		(IN_ATTACK | IN_ATTACK2 | IN_USE)
 #else
-#define COMMENTARY_BUTTONS		(IN_USE)
+	#ifdef PORTAL2
+		#define COMMENTARY_BUTTONS	(IN_USE | IN_REMOTE_VIEW)
+	#else
+		#define COMMENTARY_BUTTONS	(IN_USE)
+	#endif
 #endif
 
 bool IsHeadTrackingEnabled();
@@ -897,6 +901,13 @@ enum Class_T
 	CLASS_COMBINE_HUNTER,
 
 	LAST_SHARED_ENTITY_CLASS,
+};
+
+
+enum ModelScaleType_t
+{
+	HIERARCHICAL_MODEL_SCALE,
+	NONHIERARCHICAL_MODEL_SCALE
 };
 
 // Factions

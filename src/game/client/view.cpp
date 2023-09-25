@@ -45,15 +45,16 @@
 #include "gameui.h"
 #endif
 #ifdef GAMEUI_EMBEDDED
-
-#if defined( SWARM_DLL )
+#if defined( PORTAL2 )
+//#include "gameui/basemodpanel.h"
 #include "swarm/gameui/swarm/basemodpanel.h"
+#elif defined( SWARM_DLL )
+#include "swarm/gameui/swarm/basemodpanel.h"
+#elif defined( CSTRIKE15 )
+#include "gameui/basemodpanel.h"
 #else
 #error "GAMEUI_EMBEDDED"
 #endif
-#endif
-#ifdef INFESTED_DLL
-#include "c_asw_marine.h"
 #endif
 
 #if defined( HL2_CLIENT_DLL ) || defined( INFESTED_DLL )

@@ -35,6 +35,10 @@
 #include "../common/xbox/xboxstubs.h"
 #endif
 
+#ifdef PORTAL2
+//#include "radialmenu.h"
+#endif
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -1084,6 +1088,11 @@ void CInput::JoyStickMove( float frametime, CUserCmd *cmd )
 
 	if ( !JoyStickActive() )
 		return;
+	
+#ifdef PORTAL2
+	//if ( IsRadialMenuOpen() )
+	//	return;
+#endif
 
 	int nSlot = GET_ACTIVE_SPLITSCREEN_SLOT();
 	PerUserInput_t &user = GetPerUser( nSlot );

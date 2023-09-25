@@ -336,6 +336,16 @@ PRECACHE_REGISTER_BEGIN( GLOBAL, ClientPrecache )
 
 	PRECACHE( GAMESOUND, "BaseEntity.EnterWater" )
 	PRECACHE( GAMESOUND, "BaseEntity.ExitWater" )
+	
+#ifdef PORTAL2
+	PRECACHE( GAMESOUND, "GameUI.UiCoopHudActivate" )
+	PRECACHE( GAMESOUND, "GameUI.UiCoopHudClick" )
+	PRECACHE( GAMESOUND, "GameUI.UiCoopHudClickLow" )
+	PRECACHE( GAMESOUND, "GameUI.UiCoopHudClickHigh" )
+	PRECACHE( GAMESOUND, "GameUI.UiCoopHudDeactivate" )
+	PRECACHE( GAMESOUND, "GameUI.UiCoopHudFocus" )
+	PRECACHE( GAMESOUND, "GameUI.UiCoopHudUnfocus" )
+#endif
 
 	// Game Instructor sounds
 	PRECACHE( GAMESOUND, "Instructor.LessonStart" )

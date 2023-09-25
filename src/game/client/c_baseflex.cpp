@@ -382,6 +382,13 @@ public:
 		if ( pFolder == NULL )
 		{
 			pFolder = "expressions";
+			
+#if defined( PORTAL2 )
+			if ( IsGameConsole() )
+			{
+				return false;
+			}
+#endif
 		}
 
 		char directory[ MAX_PATH ];

@@ -32,7 +32,9 @@
 #include "collisionutils.h"
 #include "toolframework/itoolframework.h"
 
-
+#ifdef PORTAL2
+#include "ai_criteria.h"
+#endif // PORTAL2
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -222,9 +224,10 @@ BEGIN_DATADESC( CBaseAnimating )
 	DEFINE_FIELD( m_flFrozenMax, FIELD_FLOAT ),
 
 	DEFINE_FIELD( m_fBoneCacheFlags, FIELD_SHORT ),
-	DEFINE_OUTPUT(m_OnFizzled, "OnFizzled"),
-
-
+	
+#ifdef PORTAL2
+	DEFINE_OUTPUT( m_OnFizzled, "OnFizzled" ),
+#endif // PORTAL2
 
 	END_DATADESC()
 
@@ -269,12 +272,16 @@ IMPLEMENT_SERVERCLASS_ST(CBaseAnimating, DT_BaseAnimating)
 	SendPropDataTable( "serveranimdata", 0, &REFERENCE_SEND_TABLE( DT_ServerAnimationData ), SendProxy_ClientSideAnimation ),
 
 	SendPropFloat( SENDINFO( m_flFrozen ) ),
+	
+	SendPropInt( SENDINFO( m_ScaleType ) ),
 
 END_SEND_TABLE()
 
 
 BEGIN_ENT_SCRIPTDESC( CBaseAnimating, CBaseEntity, "Animating models" )
-
+	#ifdef PORTAL2
+	DEFINE_SCRIPTFUNC( GetObjectScaleLevel, "The scale size of the entity" )
+	#endif // PORTAL2
 	DEFINE_SCRIPTFUNC( LookupAttachment, "Get the named attachement id"  )
 	DEFINE_SCRIPTFUNC_NAMED( ScriptGetAttachmentOrigin, "GetAttachmentOrigin", "Get the attachement id's origin vector"  )
 	DEFINE_SCRIPTFUNC_NAMED( ScriptGetAttachmentAngles, "GetAttachmentAngles", "Get the attachement id's angles as a p,y,r vector"  )
@@ -304,6 +311,12 @@ CBaseAnimating::CBaseAnimating()
 	SetGlobalFadeScale( 1.0f );
 	m_fBoneCacheFlags = 0;
 	
+#ifdef PORTAL2
+	m_nObjectScaleLevel = 0;	 // No scale
+	m_bCanBeCaptured = true;
+#endif // PORTAL2
+	
+	m_ScaleType = HIERARCHICAL_MODEL_SCALE;
 
 }
 
@@ -317,9 +330,10 @@ CBaseAnimating::~CBaseAnimating()
 
 void CBaseAnimating::Precache()
 {
-
+#if !defined( TF_DLL ) && !defined ( DOTA_DLL ) && !defined ( PORTAL2 )
 	// Anything derived from this class can potentially burn - true, but do we want it to!
 	PrecacheParticleSystem( "burning_character" );
+#endif
 	
 #ifdef PORTAL2
 	PrecacheScriptSound( "Prop.Fizzled" );
@@ -336,8 +350,18 @@ void CBaseAnimating::Activate()
 	BaseClass::Activate();
 	SetLightingOrigin( m_iszLightingOrigin );
 	SetLightingOriginRelative( m_iszLightingOriginRelative );
+	
+#if defined ( PORTAL2 )
+	// Scaled physics objects (re)create their physics here
+	if ( GetObjectScaleLevel() != 0 && VPhysicsGetObject() )
+	{	
+		// sanity check to make sure 'm_flModelScale' is in sync with the 
+		// mod specific 'm_nObjectScaleLevel' member.
+		Assert( m_flModelScale > 0.0f && m_flModelScale != 1.0f );
 
-
+		// UTIL_CreateScaledPhysObject( this, m_flModelScale );
+	}
+#endif // PORTAL2 
 }
 
 
@@ -1018,12 +1042,12 @@ float CBaseAnimating::GetSequenceGroundSpeed( CStudioHdr *pStudioHdr, int iSeque
 
 	if (t > 0)
 	{
-#if defined( INFESTED )
+#if defined( PORTAL2 ) || defined( INFESTED )
 		float flBaseSpeed = GetSequenceMoveDist( pStudioHdr, iSequence ) / t;
-		return flBaseSpeed * GetModelScale() * GetPlaybackRate();
+		return flBaseSpeed * GetModelHierarchyScale() * GetPlaybackRate();
 #else
 		return GetSequenceMoveDist( pStudioHdr, iSequence ) / t;
-#endif // INFESTED
+#endif // PORTAL2 or INFESTED
 	}
 	else
 	{
@@ -3598,6 +3622,22 @@ float CBaseAnimating::GetModelScale() const
 	return m_flModelScale;
 }
 
+float CBaseAnimating::GetModelHierarchyScale()
+{
+	CStudioHdr* pHdr = GetModelPtr();
+	return ( GetModelScaleType() == HIERARCHICAL_MODEL_SCALE || (pHdr && pHdr->numbones() == 1) ) ? m_flModelScale : 1.0f;
+}
+
+ModelScaleType_t CBaseAnimating::GetModelScaleType() const
+{
+	return m_ScaleType;
+}
+
+void CBaseAnimating::SetModelScaleType( ModelScaleType_t scaleType )
+{
+	m_ScaleType = scaleType;
+}
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void CBaseAnimating::Ignite( float flFlameLifetime, bool bNPCOnly, float flSize, bool bCalledByLevelDesigner )
@@ -4014,9 +4054,9 @@ bool CBaseAnimating::IsSequenceLooping( CStudioHdr *pStudioHdr, int iSequence )
 	return (::GetSequenceFlags( pStudioHdr, iSequence ) & STUDIO_LOOPING) != 0;
 }
 
-void CBaseAnimating::OnFizzled(void)
+#ifdef	PORTAL2
+void CBaseAnimating::OnFizzled( void )
 {
-	m_OnFizzled.FireOutput(this, this);
+	m_OnFizzled.FireOutput( this, this );
 }
-
-
+#endif // PORTAL2

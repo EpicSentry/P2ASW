@@ -27,6 +27,11 @@
 #include "clientalphaproperty.h"
 #include "con_nprint.h"
 #include "collisionutils.h"
+
+#ifdef PORTAL
+#include "portalrender.h"
+#endif
+
 //#include "tier0/miniprofiler.h" 
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -1821,11 +1826,17 @@ int CClientLeafSystem::ExtractStaticProps( int nCount, RenderableInfo_t **ppRend
 //-----------------------------------------------------------------------------
 int CClientLeafSystem::ExtractSplitscreenRenderables( int nCount, RenderableInfo_t **ppRenderables )
 {
+#ifdef PORTAL2
+	// Ignore splitscreen culling when looking through a portal
+	if ( g_pPortalRender->GetViewRecursionLevel() > 0 )
+		return nCount;
+#else
 	if ( !IsSplitScreenSupported() )
 		return nCount;
 
 	if ( !engine->IsSplitScreenActive() )
 		return nCount;
+#endif
 
 	ASSERT_LOCAL_PLAYER_RESOLVABLE();
 	int nSlotMask = 1 << GET_ACTIVE_SPLITSCREEN_SLOT();

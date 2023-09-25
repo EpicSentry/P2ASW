@@ -2888,16 +2888,6 @@ bool C_BasePlayer::IsSplitScreenPlayer() const
 
 bool C_BasePlayer::ShouldRegenerateOriginFromCellBits() const
 {
-#if 0
-	// Don't use cell bits for local players.
-	// Assumes full update for local players!
-	int nSlot = GET_ACTIVE_SPLITSCREEN_SLOT();
-	int nIndex = engine->GetSplitScreenPlayer( nSlot );
-	if ( nIndex == entindex() )
-		return false;
-
-	return BaseClass::ShouldRegenerateOriginFromCellBits();
-#else
 	// Don't use cell bits for local players
 	if ( 
 #ifdef PORTAL2
@@ -2932,7 +2922,6 @@ bool C_BasePlayer::ShouldRegenerateOriginFromCellBits() const
 	}*/
 
 	return BaseClass::ShouldRegenerateOriginFromCellBits();
-#endif
 }
 
 

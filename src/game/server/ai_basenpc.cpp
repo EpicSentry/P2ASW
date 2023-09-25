@@ -3017,7 +3017,7 @@ bool CAI_BaseNPC::PreThink( void )
 	//
 	// Don't do this if the convar wants it hidden
 	// ----------------------------------------------------------
-
+#ifndef PORTAL2
 	if ( (CAI_BaseNPC::m_nDebugBits & bits_debugDisableAI || !g_pAINetworkManager->NetworksLoaded()) )
 	{
 		if ( gpGlobals->curtime >= g_AINextDisabledMessageTime && !IsInCommentaryMode() )
@@ -3046,7 +3046,7 @@ bool CAI_BaseNPC::PreThink( void )
 		SetActivity( ACT_IDLE );
 		return false;
 	}
-
+#endif // !PORTAL2
 
 	// --------------------------------------------------------
 	//	If debug stepping

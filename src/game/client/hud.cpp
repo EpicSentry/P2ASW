@@ -1091,9 +1091,11 @@ void CHudIcons::Init()
 
 	LoadHudTextures( textureList, "scripts/instructor_textures", NULL );
 	LoadHudTextures( textureList, "scripts/instructor_modtextures", NULL );
-
-
-
+	
+#ifdef PORTAL2
+	LoadHudTextures( textureList, "scripts/signifier_textures", NULL );
+#endif
+	// PORTAL2
 
 	int c = textureList.Count();
 	for ( int index = 0; index < c; index++ )

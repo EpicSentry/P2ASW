@@ -22,9 +22,14 @@
 #include <limits.h>
 #include "weapon_proficiency.h"
 
-
+#if defined( PORTAL2 )
 // HACK, Should come from game specific enum...
+#include "weapons_portal.h"
+#elif defined( CSTRIKE_DLL )
+#include "cs_weapon_parse.h"
+#else
 #define WEAPON_MAX 32   
+#endif
 
 
 class CScriptedTarget;
@@ -336,7 +341,9 @@ public:
 
 	// VPHYSICS
 	virtual void			VPhysicsShadowCollision( int index, gamevcollisionevent_t *pEvent );
+#if !defined( PORTAL2 )
 	virtual void			VPhysicsUpdate( IPhysicsObject *pPhysics );
+#endif
 	float					CalculatePhysicsStressDamage( vphysics_objectstress_t *pStressOut, IPhysicsObject *pPhysics );
 	void					ApplyStressDamage( IPhysicsObject *pPhysics, bool bRequireLargeObject );
 

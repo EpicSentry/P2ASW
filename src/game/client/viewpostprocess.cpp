@@ -20,8 +20,12 @@
 #include "ProxyEntity.h"
 #include "imaterialproxydict.h"
 #include "model_types.h"
+#include "bitmap/tgawriter.h"
+#include "filesystem.h"
 
-
+#ifdef PORTAL2
+#include "c_portal_player.h"
+#endif
 
 // NOTE: This has to be the last file included!
 #include "tier0/memdbgon.h"
@@ -1324,8 +1328,20 @@ void CEnginePostMaterialProxy::OnBind( C_BaseEntity *pEnt )
 
 	if ( m_pMaterialParam_FilmGrainStrength )
 		m_pMaterialParam_FilmGrainStrength->SetFloatValue( s_LocalPostProcessParameters[ nSplitScreenSlot ].m_flParameters[ PPPN_FILM_GRAIN_STRENGTH ] );
+	
+	#ifdef PORTAL2
+	const C_Portal_Player* pLocalPlayer = C_Portal_Player::GetLocalPortalPlayer();
+	const bool bScreenSpacePaintEffectIsActive = pLocalPlayer && pLocalPlayer->ScreenSpacePaintEffectIsActive();
+	if ( m_pMaterialParam_VomitEnable )
+	{
+		m_pMaterialParam_VomitEnable->SetIntValue( bScreenSpacePaintEffectIsActive ? 1 : 0 );
+	}
 
-
+	if ( bScreenSpacePaintEffectIsActive && m_pMaterialParam_VomitColor1 && m_pMaterialParam_VomitColor2 )
+	{
+		pLocalPlayer->SetScreenSpacePaintEffectColors( m_pMaterialParam_VomitColor1, m_pMaterialParam_VomitColor2 );
+	}
+	#endif
 
 	if ( m_pMaterialParam_FadeType )
 	{
@@ -1859,8 +1875,18 @@ void DoEnginePostProcessing( int x, int y, int w, int h, bool bFlashlightIsOn, b
 		{
 			Generate8BitBloomTexture( pRenderContext, x, y, w, h, true, false );
 		}
-
-
+		
+		#ifdef PORTAL2
+		// Note: the C_Portal_Player::RenderScreenSpaceEffect() call must stay right after
+		// Generate8BitBloomTexture(), because on the 360 it relies on the contents of the low-res blur buffer
+		// staying in EDRAM unaltered between the two calls. (Screenspace paint uses RGB channels, local contrast
+		// uses A of the low-res render target). Or at least this is roughly what the comment said for L4D when I
+		// acquired the Boomer vomit particle system by way of my actions.
+		// -Ted
+		C_Portal_Player::RenderLocalScreenSpaceEffect( PAINT_SCREEN_SPACE_EFFECT, pRenderContext, x, y, w, h );
+		#else if CSTRIKE15
+		C_CSPlayer::RenderLocalScreenSpaceEffect( AR_LEADER_SCREEN_SPACE_EFFECT, pRenderContext, x, y, w, h );
+		#endif
 
 
 		// Now add bloom (dest_rt0) to the framebuffer and perform software anti-aliasing and
@@ -2052,8 +2078,13 @@ EXPOSE_MATERIAL_PROXY( CMotionBlurMaterialProxy, MotionBlur );
 //=====================================================================================================================
 ConVar mat_motion_blur_enabled( "mat_motion_blur_enabled", "1" );
 
+#ifdef PORTAL2
+ConVar mat_motion_blur_forward_enabled( "mat_motion_blur_forward_enabled", "1" );
+ConVar mat_motion_blur_falling_min( "mat_motion_blur_falling_min", "8.0" );
+#else
 ConVar mat_motion_blur_forward_enabled( "mat_motion_blur_forward_enabled", "0" );
 ConVar mat_motion_blur_falling_min( "mat_motion_blur_falling_min", "10.0" );
+#endif
 
 ConVar mat_motion_blur_falling_max( "mat_motion_blur_falling_max", "20.0" );
 ConVar mat_motion_blur_falling_intensity( "mat_motion_blur_falling_intensity", "1.0" );
@@ -2084,7 +2115,11 @@ struct MotionBlurHistory_t
 
 void DoImageSpaceMotionBlur( const CViewSetup &view )
 {
-
+#ifdef PORTAL2
+	// DEMO HACKS!!!
+	if( gpGlobals->maxClients == 2 )
+		return;
+#endif
 
 	if ( ( !mat_motion_blur_enabled.GetInt() ) || ( view.m_nMotionBlurMode == MOTION_BLUR_DISABLE ) )
 	{
@@ -2156,8 +2191,48 @@ void DoImageSpaceMotionBlur( const CViewSetup &view )
 		{
 			flTimeElapsed = gpGlobals->realtime - history.m_flLastTimeUpdate;
 		}
+				
+#ifdef PORTAL2
+		float flCurrentPitch = view.angles[PITCH];
+		float flCurrentYaw = view.angles[YAW];
+		CPortal_Player *pPortalPlayer = ToPortalPlayer( C_BasePlayer::GetLocalPlayer() );
+		if ( pPortalPlayer )
+		{
+			Vector vUp = pPortalPlayer->GetPortalPlayerLocalData().m_Up;
 
+			// compute flCurrentPitch by getting angle between forward vector and up vector
+			matrix3x4_t mCurrentBasisVectors;
+			AngleMatrix( view.angles, mCurrentBasisVectors );
+			Vector vCurrentForward( mCurrentBasisVectors[0][0], mCurrentBasisVectors[1][0], mCurrentBasisVectors[2][0] );
+			Vector vCurrentRight(  mCurrentBasisVectors[0][1], mCurrentBasisVectors[1][1], mCurrentBasisVectors[2][1] );
+			AngleVectors( view.angles, &vCurrentForward );
+			flCurrentPitch = RAD2DEG( acosf( DotProduct( vUp, vCurrentForward ) ) ) - 90.f;
 
+			// compute flCurrentYaw by accumulating the offset
+			Vector vOldRight( history.m_mPreviousFrameBasisVectors[0][1], history.m_mPreviousFrameBasisVectors[1][1], history.m_mPreviousFrameBasisVectors[2][1] );
+			float flDot = DotProduct( vCurrentRight, vOldRight );
+			flDot = clamp( flDot, -1.f, 1.f );
+			if ( vCurrentRight == vOldRight )
+				flDot = 1.f;
+			float flAcos = acosf( flDot );
+
+			Vector vCross = CrossProduct( vCurrentRight, vOldRight );
+			float flSign = -clamp( DotProduct( vCross, vUp ), -1.f, 1.f );
+			float flYawOffset = Sign( flSign ) * RAD2DEG( flAcos );			
+			flCurrentYaw = history.m_flPreviousYaw + flYawOffset;
+		}
+
+		// wrap pitch and yaw to +-180
+		while ( flCurrentPitch > 180.0f )
+			flCurrentPitch -= 360.0f;
+		while ( flCurrentPitch < -180.0f )
+			flCurrentPitch += 360.0f;
+
+		while ( flCurrentYaw > 180.0f )
+			flCurrentYaw -= 360.0f;
+		while ( flCurrentYaw < -180.0f )
+			flCurrentYaw += 360.0f;
+#else
 		//===================================//
 		// Get current pitch & wrap to +-180 //
 		//===================================//
@@ -2179,8 +2254,8 @@ void DoImageSpaceMotionBlur( const CViewSetup &view )
 			flCurrentYaw -= 360.0f;
 		while ( flCurrentYaw < -180.0f )
 			flCurrentYaw += 360.0f;
-
-
+#endif
+		
 
 		/*engine->Con_NPrintf( 0, "Blur Pitch: %6.2f   Yaw: %6.2f", flCurrentPitch, flCurrentYaw );
 		engine->Con_NPrintf( 1, "Blur FOV: %6.2f   Aspect: %6.2f   Ortho: %s", view.fov, view.m_flAspectRatio, view.m_bOrtho ? "Yes" : "No" );
@@ -2412,6 +2487,14 @@ void DoImageSpaceMotionBlur( const CViewSetup &view )
 	}
 
 	//engine->Con_NPrintf( 6, "Final values: { %6.2f%%, %6.2f%%, %6.2f%%, %6.2f%% }", g_vMotionBlurValues[0]*100.0f, g_vMotionBlurValues[1]*100.0f, g_vMotionBlurValues[2]*100.0f, g_vMotionBlurValues[3]*100.0f );
+	
+#if defined ( PORTAL2 )
+	C_Portal_Player* pLocalPlayer = C_Portal_Player::GetLocalPortalPlayer( GET_ACTIVE_SPLITSCREEN_SLOT() );
+	if ( pLocalPlayer && pLocalPlayer->GetMotionBlurAmount() > 0.0f )
+	{
+		g_vMotionBlurValues[2] = pLocalPlayer->GetMotionBlurAmount();
+	}
+#endif
 
 	//==========================================//
 	// Set global g_vMotionBlurViewportValues[] //

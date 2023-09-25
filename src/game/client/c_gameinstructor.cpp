@@ -13,6 +13,7 @@
 #include "ixboxsystem.h"
 #include "tier0/icommandline.h"
 #include "iclientmode.h"
+#include "matchmaking/imatchframework.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -92,8 +93,104 @@ void SVGameInstructorDisable_ChangeCallback( IConVar *var, const char *pOldValue
 }
 
 
+void GameInstructor_KeyValueBuilder( KeyValues *pKeyValues )
+{
+	//GetGameInstructor().KeyValueBuilder( pKeyValues );
+}
 
 
+// Merged from L4D but waiting on other code to be merged before this can compile 
+class CGameInstructorUserNotificationsListener : public IMatchEventsSink
+{
+public:
+	CGameInstructorUserNotificationsListener() : m_nRefCount( 0 ) {}
+
+public:
+	void RefCount( int nDelta );
+
+public:
+	virtual void OnEvent( KeyValues *pEvent );
+
+protected:
+	void OnGameUsersChanged();
+	void OnStorageDeviceAvailable( int iCtrlr );
+
+protected:
+	int m_nRefCount;
+};
+
+void CGameInstructorUserNotificationsListener::RefCount( int nDelta )
+{
+	if ( !g_pMatchFramework )
+		return;
+
+	if ( m_nRefCount <= 0 && nDelta > 0 )
+	{
+		g_pMatchFramework->GetEventsSubscription()->Subscribe( this );
+	}
+
+	if ( m_nRefCount > 0 && m_nRefCount - nDelta <= 0 )
+	{
+		g_pMatchFramework->GetEventsSubscription()->Unsubscribe( this );
+	}
+
+	m_nRefCount = MAX( 0, m_nRefCount + nDelta );
+}
+
+void CGameInstructorUserNotificationsListener::OnEvent( KeyValues *pEvent )
+{
+	char const *szEvent = pEvent->GetName();
+
+	if ( !Q_stricmp( szEvent, "OnProfileDataLoaded" ) )
+	{
+		OnStorageDeviceAvailable( pEvent->GetInt( "iController" ) );
+	}
+	else if ( !Q_stricmp( szEvent, "OnProfilesChanged" ) )
+	{
+		OnGameUsersChanged();
+	}
+}
+
+void CGameInstructorUserNotificationsListener::OnGameUsersChanged()
+{
+	for ( int i = 0 ; i < MAX_SPLITSCREEN_PLAYERS; ++i )
+	{
+		ACTIVE_SPLITSCREEN_PLAYER_GUARD( i );
+		GetGameInstructor().ResetDisplaysAndSuccesses();
+	}
+}
+
+void CGameInstructorUserNotificationsListener::OnStorageDeviceAvailable( int iCtrlr )
+{
+#ifdef _GAMECONSOLE
+	if ( iCtrlr < 0 || iCtrlr >= XUSER_MAX_COUNT )
+		return;
+
+	int iSlot = XBX_GetSlotByUserId( iCtrlr );
+
+	if ( iSlot < 0 || iSlot >= MAX_SPLITSCREEN_PLAYERS )
+		return;
+#elif !defined( SPLIT_SCREEN_STUBS )
+	int iSlot = iCtrlr;
+#endif
+
+	ACTIVE_SPLITSCREEN_PLAYER_GUARD( iSlot );
+	GetGameInstructor().RefreshDisplaysAndSuccesses();
+}
+
+CGameInstructorUserNotificationsListener s_GameInstructorUserNotificationsListener;
+
+void GameInstructor_Init()
+{
+	// Subscribe for match events
+	s_GameInstructorUserNotificationsListener.RefCount( +1 );
+}
+
+void GameInstructor_Shutdown()
+{
+	// Unsubscribe for match events
+	s_GameInstructorUserNotificationsListener.RefCount( -1 );
+}
 
 //
 // C_GameInstructor

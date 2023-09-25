@@ -3077,11 +3077,14 @@ int CBaseCombatCharacter::GiveAmmo( int iCount, const char *szName, bool bSuppre
 
 
 ConVar	phys_stressbodyweights( "phys_stressbodyweights", "5.0" );
+// disabled stress damage to save CPU, none of the NPCs really use it and the player has a different codepath
+#if !defined( PORTAL2 )
 void CBaseCombatCharacter::VPhysicsUpdate( IPhysicsObject *pPhysics )
 {
 	ApplyStressDamage( pPhysics, false );
 	BaseClass::VPhysicsUpdate( pPhysics );
 }
+#endif
 
 float CBaseCombatCharacter::CalculatePhysicsStressDamage( vphysics_objectstress_t *pStressOut, IPhysicsObject *pPhysics )
 {

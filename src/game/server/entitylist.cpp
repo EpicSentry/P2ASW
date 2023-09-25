@@ -19,7 +19,10 @@
 #include "datacache/imdlcache.h"
 #include "tier1/utlhash.h"
 
-
+#ifdef PORTAL2
+#include "team.h"
+#include "portal_mp_gamerules.h"
+#endif // PORTAL2
 
 #ifdef HL2_DLL
 #include "npc_playercompanion.h"
@@ -679,6 +682,38 @@ CBaseEntity *CGlobalEntityList::FindEntityProcedural( const char *szName, CBaseE
 		{
 			return pSearchingEntity;
 		}
+#ifdef PORTAL2
+		else if ( FStrEq( pName, "player_orange" ) )
+		{
+			CTeam *pTeam = GetGlobalTeam( TEAM_RED );
+			Assert( pTeam );
+			if ( pTeam == NULL )
+				return NULL;
+
+			for ( int i = 0; i < pTeam->GetNumPlayers(); i++ )
+			{
+				if ( pTeam->GetPlayer( i ) != NULL )
+				{
+					return (CBaseEntity *) pTeam->GetPlayer( i );
+				}
+			}
+		}
+		else if ( FStrEq( pName, "player_blue" ) )
+		{
+			CTeam *pTeam = GetGlobalTeam( TEAM_BLUE );
+			Assert( pTeam );
+			if ( pTeam == NULL )
+				return NULL;
+
+			for ( int i = 0; i < pTeam->GetNumPlayers(); i++ )
+			{
+				if ( pTeam->GetPlayer( i ) != NULL )
+				{
+					return (CBaseEntity *) pTeam->GetPlayer( i );
+				}
+			}
+		}
+#endif // PORTAL2
 
 		else 
 		{

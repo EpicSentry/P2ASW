@@ -2690,7 +2690,10 @@ void PhysFrictionSound(CBaseEntity *pEntity, IPhysicsObject *pObject, const char
 {
 	if (!pEntity)
 		return;
-
+#if defined ( PORTAL2 )
+	if ( ( pObject->GetGameFlags() & FVPHYSICS_PLAYER_HELD ) )  
+		return;
+#endif
 	// cut out the quiet sounds
 	// UNDONE: Separate threshold for starting a sound vs. continuing?
 	flVolume = clamp(flVolume, 0.0f, 1.0f);

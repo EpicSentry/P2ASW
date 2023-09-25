@@ -1659,8 +1659,10 @@ hinttypedescs_t g_pszHintDescriptions[] =
 	{	HINT_PLAYER_ALLY_MOVE_AWAY_DEST, "Ally MoveAway Point"	},
 
 	{	HINT_CSTRIKE_HOSTAGE_ESCAPE, "CS Port: Hostage Escape"	},
-
-
+		
+#ifdef PORTAL2
+	{	HINT_PORTAL2_NEST, "Portal 2: Nest"	},
+#endif // PORTAL2
 };
 
 //-----------------------------------------------------------------------------

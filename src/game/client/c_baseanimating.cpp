@@ -183,6 +183,7 @@ IMPLEMENT_CLIENTCLASS_DT(C_BaseAnimating, DT_BaseAnimating, CBaseAnimating)
 	RecvPropDataTable( "serveranimdata", 0, 0, &REFERENCE_RECV_TABLE( DT_ServerAnimationData ) ),
 
 	RecvPropFloat( RECVINFO( m_flFrozen ) ), 
+	RecvPropInt( RECVINFO( m_ScaleType ) ),
 
 END_RECV_TABLE()
 
@@ -692,6 +693,7 @@ C_BaseAnimating::C_BaseAnimating() :
 	m_vecForce.Init();
 	m_nForceBone = -1;
 	SetGlobalFadeScale( 1.0f );
+	m_ScaleType = HIERARCHICAL_MODEL_SCALE;
 
 	m_ClientSideAnimationListHandle = INVALID_CLIENTSIDEANIMATION_LIST_HANDLE;
 
@@ -1596,6 +1598,30 @@ void C_BaseAnimating::BuildTransformations( CStudioHdr *hdr, Vector *pos, Quater
 		{
 			// Apply client-side effects to the transformation matrix
 			ApplyBoneMatrixTransform( GetBoneForWrite( i ) );
+		}
+	}
+	
+	// If a nonhierarchical scale is being applied
+	const float scale = GetModelScale();
+	if( GetModelScaleType() == NONHIERARCHICAL_MODEL_SCALE &&
+		scale > 1.0f+FLT_EPSILON || scale < 1.0f-FLT_EPSILON )
+	{
+		for( int i = 0; i < hdr->numbones(); ++i ) 
+		{
+			// Only update bones reference by the bone mask.
+			if( !( hdr->boneFlags(i) & boneMask ) )
+				continue;
+
+			if( m_pBoneMergeCache && m_pBoneMergeCache->IsBoneMerged(i) )
+				continue;
+
+			PREFETCH360( &GetBoneForWrite(i), 0 );
+
+			matrix3x4_t& transform = GetBoneForWrite(i);
+
+			VectorScale( transform[0], scale, transform[0] );
+			VectorScale( transform[1], scale, transform[1] );
+			VectorScale( transform[2], scale, transform[2] );
 		}
 	}
 }
@@ -5033,7 +5059,7 @@ C_BaseAnimating *C_BaseAnimating::CreateRagdollCopy()
 
 	pRagdoll->SetModelName( AllocPooledString(pModelName) );
 	pRagdoll->CopySequenceTransitions(this);
-	pRagdoll->SetModelScale( this->GetModelScale() );
+	pRagdoll->SetModelScale( this->GetModelScale(), this->GetModelScaleType() );
 	return pRagdoll;
 }
 
@@ -6504,13 +6530,32 @@ bool C_BaseAnimating::ComputeEntitySpaceHitboxSurroundingBox( Vector *pVecWorldM
 // Purpose: 
 // Input  : scale - 
 //-----------------------------------------------------------------------------
-void C_BaseAnimating::SetModelScale( float scale )
+void C_BaseAnimating::SetModelScale( float scale, ModelScaleType_t scaleType /*= HIERARCHICAL_MODEL_SCALE*/ )
 {
-	if ( m_flModelScale != scale )
+	if ( m_flModelScale != scale || scaleType != m_ScaleType )
 	{
 		m_flModelScale = scale;
+		SetModelScaleType( scaleType );
 		InvalidatePhysicsRecursive( BOUNDS_CHANGED );
 	}
+}
+
+float C_BaseAnimating::GetModelHierarchyScale() const
+{
+	if ( GetModelScaleType() == HIERARCHICAL_MODEL_SCALE )
+		return m_flModelScale;
+	CStudioHdr* pHdr = GetModelPtr();
+	return ( pHdr && pHdr->numbones() == 1 ) ? m_flModelScale : 1.0f;
+}
+
+ModelScaleType_t C_BaseAnimating::GetModelScaleType() const
+{
+	return m_ScaleType;
+}
+
+void C_BaseAnimating::SetModelScaleType( ModelScaleType_t scaleType )
+{
+	m_ScaleType = scaleType;
 }
 
 //-----------------------------------------------------------------------------

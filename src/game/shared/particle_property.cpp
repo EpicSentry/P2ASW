@@ -579,11 +579,14 @@ void CParticleProperty::UpdateControlPoint( ParticleEffectList_t *pEffect, int i
 						bValid = true;
 						MatrixVectors( attachmentToWorld, &vecForward, &vecRight, &vecUp );
 						MatrixPosition( attachmentToWorld, vecOrigin );
-
+						
+#ifndef PORTAL2 
+						// This is breaking in Portal
 						if ( pEffect->pParticleEffect->m_pDef->IsViewModelEffect() )
 						{
 							FormatViewModelAttachment( pPlayer, vecOrigin, true );
 						}
+#endif
 					}
 				}
 				else

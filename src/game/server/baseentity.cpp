@@ -72,6 +72,10 @@
 #include "sendprop_priorities.h"
 #include "videocfg/videocfg.h"
 
+#if defined ( PORTAL2 )
+#include "PortalSimulation.h"
+#endif
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -1467,6 +1471,13 @@ int CBaseEntity::DrawDebugTextOverlays(void)
 		Q_snprintf(tempstr, sizeof(tempstr), "Effects :%d (EF_NODRAW=%d)", GetEffects(), GetEffects() & EF_NODRAW );
 		EntityText(offset,tempstr,0);
 		offset++;
+
+#if defined ( PORTAL2 )
+		Q_snprintf(tempstr, sizeof(tempstr), "In Portal Environment: %s", (CPortalSimulator::GetSimulatorThatOwnsEntity(this))?("yes"):("no") );
+		EntityText(offset,tempstr,0);
+		offset++;
+#endif
+
 	}
 
 	if (m_debugOverlays & OVERLAY_VIEWOFFSET)
@@ -1787,8 +1798,10 @@ void CBaseEntity::Activate( void )
 	{
 		AddContext( m_iszResponseContext.ToCStr() );
 	}
-
-
+	
+#if defined ( PORTAL2 )
+	UpdateObjectCapsCache();
+#endif
 }
 
 ////////////////////////////  old CBaseEntity stuff ///////////////////////////////////
@@ -8127,13 +8140,16 @@ bool CBaseEntity::SUB_AllowedToFade( void )
 		if( VPhysicsGetObject()->GetGameFlags() & FVPHYSICS_PLAYER_HELD || GetEFlags() & EFL_IS_BEING_LIFTED_BY_BARNACLE )
 			return false;
 	}
+	
+	// only keep fading things active on the high end
+#if !defined( PORTAL2 )
+	if ( !IsGameConsole() )
+	{
+		CBasePlayer *pPlayer = ( AI_IsSinglePlayer() ) ? UTIL_GetLocalPlayer() : NULL;
 
-	// on Xbox, allow these to fade out
-#ifndef _XBOX
-	CBasePlayer *pPlayer = ( AI_IsSinglePlayer() ) ? UTIL_GetLocalPlayer() : NULL;
-
-	if ( pPlayer && pPlayer->FInViewCone( this ) )
-		return false;
+		if ( pPlayer && pPlayer->FInViewCone( this ) )
+			return false;
+	}
 #endif
 
 	return true;

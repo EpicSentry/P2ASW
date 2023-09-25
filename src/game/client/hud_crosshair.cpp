@@ -14,9 +14,10 @@
 #include "vgui/ISurface.h"
 #include "IVRenderView.h"
 
-#ifdef PORTAL
+#ifdef PORTAL2
+#include "ivieweffects.h"
 #include "c_portal_player.h"
-#endif // PORTAL
+#endif // PORTAL2
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -190,8 +191,14 @@ void CHudCrosshair::Paint( void )
 
 	x += 0.5f * screen[0] * ScreenWidth() + 0.5f;
 	y += 0.5f * screen[1] * ScreenHeight() + 0.5f;
-
-
+	
+#ifdef PORTAL2
+	// Find any full-screen fades
+	byte color[4];
+	bool blend;
+	GetViewEffects()->GetFadeParams( &color[0], &color[1], &color[2], &color[3], &blend );
+	m_clrCrosshair[3] = SimpleSplineRemapValClamped( color[3], 0, 64, 255, 0 );
+#endif // PORTAL2
 
 	m_pCrosshair->DrawSelf( 
 			x - 0.5f * m_pCrosshair->Width(), 

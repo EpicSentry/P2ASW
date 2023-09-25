@@ -20,6 +20,10 @@
 #include "vehicle_choreo_generic_shared.h"
 #include "ai_utils.h"
 
+#if defined ( PORTAL2 )
+#include "portal_player.h"
+#endif
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -419,6 +423,26 @@ void CPropVehicleChoreoGeneric::Think(void)
 		{
 			GetServerVehicle()->HandleEntryExitFinish( m_bExitAnimOn, true );
 		}
+		
+#if defined ( PORTAL2 )
+		// Hack (possibily temp?) for finale... Make sure the player's body follows somewhat closely to the eye point animation
+		// so their shoot position doesn't come from across the world.
+		// This could be cleaned up and made an option on a keyvalue if we dont end up solving it a different way.. checking in dirty because we want to this very soon.
+		CBaseAnimating *pAnimating = dynamic_cast<CBaseAnimating *>(GetServerVehicle()->GetVehicleEnt());
+		if ( pAnimating )
+		{
+			Vector vSeatOrigin;
+			QAngle qSeatAngles;
+			if ( GetDriver() && pAnimating->GetAttachment( "vehicle_feet_passenger0", vSeatOrigin, qSeatAngles ) )
+			{
+				// Set us to that position
+				CBaseEntity* pDriver = GetDriver();
+				pDriver->SetAbsOrigin( vSeatOrigin );
+				pDriver->SetAbsAngles( qSeatAngles );
+			}
+
+		}
+#endif
 	}
 
 	StudioFrameAdvance();
@@ -610,6 +634,14 @@ void CPropVehicleChoreoGeneric::EnterVehicle( CBaseCombatCharacter *pPassenger )
 
 		m_hPlayer = pPlayer;
 		m_playerOn.FireOutput( pPlayer, this, 0 );
+		
+#if defined ( PORTAL2 )
+		CPortal_Player *pPortalPlayer = ToPortalPlayer( pPlayer );
+		if ( pPortalPlayer && pPortalPlayer->IsZoomed() )
+		{
+			pPortalPlayer->ZoomOut();
+		}
+#endif
 
 		m_ServerVehicle.SoundStart();
 	}

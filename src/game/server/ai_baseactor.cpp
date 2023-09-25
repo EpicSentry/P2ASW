@@ -1469,8 +1469,11 @@ void CAI_BaseActor::StartTaskRangeAttack1( const Task_t *pTask )
 // hardcode the default rr_remarkables_enabled value for now because I don't know what
 // the current state of unhackable config files is. Should be fixed.
 // (TODO)
-
+#if defined ( PORTAL2 ) || defined ( CSTRIKE15 )
+#define AI_REMARKABLES_ENABLED_DEFAULT "1"
+#else 
 #define AI_REMARKABLES_ENABLED_DEFAULT "0"
+#endif
 
 
 ConVar rr_remarkable_world_entities_replay_limit( "rr_remarkable_world_entities_replay_limit", "1", FCVAR_CHEAT, "TLK_REMARKs will be dispatched no more than this many times for any given info_remarkable" );

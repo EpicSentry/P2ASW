@@ -12,10 +12,10 @@
 #include "tier0/memdbgon.h"
 
 // some cvars used by player movement system
-#if defined(HL2_DLL) || defined(HL2_CLIENT_DLL)
-#define DEFAULT_GRAVITY_STRING	"800"
-#else
+#if defined(HL2_DLL) || defined(HL2_CLIENT_DLL) || defined(PORTAL2)
 #define DEFAULT_GRAVITY_STRING	"600"
+#else
+#define DEFAULT_GRAVITY_STRING	"800"
 #endif
 
 ConVar	sv_gravity		( "sv_gravity",DEFAULT_GRAVITY_STRING, FCVAR_NOTIFY | FCVAR_REPLICATED, "World gravity." );

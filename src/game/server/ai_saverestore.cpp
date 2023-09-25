@@ -154,8 +154,8 @@ public:
 			
 			pRestore->EndBlock();
 		}
-		
 
+#ifndef PORTAL2
 		if ( g_AI_Manager.NumAIs() && g_pBigAINet->NumNodes() == 0 && !g_pAINetworkManager->NetworksLoaded() )
 		{
 			Msg( "***\n");
@@ -164,7 +164,7 @@ public:
 			CAI_BaseNPC::m_nDebugBits |= bits_debugDisableAI;
 			g_pAINetworkManager->MarkDontSaveGraph();
 		}
-
+#endif // PORTAL2
 	}
 
 	void PostRestore( void )

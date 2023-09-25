@@ -398,19 +398,27 @@ void SharedVehicleViewSmoothing(CBasePlayer *pPlayer,
 			
 			if ( pFOV != NULL )
 			{
+#if defined ( PORTAL2 )
+				*pFOV = Lerp( flFracFOV, flDefaultFOV, pData->flFOV );
+#else
 				if ( pData->flFOV > flDefaultFOV )
 				{
 					*pFOV = Lerp( flFracFOV, flDefaultFOV, pData->flFOV );
 				}
+#endif
 			}
 		}
 	}
 	else if ( pFOV != NULL )
 	{
+#if defined ( PORTAL2 )
+		*pFOV = pData->flFOV;
+#else
 		if ( pData->flFOV > flDefaultFOV )
 		{
 			// Not running an entry/exit anim. Just use the vehicle's FOV.
 			*pFOV = pData->flFOV;
 		}
+#endif
 	}
 }

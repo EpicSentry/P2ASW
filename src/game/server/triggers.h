@@ -238,7 +238,6 @@ private:
 	void (CBaseEntity::*m_pfnCallback)(CBaseEntity *);
 };
 
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -312,6 +311,64 @@ private:
 
 private:
 	COutputEvent m_OnEndFollow;
+};
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+class CTriggerViewProxy : public CBaseEntity
+{
+public:
+	DECLARE_CLASS( CTriggerViewProxy, CBaseEntity );
+
+	CTriggerViewProxy();
+	void Spawn( void );
+	bool KeyValue( const char *szKeyName, const char *szValue );
+	void Enable( void );
+	void Disable( void );
+	void SetPlayer( CBaseEntity *pPlayer );
+	void TranslateViewToProxy( void );
+	void Move( void );
+
+	Vector GetPlayerOffset();
+
+	// Always transmit to clients so they know where to move the view to
+	virtual int UpdateTransmitState();
+
+	DECLARE_DATADESC();
+
+	// Input handlers
+	void InputEnable( inputdata_t &inputdata );
+	void InputDisable( inputdata_t &inputdata );
+
+	void InputTeleportPlayerToProxy( inputdata_t &inputdata );
+
+
+private:
+	EHANDLE m_hPlayer;
+
+	CBaseEntity *m_pProxy;
+	string_t m_sProxy;
+	string_t m_sProxyAttachment;
+	int m_nParentAttachment;
+	int	m_state;
+	int	m_nOffsetType;
+	Vector m_vecInitialPosition;
+	Vector m_vecLastPosition;
+	Vector m_vecLastVelocity;
+	Vector m_vecInitialOffset;
+
+	float m_flTiltFraction;
+	float m_flStartTime;
+
+	bool m_bUseFakeAcceleration;
+	bool m_bSkewAccelerationForward;
+	float m_flAccelerationScalar;
+
+	bool m_bEaseAnglesToCamera;
+
+	int m_nPlayerButtons;
+	int m_nOldTakeDamage;
 };
 
 #endif // TRIGGERS_H

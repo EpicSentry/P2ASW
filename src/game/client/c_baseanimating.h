@@ -298,9 +298,14 @@ public:
 
 	inline float					GetPlaybackRate() const;
 	inline void						SetPlaybackRate( float rate );
-
-	void							SetModelScale( float scale );
+	
+	void							SetModelScale( float scale, ModelScaleType_t scaleType = HIERARCHICAL_MODEL_SCALE );
 	inline float					GetModelScale() const { return m_flModelScale; }
+	float							GetModelHierarchyScale() const;	// Get the overall scale of the entire hierarchy (model scale can be local, per-bone)
+
+	ModelScaleType_t GetModelScaleType() const;
+	void SetModelScaleType( ModelScaleType_t scaleType );
+
 	inline bool						IsModelScaleFractional() const;  /// very fast way to ask if the model scale is < 1.0f  (faster than if (GetModelScale() < 1.0f) )
 
 	int								GetSequence();
@@ -583,6 +588,7 @@ private:
 	CMouthInfo						m_mouth;
 
 	CNetworkVar( float, m_flModelScale );
+	CNetworkVar( ModelScaleType_t, m_ScaleType );
 	
 	int								m_nRestoreSequence;
 

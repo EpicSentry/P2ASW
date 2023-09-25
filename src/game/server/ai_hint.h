@@ -110,10 +110,11 @@ enum Hint_e
 
 	// CS port hints
 	HINT_CSTRIKE_HOSTAGE_ESCAPE = 1100,
-
-
-
-
+		
+#ifdef PORTAL2
+	// Aperture hints
+	HINT_PORTAL2_NEST = 1200,  // FIXME: Stomping on EP3
+#endif // PORTAL2
 
 #ifdef INFESTED_DLL
 	HINT_ASW_COVERED_SPAWN = 1300,

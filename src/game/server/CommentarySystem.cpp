@@ -435,7 +435,11 @@ public:
 			// Detect press events to start/stop commentary nodes
 			if (buttonsPressed & COMMENTARY_BUTTONS) 
 			{
+#ifdef PORTAL2
+				if ( buttonsPressed & IN_REMOTE_VIEW && (V_stristr( MapName(), "coop" ) != NULL) )
+#else
 				if ( buttonsPressed & IN_ATTACK2 )
+#endif
 				{
 					if ( !(GetActiveNode() && GetActiveNode()->CannotBeStopped()) )
 					{

@@ -15,6 +15,7 @@
 #include "studio.h"
 #include "datacache/idatacache.h"
 #include "tier0/threadtools.h"
+#include "shareddefs.h"
 
 struct animevent_t;
 struct matrix3x4_t;
@@ -281,9 +282,13 @@ public:
 	// See note in code re: bandwidth usage!!!
 	void				DrawServerHitboxes( float duration = 0.0f, bool monocolor = false );
 	void				DrawRawSkeleton( matrix3x4_t boneToWorld[], int boneMask, bool noDepthTest = true, float duration = 0.0f, bool monocolor = false );
-
-	void				SetModelScale( float scale, float change_duration = 0.0f );
+	
+	void				SetModelScale( float scale, float change_duration = 0.0f, ModelScaleType_t scaleType = HIERARCHICAL_MODEL_SCALE );
 	float				GetModelScale() const;
+	float				GetModelHierarchyScale();	// Get the overall scale of the entire hierarchy (model scale can be local, per-bone)
+
+	ModelScaleType_t GetModelScaleType() const;
+	void SetModelScaleType( ModelScaleType_t scaleType );
 
 	void				UpdateModelScale();
 	
@@ -353,8 +358,10 @@ public:
 	inline void	ClearBoneCacheFlags( unsigned short fFlag ) { m_fBoneCacheFlags &= ~fFlag; }
 
 	bool PrefetchSequence( int iSequence );
-	virtual void OnFizzled( void );
 
+#ifdef PORTAL2
+	virtual void OnFizzled( void );
+#endif // PORTAL2
 
 
 private:
@@ -367,8 +374,15 @@ private:
 
 public:
 	bool CanSkipAnimation( void );
-
-
+	
+#ifdef PORTAL2
+public:
+	void SetObjectScaleLevel( int nScaleLevel ) { m_nObjectScaleLevel = nScaleLevel; }
+	int GetObjectScaleLevel( void ) { return m_nObjectScaleLevel; }
+protected:
+	int	m_nObjectScaleLevel;
+	bool m_bCanBeCaptured;			// Set true this prop allows capture by weapon_camera
+#endif // PORTAL2
 
 public:
 
@@ -384,6 +398,9 @@ public:
 
 	// was pev->framerate
 	CNetworkVar( float, m_flPlaybackRate );
+	
+private:
+	CNetworkVar( ModelScaleType_t, m_ScaleType );
 
 public:
 	void InitStepHeightAdjust( void );
@@ -444,9 +461,10 @@ protected:
 
 public:
 	COutputEvent m_OnIgnite;
-	COutputEvent m_OnFizzled;
-
-
+	
+#if defined ( PORTAL2 )
+	COutputEvent m_OnFizzled;		// Fizzled by a fizzler
+#endif // PORTAL2 
 
 private:
 	CStudioHdr			*m_pStudioHdr;
@@ -504,7 +522,9 @@ inline void CBaseAnimating::ResetSequence(int nSequence)
 
 inline float CBaseAnimating::GetPlaybackRate() const
 {
-
+#if defined( PORTAL2 )
+	return m_flPlaybackRate * ( 1.0f / sqrt( GetModelScaleType() == HIERARCHICAL_MODEL_SCALE ? GetModelScale() : 1.0f ) );
+#endif // PORTAL2or INFESTED
 
 	// Slow the animation while partially frozen
 	return m_flPlaybackRate * clamp( 1.0f - m_flFrozen, 0.0f, 1.0f );

@@ -45,11 +45,9 @@
 #include "tier0/icommandline.h"
 
 #ifdef PORTAL2
-#include "prop_portal_shared.h"
-#include "prop_portal.h"
-#include "portal_shareddefs.h"
-#endif
-
+	#include "portal_base2d_shared.h"
+	#include "portal_grabcontroller_shared.h"
+#endif // PORTAL2
 
 #include "vstdlib/ikeyvaluessystem.h"
 
@@ -1489,6 +1487,10 @@ void CBreakableProp::ForceFadeScaleToAlwaysVisible()
 
 void CBreakableProp::RampToDefaultFadeScale()
 {
+	// This fade scale ramp is performed automatically any time props such as weighted cubes
+	// are picked up, dropped, or launched by catapults. On low-end PC, this turns weighted
+	// cube fade distance back on, which we don't want. Don't do this for Portal 2.
+#if !defined( PORTAL2 )
 	SetGlobalFadeScale( GetGlobalFadeScale() + m_flDefaultFadeScale * TICK_INTERVAL / 2.0f );
 	if ( GetGlobalFadeScale() >= m_flDefaultFadeScale )
 	{
@@ -1499,6 +1501,7 @@ void CBreakableProp::RampToDefaultFadeScale()
 	{
 		SetContextThink( &CBreakableProp::RampToDefaultFadeScale, gpGlobals->curtime + TICK_INTERVAL, s_pFadeScaleThink );
 	}
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1784,8 +1787,11 @@ void CBreakableProp::Break( CBaseEntity *pBreaker, const CTakeDamageInfo &info )
 		}
 		else
 		{
-
+#ifdef PORTAL2
+			float flScale = GetModelHierarchyScale();
+#else
 			float flScale = 1.0f;
+#endif // PORTAL2
 
 			ExplosionCreate( WorldSpaceCenter(), angles, pAttacker, m_explodeDamage * flScale, m_explodeRadius * flScale,
 				SF_ENVEXPLOSION_NOSPARKS | SF_ENVEXPLOSION_NODLIGHTS | SF_ENVEXPLOSION_NOSMOKE | SF_ENVEXPLOSION_SURFACEONLY,
@@ -1988,6 +1994,10 @@ void CDynamicProp::Spawn( )
 	}
 
 	BaseClass::Spawn();
+	
+#ifdef PORTAL2
+	AddFlag( FL_UNPAINTABLE );
+#endif
 
 	if ( IsMarkedForDeletion() )
 		return;
@@ -2173,6 +2183,7 @@ bool CDynamicProp::TestCollision( const Ray_t &ray, unsigned int mask, trace_t& 
 		}
 	}
 
+	// PORTAL2: This is a change from shipped code, but should be benign
 	return BaseClass::TestCollision( ray, mask, trace );
 }
 
@@ -2547,8 +2558,10 @@ BEGIN_DATADESC( CPhysicsProp )
 	DEFINE_KEYFIELD( m_inertiaScale, FIELD_FLOAT, "inertiascale" ),
 	DEFINE_KEYFIELD( m_damageType, FIELD_INTEGER, "Damagetype" ),
 	DEFINE_KEYFIELD( m_iszOverrideScript, FIELD_STRING, "overridescript" ),
-
-
+	
+#ifdef PORTAL2
+	DEFINE_KEYFIELD( m_bAllowPortalFunnel, FIELD_BOOLEAN, "allowfunnel" ),
+#endif // PORTAL2
 
 	DEFINE_KEYFIELD( m_damageToEnableMotion, FIELD_INTEGER, "damagetoenablemotion" ), 
 	DEFINE_KEYFIELD( m_flForceToEnableMotion, FIELD_FLOAT, "forcetoenablemotion" ), 
@@ -2611,7 +2624,9 @@ CPhysicsProp::CPhysicsProp( void ) :
 	m_bHasBeenAwakened( false ), 
 	m_fNextCheckDisableMotionContactsTime( 0 )
 {
-
+#ifdef PORTAL2
+	m_bAllowPortalFunnel = true;
+#endif // PORTAL2
 }
 
 CPhysicsProp::~CPhysicsProp()
@@ -6659,4 +6674,24 @@ static ConCommand ent_rotate("ent_rotate", CC_Ent_Rotate, "Rotates an entity by 
 // This is a dummy. The entity is entirely clientside.
 LINK_ENTITY_TO_CLASS( func_proprrespawnzone, CBaseEntity );
 
+#ifdef PORTAL2
 
+bool UTIL_PropIsMotionDisabled( CBaseEntity *pObject )
+{
+	CPhysicsProp *pProp = dynamic_cast<CPhysicsProp *>(pObject);
+	if ( pProp == NULL )
+		return false;
+
+	return ( pProp->HasSpawnFlags( SF_PHYSPROP_MOTIONDISABLED ) );
+}
+
+void UTIL_SetPropMotionDisabled( CBaseEntity *pObject )
+{
+	CPhysicsProp *pProp = dynamic_cast<CPhysicsProp *>(pObject);
+	if ( pProp == NULL )
+		return;
+
+	pProp->AddSpawnFlags( SF_PHYSPROP_MOTIONDISABLED );
+}
+
+#endif // PORTAL2

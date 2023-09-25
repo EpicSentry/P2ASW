@@ -59,7 +59,7 @@
 #endif
 
 
-#if defined( HL2_CLIENT_DLL ) || defined( INFESTED_DLL )
+#if defined( HL2_CLIENT_DLL ) || defined( CSTRIKE_DLL ) || defined( INFESTED_DLL ) || defined( PORTAL2 )
 #define USE_MONITORS
 #endif
 #include "rendertexture.h"
@@ -190,8 +190,17 @@ static ConVar r_debugcheapwater( "r_debugcheapwater", "0", FCVAR_CHEAT );
 static ConVar r_waterforceexpensive( "r_waterforceexpensive", "0" );
 #endif
 static ConVar r_waterforcereflectentities( "r_waterforcereflectentities", "0" );
+
+#if defined( _GAMECONSOLE ) && ( defined( PORTAL2 ) || defined( CSTRIKE15 ) )
+// Portal 2 doesn't use refractive water in many places, and where it does, it's too expensive for consoles (and probably low-end PCs as well)
+// Just force it off here so as not to mess with high-end PCs
+static ConVar r_WaterDrawRefraction( "r_WaterDrawRefraction", IsPS3()? "0" : "1", 0, "Enable water refraction" );
+#else
 static ConVar r_WaterDrawRefraction( "r_WaterDrawRefraction", "1", 0, "Enable water refraction" );
+#endif
+
 static ConVar r_WaterDrawReflection( "r_WaterDrawReflection", "1", 0, "Enable water reflection" );
+
 static ConVar r_ForceWaterLeaf( "r_ForceWaterLeaf", "1", 0, "Enable for optimization to water - considers view in leaf under water for purposes of culling" );
 static ConVar mat_drawwater( "mat_drawwater", "1", FCVAR_CHEAT );
 static ConVar mat_clipz( "mat_clipz", "1" );
@@ -5639,9 +5648,52 @@ bool CBaseWorldView::AdjustView( float waterHeight )
 		x = y = 0;
 		width = pTexture->GetActualWidth();
 		height = pTexture->GetActualHeight();
+
+		float fHeightDiff = (origin[2] - waterHeight) * 2.0f;
+
 		angles[0] = -angles[0];
 		angles[2] = -angles[2];
-		origin[2] -= 2.0f * ( origin[2] - (waterHeight));
+		origin[2] -= fHeightDiff;
+
+		// PORTAL2-specific code
+		if( m_bCustomViewMatrix )
+		{
+			QAngle newAngles;
+			Vector vNewOrigin;
+			VMatrix customMatrix;
+
+			// Recompute angles from custom view matrix (which is concatenation of view matrix and portal matrix)
+			customMatrix.CopyFrom3x4( m_matCustomViewMatrix );
+			customMatrix = customMatrix.Transpose();
+			MatrixToAngles( customMatrix, newAngles );
+			
+			// Apply reflection transformation
+			newAngles[0] = -newAngles[0];
+			newAngles[2] = -newAngles[2];
+
+			// Extract origin from matrix (coordinates in matrix are in view space; convert back to world space)
+			vNewOrigin = -( 
+				m_matCustomViewMatrix.m_flMatVal[0][3] * Vector( *( Vector * )m_matCustomViewMatrix.m_flMatVal[0] ) +
+				m_matCustomViewMatrix.m_flMatVal[1][3] * Vector( *( Vector * )m_matCustomViewMatrix.m_flMatVal[1] ) +
+				m_matCustomViewMatrix.m_flMatVal[2][3] * Vector( *( Vector * )m_matCustomViewMatrix.m_flMatVal[2] ) 
+				);
+
+			// Reflect position beneath water plane
+			vNewOrigin[2] -= (vNewOrigin[2] - waterHeight) * 2.0f;
+
+			VMatrix newCustomMatrix;
+
+			newCustomMatrix.Identity();
+
+			// Re-generate the custom view matrix from angles & origin
+			MatrixRotate( newCustomMatrix, Vector( 1, 0, 0 ), -newAngles[2] );
+			MatrixRotate( newCustomMatrix, Vector( 0, 1, 0 ), -newAngles[0] );
+			MatrixRotate( newCustomMatrix, Vector( 0, 0, 1 ), -newAngles[1] );
+			MatrixTranslate( newCustomMatrix, -vNewOrigin );
+
+			m_matCustomViewMatrix = newCustomMatrix.As3x4();
+		}
+
 		return true;
 	}
 
@@ -5931,6 +5983,10 @@ void CSimpleWorldView::Setup( const CViewSetup &view, int nClearFlags, bool bDra
 	{
 		m_DrawFlags |= DF_DRAWSKYBOX;
 	}
+	
+#if defined( PORTAL2 )
+	//m_DrawFlags |= ComputeSimpleWorldModelDrawFlags();
+#endif // PORTAL2
 
 	m_pCustomVisibility = pCustomVisibility;
 	m_fogInfo = fogInfo;
@@ -6080,6 +6136,11 @@ void CAboveWaterView::Setup( const CViewSetup &view, bool bDrawSkybox, const Vis
 	{
 		m_DrawFlags |= DF_RENDER_UNDERWATER;
 	}
+	
+#if defined( PORTAL2 )
+	//m_DrawFlags |= ComputeSimpleWorldModelDrawFlags();
+#endif // PORTAL2
+
 
 	m_fogInfo = fogInfo;
 	m_waterInfo = waterInfo;

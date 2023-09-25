@@ -170,6 +170,7 @@ public:
 	CHudChatHistory( vgui::Panel *pParent, const char *panelName );
 
 	virtual void	ApplySchemeSettings(vgui::IScheme *pScheme);
+	virtual void	ApplySettings(KeyValues *inResourceData);
 	virtual void Paint();
 };
 

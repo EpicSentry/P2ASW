@@ -16,8 +16,14 @@ extern ConVar sv_force_transmit_ents;
 
 void CServerGameClients::GetPlayerLimits( int& minplayers, int& maxplayers, int &defaultMaxPlayers ) const
 {
+	// TODO: Should we stay faithful in Portal 2 and allow 2 players only? Or keep this the way it is for fun?
+#if defined( PORTAL2 ) && 0
+	minplayers = defaultMaxPlayers = 1;
+	maxplayers = CommandLine()->FindParm( "-allowspectators" ) ? 3 : 2;
+#else
 	minplayers = defaultMaxPlayers = 1; 
 	maxplayers = MAX_PLAYERS;
+#endif
 }
 
 

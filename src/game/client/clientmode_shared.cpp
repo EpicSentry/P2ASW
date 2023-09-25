@@ -40,7 +40,9 @@
 #endif
 #include "matchmaking/imatchframework.h"
 
-
+#ifdef PORTAL2
+#include "c_portal_player.h"
+#endif // PORTAL2
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -927,6 +929,12 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 
 	if ( Q_strcmp( "player_connect", eventname ) == 0 )
 	{
+#ifdef PORTAL2
+		// dont show these message on the console at all
+		if ( IsGameConsole() )
+			return;
+#endif
+
 		if ( this == GetFullscreenClientMode() )
 			return;
 		if ( !hudChat )
@@ -949,6 +957,11 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 	}
 	else if ( Q_strcmp( "player_disconnect", eventname ) == 0 )
 	{
+#ifdef PORTAL2
+		// dont show these message on the console at all
+		if ( IsGameConsole() )
+			return;
+#endif
 		if ( this == GetFullscreenClientMode() )
 			return;
 		C_BasePlayer *pPlayer = USERID2PLAYER( event->GetInt("userid") );
@@ -984,6 +997,11 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 	}
 	else if ( Q_strcmp( "player_fullyjoined", eventname ) == 0 )
 	{
+#ifdef PORTAL2
+		// dont show these message on the console at all
+		if ( IsGameConsole() )
+			return;
+#endif
 		if ( this == GetFullscreenClientMode() )
 			return;
 		if ( !hudChat )

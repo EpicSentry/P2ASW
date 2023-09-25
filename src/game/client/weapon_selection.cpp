@@ -75,9 +75,11 @@ CBaseHudWeaponSelection::CBaseHudWeaponSelection( const char *pElementName ) : C
 {
 	s_pInstance[GET_ACTIVE_SPLITSCREEN_SLOT()] = this;
 	
-
+#ifdef PORTAL2
+	SetHiddenBits( HIDEHUD_WEAPONSELECTION | HIDEHUD_PLAYERDEAD );
+#else
 		SetHiddenBits( HIDEHUD_WEAPONSELECTION | HIDEHUD_NEEDSUIT | HIDEHUD_PLAYERDEAD | HIDEHUD_INVEHICLE );
-
+#endif // PORTAL2
 }
 
 //-----------------------------------------------------------------------------

@@ -100,7 +100,9 @@ class CGlobalEvent;
 
 typedef CUtlVector< CBaseEntity* > EntityList_t;
 
-
+#ifdef PORTAL2
+class CInfoPlacementHelper;
+#endif
 
 //
 // Structure passed to input handlers.
@@ -627,7 +629,9 @@ public:
 	void InputRunScript( inputdata_t &inputdata );
 	void InputRunScriptFile( inputdata_t &inputdata );
 	void InputCallScriptFunction( inputdata_t &inputdata );
-	void InputRemovePaint(inputdata_t &inputdata);
+#ifdef PORTAL2
+	void InputRemovePaint( inputdata_t &inputdata );
+#endif
 
 	bool RunScriptFile( const char *pScriptFile, bool bUseRootScope = false );
 	bool RunScript( const char *pScriptText, const char *pDebugFilename = "CBaseEntity::RunScript" );
@@ -942,7 +946,9 @@ public:
 	
 	// Paint helper
 	// Should never be called on anything that doesn't use PropPaintPowerUser, which overrides this.
-	virtual void UpdatePaintPowersFromContacts() {}
+#ifdef PORTAL2
+	virtual void UpdatePaintPowersFromContacts() { Assert(0); }
+#endif
 	
 	void	ViewPunch( const QAngle &angleOffset );
 	void	VelocityPunch( const Vector &vecForce );

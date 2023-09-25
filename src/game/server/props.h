@@ -466,6 +466,9 @@ extern ConVar func_breakdmg_bullet;
 extern ConVar func_breakdmg_club;
 extern ConVar func_breakdmg_explosive;
 
-
+#ifdef PORTAL2
+bool UTIL_PropIsMotionDisabled( CBaseEntity *pObject );
+void UTIL_SetPropMotionDisabled( CBaseEntity *pObject );
+#endif // PORTAL2
 
 #endif // PROPS_H

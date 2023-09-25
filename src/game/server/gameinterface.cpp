@@ -117,6 +117,13 @@
 #include "portal_player.h"
 #endif
 
+#ifdef PORTAL2
+#include "info_placement_helper.h"
+#include "paint/paint_saverestore.h"
+#include "prop_portal_shared.h"
+#include "portal_shareddefs.h"
+#endif // PORTAL2
+
 #ifdef _WIN32
 #include "IGameUIFuncs.h"
 #endif
@@ -791,8 +798,10 @@ bool CServerGameDLL::DLLInit( CreateInterfaceFn appSystemFactory,
 	g_pGameSaveRestoreBlockSet->AddBlockHandler( GetEventQueueSaveRestoreBlockHandler() );
 	g_pGameSaveRestoreBlockSet->AddBlockHandler( GetAchievementSaveRestoreBlockHandler() );
 	g_pGameSaveRestoreBlockSet->AddBlockHandler( GetVScriptSaveRestoreBlockHandler() );
-
-
+	
+#if defined( PORTAL2 )
+	g_pGameSaveRestoreBlockSet->AddBlockHandler( GetPaintSaveRestoreBlockHandler() );
+#endif
 
 	bool bInitSuccess = false;
 	if ( sv_threaded_init.GetBool() )
@@ -865,8 +874,10 @@ void CServerGameDLL::DLLShutdown( void )
 
 	// Due to dependencies, these are not autogamesystems
 	ModelSoundsCacheShutdown();
-
-
+	
+#ifdef PORTAL2
+	g_pGameSaveRestoreBlockSet->RemoveBlockHandler( GetPaintSaveRestoreBlockHandler() );
+#endif
 
 	g_pGameSaveRestoreBlockSet->RemoveBlockHandler( GetVScriptSaveRestoreBlockHandler() );
 	g_pGameSaveRestoreBlockSet->RemoveBlockHandler( GetAchievementSaveRestoreBlockHandler() );
@@ -3244,6 +3255,20 @@ void CServerGameClients::GetBugReportInfo( char *buf, int buflen )
 			Q_snprintf( buf, buflen, "%sCurrent time: %6.3f\n", buf, gpGlobals->curtime );
 		}
 	}
+	
+#if defined ( PORTAL2 )
+	int iPortalCount = CProp_Portal_Shared::AllPortals.Count();
+	if( iPortalCount != 0 )
+	{
+		CProp_Portal **pPortals = CProp_Portal_Shared::AllPortals.Base();
+		Q_snprintf( buf, buflen, "%sPortal Locations:\n", buf );
+		for( int i = 0; i != iPortalCount; ++i )
+		{
+			CProp_Portal *pTempPortal = pPortals[i];
+			Q_snprintf( buf, buflen, "%slinkid:%d loc: %f %f %f\n", buf, pTempPortal->GetLinkageGroup(), XYZ( pTempPortal->GetAbsOrigin() ) );
+		}
+	}
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -3557,3 +3582,10 @@ void CServerGameTags::GetTaggedConVarList( KeyValues *pCvarTagList )
 		g_pGameRules->GetTaggedConVarList( pCvarTagList );
 	}
 }
+
+#if defined(PORTAL2)
+CON_COMMAND_F( give_promo_helmet, "Gives the gamestop promo helmets for coop bots. Requires a respawn or changelevel to start showing.", FCVAR_DEVELOPMENTONLY )
+{
+	g_nPortal2PromoFlags |= PORTAL2_PROMO_HELMETS;
+}
+#endif

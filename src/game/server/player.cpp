@@ -76,6 +76,7 @@
 #include "fogvolume.h"
 
 #ifdef PORTAL2
+#include "weapon_portalgun.h"
 #include "portal_grabcontroller_shared.h"
 #endif
 
@@ -849,7 +850,7 @@ int TrainSpeed(int iSpeed, int iMax)
 void CBasePlayer::DeathSound( const CTakeDamageInfo &info )
 {
 	// temporarily using pain sounds for death sounds
-
+#if !defined ( PORTAL2 )
 	// Did we die from falling?
 	if ( m_bitsDamageType & DMG_FALL )
 	{
@@ -860,6 +861,7 @@ void CBasePlayer::DeathSound( const CTakeDamageInfo &info )
 	{
 		EmitSound( "Player.Death" );
 	}
+#endif
 
 	// play one of the suit death alarms
 	if ( IsSuitEquipped() )
@@ -1036,7 +1038,12 @@ void CBasePlayer::DamageEffect(float flDamage, int fDamageType)
 	}
 	else if ( fDamageType & DMG_BULLET )
 	{
-		EmitSound( "Flesh.BulletImpact" );
+#	ifdef PORTAL2
+		if( GameRules()->IsMultiplayer() )
+			EmitSound( "CoopBot.CoopBotBulletImpact" );
+		else
+#	endif
+			EmitSound( "Flesh.BulletImpact" );
 	}
 }
 
@@ -1445,6 +1452,7 @@ int CBasePlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 //-----------------------------------------------------------------------------
 void CBasePlayer::OnDamagedByExplosion( const CTakeDamageInfo &info )
 {
+#ifndef PORTAL2
 	float lastDamage = info.GetDamage();
 
 	float distanceFromPlayer = 9999.0f;
@@ -1468,6 +1476,7 @@ void CBasePlayer::OnDamagedByExplosion( const CTakeDamageInfo &info )
 
 	CSingleUserRecipientFilter user( this );
 	enginesound->SetPlayerDSP( user, effect, false );
+#endif
 }
 
 //=========================================================
@@ -5078,9 +5087,11 @@ void CBasePlayer::Precache( void )
 	VPROF( "CBasePlayer::Precache" );
 
 	BaseClass::Precache();
-
+	
+#if !defined ( PORTAL2 )
 	PrecacheScriptSound( "Player.FallGib" );
 	PrecacheScriptSound( "Player.Death" );
+#endif
 	PrecacheScriptSound( "Player.PlasmaDamage" );
 	PrecacheScriptSound( "Player.SonicDamage" );
 	PrecacheScriptSound( "Player.DrownStart" );
@@ -6138,7 +6149,12 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		gEvilImpulse101 = true;
 
 		EquipSuit();
-
+		
+		#if defined( PORTAL2 )
+			// Give the player portal 2 stuff!
+			GiveNamedItem( "weapon_camera" );
+			GiveNamedItem( "weapon_placement" );
+		#else // PORTAL2
 
 
 			// Give the player everything!
@@ -6170,6 +6186,7 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 			GiveNamedItem( "weapon_357" );
 			GiveNamedItem( "weapon_crossbow" );
 
+#endif // PORTAL2 
 
 
 

@@ -10,7 +10,6 @@
 #include "tier0/vprof.h"
 #include "KeyValues.h"
 #include "iachievementmgr.h"
-
 #ifdef CLIENT_DLL
 
 	#include "usermessages.h"
@@ -51,7 +50,14 @@ static CViewVectors g_DefaultViewVectors(
 													
 	Vector( 0, 0, 14 )			//VEC_DEAD_VIEWHEIGHT (m_vDeadViewHeight)
 );													
-													
+
+#ifdef PORTAL2
+ConVar sv_portal_players( "sv_portal_players", "1", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY | FCVAR_HIDDEN );
+bool IsGameRulesMultiplayer()
+{
+	return ( sv_portal_players.GetInt() > 1 );
+}
+#endif
 
 // ------------------------------------------------------------------------------------ //
 // CGameRulesProxy implementation.
@@ -749,8 +755,30 @@ bool CGameRules::ShouldCollide( int collisionGroup0, int collisionGroup1 )
 	// Adrian: TEST! Interactive Debris doesn't collide with the player.
 	if ( collisionGroup0 == COLLISION_GROUP_INTERACTIVE_DEBRIS && ( collisionGroup1 == COLLISION_GROUP_PLAYER_MOVEMENT || collisionGroup1 == COLLISION_GROUP_PLAYER ) )
 		 return false;
+	
+#ifdef PORTAL2
+	// Only hit something of the same group
+	if ( collisionGroup0 == COLLISION_GROUP_CAMERA_SOLID || collisionGroup1 == COLLISION_GROUP_CAMERA_SOLID )
+	{
+		if ( collisionGroup0 != COLLISION_GROUP_CAMERA_SOLID || collisionGroup1 != COLLISION_GROUP_CAMERA_SOLID )
+			return false;
+	}
 
+	// Only hit something of the same group
+	if ( collisionGroup0 == COLLISION_GROUP_PLACEMENT_SOLID || collisionGroup1 == COLLISION_GROUP_PLACEMENT_SOLID )
+	{
+		if ( collisionGroup0 != COLLISION_GROUP_PLACEMENT_SOLID || collisionGroup1 != COLLISION_GROUP_PLACEMENT_SOLID )
+			return false;
+	}
 
+	// Held objects shouldn't collide with players 
+	// BUG: Not sure if we want this in MP, intention is to not collide with the holding player, not necessarily all. 
+	if ( collisionGroup1 == COLLISION_GROUP_PLAYER_HELD && collisionGroup0 == COLLISION_GROUP_PLAYER )
+		return false;
+
+	if ( collisionGroup1 == COLLISION_GROUP_PLAYER_HELD && collisionGroup0 == COLLISION_GROUP_PLAYER_MOVEMENT )
+		return false;
+#endif // PORTAL2
 
 	if ( collisionGroup0 == COLLISION_GROUP_BREAKABLE_GLASS && collisionGroup1 == COLLISION_GROUP_BREAKABLE_GLASS )
 		return false;

@@ -210,6 +210,9 @@ $Project "Server (Portal 2)"
 			$File	"$SRCDIR\game\shared\portal\StaticCollisionPolyhedronCache.cpp"
 			$File	"$SRCDIR\game\shared\portal\StaticCollisionPolyhedronCache.h"
 			$File	"portal\trigger_portal_cleanser.cpp"
+			
+				
+			$File	"$SRCDIR\game\shared\portal\weapons_portal.h"
 
 			$Folder	"Weapons"
 			{

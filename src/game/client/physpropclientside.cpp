@@ -720,7 +720,7 @@ CBaseAnimating *BreakModelCreate_Ragdoll( CBaseEntity *pOwnerEnt, breakmodel_t *
 
 	pRagdoll->SetModelName( AllocPooledString( pModelName ) );
 	pRagdoll->ResetSequence( 0 );
-	pRagdoll->SetModelScale( pOwner->GetModelScale() );
+	pRagdoll->SetModelScale( pOwner->GetModelScale(), pOwner->GetModelScaleType() );
 	pRagdoll->SetCollisionGroup( COLLISION_GROUP_DEBRIS );
 	//pRagdoll->m_builtRagdoll = true;
 

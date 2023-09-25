@@ -53,6 +53,12 @@ ConVar cl_backspeed("cl_backspeed", "450", FCVAR_CHEAT);
 ConVar lookspring( "lookspring", "0", FCVAR_ARCHIVE );
 ConVar lookstrafe( "lookstrafe", "0", FCVAR_ARCHIVE );
 
+#ifdef PORTAL2
+#define MAX_LINEAR_SPEED "175"
+#else
+#define MAX_LINEAR_SPEED "450"
+#endif
+
 void IN_JoystickChangedCallback_f( IConVar *pConVar, const char *pOldString, float flOldValue );
 ConVar in_joystick( "joystick","0", FCVAR_ARCHIVE, "True if the joystick is enabled, false otherwise.", IN_JoystickChangedCallback_f );
 

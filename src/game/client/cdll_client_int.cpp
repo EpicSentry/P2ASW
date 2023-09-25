@@ -152,7 +152,7 @@
 #ifdef PORTAL2
 #include "portal_util_shared.h"
 #include "prop_portal_shared.h"
-//#include "c_keyvalue_saver.h"
+#include "c_gameinstructor.h"
 //#include "portal2/gameui/portal2/steamoverlay/isteamoverlaymgr.h"
 extern void ProcessPortalTeleportations( void );
 #if defined( PORTAL2_PUZZLEMAKER )
@@ -1215,6 +1215,16 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CGlobalVarsBase *pGloba
 	if ( (missionchooser = (IASW_Mission_Chooser *)appSystemFactory(ASW_MISSION_CHOOSER_VERSION, NULL)) == NULL )
 		return false;
 #endif
+	
+#ifdef PORTAL2
+	if ( !g_pMatchFramework )
+		return false;
+	GameInstructor_Init();
+	//  if client.dll needs to register any matchmaking extensions do it here:
+	// 	if ( IMatchExtensions *pIMatchExtensions = g_pMatchFramework->GetMatchExtensions() )
+	// 		pIMatchExtensions->RegisterExtensionInterface(
+	// 		INTERFACEVERSION_SERVERGAMEDLL, static_cast< IServerGameDLL * >( this ) );
+#endif // PORTAL2
 
 
 	if ( !CommandLine()->CheckParm( "-noscripting") )
@@ -1308,8 +1318,10 @@ void CHLClient::PostInit()
 //-----------------------------------------------------------------------------
 void CHLClient::Shutdown( void )
 {
-
-
+#ifdef PORTAL2
+	GameInstructor_Shutdown();
+#endif
+	
 	ActivityList_Free();
 	EventList_Free();
 

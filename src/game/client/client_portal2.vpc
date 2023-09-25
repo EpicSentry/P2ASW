@@ -311,6 +311,8 @@ $Project "Client (Portal 2)"
 			$File	"portal\portalrenderable_flatbasic.h"
 			$File	"portal\vgui_portal_stats_display_screen.cpp"
 			$File	"portal\vgui_neurotoxin_countdown_screen.cpp"
+				
+				$File	"$SRCDIR\game\shared\portal\weapons_portal.h"
 
 			$File	"portal\c_func_noportal_volume.cpp"
 			$File	"portal\c_func_noportal_volume.h"

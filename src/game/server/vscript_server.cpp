@@ -417,6 +417,18 @@ static float ScriptTraceLine( const Vector &vecStart, const Vector &vecEnd, HSCR
 	}
 }
 
+#if defined ( PORTAL2 )
+static void SetDucking( const char *pszLayerName, const char *pszMixGroupName, float factor )
+{
+	CReliableBroadcastRecipientFilter filter;
+	UserMessageBegin( filter, "SetMixLayerTriggerFactor" );
+		WRITE_STRING( pszLayerName );
+		WRITE_STRING( pszMixGroupName );
+		WRITE_FLOAT( factor );
+	MessageEnd();
+}
+#endif
+
 bool VScriptServerInit()
 {
 	VMPROF_START
@@ -473,6 +485,9 @@ bool VScriptServerInit()
 				ScriptRegisterFunctionNamed( g_pScriptVM, NDebugOverlay::Line, "DebugDrawLine", "Draw a debug overlay box" );
 				ScriptRegisterFunction( g_pScriptVM, DoIncludeScript, "Execute a script (internal)" );
 				ScriptRegisterFunction( g_pScriptVM, CreateProp, "Create a physics prop");
+#if defined ( PORTAL2 )
+				ScriptRegisterFunction( g_pScriptVM, SetDucking, "Set the level of an audio ducking channel" );
+#endif
 
 				
 				if ( GameRules() )

@@ -238,7 +238,10 @@ bool CSingleplayRules::Damage_ShouldNotBleed( int iDmgType )
 			if ( pWeapon == NULL )
 				continue;
 
-
+#ifdef PORTAL2
+			if ( pWeapon == pCurrentWeapon )
+				continue;
+#endif // PORTAL2
 
 			// If we have an active weapon and this weapon doesn't allow autoswitching away
 			// from another weapon, skip it.
