@@ -141,7 +141,7 @@ CBaseEntity *GetCoopSpawnLocation( int iTeam ) // Purpose: Completely restored. 
     // portal_player.cpp hack continuation
     if ( pValidSpawn->m_bForceGunOnSpawn && ((CPortalMPGameRules *)g_pGameRules)->Is2GunsCoOp() ) // Line 142
     {
-        // g_iPortalGunPlayerTeam = TEAM_BLUE; // Ensures that blue will get the portal gun if the KeyValue is set when on paintgun maps (Line 144) // TODO: Uncomment once this is implemented
+        g_iPortalGunPlayerTeam = TEAM_BLUE; // Ensures that blue will get the portal gun if the KeyValue is set when on paintgun maps (Line 144)
     }
 
     return (CBaseEntity *)pValidSpawn; // Line 147

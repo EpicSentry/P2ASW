@@ -46,10 +46,6 @@
 #include "paint/paint_swap_guns.h"
 #include "info_camera_link.h"
 #include "prop_weightedcube.h"
-
-#include "portal2_research_data_tracker.h"
-#include "dt_utlvector_send.h"
-
 #include "props.h"
 #include "sendprop_priorities.h"
 #include "env_portal_laser.h"
