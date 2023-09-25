@@ -152,8 +152,7 @@ extern void PaintPowerPickup( int colorIndex, CBasePlayer *pPlayer );
 #define ALLOWED_TEAM_TAUNT_Z_DIST 30.f
 
 // FIXME: Used for temp damage scaling -- jdw
-//extern ConVar sk_dmg_take_scale1;
-ConVar sk_dmg_take_scale1("sk_dmg_take_scale1", "1", FCVAR_REPLICATED);
+extern ConVar sk_dmg_take_scale1;
 
 
 const char *g_pszBallBotHelmetModel = "models/player/ballbot/ballbot_cage.mdl";

@@ -320,9 +320,10 @@ void CBaseAnimating::Precache()
 
 	// Anything derived from this class can potentially burn - true, but do we want it to!
 	PrecacheParticleSystem( "burning_character" );
-
-
-
+	
+#ifdef PORTAL2
+	PrecacheScriptSound( "Prop.Fizzled" );
+#endif // PORTAL2
 
 	BaseClass::Precache();
 }
@@ -3691,8 +3692,10 @@ bool CBaseAnimating::Dissolve( const char *pMaterialName, float flStartTime, boo
 			gameeventmanager->FireEvent( event );
 		}
 	}
-
-
+	
+#ifdef PORTAL2
+	EmitSound( "Prop.Fizzled" );
+#endif // PORTAL2
 
 	return bRagdollCreated;
 }

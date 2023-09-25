@@ -70,6 +70,9 @@ $Project "Server (Portal 2)"
 			$File	"hl2\grenade_beam.cpp"
 			$File	"hl2\grenade_beam.h"
 			
+			$File	"$SRCDIR\game\shared\hl2\hl2_gamerules.cpp"
+			$File	"$SRCDIR\game\shared\hl2\hl2_gamerules.h"
+			
 			$File	"hl2\hl_playermove.cpp"
 		}
 		

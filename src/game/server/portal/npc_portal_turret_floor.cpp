@@ -37,7 +37,8 @@ const char *g_PortalTalkNames[ PORTAL_TURRET_STATE_TOTAL - TURRET_STATE_TOTAL ] 
 	"NPC_FloorTurret.TalkCollide",
 	"NPC_FloorTurret.TalkPickup",
 	"NPC_FloorTurret.TalkShotAt",
-	"NPC_FloorTurret.TalkDissolved"
+	"NPC_FloorTurret.TalkDissolved",
+	"NPC_FloorTurret.TalkFlung"
 };
 
 const char* GetTurretTalkName( int iState )

@@ -2358,6 +2358,19 @@ const char *GetEffectNameFromIndex( int nEffectIndex )
 	return "error";
 }
 
+//-----------------------------------------------------------------------------
+// Precaches a movie
+//-----------------------------------------------------------------------------
+void PrecacheMovie( const char *pMovieName )
+{
+	// TODO:
+#if 0
+	Assert ( CBaseEntity::IsPrecacheAllowed() );
+
+	Assert( pMovieName && pMovieName[0] );
+	g_pStringTableMovies->AddString( CBaseEntity::IsServer(), pMovieName );
+#endif
+}
 
 
 //-----------------------------------------------------------------------------

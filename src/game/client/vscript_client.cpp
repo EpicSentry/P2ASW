@@ -64,10 +64,6 @@ bool DoIncludeScript( const char *pszScript, HSCRIPT hScope )
 	return true;
 }
 
-static void PrecacheMovie(const char* moviename)
-{
-}
-
 bool VScriptClientInit()
 {
 	VMPROF_START
@@ -109,7 +105,6 @@ bool VScriptClientInit()
 				ScriptRegisterFunction( g_pScriptVM, GetMapName, "Get the name of the map.");
 				ScriptRegisterFunction( g_pScriptVM, Time, "Get the current server time" );
 				ScriptRegisterFunction( g_pScriptVM, DoIncludeScript, "Execute a script (internal)");
-				ScriptRegisterFunction( g_pScriptVM, PrecacheMovie, "Precache a movie..." );
 				
 				if ( GameRules() )
 				{

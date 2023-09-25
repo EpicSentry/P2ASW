@@ -59,6 +59,9 @@ $Project "Client (Portal 2)"
 			$File	"hl2\c_corpse.h"
 			$File	"hl2\c_func_tankmortar.cpp"
 			
+			$File	"$SRCDIR\game\shared\hl2\hl2_gamerules.cpp"
+			$File	"$SRCDIR\game\shared\hl2\hl2_gamerules.h"
+			
 			// Portal 2's client vpc still has these files, so I suppose we should do the same.
 			$File	"$SRCDIR\game\shared\hl2\hl_gamemovement.cpp"
 			$File	"$SRCDIR\game\shared\hl2\hl_gamemovement.h"

@@ -2508,6 +2508,7 @@ void CPortal_Player::AddSurfacePaintPowerInfo( const trace_t& trace, char const*
 
 void CPortal_Player::DeterminePaintContacts()
 {
+#if 0
 	if( GetMoveType() == MOVETYPE_NOCLIP )
 	{
 		return;
@@ -2575,6 +2576,37 @@ void CPortal_Player::DeterminePaintContacts()
 	{
 		PredictPaintContacts( contactBoxMin, contactBoxMax, traceBoxMin, traceBoxMax, jump_helper_look_ahead_time.GetFloat(), JUMP_HELPER_CONTEXT );
 	}
+#else
+
+	CTraceFilterNoPlayers filter;
+
+	trace_t tr;
+	UTIL_TraceLine( GetAbsOrigin() + Vector( 0, 0, 1 ), GetAbsOrigin() - Vector( 0, 0, 1 ), MASK_SOLID, &filter, &tr );
+	
+	if ( !tr.m_pEnt )
+		return;
+	
+	//Trace for paint on the surface if it is the world
+	if( tr.m_pEnt->IsBSPModel() )
+	{
+		m_PortalLocal.m_PaintedPowerType = UTIL_Paint_TracePower( tr.m_pEnt, tr.endpos, tr.plane.normal );
+		Msg("m_PortalLocal.m_PaintedPowerType: %i\n", m_PortalLocal.m_PaintedPowerType);
+	}
+	else
+	{
+		CPaintableEntity* pPaintableEnt = dynamic_cast<CPaintableEntity*>( tr.m_pEnt );
+
+		if ( pPaintableEnt )
+		{
+			m_PortalLocal.m_PaintedPowerType = pPaintableEnt->GetPaintedPower();
+		}
+		else
+		{
+			m_PortalLocal.m_PaintedPowerType = NO_POWER;
+		}
+	}
+
+#endif
 }
 
 

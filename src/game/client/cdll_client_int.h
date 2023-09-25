@@ -138,6 +138,10 @@ int PrecacheParticleSystem( const char *pParticleSystemName );
 int GetParticleSystemIndex( const char *pParticleSystemName );
 const char *GetParticleSystemNameFromIndex( int nIndex );
 
+//-----------------------------------------------------------------------------
+// Precache-related methods for movies
+//-----------------------------------------------------------------------------
+void PrecacheMovie( const char *pMovieName );
 
 //-----------------------------------------------------------------------------
 // Precache-related methods for effects

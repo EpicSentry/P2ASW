@@ -29,7 +29,7 @@ public:
 	void Touch( CBaseEntity *pOther );
 
 	//Use CBaseEntity for now
-	static void FizzleBaseAnimating( CBaseEntity *pActivator, CBaseEntity *pEntity );
+	static void FizzleBaseAnimating( CBaseEntity *pActivator, CBaseAnimating *pBaseAnimating );
 
 	bool m_bVisible;
 	

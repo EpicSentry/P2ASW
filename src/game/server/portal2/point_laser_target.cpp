@@ -73,7 +73,11 @@ void CPortalLaserTarget::Spawn()
     {
         vExtents = vRelayExtents; // Line 74
     }
-    UTIL_SetSize( this, -vExtents, vExtents ); // Line 76
+
+	// NOTE: Doing -vExtents gives an engine error, and this needs fixing - Wonderland_War
+    //UTIL_SetSize( this, -vExtents, vExtents ); // Line 76
+    UTIL_SetSize( this, vExtents, vExtents ); // Line 76
+
 } // Line 77
 
 //-----------------------------------------------------------------------------

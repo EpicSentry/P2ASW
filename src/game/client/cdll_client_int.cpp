@@ -878,6 +878,14 @@ const char *GetMaterialNameFromIndex( int nIndex )
 	}
 }
 
+//-----------------------------------------------------------------------------
+// Precaches a movie
+//-----------------------------------------------------------------------------
+void PrecacheMovie( const char *pMovieName )
+{
+	// TODO:
+	//gHLClient.PrecacheMovie( pMovieName );
+}
 
 //-----------------------------------------------------------------------------
 // Precaches a particle system

@@ -417,11 +417,6 @@ static float ScriptTraceLine( const Vector &vecStart, const Vector &vecEnd, HSCR
 	}
 }
 
-static void PrecacheMovie(const char* movieName)
-{
-
-}
-
 bool VScriptServerInit()
 {
 	VMPROF_START
@@ -478,7 +473,6 @@ bool VScriptServerInit()
 				ScriptRegisterFunctionNamed( g_pScriptVM, NDebugOverlay::Line, "DebugDrawLine", "Draw a debug overlay box" );
 				ScriptRegisterFunction( g_pScriptVM, DoIncludeScript, "Execute a script (internal)" );
 				ScriptRegisterFunction( g_pScriptVM, CreateProp, "Create a physics prop");
-				ScriptRegisterFunction( g_pScriptVM, PrecacheMovie, "Precache a movie...");
 
 				
 				if ( GameRules() )

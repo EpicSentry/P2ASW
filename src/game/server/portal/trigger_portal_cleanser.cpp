@@ -234,14 +234,8 @@ void CTriggerPortalCleanser::Touch( CBaseEntity *pOther )
 }
 
 
-void CTriggerPortalCleanser::FizzleBaseAnimating( CBaseEntity *pActivator, CBaseEntity *pEntity )
+void CTriggerPortalCleanser::FizzleBaseAnimating( CBaseEntity *pActivator, CBaseAnimating *pBaseAnimating )
 {
-
-	Assert( pEntity );
-	Assert( pEntity->GetBaseAnimating() );
-
-	CBaseAnimating *pBaseAnimating = pEntity->GetBaseAnimating();
-
 	if ( pBaseAnimating && !pBaseAnimating->IsDissolving() )
 	{
 		int i = 0;
