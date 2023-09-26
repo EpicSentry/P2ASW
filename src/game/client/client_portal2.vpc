@@ -86,6 +86,7 @@ $Project "Client (Portal 2)"
 			$File "portal2/c_prop_weightedcube.h"
 			$File "portal2/c_fizzler_effects.cpp"
 			$File "portal2/c_fizzler_effects.h"
+			$File "portal2/c_npc_wheatley_boss.cpp"
 			//$File "portal2\c_trigger_tractorbeam.h"
 			//$File "portal2\c_trigger_tractorbeam.cpp"
 
