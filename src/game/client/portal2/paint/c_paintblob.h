@@ -19,6 +19,8 @@ public:
 	~C_PaintBlob();
 
 	virtual void PaintBlobPaint( const trace_t &tr );
+
+	virtual void Init( const Vector &vecOrigin, const Vector &vecVelocity, int paintType, float flMaxStreakTime, float flStreakSpeedDampenRate, CBaseEntity* pOwner, bool bSilent, bool bDrawOnly );
 	
 	C_PaintBlobRenderable *m_pRenderable;
 
@@ -37,6 +39,8 @@ public:
 
 	virtual void	Spawn( void );
 	virtual void	Precache( void );
+	
+	virtual int DrawModel( int flags, const RenderableInstance_t &instance );
 
 	// Data accessors
 	virtual Vector const&			GetRenderOrigin( void );

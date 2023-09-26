@@ -2487,6 +2487,7 @@ enum
 
 void CPortal_Player::DetermineTraceInfo( Vector &vStart, Vector &vEnd, int iTraceType )
 {
+
 	// Set the start to the center
 	vStart = GetAbsOrigin();
 	vStart.z = GetAbsOrigin().z + GetHullHeight() * 0.5; 
@@ -2605,6 +2606,10 @@ void CPortal_Player::AddSurfacePaintPowerInfo( const trace_t& trace, char const*
 	// Hacks since we're limited by the engine code
 
 	m_PortalLocal.m_PaintedPowerType = NO_POWER;
+	
+
+	if (GetMoveType() == MOVETYPE_NOCLIP)
+		return;
 
 	CTraceFilterNoPlayers filter;
 	Vector vStart;

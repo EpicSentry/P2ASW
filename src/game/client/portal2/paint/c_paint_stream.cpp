@@ -374,7 +374,7 @@ int C_PaintStream::DrawModel( int flags, const RenderableInstance_t &instance )
 		UpdateRefractTexture();
 	}
 	
-	DebugDrawBlobs();
+	//DebugDrawBlobs();
 	DrawBlobs( pMaterial );
 
 	return 1;

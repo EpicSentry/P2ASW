@@ -4,6 +4,7 @@
 //
 //==========================================================================//
 #include "cbase.h"
+#include "model_types.h"
 
 #include "c_paintblob.h"
 
@@ -12,18 +13,13 @@
 
 C_PaintBlob::C_PaintBlob()
 {
-	m_pRenderable = new C_PaintBlobRenderable( this );
-		
-	//cl_entitylist->AddNonNetworkableEntity( m_pRenderable->GetIClientUnknown() );
-	//m_pRenderable->PrecacheModel( BLOB_MODEL );
-	m_pRenderable->InitializeAsClientEntity( BLOB_MODEL, false );
-	m_pRenderable->Spawn();
 }
 
 
 C_PaintBlob::~C_PaintBlob()
 {
-	delete m_pRenderable;
+	if (m_pRenderable)
+		delete m_pRenderable;
 }
 
 
@@ -39,6 +35,17 @@ void C_PaintBlob::PaintBlobPaint( const trace_t &tr )
 	
 }
 
+void C_PaintBlob::Init( const Vector &vecOrigin, const Vector &vecVelocity, int paintType, float flMaxStreakTime, float flStreakSpeedDampenRate, CBaseEntity* pOwner, bool bSilent, bool bDrawOnly )
+{
+	CBasePaintBlob::Init( vecOrigin, vecVelocity, paintType, flMaxStreakTime, flStreakSpeedDampenRate, pOwner, bSilent, bDrawOnly );
+		
+	m_pRenderable = new C_PaintBlobRenderable( this );
+		
+	//cl_entitylist->AddNonNetworkableEntity( m_pRenderable->GetIClientUnknown() );
+	//m_pRenderable->PrecacheModel( BLOB_MODEL );
+	m_pRenderable->InitializeAsClientEntity( BLOB_MODEL, false );
+	m_pRenderable->Spawn();
+}
 
 C_PaintBlobRenderable::C_PaintBlobRenderable( C_PaintBlob *pSourceBlob )
 {
@@ -52,20 +59,66 @@ C_PaintBlobRenderable::~C_PaintBlobRenderable()
 	m_pSourceBlob = NULL;
 }
 
-void C_PaintBlobRenderable::Precache( void )
-{
-	PrecacheModel(BLOB_MODEL);
-	BaseClass::Precache();
-}
-
 void C_PaintBlobRenderable::Spawn( void )
 {
 	BaseClass::Spawn();
 	Precache();
 
 	SetModel(BLOB_MODEL);
+	SetModelScale( 0.75 );
+
+	PaintPowerType powerType = m_pSourceBlob->GetPaintPowerType();
+	
+	if ( powerType != NO_POWER )
+	{
+		Color color = MapPowerToColor( powerType );
+
+		SetRenderColorR( color.r() );
+		SetRenderColorG( color.g() );
+		SetRenderColorB( color.b() );
+	}
+	else
+	{
+		SetRenderMode( kRenderTransAlpha );
+		SetRenderColorR( 128 );
+		SetRenderColorG( 128 );
+		SetRenderColorB( 128 );
+		SetRenderAlpha( 160 );
+	}
 
 	g_pClientLeafSystem->DisableCachedRenderBounds( RenderHandle(), true );
+}
+
+void C_PaintBlobRenderable::Precache( void )
+{
+	PrecacheModel(BLOB_MODEL);
+	BaseClass::Precache();
+}
+
+int C_PaintBlobRenderable::DrawModel( int flags, const RenderableInstance_t &instance )
+{	
+#if 0
+	bool bOverride = false;
+	if ( ( flags & STUDIO_RENDER ) )
+	{
+		//for ( int i = 0; i < GetSkin(); i++ )
+		{
+		//	if ( IsCustomMaterialValid( i ) )
+			{
+	
+				IMaterial *pBlobMaterial = materials->FindMaterial( "materials/lights/white001", TEXTURE_GROUP_MODEL, true );
+				modelrender->ForcedMaterialOverride( pBlobMaterial, OVERRIDE_NORMAL );
+				bOverride = true;
+			}
+		}
+	}
+
+	if ( bOverride )
+	{
+	//	modelrender->ForcedMaterialOverride( NULL );
+	}
+#endif
+	return BaseClass::DrawModel( flags, instance );
 }
 
 Vector const& C_PaintBlobRenderable::GetRenderOrigin( void )

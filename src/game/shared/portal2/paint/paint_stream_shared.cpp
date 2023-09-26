@@ -154,7 +154,7 @@ void CPaintStream::QueuePaintEffect()
 void CPaintStream::PreUpdateBlobs()
 {
 	RemoveDeadBlobs();
-	DebugDrawBlobs();
+	//DebugDrawBlobs();
 }
 
 
