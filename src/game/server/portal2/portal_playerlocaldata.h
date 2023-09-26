@@ -36,52 +36,58 @@ public:
     CNetworkVar( float, m_flSlowTimeMaximum );
 #endif // USE_SLOWTIME
 
-	StickCameraState m_nStickCameraState;
-	InAirState m_InAirState;
-	PaintPowerType m_PaintedPowerType;
+	CNetworkVar( StickCameraState, m_nStickCameraState );
+	CNetworkVar( InAirState, m_InAirState );
+	CNetworkVar( PaintPowerType, m_PaintedPowerType );
 
-	int m_nLocatorEntityIndices;
+	CNetworkVar( int, m_nLocatorEntityIndices ); // FIXME: Needs to be array!
 
-	bool m_bShowingViewFinder;
-	bool m_bPlacingPhoto;
-	bool m_bDoneStickInterp;
-	bool m_bDoneCorrectPitch;
+	CNetworkVar( bool, m_bShowingViewFinder );
+	CNetworkVar( bool, m_bPlacingPhoto );
+	CNetworkVar( bool, m_bDoneStickInterp );
+	CNetworkVar( bool, m_bDoneCorrectPitch );
+	CNetworkVar( bool, m_bJumpedThisFrame );
+	CNetworkVar( bool, m_bBouncedThisFrame );
+	CNetworkVar( bool, m_bDuckedInAir );
+	CNetworkVar( bool, m_bZoomedIn );
+	CNetworkVar( bool, m_bPreventedCrouchJumpThisFrame );
+
 	bool m_bAttemptHullResize;
-	bool m_bJumpedThisFrame;
-	bool m_bBouncedThisFrame;
-	bool m_bDuckedInAir;
-	bool m_bZoomedIn;
-	bool m_bPreventedCrouchJumpThisFrame;
 
-	float m_flAirControlSupressionTime;
-	float m_flAirInputScale;
-	float m_flCurrentStickTime;
-	float m_fBouncedTime;
+	CNetworkVar( float, m_flAirControlSupressionTime );
+	CNetworkVar( float, m_flAirInputScale );
+	CNetworkVar( float, m_flCurrentStickTime );
+	CNetworkVar( float, m_fBouncedTime );
+
+	// Fixme?
+	//CNetworkVar( CountdownTimer, m_PaintedPowerTimer );
 
 	CountdownTimer m_PaintedPowerTimer;
+
 	CachedPaintPowerChoiceResult m_CachedPaintPowerChoiceResults[PAINT_POWER_TYPE_COUNT];
 	
-	Vector m_StickNormal;
-	Vector m_OldStickNormal;
-	Vector m_vPreUpdateVelocity;
-	Vector m_Up;
-	Vector m_vStickRotationAxis;
-
-	Vector m_StandHullMin;
-	Vector m_StandHullMax;
-	Vector m_DuckHullMin;
-	Vector m_DuckHullMax;
-	Vector m_CachedStandHullMinAttempt;
-	Vector m_CachedStandHullMaxAttempt;
-	Vector m_CachedDuckHullMinAttempt;
-	Vector m_CachedDuckHullMaxAttempt;
-
-	Vector m_vLocalUp;
-	Vector m_vEyeOffset;
-
-	QAngle m_qQuaternionPunch;
+	CNetworkVector( m_StickNormal );
+	CNetworkVector( m_OldStickNormal );
+	CNetworkVector( m_vPreUpdateVelocity );
+	CNetworkVector( m_Up );
+	CNetworkVector( m_vStickRotationAxis );
 	
-	EHANDLE m_hTractorBeam; // Was probably CHandle<> instead
+	CNetworkVector( m_StandHullMin );
+	CNetworkVector( m_StandHullMax );
+	CNetworkVector( m_DuckHullMin );
+	CNetworkVector( m_DuckHullMax );
+	CNetworkVector( m_CachedStandHullMinAttempt );
+	CNetworkVector( m_CachedStandHullMaxAttempt );
+	CNetworkVector( m_CachedDuckHullMinAttempt );
+	CNetworkVector( m_CachedDuckHullMaxAttempt );
+	
+	CNetworkVector( m_vLocalUp );	
+	CNetworkVector( m_vEyeOffset );
+
+	CNetworkQAngle( m_qQuaternionPunch );
+	
+	CNetworkHandle( CBaseEntity, m_hTractorBeam ) // Change to CTrigger_TractorBeam when we're ready
+
     int m_nTractorBeamCount;
 };
 

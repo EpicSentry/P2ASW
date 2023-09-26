@@ -4,57 +4,55 @@
 
 BEGIN_RECV_TABLE_NOBASE( CPortalPlayerLocalData, DT_PortalLocal ) // Purpose: Not done (Line 16)
 
-/*
-    SendPropBool(&g_SendProps_191[1], "m_bShowingViewFinder", 4, 1);
-    SendPropFloat(&g_SendProps_191[2], "m_flAirControlSupressionTime", 8, 4, 32, 0, 0.0, -121121.12, SendProxy_FloatToFloat, 0x80u);
-    SendPropInt(&v1, "m_nLocatorEntityIndices", 12, 4, -1, 0, 0, 0x80u);
+RecvPropBool( RECVINFO( m_bShowingViewFinder ) ),
+RecvPropFloat( RECVINFO( m_flAirControlSupressionTime ) ),
+RecvPropInt( RECVINFO( m_nLocatorEntityIndices ) ),
 
-    SendPropArray3(&g_SendProps_191[3], "m_nLocatorEntityIndices", 12, 4, 16, v1, SendProxy_DataTableToDataTable, 128); // v1 ??
+RecvPropInt( RECVINFO( m_nLocatorEntityIndices ) ), // FIXME: Needs to be array!
 
-    SendPropBool(&g_SendProps_191[4], "m_bPlacingPhoto", 76, 1);
+RecvPropBool( RECVINFO( m_bPlacingPhoto ) ),
 
-    SendPropVector(&g_SendProps_191[5], "m_StickNormal", 1048736, 12, 0, 4, 0.0, -121121.12, SendProxy_UnmodifiedQAngles, 0x80u);
-    SendPropVector(&g_SendProps_191[6], "m_OldStickNormal", 1048748, 12, 0, 4, 0.0, -121121.12, SendProxy_UnmodifiedQAngles, 0x80u);
-    SendPropVector(&g_SendProps_191[7], "m_vPreUpdateVelocity", 1048760, 12, 0, 4, 0.0, -121121.12, SendProxy_UnmodifiedQAngles, 0x80u);
-    SendPropVector(&g_SendProps_191[8], "m_Up", 1048772, 12, 0, 4, 0.0, -121121.12, SendProxy_UnmodifiedQAngles, 0x80u);
-    SendPropVector(&g_SendProps_191[9], "m_vStickRotationAxis", 1048784, 12, 0, 4, 0.0, -121121.12, SendProxy_UnmodifiedQAngles, 0x80u);
-    SendPropVector(&g_SendProps_191[10], "m_StandHullMin", 1048796, 12, 0, 4, 0.0, -121121.12, SendProxy_UnmodifiedQAngles, 0x80u);
-    SendPropVector(&g_SendProps_191[11], "m_StandHullMax", 1048808, 12, 0, 4, 0.0, -121121.12, SendProxy_UnmodifiedQAngles, 0x80u);
-    SendPropVector(&g_SendProps_191[12], "m_DuckHullMin", 1048820, 12, 0, 4, 0.0, -121121.12, SendProxy_UnmodifiedQAngles, 0x80u);
-    SendPropVector(&g_SendProps_191[13], "m_DuckHullMax", 1048832, 12, 0, 4, 0.0, -121121.12, SendProxy_UnmodifiedQAngles, 0x80u);
-    SendPropVector(&g_SendProps_191[14], "m_CachedStandHullMinAttempt", 1048844, 12, 0, 4, 0.0, -121121.12, SendProxy_UnmodifiedQAngles, 0x80u);
-    SendPropVector(&g_SendProps_191[15], "m_CachedStandHullMaxAttempt", 1048856, 12, 0, 4, 0.0, -121121.12, SendProxy_UnmodifiedQAngles, 0x80u);
-    SendPropVector(&g_SendProps_191[16], "m_CachedDuckHullMinAttempt", 1048868, 12, 0, 4, 0.0, -121121.12, SendProxy_UnmodifiedQAngles, 0x80u);
-    SendPropVector(&g_SendProps_191[17], "m_CachedDuckHullMaxAttempt", 1048880, 12, 0, 4, 0.0, -121121.12, SendProxy_UnmodifiedQAngles, 0x80u);
-    SendPropVector(&g_SendProps_191[18], "m_vLocalUp", 1048892, 12, 0, 4, 0.0, -121121.12, SendProxy_UnmodifiedQAngles, 0x80u);
-    SendPropVector(&g_SendProps_191[19], "m_vEyeOffset", 1048904, 12, 0, 4, 0.0, -121121.12, SendProxy_UnmodifiedQAngles, 0x80u);
+RecvPropVector( RECVINFO( m_StickNormal ) ),
+RecvPropVector( RECVINFO( m_OldStickNormal ) ),
+RecvPropVector( RECVINFO( m_vPreUpdateVelocity ) ),
+RecvPropVector( RECVINFO( m_Up ) ),
+RecvPropVector( RECVINFO( m_vStickRotationAxis ) ),
+RecvPropVector( RECVINFO( m_StandHullMin ) ),
+RecvPropVector( RECVINFO( m_StandHullMax ) ),
+RecvPropVector( RECVINFO( m_DuckHullMin ) ),
+RecvPropVector( RECVINFO( m_DuckHullMax ) ),
+RecvPropVector( RECVINFO( m_CachedStandHullMinAttempt ) ),
+RecvPropVector( RECVINFO( m_CachedStandHullMaxAttempt ) ),
+RecvPropVector( RECVINFO( m_CachedDuckHullMinAttempt ) ),
+RecvPropVector( RECVINFO( m_CachedDuckHullMaxAttempt ) ),
+RecvPropVector( RECVINFO( m_vLocalUp ) ),
+RecvPropVector( RECVINFO( m_vEyeOffset ) ),
 
-    SendPropQAngles(&g_SendProps_191[20], "m_qQuaternionPunch", 1048916, 12, 0, 4, SendProxy_QAngles, 0x80u);
+RecvPropQAngles( RECVINFO( m_qQuaternionPunch ) ),
 
-    SendPropInt(&g_SendProps_191[21], "m_PaintedPowerType", 352, 4, -1, 0, 0, 0x80u);
+RecvPropInt( RECVINFO( m_PaintedPowerType ) ),
 
-    SendPropDataTable(&g_SendProps_191[22], "m_PaintedPowerTimer", 356, &DT_CountdownTimer::g_SendTable, SendProxy_DataTableToDataTable, 0x80u);
+// RecvPropDataTable( RECVINFO( m_PaintedPowerTimer ) ), // FIXME!
 
-    SendPropFloat(&g_SendProps_191[23], "m_flCurrentStickTime", 372, 4, 0, 4, 0.0, -121121.12, SendProxy_FloatToFloat, 0x80u);
-    SendPropFloat(&g_SendProps_191[24], "m_flAirInputScale", 368, 4, 0, 4, 0.0, -121121.12, SendProxy_FloatToFloat, 0x80u);
+RecvPropFloat( RECVINFO( m_flCurrentStickTime ) ),
+RecvPropFloat( RECVINFO( m_flAirInputScale ) ),
 
-    SendPropInt(&g_SendProps_191[25], "m_nStickCameraState", 376, 4, -1, 0, 0, 0x80u);
-    SendPropInt(&g_SendProps_191[26], "m_InAirState", 380, 4, -1, 0, 0, 0x80u);
+RecvPropInt( RECVINFO( m_nStickCameraState ) ),
+RecvPropInt( RECVINFO( m_InAirState ) ),
 
-    SendPropBool(&g_SendProps_191[27], "m_bDoneStickInterp", 384, 1);
-    SendPropBool(&g_SendProps_191[28], "m_bDoneCorrectPitch", 385, 1);
-    SendPropBool(&g_SendProps_191[29], "m_bJumpedThisFrame", 387, 1);
-    SendPropBool(&g_SendProps_191[30], "m_bBouncedThisFrame", 388, 1);
-    SendPropBool(&g_SendProps_191[31], "m_bDuckedInAir", 389, 1);
+RecvPropBool( RECVINFO( m_bDoneStickInterp ) ),
+RecvPropBool( RECVINFO( m_bDoneCorrectPitch ) ),
+RecvPropBool( RECVINFO( m_bJumpedThisFrame ) ),
+RecvPropBool( RECVINFO( m_bBouncedThisFrame ) ),
+RecvPropBool( RECVINFO( m_bDuckedInAir ) ),
 
-    SendPropEHandle(&g_SendProps_191[32], "m_hTractorBeam", 392, 4, -1, SendProxy_EHandleToInt);
+RecvPropEHandle( RECVINFO( m_hTractorBeam ) ),
 
-    SendPropBool(&g_SendProps_191[33], "m_bZoomedIn", 400, 1);
+RecvPropBool( RECVINFO( m_bZoomedIn ) ),
 
-    SendPropFloat(&g_SendProps_191[34], "m_fBouncedTime", 404, 4, 32, 0, 0.0, -121121.12, SendProxy_FloatToFloat, 0x80u);
+RecvPropFloat( RECVINFO( m_fBouncedTime ) ),
 
-    SendPropBool(&g_SendProps_191[35], "m_bPreventedCrouchJumpThisFrame", 408, 1);
-	*/
+RecvPropBool( RECVINFO( m_bPreventedCrouchJumpThisFrame ) ),
 
 END_RECV_TABLE()
 

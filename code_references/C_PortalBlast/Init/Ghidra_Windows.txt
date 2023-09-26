@@ -1,0 +1,158 @@
+
+/* WARNING: Variable defined which should be unmapped: vForward */
+/* public: void __thiscall C_PortalBlast::Init(class CBaseHandle,bool,enum PortalPlacedBy_t,class
+   Vector const &,class Vector const &,class QAngle const &,float) */
+
+void __thiscall
+C_PortalBlast::Init(C_PortalBlast *this,CBaseHandle param_1,bool param_2,PortalPlacedBy_t param_3,
+                   Vector *param_4,Vector *param_5,QAngle *param_6,float param_7)
+
+{
+  Vector *pVVar1;
+  float fVar2;
+  Vector VVar3;
+  Vector VVar4;
+  undefined auVar5 [16];
+  undefined auVar6 [12];
+  char cVar7;
+  undefined4 uVar8;
+  int *piVar9;
+  int iVar10;
+  CNewParticleEffect *pCVar11;
+  char *pcVar12;
+  float fVar13;
+  float fVar14;
+  float fVar15;
+  float fVar16;
+  undefined **ppuVar17;
+  Vector local_58;
+  Vector vecRight;
+  Vector vecUp;
+  Vector local_30;
+  Vector vColor;
+  Vector vForward;
+  Color colorPortal;
+  CSmartPtr_CNewParticleEffect_CRefCountAccessor_ pEffect;
+  
+  CBaseEntityList::AddNonNetworkableEntity
+            ((CBaseEntityList *)cl_entitylist,(IHandleEntity *)&vForward);
+  CClientThinkList::SetNextClientThink
+            ((CClientThinkList *)&g_ClientThinkList,(CBaseHandle)*(ulong *)&this->field_0x384,
+             -1293.0);
+  C_BaseEntity::AddToLeafSystem((C_BaseEntity *)this,false);
+  _vecUp = ZEXT816(0xc1039b940);
+  C_BaseEntity::ThinkSet
+            ((C_BaseEntity *)this,(_func_void *)&vecUp,
+             (float)C_PropRocketTripwire::_vcall__4__flat______,&DAT_0000000c);
+  (**(code **)(*(int *)this + 0x1d0))(0xc4a1a000);
+  pVVar1 = &this->m_ptCreationPoint;
+  pVVar1->x = param_4->x;
+  (this->m_ptCreationPoint).y = param_4->y;
+  (this->m_ptCreationPoint).z = param_4->z;
+  (this->m_ptDeathPoint).x = param_5->x;
+  (this->m_ptDeathPoint).y = param_5->y;
+  (this->m_ptDeathPoint).z = param_5->z;
+  C_BaseEntity::SetAbsOrigin((C_BaseEntity *)this,pVVar1);
+  vForward.x = ((cl_portal_projectile_delay_sp.m_pParent)->m_Value).m_fValue;
+  fVar13 = vForward.x;
+  if ((g_pGameRules != (C_GameRules *)0x0) &&
+     (cVar7 = (**(code **)(*(int *)g_pGameRules + 0x84))(), fVar13 = vForward.x, cVar7 != '\0')) {
+    fVar13 = ((cl_portal_projectile_delay_mp.m_pParent)->m_Value).m_fValue;
+  }
+  fVar13 = *(float *)(gpGlobals + 0xc) + fVar13;
+  this->m_fDeathTime = param_7;
+  this->m_fCreationTime = fVar13;
+  if (param_7 - 0.1 < fVar13) {
+    this->m_fDeathTime = fVar13 + 0.1;
+  }
+  AngleVectors(param_6,&vColor,&local_58,&vecRight);
+  fVar13 = (this->m_ptCreationPoint).y;
+  fVar2 = (this->m_ptCreationPoint).z;
+  fVar14 = pVVar1->x - (this->m_ptDeathPoint).x;
+  fVar15 = fVar13 - (this->m_ptDeathPoint).y;
+  fVar16 = fVar2 - (this->m_ptDeathPoint).z;
+  fVar14 = SQRT(fVar15 * fVar15 + fVar16 * fVar16 + fVar14 * fVar14);
+  _vecUp = ZEXT416((uint)fVar14);
+  (this->m_ptAimPoint).x = pVVar1->x + vColor.x * fVar14;
+  (this->m_ptAimPoint).y = fVar13 + vColor.y * fVar14;
+  (this->m_ptAimPoint).z = fVar2 + vColor.z * fVar14;
+  vForward.y = 0.0;
+  if (param_3 == PORTAL_PLACED_BY_PLAYER) {
+    if ((param_1.m_Index == 0xffffffff) ||
+       (*(uint *)((int)(g_pEntityList + (param_1.m_Index & 0xffff) * 0x10 + 4) + 4) !=
+        param_1.m_Index >> 0x10)) {
+      uVar8 = 0;
+      ppuVar17 = &class_C_Portal_Player__RTTI_Type_Descriptor_;
+    }
+    else {
+      uVar8 = *(undefined4 *)(g_pEntityList + (param_1.m_Index & 0xffff) * 0x10 + 4);
+      ppuVar17 = &class_C_Portal_Player__RTTI_Type_Descriptor_;
+    }
+LAB_102857f8:
+    piVar9 = (int *)___RTDynamicCast(uVar8,0,&class_IHandleEntity__RTTI_Type_Descriptor_,ppuVar17,0)
+    ;
+    if ((piVar9 != (int *)0x0) && (iVar10 = (**(code **)(*piVar9 + 0x154))(), iVar10 != -1)) {
+      VVar3.z = vec3_origin.z;
+      VVar3.x = vec3_origin.x;
+      VVar3.y = vec3_origin.y;
+      pCVar11 = CParticleProperty::Create
+                          ((CParticleProperty *)&this->field_0x46c,"portal_projectile_stream",
+                           PATTACH_ABSORIGIN_FOLLOW,-1,VVar3,(matrix3x4_t *)0x0);
+      if (pCVar11 != (CNewParticleEffect *)0x0) {
+        CNewParticleEffect::AddRef(pCVar11);
+        vForward.y = (float)pCVar11;
+      }
+      UTIL_Portal_Color_Particles((int)&vForward,param_2 + 1);
+      local_30.x = (float)((uint)vForward.x & 0xff);
+      local_30.y = (float)((uint)vForward.x >> 8 & 0xff);
+      local_30.z = (float)((uint)vForward.x >> 0x10 & 0xff);
+      CNewParticleEffect::SetControlPoint((CNewParticleEffect *)vForward.y,2,&local_30);
+      goto LAB_1028590b;
+    }
+  }
+  else if (param_3 == PORTAL_PLACED_BY_PEDESTAL) {
+    if ((param_1.m_Index == 0xffffffff) ||
+       (*(uint *)((int)(g_pEntityList + (param_1.m_Index & 0xffff) * 0x10 + 4) + 4) !=
+        param_1.m_Index >> 0x10)) {
+      uVar8 = 0;
+    }
+    else {
+      uVar8 = *(undefined4 *)(g_pEntityList + (param_1.m_Index & 0xffff) * 0x10 + 4);
+    }
+    ppuVar17 = &class_C_WeaponPortalgun__RTTI_Type_Descriptor_;
+    goto LAB_102857f8;
+  }
+  pcVar12 = "portal_2_projectile_stream_pedestal";
+  if (!param_2) {
+    pcVar12 = "portal_1_projectile_stream_pedestal";
+  }
+  VVar4.z = vec3_origin.z;
+  VVar4.x = vec3_origin.x;
+  VVar4.y = vec3_origin.y;
+  pCVar11 = CParticleProperty::Create
+                      ((CParticleProperty *)&this->field_0x46c,pcVar12,PATTACH_ABSORIGIN_FOLLOW,-1,
+                       VVar4,(matrix3x4_t *)0x0);
+  if (pCVar11 != (CNewParticleEffect *)0x0) {
+    CNewParticleEffect::AddRef(pCVar11);
+    vForward.y = (float)pCVar11;
+  }
+LAB_1028590b:
+  fVar13 = vForward.y;
+  auVar6._4_4_ = vColor.x;
+  auVar6._0_4_ = vecUp.x;
+  auVar6._8_4_ = vColor.y;
+  vecUp = (Vector)(auVar6 ^ (undefined  [12])0x8000000000000000 ^
+                  SUB1612((undefined  [16])0x80000000,0));
+  auVar5._12_4_ = vColor.z;
+  auVar5._0_4_ = vecUp.x;
+  auVar5._4_4_ = vecUp.y;
+  auVar5._8_4_ = vecUp.z;
+  _vecUp = auVar5 ^ (undefined  [16])0x8000000000000000;
+  CNewParticleEffect::SetControlPointOrientation
+            ((CNewParticleEffect *)vForward.y,1,(Vector *)&vecUp.y,&local_58,&vecRight);
+  if (fVar13 != 0.0) {
+    CNewParticleEffect::Release((CNewParticleEffect *)fVar13);
+  }
+  return;
+}
+
