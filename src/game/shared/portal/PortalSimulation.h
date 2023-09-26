@@ -44,6 +44,13 @@ enum PS_PhysicsObjectSourceType_t
 	PSPOST_HOLYWALL_TUBE
 };
 
+enum RayInPortalHoleResult_t
+{
+	RIPHR_NOT_TOUCHING_HOLE = 0,
+	RIPHR_TOUCHING_HOLE_NOT_WALL, //only the hole
+	RIPHR_TOUCHING_HOLE_AND_WALL, //both hole and surrounding wall
+};
+
 struct PortalTransformAsAngledPosition_t //a matrix transformation from this portal to the linked portal, stored as vector and angle transforms
 {
 	Vector ptOriginTransform;
@@ -107,6 +114,7 @@ struct PS_PlacementData_t //stuff useful for geometric operations
 	PortalTransformAsAngledPosition_t ptaap_ThisToLinked;
 	PortalTransformAsAngledPosition_t ptaap_LinkedToThis;
 	CPhysCollide *pHoleShapeCollideable; //used to test if a collideable is in the hole, should NOT be collided against in general
+	CPhysCollide *pInvHoleShapeCollideable; //A very thin, but wide wall with the portal hole cut out in the middle. Used to test if traces are fully encapsulated in a portal hole
 	CPhysCollide *pAABBAngleTransformCollideable; //used for player traces so we can slide into the portal gracefully if there's an angular difference such that our transformed AABB is in solid until the center reaches the plane
 	Vector vCollisionCloneExtents; //how far in each direction (in front of the portal) we clone collision data from the real world.
 	EHANDLE hPortalPlacementParent;
@@ -408,8 +416,8 @@ public:
 	bool				EntityIsInPortalHole( CBaseEntity *pEntity ) const; //true if the entity is within the portal cutout bounds and crossing the plane. Not just *near* the portal
 	bool				EntityHitBoxExtentIsInPortalHole( CBaseAnimating *pBaseAnimating, bool bUseCollisionAABB ) const; //true if the entity is within the portal cutout bounds and crossing the plane. Not just *near* the portal
 	void				RemoveEntityFromPortalHole( CBaseEntity *pEntity ); //if the entity is in the portal hole, this forcibly moves it out by any means possible
-
-	bool				RayIsInPortalHole( const Ray_t &ray ) const; //traces a ray against the same detector for EntityIsInPortalHole(), bias is towards false positives
+	
+	RayInPortalHoleResult_t IsRayInPortalHole( const Ray_t &ray ) const; //traces a ray against the same detector for EntityIsInPortalHole(), bias is towards false positives
 	
 	static CPortalSimulator *GetSimulatorThatOwnsEntity( const CBaseEntity *pEntity ); //fairly cheap to call
 	

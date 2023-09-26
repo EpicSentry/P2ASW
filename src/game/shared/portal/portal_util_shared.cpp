@@ -669,8 +669,8 @@ void UTIL_Portal_TraceRay( const CPortal_Base2D *pPortal, const Ray_t &ray, unsi
 	bool bTraceStaticProps = sv_portal_trace_vs_staticprops.GetBool();
 	if( sv_portal_trace_vs_holywall.GetBool() == false )
 		bTraceHolyWall = false;
-
-	bool bTraceTransformedGeometry = ( (pLinkedPortalSimulator != NULL) && bTraceHolyWall && portalSimulator.RayIsInPortalHole( ray ) );	
+	
+	bool bTraceTransformedGeometry = ( (pLinkedPortalSimulator != NULL) && bTraceHolyWall && (portalSimulator.IsRayInPortalHole( ray ) != RIPHR_NOT_TOUCHING_HOLE) );	
 
 	bool bCopyBackBrushTraceData = false;
 
@@ -875,7 +875,7 @@ void UTIL_PortalLinked_TraceRay( const CPortal_Base2D *pPortal, const Ray_t &ray
 
 	const CPortalSimulator &portalSimulator = pPortal->m_PortalSimulator;
 	CPortal_Base2D *pLinkedPortal = (CPortal_Base2D*)(pPortal->m_hLinkedPortal.Get());
-	if( (pLinkedPortal == NULL) || (portalSimulator.RayIsInPortalHole( ray ) == false) )
+	if( (pLinkedPortal == NULL) || (portalSimulator.IsRayInPortalHole( ray ) == RIPHR_NOT_TOUCHING_HOLE) )
 	{
 		memset( pTrace, 0, sizeof(trace_t));
 		pTrace->fraction = 1.0f;
