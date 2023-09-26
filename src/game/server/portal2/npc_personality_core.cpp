@@ -300,7 +300,7 @@ void CNPC_PersonalityCore::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, US
 
 QAngle CNPC_PersonalityCore::PreferredCarryAngles()
 {
-	return QAngle(sv_personality_core_pca_pitch.GetMaxValue(), sv_personality_core_pca_yaw.GetMaxValue(), sv_personality_core_pca_roll.GetMaxValue());
+	return QAngle(sv_personality_core_pca_pitch.GetFloat(), sv_personality_core_pca_yaw.GetFloat(), sv_personality_core_pca_roll.GetFloat());
 }
 
 CAI_Expresser* CNPC_PersonalityCore::CreateExpresser()
