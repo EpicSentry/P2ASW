@@ -5,7 +5,7 @@
 // $NoKeywords: $
 //
 //=============================================================================//
-
+#include <cbase.h>
 #include "CreateMultiplayerGameBotPage.h"
 
 using namespace vgui;

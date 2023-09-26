@@ -3,7 +3,7 @@
 // Purpose: 
 //
 //==========================================================================//
-
+#include <cbase.h>
 #include "OptionsSubVoice.h"
 #include "CvarSlider.h"
 #include <vgui/IVGui.h>
@@ -27,7 +27,7 @@ using namespace vgui;
 //-----------------------------------------------------------------------------
 COptionsSubVoice::COptionsSubVoice(vgui::Panel *parent) : PropertyPage(parent, NULL)
 {
-#if !defined( NO_VOICE ) //#ifndef _XBOX
+#if !defined( NO_VOICE )
 	m_pVoiceTweak = engine->GetVoiceTweakAPI();
 #endif
     m_pMicMeter = new ImagePanel(this, "MicMeter");

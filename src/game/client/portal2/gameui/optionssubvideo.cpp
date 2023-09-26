@@ -1,10 +1,10 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright (c) 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
 // $NoKeywords: $
-//=============================================================================//
-
+//=======================================================================================//
+#include <cbase.h>
 #include "OptionsSubVideo.h"
 #include "CvarSlider.h"
 #include "EngineInterface.h"
@@ -111,15 +111,9 @@ int GetScreenAspectMode( int width, int height )
 //-----------------------------------------------------------------------------
 void GetResolutionName( vmode_t *mode, char *sz, int sizeofsz )
 {
-	if ( mode->width == 1280 && mode->height == 1024 )
-	{
-		// LCD native monitor resolution gets special case
-		Q_snprintf( sz, sizeofsz, "%i x %i (LCD)", mode->width, mode->height );
-	}
-	else
-	{
-		Q_snprintf( sz, sizeofsz, "%i x %i", mode->width, mode->height );
-	}
+	int desktopWidth, desktopHeight;
+	gameuifuncs->GetDesktopResolution( desktopWidth, desktopHeight );
+	Q_snprintf( sz, sizeofsz, "%i x %i%s", mode->width, mode->height, ( mode->width == desktopWidth ) && ( mode->height == desktopHeight ) ? " (native)" : "" );
 }
 
 //-----------------------------------------------------------------------------
@@ -468,7 +462,7 @@ public:
 
 		// append the recommended flag
 		wchar_t newText[512];
-		_snwprintf( newText, sizeof(newText) / sizeof(wchar_t), L"%s *", text );
+		Q_snwprintf( newText, sizeof(newText) / sizeof(wchar_t), L"%s *", text );
 
 		// reset
 		combo->UpdateItem(iItem, newText, NULL);
@@ -548,11 +542,11 @@ public:
 		int nAAQuality = pKeyValues->GetInt( "ConVar.mat_aaquality", 0 );
 		int nRenderToTextureShadows = pKeyValues->GetInt( "ConVar.r_shadowrendertotexture", 0 );
 		int nShadowDepthTextureShadows = pKeyValues->GetInt( "ConVar.r_flashlightdepthtexture", 0 );
-#ifndef _X360
+#ifndef _GAMECONSOLE
 		int nWaterUseRealtimeReflection = pKeyValues->GetInt( "ConVar.r_waterforceexpensive", 0 );
 #endif
 		int nWaterUseEntityReflection = pKeyValues->GetInt( "ConVar.r_waterforcereflectentities", 0 );
-		int nMatVSync = pKeyValues->GetInt( "ConVar.mat_vsync", 1 );
+		int nMatVSync = pKeyValues->GetInt( "ConVar.mat_vsync", 0 );
 		int nRootLOD = pKeyValues->GetInt( "ConVar.r_rootlod", 0 );
 		int nReduceFillRate = pKeyValues->GetInt( "ConVar.mat_reducefillrate", 0 );
 		int nDXLevel = pKeyValues->GetInt( "ConVar.mat_dxlevel", 0 );
@@ -616,7 +610,7 @@ public:
 
 		SetComboItemAsRecommended( m_pShaderDetail, nReduceFillRate ? 0 : 1 );
 		
-#ifndef _X360
+#ifndef _GAMECONSOLE
 		if ( nWaterUseRealtimeReflection )
 #endif
 		{
@@ -629,7 +623,7 @@ public:
 				SetComboItemAsRecommended( m_pWaterDetail, 1 );
 			}
 		}
-#ifndef _X360
+#ifndef _GAMECONSOLE
 		else
 		{
 			SetComboItemAsRecommended( m_pWaterDetail, 0 );
@@ -722,19 +716,19 @@ public:
 		{
 		default:
 		case 0:
-#ifndef _X360
+#ifndef _GAMECONSOLE
 			ApplyChangesToConVar( "r_waterforceexpensive", false );
 #endif
 			ApplyChangesToConVar( "r_waterforcereflectentities", false );
 			break;
 		case 1:
-#ifndef _X360
+#ifndef _GAMECONSOLE
 			ApplyChangesToConVar( "r_waterforceexpensive", true );
 #endif
 			ApplyChangesToConVar( "r_waterforcereflectentities", false );
 			break;
 		case 2:
-#ifndef _X360
+#ifndef _GAMECONSOLE
 			ApplyChangesToConVar( "r_waterforceexpensive", true );
 #endif
 			ApplyChangesToConVar( "r_waterforcereflectentities", true );
@@ -765,7 +759,7 @@ public:
 		ConVarRef mat_aaquality( "mat_aaquality" );
 		ConVarRef mat_vsync( "mat_vsync" );
 		ConVarRef r_flashlightdepthtexture( "r_flashlightdepthtexture" );
-#ifndef _X360
+#ifndef _GAMECONSOLE
 		ConVarRef r_waterforceexpensive( "r_waterforceexpensive" );
 #endif
 		ConVarRef r_waterforcereflectentities( "r_waterforcereflectentities" );
@@ -830,7 +824,7 @@ public:
 		int nMSAAMode = FindMSAAMode( nAASamples, nAAQuality );
 		m_pAntialiasingMode->ActivateItem( nMSAAMode );
 		
-#ifndef _X360
+#ifndef _GAMECONSOLE
 		if ( r_waterforceexpensive.GetBool() )
 #endif
 		{
@@ -843,7 +837,7 @@ public:
 				m_pWaterDetail->ActivateItem( 1 );
 			}
 		}
-#ifndef _X360
+#ifndef _GAMECONSOLE
 		else
 		{
 			m_pWaterDetail->ActivateItem( 0 );
@@ -1090,7 +1084,7 @@ void COptionsSubVideo::PrepareResolutionList()
 	else
 	{
 		char sz[256];
-		sprintf( sz, "%d x %d", config.m_VideoMode.m_Width, config.m_VideoMode.m_Height );
+		Q_snprintf( sz, ARRAYSIZE( sz ), "%d x %d", config.m_VideoMode.m_Width, config.m_VideoMode.m_Height );
 		m_pMode->SetText( sz );
 	}
 }
@@ -1350,8 +1344,8 @@ COptionsSubVideoThirdPartyCreditsDlg::COptionsSubVideoThirdPartyCreditsDlg( vgui
 	SetProportional( true );
 
 	// parent is ignored, since we want look like we're steal focus from the parent (we'll become modal below)
-#ifdef SDK_CLIENT_DLL
-	SetScheme( "SwarmFrameScheme" );
+#ifdef GAMEUI_BASEMODPANEL_VGUI
+	SetScheme( GAMEUI_BASEMODPANEL_SCHEME );
 #endif
 
 	SetTitle("#GameUI_ThirdPartyVideo_Title", true);

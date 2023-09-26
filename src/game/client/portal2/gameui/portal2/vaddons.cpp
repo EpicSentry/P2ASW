@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve Corporation, All rights reserved. ============//
+//========= Copyright (c) 1996-2008, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -30,8 +30,6 @@
 #include "UtlBuffer.h"
 #include "vpklib/packedstore.h"
 #include "tier2/fileutils.h"
-#include "nb_header_footer.h"
-#include "nb_button.h"
 
 // use the JPEGLIB_USE_STDIO define so that we can read in jpeg's from outside the game directory tree.  For Spray Import.
 #define JPEGLIB_USE_STDIO
@@ -160,8 +158,7 @@ void AddonListItem::Paint( )
 		int nPanelWide, nPanelTall;
 		GetSize( nPanelWide, nPanelTall );
 
-		//surface()->DrawSetColor( Color( 240, 0, 0, 255 ) );
-		surface()->DrawSetColor( Color( 169, 213, 255, 128 ) );
+		surface()->DrawSetColor( Color( 240, 0, 0, 255 ) );
 
 		// Top lines
 		surface()->DrawFilledRectFade( 0, 0, 0.5f * nPanelWide, 2, 0, 255, true );
@@ -205,16 +202,8 @@ void GetPrimaryModDirectory( char *pcModPath, int nSize )
 Addons::Addons( Panel *parent, const char *panelName ):
 BaseClass( parent, panelName, false, true )
 {
-	GameUI().PreventEngineHideGameUI();
-
 	SetDeleteSelfOnClose(true);
 	SetProportional( true );
-
-	m_pHeaderFooter = new CNB_Header_Footer( this, "HeaderFooter" );
-	m_pHeaderFooter->SetTitle( "" );
-	m_pHeaderFooter->SetHeaderEnabled( false );
-	m_pHeaderFooter->SetGradientBarEnabled( true );
-	m_pHeaderFooter->SetGradientBarPos( 75, 350 );
 
 	m_GplAddons = new GenericPanelList( this, "GplAddons", GenericPanelList::ISM_ELEVATOR );
 	m_GplAddons->ShowScrollProgress( true );
@@ -237,7 +226,7 @@ BaseClass( parent, panelName, false, true )
 		"cl_ignore_vpk_association",
 		true );
 
-	SetLowerGarnishEnabled( true );
+	SetFooterEnabled( true );
 	m_pAddonList = NULL;
 	m_ActiveControl = m_GplAddons;
 
@@ -251,7 +240,6 @@ Addons::~Addons()
 {
 	delete m_GplAddons;
 	m_pAddonList->deleteThis();
-	GameUI().AllowEngineHideGameUI();
 }
 
 //=============================================================================
@@ -261,7 +249,8 @@ void Addons::Activate()
 
 	m_GplAddons->RemoveAllPanelItems();
 	m_addonInfoList.RemoveAll();
-	m_pAddonList ? m_pAddonList->deleteThis() : NULL;
+	if ( m_pAddonList )  
+		m_pAddonList->deleteThis();
 
 	//
 	// Get the list of addons
@@ -322,17 +311,17 @@ void Addons::Activate()
 
 				// Make the addon types string based on the flags
 				addonInfo.szTypes[0] = NULL;
-				bCampaign ? wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Campaign" ), sizeof( addonInfo.szTypes ) ) : NULL;
-				bMaps ? wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Map" ), sizeof( addonInfo.szTypes ) ) : NULL;
-				bSkin ? wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Skin" ), sizeof( addonInfo.szTypes ) ) : NULL;
-				bWeapon ? wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Weapon" ), sizeof( addonInfo.szTypes ) ) : NULL;
-				bBoss ? wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Boss" ), sizeof( addonInfo.szTypes ) ) : NULL;
-				bCommon ? wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Common" ), sizeof( addonInfo.szTypes ) ) : NULL;
-				bSurvivor ? wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Survivor" ), sizeof( addonInfo.szTypes ) ) : NULL;
-				bSound ? wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Sound" ), sizeof( addonInfo.szTypes ) ) : NULL;
-				bScript ? wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Script" ), sizeof( addonInfo.szTypes ) ) : NULL;
-				bMusic ? wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Music" ), sizeof( addonInfo.szTypes ) ) : NULL;
-				bProp ? wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Props" ), sizeof( addonInfo.szTypes ) ) : NULL;
+				bCampaign ? Q_wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Campaign" ), sizeof( addonInfo.szTypes ) ) : NULL;
+				bMaps ? Q_wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Map" ), sizeof( addonInfo.szTypes ) ) : NULL;
+				bSkin ? Q_wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Skin" ), sizeof( addonInfo.szTypes ) ) : NULL;
+				bWeapon ? Q_wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Weapon" ), sizeof( addonInfo.szTypes ) ) : NULL;
+				bBoss ? Q_wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Boss" ), sizeof( addonInfo.szTypes ) ) : NULL;
+				bCommon ? Q_wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Common" ), sizeof( addonInfo.szTypes ) ) : NULL;
+				bSurvivor ? Q_wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Survivor" ), sizeof( addonInfo.szTypes ) ) : NULL;
+				bSound ? Q_wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Sound" ), sizeof( addonInfo.szTypes ) ) : NULL;
+				bScript ? Q_wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Script" ), sizeof( addonInfo.szTypes ) ) : NULL;
+				bMusic ? Q_wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Music" ), sizeof( addonInfo.szTypes ) ) : NULL;
+				bProp ? Q_wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Props" ), sizeof( addonInfo.szTypes ) ) : NULL;
 
 				// Remove trailing ','
 				if ( wcslen( addonInfo.szTypes ) )
@@ -394,7 +383,7 @@ void Addons::UpdateFooter()
 	CBaseModFooterPanel *footer = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
 	if ( footer )
 	{
-		footer->SetButtons( FB_BBUTTON, FF_AB_ONLY, false );
+		footer->SetButtons( FB_BBUTTON );
 		footer->SetButtonText( FB_BBUTTON, "#L4D360UI_Done" );
 	}
 }
@@ -441,7 +430,7 @@ void Addons::ApplySchemeSettings(vgui::IScheme *pScheme)
 //=============================================================================
 void Addons::PaintBackground()
 {
-	//BaseClass::DrawDialogBackground( "#L4D360UI_My_Addons", NULL, "#L4D360UI_My_Addons_Desc", NULL );
+	BaseClass::DrawDialogBackground( "#L4D360UI_My_Addons", NULL, "#L4D360UI_My_Addons_Desc", NULL );
 }
 
 //=============================================================================
@@ -574,7 +563,7 @@ void Addons::GetAddonImage( const char *pcAddonDir, char *pcImagePath, int nImag
 	else
 	{
 		// Copy the failsafe path
-		V_strncpy( pcImagePath, "common/swarm_cycle", nImagePathSize );
+		V_strncpy( pcImagePath, "common/l4d_spinner", nImagePathSize );
 
 		if ( CE_SUCCESS == SConvertJPEGToTGA( jpegFilename, tgaFilename) )
 		{
@@ -610,7 +599,7 @@ void Addons::SetDetailsUIForAddon( int nIndex )
 	wchar_t wsAuthorLabel[130];
 
 	V_wcsncpy( wsAuthorLabel, g_pVGuiLocalize->Find( "#L4D360UI_Addon_By" ), sizeof( wsAuthorLabel ) );
-	wcsncat( wsAuthorLabel, m_addonInfoList[nIndex].szAuthor, sizeof( wsAuthorLabel ) );
+	Q_wcsncat( wsAuthorLabel, m_addonInfoList[nIndex].szAuthor, sizeof( wsAuthorLabel ) );
 
 	m_LblName->SetText( m_addonInfoList[nIndex].szName );
 	m_LblType->SetText( m_addonInfoList[nIndex].szTypes );
@@ -654,7 +643,7 @@ static void ValveJpegErrorHandler( j_common_ptr cinfo )
 // convert the JPEG file given to a TGA file at the given output path.
 Addons::ConversionErrorType Addons::SConvertJPEGToTGA(const char *jpegpath, const char *tgaPath)
 {
-#if !defined( _X360 )
+#if !defined( _GAMECONSOLE )
 	struct jpeg_decompress_struct jpegInfo;
 	struct ValveJpegErrorHandler_t jerr;
 	JSAMPROW row_pointer[1];

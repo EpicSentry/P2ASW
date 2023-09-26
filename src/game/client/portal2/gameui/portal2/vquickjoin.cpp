@@ -34,7 +34,7 @@ ConVar cl_quick_join_scroll_start( "cl_quick_join_scroll_start", "1", FCVAR_NONE
 ConVar cl_quick_join_scroll_max( "cl_quick_join_scroll_max", "4", FCVAR_NONE, "Max players shown in the friend scrolling ticker." );
 ConVar cl_quick_join_scroll_rate( "cl_quick_join_scroll_rate", "90", FCVAR_NONE, "Rate of the friend scrolling ticker." );
 ConVar cl_quick_join_scroll_offset( "cl_quick_join_scroll_offset", "16", FCVAR_NONE, "Offset of the friend scrolling ticker from the title." );
-ConVar cl_quick_join_panel_tall( "cl_quick_join_panel_tall", IsX360() ? "16" : "14", // X360 doesn't show icons, but need extra space on PC for Steam avatars
+ConVar cl_quick_join_panel_tall( "cl_quick_join_panel_tall", IsGameConsole() ? "16" : "18", // X360 doesn't show icons, but need extra space on PC for Steam avatars
 								 FCVAR_NONE, "The spacing between panels." );
 ConVar cl_quick_join_panel_accel( "cl_quick_join_panel_accel", "0.025", FCVAR_NONE, "Acceleration for the y position of the panel when items are added or removed." );
 ConVar cl_quick_join_panel_fakecount( "cl_quick_join_panel_fakecount", "-1", FCVAR_NONE );
@@ -58,7 +58,7 @@ QuickJoinPanelItem::~QuickJoinPanelItem( )
 {
 }
 
-#ifdef _X360
+#ifdef _GAMECONSOLE
 void QuickJoinPanelItem::NavigateTo()
 {
 	BaseClass::NavigateTo();
@@ -71,7 +71,7 @@ void QuickJoinPanelItem::NavigateFrom()
 	BaseClass::NavigateFrom();
 	SetBgColor( m_UnfocusBgColor );
 }
-#endif // _X360
+#endif // _GAMECONSOLE
 
 void QuickJoinPanelItem::SetInfo( QuickJoinPanel::QuickInfo const &qi )
 {
@@ -119,7 +119,7 @@ void QuickJoinPanelItem::Update()
 			IImage *pImage = NULL;
 
 			if ( m_info.m_eType == m_info.TYPE_PLAYER )
-				pImage = CUIGameData::Get()->GetAvatarImage( m_info.m_xuid );
+				pImage = CUIGameData::Get()->AccessAvatarImage( m_info.m_xuid, CUIGameData::kAvatarImageNull ); // this doesn't have proper image resource tracking! <<unused code from l4d>>
 
 			if ( pImage )
 			{
@@ -214,7 +214,7 @@ QuickJoinPanel::~QuickJoinPanel()
 
 bool QuickJoinPanel::ShouldBeVisible() const
 {
-#ifdef _X360
+#ifdef _GAMECONSOLE
 	return !XBX_GetPrimaryUserIsGuest();
 #else
 	return true;
@@ -467,11 +467,8 @@ void QuickJoinPanel::UpdateNumGamesFoundLabel( void )
 		wchar_t* wFormatString = g_pVGuiLocalize->Find( GetTitle() );
 		if( wFormatString )
 		{
-			char gameCountTxt[ 4 ];
-			itoa( m_FriendInfo.Count(), gameCountTxt, 10 );
-
-			wchar_t wGameCountTxt[ 4 ];
-			g_pVGuiLocalize->ConvertANSIToUnicode( gameCountTxt, wGameCountTxt, sizeof( wGameCountTxt ) );
+			wchar_t wGameCountTxt[ 10 ];
+			Q_snwprintf( wGameCountTxt, sizeof( wGameCountTxt ), L"%d", m_FriendInfo.Count() );
 
 			wchar_t wMessage[ 256 ];
 			g_pVGuiLocalize->ConstructString( wMessage, sizeof( wMessage ), wFormatString, 1, wGameCountTxt );
@@ -496,7 +493,7 @@ void QuickJoinPanel::NavigateTo()
 		}
 	}
 
-#ifdef _X360
+#ifdef _GAMECONSOLE
 	m_GplQuickJoinList->NavigateTo();
 #endif
 }

@@ -18,13 +18,22 @@
 // matchsystem
 #include "matchmaking/imatchframework.h"
 
-#ifndef _X360
+#ifndef NO_STEAM
 #include "steam/steam_api.h"
 #endif
 
+#if defined (PORTAL2_PUZZLEMAKER)
+#include "puzzlemaker/puzzlemaker.h"
+#include "vpuzzlemakerexitconfirmation.h"
+#include "vpuzzlemakersavedialog.h"
+
+extern void ExitPuzzleMaker();
+#endif
+
+#include "cbase.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
-
 
 using namespace BaseModUI;
 using namespace vgui;
@@ -35,6 +44,7 @@ using namespace vgui;
 //
 
 static int s_nInviteApprovalConf = 0;
+static float s_flAbandonedTimeout = 0.f;
 static ISelectStorageDeviceClient *s_pPendingInviteStorageSelector = NULL;
 
 enum InviteUserMapping_t
@@ -45,7 +55,7 @@ enum InviteUserMapping_t
 static void Invite_MapUserForUiInput( InviteUserMapping_t eUi )
 {
 	// Check invited user if it was the active user
-#ifdef _X360
+#ifdef _GAMECONSOLE
 	if ( XBX_GetInvitedUserId() == XBX_INVALID_USER_ID )
 		return;
 
@@ -78,12 +88,18 @@ static void Invite_NotifyAction( char const *szNotifyAction )
 		"OnInvite", "action", szNotifyAction ) );
 }
 
-static void Invite_Approved()
+void CUIGameData::Invite_Approved()
 {
-	CUIGameData::Get()->Invite_Connecting();
-	Invite_NotifyAction( "join" );
+	if ( Invite_Connecting() )
+	{
+		Invite_NotifyAction( "join" );
+	}
+	else
+	{
+		s_nInviteApprovalConf = 0;
+	}
 }
-static void Invite_Declined()
+void CUIGameData::Invite_Declined()
 {
 	Invite_NotifyAction( "deny" );
 }
@@ -92,15 +108,44 @@ void CUIGameData::RunFrame_Invite()
 {
 	if ( s_nInviteApprovalConf )
 	{
+		bool bInviteAbandoned = true;
 		// Check that the confirmation wasn't dismissed without notifying the invite system
 		GenericConfirmation* confirmation = 
 			static_cast<GenericConfirmation*>( CBaseModPanel::GetSingleton().GetWindow( WT_GENERICCONFIRMATION ) );
-		if ( !confirmation ||
-			confirmation->GetUsageId() != s_nInviteApprovalConf )
+		bInviteAbandoned &= !confirmation || confirmation->GetUsageId() != s_nInviteApprovalConf;
+
+#if defined (PORTAL2_PUZZLEMAKER)
+		CPuzzleMakerExitConfirmation* pSaveConfirmation = 
+			static_cast<CPuzzleMakerExitConfirmation*>( CBaseModPanel::GetSingleton().GetWindow( WT_PUZZLEMAKEREXITCONRFIRMATION ) );
+		bInviteAbandoned &= !pSaveConfirmation;
+
+
+		CPuzzleMakerSaveDialog* pSaveDialog = 
+			static_cast<CPuzzleMakerSaveDialog*>( CBaseModPanel::GetSingleton().GetWindow( WT_PUZZLEMAKERSAVEDIALOG ) );
+		bInviteAbandoned &= !pSaveDialog;
+#endif
+
+		// If none of the right dialogs are up and we still have a conf number then the user must have dismissed these dialogs.
+		// Now we need to start timing out.  We dont want to immediately decline the invite because there's a tiny gap between
+		// when the approval confirmation gets approved and the save confirmation pops up.
+		if ( bInviteAbandoned )
 		{
-			// Well, pretend like user declined the prompt
-			Invite_Declined();
+			if( s_flAbandonedTimeout == 0.f )
+			{
+				s_flAbandonedTimeout = gpGlobals->realtime;
+			}
+			// Longer than 1 second, we'll assume they dismissed the prompts
+			else if( (gpGlobals->realtime - s_flAbandonedTimeout) > 5.f )
+			{
+				// Well, pretend like user declined the prompt
+				Invite_Declined();
+				s_flAbandonedTimeout = 0.f;
+			}
 		}
+	}
+	else
+	{
+		s_flAbandonedTimeout = 0.f;
 	}
 
 	if ( s_pPendingInviteStorageSelector && !IsXUIOpen() )
@@ -112,7 +157,7 @@ void CUIGameData::RunFrame_Invite()
 
 
 //=============================================================================
-#ifdef _X360
+#ifdef _GAMECONSOLE
 class CInviteSelectStorageDevice : public CChangeStorageDevice
 {
 public:
@@ -150,7 +195,7 @@ void CInviteSelectStorageDevice::DeviceChangeCompleted( bool bChanged )
 //=============================================================================
 bool CUIGameData::Invite_IsStorageDeviceValid()
 {
-#ifdef _X360
+#ifdef _GAMECONSOLE
 	//
 	// Note: the only code path that should lead to this routine is
 	// from invite accepting code.
@@ -191,6 +236,36 @@ bool CUIGameData::Invite_IsStorageDeviceValid()
 	return true;
 }
 
+static void Invite_Approved()
+{
+	CUIGameData::Get()->Invite_Approved();
+}
+
+static void Invite_Approved_Do_Save_Check()
+{
+#if defined ( PORTAL2_PUZZLEMAKER )
+	if( g_pPuzzleMaker->GetActive() )
+	{
+		// Check if we're clear to exit.  If not, this function will open up the prompt for
+		// the user to save their puzzle before leaving the puzzle maker
+		if( !g_pPuzzleMaker->RequestQuitGame( PUZZLEMAKER_QUIT_TO_ACCEPT_COOP_INVITE ) )
+		{
+			return;
+		}
+
+		// Close out the puzzle maker
+		ExitPuzzleMaker();
+	}
+
+#endif
+	CUIGameData::Get()->Invite_Approved();
+}
+
+static void Invite_Declined()
+{
+	CUIGameData::Get()->Invite_Declined();
+}
+
 void CUIGameData::Invite_Confirm()
 {
 	// Activate game ui
@@ -215,27 +290,46 @@ void CUIGameData::Invite_Confirm()
 
 	GenericConfirmation::Data_t data;
 	data.pWindowTitle = "#L4D360UI_LeaveInviteConf";
-	data.pMessageText = "#L4D360UI_LeaveInviteConfTxt";
+	data.pMessageText = 
+#if defined (PORTAL2_PUZZLEMAKER)
+	g_pPuzzleMaker->GetActive() ? "#PORTAL2_LeavePuzzleInviteConfTxt" : 
+#endif
+	"#L4D360UI_LeaveInviteConfTxt";
 	data.bOkButtonEnabled = true;
 	data.bCancelButtonEnabled = true;
 
-	data.pfnOkCallback = Invite_Approved;
-	data.pfnCancelCallback = Invite_Declined;
+	data.pfnOkCallback = ::Invite_Approved_Do_Save_Check;
+	data.pfnCancelCallback = ::Invite_Declined;
 
+	s_flAbandonedTimeout = 0.f;
 	s_nInviteApprovalConf = confirmation->SetUsageData(data);
 
 	Invite_MapUserForUiInput( INVITE_USER_ALLOW_INPUT );
 }
 
-void CUIGameData::Invite_Connecting()
+bool CUIGameData::Invite_Connecting()
 {
 	// Close any session that we might have outstanding
 	g_pMatchFramework->CloseSession();
+
+#ifdef _PS3
+	if ( CAttractScreen *pAttract = ( CAttractScreen * ) CBaseModPanel::GetSingleton().GetWindow( WT_ATTRACTSCREEN ) )
+	{
+		if ( !pAttract->IsGameBootReady() )
+			return false; // PS3: eating the invite until game boot sequence completed, will check the lobby ID after SteamGameBootMsg check
+	}
+#endif
 
 	// Navigate to attract screen which might take a frame
 	CBaseModPanel::GetSingleton().CloseAllWindows( CBaseModPanel::CLOSE_POLICY_EVEN_MSGS );
 	CAttractScreen::SetAttractMode( CAttractScreen::ATTRACT_ACCEPTINVITE );
 	CBaseModPanel::GetSingleton().OpenWindow( WT_ATTRACTSCREEN, NULL, true );
+
+#if defined( _PS3 ) && !defined( NO_STEAM )
+	return steamapicontext->SteamUser()->BLoggedOn();
+#else
+	return true;
+#endif
 }
 
 

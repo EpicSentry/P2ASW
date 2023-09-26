@@ -5,6 +5,7 @@
 // $NoKeywords: $
 //
 //=============================================================================//
+#include <cbase.h>
 #include "OptionsSubMouse.h"
 //#include "CommandCheckButton.h"
 #include "KeyToggleCheckButton.h"

@@ -21,7 +21,6 @@ struct SprayPaintLogo_t
 	bool m_bCustom;
 };
 
-class CNB_Header_Footer;
 
 namespace BaseModUI {
 
@@ -41,8 +40,6 @@ public:
 	virtual void OnNotifyChildFocus( vgui::Panel* child );
 	virtual void OnFlyoutMenuClose( vgui::Panel* flyTo );
 	virtual void OnFlyoutMenuCancelled();
-
-	virtual void PerformLayout();
 
 	Panel* NavigateBack();
 
@@ -80,8 +77,6 @@ private:
 
 	vgui::FileOpenDialog *m_hImportSprayDialog;
 	vgui::FileOpenDialog *m_hSelectSprayDialog;
-
-	CNB_Header_Footer *m_pHeaderFooter;
 };
 
 };

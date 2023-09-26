@@ -12,7 +12,7 @@
 
 #include "VFlyoutMenu.h"
 
-#if !defined( _X360 )
+#ifndef NO_STEAM
 #include "steam/isteamuserstats.h"
 #endif 
 
@@ -28,8 +28,11 @@ namespace BaseModUI {
 		XUID m_xuid;
 		char m_szGamerTag[XUSER_NAME_SIZE];
 		int m_iControllerIndex;
-#else
+#elif !defined( NO_STEAM )
 		CSteamID m_steamIDUser;
+		char m_szName[MAX_PLAYER_NAME_LENGTH];
+#else
+		XUID m_xuid;
 		char m_szName[MAX_PLAYER_NAME_LENGTH];
 #endif
 		int m_iRank;
@@ -63,7 +66,7 @@ namespace BaseModUI {
 		bool IsSelected( void ) { return m_bSelected; }
 		void SetSelected( bool bSelected );
 
-#if !defined( _X360 )
+#if !defined( _GAMECONSOLE )
 		bool HasMouseover( void ) { return m_bHasMouseover; }
 		void SetHasMouseover( bool bHasMouseover ) { m_bHasMouseover = bHasMouseover; }
 
@@ -78,8 +81,10 @@ namespace BaseModUI {
 
 #if defined( _X360 )
 		XUID GetXUID( void ) { return m_data.m_xuid; }
-#else
+#elif !defined( NO_STEAM )
 		CSteamID GetSteamID( void ) { return m_data.m_steamIDUser; }
+#else
+		XUID GetXUID( void ) { return m_data.m_xuid; }
 #endif
 
 		void SetShowRank( bool bShowRank, int iRankToDisplay );
@@ -100,7 +105,7 @@ namespace BaseModUI {
 
 		bool m_bSelected : 1;
 
-#if !defined( _X360 )
+#if !defined( _GAMECONSOLE )
 		bool m_bHasMouseover : 1;
 #endif
 	};
@@ -180,7 +185,7 @@ namespace BaseModUI {
 #if defined( _X360 )
 		void AddLeaderboardEntries( XUSER_STATS_READ_RESULTS *pResults );
 		void AddLeaderboardEntry( XUSER_STATS_ROW *pRow );
-#else
+#elif !defined( NO_STEAM )
 		void AddLeaderboardEntry( LeaderboardEntry_t *pEntry );
 #endif
 
@@ -190,7 +195,7 @@ namespace BaseModUI {
 		bool SendQuery_RankOneStats( void );
 		bool SendQuery_StatsGlobalPage( void );
 
-#if !defined( _X360 )
+#ifndef NO_STEAM
 		bool SendQuery_FindLeaderboard( void );
 #endif
 
@@ -214,7 +219,7 @@ namespace BaseModUI {
 
 		KeyValues *m_pDataSettings;
 
-#if !defined( _X360 )
+#ifndef NO_STEAM
 
 		// Steam callbacks
 		void OnFindLeaderboard( LeaderboardFindResult_t *pFindLeaderboardResult, bool bIOFailure );

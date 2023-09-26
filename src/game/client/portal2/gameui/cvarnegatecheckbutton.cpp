@@ -5,6 +5,7 @@
 // $NoKeywords: $
 //
 //=============================================================================//
+#include <cbase.h>
 #include "CvarNegateCheckButton.h"
 #include "EngineInterface.h"
 #include <vgui/IVGui.h>

@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-
+#include <cbase.h>
 #include "KeyToggleCheckButton.h"
 #include "EngineInterface.h"
 #include <vgui/IVGui.h>

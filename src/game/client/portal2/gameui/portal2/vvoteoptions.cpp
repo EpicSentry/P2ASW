@@ -29,12 +29,12 @@ BaseClass(parent, panelName)
 	m_BtnRestartScenario = new Button(this, "BtnRestartScenario", "#L4D360UI_RestartScenario", this, "RestartScenario");
 
 	SetUpperGarnishEnabled(true);
-	SetLowerGarnishEnabled(true);
+	SetFooterEnabled(true);
 
 	CBaseModFooterPanel *footer = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
 	if ( footer )
 	{
-		footer->SetButtons( 0, FF_NONE, true );
+		footer->SetButtons( FF_NONE );
 	}
 
 	m_ActiveControl = m_BtnChangeScenario;

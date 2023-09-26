@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-
+#include <cbase.h>
 #include "OptionsDialog.h"
 
 #include "vgui_controls/Button.h"

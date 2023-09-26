@@ -24,14 +24,13 @@ using namespace BaseModUI;
 GetLegacyData::GetLegacyData( Panel *parent, const char *panelName )
  : BaseClass( parent, panelName, true, false, false )
 {
-	GameUI().PreventEngineHideGameUI();
 	SetProportional( true );
 
 	m_LblDesc = new Label( this, "LblGetLegacyDataDescription", "" );
 
 	SetTitle( "", false );
 	SetDeleteSelfOnClose( true );
-	SetLowerGarnishEnabled( false );
+	SetFooterEnabled( false );
 	SetMoveable( false );
 	LoadControlSettings( "Resource/UI/BaseModUI/getlegacydata.res" );
 }
@@ -39,7 +38,6 @@ GetLegacyData::GetLegacyData( Panel *parent, const char *panelName )
 //=============================================================================
 GetLegacyData::~GetLegacyData()
 {
-	GameUI().AllowEngineHideGameUI();
 }
 
 //=============================================================================
@@ -71,7 +69,6 @@ void GetLegacyData::ApplySchemeSettings(vgui::IScheme *pScheme)
 //=============================================================================
 bool GetLegacyData::IsInstalling()
 {
-	// legacy support is only needed for L4D2
 	return false;
 
 #ifdef IS_WINDOWS_PC
@@ -97,9 +94,7 @@ bool GetLegacyData::IsInstalling()
 //=============================================================================
 bool GetLegacyData::IsInstalled()
 {
-	// legacy support is only needed for L4D2
 	return true;
-
 
 #ifdef IS_WINDOWS_PC
 	HKEY hKey = NULL;

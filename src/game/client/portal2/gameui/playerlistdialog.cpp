@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-
+#include <cbase.h>
 #include "PlayerListDialog.h"
 
 #include <vgui/ILocalize.h>
@@ -18,7 +18,9 @@
 #include "EngineInterface.h"
 #include "game/client/IGameClientExports.h"
 #include "GameUI_Interface.h"
+#ifndef NO_STEAM
 #include "steam/steam_api.h"
+#endif
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
