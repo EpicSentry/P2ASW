@@ -198,10 +198,7 @@ public:
 
 	inline CPortalRenderable *GetCurrentViewEntryPortal( void ) const { return m_pRenderingViewForPortal; }; //if rendering a portal view, this is the portal the current view enters into
 	inline CPortalRenderable *GetCurrentViewExitPortal( void ) const { return m_pRenderingViewExitPortal; }; //if rendering a portal view, this is the portal the current view exits from
-
-	// true if the rendering path for portals uses stencils instead of textures
-	bool ShouldUseStencilsToRenderPortals() const;
-
+	
 	//it's a good idea to force cheaper water when the ratio of performance gain to noticability is high
 	//0 = force no reflection/refraction
 	//1/2 = downgrade to simple/world reflections as seen in advanced video options
@@ -219,7 +216,6 @@ public:
 	// return value indicates that something was done, and render lists should be rebuilt afterwards
 	bool DrawPortalsUsingStencils( CViewRender *pViewRender ); 
 	
-	void DrawPortalsToTextures( CViewRender *pViewRender, const CViewSetup &cameraView ); //updates portal textures
 	void OverlayPortalRenderTargets( float w, float h );
 	
 	void UpdateDepthDoublerTexture( const CViewSetup &viewSetup ); //our chance to update all depth doubler texture before the view model is added to the back buffer
@@ -253,7 +249,6 @@ public:
 	inline CUtlVector<VPlane> &GetRecursiveViewComplexFrustums( int nIdx ) { return m_RecursiveViewComplexFrustums[ nIdx ]; }
 	
 private:
-	mutable ShaderStencilState_t state;
 	struct RecordedPortalInfo_t
 	{
 		CPortalRenderable *m_pActivePortal;
@@ -286,6 +281,8 @@ private:
 	CUtlVector<CPortalRenderable *>		m_AllPortals; //All portals currently in memory, active or not
 	CUtlVector<CPortalRenderable *>		m_ActivePortals;
 	CUtlVector< RecordedPortalInfo_t >	m_RecordedPortals;
+	
+	ShaderStencilState_t		m_StencilState;
 	
 	CUtlVector< GhostPortalRenderInfo_t > m_portalGhostRenderInfos;
 
