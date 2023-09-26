@@ -124,7 +124,7 @@ int CSDK_Background_Movie::SetTextureMaterial()
 	return m_nTextureID;
 }
 
-ConVar portal2_current_act("portal2_current_act", "1", FCVAR_CLIENTDLL | FCVAR_NEVER_AS_STRING);
+ConVar portal2_current_act("portal2_current_act", "1", FCVAR_CLIENTDLL|FCVAR_ARCHIVE);
 
 void CSDK_Background_Movie::Update()
 {
