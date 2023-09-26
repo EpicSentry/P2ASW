@@ -115,7 +115,7 @@ public:
 	virtual Vector	GetAttackSpread( CBaseCombatWeapon *pWeapon, CBaseEntity *pTarget );
 	virtual bool	HasPreferredCarryAnglesForPlayer(CBasePlayer* pPlayer) { return true; }
 	virtual QAngle	PreferredCarryAngles() { return QAngle(-45.0f,0.0f,0.0f); }
-
+	
 	// Think functions
 	virtual void	Retire( void );
 	virtual void	Deploy( void );
