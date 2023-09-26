@@ -2769,7 +2769,7 @@ void CPortalSimulator::CreatePolyhedrons( void )
 		Vector vOBBRight = m_InternalData.Placement.vRight;
 		Vector vOBBUp = m_InternalData.Placement.vUp;
 
-#if 1 // Legacy
+#if 0 // Legacy
 		//scale the extents to usable sizes
 		float flScaleX = PORTAL_COLLISION_SIM_BOUNDS_X;
 		if ( flScaleX < 200.0f )
@@ -2785,15 +2785,22 @@ void CPortalSimulator::CreatePolyhedrons( void )
 		vOBBRight	*= flScaleY;
 		vOBBUp		*= flScaleZ;	// default size for scale z (252) is player (height + portal half height) * 2. Any smaller than this will allow for players to 
 									// reach unsimulated geometry before an end touch with teh portal.
-#else
-		vOBBForward *= m_InternalData.Placement.vCollisionCloneExtents.x;
-		vOBBRight *= m_InternalData.Placement.vCollisionCloneExtents.y;
-		vOBBUp *= m_InternalData.Placement.vCollisionCloneExtents.z;
-#endif
 
 		Vector ptOBBOrigin = m_InternalData.Placement.ptCenter;
 		ptOBBOrigin -= vOBBRight / 2.0f;
 		ptOBBOrigin -= vOBBUp / 2.0f;
+#else
+		vOBBForward *= m_InternalData.Placement.vCollisionCloneExtents.x;
+		vOBBRight *= m_InternalData.Placement.vCollisionCloneExtents.y;
+		vOBBUp *= m_InternalData.Placement.vCollisionCloneExtents.z;
+
+		Vector ptOBBOrigin = m_InternalData.Placement.ptCenter;
+		ptOBBOrigin -= vOBBRight;
+		ptOBBOrigin -= vOBBUp;
+
+		vOBBRight *= 2.0f;
+		vOBBUp *= 2.0f;
+#endif
 
 		Vector vAABBMins, vAABBMaxs;
 		vAABBMins = vAABBMaxs = ptOBBOrigin;
