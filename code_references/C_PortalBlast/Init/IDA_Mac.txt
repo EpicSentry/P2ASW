@@ -1,0 +1,180 @@
+int __cdecl C_PortalBlast::Init(
+        int a1,
+        unsigned int *a2,
+        unsigned __int8 a3,
+        int a4,
+        _DWORD *a5,
+        _DWORD *a6,
+        const QAngle *a7,
+        float a8)
+{
+  float v9; // xmm2_4
+  float v10; // xmm0_4
+  float v11; // xmm2_4
+  float v12; // xmm2_4
+  float v13; // xmm3_4
+  float v14; // xmm5_4
+  float v15; // xmm2_4
+  float v16; // xmm3_4
+  float v17; // xmm5_4
+  float v18; // xmm2_4
+  unsigned int v19; // eax
+  int v20; // edx
+  const void *v21; // eax
+  void *v22; // eax
+  unsigned int v23; // eax
+  int v24; // edx
+  const void *v25; // eax
+  int v26; // eax
+  CParticleProperty *v27; // edi
+  int v28; // esi
+  CNewParticleEffect *v29; // eax
+  int v30; // ecx
+  CNewParticleEffect *v31; // esi
+  CNewParticleEffect *v32; // edi
+  int v33; // edi
+  int v34; // eax
+  const char *v35; // ecx
+  CNewParticleEffect *v36; // eax
+  CNewParticleEffect *v37; // esi
+  int result; // eax
+  Vector v39; // [esp+10h] [ebp-88h] BYREF
+  Vector v40; // [esp+28h] [ebp-70h] BYREF
+  Vector v41; // [esp+38h] [ebp-60h] BYREF
+  Vector v42; // [esp+48h] [ebp-50h] BYREF
+  Vector v43; // [esp+58h] [ebp-40h] BYREF
+  Vector v44; // [esp+68h] [ebp-30h] BYREF
+  __int64 v45; // [esp+78h] [ebp-20h]
+  int v46; // [esp+80h] [ebp-18h] BYREF
+  char v47[16]; // [esp+88h] [ebp-10h] BYREF
+
+  CBaseEntityList::AddNonNetworkableEntity((CBaseEntityList *)v47, (IHandleEntity *)cl_entitylist);
+  v46 = *(_DWORD *)(a1 + 880);
+  CClientThinkList::SetNextClientThink((CClientThinkList *)&g_ClientThinkList, (CBaseHandle)&v46, -1293.0);
+  C_BaseEntity::AddToLeafSystem((C_BaseEntity *)a1, 0);
+  v45 = 349LL;
+  C_BaseEntity::ThinkSet(a1, 349, 0, 0, 0);
+  (*(void (__cdecl **)(int, int))(*(_DWORD *)a1 + 640))(a1, -996040704);
+  *(_DWORD *)(a1 + 2668) = *a5;
+  *(_DWORD *)(a1 + 2672) = a5[1];
+  *(_DWORD *)(a1 + 2676) = a5[2];
+  *(_DWORD *)(a1 + 2680) = *a6;
+  *(_DWORD *)(a1 + 2684) = a6[1];
+  *(_DWORD *)(a1 + 2688) = a6[2];
+  C_BaseEntity::SetAbsOrigin((C_BaseEntity *)a1, (const Vector *)(a1 + 2668));
+  v9 = *(float *)(dword_1068CFC + 44);
+  if ( g_pGameRules && (*(unsigned __int8 (__cdecl **)(int))(*(_DWORD *)g_pGameRules + 136))(g_pGameRules) )
+    v9 = *(float *)(dword_1068CA4 + 44);
+  v10 = a8;
+  v11 = v9 + *((float *)gpGlobals + 3);
+  *(float *)(a1 + 2704) = v11;
+  if ( v11 > (float)(a8 + -0.1) )
+    v10 = v11 + 0.1;
+  *(float *)(a1 + 2708) = v10;
+  AngleVectors(a7, &v44, &v43, &v42);
+  v12 = *(float *)(a1 + 2668) - *(float *)(a1 + 2680);
+  v13 = *(float *)(a1 + 2672) - *(float *)(a1 + 2684);
+  v14 = *(float *)(a1 + 2676) - *(float *)(a1 + 2688);
+  v15 = fsqrt((float)(v14 * v14) + (float)((float)(v13 * v13) + (float)(v12 * v12)));
+  v16 = (float)(v44.x * v15) + *(float *)(a1 + 2668);
+  v17 = (float)(v44.y * v15) + *(float *)(a1 + 2672);
+  v18 = (float)(v15 * v44.z) + *(float *)(a1 + 2676);
+  *(float *)(a1 + 2692) = v16;
+  *(float *)(a1 + 2696) = v17;
+  *(float *)(a1 + 2700) = v18;
+  if ( a4 == 1 )
+  {
+    v19 = *a2;
+    if ( *a2 != -1 )
+    {
+      v20 = 16 * (unsigned __int16)v19;
+      if ( *(_DWORD *)(g_pEntityList + v20 + 8) == HIWORD(v19) )
+      {
+        v21 = *(const void **)(g_pEntityList + v20 + 4);
+        if ( v21 )
+        {
+          v22 = __dynamic_cast(
+                  v21,
+                  (const struct __class_type_info *)&`typeinfo for'IHandleEntity,
+                  (const struct __class_type_info *)&`typeinfo for'C_WeaponPortalgun,
+                  0);
+          if ( v22 )
+            goto LABEL_17;
+        }
+      }
+    }
+LABEL_21:
+    v27 = (CParticleProperty *)(a1 + 1112);
+    goto LABEL_22;
+  }
+  if ( a4 != 2 )
+    goto LABEL_21;
+  v23 = *a2;
+  if ( *a2 == -1 )
+    goto LABEL_21;
+  v24 = 16 * (unsigned __int16)v23;
+  if ( *(_DWORD *)(g_pEntityList + v24 + 8) != HIWORD(v23) )
+    goto LABEL_21;
+  v25 = *(const void **)(g_pEntityList + v24 + 4);
+  if ( !v25 )
+    goto LABEL_21;
+  v22 = __dynamic_cast(
+          v25,
+          (const struct __class_type_info *)&`typeinfo for'IHandleEntity,
+          (const struct __class_type_info *)&`typeinfo for'C_Portal_Player,
+          0);
+  if ( !v22 )
+    goto LABEL_21;
+LABEL_17:
+  v26 = (*(int (__cdecl **)(void *))(*(_DWORD *)v22 + 496))(v22);
+  v27 = (CParticleProperty *)(a1 + 1112);
+  if ( v26 != -1 )
+  {
+    v28 = v26;
+    memset(&v39, 0, sizeof(v39));
+    v29 = (CNewParticleEffect *)CParticleProperty::Create(
+                                  v27,
+                                  "portal_projectile_stream",
+                                  PATTACH_ABSORIGIN_FOLLOW,
+                                  -1,
+                                  v39,
+                                  0);
+    v30 = v28;
+    v31 = v29;
+    v32 = 0;
+    if ( v29 )
+    {
+      v33 = v30;
+      CNewParticleEffect::AddRef(v29);
+      v30 = v33;
+      v32 = v31;
+    }
+    v34 = UTIL_Portal_Color_Particles(a3 + 1, v30);
+    v41.x = (float)(unsigned __int8)v34;
+    v41.y = (float)BYTE1(v34);
+    v41.z = (float)BYTE2(v34);
+    CNewParticleEffect::SetControlPoint(v32, 2, &v41);
+    goto LABEL_26;
+  }
+LABEL_22:
+  v35 = "portal_1_projectile_stream_pedestal";
+  if ( a3 )
+    v35 = "portal_2_projectile_stream_pedestal";
+  memset(&v39, 0, sizeof(v39));
+  v36 = (CNewParticleEffect *)CParticleProperty::Create(v27, v35, PATTACH_ABSORIGIN_FOLLOW, -1, v39, 0);
+  v37 = v36;
+  v32 = 0;
+  if ( v36 )
+  {
+    CNewParticleEffect::AddRef(v36);
+    v32 = v37;
+  }
+LABEL_26:
+  v40.x = -v44.x;
+  v40.y = -v44.y;
+  v40.z = -v44.z;
+  result = CNewParticleEffect::SetControlPointOrientation(v32, 1, &v40, &v43, &v42);
+  if ( v32 )
+    return CNewParticleEffect::Release(v32);
+  return result;
+}
