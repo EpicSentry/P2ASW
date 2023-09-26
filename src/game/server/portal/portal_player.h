@@ -568,6 +568,8 @@ private: // PAINT SPECIFIC
 
 	void GivePortalPlayerItems( void );
 
+	void DetermineTraceInfo( Vector &vStart, Vector &vEnd, int iTraceType );
+
 	// Find all the contacts
 	void DeterminePaintContacts();
 	void DeterminePaintContactsUnderFeet(); // A hacky way to get the paint power since engine code is limiting us.

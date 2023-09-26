@@ -568,6 +568,8 @@ public: // PAINT SPECIFIC
 
 private: // PAINT SPECIFIC
 	void DecayEyeOffset();
+	
+	void DetermineTraceInfo( Vector &vStart, Vector &vEnd, int iTraceType );
 
 	// Find all the contacts
 	void DeterminePaintContacts();

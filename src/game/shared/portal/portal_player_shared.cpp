@@ -2468,6 +2468,83 @@ void CPortal_Player::AddSurfacePaintPowerInfo( const BrushContact& contact, char
 												context );
 }
 
+enum
+{
+	//PAINT_TRACE_ABSORIGIN,
+	PAINT_TRACE_BOTTOM_CORNER1,
+	PAINT_TRACE_BOTTOM_CORNER2,
+	PAINT_TRACE_BOTTOM_CORNER3,
+	PAINT_TRACE_BOTTOM_CORNER4,
+	PAINT_TRACE_TOP_CORNER1,
+	PAINT_TRACE_TOP_CORNER2,
+	PAINT_TRACE_TOP_CORNER3,
+	PAINT_TRACE_TOP_CORNER4,
+	PAINT_TRACE_COUNT
+};
+
+#define PAINT_TRACE_MINS Vector( -4, -4, -4 )
+#define PAINT_TRACE_MAXS Vector( 4, 4, 4 )
+
+void CPortal_Player::DetermineTraceInfo( Vector &vStart, Vector &vEnd, int iTraceType )
+{
+	// Set the start to the center
+	vStart = GetAbsOrigin();
+	vStart.z = GetAbsOrigin().z + GetHullHeight() * 0.5; 
+
+	float flHalfHullWidth = GetHullWidth() * 0.5;
+	Vector vOrigin = GetAbsOrigin();
+	
+	//if ( iTraceType == PAINT_TRACE_ABSORIGIN )
+	//	vStart = vOrigin;
+	if (iTraceType == PAINT_TRACE_BOTTOM_CORNER1)
+	{
+		vEnd.x = vOrigin.x + (flHalfHullWidth + 1);
+		vEnd.y = vOrigin.y + (flHalfHullWidth + 1);
+		vEnd.z = vOrigin.z - 1;
+	}
+	else if (iTraceType == PAINT_TRACE_BOTTOM_CORNER2)
+	{
+		vEnd.x = vOrigin.x - (flHalfHullWidth + 1);
+		vEnd.y = vOrigin.y + (flHalfHullWidth + 1);
+		vEnd.z = vOrigin.z + 1;
+	}
+	else if (iTraceType == PAINT_TRACE_BOTTOM_CORNER3)
+	{
+		vEnd.x = vOrigin.x + (flHalfHullWidth + 1);
+		vEnd.y = vOrigin.y - (flHalfHullWidth + 1);
+		vEnd.z = vOrigin.z - 1;
+	}
+	else if (iTraceType == PAINT_TRACE_BOTTOM_CORNER4)
+	{
+		vEnd.x = vOrigin.x - (flHalfHullWidth + 1);
+		vEnd.y = vOrigin.y - (flHalfHullWidth + 1);
+		vEnd.z = vOrigin.z - 1;
+	}
+	else if (iTraceType == PAINT_TRACE_TOP_CORNER1)
+	{
+		vEnd.x = vOrigin.x + (flHalfHullWidth + 1);
+		vEnd.y = vOrigin.y + (flHalfHullWidth + 1);
+		vEnd.z = vOrigin.z + GetHullHeight() + 1;
+	}
+	else if (iTraceType == PAINT_TRACE_TOP_CORNER2)
+	{
+		vEnd.x = vOrigin.x - (flHalfHullWidth + 1);
+		vEnd.y = vOrigin.y + (flHalfHullWidth + 1);
+		vEnd.z = vOrigin.z + GetHullHeight() + 1;
+	}
+	else if (iTraceType == PAINT_TRACE_TOP_CORNER3)
+	{
+		vEnd.x = vOrigin.x + flHalfHullWidth;
+		vEnd.y = vOrigin.y - (flHalfHullWidth + 1);
+		vEnd.z = vOrigin.z + GetHullHeight() + 1;
+	}
+	else if (iTraceType == PAINT_TRACE_TOP_CORNER4)
+	{
+		vEnd.x = vOrigin.x - (flHalfHullWidth + 1);
+		vEnd.y = vOrigin.y - (flHalfHullWidth + 1);
+		vEnd.z = vOrigin.z + GetHullHeight() + 1;
+	}
+}
 
 void CPortal_Player::AddSurfacePaintPowerInfo( const trace_t& trace, char const* context )
 {
@@ -2507,55 +2584,20 @@ void CPortal_Player::AddSurfacePaintPowerInfo( const trace_t& trace, char const*
 #else
 	// Hacks since we're limited by the engine code
 
-	enum
-	{
-		TRACE_ABSORIGIN,
-		TRACE_CORNER1,
-		TRACE_CORNER2,
-		TRACE_CORNER3,
-		TRACE_CORNER4,
-		TRACE_TYPES
-	};
-
 	m_PortalLocal.m_PaintedPowerType = NO_POWER;
 
 	CTraceFilterNoPlayers filter;
-	Vector vOrigin = GetAbsOrigin();
 	Vector vStart;
-	float flHalfHullWidth = GetHullWidth() * 0.5;
-	for (int i = 0; i < TRACE_TYPES; ++i)
-	{
-		if ( i == TRACE_ABSORIGIN )
-			vStart = vOrigin;
-		else if (i == TRACE_CORNER1)
-		{
-			vStart.x = vOrigin.x + flHalfHullWidth;
-			vStart.y = vOrigin.y + flHalfHullWidth;
-			vStart.z = vOrigin.z;
-		}
-		else if (i == TRACE_CORNER2)
-		{
-			vStart.x = vOrigin.x + -flHalfHullWidth;
-			vStart.y = vOrigin.y + flHalfHullWidth;
-			vStart.z = vOrigin.z;
-		}
-		else if (i == TRACE_CORNER3)
-		{
-			vStart.x = vOrigin.x + flHalfHullWidth;
-			vStart.y = vOrigin.y + -flHalfHullWidth;
-			vStart.z = vOrigin.z;
-		}
-		else if (i == TRACE_CORNER4)
-		{
-			vStart.x = vOrigin.x + -flHalfHullWidth;
-			vStart.y = vOrigin.y + -flHalfHullWidth;
-			vStart.z = vOrigin.z;
-		}
-			
-		UTIL_TraceLine( vStart + Vector( 0, 0, 1 ), vStart - Vector( 0, 0, 4 ), MASK_SOLID, &filter, const_cast<trace_t*>(&trace) );
+	Vector vEnd;
+	for (int i = 0; i < PAINT_TRACE_COUNT; ++i)
+	{			
+
+		DetermineTraceInfo( vStart, vEnd, i );
+		UTIL_TraceHull( vStart, vEnd, PAINT_TRACE_MINS, PAINT_TRACE_MAXS, MASK_SOLID, &filter, const_cast<trace_t*>(&trace) );
+		//UTIL_TraceLine( vStart, vEnd, MASK_SOLID, &filter, const_cast<trace_t*>(&trace) );
 	
 		if ( !trace.m_pEnt )
-			return;
+			continue;
 	
 		//Trace for paint on the surface if it is the world
 		if( trace.m_pEnt->IsBSPModel() )
