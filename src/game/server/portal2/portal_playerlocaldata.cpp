@@ -118,7 +118,10 @@ CPortalPlayerLocalData::CPortalPlayerLocalData()
 	m_StickNormal = DEFAULT_SURFACE_NORMAL;
 	m_Up = DEFAULT_SURFACE_NORMAL;
 
-#ifdef HL2_EPISODIC
-	m_flFlashBattery = 0.0f;
-#endif
+	// TODO: Are these the right values? Please check this in IDA or something
+	m_StandHullMin = VEC_HULL_MIN;
+	m_StandHullMax = VEC_HULL_MAX;
+	
+	m_DuckHullMin = VEC_DUCK_HULL_MIN;
+	m_DuckHullMax = VEC_DUCK_HULL_MAX;
 }

@@ -480,10 +480,7 @@ void CPortalGameMovement::ProcessMovement( CBasePlayer *pPlayer, CMoveData *pMov
 		//	DevMsg( "Final Player Velocity: (%f, %f, %f)\n", XYZ( player->GetAbsVelocity() ) );
 		//}
 		
-
-		// HACK!! This is a terrible idea but it prevents our mins & maxs from being 0 0 0
-		pPlayer->RecomputeBoundsForOrientation();
-
+		
 #ifndef CLIENT_DLL
 		pPlayer->UnforceButtons( IN_DUCK );
 		pPlayer->UnforceButtons( IN_JUMP );
