@@ -3013,7 +3013,7 @@ void CPortalSimulator::CreatePolyhedrons( void )
 		Vector vOBBRight = m_InternalData.Placement.vRight;
 		Vector vOBBUp = m_InternalData.Placement.vUp;
 
-#if 0 // Legacy
+#if 1 // Legacy
 		//scale the extents to usable sizes
 		float flScaleX = PORTAL_COLLISION_SIM_BOUNDS_X;
 		if ( flScaleX < 200.0f )
