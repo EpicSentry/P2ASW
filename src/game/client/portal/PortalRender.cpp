@@ -580,7 +580,7 @@ bool CPortalRender::DrawPortalsUsingStencils(CViewRender *pViewRender)
 	}
 
 	int iNumRenderablePortals = m_ActivePortals.Count();
-
+	
 	// This loop is necessary because tools can suppress rendering without telling the portal system
 	CUtlVector< CPortalRenderable* > actualActivePortals(0, iNumRenderablePortals);
 	for (int i = 0; i < iNumRenderablePortals; ++i)
@@ -606,6 +606,7 @@ bool CPortalRender::DrawPortalsUsingStencils(CViewRender *pViewRender)
 
 		actualActivePortals.AddToTail(m_ActivePortals[i]);
 	}
+
 	iNumRenderablePortals = actualActivePortals.Count();
 	if (iNumRenderablePortals == 0)
 		return false;
@@ -618,7 +619,7 @@ bool CPortalRender::DrawPortalsUsingStencils(CViewRender *pViewRender)
 		for (int i = 0; i != iNumRenderablePortals; ++i)
 		{
 			CPortalRenderable *pCurrentPortal = actualActivePortals[i];
-			pCurrentPortal->DrawPortal();
+			pCurrentPortal->DrawPortal( pRenderContext );
 		}
 		return false;
 	}
@@ -674,7 +675,7 @@ bool CPortalRender::DrawPortalsUsingStencils(CViewRender *pViewRender)
 		//nothing in the complex frustum from the current view, copy the standard frustum in
 		m_RecursiveViewComplexFrustums[m_iViewRecursionLevel].AddMultipleToTail(FRUSTUM_NUMPLANES, pViewRender->GetFrustum());
 	}
-
+	
 	for (int i = 0; i != iNumRenderablePortals; ++i)
 	{
 		CPortalRenderable *pCurrentPortal = actualActivePortals[i];
@@ -691,9 +692,26 @@ bool CPortalRender::DrawPortalsUsingStencils(CViewRender *pViewRender)
 				FreePortalViewIDNode(m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pCurrentPortal->m_iPortalViewIDNodeIndex]);
 				m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pCurrentPortal->m_iPortalViewIDNodeIndex] = NULL;
 			}
+			// NOTE: 'pCurrentPortal->ShouldUpdatePortalView_BasedOnView(*pViewSetup, m_RecursiveViewComplexFrustums[m_iViewRecursionLevel]) == false' is what's causing the portal views to not render
+#if 0
+			if (pCurrentPortal->GetLinkedPortal() == NULL)
+			{
+				Warning("pCurrentPortal->GetLinkedPortal() == NULL\n");
+			}
+			if (pCurrentPortal == m_pRenderingViewExitPortal)
+			{
+				Warning("pCurrentPortal == m_pRenderingViewExitPortal\n");
+			}
+			if (pCurrentPortal->ShouldUpdatePortalView_BasedOnView(*pViewSetup, m_RecursiveViewComplexFrustums[m_iViewRecursionLevel]) == false)
+			{
+				Warning("pCurrentPortal->ShouldUpdatePortalView_BasedOnView(*pViewSetup, m_RecursiveViewComplexFrustums[m_iViewRecursionLevel]) == false)\n");
+			}
+#endif
+
 			continue;
 		}
-		
+
+
 		Assert( m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes.Count() > pCurrentPortal->m_iPortalViewIDNodeIndex );
 
 		if( m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pCurrentPortal->m_iPortalViewIDNodeIndex] == NULL )
@@ -716,7 +734,7 @@ bool CPortalRender::DrawPortalsUsingStencils(CViewRender *pViewRender)
 			state.m_nReferenceValue = iParentLevelStencilReferenceValue;
 			pRenderContext->SetStencilState(state);
 
-			pCurrentPortal->DrawPreStencilMask();
+			pCurrentPortal->DrawPreStencilMask( pRenderContext );
 			pRenderContext->EndPIXEvent();
 		}
 
@@ -734,7 +752,7 @@ bool CPortalRender::DrawPortalsUsingStencils(CViewRender *pViewRender)
 			pCurrentPortalViewNode->iWindowPixelsAtQueryTime = iScreenPixelCount;
 #endif
 
-			pCurrentPortal->DrawStencilMask();
+			pCurrentPortal->DrawStencilMask( pRenderContext );
 
 #ifndef TEMP_DISABLE_PORTAL_VIS_QUERY
 			pRenderContext->EndOcclusionQueryDrawing(pCurrentPortalViewNode->occlusionQueryHandle);
@@ -805,7 +823,7 @@ bool CPortalRender::DrawPortalsUsingStencils(CViewRender *pViewRender)
 
 			//step 4, patch up the fact that we just made a hole in the wall because it's not *really* a hole at all
 			{
-				pCurrentPortal->DrawPostStencilFixes();
+				pCurrentPortal->DrawPostStencilFixes( pRenderContext );
 			}
 		}
 
@@ -866,7 +884,7 @@ bool CPortalRender::DrawPortalsUsingStencils(CViewRender *pViewRender)
 	for (int i = 0; i != iNumRenderablePortals; ++i)
 	{
 		CPortalRenderable *pCurrentPortal = actualActivePortals[i];
-		pCurrentPortal->DrawPortal();
+		pCurrentPortal->DrawPortal( pRenderContext );
 	}
 
 	return bRebuildDrawListsWhenDone;

@@ -39,10 +39,9 @@ CPortalRenderable_FlatBasic::CPortalRenderable_FlatBasic( void )
 {
 	m_InternallyMaintainedData.m_VisData.m_fDistToAreaPortalTolerance = 64.0f;
 	m_InternallyMaintainedData.m_VisData.m_vecVisOrigin = Vector(0,0,0);
-	/*
-	m_InternallyMaintainedData.m_VisData.m_bTrimFrustumToPortalCorners = false;
-	m_InternallyMaintainedData.m_VisData.m_vPortalOrigin = m_InternallyMaintainedData.m_VisData.m_vPortalForward = vec3_origin;
-	m_InternallyMaintainedData.m_VisData.m_flPortalRadius = 0.0f;*/
+	//m_InternallyMaintainedData.m_VisData.m_bTrimFrustumToPortalCorners = false;
+	//m_InternallyMaintainedData.m_VisData.m_vPortalOrigin = m_InternallyMaintainedData.m_VisData.m_vPortalForward = vec3_origin;
+	//m_InternallyMaintainedData.m_VisData.m_flPortalRadius = 0.0f;
 	m_InternallyMaintainedData.m_iViewLeaf = -1;
 
 	for( int i = 0; i != ARRAYSIZE( m_InternallyMaintainedData.m_DepthDoublerTextureView ); ++i )
@@ -78,15 +77,14 @@ void CPortalRenderable_FlatBasic::PortalMoved( void )
 
 
 		m_InternallyMaintainedData.m_VisData.m_vecVisOrigin = m_InternallyMaintainedData.m_ptForwardOrigin;
-		m_InternallyMaintainedData.m_VisData.m_fDistToAreaPortalTolerance = 64.0f;			
-		/*
-		m_InternallyMaintainedData.m_VisData.m_bTrimFrustumToPortalCorners = true;
-		memcpy( m_InternallyMaintainedData.m_VisData.m_vPortalCorners, m_InternallyMaintainedData.m_ptCorners, sizeof( m_InternallyMaintainedData.m_VisData.m_vPortalCorners ) );
+		m_InternallyMaintainedData.m_VisData.m_fDistToAreaPortalTolerance = 64.0f;				
+		//m_InternallyMaintainedData.m_VisData.m_bTrimFrustumToPortalCorners = true;
+		//memcpy( m_InternallyMaintainedData.m_VisData.m_vPortalCorners, m_InternallyMaintainedData.m_ptCorners, sizeof( m_InternallyMaintainedData.m_VisData.m_vPortalCorners ) );
 
-		m_InternallyMaintainedData.m_VisData.m_vPortalOrigin = m_ptOrigin;
-		m_InternallyMaintainedData.m_VisData.m_vPortalForward = m_vForward;
-		m_InternallyMaintainedData.m_VisData.m_flPortalRadius = sqrtf( m_fHalfWidth * m_fHalfWidth + m_fHalfHeight * m_fHalfHeight );
-		*/
+		//m_InternallyMaintainedData.m_VisData.m_vPortalOrigin = m_ptOrigin;
+		//m_InternallyMaintainedData.m_VisData.m_vPortalForward = m_vForward;
+		//m_InternallyMaintainedData.m_VisData.m_flPortalRadius = sqrtf( m_fHalfWidth * m_fHalfWidth + m_fHalfHeight * m_fHalfHeight );
+
 		m_InternallyMaintainedData.m_iViewLeaf = enginetrace->GetLeafContainingPoint( m_InternallyMaintainedData.m_ptForwardOrigin );
 	}
 

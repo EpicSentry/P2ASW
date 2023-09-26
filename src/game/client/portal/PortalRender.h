@@ -33,13 +33,13 @@ public:
 	CPortalRenderable( void );
 	virtual ~CPortalRenderable( void );
 
-
+	
 	//----------------------------------------------------------------------------
 	//Stencil-based drawing helpers, these are ONLY used in stencil drawing mode
 	//----------------------------------------------------------------------------
-	virtual void	DrawPreStencilMask( void ) { }; //Do whatever drawing you need before cutting the stencil hole
-	virtual void	DrawStencilMask( void ) { }; //Draw to wherever you should see through the portal. The mask will later be filled with the portal view.
-	virtual void	DrawPostStencilFixes( void ) { }; //After done drawing to the portal mask, we need to fix the depth buffer as well as fog. So draw your mesh again, writing to z and with the fog color alpha'd in by distance
+	virtual void	DrawPreStencilMask( IMatRenderContext *pRenderContext ) { }; //Do whatever drawing you need before cutting the stencil hole
+	virtual void	DrawStencilMask( IMatRenderContext *pRenderContext ) { }; //Draw to wherever you should see through the portal. The mask will later be filled with the portal view.
+	virtual void	DrawPostStencilFixes( IMatRenderContext *pRenderContext ) { }; //After done drawing to the portal mask, we need to fix the depth buffer as well as fog. So draw your mesh again, writing to z and with the fog color alpha'd in by distance
    
 
 	//----------------------------------------------------------------------------
@@ -65,7 +65,7 @@ public:
 	//Portal visibility testing
 	//-----------------------------------------------------------------------------
 	//Based on view, will the camera be able to see through the portal this frame? This will allow the stencil mask to start being tested for pixel visibility.
-	virtual bool	ShouldUpdatePortalView_BasedOnView( const CViewSetup &currentView, CUtlVector<VPlane> &currentComplexFrustum ) { return false; }; 
+	virtual bool	ShouldUpdatePortalView_BasedOnView( const CViewSetup &currentView, const CUtlVector<VPlane> &currentComplexFrustum ) { return false; }; 
 	
 	//Stencil mode only: You stated the portal was visible based on view, and this is how much of the screen your stencil mask took up last frame. Still want to draw this frame? Values less than zero indicate a lack of data from last frame
 	virtual bool	ShouldUpdatePortalView_BasedOnPixelVisibility( float fScreenFilledByStencilMaskLastFrame_Normalized ) { return (fScreenFilledByStencilMaskLastFrame_Normalized != 0.0f); }; // < 0 is unknown visibility, > 0 is known to be partially visible
@@ -77,7 +77,7 @@ public:
 	virtual CPortalRenderable* GetLinkedPortal() const { return NULL; };
 	const VMatrix&	MatrixThisToLinked() const;
 	virtual bool	ShouldUpdateDepthDoublerTexture( const CViewSetup &viewSetup ) { return false; };
-	virtual void	DrawPortal( void ) { }; //sort of like what you'd expect to happen in C_BaseAnimating::DrawModel() if portals were fully compatible with models
+	virtual void	DrawPortal( IMatRenderContext *pRenderContext ) { }; //sort of like what you'd expect to happen in C_BaseAnimating::DrawModel() if portals were fully compatible with models
 
 	virtual C_BaseEntity *PortalRenderable_GetPairedEntity( void ) { return NULL; }; //Pairing a portal with an entity is common but not required. Accessing that entity allows the CPortalRender system to better optimize.
 	VMatrix			m_matrixThisToLinked; //Always going to need a matrix
@@ -89,7 +89,7 @@ public:
 	//SFM related
 	//-----------------------------------------------------------------------------
 	bool			m_bIsPlaybackPortal;
-	virtual void	GetToolRecordingState( bool bActive, KeyValues *msg ) { };
+	virtual void	GetToolRecordingState( KeyValues *msg ) { };
 	virtual void	HandlePortalPlaybackMessage( KeyValues *pKeyValues ) { };
 
 protected:
