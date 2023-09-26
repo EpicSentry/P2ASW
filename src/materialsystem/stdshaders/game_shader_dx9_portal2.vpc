@@ -6,7 +6,7 @@
 
 $Macro OUTBINNAME	"game_shader_dx9"
 $Macro SRCDIR		"..\.."
-$Macro GAMENAME "mod_portal2"
+$Macro GAMENAME "portal2asw"
 $Include "$SRCDIR\materialsystem\stdshaders\game_shader_dx9_base.vpc"
 
 $Configuration

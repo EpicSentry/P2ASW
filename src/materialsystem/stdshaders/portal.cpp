@@ -12,12 +12,11 @@
 #include "convar.h"
 #include "cpp_shader_constant_register_map.h"
 
+// NOTE: This has to be the last file included!
+#include "tier0/memdbgon.h"
+
+
 DEFINE_FALLBACK_SHADER( Portal, Portal_DX90 )
-
-CON_COMMAND(portal_shader_loaded, "If this shows the portal shader has successfully loaded!")
-{
-
-}
 
 BEGIN_VS_SHADER( Portal_DX90, 
 				"Help for Portal shader" )
@@ -53,7 +52,7 @@ BEGIN_VS_SHADER( Portal_DX90,
 	{
 		if ( params[BASETEXTURE]->IsDefined() )
 		{
-			if ( IsX360() )
+			if ( IsGameConsole() )
 			{
 				// prevent unused rt access
 				IMaterialVar* pNameVar = params[BASETEXTURE];
@@ -142,7 +141,7 @@ BEGIN_VS_SHADER( Portal_DX90,
 
 			int fmt = VERTEX_POSITION | VERTEX_NORMAL;
 			int userDataSize = 0;
-			int	iTexCoords = 1;
+			int	iTexCoords = 2;
 			if( IS_FLAG_SET( MATERIAL_VAR_MODEL ) )
 			{
 				userDataSize = 4;				
@@ -162,13 +161,17 @@ BEGIN_VS_SHADER( Portal_DX90,
 			if( bStaticBlendTexture && bAlphaMaskTexture )
 				pShaderShadow->EnableTexture( SHADER_SAMPLER2, true );
 			
+			// Sampler for nvidia's stereo hackery
+			pShaderShadow->EnableTexture( SHADER_SAMPLER3, true );
+			pShaderShadow->EnableSRGBRead( SHADER_SAMPLER3, false );
+
 			DECLARE_STATIC_VERTEX_SHADER( portal_vs20 );
 			SET_STATIC_VERTEX_SHADER_COMBO( HASALPHAMASK, bAlphaMaskTexture );
 			SET_STATIC_VERTEX_SHADER_COMBO( HASSTATICTEXTURE, bStaticBlendTexture );
 			SET_STATIC_VERTEX_SHADER_COMBO( USEALTERNATEVIEW, (params[USEALTERNATEVIEWMATRIX]->GetIntValue() != 0) );
 			SET_STATIC_VERTEX_SHADER( portal_vs20 );
 
-			if( g_pHardwareConfig->GetDXSupportLevel() >= 92 )
+			if( g_pHardwareConfig->SupportsPixelShaders_2_b() )
 			{
 				DECLARE_STATIC_PIXEL_SHADER( portal_ps20b );
 				SET_STATIC_PIXEL_SHADER_COMBO( HASALPHAMASK, bAlphaMaskTexture );
@@ -229,20 +232,60 @@ BEGIN_VS_SHADER( Portal_DX90,
 
 				VMatrix matFinal;
 				MatrixMultiply( matProj, matCustomView, matFinal );
+#ifdef _PS3
+				// PS3's Cg likes things in row-major rather than column-major
+				MatrixTranspose( matFinal, matFinal );
+#endif // _PS3
 				pShaderAPI->SetVertexShaderConstant( VERTEX_SHADER_SHADER_SPECIFIC_CONST_0, matFinal.Base(), 4 );
 			}
 
+			// Get viewport and render target dimensions and set shader constant to do a 2D mad
+			{
+				int nViewportX, nViewportY, nViewportWidth, nViewportHeight;
+				pShaderAPI->GetCurrentViewport( nViewportX, nViewportY, nViewportWidth, nViewportHeight );
+
+				int nRtWidth, nRtHeight;
+				pShaderAPI->GetCurrentRenderTargetDimensions( nRtWidth, nRtHeight );
+
+				float vViewportMad[4];
+				vViewportMad[0] = ( float )nViewportWidth / ( float )nRtWidth;
+				vViewportMad[1] = ( float )nViewportHeight / ( float )nRtHeight;
+				vViewportMad[2] = ( float )nViewportX / ( float )nRtWidth;
+				vViewportMad[3] = ( float )nViewportY / ( float )nRtHeight;
+
+				pShaderAPI->SetVertexShaderConstant( VERTEX_SHADER_SHADER_SPECIFIC_CONST_4, vViewportMad, 1 );
+			}
+#if 0
+			int nPortalRecursionDepth = ShaderApiFast( pShaderAPI )->GetIntRenderingParameter( INT_RENDERPARM_PORTAL_RECURSION_DEPTH );
+			float vPackedConst4[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+			if( g_pHardwareConfig->UseFastClipping() )
+			{
+				vPackedConst4[0] = ( nPortalRecursionDepth > 0 ) ? 1.0f : 0.0f;
+			}
+			else
+			{
+				vPackedConst4[0] = ( nPortalRecursionDepth > 1 )? 1.0f : 0.0f;
+			}
+			ShaderApiFast( pShaderAPI )->SetVertexShaderConstant( VERTEX_SHADER_SHADER_SPECIFIC_CONST_5, vPackedConst4, 1 );
+
+			bool bNvidiaStereoActiveThisFrame = pShaderAPI->IsStereoActiveThisFrame();
+			if ( bNvidiaStereoActiveThisFrame )
+			{
+				pShaderAPI->BindStandardTexture( SHADER_SAMPLER3, TEXTURE_BINDFLAGS_NONE, TEXTURE_STEREO_PARAM_MAP );
+			}
+#endif
 			DECLARE_DYNAMIC_VERTEX_SHADER( portal_vs20 );
 			SET_DYNAMIC_VERTEX_SHADER_COMBO( SKINNING, pShaderAPI->GetCurrentNumBones() > 0 );
 			SET_DYNAMIC_VERTEX_SHADER_COMBO( ADDSTATIC, bHasStatic );
 			SET_DYNAMIC_VERTEX_SHADER( portal_vs20 );
 
-			if( g_pHardwareConfig->GetDXSupportLevel() >= 92 )
+			if( g_pHardwareConfig->SupportsPixelShaders_2_b() )
 			{
 				DECLARE_DYNAMIC_PIXEL_SHADER( portal_ps20b );
 				SET_DYNAMIC_PIXEL_SHADER_COMBO( ADDSTATIC, bHasStatic );
 				SET_DYNAMIC_PIXEL_SHADER_COMBO( HDRENABLED, IsHDREnabled() );
 				SET_DYNAMIC_PIXEL_SHADER_COMBO( PIXELFOGTYPE, pShaderAPI->GetPixelFogCombo() );
+				//SET_DYNAMIC_PIXEL_SHADER_COMBO( D_NVIDIA_STEREO, bNvidiaStereoActiveThisFrame );
 				SET_DYNAMIC_PIXEL_SHADER( portal_ps20b );
 			}
 			else

@@ -622,6 +622,7 @@ int CNewParticleEffect::DrawModel( int flags, const RenderableInstance_t &instan
 	{
 		int viewentity = render->GetViewEntity();
 		C_BaseEntity *pCameraObject = cl_entitylist->GetEnt( viewentity );
+		Assert( pCameraObject );
 		// apply logic that lets you skip rendering a system if the camera is attached to its entity
 		if   ( ( ( pCameraObject &&
 			 ( m_pDef->m_nSkipRenderControlPoint != -1 ) &&

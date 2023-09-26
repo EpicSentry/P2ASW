@@ -3,15 +3,15 @@ $Group "game"
 	"client"
 	"server"
 	"missionchooser"
-	"shaderlib"	[$PORTAL2]
-	"portal_shader"	[$PORTAL2]
+	"shaderlib"
+	"portal_shader"
 }
 
 $Group "shaders"
 {
 	"shaderlib"
 //	"game_shader"
-	"portal_shader"	[$PORTAL2]
+	"portal_shader"
 }
 
 $Group "everything"
@@ -20,6 +20,6 @@ $Group "everything"
 	"server"
 	"missionchooser"
 	"shaderlib"
-	"portal_shader"	[$PORTAL2]
+	"portal_shader"
 //	"game_shader"
 }

@@ -45,10 +45,13 @@ client.lib
 server.dll
 server.pdb
 server.lib
+game_shader_dx9.dll
+game_shader_dx9.pdb
+game_shader_dx9.lib
 missionchooser.dll
 missionchooser.pdb
 missionchooser.lib
-mod_portal2_release
+portal2asw_release
 shaderlib.lib
 graphs\*
 reslists\*
@@ -121,7 +124,7 @@ game/swarm.exe
 src/lib/public/shaderlib.lib
 
 game/bin
-game/mod_portal2/bin
+game/portal2asw/bin
 game/portal2/bin
 game/mod_swarm/bin
 game/template/bin
@@ -151,4 +154,4 @@ game/platform
 Debug_*
 Release_*
 !src/common/debug_dll_check.cpp
-!game/mod_portal2/pak01_dir.vpk
+!game/portal2asw/pak01_dir.vpk

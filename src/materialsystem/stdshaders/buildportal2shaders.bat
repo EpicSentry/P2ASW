@@ -1,6 +1,8 @@
 @echo off
 setlocal
 
+set GAMEDIR=%cd%\..\..\..\game\portal2asw
+
 rem Use dynamic shaders to build .inc files only
 rem set dynamic_shaders=1
 rem == Setup path to nmake.exe, from vc 2005 common tools directory ==
@@ -14,7 +16,7 @@ rem == Note that this path needs does not support long file/directory names ==
 rem == So instead of a path such as "C:\Program Files\Steam\steamapps\mymod" ==
 rem == you need to find the 8.3 abbreviation for the directory name using 'dir /x' ==
 rem == and set the directory to something like C:\PROGRA~2\Steam\steamapps\sourcemods\mymod ==
-set GAMEDIR=E:\Programming\Portal-2\game\mod_portal2
+set GAMEDIR=E:\Programming\Portal-2\game\portal2asw
 
 rem == Set the relative path to steamapps\common\Alien Swarm\bin ==
 rem == As above, this path does not support long directory names or spaces ==
