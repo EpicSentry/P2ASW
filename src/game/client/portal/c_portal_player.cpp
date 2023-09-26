@@ -3590,8 +3590,6 @@ void C_Portal_Player::ApplyUnpredictedPortalTeleportation( const C_Portal_Base2D
 {
 	ApplyTransformToInterpolators( pEnteredPortal->m_matrixThisToLinked, flTeleportationTime, false, bForcedDuck );
 
-	Msg("ApplyUnpredictedPortalTeleportation\n");
-
 	//Warning( "Applying teleportation view angle change %d, %f\n", m_PredictedPortalTeleportations.Count(), gpGlobals->curtime );
 
 	if( IsLocalPlayer() && (GET_ACTIVE_SPLITSCREEN_SLOT() == GetSplitScreenPlayerSlot()) )
