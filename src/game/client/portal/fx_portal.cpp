@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: Fizzle effects for portal.
 //
@@ -22,6 +22,8 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
+ConVar cl_portal_projectile_delay_mp("cl_portal_projectile_delay_mp", "0.14f", FCVAR_CHEAT);
+ConVar cl_portal_projectile_delay_sp("cl_portal_projectile_delay_sp", "0.1f", FCVAR_CHEAT);
 
 class C_PortalBlast : public C_BaseEntity
 {
@@ -29,9 +31,9 @@ class C_PortalBlast : public C_BaseEntity
 
 public:
 
-	static void		Create( bool bIsPortal2, PortalPlacedBy_t ePlacedBy, const Vector &vStart, const Vector &vEnd, const QAngle &qAngles );
+	static void		Create(CBaseHandle hOwner, bool bIsPortal2, PortalPlacedBy_t ePlacedBy, const Vector &vStart, const Vector &vEnd, const QAngle &qAngles, float fDeathTime);
 
-	void			Init( bool bIsPortal2, PortalPlacedBy_t ePlacedBy, const Vector &vStart, const Vector &vEnd, const QAngle &qAngles );
+	void			Init(CBaseHandle hOwner, bool bIsPortal2, PortalPlacedBy_t ePlacedBy, const Vector &vStart, const Vector &vEnd, const QAngle &qAngles, float fDeathTime);
 
 	virtual void	ClientThink( void );
 
@@ -42,18 +44,19 @@ private:
 	Vector	m_ptAimPoint;
 
 	float	m_fCreationTime;
+	float	m_fDeathTime;
 	bool	m_bRemove;
 };
 
 
-void C_PortalBlast::Create( bool bIsPortal2, PortalPlacedBy_t ePlacedBy, const Vector &vStart, const Vector &vEnd, const QAngle &qAngles )
+void C_PortalBlast::Create(CBaseHandle hOwner, bool bIsPortal2, PortalPlacedBy_t ePlacedBy, const Vector &vStart, const Vector &vEnd, const QAngle &qAngles, float fDeathTime)
 {
 	C_PortalBlast *pPortalBlast = new C_PortalBlast;
-	pPortalBlast->Init( bIsPortal2, ePlacedBy, vStart, vEnd, qAngles );
+	pPortalBlast->Init(hOwner, bIsPortal2, ePlacedBy, vStart, vEnd, qAngles, fDeathTime);
 }
 
 
-void C_PortalBlast::Init( bool bIsPortal2, PortalPlacedBy_t ePlacedBy, const Vector &vStart, const Vector &vEnd, const QAngle &qAngles )
+void C_PortalBlast::Init(CBaseHandle hOwner, bool bIsPortal2, PortalPlacedBy_t ePlacedBy, const Vector &vStart, const Vector &vEnd, const QAngle &qAngles, float fDeathTime)
 {
 	ClientEntityList().AddNonNetworkableEntity( this );
 	ClientThinkList()->SetNextClientThink( GetClientHandle(), CLIENT_THINK_ALWAYS );
@@ -68,20 +71,42 @@ void C_PortalBlast::Init( bool bIsPortal2, PortalPlacedBy_t ePlacedBy, const Vec
 
 	SetAbsOrigin( m_ptCreationPoint );
 
+	if (g_pGameRules)
+	{
+		if (g_pGameRules->IsMultiplayer())
+			cl_portal_projectile_delay_mp.GetFloat();
+		else
+			cl_portal_projectile_delay_sp.GetFloat();
+	}
+
+	m_fDeathTime = fDeathTime;
 	m_fCreationTime = gpGlobals->curtime;
+
+	if (gpGlobals->curtime > (fDeathTime - 0.1f))
+		m_fDeathTime = gpGlobals->curtime + 0.1f;
 
 	Vector vForward;
 	AngleVectors( qAngles, &vForward );
 
 	m_ptAimPoint = m_ptCreationPoint + vForward * m_ptCreationPoint.DistTo( m_ptDeathPoint );
-#if 0
+
+	CUtlReference<CNewParticleEffect> pEffect;
+	if (hOwner == false)
+		return;
+
 	if ( ePlacedBy == PORTAL_PLACED_BY_PLAYER )
-		ParticleProp()->Create( ( ( bIsPortal2 ) ? ( "portal_2_projectile_stream" ) : ( "portal_1_projectile_stream" ) ), PATTACH_ABSORIGIN_FOLLOW );
-	else
-		ParticleProp()->Create( ( ( bIsPortal2 ) ? ( "portal_2_projectile_stream_pedestal" ) : ( "portal_1_projectile_stream_pedestal" ) ), PATTACH_ABSORIGIN_FOLLOW );
-#else
-		ParticleProp()->Create( ( ( bIsPortal2 ) ? ( "portal_projectile_stream" ) : ( "portal_projectile_stream" ) ), PATTACH_ABSORIGIN_FOLLOW );
-#endif
+		pEffect = ParticleProp()->Create( ( ( bIsPortal2 ) ? ( "portal_projectile_stream" ) : ( "portal_projectile_stream" ) ), PATTACH_ABSORIGIN_FOLLOW );
+		
+		Color portalcolor;
+	
+		portalcolor = UTIL_Portal_Color_Particles((bIsPortal2) ? (2) : (1));
+
+		Vector vColor;
+		vColor.x = portalcolor.r();
+		vColor.y = portalcolor.g();
+		vColor.z = portalcolor.b();
+
+		pEffect->SetControlPoint(2, vColor);
 }
 
 void C_PortalBlast::ClientThink( void )
@@ -129,7 +154,7 @@ Spot:
 
 void PortalBlastCallback( const CEffectData & data )
 {
-	C_PortalBlast::Create( ( data.m_nColor == 1 ) ? ( false ) : ( true ), (PortalPlacedBy_t)data.m_nDamageType, data.m_vOrigin, data.m_vStart, data.m_vAngles );
+	C_PortalBlast::Create( (data.m_hEntity), ( data.m_nColor == 1 ) ? ( false ) : ( true ), (PortalPlacedBy_t)data.m_nDamageType, data.m_vOrigin, data.m_vStart, data.m_vAngles, data.m_flScale);
 }
 
 DECLARE_CLIENT_EFFECT( PortalBlast, PortalBlastCallback );
