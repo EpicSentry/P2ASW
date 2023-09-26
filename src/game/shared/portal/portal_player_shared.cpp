@@ -140,7 +140,7 @@ const float PORTAL_PLANE_IGNORE_EPSILON = 17.0f;
 extern ConVar sv_speed_normal;
 extern ConVar sv_speed_paint_max;
 extern ConVar portal_tauntcam_dist;
-ConVar portal_deathcam_dist( "portal_deathcam_dist", "128", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY | FCVAR_REPLICATED );
+ConVar portal_deathcam_dist( "portal_deathcam_dist", "128", FCVAR_CHEAT | FCVAR_REPLICATED );
 
 ConVar sv_portal_coop_ping_hud_indicitator_duration( "sv_portal_coop_ping_hud_indicitator_duration", "5", FCVAR_REPLICATED );
 
@@ -237,10 +237,10 @@ ConVar sv_wall_jump_help_amount("sv_wall_jump_help_amount", "5.0f", FCVAR_REPLIC
 ConVar sv_wall_jump_help_debug("sv_wall_jump_help_debug", "0", FCVAR_REPLICATED);
 
 //Debug convars
-ConVar show_player_paint_power_debug( "show_player_paint_power_debug", "0", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
+ConVar show_player_paint_power_debug( "show_player_paint_power_debug", "0", FCVAR_REPLICATED );
 ConVar mp_should_gib_bots("mp_should_gib_bots", "1", FCVAR_REPLICATED | FCVAR_CHEAT);
-ConVar sv_debug_bounce_reflection("sv_debug_bounce_reflection", "0", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
-ConVar sv_debug_bounce_reflection_time("sv_debug_bounce_reflection_time", "15.f", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
+ConVar sv_debug_bounce_reflection("sv_debug_bounce_reflection", "0", FCVAR_REPLICATED );
+ConVar sv_debug_bounce_reflection_time("sv_debug_bounce_reflection_time", "15.f", FCVAR_REPLICATED );
 ConVar paint_compute_contacts_simd("paint_compute_contacts_simd", "1", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Compute the contacts with paint in fast SIMD (1) or with slower FPU (0)." );
 
 ConVar prevent_crouch_jump("prevent_crouch_jump", "1", FCVAR_REPLICATED | FCVAR_CHEAT, "Enable/Disable crouch jump prevention.");
@@ -2302,9 +2302,6 @@ void CPortal_Player::PlayPaintSounds( const PaintPowerChoiceResultArray& touched
 		"Player.ExitSpeedPaint"
 	};
 
-	Msg("GetPaintedPower(): %i\n", GetPaintedPower());
-	Msg("GetPaintPowerAtPoint(): %i\n", GetPaintPowerAtPoint( Vector() ));
-
 	CRecipientFilter filter;
 	filter.AddRecipient( this );
 
@@ -2474,6 +2471,7 @@ void CPortal_Player::AddSurfacePaintPowerInfo( const BrushContact& contact, char
 
 void CPortal_Player::AddSurfacePaintPowerInfo( const trace_t& trace, char const* context )
 {
+#if 0
 	if( trace.m_pEnt )
 	{
 		if( trace.m_pEnt->IsBSPModel() )
@@ -2506,6 +2504,93 @@ void CPortal_Player::AddSurfacePaintPowerInfo( const trace_t& trace, char const*
 														context );	
 		}
 	}
+#else
+	// Hacks since we're limited by the engine code
+
+	enum
+	{
+		TRACE_ABSORIGIN,
+		TRACE_CORNER1,
+		TRACE_CORNER2,
+		TRACE_CORNER3,
+		TRACE_CORNER4,
+		TRACE_TYPES
+	};
+
+	m_PortalLocal.m_PaintedPowerType = NO_POWER;
+
+	CTraceFilterNoPlayers filter;
+	Vector vOrigin = GetAbsOrigin();
+	Vector vStart;
+	float flHalfHullWidth = GetHullWidth() * 0.5;
+	for (int i = 0; i < TRACE_TYPES; ++i)
+	{
+		if ( i == TRACE_ABSORIGIN )
+			vStart = vOrigin;
+		else if (i == TRACE_CORNER1)
+		{
+			vStart.x = vOrigin.x + flHalfHullWidth;
+			vStart.y = vOrigin.y + flHalfHullWidth;
+			vStart.z = vOrigin.z;
+		}
+		else if (i == TRACE_CORNER2)
+		{
+			vStart.x = vOrigin.x + -flHalfHullWidth;
+			vStart.y = vOrigin.y + flHalfHullWidth;
+			vStart.z = vOrigin.z;
+		}
+		else if (i == TRACE_CORNER3)
+		{
+			vStart.x = vOrigin.x + flHalfHullWidth;
+			vStart.y = vOrigin.y + -flHalfHullWidth;
+			vStart.z = vOrigin.z;
+		}
+		else if (i == TRACE_CORNER4)
+		{
+			vStart.x = vOrigin.x + -flHalfHullWidth;
+			vStart.y = vOrigin.y + -flHalfHullWidth;
+			vStart.z = vOrigin.z;
+		}
+			
+		UTIL_TraceLine( vStart + Vector( 0, 0, 1 ), vStart - Vector( 0, 0, 4 ), MASK_SOLID, &filter, const_cast<trace_t*>(&trace) );
+	
+		if ( !trace.m_pEnt )
+			return;
+	
+		//Trace for paint on the surface if it is the world
+		if( trace.m_pEnt->IsBSPModel() )
+		{
+			m_PortalLocal.m_PaintedPowerType = UTIL_Paint_TracePower( trace.m_pEnt, trace.endpos, trace.plane.normal );
+
+			if (m_PortalLocal.m_PaintedPowerType == NO_POWER)
+				continue;
+
+			PaintPowerInfo_t powerInfo;
+			
+			powerInfo.m_PaintPowerType = m_PortalLocal.m_PaintedPowerType;
+			powerInfo.m_ContactPoint = trace.endpos;
+			powerInfo.m_SurfaceNormal = trace.plane.normal;
+
+			AddSurfacePaintPowerInfo( powerInfo, context );
+
+			m_PortalLocal.m_PaintedPowerType = m_PortalLocal.m_PaintedPowerType;
+
+			return; // Don't fire new traces if we found a paint power.
+
+		}
+		else
+		{
+			CPaintableEntity* pPaintableEnt = dynamic_cast<CPaintableEntity*>( trace.m_pEnt );
+
+			if ( pPaintableEnt )
+			{
+				m_PortalLocal.m_PaintedPowerType = pPaintableEnt->GetPaintedPower();
+				return; // Don't fire new traces if we found a paint power.
+			}
+		}
+	}
+
+#endif
 }
 
 
@@ -2586,8 +2671,9 @@ void CPortal_Player::DeterminePaintContacts()
 
 void CPortal_Player::DeterminePaintContactsUnderFeet()
 {
-	CTraceFilterNoPlayers filter;
 	trace_t tr;
+#if 0
+	CTraceFilterNoPlayers filter;
 	UTIL_TraceLine( GetAbsOrigin() + Vector( 0, 0, 1 ), GetAbsOrigin() - Vector( 0, 0, 1 ), MASK_SOLID, &filter, &tr );
 	
 	if ( !tr.m_pEnt )
@@ -2605,10 +2691,6 @@ void CPortal_Player::DeterminePaintContactsUnderFeet()
 		powerInfo.m_ContactPoint = tr.endpos;
 		powerInfo.m_SurfaceNormal = tr.plane.normal;
 
-		ForceSetPaintPower( powerInfo );
-
-		Paint( newPower, Vector() );
-
 	}
 	else
 	{
@@ -2623,6 +2705,8 @@ void CPortal_Player::DeterminePaintContactsUnderFeet()
 			m_PortalLocal.m_PaintedPowerType = NO_POWER;
 		}
 	}
+#endif
+	AddSurfacePaintPowerInfo( tr );
 }
 
 

@@ -441,45 +441,43 @@ void CInput::ApplyMouse( int nSlot, QAngle& viewangles, CUserCmd *cmd, float mou
 
 	if ( !((in_strafe.GetPerUser( nSlot ).state & 1) || lookstrafe.GetInt()) )
 	{
+		if ( CAM_IsThirdPerson() && thirdperson_platformer.GetInt() )
 		{
-			if (CAM_IsThirdPerson() && thirdperson_platformer.GetInt())
+			if ( mouse_x )
 			{
-				if (mouse_x)
-				{
-					// use the mouse to orbit the camera around the player, and update the idealAngle
-					user.m_vecCameraOffset[YAW] -= m_yaw.GetFloat() * mouse_x;
-					cam_idealyaw.SetValue(user.m_vecCameraOffset[YAW] - viewangles[YAW]);
+				// use the mouse to orbit the camera around the player, and update the idealAngle
+				user.m_vecCameraOffset[ YAW ] -= m_yaw.GetFloat() * mouse_x;
+				cam_idealyaw.SetValue( user.m_vecCameraOffset[ YAW ] - viewangles[ YAW ] );
 
-					// why doesn't this work??? CInput::AdjustYaw is why
-					//cam_idealyaw.SetValue( cam_idealyaw.GetFloat() - m_yaw.GetFloat() * mouse_x );
-				}
+				// why doesn't this work??? CInput::AdjustYaw is why
+				//cam_idealyaw.SetValue( cam_idealyaw.GetFloat() - m_yaw.GetFloat() * mouse_x );
 			}
-			else
-			{
+		}
+		else
+		{
 			// Otherwize, use mouse to spin around vertical axis
 
 #if defined PORTAL
-				if( cl_mouselook_roll_compensation.GetBool() ) //for portal, remap yaw/pitch adjustments to be relative to your current view roll so left/right on the mouse is left/right on the screen
-				{
-					QAngle qAngleTemp( 0.0f, -(m_yaw.GetFloat() * mouse_x), 0.0f );			
+			if( cl_mouselook_roll_compensation.GetBool() ) //for portal, remap yaw/pitch adjustments to be relative to your current view roll so left/right on the mouse is left/right on the screen
+			{
+				QAngle qAngleTemp( 0.0f, -(m_yaw.GetFloat() * mouse_x), 0.0f );			
 
-					Quaternion quatTemp;
-					AngleQuaternion( qAngleTemp, quatTemp );
+				Quaternion quatTemp;
+				AngleQuaternion( qAngleTemp, quatTemp );
 
-					Quaternion qRollUndone[2];
-					QuaternionMult( quatTemp, quatInverseRoll, qRollUndone[0] );
-					QuaternionMult( quatRoll, qRollUndone[0], qRollUndone[1] );
-					QuaternionAngles( qRollUndone[1], qAngleTemp );
+				Quaternion qRollUndone[2];
+				QuaternionMult( quatTemp, quatInverseRoll, qRollUndone[0] );
+				QuaternionMult( quatRoll, qRollUndone[0], qRollUndone[1] );
+				QuaternionAngles( qRollUndone[1], qAngleTemp );
 
-					viewangles[0] += qAngleTemp[0];
-					viewangles[1] += qAngleTemp[1];
-					viewangles[2] += qAngleTemp[2];
-				}
-				else
+				viewangles[0] += qAngleTemp[0];
+				viewangles[1] += qAngleTemp[1];
+				viewangles[2] += qAngleTemp[2];
+			}
+			else
 #endif
-				{
-					viewangles[YAW] -= m_yaw.GetFloat() * mouse_x;
-				}
+			{
+				viewangles[YAW] -= m_yaw.GetFloat() * mouse_x;
 			}
 		}
 	}
@@ -494,56 +492,53 @@ void CInput::ApplyMouse( int nSlot, QAngle& viewangles, CUserCmd *cmd, float mou
 	//  to adjust view pitch.
 	if (!(in_strafe.GetPerUser( nSlot ).state & 1))
 	{
+		if ( CAM_IsThirdPerson() && thirdperson_platformer.GetInt() )
 		{
-			if (CAM_IsThirdPerson() && thirdperson_platformer.GetInt())
+			if ( mouse_y )
 			{
-				if (mouse_y)
-				{
-					// use the mouse to orbit the camera around the player, and update the idealAngle
-					user.m_vecCameraOffset[PITCH] += m_pitch->GetFloat() * mouse_y;
-					cam_idealpitch.SetValue(user.m_vecCameraOffset[PITCH] - viewangles[PITCH]);
+				// use the mouse to orbit the camera around the player, and update the idealAngle
+				user.m_vecCameraOffset[ PITCH ] += m_pitch->GetFloat() * mouse_y;
+				cam_idealpitch.SetValue( user.m_vecCameraOffset[ PITCH ] - viewangles[ PITCH ] );
 
-					// why doesn't this work??? CInput::AdjustYaw is why
-					//cam_idealpitch.SetValue( cam_idealpitch.GetFloat() + m_pitch->GetFloat() * mouse_y );
-				}
-			}
-			else
-			{
-#if defined PORTAL
-				if( cl_mouselook_roll_compensation.GetBool() ) //for portal, remap yaw/pitch adjustments to be relative to your current view roll so left/right on the mouse is left/right on the screen
-				{
-					QAngle qAngleTemp( m_pitch->GetFloat() * mouse_y, 0.0f, 0.0f );
-
-					Quaternion quatTemp;
-					AngleQuaternion( qAngleTemp, quatTemp );
-
-					Quaternion qRollUndone[2];
-					QuaternionMult( quatTemp, quatInverseRoll, qRollUndone[0] );
-					QuaternionMult( quatRoll, qRollUndone[0], qRollUndone[1] );
-					QuaternionAngles( qRollUndone[1], qAngleTemp );
-
-					viewangles[0] += qAngleTemp[0];
-					viewangles[1] += qAngleTemp[1];
-					viewangles[2] += qAngleTemp[2];
-				}
-				else
-#endif
-
-				{
-					viewangles[PITCH] += m_pitch->GetFloat() * mouse_y;
-				}
-
-				// Check pitch bounds
-				if (viewangles[PITCH] > cl_pitchdown.GetFloat())
-				{
-					viewangles[PITCH] = cl_pitchdown.GetFloat();
-				}
-				if (viewangles[PITCH] < -cl_pitchup.GetFloat())
-				{
-					viewangles[PITCH] = -cl_pitchup.GetFloat();
-				}
+				// why doesn't this work??? CInput::AdjustYaw is why
+				//cam_idealpitch.SetValue( cam_idealpitch.GetFloat() + m_pitch->GetFloat() * mouse_y );
 			}
 		}
+		else
+		{
+#if defined PORTAL
+			if( cl_mouselook_roll_compensation.GetBool() ) //for portal, remap yaw/pitch adjustments to be relative to your current view roll so left/right on the mouse is left/right on the screen
+			{
+				QAngle qAngleTemp( m_pitch->GetFloat() * mouse_y, 0.0f, 0.0f );
+
+				Quaternion quatTemp;
+				AngleQuaternion( qAngleTemp, quatTemp );
+
+				Quaternion qRollUndone[2];
+				QuaternionMult( quatTemp, quatInverseRoll, qRollUndone[0] );
+				QuaternionMult( quatRoll, qRollUndone[0], qRollUndone[1] );
+				QuaternionAngles( qRollUndone[1], qAngleTemp );
+
+				viewangles[0] += qAngleTemp[0];
+				viewangles[1] += qAngleTemp[1];
+				viewangles[2] += qAngleTemp[2];
+			}
+			else
+#endif
+			{
+				viewangles[PITCH] += m_pitch->GetFloat() * mouse_y;
+			}
+
+			// Check pitch bounds
+			if (viewangles[PITCH] > cl_pitchdown.GetFloat())
+			{
+				viewangles[PITCH] = cl_pitchdown.GetFloat();
+			}
+			if (viewangles[PITCH] < -cl_pitchup.GetFloat())
+			{
+				viewangles[PITCH] = -cl_pitchup.GetFloat();
+			}
+		}		
 	}
 	else
 	{
@@ -561,7 +556,7 @@ void CInput::ApplyMouse( int nSlot, QAngle& viewangles, CUserCmd *cmd, float mou
 
 	// Finally, add mouse state to usercmd.
 	// NOTE:  Does rounding to int cause any issues?  ywb 1/17/04
-	cmd->mousedx = (int)mouse_x;
+    cmd->mousedx = (int)mouse_x;
 	cmd->mousedy = (int)mouse_y;
 }
 

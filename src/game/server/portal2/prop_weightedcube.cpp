@@ -283,6 +283,7 @@ CCubeRotationController * CCubeRotationController::CreateRotationController( CBa
 }
 
 LINK_ENTITY_TO_CLASS( prop_weighted_cube, CPropWeightedCube );
+LINK_ENTITY_TO_CLASS( prop_monster_box, CPropWeightedCube );
 
 BEGIN_DATADESC( CPropWeightedCube )
 
