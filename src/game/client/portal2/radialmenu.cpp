@@ -31,7 +31,7 @@
 #include "soundemittersystem/isoundemittersystembase.h"
 #include "c_prop_portal.h"
 #include "c_trigger_tractorbeam.h"
-#include "c_projectedwallentity.h"
+//#include "c_projectedwallentity.h" Add this when we have projected walls finished
 #include "portal_mp_gamerules.h"
 
 #include "vgui/cursor.h"
@@ -41,7 +41,7 @@
 #include <game/client/iviewport.h>
 
 #include "radialmenu.h"
-#include "radialmenu_taunt.h"
+//#include "radialmenu_taunt.h" TODO: ADD THIS FILE!
 #include "radialbutton.h"
 
 #include "cegclientwrapper.h"
@@ -300,7 +300,8 @@ void CRadialMenuPanel::ShowPanel( bool bShow )
 
 
 
-float CRadialMenu::m_fLastPingTime[ MAX_SPLITSCREEN_PLAYERS ][ 2 ] = { { 0.0f, 0.0f }, { 0.0f, 0.0f } };
+//float CRadialMenu::m_fLastPingTime[ MAX_SPLITSCREEN_PLAYERS ][ 2 ] = { { 0.0f, 0.0f }, { 0.0f, 0.0f } }; we need to set MAX_SPLITSCREEN_PLAYERS back to 2 whenever were all ready for that, doing this for one temporarily
+float CRadialMenu::m_fLastPingTime[MAX_SPLITSCREEN_PLAYERS][1] = { { 0.0f} };
 int CRadialMenu::m_nNumPings[ MAX_SPLITSCREEN_PLAYERS ][ 2 ] = { { 0, 0 }, { 0, 0 } };
 
 DECLARE_HUDELEMENT( CRadialMenu );
@@ -512,8 +513,10 @@ void CRadialMenu::EndDrag( void )
 
 	if ( nSwap != -1 && nSwap != CENTER )
 	{
+		/* Fix this!
 		CUtlVector< TauntStatusData > *pTauntData = GetClientMenuManagerTaunt().GetTauntData();
 		TauntStatusData *pData = &((*pTauntData)[ m_nDraggingTaunt ]);
+		*/
 
 		const char *pDir = "empty";
 
@@ -552,14 +555,15 @@ void CRadialMenu::EndDrag( void )
 			break;
 		}
 
-		GetClientMenuManagerTaunt().SetTauntPosition( pData->szName, pDir );
+		//GetClientMenuManagerTaunt().SetTauntPosition( pData->szName, pDir );
 		//GetClientMenuManagerTaunt().UpdateStorageChange( pData, GetClientMenuManagerTaunt().UPDATE_STORAGE_EQUIPSLOT );
-
+		/*
 		KeyValues *menuKey = GetClientMenuManagerTaunt().FindMenu( "Default" );
-		if ( menuKey )
+		if (menuKey)
 		{
-			SetData( menuKey );
+			SetData(menuKey); Fix this!
 		}
+		*/
 	}
 
 	m_bDragging = false;
@@ -659,7 +663,7 @@ void CRadialMenu::PaintBackground( void )
 		else
 		{
 			float fJoyForward, fJoySide, fJoyPitch, fJoyYaw = 0.0f;
-			input->Joystick_Querry( fJoyForward, fJoySide, fJoyPitch, fJoyYaw );
+			//input->Joystick_Querry( fJoyForward, fJoySide, fJoyPitch, fJoyYaw ); Fix this!
 
 			// Replace if the other stick was pushed further
 			// We need to use both sticks because they might have southpaw or legacy set
@@ -1250,7 +1254,7 @@ void CRadialMenu::OnThink( void )
 
 		if ( input->ControllerModeActive() )
 		{
-			input->Joystick_Querry( fJoyForward, fJoySide, fJoyPitch, fJoyYaw );
+			//input->Joystick_Querry( fJoyForward, fJoySide, fJoyPitch, fJoyYaw ); fix this!
 
 			// Replace if the other stick was pushed further
 			// We need to use both sticks because they might have southpaw or legacy set
@@ -1407,12 +1411,13 @@ int	CRadialMenu::KeyInput( int down, ButtonCode_t keynum, const char *pszCurrent
 		ButtonCode_t key;
 		do 
 		{
+			/*
 			key = (ButtonCode_t)engine->Key_CodeForBinding( s_pszRadialMenuIgnoreActions[i], nSlot, count, -1 );
 			if ( IsJoystickCode( key ) )
 			{
-				key = GetBaseButtonCode( key );
+				key = GetBaseButtonCode( key );		Key_CodeForBinding is missing in the asw engine.
 			}
-
+			*/
 			if ( keynum == key )
 			{
 				return 0;
@@ -1453,8 +1458,8 @@ void CRadialMenu::SendCommand( const char *commandStr )
 		{
 			pchTaunt++;
 
-			GetClientMenuManagerTaunt().IsTauntTeam( pchTaunt );
-			GetClientMenuManagerTaunt().SetTauntUsed( pchTaunt );
+			//GetClientMenuManagerTaunt().IsTauntTeam( pchTaunt );
+			//GetClientMenuManagerTaunt().SetTauntUsed( pchTaunt ); fix me!
 		}
 	}
 	else
@@ -1745,7 +1750,7 @@ void FlushClientMenus( void )
 
 	for ( int i = 0; i < MAX_SPLITSCREEN_PLAYERS; ++i )
 	{
-		GetClientMenuManagerTaunt( i ).Flush();
+		//GetClientMenuManagerTaunt( i ).Flush();
 	}
 }
 
@@ -1795,7 +1800,7 @@ void OpenRadialMenu( const char *lpszTargetClassification, EHANDLE hTargetEntity
 	ClientMenuManager *pMM;
 	if ( menuType == MENU_TAUNT )
 	{
-		pMM = &GetClientMenuManagerTaunt();
+		//pMM = &GetClientMenuManagerTaunt();
 	}
 	else if ( menuType == MENU_PING )
 	{
@@ -1936,6 +1941,7 @@ bool LaunchRadialMenu( int nPlayerSlot, RadialMenuTypes_t menuType )
 		}
 		else
 		{
+			/*
 			// See if we passed through a tractor bream
 			Ray_t ray;
 
@@ -1998,8 +2004,8 @@ bool LaunchRadialMenu( int nPlayerSlot, RadialMenuTypes_t menuType )
 						}
 					}
 				}
-			}
-
+			}	Get these implemented first
+			*/
 			// If it's an entity, just return that
 			if ( tr.m_pEnt && tr.DidHitNonWorldEntity() && !tr.m_pEnt->IsBrushModel() )
 			{
@@ -2187,8 +2193,8 @@ void CloseRadialMenuCommand( RadialMenuTypes_t menuType, bool bForceClose /*= fa
 
 		if ( !bForceClose )
 		{
-			input->Joystick_ForceRecentering( 0 );
-			input->Joystick_ForceRecentering( 1 );
+			//input->Joystick_ForceRecentering( 0 );
+			//input->Joystick_ForceRecentering( 1 );
 		}
 	}
 	else if ( !pRadialMenu->IsVisible() )

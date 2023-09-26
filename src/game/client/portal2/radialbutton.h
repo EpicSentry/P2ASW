@@ -8,10 +8,10 @@
 #endif
 
 #include <vgui_controls/editablepanel.h>
+#include <vgui_controls/ImagePanel.h>
 //#include "asw_hudelement.h"
 #include "hudelement.h"
 #include "portal2_vgui_ingame_panel.h"
-//#include "vgui/polygonbutton.h"
 #include "polygonbutton.h"
 
 
@@ -28,6 +28,23 @@ class CRadialButton : public CPolygonButton, public CPortal2_VGUI_Ingame_Panel
 	DECLARE_CLASS_SIMPLE( CRadialButton, CPolygonButton );
 
 public:
+
+	//RadialMenu required functions
+
+	// Return the icon image panel of the button
+	vgui::ImagePanel *GetIcon() { return m_pIcon; }
+
+	// Set the maximum scale of the button
+	void SetMaxScale(float flMaxScale) { m_flMaxScale = flMaxScale; }
+
+	// Stub for GetGLaDOSResponse, implement this whenever you can, this isnt a very important function atm
+	int GetGLaDOSResponse() { return 0; }
+
+	// Stub for SetGLaDOSResponse
+	void SetGLaDOSResponse(int nResponse) { /* Implement this whenever you can! */ }
+
+	// Set whether the button should pulse
+	void SetPulse(bool bPulse) { m_bPulse = bPulse; }
 
 	CRadialButton( vgui::Panel *parent, const char *panelName );
 
@@ -79,6 +96,10 @@ private:
 	Color m_armedBgColor;
 	Color m_armedFgColor;
 	bool m_fakeArmed;
+
+	vgui::ImagePanel *m_pIcon;
+	float m_flMaxScale;
+	bool m_bPulse;
 
 	bool m_hasSubmenu;
 

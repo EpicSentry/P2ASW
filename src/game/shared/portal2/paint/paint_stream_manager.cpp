@@ -26,7 +26,6 @@ const char* const CPaintStreamManager::m_pPaintMaterialNames[PAINT_POWER_TYPE_CO
 	"paintblobs/blob_surface_stick", // FIXME: Bring this back for DLC2 "paintblobs/blob_surface_reflect",
 	"paintblobs/blob_surface_speed",
 	"paintblobs/blob_surface_portal",
-	//"paintblobs/blob_surface_stick", // Stick power
 	"paintblobs/blob_surface_erase",
 };
 

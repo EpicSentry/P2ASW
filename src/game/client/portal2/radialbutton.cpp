@@ -22,7 +22,6 @@
 #include "input.h"
 #include "c_portal_player.h"
 
-//#include "vgui/polygonbutton.h"
 #include "swarm/polygonbutton.h"
 
 #include "radialmenu.h"
