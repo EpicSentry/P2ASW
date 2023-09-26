@@ -37,6 +37,12 @@ SendPropVector(SENDINFO(vecNetMuzzleDir)),
 END_SEND_TABLE()
 */
 
+CPortalLaser::CPortalLaser()
+{
+	m_flLastDamageTime = 0.0;
+	m_flLastDamageSoundTime = 0.0;
+}
+
 void CPortalLaser::Think()
 {
 	// Schedule the next think
@@ -56,13 +62,13 @@ void CPortalLaser::Think()
 
 }
 
-void RotateVector(Vector& vec, const QAngle& angles) {
+void RotateVector(Vector& vec, const QAngle& angles)
+{
 	matrix3x4_t matRotate;
 	AngleMatrix(angles, matRotate);
 	VectorRotate(vec, matRotate, vec);
 }
 
-float m_flLastDamageTime = 0.0f;
 void CPortalLaser::UpdateLaser()
 {
 	Vector vecOrigin = GetAbsOrigin(); 
@@ -83,13 +89,11 @@ void CPortalLaser::UpdateLaser()
 	masterTraceFilter.AddClassnameToIgnore("player");
 	masterTraceFilter.AddClassnameToIgnore("Player");
 	masterTraceFilter.AddClassnameToIgnore("prop_energy_ball");
-
-	CTraceFilterSimpleClassnameList playerTraceFilter(this, COLLISION_GROUP_NONE);
-	playerTraceFilter.AddClassnameToIgnore("info_placement_helper");
-	playerTraceFilter.AddClassnameToIgnore("prop_energy_ball");
-	playerTraceFilter.AddClassnameToIgnore("prop_portal");
-
-	UTIL_TraceLine(vecOrigin, vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE, MASK_SHOT, &masterTraceFilter, &cubeTrace);
+	
+	// Trace from the laser emitter to check if it hits a cube
+	Ray_t ray_cube;
+	ray_cube.Init( vecOrigin, vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE );
+	UTIL_Portal_TraceRay( ray_cube, MASK_SHOT, &masterTraceFilter, &cubeTrace );
 
 	// Check if were is the cube
 	m_bIsLaserHittingCube = false;
@@ -100,7 +104,9 @@ void CPortalLaser::UpdateLaser()
 
 	// Trace for the laser catcher
 	trace_t catcherTrace;
-	UTIL_TraceLine(vecOrigin, vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE, MASK_SHOT, &masterTraceFilter, &catcherTrace);
+	Ray_t ray_catcher;
+	ray_catcher.Init( vecOrigin, vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE );
+	UTIL_Portal_TraceRay( ray_catcher, MASK_SHOT, &masterTraceFilter, &catcherTrace );
 	
 	// Check if were hitting the catcher
 	m_bIsLaserHittingCatcher = false;
@@ -110,16 +116,27 @@ void CPortalLaser::UpdateLaser()
 	}
 	
 	// Deal damage to the player if they are touching the laser beam
-	if (gpGlobals->curtime - m_flLastDamageTime >= 2.0f) // Damage every 2 seconds
+	if (gpGlobals->curtime - m_flLastDamageTime >= 0.15f) // Damage every 0.15 seconds
 	{
+
+		CTraceFilterSimpleClassnameList playerTraceFilter(this, COLLISION_GROUP_NONE);
+		playerTraceFilter.AddClassnameToIgnore("info_placement_helper");
+		playerTraceFilter.AddClassnameToIgnore("prop_energy_ball");
+		playerTraceFilter.AddClassnameToIgnore("prop_portal");
+
 		// Trace from the laser emitter to check if it hits the player
 		trace_t playerTrace;
-		UTIL_TraceLine(vecOrigin, vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE, MASK_SHOT, &playerTraceFilter, &playerTrace);
+		Ray_t ray_player;
+		ray_player.Init( vecOrigin, vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE );
+		UTIL_Portal_TraceRay( ray_player, MASK_SHOT, &playerTraceFilter, &playerTrace );
 
-		if (playerTrace.m_pEnt && FClassnameIs(playerTrace.m_pEnt, "player"))
+		// No need to do a cast here since there's no player specific functions to call
+		CBaseEntity *pPlayerTraceEnt = playerTrace.m_pEnt;
+
+		if (pPlayerTraceEnt && pPlayerTraceEnt->IsPlayer())
 		{
 			// Player is touching the laser beam, deal damage and push them
-			Vector vecPushDir = (playerTrace.m_pEnt->GetAbsOrigin() - vecOrigin);
+			Vector vecPushDir = (pPlayerTraceEnt->GetAbsOrigin() - vecOrigin);
 			VectorNormalize(vecPushDir);
 
 			Vector vecLaserDir = vecMuzzleDir;
@@ -127,9 +144,14 @@ void CPortalLaser::UpdateLaser()
 			Vector vecPushSideways = CrossProduct(vecPushDir, vecLaserDir);
 			VectorNormalize(vecPushSideways);
 
-			playerTrace.m_pEnt->TakeDamage(CTakeDamageInfo(this, this, 10, DMG_ENERGYBEAM));
-			playerTrace.m_pEnt->ApplyAbsVelocityImpulse(vecPushSideways * 500.0f); // Adjust the push force as needed
-
+			pPlayerTraceEnt->TakeDamage(CTakeDamageInfo(this, this, 10, DMG_ENERGYBEAM));
+			pPlayerTraceEnt->ApplyAbsVelocityImpulse(vecPushSideways * 500.0f); // Adjust the push force as needed
+			
+			if (gpGlobals->curtime - m_flLastDamageSoundTime >= 0.55f) // Play sound every 0.55 seconds
+			{
+				m_flLastDamageSoundTime = gpGlobals->curtime;
+				pPlayerTraceEnt->EmitSound( "HL2Player.BurnPain" );
+			}
 			m_flLastDamageTime = gpGlobals->curtime;
 		}
 	}
@@ -164,11 +186,9 @@ void CPortalLaser::UpdateLaser()
 
 	// Perform the portal detection trace from the origin to the muzzle direction
 	UTIL_TraceLine(vecOrigin, vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE, MASK_SHOT, &masterTraceFilter, &trace);
-
-	// Check if the trace hits any portals
-	CPortal_Base2D* pLocalPortal = NULL;
-	CPortal_Base2D* pRemotePortal = NULL;
-	bool bHitPortal = UTIL_DidTraceTouchPortals(rayPath, trace, &pLocalPortal, &pRemotePortal);
+	Ray_t ray;
+	ray.Init( vecOrigin, vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE );
+	UTIL_Portal_TraceRay( ray, MASK_SHOT, &masterTraceFilter, &trace );
 
 	if (UTIL_Portal_TraceRay_Beam(rayPath, MASK_SHOT, &masterTraceFilter, &fEndFraction))
 	{
@@ -180,6 +200,12 @@ void CPortalLaser::UpdateLaser()
 		vEndPoint = vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE * fEndFraction;
 		//Msg("Main Trace End Point: (%f, %f, %f)\n", vEndPoint.x, vEndPoint.y, vEndPoint.z);
 	}
+
+#if 0
+	// Check if the trace hits any portals
+	CPortal_Base2D* pLocalPortal = NULL;
+	CPortal_Base2D* pRemotePortal = NULL;
+	bool bHitPortal = UTIL_DidTraceTouchPortals(rayPath, trace, &pLocalPortal, &pRemotePortal);
 
 	// Handle portal hit, if any
 	if (bHitPortal)
@@ -200,7 +226,7 @@ void CPortalLaser::UpdateLaser()
 		// No portal hit
 		//Msg("No portal hit\n"); No need to do anything else from here.
 	}
-
+#endif
 	//v_vHitPos = vEndPoint;
 	m_pBeam->PointsInit(vEndPoint, vecOrigin);
 
@@ -327,6 +353,7 @@ void CPortalLaser::Precache(void)
 	// Precache the model using the stored model path
 	PrecacheModel(STRING(m_modelName));
 	PrecacheModel("models/props/laser_emitter_center.mdl");
+	PrecacheScriptSound( "HL2Player.BurnPain" );
 }
 
 void CPortalLaser::LaserOff(void)

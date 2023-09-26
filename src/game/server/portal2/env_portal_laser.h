@@ -12,6 +12,8 @@ public:
 	DECLARE_DATADESC();
 	//DECLARE_SERVERCLASS();
 
+	CPortalLaser();
+
 	virtual void Think(void);
 	virtual void Spawn(void);
 	virtual void Precache(void);
@@ -63,6 +65,9 @@ private:
 	static const float FLOOR_TURRET_PORTAL_END_POINT_PULSE_SCALE;
 	// Cube instances
 	string_t m_cubeUniqueID;
+	
+	float m_flLastDamageTime;
+	float m_flLastDamageSoundTime;
 	
 	CHandle<CBeam> m_hCubeBeam;
 
