@@ -1,0 +1,338 @@
+/////////////////// partial destruction group ////////////////
+///contains maps catapult intro //////////////
+
+
+////////////////////////////////
+//////sp_paint_speed_intro//////
+////////////////////////////////
+
+
+"TestChamber.paint_01"
+{
+	"dsp"	"1"
+	"fadetime" "1"
+
+
+	"playlooping"
+	{
+		"volume"	"0.61"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_01.wav"
+		"pitch"		"100"
+
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_lo.end_mach"
+		"volume" ".53"
+	}
+
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"90"
+		"wave"		"ambient/industrial/amb_mach_behind_walls_lp_02.wav"
+		"origin"	"-623.968750, 305.157715, 0.031250;"
+		"soundlevel" 	"SNDLVL_70dB"
+	}
+}
+
+"TestChamber.paint.liquid_01"
+
+{
+	"dsp"	"1"
+	"fadetime" "1"
+
+
+	"playlooping"
+	{
+		"volume"	"0.33"
+		"wave"		"ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"-2549.379639, 398.605408, -45.274536;"
+		"soundlevel" 	"SNDLVL_80dB"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.38"
+		"wave"		"ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"70"
+		"origin"	"-2551.353027, 857.484192, -34.208534;"
+		"soundlevel" 	"SNDLVL_75dB"
+
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_lo.end_mach"
+		"volume" ".38"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_water.drain"
+		"volume" ".27"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.18"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_01.wav"
+		"pitch"		"100"
+
+	}
+}
+
+"TestChamber_paint_transition_01"
+
+{
+	"dsp"	"1"
+	"fadetime" "1"
+
+
+	"playsoundscape"
+	{
+		"name" "TestChamber.Industrial_muffled_01"
+		"volume" ".75"
+	}
+
+}
+
+"TestChamber.paint.liquid_02"
+
+{
+	"dsp"	"1"
+	"fadetime" "1"
+
+
+	"playlooping"
+	{
+		"volume"	"0.35"
+		"wave"		"ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"-1275.953979, 3966.710938, -48.244823;"
+		"soundlevel" 	"SNDLVL_80dB"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.45"
+		"wave"		"ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"70"
+		"origin"	"-1359.803223, 4570.098145, -7.924160;"
+		"soundlevel" 	"SNDLVL_80dB"
+
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_lo.end_mach"
+		"volume" ".38"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_water.drain"
+		"volume" ".27"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.18"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_01.wav"
+		"pitch"		"100"
+
+	}
+}
+
+/////////////////////////////////////////
+////sp_paint_jump_trampoline_intro///////
+/////////////////////////////////////////
+
+
+
+"TestChamber.paint_02"
+{
+	"dsp"	"1"
+	"fadetime" "1"
+
+
+	"playlooping"
+	{
+		"volume"	"0.45"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_04.wav"
+		"pitch"		"100"
+
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_lo.end_mach"
+		"volume" ".53"
+	}
+
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"85"
+		"wave"		"ambient/industrial/amb_paint_shaker_lp_01.wav"
+		"origin"	"-105.641029, 295.352478, 51.636669;"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+}
+
+
+/////////////////////////////////////////
+////sp_paint_jump_redirect_bomb//////////
+/////////////////////////////////////////
+
+
+"TestChamber.paint_03"
+{
+	"dsp"	"1"
+	"fadetime" "1"
+
+
+	"playlooping"
+	{
+		"volume"	"0.61"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_01.wav"
+		"pitch"		"100"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.33"
+		"wave"		"ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"-414.047943, 0.638190, -282.841187;"
+		"soundlevel" 	"SNDLVL_75dB"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.45"
+		"wave"		"ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"125"
+		"origin"	"666.095398, -610.048157, -123.229828;"
+		"soundlevel" 	"SNDLVL_65dB"
+
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_water.drain"
+		"volume" ".22"
+	}
+
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"90"
+		"wave"		"ambient/industrial/amb_mach_behind_walls_lp_02.wav"
+		"origin"	"-623.968750, 305.157715, 0.031250;"
+		"soundlevel" 	"SNDLVL_70dB"
+	}
+
+	"playlooping"
+	{
+		"volume"	".7"
+		"pitch"		"75"
+		"wave"		"ambient/industrial/amb_paint_shaker_lp_01.wav"
+		"origin"	"-307.562256, 109.184975, 276.501434;"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+}
+
+
+"TestChamber.paint.liquid_03"
+
+{
+	"dsp"	"1"
+	"fadetime" "1"
+
+
+	"playlooping"
+	{
+		"volume"	"0.55"
+		"wave"		"ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"125"
+		"origin"	"666.095398, -610.048157, -123.229828;"
+		"soundlevel" 	"SNDLVL_65dB"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.65"
+		"wave"		"ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"70"
+		"origin"	"1786.012573, -1027.582153, -171.227005;"
+		"soundlevel" 	"SNDLVL_70dB"
+
+	}
+
+
+	"playsoundscape"
+	{
+		"name" "util_water.drain"
+		"volume" ".27"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.18"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_01.wav"
+		"pitch"		"100"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.5"
+		"wave"		"ambient/Tones/Amb_Abstract_air_lp_04.wav"
+		"pitch"		"100"
+
+	}
+
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"pitch"		"95"
+		"wave"		"ambient/industrial/amb_paint_shaker_lp_01.wav"
+		"origin"	"1638.682007, -651.562805, 117.020653;"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+}
+
+
+/////////////pan_test///////////
+////////////////////////////////
+
+
+"pan_test"
+
+{
+
+	"dsp"	"1"
+	"fadetime" "1"
+
+	"playlooping"
+	{
+		"volume"	"1"
+		"wave"		"(test/pink_noise_stereo_loop.wav"
+		"pitch"		"100"
+
+
+	}
+
+}

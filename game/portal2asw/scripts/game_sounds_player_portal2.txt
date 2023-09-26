@@ -1,0 +1,351 @@
+////////////////////////////////////
+// PORTAL 1 PLAYER PORTAL
+////////////////////////////////////
+"PortalPlayer.BonkYelp"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"0.4,0.6"
+	"pitch"			"95,105"
+
+	"soundlevel"	"SNDLVL_IDLE"
+
+	"rndwave"
+	{
+		"wave"	"common/null.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" "P2_null_start" //replaces null.wav
+	
+			"get_random_null"
+			{
+				"input_execute" "0.0"	
+			}
+			
+			"percent_null"
+			{
+				"input1" "0.60" // This is the percentage chance to play a null
+			}
+
+			"block_start"
+			{	
+				"input_execute" "1.0"
+			}
+		}
+	}
+}
+
+
+
+"PortalPlayer.PainYelp"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"0.4,0.6"
+	"pitch"			"95,105"
+
+	"soundlevel"	"SNDLVL_IDLE"
+
+	"rndwave"
+	{
+		"wave"	"common/null.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" "P2_null_start" //replaces null.wav
+	
+			"get_random_null"
+			{
+				"input_execute" "0.0"	
+			}
+			
+			"percent_null"
+			{
+				"input1" "0.60" // This is the percentage chance to play a null
+			}
+
+			"block_start"
+			{	
+				"input_execute" "1.0"
+			}
+		}
+	}
+}
+//
+//"PortalPlayer.EnterPortal"
+//{
+	//"channel"		"CHAN_STATIC"
+	//"volume"		"0.5"
+	//"soundlevel"		"SNDLVL_70db"
+	//"pitch"			"95,105"
+	//"rndwave"
+	//{
+		
+		//"wave"			"player/portal_enter1.wav"
+		//"wave"			"player/portal_enter2.wav"
+	//}
+//}
+
+//"PortalPlayer.ExitPortal"
+//{
+	//"channel"		"CHAN_STATIC"
+	//"volume"		"0.5"
+	//"soundlevel"		"SNDLVL_70db"
+	//"pitch"			"95,105"
+	//"rndwave"
+	//{
+		
+		//"wave"			"player/portal_exit1.wav"
+		//"wave"			"player/portal_exit2.wav"
+	//}
+//}
+
+"PortalPlayer.Woosh"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"1.00"
+	"soundlevel"		"SNDLVL_85dB"
+	"pitch"			"100"
+	"wave"			"player/player_fall_whoosh_lp_01.wav"
+}
+
+"PortalPlayer.WooshWooshyWoosh"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"1.00"
+	"soundlevel"		"SNDLVL_85dB"
+	"pitch"			"100"
+	"wave"			"player/player_fall_whoosh_lp_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+		}
+	}
+}
+
+"PortalPlayer.FallRecover"
+{
+	"channel"	"CHAN_STATIC"
+	"volume"	"1.0"
+	"pitch"		"95,105"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"rndwave"
+	{
+		"wave"		"player/footsteps/longfall_land_01.wav"
+		"wave"		"player/footsteps/longfall_land_02.wav"
+		"wave"		"player/footsteps/longfall_land_03.wav"
+	}
+}
+////////////////////////////////////
+// PORTAL 1 PLAYER PORTAL END
+////////////////////////////////////
+
+
+
+
+"Player.SlowTime_Start"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.85"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave" "common/null.wav"	
+// 	"rndwave"
+// 	{
+// 		"wave"	"weapons/physcannon/energy_disintegrate4.wav"
+// 		"wave"	"weapons/physcannon/energy_disintegrate5.wav"
+// 	}
+}
+
+"Player.SlowTime_Loop"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.85"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"ambient/levels/citadel/extract_loop1.wav"
+}
+
+"Player.SlowTime_Stop"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.85"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"physics/nearmiss/whoosh_large4.wav"
+}
+
+"Player.Coop_Ping"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.4"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"	"npc/roller/mine/rmine_chirp_quest1.wav"
+}
+
+"PortalPlayer.ObjectUseStop"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"  "SNDLVL_75dB"
+	"volume"		"0.5"
+	"wave"		"player/object_use_stop_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"PortalPlayer.ObjectUse"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"  "SNDLVL_75dB"
+	"volume"		"0.8"
+	"wave"		"player/object_use_lp_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack"	"p2_update_default_pitch_ramp"
+			
+			"source_info"
+			{
+				"source"   "entity"
+			}
+		
+			"volume_get_map_name"
+			{
+				"input_execute" "1.0"
+				"map_name" "sp_a1_wakeup" //your map name here
+			}	
+			
+			"volume_map_name_scalar"
+			{
+				"input_map_min" "0.8" //This is the map-specific volume scalar
+			}
+		
+			"volume_fade_initial"
+			{
+				"input_execute" "1.0"
+				"input_min" "3.0"
+				"input_max" "15.0"
+				"input_map_min" "0.0"
+				"input_map_max" "0.5"	
+			}				
+			
+			"volume_mult"
+			{
+				"input1" "@volume_map_name_scalar.output"
+			}
+
+			// "volume_apply_falloff"
+			// {
+				// "input2" "1.0" //no falloff
+			// }
+
+			"volume_fade_in"
+			{
+				"input_max" "0.15" //fade in time
+			}			
+			
+			"volume_fade_out"
+			{
+				"input_max" "0.7" //fade out time
+			}
+			
+			"pitch_fade_in"
+			{
+				"input_map_min" "0.7" //pitch to fade in from
+				"input_map_max" "1.0" //pitch to fade in to
+				"default_to_max" "false"	
+			}
+			
+			"save_restore_output"
+			{
+				"operator" "sys_output"
+				"execute_once" "true"
+				"input_float" "1.0"
+				"output" "save_restore"
+			}
+		}
+		
+		"stop_stack"
+		{
+			"import_stack" "stop_and_play"
+		
+			"play_entry"
+			{
+				"entry_name" "PortalPlayer.ObjectUseStop"
+			}		
+		}
+	}
+}
+
+
+"PortalPlayer.UseDeny"
+{
+	"channel"	"CHAN_ITEM"
+	"volume"	"0.3"
+	"soundlevel"  "SNDLVL_75dB"
+
+	"wave"	"player/object_use_failure_01.wav"
+}
+
+"PortalPlayer.ObjectUseNoGun"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"  "SNDLVL_75dB"
+	"volume"		"0.00"
+	"wave"		"player/object_use_no_gun_01.wav"
+}
+
+"PortalPlayer.UseDenyNoGun"
+{
+	"channel"	"CHAN_ITEM"
+	"volume"	"0.15"
+	"soundlevel"  "SNDLVL_75dB"
+
+	"wave"	"player/object_use_failure_no_gun_01.wav"
+}

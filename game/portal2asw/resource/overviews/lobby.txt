@@ -1,0 +1,10 @@
+GAME
+{
+  "missiontitle" "Lobby"
+//dummy values below
+	"pos_x"	"0"
+	"pos_y"	"0"
+	"scale"	"10.0"
+	"material" "vgui/swarm/Overviews/OutsideOverview"
+	"briefingmaterial" "vgui/swarm/Overviews/OutsideBriefingOverview"
+}

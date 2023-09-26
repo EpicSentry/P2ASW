@@ -1,0 +1,60 @@
+
+
+--
+-- DECLARATION
+--
+
+this:baseclass( "" );
+
+this:event( "OnCommand" );
+
+this:in( "margin", css.basebutton.margin );
+this:in( "text", "" );
+
+this:add(
+	"label",
+	"$text",
+	{
+		left = this.margin;
+		top = this.margin;
+		text = this.text;
+	}
+);
+
+this:add(
+	"hitarea",
+	"$hitarea",
+	{
+		left = 0;
+		right = this.label.width + this.margin;
+		top = 0;
+		bottom = this.label.bottom + this.margin;
+	}
+);
+
+this:out( "width", this.hitarea.right );
+this:out( "height", this.hitarea.height );
+
+
+--
+-- SCRIPTS
+--
+
+function OnKeyCodePressed( this, params )
+	if (
+		params.code == Buttons.ENTER
+		or
+		params.code == Buttons.SPACE
+		or
+		params.code == Buttons.A_BUTTON
+		)
+		then
+			params["reason"] = "key"
+			this.OnCommand:execute( params )
+	end
+end
+
+function OnMouseClicked( this, params )
+	params["reason"] = "mouse"
+	this.OnCommand:execute( params )
+end

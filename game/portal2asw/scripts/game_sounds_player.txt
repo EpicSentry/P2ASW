@@ -1,0 +1,3747 @@
+"HL2Player.Use"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.40"
+	"wave"		"common/wpn_select.wav"
+}
+
+"HL2Player.BurnPain"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.50"
+	"rndwave"
+	{
+		"wave"		"player/pl_burnpain1_no_vo.wav"
+		"wave"		"player/pl_burnpain2_no_vo.wav"
+		"wave"		"player/pl_burnpain3_no_vo.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_blocker_start"
+			
+			"get_random"
+			{
+				"operator" "math_random"
+				"input_execute" "1.0"
+				"input_min" "0.5"
+				"input_max" "0.75"		
+			}
+
+			"block_entries"
+			{
+				"match_entry" "HL2Player.BurnPain"
+				"input_duration" "@get_random.output" //in seconds
+			}
+		}
+	}
+}
+
+"Player.Death"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.80"
+	"rndwave"
+	{
+		"wave"		"player/pl_pain5.wav"
+		"wave"		"player/pl_pain6.wav"
+		"wave"		"player/pl_pain7.wav"
+	}
+}
+
+"Player.Swim"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.6, 0.65"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player/footsteps/fs_fm_water_wade_01.wav"
+		"wave"		"player/footsteps/fs_fm_water_wade_02.wav"
+		"wave"		"player/footsteps/fs_fm_water_wade_03.wav"
+		"wave"		"player/footsteps/fs_fm_water_wade_04.wav"
+		"wave"		"player/footsteps/fs_fm_water_wade_05.wav"
+		"wave"		"player/footsteps/fs_fm_water_wade_06.wav"
+		"wave"		"player/footsteps/fs_fm_water_wade_07.wav"
+		"wave"		"player/footsteps/fs_fm_water_wade_08.wav"
+		"wave"		"player/footsteps/fs_fm_water_wade_09.wav"
+		"wave"		"player/footsteps/fs_fm_water_wade_10.wav"
+	}
+}
+
+"Player.Wade"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.6, 0.65"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player/footsteps/fs_fm_water_wade_01.wav"
+		"wave"		"player/footsteps/fs_fm_water_wade_02.wav"
+		"wave"		"player/footsteps/fs_fm_water_wade_03.wav"
+		"wave"		"player/footsteps/fs_fm_water_wade_04.wav"
+		"wave"		"player/footsteps/fs_fm_water_wade_05.wav"
+		"wave"		"player/footsteps/fs_fm_water_wade_06.wav"
+		"wave"		"player/footsteps/fs_fm_water_wade_07.wav"
+		"wave"		"player/footsteps/fs_fm_water_wade_08.wav"
+		"wave"		"player/footsteps/fs_fm_water_wade_09.wav"
+		"wave"		"player/footsteps/fs_fm_water_wade_10.wav"
+	}
+}
+
+"Player.AmbientUnderWater"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.22"
+	"wave"		"ambient/water/underwater.wav"
+}
+
+"Player.UseDeny"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.40"
+	"wave"		"common/wpn_select.wav"
+}
+
+"Player.PickupWeapon"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.0"
+	"pitch"		"95,105"
+	"wave"		"items/ammo_pickup.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack"	"P2_null_player_start"
+			
+			"play_entry"
+			{
+				"entry_name" "Portal.PortalgunActivate" //Replace with the sound you want to play.
+			}
+		}
+	}
+}
+
+"Player.FallDamage"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.75"
+	"pitch"		"90,110"
+	"rndwave"
+	{
+		"wave"		"player/pl_fallpain1.wav"
+		"wave"		"player/pl_fallpain3.wav"
+	}
+}
+
+"Player.FallGib"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.75"
+	"pitch"		"90,110"
+	"rndwave"
+	{
+		"wave"		"physics/body/body_medium_break2.wav"
+		"wave"		"physics/body/body_medium_break3.wav"
+	}
+}
+
+"Player.DrownContinue"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"pitch"		"90,110"
+	"rndwave"
+	{
+		"wave"		"player/pl_drown1.wav"
+		"wave"		"player/pl_drown2.wav"
+		"wave"		"player/pl_drown3.wav"
+	}
+}
+
+"Player.PlasmaDamage"
+{
+	"channel"		"CHAN_BODY"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.50"
+	"wave"		"player/general/flesh_burn.wav"
+}
+
+"Player.SonicDamage"
+{
+	"channel"		"CHAN_BODY"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.70"
+	"rndwave"
+	{
+		"wave"		"player/pl_pain5.wav"
+		"wave"		"player/pl_pain6.wav"
+		"wave"		"player/pl_pain7.wav"
+	}
+}
+
+"Player.DrownStart"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"pitch"		"90,110"
+	"wave"		"player/pl_drown1.wav"
+}
+
+"Player.PainSmall"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.00" //muted cuz of male VO
+	"rndwave"
+	{
+		"wave"		"player/pl_burnpain1_no_vo.wav"
+		"wave"		"player/pl_burnpain2_no_vo.wav"
+		"wave"		"player/pl_burnpain3_no_vo.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_blocker_start"
+
+			"block_entries"
+			{
+				"match_entry" "Player.PainSmall"
+				"input_duration" "0.75" //in seconds
+			}
+		}
+	}
+}
+
+"CoopBot.taunt_smooth_jazz"
+{
+	"channel"		"CHAN_BODY"
+	"soundlevel"	"SNDLVL_85dB"
+	"pitch"			"100"
+	"volume"		"0.70"
+	"rndwave"
+	{
+		"wave"		"player/coop_bots/smooth_jazz_trimmed.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+	
+}
+
+"CoopBot.taunt_still_alive_dance"
+{
+	"channel"		"CHAN_BODY"
+	"soundlevel"	"SNDLVL_85dB"
+	"pitch"			"100"
+	"volume"		"0.70"
+	"rndwave"
+	{
+		"wave"		"player/coop_bots/looping_radio_mix_trimmed.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+	
+}
+
+"CoopBot.WallSlam"
+{
+	"channel"		"CHAN_BODY"
+	"soundlevel"	"SNDLVL_85dB"
+	"pitch"			"95,105"
+	"volume"		"0.6"
+	"rndwave"
+	{
+		"wave"		"physics/coop_bot/imp_coop_bot_vs_wall_01.wav"
+		"wave"		"physics/coop_bot/imp_coop_bot_vs_wall_02.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.WallSlam"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.WallSlam" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+		
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+	
+}
+
+"CoopBot.CoopBotArmMotor"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_75"
+	"volume"		"0.10,0.40"
+       //Old "volume"		"0.02,0.06"
+	"pitch"		"75,85"
+	"rndwave"
+	{
+		"wave"		"player\coop_motors\coop_bot_arm_motor_01.wav"
+		"wave"		"player\coop_motors\coop_bot_arm_motor_02.wav"
+		"wave"		"player\coop_motors\coop_bot_arm_motor_03.wav"
+		"wave"		"player\coop_motors\coop_bot_arm_motor_04.wav"
+		"wave"		"player\coop_motors\coop_bot_arm_motor_05.wav"
+		"wave"		"player\coop_motors\coop_bot_arm_motor_06.wav"
+		"wave"		"player\coop_motors\coop_bot_arm_motor_07.wav"
+		"wave"		"player\coop_motors\coop_bot_arm_motor_08.wav"
+		"wave"		"player\coop_motors\coop_bot_arm_motor_09.wav"
+		"wave"		"player\coop_motors\coop_bot_arm_motor_10.wav"
+		"wave"		"player\coop_motors\coop_bot_arm_motor_11.wav"
+		"wave"		"player\coop_motors\coop_bot_arm_motor_12.wav"
+		"wave"		"player\coop_motors\coop_bot_arm_motor_13.wav"
+		"wave"		"player\coop_motors\coop_bot_arm_motor_14.wav"
+		"wave"		"player\coop_motors\coop_bot_arm_motor_15.wav"
+		"wave"		"player\coop_motors\coop_bot_arm_motor_16.wav"
+		"wave"		"player\coop_motors\coop_bot_arm_motor_17.wav"
+		"wave"		"player\coop_motors\coop_bot_arm_motor_18.wav"
+		"wave"		"player\coop_motors\coop_bot_arm_motor_19.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotArmMotor"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotArmMotor" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotArmMotor06"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_75dB"
+	"volume"		"0.35,0.50"
+       //Old "volume"		"0.22,0.46"
+	"pitch"		"75,85"
+	"rndwave"
+	{
+
+		"wave"		"player\coop_motors\coop_bot_arm_motor_06.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotArmMotor06"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotArmMotor06" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotLegMotorL"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		"0.05,0.10"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_02.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_03.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_04.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_05.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_06.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotLegMotorL"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotLegMotorL" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotLegMotorR"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		"0.05,0.10"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_02.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_03.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_04.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_05.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_06.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotLegMotorR"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotLegMotorR" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotLegMotorRandom"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		"0.05,0.10"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_01.wav"
+		// "wave"		"player\coop_motors\coop_bot_leg_motor_r_02.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_03.wav"
+		// "wave"		"player\coop_motors\coop_bot_leg_motor_r_04.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_r_05.wav"
+		// "wave"		"player\coop_motors\coop_bot_leg_motor_r_06.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_01.wav"
+		// "wave"		"player\coop_motors\coop_bot_leg_motor_l_02.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_03.wav"
+		// "wave"		"player\coop_motors\coop_bot_leg_motor_l_04.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_l_05.wav"
+		// "wave"		"player\coop_motors\coop_bot_leg_motor_l_06.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotLegMotorRandom"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotLegMotorRandom" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotEggTweakerVox"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_75dB"
+	"volume"		"0.11,0.15"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_01.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_02.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_03.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_04.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_05.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_06.wav"
+		// "wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_07.wav"
+		// "wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_08.wav"
+		// "wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_09.wav"
+		// "wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_10.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallTweakerVox"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_75dB"
+	"volume"		"0.1,0.15"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_01.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_02.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_03.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_04.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_05.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_06.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_07.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_08.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_09.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_10.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_11.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_12.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_13.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_14.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_15.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_16.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_17.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_18.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_19.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_20.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_21.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_22.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_23.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_24.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_25.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_26.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_27.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_28.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_29.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_30.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_31.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack"	"P2_null_start"
+		
+			"get_random_null"
+			{
+				"input_execute" "1.0"	
+			}
+			
+			"percent_null"
+			{
+				"input1" "0.50" // This is the percentage chance to play a null
+			}
+
+			"block_start"
+			{	
+				"input_execute" "@percent_null.output"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallFlyingVoxBlanks"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_01.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_02.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_03.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_04.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_05.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_06.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_07.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_08.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_09.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_10.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_11.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_12.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_13.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_14.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_15.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_16.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_17.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_18.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_19.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_20.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_21.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_22.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack"	"P2_null_start"
+		
+			"get_random_null"
+			{
+				"input_execute" "1.0"	
+			}
+			
+			"percent_null"
+			{
+				"input1" "0.50" // This is the percentage chance to play a null
+			}
+
+			"block_start"
+			{	
+				"input_execute" "@percent_null.output"
+			}
+		}
+		
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallFlyingVox"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_01.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_02.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_03.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_04.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_05.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_06.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_07.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_08.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_09.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_10.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_11.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_12.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_13.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_14.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_15.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_16.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_17.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_18.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_19.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_20.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_21.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_fly_vox_22.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallButtonTauntVox"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_01.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_02.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_03.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_04.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_05.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_06.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_07.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_08.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_09.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_10.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_11.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_12.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_13.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_14.wav"
+		// "wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_15.wav"
+		//"wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_16.wav"
+		//"wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_17.wav"
+		//"wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_18.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallDeathVox"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_vox\coop_bot_ball_death_vox_01.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_death_vox_02.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_death_vox_03.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_death_vox_04.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_death_vox_05.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_death_vox_06.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_death_vox_07.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_death_vox_08.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_death_vox_09.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_death_vox_10.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_death_vox_11.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_death_vox_12.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_death_vox_13.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallPainVoxBlanks"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_01.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_02.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_03.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_04.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_05.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_06.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_07.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_08.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_09.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_10.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_11.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_12.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_13.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_14.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_15.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_16.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_17.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_18.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_19.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_20.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_21.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_22.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_23.wav"
+		//"wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_16.wav"
+		//"wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_17.wav"
+		//"wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_18.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack"	"P2_null_start"
+		
+			"get_random_null"
+			{
+				"input_execute" "1.0"	
+			}
+			
+			"percent_null"
+			{
+				"input1" "0.50" // This is the percentage chance to play a null
+			}
+
+			"block_start"
+			{	
+				"input_execute" "@percent_null.output"
+			}
+		}
+		
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallPainVox"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.40,0.48"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_01.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_02.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_03.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_04.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_05.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_06.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_07.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_08.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_09.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_10.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_11.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_12.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_13.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_14.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_15.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_16.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_17.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_18.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_19.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_20.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_21.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_22.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_pain_vox_23.wav"
+		//"wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_16.wav"
+		//"wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_17.wav"
+		//"wave"		"player\coop_vox\coop_bot_ball_button_taunt_vox_18.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack"	"P2_null_start"
+		
+			"get_random_null"
+			{
+				"input_execute" "1.0"	
+			}
+			
+			"percent_null"
+			{
+				"input1" "0.20" // This is the percentage chance to play a null
+			}
+
+			"block_start"
+			{	
+				"input_execute" "@percent_null.output"
+			}
+		}
+		
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallSecCamAngryVox"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_01.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_02.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_03.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_04.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_05.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_06.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_07.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_08.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_09.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_10.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_11.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_12.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_13.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_14.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_15.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_16.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_17.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_18.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_19.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_20.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_21.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_22.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_23.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_24.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_25.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_26.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_27.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_28.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_29.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_30.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_tweaker_vox_31.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallSecCamLaughVox"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_vox\coop_bot_ball_laugh_vox_01.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_laugh_vox_02.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_laugh_vox_03.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_laugh_vox_04.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_laugh_vox_05.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_laugh_vox_06.wav"
+	}
+
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallSecCamMockingVox"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_vox\coop_bot_ball_mock_vox_01.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_mock_vox_02.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_mock_vox_03.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_mock_vox_04.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_03.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack"	"P2_null_start"
+		
+			"get_random_null"
+			{
+				"input_execute" "1.0"	
+			}
+			
+			"percent_null"
+			{
+				"input1" "0.50" // This is the percentage chance to play a null
+			}
+
+			"block_start"
+			{	
+				"input_execute" "@percent_null.output"
+			}
+		}
+		
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallEffortVoxBlanks"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_01.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_02.wav"
+		//"wave"		"player\coop_vox\coop_bot_ball_effort_vox_03.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_04.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_05.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_06.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_07.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_08.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_09.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_10.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_11.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_12.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_13.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_14.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_15.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_16.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_17.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_18.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_19.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_20.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_21.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_22.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_23.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_24.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_25.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_26.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_27.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack"	"P2_null_start"
+		
+			"get_random_null"
+			{
+				"input_execute" "1.0"	
+			}
+			
+			"percent_null"
+			{
+				"input1" "0.50" // This is the percentage chance to play a null
+			}
+
+			"block_start"
+			{	
+				"input_execute" "@percent_null.output"
+			}
+		}
+		
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallEffortVox"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_01.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_02.wav"
+		//"wave"		"player\coop_vox\coop_bot_ball_effort_vox_03.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_04.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_05.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_06.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_07.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_08.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_09.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_10.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_11.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_12.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_13.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_14.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_15.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_16.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_17.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_18.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_19.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_20.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_21.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_22.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_23.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_24.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_25.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_26.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_effort_vox_27.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+
+"CoopBot.CoopBotBallGameShowVox"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.35,0.4"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_vox\coop_bot_ball_gameshow_vox_01.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_gameshow_vox_02.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_gameshow_vox_03.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_gameshow_vox_04.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_gameshow_vox_05.wav"
+		"wave"		"player\coop_vox\coop_bot_ball_gameshow_vox_06.wav"
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallEyeBlink"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.40,0.50"
+	"pitch"		"102,110"
+	"rndwave"
+	{
+		"wave"		")npc\sphere\personality_sphere_blink_01.wav"
+		"wave"		")npc\sphere\personality_sphere_blink_02.wav"
+		"wave"		")npc\sphere\personality_sphere_blink_03.wav"
+		"wave"		")npc\sphere\personality_sphere_blink_04.wav"
+		"wave"		")npc\sphere\personality_sphere_blink_05.wav"
+		"wave"		")npc\sphere\personality_sphere_blink_06.wav"
+		// "wave"		")npc\sphere\personality_sphere_blink_07.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotEggFsRoboticsL"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_65dB"
+	"volume"		"0.2,0.25"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\footsteps\coop_bot_egg_fs_robotics_l_01.wav"
+		"wave"		"player\footsteps\coop_bot_egg_fs_robotics_l_02.wav"
+		"wave"		"player\footsteps\coop_bot_egg_fs_robotics_l_03.wav"
+		"wave"		"player\footsteps\coop_bot_egg_fs_robotics_l_04.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotEggFsRoboticsL"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotEggFsRoboticsL" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"start_stack"
+		{
+			"import_stack"	"P2_coop_robot_start"
+
+			"stop_footsteps"
+			{
+				"match_entry" "FsRobot"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotEggFsRoboticsLLoud"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_65dB"
+	"volume"		"0.33,0.49"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\footsteps\coop_bot_egg_fs_robotics_l_01.wav"
+		"wave"		"player\footsteps\coop_bot_egg_fs_robotics_l_02.wav"
+		"wave"		"player\footsteps\coop_bot_egg_fs_robotics_l_03.wav"
+		"wave"		"player\footsteps\coop_bot_egg_fs_robotics_l_04.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotEggFsRoboticsLLoud"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotEggFsRoboticsLLoud" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"start_stack"
+		{
+			"import_stack"	"P2_coop_robot_start"
+
+			"stop_footsteps"
+			{
+				"match_entry" "FsRobot"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotEggFsRoboticsR"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_65dB"
+	"volume"		"0.2,0.25"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\footsteps\coop_bot_egg_fs_robotics_r_01.wav"
+		"wave"		"player\footsteps\coop_bot_egg_fs_robotics_r_02.wav"
+		"wave"		"player\footsteps\coop_bot_egg_fs_robotics_r_03.wav"
+		"wave"		"player\footsteps\coop_bot_egg_fs_robotics_r_04.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotEggFsRoboticsR"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotEggFsRoboticsR" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"start_stack"
+		{
+			"import_stack"	"P2_coop_robot_start"
+
+			"stop_footsteps"
+			{
+				"match_entry" "FsRobot"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotEggFsRoboticsRLoud"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_65dB"
+	"volume"		"0.33,0.49"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\footsteps\coop_bot_egg_fs_robotics_r_01.wav"
+		"wave"		"player\footsteps\coop_bot_egg_fs_robotics_r_02.wav"
+		"wave"		"player\footsteps\coop_bot_egg_fs_robotics_r_03.wav"
+		"wave"		"player\footsteps\coop_bot_egg_fs_robotics_r_04.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotEggFsRoboticsRLoud"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotEggFsRoboticsRLoud" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"start_stack"
+		{
+			"import_stack"	"P2_coop_robot_start"
+
+			"stop_footsteps"
+			{
+				"match_entry" "FsRobot"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallFsRoboticsImpact"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.15,0.2"
+        //Old "volume"		"0.03,0.06"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_impact_01.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_impact_02.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_impact_03.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_impact_04.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_impact_05.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotBallFsRoboticsImpact"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotBallFsRoboticsImpact" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallFsRoboticsImpactLoud"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.03,0.11"
+        //Old "volume"		"0.63,0.96"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_impact_01.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_impact_02.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_impact_03.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_impact_04.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_impact_05.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotBallFsRoboticsImpactLoud"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotBallFsRoboticsImpactLoud" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+"CoopBot.CoopBotBallFsRoboticsImpactLight"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_75"
+	"volume"		"0.03,0.11"
+       //Old "volume"		"0.02,0.03"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_impact_light_01.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_impact_light_02.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_impact_light_03.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_impact_light_04.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_impact_light_05.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotBallFsRoboticsImpactLight"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotBallFsRoboticsImpactLight" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallFsRoboticsLeadin"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.20,0.60"
+ 	//Old "volume"		"0.02,0.05"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_leadin_01.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_leadin_02.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_leadin_03.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_leadin_04.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_leadin_04.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_leadin_05.wav"
+	}
+
+				
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotBallFsRoboticsLeadin"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotBallFsRoboticsLeadin" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallFsRoboticsLeadinFast"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.10,0.40"
+	// Old "volume"		"0.04,0.08"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_leadin_fast_01.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_leadin_fast_02.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_leadin_fast_03.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_leadin_fast_04.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_leadin_fast_04.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_leadin_fast_05.wav"
+	}
+
+			
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+			"import_stack"	"P2_null_start"
+		
+			"get_random_null"
+			{
+				"input_execute" "1.0"	
+			}
+			
+			"percent_null"
+			{
+				"input1" "0.25" // This is the percentage chance to play a null
+			}
+
+			"block_start"
+			{	
+				"input_execute" "@percent_null.output"
+			}
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotBallFsRoboticsLeadinFast"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotBallFsRoboticsLeadinFast" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallFsRoboticsLeadinFastLight"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_85"
+	"volume"		"0.02,0.07"
+	//Old "volume"		"0.10,0.60"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_leadin_fast_01.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_leadin_fast_02.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_leadin_fast_03.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_leadin_fast_04.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_leadin_fast_04.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_leadin_fast_04.wav"	
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_leadin_fast_04.wav"
+	}
+
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotBallFsRoboticsLeadinFastLight"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotBallFsRoboticsLeadinFastLight" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallFsRoboticsRatchet"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.1,0.15"
+	//Old "volume"		"0.25,0.40"
+	"pitch"		"95,105"
+	"rndwave" //73
+	{
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_ratchet_01.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_ratchet_02.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_ratchet_03.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_ratchet_04.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_ratchet_05.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" "P2_null_start" //replaces null.wav
+	
+			"get_random_null"
+			{
+				"input_execute" "1.0"	
+				"input_min" "0.0"
+				"input_max" "1.0"	
+			}
+			
+			"percent_null"
+			{
+				"input1" "0.90" // This is the percentage chance to play a null
+			}
+
+			"block_start"
+			{	
+				"input_execute" "@percent_null.output"
+			}
+		}
+		
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallFsRoboticsRatchetLight"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_75"
+	"volume"		"0.04,0.08"
+	"pitch"		"95,105"
+	"rndwave" //73
+	{
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_ratchet_01.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_ratchet_02.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_ratchet_03.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_ratchet_04.wav"
+		"wave"		"player\footsteps\coop_bot_ball_fs_robotics_ratchet_05.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" "P2_null_start" //replaces null.wav
+	
+			"get_random_null"
+			{
+				"input_execute" "1.0"	
+				"input_min" "0.0"
+				"input_max" "1.0"	
+			}
+			
+			"percent_null"
+			{
+				"input1" "0.90" // This is the percentage chance to play a null
+			}
+
+			"block_start"
+			{	
+				"input_execute" "@percent_null.output"
+			}
+		}
+		
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotEggGlitchVox"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_75dB"
+	"volume"		"0.11,0.15"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		//"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_01.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_02.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_03.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_04.wav"
+		//"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_05.wav"
+		//"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_06.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_07.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_08.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_09.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_10.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_11.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_12.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_13.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_14.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_15.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_16.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_17.wav"
+		"wave"		"player/coop_vox/coop_bot_egg_glitch_vox_18.wav"
+		"wave"		"player/coop_vox/coop_bot_egg_glitch_vox_19.wav"
+		"wave"		"player/coop_vox/coop_bot_egg_glitch_vox_20.wav"
+		"wave"		"player/coop_vox/coop_bot_egg_glitch_vox_21.wav"
+		"wave"		"player/coop_vox/coop_bot_egg_glitch_vox_22.wav"
+		"wave"		"player/coop_vox/coop_bot_egg_glitch_vox_23.wav"
+		"wave"		"player/coop_vox/coop_bot_egg_glitch_vox_24.wav"
+		"wave"		"player/coop_vox/coop_bot_egg_glitch_vox_25.wav"
+		"wave"		"player/coop_vox/coop_bot_egg_glitch_vox_26.wav"
+		"wave"		"player/coop_vox/coop_bot_egg_glitch_vox_27.wav"
+		"wave"		"player/coop_vox/coop_bot_egg_glitch_vox_28.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotEggRandomVox"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_75dB"
+	"volume"		"0.11,0.15"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_01.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_02.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_03.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_04.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_05.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_06.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_07.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_08.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_09.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_10.wav"
+		//"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_01.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_02.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_03.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_04.wav"
+		//"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_05.wav"
+		//"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_06.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_07.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_08.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_09.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_10.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_11.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_12.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_13.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_14.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_15.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_16.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_glitch_vox_17.wav"
+		"wave"		"player/coop_vox/coop_bot_egg_glitch_vox_18.wav"
+		"wave"		"player/coop_vox/coop_bot_egg_glitch_vox_19.wav"
+		"wave"		"player/coop_vox/coop_bot_egg_glitch_vox_20.wav"
+		"wave"		"player/coop_vox/coop_bot_egg_glitch_vox_21.wav"
+		"wave"		"player/coop_vox/coop_bot_egg_glitch_vox_22.wav"
+		"wave"		"player/coop_vox/coop_bot_egg_glitch_vox_23.wav"
+		"wave"		"player/coop_vox/coop_bot_egg_glitch_vox_24.wav"
+		"wave"		"player/coop_vox/coop_bot_egg_glitch_vox_25.wav"
+		"wave"		"player/coop_vox/coop_bot_egg_glitch_vox_26.wav"
+		"wave"		"player/coop_vox/coop_bot_egg_glitch_vox_27.wav"
+		"wave"		"player/coop_vox/coop_bot_egg_glitch_vox_28.wav"
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotSpark"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.80,1.00"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		")player\coop_electric\coop_bot_spark_01.wav"
+		"wave"		")player\coop_electric\coop_bot_spark_02.wav"
+		"wave"		")player\coop_electric\coop_bot_spark_03.wav"
+		"wave"		")player\coop_electric\coop_bot_spark_04.wav"
+		"wave"		")player\coop_electric\coop_bot_spark_05.wav"
+		"wave"		")player\coop_electric\coop_bot_spark_06.wav"
+		"wave"		")player\coop_electric\coop_bot_spark_07.wav"
+		"wave"		")player\coop_electric\coop_bot_spark_08.wav"
+		"wave"		")player\coop_electric\coop_bot_spark_09.wav"
+		"wave"		")player\coop_electric\coop_bot_spark_10.wav"
+		"wave"		")player\coop_electric\coop_bot_spark_11.wav"
+		"wave"		")player\coop_electric\coop_bot_spark_12.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBulletImpact"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.80,1.00"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\bullet_impact_bot_01.wav"
+		"wave"		"player\bullet_impact_bot_02.wav"
+		"wave"		"player\bullet_impact_bot_03.wav"
+		"wave"		"player\bullet_impact_bot_04.wav"
+		"wave"		"player\bullet_impact_bot_05.wav"
+		"wave"		"player\bullet_impact_bot_06.wav"
+		"wave"		"player\bullet_impact_bot_07.wav"
+		"wave"		"player\bullet_impact_bot_08.wav"
+
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallIdleDamagedLp"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.2"
+	"wave"		"player\coop_motors\coop_bot_ball_idle_damaged_lp_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallIdleLp"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.2"
+	"wave"		"player\coop_motors\coop_bot_ball_idle_lp_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotEggIdleDamagedLp"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.2"
+	"wave"		"player\coop_motors\coop_bot_egg_idle_damaged_lp_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotEggIdleLp"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.2"
+	"wave"		"player\coop_motors\coop_bot_egg_idle_lp_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotEggLegMotorL"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_75dB"
+	"volume"		"0.05,0.09"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_13.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_03.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_05.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_07.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_09.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_11.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotEggLegMotorL"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotEggLegMotorL" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotEggLegMotorR"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_75dB"
+	"volume"		"0.05,0.09"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_02.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_04.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_06.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_10.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_12.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_15.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotEggLegMotorR"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotEggLegMotorR" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotEggLegMotorRandom"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_75dB"
+	"volume"		"0.005,0.01"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_motors\coop_bot_egg_motor_01.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_02.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_03.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_04.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_05.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_06.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_07.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_08.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_09.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_10.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_11.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_12.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_13.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_14.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_15.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotEggLegMotorRandom"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotEggLegMotorRandom" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotEggTweakerVoxBlanks"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_75dB"
+	"volume"		"0.11,0.15"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_01.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_02.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_03.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_04.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_05.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_06.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_07.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_08.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_09.wav"
+		"wave"		"player\coop_vox\coop_bot_egg_tweaker_vox_10.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" "P2_null_start" //replaces null.wav
+	
+			"get_random_null"
+			{
+				"input_execute" "1.0"	
+				"input_min" "0.0"
+				"input_max" "1.0"	
+			}
+			
+			"percent_null"
+			{
+				"input1" "0.27" // This is the percentage chance to play a null
+			}
+
+			"block_start"
+			{	
+				"input_execute" "@percent_null.output"
+			}
+		}
+		
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotEggLegMotorRandomIdle"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_65dB"
+	"volume"		"0.01,0.02"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_01.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_02.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_03.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_04.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_05.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_06.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_07.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_08.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_motor_idle_09.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_10.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_11.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_12.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_13.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_14.wav"
+		// "wave"		"player\coop_motors\coop_bot_egg_motor_idle_15.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotEggLegMotorRandomIdle"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotEggLegMotorRandomIdle" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.Explode_Gib"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"1"
+	"pitch"			"100"
+	"soundlevel"	"SNDLVL_90db"
+	"wave"			"level/explode_1.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.Explode_Gib"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.Explode_Gib" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+
+//"CoopBot.CoopBotEggPanic"
+//{
+//	"channel"		"CHAN_STATIC"
+//	"soundlevel"		"SNDLVL_85dB"
+//	"volume"		"0.05,0.10"
+//	"pitch"		"95,105"
+//	"rndwave"
+//	{
+//		"wave"		"eggbot\EGG_VO_Misc15.wav"
+//		"wave"		"eggbot\EGG_VO_Misc45.wav"
+//		"wave"		"eggbot\EGG_VO_Misc77.wav"
+//		"wave"		"eggbot\EGG_VO_Misc87.wav"
+//		"wave"		"eggbot\EGG_VO_Misc102.wav"
+//		"wave"		"eggbot\EGG_VO_Misc104.wav"
+//		"wave"		"eggbot\EGG_VO_Misc115.wav"
+//		"wave"		"eggbot\EGG_VO_Misc117.wav"
+//		"wave"		"eggbot\EGG_VO_Misc127.wav"
+//		"wave"		"eggbot\EGG_VO_Misc128.wav"
+//		"wave"		"eggbot\EGG_VO_Misc131.wav"
+//		"wave"		"eggbot\EGG_VO_Misc132.wav"
+//		"wave"		"eggbot\EGG_VO_Misc133.wav"
+//		"wave"		"eggbot\EGG_VO_Misc136.wav"
+//		"wave"		"eggbot\EGG_VO_Misc141.wav"
+//	}
+//
+//	"soundentry_version" "2"
+//
+//	"operator_stacks"
+//	{
+//		"update_stack"
+//		{
+//			"import_stack" "p2_update_default"
+//		}
+//	}
+//}
+
+//"CoopBot.CoopBotEggFloat"
+//
+//{
+//		"channel"		"CHAN_STATIC"
+//		"soundlevel"		"SNDLVL_85dB"
+//		"volume"		"0.90, 1.00"
+//		"pitch"		"95,105"
+//		"time"		"5,10"
+//		"rndwave"
+//		{
+//			"wave"		"player\eggbot\misc\EGG_VO_Misc_04.wav"
+//			"wave"		"player\eggbot\misc\EGG_VO_Misc_12.wav"
+//			"wave"		"player\eggbot\misc\EGG_VO_Misc_14.wav"
+//			"wave"		"player\eggbot\misc\EGG_VO_Misc_17.wav"
+//			"wave"		"player\eggbot\misc\EGG_VO_Misc_20.wav"
+//			"wave"		"player\eggbot\misc\EGG_VO_Misc_33.wav"
+//			"wave"		"player\eggbot\misc\EGG_VO_Misc_38.wav"
+//			"wave"		"player\eggbot\misc\EGG_VO_Misc_39.wav"
+//
+//		}
+//
+//	"soundentry_version" "2"
+//
+//	"operator_stacks"
+//		{
+//		"update_stack"
+//			{
+//			"import_stack" "p2_update_default"
+//			}
+//		}
+//	}
+//}
+
+
+"CoopBot.CoopEggBotMiscSound100"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_65"
+	"volume"		"0.30,0.50"
+	"pitch"		"75,85"
+	"rndwave"
+	{
+		"wave"		"common\null.wav"
+		"wave"		"common\null.wav"
+		"wave"		"common\null.wav"
+		"wave"		"common\null.wav"
+		"wave"		"player\eggbot\misc\EGG_VO_Misc_100.wav"
+		
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopEggBotMiscSound87"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_75"
+	"volume"		"0.40,0..50"
+	"pitch"		"75,85"
+	"rndwave"
+	{
+		"wave"		"player\eggbot\misc\silence.wav"
+		"wave"		"player\eggbot\misc\silence.wav"
+		"wave"		"player\eggbot\misc\silence.wav"
+		"wave"		"player\eggbot\misc\silence.wav"
+		"wave"		"player\eggbot\misc\EGG_VO_Misc_87.wav"
+
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+
+"CoopBot.CoopBallBotballbot_cool_05"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_75"
+	"volume"		"0.10,0.40"
+	"pitch"		"75,85"
+	"rndwave"
+	{
+		"wave"		"player\eggbot\misc\silence.wav"
+		"wave"		"player\eggbot\misc\silence.wav"
+		"wave"		"player\eggbot\misc\silence.wav"
+		"wave"		"player\eggbot\misc\silence.wav"
+		"wave"		"player\ballbot\ballbot_cool_05.wav"
+		
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBallagreement_06"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_75"
+	"volume"		"0.10,0.30"
+	"pitch"		"75,85"
+	"rndwave"
+	{
+		"wave"		"player\eggbot\misc\silence.wav"
+		"wave"		"player\eggbot\misc\silence.wav"
+		"wave"		"player\eggbot\misc\silence.wav"
+		"wave"		"player\eggbot\misc\silence.wav"
+		"wave"		"player\ballbot\ballbot_agreement_06.wav"
+		
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+
+"CoopBot.CoopEggBotSpringJump"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_65"
+	"volume"		"0.20,0..50"
+	"pitch"		"75,85"
+	"rndwave"
+	{
+		"wave"		"player\eggbot\misc\EGG_VO_Misc_127.wav"
+		"wave"		"player\eggbot\misc\EGG_VO_Misc_128.wav"
+		"wave"		"player\eggbot\misc\EGG_VO_Misc_104.wav"
+		
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack"	"P2_null_start"
+		
+			"get_random_null"
+			{
+				"input_execute" "1.0"	
+			}
+			
+			"percent_null"
+			{
+				"input1" "0.667" // This is the percentage chance to play a null
+			}
+
+			"block_start"
+			{	
+				"input_execute" "@percent_null.output"
+			}
+		}
+		
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+
+"CoopBot.CoopBallBotSpringJump"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_65"
+	"volume"		"0.20,0..50"
+	"pitch"		"75,85"//
+	"rndwave"
+	{
+		"wave"		"player\ballbot\ballbot_short_air_taunt_49.wav"
+		"wave"		"player\ballbot\ballbot_short_air_taunt_51.wav"
+		"wave"		"player\ballbot\ballbot_short_thumbs_up_03.wav"
+		
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack"	"P2_null_start"
+		
+			"get_random_null"
+			{
+				"input_execute" "1.0"	
+			}
+			
+			"percent_null"
+			{
+				"input1" "0.667" // This is the percentage chance to play a null
+			}
+
+			"block_start"
+			{	
+				"input_execute" "@percent_null.output"
+			}
+		}
+		
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopEggBotBulletFire"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_65"
+	"volume"		"0.50,0.90"
+	"pitch"		"75,85"
+	"rndwave"
+	{
+
+
+		"wave"		"player\eggbot\misc\silence.wav"
+		"wave"		"player\eggbot\misc\EGG_VO_Misc_133.wav"
+		"wave"		"player\eggbot\misc\EGG_VO_Misc_135.wav"
+		
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBallBotBulletFire"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_65"
+	"volume"		"0.70,0.90"
+	"pitch"		"75,85"
+	"rndwave"
+	{
+
+
+		"wave"		"player\eggbot\misc\silence.wav"
+		"wave"		"player\ballbot\ballbot_pain_turret_02.wav"
+		"wave"		"player\ballbot\ballbot_pain_turret_03.wav"
+		"wave"		"player\ballbot\ballbot_pain_md_01.wav"
+		
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotBallBodyMovement"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_75dB"
+	"volume"		"0.1,0.15"
+	"pitch"		"70,75"
+	"rndwave"
+	{
+		"wave"		"player\coop_motors\coop_bot_ballbot_body_movement_01.wav"
+		"wave"		"player\coop_motors\coop_bot_ballbot_body_movement_02.wav"
+		"wave"		"player\coop_motors\coop_bot_ballbot_body_movement_03.wav"
+		"wave"		"player\coop_motors\coop_bot_ballbot_body_movement_04.wav"
+		"wave"		"player\coop_motors\coop_bot_ballbot_body_movement_05.wav"
+		"wave"		"player\coop_motors\coop_bot_ballbot_body_movement_06.wav"
+		"wave"		"player\coop_motors\coop_bot_ballbot_body_movement_07.wav"
+		"wave"		"player\coop_motors\coop_bot_ballbot_body_movement_08.wav"
+		"wave"		"player\coop_motors\coop_bot_ballbot_body_movement_09.wav"
+		"wave"		"player\coop_motors\coop_bot_ballbot_body_movement_10.wav"
+		"wave"		"player\coop_motors\coop_bot_ballbot_body_movement_11.wav"
+		"wave"		"player\coop_motors\coop_bot_ballbot_body_movement_12.wav"
+		"wave"		"player\coop_motors\coop_bot_ballbot_body_movement_13.wav"
+		"wave"		"player\coop_motors\coop_bot_ballbot_body_movement_14.wav"
+		"wave"		"player\coop_motors\coop_bot_ballbot_body_movement_15.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotBallBodyMovement"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotBallBodyMovement" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotEggBodyMovement"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_75dB"
+	"volume"		"0.1,0.15"
+	"pitch"		"70,75"
+	"rndwave"
+	{
+		"wave"		"player\coop_motors\coop_bot_egg_body_movement_01.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_body_movement_02.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_body_movement_03.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_body_movement_04.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_body_movement_05.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_body_movement_06.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_body_movement_07.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_body_movement_08.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_body_movement_09.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_body_movement_10.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_body_movement_11.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_body_movement_12.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_body_movement_13.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_body_movement_14.wav"
+		"wave"		"player\coop_motors\coop_bot_egg_body_movement_15.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotEggBodyMovement"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotEggBodyMovement" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotLegMotorJump"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		"0.2,0.25"
+	"pitch"		"100,110"
+	"rndwave"
+	{
+		"wave"		"player\coop_motors\coop_bot_leg_motor_jump_01.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_jump_02.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_jump_03.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_jump_04.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_jump_05.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_jump_06.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_jump_07.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_jump_08.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_jump_09.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_jump_10.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_jump_11.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_jump_12.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotLegMotorJump"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotLegMotorJump" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotLegMotorJump09"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		"0.3,0.55"
+	"pitch"		"100,110"
+	"wave"		"player\coop_motors\coop_bot_leg_motor_jump_09.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotLegMotorJump09"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotLegMotorJump09" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+
+"CoopBot.CoopBotLegMotorJumpLoud"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		"0.5,0.75"
+	"pitch"		"100,110"
+	"rndwave"
+	{
+		
+		"wave"		"player\coop_motors\coop_bot_leg_motor_jump_06.wav"
+		"wave"		"player\coop_motors\coop_bot_leg_motor_jump_09.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.CoopBotLegMotorJumpLoud"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.CoopBotLegMotorJumpLoud" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+"CoopBot.CoopBotTauntSmack"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		"0.2,0.25"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		"player\coop_bot_taunt_smack\coop_bot_taunt_smack_01.wav"
+		"wave"		"player\coop_bot_taunt_smack\coop_bot_taunt_smack_02.wav"
+		"wave"		"player\coop_bot_taunt_smack\coop_bot_taunt_smack_03.wav"
+		"wave"		"player\coop_bot_taunt_smack\coop_bot_taunt_smack_04.wav"
+		"wave"		"player\coop_bot_taunt_smack\coop_bot_taunt_smack_05.wav"
+		"wave"		"player\coop_bot_taunt_smack\coop_bot_taunt_smack_06.wav"
+		"wave"		"player\coop_bot_taunt_smack\coop_bot_taunt_smack_07.wav"
+		"wave"		"player\coop_bot_taunt_smack\coop_bot_taunt_smack_08.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotTauntSmackLoud"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		"0.7,0.95"
+	"pitch"		"95,100"
+	"wave"		"player\coop_bot_taunt_smack\coop_bot_taunt_smack_08.wav"
+
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotTauntSmackTing"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		"0.5,0.75"
+	"pitch"		"95,100"
+	"wave"		"player\coop_bot_taunt_smack\coop_bot_taunt_smack_02.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+"CoopBot.CoopBotCoreStealReplace"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		"0.2,0.25"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		"player\coop_core_steal_replace\coop_bot_core_steal_replace_01.wav"
+		// "wave"		"player\coop_core_steal_replace\coop_bot_core_steal_replace_02.wav"
+		// "wave"		"player\coop_core_steal_replace\coop_bot_core_steal_replace_03.wav"
+		"wave"		"player\coop_core_steal_replace\coop_bot_core_steal_replace_04.wav"
+		// "wave"		"player\coop_core_steal_replace\coop_bot_core_steal_replace_05.wav"
+		// "wave"		"player\coop_core_steal_replace\coop_bot_core_steal_replace_06.wav"
+		// "wave"		"player\coop_core_steal_replace\coop_bot_core_steal_replace_07.wav"
+		// "wave"		"player\coop_core_steal_replace\coop_bot_core_steal_replace_08.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.CoopBotCoreStealReplace04"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		"0.2,0.25"
+	"pitch"		"95,100"
+	"wave"		"player\coop_core_steal_replace\coop_bot_core_steal_replace_04.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.EggBotCoreWeebleWobble"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		"0.2,0.25"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		"player\coop_spin_wobble\eggbot_weeble_wobble_01.wav"
+		"wave"		"player\coop_spin_wobble\eggbot_weeble_wobble_02.wav"
+		"wave"		"player\coop_spin_wobble\eggbot_weeble_wobble_03.wav"
+		"wave"		"player\coop_spin_wobble\eggbot_weeble_wobble_04.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.BallBotCoreGlobetrotterSpin"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		"0.2,0.25"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		"player\coop_spin_wobble\ballbot_globetrotter_spin_01.wav"
+		"wave"		"player\coop_spin_wobble\ballbot_globetrotter_spin_02.wav"
+		"wave"		"player\coop_spin_wobble\ballbot_globetrotter_spin_03.wav"
+		"wave"		"player\coop_spin_wobble\ballbot_globetrotter_spin_04.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.BallJumpLandTile01"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		"0.3,0.55"
+	"pitch"		"95,100"
+	"wave"		"player\footsteps\p2_fs_jump_land_tile_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.BallJumpLandTile01"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.BallJumpLandTile01" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.BallJumpLandTile09"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		"0.4,0.65"
+	"pitch"		"95,100"
+	"wave"		"player\footsteps\p2_fs_jump_land_tile_09.wav"
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.BallJumpLandTile09"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.BallJumpLandTile09" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.BallBotBallSpinSm"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		".95,1.0"
+	"pitch"		"95,100"
+	"wave"		"player\coop_foley\ballbot_sphere_spin_sm_01.wav"
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.BallBotBallSpinMed"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		".95,1.0"
+	"pitch"		"95,100"
+	"wave"		"player\coop_foley\ballbot_sphere_spin_med_01.wav"
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.BallBotBallBounce"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		".95,1.0"
+	"pitch"		"95,100"
+	"wave"		"player\coop_foley\ballbot_foley_ball_bounce_01.wav"
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.BallBotBallBounceFinale"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		".95,1.0"
+	"pitch"		"95,100"
+	"wave"		"player\coop_foley\ballbot_foley_ball_bounce_finale.wav"
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.BallBotBallBounceOneShot"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		".95,1.0"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+	
+	"wave"		"player\coop_foley\ballbot_foley_ball_bounce_02.wav"
+	"wave"		"player\coop_foley\ballbot_foley_ball_bounce_03.wav"
+	"wave"		"player\coop_foley\ballbot_foley_ball_bounce_04.wav"
+	"wave"		"player\coop_foley\ballbot_foley_ball_bounce_05.wav"
+	"wave"		"player\coop_foley\ballbot_foley_ball_bounce_06.wav"
+	
+	}
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.BallBotBounceOneShot"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		".95,1.0"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+	
+	"wave"		"player\coop_foley\ballbot_foley_ball_bounce_02.wav"
+	"wave"		"player\coop_foley\ballbot_foley_ball_bounce_03.wav"
+	"wave"		"player\coop_foley\ballbot_foley_ball_bounce_04.wav"
+	"wave"		"player\coop_foley\ballbot_foley_ball_bounce_05.wav"
+	"wave"		"player\coop_foley\ballbot_foley_ball_bounce_06.wav"
+	"wave"		"player\coop_foley\ballbot_foley_head_bounce_02.wav"
+	"wave"		"player\coop_foley\ballbot_foley_head_bounce_03.wav"
+	
+	}
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.BallBotBallHeadBounce"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		".95,1.0"
+	"pitch"		"95,100"
+	"wave"		"player\coop_foley\ballbot_foley_head_bounce_01.wav"
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.BallBotBallHeadBounceOneShot"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		".95,1.0"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+	
+	"wave"		"player\coop_foley\ballbot_foley_head_bounce_02.wav"
+	"wave"		"player\coop_foley\ballbot_foley_head_bounce_03.wav"
+	
+	}
+			
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.BallBotBallRollPart1"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		".95,1.0"
+	"pitch"		"95,100"
+	"wave"		"player\coop_foley\ballbot_foley_roll_part1.wav"
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.BallBotBallRollPart2"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		".95,1.0"
+	"pitch"		"95,100"
+	"wave"		"player\coop_foley\ballbot_foley_roll_part2.wav"
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.HeadSmash"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		".95,1.0"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		"player\coop_foley\coop_foley_head_smash_01.wav"
+		"wave"		"player\coop_foley\coop_foley_head_smash_02.wav"
+		"wave"		"player\coop_foley\coop_foley_head_smash_03.wav"
+	}
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.KickImpact"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		".95,1.0"
+	"pitch"		"95,100"
+	"wave"		"player\coop_foley\coop_foley_kick_impact_01.wav"
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.TauntCoreReplace"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		".95,1.0"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		"player\coop_foley\coop_foley_replace_01.wav"
+		"wave"		"player\coop_foley\coop_foley_replace_02.wav"
+		"wave"		"player\coop_foley\coop_foley_replace_03.wav"
+		"wave"		"player\coop_foley\coop_foley_replace_04.wav"
+		
+	}
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.TauntCoreSteal"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		".95,1.0"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		"player\coop_foley\coop_foley_steal_01.wav"
+		"wave"		"player\coop_foley\coop_foley_steal_02.wav"
+		"wave"		"player\coop_foley\coop_foley_steal_03.wav"
+		"wave"		"player\coop_foley\coop_foley_steal_04.wav"
+		
+	}
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.Whoosh"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		".95,1.0"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		"player\coop_foley\coop_foley_whoosh_01.wav"
+		"wave"		"player\coop_foley\coop_foley_whoosh_01.wav"
+		"wave"		"player\coop_foley\coop_foley_whoosh_01.wav"
+		
+	}
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.EggbotCoreWobble"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		".95,1.0"
+	"pitch"		"95,100"
+	"rndwave"
+	{
+		"wave"		"player\coop_foley\coop_foley_wobble_01.wav"
+		"wave"		"player\coop_foley\coop_foley_wobble_02.wav"
+		
+	}
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.EggbotSelfSpin"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		".95,1.0"
+	"pitch"		"80,1.00"
+	"wave"		"player\coop_foley\eggbot_self_spin_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.EggbotSitAndSpin"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		".95,1.0"
+	"pitch"		"95,100"
+	"wave"		"player\coop_foley\eggbot_sit_n_spin_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+	}
+}
+
+"CoopBot.BotClothFoley"
+{
+	"channel"			"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"			"0.85,1.0"
+	"pitch"				"90,110"
+	"rndwave"
+	{
+		"wave"		"player\coop_foley\coop_cloth_foley_01.wav"
+		//"wave"		"player\coop_foley\coop_cloth_foley_02.wav"
+		"wave"		"player\coop_foley\coop_cloth_foley_03.wav"
+		"wave"		"player\coop_foley\coop_cloth_foley_04.wav"
+		"wave"		"player\coop_foley\coop_cloth_foley_05.wav"
+		"wave"		"player\coop_foley\coop_cloth_foley_06.wav"
+		// "wave"		"player\coop_foley\coop_cloth_foley_07.wav"
+		// "wave"		"player\coop_foley\coop_cloth_foley_08.wav"
+		// "wave"		"player\coop_foley\coop_cloth_foley_09.wav"
+		// "wave"		"player\coop_foley\coop_cloth_foley_10.wav"
+		// "wave"		"player\coop_foley\coop_cloth_foley_11.wav"
+		// "wave"		"player\coop_foley\coop_cloth_foley_12.wav"
+		// "wave"		"player\coop_foley\coop_cloth_foley_13.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+		}
+
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "CoopBot.BotClothFoley"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+				
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "CoopBot.BotClothFoley" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+	}
+}
+
+"Player.ChellSquishedByCrusher"
+{
+	"channel"		"CHAN_BODY"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"1.0"
+	"wave"		"player/chell_squished_by_crusher.wav"
+}

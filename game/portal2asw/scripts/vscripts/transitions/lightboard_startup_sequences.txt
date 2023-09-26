@@ -1,0 +1,52 @@
+//-------------------------------------------------------------------------------
+// This file specifies which icons are going to show up on the lightboard at the 
+// beginning of the level if you need to add a new icon, you must add the actual 
+// icon to the end of the texture sheet AND add it to g_pszLightboardIcons in 
+// vgui_mp_lobby_screen
+//-------------------------------------------------------------------------------
+
+
+"lightboard_startup_sequences"
+{
+	//The different startup sequences for the panels
+	"Startups"
+	{
+		//"default_flicker" is defined in code as a fallback
+
+		"normal_flicker"
+		{
+			"flicker_rate_min" "0.2f"
+			"flicker_rate_max" "0.65f"
+			"flicker_quick_min" "0.02f"
+			"flicker_quick_max" "0.12f"
+			"bg_flicker_length" "0.75f"
+			"level_number_delay" "0.80f"
+			"icon_delay" "1.0f"
+			"progress_delay" "1.65f"
+		}
+
+		"dirty_flicker"
+		{
+			"flicker_rate_min" "0.2f"
+			"flicker_rate_max" "0.65f"
+			"flicker_quick_min" "0.02f"
+			"flicker_quick_max" "0.12f"
+			"bg_flicker_length" "0.75f"
+			"level_number_delay" "0.80f"
+			"icon_delay" "1.0f"
+			"progress_delay" "1.65f"
+		}
+
+		"broken_flicker"
+		{
+			"flicker_rate_min" "0.5f"
+			"flicker_rate_max" "0.8f"
+			"flicker_quick_min" "0.1f"
+			"flicker_quick_max" "0.5f"
+			"bg_flicker_length" "5.00f"
+			"level_number_delay" "4.5f"
+			"icon_delay" "3.0f"
+			"progress_delay" "2.8f"
+		}
+	}
+}

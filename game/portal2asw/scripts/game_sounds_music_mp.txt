@@ -1,0 +1,1049 @@
+//
+// lobbby_2
+//
+"music.mp_coop_lobby_2_course1"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_100dB"
+	"volume"		"1.0"
+
+	"wave"	"*)music/mp_coop_lobby_2_c1.wav"
+
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+ 		"start_stack"
+		{
+ 			"play_entry"
+			{
+				"operator" "sys_start_entry"
+				"input_start" "1"	
+				"entry_name" "music.mp_coop_hallway_course1"
+			}
+			"stop_entry"
+			{
+				"operator" "sys_stop_entries"
+				"input_max_entries" "0.000000" //A sound will not stop itself from playing.
+				"match_entity" "false"	
+				"match_substring" "false"
+				"match_entry" "music.mp_coop_lobby_2_course1"
+			}
+ 		}
+		"update_stack"
+		{
+			"import_stack" 	"update_music_spatial"
+			"speakers_spatialize"
+			{
+				"input_radius"  "300"
+			}
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+
+
+// 			"dsp_output"
+// 			{
+// 				"input_float" "0.15"
+// 			}
+		}
+	}
+}
+
+"music.mp_coop_lobby_2_course2"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_100dB"
+	"volume"		"1.0"
+
+	"wave"	"*)music/mp_coop_lobby_2_c2.wav"
+
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+ 		"start_stack"
+		{
+ 			"play_entry"
+			{
+				"operator" "sys_start_entry"
+				"input_start" "1"	
+				"entry_name" "music.mp_coop_hallway_course2"
+			}
+			"stop_entry"
+			{
+				"operator" "sys_stop_entries"
+				"input_max_entries" "0.000000" //A sound will not stop itself from playing.
+				"match_entity" "false"	
+				"match_substring" "false"
+				"match_entry" "music.mp_coop_lobby_2_course2"
+			}
+ 		}
+		"update_stack"
+		{
+			"import_stack" 	"update_music_spatial"
+			"speakers_spatialize"
+			{
+				"input_radius"  "300"
+			}
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+
+
+// 			"dsp_output"
+// 			{
+// 				"input_float" "0.15"
+// 			}
+		}
+	}
+}
+"music.mp_coop_lobby_2_course3"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_100dB"
+	"volume"		"0.55"
+
+	"wave"	"*)music/mp_coop_lobby_2_c6.wav"
+//	"wave"	"*music/mp_coop_lobby_2_c3.wav"
+
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+ 		"start_stack"
+		{
+ 			"play_entry"
+			{
+				"operator" "sys_start_entry"
+				"input_start" "1"	
+				"entry_name" "music.mp_coop_hallway_course3"
+			}
+			"stop_entry"
+			{
+				"operator" "sys_stop_entries"
+				"input_max_entries" "0.000000" //A sound will not stop itself from playing.
+				"match_entity" "false"	
+				"match_substring" "false"
+				"match_entry" "music.mp_coop_lobby_2_course3"
+			}
+ 		}
+		"update_stack"
+		{
+			"import_stack" 	"update_music_spatial"
+			"speakers_spatialize"
+			{
+				"input_radius"  "300"
+			}
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+
+
+// 			"dsp_output"
+// 			{
+// 				"input_float" "0.15"
+// 			}
+		}
+	}
+}
+"music.mp_coop_lobby_2_course4"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_100dB"
+	"volume"		"0.5"
+
+	"wave"	"*)music/mp_coop_lobby_2_c4.wav"
+
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+ 		"start_stack"
+		{
+ 			"play_entry"
+			{
+				"operator" "sys_start_entry"
+				"input_start" "1"	
+				"entry_name" "music.mp_coop_hallway_course4"
+			}
+			"stop_entry"
+			{
+				"operator" "sys_stop_entries"
+				"input_max_entries" "0.000000" //A sound will not stop itself from playing.
+				"match_entity" "false"	
+				"match_substring" "false"
+				"match_entry" "music.mp_coop_lobby_2_course4"
+			}
+ 		}
+		"update_stack"
+		{
+			"import_stack" 	"update_music_spatial"
+			"speakers_spatialize"
+			{
+				"input_radius"  "300"
+			}
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+
+
+// 			"dsp_output"
+// 			{
+// 				"input_float" "0.15"
+// 			}
+		}
+	}
+}
+"music.mp_coop_lobby_2_course5"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_100dB"
+	"volume"		"0.6"
+
+	"wave"	"*)music/mp_coop_lobby_2_c5.wav"
+
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+ 		"start_stack"
+		{
+ 			"play_entry"
+			{
+				"operator" "sys_start_entry"
+				"input_start" "1"	
+				"entry_name" "music.mp_coop_hallway_course5"
+			}
+			"stop_entry"
+			{
+				"operator" "sys_stop_entries"
+				"input_max_entries" "0.000000" //A sound will not stop itself from playing.
+				"match_entity" "false"	
+				"match_substring" "false"
+				"match_entry" "music.mp_coop_lobby_2_course5"
+			}
+ 		}
+		"update_stack"
+		{
+			"import_stack" 	"update_music_spatial"
+			"speakers_spatialize"
+			{
+				"input_radius"  "300"
+			}
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+
+
+// 			"dsp_output"
+// 			{
+// 				"input_float" "0.15"
+// 			}
+		}
+	}
+}
+"music.mp_coop_lobby_2_course6"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_100dB"
+	"volume"		"1.0"
+
+	"wave"	"*)music/mp_coop_lobby_2_c7.wav"
+
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+ 		"start_stack"
+		{
+//  			"play_entry"
+// 			{
+// 				"operator" "sys_start_entry"
+// 				"input_start" "1"	
+// 				"entry_name" "music.mp_coop_hallway_course6"
+// 			}
+			"stop_entry"
+			{
+				"operator" "sys_stop_entries"
+				"input_max_entries" "0.000000" //A sound will not stop itself from playing.
+				"match_entity" "false"	
+				"match_substring" "false"
+				"match_entry" "music.mp_coop_lobby_2_course6"
+			}
+ 		}
+		"update_stack"
+		{
+			"import_stack" 	"update_music_spatial"
+			"speakers_spatialize"
+			{
+				"input_radius"  "300"
+			}
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+
+
+// 			"dsp_output"
+// 			{
+// 				"input_float" "0.15"
+// 			}
+		}
+	}
+}
+"music.mp_coop_lobby_2_course7"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_100dB"
+	"volume"		"1.0"
+
+	"wave"	"*)music/mp_coop_lobby_2_c7.wav"
+
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+ 		"start_stack"
+		{
+//  			"play_entry"
+// 			{
+// 				"operator" "sys_start_entry"
+// 				"input_start" "1"	
+// 				"entry_name" "music.mp_coop_hallway_course7"
+// 			}
+			"stop_entry"
+			{
+				"operator" "sys_stop_entries"
+				"input_max_entries" "0.000000" //A sound will not stop itself from playing.
+				"match_entity" "false"	
+				"match_substring" "false"
+				"match_entry" "music.mp_coop_lobby_2_course7"
+			}
+ 		}
+		"update_stack"
+		{
+			"import_stack" 	"update_music_spatial"
+			"speakers_spatialize"
+			{
+				"input_radius"  "300"
+			}
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+
+
+// 			"dsp_output"
+// 			{
+// 				"input_float" "0.15"
+// 			}
+		}
+	}
+}
+
+
+//
+// hallway
+//
+"music.mp_coop_hallway_course1"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_80dB"
+	"volume"		"0.85"
+
+
+	"wave"	"*)music/mp_coop_hallway_c1.wav"
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+ 		"start_stack"
+		{
+			"stop_entry"
+			{
+				"operator" "sys_stop_entries"
+				"input_max_entries" "0.000000" //A sound will not stop itself from playing.
+				"match_entity" "false"	
+				"match_substring" "false"
+				"match_entry" "music.mp_coop_hallway_course1"
+			}
+ 		}
+		"update_stack"
+		{
+			"import_stack" 	"update_music_spatial"
+
+			"position_array"
+			{
+				"input_entry_count" "1"
+
+				"input_position_0[0]"   "5121.232422"
+				"input_position_0[1]"   "4586.793945"
+				"input_position_0[2]"   "-381.937286"
+
+			}
+			"speakers_spatialize"
+			{
+				"input_radius"  "200"
+			}
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+
+		}
+	}
+}
+"music.mp_coop_hallway_course2"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_80dB"
+	"volume"		"0.85"
+
+
+	"wave"	"*)music/mp_coop_hallway_c2.wav"
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+ 		"start_stack"
+		{
+			"stop_entry"
+			{
+				"operator" "sys_stop_entries"
+				"input_max_entries" "0.000000" //A sound will not stop itself from playing.
+				"match_entity" "false"	
+				"match_substring" "false"
+				"match_entry" "music.mp_coop_hallway_course2"
+			}
+ 		}
+		"update_stack"
+		{
+			"import_stack" 	"update_music_spatial"
+
+			"position_array"
+			{
+				"input_entry_count" "1"
+
+//6318.001953 4026.585693 -511.968750;
+				"input_position_0[0]"   "6318.001953"
+				"input_position_0[1]"   "4026.585693"
+				"input_position_0[2]"   "-511.968750"
+
+			}
+			"speakers_spatialize"
+			{
+				"input_radius"  "200"
+			}
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+
+		}
+	}
+}
+"music.mp_coop_hallway_course3"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_80dB"
+	"volume"		"0.85"
+
+
+	"wave"	"*)music/mp_coop_hallway_c6.wav"
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+ 		"start_stack"
+		{
+			"stop_entry"
+			{
+				"operator" "sys_stop_entries"
+				"input_max_entries" "0.000000" //A sound will not stop itself from playing.
+				"match_entity" "false"	
+				"match_substring" "false"
+				"match_entry" "music.mp_coop_hallway_course3"
+			}
+ 		}
+		"update_stack"
+		{
+			"import_stack" 	"update_music_spatial"
+
+			"position_array"
+			{
+				"input_entry_count" "1"
+// 6276.228027 3769.350830 263.531250;
+				"input_position_0[0]"   "6276.228027"
+				"input_position_0[1]"   "3769.350830"
+				"input_position_0[2]"   "263.531250"
+
+			}
+			"speakers_spatialize"
+			{
+				"input_radius"  "200"
+			}
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+
+		}
+	}
+}
+"music.mp_coop_hallway_course4"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_80dB"
+	"volume"		"0.96"
+
+
+	"wave"	"*)music/mp_coop_hallway_c4.wav"
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+ 		"start_stack"
+		{
+			"stop_entry"
+			{
+				"operator" "sys_stop_entries"
+				"input_max_entries" "0.000000" //A sound will not stop itself from playing.
+				"match_entity" "false"	
+				"match_substring" "false"
+				"match_entry" "music.mp_coop_hallway_course4"
+			}
+ 		}
+		"update_stack"
+		{
+			"import_stack" 	"update_music_spatial"
+
+			"position_array"
+			{
+				"input_entry_count" "1"
+
+// 3956.758057 4032.878906 -824.468750;
+				"input_position_0[0]"   "3956.758057"
+				"input_position_0[1]"   "4032.878906"
+				"input_position_0[2]"   "-824.468750"
+
+			}
+			"speakers_spatialize"
+			{
+				"input_radius"  "200"
+			}
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+
+		}
+	}
+}
+"music.mp_coop_hallway_course5"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_80dB"
+	"volume"		"0.85"
+
+
+	"wave"	"*)music/mp_coop_hallway_c5.wav"
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+ 		"start_stack"
+		{
+			"stop_entry"
+			{
+				"operator" "sys_stop_entries"
+				"input_max_entries" "0.000000" //A sound will not stop itself from playing.
+				"match_entity" "false"	
+				"match_substring" "false"
+				"match_entry" "music.mp_coop_hallway_course5"
+			}
+ 		}
+		"update_stack"
+		{
+			"import_stack" 	"update_music_spatial"
+
+			"position_array"
+			{
+				"input_entry_count" "1"
+// 4095.009521 4031.631104 -63.503326;
+				"input_position_0[0]"   "4095.009521"
+				"input_position_0[1]"   "4031.631104"
+				"input_position_0[2]"   "-63.503326"
+
+			}
+			"speakers_spatialize"
+			{
+				"input_radius"  "200"
+			}
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+
+		}
+	}
+}
+"music.mp_coop_hallway_course6"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_80dB"
+	"volume"		"0.85"
+
+
+	"wave"	"*)music/mp_coop_hallway_c6.wav"
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+ 		"start_stack"
+		{
+			"stop_entry"
+			{
+				"operator" "sys_stop_entries"
+				"input_max_entries" "0.000000" //A sound will not stop itself from playing.
+				"match_entity" "false"	
+				"match_substring" "false"
+				"match_entry" "music.mp_coop_hallway_course6"
+			}
+ 		}
+		"update_stack"
+		{
+			"import_stack" 	"update_music_spatial"
+
+			"position_array"
+			{
+				"input_entry_count" "1"
+
+				"input_position_0[0]"   "5121.232422"
+				"input_position_0[1]"   "4586.793945"
+				"input_position_0[2]"   "-381.937286"
+
+			}
+			"speakers_spatialize"
+			{
+				"input_radius"  "200"
+			}
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+
+		}
+	}
+}
+"music.mp_coop_hallway_course7"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_80dB"
+	"volume"		"0.85"
+
+
+//	"wave"	"*)music/mp_coop_hallway_c1.wav"
+	"wave"	"common/null.wav"
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+ 		"start_stack"
+		{
+			"stop_entry"
+			{
+				"operator" "sys_stop_entries"
+				"input_max_entries" "0.000000" //A sound will not stop itself from playing.
+				"match_entity" "false"	
+				"match_substring" "false"
+				"match_entry" "music.mp_coop_hallway_course7"
+			}
+ 		}
+		"update_stack"
+		{
+			"import_stack" 	"update_music_spatial"
+
+			"position_array"
+			{
+				"input_entry_count" "1"
+
+				"input_position_0[0]"   "5121.232422"
+				"input_position_0[1]"   "4586.793945"
+				"input_position_0[2]"   "-381.937286"
+
+			}
+			"speakers_spatialize"
+			{
+				"input_radius"  "200"
+			}
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+
+		}
+	}
+}
+
+//
+// endlevel
+//
+
+"music.mp_coop_endlevel_course1"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"1.0"
+
+
+//	"wave"	"npc/xray/beep.wav"
+	"wave"	"common/null.wav"
+
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+
+		}
+	}
+}
+"music.mp_coop_endlevel_course2"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"1.0"
+
+
+//	"wave"	"npc/xray/beep.wav"
+	"wave"	"common/null.wav"
+
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+
+		}
+	}
+}
+
+"music.mp_coop_endlevel_course3"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"1.0"
+
+
+//	"wave"	"npc/xray/beep.wav"
+	"wave"	"common/null.wav"
+
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+
+		}
+	}
+}
+"music.mp_coop_endlevel_course4"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"1.0"
+
+
+//	"wave"	"npc/xray/beep.wav"
+	"wave"	"common/null.wav"
+
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+
+		}
+	}
+}
+"music.mp_coop_endlevel_course5"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"1.0"
+
+
+//	"wave"	"npc/xray/beep.wav"
+	"wave"	"common/null.wav"
+
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+
+		}
+	}
+}
+
+"music.mp_coop_endlevel_course6"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"1.0"
+
+
+//	"wave"	"npc/xray/beep.wav"
+	"wave"	"common/null.wav"
+
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+
+		}
+	}
+}
+
+//
+// airlock
+//
+
+"music.mp_coop_airlock_course1"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"1.0"
+
+
+//	"wave"	"npc/xray/beep.wav"
+	"wave"	"common/null.wav"
+
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+
+		}
+	}
+}
+"music.mp_coop_airlock_course2"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"1.0"
+
+
+//	"wave"	"npc/xray/beep.wav"
+	"wave"	"common/null.wav"
+
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+
+		}
+	}
+}
+
+"music.mp_coop_airlock_course3"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"1.0"
+
+
+//	"wave"	"npc/xray/beep.wav"
+	"wave"	"common/null.wav"
+
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+
+		}
+	}
+}
+"music.mp_coop_airlock_course4"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"1.0"
+
+
+//	"wave"	"npc/xray/beep.wav"
+	"wave"	"common/null.wav"
+
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+
+		}
+	}
+}
+"music.mp_coop_airlock_course5"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"1.0"
+
+
+//	"wave"	"npc/xray/beep.wav"
+	"wave"	"common/null.wav"
+
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+
+		}
+	}
+}
+
+"music.mp_coop_airlock_course6"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"1.0"
+
+
+//	"wave"	"npc/xray/beep.wav"
+	"wave"	"common/null.wav"
+
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+
+		}
+	}
+}
+
+//
+// disassembly
+//
+"music.mp_coop_disassembly_01"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"1.0"
+
+
+	"wave"	"*music/mp_coop_dissasembly.wav"
+//	"wave"	"npc/xray/beep.wav"
+//	"wave"	"common/null.wav"
+
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+ 		"start_stack"
+		{
+
+			"stop_entry"
+			{
+				"operator" "sys_stop_entries"
+				"input_max_entries" "0.000000" //A sound will not stop itself from playing.
+				"match_entity" "false"	
+				"match_substring" "true"
+				"match_entry" "music"
+			}
+ 		}
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+
+		}
+	}
+}
+
+// ftw
+"music.mp_robots_ftw"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_90dB"
+	"volume"		"1.0"
+
+	"wave"	"*music/portal2_robots_ftw.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_spatial"
+			"speakers_spatialize"
+			{
+				"input_radius"  "500"
+			}
+
+		}
+	}
+}
+"music.mp_robots_ftw_stereo"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_90dB"
+	"volume"		"1.0"
+
+	"wave"	"*music/portal2_robots_ftw.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_music_stereo"
+			"volume_fade_out"
+			{
+				"input_max" "8.5"
+			}
+
+			"import_stack" "update_stop_at_time"
+			"usat_stop_time"
+			{
+				"input2" "318.0"
+			}
+		}
+	}
+}

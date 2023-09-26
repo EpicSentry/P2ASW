@@ -1,0 +1,149 @@
+//-------------------------------------------------------------------
+//by default, you start the game with the first 2 in this list.
+//-------------------------------------------------------------------
+"RadialMenu"
+{
+//-------------------------------------------------------------------
+//                                   Solo Taunts
+//-------------------------------------------------------------------
+	"smallWave"
+	{
+		"command"	"taunt smallWave"
+		"icon"		"hud/commands/gesture_sm_wave_blue"
+		"icon2"		"hud/commands/gesture_sm_wave_orange"
+		"pos"		"0"
+	}
+
+	"robotDance"
+	{
+		"command"	"taunt robotDance"
+		"icon"		"hud/commands/gesture_dance_blue"
+		"icon2"		"hud/commands/gesture_dance_orange"
+		"pos"		"4"
+	}
+
+	"laugh"
+	{
+		"command"	"taunt laugh"
+		"icon"		"hud/commands/gesture_laugh_blue"
+		"icon2"		"hud/commands/gesture_laugh_orange"
+		"pos"		"2"
+	}
+	
+	"trickfire"
+	{
+		"command"	"taunt trickfire"
+		"icon"		"hud/commands/gesture_trickfire_blue"
+		"icon2"		"hud/commands/gesture_trickfire_orange"
+		"pos"		"7"
+	}
+	
+	"thumbsUp"
+	{
+		"command"	"taunt thumbsup"
+		"icon"		"hud/commands/gesture_thumbsup_blue"
+		"icon2"		"hud/commands/gesture_thumbsup_orange"
+	}
+	
+	"fistPump"
+	{
+		"command"	"taunt `"
+		"icon"		"hud/commands/gesture_fistpump_blue"
+		"icon2"		"hud/commands/gesture_fistpump_orange"
+	}
+	
+	"shrug"
+	{
+		"command"	"taunt shrug"
+		"icon"		"hud/commands/gesture_shrug_blue"
+		"icon2"		"hud/commands/gesture_shrug_orange"
+	}
+	
+	"facepalm"
+	{
+		"command"	"taunt facepalm"
+		"icon"		"hud/commands/gesture_facepalm_blue"
+		"icon2"		"hud/commands/gesture_facepalm_orange"
+	}
+	
+	"basketball1"
+	{
+		"command"	"taunt basketball1"
+		"icon"		"hud/commands/gesture_basketball1_blue"
+	}
+	
+	
+	"basketball2"
+	{
+		"command"	"taunt basketball2"
+		"icon"		"hud/commands/gesture_basketball2_blue"
+	}
+	
+	"sitspin"
+	{
+		"command"	"taunt sitspin"
+		"icon"		"hud/commands/gesture_sitspin_orange"
+	}
+	
+	"selfspin"
+	{
+		"command"	"taunt selfspin"
+		"icon"		"hud/commands/gesture_selfspin_orange"
+	}
+	
+	"Spinjump"
+	{
+		"command"	"taunt Spinjump"
+		"icon"		"hud/commands/gesture_Spinjump"
+	}
+	
+	"headspin"
+	{
+		"command"	"taunt headspin"
+		"icon"		"hud/commands/gesture_headspin"
+	}
+		
+	"pretzelwave"
+	{
+		"command"	"taunt pretzelwave"
+		"icon"		"hud/commands/gesture_pretzelwave"
+	}
+	
+//-------------------------------------------------------------------
+//                                   Team Taunts
+//-------------------------------------------------------------------
+	"highFive"
+	{
+		"command"	"taunt highFive"
+		"icon"		"hud/commands/gesture_highfive_team"
+		"team"		"1"
+		"pos"		"1"
+	}
+	
+	"teamhug"
+	{
+		"command"	"taunt teamhug"
+		"icon"		"hud/commands/gesture_teamhug"
+		"team"		"1"
+		"pos"		"6"
+	}
+
+	"teamtease"
+	{
+		"command"	"taunt teamtease"
+		"icon"		"hud/commands/gesture_tease_blue"
+		"icon2"		"hud/commands/gesture_tease_orange"
+		"team"		"1"
+		"pos"		"5"
+	}
+
+	"rps"
+	{
+		"command"	"taunt rps"
+		"icon"		"hud/commands/gesture_rock_paper_scissors_blue"
+		"icon2"		"hud/commands/gesture_rock_paper_scissors_orange"
+		"team"		"1"
+		"pos"		"3"
+	}
+}
+

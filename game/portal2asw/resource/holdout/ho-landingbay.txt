@@ -1,0 +1,90 @@
+"WAVE"
+{
+	"Name"						"Intro"
+	"EnvironmentModifiers"		"0"
+	"Resupply"					"1"
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"3"
+		"SpawnDelay"		"0.0"
+		"SpawnDuration"		"3.0"
+		"SpawnGroup"		"group_drone_all"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"5"
+		"SpawnDelay"		"5.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_drone_all"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"5"
+		"SpawnDelay"		"10.0"
+		"SpawnDuration"		"2.0"
+		"SpawnGroup"		"group_drone_all"
+		"Modifiers"			"0"
+	}
+}
+"WAVE"
+{
+	"Name"						"Drone Swarm"
+	"EnvironmentModifiers"		"0"
+	"Resupply"					"1"
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"20"
+		"SpawnDelay"		"0.0"
+		"SpawnDuration"		"15.0"
+		"SpawnGroup"		"group_drone_all"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"10"
+		"SpawnDelay"		"20.0"
+		"SpawnDuration"		"3.0"
+		"SpawnGroup"		"group_drone_all"
+		"Modifiers"			"0"
+	}
+}
+"WAVE"
+{
+	"Name"						"Ranger Attack"
+	"EnvironmentModifiers"		"0"
+	"Resupply"					"1"
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"6"
+		"SpawnDelay"		"0.0"
+		"SpawnDuration"		"10.0"
+		"SpawnGroup"		"group_ranger_ground"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"10"
+		"SpawnDelay"		"20.0"
+		"SpawnDuration"		"5.0"
+		"SpawnGroup"		"group_ranger_ground"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"5"
+		"SpawnDelay"		"25.0"
+		"SpawnDuration"		"5.0"
+		"SpawnGroup"		"group_drone_all"
+		"Modifiers"			"0"
+	}
+}

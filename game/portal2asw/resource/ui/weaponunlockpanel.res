@@ -1,0 +1,78 @@
+"Resource/UI/WeaponUnlockPanel.res"
+{
+	"UnlockLabel"
+	{
+		"ControlName"		"Label"
+		"fieldName"		"UnlockLabel"
+		"xpos"			"75"
+		"ypos"			"5"
+		"zpos"			"0"
+		"wide"			"250"
+		"tall"			"15"
+		"enabled"		"1"
+		"textAlignment"   "north-west"
+		"fgcolor_override"	"255 255 255 255"
+	}
+	"WeaponLabel"
+	{
+		"ControlName"		"Label"
+		"fieldName"		"WeaponLabel"
+		"xpos"			"75"
+		"ypos"			"20"
+		"zpos"			"0"
+		"wide"			"250"
+		"tall"			"15"
+		"textAlignment"   "north-west"
+		"enabled"		"1"
+	}
+	"LevelRequirementLabel"
+	{
+		"ControlName"		"Label"
+		"fieldName"		"LevelRequirementLabel"
+		"xpos"			"75"
+		"ypos"			"35"
+		"zpos"			"0"
+		"wide"			"250"
+		"tall"			"15"
+		"textAlignment"   "north-west"
+		"enabled"		"1"
+	}
+	"ItemModelPanel"
+	{
+		"ControlName"		"CASW_Model_Panel"
+		"fieldName"		"ItemModelPanel"
+		"xpos"			"3"
+		"ypos"			"3"
+		"zpos"			"0"
+		"wide"			"65"
+		"tall"			"65"
+		"enabled"		"1"
+	}
+	"LockedBG"
+	{
+		"ControlName"		"Panel"
+		"fieldName"			"LockedBG"
+		"xpos"			"3"
+		"ypos"			"3"
+		"zpos"			"0"
+		"wide"			"65"
+		"tall"			"50"
+		"PaintBackgroundType"	"0"
+		"bgcolor_override"	"32 32 32 192"
+	}
+	"LockedIcon"
+	{
+		"ControlName"		"ImagePanel"
+		"fieldName"		"LockedIcon"
+		"xpos"			"15"
+		"ypos"			"7"
+		"zpos"			"0"
+		"wide"			"41"
+		"tall"			"42"
+		"enabled"		"1"
+		"drawcolor"	"128 128 128 128"
+		"image"			"swarm/EquipIcons/Locked"
+		"scaleImage"	"1"
+		"fillcolor"	"32 32 32 0"
+	}
+}

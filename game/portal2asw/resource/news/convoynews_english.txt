@@ -1,0 +1,9 @@
+GAME
+{
+	"Headline"	"United Industries Convoy Departs"
+	"HeadlineDate"	"12/21/52"
+	"Paragraph1"	"A United Industries convoy departs this week from their central colony, headed for the Core Systems.  The massive fleet contains at least 25 Leviathan-class freighters and has full IAF cover for its journey."
+	"Paragraph2"	"The convey will be bringing in much sought after off-world resources, used throughout the manufacturing and production industries in the Core Systems.  They will also be bringing exotic and luxury goods for consumer markets."
+	"Paragraph3"	"United Industries critics accuse them of also bringing in a number of black market goods, including dangerous off-world narcotics."
+	"Paragraph4"	"The IAF has devoted a large defensive force to the convoy, calling the goods 'invaluable to the functioning of the IA.'"
+}

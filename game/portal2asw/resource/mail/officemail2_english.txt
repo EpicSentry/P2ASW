@@ -1,0 +1,23 @@
+GAME
+{
+    // PDA belongs to Lt. Cain
+    
+    // inbox 
+    
+	"MailFrom1"	"From: Laura Callen"
+	"MailDate1"	"Date: 12/21/52"
+	"MailSubject1"	"Subject: Laboratory contamination"
+	"MailBody1A"	"Lt. Cain,"
+	"MailBody1B"	"I want a full report about events on Deck 2.  Include nature of the leak, blueprints, list of personnel with clearance to the labs, etc.
+I am getting tired of having to ask for this each time something comes up.  You should be keeping me updated on a regular basis."
+	"MailBody1C"	"I just returned from Timor Station.  There's another report of two missing miners.  Sounds vaguely like a security issue.  So why haven't I seen any of your staff down there?"
+	"MailBody1D"	"L. Callen"
+
+
+	"MailFrom2"	"From: Laura Callen"
+	"MailDate2"	"Date: 12/23/52"
+	"MailSubject2"	"Subject: Fwd: Laboratory Contamination"
+	"MailBody2A"	"Lt. Cain,"
+	"MailBody2B"	"Still no update.  I am out of patience.  Consider this formal notice that I will be filing a report about your behaviour with the Interstellar Alliance.  I'm also ordering further IA personnel to Vereon XII in order to obtain a clear picture of the situation.  I will expect you to meet me at 1100 at reception."
+	"MailBody2C"	"L. Callen"
+}

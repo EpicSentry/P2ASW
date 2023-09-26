@@ -1,0 +1,15 @@
+GAME
+{
+	"pos_x"	"-5993"
+	"pos_y"	"-1627"
+	"scale"	"9.3"
+	"material" "vgui/swarm/Overviews/residentialOverview"
+	"briefingmaterial" "vgui/swarm/Overviews/residentialBriefingOverview"
+	"missiontitle"		"SynTek Residential"
+	"description"	"Orbital scans show a build-up of Swarm biological material within the Residential complex.  Find and Destroy all biological material and eggs in the complex."
+	"image"		"swarm/ObjectivePics/obresidentialbio"
+	"version"		"1"
+	"author"		"Valve"
+	"website"		"http://www.alienswarm.com/"
+	"builtin"		"1"
+}

@@ -1,0 +1,580 @@
+"WAVE"
+{
+	"Name"						"Intro"
+	"EnvironmentModifiers"		"0"
+	"Resupply"					"0"
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"4"
+		"SpawnDelay"		"0.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_drone_N"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"4"
+		"SpawnDelay"		"8.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_drone_S"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"10"
+		"SpawnDelay"		"16.0"
+		"SpawnDuration"		"5.0"
+		"SpawnGroup"		"group_drone_N"
+		"Modifiers"			"0"
+	}
+	
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"4"
+		"SpawnDelay"		"22.0"
+		"SpawnDuration"		"2.0"
+		"SpawnGroup"		"group_drone_S"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"4"
+		"SpawnDelay"		"28.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_drone_N"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"10"
+		"SpawnDelay"		"34.0"
+		"SpawnDuration"		"5.0"
+		"SpawnGroup"		"group_drone_S"
+		"Modifiers"			"0"
+	}
+}
+"WAVE"
+{
+	"Name"						"XXX"
+	"EnvironmentModifiers"		"0"
+	"Resupply"					"0"
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"4"
+		"SpawnDelay"		"0.0"
+		"SpawnDuration"		"2.0"
+		"SpawnGroup"		"group_drone_N"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"10"
+		"SpawnDelay"		"0.0"
+		"SpawnDuration"		"10.0"
+		"SpawnGroup"		"group_drone_M_W"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"16"
+		"SpawnDelay"		"6.0"
+		"SpawnDuration"		"10.0"
+		"SpawnGroup"		"group_drone_M_E"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"1"
+		"SpawnDelay"		"8.0"
+		"SpawnDuration"		"4.0"
+		"SpawnGroup"		"group_ranger_M_N"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"1"
+		"SpawnDelay"		"8.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_ranger_M_E"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"1"
+		"SpawnDelay"		"14.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_ranger_W"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"8"
+		"SpawnDelay"		"20.0"
+		"SpawnDuration"		"4.0"
+		"SpawnGroup"		"group_drone_S"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"8"
+		"SpawnDelay"		"20.0"
+		"SpawnDuration"		"4.0"
+		"SpawnGroup"		"group_drone_N"
+		"Modifiers"			"0"
+	}
+}
+"WAVE"
+{
+	"Name"						"XXX"
+	"EnvironmentModifiers"		"0"
+	"Resupply"					"0"
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"40"
+		"SpawnDelay"		"0.0"
+		"SpawnDuration"		"20.0"
+		"SpawnGroup"		"group_drone_M"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"2"
+		"SpawnDelay"		"6.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_ranger_M_E"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"1"
+		"SpawnDelay"		"8.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_ranger_W"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"8"
+		"SpawnDelay"		"10.0"
+		"SpawnDuration"		"6.0"
+		"SpawnGroup"		"group_drone_M_W"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"8"
+		"SpawnDelay"		"14.0"
+		"SpawnDuration"		"6.0"
+		"SpawnGroup"		"group_drone_M_E"
+		"Modifiers"			"0"
+	}
+}
+"WAVE"
+{
+	"Name"						"BLACKOUT"
+	"EnvironmentModifiers"		"0"
+	"Resupply"					"0"
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"1"
+		"SpawnDelay"		"0.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_ranger_M_N"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"5"
+		"SpawnDelay"		"0.0"
+		"SpawnDuration"		"10.0"
+		"SpawnGroup"		"group_drone_M_W"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"2"
+		"SpawnDelay"		"5.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_ranger_M_E"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"5"
+		"SpawnDelay"		"10.0"
+		"SpawnDuration"		"2.0"
+		"SpawnGroup"		"group_drone_M_E"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"8"
+		"SpawnDelay"		"16.0"
+		"SpawnDuration"		"2.0"
+		"SpawnGroup"		"group_drone_N"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"4"
+		"SpawnDelay"		"20.0"
+		"SpawnDuration"		"2.0"
+		"SpawnGroup"		"group_drone_M"
+		"Modifiers"			"0"
+	}
+}
+"WAVE"
+{
+	"Name"						"blackout"
+	"EnvironmentModifiers"		"0"
+	"Resupply"					"0"
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"4"
+		"SpawnDelay"		"0.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_drone_M_W"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"4"
+		"SpawnDelay"		"5.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_drone_N"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"10"
+		"SpawnDelay"		"12.0"
+		"SpawnDuration"		"5.0"
+		"SpawnGroup"		"group_drone_M_E"
+		"Modifiers"			"0"
+	}
+	
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"4"
+		"SpawnDelay"		"14.0"
+		"SpawnDuration"		"2.0"
+		"SpawnGroup"		"group_drone_S"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"4"
+		"SpawnDelay"		"19.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_drone_N"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"10"
+		"SpawnDelay"		"24.0"
+		"SpawnDuration"		"5.0"
+		"SpawnGroup"		"group_drone_S"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"5"
+		"SpawnDelay"		"30.0"
+		"SpawnDuration"		"10.0"
+		"SpawnGroup"		"group_drone_M_W"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"2"
+		"SpawnDelay"		"30.0"
+		"SpawnDuration"		"6.0"
+		"SpawnGroup"		"group_ranger_M_E"
+		"Modifiers"			"0"
+	}
+}
+"WAVE"
+{
+	"Name"						"BLACKOUT"
+	"EnvironmentModifiers"		"0"
+	"Resupply"					"0"
+	"ENTRY"
+	{
+		"AlienClass"		"asw_parasite"
+		"Quantity"			"1"
+		"SpawnDelay"		"0.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_parasite"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"8"
+		"SpawnDelay"		"10.0"
+		"SpawnDuration"		"8.0"
+		"SpawnGroup"		"group_drone_M"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_parasite"
+		"Quantity"			"1"
+		"SpawnDelay"		"15.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_parasite"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"8"
+		"SpawnDelay"		"25.0"
+		"SpawnDuration"		"8.0"
+		"SpawnGroup"		"group_drone_M"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_parasite"
+		"Quantity"			"1"
+		"SpawnDelay"		"30.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_parasite"
+		"Modifiers"			"0"
+	}
+}
+"WAVE"
+{
+	"Name"						"Shieldbug"
+	"EnvironmentModifiers"		"0"
+	"Resupply"					"0"
+	"ENTRY"
+	{
+		"AlienClass"		"asw_shieldbug"
+		"Quantity"			"1"
+		"SpawnDelay"		"0.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_shieldbug"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"10"
+		"SpawnDelay"		"3.0"
+		"SpawnDuration"		"15.0"
+		"SpawnGroup"		"group_drone_M_W"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"10"
+		"SpawnDelay"		"12.0"
+		"SpawnDuration"		"10.0"
+		"SpawnGroup"		"group_drone_M_E"
+		"Modifiers"			"0"
+	}
+}
+// 8
+"WAVE"
+{
+	"Name"						"Lights on - rangers"
+	"EnvironmentModifiers"		"0"
+	"Resupply"					"0"
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"2"
+		"SpawnDelay"		"0.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_ranger_M_E"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"2"
+		"SpawnDelay"		"0.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_ranger_W"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"1"
+		"SpawnDelay"		"0.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_ranger_M_N"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"2"
+		"SpawnDelay"		"6.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_ranger_M_E"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"2"
+		"SpawnDelay"		"6.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_ranger_W"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"1"
+		"SpawnDelay"		"6.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_ranger_M_N"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"2"
+		"SpawnDelay"		"10.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_ranger_M_E"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"2"
+		"SpawnDelay"		"10.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_ranger_W"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"1"
+		"SpawnDelay"		"10.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_ranger_M_N"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"6"
+		"SpawnDelay"		"14.0"
+		"SpawnDuration"		"6.0"
+		"SpawnGroup"		"group_drone_M_W"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"2"
+		"SpawnDelay"		"15.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_ranger_M_E"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"2"
+		"SpawnDelay"		"15.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_ranger_W"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_ranger"
+		"Quantity"			"1"
+		"SpawnDelay"		"15.0"
+		"SpawnDuration"		"0.0"
+		"SpawnGroup"		"group_ranger_M_N"
+		"Modifiers"			"0"
+	}
+}
+
+"WAVE"
+{
+	"Name"						"Drone Swarm"
+	"EnvironmentModifiers"		"0"
+	"Resupply"					"0"
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"40"
+		"SpawnDelay"		"0.0"
+		"SpawnDuration"		"30.0"
+		"SpawnGroup"		"group_drone_M"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_shieldbug"
+		"Quantity"			"2"
+		"SpawnDelay"		"10.0"
+		"SpawnDuration"		"6.0"
+		"SpawnGroup"		"group_shieldbug"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"8"
+		"SpawnDelay"		"10.0"
+		"SpawnDuration"		"4.0"
+		"SpawnGroup"		"group_drone_M_W"
+		"Modifiers"			"0"
+	}
+	"ENTRY"
+	{
+		"AlienClass"		"asw_drone"
+		"Quantity"			"8"
+		"SpawnDelay"		"15.0"
+		"SpawnDuration"		"4.0"
+		"SpawnGroup"		"group_drone_M_E"
+		"Modifiers"			"0"
+	}
+}

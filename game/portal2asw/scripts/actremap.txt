@@ -1,0 +1,26 @@
+//"ACT_IDLE" - This is the name of the original activity
+//{
+//	"remapactivity" "ACT_IDLE_RELAXED" - This is the name of the activy we're going to remap to.
+//	"readiness"	"AIRL_STIMULATED" - This is the value of the readiness level
+//	"aiming"	"TRS_FALSE" - Does this activity aim a weapon
+//}
+
+// "extra"
+// Use extra to add extra information that is specific to certain classes.
+// For example, citizens use readiness and aiming so they specify the values there.
+// Valid readiness level names:
+//	AIRL_PANIC
+//	AIRL_STEALTH
+//	AIRL_RELAXED
+//	AIRL_STIMULATED
+//	AIRL_AGITATED
+
+// Valid aiming values names:
+// 	TRS_FALSE - This animation doesn't aim
+//	TRS_TRUE - This animation needs to aim
+//	TRS_NONE - Don't care
+
+"npc_playercompanion"
+{
+	// Nothing
+}

@@ -1,0 +1,1029 @@
+//-------------------------------------------------------------------------------
+// This file specifies which icons are going to show up on the lightboard at the 
+// beginning of the level if you need to add a new icon, you must add the actual 
+// icon to the end of the texture sheet AND add it to g_pszLightboardIcons in 
+// vgui_mp_lobby_screen
+//-------------------------------------------------------------------------------
+
+//These are the the startup sequences that can be used
+//Add more in lightboard_startup_sequences.txt
+//If none is specified then it will fallback to "default_flicker"
+//"normal_flicker"
+//"dirty_flicker"
+//"broken_flicker"
+
+//These are the icons that can be used
+//"cube_drop" "1"
+//"cube_button" "1"
+//"cube_bonk" "1"
+//"drink_water" "1"
+//"goop" "1"
+//"crushers" "1"
+//"laser_cube" "1"
+//"laser_power" "1"
+//"turret" "1"
+//"turret_burn" "1"
+//"portal_fling" "1"
+//"portal_fling_2" "1"
+//"plate_fling" "1"
+//"bridges" "1"
+//"bridge_block" "1"
+//"grinders" "1"
+//"tbeams" "1"
+//"tbeam_polarity" "1"
+//"paint_bounce" "1"
+//"paint_speed" "1"
+//"handoff" "1"
+//"button_stand" "1"
+//"danger_field" "1"
+
+//Dirt type
+//"dirt" 0, 1 or 2
+//0 will have the least dirt and 2 will have the most
+//If none is specified then there won't be a dirt overlay on the panel
+
+
+"sp_lightboard_icons"
+{
+	"Maps"
+	{
+		//CHAPTER 1
+		"sp_a1_intro1"
+		{
+			//Map data
+			"level_number" "0"
+			"total_levels" "19"
+			"startup" "dirty_flicker"
+			"dirt" "2"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "1"
+				"cube_bonk" "1"
+				"button_stand" "0"
+				"goop" "0"
+				"portal_fling" "0"
+				"portal_fling_2" "0"
+				"turret" "0"
+				"drink_water" "0"
+				"grinders" "0"
+			}
+		}
+
+		"sp_a1_intro2"
+		{
+			//Map data
+			"level_number" "1"
+			"total_levels" "19"
+			"startup" "dirty_flicker"
+			"dirt" "2"
+
+			"icons"
+			{
+				"cube_drop" "0"
+				"cube_button" "1"
+				"cube_bonk" "0"
+				"button_stand" "0"
+				"goop" "0"
+				"portal_fling" "0"
+				"portal_fling_2" "0"
+				"turret" "0"
+				"drink_water" "0"
+				"grinders" "0"
+			}
+		}
+
+		"sp_a1_intro3"
+		{
+			//Map data
+			"level_number" "2"
+			"total_levels" "19"
+			"startup" "dirty_flicker"
+			"dirt" "2"
+
+			"icons"
+			{
+				"cube_drop" "0"
+				"cube_button" "0"
+				"cube_bonk" "0"
+				"button_stand" "0"
+				"goop" "0"
+				"portal_fling" "0"
+				"portal_fling_2" "0"
+				"turret" "0"
+				"drink_water" "0"
+				"grinders" "0"
+			}
+		}
+
+		"sp_a1_intro4"
+		{
+			//Map data
+			"level_number" "4"
+			"total_levels" "19"
+			"startup" "dirty_flicker"
+			"dirt" "2"
+
+			"icons"
+			{
+				"cube_drop" "0"
+				"cube_button" "1"
+				"cube_bonk" "0"
+				"button_stand" "0"
+				"goop" "0"
+				"portal_fling" "0"
+				"portal_fling_2" "0"
+				"turret" "0"
+				"drink_water" "0"
+				"grinders" "0"
+			}
+		}
+
+		"sp_a1_intro5"
+		{
+			//Map data
+			"level_number" "5"
+			"total_levels" "19"
+			"startup" "dirty_flicker"
+			"dirt" "2"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "1"
+				"cube_bonk" "1"
+				"button_stand" "0"
+				"goop" "1"
+				"portal_fling" "0"
+				"portal_fling_2" "0"
+				"turret" "0"
+				"drink_water" "0"
+				"grinders" "0"
+			}
+		}
+
+		"sp_a1_intro6"
+		{
+			//Map data
+			"level_number" "6"
+			"total_levels" "19"
+			"startup" "dirty_flicker"
+			"dirt" "1"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "1"
+				"cube_bonk" "1"
+				"button_stand" "0"
+				"goop" "0"
+				"portal_fling" "1"
+				"portal_fling_2" "1"
+				"turret" "0"
+				"drink_water" "0"
+				"grinders" "0"
+			}
+		}
+
+		"sp_a1_intro7"
+		{
+			//Map data
+			"level_number" "7"
+			"total_levels" "19"
+			"startup" "dirty_flicker"
+			"dirt" "2"
+
+			"icons"
+			{
+				"cube_drop" "0"
+				"cube_button" "0"
+				"cube_bonk" "0"
+				"button_stand" "0"
+				"goop" "0"
+				"portal_fling" "0"
+				"portal_fling_2" "0"
+				"turret" "0"
+				"drink_water" "0"
+				"grinders" "0"
+			}
+		}
+
+		"sp_a2_intro"
+		{
+			//Map data
+			"level_number" "19"
+			"total_levels" "19"
+			"startup" "dirty_flicker"
+			"dirt" "2"
+
+			"icons"
+			{
+				"cube_drop" "0"
+				"cube_button" "0"
+				"cube_bonk" "0"
+				"button_stand" "0"
+				"goop" "0"
+				"portal_fling" "0"
+				"portal_fling_2" "0"
+				"turret" "0"
+				"drink_water" "0"
+				"grinders" "0"
+			}
+		}
+
+		//CHAPTER 2
+		"sp_a2_laser_intro"
+		{
+			//Map data
+			"level_number" "1"
+			"total_levels" "22"
+			"startup" "dirty_flicker"
+			"dirt" "2"
+
+			"icons"
+			{
+				"laser_power" "1"
+				"laser_cube" "0"
+				"cube_drop" "0"
+				"cube_button" "0"
+				"cube_bonk" "0"
+				"button_stand" "0"
+				"goop" "0"
+				"turret" "0"
+				"turret_burn" "0"
+				"drink_water" "0"
+			}
+		}
+
+		"sp_a2_laser_stairs"
+		{
+			//Map data
+			"level_number" "2"
+			"total_levels" "22"
+			"startup" "dirty_flicker"
+			"dirt" "1"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "1"
+				"cube_bonk" "1"
+				"button_stand" "0"
+				"goop" "0"
+				"laser_power" "1"
+				"laser_cube" "1"
+				"turret" "0"
+				"turret_burn" "0"
+				"drink_water" "0"
+			}
+		}
+
+		"sp_a2_dual_lasers"
+		{
+			//Map data
+			"level_number" "3"
+			"total_levels" "22"
+			"startup" "dirty_flicker"
+			"dirt" "2"
+
+			"icons"
+			{
+				"cube_drop" "0"
+				"cube_button" "0"
+				"cube_bonk" "0"
+				"button_stand" "0"
+				"goop" "0"
+				"laser_power" "1"
+				"laser_cube" "1"
+				"turret" "0"
+				"turret_burn" "0"
+				"drink_water" "0"
+			}
+		}
+
+		"sp_a2_laser_over_goo"
+		{
+			//Map data
+			"level_number" "4"
+			"total_levels" "22"
+			"startup" "dirty_flicker"
+			"dirt" "1"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "1"
+				"cube_bonk" "1"
+				"button_stand" "0"
+				"goop" "1"
+				"laser_power" "1"
+				"laser_cube" "0"
+				"turret" "0"
+				"turret_burn" "0"
+				"drink_water" "0"
+			}
+		}
+
+		"sp_a2_catapult_intro"
+		{
+			//Map data
+			"level_number" "5"
+			"total_levels" "22"
+			"startup" "dirty_flicker"
+			"dirt" "2"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "1"
+				"cube_bonk" "1"
+				"button_stand" "0"
+				"goop" "1"
+				"portal_fling" "0"
+				"portal_fling_2" "0"
+				"plate_fling" "1"
+				"turret" "0"
+				"drink_water" "0"
+			}
+		}
+
+		"sp_a2_trust_fling"
+		{
+			//Map data
+			"level_number" "6"
+			"total_levels" "22"
+			"startup" "dirty_flicker"
+			"dirt" "1"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "1"
+				"cube_bonk" "1"
+				"button_stand" "0"
+				"goop" "1"
+				"portal_fling" "0"
+				"portal_fling_2" "0"
+				"plate_fling" "1"
+				"turret" "0"
+				"drink_water" "0"
+			}
+		}
+
+		"sp_a2_pit_flings"
+		{
+			//Map data
+			"level_number" "7"
+			"total_levels" "22"
+			"startup" "dirty_flicker"
+			"dirt" "2"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "1"
+				"cube_bonk" "1"
+				"goop" "0"
+				"portal_fling" "1"
+				"portal_fling_2" "1"
+				"laser_power" "1"
+				"laser_cube" "0"
+				"turret" "0"
+				"drink_water" "0"
+			}
+		}
+
+		"sp_a2_fizzler_intro"
+		{
+			//Map data
+			"level_number" "8"
+			"total_levels" "22"
+			"startup" "dirty_flicker"
+			"dirt" "1"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "1"
+				"cube_bonk" "1"
+				"goop" "0"
+				"portal_fling" "0"
+				"portal_fling_2" "0"
+				"laser_power" "1"
+				"laser_cube" "1"
+				"turret" "0"
+				"drink_water" "0"
+			}
+		}
+
+		"sp_a2_sphere_peek"
+		{
+			//Map data
+			"level_number" "9"
+			"total_levels" "22"
+			"startup" "dirty_flicker"
+			"dirt" "1"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "0"
+				"cube_bonk" "1"
+				"button_stand" "0"
+				"goop" "0"
+				"laser_power" "1"
+				"laser_cube" "1"
+				"plate_fling" "1"
+				"turret" "0"
+				"drink_water" "0"
+			}
+		}
+
+		"sp_a2_ricochet"
+		{
+			//Map data
+			"level_number" "10"
+			"total_levels" "22"
+			"startup" "dirty_flicker"
+			"dirt" "1"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "1"
+				"cube_bonk" "1"
+				"goop" "0"
+				"laser_power" "1"
+				"laser_cube" "1"
+				"plate_fling" "1"
+				"portal_fling" "1"
+				"portal_fling_2" "1"
+				"drink_water" "0"
+			}
+		}
+
+		//CHAPTER 3
+		"sp_a2_bridge_intro"
+		{
+			//Map data
+			"level_number" "11"
+			"total_levels" "22"
+			"startup" "dirty_flicker"
+			"dirt" "0"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "1"
+				"cube_bonk" "1"
+				"button_stand" "0"
+				"goop" "1"
+				"bridges" "1"
+				"turret" "0"
+				"bridge_block" "0"
+				"laser_cube" "0"
+				"drink_water" "0"
+			}
+		}
+
+		"sp_a2_bridge_the_gap"
+		{
+			//Map data
+			"level_number" "12"
+			"total_levels" "22"
+			"startup" "dirty_flicker"
+			"dirt" "1"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "1"
+				"cube_bonk" "1"
+				"button_stand" "0"
+				"goop" "1"
+				"bridges" "1"
+				"turret" "0"
+				"bridge_block" "0"
+				"laser_cube" "0"
+				"drink_water" "0"
+			}
+		}
+
+		"sp_a2_turret_intro"
+		{
+			//Map data
+			"level_number" "13"
+			"total_levels" "22"
+			"startup" "dirty_flicker"
+			"dirt" "1"
+
+			"icons"
+			{
+				"cube_drop" "0"
+				"cube_button" "1"
+				"cube_bonk" "1"
+				"button_stand" "0"
+				"goop" "0"
+				"bridges" "0"
+				"turret" "1"
+				"bridge_block" "0"
+				"turret_burn" "0"
+				"drink_water" "0"
+			}
+		}
+
+		"sp_a2_laser_relays"
+		{
+			//Map data
+			"level_number" "14"
+			"total_levels" "22"
+			"startup" "normal_flicker"
+			"dirt" "0"
+
+			"icons"
+			{
+				"cube_drop" "0"
+				"cube_button" "0"
+				"cube_bonk" "0"
+				"button_stand" "0"
+				"goop" "0"
+				"laser_cube" "1"
+				"laser_power" "1"
+				"turret" "0"
+				"turret_burn" "0"
+				"drink_water" "0"
+			}
+		}
+
+		"sp_a2_turret_blocker"
+		{
+			//Map data
+			"level_number" "15"
+			"total_levels" "22"
+			"startup" "normal_flicker"
+			"dirt" "0"
+
+			"icons"
+			{
+				"cube_drop" "0"
+				"cube_button" "1"
+				"cube_bonk" "0"
+				"button_stand" "0"
+				"goop" "0"
+				"bridges" "1"
+				"turret" "1"
+				"bridge_block" "1"
+				"plate_fling" "1"
+				"drink_water" "0"
+			}
+		}
+
+		"sp_a2_laser_vs_turret"
+		{
+			//Map data
+			"level_number" "16"
+			"total_levels" "22"
+			"startup" "normal_flicker"
+			"dirt" "0"
+
+			"icons"
+			{
+				"cube_drop" "0"
+				"cube_button" "1"
+				"cube_bonk" "0"
+				"button_stand" "1"
+				"goop" "0"
+				"laser_cube" "1"
+				"laser_power" "1"
+				"turret" "1"
+				"turret_burn" "1"
+				"drink_water" "0"
+			}
+		}
+
+		"sp_a2_pull_the_rug"
+		{
+			//Map data
+			"level_number" "17"
+			"total_levels" "22"
+			"startup" "normal_flicker"
+			"dirt" "0"
+
+			"icons"
+			{
+				"cube_drop" "0"
+				"cube_button" "1"
+				"cube_bonk" "0"
+				"button_stand" "0"
+				"goop" "0"
+				"bridges" "1"
+				"laser_power" "1"
+				"turret" "0"
+				"bridge_block" "0"
+				"drink_water" "0"
+			}
+		}
+
+		//CHAPTER 4
+		"sp_a2_column_blocker"
+		{
+			//Map data
+			"level_number" "18"
+			"total_levels" "22"
+			"startup" "normal_flicker"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "0"
+				"cube_bonk" "1"
+				"goop" "1"
+				"bridges" "1"
+				"laser_power" "1"
+				"laser_cube" "1"
+				"turret" "1"
+				"bridge_block" "1"
+				"turret_burn" "1"
+			}
+		}
+
+		"sp_a2_laser_chaining"
+		{
+			//Map data
+			"level_number" "19"
+			"total_levels" "22"
+			"startup" "normal_flicker"
+
+			"icons"
+			{
+				"cube_drop" "0"
+				"cube_button" "0"
+				"cube_bonk" "0"
+				"button_stand" "0"
+				"laser_power" "1"
+				"laser_cube" "1"
+				"plate_fling" "1"
+				"turret" "1"
+				"turret_burn" "1"
+				"drink_water" "0"
+			}
+		}
+
+		"sp_a2_triple_laser"
+		{
+			//Map data
+			"level_number" "20"
+			"total_levels" "22"
+			"startup" "normal_flicker"
+
+			"icons"
+			{
+				"portal_fling" "0"
+				"portal_fling_2" "0"
+				"bridges" "0"
+				"button_stand" "0"
+				"laser_power" "1"
+				"laser_cube" "1"
+				"plate_fling" "0"
+				"turret" "0"
+				"turret_burn" "0"
+				"drink_water" "0"
+			}
+		}
+
+		"sp_a2_bts1"
+		{
+			//Map data
+			"level_number" "21"
+			"total_levels" "22"
+			"startup" "normal_flicker"
+
+			"icons"
+			{
+				"bridges" "1"
+				"cube_drop" "1"
+				"cube_button" "1"
+				"cube_bonk" "1"
+				"laser_power" "0"
+				"laser_cube" "0"
+				"turret" "0"
+				"turret_burn" "0"
+				"goop" "1"
+				"drink_water" "0"
+			}
+		}
+		//"sp_a2_bts2"
+
+		//CHAPTER 5
+		//"sp_a2_bts3"
+		//"sp_a2_bts4"
+		//"sp_a2_bts5"
+		//"sp_a2_bts6"
+		//"sp_a2_core"
+
+		//CHAPTER 6
+		//"sp_a3_00"
+		//"sp_a3_01"
+		//"sp_a3_03"
+		//"sp_a3_jump_intro"
+		//"sp_a3_bomb_flings"
+		//"sp_a3_crazy_box"
+		//"sp_a3_transition01"
+
+		//CHAPTER 7
+		//"sp_a3_speed_ramp"
+		//"sp_a3_speed_flings"
+		//"sp_a3_portal_intro"
+		//"sp_a3_end"
+
+		//CHAPTER 8
+		"sp_a4_intro"
+		{
+			//Map data
+			"level_number" "1"
+			"total_levels" "1"
+			"startup" "normal_flicker"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "1"
+				"cube_bonk" "1"
+				"button_stand" "0"
+				"goop" "0"
+				"portal_fling" "0"
+				"portal_fling_2" "0"
+				"turret" "0"
+				"drink_water" "0"
+				"grinders" "0"
+			}
+		}
+
+		"sp_a4_tb_intro"
+		{
+			//Map data
+			"level_number" "1"
+			"total_levels" "19"
+			"startup" "normal_flicker"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "1"
+				"cube_bonk" "0"
+				"button_stand" "0"
+				"goop" "0"
+				"tbeams" "1"
+				"turret" "0"
+				"drink_water" "0"
+				"grinders" "0"
+				"crushers" "0"
+			}
+		}
+
+		"sp_a4_tb_trust_drop"
+		{
+			//Map data
+			"level_number" "2"
+			"total_levels" "19"
+			"startup" "normal_flicker"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "1"
+				"cube_bonk" "1"
+				"button_stand" "0"
+				"goop" "0"
+				"tbeams" "1"
+				"turret" "0"
+				"drink_water" "0"
+				"grinders" "0"
+				"crushers" "0"
+			}
+		}
+
+		"sp_a4_tb_wall_button"
+		{
+			//Map data
+			"level_number" "3"
+			"total_levels" "19"
+			"startup" "normal_flicker"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "1"
+				"cube_bonk" "1"
+				"button_stand" "0"
+				"goop" "0"
+				"tbeams" "1"
+				"plate_fling" "1"
+				"drink_water" "0"
+				"grinders" "0"
+				"crushers" "0"
+			}
+		}
+
+		"sp_a4_tb_polarity"
+		{
+			//Map data
+			"level_number" "4"
+			"total_levels" "19"
+			"startup" "normal_flicker"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "1"
+				"cube_bonk" "1"
+				"goop" "0"
+				"tbeams" "1"
+				"tbeam_polarity" "1"
+				"turret" "1"
+				"drink_water" "0"
+				"grinders" "0"
+				"crushers" "0"
+			}
+		}
+
+		"sp_a4_tb_catch"
+		{
+			//Map data
+			"level_number" "5"
+			"total_levels" "19"
+			"startup" "normal_flicker"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "1"
+				"cube_bonk" "1"
+				"goop" "0"
+				"tbeams" "1"
+				"tbeam_polarity" "0"
+				"plate_fling" "1"
+				"drink_water" "0"
+				"grinders" "0"
+				"crushers" "0"
+			}
+		}
+
+		"sp_a4_stop_the_box"
+		{
+			//Map data
+			"level_number" "6"
+			"total_levels" "19"
+			"startup" "normal_flicker"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "1"
+				"cube_bonk" "1"
+				"bridges" "1"
+				"turret" "1"
+				"bridge_block" "1"
+				"tbeams" "0"
+				"plate_fling" "1"
+				"drink_water" "0"
+				"grinders" "0"
+			}
+		}
+
+		"sp_a4_laser_catapult"
+		{
+			//Map data
+			"level_number" "11"
+			"total_levels" "19"
+			"startup" "normal_flicker"
+
+			"icons"
+			{
+				"cube_drop" "0"
+				"cube_button" "0"
+				"cube_bonk" "0"
+				"laser_power" "1"
+				"laser_cube" "1"
+				"tbeams" "1"
+				"danger_field" "0"
+				"plate_fling" "1"
+				"drink_water" "0"
+				"grinders" "0"
+			}
+		}
+
+		"sp_a4_laser_platform"
+		{
+			//Map data
+			"level_number" "12"
+			"total_levels" "19"
+			"startup" "normal_flicker"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "0"
+				"cube_bonk" "1"
+				"button_stand" "0"
+				"laser_power" "1"
+				"laser_cube" "1"
+				"danger_field" "1"
+				"plate_fling" "0"
+				"drink_water" "0"
+				"grinders" "0"
+			}
+		}
+
+		"sp_a4_speed_tb_catch"
+		{
+			//Map data
+			"level_number" "15"
+			"total_levels" "19"
+			"startup" "normal_flicker"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "1"
+				"cube_bonk" "1"
+				"button_stand" "1"
+				"laser_power" "0"
+				"laser_cube" "0"
+				"tbeams" "1"
+				"paint_speed" "1"
+				"paint_bounce" "0"
+				"drink_water" "0"
+			}
+		}
+
+		"sp_a4_jump_polarity"
+		{
+			//Map data
+			"level_number" "16"
+			"total_levels" "19"
+			"startup" "normal_flicker"
+
+			"icons"
+			{
+				"button_stand" "1"
+				"laser_power" "0"
+				"laser_cube" "0"
+				"turret" "1"
+				"turret_burn" "0"
+				"tbeams" "1"
+				"tbeam_polarity" "1"
+				"paint_speed" "0"
+				"paint_bounce" "1"
+				"drink_water" "0"
+			}
+		}
+
+		//CHAPTER 9
+		"sp_a4_finale1"
+		{
+			//Map data
+			"level_number" "17"
+			"total_levels" "19"
+			"startup" "normal_flicker"
+
+			"icons"
+			{
+				"cube_drop" "1"
+				"cube_button" "1"
+				"cube_bonk" "1"
+				"tbeams" "1"
+				"tbeam_polarity" "1"
+				"laser_power" "0"
+				"danger_field" "1"
+				"plate_fling" "1"
+				"drink_water" "0"
+				"grinders" "0"
+			}
+		}
+
+		"sp_a4_finale2"
+		{
+			//Map data
+			"level_number" "75"
+			"total_levels" "19"
+			"startup" "normal_flicker"
+
+			"icons"
+			{
+				"turret" "1"
+				"turret" "1"
+				"turret" "1"
+				"turret" "1"
+				"turret" "1"
+				"turret" "1"
+				"turret" "1"
+				"turret" "1"
+			}
+		}
+
+		//"sp_a4_finale3"
+		//"sp_a4_finale4"
+	}
+}

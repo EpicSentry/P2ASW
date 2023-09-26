@@ -1,0 +1,943 @@
+//
+//
+// NOTE:  AUTOMATICALLY GENERATED FILE, ANY HAND EDITED COMMENTS WILL BE LOST!!!
+// NOTE:  AUTOMATICALLY GENERATED FILE, ANY HAND EDITED COMMENTS WILL BE LOST!!!
+// NOTE:  AUTOMATICALLY GENERATED FILE, ANY HAND EDITED COMMENTS WILL BE LOST!!!
+//
+// VOL_NORM		1.0f
+//
+//-----------------------------------------------------------------------------
+// common attenuation values
+//-----------------------------------------------------------------------------
+//
+// DON'T USE THESE - USE SNDLVL_ INSTEAD!!!
+//	ATTN_NONE		0.0f	
+//	ATTN_NORM		0.8f
+//	ATTN_IDLE		2.0f
+//	ATTN_STATIC		1.25f 
+//	ATTN_RICOCHET	1.5f
+//	ATTN_GUNFIRE	0.27f
+//
+//	SNDLVL_NONE		= 0,
+//	SNDLVL_25dB		= 25,
+//	SNDLVL_30dB		= 30,
+//	SNDLVL_35dB		= 35,
+//	SNDLVL_40dB		= 40,
+//	SNDLVL_45dB		= 45,
+//	SNDLVL_50dB		= 50,	= 3.9
+//	SNDLVL_55dB		= 55,	= 3.0
+//	SNDLVL_IDLE		= 60,	= 2.0
+//	SNDLVL_TALKING		= 60,	= 2.0
+//	SNDLVL_60dB		= 60,	= 2.0
+//	SNDLVL_65dB		= 65,	= 1.5
+//	SNDLVL_STATIC		= 66,	= 1.25
+//	SNDLVL_70dB		= 70,	= 1.0
+//	SNDLVL_NORM		= 75,
+//	SNDLVL_75dB		= 75,	= 0.8
+//	SNDLVL_80dB		= 80,	= 0.7
+//	SNDLVL_85dB		= 85,	= 0.6
+//	SNDLVL_90dB		= 90,	= 0.5
+//	SNDLVL_95dB		= 95,
+//	SNDLVL_100dB	= 100,	= 0.4
+//	SNDLVL_105dB	= 105,
+//	SNDLVL_120dB	= 120,
+//	SNDLVL_130dB	= 130,
+//	SNDLVL_GUNFIRE	= 140, = 0.27
+//	SNDLVL_140dB	= 140,	= 0.2
+//	SNDLVL_150dB	= 150,	= 0.2
+//
+
+"BR_chair_slide"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.65"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_70dB"
+
+	"wave"			"BR/events/chair_slide.wav"
+}
+
+"crossingL"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		".5"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_130dB"
+
+	"wave"			"BR/events/BR_crossing_bell_dop.L.wav"
+}
+"crossingR"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		".5"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_130dB"
+
+	"wave"			"BR/events/BR_crossing_bell_dop.R.wav"
+}
+
+"lookoutF"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		".7"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_130dB"
+
+	"wave"			"BR/train/doppler_VO_F.wav"
+}
+"lookoutB"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		".7"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_130dB"
+
+	"wave"			"BR/train/doppler_VO_B.wav"
+}
+
+"outside.L"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		".85"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_120dB"
+
+	"wave"			"BR/train/BR_outsidetrack_lp_01_L.wav"
+}
+"outside.R"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		".85"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_120dB"
+
+	"wave"			"BR/train/BR_outsidetrack_lp_01_R.wav"
+}
+
+"Train.rattles_01"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"1"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_130dB"
+
+	"wave"			"BR/events/Train_rattle_01.wav"
+}
+
+"Train.rattles_02"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"1"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_130dB"
+
+	"wave"			"BR/events/Train_rattle_02.wav"
+}
+
+"Train.rattles_03"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"1"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_130dB"
+
+	"wave"			"BR/events/Train_rattle_03.wav"
+}
+
+"Train.rattles_04"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"1"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_130dB"
+
+	"wave"			"BR/events/Train_rattle_04.wav"
+}
+
+"Train.shutters_open"
+{
+                "channel"                       "CHAN_STATIC"
+                "soundlevel"     		"SNDLVL_NONE"
+                "volume"                        "1.0"
+                "wave"                          "BR/events/BR_trainwindows_open.wav"
+
+                "soundentry_version" "2"
+
+                "operator_stacks"
+                {
+                                "update_stack"
+                                {
+                                                "import_stack" "p2_update_default"
+
+                                                "volume_apply_occlusion"
+                                                {
+                                                                "input2" "1.0"
+                                                }
+                                                "volume_apply_falloff"
+                                                {
+                                                                "input2" "1.0"
+                                                }
+                                                "dsp_output"
+                                                {
+                                                                "input_float" "0.0"
+                                                }
+                                                "mixer"
+                                                {
+                                                                "mixgroup" "xLoud"
+                                                }      
+						"speakers_spatialize"  
+						{
+							"input_radius"	"1000"
+						}                                     
+                                }
+                }
+}
+"breakout"
+{
+                "channel"                       "CHAN_STATIC"
+                "soundlevel"     		"SNDLVL_NONE"
+                "volume"                        "1.0"
+                "wave"                          "BR/events/BR_Breakout.wav"
+
+                "soundentry_version" "2"
+
+                "operator_stacks"
+                {
+                                "update_stack"
+                                {
+                                                "import_stack" "p2_update_default"
+
+                                                "volume_apply_occlusion"
+                                                {
+                                                                "input2" "1.0"
+                                                }
+                                                "volume_apply_falloff"
+                                                {
+                                                                "input2" "1.0"
+                                                }
+                                                "dsp_output"
+                                                {
+                                                                "input_float" "0.0"
+                                                }
+                                                "mixer"
+                                                {
+                                                                "mixgroup" "xLoud"
+                                                }      
+						"speakers_spatialize"  
+						{
+							"input_radius"	"1000"
+						}                                     
+                                }
+                }
+}
+
+
+"traincar.fall"
+{
+                "channel"                       "CHAN_STATIC"
+                "soundlevel"     		"SNDLVL_NONE"
+                "volume"                        "1.0"
+                "wave"                          "BR/events/traincar_fall.wav"
+
+                "soundentry_version" "2"
+
+                "operator_stacks"
+                {
+                                "update_stack"
+                                {
+                                                "import_stack" "p2_update_default"
+
+                                                "volume_apply_occlusion"
+                                                {
+                                                                "input2" "1.0"
+                                                }
+                                                "volume_apply_falloff"
+                                                {
+                                                                "input2" "1.0"
+                                                }
+                                                "dsp_output"
+                                                {
+                                                                "input_float" "0.0"
+                                                }
+                                                "mixer"
+                                                {
+                                                                "mixgroup" "xLoud"
+                                                }      
+						"speakers_spatialize"  
+						{
+							"input_radius"	"1000"
+						}                                     
+                                }
+                }
+}
+
+
+"traincar.crash_1"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"	"SNDLVL_NONE"
+	"volume"		"1.0"
+	"wave"			"playonce\level\animation_sfx\a4_polarity_hall_destroy.wav"
+
+
+                "soundentry_version" "2"
+
+                "operator_stacks"
+                {
+                                "update_stack"
+                                {
+                                                "import_stack" "p2_update_default"
+
+                                                "volume_apply_occlusion"
+                                                {
+                                                                "input2" "1.0"
+                                                }
+                                                "volume_apply_falloff"
+                                                {
+                                                                "input2" "1.0"
+                                                }
+                                                "dsp_output"
+                                                {
+                                                                "input_float" "0.0"
+                                                }
+                                                "mixer"
+                                                {
+                                                                "mixgroup" "xLoud"
+                                                }      
+						"speakers_spatialize"  
+						{
+							"input_radius"	"1000"
+						}                                     
+                                }
+                }
+}
+
+"traincar.crash_2"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_NONE"
+	"volume"		"1.0"
+	"wave"			"BR/events/crash_sweetener.wav"
+
+                "soundentry_version" "2"
+
+                "operator_stacks"
+                {
+                                "update_stack"
+                                {
+                                                "import_stack" "p2_update_default"
+
+                                                "volume_apply_occlusion"
+                                                {
+                                                                "input2" "1.0"
+                                                }
+                                                "volume_apply_falloff"
+                                                {
+                                                                "input2" "1.0"
+                                                }
+                                                "dsp_output"
+                                                {
+                                                                "input_float" "0.0"
+                                                }
+                                                "mixer"
+                                                {
+                                                                "mixgroup" "xLoud"
+                                                }      
+						"speakers_spatialize"  
+						{
+							"input_radius"	"1000"
+						}                                     
+                                }
+                }
+
+}
+
+"lightbulb.pop"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		".75"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_100dB"
+
+	"wave"			"BR/train/BR_bulb_pop.wav"
+}
+
+"BR_sparks"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		"1"
+	"rndwave"
+	{
+		"wave"		"BR/train/BR_spark_01.wav"
+		"wave"		"BR/train/BR_spark_02.wav"
+	}
+}
+
+"horn.long"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		".75"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_130dB"
+
+	"wave"			"BR/train/train_horn_long.wav"
+}
+
+"horn.short"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		".75"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_130dB"
+
+	"wave"			"BR/train/train_horn_shrt.wav"
+}
+
+
+
+"Train.train_brake"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"VOL_NORM"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_100dB"
+
+	"wave"			"plats/ttrain_brake1.wav"
+}
+
+"Train.train_stop"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"VOL_NORM"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_70dB"
+
+	"wave"			"plats/skylift_stop.wav"
+}
+
+"Train.train_idle"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"VOL_NORM"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_60dB"
+
+	"wave"			"trains/train_idle.wav"
+}
+
+"Train.train_horn"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"VOL_NORM"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_100dB"
+
+	"wave"			"trains/train_horn2.wav"
+}
+
+"Train.train_horn_everywhere"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"1.000000"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"0"
+
+	"wave"			"trains/train_horn2.wav"
+}
+
+"Train.train_horn_quiet"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.500000"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_90dB"
+
+	"wave"			"trains/train_horn2.wav"
+}
+
+"fireball.flyby"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.500000"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_90dB"
+
+	"wave"			"ambient\fire\amb_fireball_flyby_05.wav"
+}
+"fire.small.lp"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.900000"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_65dB"
+
+	"wave"			"ambient\fire\fire_small_loop2.wav"
+}
+"gascan.ignite"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.500000"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_90dB"
+
+	"wave"			"ambient\fire\gascan_ignite1.wav"
+}
+"gas.leak.lp"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.6"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_65dB"
+
+	"wave"			"br\ambience\gas_release_lp.wav"
+}
+"telephonepole.break"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"1"
+	"pitch"			"100"
+
+	"soundlevel"		"SNDLVL_NONE"
+
+	"wave"			"BR\events\BR_pole_and_wires.wav"
+}
+
+"telephonepole.fall"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"1"
+	"pitch"			"100"
+
+	"soundlevel"		"SNDLVL_NONE"
+
+	"wave"			"BR\events\BR_telephonepole_fall.wav"
+}
+
+"cubegun.goldenratio"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.3"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_65dB"
+
+	"wave"			"br\events\goldenratio.wav"
+}
+
+"radio.VO.1"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.95"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_70dB"
+
+	"wave"			"br\train\walla\chatter_01.wav"
+}
+
+"radio.VO.2"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.95"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_70dB"
+
+	"wave"			"br\train\walla\chatter_02.wav"
+}
+
+"radio.VO.3"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.95"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_70dB"
+
+	"wave"			"br\train\walla\chatter_03.wav"
+}
+
+"radio.VO.4"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.95"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_70dB"
+
+	"wave"			"br\train\walla\chatter_04.wav"
+}
+
+"radio.VO.5"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.95"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_70dB"
+
+	"wave"			"br\train\walla\chatter_05.wav"
+}
+
+"radio.VO.6"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.95"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_70dB"
+
+	"wave"			"br\train\walla\chatter_06.wav"
+}
+
+"radio.VO.7"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.95"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_70dB"
+
+	"wave"			"br\train\walla\chatter_07.wav"
+}
+
+"radio.VO.8"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.95"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_70dB"
+
+	"wave"			"br\train\walla\chatter_08.wav"
+}
+
+"radio.VO.8a"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_140dB"
+
+	"wave"			"br\train\walla\chatter_08a.wav"
+}
+
+"radio.VO.S1_01"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.95"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_70dB"
+
+	"wave"			"br\train\walla\S1_01.wav"
+}
+
+"radio.VO.S2_01"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.95"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_70dB"
+
+	"wave"			"br\train\walla\S2_01.wav"
+}
+
+"radio.VO.S1_02"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.95"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_70dB"
+
+	"wave"			"br\train\walla\S1_02.wav"
+}
+
+// something on tracks
+"radio.VO.S2_02"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.95"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_70dB"
+
+	"wave"			"br\train\walla\S2_02.wav"
+}
+
+// sgot eyes?
+"radio.VO.S2_03"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.95"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_70dB"
+
+	"wave"			"br\train\walla\S2_03.wav"
+}
+
+// negative
+"radio.VO.S2_04"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.95"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_70dB"
+
+	"wave"			"br\train\walla\S2_04.wav"
+}
+
+// increase pressure
+"radio.VO.S1_03"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.95"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_70dB"
+
+	"wave"			"br\train\walla\S1_03.wav"
+}
+
+// increased
+"radio.VO.S2_05"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.95"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_70dB"
+
+	"wave"			"br\train\walla\S2_05.wav"
+}
+
+// roger
+"radio.VO.S1_04"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.95"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_70dB"
+
+	"wave"			"br\train\walla\S1_04.wav"
+}
+
+// up ahead
+"radio.VO.S2_06"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_120dB"
+
+	"wave"			"br\train\walla\S2_06.wav"
+}
+
+// civ car
+"radio.VO.S1_06"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_120dB"
+
+	"wave"			"br\train\walla\S1_06.wav"
+}
+
+// sound horn
+"radio.VO.S1_07"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_120dB"
+
+	"wave"			"br\train\walla\S1_07.wav"
+}
+
+// sounding
+"radio.VO.S2_08"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_120dB"
+
+	"wave"			"br\train\walla\S2_08.wav"
+}
+
+// not moving
+"radio.VO.S2_09"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_120dB"
+
+	"wave"			"br\train\walla\S2_09.wav"
+}
+
+// look out
+"radio.VO.S2_10"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_120dB"
+
+	"wave"			"br\train\walla\S2_10.wav"
+}
+
+// oh gawd
+"radio.VO.S2_11"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.95"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_90dB"
+
+	"wave"			"br\train\walla\S2_11.wav"
+}
+
+// oh gawd
+"radio.VO.static1"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_120dB"
+
+	"wave"			"br\train\walla\radiostatic_01.wav"
+}
+
+// oh gawd
+"radio.VO.static2"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_120dB"
+
+	"wave"			"br\train\walla\radiostatic_02.wav"
+}
+
+// oh gawd
+"radio.VO.static3"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_120dB"
+
+	"wave"			"br\train\walla\radiostatic_03.wav"
+}
+
+"subject.VO.ambient"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.7"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_70dB"
+
+	"wave"			"br\events\subject_ambient.wav"
+}
+
+"subject.VO.warn"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.7"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_90dB"
+
+	"wave"			"br\events\subject_warn.wav"
+}
+
+"subject.VO.yell"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"1.0"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_120dB"
+
+	"wave"			"br\events\subject_yell.wav"
+}
+
+"trainwreck.radio"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.5"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"		"SNDLVL_70 dB"
+
+	"wave"			"BR\Ambience\vsc_radio5.wav"
+}
+"traincar.door.land"
+{
+                "channel"                       "CHAN_STATIC"
+                "soundlevel"     		"SNDLVL_NONE"
+                "volume"                        "1.0"
+                "wave"                          "BR\events\Final_Slam.wav"
+}
+"traincar.door.open"
+{
+                "channel"                       "CHAN_STATIC"
+                "soundlevel"     		"SNDLVL_NONE"
+                "volume"                        "1.0"
+                "wave"                          "world\dropper_break_01.wav"
+}
+"axle.roll"
+{
+
+                "channel"                       "CHAN_STATIC"
+		"volume"			"0.5"
+		"pitch"				"PITCH_NORM"
+
+		"soundlevel"			"SNDLVL_75 dB"
+                "wave"                          "br\train\Axle_roll.wav"
+}
+

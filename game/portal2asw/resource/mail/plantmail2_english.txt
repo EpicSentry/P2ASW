@@ -1,0 +1,32 @@
+GAME
+{
+    // PDA belongs to Brian Howe
+    
+    // inbox
+	"MailFrom1"	"From: Laura Callen"
+	"MailDate1"	"Date: 12/21/52"
+	"MailSubject1"	"Subject: Flow of information"
+	"MailBody1A"	"Mr. Howe,"
+	"MailBody1B"	"Why didn't you inform me about the eggs you and your crew found in the mine last week.  Unless you can provide a sound justification for this lapse, I will have to file a report."
+	"MailBody1C"	"L. Callen"
+	
+	"MailFrom2"	"From: Laura Callen"
+	"MailDate2"	"Date: 12/21/52"
+	"MailSubject2"	"Subject: Re: Re: Flow of information"
+	"MailBody2A"	"Mr. Howe,"
+	"MailBody2B"	"I've checked my records but I don't see your memo.  This is worrying.  I've talked to the system administrator, in hopes of finding some sort of explanation."
+I'll take the next train to Timor Station.  Arriving at 0845.  Could you pick me up?
+	"MailBody2C"	"L. Callen"
+
+    // sent mail
+    
+	"MailFrom3"	"To: Laura Callen"
+	"MailDate3"	"Date: 12/21/52"
+	"MailSubject3"	"Subject: Re: Flow of information"
+	"MailBody3A"	"Dear Ms. Callen,"
+	"MailBody3B"	"I DID follow procedure.  I mailed you a detailed memo 6 days ago.  I also mailed you about the security issues we've been having lately in Timor Station.  Two workers went missing on Monday and today we had a fatality."
+	"MailBody3C"	"My men are exhausted from working doubleshifts.  The heat is oppressive, and they are starting to hallucinate from fatigue--reporting unexplained noises and such.  I'd like you to talk to SynTek and see that things improve around here ASAP."
+	"MailBody3D"	"B. Howe"
+
+	
+}

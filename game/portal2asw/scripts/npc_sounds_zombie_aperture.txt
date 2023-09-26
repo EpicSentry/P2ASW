@@ -1,0 +1,13 @@
+"NPC_Zombie.Squash"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"1.0"
+	"soundlevel"	"SNDLVL_80dB"
+	"pitch"	"100"
+	"rndwave"
+	{
+	"wave"	"npc/zombie/squish1.wav"
+	"wave"	"npc/zombie/squish2.wav"
+	"wave"	"npc/zombie/squish3.wav"
+	}
+}

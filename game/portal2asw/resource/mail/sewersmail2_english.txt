@@ -1,0 +1,11 @@
+GAME
+{
+    // PDA belongs to brian
+	"MailFrom1"	"From: Helen Young"
+	"MailDate1"	"Date: 12/24/52"
+	"MailSubject1"	"Subject: Going to the labs"
+	"MailBody1A"	"Brian, what the hell is going on?  Gunshots?  Screaming?  Phil and I have decided to try getting into the labs.  We'll use the vent system to get to Deck 2."
+	"MailBody1B"	"I love you.  Please contact me!"
+	"MailBody1C"	"Helen"
+	"MailBody1D"	"PS: Happy birthday, for what it's worth."
+}

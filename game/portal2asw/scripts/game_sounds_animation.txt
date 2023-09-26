@@ -1,0 +1,95 @@
+"portalExperiment.portalGun_chargeUp" //Don't actually use this for a portalgun
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.85"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"			")plats/platform_start_lp_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{			
+			"level_specific_check"
+			{
+				"input_execute" "1.0" //enable map checking here
+				"operator" "get_map_name"
+				"map_name" "sp_a4_laser_catapult" //your map name here		
+			}
+			
+			"invert_map_selection"
+			{
+				"operator"	"math_float"
+				"apply"		"sub"
+				"input1"	"1.0"
+				"input2"	"@level_specific_check.output"
+			}
+			
+			"import_stack"	"P2_null_start" //This sound was deleted from the depot so we'll block it and play something else if we want to.
+
+			"block_start"
+			{	
+				"input_execute" "@invert_map_selection.output"
+			}
+		}
+	}
+}
+
+"portalExperiment.portalGun_fire"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"1.00"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"			"weapons/portalgun_shoot_red1.wav"
+}
+
+"portalExperiment.portal_open"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"1.00"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"			"weapons/portal_open1.wav"
+}
+
+"portalExperiment.portalGun_powerdown"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		".85"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"			"weapons/portalGun_powerdown.wav"
+}
+
+"portalExperiment.bot_enterPortal"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"1"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"			"weapons/portal_enter2.wav"
+}
+
+"portalExperiment.bot_exitPortal"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"1"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"			"weapons/portal_exit2.wav"
+}

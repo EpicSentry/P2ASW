@@ -1,0 +1,97 @@
+"Resource/UI/NB_Campaign_Mission_Details.res"
+{
+"Background"
+	{
+		"fieldName"		"Background"
+		"xpos"		"0"
+		"ypos"		"0"
+		"wide"		"194"
+		"ControlName"		"Panel"
+		"bgcolor_override"		"12 23 37 64"
+		"PaintBackgroundType"		"2"
+	}
+	"Background"
+	{
+		"fieldName"		"Background"
+		"xpos"		"0"
+		"ypos"		"0"
+		"wide"		"194"
+		"tall"		"180"
+		"ControlName"		"Panel"
+		"bgcolor_override"		"12 23 37 64"
+		"PaintBackgroundType"		"2"
+	}
+	"BackgroundInner"
+	{
+		"fieldName"		"BackgroundInner"
+		"xpos"		"2"
+		"ypos"		"2"
+		"wide"		"190"
+		"tall"		"176"
+		"ControlName"		"Panel"
+		"PaintBackgroundType"		"2"
+		"bgcolor_override"		"33 63 93 64"
+	}
+	"TitleBG"
+	{
+		"fieldName"		"TitleBG"
+		"xpos"		"3"
+		"ypos"		"3"
+		"wide"		"188"
+		"tall"		"34"
+		"ControlName"		"Panel"
+		"PaintBackgroundType"		"2"
+		"bgcolor_override"		"27 51 73 255"
+	}
+	"TitleBGBottom"
+	{
+		"fieldName"		"TitleBGBottom"
+		"xpos"		"3"
+		"ypos"		"15"
+		"wide"		"188"
+		"tall"		"22"
+		"ControlName"		"Panel"
+		"PaintBackgroundType"		"0"
+		"bgcolor_override"		"27 51 73 255"
+	}
+	"Title"
+	{
+		"fieldName"		"Title"
+		"xpos"		"14"
+		"ypos"		"8"
+		"wide"		"188"
+		"tall"		"24"
+		"font"		"Default"
+		"labelText"		"#nb_next_mission"
+		"textAlignment"		"north-west"
+		"ControlName"		"Label"
+		"fgcolor_override"		"169 213 255 255"
+	}
+	"MissionName"
+	{
+		"fieldName"		"MissionName"
+		"xpos"		"14"
+		"ypos"		"17"
+		"wide"		"188"
+		"tall"		"24"
+		"font"		"DefaultLarge"
+		"labelText"		""
+		"textAlignment"		"north-west"
+		"ControlName"		"Label"
+		"fgcolor_override"		"169 213 255 255"
+	}
+	"MissionDescription"
+	{
+		"fieldName"		"MissionDescription"
+		"xpos"		"14"
+		"ypos"		"45"
+		"wide"		"175"
+		"tall"		"135"
+		"font"		"Default"
+		"labelText"		""
+		"textAlignment"		"north-west"
+		"wrap"	"1"
+		"ControlName"		"Label"
+		"fgcolor_override"		"83 148 192 255"
+	}
+}

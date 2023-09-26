@@ -1,0 +1,9 @@
+GAME
+{
+	"Headline"	"IAF plans to retake Antheon Moon"
+	"HeadlineDate"	"12/19/52"
+	"Paragraph1"	"General C. Morrison recently announced that the IAF are sending another 12,000 troops to defend the Antheon System from the encroaching Swarm.  The additional troops will be attempting to regain control of the human colony on the 5th moon of Antheon Prime."
+	"Paragraph2"	"Senator Tom Wearing of the Interstellar Alliance responded by calling the move a 'serious mistake' in his public address this morning."
+	"Paragraph3"	"'I believe we are spreading our forces too thin,' said the Senator, adding, 'we should recall all our troops to Antheon Prime.  The 5th moon is already lost.'"
+	"Paragraph4"	""
+}

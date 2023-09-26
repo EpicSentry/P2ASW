@@ -1,0 +1,1999 @@
+"eggbot.egg_123_go"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_123_go.wav"
+}
+
+"eggbot.egg_allright_01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_allright_01.wav"
+}
+
+"eggbot.egg_armripple_01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_armripple_01.wav"
+}
+
+"eggbot.egg_death_01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_death_01.wav"
+}
+
+"eggbot.egg_death_02"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_death_02.wav"
+}
+
+"eggbot.egg_devillaugh_01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_devillaugh_01.wav"
+}
+
+"eggbot.egg_deviouslaugh_01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_deviouslaugh_01.wav"
+}
+
+"eggbot.egg_excited_01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_excited_01.wav"
+}
+
+"eggbot.egg_excited_02"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_excited_02.wav"
+}
+
+"eggbot.egg_fling_01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_fling_01.wav"
+}
+
+"eggbot.egg_fling_02"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_fling_02.wav"
+}
+
+"eggbot.egg_fling_03"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_fling_03.wav"
+}
+
+"eggbot.egg_fling_04"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_fling_04.wav"
+}
+
+"eggbot.egg_hifive_01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_hifive_01.wav"
+}
+
+"eggbot.egg_hifive_02"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_hifive_02.wav"
+}
+
+"eggbot.egg_hug_01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_hug_01.wav"
+}
+
+"eggbot.egg_hug_02"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_hug_02.wav"
+}
+
+"eggbot.egg_hug_03"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_hug_03.wav"
+}
+
+"eggbot.egg_hug_04"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_hug_04.wav"
+}
+
+"eggbot.egg_infinite_portal_01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_infinite_portal_01.wav"
+}
+
+"eggbot.egg_infinite_portal_02"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_infinite_portal_02.wav"
+}
+
+"eggbot.egg_jump_01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_jump_01.wav"
+}
+
+"eggbot.egg_jump_02"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_jump_02.wav"
+}
+
+"eggbot.egg_jump_03"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_jump_03.wav"
+}
+
+"eggbot.egg_jump_04"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_jump_04.wav"
+}
+
+"eggbot.egg_oh_yeah_01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_oh_yeah_01.wav"
+}
+
+"eggbot.egg_overhere_01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_overhere_01.wav"
+}
+
+"eggbot.egg_pain_01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_pain_01.wav"
+}
+
+"eggbot.egg_pain_02"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_pain_02.wav"
+}
+
+"eggbot.egg_pain_03"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_pain_03.wav"
+}
+
+"eggbot.egg_pain_04"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_pain_04.wav"
+}
+
+"eggbot.egg_pain_05"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_pain_05.wav"
+}
+
+"eggbot.egg_pain_06"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_pain_06.wav"
+}
+
+"eggbot.egg_pain_07"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_pain_07.wav"
+}
+
+"eggbot.egg_pain_08"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_pain_08.wav"
+}
+
+"eggbot.egg_pain_09"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_pain_09.wav"
+}
+
+"eggbot.egg_stop_01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_stop_01.wav"
+}
+
+"eggbot.egg_takethat_01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_takethat_01.wav"
+}
+
+"eggbot.egg_thank_you"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_thank_you.wav"
+}
+
+"eggbot.egg_uhohheadsup"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_uhohheadsup.wav"
+}
+
+"eggbot.egg_uhoh_01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_uhoh_01.wav"
+}
+
+"eggbot.egg_uhoh_02"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_uhoh_02.wav"
+}
+
+"eggbot.egg_uhoh_03"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_uhoh_03.wav"
+}
+
+"eggbot.egg_watch_out_01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_watch_out_01.wav"
+}
+
+"eggbot.egg_watch_out_02"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_watch_out_02.wav"
+}
+
+"eggbot.egg_watch_out_03"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_watch_out_03.wav"
+}
+
+"eggbot.egg_watch_out_04"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_watch_out_04.wav"
+}
+
+"eggbot.egg_woohoo_01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"pitch"		"95,100"
+	"wave"		"player/eggbot/egg_woohoo_01.wav"
+}
+
+"EGGVOMisc01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_01.wav"
+}
+
+"EGGVOMisc02"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_02.wav"
+}
+
+"EGGVOMisc03"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_03.wav"
+}
+
+"EGGVOMisc04"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_04.wav"
+}
+
+"EGGVOMisc05"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_05.wav"
+}
+
+"EGGVOMisc06"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_06.wav"
+}
+
+"EGGVOMisc07"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_07.wav"
+}
+
+"EGGVOMisc08"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_08.wav"
+}
+
+"EGGVOMisc09"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_09.wav"
+}
+
+"EGGVOMisc10"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_10.wav"
+}
+
+"EGGVOMisc11"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_11.wav"
+}
+
+"EGGVOMisc12"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_12.wav"
+}
+
+"EGGVOMisc13"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_13.wav"
+}
+
+"EGGVOMisc14"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_14.wav"
+}
+
+"EGGVOMisc15"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_15.wav"
+}
+
+"EGGVOMisc16"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_16.wav"
+}
+
+"EGGVOMisc17"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_17.wav"
+}
+
+"EGGVOMisc18"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_18.wav"
+}
+
+"EGGVOMisc19"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_19.wav"
+}
+
+"EGGVOMisc20"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_20.wav"
+}
+
+"EGGVOMisc21"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_21.wav"
+}
+
+"EGGVOMisc22"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_22.wav"
+}
+
+"EGGVOMisc23"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_23.wav"
+}
+
+"EGGVOMisc24"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_24.wav"
+}
+
+"EGGVOMisc25"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_25.wav"
+}
+
+"EGGVOMisc26"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_26.wav"
+}
+
+"EGGVOMisc27"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_27.wav"
+}
+
+"EGGVOMisc28"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_28.wav"
+}
+
+"EGGVOMisc29"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_29.wav"
+}
+
+"EGGVOMisc30"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_30.wav"
+}
+
+"EGGVOMisc31"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_31.wav"
+}
+
+"EGGVOMisc32"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_32.wav"
+}
+
+"EGGVOMisc33"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_33.wav"
+}
+
+"EGGVOMisc34"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_34.wav"
+}
+
+"EGGVOMisc35"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_35.wav"
+}
+
+"EGGVOMisc36"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_36.wav"
+}
+
+"EGGVOMisc37"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_37.wav"
+}
+
+"EGGVOMisc38"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_38.wav"
+}
+
+"EGGVOMisc39"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_39.wav"
+}
+
+"EGGVOMisc40"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_40.wav"
+}
+
+"EGGVOMisc41"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_41.wav"
+}
+
+"EGGVOMisc42"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_42.wav"
+}
+
+"EGGVOMisc43"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_43.wav"
+}
+
+"EGGVOMisc44"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_44.wav"
+}
+
+"EGGVOMisc45"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_45.wav"
+}
+
+"EGGVOMisc46"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_46.wav"
+}
+
+"EGGVOMisc47"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_47.wav"
+}
+
+"EGGVOMisc48"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_48.wav"
+}
+
+"EGGVOMisc49"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_49.wav"
+}
+
+"EGGVOMisc50"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_50.wav"
+}
+
+"EGGVOMisc51"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_51.wav"
+}
+
+"EGGVOMisc52"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_52.wav"
+}
+
+"EGGVOMisc53"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_53.wav"
+}
+
+"EGGVOMisc54"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_54.wav"
+}
+
+"EGGVOMisc55"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_55.wav"
+}
+
+"EGGVOMisc56"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_56.wav"
+}
+
+"EGGVOMisc57"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_57.wav"
+}
+
+"EGGVOMisc58"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_58.wav"
+}
+
+"EGGVOMisc59"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_59.wav"
+}
+
+"EGGVOMisc60"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_60.wav"
+}
+
+"EGGVOMisc61"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_61.wav"
+}
+
+"EGGVOMisc62"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_62.wav"
+}
+
+"EGGVOMisc63"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_63.wav"
+}
+
+"EGGVOMisc65"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_65.wav"
+}
+
+"EGGVOMisc66"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_66.wav"
+}
+
+"EGGVOMisc67"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_67.wav"
+}
+
+"EGGVOMisc68"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_68.wav"
+}
+
+"EGGVOMisc69"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_69.wav"
+}
+
+"EGGVOMisc70"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_70.wav"
+}
+
+"EGGVOMisc71"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_71.wav"
+}
+
+"EGGVOMisc72"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_72.wav"
+}
+
+"EGGVOMisc73"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_73.wav"
+}
+
+"EGGVOMisc74"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_74.wav"
+}
+
+"EGGVOMisc75"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_75.wav"
+}
+
+"EGGVOMisc76"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_76.wav"
+}
+
+"EGGVOMisc77"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_77.wav"
+}
+
+"EGGVOMisc78"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_78.wav"
+}
+
+"EGGVOMisc79"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_79.wav"
+}
+
+"EGGVOMisc80"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_80.wav"
+}
+
+"EGGVOMisc100"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_100.wav"
+}
+
+"EGGVOMisc101"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_101.wav"
+}
+
+"EGGVOMisc102"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_102.wav"
+}
+
+"EGGVOMisc103"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_103.wav"
+}
+
+"EGGVOMisc104"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_104.wav"
+}
+
+"EGGVOMisc105"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_105.wav"
+}
+
+"EGGVOMisc106"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_106.wav"
+}
+
+"EGGVOMisc107"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_107.wav"
+}
+
+"EGGVOMisc108"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_108.wav"
+}
+
+"EGGVOMisc109"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_109.wav"
+}
+
+"EGGVOMisc110"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_110.wav"
+}
+
+"EGGVOMisc111"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_111.wav"
+}
+
+"EGGVOMisc112"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_112.wav"
+}
+
+"EGGVOMisc113"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_113.wav"
+}
+
+"EGGVOMisc114"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_114.wav"
+}
+
+"EGGVOMisc115"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_115.wav"
+}
+
+"EGGVOMisc116"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_116.wav"
+}
+
+"EGGVOMisc117"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_117.wav"
+}
+
+"EGGVOMisc118"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_118.wav"
+}
+
+"EGGVOMisc119"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_119.wav"
+}
+
+"EGGVOMisc120"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_120.wav"
+}
+
+"EGGVOMisc81"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_81.wav"
+}
+
+"EGGVOMisc82"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_82.wav"
+}
+
+"EGGVOMisc83"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_83.wav"
+}
+
+"EGGVOMisc84"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_84.wav"
+}
+
+"EGGVOMisc85"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_85.wav"
+}
+
+"EGGVOMisc86"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_86.wav"
+}
+
+"EGGVOMisc87"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_87.wav"
+}
+
+"EGGVOMisc88"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_88.wav"
+}
+
+"EGGVOMisc89"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_89.wav"
+}
+
+"EGGVOMisc90"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_90.wav"
+}
+
+"EGGVOMisc91"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_91.wav"
+}
+
+"EGGVOMisc92"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_92.wav"
+}
+
+"EGGVOMisc93"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_93.wav"
+}
+
+"EGGVOMisc95"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_95.wav"
+}
+
+"EGGVOMisc96"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_96.wav"
+}
+
+"EGGVOMisc97"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_97.wav"
+}
+
+"EGGVOMisc98"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_98.wav"
+}
+
+"EGGVOMisc99"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_99.wav"
+}
+
+"EGGVOMisc121"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_121.wav"
+}
+
+"EGGVOMisc122"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_122.wav"
+}
+
+"EGGVOMisc123"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_123.wav"
+}
+
+"EGGVOMisc124"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_124.wav"
+}
+
+"EGGVOMisc125"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_125.wav"
+}
+
+"EGGVOMisc126"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_126.wav"
+}
+
+"EGGVOMisc127"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_127.wav"
+}
+
+"EGGVOMisc128"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_128.wav"
+}
+
+"EGGVOMisc129"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_129.wav"
+}
+
+"EGGVOMisc130"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_130.wav"
+}
+
+"EGGVOMisc131"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_131.wav"
+}
+
+"EGGVOMisc132"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_132.wav"
+}
+
+"EGGVOMisc133"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_133.wav"
+}
+
+"EGGVOMisc134"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_134.wav"
+}
+
+"EGGVOMisc135"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_135.wav"
+}
+
+"EGGVOMisc136"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_136.wav"
+}
+
+"EGGVOMisc137"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_137.wav"
+}
+
+"EGGVOMisc138"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_138.wav"
+}
+
+"EGGVOMisc139"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_139.wav"
+}
+
+"EGGVOMisc140"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_140.wav"
+}
+
+"EGGVOMisc141"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_110dB"
+	"wave"		"player\eggbot\misc\EGG_VO_Misc_141.wav"
+}
+
+" EggBotTractorBeam09"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\ EggBotTractorBeam_09.wav"
+}
+
+"BallTease01"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"rndwave"
+	{
+		"wave"		"player\eggbot\taunts\BallTease_01.wav"
+		"wave"		"player\eggbot\taunts\BallTease_02.wav"
+	}
+}
+
+"BallTease02"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\BallTease_02.wav"
+}
+
+"EggTeamHugFail01"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"rndwave"
+	{
+		"wave"		"player\eggbot\taunts\egg_teamHug_fail_01.wav"
+		"wave"		"player\eggbot\taunts\egg_teamHug_fail_02.wav"
+		"wave"		"player\eggbot\taunts\egg_teamHug_fail_03.wav"
+	}
+}
+
+"EggTeamHugFail02"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\egg_teamHug_fail_02.wav"
+}
+
+"EggTeamHugFail03"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\egg_teamHug_fail_03.wav"
+}
+
+"EggTeaseFail01"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"rndwave"
+	{
+		"wave"		"player\eggbot\taunts\egg_tease_fail_01.wav"
+		"wave"		"player\eggbot\taunts\egg_tease_fail_02.wav"
+		"wave"		"player\eggbot\taunts\egg_tease_fail_03.wav"
+		"wave"		"player\eggbot\taunts\egg_tease_fail_04.wav"
+	}
+}
+
+"EggTeaseFail02"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\egg_tease_fail_02.wav"
+}
+
+"EggTeaseFail03"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\egg_tease_fail_03.wav"
+}
+
+"EggTeaseFail04"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\egg_tease_fail_04.wav"
+}
+
+"EggbotBackScratcher01"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\eggbot_backScratcher_01.wav"
+}
+
+"EggbotBackScratcher02"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\eggbot_backScratcher_02.wav"
+}
+
+"EggbotBackScratcher03"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\eggbot_backScratcher_03.wav"
+}
+
+"EggbotBackScratcher04"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"rndwave"
+	{
+		"wave"		"player\eggbot\taunts\eggbot_backScratcher_04.wav"
+		"wave"		"player\eggbot\taunts\eggbot_backScratcher_01.wav"
+		"wave"		"player\eggbot\taunts\eggbot_backScratcher_02.wav"
+		"wave"		"player\eggbot\taunts\eggbot_backScratcher_03.wav"
+	}
+
+}
+
+"EggbotBigWave01"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\eggbot_bigWave_01.wav"
+	"wave"		"player\eggbot\taunts\eggbot_bigWave_02.wav"
+}
+
+"EggbotBigWave02"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\eggbot_bigWave_02.wav"
+}
+
+"EggbotLaugh01"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"rndwave"
+	{
+		"wave"		"player\eggbot\taunts\eggbot_laugh_01.wav"
+		"wave"		"player\eggbot\taunts\eggbot_laugh_03.wav"
+		"wave"		"player\eggbot\taunts\eggbot_laugh_04.wav"
+	}
+}
+
+"EggbotLaugh03"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\eggbot_laugh_03.wav"
+}
+
+"EggbotLaugh04"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\eggbot_laugh_04.wav"
+}
+
+"EggbotSomersault01"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"rndwave"
+	{
+		"wave"		"player\eggbot\taunts\eggbot_somersault_01.wav"
+		"wave"		"player\eggbot\taunts\eggbot_somersault_02.wav"
+		"wave"		"player\eggbot\taunts\eggbot_somersault_03.wav"
+		"wave"		"player\eggbot\taunts\eggbot_somersault_04.wav"
+	}
+}
+
+"EggbotSomersault02"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\eggbot_somersault_02.wav"
+}
+
+"EggbotSomersault03"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\eggbot_somersault_03.wav"
+}
+
+"EggbotSomersault04"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\eggbot_somersault_04.wav"
+}
+
+"EggbotTease01"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"rndwave"
+	{
+		"wave"		"player\eggbot\taunts\Eggbot_Tease_01.wav"
+		"wave"		"player\eggbot\taunts\Eggbot_Tease_02.wav"
+		"wave"		"player\eggbot\taunts\Eggbot_Tease_03.wav"
+		"wave"		"player\eggbot\taunts\Eggbot_Tease_04.wav"
+	}
+}
+
+"EggbotTease02"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\Eggbot_Tease_02.wav"
+}
+
+"EggbotTease03"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\Eggbot_Tease_03.wav"
+}
+
+"EggbotTease04"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\Eggbot_Tease_04.wav"
+}
+
+"EggbotTease05"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\Eggbot_Tease_05.wav"
+}
+
+"EggbotTwistFlip01"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\eggbot_twistFlip_01.wav"
+
+}
+
+"EggbotTwistFlip02"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"rndwave"
+	{
+		"wave"		"player\eggbot\taunts\eggbot_twistFlip_02.wav"
+		"wave"		"player\eggbot\taunts\eggbot_twistFlip_01.wav"
+		"wave"		"player\eggbot\taunts\eggbot_twistFlip_03.wav"
+		"wave"		"player\eggbot\taunts\eggbot_twistFlip_04.wav"
+	}
+}
+
+"EggbotTwistFlip03"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\eggbot_twistFlip_03.wav"
+}
+
+"EggbotTwistFlip04"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\eggbot_twistFlip_04.wav"
+}
+
+"EggBotFacePalm01"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"rndwave"
+	{
+		"wave"		"player\eggbot\taunts\EggBotFacePalm_01.wav"
+		"wave"		"player\eggbot\taunts\EggBotFacePalm_02.wav"
+		"wave"		"player\eggbot\taunts\EggBotFacePalm_03.wav"
+	}
+}
+
+"EggBotFacePalm02"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotFacePalm_02.wav"
+}
+
+"EggBotFacePalm03"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotFacePalm_03.wav"
+}
+
+"EggBotFistPump01"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"rndwave"	
+	{
+		"wave"		"player\eggbot\taunts\EggBotFistPump_01.wav"
+		"wave"		"player\eggbot\taunts\EggBotFistPump_02.wav"
+		"wave"		"player\eggbot\taunts\EggBotFistPump_03.wav"
+	}
+}
+
+"EggBotFistPump02"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotFistPump_02.wav"
+}
+
+"EggBotFistPump03"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotFistPump_03.wav"
+}
+
+"EggbotJumps01"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggbotJumps_01.wav"
+}
+
+"EggbotJumps02"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggbotJumps_02.wav"
+}
+
+"EggbotJumps03"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggbotJumps_03.wav"
+}
+
+"EggbotJumps04"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggbotJumps_04.wav"
+}
+
+"EggbotJumps05"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggbotJumps_05.wav"
+}
+
+"EggbotJumps06"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggbotJumps_06.wav"
+}
+
+"EggBotJumpSpin01"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotJumpSpin_01.wav"
+}
+
+"EggBotJumpSpin02"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"rndwave"
+	{
+		"wave"		"player\eggbot\taunts\EggBotJumpSpin_02.wav"
+		"wave"		"player\eggbot\taunts\EggBotJumpSpin_01.wav"
+		"wave"		"player\eggbot\taunts\EggBotJumpSpin_03.wav"
+		"wave"		"player\eggbot\taunts\EggBotJumpSpin_04.wav"
+	}
+}
+
+"EggBotJumpSpin03"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotJumpSpin_03.wav"
+}
+
+"EggBotJumpSpin04"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotJumpSpin_04.wav"
+}
+
+"EggBotPoint01"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotPoint_01.wav"
+}
+
+"EggBotPoint02"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotPoint_02.wav"
+}
+
+"EggBotPoint03"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotPoint_03.wav"
+}
+
+"EggBotPoint04"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotPoint_04.wav"
+}
+
+"EggBotPoint05"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotPoint_05.wav"
+}
+
+"EggBotPoint06"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotPoint_06.wav"
+}
+
+"EggBotPointGroup"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotPoint_01.wav"
+	"wave"		"player\eggbot\taunts\EggBotPoint_02.wav"
+	"wave"		"player\eggbot\taunts\EggBotPoint_03.wav"		
+	"wave"		"player\eggbot\taunts\EggBotPoint_04.wav"	
+	"wave"		"player\eggbot\taunts\EggBotPoint_05.wav"	
+	"wave"		"player\eggbot\taunts\EggBotPoint_06.wav"
+}
+
+"EggBotShrug01"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"rndwave"
+	{
+		"wave"		"player\eggbot\taunts\EggBotShrug_01.wav"
+		"wave"		"player\eggbot\taunts\EggBotShrug_02.wav"
+		"wave"		"player\eggbot\taunts\EggBotShrug_03.wav"
+		"wave"		"player\eggbot\taunts\EggBotShrug_04.wav"
+	}
+}
+
+"EggBotShrug02"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotShrug_02.wav"
+}
+
+"EggBotShrug03"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotShrug_03.wav"
+}
+
+"EggBotShrug04"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotShrug_04.wav"
+}
+
+"EggBotThumbsUp01"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotThumbsUp_01.wav"
+}
+
+"EggBotThumbsUp02"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"rndwave"
+	{
+		"wave"		"player\eggbot\taunts\EggBotThumbsUp_02.wav"
+		"wave"		"player\eggbot\taunts\EggBotThumbsUp_03.wav"
+		"wave"		"player\eggbot\taunts\EggBotThumbsUp_01.wav"
+	}
+}
+
+"EggBotThumbsUp03"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotThumbsUp_03.wav"
+}
+
+"EggBotTrickFire01"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotTrickFire_01.wav"
+}
+
+"EggBotTrickFire02"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"rndwave"
+	{
+		"wave"		"player\eggbot\taunts\EggBotTrickFire_02.wav"
+		"wave"		"player\eggbot\taunts\EggBotTrickFire_01.wav"
+		"wave"		"player\eggbot\taunts\EggBotTrickFire_03.wav"
+	}
+}
+
+"EggBotTrickFire03"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotTrickFire_03.wav"
+}
+
+"EggBotWave01"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotWave_01.wav"
+}
+
+"EggBotWave02"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"rndwave"
+	{
+		"wave"		"player\eggbot\taunts\EggBotWave_02.wav"
+		"wave"		"player\eggbot\taunts\EggBotWave_01.wav"
+		"wave"		"player\eggbot\taunts\EggBotWave_03.wav"
+		"wave"		"player\eggbot\taunts\EggBotWave_04.wav"
+	}
+}
+
+"EggBotWave03"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotWave_03.wav"
+}
+
+"EggBotWave04"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\EggBotWave_04.wav"
+}
+
+"TauntRpsBallbotSuccess01"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\taunt_rps_ballbot_success_01.wav"
+}
+
+"TauntRpsBallbotSuccess02"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\taunt_rps_ballbot_success_02.wav"
+}
+
+"TauntRpsEggbotSuccess01"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\taunt_rps_eggbot_success_01.wav"
+}
+
+"TauntRpsEggbotSuccess02"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\taunt_rps_eggbot_success_02.wav"
+}
+
+"TeamHugSuccess01"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"rndwave"
+	{
+		"wave"		"player\eggbot\taunts\teamHug_success_01.wav"
+		"wave"		"player\eggbot\taunts\teamHug_success_02.wav"
+	}
+}
+
+"TeamHugSuccess02"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"player\eggbot\taunts\teamHug_success_02.wav"
+}
+
+"EggBotselfpin"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"rndwave"
+	{
+		"wave"		"player\eggbot\taunts\eggbot_selfSpin_01.wav"
+		"wave"		"player\eggbot\taunts\eggbot_selfSpin_02.wav"
+	}
+}
+
+"EggBotsispin"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"rndwave"
+	{
+		"wave"		"player\eggbot\taunts\eggbot_sitSpin_01.wav"
+		"wave"		"player\eggbot\taunts\eggbot_sitSpin_02.wav"
+	}
+}
+
+

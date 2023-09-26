@@ -1,0 +1,12 @@
+GAME
+{
+    // PDA belongs to Helen Young
+    
+	"MailFrom1"	"From: Brian Howe"
+	"MailDate1"	"Date: 12/24/52"
+	"MailSubject1"	"Subject: Warhead"
+	"MailBody1A"	"Helen, for God's sake, answer me!  Please!  Dave and Tom are dead.  We couldn't get the warhead into that tunnel.  I'm hiding for now, but staying here is not an option."
+	"MailBody1B"	"I just hope you're all right.  There are so many things I wish I'd said to you.  Just never seemed like the right time.  And now...everything's wrong."
+	"MailBody1C"	"I love you."
+	"MailBody1D"	"Brian"
+}

@@ -1,0 +1,490 @@
+
+//-----------------------------------------------------------------------
+// Player Rules for Eggbot
+// Team taunt rules listed first, then solo taunt rules
+//-----------------------------------------------------------------------
+#include "talker/response_criteria.txt"
+
+criterion "IsEggbot" "is_eggbot" 1 required
+
+//-----------------------------------------------------------------------
+// Team Gesture High Five
+//-----------------------------------------------------------------------
+
+response "EggbotHighFive_Initiate"
+{
+	scene "scenes/player/eggbot/taunt_highFive_initiate.vcd"  then self teamtaunt_idle foo:0 0.0
+}
+rule EggbotTeamGestureHighFive_Initiate
+{
+	criteria IsEggbot ConceptTaunt NoTauntPartner TauntForceHighFive
+	response EggbotHighFive_Initiate
+}
+
+response "EggbotHighFive_Idle"
+{
+	scene "scenes/player/eggbot/taunt_highFive_idle.vcd"  then self teamtaunt_noshow foo:0 0.0
+}
+rule EggbotTeamGestureHighFive_Idle
+{
+	criteria IsEggbot ConceptTeamTauntIdle TauntForceHighFive
+	response EggbotHighFive_Idle
+}
+
+response "EggbotHighFive_NoShow"
+{
+	scene "scenes/player/eggbot/taunt_highFive_noShow.vcd"
+}
+rule EggbotTeamGestureHighFive_NoShow
+{
+	criteria IsEggbot ConceptTeamTauntNoShow NoTauntPartner TauntForceHighFive
+	response EggbotHighFive_NoShow
+}
+
+response "EggbotHighFive_Success"
+{
+	scene "scenes/player/eggbot/taunt_highFive_success.vcd"
+}
+rule EggbotTeamGestureHighFive_Success
+{
+	criteria IsEggbot ConceptTaunt HasTauntPartner TauntForceHighFive
+	response EggbotHighFive_Success
+}
+
+
+//-----------------------------------------------------------------------
+// Team Gesture Teamhug
+//-----------------------------------------------------------------------
+
+response "EggbotTeamhug_Initiate"
+{
+	scene "scenes/player/Eggbot/taunt_Teamhug_initiate.vcd"  then self teamtaunt_idle foo:0 0.0
+}
+rule EggbotTeamGestureTeamhug_Initiate
+{
+	criteria IsEggbot ConceptTaunt NoTauntPartner TauntForceTeamhug
+	response EggbotTeamhug_Initiate
+}
+
+response "EggbotTeamhug_Idle"
+{
+	scene "scenes/player/eggbot/taunt_Teamhug_idle.vcd"  then self teamtaunt_noshow foo:0 0.0
+}
+rule EggbotTeamGestureTeamhug_Idle
+{
+	criteria IsEggbot ConceptTeamTauntIdle TauntForceTeamhug
+	response EggbotTeamhug_Idle
+}
+
+response "EggbotTeamhug_NoShow"
+{
+	scene "scenes/player/eggbot/taunt_Teamhug_noShow.vcd"
+}
+rule EggbotTeamGestureTeamhug_NoShow
+{
+	criteria IsEggbot ConceptTeamTauntNoShow NoTauntPartner TauntForceTeamhug
+	response EggbotTeamhug_NoShow
+}
+
+response "EggbotTeamhug_Success"
+{
+	scene "scenes/player/eggbot/taunt_Teamhug_success.vcd"
+}
+rule EggbotTeamGestureTeamhug_Success
+{
+	criteria IsEggbot ConceptTaunt HasTauntPartner TauntForceTeamhug
+	response EggbotTeamhug_Success
+}
+
+
+
+//-----------------------------------------------------------------------
+// Team Gesture Teamtease
+//-----------------------------------------------------------------------
+
+// Grabber
+response "EggbotTeamEggTease_Success"
+{
+	scene "scenes/player/eggbot/taunt_teameggtease.vcd"
+}
+rule EggbotTeamGestureTeamEggTease_Success
+{
+	criteria IsEggbot ConceptTaunt HasTauntPartner TauntForceTeamEggTease
+	response EggbotTeamEggTease_Success
+}
+
+// Grabbed
+response "EggbotTeamBallTease_Success"
+{
+	scene "scenes/player/eggbot/taunt_teamballtease.vcd"
+}
+rule EggbotTeamGestureTeamBallTease_Success
+{
+	criteria IsEggbot ConceptTaunt HasTauntPartner TauntForceTeamBallTease
+	response EggbotTeamBallTease_Success
+}
+
+//This animation is only playing the start of the taunt by eggbot but then stops becuase other player is too far away
+response "EggbotTeamEggTeaseFail"
+{
+	scene "scenes/player/eggbot/taunt_teameggteasefail.vcd"
+}
+rule EggbotGestureTeamEggTeaseFail
+{
+	criteria IsEggbot ConceptTaunt TauntForceTeamTease
+	response EggbotTeamEggTeaseFail
+}
+
+
+//-----------------------------------------------------------------------
+// Gesture Laugh
+//-----------------------------------------------------------------------
+
+response "EggbotLaugh"
+{
+	scene "scenes/player/eggbot/taunt_laugh.vcd"
+}
+
+rule EggbotGestureLaugh
+{
+	criteria IsEggbot ConceptTaunt TauntForceLaugh
+	response EggbotLaugh
+}
+
+
+
+
+
+//-----------------------------------------------------------------------
+// Gesture SmallWave
+//-----------------------------------------------------------------------
+
+response "EggbotSmallWave"
+{
+	scene "scenes/player/eggbot/taunt_noGun_small_Wave.vcd"
+}
+
+rule EggbotGestureSmallWave
+{
+	criteria IsEggbot ConceptTaunt TauntForceSmallWave MidPartner NoPortalGun
+	response EggbotSmallWave
+}
+
+//-----------------------------------------------------------------------
+// Gesture Portalgun SmallWave
+//-----------------------------------------------------------------------
+
+response "EggbotPortalgunSmallWave"
+{
+	scene "scenes/player/eggbot/taunt_portalgun_small_Wave.vcd"
+}
+
+rule EggbotGesturePortalgunSmallWave
+{
+	criteria IsEggbot ConceptTaunt TauntForceSmallWave MidPartner HasPortalGun
+	response EggbotPortalgunSmallWave
+}
+
+//-----------------------------------------------------------------------
+// Gesture BigWave
+//-----------------------------------------------------------------------
+
+response "EggbotBigWave"
+{
+	scene "scenes/player/Eggbot/taunt_big_wave.vcd"
+}
+
+rule EggbotGestureBigWave
+{
+	criteria IsEggbot ConceptTaunt TauntForceSmallWave FarPartner
+	response EggbotBigWave
+}
+
+//-----------------------------------------------------------------------
+// Gesture RobotDance
+//-----------------------------------------------------------------------
+
+response "EggbotRobotDance"
+{
+	scene "scenes/player/eggbot/taunt_robot_arm_ripple.vcd"
+}
+
+rule EggbotGestureRobotDance
+{
+	criteria IsEggbot ConceptTaunt TauntForceRobotDance
+	response EggbotRobotDance
+}
+
+//-----------------------------------------------------------------------
+// Gesture Trick Fire
+//-----------------------------------------------------------------------
+
+response "EggbotTrickFire"
+{
+	scene "scenes/player/Eggbot/taunt_trickfire_ninja.vcd"
+}
+
+rule EggbotGestureTrickFire
+{
+	criteria IsEggbot ConceptTaunt TauntForceTrickFire
+	response EggbotTrickFire
+}
+
+
+
+
+
+//-----------------------------------------------------------------------
+// Back flip - 
+// this covers all air taunts, currently played randomly and equally
+// Air taunts are triggered instantly when the taunt key is pressed, no radial menu selection
+//-----------------------------------------------------------------------
+
+
+response "EggbotBackFlip"
+{
+	scene "scenes/player/eggbot/taunt_backscratcher.vcd"
+	scene "scenes/player/eggbot/taunt_somersault.vcd"
+}
+
+
+rule EggbotBackFlip
+{
+	criteria IsEggbot ConceptTaunt InAir TauntForceNone
+	response EggbotBackFlip
+}
+
+
+
+
+
+
+
+//-----------------------------------------------------------------------
+// Team Gesture RPS
+//-----------------------------------------------------------------------
+
+response "EggbotRPS_Initiate"
+{
+	scene "scenes/player/Eggbot/taunt_rps_initiate.vcd"  then self teamtaunt_idle foo:0 0.0
+}
+rule EggbotTeamGestureRPS_Initiate
+{
+	criteria IsEggbot ConceptTaunt NoTauntPartner TauntForceRPS
+	response EggbotRPS_Initiate
+}
+
+response "EggbotRPS_Idle"
+{
+	scene "scenes/player/eggbot/taunt_rps_idle.vcd"  then self teamtaunt_noshow foo:0 0.0
+}
+rule EggbotTeamGestureRPS_Idle
+{
+	criteria IsEggbot ConceptTeamTauntIdle TauntForceRPS
+	response EggbotRPS_Idle
+}
+
+response "EggbotRPS_NoShow"
+{
+	scene "scenes/player/eggbot/taunt_RPS_noShow.vcd"
+}
+rule EggbotTeamGestureRPS_NoShow
+{
+	criteria IsEggbot ConceptTeamTauntNoShow NoTauntPartner TauntForceRPS
+	response EggbotRPS_NoShow
+}
+
+// RPS Result 1
+response "EggbotRPS_Success1"
+{
+	scene "scenes/player/eggbot/taunt_rps_egglose_scissors.vcd"
+}
+rule EggbotTeamGestureRPS_Success1
+{
+	criteria IsEggbot ConceptTaunt HasTauntPartner TauntForceRPS RPSResult1
+	response EggbotRPS_Success1
+}
+
+// RPS Result 2
+response "EggbotRPS_Success2"
+{
+	scene "scenes/player/eggbot/taunt_rps_egglose_rock.vcd"
+	//scene "scenes/player/eggbot/taunt_backscratcher.vcd"
+}
+rule EggbotTeamGestureRPS_Success2
+{
+	criteria IsEggbot ConceptTaunt HasTauntPartner TauntForceRPS RPSResult2
+	response EggbotRPS_Success2
+}
+
+// RPS Result 3
+response "EggbotRPS_Success3"
+{
+	scene "scenes/player/eggbot/taunt_rps_eggwin_scissors.vcd"
+}
+rule EggbotTeamGestureRPS_Success3
+{
+	criteria IsEggbot ConceptTaunt HasTauntPartner TauntForceRPS RPSResult3
+	response EggbotRPS_Success3
+}
+
+// RPS Result 4
+response "EggbotRPS_Success4"
+{
+	scene "scenes/player/eggbot/taunt_rps_eggwin_paper.vcd"
+}
+rule EggbotTeamGestureRPS_Success4
+{
+	criteria IsEggbot ConceptTaunt HasTauntPartner TauntForceRPS RPSResult4
+	response EggbotRPS_Success4
+}
+
+// RPS Result 5
+response "EggbotRPS_Success5"
+{
+	scene "scenes/player/eggbot/taunt_rps_egglose_scissors.vcd"
+}
+rule EggbotTeamGestureRPS_Success5
+{
+	criteria IsEggbot ConceptTaunt HasTauntPartner TauntForceRPS RPSResult5
+	response EggbotRPS_Success5
+}
+
+//-----------------------------------------------------------------------
+// Gesture ThumbsUp
+//-----------------------------------------------------------------------
+
+response "EggbotThumbsUp"
+{
+	scene "scenes/player/eggbot/taunt_thumbsup.vcd"
+}
+
+rule EggbotGestureThumbsUp
+{
+	criteria IsEggbot ConceptTaunt TauntForceThumbsUp
+	response EggbotThumbsUp
+}
+
+
+//-----------------------------------------------------------------------
+// Gesture Dance
+//-----------------------------------------------------------------------
+
+response "EggbotDance"
+{
+	scene "scenes/player/eggbot/taunt_spinJump.vcd"
+}
+
+rule EggbotGestureDance
+{
+	criteria IsEggbot ConceptTaunt TauntForceDance
+	response EggbotDance
+}
+
+//-----------------------------------------------------------------------
+// Gesture FistPump
+//-----------------------------------------------------------------------
+
+response "EggbotFistPump"
+{
+	scene "scenes/player/eggbot/taunt_yes_fistPump.vcd"
+}
+
+rule EggbotGestureFistPump
+{
+	criteria IsEggbot ConceptTaunt TauntForceFistPump
+	response EggbotFistPump
+}
+
+
+//-----------------------------------------------------------------------
+// Gesture Shrug
+//-----------------------------------------------------------------------
+
+response "EggbotShrug"
+{
+	scene "scenes/player/Eggbot/taunt_shrug.vcd"
+}
+
+rule EggbotGestureShrug
+{
+	criteria IsEggbot ConceptTaunt TauntForceShrug
+	response EggbotShrug
+}
+
+//-----------------------------------------------------------------------
+// Gesture Facepalm
+//-----------------------------------------------------------------------
+
+response "EggbotFacepalm"
+{
+	scene "scenes/player/Eggbot/taunt_Face_palm.vcd"
+}
+
+rule EggbotGestureFacepalm
+{
+	criteria IsEggbot ConceptTaunt TauntForceFacepalm
+	response EggbotFacepalm
+}
+
+//-----------------------------------------------------------------------
+// Gesture sitspin
+//-----------------------------------------------------------------------
+
+response "Eggbotsitspin"
+{
+	scene "scenes/player/Eggbot/taunt_sitspin.vcd"
+}
+
+rule EggbotGesturesitspin
+{
+	criteria IsEggbot ConceptTaunt TauntForcesitspin
+	response Eggbotsitspin
+}
+
+//-----------------------------------------------------------------------
+// Gesture selfspin
+//-----------------------------------------------------------------------
+
+response "Eggbotselfspin"
+{
+	scene "scenes/player/Eggbot/taunt_selfspin.vcd"
+}
+
+rule EggbotGestureselfspin
+{
+	criteria IsEggbot ConceptTaunt TauntForceselfspin
+	response Eggbotselfspin
+}
+
+//-----------------------------------------------------------------------
+// Gesture Spinjump
+//-----------------------------------------------------------------------
+
+response "EggbotSpinjump"
+{
+	scene "scenes/player/Eggbot/taunt_Spinjump.vcd"
+}
+
+rule EggbotGestureSpinjump
+{
+	criteria IsEggbot ConceptTaunt TauntForceSpinjump
+	response EggbotSpinjump
+}
+
+
+//-----------------------------------------------------------------------
+// Gesture pretzelwave
+//-----------------------------------------------------------------------
+
+response "Eggbotpretzelwave"
+{
+	scene "scenes/player/Eggbot/taunt_pretzelwave.vcd"
+}
+
+rule EggbotGesturepretzelwave
+{
+	criteria IsEggbot ConceptTaunt TauntForcepretzelwave
+	response Eggbotpretzelwave
+}
+

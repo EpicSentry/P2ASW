@@ -1,0 +1,24 @@
+"end_puzzle"
+{
+	"id" 1
+	"version" 2
+
+	"onetoten"
+	{
+		"text"		"DIFFICULTY: Please rate the difficulty of this puzzle."
+		"labelatone"	"Very Easy"
+		"labelatten"	"Very Hard"
+	}
+
+	"onetoten"
+	{
+		"text"		"ENJOYMENT: Please rate your enjoyment of this puzzle."
+		"labelatone"	"Very Little"
+		"labelatten"	"Very Much"
+	}
+
+	"essay"	
+	{
+		"text"		"COMMENTS: Write any additional comments or observations you have about this puzzle [OPTIONAL]"
+	}
+}

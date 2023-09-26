@@ -1,5 +1,0 @@
-// No DSP, no ambients
-"Nothing"
-{
-	"dsp"	"0"
-}

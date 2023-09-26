@@ -1,0 +1,19 @@
+GAME
+{
+    // PDA belongs to Ming
+    
+    // inbox
+    
+	"MailFrom1"	"From: John Cain"
+	"MailDate1"	"Date: 12/20/52"
+	"MailSubject1"	"Subject: Delivery to Research Station 7"
+	"MailBody1A"	"Mr. Ming,"
+	"MailBody1B"	"IA agent L. Callen has discovered our shipment.  It also looks like some of the specimens are loose.  I'll take care of it, but she might come asking you and your staff some pointed questions.  I recommend you devise some good answers in advance.  Get your story straight."
+	"MailBody1C"	"Lt. Cain, SynTek Security."
+
+	"MailFrom2"	"From: Friend"
+	"MailSubject2"	"Subject: Re: Employment Opportunity"
+	"MailDate2"	"Date: 12/18/53"
+	"MailBody2A"	"Paradise Found!"
+	"MailBody2B"	"Tired of the daily grind?  Cramped living conditions, no food, medicine or clean air to breathe?  Join the Colony Placement Program (CPP) to find a better life among the stars!  Member partners include SynTek Megacorporation, United Industries and Frontier Pharmaceuticals.  Guaranteed placement, no matter your profile or credit rating!  Find your paradise today! (TM)"
+}

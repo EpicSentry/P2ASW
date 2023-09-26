@@ -1,0 +1,3456 @@
+//**************************************
+//***START OF BATCH 1
+//**************************************
+"ballbot.ballbot_1_2_3_go_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_1_2_3_go_01.wav"
+}
+"ballbot.ballbot_1_2_3_go_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_1_2_3_go_02.wav"
+}
+"ballbot.ballbot_1_2_3_go_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_1_2_3_go_03.wav"
+}
+"ballbot.ballbot_angry_rant_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_angry_rant_01.wav"
+}
+"ballbot.ballbot_angry_rant_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_angry_rant_02.wav"
+}
+"ballbot.ballbot_angry_rant_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_angry_rant_03.wav"
+}
+"ballbot.ballbot_angry_rant_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_angry_rant_04.wav"
+}
+"ballbot.ballbot_angry_rant_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_angry_rant_05.wav"
+}
+"ballbot.ballbot_apology_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_apology_01.wav"
+}
+"ballbot.ballbot_apology_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_apology_02.wav"
+}
+"ballbot.ballbot_apology_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_apology_03.wav"
+}
+"ballbot.ballbot_apology_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_apology_04.wav"
+}
+"ballbot.ballbot_awww_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_awww_01.wav"
+}
+"ballbot.ballbot_awww_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_awww_02.wav"
+}
+"ballbot.ballbot_awww_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_awww_03.wav"
+}
+"ballbot.ballbot_awww_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_awww_04.wav"
+}
+"ballbot.ballbot_awww_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_awww_05.wav"
+}
+"ballbot.ballbot_blown_up_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_blown_up_01.wav"
+}
+"ballbot.ballbot_blown_up_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_blown_up_02.wav"
+}
+"ballbot.ballbot_blown_up_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_blown_up_03.wav"
+}
+"ballbot.ballbot_bored_singing_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_bored_singing_01.wav"
+}
+"ballbot.ballbot_bored_singing_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_bored_singing_02.wav"
+}
+"ballbot.ballbot_caution_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_caution_01.wav"
+}
+"ballbot.ballbot_caution_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_caution_02.wav"
+}
+"ballbot.ballbot_caution_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_caution_03.wav"
+}
+"ballbot.ballbot_close_it_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_close_it_01.wav"
+}
+"ballbot.ballbot_close_it_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_close_it_02.wav"
+}
+"ballbot.ballbot_close_it_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_close_it_03.wav"
+}
+"ballbot.ballbot_close_it_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_close_it_04.wav"
+}
+"ballbot.ballbot_close_it_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_close_it_05.wav"
+}
+"ballbot.ballbot_close_it_06"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_close_it_06.wav"
+}
+"ballbot.ballbot_come_here_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_come_here_01.wav"
+}
+"ballbot.ballbot_come_here_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_come_here_02.wav"
+}
+"ballbot.ballbot_come_here_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_come_here_03.wav"
+}
+"ballbot.ballbot_come_on_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_come_on_01.wav"
+}
+"ballbot.ballbot_come_on_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_come_on_02.wav"
+}
+"ballbot.ballbot_come_on_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_come_on_03.wav"
+}
+"ballbot.ballbot_come_on_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_come_on_04.wav"
+}
+"ballbot.ballbot_confusion_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_confusion_01.wav"
+}
+"ballbot.ballbot_confusion_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_confusion_02.wav"
+}
+"ballbot.ballbot_confusion_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_confusion_03.wav"
+}
+"ballbot.ballbot_confusion_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_confusion_04.wav"
+}
+"ballbot.ballbot_confusion_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_confusion_05.wav"
+}
+"ballbot.ballbot_confusion_06"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_confusion_06.wav"
+}
+"ballbot.ballbot_confusion_07"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_confusion_07.wav"
+}
+"ballbot.ballbot_cool_with_that_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_cool_with_that_01.wav"
+}
+"ballbot.ballbot_cool_with_that_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_cool_with_that_02.wav"
+}
+"ballbot.ballbot_cool_with_that_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_cool_with_that_03.wav"
+}
+"ballbot.ballbot_crushed_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_crushed_01.wav"
+}
+"ballbot.ballbot_crushed_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_crushed_02.wav"
+}
+"ballbot.ballbot_crushed_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_crushed_03.wav"
+}
+"ballbot.ballbot_crushed_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_crushed_04.wav"
+}
+"ballbot.ballbot_crushed_scream_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_crushed_scream_01.wav"
+}
+"ballbot.ballbot_crushed_scream_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_crushed_scream_02.wav"
+}
+"ballbot.ballbot_crushed_scream_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_crushed_scream_03.wav"
+}
+"ballbot.ballbot_do_it_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_do_it_01.wav"
+}
+"ballbot.ballbot_do_it_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_do_it_02.wav"
+}
+"ballbot.ballbot_do_it_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_do_it_03.wav"
+}
+"ballbot.ballbot_do_it_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_do_it_04.wav"
+}
+"ballbot.ballbot_do_it_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_do_it_05.wav"
+}
+"ballbot.ballbot_drowning_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_drowning_01.wav"
+}
+"ballbot.ballbot_drowning_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_drowning_02.wav"
+}
+"ballbot.ballbot_drowning_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_drowning_03.wav"
+}
+"ballbot.ballbot_drowning_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_drowning_04.wav"
+}
+"ballbot.ballbot_drowning_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_drowning_05.wav"
+}
+"ballbot.ballbot_drowning_06"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_drowning_06.wav"
+}
+"ballbot.ballbot_drowning_07"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_drowning_07.wav"
+}
+"ballbot.ballbot_drowning_08"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_drowning_08.wav"
+}
+"ballbot.ballbot_fall_from_height_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_fall_from_height_01.wav"
+}
+"ballbot.ballbot_fall_from_height_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_fall_from_height_02.wav"
+}
+"ballbot.ballbot_fall_from_height_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_fall_from_height_03.wav"
+}
+"ballbot.ballbot_fall_from_height_sm_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_fall_from_height_sm_01.wav"
+}
+"ballbot.ballbot_fall_from_height_sm_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_fall_from_height_sm_02.wav"
+}
+"ballbot.ballbot_fall_from_height_sm_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_fall_from_height_sm_03.wav"
+}
+"ballbot.ballbot_fall_from_height_sm_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_fall_from_height_sm_04.wav"
+}
+"ballbot.ballbot_fall_from_height_sm_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_fall_from_height_sm_05.wav"
+}
+"ballbot.ballbot_fall_from_height_sm_06"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_fall_from_height_sm_06.wav"
+}
+"ballbot.ballbot_fall_from_height_sm_07"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_fall_from_height_sm_07.wav"
+}
+"ballbot.ballbot_goodbye_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_goodbye_01.wav"
+}
+"ballbot.ballbot_goodbye_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_goodbye_02.wav"
+}
+"ballbot.ballbot_goodbye_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_goodbye_03.wav"
+}
+"ballbot.ballbot_goodbye_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_goodbye_04.wav"
+}
+"ballbot.ballbot_goodbye_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_goodbye_05.wav"
+}
+"ballbot.ballbot_go_there_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_go_there_01.wav"
+}
+"ballbot.ballbot_go_there_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_go_there_02.wav"
+}
+"ballbot.ballbot_go_there_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_go_there_03.wav"
+}
+"ballbot.ballbot_have_an_idea_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_have_an_idea_01.wav"
+}
+"ballbot.ballbot_have_an_idea_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_have_an_idea_02.wav"
+}
+"ballbot.ballbot_have_an_idea_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_have_an_idea_03.wav"
+}
+"ballbot.ballbot_heads_up_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_heads_up_01.wav"
+}
+"ballbot.ballbot_heads_up_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_heads_up_02.wav"
+}
+"ballbot.ballbot_heads_up_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_heads_up_03.wav"
+}
+"ballbot.ballbot_heads_up_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_heads_up_04.wav"
+}
+"ballbot.ballbot_hello_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hello_01.wav"
+}
+"ballbot.ballbot_hello_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hello_02.wav"
+}
+"ballbot.ballbot_hello_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hello_03.wav"
+}
+"ballbot.ballbot_hello_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hello_04.wav"
+}
+"ballbot.ballbot_hello_question_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hello_question_01.wav"
+}
+"ballbot.ballbot_hello_question_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{
+	"wave"	"player/ballbot/ballbot_hello_question_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_big_wave_01.wav"
+	}
+}
+"ballbot.ballbot_hello_question_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hello_question_03.wav"
+}
+"ballbot.ballbot_hello_question_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hello_question_04.wav"
+}
+"ballbot.ballbot_hit_the_button_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hit_the_button_01.wav"
+}
+"ballbot.ballbot_hit_the_button_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hit_the_button_02.wav"
+}
+"ballbot.ballbot_hit_the_button_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hit_the_button_03.wav"
+}
+"ballbot.ballbot_hit_the_button_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hit_the_button_04.wav"
+}
+"ballbot.ballbot_hit_the_button_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hit_the_button_05.wav"
+}
+"ballbot.ballbot_hit_the_button_loud_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hit_the_button_loud_01.wav"
+}
+"ballbot.ballbot_hit_the_button_loud_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hit_the_button_loud_02.wav"
+}
+"ballbot.ballbot_hit_the_button_loud_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hit_the_button_loud_03.wav"
+}
+"ballbot.ballbot_hit_the_button_loud_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hit_the_button_loud_04.wav"
+}
+"ballbot.ballbot_hit_the_button_loud_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hit_the_button_loud_05.wav"
+}
+"ballbot.ballbot_hi_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hi_01.wav"
+}
+"ballbot.ballbot_hi_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hi_02.wav"
+}
+"ballbot.ballbot_hi_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hi_03.wav"
+}
+"ballbot.ballbot_hi_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hi_04.wav"
+}
+"ballbot.ballbot_hurry_up_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hurry_up_01.wav"
+}
+"ballbot.ballbot_hurry_up_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hurry_up_02.wav"
+}
+"ballbot.ballbot_hurry_up_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hurry_up_03.wav"
+}
+"ballbot.ballbot_hurry_up_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_hurry_up_04.wav"
+}
+"ballbot.ballbot_impatient_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_impatient_01.wav"
+}
+"ballbot.ballbot_impatient_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_impatient_02.wav"
+}
+"ballbot.ballbot_impatient_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_impatient_03.wav"
+}
+"ballbot.ballbot_impatient_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_impatient_04.wav"
+}
+"ballbot.ballbot_impatient_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_impatient_05.wav"
+}
+"ballbot.ballbot_impatient_06"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_impatient_06.wav"
+}
+"ballbot.ballbot_impatient_07"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_impatient_07.wav"
+}
+"ballbot.ballbot_impatient_08"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_impatient_08.wav"
+}
+"ballbot.ballbot_impatient_09"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_impatient_09.wav"
+}
+"ballbot.ballbot_i_dont_know_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_i_dont_know_01.wav"
+}
+"ballbot.ballbot_i_dont_know_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_i_dont_know_02.wav"
+}
+"ballbot.ballbot_i_dont_know_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_i_dont_know_03.wav"
+}
+"ballbot.ballbot_i_dont_know_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_i_dont_know_04.wav"
+}
+"ballbot.ballbot_jump_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_jump_01.wav"
+}
+"ballbot.ballbot_jump_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/v2/ballbot_jump_02.wav"
+}
+"ballbot.ballbot_jump_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_jump_03.wav"
+}
+"ballbot.ballbot_jump_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_jump_04.wav"
+}
+"ballbot.ballbot_jump_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_jump_05.wav"
+}
+"ballbot.ballbot_jump_06"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_jump_06.wav"
+}
+"ballbot.ballbot_jump_07"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_jump_07.wav"
+}
+"ballbot.ballbot_jump_08"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_jump_08.wav"
+}
+"ballbot.ballbot_jump_09"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_jump_09.wav"
+}
+"ballbot.ballbot_jump_10"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_jump_10.wav"
+}
+"ballbot.ballbot_jump_11"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_jump_11.wav"
+}
+"ballbot.ballbot_jump_12"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_jump_12.wav"
+}
+"ballbot.ballbot_jump_13"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_jump_13.wav"
+}
+"ballbot.ballbot_jump_4to6"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{
+	"wave"	"player/ballbot/v2/ballbot_jump_04.wav"
+	"wave"	"player/ballbot/v2/ballbot_jump_05.wav"
+	"wave"	"player/ballbot/v2/ballbot_jump_06.wav"
+	}
+}
+"ballbot.ballbot_jumptoFeet"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{
+	"wave"	"player/ballbot/v2/ballbot_jump_10.wav"
+	"wave"	"player/ballbot/v2/ballbot_jump_09.wav"
+	"wave"	"player/ballbot/v2/ballbot_jump_03.wav"
+	"wave"	"player/ballbot/v2/ballbot_jump_02.wav"
+	}
+}
+"ballbot.ballbot_jump_short_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_jump_short_01.wav"
+}
+"ballbot.ballbot_jump_short_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_jump_short_02.wav"
+}
+"ballbot.ballbot_jump_short_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_jump_short_03.wav"
+}
+"ballbot.ballbot_jump_short_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_jump_short_04.wav"
+}
+"ballbot.ballbot_jump_short_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_jump_short_05.wav"
+}
+"ballbot.ballbot_jump_short_06"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_jump_short_06.wav"
+}
+"ballbot.ballbot_jump_short_07"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_jump_short_07.wav"
+}
+"ballbot.ballbot_jump_short_08"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_jump_short_08.wav"
+}
+"ballbot.ballbot_jump_short_09"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_jump_short_09.wav"
+}
+"ballbot.ballbot_jump_short_10"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_jump_short_10.wav"
+}
+"ballbot.ballbot_laser_burn_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_laser_burn_01.wav"
+}
+"ballbot.ballbot_laser_burn_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_laser_burn_02.wav"
+}
+"ballbot.ballbot_laser_burn_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_laser_burn_03.wav"
+}
+"ballbot.ballbot_laser_burn_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_laser_burn_04.wav"
+}
+"ballbot.ballbot_launched_into_ceiling_impact_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_launched_into_ceiling_impact_01.wav"
+}
+"ballbot.ballbot_launched_into_ceiling_impact_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_launched_into_ceiling_impact_02.wav"
+}
+"ballbot.ballbot_launched_into_ceiling_impact_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_launched_into_ceiling_impact_03.wav"
+}
+"ballbot.ballbot_lets_go_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_lets_go_01.wav"
+}
+"ballbot.ballbot_lets_go_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_lets_go_02.wav"
+}
+"ballbot.ballbot_lets_go_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_lets_go_03.wav"
+}
+"ballbot.ballbot_lets_go_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_lets_go_04.wav"
+}
+"ballbot.ballbot_make_fun_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_make_fun_01.wav"
+}
+"ballbot.ballbot_make_fun_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_make_fun_02.wav"
+}
+"ballbot.ballbot_make_fun_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_make_fun_03.wav"
+}
+"ballbot.ballbot_make_fun_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_make_fun_04.wav"
+}
+"ballbot.ballbot_make_fun_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_make_fun_05.wav"
+}
+"ballbot.ballbot_meh_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_meh_01.wav"
+}
+"ballbot.ballbot_meh_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_meh_02.wav"
+}
+"ballbot.ballbot_meh_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_meh_03.wav"
+}
+"ballbot.ballbot_meh_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_meh_04.wav"
+}
+"ballbot.ballbot_meh_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_meh_05.wav"
+}
+"ballbot.ballbot_no_no_dont_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_no_no_dont_01.wav"
+}
+"ballbot.ballbot_no_no_dont_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_no_no_dont_02.wav"
+}
+"ballbot.ballbot_no_no_dont_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_no_no_dont_03.wav"
+}
+"ballbot.ballbot_no_no_dont_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_no_no_dont_04.wav"
+}
+"ballbot.ballbot_no_no_dont_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_no_no_dont_05.wav"
+}
+"ballbot.ballbot_no_no_dont_06"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_no_no_dont_06.wav"
+}
+"ballbot.ballbot_no_no_dont_07"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_no_no_dont_07.wav"
+}
+"ballbot.ballbot_no_no_dont_argh_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_no_no_dont_argh_01.wav"
+}
+"ballbot.ballbot_no_no_dont_argh_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_no_no_dont_argh_02.wav"
+}
+"ballbot.ballbot_no_no_dont_argh_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_no_no_dont_argh_03.wav"
+}
+"ballbot.ballbot_oh_no_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_oh_no_01.wav"
+}
+"ballbot.ballbot_oh_no_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_oh_no_02.wav"
+}
+"ballbot.ballbot_oh_no_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_oh_no_03.wav"
+}
+"ballbot.ballbot_oh_no_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_oh_no_04.wav"
+}
+"ballbot.ballbot_oh_no_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_oh_no_05.wav"
+}
+"ballbot.ballbot_oh_no_06"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_oh_no_06.wav"
+}
+"ballbot.ballbot_oh_no_07"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_oh_no_07.wav"
+}
+"ballbot.ballbot_oh_no_08"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_oh_no_08.wav"
+}
+"ballbot.ballbot_oh_no_09"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_oh_no_09.wav"
+}
+"ballbot.ballbot_oh_no_10"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_oh_no_10.wav"
+}
+"ballbot.ballbot_ok_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_ok_01.wav"
+}
+"ballbot.ballbot_ok_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_ok_02.wav"
+}
+"ballbot.ballbot_ok_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_ok_03.wav"
+}
+"ballbot.ballbot_ok_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_ok_04.wav"
+}
+"ballbot.ballbot_ok_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_ok_05.wav"
+}
+"ballbot.ballbot_oops_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_oops_01.wav"
+}
+"ballbot.ballbot_oops_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_oops_02.wav"
+}
+"ballbot.ballbot_oops_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_oops_03.wav"
+}
+"ballbot.ballbot_oops_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_oops_04.wav"
+}
+"ballbot.ballbot_oops_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_oops_05.wav"
+}
+"ballbot.ballbot_oops_06"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_oops_06.wav"
+}
+"ballbot.ballbot_oops_07"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_oops_07.wav"
+}
+"ballbot.ballbot_oops_08"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_oops_08.wav"
+}
+"ballbot.ballbot_oops_09"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_oops_09.wav"
+}
+"ballbot.ballbot_oops_10"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_oops_10.wav"
+}
+"ballbot.ballbot_oops_11"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_oops_11.wav"
+}
+"ballbot.ballbot_over_here_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_over_here_01.wav"
+}
+"ballbot.ballbot_over_here_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_over_here_02.wav"
+}
+"ballbot.ballbot_over_here_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_over_here_03.wav"
+}
+"ballbot.ballbot_over_here_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_over_here_04.wav"
+}
+"ballbot.ballbot_ow_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_ow_01.wav"
+}
+"ballbot.ballbot_ow_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_ow_02.wav"
+}
+"ballbot.ballbot_ow_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_ow_03.wav"
+}
+"ballbot.ballbot_ow_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_ow_04.wav"
+}
+"ballbot.ballbot_ow_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_ow_05.wav"
+}
+"ballbot.ballbot_pain_hard_surface_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_pain_hard_surface_01.wav"
+}
+"ballbot.ballbot_pain_hard_surface_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_pain_hard_surface_02.wav"
+}
+"ballbot.ballbot_pain_hard_surface_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_pain_hard_surface_03.wav"
+}
+"ballbot.ballbot_pain_hard_surface_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_pain_hard_surface_04.wav"
+}
+"ballbot.ballbot_pain_hard_surface_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_pain_hard_surface_05.wav"
+}
+"ballbot.ballbot_pain_lg_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_pain_lg_01.wav"
+}
+"ballbot.ballbot_pain_lg_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_pain_lg_02.wav"
+}
+"ballbot.ballbot_pain_md_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_pain_md_01.wav"
+}
+"ballbot.ballbot_pain_md_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_pain_md_02.wav"
+}
+"ballbot.ballbot_pain_md_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_pain_md_03.wav"
+}
+"ballbot.ballbot_pain_sm_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_pain_sm_01.wav"
+}
+"ballbot.ballbot_pain_sm_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_pain_sm_02.wav"
+}
+"ballbot.ballbot_pain_sm_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_pain_sm_03.wav"
+}
+"ballbot.ballbot_pain_sm_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_pain_sm_04.wav"
+}
+"ballbot.ballbot_pain_turret_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_pain_turret_01.wav"
+}
+"ballbot.ballbot_pain_turret_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_pain_turret_02.wav"
+}
+"ballbot.ballbot_pain_turret_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_pain_turret_03.wav"
+}
+"ballbot.ballbot_turret_fire_react"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{
+		"wave"	"player/ballbot/v2/ballbot_turret_fire_react_09f.wav"
+		"wave"	"player/ballbot/v2/ballbot_turret_fire_react_09e.wav"
+		"wave"	"player/ballbot/v2/ballbot_turret_fire_react_09d.wav"
+		"wave"	"player/ballbot/v2/ballbot_turret_fire_react_09c.wav"
+		"wave"	"player/ballbot/v2/ballbot_turret_fire_react_09b.wav"
+		"wave"	"player/ballbot/v2/ballbot_turret_fire_react_09.wav"
+	}
+}
+"ballbot.ballbot_pain_wall_crash_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_pain_wall_crash_01.wav"
+}
+"ballbot.ballbot_pain_wall_crash_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_pain_wall_crash_02.wav"
+}
+"ballbot.ballbot_pain_wall_crash_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_pain_wall_crash_03.wav"
+}
+"ballbot.ballbot_pain_wall_crash_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_pain_wall_crash_04.wav"
+}
+"ballbot.ballbot_ping_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_ping_01.wav"
+}
+"ballbot.ballbot_ping_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_ping_02.wav"
+}
+"ballbot.ballbot_ping_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_ping_03.wav"
+}
+"ballbot.ballbot_ping_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_ping_04.wav"
+}
+"ballbot.ballbot_ping_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_ping_05.wav"
+}
+"ballbot.ballbot_put_portal_here_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_put_portal_here_01.wav"
+}
+"ballbot.ballbot_put_portal_here_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_put_portal_here_02.wav"
+}
+"ballbot.ballbot_put_portal_here_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_put_portal_here_03.wav"
+}
+"ballbot.ballbot_put_portal_here_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_put_portal_here_04.wav"
+}
+"ballbot.ballbot_ready_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_ready_01.wav"
+}
+"ballbot.ballbot_ready_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_ready_02.wav"
+}
+"ballbot.ballbot_ready_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_ready_03.wav"
+}
+"ballbot.ballbot_ready_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_ready_04.wav"
+}
+"ballbot.ballbot_screw_with_someone_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_screw_with_someone_01.wav"
+}
+"ballbot.ballbot_screw_with_someone_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_screw_with_someone_02.wav"
+}
+"ballbot.ballbot_screw_with_someone_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_screw_with_someone_03.wav"
+}
+"ballbot.ballbot_seriously_dont_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_seriously_dont_01.wav"
+}
+"ballbot.ballbot_seriously_dont_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_seriously_dont_02.wav"
+}
+"ballbot.ballbot_seriously_dont_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_seriously_dont_03.wav"
+}
+"ballbot.ballbot_seriously_dont_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_seriously_dont_04.wav"
+}
+"ballbot.ballbot_smash_into_wall_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_smash_into_wall_01.wav"
+}
+"ballbot.ballbot_smash_into_wall_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_smash_into_wall_02.wav"
+}
+"ballbot.ballbot_smash_into_wall_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_smash_into_wall_03.wav"
+}
+"ballbot.ballbot_smash_into_wall_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_smash_into_wall_04.wav"
+}
+"ballbot.ballbot_smash_into_wall_sm_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_smash_into_wall_sm_01.wav"
+}
+"ballbot.ballbot_smash_into_wall_sm_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_smash_into_wall_sm_02.wav"
+}
+"ballbot.ballbot_smash_into_wall_sm_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_smash_into_wall_sm_03.wav"
+}
+"ballbot.ballbot_smash_into_wall_sm_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_smash_into_wall_sm_04.wav"
+}
+"ballbot.ballbot_smash_into_wall_sm_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_smash_into_wall_sm_05.wav"
+}
+"ballbot.ballbot_smash_into_wall_sm_06"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_smash_into_wall_sm_06.wav"
+}
+"ballbot.ballbot_smash_into_wall_sm_07"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_smash_into_wall_sm_07.wav"
+}
+"ballbot.ballbot_stop_messing_with_me_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_stop_messing_with_me_01.wav"
+}
+"ballbot.ballbot_stop_messing_with_me_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_stop_messing_with_me_02.wav"
+}
+"ballbot.ballbot_stop_messing_with_me_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_stop_messing_with_me_03.wav"
+}
+"ballbot.ballbot_stop_messing_with_me_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_stop_messing_with_me_04.wav"
+}
+"ballbot.ballbot_stop_messing_with_me_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_stop_messing_with_me_05.wav"
+}
+"ballbot.ballbot_stop_messing_with_me_06"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_stop_messing_with_me_06.wav"
+}
+"ballbot.ballbot_stop_messing_with_me_07"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_stop_messing_with_me_07.wav"
+}
+"ballbot.ballbot_thanks_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_thanks_01.wav"
+}
+"ballbot.ballbot_thanks_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_thanks_02.wav"
+}
+"ballbot.ballbot_thanks_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_thanks_03.wav"
+}
+"ballbot.ballbot_thanks_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_thanks_04.wav"
+}
+"ballbot.ballbot_watch_out_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_watch_out_01.wav"
+}
+"ballbot.ballbot_watch_out_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_watch_out_02.wav"
+}
+"ballbot.ballbot_watch_out_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_watch_out_03.wav"
+}
+"ballbot.ballbot_where_are_you_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_where_are_you_01.wav"
+}
+"ballbot.ballbot_where_are_you_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_where_are_you_02.wav"
+}
+"ballbot.ballbot_where_are_you_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_where_are_you_03.wav"
+}
+"ballbot.ballbot_where_are_you_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_where_are_you_04.wav"
+}
+"ballbot.ballbot_where_are_you_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_where_are_you_05.wav"
+}
+"ballbot.ballbot_where_are_you_06"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_where_are_you_06.wav"
+}
+"ballbot.ballbot_where_are_you_07"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_where_are_you_07.wav"
+}
+"ballbot.ballbot_where_are_you_08"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_where_are_you_08.wav"
+}
+"ballbot.ballbot_yes_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_yes_01.wav"
+}
+"ballbot.ballbot_yes_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_yes_02.wav"
+}
+"ballbot.ballbot_yes_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_yes_03.wav"
+}
+"ballbot.ballbot_yes_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_yes_04.wav"
+}
+"ballbot.ballbot_yes_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_yes_05.wav"
+}
+"ballbot.ballbot_yikes_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_yikes_01.wav"
+}
+"ballbot.ballbot_yikes_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_yikes_02.wav"
+}
+"ballbot.ballbot_yikes_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_yikes_03.wav"
+}
+"ballbot.ballbot_yikes_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_yikes_04.wav"
+}
+"ballbot.ballbot_yikes_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_yikes_05.wav"
+}
+"ballbot.ballbot_yikes_06"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_yikes_06.wav"
+}
+"ballbot.ballbot_yikes_07"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_yikes_07.wav"
+}
+"ballbot.ballbot_yikes_08"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_yikes_08.wav"
+}
+"ballbot.ballbot_you_still_there_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_you_still_there_01.wav"
+}
+"ballbot.ballbot_you_still_there_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_you_still_there_02.wav"
+}
+"ballbot.ballbot_you_still_there_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_you_still_there_03.wav"
+}
+"ballbot.ballbot_you_still_there_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_you_still_there_04.wav"
+}
+"ballbot.ballbot_you_still_there_05"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_you_still_there_05.wav"
+}
+"ballbot.ballbot_you_suchandsuch_01"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_you_suchandsuch_01.wav"
+}
+"ballbot.ballbot_you_suchandsuch_02"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_you_suchandsuch_02.wav"
+}
+"ballbot.ballbot_you_suchandsuch_03"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_you_suchandsuch_03.wav"
+}
+"ballbot.ballbot_you_suchandsuch_04"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"wave"	"player/ballbot/ballbot_you_suchandsuch_04.wav"
+}
+"ballbot.amped_anticipation"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_amped_anticipation_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_amped_anticipation_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_amped_anticipation_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_amped_anticipation_04.wav"
+		"wave"	"player/ballbot/v2/ballbot_amped_anticipation_05.wav"
+		// "wave"	"player/ballbot/v2/ballbot_amped_anticipation_06.wav"
+		// "wave"	"player/ballbot/v2/ballbot_amped_anticipation_07.wav"
+		// "wave"	"player/ballbot/v2/ballbot_amped_anticipation_08.wav"
+		// "wave"	"player/ballbot/v2/ballbot_amped_anticipation_09.wav"
+		// "wave"	"player/ballbot/v2/ballbot_amped_anticipation_10.wav"
+	}
+}
+"ballbot.amped_anticipationSpin"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_anticipation_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_anticipation_06.wav"
+		"wave"	"player/ballbot/v2/ballbot_anticipation_16.wav"
+		"wave"	"player/ballbot/v2/ballbot_happy_affirmations_28.wav"
+		"wave"	"player/ballbot/v2/ballbot_happy_affirmations_35.wav"
+		"wave"	"player/ballbot/v2/ballbot_happy_affirmations_39.wav"
+	}
+}
+
+"ballbot.angry"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_angry_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_angry_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_angry_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_angry_04.wav"
+		"wave"	"player/ballbot/v2/ballbot_angry_05.wav"
+		"wave"	"player/ballbot/v2/ballbot_angry_06.wav"
+		// "wave"	"player/ballbot/v2/ballbot_angry_07.wav"
+		// "wave"	"player/ballbot/v2/ballbot_angry_08.wav"
+		// "wave"	"player/ballbot/v2/ballbot_angry_09.wav"
+		// "wave"	"player/ballbot/v2/ballbot_angry_10.wav"
+		// "wave"	"player/ballbot/v2/ballbot_angry_11.wav"
+		// "wave"	"player/ballbot/v2/ballbot_angry_12.wav"
+	}
+}
+"ballbot.anticipation"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_anticipation_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_anticipation_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_anticipation_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_anticipation_04.wav"
+		"wave"	"player/ballbot/v2/ballbot_anticipation_05.wav"
+		"wave"	"player/ballbot/v2/ballbot_anticipation_06.wav"
+		// "wave"	"player/ballbot/v2/ballbot_anticipation_07.wav"
+		// "wave"	"player/ballbot/v2/ballbot_anticipation_08.wav"
+		// "wave"	"player/ballbot/v2/ballbot_anticipation_09.wav"
+		// "wave"	"player/ballbot/v2/ballbot_anticipation_10.wav"
+		// "wave"	"player/ballbot/v2/ballbot_anticipation_11.wav"
+		// "wave"	"player/ballbot/v2/ballbot_anticipation_12.wav"
+		// "wave"	"player/ballbot/v2/ballbot_anticipation_13.wav"
+		// "wave"	"player/ballbot/v2/ballbot_anticipation_14.wav"
+		// "wave"	"player/ballbot/v2/ballbot_anticipation_15.wav"
+		// "wave"	"player/ballbot/v2/ballbot_anticipation_16.wav"
+		// "wave"	"player/ballbot/v2/ballbot_anticipation_17.wav"
+		// "wave"	"player/ballbot/v2/ballbot_anticipation_18.wav"
+		// "wave"	"player/ballbot/v2/ballbot_anticipation_19.wav"
+	}
+}
+"ballbot.big_wave"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_big_wave_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_big_wave_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_big_wave_04.wav"
+	}
+}
+"ballbot.cannonball"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_cannonball_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_cannonball_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_cannonball_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_cannonball_04.wav"
+		"wave"	"player/ballbot/v2/ballbot_cannonball_05.wav"
+		"wave"	"player/ballbot/v2/ballbot_cannonball_06.wav"
+		// "wave"	"player/ballbot/v2/ballbot_cannonball_07.wav"
+		// "wave"	"player/ballbot/v2/ballbot_cannonball_08.wav"
+		// "wave"	"player/ballbot/v2/ballbot_cannonball_09.wav"
+		// "wave"	"player/ballbot/v2/ballbot_cannonball_10.wav"
+	}
+}
+"ballbot.facepalm"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_facepalm_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_facepalm_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_facepalm_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_facepalm_04.wav"
+	}
+}
+"ballbot.fist_pump"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_fist_pump_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_fist_pump_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_fist_pump_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_fist_pump_04.wav"
+	}
+}
+"ballbot.happy_affirmations"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_happy_affirmations_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_happy_affirmations_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_happy_affirmations_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_happy_affirmations_04.wav"
+		"wave"	"player/ballbot/v2/ballbot_happy_affirmations_05.wav"
+		"wave"	"player/ballbot/v2/ballbot_happy_affirmations_06.wav"
+		"wave"	"player/ballbot/v2/ballbot_happy_affirmations_07.wav"
+		"wave"	"player/ballbot/v2/ballbot_happy_affirmations_08.wav"
+		"wave"	"player/ballbot/v2/ballbot_happy_affirmations_09.wav"
+		"wave"	"player/ballbot/v2/ballbot_happy_affirmations_10.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_11.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_12.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_13.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_14.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_15.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_16.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_17.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_18.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_19.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_20.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_21.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_22.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_23.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_24.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_25.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_26.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_27.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_28.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_29.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_30.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_31.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_32.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_33.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_34.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_35.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_36.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_37.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_38.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_39.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_40.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_41.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_42.wav"
+		// "wave"	"player/ballbot/v2/ballbot_happy_affirmations_43.wav"
+	}
+}
+"ballbot.happy_affirmations_catch"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+	"wave"	"player/ballbot/v2/ballbot_happy_affirmations_08.wav"
+		"wave"	"player/ballbot/v2/ballbot_happy_affirmations_09.wav"
+			"wave"	"player/ballbot/v2/ballbot_happy_affirmations_18.wav"
+	}
+}
+"ballbot.happy_affirmations_roll"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+	"wave"	"player/ballbot/v2/ballbot_happy_affirmations_37.wav"
+		"wave"	"player/ballbot/v2/ballbot_happy_affirmations_33.wav"
+			"wave"	"player/ballbot/v2/ballbot_happy_affirmations_31.wav"
+						"wave"	"player/ballbot/v2/ballbot_happy_affirmations_28.wav"
+	}
+}
+"ballbot.happy_affirmations_spin"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+	"wave"	"player/ballbot/v2/ballbot_happy_affirmations_37.wav"
+		"wave"	"player/ballbot/v2/ballbot_happy_affirmations_34.wav"
+			"wave"	"player/ballbot/v2/ballbot_happy_affirmations_33.wav"
+						"wave"	"player/ballbot/v2/ballbot_happy_affirmations_29.wav"
+	}
+}
+"ballbot.high_five_fail"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_high_five_fail_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_high_five_fail_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_high_five_fail_03.wav"
+		// "wave"	"player/ballbot/v2/ballbot_high_five_fail_04.wav"
+		// "wave"	"player/ballbot/v2/ballbot_high_five_fail_05.wav"
+		// "wave"	"player/ballbot/v2/ballbot_high_five_fail_06.wav"
+		// "wave"	"player/ballbot/v2/ballbot_high_five_fail_07.wav"
+		// "wave"	"player/ballbot/v2/ballbot_high_five_fail_08.wav"
+		// "wave"	"player/ballbot/v2/ballbot_high_five_fail_09.wav"
+		// "wave"	"player/ballbot/v2/ballbot_high_five_fail_10.wav"
+		// "wave"	"player/ballbot/v2/ballbot_high_five_fail_11.wav"
+		// "wave"	"player/ballbot/v2/ballbot_high_five_fail_12.wav"
+		// "wave"	"player/ballbot/v2/ballbot_high_five_fail_13.wav"
+		// "wave"	"player/ballbot/v2/ballbot_high_five_fail_14.wav"
+		// "wave"	"player/ballbot/v2/ballbot_high_five_fail_15.wav"
+		// "wave"	"player/ballbot/v2/ballbot_high_five_fail_16.wav"
+		// "wave"	"player/ballbot/v2/ballbot_high_five_fail_17.wav"
+		// "wave"	"player/ballbot/v2/ballbot_high_five_fail_18.wav"
+		// "wave"	"player/ballbot/v2/ballbot_high_five_fail_19.wav"
+		// "wave"	"player/ballbot/v2/ballbot_high_five_fail_20.wav"
+	}
+}
+"ballbot.hot_laser"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_hot_laser_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_hot_laser_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_hot_laser_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_hot_laser_33b.wav"
+		// "wave"	"player/ballbot/v2/ballbot_hot_laser_04b.wav"
+		// "wave"	"player/ballbot/v2/ballbot_hot_laser_05.wav"
+		// "wave"	"player/ballbot/v2/ballbot_hot_laser_06.wav"
+		// "wave"	"player/ballbot/v2/ballbot_hot_laser_07.wav"
+		// "wave"	"player/ballbot/v2/ballbot_hot_laser_08.wav"
+		// "wave"	"player/ballbot/v2/ballbot_hot_laser_08b.wav"
+		// "wave"	"player/ballbot/v2/ballbot_hot_laser_08c.wav"
+		// "wave"	"player/ballbot/v2/ballbot_hot_laser_08d.wav"
+		// "wave"	"player/ballbot/v2/ballbot_hot_laser_08e.wav"
+		// "wave"	"player/ballbot/v2/ballbot_hot_laser_09.wav"
+		// "wave"	"player/ballbot/v2/ballbot_hot_laser_10.wav"
+		// "wave"	"player/ballbot/v2/ballbot_hot_laser_11.wav"
+		// "wave"	"player/ballbot/v2/ballbot_hot_laser_12.wav"
+		// "wave"	"player/ballbot/v2/ballbot_hot_laser_13.wav"
+		// "wave"	"player/ballbot/v2/ballbot_hot_laser_14.wav"
+		// "wave"	"player/ballbot/v2/ballbot_hot_laser_15.wav"
+		// "wave"	"player/ballbot/v2/ballbot_hot_laser_16.wav"
+		// "wave"	"player/ballbot/v2/ballbot_hot_laser_17.wav"
+		// "wave"	"player/ballbot/v2/ballbot_hot_laser_18.wav"
+		// "wave"	"player/ballbot/v2/ballbot_hot_laser_19.wav"
+		// "wave"	"player/ballbot/v2/ballbot_hot_laser_20.wav"
+	}
+}
+"ballbot.impatient"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_impatient_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_impatient_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_impatient_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_impatient_04.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_05.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_06.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_07.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_08.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_09.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_10.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_11.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_12.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_13.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_14.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_15.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_16.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_17.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_18.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_19.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_20.wav"
+	}
+}
+"ballbot.impatient_16"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+	"wave"	"player/ballbot/v2/ballbot_impatient_16.wav"
+	}
+}
+"ballbot.impatient_to_bored"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_impatient_to_bored_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_impatient_to_bored_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_impatient_to_bored_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_impatient_to_bored_04.wav"
+		"wave"	"player/ballbot/v2/ballbot_impatient_to_bored_05.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_to_bored_06.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_to_bored_07.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_to_bored_08.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_to_bored_09.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_to_bored_10.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_to_bored_11.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_to_bored_12.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_to_bored_13.wav"
+		// "wave"	"player/ballbot/v2/ballbot_impatient_to_bored_14.wav"
+	}
+}
+"ballbot.instructed_indications"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_instruced_indications_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_instruced_indications_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_instruced_indications_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_instruced_indications_04.wav"
+		"wave"	"player/ballbot/v2/ballbot_instruced_indications_05.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_06.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_07.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_08.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_09.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_10.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_11.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_12.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_13.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_14.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_15.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_16.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_17.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_18.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_19.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_20.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_20b.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_21.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_22.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_23.wav"
+	}
+}
+"ballbot.instructed_indications_quick"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_04.wav"
+		"wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_05.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_06.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_07.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_08.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_09.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_10.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_11.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_12.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_13.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_14.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_15.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_16.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_17.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_18.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_19.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_20.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_24.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_21.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_22.wav"
+		// "wave"	"player/ballbot/v2/ballbot_instruced_indications_quick_23.wav"
+	}
+}
+"ballbot.jump"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_jump_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_jump_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_jump_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_jump_04.wav"
+		"wave"	"player/ballbot/v2/ballbot_jump_05.wav"
+		// "wave"	"player/ballbot/v2/ballbot_jump_06.wav"
+		// "wave"	"player/ballbot/v2/ballbot_jump_07.wav"
+		// "wave"	"player/ballbot/v2/ballbot_jump_08.wav"
+		// "wave"	"player/ballbot/v2/ballbot_jump_09.wav"
+		// "wave"	"player/ballbot/v2/ballbot_jump_10.wav"
+	}
+}
+"ballbot.jump_spin"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_jump_spin_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_jump_spin_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_jump_spin_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_jump_spin_04.wav"
+		"wave"	"player/ballbot/v2/ballbot_jump_spin_05.wav"
+	}
+}
+"ballbot.love_affection"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_love_affection_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_love_affection_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_love_affection_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_love_affection_04.wav"
+		"wave"	"player/ballbot/v2/ballbot_love_affection_05.wav"
+		// "wave"	"player/ballbot/v2/ballbot_love_affection_06.wav"
+		// "wave"	"player/ballbot/v2/ballbot_love_affection_07.wav"
+		// "wave"	"player/ballbot/v2/ballbot_love_affection_08.wav"
+		// "wave"	"player/ballbot/v2/ballbot_love_affection_09.wav"
+		// "wave"	"player/ballbot/v2/ballbot_love_affection_10.wav"
+		// "wave"	"player/ballbot/v2/ballbot_love_affection_11.wav"
+		// "wave"	"player/ballbot/v2/ballbot_love_affection_12.wav"
+		// "wave"	"player/ballbot/v2/ballbot_love_affection_13.wav"
+		// "wave"	"player/ballbot/v2/ballbot_love_affection_14.wav"
+		// "wave"	"player/ballbot/v2/ballbot_love_affection_15.wav"
+		// "wave"	"player/ballbot/v2/ballbot_love_affection_16.wav"
+		// "wave"	"player/ballbot/v2/ballbot_love_affection_17.wav"
+		// "wave"	"player/ballbot/v2/ballbot_love_affection_18.wav"
+		// "wave"	"player/ballbot/v2/ballbot_love_affection_19.wav"
+		// "wave"	"player/ballbot/v2/ballbot_love_affection_20.wav"
+		// "wave"	"player/ballbot/v2/ballbot_love_affection_21.wav"
+		// "wave"	"player/ballbot/v2/ballbot_love_affection_22.wav"
+		// "wave"	"player/ballbot/v2/ballbot_love_affection_23.wav"
+		// "wave"	"player/ballbot/v2/ballbot_love_affection_24.wav"
+		// "wave"	"player/ballbot/v2/ballbot_love_affection_25.wav"
+	}
+}
+"ballbot.negative_affirmations"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_negative_affirmations_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_negative_affirmations_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_negative_affirmations_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_negative_affirmations_04.wav"
+		"wave"	"player/ballbot/v2/ballbot_negative_affirmations_05.wav"
+		// "wave"	"player/ballbot/v2/ballbot_negative_affirmations_06.wav"
+		// "wave"	"player/ballbot/v2/ballbot_negative_affirmations_07.wav"
+		// "wave"	"player/ballbot/v2/ballbot_negative_affirmations_08.wav"
+		// "wave"	"player/ballbot/v2/ballbot_negative_affirmations_09.wav"
+		// "wave"	"player/ballbot/v2/ballbot_negative_affirmations_10.wav"
+		// "wave"	"player/ballbot/v2/ballbot_negative_affirmations_11.wav"
+		// "wave"	"player/ballbot/v2/ballbot_negative_affirmations_12.wav"
+		// "wave"	"player/ballbot/v2/ballbot_negative_affirmations_13.wav"
+		// "wave"	"player/ballbot/v2/ballbot_negative_affirmations_14.wav"
+		// "wave"	"player/ballbot/v2/ballbot_negative_affirmations_15.wav"
+		// "wave"	"player/ballbot/v2/ballbot_negative_affirmations_16.wav"
+		// "wave"	"player/ballbot/v2/ballbot_negative_affirmations_17.wav"
+		// "wave"	"player/ballbot/v2/ballbot_negative_affirmations_18.wav"
+		// "wave"	"player/ballbot/v2/ballbot_negative_affirmations_19.wav"
+		// "wave"	"player/ballbot/v2/ballbot_negative_affirmations_20.wav"
+		// "wave"	"player/ballbot/v2/ballbot_negative_affirmations_21.wav"
+	}
+}
+"ballbot.point"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_point_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_point_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_point_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_point_04.wav"
+		"wave"	"player/ballbot/v2/ballbot_point_05.wav"
+		// "wave"	"player/ballbot/v2/ballbot_point_06.wav"
+		// "wave"	"player/ballbot/v2/ballbot_point_07.wav"
+		// "wave"	"player/ballbot/v2/ballbot_point_08.wav"
+		// "wave"	"player/ballbot/v2/ballbot_point_09.wav"
+		// "wave"	"player/ballbot/v2/ballbot_point_10.wav"
+		// "wave"	"player/ballbot/v2/ballbot_point_11.wav"
+		// "wave"	"player/ballbot/v2/ballbot_point_12.wav"
+		// "wave"	"player/ballbot/v2/ballbot_point_13.wav"
+	}
+}
+"ballbot.sad"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_sad_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_sad_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_sad_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_sad_04.wav"
+		"wave"	"player/ballbot/v2/ballbot_sad_05.wav"
+		// "wave"	"player/ballbot/v2/ballbot_sad_06.wav"
+		// "wave"	"player/ballbot/v2/ballbot_sad_07.wav"
+		// "wave"	"player/ballbot/v2/ballbot_sad_08.wav"
+		// "wave"	"player/ballbot/v2/ballbot_sad_09.wav"
+		// "wave"	"player/ballbot/v2/ballbot_sad_10.wav"
+		// "wave"	"player/ballbot/v2/ballbot_sad_11.wav"
+		// "wave"	"player/ballbot/v2/ballbot_sad_12.wav"
+		// "wave"	"player/ballbot/v2/ballbot_sad_13.wav"
+		// "wave"	"player/ballbot/v2/ballbot_sad_14.wav"
+		// "wave"	"player/ballbot/v2/ballbot_sad_15.wav"
+	}
+}
+"ballbot.sad_quick"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_sad_quick_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_sad_quick_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_sad_quick_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_sad_quick_04.wav"
+		"wave"	"player/ballbot/v2/ballbot_sad_quick_05.wav"
+		// "wave"	"player/ballbot/v2/ballbot_sad_quick_06.wav"
+		// "wave"	"player/ballbot/v2/ballbot_sad_quick_07.wav"
+		// "wave"	"player/ballbot/v2/ballbot_sad_quick_08.wav"
+		// "wave"	"player/ballbot/v2/ballbot_sad_quick_09.wav"
+		// "wave"	"player/ballbot/v2/ballbot_sad_quick_10.wav"
+		// "wave"	"player/ballbot/v2/ballbot_sad_quick_11.wav"
+		// "wave"	"player/ballbot/v2/ballbot_sad_quick_12.wav"
+		// "wave"	"player/ballbot/v2/ballbot_sad_quick_13.wav"
+	}
+}
+"ballbot.sad_quick_09"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		
+		"wave"	"player/ballbot/v2/ballbot_sad_quick_09.wav"
+
+	}
+}
+"ballbot.scared"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_scared_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_scared_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_scared_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_scared_04.wav"
+		"wave"	"player/ballbot/v2/ballbot_scared_05.wav"
+		// "wave"	"player/ballbot/v2/ballbot_scared_06.wav"
+		// "wave"	"player/ballbot/v2/ballbot_scared_07.wav"
+		// "wave"	"player/ballbot/v2/ballbot_scared_08.wav"
+		// "wave"	"player/ballbot/v2/ballbot_scared_09.wav"
+		// "wave"	"player/ballbot/v2/ballbot_scared_10.wav"
+		// "wave"	"player/ballbot/v2/ballbot_scared_11.wav"
+		// "wave"	"player/ballbot/v2/ballbot_scared_12.wav"
+		// "wave"	"player/ballbot/v2/ballbot_scared_13.wav"
+		// "wave"	"player/ballbot/v2/ballbot_scared_14.wav"
+		// "wave"	"player/ballbot/v2/ballbot_scared_15.wav"
+		// "wave"	"player/ballbot/v2/ballbot_scared_16.wav"
+		// "wave"	"player/ballbot/v2/ballbot_scared_17.wav"
+		// "wave"	"player/ballbot/v2/ballbot_scared_18.wav"
+		// "wave"	"player/ballbot/v2/ballbot_scared_19.wav"
+	}
+}
+"ballbot.shrug"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_shrug_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_shrug_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_shrug_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_shrug_04.wav"
+		"wave"	"player/ballbot/v2/ballbot_shrug_05.wav"
+	}
+}
+"ballbot.somersault"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_somersault_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_somersault_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_somersault_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_somersault_04.wav"
+		"wave"	"player/ballbot/v2/ballbot_somersault_05.wav"
+	}
+}
+"ballbot.splits"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_splits_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_splits_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_splits_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_splits_04.wav"
+		"wave"	"player/ballbot/v2/ballbot_splits_05.wav"
+	}
+}
+"ballbot.taunt_rps_count"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_taunt_rps_count_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_taunt_rps_count_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_taunt_rps_count_03.wav"
+	}
+}
+"ballbot.taunt_rps_count_final"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_taunt_rps_count_final_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_taunt_rps_count_final_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_taunt_rps_count_final_03.wav"
+	}
+}
+"ballbot.taunt_rps_count_intro"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_taunt_rps_count_intro_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_taunt_rps_count_intro_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_taunt_rps_count_intro_03.wav"
+	}
+}
+"ballbot.taunt_rps_count_success"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_taunt_rps_count_success_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_taunt_rps_count_success_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_taunt_rps_count_success_03.wav"
+	}
+}
+"ballbot.taunt_tease_grab"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_taunt_rps_count_intro_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_taunt_rps_count_intro_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_taunt_rps_count_intro_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_taunt_rps_count_intro_07.wav"
+	}
+}
+"ballbot.taunt_tease_hit_react"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_taunt_tease_hit_react_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_taunt_tease_hit_react_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_taunt_tease_hit_react_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_taunt_tease_hit_react_04.wav"
+	}
+}
+"ballbot.taunt_tease_mock"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_taunt_tease_mock_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_taunt_tease_mock_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_taunt_tease_mock_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_taunt_tease_mock_04.wav"
+	}
+}
+"ballbot.taunt_fail"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_tease_fail_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_tease_fail_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_tease_fail_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_tease_fail_04.wav"
+		"wave"	"player/ballbot/v2/ballbot_tease_fail_05.wav"
+	}
+}
+"ballbot.thumbs_up"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_thumbs_up_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_thumbs_up_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_thumbs_up_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_thumbs_up_04.wav"
+	}
+}
+"ballbot.trick_fire"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_trick_fire_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_trick_fire_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_trick_fire_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_trick_fire_04.wav"
+	}
+}
+"ballbot.laugh"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_laugh_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_laugh_02.wav"
+		"wave"	"player/ballbot/v2/ballbot_laugh_03.wav"
+		"wave"	"player/ballbot/v2/ballbot_laugh_04.wav"
+		"wave"	"player/ballbot/v2/ballbot_laugh_05.wav"
+	}
+}
+"ballbot.laugh80frames"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"VOL_NORM"
+	"pitch"	"95,100"
+	"soundlevel"	"SNDLVL_110dB"
+	"rndwave"
+	{		
+		"wave"	"player/ballbot/v2/ballbot_laugh_01.wav"
+		"wave"	"player/ballbot/v2/ballbot_laugh_02_80frames.wav"
+		"wave"	"player/ballbot/v2/ballbot_laugh_03_80frames.wav"
+		"wave"	"player/ballbot/v2/ballbot_laugh_04_80frames.wav"
+		"wave"	"player/ballbot/v2/ballbot_laugh_05_80frames.wav"
+	}
+}
+//**************************************
+//***END OF BATCH 1
+//**************************************

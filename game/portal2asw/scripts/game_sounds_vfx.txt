@@ -1,0 +1,537 @@
+"VFX.TBeamPosPolarity"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"vfx/tbeam_pos_lp_01.wav"
+	
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_ambient_sound_spatial"
+		
+			"source_info"
+			{
+				"source"   "entity"
+			}
+		}
+	}	
+}
+
+"VFX.TBeamNegPolarity"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"vfx/tbeam_neg_lp_01.wav"
+	
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_ambient_sound_spatial"
+		
+			"source_info"
+			{
+				"source"   "entity"
+			}
+		}
+	}	
+}
+
+"VFX.BridgeGlow"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_55db"
+	"volume"		"0.3"
+	"wave"		"vfx/bridge_glow_lp_01.wav"
+	
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_ambient_sound_spatial"
+		
+			"source_info"
+			{
+				"source"   "entity"
+			}
+		}
+	}
+}
+
+"VFX.PlayerEnterTbeam"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.90,1.00"
+	"pitch"		"90,105"
+	"rndwave"
+	{
+		"wave"		"vfx\player_enter_tbeam_lp_01.wav"
+		"wave"		"vfx\player_enter_tbeam_lp_02.wav"
+		"wave"		"vfx\player_enter_tbeam_lp_03.wav"
+	}
+}
+"VFX.PlayerEnterTbeam_SS"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.90,1.00"
+	"pitch"		"90,105"
+	"rndwave"
+	{
+		"wave"		"vfx\player_enter_tbeam_ss_lp_01.wav"
+		"wave"		"vfx\player_enter_tbeam_ss_lp_02.wav"
+		"wave"		"vfx\player_enter_tbeam_ss_lp_03.wav"
+	}
+}
+
+"VFX.FizzlerDestroy"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.85"
+	"wave"		")vfx/fizzler_shutdown_01.wav"
+	
+	"soundentry_version" "2"
+	
+}
+
+"VFX.FizzlerVortexLp"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_65dB"
+	"volume"		"0.7"
+	"wave"		")vfx/fizzler_vortex_lp_01.wav"
+	
+	"soundentry_version" "2"
+}
+
+"VFX.FizzlerLp"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.60"
+	"wave"		")vfx/fizzler_lp_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_ambient_sound_spatial"
+		
+			"source_info"
+			{
+				"source"   "entity"
+			}
+			//"import_stack"	"p2_update_default_pitch_ramp"			
+			//
+			//"volume_fade_out"
+			//{
+			//	"input_max" "0.8" //fade out time
+			//}
+			//
+			//"pitch_fade_in"
+			//{
+			//	"input_map_min" "0.8" //pitch to fade in from
+			//	"input_map_max" "1.0" //pitch to fade in to
+			//	"default_to_max" "false"	
+			//}
+		}
+		
+		"stop_stack"
+		{
+			"import_stack" "stop_and_play"
+		
+			"play_entry"
+			{
+				"entry_name" "VFX.FizzlerDestroy"
+			}		
+		}
+	}
+}
+
+"VFX.FizzlerStart"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.60"
+	"wave"		")vfx/fizzler_start_01.wav"
+}
+
+"VFX.TbeamEmitterStart"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.80"
+	"wave"		"props/tbeam_emitter_start_01.wav"
+}
+
+"VFX.TbeamEmitterMiddle"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.80"
+	"wave"		"props/tbeam_emitter_middle_01.wav"
+}
+
+"VFX.TbeamEmitterEnd"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"volume"		"0.80"
+	"wave"		"props/tbeam_emitter_end_01.wav"
+}
+
+"VFX.TbeamEmitterSpinLp"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_65db"
+	"volume"		"1.0"
+	"wave"		")props/tbeam_emitter_spin_lp_01.wav"
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+
+			"source_info"
+			{
+				// "source"   "entity"
+				"source"   "emitter"
+			}
+			"volume_mult"
+			{
+				"input1" "1.5"
+			}
+		}
+	}
+}
+
+"VFX.LaserBeamImpactLp"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_65db"
+	"volume"		"0.80"
+	"wave"		"vfx/laser_beam_impact_lp_01.wav"
+}
+
+"VFX.SphereFlashlightOn"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_95db"
+	"volume"		"1.0"
+	"wave"		"vfx/sphere_flashlight_on_01.wav"
+}
+
+"VFX.NeuroToxinLp"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_80db"
+	"volume"		"1.00"
+	"wave"		")vfx/vfx_ntoxin_lp.wav"
+}
+
+"VFX.LightFlicker"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_105db"
+	"volume"		"1.00"
+	"rndwave"
+	{
+		"wave"		")vfx/light_flicker/light_flicker_02.wav"
+		"wave"		")vfx/light_flicker/light_flicker_03.wav"
+		"wave"		")vfx/light_flicker/light_flicker_04.wav"
+		"wave"		")vfx/light_flicker/light_flicker_05.wav"
+		"wave"		")vfx/light_flicker/light_flicker_06.wav"
+		"wave"		")vfx/light_flicker/light_flicker_07.wav"
+		"wave"		")vfx/light_flicker/light_flicker_09.wav"
+		"wave"		")vfx/light_flicker/light_flicker_10.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_13.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_14.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_15.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_17.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_18.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_19.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_20.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_21.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_24.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_26.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_28.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_29.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_30.wav"
+	}
+			
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack"	"P2_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "VFX.LightFlicker"
+				"input_max_entries" "3.000000"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack"	"p2_offset_start_update_random"
+		
+			"delay_trigger"
+			{
+				"input2" "0.05" //Elapsed time in seconds goes here.
+			}
+			
+			"random_play"
+			{
+				"input_execute" "1.0"
+				"input_min" "0.0"
+				"input_max" "1.0"		
+			}	
+		
+			"percent_fire"
+			{
+				"input1" "0.1"
+			}	
+		
+			"triggered_sound"
+			{
+				"entry_name" "World.BigSpark"	
+			}
+			
+ 			"speakers_multi_origin"
+ 			{
+ 				"input_max_iterations" "0"
+ 			}
+
+		}
+	}
+}
+
+"VFX.LightFlickerEnd" 
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_105db"
+	"volume"		"1.0"
+	"rndwave"
+	{
+		"wave"		"vfx/light_flicker/light_flicker_end_01.wav"
+		"wave"		"vfx/light_flicker/light_flicker_end_02.wav"
+		"wave"		"vfx/light_flicker/light_flicker_end_03.wav"
+		"wave"		"vfx/light_flicker/light_flicker_end_04.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "World.LightFlickerEnd"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+
+			"block_entries"
+			{
+				"input_duration" "0.25" //in seconds
+				"match_entry" "World.LightFlickerEnd" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+		
+		"update_stack"
+		{
+			"import_stack"	"p2_offset_start_update"
+		
+			"time_elapsed_trigger"
+			{
+				"input2" "0.00" //Elapsed time in seconds goes here.
+			}
+		
+			"play_entry"
+			{
+				"entry_name" "World.LightPowerOnMd"	
+			}
+		
+			"time_elapsed_trigger_2"
+			{
+				"input2" "0.00" //Elapsed time in seconds goes here.
+			}
+		
+			"play_entry_2"
+			{
+				"entry_name" "World.LightFlickerPowerOn"	
+			} 
+		}
+	}
+}
+
+"VFX.LightFlickerAlt"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_80db"
+	"volume"		"0.80"
+	"rndwave"
+	{
+		"wave"		")vfx/light_flicker/light_flicker_02.wav"
+		"wave"		")vfx/light_flicker/light_flicker_03.wav"
+		"wave"		")vfx/light_flicker/light_flicker_04.wav"
+		"wave"		")vfx/light_flicker/light_flicker_05.wav"
+		"wave"		")vfx/light_flicker/light_flicker_06.wav"
+		"wave"		")vfx/light_flicker/light_flicker_07.wav"
+		"wave"		")vfx/light_flicker/light_flicker_09.wav"
+		"wave"		")vfx/light_flicker/light_flicker_10.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_13.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_14.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_15.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_17.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_18.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_19.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_20.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_21.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_24.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_26.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_28.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_29.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_30.wav"
+	}
+}
+
+"VFX.LightFlickerEndAlt" 
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_85db"
+	"volume"		"0.90"
+	"rndwave"
+	{
+		"wave"		")vfx/light_flicker/light_flicker_end_01.wav"
+		"wave"		")vfx/light_flicker/light_flicker_end_02.wav"
+		"wave"		")vfx/light_flicker/light_flicker_end_03.wav"
+		"wave"		")vfx/light_flicker/light_flicker_end_04.wav"
+	}
+}
+
+"VFX.OGSignFlicker"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_75db"
+	"volume"		"1.00"
+	"rndwave"
+	{
+		"wave"		")vfx/light_flicker/light_flicker_02.wav"
+		"wave"		")vfx/light_flicker/light_flicker_03.wav"
+		"wave"		")vfx/light_flicker/light_flicker_04.wav"
+		"wave"		")vfx/light_flicker/light_flicker_05.wav"
+		"wave"		")vfx/light_flicker/light_flicker_06.wav"
+		"wave"		")vfx/light_flicker/light_flicker_07.wav"
+		"wave"		")vfx/light_flicker/light_flicker_09.wav"
+		"wave"		")vfx/light_flicker/light_flicker_10.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_13.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_14.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_15.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_17.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_18.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_19.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_20.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_21.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_24.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_26.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_28.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_29.wav"
+		// "wave"		"vfx/light_flicker/light_flicker_30.wav"
+	}
+			
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack"	"P2_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "VFX.OGSignFlicker"
+				"input_max_entries" "3.000000"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack"	"p2_offset_start_update"
+		
+			"time_elapsed_trigger"
+			{
+				"input2" "0.25" //Elapsed time in seconds goes here.
+			}
+		
+			"play_entry"
+			{
+				"entry_name" "VFX.LightFlickerEndAlt"	
+			}
+
+		}
+	}
+}
+
+"VFX.LightFlickerEndMedium" 
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_105db"
+	"volume"		"0.7"
+	"rndwave"
+	{
+		"wave"		"vfx/light_flicker/light_flicker_end_01.wav"
+		"wave"		"vfx/light_flicker/light_flicker_end_02.wav"
+		"wave"		"vfx/light_flicker/light_flicker_end_03.wav"
+		"wave"		"vfx/light_flicker/light_flicker_end_04.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack"	"p2_offset_start_update"
+		
+			"time_elapsed_trigger"
+			{
+				"input2" "0.00" //Elapsed time in seconds goes here.
+			}
+		
+			"play_entry"
+			{
+				"entry_name" "World.LightPowerOnMd"	
+			}
+		}
+	}
+}
+
+"VFX.LightFlickerEndSmall" 
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_105db"
+	"volume"		"1.00"
+	"rndwave"
+	{
+		"wave"		"vfx/light_flicker/light_flicker_end_01.wav"
+		"wave"		"vfx/light_flicker/light_flicker_end_02.wav"
+		"wave"		"vfx/light_flicker/light_flicker_end_03.wav"
+		"wave"		"vfx/light_flicker/light_flicker_end_04.wav"
+	}
+}

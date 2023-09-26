@@ -1,0 +1,94 @@
+"ballbot.basketball_2_sfx"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave" "player/ballbot/taunts/store/ballbot_basketball_2_sfx_01.wav"
+}
+"ballbot.basketball_sfx"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave" "player/ballbot/taunts/store/ballbot_basketball_sfx_01.wav"
+}
+
+"ballbot.basketball_2_vo"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave" "player/ballbot/taunts/store/ballbot_basketball_2_vo_01.wav"
+}
+
+"ballbot.basketball_vo"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave" "player/ballbot/taunts/store/ballbot_basketball_vo_01.wav"
+}
+
+"ballbot.dance_spin_vo"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave" "player/ballbot/taunts/store/ballbot_dance_spin_vo_01.wav"
+}
+
+"ballbot.face_palm_vo"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave" "player/ballbot/taunts/store/ballbot_face_palm_vo_01.wav"
+}
+
+"ballbot.fist_pump_vo"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave" "player/ballbot/taunts/store/ballbot_fist_pump_vo_01.wav"
+}
+
+"ballbot.headspin_vo"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave" "player/ballbot/taunts/store/ballbot_headspin_vo_01.wav"
+}
+
+"ballbot.shrug_vo"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave" "player/ballbot/taunts/store/ballbot_shrug_vo_01.wav"
+}
+
+"ballbot.thumbsup_vo"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave" "player/ballbot/taunts/store/ballbot_thumbsup_vo_01.wav"
+}
+
+"ballbot.facepalm_sfx"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave" "player/coop_foley/coop_foley_replace_01.wav"
+}
+
+"ballbot.gun_replace_sfx"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave" "physics/metal/weapon_impact_soft3.wav"
+}

@@ -1,0 +1,24 @@
+GAME
+{
+    // PDA belongs to Brian Howe
+    
+    // inbox
+    
+	"MailFrom1"	"From: Helen Young"
+	"MailDate1"	"Date: 12/23/52"
+	"MailSubject1"	"Subject: Atrium closed!!"
+	"MailBody1A"	"Hi,"
+	"MailBody1B"	"They had to close the Atrium this morning!  Not just the south wing, but the entire facility.  We were told that the contamination has spread from Deck 2 through the ventilation system.  Security personnel are guarding the entire Northwest section of Deck 1.  They are quite unfriendly."
+	"MailBody1C"	"Meanwhile, I got mail from that idiot Ming this morning.  Seems that he and his men are still working in the labs, studying those eggs you discovered.  I'm certain his work does not have IA approval."
+	"MailBody1D"	"See you later--Helen."
+
+    // sent mail
+    
+	"MailFrom3"	"To: Helen Young"
+	"MailDate3"	"Date: 12/23/52"
+	"MailSubject3"	"Subject: Re: Atrium closed!"
+	"MailBody3A"	"Helen, things are bad down here!  We found another body tonight. This one partially devoured.  Something is down here.  Some thing.  Cain and a dozen of his crew showed up, took the elevator down to Timor Station, telling us to stay back.  A little while later, we heard gunfire."
+	"MailBody3B"	"When Cain came back, he was down to two men, both badly wounded. Cain, told me we had to pull our crew out the mine.  I said it's impossible, they're scattered all over the place.  He just shrugged at that.  Said it's my problem now.  Then he left."
+	"MailBody3C"	"So, I'll take Dave and Tom with me.  We'll do one last search for the missing workers.  I want you to inform IA agent Laura Callen about this.  While you're at it, tell her about Ming.  She's the only one with authority to stand up to Cain."
+	"MailBody3D"	"Be careful!  Brian."
+}

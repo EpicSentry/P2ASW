@@ -1,0 +1,18 @@
+
+"NPC_Mannequin.Servo_Step"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"0.9"
+	"soundlevel"	"SNDLVL_50dB"
+	"pitch"	"95,105"
+ "wave"	"npc/mannequin/servo10.wav" //(medium, short)
+}
+
+"NPC_Mannequin.Servo_Footstep"
+{
+	"channel"	"CHAN_AUTO"
+	"volume"	"0.9"
+	"soundlevel"	"SNDLVL_50dB"
+	"pitch"	"95,105"
+	"wave"	"npc/mannequin/servo8.wav" // (medium, rising)
+}

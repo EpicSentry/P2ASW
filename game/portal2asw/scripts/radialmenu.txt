@@ -1,0 +1,338 @@
+"RadialMenu"
+{
+	//--------------------------------------------------------------
+	"Default"
+	{
+		"North"
+		{
+			"command"	"countdown"
+			"icon"		"hud/commands/countdown"
+		}
+		"Center"
+		{
+			"command"	"look"
+			"icon"		"hud/commands/generic_look"
+		}
+		"South"
+		{
+			"command"	"move_here"
+			"icon"		"hud/commands/move_here"
+		}	
+	}
+	//--------------------------------------------------------------
+	"Command,Entity.prop_weighted_cube"
+	{
+		"North"
+		{
+			"command"	"countdown"
+			"icon"		"hud/commands/countdown"
+		}
+		"Center"
+		{
+			"command"	"look"
+			"icon"		"hud/commands/generic_look"
+		}
+		"South"
+		{
+			"command"	"move_here"
+			"icon"		"hud/commands/move_here"
+		}
+		"West"
+		{
+			"command"	"box_pickup"
+			"icon"		"hud/commands/box_pickup"
+		}	
+		"East"
+		{
+			"command"	"box_putdown"
+			"icon"		"hud/commands/box_drop"
+		}	
+	}
+	//--------------------------------------------------------------
+	"Command,Entity.prop_floor_cube_button"
+	{
+		"North"
+		{
+			"command"	"countdown"
+			"icon"		"hud/commands/countdown"
+		}
+		"Center"
+		{
+			"command"	"look"
+			"icon"		"hud/commands/generic_look"
+		}
+		"South"
+		{
+			"command"	"move_here"
+			"icon"		"hud/commands/move_here"
+		}	
+		"West"
+		{
+			"command"	"button_press"
+			"icon"		"hud/commands/button_press"
+		}	
+	}
+	//--------------------------------------------------------------
+	"Command,Entity.prop_button"
+	{
+		"North"
+		{
+			"command"	"countdown"
+			"icon"		"hud/commands/countdown"
+		}
+		"Center"
+		{
+			"command"	"look"
+			"icon"		"hud/commands/generic_look"
+		}
+		"South"
+		{
+			"command"	"move_here"
+			"icon"		"hud/commands/move_here"
+		}
+		"West"
+		{
+			"command"	"button_tall_press"
+			"icon"		"hud/commands/button_tall_press"
+		}	
+	}
+	//--------------------------------------------------------------
+	"Command,Entity.prop_floor_button"
+	{
+		"North"
+		{
+			"command"	"countdown"
+			"icon"		"hud/commands/countdown"
+		}
+		"Center"
+		{
+			"command"	"look"
+			"icon"		"hud/commands/generic_look"
+		}
+		"South"
+		{
+			"command"	"move_here"
+			"icon"		"hud/commands/move_here"
+		}
+		"West"
+		{
+			"command"	"button_press"
+			"icon"		"hud/commands/button_press"
+		}	
+	}
+	//--------------------------------------------------------------
+	"Command,Entity.npc_portal_turret_floor"
+	{
+		"North"
+		{
+			"command"	"countdown"
+			"icon"		"hud/commands/countdown"
+		}
+		"Center"
+		{
+			"command"	"look"
+			"icon"		"hud/commands/generic_look"
+		}
+		"South"
+		{
+			"command"	"move_here"
+			"icon"		"hud/commands/move_here"
+		}
+	}
+	//--------------------------------------------------------------
+	"Command,World.Wall"
+	{
+		"North"
+		{
+			"command"	"countdown"
+			"icon"		"hud/commands/countdown"
+			"glados"	"2"
+		}
+		"Center"
+		{
+			"command"	"look"
+			"icon"		"hud/commands/generic_look"
+			"glados"	"2"
+		}
+		"South"
+		{
+			"command"	"move_here"
+			"icon"		"hud/commands/move_here"
+			"glados"	"2"
+		}
+		"West"
+		{
+			"command"	"portal_place_wall"
+			"icon"		"hud/commands/portal_place_wall"
+			"glados"	"2"
+		}
+	}
+	//--------------------------------------------------------------
+	"Command,World.NoPortal_Wall"
+	{
+		"North"
+		{
+			"command"	"countdown"
+			"icon"		"hud/commands/countdown"
+			"glados"	"1"
+		}
+		"Center"
+		{
+			"command"	"look"
+			"icon"		"hud/commands/generic_look"
+			"glados"	"1"
+		}
+		"South"
+		{
+			"command"	"move_here"
+			"icon"		"hud/commands/move_here"
+			"glados"	"1"
+		}	
+	}
+	//--------------------------------------------------------------
+	"Command,World.Ceiling"
+	{
+		"North"
+		{
+			"command"	"countdown"
+			"icon"		"hud/commands/countdown"
+			"glados"	"2"
+		}
+		"Center"
+		{
+			"command"	"look"
+			"icon"		"hud/commands/generic_look"
+			"glados"	"2"
+		}
+		"West"
+		{
+			"command"	"portal_place_wall"
+			"icon"		"hud/commands/portal_place_wall"
+			"glados"	"2"
+		}	
+	}
+	//--------------------------------------------------------------
+	"Command,World.NoPortal_Ceiling"
+	{
+		"North"
+		{
+			"command"	"countdown"
+			"icon"		"hud/commands/countdown"
+			"glados"	"1"
+		}
+		"Center"
+		{
+			"command"	"look"
+			"icon"		"hud/commands/generic_look"
+			"glados"	"1"
+		}		
+	}
+	//--------------------------------------------------------------
+	"Command,World.Floor"
+	{
+		"North"
+		{
+			"command"	"countdown"
+			"icon"		"hud/commands/countdown"
+			"glados"	"2"
+		}
+		"Center"
+		{
+			"command"	"look"
+			"icon"		"hud/commands/generic_look"
+			"glados"	"2"
+		}
+		"South"
+		{
+			"command"	"move_here"
+			"icon"		"hud/commands/move_here"
+			"glados"	"2"
+		}
+		"West"
+		{
+			"command"	"portal_place_floor"
+			"icon"		"hud/commands/portal_place_wall"
+			"glados"	"2"
+		}
+	}
+	//--------------------------------------------------------------
+	"Command,World.NoPortal_Floor"
+	{
+		"North"
+		{
+			"command"	"countdown"
+			"icon"		"hud/commands/countdown"
+			"glados"	"1"
+		}
+		"Center"
+		{
+			"command"	"look"
+			"icon"		"hud/commands/generic_look"
+			"glados"	"1"
+		}
+		"South"
+		{
+			"command"	"move_here"
+			"icon"		"hud/commands/move_here"
+			"glados"	"1"
+		}
+	}
+	//--------------------------------------------------------------
+	"Command,Portal.Orange"
+	{
+		"North"
+		{
+			"command"	"countdown"
+			"icon"		"hud/commands/countdown"
+		}
+		"Center"
+		{
+			"command"	"look"
+			"icon"		"hud/commands/generic_look"
+		}
+		"South"
+		{
+			"command"	"move_here"
+			"icon"		"hud/commands/move_here"
+		}
+		"West"
+		{
+			"command"	"portal_enter"
+			"icon"		"hud/commands/portal_enter_wall"
+		}
+		"East"
+		{
+			"command"	"portal_exit"
+			"icon"		"hud/commands/portal_exit_wall"
+		}	
+	}
+	//--------------------------------------------------------------
+	"Command,Portal.Blue"
+	{
+		"North"
+		{
+			"command"	"countdown"
+			"icon"		"hud/commands/countdown"
+		}
+		"Center"
+		{
+			"command"	"look"
+			"icon"		"hud/commands/generic_look"
+		}
+		"South"
+		{
+			"command"	"move_here"
+			"icon"		"hud/commands/move_here"
+		}
+		"West"
+		{
+			"command"	"portal_enter"
+			"icon"		"hud/commands/portal_enter_wall"
+		}
+		"East"
+		{
+			"command"	"portal_exit"
+			"icon"		"hud/commands/portal_exit_wall"
+		}
+	}
+}

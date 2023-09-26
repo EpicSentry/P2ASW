@@ -1,0 +1,269 @@
+"NPC_FloorTurret.Retire"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_70dB"
+	"wave"		"npc/turret_floor/retract.wav"
+}
+
+"NPC_FloorTurret.Deploy"
+{
+	"channel"		"CHAN_BODY"
+	"soundlevel"		"SNDLVL_70dB"
+	"wave"		"npc/turret_floor/deploy.wav"
+}
+
+"NPC_FloorTurret.Move"
+{
+	"soundlevel"		"SNDLVL_70dB"
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.10"
+	"wave"		"npc/turret_wall/turret_loop1.wav"
+}
+
+"NPC_FloorTurret.Activate"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_IDLE"
+	"wave"		"npc/turret_floor/active.wav"
+}
+"NPC_FloorTurret.Alert"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_TALKING"
+	"wave"		"npc/turret_floor/alert.wav"
+}
+
+"NPC_FloorTurret.Shoot"
+{
+	"channel"		"CHAN_WEAPON"
+	"soundlevel"		"SNDLVL_GUNFIRE"
+	"wave"		"^npc/turret_floor/shoot1.wav"
+}
+
+"NPC_FloorTurret.ShotSounds"
+{
+	"channel"		"CHAN_WEAPON"
+	"soundlevel"		"SNDLVL_GUNFIRE"
+	"rndwave"
+	{
+		"wave"		"^npc/turret/turret_fire_4x_01.wav"
+		"wave"		"^npc/turret/turret_fire_4x_02.wav"
+		"wave"		"^npc/turret/turret_fire_4x_03.wav"
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "NPC_FloorTurret.ShotSounds"
+				"input_max_entries" "2.000000"
+				"match_substring" "false"
+			}		
+			
+			"get_random"
+			{	
+				"input_execute" "1.0"
+				"input_min" "0.19"
+				"input_max" "0.27"		
+			}
+			
+			"block_entries"
+			{
+				"input_duration" "@get_random.output" //in seconds
+				"match_entry" "NPC_FloorTurret.ShotSounds" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		
+		"update_stack"
+		{
+			"import_stack"	"p2_update_default"
+			
+ 			"speakers_multi_origin"
+ 			{
+ 				"input_max_iterations" "0"
+ 			}
+		}
+	}
+}
+
+"NPC_FloorTurret.Die"
+{
+	"channel"		"CHAN_BODY"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.75"
+	"wave"		"npc/turret_floor/die.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{			
+			"level_specific_check"
+			{
+				"input_execute" "1.0" //enable map checking here
+				"operator" "get_map_name"
+				"map_name" "sp_a4_laser_catapult" //we can remap this sound and since it's already hooked up we can do this without a map rebuild which everyone is paranoid about.
+			}
+			
+			"import_stack"	"P2_null_player_start"
+			
+			"play_entry"
+			{
+				"input_execute" "@level_specific_check.output" //enable map checking here
+				"entry_name" "World.PlatformStop" //Replace with the sound you want to play.
+			}
+
+			"block_start"
+			{	
+				"input_execute" "@level_specific_check.output" //enable map checking here
+			}	
+		}
+	}
+}
+
+"NPC_FloorTurret.Retract"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_70dB"
+	"wave"		"npc/turret_floor/retract.wav"
+}
+
+"NPC_FloorTurret.Alarm"
+{
+	"channel"		"CHAN_BODY"
+	"soundlevel"		"SNDLVL_TALKING"
+	"wave"		"npc/turret_floor/alarm.wav"
+}
+
+"NPC_FloorTurret.Ping"
+{
+	"channel"		"CHAN_BODY"
+	"soundlevel"		"SNDLVL_IDLE"
+	"volume"		"0.75"
+	"wave"		"npc/turret_floor/ping.wav"
+}
+
+"NPC_FloorTurret.Destruct"
+{
+	"channel"		"CHAN_BODY"
+	"soundlevel"	"SNDLVL_150dB"
+	"pitch"			"85,105"
+	"volume"		"1.0"
+	"rndwave"
+	{
+		"wave"		"props/explosions/explo_generic_med_01.wav"
+		"wave"		"props/explosions/explo_generic_med_02.wav"
+		"wave"		"props/explosions/explo_generic_med_03.wav"
+		"wave"		"props/explosions/explo_generic_med_04.wav"
+		"wave"		"props/explosions/explo_generic_med_05.wav"
+		"wave"		"props/explosions/explo_generic_med_06.wav"
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack"	"p2_update_default"
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "xLoud"
+			}
+		}
+	}
+}
+
+"NPC_FloorTurret.DryFire"
+{
+	"channel"		"CHAN_WEAPON"
+	"soundlevel"		"SNDLVL_70dB"
+	"volume"		"0.70"
+	"pitch"		"95,100"
+	"wave"		"^weapons/shotgun/shotgun_empty.wav"
+}
+
+"NPC_TripwireTurret.Reload"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_85dB"
+	"volume"		"0.85"
+	"wave"		")world/sphere_socket_attach_01.wav"
+}
+
+"NPC_TripwireTurret.LockedBeep"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_85dB"
+	"wave"		"weapons\rocket\rocket_locked_beep1.wav"
+}
+
+"NPC_TripwireTurret.LockingBeep"
+{
+	"channel"		"CHAN_ITEM"
+	"soundlevel"		"SNDLVL_TALKING"
+	"wave"		"weapons\rocket\rocket_locking_beep1.wav"
+}
+"NPC_FloorTurret.TalkFlung"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_TALKING"
+	"rndwave"
+	{
+		"wave"		"npc/turret/TurretLaunched01.wav"
+		"wave"		"npc/turret/TurretLaunched04.wav"
+		"wave"		"npc/turret/TurretLaunched08.wav"
+		"wave"		"npc/turret/TurretLaunched11.wav"
+	}
+}
+"NPC_FloorTurret.TalkBurned"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_TALKING"
+	"rndwave"
+	{
+		"wave"		"npc/turret/TurretShotbylaser01.wav"
+		"wave"		"npc/turret/TurretShotbylaser02.wav"
+		"wave"		"npc/turret/TurretShotbylaser03.wav"
+		"wave"		"npc/turret/TurretShotbylaser04.wav"
+	}
+}
+"NPC_FloorTurret.TalkStartBurning"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_TALKING"
+	"wave"		"npc/turret/TurretShotbylaser05.wav"
+}
+
+"NPC_FloorTurret.Distressed"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_TALKING"
+	"rndwave"
+	{
+		"wave"		"npc/turret/TurretLaunched01.wav"
+		"wave"		"npc/turret/TurretLaunched04.wav"
+		"wave"		"npc/turret/TurretLaunched08.wav"
+		"wave"		"npc/turret/TurretLaunched11.wav"
+	}
+}
+
+"Bullets.GunshipNearmiss"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_TALKING"
+	"wave"		"common/null.wav"
+}
+

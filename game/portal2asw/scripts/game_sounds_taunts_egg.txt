@@ -1,0 +1,55 @@
+"egg.face_palm"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave" "player/eggbot/taunts/store/egg_face_palm.wav"
+}
+"egg.pretzel_wave"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave" "player/eggbot/taunts/store/egg_pretzel_wave.wav"
+}
+"egg.selfspin"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave" "player/eggbot/taunts/store/egg_selfspin.wav"
+}
+"egg.shrug"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave" "player/eggbot/taunts/store/egg_shrug.wav"
+}
+"egg.sitspin"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+	
+	"wave" "player/eggbot/taunts/store/egg_sitspin.wav"
+}
+"egg.spin_jump"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave" "player/eggbot/taunts/store/egg_spin_jump.wav"
+}
+"egg.thumbs_up"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave" "player/eggbot/taunts/store/egg_thumbs_up.wav"
+}
+"egg.yes_fist_pump"
+{
+	"channel"		"CHAN_VOICE"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave" "player/eggbot/taunts/store/egg_yes_fist_pump.wav"
+}

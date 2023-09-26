@@ -1,0 +1,9 @@
+GAME
+{
+	"Headline"	"New Cellular Processes Discovered"
+	"HeadlineDate"	"12/19/52"
+	"Paragraph1"	"It is well understood that the human brain requires a steady supply of chemical energy to function properly.  SynTek Research Scientist Dr Lucas Weinburg recently announced his discovery of the genetic program which regulates this energy supply."
+	"Paragraph2"	"Having identified the receptor which controls the process, Dr Lucas is able to alter the supply and allow longer periods of conciousness.  'Eight out of 10 test subjects have easily switched from a 24 hour cycle to a 29 hour one with no ill effects,' said Lucas."
+	"Paragraph3"	"'Subjects feel healthy, strong, refreshed and ready for productive work.  Only two have complained about feeling unfocused'.  His tests also show that seven of the 10 subjects have stopped dreaming during their sleeping period."
+	"Paragraph4"	"If this technique passes long term safety tests, this could be another sensational medical achievement for the SynTek Megacorporation."
+}

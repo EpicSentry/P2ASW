@@ -1,0 +1,8 @@
+// Valve Game Info file
+//  These are key/value pairs.  Certain mods will use different settings.
+//
+game "Portal 2"
+startmap "mp_coop_start"
+trainingmap "mp_coop_start"
+hlversion "1000"
+mpentity "info_coop_spawn"

@@ -1,0 +1,661 @@
+"BR.train_interior_1"
+{
+	"dsp"	"1"
+	"fadetime" "0"
+
+
+
+	"playlooping"
+	{
+		"volume"	".75"	
+		"wave"		"BR/train/BR_Track_lp_01.wav"
+		"pitch"		"100"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	"1"	
+		"wave"		"BR/train/BR_Track_lp_03.wav"
+		"pitch"		"100"
+
+	}
+
+
+	"playrandom"
+	{
+		"volume"	".3"
+		"pitch"		"85,105"
+		"time"		"5.0, 9.0"
+		"position"	"random"
+		"rndwave"
+		{
+			"wave" "BR/train/BR_train_squeal_01.wav"
+			"wave" "BR/train/BR_train_squeal_02.wav"
+			"wave" "BR/train/BR_train_squeal_03.wav"
+			"wave" "BR/train/BR_train_squeal_04.wav"
+			"wave" "BR/train/BR_train_squeal_05.wav"
+			"wave" "BR/train/BR_train_squeal_06.wav"
+			"wave" "BR/train/BR_train_squeal_07.wav"
+		}
+	}	
+}
+
+// i just want to get ride of the track sounds for now
+"BR.train_knocked_out"
+{
+	"dsp"	"1"
+	"fadetime" "0"
+
+	"playsoundscape"
+	{
+		"name" "util.random.metal_groans"
+		"volume" ".39"
+	}
+
+	"playsoundscape"
+	{
+		"name" "utility.metal.imp.lo"
+		"volume" ".4"
+	}	
+}
+
+
+	
+"train.exterior_intro_fade"
+{
+	"dsp"	"1"
+	"fadetime" "5"
+
+	"playlooping"
+	{
+		"volume"	".2"	
+		"wave"		")BR/Ambience/BR_Crikt_lp_01.wav"
+		"pitch"		"100"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"wave"		"BR/Ambience/BR_fire_lp_01.wav"
+		"origin"	"-906.048218, -430.653961, 3.686710;"
+		"soundlevel" 	"SNDLVL_65dB"
+		"pitch"		"110"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"wave"		"BR/Ambience/BR_fire_lp_01.wav"
+		"origin"	"-298.170593, -95.631233, 39.436630;"
+		"soundlevel" 	"SNDLVL_70dB"
+		"pitch"		"100"
+
+	}
+	"playlooping"
+	{
+		"volume"	"0.76"
+		"wave"		"BR/Ambience/BR_fire_lp_01.wav"
+		"origin"	"-410.924896, -416.140991, 21.587959;"
+		"soundlevel" 	"SNDLVL_70dB"
+		"pitch"		"115"
+
+	}
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"wave"		"ambient/fire/fire_small_loop2.wav"
+		"origin"	"231.945313, -302.427673, 4.078846;"
+		"soundlevel" 	"SNDLVL_70dB"
+		"pitch"		"90"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"wave"		"ambient/fire/fire_small_loop2.wav"
+		"origin"	"-632.454285, 51.798447, 94.078331;"
+		"soundlevel" 	"SNDLVL_65dB"
+		"pitch"		"100"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.9"
+		"wave"		"ambient/fire/amb_ember_loop_01.wav"
+		"origin"	"103.25068, 786.134644, 0.031250;"
+		"soundlevel" 	"SNDLVL_70dB"
+		"pitch"		"100"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.9"
+		"wave"		"ambient/fire/amb_ember_loop_01.wav"
+		"origin"	"-940.070923, 453.074158, 33.521744;"
+		"soundlevel" 	"SNDLVL_70dB"
+		"pitch"		"100"
+
+	}
+	
+	
+}
+
+"train.exterior"
+{
+	"dsp"	"1"
+	"fadetime" "0"
+
+
+
+	"playlooping"
+	{
+		"volume"	".2"	
+		"wave"		")BR/Ambience/BR_Crikt_lp_01.wav"
+		"pitch"		"100"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"wave"		"BR/Ambience/BR_fire_lp_01.wav"
+		"origin"	"-906.048218, -430.653961, 3.686710;"
+		"soundlevel" 	"SNDLVL_65dB"
+		"pitch"		"110"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"wave"		"BR/Ambience/BR_fire_lp_01.wav"
+		"origin"	"-298.170593, -95.631233, 39.436630;"
+		"soundlevel" 	"SNDLVL_70dB"
+		"pitch"		"100"
+
+	}
+	"playlooping"
+	{
+		"volume"	"0.76"
+		"wave"		"BR/Ambience/BR_fire_lp_01.wav"
+		"origin"	"-410.924896, -416.140991, 21.587959;"
+		"soundlevel" 	"SNDLVL_70dB"
+		"pitch"		"115"
+
+	}
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"wave"		"ambient/fire/fire_small_loop2.wav"
+		"origin"	"231.945313, -302.427673, 4.078846;"
+		"soundlevel" 	"SNDLVL_70dB"
+		"pitch"		"90"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"wave"		"ambient/fire/fire_small_loop2.wav"
+		"origin"	"-632.454285, 51.798447, 94.078331;"
+		"soundlevel" 	"SNDLVL_65dB"
+		"pitch"		"100"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.9"
+		"wave"		"ambient/fire/amb_ember_loop_01.wav"
+		"origin"	"103.25068, 786.134644, 0.031250;"
+		"soundlevel" 	"SNDLVL_70dB"
+		"pitch"		"100"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.9"
+		"wave"		"ambient/fire/amb_ember_loop_01.wav"
+		"origin"	"-940.070923, 453.074158, 33.521744;"
+		"soundlevel" 	"SNDLVL_70dB"
+		"pitch"		"100"
+
+	}
+
+	"playsoundscape"
+	{
+		"name" "TestChamber_Industrial.BowedMetal_01"
+		"volume" ".4"
+	}
+
+
+	"playsoundscape"
+	{
+		"name" "util.random.rockdebris"
+		"volume" ".8"
+	}
+
+	"playsoundscape"
+	{
+		"name" "BR_metals"
+		"volume" ".5"
+	}
+
+	
+	
+}
+
+
+
+"train.exterior.quiet"
+{
+	"dsp"	"1"
+	"fadetime" "0"
+
+
+
+	"playlooping"
+	{
+		"volume"	".13"	
+		"wave"		")BR/Ambience/BR_Crikt_lp_01.wav"
+		"pitch"		"100"
+
+	}
+
+
+	"playsoundscape"
+	{
+		"name" 		"traincar.mvmnt"
+		"volume"	 "1"
+		"ambientoriginoverride"	"-127.301659, -596.039124, 17.069912;"
+	}
+
+
+	"playsoundscape"
+	{
+		"name" 		"traincar.mvmnt"
+		"volume"	 ".7"
+		"ambientoriginoverride"	"-127.301659, -596.039124, 17.069912;"
+	}
+
+	"playsoundscape"
+	{
+		"name" 		"traincar.mvmnt"
+		"volume"	 ".9"
+		"ambientoriginoverride"	"-127.301659, -596.039124, 17.069912;"
+	}
+
+
+
+
+
+	
+
+	"playlooping"
+	{
+		"volume"	"0.9"
+		"wave"		"ambient/fire/amb_ember_loop_01.wav"
+		"origin"	"-940.070923, 453.074158, 33.521744;"
+		"soundlevel" 	"SNDLVL_70dB"
+		"pitch"		"100"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		"BR/ambience/gas_release_lp.wav"
+		"origin"	"-407.298828, -562.560669, 17.889231;"
+		"soundlevel" 	"SNDLVL_65dB"
+		"pitch"		"80"
+
+	}
+	
+	
+}
+
+"TestChamber_Industrial.BowedMetal_01"
+{
+	"dsp"	"1"
+	
+	"playrandom"
+	{
+		"volume"	"0.65,0.8"
+		"pitch"		"75, 100"
+		"time"		"10.0, 15.0"
+		"position"	"random"
+		"soundlevel"	"SNDLVL_75dB"
+		"rndwave"
+		{
+			"wave" "playonce/ambient/metal/amb_metal_bowed_wronk_01.wav"
+			"wave" "playonce/ambient/metal/amb_metal_bowed_wronk_02.wav"
+			"wave" "playonce/ambient/metal/amb_metal_bowed_wronk_03.wav"
+			"wave" "playonce/ambient/metal/amb_metal_bowed_wronk_04.wav"
+			"wave" "playonce/ambient/metal/amb_metal_bowed_wronk_05.wav"
+			"wave" "playonce/ambient/metal/amb_metal_bowed_wronk_06.wav"
+			"wave" "playonce/ambient/metal/amb_metal_bowed_wronk_07.wav"
+			"wave" "playonce/ambient/metal/amb_metal_bowed_wronk_08.wav"
+			"wave" "playonce/ambient/metal/amb_metal_bowed_wronk_09.wav"
+			"wave" "playonce/ambient/metal/amb_metal_bowed_wronk_10.wav"
+			"wave" "playonce/ambient/metal/amb_metal_bowed_wronk_11.wav"
+			"wave" "playonce/ambient/metal/amb_metal_bowed_wronk_12.wav"
+			"wave" "playonce/ambient/metal/amb_metal_bowed_wronk_13.wav"
+			"wave" "playonce/ambient/metal/amb_metal_bowed_wronk_14.wav"
+			"wave" "playonce/ambient/metal/amb_metal_bowed_wronk_15.wav"
+			"wave" "playonce/ambient/metal/amb_metal_bowed_wronk_16.wav"
+			"wave" "playonce/ambient/metal/amb_metal_bowed_wronk_17.wav"
+		}
+	}
+
+
+
+}
+
+
+"traincar.mvmnt"
+{
+	"dsp"	"1"
+	
+	"playrandom"
+	{
+		"volume"	"1.0"
+		"pitch"		"85, 100"
+		"time"		"1.0, 7.0"
+
+		"soundlevel"	"SNDLVL_70dB"
+		"rndwave"
+		{
+			"wave" "BR/Ambience/rnd_mv_01.wav"
+			"wave" "BR/Ambience/rnd_mv_02.wav"
+			"wave" "BR/Ambience/rnd_mv_03.wav"
+			"wave" "BR/Ambience/rnd_mv_04.wav"
+			"wave" "BR/Ambience/rnd_mv_05.wav"
+			"wave" "BR/Ambience/rnd_mv_06.wav"
+			"wave" "BR/Ambience/rnd_mv_07.wav"
+			"wave" "BR/Ambience/rnd_mv_08.wav"
+			"wave" "BR/Ambience/rnd_mv_09.wav"
+			"wave" "BR/Ambience/rnd_mv_10.wav"
+			"wave" "BR/Ambience/rnd_mv_11.wav"
+			"wave" "BR/Ambience/rnd_mv_12.wav"
+			"wave" "BR/Ambience/rnd_mv_13.wav"
+			"wave" "BR/Ambience/rnd_mv_14.wav"
+			"wave" "BR/Ambience/rnd_mv_15.wav"
+			"wave" "BR/Ambience/rnd_mv_16.wav"
+		}
+	}
+}
+
+"TestChamber_Industrial.WarehouseImpact_01"
+{
+	"dsp"	"1"
+	
+	"playrandom"
+	{
+		"volume"	"1.0"
+		"pitch"		"85, 100"
+		"time"		"5.0, 15.0"
+		"position"	"random"
+		"soundlevel"	"SNDLVL_85dB"
+		"rndwave"
+		{
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_01.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_02.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_03.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_04.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_05.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_06.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_07.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_08.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_09.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_10.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_11.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_12.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_13.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_14.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_15.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_16.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_17.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_18.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_19.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_20.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_21.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_22.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_23.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_24.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_25.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_26.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_27.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_28.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_29.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_30.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_31.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_32.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_33.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_34.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_35.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_36.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_37.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_38.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_39.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_40.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_41.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_42.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_43.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_44.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_45.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_46.wav"
+		}
+	}
+}
+
+"TestChamber_Industrial.WarehouseImpact_02"
+{
+	"dsp"	"1"
+	
+	"playrandom"
+	{
+		"volume"	"1.0"
+		"pitch"		"85, 100"
+		"time"		"4.0, 11.0"
+		"position"	"random"
+		"soundlevel"	"SNDLVL_85dB"
+		"rndwave"
+		{
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_01.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_02.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_03.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_04.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_05.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_06.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_07.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_08.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_09.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_10.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_11.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_12.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_13.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_14.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_15.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_16.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_17.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_18.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_19.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_20.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_21.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_22.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_23.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_24.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_25.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_26.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_27.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_28.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_29.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_30.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_31.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_32.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_33.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_34.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_35.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_36.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_37.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_38.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_39.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_40.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_41.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_42.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_43.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_44.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_45.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_46.wav"
+		}
+	}
+}
+
+"TestChamber_Industrial.WarehouseImpact_03"
+{
+	"dsp"	"1"
+	
+	"playrandom"
+	{
+		"volume"	"1.0"
+		"pitch"		"85, 100"
+		"time"		"2.0, 6.0"
+		"position"	"random"
+		"soundlevel"	"SNDLVL_85dB"
+		"rndwave"
+		{
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_01.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_02.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_03.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_04.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_05.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_06.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_07.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_08.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_09.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_10.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_11.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_12.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_13.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_14.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_15.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_16.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_17.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_18.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_19.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_20.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_21.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_22.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_23.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_24.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_25.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_26.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_27.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_28.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_29.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_30.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_31.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_32.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_33.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_34.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_35.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_36.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_37.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_38.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_39.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_40.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_41.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_42.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_43.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_44.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_45.wav"
+			"wave" "playonce/ambient/metal/amb_metal_imp_warehouse_46.wav"
+		}
+	}
+}
+
+"TestChamber_Industrial.WarehouseMotor_01"
+{
+	"dsp"	"1"
+
+	"playlooping"
+	{
+		"volume"	"1.0"	
+		"wave"	"ambient/metal/amb_motor_warehouse_lp_01.wav"
+		"pitch"		"100"
+		"attenuation"	"0"
+	}
+}
+
+"TestChamber_Industrial.WarehousePower_01"
+{
+	"dsp"	"1"
+
+	"playlooping"
+	{
+		"volume"	"1.0"	
+		"wave"	"ambient/industrial/amb_warehouse_power_lp_01.wav"
+		"pitch"		"100"
+		"attenuation"	"0"
+	}
+}
+
+"TestChamber_Industrial.HotelFluorescents_01"
+{
+	"dsp"	"1"
+
+	"playlooping"
+	{
+		"volume"	"1.0"	
+		"wave"	"ambient/electrical/amb_hotel_fluorescent_lights_lp_01.wav"
+		"pitch"		"100"
+		"attenuation"	"0"
+	}
+}
+
+"BR_metals"
+{
+	"dsp"	"1"
+	
+	"playrandom"
+	{
+		"volume"	"1.0"
+		"pitch"		"65, 100"
+		"time"		"4.0, 11.0"
+		"position"	"random"
+		"rndwave"
+		{
+			"wave" "BR/Ambience/BR_metal_randoms_grn_01.wav"
+			"wave" "BR/Ambience/BR_metal_randoms_grn_02.wav"
+			"wave" "BR/Ambience/BR_metal_randoms_grn_03.wav"
+			"wave" "BR/Ambience/BR_metal_randoms_grn_04.wav"
+			"wave" "BR/Ambience/BR_metal_randoms_grn_05.wav"
+			"wave" "BR/Ambience/BR_metal_randoms_grn_06.wav"
+			"wave" "BR/Ambience/BR_metal_randoms_grn_07.wav"
+			"wave" "BR/Ambience/BR_metal_randoms_grn_08.wav"
+			"wave" "BR/Ambience/BR_metal_randoms_grn_09.wav"
+			"wave" "BR/Ambience/BR_metal_randoms_grn_10.wav"
+			"wave" "BR/Ambience/BR_metal_randoms_imp_01.wav"
+			"wave" "BR/Ambience/BR_metal_randoms_imp_02.wav"
+			"wave" "BR/Ambience/BR_metal_randoms_imp_03.wav"
+			"wave" "BR/Ambience/BR_metal_randoms_imp_04.wav"
+			"wave" "BR/Ambience/BR_metal_randoms_imp_05.wav"
+			"wave" "BR/Ambience/BR_metal_randoms_imp_06.wav"
+			"wave" "BR/Ambience/BR_metal_randoms_imp_07.wav"
+			"wave" "BR/Ambience/BR_metal_randoms_imp_08.wav"
+			"wave" "BR/Ambience/BR_metal_randoms_imp_09.wav"
+			"wave" "BR/Ambience/BR_metal_randoms_imp_10.wav"
+		}
+	}
+}
+
+
+
+

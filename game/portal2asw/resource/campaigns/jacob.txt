@@ -1,0 +1,151 @@
+GAME
+{
+	// identifier for this campaign
+	"CampaignName" "Jacob's Rest"
+	
+	// description shown on the main menu when choosing which campaign to play
+	"CampaignDescription" "IAF Command has received a distress signal from the remote planet of Vereon XII.  It appears the Swarm have attacked Jacob's Rest, SynTek's research and mining colony. IAF Command is sending your squad to strike back at the Swarm and halt the infestation."
+	
+	// texture used on the main menu when choosing which campaign to play
+	"ChooseCampaignTexture" "swarm/ObjectivePics/oblandinghack"
+	
+	// texture used on the campaign screen for the map
+	"CampaignTextureName" "swarm/Campaign/JacobCampaignMap"
+	// these textures are overlaid on top of the campaign map in order
+	"CampaignTextureLayer1" "swarm/Campaign/JacobCampaignMap_Haze"
+	"CampaignTextureLayer2" "swarm/Campaign/JacobCampaignMap_SnowNear"
+	"CampaignTextureLayer3" "swarm/Campaign/JacobCampaignMap_SnowFar"
+	
+	// position of this campaign in the galactic map (coords go from 0 to 1023)
+	"GalaxyX"   "660"
+	"GalaxyY"   "262"
+	
+	// searchlights (optional, max of 4)
+	// angle: 0 is right, 90 is up, 180 is left, 270 is down
+	"Searchlight1X" "217"
+	"Searchlight1Y" "860"
+	"Searchlight1Angle" "80"
+	"Searchlight2X" "263"
+	"Searchlight2Y" "751"
+	"Searchlight2Angle" "100"
+	"Searchlight3X" "92"
+	"Searchlight3Y" "446"
+	"Searchlight3Angle" "90"
+	"Searchlight4X" "580"
+	"Searchlight4Y" "266"
+	"Searchlight4Angle" "90"
+	
+	// first mission entry is a dummy for the starting point
+	"MISSION"
+	{
+		"MissionName"	"Atmospheric Entry"
+		"MapName"	"dropzone"
+		"LocationX"	"481"
+		"LocationY"	"877"
+		"DifficultyModifier" "-2"
+		"Links"		"ASI-Jac1-LandingBay_01" 
+		"LocationDescription"  "Atmospheric Entry"
+		"ShortBriefing"  "Atmospheric reports show nominal weather patterns at this location.  Dropship Bloodhound will enter atmosphere at these co-ordinates and proceed to primary objective."
+	}
+	
+	// each mission listed
+	"MISSION"
+	{
+		"MissionName"	"Landing Bay"		// name used on the map screen, etc.
+		"MapName"	"ASI-Jac1-LandingBay_01"		// name of the map file
+		"LocationX"	"275"			// location of the dot on the map
+		"LocationY"	"856"			// (from 0 to 1023, on the above texture)
+		"DifficultyModifier" "-2"
+		"ThreatString" "1"    // Threat level string to help players decide where to go next
+		"Links"		"dropzone ASI-Jac1-LandingBay_02"	// map names of neighbours
+		"LocationDescription" "Landing bay"
+		"ShortBriefing"  "Squad will deploy at the colony's standard Category 5 Landing Bay.  Building security has been breached, so stay alert for hostiles."
+		"AlwaysVisible"	"1"
+		"NeedsMoreThanOneMarine" "1"
+	}
+	"MISSION"
+	{
+		"MissionName"	"Cargo Elevator"		// name used on the map screen, etc.
+		"MapName"	"ASI-Jac1-LandingBay_02"		// name of the map file
+		"LocationX"	"300"			// location of the dot on the map
+		"LocationY"	"736"			// (from 0 to 1023, on the above texture)
+		"DifficultyModifier" "-2"
+		"ThreatString" "1"    // Threat level string to help players decide where to go next
+		"Links"		"ASI-Jac1-LandingBay_01 ASI-Jac2-Deima"	// map names of neighbours
+		"LocationDescription" "Cargo Elevator"
+		"ShortBriefing"  "Proceed to the main colony complex."
+		"AlwaysVisible"	"1"
+		"NeedsMoreThanOneMarine" "1"
+	}
+	"MISSION"
+	{
+		"MissionName"	"Deima Surface Bridge"
+		"MapName"	"ASI-Jac2-Deima"
+		"LocationX"	"370"
+		"LocationY"	"630"
+		"DifficultyModifier" "-1"
+		"ThreatString" "2"    // Threat level string to help players decide where to go next
+		"Links"		"ASI-Jac1-LandingBay_02 ASI-Jac3-Rydberg"
+		"LocationDescription" "Deima Surface Bridge"
+		"ShortBriefing"  "Marine squad will have to proceed across the surface to reach the main Colony Complex.  Orbital scans show a damaged bridge crossing a chasm to the colony proper."
+		"AlwaysVisible"	"1"
+		"NeedsMoreThanOneMarine" "1"
+	}
+	"MISSION"
+	{
+		"MissionName"	"Rydberg Reactor"
+		"MapName"	"ASI-Jac3-Rydberg"
+		"LocationX"	"140"
+		"LocationY"	"464"
+		"DifficultyModifier" "0"
+		"ThreatString" "3"
+		"Links"		"ASI-Jac2-Deima ASI-Jac4-Residential"
+		"LocationDescription" "Rydberg Nuclear Reactor"
+		"ShortBriefing"  "Latest diagnostic data from the colony shows main power is offline, but the reactor is in working order.  Your squad must bring the reactor back online."
+		"AlwaysVisible"	"1"
+		"NeedsMoreThanOneMarine" "1"
+	}
+	"MISSION"
+	{
+		"MissionName"	"SynTek Residential"
+		"MapName"	"ASI-Jac4-Residential"
+		"LocationX"	"478"
+		"LocationY"	"505"
+		"DifficultyModifier" "0"
+		"ThreatString" "3"
+		"Links"		"ASI-Jac3-Rydberg ASI-Jac6-SewerJunction"
+		"LocationDescription" "SynTek Residential"
+		"ShortBriefing"  "The SynTek Residential building is showing extreme levels of infestation.  Caution advised."
+		"AlwaysVisible"	"1"
+		"NeedsMoreThanOneMarine" "1"
+	}
+	"MISSION"
+	{
+		"MissionName"	"Sewer Junction B5"
+		"MapName"	"ASI-Jac6-SewerJunction"
+		"LocationX"	"508"
+		"LocationY"	"400"
+		"DifficultyModifier" "2"
+		"ThreatString" "5"
+		"Links"		"ASI-Jac4-Residential ASI-Jac7-TimorStation"		
+		"LocationDescription" "Sewer Junction B5"
+		"ShortBriefing" "Enter the sewer system and destroy an access tunnel in use by the Swarm."
+		"AlwaysVisible"	"1"
+		"NeedsMoreThanOneMarine" "1"
+	}
+	// NOTE: Last mission will only be revealed when all other missions have been completed
+	"MISSION"
+	{
+		"MissionName"	"Timor Station"
+		"MapName"	"ASI-Jac7-TimorStation"
+		"LocationX"	"605"
+		"LocationY"	"270"
+		"DifficultyModifier" "2"
+		"ThreatString" "6"
+		"Links"		"ASI-Jac6-SewerJunction"
+		"LocationDescription" "Timor Station"
+		"ShortBriefing" "The economic heart of the colony, this mining operation was fueled by cheap labour from back home.  Geological reports show instability in the rock structure and signs of Swarm infestation."
+		"AlwaysVisible"	"1"
+		"NeedsMoreThanOneMarine" "1"
+	}
+}

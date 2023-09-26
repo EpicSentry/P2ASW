@@ -1,0 +1,117 @@
+
+
+--
+-- DECLARATION
+--
+
+this:baseclass( "base/frame" );
+
+this:add(
+	"footer",
+	"base/footer",
+	{
+		buttonY =
+		{
+			visible = true;
+			left = this.right - 240;
+			text = "#Vote_Footer_Text";
+		};
+	}
+);
+
+this:add(
+	"blogtext",
+	"base/wraplabel",
+	{
+		bottom = this.footer.top;
+		top = 0;
+		left = 0;
+		right = this.width;
+		text = "#BlogText";
+	}
+)
+
+this:add(
+	"flyoutVote",
+	"blogpost/yesnoflyout",
+	{
+		left = this.footer.buttonY.left;
+		bottom = this.footer.buttonY.top - css.flyoutmenu.margin;
+		
+		yes =
+		{
+			OnCommand = "UploadVoteToServer_Yes";
+		};
+		
+		no =
+		{
+			OnCommand = "UploadVoteToServer_No";
+		};
+	}
+);
+
+this:add(
+	"lblVoteUploading",
+	"base/label",
+	{
+		left = this.footer.buttonY.left;
+		ycenter = this.footer.buttonY.ycenter;
+		text = "#Vote_Uploading";
+		visible = false;
+	}
+)
+
+this:add(
+	"lblVoteSucceeded",
+	"base/label",
+	{
+		left = this.footer.buttonY.left;
+		ycenter = this.footer.buttonY.ycenter;
+		text = "#Vote_Succeeded";
+		visible = false;
+	}
+)
+
+
+--
+-- SCRIPTS
+--
+
+function OnKeyCodePressed( this, params )
+	if ( params.code == Buttons.Y_BUTTON ) then
+		this.flyoutVote.Show:execute( params )
+	end
+end
+
+function UploadVoteToServer( this, params )
+	c:Nugget( "load:datacenter" )
+	self.batch = c:Nugget( "use:datacenter:CreateCmdBatch", {
+		vote = {
+			voteoption = paramVoteOption,
+			voteofferid = 235476,
+			blogversion = 20100208,
+			xuid = self.xuidVoteUser
+		}
+	} )
+
+	self.footer.buttonY.visible = false
+	self.footer.lblVoteUploading.visible = true
+end
+
+function UploadVoteToServer_Yes( this, params )
+	params["voteoption"] = 1
+	UploadVoteToServer( this, params )
+end
+
+function UploadVoteToServer_No( this, params )
+	params["voteoption"] = 0
+	UploadVoteToServer( this, params )
+end
+
+function OnDatacenterCmdBatchUpdate( this, params )
+	if ( params.cmdbatch == this.batch ) then
+		print( params.results.0.blogversion )
+		this.footer.lblVoteUploading.visible = false
+		this.footer.lblVoteUploaded.visible = true
+	end
+end

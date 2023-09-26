@@ -1,0 +1,25 @@
+"GameInfo"
+{
+	"game"		"Portal 2 In Alien Swarm"
+	"title"		"    "	// asw - leave this blank as we have a texture logo
+	"type"		"multiplayer_only"
+	GameData	"swarm.fgd"
+	InstancePath "tilegen/instances/"
+	
+	SupportsDX8     0
+	
+	"FileSystem"
+	{
+		"SteamAppId"	"630"
+		"ToolsAppId"	"211"
+		
+		"SearchPaths"
+		{
+			"Game"	"|gameinfo_path|."
+			"Game"	"|all_source_engine_paths|../Portal 2/portal2_dlc2"
+			"Game"	"|all_source_engine_paths|../Portal 2/portal2_dlc1"
+			"Game"	"|all_source_engine_paths|../Portal 2/portal2"
+			"Game"	"platform"
+		}
+	}
+}

@@ -1,5 +1,0 @@
-"vertexlitgeneric"
-{
-	"$baseTexture" "models\props/sphere"
-	"$surfaceprop" "metal"
-}

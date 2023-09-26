@@ -1,0 +1,10 @@
+bonus_maps_manifest
+{
+	"dir"		"scripts/advanced_chambers"
+	"dir"		"scripts/challenges"
+
+	"search"	"maps"	[$WIN32]
+
+	"map"		"scripts/challenges/challenges.bns"			[$GAMECONSOLE]
+	"map"		"scripts/advanced_chambers/advanced_chambers.bns"	[$GAMECONSOLE]
+}

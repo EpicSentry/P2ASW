@@ -1,0 +1,560 @@
+// Portalgun sounds
+
+"Weapon_Portalgun.fire_blue"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.55"
+	"soundlevel"		"SNDLVL_GUNFIRE"
+	"pitch"			"95,105"
+	"rndwave"
+	{
+		"wave"			"weapons/portalgun/wpn_portal_gun_fire_blue_01.wav"
+		"wave"			"weapons/portalgun/wpn_portal_gun_fire_blue_02.wav"
+		"wave"			"weapons/portalgun/wpn_portal_gun_fire_blue_03.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_portalgun_start"
+
+			"stop_gun"
+			{
+				"match_entry" "Portalgun.fire"
+				"input_max_entries" "1.000000"
+			}
+		}
+	}
+}
+
+"Weapon_Portalgun.fire_blue_npc"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.55"
+	"soundlevel"		"SNDLVL_GUNFIRE"
+	"pitch"			"95,105"
+	"rndwave"
+	{
+		"wave"			"^weapons/portalgun/wpn_portal_gun_fire_blue_01.wav"
+		"wave"			"^weapons/portalgun/wpn_portal_gun_fire_blue_02.wav"
+		"wave"			"^weapons/portalgun/wpn_portal_gun_fire_blue_03.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_portalgun_start"
+
+			"stop_gun"
+			{
+				"match_entry" "Portalgun.fire"
+				"input_max_entries" "1.000000"
+			}
+		}
+	}
+}
+
+"Weapon_Portalgun.fire_red"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.55"
+	"soundlevel"		"SNDLVL_GUNFIRE"
+	"pitch"			"95,105"
+	"rndwave"
+	{
+		"wave"			"weapons/portalgun/wpn_portal_gun_fire_red_01.wav"
+		"wave"			"weapons/portalgun/wpn_portal_gun_fire_red_02.wav"
+		"wave"			"weapons/portalgun/wpn_portal_gun_fire_red_03.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_portalgun_start"
+
+			"stop_gun"
+			{
+				"match_entry" "Portalgun.fire"
+				"input_max_entries" "1.000000"
+			}
+		}
+	}
+}
+
+"Weapon_Portalgun.fire_red_npc"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.55"
+	"soundlevel"		"SNDLVL_GUNFIRE"
+	"pitch"			"95,105"
+	"rndwave"
+	{
+		"wave"			"^weapons/portalgun/wpn_portal_gun_fire_red_01.wav"
+		"wave"			"^weapons/portalgun/wpn_portal_gun_fire_red_02.wav"
+		"wave"			"^weapons/portalgun/wpn_portal_gun_fire_red_03.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_portalgun_start"
+
+			"stop_gun"
+			{
+				"match_entry" "Portalgun.fire"
+				"input_max_entries" "1.000000"
+			}
+		}
+	}
+}
+
+"Weapon_Portalgun.powerup"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"		"SNDLVL_90db"
+	"pitch"			"95,105"
+	"rndwave"
+	{
+		"wave"			"weapon_ambient/wpn_portalgun_activation_01.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack"	"P2_null_player_start"
+			
+			"play_entry"
+			{
+				"entry_name" "Portal.PortalgunActivate" //Replace with the sound you want to play.
+			}
+		}
+	}
+}
+
+"Weapon_Portalgun.HoldSound"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"1.0"
+	"soundlevel"		"SNDLVL_50db"
+	"pitch"			"50"
+	"wave"			"player/hold_loop.wav"
+}
+
+
+// Portal sounds
+
+"Portal.open_red"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.8"
+	"soundlevel"		"SNDLVL_105db"
+	"pitch"			"95,105"
+	"rndwave"
+	{
+		"wave"			"weapons/portalgun/portal_open_red_01.wav"
+		"wave"			"weapons/portalgun/portal_open_red_02.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "Portal.open"
+				"input_max_entries" "1.000000"
+				"match_substring" "true"
+			}
+				
+			"block_entries"
+			{
+				
+				"match_entry" "Portal.open_red" //The sound entry to use
+				"input_duration" "0.1" //in seconds
+			}
+		}
+		
+		"update_stack"
+		{
+			"import_stack"	"p2_offset_start_update"
+		
+			"time_elapsed_trigger"
+			{
+				"input2" "0.0" //Elapsed time in seconds goes here.
+			}
+		
+			"play_entry"
+			{
+				"entry_name" "Portal.red_rock"	
+			}
+			
+ 			"speakers_multi_origin"
+ 			{
+ 				"input_max_iterations" "0"
+ 			}
+		}
+	}
+}
+
+"Portal.red_rock"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.3, 0.6"
+	"soundlevel"		"SNDLVL_85db"
+	"pitch"			"95,105"
+	"rndwave"
+	{
+		"wave"			"weapons/portalgun/portal_open_red_rock_01.wav"
+		"wave"			"weapons/portalgun/portal_open_red_rock_02.wav"
+	}
+
+		"soundentry_version" "2"
+
+		"operator_stacks"
+		{
+			"start_stack"
+			{
+				"import_stack" 	"P2_poly_limiting_start"
+
+				"limit_sound"
+				{
+					"match_entry" "Portal.red_rock"
+					"input_max_entries" "1.000000"
+				}
+			}
+			
+			"update_stack"
+			{
+				"import_stack" 	"p2_update_default"
+				
+				"speakers_multi_origin"
+				{
+					"input_max_iterations" "0"
+				}
+			}
+		}
+}
+
+"Portal.open_blue"
+{
+	"channel"		"CHAN_AUTO"
+	"volume"		"0.4"
+	"soundlevel"		"SNDLVL_105db"
+	"pitch"			"95,105"
+
+	"wave"			"weapons/portalgun/portal_open_blue_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "Portal.open"
+				"input_max_entries" "1.000000"
+				"match_substring" "true"
+			}
+				
+			"block_entries"
+			{
+				
+				"match_entry" "Portal.open_blue" //The sound entry to use
+				"input_duration" "0.1" //in seconds
+			}
+		}
+		
+		"update_stack"
+		{
+			"import_stack"	"p2_offset_start_update"
+		
+			"time_elapsed_trigger"
+			{
+				"input2" "0.0" //Elapsed time in seconds goes here.
+			}
+		
+			"play_entry"
+			{
+				"entry_name" "Portal.red_rock"	
+			}
+			
+ 			"speakers_multi_origin"
+ 			{
+ 				"input_max_iterations" "0"
+ 			}
+		}
+		
+	}
+}
+
+"Portal.close_red"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.4"
+	"soundlevel"		"SNDLVL_80db"
+	"pitch"			"95,105"
+	"wave"			"weapons/portalgun/portal_fizzle_01.wav"
+
+}
+
+"Portal.close_blue"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.4"
+	"soundlevel"		"SNDLVL_80db"
+	"pitch"			"95,105"
+
+	"wave"			"weapons/portalgun/portal_fizzle_02.wav"
+}
+
+"Portal.ambient_loop"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_70db"
+	"pitch"			"100"
+	"wave"			"weapon_ambient/wpn_portal_ambient_lp_01.wav"
+}
+
+"Portal.fizzle_moved"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.45"
+	"soundlevel"		"SNDLVL_105db"
+	"pitch"			"95,105"
+	"rndwave"
+	{
+		"wave"			")weapons/portalgun/portal_fizzle_01.wav"
+		"wave"			")weapons/portalgun/portal_fizzle_02.wav"
+	}
+}
+
+"Portal.InvalidSurfaceSwt"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.6"
+	"soundlevel"		"SNDLVL_115db"
+	"pitch"			"95,105"
+	"rndwave"
+	{
+		"wave"			"weapon_ambient/portal_invalid_surface_swt_01.wav"
+	}
+}
+
+"Portal.fizzle_invalid_surface"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.85"
+	"soundlevel"		"SNDLVL_90db"
+	"pitch"			"95,105"
+	"rndwave"
+	{
+		"wave"			"weapons/portalgun/portal_invalid_surface_01.wav"
+		"wave"			"weapons/portalgun/portal_invalid_surface_02.wav"
+		"wave"			"weapons/portalgun/portal_invalid_surface_03.wav"
+		"wave"			"weapons/portalgun/portal_invalid_surface_03.wav"
+		"wave"			"weapons/portalgun/portal_invalid_surface_03.wav"
+		"wave"			"weapons/portalgun/portal_invalid_surface_04.wav"
+		"wave"			"weapons/portalgun/portal_invalid_surface_04.wav"
+		"wave"			"weapons/portalgun/portal_invalid_surface_04.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "Portal.fizzle_invalid_surface"
+				"input_max_entries" "1.000000"
+				"match_substring" "true"
+			}
+				
+			"block_entries"
+			{
+				"match_entry" "Portal.fizzle_invalid_surface" //The sound entry to use
+				"input_duration" "0.1" //in seconds
+			}
+		}
+		
+		"update_stack"
+		{
+			"import_stack"	"p2_offset_start_update"
+		
+			"time_elapsed_trigger"
+			{
+				"input2" "0.0" //Elapsed time in seconds goes here.
+			}
+		
+			"play_entry"
+			{
+				"entry_name" "Portal.InvalidSurfaceSwt"	
+			}
+			
+ 			"speakers_multi_origin"
+ 			{
+ 				"input_max_iterations" "0"
+ 			}	
+		}
+		
+	}
+}
+
+"PortalPlayer.EnterPortal"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.3"
+	"soundlevel"		"SNDLVL_70db"
+	"pitch"			"95,105"
+	"rndwave"
+	{
+		
+		"wave"			"weapons/portalgun/portal_enter_01.wav"
+		"wave"			"weapons/portalgun/portal_enter_02.wav"
+		//"wave"			"weapons/portalgun/portal_enter_03.wav"
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+
+			"source_info"
+			{
+				// "source"   "entity"
+				"source"   "emitter"
+			}
+			"volume_mult"
+			{
+				"input1" "0.5"
+			}
+			// "volume_apply_occlusion"
+			// {
+				// "input2" "1.0"
+			// }
+		}
+	}
+
+}
+
+"PortalPlayer.ExitPortal"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.1"
+	"soundlevel"		"SNDLVL_70db"
+	"pitch"			"95,105"
+	"rndwave"
+	{
+		
+		"wave"			"weapons/portalgun/portal_exit_01.wav"
+		"wave"			"weapons/portalgun/portal_exit_02.wav"
+	}
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+
+			"source_info"
+			{
+				// "source"   "entity"
+				"source"   "emitter"
+			}
+			"volume_mult"
+			{
+				"input1" "0.3"
+			}
+			// "volume_apply_occlusion"
+			// {
+				// "input2" "1.0"
+			// }
+		}
+	}
+}
+
+"Portal.FizzlerShimmy"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.8"
+	"soundlevel"		"SNDLVL_90db"
+	"pitch"			"95,105"
+	"rndwave"
+	{
+		"wave"			"weapon_ambient/wpn_portal_fizzler_shimmy_01.wav"
+	}
+}
+
+"Portal.PortalgunActivate"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.9"
+	"soundlevel"		"SNDLVL_90db"
+	"pitch"			"95,105"
+	"rndwave"
+	{
+		"wave"			"weapon_ambient/wpn_portalgun_activation_01.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack"	"P2_exclusion_time_blocker_start"
+			
+			"block_entries" 
+			{
+				"input_duration" "0.5"
+				"match_entry" "Portal.PortalgunActivate" //The sound entry to use
+				"match_entity" "true"
+			}
+		}
+		
+		"update_stack"
+		{
+			"import_stack"	"p2_offset_start_update"
+		
+			"time_elapsed_trigger"
+			{
+				"input2" "0.25" //Elapsed time in seconds goes here.
+			}
+		
+			"play_entry"
+			{
+				"entry_name" "World.RobotMetalPillShortQuiet"	
+			}
+		}
+	}
+}

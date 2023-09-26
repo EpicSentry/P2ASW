@@ -1,0 +1,1478 @@
+"ScriptedSequence.GladosReawaken"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce/scripted_sequences/glados_reawakened_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "xLoud"
+			}
+			
+			"save_restore_output"
+			{
+				"operator" "sys_output"
+				"execute_once" "true"
+				"input_float" "1.0"
+				"output" "save_restore"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.GladosStairDestruction"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"volume"		"0.80"
+	"wave"		"playonce/scripted_sequences/glados_stair_destruction_01.wav"
+}
+
+"ScriptedSequence.IncineratorFall"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce/scripted_sequences/incinerator_fall_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "xLoud"
+			}
+			
+			"save_restore_output"
+			{
+				"operator" "sys_output"
+				"execute_once" "true"
+				"input_float" "1.0"
+				"output" "save_restore"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.HotelWallCrashLg"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce/scripted_sequences/hotel_crash_wall_lg_01.wav"
+}
+
+"ScriptedSequence.a2IntroBigLand"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce/scripted_sequences/incinerator_fall_impact_linear.wav"
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			
+			"play_entry"
+			{
+				"operator" "sys_start_entry"
+				"execute_once" "true"
+				"input_execute"	"1.0"
+				"input_start" "1"
+				"entry_name" "ScriptedSequence.BigLandLF1" //Replace with the sound you want to play.
+			}
+			
+					
+			"play_entry"
+			{
+				"operator" "sys_start_entry"
+				"execute_once" "true"
+				"input_execute"	"1.0"
+				"input_start" "1"
+				"entry_name" "ScriptedSequence.BigLandLF2" //Replace with the sound you want to play.
+			}
+			
+			"import_stack" 	"P2_null_start" //don't try to play wave						
+		}
+	}
+}
+
+"ScriptedSequence.BigLandLF1"
+{
+	"channel"	"CHAN_STATIC"
+	"volume"	"1.0"
+	"soundlevel"  "SNDLVL_110dB"
+	"wave"	"world/a2_catapult_intro_hallway_clear_LF.wav"			
+			
+	"import_stack"	"p2_update_default"        
+			
+	"volume_apply_occlusion"
+	{
+		"input2" "1.0"
+	}
+			
+	"volume_apply_falloff"
+	{
+		"input2" "1.0"
+	}
+		
+	"mixer"
+	{
+		"mixgroup" "xLoud"
+	}
+}
+
+"ScriptedSequence.BigLandLF2"
+{
+	"channel"	"CHAN_STATIC"
+	"volume"	"1.0"
+	"soundlevel"  "SNDLVL_110dB"
+	"wave"	"world/a2_catapult_intro_hallway_clear_LF2.wav"
+				
+	"import_stack"	"p2_update_default"        
+			
+	"volume_apply_occlusion"
+	{
+		"input2" "1.0"
+	}
+			
+	"volume_apply_falloff"
+	{
+		"input2" "1.0"
+	}
+		
+	"mixer"
+	{
+		"mixgroup" "xLoud"
+	}
+}
+
+"ScriptedSequence.HotelWallCrashMd"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce/scripted_sequences/hotel_crash_wall_md_01.wav"
+}
+
+"ScriptedSequence.HotelWallCrashSm"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce/scripted_sequences/hotel_crash_wall_sm_01.wav"
+}
+
+"ScriptedSequence.FloorCollapse"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce/scripted_sequences/floor_collapse_01.wav"
+}
+
+"ScriptedSequence.SadHorn"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce\level\sad_party_horn_01.wav"
+}
+
+"ScriptedSequence.IntroRideContainer01Impact01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_NORM"
+	"wave"		"playonce\scripted_sequences\intro_ride_container_01_impact_01.wav"
+}
+
+"ScriptedSequence.IntroRideContainer01Impact02"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce\scripted_sequences\intro_ride_container_01_impact_02.wav"
+}
+
+"ScriptedSequence.IntroRideContainer03Slide01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce\scripted_sequences\intro_ride_container_stack_impact_slide_01.wav"
+}
+
+"ScriptedSequence.IntroRideEndWallImpact01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce\scripted_sequences\intro_ride_end_wall_impact_01.wav"
+}
+
+"ScriptedSequence.IntroRideEndWallImpact02"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce\scripted_sequences\intro_ride_end_wall_impact_02.wav"
+}
+
+"ScriptedSequence.IntroRideEndWallImpact03"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce\scripted_sequences\intro_ride_end_wall_impact_03.wav"
+}
+
+"ScriptedSequence.IntroRideContainer02Impact01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce\scripted_sequences\intro_ride_tipping_container_impact_01.wav"
+}
+
+"ScriptedSequence.IntroRideWallImpact01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce\scripted_sequences\intro_ride_wall_impact_01.wav"
+}
+
+"ScriptedSequence.GelTubesConnect"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce\scripted_sequences\gel_tubes_connect_01.wav"
+}
+
+"ScriptedSequence.GelTubesTravel"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_140dB"
+	"volume"		"0.9"
+	"wave"		"playonce\scripted_sequences\gel_tubes_slide_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack"	"p2_update_default"
+			
+			//"dsp_output"
+			//{
+				//"input_float" "0.0"
+			//}
+		}
+	}
+}
+
+"ScriptedSequence.a2CoreGelTubesTravel"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_140dB"
+	"volume"		"0.9"
+	"wave"		"playonce\scripted_sequences\deadly_neurotoxin_tube_slide_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack"	"p2_update_default"
+			
+			"mixer"
+			{
+				"mixgroup" "ReducedDuckingLg"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.PotatoGladosImpact"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce\scripted_sequences\a3_00_potato_glados_impact_01.wav"
+}
+
+"ScriptedSequence.BigFallDebrisDestruction"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce\scripted_sequences\a3_00_debris_destruction_01.wav"
+}
+
+"ScriptedSequence.a3TransitionPotatoSkewer"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce\scripted_sequences\sp_a3_transition_01_potato_skewer.wav"
+}
+
+"ScriptedSequence.CoreGlasstastrophe01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce\scripted_sequences\core_glasstastrophe_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+			
+			"mixer"
+			{
+				"mixgroup" "xLoud"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.CoreGlasstastrophe02"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce\scripted_sequences\core_glasstastrophe_02.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+			
+			"mixer"
+			{
+				"mixgroup" "xLoud"
+			}
+
+		}
+	}
+}
+
+"ScriptedSequence.CoreGlasstastrophe03"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"rndwave"
+	{	
+		"wave"		"physics\glass\core_glasstastrophe_splinter_01.wav"
+		"wave"		"physics\glass\core_glasstastrophe_splinter_02.wav"
+		"wave"		"physics\glass\core_glasstastrophe_splinter_03.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+			
+			"mixer"
+			{
+				"mixgroup" "xLoud"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.BTSGlassBreak"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave" 			"playonce\scripted_sequences\bts_glass_hack_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+			
+			"mixer"
+			{
+				"mixgroup" "xLoud"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.RampGlassBreak"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave" 			"playonce\scripted_sequences\ramp_glasstastrophe_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+			
+			"mixer"
+			{
+				"mixgroup" "xLoud"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.CrazyBoxGlasstastrophe01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"physics\glass\crazy_box_break_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+			
+			"mixer"
+			{
+				"mixgroup" "xLoud"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.PotatoGladosSpin"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_95dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\potato_glados_spin.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"
+			
+			"mixer"
+			{
+				"mixgroup" "ReducedDuckingMd"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.FinalePaintTubeBreak"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce/scripted_sequences/finale_paint_tube_break_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "xLoud"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.ShootTheMoonSweep"
+{
+	"channel"		"CHAN_STATIC"
+	"soundlevel"		"SNDLVL_150dB"
+	"wave"		"playonce/scripted_sequences/shoot_the_moon_sweep_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "mstr"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.ClawCable01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_125dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\wheatley_grab\claw_cable_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "Claw"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.ClawCable02"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_125dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\wheatley_grab\claw_cable_02.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "Claw"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.ClawCable03"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_125dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\wheatley_grab\claw_cable_03.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "Claw"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.ClawCable04"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_125dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\wheatley_grab\claw_cable_04.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "Claw"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.ClawCrush01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_125dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\wheatley_grab\claw_crush_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "Claw"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.ClawCrush02"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_125dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\wheatley_grab\claw_crush_02.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "Claw"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.ClawGrabMotor01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_125dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\wheatley_grab\claw_grab_motor_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "Claw"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.ClawGrabMotor02"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_125dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\wheatley_grab\claw_grab_motor_02.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "Claw"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.ClawGrabMotor03"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_125dB"
+	"volume"			"0.8"
+	"wave" 			"playonce\scripted_sequences\wheatley_grab\claw_grab_motor_03.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "Claw"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.ClawGrabMotor04"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_125dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\wheatley_grab\claw_grab_motor_04.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "Claw"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.ClawImpact01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_125dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\wheatley_grab\claw_impact_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "Claw"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.ClawImpact02"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_125dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\wheatley_grab\claw_impact_02.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "Claw"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.ClawThrowWoosh01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\wheatley_grab\claw_throw_whoosh_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "Claw"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.ClawRemoveFromPole"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_125dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\wheatley_grab\claw_remove_from_pole_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "Claw"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.ClawWheatleySplash"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"	"SNDLVL_150"
+	"volume"		"0.9,1.0"
+	"pitch"			"85,90"
+	"rndwave"
+	{
+		"wave"		")world\panel_splash_water_01.wav"
+		"wave"		")world\panel_splash_water_02.wav"
+		"wave"		")world\panel_splash_water_03.wav"
+		"wave"		")world\panel_splash_water_04.wav"
+		"wave"		")world\panel_splash_water_05.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "ScriptedSequence.ClawWheatleySplash"
+				"input_max_entries" "0.000000"
+				"match_substring" "false"
+			}
+		}
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "Claw"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.ContainerInteriorImpact01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_125dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\container_interior_impact_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "xLoud"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.GladosShock"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_125dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\a2_core_glados_shock.wav"
+}
+
+"ScriptedSequence.MoronSmash01"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\moron_smash\moron_glass_hit_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "xLoud"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.MoronSmash02"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\moron_smash\moron_glass_hit_02.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "xLoud"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.MoronSmash03"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\moron_smash\moron_glass_hit_03.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "xLoud"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.MoronSmash04"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\moron_smash\moron_glass_hit_04.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "xLoud"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.MoronSmash05"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\moron_smash\moron_glass_hit_05.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "xLoud"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.MoronSmash06"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\moron_smash\moron_glass_hit_06.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "xLoud"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.MoronSmash07"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\moron_smash\moron_glass_hit_07.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "xLoud"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.MoronSmash08"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"volume"			"1.0"
+	"wave" 			"playonce\scripted_sequences\moron_smash\moron_glass_hit_08.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "p2_update_default"         
+			
+			"volume_apply_occlusion"
+			{
+				"input2" "1.0"
+			}
+			
+			"volume_apply_falloff"
+			{
+				"input2" "1.0"
+			}
+			
+			"mixer"
+			{
+				"mixgroup" "xLoud"
+			}
+		}
+	}
+}
+
+"ScriptedSequence.MoonFoley"
+{
+	"channel"		"CHAN_AUTO"
+	"soundlevel"		"SNDLVL_150dB"
+	"volume"			"0.3"
+	"wave" 			"playonce\scripted_sequences\moon_elevator_foley_01.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" "update_simple_quad"
+			
+			"mixer"
+			{
+				"mixgroup" "ReducedDuckingMstr"
+			}
+			
+			"speaker_volume"
+			{	
+				"input1" "0.7" //adjust volume
+			}
+		}	
+	}
+}
+
+"Containerride.LinearDoorKnock01"
+{
+	"channel"	"CHAN_STATIC"
+	"volume"	"1"
+	"soundlevel"  "SNDLVL_NONE"
+	"pitch"		"98,102"
+	"wave"		"playonce/scripted_sequences/container_linear_knock_01.wav"
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_simple_quad"
+			"speaker_volume"
+			{
+				"input2" "1"
+			}
+		}
+	}
+}
+
+"Containerride.LinearDoorKnock02"
+{
+	"channel"	"CHAN_STATIC"
+	"volume"	"1"
+	"soundlevel"  "SNDLVL_NONE"
+	"pitch"		"98,102"
+	"wave"		"playonce/scripted_sequences/container_linear_knock_02.wav"
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_simple_quad"
+			"speaker_volume"
+			{
+				"input2" "1"
+			}
+		}
+	}
+}
+
+
+"Containerride.LinearDoorKnock03"
+{
+	"channel"	"CHAN_STATIC"
+	"volume"	"1"
+	"soundlevel"  "SNDLVL_NONE"
+	"pitch"		"98,102"
+	"wave"		"playonce/scripted_sequences/container_linear_knock_03.wav"
+
+	"soundentry_version" "2"
+	"operator_stacks"
+	{
+		"update_stack"
+		{
+			"import_stack" 	"update_simple_quad"
+			"speaker_volume"
+			{
+				"input2" "1"
+			}
+		}
+	}
+}

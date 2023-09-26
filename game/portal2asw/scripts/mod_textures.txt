@@ -1,0 +1,50 @@
+"sprites/640_hud"
+{
+	TextureData
+	{
+		"portal_crosshair_left_invalid"
+		{
+			"file"		"sprites/hud/portal_crosshairs"
+			"x"		"2"
+			"y"		"0"
+			"width"		"44"
+			"height"	"64"
+		}
+
+		"portal_crosshair_right_invalid"
+		{
+			"file"		"sprites/hud/portal_crosshairs"
+			"x"		"50"
+			"y"		"0"
+			"width"		"44"
+			"height"	"64"
+		}
+
+		"portal_crosshair_left_valid"
+		{
+			"file"		"sprites/hud/portal_crosshairs"
+			"x"		"98"
+			"y"		"0"
+			"width"		"44"
+			"height"	"64"
+		}
+
+		"portal_crosshair_right_valid"
+		{
+			"file"		"sprites/hud/portal_crosshairs"
+			"x"		"146"
+			"y"		"0"
+			"width"		"44"
+			"height"	"64"
+		}
+
+		"portal_crosshair_last_placed"
+		{
+			"file"		"sprites/hud/portal_crosshairs"
+			"x"		"194"
+			"y"		"0"
+			"width"		"28"
+			"height"	"64"
+		}
+	}
+}

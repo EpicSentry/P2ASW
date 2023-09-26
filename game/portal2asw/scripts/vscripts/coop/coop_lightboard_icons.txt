@@ -1,0 +1,360 @@
+//-------------------------------------------------------------------------------
+// This file specifies which icons are going to show up on the lightboard at the 
+// beginning of the level if you need to add a new icon, you must add the actual 
+// icon to the end of the texture sheet AND add it to g_pszLightboardIcons in 
+// vgui_mp_lobby_screen
+//-------------------------------------------------------------------------------
+
+//	"cube_drop"	"1"
+//	"cube_button"	"1"
+//	"cube_bonk"	"1"
+//	"drink_water"	"1"
+//	"goop"		"1"
+//	"crushers"	"1"
+//	"laser_cube"	"1"
+//	"turret"	"1"
+//	"turret_burn"	"1"
+//	"portal_fling"	"1"
+//	"plate_fling"	"1"
+//	"bridges"	"1"
+//	"bridge_block"	"1"
+//	"grinders"	"1"
+//	"tbeams"	"1"
+//	"paint_bounce"	"1"
+//	"paint_speed"	"1"
+//	"handoff"	"1"
+//	"button_stand"	"1"
+
+
+"coop_lightboard_icons"
+{	
+	// These contain all 10 icons that show up
+	"Tracks"
+	{
+		"Track_1"
+		{
+			"goop" "1"	
+			"button_stand" "1"
+			"cube_button" "1"
+			"cube_bonk"	"1"
+			"handoff"	"1"
+			"turret" "1"
+			"turret_burn" "1"
+			"laser_cube" "1"
+			"crushers" "1"
+			"drink_water"	"1"
+		}
+		"Track_2"
+		{
+			"drink_water"	"1"
+			"cube_button"	"1"
+			"cube_bonk"	"1"
+			"portal_fling"	"1"
+			"plate_fling"	"1"
+			"handoff"	"1"
+			"button_stand" "1"
+			"laser_cube" "1"
+			"crushers"	"1"
+			"goop" "1"	
+		}
+		
+		"Track_3"
+		{
+			"cube_drop"	"1"
+			"cube_button"	"1"	
+			"cube_bonk"	"1"
+			"bridges"	"1"
+			"bridge_block"	"1"	
+			"handoff"	"1"
+			"turret"	"1"
+			"goop" "1"	
+			"plate_fling"	"1"		
+			"portal_fling"	"1"	
+		}
+		
+		"Track_4"
+		{
+			"portal_fling"	"1"	
+			"plate_fling"	"1"
+			"tbeams"	"1"
+			"button_stand" "1"
+			"cube_button"	"1"	
+			"laser_cube" "1"
+			"goop"		"1"
+			"grinders"	"1"
+			"crushers"	"1"
+			"turret"	"1"		
+		}
+		
+		"Track_5"
+		{
+			"portal_fling"	"1"
+			"cube_button"	"1"
+			"laser_cube"	"1"
+			"paint_bounce"	"1"
+			"paint_speed"	"1"
+			"bridges"	"1"
+			"tbeams"	"1"
+			"crushers"	"1"
+			"turret"	"1"
+			"goop"		"1"
+		}
+	}
+	
+	// In here, we just tell the board which of the 10 
+	// icons in this track should light up
+	"Maps"
+	{
+		// TRACK 1
+		"mp_coop_doors"
+		{
+			"button_stand" "1"
+		}
+		"mp_coop_race_2"
+		{
+			"cube_drop"	"1"
+			"cube_button" "1"
+			"goop" "1"
+		}
+		"mp_coop_laser_2"
+		{
+			"laser_cube" "1"
+			"turret" "1"
+			"turret_burn" "1"
+			"button_stand"	"1"
+		}
+		"mp_coop_rat_maze"
+		{
+			"button_stand" "1"
+			"laser_cube" "1"
+			"crushers" "1"
+		}
+		"mp_coop_laser_crusher"
+		{
+			"laser_cube" "1"
+			"crushers" "1"	
+			"goop" "1"
+		}
+		"mp_coop_teambts"
+		{
+		}
+		
+		//TRACK 2
+		"mp_coop_fling_3"
+		{
+			"cube_button"	"1"
+			"portal_fling"	"1"
+		}
+		"mp_coop_infinifling_train"
+		{
+			"portal_fling"	"1"
+			"goop" "1"	
+			"drink_water"	"1"
+		}
+		"mp_coop_come_along"
+		{
+			"portal_fling"	"1"
+			"goop" "1"		
+			"cube_button"	"1"
+			"handoff"	"1"
+		}
+		"mp_coop_fling_1"
+		{
+			"cube_drop"	"1"
+			"portal_fling"	"1"	
+			"cube_button"	"1"		
+		}
+		"mp_coop_catapult_1"
+		{
+			"plate_fling"	"1"
+			"goop" "1"	
+			"cube_button"	"1"
+			"handoff"	"1"
+		}
+		"mp_coop_multifling_1"
+		{
+			"plate_fling"	"1"
+			"goop" "1"	
+			"cube_button"	"1"	
+			"cube_bonk"	"1"
+		}
+		"mp_coop_fling_crushers"
+		{
+			"button_stand" "1"
+			"laser_cube" "1"
+			"crushers"	"1"
+			"portal_fling"	"1"	
+		}
+		"mp_coop_fan"
+		{
+		}
+		
+		//TRACK 3
+		"mp_coop_wall_intro"
+		{
+			"bridges"	"1"
+			"goop" "1"	
+			"plate_fling"	"1"
+			"cube_button"	"1"	
+		}
+		"mp_coop_wall_2"
+		{
+			"bridges"	"1"
+			"goop" "1"	
+		}
+		"mp_coop_catapult_wall_intro"
+		{
+			"bridges"	"1"
+			"goop" "1"	
+			"plate_fling"	"1"
+			"cube_button"	"1"			
+		}
+		"mp_coop_wall_block"
+		{
+			"bridges"	"1"
+			"goop" "1"		
+			"portal_fling"	"1"	
+			"plate_fling"	"1"
+		}
+		"mp_coop_catapult_2"
+		{
+			"bridges"	"1"
+			"plate_fling"	"1"		
+		}
+		"mp_coop_turret_walls"
+		{
+			"bridges"	"1"
+			"bridge_block"	"1"		
+			"turret"	"1"
+			"cube_button"	"1"		
+		}
+		"mp_coop_turret_ball"
+		{
+			"bridges"	"1"
+			"bridge_block"	"1"		
+			"turret"	"1"		
+			"plate_fling"	"1"
+			"cube_drop"	"1"
+		}
+		"mp_coop_wall_5"
+		{
+		}
+		
+		//TRACK 4
+		"mp_coop_tbeam_redirect"
+		{
+			"button_stand" "1"
+			"grinders"	"1"
+			"tbeams"	"1"
+		}
+		"mp_coop_tbeam_drill"
+		{
+			"goop"		"1"
+			"cube_button"	"1"	
+			"plate_fling"	"1"
+			"tbeams"	"1"
+		}
+		"mp_coop_tbeam_catch_grind_1"
+		{
+			"grinders"	"1"
+			"tbeams"	"1"
+			"cube_button"	"1"	
+			"portal_fling"	"1"	
+		}
+		"mp_coop_tbeam_laser_1"
+		{
+			"goop"		"1"
+			"cube_button"	"1"	
+			"plate_fling"	"1"
+			"tbeams"	"1"
+			"laser_cube" "1"
+		}
+		"mp_coop_tbeam_polarity"
+		{
+			"goop"		"1"
+			"cube_button"	"1"	
+			"tbeams"	"1"
+			"button_stand" "1"
+		}
+		"mp_coop_tbeam_polarity2"
+		{
+			"crushers"	"1"
+			"goop"		"1"
+			"tbeams"	"1"
+		}
+		"mp_coop_tbeam_polarity3"
+		{
+			"goop"		"1"
+			"plate_fling"	"1"
+			"tbeams"	"1"
+			"button_stand" "1"
+		}
+		"mp_coop_tbeam_maze"
+		{
+			"crushers"	"1"
+			"tbeams"	"1"
+			"turret"	"1"		
+			"cube_button"	"1"	
+		}
+		"mp_coop_tbeam_end"
+		{
+		}
+		
+		// TRACK 5
+		"mp_coop_paint_come_along"
+		{
+			"paint_bounce"	"1"
+		}
+		"mp_coop_paint_redirect"
+		{
+			"paint_bounce"	"1"
+			"tbeams"	"1"
+			"goop"		"1"
+		}
+		"mp_coop_paint_bridge"
+		{
+			"paint_bounce"	"1"
+			"bridges"	"1"
+			"goop"		"1"
+		}
+		"mp_coop_paint_walljumps"
+		{
+			"paint_bounce"	"1"
+			"bridges"	"1"
+			"goop"		"1"
+		}
+		"mp_coop_paint_speed_fling"
+		{
+			"paint_speed"	"1"
+			"portal_fling"	"1"
+			"cube_button"	"1"
+			"crushers"	"1"
+			"goop"		"1"
+		}
+		"mp_coop_paint_red_racer"
+		{
+			"paint_speed"	"1"
+			"laser_cube"	"1"
+			"portal_fling"	"1"
+			"turret"	"1"
+			"goop"		"1"
+		}
+		"mp_coop_paint_speed_catch"
+		{
+			"paint_speed"	"1"
+			"cube_button"	"1"
+			"portal_fling"	"1"
+			"goop"		"1"
+		}
+		"mp_coop_paint_longjump_intro"
+		{
+			"portal_fling"	"1"
+			"paint_bounce"	"1"
+			"paint_speed"	"1"
+			"tbeams"	"1"
+			"turret"	"1"
+			"goop"		"1"
+		}
+	}
+}
+

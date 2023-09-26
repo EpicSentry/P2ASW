@@ -1,0 +1,16 @@
+GAME
+{
+	"pos_x"	"-10590" // -15692
+	"pos_y"	"8223"
+	"scale"	"10.0"
+	"material" "vgui/swarm/Overviews/landingbay02Overview"
+	"briefingmaterial" "vgui/swarm/Overviews/landingbay02briefingOverview"
+	"mapyoffset" "0"
+	"missiontitle"		"Cargo Elevator"
+	"description"	"Proceed down the central cargo elevator to the colony complex."
+	"image"		"swarm/ObjectivePics/oblandingelev"
+	"version"		"1"
+	"author"		"Valve"
+	"website"		"http://www.alienswarm.com/"
+	"builtin"		"1"
+}

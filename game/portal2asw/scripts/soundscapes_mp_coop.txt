@@ -1,0 +1,2482 @@
+
+//////////////////////////////////////
+//////   mp_coop_lobby_2  //////////////
+//////////////////////////////////////
+
+"room01.mp_coop_lobby_2"
+{
+	"dsp"	"1"
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.WarehouseWronk_02"
+		"volume" "0.7"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.WarehouseImpact_02"
+		"volume" "0.7"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.WarehouseMotor_01"
+		"volume" "0.7"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_lo.end_mach"
+		"volume" ".63"
+	}
+
+	"playsoundscape"
+	{
+		"name" "utility.metal.imp.lo"
+		"volume" "1"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"1"
+		"wave"		"ambient/wind/Underground_wind_lp_01.wav"
+		"pitch"		"100"
+	}
+}
+"room02.mp_coop_lobby_2"
+{
+	"dsp"	"1"
+	
+	"playlooping"
+	{
+		"volume"	"0.2"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"120"
+	}
+	"playlooping"
+	{
+		"volume"	".55"
+		"pitch"		"75"
+		"wave"		"ambient/tones/Amb_Abstract_air_lp_01.wav"
+	}
+}
+
+//////////////////////////////////////
+//////   mp_coop_start  //////////////
+//////////////////////////////////////
+
+"room01.start"
+{
+	"dsp"	"1"
+	"fadetime" "1"
+
+	"playlooping"
+	{
+		"volume"	"0.2"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"120"
+
+	}
+
+
+	"playsoundscape"
+	{
+		"name" 		"utility.metal.imp.lo"
+		"volume"	 ".65"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	".55"
+		"pitch"		"75"
+		"wave"		"ambient/tones/Amb_Abstract_air_lp_01.wav"
+	}
+
+	"playlooping"
+	{
+		"volume"	".5"
+		"pitch"		"90"
+		"wave"		"ambient/industrial/Delivery_tubes_lp_03.wav"
+	}
+}
+
+"room02.start"
+{
+	"dsp"	"1"
+	
+	"playlooping"
+	{
+		"volume"	"0.5"
+		"wave"		"ambient/atmosphere/ind_int_lp_01.wav"
+		"pitch"		"100"
+		
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.3"
+		"wave"		"ambient/atmosphere/ind_int_lp_02.wav"
+		"pitch"		"100"
+	}
+
+
+}
+
+"room03.start"
+{
+	"dsp"	"1"
+
+	"playlooping"
+	{
+		"volume"	"0.6"
+		"wave"		"ambient/atmosphere/drone_int_lp.wav"
+		"pitch"		"100"
+	}
+}
+
+"endlevel.instance"
+{
+	"dsp"	"1"
+	//"fadetime" "1"
+
+	"playlooping"
+	{
+		"volume"	"0.2"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"120"
+
+	}
+
+
+	"playlooping"
+	{
+		"volume"	".55"
+		"pitch"		"75"
+		"wave"		"ambient/tones/Amb_Abstract_air_lp_01.wav"
+	}
+
+}
+
+//////////////////////////////////////
+//////  mp_coop_start_02 /////////////
+//////////////////////////////////////
+
+"spawn_room_intro.instance"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "1"
+	}
+}
+
+"room02.start02"
+{
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "1"
+	}
+}
+
+"room03.start02"
+{
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "1"
+	}
+
+}
+
+"hallway_short01.instance" //level exit instance
+{
+	"dsp"	"1"
+	"fadetime" "4"
+
+	"playlooping"
+	{
+		"volume"	"0.75"
+		"wave"		"ambient/industrial/amb_industrial_medium_lp_01.wav"
+		"pitch"		"120"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.4"
+		"wave"		"ambient/industrial/amb_heavy_mach_lp_01.wav"
+		"pitch"		"70"
+
+	}
+
+
+	"playlooping"
+	{
+		"volume"	".55"
+		"pitch"		"75"
+		"wave"		"ambient/tones/Amb_Abstract_air_lp_01.wav"
+	}
+}
+
+//////////////////////////////////////
+//////   mp_coop_start_03  ///////////
+//////////////////////////////////////
+
+
+"room02.start_03"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "1"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.5"
+		"wave"		"ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"-10177.191406, 1581.756348, 132.520493;"
+		"soundlevel" 	"SNDLVL_65dB"
+	}
+}
+
+"room03.start_03"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "1"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"-9875.786133, 2663.394043, 28.532627;"
+		"soundlevel" 	"SNDLVL_70dB"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.85"
+		"wave"		"ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"90"
+		"origin"	"-9800.537109, 3250.632813, 61.824375;"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+
+}
+
+
+//////////////////////////////////////
+//////     coop_doors   //////////////
+//////////////////////////////////////
+
+"room02.doors"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.8"
+	}
+}
+
+"room03.doors"
+{
+	"dsp"	"1"
+
+	"playlooping"
+	{
+		"volume"	"0.4"
+		"wave"		"ambient/atmosphere/drone_int_lp.wav"
+		"pitch"		"100"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.8"
+	}
+}
+
+//////////////////////////////////////
+//////     coop_race_2   //////////////
+//////////////////////////////////////
+
+"room02.race_2"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "1"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/atmosphere/toxic_slime_lp.wav"
+		"pitch"		"100"
+		"origin"	"-1750, -7, -95"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.6"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"90"
+		"origin"	"-1842, -157, -128"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+		
+}
+
+"room03.race_02"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" ".7"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.3"
+		"wave"		"ambient/Tones/Amb_Abstract_air_lp_01.wav"
+		"pitch"		"60"
+	}
+}
+
+
+//////////////////////////////////////
+//////  coop_laser_2    /////////////
+//////////////////////////////////////
+
+"room02.laser_2"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "1"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.4"
+		"wave"		"ambient/atmosphere/drone_int_lp.wav"
+		"pitch"		"100"
+	}
+}
+
+//////////////////////////////////////
+//////  coop_rat_maze    /////////////
+//////////////////////////////////////
+
+"room02.rat_maze"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "1"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.6"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"100"
+	}
+}
+
+//////////////////////////////////////
+//////  coop_laser_crusher    /////////////
+//////////////////////////////////////
+
+"room02.laser_crusher"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.8"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.4"
+		"wave"		"ambient/atmosphere/drone_int_lp.wav"
+		"pitch"		"100"
+	}
+	"playlooping"
+	{
+		"volume"	"0.6"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"2653, -913, -166"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.6"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"90"
+		"origin"	"2693, -1359, -171"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+	
+}
+
+//////////////////////////////////////
+//////  coop_seperation_1  /////////////
+//////////////////////////////////////
+
+"room02.seperation_1"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.8"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.5"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"2220, 226, -91"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.5"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"90"
+		"origin"	"2917, 285, -35"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+	
+}
+
+//////////////////////////////////////
+//////  coop_fling_3    /////////////
+//////////////////////////////////////
+
+"room02.fling_3"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.8"
+	}
+	
+}
+
+"room03.fling_3"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.8"
+	}
+}
+
+
+//////////////////////////////////////
+//////  coop_infinifling_train  //////
+//////////////////////////////////////
+
+"room02.infinifling_train"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.8"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.5"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"1237, -1415, 325"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.5"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"90"
+		"origin"	"1089, -1216, 342"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+	
+}
+
+//////////////////////////////////////
+//////  coop_come_along   ///////////
+//////////////////////////////////////
+
+"room02.come_along"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "1.0"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.5"
+		"wave"		"ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"-22, 1368, -825"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+		
+}
+
+//////////////////////////////////////
+//////  coop_fling_1      ///////////
+//////////////////////////////////////
+
+"room02.fling_1"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "1"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.6"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"100"
+	}
+}
+
+//////////////////////////////////////
+//////  coop_catapult_1    ///////////
+//////////////////////////////////////
+
+"room02.catapult_1"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "1.0"
+	}
+	
+			
+}
+
+"room04.catapult_1"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "1.0"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.5"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"-797.556641, -389.333588, 119.019379;"
+		"soundlevel" 	"SNDLVL_80dB"
+	}	
+	
+		
+}
+
+"room06.catapult_1"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "1.0"
+	}
+	"playlooping"
+	{
+		"volume"	"0.6"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"100"
+	}
+			
+}
+
+//////////////////////////////////////
+//////  coop_multifling_1    ///////////
+//////////////////////////////////////
+
+"room02.multifling_1"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.5"
+	}
+	"playlooping"
+	{
+		"volume"	"0.4"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"100"
+	}	
+			
+}
+
+"room04.multifling_1"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.4"
+	}
+	"playlooping"
+	{
+		"volume"	"0.5"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"90"
+	}
+	"playlooping"
+	{
+		"volume"	"0.6"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"-2246, 908, -33"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+	"playlooping"
+	{
+		"volume"	"0.5"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"90"
+		"origin"	"-3297, 517, -72"
+		"soundlevel" 	"SNDLVL_85dB"
+	}
+	"playlooping"
+	{
+		"volume"	"0.5"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"110"
+		"origin"	"-2886, 2011, -106"
+		"soundlevel" 	"SNDLVL_80dB"
+	}				
+}
+
+//////////////////////////////////////
+//////  coop_fling_crushers   ///////////
+//////////////////////////////////////
+
+"room02.fling_crushers"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.5"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"100"
+	}	
+			
+}
+
+"room05.fling_crushers"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.6"
+	}
+		
+}
+
+//////////////////////////////////////
+//////     coop_fan     //////////////
+//////////////////////////////////////
+
+"room01.fan"
+{
+	"dsp"	"1"
+	"fadetime" "1"
+
+
+	"playlooping"
+	{
+		"volume"	".96"
+		"wave"		"ambient/wind/Underground_wind_lp_01.wav"
+		"pitch"		"90"
+
+	}
+
+
+	"playsoundscape"
+	{
+		"name" "util.random.boomer"
+		"volume" "1"
+	}
+
+
+	"playsoundscape"
+	{
+		"name" "utility.metal.imp.lo"
+		"volume" "1"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util.random.rockdebris"
+		"volume" ".4"
+	}
+
+	"playsoundscape"
+	{
+		"name" "TestChamber_Destruction.DestructionBase"
+		"volume" ".5"
+	}
+}
+
+"room02.fan"
+{
+	"dsp"	"1"
+	"fadetime" "1"
+
+
+	"playlooping"
+	{
+		"volume"	".96"
+		"wave"		"ambient/wind/Underground_wind_lp_01.wav"
+		"pitch"		"90"
+
+	}
+
+
+	"playsoundscape"
+	{
+		"name" "util.random.boomer"
+		"volume" "1"
+	}
+
+	"playsoundscape"
+	{
+		"name" "TestChamber_Destruction.DestructionBase"
+		"volume" ".5"
+	}
+}
+
+
+"room03.fan"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "1.0"
+	}
+	"playsoundscape"
+	{
+		"name" "util.random.boomer"
+		"volume" ".5"
+	}
+
+	"playsoundscape"
+	{
+		"name" "TestChamber_Destruction.DestructionBase"
+		"volume" ".5"
+	}
+	
+}
+
+//////////////////////////////////////
+//////     wall_intro   //////////////
+//////////////////////////////////////
+
+"spawn_room01.instance"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "1"
+	}
+}
+
+"room02.wall_intro"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "1"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"90"
+		"origin"	"-294, -1845, -618"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"90"
+		"origin"	"-307, -1319, -627"
+		"soundlevel" 	"SNDLVL_70dB"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"90"
+		"origin"	"223, -1024, -643"
+		"soundlevel" 	"SNDLVL_70dB"
+	}
+	
+}
+
+"airlock01.instance"
+{
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.5"
+	}
+	"playlooping"
+	{
+		"volume"	"0.5"
+		"wave"		"ambient/atmosphere/drone_int_lp.wav"
+		"pitch"		"90, 110"
+	}	
+}
+
+"room04.wall_intro"
+{
+	"dsp"	"1"
+
+	"playlooping"
+	{
+		"volume"	"0.4"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_03.wav"
+		"pitch"		"75"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.4"
+		"wave"		")ambient/Tones/Amb_Abstract_air_lp_01.wav"
+		"pitch"		"50"
+	}
+}
+
+
+//////////////////////////////////////
+//////  coop_wall_2         //////
+//////////////////////////////////////
+
+"room02.wall_2"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.8"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.5"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"-760, -442, -333"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"90"
+		"origin"	"-834, -788, -253"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"95"
+		"origin"	"-121, -621, -267"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.6"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"95"
+		"origin"	"--512, -92, -226"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+}
+
+
+//////////////////////////////////////
+//////  coop_catapult_wall_intro //////
+//////////////////////////////////////
+
+"room02.catapult_wall_intro"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.8"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Vegetation.Insects_01"
+		"volume" "0.8"
+	}
+
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Vegetation.AfricanBirds"
+		"volume" "0.5"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.5"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"-685, -50, -256"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.6"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"90"
+		"origin"	"-138, -3, -207"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+	
+}
+
+"room04.catapult_wall_intro"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.8"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.5"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"-218, -1806, -80"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.6"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"90"
+		"origin"	" -181, -2204, -80"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+	
+}
+
+//////////////////////////////////////
+//////  coop_wall_block   ////////////
+//////////////////////////////////////
+
+"room02.wall_block"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.5"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"100"
+	}	
+			
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"-5504, -183, -326"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+		
+}
+
+"room04.wall_block"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.5"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"100"
+	}	
+			
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"-5971, -1275, -1581"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"90"
+		"origin"	"-6551, -1000, -1614"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+	
+}
+
+//////////////////////////////////////
+//////  coop_catapult_2   ////////////
+//////////////////////////////////////
+
+"room02.catapult_2"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.5"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"100"
+	}	
+			
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"-5504, -183, -326"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+		
+}
+
+"room04.catapult_2"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.5"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"100"
+	}	
+			
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	" 1278, 814, 173"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+}
+
+//////////////////////////////////////
+//////  coop_turret_walls ////////////
+//////////////////////////////////////
+
+"room02.turret_walls"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.7"
+	}
+	"playlooping"
+	{
+		"volume"	"0.6"
+		"wave"		"ambient/atmosphere/drone_int_lp.wav"
+		"pitch"		"100"
+	}		
+}
+
+"room04.turret_walls"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.7"
+	}
+			
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"1554, -1354, 564"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"110"
+		"origin"	"2083, -1285, 552"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+}
+
+
+//////////////////////////////////////
+//////  coop_turret_ball ////////////
+//////////////////////////////////////
+
+"room02.turret_ball"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.7"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"100"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"-320, -622, 2"
+		"soundlevel" 	"SNDLVL_80dB"
+	}		
+}
+
+"room04.turret_ball"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.7"
+	}
+			
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"-560, 1042, -13"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"110"
+		"origin"	"-171, 692, 8"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"71, 1379, 8"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+}
+
+//////////////////////////////////////
+//////  coop_wall_5       ////////////
+//////////////////////////////////////
+
+"room01.wall_5"
+{
+	"dsp"	"1"
+	"fadetime" ".5"
+
+	"playlooping"
+	{
+		"volume"	".95"
+		"wave"		"ambient/wind/Underground_wind_lp_01.wav"
+		"pitch"		"80"
+	}
+
+	"playlooping"
+	{
+		"volume"	".95"
+		"wave"		"(ambient/industrial/Delivery_tubes_lp_02.wav"
+		"pitch"		"60"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.ClickStick_01"
+		"volume" "1"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.ScrapedMetal_01"
+		"volume" "1"
+	}
+
+
+	"playsoundscape"
+	{
+		"name" "utility.metal.imp.lo"
+		"volume" ".2"
+	}
+
+
+	"playsoundscape"
+	{
+		"name" "util.random.boomer"
+		"volume" ".3"
+	}
+}
+
+"room02.wall_5"
+{
+	"dsp"	"1"
+	"fadetime" ".5"
+
+
+	"playlooping"
+	{
+		"volume"	".15"
+		"wave"		"ambient/wind/Underground_wind_lp_01.wav"
+		"pitch"		"80"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.45"
+		"wave"		"(ambient/Tones/Amb_Abstract_air_lp_01.wav"
+		"pitch"		"100"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.93"
+		"wave"		"(ambient/electrical/amb_hotel_refrigeration_lp_01.wav"
+		"pitch"		"90"
+	}
+
+
+	"playsoundscape"
+	{
+		"name" "utility.metal.imp.lo"
+		"volume" ".2"
+	}
+
+
+	"playsoundscape"
+	{
+		"name" "util.random.boomer"
+		"volume" ".3"
+	}
+
+}
+
+"room02_5.wall_5"
+{
+	"dsp"	"1"
+	"fadetime" ".5"
+
+	"playlooping"
+	{
+		"volume"	"0.65"
+		"wave"		"(ambient/Tones/Amb_Abstract_air_lp_01.wav"
+		"pitch"		"90"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.ClickStick_01"
+		"volume" ".4"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.ScrapedMetal_01"
+		"volume" ".4"
+	}
+	
+}
+
+"room03.wall_5"
+{
+	"dsp"	"1"
+	"fadetime" ".5"
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.ClickStick_01"
+		"volume" "1"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.ScrapedMetal_01"
+		"volume" "1"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.BowedMetal_01"
+		"volume" "1"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.Fire_01"
+		"volume" "1"
+	}
+}
+
+"room04.wall_5"
+{
+	"dsp"	"1"
+	"fadetime" ".5"
+
+	"playlooping"
+	{
+		"volume"	"0.65"
+		"wave"		"(ambient/Tones/Amb_Abstract_air_lp_01.wav"
+		"pitch"		"100"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.ClickStick_01"
+		"volume" ".7"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.ScrapedMetal_01"
+		"volume" ".7"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.BowedMetal_01"
+		"volume" ".7"
+	}
+}
+
+
+"room05.wall_5"
+{
+	"dsp"	"1"
+	"fadetime" ".5"
+	
+	
+	"playlooping"
+	{
+		"volume"	"0.98"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_03.wav"
+		"pitch"		"95"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.75"
+		"wave"		"(ambient/Tones/Amb_Abstract_air_lp_07.wav"
+		"pitch"		"85"
+	}
+
+	"playsoundscape" 
+ 	{
+		"name"		"TestChamber_Industrial.ScrapedMetal_01"
+		"volume" ".6"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"		"TestChamber_Industrial.BowedMetal_01"
+		"volume" ".6"
+	}
+	
+	"playsoundscape"
+	{		
+		"name" 		"TestChamber_Industrial.WarehouseImpact_01"
+		"volume" "1"
+	}
+
+	"playsoundscape"
+	{
+		"name" 		"TestChamber_Industrial.WarehouseWronk_02"
+		"volume"	 "1"
+
+	}
+}
+
+"room06.wall_5"
+{
+	"dsp"	"1"
+	"fadetime" ".5"
+	
+
+
+	"playlooping"
+	{
+		"volume"	"0.45"
+		"wave"		"(ambient/Tones/Amb_Abstract_air_lp_01.wav"
+		"pitch"		"100"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.93"
+		"wave"		"(ambient/electrical/amb_hotel_refrigeration_lp_01.wav"
+		"pitch"		"105"
+	}
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.ClickStick_01"
+		"volume" ".5"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.ScrapedMetal_01"
+		"volume" ".5"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.BowedMetal_01"
+		"volume" ".5"
+	}
+	
+}
+
+//////////////////////////////////////
+//////  coop_tbeam_fling_float_1 /////
+//////////////////////////////////////
+
+"room02.tbeam_fling_float_1"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.7"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"80"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"3868, -288, -1623"
+		"soundlevel" 	"SNDLVL_85dB"
+	}		
+}
+
+//////////////////////////////////////
+//////  coop_tbeam_maze///////// /////
+//////////////////////////////////////
+
+"room02.tbeam_maze"
+{
+	"dsp"	"1"
+
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"80"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		"ambient/wind/Underground_wind_lp_01.wav"
+		"pitch"		"100"
+	}
+
+	"playsoundscape"
+	{
+		"name" 		"TestChamber_Industrial.WarehouseWronk_02"
+		"volume"	 "1"
+
+	}
+
+
+	"playsoundscape"
+	{		
+		"name" 		"TestChamber_Industrial.WarehouseImpact_01"
+		"volume" "1"
+	}		
+}
+
+//////////////////////////////////////
+//////  coop_tbeam_redirect  ////////////
+//////////////////////////////////////
+
+"room02.tbeam_redirect"
+{
+	"dsp"	"1"
+	
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.ScrapedMetal_01"
+		"volume" "1"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.BowedMetal_01"
+		"volume" "1"
+	}
+	
+}
+
+"room03.tbeam_redirect"
+{
+	"dsp"	"1"
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.ClickStick_01"
+		"volume" ".5"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.ScrapedMetal_01"
+		"volume" ".5"
+	}
+	
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.Fire_01"
+		"volume" ".7"
+	}
+}
+
+//////////////////////////////////////
+//////  coop_tbeam_drill ////////////
+//////////////////////////////////////
+
+"room02.tbeam_drill"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.7"
+	}
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"60"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"90"
+		"origin"	"1658, 256, -110"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"100"
+		"origin"	"436, 541, -123"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"90"
+		"origin"	"239, 1410, -117"
+		"soundlevel" 	"SNDLVL_85dB"
+	}		
+}
+
+//////////////////////////////////////
+//////  coop_tbeam_catch_grind_1  ////
+//////////////////////////////////////
+
+"room02.tbeam_catch_grind_1"
+{
+	"dsp"	"1"
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.ClickStick_01"
+		"volume" "1"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.ScrapedMetal_01"
+		"volume" "1"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.BowedMetal_01"
+		"volume" "1"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.Fire_01"
+		"volume" "1"
+	}
+}
+
+//////////////////////////////////////
+//////  coop_tbeam_laser_1 ////////////
+//////////////////////////////////////
+
+"room02.tbeam_laser_1"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.7"
+	}
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"115"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"90"
+		"origin"	"-2855, 1163, 323"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+}
+
+//////////////////////////////////////
+//////  coop_tbeam_polarity ////////////
+//////////////////////////////////////
+
+"room02.tbeam_polarity"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.6"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"100"
+	}
+
+	"playsoundscape"
+	{
+		"name" "utility.metal.imp.lo"
+		"volume" ".6"
+	}
+
+	"playsoundscape"
+	{
+		"name" "utility.metal.imp.lo"
+		"volume" ".6"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util.random.boomer"
+		"volume" ".8"
+	}
+
+}
+
+//////////////////////////////////////
+//////  coop_tbeam_polarity2 ////////////
+//////////////////////////////////////
+
+"room02.tbeam_polarity2"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.9"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"80"
+	}
+
+	"playsoundscape"
+	{
+		"name" "utility.metal.imp.lo"
+		"volume" ".6"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util.random.boomer"
+		"volume" ".8"
+	}
+
+}
+
+//////////////////////////////////////
+//////  coop_tbeam_polarity3 //////////
+//////////////////////////////////////
+
+"room02.tbeam_polarity3"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "1"
+	}
+	"playlooping"
+	{
+		"volume"	"0.9"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"75"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"80"
+		"origin"	"242, -99, -289"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"90"
+		"origin"	"818, 10, -307"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+
+	"playsoundscape"
+	{
+		"name" "utility.metal.imp.lo"
+		"volume" ".6"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util.random.boomer"
+		"volume" ".8"
+	}
+}
+
+//////////////////////////////////////
+//////  coop_tbeam_end     //////////
+//////////////////////////////////////
+
+"room02.tbeam_end"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.7"
+	}
+	"playlooping"
+	{
+		"volume"	"1.0"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"100"
+	}
+}
+
+"room03.tbeam_end"
+{
+	"dsp"	"1"
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.ClickStick_01"
+		"volume" "1"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.ScrapedMetal_01"
+		"volume" "1"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.BowedMetal_01"
+		"volume" "1"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.Fire_01"
+		"volume" "1"
+	}
+}
+
+"room04.tbeam_end"
+{
+	"dsp"	"1"
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.ClickStick_01"
+		"volume" ".3"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.ScrapedMetal_01"
+		"volume" ".3"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.Fire_01"
+		"volume" ".4"
+	}
+}
+
+//////////////////////////////////////
+////// coop_paint_come_along   ///////
+//////////////////////////////////////
+
+"room02.paint_come_along"
+{
+	"dsp"	"1"
+
+	"playlooping"
+	{
+		"volume"	"0.4"
+		"wave"		"ambient/atmosphere/drone_int_lp.wav"
+		"pitch"		"100"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.54"
+		"wave"		"ambient/nature/water/amb_sphere_int_water_lp_01.wav"
+		"pitch"		"100"
+	}
+	
+	
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.8"
+	}
+}
+
+//////////////////////////////////////
+//////  coop_paint_redirect  //////////
+//////////////////////////////////////
+
+"room02.paint_redirect"
+{
+	"dsp"	"1"
+
+
+	"playlooping"
+	{
+		"volume"	"0.4"
+		"wave"		"ambient/nature/water/amb_sphere_water_lp_02.wav"
+		"pitch"		"100"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.ClickStick_01"
+		"volume" ".5"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.ScrapedMetal_01"
+		"volume" ".5"
+	}
+	
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.BowedMetal_01"
+		"volume" ".6"
+	}
+	
+
+}
+
+//////////////////////////////////////
+//////  coop_paint_bridge ////////////
+//////////////////////////////////////
+
+"room02.paint_bridge"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.6"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.3"
+		"wave"		"ambient/nature/water/amb_sphere_water_lp_02.wav"
+		"pitch"		"100"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.6"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"90"
+		"origin"	"334, -1720, 246"
+		"soundlevel" 	"SNDLVL_85dB"
+	}
+
+	"playsoundscape"
+	{
+		"name" "utility.metal.imp.lo"
+		"volume" ".6"
+	}
+}
+
+"room04.paint_bridge"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.6"
+	}
+
+
+	"playsoundscape"
+	{
+		"name" "TestChamber_Industrial.WarehouseImpact_01"
+		"volume" ".39"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.6"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"80"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"90"
+		"origin"	"38, 62, 262"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"110"
+		"origin"	"91, 708, 246"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+}
+
+//////////////////////////////////////
+//////  coop_paint_walljumps /////////
+//////////////////////////////////////
+
+"room02.paint_walljumps"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "1.0"
+	}
+
+	"playsoundscape"
+	{
+		"name" "TestChamber_Industrial.WarehouseImpact_01"
+		"volume" ".39"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.4"
+		"wave"		"ambient/atmosphere/drone_int_lp.wav"
+		"pitch"		"100"
+	}
+	
+}
+
+"room04.paint_walljumps"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.6"
+	}
+	"playlooping"
+	{
+		"volume"	"0.6"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"100"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"90"
+		"origin"	"-434, 446, -35"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"110"
+		"origin"	"268, 452, -52"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+}
+
+//////////////////////////////////////
+//////  coop_paint_speed_fling ///////
+//////////////////////////////////////
+
+"room02.speed_fling"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "1.0"
+	}
+
+	"playsoundscape"
+	{
+		"name" "TestChamber_Industrial.WarehouseImpact_01"
+		"volume" ".39"
+	}
+
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Industrial.ScrapedMetal_01"
+		"volume" ".4"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util.random.boomer"
+		"volume" ".6"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"115"
+	}
+	
+}
+"room04.speed_fling"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "1.0"
+	}
+	"playlooping"
+	{
+		"volume"	"0.9"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"100"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util.random.boomer"
+		"volume" ".6"
+	}
+
+	"playsoundscape"
+	{
+		"name" "util.random.metal_groans"
+		"volume" ".8"
+	}
+	
+}
+
+//////////////////////////////////////
+//////  coop_paint_red_racer /////////
+//////////////////////////////////////
+
+"room02.paint_red_racer"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "1.0"
+	}
+	
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"80"
+		"origin"	"-824, 679, -77"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+	"playlooping"
+	{
+		"volume"	"0.6"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"110"
+		"origin"	"145, 357, -58"
+		"soundlevel" 	"SNDLVL_75dB"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.28"
+		"wave"		"ambient/nature/water/amb_sphere_water_lp_02.wav"
+		"pitch"		"100"
+	}
+}
+
+"room04.paint_red_racer"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "0.6"
+	}
+	"playlooping"
+	{
+		"volume"	"0.6"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"100"
+	}
+}
+
+//////////////////////////////////////
+//////  coop_paint_speed_catch ///////
+//////////////////////////////////////
+
+"room02.paint_speed_catch"
+{
+	"dsp"	"1"
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.start"
+		"volume" "1.0"
+	}
+	"playsoundscape"
+	{
+		"name" "util.random.boomer"
+		"volume" ".8"
+	}
+
+	"playsoundscape"
+	{
+		"name" "utility.metal.imp.lo"
+		"volume" ".75"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.28"
+		"wave"		"ambient/nature/water/amb_sphere_water_lp_02.wav"
+		"pitch"		"90"
+	}
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"80"
+	}
+	"playlooping"
+	{
+		"volume"	"0.7"
+		"wave"		")ambient/nature/water/amb_Indoor_water_sludge_lp_01.wav"
+		"pitch"		"80"
+		"origin"	"610, -1120, -63"
+		"soundlevel" 	"SNDLVL_80dB"
+	}
+}
+
+//////////////////////////////////////
+//////  coop_paint_longjump_intro/////
+//////////////////////////////////////
+
+"room02.paint_longjump"
+{
+	"dsp"	"1"
+
+
+	"playsoundscape"
+	{
+		"name" "util.random.boomer"
+		"volume" ".8"
+	}
+
+	"playsoundscape"
+	{
+		"name" "utility.metal.imp.lo"
+		"volume" ".75"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.24"
+		"wave"		"ambient/nature/water/amb_sphere_water_lp_02.wav"
+		"pitch"		"90"
+	}
+	"playlooping"
+	{
+		"volume"	"0.5"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"80"
+	}
+}
+
+
+"hall01.paint_longjump"
+{
+	"dsp"	"1"
+
+
+	"playsoundscape" 
+ 	{
+		"name"	"room02.mp_coop_lobby_2"
+		"volume" "1.0"
+	}
+
+	"playsoundscape"
+	{
+		"name" "utility.metal.imp.lo"
+		"volume" ".75"
+	}
+
+}
+
+
+
+//////////////////////////////////////
+//////  coop_endlevel_room////////////
+//////////////////////////////////////
+
+"room01.endlevel"
+
+{
+	"dsp"	"1"
+	"fadetime" ".5"
+
+
+	"playlooping"
+	{
+		"volume"	".19"
+		"wave"		"ambient/wind/Underground_wind_lp_01.wav"
+		"pitch"		"80"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.8"
+		"wave"		"(ambient/Tones/Amb_Abstract_air_lp_04.wav"
+		"pitch"		"65"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.58"
+		"wave"		"(ambient/electrical/amb_hotel_refrigeration_lp_01.wav"
+		"pitch"		"70"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.2"
+		"wave"		"ambient/industrial/Delivery_tubes_lp_02.wav"
+		"pitch"		"25"
+	}
+
+
+	"playsoundscape"
+	{
+		"name" "utility.metal.imp.lo"
+		"volume" ".2"
+	}
+
+
+	"playsoundscape"
+	{
+		"name" "util.random.boomer"
+		"volume" ".3"
+	}
+
+}
+
+"coop.silence"
+{
+	"soundmixer"	"Silent_Mix"
+}

@@ -1,0 +1,24 @@
+GAME
+{
+    // PDA belongs to Shaun Ming
+    
+    // inbox
+    
+	"MailFrom1"	"From: John Cain"
+	"MailDate1"	"Date: 12/23/52"
+	"MailSubject1"	"Subject: Re: Lab clearance for Helen Young"
+	"MailBody1A"	"Ming, are you out of your mind?  You talked to Young about your findings?!  I told you clearly, NO ONE outside SynTek is allowed to know what you're doing up there!"
+	"MailBody1B"	"To make things worse, things are getting out of hand.  I just got back from Timor Station.  It's spreading.  How the hell did they get from Deck 2 to the mine?"
+	"MailBody1C"	"And btw, what's going on in the atrium?"
+	"MailBody1D"	"Lt. Cain, SynTek Security."
+	
+	// sent mail
+
+	"MailFrom3"	"To: John Cain"
+	"MailDate3"	"Date: 12/23/52"
+	"MailSubject3"	"Subject: Re:Re: Lab clearance for Helen Young"
+	"MailBody3A"	"Lt. Cain,"
+	"MailBody3B"	"Watch your mouth.  I'm not one of your grunts.  Young will keep her mouth shut.  She's done brilliant work and she knows her career depends on it.  So you saw live ones in the mines?  Interesting.  There's an obvious explanation:  The eggs become active when they defrost.  There's enough prey down there to support the growth cycle.  Do the math."
+	"MailBody3C"	"Don't sweat the atrium situation.  We've got it under control.  One of the parasites went missing yesterday.  We think it found a way through the vents to the lower deck.  The whole NW area of Deck 1 is sealed shut, so nothing's getting in or out."
+	"MailBody3D"	"S. Ming"
+}

@@ -1,0 +1,129 @@
+"_Node"
+{
+    "Name"  "*"
+    "Panel" "CKV_Node_Panel"
+    "BgColor_override" "64 64 64 255"
+    
+    "_Leaf"
+    {
+        "Name"  "fieldName"
+        "Panel" "CKV_Leaf_Panel"
+        "Unique"    "1"
+        "ReadOnly" "1"
+        "SortOrder"	"0"
+    }
+    "_Leaf"
+    {
+        "Name"  "ControlName"
+        "Panel" "CKV_Leaf_Panel"
+        "Unique"    "1"
+        "ReadOnly" "1"
+        "SortOrder"	"1"
+    }
+    "_Leaf"
+    {
+        "Name"  "xpos"
+        "Panel" "CKV_Leaf_Panel"
+        "Unique"    "1"
+        "SortOrder"	"2"
+    }
+    "_Leaf"
+    {
+        "Name"  "ypos"
+        "Panel" "CKV_Leaf_Panel"
+        "Unique"    "1"
+        "SortOrder"	"3"
+    }    
+    "_Leaf"
+    {
+        "Name"  "wide"
+        "Panel" "CKV_Leaf_Panel"
+        "Unique"    "1"
+        "SortOrder"	"4"
+    }
+    "_Leaf"
+    {
+        "Name"  "tall"
+        "Panel" "CKV_Leaf_Panel"
+        "Unique"    "1"
+        "SortOrder"	"5"
+    }
+    "_Leaf"
+    {
+        "Name"  "zpos"
+        "Panel" "CKV_Leaf_Panel"
+        "Unique"    "1"
+        "SortOrder"	"6"
+    }
+    "_Leaf"
+    {
+        "Name"  "labelText"
+        "Panel" "CKV_Leaf_Panel"
+        "Unique"    "1"
+        "SortOrder"	"7"
+    }
+    "_Leaf"
+    {
+        "Name"  "font"
+        "Panel" "CKV_Leaf_Panel"
+        "Unique"    "1"
+        "SortOrder"	"8"
+    }
+    "_Leaf"
+    {
+        "Name"  "textAlignment"
+        "Panel" "CKV_Leaf_Panel"
+        "Unique"    "1"
+        "SortOrder"	"9"
+    }
+    "_Leaf"
+    {
+        "Name"  "fgcolor_override"
+        "Panel" "CKV_Leaf_Panel"
+        "Unique"    "1"
+        "SortOrder"	"10"
+    }
+    "_Leaf"
+    {
+        "Name"  "bgcolor_override"
+        "Panel" "CKV_Leaf_Panel"
+        "Unique"    "1"
+        "SortOrder"	"11"
+    }
+    "_Leaf"
+    {
+        "Name"  "visible"
+        "Panel" "CKV_Leaf_Panel"
+        "Unique"    "1"
+        "SortOrder"	"12"
+    }
+    "_Leaf"
+    {
+        "Name"  "PaintBackgroundType"
+        "Panel" "CKV_Leaf_Panel"
+        "Unique"    "1"
+        "SortOrder"	"13"
+    }
+    
+    "_Leaf"
+    {
+        "Name"  "pin_to_sibling"
+        "Panel" "CKV_Leaf_Panel"
+        "Unique"    "1"
+        "SortOrder"	"14"
+    }
+    "_Leaf"
+    {
+        "Name"  "pin_corner_to_sibling"
+        "Panel" "CKV_Leaf_Panel"
+        "Unique"    "1"
+        "SortOrder"	"15"
+    }
+    "_Leaf"
+    {
+        "Name"  "pin_to_sibling_corner"
+        "Panel" "CKV_Leaf_Panel"
+        "Unique"    "1"
+        "SortOrder"	"16"
+    }
+}

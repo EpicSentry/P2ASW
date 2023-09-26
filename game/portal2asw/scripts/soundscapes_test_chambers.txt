@@ -1,0 +1,277 @@
+//
+// elevator
+//
+"EntryExitElevator.Interior"
+{
+	"dsp"	"104"
+
+	"playlooping"
+	{
+		"volume"	"0.78"
+		"wave"		"ambient/industrial/amb_industrial_medium_lp_01.wav"
+		"pitch"		"85"
+		"attenuation"	"0"
+	}
+}
+"EntryExitElevator.Exterior"
+{
+	"dsp"	"105"
+	"fadetime" "1"
+
+	"playlooping"
+	{
+		"volume"	"0.78"
+		"wave"		"ambient/industrial/amb_industrial_medium_lp_01.wav"
+		"pitch"		"85"
+		"attenuation"	"0"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.23"
+		"wave"		"ambient/industrial/amb_heavy_mach_lp_02.wav"
+		"pitch"		"65"
+
+	}
+}
+
+"EntryExitElevator.IndustrialStairs"
+{
+	"dsp"	"105"
+	"fadetime" "1"
+
+
+	"playlooping"
+	{
+		"volume"	"0.61"
+		"wave"		"ambient/industrial/amb_industrial_muffled_lp_02.wav"
+		"pitch"		"80"
+
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.1"
+		"wave"		"ambient/industrial/amb_heavy_mach_lp_02.wav"
+		"pitch"		"65"
+
+	}
+
+	"playsoundscape"
+	{
+		"name" "util_lo.end_mach"
+		"volume" ".63"
+	}
+}
+
+"EntryExitElevator.OpenChamber"
+{
+	"dsp"	"1"
+
+	"playlooping"
+	{
+		"volume"	"0.8"
+		//"rndwave"
+		
+		//{		
+		"wave"	"ambient/nature/insects/amb_insects_lp_01.wav"
+			//"ambient/nature/insects/amb_insects_lp_02.wav"
+			//"ambient/nature/insects/amb_insects_lp_03.wav"
+		//}
+		"pitch"		"100"
+		"attenuation"	"0"
+	}
+}
+
+
+
+// Soundscapes for Portal 2 intro testchambers
+//---------------------------
+"TestChamber_01.Vent"
+{
+	"dsp"	"1"
+
+	"playlooping"
+	{
+		"volume"	"0.2"
+		"wave"		"ambient/props/vents/tonal_vent_lp_01.wav"
+		"pitch"		"100"
+		"attenuation"	"0"
+	}
+}
+
+TestChamber.Vegetation
+{
+	"playsoundscape" 
+ 	{
+		"name"	"TestChamber_Vegetation.Standard"
+		"volume" "1"
+	}
+}
+
+///////////////////////////////////
+//BEGIN Soundscapes for SP_INTRO_02
+///////////////////////////////////
+TestChamber_Intro_02.BigRoom
+{
+	"dsp"	"1"
+	"fadetime"	"3.5"
+	
+	"playsoundscape"
+	{
+		"name"	"TestChamber_Vegetation.BirdsInsects"
+		"volume" "1"
+	}
+	
+	"playsoundscape"
+	{
+		"name"	"TestChamber_Vegetation.Insects_02"
+		"volume" "0.8"
+	}
+}
+
+TestChamber_Intro_02.IntroRoom
+{
+	"dsp"	"1"
+	"fadetime"	"3.5"
+	
+	"playsoundscape"
+	{
+		"name"	"TestChamber_Vegetation.Insects_02"
+		"volume" "1"
+	}
+	
+	"playsoundscape"
+	{
+		"name"	"TestChamber_Vegetation.Insects_03"
+		"volume" "0.8"
+	}
+}
+
+TestChamber_Intro_02.IntroRoom_02
+{
+	"dsp"	"1"
+	"fadetime"	"3.5"
+	
+	"playsoundscape"
+	{
+		"name"	"TestChamber_Vegetation.Insects_02"
+		"volume" "1"
+	}
+	
+	"playsoundscape"
+	{
+		"name"	"TestChamber_Vegetation.Insects_03"
+		"volume" "0.8"
+	}
+	
+	"playsoundscape"
+	{
+		"name"	"TestChamber_Vegetation.WaterDrips"
+		"volume" "0.7"
+	}
+}
+
+TestChamber_Intro_02.SideRoom
+{
+	"dsp"	"1"
+	"fadetime"	"2.5"
+	
+		"playsoundscape"
+	{
+		"name"	"TestChamber_Vegetation.BirdsInsects"
+		"volume" "1"
+	}
+	
+	"playsoundscape"
+	{
+		"name"	"TestChamber_Vegetation.Insects_02"
+		"volume" "0.8"
+	}
+}
+/////////////////////////////////
+//END Soundscapes for SP_INTRO_02
+/////////////////////////////////
+
+"TestChamber_01.Awake"
+{
+	"dsp"	"1"
+
+	"playlooping"
+	{
+		"volume"	"0.5"
+		"wave"		"ambient/atmosphere/ind_int_lp_01.wav"
+		"pitch"		"100"
+		"attenuation"	"0"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.3"
+		"wave"		"ambient/atmosphere/ind_int_lp_02.wav"
+		"pitch"		"100"
+		"attenuation"	"0"
+	}
+
+	"playrandom"
+	{
+		"volume"	"0.2,0.4"
+		"pitch"		"70, 120"
+		"time"		"5.0, 15.0"
+		"position"	"random"
+		"soundlevel"	"SNDLVL45dB"
+		"rndwave"
+		{
+			"wave"	"ambient/materials/creaking.wav"
+			"wave"	"ambient/materials/metal4.wav"
+			"wave"	"ambient/materials/metal_rattle4.wav"
+		}
+	}
+
+	"playrandom"
+	{
+		"volume"	"0.2,0.4"
+		"pitch"		"70, 120"
+		"time"		"30.0, 60.0"
+		"position"	"random"
+		"soundlevel"	"SNDLVL45dB"
+		"rndwave"
+		{
+			"wave"	"ambient/materials/vent_scurry_medium.wav"
+			"wave"	"ambient/materials/creaking.wav"
+			"wave"	"ambient/materials/metal4.wav"
+			"wave"	"ambient/materials/metal_rattle4.wav"
+		}
+	}
+
+	"playrandom"
+	{
+		"volume"	"0.5,0.8"
+		"pitch"		"70, 120"
+		"time"		"6.0, 9.0"
+		"position"	"random"
+		"soundlevel"	"SNDLVL_55dB"
+		"rndwave"
+		{
+			"wave"	"ambient/atmosphere/gust_int_01.wav"
+			"wave"	"ambient/atmosphere/gust_int_02.wav"
+			"wave"	"ambient/atmosphere/gust_int_03.wav"
+		}
+	}
+
+	"playrandom"
+	{
+		"volume"	"0.25,0.5"
+		"pitch"		"70, 120"
+		"time"		"9.0, 12.0"
+		"position"	"random"
+		"soundlevel"	"SNDLVL_45dB"
+		"rndwave"
+		{
+			"wave"	"ambient/atmosphere/gust_int_01.wav"
+			"wave"	"ambient/atmosphere/gust_int_02.wav"
+			"wave"	"ambient/atmosphere/gust_int_03.wav"
+		}
+	}
+}
+

@@ -1,0 +1,15 @@
+GAME
+{
+	"pos_x"	"-9090"
+	"pos_y"	"3731"
+	"scale"	"14.0"
+	"material" "vgui/swarm/Overviews/timorOverview"
+	"briefingmaterial" "vgui/swarm/Overviews/timorBriefingOverview"
+	"missiontitle"		"Timor Station"
+	"description"	"Locate nuclear warhead and get it to the alien hive entrance."
+	"image"		"swarm/ObjectivePics/obtimorstationnuke"
+	"version"		"1"
+	"author"		"Valve"
+	"website"		"http://www.alienswarm.com/"
+	"builtin"		"1"
+}

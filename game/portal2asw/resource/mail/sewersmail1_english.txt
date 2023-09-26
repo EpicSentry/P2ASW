@@ -1,0 +1,23 @@
+GAME
+{
+    // PDA belongs to Brian
+    
+    // inbox
+    
+	"MailFrom1"	"From: Helen Young"
+	"MailDate1"	"Date: 12/23/52"
+	"MailSubject1"	"Subject: L. Callen"
+	"MailBody1A"	"Brian,"
+	"MailBody1B"	"Stay out of Timor Station!  Please come back to the main quarters ASAP.  Kate is missing and no one knows where she is.  Phil said he knows of at least two other missing persons.  I'm meeting Ming tonight."
+	"MailBody1C"	"Please get back as soon as you can.  I love you."
+	"MailBody1D"	"Helen"
+
+	"MailFrom2"	"From: Helen Young"
+	"MailDate2"	"Date: 12/24/52"
+	"MailSubject2"	"Subject: WHERE ARE YOU??"
+	"MailBody2A"	"Brian, please contact me!  Where have you been?  I'm worried, all right?  Ming is experimenting with those eggs--experiments I know are illegal.  This morning they sealed off Deck 1; there are rumors of contamination but no confirmation.  SynTek wants to keep us in the dark.  We even heard gunfire somewhere in the main complex."
+	"MailBody2B"	"Please contact me. I can't stand the thought that you're still down there somewhere."
+	"MailBody2C"	"Helen"
+
+    // sent
+}

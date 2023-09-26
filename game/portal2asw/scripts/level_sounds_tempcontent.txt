@@ -1,0 +1,705 @@
+
+"intermission_music"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.7500000"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"			"*#music/smooth_jazz.mp3"
+}
+
+"apc_engine_start"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.85"
+	"soundlevel"	"SNDLVL_90db"
+
+	"wave"		")plats/platform_start_lp_01.wav"
+}
+
+"apc_engine_stop"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.85"
+	"soundlevel"	"SNDLVL_95db"
+
+	"wave"		"vehicles/apc/apc_shutdown.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack"	"P2_null_player_start" //Play an entry other than the called one!
+			
+			"play_entry"
+			{
+				"entry_name" "World.PlatformStop" //Replace with the sound you want to play.
+			}
+			
+		}
+	}
+}
+
+"Doors.FullClose8"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_75dB"
+	"pitch"		"90,110"
+	"wave"		"common/NULL.WAV"
+}
+
+"Doors.FullClose11"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_100dB"
+	"pitch"		"90,110"
+	"wave"	"doors/garage_stop1.wav"
+}
+
+"Doors.FullClose14"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.4"
+	"soundlevel"  "SNDLVL_75dB"
+	"pitch"		"100"
+	"wave"		"doors/doorstop1.wav"
+}
+
+"DoorSound.DefaultMove"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.05"
+	"soundlevel"	"SNDLVL_75dB"
+	"wave"	")doors/default_move.wav" 
+	
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" 	"P2_exclusion_time_and_poly_limiting_start"
+
+			"limit_sound"
+			{
+				"match_entry" "DoorSound.DefaultMove"
+				"input_max_entries" "1.000000"
+				"match_substring" "false"
+			}			
+			
+			"block_entries"
+			{
+				"input_duration" ".05" //in seconds
+				"match_entry" "DoorSound.DefaultMove" //The sound entry to use
+				"match_entity" "false"
+			}
+		}
+	}
+}
+
+"DoorSound.DefaultArrive"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.2"
+	"soundlevel"	"SNDLVL_75dB"
+	"wave"	"common/null.wav" 
+}
+
+"DoorSound.DefaultLocked"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.2"
+	"soundlevel"	"SNDLVL_75dB"
+	"wave"	"doors/default_locked.wav" 
+}
+
+"RotDoorSound.DefaultMove"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.05"
+	"soundlevel"	"SNDLVL_75dB"
+	"wave"	")doors/default_move.wav" 
+}
+
+"RotDoorSound.DefaultArrive"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.2"
+	"soundlevel"	"SNDLVL_75dB"
+	"wave"	"common/null.wav" 
+}
+
+"RotDoorSound.DefaultLocked"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.2"
+	"soundlevel"	"SNDLVL_75dB"
+	"wave"	"doors/default_locked.wav" 
+}
+
+"DoorSound.Null"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"1.0"
+	"pitch"			"100"
+	"soundlevel"	"SNDLVL_NORM"
+	"wave"	"common/null.wav" 
+}
+
+"Doors.FullOpen9"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.9"
+	"soundlevel"  "SNDLVL_80dB"
+	"pitch"		"95,110"
+	"wave"	"doors/door_metal_large_close2.wav"
+}
+
+"Doors.FullOpen9b"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_80dB"
+	"pitch"		"115,120"
+	"wave"	"doors/door_metal_large_close3.wav"
+}
+
+"Doors.FullOpen10"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"1.0"
+	"soundlevel"  "SNDLVL_100dB"
+	"pitch"		"70,80"
+	"wave"	"plats/hall_elev_stop.wav"
+}
+
+"Doors.FullOpen14"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_75dB"
+	"pitch"		"100"
+	"wave"	"doors/doorstop1.wav"
+}
+
+
+"Buttons.snd21" 
+{
+	"channel"	"CHAN_ITEM"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_75dB"
+	"wave"	"common/null.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack" "P2_null_start" //replaces null.wav
+		}
+	}
+}
+
+"d3_citadel.small_elevator_move"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.70000"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_80dB"
+
+	"wave"			"plats/elevator_move_loop1.wav"
+}
+
+"NPC_dog.Ravendoor_Creak"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"1.0"
+	"pitch"			"50"
+	"soundlevel"	"SNDLVL_120dB"
+
+	"wave"	"ambient/materials/metal_stress1.wav"
+}
+
+"AlyxEMP.Charge"
+{
+	"channel"	"CHAN_WEAPON"
+	"volume"	"0.65"
+	"soundlevel"  	"SNDLVL_90dB"
+	"pitch"		"100,120"
+	//"wave"		"weapons/stunstick/alyx_stunner_charge2.wav"
+//	"wave"		"weapons/stunstick/alyx_stunner2.wav"
+	"wave"		"common/null.wav"
+}
+
+"Doors.Move10"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.8"
+	"soundlevel"  "SNDLVL_100dB"
+	"pitch"		"100"
+	"wave"	"plats/hall_elev_move.wav"
+}
+
+"Buttons.snd47"
+{
+	"channel"	"CHAN_ITEM"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_75dB"
+	"pitch"		"100"
+	"wave"	"buttons/combine_button7.wav"
+}
+
+"coast.combine_apc_shutdown"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.900000"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_80dB"
+
+	"wave"			"vehicles/apc/apc_shutdown.wav"
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		"start_stack"
+		{
+			"import_stack"	"P2_null_player_start" //Play an entry other than the called one!
+			
+			"play_entry"
+			{
+				"entry_name" "World.PlatformStop" //Replace with the sound you want to play.
+			}
+			
+		}
+	}
+}
+
+"Canals.d1_canals_01a_metal_groan"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.75"
+	"pitch"			"100"
+	"soundlevel"	"SNDLVL_90db"
+	"wave"			"ambient/materials/metal_groan.wav"
+}
+
+"DoorHandles.Locked1"
+{
+	"channel"	"CHAN_ITEM"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_75dB"
+	"pitch"		"90,110"
+	"wave"	"doors/latchlocked2.wav"
+}
+
+"explode_3"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"VOL_NORM"
+	"pitch"			"95, 105"
+
+	"soundlevel"	"SNDLVL_GUNFIRE"
+
+	"wave"			"ambient/explosions/explode_3.wav"
+}
+
+"d3_citadel.small_elevator_start"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.750000"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_80dB"
+
+	"wave"			"plats/elevator_start1.wav"
+}
+
+"coast.thumper_ambient"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"VOL_NORM"
+	"pitch"			"0.500000"
+
+	"soundlevel"	"SNDLVL_80dB"
+
+	"wave"			"ambient/machines/thumper_amb.wav"
+}
+
+"Doors.FullOpen1"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.5"
+	"soundlevel"  "SNDLVL_75dB"
+	"pitch"		"90,110"
+	"wave"	"doors/door_metal_medium_open1.wav"
+}
+
+"NPC_CScanner.DiveBombFlyby"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"1.0"
+	"pitch"			"95, 105"
+
+	"soundlevel"	"SNDLVL_120dB"
+
+	"rndwave"
+	{
+		"wave"			"npc/scanner/scanner_nearmiss1.wav"
+		"wave"			"npc/scanner/scanner_nearmiss2.wav"
+	}
+}
+
+"Doors.FullClose10"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_100dB"
+	"pitch"		"70,80"
+	"wave"	"plats/hall_elev_stop.wav"
+}
+
+"Doors.CombineGate_citizen_stop1"
+{
+	"channel"	"CHAN_STATIC"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_70dB"
+	"pitch"		"100"
+	"wave"	"plats/elevator_stop1.wav"
+}
+
+"Doors.CombineGate_citizen_stop2"
+{
+	"channel"	"CHAN_STATIC"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_70dB"
+	"pitch"		"100"
+	"wave"	"plats/elevator_stop2.wav"
+}
+
+"Buttons.snd42"
+{
+	"channel"	"CHAN_ITEM"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_75dB"
+	"pitch"		"100"
+	"wave"	"buttons/combine_button2.wav"
+}
+
+"Airboat_fan_idle"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.9"
+	"pitch"			"100,120"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"			"vehicles/airboat/fan_blade_idle_loop1.wav"
+}
+
+"Doors.FullClose1"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_75dB"
+	"pitch"		"90,110"
+	"wave"		"common/NULL.WAV"
+}
+
+// NOTE: all 'short' loops must be on chan voice
+"NPC_SScanner.Combat"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"0.45"
+	"pitch"			"100,140"
+
+	"soundlevel"	"SNDLVL_85dB"
+
+	"rndwave"
+	{
+		"wave"	"npc/scanner/combat_scan_loop1.wav"
+		"wave"	"npc/scanner/combat_scan_loop2.wav"
+		"wave"	"npc/scanner/combat_scan_loop4.wav"
+		"wave"	"npc/scanner/combat_scan_loop6.wav"
+	}
+}
+
+"Buttons.snd43"
+{
+	"channel"	"CHAN_ITEM"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_75dB"
+	"pitch"		"100"
+	"wave"	"buttons/combine_button3.wav"
+}
+
+"Func_Tank.BeginUse"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+	"wave"		"weapons/shotgun/shotgun_cock.wav"
+}
+
+"Doors.Move1"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.2"
+	"soundlevel"  "SNDLVL_75dB"
+	"pitch"		"95,105"
+	"rndwave"
+	{
+		"wave"	"doors/door_metal_rusty_move1.wav"
+	}
+}
+
+"Weapon_MegaPhysCannon.Pickup"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.42"
+	"soundlevel"	"SNDLVL_105dB"
+	"pitch"		"70,80"
+
+	"wave"			"weapons/physcannon/physcannon_pickup.wav"
+}
+
+"DoorHandles.Unlocked1"
+{
+	"channel"	"CHAN_ITEM"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_75dB"
+	"pitch"		"90,110"
+	"rndwave"
+	{
+		"wave"	")doors/latchunlocked1.wav"
+		"wave"	")doors/door_latch3.wav"
+	}
+}
+
+"Weapon_CombineGuard.Special1"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.5"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"			"weapons/cguard/charging.wav"
+}
+
+"Buttons.snd22"
+{
+	"channel"	"CHAN_ITEM"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_75dB"
+	"wave"	"buttons/lever2.wav"
+
+}
+
+"doors.locker_shut"
+{
+	"channel"	"CHAN_STATIC"
+	"volume"	"0.15,0.25"
+	"soundlevel"  "SNDLVL_75dB"
+	"wave"		"common/NULL.WAV"
+}
+
+"DoorHandles.Unlocked2"
+{
+	"channel"	"CHAN_ITEM"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_75dB"
+	"pitch"		"90,110"
+	"wave"	"doors/handle_pushbar_open1.wav"
+}
+
+"ambient.steam01"
+{
+	"channel"	"CHAN_STATIC"
+	"volume"	"0.4"
+	"pitch"		"100"
+	"soundlevel"	"SNDLVL_70dB"
+
+	"wave"		"ambient/gas/steam_loop1.wav"
+}
+
+"d1_canals_03.catwalkgroan01"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"VOL_NORM"
+	"pitch"			"100"
+
+	"soundlevel"	"SNDLVL_100dB"
+
+	"wave"			"ambient/materials/metal_stress1.wav"
+}
+
+
+
+"Doors.FullClose2"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_75dB"
+	"pitch"		"90,110"
+	"rndwave"
+	{
+		"wave"	"doors/door_metal_large_close2.wav"
+		"wave"	"doors/metal_stop1.wav"
+	}
+}
+
+"container.enginestart"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_75dB"
+	"pitch"		"90,110"
+	"rndwave"
+	{
+		"wave"	"container/crane_start_loop1.wav"
+	}
+
+	"soundentry_version" "2"
+
+	"operator_stacks"
+	{
+		
+		"update_stack"
+		{
+			"import_stack"	"p2_update_default"			
+			
+			"volume_fade_out"
+			{
+				"input_max" "2.0" //fade out time
+			}
+		}
+	}
+}
+
+
+"container.enginestop"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_75dB"
+	"pitch"		"90,110"
+	"rndwave"
+	{
+		"wave"	"container/crane_stop1.wav"
+	}
+}
+
+"container.alarm"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_75dB"
+	"pitch"		"100"
+	"rndwave"
+	{
+		"wave"	"alarms\alarm_citizen_loop1.wav"
+	}
+}
+
+//**************************************************************
+//START OF Temporary container cable snapping / falling container sounds
+//**************************************************************
+"container.cablewhoosh01"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_NONE"
+	"pitch"		"90,110"
+	"wave"	"container/cablewhoosh01.wav"
+}
+"container.cablewhoosh02"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_NONE"
+	"pitch"		"90,110"
+	"wave"	"container/cablewhoosh02.wav"
+}
+"container.containercrash01"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_NONE"
+	"pitch"		"90,110"
+	"wave"	"container/containercrash01.wav"
+}
+"container.containercrash02"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_NONE"
+	"pitch"		"90,110"
+	"wave"	"container/containercrash02.wav"
+}
+"container.snap01"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_NONE"
+	"pitch"		"90,110"
+	"wave"	"container/snap01.wav"
+}
+"container.snap02"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_NONE"
+	"pitch"		"90,110"
+	"wave"	"container/snap02.wav"
+}
+"container.snap03"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_NONE"
+	"pitch"		"90,110"
+	"wave"	"container/snap03.wav"
+}
+"container.snap04"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_NONE"
+	"pitch"		"90,110"
+	"wave"	"container/snap04.wav"
+}
+"container.snapwhoosh01"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_NONE"
+	"pitch"		"90,110"
+	"wave"	"container/snapwhoosh01.wav"
+}
+"container.stretchsnap01"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_NONE"
+	"pitch"		"90,110"
+	"wave"	"container/stretchsnap01.wav"
+}
+"container.whoosh01"
+{
+	"channel"	"CHAN_BODY"
+	"volume"	"0.7"
+	"soundlevel"  "SNDLVL_NONE"
+	"pitch"		"90,110"
+	"wave"	"container/whoosh01.wav"
+}
+//**************************************************************
+//END OF Temporary container cable snapping / falling container sounds
+//**************************************************************

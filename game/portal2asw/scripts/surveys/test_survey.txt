@@ -1,0 +1,25 @@
+"survey_title"
+{
+	"version" -1
+	"id"	-1
+	"onetoten"
+	{
+		"text"		"rate from one to ten"
+		"labelatone"	"least complex"
+		"labelatten"	"most complex"
+	}
+
+	"essay"	
+	{
+		"text"		"describe in own words plz"
+	}
+	
+	"radiochoices"
+	{
+		"text"		"pick one of these"
+		"choice"	"loved it"	
+		"choice"	"it was ok"	
+		"choice"	"didnt understand it"	
+		"choice"	"it was stupid"	
+	}
+}
