@@ -133,7 +133,8 @@ void CNPC_Portal_FloorTurret::Precache( void )
 	CBaseEntity::PrecacheModel("models/npcs/turret/turret_backwards.mdl");
 	CBaseEntity::PrecacheModel("models/npcs/turret/turret_skeleton.mdl");
 	PrecacheModel("effects/redlaser1.vmt");
-	PrecacheParticleSystem("ShakeRopes");
+	//PrecacheParticleSystem("ShakeRopes");
+	PrecacheParticleSystem("AR2Tracer");
 
 	for ( int iTalkScript = 0; iTalkScript < PORTAL_TURRET_STATE_TOTAL; ++iTalkScript )
 	{
@@ -490,7 +491,7 @@ void CNPC_Portal_FloorTurret::Shoot( const Vector &vecSrc, const Vector &vecDirT
 
 	EmitSound( "NPC_FloorTurret.ShotSounds" );
 	DoMuzzleFlash();
-
+	/*
 	// Make ropes shake if they exist
 	for ( int iRope = 0; iRope < PORTAL_FLOOR_TURRET_NUM_ROPES; ++iRope )
 	{
@@ -499,7 +500,7 @@ void CNPC_Portal_FloorTurret::Shoot( const Vector &vecSrc, const Vector &vecDirT
 			m_hRopes[ iRope ]->ShakeRopes( vecSrc, 32.0f, 5.0f );
 		}
 	}
-
+	*/
 	// If a turret is partially tipped the recoil with each shot so that it can knock itself over
 	Vector	up;
 	GetVectors( NULL, NULL, &up );
