@@ -288,10 +288,6 @@ void CPortalLaser::DoTraceFromPortal( CPortal_Base2D* pRemotePortal, trace_t &tr
 
 	Vector vecPortalOrigin = pRemotePortal->GetAbsOrigin();
 
-	Msg("vecRemoteOrigin: %f %f %f\n", vecRemoteOrigin.x, vecRemoteOrigin.y, vecRemoteOrigin.z);
-	Msg("vecPortalOrigin: %f %f %f\n", vecPortalOrigin.x, vecPortalOrigin.y, vecPortalOrigin.z);
-	//Msg("vecRemoteMuzzleDir: %f %f %f\n", vecRemoteMuzzleDir.x, vecRemoteMuzzleDir.y, vecRemoteMuzzleDir.z);
-
 
 	// Perform the trace from the remote portal's origin
 	trace_t remoteTrace;
@@ -306,8 +302,6 @@ void CPortalLaser::DoTraceFromPortal( CPortal_Base2D* pRemotePortal, trace_t &tr
 	ray.Init( vecRemoteOrigin, vecRemoteOrigin + vecRemoteMuzzleDir * LASER_RANGE );
 
 	enginetrace->TraceRay( ray, MASK_SHOT, &remoteTraceFilter, &remoteTrace );
-	
-	//Msg("remoteTrace.endpos: %f %f %f\n", remoteTrace.endpos.x, remoteTrace.endpos.y, remoteTrace.endpos.z);
 
 	//UTIL_TraceLine( vecRemoteOrigin, vecRemoteOrigin + vecRemoteMuzzleDir * LASER_RANGE, MASK_SHOT, &remoteTraceFilter, &remoteTrace );
 
