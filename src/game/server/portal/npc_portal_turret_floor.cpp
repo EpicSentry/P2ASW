@@ -38,7 +38,9 @@ const char *g_PortalTalkNames[ PORTAL_TURRET_STATE_TOTAL - TURRET_STATE_TOTAL ] 
 	"NPC_FloorTurret.TalkPickup",
 	"NPC_FloorTurret.TalkShotAt",
 	"NPC_FloorTurret.TalkDissolved",
-	"NPC_FloorTurret.TalkFlung"
+	"NPC_FloorTurret.TalkFlung",
+	"NPC_FloorTurret.TalkStartBurning",
+	"NPC_FloorTurret.TalkBurned"
 };
 
 const char* GetTurretTalkName( int iState )
@@ -86,6 +88,8 @@ BEGIN_DATADESC( CNPC_Portal_FloorTurret )
 	DEFINE_THINKFUNC( InactiveThink ),
 	DEFINE_THINKFUNC( SuppressThink ),
 	DEFINE_THINKFUNC( DisabledThink ),
+	DEFINE_THINKFUNC( StartBurningThink ),
+	DEFINE_THINKFUNC( BurnedThink ),
 
 	// Inputs
 	DEFINE_INPUTFUNC( FIELD_STRING, "FireBullet", InputFireBullet ),
@@ -113,6 +117,7 @@ CNPC_Portal_FloorTurret::CNPC_Portal_FloorTurret( void )
 	m_bUseSuperDamageScale = false;
 	m_bDamageForce = true;
 	m_bPickupEnabled = true;
+	m_bIsBurning = false;
 }
 
 void CNPC_Portal_FloorTurret::Precache( void )
@@ -254,6 +259,14 @@ void CNPC_Portal_FloorTurret::UpdateOnRemove( void )
 //-----------------------------------------------------------------------------
 int CNPC_Portal_FloorTurret::OnTakeDamage( const CTakeDamageInfo &info )
 {
+	if ( ( info.GetDamageType() & DMG_BURN | DMG_ENERGYBEAM ) && !m_bIsBurning )
+	{
+		m_fNextTalk = gpGlobals->curtime;
+		m_lifeState = LIFE_DYING;
+		SetThink( &CNPC_Portal_FloorTurret::StartBurningThink );
+		SetNextThink( gpGlobals->curtime );
+	}
+
 	if ( m_lifeState == LIFE_ALIVE && ( info.GetDamageType() & DMG_BULLET ) && !info.GetAttacker()->IsPlayer() )
 	{
 		if ( gpGlobals->curtime > m_fNextTalk )
@@ -326,6 +339,9 @@ bool CNPC_Portal_FloorTurret::PreThink( turretState_e state )
 	if ( m_iLastState != iNewState && ( ( iNewState == TURRET_TIPPED && !m_bDelayTippedTalk ) || 
 										iNewState == TURRET_RETIRING || 
 										iNewState == PORTAL_TURRET_DISSOLVED || 
+										iNewState == PORTAL_TURRET_FLUNG ||
+										iNewState == PORTAL_TURRET_STARTBURNING ||
+										iNewState == PORTAL_TURRET_BURNED ||
 										iNewState == PORTAL_TURRET_PICKUP ) )
 	{
 		m_fNextTalk = gpGlobals->curtime -1.0f;
@@ -385,11 +401,22 @@ bool CNPC_Portal_FloorTurret::PreThink( turretState_e state )
 				EmitSound( pchScriptName );
 				m_fNextTalk = gpGlobals->curtime + 10.0f;	// Never going to talk again
 				break;
+
+			case PORTAL_TURRET_STARTBURNING:
+				EmitSound( pchScriptName );
+				m_fNextTalk = gpGlobals->curtime + 1.0f;
+				break;
+			case PORTAL_TURRET_BURNED:
+				EmitSound( pchScriptName );
+				m_fNextTalk = gpGlobals->curtime + 1.0f;
+				break;
 		}
 	}
 
 	// New states are not supported by old turret code
-	if (!m_bUsedAsActor && iNewState != TURRET_TIPPED && iNewState < TURRET_STATE_TOTAL )
+	if (!m_bUsedAsActor &&
+		iNewState != TURRET_TIPPED &&
+		iNewState < TURRET_STATE_TOTAL )
 		return BaseClass::PreThink( (turretState_e)iNewState );
 
 	return true;
@@ -1233,6 +1260,26 @@ void CNPC_Portal_FloorTurret::DisabledThink(void)
 		SetThink( NULL );
 	}
 
+}
+
+void CNPC_Portal_FloorTurret::StartBurningThink( void )
+{
+	PreThink( (turretState_e)PORTAL_TURRET_STARTBURNING );
+
+	Ignite( 10.0 );
+
+	m_bIsBurning = true;
+
+	SetThink( &CNPC_Portal_FloorTurret::BurnedThink );
+	SetNextThink( gpGlobals->curtime + 1.0 );
+}
+
+void CNPC_Portal_FloorTurret::BurnedThink( void )
+{
+	PreThink( (turretState_e)PORTAL_TURRET_BURNED );
+
+	SetThink( &CNPC_Portal_FloorTurret::BreakThink );
+	SetNextThink( gpGlobals->curtime + 0.5 );
 }
 
 //-----------------------------------------------------------------------------

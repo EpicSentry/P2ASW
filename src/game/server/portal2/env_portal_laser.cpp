@@ -6,7 +6,8 @@
 #include "particle_parse.h"
 #include "ieffects.h"
 #include "util_shared.h"
-
+#include "prop_weightedcube.h"
+#include "point_laser_target.h"
 
 // constants
 const int CPortalLaser::FLOOR_TURRET_PORTAL_EYE_ATTACHMENT = 1;
@@ -82,8 +83,6 @@ void CPortalLaser::UpdateLaser()
 	Vector vecMuzzleDir;
 	AngleVectors(angEyeDir, &vecMuzzleDir);
 
-	trace_t cubeTrace;
-
 	CTraceFilterSimpleClassnameList masterTraceFilter(this, COLLISION_GROUP_NONE);
 	masterTraceFilter.AddClassnameToIgnore("info_placement_helper");
 	masterTraceFilter.AddClassnameToIgnore("player");
@@ -91,28 +90,31 @@ void CPortalLaser::UpdateLaser()
 	masterTraceFilter.AddClassnameToIgnore("prop_energy_ball");
 	
 	// Trace from the laser emitter to check if it hits a cube
-	Ray_t ray_cube;
-	ray_cube.Init( vecOrigin, vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE );
-	UTIL_Portal_TraceRay( ray_cube, MASK_SHOT, &masterTraceFilter, &cubeTrace );
+	trace_t normalTrace;
+	Ray_t ray;
+	ray.Init( vecOrigin, vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE );
+	UTIL_Portal_TraceRay( ray, MASK_SHOT, &masterTraceFilter, &normalTrace );
 
-	// Check if were is the cube
-	m_bIsLaserHittingCube = false;
-	if (cubeTrace.m_pEnt && FClassnameIs(cubeTrace.m_pEnt, "prop_weighted_cube") && FStrEq(STRING(cubeTrace.m_pEnt->GetModelName()), "models/props/reflection_cube.mdl"))
-	{
-		m_bIsLaserHittingCube = true;
-	}
-
-	// Trace for the laser catcher
-	trace_t catcherTrace;
-	Ray_t ray_catcher;
-	ray_catcher.Init( vecOrigin, vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE );
-	UTIL_Portal_TraceRay( ray_catcher, MASK_SHOT, &masterTraceFilter, &catcherTrace );
-	
-	// Check if were hitting the catcher
+	// Check if were is the cube or a catcher
 	m_bIsLaserHittingCatcher = false;
-	if (catcherTrace.m_pEnt && FClassnameIs(catcherTrace.m_pEnt, "prop_laser_catcher"))
+	m_bIsLaserHittingCube = false;
+
+	CBaseEntity *pEntity = normalTrace.m_pEnt;
+
+	if ( pEntity )
 	{
-		m_bIsLaserHittingCatcher = true;
+		// It's possible for a laser to hit a cube and a catcher at the same time.
+		CPropWeightedCube *pCube = dynamic_cast<CPropWeightedCube*>( pEntity );
+		CLaserCatcher *pCatcher = dynamic_cast<CLaserCatcher*>( pEntity );
+
+		if ( pCube && pCube->GetCubeType() == CUBE_REFLECTIVE )
+		{
+			m_bIsLaserHittingCube = true;
+		}
+		if ( pCatcher )
+		{
+			m_bIsLaserHittingCatcher = true;
+		}
 	}
 	
 	// Deal damage to the player if they are touching the laser beam
@@ -168,6 +170,7 @@ void CPortalLaser::UpdateLaser()
 		m_pBeam->SetCollisionGroup(COLLISION_GROUP_NONE);
 		m_pBeam->PointsInit(vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE, vecOrigin);
 		m_pBeam->SetBeamFlag(FBEAM_REVERSED);
+		m_pBeam->SetDamage(100);
 		m_pBeam->SetStartEntity(this);
 	}
 	else
@@ -185,10 +188,9 @@ void CPortalLaser::UpdateLaser()
 	trace_t trace; // Used for determining the portal hit
 
 	// Perform the portal detection trace from the origin to the muzzle direction
-	UTIL_TraceLine(vecOrigin, vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE, MASK_SHOT, &masterTraceFilter, &trace);
-	Ray_t ray;
-	ray.Init( vecOrigin, vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE );
-	UTIL_Portal_TraceRay( ray, MASK_SHOT, &masterTraceFilter, &trace );
+	//UTIL_Portal_TraceRay( ray , MASK_SHOT, &masterTraceFilter, &trace);
+
+	UTIL_Portal_TraceRay( rayPath, MASK_SHOT, &masterTraceFilter, &trace );
 
 	if (UTIL_Portal_TraceRay_Beam(rayPath, MASK_SHOT, &masterTraceFilter, &fEndFraction))
 	{
@@ -200,6 +202,10 @@ void CPortalLaser::UpdateLaser()
 		vEndPoint = vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE * fEndFraction;
 		//Msg("Main Trace End Point: (%f, %f, %f)\n", vEndPoint.x, vEndPoint.y, vEndPoint.z);
 	}
+	
+	Assert(m_pBeam);
+
+	m_pBeam->BeamDamage( &trace );
 
 #if 0
 	// Check if the trace hits any portals

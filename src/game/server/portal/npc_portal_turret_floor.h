@@ -51,6 +51,8 @@ enum portalTurretState_e
 	PORTAL_TURRET_SHOTAT,
 	PORTAL_TURRET_DISSOLVED,
 	PORTAL_TURRET_FLUNG,
+	PORTAL_TURRET_STARTBURNING,
+	PORTAL_TURRET_BURNED,
 
 	PORTAL_TURRET_STATE_TOTAL
 };
@@ -127,6 +129,8 @@ public:
 	virtual void	InactiveThink( void );
 	virtual void	SuppressThink( void );
 	virtual void	DisabledThink( void );
+	void	StartBurningThink( void );
+	void	BurnedThink( void );
 	virtual void	HackFindEnemy( void );
 
 	virtual void	StartTouch( CBaseEntity *pOther );
@@ -159,6 +163,8 @@ private:
 	bool	m_bShootWithBottomBarrels;
 	bool	m_bDamageForce;
 	bool	m_bPickupEnabled;
+
+	bool	m_bIsBurning;
 
 	float	m_fSearchSpeed;
 	float	m_fMovingTargetThreashold;
