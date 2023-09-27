@@ -47,7 +47,7 @@ AddonAssociation::AddonAssociation( Panel *parent, const char *panelName )
 
 	SetTitle( "", false );
 	SetDeleteSelfOnClose( true );
-	SetFooterEnabled( false );
+	SetLowerGarnishEnabled( false );
 	SetMoveable( false );
 }
 

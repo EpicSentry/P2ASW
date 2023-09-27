@@ -111,7 +111,6 @@ private:
 	int iBtnDoneYPos;
 
 	bool	m_bDirtyValues;
-	bool	m_bEnableApply;
 	int		m_iAspectRatio;
 	int		m_iResolutionWidth;
 	int		m_iResolutionHeight;

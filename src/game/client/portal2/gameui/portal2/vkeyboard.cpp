@@ -4,7 +4,7 @@
 //
 //=====================================================================================//
 
-#include "VCloud.h"
+#include "vkeyboard.h"
 #include "VFooterPanel.h"
 #include "VDropDownMenu.h"
 #include "VSliderControl.h"
@@ -17,6 +17,8 @@
 #include "ConfigManager.h"
 #include "cdll_util.h"
 #include "nb_header_footer.h"
+#include "optionssubkeyboard.h"
+#include "vcontrolslistpanel.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -25,7 +27,7 @@ using namespace vgui;
 using namespace BaseModUI;
 
 //=============================================================================
-Cloud::Cloud(Panel *parent, const char *panelName):
+VKeyboard::VKeyboard(Panel *parent, const char *panelName):
 BaseClass(parent, panelName)
 {
 	GameUI().PreventEngineHideGameUI();
@@ -42,63 +44,27 @@ BaseClass(parent, panelName)
 	m_pHeaderFooter->SetHeaderEnabled( false );
 	m_pHeaderFooter->SetFooterEnabled( true );
 	m_pHeaderFooter->SetGradientBarEnabled( true );
-	m_pHeaderFooter->SetGradientBarPos( 120, 160 );
+	m_pHeaderFooter->SetGradientBarPos( 60, 320 );
 
-	m_drpCloud = NULL;
-
-	m_btnCancel = NULL;
+	m_pOptionsSubKeyboard = new COptionsSubKeyboard( this );
+	m_pOptionsSubKeyboard->OnResetData();
 }
 
 //=============================================================================
-Cloud::~Cloud()
+VKeyboard::~VKeyboard()
 {
 	GameUI().AllowEngineHideGameUI();
 }
 
 //=============================================================================
-void Cloud::Activate()
+void VKeyboard::Activate()
 {
 	BaseClass::Activate();
 
-	if ( m_drpCloud )
-	{
-		CGameUIConVarRef cl_cloud_settings( "cl_cloud_settings" );
-
-		int iCloudSettings = cl_cloud_settings.GetInt();
-
-		if ( iCloudSettings == -1 || iCloudSettings != 0 )
-		{
-			m_bCloudEnabled = true;
-			m_drpCloud->SetCurrentSelection( "SteamCloudEnabled" );
-		}
-		else
-		{
-			m_bCloudEnabled = false;
-			m_drpCloud->SetCurrentSelection( "SteamCloudDisabled" );
-		}
-
-		FlyoutMenu *pFlyout = m_drpCloud->GetCurrentFlyout();
-		if ( pFlyout )
-		{
-			pFlyout->SetListener( this );
-		}
-	}
-
 	UpdateFooter();
-
-	if ( m_drpCloud )
-	{
-		if ( m_ActiveControl )
-		{
-			m_ActiveControl->NavigateFrom( );
-		}
-
-		m_drpCloud->NavigateTo();
-		m_ActiveControl = m_drpCloud;
-	}
 }
 
-void Cloud::UpdateFooter()
+void VKeyboard::UpdateFooter()
 {
 	CBaseModFooterPanel *footer = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
 	if ( footer )
@@ -109,31 +75,12 @@ void Cloud::UpdateFooter()
 	}
 }
 
-void Cloud::OnThink()
+void VKeyboard::OnThink()
 {
 	BaseClass::OnThink();
-
-	bool needsActivate = false;
-
-	if( !m_drpCloud )
-	{
-		m_drpCloud = dynamic_cast< DropDownMenu* >( FindChildByName( "DrpCloud" ) );
-		needsActivate = true;
-	}
-
-// 	if( !m_btnCancel )
-// 	{
-// 		m_btnCancel = dynamic_cast< BaseModHybridButton* >( FindChildByName( "BtnCancel" ) );
-// 		needsActivate = true;
-// 	}
-
-	if( needsActivate )
-	{
-		Activate();
-	}
 }
 
-void Cloud::OnKeyCodePressed(KeyCode code)
+void VKeyboard::OnKeyCodePressed(KeyCode code)
 {
 	int joystick = GetJoystickForCode( code );
 	int userId = CBaseModPanel::GetSingleton().GetLastActiveUserId();
@@ -155,18 +102,43 @@ void Cloud::OnKeyCodePressed(KeyCode code)
 	}
 }
 
-//=============================================================================
-void Cloud::OnCommand(const char *command)
+#ifndef _X360
+void VKeyboard::OnKeyCodeTyped( vgui::KeyCode code )
 {
-	if( Q_stricmp( "SteamCloudEnabled", command ) == 0 )
+	// For PC, this maps space bar to OK and esc to cancel
+	switch ( code )
 	{
-		m_bCloudEnabled = true;
+	case KEY_SPACE:
+		OnKeyCodePressed( ButtonCodeToJoystickButtonCode( KEY_XBUTTON_A, CBaseModPanel::GetSingleton().GetLastActiveUserId() ) );
+		break;
+
+	case KEY_ESCAPE:
+		// close active menu if there is one, else navigate back
+		if ( FlyoutMenu::GetActiveMenu() )
+		{
+			FlyoutMenu::CloseActiveMenu( FlyoutMenu::GetActiveMenu()->GetNavFrom() );
+		}
+		else if ( !m_pOptionsSubKeyboard->GetControlsList()->IsInEditMode() )
+		{
+			m_pOptionsSubKeyboard->OnApplyChanges();
+			OnKeyCodePressed( ButtonCodeToJoystickButtonCode( KEY_XBUTTON_B, CBaseModPanel::GetSingleton().GetLastActiveUserId() ) );
+		}
+		break;
 	}
-	else if( Q_stricmp( "SteamCloudDisabled", command ) == 0 )
+
+	BaseClass::OnKeyTyped( code );
+}
+#endif
+
+//=============================================================================
+void VKeyboard::OnCommand(const char *command)
+{
+	if( Q_stricmp( "Back", command ) == 0 )
 	{
-		m_bCloudEnabled = false;
+		m_pOptionsSubKeyboard->OnApplyChanges();
+		OnKeyCodePressed( KEY_XBUTTON_B );
 	}
-	else if( Q_stricmp( "Back", command ) == 0 )
+	else if( Q_stricmp( "Cancel", command ) == 0 )
 	{
 		OnKeyCodePressed( KEY_XBUTTON_B );
 	}
@@ -176,34 +148,31 @@ void Cloud::OnCommand(const char *command)
 	}
 }
 
-void Cloud::OnNotifyChildFocus( vgui::Panel* child )
+void VKeyboard::OnNotifyChildFocus( vgui::Panel* child )
 {
 }
 
-void Cloud::OnFlyoutMenuClose( vgui::Panel* flyTo )
+void VKeyboard::OnFlyoutMenuClose( vgui::Panel* flyTo )
 {
 	UpdateFooter();
 }
 
-void Cloud::OnFlyoutMenuCancelled()
+void VKeyboard::OnFlyoutMenuCancelled()
 {
 }
 
 //=============================================================================
-Panel* Cloud::NavigateBack()
+Panel* VKeyboard::NavigateBack()
 {
-	CGameUIConVarRef cl_cloud_settings( "cl_cloud_settings" );
-	cl_cloud_settings.SetValue( ( ( m_bCloudEnabled ) ? ( STEAMREMOTESTORAGE_CLOUD_CONFIG | STEAMREMOTESTORAGE_CLOUD_SPRAY ) : ( 0 ) ) );
-
 	return BaseClass::NavigateBack();
 }
 
-void Cloud::PaintBackground()
+void VKeyboard::PaintBackground()
 {
 	//BaseClass::DrawDialogBackground( "#L4D360UI_Cloud_Title", NULL, "#L4D360UI_Cloud_Subtitle", NULL, NULL, true );
 }
 
-void Cloud::ApplySchemeSettings( vgui::IScheme *pScheme )
+void VKeyboard::ApplySchemeSettings( vgui::IScheme *pScheme )
 {
 	BaseClass::ApplySchemeSettings( pScheme );
 

@@ -22,16 +22,24 @@ BaseClass( parent, panelName )
 {
 	SetDeleteSelfOnClose(true);
 	SetProportional( true );
-	SetDialogTitle( "#PORTAL2_MainMenu_Options" );
+	SetTitle( "#L4D360UI_Options", false );
 
 	m_BtnGame = new BaseModHybridButton( this, "BtnGame", "#L4D360UI_Game", this, "Game" );
 	m_BtnAudioVideo = new BaseModHybridButton( this, "BtnAudioVideo", "#L4D360UI_AudioVideo", this, "AudioVideo" );
 	m_BtnController = new BaseModHybridButton( this, "BtnController", "#L4D360UI_Controller", this, "Controller" );
 	m_BtnStorage = new BaseModHybridButton( this, "BtnStorage", "#L4D360UI_Storage", this, "Storage" );
 	m_BtnCredits = new BaseModHybridButton( this, "BtnCredits", "#L4D360UI_Credits", this, "Credits" );
-	
-	SetFooterEnabled( true );
-	UpdateFooter();
+
+	SetUpperGarnishEnabled( true );
+	SetLowerGarnishEnabled( true );
+
+	CBaseModFooterPanel *footer = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
+	if ( footer )
+	{
+		footer->SetButtons( FB_ABUTTON | FB_BBUTTON, FF_AB_ONLY, false );
+		footer->SetButtonText( FB_ABUTTON, "#L4D360UI_Select" );
+		footer->SetButtonText( FB_BBUTTON, "#L4D360UI_Cancel" );
+	}
 
 	m_ActiveControl = m_BtnGame;
 }
@@ -44,29 +52,6 @@ Options::~Options()
 	delete m_BtnController;
 	delete m_BtnStorage;
 	delete m_BtnCredits;
-}
-
-void Options::Activate()
-{
-	BaseClass::Activate();
-	UpdateFooter();
-}
-
-void Options::UpdateFooter()
-{
-	CBaseModFooterPanel *pFooter = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
-	if ( pFooter )
-	{
-		int nButtons = FB_BBUTTON;
-		if ( IsGameConsole() )
-		{
-			nButtons |= FB_ABUTTON;
-		}
-
-		pFooter->SetButtons( nButtons );
-		pFooter->SetButtonText( FB_ABUTTON, "#L4D360UI_Select" );
-		pFooter->SetButtonText( FB_BBUTTON, "#L4D360UI_Back" );
-	}
 }
 
 //=============================================================================

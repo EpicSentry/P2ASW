@@ -89,7 +89,7 @@ BaseClass(parent, panelName)
 	SetProportional( true );
 
 	SetUpperGarnishEnabled(true);
-	//SetLowerGarnishEnabled(true);
+	SetLowerGarnishEnabled(true);
 
 	m_drpAspectRatio = NULL;
 	m_drpResolution = NULL;
@@ -125,10 +125,6 @@ BaseClass(parent, panelName)
 	m_flFilmGrainInitialValue = mat_grain_scale_override.GetFloat();
 
 	m_bDirtyValues = false;
-	m_bEnableApply = false;
-	
-	SetFooterEnabled( true );
-	UpdateFooter();
 }
 
 //=============================================================================
@@ -790,13 +786,6 @@ void Video::OnThink()
 	{
 		Activate();
 	}
-	
-	if ( m_bEnableApply != m_bDirtyValues )
-	{
-		// enable the apply button
-		m_bEnableApply = m_bDirtyValues;
-		UpdateFooter();
-	}
 }
 
 void Video::OnKeyCodePressed(KeyCode code)
@@ -1414,19 +1403,12 @@ void Video::OnNotifyChildFocus( vgui::Panel* child )
 
 void Video::UpdateFooter()
 {
-	CBaseModFooterPanel *pFooter = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
-	if ( pFooter )
+	CBaseModFooterPanel *footer = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
+	if  ( footer )
 	{
-		int visibleButtons = FB_BBUTTON | FB_XBUTTON;
-		if ( m_bEnableApply )
-		{
-			visibleButtons |= FB_ABUTTON;
-		}
-
-		pFooter->SetButtons( visibleButtons );
-		pFooter->SetButtonText( FB_ABUTTON, "#GameUI_Apply" );
-		pFooter->SetButtonText( FB_BBUTTON, "#L4D360UI_Back" );
-		pFooter->SetButtonText( FB_XBUTTON, "#GameUI_UseDefaults" );
+		footer->SetButtons( FB_ABUTTON | FB_BBUTTON, FF_AB_ONLY, IsPC() ? true : false );
+		footer->SetButtonText( FB_ABUTTON, "#L4D360UI_Select" );
+		footer->SetButtonText( FB_BBUTTON, "#L4D360UI_Controller_Done" );
 	}
 }
 

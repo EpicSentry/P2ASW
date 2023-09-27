@@ -34,17 +34,20 @@ public:
 
 	enum ButtonStyle_t
 	{
-		BUTTON_DEFAULT = 0,
-		BUTTON_MAINMENU,		// item strictly on the main menu
-		BUTTON_LEFTINDIALOG,	// button inside of a dialog, left aligned
-		BUTTON_DIALOGLIST,
+		BUTTON_SIMPLE,
+		BUTTON_MAINMENU,		// item strictly on the main or ingame menu
 		BUTTON_FLYOUTITEM,		// item inside of a flyout
 		BUTTON_DROPDOWN,		// button that has an associated value with an optional flyout
+		BUTTON_DIALOG,			// button inside of a dialog, centered		
+		BUTTON_RED,				// same as simple button, but colored red
+		BUTTON_REDMAIN,			// same as simple button, but colored red
+		BUTTON_SMALL,			// same as simple button, but colored red
+		BUTTON_MEDIUM,			// same as simple button, medium font
 		BUTTON_GAMEMODE,		// button on game mode carousel
-		BUTTON_VIRTUALNAV,		// virtual navigation button
-		BUTTON_MIXEDCASE,		// mixed case button (Steam link dialog, double-height cursor)
-		BUTTON_MIXEDCASEDEFAULT,// mixed case default button
-		BUTTON_BITMAP
+		BUTTON_MAINMENUSMALL,	// smaller item strictly on the main or ingame menu
+		BUTTON_ALIENSWARMMENUBUTTON,
+		BUTTON_ALIENSWARMMENUBUTTONSMALL,
+		BUTTON_ALIENSWARMDEFAULT,
 	};
 
 	enum EnableCondition
@@ -52,25 +55,6 @@ public:
 		EC_ALWAYS,
 		EC_LIVE_REQUIRED,
 		EC_NOTFORDEMO,
-	};
-
-	enum ListSelectionChange_t
-	{
-		SELECT_PREV,
-		SELECT_NEXT,
-	};
-
-	struct DialogListItem_t
-	{
-		DialogListItem_t()
-		{
-			m_bEnabled = true;
-		}
-
-		CUtlString	m_String;
-		CUtlString	m_StringParm1;
-		CUtlString	m_CommandString;
-		bool		m_bEnabled;
 	};
 
 	BaseModHybridButton( Panel *parent, const char *panelName, const char *text, Panel *pActionSignalTarget = NULL, const char *pCmd = NULL );
@@ -87,25 +71,22 @@ public:
 	void		NavigateTo( );
 	void		NavigateFrom( );
 
+	void		SetHelpText( const char* tooltip , bool enabled = true );
+
 	// only applies to drop down style
+	void		SetDropdownSelection( const char *pText );
 	void		EnableDropdownSelection( bool bEnable );
+
+	void		UpdateFooterHelpText();
+
+	char const  *GetHelpText( bool bEnabled ) const;
+
 	void		SetShowDropDownIndicator( bool bShowIndicator ) { m_bShowDropDownIndicator = bShowIndicator; }
 	void		SetOverrideDropDownIndicator( bool bOverrideDropDownIndicator ) { m_bOverrideDropDownIndicator = bOverrideDropDownIndicator; }
-	void		SetCurrentSelection( const char *pText );
-	void		ModifySelectionString( const char *pCommand, const char *pNewText );
-	void		EnableListItem( const char *pText, bool bEnable );
-	bool		GetListSelectionString( const char *pCommand, char *pOutBuff, int nOutBuffSize );
-	void		ModifySelectionStringParms( const char *pCommand, const char *pParm1 );
 
 	virtual void ApplySettings( KeyValues *inResourceData );
 
 	int			GetWideAtOpen() { return m_nWideAtOpen; }
-
-	void		SetClrEnabledOverride( Color clr ) { m_clrEnabledOverride = clr; }
-
-	void		SetPostCheckMark( bool bEnable ) { m_bPostCheckMark = bEnable; }
-
-	void		SetUseAlternateTiles( bool bUseAlternate ) { m_bUseAlternateTiles = bUseAlternate; }
 
 protected:
 	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );
@@ -125,25 +106,12 @@ protected:
 	virtual Panel* NavigateLeft();
 	virtual Panel* NavigateRight();
 
-	Color		m_clrEnabledOverride;
-	Color		m_TextColor;
-	Color		m_FocusColor;
-	Color		m_CursorColor;
-	Color		m_DisabledColor;
-	Color		m_FocusDisabledColor;
-	Color		m_ListButtonActiveColor;
-	Color		m_ListButtonInactiveColor;
-
 private:
 	void		PaintButtonEx();
-	void		ChangeDialogListSelection( ListSelectionChange_t eNext );
-	void		DrawDialogListButton( Color textColor );
-	bool		GetDialogListButtonCenter( int &x, int &y );
 
 	int			m_originalTall;
 	int			m_textInsetX;
 	int			m_textInsetY;
-	int			m_nListInsetX;
 
 	bool		m_isOpen;
 	bool		m_isNavigateTo; //to help cure flashing
@@ -163,38 +131,32 @@ private:
 
 	int m_iUsablePlayerIndex;
 	EnableCondition mEnableCondition;
+
+	CUtlString	m_enabledToolText;
+	CUtlString	m_disabledToolText;
 	
 	ButtonStyle_t m_nStyle;
 
 	vgui::HFont	m_hTextFont;
-	vgui::HFont	m_hSymbolFont;
+	vgui::HFont	m_hTextBlurFont;
+	vgui::HFont	m_hHintTextFont;
 
 	int			m_nTextFontHeight;
+	int			m_nHintTextFontHeight;
 
-	int			m_nDialogListCurrentIndex;
-	bool		m_bShowDropDownIndicator;		// down arrow used for player names that can be clicked on
+	vgui::HFont	m_hSelectionFont;
+	vgui::HFont	m_hSelectionBlurFont;
+
+	bool		m_bDropDownSelection;
+	CUtlString	m_DropDownSelection;
+
+	bool		m_bShowDropDownIndicator;	// down arrow used for player names that can be clicked on
 	bool		m_bOverrideDropDownIndicator;	// down arrow used for player names that can be clicked on
-	bool		m_bUseAlternateTiles;			// Use an alternate color scheme under different menu conditions
-	int			m_iSelectedArrow;				// texture ids for the arrow
+	int			m_iSelectedArrow;			// texture ids for the arrow
 	int			m_iUnselectedArrow;
-	int			m_iSelectedArrowSize;			// size to draw the arrow
+	int			m_iSelectedArrowSize;		// size to draw the arrow
 
 	int			m_nWideAtOpen;
-
-	bool		m_bAllCaps;
-	bool		m_bPostCheckMark;
-
-	int			m_nCursorHeight;
-	int			m_nMultiline;
-
-	int			m_nEnabledImageId;
-	int			m_nFocusImageId;
-
-	int				m_nBitmapFrame;
-	float			m_flLastBitmapAnimTime;
-	unsigned int	m_nBitmapFrameCache;
-
-	CUtlVector< DialogListItem_t > m_DialogListItems;
 };
 
 }; //namespace BaseModUI

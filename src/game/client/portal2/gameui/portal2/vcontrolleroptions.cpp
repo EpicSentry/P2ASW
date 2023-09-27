@@ -67,8 +67,7 @@ BaseClass(parent, panelName)
 	SetProportional( true );
 
 	SetUpperGarnishEnabled(true);
-	SetFooterEnabled( true );
-	//SetLowerGarnishEnabled(true);
+	SetLowerGarnishEnabled(true);
 
 	m_pVerticalSensitivity = NULL;
 	m_pHorizontalSensitivity = NULL;
@@ -94,26 +93,12 @@ ControllerOptions::~ControllerOptions()
 
 void ControllerOptions::UpdateFooter()
 {
-	CBaseModFooterPanel *pFooter = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
-	if ( pFooter )
+	CBaseModFooterPanel *footer = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
+	if ( footer )
 	{
-		int visibleButtons = FB_BBUTTON;
-		if ( IsGameConsole() )
-		{
-			visibleButtons |= FB_ABUTTON;
-		}
-		else
-		{
-			visibleButtons |= FB_XBUTTON;
-		}
-
-		pFooter->SetButtons( visibleButtons );
-		pFooter->SetButtonText( FB_ABUTTON, "#L4D360UI_Select" );
-		pFooter->SetButtonText( FB_BBUTTON, "#L4D360UI_Controller_Done" );
-		if ( IsPC() )
-		{
-			pFooter->SetButtonText( FB_XBUTTON, "#GameUI_UseDefaults" );
-		}
+		footer->SetButtons( FB_ABUTTON | FB_BBUTTON, FF_AB_ONLY, IsPC() ? true : false );
+		footer->SetButtonText( FB_ABUTTON, "#L4D360UI_Select" );
+		footer->SetButtonText( FB_BBUTTON, "#L4D360UI_Controller_Done" );
 	}
 }	
 
@@ -321,55 +306,27 @@ void ControllerOptions::ResetToDefaults( void )
 	m_bDirty = true;
 }
 
-void ControllerOptions::ConfirmUseDefaults()
-{
-	GenericConfirmation* confirmation = 
-		static_cast<GenericConfirmation*>( CBaseModPanel::GetSingleton().
-		OpenWindow( WT_GENERICCONFIRMATION, this, false ) );
-
-	if ( confirmation )
-	{
-		GenericConfirmation::Data_t data;
-
-		data.pWindowTitle = "#L4D360UI_Controller_Default";
-		data.pMessageText =	"#L4D360UI_Controller_Default_Details";
-		data.bOkButtonEnabled = true;
-		data.bCancelButtonEnabled = true;
-		data.pOkButtonText = "#PORTAL2_ButtonAction_Reset";
-
-		s_pControllerOptions = this;
-
-		data.pfnOkCallback = ControllerOptionsResetDefaults_Confirm;
-		data.pfnCancelCallback = NULL;
-
-		confirmation->SetUsageData(data);
-	}
-}
-
 //=============================================================================
 void ControllerOptions::OnKeyCodePressed(KeyCode code)
 {
-	int lastUser = GetJoystickForCode( code );
-	if ( m_iActiveUserSlot != lastUser )
+	if ( m_iActiveUserSlot != CBaseModPanel::GetSingleton().GetLastActiveUserId() )
 		return;
 
 	switch ( GetBaseButtonCode( code ) )
 	{
 	case KEY_XSTICK1_LEFT:
-	case KEY_XSTICK2_LEFT:
 	case KEY_XBUTTON_LEFT:
 	case KEY_XBUTTON_LEFT_SHOULDER:
 	case KEY_XSTICK1_RIGHT:
-	case KEY_XSTICK2_RIGHT:
 	case KEY_XBUTTON_RIGHT:
 	case KEY_XBUTTON_RIGHT_SHOULDER:
 	{
+
 		// If they want to modify buttons or sticks with a direction, take them to the edit menu
 		vgui::Panel *panel = FindChildByName( "BtnEditButtons" );
 		if ( panel->HasFocus() )
 		{
-			CBaseModPanel::GetSingleton().OpenWindow( WT_CONTROLLER_BUTTONS, this, true,
-				KeyValues::AutoDeleteInline( new KeyValues( "Settings", "slot", m_iActiveUserSlot ) ) );
+			CBaseModPanel::GetSingleton().OpenWindow(WT_CONTROLLER_BUTTONS, this, true);
 			m_bDirty = true;
 		}
 		else
@@ -377,8 +334,7 @@ void ControllerOptions::OnKeyCodePressed(KeyCode code)
 			panel = FindChildByName( "BtnEditSticks" );
 			if ( panel->HasFocus() )
 			{
-				CBaseModPanel::GetSingleton().OpenWindow( WT_CONTROLLER_STICKS, this, true,
-					KeyValues::AutoDeleteInline( new KeyValues( "Settings", "slot", m_iActiveUserSlot ) ) );
+				CBaseModPanel::GetSingleton().OpenWindow(WT_CONTROLLER_STICKS, this, true);
 				m_bDirty = true;
 			}
 			else
@@ -394,19 +350,17 @@ void ControllerOptions::OnKeyCodePressed(KeyCode code)
 			 ( m_pVerticalSensitivity && m_pVerticalSensitivity->IsDirty() ) || 
 			 ( m_pHorizontalSensitivity && m_pHorizontalSensitivity->IsDirty() ) )
 		{
+			if ( !CBaseModPanel::GetSingleton().IsReadyToWriteConfig() )
+			{
+				// We've written data in the past 3 seconds and will fail cert if we do it again!
+				// We'll have to stay in the menu a bit longer
+				return;
+			}
 		}
 		break;
-
-#if !defined( _GAMECONSOLE )
-	case KEY_XBUTTON_X:
-		CBaseModPanel::GetSingleton().PlayUISound( UISOUND_ACCEPT );
-		ConfirmUseDefaults();
-		break;
-#endif
-
 	}
 
-	BaseClass::OnKeyCodePressed( code );
+	BaseClass::OnKeyCodePressed(code);
 }
 
 

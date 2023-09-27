@@ -236,8 +236,8 @@ BaseClass( parent, panelName, false, true )
 		"",
 		"cl_ignore_vpk_association",
 		true );
-	
-	SetFooterEnabled( true );
+
+	SetLowerGarnishEnabled( true );
 	m_pAddonList = NULL;
 	m_ActiveControl = m_GplAddons;
 

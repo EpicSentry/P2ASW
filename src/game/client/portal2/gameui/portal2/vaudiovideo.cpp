@@ -495,13 +495,7 @@ void AudioVideo::UpdateFooter()
 	CBaseModFooterPanel *footer = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
 	if ( footer )
 	{
-		int visibleButtons = FB_BBUTTON;
-		if ( IsGameConsole() )
-		{
-			visibleButtons |= FB_ABUTTON;
-		}
-
-		footer->SetButtons( visibleButtons );
+		footer->SetButtons( FB_ABUTTON | FB_BBUTTON, FF_AB_ONLY, IsPC() ? true : false );
 		footer->SetButtonText( FB_ABUTTON, "#L4D360UI_Select" );
 		footer->SetButtonText( FB_BBUTTON, "#L4D360UI_Controller_Done" );
 	}
@@ -522,11 +516,15 @@ Panel* AudioVideo::NavigateBack()
 	// For cert we can only write one config in this spot!! (and have to wait 3 seconds before writing another)
 	if ( m_bDirtyVideoConfig || 
 		 ( m_sldBrightness && m_sldBrightness->IsDirty() ) ||
+		 ( m_sldFilmGrain && m_sldFilmGrain->IsDirty() ) ||
 		 ( m_sldGameVolume && m_sldGameVolume->IsDirty() ) || 
 		 ( m_sldMusicVolume && m_sldMusicVolume->IsDirty() ) )
 	{
-		// Trigger TitleData3 update ( XBX_GetPrimaryUserId() )
-		engine->ClientCmd_Unrestricted( VarArgs( "host_writeconfig_video_ss %d", XBX_GetPrimaryUserId() ) );
+		// Write only video config
+		if ( CBaseModPanel::GetSingleton().IsReadyToWriteConfig() )
+		{
+			engine->ClientCmd_Unrestricted( VarArgs( "host_writeconfig_video_ss %d", XBX_GetPrimaryUserId() ) );
+		}
 	}
 
 	return BaseClass::NavigateBack();

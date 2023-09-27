@@ -35,17 +35,6 @@ extern class IMatchExtSwarm *g_pMatchExtSwarm;
 extern class IMatchExtSwarm *g_pMatchExtSwarm;
 #endif
 
-#ifdef PORTAL2
-class IMatchExtPortal2
-{
-public:
-	inline KeyValues * GetAllMissions() { return NULL; }
-	inline KeyValues * GetMapInfoByBspName( KeyValues *, char const *, KeyValues ** = NULL ) { return NULL; }
-	inline KeyValues * GetMapInfo( KeyValues *, KeyValues ** = NULL ) { return NULL; }
-};
-extern class IMatchExtPortal2 *g_pMatchExt;
-#endif
-
 // engine interface singleton accessors
 extern IVEngineClient *engine;
 extern class IBik *bik;

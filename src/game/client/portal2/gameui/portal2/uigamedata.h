@@ -171,7 +171,6 @@ public:
 	float GetLookSensitivity();
 
 	bool IsXUIOpen();
-	bool IsSteamOverlayActive();
 
 	void OpenWaitScreen( const char * messageText, float minDisplayTime = 3.0f, KeyValues *pSettings = NULL, float maxDisplayTime = 0.0f );
 	void UpdateWaitPanel( const char * messageText, float minDisplayTime = 3.0f );
@@ -181,21 +180,12 @@ public:
 	void NeedConnectionProblemWaitScreen( void );
 	void ShowPasswordUI( char const *pchCurrentPW );
 	void FinishPasswordUI( bool bOk );
-	
-	void GetDownloadableContent( char const *szContent );
 
 	vgui::IImage * GetAvatarImage( XUID playerID );
 	char const * GetPlayerName( XUID playerID, char const *szPlayerNameSpeculative );
-	
-#if !defined( NO_STEAM )
-	STEAM_CALLBACK( CUIGameData, Steam_OnGameOverlayActivated, GameOverlayActivated_t, m_CallbackGameOverlayActivated );
+
+#if !defined( _X360 ) && !defined( NO_STEAM )
 	STEAM_CALLBACK( CUIGameData, Steam_OnPersonaStateChanged, PersonaStateChange_t, m_CallbackPersonaStateChanged );
-	//STEAM_CALLBACK( CUIGameData, Steam_OnAvatarImageLoaded, AvatarImageLoaded_t, m_CallbackAvatarImageLoaded );
-	STEAM_CALLBACK( CUIGameData, Steam_OnUserStatsReceived, UserStatsReceived_t, m_CallbackUserStatsReceived );
-	STEAM_CALLBACK( CUIGameData, Steam_OnUserStatsStored, UserStatsStored_t, m_CallbackUserStatsStored );
-	bool CanInitiateConnectionToSteam();
-	bool InitiateConnectionToSteam( char const *szUserName = NULL, char const *szPwd = NULL );
-	void SetConnectionToSteamReason( char const *szReason = NULL, char const *szGameMode = NULL );
 #endif
 
 	void ReloadScheme();
@@ -242,7 +232,7 @@ protected:
 	CUtlMap< XUID, CUtlString > m_mapUserXuidToName;
 
 	//XUI info
-	bool m_bXUIOpen, m_bSteamOverlayActive;
+	bool m_bXUIOpen;
 
 	//storage device info
 	bool			m_bWaitingForStorageDeviceHandle;

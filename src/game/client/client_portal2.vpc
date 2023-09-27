@@ -205,6 +205,8 @@ $Project "Client (Portal 2)"
 						"portal2\gameui\portal2\vingamedifficultyselect.cpp" \
 						"portal2\gameui\portal2\vingamekickplayerlist.cpp" \
 						"portal2\gameui\portal2\vingamemainmenu.cpp" \
+						"portal2\gameui\portal2\vjukebox.cpp" \
+						"portal2\gameui\portal2\vkeyboard.cpp" \
 						"portal2\gameui\portal2\vkeyboardmouse.cpp" \
 						"portal2\gameui\portal2\vleaderboard.cpp" \
 						"portal2\gameui\portal2\vloadingprogress.cpp" \
@@ -222,7 +224,6 @@ $Project "Client (Portal 2)"
 						"portal2\gameui\portal2\vtransitionscreen.cpp" \
 						"portal2\gameui\portal2\vvideo.cpp" \
 						"portal2\gameui\portal2\vvoteoptions.cpp" \
-						"portal2\gameui\portal2\transitionpanel.cpp" \
 						"portal2\gameui\sys_utils.cpp" \
 						"portal2\gameui\textentrybox.cpp" \
 						"portal2\gameui\urlbutton.cpp" \

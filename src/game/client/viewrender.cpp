@@ -3340,7 +3340,7 @@ void CViewRender::ViewDrawScene_Intro( const CViewSetup &view, int nClearFlags, 
 		{
 			playerView.fov = ScaleFOVByWidthRatio( introData.m_playerViewFOV, engine->GetScreenAspectRatio( view.width, view.height ) / ( 4.0f / 3.0f ) );
 		}
-		
+
 		g_pClientShadowMgr->PreRender();
 
 		// Shadowed flashlights supported on ps_2_b and up...
