@@ -4904,6 +4904,10 @@ const char *C_BaseEntity::GetClassname( void )
 	static char outstr[ 256 ];
 	outstr[ 0 ] = 0;
 	bool gotname = false;
+	ClientClass *pClientClass = GetClientClass();
+	if ( pClientClass && pClientClass->m_pMapClassname )
+		return pClientClass->m_pMapClassname;
+
 #ifndef NO_ENTITY_PREDICTION
 	if ( GetPredDescMap() )
 	{

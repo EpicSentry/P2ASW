@@ -35,11 +35,11 @@ private:
 	CSmartPtr<CParticleAttractor>	m_pAttractor;
 };
 
-STUB_WEAPON_CLASS_IMPLEMENT( weapon_physcannon, C_WeaponPhysCannon );
-
 IMPLEMENT_CLIENTCLASS_DT( C_WeaponPhysCannon, DT_WeaponPhysCannon, CWeaponPhysCannon )
 	RecvPropBool( RECVINFO( m_bIsCurrentlyUpgrading ) ),
 END_RECV_TABLE()
+
+STUB_WEAPON_CLASS_IMPLEMENT( weapon_physcannon, C_WeaponPhysCannon );
 
 //-----------------------------------------------------------------------------
 // Constructor

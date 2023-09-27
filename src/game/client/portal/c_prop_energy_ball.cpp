@@ -36,8 +36,6 @@ protected:
 	float	m_fCurAlpha;				// The amount of alpha to apply at DrawModel, to simulate a decaying energy ball
 };
 
-LINK_ENTITY_TO_CLASS( prop_energy_ball, C_PropEnergyBall );
-
 // precache our different materials for the infinite life energy balls
 PRECACHE_REGISTER_BEGIN( GLOBAL, PrecacheEffectEnergyBall )
 
@@ -54,6 +52,8 @@ IMPLEMENT_CLIENTCLASS_DT( C_PropEnergyBall, DT_PropEnergyBall, CPropEnergyBall )
 
 END_RECV_TABLE()
 
+
+LINK_ENTITY_TO_CLASS( prop_energy_ball, C_PropEnergyBall );
 
 BEGIN_PREDICTION_DATA( C_PropEnergyBall )
 

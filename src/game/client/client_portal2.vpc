@@ -59,6 +59,10 @@ $Project "Client (Portal 2)"
 			$File	"hl2\c_corpse.h"
 			$File	"hl2\c_func_tankmortar.cpp"
 			
+			$File	"$SRCDIR\game\shared\hl2\basehlcombatweapon_shared.cpp"
+			$File	"hl2\c_basehlcombatweapon.cpp"
+			$File	"hl2\c_basehlcombatweapon.h"
+			
 			$File	"$SRCDIR\game\shared\hl2\hl2_gamerules.cpp"
 			$File	"$SRCDIR\game\shared\hl2\hl2_gamerules.h"
 			

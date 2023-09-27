@@ -550,8 +550,6 @@ static void RecvProxy_Weapon( const CRecvProxyData *pData, void *pStruct, void *
 #endif
 
 
-LINK_ENTITY_TO_CLASS( viewmodel, CBaseViewModel );
-
 IMPLEMENT_NETWORKCLASS_ALIASED( BaseViewModel, DT_BaseViewModel )
 
 BEGIN_NETWORK_TABLE_NOBASE(CBaseViewModel, DT_BaseViewModel)
@@ -589,6 +587,8 @@ BEGIN_NETWORK_TABLE_NOBASE(CBaseViewModel, DT_BaseViewModel)
 
 #endif
 END_NETWORK_TABLE()
+
+LINK_ENTITY_TO_CLASS_ALIASED( viewmodel, BaseViewModel );
 
 #ifdef CLIENT_DLL
 

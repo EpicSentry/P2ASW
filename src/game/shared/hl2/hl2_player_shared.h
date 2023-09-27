@@ -20,6 +20,14 @@
 #include "hl2_player.h"
 #endif
 
+#else
+
+#if defined( CLIENT_DLL )
+#include "c_portal_player.h"
+#else
+#include "portal_player.h"
+#endif
+
 #endif // !defined ( PORTAL2 )
 
 #endif // HL2_PLAYER_SHARED_H

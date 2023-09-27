@@ -167,7 +167,7 @@ END_NETWORK_TABLE()
 
 
 IMPLEMENT_NETWORKCLASS_ALIASED( PortalMPGameRulesProxy, DT_PortalMPGameRulesProxy )
-LINK_ENTITY_TO_CLASS( portalmp_gamerules, CPortalMPGameRulesProxy );
+LINK_ENTITY_TO_CLASS_ALIASED( portalmp_gamerules, PortalMPGameRulesProxy );
 
 static PortalMPViewVectors g_PortalMPViewVectors(
 	Vector( 0, 0, 64 ),       //VEC_VIEW (m_vView) 

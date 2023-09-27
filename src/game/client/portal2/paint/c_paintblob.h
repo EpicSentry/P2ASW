@@ -23,9 +23,8 @@ public:
 	virtual void Init( const Vector &vecOrigin, const Vector &vecVelocity, int paintType, float flMaxStreakTime, float flStreakSpeedDampenRate, CBaseEntity* pOwner, bool bSilent, bool bDrawOnly );
 	
 	C_PaintBlobRenderable *m_pRenderable;
-
-private:
 };
+
 //==========================================================================//
 // Purpose: Create models that represents a blob's location
 //==========================================================================//
@@ -61,8 +60,5 @@ private:
 	C_PaintBlob *m_pSourceBlob;
 
 };
-
-typedef C_PaintBlob CPaintBlob;
-
 
 #endif

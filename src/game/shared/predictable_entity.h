@@ -155,6 +155,7 @@ class SendTable;
 		{																	\
 			GetClassMap().Add( #localName, #className, sizeof( className ),	\
 				&C##className##Factory );									\
+			__g_##className##ClientClass.m_pMapClassname = #localName;		\
 		}																	\
 	};																		\
 	static C##localName##Foo g_C##localName##Foo;
@@ -180,6 +181,8 @@ class SendTable;
 
 #define END_NETWORK_TABLE	END_RECV_TABLE
 
+#define LINK_ENTITY_TO_CLASS_ALIASED( localName, className ) LINK_ENTITY_TO_CLASS(localName, C_##className )
+
 #define IMPLEMENT_NETWORKCLASS_ALIASED(className, dataTable)			\
 	IMPLEMENT_CLIENTCLASS( C_##className, dataTable, C##className )
 #define IMPLEMENT_NETWORKCLASS(className, dataTable)			\
@@ -193,6 +196,8 @@ class SendTable;
 #define BEGIN_NETWORK_TABLE_NOBASE( className, tableName ) BEGIN_SEND_TABLE_NOBASE( className, tableName )
 
 #define END_NETWORK_TABLE	END_SEND_TABLE
+
+#define LINK_ENTITY_TO_CLASS_ALIASED( localName, className ) LINK_ENTITY_TO_CLASS(localName, C##className )
 
 #define IMPLEMENT_NETWORKCLASS_ALIASED(className, dataTable)			\
 	IMPLEMENT_SERVERCLASS( C##className, dataTable )

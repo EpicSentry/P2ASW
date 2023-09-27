@@ -60,14 +60,15 @@ public:
 	
 	CPortalSWeaponInfo const	&GetPortalWpnData() const;
 
-
 	virtual void FireBullets( const FireBulletsInfo_t &info );
 	
+	virtual int ObjectCaps( void ) { return BaseClass::ObjectCaps() | FCAP_FORCE_TRANSITION; }
+
 public:
 	#if defined( CLIENT_DLL )
 	
-		virtual int		DrawModel( int flags, const RenderableInstance_t& instance );
-		virtual bool	ShouldDraw( void );
+		virtual IClientModelRenderable*	GetClientModelRenderable();
+		virtual int		DrawModel( int flags, const RenderableInstance_t &instance );
 		virtual bool	ShouldDrawCrosshair( void ) { return true; }
 		virtual bool	ShouldPredict();
 		virtual void	OnDataChanged( DataUpdateType_t type );

@@ -2618,6 +2618,11 @@ void CPortal_Player::AddSurfacePaintPowerInfo( const trace_t& trace, char const*
 	{			
 
 		DetermineTraceInfo( vStart, vEnd, i );
+
+		//Ray_t ray;
+		//ray.Init( vStart, vEnd );
+		//UTIL_Portal_TraceRay( ray, MASK_SOLID, &filter, const_cast<trace_t*>(&trace) );
+
 		UTIL_TraceHull( vStart, vEnd, PAINT_TRACE_MINS, PAINT_TRACE_MAXS, MASK_SOLID, &filter, const_cast<trace_t*>(&trace) );
 		//UTIL_TraceLine( vStart, vEnd, MASK_SOLID, &filter, const_cast<trace_t*>(&trace) );
 	

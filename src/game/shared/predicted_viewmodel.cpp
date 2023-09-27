@@ -13,9 +13,8 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-LINK_ENTITY_TO_CLASS( predicted_viewmodel, CPredictedViewModel );
-
 IMPLEMENT_NETWORKCLASS_ALIASED( PredictedViewModel, DT_PredictedViewModel )
+LINK_ENTITY_TO_CLASS_ALIASED( predicted_viewmodel, PredictedViewModel );
 
 BEGIN_NETWORK_TABLE( CPredictedViewModel, DT_PredictedViewModel )
 END_NETWORK_TABLE()

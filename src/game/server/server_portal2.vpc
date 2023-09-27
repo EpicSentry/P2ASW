@@ -73,6 +73,11 @@ $Project "Server (Portal 2)"
 			$File	"$SRCDIR\game\shared\hl2\hl2_gamerules.cpp"
 			$File	"$SRCDIR\game\shared\hl2\hl2_gamerules.h"
 			
+			$File	"hl2\basehlcombatweapon.cpp"
+			$File	"hl2\basehlcombatweapon.h"
+			$File	"$SRCDIR\game\shared\hl2\basehlcombatweapon_shared.cpp"
+			$File	"$SRCDIR\game\shared\hl2\basehlcombatweapon_shared.h"
+			
 			$File	"hl2\hl_playermove.cpp"
 		}
 		

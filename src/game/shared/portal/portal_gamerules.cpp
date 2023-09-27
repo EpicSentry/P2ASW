@@ -64,7 +64,7 @@ END_NETWORK_TABLE()
 
 
 IMPLEMENT_NETWORKCLASS_ALIASED( PortalGameRulesProxy, DT_PortalGameRulesProxy )
-LINK_ENTITY_TO_CLASS( portal_gamerules, CPortalGameRulesProxy );
+LINK_ENTITY_TO_CLASS_ALIASED( portal_gamerules, PortalGameRulesProxy );
 
 
 #ifdef CLIENT_DLL

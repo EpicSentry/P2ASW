@@ -122,7 +122,7 @@ CON_COMMAND( viewanim_load, "load animation from file" )
 		Msg( "No view anim created\n" );
 }
 
-LINK_ENTITY_TO_CLASS( viewangleanim, CViewAngleAnimation );
+LINK_ENTITY_TO_CLASS_CLIENTONLY( viewangleanim, CViewAngleAnimation );
 
 CViewAngleAnimation::CViewAngleAnimation()
 {

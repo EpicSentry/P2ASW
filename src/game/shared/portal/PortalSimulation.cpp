@@ -3924,9 +3924,13 @@ public:
 };
 static CPS_AutoGameSys_EntityListener s_CPS_AGS_EL_Singleton;
 
-
-
-
+#ifdef GAME_DLL
+IMPLEMENT_SERVERCLASS_ST( CPSCollisionEntity, DT_PSCollisionEntity )
+END_SEND_TABLE()
+#else
+IMPLEMENT_CLIENTCLASS_DT( CPSCollisionEntity, DT_PSCollisionEntity, CPSCollisionEntity )
+END_RECV_TABLE()
+#endif // ifdef GAME_DLL
 
 LINK_ENTITY_TO_CLASS( portalsimulator_collisionentity, CPSCollisionEntity );
 

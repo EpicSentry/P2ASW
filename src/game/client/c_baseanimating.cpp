@@ -234,7 +234,7 @@ BEGIN_PREDICTION_DATA( C_BaseAnimating )
 
 END_PREDICTION_DATA()
 
-LINK_ENTITY_TO_CLASS( client_ragdoll, C_ClientRagdoll );
+LINK_ENTITY_TO_CLASS_CLIENTONLY( client_ragdoll, C_ClientRagdoll );
 
 BEGIN_DATADESC( C_ClientRagdoll )
 	DEFINE_FIELD( m_bFadeOut, FIELD_BOOLEAN ),

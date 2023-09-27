@@ -307,6 +307,13 @@ class CPortalSimulator;
 class CPSCollisionEntity : public CBaseEntity
 {
 	DECLARE_CLASS( CPSCollisionEntity, CBaseEntity );
+	
+#ifdef GAME_DLL
+	DECLARE_SERVERCLASS();
+#else
+	DECLARE_CLIENTCLASS();
+#endif
+
 private:
 	CPortalSimulator *m_pOwningSimulator;
 

@@ -12,8 +12,6 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-LINK_ENTITY_TO_CLASS( basehlcombatweapon, CBaseHLCombatWeapon );
-
 IMPLEMENT_NETWORKCLASS_ALIASED( BaseHLCombatWeapon , DT_BaseHLCombatWeapon )
 
 BEGIN_NETWORK_TABLE( CBaseHLCombatWeapon , DT_BaseHLCombatWeapon )
@@ -23,6 +21,8 @@ BEGIN_NETWORK_TABLE( CBaseHLCombatWeapon , DT_BaseHLCombatWeapon )
 //	RecvPropInt( RECVINFO( m_bReflectViewModelAnimations ) ),
 #endif
 END_NETWORK_TABLE()
+
+LINK_ENTITY_TO_CLASS_ALIASED( basehlcombatweapon, BaseHLCombatWeapon );
 
 
 #if !defined( CLIENT_DLL )
@@ -117,6 +117,7 @@ bool CBaseHLCombatWeapon::Ready( void )
 //-----------------------------------------------------------------------------
 bool CBaseHLCombatWeapon::Deploy( void )
 {
+#ifndef PORTAL2
 	// If we should be lowered, deploy in the lowered position
 	// We have to ask the player if the last time it checked, the weapon was lowered
 	if ( GetOwner() && GetOwner()->IsPlayer() )
@@ -141,6 +142,7 @@ bool CBaseHLCombatWeapon::Deploy( void )
 	}
 
 	m_bLowered = false;
+#endif
 	return BaseClass::Deploy();
 }
 
@@ -191,9 +193,7 @@ void CBaseHLCombatWeapon::WeaponIdle( void )
 	//See if we should idle high or low
 	if ( WeaponShouldBeLowered() )
 	{
-#if !defined( CLIENT_DLL )
-		CHL2_Player *pPlayer = dynamic_cast<CHL2_Player*>(GetOwner());
-
+#if !defined( CLIENT_DLL ) && !defined ( PORTAL2 )
 		if( pPlayer )
 		{
 			pPlayer->Weapon_Lower();
