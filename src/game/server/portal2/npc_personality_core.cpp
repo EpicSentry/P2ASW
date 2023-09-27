@@ -8,6 +8,7 @@
 #include "choreoevent.h"
 #include "choreoscene.h"
 #include "choreoactor.h"
+#include "tier0/memdbgon.h"
 
 ConVar sv_personality_core_pca_pitch( "sv_personality_core_pca_pitch", "180", 0, "Pitch value for personality core perferred carry angles." );
 ConVar sv_personality_core_pca_yaw( "sv_personality_core_pca_yaw", "-90", 0, "Yaw value for personality core perferred carry angles." );
