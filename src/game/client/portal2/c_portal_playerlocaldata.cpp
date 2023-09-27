@@ -61,17 +61,45 @@ BEGIN_PREDICTION_DATA_NO_BASE( C_PortalPlayerLocalData )
 
 END_PREDICTION_DATA()
 
-Vector DEFAULT_SURFACE_NORMAL( 0.0, 0.0, 1.0 ); // Used only in the constructor below
+#define DEFAULT_SURFACE_NORMAL Vector( 0.0, 0.0, 1.0 ) // Used only in the constructor below
 
 C_PortalPlayerLocalData::C_PortalPlayerLocalData()
 {
 	m_StickNormal = DEFAULT_SURFACE_NORMAL;
+	m_OldStickNormal = DEFAULT_SURFACE_NORMAL;
 	m_Up = DEFAULT_SURFACE_NORMAL;
-
+	m_vStickRotationAxis = vec3_origin;
+	
 	// TODO: Are these the right values? Please check this in IDA or something
 	m_StandHullMin = VEC_HULL_MIN;
 	m_StandHullMax = VEC_HULL_MAX;
 	
 	m_DuckHullMin = VEC_DUCK_HULL_MIN;
 	m_DuckHullMax = VEC_DUCK_HULL_MAX;
+
+	m_vLocalUp = DEFAULT_SURFACE_NORMAL;
+	m_vEyeOffset = vec3_origin;
+
+	m_qQuaternionPunch = vec3_angle;
+
+	m_bShowingViewFinder = false;
+	m_bPlacingPhoto = false;
+	m_bDoneStickInterp = false;
+	m_bDoneCorrectPitch = false;
+	m_bJumpedThisFrame = false;
+	m_bBouncedThisFrame = false;
+	m_bDuckedInAir = false;
+	m_bZoomedIn = false;
+	m_bPreventedCrouchJumpThisFrame = false;
+		
+	m_bAttemptHullResize = false;
+
+	m_flAirControlSupressionTime = 0.0;
+	m_flAirInputScale = 0.0;
+	m_flCurrentStickTime = 0.0;
+	m_fBouncedTime = 0.0;
+
+	m_hTractorBeam = NULL;
+
+	m_nTractorBeamCount = 0;
 }
