@@ -36,9 +36,11 @@ public:
 		
 		bool        bOkButtonEnabled;
 		Callback_t	pfnOkCallback;
+		const char		*pOkButtonText;
 
 		bool        bCancelButtonEnabled;
 		Callback_t	pfnCancelCallback;
+		const char		*pCancelButtonText;
 
 		bool		bCheckBoxEnabled;
 		const char *pCheckBoxLabelText;

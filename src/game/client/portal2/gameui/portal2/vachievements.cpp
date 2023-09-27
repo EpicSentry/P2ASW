@@ -510,7 +510,7 @@ BaseClass(parent, panelName, false, true)
 	m_pProgressBar->SetImage( "progressbar_bg", PROGRESS_TEXTURE_BG );
 
 	SetUpperGarnishEnabled(true);
-	SetLowerGarnishEnabled( true );
+	SetFooterEnabled( true );
 	SetOkButtonEnabled( false );
 
 	m_ActiveControl = m_GplAchievements;
@@ -667,7 +667,7 @@ void Achievements::UpdateFooter()
 	CBaseModFooterPanel *footer = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
 	if ( footer )
 	{
-		footer->SetButtons( FB_BBUTTON | FB_YBUTTON, FF_ACHIEVEMENTS, false );
+		footer->SetButtons( FB_BBUTTON | FB_YBUTTON );
 		footer->SetButtonText( FB_BBUTTON, "#L4D360UI_Done" );
 		footer->SetButtonText( FB_YBUTTON, m_bShowingAssets ? "#L4D360UI_ShowAchievements" : "#L4D360UI_ShowUnlockableAwards" );
 	}

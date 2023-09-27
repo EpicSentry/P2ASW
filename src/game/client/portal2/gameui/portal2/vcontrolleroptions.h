@@ -46,6 +46,7 @@ protected:
 
 private:
 	void UpdateFooter();
+	void ConfirmUseDefaults();
 
 	int m_iActiveUserSlot;
 

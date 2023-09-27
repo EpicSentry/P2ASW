@@ -21,7 +21,12 @@ public:
 	Options(vgui::Panel *parent, const char *panelName);
 	~Options();
 
-	void OnCommand(const char *command);
+protected:
+	virtual void OnCommand( const char *pCommand );
+	virtual void Activate();
+	
+private:
+	void UpdateFooter();
 
 private:
 	BaseModHybridButton* m_BtnGame;

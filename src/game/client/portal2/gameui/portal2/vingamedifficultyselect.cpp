@@ -26,12 +26,12 @@ BaseClass(parent, panelName)
 	SetProportional( true );
 
 	SetUpperGarnishEnabled(true);
-	SetLowerGarnishEnabled(true);
+	SetFooterEnabled(true);
 
 	CBaseModFooterPanel *footer = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
 	if ( footer )
 	{
-		footer->SetButtons( 0, FF_NONE, true );
+		footer->SetButtons( FF_NONE );
 	}
 }
 
@@ -92,8 +92,7 @@ void InGameDifficultySelect::OnCommand(const char *command)
 	if ( !Q_strcmp( command, "Easy" ) ||
 		 !Q_strcmp( command, "Normal" ) ||
 		 !Q_strcmp( command, "Hard" ) ||
-		 !Q_strcmp( command, "Insane" ) ||
-		 !Q_strcmp( command, "Imba" ) )
+		 !Q_strcmp( command, "Impossible" ) )
 	{
 		CGameUIConVarRef z_difficulty("z_difficulty");
 

@@ -35,7 +35,7 @@ BaseClass(parent, panelName)
 	SetProportional( true );
 
 	SetUpperGarnishEnabled(true);
-	SetLowerGarnishEnabled(true);
+	SetFooterEnabled(true);
 
 	m_pHeaderFooter = new CNB_Header_Footer( this, "HeaderFooter" );
 	m_pHeaderFooter->SetTitle( "" );
@@ -103,7 +103,7 @@ void Cloud::UpdateFooter()
 	CBaseModFooterPanel *footer = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
 	if ( footer )
 	{
-		footer->SetButtons( FB_ABUTTON | FB_BBUTTON, FF_AB_ONLY, false );
+		footer->SetButtons( FB_ABUTTON | FB_BBUTTON );
 		footer->SetButtonText( FB_ABUTTON, "#L4D360UI_Select" );
 		footer->SetButtonText( FB_BBUTTON, "#L4D360UI_Controller_Done" );
 	}

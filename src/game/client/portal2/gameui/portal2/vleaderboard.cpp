@@ -34,29 +34,8 @@
 using namespace vgui;
 using namespace BaseModUI;
 
-static bool IsUserLIVEEnabled( int nUserID )
-{
-#ifdef _X360
-	return ( eXUserSigninState_SignedInToLive == XUserGetSigninState( nUserID ) );
-#endif // _X360
 
-	return false;
-}
-
-static bool AnyUserConnectedToLIVE()
-{
-#ifdef _X360
-	for ( uint idx = 0; idx < XBX_GetNumGameUsers(); ++ idx )
-	{
-		if ( IsUserLIVEEnabled( XBX_GetUserId( idx ) ) )
-			return true;
-	}
-#endif
-
-	return false;
-}
-
-enum 
+enum HoldoutMedal
 {
 	HOLDOUT_MEDAL_BRONZE = 0,
 	HOLDOUT_MEDAL_SILVER,
@@ -64,7 +43,7 @@ enum
 	HOLDOUT_MEDAL_PLATINUM,
 
 	NUM_HOLDOUT_MEDALS
-} HoldoutMedal;
+};
 
 #define HOLDOUT_MEDAL_TIME_BRONZE	240
 #define HOLDOUT_MEDAL_TIME_SILVER	420
@@ -85,7 +64,7 @@ LeaderboardListItem::LeaderboardListItem( vgui::Panel *parent, const char *panel
 	SetPaintBackgroundEnabled( true );
 
 	m_bSelected = false;
-#if !defined( _X360 )
+#if !defined( _GAMECONSOLE )
 	m_bHasMouseover = false;
 #endif
 
@@ -234,11 +213,11 @@ void LeaderboardListItem::PerformLayout()
 	}
 #endif
 
-#if !defined( _X360 )
+#if !defined( _GAMECONSOLE ) && !defined( NO_STEAM )
 	vgui::ImagePanel *pGamerPic = dynamic_cast< vgui::ImagePanel* >( FindChildByName( "PnlGamerPic" ) );																						   
 	if ( pGamerPic )
 	{
-		IImage *pImage = CUIGameData::Get()->GetAvatarImage( m_data.m_steamIDUser.ConvertToUint64() );
+		IImage *pImage = CUIGameData::Get()->AccessAvatarImage( m_data.m_steamIDUser.ConvertToUint64(), CUIGameData::kAvatarImageNull );  // this doesn't have proper image resource tracking! <<unused code from l4d>>
 		if ( pImage )
 		{
 			pGamerPic->SetImage( pImage );
@@ -299,7 +278,7 @@ void LeaderboardListItem::PerformLayout()
 //=============================================================================
 void LeaderboardListItem::OnCommand( const char *command )
 {
-#ifndef _X360
+#if !defined( _GAMECONSOLE ) && !defined( NO_STEAM )
 	if ( !Q_strcmp( command, "PlayerDropDown" ) )
 	{
 		// send a message to Leaderboard with the steamID of the player to show
@@ -335,14 +314,14 @@ void LeaderboardListItem::OnCommand( const char *command )
 	{
 		CBaseModPanel::GetSingleton().PlayUISound( UISOUND_ACCEPT );
 		char steamCmd[64];
-		Q_snprintf( steamCmd, sizeof( steamCmd ), "chat/%I64u", m_data.m_steamIDUser.ConvertToUint64() );
+		Q_snprintf( steamCmd, sizeof( steamCmd ), "chat/%llu", m_data.m_steamIDUser.ConvertToUint64() );
 		CUIGameData::Get()->ExecuteOverlayCommand( steamCmd );
 	}
 	else if ( !Q_strcmp( command, "#L4D360UI_ViewSteamID" ) )
 	{
 		CBaseModPanel::GetSingleton().PlayUISound( UISOUND_ACCEPT );
 		char steamCmd[64];
-		Q_snprintf( steamCmd, sizeof( steamCmd ), "steamid/%I64u", m_data.m_steamIDUser.ConvertToUint64() );
+		Q_snprintf( steamCmd, sizeof( steamCmd ), "steamid/%llu", m_data.m_steamIDUser.ConvertToUint64() );
 		CUIGameData::Get()->ExecuteOverlayCommand( steamCmd );
 	}
 	else 
@@ -447,7 +426,7 @@ void LeaderboardListItem::OnKeyCodePressed( KeyCode code )
 	BaseClass::OnKeyCodePressed( code );
 }
 
-#ifdef _X360
+#ifdef _GAMECONSOLE
 //=============================================================================
 void LeaderboardListItem::NavigateFrom()
 {
@@ -467,7 +446,7 @@ void LeaderboardListItem::NavigateTo()
 }
 #endif
 
-#if !defined( _X360 )
+#if !defined( _GAMECONSOLE )
 
 //=============================================================================
 void LeaderboardListItem::NavigateTo( void )
@@ -536,7 +515,7 @@ Leaderboard::Leaderboard( Panel *parent ):
 
 	m_ActiveControl = NULL;	// m_pPanelList;
 
-	SetLowerGarnishEnabled( true );
+	SetFooterEnabled( true );
 
 	SetDeleteSelfOnClose( true );
 
@@ -561,10 +540,8 @@ Leaderboard::Leaderboard( Panel *parent ):
 #if defined( _X360 )
 	m_hOverlapped = NULL;
 	memset( &m_xOverlapped, 0, sizeof( m_xOverlapped ) );
-#else
+#elif !defined( NO_STEAM )
 	SetDefLessFunc( m_LeaderboardHandles );
-
-	GameUI().PreventEngineHideGameUI();
 #endif
 }
 
@@ -579,10 +556,6 @@ Leaderboard::~Leaderboard()
 		pItem->DeletePanel();
 		m_ListItemPool.Pop();
 	}
-
-#if !defined( _X360 )
-	GameUI().AllowEngineHideGameUI();
-#endif
 
 	if ( m_pDataSettings )
 		m_pDataSettings->deleteThis();
@@ -650,7 +623,7 @@ void Leaderboard::Activate()
 		int iUserId = XBX_GetUserId( idx );
 
 		// omit guests
-		if ( XBX_GetUserIsGuest( iUserId ) )
+		if ( XBX_GetUserIsGuest( idx ) )
 			continue;
 
 		// omit local profiles and silver accounts
@@ -672,10 +645,10 @@ void Leaderboard::Activate()
 	m_Mode = LEADERBOARD_FRIENDS;
 
 	KeyValues *pInfoMission = NULL;
-	KeyValues *pInfoMap = g_pMatchExtSwarm->GetMapInfo( m_pDataSettings, &pInfoMission );
+	KeyValues *pInfoMap = g_pMatchExt->GetMapInfo( m_pDataSettings, &pInfoMission );
 	
 	char const *szGameMode = m_pDataSettings->GetString( "game/mode", "survival" );
-	KeyValues *pAllMissions = g_pMatchExtSwarm->GetAllMissions();
+	KeyValues *pAllMissions = g_pMatchExt->GetAllMissions();
 	pInfoMission = pAllMissions ? pAllMissions->GetFirstTrueSubKey() : NULL;
 
 	while ( !pInfoMap && pInfoMission )
@@ -705,7 +678,7 @@ void Leaderboard::Activate()
 		return;
 	}
 
-#ifndef _X360
+#ifndef NO_STEAM
 	m_bIsSearching = false;
 
 	m_iCurrentSpinnerValue = 0;
@@ -736,7 +709,7 @@ void Leaderboard::ApplySchemeSettings( IScheme *pScheme )
 int Leaderboard::GetCurrentChapterContext( void )
 {
 	KeyValues *pMissionInfo = NULL;
-	if ( KeyValues *pMapInfo = g_pMatchExtSwarm->GetMapInfo( m_pDataSettings, &pMissionInfo ) )
+	if ( KeyValues *pMapInfo = g_pMatchExt->GetMapInfo( m_pDataSettings, &pMissionInfo ) )
 	{
 		if ( IsX360() )
 		{
@@ -799,14 +772,14 @@ void Leaderboard::OnMissionChapterChanged()
 		return;
 	s_bNoReentry = true;
 
-#if !defined( _X360 )
+#if !defined( NO_STEAM )
 	ClosePlayerFlyout();
 #endif
 
 	InitializeDropDownControls();
 
 	KeyValues *pInfoMission = NULL;
-	KeyValues *pInfoMap = g_pMatchExtSwarm->GetMapInfo( m_pDataSettings, &pInfoMission );
+	KeyValues *pInfoMap = g_pMatchExt->GetMapInfo( m_pDataSettings, &pInfoMission );
 
 	const char *pszChapter = pInfoMap ? pInfoMap->GetString( "displayname" ) : NULL;
 
@@ -869,7 +842,52 @@ void Leaderboard::OnMissionChapterChanged()
 
 void Leaderboard::InitializeDropDownControls()
 {
+	KeyValues *pInfoMission = NULL;
+	KeyValues *pInfoMap = g_pMatchExt->GetMapInfo( m_pDataSettings, &pInfoMission );
 
+	// set the dropdowns
+	DropDownMenu *pMissionDropDown = dynamic_cast< DropDownMenu* >( FindChildByName( "DrpMission" ) );
+	DropDownMenu *pChapterDropDown = dynamic_cast< DropDownMenu* >( FindChildByName( "DrpChapter" ) );
+	if( pMissionDropDown && pChapterDropDown ) //missions change what the available campaigns are, we should listen on that flyout as well
+	{
+		FlyoutMenu *flyout = pMissionDropDown->GetCurrentFlyout();
+		if( flyout )
+		{
+			flyout->CloseMenu( NULL );
+		}
+
+		//
+		// Update the flyout to display chapter map names
+		//
+		KeyValues *pFlyoutChapterDescription = KeyValues::FromString(
+			"settings",
+			" game { "
+				" mode = "
+				" campaign = "
+				" chapter #int#0 "
+			" } "
+			);
+		KeyValues::AutoDelete autodelete_pFlyoutChapterDescription( pFlyoutChapterDescription );
+		pFlyoutChapterDescription->SetString( "game/mode", m_pDataSettings->GetString( "game/mode", "survival" ) );
+		pFlyoutChapterDescription->SetString( "game/campaign", pInfoMission->GetString( "name" ) );
+
+		flyout = UpdateChapterFlyout( pFlyoutChapterDescription, this, pChapterDropDown );
+
+		if ( pInfoMap )
+		{
+			pMissionDropDown->SetCurrentSelection( pInfoMission->GetString( "displayname" ) );
+
+			// Set this after setting the mission dropdown, as that will default the chapter to the first in the campaign
+			pChapterDropDown->SetCurrentSelection( CFmtStr( "#L4D360UI_Chapter_%d", pInfoMap->GetInt( "chapter" ) ) );
+		}
+
+		if ( m_ActiveControl )
+		{
+			m_ActiveControl->NavigateFrom( );
+		}
+		pMissionDropDown->NavigateTo();
+		m_ActiveControl = pMissionDropDown;
+	}
 }
 
 
@@ -878,7 +896,7 @@ int Leaderboard::GetCurrentLeaderboardView( void )
 {
 #if defined( _X360 )
 	KeyValues *pInfoMission = NULL;
-	KeyValues *pInfoMap = g_pMatchExtSwarm->GetMapInfo( m_pDataSettings, &pInfoMission );
+	KeyValues *pInfoMap = g_pMatchExt->GetMapInfo( m_pDataSettings, &pInfoMission );
 	if ( !pInfoMap )
 	{
 		Assert( 0 );
@@ -949,7 +967,7 @@ void Leaderboard::OnItemSelected( const char *pszIgnored )
 }
 
 //=============================================================================
-#if !defined( _X360 )
+#if !defined( NO_STEAM )
 void Leaderboard::OnPlayerDropDown( KeyValues *pKeyValues )
 {
 	uint64 playerID = pKeyValues->GetUint64( "playerID", 0 );
@@ -1051,7 +1069,7 @@ bool Leaderboard::StartSearching( bool bCenterOnLocalPlayer )
 	}
 
 
-#else
+#elif !defined( NO_STEAM )
 	// STEAM Leaderboard
 
 	m_bIsSearching = true;
@@ -1089,7 +1107,7 @@ void Leaderboard::SendNextRequestInQueue( void )
 	Assert( !m_hOverlapped );
 	Assert( !m_bufAsyncReadResults.Size() );
 
-	if ( !AnyUserConnectedToLIVE() )
+	if ( !CUIGameData::Get()->AnyUserConnectedToLIVE() )
 	{
 		ClearAsyncData();
 		return;
@@ -1123,7 +1141,7 @@ void Leaderboard::SendNextRequestInQueue( void )
 		bSuccess = SendQuery_StatsGlobalPage();
 		break;
 
-#if !defined( _X360 )
+#if !defined( NO_STEAM )
 
 	case QUERY_FIND_LEADERBOARD:
 		bSuccess = SendQuery_FindLeaderboard();
@@ -1167,7 +1185,7 @@ void Leaderboard::OnThink()
 
 #ifdef _X360
 
-	if ( !AnyUserConnectedToLIVE() && !IsAQueryPending() && m_pPanelList && m_pPanelList->GetPanelItemCount() )
+	if ( !CUIGameData::Get()->AnyUserConnectedToLIVE() && !IsAQueryPending() && m_pPanelList && m_pPanelList->GetPanelItemCount() )
 	{
 		// Make sure all items are removed when disconnected from LIVE
 		StartSearching( false );
@@ -1184,7 +1202,7 @@ void Leaderboard::OnThink()
 		{
 			char const *szText = "#L4D360UI_Leaderboard_No_Times";
 
-			if ( !AnyUserConnectedToLIVE() )
+			if ( !CUIGameData::Get()->AnyUserConnectedToLIVE() )
 				szText = "#L4D360UI_MainMenu_SurvivalLeaderboards_Tip_Disabled";
 			else if ( IsAQueryPending() )
 				szText = "#L4D360UI_StillSearching";
@@ -1193,7 +1211,7 @@ void Leaderboard::OnThink()
 		}
 	}
 
-#else
+#elif !defined( NO_STEAM )
 	
 	vgui::ImagePanel *pSpinnerImage = dynamic_cast< vgui::ImagePanel* >( FindChildByName( "SearchingIcon" ) );
 	if ( pSpinnerImage )
@@ -1358,7 +1376,7 @@ bool Leaderboard::SendQuery_StatsFriends( void )
 
 	return true;
 
-#else
+#elif !defined( NO_STEAM )
 
 	// Steam friends query
 
@@ -1381,13 +1399,15 @@ bool Leaderboard::SendQuery_StatsFriends( void )
 	}
 
 	return false;
-
-#endif // _X360
+#else
+	Assert( false ); // not yet implemented for this platform; return value undefined
+	return false;
+#endif
 }
 
 ConVar leaderboard_duplicate_entries( "leaderboard_duplicate_entries", "1", FCVAR_CHEAT );
 
-#if !defined( _X360 )
+#if !defined( NO_STEAM )
 
 // If in future we want to read the stats off this entry, see LeaderboardExtraStats_t layout in client.dll
 
@@ -1577,7 +1597,7 @@ bool Leaderboard::HandleQuery_EnumFriends( void )
 	return true;
 }
 
-#if !defined( _X360 )
+#if !defined( NO_STEAM )
 
 //=============================================================================
 SteamLeaderboard_t Leaderboard::GetLeaderboardHandle( int iMapContext )
@@ -1605,7 +1625,7 @@ void Leaderboard::GetLeaderboardName( int iMapContext, char *pszBuf, int iBufLen
 	// name = "<mapname>_<gamemode>"
 
 	KeyValues *pInfoMission = NULL;
-	KeyValues *pInfoMap = g_pMatchExtSwarm->GetMapInfo( m_pDataSettings, &pInfoMission );
+	KeyValues *pInfoMap = g_pMatchExt->GetMapInfo( m_pDataSettings, &pInfoMission );
 
 	if ( pInfoMap )
 	{
@@ -2072,7 +2092,7 @@ void Leaderboard::AddLeaderboardEntry( XUSER_STATS_ROW *pRow )
 }
 #endif	// _X360
 
-#if !defined( _X360 )
+#if !defined( NO_STEAM )
 
 void Leaderboard::AddLeaderboardEntry( LeaderboardEntry_t *pEntry )
 {
@@ -2221,7 +2241,7 @@ void Leaderboard::OnCommand( const char *command )
 		CBaseModPanel::GetSingleton().OpenWindow( WT_GAMESETTINGS, NULL, true, pNewDataSettings );
 		return;
 	}
-#if !defined( _X360 )
+#if !defined( NO_STEAM )
 	else if ( !Q_strcmp( command, "Exit" ) )
 	{
 		NavigateBack();
@@ -2288,7 +2308,7 @@ void Leaderboard::OnCommand( const char *command )
 	}
 }
 
-#if !defined( _X360 )
+#if !defined( NO_STEAM )
 
 //=============================================================================
 void Leaderboard::OpenPlayerFlyout( BaseModHybridButton *button, uint64 playerId, int x, int y )
@@ -2351,7 +2371,7 @@ void Leaderboard::CmdViewGamercard( void )
 #ifdef _X360
 	// Warn a player who tries to access a gamer card without multiplayer privileges that they may not do so
 	// shouldn't be able to get into this screen without being connected to live anyway
-	if ( AnyUserConnectedToLIVE() == false )
+	if ( CUIGameData::Get()->AnyUserConnectedToLIVE() == false )
 	{
 		return;
 	}
@@ -2368,7 +2388,7 @@ void Leaderboard::CmdViewGamercard( void )
 		iController = XBX_GetUserId( iUserSlot );
 	}
 
-	if ( !IsUserLIVEEnabled( iController ) )
+	if ( !CUIGameData::Get()->IsUserLIVEEnabled( iController ) )
 		return;
 
 	// get the xuid of the selected list item
@@ -2460,7 +2480,7 @@ void Leaderboard::CmdJumpToMe()
 	int iController = XBX_GetUserId( iUserSlot );
 
 	// omit guests
-	if ( XBX_GetUserIsGuest( iController ) )
+	if ( XBX_GetUserIsGuest( iUserSlot ) )
 		return;
 
 	XUID xuid = 0ull;
@@ -2506,11 +2526,11 @@ void Leaderboard::CmdJumpToMe()
 void Leaderboard::CmdLeaderboardHelper( int nOffset )
 {
 	KeyValues *pMissionInfo = NULL;
-	KeyValues *pMapInfo = g_pMatchExtSwarm->GetMapInfo( m_pDataSettings, &pMissionInfo );
+	KeyValues *pMapInfo = g_pMatchExt->GetMapInfo( m_pDataSettings, &pMissionInfo );
 	if ( !pMapInfo )
 		return;
 
-	KeyValues *pAllMissions = g_pMatchExtSwarm->GetAllMissions();
+	KeyValues *pAllMissions = g_pMatchExt->GetAllMissions();
 	if ( !pAllMissions )
 		return;
 
@@ -2749,10 +2769,7 @@ void Leaderboard::UpdateFooter()
 	if ( footer )
 	{
 		bool bY = !engine->IsConnected();
-		footer->SetButtons(
-			( bY ? FB_YBUTTON : FB_NONE ) | FB_XBUTTON | FB_BBUTTON |
-			( AnyUserConnectedToLIVE() ? FB_ABUTTON : FB_NONE ),
-			bY ? FF_A_GAMERCARD_BY__X_HIGH : FF_A_GAMERCARD_BX, false );
+		footer->SetButtons( ( bY ? FB_YBUTTON : FB_NONE ) | FB_XBUTTON | FB_BBUTTON | ( CUIGameData::Get()->AnyUserConnectedToLIVE() ? FB_ABUTTON : FB_NONE ) );
 
 		footer->SetButtonText( FB_BBUTTON, "#L4D360UI_Back" );
 		footer->SetButtonText( FB_ABUTTON, "#L4D360UI_ViewGamerCard" );

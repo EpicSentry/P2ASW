@@ -218,6 +218,7 @@ CUIGameData::CUIGameData() :
 	g_pMatchFramework->GetEventsSubscription()->Subscribe( this );
 
 	m_bXUIOpen = false;
+	m_bSteamOverlayActive = false;
 
 	m_bWaitingForStorageDeviceHandle = false;
 	m_iStorageID = XBX_INVALID_STORAGE_ID;
@@ -280,6 +281,29 @@ CON_COMMAND( ui_fake_connection_problem, "" )
 	DevMsg( "ui_fake_connection_problem finished @%.2f\n", flTime );
 }
 #endif
+
+void CUIGameData::GetDownloadableContent( char const *szContent )
+{
+	// Try to figure out if this DLC is paid/free/unknown
+	KeyValues *kvDlcDetails = new KeyValues( "" );
+	KeyValues::AutoDelete autodelete_kvDlcDetails( kvDlcDetails );
+	if ( !kvDlcDetails->LoadFromFile( g_pFullFileSystem, "resource/UI/BaseModUI/dlcdetailsinfo.res", "MOD" ) )
+		kvDlcDetails = NULL;
+
+	// Determine the DLC offer ID
+	uint64 uiDlcOfferID = kvDlcDetails->FindKey( szContent )->GetUint64( "offerid" );
+
+	if ( uiDlcOfferID )
+	{
+		g_MarketplaceEntryPoint.uiOfferID = uiDlcOfferID;
+		g_MarketplaceEntryPoint.dwEntryPoint = kvDlcDetails->FindKey( szContent )->GetInt( "type" );
+		GoToMarketplaceForOffer();
+	}
+	else
+	{
+		Warning( "CUIGameData::GetDownloadableContent failed to locate content description for `%s`\n", szContent );
+	}
+}
 
 //=============================================================================
 void CUIGameData::RunFrame()
@@ -615,6 +639,11 @@ bool CUIGameData::IsXUIOpen()
 	return m_bXUIOpen;
 }
 
+bool CUIGameData::IsSteamOverlayActive()
+{
+	return m_bSteamOverlayActive;
+}
+
 void CUIGameData::OpenWaitScreen( const char * messageText, float minDisplayTime, KeyValues *pSettings, float maxDisplayTime )
 {
 	if ( UI_IsDebug() )
@@ -805,6 +834,44 @@ char const * CUIGameData::GetPlayerName( XUID playerID, char const *szPlayerName
 }
 
 #if !defined( _X360 ) && !defined( NO_STEAM )
+void CUIGameData::Steam_OnUserStatsStored( UserStatsStored_t *pParam )
+{
+#ifdef _PS3
+	GetPs3SaveSteamInfoProvider()->WriteSteamStats();
+#endif
+}
+
+void CUIGameData::Steam_OnUserStatsReceived( UserStatsReceived_t *pParam )
+{
+#ifdef _PS3
+	GetPs3SaveSteamInfoProvider()->WriteSteamStats();
+#endif
+}
+
+void CUIGameData::Steam_OnGameOverlayActivated( GameOverlayActivated_t *pParam )
+{
+	m_bSteamOverlayActive = !!pParam->m_bActive;
+}
+#if 0
+void CUIGameData::Steam_OnAvatarImageLoaded( AvatarImageLoaded_t *pParam )
+{
+	if ( !pParam->m_steamID.IsValid() )
+		return;
+
+	CGameUiAvatarImage *pImage = NULL;
+	int iIndex = m_mapUserXuidToAvatar.Find( pParam->m_steamID.ConvertToUint64() );
+	if ( iIndex != m_mapUserXuidToAvatar.InvalidIndex() )
+	{
+		pImage = m_mapUserXuidToAvatar.Element( iIndex );
+	}
+
+	// Re-fetch the image if we have it cached
+	if ( pImage )
+	{
+		pImage->SetAvatarXUID( pParam->m_steamID.ConvertToUint64() );
+	}
+}
+#endif
 void CUIGameData::Steam_OnPersonaStateChanged( PersonaStateChange_t *pParam )
 {
 	if ( !pParam->m_ulSteamID )
