@@ -1516,6 +1516,8 @@ bool CNPC_FloorTurret::PreThink( turretState_e state )
 			SetState( NPC_STATE_DEAD );
 			m_lifeState = LIFE_DEAD;
 
+			AssertMsg(m_pMotionController, "NOTE: If you get this assert then it means our Activate() function wasn't called, this also means you're about to crash.");
+
 			//Disable the tip controller
 			m_pMotionController->Enable( false );
 

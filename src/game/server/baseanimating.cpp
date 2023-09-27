@@ -1982,8 +1982,14 @@ int CBaseAnimating::LookupAttachment( const char *szName )
 
 	// The +1 is to make attachment indices be 1-based (namely 0 == invalid or unused attachment)
 	const int studioAttachmentNum = Studio_FindAttachment( pStudioHdr, szName );
-	AssertMsg3( studioAttachmentNum >= 0, "Couldn't find attachment %s on skeleton %s for object %s\n",
-		szName, pStudioHdr->pszName(), GetDebugName() );
+
+#ifdef DEBUG
+	if ( !FClassnameIs( this, "generic_actor" ) )
+	{
+		AssertMsg3( studioAttachmentNum >= 0, "Couldn't find attachment %s on skeleton %s for object %s\n",
+			szName, pStudioHdr->pszName(), GetDebugName() );
+	}
+#endif
 	return studioAttachmentNum + 1;
 }
 
