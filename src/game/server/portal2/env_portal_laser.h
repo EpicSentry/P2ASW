@@ -5,7 +5,7 @@
 #include "beam_shared.h"
 #include "baseanimating.h"
 
-class CPortalLaser : public CBaseAnimating // Inherit from CBaseAnimating for proper studio model support
+class CPortalLaser : public CBaseAnimating
 {
 public:
 	DECLARE_CLASS(CPortalLaser, CBaseAnimating);
@@ -52,24 +52,22 @@ public:
 private:
 	CBeam* m_pBeam;
 
-	// Add the missing declarations here
 	int m_spawnFlags;
 	bool m_bStartOff; // To check the start state
-	bool m_bLaserOn; // Add this member variable to store the laser state
+	bool m_bLaserOn;
 	int m_iLaserAttachmentIndex;
-	static const int FLOOR_TURRET_PORTAL_LASER_ATTACHMENT;
-	static const int FLOOR_TURRET_PORTAL_EYE_ATTACHMENT;
-	static const float FLOOR_TURRET_PORTAL_LASER_RANGE;
+	static const int LASER_ATTACHMENT;
+	static const int LASER_EYE_ATTACHMENT;
+	static const float LASER_RANGE;
 	static const char* LASER_ATTACHMENT_NAME; // The name of the laser attachment.
 	float m_fPulseOffset;
-	static const float FLOOR_TURRET_PORTAL_END_POINT_PULSE_SCALE;
+	static const float LASER_END_POINT_PULSE_SCALE;
 	// Cube instances
 	string_t m_cubeUniqueID;
 	
 	float m_flLastDamageTime;
 	float m_flLastDamageSoundTime;
 	
-	CHandle<CBeam> m_hCubeBeam;
 
 };
 

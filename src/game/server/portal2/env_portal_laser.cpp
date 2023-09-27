@@ -10,11 +10,11 @@
 #include "point_laser_target.h"
 
 // constants
-const int CPortalLaser::FLOOR_TURRET_PORTAL_EYE_ATTACHMENT = 1;
-const float CPortalLaser::FLOOR_TURRET_PORTAL_LASER_RANGE = 8192;
+const int CPortalLaser::LASER_EYE_ATTACHMENT = 1;
+const float CPortalLaser::LASER_RANGE = 8192;
 const char* CPortalLaser::LASER_ATTACHMENT_NAME = "laser_attachment";
-const float CPortalLaser::FLOOR_TURRET_PORTAL_END_POINT_PULSE_SCALE = 4.0f;
-const int CPortalLaser::FLOOR_TURRET_PORTAL_LASER_ATTACHMENT = 1;
+const float CPortalLaser::LASER_END_POINT_PULSE_SCALE = 4.0f;
+const int CPortalLaser::LASER_ATTACHMENT = 1;
 
 BEGIN_DATADESC(CPortalLaser)
 DEFINE_KEYFIELD(m_modelName, FIELD_STRING, "model"),
@@ -22,11 +22,11 @@ DEFINE_KEYFIELD(m_bStartOff, FIELD_BOOLEAN, "StartState"),
 DEFINE_INPUTFUNC(FIELD_VOID, "TurnOn", InputTurnOn),
 DEFINE_INPUTFUNC(FIELD_VOID, "TurnOff", InputTurnOff),
 DEFINE_INPUTFUNC(FIELD_VOID, "Toggle", InputToggle),
-
 DEFINE_THINKFUNC( Think ),
 
 //DEFINE_FIELD(m_bIsHittingPortal, FIELD_BOOLEAN),
 END_DATADESC()
+LINK_ENTITY_TO_CLASS(env_portal_laser, CPortalLaser);
 /*
 IMPLEMENT_SERVERCLASS_ST(CPortalLaser, DT_EnvPortalLaser)
 
@@ -53,32 +53,17 @@ void CPortalLaser::Think()
 	{
 		UpdateLaser(); // Update the laser position if it's on
 	}
-	else
-	{
-		if (m_hCubeBeam)
-		{
-			m_hCubeBeam->AddEffects(EF_NODRAW); // Hide the cube's beam when the laser is off
-		}
-	}
-
-}
-
-void RotateVector(Vector& vec, const QAngle& angles)
-{
-	matrix3x4_t matRotate;
-	AngleMatrix(angles, matRotate);
-	VectorRotate(vec, matRotate, vec);
 }
 
 void CPortalLaser::UpdateLaser()
 {
 	Vector vecOrigin = GetAbsOrigin(); 
 	QAngle angMuzzleDir;
-	GetAttachment(FLOOR_TURRET_PORTAL_LASER_ATTACHMENT, vecOrigin, angMuzzleDir);
+	GetAttachment(LASER_ATTACHMENT, vecOrigin, angMuzzleDir);
 
 	Vector vecEye;
 	QAngle angEyeDir;
-	GetAttachment(FLOOR_TURRET_PORTAL_EYE_ATTACHMENT, vecEye, angEyeDir);
+	GetAttachment(LASER_EYE_ATTACHMENT, vecEye, angEyeDir);
 
 	Vector vecMuzzleDir;
 	AngleVectors(angEyeDir, &vecMuzzleDir);
@@ -92,7 +77,7 @@ void CPortalLaser::UpdateLaser()
 	// Trace from the laser emitter to check if it hits a cube
 	trace_t normalTrace;
 	Ray_t ray;
-	ray.Init( vecOrigin, vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE );
+	ray.Init( vecOrigin, vecOrigin + vecMuzzleDir * LASER_RANGE );
 	UTIL_Portal_TraceRay( ray, MASK_SHOT, &masterTraceFilter, &normalTrace );
 
 	// Check if were is the cube or a catcher
@@ -129,7 +114,7 @@ void CPortalLaser::UpdateLaser()
 		// Trace from the laser emitter to check if it hits the player
 		trace_t playerTrace;
 		Ray_t ray_player;
-		ray_player.Init( vecOrigin, vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE );
+		ray_player.Init( vecOrigin, vecOrigin + vecMuzzleDir * LASER_RANGE );
 		UTIL_Portal_TraceRay( ray_player, MASK_SHOT, &playerTraceFilter, &playerTrace );
 
 		// No need to do a cast here since there's no player specific functions to call
@@ -168,14 +153,14 @@ void CPortalLaser::UpdateLaser()
 		m_pBeam->SetScrollRate(0);
 		m_pBeam->SetFadeLength(0);
 		m_pBeam->SetCollisionGroup(COLLISION_GROUP_NONE);
-		m_pBeam->PointsInit(vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE, vecOrigin);
+		m_pBeam->PointsInit(vecOrigin + vecMuzzleDir * LASER_RANGE, vecOrigin);
 		m_pBeam->SetBeamFlag(FBEAM_REVERSED);
 		m_pBeam->SetDamage(100);
 		m_pBeam->SetStartEntity(this);
 	}
 	else
 	{
-		m_pBeam->SetStartPos(vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE);
+		m_pBeam->SetStartPos(vecOrigin + vecMuzzleDir * LASER_RANGE);
 		m_pBeam->SetEndPos(vecOrigin);
 		m_pBeam->RemoveEffects(EF_NODRAW);
 	}
@@ -183,7 +168,7 @@ void CPortalLaser::UpdateLaser()
 	Vector vEndPoint;
 	float fEndFraction;
 	Ray_t rayPath;
-	rayPath.Init(vecOrigin, vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE);
+	rayPath.Init(vecOrigin, vecOrigin + vecMuzzleDir * LASER_RANGE);
 
 	trace_t trace; // Used for determining the portal hit
 
@@ -194,19 +179,18 @@ void CPortalLaser::UpdateLaser()
 
 	if (UTIL_Portal_TraceRay_Beam(rayPath, MASK_SHOT, &masterTraceFilter, &fEndFraction))
 	{
-		vEndPoint = vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE;
+		vEndPoint = vecOrigin + vecMuzzleDir * LASER_RANGE;
 		//Msg("Portal Beam End Point: (%f, %f, %f)\n", vEndPoint.x, vEndPoint.y, vEndPoint.z);
 	}
 	else
 	{
-		vEndPoint = vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE * fEndFraction;
+		vEndPoint = vecOrigin + vecMuzzleDir * LASER_RANGE * fEndFraction;
 		//Msg("Main Trace End Point: (%f, %f, %f)\n", vEndPoint.x, vEndPoint.y, vEndPoint.z);
 	}
 	
 	Assert(m_pBeam);
 
 	m_pBeam->BeamDamage( &trace );
-
 #if 0
 	// Check if the trace hits any portals
 	CPortal_Base2D* pLocalPortal = NULL;
@@ -258,9 +242,9 @@ void CPortalLaser::DoTraceFromPortal(CPortal_Base2D* pRemotePortal)
 	remoteTraceFilter.AddClassnameToIgnore("info_placement_helper");
 	remoteTraceFilter.AddClassnameToIgnore("player");
 	remoteTraceFilter.AddClassnameToIgnore("Player");
-//	remoteTraceFilter.AddClassnameToIgnore("prop_energy_ball");
+	remoteTraceFilter.AddClassnameToIgnore("prop_energy_ball");
 	remoteTraceFilter.AddClassnameToIgnore("prop_portal");
-	UTIL_TraceLine(vecRemoteOrigin, vecRemoteOrigin + vecRemoteMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE, MASK_SHOT, &remoteTraceFilter, &remoteTrace);
+	UTIL_TraceLine(vecRemoteOrigin, vecRemoteOrigin + vecRemoteMuzzleDir * LASER_RANGE, MASK_SHOT, &remoteTraceFilter, &remoteTrace);
 	NDebugOverlay::Line(vecRemoteOrigin, remoteTrace.endpos, 132, 0, 255, true, 10.0f);
 
 	// Check if the trace hits a laser catcher
@@ -365,7 +349,7 @@ void CPortalLaser::Precache(void)
 void CPortalLaser::LaserOff(void)
 {
 	m_bLaserOn = false;
-	Msg("Laser Deactivating\n");
+	//Msg("Laser Deactivating\n");
 	if (m_pBeam)
 	{
 		m_pBeam->AddEffects(EF_NODRAW);
@@ -375,7 +359,7 @@ void CPortalLaser::LaserOff(void)
 void CPortalLaser::LaserOn(void)
 {
 	m_bLaserOn = true;
-	Msg("Laser Activating\n");
+	//Msg("Laser Activating\n");
 
 	Vector vecOrigin = GetAbsOrigin();
 	QAngle angMuzzleDir;
@@ -410,7 +394,7 @@ void CPortalLaser::LaserOn(void)
 
 	Vector vecEye;
 	QAngle angEyeDir;
-	GetAttachment(FLOOR_TURRET_PORTAL_EYE_ATTACHMENT, vecEye, angEyeDir);
+	GetAttachment(LASER_EYE_ATTACHMENT, vecEye, angEyeDir);
 
 	Vector vecMuzzleDir;
 	AngleVectors(angEyeDir, &vecMuzzleDir);
@@ -426,13 +410,13 @@ void CPortalLaser::LaserOn(void)
 		m_pBeam->SetScrollRate(0);
 		m_pBeam->SetFadeLength(0);
 		m_pBeam->SetCollisionGroup(COLLISION_GROUP_NONE);
-		m_pBeam->PointsInit(vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE, vecOrigin);
+		m_pBeam->PointsInit(vecOrigin + vecMuzzleDir * LASER_RANGE, vecOrigin);
 		m_pBeam->SetBeamFlag(FBEAM_REVERSED);
 		m_pBeam->SetStartEntity(this);
 	}
 	else
 	{
-		m_pBeam->SetStartPos(vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE);
+		m_pBeam->SetStartPos(vecOrigin + vecMuzzleDir * LASER_RANGE);
 		m_pBeam->SetEndPos(vecOrigin);
 		m_pBeam->RemoveEffects(EF_NODRAW);
 	}
@@ -441,14 +425,14 @@ void CPortalLaser::LaserOn(void)
 	Vector vEndPoint;
 	float fEndFraction;
 	Ray_t rayPath;
-	rayPath.Init(vecOrigin, vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE);
+	rayPath.Init(vecOrigin, vecOrigin + vecMuzzleDir * LASER_RANGE);
 
 	CTraceFilterSkipClassname traceFilter(this, "prop_energy_ball", COLLISION_GROUP_NONE);
 
 	if (UTIL_Portal_TraceRay_Beam(rayPath, MASK_SHOT, &traceFilter, &fEndFraction))
-		vEndPoint = vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE;
+		vEndPoint = vecOrigin + vecMuzzleDir * LASER_RANGE;
 	else
-		vEndPoint = vecOrigin + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE * fEndFraction;
+		vEndPoint = vecOrigin + vecMuzzleDir * LASER_RANGE * fEndFraction;
 
 	m_pBeam->PointsInit(vEndPoint, vecOrigin);
 }
@@ -481,7 +465,7 @@ void CPortalLaser::InputToggle(inputdata_t& inputData)
 // Misc
 float CPortalLaser::LaserEndPointSize(void)
 {
-	return ((MAX(0.0f, sinf(gpGlobals->curtime * M_PI + m_fPulseOffset))) * FLOOR_TURRET_PORTAL_END_POINT_PULSE_SCALE + 3.0f) * 1.5f;
+	return ((MAX(0.0f, sinf(gpGlobals->curtime * M_PI + m_fPulseOffset))) * LASER_END_POINT_PULSE_SCALE + 3.0f) * 1.5f;
 }
 
 bool CPortalLaser::IsLaserHittingCube()
@@ -498,5 +482,3 @@ bool CPortalLaser::IsLaserHittingPortalCatcher()
 {
 	return m_bIsLaserHittingPortalCatcher;
 }
-
-LINK_ENTITY_TO_CLASS(env_portal_laser, CPortalLaser);
