@@ -19,7 +19,7 @@ C_PaintBlob::C_PaintBlob()
 C_PaintBlob::~C_PaintBlob()
 {
 	if (m_pRenderable)
-		m_pRenderable->Remove();
+		delete m_pRenderable;
 }
 
 

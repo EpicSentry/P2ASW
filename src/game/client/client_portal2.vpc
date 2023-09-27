@@ -108,6 +108,9 @@ $Project "Client (Portal 2)"
 			$File	"portal2\c_sdk_jukebox.cpp"
 			$File	"portal2\vgui_rootpanel_portal2.cpp"
 			$File	"$SRCDIR\game\shared\predicted_viewmodel.cpp"
+			$File	"$SRCDIR\game\shared\predicted_viewmodel.h"
+			$File	"$SRCDIR\game\shared\cam_thirdperson.cpp"
+			$File	"$SRCDIR\game\shared\cam_thirdperson.h"
 			
 			//$File	"$SRCDIR\game\shared\portal\trigger_tractorbeam_shared.cpp" // NOTE: Portal 2's Server VPC doesn't have this.
 		

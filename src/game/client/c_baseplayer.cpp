@@ -1370,6 +1370,15 @@ bool C_BasePlayer::ShouldInterpolate()
 
 bool C_BasePlayer::ShouldDraw()
 {
+	// $FIXME(hpe) this was returning false in splitscreen mode making 2nd player invisible
+#if defined (_GAMECONSOLE) && defined ( CSTRIKE15 )
+	ConVarRef ss_enable( "ss_enable" );
+	if ( ss_enable.GetInt() > 0 )
+	{
+		return ( IsLocalSplitScreenPlayer() || this != GetSplitScreenViewPlayer() || C_BasePlayer::ShouldDrawLocalPlayer() || (GetObserverMode() == OBS_MODE_DEATHCAM ) ) &&
+			   BaseClass::ShouldDraw();
+	}
+#endif
 	return ( this != GetSplitScreenViewPlayer() || C_BasePlayer::ShouldDrawLocalPlayer() || (GetObserverMode() == OBS_MODE_DEATHCAM ) ) &&
 		   BaseClass::ShouldDraw();
 }

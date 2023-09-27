@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose:
 //
@@ -12,9 +12,9 @@
 #endif
 
 #ifdef CLIENT_DLL
-	#include "c_baseplayer.h"
+#include "c_baseplayer.h"
 #else
-	#include "baseplayer.h"
+#include "baseplayer.h"
 #endif
 
 #define DIST_FORWARD 0
@@ -44,7 +44,7 @@ public:
 	CThirdPersonManager();
 	void	SetCameraOffsetAngles( Vector vecOffset ) { m_vecCameraOffset = vecOffset; }
 	Vector	GetCameraOffsetAngles( void ) { return m_vecCameraOffset; }
-	
+
 	void	SetDesiredCameraOffset( Vector vecOffset ) { m_vecDesiredCameraOffset = vecOffset; }
 	Vector	GetDesiredCameraOffset( void );
 

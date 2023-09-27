@@ -2598,8 +2598,6 @@ void CPortalGameMovement::HandlePortalling( void )
 
 #if defined( CLIENT_DLL )
 
-			Msg("attempt fix eye angles\n");
-
 			//engine view angles (for mouse input smoothness)
 			{
 				QAngle qEngineAngles;

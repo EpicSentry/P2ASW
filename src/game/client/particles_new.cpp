@@ -639,6 +639,7 @@ int CNewParticleEffect::DrawModel( int flags, const RenderableInstance_t &instan
 		pRenderContext->PushMatrix();
 		pRenderContext->LoadIdentity();
 		Render( pRenderContext, vecDiffuseModulation, ( flags & STUDIO_TRANSPARENCY ) ? IsTwoPass() : false, pCameraObject );
+		// NOTE: If your call stack leads here, don't be curious, it's just that we need to set up C_PortalBlast because it's incomplete.
 		pRenderContext->MatrixMode( MATERIAL_MODEL );
 		pRenderContext->PopMatrix();
 	}

@@ -126,13 +126,11 @@ void CPaintDatabase::PaintEntity( CBaseEntity *pPaintedEntity, PaintPowerType ne
 	PaintPowerType paintedPowerType = NO_POWER;
 	if( pPaintableEntity )
 	{
-		Msg("pPaintableEntity\n");
 		paintedPowerType = pPaintableEntity->GetPaintPowerAtPoint( vecPosition );
 
 		// Client player's need to handle getting painted
 		if( pPaintedEntity->IsPlayer() )
 		{
-			Msg("pPaintedEntity->IsPlayer()\n");
 			CBroadcastRecipientFilter filter;
 			filter.MakeReliable();
 			UserMessageBegin( filter, "PaintEntity" );

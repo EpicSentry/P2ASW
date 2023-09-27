@@ -174,6 +174,9 @@ BEGIN_NETWORK_TABLE( CSprite, DT_Sprite )
 #endif
 END_NETWORK_TABLE()
 
+
+LINK_ENTITY_TO_CLASS_ALIASED( env_sprite, Sprite );
+
 #ifdef CLIENT_DLL
 extern CUtlVector< CSprite * > g_ClientsideSprites;
 #endif // CLIENT_DLL
