@@ -1,5 +1,6 @@
-#include "cbase.h";
-#include <c_ai_basenpc.h>
+#include "cbase.h"
+#include "c_ai_basenpc.h"
+#include "tier0/memdbgon.h"
 
 class C_NPC_Wheatley_Boss : public C_AI_BaseNPC
 {

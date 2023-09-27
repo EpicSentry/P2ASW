@@ -231,8 +231,11 @@ protected:
 	eyeState_t				m_iEyeState;
 	CHandle<CSprite>		m_hEyeGlow;
 	CHandle<CBeam>			m_hLaser;
+#ifndef DEBUG
 	CHandle<CTurretTipController>	m_pMotionController;
-
+#else
+	CTurretTipController *m_pMotionController;
+#endif
 	CHandle<CParticleSystem>	m_hFizzleEffect;
 	Vector	m_vecEnemyLKP;
 
