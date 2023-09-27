@@ -620,8 +620,12 @@ int CNewParticleEffect::DrawModel( int flags, const RenderableInstance_t &instan
 
 	if ( ( flags & STUDIO_TRANSPARENCY ) || !IsBatchable() || !m_pDef->IsDrawnThroughLeafSystem() )
 	{
-		int viewentity = render->GetViewEntity();
-		C_BaseEntity *pCameraObject = cl_entitylist->GetEnt( viewentity );
+		//int viewentity = render->GetViewEntity();
+		C_BaseEntity *pCameraObject = GetSplitScreenViewPlayer();
+		if( ((C_BasePlayer *)pCameraObject)->GetViewEntity() )
+		{
+			pCameraObject = ((C_BasePlayer *)pCameraObject)->GetViewEntity();
+		}
 		Assert( pCameraObject );
 		// apply logic that lets you skip rendering a system if the camera is attached to its entity
 		if   ( ( ( pCameraObject &&
@@ -639,7 +643,7 @@ int CNewParticleEffect::DrawModel( int flags, const RenderableInstance_t &instan
 		pRenderContext->PushMatrix();
 		pRenderContext->LoadIdentity();
 		Render( pRenderContext, vecDiffuseModulation, ( flags & STUDIO_TRANSPARENCY ) ? IsTwoPass() : false, pCameraObject );
-		// NOTE: If your call stack leads here, don't be curious, it's just that we need to set up C_PortalBlast because it's incomplete.
+		// NOTE: If your call stack leads here, then it likely means pCameraObject is garbage.
 		pRenderContext->MatrixMode( MATERIAL_MODEL );
 		pRenderContext->PopMatrix();
 	}

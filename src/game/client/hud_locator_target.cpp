@@ -21,6 +21,7 @@
 #include "hud.h"
 #include "hudelement.h"
 #include "vgui_int.h"
+#include "ienginevgui.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -139,7 +140,12 @@ void CLocatorTarget::Activate( int serialNumber )
 
 //------------------------------------
 void CLocatorTarget::Deactivate( bool bNoFade )						
-{ 
+{
+	if ( ( engine && engine->IsPaused() ) || ( enginevgui && enginevgui->IsGameUIVisible() ) )
+	{
+		bNoFade = true;
+	}
+
 	if ( bNoFade || m_alpha == 0 || 
 		 ( m_bOccluded && !( m_iEffectsFlags & LOCATOR_ICON_FX_FORCE_CAPTION ) ) || 
 		 ( !m_bOnscreen && ( m_iEffectsFlags & LOCATOR_ICON_FX_NO_OFFSCREEN ) ) )

@@ -172,7 +172,10 @@ bool C_BaseViewModel::Interpolate( float currentTime )
 		float curtime = pPlayer ? pPlayer->GetFinalPredictedTime() : gpGlobals->curtime;
 		elapsed_time = curtime - m_flAnimTime;
 		// Adjust for interpolated partial frame
-		elapsed_time += ( gpGlobals->interpolation_amount * TICK_INTERVAL );
+		if ( !engine->IsPaused() )
+		{
+			elapsed_time += ( gpGlobals->interpolation_amount * TICK_INTERVAL );
+		}
 	}
 
 	// Prediction errors?	

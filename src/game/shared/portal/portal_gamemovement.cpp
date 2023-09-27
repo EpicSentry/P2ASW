@@ -65,7 +65,7 @@ ConVar coop_sink_speed_decay("coop_sink_speed_decay","0.02f", FCVAR_REPLICATED |
 
 ConVar coop_impact_velocity_threshold("coop_impact_velocity_threshold", "250.0", FCVAR_REPLICATED | FCVAR_CHEAT );
 
-#define sv_can_carry_both_guns			0	//extern ConVar sv_can_carry_both_guns;
+extern ConVar sv_can_carry_both_guns;
 
 ConVar sv_portal_new_player_trace( "sv_portal_new_player_trace", "1", FCVAR_REPLICATED | FCVAR_CHEAT );
 
@@ -486,7 +486,7 @@ void CPortalGameMovement::ProcessMovement( CBasePlayer *pPlayer, CMoveData *pMov
 		pPlayer->UnforceButtons( IN_JUMP );
 
 		// Try to collide with thrown weapons if we don't currently have a weapon
-		if( pPlayer->HasWeapons() == false || sv_can_carry_both_guns )
+		if( pPlayer->HasWeapons() == false || sv_can_carry_both_guns.GetBool() )
 		{
 			// Trace for the portal and paint guns
 			trace_t pm;
