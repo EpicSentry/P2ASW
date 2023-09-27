@@ -173,6 +173,16 @@ void CFuncBrush::TurnOff( void )
 	}
 
 	AddEffects( EF_NODRAW );
+
+	IPhysicsObject *pObject = VPhysicsGetObject();
+	if( pObject )
+	{
+		pObject->Wake();
+		pObject->EnableCollisions( false );
+	}
+
+	WakeRestingObjects();
+
 	m_iDisabled = TRUE;
 }
 
@@ -191,6 +201,18 @@ void CFuncBrush::TurnOn( void )
 	}
 
 	RemoveEffects( EF_NODRAW );
+
+	IPhysicsObject *pObject = VPhysicsGetObject();
+	if( pObject )
+	{
+		pObject->EnableCollisions( true );
+		if( pObject->IsAsleep() )
+		{
+			pObject->Wake();
+		}		
+	}
+
+	m_iDisabled = FALSE;
 }
 
 
