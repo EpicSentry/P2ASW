@@ -175,7 +175,7 @@ void CPortalLaser::UpdateLaser()
 	// Perform the portal detection trace from the origin to the muzzle direction
 	//UTIL_Portal_TraceRay( ray , MASK_SHOT, &masterTraceFilter, &trace);
 
-	UTIL_Portal_TraceRay( rayPath, MASK_SHOT, &masterTraceFilter, &trace );
+	enginetrace->TraceRay( rayPath, MASK_SHOT, &masterTraceFilter, &trace );
 
 	if (UTIL_Portal_TraceRay_Beam(rayPath, MASK_SHOT, &masterTraceFilter, &fEndFraction))
 	{
@@ -191,7 +191,7 @@ void CPortalLaser::UpdateLaser()
 	Assert(m_pBeam);
 
 	m_pBeam->BeamDamage( &trace );
-#if 0
+#if 1
 	// Check if the trace hits any portals
 	CPortal_Base2D* pLocalPortal = NULL;
 	CPortal_Base2D* pRemotePortal = NULL;
@@ -208,7 +208,7 @@ void CPortalLaser::UpdateLaser()
 		if (pRemotePortal != NULL)
 		{
 			//Msg("Remote Portal classname: %s\n", pRemotePortal->GetClassname());
-			DoTraceFromPortal(pRemotePortal); // Do the rest from another void
+			DoTraceFromPortal(pRemotePortal, trace, vecMuzzleDir); // Do the rest from another void
 		}
 	}
 	else
@@ -221,20 +221,77 @@ void CPortalLaser::UpdateLaser()
 	m_pBeam->PointsInit(vEndPoint, vecOrigin);
 
 	g_pEffects->Sparks(vEndPoint, 2, 2, &vecMuzzleDir);
+	
+	Ray_t targetRay;
+	targetRay.Init( normalTrace.startpos, normalTrace.endpos );
+
+	DamageAllCatchersInRay( targetRay );
+
 }
 
-void CPortalLaser::DoTraceFromPortal(CPortal_Base2D* pRemotePortal)
+void CPortalLaser::DamageAllCatchersInRay( Ray_t &ray )
+{
+	CBaseEntity *list[1024];
+
+	CFlaggedEntitiesEnum rayEnum( list, 1024, 0 );
+	partition->EnumerateElementsAlongRay( PARTITION_ENGINE_NON_STATIC_EDICTS, ray, false, &rayEnum );
+
+	int nCount = rayEnum.GetCount();
+	
+	// Loop through all entities along the ray between the gun and the surface
+	for ( int i = 0; i < nCount; i++ )
+	{
+		if( dynamic_cast<CPortalLaserTarget*>( list[i] ) != NULL )
+		{
+			CPortalLaserTarget *pTarget = static_cast<CPortalLaserTarget*>( list[i] );
+			
+			Assert(pTarget);
+
+			Msg("Found a target!!");
+
+			CTakeDamageInfo info;
+			info.SetAttacker(this);
+			info.SetInflictor(this);
+			info.SetDamage(1);
+			info.SetDamageType(DMG_ENERGYBEAM);
+
+			pTarget->OnTakeDamage( info );
+		}
+	}
+}
+
+void CPortalLaser::DoTraceFromPortal( CPortal_Base2D* pRemotePortal, trace_t &tr, Vector vecMuzzleDir )
 {
 	if (!pRemotePortal)
 		return;
+	if (!pRemotePortal->IsActivedAndLinked())
+		return;
 
-	// Get the position and angles of the remote portal
-	Vector vecRemoteOrigin = pRemotePortal->GetAbsOrigin();
-	QAngle angRemoteMuzzleDir = pRemotePortal->GetAbsAngles();
+	Assert(pRemotePortal->m_hLinkedPortal);
 
-	// Calculate the forward vector from the angles of the remote portal
+	QAngle angPortalDir = pRemotePortal->GetAbsAngles();
+	Vector vecPortalDir;
+	AngleVectors(angPortalDir, &vecPortalDir);
+
+	Vector vecRemoteOrigin;
 	Vector vecRemoteMuzzleDir;
-	AngleVectors(angRemoteMuzzleDir, &vecRemoteMuzzleDir);
+
+	VMatrix matThisToLinked = pRemotePortal->m_hLinkedPortal->MatrixThisToLinked();
+	
+	vecRemoteOrigin = matThisToLinked * tr.endpos;
+	//vecRemoteMuzzleDir = matThisToLinked * vecMuzzleDir;
+	UTIL_Portal_VectorTransform( matThisToLinked, vecMuzzleDir, vecRemoteMuzzleDir );
+
+	Assert( vecRemoteOrigin != tr.endpos );
+
+	//vecRemoteMuzzleDir += vecPortalDir;
+
+	Vector vecPortalOrigin = pRemotePortal->GetAbsOrigin();
+
+	Msg("vecRemoteOrigin: %f %f %f\n", vecRemoteOrigin.x, vecRemoteOrigin.y, vecRemoteOrigin.z);
+	Msg("vecPortalOrigin: %f %f %f\n", vecPortalOrigin.x, vecPortalOrigin.y, vecPortalOrigin.z);
+	//Msg("vecRemoteMuzzleDir: %f %f %f\n", vecRemoteMuzzleDir.x, vecRemoteMuzzleDir.y, vecRemoteMuzzleDir.z);
+
 
 	// Perform the trace from the remote portal's origin
 	trace_t remoteTrace;
@@ -244,7 +301,16 @@ void CPortalLaser::DoTraceFromPortal(CPortal_Base2D* pRemotePortal)
 	remoteTraceFilter.AddClassnameToIgnore("Player");
 	remoteTraceFilter.AddClassnameToIgnore("prop_energy_ball");
 	remoteTraceFilter.AddClassnameToIgnore("prop_portal");
-	UTIL_TraceLine(vecRemoteOrigin, vecRemoteOrigin + vecRemoteMuzzleDir * LASER_RANGE, MASK_SHOT, &remoteTraceFilter, &remoteTrace);
+	
+	Ray_t ray;
+	ray.Init( vecRemoteOrigin, vecRemoteOrigin + vecRemoteMuzzleDir * LASER_RANGE );
+
+	enginetrace->TraceRay( ray, MASK_SHOT, &remoteTraceFilter, &remoteTrace );
+	
+	//Msg("remoteTrace.endpos: %f %f %f\n", remoteTrace.endpos.x, remoteTrace.endpos.y, remoteTrace.endpos.z);
+
+	//UTIL_TraceLine( vecRemoteOrigin, vecRemoteOrigin + vecRemoteMuzzleDir * LASER_RANGE, MASK_SHOT, &remoteTraceFilter, &remoteTrace );
+
 	NDebugOverlay::Line(vecRemoteOrigin, remoteTrace.endpos, 132, 0, 255, true, 10.0f);
 
 	// Check if the trace hits a laser catcher
@@ -298,6 +364,9 @@ void CPortalLaser::DoTraceFromPortal(CPortal_Base2D* pRemotePortal)
 		m_flLastDamageTime = gpGlobals->curtime;
 	}
 	*/
+
+	DamageAllCatchersInRay( ray );
+
 }
 
 

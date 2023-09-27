@@ -20,13 +20,15 @@ public:
 	virtual void LaserOff(void);
 	virtual void LaserOn(void);
 	virtual void UpdateLaser(void);
-	virtual void DoTraceFromPortal(CPortal_Base2D* pRemotePortal);
+	virtual void DoTraceFromPortal( CPortal_Base2D* pRemotePortal, trace_t &tr, Vector vecMuzzleDir );
 	virtual float LaserEndPointSize(void);
 	void NotifyCubeLaserContact(CBaseEntity* pCube);
 	// Input functions
 	void InputTurnOn(inputdata_t& inputData);
 	void InputTurnOff(inputdata_t& inputData);
 	void InputToggle(inputdata_t& inputData);
+
+	void DamageAllCatchersInRay( Ray_t &ray );
 
 	bool IsLaserOn() const { return m_bLaserOn; }
 
