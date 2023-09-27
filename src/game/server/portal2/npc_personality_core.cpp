@@ -3,7 +3,7 @@
 #include "ai_basenpc.h"
 #include "ai_playerally.h"
 #include "props.h"
-#include <sceneentity.h>
+#include "sceneentity.h"
 #include "inforemarkable.h"
 #include "choreoevent.h"
 #include "choreoscene.h"
@@ -22,6 +22,7 @@ class CNPC_PersonalityCore : public CAI_PlayerAlly, public CDefaultPlayerPickupV
 public:
 	DECLARE_CLASS(CNPC_PersonalityCore, CAI_PlayerAlly);
 	DECLARE_DATADESC();
+	DECLARE_SERVERCLASS();
 
 	CNPC_PersonalityCore()
 	{
@@ -32,6 +33,8 @@ public:
 
 	void InputEnableMotion(inputdata_t& inputdata);
 	void InputDisableMotion(inputdata_t& inputdata);
+	void InputEnableFlashlight(inputdata_t& inputdata);
+	void InputDisableFlashlight(inputdata_t& inputdata);
 	void InputEnablePickup(inputdata_t& inputdata);
 	void InputDisablePickup(inputdata_t& inputdata);
 	void InputForcePickup(inputdata_t& inputdata);
@@ -80,6 +83,8 @@ protected:
 	COutputEvent m_OnPlayerDrop;
 	float m_flAnimResetTime;
 	int m_iIdleOverrideSequence;
+	CNetworkVar(bool, m_bFlashlightEnabled);
+	CHandle<CBaseEntity> m_hProjectedTexture;
 private:
 	CAI_Expresser* m_pExpresser;
 };
@@ -89,6 +94,8 @@ LINK_ENTITY_TO_CLASS(npc_personality_core, CNPC_PersonalityCore);
 BEGIN_DATADESC(CNPC_PersonalityCore)
 DEFINE_INPUTFUNC(FIELD_VOID, "EnableMotion", InputEnableMotion),
 DEFINE_INPUTFUNC(FIELD_VOID, "DisableMotion", InputDisableMotion),
+DEFINE_INPUTFUNC(FIELD_VOID, "EnableFlashlight", InputEnableFlashlight),
+DEFINE_INPUTFUNC(FIELD_VOID, "DisableFlashlight", InputDisableFlashlight),
 DEFINE_INPUTFUNC(FIELD_VOID, "EnablePickup", InputEnablePickup),
 DEFINE_INPUTFUNC(FIELD_VOID, "DisablePickup", InputDisablePickup),
 DEFINE_INPUTFUNC(FIELD_VOID, "ForcePickup", InputForcePickup),
@@ -102,8 +109,12 @@ DEFINE_USEFUNC(Use),
 DEFINE_KEYFIELD(m_bUseAltModel, FIELD_BOOLEAN, "altmodel"),
 DEFINE_OUTPUT(m_OnPlayerPickup, "OnPlayerPickup"),
 DEFINE_OUTPUT(m_OnPlayerDrop, "OnPlayerDrop"),
-
+DEFINE_FIELD(m_bFlashlightEnabled, FIELD_BOOLEAN),
 END_DATADESC()
+
+IMPLEMENT_SERVERCLASS_ST(CNPC_PersonalityCore, DT_NPC_Personality_Core)
+SendPropBool( SENDINFO (m_bFlashlightEnabled) ),
+END_SEND_TABLE()
 
 void CNPC_PersonalityCore::Precache(void)
 {
@@ -121,7 +132,7 @@ void CNPC_PersonalityCore::Precache(void)
 void CNPC_PersonalityCore::Spawn(void)
 {
 	Vector vecAttachOrigin;
-	Vector vecAttachAngles;
+	QAngle vecAttachAngles;
 
 	Precache();
 	CapabilitiesClear();
@@ -159,15 +170,18 @@ void CNPC_PersonalityCore::Spawn(void)
 	if ( !m_bUseAltModel )
 	{
 		int iAttachmentIndex = LookupAttachment("eyes");
-		GetAttachment(iAttachmentIndex, vecAttachOrigin, &vecAttachAngles);
+		GetAttachment(iAttachmentIndex, vecAttachOrigin, vecAttachAngles);
 
-		CBaseEntity* pProjectedTexture = CreateEntityByName("env_projectedtexture");
-		pProjectedTexture->KeyValue("lightfov", "85.0f");
-		pProjectedTexture->KeyValue("enableshadows", "1");
-		pProjectedTexture->KeyValue("texturename", "effects/flashlight001_improved");
-	
+		m_hProjectedTexture = CreateEntityByName("env_projectedtexture");
+		m_hProjectedTexture->KeyValue("lightfov", "85.0f");
+		m_hProjectedTexture->KeyValue("enableshadows", "1");
+		m_hProjectedTexture->KeyValue("texturename", "effects/flashlight001_improved");
+		DispatchSpawn(m_hProjectedTexture);
+		m_hProjectedTexture->SetAbsAngles(vecAttachAngles);
+		m_hProjectedTexture->SetAbsOrigin(vecAttachOrigin);
+
 		variant_t emptyVariant;
-		AcceptInput("TurnOff", NULL, NULL, emptyVariant, 0);
+		m_hProjectedTexture->AcceptInput("TurnOff", NULL, NULL, emptyVariant, 0);
 	}
 	if (m_pParent != NULL)
 		AddSolidFlags(FSOLID_NOT_SOLID);
@@ -192,6 +206,20 @@ void CNPC_PersonalityCore::InputDisableMotion(inputdata_t& inputdata)
 	if (pPhysicsObject != NULL) {
 		pPhysicsObject->EnableMotion(false);
 	}
+}
+
+void CNPC_PersonalityCore::InputEnableFlashlight(inputdata_t& inputdata)
+{
+	variant_t emptyVariant;
+	m_hProjectedTexture->AcceptInput("TurnOn", NULL, NULL, emptyVariant, 0);
+	m_bFlashlightEnabled = true;
+}
+
+void CNPC_PersonalityCore::InputDisableFlashlight(inputdata_t& inputdata)
+{
+	variant_t emptyVariant;
+	m_hProjectedTexture->AcceptInput("TurnOff", NULL, NULL, emptyVariant, 0);
+	m_bFlashlightEnabled = false;
 }
 
 void CNPC_PersonalityCore::InputEnablePickup(inputdata_t& inputdata)
@@ -389,3 +417,4 @@ bool CNPC_PersonalityCore::TestRemarkingUpon(CInfoRemarkable* pRemarkable)
 {
 	return IsLineOfSightClear( pRemarkable, IGNORE_ACTORS );
 }
+
