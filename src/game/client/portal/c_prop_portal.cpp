@@ -185,15 +185,7 @@ C_Prop_Portal::C_Prop_Portal( void )
 	m_fOpenAmount( 0.0f )
 {
 	
-	ms_DefaultPortalHalfHeight = DEFAULT_PORTAL_HALF_HEIGHT; // only protecting one to reduce the cost of first-portal check
-
-<<<<<<< HEAD
-=======
-		//CEG_GCV_PRE();
-		ms_DefaultPortalHalfHeight = DEFAULT_PORTAL_HALF_HEIGHT;// CEG_GET_CONSTANT_VALUE(DefaultPortalHalfHeight); // only protecting one to reduce the cost of first-portal check
-		//CEG_GCV_POST();
-	}
->>>>>>> parent of ebba631 (Large amounts of base code tweaks and added info_placement_helper server & client)
+	ms_DefaultPortalHalfHeight = DEFAULT_PORTAL_HALF_HEIGHT;// CEG_GET_CONSTANT_VALUE(DefaultPortalHalfHeight); // only protecting one to reduce the cost of first-portal check
 	m_bIsPropPortal = true;	// Member of CPortalRenderable
 	TransformedLighting.m_LightShadowHandle = CLIENTSHADOW_INVALID_HANDLE;
 	CProp_Portal_Shared::AllPortals.AddToTail( this );

@@ -164,7 +164,6 @@ void CProp_Portal::DelayedPlacementThink( void )
 }
 
 // default to sane-looking but incorrect portal height for CEG - Updated in constructor
-bool CProp_Portal::ms_DefaultPortalSizeInitialized = false; // for CEG protection
 float CProp_Portal::ms_DefaultPortalHalfWidth = DEFAULT_PORTAL_HALF_WIDTH;
 float CProp_Portal::ms_DefaultPortalHalfHeight = 0.25 * DEFAULT_PORTAL_HALF_HEIGHT;
 
