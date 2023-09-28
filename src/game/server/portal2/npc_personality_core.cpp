@@ -211,14 +211,16 @@ void CNPC_PersonalityCore::InputDisableMotion(inputdata_t& inputdata)
 void CNPC_PersonalityCore::InputEnableFlashlight(inputdata_t& inputdata)
 {
 	variant_t emptyVariant;
-	m_hProjectedTexture->AcceptInput("TurnOn", NULL, NULL, emptyVariant, 0);
+	if (m_hProjectedTexture)
+		m_hProjectedTexture->AcceptInput("TurnOn", NULL, NULL, emptyVariant, 0);
 	m_bFlashlightEnabled = true;
 }
 
 void CNPC_PersonalityCore::InputDisableFlashlight(inputdata_t& inputdata)
 {
 	variant_t emptyVariant;
-	m_hProjectedTexture->AcceptInput("TurnOff", NULL, NULL, emptyVariant, 0);
+	if (m_hProjectedTexture)
+		m_hProjectedTexture->AcceptInput("TurnOff", NULL, NULL, emptyVariant, 0);
 	m_bFlashlightEnabled = false;
 }
 
