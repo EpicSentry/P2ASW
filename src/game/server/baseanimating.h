@@ -15,6 +15,7 @@
 #include "studio.h"
 #include "datacache/idatacache.h"
 #include "tier0/threadtools.h"
+#include "shareddefs.h"
 
 struct animevent_t;
 struct matrix3x4_t;
@@ -58,8 +59,6 @@ public:
 
 	CStudioHdr *GetModelPtr( void );
 	void InvalidateMdlCache();
-
-	virtual CStudioHdr *OnNewModel();
 
 	virtual CBaseAnimating*	GetBaseAnimating() { return this; }
 
@@ -141,7 +140,7 @@ public:
 	virtual void GetBoneTransform( int iBone, matrix3x4_t &pBoneToWorld );
 	virtual void SetupBones( matrix3x4a_t *pBoneToWorld, int boneMask );
 	virtual void CalculateIKLocks( float currentTime );
-	virtual void Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity, bool bUseSlowHighAccuracyContacts = true );
+	virtual void Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity, bool bUseSlowHighAccuracyContacts = false );
 
 	bool HasAnimEvent( int nSequence, int nEvent );
 	virtual	void DispatchAnimEvents ( CBaseAnimating *eventHandler ); // Handle events that have happend since last time called up until X seconds into the future
@@ -276,13 +275,14 @@ public:
 	virtual bool TestHitboxes( const Ray_t &ray, unsigned int fContentsMask, trace_t& tr );
 	class CBoneCache *GetBoneCache( void );
 	virtual void InvalidateBoneCache( void );
+	void InvalidateBoneCacheIfOlderThan( float deltaTime );
 	virtual int DrawDebugTextOverlays( void );
 	virtual bool IsViewModel() const { return false; }
 	
 	// See note in code re: bandwidth usage!!!
 	void				DrawServerHitboxes( float duration = 0.0f, bool monocolor = false );
 	void				DrawRawSkeleton( matrix3x4_t boneToWorld[], int boneMask, bool noDepthTest = true, float duration = 0.0f, bool monocolor = false );
-
+	
 	void				SetModelScale( float scale, float change_duration = 0.0f, ModelScaleType_t scaleType = HIERARCHICAL_MODEL_SCALE );
 	float				GetModelScale() const;
 	float				GetModelHierarchyScale();	// Get the overall scale of the entire hierarchy (model scale can be local, per-bone)
@@ -374,7 +374,7 @@ private:
 
 public:
 	bool CanSkipAnimation( void );
-
+	
 #ifdef PORTAL2
 public:
 	void SetObjectScaleLevel( int nScaleLevel ) { m_nObjectScaleLevel = nScaleLevel; }
@@ -398,7 +398,7 @@ public:
 
 	// was pev->framerate
 	CNetworkVar( float, m_flPlaybackRate );
-
+	
 private:
 	CNetworkVar( ModelScaleType_t, m_ScaleType );
 
@@ -425,7 +425,6 @@ public:
 protected:
 	bool				m_bSequenceFinished;// flag set when StudioAdvanceFrame moves across a frame boundry
 	bool				m_bSequenceLoops;	// true if the sequence loops
-	bool				m_bResetSequenceInfoOnLoad; // true if a ResetSequenceInfo was queued up during dynamic load
 	float				m_flDissolveStartTime;
 
 	// was pev->frame
@@ -440,8 +439,6 @@ protected:
 
 	CNetworkVar( int, m_nNewSequenceParity );
 	CNetworkVar( int, m_nResetEventsParity );
-
-	CNetworkVar( bool, m_bSuppressAnimSounds );
 
 	// Incremented each time the entity is told to do a muzzle flash.
 	// The client picks up the change and draws the flash.
@@ -464,7 +461,7 @@ protected:
 
 public:
 	COutputEvent m_OnIgnite;
-
+	
 #if defined ( PORTAL2 )
 	COutputEvent m_OnFizzled;		// Fizzled by a fizzler
 #endif // PORTAL2 
@@ -535,8 +532,6 @@ inline float CBaseAnimating::GetPlaybackRate() const
 
 inline void CBaseAnimating::SetPlaybackRate( float rate )
 {
-	// if we start going in a new direction, the current animation isn't finished anymore
-	m_bSequenceFinished = false;
 	m_flPlaybackRate = rate;
 }
 
@@ -582,11 +577,9 @@ EXTERN_SEND_TABLE(DT_BaseAnimating);
 #define ANIMATION_SKIN_BITS				10	// 1024 body skin selections FIXME: this seems way high
 #define ANIMATION_BODY_BITS				32	// body combinations
 #define ANIMATION_HITBOXSET_BITS		2	// hit box sets 
-#if defined( TF_DLL )
-#define ANIMATION_POSEPARAMETER_BITS	8	// pose parameter resolution
-#else
+
 #define ANIMATION_POSEPARAMETER_BITS	11	// pose parameter resolution
-#endif
+
 #define ANIMATION_PLAYBACKRATE_BITS		8	// default playback rate, only used on leading edge detect sequence changes
 
 #endif // BASEANIMATING_H

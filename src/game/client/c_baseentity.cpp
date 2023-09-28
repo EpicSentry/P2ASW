@@ -1,4 +1,4 @@
-//====== Copyright 1996-2005, Valve Corporation, All rights reserved. =======//
+//===== Copyright 1996-2005, Valve Corporation, All rights reserved. ======//
 //
 // Purpose: 
 //
@@ -44,10 +44,6 @@
 #include "gamestringpool.h"
 #include "tier1/callqueue.h"
 
-#ifdef DOTA_DLL
-#include "dota_in_main.h"
-#endif
-
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -60,6 +56,9 @@
 
 static bool g_bWasSkipping = (bool)-1;
 static bool g_bWasThreaded =(bool)-1;
+static int  g_nThreadModeTicks = 0;
+static ConVar cl_interp_threadmodeticks( "cl_interp_threadmodeticks", "0", 0, "Additional interpolation ticks to use when interpolating with threaded engine mode set." );
+
 
 void cc_cl_interp_all_changed( IConVar *pConVar, const char *pOldString, float flOldValue )
 {
@@ -89,7 +88,6 @@ C_BasePlayer *C_BaseEntity::m_pPredictionPlayer = NULL;
 bool C_BaseEntity::s_bAbsQueriesValid = true;
 bool C_BaseEntity::s_bAbsRecomputationEnabled = true;
 bool C_BaseEntity::s_bInterpolate = true;
-int C_BaseEntity::s_nIncomingPacketCommandsAcknowledged = -1;
 
 bool C_BaseEntity::sm_bDisableTouchFuncs = false;	// Disables PhysicsTouch and PhysicsStartTouch function calls
 
@@ -329,13 +327,7 @@ void RecvProxy_SimulationTime( const CRecvProxyData *pData, void *pStruct, void 
 	while (t > gpGlobals->tickcount + 127)
 		t -= 256;
 	
-	float simtime = ( t * TICK_INTERVAL );
-
-	if ( simtime != pEntity->m_flSimulationTime )
-	{
-		pEntity->OnSimulationTimeChanging( pEntity->m_flSimulationTime, simtime );
-		pEntity->m_flSimulationTime = simtime;
-	}
+	pEntity->m_flSimulationTime = ( t * TICK_INTERVAL );
 }
 
 void C_BaseEntity::RecvProxy_CellBits( const CRecvProxyData *pData, void *pStruct, void *pOut )
@@ -545,9 +537,8 @@ END_RECV_TABLE()
 BEGIN_RECV_TABLE_NOBASE(C_BaseEntity, DT_BaseEntity)
 	RecvPropDataTable( "AnimTimeMustBeFirst", 0, 0, &REFERENCE_RECV_TABLE(DT_AnimTimeMustBeFirst) ),
 	RecvPropInt( RECVINFO(m_flSimulationTime), 0, RecvProxy_SimulationTime ),
-#if defined(ENABLE_CREATE_TIME)
 	RecvPropFloat( RECVINFO( m_flCreateTime ) ),
-#endif
+
 	RecvPropInt( RECVINFO( m_cellbits ), 0, C_BaseEntity::RecvProxy_CellBits ),
 //	RecvPropArray( RecvPropInt( RECVINFO(m_cellXY[0]) ), m_cellXY ),
 	RecvPropInt( RECVINFO( m_cellX ), 0, C_BaseEntity::RecvProxy_CellX ),
@@ -575,7 +566,7 @@ BEGIN_RECV_TABLE_NOBASE(C_BaseEntity, DT_BaseEntity)
 	RecvPropInt( RECVINFO( m_iParentAttachment ) ),
 
 	RecvPropString( RECVINFO( m_iName ) ),
-
+	
 #if defined ( PORTAL2 )
 	RecvPropString( RECVINFO( m_iSignifierName ) ),
 #endif
@@ -604,7 +595,7 @@ BEGIN_RECV_TABLE_NOBASE(C_BaseEntity, DT_BaseEntity)
 	RecvPropFloat( RECVINFO( m_flFadeScale ) ), 
 
 #if 1
-// #ifndef _GAMECONSOLE -- X360 client and Win32 XLSP dedicated server need equivalent SendTables
+// #ifndef _X360 -- X360 client and Win32 XLSP dedicated server need equivalent SendTables
 	RecvPropInt( RECVINFO( m_nMinCPULevel ) ), 
 	RecvPropInt( RECVINFO( m_nMaxCPULevel ) ), 
 	RecvPropInt( RECVINFO( m_nMinGPULevel ) ), 
@@ -655,7 +646,7 @@ BEGIN_PREDICTION_DATA_NO_BASE( C_BaseEntity )
 	DEFINE_FIELD( m_vecOrigin, FIELD_VECTOR ),
 	DEFINE_FIELD( m_angRotation, FIELD_VECTOR ),
 
-	DEFINE_FIELD( m_hGroundEntity, FIELD_EHANDLE ),
+//	DEFINE_FIELD( m_hGroundEntity, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_nWaterLevel, FIELD_CHARACTER ),
 	DEFINE_FIELD( m_nWaterType, FIELD_CHARACTER ),
 	DEFINE_FIELD( m_vecAngVelocity, FIELD_VECTOR ),
@@ -679,8 +670,6 @@ BEGIN_PREDICTION_DATA_NO_BASE( C_BaseEntity )
 	DEFINE_FIELD( m_flGravity, FIELD_FLOAT ),
 //	DEFINE_FIELD( m_ModelInstance, FIELD_SHORT ),
 	DEFINE_FIELD( m_flProxyRandomValue, FIELD_FLOAT ),
-
-	DEFINE_FIELD( m_bEverHadPredictionErrorsForThisCommand, FIELD_BOOLEAN ),
 
 #if defined( USE_PREDICTABLEID )
 	DEFINE_PRED_FIELD( m_hPlayerSimulationOwner, FIELD_EHANDLE, FTYPEDESC_INSENDTABLE ),	
@@ -721,12 +710,12 @@ void SpewInterpolatedVar( CInterpolatedVar< Vector > *pVar )
 	float prevtime = 0.0f;
 	while ( 1 )
 	{
-		float changetime, vel;
+		float changetime;
 		Vector *pVal = pVar->GetHistoryValue( i, changetime );
 		if ( !pVal )
 			break;
 
-		vel = apparent.AddSample( changetime, *pVal );
+		float vel = apparent.AddSample( changetime, *pVal );
 		Msg( "%6.6f: (%.2f %.2f %.2f), vel: %.2f [dt %.1f]\n", changetime, VectorExpand( *pVal ), vel, prevtime == 0.0f ? 0.0f : 1000.0f * ( changetime - prevtime ) );
 		i = pVar->GetNext( i );
 		prevtime = changetime;
@@ -747,7 +736,7 @@ void SpewInterpolatedVar( CInterpolatedVar< Vector > *pVar, float flNow, float f
 
 	while ( 1 )
 	{
-		float changetime, vel;
+		float changetime;
 		Vector *pVal = pVar->GetHistoryValue( i, changetime );
 		if ( !pVal )
 			break;
@@ -793,7 +782,7 @@ void SpewInterpolatedVar( CInterpolatedVar< Vector > *pVar, float flNow, float f
 			}
 		}
 
-		vel = apparent.AddSample( changetime, *pVal );
+		float vel = apparent.AddSample( changetime, *pVal );
 		if ( bSpewAllEntries )
 		{
 			Msg( "    %6.6f: (%.2f %.2f %.2f), vel: %.2f [dt %.1f]\n", changetime, VectorExpand( *pVal ), vel, newtime == 999999.0f ? 0.0f : 1000.0f * ( newtime - changetime ) );
@@ -811,12 +800,12 @@ void SpewInterpolatedVar( CInterpolatedVar< float > *pVar )
 	CApparentVelocity<float> apparent;
 	while ( 1 )
 	{
-		float changetime, vel;
+		float changetime;
 		float *pVal = pVar->GetHistoryValue( i, changetime );
 		if ( !pVal )
 			break;
 
-		vel = apparent.AddSample( changetime, *pVal );
+		float vel = apparent.AddSample( changetime, *pVal );
 		Msg( "%6.6f: (%.2f), vel: %.2f\n", changetime, *pVal, vel );
 		i = pVar->GetNext( i );
 	}
@@ -951,7 +940,7 @@ void C_BaseEntity::Interp_SetupMappings( VarMapping_t *map )
 	}
 }
 
-void C_BaseEntity::Interp_RestoreToLastNetworked( VarMapping_t *map, int flags )
+void C_BaseEntity::Interp_RestoreToLastNetworked( VarMapping_t *map )
 {
 	PREDICTION_TRACKVALUECHANGESCOPE_ENTITY( this, "restoretolastnetworked" );
 
@@ -963,11 +952,6 @@ void C_BaseEntity::Interp_RestoreToLastNetworked( VarMapping_t *map, int flags )
 	{
 		VarMapEntry_t *e = &map->m_Entries[ i ];
 		IInterpolatedVar *watcher = e->watcher;
-
-		int type = watcher->GetType();
-		if ( flags && !(type & flags) )
-			continue;
-
 		watcher->RestoreToLastNetworked();
 	}
 
@@ -1062,7 +1046,6 @@ C_BaseEntity::C_BaseEntity() :
 	m_bSimulatedEveryTick = false;
 	m_bAnimatedEveryTick = false;
 	m_pPhysicsObject = NULL;
-	m_bDisableSimulationFix = false;
 
 #ifdef _DEBUG
 	m_vecAbsOrigin = vec3_origin;
@@ -1111,9 +1094,8 @@ C_BaseEntity::C_BaseEntity() :
 	ParticleProp()->Init( this );
 
 	m_spawnflags = 0;
-#if defined(ENABLE_CREATE_TIME)
+
 	m_flCreateTime = 0.0f;
-#endif
 }
 
 
@@ -1152,7 +1134,7 @@ C_BaseEntity::~C_BaseEntity()
 void C_BaseEntity::Clear( void )
 {
 	m_bDormant = true;
-	m_bCanUseBrushModelFastPath = false;
+
 	m_nCreationTick = -1;
 	m_RefEHandle.Term();
 	m_ModelInstance = MODEL_INSTANCE_INVALID;
@@ -1197,10 +1179,8 @@ void C_BaseEntity::Clear( void )
 	m_nLastThinkTick = gpGlobals->tickcount;
 
 	// TrackIR
-#if defined(ENABLE_TRACKIR_SUPPORT)
 	m_vecEyeOffset.Init();
 	m_EyeAngleOffset.Init();
-#endif
 	// TrackIR
 
 	// Remove prediction context if it exists
@@ -1569,83 +1549,6 @@ bool C_BaseEntity::VPhysicsIsFlesh( void )
 	return false;
 }
 
-void C_BaseEntity::VPhysicsCompensateForPredictionErrors( const byte *predicted_state_data )
-{
-	Assert( GetPredictable() );
-
-#if defined( DBGFLAG_ASSERT )
-	const byte *networked_state_data = (const byte *)GetOriginalNetworkDataObject();
-#endif
-
-#if 0
-	{
-		int iSavedCommand;
-		int iNetworkedCommand;
-		{
-			const typedescription_t *tdSavedCommand = CPredictionCopy::FindFlatFieldByName( "m_SavedCommandNum", GetPredDescMap() );
-			Assert( tdSavedCommand );
-			Q_memcpy( &iSavedCommand, predicted_state_data + tdSavedCommand->flatOffset[ TD_OFFSET_PACKED ], sizeof( int ) );
-			Q_memcpy( &iNetworkedCommand, networked_state_data + tdSavedCommand->flatOffset[ TD_OFFSET_PACKED ], sizeof( int ) );
-		}
-		Assert( iNetworkedCommand == iSavedCommand );
-	}
-#endif
-
-	IPhysicsObject *pPhysicsObject = VPhysicsGetObject();
-	IPredictedPhysicsObject *pPredictedObject = pPhysicsObject ? pPhysicsObject->GetPredictedInterface() : NULL;
-	if( pPredictedObject )
-	{
-		Vector vPredictedOrigin;
-		
-		{
-			const typedescription_t *tdOrigin = CPredictionCopy::FindFlatFieldByName( "m_vecNetworkOrigin", GetPredDescMap() );
-			Assert( tdOrigin );
-			Q_memcpy( &vPredictedOrigin, predicted_state_data + tdOrigin->flatOffset[ TD_OFFSET_PACKED ], sizeof( Vector ) );
-
-#if defined( DBGFLAG_ASSERT )
-			Vector vNetworkedOrigin;
-			Q_memcpy( &vNetworkedOrigin, networked_state_data + tdOrigin->flatOffset[ TD_OFFSET_PACKED ], sizeof( Vector ) );
-			Assert( vNetworkedOrigin == m_vecNetworkOrigin );
-#endif
-		}
-
-		Vector vOriginDelta = m_vecNetworkOrigin - vPredictedOrigin;
-
-		
-
-		Vector vPredictedVelocity;
-		{
-			const typedescription_t *tdVelocity = CPredictionCopy::FindFlatFieldByName( "m_vecAbsVelocity", GetPredDescMap() );			
-			Assert( tdVelocity );
-			Q_memcpy( &vPredictedVelocity, predicted_state_data + tdVelocity->flatOffset[ TD_OFFSET_PACKED ], sizeof( Vector ) );
-		}
-
-		Vector vVelocityDelta = m_vecAbsVelocity - vPredictedVelocity;
-
-#if defined( DEBUG_MOTION_CONTROLLERS )
-		extern void DebugVelocity( const char *szString, const Vector &vStart, const Vector &vEnd, uint8 iRed, uint8 iGreen, uint8 iBlue );
-		extern void DebugBox( const char *szString, const Vector &vPos, const Vector &vSize, uint8 iRed, uint8 iGreen, uint8 iBlue, uint8 iAlpha );
-		if( (GetFlags() & FL_ONGROUND) == 0 )
-		{
-			DebugVelocity( "Compensate", vPredictedOrigin, m_vecNetworkOrigin, 0, 0, 255 );
-			DebugBox( "Compensate", m_vecNetworkOrigin, Vector( 0.25f, 0.25f, 0.25f ), 0, 255, 0, 100 );
-		}
-#endif
-
-#if 0
-		const float kMaxVelocityDelta = 50.0f;
-		float fVelocityLengthSqr = vVelocityDelta.LengthSqr();
-		if( vVelocityDelta.LengthSqr() > (kMaxVelocityDelta * kMaxVelocityDelta) )
-		{
-			vVelocityDelta *= (kMaxVelocityDelta / sqrtf(fVelocityLengthSqr));
-		}
-#endif
-		
-		pPredictedObject->SetErrorDelta_Position( vOriginDelta );
-		pPredictedObject->SetErrorDelta_Velocity( vVelocityDelta );
-	}	
-}
-
 //-----------------------------------------------------------------------------
 // Returns the health fraction
 //-----------------------------------------------------------------------------
@@ -1794,57 +1697,18 @@ bool C_BaseEntity::ShouldDrawForSplitScreenUser( int nSlot )
 	return m_VisibilityBits.IsBitSet( nSlot );
 }
 
-
-//-----------------------------------------------------------------------------
-// Hooks into the fast path render system
-//-----------------------------------------------------------------------------
-IClientModelRenderable*	C_BaseEntity::GetClientModelRenderable()
-{
-	if ( !m_bReadyToDraw || !m_bCanUseBrushModelFastPath )
-		return NULL;
-
-#ifdef PORTAL
-	// Cannot participate if it has a render clip plane
-	if ( GetRenderClipPlane() != NULL )
-		return NULL;
-#endif
-
-	return this; 
-}
-
-
-//----------------------------------------------------------------------------
-// Hooks into the fast path render system
-//----------------------------------------------------------------------------
-bool C_BaseEntity::GetRenderData( void *pData, ModelDataCategory_t nCategory )
-{
-	switch ( nCategory )
-	{
-	case MODEL_DATA_STENCIL:
-		return false; //ComputeStencilState( (ShaderStencilState_t*)pData );
-
-	default:
-		return false;
-	}
-}
-
 //-----------------------------------------------------------------------------
 // Purpose: Returns whether object should render.
 //-----------------------------------------------------------------------------
 bool C_BaseEntity::ShouldDraw()
 {
-// Only test this in tf2
-#if defined( INVASION_CLIENT_DLL )
-	// Let the client mode (like commander mode) reject drawing entities.
-	if (GetClientMode() && !GetClientMode()->ShouldDrawEntity(this) )
-		return false;
-#endif
+
 
 	// Some rendermodes prevent rendering
 	if ( m_nRenderMode == kRenderNone )
 		return false;
 
-	if ( !IsGameConsole() )
+	if ( !IsX360() )
 	{
 		CPULevel_t nCPULevel = GetCPULevel();
 		bool bNoDraw = ( m_nMinCPULevel && m_nMinCPULevel-1 > nCPULevel );
@@ -1920,57 +1784,6 @@ ShadowType_t C_BaseEntity::ShadowCastType()
 	return (modelType == mod_studio) ? SHADOWS_RENDER_TO_TEXTURE : SHADOWS_NONE;
 }
 
-//-----------------------------------------------------------------------------
-// Fast reflections
-//-----------------------------------------------------------------------------
-bool C_BaseEntity::ComputeIsRenderingInFastReflections() const
-{
-	if ( IsEffectActive( EF_MARKED_FOR_FAST_REFLECTION ) )
-		return true;
-
-	C_BaseEntity *pParent = GetMoveParent();
-	if ( pParent )
-		return pParent->ComputeIsRenderingInFastReflections();
-	return false;
-}
-
-bool C_BaseEntity::IsRenderingInFastReflections() const
-{
-	Assert( ( m_hRender == INVALID_CLIENT_RENDER_HANDLE ) || 
-		( ComputeIsRenderingInFastReflections() == g_pClientLeafSystem->IsRenderingInFastReflections( m_hRender ) ) );
-	return ComputeIsRenderingInFastReflections();
-}
-
-void C_BaseEntity::OnFastReflectionRenderingChanged()
-{
-	bool bIsReflecting = ComputeIsRenderingInFastReflections();
-
-	bool bChanged = ( m_hRender == INVALID_CLIENT_RENDER_HANDLE ) ||
-		( bIsReflecting != g_pClientLeafSystem->IsRenderingInFastReflections( m_hRender ) );
-	if ( bChanged )
-	{
-		g_pClientLeafSystem->RenderInFastReflections( m_hRender, bIsReflecting );
-
-		// Children must also update
-		for ( C_BaseEntity *pChild = FirstMoveChild(); pChild; pChild = pChild->NextMovePeer() )
-		{
-			pChild->OnFastReflectionRenderingChanged();
-		}
-	}
-}
-
-void C_BaseEntity::OnDisableShadowDepthRenderingChanged()
-{
-	bool bIsShadowDepthRenderingDisabled = IsEffectActive( EF_NOSHADOWDEPTH );
-	g_pClientLeafSystem->DisableShadowDepthRendering( m_hRender, bIsShadowDepthRenderingDisabled );
-}
-
-void C_BaseEntity::OnShadowDepthRenderingCacheableStateChanged()
-{
-	bool bIsShadowDepthRenderingCacheDisabled = IsEffectActive( EF_SHADOWDEPTH_NOCACHE );
-	g_pClientLeafSystem->DisableShadowDepthCaching( m_hRender, bIsShadowDepthRenderingCacheDisabled );
-}
-
 
 //-----------------------------------------------------------------------------
 // Per-entity shadow cast distance + direction
@@ -2032,9 +1845,6 @@ bool C_BaseEntity::ShouldReceiveProjectedTextures( int flags )
 
 	if ( IsEffectActive( EF_NODRAW ) )
 		 return false;
-
- 	if ( IsEffectActive( EF_NOFLASHLIGHT ) )
- 		 return false;
 
 	if( ( flags & ( SHADOW_FLAGS_FLASHLIGHT | SHADOW_FLAGS_SIMPLE_PROJECTION ) ) != 0 )
 	{
@@ -2320,15 +2130,6 @@ void C_BaseEntity::SetMoveCollide( MoveCollide_t val )
 	m_MoveCollide = val;
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Get rendermode
-// Output : int - the render mode
-//-----------------------------------------------------------------------------
-bool C_BaseEntity::IsTransparent( void )
-{
-	bool modelIsTransparent = modelinfo->IsTranslucent(model);
-	return modelIsTransparent || (m_nRenderMode != kRenderNormal);
-}
 
 //-----------------------------------------------------------------------------
 // Default implementation of compute translucency type
@@ -2367,15 +2168,7 @@ void C_BaseEntity::OnSplitscreenRenderingChanged()
 
 int C_BaseEntity::GetRenderFlags( void )
 {
-	const model_t *pModel = GetModel();
-	if ( pModel && render->DoesBrushModelNeedPowerOf2Framebuffer( pModel ) )
-	{
-		return ERENDERFLAGS_NEEDS_POWER_OF_TWO_FB;
-	}
-	else
-	{
-		return 0;
-	}
+	return 0;
 }
 
 
@@ -2489,7 +2282,7 @@ float *C_BaseEntity::GetRenderClipPlane( void )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-int C_BaseEntity::DrawBrushModel( bool bDrawingTranslucency, bool bShadowDepth, bool bTwoPass )
+int C_BaseEntity::DrawBrushModel( bool bSort, bool bShadowDepth )
 {
 	VPROF_BUDGET( "C_BaseEntity::DrawBrushModel", VPROF_BUDGETGROUP_BRUSHMODEL_RENDERING );
 	// Identity brushes are drawn in view->DrawWorld as an optimization
@@ -2497,16 +2290,11 @@ int C_BaseEntity::DrawBrushModel( bool bDrawingTranslucency, bool bShadowDepth, 
 
 	if ( bShadowDepth )
 	{
-		render->DrawBrushModelShadowDepth( this, (model_t *)model, GetAbsOrigin(), GetAbsAngles(), bDrawingTranslucency );
+		render->DrawBrushModelShadowDepth( this, (model_t *)model, GetAbsOrigin(), GetAbsAngles(), bSort );
 	}
 	else
 	{
-		DrawBrushModelMode_t mode = DBM_DRAW_ALL;
-		if ( bTwoPass )
-		{
-			mode = bDrawingTranslucency ? DBM_DRAW_TRANSLUCENT_ONLY : DBM_DRAW_OPAQUE_ONLY;
-		}
-		render->DrawBrushModelEx( this, (model_t *)model, GetAbsOrigin(), GetAbsAngles(), mode );
+		render->DrawBrushModel( this, (model_t *)model, GetAbsOrigin(), GetAbsAngles(), bSort );
 	}
 
 	return 1;
@@ -2532,7 +2320,7 @@ int C_BaseEntity::DrawModel( int flags, const RenderableInstance_t &instance )
 	{
 	case mod_brush:
 		render->SetBlend( ( flags & STUDIO_SHADOWDEPTHTEXTURE ) ? 1.0f : (float)instance.m_nAlpha * ( 1.0f / 255.0f ) );
-		drawn = DrawBrushModel( flags & STUDIO_TRANSPARENCY ? true : false, flags & STUDIO_SHADOWDEPTHTEXTURE ? true : false, ( flags & STUDIO_TWOPASS ) ? true : false );
+		drawn = DrawBrushModel( flags & STUDIO_TRANSPARENCY ? true : false, flags & STUDIO_SHADOWDEPTHTEXTURE ? true : false );
 		break;
 	case mod_studio:
 		// All studio models must be derived from C_BaseAnimating.  Issue warning.
@@ -2690,7 +2478,7 @@ void C_BaseEntity::PreDataUpdate( DataUpdateType_t updateType )
 
 	if ( !bnewentity )
 	{
-		Interp_RestoreToLastNetworked( GetVarMapping(), 0 /*both simulation and animation vars*/ );
+		Interp_RestoreToLastNetworked( GetVarMapping() );
 	}
 
 	if ( bnewentity && !IsClientCreated() )
@@ -2759,7 +2547,6 @@ void C_BaseEntity::UnlinkChild( C_BaseEntity *pParent, C_BaseEntity *pChild )
 	pChild->m_pMovePrevPeer = NULL;
 	pChild->m_pMoveParent = NULL;
 	pChild->RemoveFromAimEntsList();
-	pChild->OnFastReflectionRenderingChanged();
 
 	Interp_HierarchyUpdateInterpolationAmounts();
 }
@@ -2789,7 +2576,6 @@ void C_BaseEntity::LinkChild( C_BaseEntity *pParent, C_BaseEntity *pChild )
 	pParent->m_pMoveChild = pChild;
 	pChild->m_pMoveParent = pParent;
 	pChild->AddToAimEntsList();
-	pChild->OnFastReflectionRenderingChanged();
 
 	Interp_HierarchyUpdateInterpolationAmounts();
 }
@@ -3122,6 +2908,8 @@ void C_BaseEntity::PostDataUpdate( DataUpdateType_t updateType )
 		m_nCreationTick = gpGlobals->tickcount;
 	}
 
+	CheckInitPredictable( "PostDataUpdate" );
+
 #if !defined( NO_ENTITY_PREDICTION )
 	// It's possible that a new entity will need to be forceably added to the 
 	//   player simulation list.  If so, do this here
@@ -3146,80 +2934,6 @@ void C_BaseEntity::PostDataUpdate( DataUpdateType_t updateType )
 	{
 		UpdateVisibility();
 	}
-}
-
-static ConVar cl_simulationtimefix( "cl_simulationtimefix", "1", FCVAR_DEVELOPMENTONLY );
-void C_BaseEntity::OnSimulationTimeChanging( float flPreviousSimulationTime, float flNextSimulationTime )
-{
-	if ( m_bDisableSimulationFix )
-		return;
-
-	if ( !cl_simulationtimefix.GetBool() )
-	{
-		return;
-	}
-
-	if ( GetPredictable() || IsClientCreated() )
-	{
-		return;
-	}
-
-	if ( !ShouldDraw() )
-	{
-		return;
-	}
-
-	// If the m_flSimulationTime is changing faster than or in lockstep with the interpolation amount, then never do a fixup
-	float flOriginInterpolationAmount = m_iv_vecOrigin.GetInterpolationAmount();
-	float dtSimulationTimestamps = ROUND_TO_TICKS( flNextSimulationTime - flPreviousSimulationTime );
-	if ( dtSimulationTimestamps <= flOriginInterpolationAmount )
-		return;
-
-	// In the worst case (w/o packet loss) the engine could hit a slow frame and have to run off 0.1 (MAX_FRAMETIME) seconds worth of ticks.
-	// Thus, something moving would get new m_flSimulationTime sample up to ROUND_TO_TICKS( 0.1f ) seconds from the previous time which
-	//  is longer than the interpolation interval but still considered "smooth" and continuous motion.  We don't want to mess that case up, so what we
-	//  do is to see how far in the past the previous packet time stamp was and if the simulation time delta is even greater than that only then do we 
-	//  add some fixup samples.
-
-	// Since we haven't called PostDataUpdate, m_flLastMessageTime is the timestamp of the last packet containing this entity and engine->GetLastTimeStamp() is the timestamp of the currently being 
-	//  processed packet
-	// TBD:  Avoid the call into the engine-> virtual interface!!!
-	float dtFromLastPacket = ROUND_TO_TICKS( engine->GetLastTimeStamp() - m_flLastMessageTime );
-
-	// If the m_flSimulationTime time will have changed more quickly than the timestamps of the last two packets received, also skip fixup
-	if ( dtSimulationTimestamps <= dtFromLastPacket )
-		return;
-
-	// Worst case backfill is 100 msecs (default multiplayer interpolation amount)
-	float flSampleBackFillMaxTime = ROUND_TO_TICKS( 0.1f );
-
-	m_iv_vecOrigin.RestoreToLastNetworked();
-	m_iv_angRotation.RestoreToLastNetworked();
-
-	float flTimeBeforeWhichToLeaveOldSamples = flPreviousSimulationTime + TICK_INTERVAL * 0.5f;
-
-	for ( float simtime = flNextSimulationTime - flSampleBackFillMaxTime;  
-		  simtime < flNextSimulationTime; 
-		  simtime += TICK_INTERVAL )
-	{
-		// Don't stomp preexisting data, though
-		if ( simtime < flTimeBeforeWhichToLeaveOldSamples )
-			continue;
-
-		m_iv_vecOrigin.NoteChanged( gpGlobals->curtime, simtime, false );
-		m_iv_angRotation.NoteChanged( gpGlobals->curtime, simtime, false );
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Latch simulation values when the entity has not changed
-//-----------------------------------------------------------------------------
-void C_BaseEntity::OnDataUnchangedInPVS()
-{
-	Assert( m_hNetworkMoveParent.Get() || !m_hNetworkMoveParent.IsValid() );
-	HierarchySetParent(m_hNetworkMoveParent);
-	
-	MarkMessageReceived();
 }
 
 //-----------------------------------------------------------------------------
@@ -3553,12 +3267,6 @@ CStudioHdr *C_BaseEntity::OnNewModel()
 	g_pClientLeafSystem->SetModelType( m_hRender );
 	InvalidatePhysicsRecursive( BOUNDS_CHANGED | SEQUENCE_CHANGED );
 	SetGlobalFadeScale( GetGlobalFadeScale() );
-
-	// Can we use the model fast path?
-	const model_t *pModel = GetModel();
-	m_bCanUseBrushModelFastPath = pModel && ( modelinfo->GetModelType( pModel ) == mod_brush ) &&
-		!modelinfo->ModelHasMaterialProxy( pModel );
-
 	return NULL;
 }
 
@@ -3821,10 +3529,6 @@ void C_BaseEntity::ClientThink()
 {
 }
 
-static ConVar hermite( "hermite_fix", "1", FCVAR_DEVELOPMENTONLY, "Don't interpolate previous hermite sample when fixing up times." );
-
-extern bool g_bHermiteFix;
-
 // Defined in engine
 static ConVar cl_interpolate( "cl_interpolate", "1.0f", FCVAR_USERINFO | FCVAR_DEVELOPMENTONLY );
 // (static function)
@@ -3833,12 +3537,6 @@ void C_BaseEntity::InterpolateServerEntities()
 	VPROF_BUDGET( "C_BaseEntity::InterpolateServerEntities", VPROF_BUDGETGROUP_INTERPOLATION );
 
 	bool bPrevInterpolate = s_bInterpolate;
-
-	bool bHermiteFix = hermite.GetBool();
-	if ( bHermiteFix != g_bHermiteFix )
-	{
-		g_bHermiteFix = bHermiteFix;
-	}
 
 	s_bInterpolate = cl_interpolate.GetBool();
 
@@ -3855,10 +3553,13 @@ void C_BaseEntity::InterpolateServerEntities()
 		s_bInterpolate = false;
 	}
 
-	if ( IsSimulatingOnAlternateTicks() != g_bWasSkipping || IsEngineThreaded() != g_bWasThreaded )
+	if ( IsSimulatingOnAlternateTicks() != g_bWasSkipping ||
+		 IsEngineThreaded() != g_bWasThreaded ||
+		 cl_interp_threadmodeticks.GetInt() != g_nThreadModeTicks )
 	{
 		g_bWasSkipping = IsSimulatingOnAlternateTicks();
 		g_bWasThreaded = IsEngineThreaded();
+		g_nThreadModeTicks = cl_interp_threadmodeticks.GetInt();
 
 		C_BaseEntityIterator iterator;
 		C_BaseEntity *pEnt;
@@ -3939,6 +3640,9 @@ void C_BaseEntity::OnPreDataChanged( DataUpdateType_t type )
 
 void C_BaseEntity::OnDataChanged( DataUpdateType_t type )
 {
+	// See if it needs to allocate prediction stuff
+	CheckInitPredictable( "OnDataChanged" );
+
 	// Set up shadows; do it here so that objects can change shadowcasting state
 	CreateShadow();
 
@@ -4157,7 +3861,7 @@ void *C_BaseEntity::operator new( size_t stAllocateBlock )
 {
 	Assert( stAllocateBlock != 0 );	
 	MEM_ALLOC_CREDIT();
-	void *pMem = g_pMemAlloc->Alloc( stAllocateBlock );
+	void *pMem = malloc( stAllocateBlock );
 	memset( pMem, 0, stAllocateBlock );
 	return pMem;												
 }
@@ -4166,7 +3870,7 @@ void *C_BaseEntity::operator new[]( size_t stAllocateBlock )
 {
 	Assert( stAllocateBlock != 0 );				
 	MEM_ALLOC_CREDIT();
-	void *pMem = g_pMemAlloc->Alloc( stAllocateBlock );
+	void *pMem = malloc( stAllocateBlock );
 	memset( pMem, 0, stAllocateBlock );
 	return pMem;												
 }
@@ -4281,9 +3985,6 @@ void C_BaseEntity::AddToLeafSystem( bool bRenderWithViewModels )
 		ClientLeafSystem()->SetModelType( m_hRender );
 		ClientLeafSystem()->DisableCachedRenderBounds( m_hRender, m_bDisableCachedRenderBounds );
 	}
-	OnFastReflectionRenderingChanged();
-	OnDisableShadowDepthRenderingChanged();
-	OnShadowDepthRenderingCacheableStateChanged();
 }
 
 
@@ -4398,7 +4099,7 @@ void C_BaseEntity::SetDormant( bool bDormant )
 //			dormant when they leave the PVS on the server. Client side entities
 //			can decide for themselves whether to become dormant.
 //-----------------------------------------------------------------------------
-bool C_BaseEntity::IsDormant( void ) const
+bool C_BaseEntity::IsDormant( void )
 {
 	if ( IsServerEntity() )
 	{
@@ -4786,12 +4487,12 @@ void C_BaseEntity::CalcAbsolutePosition( )
 
 	// Construct the entity-to-world matrix
 	// Start with making an entity-to-parent matrix
-	ALIGN16 matrix3x4_t matEntityToParent ALIGN16_POST;
+	ALIGN16 matrix3x4_t matEntityToParent;
 	AngleMatrix( GetLocalAngles(), matEntityToParent );
 	MatrixSetColumn( GetLocalOrigin(), 3, matEntityToParent );
 
 	// concatenate with our parent's transform
-	ALIGN16 matrix3x4_t scratchMatrix ALIGN16_POST;
+	ALIGN16 matrix3x4_t scratchMatrix;
 	ConcatTransforms( GetParentToWorldTransform( scratchMatrix ), matEntityToParent, m_rgflCoordinateFrame );
 
 	// pull our absolute position out of the matrix
@@ -5213,7 +4914,7 @@ const char *C_BaseEntity::GetClassname( void )
 		const char *mapname =  GetClassMap().Lookup( GetPredDescMap()->dataClassName );
 		if ( mapname && mapname[ 0 ] ) 
 		{
-			Q_strncpy( outstr, mapname, sizeof( outstr ) );
+			Q_snprintf( outstr, sizeof( outstr ), "%s", mapname );
 			gotname = true;
 		}
 	}
@@ -5603,24 +5304,13 @@ void C_BaseEntity::AllocateIntermediateData( void )
 
 	m_pOriginalData = new unsigned char[ allocsize ];
 	Q_memset( m_pOriginalData, 0, allocsize );
-	for ( int i = 0; i < ARRAYSIZE( m_pIntermediateData ); i++ )
+	for ( int i = 0; i < MULTIPLAYER_BACKUP; i++ )
 	{
 		m_pIntermediateData[ i ] = new unsigned char[ allocsize ];
 		Q_memset( m_pIntermediateData[ i ], 0, allocsize );
 	}
 
-	if( !physenv || physenv->IsPredicted() ) //either predicted physics or don't know if we're predicting physics
-	{
-		for ( int i = 0; i < ARRAYSIZE( m_pIntermediateData_FirstPredicted ); i++ )
-		{
-			m_pIntermediateData_FirstPredicted[i] = new unsigned char[ allocsize ];
-			Q_memset( m_pIntermediateData_FirstPredicted[ i ], 0, allocsize );
-		}
-
-		m_nIntermediateData_FirstPredictedShiftMarker = -1;
-	}
-
-	m_nIntermediateDataCount = -1;
+	m_nIntermediateDataCount = 0;
 #endif
 }
 
@@ -5632,25 +5322,15 @@ void C_BaseEntity::DestroyIntermediateData( void )
 #if !defined( NO_ENTITY_PREDICTION )
 	if ( !m_pOriginalData )
 		return;
-	for ( int i = 0; i < ARRAYSIZE( m_pIntermediateData ); i++ )
+	for ( int i = 0; i < MULTIPLAYER_BACKUP; i++ )
 	{
 		delete[] m_pIntermediateData[ i ];
 		m_pIntermediateData[ i ] = NULL;
 	}
-
-	if( m_pIntermediateData_FirstPredicted[0] != NULL )
-	{
-		for ( int i = 0; i < ARRAYSIZE( m_pIntermediateData_FirstPredicted ); i++ )
-		{
-			delete[] m_pIntermediateData_FirstPredicted[ i ];
-			m_pIntermediateData_FirstPredicted[ i ] = NULL;
-		}		
-	}
-
 	delete[] m_pOriginalData;
 	m_pOriginalData = NULL;
 
-	m_nIntermediateDataCount = -1;
+	m_nIntermediateDataCount = 0;
 #endif
 }
 
@@ -5669,7 +5349,7 @@ void C_BaseEntity::ShiftIntermediateDataForward( int slots_to_remove, int number
 	Assert( number_of_commands_run >= slots_to_remove );
 
 	// Just moving pointers, yeah
-	byte *saved[ ARRAYSIZE( m_pIntermediateData ) ];
+	byte *saved[ MULTIPLAYER_BACKUP ];
 
 	// Remember first slots
 	int i = 0;
@@ -5691,152 +5371,6 @@ void C_BaseEntity::ShiftIntermediateDataForward( int slots_to_remove, int number
 
 		m_pIntermediateData[ slot ] = saved[ i ];
 	}
-
-	m_nIntermediateDataCount -= slots_to_remove;
-	if( m_nIntermediateDataCount < -1 )
-	{
-		m_nIntermediateDataCount = -1;
-	}
-#endif
-}
-
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : slots_to_remove -  
-//-----------------------------------------------------------------------------
-void C_BaseEntity::ShiftFirstPredictedIntermediateDataForward( int slots_to_remove )
-{
-#if !defined( NO_ENTITY_PREDICTION )
-	if ( !m_pIntermediateData_FirstPredicted[0] || m_nIntermediateData_FirstPredictedShiftMarker == -1 )
-		return;
-
-	if( m_nIntermediateData_FirstPredictedShiftMarker <= slots_to_remove ) //acknowledged more commands than we predicted, early out
-	{
-		m_nIntermediateData_FirstPredictedShiftMarker = 0;
-		return;
-	}
-
-	// Just moving pointers, yeah
-	byte *saved_FirstPredicted[ ARRAYSIZE( m_pIntermediateData_FirstPredicted ) ];
-
-	// Remember first slots
-	int i = 0;
-	for ( ; i < slots_to_remove; i++ )
-	{
-		saved_FirstPredicted[ i ] = m_pIntermediateData_FirstPredicted[ i ];
-	}
-
-	// Move rest of slots forward up to last slot
-	for ( ; i <= m_nIntermediateData_FirstPredictedShiftMarker; i++ )
-	{
-		m_pIntermediateData_FirstPredicted[ i - slots_to_remove ] = m_pIntermediateData_FirstPredicted[ i ];
-	}
-
-	int iEndBase = (m_nIntermediateData_FirstPredictedShiftMarker + 1) - slots_to_remove;
-
-	Assert( iEndBase >= 0 );
-
-	// Put remembered slots onto end
-	for ( i = 0; i < slots_to_remove; i++ )
-	{
-		m_pIntermediateData_FirstPredicted[ iEndBase + i ] = saved_FirstPredicted[ i ];
-	}
-
-	m_nIntermediateData_FirstPredictedShiftMarker -= slots_to_remove;
-	
-#endif
-}
-
-
-//-----------------------------------------------------------------------------
-// Purpose: For a predicted entity that is physically simulated, compensate for the prediction frames being coupled to player commands
-//			by shifting them around if there's an unequal number of ticks and player commands executed on the server
-// Input  : delta - number of server ticks elapsed minus the number of player commands acknowledged
-//			last_slot - the number of valid frames currently stored in m_pIntermediateData
-//-----------------------------------------------------------------------------
-void C_BaseEntity::ShiftIntermediateData_TickAdjust( int delta, int last_slot )
-{
-#if !defined( NO_ENTITY_PREDICTION )
-	Assert( m_pIntermediateData );
-	if ( !m_pIntermediateData || (last_slot == 0) )
-		return;
-
-	//Warning( "C_BaseEntity::ShiftIntermediateData_TickAdjust( %f ) delta: %i  last: %i\n", gpGlobals->curtime, delta, last_slot );
-
-	if( delta > last_slot )
-	{
-		delta = last_slot;
-	}
-	else if( delta < -last_slot )
-	{
-		return; //acknowledged more commands than we predicted. Won't be restoring frames anyway
-	}
-
-	//Warning( "\t" );
-
-	size_t allocsize = GetIntermediateDataSize();
-
-#if defined( DBGFLAG_ASSERT ) && 1
-	// Remember starting configuration
-	byte *debugCheck[ ARRAYSIZE( m_pIntermediateData ) ];
-	memcpy( debugCheck, m_pIntermediateData, ARRAYSIZE( m_pIntermediateData ) * sizeof( byte * ) );
-#endif
-
-	byte *saved[ ARRAYSIZE( m_pIntermediateData ) ];
-	memcpy( saved, m_pIntermediateData, last_slot * sizeof( byte * ) );
-
-	if( delta < 0 ) //more commands acknowledged than ticks run, slots indices should increment in value by negative delta
-	{
-		int i = 0;
-		int iStop = last_slot + delta;
-		for( ; i < iStop; ++i )
-		{
-			//Warning( "%i<-%i,", i - delta, i );
-			m_pIntermediateData[i - delta] = saved[i];
-		}
-
-		for( ; i < last_slot; ++i )
-		{
-			//Warning( "%i<-%i,", i - iStop, i );
-			m_pIntermediateData[i - iStop] = saved[i];
-			memcpy( m_pIntermediateData[i - iStop], saved[0], allocsize ); //make duplicates of the first frame we have available
-		}
-	}
-	else //more ticks run than commands acknowledged, slot indices should decrement by delta
-	{
-		int i = 0;
-		int iStop = last_slot - delta;
-		for( ; i < iStop; ++i )
-		{
-			//Warning( "%i<-%i,", i, i + delta );
-			m_pIntermediateData[i] = saved[i + delta];
-		}
-
-		for( ; i < last_slot; ++i )
-		{
-			//Warning( "%i<-%i,", i, i - iStop );
-			m_pIntermediateData[i] = saved[i - iStop];
-			memcpy( m_pIntermediateData[i], saved[last_slot - 1], allocsize ); //make duplicates of the last frame we have available
-		}
-	}
-
-	//Warning( "\n" );
-
-#if defined( DBGFLAG_ASSERT ) && 1
-	for( int i = 0; i < ARRAYSIZE( m_pIntermediateData ); ++i )
-	{
-		int j = 0;
-		for( ; j < ARRAYSIZE( m_pIntermediateData ); ++j )
-		{
-			if( m_pIntermediateData[i] == debugCheck[j] )
-				break;
-		}
-
-		Assert( j != ARRAYSIZE( m_pIntermediateData ) );
-	}
-#endif
-
 #endif
 }
 
@@ -5854,32 +5388,10 @@ void *C_BaseEntity::GetPredictedFrame( int framenumber )
 		Assert( 0 );
 		return NULL;
 	}
-	return (void *)m_pIntermediateData[ framenumber % ARRAYSIZE( m_pIntermediateData ) ];
+	return (void *)m_pIntermediateData[ framenumber % MULTIPLAYER_BACKUP ];
 #else
 	return NULL;
 #endif
-}
-
-void *C_BaseEntity::GetFirstPredictedFrame( int framenumber )
-{
-#if !defined( NO_ENTITY_PREDICTION )
-	Assert( framenumber >= 0 );
-	Assert( m_pIntermediateData_FirstPredicted[0] != 0 );
-
-	return (void *)m_pIntermediateData_FirstPredicted[ framenumber % ARRAYSIZE( m_pIntermediateData_FirstPredicted ) ];
-#else
-	return NULL;
-#endif
-}
-
-
-//-----------------------------------------------------------------------------
-// Purpose: Get the range of predicted frames we may restore from in prediction
-//-----------------------------------------------------------------------------
-void C_BaseEntity::GetUnacknowledgedPredictedFrameRange( int &iStart, int &iEnd )
-{
-	iStart = MAX( s_nIncomingPacketCommandsAcknowledged, 0 );
-	iEnd = m_nIntermediateDataCount;
 }
 
 //-----------------------------------------------------------------------------
@@ -5951,11 +5463,6 @@ void C_BaseEntity::SUB_Remove( void )
 
 CBaseEntity *FindEntityInFrontOfLocalPlayer()
 {
-#if DOTA_DLL
-	// Get the entity under our mouse cursor
-	return DOTAInput()->GetCrosshairEntity();
-#endif
-
 	C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
 	if ( pPlayer )
 	{
@@ -6215,7 +5722,7 @@ void C_BaseEntity::EstimateAbsVelocity( Vector& vel )
 
 	CInterpolationContext context;
 	context.EnableExtrapolation( true );
-	m_iv_vecOrigin.GetDerivative_SmoothVelocity( &vel, gpGlobals->curtime, !IsPlayer() ); //disable Hermite interpolation fix for the velocity estimation for players. Fixes bugbait #82165. Limiting to players only to reduce risk of regressions
+	m_iv_vecOrigin.GetDerivative_SmoothVelocity( &vel, gpGlobals->curtime );
 }
 
 void C_BaseEntity::Interp_Reset( VarMapping_t *map )
@@ -6283,12 +5790,17 @@ float C_BaseEntity::GetInterpolationAmount( int flags )
 	}
 
 	// Always fully interpolate during multi-player or during demo playback...
-	if ( ( gpGlobals->maxClients > 1 && gpGlobals->IsRemoteClient() ) || engine->IsPlayingDemo() )
+	if ( ( gpGlobals->maxClients > 1 ) || 
+		engine->IsPlayingDemo() )
 	{
 		return AdjustInterpolationAmount( this, TICKS_TO_TIME ( TIME_TO_TICKS( GetClientInterpAmount() ) + serverTickMultiple ) );
 	}
 
 	int expandedServerTickMultiple = serverTickMultiple;
+	if ( IsEngineThreaded() )
+	{
+		expandedServerTickMultiple += cl_interp_threadmodeticks.GetInt();
+	}
 
 	if ( IsAnimatedEveryTick() && IsSimulatedEveryTick() )
 	{
@@ -6521,7 +6033,6 @@ void C_BaseEntity::SetToolRecording( bool recording )
 	if ( m_bToolRecording )
 	{
 		recordinglist->AddToList( GetClientHandle() );
-		OnToolStartRecording();
 	}
 	else
 	{
@@ -6616,8 +6127,6 @@ void C_BaseEntity::ToolRecordEntities()
 
 	if ( !ToolsEnabled() || !clienttools->IsInRecordingMode() )
 		return;
-
-	ACTIVE_SPLITSCREEN_PLAYER_GUARD( 0 );
 
 	// Let non-dormant client created predictables get added, too
 	int c = recordinglist->Count();
@@ -6763,13 +6272,13 @@ int C_BaseEntity::GetCreationTick() const
 	return m_nCreationTick;
 }
 
-
 static CCallQueue s_SimulateEntitiesCallQueue;
 
 CCallQueue *C_BaseEntity::GetSimulateCallQueue( void )
 {
 	return &s_SimulateEntitiesCallQueue;
 }
+
 
 // static method
 void C_BaseEntity::SimulateEntities()
@@ -6781,10 +6290,16 @@ void C_BaseEntity::SimulateEntities()
 		int iNext;
 		for ( int iCur = g_EntityLists[ENTITY_LIST_SIMULATE].Head(); iCur != g_EntityLists[ENTITY_LIST_SIMULATE].InvalidIndex(); iCur = iNext )
 		{
-			iNext = g_EntityLists[ENTITY_LIST_SIMULATE].Next( iCur );
+			iNext = g_EntityLists[ENTITY_LIST_SIMULATE].Next(iCur);
+
 			C_BaseEntity *pCur = g_EntityLists[ENTITY_LIST_SIMULATE].Element(iCur);
-			if ( pCur->IsEFlagSet( EFL_KILLME ) )
+#ifndef _DEBUG
+			if (pCur->IsEFlagSet(EFL_KILLME))
 				continue;
+#else
+			if ((unsigned int)pCur == (unsigned int)0xdddddddd || pCur->IsEFlagSet(EFL_KILLME))
+				continue;
+#endif
 
 #ifdef _DEBUG
 			s_nSuppressChanges = ENTITY_LIST_SIMULATE;
@@ -6793,7 +6308,7 @@ void C_BaseEntity::SimulateEntities()
 #ifdef _DEBUG
 			s_nSuppressChanges = NUM_ENTITY_LISTS;
 #endif
-			if ( bRemove )
+			if (bRemove)
 			{
 				pCur->RemoveFromEntityList(ENTITY_LIST_SIMULATE);
 			}
@@ -6958,6 +6473,17 @@ HSCRIPT C_BaseEntity::GetScriptInstance()
 	}
 	return m_hScriptInstance;
 }
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+// Output : IResponseSystem
+//-----------------------------------------------------------------------------
+IResponseSystem *CBaseEntity::GetResponseSystem()
+{
+	extern IResponseSystem *g_pResponseSystem;
+	return g_pResponseSystem;
+}
+
 //------------------------------------------------------------------------------
 void CC_CL_Find_Ent( const CCommand& args )
 {
@@ -7009,8 +6535,7 @@ void CC_CL_Find_Ent_Index( const CCommand& args )
 	C_BaseEntity *ent = ClientEntityList().GetBaseEntity( iIndex );
 	if ( ent )
 	{
-		const char *pszClassname;
-		pszClassname = ent->GetClassname();
+		const char *pszClassname = ent->GetClassname();
 		Msg("   '%s' (entindex %d) %s \n", pszClassname ? pszClassname : "[NO NAME]", iIndex, ent->IsDormant() ? "(DORMANT)" : "" );
 	}
 	else

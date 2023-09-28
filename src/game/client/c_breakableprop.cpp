@@ -18,17 +18,8 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-void RecvProxy_UnmodifiedQAngles( const CRecvProxyData *pData, void *pStruct, void *pOut )
-{
-	const float *v = pData->m_Value.m_Vector;
-
-	((float*)pOut)[0] = v[0];
-	((float*)pOut)[1] = v[1];
-	((float*)pOut)[2] = v[2];
-}
-
 IMPLEMENT_CLIENTCLASS_DT(C_BreakableProp, DT_BreakableProp, CBreakableProp)
-	RecvPropQAngles( RECVINFO( m_qPreferredPlayerCarryAngles ), 0, RecvProxy_UnmodifiedQAngles ),
+	RecvPropQAngles( RECVINFO( m_qPreferredPlayerCarryAngles ) ),
 	RecvPropBool( RECVINFO( m_bClientPhysics ) ),
 END_RECV_TABLE()
 
@@ -74,12 +65,19 @@ QAngle C_BreakableProp::PreferredCarryAngles( void )
 
 bool C_BreakableProp::ShouldPredict( void )
 {
+#ifdef PORTAL
 	C_BasePlayer *pPredOwner = GetPlayerHoldingEntity( this );
 	return (pPredOwner && pPredOwner->IsLocalPlayer()) ? true : BaseClass::ShouldPredict();
+#else
+	return false;
+#endif
 }
 
 C_BasePlayer *C_BreakableProp::GetPredictionOwner( void )
 {
+#ifdef PORTAL
 	return GetPlayerHoldingEntity( this );
+#else
+	return NULL;
+#endif
 }
-

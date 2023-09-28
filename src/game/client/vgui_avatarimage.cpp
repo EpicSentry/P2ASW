@@ -9,19 +9,10 @@
 #include <vgui_controls/Panel.h>
 #include <vgui/ISurface.h>
 #include "vgui_avatarimage.h"
-
 #if defined( _X360 )
 #include "xbox/xbox_win32stubs.h"
 #endif
-
-#if defined( _PS3 )
-#include "ps3/ps3_core.h"
-#include "ps3/ps3_win32stubs.h"
-#endif
-
-#ifndef NO_STEAM
 #include "steam/steam_api.h"
-#endif
 #include "hud.h"
 
 // NOTE: This has to be the last file included!
@@ -37,21 +28,10 @@ CAvatarImage::CAvatarImage( void )
 {
 	m_iTextureID = -1;
 	ClearAvatarSteamID();
-#ifndef NO_STEAM
-	m_SourceArtSize = eAvatarSmall;
-#endif
+	m_SourceArtSize = k_EAvatarSize32x32;
 	m_pFriendIcon = NULL;
 	m_nX = 0;
 	m_nY = 0;
-}
-
-CAvatarImage::~CAvatarImage()
-{
-	if ( vgui::surface() && m_iTextureID != -1 )
-	{
-		vgui::surface()->DestroyTextureID( m_iTextureID );
-		m_iTextureID = -1;
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -61,15 +41,12 @@ void CAvatarImage::ClearAvatarSteamID( void )
 { 
 	m_bValid = false; 
 	m_bFriend = false;
-#ifndef NO_STEAM
 	m_SteamID.Set( 0, k_EUniverseInvalid, k_EAccountTypeInvalid );
-#endif
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-#ifndef NO_STEAM
 bool CAvatarImage::SetAvatarSteamID( CSteamID steamIDUser )
 {
 	if ( m_steamIDUser == steamIDUser && m_bValid )
@@ -82,19 +59,7 @@ bool CAvatarImage::SetAvatarSteamID( CSteamID steamIDUser )
 	{
 		m_SteamID = steamIDUser;
 
-		int iAvatar = -1;
-		switch ( m_SourceArtSize )
-		{
-		case eAvatarSmall:
-			iAvatar = steamapicontext->SteamFriends()->GetSmallFriendAvatar( steamIDUser );
-			break;
-		case eAvatarMedium:
-			iAvatar = steamapicontext->SteamFriends()->GetMediumFriendAvatar( steamIDUser );
-			break;
-		case eAvatarLarge:
-			iAvatar = steamapicontext->SteamFriends()->GetLargeFriendAvatar( steamIDUser );
-			break;
-		}
+		int iAvatar = steamapicontext->SteamFriends()->GetFriendAvatar( steamIDUser, m_SourceArtSize );
 
 		/*
 		// See if it's in our list already
@@ -104,7 +69,7 @@ bool CAvatarImage::SetAvatarSteamID( CSteamID steamIDUser )
 		if ( steamapicontext->SteamUtils()->GetImageSize( iAvatar, &wide, &tall ) )
 		{
 			int cubImage = wide * tall * 4;
-			byte *rgubDest = (byte*)stackalloc( cubImage );
+			byte *rgubDest = (byte*)_alloca( cubImage );
 			steamapicontext->SteamUtils()->GetImageRGBA( iAvatar, rgubDest, cubImage );
 			InitFromRGBA( rgubDest, wide, tall );
 
@@ -121,14 +86,12 @@ bool CAvatarImage::SetAvatarSteamID( CSteamID steamIDUser )
 
 	return m_bValid;
 }
-#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
 void CAvatarImage::UpdateFriendStatus( void )
 {
-#ifndef NO_STEAM
 	if ( !m_SteamID.IsValid() )
 		return;
 
@@ -140,7 +103,6 @@ void CAvatarImage::UpdateFriendStatus( void )
 			m_pFriendIcon = HudIcons().GetIcon( "ico_friend_indicator_avatar" );
 		}
 	}
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -148,14 +110,10 @@ void CAvatarImage::UpdateFriendStatus( void )
 //-----------------------------------------------------------------------------
 void CAvatarImage::InitFromRGBA( const byte *rgba, int width, int height )
 {
-	// Texture size may be changing, so recreate
-	if ( m_iTextureID != -1 )
+	if ( m_iTextureID == -1 )
 	{
-		vgui::surface()->DestroyTextureID( m_iTextureID );
-		m_iTextureID = -1;
+		m_iTextureID = vgui::surface()->CreateNewTextureID( true );
 	}
-
-	m_iTextureID = vgui::surface()->CreateNewTextureID( true );
 
 	vgui::surface()->DrawSetTextureRGBA( m_iTextureID, rgba, width, height );
 	m_nWide = XRES(width);
@@ -207,7 +165,6 @@ void CAvatarImagePanel::SetPlayer( C_BasePlayer *pPlayer )
 //-----------------------------------------------------------------------------
 void CAvatarImagePanel::SetPlayerByIndex( int iIndex )
 {
-#ifndef NO_STEAM
 	if ( iIndex && steamapicontext->SteamUtils() )
 	{
 		player_info_t pi;
@@ -220,7 +177,6 @@ void CAvatarImagePanel::SetPlayerByIndex( int iIndex )
 			}
 		}
 	}
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -236,7 +192,6 @@ void CAvatarImagePanel::PaintBackground( void )
 	}
 }
 
-#ifndef NO_STEAM
 void CAvatarImagePanel::SetAvatarBySteamID( CSteamID *friendsID )
 {
 	if ( !GetImage() )
@@ -250,9 +205,8 @@ void CAvatarImagePanel::SetAvatarBySteamID( CSteamID *friendsID )
 	GetImage()->SetPos( iIndent, iIndent );
 	int wide = GetWide() - (iIndent*2);
 
-	((CAvatarImage*)GetImage())->SetAvatarSize( ( wide > 32 ) ? eAvatarMedium : eAvatarSmall );
+	((CAvatarImage*)GetImage())->SetAvatarSize( ( wide > 32 ) ? k_EAvatarSize64x64 : k_EAvatarSize32x32 );
 	((CAvatarImage*)GetImage())->SetAvatarSteamID( *friendsID );
 
 	GetImage()->SetSize( wide, GetTall()-(iIndent*2) );
 }
-#endif

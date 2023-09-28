@@ -22,7 +22,7 @@
 #include "tier0/vprof.h"
 #include "EntityFlame.h"
 #include "EntityDissolve.h"
-#if defined( HL2_EP3 ) || defined( INFESTED_DLL )
+#if defined( INFESTED_DLL )
 #include "EntityFreezing.h"
 #endif
 #include "ai_basenpc.h"
@@ -210,10 +210,10 @@ BEGIN_DATADESC( CBaseAnimating )
 	DEFINE_INPUTFUNC( FIELD_VOID, "Ignite", InputIgnite ),
 	DEFINE_INPUTFUNC( FIELD_FLOAT, "IgniteLifetime", InputIgniteLifetime ),
 
-#ifndef HL2_EP3
+
 	DEFINE_INPUTFUNC( FIELD_INTEGER, "IgniteNumHitboxFires", InputIgnite ),
 	DEFINE_INPUTFUNC( FIELD_FLOAT, "IgniteHitboxFireScale", InputIgnite ),
-#endif
+
 	DEFINE_INPUTFUNC( FIELD_VOID, "BecomeRagdoll", InputBecomeRagdoll ),
 	DEFINE_INPUTFUNC( FIELD_STRING, "SetLightingOriginHack", InputSetLightingOriginRelative ),
 	DEFINE_INPUTFUNC( FIELD_STRING, "SetLightingOrigin", InputSetLightingOrigin ),
@@ -224,12 +224,10 @@ BEGIN_DATADESC( CBaseAnimating )
 	DEFINE_FIELD( m_flFrozenMax, FIELD_FLOAT ),
 
 	DEFINE_FIELD( m_fBoneCacheFlags, FIELD_SHORT ),
-
+	
 #ifdef PORTAL2
 	DEFINE_OUTPUT( m_OnFizzled, "OnFizzled" ),
 #endif // PORTAL2
-
-	DEFINE_KEYFIELD( m_bSuppressAnimSounds, FIELD_BOOLEAN, "SuppressAnimSounds" ),
 
 	END_DATADESC()
 
@@ -274,10 +272,8 @@ IMPLEMENT_SERVERCLASS_ST(CBaseAnimating, DT_BaseAnimating)
 	SendPropDataTable( "serveranimdata", 0, &REFERENCE_SEND_TABLE( DT_ServerAnimationData ), SendProxy_ClientSideAnimation ),
 
 	SendPropFloat( SENDINFO( m_flFrozen ) ),
-
+	
 	SendPropInt( SENDINFO( m_ScaleType ) ),
-
-	SendPropBool( SENDINFO( m_bSuppressAnimSounds ) )
 
 END_SEND_TABLE()
 
@@ -298,7 +294,6 @@ CBaseAnimating::CBaseAnimating()
 	m_vecForce.GetForModify().Init();
 	m_nForceBone = 0;
 
-	m_bResetSequenceInfoOnLoad = false;
 	m_bClientSideAnimation = false;
 	m_pIk = NULL;
 	m_iIKCounter = 0;
@@ -320,11 +315,9 @@ CBaseAnimating::CBaseAnimating()
 	m_nObjectScaleLevel = 0;	 // No scale
 	m_bCanBeCaptured = true;
 #endif // PORTAL2
-
+	
 	m_ScaleType = HIERARCHICAL_MODEL_SCALE;
 
-	// Anything animating is not intended to be cached for depth
-	AddEffects( EF_SHADOWDEPTH_NOCACHE );
 }
 
 CBaseAnimating::~CBaseAnimating()
@@ -341,7 +334,7 @@ void CBaseAnimating::Precache()
 	// Anything derived from this class can potentially burn - true, but do we want it to!
 	PrecacheParticleSystem( "burning_character" );
 #endif
-
+	
 #ifdef PORTAL2
 	PrecacheScriptSound( "Prop.Fizzled" );
 #endif // PORTAL2
@@ -357,7 +350,7 @@ void CBaseAnimating::Activate()
 	BaseClass::Activate();
 	SetLightingOrigin( m_iszLightingOrigin );
 	SetLightingOriginRelative( m_iszLightingOriginRelative );
-
+	
 #if defined ( PORTAL2 )
 	// Scaled physics objects (re)create their physics here
 	if ( GetObjectScaleLevel() != 0 && VPhysicsGetObject() )
@@ -472,9 +465,7 @@ void CBaseAnimating::StudioFrameAdvanceInternal( CStudioHdr *pStudioHdr, float f
 
 		if (m_bSequenceLoops)
 		{
-			// on PPC we can do this truncate without converting to int
-			// same as flNewCycle -= (int)(flNewCycle);
-			flNewCycle = SubtractIntegerPart(flNewCycle);
+			flNewCycle -= (int)(flNewCycle);
 		}
 		else
 		{
@@ -501,7 +492,16 @@ void CBaseAnimating::StudioFrameAdvanceInternal( CStudioHdr *pStudioHdr, float f
 	// Msg("%s : %s : %5.1f\n", GetClassname(), GetSequenceName( GetSequence() ), GetCycle() );
 	InvalidatePhysicsRecursive( ANIMATION_CHANGED );
 
-	Studio_InvalidateBoneCacheIfNotMatching( m_boneCacheHandle, gpGlobals->curtime );
+	InvalidateBoneCacheIfOlderThan( 0 );
+}
+
+void CBaseAnimating::InvalidateBoneCacheIfOlderThan( float deltaTime )
+{
+	CBoneCache *pcache = Studio_GetBoneCache( m_boneCacheHandle );
+	if ( !pcache || !pcache->IsValid( gpGlobals->curtime, deltaTime ) )
+	{
+		InvalidateBoneCache();
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -930,12 +930,6 @@ void CBaseAnimating::ResetSequenceInfo ( )
 	{
 		// This shouldn't happen.  Setting m_nSequence blindly is a horrible coding practice.
 		SetSequence( 0 );
-	}
-
-	if ( IsDynamicModelLoading() )
-	{
-		m_bResetSequenceInfoOnLoad = true;
-		return;
 	}
 
 	CStudioHdr *pStudioHdr = GetModelPtr();
@@ -1830,7 +1824,7 @@ ConVar ai_setupbones_debug( "ai_setupbones_debug", "0", 0, "Shows that bones tha
 
 
 
-bool CBaseAnimating::CanSkipAnimation( void )
+inline bool CBaseAnimating::CanSkipAnimation( void )
 {
 	if ( !sv_pvsskipanimation.GetBool() )
 		return false;
@@ -1904,7 +1898,7 @@ void CBaseAnimating::SetupBones( matrix3x4a_t *pBoneToWorld, int boneMask )
 		}
 	}
 	
-	if ( GetMoveParent() && IsEffectActive(EF_BONEMERGE) )
+	if ( GetMoveParent() )
 	{
 		CBaseAnimating *pParent = GetMoveParent()->GetBaseAnimating();
 		if ( pParent )
@@ -1940,7 +1934,7 @@ void CBaseAnimating::SetupBones( matrix3x4a_t *pBoneToWorld, int boneMask )
 		pos, 
 		q, 
 		-1,
-		GetModelHierarchyScale(), // Scaling
+		GetModelScale(), // Scaling
 		pBoneToWorld,
 		boneMask );
 
@@ -1989,10 +1983,13 @@ int CBaseAnimating::LookupAttachment( const char *szName )
 	// The +1 is to make attachment indices be 1-based (namely 0 == invalid or unused attachment)
 	const int studioAttachmentNum = Studio_FindAttachment( pStudioHdr, szName );
 
-	// This is not always a problem; don't assert.
-//	AssertMsg3( studioAttachmentNum >= 0, "Couldn't find attachment %s on skeleton %s for object %s\n",
-//		szName, pStudioHdr->pszName(), GetDebugName() );
-
+#ifdef DEBUG
+	if ( !FClassnameIs( this, "generic_actor" ) )
+	{
+		AssertMsg3( studioAttachmentNum >= 0, "Couldn't find attachment %s on skeleton %s for object %s\n",
+			szName, pStudioHdr->pszName(), GetDebugName() );
+	}
+#endif
 	return studioAttachmentNum + 1;
 }
 
@@ -2127,15 +2124,15 @@ bool CBaseAnimating::GetAttachment( int iAttachment, Vector &absOrigin, Vector *
 	MatrixPosition( attachmentToWorld, absOrigin );
 	if (forward)
 	{
-		MatrixGetColumn( attachmentToWorld, 0, *forward );
+		MatrixGetColumn( attachmentToWorld, 0, forward );
 	}
 	if (right)
 	{
-		MatrixGetColumn( attachmentToWorld, 1, *right );
+		MatrixGetColumn( attachmentToWorld, 1, right );
 	}
 	if (up)
 	{
-		MatrixGetColumn( attachmentToWorld, 2, *up );
+		MatrixGetColumn( attachmentToWorld, 2, up );
 	}
 	return bRet;
 }
@@ -2782,25 +2779,7 @@ void CBaseAnimating::SetModel( const char *szModelName )
 
 	PopulatePoseParameters();
 
-/*
-#if defined ( PORTAL2 )
-	// After we set our bounds based on the model's default size,
-	// scale the bounds based on any starting scale value set in the map.
-	if ( GetObjectScaleLevel() != 0 )
-	{	
-		CaptureInfo_t captureInfo;
-		UTIL_InitCaptureInfo( captureInfo, this );
-		float flModelScale = 1.0f;
-		if ( captureInfo.pPlacementQuery )
-		{
-			flModelScale = captureInfo.pPlacementQuery->GetScaleForStep( GetObjectScaleLevel(), &captureInfo );
-		}
-		
-		// Scale by this amount to reach our target scale
-		SetModelScale( flModelScale );
-	}
-#endif // PORTAL2 
-*/
+
 }
 
 //-----------------------------------------------------------------------------
@@ -2872,10 +2851,7 @@ CBoneCache *CBaseAnimating::GetBoneCache( void )
 	CBoneCache *pcache = Studio_GetBoneCache( m_boneCacheHandle );
 	int boneMask = BONE_USED_BY_HITBOX | BONE_USED_BY_ATTACHMENT;
 
-	// TF queries these bones to position weapons when players are killed
-#if defined( TF_DLL )
-	boneMask |= BONE_USED_BY_BONE_MERGE;
-#endif
+
 	if ( pcache )
 	{
 		if ( pcache->IsValid( gpGlobals->curtime ) && (pcache->m_boneMask & boneMask) == boneMask && pcache->m_timeValid <= gpGlobals->curtime)
@@ -2919,7 +2895,7 @@ CBoneCache *CBaseAnimating::GetBoneCache( void )
 
 void CBaseAnimating::InvalidateBoneCache( void )
 {
-	Studio_InvalidateBoneCacheIfNotMatching( m_boneCacheHandle, -1.0f );
+	Studio_InvalidateBoneCache( m_boneCacheHandle );
 }
 
 bool CBaseAnimating::TestCollision( const Ray_t &ray, unsigned int fContentsMask, trace_t& tr )
@@ -2927,7 +2903,7 @@ bool CBaseAnimating::TestCollision( const Ray_t &ray, unsigned int fContentsMask
 	IPhysicsObject *pPhysObject = VPhysicsGetObject();
 	// Return a special case for scaled physics objects
 	// FIXME: need to have scaled hitbox for scaled models for this to work, we can't assume everything has a VPhysics object
-	if ( GetModelHierarchyScale() != 1.0f && pPhysObject )
+	if ( GetModelScale() != 1.0f && pPhysObject )
 	{
 		Vector vecPosition;
 		QAngle vecAngles;
@@ -2969,7 +2945,7 @@ bool CBaseAnimating::TestHitboxes( const Ray_t &ray, unsigned int fContentsMask,
 	matrix3x4_t *hitboxbones[MAXSTUDIOBONES];
 	pcache->ReadCachedBonePointers( hitboxbones, pStudioHdr->numbones() );
 
-	if ( TraceToStudio( physprops, ray, pStudioHdr, set, hitboxbones, fContentsMask, GetAbsOrigin(), GetModelHierarchyScale(), tr ) )
+	if ( TraceToStudio( physprops, ray, pStudioHdr, set, hitboxbones, fContentsMask, GetAbsOrigin(), GetModelScale(), tr ) )
 	{
 		mstudiobbox_t *pbox = set->pHitbox( tr.hitbox );
 		mstudiobone_t *pBone = pStudioHdr->pBone(pbox->bone);
@@ -3093,6 +3069,9 @@ void CBaseAnimating::GetSkeleton( CStudioHdr *pStudioHdr, Vector pos[], Quaterni
 
 	IBoneSetup boneSetup( pStudioHdr, boneMask, GetPoseParameterArray() );
 	boneSetup.InitPose( pos, q );
+
+	if (!pos || !q)
+		return;
 
 	boneSetup.AccumulatePose( pos, q, GetSequence(), GetCycle(), 1.0, gpGlobals->curtime, m_pIk );
 
@@ -3296,7 +3275,7 @@ void CBaseAnimating::DrawServerHitboxes( float duration /*= 0.0f*/, bool monocol
 			b = ( int ) ( 255.0f * hullcolor[j][2] );
 		}
 
-		NDebugOverlay::BoxAngles( position, pbox->bbmin*GetModelHierarchyScale(), pbox->bbmax*GetModelHierarchyScale(), angles, r, g, b, 0 ,duration );
+		NDebugOverlay::BoxAngles( position, pbox->bbmin*GetModelScale(), pbox->bbmax*GetModelScale(), angles, r, g, b, 0 ,duration );
 	}
 }
 
@@ -3377,7 +3356,7 @@ bool CBaseAnimating::ComputeHitboxSurroundingBox( Vector *pVecWorldMins, Vector 
 
 		if ( pMatrix )
 		{
-			TransformAABB( *pMatrix, pbox->bbmin*GetModelHierarchyScale(), pbox->bbmax*GetModelHierarchyScale(), vecBoxAbsMins, vecBoxAbsMaxs );
+			TransformAABB( *pMatrix, pbox->bbmin*GetModelScale(), pbox->bbmax*GetModelScale(), vecBoxAbsMins, vecBoxAbsMaxs );
 			VectorMin( *pVecWorldMins, vecBoxAbsMins, *pVecWorldMins );
 			VectorMax( *pVecWorldMaxs, vecBoxAbsMaxs, *pVecWorldMaxs );
 		}
@@ -3616,16 +3595,6 @@ void CBaseAnimating::SetModelScale( float scale, float change_duration /*= 0.0f*
 	}
 }
 
-ModelScaleType_t CBaseAnimating::GetModelScaleType() const
-{
-	return m_ScaleType;
-}
-
-void CBaseAnimating::SetModelScaleType( ModelScaleType_t scaleType )
-{
-	m_ScaleType = scaleType;
-}
-
 void CBaseAnimating::UpdateModelScale()
 {
 	ModelScale *mvs = ( ModelScale * )GetDataObject( MODELSCALE );
@@ -3664,6 +3633,16 @@ float CBaseAnimating::GetModelHierarchyScale()
 {
 	CStudioHdr* pHdr = GetModelPtr();
 	return ( GetModelScaleType() == HIERARCHICAL_MODEL_SCALE || (pHdr && pHdr->numbones() == 1) ) ? m_flModelScale : 1.0f;
+}
+
+ModelScaleType_t CBaseAnimating::GetModelScaleType() const
+{
+	return m_ScaleType;
+}
+
+void CBaseAnimating::SetModelScaleType( ModelScaleType_t scaleType )
+{
+	m_ScaleType = scaleType;
 }
 
 //-----------------------------------------------------------------------------
@@ -3760,7 +3739,7 @@ bool CBaseAnimating::Dissolve( const char *pMaterialName, float flStartTime, boo
 			gameeventmanager->FireEvent( event );
 		}
 	}
-
+	
 #ifdef PORTAL2
 	EmitSound( "Prop.Fizzled" );
 #endif // PORTAL2
@@ -3833,7 +3812,7 @@ void CBaseAnimating::InputBecomeRagdoll( inputdata_t &inputdata )
 
 void CBaseAnimating::Thaw( float flThawAmount )
 {
-#if defined( HL2_EP3 ) || defined( INFESTED_DLL )
+#if defined( INFESTED_DLL )
 	if ( m_flFrozen <= 0.0f )
 		return;
 
@@ -3929,7 +3908,7 @@ void CBaseAnimating::ToggleFreeze()
 //-----------------------------------------------------------------------------
 void CBaseAnimating::Freeze( float flFreezeAmount, CBaseEntity *pFreezer, Ray_t *pFreezeRay ) 
 {
-#if defined( HL2_EP3 ) || defined( INFESTED_DLL )
+#if defined( INFESTED_DLL )
 	if ( flFreezeAmount < 0 )
 	{
 		// This is a debugging freeze
@@ -3987,7 +3966,7 @@ void CBaseAnimating::Freeze( float flFreezeAmount, CBaseEntity *pFreezer, Ray_t 
 					GetBonePosition( pBox->bone, vecPosition, angAngles );
 
 					trace_t tr;
-					if ( IntersectRayWithOBB( *pFreezeRay, vecPosition, angAngles, pBox->bbmin * GetModelHierarchyScale(), pBox->bbmax * GetModelHierarchyScale(), 0.0f, &tr ) )
+					if ( IntersectRayWithOBB( *pFreezeRay, vecPosition, angAngles, pBox->bbmin * GetModelScale(), pBox->bbmax * GetModelScale(), 0.0f, &tr ) )
 					{
 						// Ice ray intersected this bounding box
 						pFreezing->m_flFrozenPerHitbox.GetForModify( i ) = MIN( 1.0f, pFreezing->m_flFrozenPerHitbox[ i ] + flFreezeAmount );
@@ -4088,29 +4067,3 @@ void CBaseAnimating::OnFizzled( void )
 	m_OnFizzled.FireOutput( this, this );
 }
 #endif // PORTAL2
-
-//-----------------------------------------------------------------------------
-// Purpose: model-change notification. Fires on dynamic load completion as well
-//-----------------------------------------------------------------------------
-CStudioHdr *CBaseAnimating::OnNewModel()
-{
-	(void) BaseClass::OnNewModel();
-
-	// TODO: if dynamic, validate m_Sequence and apply queued body group settings?
-	if ( IsDynamicModelLoading() )
-	{
-		// Called while dynamic model still loading -> new model, clear deferred state
-		m_bResetSequenceInfoOnLoad = false;
-		return NULL;
-	}
-
-	CStudioHdr *hdr = GetModelPtr(); 
-
-	if ( m_bResetSequenceInfoOnLoad )
-	{
-		m_bResetSequenceInfoOnLoad = false;
-		ResetSequenceInfo();
-	}
-
-	return hdr;
-}

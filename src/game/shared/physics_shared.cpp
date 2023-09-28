@@ -57,10 +57,8 @@ const objectparams_t g_PhysDefaultObjectParams =
 };
 
 PRECACHE_REGISTER_BEGIN( GLOBAL, PhysFrictionEffect )
-#ifndef DOTA_DLL
 	PRECACHE( PARTICLE_SYSTEM, "impact_physics_dust" )
 	PRECACHE( PARTICLE_SYSTEM, "impact_physics_sparks" )
-#endif
 PRECACHE_REGISTER_END()
 
 void CSolidSetDefaults::SetDefaults( void *pData )
@@ -499,6 +497,10 @@ void AddSurfacepropFile( const char *pFileName, IPhysicsSurfaceProps *pProps, IF
 
 		// read the file
 		int nBufSize = len+1;
+		if ( IsXbox() )
+		{
+			nBufSize = AlignValue( nBufSize , 512 );
+		}
 		char *buffer = (char *)stackalloc( nBufSize );
 		pFileSystem->ReadEx( buffer, nBufSize, len, file );
 		pFileSystem->Close( file );
@@ -975,7 +977,7 @@ void PhysFrictionSound( CBaseEntity *pEntity, IPhysicsObject *pObject, float ene
 	float volume = energy * energy;
 		
 	unsigned short soundName = psurf->sounds.scrapeRough;
-	HSOUNDSCRIPTHASH *soundHandle = &psurf->soundhandles.scrapeRough;
+	short *soundHandle = &psurf->soundhandles.scrapeRough;
 
 	if ( psurf->sounds.scrapeSmooth && phit->audio.roughnessFactor < psurf->audio.roughThreshold )
 	{
@@ -993,7 +995,7 @@ void PhysFrictionSound( CBaseEntity *pEntity, IPhysicsObject *pObject, float ene
 // Input  : idx - 
 // Output : static void
 //-----------------------------------------------------------------------------
-static HSOUNDSCRIPTHASH PrecachePhysicsSoundByStringIndex( int idx )
+static HSOUNDSCRIPTHANDLE PrecachePhysicsSoundByStringIndex( int idx )
 {
 	// Only precache if a value was set in the script file...
 	if ( idx != 0 )
@@ -1001,7 +1003,7 @@ static HSOUNDSCRIPTHASH PrecachePhysicsSoundByStringIndex( int idx )
 		return CBaseEntity::PrecacheScriptSound( physprops->GetString( idx ) );
 	}
 
-	return SOUNDEMITTER_INVALID_HASH;
+	return SOUNDEMITTER_INVALID_HANDLE;
 }
 
 //-----------------------------------------------------------------------------

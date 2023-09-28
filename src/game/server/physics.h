@@ -90,6 +90,7 @@ extern CEntityList *g_pShadowEntities;
 #ifdef PORTAL
 extern CEntityList *g_pShadowEntities_Main;
 #endif
+
 void PhysAddShadow( CBaseEntity *pEntity );
 void PhysRemoveShadow( CBaseEntity *pEntity );
 bool PhysHasShadow( CBaseEntity *pEntity );
@@ -181,6 +182,7 @@ struct masscenteroverride_t
 void PhysSetMassCenterOverride( masscenteroverride_t &override );
 // NOTE: this removes the entry from the table as well as retrieving it
 void PhysGetMassCenterOverride( CBaseEntity *pEntity, vcollide_t *pCollide, solid_t &solidOut );
+float PhysGetEntityMass( CBaseEntity *pEntity );
 void PhysSetEntityGameFlags( CBaseEntity *pEntity, unsigned short flags );
 
 void DebugDrawContactPoints(IPhysicsObject *pPhysics);

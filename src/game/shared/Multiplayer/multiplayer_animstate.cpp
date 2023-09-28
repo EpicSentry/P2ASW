@@ -3,7 +3,6 @@
 // Purpose: 
 //
 //=============================================================================//
-
 #include "cbase.h"
 #include "tier0/vprof.h"
 #include "animation.h"
@@ -12,17 +11,12 @@
 #include "utldict.h"
 #include "multiplayer_animstate.h"
 #include "activitylist.h"
-#include "basecombatweapon_shared.h"
-#include "datacache/imdlcache.h"
 
 #ifdef CLIENT_DLL
 #include "c_baseplayer.h"
 #include "engine/ivdebugoverlay.h"
 #include "filesystem.h"
 #include "eventlist.h"
-#ifdef DEMOPOLISH_ENABLED
-#include "demo_polish/demo_polish.h"
-#endif
 ConVar anim_showmainactivity( "anim_showmainactivity", "0", FCVAR_CHEAT, "Show the idle, walk, run, and/or sprint activities." );
 #else
 #include "player.h"
@@ -32,20 +26,12 @@ ConVar anim_showmainactivity( "anim_showmainactivity", "0", FCVAR_CHEAT, "Show t
 #include "c_portal_player.h"
 #endif
 
-// NOTE: This has to be the last file included!
-#include "tier0/memdbgon.h"
-
-
 #define MOVING_MINIMUM_SPEED	0.5f
 
 ConVar anim_showstate( "anim_showstate", "-1", FCVAR_CHEAT | FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Show the (client) animation state for the specified entity (-1 for none)." );
 ConVar anim_showstatelog( "anim_showstatelog", "0", FCVAR_CHEAT | FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "1 to output anim_showstate to Msg(). 2 to store in AnimState.log. 3 for both." );
 ConVar mp_showgestureslots( "mp_showgestureslots", "-1", FCVAR_CHEAT | FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Show multiplayer client/server gesture slot information for the specified player index (-1 for no one)." );
 ConVar mp_slammoveyaw( "mp_slammoveyaw", "0", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Force movement yaw along an animation path." );
-
-
-mstudioevent_for_client_server_t *GetEventIndexForSequence( mstudioseqdesc_t &seqdesc );
-
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -141,9 +127,10 @@ void CMultiPlayerAnimState::ClearAnimationState()
 	m_bJumping = false;
 	m_bDying = false;
 	m_bCurrentFeetYawInitialized = false;
-	m_flLastAnimationStateClearTime = gpGlobals->curtime;
 
+#ifdef GAME_DLL // don't reset on the client until a ragdoll has been generated
 	ResetGestureSlots();
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -230,15 +217,8 @@ void CMultiPlayerAnimState::DoAnimationEvent( PlayerAnimEvent_t event, int nData
 			m_bFirstJumpFrame = true;
 			m_flJumpStartTime = gpGlobals->curtime;
 
-			RestartMainSequence();
+			RestartGesture( GESTURE_SLOT_JUMP, ACT_MP_JUMP );
 
-#if defined( CLIENT_DLL ) && defined( DEMO_POLISH )
-			// Notify demo polish recorder
-			if ( IsDemoPolishEnabled() && IsDemoPolishRecording() )
-			{
-				DemoPolish_GetRecorder().RecordJumpEvent( GetBasePlayer()->entindex() );
-			}
-#endif
 			break;
 		}
 	case PLAYERANIMEVENT_DIE:
@@ -349,8 +329,6 @@ bool CMultiPlayerAnimState::InitGestureSlots( void )
 
 	// Setup the number of gesture slots. 
 	m_aGestureSlots.AddMultipleToTail( GESTURE_SLOT_COUNT );
-
-	MDLCACHE_CRITICAL_SECTION();
 	for ( int iGesture = 0; iGesture < GESTURE_SLOT_COUNT; ++iGesture )
 	{
 		m_aGestureSlots[iGesture].m_pAnimLayer = pPlayer->GetAnimOverlay( iGesture );
@@ -377,6 +355,7 @@ void CMultiPlayerAnimState::ShutdownGestureSlots( void )
 //-----------------------------------------------------------------------------
 void CMultiPlayerAnimState::ResetGestureSlots( void )
 {
+	m_flLastAnimationStateClearTime = gpGlobals->curtime;
 	// Clear out all the gesture slots.
 	for ( int iGesture = 0; iGesture < GESTURE_SLOT_COUNT; ++iGesture )
 	{
@@ -397,7 +376,7 @@ void CMultiPlayerAnimState::ResetGestureSlot( int iGestureSlot )
 	{
 #ifdef CLIENT_DLL
 		// briefly set to 1.0 so we catch the events, before we reset the slot
-		pGestureSlot->m_pAnimLayer->SetCycle( 1.0 );
+		pGestureSlot->m_pAnimLayer->SetCycle(1.0);
 
 		RunGestureSlotAnimEventsToCompletion( pGestureSlot );
 #endif
@@ -436,7 +415,7 @@ void CMultiPlayerAnimState::RunGestureSlotAnimEventsToCompletion( GestureSlot_t 
 	mstudioseqdesc_t &seqdesc = pStudioHdr->pSeqdesc( pGesture->m_pAnimLayer->GetSequence() );
 	if ( seqdesc.numevents > 0 )
 	{
-		mstudioevent_t *pevent = GetEventIndexForSequence( seqdesc );
+		mstudioevent_t* pevent = (mstudioevent_t*)seqdesc.pEvent( 0 );
 
 		for (int i = 0; i < (int)seqdesc.numevents; i++)
 		{
@@ -445,13 +424,13 @@ void CMultiPlayerAnimState::RunGestureSlotAnimEventsToCompletion( GestureSlot_t 
 				if ( !( pevent[i].type & AE_TYPE_CLIENT ) )
 					continue;
 			}
-			else if ( pevent[i].Event_OldSystem() < EVENT_CLIENT ) //Adrian - Support the old event system
+			else if ( pevent[i].szeventindex < 5000 ) //Adrian - Support the old event system
 				continue;
 
 			if ( pevent[i].cycle > pGesture->m_pAnimLayer->GetPrevCycle() &&
 				pevent[i].cycle <= pGesture->m_pAnimLayer->GetCycle() )
 			{
-				pPlayer->FireEvent( pPlayer->GetAbsOrigin(), pPlayer->GetAbsAngles(), pevent[ i ].Event(), pevent[ i ].pszOptions() );
+				pPlayer->FireEvent( pPlayer->GetAbsOrigin(), pPlayer->GetAbsAngles(), pevent[ i ].szeventindex, pevent[ i ].pszOptions() );
 			}
 		}
 	}
@@ -500,7 +479,7 @@ void CMultiPlayerAnimState::RestartGesture( int iGestureSlot, Activity iGestureA
 			GestureSlot_t *pGesture = &m_aGestureSlots[iGestureSlot];
 			if ( pGesture && pGesture->m_pAnimLayer )
 			{
-				pGesture->m_pAnimLayer->SetCycle( 1.0 ); // run until the end
+				pGesture->m_pAnimLayer->SetCycle(1.0); // run until the end
 				RunGestureSlotAnimEventsToCompletion( &m_aGestureSlots[iGestureSlot] );
 			}
 		}
@@ -512,8 +491,8 @@ void CMultiPlayerAnimState::RestartGesture( int iGestureSlot, Activity iGestureA
 	}
 
 	// Reset the cycle = restart the gesture.
-	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetCycle( 0.0f );
-	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetPrevCycle( 0.0f );
+	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetCycle(0.0f);
+	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetPrevCycle(0.0f);
 }
 
 //-----------------------------------------------------------------------------
@@ -544,16 +523,16 @@ void CMultiPlayerAnimState::AddToGestureSlot( int iGestureSlot, Activity iGestur
 	m_aGestureSlots[iGestureSlot].m_iActivity = iGestureActivity;
 	m_aGestureSlots[iGestureSlot].m_bAutoKill = bAutoKill;
 	m_aGestureSlots[iGestureSlot].m_bActive = true;
-	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetSequence( iGestureSequence );
-	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetOrder( iGestureSlot );
-	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetWeight( 1.0f );
-	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetPlaybackRate( 1.0f );
-	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetCycle( 0.0f );
-	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetPrevCycle( 0.0f );
+	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetSequence(iGestureSequence);
+	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetOrder(iGestureSlot);
+	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetWeight(1.0f);
+	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetPlaybackRate(1.0f);
+	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetCycle(0.0f);
+	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetPrevCycle(0.0f);
 	m_aGestureSlots[iGestureSlot].m_pAnimLayer->m_flLayerAnimtime = 0.0f;
 	m_aGestureSlots[iGestureSlot].m_pAnimLayer->m_flLayerFadeOuttime = 0.0f;
 
-	pPlayer->SetOverlayPrevEventCycle(iGestureSlot, -1.0);
+	pPlayer->SetOverlayPrevEventCycle(iGestureSlot,-1.0);
 
 #else
 
@@ -611,21 +590,21 @@ void CMultiPlayerAnimState::AddVCDSequenceToGestureSlot( int iGestureSlot, int i
 
 #ifdef CLIENT_DLL 
 
-	// Setup the gesture.
+	// Setup the gesture.	
 	m_aGestureSlots[iGestureSlot].m_iGestureSlot = iGestureSlot;
 	m_aGestureSlots[iGestureSlot].m_iActivity = iGestureActivity;
 	m_aGestureSlots[iGestureSlot].m_bAutoKill = bAutoKill;
 	m_aGestureSlots[iGestureSlot].m_bActive = true;
-	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetSequence( iGestureSequence );
-	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetOrder( iGestureSlot ); 
-	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetWeight( 1.0f );
-	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetPlaybackRate( 1.0f );
-	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetCycle( 0.0f );
-	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetPrevCycle( 0.0f );
+	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetSequence(iGestureSequence);
+	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetOrder(iGestureSlot);
+	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetWeight(1.0f);
+	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetPlaybackRate(1.0f);
+	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetCycle(0.0f);
+	m_aGestureSlots[iGestureSlot].m_pAnimLayer->SetPrevCycle(0.0f);
 	m_aGestureSlots[iGestureSlot].m_pAnimLayer->m_flLayerAnimtime = 0.0f;
 	m_aGestureSlots[iGestureSlot].m_pAnimLayer->m_flLayerFadeOuttime = 0.0f;
 
-	pPlayer->SetOverlayPrevEventCycle(iGestureSlot, -1.0);
+	pPlayer->SetOverlayPrevEventCycle(iGestureSlot,-1.0);
 
 #else
 
@@ -720,7 +699,7 @@ bool CMultiPlayerAnimState::HandleJumping( Activity &idealActivity )
 	}
 	if ( m_bJumping )
 	{
-		idealActivity = ACT_MP_JUMP;
+//		idealActivity = ACT_MP_JUMP;
 		return true;
 	}
 	else
@@ -890,6 +869,9 @@ Activity CMultiPlayerAnimState::TranslateActivity( Activity actDesired )
 		}
 	}
 
+	if ( GetBasePlayer()->GetActiveWeapon() )
+		actDesired = GetBasePlayer()->GetActiveWeapon()->ActivityOverride( actDesired, false );
+
 	return actDesired;
 }
 
@@ -937,7 +919,6 @@ float CMultiPlayerAnimState::GetCurrentMaxGroundSpeed()
 // Input  : *bIsMoving - 
 // Output : float
 //-----------------------------------------------------------------------------
-ConVar movement_anim_playback_minrate( "movement_anim_playback_minrate", "0.25" );
 float CMultiPlayerAnimState::CalcMovementPlaybackRate( bool *bIsMoving )
 {
 	// Get the player's current velocity and speed.
@@ -965,7 +946,7 @@ float CMultiPlayerAnimState::CalcMovementPlaybackRate( bool *bIsMoving )
 		{
 			// Note this gets set back to 1.0 if sequence changes due to ResetSequenceInfo below
 			flReturn = flSpeed / flGroundSpeed;
-			flReturn = clamp( flReturn, movement_anim_playback_minrate.GetFloat(), 10.0f );
+			flReturn = clamp( flReturn, 0.01f, 10.0f );
 		}
 
 		*bIsMoving = true;
@@ -1052,7 +1033,7 @@ void CMultiPlayerAnimState::ComputeMainSequence()
 #ifdef CLIENT_DLL
 	// If we went from idle to walk, reset the interpolation history.
 	// Kind of hacky putting this here.. it might belong outside the base class.
-	if ( (oldActivity == ACT_MP_CROUCH_IDLE || oldActivity == ACT_MP_STAND_IDLE || oldActivity == ACT_MP_STAND_SECONDARY || oldActivity == ACT_MP_DEPLOYED_IDLE || oldActivity == ACT_MP_CROUCH_DEPLOYED_IDLE ) && 
+	if ( (oldActivity == ACT_MP_CROUCH_IDLE || oldActivity == ACT_MP_STAND_IDLE || oldActivity == ACT_MP_DEPLOYED_IDLE || oldActivity == ACT_MP_CROUCH_DEPLOYED_IDLE ) && 
 		 (idealActivity == ACT_MP_WALK || idealActivity == ACT_MP_CROUCHWALK ) )
 	{
 		ResetGroundSpeed();
@@ -1067,8 +1048,8 @@ void CMultiPlayerAnimState::ResetGroundSpeed( void )
 {
 #ifdef CLIENT_DLL
 		m_flMaxGroundSpeed = GetCurrentMaxGroundSpeed();
-		m_iv_flMaxGroundSpeed.Reset( gpGlobals->curtime );
-		m_iv_flMaxGroundSpeed.NoteChanged( gpGlobals->curtime, gpGlobals->curtime, 0, false );
+		m_iv_flMaxGroundSpeed.Reset(gpGlobals->curtime);
+		m_iv_flMaxGroundSpeed.NoteChanged( gpGlobals->curtime, 0, false );
 #endif
 }
 
@@ -1137,18 +1118,18 @@ void CMultiPlayerAnimState::UpdateGestureLayer( CStudioHdr *pStudioHdr, GestureS
 	if( !pPlayer )
 		return;
 
+#ifdef CLIENT_DLL 
+
 	// Get the current cycle.
 	float flCycle = pGesture->m_pAnimLayer->GetCycle();
 	flCycle += pPlayer->GetSequenceCycleRate( pStudioHdr, pGesture->m_pAnimLayer->GetSequence() ) * gpGlobals->frametime;
 
-	pGesture->m_pAnimLayer->SetPrevCycle( pGesture->m_pAnimLayer->GetCycle() );
-	pGesture->m_pAnimLayer->SetCycle( flCycle );
+	pGesture->m_pAnimLayer->SetPrevCycle(pGesture->m_pAnimLayer->GetCycle());
+	pGesture->m_pAnimLayer->SetCycle(flCycle);
 
 	if( flCycle > 1.0f )
 	{
-#ifdef CLIENT_DLL
 		RunGestureSlotAnimEventsToCompletion( pGesture );
-#endif
 
 		if ( pGesture->m_bAutoKill )
 		{
@@ -1157,15 +1138,17 @@ void CMultiPlayerAnimState::UpdateGestureLayer( CStudioHdr *pStudioHdr, GestureS
 		}
 		else
 		{
-			pGesture->m_pAnimLayer->SetCycle( 1.0f );
+			pGesture->m_pAnimLayer->SetCycle(1.0f);
 		}
 	}
 
-#ifndef CLIENT_DLL
+#else
+
 	if ( pGesture->m_iActivity != ACT_INVALID && pGesture->m_pAnimLayer->m_nActivity == ACT_INVALID )
 	{
 		ResetGestureSlot( pGesture->m_iGestureSlot );
 	}
+
 #endif
 }
 
@@ -1214,8 +1197,7 @@ void CMultiPlayerAnimState::Update( float eyeYaw, float eyePitch )
 	}
 
 #ifdef CLIENT_DLL
-	if ( C_BasePlayer::IsLocalPlayer( GetBasePlayer() ) &&
-		GetBasePlayer()->ShouldDrawLocalPlayer() )
+	if ( GetBasePlayer() == C_BasePlayer::GetLocalPlayer() && GetBasePlayer()->ShouldDrawLocalPlayer() )
 	{
 		GetBasePlayer()->SetPlaybackRate( 1.0f );
 	}
@@ -1443,19 +1425,8 @@ void CMultiPlayerAnimState::ComputePoseParam_AimYaw( CStudioHdr *pStudioHdr )
 
 			if ( fabs( flYawDelta ) > 45.0f/*m_AnimConfig.m_flMaxBodyYawDegrees*/ )
 			{
-#if defined( CLIENT_DLL ) && defined( DEMO_POLISH )
-				float const flCurrentFootYaw = m_flGoalFeetYaw;
-#endif
-
 				float flSide = ( flYawDelta > 0.0f ) ? -1.0f : 1.0f;
 				m_flGoalFeetYaw += ( 45.0f/*m_AnimConfig.m_flMaxBodyYawDegrees*/ * flSide );
-
-#if defined( CLIENT_DLL ) && defined( DEMO_POLISH )
-				if ( IsDemoPolishRecording() )
-				{
-					CDemoPolishRecorder::Instance().RecordStandingHeadingChange( GetBasePlayer()->entindex(), flCurrentFootYaw, m_flGoalFeetYaw );
-				}
-#endif
 			}
 		}
 	}
@@ -1678,7 +1649,7 @@ void CMultiPlayerAnimState::DebugShowAnimStateForPlayer( bool bIsServer )
 		CAnimationLayer *pLayer = GetBasePlayer()->GetAnimOverlay( iAnim );
 		if ( pLayer && ( pLayer->m_nOrder != CBaseAnimatingOverlay::MAX_OVERLAYS ) )
 		{
-			Anim_StatePrintf( iLine++, "Layer %s: Weight: %.2f, Cycle: %.2f", GetSequenceName( GetBasePlayer()->GetModelPtr(), pLayer->GetSequence() ), pLayer->GetWeight(), pLayer->GetCycle() );
+			Anim_StatePrintf( iLine++, "Layer %s: Weight: %.2f, Cycle: %.2f", GetSequenceName( GetBasePlayer()->GetModelPtr(), pLayer->m_nSequence ), pLayer->m_flWeight, pLayer->m_flCycle );
 		}
 #endif
 	}
@@ -1869,4 +1840,3 @@ void CMultiPlayerAnimState::OnNewModel( void )
 	m_bPoseParameterInit = false;
 	ClearAnimationState();
 }
-

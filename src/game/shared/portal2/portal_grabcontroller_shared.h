@@ -251,7 +251,7 @@ CBaseEntity *GetPlayerHeldEntity( CBasePlayer *pPlayer );
 CBasePlayer *GetPlayerHoldingEntity( const CBaseEntity *pEntity );
 
 CGrabController *GetGrabControllerForPlayer( CBasePlayer *pPlayer );
-CGrabController *GetGrabControllerForPhysCannon( CBaseCombatWeapon *pActiveWeapon );
+//CGrabController *GetGrabControllerForPhysCannon( CBaseCombatWeapon *pActiveWeapon );
 void GetSavedParamsForCarriedPhysObject( CGrabController *pGrabController, IPhysicsObject *pObject, float *pSavedMassOut, float *pSavedRotationalDampingOut );
 void UpdateGrabControllerTargetPosition( CBasePlayer *pPlayer, Vector *vPosition, QAngle *qAngles, bool bIsTeleport = false );
 bool PhysCannonAccountableForObject( CBaseCombatWeapon *pPhysCannon, CBaseEntity *pObject );

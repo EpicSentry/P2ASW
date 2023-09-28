@@ -308,8 +308,6 @@ public:
 	void InputDisableCollision( inputdata_t &inputdata );
 	void InputEnableCollision( inputdata_t &inputdata );
 	void InputSetPlaybackRate( inputdata_t &inputdata );
-	void InputBecomeRagdoll( inputdata_t &inputdata );
-	void InputFadeAndKill( inputdata_t &inputdata );
 
 	void UpdateBoneFollowers( void );
 
@@ -322,7 +320,6 @@ public:
 	int					m_iTransitionDirection;
 
 	// Random animations
-	bool				m_bAnimationDone;
 	bool				m_bHoldAnimation;
 	bool				m_bRandomAnimator;
 	bool				m_bDisableBoneFollowers;
@@ -332,7 +329,7 @@ public:
 	short				m_nPendingSequence;
 
 	bool				m_bStartDisabled;
-	bool				m_bAnimateEveryFrame;
+	bool				m_bUpdateAttachedChildren;	// For props with children on attachment points, update their child touches as we animate
 
 	CNetworkVar( bool, m_bUseHitboxesForRenderBox );
 
@@ -435,10 +432,11 @@ private:
 
 protected:
 	CNetworkVar( bool, m_bAwake );
-
+	
 #ifdef PORTAL2
 	bool		m_bAllowPortalFunnel;
 #endif // PORTAL2
+
 };
 
 

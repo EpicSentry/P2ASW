@@ -1,10 +1,10 @@
-//===== Copyright (c) Valve Corporation, All rights reserved. ======//
+//===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ======//
 //
 // Purpose: Client-side CBasePlayer.
 //
 //			- Manages the player's flashlight effect.
 //
-//==================================================================//
+//===========================================================================//
 
 #ifndef C_BASEPLAYER_H
 #define C_BASEPLAYER_H
@@ -23,14 +23,12 @@
 #include "hintsystem.h"
 #include "soundemittersystem/isoundemittersystembase.h"
 #include "c_env_fog_controller.h"
-#include "c_postprocesscontroller.h"
-#include "c_colorcorrection.h"
-
+#include "C_PostProcessController.h"
+#include "C_ColorCorrection.h"
 
 class C_BaseCombatWeapon;
 class C_BaseViewModel;
 class C_FuncLadder;
-enum CrossPlayPlatform_t;
 
 extern int g_nKillCamMode;
 extern int g_nKillCamTarget1;
@@ -82,9 +80,8 @@ public:
 
 	virtual void	Spawn( void );
 	virtual void	SharedSpawn(); // Shared between client and server.
-	virtual bool	GetSteamID( CSteamID *pID );
-	virtual void	UpdateOnRemove( void );
 	Class_T		Classify( void ) { return CLASS_PLAYER; }
+	bool hasDoubleJumped;
 
 	// IClientEntity overrides.
 	virtual void	OnPreDataChanged( DataUpdateType_t updateType );
@@ -100,8 +97,8 @@ public:
 	virtual void	MakeTracer( const Vector &vecTracerSrc, const trace_t &tr, int iTracerType );
 
 	virtual void	GetToolRecordingState( KeyValues *msg );
-
-#if defined( PORTAL2 ) || defined( LOSTSTORY )
+	
+#ifdef PORTAL2
 	bool			ClearUseEntity();
 #endif
 
@@ -143,8 +140,8 @@ public:
 	virtual void	PlayerUse( void );
 	CBaseEntity		*FindUseEntity( void );
 	virtual bool	IsUseableEntity( CBaseEntity *pEntity, unsigned int requiredCaps );
-
-#if defined( PORTAL2 ) || defined( LOSTSTORY )
+	
+#ifdef PORTAL2
 	virtual bool	CanPickupObject( CBaseEntity *pObject, float massLimit, float sizeLimit );
 	virtual float	GetHeldObjectMass( IPhysicsObject *pHeldObject );
 	virtual void	ForceDropOfCarriedPhysObjects(){};
@@ -166,9 +163,7 @@ public:
 
 	bool IsObserver() const;
 	bool IsHLTV() const;
-#if defined( REPLAY_ENABLED )
 	bool IsReplay() const;
-#endif
 	void ResetObserverMode();
 	bool IsBot( void ) const { return false; }
 
@@ -254,7 +249,7 @@ public:
 
 	void						AddSplitScreenPlayer( C_BasePlayer *pOther );
 	void						RemoveSplitScreenPlayer( C_BasePlayer *pOther );
-	CUtlVector< CHandle< C_BasePlayer > >& GetSplitScreenPlayers( void );
+	CUtlVector< CHandle< C_BasePlayer > > &GetSplitScreenPlayers();
 	void						AddPictureInPicturePlayer( C_BasePlayer *pOther );
 	void						RemovePictureInPicturePlayer( C_BasePlayer *pOther );
 	CUtlVector< CHandle< C_BasePlayer > >& GetSplitScreenAndPictureInPicturePlayers( void );
@@ -266,8 +261,7 @@ public:
 	int							GetSplitScreenPlayerSlot();
 	bool						HasAttachedSplitScreenPlayers() const;
 
-	CrossPlayPlatform_t			GetCrossPlayPlatform( void ) const;
-
+	virtual IClientModelRenderable*	GetClientModelRenderable();
 	virtual bool				PreRender( int nSplitScreenPlayerSlot );
 
 	int							GetUserID( void ) const;
@@ -285,20 +279,9 @@ public:
 #endif
 
 	virtual void				PhysicsSimulate( void );
-	virtual void				VPhysicsShadowUpdate( IPhysicsObject *pPhysics );
-	virtual bool				IsFollowingPhysics( void ) { return false; }
-	bool						IsRideablePhysics( IPhysicsObject *pPhysics );
-	IPhysicsObject				*GetGroundVPhysics();
-	void						UpdatePhysicsShadowToCurrentPosition( void );
-	void						UpdateVPhysicsPosition( const Vector &position, const Vector &velocity, float secondsToArrival );
-	void						UpdatePhysicsShadowToPosition( const Vector &vecAbsOrigin );
-	void						PostThinkVPhysics( void );
-	void						SetTouchedPhysics( bool bTouch );
-	bool						TouchedPhysics( void );
 	void						SetPhysicsFlag( int nFlag, bool bSet );
 	bool						HasPhysicsFlag( unsigned int flag ) { return (m_afPhysicsFlags & flag) != 0; }
-	void						SetVCollisionState( const Vector &vecAbsOrigin, const Vector &vecAbsVelocity, int collisionState );
-	virtual unsigned int		PhysicsSolidMaskForEntity( void ) const { return MASK_PLAYERSOLID; }
+	virtual unsigned int	PhysicsSolidMaskForEntity( void ) const { return MASK_PLAYERSOLID; }
 
 	// Prediction stuff
 	virtual bool				ShouldPredict( void );
@@ -340,8 +323,9 @@ public:
 
 	virtual bool				ShouldInterpolate();
 
+	virtual bool				ShouldDraw();
+	virtual int					DrawModel( int flags, const RenderableInstance_t &instance );
 	virtual bool				ShouldSuppressForSplitScreenPlayer( int nSlot );
-	virtual const char *		GetPlayerModelName( void );
 
 	// Called when not in tactical mode. Allows view to be overriden for things like driving a tank.
 	virtual void				OverrideView( CViewSetup *pSetup );
@@ -390,7 +374,6 @@ public:
 	// Get the command number associated with the current usercmd we're running (if in predicted code).
 	int CurrentCommandNumber() const;
 	const CUserCmd *GetCurrentUserCommand() const;
-	CUserCmd const *GetLastUserCommand( void );
 
 	virtual const QAngle&	GetPunchAngle();
 	void SetPunchAngle( const QAngle &angle );
@@ -442,11 +425,7 @@ public:
 	bool 					HintMessage( int hint, bool bForce = false, bool bOnlyIfClear = false ) { return Hints() ? Hints()->HintMessage( hint, bForce, bOnlyIfClear ) : false; }
 	void 					HintMessage( const char *pMessage ) { if (Hints()) Hints()->HintMessage( pMessage ); }
 
-	virtual	IMaterial			*GetHeadLabelMaterial( void );
-	virtual void				UpdateSpeechVOIP( bool bVoice );
-	virtual bool				ShouldShowVOIPIcon() const;
-	virtual const char			*GetVOIPParticleEffectName() const { return /*TODO: make real effect*/"impact_physics_dust"; }
-	virtual CNewParticleEffect	*GetVOIPParticleEffect( void );
+	virtual	IMaterial *GetHeadLabelMaterial( void );
 
 	// Fog
 	virtual fogparams_t		*GetFogParams( void ) { return &m_CurrentFog; }
@@ -462,7 +441,7 @@ public:
 
 	float					GetFOVTime( void ){ return m_flFOVTime; }
 
-	virtual PlayerRenderMode_t GetPlayerRenderMode( int nSlot );
+	PlayerRenderMode_t 		GetPlayerRenderMode( int nSlot );
 
 	virtual void			OnAchievementAchieved( int iAchievement ) {}
 
@@ -487,7 +466,7 @@ public:
 	static void RecvProxy_NonLocalCellOriginZ( const CRecvProxyData *pData, void *pStruct, void *pOut );
 
 	virtual bool ShouldRegenerateOriginFromCellBits() const;
-
+	
 	void SetUseEntity( CBaseEntity *pUseEntity );
 
 public:
@@ -542,32 +521,19 @@ private:
 
 public:
 	EHANDLE					m_hZoomOwner;		// This is a pointer to the entity currently controlling the player's zoom
-protected:
-	//HACKHACK: these 9 are only partially ported from server counterpart
-	IPhysicsPlayerController	*m_pPhysicsController;
-	IPhysicsObject				*m_pShadowStand;
-	IPhysicsObject				*m_pShadowCrouch;
-	int							m_vphysicsCollisionState;
-	Vector						m_oldOrigin;
-	bool						m_bTouchedPhysObject;
-	bool						m_bPhysicsWasFrozen;
-	Vector						m_vNewVPhysicsPosition;
-	Vector						m_vNewVPhysicsVelocity;
-	CUserCmd					m_LastCmd;
+private:
 
 	unsigned int			m_afPhysicsFlags;
 	EHANDLE					m_hVehicle;
 	typedef CHandle<C_BaseCombatWeapon> CBaseCombatWeaponHandle;
 	CBaseCombatWeaponHandle	m_hLastWeapon;
 	// players own view models, left & right hand
-	CHandle< C_BaseViewModel >	m_hViewModel[ MAX_VIEWMODELS ];	
-
-	CUtlReference< CNewParticleEffect > m_speechVOIPParticleEffect;
+	CHandle< C_BaseViewModel >	m_hViewModel[ MAX_VIEWMODELS ];		
 
 public:
 	// For weapon prediction
 	bool					m_fOnTarget;		//Is the crosshair on a target?
-
+	
 
 	EHANDLE			m_hUseEntity;
 
@@ -583,7 +549,6 @@ public:
 	CUserCmd		*m_pCurrentCommand;
 
 	EHANDLE			m_hViewEntity;
-	bool			m_bShouldDrawPlayerWhileUsingViewEntity;
 
 	// Movement constraints
 	EHANDLE			m_hConstraintEntity;
@@ -629,7 +594,8 @@ protected:
 	float			m_flFreezeFrameDistance;
 	bool			m_bWasFreezeFraming; 
 	float			m_flDeathTime;		// last time player died
-	CDiscontinuousInterpolatedVar< Vector >	m_iv_vecViewOffset;
+
+	CDiscontinuousInterpolatedVar< Vector >	m_iv_vecViewOffset; // Needs to be protected for Portal 2
 
 private:
 	// Make sure no one calls this...
@@ -639,8 +605,6 @@ private:
 	// Vehicle stuff.
 	EHANDLE			m_hOldVehicle;
 	
-
-
 	// Not replicated
 	Vector			m_vecWaterJumpVel;
 
@@ -687,7 +651,6 @@ private:
 
 	friend class CPrediction;
 	friend class CASW_Prediction;
-	friend class CDOTAPrediction;
 
 	// HACK FOR TF2 Prediction
 	friend class CTFGameMovementRecon;
@@ -697,7 +660,7 @@ private:
 	friend class CHL2GameMovement;
 	friend class CPortalGameMovement;
 	friend class CASW_MarineGameMovement;
-	friend class CLSGameMovement;
+	friend class CPaintGameMovement;
 	
 	// Accessors for gamemovement
 	float GetStepSize( void ) const { return m_Local.m_flStepSize; }
@@ -774,24 +737,15 @@ private:
 
 	// fog params
 	fogplayerparams_t		m_PlayerFog;
-#if defined( DEBUG_MOTION_CONTROLLERS )
-public:
-	Vector					m_Debug_vPhysPosition;
-	Vector					m_Debug_vPhysVelocity;
-	Vector					m_Debug_LinearAccel;
-#endif
-
+	
 	float m_flTimeLastTouchedGround;
 
 public:
 	float GetAirTime( void );
-
+	
 private:
 	void UpdateSplitScreenAndPictureInPicturePlayerList();
 
-	//HACK: always contains the last origin we received through C_BasePlayer::RecvProxy_LocalOriginXY() & C_BasePlayer::RecvProxy_LocalOriginZ(). Intended to fix bug 85693 without as small a scale change as possible
-	//only works because we receive both the local and nonlocal representations of our origin on recreation. It just happens that the nonlocal wins out by default because it comes last
-	Vector m_vecHack_RecvProxy_LocalPlayerOrigin; 
 };
 
 EXTERN_RECV_TABLE(DT_BasePlayer);
@@ -871,21 +825,6 @@ inline bool C_BasePlayer::IsHLTV() const
 inline bool	C_BasePlayer::IsLocalPlayer( void ) const
 {
 	return m_bIsLocalPlayer;
-}
-
-inline void CBasePlayer::SetTouchedPhysics( bool bTouch ) 
-{ 
-	m_bTouchedPhysObject = bTouch; 
-}
-
-inline bool C_BasePlayer::TouchedPhysics( void )			
-{ 
-	return m_bTouchedPhysObject; 
-}
-
-inline CUserCmd const *C_BasePlayer::GetLastUserCommand( void )
-{
-	return &m_LastCmd;
 }
 
 

@@ -1,6 +1,6 @@
 //===== Copyright � 1996-2005, Valve Corporation, All rights reserved. ======//
 //
-
+// Purpose: Functions dealing with the player.
 //
 //===========================================================================//
 
@@ -30,12 +30,17 @@
 #include "ndebugoverlay.h"
 #include "baseviewmodel.h"
 #include "in_buttons.h"
+
+	#if defined( PORTAL )
+		#include "portal_player.h"
+		#include "physicsshadowclone.h"
+	#endif
+
 #include "client.h"
 #include "team.h"
 #include "particle_smokegrenade.h"
 #include "IEffects.h"
 #include "vstdlib/random.h"
-#include "vstdlib/vstrtools.h"
 #include "engine/IEngineSound.h"
 #include "movehelper_server.h"
 #include "igamemovement.h"
@@ -70,22 +75,21 @@
 #include "env_debughistory.h"
 #include "fogcontroller.h"
 #include "gameinterface.h"
+//#include "hl2orange.spa.h"
 #include "toolframework/itoolframework.h"
 #include "sendprop_priorities.h"
 #include "logic_playerproxy.h"
 #include "fogvolume.h"
-#include "iclient.h"
 
 #ifdef PORTAL2
 #include "weapon_portalgun.h"
+#include "portal_grabcontroller_shared.h"
 #endif
 
 #ifdef HL2_DLL
 #include "combine_mine.h"
 #include "weapon_physcannon.h"
 #endif
-
-#include "cegclientwrapper.h" // [zzz]
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -98,12 +102,13 @@ ConVar autoaim_max_deflect( "autoaim_max_deflect", "0.99" );
 ConVar	spec_freeze_time( "spec_freeze_time", "4.0", FCVAR_CHEAT | FCVAR_REPLICATED, "Time spend frozen in observer freeze cam." );
 ConVar	spec_freeze_traveltime( "spec_freeze_traveltime", "0.4", FCVAR_CHEAT | FCVAR_REPLICATED, "Time taken to zoom in to frame a target in observer freeze cam.", true, 0.01, false, 0 );
 
-ConVar sv_bonus_challenge( "sv_bonus_challenge", "0", FCVAR_REPLICATED | FCVAR_HIDDEN | FCVAR_DEVELOPMENTONLY, "Set to values other than 0 to select a bonus map challenge type." );
+ConVar sv_bonus_challenge( "sv_bonus_challenge", "0", FCVAR_REPLICATED, "Set to values other than 0 to select a bonus map challenge type." );
 
 ConVar sv_regeneration_wait_time ("sv_regeneration_wait_time", "1.0", FCVAR_REPLICATED );
 
 static ConVar old_armor( "player_old_armor", "0" );
 
+static ConVar physicsshadowupdate_render( "physicsshadowupdate_render", "0" );
 bool IsInCommentaryMode( void );
 bool IsListeningToCommentary( void );
 
@@ -138,6 +143,14 @@ extern CServerGameDLL g_ServerGameDLL;
 
 #define SLOWFREEZE_DURATION	2
 #define SLOWFREEZE_DAMAGE	1.0
+
+//----------------------------------------------------
+// Player Physics Shadow
+//----------------------------------------------------
+#define VPHYS_MAX_DISTANCE		2.0
+#define VPHYS_MAX_VEL			10
+#define VPHYS_MAX_DISTSQR		(VPHYS_MAX_DISTANCE*VPHYS_MAX_DISTANCE)
+#define VPHYS_MAX_VELSQR		(VPHYS_MAX_VEL*VPHYS_MAX_VEL)
 
 
 extern bool		g_fDrawLines;
@@ -267,7 +280,7 @@ BEGIN_DATADESC( CBasePlayer )
 
 	DEFINE_FIELD( m_vecAdditionalPVSOrigin, FIELD_POSITION_VECTOR ),
 	DEFINE_FIELD( m_vecCameraPVSOrigin, FIELD_POSITION_VECTOR ),
-
+	
 	DEFINE_FIELD( m_bDropEnabled, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_bDuckEnabled, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_hUseEntity, FIELD_EHANDLE ),
@@ -286,7 +299,7 @@ BEGIN_DATADESC( CBasePlayer )
 	DEFINE_ARRAY( m_szNetworkIDString, FIELD_CHARACTER, MAX_NETWORKID_LENGTH ),	
 	DEFINE_FIELD( m_oldOrigin, FIELD_POSITION_VECTOR ),
 	DEFINE_FIELD( m_vecSmoothedVelocity, FIELD_VECTOR ),
-	//DEFINE_FIELD( m_bTouchedPhysObject, FIELD_BOOLEAN ),
+	//DEFINE_FIELD( m_touchedPhysObject, FIELD_BOOLEAN ),
 	//DEFINE_FIELD( m_bPhysicsWasFrozen, FIELD_BOOLEAN ),
 	//DEFINE_FIELD( m_iPlayerSound, FIELD_INTEGER ),	// Don't restore, set in Precache()
 	DEFINE_FIELD( m_iTargetVolume, FIELD_INTEGER ),
@@ -395,7 +408,6 @@ BEGIN_DATADESC( CBasePlayer )
 	DEFINE_FIELD( m_flOldPlayerViewOffsetZ, FIELD_FLOAT ),
 	DEFINE_FIELD( m_bPlayerUnderwater, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_hViewEntity, FIELD_EHANDLE ),
-	DEFINE_FIELD( m_bShouldDrawPlayerWhileUsingViewEntity, FIELD_BOOLEAN ),
 
 	DEFINE_FIELD( m_hConstraintEntity, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_vecConstraintCenter, FIELD_POSITION_VECTOR ),
@@ -609,9 +621,6 @@ CBasePlayer::CBasePlayer( )
 	m_nNumCrouches = 0;
 	m_bDuckToggled = false;
 	m_bPhysicsWasFrozen = false;
-	m_bDropEnabled = true;
-	m_bDuckEnabled = true;
-
 
 	m_movementCollisionNormal = Vector( 0, 0, 1 );
 
@@ -625,8 +634,6 @@ CBasePlayer::CBasePlayer( )
 
 	m_bSplitScreenPlayer = false;
 	m_hSplitOwner = NULL;
-
-	m_ClientPlatform = CROSSPLAYPLATFORM_THISPLATFORM;
 
 	m_hPostProcessCtrl.Set( NULL );
 	m_hColorCorrectionCtrl.Set( NULL );
@@ -686,16 +693,11 @@ void CBasePlayer::SetupVisibility( CBaseEntity *pViewEntity, unsigned char *pvs,
 	}
 
 	// Merge in PVS from split screen players
-	CUtlVector< CHandle<CBasePlayer> > &splitPlayers = GetSplitScreenAndPictureInPicturePlayers();
-
-	for ( int i = 0; i < splitPlayers.Count(); i++ )
+	for ( int i = 1; i < MAX_SPLITSCREEN_PLAYERS; ++i )
 	{
-		CBasePlayer *pl = splitPlayers[i];
+		CBasePlayer *pl = (CBasePlayer *)ToBasePlayer( GetContainingEntity( engine->GetSplitScreenPlayerForEdict( entindex(), i ) ) );
 		if ( !pl )
-		{
 			continue;
-		}
-
 		org = pl->EyePosition();
 		engine->AddOriginToPVS( org );
 	}
@@ -866,6 +868,7 @@ void CBasePlayer::DeathSound( const CTakeDamageInfo &info )
 		EmitSound( "Player.Death" );
 	}
 #endif
+
 	// play one of the suit death alarms
 	if ( IsSuitEquipped() )
 	{
@@ -1078,7 +1081,7 @@ bool CBasePlayer::ShouldTakeDamageInCommentaryMode( const CTakeDamageInfo &input
 		return true;
 
 #ifdef PORTAL
-	if ( inputInfo.GetDamageType() & DMG_ACID )
+	if (inputInfo.GetDamageType() & DMG_ACID)
 		return true;
 #endif
 
@@ -1379,7 +1382,7 @@ int CBasePlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 		}
 	}
 
-	float flPunch = RandomFloat( -2, -3.5f );
+	float flPunch = -2;
 
 	if( hl2_episodic.GetBool() && info.GetAttacker() && !FInViewCone( info.GetAttacker() ) )
 	{
@@ -1390,7 +1393,6 @@ int CBasePlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 	}
 
 	m_Local.m_vecPunchAngle.SetX( flPunch );
-	m_Local.m_vecPunchAngle.SetY( RandomFloat( 1, -1 ) );
 
 	if (fTookDamage && !ftrivial && fmajor && flHealthPrev >= 75) 
 	{
@@ -1481,7 +1483,6 @@ void CBasePlayer::OnDamagedByExplosion( const CTakeDamageInfo &info )
 	CSingleUserRecipientFilter user( this );
 	enginesound->SetPlayerDSP( user, effect, false );
 #endif
-
 }
 
 //=========================================================
@@ -1700,13 +1701,11 @@ void CBasePlayer::Event_Killed( const CTakeDamageInfo &info )
 
 	g_pGameRules->PlayerKilled( this, info );
 
-	#if !defined( _GAMECONSOLE ) && !defined( NO_STEAM )
 	gamestats->Event_PlayerKilled( this, info );
-	#endif
 
 	RumbleEffect( RUMBLE_STOP_ALL, 0, RUMBLE_FLAGS_NONE );
 
-	ForceDropOfCarriedPhysObjects();
+	ClearUseEntity();
 	
 	// this client isn't going to be thinking for a while, so reset the sound until they respawn
 	pSound = CSoundEnt::SoundPointerForIndex( CSoundEnt::ClientSoundIndex( edict() ) );
@@ -2574,6 +2573,7 @@ CBaseEntity * CBasePlayer::GetObserverTarget()
 
 void CBasePlayer::ObserverUse( bool bIsPressed )
 {
+#ifndef _XBOX
 #if defined( REPLAY_ENABLED )
 	if ( !HLTVDirector()->IsActive() && !ReplayDirector()->IsActive() )	
 #else
@@ -2660,6 +2660,7 @@ void CBasePlayer::ObserverUse( bool bIsPressed )
 		return;
 
 	SetAbsOrigin( tr.endpos ); */
+#endif
 }
 
 void CBasePlayer::JumptoPosition(const Vector &origin, const QAngle &angles)
@@ -2853,9 +2854,6 @@ bool CBasePlayer::IsUseableEntity( CBaseEntity *pEntity, unsigned int requiredCa
 
 	return false;
 }
-
-
-
 
 //-----------------------------------------------------------------------------
 // Purpose:	Server side of jumping rules.  Most jumping logic is already
@@ -3546,8 +3544,7 @@ bool CBasePlayer::HasQueuedUsercmds( void ) const
 //-----------------------------------------------------------------------------
 void CBasePlayer::PlayerRunCommand(CUserCmd *ucmd, IMoveHelper *moveHelper)
 {
-	m_bTouchedPhysObject = false;
-
+	m_touchedPhysObject = false;
 
 	if ( pl.fixangle == FIXANGLE_NONE)
 	{
@@ -3565,11 +3562,6 @@ void CBasePlayer::PlayerRunCommand(CUserCmd *ucmd, IMoveHelper *moveHelper)
 		ucmd->buttons = 0;
 		ucmd->impulse = 0;
 		VectorCopy ( pl.v_angle, ucmd->viewangles );
-	}
-	else if( !m_bDuckEnabled )
-	{
-		ucmd->buttons &= ~IN_DUCK;
-		m_bDuckToggled = false;
 	}
 	else
 	{
@@ -3759,12 +3751,17 @@ void CBasePlayer::PreThink(void)
 	{
 		m_Local.m_flFallVelocity = -GetAbsVelocity().z;
 	}
-
+	
 	if ( GetGroundEntity() )
 	{
 		m_flTimeLastTouchedGround = gpGlobals->curtime;
 	}
 
+	{
+		m_flTimeLastTouchedGround = gpGlobals->curtime;
+	}
+
+#ifndef _XBOX
 	CNavArea *area = TheNavMesh->GetNavArea( GetAbsOrigin() );
 	if (area && area != m_lastNavArea)
 	{
@@ -3792,6 +3789,7 @@ void CBasePlayer::PreThink(void)
 		//event->SetInt( "areaid", area->GetID() );
 		//gameeventmanager->FireEvent( event );
 	}
+#endif
 
 	// StudioFrameAdvance( );//!!!HACKHACK!!! Can't be hit by traceline when not animating?
 }
@@ -4382,7 +4380,30 @@ void FixPlayerCrouchStuck( CBasePlayer *pPlayer )
 #define SMOOTHING_FACTOR 0.9
 extern CMoveData *g_pMoveData;
 
+// UNDONE: Look and see if the ground entity is in hierarchy with a MOVETYPE_VPHYSICS?
+// Behavior in that case is not as good currently when the parent is rideable
+bool CBasePlayer::IsRideablePhysics( IPhysicsObject *pPhysics )
+{
+	if ( pPhysics )
+	{
+		if ( pPhysics->GetMass() > (VPhysicsGetObject()->GetMass()*2) )
+			return true;
+	}
 
+	return false;
+}
+
+IPhysicsObject *CBasePlayer::GetGroundVPhysics()
+{
+	CBaseEntity *pGroundEntity = GetGroundEntity();
+	if ( pGroundEntity && pGroundEntity->GetMoveType() == MOVETYPE_VPHYSICS )
+	{
+		IPhysicsObject *pPhysGround = pGroundEntity->VPhysicsGetObject();
+		if ( pPhysGround && pPhysGround->IsMoveable() )
+			return pPhysGround;
+	}
+	return NULL;
+}
 
 
 //-----------------------------------------------------------------------------
@@ -4446,9 +4467,9 @@ void CBasePlayer::PostThink()
 				if ( m_hUseEntity->OnControls( this ) && 
 					( !GetActiveWeapon() || GetActiveWeapon()->IsEffectActive( EF_NODRAW ) ||
 					( GetActiveWeapon()->GetActivity() == ACT_VM_HOLSTER ) 
-	#ifdef PORTAL // Portalgun view model stays up when holding an object -Jeep
-					|| FClassnameIs( GetActiveWeapon(), "weapon_portalgun" ) 
-	#endif //#ifdef PORTAL			
+#ifdef PORTAL // Portalgun view model stays up when holding an object -Jeep
+						|| FClassnameIs(GetActiveWeapon(), "weapon_portalgun")
+#endif //#ifdef PORTAL	
 					) )
 				{  
 #if defined ( PORTAL2 )
@@ -4477,7 +4498,7 @@ void CBasePlayer::PostThink()
 
 			if ( GetFlags() & FL_ONGROUND )
 			{		
-				if (m_Local.m_flFallVelocity > 64 && !g_pGameRules->IsMultiplayer() && gpGlobals->frametime > 0 )
+				if (m_Local.m_flFallVelocity > 64 && !g_pGameRules->IsMultiplayer())
 				{
 					CSoundEnt::InsertSound ( SOUND_PLAYER, GetAbsOrigin(), m_Local.m_flFallVelocity, 0.2, this );
 					// Msg( "fall %f\n", m_Local.m_flFallVelocity );
@@ -4562,6 +4583,52 @@ void CBasePlayer::PostThink()
 	}
 }
 
+CBaseEntity *FindEntityClassForward(CBasePlayer *pMe, char *classname)
+{
+	trace_t tr;
+
+	Vector forward;
+	pMe->EyeVectors(&forward);
+	UTIL_TraceLine(pMe->EyePosition(),
+		pMe->EyePosition() + forward * MAX_COORD_RANGE,
+		MASK_SOLID, pMe, COLLISION_GROUP_NONE, &tr);
+	if (tr.fraction != 1.0 && tr.DidHitNonWorldEntity())
+	{
+		CBaseEntity *pHit = tr.m_pEnt;
+		if (FClassnameIs(pHit, classname))
+		{
+			return pHit;
+		}
+	}
+	return NULL;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Finds the nearest entity in front of the player of the given
+//			classname, preferring collidable entities, but allows selection of 
+//			enities that are on the other side of walls or objects
+//
+// Input  :
+// Output :
+//-----------------------------------------------------------------------------
+CBaseEntity *FindPickerEntityClass(CBasePlayer *pPlayer, char *classname)
+{
+	// First try to trace a hull to an entity
+	CBaseEntity *pEntity = FindEntityClassForward(pPlayer, classname);
+
+	// If that fails just look for the nearest facing entity
+	if (!pEntity)
+	{
+		Vector forward;
+		Vector origin;
+		pPlayer->EyeVectors(&forward);
+		origin = pPlayer->WorldSpaceCenter();
+		pEntity = gEntList.FindEntityClassNearestFacing(origin, forward, 0.95, classname);
+	}
+	return pEntity;
+}
+
+
 // handles touching physics objects
 void CBasePlayer::Touch( CBaseEntity *pOther )
 {
@@ -4576,6 +4643,108 @@ void CBasePlayer::Touch( CBaseEntity *pOther )
 		return;
 
 	SetTouchedPhysics( true );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CBasePlayer::PostThinkVPhysics( void )
+{
+	// Check to see if things are initialized!
+	if ( !m_pPhysicsController )
+		return;
+
+	Vector newPosition = GetAbsOrigin();
+	float frametime = gpGlobals->frametime;
+	if ( frametime <= 0 || frametime > 0.1f )
+		frametime = 0.1f;
+
+	IPhysicsObject *pPhysGround = GetGroundVPhysics();
+
+	if ( !pPhysGround && m_touchedPhysObject && g_pMoveData->m_outStepHeight <= 0.f && (GetFlags() & FL_ONGROUND) )
+	{
+		newPosition = m_oldOrigin + frametime * g_pMoveData->m_outWishVel;
+		newPosition = (GetAbsOrigin() * 0.5f) + (newPosition * 0.5f);
+	}
+
+	int collisionState = VPHYS_WALK;
+	if ( GetMoveType() == MOVETYPE_NOCLIP || GetMoveType() == MOVETYPE_OBSERVER )
+	{
+		collisionState = VPHYS_NOCLIP;
+	}
+	else if ( GetFlags() & FL_DUCKING )
+	{
+		collisionState = VPHYS_CROUCH;
+	}
+
+	if ( collisionState != m_vphysicsCollisionState )
+	{
+		SetVCollisionState( GetAbsOrigin(), GetAbsVelocity(), collisionState );
+	}
+
+	if ( !(TouchedPhysics() || pPhysGround) )
+	{
+		float maxSpeed = m_flMaxspeed > 0.0f ? m_flMaxspeed : sv_maxspeed.GetFloat();
+		g_pMoveData->m_outWishVel.Init( maxSpeed, maxSpeed, maxSpeed );
+	}
+
+	// teleport the physics object up by stepheight (game code does this - reflect in the physics)
+	if ( g_pMoveData->m_outStepHeight > 0.1f )
+	{
+		if ( g_pMoveData->m_outStepHeight > 4.0f )
+		{
+			VPhysicsGetObject()->SetPosition( GetAbsOrigin(), vec3_angle, true );
+		}
+		else
+		{
+			// don't ever teleport into solid
+			Vector position, end;
+			VPhysicsGetObject()->GetPosition( &position, NULL );
+			end = position;
+			end.z += g_pMoveData->m_outStepHeight;
+			trace_t trace;
+			UTIL_TraceEntity( this, position, end, MASK_PLAYERSOLID, this, COLLISION_GROUP_PLAYER_MOVEMENT, &trace );
+			if ( trace.DidHit() )
+			{
+				g_pMoveData->m_outStepHeight = trace.endpos.z - position.z;
+			}
+			m_pPhysicsController->StepUp( g_pMoveData->m_outStepHeight );
+		}
+		m_pPhysicsController->Jump();
+	}
+	g_pMoveData->m_outStepHeight = 0.0f;
+	
+	// Store these off because after running the usercmds, it'll pass them
+	// to UpdateVPhysicsPosition.	
+	m_vNewVPhysicsPosition = newPosition;
+	m_vNewVPhysicsVelocity = g_pMoveData->m_outWishVel;
+
+	m_oldOrigin = GetAbsOrigin();
+}
+
+void CBasePlayer::UpdateVPhysicsPosition( const Vector &position, const Vector &velocity, float secondsToArrival )
+{
+	bool onground = (GetFlags() & FL_ONGROUND) ? true : false;
+	IPhysicsObject *pPhysGround = GetGroundVPhysics();
+	
+	// if the object is much heavier than the player, treat it as a local coordinate system
+	// the player controller will solve movement differently in this case.
+	if ( !IsRideablePhysics(pPhysGround) )
+	{
+		pPhysGround = NULL;
+	}
+
+	m_pPhysicsController->Update( position, velocity, secondsToArrival, onground, pPhysGround );
+}
+
+void CBasePlayer::UpdatePhysicsShadowToCurrentPosition()
+{
+	UpdateVPhysicsPosition( GetAbsOrigin(), vec3_origin, gpGlobals->frametime );
+}
+
+void CBasePlayer::UpdatePhysicsShadowToPosition( const Vector &vecAbsOrigin )
+{
+	UpdateVPhysicsPosition( vecAbsOrigin, vec3_origin, gpGlobals->frametime );
 }
 
 Vector CBasePlayer::GetSmoothedVelocity( void )
@@ -4721,9 +4890,7 @@ ReturnSpot:
 void CBasePlayer::InitialSpawn( void )
 {
 	m_iConnected = PlayerConnected;
-	#if !defined( _GAMECONSOLE ) && !defined( NO_STEAM )
 	gamestats->Event_PlayerConnected( this );
-	#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -4827,7 +4994,8 @@ void CBasePlayer::Spawn( void )
 	
 	m_HackedGunPos		= Vector( 0, 32, 0 );
 
-	m_iBonusChallenge = sv_bonus_challenge.GetInt();	
+	m_iBonusChallenge = sv_bonus_challenge.GetInt();
+	sv_bonus_challenge.SetValue( 0 );
 
 	if ( m_iPlayerSound == SOUNDLIST_EMPTY )
 	{
@@ -4925,9 +5093,7 @@ void CBasePlayer::Precache( void )
 	VPROF( "CBasePlayer::Precache" );
 
 	BaseClass::Precache();
-
-
-#ifndef DOTA_DLL
+	
 #if !defined ( PORTAL2 )
 	PrecacheScriptSound( "Player.FallGib" );
 	PrecacheScriptSound( "Player.Death" );
@@ -4941,13 +5107,11 @@ void CBasePlayer::Precache( void )
 	enginesound->PrecacheSentenceGroup( "HEV" );
 
 	// These are always needed
-#ifndef TF_DLL
+
 	PrecacheParticleSystem( "slime_splash_01" );
 	PrecacheParticleSystem( "slime_splash_02" );
 	PrecacheParticleSystem( "slime_splash_03" );
-#endif
 
-#endif
 
 	// in the event that the player JUST spawned, and the level node graph
 	// was loaded, fix all of the node graph pointers before the game starts.
@@ -5094,20 +5258,19 @@ void CBasePlayer::OnRestore( void )
 {
 	BaseClass::OnRestore();
 
-	SetViewEntity( m_hViewEntity, m_bShouldDrawPlayerWhileUsingViewEntity );
+	SetViewEntity( m_hViewEntity );
 	SetDefaultFOV(m_iDefaultFOV);		// force this to reset if zero
 
 	// Calculate this immediately
 	m_nVehicleViewSavedFrame = 0;
 
 	m_nBodyPitchPoseParam = LookupPoseParameter( "body_pitch" );
-
+	
 	if ( gpGlobals->eLoadType == MapLoad_Transition )
 	{
 		// HACK: (03/25/09) Then the player goes across a transition it doesn't spawn and register
 		// it's instance. We're hacking around this for now, but this will go away when we get around to 
-		// having entities cross transitions and keep their script state.
-		if( !g_pGameRules->IsMultiplayer() && g_pScriptVM )
+		// having entities cross transitions and keep their script state.if( !g_pGameRules->IsMultiplayer() && g_pScriptVM )
 		{
 			g_pScriptVM->SetValue( "player", GetScriptInstance() );
 		}
@@ -5137,6 +5300,16 @@ void CBasePlayer::IncrementArmorValue( int nCount, int nMaxValue )
 			m_ArmorValue = nMaxValue;
 	}
 }
+
+// used by the physics gun and game physics... is there a better interface?
+void CBasePlayer::SetPhysicsFlag( int nFlag, bool bSet )
+{
+	if (bSet)
+		m_afPhysicsFlags |= nFlag;
+	else
+		m_afPhysicsFlags &= ~nFlag;
+}
+
 
 void CBasePlayer::NotifyNearbyRadiationSource( float flRange )
 {
@@ -5314,9 +5487,7 @@ bool CBasePlayer::GetInVehicle( IServerVehicle *pVehicle, int nRole )
 	SetMoveType( MOVETYPE_NOCLIP );
 
 	// This is a hack to fixup the player's stats since they really didn't "cheat" and enter noclip from the console
-	#if !defined( _GAMECONSOLE ) && !defined( NO_STEAM )
 	gamestats->Event_DecrementPlayerEnteredNoClip( this );
-	#endif
 
 	// Get the seat position we'll be at in this vehicle
 	Vector vSeatOrigin;
@@ -5433,7 +5604,6 @@ void CBasePlayer::LeaveVehicle( const Vector &vecExitPoint, const QAngle &vecExi
 }
 
 
-#ifndef DOTA_DLL
 //==============================================
 // !!!UNDONE:ultra temporary SprayCan entity to apply
 // decal frame at a time. For PreAlpha CD
@@ -5489,8 +5659,6 @@ void CSprayCan::Think( void )
 	// Just painted last custom frame.
 	UTIL_Remove( this );
 }
-
-#endif
 
 class	CBloodSplat : public CPointEntity
 {
@@ -5773,7 +5941,6 @@ void CBasePlayer::ImpulseCommands( )
 		}
 		break;
 
-#ifndef DOTA_DLL
 	case	201:// paint decal
 		
 		if ( gpGlobals->curtime < m_flNextDecalTime )
@@ -5798,7 +5965,6 @@ void CBasePlayer::ImpulseCommands( )
 		}
 
 		break;
-#endif
 	case	202:// player jungle sound 
 		if ( gpGlobals->curtime < m_flNextDecalTime )
 		{
@@ -5989,12 +6155,13 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		gEvilImpulse101 = true;
 
 		EquipSuit();
-
+		
 		#if defined( PORTAL2 )
 			// Give the player portal 2 stuff!
 			GiveNamedItem( "weapon_camera" );
 			GiveNamedItem( "weapon_placement" );
 		#else // PORTAL2
+
 
 			// Give the player everything!
 			GiveAmmo( 255,	"Pistol");
@@ -6018,27 +6185,17 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 			GiveNamedItem( "weapon_ar2" );
 			GiveNamedItem( "weapon_shotgun" );
 			GiveNamedItem( "weapon_physcannon" );
-			#ifndef HL2_EP3 // No bugbait in EP3
+
 				GiveNamedItem( "weapon_bugbait" );
-			#endif
+
 			GiveNamedItem( "weapon_rpg" );
 			GiveNamedItem( "weapon_357" );
 			GiveNamedItem( "weapon_crossbow" );
 
-			#ifdef HL2_EP3
-				GiveNamedItem( "weapon_icegun" );
-				GiveNamedItem( "weapon_weaponizer" );
-				GiveNamedItem( "weapon_teleport" );
-				GiveNamedItem( "weapon_pipebomblauncher" );
-				GiveNamedItem( "weapon_flechettegun" );
-				GiveNamedItem( "weapon_flamethrower" );
-				GiveNamedItem( "weapon_egon" );
-				GiveNamedItem( "weapon_gauss" );
-				GiveAmmo( 999, "Fuel" );
-				GiveAmmo( 100, "Uranium" );
-			#endif // HL2_EP3
+#endif // PORTAL2 
 
-		#endif // PORTAL2 
+
+
 
 		if ( GetHealth() < 100 )
 		{
@@ -6506,7 +6663,7 @@ bool CBasePlayer::BumpWeapon( CBaseCombatWeapon *pWeapon )
 		{
 #ifdef HL2_DLL
 
-			if ( IsGameConsole() )
+			if ( IsX360() )
 			{
 				CFmtStr hint;
 				hint.sprintf( "#valve_hint_select_%s", pWeapon->GetClassname() );
@@ -6802,7 +6959,7 @@ bool CBasePlayer::ShouldAutoaim( void )
 		return false;
 
 	// autoaiming is only for easy and medium skill
-	return ( IsGameConsole() || !g_pGameRules->IsSkillLevel(SKILL_HARD) );
+	return ( IsX360() || !g_pGameRules->IsSkillLevel(SKILL_HARD) );
 }
 
 //-----------------------------------------------------------------------------
@@ -7409,7 +7566,6 @@ void CBasePlayer::UnlockPlayer( void )
 	m_iPlayerLocked = false;
 }
 
-
 CBaseEntity* CBasePlayer::GetUseEntity( void ) 
 { 
 	return m_hUseEntity;
@@ -7528,7 +7684,7 @@ BEGIN_DATADESC( CRevertSaved )
 
 END_DATADESC()
 
-CEG_NOINLINE CBaseEntity *CreatePlayerLoadSave( Vector vOrigin, float flDuration, float flHoldTime, float flLoadTime )
+CBaseEntity *CreatePlayerLoadSave( Vector vOrigin, float flDuration, float flHoldTime, float flLoadTime )
 {
 	CRevertSaved *pRevertSaved = (CRevertSaved *) CreateEntityByName( "player_loadsaved" );
 
@@ -7545,7 +7701,7 @@ CEG_NOINLINE CBaseEntity *CreatePlayerLoadSave( Vector vOrigin, float flDuration
 	return pRevertSaved;
 }
 
-CEG_PROTECT_FUNCTION( CreatePlayerLoadSave );
+
 
 void CRevertSaved::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
@@ -7592,16 +7748,7 @@ void CRevertSaved::LoadThink( void )
 {
 	if ( !gpGlobals->deathmatch )
 	{
-		CBasePlayer *pPlayer = UTIL_GetLocalPlayer();
-		if ( pPlayer && pPlayer->GetBonusChallenge() > 0 )
-		{
-			// Single player challenge needs to respawn this way so we don't lose the session
-			engine->ChangeLevel( gpGlobals->mapname.ToCStr(), NULL );
-		}
-		else
-		{
-			engine->ServerCommand("reload\n");
-		}
+		engine->ServerCommand("reload\n");
 	}
 }
 
@@ -7832,7 +7979,7 @@ REGISTER_SEND_PROXY_NON_MODIFIED_POINTER( SendProxy_SendNonLocalDataTable );
 	IMPLEMENT_SERVERCLASS_ST( CBasePlayer, DT_BasePlayer )
 
 		SendPropDataTable(SENDINFO_DT(pl), &REFERENCE_SEND_TABLE(DT_PlayerState), SendProxy_DataTableToDataTable),
-
+		
 		SendPropInt		(SENDINFO(m_afPhysicsFlags), 6, SPROP_UNSIGNED ),
 		SendPropEHandle(SENDINFO(m_hVehicle)),
 		SendPropEHandle(SENDINFO(m_hUseEntity)),
@@ -7861,21 +8008,9 @@ REGISTER_SEND_PROXY_NON_MODIFIED_POINTER( SendProxy_SendNonLocalDataTable );
 		SendPropEHandle		( SENDINFO(m_hPostProcessCtrl) ),
 		SendPropEHandle		( SENDINFO(m_hColorCorrectionCtrl) ),
 
-		SendPropEHandle( SENDINFO_STRUCTELEM( fogplayerparams_t, m_PlayerFog, m_hCtrl ) ),
-
-		SendPropInt( SENDINFO( m_vphysicsCollisionState ) ),
-#if defined( DEBUG_MOTION_CONTROLLERS )
-		SendPropVector( SENDINFO( m_Debug_vPhysPosition ), 0, SPROP_NOSCALE ),
-		SendPropVector( SENDINFO( m_Debug_vPhysVelocity ), 0, SPROP_NOSCALE ),
-		SendPropVector( SENDINFO( m_Debug_LinearAccel ), 0, SPROP_NOSCALE ),
-
-		SendPropVector( SENDINFO( m_vNewVPhysicsPosition ), 0, SPROP_NOSCALE ),
-		SendPropVector( SENDINFO( m_vNewVPhysicsVelocity ), 0, SPROP_NOSCALE ),
-#endif
-		
+		SendPropEHandle( SENDINFO_STRUCTELEM( m_PlayerFog.m_hCtrl ) ),
 
 		SendPropEHandle	(SENDINFO( m_hViewEntity)),
-		SendPropBool	(SENDINFO( m_bShouldDrawPlayerWhileUsingViewEntity )),
 
 		// Data that only gets sent to the local player.
 		SendPropDataTable( "localdata", 0, &REFERENCE_SEND_TABLE(DT_LocalPlayerExclusive), SendProxy_SendLocalDataTable ),
@@ -7949,6 +8084,286 @@ void CBasePlayer::VPhysicsUpdate( IPhysicsObject *pPhysics )
 	m_impactEnergyScale = savedImpact;
 }
 
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CBasePlayer::VPhysicsShadowUpdate( IPhysicsObject *pPhysics )
+{
+	if ( sv_turbophysics.GetBool() )
+		return;
+
+	Vector newPosition;
+
+	bool physicsUpdated = m_pPhysicsController->GetShadowPosition( &newPosition, NULL ) > 0 ? true : false;
+
+	// UNDONE: If the player is penetrating, but the player's game collisions are not stuck, teleport the physics shadow to the game position
+	if ( pPhysics->GetGameFlags() & FVPHYSICS_PENETRATING )
+	{
+		CUtlVector<CBaseEntity *> list;
+		PhysGetListOfPenetratingEntities( this, list );
+		for ( int i = list.Count()-1; i >= 0; --i )
+		{
+			// filter out anything that isn't simulated by vphysics
+			// UNDONE: Filter out motion disabled objects?
+			if ( list[i]->GetMoveType() == MOVETYPE_VPHYSICS )
+			{
+				// I'm currently stuck inside a moving object, so allow vphysics to 
+				// apply velocity to the player in order to separate these objects
+				m_touchedPhysObject = true;
+			}
+
+			// if it's an NPC, tell them that the player is intersecting them
+			CAI_BaseNPC *pNPC = list[i]->MyNPCPointer();
+			if ( pNPC )
+			{
+				pNPC->PlayerPenetratingVPhysics();
+			}
+		}
+	}
+
+	bool bCheckStuck = false;
+	if ( m_afPhysicsFlags & PFLAG_GAMEPHYSICS_ROTPUSH )
+	{
+		bCheckStuck = true;
+		m_afPhysicsFlags &= ~PFLAG_GAMEPHYSICS_ROTPUSH;
+	}
+	if ( m_pPhysicsController->IsInContact() || (m_afPhysicsFlags & PFLAG_VPHYSICS_MOTIONCONTROLLER) )
+	{
+		m_touchedPhysObject = true;
+	}
+
+	if ( IsFollowingPhysics() )
+	{
+		m_touchedPhysObject = true;
+	}
+
+	if ( GetMoveType() == MOVETYPE_NOCLIP || pl.deadflag )
+	{
+		m_oldOrigin = GetAbsOrigin();
+		return;
+	}
+
+	if ( phys_timescale.GetFloat() == 0.0f )
+	{
+		physicsUpdated = false;
+	}
+
+	if ( !physicsUpdated )
+		return;
+
+	IPhysicsObject *pPhysGround = GetGroundVPhysics();
+
+	Vector newVelocity;
+	pPhysics->GetPosition( &newPosition, 0 );
+	m_pPhysicsController->GetShadowVelocity( &newVelocity );
+	// assume vphysics gave us back a position without penetration
+	Vector lastValidPosition = newPosition;
+
+	if ( physicsshadowupdate_render.GetBool() )
+	{
+		NDebugOverlay::Box( GetAbsOrigin(), WorldAlignMins(), WorldAlignMaxs(), 255, 0, 0, 24, 15.0f );
+		NDebugOverlay::Box( newPosition, WorldAlignMins(), WorldAlignMaxs(), 0,0,255, 24, 15.0f);
+		//	NDebugOverlay::Box( newPosition, WorldAlignMins(), WorldAlignMaxs(), 0,0,255, 24, .01f);
+	}
+
+	Vector tmp = GetAbsOrigin() - newPosition;
+	if ( !m_touchedPhysObject && !(GetFlags() & FL_ONGROUND) )
+	{
+		tmp.z *= 0.5f;	// don't care about z delta as much
+	}
+
+	float dist = tmp.LengthSqr();
+	float deltaV = (newVelocity - GetAbsVelocity()).LengthSqr();
+
+	float maxDistErrorSqr = VPHYS_MAX_DISTSQR;
+	float maxVelErrorSqr = VPHYS_MAX_VELSQR;
+	if ( IsRideablePhysics(pPhysGround) )
+	{
+		maxDistErrorSqr *= 0.25;
+		maxVelErrorSqr *= 0.25;
+	}
+
+	// player's physics was frozen, try moving to the game's simulated position if possible
+	if ( m_pPhysicsController->WasFrozen() )
+	{
+		m_bPhysicsWasFrozen = true;
+		// check my position (physics object could have simulated into my position
+		// physics is not very far away, check my position
+		trace_t trace;
+		UTIL_TraceEntity( this, GetAbsOrigin(), GetAbsOrigin(), MASK_PLAYERSOLID, this, COLLISION_GROUP_PLAYER_MOVEMENT, &trace );
+		if ( !trace.startsolid )
+			return;
+
+		// The physics shadow position is probably not in solid, try to move from there to the desired position
+		UTIL_TraceEntity( this, newPosition, GetAbsOrigin(), MASK_PLAYERSOLID, this, COLLISION_GROUP_PLAYER_MOVEMENT, &trace );
+		if ( !trace.startsolid )
+		{
+			// found a valid position between the two?  take it.
+			SetAbsOrigin( trace.endpos );
+			UpdateVPhysicsPosition(trace.endpos, vec3_origin, 0);
+			return;
+		}
+
+	}
+	if ( dist >= maxDistErrorSqr || deltaV >= maxVelErrorSqr || (pPhysGround && !m_touchedPhysObject) )
+	{
+		if ( m_touchedPhysObject || pPhysGround )
+		{
+			// BUGBUG: Rewrite this code using fixed timestep
+			if ( deltaV >= maxVelErrorSqr && !m_bPhysicsWasFrozen )
+			{
+				Vector dir = GetAbsVelocity();
+				float len = VectorNormalize(dir);
+				float dot = DotProduct( newVelocity, dir );
+				if ( dot > len )
+				{
+					dot = len;
+				}
+				else if ( dot < -len )
+				{
+					dot = -len;
+				}
+				
+				VectorMA( newVelocity, -dot, dir, newVelocity );
+				
+				if ( m_afPhysicsFlags & PFLAG_VPHYSICS_MOTIONCONTROLLER )
+				{
+					float val = Lerp( 0.1f, len, dot );
+					VectorMA( newVelocity, val - len, dir, newVelocity );
+				}
+
+				if ( !IsRideablePhysics(pPhysGround) )
+				{
+					if ( !(m_afPhysicsFlags & PFLAG_VPHYSICS_MOTIONCONTROLLER ) && IsSimulatingOnAlternateTicks() )
+					{
+						newVelocity *= 0.5f;
+					}
+					ApplyAbsVelocityImpulse( newVelocity );
+				}
+			}
+			
+			trace_t trace;
+			UTIL_TraceEntity( this, newPosition, newPosition, MASK_PLAYERSOLID, this, COLLISION_GROUP_PLAYER_MOVEMENT, &trace );
+			if ( !trace.allsolid && !trace.startsolid )
+			{
+				SetAbsOrigin( newPosition );
+			}
+		}
+		else
+		{
+#if defined( PORTAL ) && defined( GAME_DLL ) && 1
+			CPortal_Player *pPortalPlayer = (CPortal_Player *)this;
+			CPortal_Base2D *pPortalEnvironment = pPortalPlayer->m_hPortalEnvironment.Get();
+			if( pPortalEnvironment != NULL )
+			{
+				trace_t trace;
+
+				Ray_t ray;
+				ray.Init( GetAbsOrigin(), GetAbsOrigin(), WorldAlignMins(), WorldAlignMaxs() );
+
+				CTraceFilterSimple OriginalTraceFilter( this, COLLISION_GROUP_PLAYER_MOVEMENT );
+				CTraceFilterTranslateClones traceFilter( &OriginalTraceFilter );
+
+				enginetrace->TraceRay( ray, MASK_PLAYERSOLID, &traceFilter, &trace );
+
+				if( trace.startsolid )
+				{
+					UTIL_Portal_TraceRay_With( pPortalEnvironment, ray, MASK_PLAYERSOLID, &traceFilter, &trace );
+
+					// current position is not ok, fixup
+					if ( trace.allsolid || trace.startsolid )
+					{
+						//try again with new position
+						ray.Init( newPosition, newPosition, WorldAlignMins(), WorldAlignMaxs() );
+						UTIL_Portal_TraceRay_With( pPortalEnvironment, ray, MASK_PLAYERSOLID, &traceFilter, &trace );
+
+						if( trace.startsolid == false )
+						{
+							SetAbsOrigin( newPosition );
+						}
+						else
+						{
+							Vector vNewCenter = vec3_origin;
+							Vector vExtents = (pPortalPlayer->GetHullMaxs() - pPortalPlayer->GetHullMins()) * 0.5f;
+							Vector vOriginToCenter = (pPortalPlayer->GetHullMaxs() + pPortalPlayer->GetHullMins()) * 0.5f;
+							
+							if( UTIL_FindClosestPassableSpace_InPortal_CenterMustStayInFront( pPortalEnvironment, GetAbsOrigin() + vOriginToCenter, vExtents, pPortalEnvironment->m_plane_Origin.normal, &traceFilter, MASK_PLAYERSOLID, 100, vNewCenter ) &&
+								(pPortalEnvironment->m_plane_Origin.normal.Dot( vNewCenter ) - pPortalEnvironment->m_plane_Origin.dist) >= 0.0f )
+							{
+								SetAbsOrigin( vNewCenter - vOriginToCenter );
+							}
+							else 
+							{
+								VPlane stayInFrontOfPlane;
+								stayInFrontOfPlane.m_Normal = pPortalEnvironment->m_plane_Origin.normal;
+								stayInFrontOfPlane.m_Dist = pPortalEnvironment->m_plane_Origin.dist;
+								if( !(UTIL_FindClosestPassableSpace_CenterMustStayInFrontOfPlane( GetAbsOrigin() + vOriginToCenter, vExtents, newPosition - GetAbsOrigin(), &traceFilter, MASK_PLAYERSOLID, 100, vNewCenter, stayInFrontOfPlane ) &&
+									(pPortalEnvironment->m_plane_Origin.normal.Dot( vNewCenter ) - pPortalEnvironment->m_plane_Origin.dist) >= 0.0f) )
+								{
+									// Try moving the player closer to the center of the portal
+									newPosition += ( pPortalEnvironment->GetAbsOrigin() - WorldSpaceCenter() ) * 0.1f;
+									SetAbsOrigin( newPosition );
+
+									DevMsg( "Hurting the player for FindClosestPassableSpaceFailure!\n" );
+
+									// Deal 1 damage per frame... this will kill a player very fast, but allow for the above correction to fix some cases
+									CTakeDamageInfo info( this, this, vec3_origin, vec3_origin, 1, DMG_CRUSH );
+									OnTakeDamage( info );
+								}
+								else
+								{
+									SetAbsOrigin( vNewCenter - vOriginToCenter );
+								}
+							}						
+						}
+					}
+				}
+			}
+			else
+#endif
+			{
+				bCheckStuck = true;
+			}
+		}
+	}
+	else
+	{
+		if ( m_touchedPhysObject )
+		{
+			// check my position (physics object could have simulated into my position
+			// physics is not very far away, check my position
+			trace_t trace;
+			UTIL_TraceEntity( this, GetAbsOrigin(), GetAbsOrigin(),
+				MASK_PLAYERSOLID, this, COLLISION_GROUP_PLAYER_MOVEMENT, &trace );
+			
+			// is current position ok?
+			if ( trace.allsolid || trace.startsolid )
+			{
+				// no use the final stuck check to move back to old if this stuck fix didn't work
+				bCheckStuck = true;
+				lastValidPosition = m_oldOrigin;
+				SetAbsOrigin( newPosition );
+			}
+		}
+	}
+
+	if ( bCheckStuck )
+	{
+		trace_t trace;
+		UTIL_TraceEntity( this, GetAbsOrigin(), GetAbsOrigin(), MASK_PLAYERSOLID, this, COLLISION_GROUP_PLAYER_MOVEMENT, &trace );
+
+		// current position is not ok, fixup
+		if ( trace.allsolid || trace.startsolid )
+		{
+			// STUCK!?!?!
+			//Warning( "Checkstuck failed.  Stuck on %s!!\n", trace.m_pEnt->GetClassname() );
+			SetAbsOrigin( lastValidPosition );
+		}
+	}
+	m_oldOrigin = GetAbsOrigin();
+	m_bPhysicsWasFrozen = false;
+}
+
 // recreate physics on save/load, don't try to save the state!
 bool CBasePlayer::ShouldSavePhysics()
 {
@@ -8005,6 +8420,39 @@ void CBasePlayer::VPhysicsDestroyObject()
 	BaseClass::VPhysicsDestroyObject();
 }
 
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CBasePlayer::SetVCollisionState( const Vector &vecAbsOrigin, const Vector &vecAbsVelocity, int collisionState )
+{
+	m_vphysicsCollisionState = collisionState;
+	switch( collisionState )
+	{
+	case VPHYS_WALK:
+ 		m_pShadowStand->SetPosition( vecAbsOrigin, vec3_angle, true );
+		m_pShadowStand->SetVelocity( &vecAbsVelocity, NULL );
+		m_pShadowCrouch->EnableCollisions( false );
+		m_pPhysicsController->SetObject( m_pShadowStand );
+		VPhysicsSwapObject( m_pShadowStand );
+		m_pShadowStand->EnableCollisions( true );
+		break;
+
+	case VPHYS_CROUCH:
+		m_pShadowCrouch->SetPosition( vecAbsOrigin, vec3_angle, true );
+		m_pShadowCrouch->SetVelocity( &vecAbsVelocity, NULL );
+		m_pShadowStand->EnableCollisions( false );
+		m_pPhysicsController->SetObject( m_pShadowCrouch );
+		VPhysicsSwapObject( m_pShadowCrouch );
+		m_pShadowCrouch->EnableCollisions( true );
+		break;
+	
+	case VPHYS_NOCLIP:
+		m_pShadowCrouch->EnableCollisions( false );
+		m_pShadowStand->EnableCollisions( false );
+		break;
+	}
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -8133,27 +8581,7 @@ void CBasePlayer::ModifyOrAppendPlayerCriteria( AI_CriteriaSet& set )
 
 	set.AppendCriteria( "playerspeed", UTIL_VarArgs( "%.3f", GetAbsVelocity().Length() ) );
 
-#ifdef HL2_EP3
-	CBaseEntity *pHeldObject = GetPlayerHeldEntity( this );
-	if( !pHeldObject )
-	{
-		pHeldObject = PhysCannonGetHeldEntity( GetActiveWeapon() );
-	}
-	
-	if ( pHeldObject )
-	{
-		if ( pHeldObject->GetEntityName() == NULL_STRING )
-		{
-			set.AppendCriteria( "playerheldentity", pHeldObject->GetClassname() );
-		}
-		else
-		{
-			set.AppendCriteria( "playerheldentity", STRING( pHeldObject->GetEntityName() ) );
-		}
-		
-		set.AppendCriteria( "playerheldmodel", STRING( pHeldObject->GetModelName() ) );
-	}
-#endif
+
 
 	AppendContextToCriteria( set, "player" );
 }
@@ -8347,7 +8775,7 @@ void CBasePlayer::InputSetFogController( inputdata_t &inputdata )
 
 	if ( pFogController )
 	{
-		SetFogController( pFogController );
+		m_PlayerFog.m_hCtrl.Set( pFogController );
 	}
 }
 
@@ -8426,10 +8854,9 @@ void CBasePlayer::InputSetColorCorrectionController( inputdata_t &inputdata )
 // Purpose: 
 // Input  : *pEntity - 
 //-----------------------------------------------------------------------------
-void CBasePlayer::SetViewEntity( CBaseEntity *pEntity, bool bShouldDrawPlayer /*= true*/ ) 
+void CBasePlayer::SetViewEntity( CBaseEntity *pEntity ) 
 { 
 	m_hViewEntity = pEntity; 
-	m_bShouldDrawPlayerWhileUsingViewEntity = bShouldDrawPlayer;
 
 	if ( m_hViewEntity )
 	{
@@ -8515,7 +8942,7 @@ void CBasePlayer::SetPlayerName( const char *name )
 	{
 		Assert( strlen(name) > 0 );
 
-		V_UTF8_strncpy( m_szNetname, name, sizeof(m_szNetname) );
+		Q_strncpy( m_szNetname, name, sizeof(m_szNetname) );
 	}
 }
 
@@ -8983,9 +9410,7 @@ void CBasePlayer::Event_KilledOther( CBaseEntity *pVictim, const CTakeDamageInfo
 	BaseClass::Event_KilledOther( pVictim, info );
 	if ( pVictim != this )
 	{
-		#if !defined( _GAMECONSOLE ) && !defined( NO_STEAM )
 		gamestats->Event_PlayerKilledOther( this, pVictim, info );
-		#endif
 	}
 }
 
@@ -9077,16 +9502,6 @@ int CBasePlayer::GetSplitScreenPlayerSlot()
 
 	Assert( 0 );
 	return 0;
-}
-
-void CBasePlayer::SetCrossPlayPlatform( CrossPlayPlatform_t clientPlatform )
-{
-	m_ClientPlatform = clientPlatform;
-}
-
-CrossPlayPlatform_t CBasePlayer::GetCrossPlayPlatform( void ) const
-{
-	return m_ClientPlatform;
 }
 
 bool CBasePlayer::EnsureSplitScreenTeam()
@@ -9283,30 +9698,3 @@ void CBasePlayer::UpdateFXVolume( void )
 	}
 }
 
-#if !defined(NO_STEAM)
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-bool CBasePlayer::GetSteamID( CSteamID *pID )
-{
-	const CSteamID *pClientID = engine->GetClientSteamID( edict() );
-	if ( pClientID )
-	{
-		*pID = *pClientID;
-		return true;
-	}
-
-	return false;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-uint64 CBasePlayer::GetSteamIDAsUInt64( void )
-{
-	CSteamID steamIDForPlayer;
-	if ( GetSteamID( &steamIDForPlayer ) )
-		return steamIDForPlayer.ConvertToUint64();
-	return 0;
-}
-#endif // NO_STEAM

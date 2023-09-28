@@ -28,7 +28,7 @@
 #	include "trigger_portal_cleanser.h"
 //#	include "portal_mp_stats.h"
 #else
-#	include "c_info_placement_helper.h"
+//#	include "c_info_placement_helper.h"
 #	include "c_te_effect_dispatch.h"
 #	include "c_portal_player.h"
 #	include "igameevents.h"
@@ -1202,11 +1202,14 @@ PortalPlacementResult_t CWeaponPortalgun::FirePortal( bool bPortal2, Vector *pVe
 		PortalPlaced();
 	}
 
+	//FIXME:
+#if 0
 	// Bind the helper to the portal so it can toggle its state based on the portal's state
 	if ( placementInfo.pPlacementHelper != NULL  )
 	{
 		placementInfo.pPlacementHelper->BindToPortal( pPortal );
 	}
+#endif
 #endif
 
 	return placementInfo.ePlacementResult;
@@ -1633,6 +1636,8 @@ bool CWeaponPortalgun::AttemptStealCoopPortal( TracePortalPlacementInfo_t &place
 //-----------------------------------------------------------------------------
 bool CWeaponPortalgun::AttemptSnapToPlacementHelper( CProp_Portal *pPortal, ComplexPortalTrace_t *pTraceResults, int nNumResultSegments, PortalPlacedBy_t ePlacedBy, TracePortalPlacementInfo_t &placementInfo )
 {
+	// We need more CInfoPlacementHelper code before we can use this
+#if 0
 	// First, find a helper in the general area we hit
 	CInfoPlacementHelper *pHelper = UTIL_FindPlacementHelper( placementInfo.vecFinalPosition, (GetOwner() && GetOwner()->IsPlayer()) ? (CBasePlayer *)GetOwner() : NULL );
 	if ( pHelper == NULL )
@@ -1729,6 +1734,7 @@ bool CWeaponPortalgun::AttemptSnapToPlacementHelper( CProp_Portal *pPortal, Comp
 		placementInfo.ePlacementResult	= PORTAL_PLACEMENT_USED_HELPER;
 		return true;
 	}
+#endif
 
 	return false;
 }

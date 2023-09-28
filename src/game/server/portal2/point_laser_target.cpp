@@ -38,7 +38,10 @@ LINK_ENTITY_TO_CLASS( point_laser_target, CPortalLaserTarget );
 #define LASER_CATCHER_CENTER_NAME "models/props/laser_catcher_center.mdl"
 #define LASER_RELAY_NAME "models/props/laser_receptacle.mdl"
 
-Vector vLaserCatcherExtents( 16.0, 16.0, 16.0 );    // Vector vLaserCatcherExtents( 11.0, 11.0, 11.0 ); // TODO: This is the original value for CLaserCatcher default extent
+// These extents just aren't big enough
+//Vector vLaserCatcherExtents( 11.0, 11.0, 11.0 );    // CLaserCatcher default extent
+
+Vector vLaserCatcherExtents( 16.0, 16.0, 16.0 );    // CLaserCatcher default extent
 Vector vRelayExtents( 10.0, 10.0, 17.0 );           // CLaserRelay default extent
 
 //-----------------------------------------------------------------------------
@@ -53,7 +56,9 @@ void CPortalLaserTarget::Spawn()
 
     if ( IsTerminalPoint() ) // Replaced with optimized function "IsTerminalPoint" (Line 54)
     {
-		/*CLaserCatcher *pLaserCatcher = (CLaserCatcher *)GetParent(); // Line 56
+		// This is causing a crash, use default extents for now.
+		/*
+		CLaserCatcher *pLaserCatcher = (CLaserCatcher *)GetParent(); // Line 56
 
         if ( pLaserCatcher && !Q_strcmp( pLaserCatcher->GetCatcherModelName(), LASER_CATCHER_CENTER_NAME ) ) // Line 58
         {
@@ -73,7 +78,9 @@ void CPortalLaserTarget::Spawn()
     {
         vExtents = vRelayExtents; // Line 74
     }
+
     UTIL_SetSize( this, -vExtents, vExtents ); // Line 76
+
 } // Line 77
 
 //-----------------------------------------------------------------------------

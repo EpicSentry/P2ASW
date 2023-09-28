@@ -15,8 +15,8 @@
 
 struct RenderableInstance_t;
 
-bool DoEnginePostProcessing( int x, int y, int w, int h, bool bFlashlightIsOn, bool bPostVGui = false );
-bool DoImageSpaceMotionBlur( const CViewSetup &view );
+void DoEnginePostProcessing( int x, int y, int w, int h, bool bFlashlightIsOn, bool bPostVGui = false );
+void DoImageSpaceMotionBlur( const CViewSetup &view );
 bool IsDepthOfFieldEnabled();
 void DoDepthOfField( const CViewSetup &view );
 void BlurEntity( IClientRenderable *pRenderable, bool bPreDraw, int drawFlags, const RenderableInstance_t &instance, const CViewSetup &view, int x, int y, int w, int h );

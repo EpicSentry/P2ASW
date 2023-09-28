@@ -42,7 +42,8 @@
 
 #include "simple_keys.h"
 
-#include "c_baseprojectedentity.h"
+// FIXME:
+//#include "c_baseprojectedentity.h"
 #include "view_scene.h"
 
 #ifdef _DEBUG
@@ -186,6 +187,13 @@ C_Prop_Portal::C_Prop_Portal( void )
 	
 	ms_DefaultPortalHalfHeight = DEFAULT_PORTAL_HALF_HEIGHT; // only protecting one to reduce the cost of first-portal check
 
+<<<<<<< HEAD
+=======
+		//CEG_GCV_PRE();
+		ms_DefaultPortalHalfHeight = DEFAULT_PORTAL_HALF_HEIGHT;// CEG_GET_CONSTANT_VALUE(DefaultPortalHalfHeight); // only protecting one to reduce the cost of first-portal check
+		//CEG_GCV_POST();
+	}
+>>>>>>> parent of ebba631 (Large amounts of base code tweaks and added info_placement_helper server & client)
 	m_bIsPropPortal = true;	// Member of CPortalRenderable
 	TransformedLighting.m_LightShadowHandle = CLIENTSHADOW_INVALID_HANDLE;
 	CProp_Portal_Shared::AllPortals.AddToTail( this );
@@ -408,7 +416,8 @@ void C_Prop_Portal::OnPortalMoved( void )
 
 		UpdateTransformedLighting();
 
-		C_BaseProjectedEntity::TestAllForProjectionChanges();
+		//FIXME:
+		//C_BaseProjectedEntity::TestAllForProjectionChanges();
 	}
 
 	BaseClass::OnPortalMoved();
@@ -1257,14 +1266,18 @@ void C_Prop_Portal::GetToolRecordingState( KeyValues *msg )
 	}
 
 	{
+#if 0
 		KeyValues *pKV = CIFM_EntityKeyValuesHandler_AutoRegister::FindOrCreateNonConformantKeyValues( msg );
 		pKV->SetString( CIFM_EntityKeyValuesHandler_AutoRegister::GetHandlerIDKeyString(), "C_Prop_Portal" );
 
 		pKV->SetInt( "entIndex", index );
 		pKV->SetInt( "teamNumber", GetTeamNumber() );
+#endif
 	}
 }
 
+// No IFM in Swarm
+#if 0
 class C_Prop_Portal_EntityKeyValuesHandler : public CIFM_EntityKeyValuesHandler_AutoRegister
 {
 public:
@@ -1335,7 +1348,10 @@ public:
 	CUtlVector<RecordedPortal_t> m_PlaybackPortals;
 };
 
+
 static C_Prop_Portal_EntityKeyValuesHandler s_ProjectedWallEntityIFMHandler;
+
+#endif
 
 void C_Prop_Portal::HandlePortalPlaybackMessage( KeyValues *pKeyValues )
 {
@@ -1346,7 +1362,8 @@ void C_Prop_Portal::HandlePortalPlaybackMessage( KeyValues *pKeyValues )
 	
 	UpdateTeleportMatrix();
 
-	
+
+#if 0
 	int iEntIndexint = pKeyValues->GetInt( "portalId" );
 	for( int i = 0; i != s_ProjectedWallEntityIFMHandler.m_PlaybackPortals.Count(); ++i )
 	{
@@ -1355,6 +1372,7 @@ void C_Prop_Portal::HandlePortalPlaybackMessage( KeyValues *pKeyValues )
 			m_iTeamNum = s_ProjectedWallEntityIFMHandler.m_PlaybackPortals[i].iTeamNumber;
 		}
 	}
+#endif
 }
 
 

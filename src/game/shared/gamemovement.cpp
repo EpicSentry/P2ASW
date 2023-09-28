@@ -16,9 +16,7 @@
 	#include "hl_movedata.h"
 #endif
 
-#if defined(HL2_EP3) && !defined(CLIENT_DLL)
-	#include "ep3/weapon_icegun.h"
-#endif
+
 
 #if (PREDICTION_ERROR_CHECK_LEVEL > 0) && (PREDICTION_ERROR_CHECK_STACKS_FOR_MISSING > 0)
 #include "tier0/stacktools.h"
@@ -40,10 +38,15 @@ extern IFileSystem *filesystem;
 	#include "env_player_surface_trigger.h"
 	static ConVar dispcoll_drawplane( "dispcoll_drawplane", "0" );
 #endif
-
+	
 #if defined ( PORTAL2 ) &&  !defined ( CLIENT_DLL )
 #include "portal_player.h"
 #endif 
+
+// Double jumping doesn't seem necessary - Wonderland_War
+#if 0
+ConVar portal2_doublejump("portal2_doublejump", "1", FCVAR_REPLICATED | FCVAR_ARCHIVE, "Enables doublejump and slide");
+#endif
 
 // tickcount currently isn't set during prediction, although gpGlobals->curtime and
 // gpGlobals->frametime are. We should probably set tickcount (to player->m_nTickBase),
@@ -58,6 +61,11 @@ ConVar xc_uncrouch_on_jump( "xc_uncrouch_on_jump", "1", FCVAR_ARCHIVE, "Uncrouch
 #if defined( HL2_DLL ) || defined( HL2_CLIENT_DLL )
 ConVar player_limit_jump_speed( "player_limit_jump_speed", "1", FCVAR_REPLICATED );
 #endif
+
+// option_duck_method is a carrier convar. Its sole purpose is to serve an easy-to-flip
+// convar which is ONLY set by the X360 controller menu to tell us which way to bind the
+// duck controls. Its value is meaningless anytime we don't have the options window open.
+ConVar option_duck_method("option_duck_method", "1", FCVAR_REPLICATED|FCVAR_ARCHIVE );// 0 = HOLD to duck, 1 = Duck is a toggle
 
 // [MD] I'll remove this eventually. For now, I want the ability to A/B the optimizations.
 bool g_bMovementOptimizations = true;
@@ -597,6 +605,7 @@ void CGameMovement::DiffPrint( char const *fmt, ... )
 
 #endif // !PREDICTION_ERROR_CHECK_LEVEL
 
+#ifndef _XBOX
 void COM_Log( char *pszFile, char *fmt, ...)
 {
 	va_list		argptr;
@@ -623,6 +632,7 @@ void COM_Log( char *pszFile, char *fmt, ...)
 		filesystem->Close(fp);
 	}
 }
+#endif
 
 #ifndef CLIENT_DLL
 //-----------------------------------------------------------------------------
@@ -1827,7 +1837,7 @@ void CGameMovement::Friction( void )
 		// Bleed off some speed, but if we have less than the bleed
 		//  threshold, bleed the threshold amount.
 
-		if ( IsGameConsole() )
+		if ( IsX360() )
 		{
 			if( player->m_Local.m_bDucked )
 			{
@@ -1835,11 +1845,9 @@ void CGameMovement::Friction( void )
 			}
 			else
 			{
-#if defined ( TF_DLL ) || defined ( TF_CLIENT_DLL )
-				control = (speed < sv_stopspeed.GetFloat()) ? sv_stopspeed.GetFloat() : speed;
-#else
+
 				control = (speed < sv_stopspeed.GetFloat()) ? (sv_stopspeed.GetFloat() * 2.0f) : speed;
-#endif
+
 			}
 		}
 		else
@@ -2294,6 +2302,7 @@ void CGameMovement::FullWalkMove( )
 		if (player->GetGroundEntity() != NULL)
 		{
 			WalkMove();
+			player->hasDoubleJumped = false;
 		}
 		else
 		{
@@ -2588,10 +2597,21 @@ bool CGameMovement::CheckJumpButton( void )
 	}
 
 	// No more effect
- 	if (player->GetGroundEntity() == NULL)
+	if (player->GetGroundEntity() == NULL)
 	{
+#if 0
+		if (portal2_doublejump.GetBool() && !player->hasDoubleJumped)
+		{
+			//dunno why i need this, but without it diving is janky so i need it
+			player->m_Local.m_bInDuckJump = false;
+			mv->m_vecVelocity[2] = sqrt(2 * sv_gravity.GetFloat() * 42 * 0.85);
+			player->SetMoveType(MOVETYPE_WALK);
+			player->hasDoubleJumped = true;
+		}
+#else
 		mv->m_nOldButtons |= IN_JUMP;
-		return false;		// in air, so no effect
+#endif
+		return true;
 	}
 
 	// Don't allow jumping when the player is in a stasis field.
@@ -2632,8 +2652,9 @@ bool CGameMovement::CheckJumpButton( void )
 		Assert( sv_gravity.GetFloat() == 600.0f );
 		flMul = 160.0f;	// approx. 21 units.
 #else
-		Assert( sv_gravity.GetFloat() == 800.0f );
-		flMul = 268.3281572999747f;
+		Assert( sv_gravity.GetFloat() == 600.0f );
+		//flMul = 268.3281572999747f;
+		flMul = 160.0f;	// approx. 21 units.
 #endif
 
 	}
@@ -2662,11 +2683,9 @@ bool CGameMovement::CheckJumpButton( void )
 
 	// Add a little forward velocity based on your current forward velocity - if you are not sprinting.
 #if defined( HL2_DLL ) || defined( HL2_CLIENT_DLL )
-#ifdef PORTAL
-	const bool bAllowBunnyHopperSpeedBoost = true;
-#else
+
 	bool bAllowBunnyHopperSpeedBoost = ( gpGlobals->maxClients == 1 );
-#endif
+
 
 	if ( bAllowBunnyHopperSpeedBoost )
 	{
@@ -2703,12 +2722,13 @@ bool CGameMovement::CheckJumpButton( void )
 
 	mv->m_outJumpVel.z += mv->m_vecVelocity[2] - startz;
 	mv->m_outStepHeight += 0.15f;
-
+		
 #if !defined( PORTAL2 )
 	bool bSetDuckJump = (gpGlobals->maxClients == 1); //most games we only set duck jump if the game is single player
 #else
 	const bool bSetDuckJump = true; //in portal 2, do it for both single and multiplayer
 #endif
+
 
 	// Set jump time.
 	if ( bSetDuckJump )
@@ -3782,6 +3802,31 @@ bool CGameMovement::CheckWater( void )
 			if ( cont & MASK_WATER )
 				player->SetWaterLevel( WL_Eyes );  // In over our eyes
 		}
+
+		// Adjust velocity based on water current, if any.
+		if ( cont & MASK_CURRENT )
+		{
+			Vector v;
+			VectorClear(v);
+			if ( cont & CONTENTS_CURRENT_0 )
+				v[0] += 1;
+			if ( cont & CONTENTS_CURRENT_90 )
+				v[1] += 1;
+			if ( cont & CONTENTS_CURRENT_180 )
+				v[0] -= 1;
+			if ( cont & CONTENTS_CURRENT_270 )
+				v[1] -= 1;
+			if ( cont & CONTENTS_CURRENT_UP )
+				v[2] += 1;
+			if ( cont & CONTENTS_CURRENT_DOWN )
+				v[2] -= 1;
+
+			// BUGBUG -- this depends on the value of an unspecified enumerated type
+			// The deeper we are, the stronger the current.
+			Vector temp;
+			VectorMA( player->GetBaseVelocity(), 50.0*player->GetWaterLevel(), v, temp );
+			player->SetBaseVelocity( temp );
+		}
 	}
 
 	// if we just transitioned from not in water to in water, record the time it happened
@@ -4023,12 +4068,7 @@ void CGameMovement::CategorizePosition( void )
 		// Was on ground, but now suddenly am not.  If we hit a steep plane, we are not on ground
 		float flStandableZ = 0.7;
 
-#if defined(HL2_EP3) && !defined(CLIENT_DLL)
-		if ( Icegun_IsPlayerIceSurfing() )
-		{
-			flStandableZ = 0;
-		}
-#endif
+
 
 		if ( !pm.m_pEnt || ( pm.plane.normal[2] < flStandableZ ) )
 		{
@@ -4155,20 +4195,7 @@ void CGameMovement::CheckFalling( void )
 		}
 	}
 
-#if defined( CSTRIKE2_DLL )
-	float flFallVel = player->m_Local.m_flFallVelocity;
-	if ( player->GetGroundEntity() != NULL && flFallVel > 16.0f && flFallVel <= PLAYER_FATAL_FALL_SPEED )
-	{
-		// punch view when we hit the ground
-		QAngle punchAngle = player->GetPunchAngle();
-		punchAngle.x = (flFallVel * 0.0001);
-	
-		if ( punchAngle.x < 3 )
-			punchAngle.x = 3;
 
-		player->SetPunchAngle( punchAngle );
-	}
-#endif
 
 	//
 	// Clear the fall velocity so the impact doesn't happen again.
@@ -4558,7 +4585,7 @@ void CGameMovement::Duck( void )
 		{
 // XBOX SERVER ONLY
 #if !defined(CLIENT_DLL)
-			if ( IsGameConsole() && buttonsPressed & IN_DUCK )
+			if ( IsX360() && buttonsPressed & IN_DUCK )
 			{
 				// Hinting logic
 				if ( player->GetToggledDuckState() && player->m_nNumCrouches < NUM_CROUCH_HINTS )
@@ -4619,6 +4646,7 @@ void CGameMovement::Duck( void )
 							}
 							
 #endif 
+
 							FinishUnDuckJump( trace );
 							player->m_Local.m_nDuckJumpTimeMsecs = (int)( ( (float)GAMEMOVEMENT_TIME_TO_UNDUCK_MSECS * ( 1.0f - trace.fraction ) ) + (float)GAMEMOVEMENT_TIME_TO_UNDUCK_MSECS_INV );
 						}
@@ -5091,21 +5119,3 @@ bool CGameMovement::GameHasLadders() const
 {
 	return true;
 }
-
-
-
-
-#if (PREDICTION_ERROR_CHECK_LEVEL > 0)
-void _Easy_DiffPrint( CBaseEntity *pEntity, const char *szFormatSTring, ... )
-{
-	va_list args;
-	va_start( args, szFormatSTring );
-
-	//convert the va_list into something we can pass to diffprint
-	char szText[4096];
-	Q_vsnprintf( szText, sizeof( szText ), szFormatSTring, args );
-	
-	g_pGameMovement->DiffPrint( "%s", szText );
-	va_end( args );
-}
-#endif

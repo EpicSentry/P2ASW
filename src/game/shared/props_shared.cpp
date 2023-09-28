@@ -12,28 +12,24 @@
 #include "animation.h"
 #include <vcollide_parse.h>
 #include <bone_setup.h>
-#include "vstdlib/ikeyvaluessystem.h"
 
 #ifdef CLIENT_DLL
 #include "gamestringpool.h"
-#include "c_physicsprop.h"
-#else
-#include "props.h"
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 ConVar sv_pushaway_clientside_size( "sv_pushaway_clientside_size", "15", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Minimum size of pushback objects" );
-ConVar props_break_max_pieces( "props_break_max_pieces", IsGameConsole() ? "32" : "-1", FCVAR_REPLICATED, "Maximum prop breakable piece count (-1 = model default)" );
-ConVar props_break_max_pieces_perframe( "props_break_max_pieces_perframe", IsGameConsole() ? "10" : "-1", FCVAR_REPLICATED, "Maximum prop breakable piece count per frame (-1 = model default)" );
+ConVar props_break_max_pieces( "props_break_max_pieces", "-1", FCVAR_REPLICATED, "Maximum prop breakable piece count (-1 = model default)" );
+ConVar props_break_max_pieces_perframe( "props_break_max_pieces_perframe", "-1", FCVAR_REPLICATED, "Maximum prop breakable piece count per frame (-1 = model default)" );
 #ifdef GAME_DLL
 extern ConVar breakable_multiplayer;
 #else
 ConVar cl_burninggibs( "cl_burninggibs", "0", 0, "A burning player that gibs has burning gibs." );
 #endif // GAME_DLL
 
-extern bool PropBreakableCapEdictsOnCreateAll( CUtlVector<breakmodel_t> &list, IPhysicsObject *pPhysics, const breakablepropparams_t &params, CBaseEntity *pEntity, int iPrecomputedBreakableCount = -1 );
+extern bool PropBreakableCapEdictsOnCreateAll(int modelindex, IPhysicsObject *pPhysics, const breakablepropparams_t &params, CBaseEntity *pEntity, int iPrecomputedBreakableCount = -1 );
 extern CBaseEntity *BreakModelCreateSingle( CBaseEntity *pOwner, breakmodel_t *pModel, const Vector &position, 
 	const QAngle &angles, const Vector &velocity, const AngularImpulse &angVelocity, int nSkin, const breakablepropparams_t &params );
 
@@ -152,34 +148,32 @@ struct propdata_interaction_s
 	const char *pszSectionName;
 	const char *pszKeyName;
 	const char *pszValue;
-	int m_keySection;
-	int m_keyKeyName;
 };
 
 #if !defined(_STATIC_LINKED) || defined(CLIENT_DLL)
 propdata_interaction_s sPropdataInteractionSections[PROPINTER_NUM_INTERACTIONS] =
 {
-	{ "physgun_interactions", "onworldimpact", "stick", -1, -1 },		// PROPINTER_PHYSGUN_WORLD_STICK,
-	{ "physgun_interactions", "onfirstimpact", "break", -1, -1 },		// PROPINTER_PHYSGUN_FIRST_BREAK,
-	{ "physgun_interactions", "onfirstimpact", "paintsplat", -1, -1 },	// PROPINTER_PHYSGUN_FIRST_PAINT,
-	{ "physgun_interactions", "onfirstimpact", "impale", -1, -1 },		// PROPINTER_PHYSGUN_FIRST_IMPALE,
-	{ "physgun_interactions", "onlaunch", "spin_none", -1, -1 },		// PROPINTER_PHYSGUN_LAUNCH_SPIN_NONE,
-	{ "physgun_interactions", "onlaunch", "spin_zaxis", -1, -1 },		// PROPINTER_PHYSGUN_LAUNCH_SPIN_Z,
-	{ "physgun_interactions", "onbreak", "explode_fire", -1, -1 },		// PROPINTER_PHYSGUN_BREAK_EXPLODE,
-	{ "physgun_interactions", "onbreak", "explode_ice", -1, -1 },		// PROPINTER_PHYSGUN_BREAK_EXPLODE_ICE,
-	{ "physgun_interactions", "damage", "none", -1, -1 },				// PROPINTER_PHYSGUN_DAMAGE_NONE,
+	{ "physgun_interactions", "onworldimpact", "stick" },		// PROPINTER_PHYSGUN_WORLD_STICK,
+	{ "physgun_interactions", "onfirstimpact", "break" },		// PROPINTER_PHYSGUN_FIRST_BREAK,
+	{ "physgun_interactions", "onfirstimpact", "paintsplat" },	// PROPINTER_PHYSGUN_FIRST_PAINT,
+	{ "physgun_interactions", "onfirstimpact", "impale" },		// PROPINTER_PHYSGUN_FIRST_IMPALE,
+	{ "physgun_interactions", "onlaunch", "spin_none" },		// PROPINTER_PHYSGUN_LAUNCH_SPIN_NONE,
+	{ "physgun_interactions", "onlaunch", "spin_zaxis" },		// PROPINTER_PHYSGUN_LAUNCH_SPIN_Z,
+	{ "physgun_interactions", "onbreak", "explode_fire" },		// PROPINTER_PHYSGUN_BREAK_EXPLODE,
+	{ "physgun_interactions", "onbreak", "explode_ice" },		// PROPINTER_PHYSGUN_BREAK_EXPLODE_ICE,
+	{ "physgun_interactions", "damage", "none" },				// PROPINTER_PHYSGUN_DAMAGE_NONE,
 	
-	{ "fire_interactions", "flammable", "yes", -1, -1 },				// PROPINTER_FIRE_FLAMMABLE,
-	{ "fire_interactions", "explosive_resist", "yes", -1, -1 },			// PROPINTER_FIRE_EXPLOSIVE_RESIST,
-	{ "fire_interactions", "ignite", "halfhealth", -1, -1 },			// PROPINTER_FIRE_IGNITE_HALFHEALTH,
+	{ "fire_interactions", "flammable", "yes" },				// PROPINTER_FIRE_FLAMMABLE,
+	{ "fire_interactions", "explosive_resist", "yes" },			// PROPINTER_FIRE_EXPLOSIVE_RESIST,
+	{ "fire_interactions", "ignite", "halfhealth" },			// PROPINTER_FIRE_IGNITE_HALFHEALTH,
 
-	{ "physgun_interactions", "onpickup", "create_flare", -1, -1 },		// PROPINTER_PHYSGUN_CREATE_FLARE,
+	{ "physgun_interactions", "onpickup", "create_flare" },		// PROPINTER_PHYSGUN_CREATE_FLARE,
 
-	{ "physgun_interactions", "allow_overhead", "yes", -1, -1 },		// 	PROPINTER_PHYSGUN_ALLOW_OVERHEAD,
+	{ "physgun_interactions", "allow_overhead", "yes" },		// 	PROPINTER_PHYSGUN_ALLOW_OVERHEAD,
 
-	{ "world_interactions", "onworldimpact", "bloodsplat", -1, -1 },	// PROPINTER_WORLD_BLOODSPLAT,
-	{ "physgun_interactions", "physgun_notify_children", "yes", -1, -1 },// PROPINTER_PHYSGUN_NOTIFY_CHILDREN,
-	{ "fire_interactions", "melee_immune", "yes", -1, -1 },				// PROPINTER_MELEE_IMMUNE,	
+	{ "world_interactions", "onworldimpact", "bloodsplat" },	// PROPINTER_WORLD_BLOODSPLAT,
+	{ "physgun_interactions", "physgun_notify_children", "yes" },// PROPINTER_PHYSGUN_NOTIFY_CHILDREN,
+	{ "fire_interactions", "melee_immune", "yes" },				// PROPINTER_MELEE_IMMUNE,	
 };
 #else
 extern propdata_interaction_s sPropdataInteractionSections[PROPINTER_NUM_INTERACTIONS];
@@ -193,11 +187,6 @@ CPropData::CPropData( void ) :
 {
 	m_bPropDataLoaded = false;
 	m_pKVPropData = NULL;
-	for ( int i = 0; i < PROPINTER_NUM_INTERACTIONS; i++ )
-	{
-		sPropdataInteractionSections[i].m_keySection = KeyValuesSystem()->GetSymbolForString( sPropdataInteractionSections[i].pszSectionName );
-		sPropdataInteractionSections[i].m_keyKeyName = KeyValuesSystem()->GetSymbolForString( sPropdataInteractionSections[i].pszKeyName );
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -273,8 +262,9 @@ void CPropData::ParsePropDataFile( void )
 //			are OUTSIDE the "prop_data" KV section in the model, but may be contained WITHIN the 
 //			specified Base's "prop_data" section (i.e. in propdata.txt)
 //-----------------------------------------------------------------------------
-int CPropData::ParsePropFromKV( CBaseEntity *pProp, IBreakableWithPropData *pBreakableInterface, KeyValues *pSection, KeyValues *pInteractionSection )
+int CPropData::ParsePropFromKV( CBaseEntity *pProp, KeyValues *pSection, KeyValues *pInteractionSection )
 {
+	IBreakableWithPropData *pBreakableInterface = dynamic_cast<IBreakableWithPropData*>(pProp);
 	if ( !pBreakableInterface )
 		return PARSE_FAILED_BAD_DATA;
 
@@ -283,43 +273,24 @@ int CPropData::ParsePropFromKV( CBaseEntity *pProp, IBreakableWithPropData *pBre
 
 	int iBaseResult = PARSE_SUCCEEDED;
 
-	// OPTIMIZE: keep these static so we don't have to look up these strings every time we create a prop
-	static int keyBase = KeyValuesSystem()->GetSymbolForString( "base" );
-	static int keyBlockLOS = KeyValuesSystem()->GetSymbolForString( "blockLOS" );
-	static int keyAIWalkable = KeyValuesSystem()->GetSymbolForString( "AIWalkable" );
-	static int keyDamageTable = KeyValuesSystem()->GetSymbolForString( "damage_table" );
-	static int keyPhysicsMode = KeyValuesSystem()->GetSymbolForString( "physicsmode" );
-	static int keyMultiplayerBreak = KeyValuesSystem()->GetSymbolForString( "multiplayer_break" );
-	static int keyDmgBullets = KeyValuesSystem()->GetSymbolForString( "dmg.bullets" );
-	static int keyDmgClub = KeyValuesSystem()->GetSymbolForString( "dmg.club" );
-	static int keyDmgExplosive = KeyValuesSystem()->GetSymbolForString( "dmg.explosive" );
-	static int keyHealth = KeyValuesSystem()->GetSymbolForString( "health" );
-	static int keyBreakableModel = KeyValuesSystem()->GetSymbolForString( "breakable_model" );
-	static int keyBreakableSkin = KeyValuesSystem()->GetSymbolForString( "breakable_skin" );
-	static int keyBreakableCount = KeyValuesSystem()->GetSymbolForString( "breakable_count" );
-	static int keyExplosiveDamage = KeyValuesSystem()->GetSymbolForString( "explosive_damage" );
-	static int keyExplosiveRadius = KeyValuesSystem()->GetSymbolForString( "explosive_radius" );
-	static int keyAllowStatic = KeyValuesSystem()->GetSymbolForString( "allowstatic" );
-	
-
 	// Do we have a base?
-	char const *pszBase = pSection->GetString( keyBase );
+	char const *pszBase = pSection->GetString( "base" );
 	if ( pszBase && pszBase[0] )
 	{
-		iBaseResult = ParsePropFromBase( pProp, pBreakableInterface, pszBase );
+		iBaseResult = ParsePropFromBase( pProp, pszBase );
 		if ( (iBaseResult != PARSE_SUCCEEDED) && (iBaseResult != PARSE_SUCCEEDED_ALLOWED_STATIC) )
 			return iBaseResult;
 	}
 
 	// Allow overriding of Block LOS
-	int iBlockLOS = pSection->GetFloat( keyBlockLOS, -1 );
+	int iBlockLOS = pSection->GetFloat( "blockLOS", -1 );
 	if ( iBlockLOS != -1 )
 	{
 		pBreakableInterface->SetPropDataBlocksLOS( iBlockLOS != 0 );
 	}
 
 	// Set whether AI can walk on this prop
-	int iIsWalkable = pSection->GetFloat( keyAIWalkable, -1 );
+	int iIsWalkable = pSection->GetFloat( "AIWalkable", -1 );
 	if ( iIsWalkable != -1 )
 	{
 		pBreakableInterface->SetPropDataIsAIWalkable( iIsWalkable != 0 );
@@ -329,11 +300,11 @@ int CPropData::ParsePropFromKV( CBaseEntity *pProp, IBreakableWithPropData *pBre
 	const char *pszTableName;
 	if ( pBreakableInterface->GetPhysicsDamageTable() == NULL_STRING )
 	{
-		pszTableName = pSection->GetString( keyDamageTable, NULL );
+		pszTableName = pSection->GetString( "damage_table", NULL );
 	}
 	else
 	{
-		pszTableName = pSection->GetString( keyDamageTable, STRING(pBreakableInterface->GetPhysicsDamageTable()) );
+		pszTableName = pSection->GetString( "damage_table", STRING(pBreakableInterface->GetPhysicsDamageTable()) );
 	}
 	if ( pszTableName && pszTableName[0] )
 	{
@@ -345,9 +316,10 @@ int CPropData::ParsePropFromKV( CBaseEntity *pProp, IBreakableWithPropData *pBre
 	}
 
 	// Get multiplayer physics mode if not set by map
-	pBreakableInterface->SetPhysicsMode( pSection->GetInt( keyPhysicsMode, pBreakableInterface->GetPhysicsMode() ) );
+	pBreakableInterface->SetPhysicsMode( pSection->GetInt( "physicsmode", 
+		pBreakableInterface->GetPhysicsMode() ) );
 
-	const char *multiplayer_break = pSection->GetString( keyMultiplayerBreak, NULL );
+	const char *multiplayer_break = pSection->GetString( "multiplayer_break", NULL );
 	if ( multiplayer_break )
 	{
 		mp_break_t mode = MULTIPLAYER_BREAK_DEFAULT;
@@ -367,18 +339,18 @@ int CPropData::ParsePropFromKV( CBaseEntity *pProp, IBreakableWithPropData *pBre
 	}
 
 	// Get damage modifiers, but only if they're specified, because our base may have already overridden them.
-	pBreakableInterface->SetDmgModBullet( pSection->GetFloat( keyDmgBullets, pBreakableInterface->GetDmgModBullet() ) );
-	pBreakableInterface->SetDmgModClub( pSection->GetFloat( keyDmgClub, pBreakableInterface->GetDmgModClub() ) );
-	pBreakableInterface->SetDmgModExplosive( pSection->GetFloat( keyDmgExplosive, pBreakableInterface->GetDmgModExplosive() ) );
+	pBreakableInterface->SetDmgModBullet( pSection->GetFloat( "dmg.bullets", pBreakableInterface->GetDmgModBullet() ) );
+	pBreakableInterface->SetDmgModClub( pSection->GetFloat( "dmg.club", pBreakableInterface->GetDmgModClub() ) );
+	pBreakableInterface->SetDmgModExplosive( pSection->GetFloat( "dmg.explosive", pBreakableInterface->GetDmgModExplosive() ) );
 
 	// Get the health (unless this is an override prop)
 	if ( !FClassnameIs( pProp, "prop_physics_override" ) && !FClassnameIs( pProp, "prop_dynamic_override" ) )
 	{
-		pProp->SetHealth( pSection->GetInt( keyHealth, pProp->GetHealth() ) );
+		pProp->SetHealth( pSection->GetInt( "health", pProp->GetHealth() ) );
 
 		// Explosive?
-		pBreakableInterface->SetExplosiveDamage( pSection->GetFloat( keyExplosiveDamage, pBreakableInterface->GetExplosiveDamage() ) );
-		pBreakableInterface->SetExplosiveRadius( pSection->GetFloat( keyExplosiveRadius, pBreakableInterface->GetExplosiveRadius() ) );
+		pBreakableInterface->SetExplosiveDamage( pSection->GetFloat( "explosive_damage", pBreakableInterface->GetExplosiveDamage() ) );
+		pBreakableInterface->SetExplosiveRadius( pSection->GetFloat( "explosive_radius", pBreakableInterface->GetExplosiveRadius() ) );
 
 #ifdef GAME_DLL
 		// If we now have health, we're not allowed to ignore physics damage
@@ -392,11 +364,11 @@ int CPropData::ParsePropFromKV( CBaseEntity *pProp, IBreakableWithPropData *pBre
 	const char *pszBreakableModel;
 	if ( pBreakableInterface->GetBreakableModel() == NULL_STRING )
 	{
-		pszBreakableModel = pSection->GetString( keyBreakableModel, NULL );
+		pszBreakableModel = pSection->GetString( "breakable_model", NULL );
 	}
 	else
 	{
-		pszBreakableModel = pSection->GetString( keyBreakableModel, STRING(pBreakableInterface->GetBreakableModel()) );
+		pszBreakableModel = pSection->GetString( "breakable_model", STRING(pBreakableInterface->GetBreakableModel()) );
 	}
 	if ( pszBreakableModel && pszBreakableModel[0] )
 	{
@@ -406,8 +378,8 @@ int CPropData::ParsePropFromKV( CBaseEntity *pProp, IBreakableWithPropData *pBre
 	{
 		pBreakableInterface->SetBreakableModel( NULL_STRING );
 	}
-	pBreakableInterface->SetBreakableSkin( pSection->GetInt( keyBreakableSkin, pBreakableInterface->GetBreakableSkin() ) );
-	pBreakableInterface->SetBreakableCount( pSection->GetInt( keyBreakableCount, pBreakableInterface->GetBreakableCount() ) );
+	pBreakableInterface->SetBreakableSkin( pSection->GetInt( "breakable_skin", pBreakableInterface->GetBreakableSkin() ) );
+	pBreakableInterface->SetBreakableCount( pSection->GetInt( "breakable_count", pBreakableInterface->GetBreakableCount() ) );
 
 	// Calculate the maximum size of the breakables this breakable will produce
 	Vector vecSize = pProp->CollisionProp()->OBBSize();
@@ -428,10 +400,10 @@ int CPropData::ParsePropFromKV( CBaseEntity *pProp, IBreakableWithPropData *pBre
 		if ( !pInteraction->pszSectionName )
 			continue;
 
-		KeyValues *pkvCurrentInter = pInteractionSection->FindKey( pInteraction->m_keySection );
+		KeyValues *pkvCurrentInter = pInteractionSection->FindKey( pInteraction->pszSectionName );
 		if ( pkvCurrentInter )
 		{
-			char const *pszInterBase = pkvCurrentInter->GetString( pInteraction->m_keyKeyName );
+			char const *pszInterBase = pkvCurrentInter->GetString( pInteraction->pszKeyName );
 			if ( pszInterBase && pszInterBase[0] && !stricmp( pszInterBase, pInteraction->pszValue ) )
 			{
 				pBreakableInterface->SetInteraction( (propdata_interactions_t)i );
@@ -461,7 +433,7 @@ int CPropData::ParsePropFromKV( CBaseEntity *pProp, IBreakableWithPropData *pBre
 		return PARSE_SUCCEEDED_ALLOWED_STATIC;
 
 	// Otherwise, see if our propdata says we are allowed to be static
-	if ( pSection->GetInt( keyAllowStatic, 0 ) )
+	if ( pSection->GetInt( "allowstatic", 0 ) )
 		return PARSE_SUCCEEDED_ALLOWED_STATIC;
 
 	return PARSE_SUCCEEDED;
@@ -470,13 +442,17 @@ int CPropData::ParsePropFromKV( CBaseEntity *pProp, IBreakableWithPropData *pBre
 //-----------------------------------------------------------------------------
 // Purpose: Fill out a prop's with base data parsed from the propdata file
 //-----------------------------------------------------------------------------
-int CPropData::ParsePropFromBase( CBaseEntity *pProp, IBreakableWithPropData *pBreakableInterface, const char *pszPropData )
+int CPropData::ParsePropFromBase( CBaseEntity *pProp, const char *pszPropData )
 {
 	if ( !m_bPropDataLoaded )
 		return PARSE_FAILED_NO_DATA;
 
+	IBreakableWithPropData *pBreakableInterface = dynamic_cast<IBreakableWithPropData*>(pProp);
+	
 	if ( !pBreakableInterface )
+	{
 		return PARSE_FAILED_BAD_DATA;
+	}
 
 	if ( !m_pKVPropData )
 	{
@@ -497,7 +473,7 @@ int CPropData::ParsePropFromBase( CBaseEntity *pProp, IBreakableWithPropData *pB
 		pBreakableInterface->SetBasePropData( AllocPooledString( pszPropData ) );
 	}
 
-	return ParsePropFromKV( pProp, pBreakableInterface, pSection, pSection );
+	return ParsePropFromKV( pProp, pSection, pSection );
 }
 
 //-----------------------------------------------------------------------------
@@ -781,14 +757,12 @@ class CGameGibManager : public CBaseEntity
 
 public:
 
-	CGameGibManager();
-	virtual ~CGameGibManager();
+	CGameGibManager() : m_iCurrentMaxPieces(-1), m_iMaxPieces(-1) {}
 
 	void Activate( void );
 	void AddGibToLRU( CBaseAnimating *pEntity );
 
 	inline bool AllowedToSpawnGib( void );
-	CGameGibManager		*m_pNext;
 
 private:
 
@@ -806,20 +780,6 @@ private:
 	int			m_iMaxPieces;
 	int			m_iLastFrame;
 };
-
-static CGameGibManager *g_pGibManager = NULL;
-CGameGibManager::CGameGibManager() : m_iCurrentMaxPieces(-1), m_iMaxPieces(-1) 
-{
-	g_pGibManager = this;
-}
-
-CGameGibManager::~CGameGibManager()
-{
-	if ( g_pGibManager == this )
-	{
-		g_pGibManager = NULL;
-	}
-}
 
 BEGIN_DATADESC( CGameGibManager )
 	// Silence perfidous classcheck!
@@ -920,9 +880,20 @@ void CGameGibManager::AddGibToLRU( CBaseAnimating *pEntity )
 	m_iLastFrame = gpGlobals->framecount;
 }
 
+EHANDLE g_hGameGibManager;
+
 CGameGibManager *GetGibManager( void )
 {
-	return (CGameGibManager *)g_pGibManager;
+#ifndef HL2_EPISODIC
+	return NULL;
+#endif
+
+	if ( g_hGameGibManager == NULL )
+	{
+		g_hGameGibManager = (CGameGibManager *)gEntList.FindEntityByClassname( NULL, "game_gib_manager" );
+	}
+
+	return (CGameGibManager *)g_hGameGibManager.Get();
 }
 
 #endif
@@ -957,6 +928,15 @@ void PropBreakableCreateAll( int modelindex, IPhysicsObject *pPhysics, const bre
 		}
 	}
 
+#ifdef GAME_DLL
+	// On server limit break model creation
+	if ( !PropBreakableCapEdictsOnCreateAll(modelindex, pPhysics, params, pEntity, iPrecomputedBreakableCount ) )
+	{
+		DevMsg( "Failed to create PropBreakable: would exceed MAX_EDICTS\n" );
+		return;
+	}
+#endif
+	
 	vcollide_t *pCollide = modelinfo->GetVCollide( modelindex );
 	if ( !pCollide )
 		return;
@@ -978,62 +958,31 @@ void PropBreakableCreateAll( int modelindex, IPhysicsObject *pPhysics, const bre
 	}
 	matrix3x4_t localToWorld;
 
-	CStudioHdr parentStudioHdr;
+	CStudioHdr studioHdr;
 	const model_t *model = modelinfo->GetModel( modelindex );
 	if ( model )
 	{
-		parentStudioHdr.Init( modelinfo->GetStudiomodel( model ) );
+		studioHdr.Init( modelinfo->GetStudiomodel( model ) );
 	}
 
 	Vector parentOrigin = vec3_origin;
-	int parentAttachment = 	Studio_FindAttachment( &parentStudioHdr, "placementOrigin" ) + 1;
+	int parentAttachment = 	Studio_FindAttachment( &studioHdr, "placementOrigin" ) + 1;
 	if ( parentAttachment > 0 )
 	{
-		GetAttachmentLocalSpace( &parentStudioHdr, parentAttachment-1, localToWorld );
+		GetAttachmentLocalSpace( &studioHdr, parentAttachment-1, localToWorld );
 		MatrixGetColumn( localToWorld, 3, parentOrigin );
 	}
 	else
 	{
 		AngleMatrix( vec3_angle, localToWorld );
 	}
-
-	// Search for a burst center on the parent
-	matrix3x4_t matrix;
-	AngleMatrix( params.angles, params.origin, matrix );
-
-	Vector burstCenter = params.origin;
-	const int parentBurstCenterAttachment = Studio_FindAttachment( &parentStudioHdr, "burstCenter" ) + 1;
-	if( parentBurstCenterAttachment > 0 )
-	{
-		if( pOwnerAnim )
-		{
-			matrix3x4_t burstCenterTransform;
-			pOwnerAnim->GetAttachment( parentBurstCenterAttachment, burstCenterTransform );
-			MatrixGetColumn( burstCenterTransform, 3, burstCenter );
-		}
-		else
-		{
-			GetAttachmentLocalSpace( &parentStudioHdr, parentBurstCenterAttachment - 1, localToWorld );
-			MatrixGetColumn( localToWorld, 3, burstCenter );
-			VectorTransform( burstCenter - parentOrigin, matrix, burstCenter );
-		}
-	}
 	
 	CUtlVector<breakmodel_t> list;
 
-	list.EnsureCapacity( 20 );
 	BreakModelList( list, modelindex, params.defBurstScale, params.defCollisionGroup );
 
 	if ( list.Count() )
 	{
-#ifdef GAME_DLL
-		// On server limit break model creation
-		if ( !PropBreakableCapEdictsOnCreateAll( list, pPhysics, params, pEntity, iPrecomputedBreakableCount ) )
-		{
-			DevMsg( "Failed to create PropBreakable: would exceed MAX_EDICTS\n" );
-			return;
-		}
-#endif
 		for ( int i = 0; i < list.Count(); i++ )
 		{
 			const char *modelName = list[i].modelName;
@@ -1068,6 +1017,9 @@ void PropBreakableCreateAll( int modelindex, IPhysicsObject *pPhysics, const bre
 
 			if ( ( iPrecomputedBreakableCount != -1 ) && ( i >= iPrecomputedBreakableCount ) )
 				break;
+
+			matrix3x4_t matrix;
+			AngleMatrix( params.angles, params.origin, matrix );
 
 			CStudioHdr studioHdr;
 			const model_t *model = modelinfo->GetModel( modelIndex );
@@ -1115,9 +1067,16 @@ void PropBreakableCreateAll( int modelindex, IPhysicsObject *pPhysics, const bre
 
 				VectorTransform( list[i].offset - placementOrigin, matrix, position );
 			}
+			
 			Vector objectVelocity = params.velocity;
+			float flScale = VectorNormalize( objectVelocity );
+			objectVelocity.x += RandomFloat( -1.f, 1.0f );
+			objectVelocity.y += RandomFloat( -1.0f, 1.0f );
+			objectVelocity.z += RandomFloat( 0.0f, 1.0f );
+			VectorNormalize( objectVelocity );
+			objectVelocity *= flScale;
 
-			if (pPhysics)
+			if ( pPhysics && !params.useThisRawVelocity )
 			{
 				pPhysics->GetVelocityAtPoint( position, &objectVelocity );
 			}
@@ -1152,12 +1111,12 @@ void PropBreakableCreateAll( int modelindex, IPhysicsObject *pPhysics, const bre
 				// the origin in addition to travelling in the wished velocity.
 				if ( list[i].burstScale != 0.0 )
 				{
-					Vector vecBurstDir = position - burstCenter;
+					Vector vecBurstDir = position - params.origin;
 
 					// If $autocenter wasn't used, try the center of the piece
 					if ( vecBurstDir == vec3_origin )
 					{
-						vecBurstDir = pBreakable->WorldSpaceCenter() - burstCenter;
+						vecBurstDir = pBreakable->WorldSpaceCenter() - params.origin;
 					}
 
 					VectorNormalize( vecBurstDir );
@@ -1191,6 +1150,13 @@ void PropBreakableCreateAll( int modelindex, IPhysicsObject *pPhysics, const bre
 					break;
 
 				Q_strncpy( breakModel.modelName, g_PropDataSystem.GetRandomChunkModel(STRING(pBreakableInterface->GetBreakableModel()), pBreakableInterface->GetMaxBreakableSize()), sizeof(breakModel.modelName) );
+
+				if ( modelinfo->GetModelIndex( breakModel.modelName ) == -1 )
+				{
+					// This model doesn't exist!
+					DevWarning( "PropBreakableCreateAll: Could not create model %s\n", breakModel.modelName );
+					continue;
+				}
 
 				breakModel.health = 1;
 				breakModel.fadeTime = RandomFloat(5,10);
@@ -1228,10 +1194,6 @@ void PropBreakableCreateAll( int modelindex, IPhysicsObject *pPhysics, const bre
 #endif
 				{
 					pBreakable = BreakModelCreateSingle( pOwnerEntity, &breakModel, breakModel.offset, vecAngles, vecVelocity, vec3_origin/*params.angularVelocity*/, iSkin, params );
-					if ( !pBreakable )
-					{
-						DevWarning( "PropBreakableCreateAll: Could not create model %s\n", breakModel.modelName );
-					}
 				}
 
 				if ( pBreakable )
@@ -1368,7 +1330,7 @@ CBaseEntity *CreateGibsFromList( CUtlVector<breakmodel_t> &list, int modelindex,
 
 #ifdef GAME_DLL
 	// On server limit break model creation
-	if ( !PropBreakableCapEdictsOnCreateAll( list, pPhysics, params, pEntity, iPrecomputedBreakableCount ) )
+	if ( !PropBreakableCapEdictsOnCreateAll(modelindex, pPhysics, params, pEntity, iPrecomputedBreakableCount ) )
 	{
 		DevMsg( "Failed to create PropBreakable: would exceed MAX_EDICTS\n" );
 		return NULL;
@@ -1511,7 +1473,7 @@ CBaseEntity *CreateGibsFromList( CUtlVector<breakmodel_t> &list, int modelindex,
 			VectorNormalize( objectVelocity );
 			objectVelocity *= flScale;
 
-			if (pPhysics)
+			if ( pPhysics && !params.useThisRawVelocity )
 			{
 				pPhysics->GetVelocityAtPoint( position, &objectVelocity );
 			}
@@ -1603,6 +1565,13 @@ CBaseEntity *CreateGibsFromList( CUtlVector<breakmodel_t> &list, int modelindex,
 
 				Q_strncpy( breakModel.modelName, g_PropDataSystem.GetRandomChunkModel(STRING(pBreakableInterface->GetBreakableModel()), pBreakableInterface->GetMaxBreakableSize()), sizeof(breakModel.modelName) );
 
+				if ( modelinfo->GetModelIndex( breakModel.modelName ) == -1 )
+				{
+					// This model doesn't exist!
+					DevWarning( "PropBreakableCreateAll: Could not create model %s\n", breakModel.modelName );
+					continue;
+				}
+
 				breakModel.health = 1;
 				breakModel.fadeTime = RandomFloat(5,10);
 				breakModel.fadeMinDist = 0.0f;
@@ -1681,10 +1650,6 @@ CBaseEntity *CreateGibsFromList( CUtlVector<breakmodel_t> &list, int modelindex,
 						pGibList->AddToTail( pBreakable );
 					}
 				}
-				else
-				{
-					DevWarning( "PropBreakableCreateAll: Could not create model %s\n", breakModel.modelName );
-				}
 			}
 		}
 	}
@@ -1692,53 +1657,3 @@ CBaseEntity *CreateGibsFromList( CUtlVector<breakmodel_t> &list, int modelindex,
 	return pFirstBreakable;
 }
 
-//-----------------------------------------------------------------------------
-// Shared physics prop methods to help the grab controller
-//-----------------------------------------------------------------------------
-
-#if defined CLIENT_DLL
-#define CPhysicsProp C_PhysicsProp
-#endif
-
-bool CPhysicsProp::GetPropDataAngles( const char *pKeyName, QAngle &vecAngles )
-{
-	KeyValues *pModelKV = modelinfo->GetModelKeyValues( GetModel() );
-	if ( pModelKV )
-	{
-		static int keyPhysgunInteractions = KeyValuesSystem()->GetSymbolForString( "physgun_interactions" );
-		KeyValues *pkvPropData = pModelKV->FindKey( keyPhysgunInteractions );
-		if ( pkvPropData )
-		{
-			char const *pszBase = pkvPropData->GetString( pKeyName );
-			if ( pszBase && pszBase[0] )
-			{
-				UTIL_StringToVector( vecAngles.Base(), pszBase );
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-float CPhysicsProp::GetCarryDistanceOffset( void )
-{
-	KeyValues *pModelKV = modelinfo->GetModelKeyValues( GetModel() );
-	if ( pModelKV )
-	{
-		static int keyPhysgunInteractions = KeyValuesSystem()->GetSymbolForString( "physgun_interactions" );
-		KeyValues *pkvPropData = pModelKV->FindKey( keyPhysgunInteractions );
-		if ( pkvPropData )
-		{
-			float flDistance = pkvPropData->GetFloat( "carry_distance_offset", 0 );
-			return flDistance;
-		}
-	}
-
-	return 0;
-}
-
-
-#if defined CLIENT_DLL 
-#undef CPhysicsProp
-#endif

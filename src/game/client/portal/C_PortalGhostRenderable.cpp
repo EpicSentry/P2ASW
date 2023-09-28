@@ -11,7 +11,7 @@
 #include "c_portal_player.h"
 #include "model_types.h"
 #include "c_basecombatweapon.h"
-#include "c_combatweaponworldclone.h"
+//#include "c_combatweaponworldclone.h" // FIXME!
 #include "toolframework_client.h"
 
 ConVar portal_ghosts_disable( "portal_ghosts_disable", "0", 0, "Disables rendering of ghosted objects in portal environments" );
@@ -105,7 +105,8 @@ C_PortalGhostRenderable::C_PortalGhostRenderable( C_Portal_Base2D *pOwningPortal
 	m_bCombatWeapon = (dynamic_cast<C_BaseCombatWeapon *>(pGhostSource) != NULL);
 	SetModelIndex( m_bCombatWeapon ? ((C_BaseCombatWeapon *)pGhostSource)->GetWorldModelIndex() : pGhostSource->GetModelIndex() );
 
-	m_bCombatWeaponWorldClone = ( dynamic_cast< C_CombatWeaponClone* >( pGhostSource ) != NULL );
+	// FIXME:
+	m_bCombatWeaponWorldClone = false;//( dynamic_cast< C_CombatWeaponClone* >( pGhostSource ) != NULL );
 
 	m_bPlayerHeldClone = ( dynamic_cast< C_PlayerHeldObjectClone* >( pGhostSource ) != NULL );
 
@@ -509,17 +510,13 @@ int C_PortalGhostRenderable::DrawModel( int flags, const RenderableInstance_t &i
 	}
 	else
 	{
-		DrawBrushModelMode_t mode = DBM_DRAW_ALL;
-		if ( flags & STUDIO_TWOPASS )
-		{
-			mode = ( flags & STUDIO_TRANSPARENCY ) ? DBM_DRAW_TRANSLUCENT_ONLY : DBM_DRAW_OPAQUE_ONLY;
-		}
 
-		render->DrawBrushModelEx( m_hGhostedRenderable, 
+		render->DrawBrushModel( m_hGhostedRenderable, 
 								(model_t *)m_hGhostedRenderable->GetModel(), 
 								GetRenderOrigin(), 
-								GetRenderAngles(), 
-								mode );
+								GetRenderAngles(),
+								true // TODO: or false??
+								);
 		
 		return 1;
 	}

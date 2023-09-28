@@ -23,12 +23,16 @@
 #include "portal_base2d_shared.h"
 #include "particles_new.h"
 #include "materialsystem/imaterialvar.h"
-#include "c_baseprojectedentity.h"
 #include "c_basetempentity.h"
-#include "c_combatweaponworldclone.h"
 #include "C_Portal_Player.h"
 #include "prediction.h"
 #include "tier1/callqueue.h"
+
+//FIXME
+#if 0
+#include "c_baseprojectedentity.h"
+#include "c_combatweaponworldclone.h"
+#endif
 
 #include "c_pixel_visibility.h"
 

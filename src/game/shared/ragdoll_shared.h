@@ -28,7 +28,7 @@ class CBoneAccessor;
 #include "vcollide_parse.h"
 
 // UNDONE: Remove and make dynamic?
-#define RAGDOLL_MAX_ELEMENTS	24
+#define RAGDOLL_MAX_ELEMENTS	32
 #define RAGDOLL_INDEX_BITS		5			// NOTE 1<<RAGDOLL_INDEX_BITS >= RAGDOLL_MAX_ELEMENTS
 
 #define CORE_DISSOLVE_FADE_START 0.2f

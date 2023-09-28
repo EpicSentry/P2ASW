@@ -1,8 +1,8 @@
-//========== Copyright (c) 2008, Valve Corporation, All rights reserved. ==========
+//========== Copyright © 2008, Valve Corporation, All rights reserved. ==========
 //
 // Purpose:
 //
-//=================================================================================
+//==============================================================================
 
 #include "cbase.h"
 
@@ -67,12 +67,6 @@ static ConVar mat_dynamic_tonemapping( "mat_dynamic_tonemapping", "1", FCVAR_CHE
 static ConVar mat_tonemapping_occlusion_use_stencil( "mat_tonemapping_occlusion_use_stencil", "0" );
 
 static ConVar mat_autoexposure_max( "mat_autoexposure_max", "2" );
-#if defined( _X360 )
-// Allow the max. pixel shader multiplier to be 50% higher to better utilize the available 8-bit output range, and to help compensate for the gamma ramp adjustments we've made. (At some point we should also adjust the PS3.)
-static ConVar mat_autoexposure_max_multiplier("mat_autoexposure_max_multiplier","1.5");
-#else
-static ConVar mat_autoexposure_max_multiplier("mat_autoexposure_max_multiplier","1.0");
-#endif
 static ConVar mat_autoexposure_min( "mat_autoexposure_min", "0.5" );
 static ConVar mat_show_histogram( "mat_show_histogram", "0" );
 ConVar mat_hdr_uncapexposure( "mat_hdr_uncapexposure", "0", FCVAR_CHEAT );
@@ -100,12 +94,7 @@ ConVar mat_exposure_center_region_x( "mat_exposure_center_region_x","0.9", FCVAR
 ConVar mat_exposure_center_region_y( "mat_exposure_center_region_y","0.85", FCVAR_CHEAT );
 
 ConVar mat_tonemap_algorithm( "mat_tonemap_algorithm", "1", FCVAR_CHEAT, "0 = Original Algorithm 1 = New Algorithm" );
-#if defined( _X360 )
-// Move "up" the percent target to make X360 a bit brighter than it's been to compensate for our bad 8-bit histogram utilization and to also compensate for the non-PWL texture change.
-ConVar mat_tonemap_percent_target( "mat_tonemap_percent_target", "80.0", FCVAR_CHEAT );
-#else
 ConVar mat_tonemap_percent_target( "mat_tonemap_percent_target", "60.0", FCVAR_CHEAT );
-#endif
 ConVar mat_tonemap_percent_bright_pixels( "mat_tonemap_percent_bright_pixels", "2.0", FCVAR_CHEAT );
 ConVar mat_tonemap_min_avglum( "mat_tonemap_min_avglum", "3.0", FCVAR_CHEAT );
 ConVar mat_force_tonemap_scale( "mat_force_tonemap_scale", "0.0", FCVAR_CHEAT );
@@ -114,10 +103,6 @@ ConVar mat_fullbright( "mat_fullbright", "0", FCVAR_CHEAT );
 ConVar mat_grain_enable( "mat_grain_enable", "0" );
 ConVar mat_vignette_enable( "mat_vignette_enable", "0" );
 ConVar mat_local_contrast_enable( "mat_local_contrast_enable", "0" );
-
-ConVar mat_blur_r( "mat_blur_r", "0.7" );
-ConVar mat_blur_g( "mat_blur_g", "0.7" );
-ConVar mat_blur_b( "mat_blur_b", "0.7" );
 
 static void SetRenderTargetAndViewPort(ITexture *rt)
 {
@@ -210,8 +195,7 @@ void CHistogramBucket::IssueQuery( int nFrameNum )
 		state.m_CompareFunc = SHADER_STENCILFUNC_ALWAYS;
 		state.m_FailOp = SHADER_STENCILOP_KEEP;
 		state.m_ZFailOp = SHADER_STENCILOP_KEEP;
-		state.m_nReferenceValue = 0x80;
-		state.m_nWriteMask = 0x80;
+		state.m_nReferenceValue = 1;
 		pRenderContext->SetStencilState( state );
 	}
 	else
@@ -242,12 +226,12 @@ void CHistogramBucket::IssueQuery( int nFrameNum )
 
 		// Issue an occlusion query using stencil as the mask
 		state.m_bEnable = true;
-		state.m_nTestMask = 0x80;
+		state.m_nTestMask = 1;
 		state.m_PassOp = SHADER_STENCILOP_KEEP;
 		state.m_CompareFunc = SHADER_STENCILFUNC_EQUAL;
 		state.m_FailOp = SHADER_STENCILOP_KEEP;
 		state.m_ZFailOp = SHADER_STENCILOP_KEEP;
-		state.m_nReferenceValue = 0x80;
+		state.m_nReferenceValue = 1;
 		pRenderContext->SetStencilState( state );
 
 		IMaterial *pLumCompareStencilMaterial = materials->FindMaterial( "dev/no_pixel_write", TEXTURE_GROUP_OTHER, true);
@@ -579,8 +563,6 @@ static void GetExposureRange( float *pflAutoExposureMin, float *pflAutoExposureM
 		*pflAutoExposureMax = mat_autoexposure_max.GetFloat();
 	}
 
-	*pflAutoExposureMax *= mat_autoexposure_max_multiplier.GetFloat();
-
 	// Override
 	if ( mat_hdr_uncapexposure.GetInt() )
 	{
@@ -730,7 +712,7 @@ void CTonemapSystem::DisplayHistogram()
 	//pRenderContext->ClearBuffers( true, true );
 
 	// Output some text data
-	if ( !IsGameConsole() && ( mat_show_histogram.GetInt() == 1 ) )
+	if ( !IsX360() )
 	{
 		engine->Con_NPrintf( 23 + ( nViewportY / 10 ), "(Histogram luminance is in linear space)" );
 
@@ -741,82 +723,79 @@ void CTonemapSystem::DisplayHistogram()
 	}
 
 	int xpStart = nViewportX + nViewportWidth - nTotalGraphPixelsWide - 10;
-	if ( IsGameConsole() )
+	if ( IsX360() )
 	{
 		xpStart -= 50;
 	}
 
 	int yOffset = 4 + nViewportY;
 
-	if ( mat_show_histogram.GetInt() == 1 )
+	int xp = xpStart;
+	for ( int nBucket = 0; nBucket < nNumHistogramBuckets; nBucket++ )
 	{
-		int xp = xpStart;
-		for ( int nBucket = 0; nBucket < nNumHistogramBuckets; nBucket++ )
+		int np = 0;
+		CHistogramBucket &e = m_histogramBucketArray[ nBucket ];
+		if ( e.ContainsValidData() )
+			np += e.m_nPixelsInRange;
+		int width = MAX( 1, 500 * ( e.m_flMaxLuminance - e.m_flMinLuminance ) );
+
+		//Warning( "Bucket %d: min/max %f / %f.  m_nPixelsInRange=%d   m_nPixels=%d\n", nBucket, e.m_flMinLuminance, e.m_flMaxLuminance, e.m_nPixelsInRange, e.m_nPixels );
+
+		if ( np )
 		{
-			int np = 0;
-			CHistogramBucket &e = m_histogramBucketArray[ nBucket ];
-			if ( e.ContainsValidData() )
-				np += e.m_nPixelsInRange;
-			int width = MAX( 1, 500 * ( e.m_flMaxLuminance - e.m_flMinLuminance ) );
-	
-			//Warning( "Bucket %d: min/max %f / %f.  m_nPixelsInRange=%d   m_nPixels=%d\n", nBucket, e.m_flMinLuminance, e.m_flMaxLuminance, e.m_nPixelsInRange, e.m_nPixels );
-	
-			if ( np )
-			{
-				int height = MAX( 1, MIN( HISTOGRAM_BAR_SIZE, ( (float)np / (float)nMaxValidPixels ) * HISTOGRAM_BAR_SIZE ) );
-	
-				pRenderContext->ClearColor3ub( 255, 0, 0 );
-				pRenderContext->Viewport( xp, yOffset + HISTOGRAM_BAR_SIZE - height, width, height );
-				pRenderContext->ClearBuffers( true, true );
-			}
-			else
-			{
-				int height = 1;
-				pRenderContext->ClearColor3ub( 0, 0, 0 );
-				pRenderContext->Viewport( xp, yOffset + HISTOGRAM_BAR_SIZE - height, width, height );
-				pRenderContext->ClearBuffers( true, true );
-			}
-			xp += width + 2;
-		}
-	
-		if ( mat_tonemap_algorithm.GetInt() == 1 ) // New algorithm only
-		{
-			float flYellowTargetPixelStart = ( xpStart + ( float( nTotalGraphPixelsWide ) * mat_tonemap_percent_target.GetFloat() / 100.0f ) );
-			float flYellowAveragePixelStart = ( xpStart + ( float( nTotalGraphPixelsWide ) * mat_tonemap_min_avglum.GetFloat() / 100.0f ) );
-	
-			float flTargetPixelStart = ( xpStart + ( float( nTotalGraphPixelsWide ) * FindLocationOfPercentBrightPixels( mat_tonemap_percent_bright_pixels.GetFloat(), mat_tonemap_percent_target.GetFloat() ) ) );
-			float flAveragePixelStart = ( xpStart + ( float( nTotalGraphPixelsWide ) * FindLocationOfPercentBrightPixels( 50.0f ) ) );
-	
-			// Draw target yellow border bar
-			int nHeight = HISTOGRAM_BAR_SIZE * 3 / 4;
-			int nHeightOffset = -( HISTOGRAM_BAR_SIZE - nHeight ) / 2;
-	
-			// Green is current percent target location
-			pRenderContext->Viewport( flYellowTargetPixelStart-1, yOffset + nHeightOffset + HISTOGRAM_BAR_SIZE - nHeight - 2, 8, nHeight + 4 );
-			pRenderContext->ClearColor3ub( 0, 127, 0 );
-			pRenderContext->ClearBuffers( true, true );
-			
-			pRenderContext->Viewport( flYellowTargetPixelStart+1, yOffset + nHeightOffset + HISTOGRAM_BAR_SIZE - nHeight, 4, nHeight );
-			pRenderContext->ClearColor3ub( 0, 0, 0 );
-			pRenderContext->ClearBuffers( true, true );
-	
-			pRenderContext->Viewport( flTargetPixelStart+1, yOffset + nHeightOffset + HISTOGRAM_BAR_SIZE - nHeight, 4, nHeight );
-			pRenderContext->ClearColor3ub( 0, 255, 0 );
-			pRenderContext->ClearBuffers( true, true );
-			
-			// Blue is average luminance location
-			pRenderContext->Viewport( flYellowAveragePixelStart-1, yOffset + nHeightOffset + HISTOGRAM_BAR_SIZE - nHeight - 2, 8, nHeight + 4 );
-			pRenderContext->ClearColor3ub( 0, 114, 188 );
-			pRenderContext->ClearBuffers( true, true );
-			
-			pRenderContext->Viewport( flYellowAveragePixelStart+1, yOffset + nHeightOffset + HISTOGRAM_BAR_SIZE - nHeight, 4, nHeight );
-			pRenderContext->ClearColor3ub( 0, 0, 0 );
-			pRenderContext->ClearBuffers( true, true );
-	
-			pRenderContext->Viewport( flAveragePixelStart+1, yOffset + nHeightOffset + HISTOGRAM_BAR_SIZE - nHeight, 4, nHeight );
-			pRenderContext->ClearColor3ub( 0, 191, 243 );
+			int height = MAX( 1, MIN( HISTOGRAM_BAR_SIZE, ( (float)np / (float)nMaxValidPixels ) * HISTOGRAM_BAR_SIZE ) );
+
+			pRenderContext->ClearColor3ub( 255, 0, 0 );
+			pRenderContext->Viewport( xp, yOffset + HISTOGRAM_BAR_SIZE - height, width, height );
 			pRenderContext->ClearBuffers( true, true );
 		}
+		else
+		{
+			int height = 1;
+			pRenderContext->ClearColor3ub( 0, 0, 0 );
+			pRenderContext->Viewport( xp, yOffset + HISTOGRAM_BAR_SIZE - height, width, height );
+			pRenderContext->ClearBuffers( true, true );
+		}
+		xp += width + 2;
+	}
+
+	if ( mat_tonemap_algorithm.GetInt() == 1 ) // New algorithm only
+	{
+		float flYellowTargetPixelStart = ( xpStart + ( float( nTotalGraphPixelsWide ) * mat_tonemap_percent_target.GetFloat() / 100.0f ) );
+		float flYellowAveragePixelStart = ( xpStart + ( float( nTotalGraphPixelsWide ) * mat_tonemap_min_avglum.GetFloat() / 100.0f ) );
+
+		float flTargetPixelStart = ( xpStart + ( float( nTotalGraphPixelsWide ) * FindLocationOfPercentBrightPixels( mat_tonemap_percent_bright_pixels.GetFloat(), mat_tonemap_percent_target.GetFloat() ) ) );
+		float flAveragePixelStart = ( xpStart + ( float( nTotalGraphPixelsWide ) * FindLocationOfPercentBrightPixels( 50.0f ) ) );
+
+		// Draw target yellow border bar
+		int nHeight = HISTOGRAM_BAR_SIZE * 3 / 4;
+		int nHeightOffset = -( HISTOGRAM_BAR_SIZE - nHeight ) / 2;
+
+		// Green is current percent target location
+		pRenderContext->Viewport( flYellowTargetPixelStart-1, yOffset + nHeightOffset + HISTOGRAM_BAR_SIZE - nHeight - 2, 8, nHeight + 4 );
+		pRenderContext->ClearColor3ub( 0, 127, 0 );
+		pRenderContext->ClearBuffers( true, true );
+		
+		pRenderContext->Viewport( flYellowTargetPixelStart+1, yOffset + nHeightOffset + HISTOGRAM_BAR_SIZE - nHeight, 4, nHeight );
+		pRenderContext->ClearColor3ub( 0, 0, 0 );
+		pRenderContext->ClearBuffers( true, true );
+
+		pRenderContext->Viewport( flTargetPixelStart+1, yOffset + nHeightOffset + HISTOGRAM_BAR_SIZE - nHeight, 4, nHeight );
+		pRenderContext->ClearColor3ub( 0, 255, 0 );
+		pRenderContext->ClearBuffers( true, true );
+		
+		// Blue is average luminance location
+		pRenderContext->Viewport( flYellowAveragePixelStart-1, yOffset + nHeightOffset + HISTOGRAM_BAR_SIZE - nHeight - 2, 8, nHeight + 4 );
+		pRenderContext->ClearColor3ub( 0, 114, 188 );
+		pRenderContext->ClearBuffers( true, true );
+		
+		pRenderContext->Viewport( flYellowAveragePixelStart+1, yOffset + nHeightOffset + HISTOGRAM_BAR_SIZE - nHeight, 4, nHeight );
+		pRenderContext->ClearColor3ub( 0, 0, 0 );
+		pRenderContext->ClearBuffers( true, true );
+
+		pRenderContext->Viewport( flAveragePixelStart+1, yOffset + nHeightOffset + HISTOGRAM_BAR_SIZE - nHeight, 4, nHeight );
+		pRenderContext->ClearColor3ub( 0, 191, 243 );
+		pRenderContext->ClearBuffers( true, true );
 	}
 
 	// Show actual tonemap value
@@ -829,41 +808,26 @@ void CTonemapSystem::DisplayHistogram()
 		float flBarWidth = nTotalGraphPixelsWide;
 		float flBarStart = xpStart;
 
-		float flHistogramBarSize = HISTOGRAM_BAR_SIZE;
-		if ( mat_show_histogram.GetInt() == 2 ) // No histogram
-		{
-			flHistogramBarSize = 0.0f;
-		}
-
-		pRenderContext->Viewport( flBarStart, yOffset + flHistogramBarSize - 4 + 20, flBarWidth, 4 );
+		pRenderContext->Viewport( flBarStart, yOffset + HISTOGRAM_BAR_SIZE - 4 + 20, flBarWidth, 4 );
 		pRenderContext->ClearColor3ub( 200, 200, 200 );
 		pRenderContext->ClearBuffers( true, true );
 
-		pRenderContext->Viewport( flBarStart, yOffset + flHistogramBarSize - 4 + 20 + 1, flBarWidth, 2 );
+		pRenderContext->Viewport( flBarStart, yOffset + HISTOGRAM_BAR_SIZE - 4 + 20 + 1, flBarWidth, 2 );
 		pRenderContext->ClearColor3ub( 0, 0, 0 );
 		pRenderContext->ClearBuffers( true, true );
 
 		pRenderContext->Viewport( flBarStart + ( flBarWidth * ( ( m_flCurrentTonemapScale - flAutoExposureMin ) / ( flAutoExposureMax - flAutoExposureMin ) ) ) - 1,
-								  yOffset + flHistogramBarSize - 4 + 20 - 6 - 1, 4 + 2, 16 + 2 );
+								  yOffset + HISTOGRAM_BAR_SIZE - 4 + 20 - 6 - 1, 4 + 2, 16 + 2 );
 		pRenderContext->ClearColor3ub( 0, 0, 0 );
 		pRenderContext->ClearBuffers( true, true );
 
 		pRenderContext->Viewport( flBarStart + ( flBarWidth * ( ( m_flCurrentTonemapScale - flAutoExposureMin ) / ( flAutoExposureMax - flAutoExposureMin ) ) ),
-								  yOffset + flHistogramBarSize - 4 + 20 - 6, 4, 16 );
+								  yOffset + HISTOGRAM_BAR_SIZE - 4 + 20 - 6, 4, 16 );
 		pRenderContext->ClearColor3ub( 255, 255, 0 );
 		pRenderContext->ClearBuffers( true, true );
 
-		if ( !IsGameConsole() )
-		{
-			int nHeight = 21;
-			if ( mat_show_histogram.GetInt() == 2 ) // No histogram
-			{
-				nHeight = 1;
-			}
-
-			engine->Con_NPrintf( nHeight + ( nViewportY / 10 ), "%.2f                                                                             %.2f                                                                           %.2f",
-								 flAutoExposureMin, ( flAutoExposureMax + flAutoExposureMin ) / 2.0f, flAutoExposureMax );
-		}
+		if ( !IsX360() )
+			engine->Con_NPrintf( 21 + ( nViewportY / 10 ), "%.2f                                                                             %.2f                                                                           %.2f", flAutoExposureMin, ( flAutoExposureMax + flAutoExposureMin ) / 2.0f, flAutoExposureMax );
 	}
 
 	// Last bar doesn't clear properly so draw an extra pixel
@@ -1188,7 +1152,7 @@ EXPOSE_MATERIAL_PROXY( CBloomAddMaterialProxy, BloomAdd );
 // Engine_Post material proxy ============================================================================================
 //=====================================================================================================================
 
-static ConVar mat_software_aa_strength( "mat_software_aa_strength", IsPS3()? "0" : "-1.0", 0, "Software AA - perform a software anti-aliasing post-process (an alternative/supplement to MSAA). This value sets the strength of the effect: (0.0 - off), (1.0 - full)" );
+static ConVar mat_software_aa_strength( "mat_software_aa_strength", "-1.0", 0, "Software AA - perform a software anti-aliasing post-process (an alternative/supplement to MSAA). This value sets the strength of the effect: (0.0 - off), (1.0 - full)" );
 static ConVar mat_software_aa_quality( "mat_software_aa_quality", "0", 0, "Software AA quality mode: (0 - 5-tap filter), (1 - 9-tap filter)" );
 static ConVar mat_software_aa_edge_threshold( "mat_software_aa_edge_threshold", "1.0", 0, "Software AA - adjusts the sensitivity of the software AA shader's edge detection (default 1.0 - a lower value will soften more edges, a higher value will soften fewer)" );
 static ConVar mat_software_aa_blur_one_pixel_lines( "mat_software_aa_blur_one_pixel_lines", "0.5", 0, "How much software AA should blur one-pixel thick lines: (0.0 - none), (1.0 - lots)" );
@@ -1364,7 +1328,7 @@ void CEnginePostMaterialProxy::OnBind( C_BaseEntity *pEnt )
 
 	if ( m_pMaterialParam_FilmGrainStrength )
 		m_pMaterialParam_FilmGrainStrength->SetFloatValue( s_LocalPostProcessParameters[ nSplitScreenSlot ].m_flParameters[ PPPN_FILM_GRAIN_STRENGTH ] );
-
+	
 	#ifdef PORTAL2
 	const C_Portal_Player* pLocalPlayer = C_Portal_Player::GetLocalPortalPlayer();
 	const bool bScreenSpacePaintEffectIsActive = pLocalPlayer && pLocalPlayer->ScreenSpacePaintEffectIsActive();
@@ -1478,7 +1442,7 @@ static void DrawBloomDebugBoxes( IMatRenderContext *pRenderContext, int nX, int 
 {
 	// draw inset rects which should have a centered bloom 
 	pRenderContext->PushRenderTargetAndViewport();
-	pRenderContext->SetRenderTarget( IsPS3() ? materials->FindTexture( "_rt_FullFrameFB", TEXTURE_GROUP_RENDER_TARGET ) : NULL );
+	pRenderContext->SetRenderTarget(NULL);
 
 	// full screen clear
 	pRenderContext->Viewport( nX, nY, nWidth, nHeight );
@@ -1547,7 +1511,7 @@ static float GetBloomAmount( void )
 		currentBloomAmount = GetCurrentBloomScale() * rate + ( 1.0f - rate ) * currentBloomAmount;
 		flBloomAmount = currentBloomAmount;
 
-		if (IsGameConsole())
+		if (IsX360())
 		{
 			//we want to scale the bloom effect down because the effect textures are lower reolution on the 360.
 			//target match 1280x1024
@@ -1570,54 +1534,6 @@ static float GetBloomAmount( void )
 	flBloomAmount *= mat_bloom_scalefactor_scalar.GetFloat();
 
 	return flBloomAmount;
-}
-
-// Control for dumping render targets to files for debugging
-static ConVar mat_dump_rts( "mat_dump_rts", "0", FCVAR_DEVELOPMENTONLY );
-static bool s_bDumpRenderTargets = false;
-static int s_nRTIndex = 0;
-
-// Dump a rendertarget to a TGA.  Useful for looking at intermediate render target results.
-static void DumpTGAofRenderTarget( const int width, const int height, const char *pFilename )
-{
-	// Ensure that mat_queue_mode is zero...this ConVarRef lookup isn't cheap, but this is rarely-run debug code
-	ConVarRef mat_queue_mode( "mat_queue_mode" );
-	if ( mat_queue_mode.GetInt() != 0 )
-	{
-		DevMsg( "Error: mat_queue_mode must be 0 to dump debug rendertargets\n" );
-		mat_dump_rts.SetValue( 0 );		// Just report this error once and stop trying to dump images
-		return;
-	}
-
-	CMatRenderContextPtr pRenderContext( materials );
-
-	// Get the data from the render target and save to disk bitmap bits
-	unsigned char *pImage = ( unsigned char * )malloc( width * 4 * height );
-
-	// Get Bits from the material system
-	pRenderContext->ReadPixels( 0, 0, width, height, pImage, IMAGE_FORMAT_RGBA8888 );
-
-	// allocate a buffer to write the tga into
-	int iMaxTGASize = 1024 + (width * height * 4);
-	void *pTGA = malloc( iMaxTGASize );
-	CUtlBuffer buffer( pTGA, iMaxTGASize );
-
-	if( !TGAWriter::WriteToBuffer( pImage, buffer, width, height, IMAGE_FORMAT_RGBA8888, IMAGE_FORMAT_RGBA8888 ) )
-	{
-		Error( "Couldn't write bitmap data snapshot.\n" );
-	}
-
-	free( pImage );
-
-	// async write to disk (this will take ownership of the memory)
-	char szPathedFileName[_MAX_PATH];
-	Q_snprintf( szPathedFileName, sizeof(szPathedFileName), "//MOD/%d_%s_%s.tga", s_nRTIndex++, pFilename, IsOSX() ? "OSX" : "PC" );
-
-	FileHandle_t fileTGA = filesystem->Open( szPathedFileName, "wb" );
-	filesystem->Write( buffer.Base(), buffer.TellPut(), fileTGA );
-	filesystem->Close( fileTGA );
-
-	free( pTGA );
 }
 
 static bool s_bScreenEffectTextureIsUpdated = false;
@@ -1662,10 +1578,6 @@ static void DownsampleFBQuarterSize( IMatRenderContext *pRenderContext, int nSrc
 	{
 		pRenderContext->CopyRenderTargetToTextureEx( pDest, 0, NULL, NULL );
 	}
-	else if ( s_bDumpRenderTargets )
-	{
-		DumpTGAofRenderTarget( nSrcWidth/4, nSrcHeight/4, "QuarterSizeFB" );
-	}
 }
 
 static void Generate8BitBloomTexture( IMatRenderContext *pRenderContext, 
@@ -1706,7 +1618,7 @@ static void Generate8BitBloomTexture( IMatRenderContext *pRenderContext,
 		DownsampleFBQuarterSize( pRenderContext, nSrcWidth, nSrcHeight, dest_rt0, true );
 	}
 
-	// Gaussian blur x rt0 to rt1
+	// guassian blur x rt0 to rt1
 	SetRenderTargetAndViewPort( dest_rt1 );
 	pRenderContext->DrawScreenSpaceRectangle(	xblur_mat, 0, 0, nSrcWidth/4, nSrcHeight/4,
 												0, 0, nSrcWidth/4-1, nSrcHeight/4-1,
@@ -1715,12 +1627,8 @@ static void Generate8BitBloomTexture( IMatRenderContext *pRenderContext,
 	{
 		pRenderContext->CopyRenderTargetToTextureEx( dest_rt1, 0, NULL, NULL );
 	}
-	else if ( s_bDumpRenderTargets )
-	{
-		DumpTGAofRenderTarget( nSrcWidth/4, nSrcHeight/4, "BlurX" );
-	}
 
-	// Gaussian blur y rt1 to rt0
+	// GR - gaussian blur y rt1 to rt0
 	SetRenderTargetAndViewPort( dest_rt0 );
 	IMaterialVar *pBloomAmountVar = yblur_mat->FindVar( "$bloomamount", NULL );
 	pBloomAmountVar->SetFloatValue( 1.0f );	// the bloom amount is now applied in engine_post or bloomadd materials
@@ -1731,10 +1639,6 @@ static void Generate8BitBloomTexture( IMatRenderContext *pRenderContext,
 	if ( IsX360() )
 	{
 		pRenderContext->CopyRenderTargetToTextureEx( dest_rt0, 0, NULL, NULL );
-	}
-	else if ( s_bDumpRenderTargets )
-	{
-		DumpTGAofRenderTarget( nSrcWidth/4, nSrcHeight/4, "BlurYAndBloom" );
 	}
 
 	pRenderContext->PopRenderTargetAndViewport();
@@ -1749,7 +1653,7 @@ static void DoTonemapping( IMatRenderContext *pRenderContext, int nX, int nY, in
 	// Update HDR histogram
 	if ( mat_dynamic_tonemapping.GetInt() )
 	{
-		if ( s_bScreenEffectTextureIsUpdated == false && !IsPS3() )
+		if ( s_bScreenEffectTextureIsUpdated == false )
 		{
 			// FIXME: nX/nY/nWidth/nHeight are used here, but the equivalent parameters are ignored in Generate8BitBloomTexture
 			UpdateScreenEffectTexture( 0, nX, nY, nWidth, nHeight, false );
@@ -1765,8 +1669,8 @@ static void DoTonemapping( IMatRenderContext *pRenderContext, int nX, int nY, in
 
 		if ( mat_show_histogram.GetInt() )
 		{
-			bool bDrawTextThisFrame = ( mat_show_histogram.GetInt() == 1 );
-			if ( IsGameConsole() )
+			bool bDrawTextThisFrame = true;
+			if ( IsX360() )
 			{
 				static float s_flLastTimeUpdate = 0.0f;
 				if ( int( gpGlobals->curtime ) - int( s_flLastTimeUpdate ) >= 2 )
@@ -1789,7 +1693,7 @@ static void DoTonemapping( IMatRenderContext *pRenderContext, int nX, int nY, in
 				}
 				else
 				{
-					if ( IsGameConsole() )
+					if ( IsX360() )
 					{
 						engine->Con_NPrintf( 25 + ( nY / 10 ), "[mat_show_histogram]  Target Scalar = %4.2f  Min/Max( %4.2f, %4.2f )  Final Scalar: %4.2f\n",
 							GetCurrentTonemappingSystem()->ComputeTargetTonemapScalar( true ), flAutoExposureMin, flAutoExposureMax, GetCurrentTonemappingSystem()->GetCurrentTonemappingScale() );
@@ -1825,28 +1729,15 @@ static ConVar mat_postprocess_x( "mat_postprocess_x", "4" );
 static ConVar mat_postprocess_y( "mat_postprocess_y", "1" );
 static ConVar mat_postprocess_enable( "mat_postprocess_enable", "1", FCVAR_CHEAT );
 
-bool DoEnginePostProcessing( int x, int y, int w, int h, bool bFlashlightIsOn, bool bPostVGui )
+void DoEnginePostProcessing( int x, int y, int w, int h, bool bFlashlightIsOn, bool bPostVGui )
 {
 	// don't do this if disabled or in alt-tab
 	if ( s_bOverridePostProcessingDisable || w <=0 || h <= 0 )
 	{
-		return false;
+		return;
 	}
 
-	if ( s_bDumpRenderTargets )
-	{
-		s_bDumpRenderTargets = false;	// Turn off from previous frame
-	}
-
-	if ( mat_dump_rts.GetBool() )
-	{
-		s_bDumpRenderTargets = true;	// Dump intermediate render targets this frame
-		s_nRTIndex = 0;					// Used for numbering the TGA files for easy browsing
-		mat_dump_rts.SetValue( 0 );		// We only want to capture one frame, on rising edge of this convar
-	}
-	
 	CMatRenderContextPtr pRenderContext( materials );
-	PIXEVENT( pRenderContext, "DoEnginePostProcessing" );
 
 	if ( r_queued_post_processing.GetInt() )
 	{
@@ -1854,7 +1745,7 @@ bool DoEnginePostProcessing( int x, int y, int w, int h, bool bFlashlightIsOn, b
 		if ( pCallQueue )
 		{
 			pCallQueue->QueueCall( DoEnginePostProcessing, x, y, w, h, bFlashlightIsOn, bPostVGui );
-			return false;
+			return;
 		}
 	}
 
@@ -1888,13 +1779,13 @@ bool DoEnginePostProcessing( int x, int y, int w, int h, bool bFlashlightIsOn, b
 			pRenderContext->PopVertexShaderGPRAllocation();
 		#endif
 
-		return false;
+		return;
 	}
 
 	// Set software-AA on by default for 360
 	if ( mat_software_aa_strength.GetFloat() == -1.0f )
 	{
-		if ( IsGameConsole() )
+		if ( IsX360() )
 		{
 			mat_software_aa_strength.SetValue( 1.0f );
 			if ( g_pMaterialSystem->GetCurrentConfigForVideoCard().m_VideoMode.m_Height > 480 )
@@ -1919,7 +1810,7 @@ bool DoEnginePostProcessing( int x, int y, int w, int h, bool bFlashlightIsOn, b
 	// Same trick for setting up the vgui aa strength
 	if ( mat_software_aa_strength_vgui.GetFloat() == -1.0f )
 	{
-		if ( IsGameConsole() && (g_pMaterialSystem->GetCurrentConfigForVideoCard().m_VideoMode.m_Height == 720) )
+		if ( IsX360() && (g_pMaterialSystem->GetCurrentConfigForVideoCard().m_VideoMode.m_Height == 720) )
 		{
 			mat_software_aa_strength_vgui.SetValue( 2.0f );
 		}
@@ -1932,7 +1823,7 @@ bool DoEnginePostProcessing( int x, int y, int w, int h, bool bFlashlightIsOn, b
 	float flAAStrength;
 
 	// We do a second AA blur pass over the TF intro menus. use mat_software_aa_strength_vgui there instead
-	if ( IsGameConsole() && bPostVGui )
+	if ( IsX360() && bPostVGui )
 	{
 		flAAStrength = mat_software_aa_strength_vgui.GetFloat();
 	}
@@ -1966,8 +1857,6 @@ bool DoEnginePostProcessing( int x, int y, int w, int h, bool bFlashlightIsOn, b
 		}
 	}
 
-	bool bPerformedPostProcessPass = false;
-
 	if ( true )
 	{
 		ITexture *pSrc = materials->FindTexture( "_rt_FullFrameFB", TEXTURE_GROUP_RENDER_TARGET );
@@ -1976,22 +1865,17 @@ bool DoEnginePostProcessing( int x, int y, int w, int h, bool bFlashlightIsOn, b
 
 		ITexture *dest_rt1 = materials->FindTexture( "_rt_SmallFB1", TEXTURE_GROUP_RENDER_TARGET );
 
-		if ( !s_bScreenEffectTextureIsUpdated && !IsPS3() )
+		if ( !s_bScreenEffectTextureIsUpdated )
 		{
 			UpdateScreenEffectTexture( 0, x, y, w, h, false );
 			s_bScreenEffectTextureIsUpdated = true;
-		}
-
-		if ( s_bDumpRenderTargets )
-		{
-			DumpTGAofRenderTarget( nSrcWidth, nSrcHeight, "FullFrameFB" );
 		}
 
 		if ( bPerformBloom || bPerformLocalContrastEnhancement )
 		{
 			Generate8BitBloomTexture( pRenderContext, x, y, w, h, true, false );
 		}
-
+		
 		#ifdef PORTAL2
 		// Note: the C_Portal_Player::RenderScreenSpaceEffect() call must stay right after
 		// Generate8BitBloomTexture(), because on the 360 it relies on the contents of the low-res blur buffer
@@ -2000,6 +1884,8 @@ bool DoEnginePostProcessing( int x, int y, int w, int h, bool bFlashlightIsOn, b
 		// acquired the Boomer vomit particle system by way of my actions.
 		// -Ted
 		C_Portal_Player::RenderLocalScreenSpaceEffect( PAINT_SCREEN_SPACE_EFFECT, pRenderContext, x, y, w, h );
+		#else if CSTRIKE15
+		C_CSPlayer::RenderLocalScreenSpaceEffect( AR_LEADER_SCREEN_SPACE_EFFECT, pRenderContext, x, y, w, h );
 		#endif
 
 
@@ -2046,7 +1932,7 @@ bool DoEnginePostProcessing( int x, int y, int w, int h, bool bFlashlightIsOn, b
 		// when run outside the debugger for some mods (DoD). This forces it to skip
 		// a frame, ensuring we don't get the weird texture crash we otherwise would.
 		// FIXME: This will be removed when the true cause is found [added: Main CL 144694]
-		static bool bFirstFrame = !IsGameConsole();
+		static bool bFirstFrame = !IsX360();
 		if ( !bFirstFrame || !bPerformColCorrect )
 		{
 			HDRType_t hdrType = g_pMaterialSystemHardwareConfig->GetHDRType();
@@ -2072,13 +1958,6 @@ bool DoEnginePostProcessing( int x, int y, int w, int h, bool bFlashlightIsOn, b
 													  dest_rt1->GetActualWidth(), dest_rt1->GetActualHeight(),
 													  GetClientWorldEntity()->GetClientRenderable(),
 													  mat_postprocess_x.GetInt(), mat_postprocess_y.GetInt() );
-
-			bPerformedPostProcessPass = true;
-
-			if ( s_bDumpRenderTargets )
-			{
-				DumpTGAofRenderTarget( partialViewportPostDestRect.width, partialViewportPostDestRect.height, "EnginePost" );
-			}
 		}
 		bFirstFrame = false;
 	}
@@ -2088,8 +1967,6 @@ bool DoEnginePostProcessing( int x, int y, int w, int h, bool bFlashlightIsOn, b
 	#if defined( _X360 )
 		pRenderContext->PopVertexShaderGPRAllocation();
 	#endif
-
-	return bPerformedPostProcessPass;
 }
 
 void DoBlurFade( float flStrength, float flDesaturate, int x, int y, int w, int h )
@@ -2099,11 +1976,9 @@ void DoBlurFade( float flStrength, float flDesaturate, int x, int y, int w, int 
 		return;
 	}
 
+	UpdateScreenEffectTexture();
+
 	CMatRenderContextPtr pRenderContext( materials );
-	PIXEVENT( pRenderContext, "DoBlurFade()" );
-
-	UpdateScreenEffectTexture( 0, x, y, w, h );
-
 	Generate8BitBloomTexture( pRenderContext, x, y, w, h, false, false );
 
 	int nViewportX, nViewportY, nViewportWidth, nViewportHeight;
@@ -2115,46 +1990,22 @@ void DoBlurFade( float flStrength, float flDesaturate, int x, int y, int w, int 
 	IMaterial* pMat = materials->FindMaterial( "dev/fade_blur", TEXTURE_GROUP_OTHER, true );
 	bool bFound = false;
 	IMaterialVar* pVar = pMat->FindVar( "$c0_x", &bFound );
-	if ( pVar && bFound )
+	if ( pVar )
 	{
 		pVar->SetFloatValue( flStrength );
 	}
 
 	// Desaturate strength
 	pVar = pMat->FindVar( "$c1_x", &bFound );
-	if ( pVar && bFound )
+	if ( pVar )
 	{
 		pVar->SetFloatValue( flDesaturate );
 	}
 
-	// Color fade
-	pVar = pMat->FindVar( "$c2_x", &bFound );
-	if ( pVar && bFound )
-	{
-		pVar->SetFloatValue( mat_blur_r.GetFloat() );
-	}
-
-	pVar = pMat->FindVar( "$c2_y", &bFound );
-	if ( pVar && bFound )
-	{
-		pVar->SetFloatValue( mat_blur_g.GetFloat() );
-	}
-
-	pVar = pMat->FindVar( "$c2_z", &bFound );
-	if ( pVar && bFound )
-	{
-		pVar->SetFloatValue( mat_blur_b.GetFloat() );
-	}
-
-	// Draw
 	pRenderContext->DrawScreenSpaceRectangle(	pMat, 0, 0, nViewportWidth, nViewportHeight,
 												nViewportX, nViewportY,
 												nViewportX + nViewportWidth - 1, nViewportY + nViewportHeight - 1,
 												nRtWidth, nRtHeight );
-	if ( s_bDumpRenderTargets )
-	{
-		DumpTGAofRenderTarget( nViewportWidth, nViewportHeight, "BlurFade" );
-	}
 }
 
 // Motion Blur Material Proxy =========================================================================================
@@ -2226,6 +2077,7 @@ EXPOSE_MATERIAL_PROXY( CMotionBlurMaterialProxy, MotionBlur );
 // Image-space Motion Blur ============================================================================================
 //=====================================================================================================================
 ConVar mat_motion_blur_enabled( "mat_motion_blur_enabled", "1" );
+
 #ifdef PORTAL2
 ConVar mat_motion_blur_forward_enabled( "mat_motion_blur_forward_enabled", "1" );
 ConVar mat_motion_blur_falling_min( "mat_motion_blur_falling_min", "8.0" );
@@ -2233,6 +2085,7 @@ ConVar mat_motion_blur_falling_min( "mat_motion_blur_falling_min", "8.0" );
 ConVar mat_motion_blur_forward_enabled( "mat_motion_blur_forward_enabled", "0" );
 ConVar mat_motion_blur_falling_min( "mat_motion_blur_falling_min", "10.0" );
 #endif
+
 ConVar mat_motion_blur_falling_max( "mat_motion_blur_falling_max", "20.0" );
 ConVar mat_motion_blur_falling_intensity( "mat_motion_blur_falling_intensity", "1.0" );
 //ConVar mat_motion_blur_roll_intensity( "mat_motion_blur_roll_intensity", "1.0" );
@@ -2260,17 +2113,17 @@ struct MotionBlurHistory_t
 	float m_flNoRotationalMotionBlurUntil;
 };
 
-bool DoImageSpaceMotionBlur( const CViewSetup &view )
+void DoImageSpaceMotionBlur( const CViewSetup &view )
 {
 #ifdef PORTAL2
 	// DEMO HACKS!!!
 	if( gpGlobals->maxClients == 2 )
-		return false;
+		return;
 #endif
 
 	if ( ( !mat_motion_blur_enabled.GetInt() ) || ( view.m_nMotionBlurMode == MOTION_BLUR_DISABLE ) )
 	{
-		return false;
+		return;
 	}
 
 	int x = view.x;
@@ -2338,7 +2191,7 @@ bool DoImageSpaceMotionBlur( const CViewSetup &view )
 		{
 			flTimeElapsed = gpGlobals->realtime - history.m_flLastTimeUpdate;
 		}
-
+				
 #ifdef PORTAL2
 		float flCurrentPitch = view.angles[PITCH];
 		float flCurrentYaw = view.angles[YAW];
@@ -2402,7 +2255,7 @@ bool DoImageSpaceMotionBlur( const CViewSetup &view )
 		while ( flCurrentYaw < -180.0f )
 			flCurrentYaw += 360.0f;
 #endif
-
+		
 
 		/*engine->Con_NPrintf( 0, "Blur Pitch: %6.2f   Yaw: %6.2f", flCurrentPitch, flCurrentYaw );
 		engine->Con_NPrintf( 1, "Blur FOV: %6.2f   Aspect: %6.2f   Ortho: %s", view.fov, view.m_flAspectRatio, view.m_bOrtho ? "Yes" : "No" );
@@ -2573,7 +2426,7 @@ bool DoImageSpaceMotionBlur( const CViewSetup &view )
 			//===============================================================//
 			// Dampen motion blur from 100%-0% as fps drops from 50fps-30fps //
 			//===============================================================//
-			if ( !IsGameConsole() && !bSFMBlur ) // I'm not doing this on the 360 yet since I can't test it.  SFM doesn't need it either
+			if ( !IsX360() && !bSFMBlur ) // I'm not doing this on the 360 yet since I can't test it.  SFM doesn't need it either
 			{
 				float flSlowFps = 30.0f;
 				float flFastFps = 50.0f;
@@ -2634,7 +2487,7 @@ bool DoImageSpaceMotionBlur( const CViewSetup &view )
 	}
 
 	//engine->Con_NPrintf( 6, "Final values: { %6.2f%%, %6.2f%%, %6.2f%%, %6.2f%% }", g_vMotionBlurValues[0]*100.0f, g_vMotionBlurValues[1]*100.0f, g_vMotionBlurValues[2]*100.0f, g_vMotionBlurValues[3]*100.0f );
-
+	
 #if defined ( PORTAL2 )
 	C_Portal_Player* pLocalPlayer = C_Portal_Player::GetLocalPortalPlayer( GET_ACTIVE_SPLITSCREEN_SLOT() );
 	if ( pLocalPlayer && pLocalPlayer->GetMotionBlurAmount() > 0.0f )
@@ -2687,46 +2540,33 @@ bool DoImageSpaceMotionBlur( const CViewSetup &view )
 	//=============================================================================================//
 	// Render quad and let material proxy pick up the g_vMotionBlurValues[4] values just set above //
 	//=============================================================================================//
-	bool bPerformedMotionBlur = false;
 	if ( true )
 	{
 		CMatRenderContextPtr pRenderContext( materials );
-						
-		ITexture *pSrc = materials->FindTexture( IsPS3() ? "^PS3^BACKBUFFER" : "_rt_FullFrameFB", TEXTURE_GROUP_RENDER_TARGET );
+		//pRenderContext->PushRenderTargetAndViewport();
+		ITexture *pSrc = materials->FindTexture( "_rt_FullFrameFB", TEXTURE_GROUP_RENDER_TARGET );
 		int nSrcWidth = pSrc->GetActualWidth();
 		int nSrcHeight = pSrc->GetActualHeight();
 		int nViewportWidth, nViewportHeight, nDummy;
 		pRenderContext->GetViewport( nDummy, nDummy, nViewportWidth, nViewportHeight );
 
-		if ( !IsPS3() )
-		{
-			UpdateScreenEffectTexture( 0, x, y, w, h, false );
-		}
-		
+		UpdateScreenEffectTexture( 0, x, y, w, h, false );
+
 		// Get material pointer
 		IMaterial *pMatMotionBlur = materials->FindMaterial( "dev/motion_blur", TEXTURE_GROUP_OTHER, true );
 
 		//SetRenderTargetAndViewPort( dest_rt0 );
 		//pRenderContext->PopRenderTargetAndViewport();
 
-		if ( pMatMotionBlur != NULL && nSrcWidth > 0 && nSrcHeight > 0 )
+		if ( pMatMotionBlur != NULL )
 		{
 			pRenderContext->DrawScreenSpaceRectangle(
 				pMatMotionBlur,
 				0, 0, nViewportWidth, nViewportHeight,
 				x, y, x + w-1, y + h-1,
 				nSrcWidth, nSrcHeight, GetClientWorldEntity()->GetClientRenderable() );
-			
-			bPerformedMotionBlur = true;
-
-			if ( s_bDumpRenderTargets )
-			{
-				DumpTGAofRenderTarget( nViewportWidth, nViewportHeight, "MotionBlur" );
-			}
 		}
 	}
-
-	return bPerformedMotionBlur;
 }
 
 //=====================================================================================================================
@@ -2874,7 +2714,7 @@ void DoDepthOfField( const CViewSetup &view )
 		DownsampleFBQuarterSize( pRenderContext, nSrcWidth, nSrcHeight, dest_rt0, true );
 		
 		//////////////////////////////////////
-		// Additional blur using 3x3 Gaussian
+		// Additional blur using 3x3 gaussian
 		//////////////////////////////////////
 
 		IMaterial *pMat = materials->FindMaterial( "dev/blurgaussian_3x3", TEXTURE_GROUP_OTHER, true );
@@ -2895,7 +2735,7 @@ void DoDepthOfField( const CViewSetup &view )
 			0, 0, dest_rt0->GetActualWidth()-1, dest_rt0->GetActualHeight()-1,
 			dest_rt0->GetActualWidth(), dest_rt0->GetActualHeight() );
 
-		if ( IsGameConsole() )
+		if ( IsX360() )
 		{
 			pRenderContext->CopyRenderTargetToTextureEx( dest_rt1, 0, NULL, NULL );
 		}
@@ -3137,7 +2977,7 @@ void BlurEntity( IClientRenderable *pRenderable, bool bPreDraw, int drawFlags, c
 				0, 0, dest_rt[iSrc]->GetActualWidth()-1, dest_rt[iSrc]->GetActualHeight()-1,
 				dest_rt[iSrc]->GetActualWidth(), dest_rt[iSrc]->GetActualHeight() );
 
-			if ( IsGameConsole() )
+			if ( IsX360() )
 			{
 				pRenderContext->CopyRenderTargetToTextureEx( dest_rt[iDest], 0, NULL, NULL );
 			}

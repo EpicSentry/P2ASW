@@ -495,8 +495,7 @@ CStudioHdr *C_ServerRagdoll::OnNewModel( void )
 		vcollide_t *pCollide = modelinfo->GetVCollide( GetModelIndex() );
 		if ( !pCollide )
 		{
-			const char *pszName;
-			pszName = modelinfo->GetModelName( modelinfo->GetModel( GetModelIndex() ) );
+			const char *pszName = modelinfo->GetModelName( modelinfo->GetModel( GetModelIndex() ) );
 			Msg( "*** ERROR: C_ServerRagdoll::InitModel: %s missing vcollide data ***\n", (pszName) ? pszName : "<null>" );
 			m_elementCount = 0;
 		}
