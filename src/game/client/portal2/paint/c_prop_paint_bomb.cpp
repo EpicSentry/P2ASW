@@ -12,6 +12,7 @@
 #include "paint/paint_stream_manager.h"
 #include "videocfg/videocfg.h"
 #include "CegClientWrapper.h"
+#include "c_paintblob.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -63,6 +64,9 @@ void C_PropPaintBomb::Spawn( void )
 void C_PropPaintBomb::UpdateOnRemove( void )
 {
 	m_blobs.Purge();
+
+	if ( m_pRenderable )
+		delete m_pRenderable;
 
 	BaseClass::UpdateOnRemove();
 }
@@ -127,7 +131,13 @@ void C_PropPaintBomb::PostDataUpdate( DataUpdateType_t updateType )
 	if ( updateType == DATA_UPDATE_CREATED )
 	{
 		// disable the fast path for these entities so our custom DrawModel() function gets called
-		m_bCanUseFastPath = false;
+		m_bCanUseFastPath = false;		
+	
+		m_pRenderable = new C_PaintBlobRenderable( this, 1.5 );
+		
+		//cl_entitylist->AddNonNetworkableEntity( m_pRenderable->GetIClientUnknown() );
+		m_pRenderable->InitializeAsClientEntity( BLOB_MODEL, false );
+		m_pRenderable->Spawn();
 	}
 }
 
@@ -252,11 +262,21 @@ int C_PropPaintBomb::DrawModel( int flags, const RenderableInstance_t &instance 
 	IMaterial *pMaterial = materials->FindMaterial( PaintStreamManager.GetPaintMaterialName( m_nPaintPowerType ), TEXTURE_GROUP_OTHER, true );
 	NPaintRenderer::PortalMatrixList_t portalMatrixList;
 	NPaintRenderer::Paintblob_Draw( BLOB_RENDER_BLOBULATOR, pMaterial, paintblob_isosurface_box_width.GetFloat(), portalMatrixList, particleList );
+#else // No paint blob render
+
+	Assert( m_pRenderable );
+	m_pRenderable->PerFrameUpdate();
+
 #endif
 
-	return BaseClass::DrawModel( flags, instance );
+	return 1;
+}
 
-	//return 1;
+bool C_PropPaintBomb::Simulate( void )
+{
+	Assert( m_pRenderable );
+	m_pRenderable->PerFrameUpdate();
+	return BaseClass::Simulate();
 }
 
 RenderableTranslucencyType_t C_PropPaintBomb::ComputeTranslucencyType( )
@@ -266,10 +286,4 @@ RenderableTranslucencyType_t C_PropPaintBomb::ComputeTranslucencyType( )
 
 void C_PropPaintBomb::CleansePaintPower( void )
 {
-}
-
-QAngle const& C_PropPaintBomb::GetRenderAngles( void )
-{
-	m_qRenderAngles = vec3_angle;
-	return m_qRenderAngles;
 }

@@ -25,6 +25,8 @@ public:
 	C_PaintBlobRenderable *m_pRenderable;
 };
 
+class C_PropPaintBomb;
+
 //==========================================================================//
 // Purpose: Create models that represents a blob's location
 //==========================================================================//
@@ -32,8 +34,9 @@ public:
 class C_PaintBlobRenderable : public C_BaseAnimating
 {
 public:
-
-	C_PaintBlobRenderable( C_PaintBlob *pSourceBlob );
+	
+	C_PaintBlobRenderable( C_PropPaintBomb *pPaintBomb, float flModelScale );
+	C_PaintBlobRenderable( C_PaintBlob *pSourceBlob, float flModelScale );
 	~C_PaintBlobRenderable();
 
 	virtual void	Spawn( void );
@@ -58,6 +61,7 @@ public:
 private:
 
 	C_PaintBlob *m_pSourceBlob;
+	C_PropPaintBomb *m_pPaintBomb;
 
 };
 

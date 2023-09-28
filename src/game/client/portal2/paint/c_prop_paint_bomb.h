@@ -15,6 +15,8 @@ struct PaintBombBlob_t
 
 typedef CUtlVector< PaintBombBlob_t > PaintBombBlobVector_t;
 
+class C_PaintBlobRenderable;
+
 class C_PropPaintBomb : public C_PhysicsProp
 {
 public:
@@ -36,14 +38,16 @@ public:
 	virtual int DrawModel( int flags, const RenderableInstance_t &instance );
 
 	virtual void ClientThink( void );
-	virtual QAngle const&			GetRenderAngles( void );
+
+	
+	virtual bool Simulate();
 
 	// Needed to sort properly the transparent paint
 	virtual RenderableTranslucencyType_t ComputeTranslucencyType( );
 
+	PaintPowerType GetPaintPowerType( void ) { return m_nPaintPowerType; }
+		
 private:
-
-	QAngle m_qRenderAngles;
 
 	void UpdateBlobs( float flDeltaTime );
 	void CreatePaintBombPaintBlobs( void );
@@ -57,6 +61,9 @@ private:
 	Vector m_vPrevPosition;
 	float m_flAccumulatedTime;
 	float m_flLastUpdateTime;
+
+	C_PaintBlobRenderable *m_pRenderable;
+
 };
 
 #endif	//C_PROP_PAINT_BOMB_H

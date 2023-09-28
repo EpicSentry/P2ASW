@@ -85,6 +85,7 @@ CPropPaintBomb::~CPropPaintBomb( void )
 
 void CPropPaintBomb::Precache( void )
 {
+	PrecacheModel( BLOB_MODEL );
 	PrecacheModel( PAINT_BOMB_MODEL_NAME );
 	PrecacheModel( "models/props/futbol_gib01.mdl" );
 	PrecacheModel( "models/props/futbol_gib02.mdl" );

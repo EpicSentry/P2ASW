@@ -7,6 +7,7 @@
 #include "model_types.h"
 
 #include "c_paintblob.h"
+#include "c_prop_paint_bomb.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -19,7 +20,10 @@ C_PaintBlob::C_PaintBlob()
 C_PaintBlob::~C_PaintBlob()
 {
 	if (m_pRenderable)
+	{
 		delete m_pRenderable;
+		m_pRenderable = NULL;
+	}
 }
 
 
@@ -39,7 +43,7 @@ void C_PaintBlob::Init( const Vector &vecOrigin, const Vector &vecVelocity, int 
 {
 	CBasePaintBlob::Init( vecOrigin, vecVelocity, paintType, flMaxStreakTime, flStreakSpeedDampenRate, pOwner, bSilent, bDrawOnly );
 		
-	m_pRenderable = new C_PaintBlobRenderable( this );
+	m_pRenderable = new C_PaintBlobRenderable( this, 0.75 );
 		
 	//cl_entitylist->AddNonNetworkableEntity( m_pRenderable->GetIClientUnknown() );
 	//m_pRenderable->PrecacheModel( BLOB_MODEL );
@@ -47,9 +51,18 @@ void C_PaintBlob::Init( const Vector &vecOrigin, const Vector &vecVelocity, int 
 	m_pRenderable->Spawn();
 }
 
-C_PaintBlobRenderable::C_PaintBlobRenderable( C_PaintBlob *pSourceBlob )
+C_PaintBlobRenderable::C_PaintBlobRenderable( C_PropPaintBomb *pPaintBomb, float flModelScale )
 {
+	SetModelScale( flModelScale );
+	m_pPaintBomb = pPaintBomb;
+	m_pSourceBlob = NULL;
+}
+
+C_PaintBlobRenderable::C_PaintBlobRenderable( C_PaintBlob *pSourceBlob, float flModelScale )
+{
+	SetModelScale( flModelScale );
 	m_pSourceBlob = pSourceBlob;
+	m_pPaintBomb = NULL;
 }
 
 C_PaintBlobRenderable::~C_PaintBlobRenderable()
@@ -57,6 +70,7 @@ C_PaintBlobRenderable::~C_PaintBlobRenderable()
 	//g_pClientLeafSystem->RemoveRenderable( RenderHandle() );
 	cl_entitylist->RemoveEntity( GetIClientUnknown()->GetRefEHandle() );
 	m_pSourceBlob = NULL;
+	m_pPaintBomb = NULL;
 }
 
 void C_PaintBlobRenderable::Spawn( void )
@@ -65,9 +79,18 @@ void C_PaintBlobRenderable::Spawn( void )
 	Precache();
 
 	SetModel(BLOB_MODEL);
-	SetModelScale( 0.75 );
 
-	PaintPowerType powerType = m_pSourceBlob->GetPaintPowerType();
+	PaintPowerType powerType = NO_POWER;
+	
+	if ( m_pSourceBlob )
+	{
+		powerType = m_pSourceBlob->GetPaintPowerType();
+	}
+	else if ( m_pPaintBomb )
+	{
+		powerType = m_pPaintBomb->GetPaintPowerType();
+	}
+
 	
 	if ( powerType != NO_POWER )
 	{
@@ -123,7 +146,16 @@ int C_PaintBlobRenderable::DrawModel( int flags, const RenderableInstance_t &ins
 
 Vector const& C_PaintBlobRenderable::GetRenderOrigin( void )
 {
-	return m_pSourceBlob->GetPosition();
+	if ( m_pSourceBlob )
+	{
+		return m_pSourceBlob->GetPosition();
+	}
+	else if (m_pPaintBomb)
+	{
+		return m_pPaintBomb->GetAbsOrigin();
+	}
+
+	return vec3_origin;
 }
 
 QAngle const& C_PaintBlobRenderable::GetRenderAngles( void )
@@ -136,7 +168,11 @@ void C_PaintBlobRenderable::PerFrameUpdate( void )
 	//SetEffects( EF_NOINTERP );		
 
 	// Set position and angles relative to the object it's ghosting
-	Vector ptNewOrigin = m_pSourceBlob->GetPosition();
+	Vector ptNewOrigin;
+	if ( m_pSourceBlob )
+		ptNewOrigin = m_pSourceBlob->GetPosition();
+	else if ( m_pPaintBomb )
+		ptNewOrigin = m_pPaintBomb->GetAbsOrigin();
 
 	SetNetworkOrigin( ptNewOrigin );
 	SetLocalOrigin( ptNewOrigin );

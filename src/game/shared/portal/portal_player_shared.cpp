@@ -2482,8 +2482,12 @@ enum
 	PAINT_TRACE_COUNT
 };
 
-#define PAINT_TRACE_MINS Vector( -4, -4, -4 )
-#define PAINT_TRACE_MAXS Vector( 4, 4, 4 )
+#define PAINT_TRACE_EXTENTS_VALUE 1
+
+#define PAINT_TRACE_MINS Vector( -PAINT_TRACE_EXTENTS_VALUE, -PAINT_TRACE_EXTENTS_VALUE, -PAINT_TRACE_EXTENTS_VALUE )
+#define PAINT_TRACE_MAXS Vector( PAINT_TRACE_EXTENTS_VALUE, PAINT_TRACE_EXTENTS_VALUE, PAINT_TRACE_EXTENTS_VALUE )
+
+#define FORGIVENESS_MULTIPLIER 0.03
 
 void CPortal_Player::DetermineTraceInfo( Vector &vStart, Vector &vEnd, int iTraceType )
 {
@@ -2496,74 +2500,110 @@ void CPortal_Player::DetermineTraceInfo( Vector &vStart, Vector &vEnd, int iTrac
 	Vector vOrigin = GetAbsOrigin();
 
 	// NOTE: We need this because using the direct vertex positions won't work!
-	float flXForgiveness;
-	float flYForgiveness;
-	float flZForgiveness;
+	float flForwardForgiveness;
+	float flBackwardForgiveness;
+	float flRightForgiveness;
+	float flLeftForgiveness;
+	float flTopForgiveness;
+	float flBottomForgiveness;
 	
 	// TODO: Scale forgiveness by the player's velocity
 
 	if ( !(GetFlags() & FL_ONGROUND) )
 	{
-		flXForgiveness = 8;
-		flYForgiveness = 8;
-		flZForgiveness = 8;
+		flForwardForgiveness = 1;
+		flBackwardForgiveness = -1;
+		flLeftForgiveness = 1;
+		flRightForgiveness = -1;
+		flTopForgiveness = 1;
+		flBottomForgiveness = -1;
+		
+		if (GetAbsVelocity().x > 0)
+		{
+			flForwardForgiveness += ( GetAbsVelocity().x * FORGIVENESS_MULTIPLIER );
+		}
+		else
+		{
+			flBackwardForgiveness -= ( GetAbsVelocity().x * FORGIVENESS_MULTIPLIER );
+		}
+		
+		if (GetAbsVelocity().y > 0)
+		{
+			flLeftForgiveness += ( GetAbsVelocity().y * FORGIVENESS_MULTIPLIER );
+		}
+		else
+		{
+			flRightForgiveness -= ( GetAbsVelocity().y * FORGIVENESS_MULTIPLIER );
+		}
+
+		if (GetAbsVelocity().z > 0)
+		{
+			flTopForgiveness += ( GetAbsVelocity().z * FORGIVENESS_MULTIPLIER );
+		}
+		else
+		{
+			flBottomForgiveness -= ( GetAbsVelocity().z * FORGIVENESS_MULTIPLIER );
+		}
 	}
 	else
 	{
-		flXForgiveness = 1;
-		flYForgiveness = 1;
-		flZForgiveness = 1;
+		flForwardForgiveness = 1;
+		flBackwardForgiveness = 1;
+		flLeftForgiveness = 1;
+		flRightForgiveness = 1;
+		flTopForgiveness = 1;
+		flBottomForgiveness = 1;
 	}
 
 	//if ( iTraceType == PAINT_TRACE_ABSORIGIN )
 	//	vStart = vOrigin;
 	if (iTraceType == PAINT_TRACE_BOTTOM_CORNER1)
 	{
-		vEnd.x = vOrigin.x + (flHalfHullWidth + flXForgiveness);
-		vEnd.y = vOrigin.y + (flHalfHullWidth + flYForgiveness);
-		vEnd.z = vOrigin.z - flZForgiveness;
+		vEnd.x = vOrigin.x + (flHalfHullWidth + flForwardForgiveness);
+		vEnd.y = vOrigin.y + (flHalfHullWidth + flLeftForgiveness);
+		vEnd.z = vOrigin.z - flBottomForgiveness;
 	}
 	else if (iTraceType == PAINT_TRACE_BOTTOM_CORNER2)
 	{
-		vEnd.x = vOrigin.x - (flHalfHullWidth + flXForgiveness);
-		vEnd.y = vOrigin.y + (flHalfHullWidth + flYForgiveness);
-		vEnd.z = vOrigin.z - flZForgiveness;
+		vEnd.x = vOrigin.x - (flHalfHullWidth + flBackwardForgiveness);
+		vEnd.y = vOrigin.y + (flHalfHullWidth + flLeftForgiveness);
+		vEnd.z = vOrigin.z - flBottomForgiveness;
 	}
 	else if (iTraceType == PAINT_TRACE_BOTTOM_CORNER3)
 	{
-		vEnd.x = vOrigin.x + (flHalfHullWidth + flXForgiveness);
-		vEnd.y = vOrigin.y - (flHalfHullWidth + flYForgiveness);
-		vEnd.z = vOrigin.z - flZForgiveness;
+		vEnd.x = vOrigin.x + (flHalfHullWidth + flForwardForgiveness);
+		vEnd.y = vOrigin.y - (flHalfHullWidth + flRightForgiveness);
+		vEnd.z = vOrigin.z - flBottomForgiveness;
 	}
 	else if (iTraceType == PAINT_TRACE_BOTTOM_CORNER4)
 	{
-		vEnd.x = vOrigin.x - (flHalfHullWidth + flXForgiveness);
-		vEnd.y = vOrigin.y - (flHalfHullWidth + flYForgiveness);
-		vEnd.z = vOrigin.z - flZForgiveness;
+		vEnd.x = vOrigin.x - (flHalfHullWidth + flBackwardForgiveness);
+		vEnd.y = vOrigin.y - (flHalfHullWidth + flRightForgiveness);
+		vEnd.z = vOrigin.z - flBottomForgiveness;
 	}
 	else if (iTraceType == PAINT_TRACE_TOP_CORNER1)
 	{
-		vEnd.x = vOrigin.x + (flHalfHullWidth + flXForgiveness);
-		vEnd.y = vOrigin.y + (flHalfHullWidth + flYForgiveness);
-		vEnd.z = vOrigin.z + GetHullHeight() + flZForgiveness;
+		vEnd.x = vOrigin.x + (flHalfHullWidth + flForwardForgiveness);
+		vEnd.y = vOrigin.y + (flHalfHullWidth + flLeftForgiveness);
+		vEnd.z = vOrigin.z + GetHullHeight() + flTopForgiveness;
 	}
 	else if (iTraceType == PAINT_TRACE_TOP_CORNER2)
 	{
-		vEnd.x = vOrigin.x - (flHalfHullWidth + flXForgiveness);
-		vEnd.y = vOrigin.y + (flHalfHullWidth + flYForgiveness);
-		vEnd.z = vOrigin.z + GetHullHeight() + flZForgiveness;
+		vEnd.x = vOrigin.x - (flHalfHullWidth + flBackwardForgiveness);
+		vEnd.y = vOrigin.y + (flHalfHullWidth + flLeftForgiveness);
+		vEnd.z = vOrigin.z + GetHullHeight() + flTopForgiveness;
 	}
 	else if (iTraceType == PAINT_TRACE_TOP_CORNER3)
 	{
-		vEnd.x = vOrigin.x + (flHalfHullWidth + flXForgiveness);
-		vEnd.y = vOrigin.y - (flHalfHullWidth + flYForgiveness);
-		vEnd.z = vOrigin.z + GetHullHeight() + flZForgiveness;
+		vEnd.x = vOrigin.x + (flHalfHullWidth + flForwardForgiveness);
+		vEnd.y = vOrigin.y - (flHalfHullWidth + flRightForgiveness);
+		vEnd.z = vOrigin.z + GetHullHeight() + flTopForgiveness;
 	}
 	else if (iTraceType == PAINT_TRACE_TOP_CORNER4)
 	{
-		vEnd.x = vOrigin.x - (flHalfHullWidth + flXForgiveness);
-		vEnd.y = vOrigin.y - (flHalfHullWidth + flYForgiveness);
-		vEnd.z = vOrigin.z + GetHullHeight() + flZForgiveness;
+		vEnd.x = vOrigin.x - (flHalfHullWidth + flBackwardForgiveness);
+		vEnd.y = vOrigin.y - (flHalfHullWidth + flRightForgiveness);
+		vEnd.z = vOrigin.z + GetHullHeight() + flTopForgiveness;
 	}
 }
 
