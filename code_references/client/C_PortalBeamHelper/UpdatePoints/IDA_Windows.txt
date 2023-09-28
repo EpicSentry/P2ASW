@@ -1,0 +1,247 @@
+// NOTE: nBeams/a2 was probably just m_beams.Count()
+
+void __userpurge C_PortalBeamHelper::UpdatePoints(
+        C_PortalBeamHelper *this@<ecx>,
+        int a2@<ebp>,
+        const Vector *vStartPoint,
+        const Vector *vEndPoint,
+        unsigned int fMask,
+        ITraceFilter *pTraceFilter,
+        CGameTrace *tr)
+{
+  float x; // edi
+  float z; // ecx
+  char v9; // al
+  float y; // edx
+  char v11; // cl
+  float v12; // xmm1_4
+  float v13; // xmm2_4
+  int v14; // eax
+  CUtlMemory<vgui::TreeNode *,int> *v15; // esi
+  int v16; // edi
+  vgui::TreeNode **m_pMemory; // ecx
+  int v18; // eax
+  C_Beam **v19; // esi
+  C_Beam *Beam; // eax
+  C_Beam *v21; // esi
+  float v22; // xmm0_4
+  float v23; // xmm0_4
+  bool v24; // zf
+  float v25; // eax
+  int v26; // esi
+  int v27; // edx
+  unsigned __int8 y_low; // cl
+  unsigned __int8 v29; // dl
+  float v30; // xmm0_4
+  __int16 y_high; // cx
+  float v32; // xmm0_4
+  int dist_low; // edx
+  __int16 v34; // cx
+  float v35; // xmm0_4
+  const char *contents; // edx
+  int v37; // ecx
+  int fractionleftsolid_low; // edx
+  struct CBaseEntity *v39; // ecx
+  int hitgroup; // edx
+  int v41; // [esp+24h] [ebp-12Ch] BYREF
+  Ray_t rayTransformed; // [esp+30h] [ebp-120h] BYREF
+  Ray_t ray; // [esp+80h] [ebp-D0h] BYREF
+  CGameTrace tempTrace; // [esp+D0h] [ebp-80h] BYREF
+  float v45; // [esp+124h] [ebp-2Ch]
+  Vector vStart; // [esp+128h] [ebp-28h] BYREF
+  Vector vDir; // [esp+134h] [ebp-1Ch] BYREF
+  int nNumRemoved; // [esp+140h] [ebp-10h]
+  int nBeams; // [esp+144h] [ebp-Ch]
+  int j; // [esp+148h] [ebp-8h]
+  int retaddr; // [esp+150h] [ebp+0h]
+
+  nBeams = a2;
+  j = retaddr;
+  x = *(float *)&this;
+  LODWORD(vDir.x) = this;
+  z = vStartPoint->z;
+  *(_QWORD *)&tempTrace.m_pEnt = *(_QWORD *)&vStartPoint->x;
+  v45 = z;
+  vStart.x = vEndPoint->x - vStartPoint->x;
+  vStart.y = vEndPoint->y - vStartPoint->y;
+  vStart.z = vEndPoint->z - vStartPoint->z;
+  VectorNormalize(&vStart);
+  v9 = 0;
+  y = 0.0;
+  v11 = 1;
+  vDir.y = 0.0;
+  while ( 1 )
+  {
+    v12 = FLOAT_56755_84;
+    v13 = FLOAT_102_3;
+    if ( !v9 && !v11 )
+      break;
+    if ( SLODWORD(y) >= 10 )
+      break;
+    if ( LODWORD(y) == *(_DWORD *)(LODWORD(x) + 16) )
+    {
+      v14 = *(_DWORD *)(LODWORD(x) + 8);
+      v15 = (CUtlMemory<vgui::TreeNode *,int> *)(LODWORD(x) + 4);
+      v16 = *(_DWORD *)(LODWORD(x) + 16);
+      if ( v16 + 1 > v14 )
+      {
+        CUtlMemory<CPortalLeaderboard *,int>::Grow(v15, v16 - v14 + 1);
+        y = vDir.y;
+      }
+      ++v15[1].m_pMemory;
+      m_pMemory = v15->m_pMemory;
+      v18 = (int)v15[1].m_pMemory - v16 - 1;
+      v15[1].m_nAllocationCount = (int)v15->m_pMemory;
+      if ( v18 > 0 )
+      {
+        _V_memmove(&m_pMemory[v16 + 1], &m_pMemory[v16], 4 * v18);
+        y = vDir.y;
+      }
+      v19 = (C_Beam **)&v15->m_pMemory[LODWORD(y)];
+      Beam = C_PortalBeamHelper::CreateBeam((C_PortalBeamHelper *)LODWORD(vDir.x));
+      v12 = FLOAT_56755_84;
+      v13 = FLOAT_102_3;
+      y = vDir.y;
+      x = vDir.x;
+      *v19 = Beam;
+    }
+    v21 = *(C_Beam **)(*(_DWORD *)(LODWORD(x) + 4) + 4 * LODWORD(y));
+    if ( SLODWORD(y) > 0 )
+    {
+      v22 = *(float *)(*(_DWORD *)LODWORD(x) + 2808);
+      if ( v22 > v13 )
+        v22 = v13;
+      if ( v21->m_fWidth.m_Value != v22 )
+        v21->m_fWidth.m_Value = v22;
+      v23 = *(float *)(*(_DWORD *)LODWORD(x) + 2808);
+      if ( v23 > v13 )
+        v23 = v13;
+      if ( v21->m_fEndWidth.m_Value != v23 )
+        v21->m_fEndWidth.m_Value = v23;
+    }
+    ray.m_Start.z = (float)(*(float *)&tempTrace.hitbox + (float)(vStart.y * v12)) - *(float *)&tempTrace.hitbox;
+    ray.m_Start.y = (float)((float)(vStart.x * v12) + *(float *)&tempTrace.m_pEnt) - *(float *)&tempTrace.m_pEnt;
+    ray.m_Start.w = (float)(v45 + (float)(vStart.z * v12)) - v45;
+    BYTE1(ray.m_Extents.z) = (float)((float)((float)(ray.m_Start.z * ray.m_Start.z)
+                                           + (float)(ray.m_Start.y * ray.m_Start.y))
+                                   + (float)(ray.m_Start.w * ray.m_Start.w)) != 0.0;
+    memset(&ray.m_StartOffset.y, 0, 12);
+    ray.m_Extents.y = 0.0;
+    LOBYTE(ray.m_Extents.z) = 1;
+    memset(&ray.m_Delta.y, 0, 12);
+    *(_DWORD *)&rayTransformed.m_IsRay = tempTrace.m_pEnt;
+    *(_DWORD *)(&rayTransformed.m_IsSwept + 3) = tempTrace.hitbox;
+    *(float *)(&rayTransformed.m_IsSwept + 7) = v45;
+    UTIL_ClearTrace((CGameTrace *)&ray.m_IsRay);
+    enginetrace->TraceRay(
+      enginetrace,
+      (const Ray_t *)&rayTransformed.m_IsRay,
+      fMask,
+      pTraceFilter,
+      (CGameTrace *)&ray.m_IsRay);
+    if ( r_visualizetraces.m_pParent->m_Value.m_nValue )
+      DebugDrawLine((const Vector *)&ray.m_IsRay, &tempTrace.startpos, 255, 0, 0, 1, -1.0);
+    BYTE2(nNumRemoved) = 0;
+    if ( UTIL_DidTraceTouchPortals(
+           (const Ray_t *)&rayTransformed.m_IsRay,
+           (const CGameTrace *)&ray.m_IsRay,
+           (C_Portal_Base2D **)&vDir.z,
+           0)
+      && LODWORD(vDir.z)
+      && C_Portal_Base2D::IsActivedAndLinked((C_Portal_Base2D *)LODWORD(vDir.z)) )
+    {
+      v24 = v21->m_nHaloIndex.m_Value == 0;
+      HIBYTE(nNumRemoved) = 1;
+      if ( !v24 )
+        v21->m_nHaloIndex.m_Value = 0;
+      C_Beam::PointsInit(v21, (const Vector *)&tempTrace.m_pEnt, &tempTrace.startpos);
+      C_BaseEntity::SetAbsOrigin(v21, (const Vector *)&tempTrace.m_pEnt);
+      C_Beam::TurnOff(v21);
+      rayTransformed.m_Extents.y = 0.0;
+      UTIL_Portal_RayTransform(
+        (const VMatrix *)(LODWORD(vDir.z) + 3516),
+        (const Ray_t *)&rayTransformed.m_IsRay,
+        (Ray_t *)&v41);
+      vStart = *(Vector *)&rayTransformed.m_Start.y;
+      VectorNormalize(&vStart);
+      UTIL_Portal_PointTransform(
+        (const VMatrix *)(LODWORD(vDir.z) + 3516),
+        &tempTrace.startpos,
+        (Vector *)&tempTrace.m_pEnt);
+      v11 = HIBYTE(nNumRemoved);
+      v9 = BYTE2(nNumRemoved);
+      ++LODWORD(vDir.y);
+      y = vDir.y;
+    }
+    else
+    {
+      HIBYTE(nNumRemoved) = 0;
+      C_Beam::PointsInit(v21, (const Vector *)&tempTrace.m_pEnt, &tempTrace.startpos);
+      C_BaseEntity::SetAbsOrigin(v21, (const Vector *)&tempTrace.m_pEnt);
+      C_Beam::TurnOff(v21);
+      v9 = UTIL_Paint_Reflect((const CGameTrace *)&ray.m_IsRay, (Vector *)&tempTrace.m_pEnt, &vStart, REFLECT_POWER);
+      v11 = HIBYTE(nNumRemoved);
+      ++LODWORD(vDir.y);
+      y = vDir.y;
+      BYTE2(nNumRemoved) = v9;
+    }
+  }
+  LODWORD(v25) = *(_DWORD *)(LODWORD(x) + 16) - LODWORD(y);
+  v26 = *(_DWORD *)(LODWORD(x) + 16) - 1;
+  vDir.x = v25;
+  for ( vDir.z = v25; v26 >= 0; *(_DWORD *)(v27 + 4 * v26 + 4) = 0 )
+  {
+    if ( SLODWORD(vDir.z) <= 0 )
+      break;
+    C_BaseEntity::Remove(*(C_BaseEntity **)(*(_DWORD *)(LODWORD(x) + 4) + 4 * v26));
+    v27 = *(_DWORD *)(LODWORD(x) + 4);
+    --LODWORD(vDir.z);
+    --v26;
+    v25 = vDir.x;
+  }
+  *(_DWORD *)(LODWORD(x) + 16) -= LODWORD(v25);
+  if ( tr )
+  {
+    y_low = LOBYTE(tempTrace.plane.normal.y);
+    tr->startpos.x = *(float *)&ray.m_IsRay;
+    v29 = BYTE1(tempTrace.plane.normal.y);
+    tr->startpos.y = *(float *)(&ray.m_IsSwept + 3);
+    tr->startpos.z = *(float *)(&ray.m_IsSwept + 7);
+    tr->endpos = tempTrace.startpos;
+    tr->plane.normal.x = tempTrace.endpos.x;
+    v30 = tempTrace.endpos.y;
+    tr->plane.type = y_low;
+    y_high = HIWORD(tempTrace.plane.normal.y);
+    tr->plane.normal.y = v30;
+    v32 = tempTrace.endpos.z;
+    tr->plane.signbits = v29;
+    dist_low = LODWORD(tempTrace.plane.dist);
+    tr->plane.normal.z = v32;
+    tr->plane.dist = tempTrace.plane.normal.x;
+    *(_WORD *)tr->plane.pad = y_high;
+    v34 = *(_WORD *)&tempTrace.plane.type;
+    v35 = tempTrace.plane.normal.z;
+    tr->contents = dist_low;
+    LOBYTE(dist_low) = tempTrace.plane.pad[0];
+    tr->dispFlags = v34;
+    LOBYTE(v34) = tempTrace.plane.pad[1];
+    tr->allsolid = dist_low;
+    contents = (const char *)tempTrace.contents;
+    tr->startsolid = v34;
+    v37 = *(_DWORD *)&tempTrace.dispFlags;
+    tr->surface.name = contents;
+    fractionleftsolid_low = LODWORD(tempTrace.fractionleftsolid);
+    *(_DWORD *)&tr->surface.surfaceProps = v37;
+    LOWORD(v37) = tempTrace.surface.name;
+    tr->hitgroup = fractionleftsolid_low;
+    LOWORD(fractionleftsolid_low) = HIWORD(tempTrace.surface.name);
+    tr->physicsbone = v37;
+    v39 = *(struct CBaseEntity **)&tempTrace.surface.surfaceProps;
+    tr->worldSurfaceIndex = fractionleftsolid_low;
+    hitgroup = tempTrace.hitgroup;
+    tr->fraction = v35;
+    tr->fractionleftsolid = tempTrace.fraction;
+    tr->m_pEnt = v39;
+    tr->hitbox = hitgroup;
+  }
+}

@@ -1,0 +1,198 @@
+void __thiscall C_WeaponPortalgun::DoEffectHolding(C_WeaponPortalgun *this)
+{
+  C_BasePlayer *Owner; // edi
+  C_BaseViewModel *vm; // ebx
+  CParticleProperty *p_m_Particles; // edi
+  CNewParticleEffect *pParticleBeamHoldingFP; // eax
+  CNewParticleEffect *pParticleObject; // ecx
+  CUtlReference<CNewParticleEffect> *p_m_hPortalGunEffectHoldingFP; // ecx
+  CUtlReference<CNewParticleEffect> *m_pHead; // edx
+  CNewParticleEffect *v9; // ebx
+  C_BaseCombatCharacter *v10; // eax
+  CNewParticleEffect *v11; // ebx
+  C_BaseCombatCharacter *v12; // eax
+  C_BaseCombatCharacter *v13; // eax
+  C_BasePlayer *v14; // ebx
+  C_BasePlayer *v15; // ecx
+  CNewParticleEffect *v16; // ebx
+  C_BaseEntity *PlayerHeldEntity; // eax
+  C_BaseEntity::NetworkVar_m_Particles *v18; // edi
+  CNewParticleEffect *v19; // eax
+  CNewParticleEffect *v20; // ecx
+  CUtlReference<CNewParticleEffect> *p_m_hPortalGunEffectHoldingTP; // ebx
+  CUtlReference<CNewParticleEffect> *v22; // ecx
+  CNewParticleEffect *v23; // ebx
+  C_BaseCombatCharacter *v24; // eax
+  CNewParticleEffect *v25; // ebx
+  C_BaseCombatCharacter *v26; // eax
+  C_BaseCombatCharacter *v27; // eax
+  C_BasePlayer *v28; // ebx
+  CNewParticleEffect *v29; // esi
+  C_BaseEntity *v30; // eax
+  Vector v31; // [esp-10h] [ebp-20h]
+  Vector v32; // [esp-10h] [ebp-20h]
+  Vector v33; // [esp-10h] [ebp-20h]
+  Vector v34; // [esp-10h] [ebp-20h]
+  CNewParticleEffect *v35; // [esp+Ch] [ebp-4h]
+  CNewParticleEffect *v36; // [esp+Ch] [ebp-4h]
+
+  if ( C_BaseCombatWeapon::GetOwner(this) )
+  {
+    Owner = (C_BasePlayer *)C_BaseCombatWeapon::GetOwner(this);
+    if ( !Owner || !Owner->IsPlayer(Owner) )
+      Owner = 0;
+    vm = C_BasePlayer::GetViewModel(Owner, 0);
+  }
+  else
+  {
+    vm = 0;
+  }
+  if ( !this->m_hPortalGunEffectHoldingFP.m_pObject && vm )
+  {
+    p_m_Particles = &vm->m_Particles;
+    pParticleBeamHoldingFP = CParticleProperty::Create(
+                               &vm->m_Particles,
+                               "portalgun_beam_holding_FP",
+                               PATTACH_POINT_FOLLOW,
+                               "muzzle");
+    pParticleObject = this->m_hPortalGunEffectHoldingFP.m_pObject;
+    v35 = pParticleBeamHoldingFP;
+    if ( pParticleObject != pParticleBeamHoldingFP )
+    {
+      if ( pParticleObject )
+      {
+        CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(
+          (CUtlIntrusiveDList<CUtlReference<CSheet> > *)&pParticleObject->m_References,
+          (CUtlReference<CSheet> *)&this->m_hPortalGunEffectHoldingFP);
+        pParticleBeamHoldingFP = v35;
+        this->m_hPortalGunEffectHoldingFP.m_pObject = 0;
+      }
+      p_m_hPortalGunEffectHoldingFP = &this->m_hPortalGunEffectHoldingFP;
+      this->m_hPortalGunEffectHoldingFP.m_pObject = pParticleBeamHoldingFP;
+      if ( pParticleBeamHoldingFP )
+      {
+        p_m_hPortalGunEffectHoldingFP->m_pNext = pParticleBeamHoldingFP->m_References.m_pHead;
+        m_pHead = pParticleBeamHoldingFP->m_References.m_pHead;
+        if ( m_pHead )
+          m_pHead->m_pPrev = p_m_hPortalGunEffectHoldingFP;
+        this->m_hPortalGunEffectHoldingFP.m_pPrev = 0;
+        pParticleBeamHoldingFP->m_References.m_pHead = p_m_hPortalGunEffectHoldingFP;
+      }
+    }
+    CParticleProperty::AddControlPoint(
+      &vm->m_Particles,
+      this->m_hPortalGunEffectHoldingFP.m_pObject,
+      1,
+      vm,
+      PATTACH_POINT_FOLLOW,
+      "Arm1_attach3",
+      vec3_origin,
+      0);
+    CParticleProperty::AddControlPoint(
+      &vm->m_Particles,
+      this->m_hPortalGunEffectHoldingFP.m_pObject,
+      2,
+      vm,
+      PATTACH_POINT_FOLLOW,
+      "Arm2_attach3",
+      vec3_origin,
+      0);
+    CParticleProperty::AddControlPoint(
+      &vm->m_Particles,
+      this->m_hPortalGunEffectHoldingFP.m_pObject,
+      3,
+      vm,
+      PATTACH_POINT_FOLLOW,
+      "Arm3_attach3",
+      vec3_origin,
+      0);
+    v9 = this->m_hPortalGunEffectHoldingFP.m_pObject;
+    v31 = vec3_origin;
+    v10 = C_BaseCombatWeapon::GetOwner(this);
+    CParticleProperty::AddControlPoint(p_m_Particles, v9, 4, v10, PATTACH_CUSTOMORIGIN, 0, v31, 0);
+    v11 = this->m_hPortalGunEffectHoldingFP.m_pObject;
+    v12 = C_BaseCombatWeapon::GetOwner(this);
+    CNewParticleEffect::SetControlPointEntity(v11, 4, v12);
+    v13 = C_BaseCombatWeapon::GetOwner(this);
+    v14 = (C_BasePlayer *)v13;
+    if ( v13 && v13->IsPlayer(v13) )
+      v15 = v14;
+    else
+      v15 = 0;
+    v16 = this->m_hPortalGunEffectHoldingFP.m_pObject;
+    v32 = vec3_origin;
+    PlayerHeldEntity = GetPlayerHeldEntity(v15);
+    CParticleProperty::AddControlPoint(p_m_Particles, v16, 5, PlayerHeldEntity, PATTACH_ABSORIGIN_FOLLOW, 0, v32, 0);
+  }
+  if ( !this->m_hPortalGunEffectHoldingTP.m_pObject )
+  {
+    v18 = &this->m_Particles;
+    v19 = CParticleProperty::Create(&this->m_Particles, "portalgun_beam_holding_TP", PATTACH_POINT_FOLLOW, "muzzle");
+    v20 = this->m_hPortalGunEffectHoldingTP.m_pObject;
+    p_m_hPortalGunEffectHoldingTP = &this->m_hPortalGunEffectHoldingTP;
+    v36 = v19;
+    if ( v20 != v19 )
+    {
+      if ( v20 )
+      {
+        CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(
+          (CUtlIntrusiveDList<CUtlReference<CSheet> > *)&v20->m_References,
+          (CUtlReference<CSheet> *)&this->m_hPortalGunEffectHoldingTP);
+        v19 = v36;
+        this->m_hPortalGunEffectHoldingTP.m_pObject = 0;
+      }
+      this->m_hPortalGunEffectHoldingTP.m_pObject = v19;
+      if ( v19 )
+      {
+        p_m_hPortalGunEffectHoldingTP->m_pNext = v19->m_References.m_pHead;
+        v22 = v19->m_References.m_pHead;
+        if ( v22 )
+          v22->m_pPrev = p_m_hPortalGunEffectHoldingTP;
+        this->m_hPortalGunEffectHoldingTP.m_pPrev = 0;
+        v19->m_References.m_pHead = p_m_hPortalGunEffectHoldingTP;
+      }
+    }
+    CParticleProperty::AddControlPoint(
+      &this->m_Particles,
+      this->m_hPortalGunEffectHoldingTP.m_pObject,
+      1,
+      this,
+      PATTACH_POINT_FOLLOW,
+      "Arm1_attach3",
+      vec3_origin,
+      0);
+    CParticleProperty::AddControlPoint(
+      &this->m_Particles,
+      this->m_hPortalGunEffectHoldingTP.m_pObject,
+      2,
+      this,
+      PATTACH_POINT_FOLLOW,
+      "Arm2_attach3",
+      vec3_origin,
+      0);
+    CParticleProperty::AddControlPoint(
+      &this->m_Particles,
+      this->m_hPortalGunEffectHoldingTP.m_pObject,
+      3,
+      this,
+      PATTACH_POINT_FOLLOW,
+      "Arm3_attach3",
+      vec3_origin,
+      0);
+    v23 = this->m_hPortalGunEffectHoldingTP.m_pObject;
+    v33 = vec3_origin;
+    v24 = C_BaseCombatWeapon::GetOwner(this);
+    CParticleProperty::AddControlPoint(&this->m_Particles, v23, 4, v24, PATTACH_CUSTOMORIGIN, 0, v33, 0);
+    v25 = this->m_hPortalGunEffectHoldingTP.m_pObject;
+    v26 = C_BaseCombatWeapon::GetOwner(this);
+    CNewParticleEffect::SetControlPointEntity(v25, 4, v26);
+    v27 = C_BaseCombatWeapon::GetOwner(this);
+    v28 = (C_BasePlayer *)v27;
+    if ( !v27 || !v27->IsPlayer(v27) )
+      v28 = 0;
+    v29 = this->m_hPortalGunEffectHoldingTP.m_pObject;
+    v34 = vec3_origin;
+    v30 = GetPlayerHeldEntity(v28);
+    CParticleProperty::AddControlPoint(v18, v29, 5, v30, PATTACH_ABSORIGIN_FOLLOW, 0, v34, 0);
+  }
+}

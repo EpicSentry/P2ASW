@@ -1,0 +1,14 @@
+void __thiscall C_PortalBeamHelper::TurnOn(C_PortalBeamHelper *this)
+{
+  int i; // edi
+  C_Beam *v3; // esi
+
+  for ( i = 0; i < this->m_beams.m_Size; ++i )
+  {
+    v3 = this->m_beams.m_Memory.m_pMemory[i];
+    v3->m_fEffects &= ~0x20u;
+    C_BaseEntity::UpdateVisibility(v3);
+    C_BaseEntity::OnDisableShadowDepthRenderingChanged(v3);
+    C_BaseEntity::OnShadowDepthRenderingCacheableStateChanged(v3);
+  }
+}

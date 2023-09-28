@@ -1,0 +1,132 @@
+void __thiscall C_PortalLaser::ClientThink(C_PortalLaser *this)
+{
+  unsigned int m_nGrowSize; // ecx
+  C_BaseEntity *m_pEntity; // edi
+  const Vector *(__thiscall *WorldSpaceCenter)(C_BaseEntity *); // edx
+  float *v5; // eax
+  CPortalSimulator *SimulatorThatOwnsEntity; // eax
+  float *v7; // esi
+  float *v8; // eax
+  float v9; // xmm0_4
+  float v10; // xmm2_4
+  float v11; // xmm1_4
+  float v12; // xmm2_4
+  CNewParticleEffect *m_Index; // ecx
+  const QAngle *v14; // [esp-4h] [ebp-B8h]
+  CGameTrace tr; // [esp+Ch] [ebp-A8h] BYREF
+  CTraceFilterSimpleClassnameList traceFilter; // [esp+60h] [ebp-54h] BYREF
+  Vector up; // [esp+84h] [ebp-30h] BYREF
+  Vector vec; // [esp+90h] [ebp-24h] BYREF
+  Vector vStart; // [esp+9Ch] [ebp-18h] BYREF
+  Vector vDir; // [esp+A8h] [ebp-Ch] BYREF
+
+  m_nGrowSize = this->m_beamHelper.m_beams.m_Memory.m_nGrowSize;
+  if ( m_nGrowSize == -1
+    || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_nGrowSize].m_SerialNumber != HIWORD(m_nGrowSize) )
+  {
+    m_pEntity = 0;
+  }
+  else
+  {
+    m_pEntity = (C_BaseEntity *)g_pEntityList->m_EntPtrArray[(unsigned __int16)m_nGrowSize].m_pEntity;
+  }
+  CTraceFilterSimpleClassnameList::CTraceFilterSimpleClassnameList(&traceFilter, m_pEntity, 0);
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore(&traceFilter, "projected_wall_entity");
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore(&traceFilter, "player");
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore(&traceFilter, "point_laser_target");
+  if ( m_pEntity )
+  {
+    if ( LOBYTE(this->m_vEndPoint.y) )
+    {
+      AngleVectors((const QAngle *)&this->m_vEndPoint.z, &vDir);
+    }
+    else
+    {
+      v14 = m_pEntity->GetAbsAngles(m_pEntity);
+      AngleVectors(v14, &vDir);
+    }
+    WorldSpaceCenter = m_pEntity->WorldSpaceCenter;
+    vec.x = vDir.x * 22.0;
+    vec.y = vDir.y * 22.0;
+    vec.z = vDir.z * 22.0;
+    v5 = (float *)WorldSpaceCenter(m_pEntity);
+    vStart.x = vec.x + *v5;
+    vStart.y = v5[1] + vec.y;
+    vStart.z = v5[2] + vec.z;
+    SimulatorThatOwnsEntity = CPortalSimulator::GetSimulatorThatOwnsEntity(m_pEntity);
+    v7 = (float *)SimulatorThatOwnsEntity;
+    if ( SimulatorThatOwnsEntity )
+    {
+      if ( CPortalSimulator::EntityIsInPortalHole(SimulatorThatOwnsEntity, m_pEntity)
+        && (float)((float)((float)((float)(v7[26] * vStart.x) + (float)(v7[27] * vStart.y)) + (float)(v7[28] * vStart.z))
+                 - v7[29]) < 0.0 )
+      {
+        v8 = (float *)m_pEntity->WorldSpaceCenter(m_pEntity);
+        if ( (float)((float)((float)((float)(v8[1] * v7[27]) + (float)(v7[26] * *v8)) + (float)(v8[2] * v7[28])) - v7[29]) > 0.0 )
+        {
+          v9 = (float)((float)((float)(v7[31] * vStart.y) + (float)(vStart.x * v7[30])) + (float)(v7[32] * vStart.z))
+             + v7[33];
+          v10 = (float)((float)((float)(v7[38] * vStart.x) + (float)(v7[39] * vStart.y)) + (float)(v7[40] * vStart.z))
+              + v7[41];
+          vStart.y = (float)((float)((float)(v7[35] * vStart.y) + (float)(v7[34] * vStart.x))
+                           + (float)(v7[36] * vStart.z))
+                   + v7[37];
+          vStart.z = v10;
+          vStart.x = v9;
+          v11 = (float)((float)(v7[35] * vDir.y) + (float)(v7[34] * vDir.x)) + (float)(v7[36] * vDir.z);
+          v12 = (float)((float)(v7[38] * vDir.x) + (float)(v7[39] * vDir.y)) + (float)(v7[40] * vDir.z);
+          vDir.x = (float)((float)(v7[31] * vDir.y) + (float)(vDir.x * v7[30])) + (float)(v7[32] * vDir.z);
+          vDir.y = v11;
+          vDir.z = v12;
+        }
+      }
+    }
+    if ( BYTE2(this->m_vEndPoint.x) )
+    {
+      up.x = this->m_vStartPoint.x - vStart.x;
+      up.y = this->m_vStartPoint.y - vStart.y;
+      up.z = this->m_vStartPoint.z - vStart.z;
+      vec = up;
+      VectorNormalize(&vec);
+      vDir = vec;
+    }
+    else
+    {
+      UTIL_Portal_Laser_Prevent_Tilting(&vDir);
+    }
+    C_PortalBeamHelper::UpdatePointDirection(
+      (C_PortalBeamHelper *)&this->m_vecRenderOriginOverride.z,
+      &vStart,
+      &vDir,
+      0x46004001u,
+      &traceFilter,
+      &tr);
+  }
+  else
+  {
+    C_PortalBeamHelper::UpdatePoints(
+      (C_PortalBeamHelper *)&this->m_vecRenderOriginOverride.z,
+      (const Vector *)&this->m_pSparkEffect,
+      &this->m_vStartPoint,
+      0x46004001u,
+      &traceFilter,
+      &tr);
+  }
+  if ( HIBYTE(this->m_vEndPoint.x) )
+  {
+    m_Index = (CNewParticleEffect *)this->m_hReflector.m_Index;
+    if ( m_Index )
+    {
+      CNewParticleEffect::SetControlPoint(m_Index, 0, &tr.endpos);
+      VectorVectors(&tr.plane.normal, &vec, &up);
+      CNewParticleEffect::SetControlPointOrientation(
+        (CNewParticleEffect *)this->m_hReflector.m_Index,
+        0,
+        &tr.plane.normal,
+        &vec,
+        &up);
+    }
+  }
+  (*(void (__stdcall **)(_DWORD))(LODWORD(this[-1].m_angParentAngles.y) + 464))(LODWORD(FLOAT_N1293_0));
+  CUtlVector<VideoPanel *,CUtlMemory<VideoPanel *,int>>::~CUtlVector<VideoPanel *,CUtlMemory<VideoPanel *,int>>((CUtlVector<vgui::CTreeViewListControl::CColumnInfo,CUtlMemory<vgui::CTreeViewListControl::CColumnInfo,int> > *)&traceFilter.m_PassClassnames);
+}

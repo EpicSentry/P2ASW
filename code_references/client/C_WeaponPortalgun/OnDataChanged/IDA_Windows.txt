@@ -1,0 +1,69 @@
+void __thiscall C_WeaponPortalgun::OnDataChanged(C_WeaponPortalgun *this, DataUpdateType_t updateType)
+{
+  DataUpdateType_t v2; // edi
+  int z_low; // eax
+  char m_pLastOwner; // cl
+  char v6; // dl
+  C_BaseAnimating *v7; // edi
+  C_BasePlayer *Owner; // esi
+  C_BaseViewModel *ViewModel; // eax
+  int v10; // [esp+0h] [ebp-Ch]
+
+  v2 = updateType;
+  C_WeaponPortalBase::OnDataChanged(this, updateType);
+  if ( v2 )
+  {
+    z_low = LODWORD(this->m_vecOrangePortalPos.z);
+    if ( LODWORD(this->m_fEffectsMaxSize1.m_Value) != z_low
+      || LOBYTE(this->m_fEffectsMaxSize2.m_Value) != LOBYTE(this->m_pLastOwner)
+      || BYTE1(this->m_fEffectsMaxSize2.m_Value) != BYTE1(this->m_pLastOwner) )
+    {
+      C_WeaponPortalgun::DoEffect((C_WeaponPortalgun *)((char *)this - 8), z_low, 0);
+      m_pLastOwner = (char)this->m_pLastOwner;
+      v6 = BYTE1(this->m_pLastOwner);
+      this->m_fEffectsMaxSize1.m_Value = this->m_vecOrangePortalPos.z;
+      LOBYTE(this->m_fEffectsMaxSize2.m_Value) = m_pLastOwner;
+      BYTE1(this->m_fEffectsMaxSize2.m_Value) = v6;
+    }
+  }
+  else
+  {
+    ((void (__thiscall *)(CUtlReference<CNewParticleEffect> **, _DWORD))this[-1].m_hPortalGunEffectHoldingTP.m_pPrev[38].m_pObject)(
+      &this[-1].m_hPortalGunEffectHoldingTP.m_pPrev,
+      LODWORD(FLOAT_N1293_0));
+    C_BaseAnimating::AutoAllowBoneAccess::AutoAllowBoneAccess(
+      (C_BaseAnimating::AutoAllowBoneAccess *)&updateType + 3,
+      1,
+      1);
+    C_WeaponPortalgun::StartEffects((C_WeaponPortalgun *)((char *)this - 8));
+    C_BaseAnimating::AutoAllowBoneAccess::~AutoAllowBoneAccess((C_BaseAnimating::AutoAllowBoneAccess *)&updateType + 3);
+    C_WeaponPortalgun::DoEffect((C_WeaponPortalgun *)((char *)this - 8), LODWORD(this->m_vecOrangePortalPos.z), 0);
+  }
+  if ( g_pGameRules->IsMultiplayer(g_pGameRules) )
+  {
+    v7 = (C_WeaponPortalgun *)((char *)this - 8);
+    Owner = (C_BasePlayer *)C_BaseCombatWeapon::GetOwner((C_WeaponPortalgun *)((char *)this - 8));
+    if ( Owner )
+    {
+      if ( Owner->IsPlayer(Owner) )
+      {
+        if ( Owner->GetTeamNumber(Owner) == 2 )
+        {
+          C_BaseAnimating::SetSkin(v7, 2);
+          if ( !C_BasePlayer::GetViewModel(Owner, 0) )
+            return;
+          v10 = 2;
+        }
+        else
+        {
+          C_BaseAnimating::SetSkin(v7, 1);
+          if ( !C_BasePlayer::GetViewModel(Owner, 0) )
+            return;
+          v10 = 1;
+        }
+        ViewModel = C_BasePlayer::GetViewModel(Owner, 0);
+        C_BaseAnimating::SetSkin(ViewModel, v10);
+      }
+    }
+  }
+}

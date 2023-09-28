@@ -1,0 +1,20 @@
+void __thiscall C_PortalLaser::UpdateOnRemove(C_PortalLaser *this)
+{
+  CNewParticleEffect *m_pObject; // eax
+  CNewParticleEffect *v3; // eax
+
+  m_pObject = this->m_pSparkEffect.m_pObject;
+  if ( m_pObject )
+  {
+    CParticleProperty::StopEmission(&this->m_Particles, m_pObject, 0, 0, 0, 0);
+    v3 = this->m_pSparkEffect.m_pObject;
+    if ( v3 )
+    {
+      CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(
+        (CUtlIntrusiveDList<CUtlReference<CSheet> > *)&v3->m_References,
+        (CUtlReference<CSheet> *)&this->m_pSparkEffect);
+      this->m_pSparkEffect.m_pObject = 0;
+    }
+  }
+  C_BaseEntity::UpdateOnRemove(this);
+}

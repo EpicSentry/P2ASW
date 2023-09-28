@@ -1,0 +1,61 @@
+void __thiscall C_WeaponPortalgun::DoEffectNone(C_WeaponPortalgun *this)
+{
+  CNewParticleEffect *m_pObject; // ecx
+  CNewParticleEffect *v3; // eax
+  CNewParticleEffect *v4; // eax
+  CNewParticleEffect *v5; // ecx
+  CNewParticleEffect *v6; // eax
+  CNewParticleEffect *v7; // ecx
+  CNewParticleEffect *v8; // eax
+  CUtlReference<CSheet> *p_m_hPortalGunEffectHoldingTP; // esi
+
+  m_pObject = this->m_hPortalGunEffectFP.m_pObject;
+  if ( m_pObject && this->m_hPortalGunEffectTP.m_pObject )
+  {
+    CNewParticleEffect::StopEmission(m_pObject, 0, 0, 0, 0);
+    v3 = this->m_hPortalGunEffectFP.m_pObject;
+    if ( v3 )
+    {
+      CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(
+        (CUtlIntrusiveDList<CUtlReference<CSheet> > *)&v3->m_References,
+        (CUtlReference<CSheet> *)&this->m_hPortalGunEffectFP);
+      this->m_hPortalGunEffectFP.m_pObject = 0;
+    }
+    CNewParticleEffect::StopEmission(this->m_hPortalGunEffectTP.m_pObject, 0, 0, 0, 0);
+    v4 = this->m_hPortalGunEffectTP.m_pObject;
+    if ( v4 )
+    {
+      CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(
+        (CUtlIntrusiveDList<CUtlReference<CSheet> > *)&v4->m_References,
+        (CUtlReference<CSheet> *)&this->m_hPortalGunEffectTP);
+      this->m_hPortalGunEffectTP.m_pObject = 0;
+    }
+  }
+  v5 = this->m_hPortalGunEffectHoldingFP.m_pObject;
+  if ( v5 )
+  {
+    CNewParticleEffect::StopEmission(v5, 0, 0, 0, 0);
+    v6 = this->m_hPortalGunEffectHoldingFP.m_pObject;
+    if ( v6 )
+    {
+      CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(
+        (CUtlIntrusiveDList<CUtlReference<CSheet> > *)&v6->m_References,
+        (CUtlReference<CSheet> *)&this->m_hPortalGunEffectHoldingFP);
+      this->m_hPortalGunEffectHoldingFP.m_pObject = 0;
+    }
+  }
+  v7 = this->m_hPortalGunEffectHoldingTP.m_pObject;
+  if ( v7 )
+  {
+    CNewParticleEffect::StopEmission(v7, 0, 0, 0, 0);
+    v8 = this->m_hPortalGunEffectHoldingTP.m_pObject;
+    p_m_hPortalGunEffectHoldingTP = (CUtlReference<CSheet> *)&this->m_hPortalGunEffectHoldingTP;
+    if ( v8 )
+    {
+      CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(
+        (CUtlIntrusiveDList<CUtlReference<CSheet> > *)&v8->m_References,
+        p_m_hPortalGunEffectHoldingTP);
+      p_m_hPortalGunEffectHoldingTP->m_pObject = 0;
+    }
+  }
+}
