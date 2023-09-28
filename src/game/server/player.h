@@ -1,4 +1,4 @@
-//===== Copyright © 1996-2009, Valve Corporation, All rights reserved. ======//
+//========= Copyright (c) Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -19,6 +19,7 @@
 #include "SoundEmitterSystem/isoundemittersystembase.h"
 #include "simtimer.h"
 #include "vprof.h"
+#include "iclient.h"
 
 class CLogicPlayerProxy;
 
@@ -96,6 +97,7 @@ struct surfacedata_t;
 // !!!set this bit on guns and stuff that should never respawn.
 #define	SF_NORESPAWN	( 1 << 30 )
 
+
 //
 // generic player
 //
@@ -125,29 +127,6 @@ struct surfacedata_t;
 #define AUTOAIM_8DEGREES  0.1391731009601
 #define AUTOAIM_10DEGREES 0.1736481776669
 #define AUTOAIM_20DEGREES 0.3490658503989
-
-// useful cosines
-#define DOT_1DEGREE   0.9998476951564
-#define DOT_2DEGREE   0.9993908270191
-#define DOT_3DEGREE   0.9986295347546
-#define DOT_4DEGREE   0.9975640502598
-#define DOT_5DEGREE   0.9961946980917
-#define DOT_6DEGREE   0.9945218953683
-#define DOT_7DEGREE   0.9925461516413
-#define DOT_8DEGREE   0.9902680687416
-#define DOT_9DEGREE   0.9876883405951
-#define DOT_10DEGREE  0.9848077530122
-#define DOT_15DEGREE  0.9659258262891
-#define DOT_20DEGREE  0.9396926207859
-#define DOT_25DEGREE  0.9063077870367
-#define DOT_30DEGREE  0.866025403784
-#define DOT_45DEGREE  0.707106781187
-enum
-{
-	VPHYS_WALK = 0,
-	VPHYS_CROUCH,
-	VPHYS_NOCLIP,
-};
 
 
 enum PlayerConnectedState
@@ -247,7 +226,6 @@ public:
 	void					FinishUserMessageThrottling();
 
 	bool					ShouldThrottleUserMessage( char const *pchMessageName );
-	bool hasDoubleJumped;
 
 	
 	// IPlayerInfo passthrough (because we can't do multiple inheritance)
@@ -293,6 +271,8 @@ public:
 	virtual void			InitialSpawn( void );
 	virtual void			InitHUD( void ) {}
 	virtual void			ShowViewPortPanel( const char * name, bool bShow = true, KeyValues *data = NULL );
+
+	virtual const char *	GetPlayerModelName( void );
 
 	virtual void			PlayerDeathThink( void );
 
@@ -407,7 +387,9 @@ public:
 	virtual void			PackDeadPlayerItems( void );
 	virtual void			RemoveAllItems( bool removeSuit );
 	bool					IsDead() const;
-
+#ifdef CSTRIKE_DLL
+	virtual bool			IsRunning( void ) const	{ return false; } // bot support under cstrike (AR)
+#endif
 
 	bool					HasPhysicsFlag( unsigned int flag ) { return (m_afPhysicsFlags & flag) != 0; }
 
@@ -456,7 +438,7 @@ public:
 	virtual void			DeathSound( const CTakeDamageInfo &info );
 	const Vector &			GetMovementCollisionNormal( void ) const;	// return the normal of the surface we last collided with
 	const Vector &			GetGroundNormal( void ) const;
-	
+
 	virtual					void SetFogController( CFogController *pFogController );
 
 	// return the entity used for soundscape radius checks
@@ -582,7 +564,7 @@ public:
 	virtual bool			ShouldAutoaim( void );
 	void					SetTargetInfo( Vector &vecSrc, float flDist );
 
-	void					SetViewEntity( CBaseEntity *pEntity );
+	void					SetViewEntity( CBaseEntity *pEntity, bool bShouldDrawPlayer = true );
 	CBaseEntity				*GetViewEntity( void ) { return m_hViewEntity; }
 
 	virtual void			ForceClientDllUpdate( void );  // Forces all client .dll specific data to be resent to client.
@@ -644,13 +626,17 @@ public:
 
 	void					AddSplitScreenPlayer( CBasePlayer *pOther );
 	void					RemoveSplitScreenPlayer( CBasePlayer *pOther );
-	CUtlVector< CHandle< CBasePlayer > > &GetSplitScreenPlayers();
+	CUtlVector< CHandle< CBasePlayer > >& GetSplitScreenPlayers();
 	bool					HasAttachedSplitScreenPlayers() const;
-	
+
 	void					AddPictureInPicturePlayer( CBasePlayer *pOther );
 	void					RemovePictureInPicturePlayer( CBasePlayer *pOther );
 	CUtlVector< CHandle< CBasePlayer > >& GetSplitScreenAndPictureInPicturePlayers();
 	CUtlVector< CHandle< CBasePlayer > >& GetPictureInPicturePlayers( void );
+
+	void					SetCrossPlayPlatform( CrossPlayPlatform_t clientPlatform );
+	CrossPlayPlatform_t		GetCrossPlayPlatform( void ) const;
+
 
 	// Returns true if team was changed
 	virtual bool			EnsureSplitScreenTeam();
@@ -811,6 +797,13 @@ public:
 	// Here so that derived classes can use the expresser
 	virtual CAI_Expresser *GetExpresser() { return NULL; };
 
+#if !defined(NO_STEAM)
+	//----------------------------
+	// Steam handling
+	bool		GetSteamID( CSteamID *pID );
+	uint64		GetSteamIDAsUInt64( void );
+#endif
+
 	void				IncrementEFNoInterpParity();
 	int					GetEFNoInterpParity() const;
 
@@ -827,6 +820,7 @@ private:
 
 	int					DetermineSimulationTicks( void );
 	void				AdjustPlayerTimeBase( int simulation_ticks );
+	void				UpdateSplitScreenAndPictureInPicturePlayerList();
 
 public:
 	
@@ -923,7 +917,7 @@ protected:
 	Vector					m_vecAdditionalPVSOrigin; 
 	// Extra PVS origin if we are using a camera object
 	Vector					m_vecCameraPVSOrigin;
-	
+
 	bool					m_bDropEnabled;
 	bool					m_bDuckEnabled;
 	CNetworkHandle( CBaseEntity, m_hUseEntity );			// the player is currently controlling this entity because of +USE latched, NULL if no entity
@@ -943,7 +937,7 @@ protected:
 	bool	m_bPauseBonusProgress;
 	CNetworkVar( int, m_iBonusProgress );
 	CNetworkVar( int, m_iBonusChallenge );
-	
+
 	float m_flTimeLastTouchedGround;
 
 	int						m_lastDamageAmount;		// Last damage taken
@@ -980,7 +974,7 @@ protected:
 	BYTE					m_rgbTimeBasedDamage[CDMG_TIMEBASED];
 
 	// Player Physics Shadow
-	int						m_vphysicsCollisionState;
+	CNetworkVar( int, m_vphysicsCollisionState );
 
 	virtual int SpawnArmorValue( void ) const { return 0; }
 
@@ -1009,7 +1003,7 @@ protected: //used to be private, but need access for portal mod (Dave Kircher)
 	IPhysicsObject				*m_pShadowCrouch;
 	Vector						m_oldOrigin;
 	Vector						m_vecSmoothedVelocity;
-	bool						m_touchedPhysObject;
+	bool						m_bTouchedPhysObject;
 	bool						m_bPhysicsWasFrozen;
 
 private:
@@ -1134,6 +1128,7 @@ private:
 	bool					m_bPlayerUnderwater;
 
 	CNetworkHandle( CBaseEntity, m_hViewEntity );
+	CNetworkVar( bool, m_bShouldDrawPlayerWhileUsingViewEntity );
 
 	// Movement constraints
 	CNetworkHandle( CBaseEntity, m_hConstraintEntity );
@@ -1146,7 +1141,9 @@ private:
 	friend class CPlayerMove;
 	friend class CPlayerClass;
 	friend class CASW_PlayerMove;
+	friend class CDOTAPlayerMove;
 	friend class CPaintPlayerMove;
+	friend class CLSPlayerMove;
 
 	// Player name
 	char					m_szNetname[MAX_PLAYER_NAME_LENGTH];
@@ -1161,6 +1158,7 @@ protected:
 	friend class CHL2GameMovement;
 	friend class CPortalGameMovement;
 	friend class CASW_MarineGameMovement;
+	friend class CLSGameMovement;
 	
 	// Accessors for gamemovement
 	bool IsDucked( void ) const { return m_Local.m_bDucked; }
@@ -1170,8 +1168,13 @@ protected:
 	CNetworkVar( float,  m_flLaggedMovementValue );
 
 	// These are generated while running usercmds, then given to UpdateVPhysicsPosition after running all queued commands.
+#if defined( DEBUG_MOTION_CONTROLLERS )
+	CNetworkVector( m_vNewVPhysicsPosition );
+	CNetworkVector( m_vNewVPhysicsVelocity );
+#else
 	Vector m_vNewVPhysicsPosition;
 	Vector m_vNewVPhysicsVelocity;
+#endif
 	
 	Vector	m_vecVehicleViewOrigin;		// Used to store the calculated view of the player while riding in a vehicle
 	QAngle	m_vecVehicleViewAngles;		// Vehicle angles
@@ -1243,7 +1246,6 @@ private:
 	CUtlLinkedList< CPlayerSimInfo >  m_vecPlayerSimInfo;
 	CUtlLinkedList< CPlayerCmdInfo >  m_vecPlayerCmdInfo;
 
-	friend class CGameMovement;
 	friend class CMoveHelperServer;
 	Vector m_movementCollisionNormal;
 	Vector m_groundNormal;
@@ -1256,12 +1258,11 @@ private:
 	CUtlVector< CHandle< CBasePlayer > > m_hSplitScreenPlayers;
 	CUtlVector< CHandle< CBasePlayer > > m_hSplitScreenAndPipPlayers;
 	CUtlVector< CHandle< CBasePlayer > > m_hPipPlayers;
-	
+
+	CrossPlayPlatform_t m_ClientPlatform;
+
 public:
 	float GetAirTime( void );
-	
-private:
-	void UpdateSplitScreenAndPictureInPicturePlayerList();
 
 private:
 	float	GetAutoaimScore( const Vector &eyePosition, const Vector &viewDir, const Vector &vecTarget, CBaseEntity *pTarget, float fScale, CBaseCombatWeapon *pActiveWeapon );
@@ -1269,6 +1270,11 @@ private:
 
 public:
 	virtual unsigned int PlayerSolidMask( bool brushOnly = false ) const;	// returns the solid mask for the given player, so bots can have a more-restrictive set
+#if defined( DEBUG_MOTION_CONTROLLERS )
+	CNetworkVector( m_Debug_vPhysPosition );
+	CNetworkVector( m_Debug_vPhysVelocity );
+	CNetworkVector( m_Debug_LinearAccel );
+#endif
 };
 
 typedef CHandle<CBasePlayer> CBasePlayerHandle;
@@ -1313,6 +1319,16 @@ inline void CBasePlayer::SetCameraPVSOrigin( const Vector &vecOrigin )
 inline void CBasePlayer::SetMuzzleFlashTime( float flTime ) 
 { 
 	m_flFlashTime = flTime; 
+}
+
+inline void CBasePlayer::SetDropEnabled( bool bEnabled ) 
+{ 
+	m_bDropEnabled = bEnabled; 
+}
+
+inline void CBasePlayer::SetDuckEnabled( bool bEnabled ) 
+{ 
+	m_bDuckEnabled = bEnabled; 
 }
 
 // Bot accessors...
@@ -1368,12 +1384,12 @@ inline bool CBasePlayer::IsInAVehicle( void ) const
 
 inline void CBasePlayer::SetTouchedPhysics( bool bTouch ) 
 { 
-	m_touchedPhysObject = bTouch; 
+	m_bTouchedPhysObject = bTouch; 
 }
 
 inline bool CBasePlayer::TouchedPhysics( void )			
 { 
-	return m_touchedPhysObject; 
+	return m_bTouchedPhysObject; 
 }
 
 //-----------------------------------------------------------------------------
@@ -1399,16 +1415,6 @@ inline const CBasePlayer *ToBasePlayer( const CBaseEntity *pEntity )
 #else
 	return static_cast<const CBasePlayer *>( pEntity );
 #endif
-}
-
-inline void CBasePlayer::SetDropEnabled( bool bEnabled ) 
-{ 
-	m_bDropEnabled = bEnabled; 
-}
-
-inline void CBasePlayer::SetDuckEnabled( bool bEnabled ) 
-{ 
-	m_bDuckEnabled = bEnabled; 
 }
 
 

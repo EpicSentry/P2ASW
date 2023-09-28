@@ -1,4 +1,4 @@
-//===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ======//
+//===== Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ======//
 //
 // Purpose: 
 //
@@ -79,6 +79,7 @@ ConVar RagdollImpactStrength( "z_ragdoll_impact_strength", "500" );
 ConVar cl_disable_ragdolls( "cl_disable_ragdolls", "0", FCVAR_CHEAT );
 
 ConVar cl_ejectbrass( "cl_ejectbrass", "1" );
+ConVar cl_minimal_rtt_shadows( "cl_minimal_rtt_shadows", "1", FCVAR_ARCHIVE );
 
 
 // If an NPC is moving faster than this, he should play the running footstep sound
@@ -184,6 +185,7 @@ IMPLEMENT_CLIENTCLASS_DT(C_BaseAnimating, DT_BaseAnimating, CBaseAnimating)
 
 	RecvPropFloat( RECVINFO( m_flFrozen ) ), 
 	RecvPropInt( RECVINFO( m_ScaleType ) ),
+	RecvPropBool( RECVINFO( m_bSuppressAnimSounds ) )
 
 END_RECV_TABLE()
 
@@ -653,7 +655,7 @@ void C_ClientRagdoll::Release( void )
 	}
 	ClientEntityList().RemoveEntity( GetClientHandle() );
 
-	partition->Remove( PARTITION_CLIENT_SOLID_EDICTS | PARTITION_CLIENT_RESPONSIVE_EDICTS | PARTITION_CLIENT_NON_STATIC_EDICTS, CollisionProp()->GetPartitionHandle() );
+	::partition->Remove( PARTITION_CLIENT_SOLID_EDICTS | PARTITION_CLIENT_RESPONSIVE_EDICTS | PARTITION_CLIENT_NON_STATIC_EDICTS, CollisionProp()->GetPartitionHandle() );
 	RemoveFromLeafSystem();
 
 	BaseClass::Release();
@@ -744,9 +746,7 @@ C_BaseAnimating::C_BaseAnimating() :
 	m_flModelScale = 1.0f;
 
 	m_iEyeAttachment = 0;
-#ifdef _XBOX
-	m_iAccumulatedBoneMask = 0;
-#endif
+
 	m_pStudioHdr = NULL;
 	m_hStudioHdr = MDLHANDLE_INVALID;
 
@@ -760,6 +760,10 @@ C_BaseAnimating::C_BaseAnimating() :
 	m_pJiggleBones = NULL;
 	m_isJiggleBonesEnabled = true;
 	AddToEntityList(ENTITY_LIST_SIMULATE);
+	m_bForceRTTShadows = false;
+
+	m_bDynamicModelAllowed = false;
+	m_bDynamicModelPending = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -795,6 +799,13 @@ C_BaseAnimating::~C_BaseAnimating()
 		m_pJiggleBones = NULL;
 	}
 }
+
+
+bool C_BaseAnimating::UsesPowerOfTwoFrameBufferTexture( void )
+{
+	return modelinfo->IsUsingFBTexture( GetModel(), GetSkin(), GetBody(), GetClientRenderable() );
+}
+
 
 int C_BaseAnimating::GetRenderFlags( void )
 {
@@ -839,6 +850,18 @@ ShadowType_t C_BaseAnimating::ShadowCastType()
 	if ( IsEffectActive(EF_NODRAW | EF_NOSHADOW) )
 		return SHADOWS_NONE;
 
+	if ( cl_minimal_rtt_shadows.GetBool() && m_bForceRTTShadows == false )
+	{
+		return SHADOWS_NONE;
+	}
+	else
+	{
+		return GetShadowCastTypeForStudio( pStudioHdr );
+	}
+}
+
+ShadowType_t C_BaseAnimating::GetShadowCastTypeForStudio( CStudioHdr *pStudioHdr )
+{
 	if (pStudioHdr->GetNumSeq() == 0)
 		return SHADOWS_RENDER_TO_TEXTURE;
 		  
@@ -1140,6 +1163,7 @@ void C_BaseAnimating::GetBoneTransform( int iBone, matrix3x4_t &pBoneToWorld )
 	bool bWrote = false;
 	if ( hdr && iBone >= 0 && iBone < hdr->numbones() )
 	{
+		// BUG:  why is this written to NOT allow getting attachment points?
 		const int boneMask = BONE_USED_BY_HITBOX;
 		if ( hdr->boneFlags(iBone) & boneMask )
 		{
@@ -1151,8 +1175,10 @@ void C_BaseAnimating::GetBoneTransform( int iBone, matrix3x4_t &pBoneToWorld )
 			bWrote = true;
 		}
 	}
+
 	if ( !bWrote )
 	{
+		Assert( false );
 		MatrixCopy( EntityToWorldTransform(), pBoneToWorld );
 	}
 	Assert( GetModelPtr() && iBone >= 0 && iBone < GetModelPtr()->numbones() );
@@ -1365,7 +1391,7 @@ float C_BaseAnimating::ClampCycle( float flCycle, bool isLooping )
 	if (isLooping) 
 	{
 		// FIXME: does this work with negative framerate?
-		flCycle -= (int)flCycle;
+		flCycle = SubtractIntegerPart(flCycle);
 		if (flCycle < 0.0f)
 		{
 			flCycle += 1.0f;
@@ -1431,34 +1457,6 @@ void C_BaseAnimating::GetCachedBoneMatrix( int boneIndex, matrix3x4_t &out )
 
 
 //-----------------------------------------------------------------------------
-// Purpose:	Merge shared bones over from "followed" entity
-//-----------------------------------------------------------------------------
-
-void C_BaseAnimating::CalcBoneMerge( CStudioHdr *hdr, int boneMask, CBoneBitList &boneComputed )
-{
-	// For EF_BONEMERGE entities, copy the bone matrices for any bones that have matching names.
-	bool boneMerge = IsEffectActive(EF_BONEMERGE);
-	if ( boneMerge || m_pBoneMergeCache )
-	{
-		if ( boneMerge )
-		{
-			if ( !m_pBoneMergeCache )
-			{
-				m_pBoneMergeCache = new CBoneMergeCache;
-				m_pBoneMergeCache->Init( this );
-			}
-			m_pBoneMergeCache->MergeMatchingBones( boneMask, boneComputed );
-		}
-		else
-		{
-			delete m_pBoneMergeCache;
-			m_pBoneMergeCache = NULL;
-		}
-	}
-}
-
-
-//-----------------------------------------------------------------------------
 // Purpose:	move position and rotation transforms into global matrices
 //-----------------------------------------------------------------------------
 void C_BaseAnimating::BuildTransformations( CStudioHdr *hdr, Vector *pos, Quaternion *q, const matrix3x4_t &cameraTransform, int boneMask, CBoneBitList &boneComputed )
@@ -1499,23 +1497,38 @@ void C_BaseAnimating::BuildTransformations( CStudioHdr *hdr, Vector *pos, Quater
 	}
 
 	// For EF_BONEMERGE entities, copy the bone matrices for any bones that have matching names.
-	CalcBoneMerge( hdr, boneMask, boneComputed );
+	bool boneMerge = IsEffectActive(EF_BONEMERGE);
+	if ( boneMerge || m_pBoneMergeCache )
+	{
+		if ( boneMerge )
+		{
+			if ( !m_pBoneMergeCache )
+			{
+				m_pBoneMergeCache = new CBoneMergeCache;
+				m_pBoneMergeCache->Init( this );
+			}
+			m_pBoneMergeCache->MergeMatchingBones( boneMask );
+		}
+		else
+		{
+			delete m_pBoneMergeCache;
+			m_pBoneMergeCache = NULL;
+		}
+	}
 
-	for (int i = 0; i < hdr->numbones(); i++) 
+	for (int i = 0; i < hdr->numbones(); ++i) 
 	{
 		// Only update bones reference by the bone mask.
 		if ( !( hdr->boneFlags( i ) & boneMask ) )
 			continue;
 
+		if ( m_pBoneMergeCache && m_pBoneMergeCache->IsBoneMerged( i ) )
+			continue;
+
 		PREFETCH360( &GetBoneForWrite( i ), 0 );
 
-		// skip bones that are already setup
-		if (boneComputed.IsBoneMarked( i ))
-		{
-			// dummy operation, just used to verify in debug that this should have happened
-			GetBoneForWrite( i );
-		}
-		else if ( boneSimulated[i] )
+		// animate all non-simulated bones
+		if ( boneSimulated[i] )
 		{
 			ApplyBoneMatrixTransform( GetBoneForWrite( i ) );
 			if ( bFixupSimulatedPositions && pbones[i].parent != -1 )
@@ -1530,9 +1543,14 @@ void C_BaseAnimating::BuildTransformations( CStudioHdr *hdr, Vector *pos, Quater
 		{
 			continue;
 		}
+		// skip bones that the IK has already setup
+		else if (boneComputed.IsBoneMarked( i ))
+		{
+			// dummy operation, just used to verify in debug that this should have happened
+			GetBoneForWrite( i );
+		}
 		else
 		{
-			// animate all non-simulated bones
 			QuaternionMatrix( q[i], pos[i], bonematrix );
 
 			Assert( fabs( pos[i].x ) < 100000 );
@@ -1600,7 +1618,7 @@ void C_BaseAnimating::BuildTransformations( CStudioHdr *hdr, Vector *pos, Quater
 			ApplyBoneMatrixTransform( GetBoneForWrite( i ) );
 		}
 	}
-	
+
 	// If a nonhierarchical scale is being applied
 	const float scale = GetModelScale();
 	if( GetModelScaleType() == NONHIERARCHICAL_MODEL_SCALE &&
@@ -1632,7 +1650,7 @@ void C_BaseAnimating::BuildTransformations( CStudioHdr *hdr, Vector *pos, Quater
 //-----------------------------------------------------------------------------
 void C_BaseAnimating::ApplyBoneMatrixTransform( matrix3x4_t& transform )
 {
-	float scale = GetModelScale();
+	float scale = GetModelHierarchyScale();
 	if ( scale > 1.0f+FLT_EPSILON || scale < 1.0f-FLT_EPSILON )
 	{
 		// The bone transform is in worldspace, so to scale this, we need to translate it back
@@ -2320,8 +2338,8 @@ void C_BaseAnimating::CalculateIKLocks( float currentTime )
 	// In TF, we might be attaching a player's view to a walking model that's using IK. If we are, it can
 	// get in here during the view setup code, and it's not normally supposed to be able to access the spatial
 	// partition that early in the rendering loop. So we allow access right here for that special case.
-	SpatialPartitionListMask_t curSuppressed = partition->GetSuppressedLists();
-	partition->SuppressLists( PARTITION_ALL_CLIENT_EDICTS, false );
+	SpatialPartitionListMask_t curSuppressed = ::partition->GetSuppressedLists();
+	::partition->SuppressLists( PARTITION_ALL_CLIENT_EDICTS, false );
 	CBaseEntity::PushEnableAbsRecomputations( false );
 
 	Ray_t ray;
@@ -2541,7 +2559,7 @@ void C_BaseAnimating::CalculateIKLocks( float currentTime )
 #endif
 
 	CBaseEntity::PopEnableAbsRecomputations();
-	partition->SuppressLists( curSuppressed, true );
+	::partition->SuppressLists( curSuppressed, true );
 }
 
 bool C_BaseAnimating::GetPoseParameterRange( int index, float &minValue, float &maxValue )
@@ -2607,7 +2625,7 @@ CMouthInfo *C_BaseAnimating::GetMouth( void )
 #ifdef DEBUG_BONE_SETUP_THREADING
 ConVar cl_warn_thread_contested_bone_setup("cl_warn_thread_contested_bone_setup", "0" );
 #endif
-ConVar cl_threaded_bone_setup("cl_threaded_bone_setup", ( IsX360() ) ? "1" : "0", 0, "Enable parallel processing of C_BaseAnimating::SetupBones()" );
+ConVar cl_threaded_bone_setup("cl_threaded_bone_setup", IsX360() ? "1" : (IsPS3() ? "2" : "0"), 0, "Enable parallel processing of C_BaseAnimating::SetupBones()" );
 
 //-----------------------------------------------------------------------------
 // Purpose: Do the default sequence blending rules as done in HL1
@@ -2658,13 +2676,13 @@ void C_BaseAnimating::InitBoneSetupThreadPool()
 #ifdef DEBUG_BONE_SETUP_THREADING
 	pCount = new CThreadLocalInt<>;
 #endif
-	if ( IsX360() )
-	{
 #ifdef _X360
+	if ( g_pAlternateThreadPool )
+	{
 		g_pBoneSetupThreadPool = g_pAlternateThreadPool;
-#endif
 	}
 	else
+#endif
 	{
 		g_pBoneSetupThreadPool = g_pThreadPool;
 	}
@@ -2713,24 +2731,24 @@ void C_BaseAnimating::ThreadedBoneSetup()
 			for ( int i = g_PreviousBoneSetups.Count() - 1; i >= 0; i-- )
 			{
 				C_BaseAnimating *pAnimating = g_PreviousBoneSetups[i];
-				C_BaseAnimating *pParent;
-				if ( pAnimating->GetMoveParent() && ( pParent = pAnimating->GetMoveParent()->GetBaseAnimating() ) != NULL )
+				C_BaseAnimating *pDependancy;
+				if ( (pDependancy = pAnimating->GetBoneSetupDependancy()) != NULL )
 				{
 					Assert( pAnimating->m_pNextForThreadedBoneSetup == NULL );
-					C_BaseAnimating *pNextParent;
-					while ( pParent->GetMoveParent() && ( pNextParent = pParent->GetMoveParent()->GetBaseAnimating() ) != NULL )
+					C_BaseAnimating *pNextDependancy;
+					while ( (pNextDependancy = pDependancy->GetBoneSetupDependancy()) != NULL )
 					{
-						pParent = pNextParent;
+						pDependancy = pNextDependancy;
 					}
 					
-					pAnimating->m_pNextForThreadedBoneSetup = pParent->m_pNextForThreadedBoneSetup;
-					pParent->m_pNextForThreadedBoneSetup = pAnimating;
+					pAnimating->m_pNextForThreadedBoneSetup = pDependancy->m_pNextForThreadedBoneSetup;
+					pDependancy->m_pNextForThreadedBoneSetup = pAnimating;
 					g_PreviousBoneSetups.FastRemove( i );
-					if ( pParent->m_iMostRecentBoneSetupRequest != g_iPreviousBoneCounter )
+					if ( pDependancy->m_iMostRecentBoneSetupRequest != g_iPreviousBoneCounter )
 					{
-						Assert( g_PreviousBoneSetups.Find( pParent ) == -1 );
-						pParent->m_iMostRecentBoneSetupRequest = g_iPreviousBoneCounter;
-						g_PreviousBoneSetups.AddToTail( pParent );
+						Assert( g_PreviousBoneSetups.Find( pDependancy ) == -1 );
+						pDependancy->m_iMostRecentBoneSetupRequest = g_iPreviousBoneCounter;
+						g_PreviousBoneSetups.AddToTail( pDependancy );
 					}
 				}
 			}
@@ -2827,7 +2845,9 @@ bool C_BaseAnimating::SetupBones( matrix3x4a_t *pBoneToWorldOut, int nMaxBones, 
 		if ( !m_BoneSetupLock.TryLock() )
 		{
 			// someone else is handling
-			return false;
+			// bones are in some intermediate state, wait until the other thread is done.  
+			// If they've setup what bones we want, it'll early out down below
+			m_BoneSetupLock.Lock();
 		}
 		// else, we have the lock
 	}
@@ -2882,6 +2902,11 @@ bool C_BaseAnimating::SetupBones( matrix3x4a_t *pBoneToWorldOut, int nMaxBones, 
 			m_BoneAccessor.SetReadableBones( 0 );
 			m_BoneAccessor.SetWritableBones( 0 );
 			m_flLastBoneSetupTime = currentTime;
+
+#if defined( DBGFLAG_ASSERT )
+			m_vBoneSetupCachedOrigin = GetRenderOrigin();
+			m_qBoneSetupCachedAngles = GetRenderAngles();
+#endif
 		}
 		m_iPrevBoneMask = m_iAccumulatedBoneMask;
 		m_iAccumulatedBoneMask = 0;
@@ -2910,8 +2935,6 @@ bool C_BaseAnimating::SetupBones( matrix3x4a_t *pBoneToWorldOut, int nMaxBones, 
 	// Have we cached off all bones meeting the flag set?
 	if( ( m_BoneAccessor.GetReadableBones() & boneMask ) != boneMask )
 	{
-		MDLCACHE_CRITICAL_SECTION();
-
 		CStudioHdr *hdr = GetModelPtr();
 		if ( !hdr || !hdr->SequencesAvailable() )
 		{
@@ -2919,9 +2942,15 @@ bool C_BaseAnimating::SetupBones( matrix3x4a_t *pBoneToWorldOut, int nMaxBones, 
 			return false;
 		}
 
+#if defined( DBGFLAG_ASSERT )
+		bool bHadDirtyAbsTransform = IsEFlagSet( EFL_DIRTY_ABSTRANSFORM );
+#endif
+
 		// Setup our transform based on render angles and origin.
-		ALIGN16 matrix3x4_t parentTransform;
+		ALIGN16 matrix3x4_t parentTransform ALIGN16_POST;
 		AngleMatrix( GetRenderAngles(), GetRenderOrigin(), parentTransform );
+		AssertMsgOnce( !bHadDirtyAbsTransform || !IsEFlagSet( EFL_DIRTY_ABSTRANSFORM ), "Using an old origin/angles and unable to recompute before caching off the bones" );
+		
 
 		// Load the boneMask with the total of what was asked for last frame.
 		boneMask |= m_iPrevBoneMask;
@@ -2961,14 +2990,14 @@ bool C_BaseAnimating::SetupBones( matrix3x4a_t *pBoneToWorldOut, int nMaxBones, 
 			// since we're right in the middle of setting up our new transforms. 
 			//
 			// Setting this flag forces move children to keep their abs transform invalidated.
-			AddFlag( EFL_SETTING_UP_BONES );
+			AddEFlags( EFL_SETTING_UP_BONES );
 
 // NOTE: For model scaling, we need to opt out of IK because it will mark the bones as already being calculated
-#if defined( PORTAL2 ) || defined( INFESTED ) || defined( CSTRIKE15 )
+#if defined( PORTAL2 ) || defined( INFESTED )
 			// only allocate an ik block if the npc can use it
 			if ( !m_pIk && hdr->numikchains() > 0 && !(m_EntClientFlags & ENTCLIENTFLAG_DONTUSEIK) )
 				m_pIk = new CIKContext;
-#endif
+#endif // PORTAL2
 
 			Vector		pos[MAXSTUDIOBONES];
 			QuaternionAligned	q[MAXSTUDIOBONES];
@@ -3034,7 +3063,7 @@ bool C_BaseAnimating::SetupBones( matrix3x4a_t *pBoneToWorldOut, int nMaxBones, 
 				DrawSkeleton( hdr, boneMask );
 			}
 
-			RemoveFlag( EFL_SETTING_UP_BONES );
+			RemoveEFlags( EFL_SETTING_UP_BONES );
 			ControlMouth( hdr );
 		}
 		
@@ -3048,6 +3077,8 @@ bool C_BaseAnimating::SetupBones( matrix3x4a_t *pBoneToWorldOut, int nMaxBones, 
 	// its bones setup, it doesn't need the transforms yet.
 	if ( pBoneToWorldOut )
 	{
+		AssertMsgOnce( !IsEFlagSet( EFL_DIRTY_ABSTRANSFORM ), "Cached bone data has old abs origin/angles" );
+		AssertMsgOnce( (m_vBoneSetupCachedOrigin == GetRenderOrigin()) && (m_qBoneSetupCachedAngles == GetRenderAngles()), "Renderable moved since cached" );
 		if ( nMaxBones >= m_CachedBoneData.Count() )
 		{
 			Plat_FastMemcpy( pBoneToWorldOut, m_CachedBoneData.Base(), sizeof( matrix3x4_t ) * m_CachedBoneData.Count() );
@@ -3189,6 +3220,18 @@ void C_BaseAnimating::InvalidateBoneCaches()
 	g_iModelBoneCounter++;
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+bool C_BaseAnimating::GetRootBone( matrix3x4_t &rootBone )
+{
+	if ( IsEffectActive( EF_BONEMERGE ) && GetMoveParent() && m_pBoneMergeCache )
+		return m_pBoneMergeCache->GetRootBone( rootBone );
+
+	GetBoneTransform( 0, rootBone );
+	return true;
+}
+
 
 ConVar r_drawothermodels( "r_drawothermodels", "1", FCVAR_CHEAT, "0=Off, 1=Normal, 2=Wireframe" );
 
@@ -3224,7 +3267,7 @@ int C_BaseAnimating::DrawModel( int flags, const RenderableInstance_t &instance 
 	VPROF_BUDGET( "C_BaseAnimating::DrawModel", VPROF_BUDGETGROUP_MODEL_RENDERING );
 	if ( !m_bReadyToDraw )
 		return 0;
-	
+
 #if defined ( PORTAL2 )
 	if ( IsRenderingWithViewModels() )
 	{
@@ -3374,7 +3417,7 @@ static ConVar r_drawmodelstatsoverlay( "r_drawmodelstatsoverlay", "0", FCVAR_CHE
 IClientModelRenderable*	C_BaseAnimating::GetClientModelRenderable()
 { 
 	// Cannot participate if it has a render clip plane
-	if ( !m_bCanUseFastPath || m_bIsUsingRelativeLighting || !IsVisible() )
+	if ( !m_bCanUseFastPath || m_bIsUsingRelativeLighting )
 		return NULL;
 	
 	if ( r_drawothermodels.GetInt() != 1 || r_drawmodelstatsoverlay.GetInt() != 0 || mat_wireframe.GetInt() != 0 )
@@ -3382,7 +3425,7 @@ IClientModelRenderable*	C_BaseAnimating::GetClientModelRenderable()
 
 	if ( IsFollowingEntity() && !FindFollowedEntity() )
 		return NULL;
-	
+
 #ifdef PORTAL
 	if ( GetRenderClipPlane() != NULL )
 		return NULL;
@@ -3431,11 +3474,11 @@ bool C_BaseAnimating::OnInternalDrawModel( ClientModelRenderInfo_t *pInfo )
 //-----------------------------------------------------------------------------
 // 
 //-----------------------------------------------------------------------------
-void C_BaseAnimating::DoInternalDrawModel( ClientModelRenderInfo_t *pInfo, DrawModelState_t *pState, matrix3x4_t *pBoneToWorldArray )
+void C_BaseAnimating::DoInternalDrawModel( IMatRenderContext *pRenderContext, ClientModelRenderInfo_t *pInfo, DrawModelState_t *pState, matrix3x4_t *pBoneToWorldArray )
 {
 	if ( pState)
 	{
-		modelrender->DrawModelExecute( *pState, *pInfo, pBoneToWorldArray );
+		modelrender->DrawModelExecute( pRenderContext, *pState, *pInfo, pBoneToWorldArray );
 	}
 
 	if ( vcollide_wireframe.GetBool() )
@@ -3581,7 +3624,7 @@ int C_BaseAnimating::InternalDrawModel( int flags, const RenderableInstance_t &i
 		CMatRenderDataReference rd( pRenderContext );
 		DrawModelState_t state;
 		matrix3x4_t *pBoneToWorld;
-		bMarkAsDrawn = modelrender->DrawModelSetup( *pInfo, &state, &pBoneToWorld );
+		bMarkAsDrawn = modelrender->DrawModelSetup( pRenderContext, *pInfo, &state, &pBoneToWorld );
 
 		// Scale the base transform if we don't have a bone hierarchy
 		if ( GetModelScale() > 1.0f+FLT_EPSILON || GetModelScale() < 1.0f-FLT_EPSILON )
@@ -3590,14 +3633,14 @@ int C_BaseAnimating::InternalDrawModel( int flags, const RenderableInstance_t &i
 			if ( pHdr && pBoneToWorld && pHdr->numbones() == 1 )
 			{
 				// Scale the bone to world at this point
-				const float flScale = GetModelScale();
+				const float flScale = GetModelHierarchyScale();
 				VectorScale( (*pBoneToWorld)[0], flScale, (*pBoneToWorld)[0] );
 				VectorScale( (*pBoneToWorld)[1], flScale, (*pBoneToWorld)[1] );
 				VectorScale( (*pBoneToWorld)[2], flScale, (*pBoneToWorld)[2] );
 			}
 		}
 
-		DoInternalDrawModel( pInfo, ( bMarkAsDrawn && ( pInfo->flags & STUDIO_RENDER ) ) ? &state : NULL, pBoneToWorld );
+		DoInternalDrawModel( pRenderContext, pInfo, ( bMarkAsDrawn && ( pInfo->flags & STUDIO_RENDER ) ) ? &state : NULL, pBoneToWorld );
 	}
 
 	if ( bUsingStencil )
@@ -4163,6 +4206,9 @@ void C_BaseAnimating::FireEvent( const Vector& origin, const QAngle& angles, int
 
 	case AE_CL_PLAYSOUND:
 		{
+			if ( m_bSuppressAnimSounds )
+				return;
+			
 			CLocalPlayerFilter filter;
 
 			if ( m_Attachments.Count() > 0)
@@ -4687,6 +4733,11 @@ bool C_BaseAnimating::IsRagdoll() const
 	return m_pRagdoll && m_bClientSideRagdoll;
 }
 
+Vector C_BaseAnimating::GetThirdPersonViewPosition( void )
+{
+	return GetRenderOrigin() + GetViewOffset();
+}
+
 
 //-----------------------------------------------------------------------------
 // implements these so ragdolls can handle frustum culling & leaf visibility
@@ -4734,7 +4785,7 @@ void C_BaseAnimating::GetRenderBounds( Vector& theMins, Vector& theMaxs )
 	}
 
 	// Scale this up depending on if our model is currently scaling
-	const float flScale = GetModelScale();
+	const float flScale = GetModelHierarchyScale();
 	theMaxs *= flScale;
 	theMins *= flScale;
 }
@@ -4756,7 +4807,7 @@ const Vector& C_BaseAnimating::GetRenderOrigin( void )
 	{
 		return m_pRagdoll->GetRagdollOrigin();
 	}
-	
+
 	if ( m_vecRenderOriginOverride != vec3_invalid )
 	{
 		return m_vecRenderOriginOverride;
@@ -4764,6 +4815,7 @@ const Vector& C_BaseAnimating::GetRenderOrigin( void )
 
 	return BaseClass::GetRenderOrigin();	
 }
+
 
 const QAngle& C_BaseAnimating::GetRenderAngles( void )
 {
@@ -4823,7 +4875,7 @@ void C_BaseAnimating::PreDataUpdate( DataUpdateType_t updateType )
 {
 	m_flOldCycle = GetCycle();
 	m_nOldSequence = GetSequence();
-	m_flOldModelScale = GetModelScale();
+	m_flOldModelScale = GetModelHierarchyScale();
 
 	int i;
 	for ( i=0;i<MAXSTUDIOBONECTRLS;i++ )
@@ -4896,7 +4948,7 @@ void C_BaseAnimating::PostDataUpdate( DataUpdateType_t updateType )
 	// Cycle change? Then re-render
 	bool bAnimationChanged = m_flOldCycle != GetCycle() || bBoneControllersChanged || bPoseParametersChanged;
 	bool bSequenceChanged = m_nOldSequence != GetSequence();
-	bool bScaleChanged = ( m_flOldModelScale != GetModelScale() );
+	bool bScaleChanged = ( m_flOldModelScale != GetModelHierarchyScale() );
 	if ( bAnimationChanged || bSequenceChanged || bScaleChanged )
 	{
 		int nFlags = bAnimationChanged ? ANIMATION_CHANGED : 0;
@@ -5164,6 +5216,26 @@ bool C_BaseAnimating::InitAsClientRagdoll( const matrix3x4_t *pDeltaBones0, cons
 }
 
 
+static const char* g_pszForceRTTClassnames[] =
+{
+	"prop_weighted_cube",
+	"class C_NPC_Portal_FloorTurret",
+	"class C_NPC_Personality_Core",
+	"class C_PhysicsProp",
+	//"prop_box_monster",
+};
+
+void C_BaseAnimating::CheckIfEntityShouldForceRTTShadows( void )
+{
+	for ( int i = 0; i < ARRAYSIZE( g_pszForceRTTClassnames ); ++i )
+	{
+		if ( FClassnameIs( this, g_pszForceRTTClassnames[i] ) )
+		{
+			m_bForceRTTShadows = true;
+			return;
+		}
+	}
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -5190,6 +5262,9 @@ void C_BaseAnimating::OnDataChanged( DataUpdateType_t updateType )
 		UpdateRelevantInterpolatedVars();
 		m_nPrevSequence = -1;
 		m_nRestoreSequence = -1;
+
+		// Check if this is one of the ents that wants RTT shadows
+		CheckIfEntityShouldForceRTTShadows();
 	}
 
 	bool modelchanged = false;
@@ -5246,10 +5321,7 @@ void C_BaseAnimating::OnDataChanged( DataUpdateType_t updateType )
 	{
 		if ( !cl_disable_ragdolls.GetBool() )
 		{
-			if ( !BecomeRagdollOnClient() )
-			{
-				AddEffects( EF_NODRAW );
-			}
+			BecomeRagdollOnClient( );
 		}
 	}
 
@@ -5350,6 +5422,9 @@ void C_BaseAnimating::UpdateClientSideAnimation()
 		Assert( m_ClientSideAnimationListHandle != INVALID_CLIENTSIDEANIMATION_LIST_HANDLE );
 		if ( GetSequence() != -1 )
 		{
+#ifdef DOTA_DLL
+			if ( IsVisibleToAnyPlayer() )
+#endif
 			{
 				// latch old values
 				OnLatchInterpolatedVariables( LATCH_ANIMATION_VAR );
@@ -5460,7 +5535,7 @@ bool C_BaseAnimating::TestHitboxes( const Ray_t &ray, unsigned int fContentsMask
 	matrix3x4_t *hitboxbones[MAXSTUDIOBONES];
 	HitboxToWorldTransforms( hitboxbones );
 
-	if ( TraceToStudio( physprops, ray, pStudioHdr, set, hitboxbones, fContentsMask, GetRenderOrigin(), GetModelScale(), tr ) )
+	if ( TraceToStudio( physprops, ray, pStudioHdr, set, hitboxbones, fContentsMask, GetRenderOrigin(), GetModelHierarchyScale(), tr ) )
 	{
 		mstudiobbox_t *pbox = set->pHitbox( tr.hitbox );
 		mstudiobone_t *pBone = pStudioHdr->pBone(pbox->bone);
@@ -5635,7 +5710,7 @@ void C_BaseAnimating::StudioFrameAdvance()
 	{
 		if ( IsSequenceLooping( hdr, GetSequence() ) )
 		{
-			 flNewCycle -= (int)(flNewCycle);
+			 flNewCycle = SubtractIntegerPart(flNewCycle);
 		}
 		else
 		{
@@ -5898,7 +5973,8 @@ float C_BaseAnimating::FrameAdvance( float flInterval )
 
 		if( adjustOkay )
 		{
-			float originalAdvance = addcycle;
+			float originalAdvance;
+			originalAdvance = addcycle;
 			addcycle = (serverAdvance + addcycle) / 2;
 
 			const float MAX_CYCLE_ADJUSTMENT = 0.1f;
@@ -5929,7 +6005,7 @@ float C_BaseAnimating::FrameAdvance( float flInterval )
 
 		if ( IsSequenceLooping( hdr, GetSequence() ) )
 		{
-			flNewCycle -= (int)(flNewCycle);
+			flNewCycle = SubtractIntegerPart(flNewCycle);
 		}
 		else
 		{

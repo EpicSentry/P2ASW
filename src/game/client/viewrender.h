@@ -151,9 +151,11 @@ struct WaterRenderInfo_t
 	bool m_bReflect : 1;
 	bool m_bRefract : 1;
 	bool m_bReflectEntities : 1;
+	bool m_bReflectOnlyMarkedEntities : 1;
 	bool m_bDrawWaterSurface : 1;
 	bool m_bOpaqueWater : 1;
-
+	bool m_bPseudoTranslucentWater : 1;
+	bool m_bReflect2DSkybox : 1;
 };
 
 //-----------------------------------------------------------------------------
@@ -220,7 +222,7 @@ protected:
 	void			SetFogVolumeState( const VisibleFogVolumeInfo_t &fogInfo, bool bUseHeightFog );
 
 	// Draw setup
-	void			SetupRenderablesList( int viewID );
+	void			SetupRenderablesList( int viewID, bool bFastEntityRendering = false, bool bDrawDepthViewNonCachedObjectsOnly = false );
 
 	// If iForceViewLeaf is not -1, then it uses the specified leaf as your starting area for setting up area portal culling.
 	// This is used by water since your reflected view origin is often in solid space, but we still want to treat it as though
@@ -228,17 +230,25 @@ protected:
 	void			BuildWorldRenderLists( bool bDrawEntities, int iForceViewLeaf = -1, bool bUseCacheIfEnabled = true, bool bShadowDepth = false, float *pReflectionWaterHeight = NULL );
 
 	// Purpose: Builds render lists for renderables. Called once for refraction, once for over water
-	void			BuildRenderableRenderLists( int viewID );
+	void			BuildRenderableRenderLists( int viewID, bool bFastEntityRendering = false, bool bDrawDepthViewNonCachedObjectsOnly = false );
 
 	// More concise version of the above BuildRenderableRenderLists().  Called for shadow depth map rendering
 	void			BuildShadowDepthRenderableRenderLists();
 
-	void			DrawWorld( float waterZAdjust );
+	void			DrawWorld( IMatRenderContext *pRenderContext, float waterZAdjust );
 
 	// Draws all opaque/translucent renderables in leaves that were rendered
-	void			DrawOpaqueRenderables( bool bShadowDepth );
+	enum RenderablesRenderPath_t
+	{
+		RENDERABLES_RENDER_PATH_NORMAL							= 0,
+		RENDERABLES_RENDER_PATH_SHADOWDEPTH_DEFAULT				= ( 1 << 0 ),
+		RENDERABLES_RENDER_PATH_SHADOWDEPTH_BUILD_GEOCACHE		= ( 1 << 1 ),
+		RENDERABLES_RENDER_PATH_SHADOWDEPTH_USE_GEOCACHE		= ( 1 << 2 ),
+	};
+	void			DrawOpaqueRenderables( IMatRenderContext *pRenderContext, RenderablesRenderPath_t eRenderPath, CUtlVector< CClientRenderablesList::CEntry * > *pDeferClippedOpaqueRenderables_Out );
+	void			DrawDeferredClippedOpaqueRenderables( IMatRenderContext *pRenderContext, RenderablesRenderPath_t eRenderPath, CUtlVector< CClientRenderablesList::CEntry * > *pDeferClippedOpaqueRenderables );
 	void			DrawTranslucentRenderables( bool bInSkybox, bool bShadowDepth );
-	
+
 #if defined( PORTAL )
 	void			DrawRecursivePortalViews( void );
 #endif
@@ -250,17 +260,17 @@ protected:
 	void			DrawNoZBufferTranslucentRenderables( void );
 
 	// Renders all translucent world surfaces in a particular set of leaves
-	void			DrawTranslucentWorldInLeaves( bool bShadowDepth );
+	void			DrawTranslucentWorldInLeaves( IMatRenderContext *pRenderContext, bool bShadowDepth );
 
 	// Renders all translucent world + detail objects in a particular set of leaves
-	void			DrawTranslucentWorldAndDetailPropsInLeaves( int iCurLeaf, int iFinalLeaf, int nEngineDrawFlags, int &nDetailLeafCount, LeafIndex_t* pDetailLeafList, bool bShadowDepth );
+	void			DrawTranslucentWorldAndDetailPropsInLeaves( IMatRenderContext *pRenderContext, int iCurLeaf, int iFinalLeaf, int nEngineDrawFlags, int &nDetailLeafCount, LeafIndex_t* pDetailLeafList, bool bShadowDepth );
 
 	// Purpose: Computes the actual world list info based on the render flags
 	void			PruneWorldListInfo();
 
-	// Sets up automatic z-prepass on the 360. No-op on PC.
-	void			Begin360ZPass();
-	void			End360ZPass();
+	// Sets up automatic z-prepass on the 360 and PS/3. No-op on PC.
+	void			BeginConsoleZPass();
+	void			EndConsoleZPass();
 
 #ifdef PORTAL
 	virtual bool	ShouldDrawPortals() { return true; }
@@ -409,10 +419,7 @@ public:
 
 	void			GetWaterLODParams( float &flCheapWaterStartDistance, float &flCheapWaterEndDistance );
 
-	virtual void	QueueOverlayRenderView( const CViewSetup &view, int nClearFlags, int whatToDraw );
-
-	virtual void	GetScreenFadeDistances( float *min, float *max );
-	virtual bool	AllowScreenspaceFade( void ) { return true; }
+	virtual void	GetScreenFadeDistances( float *pMin, float *pMax, float *pScale );
 
 	virtual C_BaseEntity *GetCurrentlyDrawingEntity();
 	virtual void		  SetCurrentlyDrawingEntity( C_BaseEntity *pEnt );
@@ -460,6 +467,13 @@ protected:
 
 	void			PerformScreenSpaceEffects( int x, int y, int w, int h );
 
+	// Perform image-space motion blur and depth of field:
+	void			DoImageSpaceMotionBlurAndDepthOfField( const CViewSetup &view );
+
+	// Full-screen effects (fade, smoke, HDR, colour-correction):
+	void			DoFullScreenProcessing( const CViewSetup &view );
+
+
 	// Overlays
 	void			SetScreenOverlayMaterial( IMaterial *pMaterial );
 	IMaterial		*GetScreenOverlayMaterial( );
@@ -474,9 +488,13 @@ protected:
 
 #ifdef PORTAL 
 	// Intended for use in the middle of another ViewDrawScene call, this allows stencils to be drawn after opaques but before translucents are drawn in the main view.
-	void			ViewDrawScene_PortalStencil(const CViewSetup &view, ViewCustomVisibility_t *pCustomVisibility);
-	void			Draw3dSkyboxworld_Portal(const CViewSetup &view, int &nClearFlags, bool &bDrew3dSkybox, SkyboxVisibility_t &nSkyboxVisible, ITexture *pRenderTarget = NULL);
+	void			ViewDrawScene_PortalStencil( const CViewSetup &view, ViewCustomVisibility_t *pCustomVisibility );
+	void			Draw3dSkyboxworld_Portal( const CViewSetup &view, int &nClearFlags, bool &bDrew3dSkybox, SkyboxVisibility_t &nSkyboxVisible, ITexture *pRenderTarget = NULL );
 #endif // PORTAL
+
+#ifdef PORTAL2
+	void			ViewDrawPhoto( ITexture *pRenderTarget, C_BaseEntity *pEnt ); //need a photo of an entity
+#endif
 
 	// Determines what kind of water we're going to use
 	void			DetermineWaterRenderInfo( const VisibleFogVolumeInfo_t &fogVolumeInfo, WaterRenderInfo_t &info );
@@ -490,6 +508,8 @@ protected:
 
 	void			GetLetterBoxRectangles( int nSlot, const CViewSetup &view, CUtlVector< vrect_t >& vecLetterBoxRectangles );
 	void			DrawLetterBoxRectangles( int nSlot, const CUtlVector< vrect_t >& vecLetterBoxRectangles );
+
+	void			EnableWaterDepthFeathing( IMaterial *pWaterMaterial, bool bEnable );
 
 	// This stores the current view
  	CViewSetup		m_CurrentView;
@@ -512,11 +532,6 @@ protected:
 	float				m_flCheapWaterStartDistance;
 	float				m_flCheapWaterEndDistance;
 
-	CViewSetup			m_OverlayViewSetup;
-	int					m_OverlayClearFlags;
-	int					m_OverlayDrawFlags;
-	bool				m_bDrawOverlay;
-
 	int					m_BaseDrawFlags;	// Set in ViewDrawScene and OR'd into m_DrawFlags as it goes.
 	C_BaseEntity		*m_pCurrentlyDrawingEntity;
 
@@ -524,7 +539,6 @@ protected:
 	friend class CPortalRender; //portal drawing needs muck with views in weird ways
 	friend class CPortalRenderable;
 #endif
-
 	int				m_BuildRenderableListsNumber;
 
 	friend class CBase3dView;

@@ -1,6 +1,6 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright (c) 1996-2005, Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================//
@@ -32,6 +32,7 @@
 #endif
 #include "tier1/fmtstr.h"
 #include "vphysics/friction.h"
+#include "prediction.h"
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -39,8 +40,9 @@
 extern IFileSystem *filesystem;
 
 static ConVar	cl_phys_timescale( "cl_phys_timescale", "1.0", FCVAR_CHEAT, "Sets the scale of time for client-side physics (ragdolls)" );
-static ConVar	cl_phys_maxticks( "cl_phys_maxticks", IsX360() ? "2" : "0", FCVAR_NONE, "Sets the max number of physics ticks allowed for client-side physics (ragdolls)" );
+static ConVar	cl_phys_maxticks( "cl_phys_maxticks", IsGameConsole() ? "2" : "0", FCVAR_NONE, "Sets the max number of physics ticks allowed for client-side physics (ragdolls)" );
 ConVar	cl_ragdoll_gravity( "cl_ragdoll_gravity", "386", FCVAR_CHEAT, "Sets the gravity client-side ragdolls" );
+ConVar phys_debug_check_contacts("phys_debug_check_contacts", "0", FCVAR_CHEAT|FCVAR_REPLICATED);
 
 // blocked entity detecting
 static ConVar cl_phys_block_fraction("cl_phys_block_fraction", "0.1");
@@ -49,6 +51,22 @@ static ConVar cl_phys_block_dist("cl_phys_block_dist","1.0");
 void PrecachePhysicsSounds( void );
 
 //FIXME: Replicated from server end, consolidate?
+
+
+CUtlLinkedList<C_BaseEntity *> g_ShadowEntities;
+
+void PhysAddShadow( C_BaseEntity *pEntity )
+{
+	if( g_ShadowEntities.Find( pEntity ) == g_ShadowEntities.InvalidIndex() )
+	{
+		g_ShadowEntities.AddToTail( pEntity );
+	}
+}
+
+void PhysRemoveShadow( C_BaseEntity *pEntity )
+{
+	g_ShadowEntities.FindAndRemove( pEntity );
+}
 
 
 extern IVEngineClient *engine;
@@ -192,10 +210,18 @@ bool PhysicsDLLInit( CreateInterfaceFn physicsFactory )
 	return true;
 }
 
+extern ConVar_ServerBounded *cl_predict;
+ConVar cl_predictphysics( "cl_predictphysics", "0", 0, "Use a prediction-friendly physics interface on the client" );
+
 void PhysicsLevelInit( void )
 {
 	physenv = physics->CreateEnvironment();
 	assert( physenv );
+	if( gpGlobals->IsRemoteClient() && g_pGameRules->IsMultiplayer() && cl_predictphysics.GetBool() )
+	{
+		physenv->SetPredicted( true );
+	}
+
 #ifdef PORTAL
 	physenv_main = physenv;
 #endif
@@ -333,8 +359,8 @@ int CCollisionEvent::ShouldCollide_2( IPhysicsObject *pObj0, IPhysicsObject *pOb
 	// entities with non-physical move parents or entities with MOVETYPE_PUSH
 	// are considered as "AI movers".  They are unchanged by collision; they exert
 	// physics forces on the rest of the system.
-	bool aiMove0 = (movetype0==MOVETYPE_PUSH) ? true : false;
-	bool aiMove1 = (movetype1==MOVETYPE_PUSH) ? true : false;
+	bool aiMove0 = (movetype0 == MOVETYPE_PUSH || movetype0 == MOVETYPE_NONE) ? true : false;
+	bool aiMove1 = (movetype1 == MOVETYPE_PUSH || movetype1 == MOVETYPE_NONE) ? true : false;
 	// Anything with custom movement and a shadow controller is assumed to do its own world/AI collisions
 	if ( movetype0 == MOVETYPE_CUSTOM && pObj0->GetShadowController() )
 	{
@@ -585,6 +611,7 @@ bool IsBlockedShouldDisableCollisions( C_BaseEntity *pEntity )
 	return false;
 }
 
+ConVar cl_phys_show_active( "cl_phys_show_active", "0", FCVAR_CHEAT );
 
 void CPhysicsSystem::PhysicsSimulate()
 {
@@ -594,10 +621,63 @@ void CPhysicsSystem::PhysicsSimulate()
 
 	if ( physenv )
 	{
+		if( physenv->IsPredicted() )
+		{
+			if( !prediction->InPrediction() )
+				return;
+
+			if( !prediction->IsFirstTimePredicted() )
+			{
+				//Don't actually simulate. Fake it while restoring results from the first time
+				physenv->RestorePredictedSimulation();
+
+				int activeCount = physenv->GetActiveObjectCount();
+				if ( activeCount )
+				{
+					IPhysicsObject **pActiveList = NULL;
+					pActiveList = (IPhysicsObject **)stackalloc( sizeof(IPhysicsObject *)*activeCount );
+					physenv->GetActiveObjects( pActiveList );
+
+					for ( int i = 0; i < activeCount; i++ )
+					{
+						CBaseEntity *pEntity = reinterpret_cast<CBaseEntity *>(pActiveList[i]->GetGameData());
+						if ( pEntity )
+						{
+							if ( pEntity->CollisionProp()->DoesVPhysicsInvalidateSurroundingBox() )
+							{
+								pEntity->CollisionProp()->MarkSurroundingBoundsDirty();
+							}
+							pEntity->VPhysicsUpdate( pActiveList[i] );
+						}
+					}
+					stackfree( pActiveList );
+				}
+
+				if( g_ShadowEntities.Count() > 0 )
+				{
+					VPROF( "PhysFrame VPhysicsShadowUpdate" );
+					for ( int i = g_ShadowEntities.Head(); i != g_ShadowEntities.InvalidIndex(); i = g_ShadowEntities.Next(i) )
+					{
+						CBaseEntity *pEntity = g_ShadowEntities[i];
+
+						IPhysicsObject *pPhysics = pEntity->VPhysicsGetObject();
+						// apply updates
+						if ( pPhysics && !pPhysics->IsAsleep() )
+						{
+							pEntity->VPhysicsShadowUpdate( pPhysics );
+						}
+					}
+				}
+
+				return;
+			}
+		}
+
 		g_Collisions.BufferTouchEvents( true );
-#ifdef _DEBUG
-		physenv->DebugCheckContacts();
-#endif
+		if( phys_debug_check_contacts.GetBool() && physenv )
+		{
+			physenv->DebugCheckContacts();
+		}
 		frametime *= cl_phys_timescale.GetFloat();
 
 		int maxTicks = cl_phys_maxticks.GetInt();
@@ -685,6 +765,34 @@ void CPhysicsSystem::PhysicsSimulate()
 					}
 				}
 			}
+			if ( cl_phys_show_active.GetBool() )
+			{
+				for ( int i = 0; i < activeCount; i++ )
+				{
+					CBaseEntity *pEntity = reinterpret_cast<CBaseEntity *>(pActiveList[i]->GetGameData());
+					if ( pEntity )
+					{
+						//debugoverlay->Cross3D( pEntity->GetAbsOrigin(), 12, 255, 0, 0, false, 0 );
+						debugoverlay->AddBoxOverlay( pEntity->GetAbsOrigin(), pEntity->CollisionProp()->OBBMins(), pEntity->CollisionProp()->OBBMaxs(), pEntity->GetAbsAngles(), 255, 255, 0, 8, 0 );
+					}
+				}
+			}
+		}
+
+		if( g_ShadowEntities.Count() > 0 )
+		{
+			VPROF( "PhysFrame VPhysicsShadowUpdate" );
+			for ( int i = g_ShadowEntities.Head(); i != g_ShadowEntities.InvalidIndex(); i = g_ShadowEntities.Next(i) )
+			{
+				CBaseEntity *pEntity = g_ShadowEntities[i];
+				
+				IPhysicsObject *pPhysics = pEntity->VPhysicsGetObject();
+				// apply updates
+				if ( pPhysics && !pPhysics->IsAsleep() )
+				{
+					pEntity->VPhysicsShadowUpdate( pPhysics );
+				}
+			}
 		}
 
 #if 0
@@ -724,6 +832,11 @@ void CPhysicsSystem::PhysicsSimulate()
 void PhysicsSimulate()
 {
 	g_PhysicsSystem.PhysicsSimulate();
+}
+
+void PhysSetPredictionCommandNum( int iCommandNum )
+{
+	physenv->SetPredictionCommandNum( iCommandNum );
 }
 
 
@@ -1284,7 +1397,7 @@ IPhysicsObject *GetWorldPhysObject ( void )
 	return g_PhysWorldObject;
 }
 
-void PhysFrictionSound( CBaseEntity *pEntity, IPhysicsObject *pObject, const char *pSoundName, HSOUNDSCRIPTHANDLE& handle, float flVolume )
+void PhysFrictionSound( CBaseEntity *pEntity, IPhysicsObject *pObject, const char *pSoundName, HSOUNDSCRIPTHASH& handle, float flVolume )
 {
 	if ( !pEntity )
 		return;

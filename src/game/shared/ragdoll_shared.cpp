@@ -20,13 +20,13 @@
 #include "c_entityflame.h"
 #include "c_fire_smoke.h"
 #include "c_entitydissolve.h"
-#include "engine/IEngineSound.h"
+#include "engine/ienginesound.h"
 #endif
 //SERVER
 #if !defined( CLIENT_DLL )
 #include "util.h"
-#include "EntityFlame.h"
-#include "EntityDissolve.h"
+#include "entityflame.h"
+#include "entitydissolve.h"
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -286,16 +286,20 @@ static cache_ragdoll_t *ParseRagdollIntoCache( CStudioHdr *pStudioHdr, vcollide_
 
 static void RagdollCreateObjects( IPhysicsEnvironment *pPhysEnv, ragdoll_t &ragdoll, const ragdollparams_t &params )
 {
-	//P2ASW Fix = Portal 2 doesnt have a player ragdoll...
-	return;
-
 	ragdoll.listCount = 0;
 	ragdoll.pGroup = NULL;
 	ragdoll.allowStretch = params.allowStretch;
 	memset( ragdoll.list, 0, sizeof(ragdoll.list) );
 	memset( &ragdoll.animfriction, 0, sizeof(ragdoll.animfriction) );
 	
-	if ( !params.pCollide || params.pCollide->solidCount > RAGDOLL_MAX_ELEMENTS )
+	if ( !params.pCollide )
+	{
+		Warning( "Ragdoll has no pCollide!" );
+		Assert( false );
+		return;
+	}
+
+	if ( params.pCollide->solidCount > RAGDOLL_MAX_ELEMENTS )
 	{
 		Warning( "Ragdoll solid count %d exceeds maximum limit of %d - Ragdoll not created", params.pCollide->solidCount, RAGDOLL_MAX_ELEMENTS );
 		Assert( false );
@@ -665,7 +669,7 @@ void RagdollSolveSeparation( ragdoll_t &ragdoll, CBaseEntity *pEntity )
 			if ( dir.LengthSqr() > 1.0f )
 			{
 				// this fixes a bug in ep2 with antlion grubs, but causes problems in TF2 - revisit, but disable for TF now
-
+#if !defined(TF_CLIENT_DLL)
 				// heuristic: guess that anything separated and small mass ratio is in some state that's 
 				// keeping the solver from fixing it
 				float mass = element.pObject->GetMass();
@@ -679,7 +683,7 @@ void RagdollSolveSeparation( ragdoll_t &ragdoll, CBaseEntity *pEntity )
 					++fixCount;
 					continue;
 				}
-
+#endif
 
 				if ( PhysHasContactWithOtherInDirection(element.pObject, dir) )
 				{
@@ -725,12 +729,7 @@ void RagdollSolveSeparation( ragdoll_t &ragdoll, CBaseEntity *pEntity )
 //-----------------------------------------------------------------------------
 // LRU
 //-----------------------------------------------------------------------------
-#ifdef _XBOX
-// xbox defaults to 4 ragdolls max
-ConVar g_ragdoll_maxcount("g_ragdoll_maxcount", "4", FCVAR_REPLICATED );
-#else
 ConVar g_ragdoll_maxcount("g_ragdoll_maxcount", "8", FCVAR_REPLICATED );
-#endif
 ConVar g_debug_ragdoll_removal("g_debug_ragdoll_removal", "0", FCVAR_REPLICATED |FCVAR_CHEAT );
 
 CRagdollLRURetirement s_RagdollLRU( "CRagdollLRURetirement" );

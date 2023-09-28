@@ -15,17 +15,11 @@
 #include "iviewrender.h"
 #include "view_shared.h"
 #include "viewrender.h"
-#include "shaderapi\ishaderapi.h"
+#include "shaderapi/ishaderapi.h"
 
 #define MAX_PORTAL_RECURSIVE_VIEWS 11 //maximum number of recursions we allow when drawing views through portals. Seeing as how 5 is extremely choppy under best conditions and is barely visible, 10 is a safe limit. Adding one because 0 tends to be the primary view in most arrays of this size
 
 class C_Prop_Portal;
-
-struct ClampedPortalMeshRenderInfo_t
-{
-	int nStartIndex;
-	int nIndexCount;
-};
 
 class CPortalRenderable
 {
@@ -33,7 +27,7 @@ public:
 	CPortalRenderable( void );
 	virtual ~CPortalRenderable( void );
 
-	
+
 	//----------------------------------------------------------------------------
 	//Stencil-based drawing helpers, these are ONLY used in stencil drawing mode
 	//----------------------------------------------------------------------------
@@ -60,6 +54,7 @@ public:
 	//-----------------------------------------------------------------------------
 	virtual const Vector&	GetFogOrigin( void ) const { return vec3_origin; };
 	virtual void			ShiftFogForExitPortalView() const;
+	virtual float			GetPortalDistanceBias() const { return 0.0f; }
 
 	//-----------------------------------------------------------------------------
 	//Portal visibility testing
@@ -82,7 +77,7 @@ public:
 
 	virtual C_BaseEntity *PortalRenderable_GetPairedEntity( void ) { return NULL; }; //Pairing a portal with an entity is common but not required. Accessing that entity allows the CPortalRender system to better optimize.
 	VMatrix			m_matrixThisToLinked; //Always going to need a matrix
-	
+
 	// Poor man's RTTI
 	FORCEINLINE bool IsPropPortal() const { return m_bIsPropPortal; }
 
@@ -90,16 +85,9 @@ public:
 	//SFM related
 	//-----------------------------------------------------------------------------
 	bool			m_bIsPlaybackPortal;
-	virtual void	GetToolRecordingState( KeyValues *msg ) { };
 	virtual void	HandlePortalPlaybackMessage( KeyValues *pKeyValues ) { };
 
 protected:
-	//-----------------------------------------------------------------------------
-	// Wrap the draw of the surface that makes use of your portal render targets with these. Only required for texture mode, but won't hurt stencil mode.
-	//   Using these will allow you to know whether it's worth drawing the other side of a portal next frame.
-	//-----------------------------------------------------------------------------
-	void BeginPortalPixelVisibilityQuery( void );
-	void EndPortalPixelVisibilityQuery( void );
 
 	CPortalRenderable *FindRecordedPortal( int nPortalId ); //routed through here to get friend access to CPortalRender
 
@@ -111,11 +99,12 @@ protected:
 	void SetViewRecursionLevel( int iViewRecursionLevel );
 	void SetRemainingViewDepth( int iRemainingViewDepth );
 	void SetViewEntranceAndExitPortals( CPortalRenderable *pEntryPortal, CPortalRenderable *pExitPortal );
-	
+
 	bool m_bIsPropPortal;
 
 private:
 	int m_iPortalViewIDNodeIndex; //each PortalViewIDNode_t has a child node link for each CPortalRenderable in CPortalRender::m_ActivePortals. This portal follows the same indexed link from each node
+	// m_iPortalViewIDNodeIndex is the index into CPortalRender::m_AllPortals
 	friend class CPortalRender;
 };
 
@@ -139,13 +128,6 @@ struct PortalRenderingMaterials_t
 	unsigned int		m_nDepthDoubleViewMatrixVarCache;
 };
 
-typedef CPortalRenderable *(*PortalRenderableCreationFunc)( void );
-struct PortalRenderableCreationFunction_t
-{
-	CUtlString portalType;
-	PortalRenderableCreationFunc creationFunc;
-};
-
 struct PortalViewIDNode_t
 {
 	CUtlVector<PortalViewIDNode_t *> ChildNodes; //links will only be non-null if they're useful (can see through the portal at that depth and view setup)
@@ -167,7 +149,11 @@ struct GhostPortalRenderInfo_t
 	IMaterial *m_pGhostMaterial;
 };
 
-
+struct ClampedPortalMeshRenderInfo_t
+{
+	int nStartIndex;
+	int nIndexCount;
+};
 
 //-----------------------------------------------------------------------------
 // Portal rendering management class
@@ -176,6 +162,7 @@ class CPortalRender	: public CAutoGameSystem
 {
 public:
 	CPortalRender();
+	~CPortalRender();
 
 	// Inherited from IGameSystem
 	virtual void LevelInitPreEntity();
@@ -199,7 +186,7 @@ public:
 
 	inline CPortalRenderable *GetCurrentViewEntryPortal( void ) const { return m_pRenderingViewForPortal; }; //if rendering a portal view, this is the portal the current view enters into
 	inline CPortalRenderable *GetCurrentViewExitPortal( void ) const { return m_pRenderingViewExitPortal; }; //if rendering a portal view, this is the portal the current view exits from
-	
+
 	//it's a good idea to force cheaper water when the ratio of performance gain to noticability is high
 	//0 = force no reflection/refraction
 	//1/2 = downgrade to simple/world reflections as seen in advanced video options
@@ -208,6 +195,10 @@ public:
 
 	bool ShouldObeyStencilForClears() const;
 
+#ifdef _PS3
+	void ReloadZcullMemory();
+#endif // _PS3
+
 	//sometimes we have to tweak some systems to render water properly with portals
 	void WaterRenderingHandler_PreReflection() const;
 	void WaterRenderingHandler_PostReflection() const;
@@ -215,14 +206,14 @@ public:
 	void WaterRenderingHandler_PostRefraction() const;
 
 	// return value indicates that something was done, and render lists should be rebuilt afterwards
-	bool DrawPortalsUsingStencils( CViewRender *pViewRender );
-	bool DrawPortalsUsingStencils_Old( CViewRender *pViewRender );
+	bool DrawPortalsUsingStencils( CViewRender *pViewRender ); 
+	bool DrawPortalsUsingStencils_Old( CViewRender *pViewRender ); 
 	
 	void OverlayPortalRenderTargets( float w, float h );
-	
+
 	void UpdateDepthDoublerTexture( const CViewSetup &viewSetup ); //our chance to update all depth doubler texture before the view model is added to the back buffer
 	static bool DepthDoublerPIPDisableCheck( void ); //the depth doubler texture is unusable for a picture-in-picture view. Rather than sort out that ugly mess, just disable it for that case.
-	
+
 	void EnteredPortal( int nPlayerSlot, CPortalRenderable *pEnteredPortal ); //does a bit of internal maintenance whenever the player/camera has logically passed the portal threshold
 
 	// adds, removes a portal to the set of renderable portals
@@ -231,6 +222,7 @@ public:
 
 	// Methods to query about the exit portal associated with the currently rendering portal
 	void ShiftFogForExitPortalView() const;
+	float GetCurrentPortalDistanceBias() const;
 	const Vector &GetExitPortalFogOrigin() const;
 	SkyboxVisibility_t IsSkyboxVisibleFromExitPortal() const;
 	bool DoesExitPortalViewIntersectWaterPlane( float waterZ, int leafWaterDataID ) const;
@@ -238,10 +230,6 @@ public:
 	void HandlePortalPlaybackMessage( KeyValues *pKeyValues );
 
 	CPortalRenderable* FindRecordedPortal( IClientRenderable *pRenderable );
-	
-	void DrawPortalGhostLocations( IMatRenderContext *pRenderContext, IMesh *pPortalQuadMesh, const GhostPortalRenderInfo_t *pGhostPortalRenderInfos, int nPortalCount ) const;
-	void RenderPortalEffects( IMatRenderContext *pRenderContext, IMesh *pPortalQuadMesh, const CUtlVector< CPortalRenderable* > &actualActivePortals,
-		const CUtlVector< int > &actualActivePortalQuadVBIndex ) const;
 
 	CViewSetup m_RecursiveViewSetups[MAX_PORTAL_RECURSIVE_VIEWS]; //before we recurse into a view, we backup the view setup here for reference
 
@@ -249,7 +237,9 @@ public:
 	bool IsPortalViewID( view_id_t id );
 	
 	inline CUtlVector<VPlane> &GetRecursiveViewComplexFrustums( int nIdx ) { return m_RecursiveViewComplexFrustums[ nIdx ]; }
-	
+
+	void DrawEarlyZPortals( CViewRender *pViewRender );
+
 private:
 	struct RecordedPortalInfo_t
 	{
@@ -270,9 +260,12 @@ private:
 	int FindRecordedPortalIndex( int nPortalId );
 	CPortalRenderable* FindRecordedPortal( int nPortalId );
 
-	//CUtlVector<PortalRenderableCreationFunction_t> m_PortalRenderableCreators; //for SFM compatibility
+	void DrawPortalGhostLocations( IMatRenderContext *pRenderContext, IMesh *pPortalQuadMesh, const GhostPortalRenderInfo_t *pGhostPortalRenderInfos, int nPortalCount ) const;
+	void RenderPortalEffects( IMatRenderContext *pRenderContext, IMesh *pPortalQuadMesh, const CUtlVector< CPortalRenderable* > &actualActivePortals,
+		const CUtlVector< int > &actualActivePortalQuadVBIndex ) const;
 
 private:
+
 	PortalRenderingMaterials_t	m_Materials;
 	int							m_iViewRecursionLevel;
 	int							m_iRemainingPortalViewDepth; //let's portals know that they should do "end of the line" kludges to cover up that portals don't go infinitely recursive
@@ -280,6 +273,7 @@ private:
 	// Data that's only valid while inside DrawPortalsUsingStencil()
 	CUtlStack<int>				m_stencilValueStack;
 	CUtlStack<int>				m_parentPortalIdStack;
+	ICachedPerFrameMeshData		*m_pCachedPortalQuadMeshData;
 	VertexFormat_t				m_portalQuadMeshVertexFmt;
 	CUtlVector< ClampedPortalMeshRenderInfo_t > m_clampedPortalMeshRenderInfos;
 	CUtlVector< bool >			m_portalIsOpening;
@@ -290,16 +284,17 @@ private:
 	CUtlVector<CPortalRenderable *>		m_AllPortals; //All portals currently in memory, active or not
 	CUtlVector<CPortalRenderable *>		m_ActivePortals;
 	CUtlVector< RecordedPortalInfo_t >	m_RecordedPortals;
-	
+
 	ShaderStencilState_t		m_StencilState;
-	
+
+	CUtlVector<VPlane>					m_RecursiveViewComplexFrustums[MAX_PORTAL_RECURSIVE_VIEWS]; 
+
 	CUtlVector< GhostPortalRenderInfo_t > m_portalGhostRenderInfos;
 
 public:
 	//frustums with more (or less) than 6 planes. Store each recursion level's custom frustum here so further recursions can be better optimized.
 	//When going into further recursions, if you've failed to fill in a complex frustum, the standard frustum will be copied in.
 	//So all parent levels are guaranteed to contain valid data
-	CUtlVector<VPlane>					m_RecursiveViewComplexFrustums[MAX_PORTAL_RECURSIVE_VIEWS]; 
 	PortalRenderingMaterials_t& m_MaterialsAccess;
 
 	friend class CPortalRenderable;
@@ -313,6 +308,7 @@ inline CPortalRenderable *CPortalRenderable::FindRecordedPortal( int nPortalId )
 { 
 	return g_pPortalRender->FindRecordedPortal( nPortalId );
 }
+
 
 typedef CPortalRenderable *(*PortalRenderableCreationFunc)( void );
 
@@ -333,6 +329,7 @@ private:
 	static CPortalRenderableCreator_AutoRegister *s_pRegisteredTypes;
 	friend class CPortalRender;
 };
+
 
 
 //-----------------------------------------------------------------------------

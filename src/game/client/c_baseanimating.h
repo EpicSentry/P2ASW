@@ -1,4 +1,4 @@
-//===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ======//
+//===== Copyright ï¿½ 1996-2005, Valve Corporation, All rights reserved. ======//
 //
 // Purpose: 
 //
@@ -81,7 +81,7 @@ public:
 	QAngle	m_angRotation;
 	Vector	m_vOriginVelocity;
 	int		m_nLastFramecount : 31;
-	int		m_bAnglesComputed : 1;
+	bool	m_bAnglesComputed : 1;
 };
 
 
@@ -89,8 +89,7 @@ typedef unsigned int			ClientSideAnimationListHandle_t;
 
 #define		INVALID_CLIENTSIDEANIMATION_LIST_HANDLE	(ClientSideAnimationListHandle_t)~0
 
-
-class C_BaseAnimating : public C_BaseEntity, public IClientModelRenderable
+class C_BaseAnimating : public C_BaseEntity
 {
 public:
 	DECLARE_CLASS( C_BaseAnimating, C_BaseEntity );
@@ -119,6 +118,8 @@ public:
 	~C_BaseAnimating();
 
 	virtual C_BaseAnimating*		GetBaseAnimating() { return this; }
+
+	bool UsesPowerOfTwoFrameBufferTexture( void );
 
 	int GetRenderFlags( void );
 
@@ -149,7 +150,6 @@ public:
 	// base model functionality
 	float		  ClampCycle( float cycle, bool isLooping );
 	virtual void GetPoseParameters( CStudioHdr *pStudioHdr, float poseParameter[MAXSTUDIOPOSEPARAM] );
-	virtual void CalcBoneMerge( CStudioHdr *hdr, int boneMask, CBoneBitList &boneComputed );
 	virtual void BuildTransformations( CStudioHdr *pStudioHdr, Vector *pos, Quaternion q[], const matrix3x4_t& cameraTransform, int boneMask, CBoneBitList &boneComputed );
 	void BuildJiggleTransformations( int boneIndex, const mstudiojigglebone_t *jiggleParams, const matrix3x4_t &goalMX );
 	virtual void ApplyBoneMatrixTransform( matrix3x4_t& transform );
@@ -163,7 +163,7 @@ public:
 	virtual int	InternalDrawModel( int flags, const RenderableInstance_t &instance );
 	virtual bool OnInternalDrawModel( ClientModelRenderInfo_t *pInfo );
 	virtual bool OnPostInternalDrawModel( ClientModelRenderInfo_t *pInfo );
-	void		DoInternalDrawModel( ClientModelRenderInfo_t *pInfo, DrawModelState_t *pState, matrix3x4_t *pBoneToWorldArray = NULL );
+	void		DoInternalDrawModel( class IMatRenderContext *pRenderContext, ClientModelRenderInfo_t *pInfo, DrawModelState_t *pState, matrix3x4_t *pBoneToWorldArray = NULL );
 
 	//
 	virtual CMouthInfo *GetMouth();
@@ -239,6 +239,7 @@ public:
 	virtual void					ResetLatched();
 
 	// implements these so ragdolls can handle frustum culling & leaf visibility
+	virtual Vector					GetThirdPersonViewPosition( void );
 	virtual void					GetRenderBounds( Vector& theMins, Vector& theMaxs );
 	virtual const Vector&			GetRenderOrigin( void );
 	virtual const QAngle&			GetRenderAngles( void );
@@ -298,7 +299,7 @@ public:
 
 	inline float					GetPlaybackRate() const;
 	inline void						SetPlaybackRate( float rate );
-	
+
 	void							SetModelScale( float scale, ModelScaleType_t scaleType = HIERARCHICAL_MODEL_SCALE );
 	inline float					GetModelScale() const { return m_flModelScale; }
 	float							GetModelHierarchyScale() const;	// Get the overall scale of the entire hierarchy (model scale can be local, per-bone)
@@ -426,7 +427,7 @@ public:
 	void InitModelEffects( void );
 
 	// Sometimes the server wants to update the client's cycle to get the two to run in sync (for proper hit detection)
-	virtual void SetServerIntendedCycle( float intended ) { intended; }
+	virtual void SetServerIntendedCycle( float intended ) { NOTE_UNUSED( intended ); }
 	virtual float GetServerIntendedCycle( void ) { return -1.0f; }
 
 	// For prediction
@@ -456,10 +457,18 @@ public:
 	void							DisableJiggleBones( void );
 
 	void							ScriptSetPoseParameter( const char *szName, float fValue );
-	
+
 	void							SetRenderOriginOverride( const Vector &vec );
 	void							DisableRenderOriginOverride( void );
 	bool							IsUsingRenderOriginOverride( void ) { return m_vecRenderOriginOverride != vec3_invalid; }
+
+	virtual C_BaseAnimating *		GetBoneSetupDependancy( void ) { return GetMoveParent() ? GetMoveParent()->GetBaseAnimating() : NULL; }
+	
+	bool GetRootBone( matrix3x4_t &rootBone );
+
+
+	void							EnableDynamicModels() { m_bDynamicModelAllowed = true; }
+	bool							IsDynamicModelLoading() const { return m_bDynamicModelPending; }
 
 protected:
 	// View models scale their attachment positions to account for FOV. To get the unmodified
@@ -630,11 +639,12 @@ protected:
 
 	// True if bone setup should latch bones for demo polish subsystem
 	bool							m_bBonePolishSetup;
-	
-	virtual bool UpdateBlending( int flags, const RenderableInstance_t &instance );
 
-	CBoneMergeCache					*m_pBoneMergeCache;	// This caches the strcmp lookups that it has to do
-														// when merg
+	virtual bool UpdateBlending( int flags, const RenderableInstance_t &instance );
+	
+	void CheckIfEntityShouldForceRTTShadows( void );
+	ShadowType_t GetShadowCastTypeForStudio( CStudioHdr *pStudioHdr );
+	bool m_bForceRTTShadows;
 
 private:
 	int m_nPrevBody;
@@ -642,6 +652,8 @@ private:
 
 	float							m_flOldModelScale;
 	int								m_nOldSequence;
+	CBoneMergeCache					*m_pBoneMergeCache;	// This caches the strcmp lookups that it has to do
+														// when merg
 	
 	CUtlVector< matrix3x4a_t, CUtlMemoryAligned<matrix3x4a_t,16> >		m_CachedBoneData; // never access this directly. Use m_BoneAccessor.
 	float							m_flLastBoneSetupTime;
@@ -652,7 +664,6 @@ private:
 	CUtlVector<CAttachmentData>		m_Attachments;
 
 	void							SetupBones_AttachmentHelper( CStudioHdr *pStudioHdr );
-
 	EHANDLE							m_hLightingOrigin;
 
 	unsigned char					m_nOldMuzzleFlashParity;
@@ -662,6 +673,8 @@ private:
 	static bool						m_bBoneListInUse;
 	static CBoneList				m_recordingBoneList;
 
+	bool							m_bSuppressAnimSounds;
+
 private:
 	mutable CStudioHdr				*m_pStudioHdr;
 	mutable MDLHandle_t				m_hStudioHdr;
@@ -670,7 +683,17 @@ private:
 	CUtlReference<CNewParticleEffect>	m_ejectBrassEffect;
 	int									m_iEjectBrassAttachment;
 
-	Vector							m_vecRenderOriginOverride;
+	Vector								m_vecRenderOriginOverride;
+
+	// Dynamic models
+	bool							m_bDynamicModelAllowed;
+	bool							m_bDynamicModelPending;
+
+#if defined( DBGFLAG_ASSERT )
+	Vector m_vBoneSetupCachedOrigin;
+	QAngle m_qBoneSetupCachedAngles;
+#endif
+	
 };
 
 enum 
@@ -722,9 +745,6 @@ public:
 	// returns true if we are of type C_ClientRagdoll
 	virtual bool					IsClientRagdoll() const { return true; }
 
-protected:
-	bool m_bReleaseRagdoll;
-
 private:
 	int m_iCurrentFriction;
 	int m_iMinFriction;
@@ -733,6 +753,7 @@ private:
 	float m_flFrictionTime;
 
 	int  m_iFrictionAnimState;
+	bool m_bReleaseRagdoll;
 
 	bool m_bFadingOut;
 
@@ -792,7 +813,7 @@ inline float C_BaseAnimating::GetCycle() const
 inline CStudioHdr *C_BaseAnimating::GetModelPtr() const
 { 
 #ifdef _DEBUG
-#ifndef _X360
+#ifndef _GAMECONSOLE
 	// 360's don't need to lock the modeldata cache since it never flushes
 	static IDataCacheSection *pModelCache = g_pDataCache->FindSection( "ModelData" );
 	AssertOnce( pModelCache->IsFrameLocking() );

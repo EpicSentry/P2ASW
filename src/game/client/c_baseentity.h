@@ -1,4 +1,4 @@
-//===== Copyright 1996-2005, Valve Corporation, All rights reserved. ======//
+//===== Copyright (c) Valve Corporation, All rights reserved. ======//
 //
 // Purpose: A base class for the client-side representation of entities.
 //
@@ -7,7 +7,7 @@
 //			client.
 //
 // $NoKeywords: $
-//===========================================================================//
+//==================================================================//
 
 #ifndef C_BASEENTITY_H
 #define C_BASEENTITY_H
@@ -65,16 +65,6 @@ struct CSoundParameters;
 class CCallQueue;
 
 typedef unsigned int			AimEntsListHandle_t;
-
-#ifndef AI_CriteriaSet
-#define AI_CriteriaSet ResponseRules::CriteriaSet 
-#endif
-namespace ResponseRules 
-{ 
-	class CriteriaSet; 
-	class IResponseSystem;
-};
-using ResponseRules::IResponseSystem;
 
 #define		INVALID_AIMENTS_LIST_HANDLE		(AimEntsListHandle_t)~0
 
@@ -191,12 +181,11 @@ enum entity_list_ids_t
 	NUM_ENTITY_LISTS
 };
 
-
 template< typename Type >
 class CDiscontinuousInterpolatedVar : public CInterpolatedVar<Type>
 {
 public:
-	explicit CDiscontinuousInterpolatedVar( const char *pDebugName = NULL )
+	CDiscontinuousInterpolatedVar( const char *pDebugName = NULL )
 		: CInterpolatedVar<Type>(pDebugName)
 	{
 
@@ -406,7 +395,7 @@ inline void CDiscontinuousInterpolatedVar<QAngle>::TransformValue( const matrix3
 //-----------------------------------------------------------------------------
 // Purpose: Base client side entity object
 //-----------------------------------------------------------------------------
-class C_BaseEntity : public IClientEntity
+class C_BaseEntity : public IClientEntity, public IClientModelRenderable
 {
 // Construction
 	DECLARE_CLASS_NOBASE( C_BaseEntity );
@@ -430,7 +419,6 @@ protected:
 public:
 	static C_BaseEntity				*CreatePredictedEntityByName( const char *classname, const char *module, int line, bool persist = false );
 	static void						UpdateVisibilityAllEntities();
-	virtual void					ModifyOrAppendCriteria( AI_CriteriaSet& set );
 
 	// FireBullets uses shared code for prediction.
 	virtual void					FireBullets( const FireBulletsInfo_t &info );
@@ -480,7 +468,7 @@ public:
 	// Returns 1 if there are no more changes (ie: we could call RemoveFromInterpolationList).
 	int								Interp_Interpolate( VarMapping_t *map, float currentTime );
 	
-	void							Interp_RestoreToLastNetworked( VarMapping_t *map );
+	void							Interp_RestoreToLastNetworked( VarMapping_t *map, int flags );
 	void							Interp_UpdateInterpolationAmounts( VarMapping_t *map );
 	void							Interp_HierarchyUpdateInterpolationAmounts();
 
@@ -528,16 +516,16 @@ public:
 	bool					IsToolRecording() const;
 	bool					HasRecordedThisFrame() const;
 	virtual void			RecordToolMessage();
+	virtual void			OnToolStartRecording( void ) {};
 
 	// used to exclude entities from being recorded in the SFM tools
 	void					DontRecordInTools();
 	bool					ShouldRecordInTools() const;
 
-	virtual ResponseRules::IResponseSystem *GetResponseSystem();
-
 protected:
 	virtual void					Release();
 
+// IClientEntity
 public:
 	virtual ICollideable*			GetCollideable()		{ return &m_Collision; }
 	virtual IClientNetworkable*		GetClientNetworkable()	{ return this; }
@@ -545,8 +533,17 @@ public:
 	virtual IClientEntity*			GetIClientEntity()		{ return this; }
 	virtual C_BaseEntity*			GetBaseEntity()			{ return this; }
 	virtual IClientThinkable*		GetClientThinkable()	{ return this; }
-	virtual IClientModelRenderable*	GetClientModelRenderable()	{ return NULL; }
+	virtual IClientModelRenderable*	GetClientModelRenderable();
 	virtual IClientAlphaProperty*	GetClientAlphaProperty();
+
+	// Inherited from IClientModelRenderable
+public:
+	virtual bool GetRenderData( void *pData, ModelDataCategory_t nCategory );
+
+#if 0	
+	virtual string_t		GetModelName( void ) const;
+#endif
+
 // Methods of IClientRenderable
 public:
 
@@ -554,6 +551,7 @@ public:
 	virtual const QAngle&			GetRenderAngles( void );
 	virtual Vector					GetObserverCamOrigin( void ) { return GetRenderOrigin(); }	// Return the origin for player observers tracking this target
 	virtual const matrix3x4_t &		RenderableToWorldTransform();
+	virtual bool					IsTransparent( void );
 	virtual int 					GetRenderFlags( void );
 	virtual const model_t			*GetModel( void ) const;
 	virtual int						DrawModel( int flags, const RenderableInstance_t &instance );
@@ -592,12 +590,13 @@ public:
 	// save out interpolated values
 	virtual void					PreDataUpdate( DataUpdateType_t updateType );
 	virtual void					PostDataUpdate( DataUpdateType_t updateType );
+	virtual void					OnDataUnchangedInPVS();
 
 	virtual void					ValidateModelIndex( void );
 
 	// pvs info. NOTE: Do not override these!!
 	virtual void					SetDormant( bool bDormant );
-	virtual bool					IsDormant( void );
+	virtual bool					IsDormant( void ) const;
 
 	virtual void					OnSetDormant( bool bDormant ) {}
 
@@ -666,11 +665,18 @@ public:
 	virtual int						Save( ISave &save );
 	virtual int						Restore( IRestore &restore );
 
-private:
+	bool IsRenderingInFastReflections() const;
 
+private:
 	int SaveDataDescBlock( ISave &save, datamap_t *dmap );
 	int RestoreDataDescBlock( IRestore &restore, datamap_t *dmap );
+	bool ComputeIsRenderingInFastReflections() const;
 
+	// Client code should call this under any circumstances where fast reflection rendering type may change
+	void OnFastReflectionRenderingChanged();
+	void OnDisableShadowDepthRenderingChanged();
+	void OnShadowDepthRenderingCacheableStateChanged();
+	
 public:
 
 	// Called after spawn, and in the case of self-managing objects, after load
@@ -693,14 +699,17 @@ private:
 public:
 
 	void			VPhysicsSetObject( IPhysicsObject *pPhysics );
+	void			VPhysicsSwapObject( IPhysicsObject *pSwap );
 	// destroy and remove the physics object for this entity
 	virtual void	VPhysicsDestroyObject( void );
 
 	// Purpose: My physics object has been updated, react or extract data
 	virtual void					VPhysicsUpdate( IPhysicsObject *pPhysics );
+	virtual void					VPhysicsShadowUpdate( IPhysicsObject *pPhysics ) {}
 	inline IPhysicsObject			*VPhysicsGetObject( void ) const { return m_pPhysicsObject; }
 	virtual int						VPhysicsGetObjectList( IPhysicsObject **pList, int listMax );
 	virtual bool					VPhysicsIsFlesh( void );
+	virtual void					VPhysicsCompensateForPredictionErrors( const byte *predictedFrame ); //compare your predictive data vs the server data and do something about any discrepancies.
 
 // IClientEntity implementation.
 public:
@@ -711,9 +720,9 @@ public:
 
 	virtual const Vector&			GetAbsOrigin( void ) const;
 	virtual const QAngle&			GetAbsAngles( void ) const;  // see also GetVectors()
-	inline Vector					Forward() const; ///< get my forward (+x) vector
-	inline Vector					Left() const;    ///< get my left    (+y) vector
-	inline Vector					Up() const;      ///< get my up      (+z) vector
+	inline Vector					Forward() const RESTRICT; ///< get my forward (+x) vector
+	inline Vector					Left() const RESTRICT;    ///< get my left    (+y) vector
+	inline Vector					Up() const RESTRICT;      ///< get my up      (+z) vector
 
 	const Vector&					GetNetworkOrigin() const;
 	const QAngle&					GetNetworkAngles() const;
@@ -733,7 +742,7 @@ public:
 
 	virtual const Vector&			GetPrevLocalOrigin() const;
 	virtual const QAngle&			GetPrevLocalAngles() const;
-	
+
 	// change position, velocity, orientation instantly
 	// passing NULL means no change
 	virtual void					Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity );
@@ -791,7 +800,7 @@ public:
 	// pointing you right at a variable in your parent.
 	matrix3x4_t&					GetParentToWorldTransform( matrix3x4_t &tempMatrix );
 
-	void							GetVectors(Vector* forward, Vector* right, Vector* up) const;
+	virtual void						GetVectors(Vector* forward, Vector* right, Vector* up) const;
 
 	// Sets abs angles, but also sets local angles to be appropriate
 	void							SetAbsOrigin( const Vector& origin );
@@ -802,7 +811,6 @@ public:
 	void							ToggleFlag( int flagToToggle );
 	int								GetFlags( void ) const;
 	void							ClearFlags();
-
 
 	void							SetDistanceFade( float flMinDist, float flMaxDist );
 	void							SetGlobalFadeScale( float flFadeScale );
@@ -848,32 +856,33 @@ public:
 	virtual char					*GetIDString( void ) { return ""; };
 
 	// See CSoundEmitterSystem
-	void	EmitSound( const char *soundname, float soundtime = 0.0f, float *duration = NULL );  // Override for doing the general case of CPASAttenuationFilter( this ), and EmitSound( filter, entindex(), etc. );
-	void	EmitSound( const char *soundname, HSOUNDSCRIPTHANDLE& handle, float soundtime = 0.0f, float *duration = NULL );  // Override for doing the general case of CPASAttenuationFilter( this ), and EmitSound( filter, entindex(), etc. );
+	// Will return the sound guid. If negative, the guid is unknown (call may be successful or not). 0 if the sound was not emitted. Positive if the guid is valid.
+	int		EmitSound( const char *soundname, float soundtime = 0.0f, float *duration = NULL );  // Override for doing the general case of CPASAttenuationFilter( this ), and EmitSound( filter, entindex(), etc. );
+	int		EmitSound( const char *soundname, HSOUNDSCRIPTHASH& handle, float soundtime = 0.0f, float *duration = NULL );  // Override for doing the general case of CPASAttenuationFilter( this ), and EmitSound( filter, entindex(), etc. );
 	void	StopSound( const char *soundname );
-	void	StopSound( const char *soundname, HSOUNDSCRIPTHANDLE& handle );
+	void	StopSound( const char *soundname, HSOUNDSCRIPTHASH& handle );
 	void	GenderExpandString( char const *in, char *out, int maxlen );
 
 	static float GetSoundDuration( const char *soundname, char const *actormodel );
 
 	static bool	GetParametersForSound( const char *soundname, CSoundParameters &params, const char *actormodel );
-	static bool	GetParametersForSound( const char *soundname, HSOUNDSCRIPTHANDLE& handle, CSoundParameters &params, const char *actormodel );
+	static bool	GetParametersForSound( const char *soundname, HSOUNDSCRIPTHASH& handle, CSoundParameters &params, const char *actormodel );
 
-	static void EmitSound( IRecipientFilter& filter, int iEntIndex, const char *soundname, const Vector *pOrigin = NULL, float soundtime = 0.0f, float *duration = NULL );
-	static void EmitSound( IRecipientFilter& filter, int iEntIndex, const char *soundname, HSOUNDSCRIPTHANDLE& handle, const Vector *pOrigin = NULL, float soundtime = 0.0f, float *duration = NULL );
+	static int EmitSound( IRecipientFilter& filter, int iEntIndex, const char *soundname, const Vector *pOrigin = NULL, float soundtime = 0.0f, float *duration = NULL );
+	static int EmitSound( IRecipientFilter& filter, int iEntIndex, const char *soundname, HSOUNDSCRIPTHASH& handle, const Vector *pOrigin = NULL, float soundtime = 0.0f, float *duration = NULL );
 	static void StopSound( int iEntIndex, const char *soundname );
 	static soundlevel_t LookupSoundLevel( const char *soundname );
-	static soundlevel_t LookupSoundLevel( const char *soundname, HSOUNDSCRIPTHANDLE& handle );
+	static soundlevel_t LookupSoundLevel( const char *soundname, HSOUNDSCRIPTHASH& handle );
 
-	static void EmitSound( IRecipientFilter& filter, int iEntIndex, const EmitSound_t & params );
-	static void EmitSound( IRecipientFilter& filter, int iEntIndex, const EmitSound_t & params, HSOUNDSCRIPTHANDLE& handle );
+	static int EmitSound( IRecipientFilter& filter, int iEntIndex, const EmitSound_t & params );
+	static int EmitSound( IRecipientFilter& filter, int iEntIndex, const EmitSound_t & params, HSOUNDSCRIPTHASH& handle );
 
 	static void StopSound( int iEntIndex, int iChannel, const char *pSample, bool bIsStoppingSpeakerSound = false );
 
 	static void EmitAmbientSound( int entindex, const Vector& origin, const char *soundname, int flags = 0, float soundtime = 0.0f, float *duration = NULL );
 
 	// These files need to be listed in scripts/game_sounds_manifest.txt
-	static HSOUNDSCRIPTHANDLE PrecacheScriptSound( const char *soundname );
+	static HSOUNDSCRIPTHASH PrecacheScriptSound( const char *soundname );
 	static void PrefetchScriptSound( const char *soundname );
 
 	// For each client who appears to be a valid recipient, checks the client has disabled CC and if so, removes them from 
@@ -942,7 +951,7 @@ public:
 	C_BaseEntity *NextMovePeer( void ) const;
 
 	inline ClientEntityHandle_t		GetClientHandle() const	{ return ClientEntityHandle_t( m_RefEHandle ); }
-	inline bool						IsServerEntity( void );
+	inline bool						IsServerEntity( void ) const;
 
 	void							RenderWithViewModels( bool bEnable );
 	bool							IsRenderingWithViewModels() const;
@@ -973,11 +982,11 @@ public:
 	inline	bool					IsVisible() const;
 	inline bool						IsVisibleToAnyPlayer() const;
 			void					UpdateVisibility();
-			
+	
 	// Totally sucky, but I can't think of a better way of doing this
 	// without changing zillions of ShouldDraw calls.
 	virtual bool					ShouldSuppressForSplitScreenPlayer( int nSlot ) { return false; }
-	
+
 	// Returns true if the entity changes its position every frame on the server but it doesn't
 	// set animtime. In that case, the client returns true here so it copies the server time to
 	// animtime in OnDataChanged and the position history is correct for interpolation.
@@ -1001,9 +1010,9 @@ public:
 	void							Interp_Reset( VarMapping_t *map );
 	virtual void					ResetLatched();
 	
-	virtual float					GetInterpolationAmount( int flags );
+	float							GetInterpolationAmount( int flags );
 	float							GetLastChangeTime( int flags );
-	
+
 	//Get the time we would pass as an input to our interpolators
 	float							GetEffectiveInterpolationCurTime( float currentTime );
 
@@ -1023,7 +1032,7 @@ public:
 	// Reset internal fields
 	virtual void					Clear( void );
 	// Helper to draw raw brush models
-	virtual int						DrawBrushModel( bool bSort, bool bShadowDepth );
+	virtual int						DrawBrushModel( bool bTranslucent, bool bShadowDepth, bool bTwoPass );
 
 	// returns the material animation start time
 	virtual float					GetTextureAnimationStartTime();
@@ -1090,8 +1099,12 @@ public:
 	void							AllocateIntermediateData( void );
 	void							DestroyIntermediateData( void );
 	void							ShiftIntermediateDataForward( int slots_to_remove, int previous_last_slot );
+	void							ShiftFirstPredictedIntermediateDataForward( int slots_to_remove );
+	void							ShiftIntermediateData_TickAdjust( int delta, int last_slot );
 
 	void							*GetPredictedFrame( int framenumber );
+	void							*GetFirstPredictedFrame( int framenumber ); //similar to GetPredictedFrame() but only stores the results from the first prediction of each command
+	void							GetUnacknowledgedPredictedFrameRange( int &iStart, int &iEnd ); //Get the range of predicted frames we may restore from at any moment.
 	void							*GetOriginalNetworkDataObject( void );
 	bool							IsIntermediateDataAllocated( void ) const;
 
@@ -1105,6 +1118,8 @@ public:
 	void							PostEntityPacketReceived( void );
 	bool							PostNetworkDataReceived( int commands_acknowledged );
 	virtual void					HandlePredictionError( bool bErrorInThisEntity ); //we just processed a network update with errors, bErrorInThisEntity is false if the prediction errors were entirely in other entities and not this one
+	virtual bool					PredictionErrorShouldResetLatchedForAllPredictables( void ) { return true; } //legacy behavior is that any prediction error causes all predictables to reset latched
+	virtual bool					PredictionIsPhysicallySimulated( void ) { return false; } //by default, all prediction is driven by player commands, return true if your prediction is based on server simulation ticks
 	bool							GetPredictionEligible( void ) const;
 	void							SetPredictionEligible( bool canpredict );
 
@@ -1170,8 +1185,6 @@ public:
 #ifdef PORTAL2
 	const char						*GetSignifierName( void );
 #endif // PORTAL2
-
-
 
 public:
 
@@ -1472,19 +1485,21 @@ public:
 	float	GetSimulationTime() const;
 	void	SetSimulationTime( float st );
 
+#if defined(ENABLE_CREATE_TIME)
 	float	GetCreateTime()										{ return m_flCreateTime; }
 	void	SetCreateTime( float flCreateTime )					{ m_flCreateTime = flCreateTime; }
+#endif
 
 	int		GetCreationTick() const;
 
 #ifdef _DEBUG
-	void FunctionCheck( void *pFunction, const char *name );
+	void FunctionCheck( inputfunc_t pFunction, const char *name );
 
 	ENTITYFUNCPTR TouchSet( ENTITYFUNCPTR func, char *name ) 
 	{ 
-		//COMPILE_TIME_ASSERT( sizeof(func) == 4 );
+		//COMPILE_TIME_ASSERT( sizeof(func) == 4 ? 8 );
 		m_pfnTouch = func; 
-		//FunctionCheck( *(reinterpret_cast<void **>(&m_pfnTouch)), name ); 
+		//FunctionCheck( reinterpret_cast<inputfunc_t>(m_pfnTouch), name ); 
 		return func;
 	}
 #endif
@@ -1573,7 +1588,7 @@ public:
 	static void PreRenderEntities( int nSplitScreenPlayerSlot );
 	static void PurgeRemovedEntities();
 	static void SimulateEntities();
-	
+
 	//A queue that processes after we simulate all client entities. For operations that modify the simulate list (portal ghostrenderables)
 	static CCallQueue *				GetSimulateCallQueue( void );
 
@@ -1656,6 +1671,8 @@ private:
 	// Unused for client only entities.
 	bool							m_bDormant;
 
+	bool							m_bCanUseBrushModelFastPath;
+
 // FTYPEDESC_INSENDTABLE STUFF (end)
 private:
 	// Effects to apply
@@ -1690,7 +1707,7 @@ private:
 	EHANDLE							m_hGroundEntity;
 
 	char							m_iName[MAX_PATH];
-	
+
 #ifdef PORTAL2
 	char							m_iSignifierName[MAX_PATH];
 #endif // PORTAL2
@@ -1719,7 +1736,9 @@ public:
 	float							m_flSimulationTime;
 	float							m_flOldSimulationTime;
 	
+#if defined(ENABLE_CREATE_TIME)
 	float							m_flCreateTime;
+#endif
 
 private:
 	unsigned char 					m_nOldRenderMode;
@@ -1800,11 +1819,11 @@ public:
 	int								GetMaxCPULevel( ) const;
 	int								GetMinGPULevel( ) const;
 	int								GetMaxGPULevel( ) const;
-	
+
 
 #if defined ( PORTAL2 )
 	int								GetServerObjectCaps() { return m_iObjectCapsCache; }
-#endif	
+#endif
 
 protected:
 	// FIXME: Should I move the functions handling these out of C_ClientEntity
@@ -1839,22 +1858,24 @@ protected:
 
 
 	// TrackIR
+#if defined(ENABLE_TRACKIR_SUPPORT)
 	Vector							m_vecEyeOffset;
 	QAngle							m_EyeAngleOffset;    
-
+#endif
 	// TrackIR
+
 	int								m_spawnflags;
 
 	// Allow studio models to tell us what their m_nBody value is
 	virtual int						GetStudioBody( void ) { return 0; }
 	// call this in postdataupdate to detect hierarchy changes
 	bool							IsParentChanging();
-		
+
+
 #if defined ( PORTAL2 )
 	// Received caps from server. Using this for +use validity checking.
 	int								m_iObjectCapsCache;
 #endif
-
 private:
 	friend void OnRenderStart();
 
@@ -1949,11 +1970,6 @@ private:
 	ClientShadowHandle_t			m_ShadowHandle;
 	CBitVec< MAX_SPLITSCREEN_PLAYERS > m_ShadowBits; // Per-splitscreen user shadow visibility bits
 
-	// Fades
-	float							m_fadeMinDist;
-	float							m_fadeMaxDist;
-	float							m_flFadeScale;
-
 	ClientThinkHandle_t				m_hThink;
 
 	unsigned char					m_iParentAttachment; // 0 if we're relative to the parent's absorigin and absangles.
@@ -1965,6 +1981,21 @@ private:
 	bool							m_bPredictable;
 	bool							m_bRenderWithViewModels;
 	bool							m_bDisableCachedRenderBounds;
+protected:
+	// NOTE: This is a hack for portal2.  There is a piece of networking code in OnDataChangedInPVS() that slams m_flSimulationTime
+	// this causes interpolation bugs on remote players in p2
+	bool							m_bDisableSimulationFix;
+
+	// Fades
+	float							m_fadeMinDist;
+	float							m_fadeMaxDist;
+	float							m_flFadeScale;
+
+public:
+
+	void							OnSimulationTimeChanging( float flPreviousSimulationTime, float flNextSimulationTime );
+
+private:
 	int								m_nSplitUserPlayerPredictionSlot;
 
 	// Hierarchy
@@ -2007,8 +2038,12 @@ private:
 #if !defined( NO_ENTITY_PREDICTION )
 	// For storing prediction results and pristine network state
 	byte							*m_pIntermediateData[ MULTIPLAYER_BACKUP ];
+	byte							*m_pIntermediateData_FirstPredicted[ MULTIPLAYER_BACKUP + 1 ]; //we store just as much as m_pIntermediateData, but also hold onto the frame from our last received packet
 	byte							*m_pOriginalData;
 	int								m_nIntermediateDataCount;
+	static int						s_nIncomingPacketCommandsAcknowledged; //only set to a valid value during entity network update processing
+	int								m_nIntermediateData_FirstPredictedShiftMarker; //can't use predicted commands to optimize first predicted version of ShiftIntermediateDataForward(). Use this instead for its longer lifetime
+	bool							m_bEverHadPredictionErrorsForThisCommand;
 
 	bool							m_bIsPlayerSimulated;
 #endif
@@ -2081,10 +2116,7 @@ EXTERN_RECV_TABLE(DT_BaseEntity);
 inline bool FClassnameIs( C_BaseEntity *pEntity, const char *szClassname )
 { 
 	Assert( pEntity );
-	if ( pEntity == NULL )
-		return false;
-
-	return !strcmp( pEntity->GetClassname(), szClassname ) ? true : false; 
+	return pEntity && !strcmp( pEntity->GetClassname(), szClassname ); 
 }
 
 #define SetThink( a ) ThinkSet( static_cast <void (CBaseEntity::*)(void)> (a), 0, NULL )
@@ -2138,7 +2170,7 @@ inline const CParticleProperty *C_BaseEntity::ParticleProp() const
 //-----------------------------------------------------------------------------
 // Purpose: Returns whether this entity was created on the client.
 //-----------------------------------------------------------------------------
-inline bool C_BaseEntity::IsServerEntity( void )
+inline bool C_BaseEntity::IsServerEntity( void ) const
 {
 	return index != -1;
 }
@@ -2496,6 +2528,13 @@ inline ClientRenderHandle_t& CBaseEntity::RenderHandle()
 }
 
 // TrackIR
+#if !defined(ENABLE_TRACKIR_SUPPORT)
+inline const Vector& CBaseEntity::GetEyeOffset() const { return vec3_origin; }
+inline void CBaseEntity::SetEyeOffset( const Vector& v ) {}
+inline const QAngle & CBaseEntity::GetEyeAngleOffset() const { return vec3_angle; }
+inline void CBaseEntity::SetEyeAngleOffset( const QAngle & qa ) {}
+#else
+
 inline const Vector& CBaseEntity::GetEyeOffset() const 
 { 
 	return m_vecEyeOffset; 
@@ -2515,6 +2554,7 @@ inline void CBaseEntity::SetEyeAngleOffset( const QAngle & qa )
 { 
 	m_EyeAngleOffset = qa; 
 }
+#endif
 // TrackIR
 
 //-----------------------------------------------------------------------------

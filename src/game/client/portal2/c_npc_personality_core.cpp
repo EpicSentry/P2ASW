@@ -16,3 +16,16 @@ RecvPropBool( RECVINFO ( m_bFlashlightEnabled) ),
 END_RECV_TABLE()
 
 LINK_ENTITY_TO_CLASS(npc_personality_core, C_NPC_Personality_Core);
+
+// TODO: Find line placements for this class
+class C_NPC_Wheatley_Boss : public C_AI_BaseNPC
+{
+public:
+	DECLARE_CLASS(C_NPC_Wheatley_Boss, C_AI_BaseNPC);
+	DECLARE_CLIENTCLASS();
+};
+
+IMPLEMENT_CLIENTCLASS_DT(C_NPC_Wheatley_Boss, DT_NPC_Wheatley_Boss, CNPC_Wheatley_Boss)
+END_RECV_TABLE()
+
+LINK_ENTITY_TO_CLASS(npc_wheatley_boss, C_NPC_Wheatley_Boss);

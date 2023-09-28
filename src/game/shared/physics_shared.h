@@ -26,7 +26,6 @@ extern IPhysicsEnvironment	*physenv;
 #ifdef PORTAL
 extern IPhysicsEnvironment	*physenv_main;
 #endif
-
 extern IPhysicsSurfaceProps *physprops;
 extern IPhysicsObjectPairHash *g_EntityCollisionHash;
 
@@ -58,6 +57,7 @@ extern const objectparams_t g_PhysDefaultObjectParams;
 #define FVPHYSICS_DMG_DISSOLVE			0x0200		// does dissolve damage, not just blunt damage
 #define FVPHYSICS_NO_IMPACT_DMG			0x0400		// don't do impact damage to anything
 #define FVPHYSICS_NO_NPC_IMPACT_DMG		0x0800		// Don't do impact damage to NPC's. This is temporary for NPC's shooting combine balls (sjb)
+#define FVPHYSICS_PUSH_PLAYER			0x1000		// this is a shadow object that can push the player's physics
 #define FVPHYSICS_NO_SELF_COLLISIONS	0x8000		// don't collide with other objects that are part of the same entity
 
 //-----------------------------------------------------------------------------
@@ -93,7 +93,7 @@ struct fluidevent_t
 };
 
 void PhysFrictionSound( CBaseEntity *pEntity, IPhysicsObject *pObject, float energy, int surfaceProps, int surfacePropsHit );
-void PhysFrictionSound( CBaseEntity *pEntity, IPhysicsObject *pObject, const char *pSoundName, HSOUNDSCRIPTHANDLE& handle, float flVolume );
+void PhysFrictionSound( CBaseEntity *pEntity, IPhysicsObject *pObject, const char *pSoundName, HSOUNDSCRIPTHASH& handle, float flVolume );
 void PhysCleanupFrictionSounds( CBaseEntity *pEntity );
 void PhysFrictionEffect( Vector &vecPos, Vector vecVel, float energy, int surfaceProps, int surfacePropsHit );
 float PhysGetEntityMass( CBaseEntity *pEntity );

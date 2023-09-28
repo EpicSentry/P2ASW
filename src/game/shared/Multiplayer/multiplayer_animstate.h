@@ -10,7 +10,6 @@
 #endif
 
 #include "convar.h"
-#include "basecombatweapon_shared.h"
 
 #if defined( CLIENT_DLL )
 class C_BasePlayer;
@@ -58,12 +57,6 @@ enum PlayerAnimEvent_t
 	PLAYERANIMEVENT_GRENADE1_THROW,
 	PLAYERANIMEVENT_GRENADE2_THROW,
 	PLAYERANIMEVENT_VOICE_COMMAND_GESTURE,
-
-	// Tony; some SDK ones now too.
-	PLAYERANIMEVENT_STAND_TO_PRONE,
-	PLAYERANIMEVENT_CROUCH_TO_PRONE,
-	PLAYERANIMEVENT_PRONE_TO_STAND,
-	PLAYERANIMEVENT_PRONE_TO_CROUCH,
 
 	PLAYERANIMEVENT_COUNT
 };
@@ -154,6 +147,10 @@ struct MultiPlayerMovementData_t
 //
 // Multi-Player Animation State
 //
+
+class CBaseCombatWeapon;
+class CBasePlayer;
+
 class CMultiPlayerAnimState
 {
 public:
@@ -236,7 +233,7 @@ protected:
 	virtual float CalcMovementPlaybackRate( bool *bIsMoving );
 
 	// Pose paramters.
-	bool				SetupPoseParameters( CStudioHdr *pStudioHdr );
+	virtual bool		SetupPoseParameters( CStudioHdr *pStudioHdr );
 	virtual void		ComputePoseParam_MoveYaw( CStudioHdr *pStudioHdr );
 	virtual void		ComputePoseParam_AimPitch( CStudioHdr *pStudioHdr );
 	virtual void		ComputePoseParam_AimYaw( CStudioHdr *pStudioHdr );
@@ -272,7 +269,7 @@ protected:
 	CBasePlayer	*m_pPlayer;
 
 	QAngle				m_angRender;
-	
+
 #if defined( PORTAL ) && defined( CLIENT_DLL )
 	QAngle				m_angRender_InterpHistory; //discontinuous space handling
 #endif
@@ -280,6 +277,7 @@ protected:
 	// Pose parameters.
 	bool						m_bPoseParameterInit;
 	MultiPlayerPoseData_t		m_PoseParameterData;
+	DebugPlayerAnimData_t		m_DebugAnimData;
 
 	bool						m_bCurrentFeetYawInitialized;
 	float						m_flLastAnimationStateClearTime;
@@ -320,14 +318,6 @@ protected:
 	CInterpolatedVar<float> m_iv_flMaxGroundSpeed;
 #endif
 	float m_flMaxGroundSpeed;
-
-	//Tony; moved debuganim data to a private block and made the 2 sdk animstates friendly. I override the base classes
-	//but want complete functionality.
-private:
-	friend class CSDKPlayerAnimState;
-	friend class CHL2MPPlayerAnimState;
-	DebugPlayerAnimData_t		m_DebugAnimData;
-
 };
 
 // If this is set, then the game code needs to make sure to send player animation events

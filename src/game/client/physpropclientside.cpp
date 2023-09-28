@@ -179,23 +179,16 @@ void C_PhysPropClientside::DestroyAll()
 //-----------------------------------------------------------------------------
 int C_PhysPropClientside::ParsePropData( void )
 {
-	KeyValues *modelKeyValues = new KeyValues("");
-	if ( !modelKeyValues->LoadFromBuffer( modelinfo->GetModelName( GetModel() ), modelinfo->GetModelKeyValueText( GetModel() ) ) )
-	{
-		modelKeyValues->deleteThis();
+	KeyValues *pModelKV = modelinfo->GetModelKeyValues( GetModel() );
+	if ( !pModelKV )
 		return PARSE_FAILED_NO_DATA;
-	}
 
 	// Do we have a props section?
-	KeyValues *pkvPropData = modelKeyValues->FindKey("prop_data");
+	KeyValues *pkvPropData = pModelKV->FindKey("prop_data");
 	if ( !pkvPropData )
-	{
-		modelKeyValues->deleteThis();
 		return PARSE_FAILED_NO_DATA;
-	}
 
-	int iResult = g_PropDataSystem.ParsePropFromKV( this, pkvPropData, modelKeyValues );
-	modelKeyValues->deleteThis();
+	int iResult = g_PropDataSystem.ParsePropFromKV( this, this, pkvPropData, pModelKV );
 	return iResult;
 }
 

@@ -12,15 +12,11 @@
 #endif
 
 // PlayerUse defines
-
-// PlayerUse defines
 #ifdef PORTAL2
 #define	PLAYER_USE_RADIUS	100.f
 #else
 #define	PLAYER_USE_RADIUS	80.f
-#define	PLAYER_USE_BOT_RADIUS	140.f
 #endif // PORTAL2
-
 
 #define CONE_45_DEGREES		0.707f
 #define CONE_15_DEGREES		0.9659258f
@@ -89,6 +85,32 @@ enum PlayerPhysFlag_e
 	// If you add another flag here check that you aren't 
 	// overwriting phys flags in the HL2 of TF2 player classes
 };
+
+enum
+{
+	VPHYS_WALK = 0,
+	VPHYS_CROUCH,
+	VPHYS_NOCLIP,
+};
+
+// useful cosines
+#define DOT_1DEGREE   0.9998476951564
+#define DOT_2DEGREE   0.9993908270191
+#define DOT_3DEGREE   0.9986295347546
+#define DOT_4DEGREE   0.9975640502598
+#define DOT_5DEGREE   0.9961946980917
+#define DOT_6DEGREE   0.9945218953683
+#define DOT_7DEGREE   0.9925461516413
+#define DOT_8DEGREE   0.9902680687416
+#define DOT_9DEGREE   0.9876883405951
+#define DOT_10DEGREE  0.9848077530122
+#define DOT_15DEGREE  0.9659258262891
+#define DOT_20DEGREE  0.9396926207859
+#define DOT_25DEGREE  0.9063077870367
+#define DOT_30DEGREE  0.866025403784
+#define DOT_45DEGREE  0.707106781187
+
+//#define DEBUG_MOTION_CONTROLLERS  //uncomment to spew debug data while in a motion controller
 
 // Shared header file for players
 #if defined( CLIENT_DLL )

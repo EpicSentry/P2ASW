@@ -12,7 +12,9 @@
 
 #include <vgui_controls/Image.h>
 #include <vgui_controls/ImagePanel.h>
+#ifndef NO_STEAM
 #include "steam/steam_api.h"
+#endif
 #include "c_baseplayer.h"
 
 // Avatar images, and avatar images with friends, don't scale with resolution.
@@ -21,6 +23,13 @@
 #define AVATAR_POSTDENT_X		(1)
 #define AVATAR_POSTDENT_Y		(1)
 
+enum EAvatarSize
+{
+	eAvatarSmall,
+	eAvatarMedium,
+	eAvatarLarge
+};
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -28,9 +37,12 @@ class CAvatarImage : public vgui::IImage
 {
 public:
 	CAvatarImage( void );
+	virtual ~CAvatarImage();
 
 	// Call this to set the steam ID associated with the avatar
+#ifndef NO_STEAM
 	bool SetAvatarSteamID( CSteamID steamIDUser );
+#endif
 	void UpdateFriendStatus( void );
 	void ClearAvatarSteamID( void );
 
@@ -78,10 +90,12 @@ public:
 		m_Color = col; 
 	}
 
-	void SetAvatarSize( EAvatarSize size )
+#ifndef NO_STEAM
+	void SetAvatarSize( int size )
 	{
 		m_SourceArtSize = size;
 	}
+#endif
 
 	bool IsValid( void ) { return m_bValid; }
 
@@ -96,7 +110,9 @@ protected:
 	void InitFromRGBA( const byte *rgba, int width, int height );
 
 private:
+#ifndef NO_STEAM
 	CSteamID m_steamIDUser;
+#endif
 	Color m_Color;
 	int m_iTextureID;
 	int m_nX, m_nY, m_nWide, m_nTall;
@@ -105,8 +121,10 @@ private:
 	CHudTexture *m_pFriendIcon;
 	int	 m_iAvatarWidth;
 	int	 m_iAvatarHeight;
+#ifndef NO_STEAM
 	CSteamID	m_SteamID;
-	EAvatarSize m_SourceArtSize;
+	int			m_SourceArtSize;
+#endif
 };
 
 //-----------------------------------------------------------------------------
@@ -122,7 +140,9 @@ public:
 	// Set the player that this Avatar should display for
 	void SetPlayer( C_BasePlayer *pPlayer );
 	void SetPlayerByIndex( int iIndex );
+#ifndef NO_STEAM
 	void SetAvatarBySteamID( CSteamID *friendsID );
+#endif
 
 	virtual void PaintBackground( void );
 	bool	IsValid( void ) { return (GetImage() && ((CAvatarImage*)GetImage())->IsValid()); }

@@ -26,4 +26,8 @@ extern void PhysicsSimulate();
 extern float PhysGetSyncCreateTime();
 extern void VPhysicsShadowDataChanged( bool bCreate, C_BaseEntity *pEntity );
 
+void PhysAddShadow( C_BaseEntity *pEntity );
+void PhysRemoveShadow( C_BaseEntity *pEntity );
+void PhysSetPredictionCommandNum( int iCommandNum );
+
 #endif // PHYSICS_H

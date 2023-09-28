@@ -1,4 +1,4 @@
-//========= Copyright � 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: Implements shared baseplayer class functionality
 //
@@ -10,6 +10,12 @@
 #include "util_shared.h"
 #include "datacache/imdlcache.h"
 #include "collisionutils.h"
+#include "vphysics/player_controller.h"
+
+#if defined CLIENT_DLL
+#define CPhysicsProp C_PhysicsProp
+#define CPhysBox C_PhysBox
+#endif
 
 #if defined( CLIENT_DLL )
 
@@ -18,11 +24,8 @@
 	#include "c_basedoor.h"
 	#include "c_world.h"
 	#include "view.h"
-
-#ifdef PORTAL2
-	#include "c_physbox.h"
 	#include "c_physicsprop.h"
-#endif
+	#include "c_physbox.h"
 
 	#define CRecipientFilter C_RecipientFilter
 
@@ -35,23 +38,16 @@
 	#include "ai_basenpc.h"
 	#include "env_zoom.h"
 	#include "ammodef.h"
-
-#ifdef PORTAL2
+	#include "props.h"
 	#include "physobj.h"
-#endif
+
+	#if defined( PORTAL )
+		#include "portal_player.h"
+		#include "physicsshadowclone.h"
+	#endif
 
 	extern int TrainSpeed(int iSpeed, int iMax);
 	
-#endif
-
-#ifdef PORTAL2
-#include "portal_grabcontroller_shared.h"
-
-#ifdef CLIENT_DLL
-#define CPhysicsProp C_PhysicsProp
-#define CPhysBox C_PhysBox
-#endif
-
 #endif
 
 #include "in_buttons.h"
@@ -60,13 +56,82 @@
 #include "SoundEmitterSystem/isoundemittersystembase.h"
 #include "decals.h"
 #include "obstacle_pushaway.h"
+#include "igamemovement.h"
+
+
+#if defined( PORTAL2 ) || !defined( CLIENT_DLL )
+#include "portal2/portal_grabcontroller_shared.h"
+#endif
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
+//----------------------------------------------------
+// Player Physics Shadow
+//----------------------------------------------------
+#define VPHYS_MAX_DISTANCE		2.0
+#define VPHYS_MAX_VEL			10
+#define VPHYS_MAX_DISTSQR		(VPHYS_MAX_DISTANCE*VPHYS_MAX_DISTANCE)
+#define VPHYS_MAX_VELSQR		(VPHYS_MAX_VEL*VPHYS_MAX_VEL)
+
+#if defined( DEBUG_MOTION_CONTROLLERS )
+#if defined( GAME_DLL )
+unsigned char g_uColorValue = 255;
+#else
+unsigned char g_uColorValue = 128;
+#endif
+Vector g_vLastPos = vec3_origin;
+Vector g_vShift = vec3_origin;
+ConVar dbg_motionlinetime( "dbg_motionlinetime", "30.0", FCVAR_REPLICATED );
+
+void DebugVelocity( const char *szString, const Vector &vStart, const Vector &vEnd, uint8 iRed, uint8 iGreen, uint8 iBlue )
+{
+	if( dbg_motionlinetime.GetFloat() < 0.0f )
+		return;
+
+	Vector vShift = g_vShift;
+#if defined( CLIENT_DLL )
+#	if defined( KEEP_COMMAND_REPREDICTION_COUNT )
+		vShift *= (1.0f + (float)prediction->GetRepredictionCount());
+#	else
+		vShift *= prediction->IsFirstTimePredicted() ? 1.0f : 2.0f;
+#	endif
+
+
+	iRed >>= 1;
+	iGreen >>= 1;
+	iBlue >>= 1;
+#endif
+	NDebugOverlay::Line( vStart + vShift, vEnd + vShift, iRed, iGreen, iBlue, true, dbg_motionlinetime.GetFloat() );
+}
+
+
+
+void DebugBox( const char *szString, const Vector &vPos, const Vector &vSize, uint8 iRed, uint8 iGreen, uint8 iBlue, uint8 iAlpha )
+{
+	if( dbg_motionlinetime.GetFloat() < 0.0f )
+		return;
+
+	Vector vShift = g_vShift;
+#if defined( CLIENT_DLL )
+#	if defined( KEEP_COMMAND_REPREDICTION_COUNT )
+		vShift *= (1.0f + (float)prediction->GetRepredictionCount());
+#	else
+		vShift *= prediction->IsFirstTimePredicted() ? 1.0f : 2.0f;
+#	endif
+
+	iRed >>= 1;
+	iGreen >>= 1;
+	iBlue >>= 1;
+#endif
+	NDebugOverlay::Box( vPos + vShift, -vSize, vSize, iRed, iGreen, iBlue, iAlpha, dbg_motionlinetime.GetFloat() );
+}
+#endif
+
 #if defined(GAME_DLL) 
+	static ConVar physicsshadowupdate_render( "physicsshadowupdate_render", "0" );
 	ConVar sv_infinite_ammo( "sv_infinite_ammo", "0", FCVAR_CHEAT, "Player's active weapon will never run out of ammo" );
-#if !defined(_XBOX)
+
 	extern ConVar sv_pushaway_max_force;
 	extern ConVar sv_pushaway_force;
 	extern ConVar sv_turbophysics;
@@ -89,12 +154,18 @@
 			return g_pGameRules->CanEntityBeUsePushed( pEntity );
 		}
 	};
-#endif
+#else
+	static ConVar physicsshadowupdate_render( "cl_physicsshadowupdate_render", "0" );
+	ConVar cl_shadowupdatespacing( "cl_shadowupdatespacing", "10.0" );
+	ConVar cl_predict_motioncontrol( "cl_predict_motioncontrol", "0" );
 #endif
 
 #ifdef CLIENT_DLL
 ConVar mp_usehwmmodels( "mp_usehwmmodels", "0", NULL, "Enable the use of the hw morph models. (-1 = never, 1 = always, 0 = based upon GPU)" ); // -1 = never, 0 = if hasfastvertextextures, 1 = always
 #endif
+
+extern ConVar sv_turbophysics;
+extern CMoveData *g_pMoveData;
 
 bool UseHWMorphModels()
 {
@@ -690,15 +761,8 @@ void CBasePlayer::PlayStepSound( Vector &vecOrigin, surfacedata_t *psurface, flo
 	}
 
 	CRecipientFilter filter;
+	filter.UsePredictionRules();
 	filter.AddRecipientsByPAS( vecOrigin );
-
-#ifndef CLIENT_DLL
-	// in MP, server removes all players in the vecOrigin's PVS, these players generate the footsteps client side
-	if ( gpGlobals->maxClients > 1 )
-	{
-		filter.RemoveRecipientsByPVS( vecOrigin );
-	}
-#endif
 
 	EmitSound_t ep;
 	ep.m_nChannel = CHAN_BODY;
@@ -708,6 +772,8 @@ void CBasePlayer::PlayStepSound( Vector &vecOrigin, surfacedata_t *psurface, flo
 	ep.m_nFlags = 0;
 	ep.m_nPitch = params.pitch;
 	ep.m_pOrigin = &vecOrigin;
+	ep.m_hSoundScriptHash = params.m_hSoundScriptHash;
+	ep.m_nSoundEntryVersion = params.m_nSoundEntryVersion;
 
 	EmitSound( filter, entindex(), ep );
 }
@@ -1032,7 +1098,9 @@ CBaseEntity *CBasePlayer::FindUseEntity()
 	// A button, etc. can be made out of clip brushes, make sure it's +useable via a traceline, too.
 	int useableContents = MASK_SOLID | CONTENTS_DEBRIS | CONTENTS_PLAYERCLIP;
 
-
+#ifdef CSTRIKE_DLL
+	useableContents = MASK_NPCSOLID_BRUSHONLY | MASK_OPAQUE_AND_NPCS;
+#endif
 
 #ifndef CLIENT_DLL
 	CBaseEntity *pFoundByTrace = NULL;
@@ -1239,7 +1307,6 @@ void CBasePlayer::PlayerUse ( void )
 		return;
 	}
 
-#if !defined(_XBOX)
 	// push objects in turbo physics mode
 	if ( (m_nButtons & IN_USE) && sv_turbophysics.GetBool() )
 	{
@@ -1276,7 +1343,6 @@ void CBasePlayer::PlayerUse ( void )
 			}
 		}
 	}
-#endif
 
 	if ( m_afButtonPressed & IN_USE )
 	{
@@ -1344,6 +1410,8 @@ void CBasePlayer::PlayerUse ( void )
 	{
 		PlayUseDenySound();
 	}
+#else
+	STEAMWORKS_TESTSECRET(); 
 #endif
 }
 
@@ -1398,6 +1466,19 @@ void CBasePlayer::SmoothViewOnStairs( Vector& eyeOrigin )
 	CBaseEntity *pGroundEntity = GetGroundEntity();
 	float flCurrentPlayerZ = GetLocalOrigin().z;
 	float flCurrentPlayerViewOffsetZ = GetViewOffset().z;
+
+#if defined( CLIENT_DLL )
+	{
+		matrix3x4_t matOriginDisontinuity;
+		if( GetOriginInterpolator().GetDiscontinuityTransform( GetEffectiveInterpolationCurTime( gpGlobals->curtime ), matOriginDisontinuity ) )
+		{
+			//if the origin has a discontinuity, assume that m_flOldPlayerZ is in the new space. Therefore, we need to transform the local origin into the new space for comparisons
+			Vector vCurrentSpaceLocalOrigin;
+			VectorITransform( GetLocalOrigin(), matOriginDisontinuity, vCurrentSpaceLocalOrigin ); //inverse transform because the matrix goes from new space to old space
+			flCurrentPlayerZ = vCurrentSpaceLocalOrigin.z;
+		}
+	}
+#endif
 
 	// Smooth out stair step ups
 	// NOTE: Don't want to do this when the ground entity is moving the player
@@ -1461,7 +1542,6 @@ static bool IsWaterContents( int contents )
 
 void CBasePlayer::ResetObserverMode()
 {
-
 	m_hObserverTarget.Set( 0 );
 	m_iObserverMode = (int)OBS_MODE_NONE;
 
@@ -1469,6 +1549,8 @@ void CBasePlayer::ResetObserverMode()
 	m_iObserverLastMode = OBS_MODE_ROAMING;
 	m_bForcedObserverMode = false;
 	m_afPhysicsFlags &= ~PFLAG_OBSERVER;
+#else
+	UpdateVisibility();
 #endif
 }
 
@@ -1821,7 +1903,12 @@ void CBasePlayer::SharedSpawn()
 	m_flMaxspeed		= 0.0f;
 
 	MDLCACHE_CRITICAL_SECTION();
-	SetSequence( SelectWeightedSequence( ACT_IDLE ) );
+	int iIdleSequence = SelectWeightedSequence( ACT_IDLE );
+	if( iIdleSequence < 0 )
+	{
+		iIdleSequence = 0;
+	}
+	SetSequence( iIdleSequence );
 
 	if ( GetFlags() & FL_DUCKING ) 
 		SetCollisionBounds( VEC_DUCK_HULL_MIN, VEC_DUCK_HULL_MAX );
@@ -1830,10 +1917,10 @@ void CBasePlayer::SharedSpawn()
 
 	// dont let uninitialized value here hurt the player
 	m_Local.m_flFallVelocity = 0;
-	
-	m_hUseEntity = NULL;
 
 	SetBloodColor( BLOOD_COLOR_RED );
+
+	m_hUseEntity = NULL;
 }
 
 
@@ -1862,7 +1949,6 @@ int CBasePlayer::GetDefaultFOV( void ) const
 
 void CBasePlayer::AvoidPhysicsProps( CUserCmd *pCmd )
 {
-#ifndef _XBOX
 	// Don't avoid if noclipping or in movetype none
 	switch ( GetMoveType() )
 	{
@@ -1878,7 +1964,6 @@ void CBasePlayer::AvoidPhysicsProps( CUserCmd *pCmd )
 		return;
 
 	AvoidPushawayProps( this, pCmd );
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -2076,7 +2161,7 @@ void CBasePlayer::AddSplitScreenPlayer( CBasePlayer *pOther )
 	{
 		m_hSplitScreenPlayers.AddToTail( h );
 	}
-	
+
 	UpdateSplitScreenAndPictureInPicturePlayerList();
 }
 
@@ -2188,7 +2273,6 @@ bool CBasePlayer::ClearUseEntity()
 
 		// Stop controlling the train/object
 		// TODO: Send HUD Update
-#if defined ( PORTAL2 )
 		CPlayerPickupController *pPickup = (CPlayerPickupController*)GetUseEntity();
 		Assert( pPickup );
 		if ( pPickup )
@@ -2199,9 +2283,6 @@ bool CBasePlayer::ClearUseEntity()
 				return true;
 			}
 		}
-#else
-		GetUseEntity()->Use( this, this, USE_OFF, 0 );
-#endif // PORTAL2
 	}
 
 	return false;
@@ -2289,7 +2370,577 @@ float CBasePlayer::GetHeldObjectMass( IPhysicsObject *pHeldObject )
 
 #endif
 
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CBasePlayer::VPhysicsShadowUpdate( IPhysicsObject *pPhysics )
+{
+	if ( sv_turbophysics.GetBool() )
+		return;
+
+#if defined( DEBUG_MOTION_CONTROLLERS ) && defined( CLIENT_DLL ) 
+	GetVectors( NULL, &g_vShift, NULL );
+	g_vShift *= cl_shadowupdatespacing.GetFloat();
+#endif
+
+	Vector newPosition;
+
+	bool physicsUpdated = m_pPhysicsController->GetShadowPosition( &newPosition, NULL ) > 0 ? true : false;
+
+#if defined( GAME_DLL )
+	// UNDONE: If the player is penetrating, but the player's game collisions are not stuck, teleport the physics shadow to the game position
+	if ( pPhysics->GetGameFlags() & FVPHYSICS_PENETRATING )
+	{
+		CUtlVector<CBaseEntity *> list;
+		PhysGetListOfPenetratingEntities( this, list );
+		for ( int i = list.Count()-1; i >= 0; --i )
+		{
+			// filter out anything that isn't simulated by vphysics
+			// UNDONE: Filter out motion disabled objects?
+			if ( list[i]->GetMoveType() == MOVETYPE_VPHYSICS )
+			{
+				// I'm currently stuck inside a moving object, so allow vphysics to 
+				// apply velocity to the player in order to separate these objects
+				m_bTouchedPhysObject = true;
+			}
+
+			// if it's an NPC, tell them that the player is intersecting them
+			CAI_BaseNPC *pNPC = list[i]->MyNPCPointer();
+			if ( pNPC )
+			{
+				pNPC->PlayerPenetratingVPhysics();
+			}
+		}
+	}
+#endif
+
+	bool bCheckStuck = false;
+	if ( m_afPhysicsFlags & PFLAG_GAMEPHYSICS_ROTPUSH )
+	{
+		bCheckStuck = true;
+		m_afPhysicsFlags &= ~PFLAG_GAMEPHYSICS_ROTPUSH;
+	}
+	uint32 nContactState = m_pPhysicsController->GetContactState( FVPHYSICS_PUSH_PLAYER );
+	if ( (nContactState & PLAYER_CONTACT_PHYSICS) || (m_afPhysicsFlags & PFLAG_VPHYSICS_MOTIONCONTROLLER) )
+	{
+		m_bTouchedPhysObject = true;
+	}
+
+	if ( IsFollowingPhysics() )
+	{
+		m_bTouchedPhysObject = true;
+	}
+
+#if defined( CLIENT_DLL )
+	if( !cl_predict_motioncontrol.GetBool() )
+	{
+		m_bTouchedPhysObject = false;
+	}
+#endif
+
+
+	if ( GetMoveType() == MOVETYPE_NOCLIP || pl.deadflag )
+	{
+		m_oldOrigin = GetAbsOrigin();
+		return;
+	}
+
+#if defined( GAME_DLL )
+	if ( phys_timescale.GetFloat() == 0.0f )
+	{
+		physicsUpdated = false;
+	}
+#endif
+
+	if ( !physicsUpdated )
+		return;
+
+	IPhysicsObject *pPhysGround = GetGroundVPhysics();
+
+	Vector newVelocity;
+	pPhysics->GetPosition( &newPosition, 0 );
+	m_pPhysicsController->GetShadowVelocity( &newVelocity );
+	
+	// assume vphysics gave us back a position without penetration
+	Vector lastValidPosition = newPosition;
+
+	if ( physicsshadowupdate_render.GetBool() )
+	{
+#if defined( GAME_DLL )
+		NDebugOverlay::Box( GetAbsOrigin(), WorldAlignMins(), WorldAlignMaxs(), 255, 0, 0, 24, 15.0f );
+		NDebugOverlay::Box( newPosition, WorldAlignMins(), WorldAlignMaxs(), 0,0,255, 24, 15.0f);
+		//	NDebugOverlay::Box( newPosition, WorldAlignMins(), WorldAlignMaxs(), 0,0,255, 24, .01f);
+#else
+		NDebugOverlay::Box( GetAbsOrigin(), WorldAlignMins(), WorldAlignMaxs(), 255, 255, 0, 24, 15.0f );
+		NDebugOverlay::Box( newPosition, WorldAlignMins(), WorldAlignMaxs(), 0,255,255, 24, 15.0f);
+		//	NDebugOverlay::Box( newPosition, WorldAlignMins(), WorldAlignMaxs(), 0,255,255, 24, .01f);
+#endif
+	}
+
+	Vector tmp = GetAbsOrigin() - newPosition;
+	if ( !m_bTouchedPhysObject && !(GetFlags() & FL_ONGROUND) )
+	{
+		tmp.z *= 0.5f;	// don't care about z delta as much
+	}
+
+	float dist = tmp.LengthSqr();
+	float deltaV = (newVelocity - GetAbsVelocity()).LengthSqr();
+
+	float maxDistErrorSqr = VPHYS_MAX_DISTSQR;
+	float maxVelErrorSqr = VPHYS_MAX_VELSQR;
+	if ( IsRideablePhysics(pPhysGround) )
+	{
+		maxDistErrorSqr *= 0.25;
+		maxVelErrorSqr *= 0.25;
+	}
+
+	// player's physics was frozen, try moving to the game's simulated position if possible
+	if ( m_pPhysicsController->WasFrozen() )
+	{
+		m_bPhysicsWasFrozen = true;
+		// check my position (physics object could have simulated into my position
+		// physics is not very far away, check my position
+		trace_t trace;
+		UTIL_TraceEntity( this, GetAbsOrigin(), GetAbsOrigin(), MASK_PLAYERSOLID, this, COLLISION_GROUP_PLAYER_MOVEMENT, &trace );
+		if ( !trace.startsolid )
+			return;
+
+		// The physics shadow position is probably not in solid, try to move from there to the desired position
+		UTIL_TraceEntity( this, newPosition, GetAbsOrigin(), MASK_PLAYERSOLID, this, COLLISION_GROUP_PLAYER_MOVEMENT, &trace );
+		if ( !trace.startsolid )
+		{
+			// found a valid position between the two?  take it.
+			SetAbsOrigin( trace.endpos );
+			UpdateVPhysicsPosition(trace.endpos, vec3_origin, 0);
+			return;
+		}
+
+	}
+	if ( dist >= maxDistErrorSqr || deltaV >= maxVelErrorSqr || (pPhysGround && !m_bTouchedPhysObject) )
+	{
+		if ( m_bTouchedPhysObject || pPhysGround )
+		{
+			// BUGBUG: Rewrite this code using fixed timestep
+			if ( deltaV >= maxVelErrorSqr && !m_bPhysicsWasFrozen )
+			{
+				if ( !IsRideablePhysics(pPhysGround) )
+				{
+					Vector dir = GetAbsVelocity();
+					float len = VectorNormalize(dir);
+					float dot = DotProduct( newVelocity, dir );
+					if ( dot > len )
+					{
+						dot = len;
+					}
+					else if ( dot < -len )
+					{
+						dot = -len;
+					}
+
+					VectorMA( newVelocity, -dot, dir, newVelocity );
+
+					if ( m_afPhysicsFlags & PFLAG_VPHYSICS_MOTIONCONTROLLER )
+					{
+						float val = Lerp( 0.1f, len, dot );
+						VectorMA( newVelocity, val - len, dir, newVelocity );
+					}
+
+				
+					if ( !(m_afPhysicsFlags & PFLAG_VPHYSICS_MOTIONCONTROLLER ) && IsSimulatingOnAlternateTicks() )
+					{
+						newVelocity *= 0.5f;
+					}
+	
+					ApplyAbsVelocityImpulse( newVelocity );
+				}
+				else
+				{
+					Vector forward, right, up;
+
+					AngleVectors (g_pMoveData->m_vecViewAngles, &forward, &right, &up);  // Determine movement angles
+
+					// Copy movement amounts
+					float fmove = g_pMoveData->m_flForwardMove;
+					float smove = g_pMoveData->m_flSideMove;
+
+					// Keep movement vectors in our plane of movement
+					forward -= Vector(0,0,-1) * DotProduct( forward, Vector(0,0,-1) );
+					VectorNormalize( forward );
+
+					right -= Vector(0,0,-1) * DotProduct( right, Vector(0,0,-1) );
+					VectorNormalize( right );
+
+					// Determine velocity
+					Vector wishvel = fmove * forward + smove * right;
+
+					// HACK!:  This code let's the player walk around with a little more control when on a func_physbox.
+					//		   They still slide around more than physical objects, but at least you can actually
+					//		   control yourself.
+					// Trying to walk around
+					if( wishvel.Length2DSqr() )
+					{
+						Vector vVel = -newVelocity;
+						vVel += GetAbsVelocity() + wishvel;
+
+						// Clamp or else this can get wildy huge and I don't know why
+						for( int i=0; i<3; ++i )
+						{
+							vVel[i] = clamp( vVel[i], newVelocity[i] - 180, newVelocity[i] + 180 );
+						}
+
+						SetAbsVelocity( vVel );
+					}
+
+				}
+			}
+
+			trace_t trace;
+			UTIL_TraceEntity( this, newPosition, newPosition, MASK_PLAYERSOLID, this, COLLISION_GROUP_PLAYER_MOVEMENT, &trace );
+			if ( !trace.allsolid && !trace.startsolid )
+			{
+				SetAbsOrigin( newPosition );
+			}
+		}
+		else
+		{
+#if defined( PORTAL ) && defined( GAME_DLL )
+			CPortal_Player *pPortalPlayer = (CPortal_Player *)this;
+			CPortal_Base2D *pPortalEnvironment = pPortalPlayer->m_hPortalEnvironment.Get();
+			if( pPortalEnvironment != NULL )
+			{
+				trace_t trace;
+
+				Ray_t ray;
+				ray.Init( GetAbsOrigin(), GetAbsOrigin(), WorldAlignMins(), WorldAlignMaxs() );
+
+				CTraceFilterSimple OriginalTraceFilter( this, COLLISION_GROUP_PLAYER_MOVEMENT );
+				CTraceFilterTranslateClones traceFilter( &OriginalTraceFilter );
+
+				enginetrace->TraceRay( ray, MASK_PLAYERSOLID, &traceFilter, &trace );
+
+				if( trace.startsolid )
+				{
+					UTIL_Portal_TraceRay_With( pPortalEnvironment, ray, MASK_PLAYERSOLID, &traceFilter, &trace );
+
+					// current position is not ok, fixup
+					if ( trace.allsolid || trace.startsolid )
+					{
+						//try again with new position
+						ray.Init( newPosition, newPosition, WorldAlignMins(), WorldAlignMaxs() );
+						UTIL_Portal_TraceRay_With( pPortalEnvironment, ray, MASK_PLAYERSOLID, &traceFilter, &trace );
+
+						if( trace.startsolid == false )
+						{
+							SetAbsOrigin( newPosition );
+						}
+						else
+						{
+							Vector vNewCenter = vec3_origin;
+							Vector vExtents = (pPortalPlayer->GetHullMaxs() - pPortalPlayer->GetHullMins()) * 0.5f;
+							Vector vOriginToCenter = (pPortalPlayer->GetHullMaxs() + pPortalPlayer->GetHullMins()) * 0.5f;
+							
+							if( UTIL_FindClosestPassableSpace_InPortal_CenterMustStayInFront( pPortalEnvironment, GetAbsOrigin() + vOriginToCenter, vExtents, pPortalEnvironment->m_plane_Origin.normal, &traceFilter, MASK_PLAYERSOLID, 100, vNewCenter ) &&
+								(pPortalEnvironment->m_plane_Origin.normal.Dot( vNewCenter ) - pPortalEnvironment->m_plane_Origin.dist) >= 0.0f )
+							{
+								SetAbsOrigin( vNewCenter - vOriginToCenter );
+							}
+							else 
+							{
+								VPlane stayInFrontOfPlane;
+								stayInFrontOfPlane.m_Normal = pPortalEnvironment->m_plane_Origin.normal;
+								stayInFrontOfPlane.m_Dist = pPortalEnvironment->m_plane_Origin.dist;
+								if( !(UTIL_FindClosestPassableSpace_CenterMustStayInFrontOfPlane( GetAbsOrigin() + vOriginToCenter, vExtents, newPosition - GetAbsOrigin(), &traceFilter, MASK_PLAYERSOLID, 100, vNewCenter, stayInFrontOfPlane ) &&
+									(pPortalEnvironment->m_plane_Origin.normal.Dot( vNewCenter ) - pPortalEnvironment->m_plane_Origin.dist) >= 0.0f) )
+								{
+									// Try moving the player closer to the center of the portal
+									newPosition += ( pPortalEnvironment->GetAbsOrigin() - WorldSpaceCenter() ) * 0.1f;
+									SetAbsOrigin( newPosition );
+
+									DevMsg( "Hurting the player for FindClosestPassableSpaceFailure!\n" );
+
+									// Deal 1 damage per frame... this will kill a player very fast, but allow for the above correction to fix some cases
+									CTakeDamageInfo info( this, this, vec3_origin, vec3_origin, 1, DMG_CRUSH );
+									OnTakeDamage( info );
+								}
+								else
+								{
+									SetAbsOrigin( vNewCenter - vOriginToCenter );
+								}
+							}
+						}
+					}
+				}
+			}
+			else
+#endif
+			{
+				bCheckStuck = true;
+			}
+		}
+	}
+	else
+	{
+		if ( m_bTouchedPhysObject || (nContactState & PLAYER_CONTACT_GAMEOBJECT) )
+		{
+			// check my position (physics object could have simulated into my position
+			// physics is not very far away, check my position
+			trace_t trace;
+			UTIL_TraceEntity( this, GetAbsOrigin(), GetAbsOrigin(),
+				MASK_PLAYERSOLID, this, COLLISION_GROUP_PLAYER_MOVEMENT, &trace );
+
+			// is current position ok?
+			if ( trace.allsolid || trace.startsolid )
+			{
+				// no use the final stuck check to move back to old if this stuck fix didn't work
+				bCheckStuck = true;
+				lastValidPosition = m_oldOrigin;
+				SetAbsOrigin( newPosition );
+			}
+		}
+	}
+
+	if ( bCheckStuck )
+	{
+		trace_t trace;
+		UTIL_TraceEntity( this, GetAbsOrigin(), GetAbsOrigin(), MASK_PLAYERSOLID, this, COLLISION_GROUP_PLAYER_MOVEMENT, &trace );
+
+		// current position is not ok, fixup
+		if ( trace.allsolid || trace.startsolid )
+		{
+			// STUCK!?!?!
+			//Warning( "Checkstuck failed.  Stuck on %s!!\n", trace.m_pEnt->GetClassname() );
+			SetAbsOrigin( lastValidPosition );
+		}
+	}
+	m_oldOrigin = GetAbsOrigin();
+	m_bPhysicsWasFrozen = false;
+
+#if defined( DEBUG_MOTION_CONTROLLERS )
+	g_vLastPos = newPosition;
+#endif
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CBasePlayer::PostThinkVPhysics( void )
+{
+	// Check to see if things are initialized!
+	if ( !m_pPhysicsController )
+	{
+#if defined( CLIENT_DLL )
+		if( !physenv->IsPredicted() )
+		{
+			if ( GetMoveType() == MOVETYPE_NOCLIP || GetMoveType() == MOVETYPE_OBSERVER )
+			{
+				m_vphysicsCollisionState = VPHYS_NOCLIP;
+			}
+			else if ( GetFlags() & FL_DUCKING )
+			{
+				m_vphysicsCollisionState = VPHYS_CROUCH;
+			}
+			else
+			{
+				m_vphysicsCollisionState = VPHYS_WALK;
+			}
+		}
+#endif
+		return;
+	}
+
+	Vector newPosition = GetAbsOrigin();
+	float frametime = gpGlobals->frametime;
+	if ( frametime <= 0 || frametime > 0.1f )
+		frametime = 0.1f;
+
+	IPhysicsObject *pPhysGround = GetGroundVPhysics();
+
+	if ( !pPhysGround && m_bTouchedPhysObject && g_pMoveData->m_outStepHeight <= 0.f && (GetFlags() & FL_ONGROUND) )
+	{
+		newPosition = m_oldOrigin + frametime * g_pMoveData->m_outWishVel;
+		newPosition = (GetAbsOrigin() * 0.5f) + (newPosition * 0.5f);
+	}
+
+	int collisionState = VPHYS_WALK;
+	if ( GetMoveType() == MOVETYPE_NOCLIP || GetMoveType() == MOVETYPE_OBSERVER )
+	{
+		collisionState = VPHYS_NOCLIP;
+	}
+	else if ( GetFlags() & FL_DUCKING )
+	{
+		collisionState = VPHYS_CROUCH;
+	}
+
+	if ( collisionState != m_vphysicsCollisionState )
+	{
+		SetVCollisionState( GetAbsOrigin(), GetAbsVelocity(), collisionState );
+	}
+
+	if ( !(TouchedPhysics() || pPhysGround) )
+	{
+		float maxSpeed = m_flMaxspeed > 0.0f ? m_flMaxspeed : sv_maxspeed.GetFloat();
+		g_pMoveData->m_outWishVel.Init( maxSpeed, maxSpeed, maxSpeed );
+	}
+
+	// teleport the physics object up by stepheight (game code does this - reflect in the physics)
+	if ( g_pMoveData->m_outStepHeight > 0.1f )
+	{
+		if ( g_pMoveData->m_outStepHeight > 4.0f )
+		{
+			VPhysicsGetObject()->SetPosition( GetAbsOrigin(), vec3_angle, true );
+		}
+		else
+		{
+			// don't ever teleport into solid
+			Vector position, end;
+			VPhysicsGetObject()->GetPosition( &position, NULL );
+			end = position;
+			end.z += g_pMoveData->m_outStepHeight;
+			trace_t trace;
+			UTIL_TraceEntity( this, position, end, MASK_PLAYERSOLID, this, COLLISION_GROUP_PLAYER_MOVEMENT, &trace );
+			if ( trace.DidHit() )
+			{
+				g_pMoveData->m_outStepHeight = trace.endpos.z - position.z;
+			}
+			m_pPhysicsController->StepUp( g_pMoveData->m_outStepHeight );
+		}
+		m_pPhysicsController->Jump();
+	}
+	g_pMoveData->m_outStepHeight = 0.0f;
+
+	// Store these off because after running the usercmds, it'll pass them
+	// to UpdateVPhysicsPosition.	
+	m_vNewVPhysicsPosition = newPosition;
+	m_vNewVPhysicsVelocity = g_pMoveData->m_outWishVel;
+
+	m_oldOrigin = GetAbsOrigin();
+}
+
+
+IPhysicsObject *CBasePlayer::GetGroundVPhysics()
+{
+	CBaseEntity *pGroundEntity = GetGroundEntity();
+	if ( pGroundEntity && pGroundEntity->GetMoveType() == MOVETYPE_VPHYSICS )
+	{
+		IPhysicsObject *pPhysGround = pGroundEntity->VPhysicsGetObject();
+		if ( pPhysGround && pPhysGround->IsMoveable() )
+			return pPhysGround;
+	}
+	return NULL;
+}
+
+// UNDONE: Look and see if the ground entity is in hierarchy with a MOVETYPE_VPHYSICS?
+// Behavior in that case is not as good currently when the parent is rideable
+bool CBasePlayer::IsRideablePhysics( IPhysicsObject *pPhysics )
+{
+	if ( pPhysics )
+	{
+		if ( pPhysics->GetMass() > (VPhysicsGetObject()->GetMass()*2) )
+			return true;
+	}
+
+	return false;
+}
+
+void CBasePlayer::UpdateVPhysicsPosition( const Vector &position, const Vector &velocity, float secondsToArrival )
+{
+	if( !m_pPhysicsController )
+		return;
+
+	bool onground = (GetFlags() & FL_ONGROUND) ? true : false;
+	IPhysicsObject *pPhysGround = GetGroundVPhysics();
+
+	// if the object is much heavier than the player, treat it as a local coordinate system
+	// the player controller will solve movement differently in this case.
+	if ( !IsRideablePhysics(pPhysGround) )
+	{
+		pPhysGround = NULL;
+	}
+#if defined( DEBUG_MOTION_CONTROLLERS )
+	if( (GetFlags() & FL_ONGROUND) == 0 )
+	{
+		Vector vCurPos;
+		m_pPhysicsController->GetShadowPosition( &vCurPos, NULL );
+
+#	if defined( CLIENT_DLL )
+		DebugVelocity( "CBasePlayer::UpdateVPhysicsPosition", vCurPos, position, 255, prediction->IsFirstTimePredicted() ? 0 : 128, 0 );
+		DebugBox( "CBasePlayer::UpdateVPhysicsPosition", vCurPos, Vector( 0.1f, 0.1f, 0.1f ), 0, prediction->IsFirstTimePredicted() ? 0 : 128, 255, 100 ); 
+		DebugBox( "CBasePlayer::UpdateVPhysicsPosition", position, Vector( 0.1f, 0.1f, 0.1f ), 255, prediction->IsFirstTimePredicted() ? 0 : 128, 0, 100 ); 
+#	else
+		DebugVelocity( "CBasePlayer::UpdateVPhysicsPosition", vCurPos, position, 255, 0, 0 );
+		DebugBox( "CBasePlayer::UpdateVPhysicsPosition", vCurPos, Vector( 0.1f, 0.1f, 0.1f ), 0, 0, 255, 100 ); 
+		DebugBox( "CBasePlayer::UpdateVPhysicsPosition", position, Vector( 0.1f, 0.1f, 0.1f ), 255, 0, 0, 100 ); 
+#	endif
+	}
+#endif
+
+	m_pPhysicsController->Update( position, velocity, secondsToArrival, onground, pPhysGround );
+}
+
+// used by the physics gun and game physics... is there a better interface?
+void CBasePlayer::SetPhysicsFlag( int nFlag, bool bSet )
+{
+	if (bSet)
+		m_afPhysicsFlags |= nFlag;
+	else
+		m_afPhysicsFlags &= ~nFlag;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CBasePlayer::SetVCollisionState( const Vector &vecAbsOrigin, const Vector &vecAbsVelocity, int collisionState )
+{
+	m_vphysicsCollisionState = collisionState;
+	if( m_pShadowStand == NULL )
+		return;
+
+	switch( collisionState )
+	{
+	case VPHYS_WALK:
+		m_pShadowStand->SetPosition( vecAbsOrigin, vec3_angle, true );
+		m_pShadowStand->SetVelocity( &vecAbsVelocity, NULL );
+		m_pShadowCrouch->EnableCollisions( false );
+		m_pPhysicsController->SetObject( m_pShadowStand );
+		VPhysicsSwapObject( m_pShadowStand );
+		m_pShadowStand->EnableCollisions( true );
+		break;
+
+	case VPHYS_CROUCH:
+		m_pShadowCrouch->SetPosition( vecAbsOrigin, vec3_angle, true );
+		m_pShadowCrouch->SetVelocity( &vecAbsVelocity, NULL );
+		m_pShadowStand->EnableCollisions( false );
+		m_pPhysicsController->SetObject( m_pShadowCrouch );
+		VPhysicsSwapObject( m_pShadowCrouch );
+		m_pShadowCrouch->EnableCollisions( true );
+		break;
+
+	case VPHYS_NOCLIP:
+		m_pShadowCrouch->EnableCollisions( false );
+		m_pShadowStand->EnableCollisions( false );
+		break;
+	}
+}
+
+void CBasePlayer::UpdatePhysicsShadowToCurrentPosition()
+{
+	UpdateVPhysicsPosition( GetAbsOrigin(), vec3_origin, gpGlobals->frametime );
+}
+
+void CBasePlayer::UpdatePhysicsShadowToPosition( const Vector &vecAbsOrigin )
+{
+	UpdateVPhysicsPosition( vecAbsOrigin, vec3_origin, gpGlobals->frametime );
+}
+
+const char *CBasePlayer::GetPlayerModelName( void )
+{
+	return "models/player.mdl";
+}
+
 float CBasePlayer::GetAirTime( void )
 {
 	return m_flTimeLastTouchedGround == 0.0f ? 0.0f : gpGlobals->curtime - m_flTimeLastTouchedGround;
 }
+
