@@ -322,7 +322,7 @@ void C_PaintStream::DrawBlobs( IMaterial* pMaterial )
 		if (!m_blobs[i])
 			continue;
 		
-		m_blobs[i]->m_pRenderable->PerFrameUpdate();
+		m_blobs[i]->m_hRenderable->PerFrameUpdate();
 		
 	}
 

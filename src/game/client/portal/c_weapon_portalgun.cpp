@@ -178,6 +178,8 @@ BEGIN_NETWORK_TABLE( C_WeaponPortalgun, DT_WeaponPortalgun )
 	RecvPropInt( RECVINFO( m_EffectState ) ),
 	RecvPropEHandle( RECVINFO( m_hPrimaryPortal ) ),
 	RecvPropEHandle( RECVINFO( m_hSecondaryPortal ) ),
+	RecvPropVector( RECVINFO( m_vecBluePortalPos ) ),
+	RecvPropVector( RECVINFO( m_vecOrangePortalPos ) ),
 END_NETWORK_TABLE()
 
 BEGIN_PREDICTION_DATA( C_WeaponPortalgun )
@@ -611,6 +613,31 @@ void C_WeaponPortalgun::DoEffectReady( void )
 //-----------------------------------------------------------------------------
 void C_WeaponPortalgun::DoEffectHolding( void )
 {
+
+#if 0 // TODO: Implement Portal 2 holding beams
+	
+	CNewParticleEffect *pParticleObject = NULL;
+
+	CBaseViewModel *vm = NULL;
+
+	C_BasePlayer *pPlayer = ToBasePlayer( GetOwner() );
+
+	if( pPlayer )
+	{
+		vm = pPlayer->GetViewModel();
+	}
+
+	if( !m_hPortalGunEffectHoldingFP.GetObject() && vm )
+	{
+		m_hPortalGunEffectFP = vm->ParticleProp()->Create( "portalgun_beam_holding_FP", PATTACH_POINT_FOLLOW, "muzzle");
+
+		pParticleObject = m_hPortalGunEffectHoldingFP.GetObject();
+
+	}
+
+
+
+#else // Portal 1 particles
 	int i;
 
 	// Turn on the glow sprites
@@ -681,6 +708,7 @@ void C_WeaponPortalgun::DoEffectHolding( void )
 		m_Beams[i].SetVisible3rdPerson();
 		m_Beams[i].SetBrightness( 128.0f );
 	}
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -740,10 +768,7 @@ void C_WeaponPortalgun::DoEffectNone( void )
 
 void C_WeaponPortalgun::OnPreDataChanged( DataUpdateType_t updateType )
 {
-	//PreDataChanged.m_matrixThisToLinked = m_matrixThisToLinked;
-	m_bOldCanFirePortal1 = m_bCanFirePortal1;
-	m_bOldCanFirePortal1 = m_bCanFirePortal2;
-
+	// TODO: Wtf?
 	BaseClass::OnPreDataChanged( updateType );
 }
 

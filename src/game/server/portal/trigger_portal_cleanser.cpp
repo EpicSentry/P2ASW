@@ -99,7 +99,7 @@ void CTriggerPortalCleanser::Touch( CBaseEntity *pOther )
 
 				if ( pPortalgun->CanFirePortal1() )
 				{
-					CProp_Portal *pPortal = CProp_Portal::FindPortal( pPortalgun->m_iPortalLinkageGroupID, false );
+					CProp_Portal *pPortal = CProp_Portal::FindPortal( pPortalgun->GetLinkageGroupID(), false );
 
 					if ( pPortal && pPortal->IsActive() )
 					{
@@ -114,7 +114,7 @@ void CTriggerPortalCleanser::Touch( CBaseEntity *pOther )
 
 				if ( pPortalgun->CanFirePortal2() )
 				{
-					CProp_Portal *pPortal = CProp_Portal::FindPortal( pPortalgun->m_iPortalLinkageGroupID, true );
+					CProp_Portal *pPortal = CProp_Portal::FindPortal( pPortalgun->GetLinkageGroupID(), true );
 
 					if ( pPortal && pPortal->IsActive() )
 					{

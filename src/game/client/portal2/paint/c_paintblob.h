@@ -22,7 +22,7 @@ public:
 
 	virtual void Init( const Vector &vecOrigin, const Vector &vecVelocity, int paintType, float flMaxStreakTime, float flStreakSpeedDampenRate, CBaseEntity* pOwner, bool bSilent, bool bDrawOnly );
 	
-	C_PaintBlobRenderable *m_pRenderable;
+	CHandle<C_PaintBlobRenderable> m_hRenderable;
 };
 
 class C_PropPaintBomb;

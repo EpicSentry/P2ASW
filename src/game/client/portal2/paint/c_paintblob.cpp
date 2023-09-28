@@ -19,10 +19,10 @@ C_PaintBlob::C_PaintBlob()
 
 C_PaintBlob::~C_PaintBlob()
 {
-	if (m_pRenderable)
+	if (m_hRenderable && m_hRenderable.Get())
 	{
-		delete m_pRenderable;
-		m_pRenderable = NULL;
+		delete m_hRenderable.Get();
+		m_hRenderable = NULL;
 	}
 }
 
@@ -43,12 +43,14 @@ void C_PaintBlob::Init( const Vector &vecOrigin, const Vector &vecVelocity, int 
 {
 	CBasePaintBlob::Init( vecOrigin, vecVelocity, paintType, flMaxStreakTime, flStreakSpeedDampenRate, pOwner, bSilent, bDrawOnly );
 		
-	m_pRenderable = new C_PaintBlobRenderable( this, 0.75 );
+	C_PaintBlobRenderable *pRenderable = new C_PaintBlobRenderable( this, 0.75 );
 		
 	//cl_entitylist->AddNonNetworkableEntity( m_pRenderable->GetIClientUnknown() );
 	//m_pRenderable->PrecacheModel( BLOB_MODEL );
-	m_pRenderable->InitializeAsClientEntity( BLOB_MODEL, false );
-	m_pRenderable->Spawn();
+	pRenderable->InitializeAsClientEntity( BLOB_MODEL, false );
+	pRenderable->Spawn();
+
+	m_hRenderable = pRenderable;
 }
 
 C_PaintBlobRenderable::C_PaintBlobRenderable( C_PropPaintBomb *pPaintBomb, float flModelScale )

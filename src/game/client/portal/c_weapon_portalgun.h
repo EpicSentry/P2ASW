@@ -170,9 +170,6 @@ public:
 	
 	void PostAttack( void );
 	
-	CHandle<CProp_Portal> m_hPrimaryPortal;
-	CHandle<CProp_Portal> m_hSecondaryPortal;
-	
 
 	bool TraceFirePortal( const Vector &vTraceStart, const Vector &vDirection, bool bPortal2, PortalPlacedBy_t ePlacedBy, TracePortalPlacementInfo_t &placementInfo );
 	PortalPlacementResult_t FirePortal( bool bPortal2, Vector *pVector = 0 );
@@ -200,6 +197,14 @@ protected:
 	void	DoEffectReady( void );
 	void	DoEffectHolding( void );
 	void	DoEffectNone( void );
+
+
+	CHandle<CProp_Portal> m_hPrimaryPortal;
+	CHandle<CProp_Portal> m_hSecondaryPortal;
+    CUtlReference<CNewParticleEffect> m_hPortalGunEffectFP;
+    CUtlReference<CNewParticleEffect> m_hPortalGunEffectTP;
+    CUtlReference<CNewParticleEffect> m_hPortalGunEffectHoldingFP;
+    CUtlReference<CNewParticleEffect> m_hPortalGunEffectHoldingTP;
 
 	enum EffectType_t
 	{
