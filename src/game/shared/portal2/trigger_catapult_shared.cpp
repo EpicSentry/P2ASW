@@ -5,24 +5,29 @@
 // $NoKeywords: $
 //=============================================================================//
 
-// copied from portal2 code; original code came with client-predicted counterpart,
-// but implementing predictable triggers in tf2 wasn't trivial so this is just the
-// server component. it works but causes prediction errors.
 #include "cbase.h"
 
 #include "movevars_shared.h"
 
 #if defined( GAME_DLL )
 #include "trigger_catapult.h"
-#include "portal_player.h"
+#include "portal_player.h"				// tf_player -> portal_player
 #include "vcollide_parse.h"
 #include "props.h"
+#include "portal_gamestats.h" 			// Re-added
+#include "npc_portal_turret_floor.h"	// Re-added
 #else
 #include "c_trigger_catapult.h"
 #endif
 
+#include "cegclientwrapper.h"       	// Re-added for CEG stuff
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
+
+
+
+
 
 ConVar catapult_physics_drag_boost( "catapult_physics_drag_boost", "2.1", FCVAR_REPLICATED );
 
@@ -31,7 +36,7 @@ ConVar catapult_physics_drag_boost( "catapult_physics_drag_boost", "2.1", FCVAR_
 // Purpose: calculates the launch vector between the entity that touched the
 //			catapult trigger and the catapult target
 //-----------------------------------------------------------------------------
-Vector CTriggerCatapult::CalculateLaunchVector( CBaseEntity *pVictim, CBaseEntity *pTarget  )
+CEG_NOINLINE Vector CTriggerCatapult::CalculateLaunchVector( CBaseEntity *pVictim, CBaseEntity *pTarget  )
 {
 #if defined( CLIENT_DLL )
 	if( !GetPredictable() || !pVictim->GetPredictable() )
@@ -55,7 +60,10 @@ Vector CTriggerCatapult::CalculateLaunchVector( CBaseEntity *pVictim, CBaseEntit
 
 	// throw at a constant time
 	float time = vecVelocity.Length( ) / flSpeed;
-	vecVelocity = vecVelocity * (1.f / time); // CatapultLaunchVelocityMultiplier
+
+
+	const float CEG_CATAPULT_LAUNCH_VELOCITY_MULTIPLIER = /*CEG_GET_CONSTANT_VALUE( CatapultLaunchVelocityMultiplier );*/ 1.0; // Returns CBaseCombatWeapon (or C_BaseCombatWeapon)::WeaponAutoAimScale which is just 1.0
+	vecVelocity = vecVelocity * (CEG_CATAPULT_LAUNCH_VELOCITY_MULTIPLIER / time);
 
 	// adjust upward toss to compensate for gravity loss
 	vecVelocity.z += flGravity * time * 0.5;
@@ -189,12 +197,12 @@ void CTriggerCatapult::LaunchByTarget( CBaseEntity *pVictim, CBaseEntity *pTarge
 				// If set in the map, use this override time
 				flSupressionTimeInSeconds = m_flAirControlSupressionTime;
 			}
-			//pPlayer->SetAirControlSupressionTime( flSupressionTimeInSeconds * 1000.0f ); // fix units, this method expects milliseconds
+			pPlayer->SetAirControlSupressionTime( flSupressionTimeInSeconds * 1000.0f ); // fix units, this method expects milliseconds
 			pVictim->Teleport( NULL, NULL, &vecVelocity );
 			OnLaunchedVictim( pVictim );
 
 #if defined( GAME_DLL ) && !defined( _GAMECONSOLE ) && !defined( NO_STEAM )
-			//g_PortalGameStats.Event_Catapult_LaunchByTarget( pPlayer, vecVelocity );
+			//g_PortalGameStats.Event_Catapult_LaunchByTarget( pPlayer, vecVelocity ); // TODO: Fix
 #endif
 		}
 	}
@@ -209,7 +217,10 @@ void CTriggerCatapult::LaunchByTarget( CBaseEntity *pVictim, CBaseEntity *pTarge
 				AngularImpulse angImpulse = m_bApplyAngularImpulse ? RandomAngularImpulse( -150.0f, 150.0f ) : vec3_origin;
 				pPhysObject->SetVelocityInstantaneous( &vecVelocity, &angImpulse );
 
-				// UNDONE: don't mess with physics properties 
+				// Force this!
+				float flNull = 0.0f;
+				pPhysObject->SetDragCoefficient( &flNull, &flNull );
+				pPhysObject->SetDamping( &flNull, &flNull );
 
 #if defined( GAME_DLL )
 				CPhysicsProp *pProp = dynamic_cast<CPhysicsProp *>(pVictim);
@@ -270,12 +281,12 @@ void CTriggerCatapult::LaunchByDirection( CBaseEntity *pVictim  )
 				flSupressionTimeInSeconds = m_flAirControlSupressionTime;
 			}
 
-			//CTFPlayer* pTFPlayer = static_cast<CTFPlayer*>(pVictim);
-			//pTFPlayer->SetAirControlSupressionTime( flSupressionTimeInSeconds * 1000.0f ); // fix units, this method expects milliseconds
+			CPortal_Player* pPortalPlayer = static_cast<CPortal_Player*>(pVictim);
+			pPortalPlayer->SetAirControlSupressionTime( flSupressionTimeInSeconds * 1000.0f ); // fix units, this method expects milliseconds
 		}
 
 #if defined( GAME_DLL ) && !defined( _GAMECONSOLE ) && !defined( NO_STEAM )
-		//g_PortalGameStats.Event_Catapult_LaunchByDirection( ToPortalPlayer(pVictim), vecPush );
+		//g_PortalGameStats.Event_Catapult_LaunchByDirection( ToPortalPlayer(pVictim), vecPush ); // TODO: Fix
 #endif
 	}
 #if defined( GAME_DLL )
@@ -316,10 +327,10 @@ void CTriggerCatapult::LaunchByDirection( CBaseEntity *pVictim  )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CTriggerCatapult::OnLaunchedVictim( CBaseEntity *pVictim )
+void CTriggerCatapult::OnLaunchedVictim(CBaseEntity* pVictim)
 {
 #if defined( CLIENT_DLL )
-	if( !GetPredictable() || !pVictim->GetPredictable() )
+	if ( !GetPredictable() || !pVictim->GetPredictable() )
 		return;
 #endif
 
@@ -329,23 +340,32 @@ void CTriggerCatapult::OnLaunchedVictim( CBaseEntity *pVictim )
 
 	if ( pVictim->IsPlayer() )
 	{
-		CPortal_Player *pPlayer = static_cast< CPortal_Player* >( pVictim );
+		CPortal_Player* pPlayer = static_cast< CPortal_Player* >( pVictim );
 		int nRefireIndex = pPlayer->entindex();
 #if defined( GAME_DLL )
-		m_flRefireDelay[ nRefireIndex ] = gpGlobals->curtime + 0.5f; // HACK!
+		m_flRefireDelay[ nRefireIndex ] = gpGlobals->curtime + 0.1f; // HACK!
 #else
-		m_flRefireDelay[ nRefireIndex ] = gpGlobals->curtime + 0.5f; // HACK!
+		m_flRefireDelay[ nRefireIndex ] = gpGlobals->curtime + 0.1f; // HACK!
 #endif
 	}
 	else
 	{
 #if defined( GAME_DLL )
-		m_flRefireDelay[ 0 ] = gpGlobals->curtime + 0.5f; // HACK!
+		m_flRefireDelay[0] = gpGlobals->curtime + 0.1f; // HACK!
+		// TODO: Fix
+		//if ( pVictim->ClassMatches( "npc_portal_turret_floor" ) ) // Line 356
+		//{
+		//	CNPC_Portal_FloorTurret* pVictim = static_cast<CNPC_Portal_FloorTurret*>(pVictim);
+		//	if ( pVictim->GetPreviousHeldOwner() ) // Line 359
+		//	{
+		//		UTIL_RecordAchievementEvent( "ACH.LAUNCH_TURRET", pVictim->GetPreviousHeldOwner() ); // Line 361
+		//	}
+		//}
 #else
-		m_flRefireDelay[ 0 ] = gpGlobals->curtime + 0.5f; // HACK!
+		m_flRefireDelay[0] = gpGlobals->curtime + 0.1f; // HACK!
 #endif
 	}
-}
+} // Line 368
 
 
 
@@ -354,7 +374,7 @@ void CTriggerCatapult::OnLaunchedVictim( CBaseEntity *pVictim )
 // Purpose: 
 //-----------------------------------------------------------------------------
 void CTriggerCatapult::StartTouch( CBaseEntity *pOther )
-{
+{ // Line 377
 	if ( pOther == NULL )
 		return;
 
@@ -382,18 +402,8 @@ void CTriggerCatapult::StartTouch( CBaseEntity *pOther )
 		Warning( "CTriggerCatapult::StartTouch Trying to store a refire index for an entity( %d ) outside the expected range ( < %d ).\n", nRefireIndex, MAX_PLAYERS + 1 );
 		nRefireIndex = 0;
 	}
-
 	if ( m_flRefireDelay[ nRefireIndex ] > gpGlobals->curtime )
-	{
-		// but also don't forget to try again
-		if ( m_hAbortedLaunchees.Find( pOther ) == -1 )
-		{
-			m_hAbortedLaunchees.AddToTail( pOther );
-		}
-		SetThink( &CTriggerCatapult::LaunchThink );
-		SetNextThink( gpGlobals->curtime + 0.05f );
 		return;
-	}
 
 #if defined( GAME_DLL )
 	// Don't touch things the player is holding
@@ -440,7 +450,7 @@ void CTriggerCatapult::StartTouch( CBaseEntity *pOther )
 			}
 			else
 			{
-//				DevMsg("Catapult fail!!  Object is not a player and has no physics object!  BUG THIS\n");
+				DevMsg("Catapult fail!!  Object is not a player and has no physics object!  BUG THIS\n");
 				vecVictim = vec3_origin;
 			}
 
@@ -480,17 +490,17 @@ void CTriggerCatapult::StartTouch( CBaseEntity *pOther )
 					{
 						// Launch!
 						LaunchByTarget( pOther, pLaunchTarget );
-//						DevMsg( 1, "Catapult \"%s\" is adjusting velocity of \"%s\" so it will hit the target. (Object Velocity: %.1f -- Object needed to be between %.1f and %.1f \n", STRING(GetEntityName()), pOther->GetClassname(), flVictimSpeed, flLaunchSpeed - (flLaunchSpeed * m_flLowerThreshold ), flLaunchSpeed + (flLaunchSpeed * m_flUpperThreshold ) );
+						DevMsg( 1, "Catapult \"%s\" is adjusting velocity of \"%s\" so it will hit the target. (Object Velocity: %.1f -- Object needed to be between %.1f and %.1f \n", STRING(GetEntityName()), pOther->GetClassname(), flVictimSpeed, flLaunchSpeed - (flLaunchSpeed * m_flLowerThreshold ), flLaunchSpeed + (flLaunchSpeed * m_flUpperThreshold ) );
 					}
 				}
 				else
 				{
-//					DevMsg( 1, "Catapult \"%s\" ignoring object \"%s\" because its velocity is outside of the threshold. (Object Velocity: %.1f -- Object needed to be between %.1f and %.1f \n", STRING(GetEntityName()), pOther->GetClassname(), flVictimSpeed, flLaunchSpeed - (flLaunchSpeed * m_flLowerThreshold ), flLaunchSpeed + (flLaunchSpeed * m_flUpperThreshold ) );
+					DevMsg( 1, "Catapult \"%s\" ignoring object \"%s\" because its velocity is outside of the threshold. (Object Velocity: %.1f -- Object needed to be between %.1f and %.1f \n", STRING(GetEntityName()), pOther->GetClassname(), flVictimSpeed, flLaunchSpeed - (flLaunchSpeed * m_flLowerThreshold ), flLaunchSpeed + (flLaunchSpeed * m_flUpperThreshold ) );
 					// since we attempted a fling set the refire delay
 #if defined( GAME_DLL )
-					m_flRefireDelay[ nRefireIndex ] = gpGlobals->curtime + 0.5f; // HACK!
+					m_flRefireDelay[ nRefireIndex ] = gpGlobals->curtime + 0.1f; // HACK!
 #else
-					m_flRefireDelay[ nRefireIndex ] = gpGlobals->curtime + 0.5f; // HACK!
+					m_flRefireDelay[ nRefireIndex ] = gpGlobals->curtime + 0.1f; // HACK!
 #endif
 				}
 			}
@@ -498,9 +508,9 @@ void CTriggerCatapult::StartTouch( CBaseEntity *pOther )
 			{
 				// we're facing the wrong way.  set the refire delay.
 #if defined( GAME_DLL )
-				m_flRefireDelay[ nRefireIndex ] = gpGlobals->curtime + 0.5f; // HACK!
+				m_flRefireDelay[ nRefireIndex ] = gpGlobals->curtime + 0.1f; // HACK!
 #else
-				m_flRefireDelay[ nRefireIndex ] = gpGlobals->curtime + 0.5f; // HACK!
+				m_flRefireDelay[ nRefireIndex ] = gpGlobals->curtime + 0.1f; // HACK!
 #endif
 			}
 		}
@@ -538,7 +548,7 @@ void CTriggerCatapult::StartTouch( CBaseEntity *pOther )
 			}
 			else
 			{
-//				DevMsg("Catapult fail!!  Object is not a player and has no physics object!  BUG THIS\n");
+				DevMsg("Catapult fail!!  Object is not a player and has no physics object!  BUG THIS\n");
 				vecVictim = vec3_origin;
 			}
 
@@ -556,6 +566,9 @@ void CTriggerCatapult::StartTouch( CBaseEntity *pOther )
 
 		if( bShouldLaunch )
 		{
+#if defined( CLIENT_DLL )
+			CEG_PROTECT_VIRTUAL_FUNCTION ( CTriggerCatapult_StartTouch );
+#endif
 			if( m_bOnlyVelocityCheck )
 			{
 				OnLaunchedVictim( pOther );
