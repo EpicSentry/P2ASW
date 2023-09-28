@@ -5,6 +5,8 @@
 #include "beam_shared.h"
 #include "baseanimating.h"
 
+class CPropWeightedCube;
+
 class CPortalLaser : public CBaseAnimating
 {
 public:
@@ -13,22 +15,23 @@ public:
 	//DECLARE_SERVERCLASS();
 
 	CPortalLaser();
-
-	virtual void Think(void);
-	virtual void Spawn(void);
-	virtual void Precache(void);
-	virtual void LaserOff(void);
-	virtual void LaserOn(void);
-	virtual void UpdateLaser(void);
+	
+	virtual void Spawn( void );
+	virtual void Precache( void );
+	virtual void UpdateOnRemove( void );
+	virtual void Think( void );
+	virtual void LaserOff( void );
+	virtual void LaserOn( void );
+	virtual void UpdateLaser( void );
 	virtual void DoTraceFromPortal( CPortal_Base2D* pRemotePortal, trace_t &tr, Vector vecMuzzleDir );
-	virtual float LaserEndPointSize(void);
-	void NotifyCubeLaserContact(CBaseEntity* pCube);
+	virtual float LaserEndPointSize( void );
+	void NotifyCubeLaserContact( CBaseEntity* pCube );
 	// Input functions
 	void InputTurnOn(inputdata_t& inputData);
 	void InputTurnOff(inputdata_t& inputData);
 	void InputToggle(inputdata_t& inputData);
 
-	void DamageAllCatchersInRay( Ray_t &ray );
+	void DamageAllTargetsInRay( Ray_t &ray );
 
 	bool IsLaserOn() const { return m_bLaserOn; }
 
@@ -37,12 +40,14 @@ public:
 	//Handling laser on cube
 	bool IsLaserHittingCube();
 	bool m_bIsLaserHittingCube;
+	/*
 	//Handling laser on catcher
 	bool IsLaserHittingCatcher();
 	bool m_bIsLaserHittingCatcher;
 	//Handling remote portal catcher
 	bool IsLaserHittingPortalCatcher();
 	bool m_bIsLaserHittingPortalCatcher;
+	*/
 	//Hitting a portal?
 	bool m_bIsHittingPortal;
 	/*
@@ -51,10 +56,13 @@ public:
 	CNetworkVar(Vector, vecNetOrigin);
 	CNetworkVar(Vector, vecNetMuzzleDir);
 	*/
+
+	bool m_bLaserOnly;
+	bool m_bIsLaserExtender;
+
 private:
 	CBeam* m_pBeam;
 
-	int m_spawnFlags;
 	bool m_bStartOff; // To check the start state
 	bool m_bLaserOn;
 	int m_iLaserAttachmentIndex;
@@ -69,7 +77,9 @@ private:
 	
 	float m_flLastDamageTime;
 	float m_flLastDamageSoundTime;
-	
+	float m_flLastSparkTime;
+
+	CHandle<CPropWeightedCube> m_hReflectorCube;
 
 };
 

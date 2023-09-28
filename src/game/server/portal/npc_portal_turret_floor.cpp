@@ -16,6 +16,7 @@
 #include "rope_shared.h"
 #include "prop_portal_shared.h"
 #include "sprite.h"
+#include "particle_parse.h"
 
 int ACT_FLOOR_TURRET_FIRE2;
 
@@ -55,8 +56,6 @@ LINK_ENTITY_TO_CLASS( npc_portal_turret_floor, CNPC_Portal_FloorTurret );
 
 //Datatable
 BEGIN_DATADESC( CNPC_Portal_FloorTurret )
-
-	DEFINE_ARRAY( m_hRopes, FIELD_EHANDLE, PORTAL_FLOOR_TURRET_NUM_ROPES ),
 
 	DEFINE_FIELD( m_bOutOfAmmo, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_bLaserOn, FIELD_BOOLEAN ),
@@ -135,6 +134,7 @@ void CNPC_Portal_FloorTurret::Precache( void )
 	PrecacheModel("effects/redlaser1.vmt");
 	//PrecacheParticleSystem("ShakeRopes");
 	PrecacheParticleSystem("AR2Tracer");
+	PrecacheParticleSystem("burning_character");
 
 	for ( int iTalkScript = 0; iTalkScript < PORTAL_TURRET_STATE_TOTAL; ++iTalkScript )
 	{
@@ -250,7 +250,6 @@ void CNPC_Portal_FloorTurret::UpdateOnRemove( void )
 		EmitSound( GetTurretTalkName( PORTAL_TURRET_DISSOLVED ) );
 
 	LaserOff();
-	RopesOff();
 	BaseClass::UpdateOnRemove();
 }
 
@@ -313,13 +312,6 @@ void CNPC_Portal_FloorTurret::OnPhysGunPickup( CBasePlayer *pPhysGunUser, PhysGu
 
 void CNPC_Portal_FloorTurret::NotifySystemEvent(CBaseEntity *pNotify, notify_system_event_t eventType, const notify_system_event_params_t &params )
 {
-	// On teleport, we record a pointer to the portal we are arriving at
-	if ( eventType == NOTIFY_EVENT_TELEPORT )
-	{
-		RopesOff();
-		RopesOn();
-	}
-
 	BaseClass::NotifySystemEvent( pNotify, eventType, params );
 }
 
@@ -677,7 +669,6 @@ void CNPC_Portal_FloorTurret::Retire( void )
 void CNPC_Portal_FloorTurret::Deploy( void )
 {
 	LaserOn();
-	RopesOn();
 
 	BaseClass::Deploy();
 }
@@ -1017,21 +1008,11 @@ void CNPC_Portal_FloorTurret::SearchThink( void )
 	//Turn and ping
 	UpdateFacing();
 	Ping();
-
-	// Update rope positions
-	for ( int iRope = 0; iRope < PORTAL_FLOOR_TURRET_NUM_ROPES; ++iRope )
-	{
-		if ( m_hRopes[ iRope ] )
-		{
-			m_hRopes[ iRope ]->EndpointsChanged();
-		}
-	}
 }
 
 void CNPC_Portal_FloorTurret::AutoSearchThink( void )
 {
 	LaserOn();
-	RopesOff();
 
 	BaseClass::AutoSearchThink();
 }
@@ -1055,7 +1036,6 @@ void CNPC_Portal_FloorTurret::TippedThink( void )
 	}
 
 	LaserOn();
-	RopesOn();
 
 	//See if we should continue to thrash
 	if ( gpGlobals->curtime < m_flThrashTime && !IsDissolving() )
@@ -1145,7 +1125,6 @@ void CNPC_Portal_FloorTurret::TippedThink( void )
 				// Start thinking slowly to see if we're ever set upright somehow
 				SetThink( &CNPC_FloorTurret::InactiveThink );
 				SetNextThink( gpGlobals->curtime + 1.0f );
-				RopesOff();
 			}
 		}
 	}
@@ -1177,7 +1156,6 @@ void CNPC_Portal_FloorTurret::HeldThink( void )
 	}
 
 	LaserOn();
-	RopesOn();
 
 	//See if we should continue to thrash
 	if ( !IsDissolving() )
@@ -1201,7 +1179,6 @@ void CNPC_Portal_FloorTurret::HeldThink( void )
 void CNPC_Portal_FloorTurret::InactiveThink( void )
 {
 	LaserOff();
-	RopesOff();
 
 	// Update our PVS state
 	CheckPVSCondition();
@@ -1241,7 +1218,6 @@ void CNPC_Portal_FloorTurret::DisabledThink(void)
 	float thinkTime;
 
 	LaserOff();
-	RopesOff();
 
 	if (this->m_bUsedAsActor)
 	{
@@ -1266,6 +1242,8 @@ void CNPC_Portal_FloorTurret::DisabledThink(void)
 void CNPC_Portal_FloorTurret::StartBurningThink( void )
 {
 	PreThink( (turretState_e)PORTAL_TURRET_STARTBURNING );
+		
+	//DispatchParticleEffect( "burning_character", PATTACH_ABSORIGIN_FOLLOW, this );
 
 	Ignite( 10.0 );
 
@@ -1427,45 +1405,6 @@ void CNPC_Portal_FloorTurret::LaserOn( void )
 {
 	m_bLaserOn = true;
 }
-
-void CNPC_Portal_FloorTurret::RopesOn( void )
-{
-	for ( int iRope = 0; iRope < PORTAL_FLOOR_TURRET_NUM_ROPES; ++iRope )
-	{
-		// Make a rope if it doesn't exist
-		if ( !m_hRopes[ iRope ] )
-		{
-			CFmtStr str;
-
-			int iStartIndex = LookupAttachment( str.sprintf( "Wire%i_start", iRope + 1 ) );
-			int iEndIndex = LookupAttachment( str.sprintf( "Wire%i_end", iRope + 1 ) );
-
-			m_hRopes[ iRope ] = CRopeKeyframe::Create( this, this, iStartIndex, iEndIndex );
-			if ( m_hRopes[ iRope ] )
-			{
-				m_hRopes[ iRope ]->m_Width = 0.7;
-				m_hRopes[ iRope ]->m_nSegments = ROPE_MAX_SEGMENTS;
-				m_hRopes[ iRope ]->EnableWind( false );
-				m_hRopes[ iRope ]->SetupHangDistance( 9.0f );
-				m_hRopes[ iRope ]->m_bConstrainBetweenEndpoints = true;;
-			}
-		}
-	}
-}
-
-void CNPC_Portal_FloorTurret::RopesOff( void )
-{
-	for ( int iRope = 0; iRope < PORTAL_FLOOR_TURRET_NUM_ROPES; ++iRope )
-	{
-		// Remove rope if it's alive
-		if ( m_hRopes[ iRope ] )
-		{
-			 UTIL_Remove( m_hRopes[ iRope ] );
-			 m_hRopes[ iRope ] = NULL;
-		}
-	}
-}
-
 void CNPC_Portal_FloorTurret::FireBullet( const char *pTargetName )
 {
 	CBaseEntity *pEnemy = gEntList.FindEntityByName( NULL, pTargetName );

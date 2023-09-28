@@ -9,8 +9,6 @@
 #include "ammodef.h"
 #include "ai_senses.h"
 #include "ai_memory.h"
-#include "rope.h"
-#include "rope_shared.h"
 #include "prop_portal_shared.h"
 #include "sprite.h"
 #include "paint/player_pickup_paint_power_user.h"
@@ -39,8 +37,6 @@
 #define TURRET_FLOOR_DAMAGE_MULTIPLIER 3.0f
 #define TURRET_FLOOR_BULLET_FORCE_MULTIPLIER 0.4f
 #define TURRET_FLOOR_PHYSICAL_FORCE_MULTIPLIER 135.0f
-
-#define PORTAL_FLOOR_TURRET_NUM_ROPES 4
 
 //Turret states
 enum portalTurretState_e
@@ -138,8 +134,6 @@ public:
 	bool	IsLaserOn( void ) { return m_bLaserOn; }
 	void	LaserOff( void );
 	void	LaserOn( void );
-	void	RopesOn();
-	void	RopesOff();
 
 	void	FireBullet( const char *pTargetName );
 
@@ -152,9 +146,7 @@ public:
 
 	virtual void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 private:
-
-	CHandle<CRopeKeyframe>	m_hRopes[ PORTAL_FLOOR_TURRET_NUM_ROPES ];
-
+	
 	CNetworkVar( bool, m_bOutOfAmmo );
 	CNetworkVar( bool, m_bLaserOn );
 	CNetworkVar( int, m_sLaserHaloSprite );

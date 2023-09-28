@@ -38,7 +38,10 @@ LINK_ENTITY_TO_CLASS( point_laser_target, CPortalLaserTarget );
 #define LASER_CATCHER_CENTER_NAME "models/props/laser_catcher_center.mdl"
 #define LASER_RELAY_NAME "models/props/laser_receptacle.mdl"
 
-Vector vLaserCatcherExtents( 11.0, 11.0, 11.0 );    // CLaserCatcher default extent
+// These extents just aren't big enough
+//Vector vLaserCatcherExtents( 11.0, 11.0, 11.0 );    // CLaserCatcher default extent
+
+Vector vLaserCatcherExtents( 16.0, 16.0, 16.0 );    // CLaserCatcher default extent
 Vector vRelayExtents( 10.0, 10.0, 17.0 );           // CLaserRelay default extent
 
 //-----------------------------------------------------------------------------
@@ -85,7 +88,6 @@ void CPortalLaserTarget::Spawn()
 //-----------------------------------------------------------------------------
 int CPortalLaserTarget::OnTakeDamage( const CTakeDamageInfo &info )
 {
-	Msg("DAMAGE!!!\n");
     if ( IsPowered() ) // Replaced with optimized function "IsPowered" (Line 84)
     {
         // Continue thinking

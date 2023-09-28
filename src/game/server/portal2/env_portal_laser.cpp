@@ -8,6 +8,7 @@
 #include "util_shared.h"
 #include "prop_weightedcube.h"
 #include "point_laser_target.h"
+#include "physicsshadowclone.h"
 
 // constants
 const int CPortalLaser::LASER_EYE_ATTACHMENT = 1;
@@ -42,12 +43,18 @@ CPortalLaser::CPortalLaser()
 {
 	m_flLastDamageTime = 0.0;
 	m_flLastDamageSoundTime = 0.0;
+	m_bLaserOnly = false;
+	m_bStartOff = false;
+	m_flLastSparkTime = false;
+	m_bIsLaserExtender = false;
+
+	m_hReflectorCube = NULL;
 }
 
 void CPortalLaser::Think()
 {
 	// Schedule the next think
-	SetNextThink(gpGlobals->curtime + 0.1f);
+	SetNextThink(gpGlobals->curtime + 0.015f);
 
 	if (m_bLaserOn)
 	{
@@ -57,6 +64,8 @@ void CPortalLaser::Think()
 
 void CPortalLaser::UpdateLaser()
 {
+	bool bShouldSpark = true;
+
 	Vector vecOrigin = GetAbsOrigin(); 
 	QAngle angMuzzleDir;
 	GetAttachment(LASER_ATTACHMENT, vecOrigin, angMuzzleDir);
@@ -80,8 +89,6 @@ void CPortalLaser::UpdateLaser()
 	ray.Init( vecOrigin, vecOrigin + vecMuzzleDir * LASER_RANGE );
 	UTIL_Portal_TraceRay( ray, MASK_SHOT, &masterTraceFilter, &normalTrace );
 
-	// Check if were is the cube or a catcher
-	m_bIsLaserHittingCatcher = false;
 	m_bIsLaserHittingCube = false;
 
 	CBaseEntity *pEntity = normalTrace.m_pEnt;
@@ -90,15 +97,37 @@ void CPortalLaser::UpdateLaser()
 	{
 		// It's possible for a laser to hit a cube and a catcher at the same time.
 		CPropWeightedCube *pCube = dynamic_cast<CPropWeightedCube*>( pEntity );
-		CLaserCatcher *pCatcher = dynamic_cast<CLaserCatcher*>( pEntity );
 
 		if ( pCube && pCube->GetCubeType() == CUBE_REFLECTIVE )
 		{
+			bShouldSpark = false;
+
+			m_hReflectorCube = pCube;
 			m_bIsLaserHittingCube = true;
+
+			if (!pCube->HasLaser())
+			{
+				CPortalLaser *pNewLaser = (CPortalLaser*)CreateEntityByName("env_portal_laser");
+				pNewLaser->m_bLaserOnly = true;
+				pNewLaser->m_bIsLaserExtender = true;
+				pNewLaser->SetParent( pCube );
+				pNewLaser->SetAbsOrigin( pCube->GetAbsOrigin() );
+				pNewLaser->SetAbsAngles( pCube->GetAbsAngles() );
+				DispatchSpawn( pNewLaser );
+				pCube->SetLaser( pNewLaser );
+			}			
 		}
-		if ( pCatcher )
+		else
 		{
-			m_bIsLaserHittingCatcher = true;
+
+			bShouldSpark = !FClassnameIs( pEntity, "prop_laser_catcher" );
+
+			if ( m_hReflectorCube.Get() )
+			{
+				UTIL_Remove( m_hReflectorCube->GetLaser() );
+				m_hReflectorCube->SetLaser( NULL );
+				m_hReflectorCube = NULL;
+			}
 		}
 	}
 	
@@ -120,7 +149,31 @@ void CPortalLaser::UpdateLaser()
 		// No need to do a cast here since there's no player specific functions to call
 		CBaseEntity *pPlayerTraceEnt = playerTrace.m_pEnt;
 
-		if (pPlayerTraceEnt && pPlayerTraceEnt->IsPlayer())
+		bool bPlayer = false;
+
+		if (!pPlayerTraceEnt)
+		{
+			bPlayer = false;
+		}
+		else
+		{
+			bPlayer = pPlayerTraceEnt->IsPlayer();
+			
+			if (!bPlayer)
+			{				
+				if( CPhysicsShadowClone::IsShadowClone( pPlayerTraceEnt ) )
+				{
+					CBaseEntity *pCloned = ((CPhysicsShadowClone *)pPlayerTraceEnt)->GetClonedEntity();
+					if ( pCloned )
+					{
+						bPlayer = pCloned->IsPlayer();
+					}
+				}
+			}
+
+		}
+
+		if ( bPlayer )
 		{
 			// Player is touching the laser beam, deal damage and push them
 			Vector vecPushDir = (pPlayerTraceEnt->GetAbsOrigin() - vecOrigin);
@@ -155,7 +208,6 @@ void CPortalLaser::UpdateLaser()
 		m_pBeam->SetCollisionGroup(COLLISION_GROUP_NONE);
 		m_pBeam->PointsInit(vecOrigin + vecMuzzleDir * LASER_RANGE, vecOrigin);
 		m_pBeam->SetBeamFlag(FBEAM_REVERSED);
-		m_pBeam->SetDamage(100);
 		m_pBeam->SetStartEntity(this);
 	}
 	else
@@ -188,10 +240,9 @@ void CPortalLaser::UpdateLaser()
 		//Msg("Main Trace End Point: (%f, %f, %f)\n", vEndPoint.x, vEndPoint.y, vEndPoint.z);
 	}
 	
-	Assert(m_pBeam);
+	// Note: This gives us an assert, but we need it for turrets
+	m_pBeam->BeamDamageInstant( &trace, 0 );
 
-	m_pBeam->BeamDamage( &trace );
-#if 1
 	// Check if the trace hits any portals
 	CPortal_Base2D* pLocalPortal = NULL;
 	CPortal_Base2D* pRemotePortal = NULL;
@@ -216,20 +267,39 @@ void CPortalLaser::UpdateLaser()
 		// No portal hit
 		//Msg("No portal hit\n"); No need to do anything else from here.
 	}
-#endif
+
 	//v_vHitPos = vEndPoint;
 	m_pBeam->PointsInit(vEndPoint, vecOrigin);
-
-	g_pEffects->Sparks(vEndPoint, 2, 2, &vecMuzzleDir);
 	
+	// Our high thinkrate means we're creating too many sparks, so let's do this
+	if (gpGlobals->curtime - m_flLastSparkTime <= 0.1f)
+	{
+		bShouldSpark = false;
+	}
+
+	if ( bShouldSpark )
+	{
+		// laser_cutter_sparks doesn't work for some reason
+#if 0
+		QAngle qPlaneNormal;
+		VectorAngles( trace.plane.normal, qPlaneNormal );
+
+		m_flLastSparkTime = gpGlobals->curtime;
+		DispatchParticleEffect( "laser_cutter_sparks", normalTrace.endpos, qPlaneNormal );
+#else
+		m_pBeam->PointsInit(vEndPoint, vecOrigin);
+
+		g_pEffects->Sparks(vEndPoint, 2, 2, &vecMuzzleDir);
+#endif
+	}
 	Ray_t targetRay;
 	targetRay.Init( normalTrace.startpos, normalTrace.endpos );
 
-	DamageAllCatchersInRay( targetRay );
+	DamageAllTargetsInRay( targetRay );
 
 }
 
-void CPortalLaser::DamageAllCatchersInRay( Ray_t &ray )
+void CPortalLaser::DamageAllTargetsInRay( Ray_t &ray )
 {
 	CBaseEntity *list[1024];
 
@@ -246,9 +316,6 @@ void CPortalLaser::DamageAllCatchersInRay( Ray_t &ray )
 			CPortalLaserTarget *pTarget = static_cast<CPortalLaserTarget*>( list[i] );
 			
 			Assert(pTarget);
-
-			Msg("Found a target!!");
-
 			CTakeDamageInfo info;
 			info.SetAttacker(this);
 			info.SetInflictor(this);
@@ -305,25 +372,12 @@ void CPortalLaser::DoTraceFromPortal( CPortal_Base2D* pRemotePortal, trace_t &tr
 
 	//UTIL_TraceLine( vecRemoteOrigin, vecRemoteOrigin + vecRemoteMuzzleDir * LASER_RANGE, MASK_SHOT, &remoteTraceFilter, &remoteTrace );
 
-	NDebugOverlay::Line(vecRemoteOrigin, remoteTrace.endpos, 132, 0, 255, true, 10.0f);
-
 	// Check if the trace hits a laser catcher
 	if (remoteTrace.m_pEnt)
 	{
 		// Print the class name and position of the hit entity
 		DevMsg("Hit entity class name: %s at: %.2f %.2f %.2f\n", remoteTrace.m_pEnt->GetClassname(),
 			remoteTrace.m_pEnt->GetAbsOrigin().x, remoteTrace.m_pEnt->GetAbsOrigin().y, remoteTrace.m_pEnt->GetAbsOrigin().z);
-
-		if (FClassnameIs(remoteTrace.m_pEnt, "prop_laser_catcher"))
-		{
-			//Msg("Hit catcher!\n");
-			m_bIsLaserHittingPortalCatcher = true;
-		}
-		else
-		{
-			//Msg("No Catcher hit\n");
-			m_bIsLaserHittingPortalCatcher = false;
-		}
 	}
 	else
 	{
@@ -359,19 +413,28 @@ void CPortalLaser::DoTraceFromPortal( CPortal_Base2D* pRemotePortal, trace_t &tr
 	}
 	*/
 
-	DamageAllCatchersInRay( ray );
+	DamageAllTargetsInRay( ray );
 
 }
 
 
 void CPortalLaser::Spawn(void)
 {
-	//Msg("Laser Init\n");
 	Precache();
-	SetSolid(SOLID_BBOX);
-	SetMoveType(MOVETYPE_NONE);
-	SetModel("models/props/laser_emitter_center.mdl"); // Default model if it is not defined as a keyvalue
+	SetMoveType( MOVETYPE_NONE );
+	
+	if (!m_bLaserOnly)
+	{
+		SetSolid( SOLID_BBOX );
+	}
+	else
+	{
+		AddEffects( EF_NODRAW );
+	}
 
+	// Note: We must have a model for angMuzzleDir
+	SetModel("models/props/laser_emitter_center.mdl"); // Default model if it is not defined as a keyvalue
+	
 	// Check if the entity has a keyvalue for "model" and use that value to set the model path
 	if (m_modelName != NULL_STRING)
 	{
@@ -384,12 +447,10 @@ void CPortalLaser::Spawn(void)
 
 	if (m_bStartOff)
 	{
-		Msg("Laser state set to OFF\n");
 		LaserOff();
 	}
 	else
 	{
-		Msg("Laser state set to ON\n");
 		LaserOn();
 	}
 
@@ -400,13 +461,26 @@ void CPortalLaser::Spawn(void)
 	BaseClass::Spawn();
 }
 
+void CPortalLaser::UpdateOnRemove( void )
+{
+	LaserOff();
+	UTIL_Remove(m_pBeam);
+	BaseClass::UpdateOnRemove();
+}
+
 void CPortalLaser::Precache(void)
 {
-	Msg("Laser Precache\n");
 	// Precache the model using the stored model path
 	PrecacheModel(STRING(m_modelName));
 	PrecacheModel("models/props/laser_emitter_center.mdl");
+
 	PrecacheScriptSound( "HL2Player.BurnPain" );
+	if (!m_bIsLaserExtender)
+		PrecacheParticleSystem( "laser_start_glow" );
+	else		
+		PrecacheParticleSystem( "reflector_start_glow" );
+
+	PrecacheParticleSystem( "laser_cutter_sparks" );
 }
 
 void CPortalLaser::LaserOff(void)
@@ -416,6 +490,15 @@ void CPortalLaser::LaserOff(void)
 	if (m_pBeam)
 	{
 		m_pBeam->AddEffects(EF_NODRAW);
+	}
+	
+	StopParticleEffects( this );
+	
+	CPropWeightedCube *pReflectorCube = dynamic_cast<CPropWeightedCube*>(GetParent());
+
+	if (pReflectorCube)
+	{			
+		StopParticleEffects( pReflectorCube );
 	}
 }
 //start laseron
@@ -450,7 +533,6 @@ void CPortalLaser::LaserOn(void)
 
 	if (!bFoundAttachment)
 	{
-		Msg("Laser Attachment NOT Found: laser_attachment\n");
 		LaserOff();
 		return;
 	}
@@ -468,7 +550,7 @@ void CPortalLaser::LaserOn(void)
 		//m_pBeam->SetColor(255, 32, 32);
 		m_pBeam->SetBrightness(92);
 		m_pBeam->SetNoise(0);
-		m_pBeam->SetWidth(10.0f);
+		m_pBeam->SetWidth(24.0f);
 		m_pBeam->SetEndWidth(0);
 		m_pBeam->SetScrollRate(0);
 		m_pBeam->SetFadeLength(0);
@@ -498,6 +580,18 @@ void CPortalLaser::LaserOn(void)
 		vEndPoint = vecOrigin + vecMuzzleDir * LASER_RANGE * fEndFraction;
 
 	m_pBeam->PointsInit(vEndPoint, vecOrigin);
+	
+	if (!m_bIsLaserExtender)
+		DispatchParticleEffect( "laser_start_glow", PATTACH_POINT_FOLLOW, this, "laser_attachment", true, -1 );
+	else
+	{
+		CPropWeightedCube *pReflectorCube = dynamic_cast<CPropWeightedCube*>(GetParent());
+
+		if (pReflectorCube)
+		{
+			DispatchParticleEffect( "reflector_start_glow", PATTACH_ABSORIGIN_FOLLOW, pReflectorCube );
+		}
+	}
 }
 
 //end laseron
@@ -534,14 +628,4 @@ float CPortalLaser::LaserEndPointSize(void)
 bool CPortalLaser::IsLaserHittingCube()
 {
 	return m_bIsLaserHittingCube;
-}
-
-bool CPortalLaser::IsLaserHittingCatcher()
-{
-	return m_bIsLaserHittingCatcher;
-}
-
-bool CPortalLaser::IsLaserHittingPortalCatcher()
-{
-	return m_bIsLaserHittingPortalCatcher;
 }
