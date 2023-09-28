@@ -2506,8 +2506,6 @@ void CPortal_Player::DetermineTraceInfo( Vector &vStart, Vector &vEnd, int iTrac
 	float flLeftForgiveness;
 	float flTopForgiveness;
 	float flBottomForgiveness;
-	
-	// TODO: Scale forgiveness by the player's velocity
 
 	if ( !(GetFlags() & FL_ONGROUND) )
 	{

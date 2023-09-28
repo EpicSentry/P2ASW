@@ -259,7 +259,7 @@ void CNPC_Portal_FloorTurret::UpdateOnRemove( void )
 //-----------------------------------------------------------------------------
 int CNPC_Portal_FloorTurret::OnTakeDamage( const CTakeDamageInfo &info )
 {
-	if ( ( info.GetDamageType() & DMG_BURN | DMG_ENERGYBEAM ) && !m_bIsBurning )
+	if ( ( info.GetDamageType() & DMG_ENERGYBEAM ) && !m_bIsBurning )
 	{
 		m_fNextTalk = gpGlobals->curtime;
 		m_lifeState = LIFE_DYING;

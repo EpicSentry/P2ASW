@@ -39,6 +39,8 @@ SendPropVector(SENDINFO(vecNetMuzzleDir)),
 END_SEND_TABLE()
 */
 
+#define	MASK_PORTAL_LASER (CONTENTS_SOLID|CONTENTS_MONSTER)
+
 CPortalLaser::CPortalLaser()
 {
 	m_flLastDamageTime = 0.0;
@@ -87,7 +89,7 @@ void CPortalLaser::UpdateLaser()
 	trace_t normalTrace;
 	Ray_t ray;
 	ray.Init( vecOrigin, vecOrigin + vecMuzzleDir * LASER_RANGE );
-	UTIL_Portal_TraceRay( ray, MASK_SHOT, &masterTraceFilter, &normalTrace );
+	UTIL_Portal_TraceRay( ray, MASK_PORTAL_LASER, &masterTraceFilter, &normalTrace );
 
 	m_bIsLaserHittingCube = false;
 
@@ -144,7 +146,7 @@ void CPortalLaser::UpdateLaser()
 		trace_t playerTrace;
 		Ray_t ray_player;
 		ray_player.Init( vecOrigin, vecOrigin + vecMuzzleDir * LASER_RANGE );
-		UTIL_Portal_TraceRay( ray_player, MASK_SHOT, &playerTraceFilter, &playerTrace );
+		UTIL_Portal_TraceRay( ray_player, MASK_PORTAL_LASER, &playerTraceFilter, &playerTrace );
 
 		// No need to do a cast here since there's no player specific functions to call
 		CBaseEntity *pPlayerTraceEnt = playerTrace.m_pEnt;
@@ -227,9 +229,9 @@ void CPortalLaser::UpdateLaser()
 	// Perform the portal detection trace from the origin to the muzzle direction
 	//UTIL_Portal_TraceRay( ray , MASK_SHOT, &masterTraceFilter, &trace);
 
-	enginetrace->TraceRay( rayPath, MASK_SHOT, &masterTraceFilter, &trace );
+	enginetrace->TraceRay( rayPath, MASK_PORTAL_LASER, &masterTraceFilter, &trace );
 
-	if (UTIL_Portal_TraceRay_Beam(rayPath, MASK_SHOT, &masterTraceFilter, &fEndFraction))
+	if (UTIL_Portal_TraceRay_Beam(rayPath, MASK_PORTAL_LASER, &masterTraceFilter, &fEndFraction))
 	{
 		vEndPoint = vecOrigin + vecMuzzleDir * LASER_RANGE;
 		//Msg("Portal Beam End Point: (%f, %f, %f)\n", vEndPoint.x, vEndPoint.y, vEndPoint.z);
@@ -284,13 +286,13 @@ void CPortalLaser::UpdateLaser()
 		QAngle qPlaneNormal;
 		VectorAngles( trace.plane.normal, qPlaneNormal );
 
-		m_flLastSparkTime = gpGlobals->curtime;
 		DispatchParticleEffect( "laser_cutter_sparks", normalTrace.endpos, qPlaneNormal );
 #else
 		m_pBeam->PointsInit(vEndPoint, vecOrigin);
 
 		g_pEffects->Sparks(vEndPoint, 2, 2, &vecMuzzleDir);
 #endif
+		m_flLastSparkTime = gpGlobals->curtime;
 	}
 	Ray_t targetRay;
 	targetRay.Init( normalTrace.startpos, normalTrace.endpos );
@@ -574,7 +576,7 @@ void CPortalLaser::LaserOn(void)
 
 	CTraceFilterSkipClassname traceFilter(this, "prop_energy_ball", COLLISION_GROUP_NONE);
 
-	if (UTIL_Portal_TraceRay_Beam(rayPath, MASK_SHOT, &traceFilter, &fEndFraction))
+	if (UTIL_Portal_TraceRay_Beam(rayPath, MASK_PORTAL_LASER, &traceFilter, &fEndFraction))
 		vEndPoint = vecOrigin + vecMuzzleDir * LASER_RANGE;
 	else
 		vEndPoint = vecOrigin + vecMuzzleDir * LASER_RANGE * fEndFraction;
