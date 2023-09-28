@@ -97,7 +97,6 @@ public:
 	QAngle					m_qDelayedAngles;
 	int						m_iDelayedFailure;
 
-	static bool				ms_DefaultPortalSizeInitialized; // for CEG protection
 	static float			ms_DefaultPortalHalfWidth;
 	static float			ms_DefaultPortalHalfHeight;
 

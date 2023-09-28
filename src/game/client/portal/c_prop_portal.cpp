@@ -183,14 +183,9 @@ C_Prop_Portal::C_Prop_Portal( void )
 	m_fSecondaryStaticAmount( 0.0f ),
 	m_fOpenAmount( 0.0f )
 {
-	if( !ms_DefaultPortalSizeInitialized )
-	{
-		ms_DefaultPortalSizeInitialized = true; // for CEG protection
+	
+	ms_DefaultPortalHalfHeight = DEFAULT_PORTAL_HALF_HEIGHT; // only protecting one to reduce the cost of first-portal check
 
-		CEG_GCV_PRE();
-		ms_DefaultPortalHalfHeight = CEG_GET_CONSTANT_VALUE( DefaultPortalHalfHeight ); // only protecting one to reduce the cost of first-portal check
-		CEG_GCV_POST();
-	}
 	m_bIsPropPortal = true;	// Member of CPortalRenderable
 	TransformedLighting.m_LightShadowHandle = CLIENTSHADOW_INVALID_HANDLE;
 	CProp_Portal_Shared::AllPortals.AddToTail( this );
