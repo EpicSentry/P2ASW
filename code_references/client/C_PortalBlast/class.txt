@@ -1,0 +1,21 @@
+class C_PortalBlast : public C_BaseEntity
+{
+public:
+	
+	DECLARE_CLASS( C_PortalBlast, C_BaseEntity );
+	
+    void Create(class CBaseHandle ,bool ,enum PortalPlacedBy_t ,class Vector & ,class Vector & ,class QAngle & ,float );
+    void Init(class CBaseHandle ,bool ,enum PortalPlacedBy_t ,class Vector & ,class Vector & ,class QAngle & ,float );
+    void ClientThink();
+   // bool ShouldDrawForSplitScreenUser(int );
+    void C_PortalBlast(class C_PortalBlast & );
+    void C_PortalBlast();
+    void ~C_PortalBlast();
+    
+private:
+    Vector m_ptCreationPoint;
+    Vector m_ptDeathPoint;
+    Vector m_ptAimPoint;
+    float m_fCreationTime;
+    float m_fDeathTime;
+};

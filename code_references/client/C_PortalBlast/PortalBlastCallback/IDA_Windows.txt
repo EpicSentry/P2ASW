@@ -1,0 +1,4 @@
+void __cdecl PortalBlastCallback(const CEffectData *data)
+{
+  C_PortalBlast::Create( data->m_hEntity, data->m_nColor != 1, (PortalPlacedBy_t)data->m_nDamageType, &data->m_vOrigin, &data->m_vStart, &data->m_vAngles, data->m_flScale );
+}

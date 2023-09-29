@@ -1,0 +1,48 @@
+void __thiscall C_PortalBlast::ClientThink(C_PortalBlast *this)
+{
+  float x; // xmm1_4
+  float v3; // xmm0_4
+  float y; // xmm1_4
+  float v5; // xmm7_4
+  float z; // xmm5_4
+  float v7; // xmm3_4
+  float v8; // xmm1_4
+  float v9; // xmm2_4
+  Vector absOrigin; // [esp+0h] [ebp-10h] BYREF
+  float v11; // [esp+Ch] [ebp-4h]
+
+  x = this->m_ptAimPoint.x;
+  if ( x == 0.0 && this->m_ptAimPoint.y == 0.0 )
+  {
+    C_BaseEntity::Remove((C_PortalBlast *)((char *)this - 12));
+    return;
+  }
+  v3 = (float)(*(float *)(gpGlobals.m_Index + 12) - x) / (float)(this->m_ptAimPoint.y - x);
+  if ( v3 < 0.0 )
+  {
+    v3 = 0.0;
+LABEL_6:
+    y = this->m_ptCreationPoint.y;
+    v5 = this->m_ptDeathPoint.y;
+    z = this->m_ptCreationPoint.z;
+    v7 = this->m_ptDeathPoint.z;
+    v11 = 1.0 - v3;
+    v8 = (float)(*(float *)&this->m_CalcAbsoluteVelocityMutex.m_depth * (float)(1.0 - v3))
+       + (float)((float)((float)(y * v3) + (float)(v5 * (float)(1.0 - v3))) * v3);
+    v9 = (float)(*(float *)&this->m_bIsBlurred * (float)(1.0 - v3))
+       + (float)((float)((float)(v7 * (float)(1.0 - v3)) + (float)(z * v3)) * v3);
+    absOrigin.x = (float)(*(float *)&this->m_CalcAbsoluteVelocityMutex.m_ownerID * (float)(1.0 - v3))
+                + (float)((float)((float)(this->m_ptDeathPoint.x * (float)(1.0 - v3))
+                                + (float)(v3 * this->m_ptCreationPoint.x))
+                        * v3);
+    absOrigin.y = v8;
+    absOrigin.z = v9;
+    C_BaseEntity::SetAbsOrigin((C_PortalBlast *)((char *)this - 12), &absOrigin);
+    return;
+  }
+  if ( v3 <= 1.0 && v3 < 1.0 )
+    goto LABEL_6;
+  C_BaseEntity::SetAbsOrigin((C_PortalBlast *)((char *)this - 12), &this->m_ptCreationPoint);
+  this->m_ptAimPoint.x = 0.0;
+  this->m_ptAimPoint.y = 0.0;
+}
