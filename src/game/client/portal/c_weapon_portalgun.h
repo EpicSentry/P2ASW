@@ -21,86 +21,6 @@
 #include "beamdraw.h"
 #include "iviewrender_beams.h"
 
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
-//  CPhysCannonEffect class
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
-
-class CPortalgunEffect
-{
-public:
-
-	CPortalgunEffect( void ) 
-		: m_vecColor( 255, 255, 255 ), 
-		  m_bVisibleViewModel( true ), 
-		  m_bVisible3rdPerson( true ), 
-		  m_nAttachment( -1 )
-	{}
-
-	void SetAttachment( int attachment ) { m_nAttachment = attachment; }
-	int	GetAttachment( void ) const { return m_nAttachment; }
-
-	void SetVisible( bool visible = true ) { m_bVisibleViewModel = visible; m_bVisible3rdPerson = visible; }
-
-	void SetVisibleViewModel( bool visible = true ) { m_bVisibleViewModel = visible; }
-	int IsVisibleViewModel( void ) const { return m_bVisibleViewModel; }
-
-	void SetVisible3rdPerson( bool visible = true ) { m_bVisible3rdPerson = visible; }
-	int IsVisible3rdPerson( void ) const { return m_bVisible3rdPerson; }
-
-	void SetColor( const Vector &color ) { m_vecColor = color; }
-	const Vector &GetColor( void ) const { return m_vecColor; }
-
-	bool SetMaterial(  const char *materialName )
-	{
-		m_hMaterial.Init( materialName, TEXTURE_GROUP_CLIENT_EFFECTS );
-		return ( m_hMaterial != NULL );
-	}
-
-	CMaterialReference &GetMaterial( void ) { return m_hMaterial; }
-
-	CInterpolatedValue &GetAlpha( void ) { return m_Alpha; }
-	CInterpolatedValue &GetScale( void ) { return m_Scale; }
-
-	virtual PortalWeaponID GetWeaponID( void ) const { return WEAPON_PORTALGUN; }
-
-private:
-	CInterpolatedValue	m_Alpha;
-	CInterpolatedValue	m_Scale;
-
-	Vector				m_vecColor;
-	bool				m_bVisibleViewModel;
-	bool				m_bVisible3rdPerson;
-	int					m_nAttachment;
-	CMaterialReference	m_hMaterial;
-};
-
-
-class CPortalgunEffectBeam
-{
-public:
-	CPortalgunEffectBeam( void );;
-	~CPortalgunEffectBeam( void );
-
-	void Release( void );
-
-	void Init( int startAttachment, int endAttachment, CBaseEntity *pEntity, bool firstPerson );
-
-	void SetVisibleViewModel( bool visible = true );
-	int IsVisibleViewModel( void ) const;
-
-	void SetVisible3rdPerson( bool visible = true );
-	int SetVisible3rdPerson( void ) const;
-
-	void SetBrightness( float fBrightness );
-
-	void DrawBeam( void );
-
-private:
-	Beam_t	*m_pBeam;
-
-	float	m_fBrightness;
-};
-
 
 class C_WeaponPortalgun : public CBasePortalCombatWeapon
 {
@@ -197,15 +117,18 @@ protected:
 	void	DoEffectReady( void );
 	void	DoEffectHolding( void );
 	void	DoEffectNone( void );
+	
+    void DoCleanseEffect(bool ,bool );
 
 
 	CHandle<CProp_Portal> m_hPrimaryPortal;
 	CHandle<CProp_Portal> m_hSecondaryPortal;
+
     CUtlReference<CNewParticleEffect> m_hPortalGunEffectFP;
     CUtlReference<CNewParticleEffect> m_hPortalGunEffectTP;
     CUtlReference<CNewParticleEffect> m_hPortalGunEffectHoldingFP;
     CUtlReference<CNewParticleEffect> m_hPortalGunEffectHoldingTP;
-
+#if 0
 	enum EffectType_t
 	{
 		PORTALGUN_GRAVLIGHT = 0,
@@ -255,7 +178,7 @@ protected:
 
 		NUM_PORTALGUN_PARAMETERS	// Must be last!
 	};
-
+#endif
 	#define	NUM_GLOW_SPRITES ((C_WeaponPortalgun::PORTALGUN_GLOW6-C_WeaponPortalgun::PORTALGUN_GLOW1)+1)
 	#define	NUM_GLOW_SPRITES_WORLD ((C_WeaponPortalgun::PORTALGUN_GLOW6_WORLD-C_WeaponPortalgun::PORTALGUN_GLOW1_WORLD)+1)
 	#define NUM_ENDCAP_SPRITES ((C_WeaponPortalgun::PORTALGUN_ENDCAP3-C_WeaponPortalgun::PORTALGUN_ENDCAP1)+1)
@@ -265,8 +188,9 @@ protected:
 
 	#define	NUM_PORTALGUN_BEAMS	6
 
-	void			DrawEffects( bool b3rdPerson );
 	Vector			GetEffectColor( int iPalletIndex );
+#if 0
+	void			DrawEffects( bool b3rdPerson );
 	void			GetEffectParameters( EffectType_t effectID, color32 &color, float &scale, IMaterial **pMaterial, Vector &vecAttachment, bool b3rdPerson );
 	void			DrawEffectSprite( EffectType_t effectID, bool b3rdPerson );
 	inline bool		IsEffectVisible( EffectType_t effectID, bool b3rdPerson );
@@ -274,6 +198,7 @@ protected:
 
 	CPortalgunEffect		m_Parameters[NUM_PORTALGUN_PARAMETERS];	// Interpolated parameters for the effects
 	CPortalgunEffectBeam	m_Beams[NUM_PORTALGUN_BEAMS];				// Beams
+#endif
 
 	int				m_nOldEffectState;	// Used for parity checks
 	bool			m_bOldCanFirePortal1;
@@ -286,12 +211,13 @@ protected:
 
 public:
 
+#if 0
 	virtual int		DrawModel( int flags, const RenderableInstance_t& instance );
-	virtual void	ViewModelDrawn( C_BaseViewModel *pBaseViewModel );
+	virtual void	ViewModelDrawn( int nFlags, CBaseViewModel *pViewModel );
+#endif
 	virtual void	OnPreDataChanged( DataUpdateType_t updateType );
 	virtual void	OnDataChanged( DataUpdateType_t updateType );
 	virtual void	ClientThink( void );
-
 	void DoEffectIdle( void );
 
 public:

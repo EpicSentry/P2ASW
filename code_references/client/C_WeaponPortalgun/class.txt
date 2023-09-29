@@ -1,0 +1,137 @@
+class C_WeaponPortalgun : public C_BasePortalCombatWeapon
+{
+    public int YouForgotToImplementOrDeclareClientClass();
+    public class ClientClass * GetClientClass();
+    public class RecvTable * m_pClassRecvTable;
+    public struct typedescription_t m_PredDesc[0];
+    public struct datamap_t m_PredMap;
+    public struct datamap_t * GetPredDescMap();
+    class NetworkVar_m_bCanFirePortal1
+    {
+        public void NetworkStateChanged(void * );
+        public void NetworkStateChanged(void * ,void * );
+    };
+    private class CNetworkVarBase<bool,C_WeaponPortalgun::NetworkVar_m_bCanFirePortal1> m_bCanFirePortal1;
+    class NetworkVar_m_bCanFirePortal2
+    {
+        public void NetworkStateChanged(void * );
+        public void NetworkStateChanged(void * ,void * );
+    };
+    private class CNetworkVarBase<bool,C_WeaponPortalgun::NetworkVar_m_bCanFirePortal2> m_bCanFirePortal2;
+    class NetworkVar_m_iLastFiredPortal
+    {
+        public void NetworkStateChanged(void * );
+        public void NetworkStateChanged(void * ,void * );
+    };
+    private class CNetworkVarBase<int,C_WeaponPortalgun::NetworkVar_m_iLastFiredPortal> m_iLastFiredPortal;
+    class NetworkVar_m_bOpenProngs
+    {
+        public void NetworkStateChanged(void * );
+        public void NetworkStateChanged(void * ,void * );
+    };
+    private class CNetworkVarBase<bool,C_WeaponPortalgun::NetworkVar_m_bOpenProngs> m_bOpenProngs;
+    class NetworkVar_m_fEffectsMaxSize1
+    {
+        public void NetworkStateChanged(void * );
+        public void NetworkStateChanged(void * ,void * );
+    };
+    private class CNetworkVarBase<float,C_WeaponPortalgun::NetworkVar_m_fEffectsMaxSize1> m_fEffectsMaxSize1;
+    class NetworkVar_m_fEffectsMaxSize2
+    {
+        public void NetworkStateChanged(void * );
+        public void NetworkStateChanged(void * ,void * );
+    };
+    private class CNetworkVarBase<float,C_WeaponPortalgun::NetworkVar_m_fEffectsMaxSize2> m_fEffectsMaxSize2;
+    public class Vector & GetBulletSpread();
+    public void Precache();
+    public void OnRestore();
+    public void UpdateOnRemove();
+    public void Spawn();
+    public void DoEffectCreate(class Vector & ,class Vector & ,class Vector & ,bool ,bool );
+    public bool ShouldDrawCrosshair();
+    public void SetLastFiredPortal(int );
+    public int GetLastFiredPortal();
+    public bool IsHoldingObject();
+    public bool Reload();
+    public void FillClip();
+    public void CheckHolsterReload();
+    public void ItemHolsterFrame();
+    public bool Holster(class C_BaseCombatWeapon * );
+    public bool Deploy();
+    public void ResetRefireTime();
+    public void SetCanFirePortal1(bool );
+    public void SetCanFirePortal2(bool );
+    public bool CanFirePortal1();
+    public bool CanFirePortal2();
+    public void FirePortal1();
+    public void FirePortal2();
+    public enum PortalPlacementResult_t FirePortal(bool ,class Vector * );
+    public bool TraceFirePortal(class Vector & ,class Vector & ,bool ,enum PortalPlacedBy_t ,struct TracePortalPlacementInfo_t & );
+    public void PortalPlaced();
+    public void PrimaryAttack();
+    public void SecondaryAttack();
+    public void DelayAttack(float );
+    public void DryFire();
+    public void UseDeny();
+    public float GetFireRate();
+    public void WeaponIdle();
+    public void GetToolRecordingState(class KeyValues * );
+    public void GetToolViewModelState(class KeyValues * );
+    public void GetToolRecordingEffectState(class KeyValues * ,bool );
+    public enum Activity GetPrimaryAttackActivity();
+    public class Vector GetBluePortalPosition();
+    public class Vector GetOrangePortalPosition();
+    public void GetPrimaryPortalPosition(class Vector & ,class QAngle & );
+    public void GetSecondaryPortalPosition(class Vector & ,class QAngle & );
+    public class C_Prop_Portal * GetAssociatedPortal(bool );
+    public void InitPredictable(class C_BasePlayer * );
+    protected void StartEffects();
+    protected void StopEffects(bool );
+    protected void DestroyEffects();
+    protected void DoEffect(int ,class Vector * );
+    protected void DoEffectClosed();
+    protected void DoEffectReady();
+    protected void DoEffectHolding();
+    protected void DoEffectNone();
+    protected void PostAttack();
+    protected class Vector GetEffectColor(int );
+    protected void UpdateElementPosition();
+    protected int m_nOldEffectState;
+    protected bool m_bOldCanFirePortal1;
+    protected bool m_bOldCanFirePortal2;
+    protected bool m_bPulseUp;
+    protected float m_fPulse;
+    protected class Vector m_vecBluePortalPos;
+    protected class Vector m_vecOrangePortalPos;
+    protected unsigned int m_iPortalLinkageGroupID;
+    class NetworkVar_m_EffectState
+    {
+        public void NetworkStateChanged(void * );
+        public void NetworkStateChanged(void * ,void * );
+    };
+    protected class CNetworkVarBase<int,C_WeaponPortalgun::NetworkVar_m_EffectState> m_EffectState;
+    protected class CHandle<C_Prop_Portal> m_hPrimaryPortal;
+    protected class CHandle<C_Prop_Portal> m_hSecondaryPortal;
+    protected class CUtlReference<CNewParticleEffect> m_hPortalGunEffectFP;
+    protected class CUtlReference<CNewParticleEffect> m_hPortalGunEffectTP;
+    protected class CUtlReference<CNewParticleEffect> m_hPortalGunEffectHoldingFP;
+    protected class CUtlReference<CNewParticleEffect> m_hPortalGunEffectHoldingTP;
+    public void OnPreDataChanged(enum DataUpdateType_t );
+    public void OnDataChanged(enum DataUpdateType_t );
+    public void ClientThink();
+    public void DoEffectIdle();
+    public void DoEffectBlast(class C_BaseEntity * ,bool ,int ,class Vector & ,class Vector & ,class QAngle & ,float );
+    public void DoCleanseEffect(bool ,bool );
+    public bool AttemptStealCoopPortal(struct TracePortalPlacementInfo_t & );
+    public bool PortalTraceClippedByBlockers(struct ComplexPortalTrace_t * ,int ,class Vector & ,bool ,struct TracePortalPlacementInfo_t & );
+    public bool AttemptSnapToPlacementHelper(class C_Prop_Portal * ,struct ComplexPortalTrace_t * ,int ,enum PortalPlacedBy_t ,struct TracePortalPlacementInfo_t & );
+    public struct acttable_t m_acttable[0];
+    public struct acttable_t * ActivityList();
+    public int ActivityListCount();
+    private void C_WeaponPortalgun(class C_WeaponPortalgun & );
+    public void C_WeaponPortalgun();
+    public void ~C_WeaponPortalgun();
+    public class C_WeaponPortalgun & operator=(class C_WeaponPortalgun & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};

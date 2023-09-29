@@ -1601,6 +1601,8 @@ void C_BaseAnimating::BuildTransformations( CStudioHdr *hdr, Vector *pos, Quater
 		}
 	}
 	
+	PostBuildTransformations( hdr, pos, q );
+
 	// If a nonhierarchical scale is being applied
 	const float scale = GetModelScale();
 	if( GetModelScaleType() == NONHIERARCHICAL_MODEL_SCALE &&
@@ -6919,6 +6921,180 @@ void C_BaseAnimating::SetReceivedSequence( void )
 bool C_BaseAnimating::ShouldResetSequenceOnNewModel( void )
 {
 	return ( m_bReceivedSequence == false );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void C_BaseAnimating::UpdateBoneAttachments( void )
+{
+	if ( !m_pAttachedTo )
+		return;
+
+	//	Assert( IsFollowingEntity() );
+	//	Assert( m_boneIndexAttached >= 0 );
+
+	C_BaseAnimating *follow = FindFollowedEntity();
+	if ( follow && (m_boneIndexAttached >= 0) )
+	{
+		matrix3x4_t boneToWorld, localSpace;
+		follow->GetCachedBoneMatrix( m_boneIndexAttached, boneToWorld );
+		AngleMatrix( m_boneAngles, m_bonePosition, localSpace );
+		ConcatTransforms( boneToWorld, localSpace, GetBoneForWrite( 0 ) );
+
+		Vector absOrigin;
+		MatrixGetColumn( GetBone( 0 ), 3, absOrigin );
+		SetAbsOrigin( absOrigin );
+
+		QAngle absAngle;
+		MatrixAngles( GetBone( 0 ), absAngle );
+		SetAbsAngles( absAngle);
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void C_BaseAnimating::AttachEntityToBone( C_BaseAnimating* attachTarget, int boneIndexAttached, Vector bonePosition, QAngle boneAngles )
+{
+	if ( !attachTarget )
+		return;
+
+	SetCollisionGroup( COLLISION_GROUP_DEBRIS );
+
+	FollowEntity( attachTarget );
+	SetOwnerEntity( attachTarget );
+
+	//	Assert( boneIndexAttached >= 0 );		// We should be attaching to a bone.
+
+	if ( boneIndexAttached >= 0 )
+	{
+		m_boneIndexAttached = boneIndexAttached;
+		m_bonePosition = bonePosition;
+		m_boneAngles = boneAngles;
+	}
+
+	m_BoneAccessor.SetReadableBones( BONE_USED_BY_ANYTHING );
+	m_BoneAccessor.SetWritableBones( BONE_USED_BY_ANYTHING );
+
+	attachTarget->AddBoneAttachment( this );
+
+	NotifyBoneAttached( attachTarget );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void C_BaseAnimating::NotifyBoneAttached( C_BaseAnimating* attachTarget )
+{
+	// If we're already attached to something, remove us from it.
+	if ( m_pAttachedTo )
+	{
+		m_pAttachedTo->RemoveBoneAttachment( this );
+		m_pAttachedTo = NULL;
+	}
+
+	// Remember the new attach target.
+	m_pAttachedTo = attachTarget;
+
+	// Special case: if we just attached to the local player and he is hidden, hide us as well.
+	C_BasePlayer *pPlayer = dynamic_cast< C_BasePlayer* >( attachTarget );
+	if ( pPlayer && pPlayer->IsLocalPlayer() )
+	{
+		if ( !pPlayer->ShouldDrawLocalPlayer() )
+		{
+			AddEffects( EF_NODRAW );
+		}
+	}
+	else
+	{
+		RemoveEffects( EF_NODRAW );
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void C_BaseAnimating::AddBoneAttachment( C_BaseAnimating* newBoneAttachment )
+{
+	if ( !newBoneAttachment )
+		return;
+
+	m_BoneAttachments.AddToTail( newBoneAttachment );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void C_BaseAnimating::RemoveBoneAttachment( C_BaseAnimating* boneAttachment )
+{
+	if ( !boneAttachment )
+		return;
+
+	m_BoneAttachments.FindAndRemove( boneAttachment );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+int C_BaseAnimating::GetNumBoneAttachments()
+{
+	return m_BoneAttachments.Count();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+C_BaseAnimating* C_BaseAnimating::GetBoneAttachment( int i )
+{
+	if ( m_BoneAttachments.IsValidIndex(i) )
+	{
+		return m_BoneAttachments[i];
+	}
+	return NULL;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void C_BaseAnimating::DestroyBoneAttachments()
+{
+	while ( GetNumBoneAttachments() )
+	{
+		C_BaseAnimating *pAttachment = GetBoneAttachment(0);
+		if ( pAttachment )
+		{
+			pAttachment->Release();
+		}
+		else
+		{
+			m_BoneAttachments.Remove(0);
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void C_BaseAnimating::MoveBoneAttachments( C_BaseAnimating* attachTarget )
+{
+	if ( !attachTarget )
+		return;
+
+	// Move all of our bone attachments to this new object.
+	// Preserves the specific bone and attachment location information.
+	while ( GetNumBoneAttachments() )
+	{
+		C_BaseAnimating *pAttachment = GetBoneAttachment(0);
+		if ( pAttachment )
+		{
+			pAttachment->AttachEntityToBone( attachTarget );
+		}
+		else
+		{
+			m_BoneAttachments.Remove(0);
+		}
+	}
 }
 
 bool C_BaseAnimating::m_bBoneListInUse = false;

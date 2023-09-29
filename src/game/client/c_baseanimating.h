@@ -221,6 +221,24 @@ public:
 	//bool solveIK(float a, float b, const Vector &Foot, const Vector &Knee1, Vector &Knee2);
 	//void DebugIK( mstudioikchain_t *pikchain );
 
+	// Bone attachments
+	virtual void		AttachEntityToBone( C_BaseAnimating* attachTarget, int boneIndexAttached=-1, Vector bonePosition=Vector(0,0,0), QAngle boneAngles=QAngle(0,0,0) );
+	void				AddBoneAttachment( C_BaseAnimating* newBoneAttachment );
+	void				RemoveBoneAttachment( C_BaseAnimating* boneAttachment );
+	void				RemoveBoneAttachments();
+	void				DestroyBoneAttachments();
+	void				MoveBoneAttachments( C_BaseAnimating* attachTarget );
+	int					GetNumBoneAttachments();
+	C_BaseAnimating*	GetBoneAttachment( int i );
+	virtual void		NotifyBoneAttached( C_BaseAnimating* attachTarget );
+
+	virtual void		PostBuildTransformations( CStudioHdr *pStudioHdr, BoneVector *pos, BoneQuaternion q[] ) {}
+
+private:
+	virtual void		UpdateBoneAttachments( void );
+
+public:
+
 	virtual void					PreDataUpdate( DataUpdateType_t updateType );
 	virtual void					PostDataUpdate( DataUpdateType_t updateType );
 	
@@ -568,6 +586,14 @@ protected:
 
 	// Client-side animation
 	bool							m_bClientSideFrameReset;
+	
+	// Bone attachments. Used for attaching one BaseAnimating to another's bones.
+	// Client side only.
+	CUtlVector<CHandle<C_BaseAnimating> > m_BoneAttachments;
+	int								m_boneIndexAttached;
+	Vector							m_bonePosition;
+	QAngle							m_boneAngles;
+	CHandle<C_BaseAnimating>		m_pAttachedTo;
 
 protected:
 

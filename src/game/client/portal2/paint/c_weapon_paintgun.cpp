@@ -93,6 +93,8 @@ void C_WeaponPaintGun::Precache( void )
 	PrecacheParticleSystem( "paint_splat_speed_01" );
 	PrecacheParticleSystem( "paint_splat_erase_01" );
 	PrecacheParticleSystem( "rtube_muzzle" );
+	PrecacheParticleSystem( PAINT_PARTICLE_STREAM );
+
 	
 
 
@@ -269,7 +271,13 @@ void C_WeaponPaintGun::StartHoseEffect()
 		// If there's already a different stream particle effect, get rid of it.
 		if( !m_pStreamEffect.IsValid() )
 		{
-			m_pStreamEffect = pOwner->GetViewModel()->ParticleProp()->Create( particleEffectName, PATTACH_POINT_FOLLOW, "rtube_muzzle" );
+			const char* pAttachmentName = "muzzle";
+
+			// NOTE: We don't want to override the original weaponizer attachments if the model ever gets leaked or recreated.
+			if ( pOwner->GetViewModel()->GetModelName() && !V_strcmp( pOwner->GetViewModel()->GetModelName(), "models/weapons/v_models/v_weaponizer.mdl" ) )
+				pAttachmentName = "rtube_muzzle";
+
+			m_pStreamEffect = pOwner->GetViewModel()->ParticleProp()->Create( particleEffectName, PATTACH_POINT_FOLLOW, pAttachmentName );
 		}
 
 		paintColor = m_bFiringPaint ? MapPowerToVisualColor( m_iSubType ) : MapPowerToVisualColor( NO_POWER );

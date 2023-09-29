@@ -105,6 +105,12 @@ public:
 
 	bool					ShouldFlipViewModel();
 	void					UpdateAnimationParity( void );
+	
+	virtual void			PostBuildTransformations( CStudioHdr *pStudioHdr, BoneVector *pos, BoneQuaternion q[] );
+	Vector m_vecCamDriverLastPos;
+	QAngle m_angCamDriverLastAng;
+	float m_flCamDriverAppliedTime;
+	float m_flCamDriverWeight;
 
 	virtual void			ApplyBoneMatrixTransform( matrix3x4_t& transform );
 

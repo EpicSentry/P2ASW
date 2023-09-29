@@ -254,11 +254,16 @@ void CWeaponPortalgun::GunEffectsThink( void )
 	{
 		if ( g_pGameRules->IsMultiplayer() )
 		{
-			m_nSkin = pPlayer->GetTeamNumber();
-			
-			CBaseViewModel *vm = pPlayer->GetViewModel();
-			if ( vm )
-				vm->m_nSkin = pPlayer->GetTeamNumber();
+			int iSkin = 0;
+
+			if ( pPlayer->GetTeamNumber() == 2 )
+				iSkin = 2;
+			else
+				iSkin = 1;
+
+			m_nSkin = iSkin;
+			if ( pPlayer->GetViewModel() )
+				pPlayer->GetViewModel()->m_nSkin = iSkin;
 		}
 
 		float flMinEffectsSize = 4.0;

@@ -1,0 +1,7 @@
+void __thiscall C_WeaponPortalgun::StopEffects(C_WeaponPortalgun *this, bool stopSound)
+{
+  if ( this->m_EffectState.m_Value )
+    this->m_EffectState.m_Value = 0;
+  this->m_nOldEffectState = this->m_EffectState.m_Value;
+  C_WeaponPortalgun::DoEffectNone(this);
+}

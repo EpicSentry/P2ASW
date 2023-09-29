@@ -7,7 +7,7 @@ void __thiscall C_WeaponPortalgun::OnDataChanged(C_WeaponPortalgun *this, DataUp
   C_BaseAnimating *v7; // edi
   C_BasePlayer *Owner; // esi
   C_BaseViewModel *ViewModel; // eax
-  int v10; // [esp+0h] [ebp-Ch]
+  int skin; // [esp+0h] [ebp-Ch]
 
   v2 = updateType;
   C_WeaponPortalBase::OnDataChanged(this, updateType);
@@ -52,17 +52,17 @@ void __thiscall C_WeaponPortalgun::OnDataChanged(C_WeaponPortalgun *this, DataUp
           C_BaseAnimating::SetSkin(v7, 2);
           if ( !C_BasePlayer::GetViewModel(Owner, 0) )
             return;
-          v10 = 2;
+          skin = 2;
         }
         else
         {
           C_BaseAnimating::SetSkin(v7, 1);
           if ( !C_BasePlayer::GetViewModel(Owner, 0) )
             return;
-          v10 = 1;
+          skin = 1;
         }
         ViewModel = C_BasePlayer::GetViewModel(Owner, 0);
-        C_BaseAnimating::SetSkin(ViewModel, v10);
+        C_BaseAnimating::SetSkin(ViewModel, skin);
       }
     }
   }

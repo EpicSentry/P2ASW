@@ -78,7 +78,7 @@ void CPredictedViewModel::CalcViewModelLag( Vector& origin, QAngle& angles, QAng
 	AngleVectors( -angleDiff, &vLaggedForward, 0, 0 );
 	Vector vForwardDiff = Vector(1,0,0) - vLaggedForward;
 
-	//if ( ShouldFlipModel() )
+	//if ( ShouldFlipViewModel() )
 	//	right = -right;
 
 	// Now offset the origin using that.

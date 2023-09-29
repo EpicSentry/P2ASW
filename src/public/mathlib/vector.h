@@ -1874,6 +1874,21 @@ public:
 
 
 //-----------------------------------------------------------------------------
+// Src data hasn't changed, but work data is of a form more friendly for SPU
+//-----------------------------------------------------------------------------
+#if defined( _PS3 )
+//typedef Vector		BoneVector;
+typedef VectorAligned		BoneVector;
+typedef QuaternionAligned	BoneQuaternion;
+typedef QuaternionAligned	BoneQuaternionAligned;
+#else
+typedef Vector				BoneVector;
+typedef Quaternion			BoneQuaternion;
+typedef QuaternionAligned	BoneQuaternionAligned;
+#endif
+
+
+//-----------------------------------------------------------------------------
 // Radian Euler angle aligned to axis (NOT ROLL/PITCH/YAW)
 //-----------------------------------------------------------------------------
 class QAngle;

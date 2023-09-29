@@ -39,6 +39,11 @@ CBaseViewModel::CBaseViewModel()
 	m_nOldAnimationParity = 0;
 	m_EntClientFlags |= ENTCLIENTFLAG_ALWAYS_INTERPOLATE;
 	RenderWithViewModels( true );
+	
+	m_flCamDriverAppliedTime = 0;
+	m_flCamDriverWeight = 0;
+	m_vecCamDriverLastPos.Init();
+	m_angCamDriverLastAng.Init();
 #endif
 
 	SetRenderColor( 255, 255, 255 );
@@ -368,6 +373,26 @@ void CBaseViewModel::SendViewModelMatchingSequence( int sequence )
 
 #if defined( CLIENT_DLL )
 #include "ivieweffects.h"
+#endif
+
+#ifdef CLIENT_DLL
+void CBaseViewModel::PostBuildTransformations( CStudioHdr *pStudioHdr, BoneVector *pos, BoneQuaternion q[] )
+{
+	int nCamDriverBone = LookupBone( "cam_driver" );
+	if ( nCamDriverBone != -1 )
+	{
+		m_flCamDriverAppliedTime = gpGlobals->curtime;		
+		VectorCopy( pos[nCamDriverBone], m_vecCamDriverLastPos );
+		QuaternionAngles( q[nCamDriverBone], m_angCamDriverLastAng );
+
+		if ( ShouldFlipViewModel() )
+		{
+			m_angCamDriverLastAng[YAW] = -m_angCamDriverLastAng[YAW];
+			m_vecCamDriverLastPos.y = -m_vecCamDriverLastPos.y;
+		}
+
+	}
+}
 #endif
 
 void CBaseViewModel::CalcViewModelView( CBasePlayer *owner, const Vector& eyePosition, const QAngle& eyeAngles )
