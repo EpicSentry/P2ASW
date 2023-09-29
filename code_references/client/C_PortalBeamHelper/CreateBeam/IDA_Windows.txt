@@ -1,0 +1,76 @@
+C_Beam *__thiscall C_PortalBeamHelper::CreateBeam(C_PortalBeamHelper *this)
+{
+  C_BaseEntity *m_pBeamTemplate; // ecx
+  const char *ModelName; // eax
+  C_Beam *v4; // esi
+  int Type; // eax
+  int BeamFlags; // eax
+  C_Beam *v7; // ecx
+  float m_Value; // xmm0_4
+  float v9; // xmm0_4
+  float v10; // xmm0_4
+  float v11; // xmm0_4
+  float v12; // xmm0_4
+  unsigned __int8 b; // dl
+  unsigned __int8 g; // al
+  unsigned __int8 r; // cl
+  unsigned __int8 RenderAlpha; // al
+  C_Beam *v17; // edi
+  float v18; // xmm0_4
+  float v19; // xmm0_4
+  float v20; // xmm0_4
+  C_Beam *result; // eax
+  float width; // [esp+0h] [ebp-Ch]
+
+  m_pBeamTemplate = this->m_pBeamTemplate;
+  width = *(float *)&m_pBeamTemplate[1].m_cellwidth;
+  ModelName = C_BaseEntity::GetModelName(m_pBeamTemplate);
+  v4 = C_Beam::BeamCreate(ModelName, width);
+  Type = C_Beam::GetType(this->m_pBeamTemplate);
+  C_Beam::SetType(v4, Type);
+  BeamFlags = C_Beam::GetBeamFlags(this->m_pBeamTemplate);
+  C_Beam::SetBeamFlags(v4, BeamFlags);
+  v7 = this->m_pBeamTemplate;
+  m_Value = this->m_pBeamTemplate->m_fHaloScale.m_Value;
+  if ( v4->m_fHaloScale.m_Value != m_Value )
+    v4->m_fHaloScale.m_Value = m_Value;
+  v9 = v7->m_fWidth.m_Value;
+  if ( v9 > 102.3 )
+    v9 = FLOAT_102_3;
+  if ( v4->m_fWidth.m_Value != v9 )
+    v4->m_fWidth.m_Value = v9;
+  v10 = v7->m_fEndWidth.m_Value;
+  if ( v10 > 102.3 )
+    v10 = FLOAT_102_3;
+  if ( v4->m_fEndWidth.m_Value != v10 )
+    v4->m_fEndWidth.m_Value = v10;
+  v11 = v7->m_fFadeLength.m_Value;
+  if ( v4->m_fFadeLength.m_Value != v11 )
+    v4->m_fFadeLength.m_Value = v11;
+  v12 = v7->m_fAmplitude.m_Value;
+  if ( v4->m_fAmplitude.m_Value != v12 )
+    v4->m_fAmplitude.m_Value = v12;
+  b = v7->m_clrRender.m_Value.b;
+  g = v7->m_clrRender.m_Value.g;
+  r = v7->m_clrRender.m_Value.r;
+  if ( v4->m_clrRender.m_Value.r != r )
+    v4->m_clrRender.m_Value.r = r;
+  if ( v4->m_clrRender.m_Value.g != g )
+    v4->m_clrRender.m_Value.g = g;
+  if ( v4->m_clrRender.m_Value.b != b )
+    v4->m_clrRender.m_Value.b = b;
+  RenderAlpha = C_BaseEntity::GetRenderAlpha(this->m_pBeamTemplate);
+  C_BaseEntity::SetRenderAlpha(v4, RenderAlpha);
+  v17 = this->m_pBeamTemplate;
+  v18 = v17->m_fStartFrame.m_Value;
+  if ( v4->m_fStartFrame.m_Value != v18 )
+    v4->m_fStartFrame.m_Value = v18;
+  v19 = (float)(int)v17->m_fSpeed.m_Value;
+  if ( v4->m_fSpeed.m_Value != v19 )
+    v4->m_fSpeed.m_Value = v19;
+  v20 = v17->m_flHDRColorScale.m_Value;
+  result = v4;
+  if ( v4->m_flHDRColorScale.m_Value != v20 )
+    v4->m_flHDRColorScale.m_Value = v20;
+  return result;
+}

@@ -1,0 +1,9 @@
+void __thiscall C_PortalBeamHelper::C_PortalBeamHelper(C_PortalBeamHelper *this)
+{
+  this->m_pBeamTemplate = 0;
+  this->m_beams.m_Memory.m_pMemory = 0;
+  this->m_beams.m_Memory.m_nAllocationCount = 0;
+  this->m_beams.m_Memory.m_nGrowSize = 0;
+  this->m_beams.m_Size = 0;
+  this->m_beams.m_pElements = 0;
+}

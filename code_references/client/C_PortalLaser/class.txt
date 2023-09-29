@@ -5,14 +5,14 @@ public:
 	
 	DECLARE_CLIENTCLASS();
     
-	void C_PortalLaser(class C_PortalLaser & );
-    void C_PortalLaser();
+	C_PortalLaser(class C_PortalLaser & );
+	C_PortalLaser();
     void Precache();
-    void Spawn();
+	void Spawn();
     void UpdateOnRemove();
     void OnDataChanged(enum DataUpdateType_t );
     void ClientThink();
-    void ~C_PortalLaser();
+	~C_PortalLaser();
 	
 private:
 	

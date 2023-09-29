@@ -1,0 +1,52 @@
+void __usercall C_NPC_Portal_FloorTurret::LaserOn(C_NPC_Portal_FloorTurret *this@<ecx>, float a2@<edi>)
+{
+  C_PortalBeamHelper *p_m_beamHelper; // edi
+  float v4; // xmm0_4
+  C_Beam *LastBeam; // eax
+  int m_sLaserHaloSprite; // esi
+  C_Beam *v7; // eax
+  Vector vecEye; // [esp+4h] [ebp-40h] BYREF
+  QAngle angMuzzleDir; // [esp+10h] [ebp-34h] BYREF
+  QAngle angEyeDir; // [esp+1Ch] [ebp-28h] BYREF
+  Vector vecMuzzle; // [esp+28h] [ebp-1Ch] BYREF
+  Vector vecMuzzleDir; // [esp+34h] [ebp-10h] BYREF
+  float v14; // [esp+40h] [ebp-4h]
+
+  if ( C_BaseAnimating::IsBoneAccessAllowed(this) )
+  {
+    this->GetAttachment(&this->IClientRenderable, 2, &vecMuzzle, &angMuzzleDir);
+    this->GetAttachment(&this->IClientRenderable, 1, &vecEye, &angEyeDir);
+    AngleVectors(&angEyeDir, &vecMuzzleDir);
+    if ( COERCE_FLOAT(COERCE_UNSIGNED_INT(vecMuzzleDir.x - this->m_vLastMuzzleDir.x) & _mask__AbsFloat_) > 0.001
+      || COERCE_FLOAT(COERCE_UNSIGNED_INT(vecMuzzleDir.y - this->m_vLastMuzzleDir.y) & _mask__AbsFloat_) > 0.001
+      || COERCE_FLOAT(COERCE_UNSIGNED_INT(vecMuzzleDir.z - this->m_vLastMuzzleDir.z) & _mask__AbsFloat_) > 0.001
+      || COERCE_FLOAT(COERCE_UNSIGNED_INT(vecMuzzle.x - this->m_vLastMuzzle.x) & _mask__AbsFloat_) > 0.001
+      || COERCE_FLOAT(COERCE_UNSIGNED_INT(vecMuzzle.y - this->m_vLastMuzzle.y) & _mask__AbsFloat_) > 0.001
+      || COERCE_FLOAT(COERCE_UNSIGNED_INT(vecMuzzle.z - this->m_vLastMuzzle.z) & _mask__AbsFloat_) > 0.001
+      || *(float *)(gpGlobals.m_Index + 12) > this->m_flNextBeamUpdate )
+    {
+      C_NPC_Portal_FloorTurret::UpdateBeam(this, &vecMuzzle, &vecMuzzleDir);
+      this->m_flNextBeamUpdate = *(float *)(gpGlobals.m_Index + 12) + 0.2;
+    }
+    p_m_beamHelper = &this->m_beamHelper;
+    if ( C_PortalBeamHelper::GetLastBeam(&this->m_beamHelper) )
+    {
+      v4 = *(float *)(gpGlobals.m_Index + 12) * 3.141592653589793 + this->m_fPulseOffset;
+      __libm_sse2_sinf(a2);
+      if ( v4 < 0.0 )
+        v4 = 0.0;
+      v14 = (float)((float)(v4 * 4.0) + 3.0) * 1.5;
+      LastBeam = C_PortalBeamHelper::GetLastBeam(&this->m_beamHelper);
+      if ( LastBeam->m_fHaloScale.m_Value != v14 )
+        LastBeam->m_fHaloScale.m_Value = v14;
+      m_sLaserHaloSprite = this->m_sLaserHaloSprite;
+      v7 = C_PortalBeamHelper::GetLastBeam(p_m_beamHelper);
+      if ( v7->m_nHaloIndex.m_Value != m_sLaserHaloSprite )
+        v7->m_nHaloIndex.m_Value = m_sLaserHaloSprite;
+    }
+  }
+  else
+  {
+    C_PortalBeamHelper::TurnOff(&this->m_beamHelper);
+  }
+}

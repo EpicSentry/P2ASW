@@ -1,0 +1,25 @@
+void __thiscall C_PortalBeamHelper::Init(C_PortalBeamHelper *this, C_Beam *pBeamTemplate)
+{
+  CUtlMemory<vgui::TreeNode *,int> *p_m_beams; // esi
+  int m_nAllocationCount; // eax
+  int m_Size; // edi
+  vgui::TreeNode **m_pMemory; // ecx
+  int v6; // eax
+  vgui::TreeNode **v7; // eax
+
+  p_m_beams = (CUtlMemory<vgui::TreeNode *,int> *)&this->m_beams;
+  this->m_pBeamTemplate = pBeamTemplate;
+  m_nAllocationCount = this->m_beams.m_Memory.m_nAllocationCount;
+  m_Size = this->m_beams.m_Size;
+  if ( m_Size + 1 > m_nAllocationCount )
+    CUtlMemory<CPortalLeaderboard *,int>::Grow(p_m_beams, m_Size - m_nAllocationCount + 1);
+  ++p_m_beams[1].m_pMemory;
+  m_pMemory = p_m_beams->m_pMemory;
+  v6 = (int)p_m_beams[1].m_pMemory - m_Size - 1;
+  p_m_beams[1].m_nAllocationCount = (int)p_m_beams->m_pMemory;
+  if ( v6 > 0 )
+    _V_memmove(&m_pMemory[m_Size + 1], &m_pMemory[m_Size], 4 * v6);
+  v7 = &p_m_beams->m_pMemory[m_Size];
+  if ( v7 )
+    *v7 = (vgui::TreeNode *)pBeamTemplate;
+}

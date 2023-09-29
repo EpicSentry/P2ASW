@@ -1,0 +1,44 @@
+void __thiscall C_PortalBeamHelper::~C_PortalBeamHelper(C_PortalBeamHelper *this)
+{
+  int v2; // edi
+  C_Beam **m_pMemory; // eax
+
+  v2 = 0;
+  for ( this->m_pBeamTemplate = 0; v2 < this->m_beams.m_Size; ++v2 )
+  {
+    C_BaseEntity::Remove(this->m_beams.m_Memory.m_pMemory[v2]);
+    this->m_beams.m_Memory.m_pMemory[v2] = 0;
+  }
+  this->m_beams.m_Size = 0;
+  if ( this->m_beams.m_Memory.m_nGrowSize >= 0 )
+  {
+    if ( this->m_beams.m_Memory.m_pMemory )
+    {
+      _g_pMemAlloc->Free(_g_pMemAlloc, this->m_beams.m_Memory.m_pMemory);
+      this->m_beams.m_Memory.m_pMemory = 0;
+    }
+    this->m_beams.m_Memory.m_nAllocationCount = 0;
+  }
+  this->m_beams.m_pElements = this->m_beams.m_Memory.m_pMemory;
+  this->m_beams.m_Size = 0;
+  if ( this->m_beams.m_Memory.m_nGrowSize >= 0 )
+  {
+    if ( this->m_beams.m_Memory.m_pMemory )
+    {
+      _g_pMemAlloc->Free(_g_pMemAlloc, this->m_beams.m_Memory.m_pMemory);
+      this->m_beams.m_Memory.m_pMemory = 0;
+    }
+    this->m_beams.m_Memory.m_nAllocationCount = 0;
+  }
+  m_pMemory = this->m_beams.m_Memory.m_pMemory;
+  this->m_beams.m_pElements = m_pMemory;
+  if ( this->m_beams.m_Memory.m_nGrowSize >= 0 )
+  {
+    if ( m_pMemory )
+    {
+      _g_pMemAlloc->Free(_g_pMemAlloc, m_pMemory);
+      this->m_beams.m_Memory.m_pMemory = 0;
+    }
+    this->m_beams.m_Memory.m_nAllocationCount = 0;
+  }
+}

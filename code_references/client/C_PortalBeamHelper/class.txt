@@ -4,8 +4,8 @@ class C_PortalBeamHelper
 public:
 
     //void C_PortalBeamHelper(class C_PortalBeamHelper & );
-    void C_PortalBeamHelper();
-    void ~C_PortalBeamHelper();
+    C_PortalBeamHelper();
+    ~C_PortalBeamHelper();
     void Init( class C_Beam * );
     void TurnOn();
     void TurnOff();

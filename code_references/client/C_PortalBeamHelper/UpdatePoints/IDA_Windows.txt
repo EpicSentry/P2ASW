@@ -1,5 +1,3 @@
-// NOTE: nBeams/a2 was probably just m_beams.Count()
-
 void __userpurge C_PortalBeamHelper::UpdatePoints(
         C_PortalBeamHelper *this@<ecx>,
         int a2@<ebp>,

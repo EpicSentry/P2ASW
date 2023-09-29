@@ -1,0 +1,43 @@
+void __usercall C_NPC_Portal_FloorTurret::Spawn(C_NPC_Portal_FloorTurret *this@<ecx>, int a2@<edi>, int a3@<esi>)
+{
+  C_Beam *v4; // eax
+  C_Beam *v5; // esi
+  IUniformRandomStream *v6; // ecx
+  __int64 v8[2]; // [esp+14h] [ebp-10h] BYREF
+
+  v8[1] = 0i64;
+  LODWORD(v8[0]) =  __thiscall C_Prop_Portal::`vcall'{4,{flat}};
+  HIDWORD(v8[0]) = 12;
+  C_BaseEntity::ThinkSet(this, v8, (unsigned __int64)v8[0], 0.0, 0);
+  ((void (__thiscall *)(C_NPC_Portal_FloorTurret *, _DWORD, int, int))this->SetNextClientThink)(
+    this,
+    LODWORD(FLOAT_N1293_0),
+    a2,
+    a3);
+  v4 = C_Beam::BeamCreate("effects/redlaser1.vmt", 0.2);
+  v5 = v4;
+  if ( v4->m_clrRender.m_Value.r != 0xFF )
+    v4->m_clrRender.m_Value.r = -1;
+  if ( v4->m_clrRender.m_Value.g != 32 )
+    v4->m_clrRender.m_Value.g = 32;
+  if ( v4->m_clrRender.m_Value.b != 32 )
+    v4->m_clrRender.m_Value.b = 32;
+  C_BaseEntity::SetRenderAlpha(v4, 0xFFu);
+  if ( v5->m_fAmplitude.m_Value != 0.0 )
+    v5->m_fAmplitude.m_Value = 0.0;
+  if ( v5->m_fWidth.m_Value != 0.0 )
+    v5->m_fWidth.m_Value = 0.0;
+  if ( v5->m_fEndWidth.m_Value != 0.75 )
+    v5->m_fEndWidth.m_Value = FLOAT_0_75;
+  if ( v5->m_fSpeed.m_Value != 0.0 )
+    v5->m_fSpeed.m_Value = 0.0;
+  if ( v5->m_fFadeLength.m_Value != 0.0 )
+    v5->m_fFadeLength.m_Value = 0.0;
+  if ( v5->m_fHaloScale.m_Value != 4.0 )
+    v5->m_fHaloScale.m_Value = FLOAT_4_0;
+  C_Beam::SetBeamFlag(v5, 0x10000);
+  C_PortalBeamHelper::Init(&this->m_beamHelper, v5);
+  this->m_fPulseOffset = _RandomFloat(v6, 0.0, 6.2831855);
+  this->m_bBeamFlickerOff = 0.0;
+  this->m_fBeamFlickerTime = 0.0;
+}
