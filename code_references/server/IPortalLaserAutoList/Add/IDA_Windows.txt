@@ -1,0 +1,35 @@
+void __cdecl IPortalLaserAutoList::Add(IPortalLaserAutoList *pElement)
+{
+  int m_Size; // eax
+  int v2; // esi
+  IPortalLaserAutoList **m_pMemory; // ecx
+  int v4; // eax
+  IPortalLaserAutoList **v5; // eax
+
+  m_Size = IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Size;
+  v2 = IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Size;
+  if ( IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Size + 1 > IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Memory.m_nAllocationCount )
+  {
+    CUtlMemory<CNavLadder *,int>::Grow(
+      (CUtlMemory<vgui::TreeNode *,int> *)&IPortalLaserAutoList::m_IPortalLaserAutoListAutoList,
+      IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Size
+    - IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Memory.m_nAllocationCount
+    + 1);
+    m_Size = IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Size;
+  }
+  m_pMemory = IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Memory.m_pMemory;
+  IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Size = m_Size + 1;
+  v4 = m_Size - v2;
+  IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_pElements = IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Memory.m_pMemory;
+  if ( v4 > 0 )
+  {
+    _V_memmove(
+      &IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Memory.m_pMemory[v2 + 1],
+      &IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Memory.m_pMemory[v2],
+      4 * v4);
+    m_pMemory = IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Memory.m_pMemory;
+  }
+  v5 = &m_pMemory[v2];
+  if ( v5 )
+    *v5 = pElement;
+}

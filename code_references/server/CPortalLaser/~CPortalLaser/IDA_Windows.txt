@@ -1,0 +1,11 @@
+CPortalLaser *__thiscall CPortalLaser::`scalar deleting destructor'(CPortalLaser *this, char a2)
+{
+  this->CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable = (CPortalLaser_vtbl *)&CPortalLaser::`vftable'{for `CBaseAnimating'};
+  this->IPortalLaserAutoList::__vftable = (IPortalLaserAutoList_vtbl *)&CPortalLaser::`vftable'{for `IPortalLaserAutoList'};
+  this->IPortalLaserAutoList::__vftable = (IPortalLaserAutoList_vtbl *)&IPortalLaserAutoList::`vftable';
+  IPortalLaserAutoList::Remove(&this->IPortalLaserAutoList);
+  CBaseAnimating::~CBaseAnimating(this);
+  if ( (a2 & 1) != 0 )
+    CBaseEntity::operator delete(this);
+  return this;
+}

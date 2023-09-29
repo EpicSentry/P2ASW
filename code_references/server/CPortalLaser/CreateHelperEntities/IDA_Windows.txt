@@ -1,0 +1,17 @@
+void __thiscall CPortalLaser::CreateHelperEntities(CPortalLaser *this)
+{
+  if ( !this->m_bNoPlacementHelper && !this->m_pPlacementHelper )
+  {
+    this->m_pPlacementHelper = (CInfoPlacementHelper *)CreateEntityByName("info_placement_helper", -1, 1);
+    if ( (this->m_iEFlags & 0x800) != 0 )
+      CBaseEntity::CalcAbsolutePosition(this);
+    CBaseEntity::SetAbsOrigin(this->m_pPlacementHelper, &this->m_vecAbsOrigin);
+    if ( (this->m_iEFlags & 0x800) != 0 )
+      CBaseEntity::CalcAbsolutePosition(this);
+    CBaseEntity::SetAbsAngles(this->m_pPlacementHelper, &this->m_angAbsRotation);
+    this->m_pPlacementHelper->KeyValue(this->m_pPlacementHelper, "radius", "16");
+    this->m_pPlacementHelper->KeyValue(this->m_pPlacementHelper, "hide_until_placed", "0");
+    DispatchSpawn(this->m_pPlacementHelper, 1);
+  }
+  CPortalLaser::CreateSoundProxies(this);
+}

@@ -1,0 +1,225 @@
+// local variable allocation has failed, the output may be wrong!
+CBaseEntity *__userpurge CPortalLaser::GetEntitiesAlongLaser@<eax>( CPortalLaser *this@<ecx>, float a2@<ebp>, const Vector *vecStart, Vector *vecEnd, Vector *pVecOut, CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > *infoList, bool bIsFirstTrace )
+{
+  Vector *v7; // esi
+  CPortalLaser::PortalLaserInfo_t *v8; // eax
+  double x; // st7
+  float v10; // xmm0_4
+  float v11; // xmm1_4
+  float v12; // xmm2_4
+  float v13; // xmm2_4
+  __int128 v14; // xmm0
+  float m_fValue; // xmm0_4
+  CBaseEntity *v16; // esi
+  const Vector *v17; // eax
+  float y; // esi
+  float v19; // ecx
+  vgui::TreeNode **v20; // edi
+  int v21; // eax
+  vgui::TreeNode **v22; // edx
+  int v23; // eax
+  vgui::TreeNode **v24; // edi
+  bool v25; // al
+  _BYTE *v26; // eax
+  CBaseEntity *v28[3]; // [esp+14h] [ebp-8DCh] BYREF
+  CBaseEntity *list[512]; // [esp+20h] [ebp-8D0h] BYREF
+  _BYTE ray_52[32]; // [esp+854h] [ebp-9Ch] OVERLAPPED BYREF
+  Vector v31; // [esp+884h] [ebp-6Ch] BYREF
+  Vector vecDirection; // [esp+890h] [ebp-60h] BYREF
+  int nCount; // [esp+89Ch] [ebp-54h]
+  CPortalLaser::PortalLaserInfo_t *info; // [esp+8A0h] [ebp-50h]
+  Vector vecMins; // [esp+8A4h] [ebp-4Ch] BYREF
+  Vector vecMaxs; // [esp+8B0h] [ebp-40h] BYREF
+  CUtlSortVector<LaserVictimInfo_t,CLaserVictimLess,CUtlVector<LaserVictimInfo_t,CUtlMemory<LaserVictimInfo_t,int> > > vsrtVictims; // [esp+8BCh] [ebp-34h] BYREF
+  LaserVictimInfo_t victim; // [esp+8D8h] [ebp-18h] BYREF
+  char v39; // [esp+8E3h] [ebp-Dh] BYREF
+  float flFraction; // [esp+8E4h] [ebp-Ch]
+  int i; // [esp+8E8h] [ebp-8h]
+  int retaddr; // [esp+8F0h] [ebp+0h]
+
+  flFraction = a2;
+  i = retaddr;
+  CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int>>::InsertBefore(
+    infoList,
+    infoList->m_Size);
+  v7 = vecEnd;
+  v8 = &infoList->m_Memory.m_pMemory[infoList->m_Size - 1];
+  x = vecStart->x;
+  LODWORD(vecDirection.y) = v8;
+  v8->vecStart.x = x;
+  v8->vecStart.y = vecStart->y;
+  v8->vecStart.z = vecStart->z;
+  v8->vecEnd = *vecEnd;
+  v10 = vecEnd->x - vecStart->x;
+  v11 = vecEnd->y - vecStart->y;
+  v12 = vecEnd->z - vecStart->z;
+  v31.x = v10;
+  v31.y = v11;
+  v31.z = v12;
+  if ( bIsFirstTrace )
+  {
+    v13 = (float)((float)(v12 * v12) + (float)(v11 * v11)) + (float)(v10 * v10);
+    v14 = 0i64;
+    *(float *)&v14 = fsqrt(v13);
+    *(_OWORD *)&ray_52[16] = v14;
+    m_fValue = (float)(*(float *)&v14 * 0.00390625) + 16.0;
+  }
+  else
+  {
+    m_fValue = sv_laser_tight_box.m_pParent->m_Value.m_fValue;
+  }
+  LODWORD(vecDirection.z) = LODWORD(m_fValue) ^ _mask__NegFloat_;
+  nCount = LODWORD(m_fValue) ^ _mask__NegFloat_;
+  info = (CPortalLaser::PortalLaserInfo_t *)(LODWORD(m_fValue) ^ _mask__NegFloat_);
+  vecMins.x = m_fValue;
+  vecMins.y = m_fValue;
+  vecMins.z = m_fValue;
+  if ( sv_debug_laser.m_pParent->m_Value.m_nValue )
+  {
+    VectorAngles(&v31, (QAngle *)&vsrtVictims.m_pElements);
+    if ( bIsFirstTrace )
+      NDebugOverlay::SweptBox(
+        vecStart,
+        vecEnd,
+        (Vector *)&vecDirection.z,
+        &vecMins,
+        (const QAngle *)&vsrtVictims.m_pElements,
+        255,
+        0,
+        0,
+        0,
+        0.1);
+    else
+      NDebugOverlay::SweptBox(
+        vecStart,
+        vecEnd,
+        (Vector *)&vecDirection.z,
+        &vecMins,
+        (const QAngle *)&vsrtVictims.m_pElements,
+        0,
+        255,
+        0,
+        0,
+        0.1);
+  }
+  *(_DWORD *)ray_52 = 0;
+  Ray_t::Init((Ray_t *)&list[509], vecStart, vecEnd, (Vector *)&vecDirection.z, &vecMins);
+  CFlaggedEntitiesEnum::CFlaggedEntitiesEnum((CFlaggedEntitiesEnum *)&ray_52[16], v28, 512, 33562752);
+  LODWORD(vecDirection.x) = UTIL_EntitiesAlongRay((const Ray_t *)&list[509], (CFlaggedEntitiesEnum *)&ray_52[16]);
+  memset(&vecMaxs, 0, sizeof(vecMaxs));
+  memset(&vsrtVictims, 0, 13);
+  victim.flFraction = 0.0;
+  if ( SLODWORD(vecDirection.x) > 0 )
+  {
+    do
+    {
+      v16 = v28[LODWORD(victim.flFraction)];
+      if ( (v16
+         && (v16->m_iClassname.pszValue == "point_laser_target"
+          || CBaseEntity::ClassMatchesComplex(v16, "point_laser_target")
+          || v16->m_iClassname.pszValue == "npc_portal_turret_floor"
+          || CBaseEntity::ClassMatchesComplex(v16, "npc_portal_turret_floor"))
+         || v16->IsPlayer(v16))
+        && v16->IsAlive(v16) )
+      {
+        v17 = v16->WorldSpaceCenter(v16);
+        CalcClosestPointOnLineSegment(v17, vecStart, vecEnd, (Vector *)&ray_52[24], (float *)&victim);
+        if ( (!v16->IsPlayer(v16) || sv_player_collide_with_laser.m_pParent->m_Value.m_nValue)
+          && *(float *)&victim.pVictim > 0.0 )
+        {
+          vsrtVictims.m_pLessContext = v16;
+          *(_DWORD *)&vsrtVictims.m_bNeedsSort = victim.pVictim;
+          CUtlSortVector<LaserVictimInfo_t,CLaserVictimLess,CUtlVector<LaserVictimInfo_t,CUtlMemory<LaserVictimInfo_t,int>>>::InsertNoSort(
+            (CUtlSortVector<LaserVictimInfo_t,CLaserVictimLess,CUtlVector<LaserVictimInfo_t,CUtlMemory<LaserVictimInfo_t,int> > > *)&vecMaxs,
+            (const LaserVictimInfo_t *)&vsrtVictims.m_pLessContext);
+        }
+      }
+      ++LODWORD(victim.flFraction);
+    }
+    while ( SLODWORD(victim.flFraction) < SLODWORD(vecDirection.x) );
+    if ( (int)vsrtVictims.m_Memory.m_pMemory > 1 )
+    {
+      vsrtVictims.m_pLessContext = (void *)vsrtVictims.m_Memory.m_nGrowSize;
+      *(_DWORD *)&vsrtVictims.m_bNeedsSort = &v39;
+      qsort_s(
+        (void *)LODWORD(vecMaxs.x),
+        (unsigned int)vsrtVictims.m_Memory.m_pMemory,
+        8u,
+        (int (__cdecl *)(void *, const void *, const void *))CUtlSortVector<LaserVictimInfo_t,CLaserVictimLess,CUtlVector<LaserVictimInfo_t,CUtlMemory<LaserVictimInfo_t,int>>>::CompareHelper,
+        &vsrtVictims.m_pLessContext);
+    }
+    v7 = vecEnd;
+  }
+  v39 = 0;
+  victim.pVictim = 0;
+  if ( (int)vsrtVictims.m_Memory.m_pMemory > 0 )
+  {
+    y = vecDirection.y;
+    while ( 1 )
+    {
+      v19 = *(float *)(LODWORD(vecMaxs.x) + 8 * (int)victim.pVictim);
+      v20 = *(vgui::TreeNode ***)(LODWORD(y) + 36);
+      v21 = *(_DWORD *)(LODWORD(y) + 28);
+      victim.flFraction = v19;
+      if ( (int)v20 + 1 > v21 )
+      {
+        CUtlMemory<CNavLadder *,int>::Grow((CUtlMemory<vgui::TreeNode *,int> *)(LODWORD(y) + 24), (int)v20 - v21 + 1);
+        v19 = victim.flFraction;
+      }
+      ++*(_DWORD *)(LODWORD(y) + 36);
+      v22 = *(vgui::TreeNode ***)(LODWORD(y) + 24);
+      v23 = *(_DWORD *)(LODWORD(y) + 36) - (_DWORD)v20 - 1;
+      *(_DWORD *)(LODWORD(y) + 40) = v22;
+      if ( v23 > 0 )
+      {
+        _V_memmove(&v22[(_DWORD)v20 + 1], &v22[(_DWORD)v20], 4 * v23);
+        v19 = victim.flFraction;
+      }
+      v24 = (vgui::TreeNode **)(*(_DWORD *)(LODWORD(y) + 24) + 4 * (_DWORD)v20);
+      if ( v24 )
+        *(float *)v24 = v19;
+      if ( v19 != 0.0 )
+      {
+        if ( (*(const char **)(LODWORD(v19) + 96) == "point_laser_target"
+           || (v25 = CBaseEntity::ClassMatchesComplex((CBaseEntity *)LODWORD(v19), "point_laser_target"),
+               v19 = victim.flFraction,
+               v25))
+          && !v39 )
+        {
+          v26 = __RTDynamicCast(
+                  (void *)LODWORD(v19),
+                  0,
+                  &CBaseEntity `RTTI Type Descriptor',
+                  &CPortalLaserTarget `RTTI Type Descriptor',
+                  0);
+          if ( v26 && v26[909] )
+          {
+            if ( pVecOut )
+              *pVecOut = *(Vector *)(*(int (__thiscall **)(_BYTE *))(*(_DWORD *)v26 + 596))(v26);
+            if ( vecMaxs.z >= 0.0 )
+            {
+              if ( LODWORD(vecMaxs.x) )
+                _g_pMemAlloc->Free(_g_pMemAlloc, (void *)LODWORD(vecMaxs.x));
+            }
+            return (CBaseEntity *)LODWORD(victim.flFraction);
+          }
+        }
+        else if ( *(const char **)(LODWORD(v19) + 96) == "npc_portal_turret_floor"
+               || CBaseEntity::ClassMatchesComplex((CBaseEntity *)LODWORD(v19), "npc_portal_turret_floor") )
+        {
+          v39 = 1;
+        }
+      }
+      if ( (int)++victim.pVictim >= (int)vsrtVictims.m_Memory.m_pMemory )
+      {
+        v7 = vecEnd;
+        break;
+      }
+    }
+  }
+  if ( pVecOut )
+    *pVecOut = *v7;
+  if ( vecMaxs.z >= 0.0 && LODWORD(vecMaxs.x) )
+    _g_pMemAlloc->Free(_g_pMemAlloc, (void *)LODWORD(vecMaxs.x));
+  return 0;
+}

@@ -1,0 +1,230 @@
+void __thiscall CPortalLaser::DamageEntitiesAlongLaser(
+        CPortalLaser *this,
+        const CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > *infoList,
+        bool bAutoAim)
+{
+  const CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > *v3; // esi
+  Vector *p_vecStart; // edi
+  int v6; // eax
+  _BYTE *v7; // esi
+  int v8; // edi
+  const Vector *v9; // eax
+  int (__thiscall *v10)(_BYTE *); // eax
+  const Vector *v11; // eax
+  Vector *p_vecMeleeDir; // ecx
+  int (__thiscall *v13)(_BYTE *); // eax
+  int (__thiscall *v14)(_BYTE *); // eax
+  float v15; // edx
+  float v16; // ecx
+  float y; // xmm2_4
+  float v18; // xmm0_4
+  float x; // xmm3_4
+  float v20; // xmm0_4
+  bool v21; // zf
+  float v22; // xmm0_4
+  int (__thiscall *v23)(_BYTE *); // eax
+  const Vector *v24; // eax
+  const Vector *v25; // [esp-14h] [ebp-120h]
+  const Vector *v26; // [esp-10h] [ebp-11Ch]
+  const QAngle *v27; // [esp-Ch] [ebp-118h]
+  float duration; // [esp+8h] [ebp-104h]
+  CTakeDamageInfo info; // [esp+18h] [ebp-F4h] BYREF
+  Vector vecNearestPoint; // [esp+68h] [ebp-A4h] BYREF
+  int v31[3]; // [esp+74h] [ebp-98h] BYREF
+  Vector vecMeleeDir; // [esp+80h] [ebp-8Ch] BYREF
+  Vector v33; // [esp+8Ch] [ebp-80h] BYREF
+  Vector vecPlayerPos; // [esp+98h] [ebp-74h]
+  int v35[3]; // [esp+A4h] [ebp-68h] BYREF
+  Vector v36; // [esp+B0h] [ebp-5Ch]
+  Vector vecPlayerVelocity; // [esp+BCh] [ebp-50h] BYREF
+  Vector vecDirection; // [esp+C8h] [ebp-44h] BYREF
+  int i; // [esp+D4h] [ebp-38h]
+  int j; // [esp+D8h] [ebp-34h]
+  Vector vecLineToLaser; // [esp+DCh] [ebp-30h] BYREF
+  Vector vecPushVelocity; // [esp+E8h] [ebp-24h] BYREF
+  Vector vecBounce; // [esp+F4h] [ebp-18h] BYREF
+  unsigned int v44; // [esp+100h] [ebp-Ch]
+  Vector *vLineA; // [esp+104h] [ebp-8h]
+  bool bBlockTarget; // [esp+10Bh] [ebp-1h]
+
+  v3 = infoList;
+  bBlockTarget = 0;
+  i = 0;
+  if ( infoList->m_Size <= 0 )
+    return;
+  v44 = 0;
+  do
+  {
+    p_vecStart = &v3->m_Memory.m_pMemory[v44 / 0x2C].vecStart;
+    v36.x = p_vecStart[1].x - p_vecStart->x;
+    v36.y = p_vecStart[1].y - p_vecStart->y;
+    v36.z = p_vecStart[1].z - p_vecStart->z;
+    vLineA = p_vecStart;
+    vecDirection = v36;
+    VectorNormalize(&vecDirection);
+    v6 = 0;
+    j = 0;
+    if ( SLODWORD(p_vecStart[3].x) <= 0 )
+      goto LABEL_45;
+    do
+    {
+      v7 = *(_BYTE **)(LODWORD(p_vecStart[2].x) + 4 * v6);
+      if ( sv_debug_laser.m_pParent->m_Value.m_nValue )
+      {
+        v8 = (*(int (__thiscall **)(_BYTE *))(*(_DWORD *)v7 + 12))(v7);
+        if ( v8 )
+        {
+          v27 = (const QAngle *)(*(int (__thiscall **)(int))(*(_DWORD *)v8 + 36))(v8);
+          v26 = (const Vector *)(*(int (__thiscall **)(int))(*(_DWORD *)v8 + 8))(v8);
+          v25 = (const Vector *)(*(int (__thiscall **)(int))(*(_DWORD *)v8 + 4))(v8);
+          v9 = (const Vector *)(*(int (__thiscall **)(int))(*(_DWORD *)v8 + 32))(v8);
+          NDebugOverlay::BoxAngles(v9, v25, v26, v27, 255, 255, 0, 0, 0.1);
+        }
+        p_vecStart = vLineA;
+      }
+      if ( v7 )
+      {
+        if ( (*((const char **)v7 + 24) == "point_laser_target"
+           || CBaseEntity::ClassMatchesComplex((CBaseEntity *)v7, "point_laser_target"))
+          && !bBlockTarget )
+        {
+          if ( !v7[909] )
+          {
+            CTakeDamageInfo::CTakeDamageInfo(&info, this, this, gpGlobals->frametime, 8, 0);
+            v14 = *(int (__thiscall **)(_BYTE *))(*(_DWORD *)v7 + 596);
+            *(float *)v35 = FLOAT_1_0;
+            v35[1] = 0;
+            v35[2] = 0;
+            duration = FLOAT_1_0;
+            v11 = (const Vector *)v14(v7);
+            p_vecMeleeDir = (Vector *)v35;
+            goto LABEL_19;
+          }
+          if ( !this->m_bAutoAimEnabled )
+          {
+            CTakeDamageInfo::CTakeDamageInfo(&info, this, this, gpGlobals->frametime, 8, 0);
+            v10 = *(int (__thiscall **)(_BYTE *))(*(_DWORD *)v7 + 596);
+            vecMeleeDir.x = FLOAT_1_0;
+            vecMeleeDir.y = 0.0;
+            vecMeleeDir.z = 0.0;
+            duration = FLOAT_1_0;
+            v11 = (const Vector *)v10(v7);
+            p_vecMeleeDir = &vecMeleeDir;
+LABEL_19:
+            CalculateMeleeDamageForce(&info, p_vecMeleeDir, v11, duration);
+            CBaseEntity::TakeDamage((CBaseEntity *)v7, &info);
+            goto LABEL_43;
+          }
+          if ( bAutoAim || this->m_bFromReflectedCube )
+          {
+            CTakeDamageInfo::CTakeDamageInfo(&info, this, this, gpGlobals->frametime, 8, 0);
+            v13 = *(int (__thiscall **)(_BYTE *))(*(_DWORD *)v7 + 596);
+            *(float *)v31 = FLOAT_1_0;
+            v31[1] = 0;
+            v31[2] = 0;
+            duration = FLOAT_1_0;
+            v11 = (const Vector *)v13(v7);
+            p_vecMeleeDir = (Vector *)v31;
+            goto LABEL_19;
+          }
+          goto LABEL_43;
+        }
+        if ( *((const char **)v7 + 24) == "npc_portal_turret_floor"
+          || CBaseEntity::ClassMatchesComplex((CBaseEntity *)v7, "npc_portal_turret_floor") )
+        {
+          bBlockTarget = 1;
+          goto LABEL_43;
+        }
+      }
+      if ( (*(unsigned __int8 (__thiscall **)(_BYTE *))(*(_DWORD *)v7 + 340))(v7)
+        && v7[218] != 8
+        && (CBaseEntity::GetGroundEntity((CBaseEntity *)v7)
+         || COERCE_FLOAT(LODWORD(vecDirection.z) & _mask__AbsFloat_) >= 0.2) )
+      {
+        if ( (*((_DWORD *)v7 + 50) & 0x1000) != 0 )
+          CBaseEntity::CalcAbsoluteVelocity((CBaseEntity *)v7);
+        v15 = *((float *)v7 + 93);
+        *(_QWORD *)&vecPlayerVelocity.x = *(_QWORD *)(v7 + 364);
+        vecPlayerVelocity.z = v15;
+        VectorNormalize(&vecPlayerVelocity);
+        if ( (*((_DWORD *)v7 + 50) & 0x800) != 0 )
+          CBaseEntity::CalcAbsolutePosition((CBaseEntity *)v7);
+        CalcClosestPointOnLineSegment((const Vector *)(v7 + 460), vLineA, vLineA + 1, &vecNearestPoint, 0);
+        if ( (*((_DWORD *)v7 + 50) & 0x800) != 0 )
+          CBaseEntity::CalcAbsolutePosition((CBaseEntity *)v7);
+        v16 = *((float *)v7 + 117);
+        *(_QWORD *)&vecPlayerPos.x = *(_QWORD *)(v7 + 460);
+        vecLineToLaser.x = vecPlayerPos.x - vecNearestPoint.x;
+        vecLineToLaser.y = vecPlayerPos.y - vecNearestPoint.y;
+        vecPlayerPos.z = v16;
+        vecLineToLaser.z = 0.0;
+        VectorNormalize(&vecLineToLaser);
+        vecLineToLaser.z = 0.0;
+        if ( (float)((float)((float)(vecPlayerVelocity.y * vecPlayerVelocity.y)
+                           + (float)(vecPlayerVelocity.x * vecPlayerVelocity.x))
+                   + (float)(vecPlayerVelocity.z * vecPlayerVelocity.z)) < 1.4210855e-14 )
+        {
+          y = (float)(vecDirection.z * 0.0) - vecDirection.x;
+          v18 = (float)(vecDirection.x * 0.0) - (float)(vecDirection.y * 0.0);
+          x = vecDirection.y - (float)(vecDirection.z * 0.0);
+          vecBounce.x = x;
+          vecBounce.y = y;
+          vecBounce.z = v18;
+          goto LABEL_36;
+        }
+        v20 = (float)((float)(vecPlayerVelocity.y * vecLineToLaser.y) + (float)(vecLineToLaser.x * vecPlayerVelocity.x))
+            + (float)(vecPlayerVelocity.z * 0.0);
+        vecBounce.x = (float)((float)(vecLineToLaser.x * -2.0) * v20) + vecPlayerVelocity.x;
+        vecBounce.y = (float)((float)(vecLineToLaser.y * -2.0) * v20) + vecPlayerVelocity.y;
+        vecBounce.z = (float)(v20 * -0.0) + vecPlayerVelocity.z;
+        VectorNormalize(&vecBounce);
+        y = vecBounce.y;
+        x = vecBounce.x;
+        v18 = 0.0;
+        vecBounce.z = 0.0;
+        if ( (float)((float)((float)(vecBounce.y * vecLineToLaser.y) + (float)(vecLineToLaser.x * vecBounce.x))
+                   + (float)(vecLineToLaser.z * 0.0)) >= 0.0 )
+        {
+LABEL_36:
+          v21 = (v7[204] & 1) == 0;
+          vecPushVelocity.x = x * 100.0;
+          vecPushVelocity.y = y * 100.0;
+          vecPushVelocity.z = v18 * 100.0;
+          if ( !v21 )
+          {
+            CBaseEntity::SetGroundEntity((CBaseEntity *)v7, 0);
+            CBaseEntity::SetGroundChangeTime((CBaseEntity *)v7, gpGlobals->curtime + 0.5);
+            vecPushVelocity.x = vecPushVelocity.x * 2.0;
+            vecPushVelocity.y = vecPushVelocity.y * 2.0;
+            vecPushVelocity.z = vecPushVelocity.z * 2.0;
+          }
+          CBaseEntity::SetAbsVelocity((CBaseEntity *)v7, &vecPushVelocity);
+          if ( this->m_bIsLethal.m_Value )
+            v22 = FLOAT_100000_0;
+          else
+            v22 = FLOAT_150_0;
+          CTakeDamageInfo::CTakeDamageInfo(&info, this, this, gpGlobals->frametime * v22, 8, 0);
+          v23 = *(int (__thiscall **)(_BYTE *))(*(_DWORD *)v7 + 596);
+          v33.x = FLOAT_1_0;
+          v33.y = 0.0;
+          v33.z = 0.0;
+          v24 = (const Vector *)v23(v7);
+          CalculateMeleeDamageForce(&info, &v33, v24, 1.0);
+          CBaseEntity::TakeDamage((CBaseEntity *)v7, &info);
+          CBaseEntity::EmitSound((CBaseEntity *)v7, "Flesh.LaserBurn", 0.0, 0);
+          CBaseEntity::EmitSound((CBaseEntity *)v7, "Player.PainSmall", 0.0, 0);
+        }
+        p_vecStart = vLineA;
+      }
+LABEL_43:
+      v6 = j + 1;
+      j = v6;
+    }
+    while ( v6 < SLODWORD(p_vecStart[3].x) );
+    v3 = infoList;
+LABEL_45:
+    v44 += 44;
+    ++i;
+  }
+  while ( i < v3->m_Size );
+}

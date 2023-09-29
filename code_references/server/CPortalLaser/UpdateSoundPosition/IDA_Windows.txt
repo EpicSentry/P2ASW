@@ -1,0 +1,52 @@
+void __thiscall CPortalLaser::UpdateSoundPosition(CPortalLaser *this, const Vector *vecStart, const Vector *vecEnd)
+{
+  int v4; // eax
+  float *p_z; // esi
+  int v6; // ebx
+  CBasePlayer *v7; // eax
+  bool v8; // zf
+  float v9; // xmm6_4
+  float v10; // xmm7_4
+  Vector vecPlayer; // [esp+Ch] [ebp-18h] BYREF
+  Vector vecNearestPoint; // [esp+18h] [ebp-Ch] BYREF
+
+  v4 = 0;
+  p_z = &this->m_vecNearestSoundSource[0].z;
+  do
+  {
+    v6 = v4 + 1;
+    v7 = UTIL_PlayerByIndex(v4 + 1);
+    if ( !v7 )
+    {
+      v8 = (this->m_iEFlags & 0x800) == 0;
+LABEL_4:
+      if ( !v8 )
+        CBaseEntity::CalcAbsolutePosition(this);
+      *(p_z - 2) = this->m_vecAbsOrigin.x;
+      *(p_z - 1) = this->m_vecAbsOrigin.y;
+      *p_z = this->m_vecAbsOrigin.z;
+      goto LABEL_14;
+    }
+    if ( v7->m_iConnected == PlayerDisconnected )
+    {
+      v8 = (this->m_iEFlags & 0x800) == 0;
+      goto LABEL_4;
+    }
+    v7->EyePosition(v7, &vecPlayer);
+    CalcClosestPointOnLineSegment(&vecPlayer, vecStart, vecEnd, &vecNearestPoint, 0);
+    v9 = *(p_z - 2);
+    v10 = *p_z;
+    if ( (float)((float)((float)((float)(vecPlayer.y - *(p_z - 1)) * (float)(vecPlayer.y - *(p_z - 1)))
+                       + (float)((float)(vecPlayer.x - v9) * (float)(vecPlayer.x - v9)))
+               + (float)((float)(vecPlayer.z - v10) * (float)(vecPlayer.z - v10))) > (float)((float)((float)((float)(vecPlayer.y - vecNearestPoint.y) * (float)(vecPlayer.y - vecNearestPoint.y)) + (float)((float)(vecPlayer.x - vecNearestPoint.x) * (float)(vecPlayer.x - vecNearestPoint.x)))
+                                                                                           + (float)((float)(vecPlayer.z - vecNearestPoint.z) * (float)(vecPlayer.z - vecNearestPoint.z)))
+      || vec3_invalid.x == v9 && vec3_invalid.y == *(p_z - 1) && vec3_invalid.z == v10 )
+    {
+      *(Vector *)(p_z - 2) = vecNearestPoint;
+    }
+LABEL_14:
+    v4 = v6;
+    p_z += 3;
+  }
+  while ( v6 < 33 );
+}

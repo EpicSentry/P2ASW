@@ -1,0 +1,19 @@
+bool __thiscall CPortalLaser::ShouldAutoAim(CPortalLaser *this, CBaseEntity *pEntity)
+{
+  _BYTE *v4; // eax
+  bool v5; // bl
+
+  if ( !this->m_bAutoAimEnabled )
+    return 0;
+  if ( !pEntity
+    || pEntity->m_iClassname.pszValue != "point_laser_target"
+    && !CBaseEntity::ClassMatchesComplex(pEntity, "point_laser_target") )
+  {
+    return 0;
+  }
+  v4 = __RTDynamicCast(pEntity, 0, &CBaseEntity `RTTI Type Descriptor', &CPortalLaserTarget `RTTI Type Descriptor', 0);
+  v5 = v4 && v4[909];
+  if ( !this->m_bFromReflectedCube )
+    return v5;
+  return (sv_laser_cube_autoaim.m_pParent->m_Value.m_nValue || g_pGameRules->IsMultiplayer(g_pGameRules)) && v5;
+}

@@ -1,0 +1,18 @@
+CPropWeightedCube *__cdecl UTIL_GetSchrodingerTwin(CBaseEntity *pEntity)
+{
+  unsigned int m_Value; // ecx
+
+  if ( pEntity
+    && (pEntity->m_iClassname.pszValue == "prop_weighted_cube"
+     || CBaseEntity::ClassMatchesComplex(pEntity, "prop_weighted_cube"))
+    && pEntity[2].m_iGlobalname.pszValue == (const char *)5
+    && (m_Value = pEntity[2].m_iHealth.m_Value, m_Value != -1)
+    && g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Value].m_SerialNumber == HIWORD(m_Value) )
+  {
+    return (CPropWeightedCube *)g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Value].m_pEntity;
+  }
+  else
+  {
+    return 0;
+  }
+}

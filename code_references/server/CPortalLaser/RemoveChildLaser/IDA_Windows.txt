@@ -1,0 +1,12 @@
+void __thiscall CPortalLaser::RemoveChildLaser(CPortalLaser *this)
+{
+  CPortalLaser *m_pChildLaser; // eax
+
+  m_pChildLaser = this->m_pChildLaser;
+  if ( m_pChildLaser )
+  {
+    m_pChildLaser->m_pParentLaser = 0;
+    UTIL_Remove(this->m_pChildLaser);
+    this->m_pChildLaser = 0;
+  }
+}

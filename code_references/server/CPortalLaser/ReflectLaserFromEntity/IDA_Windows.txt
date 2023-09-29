@@ -1,0 +1,112 @@
+char __thiscall CPortalLaser::ReflectLaserFromEntity(CPortalLaser *this, CPropWeightedCube *pReflector)
+{
+  unsigned int m_Index; // eax
+  CBaseEntity *m_pEntity; // ecx
+  CPortalLaser *m_pChildLaser; // eax
+  const QAngle *AbsAngles; // eax
+  const Vector *v8; // eax
+  CPortalSimulator *SimulatorThatOwnsEntity; // eax
+  float *v10; // esi
+  const Vector *v11; // eax
+  float v12; // xmm0_4
+  float v13; // xmm2_4
+  float v14; // xmm1_4
+  float v15; // xmm2_4
+  float v16; // [esp+Ch] [ebp-24h]
+  float v17; // [esp+10h] [ebp-20h]
+  float v18; // [esp+14h] [ebp-1Ch]
+  Vector vecOffset; // [esp+18h] [ebp-18h] BYREF
+  Vector vecForward; // [esp+24h] [ebp-Ch] BYREF
+
+  m_Index = this->m_hReflector.m_Value.m_Index;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+    m_pEntity = 0;
+  else
+    m_pEntity = (CBaseEntity *)g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+  if ( pReflector == m_pEntity )
+  {
+    m_pChildLaser = this->m_pChildLaser;
+    if ( m_pChildLaser )
+    {
+      m_pChildLaser->m_pParentLaser = 0;
+      UTIL_Remove(this->m_pChildLaser);
+      this->m_pChildLaser = 0;
+    }
+    return 1;
+  }
+  else if ( pReflector && (UTIL_IsReflectiveCube(pReflector) || UTIL_IsSchrodinger(pReflector)) )
+  {
+    if ( CPropWeightedCube::HasLaser(pReflector) )
+    {
+      if ( CPropWeightedCube::GetLaser(pReflector) != this->m_pChildLaser )
+        CPortalLaser::RemoveChildLaser(this);
+    }
+    else
+    {
+      if ( UTIL_GetSchrodingerTwin(pReflector) )
+      {
+        AngleVectors(&this->m_angPortalExitAngles, &vecForward);
+      }
+      else
+      {
+        AbsAngles = CBaseEntity::GetAbsAngles(pReflector);
+        AngleVectors(AbsAngles, &vecForward);
+      }
+      v16 = vecForward.x * 22.0;
+      v17 = vecForward.y * 22.0;
+      v18 = vecForward.z * 22.0;
+      v8 = pReflector->WorldSpaceCenter(pReflector);
+      vecOffset.x = v8->x + v16;
+      vecOffset.y = v8->y + v17;
+      vecOffset.z = v8->z + v18;
+      SimulatorThatOwnsEntity = CPortalSimulator::GetSimulatorThatOwnsEntity(pReflector);
+      v10 = (float *)SimulatorThatOwnsEntity;
+      if ( SimulatorThatOwnsEntity )
+      {
+        if ( CPortalSimulator::EntityIsInPortalHole(SimulatorThatOwnsEntity, pReflector)
+          && (float)((float)((float)((float)(v10[26] * vecOffset.x) + (float)(vecOffset.y * v10[27]))
+                           + (float)(vecOffset.z * v10[28]))
+                   - v10[29]) < 0.0 )
+        {
+          v11 = pReflector->WorldSpaceCenter(pReflector);
+          if ( (float)((float)((float)((float)(v11->y * v10[27]) + (float)(v10[26] * v11->x)) + (float)(v11->z * v10[28]))
+                     - v10[29]) > 0.0 )
+          {
+            v12 = (float)((float)((float)(v10[31] * vecOffset.y) + (float)(v10[30] * vecOffset.x))
+                        + (float)(v10[32] * vecOffset.z))
+                + v10[33];
+            v13 = (float)((float)((float)(v10[38] * vecOffset.x) + (float)(vecOffset.y * v10[39]))
+                        + (float)(vecOffset.z * v10[40]))
+                + v10[41];
+            vecOffset.y = (float)((float)((float)(v10[34] * vecOffset.x) + (float)(v10[35] * vecOffset.y))
+                                + (float)(v10[36] * vecOffset.z))
+                        + v10[37];
+            vecOffset.z = v13;
+            vecOffset.x = v12;
+            v14 = (float)((float)(v10[35] * vecForward.y) + (float)(v10[34] * vecForward.x))
+                + (float)(v10[36] * vecForward.z);
+            v15 = (float)((float)(v10[38] * vecForward.x) + (float)(vecForward.y * v10[39]))
+                + (float)(vecForward.z * v10[40]);
+            vecForward.x = (float)((float)(v10[30] * vecForward.x) + (float)(v10[31] * vecForward.y))
+                         + (float)(v10[32] * vecForward.z);
+            vecForward.y = v14;
+            vecForward.z = v15;
+          }
+        }
+      }
+      UTIL_Portal_Laser_Prevent_Tilting(&vecForward);
+      CPortalLaser::UpdateNextLaser(this, &vecOffset, &vecForward, pReflector);
+    }
+    if ( !pReflector->m_bMovementDisabled
+      && reflector_cube_disable_when_on_laser.m_pParent->m_Value.m_nValue
+      && CPropWeightedCube::ShouldEnterDisabledState(pReflector) )
+    {
+      CPropWeightedCube::EnterDisabledState(pReflector);
+    }
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
+}

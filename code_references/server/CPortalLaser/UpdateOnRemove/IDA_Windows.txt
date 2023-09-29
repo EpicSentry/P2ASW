@@ -1,0 +1,77 @@
+void __thiscall CPortalLaser::UpdateOnRemove(CPortalLaser *this)
+{
+  CBaseEntity **m_pSoundProxy; // esi
+  int v3; // ebx
+  edict_t *m_pPev; // ecx
+  CPortalLaser *m_pChildLaser; // eax
+  bool v6; // zf
+  unsigned int m_Index; // ecx
+  CSoundPatch **m_pAmbientSound; // esi
+  int v9; // ebx
+  CSoundEnvelopeController *Controller; // eax
+
+  if ( this->m_pPlacementHelper )
+    UTIL_Remove(this->m_pPlacementHelper);
+  m_pSoundProxy = this->m_pSoundProxy;
+  v3 = 33;
+  do
+  {
+    if ( *m_pSoundProxy )
+      UTIL_Remove(*m_pSoundProxy);
+    ++m_pSoundProxy;
+    --v3;
+  }
+  while ( v3 );
+  if ( this->m_bLaserOn.m_Value )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x780u);
+    }
+    this->m_bLaserOn.m_Value = 0;
+  }
+  m_pChildLaser = this->m_pChildLaser;
+  if ( m_pChildLaser )
+  {
+    m_pChildLaser->m_pParentLaser = 0;
+    UTIL_Remove(this->m_pChildLaser);
+    this->m_pChildLaser = 0;
+  }
+  v6 = !this->m_bFromReflectedCube;
+  this->m_bGlowInitialized = 0;
+  if ( v6 )
+  {
+    StopParticleEffects(this);
+  }
+  else
+  {
+    m_Index = this->m_hReflector.m_Value.m_Index;
+    if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+      StopParticleEffects(0);
+    else
+      StopParticleEffects((CBaseEntity *)g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity);
+  }
+  m_pAmbientSound = this->m_pAmbientSound;
+  v9 = 33;
+  do
+  {
+    if ( *m_pAmbientSound )
+    {
+      Controller = CSoundEnvelopeController::GetController();
+      Controller->SoundDestroy(Controller, *m_pAmbientSound);
+      *m_pAmbientSound = 0;
+    }
+    ++m_pAmbientSound;
+    --v9;
+  }
+  while ( v9 );
+  CBaseEntity::SetNextThink(this, -1.0, 0);
+  CBaseEntity::ThinkSet(this, 0, 0.0, 0);
+  CBaseEntity::UpdateOnRemove(this);
+}

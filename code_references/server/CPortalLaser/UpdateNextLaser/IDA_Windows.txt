@@ -1,0 +1,183 @@
+void __thiscall CPortalLaser::UpdateNextLaser(
+        CPortalLaser *this,
+        const Vector *vecStart,
+        const Vector *vecDirection,
+        CPropWeightedCube *pReflector)
+{
+  CPortalLaser *m_pChildLaser; // eax
+  CPortalLaser *EntityByName; // eax
+  CPropWeightedCube *v7; // ebx
+  unsigned int m_Index; // esi
+  IHandleEntity *m_pEntity; // edx
+  unsigned int v10; // eax
+  IHandleEntity *v11; // ecx
+  unsigned int *v12; // edx
+  CNetworkVarBase<CHandle<CBaseEntity>,CPortalLaser::NetworkVar_m_hReflector> *v13; // eax
+  CBaseEdict *v14; // ecx
+  CPropWeightedCube *SchrodingerTwin; // eax
+  CPortalLaser *v16; // esi
+  bool v17; // bl
+  CBaseEdict *m_pPev; // ecx
+  CPortalLaser *v19; // esi
+  CBaseEdict *v20; // ecx
+  unsigned int v21; // eax
+  CPropWeightedCube *v22; // ecx
+  CPortalLaser *v23; // esi
+  unsigned int v24; // ebx
+  IHandleEntity *v25; // edx
+  unsigned int v26; // eax
+  IHandleEntity *v27; // ecx
+  CBaseEdict *v28; // ecx
+  CNetworkVarBase<CHandle<CBaseEntity>,CPortalLaser::NetworkVar_m_hReflector> *p_m_hReflector; // [esp+4h] [ebp-4h]
+  int v30; // [esp+4h] [ebp-4h]
+  int savedregs; // [esp+8h] [ebp+0h] BYREF
+
+  if ( IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Size < 30 )
+  {
+    m_pChildLaser = this->m_pChildLaser;
+    if ( !m_pChildLaser )
+    {
+      EntityByName = (CPortalLaser *)CreateEntityByName("env_portal_laser", -1, 1);
+      v7 = pReflector;
+      this->m_pChildLaser = EntityByName;
+      p_m_hReflector = &EntityByName->m_hReflector;
+      if ( pReflector )
+      {
+        m_Index = pReflector->GetRefEHandle(pReflector)->m_Index;
+        if ( m_Index != -1 && g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber == HIWORD(m_Index) )
+        {
+          m_pEntity = g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+          goto LABEL_9;
+        }
+      }
+      else
+      {
+        m_Index = -1;
+      }
+      m_pEntity = 0;
+LABEL_9:
+      v10 = p_m_hReflector->m_Value.m_Index;
+      if ( p_m_hReflector->m_Value.m_Index == -1
+        || (v7 = pReflector, g_pEntityList->m_EntPtrArray[(unsigned __int16)v10].m_SerialNumber != HIWORD(v10)) )
+      {
+        v11 = 0;
+      }
+      else
+      {
+        v11 = g_pEntityList->m_EntPtrArray[(unsigned __int16)v10].m_pEntity;
+      }
+      if ( v11 != m_pEntity )
+      {
+        v12 = (unsigned int *)p_m_hReflector;
+        v13 = p_m_hReflector - 473;
+        if ( LOBYTE(p_m_hReflector[-451].m_Value.m_Index) )
+        {
+          LOBYTE(v13[23].m_Value.m_Index) |= 1u;
+        }
+        else
+        {
+          v14 = (CBaseEdict *)v13[7].m_Value.m_Index;
+          if ( v14 )
+          {
+            CBaseEdict::StateChanged(v14, 0x764u);
+            v12 = (unsigned int *)p_m_hReflector;
+          }
+        }
+        *v12 = m_Index;
+      }
+      this->m_pChildLaser->m_bFromReflectedCube = 1;
+      CPropWeightedCube::SetLaser(v7, this->m_pChildLaser);
+      CPortalLaser::TurnOnGlow(this->m_pChildLaser);
+      this->m_pChildLaser->m_pParentLaser = this;
+      SchrodingerTwin = UTIL_GetSchrodingerTwin(v7);
+      v16 = this->m_pChildLaser;
+      v17 = SchrodingerTwin != 0;
+      if ( v16->m_bUseParentDir.m_Value != (SchrodingerTwin != 0) )
+      {
+        if ( v16->m_Network.m_TimerEvent.m_bRegistered )
+        {
+          *((_BYTE *)&v16->m_Network + 76) |= 1u;
+        }
+        else
+        {
+          m_pPev = v16->m_Network.m_pPev;
+          if ( m_pPev )
+            CBaseEdict::StateChanged(m_pPev, 0x784u);
+        }
+        v16->m_bUseParentDir.m_Value = v17;
+      }
+      v19 = this->m_pChildLaser;
+      if ( this->m_angParentAngles.m_Value.x != v19->m_angParentAngles.m_Value.x
+        || this->m_angParentAngles.m_Value.y != v19->m_angParentAngles.m_Value.y
+        || this->m_angParentAngles.m_Value.z != v19->m_angParentAngles.m_Value.z )
+      {
+        if ( v19->m_Network.m_TimerEvent.m_bRegistered )
+        {
+          *((_BYTE *)&v19->m_Network + 76) |= 1u;
+        }
+        else
+        {
+          v20 = v19->m_Network.m_pPev;
+          if ( v20 )
+            CBaseEdict::StateChanged(v20, 0x788u);
+        }
+        v19->m_angParentAngles.m_Value.x = this->m_angParentAngles.m_Value.x;
+        v19->m_angParentAngles.m_Value.y = this->m_angParentAngles.m_Value.y;
+        v19->m_angParentAngles.m_Value.z = this->m_angParentAngles.m_Value.z;
+      }
+      DispatchSpawn(this->m_pChildLaser, 1);
+LABEL_55:
+      this->m_pChildLaser->m_bAutoAimEnabled = this->m_bAutoAimEnabled;
+      CPortalLaser::FireLaser(this->m_pChildLaser, (int)&savedregs, vecStart, vecDirection, pReflector);
+      return;
+    }
+    v21 = m_pChildLaser->m_hReflector.m_Value.m_Index;
+    if ( v21 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v21].m_SerialNumber != HIWORD(v21) )
+      v22 = 0;
+    else
+      v22 = (CPropWeightedCube *)g_pEntityList->m_EntPtrArray[(unsigned __int16)v21].m_pEntity;
+    CPropWeightedCube::SetLaser(v22, 0);
+    CPortalLaser::TurnOffGlow(this->m_pChildLaser);
+    v23 = this->m_pChildLaser;
+    if ( pReflector )
+    {
+      v24 = pReflector->GetRefEHandle(pReflector)->m_Index;
+      v30 = v24;
+      if ( v24 != -1 && g_pEntityList->m_EntPtrArray[(unsigned __int16)v24].m_SerialNumber == HIWORD(v24) )
+      {
+        v25 = g_pEntityList->m_EntPtrArray[(unsigned __int16)v24].m_pEntity;
+        goto LABEL_44;
+      }
+    }
+    else
+    {
+      v24 = -1;
+      v30 = -1;
+    }
+    v25 = 0;
+LABEL_44:
+    v26 = v23->m_hReflector.m_Value.m_Index;
+    if ( v26 == -1 || (v24 = v30, g_pEntityList->m_EntPtrArray[(unsigned __int16)v26].m_SerialNumber != HIWORD(v26)) )
+      v27 = 0;
+    else
+      v27 = g_pEntityList->m_EntPtrArray[(unsigned __int16)v26].m_pEntity;
+    if ( v27 != v25 )
+    {
+      if ( v23->m_Network.m_TimerEvent.m_bRegistered )
+      {
+        *((_BYTE *)&v23->m_Network + 76) |= 1u;
+      }
+      else
+      {
+        v28 = v23->m_Network.m_pPev;
+        if ( v28 )
+          CBaseEdict::StateChanged(v28, 0x764u);
+      }
+      v23->m_hReflector.m_Value.m_Index = v24;
+    }
+    this->m_pChildLaser->m_bFromReflectedCube = 1;
+    CPortalLaser::TurnOnGlow(this->m_pChildLaser);
+    CPropWeightedCube::SetLaser(pReflector, this->m_pChildLaser);
+    goto LABEL_55;
+  }
+}
