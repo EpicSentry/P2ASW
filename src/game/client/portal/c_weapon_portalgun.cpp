@@ -15,6 +15,7 @@
 #include "bone_setup.h"
 #include "c_rumble.h"
 #include "rumble_shared.h"
+#include "particles_new.h"
 
 #include "weapon_portalgun_shared.h"
 
@@ -45,127 +46,6 @@ PRECACHE( MATERIAL, PORTALGUN_PORTAL_TUBE_BEAM_SPRITE )
 PRECACHE_REGISTER_END()
 
 
-CPortalgunEffectBeam::CPortalgunEffectBeam( void ) 
-	: m_pBeam( NULL ), 
-	  m_fBrightness( 255.0f )
-{}
-
-CPortalgunEffectBeam::~CPortalgunEffectBeam( void )
-{
-	Release();
-}
-
-void CPortalgunEffectBeam::Release( void )
-{
-	if ( m_pBeam != NULL )
-	{
-		m_pBeam->flags = 0;
-		m_pBeam->die = gpGlobals->curtime - 1;
-
-		m_pBeam = NULL;
-	}
-}
-
-void CPortalgunEffectBeam::Init( int startAttachment, int endAttachment, CBaseEntity *pEntity, bool firstPerson )
-{
-	if ( m_pBeam != NULL )
-		return;
-
-	BeamInfo_t beamInfo;
-
-	beamInfo.m_pStartEnt = pEntity;
-	beamInfo.m_nStartAttachment = startAttachment;
-	beamInfo.m_pEndEnt = pEntity;
-	beamInfo.m_nEndAttachment = endAttachment;
-	beamInfo.m_nType = TE_BEAMPOINTS;
-	beamInfo.m_vecStart = vec3_origin;
-	beamInfo.m_vecEnd = vec3_origin;
-
-	beamInfo.m_pszModelName = ( firstPerson ) ? PORTALGUN_BEAM_SPRITE_NOZ : PORTALGUN_BEAM_SPRITE;
-
-	beamInfo.m_flHaloScale = 0.0f;
-	beamInfo.m_flLife = 0.0f;
-
-	if ( firstPerson )
-	{
-		beamInfo.m_flWidth = 0.0f;
-		beamInfo.m_flEndWidth = 2.0f;
-	}
-	else
-	{
-		beamInfo.m_flWidth = 0.5f;
-		beamInfo.m_flEndWidth = 2.0f;
-	}
-
-	beamInfo.m_flFadeLength = 0.0f;
-	beamInfo.m_flAmplitude = 16;
-	beamInfo.m_flBrightness = 128.0;
-	beamInfo.m_flSpeed = 150.0f;
-	beamInfo.m_nStartFrame = 0.0;
-	beamInfo.m_flFrameRate = 30.0;
-	beamInfo.m_flRed = 255.0;
-	beamInfo.m_flGreen = 255.0;
-	beamInfo.m_flBlue = 255.0;
-	beamInfo.m_nSegments = 8;
-	beamInfo.m_bRenderable = true;
-	beamInfo.m_nFlags = FBEAM_FOREVER;
-
-	m_pBeam = beams->CreateBeamEntPoint( beamInfo );
-
-	if ( m_pBeam )
-	{
-		m_pBeam->m_bDrawInMainRender = false;
-		m_pBeam->m_bDrawInPortalRender = false;
-	}
-}
-
-void CPortalgunEffectBeam::SetVisibleViewModel( bool visible /*= true*/ )
-{
-	if ( m_pBeam == NULL )
-		return;
-
-	m_pBeam->m_bDrawInMainRender = visible;
-}
-
-int CPortalgunEffectBeam::IsVisibleViewModel( void ) const
-{
-	if ( m_pBeam == NULL )
-		return false;
-
-	return m_pBeam->m_bDrawInMainRender;
-}
-
-void CPortalgunEffectBeam::SetVisible3rdPerson( bool visible /*= true*/ )
-{
-	if ( m_pBeam == NULL )
-		return;
-
-	m_pBeam->m_bDrawInPortalRender = visible;
-}
-
-int CPortalgunEffectBeam::SetVisible3rdPerson( void ) const
-{
-	if ( m_pBeam == NULL )
-		return false;
-
-	return m_pBeam->m_bDrawInPortalRender;
-}
-
-void CPortalgunEffectBeam::SetBrightness( float fBrightness )
-{
-	m_fBrightness = clamp( fBrightness, 0.0f, 255.0f );
-}
-
-void CPortalgunEffectBeam::DrawBeam( void )
-{
-	RenderableInstance_t instance;
-	instance.m_nAlpha = 255;
-
-	if ( m_pBeam )
-		m_pBeam->DrawModel( 0, instance );
-}
-
-
 IMPLEMENT_NETWORKCLASS_ALIASED( WeaponPortalgun, DT_WeaponPortalgun )
 
 BEGIN_NETWORK_TABLE( C_WeaponPortalgun, DT_WeaponPortalgun )
@@ -193,7 +73,6 @@ END_PREDICTION_DATA()
 LINK_ENTITY_TO_CLASS( weapon_portalgun, C_WeaponPortalgun );
 //PRECACHE_WEAPON_REGISTER(weapon_portalgun);
 
-
 void C_WeaponPortalgun::Spawn( void )
 {
 	Precache();
@@ -209,6 +88,58 @@ void C_WeaponPortalgun::Spawn( void )
 //-----------------------------------------------------------------------------
 void C_WeaponPortalgun::StartEffects( void )
 {
+#if 1 // Portal 2 Effects
+
+	Vector vColorPortal; // [esp+Ch] [ebp-14h] BYREF
+
+	C_BaseCombatCharacter *pOwner = GetOwner();
+	C_BasePlayer *pPlayer = ToBasePlayer(pOwner); // edi
+	C_BaseViewModel *vm = NULL; // eax
+
+	if (pPlayer)
+		vm = pPlayer->GetViewModel();
+
+	if (!m_hPortalGunEffectFP.IsValid() && vm)
+	{
+		m_hPortalGunEffectFP = vm->ParticleProp()->Create( "portalgun_top_light_firstperson", PATTACH_POINT_FOLLOW, "Body_light");
+
+		vm->ParticleProp()->AddControlPoint( m_hPortalGunEffectFP, 2, pOwner, PATTACH_CUSTOMORIGIN, 0, vec3_origin, 0 );
+		m_hPortalGunEffectFP->SetControlPointEntity( 2, pOwner );
+		vm->ParticleProp()->AddControlPoint( m_hPortalGunEffectFP, 3, vm, PATTACH_POINT_FOLLOW, "Beam_point1", vec3_origin, 0 );
+		vm->ParticleProp()->AddControlPoint( m_hPortalGunEffectFP, 4, vm, PATTACH_POINT_FOLLOW, "Beam_point5", vec3_origin, 0 );
+	}
+	if ( m_hPortalGunEffectTP.IsValid() )
+	{
+	LABEL_28:
+
+		vColorPortal = GetEffectColor( m_iLastFiredPortal.m_Value );
+		if ( m_hPortalGunEffectFP.IsValid() )
+		{
+			m_hPortalGunEffectFP->SetControlPoint( 1, vColorPortal );
+			m_hPortalGunEffectFP->SetControlPointEntity( 2, pOwner );
+		}
+
+		if ( m_hPortalGunEffectTP.IsValid() )
+		{
+			m_hPortalGunEffectTP->SetControlPoint( 1, vColorPortal );
+			m_hPortalGunEffectTP->SetControlPointEntity( 2, pOwner );
+		}
+		return;
+	}
+
+	m_hPortalGunEffectTP = ParticleProp()->Create( "portalgun_top_light_thirdperson", PATTACH_POINT_FOLLOW, "Body_light" );
+
+	if ( m_hPortalGunEffectTP.IsValid() )
+	{
+		ParticleProp()->AddControlPoint( m_hPortalGunEffectTP, 2, pOwner, PATTACH_CUSTOMORIGIN, 0, vec3_origin, 0 );
+
+		m_hPortalGunEffectTP->SetControlPointEntity( 2, pOwner );
+		ParticleProp()->AddControlPoint( m_hPortalGunEffectTP, 3, this, PATTACH_POINT_FOLLOW, "Beam_point1", vec3_origin, 0 );
+		ParticleProp()->AddControlPoint( m_hPortalGunEffectTP, 4, this, PATTACH_POINT_FOLLOW, "Beam_point5", vec3_origin, 0 );
+		goto LABEL_28;
+	}
+
+#else // Portal 1 Effects
 	int i;
 
 	CBaseEntity *pModelView = ( ( GetOwner() ) ? ( ToBasePlayer( GetOwner() )->GetViewModel() ) : ( 0 ) );
@@ -518,16 +449,19 @@ void C_WeaponPortalgun::StartEffects( void )
 	m_Beams[iBeam++].Init( pModelWorld->LookupAttachment( "Arm1_attach3" ), pModelWorld->LookupAttachment( "muzzle" ), pModelWorld, false );
 	m_Beams[iBeam++].Init( pModelWorld->LookupAttachment( "Arm2_attach3" ), pModelWorld->LookupAttachment( "muzzle" ), pModelWorld, false );
 	m_Beams[iBeam++].Init( pModelWorld->LookupAttachment( "Arm3_attach3" ), pModelWorld->LookupAttachment( "muzzle" ), pModelWorld, false );
+#endif
 }
 
 void C_WeaponPortalgun::DestroyEffects( void )
 {
+#if 1
+#else
 	// Free our beams
 	for ( int i = 0; i < NUM_PORTALGUN_BEAMS; ++i )
 	{
 		m_Beams[i].Release();
 	}
-
+#endif
 	// Stop everything
 	StopEffects();
 }
@@ -537,6 +471,16 @@ void C_WeaponPortalgun::DestroyEffects( void )
 //-----------------------------------------------------------------------------
 void C_WeaponPortalgun::DoEffectReady( void )
 {
+#if 1
+
+	C_BasePlayer *pPlayer = ToBasePlayer( GetOwner() );
+
+	if( pPlayer )
+	{
+		RumbleEffect( pPlayer->GetUserID(), 0x14u, 0, 0 );
+	}
+
+#else
 	int i;
 
 	// Turn on the glow sprites
@@ -605,6 +549,7 @@ void C_WeaponPortalgun::DoEffectReady( void )
 	{
 		RumbleEffect( RUMBLE_PHYSCANNON_OPEN, 0, RUMBLE_FLAG_STOP );
 	}*/
+#endif
 }
 
 
@@ -613,31 +558,57 @@ void C_WeaponPortalgun::DoEffectReady( void )
 //-----------------------------------------------------------------------------
 void C_WeaponPortalgun::DoEffectHolding( void )
 {
+	Msg("DO EFFECT HOLDING!!!\n");
+	Msg("Effect State %i\n", m_EffectState);
 
-#if 0 // TODO: Implement Portal 2 holding beams
-	
-	CNewParticleEffect *pParticleObject = NULL;
+#if 1 // Portal 2 Effects:
+  
+	C_BaseViewModel *vm = NULL; // ebx
+	C_BaseCombatCharacter *pOwner = GetOwner();
+  
+	C_BasePlayer *pPlayer = ToBasePlayer( pOwner ); // edi
 
-	CBaseViewModel *vm = NULL;
-
-	C_BasePlayer *pPlayer = ToBasePlayer( GetOwner() );
-
-	if( pPlayer )
+	if ( pPlayer )
 	{
 		vm = pPlayer->GetViewModel();
 	}
-
-	if( !m_hPortalGunEffectHoldingFP.GetObject() && vm )
+  
+	if ( !m_hPortalGunEffectHoldingFP.IsValid() && vm )
 	{
-		m_hPortalGunEffectFP = vm->ParticleProp()->Create( "portalgun_beam_holding_FP", PATTACH_POINT_FOLLOW, "muzzle");
 
-		pParticleObject = m_hPortalGunEffectHoldingFP.GetObject();
+		Msg("CREATE BEAM!!!!\n");
 
+		m_hPortalGunEffectHoldingFP = vm->ParticleProp()->Create( "portalgun_beam_holding_FP", PATTACH_POINT_FOLLOW, "muzzle" );
+
+		vm->ParticleProp()->AddControlPoint( m_hPortalGunEffectHoldingFP, 1, vm, PATTACH_POINT_FOLLOW, "Arm1_attach3" );
+		vm->ParticleProp()->AddControlPoint( m_hPortalGunEffectHoldingFP, 2, vm, PATTACH_POINT_FOLLOW, "Arm2_attach3" );
+		vm->ParticleProp()->AddControlPoint( m_hPortalGunEffectHoldingFP, 3, vm, PATTACH_POINT_FOLLOW, "Arm3_attach3" );
+		
+		vm->ParticleProp()->AddControlPoint( m_hPortalGunEffectHoldingFP, 4, pOwner, PATTACH_CUSTOMORIGIN );
+		
+		m_hPortalGunEffectHoldingFP->SetControlPointEntity( 4, vm );
+		
+		vm->ParticleProp()->AddControlPoint( m_hPortalGunEffectHoldingFP, 5, GetPlayerHeldEntity( pPlayer ), PATTACH_ABSORIGIN_FOLLOW );
+	}
+	if ( !m_hPortalGunEffectHoldingTP )
+	{
+		m_hPortalGunEffectHoldingTP = ParticleProp()->Create( "portalgun_beam_holding_TP", PATTACH_POINT_FOLLOW, "muzzle");
+
+		ParticleProp()->AddControlPoint( m_hPortalGunEffectHoldingTP, 1, this, PATTACH_POINT_FOLLOW, "Arm1_attach3" );
+		ParticleProp()->AddControlPoint( m_hPortalGunEffectHoldingTP, 2, this, PATTACH_POINT_FOLLOW, "Arm2_attach3" );
+		ParticleProp()->AddControlPoint( m_hPortalGunEffectHoldingTP, 3, this, PATTACH_POINT_FOLLOW, "Arm3_attach3" );
+		
+		ParticleProp()->AddControlPoint( m_hPortalGunEffectHoldingTP, 4, pOwner, PATTACH_CUSTOMORIGIN );
+
+		m_hPortalGunEffectHoldingTP->SetControlPointEntity( 4, pOwner );
+		
+		ParticleProp()->AddControlPoint( m_hPortalGunEffectHoldingTP, 5, GetPlayerHeldEntity(pPlayer), PATTACH_ABSORIGIN_FOLLOW, 0 );
 	}
 
+	
 
 
-#else // Portal 1 particles
+#else // Portal 1 Effects
 	int i;
 
 	// Turn on the glow sprites
@@ -716,6 +687,35 @@ void C_WeaponPortalgun::DoEffectHolding( void )
 //-----------------------------------------------------------------------------
 void C_WeaponPortalgun::DoEffectNone( void )
 {
+#if 1
+
+	Msg(" DO EFFECT NONE \n");
+
+	
+	if ( m_hPortalGunEffectFP.IsValid() )
+	{
+		m_hPortalGunEffectFP->StopEmission();
+		m_hPortalGunEffectFP = NULL;
+	}
+	
+	if ( m_hPortalGunEffectTP.IsValid() )
+	{
+		m_hPortalGunEffectTP->StopEmission();
+		m_hPortalGunEffectTP = NULL;
+	}
+	
+	if ( m_hPortalGunEffectHoldingFP.IsValid() )
+	{
+		m_hPortalGunEffectHoldingFP->StopEmission();
+		m_hPortalGunEffectHoldingFP = NULL;
+	}
+	
+	if ( m_hPortalGunEffectHoldingTP.IsValid() )
+	{
+		m_hPortalGunEffectHoldingTP->StopEmission();
+		m_hPortalGunEffectHoldingTP = NULL;
+	}
+#else
 	int i;
 
 	//Turn off main glows
@@ -764,6 +764,7 @@ void C_WeaponPortalgun::DoEffectNone( void )
 		m_Beams[i].SetVisibleViewModel( false );
 		m_Beams[i].SetVisible3rdPerson( false );
 	}
+#endif
 }
 
 void C_WeaponPortalgun::OnPreDataChanged( DataUpdateType_t updateType )
@@ -776,6 +777,38 @@ void C_WeaponPortalgun::OnDataChanged( DataUpdateType_t updateType )
 {
 	BaseClass::OnDataChanged( updateType );
 
+#if 1
+	
+	if( updateType == DATA_UPDATE_DATATABLE_CHANGED )
+	{
+		m_fEffectsMaxSize1.m_Value = m_vecOrangePortalPos.z;
+	}
+	else
+	{
+		StartEffects();
+		DoEffect( EFFECT_NONE );
+	}
+
+	if( g_pGameRules->IsMultiplayer() )
+	{
+		CBasePlayer *pPlayer = ToBasePlayer( GetOwner() );
+		if( pPlayer )
+		{
+			int iSkin = 0;
+
+			if ( pPlayer->GetTeamNumber() == 2 )
+				iSkin = 2;
+			else
+				iSkin = 1;
+
+			SetSkin( iSkin );
+			if ( pPlayer->GetViewModel() )
+				pPlayer->GetViewModel()->SetSkin( iSkin );
+
+		}
+	}
+
+#else
 	if ( updateType == DATA_UPDATE_CREATED )
 	{
 		// Start thinking (Baseclass stops it)
@@ -788,12 +821,14 @@ void C_WeaponPortalgun::OnDataChanged( DataUpdateType_t updateType )
 
 		DoEffect( m_EffectState );
 	}
-
+#endif
 	// Update effect state when out of parity with the server
-	else if ( m_nOldEffectState != m_EffectState || m_bOldCanFirePortal1 != m_bCanFirePortal1 || m_bOldCanFirePortal2 != m_bCanFirePortal2 )
+	if ( m_nOldEffectState != m_EffectState || m_bOldCanFirePortal1 != m_bCanFirePortal1 || m_bOldCanFirePortal2 != m_bCanFirePortal2 )
 	{
+		Msg("m_EffectState: %i\n", m_EffectState);
+		Msg("DoEffect!!!\n");
 		DoEffect( m_EffectState );
-		m_nOldEffectState = m_EffectState;
+		//m_nOldEffectState = m_EffectState;
 
 		m_bOldCanFirePortal1 = m_bCanFirePortal1;
 		m_bOldCanFirePortal2 = m_bCanFirePortal2;
@@ -802,15 +837,32 @@ void C_WeaponPortalgun::OnDataChanged( DataUpdateType_t updateType )
 
 void C_WeaponPortalgun::ClientThink( void )
 {
+
 	CPortal_Player *pPlayer = ToPortalPlayer( GetOwner() );
 
 	if ( pPlayer && dynamic_cast<C_WeaponPortalgun*>( pPlayer->GetActiveWeapon() ) )
 	{
 		if ( m_EffectState == EFFECT_NONE )
 		{
-			//DoEffect( ( GetPlayerHeldEntity( pPlayer ) ) ? ( EFFECT_HOLDING ) : ( EFFECT_READY ) );
-		}
+#if 1 // Portal 2
 
+			if( m_hPortalGunEffectTP.IsValid() )
+			{
+				m_hPortalGunEffectTP->StopEmission();
+				m_hPortalGunEffectTP = NULL;
+			}
+
+			if ( m_hPortalGunEffectHoldingFP.IsValid() )
+			{
+				m_hPortalGunEffectHoldingFP->StopEmission();
+				m_hPortalGunEffectHoldingFP = NULL;
+			}
+
+#else // Portal 1
+			//DoEffect( ( GetPlayerHeldEntity( pPlayer ) ) ? ( EFFECT_HOLDING ) : ( EFFECT_READY ) );
+#endif
+		}
+#if 0
 		if ( m_EffectState != EFFECT_NONE )
 		{
 			// Showing a special color for holding is confusing... just use the last fired color -Jeep
@@ -838,10 +890,34 @@ void C_WeaponPortalgun::ClientThink( void )
 				m_Parameters[PORTALGUN_PORTAL2LIGHT_WORLD].SetVisible3rdPerson( m_iLastFiredPortal == 2 );
 			}
 		}
+#endif
 	}
 
 	// Update our effects
-	DoEffectIdle();
+	//DoEffectIdle();
+	
+	StartEffects();
+	
+	if ( m_bPulseUp )
+	{
+		float flNewPulse = gpGlobals->frametime + 16 + m_fPulse;
+		m_fPulse = flNewPulse;
+		if ( flNewPulse > 1.0 )
+		{
+		  m_bPulseUp = false;
+		  m_fPulse = 1.0;
+		}
+	}
+	else
+	{
+		float flNewPulse = m_fPulse - gpGlobals->frametime + 16;
+		m_fPulse = flNewPulse;
+		if ( flNewPulse < 0.0 )
+		{
+			m_bPulseUp = true;
+			m_fPulse = 0.0;
+		}
+	}
 
 	NetworkStateChanged();
 }
@@ -857,11 +933,11 @@ Vector C_WeaponPortalgun::GetEffectColor( int iPalletIndex )
 	}
 	else */if ( m_iLastFiredPortal == 1 )
 	{
-		color = UTIL_Portal_Color( 1 );
+		color = UTIL_Portal_Color_Particles( 1, GetTeamNumber() );
 	}
 	else if ( m_iLastFiredPortal == 2 )
 	{
-		color = UTIL_Portal_Color( 2 );
+		color = UTIL_Portal_Color_Particles( 2, GetTeamNumber() );
 	}
 	else
 	{
@@ -877,7 +953,7 @@ Vector C_WeaponPortalgun::GetEffectColor( int iPalletIndex )
 }
 
 extern void FormatViewModelAttachment( C_BasePlayer* pPlayer, Vector &vOrigin, bool bInverse );
-
+#if 0
 //-----------------------------------------------------------------------------
 // Purpose: Gets the complete list of values needed to render an effect from an
 //			effect parameter
@@ -982,7 +1058,6 @@ void C_WeaponPortalgun::DrawEffects( bool b3rdPerson )
 		DrawEffectSprite( (EffectType_t) i, b3rdPerson );
 	}
 }
-
 //-----------------------------------------------------------------------------
 // Purpose: Third-person function call to render world model
 //-----------------------------------------------------------------------------
@@ -1008,14 +1083,16 @@ int C_WeaponPortalgun::DrawModel( int flags, const RenderableInstance_t& instanc
 //-----------------------------------------------------------------------------
 // Purpose: First-person function call after viewmodel has been drawn
 //-----------------------------------------------------------------------------
-void C_WeaponPortalgun::ViewModelDrawn( C_BaseViewModel *pBaseViewModel )
+void C_WeaponPortalgun::ViewModelDrawn( int nFlags, C_BaseViewModel *pViewModel )
 {
 	// Render our effects
 	DrawEffects( false );
 
 	// Pass this back up
-	BaseClass::ViewModelDrawn( pBaseViewModel );
+	BaseClass::ViewModelDrawn( nFlags, pBaseViewModel );
 }
+
+#endif
 
 void UpdatePoseParameter( C_BaseAnimating *pBaseAnimating, int iPose, float fValue )
 {
@@ -1044,12 +1121,14 @@ void InterpToward( float *pfCurrent, float fGoal, float fRate )
 	}
 }
 
+#if 0
 //-----------------------------------------------------------------------------
 // Purpose: Idle effect (pulsing)
 //-----------------------------------------------------------------------------
 void C_WeaponPortalgun::DoEffectIdle( void )
 {
 	StartEffects();
+
 
 	int i;
 
@@ -1129,3 +1208,4 @@ void C_WeaponPortalgun::DoEffectIdle( void )
 		m_Parameters[i].SetColor( colorMagSprites );
 	}
 }
+#endif
