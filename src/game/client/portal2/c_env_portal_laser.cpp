@@ -245,8 +245,6 @@ void C_PortalLaser::ClientThink( void )
 		m_beamHelper.UpdatePoints( m_vStartPoint, m_vEndPoint, MASK_SHOT, &traceFilter, tr );
 	}
 
-	Msg(" %i : tr.endpos: %f %f %f\n", entindex(), tr.endpos.x, tr.endpos.y, tr.endpos.z);
-
 	if (m_bShouldSpark)
 		UpdateSparkEffect( tr.endpos, tr.plane.normal );
 }
