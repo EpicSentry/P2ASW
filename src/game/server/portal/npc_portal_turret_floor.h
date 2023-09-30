@@ -173,5 +173,7 @@ private:
 
 	short m_nModelIndex;
 
+protected:
+	float GetFireConeZTolerance();
 };
 #endif // PORTAL_TURRET_FLOOR_H
