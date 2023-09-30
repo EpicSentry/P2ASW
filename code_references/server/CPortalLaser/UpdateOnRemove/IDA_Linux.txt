@@ -1,0 +1,14 @@
+void __cdecl CPortalLaser::UpdateOnRemove(CPortalLaser *const this)
+{
+  int i; // ebx
+
+  if ( this->m_pPlacementHelper )
+    UTIL_Remove(this->m_pPlacementHelper);
+  for ( i = 0; i != 33; ++i )
+  {
+    if ( this->m_pSoundProxy[i] )
+      UTIL_Remove(this->m_pSoundProxy[i]);
+  }
+  CPortalLaser::TurnOff(this);
+  CBaseEntity::UpdateOnRemove(this);
+}

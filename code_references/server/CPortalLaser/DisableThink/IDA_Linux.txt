@@ -1,0 +1,12 @@
+void __cdecl CPortalLaserTarget::DisableThink(CPortalLaserTarget *const this)
+{
+  CCatcher *m_pCatcher; // eax
+  BASEPTR v2; // [esp+28h] [ebp-10h] BYREF
+
+  this->m_bPowered = 0;
+  COutputEvent::FireOutput(&this->m_OnUnpowered, this, this, 0.0);
+  m_pCatcher = this->m_pCatcher;
+  if ( m_pCatcher )
+    (*((void (__cdecl **)(CCatcher *))m_pCatcher->_vptr_ICatcher + 1))(this->m_pCatcher);
+  CBaseEntity::ThinkSet(&v2, this, 0LL, 0.0, 0);
+}

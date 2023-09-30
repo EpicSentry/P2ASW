@@ -1,0 +1,84 @@
+void __cdecl CPortalLaser::BeamDamage(CPortalLaser *const this, trace_t *ptr)
+{
+  CBaseEntity *m_pEnt; // edi
+  CBaseEntity *v3; // eax
+  CBaseEntity *v4; // esi
+  void *v5; // eax
+  BASEPTR v6; // [esp+28h] [ebp-D0h] BYREF
+  CTakeDamageInfo v7; // [esp+34h] [ebp-C4h] BYREF
+  CTakeDamageInfo v8; // [esp+84h] [ebp-74h] BYREF
+  Vector vec; // [esp+D4h] [ebp-24h] BYREF
+
+  if ( !(_BYTE)`guard variable for'CPortalLaser::BeamDamage(CGameTrace *)::CEG_LASER_DAMAGE_AMOUNT
+    && _cxa_guard_acquire(&`guard variable for'CPortalLaser::BeamDamage(CGameTrace *)::CEG_LASER_DAMAGE_AMOUNT) )
+  {
+    CPortalLaser::BeamDamage(CGameTrace *)::CEG_LASER_DAMAGE_AMOUNT = LaserDamageAmount();
+    _cxa_guard_release(&`guard variable for'CPortalLaser::BeamDamage(CGameTrace *)::CEG_LASER_DAMAGE_AMOUNT);
+  }
+  if ( ptr->fraction != 1.0 )
+  {
+    m_pEnt = ptr->m_pEnt;
+    if ( m_pEnt )
+    {
+      ClearMultiDamage();
+      if ( (this->m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(this);
+      vec.x = ptr->endpos.x - this->m_vecAbsOrigin.x;
+      vec.y = ptr->endpos.y - this->m_vecAbsOrigin.y;
+      vec.z = ptr->endpos.z - this->m_vecAbsOrigin.z;
+      VectorNormalize(&vec);
+      CTakeDamageInfo::CTakeDamageInfo(
+        &v7,
+        this,
+        this,
+        gpGlobals->frametime * CPortalLaser::BeamDamage(CGameTrace *)::CEG_LASER_DAMAGE_AMOUNT,
+        8,
+        0);
+      CalculateMeleeDamageForce(&v7, &vec, &ptr->endpos, 1.0);
+      CBaseEntity::DispatchTraceAttack(m_pEnt, &v7, &vec, ptr);
+      ApplyMultiDamage();
+      v3 = (CBaseEntity *)(*((int (__cdecl **)(CBaseEntity *))m_pEnt->_vptr_IHandleEntity + 55))(m_pEnt);
+      v4 = v3;
+      if ( v3
+        && (v3->m_iClassname.pszValue == "npc_portal_turret_floor"
+         || CBaseEntity::ClassMatchesComplex(v3, "npc_portal_turret_floor")
+         || v4->m_iClassname.pszValue == "npc_hover_turret"
+         || CBaseEntity::ClassMatchesComplex(v4, "npc_hover_turret")) )
+      {
+        if ( hitbox_damage_enabled.m_pParent->m_Value.m_nValue )
+        {
+          CTakeDamageInfo::CTakeDamageInfo(&v8);
+          v8.m_flDamage = 1.0;
+          v8.m_bitsDamageType = 1;
+          (*((void (__cdecl **)(CBaseEntity *, CTakeDamageInfo *))v4->_vptr_IHandleEntity + 71))(v4, &v8);
+          (*((void (__cdecl **)(CBaseEntity *))v4->_vptr_IHandleEntity + 645))(v4);
+          CBaseEntity::ThinkSet(&v6, v4, 0LL, 0.0, 0);
+        }
+        else
+        {
+          (*((void (__cdecl **)(CBaseEntity *, int, int, _DWORD, _DWORD))v4->_vptr_IHandleEntity + 223))(
+            v4,
+            1106247680,
+            1,
+            0,
+            0);
+        }
+      }
+      else if ( m_pEnt->m_MoveType.m_Value == 6 )
+      {
+        v5 = _dynamic_cast(
+               m_pEnt,
+               (const struct __class_type_info *)&`typeinfo for'CBaseEntity,
+               (const struct __class_type_info *)&`typeinfo for'CPhysicsProp,
+               0);
+        if ( v5 )
+          (*(void (__cdecl **)(void *, int, _DWORD, _DWORD, _DWORD))(*(_DWORD *)v5 + 892))(v5, 1106247680, 0, 0, 0);
+      }
+      if ( !this->m_bShouldSpark.m_Value )
+      {
+        CBaseEntity::NetworkStateChanged(this, &this->m_bShouldSpark);
+        this->m_bShouldSpark.m_Value = 1;
+      }
+    }
+  }
+}

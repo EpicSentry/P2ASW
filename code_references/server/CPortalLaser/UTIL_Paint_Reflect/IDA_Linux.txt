@@ -1,0 +1,80 @@
+bool __cdecl UTIL_Paint_Reflect(
+        const trace_t *const tr,
+        Vector *const vStart,
+        Vector *const vDir,
+        PaintPowerType reflectPower)
+{
+  bool v4; // si
+  float v6; // xmm2_4
+  float v7; // xmm1_4
+  float v8; // xmm6_4
+  float y; // xmm5_4
+  float z; // xmm4_4
+  float v11; // xmm0_4
+  float v12; // xmm0_4
+  vec_t v13; // eax
+  __m128 z_low; // xmm2
+  float v15; // xmm2_4
+  float v16; // xmm0_4
+  float x; // [esp+30h] [ebp-48h]
+  Vector vec; // [esp+48h] [ebp-30h] BYREF
+  Vector v19; // [esp+54h] [ebp-24h] BYREF
+
+  v4 = 0;
+  if ( (*((unsigned __int8 (__cdecl **)(CUtlCachedFileData<CModelSoundsCache> *))engine->_vptr_CUtlCachedFileData + 129))(engine) )
+  {
+    if ( tr->m_pEnt )
+    {
+      if ( CBaseEntity::IsBSPModel(tr->m_pEnt)
+        && UTIL_Paint_TracePower(tr->m_pEnt, &tr->endpos, &tr->plane.normal) == reflectPower )
+      {
+        v6 = tr->endpos.y - tr->startpos.y;
+        v7 = tr->endpos.z - tr->startpos.z;
+        vec.x = tr->endpos.x - tr->startpos.x;
+        vec.y = v6;
+        vec.z = v7;
+        x = vec.x;
+        VectorNormalize(&vec);
+        v8 = tr->plane.normal.x;
+        y = tr->plane.normal.y;
+        z = tr->plane.normal.z;
+        if ( (float)((float)((float)(vec.x * v8) + (float)(vec.y * y)) + (float)(vec.z * z)) > -0.99000001 )
+        {
+          *vStart = tr->endpos;
+          v11 = (float)((float)(x * v8) + (float)(v6 * y)) + (float)(v7 * z);
+          v12 = v11 + v11;
+          v19.x = x - (float)(v8 * v12);
+          v19.y = v6 - (float)(y * v12);
+          v19.z = v7 - (float)(v12 * z);
+          VectorNormalize(&v19);
+          v13 = v19.x;
+          z_low = (__m128)LODWORD(v19.z);
+          vDir->z = v19.z;
+          v15 = _mm_unpacklo_ps(z_low, z_low).m128_f32[0];
+          vDir->x = v13;
+          vDir->y = v19.y;
+          v16 = (float)((float)(tr->plane.normal.x * 0.0) + (float)(tr->plane.normal.y * 0.0)) + tr->plane.normal.z;
+          if ( v15 > 0.1 && v16 > 0.0 && v16 < 1.0 )
+          {
+            vDir->x = 0.0;
+            v4 = 1;
+            vDir->y = 0.0;
+            vDir->z = 1.0;
+          }
+          else if ( v15 >= -0.1 || v16 <= 0.0 || v16 >= 1.0 )
+          {
+            return 1;
+          }
+          else
+          {
+            vDir->x = 0.0;
+            v4 = 1;
+            vDir->y = 0.0;
+            vDir->z = -1.0;
+          }
+        }
+      }
+    }
+  }
+  return v4;
+}

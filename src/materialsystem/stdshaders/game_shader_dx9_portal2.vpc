@@ -23,4 +23,6 @@ $Project "Shaders (Portal 2)"
 	$File "portal_refract.cpp"
 	$File "portal_refract_helper.cpp"
 	$File "portalstaticoverlay.cpp"
+	$file "lightmappedpaint_dx9_helper.h"
+	$file "lightmappedpaint_dx9_helper.cpp"
 }

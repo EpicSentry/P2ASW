@@ -1,0 +1,4 @@
+bool __cdecl CPortalLaser::IsOn(CPortalLaser *const this)
+{
+  return this->m_pfnThink.__pfn != 0;
+}

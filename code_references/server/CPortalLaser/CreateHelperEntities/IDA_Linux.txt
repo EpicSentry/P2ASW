@@ -1,0 +1,33 @@
+void __cdecl CPortalLaser::CreateHelperEntities(CPortalLaser *const this)
+{
+  CInfoPlacementHelper *EntityByName; // eax
+  bool v2; // zf
+
+  if ( !this->m_bNoPlacementHelper && !this->m_pPlacementHelper )
+  {
+    EntityByName = (CInfoPlacementHelper *)CreateEntityByName("info_placement_helper", -1, 1);
+    v2 = (this->m_iEFlags & 0x800) == 0;
+    this->m_pPlacementHelper = EntityByName;
+    if ( !v2 )
+    {
+      CBaseEntity::CalcAbsolutePosition(this);
+      EntityByName = this->m_pPlacementHelper;
+    }
+    CBaseEntity::SetAbsOrigin(EntityByName, &this->m_vecAbsOrigin);
+    if ( (this->m_iEFlags & 0x800) != 0 )
+      CBaseEntity::CalcAbsolutePosition(this);
+    CBaseEntity::SetAbsAngles(this->m_pPlacementHelper, &this->m_angAbsRotation);
+    (*((void (__cdecl **)(CInfoPlacementHelper *, const char *, char *))this->m_pPlacementHelper->_vptr_IHandleEntity
+     + 33))(
+      this->m_pPlacementHelper,
+      "radius",
+      "16");
+    (*((void (__cdecl **)(CInfoPlacementHelper *, const char *, const char *))this->m_pPlacementHelper->_vptr_IHandleEntity
+     + 33))(
+      this->m_pPlacementHelper,
+      "hide_until_placed",
+      "0");
+    DispatchSpawn(this->m_pPlacementHelper, 1);
+  }
+  CPortalLaser::CreateSoundProxies(this);
+}

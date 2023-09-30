@@ -1,0 +1,38 @@
+void __cdecl C_PortalLaser::~C_PortalLaser(C_PortalLaser *const this)
+{
+  CNewParticleEffect *m_pObject; // edx
+  CUtlReference<CNewParticleEffect> *m_pPrev; // eax
+  CUtlReference<CNewParticleEffect> *m_pNext; // eax
+  CUtlReference<CNewParticleEffect> *v4; // eax
+
+  m_pObject = this->m_pSparkEffect.m_pObject;
+  this->_vptr_IHandleEntity = (int (**)(...))off_12DC7C8;
+  this->_vptr_IClientRenderable = (int (**)(...))&off_12DCC44;
+  this->_vptr_IClientNetworkable = (int (**)(...))&off_12DCD00;
+  this->_vptr_IClientThinkable = (int (**)(...))&off_12DCD40;
+  this->_vptr_IClientModelRenderable = (int (**)(...))&off_12DCD5C;
+  if ( m_pObject )
+  {
+    m_pPrev = this->m_pSparkEffect.m_pPrev;
+    if ( m_pPrev )
+    {
+      m_pPrev->m_pNext = this->m_pSparkEffect.m_pNext;
+      m_pNext = this->m_pSparkEffect.m_pNext;
+      if ( m_pNext )
+        m_pNext->m_pPrev = this->m_pSparkEffect.m_pPrev;
+    }
+    else if ( m_pObject->m_References.m_pHead == &this->m_pSparkEffect )
+    {
+      v4 = this->m_pSparkEffect.m_pNext;
+      m_pObject->m_References.m_pHead = v4;
+      if ( v4 )
+        v4->m_pPrev = 0;
+    }
+    this->m_pSparkEffect.m_pPrev = 0;
+    this->m_pSparkEffect.m_pNext = 0;
+    this->m_pSparkEffect.m_pObject = 0;
+  }
+  C_PortalBeamHelper::~C_PortalBeamHelper(&this->m_beamHelper);
+  C_BaseAnimating::~C_BaseAnimating(this);
+  C_BaseEntity::operator delete(this);
+}

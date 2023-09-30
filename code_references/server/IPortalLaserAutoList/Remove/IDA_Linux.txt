@@ -1,0 +1,33 @@
+void __cdecl IPortalLaserAutoList::Remove(IPortalLaserAutoList *pElement)
+{
+  int v1; // eax
+  int v2; // edx
+
+  if ( IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Size > 0 )
+  {
+    v1 = 0;
+    if ( *IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Memory.m_pMemory == pElement )
+    {
+LABEL_8:
+      v2 = IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Size - 1;
+      if ( v1 != IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Size - 1 )
+      {
+        IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Memory.m_pMemory[v1] = IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Memory.m_pMemory[v2];
+        v2 = IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Size - 1;
+      }
+      IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Size = v2;
+    }
+    else
+    {
+      while ( ++v1 != IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Size )
+      {
+        if ( IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Memory.m_pMemory[v1] == pElement )
+        {
+          if ( v1 == -1 )
+            return;
+          goto LABEL_8;
+        }
+      }
+    }
+  }
+}

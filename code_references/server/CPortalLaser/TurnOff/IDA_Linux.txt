@@ -1,0 +1,15 @@
+void __cdecl CPortalLaser::TurnOff(CPortalLaser *const this)
+{
+  BASEPTR v1; // [esp+28h] [ebp-10h] BYREF
+
+  if ( this->m_bLaserOn.m_Value )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_bLaserOn);
+    this->m_bLaserOn.m_Value = 0;
+  }
+  CPortalLaser::RemoveChildLaser(this);
+  CPortalLaser::TurnOffGlow(this);
+  CPortalLaser::TurnOffLaserSound(this);
+  CBaseEntity::SetNextThink(this, -1.0, 0);
+  CBaseEntity::ThinkSet(&v1, this, 0LL, 0.0, 0);
+}

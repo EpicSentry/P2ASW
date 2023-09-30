@@ -1,0 +1,5 @@
+void __cdecl CPortalLaser::Activate(CPortalLaser *const this)
+{
+  CPortalLaser::CreateHelperEntities(this);
+  CBaseAnimating::Activate(this);
+}

@@ -1,0 +1,47 @@
+void __cdecl C_PortalLaser::CreateSparkEffect(C_PortalLaser *const this)
+{
+  CNewParticleEffect *v1; // eax
+  CNewParticleEffect *m_pObject; // edx
+  CUtlReference<CNewParticleEffect> *p_m_pSparkEffect; // ecx
+  CUtlReference<CNewParticleEffect> *m_pPrev; // esi
+  CUtlReference<CNewParticleEffect> *m_pNext; // edx
+  CUtlReference<CNewParticleEffect> *m_pHead; // edx
+  CUtlReference<CNewParticleEffect> *v7; // esi
+
+  v1 = CParticleProperty::Create(&this->m_Particles, LASER_SPARK_EFFECT_NAME, PATTACH_CUSTOMORIGIN, -1, vec3_origin, 0);
+  m_pObject = this->m_pSparkEffect.m_pObject;
+  if ( v1 != m_pObject )
+  {
+    p_m_pSparkEffect = &this->m_pSparkEffect;
+    if ( m_pObject )
+    {
+      m_pPrev = this->m_pSparkEffect.m_pPrev;
+      if ( m_pPrev )
+      {
+        m_pPrev->m_pNext = this->m_pSparkEffect.m_pNext;
+        m_pNext = this->m_pSparkEffect.m_pNext;
+        if ( m_pNext )
+          m_pNext->m_pPrev = this->m_pSparkEffect.m_pPrev;
+      }
+      else if ( p_m_pSparkEffect == m_pObject->m_References.m_pHead )
+      {
+        v7 = this->m_pSparkEffect.m_pNext;
+        m_pObject->m_References.m_pHead = v7;
+        if ( v7 )
+          v7->m_pPrev = 0;
+      }
+      this->m_pSparkEffect.m_pPrev = 0;
+      this->m_pSparkEffect.m_pNext = 0;
+    }
+    this->m_pSparkEffect.m_pObject = v1;
+    if ( v1 )
+    {
+      this->m_pSparkEffect.m_pNext = v1->m_References.m_pHead;
+      m_pHead = v1->m_References.m_pHead;
+      if ( m_pHead )
+        m_pHead->m_pPrev = p_m_pSparkEffect;
+      this->m_pSparkEffect.m_pPrev = 0;
+      v1->m_References.m_pHead = p_m_pSparkEffect;
+    }
+  }
+}

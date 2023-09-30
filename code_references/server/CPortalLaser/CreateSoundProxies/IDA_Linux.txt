@@ -1,0 +1,93 @@
+void __cdecl CPortalLaser::CreateSoundProxies(CPortalLaser *const this)
+{
+  int v1; // ebx
+  CSoundEnvelopeController *Controller; // edi
+  CBaseEntity **m_pSoundProxy; // esi
+  CBasePlayer *v4; // eax
+  bool IsSplitScreenPlayer; // al
+  CBasePlayer *v6; // edx
+  CBaseEntity *EntityByName; // eax
+  CBasePlayer *v8; // edx
+  CBaseEntity *v9; // eax
+  int (__cdecl *v10)(CSoundEnvelopeController *, CSingleUserRecipientFilter *, signed int, const char *); // ecx
+  edict_t *m_pPev; // edx
+  signed int v12; // eax
+  int v13; // eax
+  CBasePlayer *player; // [esp+28h] [ebp-40h]
+  CBasePlayer *playera; // [esp+28h] [ebp-40h]
+  CBasePlayer *playerb; // [esp+28h] [ebp-40h]
+  CSingleUserRecipientFilter filter; // [esp+30h] [ebp-38h] BYREF
+
+  v1 = 0;
+  Controller = CSoundEnvelopeController::GetController();
+  m_pSoundProxy = this->m_pSoundProxy;
+  do
+  {
+    v4 = UTIL_PlayerByIndex(++v1);
+    if ( !v4 )
+      goto LABEL_7;
+    if ( v4->m_iConnected == PlayerDisconnected )
+      goto LABEL_7;
+    player = v4;
+    IsSplitScreenPlayer = CBasePlayer::IsSplitScreenPlayer(v4);
+    v6 = player;
+    if ( IsSplitScreenPlayer )
+      goto LABEL_7;
+    if ( *m_pSoundProxy )
+    {
+      if ( m_pSoundProxy[33] )
+        goto LABEL_7;
+LABEL_12:
+      playerb = v6;
+      CRecipientFilter::CRecipientFilter(&filter);
+      filter._vptr_IRecipientFilter = (int (**)(...))off_B980E8;
+      CRecipientFilter::AddRecipient(&filter, playerb);
+      v10 = (int (__cdecl *)(CSoundEnvelopeController *, CSingleUserRecipientFilter *, signed int, const char *))*((_DWORD *)Controller->_vptr_CSoundEnvelopeController + 6);
+      m_pPev = (*m_pSoundProxy)->m_Network.m_pPev;
+      v12 = 0;
+      if ( this->m_bIsLethal.m_Value )
+      {
+        if ( m_pPev )
+          v12 = m_pPev - gpGlobals->pEdicts;
+        v13 = v10(Controller, &filter, v12, "LaserGreen.BeamLoop");
+      }
+      else
+      {
+        if ( m_pPev )
+          v12 = m_pPev - gpGlobals->pEdicts;
+        v13 = v10(Controller, &filter, v12, "Laser.BeamLoop");
+      }
+      m_pSoundProxy[33] = (CBaseEntity *)v13;
+      (*((void (__cdecl **)(CSoundEnvelopeController *, int, int, int, _DWORD))Controller->_vptr_CSoundEnvelopeController
+       + 2))(
+        Controller,
+        v13,
+        1065353216,
+        1120403456,
+        0);
+      filter._vptr_IRecipientFilter = (int (**)(...))off_B980E8;
+      CRecipientFilter::~CRecipientFilter(&filter);
+      goto LABEL_7;
+    }
+    EntityByName = CreateEntityByName("info_target", -1, 1);
+    *m_pSoundProxy = EntityByName;
+    v8 = player;
+    if ( (this->m_iEFlags & 0x800) != 0 )
+    {
+      CBaseEntity::CalcAbsolutePosition(this);
+      EntityByName = *m_pSoundProxy;
+      v8 = player;
+    }
+    playera = v8;
+    CBaseEntity::SetAbsOrigin(EntityByName, &this->m_vecAbsOrigin);
+    v9 = *m_pSoundProxy;
+    v9->m_iEFlags |= 0x80u;
+    CBaseEntity::DispatchUpdateTransmitState(v9);
+    v6 = playera;
+    if ( !m_pSoundProxy[33] )
+      goto LABEL_12;
+LABEL_7:
+    ++m_pSoundProxy;
+  }
+  while ( v1 != 33 );
+}

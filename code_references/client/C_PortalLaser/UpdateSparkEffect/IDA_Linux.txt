@@ -1,0 +1,12 @@
+void __cdecl C_PortalLaser::UpdateSparkEffect( C_PortalLaser *const this, const Vector *const vSparkPosition, const Vector *const vSparkNormal )
+{
+  Vector vecRight; // [esp+38h] [ebp-30h] BYREF
+  Vector vecUp; // [esp+44h] [ebp-24h] BYREF
+
+  if ( this->m_pSparkEffect.m_pObject )
+  {
+    CNewParticleEffect::SetControlPoint(this->m_pSparkEffect.m_pObject, 0, vSparkPosition);
+    VectorVectors(vSparkNormal, &vecRight, &vecUp);
+    CNewParticleEffect::SetControlPointOrientation(this->m_pSparkEffect.m_pObject, 0, vSparkNormal, &vecRight, &vecUp);
+  }
+}

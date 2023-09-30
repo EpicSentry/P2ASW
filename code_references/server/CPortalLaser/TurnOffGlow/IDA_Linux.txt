@@ -1,0 +1,26 @@
+void __cdecl CPortalLaser::TurnOffGlow(CPortalLaser *const this)
+{
+  bool v1; // zf
+  unsigned int m_Index; // eax
+  CBaseEntity *v3; // edx
+  char *v4; // ecx
+
+  v1 = !this->m_bFromReflectedCube;
+  this->m_bGlowInitialized = 0;
+  if ( v1 )
+  {
+    StopParticleEffects(this);
+  }
+  else
+  {
+    m_Index = this->m_hReflector.m_Value.m_Index;
+    v3 = 0;
+    if ( m_Index != -1 )
+    {
+      v4 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+      if ( *((_DWORD *)v4 + 2) == HIWORD(m_Index) )
+        v3 = (CBaseEntity *)*((_DWORD *)v4 + 1);
+    }
+    StopParticleEffects(v3);
+  }
+}

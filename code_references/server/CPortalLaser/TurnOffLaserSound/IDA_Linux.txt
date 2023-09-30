@@ -1,0 +1,17 @@
+void __cdecl CPortalLaser::TurnOffLaserSound(CPortalLaser *const this)
+{
+  int i; // ebx
+  CSoundEnvelopeController *Controller; // eax
+
+  for ( i = 0; i != 33; ++i )
+  {
+    if ( this->m_pAmbientSound[i] )
+    {
+      Controller = CSoundEnvelopeController::GetController();
+      (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))Controller->_vptr_CSoundEnvelopeController + 11))(
+        Controller,
+        this->m_pAmbientSound[i]);
+      this->m_pAmbientSound[i] = 0;
+    }
+  }
+}

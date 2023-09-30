@@ -1,0 +1,29 @@
+void __cdecl C_PortalLaser::C_PortalLaser(C_PortalLaser *const this)
+{
+  vec_t x; // ecx
+  vec_t y; // edx
+  vec_t z; // eax
+
+  C_BaseAnimating::C_BaseAnimating(this);
+  this->_vptr_IHandleEntity = (int (**)(...))off_12DC7C8;
+  this->_vptr_IClientRenderable = (int (**)(...))&off_12DCC44;
+  this->_vptr_IClientNetworkable = (int (**)(...))&off_12DCD00;
+  this->_vptr_IClientThinkable = (int (**)(...))&off_12DCD40;
+  this->_vptr_IClientModelRenderable = (int (**)(...))&off_12DCD5C;
+  C_PortalBeamHelper::C_PortalBeamHelper(&this->m_beamHelper);
+  x = vec3_origin.x;
+  this->m_bLaserOn = 0;
+  y = vec3_origin.y;
+  this->m_hReflector.m_Index = -1;
+  z = vec3_origin.z;
+  this->m_pSparkEffect.m_pPrev = 0;
+  this->m_pSparkEffect.m_pNext = 0;
+  this->m_pSparkEffect.m_pObject = 0;
+  this->m_vStartPoint.x = x;
+  this->m_vStartPoint.y = y;
+  this->m_vStartPoint.z = z;
+  this->m_vEndPoint.x = x;
+  this->m_vEndPoint.y = y;
+  this->m_vEndPoint.z = z;
+  this->m_bShouldSpark = 0;
+}

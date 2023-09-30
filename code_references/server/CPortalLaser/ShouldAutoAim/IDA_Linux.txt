@@ -1,0 +1,28 @@
+bool __cdecl CPortalLaser::ShouldAutoAim(CPortalLaser *const this, CBaseEntity *pEntity)
+{
+  char v2; // bl
+  _BYTE *v4; // eax
+
+  v2 = 0;
+  if ( this->m_bAutoAimEnabled
+    && pEntity
+    && (pEntity->m_iClassname.pszValue == "point_laser_target"
+     || CBaseEntity::ClassMatchesComplex(pEntity, "point_laser_target")) )
+  {
+    v2 = 0;
+    v4 = _dynamic_cast(
+           pEntity,
+           (const struct __class_type_info *)&`typeinfo for'CBaseEntity,
+           (const struct __class_type_info *)&`typeinfo for'CPortalLaserTarget,
+           0);
+    if ( v4 )
+      v2 = v4[933];
+    if ( this->m_bFromReflectedCube
+      && !sv_laser_cube_autoaim.m_pParent->m_Value.m_nValue
+      && !(*((unsigned __int8 (__cdecl **)(CGameRules *))g_pGameRules->_vptr_IGameSystem + 34))(g_pGameRules) )
+    {
+      return 0;
+    }
+  }
+  return v2;
+}

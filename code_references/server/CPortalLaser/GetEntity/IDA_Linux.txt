@@ -1,0 +1,4 @@
+CBaseEntity *__cdecl CPortalLaser::GetEntity(CPortalLaser *const this)
+{
+  return this;
+}

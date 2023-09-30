@@ -278,7 +278,7 @@ class ConstructMe_lightmappedpaint_ps20
 public:
 	ConstructMe_lightmappedpaint_ps20()
 	{
-		GetShaderDLL()->AddShaderComboInformation( &lightmappedpaint_ps20_combos );
+		//GetShaderDLL()->AddShaderComboInformation( &lightmappedpaint_ps20_combos );
 	}
 };
 

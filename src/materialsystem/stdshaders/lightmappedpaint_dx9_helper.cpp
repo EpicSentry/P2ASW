@@ -10,19 +10,24 @@
 #include "BaseVSShader.h"
 #include "shaderlib/commandbuilder.h"
 #include "convar.h"
+
+#define PAINT
+
 #include "lightmappedgeneric_vs20.inc"
+#ifdef PAINT
 #include "lightmappedpaint_ps20.inc"
 #include "lightmappedpaint_ps20b.inc"
-
+#endif
 #include "tier0/vprof.h"
 
 #include "tier0/memdbgon.h"
 
-extern ConVar mat_fullbright;
 
-extern ConVar mat_ambient_light_r;
-extern ConVar mat_ambient_light_g;
-extern ConVar mat_ambient_light_b;
+static ConVar mat_fullbright( "mat_fullbright", "0", FCVAR_CHEAT ); // get it from the engine
+
+static ConVar mat_ambient_light_r( "mat_ambient_light_r", "0", FCVAR_CHEAT ); // get it from the engine
+static ConVar mat_ambient_light_g( "mat_ambient_light_g", "0", FCVAR_CHEAT ); // get it from the engine
+static ConVar mat_ambient_light_b( "mat_ambient_light_b", "0", FCVAR_CHEAT ); // get it from the engine
 
 
 void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IShaderDynamicAPI *pShaderAPI, IShaderShadow* pShaderShadow, 
@@ -52,9 +57,9 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 			pContextData->m_bMaterialVarsChanged = pLightmapContextData->m_bMaterialVarsChanged;
 		}
 	}
-
+#ifdef PAINT
 	bool bShaderSrgbRead = ( IsX360() && IS_PARAM_DEFINED( info.m_nShaderSrgbRead360 ) && params[info.m_nShaderSrgbRead360]->GetIntValue() );
-
+#endif
 	if ( pShaderShadow || ( ! pContextData ) || pContextData->m_bMaterialVarsChanged )
 	{
 		bool bFullyOpaqueWithoutAlphaTest = false; 
@@ -84,7 +89,7 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 		if ( pShaderShadow || bNeedRegenStaticCmds )
 		{
 			bool hasVertexColor = IS_FLAG_SET( MATERIAL_VAR_VERTEXCOLOR );
-			bool hasDiffuseBumpmap = hasBump;// && (params[info.m_nNoDiffuseBumpLighting]->GetIntValue() == 0);
+			//bool hasDiffuseBumpmap = hasBump;// && (params[info.m_nNoDiffuseBumpLighting]->GetIntValue() == 0);
 
 			bool hasEnvmap = true; //params[info.m_nEnvmap]->IsTexture();
 			int envmap_variant; //0 = no envmap, 1 = regular, 2 = darken in shadow mode
@@ -214,30 +219,32 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 				pShaderShadow->VertexShaderVertexFormat( flags, numTexCoords, 0, 0 );
 
 				// Pre-cache pixel shaders
-
+#ifdef PAINT
 				int bumpmap_variant=(hasSSBump) ? 2 : hasBump;
-
+#endif
 				DECLARE_STATIC_VERTEX_SHADER( lightmappedgeneric_vs20 );
 				SET_STATIC_VERTEX_SHADER_COMBO( ENVMAP_MASK,  hasEnvmapMask );
 				SET_STATIC_VERTEX_SHADER_COMBO( TANGENTSPACE, 1 ); //need tangent transpose matrix for lighting
 				SET_STATIC_VERTEX_SHADER_COMBO( BUMPMAP,  hasBump );
-				SET_STATIC_VERTEX_SHADER_COMBO( DIFFUSEBUMPMAP, hasDiffuseBumpmap );
+				SET_STATIC_VERTEX_SHADER_COMBO( ADDBUMPMAPS,  hasBump );
+				//SET_STATIC_VERTEX_SHADER_COMBO( DIFFUSEBUMPMAP, hasDiffuseBumpmap );
 				SET_STATIC_VERTEX_SHADER_COMBO( VERTEXCOLOR, IS_FLAG_SET( MATERIAL_VAR_VERTEXCOLOR ) );
 				SET_STATIC_VERTEX_SHADER_COMBO( VERTEXALPHATEXBLENDFACTOR, 0 );
 				SET_STATIC_VERTEX_SHADER_COMBO( BUMPMASK, 0 );
 				SET_STATIC_VERTEX_SHADER_COMBO( LIGHTING_PREVIEW, nLightingPreviewMode );
-				SET_STATIC_VERTEX_SHADER_COMBO( PARALLAX_MAPPING, 0 );
+				//SET_STATIC_VERTEX_SHADER_COMBO( PARALLAX_MAPPING, 0 );
 				SET_STATIC_VERTEX_SHADER_COMBO( SEAMLESS, bSeamlessMapping );
 				SET_STATIC_VERTEX_SHADER_COMBO( DETAILTEXTURE, 0 );
 				SET_STATIC_VERTEX_SHADER_COMBO( FANCY_BLENDING, bHasBlendModulateTexture );
 				SET_STATIC_VERTEX_SHADER_COMBO( SELFILLUM,  hasSelfIllum );
+				SET_STATIC_VERTEX_SHADER_COMBO( PAINT, 1 );
 #ifdef _X360
 				SET_STATIC_VERTEX_SHADER_COMBO( FLASHLIGHT, hasFlashlight);
 #endif
 				SET_STATIC_VERTEX_SHADER( lightmappedgeneric_vs20 );
 
 #define TCOMBINE_NONE 12									// there is no detail texture
-
+#ifdef PAINT
 				if ( g_pHardwareConfig->SupportsPixelShaders_2_b() )
 				{
 					DECLARE_STATIC_PIXEL_SHADER( lightmappedpaint_ps20b );
@@ -245,9 +252,10 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 					SET_STATIC_PIXEL_SHADER_COMBO( CUBEMAP,  envmap_variant );
 					SET_STATIC_PIXEL_SHADER_COMBO( SEAMLESS, bSeamlessMapping );
 //#ifdef _X360
-					SET_STATIC_PIXEL_SHADER_COMBO( FLASHLIGHT, hasFlashlight);
+					//SET_STATIC_PIXEL_SHADER_COMBO( FLASHLIGHT, hasFlashlight);
 //#endif
-					SET_STATIC_PIXEL_SHADER_COMBO( SHADER_SRGB_READ, bShaderSrgbRead );
+					//SET_STATIC_PIXEL_SHADER_COMBO( SHADER_SRGB_READ, bShaderSrgbRead );
+					SET_STATIC_PIXEL_SHADER_COMBO( THICKPAINT, bShaderSrgbRead );
 					SET_STATIC_PIXEL_SHADER( lightmappedpaint_ps20b );
 				}
 				else
@@ -256,10 +264,12 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 					SET_STATIC_PIXEL_SHADER_COMBO( BUMPMAP,  bumpmap_variant );
 					SET_STATIC_PIXEL_SHADER_COMBO( CUBEMAP,  envmap_variant );
 					SET_STATIC_PIXEL_SHADER_COMBO( SEAMLESS, bSeamlessMapping );
-					SET_STATIC_PIXEL_SHADER_COMBO( FLASHLIGHT, hasFlashlight );
-					SET_STATIC_PIXEL_SHADER_COMBO( SHADER_SRGB_READ, bShaderSrgbRead );
+					//SET_STATIC_PIXEL_SHADER_COMBO( FLASHLIGHT, hasFlashlight );
+					//SET_STATIC_PIXEL_SHADER_COMBO( SHADER_SRGB_READ, bShaderSrgbRead );
+					SET_STATIC_PIXEL_SHADER_COMBO( THICKPAINT, true );
 					SET_STATIC_PIXEL_SHADER( lightmappedpaint_ps20 );
 				}
+#endif
 				// HACK HACK HACK - enable alpha writes all the time so that we have them for
 				// underwater stuff and writing depth to dest alpha
 				// But only do it if we're not using the alpha already for translucency
@@ -536,7 +546,7 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 			}
 			DynamicCmdsOut.SetPixelShaderConstant( 31, vAmbientColor, 1 );
 		}
-
+#ifdef PAINT
 		float envmapContrast = params[info.m_nEnvmapContrast]->GetFloatValue();
 		if ( g_pHardwareConfig->SupportsPixelShaders_2_b() )
 		{
@@ -545,7 +555,7 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 			SET_DYNAMIC_PIXEL_SHADER_COMBO( FASTPATHENVMAPCONTRAST,  bPixelShaderFastPath && envmapContrast == 1.0f );
 			
 			// Don't write fog to alpha if we're using translucency
-			SET_DYNAMIC_PIXEL_SHADER_COMBO( FLASHLIGHTSHADOWS, bFlashlightShadows );
+			//SET_DYNAMIC_PIXEL_SHADER_COMBO( FLASHLIGHTSHADOWS, bFlashlightShadows );
 			SET_DYNAMIC_PIXEL_SHADER_CMD( DynamicCmdsOut, lightmappedpaint_ps20b );
 		}
 		else
@@ -557,7 +567,7 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 			// Don't write fog to alpha if we're using translucency
 			SET_DYNAMIC_PIXEL_SHADER_CMD( DynamicCmdsOut, lightmappedpaint_ps20 );
 		}
-
+#endif
 		DynamicCmdsOut.End();
 		pShaderAPI->ExecuteCommandBuffer( DynamicCmdsOut.Base() );
 	}

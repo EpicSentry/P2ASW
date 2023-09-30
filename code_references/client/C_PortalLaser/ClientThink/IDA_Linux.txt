@@ -1,0 +1,151 @@
+void __cdecl C_PortalLaser::ClientThink(C_PortalLaser *const this)
+{
+  C_BaseEntity *v1; // esi
+  unsigned int m_Index; // eax
+  char *v3; // edx
+  const QAngle *v4; // eax
+  float *v5; // eax
+  vec_t v6; // xmm0_4
+  CPortalSimulator *SimulatorThatOwnsEntity; // eax
+  vec_t v8; // xmm0_4
+  vec_t v9; // xmm2_4
+  float *v10; // eax
+  float v11; // xmm2_4
+  float v12; // xmm6_4
+  float v13; // xmm5_4
+  float v14; // xmm4_4
+  float v15; // xmm7_4
+  float v16; // xmm3_4
+  float x; // xmm2_4
+  vec_t v18; // xmm3_4
+  vec_t v19; // xmm3_4
+  vec_t v20; // xmm2_4
+  float v21; // [esp+2Ch] [ebp-DCh]
+  float v22; // [esp+30h] [ebp-D8h]
+  float v23; // [esp+34h] [ebp-D4h]
+  float v24; // [esp+38h] [ebp-D0h]
+  float v25; // [esp+3Ch] [ebp-CCh]
+  float z; // [esp+40h] [ebp-C8h]
+  float v27; // [esp+40h] [ebp-C8h]
+  float y; // [esp+44h] [ebp-C4h]
+  float pSimulatora; // [esp+4Ch] [ebp-BCh]
+  CPortalSimulator *pSimulator; // [esp+4Ch] [ebp-BCh]
+  trace_t tr; // [esp+54h] [ebp-B4h] BYREF
+  CTraceFilterSimpleClassnameList traceFilter; // [esp+A8h] [ebp-60h] BYREF
+  Vector vDir; // [esp+CCh] [ebp-3Ch] BYREF
+  Vector vStart; // [esp+D8h] [ebp-30h] BYREF
+  Vector vec; // [esp+E4h] [ebp-24h] BYREF
+
+  v1 = 0;
+  m_Index = this->m_hReflector.m_Index;
+  if ( m_Index != -1 )
+  {
+    v3 = (char *)g_pEntityList + 16 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v3 + 2) == HIWORD(m_Index) )
+      v1 = (C_BaseEntity *)*((_DWORD *)v3 + 1);
+  }
+  CTraceFilterSimpleClassnameList::CTraceFilterSimpleClassnameList(&traceFilter, v1, 0);
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore(&traceFilter, "projected_wall_entity");
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore(&traceFilter, "player");
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore(&traceFilter, "point_laser_target");
+  if ( v1 )
+  {
+    if ( this->m_bUseParentDir )
+    {
+      AngleVectors(&this->m_angParentAngles, &vDir);
+    }
+    else
+    {
+      v4 = (const QAngle *)(*((int (__cdecl **)(C_BaseEntity *))v1->_vptr_IHandleEntity + 13))(v1);
+      AngleVectors(v4, &vDir);
+    }
+    pSimulatora = vDir.x;
+    y = vDir.y;
+    z = vDir.z;
+    v5 = (float *)(*((int (__cdecl **)(C_BaseEntity *))v1->_vptr_IHandleEntity + 112))(v1);
+    vStart.x = (float)(pSimulatora * 22.0) + *v5;
+    v6 = (float)(22.0 * z) + v5[2];
+    vStart.y = (float)(y * 22.0) + v5[1];
+    vStart.z = v6;
+    SimulatorThatOwnsEntity = CPortalSimulator::GetSimulatorThatOwnsEntity(v1);
+    pSimulator = SimulatorThatOwnsEntity;
+    if ( SimulatorThatOwnsEntity )
+    {
+      if ( CPortalSimulator::EntityIsInPortalHole(SimulatorThatOwnsEntity, v1)
+        && (float)((float)((float)((float)(vStart.x * pSimulator->m_InternalData.Placement.PortalPlane.m_Normal.x)
+                                 + (float)(vStart.y * pSimulator->m_InternalData.Placement.PortalPlane.m_Normal.y))
+                         + (float)(vStart.z * pSimulator->m_InternalData.Placement.PortalPlane.m_Normal.z))
+                 - pSimulator->m_InternalData.Placement.PortalPlane.m_Dist) < 0.0 )
+      {
+        v10 = (float *)(*((int (__cdecl **)(C_BaseEntity *))v1->_vptr_IHandleEntity + 112))(v1);
+        if ( (float)((float)((float)((float)(*v10 * pSimulator->m_InternalData.Placement.PortalPlane.m_Normal.x)
+                                   + (float)(v10[1] * pSimulator->m_InternalData.Placement.PortalPlane.m_Normal.y))
+                           + (float)(v10[2] * pSimulator->m_InternalData.Placement.PortalPlane.m_Normal.z))
+                   - pSimulator->m_InternalData.Placement.PortalPlane.m_Dist) > 0.0 )
+        {
+          v27 = pSimulator->m_InternalData.Placement.matThisToLinked.m[1][0];
+          v25 = pSimulator->m_InternalData.Placement.matThisToLinked.m[1][1];
+          v11 = vStart.y;
+          v24 = pSimulator->m_InternalData.Placement.matThisToLinked.m[1][2];
+          v12 = pSimulator->m_InternalData.Placement.matThisToLinked.m[0][0];
+          v13 = pSimulator->m_InternalData.Placement.matThisToLinked.m[0][1];
+          v14 = pSimulator->m_InternalData.Placement.matThisToLinked.m[0][2];
+          v23 = pSimulator->m_InternalData.Placement.matThisToLinked.m[2][0];
+          v22 = pSimulator->m_InternalData.Placement.matThisToLinked.m[2][1];
+          v21 = pSimulator->m_InternalData.Placement.matThisToLinked.m[2][2];
+          v15 = v22 * vStart.y;
+          vStart.y = (float)((float)((float)(v27 * vStart.x) + (float)(v25 * vStart.y)) + (float)(vStart.z * v24))
+                   + pSimulator->m_InternalData.Placement.matThisToLinked.m[1][3];
+          v16 = (float)((float)(vStart.x * v12) + (float)(v11 * v13)) + (float)(vStart.z * v14);
+          x = vDir.x;
+          v18 = v16 + pSimulator->m_InternalData.Placement.matThisToLinked.m[0][3];
+          vStart.z = (float)((float)((float)(v23 * vStart.x) + v15) + (float)(vStart.z * v21))
+                   + pSimulator->m_InternalData.Placement.matThisToLinked.m[2][3];
+          vStart.x = v18;
+          vDir.x = (float)((float)(v12 * vDir.x) + (float)(v13 * vDir.y)) + (float)(v14 * vDir.z);
+          v19 = (float)((float)(v27 * x) + (float)(v25 * vDir.y)) + (float)(v24 * vDir.z);
+          v20 = (float)((float)(x * v23) + (float)(vDir.y * v22)) + (float)(vDir.z * v21);
+          vDir.y = v19;
+          vDir.z = v20;
+        }
+      }
+    }
+    if ( this->m_bIsAutoAiming )
+    {
+      v8 = this->m_vEndPoint.z - vStart.z;
+      v9 = this->m_vEndPoint.x - vStart.x;
+      vec.y = this->m_vEndPoint.y - vStart.y;
+      vec.z = v8;
+      vec.x = v9;
+      VectorNormalize(&vec);
+      vDir = vec;
+    }
+    else
+    {
+      UTIL_Portal_Laser_Prevent_Tilting(&vDir);
+    }
+    C_PortalBeamHelper::UpdatePointDirection(&this->m_beamHelper, &vStart, &vDir, 0x46004001u, &traceFilter, &tr);
+  }
+  else
+  {
+    C_PortalBeamHelper::UpdatePoints(
+      &this->m_beamHelper,
+      &this->m_vStartPoint,
+      &this->m_vEndPoint,
+      0x46004001u,
+      &traceFilter,
+      &tr);
+  }
+  if ( this->m_bShouldSpark )
+    C_PortalLaser::UpdateSparkEffect(this, &tr.endpos, &tr.plane.normal);
+  (*((void (__cdecl **)(C_PortalLaser *const, int))this->_vptr_IHandleEntity + 160))(this, -996040704);
+  traceFilter._vptr_ITraceFilter = (int (**)(...))&off_11FA768;
+  traceFilter.m_PassClassnames.m_Size = 0;
+  if ( traceFilter.m_PassClassnames.m_Memory.m_nGrowSize >= 0 )
+  {
+    if ( traceFilter.m_PassClassnames.m_Memory.m_pMemory )
+      (*(void (__cdecl **)(_DWORD, const char **))(*g_pMemAlloc + 8))(
+        g_pMemAlloc,
+        traceFilter.m_PassClassnames.m_Memory.m_pMemory);
+  }
+}

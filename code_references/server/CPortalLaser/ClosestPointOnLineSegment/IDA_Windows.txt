@@ -1,4 +1,4 @@
-Vector *__thiscall CPortalLaser::ClosestPointOnLineSegment(CPortalLaser *this, Vector *result, const Vector *vPos)
+Vector *__thiscall CPortalLaser::ClosestPointOnLineSegment( CPortalLaser *this, Vector *result, const Vector *vPos )
 {
   CalcClosestPointOnLineSegment(vPos, &this->m_vStartPoint.m_Value, &this->m_vEndPoint.m_Value, result, 0);
   return result;

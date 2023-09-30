@@ -1,0 +1,5 @@
+Vector *__userpurge CPortalLaser::ClosestPointOnLineSegment@<eax>( Vector *retstr, CPortalLaser *const this, const Vector *const vPos )
+{
+  CalcClosestPointOnLineSegment(vPos, &this->m_vStartPoint.m_Value, &this->m_vEndPoint.m_Value, retstr, 0);
+  return retstr;
+}

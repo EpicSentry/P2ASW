@@ -112,6 +112,7 @@ void __thiscall C_PortalLaser::ClientThink(C_PortalLaser *this)
       &traceFilter,
       &tr);
   }
+  // UpdateSparkEffect():
   if ( HIBYTE(this->m_vEndPoint.x) )
   {
     m_Index = (CNewParticleEffect *)this->m_hReflector.m_Index;

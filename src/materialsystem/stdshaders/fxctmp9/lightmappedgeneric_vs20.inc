@@ -521,7 +521,7 @@ class ConstructMe_lightmappedgeneric_vs20
 public:
 	ConstructMe_lightmappedgeneric_vs20()
 	{
-		GetShaderDLL()->AddShaderComboInformation( &lightmappedgeneric_vs20_combos );
+		//GetShaderDLL()->AddShaderComboInformation( &lightmappedgeneric_vs20_combos );
 	}
 };
 

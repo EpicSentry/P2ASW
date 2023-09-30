@@ -90,11 +90,14 @@ $Project "Client (Portal 2)"
 			$File "portal2/c_prop_weightedcube.h"
 			$File "portal2/c_fizzler_effects.cpp"
 			$File "portal2/c_fizzler_effects.h"
+			$File "portal2/c_portal_beam_helper.h"
+			$File "portal2/c_portal_beam_helper.cpp"
 			$File "portal2/c_npc_personality_core.cpp"
 			//$File "portal2\c_trigger_tractorbeam.h"
 			//$File "portal2\c_trigger_tractorbeam.cpp"
 			$File "portal2\c_info_placement_helper.h"
 			$File "portal2\c_info_placement_helper.cpp"
+			$File "portal2\c_env_portal_laser.cpp"
 
 			// Radial Menu preparations for when we get to work on coop.
 			/*

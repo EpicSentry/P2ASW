@@ -1,0 +1,40 @@
+datamap_t *__cdecl DataMapInit<CPortalLaser>(CPortalLaser *a1)
+{
+  datamap_t *result; // eax
+  char *s; // [esp+1Ch] [ebp-Ch] BYREF
+
+  if ( !(_BYTE)`guard variable for'datamap_t * DataMapInit<CPortalLaser>(CPortalLaser *)::nameHolder
+    && _cxa_guard_acquire(&`guard variable for'datamap_t * DataMapInit<CPortalLaser>(CPortalLaser *)::nameHolder) )
+  {
+    DataMapInit<CPortalLaser>(CPortalLaser *)::nameHolder.m_pszBase = "CPortalLaser";
+    DataMapInit<CPortalLaser>(CPortalLaser *)::nameHolder.m_Names.m_Memory.m_pMemory = 0;
+    DataMapInit<CPortalLaser>(CPortalLaser *)::nameHolder.m_Names.m_Memory.m_nAllocationCount = 0;
+    DataMapInit<CPortalLaser>(CPortalLaser *)::nameHolder.m_Names.m_Memory.m_nGrowSize = 0;
+    DataMapInit<CPortalLaser>(CPortalLaser *)::nameHolder.m_Names.m_Size = 0;
+    DataMapInit<CPortalLaser>(CPortalLaser *)::nameHolder.m_Names.m_pElements = 0;
+    DataMapInit<CPortalLaser>(CPortalLaser *)::nameHolder.m_nLenBase = 12;
+    _cxa_guard_release(&`guard variable for'datamap_t * DataMapInit<CPortalLaser>(CPortalLaser *)::nameHolder);
+    _cxa_atexit(
+      (void (__cdecl *)(void *))CDatadescGeneratedNameHolder::~CDatadescGeneratedNameHolder,
+      &DataMapInit<CPortalLaser>(CPortalLaser *)::nameHolder,
+      &_dso_handle);
+  }
+  CPortalLaser::m_DataMap.baseMap = &CBaseAnimating::m_DataMap;
+  if ( !(_BYTE)`guard variable for'datamap_t * DataMapInit<CPortalLaser>(CPortalLaser *)::dataDesc
+    && _cxa_guard_acquire(&`guard variable for'datamap_t * DataMapInit<CPortalLaser>(CPortalLaser *)::dataDesc) )
+  {
+    s = (char *)operator new[](DataMapInit<CPortalLaser>(CPortalLaser *)::nameHolder.m_nLenBase + 12);
+    strcpy(s, DataMapInit<CPortalLaser>(CPortalLaser *)::nameHolder.m_pszBase);
+    strcat(s, "StrikeThink");
+    CUtlVector<char *,CUtlMemory<char *,int>>::InsertBefore(
+      &DataMapInit<CPortalLaser>(CPortalLaser *)::nameHolder.m_Names,
+      DataMapInit<CPortalLaser>(CPortalLaser *)::nameHolder.m_Names.m_Size,
+      &s);
+    DataMapInit<CPortalLaser>(CPortalLaser *)::dataDesc[1].fieldName = s;
+    _cxa_guard_release(&`guard variable for'datamap_t * DataMapInit<CPortalLaser>(CPortalLaser *)::dataDesc);
+  }
+  CPortalLaser::m_DataMap.dataNumFields = 24;
+  result = &CPortalLaser::m_DataMap;
+  CPortalLaser::m_DataMap.dataDesc = &DataMapInit<CPortalLaser>(CPortalLaser *)::dataDesc[1];
+  return result;
+}

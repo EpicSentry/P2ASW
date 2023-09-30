@@ -1,0 +1,138 @@
+bool __cdecl CPortalLaser::ReflectLaserFromEntity(CPortalLaser *const this, CBaseEntity *pReflector)
+{
+  CBaseEntity *v2; // edx
+  unsigned int m_Index; // eax
+  char *v4; // ecx
+  bool v5; // di
+  vec_t y; // edx
+  char *v7; // eax
+  CPortalLaser *v8; // eax
+  float *v10; // eax
+  vec_t v11; // xmm1_4
+  vec_t v12; // xmm0_4
+  CPortalSimulator *SimulatorThatOwnsEntity; // eax
+  float *v14; // edi
+  float *v15; // eax
+  float v16; // xmm3_4
+  float v17; // xmm6_4
+  float v18; // xmm5_4
+  float v19; // xmm4_4
+  float v20; // xmm0_4
+  float v21; // xmm7_4
+  float v22; // xmm2_4
+  float z; // xmm7_4
+  float x; // xmm2_4
+  float v25; // xmm3_4
+  vec_t v26; // xmm2_4
+  float v27; // [esp+10h] [ebp-88h]
+  float v28; // [esp+20h] [ebp-78h]
+  float v29; // [esp+30h] [ebp-68h]
+  float v30; // [esp+48h] [ebp-50h]
+  float v31; // [esp+4Ch] [ebp-4Ch]
+  float v32; // [esp+50h] [ebp-48h]
+  float v33; // [esp+54h] [ebp-44h]
+  float v34; // [esp+58h] [ebp-40h]
+  Vector forward; // [esp+68h] [ebp-30h] BYREF
+  Vector vecStart; // [esp+74h] [ebp-24h] BYREF
+
+  v2 = 0;
+  m_Index = this->m_hReflector.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v4 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v4 + 2) == HIWORD(m_Index) )
+      v2 = (CBaseEntity *)*((_DWORD *)v4 + 1);
+  }
+  if ( pReflector == v2 )
+  {
+    v5 = 1;
+    CPortalLaser::RemoveChildLaser(this);
+  }
+  else
+  {
+    v5 = 0;
+    if ( pReflector && (UTIL_IsReflectiveCube(pReflector) || UTIL_IsSchrodinger(pReflector)) )
+    {
+      y = pReflector[2].m_vecAbsOrigin.y;
+      if ( y != NAN
+        && (v7 = (char *)g_pEntityList + 24 * LOWORD(y), *((_DWORD *)v7 + 2) == HIWORD(LODWORD(y)))
+        && (v8 = (CPortalLaser *)*((_DWORD *)v7 + 1)) != 0 )
+      {
+        if ( this->m_pChildLaser != v8 )
+          CPortalLaser::RemoveChildLaser(this);
+      }
+      else
+      {
+        if ( UTIL_GetSchrodingerTwin(pReflector) )
+        {
+          AngleVectors(&this->m_angPortalExitAngles, &forward);
+        }
+        else
+        {
+          if ( (pReflector->m_iEFlags & 0x800) != 0 )
+            CBaseEntity::CalcAbsolutePosition(pReflector);
+          AngleVectors(&pReflector->m_angAbsRotation, &forward);
+        }
+        v28 = forward.x * 22.0;
+        v29 = forward.y * 22.0;
+        v27 = 22.0 * forward.z;
+        v10 = (float *)(*((int (__cdecl **)(CBaseEntity *))pReflector->_vptr_IHandleEntity + 150))(pReflector);
+        v11 = v29 + v10[1];
+        v12 = v27 + v10[2];
+        vecStart.x = v28 + *v10;
+        vecStart.y = v11;
+        vecStart.z = v12;
+        SimulatorThatOwnsEntity = CPortalSimulator::GetSimulatorThatOwnsEntity(pReflector);
+        v14 = (float *)SimulatorThatOwnsEntity;
+        if ( SimulatorThatOwnsEntity )
+        {
+          if ( CPortalSimulator::EntityIsInPortalHole(SimulatorThatOwnsEntity, pReflector)
+            && (float)((float)((float)((float)(vecStart.x * v14[26]) + (float)(vecStart.y * v14[27]))
+                             + (float)(vecStart.z * v14[28]))
+                     - v14[29]) < 0.0 )
+          {
+            v15 = (float *)(*((int (__cdecl **)(CBaseEntity *))pReflector->_vptr_IHandleEntity + 150))(pReflector);
+            if ( (float)((float)((float)((float)(*v15 * v14[26]) + (float)(v15[1] * v14[27])) + (float)(v15[2] * v14[28]))
+                       - v14[29]) > 0.0 )
+            {
+              v34 = v14[35];
+              v16 = v14[34];
+              v33 = v14[36];
+              v17 = v14[30];
+              v18 = v14[31];
+              v19 = v14[32];
+              v32 = v14[38];
+              v31 = v14[39];
+              v30 = v14[40];
+              v20 = (float)((float)(v32 * vecStart.x) + (float)(vecStart.y * v31)) + (float)(vecStart.z * v30);
+              v21 = vecStart.y;
+              vecStart.y = (float)((float)((float)(vecStart.x * v16) + (float)(vecStart.y * v34))
+                                 + (float)(vecStart.z * v33))
+                         + v14[37];
+              v22 = (float)(vecStart.x * v17) + (float)(v21 * v18);
+              z = vecStart.z;
+              vecStart.z = v20 + v14[41];
+              vecStart.x = (float)(v22 + (float)(z * v19)) + v14[33];
+              x = forward.x;
+              v25 = v16 * forward.x;
+              forward.x = (float)((float)(v17 * forward.x) + (float)(v18 * forward.y)) + (float)(v19 * forward.z);
+              v26 = (float)((float)(x * v32) + (float)(forward.y * v31)) + (float)(forward.z * v30);
+              forward.y = (float)(v25 + (float)(v34 * forward.y)) + (float)(v33 * forward.z);
+              forward.z = v26;
+            }
+          }
+        }
+        UTIL_Portal_Laser_Prevent_Tilting(&forward);
+        CPortalLaser::UpdateNextLaser(this, &vecStart, &forward, pReflector);
+      }
+      v5 = 1;
+      if ( !LOBYTE(pReflector[2].m_vecVelocity.m_Value.z)
+        && reflector_cube_disable_when_on_laser.m_pParent->m_Value.m_nValue
+        && CPropWeightedCube::ShouldEnterDisabledState((CPropWeightedCube *const)pReflector) )
+      {
+        CPropWeightedCube::EnterDisabledState((CPropWeightedCube *const)pReflector);
+      }
+    }
+  }
+  return v5;
+}

@@ -1,0 +1,5 @@
+void __cdecl CPortalLaser::InputTurnOn(CPortalLaser *const this, inputdata_t *const inputdata)
+{
+  if ( !this->m_pfnThink.__pfn )
+    CPortalLaser::TurnOn(this);
+}

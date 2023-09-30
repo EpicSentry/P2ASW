@@ -1,0 +1,52 @@
+void __cdecl C_PortalLaser::OnDataChanged(C_PortalLaser *const this, DataUpdateType_t updateType)
+{
+  CNewParticleEffect *m_pObject; // eax
+  CUtlReference<CNewParticleEffect> *m_pPrev; // edx
+  CUtlReference<CNewParticleEffect> *m_pNext; // eax
+  CUtlReference<CNewParticleEffect> *v5; // edx
+  C_PortalBeamHelper *p_m_beamHelper; // [esp+0h] [ebp-28h]
+
+  if ( this->m_bShouldSpark )
+  {
+    if ( !this->m_pSparkEffect.m_pObject )
+      C_PortalLaser::CreateSparkEffect(this);
+  }
+  else if ( this->m_pSparkEffect.m_pObject )
+  {
+    CParticleProperty::StopEmission(&this->m_Particles, this->m_pSparkEffect.m_pObject, 0, 0, 0, 0);
+    m_pObject = this->m_pSparkEffect.m_pObject;
+    if ( m_pObject )
+    {
+      m_pPrev = this->m_pSparkEffect.m_pPrev;
+      if ( m_pPrev )
+      {
+        m_pPrev->m_pNext = this->m_pSparkEffect.m_pNext;
+        m_pNext = this->m_pSparkEffect.m_pNext;
+        if ( m_pNext )
+          m_pNext->m_pPrev = this->m_pSparkEffect.m_pPrev;
+      }
+      else if ( m_pObject->m_References.m_pHead == &this->m_pSparkEffect )
+      {
+        v5 = this->m_pSparkEffect.m_pNext;
+        m_pObject->m_References.m_pHead = v5;
+        if ( v5 )
+          v5->m_pPrev = 0;
+      }
+      this->m_pSparkEffect.m_pPrev = 0;
+      this->m_pSparkEffect.m_pNext = 0;
+      this->m_pSparkEffect.m_pObject = 0;
+    }
+  }
+  p_m_beamHelper = &this->m_beamHelper;
+  if ( this->m_bLaserOn )
+  {
+    C_PortalBeamHelper::TurnOn(p_m_beamHelper);
+    (*((void (__cdecl **)(C_PortalLaser *const, int))this->_vptr_IHandleEntity + 160))(this, -996040704);
+  }
+  else
+  {
+    C_PortalBeamHelper::TurnOff(p_m_beamHelper);
+    (*((void (__cdecl **)(C_PortalLaser *const, int))this->_vptr_IHandleEntity + 160))(this, -1082130432);
+  }
+  C_BaseAnimating::OnDataChanged(this, updateType);
+}
