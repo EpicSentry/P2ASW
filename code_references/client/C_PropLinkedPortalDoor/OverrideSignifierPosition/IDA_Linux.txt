@@ -1,0 +1,4 @@
+bool __cdecl C_PropLinkedPortalDoor::OverrideSignifierPosition(C_PropLinkedPortalDoor *const this)
+{
+  return 1;
+}

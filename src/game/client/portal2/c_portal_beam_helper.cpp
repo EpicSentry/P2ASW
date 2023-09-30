@@ -47,39 +47,51 @@ C_Beam *C_PortalBeamHelper::CreateBeam( void )
   return pNewBeam;
 }
 
-void C_PortalBeamHelper::UpdatePointDirection( const Vector &vStartPoint, const Vector &vDirection, unsigned int fMask, ITraceFilter *pTraceFilter, trace_t &tr )
+void C_PortalBeamHelper::UpdatePointDirection( Vector &vStartPoint, Vector &vDirection, unsigned int fMask, ITraceFilter *pTraceFilter, trace_t &tr )
 {
 	Vector vEndPoint = vStartPoint + ( vDirection * MAX_TRACE_LENGTH );
 
 	C_PortalBeamHelper::UpdatePoints( vStartPoint, vEndPoint, fMask, pTraceFilter, tr );
 }
 
-void C_PortalBeamHelper::UpdatePoints( const Vector &vStartPoint, const Vector &vEndPoint, unsigned int fMask, ITraceFilter *pTraceFilter, trace_t &tr )
+void C_PortalBeamHelper::UpdatePoints( Vector &vStartPoint, Vector &vEndPoint, unsigned int fMask, ITraceFilter *pTraceFilter, trace_t &tr )
 {
 	Vector vStart = vStartPoint;
+
 	Vector vDir = vEndPoint - vStartPoint;
 	VectorNormalize( vDir );
 
 	bool bHitReflectiveSurface = false;
-	bool bFirePass = true;	
+	bool bHitPortal = true;	
 
 	trace_t tempTrace;
 
-	int nLastRemovedBeam = 0;
-	while ( (bHitReflectiveSurface || bFirePass) && nLastRemovedBeam != 10 )
+	int nLastCreatedBeam = 0;
+
+
+#ifdef DEBUG
+	int iCycleCount2 = 0;
+#endif
+
+	for (nLastCreatedBeam = 0; (bHitReflectiveSurface || bHitPortal) && nLastCreatedBeam < 10 ; ++nLastCreatedBeam)
 	{
-		if ( nLastRemovedBeam == m_beams.Count() )
+#ifdef DEBUG
+		++iCycleCount2;
+#endif
+		AssertMsg(iCycleCount2 < 100, "You're probably stuck in a loop if you managed to get this high");
+
+		if ( nLastCreatedBeam == m_beams.Count() )
 		{
 			m_beams.AddToTail( CreateBeam() );
 		}
 
-		if ( nLastRemovedBeam )
+		if ( nLastCreatedBeam )
 		{
-			m_beams[nLastRemovedBeam]->SetEndWidth( m_pBeamTemplate->GetEndWidth() );
+			m_beams[nLastCreatedBeam]->SetEndWidth( m_pBeamTemplate->GetEndWidth() );
 		}
 
 		Ray_t ray;
-		ray.Init( vStart, (vDir * MAX_TRACE_LENGTH) + vStart - vStart );
+		ray.Init( vStart, (vDir * MAX_TRACE_LENGTH) + vStart );
     
 		UTIL_ClearTrace( tempTrace );
 
@@ -95,9 +107,9 @@ void C_PortalBeamHelper::UpdatePoints( const Vector &vStartPoint, const Vector &
 		  && pPortal->IsActivedAndLinked() )
 		{
 
-			m_beams[nLastRemovedBeam]->PointsInit( vStart, tempTrace.endpos);
-			m_beams[nLastRemovedBeam]->SetAbsOrigin( vStart );
-			m_beams[nLastRemovedBeam]->TurnOff();
+			m_beams[nLastCreatedBeam]->PointsInit( vStart, tempTrace.endpos);
+			m_beams[nLastCreatedBeam]->SetAbsOrigin( vStart );
+			m_beams[nLastCreatedBeam]->TurnOff();
 
 			Ray_t rayTransformed;
 			UTIL_Portal_RayTransform( pPortal->m_matrixThisToLinked, ray, rayTransformed );
@@ -105,38 +117,41 @@ void C_PortalBeamHelper::UpdatePoints( const Vector &vStartPoint, const Vector &
 			vDir = rayTransformed.m_Delta;
 			VectorNormalize( vDir );
 			UTIL_Portal_PointTransform( pPortal->m_matrixThisToLinked, tempTrace.endpos, vStart );
-			bFirePass = true;
+			bHitPortal = true;
 			bHitReflectiveSurface = false;
 		}
 		else
 		{	
-			m_beams[nLastRemovedBeam]->PointsInit( vStart, tempTrace.endpos );
-			m_beams[nLastRemovedBeam]->SetAbsOrigin( vStart );
-			m_beams[nLastRemovedBeam]->TurnOff();
+			m_beams[nLastCreatedBeam]->PointsInit( vStart, tempTrace.endpos );
+			m_beams[nLastCreatedBeam]->SetAbsOrigin( vStart );
+			m_beams[nLastCreatedBeam]->TurnOff();
 			bHitReflectiveSurface = UTIL_Paint_Reflect( tempTrace, vStart, vDir, REFLECT_POWER );
-			bFirePass = true;
+			bHitPortal = false;
 		}
-		++nLastRemovedBeam;
 	}
 
 	int iLastBeam = m_beams.Count() - 1;
+	int nNumRemoveda = m_beams.Count() - nLastCreatedBeam;
 
-	bool bRemovedAll = m_beams.Count() == nLastRemovedBeam;
-	
-	int nNumRemoveda = m_beams.Count() - nLastRemovedBeam;
+	bool bRemovedAll = m_beams.Count() == nLastCreatedBeam;
 
 	if ( nNumRemoveda >= 0 && !bRemovedAll && iLastBeam >= 0 )
 	{
-		int iLastBeamIndex = m_beams.Count() - 1;
+#ifdef DEBUG
+		int iCycleCount = 0;
+#endif
 
-		while ( nNumRemoveda > 0 && iLastBeamIndex >= 0 );
+		do
 		{
+#ifdef DEBUG
+			++iCycleCount;
+#endif
+			AssertMsg( iCycleCount < 100, "You're probably stuck in a loop if you managed to get this high" );
 			--nNumRemoveda;
-			--iLastBeamIndex;
+			--iLastBeam;
 			GetLastBeam()->Remove();
 			m_beams.FindAndRemove( GetLastBeam() );
-
-		}
+		} while ( nNumRemoveda > 0 && iLastBeam >= 0 );
 	}
 
 	tr = tempTrace;
@@ -145,14 +160,32 @@ void C_PortalBeamHelper::UpdatePoints( const Vector &vStartPoint, const Vector &
 
 void C_PortalBeamHelper::TurnOff( void )
 {
+#ifdef DEBUG
+	int iCycleCount = 0;
+#endif
 	for ( int i = 0; i < m_beams.Count(); ++i )
+	{
+#ifdef DEBUG
+		++iCycleCount;
+#endif
+		AssertMsg(iCycleCount < 100, "You're probably stuck in a loop if you managed to get this high");
+
+		Msg("Turn off Beam %i\n", i);
 		m_beams[i]->TurnOff();
+	}
 }
 
 void C_PortalBeamHelper::TurnOn( void )
 {
+	int iCycleCount = 0;
 	for ( int i = 0; i < m_beams.Count(); ++i )
 	{
+#ifdef DEBUG
+		++iCycleCount;
+#endif
+		AssertMsg(iCycleCount < 100, "You're probably stuck in a loop if you managed to get this high");
+
+		Msg("Turn on Beam %i\n", i);
 		m_beams[i]->TurnOn();
 		m_beams[i]->UpdateVisibility();
 		//m_beams[i]->OnDisableShadowDepthRenderingChanged();

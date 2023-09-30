@@ -12,7 +12,7 @@ class CPortalLaser : public CBaseAnimating
 public:
 	DECLARE_CLASS(CPortalLaser, CBaseAnimating);
 	DECLARE_DATADESC();
-	//DECLARE_SERVERCLASS();
+	DECLARE_SERVERCLASS();
 
 	CPortalLaser();
 	
@@ -39,7 +39,7 @@ public:
 	string_t m_modelName; // The model path for the laser entity
 	//Handling laser on cube
 	bool IsLaserHittingCube();
-	bool m_bIsLaserHittingCube;
+	bool m_bFromReflectedCube;
 	/*
 	//Handling laser on catcher
 	bool IsLaserHittingCatcher();
@@ -64,7 +64,9 @@ private:
 	CBeam* m_pBeam;
 
 	bool m_bStartOff; // To check the start state
-	bool m_bLaserOn;
+	CNetworkVar( bool, m_bLaserOn );
+	CNetworkVar( bool, m_bShouldSpark );
+	CNetworkVar( bool, m_bUseParentDir );
 	int m_iLaserAttachmentIndex;
 	static const int LASER_ATTACHMENT;
 	static const int LASER_EYE_ATTACHMENT;
@@ -75,11 +77,16 @@ private:
 	// Cube instances
 	string_t m_cubeUniqueID;
 	
+	CNetworkVector( m_vStartPoint );
+	CNetworkVector( m_vEndPoint );
+	CNetworkQAngle( m_angParentAngles );
+
 	float m_flLastDamageTime;
 	float m_flLastDamageSoundTime;
 	float m_flLastSparkTime;
 
-	CHandle<CPropWeightedCube> m_hReflectorCube;
+	CHandle<CPropWeightedCube> m_hTouchingReflector;
+	CNetworkHandle( CPropWeightedCube, m_hReflector );
 
 };
 

@@ -3,14 +3,14 @@
 #include "c_portal_beam_helper.h"
 #include "portal_util_shared.h"
 #include "util_shared.h"
+#include "c_prop_weightedcube.h"
 
 const char *LASER_SPARK_EFFECT_NAME = "discouragement_beam_sparks";
 
 class C_PortalLaser : public C_BaseAnimating
 {
-	DECLARE_CLASS( C_PortalLaser, C_BaseAnimating );
 public:
-	
+	DECLARE_CLASS( C_PortalLaser, C_BaseAnimating );	
 	DECLARE_CLIENTCLASS();
     
     C_PortalLaser();
@@ -26,7 +26,9 @@ private:
     void CreateSparkEffect( void );
     void UpdateSparkEffect( const Vector &vSparkPosition, const Vector &vSparkNormal );
     C_PortalBeamHelper m_beamHelper;
-    EHANDLE m_hReflector;
+    
+	CHandle<C_PropWeightedCube> m_hReflector;
+
     CUtlReference<CNewParticleEffect> m_pSparkEffect;
     Vector m_vStartPoint;
     Vector m_vEndPoint;
@@ -46,6 +48,10 @@ RecvPropBool( RECVINFO( m_bShouldSpark ) ),
 RecvPropBool( RECVINFO( m_bIsAutoAiming ) ),
 RecvPropBool( RECVINFO( m_bIsLethal ) ),
 RecvPropBool( RECVINFO( m_bUseParentDir ) ),
+RecvPropEHandle( RECVINFO( m_hReflector ) ),
+RecvPropVector( RECVINFO( m_vStartPoint ) ),
+RecvPropVector( RECVINFO( m_vEndPoint ) ),
+RecvPropQAngles( RECVINFO( m_angParentAngles ) ),
 
 END_RECV_TABLE();
 
@@ -87,9 +93,7 @@ void C_PortalLaser::Spawn( void )
 	{
 		pNewBeam = C_Beam::BeamCreate("sprites/purplelaser1.vmt", 32.0);
 	}
-
-	SetNextClientThink( CLIENT_THINK_ALWAYS );
-
+	
 	m_beamHelper.Init( pNewBeam );
 	BaseClass::Spawn();
 }
@@ -120,10 +124,12 @@ void C_PortalLaser::OnDataChanged( DataUpdateType_t updateType )
 
 	if (m_bLaserOn)
 	{
+		SetNextClientThink(CLIENT_THINK_ALWAYS);
 		m_beamHelper.TurnOn();
 	}
 	else
 	{
+		SetNextClientThink(CLIENT_THINK_NEVER);
 		m_beamHelper.TurnOff();
 	}
 
@@ -161,8 +167,7 @@ void C_PortalLaser::ClientThink( void )
 	trace_t tr;
 	Vector vDir; 
 	Vector vStart;
-
-
+	
 	CTraceFilterSimpleClassnameList traceFilter( m_hReflector.Get(), COLLISION_GROUP_NONE );
 	traceFilter.AddClassnameToIgnore( "projected_wall_entity" );
 	traceFilter.AddClassnameToIgnore( "player" );
@@ -181,7 +186,7 @@ void C_PortalLaser::ClientThink( void )
 			AngleVectors( GetAbsAngles(), &vDir );
 		}
 		
-		vStart = (vDir * 22.0) + WorldSpaceCenter();
+		vStart = (vDir * 22.0) + pReflector->WorldSpaceCenter();
 
 		CPortalSimulator *pSimulator = CPortalSimulator::GetSimulatorThatOwnsEntity( pReflector );
 		if (pSimulator)
@@ -220,9 +225,10 @@ void C_PortalLaser::ClientThink( void )
 #endif
 			}
 		}
+
 		if (m_bIsAutoAiming)
 		{
-			vDir = vDir - (m_vEndPoint - vStart);
+			vDir = (m_vEndPoint - vStart);
 			
 			VectorNormalize( vDir );
 		}
@@ -230,12 +236,17 @@ void C_PortalLaser::ClientThink( void )
 		{
 			UTIL_Portal_Laser_Prevent_Tilting(vDir);
 		}
-		m_beamHelper.UpdatePointDirection( vStart, vDir, 0x46004001u, &traceFilter, tr );
+
+		// MASK: 0x46004001u
+		m_beamHelper.UpdatePointDirection( vStart, vDir, MASK_SHOT, &traceFilter, tr );
 	}
 	else
 	{
-		m_beamHelper.UpdatePoints( m_vStartPoint, m_vEndPoint, 0x46004001u, &traceFilter, tr );
+		m_beamHelper.UpdatePoints( m_vStartPoint, m_vEndPoint, MASK_SHOT, &traceFilter, tr );
 	}
+
+	Msg(" %i : tr.endpos: %f %f %f\n", entindex(), tr.endpos.x, tr.endpos.y, tr.endpos.z);
+
 	if (m_bShouldSpark)
 		UpdateSparkEffect( tr.endpos, tr.plane.normal );
 }

@@ -10,6 +10,13 @@
 #include "point_laser_target.h"
 #include "physicsshadowclone.h"
 
+
+ConVar portal_laser_normal_update( "portal_laser_normal_update", "0.05f", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
+ConVar portal_laser_high_precision_update( "portal_laser_high_precision_update", "0.03f", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
+ConVar sv_debug_laser( "sv_debug_laser", "0", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
+ConVar new_portal_laser( "new_portal_laser", "1", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
+ConVar sv_laser_cube_autoaim( "sv_laser_cube_autoaim", "1", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
+
 // constants
 const int CPortalLaser::LASER_EYE_ATTACHMENT = 1;
 const float CPortalLaser::LASER_RANGE = 8192;
@@ -25,19 +32,30 @@ DEFINE_INPUTFUNC(FIELD_VOID, "TurnOff", InputTurnOff),
 DEFINE_INPUTFUNC(FIELD_VOID, "Toggle", InputToggle),
 DEFINE_THINKFUNC( Think ),
 
+DEFINE_FIELD( m_bLaserOn, FIELD_BOOLEAN ),
+DEFINE_FIELD( m_hReflector, FIELD_EHANDLE ),
+DEFINE_FIELD( m_hTouchingReflector, FIELD_EHANDLE ),
+DEFINE_FIELD( m_vStartPoint, FIELD_VECTOR ),
+DEFINE_FIELD( m_vEndPoint, FIELD_VECTOR ),
+
+
 //DEFINE_FIELD(m_bIsHittingPortal, FIELD_BOOLEAN),
 END_DATADESC()
 LINK_ENTITY_TO_CLASS(env_portal_laser, CPortalLaser);
-/*
-IMPLEMENT_SERVERCLASS_ST(CPortalLaser, DT_EnvPortalLaser)
 
-SendPropBool(SENDINFO(m_bIsHittingPortal)),
-SendPropVector(SENDINFO(v_vHitPos)),
-SendPropVector(SENDINFO(vecNetOrigin)),
-SendPropVector(SENDINFO(vecNetMuzzleDir)),
+
+IMPLEMENT_SERVERCLASS_ST( CPortalLaser, DT_PortalLaser )
+
+SendPropEHandle( SENDINFO( m_hReflector ) ),
+SendPropBool( SENDINFO( m_bLaserOn ) ),
+SendPropBool( SENDINFO( m_bShouldSpark ) ),
+SendPropBool( SENDINFO( m_bUseParentDir ) ),
+SendPropVector( SENDINFO( m_vStartPoint ) ),
+SendPropVector( SENDINFO( m_vEndPoint ) ),
+SendPropQAngles( SENDINFO( m_angParentAngles ) ),
 
 END_SEND_TABLE()
-*/
+
 
 #define	MASK_PORTAL_LASER (CONTENTS_SOLID|CONTENTS_MONSTER)
 
@@ -50,13 +68,20 @@ CPortalLaser::CPortalLaser()
 	m_flLastSparkTime = false;
 	m_bIsLaserExtender = false;
 
-	m_hReflectorCube = NULL;
+	m_hTouchingReflector = NULL;
+	m_hReflector = NULL;
 }
 
 void CPortalLaser::Think()
 {
+	float flValue;
 	// Schedule the next think
-	SetNextThink(gpGlobals->curtime + 0.015f);
+	if ( m_bFromReflectedCube )
+		flValue = portal_laser_normal_update.GetFloat();
+	else
+		flValue = portal_laser_high_precision_update.GetFloat();
+		
+	SetNextThink( flValue + gpGlobals->curtime, 0);
 
 	if (m_bLaserOn)
 	{
@@ -68,9 +93,12 @@ void CPortalLaser::UpdateLaser()
 {
 	bool bShouldSpark = true;
 
-	Vector vecOrigin = GetAbsOrigin(); 
+	m_vStartPoint = GetAbsOrigin();
 	QAngle angMuzzleDir;
-	GetAttachment(LASER_ATTACHMENT, vecOrigin, angMuzzleDir);
+
+	Vector vTempStart = m_vStartPoint;
+	GetAttachment( LASER_ATTACHMENT, vTempStart, angMuzzleDir );
+	m_vStartPoint = vTempStart;
 
 	Vector vecEye;
 	QAngle angEyeDir;
@@ -88,10 +116,10 @@ void CPortalLaser::UpdateLaser()
 	// Trace from the laser emitter to check if it hits a cube
 	trace_t normalTrace;
 	Ray_t ray;
-	ray.Init( vecOrigin, vecOrigin + vecMuzzleDir * LASER_RANGE );
+	ray.Init( m_vStartPoint, m_vStartPoint + vecMuzzleDir * LASER_RANGE );
 	UTIL_Portal_TraceRay( ray, MASK_PORTAL_LASER, &masterTraceFilter, &normalTrace );
 
-	m_bIsLaserHittingCube = false;
+	m_bFromReflectedCube = false;
 
 	CBaseEntity *pEntity = normalTrace.m_pEnt;
 
@@ -104,8 +132,8 @@ void CPortalLaser::UpdateLaser()
 		{
 			bShouldSpark = false;
 
-			m_hReflectorCube = pCube;
-			m_bIsLaserHittingCube = true;
+			m_hTouchingReflector = pCube;
+			m_bFromReflectedCube = true;
 
 			if (!pCube->HasLaser())
 			{
@@ -115,24 +143,33 @@ void CPortalLaser::UpdateLaser()
 				pNewLaser->SetParent( pCube );
 				pNewLaser->SetAbsOrigin( pCube->GetAbsOrigin() );
 				pNewLaser->SetAbsAngles( pCube->GetAbsAngles() );
+				pNewLaser->m_hReflector = pCube;
+				pNewLaser->m_angParentAngles = pCube->GetAbsAngles();
+				pNewLaser->m_bUseParentDir = true;
+				pNewLaser->m_bLaserOn = true;
+
 				DispatchSpawn( pNewLaser );
+
 				pCube->SetLaser( pNewLaser );
-			}			
+			}
 		}
 		else
 		{
 
 			bShouldSpark = !FClassnameIs( pEntity, "prop_laser_catcher" );
 
-			if ( m_hReflectorCube.Get() )
+			if ( m_hTouchingReflector.Get() )
 			{
-				UTIL_Remove( m_hReflectorCube->GetLaser() );
-				m_hReflectorCube->SetLaser( NULL );
-				m_hReflectorCube = NULL;
+				UTIL_Remove( m_hTouchingReflector->GetLaser() );
+				m_hTouchingReflector->SetLaser( NULL );
+				m_hTouchingReflector = NULL;
 			}
 		}
 	}
-	
+
+	if ( GetParent() )
+		m_angParentAngles = GetParent()->GetAbsAngles();
+
 	// Deal damage to the player if they are touching the laser beam
 	if (gpGlobals->curtime - m_flLastDamageTime >= 0.15f) // Damage every 0.15 seconds
 	{
@@ -145,7 +182,7 @@ void CPortalLaser::UpdateLaser()
 		// Trace from the laser emitter to check if it hits the player
 		trace_t playerTrace;
 		Ray_t ray_player;
-		ray_player.Init( vecOrigin, vecOrigin + vecMuzzleDir * LASER_RANGE );
+		ray_player.Init( m_vStartPoint, m_vStartPoint + vecMuzzleDir * LASER_RANGE );
 		UTIL_Portal_TraceRay( ray_player, MASK_PORTAL_LASER, &playerTraceFilter, &playerTrace );
 
 		// No need to do a cast here since there's no player specific functions to call
@@ -169,6 +206,9 @@ void CPortalLaser::UpdateLaser()
 					if ( pCloned )
 					{
 						bPlayer = pCloned->IsPlayer();
+
+						// Attack the player instead of their shadow clone.
+						pPlayerTraceEnt = pCloned;
 					}
 				}
 			}
@@ -178,7 +218,7 @@ void CPortalLaser::UpdateLaser()
 		if ( bPlayer )
 		{
 			// Player is touching the laser beam, deal damage and push them
-			Vector vecPushDir = (pPlayerTraceEnt->GetAbsOrigin() - vecOrigin);
+			Vector vecPushDir = (pPlayerTraceEnt->GetAbsOrigin() - m_vStartPoint);
 			VectorNormalize(vecPushDir);
 
 			Vector vecLaserDir = vecMuzzleDir;
@@ -200,7 +240,8 @@ void CPortalLaser::UpdateLaser()
 
 	if (!m_pBeam)
 	{
-		m_pBeam = CBeam::BeamCreate("sprites/purplelaser1.vmt", 0.2);
+		//m_pBeam = CBeam::BeamCreate("sprites/purplelaser1.vmt", 0.2);
+		m_pBeam = CBeam::BeamCreate("", 0.2); // NOTE: We don't want this to render on the client because the client creates its own laser
 		m_pBeam->SetBrightness(92);
 		m_pBeam->SetNoise(0);
 		m_pBeam->SetWidth(10.0f);
@@ -208,21 +249,20 @@ void CPortalLaser::UpdateLaser()
 		m_pBeam->SetScrollRate(0);
 		m_pBeam->SetFadeLength(0);
 		m_pBeam->SetCollisionGroup(COLLISION_GROUP_NONE);
-		m_pBeam->PointsInit(vecOrigin + vecMuzzleDir * LASER_RANGE, vecOrigin);
+		m_pBeam->PointsInit(m_vStartPoint + vecMuzzleDir * LASER_RANGE, m_vStartPoint);
 		m_pBeam->SetBeamFlag(FBEAM_REVERSED);
 		m_pBeam->SetStartEntity(this);
 	}
 	else
 	{
-		m_pBeam->SetStartPos(vecOrigin + vecMuzzleDir * LASER_RANGE);
-		m_pBeam->SetEndPos(vecOrigin);
+		m_pBeam->SetStartPos(m_vStartPoint + vecMuzzleDir * LASER_RANGE);
+		m_pBeam->SetEndPos(m_vStartPoint);
 		m_pBeam->RemoveEffects(EF_NODRAW);
 	}
 
-	Vector vEndPoint;
 	float fEndFraction;
 	Ray_t rayPath;
-	rayPath.Init(vecOrigin, vecOrigin + vecMuzzleDir * LASER_RANGE);
+	rayPath.Init(m_vStartPoint, m_vStartPoint + vecMuzzleDir * LASER_RANGE);
 
 	trace_t trace; // Used for determining the portal hit
 
@@ -233,14 +273,9 @@ void CPortalLaser::UpdateLaser()
 
 	if (UTIL_Portal_TraceRay_Beam(rayPath, MASK_PORTAL_LASER, &masterTraceFilter, &fEndFraction))
 	{
-		vEndPoint = vecOrigin + vecMuzzleDir * LASER_RANGE;
-		//Msg("Portal Beam End Point: (%f, %f, %f)\n", vEndPoint.x, vEndPoint.y, vEndPoint.z);
 	}
-	else
-	{
-		vEndPoint = vecOrigin + vecMuzzleDir * LASER_RANGE * fEndFraction;
-		//Msg("Main Trace End Point: (%f, %f, %f)\n", vEndPoint.x, vEndPoint.y, vEndPoint.z);
-	}
+
+	m_vEndPoint = trace.endpos;
 	
 	// Note: This gives us an assert, but we need it for turrets
 	m_pBeam->BeamDamageInstant( &trace, 0 );
@@ -271,31 +306,34 @@ void CPortalLaser::UpdateLaser()
 	}
 
 	//v_vHitPos = vEndPoint;
-	m_pBeam->PointsInit(vEndPoint, vecOrigin);
+	m_pBeam->PointsInit(m_vEndPoint, m_vStartPoint);
+
 	
+	m_bShouldSpark = bShouldSpark;
+
+	// Spark effects are handled by the client now.
+#if 0
 	// Our high thinkrate means we're creating too many sparks, so let's do this
 	if (gpGlobals->curtime - m_flLastSparkTime <= 0.1f)
 	{
 		bShouldSpark = false;
 	}
 
+
 	if ( bShouldSpark )
 	{
 		// laser_cutter_sparks doesn't work for some reason
-#if 0
-		QAngle qPlaneNormal;
-		VectorAngles( trace.plane.normal, qPlaneNormal );
 
-		DispatchParticleEffect( "laser_cutter_sparks", normalTrace.endpos, qPlaneNormal );
-#else
-		m_pBeam->PointsInit(vEndPoint, vecOrigin);
+		m_pBeam->PointsInit(m_vEndPoint, m_vStartPoint);
 
-		g_pEffects->Sparks(vEndPoint, 2, 2, &vecMuzzleDir);
-#endif
+		g_pEffects->Sparks(m_vEndPoint, 2, 2, &vecMuzzleDir);
+
 		m_flLastSparkTime = gpGlobals->curtime;
 	}
+#endif
+
 	Ray_t targetRay;
-	targetRay.Init( normalTrace.startpos, normalTrace.endpos );
+	targetRay.Init( trace.startpos, trace.endpos );
 
 	DamageAllTargetsInRay( targetRay );
 
@@ -414,8 +452,11 @@ void CPortalLaser::DoTraceFromPortal( CPortal_Base2D* pRemotePortal, trace_t &tr
 		m_flLastDamageTime = gpGlobals->curtime;
 	}
 	*/
+	
+	Ray_t targetRay;
+	targetRay.Init( remoteTrace.startpos, remoteTrace.endpos );
 
-	DamageAllTargetsInRay( ray );
+	DamageAllTargetsInRay( targetRay );
 
 }
 
@@ -425,6 +466,8 @@ void CPortalLaser::Spawn(void)
 	Precache();
 	SetMoveType( MOVETYPE_NONE );
 	
+	m_angParentAngles = vec3_angle;
+
 	if (!m_bLaserOnly)
 	{
 		SetSolid( SOLID_BBOX );
@@ -482,11 +525,11 @@ void CPortalLaser::Precache(void)
 	else		
 		PrecacheParticleSystem( "reflector_start_glow" );
 
-	PrecacheParticleSystem( "laser_cutter_sparks" );
 }
 
 void CPortalLaser::LaserOff(void)
 {
+	m_bShouldSpark = false;
 	m_bLaserOn = false;
 	//Msg("Laser Deactivating\n");
 	if (m_pBeam)
@@ -509,7 +552,7 @@ void CPortalLaser::LaserOn(void)
 	m_bLaserOn = true;
 	//Msg("Laser Activating\n");
 
-	Vector vecOrigin = GetAbsOrigin();
+	Vector m_vStartPoint = GetAbsOrigin();
 	QAngle angMuzzleDir;
 	CBaseAnimating* pBaseAnimating = dynamic_cast<CBaseAnimating*>(this);
 	bool bFoundAttachment = false;
@@ -518,7 +561,7 @@ void CPortalLaser::LaserOn(void)
 		int lensBone = pBaseAnimating->LookupBone("lens");
 		if (lensBone != -1)
 		{
-			pBaseAnimating->GetBonePosition(lensBone, vecOrigin, angMuzzleDir);
+			pBaseAnimating->GetBonePosition(lensBone, m_vStartPoint, angMuzzleDir);
 			bFoundAttachment = true;
 		}
 	}
@@ -528,7 +571,7 @@ void CPortalLaser::LaserOn(void)
 		int laserAttachmentIndex = LookupAttachment("laser_attachment");
 		if (laserAttachmentIndex > 0)
 		{
-			GetAttachmentLocal(laserAttachmentIndex, vecOrigin, angMuzzleDir);
+			GetAttachmentLocal(laserAttachmentIndex, m_vStartPoint, angMuzzleDir);
 			bFoundAttachment = true;
 		}
 	}
@@ -548,7 +591,8 @@ void CPortalLaser::LaserOn(void)
 
 	if (!m_pBeam)
 	{
-		m_pBeam = CBeam::BeamCreate("sprites/purplelaser1.vmt", 0.2);
+		//m_pBeam = CBeam::BeamCreate("sprites/purplelaser1.vmt", 0.2);
+		m_pBeam = CBeam::BeamCreate("", 0.2); // NOTE: We don't want this to render on the client because the client creates its own laser
 		//m_pBeam->SetColor(255, 32, 32);
 		m_pBeam->SetBrightness(92);
 		m_pBeam->SetNoise(0);
@@ -557,31 +601,30 @@ void CPortalLaser::LaserOn(void)
 		m_pBeam->SetScrollRate(0);
 		m_pBeam->SetFadeLength(0);
 		m_pBeam->SetCollisionGroup(COLLISION_GROUP_NONE);
-		m_pBeam->PointsInit(vecOrigin + vecMuzzleDir * LASER_RANGE, vecOrigin);
+		m_pBeam->PointsInit(m_vStartPoint + vecMuzzleDir * LASER_RANGE, m_vStartPoint);
 		m_pBeam->SetBeamFlag(FBEAM_REVERSED);
 		m_pBeam->SetStartEntity(this);
 	}
 	else
 	{
-		m_pBeam->SetStartPos(vecOrigin + vecMuzzleDir * LASER_RANGE);
-		m_pBeam->SetEndPos(vecOrigin);
+		m_pBeam->SetStartPos(m_vStartPoint + vecMuzzleDir * LASER_RANGE);
+		m_pBeam->SetEndPos(m_vStartPoint);
 		m_pBeam->RemoveEffects(EF_NODRAW);
 	}
 
 	// Trace to find an endpoint
-	Vector vEndPoint;
 	float fEndFraction;
 	Ray_t rayPath;
-	rayPath.Init(vecOrigin, vecOrigin + vecMuzzleDir * LASER_RANGE);
+	rayPath.Init(m_vStartPoint, m_vStartPoint + vecMuzzleDir * LASER_RANGE);
 
 	CTraceFilterSkipClassname traceFilter(this, "prop_energy_ball", COLLISION_GROUP_NONE);
 
 	if (UTIL_Portal_TraceRay_Beam(rayPath, MASK_PORTAL_LASER, &traceFilter, &fEndFraction))
-		vEndPoint = vecOrigin + vecMuzzleDir * LASER_RANGE;
+		m_vEndPoint = m_vStartPoint + vecMuzzleDir * LASER_RANGE;
 	else
-		vEndPoint = vecOrigin + vecMuzzleDir * LASER_RANGE * fEndFraction;
+		m_vEndPoint = m_vStartPoint + vecMuzzleDir * LASER_RANGE * fEndFraction;
 
-	m_pBeam->PointsInit(vEndPoint, vecOrigin);
+	m_pBeam->PointsInit(m_vEndPoint, m_vStartPoint);
 	
 	if (!m_bIsLaserExtender)
 		DispatchParticleEffect( "laser_start_glow", PATTACH_POINT_FOLLOW, this, "laser_attachment", true, -1 );
@@ -592,6 +635,19 @@ void CPortalLaser::LaserOn(void)
 		if (pReflectorCube)
 		{
 			DispatchParticleEffect( "reflector_start_glow", PATTACH_ABSORIGIN_FOLLOW, pReflectorCube );
+		}
+	}
+	
+	
+	CPropWeightedCube *pCube = assert_cast<CPropWeightedCube*>( m_hTouchingReflector.Get() );	
+	if ( pCube )
+	{
+		CPortalLaser *pLaser = assert_cast<CPortalLaser*>( pCube->GetLaser() );
+
+		if ( pLaser )
+		{
+			UTIL_Remove( pLaser );
+			pCube->SetLaser( NULL );
 		}
 	}
 }
@@ -629,5 +685,5 @@ float CPortalLaser::LaserEndPointSize(void)
 
 bool CPortalLaser::IsLaserHittingCube()
 {
-	return m_bIsLaserHittingCube;
+	return m_bFromReflectedCube;
 }

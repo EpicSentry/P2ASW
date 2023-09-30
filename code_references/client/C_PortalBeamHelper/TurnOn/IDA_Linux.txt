@@ -1,0 +1,19 @@
+void __cdecl C_PortalBeamHelper::TurnOn(C_PortalBeamHelper *const this)
+{
+  int v1; // esi
+  C_Beam *v2; // ebx
+
+  if ( this->m_beams.m_Size > 0 )
+  {
+    v1 = 0;
+    do
+    {
+      v2 = this->m_beams.m_Memory.m_pMemory[v1++];
+      v2->m_fEffects &= ~0x20u;
+      C_BaseEntity::UpdateVisibility(v2);
+      C_BaseEntity::OnDisableShadowDepthRenderingChanged(v2);
+      C_BaseEntity::OnShadowDepthRenderingCacheableStateChanged(v2);
+    }
+    while ( this->m_beams.m_Size > v1 );
+  }
+}

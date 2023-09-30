@@ -1,0 +1,14 @@
+bool __cdecl C_PropLinkedPortalDoor::GetSignifierPosition(
+        C_PropLinkedPortalDoor *const this,
+        const Vector *const vSource,
+        Vector *const vPositionOut,
+        Vector *const vNormalOut)
+{
+  *vPositionOut = *(Vector *)(*((int (__cdecl **)(C_PropLinkedPortalDoor *const))this->_vptr_IHandleEntity + 112))(this);
+  (*((void (__cdecl **)(C_PropLinkedPortalDoor *const, Vector *const, _DWORD, _DWORD))this->_vptr_IHandleEntity + 114))(
+    this,
+    vNormalOut,
+    0,
+    0);
+  return 1;
+}

@@ -1,0 +1,185 @@
+void __cdecl C_PortalBeamHelper::UpdatePoints(
+        C_PortalBeamHelper *const this,
+        const Vector *const vStartPoint,
+        const Vector *const vEndPoint,
+        unsigned int fMask,
+        ITraceFilter *pTraceFilter,
+        trace_t *tr)
+{
+  vec_t x; // ecx
+  float y; // xmm0_4
+  float v8; // ecx
+  float z; // xmm0_4
+  bool v10; // al
+  char v11; // dl
+  C_PortalBeamHelper *v12; // esi
+  int m_Size; // eax
+  int v14; // edi
+  bool v15; // zf
+  int v16; // ebx
+  int v17; // esi
+  int v18; // edi
+  C_PortalBeamHelper *v19; // eax
+  int v20; // edx
+  float fractionleftsolid; // eax
+  int v22; // ebx
+  C_Beam *v23; // ebx
+  float v24; // xmm1_4
+  float m_Value; // xmm0_4
+  bool v26; // al
+  bool v27; // al
+  C_Beam **v28; // esi
+  C_PortalBeamHelper *v29; // [esp+20h] [ebp-148h]
+  CUtlVector<C_Beam*,CUtlMemory<C_Beam*,int> > *p_m_beams; // [esp+24h] [ebp-144h]
+  int nNumRemoved; // [esp+2Ch] [ebp-13Ch]
+  int nNumRemoveda; // [esp+2Ch] [ebp-13Ch]
+  trace_t tempTrace; // [esp+3Ch] [ebp-12Ch] BYREF
+  Ray_t ray; // [esp+90h] [ebp-D8h] BYREF
+  Ray_t rayTransformed; // [esp+E0h] [ebp-88h] BYREF
+  Vector vStart; // [esp+134h] [ebp-34h] BYREF
+  Vector vDir; // [esp+140h] [ebp-28h] BYREF
+  C_Portal_Base2D *pPortal; // [esp+14Ch] [ebp-1Ch] BYREF
+
+  x = vStartPoint->x;
+  vDir.x = vEndPoint->x - vStartPoint->x;
+  y = vEndPoint->y;
+  vStart.x = x;
+  v8 = vStartPoint->y;
+  vDir.y = y - v8;
+  z = vEndPoint->z;
+  vStart.y = v8;
+  vStart.z = vStartPoint->z;
+  vDir.z = z - vStart.z;
+  VectorNormalize(&vDir);
+  v10 = 0;
+  nNumRemoved = 0;
+  v11 = 1;
+  p_m_beams = &this->m_beams;
+  while ( (v10 || v11) && nNumRemoved != 10 )
+  {
+    v22 = nNumRemoved;
+    if ( nNumRemoved == this->m_beams.m_Size )
+    {
+      CUtlVector<C_Beam *,CUtlMemory<C_Beam *,int>>::GrowVector(p_m_beams, 1);
+      CUtlVector<C_Beam *,CUtlMemory<C_Beam *,int>>::ShiftElementsRight(p_m_beams, nNumRemoved, 1);
+      v22 = nNumRemoved;
+      v28 = &this->m_beams.m_Memory.m_pMemory[nNumRemoved];
+      *v28 = C_PortalBeamHelper::CreateBeam(this);
+    }
+    v23 = this->m_beams.m_Memory.m_pMemory[v22];
+    if ( nNumRemoved )
+    {
+      v24 = 102.3;
+      m_Value = this->m_pBeamTemplate->m_fEndWidth.m_Value;
+      v26 = m_Value > 102.3;
+      if ( m_Value <= 102.3 )
+        v24 = this->m_pBeamTemplate->m_fEndWidth.m_Value;
+      if ( v24 != v23->m_fWidth.m_Value )
+      {
+        v23->m_fWidth.m_Value = v24;
+        m_Value = this->m_pBeamTemplate->m_fEndWidth.m_Value;
+        v26 = m_Value > 102.3;
+      }
+      if ( v26 )
+        m_Value = 102.3;
+      if ( m_Value != v23->m_fEndWidth.m_Value )
+        v23->m_fEndWidth.m_Value = m_Value;
+    }
+    v27 = 1;
+    ray.m_IsRay = 1;
+    ray.m_pWorldAxisTransform = 0;
+    ray.m_Start.Vector = vStart;
+    ray.m_Delta.y = (float)((float)(vDir.y * 56755.84) + vStart.y) - vStart.y;
+    ray.m_Delta.z = (float)((float)(vDir.z * 56755.84) + vStart.z) - vStart.z;
+    ray.m_Delta.x = (float)((float)(56755.84 * vDir.x) + vStart.x) - vStart.x;
+    memset(&ray.m_Extents, 0, 12);
+    memset(&ray.m_StartOffset, 0, 12);
+    if ( (float)((float)((float)(ray.m_Delta.x * ray.m_Delta.x) + (float)(ray.m_Delta.y * ray.m_Delta.y))
+               + (float)(ray.m_Delta.z * ray.m_Delta.z)) == 0.0 )
+      v27 = 0;
+    ray.m_IsSwept = v27;
+    UTIL_ClearTrace(&tempTrace);
+    (*(void (__cdecl **)(IEngineTrace *, Ray_t *, unsigned int, ITraceFilter *, trace_t *))(*(_DWORD *)enginetrace + 20))(
+      enginetrace,
+      &ray,
+      fMask,
+      pTraceFilter,
+      &tempTrace);
+    if ( r_visualizetraces.m_pParent->m_Value.m_nValue )
+      DebugDrawLine(&tempTrace.startpos, &tempTrace.endpos, 255, 0, 0, 1, -1.0);
+    if ( UTIL_DidTraceTouchPortals(&ray, &tempTrace, &pPortal, 0)
+      && pPortal
+      && C_Portal_Base2D::IsActivedAndLinked(pPortal) )
+    {
+      if ( v23->m_nHaloIndex.m_Value )
+        v23->m_nHaloIndex.m_Value = 0;
+      C_Beam::PointsInit(v23, &vStart, &tempTrace.endpos);
+      C_BaseEntity::SetAbsOrigin(v23, &vStart);
+      C_Beam::TurnOff(v23);
+      rayTransformed.m_pWorldAxisTransform = 0;
+      UTIL_Portal_RayTransform(&pPortal->m_matrixThisToLinked, &ray, &rayTransformed);
+      vDir = rayTransformed.m_Delta.Vector;
+      VectorNormalize(&vDir);
+      UTIL_Portal_PointTransform(&pPortal->m_matrixThisToLinked, &tempTrace.endpos, &vStart);
+      v11 = 1;
+      v10 = 0;
+    }
+    else
+    {
+      C_Beam::PointsInit(v23, &vStart, &tempTrace.endpos);
+      C_BaseEntity::SetAbsOrigin(v23, &vStart);
+      C_Beam::TurnOff(v23);
+      v10 = UTIL_Paint_Reflect(&tempTrace, &vStart, &vDir, REFLECT_POWER);
+      v11 = 0;
+    }
+    ++nNumRemoved;
+  }
+  v12 = this;
+  m_Size = this->m_beams.m_Size;
+  v14 = m_Size - 1;
+  v15 = m_Size == nNumRemoved;
+  nNumRemoveda = m_Size - nNumRemoved;
+  if ( nNumRemoveda >= 0 && !v15 && v14 >= 0 )
+  {
+    v16 = v14;
+    v17 = m_Size - 1;
+    v18 = nNumRemoveda;
+    v19 = this;
+    do
+    {
+      --v18;
+      --v17;
+      v29 = v19;
+      C_BaseEntity::Remove(v19->m_beams.m_Memory.m_pMemory[v16]);
+      v19 = v29;
+      v29->m_beams.m_Memory.m_pMemory[v16--] = 0;
+    }
+    while ( v18 > 0 && v17 >= 0 );
+    v12 = v29;
+    m_Size = v29->m_beams.m_Size;
+  }
+  v12->m_beams.m_Size = m_Size - nNumRemoveda;
+  if ( tr )
+  {
+    tr->startpos.x = tempTrace.startpos.x;
+    tr->startpos.y = tempTrace.startpos.y;
+    tr->startpos.z = tempTrace.startpos.z;
+    tr->endpos = tempTrace.endpos;
+    tr->plane = tempTrace.plane;
+    tr->fraction = tempTrace.fraction;
+    tr->contents = tempTrace.contents;
+    tr->dispFlags = tempTrace.dispFlags;
+    tr->allsolid = tempTrace.allsolid;
+    v20 = *(_DWORD *)&tempTrace.surface.surfaceProps;
+    tr->startsolid = tempTrace.startsolid;
+    fractionleftsolid = tempTrace.fractionleftsolid;
+    *(_DWORD *)&tr->surface.surfaceProps = v20;
+    tr->fractionleftsolid = fractionleftsolid;
+    tr->surface.name = tempTrace.surface.name;
+    tr->hitgroup = tempTrace.hitgroup;
+    tr->physicsbone = tempTrace.physicsbone;
+    tr->worldSurfaceIndex = tempTrace.worldSurfaceIndex;
+    tr->m_pEnt = tempTrace.m_pEnt;
+    tr->hitbox = tempTrace.hitbox;
+  }
+}

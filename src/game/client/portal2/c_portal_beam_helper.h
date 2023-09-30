@@ -17,8 +17,8 @@ public:
     C_Beam *GetBeam( int i );
     C_Beam *GetFirstBeam();
     C_Beam *GetLastBeam();
-    void UpdatePoints( const Vector &vStartPoint, const Vector &vEndPoint, unsigned int fMask, ITraceFilter *pTraceFilter, trace_t &tr );
-    void UpdatePointDirection( const Vector &vStartPoint, const Vector &vDirection, unsigned int fMask, ITraceFilter *pTraceFilter, trace_t &tr );
+    void UpdatePoints( Vector &vStartPoint, Vector &vEndPoint, unsigned int fMask, ITraceFilter *pTraceFilter, trace_t &tr );
+    void UpdatePointDirection( Vector &vStartPoint, Vector &vDirection, unsigned int fMask, ITraceFilter *pTraceFilter, trace_t &tr );
     //void * __vecDelDtor(unsigned int );
 
 private:

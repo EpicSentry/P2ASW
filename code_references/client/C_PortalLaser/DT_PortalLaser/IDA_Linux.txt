@@ -1,0 +1,80 @@
+int __cdecl ClientClassInit<DT_PortalLaser::ignored>(DT_PortalLaser::ignored *a1)
+{
+  if ( !(_BYTE)`guard variable for'int ClientClassInit<DT_PortalLaser::ignored>(DT_PortalLaser::ignored *)::RecvProps
+    && _cxa_guard_acquire(&`guard variable for'int ClientClassInit<DT_PortalLaser::ignored>(DT_PortalLaser::ignored *)::RecvProps) )
+  {
+    RecvPropInt(
+      ClientClassInit<DT_PortalLaser::ignored>(DT_PortalLaser::ignored *)::RecvProps,
+      "should_never_see_this",
+      0,
+      4,
+      0,
+      0);
+    RecvPropDataTable(
+      &ClientClassInit<DT_PortalLaser::ignored>(DT_PortalLaser::ignored *)::RecvProps[1],
+      "baseclass",
+      0,
+      0,
+      C_BaseAnimating::m_pClassRecvTable,
+      DataTableRecvProxy_StaticDataTable);
+    RecvPropEHandle(
+      &ClientClassInit<DT_PortalLaser::ignored>(DT_PortalLaser::ignored *)::RecvProps[2],
+      "m_hReflector",
+      3512,
+      4,
+      RecvProxy_IntToEHandle);
+    RecvPropVector(
+      &ClientClassInit<DT_PortalLaser::ignored>(DT_PortalLaser::ignored *)::RecvProps[3],
+      "m_vStartPoint",
+      3528,
+      12,
+      0,
+      RecvProxy_VectorToVector);
+    RecvPropVector(
+      &ClientClassInit<DT_PortalLaser::ignored>(DT_PortalLaser::ignored *)::RecvProps[4],
+      "m_vEndPoint",
+      3540,
+      12,
+      0,
+      RecvProxy_VectorToVector);
+    RecvPropBool(
+      &ClientClassInit<DT_PortalLaser::ignored>(DT_PortalLaser::ignored *)::RecvProps[5],
+      "m_bLaserOn",
+      3552,
+      1);
+    RecvPropBool(
+      &ClientClassInit<DT_PortalLaser::ignored>(DT_PortalLaser::ignored *)::RecvProps[6],
+      "m_bIsLethal",
+      3553,
+      1);
+    RecvPropBool(
+      &ClientClassInit<DT_PortalLaser::ignored>(DT_PortalLaser::ignored *)::RecvProps[7],
+      "m_bIsAutoAiming",
+      3554,
+      1);
+    RecvPropBool(
+      &ClientClassInit<DT_PortalLaser::ignored>(DT_PortalLaser::ignored *)::RecvProps[8],
+      "m_bShouldSpark",
+      3555,
+      1);
+    RecvPropBool(
+      &ClientClassInit<DT_PortalLaser::ignored>(DT_PortalLaser::ignored *)::RecvProps[9],
+      "m_bUseParentDir",
+      3556,
+      1);
+    RecvPropVector(
+      &ClientClassInit<DT_PortalLaser::ignored>(DT_PortalLaser::ignored *)::RecvProps[10],
+      "m_angParentAngles",
+      3560,
+      12,
+      0,
+      RecvProxy_VectorToVector);
+    _cxa_guard_release(&`guard variable for'int ClientClassInit<DT_PortalLaser::ignored>(DT_PortalLaser::ignored *)::RecvProps);
+  }
+  RecvTable::Construct(
+    &DT_PortalLaser::g_RecvTable,
+    &ClientClassInit<DT_PortalLaser::ignored>(DT_PortalLaser::ignored *)::RecvProps[1],
+    10,
+    "DT_PortalLaser");
+  return 1;
+}
