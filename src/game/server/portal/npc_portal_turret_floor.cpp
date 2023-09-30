@@ -18,6 +18,12 @@
 #include "sprite.h"
 #include "particle_parse.h"
 
+ConVar sv_portal_turret_fire_cone_z_tolerance("sv_portal_turret_fire_cone_z_tolerance", "45.0", FCVAR_CHEAT, "The max height of the turrets firing view cone (in degrees)", true, 0.0f, true, 180.0f);
+ConVar sv_portal_turret_burn_time_min("sv_portal_turret_burn_time_min", "1.0f", FCVAR_CHEAT, "The min time that the turret will burn for.");
+ConVar sv_portal_turret_burn_time_max("sv_portal_turret_burn_time_max", "1.5f", FCVAR_CHEAT, "The max time that the turret will burn for.");
+ConVar sv_portal_turret_shoot_at_death("sv_portal_turret_shoot_at_death", "1", FCVAR_CHEAT, "If the turrets should shoot after they die.");
+ConVar sv_portal_turret_shoot_through_portals_proximity("sv_portal_turret_shoot_through_portals_proximity", "36864", FCVAR_CHEAT, "Only allow turrets to shoot through portals at players this close to portals (in square units)");
+
 int ACT_FLOOR_TURRET_FIRE2;
 
 const char *g_TalkNames[] = 
@@ -1047,7 +1053,7 @@ void CNPC_Portal_FloorTurret::TippedThink( void )
 				SetActivity( (Activity) ACT_FLOOR_TURRET_OPEN_IDLE );
 				DryFire();
 			}
-			else
+			else if (sv_portal_turret_shoot_at_death.GetInt())
 			{
 				Vector vecMuzzle, vecMuzzleDir;
 				GetAttachment( m_iMuzzleAttachment, vecMuzzle, &vecMuzzleDir );
@@ -1506,4 +1512,9 @@ void CNPC_Portal_FloorTurret::Use(CBaseEntity* pActivator, CBaseEntity* pCaller,
 
 	if ( this->m_bPickupEnabled && pActivator)
 		pPlayer->PickupObject(this, false);
+}
+
+float CNPC_Portal_FloorTurret::GetFireConeZTolerance()
+{
+	return sv_portal_turret_fire_cone_z_tolerance.GetFloat();
 }
