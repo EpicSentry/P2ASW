@@ -130,14 +130,14 @@ private:
 class CInfoPlacementManager : public CAutoGameSystem
 {
 public:
-    virtual void LevelShutdownPostEntity();														// Linux
+    virtual void LevelShutdownPostEntity();															// Linux
 
-    void Purge();																				// Optimized out of all builds; reimplmented based on obvious predictions...
-    void AddPlacementHelper( CInfoPlacementHelper *pHelper );									// Windows
-    void RemovePlacementHelper( CInfoPlacementHelper *pHelper );								// need to confirm pHelper variable name!
-    CInfoPlacementHelper *FindPlacementHelper( const Vector &vecOrigin, CBasePlayer *pPlayer );   // Windows
+    void Purge();																					// Optimized out of all builds; reimplmented based on obvious predictions...
+    void AddPlacementHelper( CInfoPlacementHelper *pHelper );										// Windows
+    void RemovePlacementHelper( CInfoPlacementHelper *pHelper );									// need to confirm pHelper variable name!
+    CInfoPlacementHelper *FindPlacementHelper( const Vector &vecOrigin, CBasePlayer *pPlayer );		// Windows
 private:
-    CUtlVector<CHandle<CInfoPlacementHelper>> m_PlacementHelpers;								// list of placement helpers in the current level
+    CUtlVector<CHandle<CInfoPlacementHelper>> m_PlacementHelpers;									// list of placement helpers in the current level
 };
 
 extern CInfoPlacementManager g_PlacementManager;

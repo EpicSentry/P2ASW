@@ -82,7 +82,7 @@ bool C_InfoPlacementHelper::IsEnabled()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose:
+// Purpose: Not sure if this is right; Will revisit soonTM
 //-----------------------------------------------------------------------------
 C_InfoPlacementHelper *UTIL_FindPlacementHelper( const Vector &vecEndPoint, C_BasePlayer *pPlayer )
 {
@@ -95,7 +95,7 @@ C_InfoPlacementHelper *UTIL_FindPlacementHelper( const Vector &vecEndPoint, C_Ba
 
     // Try to find the best helper according to the positional data
     C_InfoPlacementHelper *pBestHelper = NULL;
-    float flBestDist = 9.9999998e17; // 10677D30: using guessed type const float FLOAT_9_9999998e17; prob a max value for vector tracing in a #define idk (Line 106)
+    float flBestDist = 9.9999998e17; // 10677D30: using guessed type const float FLOAT_9_9999998e17; prob a max value for vector tracing in a #define idk
 
     for ( int i = 0; i < s_PlacementHelpers.Count(); i++ )
     {
