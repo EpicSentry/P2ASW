@@ -197,6 +197,7 @@ protected:
 	bool	UpdateFacing( void );
 	void	DryFire( void );
 	void	UpdateMuzzleMatrix();
+	float	GetFireConeZTolerance() { return 28.0f; }
 
 protected:
 	matrix3x4_t m_muzzleToWorld;
