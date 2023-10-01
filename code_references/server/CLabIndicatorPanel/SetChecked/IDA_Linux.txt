@@ -1,0 +1,13 @@
+void __cdecl CLabIndicatorPanel::SetChecked(CLabIndicatorPanel *const this, bool bIsChecked)
+{
+  if ( this->m_bIsChecked.m_Value != bIsChecked )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_bIsChecked);
+    this->m_bIsChecked.m_Value = bIsChecked;
+  }
+  if ( this->m_bIsCountdownTimer.m_Value )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_bIsCountdownTimer);
+    this->m_bIsCountdownTimer.m_Value = 0;
+  }
+}

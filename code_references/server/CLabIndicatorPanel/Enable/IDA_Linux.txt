@@ -1,0 +1,9 @@
+void __cdecl CLabIndicatorPanel::Enable(CLabIndicatorPanel *const this)
+{
+  if ( !this->m_bEnabled.m_Value )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_bEnabled);
+    this->m_bEnabled.m_Value = 1;
+    CLabIndicatorPanel::ScreenVisible(this, 1);
+  }
+}

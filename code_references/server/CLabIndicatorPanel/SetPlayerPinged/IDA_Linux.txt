@@ -1,0 +1,13 @@
+void __cdecl CLabIndicatorPanel::SetPlayerPinged(CLabIndicatorPanel *const this, int iPlayerPinged)
+{
+  if ( iPlayerPinged != this->m_iPlayerPinged.m_Value )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_iPlayerPinged);
+    this->m_iPlayerPinged.m_Value = iPlayerPinged;
+  }
+  if ( this->m_bIsCountdownTimer.m_Value )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_bIsCountdownTimer);
+    this->m_bIsCountdownTimer.m_Value = 0;
+  }
+}

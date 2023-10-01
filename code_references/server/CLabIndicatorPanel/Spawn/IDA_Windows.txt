@@ -1,0 +1,69 @@
+void __thiscall CLabIndicatorPanel::Spawn(CLabIndicatorPanel *this)
+{
+  edict_t *m_pPev; // ecx
+  edict_t *v3; // ecx
+  edict_t *v4; // ecx
+  edict_t *v5; // ecx
+
+  this->Precache(this);
+  CFuncTank::FuncTankPreThink((vgui::BaseTooltip *)this);
+  CLabIndicatorPanel::SpawnControlPanels(this);
+  if ( !this->m_bEnabled.m_Value )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x35Cu);
+    }
+    this->m_bEnabled.m_Value = 1;
+  }
+  CLabIndicatorPanel::ScreenVisible(this, this->m_bEnabled.m_Value);
+  if ( this->m_bCountingDown.m_Value )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      v3 = this->m_Network.m_pPev;
+      if ( v3 )
+        CBaseEdict::StateChanged(v3, 0x35Eu);
+    }
+    this->m_bCountingDown.m_Value = 0;
+  }
+  if ( this->m_bStopped.m_Value )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      v4 = this->m_Network.m_pPev;
+      if ( v4 )
+        CBaseEdict::StateChanged(v4, 0x35Du);
+    }
+    this->m_bStopped.m_Value = 0;
+  }
+  if ( this->m_flTimerStart.m_Value != 0.0 )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+      this->m_flTimerStart.m_Value = 0.0;
+    }
+    else
+    {
+      v5 = this->m_Network.m_pPev;
+      if ( v5 )
+        CBaseEdict::StateChanged(v5, 0x36Cu);
+      this->m_flTimerStart.m_Value = 0.0;
+    }
+  }
+}

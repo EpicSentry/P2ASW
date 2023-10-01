@@ -1,0 +1,35 @@
+void __thiscall CPropIndicatorPanel::InputUncheck(CPropIndicatorPanel *this, inputdata_t *indata)
+{
+  unsigned int m_Index; // ecx
+  int v4; // eax
+  CEntInfo *v5; // edx
+  unsigned int v6; // ecx
+  int v7; // eax
+  bool v8; // zf
+  CLabIndicatorPanel **v9; // eax
+  CLabIndicatorPanel *v10; // eax
+
+  m_Index = this->m_hIndicatorPanel.m_Index;
+  if ( m_Index != -1 )
+  {
+    v4 = (unsigned __int16)m_Index;
+    v5 = &g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index];
+    v6 = HIWORD(m_Index);
+    if ( v5->m_SerialNumber == v6 )
+    {
+      if ( v5->m_pEntity )
+      {
+        v7 = v4;
+        v8 = g_pEntityList->m_EntPtrArray[v7].m_SerialNumber == v6;
+        v9 = (CLabIndicatorPanel **)&g_pEntityList->m_EntPtrArray[v7];
+        if ( v8 )
+          v10 = *v9;
+        else
+          v10 = 0;
+        CLabIndicatorPanel::SetChecked(v10, 0);
+      }
+    }
+  }
+  CBaseEntity::ThinkSet(this, 0, 0.0, 0);
+  CPropIndicatorPanel::ToggleIndicatorLights(this, 0);
+}

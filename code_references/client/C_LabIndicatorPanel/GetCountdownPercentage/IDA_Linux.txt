@@ -1,0 +1,30 @@
+float __cdecl C_LabIndicatorPanel::GetCountdownPercentage(C_LabIndicatorPanel *const this)
+{
+  float v1; // xmm0_4
+  float m_flTimerStart; // xmm1_4
+  float v3; // xmm2_4
+  float curtime; // xmm3_4
+  float v5; // xmm3_4
+  __m128 v7; // xmm3
+
+  v1 = 1.0;
+  if ( !this->m_bCountingDown )
+    return v1;
+  m_flTimerStart = this->m_flTimerStart;
+  v3 = this->m_flTimerDuration + m_flTimerStart;
+  curtime = gpGlobals->curtime;
+  if ( m_flTimerStart != v3 )
+  {
+    v1 = 1.0;
+    v5 = (float)(curtime - m_flTimerStart) / (float)(v3 - m_flTimerStart);
+    if ( v5 >= 0.0 )
+    {
+      v1 = 0.0;
+      if ( v5 <= 1.0 )
+        return 1.0 - v5;
+    }
+    return v1;
+  }
+  v7.m128_f32[0] = curtime - v3;
+  return _mm_andnot_ps(_mm_cmple_ss((__m128)0LL, v7), (__m128)0x3F800000u).m128_f32[0];
+}

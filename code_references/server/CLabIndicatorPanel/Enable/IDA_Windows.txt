@@ -1,0 +1,23 @@
+void __thiscall CLabIndicatorPanel::Enable(CLabIndicatorPanel *this)
+{
+  edict_t *m_pPev; // ecx
+
+  if ( !this->m_bEnabled.m_Value )
+  {
+    if ( !this->m_bEnabled.m_Value )
+    {
+      if ( this->m_Network.m_TimerEvent.m_bRegistered )
+      {
+        *((_BYTE *)&this->m_Network + 76) |= 1u;
+        this->m_bEnabled.m_Value = 1;
+        CLabIndicatorPanel::ScreenVisible(this, 1);
+        return;
+      }
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x35Cu);
+      this->m_bEnabled.m_Value = 1;
+    }
+    CLabIndicatorPanel::ScreenVisible(this, 1);
+  }
+}

@@ -1,0 +1,31 @@
+void __cdecl CLabIndicatorPanel::StartTimer(CLabIndicatorPanel *const this, float flDuration)
+{
+  float curtime; // [esp+10h] [ebp-18h]
+
+  if ( gpGlobals->curtime != this->m_flTimerStart.m_Value )
+  {
+    curtime = gpGlobals->curtime;
+    CBaseEntity::NetworkStateChanged(this, &this->m_flTimerStart);
+    this->m_flTimerStart.m_Value = curtime;
+  }
+  if ( this->m_bStopped.m_Value )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_bStopped);
+    this->m_bStopped.m_Value = 0;
+  }
+  if ( !this->m_bCountingDown.m_Value )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_bCountingDown);
+    this->m_bCountingDown.m_Value = 1;
+  }
+  if ( !this->m_bIsCountdownTimer.m_Value )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_bIsCountdownTimer);
+    this->m_bIsCountdownTimer.m_Value = 1;
+  }
+  if ( flDuration != this->m_flTimerDuration.m_Value )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_flTimerDuration);
+    this->m_flTimerDuration.m_Value = flDuration;
+  }
+}

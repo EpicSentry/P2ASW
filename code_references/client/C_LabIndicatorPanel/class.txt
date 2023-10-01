@@ -1,0 +1,32 @@
+class C_LabIndicatorPanel : public C_BaseEntity
+{
+
+public:
+	DECLARE_CLASS( C_LabIndicatorPanel, C_BaseEntity );
+	DECLARE_CLIENTCLASS();
+	
+    C_LabIndicatorPanel();
+    ~C_LabIndicatorPanel();
+    float GetCountdownPercentage();
+	
+    bool IsCountingDown();
+    bool IsCountdownTimer();
+    bool IsPaused();
+    bool IsChecked();
+    bool IsEnabled();
+	
+    int GetPlayerPinged();
+	
+private:
+	
+    bool m_bEnabled;
+    bool m_bStopped;
+    bool m_bCountingDown;
+    bool m_bIsCountdownTimer;
+    bool m_bIsChecked;
+	
+    float m_flTimerDuration;
+    float m_flTimerStart;
+	
+    int m_iPlayerPinged;
+};

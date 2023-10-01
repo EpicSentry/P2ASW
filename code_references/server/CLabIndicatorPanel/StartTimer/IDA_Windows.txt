@@ -1,0 +1,82 @@
+void __thiscall CLabIndicatorPanel::StartTimer(CLabIndicatorPanel *this, float flDuration)
+{
+  CGlobalVars *v2; // edi
+  edict_t *m_pPev; // ecx
+  edict_t *v5; // ecx
+  edict_t *v6; // ecx
+  edict_t *v7; // ecx
+  edict_t *v8; // ecx
+
+  v2 = gpGlobals;
+  if ( this->m_flTimerStart.m_Value != gpGlobals->curtime )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x36Cu);
+    }
+    this->m_flTimerStart.m_Value = v2->curtime;
+  }
+  if ( this->m_bStopped.m_Value )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      v5 = this->m_Network.m_pPev;
+      if ( v5 )
+        CBaseEdict::StateChanged(v5, 0x35Du);
+    }
+    this->m_bStopped.m_Value = 0;
+  }
+  if ( !this->m_bCountingDown.m_Value )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      v6 = this->m_Network.m_pPev;
+      if ( v6 )
+        CBaseEdict::StateChanged(v6, 0x35Eu);
+    }
+    this->m_bCountingDown.m_Value = 1;
+  }
+  if ( !this->m_bIsCountdownTimer.m_Value )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      v7 = this->m_Network.m_pPev;
+      if ( v7 )
+        CBaseEdict::StateChanged(v7, 0x35Fu);
+    }
+    this->m_bIsCountdownTimer.m_Value = 1;
+  }
+  if ( this->m_flTimerDuration.m_Value != flDuration )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+      this->m_flTimerDuration.m_Value = flDuration;
+    }
+    else
+    {
+      v8 = this->m_Network.m_pPev;
+      if ( v8 )
+        CBaseEdict::StateChanged(v8, 0x368u);
+      this->m_flTimerDuration.m_Value = flDuration;
+    }
+  }
+}

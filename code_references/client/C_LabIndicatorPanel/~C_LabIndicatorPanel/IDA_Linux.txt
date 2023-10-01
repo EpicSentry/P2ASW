@@ -1,0 +1,9 @@
+void __cdecl C_LabIndicatorPanel::~C_LabIndicatorPanel(C_LabIndicatorPanel *const this)
+{
+  this->_vptr_IHandleEntity = (int (**)(...))off_12DDA48;
+  this->_vptr_IClientRenderable = (int (**)(...))off_12DDE00;
+  this->_vptr_IClientNetworkable = (int (**)(...))off_12DDEBC;
+  this->_vptr_IClientThinkable = (int (**)(...))off_12DDEFC;
+  this->_vptr_IClientModelRenderable = (int (**)(...))&off_12DDF18;
+  C_BaseEntity::~C_BaseEntity((C_BaseEntity *const)this);
+}

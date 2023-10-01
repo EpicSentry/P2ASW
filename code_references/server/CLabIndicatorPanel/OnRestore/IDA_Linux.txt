@@ -1,0 +1,6 @@
+void __cdecl CLabIndicatorPanel::OnRestore(CLabIndicatorPanel *const this)
+{
+  CBaseEntity::OnRestore(this);
+  CLabIndicatorPanel::RestoreControlPanels(this);
+  CLabIndicatorPanel::ScreenVisible(this, this->m_bEnabled.m_Value);
+}

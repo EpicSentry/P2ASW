@@ -1,0 +1,36 @@
+void __thiscall CLabIndicatorPanel::~CLabIndicatorPanel(CLabIndicatorPanel *this)
+{
+  unsigned int m_Index; // ecx
+  int v3; // eax
+  CEntInfo *v4; // edx
+  unsigned int v5; // ecx
+  int v6; // eax
+  bool v7; // zf
+  CVGuiScreen **v8; // eax
+
+  this->__vftable = (CLabIndicatorPanel_vtbl *)&CLabIndicatorPanel::`vftable';
+  m_Index = this->m_hScreen.m_Index;
+  if ( m_Index != -1 )
+  {
+    v3 = (unsigned __int16)m_Index;
+    v4 = &g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index];
+    v5 = HIWORD(m_Index);
+    if ( v4->m_SerialNumber == v5 )
+    {
+      if ( v4->m_pEntity )
+      {
+        v6 = v3;
+        v7 = g_pEntityList->m_EntPtrArray[v6].m_SerialNumber == v5;
+        v8 = (CVGuiScreen **)&g_pEntityList->m_EntPtrArray[v6];
+        if ( v7 )
+        {
+          DestroyVGuiScreen(*v8);
+          CBaseEntity::~CBaseEntity(this);
+          return;
+        }
+        DestroyVGuiScreen(0);
+      }
+    }
+  }
+  CBaseEntity::~CBaseEntity(this);
+}

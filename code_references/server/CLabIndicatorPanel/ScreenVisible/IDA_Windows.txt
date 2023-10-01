@@ -1,0 +1,61 @@
+void __thiscall CLabIndicatorPanel::ScreenVisible(CLabIndicatorPanel *this, bool bVisible)
+{
+  unsigned int m_Index; // ecx
+  int v3; // eax
+  CEntInfo *v4; // edx
+  unsigned int v5; // ecx
+  CEntInfo *v6; // eax
+  CBaseEntity *m_pEntity; // ebx
+  int m_Value; // eax
+  unsigned int v9; // edi
+  CBaseEdict *m_pPev; // ecx
+
+  m_Index = this->m_hScreen.m_Index;
+  if ( m_Index != -1 )
+  {
+    v3 = (unsigned __int16)m_Index;
+    v4 = &g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index];
+    v5 = HIWORD(m_Index);
+    if ( v4->m_SerialNumber == v5 )
+    {
+      if ( v4->m_pEntity )
+      {
+        v6 = &g_pEntityList->m_EntPtrArray[v3];
+        if ( bVisible )
+        {
+          if ( v6->m_SerialNumber == v5 )
+            m_pEntity = (CBaseEntity *)v6->m_pEntity;
+          else
+            m_pEntity = 0;
+          m_Value = m_pEntity->m_fEffects.m_Value;
+          v9 = m_Value & 0xFFFFFFDF;
+          if ( m_Value != (m_Value & 0xFFFFFFDF) )
+          {
+            if ( m_pEntity->m_Network.m_TimerEvent.m_bRegistered )
+            {
+              *((_BYTE *)&m_pEntity->m_Network + 76) |= 1u;
+            }
+            else
+            {
+              m_pPev = m_pEntity->m_Network.m_pPev;
+              if ( m_pPev )
+                CBaseEdict::StateChanged(m_pPev, 0xA8u);
+            }
+            m_pEntity->m_fEffects.m_Value = v9;
+          }
+          if ( m_pEntity->m_Network.m_pPev )
+            m_pEntity->m_Network.m_pPev->m_fStateFlags |= 0x80u;
+          CBaseEntity::DispatchUpdateTransmitState(m_pEntity);
+        }
+        else if ( v6->m_SerialNumber == v5 )
+        {
+          CBaseEntity::AddEffects((CBaseEntity *)v6->m_pEntity, 32);
+        }
+        else
+        {
+          CBaseEntity::AddEffects(0, 32);
+        }
+      }
+    }
+  }
+}

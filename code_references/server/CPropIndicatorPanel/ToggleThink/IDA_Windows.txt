@@ -1,0 +1,5 @@
+void __thiscall CPropIndicatorPanel::ToggleThink(CPropIndicatorPanel *this)
+{
+  CPropIndicatorPanel::ToggleIndicatorLights(this, 0);
+  CBaseEntity::ThinkSet(this, 0, 0.0, 0);
+}

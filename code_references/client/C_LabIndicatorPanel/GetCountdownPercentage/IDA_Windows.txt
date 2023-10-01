@@ -1,0 +1,34 @@
+double __thiscall C_LabIndicatorPanel::GetCountdownPercentage(C_LabIndicatorPanel *this)
+{
+  float m_flTimerStart; // xmm2_4
+  float v2; // xmm0_4
+  float v3; // xmm1_4
+  float v5; // xmm0_4
+
+  if ( !this->m_bCountingDown )
+    return 1.0;
+  m_flTimerStart = this->m_flTimerStart;
+  v2 = *(float *)(gpGlobals.m_Index + 12);
+  v3 = this->m_flTimerDuration + m_flTimerStart;
+  if ( m_flTimerStart == v3 )
+  {
+    if ( (float)(v2 - v3) < 0.0 )
+      return 1.0;
+    else
+      return 0.0;
+  }
+  else
+  {
+    v5 = (float)(v2 - m_flTimerStart) / (float)(v3 - m_flTimerStart);
+    if ( v5 >= 0.0 )
+    {
+      if ( v5 > 1.0 )
+        v5 = *(float *)&FLOAT_1_0;
+      return (float)(1.0 - v5);
+    }
+    else
+    {
+      return (float)(1.0 - 0.0);
+    }
+  }
+}

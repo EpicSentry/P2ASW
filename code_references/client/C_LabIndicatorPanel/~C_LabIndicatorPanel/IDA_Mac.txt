@@ -1,0 +1,5 @@
+void __cdecl C_LabIndicatorPanel::~C_LabIndicatorPanel(C_LabIndicatorPanel *this)
+{
+  C_BaseEntity::~C_BaseEntity(this);
+  C_BaseEntity::operator delete(this);
+}

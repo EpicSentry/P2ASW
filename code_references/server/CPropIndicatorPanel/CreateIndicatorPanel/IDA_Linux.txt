@@ -1,0 +1,171 @@
+void __cdecl CPropIndicatorPanel::CreateIndicatorPanel(CPropIndicatorPanel *const this)
+{
+  CBaseEntity *EntityByName; // eax
+  unsigned int *v2; // eax
+  CBaseEntityList *v3; // ecx
+  unsigned int v4; // eax
+  char *v5; // edx
+  unsigned int m_Index; // edx
+  CBaseEntity *v7; // ecx
+  char *v8; // esi
+  float v9; // xmm2_4
+  float v10; // xmm4_4
+  float v11; // xmm3_4
+  float v12; // xmm1_4
+  float v13; // xmm0_4
+  unsigned int v14; // eax
+  CBaseEntity *v15; // edx
+  vec_t v16; // xmm1_4
+  vec_t v17; // xmm0_4
+  char *v18; // ecx
+  unsigned int v19; // edx
+  int v20; // eax
+  char *v21; // ecx
+  unsigned int v22; // eax
+  CLabIndicatorPanel *v23; // edx
+  char *v24; // ecx
+  unsigned int v25; // eax
+  CLabIndicatorPanel *v26; // edx
+  char *v27; // ecx
+  unsigned int v28; // eax
+  CLabIndicatorPanel *v29; // edx
+  char *v30; // ecx
+  unsigned int v31; // eax
+  CBaseEntity *v32; // edx
+  char *v33; // ecx
+  float v34; // [esp+10h] [ebp-168h]
+  float v35; // [esp+20h] [ebp-158h]
+  float v36; // [esp+30h] [ebp-148h]
+  VMatrix mat; // [esp+58h] [ebp-120h] BYREF
+  VMatrix rotation; // [esp+98h] [ebp-E0h] BYREF
+  VMatrix tmp; // [esp+D8h] [ebp-A0h] BYREF
+  QAngle angles; // [esp+118h] [ebp-60h] BYREF
+  Vector vAxisOfRot; // [esp+124h] [ebp-54h] BYREF
+  Vector vecForward; // [esp+130h] [ebp-48h] BYREF
+  Vector vecRight; // [esp+13Ch] [ebp-3Ch] BYREF
+  Vector vecUp; // [esp+148h] [ebp-30h] BYREF
+  Vector absOrigin; // [esp+154h] [ebp-24h] BYREF
+
+  EntityByName = CreateEntityByName("vgui_indicator_panel", -1, 1);
+  if ( EntityByName )
+  {
+    v2 = (unsigned int *)(*((int (__cdecl **)(CBaseEntity *))EntityByName->_vptr_IHandleEntity + 3))(EntityByName);
+    v3 = g_pEntityList;
+    v4 = *v2;
+    this->m_hIndicatorPanel.m_Index = v4;
+    if ( v4 != -1 )
+    {
+      v5 = (char *)v3 + 24 * (unsigned __int16)v4;
+      if ( *((_DWORD *)v5 + 2) == HIWORD(v4) )
+      {
+        if ( *((_DWORD *)v5 + 1) )
+        {
+          if ( (this->m_iEFlags & 0x800) != 0 )
+            CBaseEntity::CalcAbsolutePosition(this);
+          angles = this->m_angAbsRotation;
+          MatrixFromAngles(&angles, &mat);
+          vAxisOfRot.x = 0.0;
+          vAxisOfRot.y = 1.0;
+          vAxisOfRot.z = 0.0;
+          MatrixBuildRotationAboutAxis(&rotation, &vAxisOfRot, 90.0);
+          MatrixMultiply(&mat, &rotation, &tmp);
+          MatrixBuildRotateZ(&rotation, 90.0);
+          MatrixMultiply(&tmp, &rotation, &mat);
+          MatrixToAngles(&mat, &angles);
+          m_Index = this->m_hIndicatorPanel.m_Index;
+          v7 = 0;
+          if ( m_Index != -1 )
+          {
+            v8 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+            if ( *((_DWORD *)v8 + 2) == HIWORD(m_Index) )
+              v7 = (CBaseEntity *)*((_DWORD *)v8 + 1);
+          }
+          CBaseEntity::SetAbsAngles(v7, &angles);
+          (*((void (__cdecl **)(CPropIndicatorPanel *const, Vector *, Vector *, Vector *))this->_vptr_IHandleEntity + 135))(
+            this,
+            &vecForward,
+            &vecRight,
+            &vecUp);
+          v9 = (float)(vecUp.x * -16.0) + (float)((float)(vecRight.x * 16.0) - vecForward.x);
+          v10 = (float)(vecRight.y * 16.0) - vecForward.y;
+          v11 = (float)(16.0 * vecRight.z) - vecForward.z;
+          v12 = (float)(vecUp.y * -16.0) + v10;
+          v13 = (float)(-16.0 * vecUp.z) + v11;
+          if ( (this->m_iEFlags & 0x800) != 0 )
+          {
+            v34 = (float)(-16.0 * vecUp.z) + v11;
+            v35 = (float)(vecUp.y * -16.0) + v10;
+            v36 = (float)(vecUp.x * -16.0) + (float)((float)(vecRight.x * 16.0) - vecForward.x);
+            CBaseEntity::CalcAbsolutePosition(this);
+            v9 = v36;
+            v12 = v35;
+            v13 = v34;
+          }
+          v14 = this->m_hIndicatorPanel.m_Index;
+          v15 = 0;
+          v16 = v12 + this->m_vecAbsOrigin.y;
+          v17 = v13 + this->m_vecAbsOrigin.z;
+          absOrigin.x = v9 + this->m_vecAbsOrigin.x;
+          absOrigin.y = v16;
+          absOrigin.z = v17;
+          if ( v14 != -1 )
+          {
+            v18 = (char *)g_pEntityList + 24 * (unsigned __int16)v14;
+            if ( *((_DWORD *)v18 + 2) == HIWORD(v14) )
+              v15 = (CBaseEntity *)*((_DWORD *)v18 + 1);
+          }
+          CBaseEntity::SetAbsOrigin(v15, &absOrigin);
+          v19 = this->m_hIndicatorPanel.m_Index;
+          v20 = 0;
+          if ( v19 != -1 )
+          {
+            v21 = (char *)g_pEntityList + 24 * (unsigned __int16)v19;
+            if ( *((_DWORD *)v21 + 2) == HIWORD(v19) )
+              v20 = *((_DWORD *)v21 + 1);
+          }
+          (*(void (__cdecl **)(int, CPropIndicatorPanel *const, int))(*(_DWORD *)v20 + 156))(v20, this, -1);
+          v22 = this->m_hIndicatorPanel.m_Index;
+          v23 = 0;
+          if ( v22 != -1 )
+          {
+            v24 = (char *)g_pEntityList + 24 * (unsigned __int16)v22;
+            if ( *((_DWORD *)v24 + 2) == HIWORD(v22) )
+              v23 = (CLabIndicatorPanel *)*((_DWORD *)v24 + 1);
+          }
+          CLabIndicatorPanel::SetPlayerPinged(v23, -1);
+          v25 = this->m_hIndicatorPanel.m_Index;
+          v26 = 0;
+          if ( v25 != -1 )
+          {
+            v27 = (char *)g_pEntityList + 24 * (unsigned __int16)v25;
+            if ( *((_DWORD *)v27 + 2) == HIWORD(v25) )
+              v26 = (CLabIndicatorPanel *)*((_DWORD *)v27 + 1);
+          }
+          CLabIndicatorPanel::SetChecked(v26, this->m_bIsChecked);
+          v28 = this->m_hIndicatorPanel.m_Index;
+          v29 = 0;
+          if ( v28 != -1 )
+          {
+            v30 = (char *)g_pEntityList + 24 * (unsigned __int16)v28;
+            if ( *((_DWORD *)v30 + 2) == HIWORD(v28) )
+              v29 = (CLabIndicatorPanel *)*((_DWORD *)v30 + 1);
+          }
+          CLabIndicatorPanel::SetIsTimer(v29, this->m_bIsCountdownTimer);
+          v31 = this->m_hIndicatorPanel.m_Index;
+          v32 = 0;
+          if ( v31 != -1 )
+          {
+            v33 = (char *)g_pEntityList + 24 * (unsigned __int16)v31;
+            if ( *((_DWORD *)v33 + 2) == HIWORD(v31) )
+              v32 = (CBaseEntity *)*((_DWORD *)v33 + 1);
+          }
+          DispatchSpawn(v32, 1);
+        }
+      }
+    }
+  }
+  else
+  {
+    this->m_hIndicatorPanel.m_Index = -1;
+  }
+}

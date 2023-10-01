@@ -1,0 +1,87 @@
+void __cdecl CPropIndicatorPanel::ToggleIndicatorLights(CPropIndicatorPanel *const this, bool bLightsOn)
+{
+  CBaseEntity *EntityByName; // ebx
+  const char *pszValue; // eax
+  CBaseEdict *m_pPev; // edx
+  IChangeInfoAccessor *v5; // eax
+  CBaseEdict *v6; // edx
+  CSharedEdictChangeInfo *v7; // edx
+  char *v8; // eax
+  int v9; // ecx
+  CBaseEdict *v10; // [esp+28h] [ebp-30h]
+  char *v11; // [esp+34h] [ebp-24h]
+  char *v12; // [esp+38h] [ebp-20h]
+  unsigned __int16 m_nChangeInfos; // [esp+3Ch] [ebp-1Ch]
+  unsigned __int16 v14; // [esp+3Ch] [ebp-1Ch]
+
+  EntityByName = 0;
+  while ( 1 )
+  {
+    pszValue = this->m_strIndicatorLights.pszValue;
+    if ( !pszValue )
+      pszValue = "";
+    EntityByName = CGlobalEntityList::FindEntityByName(&gEntList, EntityByName, pszValue, 0, 0, 0, 0);
+    if ( !EntityByName )
+      break;
+    if ( bLightsOn != EntityByName->m_iTextureFrameIndex.m_Value )
+    {
+      if ( EntityByName->m_Network.m_TimerEvent.m_bRegistered )
+      {
+        *((_BYTE *)&EntityByName->m_Network + 76) |= 1u;
+        goto LABEL_9;
+      }
+      m_pPev = EntityByName->m_Network.m_pPev;
+      if ( m_pPev && (m_pPev->m_fStateFlags & 0x100) == 0 )
+      {
+        m_pPev->m_fStateFlags |= 1u;
+        v10 = m_pPev;
+        v5 = CBaseEdict::GetChangeAccessor(m_pPev);
+        v6 = v10;
+        if ( v5->m_iChangeInfoSerialNumber == g_pSharedChangeInfo->m_iSerialNumber )
+        {
+          v11 = (char *)g_pSharedChangeInfo + 40 * v5->m_iChangeInfo;
+          v12 = v11 + 2;
+          v14 = *((_WORD *)v11 + 20);
+          if ( !v14 )
+            goto LABEL_21;
+          if ( *((_WORD *)v11 + 1) == 508 )
+            goto LABEL_9;
+          v9 = 0;
+          while ( v9 != 2 * (unsigned __int16)(v14 - 1) )
+          {
+            v9 += 2;
+            if ( *(_WORD *)&v12[v9] == 508 )
+              goto LABEL_9;
+          }
+          v6 = v10;
+          if ( v14 != 19 )
+          {
+LABEL_21:
+            *(_WORD *)&v12[2 * v14] = 508;
+            *((_WORD *)v11 + 20) = v14 + 1;
+            goto LABEL_9;
+          }
+        }
+        else
+        {
+          m_nChangeInfos = g_pSharedChangeInfo->m_nChangeInfos;
+          if ( m_nChangeInfos != 100 )
+          {
+            v5->m_iChangeInfo = m_nChangeInfos;
+            v7 = g_pSharedChangeInfo;
+            ++g_pSharedChangeInfo->m_nChangeInfos;
+            v5->m_iChangeInfoSerialNumber = v7->m_iSerialNumber;
+            v8 = (char *)g_pSharedChangeInfo + 40 * v5->m_iChangeInfo;
+            *((_WORD *)v8 + 1) = 508;
+            *((_WORD *)v8 + 20) = 1;
+            goto LABEL_9;
+          }
+        }
+        v5->m_iChangeInfoSerialNumber = 0;
+        v6->m_fStateFlags |= 0x100u;
+      }
+LABEL_9:
+      EntityByName->m_iTextureFrameIndex.m_Value = bLightsOn;
+    }
+  }
+}

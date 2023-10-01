@@ -1,0 +1,4 @@
+void __cdecl CLabIndicatorPanel::InputEnable(CLabIndicatorPanel *const this, inputdata_t *const inputdata)
+{
+  CLabIndicatorPanel::Enable(this);
+}

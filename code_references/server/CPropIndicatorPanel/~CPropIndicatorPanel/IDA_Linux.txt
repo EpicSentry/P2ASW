@@ -1,0 +1,5 @@
+void __cdecl CPropIndicatorPanel::~CPropIndicatorPanel(CPropIndicatorPanel *const this)
+{
+  this->_vptr_IHandleEntity = (int (**)(...))off_C84D88;
+  CBaseAnimating::~CBaseAnimating(this);
+}

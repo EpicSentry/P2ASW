@@ -1,0 +1,32 @@
+long double __cdecl C_LabIndicatorPanel::GetCountdownPercentage(C_LabIndicatorPanel *this)
+{
+  float v1; // xmm0_4
+  float v2; // xmm1_4
+  float v3; // xmm3_4
+  float v4; // xmm2_4
+  __m128 v5; // xmm1
+  __m128 v6; // xmm2
+
+  v1 = 1.0;
+  if ( *((_BYTE *)this + 2667) )
+  {
+    v2 = *((float *)gpGlobals + 3);
+    v3 = *((float *)this + 670);
+    v4 = *((float *)this + 669) + v3;
+    if ( v3 == v4 )
+    {
+      return dword_B6E260[(float)(v2 - v4) >= 0.0];
+    }
+    else
+    {
+      v5.f32[0] = (float)(v2 - v3) / (float)(v4 - v3);
+      if ( v5.f32[0] >= 0.0 )
+      {
+        v6 = (__m128)0x3F800000u;
+        v6.f32[0] = 1.0 - v5.f32[0];
+        LODWORD(v1) = _mm_andnot_ps(_mm_cmplt_ss((__m128)0x3F800000u, v5), v6).u32[0];
+      }
+    }
+  }
+  return v1;
+}

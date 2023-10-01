@@ -1,0 +1,7 @@
+void __cdecl CPropIndicatorPanel::ToggleThink(CPropIndicatorPanel *const this)
+{
+  BASEPTR v1; // [esp+28h] [ebp-10h] BYREF
+
+  CPropIndicatorPanel::ToggleIndicatorLights(this, 0);
+  CBaseEntity::ThinkSet(&v1, this, 0LL, 0.0, 0);
+}

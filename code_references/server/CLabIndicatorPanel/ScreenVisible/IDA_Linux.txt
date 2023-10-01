@@ -1,0 +1,38 @@
+void __cdecl CLabIndicatorPanel::ScreenVisible(CLabIndicatorPanel *const this, bool bVisible)
+{
+  unsigned int m_Index; // eax
+  char *v3; // edx
+  CBaseEntity *v4; // ebx
+  unsigned int v5; // esi
+  edict_t *m_pPev; // eax
+
+  m_Index = this->m_hScreen.m_Index;
+  if ( m_Index != -1 )
+  {
+    v3 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v3 + 2) == HIWORD(m_Index) )
+    {
+      v4 = (CBaseEntity *)*((_DWORD *)v3 + 1);
+      if ( v4 )
+      {
+        if ( bVisible )
+        {
+          v5 = v4->m_fEffects.m_Value & 0xFFFFFFDF;
+          if ( v4->m_fEffects.m_Value != v5 )
+          {
+            CBaseEntity::NetworkStateChanged(*((CBaseEntity *const *)v3 + 1), &v4->m_fEffects);
+            v4->m_fEffects.m_Value = v5;
+          }
+          m_pPev = v4->m_Network.m_pPev;
+          if ( m_pPev )
+            m_pPev->m_fStateFlags |= 0x80u;
+          CBaseEntity::DispatchUpdateTransmitState(v4);
+        }
+        else
+        {
+          CBaseEntity::AddEffects(*((CBaseEntity *const *)v3 + 1), 32);
+        }
+      }
+    }
+  }
+}
