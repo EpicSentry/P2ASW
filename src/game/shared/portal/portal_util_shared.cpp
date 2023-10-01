@@ -1583,19 +1583,16 @@ float UTIL_Portal_ShortestDistanceSqr( const Vector &vPoint1, const Vector &vPoi
 						{
 							ptPlaneIntersection = vPoint1Transformed;
 						}
-
-						Vector vRight, vUp;
-						pLinkedPortal->GetVectors( NULL, &vRight, &vUp );
 						
-						Vector ptLinkedCenter = pLinkedPortal->GetAbsOrigin();
+						Vector ptLinkedCenter = pLinkedPortal->m_ptOrigin;
 						Vector vCenterToIntersection = ptPlaneIntersection - ptLinkedCenter;
-						float fRight = vRight.Dot( vCenterToIntersection );
-						float fUp = vUp.Dot( vCenterToIntersection );
+						float fRight = pLinkedPortal->m_vRight.Dot( vCenterToIntersection );
+						float fUp = pLinkedPortal->m_vUp.Dot( vCenterToIntersection );
 
 						float fAbsRight = fabs( fRight );
 						float fAbsUp = fabs( fUp );
-						if( (fAbsRight > PORTAL_HALF_WIDTH) ||
-							(fAbsUp > PORTAL_HALF_HEIGHT) )
+						if( (fAbsRight > pTempPortal->GetHalfWidth()) ||
+							(fAbsUp > pTempPortal->GetHalfHeight()) )
 							bStraightLine = false;
 
 						if( bStraightLine == false )
@@ -1605,20 +1602,20 @@ float UTIL_Portal_ShortestDistanceSqr( const Vector &vPoint1, const Vector &vPoi
 
 							//find the offending extent and shorten both extents to bring it into the portal quad
 							float fNormalizer;
-							if( fAbsRight > PORTAL_HALF_WIDTH )
+							if( fAbsRight > pTempPortal->GetHalfWidth() )
 							{
-								fNormalizer = fAbsRight/PORTAL_HALF_WIDTH;
+								fNormalizer = fAbsRight/pTempPortal->GetHalfWidth();
 
-								if( fAbsUp > PORTAL_HALF_HEIGHT )
+								if( fAbsUp > pTempPortal->GetHalfHeight() )
 								{
-									float fUpNormalizer = fAbsUp/PORTAL_HALF_HEIGHT;
+									float fUpNormalizer = fAbsUp/pTempPortal->GetHalfHeight();
 									if( fUpNormalizer > fNormalizer )
 										fNormalizer = fUpNormalizer;
 								}
 							}
 							else
 							{
-								fNormalizer = fAbsUp/PORTAL_HALF_HEIGHT;
+								fNormalizer = fAbsUp/pTempPortal->GetHalfHeight();
 							}
 
 							vCenterToIntersection *= (1.0f/fNormalizer);
@@ -1629,6 +1626,7 @@ float UTIL_Portal_ShortestDistanceSqr( const Vector &vPoint1, const Vector &vPoi
 							{
 								fMinDist = fWrapDist;
 								pShortestDistPortal = pTempPortal;
+								*pShortestDistPortal_Out = pShortestDistPortal;
 							}
 						}
 						else
@@ -1636,6 +1634,7 @@ float UTIL_Portal_ShortestDistanceSqr( const Vector &vPoint1, const Vector &vPoi
 							//it's a straight shot from point 1 to 2 through the portal
 							fMinDist = fDirectDist;
 							pShortestDistPortal = pTempPortal;
+							*pShortestDistPortal_Out = pShortestDistPortal;
 						}
 					}
 					else
@@ -1646,11 +1645,12 @@ float UTIL_Portal_ShortestDistanceSqr( const Vector &vPoint1, const Vector &vPoi
 						//do some crazy wrapped line intersection algorithm
 
 						//for now, just do the cheap and easy solution
-						float fWrapDist = vPoint1.DistToSqr( pTempPortal->GetAbsOrigin() ) + pLinkedPortal->GetAbsOrigin().DistToSqr( vPoint2 );
+						float fWrapDist = vPoint1.DistToSqr( pTempPortal->m_ptOrigin ) + ((Vector)pLinkedPortal->m_ptOrigin).DistToSqr( vPoint2 );
 						if( fWrapDist < fMinDist )
 						{
 							fMinDist = fWrapDist;
 							pShortestDistPortal = pTempPortal;
+							*pShortestDistPortal_Out = pShortestDistPortal;
 						}
 					}
 				}
@@ -1659,6 +1659,37 @@ float UTIL_Portal_ShortestDistanceSqr( const Vector &vPoint1, const Vector &vPoi
 	}
 
 	return fMinDist;
+}
+
+void UTIL_Portal_VectorToGlobalTransforms( const Vector &vPoint, CUtlVector< Vector > *utlVecPositions )
+{
+
+	int iPortalCount = CPortal_Base2D_Shared::AllPortals.Count();
+	if( iPortalCount == 0 )
+	{
+		return;
+	}
+	CPortal_Base2D **pPortals = CPortal_Base2D_Shared::AllPortals.Base();
+
+	for( int i = 0; i != iPortalCount; ++i )
+	{
+		CPortal_Base2D *pTempPortal = pPortals[i];
+		if( pTempPortal->IsActive() )
+		{
+			CPortal_Base2D *pLinkedPortal = pTempPortal->m_hLinkedPortal.Get();
+			if( pLinkedPortal != NULL )
+			{
+				VMatrix matrixFromPortal;
+				MatrixInverseTR( pTempPortal->MatrixThisToLinked(), matrixFromPortal );
+
+				Vector vPoint1Transformed = matrixFromPortal * vPoint;
+				utlVecPositions->AddToTail( vPoint1Transformed );
+// 				vPositions[i][0] = vPoint1Transformed[0];
+// 				vPositions[i][1] = vPoint1Transformed[1];
+// 				vPositions[i][2] = vPoint1Transformed[2];
+			}
+		}
+	}
 }
 
 void UTIL_Portal_AABB( const CPortal_Base2D *pPortal, Vector &vMin, Vector &vMax )
@@ -1674,8 +1705,8 @@ void UTIL_Portal_AABB( const CPortal_Base2D *pPortal, Vector &vMin, Vector &vMax
 
 	//scale the extents to usable sizes
 	vOBBForward *= PORTAL_HALF_DEPTH;
-	vOBBRight *= PORTAL_HALF_WIDTH;
-	vOBBUp *= PORTAL_HALF_HEIGHT;
+	vOBBRight *= pPortal->GetHalfWidth();
+	vOBBUp *= pPortal->GetHalfHeight();
 
 	vOrigin -= vOBBForward + vOBBRight + vOBBUp;
 
@@ -2144,7 +2175,7 @@ CPortal_Base2D *UTIL_PointIsOnPortalQuad( const Vector vPoint, float fOnPlaneEps
 
 bool UTIL_Portal_EntityIsInPortalHole( const CPortal_Base2D *pPortal, CBaseEntity *pEntity )
 {
-	CCollisionProperty *pCollisionProp = pEntity->CollisionProp();
+	const CCollisionProperty *pCollisionProp = pEntity->CollisionProp();
 	Vector vMins = pCollisionProp->OBBMins();
 	Vector vMaxs = pCollisionProp->OBBMaxs();
 	Vector vForward, vUp, vRight;
@@ -2158,13 +2189,9 @@ bool UTIL_Portal_EntityIsInPortalHole( const CPortal_Base2D *pPortal, CBaseEntit
 	vRight *= vExtents.y;
 	vUp *= vExtents.z;
 
-	Vector vPortalForward, vPortalRight, vPortalUp;
-	pPortal->GetVectors( &vPortalForward, &vPortalRight, &vPortalUp );
-	Vector ptPortalCenter = pPortal->GetAbsOrigin();
-
 	return OBBHasFullyContainedIntersectionWithQuad( vForward, vRight, vUp, ptOBBCenter, 
-		vPortalForward, vPortalForward.Dot( ptPortalCenter ), ptPortalCenter, 
-		vPortalRight, PORTAL_HALF_WIDTH + 1.0f, vPortalUp, PORTAL_HALF_HEIGHT + 1.0f );
+		pPortal->m_vForward, pPortal->m_vForward.Dot( pPortal->m_ptOrigin ), pPortal->m_ptOrigin, 
+		pPortal->m_vRight, pPortal->GetHalfWidth() + 1.0f, pPortal->m_vUp, pPortal->GetHalfHeight() + 1.0f );
 }
 
 const Vector UTIL_ProjectPointOntoPlane( const Vector& point, const cplane_t& plane )
@@ -2181,9 +2208,9 @@ bool UTIL_PointIsNearPortal( const Vector& point, const CPortal_Base2D* pPortal2
 	pPortal2D->WorldToEntitySpace( point, &transformedPt );
 	pPortal2D->WorldToEntitySpace( UTIL_ProjectPointOntoPlane( pPortal2D->WorldSpaceCenter(), portalPlane ), &origin );
 
-	AssertMsg( PORTAL_HALF_WIDTH > radiusReduction && PORTAL_HALF_HEIGHT > radiusReduction, "Reduction of the box is too high." );
-	const float halfWidth = PORTAL_HALF_WIDTH - radiusReduction;
-	const float halfHeight = PORTAL_HALF_HEIGHT - radiusReduction;
+	AssertMsg( pPortal2D->GetHalfWidth() > radiusReduction && pPortal2D->GetHalfHeight() > radiusReduction, "Reduction of the box is too high." );
+	const float halfWidth = pPortal2D->GetHalfWidth() - radiusReduction;
+	const float halfHeight = pPortal2D->GetHalfHeight() - radiusReduction;
 	const Vector boxMin( origin[0] - planeDist, origin[1] - halfWidth, origin[2] - halfHeight );
 	const Vector boxMax( origin[0] + planeDist, origin[1] + halfWidth, origin[2] + halfHeight );
 

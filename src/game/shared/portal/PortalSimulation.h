@@ -124,8 +124,8 @@ struct PS_PlacementData_t //stuff useful for geometric operations
 		memset( this, 0, sizeof( PS_PlacementData_t ) );
 
 		// Hacks
-		fHalfHeight = PORTAL_HALF_HEIGHT;
-		fHalfWidth = PORTAL_HALF_WIDTH;
+		//fHalfHeight = PORTAL_HALF_HEIGHT;
+		//fHalfWidth = PORTAL_HALF_WIDTH;
 	}
 };
 
