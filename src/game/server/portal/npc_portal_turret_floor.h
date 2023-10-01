@@ -143,6 +143,7 @@ public:
 	void	InputDisableGagging(inputdata_t& inputdata);
 	void	InputEnablePickup(inputdata_t& inputdata);
 	void	InputDisablePickup(inputdata_t& inputdata);
+	void	InputSelfDestructImmediately(inputdata_t& inputdata);
 
 	virtual void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 private:
