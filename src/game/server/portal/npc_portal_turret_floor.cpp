@@ -102,6 +102,7 @@ BEGIN_DATADESC( CNPC_Portal_FloorTurret )
 	DEFINE_INPUTFUNC( FIELD_VOID, "DisableGagging", InputDisableGagging),
 	DEFINE_INPUTFUNC( FIELD_VOID, "EnablePickup", InputEnablePickup),
 	DEFINE_INPUTFUNC( FIELD_VOID, "DisablePickup", InputDisablePickup),
+	DEFINE_INPUTFUNC( FIELD_VOID, "SelfDestructImmediately", InputSelfDestructImmediately),
 
 END_DATADESC()
 
@@ -139,7 +140,8 @@ void CNPC_Portal_FloorTurret::Precache( void )
 	CBaseEntity::PrecacheModel("models/npcs/turret/turret_skeleton.mdl");
 	PrecacheModel("effects/redlaser1.vmt");
 	//PrecacheParticleSystem("ShakeRopes");
-	PrecacheParticleSystem("AR2Tracer");
+	//PrecacheParticleSystem("AR2Tracer");
+	PrecacheEffect("AR2Tracer");
 	PrecacheParticleSystem("burning_character");
 
 	for ( int iTalkScript = 0; iTalkScript < PORTAL_TURRET_STATE_TOTAL; ++iTalkScript )
@@ -165,6 +167,9 @@ void CNPC_Portal_FloorTurret::Spawn( void )
 { 
 	BaseClass::Spawn();
 
+	CAmmoDef* pAmmoDef = GetAmmoDef();
+	m_iAmmoType = pAmmoDef->Index("PortalTurretBullet");
+	AddFlag(FL_NPC);
 	// Check the m_nModelIndex and set the model based on its value
 	switch (m_nModelIndex)
 	{
@@ -204,6 +209,10 @@ void CNPC_Portal_FloorTurret::Spawn( void )
 
 	m_bNoAlarmSounds = true;
 	m_bOutOfAmmo = ( m_spawnflags & SF_FLOOR_TURRET_OUT_OF_AMMO ) != 0;
+
+	AddEffects(EF_NOFLASHLIGHT);
+	SetFadeDistance(-1.0f, 0.0f);
+	SetGlobalFadeScale(0.0f);
 }
 
 //-----------------------------------------------------------------------------
@@ -1504,6 +1513,12 @@ void CNPC_Portal_FloorTurret::InputEnablePickup(inputdata_t& inputdata)
 void CNPC_Portal_FloorTurret::InputDisablePickup(inputdata_t& inputdata)
 {
 	m_bPickupEnabled = false;
+}
+
+void CNPC_Portal_FloorTurret::InputSelfDestructImmediately(inputdata_t& inputdata)
+{
+	SetThink(&CNPC_Portal_FloorTurret::BreakThink);
+	SetNextThink(gpGlobals->curtime);
 }
 
 void CNPC_Portal_FloorTurret::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
