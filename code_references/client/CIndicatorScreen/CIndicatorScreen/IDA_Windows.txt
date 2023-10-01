@@ -1,0 +1,43 @@
+void __thiscall CIndicatorScreen::CIndicatorScreen(
+        CIndicatorScreen *this,
+        vgui::Panel *parent,
+        const char *panelName,
+        int a4)
+{
+  vgui::ISchemeManager *v5; // edi
+  vgui::ISchemeManager_vtbl *v6; // ebx
+  int v7; // eax
+  unsigned int v8; // eax
+  int v9; // edx
+
+  if ( a4 )
+  {
+    *((_DWORD *)&this->__vftable + 1) = &CStorePricePanel_Popular::`vbtable';
+    *(_DWORD *)&this->gap1BC[4] = &vgui::IClientPanel::`vftable';
+  }
+  v5 = g_pVGuiSchemeManager;
+  v6 = g_pVGuiSchemeManager->__vftable;
+  v7 = ((int (__thiscall *)(IEngineVGui *, int, const char *, const char *))enginevgui->GetPanel)(
+         enginevgui,
+         2,
+         "scripts/screens/indicator_panel.res",
+         "IndicatorPanelScreen");
+  v8 = ((int (__thiscall *)(vgui::ISchemeManager *, int))v6->LoadSchemeFromFileEx)(v5, v7);
+  CVGuiScreenPanel::CVGuiScreenPanel(this, parent, "CIndicatorScreen", v8);
+  v9 = *((_DWORD *)&this->__vftable + 1);
+  this->__vftable = (CIndicatorScreen_vtbl *)&CIndicatorScreen::`vftable'{for `vgui::Panel'};
+  *(CIndicatorScreen_vtbl **)((char *)&this->__vftable + *(_DWORD *)(v9 + 4) + 4) = (CIndicatorScreen_vtbl *)&CIndicatorScreen::`vftable'{for `vgui::IClientPanel'};
+  *(CIndicatorScreen_vtbl **)((char *)&this->__vftable + *(_DWORD *)(*((_DWORD *)&this->__vftable + 1) + 4)) = (CIndicatorScreen_vtbl *)(*(_DWORD *)(*((_DWORD *)&this->__vftable + 1) + 4) - 444);
+  this->m_hVGUIScreen.m_Index = -1;
+  this->m_hScreenEntity.m_Index = -1;
+  this->m_nTimerBackgroundTextureID = -1;
+  this->m_nTimerBackgroundActiveTextureID = -1;
+  this->m_nTimerUpperSliceTextureID = -1;
+  this->m_nTimerLowerSliceTextureID = -1;
+  *(&this->m_iConfigID + 2) = -1;
+  *(_DWORD *)this->gap190 = -1;
+  this->m_nXTextureID = -1;
+  this->m_nOTextureID = -1;
+  this->m_bWasCounting = 0;
+  this->m_flFadeUpTime = 0.0;
+}

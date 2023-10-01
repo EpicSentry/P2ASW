@@ -134,8 +134,10 @@ $Project "Client (Portal 2)"
 				$File	"portal2\vgui\sdk_loading_panel.cpp"
 				$File	"portal2\vgui\sdk_logo_panel.cpp"
 				$File	"portal2\vgui\sdk_vgui_music_importer.cpp"
-				$file	"portal2\vgui\portal2_vgui_ingame_panel.cpp"
-				$file	"portal2\vgui\portal2_vgui_ingame_panel.h"
+				$File	"portal2\vgui\portal2_vgui_ingame_panel.cpp"
+				$File	"portal2\vgui\portal2_vgui_ingame_panel.h"
+				
+				$File	"portal2\vgui\vgui_indicator_panel.cpp"
 			}
 
 			$Folder	"GameUI"

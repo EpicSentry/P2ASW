@@ -1,0 +1,24 @@
+void __cdecl CIndicatorScreen::Paint(CIndicatorScreen *const this)
+{
+  unsigned int m_Index; // eax
+  char *v2; // edx
+  int v3; // eax
+
+  vgui::Panel::Paint(this);
+  m_Index = this->m_hScreenEntity.m_Index;
+  if ( m_Index != -1 )
+  {
+    v2 = (char *)g_pEntityList + 16 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v2 + 2) == HIWORD(m_Index) )
+    {
+      v3 = *((_DWORD *)v2 + 1);
+      if ( v3 )
+      {
+        if ( *(_BYTE *)(v3 + 2668) )
+          CIndicatorScreen::PaintCountdownTimer(this);
+        else
+          CIndicatorScreen::PaintIndicator(this);
+      }
+    }
+  }
+}

@@ -1,0 +1,59 @@
+void __cdecl CHudIndicator::CHudIndicator(
+        CHudIndicator *const this,
+        const void **const __vtt_parm,
+        const char *pElementName)
+{
+  _DWORD *v3; // eax
+  bool v4; // zf
+  vgui::PanelKeyBindingMap *v5; // eax
+  IClientMode *ClientMode; // eax
+  vgui::Panel *v7; // eax
+  vgui::PanelMessageMap *v8; // eax
+  vgui::PanelMessageMap *v9; // ebx
+  vgui::PanelMessageMap *v10; // eax
+  PanelAnimationMap *v11; // eax
+
+  vgui::EditablePanel::EditablePanel(this, __vtt_parm + 1, 0, "HudIndicator");
+  CHudElement::CHudElement(&this->CHudElement, pElementName);
+  v3 = *__vtt_parm;
+  *(_DWORD *)this->gap0 = *__vtt_parm;
+  *(_DWORD *)&this->gap0[*(v3 - 31)] = __vtt_parm[5];
+  v4 = CHudIndicator::ChainToMap(void)::chained == 0;
+  this->_vptr_IGameEventListener2 = (int (**)(...))off_13D4F24;
+  if ( v4 )
+  {
+    CHudIndicator::ChainToMap(void)::chained = 1;
+    v8 = vgui::FindOrAddPanelMessageMap("CHudIndicator");
+    v8->pfnClassName = CHudIndicator::GetPanelClassName;
+    v9 = v8;
+    v10 = vgui::FindOrAddPanelMessageMap("EditablePanel");
+    v4 = CHudIndicator::ChainToAnimationMap(void)::chained == 0;
+    v9->baseMap = v10;
+    if ( !v4 )
+      goto LABEL_3;
+  }
+  else if ( CHudIndicator::ChainToAnimationMap(void)::chained )
+  {
+    goto LABEL_3;
+  }
+  CHudIndicator::ChainToAnimationMap(void)::chained = 1;
+  v11 = FindOrAddPanelAnimationMap("CHudIndicator");
+  v11->pfnClassName = CHudIndicator::GetPanelClassName;
+  v11->baseMap = FindOrAddPanelAnimationMap("EditablePanel");
+LABEL_3:
+  if ( !CHudIndicator::KB_ChainToMap(void)::chained )
+  {
+    CHudIndicator::KB_ChainToMap(void)::chained = 1;
+    v5 = vgui::FindOrAddPanelKeyBindingMap("CHudIndicator");
+    v5->pfnClassName = CHudIndicator::GetPanelClassName;
+    v5->baseMap = vgui::FindOrAddPanelKeyBindingMap("EditablePanel");
+  }
+  ClientMode = GetClientMode();
+  v7 = (vgui::Panel *)(*((int (__cdecl **)(IClientMode *))ClientMode->_vptr_IClientMode + 10))(ClientMode);
+  vgui::Panel::SetParent(this, v7);
+  CHudElement::SetHiddenBits(&this->CHudElement, 16);
+  vgui::EditablePanel::LoadControlSettings(this, "Resource/Indicator.res", 0, 0, 0);
+  this->m_nTexture[0] = -1;
+  this->m_nTexture[1] = -1;
+  this->m_nIndicatorType = 0;
+}

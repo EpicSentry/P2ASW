@@ -1,0 +1,217 @@
+bool __cdecl CIndicatorScreen::Init(
+        CIndicatorScreen *const this,
+        KeyValues *pKeyValues,
+        VGuiScreenInitData_t *pInitData)
+{
+  vgui::IVGui *v3; // esi
+  void (__cdecl *v4)(vgui::IVGui *, int, _DWORD); // edi
+  int v5; // eax
+  bool v6; // si
+  unsigned int m_Index; // eax
+  CBaseEntityList *v8; // ecx
+  char *v9; // edx
+  const void *v10; // eax
+  void *v11; // eax
+  unsigned int *v12; // eax
+  unsigned int v13; // eax
+  char *v14; // edx
+  int v15; // eax
+  unsigned int v16; // eax
+  char *v17; // edx
+  const void *v18; // eax
+  void *v19; // eax
+  int v21; // eax
+  vgui::ISurface *v22; // edx
+  int v23; // eax
+  vgui::ISurface *v24; // edx
+  int v25; // eax
+  vgui::ISurface *v26; // edx
+  int v27; // eax
+  vgui::ISurface *v28; // edx
+  int v29; // eax
+  vgui::ISurface *v30; // edx
+  int v31; // eax
+  vgui::ISurface *v32; // edx
+  int v33; // eax
+  vgui::ISurface *v34; // edx
+  int v35; // eax
+  vgui::ISurface *v36; // edx
+  vgui::IVGui *v37; // [esp+0h] [ebp-38h]
+
+  v3 = g_pVGui;
+  v4 = *(void (__cdecl **)(vgui::IVGui *, int, _DWORD))(*(_DWORD *)g_pVGui + 84);
+  v5 = (**(int (__cdecl ***)(CIndicatorScreen *const))this->gap0)(this);
+  v37 = v3;
+  v6 = 0;
+  v4(v37, v5, 0);
+  if ( !CVGuiScreenPanel::Init(this, pKeyValues, pInitData) )
+    return v6;
+  m_Index = this->m_hEntity.m_Index;
+  v8 = g_pEntityList;
+  if ( m_Index != -1
+    && (v9 = (char *)g_pEntityList + 16 * (unsigned __int16)m_Index, *((_DWORD *)v9 + 2) == HIWORD(m_Index))
+    && (v10 = (const void *)*((_DWORD *)v9 + 1)) != 0
+    && (v11 = _dynamic_cast(
+                v10,
+                (const struct __class_type_info *)&`typeinfo for'C_BaseEntity,
+                (const struct __class_type_info *)&`typeinfo for'C_VGuiScreen,
+                0)) != 0 )
+  {
+    v12 = (unsigned int *)(*(int (__cdecl **)(void *))(*(_DWORD *)v11 + 12))(v11);
+    v8 = g_pEntityList;
+    v13 = *v12;
+    this->m_hVGUIScreen.m_Index = v13;
+    if ( v13 != -1 )
+    {
+      v14 = (char *)v8 + 16 * (unsigned __int16)v13;
+      if ( *((_DWORD *)v14 + 2) == HIWORD(v13) )
+      {
+        v15 = *((_DWORD *)v14 + 1);
+        if ( v15 )
+        {
+          v16 = *(_DWORD *)(v15 + 300);
+          if ( v16 != -1
+            && (v17 = (char *)v8 + 16 * (unsigned __int16)v16, *((_DWORD *)v17 + 2) == HIWORD(v16))
+            && (v18 = (const void *)*((_DWORD *)v17 + 1)) != 0
+            && (v19 = _dynamic_cast(
+                        v18,
+                        (const struct __class_type_info *)&`typeinfo for'C_BaseEntity,
+                        (const struct __class_type_info *)&`typeinfo for'C_LabIndicatorPanel,
+                        0)) != 0 )
+          {
+            this->m_hScreenEntity.m_Index = *(_DWORD *)(*(int (__cdecl **)(void *))(*(_DWORD *)v19 + 12))(v19);
+          }
+          else
+          {
+            this->m_hScreenEntity.m_Index = -1;
+          }
+        }
+      }
+    }
+  }
+  else
+  {
+    this->m_hVGUIScreen.m_Index = -1;
+  }
+  if ( this->m_nTimerBackgroundTextureID == -1 )
+  {
+    v27 = (*(int (__thiscall **)(CBaseEntityList *, vgui::ISurface *, _DWORD))(*(_DWORD *)g_pVGuiSurface + 164))(
+            v8,
+            g_pVGuiSurface,
+            0);
+    v28 = g_pVGuiSurface;
+    this->m_nTimerBackgroundTextureID = v27;
+    (*(void (__cdecl **)(vgui::ISurface *, int, const char *, int, _DWORD))(*(_DWORD *)v28 + 140))(
+      v28,
+      v27,
+      "vgui/signage/vgui_countdown_background",
+      1,
+      0);
+  }
+  if ( this->m_nTimerBackgroundActiveTextureID == -1 )
+  {
+    v25 = (*(int (__thiscall **)(CBaseEntityList *, vgui::ISurface *, _DWORD))(*(_DWORD *)g_pVGuiSurface + 164))(
+            v8,
+            g_pVGuiSurface,
+            0);
+    v26 = g_pVGuiSurface;
+    this->m_nTimerBackgroundActiveTextureID = v25;
+    (*(void (__cdecl **)(vgui::ISurface *, int, const char *, int, _DWORD))(*(_DWORD *)v26 + 140))(
+      v26,
+      v25,
+      "vgui/signage/vgui_countdown_background_on",
+      1,
+      0);
+  }
+  if ( this->m_nTimerUpperSliceTextureID == -1 )
+  {
+    v35 = (*(int (__thiscall **)(CBaseEntityList *, vgui::ISurface *, _DWORD))(*(_DWORD *)g_pVGuiSurface + 164))(
+            v8,
+            g_pVGuiSurface,
+            0);
+    v36 = g_pVGuiSurface;
+    this->m_nTimerUpperSliceTextureID = v35;
+    (*(void (__cdecl **)(vgui::ISurface *, int, const char *, int, _DWORD))(*(_DWORD *)v36 + 140))(
+      v36,
+      v35,
+      "vgui/signage/vgui_countdown_slice1",
+      1,
+      0);
+  }
+  if ( this->m_nTimerLowerSliceTextureID == -1 )
+  {
+    v33 = (*(int (__thiscall **)(CBaseEntityList *, vgui::ISurface *, _DWORD))(*(_DWORD *)g_pVGuiSurface + 164))(
+            v8,
+            g_pVGuiSurface,
+            0);
+    v34 = g_pVGuiSurface;
+    this->m_nTimerLowerSliceTextureID = v33;
+    (*(void (__cdecl **)(vgui::ISurface *, int, const char *, int, _DWORD))(*(_DWORD *)v34 + 140))(
+      v34,
+      v33,
+      "vgui/signage/vgui_countdown_slice2",
+      1,
+      0);
+  }
+  if ( this->m_nCheckTextureID == -1 )
+  {
+    v31 = (*(int (__thiscall **)(CBaseEntityList *, vgui::ISurface *, _DWORD))(*(_DWORD *)g_pVGuiSurface + 164))(
+            v8,
+            g_pVGuiSurface,
+            0);
+    v32 = g_pVGuiSurface;
+    this->m_nCheckTextureID = v31;
+    (*(void (__cdecl **)(vgui::ISurface *, int, const char *, int, _DWORD))(*(_DWORD *)v32 + 140))(
+      v32,
+      v31,
+      "vgui/signage/vgui_indicator_checked",
+      1,
+      0);
+  }
+  if ( this->m_nUncheckedTextureID == -1 )
+  {
+    v29 = (*(int (__thiscall **)(CBaseEntityList *, vgui::ISurface *, _DWORD))(*(_DWORD *)g_pVGuiSurface + 164))(
+            v8,
+            g_pVGuiSurface,
+            0);
+    v30 = g_pVGuiSurface;
+    this->m_nUncheckedTextureID = v29;
+    (*(void (__cdecl **)(vgui::ISurface *, int, const char *, int, _DWORD))(*(_DWORD *)v30 + 140))(
+      v30,
+      v29,
+      "vgui/signage/vgui_indicator_unchecked",
+      1,
+      0);
+  }
+  if ( this->m_nXTextureID == -1 )
+  {
+    v23 = (*(int (__thiscall **)(CBaseEntityList *, vgui::ISurface *, _DWORD))(*(_DWORD *)g_pVGuiSurface + 164))(
+            v8,
+            g_pVGuiSurface,
+            0);
+    v24 = g_pVGuiSurface;
+    this->m_nXTextureID = v23;
+    (*(void (__cdecl **)(vgui::ISurface *, int, const char *, int, _DWORD))(*(_DWORD *)v24 + 140))(
+      v24,
+      v23,
+      "vgui/signage/vgui_shape04",
+      1,
+      0);
+  }
+  v6 = 1;
+  if ( this->m_nOTextureID != -1 )
+    return v6;
+  v21 = (*(int (__thiscall **)(CBaseEntityList *, vgui::ISurface *, _DWORD))(*(_DWORD *)g_pVGuiSurface + 164))(
+          v8,
+          g_pVGuiSurface,
+          0);
+  v22 = g_pVGuiSurface;
+  this->m_nOTextureID = v21;
+  (*(void (__cdecl **)(vgui::ISurface *, int, const char *, int, _DWORD))(*(_DWORD *)v22 + 140))(
+    v22,
+    v21,
+    "vgui/signage/vgui_shape05",
+    1,
+    0);
+  return 1;
+}

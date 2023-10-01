@@ -1,0 +1,66 @@
+void __thiscall CIndicatorScreen::PaintIndicator(CIndicatorScreen *this)
+{
+  unsigned int m_Index; // eax
+  IHandleEntity *m_pEntity; // ecx
+  IHandleEntity_vtbl *v4; // ecx
+  char *v5; // ecx
+  IHandleEntity *v6; // ecx
+  int m_nOTextureID; // edi
+  vgui::ISurface *v8; // edi
+  vgui::ISurface_vtbl *v9; // ebx
+  int Wide; // eax
+  vgui::ISurface *v11; // edi
+  vgui::ISurface_vtbl *v12; // ebx
+  int v13; // eax
+  int Tall; // [esp-4h] [ebp-14h]
+  int v15; // [esp-4h] [ebp-14h]
+
+  m_Index = this->m_hScreenEntity.m_Index;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+    m_pEntity = 0;
+  else
+    m_pEntity = g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+  v4 = m_pEntity[674].__vftable;
+  if ( v4 )
+  {
+    v5 = (char *)&v4[-1].GetRefEHandle + 3;
+    if ( v5 )
+    {
+      if ( v5 == (char *)1 )
+      {
+        m_nOTextureID = this->m_nOTextureID;
+      }
+      else
+      {
+        if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+          v6 = 0;
+        else
+          v6 = g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+        if ( LOBYTE(v6[673].__vftable) )
+          m_nOTextureID = *(&this->m_iConfigID + 2);
+        else
+          m_nOTextureID = *(_DWORD *)this->gap190;
+      }
+    }
+    else
+    {
+      m_nOTextureID = this->m_nXTextureID;
+    }
+    ((void (__thiscall *)(vgui::ISurface *, int))g_pVGuiSurface->DrawSetColor)(g_pVGuiSurface, -1);
+    g_pVGuiSurface->DrawSetTexture(g_pVGuiSurface, m_nOTextureID);
+    v8 = g_pVGuiSurface;
+    v9 = g_pVGuiSurface->__vftable;
+    Tall = vgui::Panel::GetTall(this);
+    Wide = vgui::Panel::GetWide(this);
+    v9->DrawTexturedRect(v8, 0, 0, Wide, Tall);
+  }
+  else
+  {
+    ((void (__thiscall *)(vgui::ISurface *, int))g_pVGuiSurface->DrawSetColor)(g_pVGuiSurface, -14145496);
+    v11 = g_pVGuiSurface;
+    v12 = g_pVGuiSurface->__vftable;
+    v15 = vgui::Panel::GetTall(this);
+    v13 = vgui::Panel::GetWide(this);
+    v12->DrawFilledRect(v11, 0, 0, v13, v15);
+  }
+}

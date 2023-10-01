@@ -1,0 +1,30 @@
+class CHudIndicator : vgui::EditablePanel, CHudElement, vgui::IClientPanel
+{
+
+public:
+	
+	DECLARE_PANELMESSAGEMAP( CHudIndicator );
+	
+	//void CHudIndicator(class CHudIndicator & );
+    void CHudIndicator(char * );
+    void ~CHudIndicator();
+    void MsgFunc_IndicatorFlash( bf_read &msg );
+	
+protected:
+
+	void ApplySchemeSettings( vgui::IScheme *scheme );
+    void Paint();
+    void Init();
+    void Reset();
+    bool ShouldDraw();
+
+private:
+
+    int m_nTexture[2];
+    int m_nIndicatorType;
+    float m_flDisplayTime;
+    float m_flStartTime;
+    float m_flFadeInTime;
+    float m_flFadeOutTime;
+	
+};

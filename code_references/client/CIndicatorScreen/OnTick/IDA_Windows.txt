@@ -1,0 +1,4 @@
+void __thiscall CIndicatorScreen::OnTick(CIndicatorScreen *this)
+{
+  C_Prop_Portal::Fizzle((vgui::PropertyPage *)&this[-1].CVGuiScreenPanel::vgui::EditablePanel::_buildGroup);
+}

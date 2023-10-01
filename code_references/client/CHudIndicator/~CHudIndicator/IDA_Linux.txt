@@ -1,0 +1,28 @@
+void __cdecl CHudIndicator::~CHudIndicator(CHudIndicator *const this, const void **const __vtt_parm)
+{
+  _DWORD *v2; // eax
+
+  v2 = *__vtt_parm;
+  *(_DWORD *)this->gap0 = *__vtt_parm;
+  *(_DWORD *)&this->gap0[*(v2 - 31)] = __vtt_parm[5];
+  this->_vptr_IGameEventListener2 = (int (**)(...))off_13D4F24;
+  if ( g_pVGuiSurface )
+  {
+    if ( this->m_nTexture[0] != -1 )
+    {
+      (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 564))(
+        g_pVGuiSurface,
+        this->m_nTexture[0]);
+      this->m_nTexture[0] = -1;
+    }
+    if ( this->m_nTexture[1] != -1 )
+    {
+      (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 564))(
+        g_pVGuiSurface,
+        this->m_nTexture[1]);
+      this->m_nTexture[1] = -1;
+    }
+  }
+  CHudElement::~CHudElement(&this->CHudElement);
+  vgui::EditablePanel::~EditablePanel(this, __vtt_parm + 1);
+}

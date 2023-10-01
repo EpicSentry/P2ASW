@@ -1,0 +1,402 @@
+char __cdecl CIndicatorScreen::PaintCountdownTimer(CIndicatorScreen *this)
+{
+  unsigned int v1; // edx
+  C_LabIndicatorPanel *v2; // eax
+  int v3; // ebx
+  __m128 v4; // xmm0
+  __m128 v5; // xmm1
+  int v6; // edx
+  _DWORD *v7; // ebx
+  int Wide; // esi
+  int Tall; // eax
+  float v10; // xmm4_4
+  float v11; // xmm0_4
+  CIndicatorScreen *v12; // ebx
+  int v13; // xmm2_4
+  char result; // al
+  float v15; // xmm2_4
+  float v16; // xmm1_4
+  __m128 v17; // xmm0
+  float v18; // xmm1_4
+  __m128 v19; // xmm3
+  __m128 v20; // xmm2
+  __m128 v21; // rt1
+  __m128 v22; // xmm4
+  _DWORD *v23; // esi
+  int v24; // eax
+  vgui::Panel *v25; // ecx
+  int v26; // ebx
+  int v27; // eax
+  _DWORD *v28; // eax
+  void (__cdecl *v29)(_DWORD *, int); // ecx
+  int v30; // edx
+  int v31; // ebx
+  int v32; // eax
+  _DWORD *v33; // eax
+  void (__cdecl *v34)(_DWORD *, int); // ecx
+  int v35; // edx
+  int v36; // ebx
+  int v37; // eax
+  _DWORD *v38; // eax
+  void (__cdecl *v39)(_DWORD *, int); // ecx
+  int v40; // edx
+  int v41; // ebx
+  int v42; // eax
+  _DWORD *v43; // eax
+  int v44; // ecx
+  CIndicatorScreen *v45; // ebx
+  _DWORD *v46; // esi
+  int (__cdecl *v47)(_DWORD *, _DWORD, int, int, int, int, int, _DWORD, _DWORD); // edi
+  int v48; // eax
+  _DWORD *v49; // eax
+  void (__cdecl *v50)(_DWORD *, int); // ecx
+  int v51; // edx
+  _DWORD *v52; // esi
+  int (__cdecl *v53)(_DWORD *, _DWORD, int, int, int, int, int, _DWORD, _DWORD); // edi
+  int v54; // eax
+  _DWORD *v55; // eax
+  void (__cdecl *v56)(_DWORD *, int); // ecx
+  int v57; // edx
+  _DWORD *v58; // esi
+  int (__cdecl *v59)(_DWORD *, _DWORD, _DWORD, int, int, int, _DWORD, _DWORD, int); // edi
+  int v60; // eax
+  _DWORD *v61; // esi
+  int (__cdecl *v62)(_DWORD *, _DWORD, _DWORD, int, int, int, _DWORD, _DWORD, int); // edi
+  int v63; // eax
+  _DWORD *v64; // [esp+24h] [ebp-B4h]
+  _DWORD *v65; // [esp+24h] [ebp-B4h]
+  _DWORD *v66; // [esp+24h] [ebp-B4h]
+  float v67; // [esp+28h] [ebp-B0h]
+  int (__cdecl *v68)(_DWORD *, int, _DWORD, int, int); // [esp+28h] [ebp-B0h]
+  int (__cdecl *v69)(_DWORD *, int, int, int, int, _DWORD, int, int, _DWORD); // [esp+28h] [ebp-B0h]
+  int (__cdecl *v70)(_DWORD *, int, int, int, int, _DWORD, int, int, _DWORD); // [esp+28h] [ebp-B0h]
+  int v71; // [esp+2Ch] [ebp-ACh]
+  float v72; // [esp+30h] [ebp-A8h]
+  void (__cdecl *v73)(_DWORD *, _DWORD, _DWORD, int, int); // [esp+34h] [ebp-A4h]
+  float v74; // [esp+34h] [ebp-A4h]
+  int v75; // [esp+38h] [ebp-A0h]
+  float v76; // [esp+44h] [ebp-94h]
+  void (__cdecl *v77)(_DWORD *, int, _DWORD, int, int); // [esp+44h] [ebp-94h]
+  float v78; // [esp+44h] [ebp-94h]
+  float v79; // [esp+48h] [ebp-90h]
+  float CountdownPercentage; // [esp+4Ch] [ebp-8Ch]
+  int v81; // [esp+50h] [ebp-88h]
+  int v82; // [esp+58h] [ebp-80h]
+  int v83; // [esp+60h] [ebp-78h]
+  int v84; // [esp+68h] [ebp-70h]
+  int v85; // [esp+70h] [ebp-68h]
+  int v86; // [esp+78h] [ebp-60h]
+  int v87; // [esp+80h] [ebp-58h]
+  int v88; // [esp+88h] [ebp-50h]
+  int v89; // [esp+90h] [ebp-48h]
+  int v90; // [esp+98h] [ebp-40h]
+  int v91; // [esp+A0h] [ebp-38h]
+  int v92; // [esp+A8h] [ebp-30h]
+  int v93; // [esp+B0h] [ebp-28h]
+  int v94; // [esp+B8h] [ebp-20h]
+  int v95; // [esp+C0h] [ebp-18h]
+
+  v1 = *((_DWORD *)this + 109);
+  v2 = 0;
+  if ( v1 != -1 )
+  {
+    v3 = 16 * (unsigned __int16)v1;
+    if ( *(_DWORD *)((char *)g_pEntityList + v3 + 8) == HIWORD(v1) )
+      v2 = *(C_LabIndicatorPanel **)((char *)g_pEntityList + v3 + 4);
+  }
+  CountdownPercentage = C_LabIndicatorPanel::GetCountdownPercentage(v2);
+  v76 = CountdownPercentage * 8.0;
+  v79 = ceilf(CountdownPercentage * 8.0);
+  v4.f32[0] = (float)(int)v79 - (float)(CountdownPercentage * 8.0);
+  if ( v4.f32[0] >= 0.0 )
+  {
+    v5 = (__m128)0xC37F0000;
+    v5.f32[0] = (float)(-255.0 * v4.f32[0]) + *(float *)((char *)&loc_56D7AF + 6285137);
+    LODWORD(v72) = _mm_andnot_ps(_mm_cmplt_ss((__m128)*(unsigned int *)((char *)&locret_56D397 + 6285137), v4), v5).u32[0];
+  }
+  else
+  {
+    v72 = *(float *)((char *)&loc_56D7AF + 6285137);
+  }
+  v75 = vgui::Panel::GetWide(this) / 2;
+  v71 = vgui::Panel::GetTall(this) / 2;
+  (*(void (__cdecl **)(_DWORD *, int))(*g_pVGuiSurface + 56))(g_pVGuiSurface, -1);
+  if ( *(_BYTE *)(*((_DWORD *)g_pEntityList + 4 * *((unsigned __int16 *)this + 218) + 1) + 2667)
+    && v76 > 0.00000011920929 )
+  {
+    v6 = *((_DWORD *)this + 103);
+  }
+  else
+  {
+    v6 = *((_DWORD *)this + 102);
+  }
+  (*(void (__cdecl **)(_DWORD *, int))(*g_pVGuiSurface + 148))(g_pVGuiSurface, v6);
+  v7 = g_pVGuiSurface;
+  v73 = *(void (__cdecl **)(_DWORD *, _DWORD, _DWORD, int, int))(*g_pVGuiSurface + 156);
+  Wide = vgui::Panel::GetWide(this);
+  Tall = vgui::Panel::GetTall(this);
+  v73(v7, 0, 0, Wide, Tall);
+  v10 = CountdownPercentage * 8.0;
+  if ( v76 <= 0.00000011920929 )
+  {
+    v11 = *((float *)gpGlobals + 3);
+    v12 = this;
+    if ( *((_BYTE *)this + 424) )
+    {
+      *((float *)this + 107) = v11;
+      *((_BYTE *)this + 424) = 0;
+      v67 = 8.0;
+      *(float *)&v13 = 0.0;
+    }
+    else
+    {
+      v15 = *((float *)this + 107);
+      v16 = *(float *)((char *)&loc_56EDEF + 6285137) + v15;
+      if ( v15 == v16 )
+      {
+        v13 = dword_B7EED0[(float)(v11 - v16) >= 0.0];
+        v67 = 8.0;
+      }
+      else
+      {
+        v17.f32[0] = (float)(v11 - v15) / (float)(v16 - v15);
+        *(float *)&v13 = 0.0;
+        if ( v17.f32[0] >= 0.0 )
+        {
+          v18 = *(float *)((char *)&loc_56D7AF + 6285137);
+          v19 = 0LL;
+          v19.f32[0] = (float)(v17.f32[0] * v18) + 0.0;
+          v20 = _mm_cmplt_ss((__m128)*(unsigned int *)((char *)&locret_56D397 + 6285137), v17);
+          v13 = v20.i32[0] & LODWORD(v18) | _mm_andnot_ps(v20, v19).u32[0];
+        }
+        v67 = 8.0;
+      }
+    }
+    goto LABEL_22;
+  }
+  *((_BYTE *)this + 424) = 1;
+  v13 = *(int *)((char *)&loc_56D7AF + 6285137);
+  v12 = this;
+  if ( v76 > *(float *)((char *)&loc_56F71F + 6285137) )
+  {
+    v67 = CountdownPercentage * 8.0;
+LABEL_22:
+    v74 = *(float *)&v13;
+    v21.i32[0] = 872415232;
+    v22 = _mm_cmple_ss((__m128)LODWORD(v76), v21);
+    LOWORD(v95) = -1;
+    BYTE2(v95) = -1;
+    HIBYTE(v95) = (int)COERCE_FLOAT(_mm_andnot_ps(v22, (__m128)LODWORD(v72)).u32[0] | v22.i32[0] & v13);
+    (*(void (__cdecl **)(_DWORD *, int))(*g_pVGuiSurface + 56))(g_pVGuiSurface, v95);
+    (*(void (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 148))(g_pVGuiSurface, *((_DWORD *)v12 + 104));
+    v23 = g_pVGuiSurface;
+    v77 = *(void (__cdecl **)(_DWORD *, int, _DWORD, int, int))(*g_pVGuiSurface + 156);
+    v24 = vgui::Panel::GetWide(v12);
+    v25 = v12;
+    v26 = v75 + v24 / 2;
+    v27 = vgui::Panel::GetTall(v25);
+    v77(v23, v75, 0, v26, v27 / 2);
+    result = 1;
+    v10 = v67;
+    goto LABEL_23;
+  }
+  v74 = *(float *)((char *)&loc_56D7AF + 6285137);
+  result = 0;
+LABEL_23:
+  if ( v10 > 6.0 && *(float *)((char *)&loc_56F71F + 6285137) > v10 )
+  {
+    v28 = g_pVGuiSurface;
+    v29 = *(void (__cdecl **)(_DWORD *, int))(*g_pVGuiSurface + 56);
+    LOWORD(v94) = -1;
+    BYTE2(v94) = -1;
+    HIBYTE(v94) = (int)v72;
+    v30 = v94;
+LABEL_28:
+    v29(v28, v30);
+    (*(void (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 148))(g_pVGuiSurface, *((_DWORD *)this + 105));
+    v64 = g_pVGuiSurface;
+    v68 = *(int (__cdecl **)(_DWORD *, int, _DWORD, int, int))(*g_pVGuiSurface + 156);
+    v31 = v75 + vgui::Panel::GetWide(this) / 2;
+    v32 = vgui::Panel::GetTall(this);
+    result = v68(v64, v75, 0, v31, v32 / 2);
+    goto LABEL_29;
+  }
+  if ( result )
+  {
+    v28 = g_pVGuiSurface;
+    v29 = *(void (__cdecl **)(_DWORD *, int))(*g_pVGuiSurface + 56);
+    LOWORD(v93) = -1;
+    BYTE2(v93) = -1;
+    HIBYTE(v93) = (int)v74;
+    v30 = v93;
+    goto LABEL_28;
+  }
+LABEL_29:
+  if ( v10 > 5.0 && v10 < 6.0 )
+  {
+    v33 = g_pVGuiSurface;
+    v34 = *(void (__cdecl **)(_DWORD *, int))(*g_pVGuiSurface + 56);
+    LOWORD(v92) = -1;
+    BYTE2(v92) = -1;
+    HIBYTE(v92) = (int)v72;
+    v35 = v92;
+LABEL_34:
+    v34(v33, v35);
+    (*(void (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 148))(g_pVGuiSurface, *((_DWORD *)this + 105));
+    v65 = g_pVGuiSurface;
+    v69 = *(int (__cdecl **)(_DWORD *, int, int, int, int, _DWORD, int, int, _DWORD))(*g_pVGuiSurface + 412);
+    v36 = v75 + vgui::Panel::GetWide(this) / 2;
+    v37 = vgui::Panel::GetTall(this);
+    result = v69(v65, v75, v71, v36, v71 + v37 / 2, 0, 1065353216, 1065353216, 0);
+    goto LABEL_35;
+  }
+  if ( v10 > 6.0 )
+  {
+    v33 = g_pVGuiSurface;
+    v34 = *(void (__cdecl **)(_DWORD *, int))(*g_pVGuiSurface + 56);
+    LOWORD(v91) = -1;
+    BYTE2(v91) = -1;
+    HIBYTE(v91) = (int)v74;
+    v35 = v91;
+    goto LABEL_34;
+  }
+LABEL_35:
+  if ( v10 > 4.0 && v10 < 5.0 )
+  {
+    v38 = g_pVGuiSurface;
+    v39 = *(void (__cdecl **)(_DWORD *, int))(*g_pVGuiSurface + 56);
+    LOWORD(v90) = -1;
+    BYTE2(v90) = -1;
+    HIBYTE(v90) = (int)v72;
+    v40 = v90;
+LABEL_40:
+    v39(v38, v40);
+    (*(void (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 148))(g_pVGuiSurface, *((_DWORD *)this + 104));
+    v66 = g_pVGuiSurface;
+    v70 = *(int (__cdecl **)(_DWORD *, int, int, int, int, _DWORD, int, int, _DWORD))(*g_pVGuiSurface + 412);
+    v41 = v75 + vgui::Panel::GetWide(this) / 2;
+    v42 = vgui::Panel::GetTall(this);
+    result = v70(v66, v75, v71, v41, v71 + v42 / 2, 0, 1065353216, 1065353216, 0);
+    goto LABEL_41;
+  }
+  if ( v10 > 5.0 )
+  {
+    v38 = g_pVGuiSurface;
+    v39 = *(void (__cdecl **)(_DWORD *, int))(*g_pVGuiSurface + 56);
+    LOWORD(v89) = -1;
+    BYTE2(v89) = -1;
+    HIBYTE(v89) = (int)v74;
+    v40 = v89;
+    goto LABEL_40;
+  }
+LABEL_41:
+  if ( v10 > 3.0 && v10 < 4.0 )
+  {
+    LOWORD(v88) = -1;
+    BYTE2(v88) = -1;
+    HIBYTE(v88) = (int)v72;
+    v78 = v10;
+    (*(void (__cdecl **)(_DWORD *, int))(*g_pVGuiSurface + 56))(g_pVGuiSurface, v88);
+    v43 = g_pVGuiSurface;
+    v44 = *g_pVGuiSurface;
+    v45 = this;
+LABEL_46:
+    (*(void (__cdecl **)(_DWORD *, _DWORD))(v44 + 148))(v43, *((_DWORD *)v45 + 104));
+    v46 = g_pVGuiSurface;
+    v47 = *(int (__cdecl **)(_DWORD *, _DWORD, int, int, int, int, int, _DWORD, _DWORD))(*g_pVGuiSurface + 412);
+    v48 = vgui::Panel::GetTall(v45);
+    result = v47(v46, 0, v71, v75, v71 + v48 / 2, 1065353216, 1065353216, 0, 0);
+    v10 = v78;
+    goto LABEL_47;
+  }
+  v45 = this;
+  if ( v10 > 4.0 )
+  {
+    LOWORD(v87) = -1;
+    BYTE2(v87) = -1;
+    HIBYTE(v87) = (int)v74;
+    v78 = v10;
+    (*(void (__cdecl **)(_DWORD *, int))(*g_pVGuiSurface + 56))(g_pVGuiSurface, v87);
+    v43 = g_pVGuiSurface;
+    v44 = *g_pVGuiSurface;
+    goto LABEL_46;
+  }
+LABEL_47:
+  if ( v10 > 2.0 && v10 < 3.0 )
+  {
+    v49 = g_pVGuiSurface;
+    v50 = *(void (__cdecl **)(_DWORD *, int))(*g_pVGuiSurface + 56);
+    LOWORD(v86) = -1;
+    BYTE2(v86) = -1;
+    HIBYTE(v86) = (int)v72;
+    v51 = v86;
+LABEL_52:
+    v50(v49, v51);
+    (*(void (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 148))(g_pVGuiSurface, *((_DWORD *)v45 + 105));
+    v52 = g_pVGuiSurface;
+    v53 = *(int (__cdecl **)(_DWORD *, _DWORD, int, int, int, int, int, _DWORD, _DWORD))(*g_pVGuiSurface + 412);
+    v54 = vgui::Panel::GetTall(v45);
+    result = v53(v52, 0, v71, v75, v71 + v54 / 2, 1065353216, 1065353216, 0, 0);
+    goto LABEL_53;
+  }
+  if ( v10 > 3.0 )
+  {
+    v49 = g_pVGuiSurface;
+    v50 = *(void (__cdecl **)(_DWORD *, int))(*g_pVGuiSurface + 56);
+    LOWORD(v85) = -1;
+    BYTE2(v85) = -1;
+    HIBYTE(v85) = (int)v74;
+    v51 = v85;
+    goto LABEL_52;
+  }
+LABEL_53:
+  if ( v10 > *(float *)((char *)&locret_56D397 + 6285137) && v10 < 2.0 )
+  {
+    v55 = g_pVGuiSurface;
+    v56 = *(void (__cdecl **)(_DWORD *, int))(*g_pVGuiSurface + 56);
+    LOWORD(v84) = -1;
+    BYTE2(v84) = -1;
+    HIBYTE(v84) = (int)v72;
+    v57 = v84;
+LABEL_58:
+    v56(v55, v57);
+    (*(void (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 148))(g_pVGuiSurface, *((_DWORD *)v45 + 105));
+    v58 = g_pVGuiSurface;
+    v59 = *(int (__cdecl **)(_DWORD *, _DWORD, _DWORD, int, int, int, _DWORD, _DWORD, int))(*g_pVGuiSurface + 412);
+    v60 = vgui::Panel::GetTall(v45);
+    result = v59(v58, 0, 0, v75, v60 / 2, 1065353216, 0, 0, 1065353216);
+    goto LABEL_59;
+  }
+  if ( v10 > 2.0 )
+  {
+    v55 = g_pVGuiSurface;
+    v56 = *(void (__cdecl **)(_DWORD *, int))(*g_pVGuiSurface + 56);
+    LOWORD(v83) = -1;
+    BYTE2(v83) = -1;
+    HIBYTE(v83) = (int)v74;
+    v57 = v83;
+    goto LABEL_58;
+  }
+LABEL_59:
+  if ( v10 <= 0.0 || *(float *)((char *)&locret_56D397 + 6285137) <= v10 )
+  {
+    if ( v10 <= *(float *)((char *)&locret_56D397 + 6285137) )
+      return result;
+    LOWORD(v81) = -1;
+    BYTE2(v81) = -1;
+    HIBYTE(v81) = (int)v74;
+    (*(void (__cdecl **)(_DWORD *, int))(*g_pVGuiSurface + 56))(g_pVGuiSurface, v81);
+  }
+  else
+  {
+    LOWORD(v82) = -1;
+    BYTE2(v82) = -1;
+    HIBYTE(v82) = (int)v72;
+    (*(void (__cdecl **)(_DWORD *, int))(*g_pVGuiSurface + 56))(g_pVGuiSurface, v82);
+  }
+  (*(void (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 148))(g_pVGuiSurface, *((_DWORD *)v45 + 104));
+  v61 = g_pVGuiSurface;
+  v62 = *(int (__cdecl **)(_DWORD *, _DWORD, _DWORD, int, int, int, _DWORD, _DWORD, int))(*g_pVGuiSurface + 412);
+  v63 = vgui::Panel::GetTall(v45);
+  return v62(v61, 0, 0, v75, v63 / 2, 1065353216, 0, 0, 1065353216);
+}

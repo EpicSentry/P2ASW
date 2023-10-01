@@ -66,6 +66,8 @@ void CLabIndicatorPanel::Spawn( void )
 
 	m_bEnabled = true;
 
+	m_bDoFullTransmit = true;
+
 	ScreenVisible( true );
 
 	m_bCountingDown = false;
@@ -87,6 +89,7 @@ void CLabIndicatorPanel::Precache( void )
 void CLabIndicatorPanel::OnRestore( void )
 {
 	BaseClass::OnRestore();
+	m_bDoFullTransmit = true;
 	RestoreControlPanels();
 	ScreenVisible( m_bEnabled );
 }
@@ -108,11 +111,12 @@ void CLabIndicatorPanel::RestoreControlPanels( void )
 //-----------------------------------------------------------------------------
 void CLabIndicatorPanel::Enable( void )
 {
-	if ( !m_bEnabled )
-	{
-		m_bEnabled = true;
-		ScreenVisible( true );
-	}
+	if ( m_bEnabled )
+		return;
+
+	m_bEnabled = true;
+
+	ScreenVisible( true );
 }
 
 //-----------------------------------------------------------------------------
@@ -120,11 +124,12 @@ void CLabIndicatorPanel::Enable( void )
 //-----------------------------------------------------------------------------
 void CLabIndicatorPanel::Disable( void )
 {
-	if ( m_bEnabled )
-	{
-		m_bEnabled = false;
-		ScreenVisible( false );
-	}
+	if ( !m_bEnabled )
+		return;
+
+	m_bEnabled = false;
+
+	ScreenVisible( false );
 }
 
 //-----------------------------------------------------------------------------
@@ -179,35 +184,44 @@ void CLabIndicatorPanel::GetControlPanelClassName( int nPanelIndex, const char *
 //-----------------------------------------------------------------------------
 void CLabIndicatorPanel::SpawnControlPanels( void )
 {
-	CVGuiScreen *VGuiScreen = CreateVGuiScreen("vgui_screen", "indicator_panel", this, this, -1);
+	int nPanel;
+	for ( nPanel = 0; true; ++nPanel )
+	{
+		const char *pScreenName;
+		GetControlPanelInfo( nPanel, pScreenName );
+		if (!pScreenName)
+			continue;
 
-	VGuiScreen->ChangeTeam( GetTeamNumber() );
-	VGuiScreen->SetActualSize( 32.0, 32.0);
-	VGuiScreen->SetActive( true );
-	VGuiScreen->MakeVisibleOnlyToTeammates( false );
-	VGuiScreen->SetTransparency( true );
+		const char *pScreenClassname;
+		GetControlPanelClassName( nPanel, pScreenClassname );
+		if ( !pScreenClassname )
+			continue;
 
-	m_hScreen = VGuiScreen;
+		CVGuiScreen *pScreen = CreateVGuiScreen(pScreenClassname, pScreenName, this, this, 0);
+
+		pScreen->ChangeTeam(GetTeamNumber());
+		pScreen->SetActualSize( 32.0, 32.0);
+		pScreen->SetActive(true);
+		pScreen->MakeVisibleOnlyToTeammates(false);
+		pScreen->SetTransparency(true);		
+		
+		m_hScreen = pScreen;
+
+		return;
+	}
 }
 void CLabIndicatorPanel::ScreenVisible( bool bVisible )
 {
-	if (m_hScreen)
-	{
-		if (bVisible)
-		{
-#if 0
-			m_pPev = entscreen2->m_Network.m_pPev;
-			if (m_pPev)
-				m_pPev->m_fStateFlags |= 0x80u;
-#endif
-			m_hScreen->RemoveEffects(EF_NODRAW);
-			//m_hScreen->DispatchUpdateTransmitState();
+	// Set its active state
+	m_hScreen->SetActive( bVisible );
 
-		}
-		else
-		{
-			m_hScreen->AddEffects( EF_NODRAW );
-		}
+	if ( bVisible )
+	{
+		m_hScreen->RemoveEffects( EF_NODRAW );
+	}
+	else
+	{
+		m_hScreen->AddEffects( EF_NODRAW );
 	}
 }
 
@@ -224,8 +238,8 @@ void CLabIndicatorPanel::SetIsTimer( bool bIsTimer )
 //-----------------------------------------------------------------------------
 void CLabIndicatorPanel::SetChecked( bool bIsChecked )
 {
-	m_bIsChecked = true;
-	m_bIsCountdownTimer = false;
+	m_bIsChecked = bIsChecked;
+	SetIsTimer( false );
 }
 
 //-----------------------------------------------------------------------------
@@ -233,6 +247,12 @@ void CLabIndicatorPanel::SetChecked( bool bIsChecked )
 //-----------------------------------------------------------------------------
 int CLabIndicatorPanel::UpdateTransmitState( void )
 {
+	if ( m_bDoFullTransmit )
+	{
+		m_bDoFullTransmit = false;
+		return SetTransmitState( FL_EDICT_ALWAYS );
+	}
+
 	return SetTransmitState( FL_EDICT_FULLCHECK );
 }
 
@@ -241,9 +261,14 @@ int CLabIndicatorPanel::UpdateTransmitState( void )
 //-----------------------------------------------------------------------------
 void CLabIndicatorPanel::SetTransmit( CCheckTransmitInfo *pInfo, bool bAlways )
 {
+	// Are we already marked for transmission?
+	if ( pInfo->m_pTransmitEdict->Get( entindex() ) )
+		return;
+
 	BaseClass::SetTransmit( pInfo, bAlways );
-	if ( m_hScreen )
-		m_hScreen->SetTransmit( pInfo, bAlways );
+
+	// Force our screen to be sent too.
+	m_hScreen->SetTransmit( pInfo, bAlways );
 }
 
 //-----------------------------------------------------------------------------
@@ -269,11 +294,13 @@ BEGIN_DATADESC( CPropIndicatorPanel )
 
 	DEFINE_FIELD( m_flTimerStart, FIELD_BOOLEAN ),
 
+	DEFINE_FIELD( m_hIndicatorPanel, FIELD_EHANDLE ),
+
 	DEFINE_KEYFIELD( m_bEnabled, FIELD_BOOLEAN, "Enabled" ),
 	DEFINE_KEYFIELD( m_bIsCountdownTimer, FIELD_BOOLEAN, "IsTimer" ),
 	DEFINE_KEYFIELD( m_bIsChecked, FIELD_BOOLEAN, "IsChecked" ),
 	DEFINE_KEYFIELD( m_strIndicatorLights, FIELD_STRING, "IndicatorLights" ),
-	DEFINE_KEYFIELD( m_flTimerDuration, FIELD_BOOLEAN, "TimerDuration" ),
+	DEFINE_KEYFIELD( m_flTimerDuration, FIELD_FLOAT, "TimerDuration" ),
 
 	DEFINE_INPUTFUNC( FIELD_VOID, "Check", InputCheck ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "Uncheck", InputUncheck ),

@@ -1,0 +1,4 @@
+int __cdecl CIndicatorScreen::OnTick(CIndicatorScreen *this)
+{
+  return vgui::Panel::OnTick(this);
+}

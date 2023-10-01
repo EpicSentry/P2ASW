@@ -1,0 +1,28 @@
+void __cdecl CIndicatorScreen::~CIndicatorScreen(CIndicatorScreen *this, int *a2)
+{
+  int v2; // ecx
+
+  v2 = *a2;
+  *(_DWORD *)this = *a2;
+  *(_DWORD *)((char *)this + *(_DWORD *)(v2 - 124)) = a2[7];
+  if ( g_pVGuiSurface )
+  {
+    if ( *((_DWORD *)this + 102) != -1 )
+      (*(void (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 564))(g_pVGuiSurface, *((_DWORD *)this + 102));
+    if ( *((_DWORD *)this + 103) != -1 )
+      (*(void (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 564))(g_pVGuiSurface, *((_DWORD *)this + 103));
+    if ( *((_DWORD *)this + 104) != -1 )
+      (*(void (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 564))(g_pVGuiSurface, *((_DWORD *)this + 104));
+    if ( *((_DWORD *)this + 105) != -1 )
+      (*(void (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 564))(g_pVGuiSurface, *((_DWORD *)this + 105));
+    if ( *((_DWORD *)this + 98) != -1 )
+      (*(void (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 564))(g_pVGuiSurface, *((_DWORD *)this + 98));
+    if ( *((_DWORD *)this + 99) != -1 )
+      (*(void (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 564))(g_pVGuiSurface, *((_DWORD *)this + 99));
+    if ( *((_DWORD *)this + 100) != -1 )
+      (*(void (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 564))(g_pVGuiSurface, *((_DWORD *)this + 100));
+    if ( *((_DWORD *)this + 101) != -1 )
+      (*(void (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 564))(g_pVGuiSurface, *((_DWORD *)this + 101));
+  }
+  CVGuiScreenPanel::~CVGuiScreenPanel(this);
+}

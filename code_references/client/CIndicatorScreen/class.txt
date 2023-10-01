@@ -1,0 +1,31 @@
+class CIndicatorScreen : public CVGuiScreenPanel, public vgui::IClientPanel
+{
+public:
+
+    void CIndicatorScreen(class CIndicatorScreen & );
+    void CIndicatorScreen(class vgui::Panel * ,char * );
+    void ~CIndicatorScreen();
+    void ApplySchemeSettings(class vgui::IScheme * );
+    bool Init(class KeyValues * ,struct VGuiScreenInitData_t * );
+    void OnTick();
+    void Paint();
+	
+private:
+	
+    void PaintCountdownTimer();
+    void PaintIndicator();
+	
+    int m_nCheckTextureID;
+    int m_nUncheckedTextureID;
+    int m_nXTextureID;
+    int m_nOTextureID;
+    int m_nTimerBackgroundTextureID;
+    int m_nTimerBackgroundActiveTextureID;
+    int m_nTimerUpperSliceTextureID;
+    int m_nTimerLowerSliceTextureID;
+	
+    bool m_bWasCounting;
+    float m_flFadeUpTime;
+    CHandle<C_VGuiScreen> m_hVGUIScreen;
+    CHandle<C_LabIndicatorPanel> m_hScreenEntity;
+};

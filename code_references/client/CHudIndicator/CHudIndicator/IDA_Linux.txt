@@ -1,0 +1,54 @@
+void __cdecl CHudIndicator::CHudIndicator(CHudIndicator *const this, const char *pElementName)
+{
+  bool v2; // zf
+  vgui::PanelKeyBindingMap *v3; // eax
+  IClientMode *ClientMode; // eax
+  vgui::Panel *v5; // eax
+  vgui::PanelMessageMap *v6; // eax
+  vgui::PanelMessageMap *v7; // ebx
+  vgui::PanelMessageMap *v8; // eax
+  PanelAnimationMap *v9; // eax
+
+  *(_DWORD *)this->gap0 = off_11D71C8;
+  vgui::EditablePanel::EditablePanel(this, (const void **const)&off_13D4AB4, 0, "HudIndicator");
+  CHudElement::CHudElement(&this->CHudElement, pElementName);
+  *(_DWORD *)this->gap0 = off_13D4B5C;
+  v2 = CHudIndicator::ChainToMap(void)::chained == 0;
+  this->_vptr_IGameEventListener2 = (int (**)(...))off_13D4F24;
+  if ( v2 )
+  {
+    CHudIndicator::ChainToMap(void)::chained = 1;
+    v6 = vgui::FindOrAddPanelMessageMap("CHudIndicator");
+    v6->pfnClassName = CHudIndicator::GetPanelClassName;
+    v7 = v6;
+    v8 = vgui::FindOrAddPanelMessageMap("EditablePanel");
+    v2 = CHudIndicator::ChainToAnimationMap(void)::chained == 0;
+    v7->baseMap = v8;
+    if ( !v2 )
+      goto LABEL_3;
+  }
+  else if ( CHudIndicator::ChainToAnimationMap(void)::chained )
+  {
+    goto LABEL_3;
+  }
+  CHudIndicator::ChainToAnimationMap(void)::chained = 1;
+  v9 = FindOrAddPanelAnimationMap("CHudIndicator");
+  v9->pfnClassName = CHudIndicator::GetPanelClassName;
+  v9->baseMap = FindOrAddPanelAnimationMap("EditablePanel");
+LABEL_3:
+  if ( !CHudIndicator::KB_ChainToMap(void)::chained )
+  {
+    CHudIndicator::KB_ChainToMap(void)::chained = 1;
+    v3 = vgui::FindOrAddPanelKeyBindingMap("CHudIndicator");
+    v3->pfnClassName = CHudIndicator::GetPanelClassName;
+    v3->baseMap = vgui::FindOrAddPanelKeyBindingMap("EditablePanel");
+  }
+  ClientMode = GetClientMode();
+  v5 = (vgui::Panel *)(*((int (__cdecl **)(IClientMode *))ClientMode->_vptr_IClientMode + 10))(ClientMode);
+  vgui::Panel::SetParent(this, v5);
+  CHudElement::SetHiddenBits(&this->CHudElement, 16);
+  vgui::EditablePanel::LoadControlSettings(this, "Resource/Indicator.res", 0, 0, 0);
+  this->m_nTexture[0] = -1;
+  this->m_nTexture[1] = -1;
+  this->m_nIndicatorType = 0;
+}

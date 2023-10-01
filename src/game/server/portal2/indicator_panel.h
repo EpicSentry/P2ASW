@@ -44,7 +44,10 @@ private:
 	
 	CNetworkVar( int, m_iPlayerPinged );
 
-   CHandle<CVGuiScreen> m_hScreen;
+	// NOTE: This isn't faithful to the code, just trying to fix an issue where GetEntity() for the client is NULL
+	bool m_bDoFullTransmit;
+
+	CHandle<CVGuiScreen> m_hScreen;
 	
 };
 

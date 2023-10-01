@@ -1,0 +1,52 @@
+void __thiscall CIndicatorScreen::~CIndicatorScreen(CIndicatorScreen *this)
+{
+  int v2; // eax
+  vgui::ISurface *v3; // ecx
+
+  v2 = *((_DWORD *)&this->__vftable + 1);
+  this->__vftable = (CIndicatorScreen_vtbl *)&CIndicatorScreen::`vftable'{for `vgui::Panel'};
+  *(CIndicatorScreen_vtbl **)((char *)&this->__vftable + *(_DWORD *)(v2 + 4) + 4) = (CIndicatorScreen_vtbl *)&CIndicatorScreen::`vftable'{for `vgui::IClientPanel'};
+  *(CIndicatorScreen_vtbl **)((char *)&this->__vftable + *(_DWORD *)(*((_DWORD *)&this->__vftable + 1) + 4)) = (CIndicatorScreen_vtbl *)(*(_DWORD *)(*((_DWORD *)&this->__vftable + 1) + 4) - 444);
+  v3 = g_pVGuiSurface;
+  if ( g_pVGuiSurface )
+  {
+    if ( this->m_nTimerBackgroundTextureID != -1 )
+    {
+      ((void (__stdcall *)(int))g_pVGuiSurface->DestroyTextureID)(this->m_nTimerBackgroundTextureID);
+      v3 = g_pVGuiSurface;
+    }
+    if ( this->m_nTimerBackgroundActiveTextureID != -1 )
+    {
+      v3->DestroyTextureID(v3, this->m_nTimerBackgroundActiveTextureID);
+      v3 = g_pVGuiSurface;
+    }
+    if ( this->m_nTimerUpperSliceTextureID != -1 )
+    {
+      v3->DestroyTextureID(v3, this->m_nTimerUpperSliceTextureID);
+      v3 = g_pVGuiSurface;
+    }
+    if ( this->m_nTimerLowerSliceTextureID != -1 )
+    {
+      v3->DestroyTextureID(v3, this->m_nTimerLowerSliceTextureID);
+      v3 = g_pVGuiSurface;
+    }
+    if ( *(&this->m_iConfigID + 2) != -1 )
+    {
+      v3->DestroyTextureID(v3, *(&this->m_iConfigID + 2));
+      v3 = g_pVGuiSurface;
+    }
+    if ( *(_DWORD *)this->gap190 != -1 )
+    {
+      v3->DestroyTextureID(v3, *(_DWORD *)this->gap190);
+      v3 = g_pVGuiSurface;
+    }
+    if ( this->m_nXTextureID != -1 )
+    {
+      v3->DestroyTextureID(v3, this->m_nXTextureID);
+      v3 = g_pVGuiSurface;
+    }
+    if ( this->m_nOTextureID != -1 )
+      v3->DestroyTextureID(v3, this->m_nOTextureID);
+  }
+  CVGuiScreenPanel::~CVGuiScreenPanel(this);
+}

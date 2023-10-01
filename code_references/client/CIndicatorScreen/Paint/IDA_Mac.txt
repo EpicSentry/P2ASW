@@ -1,0 +1,25 @@
+unsigned int __cdecl CIndicatorScreen::Paint(CIndicatorScreen *this)
+{
+  unsigned int result; // eax
+  int v2; // edx
+
+  vgui::Panel::Paint(this);
+  result = *((_DWORD *)this + 109);
+  if ( result != -1 )
+  {
+    v2 = 16 * (unsigned __int16)result;
+    result >>= 16;
+    if ( *(_DWORD *)(g_pEntityList + v2 + 8) == result )
+    {
+      result = *(_DWORD *)(g_pEntityList + v2 + 4);
+      if ( result )
+      {
+        if ( *(_BYTE *)(result + 2668) )
+          return CIndicatorScreen::PaintCountdownTimer(this);
+        else
+          return CIndicatorScreen::PaintIndicator(this);
+      }
+    }
+  }
+  return result;
+}

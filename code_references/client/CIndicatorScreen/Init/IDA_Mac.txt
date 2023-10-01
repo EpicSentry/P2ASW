@@ -1,0 +1,179 @@
+int __cdecl CIndicatorScreen::Init(int a1, int a2, int a3)
+{
+  _DWORD *v3; // esi
+  void (__cdecl *v4)(_DWORD *, int, _DWORD); // ebx
+  int v5; // eax
+  unsigned int v6; // eax
+  int *v7; // ebx
+  int v8; // edx
+  const void *v9; // eax
+  void *v10; // eax
+  unsigned int *v11; // eax
+  unsigned int v12; // ecx
+  bool v13; // zf
+  int v14; // eax
+  int v15; // edx
+  int v16; // ecx
+  unsigned int v17; // ecx
+  int v18; // edx
+  const void *v19; // eax
+  void *v20; // eax
+  unsigned __int8 v21; // bl
+  int v22; // eax
+  int v23; // eax
+  int v24; // eax
+  int v25; // eax
+  int v26; // eax
+  int v27; // eax
+  int v28; // eax
+  int v29; // eax
+  struct __class_type_info *lpstype; // [esp+14h] [ebp-14h]
+
+  v3 = g_pVGui;
+  v4 = *(void (__cdecl **)(_DWORD *, int, _DWORD))(*g_pVGui + 84);
+  v5 = (**(int (__cdecl ***)(int))a1)(a1);
+  v4(v3, v5, 0);
+  if ( (unsigned __int8)CVGuiScreenPanel::Init(a1, a2, a3) )
+  {
+    v6 = *(_DWORD *)(a1 + 388);
+    if ( v6 != -1
+      && (v7 = *(int **)((char *)&loc_6E3D4A + 6284030),
+          v8 = 16 * (unsigned __int16)v6,
+          *(_DWORD *)(*v7 + v8 + 8) == HIWORD(v6))
+      && (v9 = *(const void **)(*v7 + v8 + 4)) != 0
+      && (lpstype = *(struct __class_type_info **)((char *)&loc_6E3DC6 + 6284030),
+          (v10 = __dynamic_cast(v9, lpstype, (const struct __class_type_info *)&`typeinfo for'C_VGuiScreen, 0)) != 0) )
+    {
+      v11 = (unsigned int *)(*(int (__cdecl **)(void *))(*(_DWORD *)v10 + 12))(v10);
+      v12 = *v11;
+      v13 = *v11 == -1;
+      *(_DWORD *)(a1 + 432) = *v11;
+      if ( !v13 )
+      {
+        v14 = *v7;
+        v15 = 16 * (unsigned __int16)v12;
+        if ( *(_DWORD *)(*v7 + v15 + 8) == HIWORD(v12) )
+        {
+          v16 = *(_DWORD *)(v14 + v15 + 4);
+          if ( v16 )
+          {
+            v17 = *(_DWORD *)(v16 + 300);
+            if ( v17 != -1
+              && (v18 = 16 * (unsigned __int16)v17, *(_DWORD *)(v14 + v18 + 8) == HIWORD(v17))
+              && (v19 = *(const void **)(v14 + v18 + 4)) != 0
+              && (v20 = __dynamic_cast(
+                          v19,
+                          lpstype,
+                          (const struct __class_type_info *)&`typeinfo for'C_LabIndicatorPanel,
+                          0)) != 0 )
+            {
+              *(_DWORD *)(a1 + 436) = *(_DWORD *)(*(int (__cdecl **)(void *))(*(_DWORD *)v20 + 12))(v20);
+            }
+            else
+            {
+              *(_DWORD *)(a1 + 436) = -1;
+            }
+          }
+        }
+      }
+    }
+    else
+    {
+      *(_DWORD *)(a1 + 432) = -1;
+    }
+    if ( *(_DWORD *)(a1 + 408) == -1 )
+    {
+      v22 = (*(int (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 164))(g_pVGuiSurface, 0);
+      *(_DWORD *)(a1 + 408) = v22;
+      (*(void (__cdecl **)(_DWORD *, int, char *, int, _DWORD))(*g_pVGuiSurface + 140))(
+        g_pVGuiSurface,
+        v22,
+        (char *)&loc_54AEC6 + 6284030,
+        1,
+        0);
+    }
+    if ( *(_DWORD *)(a1 + 412) == -1 )
+    {
+      v23 = (*(int (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 164))(g_pVGuiSurface, 0);
+      *(_DWORD *)(a1 + 412) = v23;
+      (*(void (__cdecl **)(_DWORD *, int, const char *, int, _DWORD))(*g_pVGuiSurface + 140))(
+        g_pVGuiSurface,
+        v23,
+        "vgui/signage/vgui_countdown_background_on",
+        1,
+        0);
+    }
+    if ( *(_DWORD *)(a1 + 416) == -1 )
+    {
+      v24 = (*(int (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 164))(g_pVGuiSurface, 0);
+      *(_DWORD *)(a1 + 416) = v24;
+      (*(void (__cdecl **)(_DWORD *, int, char *, int, _DWORD))(*g_pVGuiSurface + 140))(
+        g_pVGuiSurface,
+        v24,
+        (char *)&unk_54AF17 + 6284030,
+        1,
+        0);
+    }
+    if ( *(_DWORD *)(a1 + 420) == -1 )
+    {
+      v25 = (*(int (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 164))(g_pVGuiSurface, 0);
+      *(_DWORD *)(a1 + 420) = v25;
+      (*(void (__cdecl **)(_DWORD *, int, char *, int, _DWORD))(*g_pVGuiSurface + 140))(
+        g_pVGuiSurface,
+        v25,
+        (char *)&loc_54AF3A + 6284030,
+        1,
+        0);
+    }
+    if ( *(_DWORD *)(a1 + 392) == -1 )
+    {
+      v26 = (*(int (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 164))(g_pVGuiSurface, 0);
+      *(_DWORD *)(a1 + 392) = v26;
+      (*(void (__cdecl **)(_DWORD *, int, const char *, int, _DWORD))(*g_pVGuiSurface + 140))(
+        g_pVGuiSurface,
+        v26,
+        "vgui/signage/vgui_indicator_checked",
+        1,
+        0);
+    }
+    if ( *(_DWORD *)(a1 + 396) == -1 )
+    {
+      v27 = (*(int (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 164))(g_pVGuiSurface, 0);
+      *(_DWORD *)(a1 + 396) = v27;
+      (*(void (__cdecl **)(_DWORD *, int, const char *, int, _DWORD))(*g_pVGuiSurface + 140))(
+        g_pVGuiSurface,
+        v27,
+        "vgui/signage/vgui_indicator_unchecked",
+        1,
+        0);
+    }
+    if ( *(_DWORD *)(a1 + 400) == -1 )
+    {
+      v28 = (*(int (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 164))(g_pVGuiSurface, 0);
+      *(_DWORD *)(a1 + 400) = v28;
+      (*(void (__cdecl **)(_DWORD *, int, const char *, int, _DWORD))(*g_pVGuiSurface + 140))(
+        g_pVGuiSurface,
+        v28,
+        "vgui/signage/vgui_shape04",
+        1,
+        0);
+    }
+    v21 = 1;
+    if ( *(_DWORD *)(a1 + 404) == -1 )
+    {
+      v29 = (*(int (__cdecl **)(_DWORD *, _DWORD))(*g_pVGuiSurface + 164))(g_pVGuiSurface, 0);
+      *(_DWORD *)(a1 + 404) = v29;
+      (*(void (__cdecl **)(_DWORD *, int, const char *, int, _DWORD))(*g_pVGuiSurface + 140))(
+        g_pVGuiSurface,
+        v29,
+        "vgui/signage/vgui_shape05",
+        1,
+        0);
+    }
+  }
+  else
+  {
+    return 0;
+  }
+  return v21;
+}
