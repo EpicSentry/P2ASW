@@ -125,6 +125,7 @@ public:
 	virtual void	InactiveThink( void );
 	virtual void	SuppressThink( void );
 	virtual void	DisabledThink( void );
+	virtual void	BreakThink( void );
 	void	StartBurningThink( void );
 	void	BurnedThink( void );
 	virtual void	HackFindEnemy( void );

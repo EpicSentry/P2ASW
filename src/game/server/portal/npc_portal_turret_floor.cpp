@@ -139,10 +139,10 @@ void CNPC_Portal_FloorTurret::Precache( void )
 	CBaseEntity::PrecacheModel("models/npcs/turret/turret_backwards.mdl");
 	CBaseEntity::PrecacheModel("models/npcs/turret/turret_skeleton.mdl");
 	PrecacheModel("effects/redlaser1.vmt");
-	//PrecacheParticleSystem("ShakeRopes");
-	//PrecacheParticleSystem("AR2Tracer");
 	PrecacheEffect("AR2Tracer");
 	PrecacheParticleSystem("burning_character");
+	PrecacheParticleSystem("turret_coop_explosion");
+	PrecacheEffect("ShakeRopes");
 
 	for ( int iTalkScript = 0; iTalkScript < PORTAL_TURRET_STATE_TOTAL; ++iTalkScript )
 	{
@@ -1252,6 +1252,44 @@ void CNPC_Portal_FloorTurret::DisabledThink(void)
 		SetThink( NULL );
 	}
 
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CNPC_Portal_FloorTurret::BreakThink(void)
+{
+	Vector vecUp;
+	GetVectors(NULL, NULL, &vecUp);
+	Vector vecOrigin = WorldSpaceCenter() + (vecUp * 12.0f);
+
+	// K-boom
+	RadiusDamage(CTakeDamageInfo(this, this, 15.0f, DMG_BLAST), vecOrigin, (10 * 12), CLASS_NONE, this);
+
+	EmitSound("NPC_FloorTurret.Destruct");
+
+	if (g_pGameRules->IsMultiplayer())
+	{
+		DispatchParticleEffect("turret_coop_explosion", vecOrigin, GetAbsAngles(), PATTACH_ABSORIGIN, NULL);
+	}
+	else
+	{
+		breakablepropparams_t params(GetAbsOrigin(), GetAbsAngles(), vec3_origin, RandomAngularImpulse(-800.0f, 800.0f));
+		params.impactEnergyScale = 1.0f;
+		params.defCollisionGroup = COLLISION_GROUP_INTERACTIVE;
+
+		// no damage/damage force? set a burst of 100 for some movement
+		params.defBurstScale = 100;
+		PropBreakableCreateAll(GetModelIndex(), VPhysicsGetObject(), params, this, -1, true);
+
+		// Throw out some small chunks too obscure the explosion even more
+		CPVSFilter filter(vecOrigin);
+		Vector gibVelocity = RandomVector(-100, 100);
+		int iModelIndex = modelinfo->GetModelIndex(g_PropDataSystem.GetRandomChunkModel("MetalChunks"));
+		te->BreakModel(filter, 0.0, vecOrigin, GetAbsAngles(), Vector(40, 40, 40), gibVelocity, iModelIndex, 150, 4, 2.5, BREAK_METAL);
+	}
+	// We're done!
+	UTIL_Remove(this);
 }
 
 void CNPC_Portal_FloorTurret::StartBurningThink( void )
