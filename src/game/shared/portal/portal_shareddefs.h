@@ -10,6 +10,11 @@
 #pragma once
 #endif
 
+//#ifdef CLIENT_DLL
+#define NO_TRACTOR_BEAM
+//#endif
+
+
 #define PORTAL2_MP_SAVE_FILE "coop_data.txt"
 #define PORTAL2_MP_TEAM_TAUNT_FORCE_LENGTH 64
 

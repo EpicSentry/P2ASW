@@ -19,6 +19,10 @@
 #include "collisionutils.h"
 #include "portal_mp_gamerules.h"
 
+#ifndef NO_TRACTOR_BEAM
+#include "trigger_tractorbeam_shared.h"
+#endif
+
 #ifdef GAME_DLL
 BEGIN_SIMPLE_DATADESC( PortalPlayerStatistics_t )
 
@@ -5361,7 +5365,7 @@ void CPortalPlayerShared::ConditionGameRulesThink( void )
 #endif
 }
 
-#if 0
+#ifndef NO_TRACTOR_BEAM
 void CPortal_Player::SetInTractorBeam( CTrigger_TractorBeam *pTractorBeam )
 {
 	// TODO:

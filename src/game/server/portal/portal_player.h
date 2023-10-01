@@ -354,7 +354,7 @@ public:
 	bool FlashlightTurnOn( bool playSound /*= false*/ );
 	void FlashlightTurnOff( bool playSound /*= false*/ );
 	
-#if 0
+#ifndef NO_TRACTOR_BEAM
 	void SetInTractorBeam( CTrigger_TractorBeam *pTractorBeam );
 	void SetLeaveTractorBeam( CTrigger_TractorBeam *pTractorBeam, bool bKeepFloating );
 	CTrigger_TractorBeam* GetTractorBeam( void ) const { return m_PortalLocal.m_hTractorBeam.Get(); }

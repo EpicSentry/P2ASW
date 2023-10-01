@@ -86,7 +86,11 @@ public:
 
 	CNetworkQAngle( m_qQuaternionPunch );
 	
+#ifndef NO_TRACTOR_BEAM
+	CNetworkHandle( CTrigger_TractorBeam, m_hTractorBeam ) // Change to CTrigger_TractorBeam when we're ready
+#else
 	CNetworkHandle( CBaseEntity, m_hTractorBeam ) // Change to CTrigger_TractorBeam when we're ready
+#endif
 
     int m_nTractorBeamCount;
 };

@@ -156,6 +156,7 @@ extern const fltx4 Four_2ToThe23s;								// (1<<23)..
 extern const fltx4 Four_2ToThe24s;								// (1<<24)..
 extern const fltx4 Four_Origin;									// 0 0 0 1 (origin point, like vr0 on the PS2)
 extern const fltx4 Four_NegativeOnes;							// -1 -1 -1 -1 
+extern const fltx4 Four_DegToRad;								// (float)(M_PI_F / 180.f) times four
 #else
 #define			   Four_Zeros XMVectorZero()					// 0 0 0 0
 #define			   Four_Ones XMVectorSplatOne()					// 1 1 1 1
@@ -2449,6 +2450,12 @@ FORCEINLINE fltx4 DivSIMD( const fltx4 & a, const fltx4 & b )				// a/b
 	return _mm_div_ps( a, b );
 };
 
+fltx4 ReciprocalEstSIMD( const fltx4 & a );
+FORCEINLINE fltx4 DivEstSIMD( const fltx4 & a, const fltx4 & b )			// Est(a/b)
+{
+	return MulSIMD( ReciprocalEstSIMD( b ), a );
+};
+
 FORCEINLINE fltx4 MaddSIMD( const fltx4 & a, const fltx4 & b, const fltx4 & c )				// a*b + c
 {
 	return AddSIMD( MulSIMD(a,b), c );
@@ -2870,6 +2877,18 @@ FORCEINLINE void ExpandSIMD( fltx4 const &a, fltx4 &fl4OutA, fltx4 &fl4OutB )
 	fl4OutB = _mm_shuffle_ps( a, a, MM_SHUFFLE_REV( 2, 2, 3, 3 ) );
 
 }
+
+// construct a fltx4 from four different scalars, which are assumed to be neither aligned nor contiguous
+FORCEINLINE fltx4 LoadGatherSIMD( const float &x, const float &y, const float &z, const float &w )
+{
+	// load the float into the low word of each vector register (this exploits the unaligned load op)
+	fltx4 vx = _mm_load_ss( &x );
+	fltx4 vy = _mm_load_ss( &y );
+	fltx4 vz = _mm_load_ss( &z );
+	fltx4 vw = _mm_load_ss( &w );
+	return Compress4SIMD( vx, vy, vz, vw );
+}
+
 // These are not optimized right now for some platforms. We should be able to shuffle the values in some platforms.
 // As the methods are hard-coded we can actually avoid loading memory to do the transfer.
 // We should be able to create all versions.

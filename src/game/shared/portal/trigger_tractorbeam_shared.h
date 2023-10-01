@@ -17,6 +17,10 @@
 #include "utlvector.h"
 #include "igamesystem.h"
 
+#ifdef NO_TRACTOR_BEAM
+#error "THIS FILE SHOULDN'T BE INCLUDED"
+#endif
+
 class CTrigger_TractorBeam_Shared  //defined as a class to make intellisense more intelligent
 {
 public:
@@ -172,20 +176,7 @@ extern CTractorBeam_Manager g_TractorBeamManager;
 
 // Not sure where else to put this
 
-class ITriggerTractorBeamAutoList
-{
-public:
-	
-	virtual C_BaseEntity * GetEntity( void ) { return NULL; } // NOTE: This is just my best guess, could be inaccurate.
 
-	void ITriggerTractorBeamAutoList( class ITriggerTractorBeamAutoList & );
-	void ITriggerTractorBeamAutoList( bool );
-	void ~ITriggerTractorBeamAutoList();
-	void Add(class ITriggerTractorBeamAutoList * );
-	void Remove(class ITriggerTractorBeamAutoList * );
-	CUtlVector<ITriggerTractorBeamAutoList *,CUtlMemory<ITriggerTractorBeamAutoList *,int> > & AutoList();
-private:
-	CUtlVector<ITriggerTractorBeamAutoList *,CUtlMemory<ITriggerTractorBeamAutoList *,int> > m_ITriggerTractorBeamAutoListAutoList;
-};
+DECLARE_AUTO_LIST( ITriggerTractorBeamAutoList );
 
 #endif //TRIGGRE_TRACTORBEAM_SHARED_H

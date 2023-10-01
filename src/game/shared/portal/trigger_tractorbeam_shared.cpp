@@ -20,7 +20,7 @@
 #include "portal_player.h"
 #include "npc_portal_turret_floor.h"
 #include "prop_weightedcube.h"
-#include "cpaintblob.h"
+#include "paint/cpaintblob.h"
 
 #endif
 

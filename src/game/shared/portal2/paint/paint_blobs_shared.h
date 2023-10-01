@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//========= Copyright © Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -6,17 +6,25 @@
 #ifndef PAINT_BLOBS_SHARED_H
 #define PAINT_BLOBS_SHARED_H
 
+#include "portal_shareddefs.h"
 #include "paint_color_manager.h"
 
 #define BLOB_MODEL "models/props/sphere.mdl"
 
+#ifndef NO_TRACTOR_BEAM
+#include "trigger_tractorbeam_shared.h"
+#endif
+
 enum BlobTraceResult
 {
 	BLOB_TRACE_HIT_NOTHING = 0,
+	BLOB_TRACE_HIT_PORTAL,
 	BLOB_TRACE_HIT_WORLD,
 	BLOB_TRACE_HIT_PAINT_CLEANSER,
 	BLOB_TRACE_HIT_SOMETHING,
 	BLOB_TRACE_HIT_PLAYER,
+	BLOB_TRACE_HIT_TRACTORBEAM,
+	BLOB_TRACE_HIT_PROP_PORTAL // this flag is for creating ghost blobs to make smooth blobs rendering when blobs go through portal
 };
 
 struct BlobCollisionRecord
@@ -30,89 +38,96 @@ enum PaintBlobMoveState
 {
 	PAINT_BLOB_AIR_MOVE = 0,
 	PAINT_BLOB_STREAK_MOVE,
+	PAINT_BLOB_TRACTOR_BEAM_MOVE
 };
 
 
 class CBasePaintBlob
 {
 public:
-	CBasePaintBlob( void );
-	~CBasePaintBlob( void );
+	CBasePaintBlob(void);
+	~CBasePaintBlob(void);
 
-	virtual void Init( const Vector &vecOrigin, const Vector &vecVelocity, int paintType, float flMaxStreakTime, float flStreakSpeedDampenRate, CBaseEntity* pOwner, bool bSilent, bool bDrawOnly );
+	void Init(const Vector &vecOrigin, const Vector &vecVelocity, int paintType, float flMaxStreakTime, float flStreakSpeedDampenRate, CBaseEntity* pOwner, bool bSilent, bool bDrawOnly);
 
-	bool IsStreaking( void ) const;
+	bool IsStreaking(void) const;
 
-	const Vector& GetTempEndPosition( void ) const;
-	void SetTempEndPosition( const Vector &vecTempEndPosition );
+#ifndef NO_TRACTOR_BEAM
+	void SetTractorBeam(CTrigger_TractorBeam* pBeam);
+#endif
 
-	const Vector& GetTempEndVelocity( void ) const;
-	void SetTempEndVelocity( const Vector &vecTempEndVelocity );
+	const Vector& GetTempEndPosition(void) const;
+	void SetTempEndPosition(const Vector &vecTempEndPosition);
 
-	const Vector& GetPosition( void ) const;
-	void SetPosition( const Vector &vecPosition );
+	const Vector& GetTempEndVelocity(void) const;
+	void SetTempEndVelocity(const Vector &vecTempEndVelocity);
+
+	const Vector& GetPosition(void) const;
+	void SetPosition(const Vector &vecPosition);
 
 	const Vector& GetPrevPosition() const;
-	void SetPrevPosition( const Vector& vPrevPosition );
+	void SetPrevPosition(const Vector& vPrevPosition);
 
-	const Vector& GetVelocity( void ) const;
-	void SetVelocity( const Vector &vecVelocity );
+	const Vector& GetVelocity(void) const;
+	void SetVelocity(const Vector &vecVelocity);
 
 	const Vector& GetStreakDir() const;
 
-	PaintPowerType GetPaintPowerType( void ) const;
+	PaintPowerType GetPaintPowerType(void) const;
 
-	PaintBlobMoveState GetMoveState( void ) const;
-	void SetMoveState( PaintBlobMoveState moveState );
+	PaintBlobMoveState GetMoveState(void) const;
+	void SetMoveState(PaintBlobMoveState moveState);
 
 	float GetAccumulatedTime() const { return m_flAccumulatedTime; }
-	void SetAccumulatedTime( float flAccumulatedTime ) { m_flAccumulatedTime = flAccumulatedTime; }
+	void SetAccumulatedTime(float flAccumulatedTime) { m_flAccumulatedTime = flAccumulatedTime; }
 
 	// kill this if we don't need fixed time step
 	float GetLastUpdateTime() const { return m_flLastUpdateTime; }
-	void SetLastUpdateTime( float flLastUpdateTime ) { m_flLastUpdateTime = flLastUpdateTime; }
+	void SetLastUpdateTime(float flLastUpdateTime) { m_flLastUpdateTime = flLastUpdateTime; }
 
 	float GetVortexDirection() const;
 
 	bool ShouldDeleteThis() const;
-	void SetDeletionFlag( bool bDelete );
+	void SetDeletionFlag(bool bDelete);
 
 	float GetLifeTime() const;
-	void UpdateLifeTime( float flUpdateTime );
+	void UpdateLifeTime(float flUpdateTime);
 
-	void UpdateBlobCollision( float flDeltaTime, const Vector& vecEndPos, Vector& vecEndVelocity );
-	void UpdateBlobPostCollision( float flDeltaTime );
+	void UpdateBlobCollision(float flDeltaTime, const Vector& vecEndPos, Vector& vecEndVelocity);
+	void UpdateBlobPostCollision(float flDeltaTime);
 
 	const Vector& GetContactNormal() const;
 
 	float GetStreakTime() const { return m_flStreakTimer; }
 	float GetStreakSpeedDampenRate() const { return m_flStreakSpeedDampenRate; }
 
-	void SetRadiusScale( float flRadiusScale );
-	float GetRadiusScale( void ) const;
+	void SetRadiusScale(float flRadiusScale);
+	float GetRadiusScale(void) const;
 
 	bool ShouldPlayEffect() const;
 
 	bool IsSilent() const { return m_bSilent; }
-	
-	bool IsGhosting() const { return ( m_hPortal != NULL ); }
-	void GetGhostMatrix( VMatrix& matGhostTransform );
+
+	bool IsGhosting() const { return (m_hPortal != NULL); }
+	void GetGhostMatrix(VMatrix& matGhostTransform);
 	void ResetGhostState() { m_hPortal = NULL; }
+	
+#ifndef NO_TRACTOR_BEAM
+	CTrigger_TractorBeam* GetCurrentBeam() const;
+#endif
 
-	//CTrigger_TractorBeam* GetCurrentBeam() const;
+	bool PaintBlobCheckShouldStreak(const trace_t &trace);
 
-	bool PaintBlobCheckShouldStreak( const trace_t &trace );
+	void PlayEffect(const Vector& vPosition, const Vector& vNormal);
 
-	void PlayEffect( const Vector& vPosition, const Vector& vNormal );
+	bool PaintBlobStreakPaint(const Vector &vecBlobStartPos);
 
-	bool PaintBlobStreakPaint( const Vector &vecBlobStartPos );
+	virtual void PaintBlobPaint(const trace_t &tr) = 0;
 
-	virtual void PaintBlobPaint( const trace_t &tr ) = 0;
-
-	void SetShouldPlaySound( bool shouldPlaySound );
+	void SetShouldPlaySound(bool shouldPlaySound);
 	bool ShouldPlaySound() const;
 
-	void SetBlobTeleportedThisFrame( bool bTeleported ) { m_bTeleportedThisFrame = bTeleported; }
+	void SetBlobTeleportedThisFrame(bool bTeleported) { m_bTeleportedThisFrame = bTeleported; }
 	bool HasBlobTeleportedThisFrame() const { return m_bTeleportedThisFrame; }
 	int GetTeleportationCount() const { return m_nTeleportationCount; }
 
@@ -122,12 +137,15 @@ public:
 	float m_flVortexDirection; // -1.f or 1.f
 
 protected:
-	BlobTraceResult BlobHitSolid( CBaseEntity* pHitEntity );
-	int CheckCollision( BlobCollisionRecord *pCollisions, int maxCollisions, const Vector &vecEndPos );
-	void CheckCollisionAgainstWorldAndStaticProps( BlobCollisionRecord& solidHitRecord, float& flHitFraction );
-	void ResolveCollision( bool& bDeleted, const BlobCollisionRecord& collision, Vector& targetVelocity, float deltaTime );
+	void PaintBlobMoveThroughPortal(float flDeltaTime, CPortal_Base2D *pInPortal, const Vector &vecStartPos, const Vector &vecTransformedEndPos);
 
-	void DecayVortexSpeed( float flDeltaTime );
+	BlobTraceResult BlobHitSolid(CBaseEntity* pHitEntity);
+	int CheckCollision(BlobCollisionRecord *pCollisions, int maxCollisions, const Vector &vecEndPos);
+	void CheckCollisionAgainstWorldAndStaticProps(BlobCollisionRecord& solidHitRecord, float& flHitFraction);
+	int CheckCollisionThroughPortal(BlobCollisionRecord *pCollisions, int maxCollisions, const Vector &vecEndPos);
+	void ResolveCollision(bool& bDeleted, const BlobCollisionRecord& collision, Vector& targetVelocity, float deltaTime);
+
+	void DecayVortexSpeed(float flDeltaTime);
 
 	Vector m_vecTempEndPosition;
 	Vector m_vecTempEndVelocity;
@@ -163,9 +181,15 @@ protected:
 
 	bool m_bShouldPlayEffect;
 
+	// blob needs to know if hitting beam is the same as the current beam, so it doesn't need to init beam data again
+#ifndef NO_TRACTOR_BEAM
+	EntityBeamHistory_t m_beamHistory;
+	bool m_bInTractorBeam;
+#endif
+
 	// HACK: remove this when awesome paint box/sphere feature is done (Bank)
 	bool m_bSilent;
-	
+
 	// portal handle (for ghosting)
 	EHANDLE m_hPortal;
 
@@ -187,8 +211,7 @@ protected:
 class CPaintBlob;
 #else
 class C_PaintBlob;
-//typedef C_PaintBlob CPaintBlob
-#define CPaintBlob C_PaintBlob
+typedef C_PaintBlob CPaintBlob;
 #endif
 
 typedef CUtlVector<CPaintBlob*> PaintBlobVector_t;
@@ -199,11 +222,11 @@ typedef CUtlVector<CPaintBlob*> PaintBlobVector_t;
 //////////////////////////////////////////////////////////////////////////
 struct BlobTeleportationHistory_t
 {
-	BlobTeleportationHistory_t() : m_vEnterPosition( vec3_origin ), m_vExitPosition( vec3_origin ), m_flTeleportTime( 0.f )
+	BlobTeleportationHistory_t() : m_vEnterPosition(vec3_origin), m_vExitPosition(vec3_origin), m_flTeleportTime(0.f)
 	{
 	}
 
-	BlobTeleportationHistory_t( const VMatrix& matSourceToLinked, const VMatrix& matLinkedToSource, const Vector& vEnter, const Vector& vExit, float flTeleportTime )
+	BlobTeleportationHistory_t(const VMatrix& matSourceToLinked, const VMatrix& matLinkedToSource, const Vector& vEnter, const Vector& vExit, float flTeleportTime)
 	{
 		m_matSourceToLinked = matSourceToLinked;
 		m_matLinkedToSource = matLinkedToSource;
@@ -232,10 +255,10 @@ struct BlobData_t
 		m_flScale = 0.f;
 		m_bTeleportedThisFrame = false;
 		m_bGhosting = false;
-		MatrixSetIdentity( m_matGhostTransform );
+		MatrixSetIdentity(m_matGhostTransform);
 	}
 
-	BlobData_t( const BlobData_t& blobData )
+	BlobData_t(const BlobData_t& blobData)
 	{
 		m_blobID = blobData.m_blobID;
 		m_vPosition = blobData.m_vPosition;
@@ -257,7 +280,7 @@ struct BlobData_t
 	// teleportation data
 	bool m_bTeleportedThisFrame;
 	BlobTeleportationHistoryVector_t m_teleportationHistory;
-	
+
 	// ghosting data
 	bool m_bGhosting;
 	VMatrix m_matGhostTransform;
@@ -283,6 +306,6 @@ struct BlobInterpolationData_t
 
 typedef CUtlVector< BlobInterpolationData_t > BlobInterpolationDataVector_t;
 
-void PaintBlobUpdate( const PaintBlobVector_t& blobList );
+void PaintBlobUpdate(const PaintBlobVector_t& blobList);
 
 #endif //PAINT_BLOBS_SHARED_H
