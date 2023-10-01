@@ -1,7 +1,4 @@
-void __cdecl CLabIndicatorPanel::GetControlPanelInfo(
-        CLabIndicatorPanel *const this,
-        int nPanelIndex,
-        const char **const pPanelName)
+void __cdecl CLabIndicatorPanel::GetControlPanelInfo( CLabIndicatorPanel *const this, int nPanelIndex, const char **const pPanelName )
 {
   *pPanelName = "indicator_panel";
 }

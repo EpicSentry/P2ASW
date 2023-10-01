@@ -657,19 +657,19 @@ void CPortalLaser::LaserOn(void)
 //Hammer entity options
 //this section controls the numerous values this entity can have in hammer
 //----------------------------------------------------------------------------
-void CPortalLaser::InputTurnOn(inputdata_t& inputData)
+void CPortalLaser::InputTurnOn(inputdata_t& inputdata)
 {
 	if (!m_bLaserOn)
 		LaserOn();
 }
 
-void CPortalLaser::InputTurnOff(inputdata_t& inputData)
+void CPortalLaser::InputTurnOff(inputdata_t& inputdata)
 {
 	if (m_bLaserOn)
 		LaserOff();
 }
 
-void CPortalLaser::InputToggle(inputdata_t& inputData)
+void CPortalLaser::InputToggle(inputdata_t& inputdata)
 {
 	if (m_bLaserOn)
 		LaserOff();

@@ -84,6 +84,8 @@ $Project "Server (Portal 2)"
 		$Folder	"Portal 2"
 		{
 				$File "portal2/npc_personality_core.cpp"
+				$File "portal2/indicator_panel.cpp"
+				$File "portal2/indicator_panel.h"
 				$File "portal2/npc_wheatley_boss.cpp"
 				$File "portal2/prop_button.cpp"
 				$File "portal2/prop_floor_button.cpp"

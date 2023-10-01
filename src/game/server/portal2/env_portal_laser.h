@@ -27,9 +27,9 @@ public:
 	virtual float LaserEndPointSize( void );
 	void NotifyCubeLaserContact( CBaseEntity* pCube );
 	// Input functions
-	void InputTurnOn(inputdata_t& inputData);
-	void InputTurnOff(inputdata_t& inputData);
-	void InputToggle(inputdata_t& inputData);
+	void InputTurnOn(inputdata_t& inputdata);
+	void InputTurnOff(inputdata_t& inputdata);
+	void InputToggle(inputdata_t& inputdata);
 
 	void DamageAllTargetsInRay( Ray_t &ray );
 
