@@ -1,0 +1,74 @@
+void __userpurge CBasePaintBlob::SetTractorBeam(
+        CBasePaintBlob *this@<ecx>,
+        float a2@<ebp>,
+        CTrigger_TractorBeam *pBeam)
+{
+  Vector *p_m_vecPosition; // edi
+  float v5; // xmm1_4
+  float v6; // xmm0_4
+  float v7; // xmm2_4
+  float v8; // xmm3_4
+  float v9; // xmm2_4
+  float v10; // [esp-1Ch] [ebp-2Ch]
+  Vector v11; // [esp-Ch] [ebp-1Ch] BYREF
+  Vector vecPointOnLine; // [esp+0h] [ebp-10h]
+  float retaddr; // [esp+10h] [ebp+0h]
+
+  vecPointOnLine.y = a2;
+  vecPointOnLine.z = retaddr;
+  LODWORD(vecPointOnLine.x) = this;
+  if ( pBeam )
+  {
+    this->m_MoveState = PAINT_BLOB_TRACTOR_BEAM_MOVE;
+    if ( !EntityBeamHistory_t::IsDifferentBeam(&this->m_beamHistory, pBeam) )
+      return;
+    EntityBeamHistory_t::UpdateBeam(&this->m_beamHistory, pBeam);
+    p_m_vecPosition = &this->m_vecPosition;
+    CalcClosestPointOnLineSegment(p_m_vecPosition, &pBeam->m_vStart.m_Value, &pBeam->m_vEnd.m_Value, &v11, 0);
+    v5 = pBeam->m_flRadius.m_Value - paintblob_beam_radius_offset.m_pParent->m_Value.m_fValue;
+    v10 = fsqrt(
+            (float)((float)((float)(p_m_vecPosition->y - v11.y) * (float)(p_m_vecPosition->y - v11.y))
+                  + (float)((float)(p_m_vecPosition->z - v11.z) * (float)(p_m_vecPosition->z - v11.z)))
+          + (float)((float)(p_m_vecPosition->x - v11.x) * (float)(p_m_vecPosition->x - v11.x)));
+    v6 = FLOAT_1_0;
+    if ( v5 <= 0.0 )
+      v7 = FLOAT_1_0;
+    else
+      v7 = pBeam->m_flRadius.m_Value - paintblob_beam_radius_offset.m_pParent->m_Value.m_fValue;
+    v8 = 1.0 / v7;
+    if ( v5 > 0.0 )
+    {
+      if ( 1.0 != v5 )
+      {
+        v9 = (float)(v10 - 1.0) / (float)(v5 - 1.0);
+        if ( v9 >= 0.0 )
+        {
+          if ( v9 > 1.0 )
+            v9 = FLOAT_1_0;
+        }
+        else
+        {
+          v9 = 0.0;
+        }
+        v6 = (float)((float)(1.0 - v8) * v9) + v8;
+LABEL_19:
+        *(float *)(LODWORD(vecPointOnLine.x) + 8) = v6;
+        return;
+      }
+    }
+    else
+    {
+      v5 = FLOAT_1_0;
+    }
+    if ( (float)(v10 - v5) < 0.0 )
+    {
+      *(float *)(LODWORD(vecPointOnLine.x) + 8) = v8;
+      return;
+    }
+    goto LABEL_19;
+  }
+  if ( this->m_MoveState != PAINT_BLOB_STREAK_MOVE )
+    this->m_MoveState = PAINT_BLOB_AIR_MOVE;
+  this->m_beamHistory.m_beams.m_Size = 0;
+  this->m_beamHistory.m_beams.m_pElements = (BeamInfo_t *)&this->m_beamHistory;
+}

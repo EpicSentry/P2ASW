@@ -1,0 +1,11 @@
+char __thiscall CTrigger_TractorBeam::CreateVPhysics(CTrigger_TractorBeam *this)
+{
+  IMotionEvent *v1; // eax
+
+  if ( this )
+    v1 = &this->IMotionEvent;
+  else
+    v1 = 0;
+  this->m_pController = physenv->CreateMotionController(physenv, v1);
+  return 1;
+}

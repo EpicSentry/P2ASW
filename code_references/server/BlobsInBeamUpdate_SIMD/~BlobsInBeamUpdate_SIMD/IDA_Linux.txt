@@ -1,0 +1,13 @@
+void __cdecl BlobsInBeamUpdate_SIMD::~BlobsInBeamUpdate_SIMD(BlobsInBeamUpdate_SIMD *const this)
+{
+  BlobsInBeamUpdate_SIMD::BlobBeamUpdateData_t *m_pMemory; // eax
+
+  this->m_data.m_Size = 0;
+  CUtlMemoryAligned<BlobsInBeamUpdate_SIMD::BlobBeamUpdateData_t,16>::Purge(&this->m_data.m_Memory);
+  m_pMemory = this->m_data.m_Memory.m_pMemory;
+  this->m_data.m_Size = 0;
+  this->m_data.m_pElements = m_pMemory;
+  CUtlMemoryAligned<BlobsInBeamUpdate_SIMD::BlobBeamUpdateData_t,16>::Purge(&this->m_data.m_Memory);
+  this->m_data.m_pElements = this->m_data.m_Memory.m_pMemory;
+  CUtlMemoryAligned<BlobsInBeamUpdate_SIMD::BlobBeamUpdateData_t,16>::~CUtlMemoryAligned(&this->m_data.m_Memory);
+}

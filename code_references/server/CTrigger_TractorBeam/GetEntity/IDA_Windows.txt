@@ -1,0 +1,4 @@
+CTrigger_TractorBeam *__thiscall CTrigger_TractorBeam::GetEntity(CTrigger_TractorBeam *this)
+{
+  return (CTrigger_TractorBeam *)((char *)this - 876);
+}

@@ -1,0 +1,29 @@
+int __thiscall CTrigger_TractorBeam::Simulate(
+        CTrigger_TractorBeam *this,
+        IPhysicsMotionController *pController,
+        IPhysicsObject *pObject,
+        float deltaTime,
+        Vector *linear,
+        Vector *angular)
+{
+  void *v7; // eax
+
+  if ( this[-1].m_bReversed.m_Value )
+    return 0;
+  linear->x = 0.0;
+  linear->y = 0.0;
+  linear->z = 0.0;
+  angular->x = 0.0;
+  angular->y = 0.0;
+  angular->z = 0.0;
+  if ( !pObject || (((int (__thiscall *)(IPhysicsObject *))pObject->GetGameFlags)(pObject) & 4) != 0 )
+    return 0;
+  v7 = pObject->GetGameData(pObject);
+  (*(void (__stdcall **)(IPhysicsObject *, void *, _DWORD, Vector *, Vector *))(this[-1].m_aThinkFunctions.m_Size + 800))(
+    pObject,
+    v7,
+    LODWORD(deltaTime),
+    linear,
+    angular);
+  return 3;
+}

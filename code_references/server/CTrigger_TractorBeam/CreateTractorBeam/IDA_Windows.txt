@@ -1,0 +1,29 @@
+CTrigger_TractorBeam *__cdecl CTrigger_TractorBeam::CreateTractorBeam(
+        const Vector *vStart,
+        const Vector *vEnd,
+        CProjectedTractorBeamEntity *pOwner)
+{
+  CTrigger_TractorBeam *result; // eax
+  CTrigger_TractorBeam *v4; // esi
+  int v6; // eax
+  const Vector *v7; // eax
+  float flLinearForce; // [esp+10h] [ebp-4h]
+
+  result = (CTrigger_TractorBeam *)CreateEntityByName("trigger_tractorbeam", -1, 1);
+  v4 = result;
+  if ( result )
+  {
+    ((void (__thiscall *)(CTrigger_TractorBeam *))result->SetOwnerEntity)(result);
+    v4->Precache(v4);
+    flLinearForce = CProjectedTractorBeamEntity::GetLinearForce(pOwner);
+    v6 = (int)pOwner->GetEndPoint(pOwner);
+    v7 = (const Vector *)((int (__thiscall *)(CProjectedTractorBeamEntity *, int))pOwner->GetStartPoint)(pOwner, v6);
+    CTrigger_TractorBeam::UpdateBeam(v4, v7, (const Vector *)LODWORD(flLinearForce), *(float *)&pOwner);
+    CNetworkHandleBase<CTrigger_TractorBeam,CProjectedTractorBeamEntity::NetworkVar_m_hTractorBeamTrigger>::Set(
+      (CNetworkHandleBase<CTrigger_TractorBeam,CProjectedTractorBeamEntity::NetworkVar_m_hTractorBeamTrigger> *)&v4->m_hProxyEntity,
+      (const CTrigger_TractorBeam *)pOwner);
+    DispatchSpawn(v4, 1);
+    return v4;
+  }
+  return result;
+}

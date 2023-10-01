@@ -1,0 +1,795 @@
+// local variable allocation has failed, the output may be wrong!
+void __cdecl BlobsInBeamUpdate_SIMD::UpdateBlobsInBeam_SIMD(BlobsInBeamUpdate_SIMD *const this)
+{
+  float v1; // xmm1_4
+  float v2; // xmm0_4
+  CTrigger_TractorBeam *m_pBeam; // eax
+  long double v4; // fst7
+  CTrigger_TractorBeam *v5; // eax
+  __m128 v6; // xmm7
+  float m_Value; // xmm2_4
+  __m128 v8; // xmm1
+  float v9; // xmm2_4
+  __m128 v10; // xmm7
+  __m128 v11; // xmm2
+  __m128 v12; // xmm4
+  __m128 v13; // xmm1
+  __m128 v14; // xmm0
+  __m128 v15; // xmm2
+  __m128d v16; // xmm0
+  __m128 v17; // xmm3
+  int m_Size; // eax
+  __m128 v19; // xmm4
+  fltx4_76 v20; // xmm2
+  __m128 v21; // xmm3
+  __m128 v22; // xmm2
+  int v23; // eax
+  __m128 v24; // xmm4
+  __m128 v25; // xmm0
+  __m128 v26; // xmm0
+  int v27; // esi
+  __m128 v28; // xmm2
+  __m128 v29; // xmm1
+  BlobsInBeamUpdate_SIMD::BlobBeamUpdateData_t *m_pMemory; // eax
+  __m128 *v31; // ecx
+  __m128 v32; // xmm6
+  __m128 v33; // xmm5
+  __m128 v34; // xmm1
+  __int32 v35; // edx
+  BlobsInBeamUpdate_SIMD::BlobBeamUpdateData_t *v36; // eax
+  __m128 v37; // xmm4
+  __m128 v38; // xmm3
+  __m128 v39; // xmm2
+  __m128 v40; // xmm6
+  __m128 v41; // xmm2
+  __m128 v42; // xmm1
+  __m128 v43; // xmm3
+  __m128 v44; // xmm1
+  __m128 v45; // xmm2
+  __m128 v46; // xmm1
+  __m128 v47; // xmm6
+  __m128 v48; // xmm5
+  __m128 v49; // xmm1
+  BlobsInBeamUpdate_SIMD::BlobBeamUpdateData_t *v50; // eax
+  __m128 v51; // xmm2
+  __m128 v52; // xmm4
+  __m128 v53; // xmm2
+  __m128 v54; // xmm1
+  __m128 v55; // xmm3
+  __m128 v56; // xmm2
+  __m128 v57; // xmm5
+  __m128 v58; // xmm6
+  __m128 v59; // xmm4
+  __m128 v60; // xmm3
+  __m128 v61; // xmm1
+  __m128 v62; // xmm3
+  __m128 v63; // xmm1
+  __m128 v64; // xmm4
+  __m128 v65; // xmm5
+  __m128 v66; // xmm2
+  __m128 v67; // xmm1
+  __m128 v68; // xmm6
+  long double v69; // fst6
+  long double v70; // fst6
+  long double v71; // fst6
+  __m128 v72; // xmm3
+  __m128 v73; // xmm4
+  __m128 v74; // xmm2
+  __m128 v75; // xmm1
+  __m128 v76; // xmm6
+  __m128 v77; // xmm3
+  __m128 v78; // xmm4
+  __m128 v79; // xmm3
+  __m128 v80; // xmm1
+  __m128 v81; // xmm2
+  __m128 v82; // xmm6
+  __m128 v83; // xmm2
+  __m128 v84; // xmm4
+  __m128 v85; // xmm7
+  __m128 v86; // xmm5
+  __m128 v87; // xmm7
+  __m128 v88; // xmm2
+  __m128 v89; // xmm3
+  __m128 v90; // xmm2
+  __m128 v91; // xmm4
+  BlobsInBeamUpdate_SIMD::BlobBeamUpdateData_t *v92; // eax
+  __m128 v93; // xmm5
+  __m128 v94; // xmm2
+  __m128 v95; // xmm3
+  __int32 v96; // ecx
+  int v97; // ecx
+  BlobsInBeamUpdate_SIMD::BlobBeamUpdateData_t *v98; // eax
+  _DWORD *v99; // edx
+  _DWORD *v100; // ecx
+  _DWORD *p_x; // eax
+  _DWORD *v102; // eax
+  int v103; // edx
+  fltx4_76 v104; // xmm2
+  __m128 v105; // xmm4
+  __m128 v106; // xmm6
+  BlobsInBeamUpdate_SIMD::BlobBeamUpdateData_t *v107; // ecx
+  __m128 v108; // xmm2
+  __m128 v109; // xmm3
+  __m128 v110; // xmm1
+  __m128 v111; // xmm4
+  _DWORD *v112; // eax
+  __m128 v113; // xmm3
+  __m128 v114; // xmm6
+  _DWORD *v115; // edx
+  _DWORD *v116; // ecx
+  bool v117; // cc
+  _DWORD *v118; // ecx
+  unsigned int v119; // eax
+  int v120; // esi
+  __m128 v121; // xmm3
+  int v122; // edi
+  __m128 m_flDestVortexRadius_low; // xmm5
+  BlobsInBeamUpdate_SIMD::BlobBeamUpdateData_t *v124; // eax
+  float v125; // xmm3_4
+  float m_flCurrentVortexSpeed; // xmm6_4
+  __m128 v127; // xmm1
+  __m128 v128; // xmm2
+  __m128 v129; // xmm3
+  __m128 v130; // xmm2
+  float v131; // xmm3_4
+  __m128 v132; // xmm5
+  BlobsInBeamUpdate_SIMD::BlobBeamUpdateData_t *v133; // eax
+  __m128 v134; // xmm1
+  __m128 v135; // xmm6
+  float m_flVortexDirection; // xmm4_4
+  float v137; // xmm2_4
+  __m128 v138; // xmm4
+  __m128 v139; // xmm1
+  __m128 v140; // xmm1
+  __m128 v141; // xmm6
+  __m128 v142; // xmm4
+  __m128 v143; // xmm1
+  __m128 v144; // xmm6
+  __m128 v145; // xmm5
+  __m128 v146; // xmm4
+  __m128 v147; // xmm1
+  __m128 v148; // xmm3
+  __m128 v149; // xmm1
+  __m128 v150; // xmm0
+  __m128 v151; // xmm4
+  float v152; // xmm4_4
+  BlobsInBeamUpdate_SIMD::BlobBeamUpdateData_t *v153; // eax
+  BlobsInBeamUpdate_SIMD::BlobBeamUpdateData_t *v154; // edx
+  __m128 v155; // xmm4
+  BlobsInBeamUpdate_SIMD::BlobBeamUpdateData_t *v156; // eax
+  __m128 v157; // xmm1
+  __m128 v158; // xmm5
+  __m128 v159; // xmm0
+  __m128 v160; // xmm1
+  __m128 v161; // xmm0
+  float v162; // xmm6_4
+  __m128d v163; // xmm2
+  __m128 v164; // xmm2
+  __m128 v165; // xmm4
+  __m128 v166; // xmm4
+  float v167; // xmm3_4
+  float v168; // xmm3_4
+  unsigned __int64 v169; // [esp+28h] [ebp-4E0h]
+  __m128 v170; // [esp+30h] [ebp-4D8h]
+  fltx4_639 z; // [esp+70h] [ebp-498h]
+  fltx4_639 y; // [esp+80h] [ebp-488h]
+  fltx4_639 x; // [esp+90h] [ebp-478h]
+  fltx4_76 f4BeamRadiusSqr; // [esp+A0h] [ebp-468h]
+  __m128 v175; // [esp+B0h] [ebp-458h]
+  __m128 v176; // [esp+C0h] [ebp-448h]
+  __m128 v177; // [esp+D0h] [ebp-438h]
+  __m128 v178; // [esp+E0h] [ebp-428h]
+  __m128 v179; // [esp+F0h] [ebp-418h]
+  bi32x4 bCmpGoingTowardsPortal; // [esp+100h] [ebp-408h]
+  int count_0; // [esp+114h] [ebp-3F4h]
+  bool bGoingTowardsPortal; // [esp+11Bh] [ebp-3EDh]
+  float v183; // [esp+11Ch] [ebp-3ECh]
+  __m128 v184; // [esp+120h] [ebp-3E8h]
+  __m128 v185; // [esp+130h] [ebp-3D8h]
+  float v186; // [esp+140h] [ebp-3C8h]
+  float flVortexRadiusOffsetDT; // [esp+144h] [ebp-3C4h]
+  float flVortexAccelDT; // [esp+148h] [ebp-3C0h]
+  bool bIsBeamReversed; // [esp+14Fh] [ebp-3B9h]
+  fltx4_76 f4TWO_PI; // [esp+150h] [ebp-3B8h]
+  fltx4_76 f4VortexAccelDT; // [esp+160h] [ebp-3A8h]
+  fltx4_76 f4VortexRadiusOffsetDT; // [esp+170h] [ebp-398h]
+  fltx4_76 f4TbeamPortalCirculation; // [esp+180h] [ebp-388h]
+  fltx4_76 f4TbeamCirculation; // [esp+190h] [ebp-378h]
+  __m128 *vBeamEnd; // [esp+1A0h] [ebp-368h]
+  __m128 *vLineA; // [esp+1A4h] [ebp-364h]
+  float p_flDeltaTime_0; // [esp+1A8h] [ebp-360h]
+  float flMinVortexRadiusScale; // [esp+1ACh] [ebp-35Ch]
+  __m128 v199; // [esp+1B0h] [ebp-358h]
+  __m128 v200; // [esp+1C0h] [ebp-348h]
+  bi32x4 bCmpIsBeamReversed; // [esp+1D0h] [ebp-338h]
+  float m_fValue; // [esp+1E4h] [ebp-324h]
+  float flHalfBeamLength; // [esp+1E8h] [ebp-320h]
+  float flBeamLength; // [esp+1ECh] [ebp-31Ch]
+  __m128 v205; // [esp+1F0h] [ebp-318h] BYREF
+  fltx4_76 f4HalfBeamLength; // [esp+200h] [ebp-308h]
+  fltx4_76 f4BeamLength; // [esp+210h] [ebp-2F8h]
+  fltx4_76 f4VortexDistance; // [esp+220h] [ebp-2E8h]
+  fltx4_76 f4BeamAccelDT; // [esp+230h] [ebp-2D8h]
+  fltx4_76 f4MinVortexRadiusScale; // [esp+240h] [ebp-2C8h]
+  fltx4_76 f4BeamRadius; // [esp+250h] [ebp-2B8h]
+  bi32x4 isSignificant; // [esp+260h] [ebp-2A8h]
+  __m128 v213; // [esp+270h] [ebp-298h]
+  __m128 v214; // [esp+280h] [ebp-288h]
+  __m128 v215; // [esp+290h] [ebp-278h]
+  fltx4_76 f4BeamSpeed; // [esp+2A0h] [ebp-268h]
+  fltx4_76 f4InvDeltaTime; // [esp+2B0h] [ebp-258h]
+  fltx4_76 f4DeltaTime; // [esp+2C0h] [ebp-248h]
+  fltx4_76 f4CurrentVortexRadius; // [esp+2D0h] [ebp-238h]
+  fltx4_76 f4NewVortexRadius; // [esp+2E0h] [ebp-228h]
+  __m128 v221; // [esp+2F0h] [ebp-218h]
+  __m128 v222; // [esp+300h] [ebp-208h]
+  __m128 v223; // [esp+310h] [ebp-1F8h]
+  __m128 v224; // [esp+320h] [ebp-1E8h]
+  __m128 v225; // [esp+330h] [ebp-1D8h]
+  int count; // [esp+340h] [ebp-1C8h]
+  FourVectors_6 *vClosest; // [esp+344h] [ebp-1C4h]
+  _BYTE flBeamRadius[24]; // [esp+348h] [ebp-1C0h] OVERLAPPED BYREF
+  __m128 v229; // [esp+360h] [ebp-1A8h]
+  fltx4_76 f4PointOnLine; // [esp+370h] [ebp-198h]
+  FourVectors_1 v4BeamStart; // [esp+380h] [ebp-188h] BYREF
+  FourVectors_1 v4BeamEnd; // [esp+3B0h] [ebp-158h] BYREF
+  __m128 vecPointOnLine; // [esp+3E0h] [ebp-128h] OVERLAPPED BYREF
+  __m128 v234; // [esp+3F0h] [ebp-118h]
+  __m128 v235; // [esp+400h] [ebp-108h]
+  Quaternion qRotate; // [esp+410h] [ebp-F8h] BYREF
+  int maskTRUE[4]; // [esp+440h] [ebp-C8h] BYREF
+  int maskFALSE[4]; // [esp+450h] [ebp-B8h] BYREF
+  fltx4_76 f4DistOnLine; // [esp+460h] [ebp-A8h] BYREF
+  fltx4_76 f4CurrentVortexSpeed; // [esp+470h] [ebp-98h]
+  fltx4_76 f4FinalRadiusScale; // [esp+480h] [ebp-88h]
+  __m128 v242; // [esp+490h] [ebp-78h]
+  __m128 flDistOnLine; // [esp+4A0h] [ebp-68h] OVERLAPPED BYREF
+  __m128 v244; // [esp+4B0h] [ebp-58h]
+  _BYTE vBeamDir[24]; // [esp+4C0h] [ebp-48h] OVERLAPPED BYREF
+  _BYTE vecVortexRadius[24]; // [esp+4D8h] [ebp-30h] OVERLAPPED BYREF
+
+  p_flDeltaTime_0 = this->m_flDeltaTime;
+  v1 = 1.0 / this->m_flDeltaTime;
+  v2 = this->m_flDeltaTime * paintblob_tbeam_accel.m_pParent->m_Value.m_fValue;
+  flVortexAccelDT = this->m_flDeltaTime * paintblob_tbeam_vortex_accel.m_pParent->m_Value.m_fValue;
+  m_fValue = paintblob_tbeam_vortex_distance.m_pParent->m_Value.m_fValue;
+  v186 = paintblob_tbeam_vortex_circulation.m_pParent->m_Value.m_fValue;
+  v183 = paintblob_tbeam_portal_vortex_circulation.m_pParent->m_Value.m_fValue;
+  m_pBeam = this->m_pBeam;
+  flVortexRadiusOffsetDT = this->m_flDeltaTime * paintblob_tbeam_vortex_radius_rate.m_pParent->m_Value.m_fValue;
+  vLineA = (__m128 *)&m_pBeam->m_vStart;
+  vBeamEnd = (__m128 *)&m_pBeam->m_vEnd;
+  *(float *)vBeamDir = m_pBeam->m_vEnd.m_Value.x - m_pBeam->m_vStart.m_Value.x;
+  *(float *)&vBeamDir[4] = m_pBeam->m_vEnd.m_Value.y - m_pBeam->m_vStart.m_Value.y;
+  *(float *)&vBeamDir[8] = m_pBeam->m_vEnd.m_Value.z - m_pBeam->m_vStart.m_Value.z;
+  v4 = VectorNormalize((Vector *const)vBeamDir);
+  v5 = this->m_pBeam;
+  flBeamLength = v4;
+  bIsBeamReversed = v5->m_bReversed.m_Value;
+  flHalfBeamLength = flBeamLength * 0.5;
+  if ( bIsBeamReversed )
+    bGoingTowardsPortal = v5->m_bFromPortal.m_Value;
+  else
+    bGoingTowardsPortal = v5->m_bToPortal.m_Value;
+  v6 = 0LL;
+  m_Value = v5->m_flRadius.m_Value;
+  v6.m128_f32[0] = v1;
+  f4DeltaTime = _mm_shuffle_ps((__m128)LODWORD(p_flDeltaTime_0), (__m128)LODWORD(p_flDeltaTime_0), 0);
+  v8 = 0LL;
+  v8.m128_f32[0] = v2;
+  v9 = m_Value - paintblob_beam_radius_offset.m_pParent->m_Value.m_fValue;
+  f4InvDeltaTime = _mm_shuffle_ps(v6, v6, 0);
+  f4BeamAccelDT = _mm_shuffle_ps(v8, v8, 0);
+  v10 = 0LL;
+  f4VortexAccelDT = _mm_shuffle_ps((__m128)LODWORD(flVortexAccelDT), (__m128)LODWORD(flVortexAccelDT), 0);
+  *(float *)flBeamRadius = v9;
+  v11 = _mm_cmplt_ss((__m128)0LL, *(__m128 *)flBeamRadius);
+  *(_DWORD *)flBeamRadius = _mm_andnot_ps(v11, (__m128)0x3F800000u).m128_u32[0] | *(_DWORD *)flBeamRadius & v11.m128_i32[0];
+  f4TbeamCirculation = _mm_shuffle_ps((__m128)LODWORD(v186), (__m128)LODWORD(v186), 0);
+  f4VortexDistance = _mm_shuffle_ps((__m128)LODWORD(m_fValue), (__m128)LODWORD(m_fValue), 0);
+  flMinVortexRadiusScale = 1.0 / *(float *)flBeamRadius;
+  f4TbeamPortalCirculation = _mm_shuffle_ps((__m128)LODWORD(v183), (__m128)LODWORD(v183), 0);
+  f4MinVortexRadiusScale = _mm_shuffle_ps(
+                             (__m128)LODWORD(flMinVortexRadiusScale),
+                             (__m128)LODWORD(flMinVortexRadiusScale),
+                             0);
+  v12 = 0LL;
+  f4VortexRadiusOffsetDT = _mm_shuffle_ps(
+                             (__m128)LODWORD(flVortexRadiusOffsetDT),
+                             (__m128)LODWORD(flVortexRadiusOffsetDT),
+                             0);
+  v13 = _mm_sub_ps(*(__m128 *)&v5->m_vEnd.m_Value.x, *(__m128 *)&v5->m_vStart.m_Value.x);
+  v242 = _mm_mul_ps(v13, v13);
+  v10.m128_f32[0] = (float)(v242.m128_f32[0] + v242.m128_f32[1]) + v242.m128_f32[2];
+  v14 = _mm_shuffle_ps(v10, v10, 0);
+  v15 = _mm_rsqrt_ps(v14);
+  isSignificant = _mm_and_ps(
+                    _mm_mul_ps(
+                      _mm_mul_ps(
+                        _mm_mul_ps(_mm_sub_ps(Four_Threes, _mm_mul_ps(_mm_mul_ps(v15, v15), v14)), v15),
+                        Four_PointFives),
+                      v13),
+                    _mm_cmplt_ps(Four_Epsilons, v14));
+  v16 = _mm_and_pd(_mm_cvtps_pd((__m128)LODWORD(v5->m_linearForce.m_Value)), (__m128d)xmmword_B996A0);
+  v16.m128d_f64[0] = v16.m128d_f64[0] * 0.5;
+  memset(maskFALSE, 0, sizeof(maskFALSE));
+  f4BeamRadius = _mm_shuffle_ps((__m128)*(unsigned int *)flBeamRadius, (__m128)*(unsigned int *)flBeamRadius, 0);
+  f4BeamLength = _mm_shuffle_ps((__m128)LODWORD(flBeamLength), (__m128)LODWORD(flBeamLength), 0);
+  v12.m128_f32[0] = _mm_unpacklo_pd(v16, v16).m128d_f64[0];
+  f4BeamRadiusSqr = _mm_mul_ps(f4BeamRadius, f4BeamRadius);
+  f4BeamSpeed = _mm_shuffle_ps(v12, v12, 0);
+  f4HalfBeamLength = _mm_shuffle_ps((__m128)LODWORD(flHalfBeamLength), (__m128)LODWORD(flHalfBeamLength), 0);
+  memset(maskTRUE, 255, sizeof(maskTRUE));
+  bCmpGoingTowardsPortal = 0u;
+  if ( bGoingTowardsPortal )
+    bCmpGoingTowardsPortal = *(bi32x4 *)maskTRUE;
+  bCmpIsBeamReversed = *(bi32x4 *)maskFALSE;
+  if ( bIsBeamReversed )
+    bCmpIsBeamReversed = *(bi32x4 *)maskTRUE;
+  f4TWO_PI = _mm_shuffle_ps((__m128)0x40C90FDBu, (__m128)0x40C90FDBu, 0);
+  v4BeamStart.x = *vLineA;
+  v4BeamStart.y = *vLineA;
+  v17 = _mm_unpacklo_ps(v4BeamStart.x, v4BeamStart.y);
+  v4BeamStart.z = *vLineA;
+  m_Size = this->m_data.m_Size;
+  v19 = _mm_unpacklo_ps(v4BeamStart.z, *vLineA);
+  v20 = _mm_movelh_ps(_mm_unpackhi_ps(v4BeamStart.x, v4BeamStart.y), _mm_unpackhi_ps(v4BeamStart.z, *vLineA));
+  v4BeamStart.x = _mm_movelh_ps(v17, v19);
+  v4BeamStart.y = _mm_movehl_ps(v19, v17);
+  v4BeamStart.z = v20;
+  v4BeamEnd.x = *vBeamEnd;
+  v4BeamEnd.y = *vBeamEnd;
+  v21 = _mm_unpacklo_ps(v4BeamEnd.x, v4BeamEnd.y);
+  v22 = _mm_unpackhi_ps(v4BeamEnd.x, v4BeamEnd.y);
+  v4BeamEnd.z = *vBeamEnd;
+  count_0 = m_Size;
+  v23 = 0;
+  v24 = _mm_unpacklo_ps(v4BeamEnd.z, *vBeamEnd);
+  v25 = _mm_unpackhi_ps(v4BeamEnd.z, *vBeamEnd);
+  v4BeamEnd.x = _mm_movelh_ps(v21, v24);
+  v4BeamEnd.z = _mm_movelh_ps(v22, v25);
+  v4BeamEnd.y = _mm_movehl_ps(v24, v21);
+  v26 = _mm_unpacklo_ps(*(__m128 *)vBeamDir, *(__m128 *)vBeamDir);
+  v205 = _mm_unpackhi_ps(*(__m128 *)vBeamDir, *(__m128 *)vBeamDir);
+  v200 = _mm_movelh_ps(v26, v26);
+  _mm_storel_ps((double *)&v205.m128_u64[1], v205);
+  v199 = _mm_movehl_ps(v26, v26);
+  if ( count_0 > 3 )
+  {
+    v27 = 0;
+    vClosest = (FourVectors_6 *)&qRotate;
+    v179 = _mm_shuffle_ps(isSignificant, isSignificant, 0);
+    v177 = _mm_shuffle_ps(isSignificant, isSignificant, 170);
+    v178 = _mm_shuffle_ps(isSignificant, isSignificant, 85);
+    v175 = _mm_sub_ps(Four_Ones, Four_Zeros);
+    v28 = _mm_cmpeq_ps(Four_Zeros, f4BeamRadiusSqr);
+    v29 = _mm_cmpeq_ps(Four_Ones, f4BeamRadius);
+    count = count_0;
+    v185 = _mm_or_ps(_mm_andnot_ps(v28, _mm_sub_ps(f4BeamRadiusSqr, Four_Zeros)), _mm_and_ps(v28, Four_Ones));
+    v176 = _mm_sub_ps(Four_Ones, f4MinVortexRadiusScale);
+    v184 = _mm_or_ps(_mm_andnot_ps(v29, _mm_sub_ps(f4BeamRadius, Four_Ones)), _mm_and_ps(v29, Four_Ones));
+    do
+    {
+      m_pMemory = this->m_data.m_Memory.m_pMemory;
+      *(_DWORD *)&flBeamRadius[4] = v27 * 40 + 120;
+      v225.m128_i32[0] = v27 * 40 + 80;
+      v224.m128_i32[0] = v27 * 40 + 40;
+      v31 = (__m128 *)&m_pMemory[v27];
+      v32 = *(__m128 *)&m_pMemory[v27].m_vVelocity.x;
+      f4PointOnLine.m128_i32[0] = (__int32)&m_pMemory[v27 + 1];
+      v33 = *(__m128 *)(f4PointOnLine.m128_i32[0] + 12);
+      v34 = _mm_unpacklo_ps(v32, v33);
+      v35 = (__int32)&m_pMemory[v27 + 2];
+      v36 = &m_pMemory[v27 + 3];
+      v229.m128_i32[0] = v35;
+      v37 = *(__m128 *)(v35 + 12);
+      v38 = *(__m128 *)&v36->m_vVelocity.x;
+      v39 = _mm_unpacklo_ps(v37, v38);
+      v40 = _mm_add_ps(
+              _mm_mul_ps(_mm_movelh_ps(_mm_unpackhi_ps(v32, v33), _mm_unpackhi_ps(v37, v38)), v205),
+              _mm_add_ps(_mm_mul_ps(_mm_movehl_ps(v39, v34), v199), _mm_mul_ps(_mm_movelh_ps(v34, v39), v200)));
+      v41 = _mm_cmplt_ps(v40, Four_Zeros);
+      v42 = _mm_add_ps(_mm_or_ps(_mm_and_ps(v41, Four_Zeros), _mm_andnot_ps(v41, v40)), f4BeamAccelDT);
+      v43 = _mm_cmplt_ps(v42, f4BeamSpeed);
+      v44 = _mm_or_ps(_mm_and_ps(v42, v43), _mm_andnot_ps(v43, f4BeamSpeed));
+      v214 = _mm_mul_ps(v199, v44);
+      v215 = _mm_mul_ps(v200, v44);
+      v213 = _mm_mul_ps(v44, v205);
+      vecPointOnLine = *v31;
+      v234 = *(__m128 *)f4PointOnLine.m128_i32[0];
+      v235 = *(__m128 *)v35;
+      v45 = _mm_unpacklo_ps(v235, *(__m128 *)&v36->m_vPosition.x);
+      v46 = _mm_unpacklo_ps(vecPointOnLine, v234);
+      v47 = _mm_movehl_ps(v45, v46);
+      v48 = _mm_movelh_ps(v46, v45);
+      v49 = _mm_add_ps(
+              _mm_mul_ps(v213, f4DeltaTime),
+              _mm_movelh_ps(
+                _mm_unpackhi_ps(vecPointOnLine, v234),
+                _mm_unpackhi_ps(v235, *(__m128 *)&v36->m_vPosition.x)));
+      vecPointOnLine = _mm_add_ps(_mm_mul_ps(v215, f4DeltaTime), v48);
+      v235 = v49;
+      v234 = _mm_add_ps(_mm_mul_ps(v214, f4DeltaTime), v47);
+      FourVectors::CalcClosestPointOnLineSIMD(
+        (const FourVectors_6 *const)&vecPointOnLine,
+        (const FourVectors_6 *const)&v4BeamStart,
+        (const FourVectors_6 *const)&v4BeamEnd,
+        vClosest,
+        &f4DistOnLine);
+      v50 = this->m_data.m_Memory.m_pMemory;
+      f4DistOnLine = _mm_mul_ps(f4BeamLength, f4DistOnLine);
+      f4PointOnLine.m128_i32[0] = (__int32)v50 + v225.m128_i32[0];
+      v51 = _mm_cmplt_ps(
+              _mm_sub_ps(
+                _mm_sub_ps(
+                  f4HalfBeamLength,
+                  _mm_and_ps(_mm_sub_ps(f4DistOnLine, f4HalfBeamLength), *(__m128 *)g_SIMD_clear_signmask)),
+                f4VortexDistance),
+              Four_Zeros);
+      v52 = _mm_or_ps(_mm_and_ps(v51, f4TbeamPortalCirculation), _mm_andnot_ps(v51, f4TbeamCirculation));
+      v53 = _mm_and_ps(
+              _mm_cmplt_ps(_mm_sub_ps(_mm_sub_ps(f4BeamLength, f4DistOnLine), f4VortexDistance), Four_Zeros),
+              bCmpGoingTowardsPortal);
+      v54 = _mm_mul_ps(
+              _mm_or_ps(
+                _mm_and_ps(v53, f4MinVortexRadiusScale),
+                _mm_andnot_ps(
+                  v53,
+                  _mm_movelh_ps(
+                    _mm_unpacklo_ps(
+                      (__m128)LODWORD(v50[v27].m_flDestVortexRadius),
+                      (__m128)*(unsigned int *)((char *)&v50->m_flDestVortexRadius + v224.m128_i32[0])),
+                    _mm_unpacklo_ps(
+                      (__m128)*(unsigned int *)((char *)&v50->m_flDestVortexRadius + v225.m128_i32[0]),
+                      (__m128)*(unsigned int *)((char *)&v50->m_flDestVortexRadius + *(_DWORD *)&flBeamRadius[4]))))),
+              f4BeamRadius);
+      v55 = _mm_mul_ps(
+              _mm_movelh_ps(
+                _mm_unpacklo_ps(
+                  (__m128)LODWORD(v50[v27].m_flCurrentVortexRadius),
+                  (__m128)*(unsigned int *)((char *)&v50->m_flCurrentVortexRadius + v224.m128_i32[0])),
+                _mm_unpacklo_ps(
+                  (__m128)*(unsigned int *)((char *)&v50->m_flCurrentVortexRadius + v225.m128_i32[0]),
+                  (__m128)*(unsigned int *)((char *)&v50->m_flCurrentVortexRadius + *(_DWORD *)&flBeamRadius[4]))),
+              f4BeamRadius);
+      v56 = _mm_mul_ps(_mm_rcp_ps(_mm_mul_ps(f4TWO_PI, v55)), v52);
+      v57 = _mm_movelh_ps(
+              _mm_unpacklo_ps(
+                (__m128)LODWORD(v50[v27].m_flCurrentVortexSpeed),
+                (__m128)*(unsigned int *)((char *)&v50->m_flCurrentVortexSpeed + v224.m128_i32[0])),
+              _mm_unpacklo_ps(
+                (__m128)*(unsigned int *)((char *)&v50->m_flCurrentVortexSpeed + v225.m128_i32[0]),
+                (__m128)*(unsigned int *)((char *)&v50->m_flCurrentVortexSpeed + *(_DWORD *)&flBeamRadius[4])));
+      v58 = _mm_cmplt_ps(_mm_sub_ps(v54, v55), Four_Zeros);
+      v59 = _mm_or_ps(_mm_and_ps(v58, Four_NegativeOnes), _mm_andnot_ps(v58, Four_Ones));
+      f4NewVortexRadius = _mm_add_ps(v55, _mm_mul_ps(f4VortexRadiusOffsetDT, v59));
+      v60 = _mm_cmplt_ps(Four_Zeros, _mm_mul_ps(_mm_sub_ps(v54, f4NewVortexRadius), v59));
+      f4CurrentVortexRadius = _mm_or_ps(_mm_andnot_ps(v60, v54), _mm_and_ps(v60, f4NewVortexRadius));
+      v61 = _mm_cmplt_ps(_mm_sub_ps(v56, v57), Four_Zeros);
+      v62 = _mm_or_ps(_mm_and_ps(v61, Four_NegativeOnes), _mm_andnot_ps(v61, Four_Ones));
+      v63 = _mm_add_ps(_mm_mul_ps(f4VortexAccelDT, v62), v57);
+      z = vClosest->z;
+      v64 = _mm_cmplt_ps(Four_Zeros, _mm_mul_ps(_mm_sub_ps(v56, v63), v62));
+      y = vClosest->y;
+      x = vClosest->x;
+      f4CurrentVortexSpeed = _mm_or_ps(_mm_and_ps(v64, v63), _mm_andnot_ps(v64, v56));
+      v65 = _mm_sub_ps(v235, z);
+      v66 = _mm_sub_ps(v234, y);
+      v67 = _mm_sub_ps(vecPointOnLine, x);
+      v68 = _mm_movelh_ps(
+              _mm_unpacklo_ps(
+                (__m128)LODWORD(v50[v27].m_flVortexDirection),
+                (__m128)*(unsigned int *)((char *)&v50->m_flVortexDirection + v224.m128_i32[0])),
+              _mm_unpacklo_ps(
+                (__m128)*(unsigned int *)((char *)&v50->m_flVortexDirection + v225.m128_i32[0]),
+                (__m128)*(unsigned int *)((char *)&v50->m_flVortexDirection + *(_DWORD *)&flBeamRadius[4])));
+      v242 = _mm_mul_ps(
+               _mm_mul_ps(
+                 _mm_mul_ps(
+                   _mm_mul_ps(
+                     _mm_or_ps(
+                       _mm_and_ps(_mm_sub_ps(Four_Zeros, v68), bCmpIsBeamReversed),
+                       _mm_andnot_ps(bCmpIsBeamReversed, v68)),
+                     f4CurrentVortexSpeed),
+                   f4DeltaTime),
+                 Four_DegToRad),
+               Four_PointFives);
+      v69 = cos(v242.m128_f32[0]);
+      v62.m128_f32[0] = sin(v242.m128_f32[0]);
+      flDistOnLine.m128_i32[0] = v62.m128_i32[0];
+      v64.m128_f32[0] = _mm_unpacklo_pd((__m128d)COERCE_UNSIGNED_INT64(v69), (__m128d)COERCE_UNSIGNED_INT64(v69)).m128d_f64[0];
+      v244.m128_i32[0] = v64.m128_i32[0];
+      v70 = cos(v242.m128_f32[1]);
+      v62.m128_f32[0] = sin(v242.m128_f32[1]);
+      flDistOnLine.m128_i32[1] = v62.m128_i32[0];
+      v64.m128_f32[0] = _mm_unpacklo_pd((__m128d)COERCE_UNSIGNED_INT64(v70), (__m128d)COERCE_UNSIGNED_INT64(v70)).m128d_f64[0];
+      v244.m128_i32[1] = v64.m128_i32[0];
+      v71 = cos(v242.m128_f32[2]);
+      v62.m128_f32[0] = sin(v242.m128_f32[2]);
+      flDistOnLine.m128_i32[2] = v62.m128_i32[0];
+      v64.m128_f32[0] = _mm_unpacklo_pd((__m128d)COERCE_UNSIGNED_INT64(v71), (__m128d)COERCE_UNSIGNED_INT64(v71)).m128d_f64[0];
+      v244.m128_i32[2] = v64.m128_i32[0];
+      *(double *)&v169 = cos(v242.m128_f32[3]);
+      v62.m128_f32[0] = sin(v242.m128_f32[3]);
+      flDistOnLine.m128_i32[3] = v62.m128_i32[0];
+      v64.m128_f32[0] = _mm_unpacklo_pd((__m128d)v169, (__m128d)v169).m128d_f64[0];
+      v244.m128_i32[3] = v64.m128_i32[0];
+      v223 = _mm_mul_ps(v179, flDistOnLine);
+      v222 = _mm_mul_ps(v178, flDistOnLine);
+      v221 = _mm_mul_ps(flDistOnLine, v177);
+      v72 = _mm_sub_ps(_mm_add_ps(_mm_mul_ps(v244, v67), _mm_mul_ps(v222, v65)), _mm_mul_ps(v221, v66));
+      v73 = _mm_sub_ps(_mm_add_ps(_mm_mul_ps(v244, v66), _mm_mul_ps(v221, v67)), _mm_mul_ps(v223, v65));
+      v229 = _mm_mul_ps(v222, v67);
+      *(__m128 *)&flBeamRadius[8] = _mm_add_ps(
+                                      _mm_mul_ps(v65, v221),
+                                      _mm_add_ps(_mm_mul_ps(v66, v222), _mm_mul_ps(v67, v223)));
+      f4PointOnLine = _mm_sub_ps(_mm_add_ps(_mm_mul_ps(v223, v66), _mm_mul_ps(v244, v65)), v229);
+      v74 = _mm_add_ps(
+              _mm_sub_ps(
+                _mm_add_ps(_mm_mul_ps(*(__m128 *)&flBeamRadius[8], v223), _mm_mul_ps(v244, v72)),
+                _mm_mul_ps(v221, v73)),
+              _mm_mul_ps(v222, f4PointOnLine));
+      v75 = _mm_add_ps(
+              _mm_sub_ps(
+                _mm_add_ps(_mm_mul_ps(*(__m128 *)&flBeamRadius[8], v222), _mm_mul_ps(v244, v73)),
+                _mm_mul_ps(v223, f4PointOnLine)),
+              _mm_mul_ps(v221, v72));
+      v76 = _mm_add_ps(
+              _mm_sub_ps(
+                _mm_add_ps(_mm_mul_ps(*(__m128 *)&flBeamRadius[8], v221), _mm_mul_ps(f4PointOnLine, v244)),
+                _mm_mul_ps(v72, v222)),
+              _mm_mul_ps(v223, v73));
+      v77 = _mm_add_ps(_mm_mul_ps(v76, v76), _mm_add_ps(_mm_mul_ps(v75, v75), _mm_mul_ps(v74, v74)));
+      v78 = _mm_rsqrt_ps(v77);
+      v79 = _mm_mul_ps(_mm_mul_ps(_mm_sub_ps(Four_Threes, _mm_mul_ps(_mm_mul_ps(v78, v78), v77)), v78), Four_PointFives);
+      f4PointOnLine = _mm_add_ps(x, _mm_mul_ps(_mm_mul_ps(v74, v79), f4CurrentVortexRadius));
+      v80 = _mm_add_ps(_mm_mul_ps(_mm_mul_ps(v75, v79), f4CurrentVortexRadius), y);
+      v229 = _mm_sub_ps(x, vecPointOnLine);
+      *(__m128 *)&flBeamRadius[8] = _mm_sub_ps(y, v234);
+      v81 = _mm_sub_ps(z, v235);
+      v82 = _mm_add_ps(_mm_mul_ps(_mm_mul_ps(v76, v79), f4CurrentVortexRadius), z);
+      v229 = _mm_mul_ps(v229, v229);
+      v83 = _mm_add_ps(
+              _mm_mul_ps(
+                v175,
+                _mm_max_ps(
+                  Four_Zeros,
+                  _mm_min_ps(
+                    Four_Ones,
+                    _mm_div_ps(
+                      _mm_sub_ps(
+                        _mm_add_ps(
+                          _mm_mul_ps(v81, v81),
+                          _mm_add_ps(_mm_mul_ps(*(__m128 *)&flBeamRadius[8], *(__m128 *)&flBeamRadius[8]), v229)),
+                        Four_Zeros),
+                      v185)))),
+              Four_Zeros);
+      v84 = _mm_add_ps(_mm_mul_ps(_mm_mul_ps(_mm_sub_ps(v80, v234), f4InvDeltaTime), v83), v214);
+      v85 = _mm_add_ps(_mm_mul_ps(_mm_mul_ps(_mm_sub_ps(f4PointOnLine, vecPointOnLine), f4InvDeltaTime), v83), v215);
+      v86 = _mm_unpackhi_ps(v85, v84);
+      v87 = _mm_unpacklo_ps(v85, v84);
+      f4FinalRadiusScale = _mm_add_ps(
+                             _mm_mul_ps(
+                               v176,
+                               _mm_max_ps(
+                                 Four_Zeros,
+                                 _mm_min_ps(Four_Ones, _mm_div_ps(_mm_sub_ps(f4NewVortexRadius, Four_Ones), v184)))),
+                             f4MinVortexRadiusScale);
+      v88 = _mm_add_ps(_mm_mul_ps(_mm_mul_ps(_mm_sub_ps(v82, v235), f4InvDeltaTime), v83), v213);
+      v89 = _mm_unpackhi_ps(v88, Four_Zeros);
+      v90 = _mm_unpacklo_ps(v88, Four_Zeros);
+      v91 = _mm_movehl_ps(v90, v87);
+      LODWORD(v50[v27].m_flCurrentVortexRadius) = f4FinalRadiusScale.m128_i32[0];
+      v92 = this->m_data.m_Memory.m_pMemory;
+      *(__m128 *)&flBeamRadius[8] = v86;
+      v93 = _mm_movelh_ps(v87, v90);
+      v94 = _mm_movelh_ps(*(__m128 *)&flBeamRadius[8], v89);
+      v95 = _mm_loadl_ps((const double *)&flBeamRadius[16]);
+      *(_DWORD *)((char *)&v92->m_flCurrentVortexRadius + v224.m128_i32[0]) = f4FinalRadiusScale.m128_i32[1];
+      *(_DWORD *)((char *)&this->m_data.m_Memory.m_pMemory->m_flCurrentVortexRadius + v225.m128_i32[0]) = f4FinalRadiusScale.m128_i32[2];
+      *(_DWORD *)((char *)&this->m_data.m_Memory.m_pMemory->m_flCurrentVortexRadius + *(_DWORD *)&flBeamRadius[4]) = f4FinalRadiusScale.m128_i32[3];
+      v96 = v224.m128_i32[0];
+      LODWORD(this->m_data.m_Memory.m_pMemory[v27].m_flCurrentVortexSpeed) = f4CurrentVortexSpeed.m128_i32[0];
+      *(_DWORD *)((char *)&this->m_data.m_Memory.m_pMemory->m_flCurrentVortexSpeed + v96) = f4CurrentVortexSpeed.m128_i32[1];
+      *(_DWORD *)((char *)&this->m_data.m_Memory.m_pMemory->m_flCurrentVortexSpeed + v225.m128_i32[0]) = f4CurrentVortexSpeed.m128_i32[2];
+      v97 = *(_DWORD *)&flBeamRadius[4];
+      *(_DWORD *)((char *)&this->m_data.m_Memory.m_pMemory->m_flCurrentVortexSpeed + *(_DWORD *)&flBeamRadius[4]) = f4CurrentVortexSpeed.m128_i32[3];
+      v98 = this->m_data.m_Memory.m_pMemory;
+      v99 = (_DWORD *)((char *)&v98->m_vPosition.x + v225.m128_i32[0]);
+      v229.m128_i32[0] = (__int32)v98 + v97;
+      v100 = (_DWORD *)((char *)&v98->m_vPosition.x + v224.m128_i32[0]);
+      p_x = (_DWORD *)&v98[v27].m_vPosition.x;
+      p_x[3] = v93.m128_i32[0];
+      count -= 4;
+      p_x[5] = _mm_shuffle_ps(v93, v93, 78).m128_u32[0];
+      p_x[4] = _mm_shuffle_ps(v93, v93, 57).m128_u32[0];
+      v102 = (_DWORD *)v229.m128_i32[0];
+      v100[3] = v91.m128_i32[0];
+      v100[5] = _mm_shuffle_ps(v91, v91, 78).m128_u32[0];
+      v100[4] = _mm_shuffle_ps(v91, v91, 57).m128_u32[0];
+      v99[3] = v94.m128_i32[0];
+      v99[5] = _mm_shuffle_ps(v94, v94, 78).m128_u32[0];
+      v99[4] = _mm_shuffle_ps(v94, v94, 57).m128_u32[0];
+      v103 = *(_DWORD *)&flBeamRadius[4];
+      v102[3] = v95.m128_i32[0];
+      v102[4] = _mm_shuffle_ps(v95, v95, 57).m128_u32[0];
+      v104 = f4PointOnLine;
+      v105 = _mm_unpacklo_ps(v82, Four_Zeros);
+      v102[5] = _mm_shuffle_ps(v95, v95, 78).m128_u32[0];
+      v106 = _mm_unpackhi_ps(v82, Four_Zeros);
+      v107 = this->m_data.m_Memory.m_pMemory;
+      v108 = _mm_unpackhi_ps(v104, v80);
+      v109 = _mm_unpacklo_ps(f4PointOnLine, v80);
+      v110 = _mm_movelh_ps(v109, v105);
+      v111 = _mm_movehl_ps(v105, v109);
+      v229.m128_i32[0] = (__int32)v107 + v103;
+      v112 = (_DWORD *)((char *)&v107->m_vPosition.x + v225.m128_i32[0]);
+      v113 = _mm_movelh_ps(v108, v106);
+      v114 = _mm_movehl_ps(v106, v108);
+      v115 = (_DWORD *)((char *)&v107->m_vPosition.x + v224.m128_i32[0]);
+      v116 = (_DWORD *)&v107[v27].m_vPosition.x;
+      v27 += 4;
+      *v116 = v110.m128_i32[0];
+      v117 = count <= 3;
+      v116[1] = _mm_shuffle_ps(v110, v110, 57).m128_u32[0];
+      v116[2] = _mm_shuffle_ps(v110, v110, 78).m128_u32[0];
+      v118 = (_DWORD *)v229.m128_i32[0];
+      v115[1] = _mm_shuffle_ps(v111, v111, 57).m128_u32[0];
+      *v115 = v111.m128_i32[0];
+      v115[2] = _mm_shuffle_ps(v111, v111, 78).m128_u32[0];
+      v112[1] = _mm_shuffle_ps(v113, v113, 57).m128_u32[0];
+      *v112 = v113.m128_i32[0];
+      v112[2] = _mm_shuffle_ps(v113, v113, 78).m128_u32[0];
+      *v118 = v114.m128_i32[0];
+      v118[1] = _mm_shuffle_ps(v114, v114, 57).m128_u32[0];
+      v118[2] = _mm_shuffle_ps(v114, v114, 78).m128_u32[0];
+    }
+    while ( !v117 );
+    v119 = (unsigned int)(count_0 - 4) >> 2;
+    count_0 = (count_0 - 4) & 3;
+    v23 = 4 * v119 + 4;
+  }
+  if ( count_0 > 0 )
+  {
+    v120 = v23;
+    *(_DWORD *)&flBeamRadius[4] = &vecPointOnLine;
+    *(_DWORD *)&flBeamRadius[8] = &qRotate;
+    v121 = _mm_cmpeq_ps(Four_Zeros, f4BeamRadiusSqr);
+    v122 = count_0;
+    v224 = _mm_sub_ps(Four_Ones, Four_Zeros);
+    v225 = _mm_or_ps(_mm_andnot_ps(v121, _mm_sub_ps(f4BeamRadiusSqr, Four_Zeros)), _mm_and_ps(v121, Four_Ones));
+    do
+    {
+      v155 = 0LL;
+      v156 = &this->m_data.m_Memory.m_pMemory[v120];
+      v244 = _mm_mul_ps(*(__m128 *)&v156->m_vVelocity.x, isSignificant);
+      v155.m128_f32[0] = (float)(v244.m128_f32[0] + v244.m128_f32[1]) + v244.m128_f32[2];
+      v157 = _mm_shuffle_ps(v155, v155, 0);
+      v158 = _mm_cmplt_ps(v157, Four_Zeros);
+      v159 = _mm_add_ps(_mm_or_ps(_mm_and_ps(v158, Four_Zeros), _mm_andnot_ps(v158, v157)), f4BeamAccelDT);
+      v160 = _mm_cmplt_ps(v159, f4BeamSpeed);
+      v229 = _mm_mul_ps(_mm_or_ps(_mm_andnot_ps(v160, f4BeamSpeed), _mm_and_ps(v160, v159)), isSignificant);
+      v161 = _mm_add_ps(_mm_mul_ps(f4DeltaTime, v229), *(__m128 *)&v156->m_vPosition.x);
+      *(_DWORD *)&vBeamDir[12] = v161.m128_i32[0];
+      *(_DWORD *)&vBeamDir[16] = _mm_shuffle_ps(v161, v161, 57).m128_u32[0];
+      *(_DWORD *)&vBeamDir[20] = _mm_shuffle_ps(v161, v161, 78).m128_u32[0];
+      CalcClosestPointOnLine(
+        (const Vector *const)&vBeamDir[12],
+        (const Vector *const)vLineA,
+        (const Vector *const)vBeamEnd,
+        *(Vector *const *)&flBeamRadius[4],
+        flDistOnLine.m128_f32);
+      v162 = flBeamLength - (float)(flBeamLength * flDistOnLine.m128_f32[0]);
+      flDistOnLine.m128_f32[0] = flBeamLength * flDistOnLine.m128_f32[0];
+      v163.m128d_f64[0] = (float)(flDistOnLine.m128_f32[0] - flHalfBeamLength);
+      v163.m128d_f64[1] = v163.m128d_f64[0];
+      v164 = (__m128)_mm_and_pd(v163, (__m128d)xmmword_B996A0);
+      v164.m128_f32[0] = _mm_unpacklo_pd((__m128d)v164, (__m128d)v164).m128d_f64[0];
+      v164.m128_f32[0] = (float)(flHalfBeamLength - v164.m128_f32[0]) - m_fValue;
+      v165 = _mm_cmple_ss((__m128)0LL, v164);
+      v166 = _mm_or_ps(_mm_andnot_ps(v165, (__m128)LODWORD(v183)), _mm_and_ps((__m128)LODWORD(v186), v165));
+      if ( (float)(v162 - m_fValue) < 0.0 && bGoingTowardsPortal )
+      {
+        m_flDestVortexRadius_low = (__m128)LODWORD(flMinVortexRadiusScale);
+        v124 = &this->m_data.m_Memory.m_pMemory[v120];
+      }
+      else
+      {
+        v124 = &this->m_data.m_Memory.m_pMemory[v120];
+        m_flDestVortexRadius_low = (__m128)LODWORD(v124->m_flDestVortexRadius);
+      }
+      v125 = *(float *)flBeamRadius * v124->m_flCurrentVortexRadius;
+      m_flDestVortexRadius_low.m128_f32[0] = m_flDestVortexRadius_low.m128_f32[0] * *(float *)flBeamRadius;
+      m_flCurrentVortexSpeed = v124->m_flCurrentVortexSpeed;
+      v166.m128_f32[0] = v166.m128_f32[0] / (float)(6.2831855 * v125);
+      v127.m128_f32[0] = m_flDestVortexRadius_low.m128_f32[0] - v125;
+      v128 = _mm_cmple_ss((__m128)0LL, v127);
+      v128.m128_i32[0] = _mm_andnot_ps(v128, (__m128)0xBF800000).m128_u32[0] | v128.m128_i32[0] & 0x3F800000;
+      v127.m128_f32[0] = (float)(flVortexRadiusOffsetDT * v128.m128_f32[0]) + v125;
+      v129.m128_f32[0] = (float)(m_flDestVortexRadius_low.m128_f32[0] - v127.m128_f32[0]) * v128.m128_f32[0];
+      v130 = _mm_cmple_ss((__m128)0LL, v129);
+      LODWORD(v131) = _mm_andnot_ps(v130, m_flDestVortexRadius_low).m128_u32[0] | v127.m128_i32[0] & v130.m128_i32[0];
+      v127.m128_f32[0] = v166.m128_f32[0] - m_flCurrentVortexSpeed;
+      v132 = _mm_cmple_ss((__m128)0LL, v127);
+      v127.m128_i32[0] = _mm_andnot_ps(v132, (__m128)0xBF800000).m128_u32[0] | v132.m128_i32[0] & 0x3F800000;
+      v132.m128_f32[0] = (float)(flVortexAccelDT * v127.m128_f32[0]) + m_flCurrentVortexSpeed;
+      v130.m128_f32[0] = (float)(v166.m128_f32[0] - v132.m128_f32[0]) * v127.m128_f32[0];
+      v133 = this->m_data.m_Memory.m_pMemory;
+      f4PointOnLine = **(fltx4_76 **)&flBeamRadius[4];
+      v134 = _mm_sub_ps(v161, f4PointOnLine);
+      v135 = _mm_cmple_ss((__m128)0LL, v130);
+      v130.m128_f32[0] = _mm_andnot_ps(v135, v166).m128_f32[0];
+      m_flVortexDirection = v133[v120].m_flVortexDirection;
+      LODWORD(v137) = v130.m128_i32[0] | v132.m128_i32[0] & v135.m128_i32[0];
+      if ( bIsBeamReversed )
+        m_flVortexDirection = -m_flVortexDirection;
+      v170 = v134;
+      AxisAngleQuaternion(
+        (const Vector *const)vBeamDir,
+        (float)(m_flVortexDirection * p_flDeltaTime_0) * v137,
+        *(Quaternion *const *)&flBeamRadius[8]);
+      *(_DWORD *)vecVortexRadius = v134.m128_i32[0];
+      *(_DWORD *)&vecVortexRadius[4] = _mm_shuffle_ps(v170, v170, 57).m128_u32[0];
+      *(_DWORD *)&vecVortexRadius[8] = _mm_shuffle_ps(v170, v170, 78).m128_u32[0];
+      *(_QWORD *)&vecVortexRadius[12] = __PAIR64__(*(unsigned int *)&vecVortexRadius[4], v134.m128_u32[0]);
+      *(_DWORD *)&vecVortexRadius[20] = *(_DWORD *)&vecVortexRadius[8];
+      VectorRotate(
+        (const Vector *const)&vecVortexRadius[12],
+        *(const Quaternion *const *)&flBeamRadius[8],
+        (Vector *const)vecVortexRadius);
+      v138 = 0LL;
+      v139 = _mm_mul_ps(*(__m128 *)vecVortexRadius, *(__m128 *)vecVortexRadius);
+      v138.m128_f32[0] = (float)(v139.m128_f32[0] + v139.m128_f32[1]) + v139.m128_f32[2];
+      v140 = _mm_shuffle_ps(v138, v138, 0);
+      v141 = _mm_rsqrt_ps(v140);
+      v142 = _mm_cmplt_ps(Four_Epsilons, v140);
+      v143 = _mm_mul_ps(_mm_sub_ps(Four_Threes, _mm_mul_ps(_mm_mul_ps(v141, v141), v140)), v141);
+      v144 = 0LL;
+      v145 = _mm_sub_ps(f4PointOnLine, v161);
+      v146 = _mm_and_ps(v142, _mm_mul_ps(_mm_mul_ps(v143, Four_PointFives), *(__m128 *)vecVortexRadius));
+      v147 = 0LL;
+      v147.m128_f32[0] = v131;
+      v148.m128_f32[0] = v131 - 1.0;
+      v149 = _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(v147, v147, 0), v146), f4PointOnLine);
+      v244 = _mm_mul_ps(v145, v145);
+      v144.m128_f32[0] = (float)(v244.m128_f32[0] + v244.m128_f32[1]) + v244.m128_f32[2];
+      v150 = _mm_add_ps(
+               _mm_mul_ps(
+                 _mm_add_ps(
+                   _mm_mul_ps(
+                     v224,
+                     _mm_max_ps(
+                       Four_Zeros,
+                       _mm_min_ps(Four_Ones, _mm_div_ps(_mm_sub_ps(_mm_shuffle_ps(v144, v144, 0), Four_Zeros), v225)))),
+                   Four_Zeros),
+                 _mm_mul_ps(_mm_sub_ps(v149, v161), f4InvDeltaTime)),
+               v229);
+      if ( *(float *)flBeamRadius == 1.0 )
+      {
+        v151 = _mm_cmple_ss((__m128)0LL, v148);
+        LODWORD(v152) = _mm_andnot_ps(v151, (__m128)LODWORD(flMinVortexRadiusScale)).m128_u32[0] | v151.m128_i32[0] & 0x3F800000;
+      }
+      else
+      {
+        v167 = v148.m128_f32[0] / (float)(*(float *)flBeamRadius - 1.0);
+        if ( v167 < 0.0 )
+          v168 = 0.0;
+        else
+          v168 = fminf(1.0, v167);
+        v152 = (float)((float)(1.0 - flMinVortexRadiusScale) * v168) + flMinVortexRadiusScale;
+      }
+      this->m_data.m_Memory.m_pMemory[v120].m_flCurrentVortexRadius = v152;
+      this->m_data.m_Memory.m_pMemory[v120].m_flCurrentVortexSpeed = v137;
+      v153 = &this->m_data.m_Memory.m_pMemory[v120];
+      LODWORD(v153->m_vVelocity.x) = v150.m128_i32[0];
+      LODWORD(v153->m_vVelocity.y) = _mm_shuffle_ps(v150, v150, 57).m128_u32[0];
+      LODWORD(v153->m_vVelocity.z) = _mm_shuffle_ps(v150, v150, 78).m128_u32[0];
+      v154 = &this->m_data.m_Memory.m_pMemory[v120++];
+      --v122;
+      LODWORD(v154->m_vPosition.x) = v149.m128_i32[0];
+      LODWORD(v154->m_vPosition.y) = _mm_shuffle_ps(v149, v149, 57).m128_u32[0];
+      LODWORD(v154->m_vPosition.z) = _mm_shuffle_ps(v149, v149, 78).m128_u32[0];
+    }
+    while ( v122 );
+  }
+}

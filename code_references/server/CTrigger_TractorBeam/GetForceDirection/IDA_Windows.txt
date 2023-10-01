@@ -1,0 +1,13 @@
+Vector *__thiscall CTrigger_TractorBeam::GetForceDirection(CTrigger_TractorBeam *this, Vector *result)
+{
+  float v2; // eax
+  __int64 vecForceDir; // [esp+0h] [ebp-Ch]
+
+  *(float *)&vecForceDir = this->m_vEnd.m_Value.x - this->m_vStart.m_Value.x;
+  *((float *)&vecForceDir + 1) = this->m_vEnd.m_Value.y - this->m_vStart.m_Value.y;
+  v2 = this->m_vEnd.m_Value.z - this->m_vStart.m_Value.z;
+  *(_QWORD *)&result->x = vecForceDir;
+  result->z = v2;
+  VectorNormalize(result);
+  return result;
+}

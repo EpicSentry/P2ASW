@@ -1,0 +1,26 @@
+void __usercall CTrigger_TractorBeam::RemoveAllBlobsFromBeam(CTrigger_TractorBeam *this@<ecx>, float a2@<ebp>)
+{
+  int i; // edi
+  bool v4; // sf
+  CPaintBlob **m_pMemory; // ecx
+
+  for ( i = 0; i < this->m_blobs.m_Size; ++i )
+    CBasePaintBlob::SetTractorBeam(this->m_blobs.m_Memory.m_pMemory[i], a2, 0);
+  v4 = this->m_blobs.m_Memory.m_nGrowSize < 0;
+  this->m_blobs.m_Size = 0;
+  if ( v4 )
+  {
+    this->m_blobs.m_pElements = this->m_blobs.m_Memory.m_pMemory;
+  }
+  else
+  {
+    if ( this->m_blobs.m_Memory.m_pMemory )
+    {
+      _g_pMemAlloc->Free(_g_pMemAlloc, this->m_blobs.m_Memory.m_pMemory);
+      this->m_blobs.m_Memory.m_pMemory = 0;
+    }
+    m_pMemory = this->m_blobs.m_Memory.m_pMemory;
+    this->m_blobs.m_Memory.m_nAllocationCount = 0;
+    this->m_blobs.m_pElements = m_pMemory;
+  }
+}

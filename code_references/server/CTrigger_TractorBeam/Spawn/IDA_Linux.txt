@@ -1,0 +1,18 @@
+void __cdecl CTrigger_TractorBeam::Spawn(CTrigger_TractorBeam *const this)
+{
+  BASEPTR v1; // [esp+28h] [ebp-10h] BYREF
+
+  (*((void (__cdecl **)(CTrigger_TractorBeam *const))this->_vptr_IHandleEntity + 26))(this);
+  CCollisionProperty::SetSolid(&this->m_Collision, SOLID_VPHYSICS);
+  CCollisionProperty::SetSolidFlags(&this->m_Collision, this->m_Collision.m_usSolidFlags.m_Value | 4);
+  CBaseEntity::SetMoveType(this, MOVETYPE_NONE, MOVECOLLIDE_DEFAULT);
+  (*((void (__cdecl **)(CTrigger_TractorBeam *const))this->_vptr_IHandleEntity + 152))(this);
+  CBaseEntity::SetTransmitState(this, 32);
+  CBaseEntity::ThinkSet(&v1, this, (BASEPTR)(unsigned int)CTrigger_TractorBeam::TractorThink, 0.0, 0);
+  CBaseEntity::SetNextThink(this, gpGlobals->curtime, 0);
+  if ( this->m_bDisablePlayerMove.m_Value )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_bDisablePlayerMove);
+    this->m_bDisablePlayerMove.m_Value = 0;
+  }
+}

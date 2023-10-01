@@ -1,0 +1,123 @@
+void __thiscall CTrigger_TractorBeam::EndTouch(CTrigger_TractorBeam *this, CNPC_Portal_FloorTurret *pOther)
+{
+  CTrigger_TractorBeam *v2; // ebx
+  bool (__thiscall *PassesTriggerFilters)(CBaseVPhysicsTrigger *, CBaseEntity *); // edx
+  CNPC_Portal_FloorTurret *v4; // esi
+  bool (__thiscall *IsPlayer)(CBaseEntity *); // edx
+  unsigned int m_Index; // eax
+  float *v7; // edi
+  float *v8; // eax
+  float v9; // xmm0_4
+  int v10; // edi
+  CPortal_Base2D *v11; // ebx
+  const Vector *v12; // eax
+  CHandle<CBaseEntity> *p_m_hProxyEntity; // ecx
+  CBaseEntity *v14; // ecx
+  CPortal_Base2D *v15; // eax
+  CBaseEntity *v16; // ecx
+  CSoundEnvelopeController *Controller; // eax
+  EntityBeamHistory_t *HistoryFromEnt; // edi
+  CTrigger_TractorBeam *v19; // eax
+  triggerevent_t event; // [esp+20h] [ebp-34h] BYREF
+  char v21[12]; // [esp+34h] [ebp-20h] BYREF
+  Vector vExtents; // [esp+40h] [ebp-14h] BYREF
+  BOOL bTravelingToLinkedTBeam; // [esp+4Ch] [ebp-8h]
+  CTrigger_TractorBeam *v24; // [esp+50h] [ebp-4h]
+
+  v2 = this;
+  PassesTriggerFilters = this->PassesTriggerFilters;
+  v4 = pOther;
+  v24 = this;
+  if ( !PassesTriggerFilters(this, pOther) )
+    return;
+  CAI_ActBusyGoal::NPCMovingToBusy((vgui::TreeView *)v2, (int)v4);
+  if ( v4
+    && (v4->m_iClassname.pszValue == "npc_portal_turret_floor"
+     || CBaseEntity::ClassMatchesComplex(v4, "npc_portal_turret_floor")) )
+  {
+    CNPC_Portal_FloorTurret::OnExitedTractorBeam(v4);
+  }
+  else if ( UTIL_IsReflectiveCube(v4) && v4 )
+  {
+    CPropWeightedCube::OnExitedTractorBeam((CPropWeightedCube *)v4);
+  }
+  IsPlayer = v4->IsPlayer;
+  LOBYTE(bTravelingToLinkedTBeam) = 0;
+  if ( !IsPlayer(v4) )
+  {
+    if ( PhysGetTriggerEvent(&event, v2) && event.pObject && v2->m_pController )
+    {
+      ((void (*)(void))event.pObject->Wake)();
+      v2->m_pController->DetachObject(v2->m_pController, event.pObject);
+    }
+    pOther = (CNPC_Portal_FloorTurret *)v4->GetRefEHandle(v4)->m_Index;
+    HistoryFromEnt = CTractorBeam_Manager::GetHistoryFromEnt(
+                       &g_TractorBeamManager,
+                       (const CHandle<CBaseEntity> *)&pOther);
+    EntityBeamHistory_t::LeaveBeam(HistoryFromEnt, v2);
+    if ( HistoryFromEnt->m_beams.m_Size && CHandle<CBaseEntity>::operator!=((CHandle<CBaseEntity> *)HistoryFromEnt, 0) )
+    {
+      v19 = (CTrigger_TractorBeam *)CHandle<CPortal_Base2D>::operator CPortal_Base2D *((CHandle<CBaseEntity> *)HistoryFromEnt);
+      CTrigger_TractorBeam::ForceAttachEntity(v19, v4);
+    }
+    return;
+  }
+  m_Index = v2->m_hProxyEntity.m_Value.m_Index;
+  if ( m_Index == -1 )
+    goto LABEL_26;
+  if ( g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+    goto LABEL_26;
+  if ( !g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity )
+    goto LABEL_26;
+  v7 = (float *)((int (__thiscall *)(CNPC_Portal_FloorTurret *, char *))v4->OnStartSchedule)(v4, v21);
+  v8 = (float *)((int (__thiscall *)(CNPC_Portal_FloorTurret *, CBaseEntity **))v4->SelectSchedule)(v4, &event.pEntity);
+  vExtents.x = *v8 - *v7;
+  vExtents.y = v8[1] - v7[1];
+  v9 = v8[2] - v7[2];
+  v10 = 0;
+  vExtents.z = v9;
+  pOther = 0;
+  if ( CPortal_Base2D_Shared::AllPortals.m_Size <= 0 )
+    goto LABEL_26;
+  while ( 1 )
+  {
+    v11 = CPortal_Base2D_Shared::AllPortals.m_Memory.m_pMemory[v10];
+    if ( !v11 )
+      goto LABEL_22;
+    v12 = v4->WorldSpaceCenter(v4);
+    if ( !UTIL_IsBoxIntersectingPortal(v12, &vExtents, v11, 0.0) )
+      goto LABEL_22;
+    p_m_hProxyEntity = (CHandle<CBaseEntity> *)&v24->m_hProxyEntity;
+    if ( v24->m_bReversed.m_Value )
+    {
+      v14 = CHandle<CPortal_Base2D>::operator CPortal_Base2D *(p_m_hProxyEntity);
+      v15 = (CPortal_Base2D *)v14->__vftable[1].GetNetworkable(v14);
+    }
+    else
+    {
+      v16 = CHandle<CPortal_Base2D>::operator CPortal_Base2D *(p_m_hProxyEntity);
+      v15 = (CPortal_Base2D *)v16->__vftable[1].GetRefEHandle(v16);
+    }
+    if ( v11 == v15 || CPortal_Base2D::GetLinkedPortal(v11) == v15 )
+      break;
+    v10 = (int)pOther;
+LABEL_22:
+    pOther = (CNPC_Portal_FloorTurret *)++v10;
+    if ( v10 >= CPortal_Base2D_Shared::AllPortals.m_Size )
+      goto LABEL_25;
+  }
+  LOBYTE(bTravelingToLinkedTBeam) = 1;
+LABEL_25:
+  v2 = v24;
+LABEL_26:
+  CPortal_Player::SetLeaveTractorBeam((CPortal_Player *)v4, v2, bTravelingToLinkedTBeam);
+  if ( v2->m_sndPlayerInBeam )
+  {
+    Controller = CSoundEnvelopeController::GetController();
+    ((void (__thiscall *)(CSoundEnvelopeController *, CSoundPatch *, _DWORD, _DWORD))Controller->SoundFadeOut)(
+      Controller,
+      v2->m_sndPlayerInBeam,
+      LODWORD(FLOAT_0_5),
+      0);
+  }
+}

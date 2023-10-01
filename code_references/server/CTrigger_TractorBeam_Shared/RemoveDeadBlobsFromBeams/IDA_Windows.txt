@@ -1,0 +1,58 @@
+void __cdecl CTrigger_TractorBeam_Shared::RemoveDeadBlobsFromBeams()
+{
+  int v0; // ecx
+  ITriggerTractorBeamAutoList *v1; // eax
+  ITriggerTractorBeamAutoList *v2; // ebx
+  CBasePaintBlob **v3; // esi
+  CBasePaintBlob **v4; // edi
+  int v5; // esi
+  CBasePaintBlob *v6; // eax
+  CBasePaintBlob **v7; // [esp+0h] [ebp-8h]
+  int i; // [esp+4h] [ebp-4h]
+
+  v0 = 0;
+  for ( i = 0; v0 < ITriggerTractorBeamAutoList::m_ITriggerTractorBeamAutoListAutoList.m_Size; i = v0 )
+  {
+    v1 = ITriggerTractorBeamAutoList::m_ITriggerTractorBeamAutoListAutoList.m_Memory.m_pMemory[v0];
+    if ( v1 )
+      v2 = v1 - 219;
+    else
+      v2 = 0;
+    if ( v2[223].__vftable )
+    {
+      v3 = (CBasePaintBlob **)v2[220].__vftable;
+      v7 = v3;
+      v4 = &v3[(int)v2[223].__vftable];
+LABEL_7:
+      if ( v3 != v4 )
+      {
+        while ( CBasePaintBlob::ShouldDeleteThis(*v3) )
+        {
+          if ( ++v3 == v4 )
+            goto LABEL_10;
+        }
+        if ( v3 != v4 )
+        {
+          while ( v3 != --v4 )
+          {
+            if ( CBasePaintBlob::ShouldDeleteThis(*v4) )
+            {
+              v6 = *v3;
+              *v3 = *v4;
+              *v4 = v6;
+              ++v3;
+              goto LABEL_7;
+            }
+          }
+        }
+      }
+LABEL_10:
+      v5 = v3 - v7;
+      if ( (int)v2[223].__vftable - v5 > 0 && v5 > 0 )
+        _V_memmove(v2[220].__vftable, &v2[220].~ITriggerTractorBeamAutoList + v5, 4 * ((int)v2[223].__vftable - v5));
+      v2[223].__vftable = (ITriggerTractorBeamAutoList_vtbl *)((char *)v2[223].__vftable - v5);
+      v0 = i;
+    }
+    ++v0;
+  }
+}

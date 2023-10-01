@@ -1,0 +1,47 @@
+void __cdecl CTrigger_TractorBeam::TractorThink(CTrigger_TractorBeam *const this)
+{
+  unsigned int m_Index; // eax
+  char *v2; // edx
+  int v3; // eax
+  bool v4; // si
+  unsigned int v5; // edx
+  int v6; // eax
+  char *v7; // ecx
+  bool v8; // al
+  bool v9; // [esp+1Ch] [ebp-Ch]
+
+  m_Index = this->m_hProxyEntity.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v2 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v2 + 2) == HIWORD(m_Index) )
+    {
+      v3 = *((_DWORD *)v2 + 1);
+      if ( v3 )
+      {
+        v4 = (*(int (__thiscall **)(CBaseEntityList *, int))(*(_DWORD *)v3 + 808))(g_pEntityList, v3) != 0;
+        if ( v4 != this->m_bFromPortal.m_Value )
+        {
+          CBaseEntity::NetworkStateChanged(this, &this->m_bFromPortal);
+          this->m_bFromPortal.m_Value = v4;
+        }
+        v5 = this->m_hProxyEntity.m_Value.m_Index;
+        v6 = 0;
+        if ( v5 != -1 )
+        {
+          v7 = (char *)g_pEntityList + 24 * (unsigned __int16)v5;
+          if ( *((_DWORD *)v7 + 2) == HIWORD(v5) )
+            v6 = *((_DWORD *)v7 + 1);
+        }
+        v8 = (*(int (__cdecl **)(int))(*(_DWORD *)v6 + 800))(v6) != 0;
+        if ( v8 != this->m_bToPortal.m_Value )
+        {
+          v9 = v8;
+          CBaseEntity::NetworkStateChanged(this, &this->m_bToPortal);
+          this->m_bToPortal.m_Value = v9;
+        }
+      }
+    }
+  }
+  CBaseEntity::SetNextThink(this, gpGlobals->curtime, 0);
+}

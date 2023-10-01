@@ -1,0 +1,17 @@
+void __cdecl CTrigger_TractorBeam::ForceDetachEntity(CTrigger_TractorBeam *const this, CBaseEntity *pEntity)
+{
+  IPhysicsObject *m_pPhysicsObject; // ebx
+
+  m_pPhysicsObject = pEntity->m_pPhysicsObject;
+  if ( m_pPhysicsObject )
+  {
+    if ( this->m_pController )
+    {
+      (*((void (__cdecl **)(IPhysicsObject *))m_pPhysicsObject->_vptr_IPhysicsObject + 25))(pEntity->m_pPhysicsObject);
+      (*((void (__cdecl **)(IPhysicsMotionController *, IPhysicsObject *))this->m_pController->_vptr_IPhysicsMotionController
+       + 4))(
+        this->m_pController,
+        m_pPhysicsObject);
+    }
+  }
+}

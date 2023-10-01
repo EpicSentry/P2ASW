@@ -1,0 +1,14 @@
+void __thiscall CTrigger_TractorBeam::ForceAttachEntity(CTrigger_TractorBeam *this, CBaseEntity *pEntity)
+{
+  IPhysicsObject *m_pPhysicsObject; // esi
+
+  m_pPhysicsObject = pEntity->m_pPhysicsObject;
+  if ( m_pPhysicsObject )
+  {
+    if ( this->m_pController )
+    {
+      m_pPhysicsObject->Wake(pEntity->m_pPhysicsObject);
+      this->m_pController->AttachObject(this->m_pController, m_pPhysicsObject, 1);
+    }
+  }
+}

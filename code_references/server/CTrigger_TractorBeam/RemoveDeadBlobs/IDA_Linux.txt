@@ -1,0 +1,70 @@
+void __cdecl CTrigger_TractorBeam::RemoveDeadBlobs(CTrigger_TractorBeam *const this)
+{
+  int m_Size; // eax
+  CPaintBlob **m_pMemory; // ecx
+  const CBasePaintBlob **v3; // ebx
+  CPaintBlob **v4; // edi
+  const CBasePaintBlob **v5; // esi
+  const CBasePaintBlob *v6; // eax
+  int v7; // eax
+  int v8; // esi
+  CPaintBlob **begin; // [esp+18h] [ebp-20h]
+  const CBasePaintBlob **v10; // [esp+1Ch] [ebp-1Ch]
+
+  m_Size = this->m_blobs.m_Size;
+  if ( m_Size )
+  {
+    m_pMemory = this->m_blobs.m_Memory.m_pMemory;
+    v3 = (const CBasePaintBlob **)&m_pMemory[m_Size];
+    begin = m_pMemory;
+    v4 = m_pMemory + 1;
+    if ( m_pMemory != (CPaintBlob **)v3 )
+    {
+      while ( 1 )
+      {
+        v10 = (const CBasePaintBlob **)v4;
+        v5 = (const CBasePaintBlob **)(v4 - 1);
+        if ( !CBasePaintBlob::ShouldDeleteThis(*(v4 - 1)) )
+          break;
+LABEL_9:
+        ++v4;
+        if ( v3 == v10 )
+        {
+          v7 = this->m_blobs.m_Size;
+          v8 = ((char *)v3 - (char *)begin) >> 2;
+          goto LABEL_12;
+        }
+      }
+      if ( v5 == --v3 )
+      {
+        v7 = this->m_blobs.m_Size;
+        v8 = ((char *)v3 - (char *)begin) >> 2;
+      }
+      else
+      {
+        do
+        {
+          if ( CBasePaintBlob::ShouldDeleteThis(*v3) )
+          {
+            v6 = *(v4 - 1);
+            *(v4 - 1) = (CPaintBlob *)*v3;
+            *v3 = v6;
+            goto LABEL_9;
+          }
+          --v3;
+        }
+        while ( v5 != v3 );
+        v7 = this->m_blobs.m_Size;
+        v8 = ((char *)v5 - (char *)begin) >> 2;
+      }
+LABEL_12:
+      m_Size = v7 - v8;
+      if ( v8 > 0 && m_Size > 0 )
+      {
+        _V_memmove(this->m_blobs.m_Memory.m_pMemory, &this->m_blobs.m_Memory.m_pMemory[v8], 4 * m_Size);
+        m_Size = this->m_blobs.m_Size - v8;
+      }
+    }
+    this->m_blobs.m_Size = m_Size;
+  }
+}

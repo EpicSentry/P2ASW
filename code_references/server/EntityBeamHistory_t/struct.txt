@@ -1,0 +1,10 @@
+struct EntityBeamHistory_t
+{
+	EntityBeamHistory_t();
+	~EntityBeamHistory_t();
+    
+	bool IsDifferentBeam( CTrigger_TractorBeam * );
+	void UpdateBeam( CTrigger_TractorBeam * );
+	void LeaveBeam( CTrigger_TractorBeam * );
+	void ClearAllBeams();
+};

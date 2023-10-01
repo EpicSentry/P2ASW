@@ -1,0 +1,12 @@
+void __cdecl CTrigger_TractorBeam::OnRestore(CTrigger_TractorBeam *const this)
+{
+  IPhysicsMotionController *m_pController; // eax
+
+  CBaseEntity::OnRestore(this);
+  m_pController = this->m_pController;
+  if ( m_pController )
+    (*((void (__cdecl **)(IPhysicsMotionController *, IMotionEvent *))m_pController->_vptr_IPhysicsMotionController + 2))(
+      this->m_pController,
+      &this->IMotionEvent);
+  CBaseEntity::SetTransmitState(this, 32);
+}

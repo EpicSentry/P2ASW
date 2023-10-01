@@ -1,0 +1,8 @@
+bool __cdecl CTrigger_TractorBeam::CreateVPhysics(CTrigger_TractorBeam *const this)
+{
+  this->m_pController = (IPhysicsMotionController *)(*((int (__cdecl **)(IPhysicsEnvironment *, IMotionEvent *))physenv->_vptr_IPhysicsEnvironment
+                                                     + 30))(
+                                                      physenv,
+                                                      &this->IMotionEvent);
+  return 1;
+}

@@ -1,0 +1,4 @@
+void __cdecl CTrigger_TractorBeam::Activate(CTrigger_TractorBeam *const this)
+{
+  CBaseVPhysicsTrigger::Activate(this);
+}
