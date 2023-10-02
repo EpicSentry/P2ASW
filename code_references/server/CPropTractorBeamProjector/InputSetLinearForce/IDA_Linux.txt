@@ -1,0 +1,166 @@
+void __cdecl CPropTractorBeamProjector::InputSetLinearForce(
+        CPropTractorBeamProjector *const this,
+        inputdata_t *const indata)
+{
+  float flVal; // xmm0_4
+  float m_Value; // xmm1_4
+  vec_t x; // xmm0_4
+  edict_t *v5; // esi
+  IChangeInfoAccessor *v6; // eax
+  unsigned __int16 v7; // dx
+  CSharedEdictChangeInfo *v8; // edx
+  char *v9; // eax
+  vec_t y; // eax
+  edict_t *m_pPev; // esi
+  IChangeInfoAccessor *v12; // eax
+  unsigned __int16 m_nChangeInfos; // dx
+  CSharedEdictChangeInfo *v14; // edx
+  char *v15; // eax
+  char *v16; // ecx
+  int v17; // edx
+  char *v18; // ecx
+  int v19; // edx
+  char *v20; // [esp+38h] [ebp-24h]
+  char *v21; // [esp+38h] [ebp-24h]
+  unsigned __int16 v22; // [esp+3Eh] [ebp-1Eh]
+  unsigned __int16 v23; // [esp+3Eh] [ebp-1Eh]
+
+  flVal = indata->value._anon_0.flVal;
+  if ( indata->value.fieldType != FIELD_FLOAT )
+    flVal = 0.0;
+  m_Value = this->m_flLinearForce.m_Value;
+  if ( flVal != m_Value )
+  {
+    if ( !this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( !m_pPev || (m_pPev->m_fStateFlags & 0x100) != 0 )
+        goto LABEL_22;
+      m_pPev->m_fStateFlags |= 1u;
+      v12 = CBaseEdict::GetChangeAccessor(m_pPev);
+      if ( v12->m_iChangeInfoSerialNumber == g_pSharedChangeInfo->m_iSerialNumber )
+      {
+        v20 = (char *)g_pSharedChangeInfo + 40 * v12->m_iChangeInfo;
+        v16 = v20 + 2;
+        v22 = *((_WORD *)v20 + 20);
+        if ( !v22 )
+          goto LABEL_35;
+        if ( *((_WORD *)v20 + 1) == 1236 )
+          goto LABEL_22;
+        v17 = 0;
+        while ( v17 != 2 * (unsigned __int16)(v22 - 1) )
+        {
+          v17 += 2;
+          if ( *(_WORD *)&v16[v17] == 1236 )
+            goto LABEL_22;
+        }
+        if ( v22 != 19 )
+        {
+LABEL_35:
+          *(_WORD *)&v16[2 * v22] = 1236;
+          *((_WORD *)v20 + 20) = v22 + 1;
+          goto LABEL_22;
+        }
+      }
+      else
+      {
+        m_nChangeInfos = g_pSharedChangeInfo->m_nChangeInfos;
+        if ( m_nChangeInfos != 100 )
+        {
+          v12->m_iChangeInfo = m_nChangeInfos;
+          v14 = g_pSharedChangeInfo;
+          ++g_pSharedChangeInfo->m_nChangeInfos;
+          v12->m_iChangeInfoSerialNumber = v14->m_iSerialNumber;
+          v15 = (char *)g_pSharedChangeInfo + 40 * v12->m_iChangeInfo;
+          *((_WORD *)v15 + 1) = 1236;
+          *((_WORD *)v15 + 20) = 1;
+          goto LABEL_22;
+        }
+      }
+      v12->m_iChangeInfoSerialNumber = 0;
+      m_pPev->m_fStateFlags |= 0x100u;
+      goto LABEL_22;
+    }
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+LABEL_22:
+    this->m_flLinearForce.m_Value = flVal;
+    m_Value = flVal;
+  }
+  if ( m_Value == 0.0 )
+  {
+    CBaseProjector::EnableProjection(this, 0);
+    x = vec3_origin.x;
+    if ( vec3_origin.x != this->m_vEndPos.m_Value.x
+      || vec3_origin.y != this->m_vEndPos.m_Value.y
+      || vec3_origin.z != this->m_vEndPos.m_Value.z )
+    {
+      if ( this->m_Network.m_TimerEvent.m_bRegistered )
+      {
+        *((_BYTE *)&this->m_Network + 76) |= 1u;
+      }
+      else
+      {
+        v5 = this->m_Network.m_pPev;
+        if ( !v5 || (v5->m_fStateFlags & 0x100) != 0 )
+          goto LABEL_18;
+        v5->m_fStateFlags |= 1u;
+        v6 = CBaseEdict::GetChangeAccessor(v5);
+        if ( v6->m_iChangeInfoSerialNumber != g_pSharedChangeInfo->m_iSerialNumber )
+        {
+          v7 = g_pSharedChangeInfo->m_nChangeInfos;
+          if ( v7 != 100 )
+          {
+            v6->m_iChangeInfo = v7;
+            v8 = g_pSharedChangeInfo;
+            ++g_pSharedChangeInfo->m_nChangeInfos;
+            v6->m_iChangeInfoSerialNumber = v8->m_iSerialNumber;
+            v9 = (char *)g_pSharedChangeInfo + 40 * v6->m_iChangeInfo;
+            *((_WORD *)v9 + 1) = 1240;
+            *((_WORD *)v9 + 20) = 1;
+LABEL_17:
+            x = vec3_origin.x;
+            goto LABEL_18;
+          }
+          goto LABEL_45;
+        }
+        v21 = (char *)g_pSharedChangeInfo + 40 * v6->m_iChangeInfo;
+        v18 = v21 + 2;
+        v23 = *((_WORD *)v21 + 20);
+        if ( !v23 )
+          goto LABEL_44;
+        x = vec3_origin.x;
+        if ( *((_WORD *)v21 + 1) != 1240 )
+        {
+          v19 = 0;
+          while ( v19 != 2 * (unsigned __int16)(v23 - 1) )
+          {
+            v19 += 2;
+            if ( *(_WORD *)&v18[v19] == 1240 )
+              goto LABEL_17;
+          }
+          if ( v23 == 19 )
+          {
+LABEL_45:
+            v6->m_iChangeInfoSerialNumber = 0;
+            v5->m_fStateFlags |= 0x100u;
+            x = vec3_origin.x;
+            goto LABEL_18;
+          }
+LABEL_44:
+          *(_WORD *)&v18[2 * v23] = 1240;
+          x = vec3_origin.x;
+          *((_WORD *)v21 + 20) = v23 + 1;
+        }
+      }
+LABEL_18:
+      y = vec3_origin.y;
+      this->m_vEndPos.m_Value.x = x;
+      this->m_vEndPos.m_Value.y = y;
+      this->m_vEndPos.m_Value.z = vec3_origin.z;
+    }
+  }
+  else if ( this->m_bEnabled.m_Value )
+  {
+    (*((void (__cdecl **)(CPropTractorBeamProjector *const))this->_vptr_IHandleEntity + 234))(this);
+  }
+}

@@ -31,12 +31,15 @@ public:
     void GetProjectionExtents( class Vector & ,class Vector & );
     float GetLinearForce();
     CProjectedTractorBeamEntity *CreateNewInstance();
-    CBaseProjectedEntity *CreateNewProjectedEntity();
+    virtual CBaseProjectedEntity *CreateNewProjectedEntity();
     void OnProjected();
     void OnPreProjected();	
-	
-private:
 
+	// HACK:
+	float m_flLinearForce;
+
+private:
+	
 	CNetworkHandle( CTrigger_TractorBeam, m_hTractorBeamTrigger );
 };
 
@@ -97,7 +100,7 @@ public:
 	bool HasAngularScale();
 	bool HasLinearForce();
 
-    CTrigger_TractorBeam *CreateTractorBeam( const Vector &vStart, const Vector &vEnd, CProjectedTractorBeamEntity *pOwner );
+    static CTrigger_TractorBeam *CreateTractorBeam( const Vector &vStart, const Vector &vEnd, CProjectedTractorBeamEntity *pOwner );
     
 	//PaintBlobVector_t m_blobs;
     

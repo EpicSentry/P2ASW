@@ -1,0 +1,15 @@
+class ProjectedEntityAmbientSoundProxy : public CBaseEntity
+{
+public:
+	
+	DECLARE_CLASS( ProjectedEntityAmbientSoundProxy, CBaseEntity );
+	DECLARE_SERVERCLASS();
+	
+	ProjectedEntityAmbientSoundProxy();
+	~ProjectedEntityAmbientSoundProxy();
+	
+	ProjectedEntityAmbientSoundProxy *Create(class CBaseEntity * );
+    
+	int UpdateTransmitState();
+	void AttachToEntity(class CBaseEntity * );
+};

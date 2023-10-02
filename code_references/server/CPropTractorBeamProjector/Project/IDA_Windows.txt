@@ -1,0 +1,169 @@
+void __thiscall CPropTractorBeamProjector::Project(CPropTractorBeamProjector *this)
+{
+  unsigned int m_Index; // eax
+  IHandleEntity *m_pEntity; // ecx
+  float *v4; // ebx
+  edict_t *m_pPev; // ecx
+  CSoundEnvelopeController *Controller; // ebx
+  unsigned int v7; // eax
+  unsigned int v8; // ecx
+  edict_t *v9; // eax
+  unsigned int v10; // eax
+  IHandleEntity *v11; // ecx
+  IHandleEntity_vtbl *v12; // eax
+  signed int v13; // eax
+  bool v14; // cc
+  CSoundEnvelopeController *v15; // edi
+  const char *v16; // eax
+  unsigned int v17; // eax
+  IHandleEntity *v18; // ecx
+  IHandleEntity_vtbl *v19; // eax
+  signed int v20; // eax
+  CSoundPatch *v21; // eax
+  EmitSound_t ep; // [esp+78h] [ebp-70h] BYREF
+  CReliableBroadcastRecipientFilter filter; // [esp+C0h] [ebp-28h] BYREF
+  char v24[4]; // [esp+E0h] [ebp-8h] BYREF
+  const char *soundName; // [esp+E4h] [ebp-4h]
+
+  CBaseProjector::Project(this);
+  m_Index = this->m_hFirstChild.m_Value.m_Index;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+    m_pEntity = 0;
+  else
+    m_pEntity = g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+  v4 = (float *)((int (__thiscall *)(IHandleEntity *))m_pEntity->__vftable[68].~IHandleEntity)(m_pEntity);
+  if ( *v4 != this->m_vEndPos.m_Value.x || v4[1] != this->m_vEndPos.m_Value.y || v4[2] != this->m_vEndPos.m_Value.z )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x4C0u);
+    }
+    this->m_vEndPos.m_Value.x = *v4;
+    this->m_vEndPos.m_Value.y = v4[1];
+    this->m_vEndPos.m_Value.z = v4[2];
+  }
+  Controller = CSoundEnvelopeController::GetController();
+  if ( !this->m_sndMechanical )
+  {
+    ep.m_nSpeakerEntity = -1;
+    ep.m_hSoundScriptHash = -1;
+    v7 = (unsigned int)this->m_iEFlags >> 11;
+    ep.m_nFlags = 0;
+    ep.m_nPitch = 100;
+    memset(&ep.m_pOrigin, 0, 12);
+    *(_WORD *)&ep.m_bEmitCloseCaption = 1;
+    ep.m_bWarnOnDirectWaveReference = 0;
+    memset(&ep.m_UtlVecSoundOrigin, 0, sizeof(ep.m_UtlVecSoundOrigin));
+    ep.m_nSoundEntryVersion = 1;
+    ep.m_nChannel = 6;
+    ep.m_pSoundName = "VFX.TbeamEmitterSpinLp";
+    ep.m_flVolume = FLOAT_1_0;
+    ep.m_SoundLevel = SNDLVL_NORM;
+    if ( (v7 & 1) != 0 )
+      CBaseEntity::CalcAbsolutePosition(this);
+    v8 = (unsigned int)this->m_iEFlags >> 11;
+    ep.m_pOrigin = &this->m_vecAbsOrigin;
+    if ( (v8 & 1) != 0 )
+      CBaseEntity::CalcAbsolutePosition(this);
+    CRecipientFilter::CRecipientFilter(&filter);
+    filter.__vftable = (CReliableBroadcastRecipientFilter_vtbl *)&CPASFilter::`vftable';
+    CRecipientFilter::AddRecipientsByPAS(&filter, &this->m_vecAbsOrigin);
+    v9 = this->m_Network.m_pPev;
+    if ( v9 )
+      v9 -= (int)gpGlobals->pEdicts;
+    this->m_sndMechanical = Controller->SoundCreate(Controller, &filter, (int)v9, &ep);
+    CRecipientFilter::~CRecipientFilter(&filter);
+    CUtlVector<ITriggerTractorBeamAutoList *,CUtlMemory<ITriggerTractorBeamAutoList *,int>>::~CUtlVector<ITriggerTractorBeamAutoList *,CUtlMemory<ITriggerTractorBeamAutoList *,int>>((CUtlVector<__m128,CUtlMemory<__m128,int> > *)&ep.m_UtlVecSoundOrigin);
+  }
+  ((void (__thiscall *)(CSoundEnvelopeController *, CSoundPatch *, char *const, _DWORD, _DWORD))Controller->Play)(
+    Controller,
+    this->m_sndMechanical,
+    FLOAT_0_1,
+    LODWORD(FLOAT_100_0),
+    0);
+  ((void (__thiscall *)(CSoundEnvelopeController *, CSoundPatch *, _DWORD, _DWORD))Controller->SoundChangeVolume)(
+    Controller,
+    this->m_sndMechanical,
+    LODWORD(FLOAT_1_0),
+    LODWORD(FLOAT_0_75));
+  if ( !this->m_sndAmbientMusic )
+  {
+    CRecipientFilter::CRecipientFilter(&filter);
+    filter.__vftable = (CReliableBroadcastRecipientFilter_vtbl *)&CBroadcastRecipientFilter::`vftable';
+    CRecipientFilter::AddAllPlayers(&filter);
+    filter.__vftable = (CReliableBroadcastRecipientFilter_vtbl *)&CReliableBroadcastRecipientFilter::`vftable';
+    CRecipientFilter::MakeReliable((CFmtStrN<256> *)&filter);
+    v10 = this->m_hAmbientSoundProxy.m_Index;
+    if ( v10 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v10].m_SerialNumber != HIWORD(v10) )
+      v11 = 0;
+    else
+      v11 = g_pEntityList->m_EntPtrArray[(unsigned __int16)v10].m_pEntity;
+    v12 = v11[7].__vftable;
+    if ( v12 )
+      v13 = ((char *)v12 - (char *)gpGlobals->pEdicts) >> 4;
+    else
+      v13 = 0;
+    this->m_sndAmbientMusic = Controller->SoundCreate(
+                                Controller,
+                                &filter,
+                                v13,
+                                CPropTractorBeamProjector::s_AmbientBeamMusic);
+    CRecipientFilter::~CRecipientFilter(&filter);
+  }
+  ((void (__thiscall *)(CSoundEnvelopeController *, CSoundPatch *, _DWORD, _DWORD, _DWORD))Controller->Play)(
+    Controller,
+    this->m_sndAmbientMusic,
+    LODWORD(FLOAT_1_0),
+    LODWORD(FLOAT_100_0),
+    0);
+  v14 = this->m_flLinearForce.m_Value >= 0.0;
+  soundName = "VFX.TBeamNegPolarity";
+  if ( v14 )
+    soundName = "VFX.TBeamPosPolarity";
+  if ( !this->m_sndAmbientSound )
+    goto LABEL_37;
+  v15 = CSoundEnvelopeController::GetController();
+  v16 = *(const char **)((int (__thiscall *)(CSoundEnvelopeController *, char *, CSoundPatch *))v15->SoundGetScriptName)(
+                          v15,
+                          v24,
+                          this->m_sndAmbientSound);
+  if ( !v16 )
+    v16 = locale;
+  if ( _V_strcmp(v16, soundName) )
+  {
+    v15->Shutdown(v15, this->m_sndAmbientSound);
+    v15->SoundDestroy(v15, this->m_sndAmbientSound);
+    this->m_sndAmbientSound = 0;
+LABEL_37:
+    CRecipientFilter::CRecipientFilter(&filter);
+    filter.__vftable = (CReliableBroadcastRecipientFilter_vtbl *)&CBroadcastRecipientFilter::`vftable';
+    CRecipientFilter::AddAllPlayers(&filter);
+    filter.__vftable = (CReliableBroadcastRecipientFilter_vtbl *)&CReliableBroadcastRecipientFilter::`vftable';
+    CRecipientFilter::MakeReliable((CFmtStrN<256> *)&filter);
+    v17 = this->m_hAmbientSoundProxy.m_Index;
+    if ( v17 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v17].m_SerialNumber != HIWORD(v17) )
+      v18 = 0;
+    else
+      v18 = g_pEntityList->m_EntPtrArray[(unsigned __int16)v17].m_pEntity;
+    v19 = v18[7].__vftable;
+    if ( v19 )
+      v20 = ((char *)v19 - (char *)gpGlobals->pEdicts) >> 4;
+    else
+      v20 = 0;
+    v21 = Controller->SoundCreate(Controller, &filter, v20, soundName);
+    this->m_sndAmbientSound = v21;
+    ((void (__thiscall *)(CSoundEnvelopeController *, CSoundPatch *, _DWORD, _DWORD, _DWORD))Controller->Play)(
+      Controller,
+      v21,
+      LODWORD(FLOAT_1_0),
+      LODWORD(FLOAT_100_0),
+      0);
+    CRecipientFilter::~CRecipientFilter(&filter);
+  }
+}

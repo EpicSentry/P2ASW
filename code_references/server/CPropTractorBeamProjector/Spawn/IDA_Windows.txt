@@ -1,0 +1,32 @@
+void __thiscall CPropTractorBeamProjector::Spawn(CPropTractorBeamProjector *this)
+{
+  void (__thiscall *SetModel)(CBaseEntity *, const char *); // edx
+  unsigned int m_Index; // eax
+  ProjectedEntityAmbientSoundProxy *v4; // eax
+
+  CBaseProjector::Spawn(this);
+  this->Precache(this);
+  CBaseEntity::AddEffects(this, 1024);
+  SetModel = this->SetModel;
+  if ( this->m_bUse128Model )
+    SetModel(this, "models/props_ingame/tractor_beam_128.mdl");
+  else
+    SetModel(this, "models/props/tractor_beam_emitter.mdl");
+  CCollisionProperty::SetSolid(&this->m_Collision, SOLID_VPHYSICS);
+  CBaseAnimating::ResetSequence(this, 2);
+  CBaseAnimating::UseClientSideAnimation(this);
+  m_Index = this->m_hAmbientSoundProxy.m_Index;
+  if ( m_Index == -1
+    || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index)
+    || !g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity )
+  {
+    v4 = ProjectedEntityAmbientSoundProxy::Create(this);
+    if ( v4 )
+      this->m_hAmbientSoundProxy.m_Index = v4->GetRefEHandle(v4)->m_Index;
+    else
+      this->m_hAmbientSoundProxy.m_Index = -1;
+  }
+  CBaseAnimating::SetFadeDistance(this, -1.0, 0.0);
+  CBaseEntity::SetGlobalFadeScale(this, 0.0);
+  CBaseEntity::AddEffects(this, 16);
+}

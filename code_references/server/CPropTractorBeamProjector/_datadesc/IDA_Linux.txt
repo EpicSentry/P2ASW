@@ -1,0 +1,34 @@
+datamap_t *__cdecl DataMapInit<CPropTractorBeamProjector>(CPropTractorBeamProjector *a1)
+{
+  datamap_t *result; // eax
+
+  if ( !(_BYTE)`guard variable for'datamap_t * DataMapInit<CPropTractorBeamProjector>(CPropTractorBeamProjector *)::nameHolder
+    && _cxa_guard_acquire(&`guard variable for'datamap_t * DataMapInit<CPropTractorBeamProjector>(CPropTractorBeamProjector *)::nameHolder) )
+  {
+    DataMapInit<CPropTractorBeamProjector>(CPropTractorBeamProjector *)::nameHolder.m_pszBase = "CPropTractorBeamProjector";
+    DataMapInit<CPropTractorBeamProjector>(CPropTractorBeamProjector *)::nameHolder.m_Names.m_Memory.m_pMemory = 0;
+    DataMapInit<CPropTractorBeamProjector>(CPropTractorBeamProjector *)::nameHolder.m_Names.m_Memory.m_nAllocationCount = 0;
+    DataMapInit<CPropTractorBeamProjector>(CPropTractorBeamProjector *)::nameHolder.m_Names.m_Memory.m_nGrowSize = 0;
+    DataMapInit<CPropTractorBeamProjector>(CPropTractorBeamProjector *)::nameHolder.m_Names.m_Size = 0;
+    DataMapInit<CPropTractorBeamProjector>(CPropTractorBeamProjector *)::nameHolder.m_Names.m_pElements = 0;
+    DataMapInit<CPropTractorBeamProjector>(CPropTractorBeamProjector *)::nameHolder.m_nLenBase = 25;
+    _cxa_guard_release(&`guard variable for'datamap_t * DataMapInit<CPropTractorBeamProjector>(CPropTractorBeamProjector *)::nameHolder);
+    _cxa_atexit(
+      (void (__cdecl *)(void *))CDatadescGeneratedNameHolder::~CDatadescGeneratedNameHolder,
+      &DataMapInit<CPropTractorBeamProjector>(CPropTractorBeamProjector *)::nameHolder,
+      &_dso_handle);
+  }
+  CPropTractorBeamProjector::m_DataMap.baseMap = &CBaseProjector::m_DataMap;
+  if ( !(_BYTE)`guard variable for'datamap_t * DataMapInit<CPropTractorBeamProjector>(CPropTractorBeamProjector *)::dataDesc
+    && _cxa_guard_acquire(&`guard variable for'datamap_t * DataMapInit<CPropTractorBeamProjector>(CPropTractorBeamProjector *)::dataDesc) )
+  {
+    DataMapInit<CPropTractorBeamProjector>(CPropTractorBeamProjector *)::dataDesc[5].pSaveRestoreOps = GetSoundSaveRestoreOps();
+    DataMapInit<CPropTractorBeamProjector>(CPropTractorBeamProjector *)::dataDesc[6].pSaveRestoreOps = GetSoundSaveRestoreOps();
+    DataMapInit<CPropTractorBeamProjector>(CPropTractorBeamProjector *)::dataDesc[7].pSaveRestoreOps = GetSoundSaveRestoreOps();
+    _cxa_guard_release(&`guard variable for'datamap_t * DataMapInit<CPropTractorBeamProjector>(CPropTractorBeamProjector *)::dataDesc);
+  }
+  CPropTractorBeamProjector::m_DataMap.dataNumFields = 8;
+  result = &CPropTractorBeamProjector::m_DataMap;
+  CPropTractorBeamProjector::m_DataMap.dataDesc = &DataMapInit<CPropTractorBeamProjector>(CPropTractorBeamProjector *)::dataDesc[1];
+  return result;
+}

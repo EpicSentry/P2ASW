@@ -1,0 +1,4 @@
+bool __cdecl CPropTractorBeamProjector::IsReversed(const CPropTractorBeamProjector *const this)
+{
+  return this->m_flLinearForce.m_Value < 0.0;
+}

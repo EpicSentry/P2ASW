@@ -1,0 +1,11 @@
+void __cdecl ProjectedEntityAmbientSoundProxy::AttachToEntity(
+        ProjectedEntityAmbientSoundProxy *const this,
+        CBaseEntity *pAttachTo)
+{
+  (*((void (__cdecl **)(ProjectedEntityAmbientSoundProxy *const, CBaseEntity *, int))this->_vptr_IHandleEntity + 39))(
+    this,
+    pAttachTo,
+    -1);
+  CBaseEntity::SetLocalOrigin(this, &vec3_origin);
+  CBaseEntity::SetLocalAngles(this, &vec3_angle);
+}

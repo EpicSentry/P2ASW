@@ -1,0 +1,24 @@
+void __thiscall CPropTractorBeamProjector::Precache(CPropTractorBeamProjector *this)
+{
+  const char *pszValue; // eax
+
+  if ( this->m_bUse128Model )
+    CBaseEntity::PrecacheModel("models/props_ingame/tractor_beam_128.mdl");
+  else
+    CBaseEntity::PrecacheModel("models/props/tractor_beam_emitter.mdl");
+  PrecacheParticleSystem("tractor_beam_arm");
+  PrecacheParticleSystem("tractor_beam_core");
+  CBaseEntity::PrecacheScriptSound("VFX.TbeamEmitterSpinLp");
+  CBaseEntity::PrecacheScriptSound("VFX.TBeamPosPolarity");
+  CBaseEntity::PrecacheScriptSound("VFX.TBeamNegPolarity");
+  pszValue = gpGlobals->mapname.pszValue;
+  if ( !pszValue )
+    pszValue = locale;
+  V_snprintf(CPropTractorBeamProjector::s_AmbientBeamMusic, 64, "music.%s_tbout", pszValue);
+  if ( CBaseEntity::PrecacheScriptSound(CPropTractorBeamProjector::s_AmbientBeamMusic) == -1 )
+  {
+    V_snprintf(CPropTractorBeamProjector::s_AmbientBeamMusic, 64, "music.sp_all_maps_tbout");
+    CBaseEntity::PrecacheScriptSound(CPropTractorBeamProjector::s_AmbientBeamMusic);
+  }
+  UTIL_PrecacheOther("trigger_tractorbeam", 0);
+}

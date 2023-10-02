@@ -126,7 +126,7 @@ void CBaseProjector::Project( void )
 	if ( !m_hFirstChild )
 	{
 		bCreateNew = true;
-		m_hFirstChild = (CBaseProjectedEntity*)CreateEntityByName( "projected_entity" );
+		m_hFirstChild = CBaseProjectedEntity::CreateNewProjectedEntity();
 	}
 
 	Assert( m_hFirstChild );

@@ -15,11 +15,15 @@ IMPLEMENT_SERVERCLASS_ST( CProjectedTractorBeamEntity, DT_ProjectedTractorBeamEn
 END_SEND_TABLE()
 #endif
 
+LINK_ENTITY_TO_CLASS( projected_tractor_beam_entity, CProjectedTractorBeamEntity )
+
 //-------------------------------------------------//
 
 BEGIN_DATADESC( CTrigger_TractorBeam )
 
 	DEFINE_FIELD( m_hProxyEntity, FIELD_EHANDLE ),
+
+	DEFINE_THINKFUNC( TractorThink ),
 
 END_DATADESC()
 
@@ -33,12 +37,76 @@ LINK_ENTITY_TO_CLASS( trigger_tractorbeam, CTrigger_TractorBeam )
 
 IMPLEMENT_AUTO_LIST( ITriggerTractorBeamAutoList )
 
+CProjectedTractorBeamEntity::CProjectedTractorBeamEntity( void )
+{
+	m_flLinearForce = 0.0;
+}
+
+CProjectedTractorBeamEntity::~CProjectedTractorBeamEntity( void )
+{
+
+}
+
+void CProjectedTractorBeamEntity::Spawn( void )
+{
+	BaseClass::Spawn();
+	m_hTractorBeamTrigger = CTrigger_TractorBeam::CreateTractorBeam( m_vecStartPoint, m_vecEndPoint, this );
+	
+	SetTransmitState( FL_EDICT_FULL ); // 8
+}
+
+void CProjectedTractorBeamEntity::UpdateOnRemove( void )
+{
+	CheckForSettledReflectorCubes();
+
+	if ( m_hTractorBeamTrigger )
+		UTIL_Remove( m_hTractorBeamTrigger );
+
+	BaseClass::UpdateOnRemove();
+}
+
+void CProjectedTractorBeamEntity::OnProjected( void )
+{
+	BaseClass::OnProjected();
+	if ( m_hTractorBeamTrigger )
+	{
+		if ( IsPlayerSimulated() )
+		{
+			if ( GetSimulatingPlayer() )
+				m_hTractorBeamTrigger->SetPlayerSimulated( GetSimulatingPlayer() );
+			else
+				m_hTractorBeamTrigger->SetPlayerSimulated( NULL );
+		}
+		else
+		{
+			m_hTractorBeamTrigger->UnsetPlayerSimulated();
+		}
+		m_hTractorBeamTrigger->UpdateBeam( GetStartPoint(), GetEndPoint(), GetLinearForce() );	
+	}
+}
+
+void CProjectedTractorBeamEntity::OnPreProjected( void )
+{
+	if ( m_hTractorBeamTrigger )
+	{
+		CheckForSettledReflectorCubes();
+	}
+}
+
 
 float CProjectedTractorBeamEntity::GetLinearForce( void )
 {
-	Assert( m_hTractorBeamTrigger );
+	return m_flLinearForce;
+}
 
-	return m_hTractorBeamTrigger->GetLinearForce();
+CProjectedTractorBeamEntity *CProjectedTractorBeamEntity::CreateNewInstance(void)
+{
+	return (CProjectedTractorBeamEntity*)CreateEntityByName("projected_tractor_beam_entity");
+}
+
+CBaseProjectedEntity *CProjectedTractorBeamEntity::CreateNewProjectedEntity(void)
+{
+	return CreateNewInstance();
 }
 
 CTrigger_TractorBeam::CTrigger_TractorBeam()
@@ -255,31 +323,36 @@ void CTrigger_TractorBeam::ForceDetachEntity( CBaseEntity *pEntity )
 
 void CTrigger_TractorBeam::WakeTouchingObjects( void )
 {
+	// HACK: REMOVE THIS AS SOON AS POSSIBLE, WE NEED TO FIGURE OUT WHERE THIS VARIABLE IS SET!!!
+	m_flRadius = 32;
+
 	// NOTE: This may need to be changed...
-	Vector vecRayExtents = Vector( m_flRadius, m_flRadius, m_flRadius );
+	Vector vecRayMins = Vector( -m_flRadius, -m_flRadius, -m_flRadius );
+	Vector vecRayMaxs = Vector( m_flRadius, m_flRadius, m_flRadius );
 
 	Ray_t ray;
-	ray.Init( m_vStart, m_vEnd, -vecRayExtents, vecRayExtents );
+	ray.Init( m_vStart, m_vEnd, vecRayMins, vecRayMaxs );
 
 	CBaseEntity *pList[1024];
-	UTIL_EntitiesAlongRay( pList, 1024, ray, MASK_SOLID );
-
-	for ( int i = 0; i < 1024; ++i )
+	int count = UTIL_EntitiesAlongRay( pList, 1024, ray, MASK_OPAQUE );
+	
+	for ( int i = 0; i < count; ++i )
 	{
 		CBaseEntity *pEntity = pList[i];
 
 		if (!pEntity)
 			continue;
+
 		
-		// Cubes in a disabled state don't move
+		// Cubes in a disabled state don't move, se we force it
 		if ( UTIL_IsReflectiveCube( pEntity ) || UTIL_IsSchrodinger( pEntity ) )
-			assert_cast<CPropWeightedCube*>(pEntity)->ExitDisabledState();
+			assert_cast<CPropWeightedCube*>( pEntity )->ExitDisabledState();
 
 		IPhysicsObject *pPhys = pEntity->VPhysicsGetObject();
 
 		if (!pPhys)
 			continue;
-
+		
 		pPhys->Wake();
 	}
 }
@@ -385,7 +458,7 @@ CTrigger_TractorBeam *CTrigger_TractorBeam::CreateTractorBeam( const Vector &vSt
 	pBeam->Precache();						
 	pBeam->UpdateBeam( vStart, vEnd, pOwner->GetLinearForce() );
 	pBeam->SetOwnerEntity( pOwner );
-	m_hProxyEntity = pOwner;
+	pBeam->m_hProxyEntity = pOwner;
 
 	DispatchSpawn( pBeam );
 	

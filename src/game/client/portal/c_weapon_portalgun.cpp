@@ -68,6 +68,7 @@ BEGIN_PREDICTION_DATA( C_WeaponPortalgun )
 	DEFINE_PRED_FIELD( m_iLastFiredPortal, FIELD_INTEGER, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD( m_bOpenProngs, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD( m_EffectState,	FIELD_INTEGER,	FTYPEDESC_INSENDTABLE ),
+	DEFINE_PRED_FIELD( m_nSkin, FIELD_INTEGER, FTYPEDESC_NOERRORCHECK | FTYPEDESC_PRIVATE )
 END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS( weapon_portalgun, C_WeaponPortalgun );
@@ -790,7 +791,7 @@ void C_WeaponPortalgun::OnDataChanged( DataUpdateType_t updateType )
 	}
 
 	// Disabled for now because it's too buggy
-#if 0
+#if 1
 	if( g_pGameRules->IsMultiplayer() )
 	{
 		CBasePlayer *pPlayer = ToBasePlayer( GetOwner() );

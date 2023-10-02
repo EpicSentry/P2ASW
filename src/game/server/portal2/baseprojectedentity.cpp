@@ -1,6 +1,7 @@
 #include "cbase.h"
 #include "info_placement_helper.h"
 #include "baseprojectedentity_shared.h"
+#include "prop_weightedcube.h"
 
 BEGIN_DATADESC( CBaseProjectedEntity )
 END_DATADESC()
@@ -81,9 +82,31 @@ void CBaseProjectedEntity::SetTransmit( CCheckTransmitInfo *pInfo, bool bAlways 
 		m_hChildSegment->SetTransmit( pInfo, bAlways );
 }
 
-CBaseProjectedEntity *CBaseProjectedEntity::CreateNewProjectedEntity(void)
+void CBaseProjectedEntity::CheckForSettledReflectorCubes( void )
 {
-	return (CBaseProjectedEntity*)CreateEntityByName("projected_entity");
+	if (vec3_origin == m_vecStartPoint || vec3_origin == m_vecEndPoint )
+		return;
+	
+	for ( int i = 0; i < IPropWeightedCubeAutoList::AutoList().Count(); ++i)
+	{
+		CPropWeightedCube *pCube = assert_cast<CPropWeightedCube*>( IPropWeightedCubeAutoList::AutoList()[i]->GetEntity() );
+		if ( !pCube )
+			continue;
+
+		if ( !pCube->IsMovementDisabled() )
+			continue;
+
+		pCube->ExitDisabledState();
+	}	
 }
 
+CBaseProjectedEntity *CBaseProjectedEntity::CreateNewProjectedEntity(void)
+{
+#if 0
+	return (CBaseProjectedEntity*)CreateEntityByName("projected_entity");
+#else
+	return (CBaseProjectedEntity*)CreateEntityByName("projected_tractor_beam_entity");
+
+#endif
+}
 

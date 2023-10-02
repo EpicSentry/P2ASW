@@ -5,6 +5,8 @@
 
 #define NO_CLIENT_PROJECTOR
 
+class CBaseProjectedEntity;
+
 class CBaseProjector : public CBaseAnimating
 {
 public:
@@ -23,7 +25,7 @@ public:
     virtual void OnRestore();
     virtual void Project();
     
-	class CBaseProjectedEntity * CreateNewProjectedEntity();
+	//virtual CBaseProjectedEntity *CreateNewProjectedEntity();
     void EnableProjection( bool bEnable );
     void TestProjectionChangesThink();
     void TestAllForProjectionChanges();

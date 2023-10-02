@@ -1,0 +1,5 @@
+// attributes: thunk
+CBaseProjectedEntity *__thiscall CPropTractorBeamProjector::CreateNewProjectedEntity(CPropTractorBeamProjector *this)
+{
+  return CProjectedTractorBeamEntity::CreateNewInstance((CProjectedTractorBeamEntity *)this);
+}

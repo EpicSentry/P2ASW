@@ -1,0 +1,301 @@
+void __cdecl CPropTractorBeamProjector::Project(CPropTractorBeamProjector *const this)
+{
+  unsigned int m_Index; // edx
+  int v2; // eax
+  char *v3; // ecx
+  int v4; // eax
+  vec_t v5; // xmm0_4
+  vec_t *v6; // esi
+  edict_t *m_pPev; // edi
+  CSoundEnvelopeController *Controller; // esi
+  CSoundPatch *m_sndMechanical; // eax
+  CSoundPatch *m_sndAmbientMusic; // eax
+  const char *v11; // eax
+  CSoundEnvelopeController *v12; // edi
+  const char *v13; // eax
+  unsigned int v14; // eax
+  char *v15; // edx
+  int v16; // edx
+  signed int v17; // eax
+  CSoundPatch *v18; // eax
+  bool v19; // zf
+  edict_t *v20; // edx
+  signed int v21; // eax
+  int m_nGrowSize; // eax
+  unsigned int v23; // eax
+  char *v24; // ecx
+  signed int v25; // eax
+  int v26; // edx
+  int m_iEFlags; // eax
+  IChangeInfoAccessor *v28; // eax
+  unsigned __int16 m_nChangeInfos; // dx
+  CSharedEdictChangeInfo *v30; // edx
+  char *v31; // eax
+  int v32; // edx
+  int v33; // [esp+28h] [ebp-B0h]
+  int v34; // [esp+2Ch] [ebp-ACh]
+  char *v35; // [esp+2Ch] [ebp-ACh]
+  char *v36; // [esp+44h] [ebp-94h]
+  const char *soundName; // [esp+48h] [ebp-90h]
+  Vector *soundNamea; // [esp+48h] [ebp-90h]
+  unsigned __int16 soundNameb; // [esp+48h] [ebp-90h]
+  const char *v40; // [esp+4Ch] [ebp-8Ch] BYREF
+  EmitSound_t ep; // [esp+58h] [ebp-80h] BYREF
+  CPASFilter filter; // [esp+A0h] [ebp-38h] BYREF
+
+  CBaseProjector::Project(this);
+  m_Index = this->m_hFirstChild.m_Value.m_Index;
+  v2 = 0;
+  if ( m_Index != -1 )
+  {
+    v3 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v3 + 2) == HIWORD(m_Index) )
+      v2 = *((_DWORD *)v3 + 1);
+  }
+  v4 = (*(int (__cdecl **)(int))(*(_DWORD *)v2 + 820))(v2);
+  v5 = *(float *)v4;
+  v6 = (vec_t *)v4;
+  if ( *(float *)v4 != this->m_vEndPos.m_Value.x
+    || *(float *)(v4 + 4) != this->m_vEndPos.m_Value.y
+    || *(float *)(v4 + 8) != this->m_vEndPos.m_Value.z )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+      v5 = *(float *)v4;
+LABEL_8:
+      this->m_vEndPos.m_Value.x = v5;
+      this->m_vEndPos.m_Value.y = v6[1];
+      this->m_vEndPos.m_Value.z = v6[2];
+      goto LABEL_9;
+    }
+    m_pPev = this->m_Network.m_pPev;
+    if ( !m_pPev || (m_pPev->m_fStateFlags & 0x100) != 0 )
+      goto LABEL_8;
+    m_pPev->m_fStateFlags |= 1u;
+    v28 = CBaseEdict::GetChangeAccessor(m_pPev);
+    if ( v28->m_iChangeInfoSerialNumber == g_pSharedChangeInfo->m_iSerialNumber )
+    {
+      v36 = (char *)g_pSharedChangeInfo + 40 * v28->m_iChangeInfo;
+      v35 = v36 + 2;
+      soundNameb = *((_WORD *)v36 + 20);
+      if ( !soundNameb )
+        goto LABEL_58;
+      if ( *((_WORD *)v36 + 1) == 1240 )
+        goto LABEL_51;
+      v32 = 0;
+      while ( v32 != 2 * (unsigned __int16)(soundNameb - 1) )
+      {
+        v32 += 2;
+        if ( *(_WORD *)&v35[v32] == 1240 )
+          goto LABEL_51;
+      }
+      if ( soundNameb != 19 )
+      {
+LABEL_58:
+        *(_WORD *)&v35[2 * soundNameb] = 1240;
+        *((_WORD *)v36 + 20) = soundNameb + 1;
+        v5 = *v6;
+        goto LABEL_8;
+      }
+    }
+    else
+    {
+      m_nChangeInfos = g_pSharedChangeInfo->m_nChangeInfos;
+      if ( m_nChangeInfos != 100 )
+      {
+        v28->m_iChangeInfo = m_nChangeInfos;
+        v30 = g_pSharedChangeInfo;
+        ++g_pSharedChangeInfo->m_nChangeInfos;
+        v28->m_iChangeInfoSerialNumber = v30->m_iSerialNumber;
+        v31 = (char *)g_pSharedChangeInfo + 40 * v28->m_iChangeInfo;
+        *((_WORD *)v31 + 1) = 1240;
+        *((_WORD *)v31 + 20) = 1;
+LABEL_51:
+        v5 = *v6;
+        goto LABEL_8;
+      }
+    }
+    v28->m_iChangeInfoSerialNumber = 0;
+    m_pPev->m_fStateFlags |= 0x100u;
+    v5 = *v6;
+    goto LABEL_8;
+  }
+LABEL_9:
+  Controller = CSoundEnvelopeController::GetController();
+  m_sndMechanical = this->m_sndMechanical;
+  if ( !m_sndMechanical )
+  {
+    v19 = (this->m_iEFlags & 0x800) == 0;
+    ep.m_nFlags = 0;
+    ep.m_nPitch = 100;
+    memset(&ep.m_pOrigin, 0, 12);
+    ep.m_bEmitCloseCaption = 1;
+    ep.m_bWarnOnMissingCloseCaption = 0;
+    ep.m_bWarnOnDirectWaveReference = 0;
+    ep.m_nSpeakerEntity = -1;
+    memset(&ep.m_UtlVecSoundOrigin, 0, sizeof(ep.m_UtlVecSoundOrigin));
+    ep.m_hSoundScriptHash = -1;
+    ep.m_nSoundEntryVersion = 1;
+    ep.m_nChannel = 6;
+    ep.m_pSoundName = "VFX.TbeamEmitterSpinLp";
+    ep.m_flVolume = 1.0;
+    ep.m_SoundLevel = SNDLVL_NORM;
+    if ( v19 )
+    {
+      soundNamea = &this->m_vecAbsOrigin;
+      ep.m_pOrigin = &this->m_vecAbsOrigin;
+    }
+    else
+    {
+      CBaseEntity::CalcAbsolutePosition(this);
+      m_iEFlags = this->m_iEFlags;
+      soundNamea = &this->m_vecAbsOrigin;
+      ep.m_pOrigin = &this->m_vecAbsOrigin;
+      if ( (m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(this);
+    }
+    CRecipientFilter::CRecipientFilter(&filter);
+    filter._vptr_IRecipientFilter = (int (**)(...))off_B98108;
+    CRecipientFilter::AddRecipientsByPAS(&filter, soundNamea);
+    v20 = this->m_Network.m_pPev;
+    v21 = 0;
+    if ( v20 )
+      v21 = v20 - gpGlobals->pEdicts;
+    this->m_sndMechanical = (CSoundPatch *)(*((int (__cdecl **)(CSoundEnvelopeController *, CPASFilter *, signed int, EmitSound_t *))Controller->_vptr_CSoundEnvelopeController
+                                            + 10))(
+                                             Controller,
+                                             &filter,
+                                             v21,
+                                             &ep);
+    filter._vptr_IRecipientFilter = (int (**)(...))off_B98108;
+    CRecipientFilter::~CRecipientFilter(&filter);
+    m_nGrowSize = ep.m_UtlVecSoundOrigin.m_Memory.m_nGrowSize;
+    ep.m_UtlVecSoundOrigin.m_Size = 0;
+    if ( ep.m_UtlVecSoundOrigin.m_Memory.m_nGrowSize < 0 )
+    {
+      ep.m_UtlVecSoundOrigin.m_pElements = ep.m_UtlVecSoundOrigin.m_Memory.m_pMemory;
+    }
+    else
+    {
+      if ( ep.m_UtlVecSoundOrigin.m_Memory.m_pMemory )
+      {
+        (*(void (__cdecl **)(_DWORD, Vector *))(*g_pMemAlloc + 8))(
+          g_pMemAlloc,
+          ep.m_UtlVecSoundOrigin.m_Memory.m_pMemory);
+        m_nGrowSize = ep.m_UtlVecSoundOrigin.m_Memory.m_nGrowSize;
+        ep.m_UtlVecSoundOrigin.m_Memory.m_pMemory = 0;
+      }
+      ep.m_UtlVecSoundOrigin.m_Memory.m_nAllocationCount = 0;
+      ep.m_UtlVecSoundOrigin.m_pElements = 0;
+      if ( m_nGrowSize >= 0 )
+        ep.m_UtlVecSoundOrigin.m_Memory.m_nAllocationCount = 0;
+    }
+    m_sndMechanical = this->m_sndMechanical;
+  }
+  (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *, int, int, _DWORD))Controller->_vptr_CSoundEnvelopeController
+   + 2))(
+    Controller,
+    m_sndMechanical,
+    1036831949,
+    1120403456,
+    0);
+  (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *, int, int))Controller->_vptr_CSoundEnvelopeController
+   + 13))(
+    Controller,
+    this->m_sndMechanical,
+    1065353216,
+    1061158912);
+  m_sndAmbientMusic = this->m_sndAmbientMusic;
+  if ( !m_sndAmbientMusic )
+  {
+    CRecipientFilter::CRecipientFilter(&filter);
+    filter._vptr_IRecipientFilter = (int (**)(...))off_B986C8;
+    CRecipientFilter::AddAllPlayers(&filter);
+    filter._vptr_IRecipientFilter = (int (**)(...))off_BA41A8;
+    CRecipientFilter::MakeReliable(&filter);
+    v34 = 0;
+    v23 = this->m_hAmbientSoundProxy.m_Index;
+    if ( v23 != -1 )
+    {
+      v24 = (char *)g_pEntityList + 24 * (unsigned __int16)v23;
+      if ( *((_DWORD *)v24 + 2) == HIWORD(v23) )
+        v34 = *((_DWORD *)v24 + 1);
+    }
+    v25 = 0;
+    v26 = *(_DWORD *)(v34 + 36);
+    if ( v26 )
+      v25 = (signed int)(v26 - (unsigned int)gpGlobals->pEdicts) >> 4;
+    this->m_sndAmbientMusic = (CSoundPatch *)(*((int (__cdecl **)(CSoundEnvelopeController *, CPASFilter *, signed int, char *))Controller->_vptr_CSoundEnvelopeController
+                                              + 6))(
+                                               Controller,
+                                               &filter,
+                                               v25,
+                                               CPropTractorBeamProjector::s_AmbientBeamMusic);
+    filter._vptr_IRecipientFilter = (int (**)(...))off_B986C8;
+    CRecipientFilter::~CRecipientFilter(&filter);
+    m_sndAmbientMusic = this->m_sndAmbientMusic;
+  }
+  (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *, int, int, _DWORD))Controller->_vptr_CSoundEnvelopeController
+   + 2))(
+    Controller,
+    m_sndAmbientMusic,
+    1065353216,
+    1120403456,
+    0);
+  v11 = "VFX.TBeamNegPolarity";
+  if ( this->m_flLinearForce.m_Value >= 0.0 )
+    v11 = "VFX.TBeamPosPolarity";
+  soundName = v11;
+  if ( !this->m_sndAmbientSound )
+    goto LABEL_23;
+  v12 = CSoundEnvelopeController::GetController();
+  (*((void (__stdcall **)(const char **))v12->_vptr_CSoundEnvelopeController + 21))(&v40);
+  v13 = v40;
+  if ( !v40 )
+    v13 = "";
+  if ( _V_strcmp(v13, soundName) )
+  {
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))v12->_vptr_CSoundEnvelopeController + 5))(
+      v12,
+      this->m_sndAmbientSound);
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))v12->_vptr_CSoundEnvelopeController + 11))(
+      v12,
+      this->m_sndAmbientSound);
+    this->m_sndAmbientSound = 0;
+LABEL_23:
+    CRecipientFilter::CRecipientFilter(&filter);
+    filter._vptr_IRecipientFilter = (int (**)(...))off_B986C8;
+    CRecipientFilter::AddAllPlayers(&filter);
+    filter._vptr_IRecipientFilter = (int (**)(...))off_BA41A8;
+    CRecipientFilter::MakeReliable(&filter);
+    v33 = 0;
+    v14 = this->m_hAmbientSoundProxy.m_Index;
+    if ( v14 != -1 )
+    {
+      v15 = (char *)g_pEntityList + 24 * (unsigned __int16)v14;
+      if ( *((_DWORD *)v15 + 2) == HIWORD(v14) )
+        v33 = *((_DWORD *)v15 + 1);
+    }
+    v16 = *(_DWORD *)(v33 + 36);
+    v17 = 0;
+    if ( v16 )
+      v17 = (signed int)(v16 - (unsigned int)gpGlobals->pEdicts) >> 4;
+    v18 = (CSoundPatch *)(*((int (__cdecl **)(CSoundEnvelopeController *, CPASFilter *, signed int, const char *))Controller->_vptr_CSoundEnvelopeController
+                          + 6))(
+                           Controller,
+                           &filter,
+                           v17,
+                           soundName);
+    this->m_sndAmbientSound = v18;
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *, int, int, _DWORD))Controller->_vptr_CSoundEnvelopeController
+     + 2))(
+      Controller,
+      v18,
+      1065353216,
+      1120403456,
+      0);
+    filter._vptr_IRecipientFilter = (int (**)(...))off_B986C8;
+    CRecipientFilter::~CRecipientFilter(&filter);
+  }
+}
