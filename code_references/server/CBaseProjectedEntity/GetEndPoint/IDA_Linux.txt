@@ -1,0 +1,4 @@
+const Vector *__cdecl CBaseProjectedEntity::GetEndPoint(const CBaseProjectedEntity *const this)
+{
+  return &this->m_vecEndPoint.m_Value;
+}

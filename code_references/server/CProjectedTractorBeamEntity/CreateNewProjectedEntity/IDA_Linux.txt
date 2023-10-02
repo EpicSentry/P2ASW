@@ -1,0 +1,5 @@
+CBaseProjectedEntity *__cdecl CProjectedTractorBeamEntity::CreateNewProjectedEntity(
+        CProjectedTractorBeamEntity *const this)
+{
+  return CProjectedTractorBeamEntity::CreateNewInstance();
+}

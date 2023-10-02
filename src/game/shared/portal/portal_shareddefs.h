@@ -10,9 +10,9 @@
 #pragma once
 #endif
 
-//#ifdef CLIENT_DLL
+#ifdef CLIENT_DLL
 #define NO_TRACTOR_BEAM
-//#endif
+#endif
 
 
 #define PORTAL2_MP_SAVE_FILE "coop_data.txt"

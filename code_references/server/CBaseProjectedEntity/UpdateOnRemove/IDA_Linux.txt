@@ -1,0 +1,34 @@
+void __cdecl CBaseProjectedEntity::UpdateOnRemove(CBaseProjectedEntity *const this)
+{
+  CBaseEntityList *v1; // edx
+  unsigned int m_Index; // eax
+  CBaseEntity **v3; // ecx
+  unsigned int v4; // eax
+  CBaseEntity **v5; // edx
+
+  v1 = g_pEntityList;
+  m_Index = this->m_hChildSegment.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v3 = (CBaseEntity **)((char *)g_pEntityList + 24 * (unsigned __int16)m_Index);
+    if ( v3[2] == (CBaseEntity *)HIWORD(m_Index) )
+    {
+      if ( v3[1] )
+      {
+        UTIL_Remove(v3[1]);
+        v1 = g_pEntityList;
+      }
+    }
+  }
+  v4 = this->m_hPlacementHelper.m_Value.m_Index;
+  if ( v4 != -1 )
+  {
+    v5 = (CBaseEntity **)((char *)v1 + 24 * (unsigned __int16)v4);
+    if ( v5[2] == (CBaseEntity *)HIWORD(v4) )
+    {
+      if ( v5[1] )
+        UTIL_Remove(v5[1]);
+    }
+  }
+  CBaseEntity::UpdateOnRemove(this);
+}

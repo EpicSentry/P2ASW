@@ -1,0 +1,4 @@
+void __cdecl CBaseProjector::InputDisable(CBaseProjector *const this, inputdata_t *const data)
+{
+  CBaseProjector::EnableProjection(this, 0);
+}

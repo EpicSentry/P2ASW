@@ -1,0 +1,40 @@
+class CBaseProjector : public CBaseAnimating
+{
+public:
+	
+	DECLARE_CLASS( CBaseProjector, CBaseAnimating );
+	DECLARE_DATADESC();
+	DECLARE_SERVERCLASS();
+	
+    CBaseProjector();
+    ~CBaseProjector();
+    
+	virtual void Spawn();
+    virtual void Activate();
+    virtual void UpdateOnRemove();
+    virtual void OnRestore();
+    virtual void Project();
+    
+	class CBaseProjectedEntity * CreateNewProjectedEntity();
+    void EnableProjection(bool );
+    void TestProjectionChangesThink();
+    void TestAllForProjectionChanges();
+	
+	CNetworkVar( bool, m_bEnabled );
+	
+    void SetTransmit(class CCheckTransmitInfo * ,bool );
+	
+protected:
+	
+    void Shutdown();
+    void Cleanup();
+    int DrawDebugTextOverlays();
+    void DrawBoundsHighlight();
+    void TestForPortalChanges();
+    void InputEnable(struct inputdata_t & );
+    void InputDisable(struct inputdata_t & );
+	
+	CNetworkHandle( CBaseProjectedEntity, m_hFirstChild );
+	
+    bool m_bDisablePlacementHelper;
+};

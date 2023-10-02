@@ -1,0 +1,48 @@
+bool __cdecl CBaseProjectedEntity::DidRedirectionPortalMove(CBaseProjectedEntity *const this, CPortal_Base2D *pPortal)
+{
+  bool v2; // si
+  unsigned int m_Index; // eax
+  char *v4; // edx
+  float *v6; // eax
+  float *v7; // edi
+  float *v8; // eax
+
+  v2 = 1;
+  if ( pPortal )
+  {
+    if ( CPortal_Base2D::IsActivedAndLinked(pPortal) )
+    {
+      m_Index = this->m_hHitPortal.m_Value.m_Index;
+      if ( m_Index != -1 )
+      {
+        v4 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+        if ( *((_DWORD *)v4 + 2) == HIWORD(m_Index) && pPortal == *((CPortal_Base2D **)v4 + 1) )
+        {
+          v6 = (float *)CBaseHandle::Get(&this->m_hChildSegment.m_Value);
+          v7 = v6;
+          if ( v6 )
+          {
+            if ( fabs(v6[226] - pPortal->m_ptOrigin.m_Value.x) <= 0.0
+              && fabs(v6[227] - pPortal->m_ptOrigin.m_Value.y) <= 0.0
+              && fabs(v6[228] - pPortal->m_ptOrigin.m_Value.z) <= 0.0
+              && fabs(v6[232] - pPortal->m_qAbsAngle.m_Value.x) <= 0.0
+              && fabs(v6[233] - pPortal->m_qAbsAngle.m_Value.y) <= 0.0
+              && fabs(v6[234] - pPortal->m_qAbsAngle.m_Value.z) <= 0.0 )
+            {
+              v8 = (float *)CBaseHandle::Get(&pPortal->m_hLinkedPortal.m_Value);
+              if ( fabs(v7[223] - v8[383]) <= 0.0
+                && fabs(v7[224] - v8[384]) <= 0.0
+                && fabs(v7[225] - v8[385]) <= 0.0
+                && fabs(v7[229] - v8[395]) <= 0.0
+                && fabs(v7[230] - v8[396]) <= 0.0 )
+              {
+                return fabs(v7[231] - v8[397]) > 0.0;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return v2;
+}

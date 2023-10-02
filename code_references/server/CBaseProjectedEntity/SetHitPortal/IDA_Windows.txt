@@ -1,0 +1,8 @@
+void __thiscall CBaseProjectedEntity::SetHitPortal(CBaseProjectedEntity *this, CPortal_Base2D *pPortal)
+{
+  CNetworkHandleBase<CBaseEntity,CEntityFlame::NetworkVar_m_hEntAttached>::Set(
+    (CNetworkHandleBase<CBaseEntity,CSprite::NetworkVar_m_hAttachedToEntity> *)&this->m_hHitPortal,
+    pPortal);
+  if ( pPortal )
+    CPortal_Base2D::IsActivedAndLinked(pPortal);
+}

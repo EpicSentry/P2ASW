@@ -1,6 +1,0 @@
-class CTrigger_TractorBeam_Shared
-{
-public:
-	void RemoveDeadBlobsFromBeams();
-	void RemoveBlobsFromPreviousBeams();
-};

@@ -1,0 +1,200 @@
+void __thiscall CBaseProjectedEntity::SetSourcePortal(CBaseProjectedEntity *this, CPortal_Base2D *pPortal)
+{
+  CBaseProjectedEntity *v2; // edi
+  CBaseEdict *m_pPev; // ecx
+  unsigned int m_Index; // eax
+  float *m_pEntity; // edi
+  edict_t *v6; // ecx
+  edict_t *v7; // ecx
+  unsigned int v8; // eax
+  float *v9; // edi
+  edict_t *v10; // ecx
+  unsigned int v11; // ecx
+  int v12; // eax
+  CEntInfo *v13; // edx
+  unsigned int v14; // ecx
+  int v15; // eax
+  bool v16; // zf
+  CBasePlayer **v17; // eax
+  CBaseEdict *v18; // ecx
+  CBaseEdict *v19; // ecx
+  CBaseEdict *v20; // ecx
+  CBaseEdict *v21; // ecx
+
+  v2 = this;
+  CNetworkHandleBase<CPortal_Base2D,CBaseProjectedEntity::NetworkVar_m_hSourcePortal>::Set(
+    &this->m_hSourcePortal,
+    pPortal);
+  if ( pPortal )
+  {
+    if ( pPortal->m_ptOrigin.m_Value.x != v2->m_vecSourcePortalCenter.m_Value.x
+      || pPortal->m_ptOrigin.m_Value.y != v2->m_vecSourcePortalCenter.m_Value.y
+      || pPortal->m_ptOrigin.m_Value.z != v2->m_vecSourcePortalCenter.m_Value.z )
+    {
+      if ( v2->m_Network.m_TimerEvent.m_bRegistered )
+      {
+        *((_BYTE *)&v2->m_Network + 76) |= 1u;
+      }
+      else
+      {
+        m_pPev = v2->m_Network.m_pPev;
+        if ( m_pPev )
+          CBaseEdict::StateChanged(m_pPev, 0x364u);
+      }
+      v2->m_vecSourcePortalCenter = (CNetworkVectorBase<Vector,CBaseProjectedEntity::NetworkVar_m_vecSourcePortalCenter>)pPortal->m_ptOrigin;
+    }
+    m_Index = pPortal->m_hLinkedPortal.m_Value.m_Index;
+    if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+      m_pEntity = 0;
+    else
+      m_pEntity = (float *)g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+    if ( m_pEntity[377] != this->m_vecSourcePortalRemoteCenter.m_Value.x
+      || m_pEntity[378] != this->m_vecSourcePortalRemoteCenter.m_Value.y
+      || m_pEntity[379] != this->m_vecSourcePortalRemoteCenter.m_Value.z )
+    {
+      if ( this->m_Network.m_TimerEvent.m_bRegistered )
+      {
+        *((_BYTE *)&this->m_Network + 76) |= 1u;
+      }
+      else
+      {
+        v6 = this->m_Network.m_pPev;
+        if ( v6 )
+          CBaseEdict::StateChanged(v6, 0x370u);
+      }
+      this->m_vecSourcePortalRemoteCenter.m_Value.x = m_pEntity[377];
+      this->m_vecSourcePortalRemoteCenter.m_Value.y = m_pEntity[378];
+      this->m_vecSourcePortalRemoteCenter.m_Value.z = m_pEntity[379];
+    }
+    if ( pPortal->m_qAbsAngle.m_Value.x != this->m_vecSourcePortalAngle.m_Value.x
+      || pPortal->m_qAbsAngle.m_Value.y != this->m_vecSourcePortalAngle.m_Value.y
+      || pPortal->m_qAbsAngle.m_Value.z != this->m_vecSourcePortalAngle.m_Value.z )
+    {
+      if ( this->m_Network.m_TimerEvent.m_bRegistered )
+      {
+        *((_BYTE *)&this->m_Network + 76) |= 1u;
+      }
+      else
+      {
+        v7 = this->m_Network.m_pPev;
+        if ( v7 )
+          CBaseEdict::StateChanged(v7, 0x37Cu);
+      }
+      this->m_vecSourcePortalAngle = (CNetworkVectorBase<QAngle,CBaseProjectedEntity::NetworkVar_m_vecSourcePortalAngle>)pPortal->m_qAbsAngle;
+    }
+    v8 = pPortal->m_hLinkedPortal.m_Value.m_Index;
+    if ( v8 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v8].m_SerialNumber != HIWORD(v8) )
+      v9 = 0;
+    else
+      v9 = (float *)g_pEntityList->m_EntPtrArray[(unsigned __int16)v8].m_pEntity;
+    if ( v9[389] != this->m_vecSourcePortalRemoteAngle.m_Value.x
+      || v9[390] != this->m_vecSourcePortalRemoteAngle.m_Value.y
+      || v9[391] != this->m_vecSourcePortalRemoteAngle.m_Value.z )
+    {
+      if ( this->m_Network.m_TimerEvent.m_bRegistered )
+      {
+        *((_BYTE *)&this->m_Network + 76) |= 1u;
+      }
+      else
+      {
+        v10 = this->m_Network.m_pPev;
+        if ( v10 )
+          CBaseEdict::StateChanged(v10, 0x388u);
+      }
+      this->m_vecSourcePortalRemoteAngle.m_Value.x = v9[389];
+      this->m_vecSourcePortalRemoteAngle.m_Value.y = v9[390];
+      this->m_vecSourcePortalRemoteAngle.m_Value.z = v9[391];
+    }
+    v11 = pPortal->m_hPlayerSimulationOwner.m_Value.m_Index;
+    if ( v11 != -1 )
+    {
+      v12 = (unsigned __int16)v11;
+      v13 = &g_pEntityList->m_EntPtrArray[(unsigned __int16)v11];
+      v14 = HIWORD(v11);
+      if ( v13->m_SerialNumber == v14 )
+      {
+        if ( v13->m_pEntity )
+        {
+          v15 = v12;
+          v16 = g_pEntityList->m_EntPtrArray[v15].m_SerialNumber == v14;
+          v17 = (CBasePlayer **)&g_pEntityList->m_EntPtrArray[v15];
+          if ( v16 )
+            CBaseEntity::SetPlayerSimulated(this, *v17);
+          else
+            CBaseEntity::SetPlayerSimulated(this, 0);
+          return;
+        }
+      }
+    }
+    v2 = this;
+LABEL_81:
+    CBaseEntity::UnsetPlayerSimulated(v2);
+    return;
+  }
+  if ( vec3_origin.x != v2->m_vecSourcePortalCenter.m_Value.x
+    || vec3_origin.y != v2->m_vecSourcePortalCenter.m_Value.y
+    || vec3_origin.z != v2->m_vecSourcePortalCenter.m_Value.z )
+  {
+    if ( v2->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&v2->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      v18 = v2->m_Network.m_pPev;
+      if ( v18 )
+        CBaseEdict::StateChanged(v18, 0x364u);
+    }
+    v2->m_vecSourcePortalCenter.m_Value = vec3_origin;
+  }
+  if ( vec3_origin.x != v2->m_vecSourcePortalRemoteCenter.m_Value.x
+    || vec3_origin.y != v2->m_vecSourcePortalRemoteCenter.m_Value.y
+    || vec3_origin.z != v2->m_vecSourcePortalRemoteCenter.m_Value.z )
+  {
+    if ( v2->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&v2->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      v19 = v2->m_Network.m_pPev;
+      if ( v19 )
+        CBaseEdict::StateChanged(v19, 0x370u);
+    }
+    v2->m_vecSourcePortalRemoteCenter.m_Value = vec3_origin;
+  }
+  if ( vec3_angle.x != v2->m_vecSourcePortalAngle.m_Value.x
+    || vec3_angle.y != v2->m_vecSourcePortalAngle.m_Value.y
+    || vec3_angle.z != v2->m_vecSourcePortalAngle.m_Value.z )
+  {
+    if ( v2->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&v2->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      v20 = v2->m_Network.m_pPev;
+      if ( v20 )
+        CBaseEdict::StateChanged(v20, 0x37Cu);
+    }
+    v2->m_vecSourcePortalAngle.m_Value = vec3_angle;
+  }
+  if ( vec3_angle.x == v2->m_vecSourcePortalRemoteAngle.m_Value.x
+    && vec3_angle.y == v2->m_vecSourcePortalRemoteAngle.m_Value.y
+    && vec3_angle.z == v2->m_vecSourcePortalRemoteAngle.m_Value.z )
+  {
+    goto LABEL_81;
+  }
+  if ( v2->m_Network.m_TimerEvent.m_bRegistered )
+  {
+    *((_BYTE *)&v2->m_Network + 76) |= 1u;
+  }
+  else
+  {
+    v21 = v2->m_Network.m_pPev;
+    if ( v21 )
+      CBaseEdict::StateChanged(v21, 0x388u);
+  }
+  v2->m_vecSourcePortalRemoteAngle.m_Value = vec3_angle;
+  CBaseEntity::UnsetPlayerSimulated(v2);
+}

@@ -123,12 +123,23 @@ $Project "Server (Portal 2)"
 				$File "portal2/prop_glass_futbol.cpp"
 				$File "$SRCDIR\game\shared\portal2\trigger_catapult_shared.cpp"
 				
-				//$File "portal2/trigger_tractorbeam.h"
-				//$File "portal2/trigger_tractorbeam.cpp"
+				$File "portal2/trigger_tractorbeam.h"
+				$File "portal2/trigger_tractorbeam.cpp"
 				
 				// NOTE: This isn't in Portal 2's vpc, but let's see how it goes...
-				//$File	"$SRCDIR\game\shared\portal\trigger_tractorbeam_shared.h"
-				//$File	"$SRCDIR\game\shared\portal\trigger_tractorbeam_shared.cpp"
+				$File	"$SRCDIR\game\shared\portal\trigger_tractorbeam_shared.h"
+				$File	"$SRCDIR\game\shared\portal\trigger_tractorbeam_shared.cpp"
+				
+				
+				$File "portal2/baseprojector.h"
+				$File "portal2/baseprojector.cpp"
+				
+				$File "portal2/baseprojectedentity.h"
+				$File "portal2/baseprojectedentity.cpp"
+				
+				$File	"$SRCDIR\game\shared\portal\baseprojectedentity_shared.h"
+				$File	"$SRCDIR\game\shared\portal\baseprojectedentity_shared.cpp"
+				
 
 			$File	"portal2\portal2_eventlog.cpp"
 			

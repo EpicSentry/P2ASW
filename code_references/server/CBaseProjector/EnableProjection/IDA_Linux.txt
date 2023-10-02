@@ -1,0 +1,90 @@
+void __cdecl CBaseProjector::EnableProjection(CBaseProjector *const this, bool bEnable)
+{
+  bool v2; // dl
+  bool m_Value; // al
+  edict_t *m_pPev; // esi
+  bool v5; // zf
+  int (**vptr_IHandleEntity)(...); // eax
+  IChangeInfoAccessor *v7; // eax
+  unsigned __int16 m_nChangeInfos; // cx
+  CSharedEdictChangeInfo *v9; // ecx
+  char *v10; // eax
+  int v11; // ecx
+  char *v12; // [esp+18h] [ebp-30h]
+  char *v13; // [esp+28h] [ebp-20h]
+  unsigned __int16 v14; // [esp+2Eh] [ebp-1Ah]
+
+  v2 = bEnable;
+  m_Value = this->m_bEnabled.m_Value;
+  if ( m_Value == bEnable )
+    goto LABEL_6;
+  if ( !this->m_Network.m_TimerEvent.m_bRegistered )
+  {
+    m_pPev = this->m_Network.m_pPev;
+    if ( !m_pPev || (m_pPev->m_fStateFlags & 0x100) != 0 )
+      goto LABEL_5;
+    m_pPev->m_fStateFlags |= 1u;
+    v7 = CBaseEdict::GetChangeAccessor(m_pPev);
+    v2 = bEnable;
+    if ( v7->m_iChangeInfoSerialNumber == g_pSharedChangeInfo->m_iSerialNumber )
+    {
+      v13 = (char *)g_pSharedChangeInfo + 40 * v7->m_iChangeInfo;
+      v12 = v13 + 2;
+      v14 = *((_WORD *)v13 + 20);
+      if ( !v14 )
+        goto LABEL_19;
+      if ( *((_WORD *)v13 + 1) == 1224 )
+        goto LABEL_5;
+      v11 = 0;
+      while ( v11 != 2 * (unsigned __int16)(v14 - 1) )
+      {
+        v11 += 2;
+        if ( *(_WORD *)&v12[v11] == 1224 )
+          goto LABEL_5;
+      }
+      if ( v14 != 19 )
+      {
+LABEL_19:
+        *(_WORD *)&v12[2 * v14] = 1224;
+        *((_WORD *)v13 + 20) = v14 + 1;
+        goto LABEL_5;
+      }
+    }
+    else
+    {
+      m_nChangeInfos = g_pSharedChangeInfo->m_nChangeInfos;
+      if ( m_nChangeInfos != 100 )
+      {
+        v7->m_iChangeInfo = m_nChangeInfos;
+        v9 = g_pSharedChangeInfo;
+        ++g_pSharedChangeInfo->m_nChangeInfos;
+        v7->m_iChangeInfoSerialNumber = v9->m_iSerialNumber;
+        v10 = (char *)g_pSharedChangeInfo + 40 * v7->m_iChangeInfo;
+        *((_WORD *)v10 + 1) = 1224;
+        *((_WORD *)v10 + 20) = 1;
+LABEL_5:
+        this->m_bEnabled.m_Value = v2;
+        m_Value = v2;
+        goto LABEL_6;
+      }
+    }
+    v7->m_iChangeInfoSerialNumber = 0;
+    m_pPev->m_fStateFlags |= 0x100u;
+    goto LABEL_5;
+  }
+  *((_BYTE *)&this->m_Network + 76) |= 1u;
+  this->m_bEnabled.m_Value = bEnable;
+  m_Value = bEnable;
+LABEL_6:
+  v5 = !m_Value;
+  vptr_IHandleEntity = this->_vptr_IHandleEntity;
+  if ( v5 )
+  {
+    vptr_IHandleEntity[236](this);
+    CBaseProjector::Cleanup(this);
+  }
+  else
+  {
+    vptr_IHandleEntity[234](this);
+  }
+}

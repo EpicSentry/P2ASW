@@ -90,7 +90,9 @@ extern int TrainSpeed(int iSpeed, int iMax);
 #include "paint/weapon_paintgun.h"
 #include "weapon_portalgun.h"
 #include "trigger_catapult.h"
-//#include "trigger_tractorbeam.h"
+#ifndef NO_TRACTOR_BEAM
+#include "trigger_tractorbeam.h"
+#endif
 #include "physicsshadowclone.h"
 
 #include "explode.h"

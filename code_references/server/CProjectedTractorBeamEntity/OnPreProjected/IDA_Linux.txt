@@ -1,0 +1,16 @@
+void __cdecl CProjectedTractorBeamEntity::OnPreProjected(CProjectedTractorBeamEntity *const this)
+{
+  unsigned int m_Index; // edx
+  char *v2; // ecx
+
+  m_Index = this->m_hTractorBeamTrigger.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v2 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v2 + 2) == HIWORD(m_Index) )
+    {
+      if ( *((_DWORD *)v2 + 1) )
+        (*((void (**)(void))this->_vptr_IHandleEntity + 214))();
+    }
+  }
+}

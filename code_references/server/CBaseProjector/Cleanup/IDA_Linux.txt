@@ -1,0 +1,94 @@
+void __cdecl CBaseProjector::Cleanup(CBaseProjector *const this)
+{
+  unsigned int m_Index; // eax
+  CBaseEntity **v2; // edx
+  unsigned int v3; // eax
+  char *v4; // edx
+  edict_t *m_pPev; // esi
+  IChangeInfoAccessor *v6; // eax
+  unsigned __int16 m_nChangeInfos; // dx
+  CSharedEdictChangeInfo *v8; // edx
+  char *v9; // eax
+  char *v10; // ecx
+  int v11; // edx
+  char *v12; // [esp+18h] [ebp-20h]
+  unsigned __int16 v13; // [esp+1Eh] [ebp-1Ah]
+
+  m_Index = this->m_hFirstChild.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v2 = (CBaseEntity **)((char *)g_pEntityList + 24 * (unsigned __int16)m_Index);
+    if ( v2[2] == (CBaseEntity *)HIWORD(m_Index) )
+    {
+      if ( v2[1] )
+      {
+        UTIL_Remove(v2[1]);
+        v3 = this->m_hFirstChild.m_Value.m_Index;
+        if ( v3 != -1 )
+        {
+          v4 = (char *)g_pEntityList + 24 * (unsigned __int16)v3;
+          if ( *((_DWORD *)v4 + 2) == HIWORD(v3) )
+          {
+            if ( *((_DWORD *)v4 + 1) )
+            {
+              if ( !this->m_Network.m_TimerEvent.m_bRegistered )
+              {
+                m_pPev = this->m_Network.m_pPev;
+                if ( !m_pPev || (m_pPev->m_fStateFlags & 0x100) != 0 )
+                  goto LABEL_14;
+                m_pPev->m_fStateFlags |= 1u;
+                v6 = CBaseEdict::GetChangeAccessor(m_pPev);
+                if ( v6->m_iChangeInfoSerialNumber == g_pSharedChangeInfo->m_iSerialNumber )
+                {
+                  v12 = (char *)g_pSharedChangeInfo + 40 * v6->m_iChangeInfo;
+                  v10 = v12 + 2;
+                  v13 = *((_WORD *)v12 + 20);
+                  if ( !v13 )
+                    goto LABEL_22;
+                  if ( *((_WORD *)v12 + 1) == 1228 )
+                    goto LABEL_14;
+                  v11 = 0;
+                  while ( v11 != 2 * (unsigned __int16)(v13 - 1) )
+                  {
+                    v11 += 2;
+                    if ( *(_WORD *)&v10[v11] == 1228 )
+                      goto LABEL_14;
+                  }
+                  if ( v13 != 19 )
+                  {
+LABEL_22:
+                    *(_WORD *)&v10[2 * v13] = 1228;
+                    *((_WORD *)v12 + 20) = v13 + 1;
+                    goto LABEL_14;
+                  }
+                }
+                else
+                {
+                  m_nChangeInfos = g_pSharedChangeInfo->m_nChangeInfos;
+                  if ( m_nChangeInfos != 100 )
+                  {
+                    v6->m_iChangeInfo = m_nChangeInfos;
+                    v8 = g_pSharedChangeInfo;
+                    ++g_pSharedChangeInfo->m_nChangeInfos;
+                    v6->m_iChangeInfoSerialNumber = v8->m_iSerialNumber;
+                    v9 = (char *)g_pSharedChangeInfo + 40 * v6->m_iChangeInfo;
+                    *((_WORD *)v9 + 1) = 1228;
+                    *((_WORD *)v9 + 20) = 1;
+LABEL_14:
+                    this->m_hFirstChild.m_Value.m_Index = -1;
+                    return;
+                  }
+                }
+                v6->m_iChangeInfoSerialNumber = 0;
+                m_pPev->m_fStateFlags |= 0x100u;
+                goto LABEL_14;
+              }
+              *((_BYTE *)&this->m_Network + 76) |= 1u;
+              goto LABEL_14;
+            }
+          }
+        }
+      }
+    }
+  }
+}

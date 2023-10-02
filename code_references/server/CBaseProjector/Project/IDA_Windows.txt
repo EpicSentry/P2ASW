@@ -1,0 +1,44 @@
+void __thiscall CBaseProjector::Project(CBaseProjector *this)
+{
+  unsigned int m_Index; // eax
+  IHandleEntity *m_pEntity; // ecx
+  const CBaseProjectedEntity *v4; // eax
+  unsigned int v5; // eax
+  unsigned int v6; // eax
+  CBaseProjectedEntity *v7; // ecx
+  CPortal_Base2D *bCreateNew; // [esp+8h] [ebp-4h]
+
+  m_Index = this->m_hFirstChild.m_Value.m_Index;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+    m_pEntity = 0;
+  else
+    m_pEntity = g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+  LOBYTE(bCreateNew) = m_pEntity == 0;
+  if ( m_pEntity
+    || (v4 = this->CreateNewProjectedEntity(this),
+        CNetworkHandleBase<CBaseProjectedEntity,CBaseProjector::NetworkVar_m_hFirstChild>::Set(&this->m_hFirstChild, v4),
+        v5 = this->m_hFirstChild.m_Value.m_Index,
+        v5 != -1)
+    && g_pEntityList->m_EntPtrArray[(unsigned __int16)v5].m_SerialNumber == HIWORD(v5)
+    && g_pEntityList->m_EntPtrArray[(unsigned __int16)v5].m_pEntity )
+  {
+    if ( (this->m_iEFlags & 0x800) != 0 )
+      CBaseEntity::CalcAbsolutePosition(this);
+    if ( (this->m_iEFlags & 0x800) != 0 )
+      CBaseEntity::CalcAbsolutePosition(this);
+    v6 = this->m_hFirstChild.m_Value.m_Index;
+    if ( v6 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v6].m_SerialNumber != HIWORD(v6) )
+      v7 = 0;
+    else
+      v7 = (CBaseProjectedEntity *)g_pEntityList->m_EntPtrArray[(unsigned __int16)v6].m_pEntity;
+    CBaseProjectedEntity::RecursiveProjection(
+      v7,
+      bCreateNew,
+      this,
+      0,
+      &this->m_vecAbsOrigin,
+      &this->m_angAbsRotation,
+      16,
+      this->m_bDisablePlacementHelper);
+  }
+}

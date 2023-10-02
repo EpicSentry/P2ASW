@@ -1,0 +1,141 @@
+void __cdecl CBaseProjectedEntity::TestForProjectionChanges(CBaseProjectedEntity *const this)
+{
+  CBaseProjectedEntity *v1; // esi
+  char v2; // al
+  unsigned int m_Index; // edx
+  char *v4; // ecx
+  float *v5; // eax
+  CPortal_Base2D *v6; // eax
+  float *v7; // eax
+  float *v8; // eax
+  float *v9; // eax
+  float *v10; // eax
+  bool v11; // di
+  CBaseProjector *v12; // eax
+  float v13; // [esp+20h] [ebp-78h]
+  float v14; // [esp+30h] [ebp-68h]
+  float v15; // [esp+40h] [ebp-58h]
+  CPortal_Base2D *pExitPortal; // [esp+50h] [ebp-48h]
+  float v17; // [esp+54h] [ebp-44h]
+  float v18; // [esp+58h] [ebp-40h]
+  float v19; // [esp+5Ch] [ebp-3Ch]
+  Vector vNewPosition; // [esp+64h] [ebp-34h] BYREF
+  QAngle qNewAngles; // [esp+70h] [ebp-28h] BYREF
+  CPortal_Base2D *pHitPortal; // [esp+7Ch] [ebp-1Ch] BYREF
+
+  v1 = 0;
+  pHitPortal = 0;
+  v2 = (*((int (__cdecl **)(CBaseProjectedEntity *const, Vector *, QAngle *, CPortal_Base2D **))this->_vptr_IHandleEntity
+        + 208))(
+         this,
+         &vNewPosition,
+         &qNewAngles,
+         &pHitPortal);
+  m_Index = this->m_hChildSegment.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v4 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v4 + 2) == HIWORD(m_Index) )
+      v1 = (CBaseProjectedEntity *)*((_DWORD *)v4 + 1);
+  }
+  if ( !v2 )
+    goto LABEL_5;
+  if ( !pHitPortal )
+  {
+    v6 = 0;
+LABEL_13:
+    if ( !CPortal_Base2D::IsActivedAndLinked(v6) )
+    {
+      if ( !v1 )
+        return;
+LABEL_15:
+      (*((void (__cdecl **)(CBaseProjectedEntity *))v1->_vptr_IHandleEntity + 209))(v1);
+      return;
+    }
+    if ( !(*((unsigned __int8 (__cdecl **)(CBaseProjectedEntity *const, CPortal_Base2D *))this->_vptr_IHandleEntity + 203))(
+            this,
+            pHitPortal) )
+    {
+      if ( v1 )
+        goto LABEL_15;
+      if ( this->m_iMaxRemainingRecursions.m_Value <= 0 )
+        return;
+    }
+    v7 = (float *)(*((int (__cdecl **)(CBaseProjectedEntity *const))this->_vptr_IHandleEntity + 204))(this);
+    v15 = v7[1];
+    v13 = v7[2];
+    v14 = *v7;
+    v8 = (float *)(*((int (__cdecl **)(CBaseProjectedEntity *const))this->_vptr_IHandleEntity + 205))(this);
+    v19 = *v8;
+    v18 = v8[1];
+    v17 = v8[2];
+    (*((void (__cdecl **)(CBaseProjectedEntity *const))this->_vptr_IHandleEntity + 198))(this);
+    v9 = (float *)(*((int (__cdecl **)(CBaseProjectedEntity *const))this->_vptr_IHandleEntity + 204))(this);
+    if ( v14 != *v9
+      || v15 != v9[1]
+      || v13 != v9[2]
+      || (v10 = (float *)(*((int (__cdecl **)(CBaseProjectedEntity *const))this->_vptr_IHandleEntity + 205))(this),
+          v19 != *v10)
+      || v18 != v10[1]
+      || v17 != v10[2] )
+    {
+      (*((void (__cdecl **)(CBaseProjectedEntity *const))this->_vptr_IHandleEntity + 213))(this);
+    }
+    (*((void (__cdecl **)(CBaseProjectedEntity *const, CPortal_Base2D *))this->_vptr_IHandleEntity + 199))(
+      this,
+      pHitPortal);
+    v11 = v1 == 0;
+    if ( !v1 )
+    {
+      v1 = (CBaseProjectedEntity *)(*((int (__cdecl **)(CBaseProjectedEntity *const))this->_vptr_IHandleEntity + 210))(this);
+      if ( v1 != CBaseHandle::Get(&this->m_hChildSegment.m_Value) )
+      {
+        CBaseEntity::NetworkStateChanged(this, &this->m_hChildSegment);
+        if ( v1 )
+          this->m_hChildSegment.m_Value.m_Index = *(_DWORD *)(*((int (__cdecl **)(CBaseProjectedEntity *))v1->_vptr_IHandleEntity
+                                                              + 3))(v1);
+        else
+          this->m_hChildSegment.m_Value.m_Index = -1;
+      }
+    }
+    pExitPortal = (CPortal_Base2D *)CBaseHandle::Get(&pHitPortal->m_hLinkedPortal.m_Value);
+    v12 = (CBaseProjector *)CBaseHandle::Get(&this->m_hOwnerEntity.m_Value);
+    CBaseProjectedEntity::RecursiveProjection(
+      v1,
+      v11,
+      v12,
+      pExitPortal,
+      &vNewPosition,
+      &qNewAngles,
+      this->m_iMaxRemainingRecursions.m_Value - 1,
+      this->m_bCreatePlacementHelper);
+    return;
+  }
+  if ( CPortal_Base2D::IsActivedAndLinked(pHitPortal) )
+  {
+    v6 = pHitPortal;
+    goto LABEL_13;
+  }
+LABEL_5:
+  (*((void (__cdecl **)(CBaseProjectedEntity *const, _DWORD))this->_vptr_IHandleEntity + 199))(this, 0);
+  v5 = (float *)(*((int (__cdecl **)(CBaseProjectedEntity *const))this->_vptr_IHandleEntity + 205))(this);
+  if ( (float)((float)((float)((float)(*v5 - vNewPosition.x) * (float)(*v5 - vNewPosition.x))
+                     + (float)((float)(v5[1] - vNewPosition.y) * (float)(v5[1] - vNewPosition.y)))
+             + (float)((float)(v5[2] - vNewPosition.z) * (float)(v5[2] - vNewPosition.z))) > 0.1 )
+  {
+    (*((void (__cdecl **)(CBaseProjectedEntity *const))this->_vptr_IHandleEntity + 198))(this);
+    (*((void (__cdecl **)(CBaseProjectedEntity *const))this->_vptr_IHandleEntity + 213))(this);
+    if ( !v1 )
+      return;
+  }
+  else if ( !v1 )
+  {
+    return;
+  }
+  UTIL_Remove(v1);
+  if ( CBaseHandle::Get(&this->m_hChildSegment.m_Value) )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_hChildSegment);
+    this->m_hChildSegment.m_Value.m_Index = -1;
+  }
+}

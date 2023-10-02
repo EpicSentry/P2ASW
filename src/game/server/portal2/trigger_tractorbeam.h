@@ -1,18 +1,55 @@
 #ifndef TRIGGER_TRACTORBEAM_H
 #define TRIGGER_TRACTORBEAM_H
 
+#include "cbase.h"
 #include "triggers.h"
+#include "baseprojectedentity.h"
+
+
+//#include "trigger_tractorbeam_shared.h"
+
+#define NO_CLIENT_TRACTOR_BEAM
+
+class CTrigger_TractorBeam;
+class CPaintBlob;
+
+class CProjectedTractorBeamEntity : public CBaseProjectedEntity
+{
+
+public:
+
+	DECLARE_CLASS( CProjectedTractorBeamEntity, CBaseProjectedEntity );
+#ifndef NO_CLIENT_TRACTOR_BEAM
+	DECLARE_SERVERCLASS();
+#endif
+	DECLARE_DATADESC();
+    CProjectedTractorBeamEntity();
+    ~CProjectedTractorBeamEntity();
+	
+    void Spawn();
+    void UpdateOnRemove();
+    void GetProjectionExtents( class Vector & ,class Vector & );
+    float GetLinearForce();
+    CProjectedTractorBeamEntity *CreateNewInstance();
+    CBaseProjectedEntity *CreateNewProjectedEntity();
+    void OnProjected();
+    void OnPreProjected();	
+	
+private:
+
+	CNetworkHandle( CTrigger_TractorBeam, m_hTractorBeamTrigger );
+};
+
+DECLARE_AUTO_LIST( ITriggerTractorBeamAutoList )
 
 class CTrigger_TractorBeam : public CBaseVPhysicsTrigger, public IMotionEvent, public ITriggerTractorBeamAutoList
 {
+public:
 	DECLARE_CLASS( CTrigger_TractorBeam, CBaseVPhysicsTrigger )
 	DECLARE_DATADESC()
-public:
-
+#ifndef NO_CLIENT_TRACTOR_BEAM
 	DECLARE_SERVERCLASS();
-	
-    CBaseEntity *GetEntity();
-    
+#endif
 	CTrigger_TractorBeam();
     ~CTrigger_TractorBeam();
     
@@ -27,52 +64,58 @@ public:
     void StartTouch( CBaseEntity *pOther );
     void EndTouch( CBaseEntity *pOther );
 	
-    void InputSetVelocityLimitTime(struct inputdata_t & );
+    void InputSetVelocityLimitTime( inputdata_t &inputdata );
 	
     float GetLinearLimit();
     float GetLinearForce();
-    void SetLinearForce( float );
-    void SetLinearForce( Vector & , float );
-    void SetAsReversed( bool );
-    void SetGravityScale( float );
-    void SetAirDensity( float );
-    void SetLinearLimit( float );
-    void SetAngularLimt( float );
-    void SetProxyEntity( CProjectedTractorBeamEntity * );
+    void SetLinearForce( float flLinearForce );
+    void SetLinearForce( Vector vDir, float flLinearForce );
+    void SetAsReversed( bool bReversed );
+    void SetGravityScale( float flGravityScale );
+    void SetAirDensity( float flAirDensity );
+    void SetLinearLimit( float flLinearLimit );
+    void SetAngularLimt( float flAngularLimit );
+	void SetProxyEntity( CProjectedTractorBeamEntity * );
     void DisablePlayerMovement( bool );
-    bool HasGravityScale();
-    bool HasAirDensity();
-    bool HasLinearLimit();
-    bool HasLinearScale();
-    bool HasAngularLimit();
-    bool HasAngularScale();
-    bool HasLinearForce();
     void SetDirection( const Vector &vStart, const Vector &vEnd );
     void UpdateBeam( const Vector& vStartPoint, const Vector& vEndPoint, float flLinearForce );
-    IMotionEvent::simresult_e Simulate(class IPhysicsMotionController * ,class IPhysicsObject * ,float ,class Vector & ,class Vector & );
+	IMotionEvent::simresult_e Simulate( IPhysicsMotionController *pController, IPhysicsObject *pObject, float deltaTime, Vector &linear, AngularImpulse &angular );
     void WakeTouchingObjects();
     void CalculateFrameMovement(class IPhysicsObject * ,class CBaseEntity * ,float ,class Vector & ,class Vector & );
     void SetBeamRadius(float );
-    float &GetBeamRadius();
     void RemoveDeadBlobs();
     void RemoveChangedBeamBlobs();
     void RemoveAllBlobsFromBeam();
-	
-    CTrigger_TractorBeam *CreateTractorBeam(class Vector & ,class Vector & ,class CBaseEntity * );
+
+	float GetBeamRadius();
+
+	bool HasGravityScale();
+	bool HasAirDensity();
+	bool HasLinearLimit();
+	bool HasLinearScale();
+	bool HasAngularLimit();
+	bool HasAngularScale();
+	bool HasLinearForce();
+
+    CTrigger_TractorBeam *CreateTractorBeam( const Vector &vStart, const Vector &vEnd, CProjectedTractorBeamEntity *pOwner );
     
-	PaintBlobVector_t m_blobs;
+	//PaintBlobVector_t m_blobs;
     
-	int GetLastUpdateFrame();
-    void ForceAttachEntity( CBaseEntity * );
-    void ForceDetachEntity( CBaseEntity * );
+	CUtlVector<CPaintBlob*> m_blobs;
+
+	int GetLastUpdateFrame() const;
+    void ForceAttachEntity( CBaseEntity *pEntity );
+    void ForceDetachEntity( CBaseEntity *pEntity );
 	
-    bool IsReversed();
-    bool IsFromPortal();
-    bool IsToPortal();
+	bool IsReversed() { return m_bReversed; }
+    bool IsFromPortal() { return m_bFromPortal; }
+	bool IsToPortal() { return m_bToPortal; }
 	
 	Vector GetForceDirection() const;
-    Vector GetStartPoint() const;
-	Vector GetEndPoint() const;
+	Vector GetStartPoint() const { return m_vStart; }
+	Vector GetEndPoint() const { return m_vEnd; }
+
+	CBaseEntity *GetEntity() { return this; }
 	
 private:
 	

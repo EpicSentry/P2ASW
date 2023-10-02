@@ -147,6 +147,14 @@ public:
 	void	InputSelfDestructImmediately(inputdata_t& inputdata);
 
 	virtual void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+
+#ifndef NO_TRACTOR_BEAM
+
+	void	OnExitedTractorBeam( void ) {}
+	void	OnEnteredTractorBeam( void ) {}
+
+#endif
+
 private:
 	
 	CNetworkVar( bool, m_bOutOfAmmo );

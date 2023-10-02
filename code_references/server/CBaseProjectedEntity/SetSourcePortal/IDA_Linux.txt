@@ -1,0 +1,149 @@
+void __cdecl CBaseProjectedEntity::SetSourcePortal(CBaseProjectedEntity *const this, CPortal_Base2D *pPortal)
+{
+  CPortal_Base2D *v2; // edx
+  unsigned int m_Index; // eax
+  char *v4; // ecx
+  unsigned int v5; // eax
+  int v6; // edi
+  char *v7; // edx
+  unsigned int v8; // eax
+  int v9; // edi
+  CBaseEntityList *v10; // edx
+  char *v11; // ecx
+  unsigned int v12; // ecx
+  char *v13; // eax
+  CBasePlayer *v14; // eax
+  float x; // xmm0_4
+  float y; // xmm1_4
+  float z; // xmm2_4
+  float v18; // xmm0_4
+  float v19; // xmm1_4
+  float v20; // xmm2_4
+
+  v2 = 0;
+  m_Index = this->m_hSourcePortal.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v4 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v4 + 2) == HIWORD(m_Index) )
+      v2 = (CPortal_Base2D *)*((_DWORD *)v4 + 1);
+  }
+  if ( pPortal == v2 )
+  {
+    if ( pPortal )
+      goto LABEL_7;
+LABEL_30:
+    x = vec3_origin.x;
+    if ( vec3_origin.x != this->m_vecSourcePortalCenter.m_Value.x
+      || (y = vec3_origin.y, vec3_origin.y != this->m_vecSourcePortalCenter.m_Value.y)
+      || (z = vec3_origin.z, vec3_origin.z != this->m_vecSourcePortalCenter.m_Value.z) )
+    {
+      CBaseEntity::NetworkStateChanged(this, &this->m_vecSourcePortalCenter);
+      x = vec3_origin.x;
+      y = vec3_origin.y;
+      z = vec3_origin.z;
+      this->m_vecSourcePortalCenter.m_Value.x = vec3_origin.x;
+      this->m_vecSourcePortalCenter.m_Value.y = y;
+      this->m_vecSourcePortalCenter.m_Value.z = z;
+    }
+    if ( x != this->m_vecSourcePortalRemoteCenter.m_Value.x
+      || y != this->m_vecSourcePortalRemoteCenter.m_Value.y
+      || z != this->m_vecSourcePortalRemoteCenter.m_Value.z )
+    {
+      CBaseEntity::NetworkStateChanged(this, &this->m_vecSourcePortalRemoteCenter);
+      this->m_vecSourcePortalRemoteCenter.m_Value = vec3_origin;
+    }
+    v18 = vec3_angle.x;
+    if ( vec3_angle.x != this->m_vecSourcePortalAngle.m_Value.x
+      || (v19 = vec3_angle.y, vec3_angle.y != this->m_vecSourcePortalAngle.m_Value.y)
+      || (v20 = vec3_angle.z, vec3_angle.z != this->m_vecSourcePortalAngle.m_Value.z) )
+    {
+      CBaseEntity::NetworkStateChanged(this, &this->m_vecSourcePortalAngle);
+      v18 = vec3_angle.x;
+      v19 = vec3_angle.y;
+      v20 = vec3_angle.z;
+      this->m_vecSourcePortalAngle.m_Value.x = vec3_angle.x;
+      this->m_vecSourcePortalAngle.m_Value.y = v19;
+      this->m_vecSourcePortalAngle.m_Value.z = v20;
+    }
+    if ( v18 != this->m_vecSourcePortalRemoteAngle.m_Value.x
+      || v19 != this->m_vecSourcePortalRemoteAngle.m_Value.y
+      || v20 != this->m_vecSourcePortalRemoteAngle.m_Value.z )
+    {
+      CBaseEntity::NetworkStateChanged(this, &this->m_vecSourcePortalRemoteAngle);
+      this->m_vecSourcePortalRemoteAngle.m_Value = vec3_angle;
+    }
+    goto LABEL_42;
+  }
+  CBaseEntity::NetworkStateChanged(this, &this->m_hSourcePortal);
+  if ( !pPortal )
+  {
+    this->m_hSourcePortal.m_Value.m_Index = -1;
+    goto LABEL_30;
+  }
+  this->m_hSourcePortal.m_Value.m_Index = *(_DWORD *)(*((int (__cdecl **)(CPortal_Base2D *))pPortal->_vptr_IHandleEntity
+                                                      + 3))(pPortal);
+LABEL_7:
+  if ( pPortal->m_ptOrigin.m_Value.x != this->m_vecSourcePortalCenter.m_Value.x
+    || pPortal->m_ptOrigin.m_Value.y != this->m_vecSourcePortalCenter.m_Value.y
+    || pPortal->m_ptOrigin.m_Value.z != this->m_vecSourcePortalCenter.m_Value.z )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_vecSourcePortalCenter);
+    this->m_vecSourcePortalCenter = (CNetworkVectorBase<Vector,CBaseProjectedEntity::NetworkVar_m_vecSourcePortalCenter>)pPortal->m_ptOrigin;
+  }
+  v5 = pPortal->m_hLinkedPortal.m_Value.m_Index;
+  v6 = 0;
+  if ( v5 != -1 )
+  {
+    v7 = (char *)g_pEntityList + 24 * (unsigned __int16)v5;
+    if ( *((_DWORD *)v7 + 2) == HIWORD(v5) )
+      v6 = *((_DWORD *)v7 + 1);
+  }
+  if ( *(float *)(v6 + 1532) != this->m_vecSourcePortalRemoteCenter.m_Value.x
+    || *(float *)(v6 + 1536) != this->m_vecSourcePortalRemoteCenter.m_Value.y
+    || *(float *)(v6 + 1540) != this->m_vecSourcePortalRemoteCenter.m_Value.z )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_vecSourcePortalRemoteCenter);
+    this->m_vecSourcePortalRemoteCenter = *(CNetworkVectorBase<Vector,CBaseProjectedEntity::NetworkVar_m_vecSourcePortalRemoteCenter> *)(v6 + 1532);
+  }
+  if ( pPortal->m_qAbsAngle.m_Value.x != this->m_vecSourcePortalAngle.m_Value.x
+    || pPortal->m_qAbsAngle.m_Value.y != this->m_vecSourcePortalAngle.m_Value.y
+    || pPortal->m_qAbsAngle.m_Value.z != this->m_vecSourcePortalAngle.m_Value.z )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_vecSourcePortalAngle);
+    this->m_vecSourcePortalAngle = (CNetworkVectorBase<QAngle,CBaseProjectedEntity::NetworkVar_m_vecSourcePortalAngle>)pPortal->m_qAbsAngle;
+  }
+  v8 = pPortal->m_hLinkedPortal.m_Value.m_Index;
+  v9 = 0;
+  v10 = g_pEntityList;
+  if ( v8 != -1 )
+  {
+    v11 = (char *)g_pEntityList + 24 * (unsigned __int16)v8;
+    if ( *((_DWORD *)v11 + 2) == HIWORD(v8) )
+      v9 = *((_DWORD *)v11 + 1);
+  }
+  if ( *(float *)(v9 + 1580) != this->m_vecSourcePortalRemoteAngle.m_Value.x
+    || *(float *)(v9 + 1584) != this->m_vecSourcePortalRemoteAngle.m_Value.y
+    || *(float *)(v9 + 1588) != this->m_vecSourcePortalRemoteAngle.m_Value.z )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_vecSourcePortalRemoteAngle);
+    v10 = g_pEntityList;
+    this->m_vecSourcePortalRemoteAngle = *(CNetworkVectorBase<QAngle,CBaseProjectedEntity::NetworkVar_m_vecSourcePortalRemoteAngle> *)(v9 + 1580);
+  }
+  v12 = pPortal->m_hPlayerSimulationOwner.m_Value.m_Index;
+  if ( v12 != -1 )
+  {
+    v13 = (char *)v10 + 24 * (unsigned __int16)v12;
+    if ( *((_DWORD *)v13 + 2) == HIWORD(v12) )
+    {
+      v14 = (CBasePlayer *)*((_DWORD *)v13 + 1);
+      if ( v14 )
+      {
+        CBaseEntity::SetPlayerSimulated(this, v14);
+        return;
+      }
+    }
+  }
+LABEL_42:
+  CBaseEntity::UnsetPlayerSimulated(this);
+}

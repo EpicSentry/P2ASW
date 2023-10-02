@@ -1,0 +1,42 @@
+bool __thiscall CBaseProjectedEntity::DidRedirectionPortalMove(CBaseProjectedEntity *this, CPortal_Base2D *pPortal)
+{
+  unsigned int m_Index; // eax
+  CPortal_Base2D *m_pEntity; // ecx
+  unsigned int v6; // eax
+  CEntInfo *v7; // ecx
+  IHandleEntity *v8; // esi
+  CBaseEntity *v9; // eax
+  CBaseEntity *v10; // eax
+
+  if ( !pPortal || !CPortal_Base2D::IsActivedAndLinked(pPortal) )
+    return 1;
+  m_Index = this->m_hHitPortal.m_Value.m_Index;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+    m_pEntity = 0;
+  else
+    m_pEntity = (CPortal_Base2D *)g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+  if ( pPortal != m_pEntity )
+    return 1;
+  v6 = this->m_hChildSegment.m_Value.m_Index;
+  if ( v6 == -1 )
+    return 1;
+  v7 = &g_pEntityList->m_EntPtrArray[(unsigned __int16)v6];
+  if ( g_pEntityList->m_EntPtrArray[(unsigned __int16)v6].m_SerialNumber != HIWORD(v6) )
+    return 1;
+  v8 = v7->m_pEntity;
+  if ( !v7->m_pEntity )
+    return 1;
+  if ( COERCE_FLOAT(COERCE_UNSIGNED_INT(*(float *)&v8[220].__vftable - pPortal->m_ptOrigin.m_Value.x) & _mask__AbsFloat_) > 0.0 )
+    return 1;
+  if ( COERCE_FLOAT(COERCE_UNSIGNED_INT(*(float *)&v8[221].__vftable - pPortal->m_ptOrigin.m_Value.y) & _mask__AbsFloat_) > 0.0 )
+    return 1;
+  if ( COERCE_FLOAT(COERCE_UNSIGNED_INT(*(float *)&v8[222].__vftable - pPortal->m_ptOrigin.m_Value.z) & _mask__AbsFloat_) > 0.0 )
+    return 1;
+  if ( !VectorsAreEqual((const Vector *)&v8[226], (const Vector *)&pPortal->m_qAbsAngle, 0.0) )
+    return 1;
+  v9 = CHandle<CPortal_Base2D>::operator CPortal_Base2D *((CHandle<CBaseEntity> *)&pPortal->m_hLinkedPortal);
+  if ( !VectorsAreEqual((const Vector *)&v8[217], (const Vector *)&v9[1].m_OnUser4.m_Value.fieldType, 0.0) )
+    return 1;
+  v10 = CHandle<CPortal_Base2D>::operator CPortal_Base2D *((CHandle<CBaseEntity> *)&pPortal->m_hLinkedPortal);
+  return !VectorsAreEqual((const Vector *)&v8[223], (const Vector *)&v10[1].m_cellZ, 0.0);
+}

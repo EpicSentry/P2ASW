@@ -1,0 +1,5 @@
+void __thiscall CBaseProjectedEntity::Spawn(CBaseProjectedEntity *this)
+{
+  CFuncTank::FuncTankPreThink((vgui::BaseTooltip *)this);
+  this->FindProjectedEndpoints(this);
+}

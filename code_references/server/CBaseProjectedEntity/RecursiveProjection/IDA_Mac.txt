@@ -1,0 +1,354 @@
+void __usercall CBaseProjectedEntity::RecursiveProjection(
+        CBaseEntity *a1@<edx>,
+        CBaseProjectedEntity *this,
+        bool bShouldSpawn,
+        CBaseProjector *pParentProjector,
+        CPortal_Base2D *pExitPortal,
+        Vector *vProjectOrigin,
+        const QAngle *qProjectAngles,
+        int iRemainingProjections,
+        bool bDisablePlacementHelper)
+{
+  CBaseProjectedEntity *v9; // edi
+  CPortal_Base2D *p_m_ptOrigin; // ebx
+  unsigned int v11; // eax
+  int v12; // ecx
+  int v13; // edx
+  int v14; // eax
+  int v15; // eax
+  CBaseCombatCharacter *Owner; // eax
+  const Vector *v17; // edx
+  const Vector *v18; // ecx
+  char v19; // al
+  int v20; // eax
+  unsigned int m_Index; // ecx
+  CPortal_Base2D *v22; // ebx
+  int v23; // edx
+  unsigned int v24; // eax
+  int v25; // edx
+  CBaseEntity *v26; // eax
+  unsigned int v27; // eax
+  int v28; // edx
+  unsigned int v29; // ecx
+  int v30; // edx
+  int v31; // edx
+  int v32; // ebx
+  CNetworkHandleBase<CBaseProjectedEntity,CBaseProjectedEntity::NetworkVar_m_hChildSegment> *p_m_hChildSegment; // ebx
+  unsigned int *v34; // eax
+  CBaseProjectedEntity *v35; // edx
+  int v36; // ebx
+  unsigned int v37; // eax
+  int v38; // edx
+  int (*v39)(void); // eax
+  CBaseEntity *EntityByName; // esi
+  int (**v41)(void); // ecx
+  CNetworkHandleBase<CInfoPlacementHelper,CBaseProjectedEntity::NetworkVar_m_hPlacementHelper> *p_m_hPlacementHelper; // ebx
+  unsigned int v43; // edi
+  CBaseEntity *v44; // edx
+  unsigned int *v45; // eax
+  void (__thiscall *v46)(int (**)(void), CBaseProjectedEntity *, int (*)(void)); // edx
+  int (*v47)(void); // esi
+  int v48; // eax
+  unsigned int v49; // edx
+  CBaseEntity *v50; // eax
+  int v51; // esi
+  CBaseEntity *v52; // edx
+  void *p_qModAngles; // [esp+4h] [ebp-B4h]
+  CNetworkVectorBase<Vector,CPortal_Base2D::NetworkVar_m_ptOrigin> *v54; // [esp+4h] [ebp-B4h]
+  Vector *p_vecForward; // [esp+8h] [ebp-B0h]
+  const Vector *v56; // [esp+Ch] [ebp-ACh]
+  CPortal_Base2D *v57; // [esp+2Ch] [ebp-8Ch]
+  int v58; // [esp+30h] [ebp-88h]
+  int *v59; // [esp+34h] [ebp-84h]
+  int v60; // [esp+34h] [ebp-84h]
+  bool v61; // [esp+38h] [ebp-80h]
+  CBaseCombatWeapon *v62; // [esp+3Ch] [ebp-7Ch]
+  CBaseCombatWeapon *v63; // [esp+3Ch] [ebp-7Ch]
+  CBaseCombatWeapon *v64; // [esp+3Ch] [ebp-7Ch]
+  CBaseCombatWeapon *v65; // [esp+3Ch] [ebp-7Ch]
+  QAngle qNewProjectedEntityAngles; // [esp+40h] [ebp-78h] BYREF
+  Vector vNewProjectedEntityOrigin; // [esp+50h] [ebp-68h] BYREF
+  CPortal_Base2D *pHitPortal; // [esp+5Ch] [ebp-5Ch] BYREF
+  Vector vecUp; // [esp+60h] [ebp-58h] BYREF
+  Vector vecRight; // [esp+70h] [ebp-48h] BYREF
+  Vector vecForward; // [esp+80h] [ebp-38h] BYREF
+  QAngle qModAngles; // [esp+90h] [ebp-28h] BYREF
+  Vector vFlooredPosition; // [esp+A0h] [ebp-18h]
+
+  v9 = this;
+  CBaseEntity::AddEffects(a1, 816801);
+  vFlooredPosition = *vProjectOrigin;
+  (*((void (__cdecl **)(CBaseProjectedEntity *, int))v9->_vptr$IHandleEntity + 212))(v9, 8);
+  if ( (this->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition((CBaseEntity *)vProjectOrigin);
+  qModAngles.x = (float)(unsigned __int16)(int)(float)(qProjectAngles->x * 182.04445) * 0.0054931641;
+  qModAngles.y = (float)(unsigned __int16)(int)(float)(qProjectAngles->y * 182.04445) * 0.0054931641;
+  qModAngles.z = (float)(unsigned __int16)(int)(float)(182.04445 * qProjectAngles->z) * 0.0054931641;
+  (*((void (__cdecl **)(CBaseProjectedEntity *, CBaseProjector *))this->_vptr$IHandleEntity + 19))(
+    this,
+    pParentProjector);
+  CBaseEntity::SetLocalOrigin((CBaseEntity *)&loc_C76A1, (const Vector *)this);
+  p_qModAngles = &qModAngles;
+  CBaseEntity::SetLocalAngles((CBaseEntity *)&loc_C76A1, &qModAngles);
+  if ( this->m_iMaxRemainingRecursions.m_Value != iRemainingProjections )
+  {
+    p_qModAngles = &this->m_iMaxRemainingRecursions;
+    CBaseEntity::NetworkStateChanged(this, this);
+    this->m_iMaxRemainingRecursions.m_Value = iRemainingProjections;
+  }
+  p_m_ptOrigin = pExitPortal;
+  if ( bShouldSpawn )
+    DispatchSpawn(this, 1);
+  else
+    (*((void (__cdecl **)(CBaseProjectedEntity *, void *))this->_vptr$IHandleEntity + 198))(this, p_qModAngles);
+  if ( pExitPortal )
+  {
+    (*((void (__cdecl **)(CBaseProjectedEntity *, CPortal_Base2D *))this->_vptr$IHandleEntity + 201))(this, pExitPortal);
+    v11 = *(unsigned int *)((char *)&pExitPortal->_vptr$IHandleEntity + (_DWORD)&loc_C7C17 - 816799);
+    if ( v11 != -1 )
+    {
+      v12 = **(_DWORD **)((char *)&dword_97D993 + 816801);
+      v13 = 24 * (unsigned __int16)v11;
+      if ( *(_DWORD *)(v12 + v13 + 8) == HIWORD(v11) )
+      {
+        v14 = *(_DWORD *)(v12 + v13 + 4);
+        if ( v14 )
+        {
+          v15 = __dynamic_cast(
+                  v14,
+                  *(int *)((char *)&dword_97DA13 + 816801),
+                  *(int *)((char *)&dword_97DBFF + 816801),
+                  0);
+          if ( v15 )
+          {
+            v62 = (CBaseCombatWeapon *)v15;
+            AngleVectors(&qModAngles, &vecForward, &vecRight, &vecUp);
+            Owner = CBaseCombatWeapon::GetOwner(v62);
+            v18 = 0;
+            if ( Owner )
+            {
+              v63 = (CBaseCombatWeapon *)Owner;
+              v19 = (*((int (__cdecl **)(CBaseCombatCharacter *))Owner->_vptr$IHandleEntity + 86))(Owner);
+              v18 = 0;
+              if ( v19 )
+                v18 = (const Vector *)v63;
+            }
+            p_m_ptOrigin = (CPortal_Base2D *)&pExitPortal->m_ptOrigin;
+            v56 = v18;
+            p_vecForward = &vecForward;
+            v54 = &pExitPortal->m_ptOrigin;
+            CPortalGameStats::Event_TractorBeam_Project(
+              (CPortalGameStats *)&pExitPortal->m_ptOrigin,
+              v17,
+              v18,
+              *(CPortal_Player_0 **)((char *)&dword_97DC07 + 816801));
+          }
+        }
+      }
+    }
+  }
+  (*((void (__cdecl **)(CBaseProjectedEntity *, CNetworkVectorBase<Vector,CPortal_Base2D::NetworkVar_m_ptOrigin> *, Vector *, const Vector *))this->_vptr$IHandleEntity
+   + 213))(
+    this,
+    v54,
+    p_vecForward,
+    v56);
+  if ( iRemainingProjections >= 2 )
+  {
+    pHitPortal = 0;
+    LOBYTE(p_m_ptOrigin) = (*((int (__cdecl **)(CBaseProjectedEntity *, Vector *, QAngle *, CPortal_Base2D **))this->_vptr$IHandleEntity
+                            + 208))(
+                             this,
+                             &vNewProjectedEntityOrigin,
+                             &qNewProjectedEntityAngles,
+                             &pHitPortal);
+    (*((void (__cdecl **)(CBaseProjectedEntity *, CPortal_Base2D *))this->_vptr$IHandleEntity + 199))(this, pHitPortal);
+    if ( (_BYTE)p_m_ptOrigin && pHitPortal && CPortal_Base2D::IsActivedAndLinked((const CPortal_Base2D *)this) )
+    {
+      v59 = *(int **)((char *)&dword_97D993 + 816801);
+      v20 = *v59;
+      m_Index = pHitPortal->m_hLinkedPortal.m_Value.m_Index;
+      v22 = 0;
+      if ( m_Index != -1 )
+      {
+        v23 = 24 * (unsigned __int16)m_Index;
+        if ( *(_DWORD *)(v20 + v23 + 8) == HIWORD(m_Index) )
+          v22 = *(CPortal_Base2D **)(v20 + v23 + 4);
+      }
+      v29 = this->m_hChildSegment.m_Value.m_Index;
+      if ( v29 != -1
+        && (v30 = 24 * (unsigned __int16)v29, *(_DWORD *)(v20 + v30 + 8) == HIWORD(v29))
+        && *(_DWORD *)(v20 + v30 + 4) )
+      {
+        v57 = v22;
+        v61 = 0;
+      }
+      else
+      {
+        v57 = v22;
+        v58 = (*((int (__cdecl **)(CBaseProjectedEntity *))this->_vptr$IHandleEntity + 210))(this);
+        v20 = *v59;
+        v29 = this->m_hChildSegment.m_Value.m_Index;
+        v31 = 0;
+        if ( v29 != -1 )
+        {
+          v32 = 24 * (unsigned __int16)v29;
+          if ( *(_DWORD *)(v20 + v32 + 8) == HIWORD(v29) )
+            v31 = *(_DWORD *)(v20 + v32 + 4);
+        }
+        v61 = 1;
+        if ( v31 != v58 )
+        {
+          p_m_hChildSegment = &this->m_hChildSegment;
+          CBaseEntity::NetworkStateChanged(
+            (CBaseEntity *)((char *)&this->m_hChildSegment + (_DWORD)&loc_C72DF - 816799),
+            (char *)&this->m_hChildSegment + (_DWORD)&loc_C72DF - 816799);
+          if ( !v58 )
+          {
+            p_m_hChildSegment->m_Value.m_Index = -1;
+            v35 = 0;
+            v61 = 1;
+LABEL_46:
+            p_m_ptOrigin = v57;
+            CBaseProjectedEntity::RecursiveProjection(
+              v35,
+              v61,
+              pParentProjector,
+              v57,
+              &vNewProjectedEntityOrigin,
+              &qNewProjectedEntityAngles,
+              iRemainingProjections - 1,
+              bDisablePlacementHelper);
+            goto LABEL_47;
+          }
+          v34 = (unsigned int *)(*(int (__cdecl **)(int, CNetworkHandleBase<CBaseProjectedEntity,CBaseProjectedEntity::NetworkVar_m_hChildSegment> *))(*(_DWORD *)v58 + 12))(
+                                  v58,
+                                  &this->m_hChildSegment);
+          v29 = *v34;
+          p_m_hChildSegment->m_Value.m_Index = *v34;
+          v20 = *v59;
+        }
+      }
+      v35 = 0;
+      if ( v29 != -1 )
+      {
+        v36 = 24 * (unsigned __int16)v29;
+        if ( *(_DWORD *)(v20 + v36 + 8) == HIWORD(v29) )
+          v35 = *(CBaseProjectedEntity **)(v20 + v36 + 4);
+      }
+      goto LABEL_46;
+    }
+    v24 = this->m_hChildSegment.m_Value.m_Index;
+    if ( v24 != -1 )
+    {
+      p_m_ptOrigin = *(CPortal_Base2D **)((char *)&dword_97D993 + 816801);
+      v25 = 6 * (unsigned __int16)v24;
+      if ( p_m_ptOrigin->_vptr$IHandleEntity[v25 + 2] == (int (*)(void))HIWORD(v24) )
+      {
+        v26 = (CBaseEntity *)p_m_ptOrigin->_vptr$IHandleEntity[v25 + 1];
+        if ( v26 )
+        {
+          v64 = (CBaseCombatWeapon *)&this->m_hChildSegment;
+          UTIL_Remove(v26);
+          v27 = this->m_hChildSegment.m_Value.m_Index;
+          if ( v27 != -1 )
+          {
+            v28 = 6 * (unsigned __int16)v27;
+            if ( p_m_ptOrigin->_vptr$IHandleEntity[v28 + 2] == (int (*)(void))HIWORD(v27) )
+            {
+              if ( p_m_ptOrigin->_vptr$IHandleEntity[v28 + 1] )
+              {
+                p_m_ptOrigin = (CPortal_Base2D *)&this->m_hChildSegment;
+                CBaseEntity::NetworkStateChanged(
+                  (CBaseEntity *)((char *)v64 + (_DWORD)&loc_C72DF - 816799),
+                  (char *)v64 + (_DWORD)&loc_C72DF - 816799);
+                v64->_vptr$IHandleEntity = (int (**)(void))-1;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+LABEL_47:
+  if ( bDisablePlacementHelper )
+  {
+    this->m_bCreatePlacementHelper = 0;
+    goto LABEL_68;
+  }
+  this->m_bCreatePlacementHelper = 1;
+  p_m_ptOrigin = *(CPortal_Base2D **)((char *)&dword_97D993 + 816801);
+  v37 = this->m_hPlacementHelper.m_Value.m_Index;
+  if ( v37 != -1 )
+  {
+    v38 = 6 * (unsigned __int16)v37;
+    if ( p_m_ptOrigin->_vptr$IHandleEntity[v38 + 2] == (int (*)(void))HIWORD(v37) )
+    {
+      v39 = p_m_ptOrigin->_vptr$IHandleEntity[v38 + 1];
+      if ( v39 )
+      {
+        (*((void (__cdecl **)(CBaseProjectedEntity *, int (*)(void)))this->_vptr$IHandleEntity + 211))(this, v39);
+        goto LABEL_68;
+      }
+    }
+  }
+  v65 = *(CBaseCombatWeapon **)((char *)&dword_97D993 + 816801);
+  EntityByName = CreateEntityByName("info_placement_helper", -1, 1);
+  v41 = p_m_ptOrigin->_vptr$IHandleEntity;
+  p_m_hPlacementHelper = &this->m_hPlacementHelper;
+  v43 = this->m_hPlacementHelper.m_Value.m_Index;
+  v44 = 0;
+  if ( v43 != -1 )
+  {
+    v60 = 6 * (unsigned __int16)v43;
+    if ( v41[v60 + 2] == (int (*)(void))HIWORD(v43) )
+      v44 = (CBaseEntity *)v41[v60 + 1];
+  }
+  if ( v44 == EntityByName )
+    goto LABEL_59;
+  CBaseEntity::NetworkStateChanged(
+    (CBaseEntity *)((char *)p_m_hPlacementHelper + (_DWORD)&loc_C72DC - 816800),
+    (char *)p_m_hPlacementHelper + (_DWORD)&loc_C72DC - 816800);
+  if ( EntityByName )
+  {
+    v45 = (unsigned int *)(*((int (__cdecl **)(CBaseEntity *, CNetworkHandleBase<CInfoPlacementHelper,CBaseProjectedEntity::NetworkVar_m_hPlacementHelper> *))EntityByName->_vptr$IHandleEntity
+                           + 3))(
+                            EntityByName,
+                            p_m_hPlacementHelper);
+    v43 = *v45;
+    p_m_hPlacementHelper->m_Value.m_Index = *v45;
+    v41 = v65->_vptr$IHandleEntity;
+LABEL_59:
+    v46 = (void (__thiscall *)(int (**)(void), CBaseProjectedEntity *, int (*)(void)))*((_DWORD *)this->_vptr$IHandleEntity
+                                                                                      + 211);
+    v47 = 0;
+    if ( v43 != -1 )
+    {
+      v48 = 6 * (unsigned __int16)v43;
+      if ( v41[v48 + 2] == (int (*)(void))HIWORD(v43) )
+        v47 = v41[v48 + 1];
+    }
+    v9 = this;
+    goto LABEL_64;
+  }
+  v9 = this;
+  this->m_hPlacementHelper.m_Value.m_Index = -1;
+  v46 = (void (__thiscall *)(int (**)(void), CBaseProjectedEntity *, int (*)(void)))*((_DWORD *)this->_vptr$IHandleEntity
+                                                                                    + 211);
+  v47 = 0;
+LABEL_64:
+  p_m_ptOrigin = (CPortal_Base2D *)v65;
+  v46(v41, v9, v47);
+  v49 = v9->m_hPlacementHelper.m_Value.m_Index;
+  v50 = 0;
+  if ( v49 != -1 )
+  {
+    v51 = 6 * (unsigned __int16)v49;
+    if ( v65->_vptr$IHandleEntity[v51 + 2] == (int (*)(void))HIWORD(v49) )
+      v50 = (CBaseEntity *)v65->_vptr$IHandleEntity[v51 + 1];
+  }
+  DispatchSpawn(v50, 1);
+LABEL_68:
+  CBaseEntity::PhysicsTouchTriggers(v9, 0);
+  CBaseEntity::AddEffects(v52, (int)p_m_ptOrigin);
+}

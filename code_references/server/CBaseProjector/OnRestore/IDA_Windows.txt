@@ -1,0 +1,6 @@
+void __thiscall CBaseProjector::OnRestore(CBaseProjector *this)
+{
+  CBaseAnimating::OnRestore(this);
+  if ( this->m_bEnabled.m_Value )
+    this->Project(this);
+}

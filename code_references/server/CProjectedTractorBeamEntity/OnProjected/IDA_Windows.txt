@@ -1,0 +1,42 @@
+void __thiscall CProjectedTractorBeamEntity::OnProjected(CProjectedTractorBeamEntity *this)
+{
+  unsigned int m_Index; // eax
+  CBaseEntity **v3; // ecx
+  CTrigger_TractorBeam *v4; // edi
+  unsigned int v5; // eax
+  const Vector *v6; // eax
+  const Vector *v7; // [esp-4h] [ebp-10h]
+  float flLinearForce; // [esp+0h] [ebp-Ch]
+
+  CBaseProjectedEntity::OnProjected(this);
+  m_Index = this->m_hTractorBeamTrigger.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v3 = (CBaseEntity **)&g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index];
+    if ( g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber == HIWORD(m_Index) )
+    {
+      v4 = (CTrigger_TractorBeam *)*v3;
+      if ( *v3 )
+      {
+        if ( this->m_bIsPlayerSimulated.m_Value )
+        {
+          v5 = this->m_hPlayerSimulationOwner.m_Value.m_Index;
+          if ( v5 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v5].m_SerialNumber != HIWORD(v5) )
+            CBaseEntity::SetPlayerSimulated(v4, 0);
+          else
+            CBaseEntity::SetPlayerSimulated(
+              v4,
+              (CBasePlayer *)g_pEntityList->m_EntPtrArray[(unsigned __int16)v5].m_pEntity);
+        }
+        else
+        {
+          CBaseEntity::UnsetPlayerSimulated(*v3);
+        }
+        flLinearForce = CProjectedTractorBeamEntity::GetLinearForce(this);
+        v7 = this->GetEndPoint(this);
+        v6 = this->GetStartPoint(this);
+        CTrigger_TractorBeam::UpdateBeam(v4, v6, v7, flLinearForce);
+      }
+    }
+  }
+}

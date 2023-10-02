@@ -1,0 +1,230 @@
+void __thiscall CBaseProjectedEntity::RecursiveProjection(
+        CBaseProjectedEntity *this,
+        CPortal_Base2D *bShouldSpawn,
+        CBaseProjector *pParentProjector,
+        CPortal_Base2D *pExitPortal,
+        const Vector *vProjectOrigin,
+        const QAngle *qProjectAngles,
+        int iRemainingProjections,
+        bool bDisablePlacementHelper)
+{
+  CBaseProjectedEntity_vtbl *v9; // edx
+  void (__thiscall *OnPreProjected)(CBaseProjectedEntity *); // eax
+  void (__thiscall *SetOwnerEntity)(CBaseEntity *, CBaseEntity *); // edx
+  int v12; // ebx
+  edict_t *m_pPev; // ecx
+  CPortal_Base2D *v14; // ebx
+  unsigned int m_Index; // eax
+  IHandleEntity *m_pEntity; // ecx
+  CBaseCombatWeapon *v17; // edi
+  CBaseCombatCharacter *Owner; // eax
+  CPortal_Player *v19; // edi
+  bool (__thiscall *IsHittingPortal)(CBaseProjectedEntity *, Vector *, QAngle *, CPortal_Base2D **); // edx
+  bool v21; // bl
+  CPortal_Base2D *v22; // ebx
+  CBaseEntity *v23; // eax
+  const CBaseProjectedEntity *v24; // eax
+  CBaseProjectedEntity *v25; // eax
+  unsigned int v26; // ecx
+  CNetworkHandleBase<CBaseProjectedEntity,CBaseProjectedEntity::NetworkVar_m_hChildSegment> *p_m_hChildSegment; // ebx
+  int v28; // eax
+  CEntInfo *v29; // edx
+  unsigned int v30; // ecx
+  int v31; // eax
+  bool v32; // zf
+  CEntInfo *v33; // eax
+  CBaseEntity *v34; // eax
+  unsigned int v35; // eax
+  edict_t *v36; // ecx
+  unsigned int v37; // eax
+  IHandleEntity *v38; // ecx
+  bool v39; // bl
+  const CInfoPlacementHelper *EntityByName; // eax
+  unsigned int v41; // eax
+  CInfoPlacementHelper *v42; // ecx
+  unsigned int v43; // eax
+  char v44; // [esp-1Ch] [ebp-64h]
+  CBaseProjector *v45; // [esp-18h] [ebp-60h]
+  int v46; // [esp-8h] [ebp-50h]
+  bool v47; // [esp-4h] [ebp-4Ch]
+  Vector vecRight; // [esp+Ch] [ebp-3Ch] BYREF
+  Vector vNewProjectedEntityOrigin; // [esp+18h] [ebp-30h] BYREF
+  QAngle qNewProjectedEntityAngles; // [esp+24h] [ebp-24h] BYREF
+  Vector vFlooredPosition; // [esp+30h] [ebp-18h] BYREF
+  QAngle qModAngles; // [esp+3Ch] [ebp-Ch] BYREF
+
+  CBaseEntity::AddEffects(this, 8);
+  v9 = this->__vftable;
+  vFlooredPosition.z = vProjectOrigin->z;
+  OnPreProjected = v9->OnPreProjected;
+  *(_QWORD *)&vFlooredPosition.x = *(_QWORD *)&vProjectOrigin->x;
+  OnPreProjected(this);
+  if ( (this->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(this);
+  qModAngles.x = (float)(unsigned __int16)(int)(float)(qProjectAngles->x * 182.04445) * 0.0054931641;
+  qModAngles.y = (float)(unsigned __int16)(int)(float)(qProjectAngles->y * 182.04445) * 0.0054931641;
+  SetOwnerEntity = this->SetOwnerEntity;
+  qModAngles.z = (float)(unsigned __int16)(int)(float)(qProjectAngles->z * 182.04445) * 0.0054931641;
+  SetOwnerEntity(this, pParentProjector);
+  CBaseEntity::SetLocalOrigin(this, &vFlooredPosition);
+  CBaseEntity::SetLocalAngles(this, &qModAngles);
+  v12 = iRemainingProjections;
+  if ( this->m_iMaxRemainingRecursions.m_Value != iRemainingProjections )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x3B8u);
+    }
+    this->m_iMaxRemainingRecursions.m_Value = v12;
+  }
+  if ( (_BYTE)bShouldSpawn )
+    DispatchSpawn(this, 1);
+  else
+    this->FindProjectedEndpoints(this);
+  v14 = pExitPortal;
+  if ( pExitPortal )
+  {
+    this->SetSourcePortal(this, pExitPortal);
+    m_Index = v14->m_hPlacedBy.m_Index;
+    if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+      m_pEntity = 0;
+    else
+      m_pEntity = g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+    v17 = (CBaseCombatWeapon *)__RTDynamicCast(
+                                 m_pEntity,
+                                 0,
+                                 &CBaseEntity `RTTI Type Descriptor',
+                                 &CWeaponPortalgun `RTTI Type Descriptor',
+                                 0);
+    if ( v17 )
+    {
+      AngleVectors(&qModAngles, (Vector *)&qNewProjectedEntityAngles, &vecRight, &vNewProjectedEntityOrigin);
+      Owner = CBaseCombatWeapon::GetOwner(v17);
+      v19 = (CPortal_Player *)Owner;
+      if ( !Owner || !Owner->IsPlayer(Owner) )
+        v19 = 0;
+      CPortalGameStats::Event_TractorBeam_Project(
+        &g_PortalGameStats,
+        &v14->m_ptOrigin.m_Value,
+        (const Vector *)&qNewProjectedEntityAngles,
+        v19);
+    }
+  }
+  this->OnProjected(this);
+  if ( iRemainingProjections > 1 )
+  {
+    IsHittingPortal = this->IsHittingPortal;
+    bShouldSpawn = 0;
+    v21 = IsHittingPortal(this, &vNewProjectedEntityOrigin, &qNewProjectedEntityAngles, &bShouldSpawn);
+    this->SetHitPortal(this, bShouldSpawn);
+    if ( v21 && bShouldSpawn && CPortal_Base2D::IsActivedAndLinked(bShouldSpawn) )
+    {
+      v22 = (CPortal_Base2D *)CHandle<CPortal_Base2D>::operator CPortal_Base2D *((CHandle<CBaseEntity> *)&bShouldSpawn->m_hLinkedPortal);
+      v23 = CHandle<CPortal_Base2D>::operator CPortal_Base2D *((CHandle<CBaseEntity> *)&this->m_hChildSegment);
+      LOBYTE(vProjectOrigin) = v23 == 0;
+      if ( !v23 )
+      {
+        v24 = this->CreateNewProjectedEntity(this);
+        CNetworkHandleBase<CBaseProjectedEntity,CBaseProjectedEntity::NetworkVar_m_hChildSegment>::Set(
+          &this->m_hChildSegment,
+          v24);
+      }
+      v47 = bDisablePlacementHelper;
+      v46 = iRemainingProjections - 1;
+      v45 = pParentProjector;
+      v44 = (char)vProjectOrigin;
+      v25 = (CBaseProjectedEntity *)CHandle<CPortal_Base2D>::operator CPortal_Base2D *((CHandle<CBaseEntity> *)&this->m_hChildSegment);
+      CBaseProjectedEntity::RecursiveProjection(
+        v25,
+        v44,
+        v45,
+        v22,
+        &vNewProjectedEntityOrigin,
+        &qNewProjectedEntityAngles,
+        v46,
+        v47);
+    }
+    else
+    {
+      v26 = this->m_hChildSegment.m_Value.m_Index;
+      p_m_hChildSegment = &this->m_hChildSegment;
+      if ( v26 != -1 )
+      {
+        v28 = (unsigned __int16)v26;
+        v29 = &g_pEntityList->m_EntPtrArray[(unsigned __int16)v26];
+        v30 = HIWORD(v26);
+        if ( v29->m_SerialNumber == v30 )
+        {
+          if ( v29->m_pEntity )
+          {
+            v31 = v28;
+            v32 = g_pEntityList->m_EntPtrArray[v31].m_SerialNumber == v30;
+            v33 = &g_pEntityList->m_EntPtrArray[v31];
+            v34 = v32 ? (CBaseEntity *)v33->m_pEntity : 0;
+            UTIL_Remove(v34);
+            v35 = p_m_hChildSegment->m_Value.m_Index;
+            if ( p_m_hChildSegment->m_Value.m_Index != -1
+              && g_pEntityList->m_EntPtrArray[(unsigned __int16)v35].m_SerialNumber == HIWORD(v35)
+              && g_pEntityList->m_EntPtrArray[(unsigned __int16)v35].m_pEntity )
+            {
+              if ( this->m_Network.m_TimerEvent.m_bRegistered )
+              {
+                *((_BYTE *)&this->m_Network + 76) |= 1u;
+              }
+              else
+              {
+                v36 = this->m_Network.m_pPev;
+                if ( v36 )
+                  CBaseEdict::StateChanged(v36, 0x3ACu);
+              }
+              p_m_hChildSegment->m_Value.m_Index = -1;
+            }
+          }
+        }
+      }
+    }
+  }
+  if ( bDisablePlacementHelper )
+  {
+    this->m_bCreatePlacementHelper = 0;
+  }
+  else
+  {
+    this->m_bCreatePlacementHelper = 1;
+    v37 = this->m_hPlacementHelper.m_Value.m_Index;
+    if ( v37 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v37].m_SerialNumber != HIWORD(v37) )
+      v38 = 0;
+    else
+      v38 = g_pEntityList->m_EntPtrArray[(unsigned __int16)v37].m_pEntity;
+    v39 = v38 == 0;
+    if ( !v38 )
+    {
+      EntityByName = (const CInfoPlacementHelper *)CreateEntityByName("info_placement_helper", -1, 1);
+      CNetworkHandleBase<CInfoPlacementHelper,CBaseProjectedEntity::NetworkVar_m_hPlacementHelper>::Set(
+        &this->m_hPlacementHelper,
+        EntityByName);
+    }
+    v41 = this->m_hPlacementHelper.m_Value.m_Index;
+    if ( v41 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v41].m_SerialNumber != HIWORD(v41) )
+      v42 = 0;
+    else
+      v42 = (CInfoPlacementHelper *)g_pEntityList->m_EntPtrArray[(unsigned __int16)v41].m_pEntity;
+    this->PlacePlacementHelper(this, v42);
+    if ( v39 )
+    {
+      v43 = this->m_hPlacementHelper.m_Value.m_Index;
+      if ( v43 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v43].m_SerialNumber != HIWORD(v43) )
+        DispatchSpawn(0, 1);
+      else
+        DispatchSpawn((CBaseEntity *)g_pEntityList->m_EntPtrArray[(unsigned __int16)v43].m_pEntity, 1);
+    }
+  }
+  CBaseEntity::PhysicsTouchTriggers(this, 0);
+  CBaseEntity::AddEffects(this, 1024);
+}

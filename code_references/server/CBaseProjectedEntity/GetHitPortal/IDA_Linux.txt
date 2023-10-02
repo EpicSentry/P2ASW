@@ -1,0 +1,16 @@
+CPortal_Base2D *__cdecl CBaseProjectedEntity::GetHitPortal(CBaseProjectedEntity *const this)
+{
+  unsigned int m_Index; // edx
+  CPortal_Base2D *result; // eax
+  char *v3; // ecx
+
+  m_Index = this->m_hHitPortal.m_Value.m_Index;
+  result = 0;
+  if ( m_Index != -1 )
+  {
+    v3 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v3 + 2) == HIWORD(m_Index) )
+      return (CPortal_Base2D *)*((_DWORD *)v3 + 1);
+  }
+  return result;
+}

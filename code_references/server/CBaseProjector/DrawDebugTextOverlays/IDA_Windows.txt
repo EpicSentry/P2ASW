@@ -1,0 +1,5 @@
+// attributes: thunk
+int __thiscall CBaseProjector::DrawDebugTextOverlays(CBaseProjector *this)
+{
+  return CBaseAnimating::DrawDebugTextOverlays(this);
+}

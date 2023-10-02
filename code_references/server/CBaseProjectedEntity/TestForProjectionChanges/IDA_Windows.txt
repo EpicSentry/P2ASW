@@ -1,0 +1,163 @@
+void __thiscall CBaseProjectedEntity::TestForProjectionChanges(CBaseProjectedEntity *this)
+{
+  bool (__thiscall *IsHittingPortal)(CBaseProjectedEntity *, Vector *, QAngle *, CPortal_Base2D **); // edx
+  CBaseProjectedEntity *m_pEntity; // edi
+  bool v4; // al
+  unsigned int m_Index; // ecx
+  CPortal_Base2D *v6; // ecx
+  const Vector *v7; // eax
+  __int64 v8; // xmm0_8
+  CBaseProjectedEntity_vtbl *v9; // edx
+  const Vector *(__thiscall *GetEndPoint)(CBaseProjectedEntity *); // eax
+  int v11; // eax
+  float v12; // ecx
+  __int64 v13; // xmm0_8
+  void (__thiscall *FindProjectedEndpoints)(CBaseProjectedEntity *); // eax
+  const Vector *v15; // ecx
+  const Vector *v16; // eax
+  CBaseProjectedEntity *v17; // edi
+  unsigned int v18; // eax
+  IHandleEntity *v19; // ecx
+  CBaseProjector *OwnerEntity; // eax
+  const Vector *v21; // eax
+  unsigned int v22; // eax
+  edict_t *m_pPev; // ecx
+  CPortal_Base2D *v24; // [esp-14h] [ebp-5Ch]
+  int v25; // [esp-8h] [ebp-50h]
+  bool m_bCreatePlacementHelper; // [esp-4h] [ebp-4Ch]
+  QAngle qNewAngles; // [esp+Ch] [ebp-3Ch] BYREF
+  Vector vPrevEnd; // [esp+18h] [ebp-30h] BYREF
+  Vector vNewPosition; // [esp+24h] [ebp-24h] BYREF
+  Vector vPrevStart; // [esp+30h] [ebp-18h]
+  CPortal_Base2D *bCreateNew; // [esp+3Ch] [ebp-Ch]
+  CBaseProjectedEntity *pChild; // [esp+40h] [ebp-8h]
+  CPortal_Base2D *pHitPortal; // [esp+44h] [ebp-4h] BYREF
+
+  IsHittingPortal = this->IsHittingPortal;
+  m_pEntity = 0;
+  pHitPortal = 0;
+  v4 = IsHittingPortal(this, &vNewPosition, &qNewAngles, &pHitPortal);
+  m_Index = this->m_hChildSegment.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    if ( g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber == HIWORD(m_Index) )
+      m_pEntity = (CBaseProjectedEntity *)g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+    else
+      m_pEntity = 0;
+  }
+  pChild = m_pEntity;
+  if ( v4 )
+  {
+    v6 = pHitPortal;
+    if ( !pHitPortal )
+      goto LABEL_9;
+    if ( CPortal_Base2D::IsActivedAndLinked(pHitPortal) )
+    {
+      v6 = pHitPortal;
+LABEL_9:
+      if ( CPortal_Base2D::IsActivedAndLinked(v6) )
+      {
+        if ( this->DidRedirectionPortalMove(this, pHitPortal) )
+        {
+LABEL_13:
+          v7 = this->GetStartPoint(this);
+          v8 = *(_QWORD *)&v7->x;
+          v9 = this->__vftable;
+          vPrevStart.z = v7->z;
+          GetEndPoint = v9->GetEndPoint;
+          *(_QWORD *)&vPrevStart.x = v8;
+          v11 = (int)GetEndPoint(this);
+          v12 = *(float *)(v11 + 8);
+          v13 = *(_QWORD *)v11;
+          FindProjectedEndpoints = this->FindProjectedEndpoints;
+          vPrevEnd.z = v12;
+          *(_QWORD *)&vPrevEnd.x = v13;
+          FindProjectedEndpoints(this);
+          v15 = this->GetStartPoint(this);
+          if ( v15->x != vPrevStart.x
+            || v15->y != vPrevStart.y
+            || v15->z != vPrevStart.z
+            || (v16 = this->GetEndPoint(this), Vector::operator!=(&vPrevEnd, v16)) )
+          {
+            this->OnProjected(this);
+          }
+          this->SetHitPortal(this, pHitPortal);
+          LOBYTE(bCreateNew) = m_pEntity == 0;
+          if ( m_pEntity )
+          {
+            v17 = pChild;
+          }
+          else
+          {
+            v17 = this->CreateNewProjectedEntity(this);
+            CNetworkHandleBase<CBaseProjectedEntity,CBaseProjectedEntity::NetworkVar_m_hChildSegment>::Set(
+              &this->m_hChildSegment,
+              v17);
+          }
+          v18 = pHitPortal->m_hLinkedPortal.m_Value.m_Index;
+          if ( v18 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v18].m_SerialNumber != HIWORD(v18) )
+            v19 = 0;
+          else
+            v19 = g_pEntityList->m_EntPtrArray[(unsigned __int16)v18].m_pEntity;
+          m_bCreatePlacementHelper = this->m_bCreatePlacementHelper;
+          v25 = this->m_iMaxRemainingRecursions.m_Value - 1;
+          v24 = (CPortal_Base2D *)v19;
+          OwnerEntity = (CBaseProjector *)CBaseEntity::GetOwnerEntity(this);
+          CBaseProjectedEntity::RecursiveProjection(
+            v17,
+            bCreateNew,
+            OwnerEntity,
+            v24,
+            &vNewPosition,
+            &qNewAngles,
+            v25,
+            m_bCreatePlacementHelper);
+          return;
+        }
+        if ( !m_pEntity )
+        {
+          if ( this->m_iMaxRemainingRecursions.m_Value <= 0 )
+            return;
+          goto LABEL_13;
+        }
+      }
+      else if ( !m_pEntity )
+      {
+        return;
+      }
+      m_pEntity->TestForProjectionChanges(m_pEntity);
+      return;
+    }
+  }
+  this->SetHitPortal(this, 0);
+  v21 = this->GetEndPoint(this);
+  if ( (float)((float)((float)((float)(v21->y - vNewPosition.y) * (float)(v21->y - vNewPosition.y))
+                     + (float)((float)(v21->x - vNewPosition.x) * (float)(v21->x - vNewPosition.x)))
+             + (float)((float)(v21->z - vNewPosition.z) * (float)(v21->z - vNewPosition.z))) > 0.1 )
+  {
+    this->FindProjectedEndpoints(this);
+    this->OnProjected(this);
+  }
+  if ( m_pEntity )
+  {
+    UTIL_Remove(m_pEntity);
+    v22 = this->m_hChildSegment.m_Value.m_Index;
+    if ( v22 != -1
+      && g_pEntityList->m_EntPtrArray[(unsigned __int16)v22].m_SerialNumber == HIWORD(v22)
+      && g_pEntityList->m_EntPtrArray[(unsigned __int16)v22].m_pEntity )
+    {
+      if ( this->m_Network.m_TimerEvent.m_bRegistered )
+      {
+        *((_BYTE *)&this->m_Network + 76) |= 1u;
+        this->m_hChildSegment.m_Value.m_Index = -1;
+      }
+      else
+      {
+        m_pPev = this->m_Network.m_pPev;
+        if ( m_pPev )
+          CBaseEdict::StateChanged(m_pPev, 0x3ACu);
+        this->m_hChildSegment.m_Value.m_Index = -1;
+      }
+    }
+  }
+}

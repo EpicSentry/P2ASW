@@ -1,0 +1,6 @@
+void __cdecl CBaseProjector::OnRestore(CBaseProjector *const this)
+{
+  CBaseAnimating::OnRestore(this);
+  if ( this->m_bEnabled.m_Value )
+    (*((void (__cdecl **)(CBaseProjector *const))this->_vptr_IHandleEntity + 234))(this);
+}

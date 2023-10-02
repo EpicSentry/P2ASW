@@ -33,6 +33,10 @@ class CPortal_Player;
 	#include "portal2_item_inventory.h"
 #endif
 
+#ifndef NO_TRACTOR_BEAM 
+
+#endif
+
 extern bool UTIL_TimeScaleIsNonStandard( void );
 
 
@@ -70,6 +74,7 @@ public:
 };
 
 class CMoveData;
+class CTrigger_TractorBeam;
 
 //=============================================================================
 // >> Portal_Player

@@ -1,0 +1,4 @@
+void __cdecl CBaseProjectedEntity::OnProjected(CBaseProjectedEntity *const this)
+{
+  CBaseEntity::AddEffects(this, 8);
+}

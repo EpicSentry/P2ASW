@@ -1,0 +1,22 @@
+class CProjectedTractorBeamEntity : public CBaseProjectedEntity
+{
+	DECLARE_CLASS( CProjectedTractorBeamEntity, CBaseProjectedEntity );
+	DECLARE_SERVERCLASS();
+	DECLARE_DATADESC();
+	
+    void CProjectedTractorBeamEntity();
+    void ~CProjectedTractorBeamEntity();
+	
+    void Spawn();
+    void UpdateOnRemove();
+    void GetProjectionExtents( class Vector & ,class Vector & );
+    float GetLinearForce();
+    CProjectedTractorBeamEntity *CreateNewInstance();
+    CBaseProjectedEntity *CreateNewProjectedEntity();
+    void OnProjected();
+    void OnPreProjected();	
+	
+private:
+
+	CNetworkHandle( CTrigger_TractorBeam, m_hTractorBeamTrigger );
+};

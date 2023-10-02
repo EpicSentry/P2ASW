@@ -1,0 +1,63 @@
+class CBaseProjectedEntity : public CBaseEntity
+{
+public:
+	DECLARE_CLASS( CBaseProjectedEntity, CBaseEntity );
+	DECLARE_DATADESC();
+	DECLARE_SERVERCLASS();
+
+	CBaseProjectedEntity();
+    ~CBaseProjectedEntity();
+    
+	virtual void Spawn();
+    virtual void UpdateOnRemove();
+    virtual void OnRestore();
+    virtual void OnPreProjected();
+    virtual void OnProjected();
+	
+    void FindProjectedEndpoints();
+    void RecursiveProjection(bool ,CBaseProjector * ,CPortal_Base2D * ,Vector & ,QAngle & ,int ,bool );
+    void TestForProjectionChanges();
+    void TestForReflectPaint();
+    void PlacePlacementHelper(CInfoPlacementHelper * );
+    void SetTransmit(CCheckTransmitInfo * ,bool );
+    void CheckForSettledReflectorCubes();
+	
+    void GetProjectionExtents(Vector & ,Vector & );
+	
+    bool IsHittingPortal(Vector * ,QAngle * ,CPortal_Base2D ** );
+    bool DidRedirectionPortalMove(CPortal_Base2D * );
+	
+    void SetHitPortal(CPortal_Base2D * );
+    void SetSourcePortal(CPortal_Base2D * );
+	
+    Vector GetStartPoint();
+    Vector GetEndPoint();
+    Vector GetLengthVector();
+	
+    CPortal_Base2D *GetHitPortal();
+    CPortal_Base2D *GetSourcePortal();
+	
+    CBaseProjectedEntity *CreateNewProjectedEntity();
+	
+protected:
+		
+	CNetworkHandle( CPortal_Base2D, m_hHitPortal );
+	CNetworkHandle( CPortal_Base2D, m_hSourcePortal );
+	
+	CNetworkVector( m_vecStartPoint );
+	CNetworkVector( m_vecStartPoint );
+	CNetworkVector( m_vecSourcePortalCenter );
+	CNetworkVector( m_vecSourcePortalRemoteCenter );
+	CNetworkQAngle( m_vecSourcePortalAngle );
+	CNetworkQAngle( m_vecSourcePortalRemoteAngle );
+	
+	CNetworkVector( m_vecStartPoint );
+	CNetworkVector( m_vecEndPoint );
+	
+	CNetworkHandle( CBaseProjectedEntity, m_hChildSegment );
+	CNetworkHandle( CInfoPlacementHelper, m_hPlacementHelper );
+	
+	CNetworkVar( int, m_bCreatePlacementHelper );
+	CNetworkVar( int, m_iMaxRemainingRecursions );
+	
+};

@@ -1,0 +1,4 @@
+CProjectedTractorBeamEntity *CProjectedTractorBeamEntity::CreateNewInstance()
+{
+  return (CProjectedTractorBeamEntity *)CreateEntityByName("projected_tractor_beam_entity", -1, 1);
+}

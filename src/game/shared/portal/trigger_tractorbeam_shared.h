@@ -18,7 +18,7 @@
 #include "igamesystem.h"
 
 #ifdef NO_TRACTOR_BEAM
-#error "THIS FILE SHOULDN'T BE INCLUDED"
+#error "THIS FILE SHOULDN'T BE INCLUDED IF WE AREN'T USING TRACTOR BEAMS"
 #endif
 
 class CTrigger_TractorBeam_Shared  //defined as a class to make intellisense more intelligent
@@ -173,10 +173,5 @@ private:
 };
 
 extern CTractorBeam_Manager g_TractorBeamManager;
-
-// Not sure where else to put this
-
-
-DECLARE_AUTO_LIST( ITriggerTractorBeamAutoList );
 
 #endif //TRIGGRE_TRACTORBEAM_SHARED_H

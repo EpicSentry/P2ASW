@@ -1,0 +1,64 @@
+void __thiscall CBaseProjector::CBaseProjector(CBaseProjector *this)
+{
+  edict_t *m_pPev; // ecx
+  unsigned int m_Index; // eax
+  edict_t *v4; // ecx
+  int m_Size; // eax
+  int v6; // esi
+  CBaseProjector **m_pMemory; // ecx
+  int v8; // eax
+  CBaseProjector **v9; // eax
+
+  CBaseAnimating::CBaseAnimating(this);
+  this->__vftable = (CBaseProjector_vtbl *)&CBaseProjector::`vftable';
+  this->m_bEnabled.m_Value = 1;
+  if ( this->m_Network.m_TimerEvent.m_bRegistered )
+  {
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+  }
+  else
+  {
+    m_pPev = this->m_Network.m_pPev;
+    if ( m_pPev )
+      CBaseEdict::StateChanged(m_pPev, 0x4B0u);
+  }
+  this->m_hFirstChild.m_Value.m_Index = -1;
+  m_Index = this->m_hFirstChild.m_Value.m_Index;
+  if ( m_Index != -1
+    && g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber == HIWORD(m_Index)
+    && g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      v4 = this->m_Network.m_pPev;
+      if ( v4 )
+        CBaseEdict::StateChanged(v4, 0x4B4u);
+    }
+    this->m_hFirstChild.m_Value.m_Index = -1;
+  }
+  m_Size = s_AllProjectors.m_Size;
+  v6 = s_AllProjectors.m_Size;
+  if ( s_AllProjectors.m_Size + 1 > s_AllProjectors.m_Memory.m_nAllocationCount )
+  {
+    CUtlMemory<CNavLadder *,int>::Grow(
+      (CUtlMemory<vgui::TreeNode *,int> *)&s_AllProjectors,
+      s_AllProjectors.m_Size - s_AllProjectors.m_Memory.m_nAllocationCount + 1);
+    m_Size = s_AllProjectors.m_Size;
+  }
+  m_pMemory = s_AllProjectors.m_Memory.m_pMemory;
+  s_AllProjectors.m_Size = m_Size + 1;
+  v8 = m_Size - v6;
+  s_AllProjectors.m_pElements = s_AllProjectors.m_Memory.m_pMemory;
+  if ( v8 > 0 )
+  {
+    _V_memmove(&s_AllProjectors.m_Memory.m_pMemory[v6 + 1], &s_AllProjectors.m_Memory.m_pMemory[v6], 4 * v8);
+    m_pMemory = s_AllProjectors.m_Memory.m_pMemory;
+  }
+  v9 = &m_pMemory[v6];
+  if ( v9 )
+    *v9 = this;
+}

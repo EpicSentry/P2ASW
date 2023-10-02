@@ -1,0 +1,54 @@
+void __thiscall CBaseProjector::Cleanup(CBaseProjector *this)
+{
+  CNetworkHandleBase<CBaseProjectedEntity,CBaseProjector::NetworkVar_m_hFirstChild> *p_m_hFirstChild; // edi
+  unsigned int m_Index; // ecx
+  int v3; // eax
+  CEntInfo *v4; // edx
+  unsigned int v5; // ecx
+  int v6; // eax
+  bool v7; // zf
+  CEntInfo *v8; // eax
+  CBaseEntity *v9; // eax
+  unsigned int v10; // eax
+  CNetworkHandleBase<CBaseProjectedEntity,CBaseProjector::NetworkVar_m_hFirstChild> *v11; // eax
+  CBaseEdict *v12; // ecx
+
+  p_m_hFirstChild = &this->m_hFirstChild;
+  m_Index = this->m_hFirstChild.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v3 = (unsigned __int16)m_Index;
+    v4 = &g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index];
+    v5 = HIWORD(m_Index);
+    if ( v4->m_SerialNumber == v5 )
+    {
+      if ( v4->m_pEntity )
+      {
+        v6 = v3;
+        v7 = g_pEntityList->m_EntPtrArray[v6].m_SerialNumber == v5;
+        v8 = &g_pEntityList->m_EntPtrArray[v6];
+        v9 = v7 ? (CBaseEntity *)v8->m_pEntity : 0;
+        UTIL_Remove(v9);
+        v10 = p_m_hFirstChild->m_Value.m_Index;
+        if ( p_m_hFirstChild->m_Value.m_Index != -1
+          && g_pEntityList->m_EntPtrArray[(unsigned __int16)v10].m_SerialNumber == HIWORD(v10)
+          && g_pEntityList->m_EntPtrArray[(unsigned __int16)v10].m_pEntity )
+        {
+          v11 = p_m_hFirstChild - 301;
+          if ( LOBYTE(p_m_hFirstChild[-279].m_Value.m_Index) )
+          {
+            LOBYTE(v11[23].m_Value.m_Index) |= 1u;
+            p_m_hFirstChild->m_Value.m_Index = -1;
+          }
+          else
+          {
+            v12 = (CBaseEdict *)v11[7].m_Value.m_Index;
+            if ( v12 )
+              CBaseEdict::StateChanged(v12, 0x4B4u);
+            p_m_hFirstChild->m_Value.m_Index = -1;
+          }
+        }
+      }
+    }
+  }
+}

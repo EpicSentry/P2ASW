@@ -1,0 +1,9 @@
+void __thiscall CBaseProjector::Spawn(CBaseProjector *this)
+{
+  CPortalPlayerInventory::ValidateInventoryPositions((vgui::ListViewPanel *)this);
+  CBaseEntity::ThinkSet(
+    this,
+    (void (__thiscall *)(CBaseEntity *))CBaseProjector::TestProjectionChangesThink,
+    gpGlobals->curtime + 0.050000001,
+    "TestProjectionChanges");
+}

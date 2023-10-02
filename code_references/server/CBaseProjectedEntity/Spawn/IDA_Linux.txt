@@ -1,0 +1,5 @@
+void __cdecl CBaseProjectedEntity::Spawn(CBaseProjectedEntity *const this)
+{
+  CBaseEntity::Spawn(this);
+  (*((void (__cdecl **)(CBaseProjectedEntity *const))this->_vptr_IHandleEntity + 198))(this);
+}

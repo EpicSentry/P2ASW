@@ -1,0 +1,10 @@
+CPortal_Base2D *__thiscall CBaseProjectedEntity::GetHitPortal(CBaseProjectedEntity *this)
+{
+  unsigned int m_Index; // ecx
+
+  m_Index = this->m_hHitPortal.m_Value.m_Index;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+    return 0;
+  else
+    return (CPortal_Base2D *)g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+}

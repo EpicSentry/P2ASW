@@ -1,0 +1,40 @@
+datamap_t *__cdecl DataMapInit<CBaseProjector>(CBaseProjector *a1)
+{
+  datamap_t *result; // eax
+  char *s; // [esp+1Ch] [ebp-Ch] BYREF
+
+  if ( !(_BYTE)`guard variable for'datamap_t * DataMapInit<CBaseProjector>(CBaseProjector *)::nameHolder
+    && _cxa_guard_acquire(&`guard variable for'datamap_t * DataMapInit<CBaseProjector>(CBaseProjector *)::nameHolder) )
+  {
+    DataMapInit<CBaseProjector>(CBaseProjector *)::nameHolder.m_pszBase = "CBaseProjector";
+    DataMapInit<CBaseProjector>(CBaseProjector *)::nameHolder.m_Names.m_Memory.m_pMemory = 0;
+    DataMapInit<CBaseProjector>(CBaseProjector *)::nameHolder.m_Names.m_Memory.m_nAllocationCount = 0;
+    DataMapInit<CBaseProjector>(CBaseProjector *)::nameHolder.m_Names.m_Memory.m_nGrowSize = 0;
+    DataMapInit<CBaseProjector>(CBaseProjector *)::nameHolder.m_Names.m_Size = 0;
+    DataMapInit<CBaseProjector>(CBaseProjector *)::nameHolder.m_Names.m_pElements = 0;
+    DataMapInit<CBaseProjector>(CBaseProjector *)::nameHolder.m_nLenBase = 14;
+    _cxa_guard_release(&`guard variable for'datamap_t * DataMapInit<CBaseProjector>(CBaseProjector *)::nameHolder);
+    _cxa_atexit(
+      (void (__cdecl *)(void *))CDatadescGeneratedNameHolder::~CDatadescGeneratedNameHolder,
+      &DataMapInit<CBaseProjector>(CBaseProjector *)::nameHolder,
+      &_dso_handle);
+  }
+  CBaseProjector::m_DataMap.baseMap = &CBaseAnimating::m_DataMap;
+  if ( !(_BYTE)`guard variable for'datamap_t * DataMapInit<CBaseProjector>(CBaseProjector *)::dataDesc
+    && _cxa_guard_acquire(&`guard variable for'datamap_t * DataMapInit<CBaseProjector>(CBaseProjector *)::dataDesc) )
+  {
+    s = (char *)operator new[](DataMapInit<CBaseProjector>(CBaseProjector *)::nameHolder.m_nLenBase + 27);
+    strcpy(s, DataMapInit<CBaseProjector>(CBaseProjector *)::nameHolder.m_pszBase);
+    strcat(s, "TestProjectionChangesThink");
+    CUtlVector<char *,CUtlMemory<char *,int>>::InsertBefore(
+      &DataMapInit<CBaseProjector>(CBaseProjector *)::nameHolder.m_Names,
+      DataMapInit<CBaseProjector>(CBaseProjector *)::nameHolder.m_Names.m_Size,
+      &s);
+    DataMapInit<CBaseProjector>(CBaseProjector *)::dataDesc[6].fieldName = s;
+    _cxa_guard_release(&`guard variable for'datamap_t * DataMapInit<CBaseProjector>(CBaseProjector *)::dataDesc);
+  }
+  CBaseProjector::m_DataMap.dataNumFields = 6;
+  result = &CBaseProjector::m_DataMap;
+  CBaseProjector::m_DataMap.dataDesc = &DataMapInit<CBaseProjector>(CBaseProjector *)::dataDesc[1];
+  return result;
+}

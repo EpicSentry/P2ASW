@@ -1,0 +1,13 @@
+void __cdecl CBaseProjectedEntity::GetProjectionExtents(
+        CBaseProjectedEntity *const this,
+        Vector *const outMins,
+        Vector *const outMaxs)
+{
+  vec_t x; // ecx
+
+  x = vec3_origin.x;
+  *outMaxs = vec3_origin;
+  outMins->x = x;
+  outMins->y = outMaxs->y;
+  outMins->z = outMaxs->z;
+}

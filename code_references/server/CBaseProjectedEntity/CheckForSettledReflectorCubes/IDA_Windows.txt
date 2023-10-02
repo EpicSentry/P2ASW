@@ -1,0 +1,23 @@
+void __thiscall CBaseProjectedEntity::CheckForSettledReflectorCubes(CBaseProjectedEntity *this)
+{
+  int i; // esi
+  IPropWeightedCubeAutoList *v2; // eax
+
+  if ( vec3_origin.x != this->m_vecStartPoint.m_Value.x
+    || vec3_origin.y != this->m_vecStartPoint.m_Value.y
+    || vec3_origin.z != this->m_vecStartPoint.m_Value.z
+    || vec3_origin.x != this->m_vecEndPoint.m_Value.x
+    || vec3_origin.y != this->m_vecEndPoint.m_Value.y
+    || vec3_origin.z != this->m_vecEndPoint.m_Value.z )
+  {
+    for ( i = 0; i < IPropWeightedCubeAutoList::m_IPropWeightedCubeAutoListAutoList.m_Size; ++i )
+    {
+      v2 = IPropWeightedCubeAutoList::m_IPropWeightedCubeAutoListAutoList.m_Memory.m_pMemory[i];
+      if ( v2 )
+      {
+        if ( v2 != (IPropWeightedCubeAutoList *)2100 )
+          CPropWeightedCube::ExitDisabledState((CPropWeightedCube *)&v2[-525]);
+      }
+    }
+  }
+}

@@ -15,8 +15,8 @@
 
 #include "portal_player_shared.h"   // PortalPlayerStatistics_t define
 #include "portal_shareddefs.h"      // USE_SLOWTIME define
+#include "trigger_tractorbeam_shared.h"
 
-class CTrigger_TractorBeam;
 //-----------------------------------------------------------------------------
 // Purpose: Player specific data for Portal ( sent only to local player, too )
 //-----------------------------------------------------------------------------
@@ -87,7 +87,7 @@ public:
 	CNetworkQAngle( m_qQuaternionPunch );
 	
 #ifndef NO_TRACTOR_BEAM
-	CNetworkHandle( CTrigger_TractorBeam, m_hTractorBeam ) // Change to CTrigger_TractorBeam when we're ready
+	CNetworkHandle( CTrigger_TractorBeam, m_hTractorBeam )
 #else
 	CNetworkHandle( CBaseEntity, m_hTractorBeam ) // Change to CTrigger_TractorBeam when we're ready
 #endif

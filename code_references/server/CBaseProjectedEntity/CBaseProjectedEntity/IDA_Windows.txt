@@ -1,0 +1,9 @@
+void __thiscall CBaseProjectedEntity::CBaseProjectedEntity(CBaseProjectedEntity *this)
+{
+  CBaseEntity::CBaseEntity(this, 0);
+  this->__vftable = (CBaseProjectedEntity_vtbl *)&CBaseProjectedEntity::`vftable';
+  this->m_hHitPortal.m_Value.m_Index = -1;
+  this->m_hSourcePortal.m_Value.m_Index = -1;
+  this->m_hChildSegment.m_Value.m_Index = -1;
+  this->m_hPlacementHelper.m_Value.m_Index = -1;
+}
