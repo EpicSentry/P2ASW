@@ -24,6 +24,8 @@ class CTriggerPortalCleanser : public CBaseTrigger
 {
 public:
 	DECLARE_CLASS( CTriggerPortalCleanser, CBaseTrigger );
+	DECLARE_SERVERCLASS();
+
 
 	void Spawn( void );
 	void Touch( CBaseEntity *pOther );

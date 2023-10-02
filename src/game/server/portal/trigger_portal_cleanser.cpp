@@ -34,6 +34,10 @@ DEFINE_OUTPUT( m_OnDissolveBox, "OnDissolveBox" ),
 
 END_DATADESC()
 
+IMPLEMENT_SERVERCLASS_ST( CTriggerPortalCleanser, DT_TriggerPortalCleanser )
+	SendPropBool(SENDINFO(m_bDisabled))
+END_SEND_TABLE()
+
 
 LINK_ENTITY_TO_CLASS( trigger_portal_cleanser, CTriggerPortalCleanser );
 

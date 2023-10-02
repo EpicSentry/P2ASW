@@ -64,7 +64,8 @@ public:
 	// by default, triggers don't deal with TraceAttack
 	void TraceAttack(CBaseEntity *pAttacker, float flDamage, const Vector &vecDir, trace_t *ptr, int bitsDamageType) {}
 
-	bool		m_bDisabled;
+	CNetworkVar(bool, m_bDisabled);
+
 	string_t	m_iFilterName;
 	CHandle<class CBaseFilter>	m_hFilter;
 
