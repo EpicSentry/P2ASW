@@ -789,6 +789,8 @@ void C_WeaponPortalgun::OnDataChanged( DataUpdateType_t updateType )
 		DoEffect( EFFECT_NONE );
 	}
 
+	// Disabled for now because it's too buggy
+#if 0
 	if( g_pGameRules->IsMultiplayer() )
 	{
 		CBasePlayer *pPlayer = ToBasePlayer( GetOwner() );
@@ -807,6 +809,7 @@ void C_WeaponPortalgun::OnDataChanged( DataUpdateType_t updateType )
 
 		}
 	}
+#endif
 
 #else
 	if ( updateType == DATA_UPDATE_CREATED )
