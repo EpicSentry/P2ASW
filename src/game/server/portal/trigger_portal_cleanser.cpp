@@ -109,6 +109,7 @@ void CTriggerPortalCleanser::Touch( CBaseEntity *pOther )
 					{
 						pPortal->DoFizzleEffect( PORTAL_FIZZLE_KILLED, false );
 						pPortal->Fizzle();
+						pPortal->EmitSound( "Portal.FizzlerShimmy" );
 						// HACK HACK! Used to make the gun visually change when going through a cleanser!
 						pPortalgun->m_fEffectsMaxSize1 = 50.0f;
 
@@ -124,6 +125,7 @@ void CTriggerPortalCleanser::Touch( CBaseEntity *pOther )
 					{
 						pPortal->DoFizzleEffect( PORTAL_FIZZLE_KILLED, false );
 						pPortal->Fizzle();
+						pPortal->EmitSound( "Portal.FizzlerShimmy" );
 						// HACK HACK! Used to make the gun visually change when going through a cleanser!
 						pPortalgun->m_fEffectsMaxSize2 = 50.0f;
 
@@ -133,16 +135,8 @@ void CTriggerPortalCleanser::Touch( CBaseEntity *pOther )
 
 				if ( bFizzledPortal )
 				{
-#ifdef BLUEPORTALS
-					// Don't change the animation if the player is holding something through a fizzler.
-					// This needs to be added in for the anti-fizzle cube in BP. ~reep.
-					CBaseEntity *pHeldObject = GetPlayerHeldEntity(pPlayer);
-					if (!pHeldObject) {
-						pPortalgun->SendWeaponAnim(ACT_VM_FIZZLE);
-					}
-#else
-					pPortalgun->SendWeaponAnim(ACT_VM_FIZZLE);
-#endif
+					pPortalgun->SendWeaponAnim( ACT_VM_FIZZLE );
+
 					pPortalgun->SetLastFiredPortal( 0 );
 					m_OnFizzle.FireOutput( pOther, this );
 					pPlayer->RumbleEffect( RUMBLE_RPG_MISSILE, 0, RUMBLE_FLAG_RESTART );
@@ -237,8 +231,7 @@ void CTriggerPortalCleanser::Touch( CBaseEntity *pOther )
 	}
 }
 
-
-void CTriggerPortalCleanser::FizzleBaseAnimating( CBaseEntity *pActivator, CBaseAnimating *pBaseAnimating )
+void CTriggerPortalCleanser::FizzleBaseAnimating( CTriggerPortalCleanser *pFizzler, CBaseAnimating *pBaseAnimating )
 {
 	if ( pBaseAnimating && !pBaseAnimating->IsDissolving() )
 	{

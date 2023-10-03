@@ -13,6 +13,7 @@ static char *g_pszPortalNonCleansable[] =
 	"env_ghostanimating",
 	"physicsshadowclone",
 	"prop_energy_ball",
+	"npc_personality_core",
 	NULL,
 };
 
@@ -31,7 +32,7 @@ public:
 	void Touch( CBaseEntity *pOther );
 
 	//Use CBaseEntity for now
-	static void FizzleBaseAnimating( CBaseEntity *pActivator, CBaseAnimating *pBaseAnimating );
+	static void FizzleBaseAnimating( CTriggerPortalCleanser *pFizzler, CBaseAnimating *pBaseAnimating );
 
 	bool m_bVisible;
 	

@@ -79,8 +79,8 @@ void CPropMonsterBox::Spawn( void )
 
 	SetContextThink( &CPropMonsterBox::AnimateThink, gpGlobals->curtime + 0.1, s_pAnimateThinkContext );
 
-	if (m_pPhysicsObject)
-		m_pPhysicsObject->SetMass(40.0);
+	if (VPhysicsGetObject())
+		VPhysicsGetObject()->SetMass(40.0);
 	
 	UpdateObjectCapsCache();
 	SetFadeDistance(-1.0, 0.0);
@@ -113,17 +113,17 @@ void CPropMonsterBox::BecomeBox( bool bForce )
 	else
 	{
 		m_bIsABox = true;
-		if (m_pPhysicsObject)
+		if (VPhysicsGetObject())
 		{
 			Vector vecVelocity;
 			Vector vecAngVelocity;
 
-			m_pPhysicsObject->GetVelocity( &vecVelocity, &vecAngVelocity );
+			VPhysicsGetObject()->GetVelocity( &vecVelocity, &vecAngVelocity );
 			SetModel("models/npcs/monsters/monster_A_box.mdl");
 			VPhysicsDestroyObject();
 			CreateVPhysics();
 
-			m_pPhysicsObject->SetVelocity( &vecVelocity, &vecAngVelocity );
+			VPhysicsGetObject()->SetVelocity( &vecVelocity, &vecAngVelocity );
 				
 			ResetSequence( LookupSequence("hermit_in") );
 		}
@@ -155,15 +155,15 @@ void CPropMonsterBox::BecomeMonster( bool bForce )
 		else
 		{
 			m_bIsABox = false;
-			if (m_pPhysicsObject)
+			if (VPhysicsGetObject())
 			{
-				m_pPhysicsObject->GetVelocity( &vecVelocity, &vecAngVelocity );
+				VPhysicsGetObject()->GetVelocity( &vecVelocity, &vecAngVelocity );
 				
 				SetModel("models/npcs/monsters/monster_a.mdl");
 				VPhysicsDestroyObject();
 				CreateVPhysics();
 
-				m_pPhysicsObject->SetVelocity( &vecVelocity, &vecAngVelocity );
+				VPhysicsGetObject()->SetVelocity( &vecVelocity, &vecAngVelocity );
 				
 				CBaseAnimating::ResetSequence( LookupSequence("hermit_out") );
 			}
@@ -177,18 +177,18 @@ void CPropMonsterBox::BecomeMonster( bool bForce )
 
 void CPropMonsterBox::BecomeShortcircuit( void )
 {
-	if (m_pPhysicsObject)
+	if (VPhysicsGetObject())
 	{
 		if (!m_bIsABox)
 		{
 			Vector vecVelocity;
 			Vector vecAngVelocity;
-			m_pPhysicsObject->GetVelocity( &vecVelocity, &vecAngVelocity );
+			VPhysicsGetObject()->GetVelocity( &vecVelocity, &vecAngVelocity );
 			SetModel("models/npcs/monsters/monster_A_box.mdl");
 			VPhysicsDestroyObject();
 			CreateVPhysics();
 			
-			m_pPhysicsObject->SetVelocity( &vecVelocity, &vecAngVelocity );
+			VPhysicsGetObject()->SetVelocity( &vecVelocity, &vecAngVelocity );
 		}
 
 		// NOTE: This was UTIL_GetLocalPlayer, but this won't work well in multiplayer and will force the player
@@ -248,7 +248,7 @@ void CPropMonsterBox::HandleAnimEvent( animevent_t *pEvent )
 	}
 	else
 	{
-		if (m_pPhysicsObject)
+		if (VPhysicsGetObject())
 		{
 			Vector vecForward;
 			Vector vecUp;
@@ -281,10 +281,10 @@ void CPropMonsterBox::HandleAnimEvent( animevent_t *pEvent )
 					vecVelocity.y = ( (vecForward.y + flRandom) * flVel ) * m_flPushStrength;
 					vecVelocity.z = ( (vecForward.z + vecAbsEnd.z) * flVel ) * m_flPushStrength;
 					SetGroundEntity( NULL );
-					m_pPhysicsObject->Wake();
+					VPhysicsGetObject()->Wake();
 
-					m_pPhysicsObject->SetVelocityInstantaneous( &vec3_origin, &angImpulse);
-					m_pPhysicsObject->ApplyForceCenter( vecVelocity );
+					VPhysicsGetObject()->SetVelocityInstantaneous( &vec3_origin, &angImpulse);
+					VPhysicsGetObject()->ApplyForceCenter( vecVelocity );
 					ApplyAbsVelocityImpulse( vecVelocity );
 				}
 			}
@@ -309,8 +309,8 @@ void CPropMonsterBox::AnimateThink( void )
 	else
 	{
 		Vector vecVelocity = vec3_origin;
-		if (m_pPhysicsObject)
-			m_pPhysicsObject->GetVelocity( &vecVelocity, NULL );
+		if (VPhysicsGetObject())
+			VPhysicsGetObject()->GetVelocity( &vecVelocity, NULL );
 
 		if ((((vecVelocity.y * vecVelocity.y) + (vecVelocity.x * vecVelocity.x))
 			+ (vecVelocity.z * vecVelocity.z)) <= (m_flBoxSwitchSpeed * m_flBoxSwitchSpeed))
@@ -340,9 +340,9 @@ void CPropMonsterBox::AnimateThink( void )
 					
 					SetGroundEntity( NULL );
 					
-					m_pPhysicsObject->Wake();
-					m_pPhysicsObject->SetVelocityInstantaneous( &vec3_origin, &angImpulse );
-					m_pPhysicsObject->ApplyForceCenter( vecImpulse );
+					VPhysicsGetObject()->Wake();
+					VPhysicsGetObject()->SetVelocityInstantaneous( &vec3_origin, &angImpulse );
+					VPhysicsGetObject()->ApplyForceCenter( vecImpulse );
 					
 					ApplyAbsVelocityImpulse( vecImpulse );
 				}
