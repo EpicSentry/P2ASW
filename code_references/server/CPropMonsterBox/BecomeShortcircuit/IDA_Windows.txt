@@ -1,0 +1,32 @@
+void __thiscall CPropMonsterBox::BecomeShortcircuit(CPropMonsterBox *this)
+{
+  IPhysicsObject *m_pPhysicsObject; // ecx
+  IPhysicsObject *v3; // ecx
+  CBasePlayer *LocalPlayer; // eax
+  int v5; // eax
+  Vector vecVelocity; // [esp+24h] [ebp-18h] BYREF
+  Vector vecAngVelocity; // [esp+30h] [ebp-Ch] BYREF
+
+  m_pPhysicsObject = this->m_pPhysicsObject;
+  if ( m_pPhysicsObject )
+  {
+    if ( !this->m_bIsABox )
+    {
+      m_pPhysicsObject->GetVelocity(m_pPhysicsObject, &vecVelocity, &vecAngVelocity);
+      this->SetModel(this, "models/npcs/monsters/monster_A_box.mdl");
+      this->VPhysicsDestroyObject(this);
+      this->CreateVPhysics(this);
+      v3 = this->m_pPhysicsObject;
+      if ( v3 )
+        v3->SetVelocity(v3, &vecVelocity, &vecAngVelocity);
+    }
+    LocalPlayer = UTIL_GetLocalPlayer();
+    if ( LocalPlayer )
+      LocalPlayer->ForceDropOfCarriedPhysObjects(LocalPlayer, this);
+    v5 = CBaseAnimating::LookupSequence(this, "shortcircuit");
+    CBaseAnimating::ResetSequence(this, v5);
+    CBaseEntity::EmitSound(this, "DoSparkSmaller", 0.0, 0);
+    this->m_bIsABox = 1;
+    this->m_bIsShortcircuit = 1;
+  }
+}

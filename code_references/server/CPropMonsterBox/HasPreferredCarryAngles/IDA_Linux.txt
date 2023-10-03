@@ -1,0 +1,4 @@
+bool __cdecl CPropMonsterBox::HasPreferredCarryAnglesForPlayer(CPropMonsterBox *const this, CBasePlayer *pPlayer)
+{
+  return 1;
+}

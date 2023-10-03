@@ -1,0 +1,48 @@
+void __thiscall CPropMonsterBox::BecomeMonster(CPropMonsterBox *this, bool bForce)
+{
+  IPhysicsObject *m_pPhysicsObject; // ecx
+  IPhysicsObject *v4; // ecx
+  int v5; // eax
+  Vector vecVelocity; // [esp+4h] [ebp-18h] BYREF
+  Vector vecAngVelocity; // [esp+10h] [ebp-Ch] BYREF
+
+  if ( !this->m_bIsShortcircuit )
+  {
+    if ( bForce )
+    {
+      this->m_bForcedAsBox = 0;
+    }
+    else if ( this->m_bForcedAsBox )
+    {
+      return;
+    }
+    if ( this->m_bIsABox )
+    {
+      if ( this->m_bHeld )
+      {
+        this->m_nDeferredTransform = 2;
+      }
+      else
+      {
+        m_pPhysicsObject = this->m_pPhysicsObject;
+        this->m_bIsABox = 0;
+        if ( m_pPhysicsObject )
+        {
+          m_pPhysicsObject->GetVelocity(m_pPhysicsObject, &vecVelocity, &vecAngVelocity);
+          this->SetModel(this, "models/npcs/monsters/monster_a.mdl");
+          this->VPhysicsDestroyObject(this);
+          this->CreateVPhysics(this);
+          v4 = this->m_pPhysicsObject;
+          if ( v4 )
+            v4->SetVelocity(v4, &vecVelocity, &vecAngVelocity);
+          v5 = CBaseAnimating::LookupSequence(this, "hermit_out");
+          CBaseAnimating::ResetSequence(this, v5);
+        }
+      }
+    }
+    else
+    {
+      this->m_nDeferredTransform = 0;
+    }
+  }
+}

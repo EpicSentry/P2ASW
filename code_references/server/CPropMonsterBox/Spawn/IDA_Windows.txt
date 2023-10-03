@@ -1,0 +1,86 @@
+// positive sp value has been detected, the output may be wrong!
+void __usercall CPropMonsterBox::Spawn(CPropMonsterBox *this@<ecx>, int a2@<edi>)
+{
+  const char *v3; // eax
+  const char *v4; // eax
+  int v5; // eax
+  edict_t *m_pPev; // ecx
+  int v7; // eax
+  IUniformRandomStream *v8; // ecx
+  IUniformRandomStream *v9; // ecx
+  IPhysicsObject *m_pPhysicsObject; // ecx
+
+  v3 = "models/npcs/monsters/monster_A_box.mdl";
+  if ( !this->m_bForcedAsBox )
+    v3 = "models/npcs/monsters/monster_a.mdl";
+  this->m_ModelName.pszValue = v3;
+  CBaseEntity::DispatchUpdateTransmitState(this);
+  this->Precache(this);
+  v4 = "models/npcs/monsters/monster_A_box.mdl";
+  if ( !this->m_bForcedAsBox )
+    v4 = "models/npcs/monsters/monster_a.mdl";
+  ((void (__thiscall *)(CPropMonsterBox *, const char *, int))this->SetModel)(this, v4, a2);
+  CCollisionProperty::SetSolid(&this->m_Collision, SOLID_BBOX);
+  CBaseEntity::AddEffects(this, 1024);
+  CPortalGameStats::Event_CubeSpawn(&g_PortalGameStats);
+  CPhysicsProp::Spawn(this);
+  if ( this->m_bForcedAsBox )
+  {
+    v5 = CBaseAnimating::LookupSequence(this, "hermit_idle");
+    CBaseAnimating::ResetSequence(this, v5);
+    if ( this->m_flCycle.m_Value != 0.0 )
+    {
+      if ( this->m_Network.m_TimerEvent.m_bRegistered )
+      {
+        *((_BYTE *)&this->m_Network + 76) |= 1u;
+      }
+      else
+      {
+        m_pPev = this->m_Network.m_pPev;
+        if ( m_pPev )
+          CBaseEdict::StateChanged(m_pPev, 0x3B8u);
+      }
+      this->m_flCycle.m_Value = 0.0;
+    }
+    this->m_bIsABox = 1;
+  }
+  else
+  {
+    v7 = CBaseAnimating::LookupSequence(this, "straight01");
+    CBaseAnimating::ResetSequence(this, v7);
+    if ( this->m_flCycle.m_Value != 0.0 )
+    {
+      if ( this->m_Network.m_TimerEvent.m_bRegistered )
+      {
+        *((_BYTE *)&this->m_Network + 76) |= 1u;
+      }
+      else
+      {
+        m_pPev = this->m_Network.m_pPev;
+        if ( m_pPev )
+          CBaseEdict::StateChanged(m_pPev, 0x3B8u);
+      }
+      this->m_flCycle.m_Value = 0.0;
+    }
+    this->m_bIsABox = 0;
+  }
+  this->m_nBodyGroups = _RandomInt((IUniformRandomStream *)m_pPev, 0, 15);
+  this->m_nBodyGroups |= _RandomInt(v8, 0, 15);
+  this->m_nBodyGroups |= _RandomInt(v9, 0, 15);
+  CBaseAnimating::SetBodygroup(this, 1, this->m_nBodyGroups & 1);
+  CBaseAnimating::SetBodygroup(this, 2, ((unsigned int)this->m_nBodyGroups >> 1) & 1);
+  CBaseAnimating::SetBodygroup(this, 3, ((unsigned int)this->m_nBodyGroups >> 2) & 1);
+  CBaseAnimating::SetBodygroup(this, 4, ((unsigned int)this->m_nBodyGroups >> 3) & 1);
+  CBaseEntity::SetMoveType(this, MOVETYPE_VPHYSICS, MOVECOLLIDE_DEFAULT);
+  CBaseEntity::ThinkSet(
+    this,
+    (void (__thiscall *)(CBaseEntity *))CPropMonsterBox::AnimateThink,
+    gpGlobals->curtime + 0.1,
+    s_pAnimateThinkContext_0);
+  m_pPhysicsObject = this->m_pPhysicsObject;
+  if ( m_pPhysicsObject )
+    ((void (__cdecl *)(_DWORD))m_pPhysicsObject->SetMass)(LODWORD(FLOAT_40_0));
+  CBaseEntity::UpdateObjectCapsCache(this);
+  CBaseAnimating::SetFadeDistance(this, -1.0, 0.0);
+  CBaseEntity::SetGlobalFadeScale(this, 0.0);
+}

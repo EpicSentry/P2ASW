@@ -1,0 +1,5 @@
+// attributes: thunk
+void __thiscall CPropMonsterBox::InputBecomeShortcircuit(CPropMonsterBox *this, inputdata_t *inputdata)
+{
+  CPropMonsterBox::BecomeShortcircuit(this);
+}

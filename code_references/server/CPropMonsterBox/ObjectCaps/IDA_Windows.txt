@@ -1,0 +1,4 @@
+int __thiscall CPropMonsterBox::ObjectCaps(CPropMonsterBox *this)
+{
+  return CPhysicsProp::ObjectCaps(this) | 0x21;
+}

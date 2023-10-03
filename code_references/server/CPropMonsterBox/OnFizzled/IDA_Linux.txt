@@ -1,0 +1,4 @@
+void __cdecl CPropMonsterBox::OnFizzled(CPropMonsterBox *const this)
+{
+  COutputEvent::FireOutput(&this->m_OnFizzled, this, this, 0.0);
+}

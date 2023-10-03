@@ -1,0 +1,7 @@
+void __thiscall CPropMonsterBox::Precache(CPropMonsterBox *this)
+{
+  CPhysicsProp::Precache(this);
+  CBaseEntity::PrecacheModel("models/npcs/monsters/monster_a.mdl");
+  CBaseEntity::PrecacheModel("models/npcs/monsters/monster_A_box.mdl");
+  CBaseEntity::PrecacheScriptSound("DoSparkSmaller");
+}

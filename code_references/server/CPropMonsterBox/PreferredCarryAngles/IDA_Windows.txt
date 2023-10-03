@@ -1,0 +1,10 @@
+QAngle *__thiscall CPropMonsterBox::PreferredCarryAngles(CPropMonsterBox *this, QAngle *result)
+{
+  QAngle *v2; // eax
+
+  v2 = result;
+  result->x = FLOAT_180_0;
+  result->y = 0.0;
+  result->z = FLOAT_180_0;
+  return v2;
+}

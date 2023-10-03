@@ -1,0 +1,43 @@
+void __cdecl CPropMonsterBox::BecomeBox(CPropMonsterBox *const this, bool bForce)
+{
+  IPhysicsObject *m_pPhysicsObject; // eax
+  IPhysicsObject *v3; // eax
+  int v4; // eax
+  char v5[12]; // [esp+18h] [ebp-30h] BYREF
+  char v6[24]; // [esp+24h] [ebp-24h] BYREF
+
+  if ( !this->m_bIsShortcircuit )
+  {
+    this->m_bForcedAsBox |= bForce;
+    if ( this->m_bIsABox )
+    {
+      this->m_nDeferredTransform = 0;
+    }
+    else if ( this->m_bHeld )
+    {
+      this->m_nDeferredTransform = 1;
+    }
+    else
+    {
+      m_pPhysicsObject = this->m_pPhysicsObject;
+      this->m_bIsABox = 1;
+      if ( m_pPhysicsObject )
+      {
+        (*((void (__cdecl **)(IPhysicsObject *, char *, char *))m_pPhysicsObject->_vptr_IPhysicsObject + 53))(
+          m_pPhysicsObject,
+          v5,
+          v6);
+        (*((void (__cdecl **)(CPropMonsterBox *const, const char *))this->_vptr_IHandleEntity + 27))(
+          this,
+          "models/npcs/monsters/monster_A_box.mdl");
+        (*((void (__cdecl **)(CPropMonsterBox *const))this->_vptr_IHandleEntity + 154))(this);
+        (*((void (__cdecl **)(CPropMonsterBox *const))this->_vptr_IHandleEntity + 152))(this);
+        v3 = this->m_pPhysicsObject;
+        if ( v3 )
+          (*((void (__cdecl **)(IPhysicsObject *, char *, char *))v3->_vptr_IPhysicsObject + 51))(v3, v5, v6);
+        v4 = CBaseAnimating::LookupSequence(this, "hermit_in");
+        CBaseAnimating::ResetSequence(this, v4);
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+class CPropMonsterBox : public CPhysicsProp
+{
+
+public:
+	DECLARE_CLASS( CPropMonsterBox, CPhysicsProp );
+	DECLARE_DATADESC();
+	
+	CPropMonsterBox();
+	~CPropMonsterBox();
+	void Spawn();
+	void Precache();
+	QAngle PreferredCarryAngles();
+	bool HasPreferredCarryAnglesForPlayer(class CBasePlayer * );
+	void OnFizzled();
+	void InputSilentDissolve(struct inputdata_t & );
+	void BecomeBox(bool );
+	void BecomeMonster(bool );
+	void BecomeShortcircuit();
+	void InputBecomeBox(struct inputdata_t & );
+	void InputBecomeMonster(struct inputdata_t & );
+	void InputDissolve(struct inputdata_t & );
+	void InputBecomeShortcircuit(struct inputdata_t & );
+	void AnimateThink();
+	void HandleAnimEvent(struct animevent_t * );
+	void Use(class CBaseEntity * ,class CBaseEntity * ,enum USE_TYPE ,float );
+	void OnPhysGunPickup(class CBasePlayer * ,enum PhysGunPickup_t );
+	void OnPhysGunDrop(class CBasePlayer * ,enum PhysGunDrop_t );
+	int ObjectCaps();
+	
+	COutputEvent m_OnFizzled;
+    
+private:
+	
+	bool m_bIsShortcircuit;
+	bool m_bHeld;
+	bool m_bIsABox;
+	bool m_bForcedAsBox;
+	bool m_bIsFlying;
+	
+	float m_flBoxSwitchSpeed;
+	float m_flPushStrength;
+    
+	int m_nBodyGroups;
+	int m_nDeferredTransform;
+    
+	bool m_bAllowSilentDissolve;
+    	
+};

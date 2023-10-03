@@ -1,0 +1,20 @@
+void __cdecl CPropMonsterBox::CPropMonsterBox(CPropMonsterBox *const this)
+{
+  CPhysicsProp::CPhysicsProp((CPhysicsProp *const)this);
+  this->_vptr_IHandleEntity = (int (**)(...))off_C9A628;
+  this->_vptr_IBreakableWithPropData = (int (**)(...))off_C9AA90;
+  this->_vptr_IPlayerPickupVPhysics = (int (**)(...))&off_C9AB14;
+  this->_vptr_INavAvoidanceObstacle = (int (**)(...))off_C9AB44;
+  this->m_OnFizzled.m_Value._anon_0.iVal = 0;
+  this->m_OnFizzled.m_Value.eVal.m_Index = -1;
+  this->m_OnFizzled.m_Value.fieldType = FIELD_VOID;
+  this->m_bIsShortcircuit = 0;
+  this->m_bIsFlying = 0;
+  this->m_bIsABox = 0;
+  this->m_bHeld = 0;
+  this->m_bForcedAsBox = 0;
+  this->m_flPushStrength = 1.0;
+  this->m_flBoxSwitchSpeed = 400.0;
+  this->m_nDeferredTransform = 0;
+  this->m_bAllowSilentDissolve = 0;
+}

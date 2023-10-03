@@ -1,0 +1,168 @@
+void __usercall CPropMonsterBox::AnimateThink(CPropMonsterBox *this@<ecx>, int a2@<edi>)
+{
+  int v3; // eax
+  IPhysicsObject *m_pPhysicsObject; // edi
+  float m_flBoxSwitchSpeed; // xmm0_4
+  const Vector *v6; // eax
+  IUniformRandomStream *v7; // ecx
+  IUniformRandomStream *v8; // ecx
+  IUniformRandomStream *v9; // ecx
+  float m_fValue; // xmm3_4
+  int v11; // eax
+  const Vector *v12; // eax
+  const Vector *v13; // eax
+  IUniformRandomStream *v14; // ecx
+  int v15; // eax
+  int v16; // eax
+  int v17; // eax
+  int v18; // eax
+  int v19; // eax
+  int v20; // eax
+  int v21; // eax
+  const Vector *AbsOrigin; // [esp-Ch] [ebp-C8h]
+  const Vector *v23; // [esp-8h] [ebp-C4h]
+  const Vector *v24; // [esp-4h] [ebp-C0h]
+  CGameTrace tr; // [esp+28h] [ebp-94h] BYREF
+  Vector angImpulse; // [esp+7Ch] [ebp-40h] BYREF
+  Vector vecVelocity; // [esp+88h] [ebp-34h] BYREF
+  float v29; // [esp+94h] [ebp-28h]
+  Vector vecUp; // [esp+98h] [ebp-24h] BYREF
+  Vector vecImpulse; // [esp+A4h] [ebp-18h] BYREF
+  float v32; // [esp+B0h] [ebp-Ch]
+  float v33; // [esp+B4h] [ebp-8h]
+  float v34; // [esp+B8h] [ebp-4h]
+
+  this->StudioFrameAdvance(this);
+  this->DispatchAnimEvents(this, this);
+  CBaseEntity::ThinkSet(
+    this,
+    (void (__thiscall *)(CBaseEntity *))CPropMonsterBox::AnimateThink,
+    gpGlobals->curtime + 0.1,
+    s_pAnimateThinkContext_0);
+  if ( this->m_bIsShortcircuit )
+  {
+    if ( this->m_bSequenceFinished )
+    {
+      v3 = CBaseAnimating::LookupSequence(this, "shortcircuit");
+      CBaseAnimating::ResetSequence(this, v3);
+    }
+  }
+  else
+  {
+    m_pPhysicsObject = this->m_pPhysicsObject;
+    vecVelocity = vec3_origin;
+    if ( m_pPhysicsObject )
+      ((void (__thiscall *)(IPhysicsObject *, Vector *, _DWORD, int))m_pPhysicsObject->GetVelocity)(
+        m_pPhysicsObject,
+        &vecVelocity,
+        0,
+        a2);
+    m_flBoxSwitchSpeed = this->m_flBoxSwitchSpeed;
+    v29 = vecVelocity.y * vecVelocity.y;
+    if ( (float)((float)((float)(vecVelocity.y * vecVelocity.y) + (float)(vecVelocity.x * vecVelocity.x))
+               + (float)(vecVelocity.z * vecVelocity.z)) <= (float)(m_flBoxSwitchSpeed * m_flBoxSwitchSpeed) )
+    {
+      if ( !this->m_bHeld && this->m_bIsFlying && !this->m_bForcedAsBox )
+      {
+        v24 = this->m_Collision.OBBMaxs(&this->m_Collision);
+        v23 = this->m_Collision.OBBMins(&this->m_Collision);
+        AbsOrigin = CBaseEntity::GetAbsOrigin(this);
+        v6 = CBaseEntity::GetAbsOrigin(this);
+        UTIL_TraceHull(v6, AbsOrigin, v23, v24, 0x200400Bu, this, 0, &tr);
+        if ( tr.startsolid || tr.allsolid )
+        {
+          this->GetVectors(this, 0, 0, &vecUp);
+          RandomAngularImpulse(&angImpulse, -0.5, 0.5);
+          v32 = _RandomFloat(v7, -0.2, 0.2);
+          v33 = _RandomFloat(v8, -0.2, 0.2);
+          v34 = _RandomFloat(v9, 1.7, 2.0);
+          vecImpulse.x = vecUp.x + v32;
+          vecImpulse.y = vecUp.y + v33;
+          vecImpulse.z = vecUp.z + v34;
+          m_fValue = sv_monster_turret_velocity.m_pParent->m_Value.m_fValue;
+          vecImpulse.x = (float)(vecUp.x + v32) * m_fValue;
+          vecImpulse.y = (float)(vecUp.y + v33) * m_fValue;
+          vecImpulse.z = (float)(vecUp.z + v34) * m_fValue;
+          CBaseEntity::SetGroundEntity(this, 0);
+          m_pPhysicsObject->Wake(m_pPhysicsObject);
+          m_pPhysicsObject->SetVelocityInstantaneous(m_pPhysicsObject, &vec3_origin, &angImpulse);
+          m_pPhysicsObject->ApplyForceCenter(m_pPhysicsObject, &vecImpulse);
+          CBaseEntity::ApplyAbsVelocityImpulse(this, &vecImpulse);
+        }
+        else
+        {
+          this->m_bIsFlying = 0;
+          CPropMonsterBox::BecomeMonster(this, 0);
+        }
+      }
+    }
+    else if ( !this->m_bHeld && !this->m_bIsFlying )
+    {
+      this->m_bIsFlying = 1;
+      CPropMonsterBox::BecomeBox(this, 0);
+    }
+    if ( this->m_bSequenceFinished )
+    {
+      if ( this->m_bHeld || this->m_bForcedAsBox )
+      {
+        v21 = CBaseAnimating::LookupSequence(this, "hermit_idle");
+        CBaseAnimating::ResetSequence(this, v21);
+      }
+      else
+      {
+        this->GetVectors(this, 0, 0, &vecUp);
+        if ( vecUp.z >= 0.60000002 )
+        {
+          v32 = vecUp.x * 32.0;
+          v33 = vecUp.y * 32.0;
+          v34 = vecUp.z * 32.0;
+          v12 = CBaseEntity::GetAbsOrigin(this);
+          vecImpulse.x = v12->x - v32;
+          vecImpulse.y = v12->y - v33;
+          vecImpulse.z = v12->z - v34;
+          v13 = CBaseEntity::GetAbsOrigin(this);
+          UTIL_TraceLine(v13, &vecImpulse, 0x200400Bu, this, 0, &tr);
+          if ( tr.fraction == 1.0 )
+          {
+            v15 = CBaseAnimating::LookupSequence(this, "intheair");
+            CBaseAnimating::ResetSequence(this, v15);
+          }
+          else
+          {
+            v16 = _RandomInt(v14, 0, 2);
+            if ( v16 )
+            {
+              v17 = v16 - 1;
+              if ( v17 )
+              {
+                if ( v17 == 1 )
+                {
+                  v18 = CBaseAnimating::LookupSequence(this, "straight03");
+                  CBaseAnimating::ResetSequence(this, v18);
+                  this->m_flPushStrength = FLOAT_1_1;
+                }
+              }
+              else
+              {
+                v19 = CBaseAnimating::LookupSequence(this, "straight02");
+                CBaseAnimating::ResetSequence(this, v19);
+                LODWORD(this->m_flPushStrength) = FLOAT_0_69999999;
+              }
+            }
+            else
+            {
+              v20 = CBaseAnimating::LookupSequence(this, "straight01");
+              CBaseAnimating::ResetSequence(this, v20);
+              this->m_flPushStrength = FLOAT_1_0;
+            }
+          }
+        }
+        else
+        {
+          v11 = CBaseAnimating::LookupSequence(this, "fallover_idle");
+          CBaseAnimating::ResetSequence(this, v11);
+        }
+      }
+    }
+  }
+}

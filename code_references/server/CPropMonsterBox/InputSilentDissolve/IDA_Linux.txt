@@ -1,0 +1,8 @@
+void __cdecl CPropMonsterBox::InputSilentDissolve(CPropMonsterBox *const this, inputdata_t *const in)
+{
+  if ( this->m_bAllowSilentDissolve )
+  {
+    (*((void (__cdecl **)(CPropMonsterBox *const))this->_vptr_IHandleEntity + 233))(this);
+    UTIL_Remove(this);
+  }
+}
