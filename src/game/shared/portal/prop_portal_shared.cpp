@@ -11,13 +11,11 @@
 #include "portal_placement.h"
 #include "weapon_portalgun_shared.h"
 
-#if 0
 #if defined( GAME_DLL )
 #include "baseprojector.h"
 #else
 #include "c_baseprojectedentity.h"
 typedef C_BaseProjectedEntity CBaseProjectedEntity;
-#endif
 #endif
 
 CUtlVector<CProp_Portal *> CProp_Portal_Shared::AllPortals;
@@ -151,7 +149,7 @@ void CProp_Portal::DelayedPlacementThink( void )
 
 	// Move to new location
 	NewLocation( m_vDelayedPosition, m_qDelayedAngles );
-#if 0
+
 #if defined( GAME_DLL )
 	// Test for our surface moving out from behind us
 	SetContextThink( &CProp_Portal::TestRestingSurfaceThink, gpGlobals->curtime + 0.1f, s_szTestRestingSurfaceThinkContext );
@@ -159,7 +157,6 @@ void CProp_Portal::DelayedPlacementThink( void )
 	CBaseProjector::TestAllForProjectionChanges();
 #else
 	CBaseProjectedEntity::TestAllForProjectionChanges();
-#endif
 #endif
 }
 

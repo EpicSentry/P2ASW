@@ -44,14 +44,22 @@ END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS( projected_entity, C_BaseProjectedEntity )
 
+CUtlVector<C_BaseProjectedEntity*> s_AllProjectedEntities;
+
 C_BaseProjectedEntity::C_BaseProjectedEntity()
 {
-
+	s_AllProjectedEntities.AddToTail(this);
 }
 
 C_BaseProjectedEntity::~C_BaseProjectedEntity()
 {
+	s_AllProjectedEntities.FindAndRemove(this);
+}
 
+void C_BaseProjectedEntity::TestAllForProjectionChanges( void )
+{
+	for ( int i = 0; i < s_AllProjectedEntities.Count(); ++i)
+		s_AllProjectedEntities[i]->TestForProjectionChanges();
 }
 
 // FIXME: Some of this may be inaccurate

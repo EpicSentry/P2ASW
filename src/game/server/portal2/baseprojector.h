@@ -30,13 +30,13 @@ public:
 	
 	CNetworkVar( bool, m_bEnabled );
 	
-    void SetTransmit( CCheckTransmitInfo *pInfo, bool bAlways );
+    virtual void SetTransmit( CCheckTransmitInfo *pInfo, bool bAlways );
 	
 protected:
 	
-    void Shutdown();
-    void Cleanup();
-    int DrawDebugTextOverlays();
+    virtual void Shutdown();
+    virtual void Cleanup();
+    virtual int DrawDebugTextOverlays();
     void DrawBoundsHighlight();
     void TestForPortalChanges();
     void InputEnable( inputdata_t &inputdata );

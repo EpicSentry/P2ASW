@@ -163,6 +163,8 @@ void CBaseProjectedEntity::RecursiveProjection( bool bShouldSpawn, CBaseProjecto
 		return;
 #endif
 
+	Msg("RecursiveProjection\n");
+
 	AddEffects( EF_NOINTERP );
 
 #if 0

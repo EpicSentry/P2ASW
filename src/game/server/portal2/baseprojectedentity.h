@@ -27,10 +27,10 @@ public:
     void TestForProjectionChanges();
     void TestForReflectPaint();
     void PlacePlacementHelper( CInfoPlacementHelper *pHelper );
-    void SetTransmit( CCheckTransmitInfo *pInfo, bool bAlways );
+    virtual void SetTransmit( CCheckTransmitInfo *pInfo, bool bAlways );
     void CheckForSettledReflectorCubes();
 	
-    void GetProjectionExtents( Vector &outMins, Vector &outMaxs );
+    virtual void GetProjectionExtents( Vector &outMins, Vector &outMaxs );
 	
     bool IsHittingPortal( Vector* pOutOrigin, QAngle* pOutAngles, CPortal_Base2D** pOutPortal );
     bool DidRedirectionPortalMove( CPortal_Base2D* pPortal );

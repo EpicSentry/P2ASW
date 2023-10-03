@@ -26,13 +26,14 @@ public:
     CProjectedTractorBeamEntity();
     ~CProjectedTractorBeamEntity();
 	
-    void Spawn();
-    void UpdateOnRemove();
-    void GetProjectionExtents( Vector &outMins, Vector &outMaxs );
-    float GetLinearForce();
-    void OnProjected();
-    void OnPreProjected();
-	
+    virtual void Spawn();
+    virtual void UpdateOnRemove();
+    virtual void GetProjectionExtents( Vector &outMins, Vector &outMaxs );
+    virtual void OnProjected();
+    virtual void OnPreProjected();
+
+	float GetLinearForce();
+
     static CProjectedTractorBeamEntity *CreateNewInstance();
     static CProjectedTractorBeamEntity *CreateNewProjectedEntity();
 
@@ -76,13 +77,13 @@ public:
     void SetAirDensity( float flAirDensity );
     void SetLinearLimit( float flLinearLimit );
     void SetAngularLimt( float flAngularLimit );
-	void SetProxyEntity( CProjectedTractorBeamEntity * );
+	void SetProxyEntity( CProjectedTractorBeamEntity *pProxy );
     void DisablePlayerMovement( bool );
     void SetDirection( const Vector &vStart, const Vector &vEnd );
     void UpdateBeam( const Vector& vStartPoint, const Vector& vEndPoint, float flLinearForce );
 	IMotionEvent::simresult_e Simulate( IPhysicsMotionController *pController, IPhysicsObject *pObject, float deltaTime, Vector &linear, AngularImpulse &angular );
     void WakeTouchingObjects();
-    void CalculateFrameMovement(class IPhysicsObject * ,class CBaseEntity * ,float ,class Vector & ,class Vector & );
+    void CalculateFrameMovement( IPhysicsObject *pObject, CBaseEntity *pEntity, float deltaTime, Vector &linear, AngularImpulse &angular );
     void SetBeamRadius(float );
     void RemoveDeadBlobs();
     void RemoveChangedBeamBlobs();

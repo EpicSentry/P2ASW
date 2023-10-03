@@ -50,6 +50,8 @@
 #include "filesystem.h"
 #endif
 
+#include "c_baseprojectedentity.h"
+
 #include "debugoverlay_shared.h"
 
 IMPLEMENT_CLIENTCLASS_DT( C_Prop_Portal, DT_Prop_Portal, CProp_Portal )
@@ -408,8 +410,7 @@ void C_Prop_Portal::OnPortalMoved( void )
 
 		UpdateTransformedLighting();
 
-		//FIXME:
-		//C_BaseProjectedEntity::TestAllForProjectionChanges();
+		C_BaseProjectedEntity::TestAllForProjectionChanges();
 	}
 
 	BaseClass::OnPortalMoved();

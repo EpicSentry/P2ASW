@@ -66,8 +66,19 @@ void CProjectedTractorBeamEntity::UpdateOnRemove( void )
 	BaseClass::UpdateOnRemove();
 }
 
+void CProjectedTractorBeamEntity::GetProjectionExtents( Vector &outMins, Vector &outMaxs )
+{
+	outMins.x = -2.0;
+	outMins.y = -2.0;
+	outMins.z = 0.0;
+	outMaxs.x = 2.0;
+	outMaxs.y = 2.0;
+	outMaxs.z = 0.0;
+}
+
 void CProjectedTractorBeamEntity::OnProjected( void )
 {
+	Msg("OnProjected\nOnProjected\nOnProjected\nOnProjected\nOnProjected\nOnProjected\n");
 	BaseClass::OnProjected();
 	if ( m_hTractorBeamTrigger )
 	{
@@ -82,7 +93,11 @@ void CProjectedTractorBeamEntity::OnProjected( void )
 		{
 			m_hTractorBeamTrigger->UnsetPlayerSimulated();
 		}
+		
 		m_hTractorBeamTrigger->UpdateBeam( GetStartPoint(), GetEndPoint(), GetLinearForce() );	
+
+		DebugDrawLine( GetStartPoint(), GetEndPoint(), 0, 0, 255, true, gpGlobals->frametime );
+
 	}
 }
 

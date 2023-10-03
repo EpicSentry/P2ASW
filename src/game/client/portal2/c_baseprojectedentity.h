@@ -26,15 +26,15 @@ public:
     bool DidRedirectionPortalMove( C_Portal_Base2D* pPortal );
 
 	void FindProjectedEndpoints();
-    void GetProjectionExtents( Vector &outMins, Vector &outMaxs );
-	void OnProjected();
-	void HandleDataChange();
-	void HandlePredictionError( bool bErrorInThisEntity );
-	void OnPreDataChanged( DataUpdateType_t updateType );
-	void OnDataChanged( DataUpdateType_t updateType );
+    virtual void GetProjectionExtents( Vector &outMins, Vector &outMaxs );
+	virtual void OnProjected();
+	virtual void HandleDataChange();
+	virtual void HandlePredictionError(bool bErrorInThisEntity);
+	virtual void OnPreDataChanged( DataUpdateType_t updateType );
+	virtual void OnDataChanged( DataUpdateType_t updateType );
 	C_BasePlayer *GetPredictionOwner();
 	bool ShouldPredict();
-	void TestAllForProjectionChanges();
+	static void TestAllForProjectionChanges();
 	
 	struct BaseProjectedEntity_PreDataChanged
 	{
