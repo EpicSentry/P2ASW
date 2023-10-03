@@ -119,14 +119,22 @@ void CPropGlassFutbol::OnPhysGunDrop(CBasePlayer* pPhysGunUser, PhysGunDrop_t re
 	if (pPhysGunUser)
 	{
 		BaseClass::OnPhysGunDrop(pPhysGunUser, reason);
-		pPhysGunUser->EyeVectors(&forward);
+		pPhysGunUser->EyeVectors(&forward);		
 
-		VMatrix matThisToLinked;
+		CPortal_Player *pPlayer = static_cast<CPortal_Player*>( pPhysGunUser );
 
-		if (pPhysGunUser->IsPlayer())
+		if ( pPlayer )
 		{
-			UTIL_Portal_VectorTransform(matThisToLinked, forward, forward);
+			CPortal_Base2D *pPortal = pPlayer->GetHeldObjectPortal();
+
+			if ( pPortal )
+			{
+				VMatrix matThisToLinked = pPortal->MatrixThisToLinked();
+				UTIL_Portal_VectorTransform(matThisToLinked, forward, forward);
+			}
 		}
+		
+		m_vecThrowDirection = forward;
 		SetContextThink(&CPropGlassFutbol::ThrownThink, gpGlobals->interval_per_tick + gpGlobals->curtime, g_szFutbolThrownThinkContext);
 	}
 }
