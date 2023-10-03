@@ -39,14 +39,14 @@ CPropMonsterBox::~CPropMonsterBox()
 
 void CPropMonsterBox::Spawn( void )
 {
+	Precache();
+
 	const char *pszModelName = "models/npcs/monsters/monster_A_box.mdl";
 	if (!m_bForcedAsBox)
 		pszModelName = "models/npcs/monsters/monster_a.mdl";
 	
 	SetModel(pszModelName);
 	
-	Precache();
-
 	CollisionProp()->SetSolid( SOLID_BBOX );
 	AddEffects( 1024 );
 	//g_PortalGameStats.Event_CubeSpawn();

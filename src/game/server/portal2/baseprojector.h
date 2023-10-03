@@ -25,7 +25,7 @@ public:
     virtual void OnRestore();
     virtual void Project();
     
-	//virtual CBaseProjectedEntity *CreateNewProjectedEntity();
+	virtual CBaseProjectedEntity *CreateNewProjectedEntity();
     void EnableProjection( bool bEnable );
     void TestProjectionChangesThink();
     void TestAllForProjectionChanges();

@@ -34,13 +34,13 @@ public:
     void Precache();
     void Project();
 	
-    float GetLinearForce();
+	float GetLinearForce() { return m_flLinearForce; }
     
 	bool IsReversed();
 	
 protected:
 	
-    //virtual CBaseProjectedEntity *CreateNewProjectedEntity();
+    virtual CBaseProjectedEntity *CreateNewProjectedEntity();
     
 	void InputSetLinearForce( inputdata_t &inputdata );
     

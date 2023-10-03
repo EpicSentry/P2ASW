@@ -102,11 +102,6 @@ void CBaseProjectedEntity::CheckForSettledReflectorCubes( void )
 
 CBaseProjectedEntity *CBaseProjectedEntity::CreateNewProjectedEntity(void)
 {
-#if 0
 	return (CBaseProjectedEntity*)CreateEntityByName("projected_entity");
-#else
-	return (CBaseProjectedEntity*)CreateEntityByName("projected_tractor_beam_entity");
-
-#endif
 }
 

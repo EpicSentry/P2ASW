@@ -126,12 +126,17 @@ void CBaseProjector::Project( void )
 	if ( !m_hFirstChild )
 	{
 		bCreateNew = true;
-		m_hFirstChild = CBaseProjectedEntity::CreateNewProjectedEntity();
+		m_hFirstChild = CreateNewProjectedEntity();
 	}
 
 	Assert( m_hFirstChild );
 
 	m_hFirstChild->RecursiveProjection( bCreateNew, this, NULL, GetAbsOrigin(), GetAbsAngles(), 16, m_bDisablePlacementHelper );
+}
+
+CBaseProjectedEntity *CBaseProjector::CreateNewProjectedEntity( void )
+{
+	return CBaseProjectedEntity::CreateNewProjectedEntity();
 }
 
 void CBaseProjector::SetTransmit( CCheckTransmitInfo *pInfo, bool bAlways )

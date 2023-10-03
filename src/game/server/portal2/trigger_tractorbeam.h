@@ -28,15 +28,13 @@ public:
 	
     void Spawn();
     void UpdateOnRemove();
-    void GetProjectionExtents( class Vector & ,class Vector & );
+    void GetProjectionExtents( Vector &outMins, Vector &outMaxs );
     float GetLinearForce();
-    CProjectedTractorBeamEntity *CreateNewInstance();
-    virtual CBaseProjectedEntity *CreateNewProjectedEntity();
     void OnProjected();
-    void OnPreProjected();	
-
-	// HACK:
-	float m_flLinearForce;
+    void OnPreProjected();
+	
+    static CProjectedTractorBeamEntity *CreateNewInstance();
+    static CProjectedTractorBeamEntity *CreateNewProjectedEntity();
 
 private:
 	

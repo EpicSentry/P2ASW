@@ -234,14 +234,16 @@ bool CPropTractorBeamProjector::IsReversed( void )
 	return m_flLinearForce < 0.0;
 }
 
+
+CBaseProjectedEntity *CPropTractorBeamProjector::CreateNewProjectedEntity( void )
+{
+	return CProjectedTractorBeamEntity::CreateNewProjectedEntity();
+}
+
 void CPropTractorBeamProjector::InputSetLinearForce( inputdata_t &inputdata )
 {
-
 	m_flLinearForce = inputdata.value.Float();
 	
-	//HACK:
-	assert_cast< CProjectedTractorBeamEntity* >( m_hFirstChild.Get() )->m_flLinearForce = m_flLinearForce;
-
 	if ( m_flLinearForce == 0.0)
 	{
 		EnableProjection( false );

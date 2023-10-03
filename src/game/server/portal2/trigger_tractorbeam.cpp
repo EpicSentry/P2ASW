@@ -3,6 +3,7 @@
 #include "prop_weightedcube.h"
 #include "npc_portal_turret_floor.h"
 #include "particle_parse.h"
+#include "prop_tractorbeam.h"
 
 BEGIN_DATADESC( CProjectedTractorBeamEntity )
 
@@ -39,7 +40,7 @@ IMPLEMENT_AUTO_LIST( ITriggerTractorBeamAutoList )
 
 CProjectedTractorBeamEntity::CProjectedTractorBeamEntity( void )
 {
-	m_flLinearForce = 0.0;
+	//m_flLinearForce = 0.0;
 }
 
 CProjectedTractorBeamEntity::~CProjectedTractorBeamEntity( void )
@@ -96,7 +97,12 @@ void CProjectedTractorBeamEntity::OnPreProjected( void )
 
 float CProjectedTractorBeamEntity::GetLinearForce( void )
 {
-	return m_flLinearForce;
+	CPropTractorBeamProjector *pPropTractor = assert_cast<CPropTractorBeamProjector*>(m_hOwnerEntity.Get());
+
+	// If we don't have a projector, then wtf?
+	Assert( pPropTractor );
+
+	return pPropTractor->GetLinearForce();
 }
 
 CProjectedTractorBeamEntity *CProjectedTractorBeamEntity::CreateNewInstance(void)
@@ -104,10 +110,11 @@ CProjectedTractorBeamEntity *CProjectedTractorBeamEntity::CreateNewInstance(void
 	return (CProjectedTractorBeamEntity*)CreateEntityByName("projected_tractor_beam_entity");
 }
 
-CBaseProjectedEntity *CProjectedTractorBeamEntity::CreateNewProjectedEntity(void)
+CProjectedTractorBeamEntity *CProjectedTractorBeamEntity::CreateNewProjectedEntity()
 {
 	return CreateNewInstance();
 }
+
 
 CTrigger_TractorBeam::CTrigger_TractorBeam()
 {
@@ -230,7 +237,7 @@ void CTrigger_TractorBeam::StartTouch( CBaseEntity *pOther )
 		{
 			Controller.Shutdown( m_sndPlayerInBeam );
 			Controller.SoundDestroy( m_sndPlayerInBeam );
-			this->m_sndPlayerInBeam = 0;
+			m_sndPlayerInBeam = NULL;
 		}
 
 		EmitSound_t ep;
@@ -359,7 +366,7 @@ void CTrigger_TractorBeam::WakeTouchingObjects( void )
 
 void CTrigger_TractorBeam::TractorThink( void )
 {
-	// NOTE: This function is supposed to set the m_bToPortal and m_bFromPortal functions
+	// NOTE: This function is supposed to set the m_bToPortal and m_bFromPortal values
 	// Look at the decompiled code and be prepared to think to yourself WTF??
 	
 	// Anyways this is my best guess as to what the function is calling:
