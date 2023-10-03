@@ -1,0 +1,11 @@
+bool __cdecl C_BaseProjectedEntity::ShouldPredict(C_BaseProjectedEntity *const this)
+{
+  int v1; // eax
+  bool v2; // dl
+
+  v1 = (*((int (__cdecl **)(C_BaseProjectedEntity *const))this->_vptr_IHandleEntity + 175))(this);
+  v2 = 0;
+  if ( v1 )
+    return *(_BYTE *)(v1 + 6452);
+  return v2;
+}

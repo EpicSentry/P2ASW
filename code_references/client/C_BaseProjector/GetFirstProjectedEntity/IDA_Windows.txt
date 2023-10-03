@@ -1,0 +1,10 @@
+const C_BaseProjectedEntity *__thiscall C_BaseProjector::GetFirstProjectedEntity(C_BaseProjector *this)
+{
+  unsigned int m_Index; // ecx
+
+  m_Index = this->m_hFirstChild.m_Index;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+    return 0;
+  else
+    return (const C_BaseProjectedEntity *)g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+}

@@ -1,0 +1,75 @@
+void __thiscall C_BaseProjectedEntity::RecursiveProjection(
+        C_BaseProjectedEntity *this,
+        bool bShouldSpawn,
+        C_BaseProjector *pParentProjector,
+        C_Portal_Base2D *pExitPortal,
+        C_Portal_Base2D *vProjectOrigin,
+        const QAngle *qProjectAngles,
+        int iRemainingProjections,
+        bool bDisablePlacementHelper)
+{
+  C_BaseProjectedEntity_vtbl *v9; // edx
+  const Vector *(__thiscall *GetAbsOrigin)(IClientEntity *); // eax
+  int v11; // edi
+  void (__thiscall *FindProjectedEndpoints)(C_BaseProjectedEntity *); // edx
+  bool (__thiscall *IsHittingPortal)(C_BaseProjectedEntity *, Vector *, QAngle *, C_Portal_Base2D **); // edx
+  bool v14; // bl
+  C_BaseProjectedEntity *v15; // eax
+  C_Portal_Base2D *v16; // [esp-18h] [ebp-4Ch]
+  bool v17; // [esp-8h] [ebp-3Ch]
+  Vector vNewProjectedEntityOrigin; // [esp+4h] [ebp-30h] BYREF
+  QAngle qNewProjectedEntityAngles; // [esp+10h] [ebp-24h] BYREF
+  Vector vFlooredPosition; // [esp+1Ch] [ebp-18h] BYREF
+  QAngle qModAngles; // [esp+28h] [ebp-Ch] BYREF
+
+  if ( prediction->InPrediction(prediction) && C_BaseEntity::GetPredictable(this) )
+  {
+    C_BaseEntity::AddEffects(this, 8);
+    v9 = this->C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable;
+    LODWORD(vFlooredPosition.z) = vProjectOrigin->CPortalRenderable_FlatBasic::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientNetworkable::__vftable;
+    GetAbsOrigin = v9->GetAbsOrigin;
+    *(_QWORD *)&vFlooredPosition.x = *(_QWORD *)&vProjectOrigin->CPortalRenderable_FlatBasic::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable;
+    GetAbsOrigin(this);
+    qModAngles.x = (float)(unsigned __int16)(int)(float)(qProjectAngles->x * 182.04445) * 0.0054931641;
+    qModAngles.y = (float)(unsigned __int16)(int)(float)(qProjectAngles->y * 182.04445) * 0.0054931641;
+    qModAngles.z = (float)(unsigned __int16)(int)(float)(qProjectAngles->z * 182.04445) * 0.0054931641;
+    C_BaseEntity::SetNetworkOrigin(this, &vFlooredPosition);
+    C_BaseEntity::SetNetworkAngles(this, &qModAngles);
+    v11 = iRemainingProjections;
+    FindProjectedEndpoints = this->FindProjectedEndpoints;
+    this->m_iMaxRemainingRecursions = iRemainingProjections;
+    FindProjectedEndpoints(this);
+    if ( pExitPortal )
+      this->SetSourcePortal(this, pExitPortal);
+    this->OnProjected(this);
+    if ( cl_predict_projected_entities.m_pParent->m_Value.m_nValue )
+    {
+      if ( v11 > 1 )
+      {
+        IsHittingPortal = this->IsHittingPortal;
+        vProjectOrigin = 0;
+        v14 = IsHittingPortal(this, &vNewProjectedEntityOrigin, &qNewProjectedEntityAngles, &vProjectOrigin);
+        this->SetHitPortal(this, vProjectOrigin);
+        if ( v14 && vProjectOrigin && C_Portal_Base2D::IsActivedAndLinked(vProjectOrigin) )
+        {
+          if ( CHandle<C_PointCommentaryNode>::operator C_PointCommentaryNode *((CHandle<C_BaseCombatWeapon> *)&this->m_hChildSegment) )
+          {
+            v17 = bDisablePlacementHelper;
+            v16 = (C_Portal_Base2D *)CHandle<C_PointCommentaryNode>::operator C_PointCommentaryNode *((CHandle<C_BaseCombatWeapon> *)&vProjectOrigin->m_hLinkedPortal);
+            v15 = (C_BaseProjectedEntity *)CHandle<C_PointCommentaryNode>::operator C_PointCommentaryNode *((CHandle<C_BaseCombatWeapon> *)&this->m_hChildSegment);
+            C_BaseProjectedEntity::RecursiveProjection(
+              v15,
+              0,
+              pParentProjector,
+              v16,
+              &vNewProjectedEntityOrigin,
+              &qNewProjectedEntityAngles,
+              v11 - 1,
+              v17);
+          }
+        }
+      }
+      C_BaseEntity::AddEffects(this, 1024);
+    }
+  }
+}

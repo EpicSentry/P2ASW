@@ -1,0 +1,49 @@
+C_BasePlayer_0 *__cdecl C_BaseProjectedEntity::GetPredictionOwner(C_BaseProjectedEntity *const this)
+{
+  C_BasePlayer_0 *v1; // ebx
+  CBaseEntityList *v2; // esi
+  unsigned int m_Index; // eax
+  char *v4; // edx
+  const void *v5; // eax
+  _DWORD *v6; // eax
+  unsigned int v7; // eax
+  char *v8; // esi
+
+  v1 = 0;
+  v2 = g_pEntityList;
+  m_Index = this->m_hSourcePortal.m_Index;
+  if ( m_Index != -1 )
+  {
+    v4 = (char *)g_pEntityList + 16 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v4 + 2) == HIWORD(m_Index) )
+    {
+      v5 = (const void *)*((_DWORD *)v4 + 1);
+      if ( v5 )
+      {
+        v6 = _dynamic_cast(
+               v5,
+               (const struct __class_type_info *)&`typeinfo for'C_Portal_Base2D,
+               (const struct __class_type_info *)&`typeinfo for'C_Prop_Portal,
+               0);
+        if ( v6 )
+        {
+          v7 = v6[3391];
+          if ( v7 != -1 )
+          {
+            v8 = (char *)v2 + 16 * (unsigned __int16)v7;
+            if ( *((_DWORD *)v8 + 2) == HIWORD(v7) )
+            {
+              v1 = (C_BasePlayer_0 *)*((_DWORD *)v8 + 1);
+              if ( v1 )
+              {
+                if ( !(*((unsigned __int8 (__cdecl **)(_DWORD))v1->_vptr_IHandleEntity + 200))(*((_DWORD *)v8 + 1)) )
+                  return 0;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return v1;
+}

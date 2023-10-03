@@ -1,0 +1,32 @@
+C_BasePlayer *__thiscall C_BaseProjectedEntity::GetPredictionOwner(C_BaseProjectedEntity *this)
+{
+  unsigned int m_Index; // ecx
+  IHandleEntity *m_pEntity; // eax
+  _DWORD *v3; // eax
+  unsigned int v4; // ecx
+  CEntInfo *v5; // eax
+  IHandleEntity *v6; // esi
+
+  m_Index = this->m_hSourcePortal.m_Index;
+  if ( m_Index != -1
+    && g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber == HIWORD(m_Index)
+    && (m_pEntity = g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity) != 0
+    && (v3 = __RTDynamicCast(
+               m_pEntity,
+               0,
+               &C_Portal_Base2D `RTTI Type Descriptor',
+               &C_Prop_Portal `RTTI Type Descriptor',
+               0)) != 0
+    && (v4 = v3[3399], v4 != -1)
+    && (v5 = &g_pEntityList->m_EntPtrArray[(unsigned __int16)v4],
+        g_pEntityList->m_EntPtrArray[(unsigned __int16)v4].m_SerialNumber == HIWORD(v4))
+    && (v6 = v5->m_pEntity) != 0
+    && v6->__vftable[49].GetRefEHandle(v6) )
+  {
+    return (C_BasePlayer *)v6;
+  }
+  else
+  {
+    return 0;
+  }
+}

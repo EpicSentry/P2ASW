@@ -6,6 +6,28 @@
 BEGIN_DATADESC( CBaseProjectedEntity )
 END_DATADESC()
 
+
+IMPLEMENT_SERVERCLASS_ST( CBaseProjectedEntity, DT_BaseProjectedEntity )
+
+	SendPropEHandle( SENDINFO( m_hHitPortal ) ),
+	SendPropEHandle( SENDINFO( m_hSourcePortal ) ),
+	SendPropEHandle( SENDINFO( m_hChildSegment ) ),
+	SendPropEHandle( SENDINFO( m_hPlacementHelper ) ),
+
+	SendPropVector( SENDINFO( m_vecSourcePortalCenter ) ),
+	SendPropVector( SENDINFO( m_vecSourcePortalRemoteCenter ) ),
+	SendPropQAngles( SENDINFO( m_vecSourcePortalAngle ) ),
+	SendPropQAngles( SENDINFO( m_vecSourcePortalRemoteAngle ) ),
+	
+	SendPropVector( SENDINFO( m_vecStartPoint ) ),
+	SendPropVector( SENDINFO( m_vecEndPoint ) ),
+	
+	SendPropBool( SENDINFO( m_bCreatePlacementHelper ) ),
+	SendPropInt( SENDINFO( m_iMaxRemainingRecursions ) ),
+
+
+END_SEND_TABLE()
+
 LINK_ENTITY_TO_CLASS( projected_entity, CBaseProjectedEntity )
 
 CBaseProjectedEntity::CBaseProjectedEntity( void )

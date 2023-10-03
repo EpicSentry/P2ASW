@@ -1,0 +1,21 @@
+void __cdecl C_BaseProjectedEntity::HandleDataChange(C_BaseProjectedEntity *const this)
+{
+  float *v1; // eax
+  float *v2; // eax
+  const QAngle *NetworkAngles; // eax
+
+  v1 = (float *)(*((int (__cdecl **)(C_BaseProjectedEntity *const))this->_vptr_IHandleEntity + 236))(this);
+  if ( *v1 != this->PreDataChanged.vStartPoint.x
+    || v1[1] != this->PreDataChanged.vStartPoint.y
+    || v1[2] != this->PreDataChanged.vStartPoint.z
+    || (v2 = (float *)(*((int (__cdecl **)(C_BaseProjectedEntity *const))this->_vptr_IHandleEntity + 237))(this),
+        *v2 != this->PreDataChanged.vEndPoint.x)
+    || v2[1] != this->PreDataChanged.vEndPoint.y
+    || v2[2] != this->PreDataChanged.vEndPoint.z
+    || (NetworkAngles = C_BaseEntity::GetNetworkAngles(this), NetworkAngles->x != this->PreDataChanged.qAngles.x)
+    || NetworkAngles->y != this->PreDataChanged.qAngles.y
+    || NetworkAngles->z != this->PreDataChanged.qAngles.z )
+  {
+    (*((void (__cdecl **)(C_BaseProjectedEntity *const))this->_vptr_IHandleEntity + 248))(this);
+  }
+}

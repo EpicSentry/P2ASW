@@ -3,7 +3,6 @@
 
 #include "cbase.h"
 
-#define NO_CLIENT_PROJECTOR
 
 class CBaseProjectedEntity;
 
@@ -13,9 +12,8 @@ public:
 	
 	DECLARE_CLASS( CBaseProjector, CBaseAnimating );
 	DECLARE_DATADESC();
-#ifndef NO_CLIENT_PROJECTOR
 	DECLARE_SERVERCLASS();
-#endif
+
     CBaseProjector();
     ~CBaseProjector();
     
@@ -28,11 +26,11 @@ public:
 	virtual CBaseProjectedEntity *CreateNewProjectedEntity();
     void EnableProjection( bool bEnable );
     void TestProjectionChangesThink();
-    void TestAllForProjectionChanges();
+    static void TestAllForProjectionChanges();
 	
 	CNetworkVar( bool, m_bEnabled );
 	
-    void SetTransmit(class CCheckTransmitInfo * ,bool );
+    void SetTransmit( CCheckTransmitInfo *pInfo, bool bAlways );
 	
 protected:
 	

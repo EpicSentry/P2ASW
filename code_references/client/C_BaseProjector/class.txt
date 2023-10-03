@@ -1,0 +1,17 @@
+class C_BaseProjector : public C_BaseAnimating
+{
+public:
+	
+	DECLARE_CLASS( C_BaseProjector, C_BaseAnimating );
+	DECLARE_CLIENTCLASS();
+	
+	void C_BaseProjector();
+	void ~C_BaseProjector();
+	
+	class C_BaseProjectedEntity * GetFirstProjectedEntity();
+	
+protected:
+	
+	CHandle<C_BaseProjectedEntity> m_hFirstChild;
+	bool m_bEnabled;
+};

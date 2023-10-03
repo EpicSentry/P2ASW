@@ -15,14 +15,13 @@ BEGIN_DATADESC( CBaseProjector )
 
 END_DATADESC()
 
-#ifndef NO_CLIENT_PROJECTOR
 IMPLEMENT_SERVERCLASS_ST( CBaseProjector, DT_BaseProjector )
 	
 	SendPropEHandle( SENDINFO( m_hFirstChild ) ),
 	SendPropBool( SENDINFO( m_bEnabled ) ),
 
 END_SEND_TABLE()
-#endif
+
 
 CUtlVector<CBaseProjector*> s_AllProjectors;
 
@@ -101,7 +100,8 @@ void CBaseProjector::EnableProjection( bool bEnable )
 void CBaseProjector::TestAllForProjectionChanges( void )
 {
 	// TODO: Add code after the continue, but what code!?
-#if 0
+	// NOTE: Doing a best guess here:
+#if 1
 	for ( int i = 0; i < s_AllProjectors.Count(); ++i )
 	{		
 		Assert( s_AllProjectors[i] );
@@ -109,6 +109,9 @@ void CBaseProjector::TestAllForProjectionChanges( void )
 
 		if ( !pProjectedEnt )
 			continue;
+	
+		pProjectedEnt->TestForProjectionChanges();
+	
 	}
 #endif
 }

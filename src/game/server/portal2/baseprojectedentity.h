@@ -1,7 +1,6 @@
 #ifndef BASE_PROJECTED_ENTITY_H
 #define BASE_PROJECTED_ENTITY_H
 
-#define NO_PROJECTED_ENTITY_CLIENTCLASS
 
 #include "cbase.h"
 #include "portal_base2d.h"
@@ -12,9 +11,8 @@ class CBaseProjectedEntity : public CBaseEntity
 public:
 	DECLARE_CLASS( CBaseProjectedEntity, CBaseEntity );
 	DECLARE_DATADESC();
-#ifndef NO_PROJECTED_ENTITY_CLIENTCLASS
 	DECLARE_SERVERCLASS();
-#endif
+
 	CBaseProjectedEntity();
     ~CBaseProjectedEntity();
     

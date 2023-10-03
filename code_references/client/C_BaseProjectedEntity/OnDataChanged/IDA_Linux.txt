@@ -1,0 +1,36 @@
+void __cdecl C_BaseProjectedEntity::OnDataChanged(C_BaseProjectedEntity *const this, DataUpdateType_t updateType)
+{
+  unsigned int m_Index; // eax
+  char *v3; // edx
+  int v4; // esi
+  unsigned int v5; // eax
+  C_BasePlayer_0 *v6; // ecx
+  char *v7; // edx
+
+  C_BaseEntity::OnDataChanged(this, updateType);
+  C_BaseProjectedEntity::HandleDataChange(this);
+  m_Index = this->m_hSourcePortal.m_Index;
+  if ( m_Index == -1
+    || (v3 = (char *)g_pEntityList + 16 * (unsigned __int16)m_Index, *((_DWORD *)v3 + 2) != HIWORD(m_Index))
+    || (v4 = *((_DWORD *)v3 + 1)) == 0 )
+  {
+    C_BaseEntity::SetPredictionEligible(this, 0);
+    goto LABEL_10;
+  }
+  C_BaseEntity::SetPredictionEligible(this, 1);
+  if ( !*(_BYTE *)(v4 + 2585) )
+  {
+LABEL_10:
+    C_BaseEntity::UnsetPlayerSimulated(this);
+    return;
+  }
+  v5 = *(_DWORD *)(v4 + 2600);
+  v6 = 0;
+  if ( v5 != -1 )
+  {
+    v7 = (char *)g_pEntityList + 16 * (unsigned __int16)v5;
+    if ( *((_DWORD *)v7 + 2) == HIWORD(v5) )
+      v6 = (C_BasePlayer_0 *)*((_DWORD *)v7 + 1);
+  }
+  C_BaseEntity::SetPlayerSimulated(this, v6);
+}

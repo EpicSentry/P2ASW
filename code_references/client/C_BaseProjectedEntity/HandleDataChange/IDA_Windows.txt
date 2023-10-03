@@ -1,0 +1,20 @@
+void __thiscall C_BaseProjectedEntity::HandleDataChange(C_BaseProjectedEntity *this)
+{
+  const Vector *v2; // ecx
+  const Vector *v3; // ecx
+  const QAngle *NetworkAngles; // ecx
+
+  v2 = this->GetStartPoint(this);
+  if ( v2->x != this->PreDataChanged.vStartPoint.x
+    || v2->y != this->PreDataChanged.vStartPoint.y
+    || v2->z != this->PreDataChanged.vStartPoint.z
+    || (v3 = this->GetEndPoint(this), v3->x != this->PreDataChanged.vEndPoint.x)
+    || v3->y != this->PreDataChanged.vEndPoint.y
+    || v3->z != this->PreDataChanged.vEndPoint.z
+    || (NetworkAngles = C_BaseEntity::GetNetworkAngles(this), NetworkAngles->x != this->PreDataChanged.qAngles.x)
+    || NetworkAngles->y != this->PreDataChanged.qAngles.y
+    || NetworkAngles->z != this->PreDataChanged.qAngles.z )
+  {
+    this->OnProjected(this);
+  }
+}

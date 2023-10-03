@@ -1,0 +1,16 @@
+const C_BaseProjectedEntity *__cdecl C_BaseProjector::GetFirstProjectedEntity(const C_BaseProjector *const this)
+{
+  unsigned int m_Index; // edx
+  const C_BaseProjectedEntity *result; // eax
+  char *v3; // ecx
+
+  m_Index = this->m_hFirstChild.m_Index;
+  result = 0;
+  if ( m_Index != -1 )
+  {
+    v3 = (char *)g_pEntityList + 16 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v3 + 2) == HIWORD(m_Index) )
+      return (const C_BaseProjectedEntity *)*((_DWORD *)v3 + 1);
+  }
+  return result;
+}

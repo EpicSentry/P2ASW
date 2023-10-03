@@ -753,8 +753,7 @@ void CProp_Portal::ActivatePortal( void )
 
 	UpdatePortalLinkage();
 	
-	//TODO:
-	//CBaseProjector::TestAllForProjectionChanges();
+	CBaseProjector::TestAllForProjectionChanges();
 }
 
 //-----------------------------------------------------------------------------
@@ -775,8 +774,7 @@ void CProp_Portal::DeactivatePortal( void )
 
 	UpdatePortalLinkage();
 
-	//TODO:
-	//CBaseProjector::TestAllForProjectionChanges();
+	CBaseProjector::TestAllForProjectionChanges();
 }
 
 void CProp_Portal::InputSetActivatedState( inputdata_t &inputdata )

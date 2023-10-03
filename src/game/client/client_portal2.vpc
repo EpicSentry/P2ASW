@@ -100,6 +100,14 @@ $Project "Client (Portal 2)"
 			$File "portal2\c_info_placement_helper.h"
 			$File "portal2\c_info_placement_helper.cpp"
 			$File "portal2\c_env_portal_laser.cpp"
+			
+			$File "portal2\c_baseprojectedentity.h"
+			$File "portal2\c_baseprojectedentity.cpp"
+			$File "portal2\c_baseprojector.h"
+			$File "portal2\c_baseprojector.cpp"
+			
+			$File	"$SRCDIR\game\shared\portal\baseprojectedentity_shared.h"
+			$File	"$SRCDIR\game\shared\portal\baseprojectedentity_shared.cpp"
 
 			// Radial Menu preparations for when we get to work on coop.
 			/*
