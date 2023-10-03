@@ -92,10 +92,7 @@ void CPropGlassFutbol::ThrownThink()
 {
 	IPhysicsObject* pPhysicsObject = VPhysicsGetObject();
 	
-	Vector vecForce;
-	vecForce.x = m_vecThrowDirection.x * sv_futbol_fake_force.GetFloat();
-	vecForce.y = m_vecThrowDirection.y * sv_futbol_fake_force.GetFloat();
-	vecForce.z = m_vecThrowDirection.z * sv_futbol_fake_force.GetFloat();
+	Vector vecForce = m_vecThrowDirection * sv_futbol_fake_force.GetFloat();
 
 	if (pPhysicsObject)
 	{
