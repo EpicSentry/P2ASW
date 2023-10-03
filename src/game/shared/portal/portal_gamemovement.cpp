@@ -682,7 +682,7 @@ void CPortalGameMovement::AirAccelerate( Vector& wishdir, float wishspeed, float
 void CPortalGameMovement::TBeamMove( void )
 {
 	// TODO:
-#if 0
+#ifndef NO_TRACTOR_BEAM
 	CPortal_Player *pPortalPlayer = GetPortalPlayer();
 	if ( !pPortalPlayer )
 		return;

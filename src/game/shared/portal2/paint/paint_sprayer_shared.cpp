@@ -1,4 +1,4 @@
-//========= Copyright 1996-2009, Valve Corporation, All rights reserved. ============//
+//========= Copyright © 1996-2009, Valve Corporation, All rights reserved. ============//
 //
 //=============================================================================//
 
@@ -122,10 +122,10 @@ CPaintBlob* FirePaintBlob( const Vector& vecSourcePosition,
 					  CBaseEntity *pOwner,
 					  int nRandomSeed /*= 0*/ )
 {
-#ifdef CLIENT_DLL
+#if defined ( CLIENT_DLL ) && 0
 	// if the client is listen server, don't create blobs twice, we don't want to double the work
-	//if ( engine->IsClientLocalToActiveServer() )
-	//	return NULL;
+	if ( engine->IsClientLocalToActiveServer() )
+		return NULL;
 #endif
 
 	// set random seed
@@ -195,10 +195,6 @@ CPaintBlob* FirePaintBlob( const Vector& vecSourcePosition,
 	if ( pBlob )
 	{
 		pBlob->Init( vecBlobFirePos, vecBlobVelocity, paintType, flStreakTime, flStreakSpeedDampen, pOwner, bSilent, bDrawOnly );
-	}
-	else
-	{
-		Warning("pBlob == NULL!!!\n");
 	}
 
 	return pBlob;

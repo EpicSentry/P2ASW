@@ -1,4 +1,4 @@
-//========= Copyright 1996-2009, Valve Corporation, All rights reserved. ============//
+//========= Copyright © 1996-2009, Valve Corporation, All rights reserved. ============//
 //
 //=============================================================================//
 #ifndef PAINT_STREAM_MANAGER_H
@@ -62,11 +62,6 @@ public:
 	virtual void PreClientUpdate( void );
 #endif
 
-#if defined( GAME_DLL ) && defined( TACTICALINTERVENTION )
-	//Tony; this is a royal hack, I would like to clean this up -- this is just so I can force the lag compensation manager to happen dead LAST
-	//of every other server-side thing.
-	virtual bool ThisIsAHackToEnsureLagCompensationHappensLast() { return false; };
-#endif
 	void RemoveAllPaintBlobs( void );
 
 	const char *GetPaintMaterialName( int type );

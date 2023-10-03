@@ -1,4 +1,4 @@
-//========= Copyright 1996-2009, Valve Corporation, All rights reserved. ============//
+//========= Copyright © 1996-2009, Valve Corporation, All rights reserved. ============//
 //
 //=============================================================================//
 #include "cbase.h"
@@ -26,7 +26,7 @@ const char* const CPaintStreamManager::m_pPaintMaterialNames[PAINT_POWER_TYPE_CO
 	"paintblobs/blob_surface_stick", // FIXME: Bring this back for DLC2 "paintblobs/blob_surface_reflect",
 	"paintblobs/blob_surface_speed",
 	"paintblobs/blob_surface_portal",
-	"paintblobs/blob_surface_erase",
+	"paintblobs/blob_surface_erase"
 };
 
 const char* const CPaintStreamManager::s_SoundEffectNames[PAINT_IMPACT_EFFECT_COUNT] =
@@ -95,14 +95,24 @@ void CPaintStreamManager::AllocatePaintBlobPool( int nMaxBlobs )
 {
 	int nMaxCount = ( nMaxBlobs ) ? nMaxBlobs : 250;
 	// pre-allocate pool of blobs
-#ifdef GAME_DLL
-	m_pBlobPool = new CClassMemoryPool< CPaintBlob >( nMaxCount, CUtlMemoryPool::GROW_NONE );
-#else
-	//if ( !engine->IsClientLocalToActiveServer() )
+	if ( !m_pBlobPool )
 	{
+#ifdef GAME_DLL
 		m_pBlobPool = new CClassMemoryPool< CPaintBlob >( nMaxCount, CUtlMemoryPool::GROW_NONE );
-	}
+#else
+#if 0
+		if ( !engine->IsClientLocalToActiveServer() )
 #endif
+		{
+			m_pBlobPool = new CClassMemoryPool< CPaintBlob >( nMaxCount, CUtlMemoryPool::GROW_NONE );
+		}
+#endif
+	}
+	else if ( ( m_pBlobPool->Size() / m_pBlobPool->BlockSize() ) != nMaxBlobs )
+	{
+		Assert( 0 );
+		Warning( "CPaintStreamManager::AllocatePaintBlobPool is being called multiple times (for some reasons) with different pool sizes." );
+	}
 }
 
 
@@ -124,34 +134,17 @@ CPaintBlob* CPaintStreamManager::AllocatePaintBlob( bool bSilent /*= false*/ )
 	// don't create when blob is paused
 	if ( blobs_paused.GetBool() )
 	{
-#ifdef GAME_DLL
-		Msg("(server) Blob is NULL because blobs_paused is true\n");
-#else
-		Msg("(client) Blob is NULL because blobs_paused is true\n");
-#endif
 		return NULL;
 	}
 
 #ifdef CLIENT_DLL
 	if ( bSilent )
 	{
-		Msg("(client) Blob is NULL because bSlient is true\n");
+		return NULL;
+	}
+#endif
 
-		return NULL;
-	}
-#endif
-	if (m_pBlobPool)
-		return m_pBlobPool->Alloc();
-	else
-	{
-#ifdef GAME_DLL
-		Msg("(server) Blob is NULL because m_pBlobPool is NULL\n");
-#else
-		Msg("(client) Blob is NULL because m_pBlobPool is NULL\n");
-#endif
-		Assert( 0 );
-		return NULL;
-	}
+	return m_pBlobPool->Alloc();
 }
 
 
@@ -228,10 +221,9 @@ void CPaintStreamManager::PaintStreamUpdate()
 {
 	VPROF_BUDGET( "CPaintStreamManager::PaintStreamUpdate", VPROF_BUDGETGROUP_PAINTBLOB );
 
-#ifdef CLIENT_DLL
+#if defined ( CLIENT_DLL ) && 0
 	// if the client is local to server, only update render bounds
 	// let the server do all the work.
-	/*
 	if ( engine->IsClientLocalToActiveServer() )
 	{
 		for ( int i = 0; i < IPaintStreamAutoList::AutoList().Count(); ++i )
@@ -244,9 +236,12 @@ void CPaintStreamManager::PaintStreamUpdate()
 		}
 		return;
 	}
-	*/
 #endif
 
+#ifndef NO_TRACTOR_BEAM
+	// remove dead blobs from beam list before we set dead blobs to NULL
+	CTrigger_TractorBeam_Shared::RemoveDeadBlobsFromBeams();
+#endif
 	// we want to update blob collision for all blobs at once
 	PaintBlobVector_t allBlobs;
 
@@ -289,6 +284,11 @@ void CPaintStreamManager::PaintStreamUpdate()
 			pStream->PostUpdateBlobs();
 		}
 	}
+
+#ifndef NO_TRACTOR_BEAM
+	// remove blobs that change beams to correct blob list in beam
+	CTrigger_TractorBeam_Shared::RemoveBlobsFromPreviousBeams();
+#endif
 }
 
 
@@ -381,7 +381,6 @@ SplatParticlesForPaint_t paintSplatCallbacks[] =
 	{ REFLECT_POWER,"paint_splat_stick_01" }, // FIXME: Bring this back for DLC2 { REFLECT_POWER,"paint_splat_reflect_01" },
 	{ SPEED_POWER,	"paint_splat_speed_01" },
 	{ PORTAL_POWER,	"paint_splat_erase_01" },
-	//{ STICK_POWER,	"paint_splat_stick_01" },
 	{ NO_POWER,		"paint_splat_erase_01" },
 };
 

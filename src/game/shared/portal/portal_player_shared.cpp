@@ -5407,7 +5407,7 @@ void CPortal_Player::SetInTractorBeam( CTrigger_TractorBeam *pTractorBeam )
 	SetGravity( FLT_MIN );
 
 	// TODO:
-#if defined ( GAME_DLL ) && 0
+#if defined ( GAME_DLL ) && 1
 	triggerevent_t event;
 	if ( PhysGetTriggerEvent( &event, pTractorBeam ) && event.pObject )
 	{
