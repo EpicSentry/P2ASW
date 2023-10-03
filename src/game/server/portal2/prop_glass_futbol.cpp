@@ -1,3 +1,4 @@
+#include "cbase.h"
 #include "prop_glass_futbol.h"
 #include "tier0/memdbgon.h"
 
