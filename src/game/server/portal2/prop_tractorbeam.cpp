@@ -60,6 +60,13 @@ LINK_ENTITY_TO_CLASS( prop_tractor_beam, CPropTractorBeamProjector )
 
 #ifndef NO_TRACTORBEAM_CLIENTCLASS
 IMPLEMENT_SERVERCLASS_ST( CPropTractorBeamProjector, DT_PropTractorBeamProjector )
+
+SendPropFloat( SENDINFO( m_flLinearForce ) ),
+SendPropBool( SENDINFO( m_bNoEmitterParticles ) ),
+SendPropBool( SENDINFO( bDisableAutoReprojection ) ),
+
+SendPropVector( SENDINFO( m_vEndPos ) ),
+
 END_SEND_TABLE()
 #endif
 

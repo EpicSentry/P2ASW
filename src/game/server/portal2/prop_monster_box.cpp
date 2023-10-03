@@ -20,6 +20,8 @@ BEGIN_DATADESC( CPropMonsterBox )
 	DEFINE_INPUTFUNC( FIELD_VOID, "BecomeShortcircuit", InputBecomeShortcircuit ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "Dissolve", InputDissolve ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "SilentDissolve", InputSilentDissolve ),
+	
+	DEFINE_THINKFUNC( AnimateThink ),
 
 DEFINE_FIELD( m_bIsShortcircuit, FIELD_BOOLEAN ),
 

@@ -119,8 +119,10 @@ CProjectedTractorBeamEntity *CProjectedTractorBeamEntity::CreateNewProjectedEnti
 CTrigger_TractorBeam::CTrigger_TractorBeam()
 {
 	m_blobs.Purge();
-	m_sndPlayerInBeam = NULL;
+
 	m_hProxyEntity = NULL;
+	m_sndPlayerInBeam = NULL;
+	m_flRadius = 55.0;
 }
 
 CTrigger_TractorBeam::~CTrigger_TractorBeam()
@@ -330,9 +332,6 @@ void CTrigger_TractorBeam::ForceDetachEntity( CBaseEntity *pEntity )
 
 void CTrigger_TractorBeam::WakeTouchingObjects( void )
 {
-	// HACK: REMOVE THIS AS SOON AS POSSIBLE, WE NEED TO FIGURE OUT WHERE THIS VARIABLE IS SET!!!
-	m_flRadius = 32;
-
 	// NOTE: This may need to be changed...
 	Vector vecRayMins = Vector( -m_flRadius, -m_flRadius, -m_flRadius );
 	Vector vecRayMaxs = Vector( m_flRadius, m_flRadius, m_flRadius );
