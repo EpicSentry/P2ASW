@@ -124,6 +124,8 @@ $Project "Server (Portal 2)"
 				$File "portal2/point_laser_target.h"
 				$File "portal2/prop_glass_futbol.cpp"
 				$File "portal2/prop_glass_futbol.h"
+				$File "portal2/futbol_catcher.cpp"
+				$File "portal2/futbol_catcher.h"
 				$File "portal2\prop_tractorbeam.h"
 				$File "portal2\prop_tractorbeam.cpp"
 				
