@@ -129,6 +129,6 @@ public:
 	int m_nPlacementAttemptParity;
 };
 
-typedef C_Prop_Portal CProp_Portal;
+#define CProp_Portal C_Prop_Portal
 
 #endif //#ifndef C_PROP_PORTAL_H

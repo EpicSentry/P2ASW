@@ -40,7 +40,7 @@ public:
 	
 	Vector GetStartPoint() { return m_vecStartPoint; }
 	Vector GetEndPoint() { return m_vecEndPoint; }
-    Vector GetLengthVector();
+    Vector GetLengthVector( void );
 	
     CPortal_Base2D *GetHitPortal();
     CPortal_Base2D *GetSourcePortal();

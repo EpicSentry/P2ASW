@@ -3,6 +3,8 @@
 #include "c_portal_player.h"
 #include "soundinfo.h"
 
+#undef CProjectedTractorBeamEntity // Just in case
+
 IMPLEMENT_CLIENTCLASS_DT( C_ProjectedTractorBeamEntity, DT_ProjectedTractorBeamEntity, CProjectedTractorBeamEntity )
 	RecvPropEHandle( RECVINFO(m_hTractorBeamTrigger) ),
 END_RECV_TABLE()

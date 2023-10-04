@@ -42,8 +42,6 @@ BEGIN_PREDICTION_DATA( C_BaseProjectedEntity )
 
 END_PREDICTION_DATA()
 
-LINK_ENTITY_TO_CLASS( projected_entity, C_BaseProjectedEntity )
-
 CUtlVector<C_BaseProjectedEntity*> s_AllProjectedEntities;
 
 C_BaseProjectedEntity::C_BaseProjectedEntity()
@@ -139,4 +137,9 @@ bool C_BaseProjectedEntity::ShouldPredict( void )
 		return true;
 
 	return false;
+}
+
+Vector C_BaseProjectedEntity::GetLengthVector( void )
+{
+	return m_vecEndPoint - m_vecStartPoint;
 }

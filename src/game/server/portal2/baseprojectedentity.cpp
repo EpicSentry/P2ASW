@@ -32,7 +32,10 @@ LINK_ENTITY_TO_CLASS( projected_entity, CBaseProjectedEntity )
 
 CBaseProjectedEntity::CBaseProjectedEntity( void )
 {
-
+	m_hHitPortal = NULL;
+	m_hSourcePortal = NULL;
+	m_hChildSegment = NULL;
+	m_hPlacementHelper = NULL;
 }
 
 CBaseProjectedEntity::~CBaseProjectedEntity( void )
@@ -120,6 +123,11 @@ void CBaseProjectedEntity::CheckForSettledReflectorCubes( void )
 
 		pCube->ExitDisabledState();
 	}	
+}
+
+Vector CBaseProjectedEntity::GetLengthVector( void )
+{
+	return m_vecEndPoint - m_vecStartPoint;
 }
 
 CBaseProjectedEntity *CBaseProjectedEntity::CreateNewProjectedEntity(void)

@@ -1,33 +1,5 @@
-portal_ps2x.fxc
-common_ps_fxc.h
-common_fxc.h
-common_pragmas.h
-common_vertexlitgeneric_dx9.h
-common_hlsl_cpp_consts.h
-shader_constant_register_map.h
-portal_ps2x.fxc
-common_ps_fxc.h
-common_fxc.h
-common_pragmas.h
-common_vertexlitgeneric_dx9.h
-common_hlsl_cpp_consts.h
-shader_constant_register_map.h
-portal_ps2x.fxc
-common_ps_fxc.h
-common_fxc.h
-common_pragmas.h
-common_vertexlitgeneric_dx9.h
-common_hlsl_cpp_consts.h
-shader_constant_register_map.h
-portal_ps2x.fxc
-common_ps_fxc.h
-common_fxc.h
-common_pragmas.h
-common_vertexlitgeneric_dx9.h
-common_hlsl_cpp_consts.h
-shader_constant_register_map.h
 ..\..\dx9sdk\utilities\dx_proxy.dll 
-..\..\..\game\bin\shadercompile.exe 
-..\..\..\game\bin\shadercompile_dll.dll 
-..\..\..\game\bin\vstdlib.dll 
-..\..\..\game\bin\tier0.dll 
+E:\Program Files (x86)\Steam\steamapps\common\SourceSDK\..\ALIENS~1\bin\shadercompile.exe 
+E:\Program Files (x86)\Steam\steamapps\common\SourceSDK\..\ALIENS~1\bin\shadercompile_dll.dll 
+E:\Program Files (x86)\Steam\steamapps\common\SourceSDK\..\ALIENS~1\bin\vstdlib.dll 
+E:\Program Files (x86)\Steam\steamapps\common\SourceSDK\..\ALIENS~1\bin\tier0.dll 
