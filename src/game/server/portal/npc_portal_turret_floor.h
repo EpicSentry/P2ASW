@@ -73,6 +73,8 @@ extern int ACT_FLOOR_TURRET_OPEN_IDLE;
 extern int ACT_FLOOR_TURRET_CLOSED_IDLE;
 extern int ACT_FLOOR_TURRET_FIRE;
 extern int ACT_FLOOR_TURRET_FIRE2;
+extern int ACT_FLOOR_TURRET_DIE;
+extern int ACT_FLOOR_TURRET_DIE_IDLE;
 
 
 
@@ -107,6 +109,7 @@ public:
 	virtual void	SetEyeState( eyeState_t state );
 
 	virtual void    TryEmitSound(const char* soundname);
+	virtual void	SetTurretType(int nType);
 	virtual bool	OnSide( void );
 
 	virtual float	GetAttackDamageScale( CBaseEntity *pVictim );
@@ -123,11 +126,11 @@ public:
 	virtual void	TippedThink( void );
 	virtual void	HeldThink( void );
 	virtual void	InactiveThink( void );
+	virtual void	DieThink( void );
 	virtual void	SuppressThink( void );
 	virtual void	DisabledThink( void );
 	virtual void	BreakThink( void );
-	void	StartBurningThink( void );
-	void	BurnedThink( void );
+	virtual void	BurnThink( void );
 	virtual void	HackFindEnemy( void );
 
 	virtual void	StartTouch( CBaseEntity *pOther );
@@ -145,6 +148,7 @@ public:
 	void	InputEnablePickup(inputdata_t& inputdata);
 	void	InputDisablePickup(inputdata_t& inputdata);
 	void	InputSelfDestructImmediately(inputdata_t& inputdata);
+	void	InputSetModel(inputdata_t& inputdata);
 
 	virtual void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
@@ -161,27 +165,29 @@ private:
 	CNetworkVar( bool, m_bLaserOn );
 	CNetworkVar( int, m_sLaserHaloSprite );
 
+	bool	m_bIsDead;
 	int		m_iBarrelAttachments[ 4 ];
+	int		m_iNextShootingBarrel;
 	bool	m_bShootWithBottomBarrels;
 	bool	m_bDamageForce;
 	bool	m_bPickupEnabled;
-
+	bool	m_bLoadAlternativeModels;
 	bool	m_bIsBurning;
 
 	float	m_fSearchSpeed;
 	float	m_fMovingTargetThreashold;
 	float	m_flDistToEnemy;
+	float	m_flBurnExplodeTime;
 
 	turretState_e	m_iLastState;
 	float			m_fNextTalk;
 	bool			m_bDelayTippedTalk;
 	bool			m_bUsedAsActor;
 	bool			m_bGagged;
+	int				m_nModelIndex;
 	bool			m_bUseSuperDamageScale;
 
 	string_t m_ModelName;
-
-	short m_nModelIndex;
 
 protected:
 	float GetFireConeZTolerance();
