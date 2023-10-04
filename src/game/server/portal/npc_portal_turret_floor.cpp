@@ -590,9 +590,6 @@ void CNPC_Portal_FloorTurret::SetEyeState( eyeState_t state )
 		m_hEyeGlow->SetColor( 255, 0, 0 );
 		m_hEyeGlow->SetScale( 0.1f, 3.0f );
 		m_hEyeGlow->SetBrightness( 0, 3.0f );
-
-		if ( bNewState )
-			m_nSkin = 1;
 		break;
 
 	case TURRET_EYE_DISABLED:
