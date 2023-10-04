@@ -1,32 +1,8 @@
 #include "cbase.h"
-#include "futbol_catcher.h"
+#include "prop_glass_futbol_spawner.h"
 #include "tier0/memdbgon.h"
 
-class CPropFutbolSpawner : public CFutbolCatcher
-{
-public:
-	DECLARE_CLASS(CPropFutbolSpawner, CFutbolCatcher);
-	DECLARE_DATADESC();
-
-	CPropFutbolSpawner::CPropFutbolSpawner()
-	{
-		m_bHasFutbol = false;
-		m_vCatcherBoxHalfDiagonal.x = 7.0f;
-		m_vCatcherBoxHalfDiagonal.y = 7.0f;
-		m_vCatcherBoxHalfDiagonal.z = 7.0f;
-	}
-
-	void Precache();
-	void Spawn();
-	void FutbolDestroyed();
-	void FutbolGrabbed();
-private:
-	bool m_bHasFutbol;
-	COutputEvent m_OnFutbolSpawned;
-	COutputEvent m_OnFutbolGrabbed;
-	void InputForceSpawn(inputdata_t& data);
-	void SpawnFutbol();
-};
+LINK_ENTITY_TO_CLASS(prop_glass_futbol_spawner, CPropFutbolSpawner);
 
 BEGIN_DATADESC(CPropFutbolSpawner)
 	DEFINE_INPUTFUNC(FIELD_VOID, "ForceSpawn", InputForceSpawn),
