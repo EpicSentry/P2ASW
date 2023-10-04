@@ -100,3 +100,8 @@ void CPropGlassFutbol::OnPhysGunPickup(CBasePlayer* pPhysGunUser, PhysGunDrop_t 
 	if (reason == PICKED_UP_BY_PLAYER && pPortalPlayer && sv_futbol_use_steals_from_holding_player.GetInt())
 		pPortalPlayer->SetUseKeyCooldownTime(sv_futbol_use_cooldown_time.GetFloat());
 }
+
+void CPropGlassFutbol::SetSpawner(CPropFutbolSpawner* pMySpawner)
+{
+	pMySpawner = m_hSpawner;
+}
