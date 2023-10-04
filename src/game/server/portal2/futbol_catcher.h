@@ -14,9 +14,7 @@ public:
 
 	CFutbolCatcher::CFutbolCatcher()
 	{
-		m_vCatcherBoxHalfDiagonal.x = 25.0f;
-		m_vCatcherBoxHalfDiagonal.y = 25.0f;
-		m_vCatcherBoxHalfDiagonal.z = 25.0f;
+		m_vCatcherBoxHalfDiagonal = Vector(25.0f, 25.0f, 25.0f);
 		m_vecCatchBoxMins = vec3_origin;
 		m_vecCatchBoxMaxs = vec3_origin;
 		m_vecCatchBoxOrig = vec3_origin;
