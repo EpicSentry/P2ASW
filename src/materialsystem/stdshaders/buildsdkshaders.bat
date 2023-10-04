@@ -4,7 +4,7 @@ setlocal
 rem Use dynamic shaders to build .inc files only
 rem set dynamic_shaders=1
 rem == Setup path to nmake.exe, from vc 2005 common tools directory ==
-call "%VS80COMNTOOLS%vsvars32.bat"
+call "%VS120COMNTOOLS%vsvars32.bat"
 
 rem ================================
 rem ==== MOD PATH CONFIGURATIONS ===
@@ -14,12 +14,12 @@ rem == Note that this path needs does not support long file/directory names ==
 rem == So instead of a path such as "C:\Program Files\Steam\steamapps\mymod" ==
 rem == you need to find the 8.3 abbreviation for the directory name using 'dir /x' ==
 rem == and set the directory to something like C:\PROGRA~2\Steam\steamapps\sourcemods\mymod ==
-set GAMEDIR=%cd%\..\..\..\game\swarm
+set GAMEDIR=../../../game/portal2asw
 
 rem == Set the relative path to steamapps\common\Alien Swarm\bin ==
 rem == As above, this path does not support long directory names or spaces ==
 rem == e.g. ..\..\..\..\..\PROGRA~2\Steam\steamapps\common\ALIENS~1\bin ==
-set SDKBINDIR=..\..\..\..\STEAME~1\steamapps\common\ALIENS~1\bin
+set SDKBINDIR="%AlienSwarm%\bin"
 
 rem ==  Set the Path to your mods root source code ==
 rem this should already be correct, accepts relative paths only!

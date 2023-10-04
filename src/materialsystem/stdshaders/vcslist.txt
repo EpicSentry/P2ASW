@@ -1,0 +1,12 @@
+..\..\..\game\platform\shaders\fxc\Bloom_ps20.vcs
+..\..\..\game\platform\shaders\fxc\Bloom_ps20b.vcs
+..\..\..\game\platform\shaders\fxc\screenspaceeffect_vs20.vcs
+..\..\..\game\platform\shaders\fxc\portal_ps20.vcs
+..\..\..\game\platform\shaders\fxc\portal_ps20b.vcs
+..\..\..\game\platform\shaders\fxc\portal_vs20.vcs
+..\..\..\game\platform\shaders\fxc\portalstaticoverlay_ps20.vcs
+..\..\..\game\platform\shaders\fxc\portalstaticoverlay_ps20b.vcs
+..\..\..\game\platform\shaders\fxc\portalstaticoverlay_vs20.vcs
+..\..\..\game\platform\shaders\fxc\portal_refract_vs20.vcs
+..\..\..\game\platform\shaders\fxc\portal_refract_ps20.vcs
+..\..\..\game\platform\shaders\fxc\portal_refract_ps20b.vcs

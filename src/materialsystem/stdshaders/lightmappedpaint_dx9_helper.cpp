@@ -89,7 +89,7 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 		if ( pShaderShadow || bNeedRegenStaticCmds )
 		{
 			bool hasVertexColor = IS_FLAG_SET( MATERIAL_VAR_VERTEXCOLOR );
-			//bool hasDiffuseBumpmap = hasBump;// && (params[info.m_nNoDiffuseBumpLighting]->GetIntValue() == 0);
+			bool hasDiffuseBumpmap = hasBump;// && (params[info.m_nNoDiffuseBumpLighting]->GetIntValue() == 0);
 
 			bool hasEnvmap = true; //params[info.m_nEnvmap]->IsTexture();
 			int envmap_variant; //0 = no envmap, 1 = regular, 2 = darken in shadow mode
@@ -226,18 +226,18 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 				SET_STATIC_VERTEX_SHADER_COMBO( ENVMAP_MASK,  hasEnvmapMask );
 				SET_STATIC_VERTEX_SHADER_COMBO( TANGENTSPACE, 1 ); //need tangent transpose matrix for lighting
 				SET_STATIC_VERTEX_SHADER_COMBO( BUMPMAP,  hasBump );
-				SET_STATIC_VERTEX_SHADER_COMBO( ADDBUMPMAPS,  hasBump );
-				//SET_STATIC_VERTEX_SHADER_COMBO( DIFFUSEBUMPMAP, hasDiffuseBumpmap );
+				//SET_STATIC_VERTEX_SHADER_COMBO( ADDBUMPMAPS,  hasBump );
+				SET_STATIC_VERTEX_SHADER_COMBO( DIFFUSEBUMPMAP, hasDiffuseBumpmap );
 				SET_STATIC_VERTEX_SHADER_COMBO( VERTEXCOLOR, IS_FLAG_SET( MATERIAL_VAR_VERTEXCOLOR ) );
 				SET_STATIC_VERTEX_SHADER_COMBO( VERTEXALPHATEXBLENDFACTOR, 0 );
 				SET_STATIC_VERTEX_SHADER_COMBO( BUMPMASK, 0 );
 				SET_STATIC_VERTEX_SHADER_COMBO( LIGHTING_PREVIEW, nLightingPreviewMode );
-				//SET_STATIC_VERTEX_SHADER_COMBO( PARALLAX_MAPPING, 0 );
+				SET_STATIC_VERTEX_SHADER_COMBO( PARALLAX_MAPPING, 0 );
 				SET_STATIC_VERTEX_SHADER_COMBO( SEAMLESS, bSeamlessMapping );
 				SET_STATIC_VERTEX_SHADER_COMBO( DETAILTEXTURE, 0 );
 				SET_STATIC_VERTEX_SHADER_COMBO( FANCY_BLENDING, bHasBlendModulateTexture );
 				SET_STATIC_VERTEX_SHADER_COMBO( SELFILLUM,  hasSelfIllum );
-				SET_STATIC_VERTEX_SHADER_COMBO( PAINT, 1 );
+				//SET_STATIC_VERTEX_SHADER_COMBO( PAINT, 1 );
 #ifdef _X360
 				SET_STATIC_VERTEX_SHADER_COMBO( FLASHLIGHT, hasFlashlight);
 #endif
@@ -252,10 +252,10 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 					SET_STATIC_PIXEL_SHADER_COMBO( CUBEMAP,  envmap_variant );
 					SET_STATIC_PIXEL_SHADER_COMBO( SEAMLESS, bSeamlessMapping );
 //#ifdef _X360
-					//SET_STATIC_PIXEL_SHADER_COMBO( FLASHLIGHT, hasFlashlight);
+					SET_STATIC_PIXEL_SHADER_COMBO( FLASHLIGHT, hasFlashlight);
 //#endif
-					//SET_STATIC_PIXEL_SHADER_COMBO( SHADER_SRGB_READ, bShaderSrgbRead );
-					SET_STATIC_PIXEL_SHADER_COMBO( THICKPAINT, bShaderSrgbRead );
+					SET_STATIC_PIXEL_SHADER_COMBO( SHADER_SRGB_READ, bShaderSrgbRead );
+				//	SET_STATIC_PIXEL_SHADER_COMBO( THICKPAINT, bShaderSrgbRead );
 					SET_STATIC_PIXEL_SHADER( lightmappedpaint_ps20b );
 				}
 				else
@@ -264,9 +264,9 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 					SET_STATIC_PIXEL_SHADER_COMBO( BUMPMAP,  bumpmap_variant );
 					SET_STATIC_PIXEL_SHADER_COMBO( CUBEMAP,  envmap_variant );
 					SET_STATIC_PIXEL_SHADER_COMBO( SEAMLESS, bSeamlessMapping );
-					//SET_STATIC_PIXEL_SHADER_COMBO( FLASHLIGHT, hasFlashlight );
-					//SET_STATIC_PIXEL_SHADER_COMBO( SHADER_SRGB_READ, bShaderSrgbRead );
-					SET_STATIC_PIXEL_SHADER_COMBO( THICKPAINT, true );
+					SET_STATIC_PIXEL_SHADER_COMBO( FLASHLIGHT, hasFlashlight );
+					SET_STATIC_PIXEL_SHADER_COMBO( SHADER_SRGB_READ, bShaderSrgbRead );
+				//	SET_STATIC_PIXEL_SHADER_COMBO( THICKPAINT, true );
 					SET_STATIC_PIXEL_SHADER( lightmappedpaint_ps20 );
 				}
 #endif
@@ -555,7 +555,7 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 			SET_DYNAMIC_PIXEL_SHADER_COMBO( FASTPATHENVMAPCONTRAST,  bPixelShaderFastPath && envmapContrast == 1.0f );
 			
 			// Don't write fog to alpha if we're using translucency
-			//SET_DYNAMIC_PIXEL_SHADER_COMBO( FLASHLIGHTSHADOWS, bFlashlightShadows );
+			SET_DYNAMIC_PIXEL_SHADER_COMBO( FLASHLIGHTSHADOWS, bFlashlightShadows );
 			SET_DYNAMIC_PIXEL_SHADER_CMD( DynamicCmdsOut, lightmappedpaint_ps20b );
 		}
 		else
