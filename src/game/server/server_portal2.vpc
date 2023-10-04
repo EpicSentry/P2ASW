@@ -127,6 +127,7 @@ $Project "Server (Portal 2)"
 				$File "portal2/futbol_catcher.cpp"
 				$File "portal2/futbol_catcher.h"
 				$File "portal2/prop_glass_futbol_spawner.cpp"
+				$File "portal2/prop_glass_futbol_spawner.h"
 				$File "portal2\prop_tractorbeam.h"
 				$File "portal2\prop_tractorbeam.cpp"
 				
