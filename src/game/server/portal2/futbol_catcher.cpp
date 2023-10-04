@@ -19,13 +19,6 @@ public:
 		m_vecCatchBoxOrig = vec3_origin;
 		m_bDisableRecaptureOnPlayerGrab = false;
 	}
-
-	Vector m_vCatcherBoxHalfDiagonal;
-	Vector m_vecCatchBoxMins;
-	Vector m_vecCatchBoxMaxs;
-	Vector m_vecCatchBoxOrig;
-	bool m_bDisableRecaptureOnPlayerGrab;
-
 	void Spawn();
 
 protected:
@@ -66,7 +59,7 @@ void CFutbolCatcher::Spawn()
 	GetAttachment("ball", m_vecCatchBoxOrig);
 
 	m_vecCatchBoxMaxs = m_vCatcherBoxHalfDiagonal;
-	SetThink(&CFutbolCatcher::CatchThink,0.0f);
+	SetThink(&CFutbolCatcher::CatchThink);
 	SetNextThink(gpGlobals->interval_per_tick + gpGlobals->curtime);
 }
 
@@ -111,7 +104,17 @@ void CFutbolCatcher::CaptureThink()
 
 void CFutbolCatcher::CaptureFutbol(CPropGlassFutbol* pFutbol)
 {
-//TODO
+	IPhysicsObject* pPhysicsObject = VPhysicsGetObject();
+
+	if (pFutbol)
+	{
+		if (pPhysicsObject)
+			pPhysicsObject->EnableMotion(false);
+		pFutbol->Teleport(&m_vecCatchBoxOrig, &vec3_angle, &vec3_origin, true);
+		SetThink(&CFutbolCatcher::CaptureThink);
+		pFutbol->GetHolder = FUTBOL_HELD_BY_CATCHER;
+		m_OnFutbolCaught.FireOutput(pFutbol, pFutbol->GetLastPlayerToHold());
+	}
 }
 
 bool CFilterOnlyGlassFutbol::ShouldHitEntity(IHandleEntity* pHandleEntity, int contentsMask)
