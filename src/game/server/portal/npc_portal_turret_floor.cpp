@@ -545,7 +545,7 @@ void CNPC_Portal_FloorTurret::SetEyeState( eyeState_t state )
 		m_hEyeGlow->SetAttachment( this, m_iEyeAttachment );
 	}
 
-	bool bNewState = ( m_iEyeState != state );
+//	bool bNewState = ( m_iEyeState != state );
 
 	m_iEyeState = state;
 

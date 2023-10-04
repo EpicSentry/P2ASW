@@ -58,8 +58,8 @@
 #include "replay_ragdoll.h"
 
 #if defined ( PORTAL2 )
-#include "c_portal_player.h"
-#include "portal2/portal_grabcontroller_shared.h"
+//#include "c_portal_player.h"
+//#include "portal2/portal_grabcontroller_shared.h"
 #endif
 
 #include "clientalphaproperty.h"

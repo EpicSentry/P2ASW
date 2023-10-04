@@ -145,7 +145,7 @@ void CPropTractorBeamProjector::Project( void )
 
 	m_vEndPos = m_hFirstChild->GetEndPoint();
 
-	CSoundEnvelopeController &Controller = CSoundEnvelopeController::GetController();
+	CSoundEnvelopeController &controller = CSoundEnvelopeController::GetController();
 	CReliableBroadcastRecipientFilter filter; // [esp+C0h] [ebp-28h] BYREF
 	if ( !m_sndMechanical )
 	{
@@ -167,21 +167,20 @@ void CPropTractorBeamProjector::Project( void )
 
 		filter.AddRecipientsByPAS( GetAbsOrigin() );
 
-		m_sndMechanical = Controller.SoundCreate( filter, entindex(), ep );
+		m_sndMechanical = controller.SoundCreate( filter, entindex(), ep );
 		
-		//CRecipientFilter::~CRecipientFilter(&filter);
 		//CUtlVector<ITriggerTractorBeamAutoList *, CUtlMemory<ITriggerTractorBeamAutoList *, int>>::~CUtlVector<ITriggerTractorBeamAutoList *, CUtlMemory<ITriggerTractorBeamAutoList *, int>>((CUtlVector<__m128, CUtlMemory<__m128, int> > *)&ep.m_UtlVecSoundOrigin);
 	}
-	Controller.Play( m_sndMechanical, 0.1, 100.0 );
-	Controller.SoundChangeVolume( m_sndMechanical, 1.0, 0.75 );
+	controller.Play( m_sndMechanical, 0.1, 100.0 );
+	controller.SoundChangeVolume( m_sndMechanical, 1.0, 0.75 );
 	if ( !m_sndAmbientMusic )
 	{
 		filter.AddAllPlayers();
 		filter.MakeReliable();
 		
-		m_sndAmbientMusic = Controller.SoundCreate( filter, m_hAmbientSoundProxy->entindex(), s_AmbientBeamMusic );
+		m_sndAmbientMusic = controller.SoundCreate( filter, m_hAmbientSoundProxy->entindex(), s_AmbientBeamMusic );
 	}
-	Controller.Play( m_sndAmbientMusic, 1.0, 100.0 );
+	controller.Play( m_sndAmbientMusic, 1.0, 100.0 );
 
 	const char *soundName = "VFX.TBeamPosPolarity";
 	if ( IsReversed() )
@@ -189,15 +188,15 @@ void CPropTractorBeamProjector::Project( void )
 
 	if ( !m_sndAmbientSound )
 		goto LABEL_37;
-	Controller = CSoundEnvelopeController::GetController();
-	const char *pszAmbientSoundName = Controller.SoundGetScriptName( m_sndAmbientSound ).ToCStr();
+
+	const char *pszAmbientSoundName = controller.SoundGetScriptName( m_sndAmbientSound ).ToCStr();
 	if (!pszAmbientSoundName)
 		pszAmbientSoundName = "";
 
-	if (_V_strcmp(pszAmbientSoundName, soundName))
+	if (V_strcmp(pszAmbientSoundName, soundName))
 	{
-		Controller.Shutdown( m_sndAmbientSound );
-		Controller.SoundDestroy( m_sndAmbientSound );
+		controller.Shutdown( m_sndAmbientSound );
+		controller.SoundDestroy( m_sndAmbientSound );
 		m_sndAmbientSound = NULL;
 
 	LABEL_37:
@@ -205,9 +204,9 @@ void CPropTractorBeamProjector::Project( void )
 		filter.AddAllPlayers();
 		filter.MakeReliable();
 
-		m_sndAmbientSound = Controller.SoundCreate( filter, m_hAmbientSoundProxy->entindex(), soundName );
+		m_sndAmbientSound = controller.SoundCreate( filter, m_hAmbientSoundProxy->entindex(), soundName );
 
-		Controller.Play( m_sndAmbientSound, 1.0, 100.0, 0 );
+		controller.Play( m_sndAmbientSound, 1.0, 100.0, 0 );
 	}
 }
 

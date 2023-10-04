@@ -177,7 +177,9 @@ void C_PortalBeamHelper::TurnOff( void )
 
 void C_PortalBeamHelper::TurnOn( void )
 {
+#ifdef DEBUG
 	int iCycleCount = 0;
+#endif
 	for ( int i = 0; i < m_beams.Count(); ++i )
 	{
 #ifdef DEBUG
