@@ -5,7 +5,6 @@
 #include "cbase.h"
 #include "props.h"
 #include "portal_player.h"
-#include "prop_glass_futbol_spawner.h"
 
 enum futbol_holder_type_t
 {
