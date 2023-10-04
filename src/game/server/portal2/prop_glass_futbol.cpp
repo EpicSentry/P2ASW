@@ -1,6 +1,5 @@
 #include "cbase.h"
-#include "props.h"
-#include "portal_player.h"
+#include "prop_glass_futbol.h"
 #include "tier0/memdbgon.h"
 
 ConVar sv_futbol_fake_force("sv_futbol_fake_force", "500", FCVAR_NONE);
@@ -10,48 +9,6 @@ ConVar sv_futbol_use_steals_from_holding_player("sv_futbol_use_steals_from_holdi
 
 static const char* g_szFutbolAnimThinkContext = "FutbolAnimateThinkContext";
 static const char* g_szFutbolThrownThinkContext = "FutbolThrownThinkContext";
-
-enum futbol_holder_type_t
-{
-	FUTBOL_HELD_BY_NONE = 0,
-	FUTBOL_HELD_BY_PLAYER = 1,
-	FUTBOL_HELD_BY_SPAWNER = 2,
-	FUTBOL_HELD_BY_CATCHER = 3,
-	FUTBOL_HELD_BY_COUNT = 4
-};
-
-class CPropGlassFutbol : public CPhysicsProp
-{
-public:
-	DECLARE_CLASS(CPropGlassFutbol, CPhysicsProp);
-	DECLARE_DATADESC();
-
-
-	CPropGlassFutbol::CPropGlassFutbol()
-	{
-		m_Holder = FUTBOL_HELD_BY_NONE;
-		m_vecThrowDirection = vec3_origin;
-	}
-
-	QAngle PreferredCarryAngles() { return QAngle(180, -90, 180); }
-	bool HasPreferredCarryAnglesForPlayer(CBasePlayer* pPlayer) { return true; }
-	void Precache();
-	void Spawn();
-	void Event_Killed(const CTakeDamageInfo &info);
-
-	//Think functions
-	void ThrownThink();
-	void AnimThink();
-
-	void OnPhysGunDrop(CBasePlayer* pPhysGunUser, PhysGunDrop_t reason);
-	void OnPhysGunPickup(CBasePlayer* pPhysGunUser, PhysGunDrop_t reason);
-
-	string_t m_strSpawnerName;
-	futbol_holder_type_t m_Holder;
-	Vector m_vecThrowDirection;
-private:
-	CHandle<CPortal_Player> m_hLastHeldByPlayer;
-};
 
 LINK_ENTITY_TO_CLASS(prop_glass_futbol, CPropGlassFutbol);
 
@@ -142,4 +99,9 @@ void CPropGlassFutbol::OnPhysGunPickup(CBasePlayer* pPhysGunUser, PhysGunDrop_t 
 
 	if (reason == PICKED_UP_BY_PLAYER && pPortalPlayer && sv_futbol_use_steals_from_holding_player.GetInt())
 		pPortalPlayer->SetUseKeyCooldownTime(sv_futbol_use_cooldown_time.GetFloat());
+}
+
+void CPropGlassFutbol::SetSpawner(CPropFutbolSpawner* pMySpawner)
+{
+	pMySpawner = m_hSpawner;
 }
