@@ -117,7 +117,13 @@ void CFutbolCatcher::CaptureFutbol(CPropGlassFutbol* pFutbol)
 	}
 }
 
-bool CFilterOnlyGlassFutbol::ShouldHitEntity(IHandleEntity* pHandleEntity, int contentsMask)
+bool CFilterOnlyGlassFutbol::ShouldHitEntity(IHandleEntity* pServerEntity, int contentsMask)
 {
-	return true;
+	CBaseEntity* pEnt = static_cast<IServerUnknown*>(pServerEntity)->GetBaseEntity();
+	if (pEnt)
+	{
+		if (FClassnameIs(pEnt, "prop_glass_futbol"))
+			return true;
+	}
+	return false;
 }
