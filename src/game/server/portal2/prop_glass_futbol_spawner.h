@@ -5,6 +5,7 @@
 #include "cbase.h"
 #include "futbol_catcher.h"
 
+class CFutbolCatcher;
 class CPropFutbolSpawner : public CFutbolCatcher
 {
 public:
@@ -14,9 +15,7 @@ public:
 	CPropFutbolSpawner::CPropFutbolSpawner()
 	{
 		m_bHasFutbol = false;
-		m_vCatcherBoxHalfDiagonal.x = 7.0f;
-		m_vCatcherBoxHalfDiagonal.y = 7.0f;
-		m_vCatcherBoxHalfDiagonal.z = 7.0f;
+		m_vCatcherBoxHalfDiagonal = Vector(7.0f, 7.0f, 7.0f);
 	}
 
 	void Precache();
