@@ -40,7 +40,9 @@ public:
 
 	void OnPhysGunDrop(CBasePlayer* pPhysGunUser, PhysGunDrop_t reason);
 	void OnPhysGunPickup(CBasePlayer* pPhysGunUser, PhysGunDrop_t reason);
-
+	enum futbol_holder_type_t GetHolder { m_Holder };
+	void SetHolder(futbol_holder_type_t type) { GetHolder = type; }
+	CPortal_Player* GetLastPlayerToHold() { return m_hLastHeldByPlayer; }
 private:
 	string_t m_strSpawnerName;
 	futbol_holder_type_t m_Holder;
