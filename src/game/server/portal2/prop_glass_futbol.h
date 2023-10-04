@@ -5,6 +5,7 @@
 #include "cbase.h"
 #include "props.h"
 #include "portal_player.h"
+#include "prop_glass_futbol_spawner.h"
 
 enum futbol_holder_type_t
 {
@@ -15,6 +16,7 @@ enum futbol_holder_type_t
 	FUTBOL_HELD_BY_COUNT = 4
 };
 
+class CPropFutbolSpawner;
 class CPropGlassFutbol : public CPhysicsProp
 {
 public:
@@ -40,10 +42,13 @@ public:
 
 	void OnPhysGunDrop(CBasePlayer* pPhysGunUser, PhysGunDrop_t reason);
 	void OnPhysGunPickup(CBasePlayer* pPhysGunUser, PhysGunDrop_t reason);
+	void SetSpawner(CPropFutbolSpawner* pMySpawner);
+
 	enum futbol_holder_type_t GetHolder { m_Holder };
 	void SetHolder(futbol_holder_type_t type) { GetHolder = type; }
 	CPortal_Player* GetLastPlayerToHold() { return m_hLastHeldByPlayer; }
 private:
+	CHandle<CPropFutbolSpawner> m_hSpawner;
 	string_t m_strSpawnerName;
 	futbol_holder_type_t m_Holder;
 	Vector m_vecThrowDirection;
