@@ -1,0 +1,19 @@
+void __thiscall C_PropTractorBeamProjector::C_PropTractorBeamProjector(C_PropTractorBeamProjector *this)
+{
+  C_BaseAnimating::C_BaseAnimating(this);
+  this->m_hFirstChild.m_Index = -1;
+  this->C_BaseProjector::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable = (C_PropTractorBeamProjector_vtbl *)&C_PropTractorBeamProjector::`vftable'{for `IClientUnknown'};
+  this->C_BaseProjector::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientRenderable::__vftable = (IClientRenderable_vtbl *)&C_PropTractorBeamProjector::`vftable'{for `IClientRenderable'};
+  this->C_BaseProjector::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientNetworkable::__vftable = (IClientNetworkable_vtbl *)&C_PropTractorBeamProjector::`vftable'{for `IClientNetworkable'};
+  this->C_BaseProjector::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientThinkable::__vftable = (IClientThinkable_vtbl *)&C_PropTractorBeamProjector::`vftable'{for `IClientThinkable'};
+  this->C_BaseProjector::C_BaseAnimating::C_BaseEntity::IClientModelRenderable::__vftable = (IClientModelRenderable_vtbl *)&C_PropTractorBeamProjector::`vftable';
+  this->m_hEmitterEffect[0].m_pPrev = 0;
+  this->m_hEmitterEffect[0].m_pNext = 0;
+  this->m_hEmitterEffect[0].m_pObject = 0;
+  this->m_hEmitterEffect[1].m_pPrev = 0;
+  this->m_hEmitterEffect[1].m_pNext = 0;
+  this->m_hEmitterEffect[1].m_pObject = 0;
+  this->m_hEmitterEffect[2].m_pPrev = 0;
+  this->m_hEmitterEffect[2].m_pNext = 0;
+  this->m_hEmitterEffect[2].m_pObject = 0;
+}

@@ -1,0 +1,54 @@
+void __cdecl C_PropTractorBeamProjector::ClientThink(C_PropTractorBeamProjector *const this)
+{
+  long double v1; // fst7
+  CStudioHdr *m_pStudioHdr; // eax
+  int v3; // esi
+  long double v4; // fst7
+  CStudioHdr *v5; // eax
+  long double v6; // fst7
+  int (**vptr_IHandleEntity)(...); // eax
+  float v8; // [esp+Ch] [ebp-1Ch]
+  float v9; // [esp+10h] [ebp-18h]
+  float v10; // [esp+10h] [ebp-18h]
+
+  if ( this->m_bEnabled && !this->m_bEffectsActive && this->m_flLinearForce != 0.0 && gpGlobals->curtime > 0.5 )
+  {
+    C_PropTractorBeamProjector::CreateEffect(this);
+    this->m_bActivated = 1;
+  }
+  v1 = C_PropTractorBeamProjector::CalculateArmaturePose(this);
+  if ( !this->m_pStudioHdr )
+  {
+    v10 = v1;
+    v1 = v10;
+    if ( (*((int (__cdecl **)(C_PropTractorBeamProjector *const))this->_vptr_IHandleEntity + 61))(this) )
+    {
+      C_BaseAnimating::LockStudioHdr(this);
+      v1 = v10;
+    }
+  }
+  m_pStudioHdr = this->m_pStudioHdr;
+  if ( m_pStudioHdr && !m_pStudioHdr->m_pStudioHdr )
+    m_pStudioHdr = 0;
+  v9 = v1;
+  v3 = C_BaseAnimating::LookupPoseParameter(this, m_pStudioHdr, "reversal");
+  v4 = v9;
+  if ( !this->m_pStudioHdr )
+  {
+    v4 = v9;
+    if ( (*((int (__cdecl **)(C_PropTractorBeamProjector *const))this->_vptr_IHandleEntity + 61))(this) )
+    {
+      C_BaseAnimating::LockStudioHdr(this);
+      v4 = v9;
+    }
+  }
+  v5 = this->m_pStudioHdr;
+  if ( v5 && !v5->m_pStudioHdr )
+    v5 = 0;
+  v8 = v4;
+  C_BaseAnimating::SetPoseParameter(this, v5, v3, v8);
+  v6 = C_PropTractorBeamProjector::CalculateRotationPose(this);
+  vptr_IHandleEntity = this->_vptr_IHandleEntity;
+  this->m_flPlaybackRate = v6;
+  vptr_IHandleEntity[264](this);
+}

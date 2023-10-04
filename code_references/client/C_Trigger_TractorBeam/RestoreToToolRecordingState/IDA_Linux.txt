@@ -1,0 +1,40 @@
+void __cdecl C_Trigger_TractorBeam::RestoreToToolRecordedState(C_Trigger_TractorBeam *const this, KeyValues *pKV)
+{
+  Vector vecMin; // [esp+28h] [ebp-30h] BYREF
+  Vector vecMax; // [esp+34h] [ebp-24h] BYREF
+
+  this->m_flStartTime = KeyValues::GetFloat(pKV, "starttime", 0.0);
+  this->m_bReversed = KeyValues::GetInt(pKV, "reversed", 0) == 1;
+  this->m_linearForce = KeyValues::GetFloat(pKV, "force", 0.0);
+  this->m_vStart.x = KeyValues::GetFloat(pKV, "sp_x", 0.0);
+  this->m_vStart.y = KeyValues::GetFloat(pKV, "sp_y", 0.0);
+  this->m_vStart.z = KeyValues::GetFloat(pKV, "sp_z", 0.0);
+  this->m_vEnd.x = KeyValues::GetFloat(pKV, "ep_x", 0.0);
+  this->m_vEnd.y = KeyValues::GetFloat(pKV, "ep_y", 0.0);
+  vecMax.x = 16384.0;
+  vecMax.y = 16384.0;
+  vecMax.z = 16384.0;
+  vecMin.x = -16384.0;
+  vecMin.y = -16384.0;
+  vecMin.z = -16384.0;
+  this->m_vEnd.z = KeyValues::GetFloat(pKV, "ep_z", 0.0);
+  C_BaseEntity::SetSize((C_BaseEntity *const)this, &vecMin, &vecMax);
+  this->m_pMaterial1 = (IMaterial *)(*(int (__cdecl **)(IMaterialSystem *, void *, _DWORD, _DWORD, _DWORD))(*(_DWORD *)materials + 328))(
+                                      materials,
+                                      &unk_12E8D9C,
+                                      0,
+                                      0,
+                                      0);
+  this->m_pMaterial2 = (IMaterial *)(*(int (__cdecl **)(IMaterialSystem *, const char *, _DWORD, _DWORD, _DWORD))(*(_DWORD *)materials + 328))(
+                                      materials,
+                                      "effects/tractor_beam2",
+                                      0,
+                                      0,
+                                      0);
+  this->m_pMaterial3 = (IMaterial *)(*(int (__cdecl **)(IMaterialSystem *, const char *, _DWORD, _DWORD, _DWORD))(*(_DWORD *)materials + 328))(
+                                      materials,
+                                      "effects/tractor_beam3",
+                                      0,
+                                      0,
+                                      0);
+}

@@ -5466,6 +5466,9 @@ void CTriggerSoundOperator::EndTouch( CBaseEntity *pOther )
 //------------------------------------------------------------------------------
 // Base VPhysics trigger implementation
 //------------------------------------------------------------------------------
+IMPLEMENT_SERVERCLASS_ST( CBaseVPhysicsTrigger, DT_BaseVPhysicsTrigger )
+	//RecvPropBool	( RECVINFO( m_bDisabled ) )
+END_SEND_TABLE()
 //------------------------------------------------------------------------------
 // Save/load
 //------------------------------------------------------------------------------

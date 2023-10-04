@@ -1,0 +1,8 @@
+void __cdecl C_PropTractorBeamProjector::Spawn(C_PropTractorBeamProjector *const this)
+{
+  C_BaseEntity::Spawn(this);
+  (*((void (__cdecl **)(C_PropTractorBeamProjector *const, int))this->_vptr_IHandleEntity + 160))(this, -996040704);
+  this->m_bEffectsActive = 0;
+  this->m_bActivated = 0;
+  this->m_bNoEmitterParticles = 1;
+}

@@ -3,10 +3,9 @@
 #include "soundenvelope.h"
 #include "trigger_tractorbeam_shared.h"
 
-#ifndef NO_TRACTORBEAM_CLIENTCLASS
+
 IMPLEMENT_SERVERCLASS_ST( ProjectedEntityAmbientSoundProxy, DT_ProjectedEntityAmbientSoundProxy )
 END_SEND_TABLE()
-#endif
 
 LINK_ENTITY_TO_CLASS( projected_entity_ambient_sound_proxy, ProjectedEntityAmbientSoundProxy )
 
@@ -58,17 +57,15 @@ END_DATADESC()
 
 LINK_ENTITY_TO_CLASS( prop_tractor_beam, CPropTractorBeamProjector )
 
-#ifndef NO_TRACTORBEAM_CLIENTCLASS
 IMPLEMENT_SERVERCLASS_ST( CPropTractorBeamProjector, DT_PropTractorBeamProjector )
 
-SendPropFloat( SENDINFO( m_flLinearForce ) ),
-SendPropBool( SENDINFO( m_bNoEmitterParticles ) ),
-SendPropBool( SENDINFO( bDisableAutoReprojection ) ),
+	SendPropFloat( SENDINFO( m_flLinearForce ) ),
+	SendPropBool( SENDINFO( m_bNoEmitterParticles ) ),
+	//SendPropBool( SENDINFO( bDisableAutoReprojection ) ),
 
-SendPropVector( SENDINFO( m_vEndPos ) ),
+	SendPropVector( SENDINFO( m_vEndPos ) ),
 
 END_SEND_TABLE()
-#endif
 
 CPropTractorBeamProjector::CPropTractorBeamProjector()
 {

@@ -1,0 +1,95 @@
+int __cdecl C_Trigger_TractorBeam::DrawModel(
+        C_Trigger_TractorBeam *const this,
+        int flags,
+        const RenderableInstance_t *const instance)
+{
+  int m_nValue; // eax
+  long double v4; // fst7
+  float m_flStartTime; // xmm0_4
+  __m128 v6; // xmm1
+  __m128 v7; // xmm3
+  float v8; // xmm2_4
+  float v9; // xmm1_4
+  float v10; // xmm0_4
+  float v11; // xmm2_4
+  int v13; // [esp+34h] [ebp-84h]
+  float flLength; // [esp+3Ch] [ebp-7Ch]
+  matrix3x4_t xform; // [esp+40h] [ebp-78h] BYREF
+  Vector vDir; // [esp+70h] [ebp-48h] BYREF
+  QAngle angles; // [esp+7Ch] [ebp-3Ch] BYREF
+  Vector xAxis; // [esp+88h] [ebp-30h] BYREF
+  Vector yAxis; // [esp+94h] [ebp-24h] BYREF
+
+  if ( !(_BYTE)`guard variable for'C_Trigger_TractorBeam::DrawModel(int,RenderableInstance_t const&)::gpu_level
+    && _cxa_guard_acquire(&`guard variable for'C_Trigger_TractorBeam::DrawModel(int,RenderableInstance_t const&)::gpu_level) )
+  {
+    ConVarRef::ConVarRef(&C_Trigger_TractorBeam::DrawModel(int,RenderableInstance_t const&)::gpu_level, "gpu_level");
+    _cxa_guard_release(&`guard variable for'C_Trigger_TractorBeam::DrawModel(int,RenderableInstance_t const&)::gpu_level);
+  }
+  vDir.x = this->m_vEnd.x - this->m_vStart.x;
+  m_nValue = C_Trigger_TractorBeam::DrawModel(int,RenderableInstance_t const&)::gpu_level.m_pConVarState->m_Value.m_nValue;
+  vDir.y = this->m_vEnd.y - this->m_vStart.y;
+  v13 = m_nValue;
+  vDir.z = this->m_vEnd.z - this->m_vStart.z;
+  v4 = VectorNormalize(&vDir);
+  m_flStartTime = this->m_flStartTime;
+  flLength = v4;
+  v6 = (__m128)0x3F000000u;
+  v8 = gpGlobals->curtime - m_flStartTime;
+  if ( v8 < 0.5 )
+  {
+    v6.m128_f32[0] = m_flStartTime + 0.5;
+    if ( m_flStartTime == v6.m128_f32[0] )
+    {
+      v7.m128_i32[0] = LODWORD(gpGlobals->curtime);
+      flLength = COERCE_FLOAT(_mm_cmple_ss(v6, v7).m128_u32[0] & 0x3F800000) * flLength;
+    }
+    else
+    {
+      v9 = v6.m128_f32[0] - m_flStartTime;
+      v10 = 0.0;
+      v11 = v8 / v9;
+      if ( v11 >= 0.0 )
+      {
+        v10 = 1.0;
+        if ( v11 <= 1.0 )
+          v10 = (float)((float)(3.0 * (float)(v11 * v11))
+                      - (float)((float)((float)(v11 * v11) + (float)(v11 * v11)) * v11))
+              + 0.0;
+      }
+      flLength = v10 * flLength;
+    }
+  }
+  VectorAngles(&vDir, &angles);
+  AngleMatrix(&angles, &this->m_vStart, &xform);
+  MatrixGetColumn(&xform, 2, &xAxis);
+  MatrixGetColumn(&xform, 1, &yAxis);
+  C_Trigger_TractorBeam::DrawColumn(
+    this,
+    this->m_pMaterial1,
+    &this->m_vStart,
+    &vDir,
+    flLength,
+    &xAxis,
+    &yAxis,
+    58.0,
+    1.0,
+    this->m_bFromPortal,
+    this->m_bToPortal,
+    0.0);
+  if ( v13 > 1 )
+    C_Trigger_TractorBeam::DrawColumn(
+      this,
+      this->m_pMaterial2,
+      &this->m_vStart,
+      &vDir,
+      flLength,
+      &xAxis,
+      &yAxis,
+      60.0,
+      1.0,
+      this->m_bFromPortal,
+      this->m_bToPortal,
+      0.0);
+  return 1;
+}

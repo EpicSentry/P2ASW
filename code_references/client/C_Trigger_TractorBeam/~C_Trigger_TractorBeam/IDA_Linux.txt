@@ -1,0 +1,89 @@
+void __cdecl C_Trigger_TractorBeam::~C_Trigger_TractorBeam(C_Trigger_TractorBeam *const this)
+{
+  CNewParticleEffect *m_pObject; // edx
+  CUtlReference<CNewParticleEffect> *m_pPrev; // eax
+  CUtlReference<CNewParticleEffect> *m_pNext; // eax
+  int v4; // eax
+  int v5; // edx
+  CUtlReference<CNewParticleEffect> *v6; // eax
+
+  this->_vptr_IHandleEntity = (int (**)(...))off_12E9668;
+  this->_vptr_IClientRenderable = (int (**)(...))off_12E9A2C;
+  this->_vptr_IClientNetworkable = (int (**)(...))off_12E9AE8;
+  this->_vptr_IClientThinkable = (int (**)(...))off_12E9B28;
+  this->_vptr_IClientModelRenderable = (int (**)(...))&off_12E9B44;
+  this->_vptr_IMotionEvent = (int (**)(...))&off_12E9B50;
+  this->_vptr_ITriggerTractorBeamAutoList = (int (**)(...))off_12E9B5C;
+  C_Trigger_TractorBeam::RemoveAllBlobsFromBeam(this);
+  m_pObject = this->m_hCoreEffect.m_pObject;
+  if ( m_pObject )
+  {
+    m_pPrev = this->m_hCoreEffect.m_pPrev;
+    if ( m_pPrev )
+    {
+      m_pPrev->m_pNext = this->m_hCoreEffect.m_pNext;
+      m_pNext = this->m_hCoreEffect.m_pNext;
+      if ( m_pNext )
+        m_pNext->m_pPrev = this->m_hCoreEffect.m_pPrev;
+    }
+    else if ( m_pObject->m_References.m_pHead == &this->m_hCoreEffect )
+    {
+      v6 = this->m_hCoreEffect.m_pNext;
+      m_pObject->m_References.m_pHead = v6;
+      if ( v6 )
+        v6->m_pPrev = 0;
+    }
+    this->m_hCoreEffect.m_pPrev = 0;
+    this->m_hCoreEffect.m_pNext = 0;
+    this->m_hCoreEffect.m_pObject = 0;
+  }
+  this->m_blobs.m_Size = 0;
+  if ( this->m_blobs.m_Memory.m_nGrowSize < 0 )
+  {
+    this->m_blobs.m_pElements = this->m_blobs.m_Memory.m_pMemory;
+  }
+  else
+  {
+    if ( this->m_blobs.m_Memory.m_pMemory )
+    {
+      (*(void (__cdecl **)(_DWORD, C_PaintBlob **))(*g_pMemAlloc + 8))(g_pMemAlloc, this->m_blobs.m_Memory.m_pMemory);
+      this->m_blobs.m_Memory.m_pMemory = 0;
+    }
+    this->m_blobs.m_Memory.m_nAllocationCount = 0;
+    this->m_blobs.m_pElements = 0;
+  }
+  this->_vptr_ITriggerTractorBeamAutoList = (int (**)(...))off_12E9120;
+  if ( ITriggerTractorBeamAutoList::m_ITriggerTractorBeamAutoListAutoList.m_Size > 0 )
+  {
+    v4 = 0;
+    if ( &this->ITriggerTractorBeamAutoList == (ITriggerTractorBeamAutoList *)*(C_Trigger_TractorBeam *const *)ITriggerTractorBeamAutoList::m_ITriggerTractorBeamAutoListAutoList.m_Memory.m_pMemory )
+    {
+LABEL_17:
+      v5 = ITriggerTractorBeamAutoList::m_ITriggerTractorBeamAutoListAutoList.m_Size - 1;
+      if ( v4 != ITriggerTractorBeamAutoList::m_ITriggerTractorBeamAutoListAutoList.m_Size - 1 )
+      {
+        ITriggerTractorBeamAutoList::m_ITriggerTractorBeamAutoListAutoList.m_Memory.m_pMemory[v4] = ITriggerTractorBeamAutoList::m_ITriggerTractorBeamAutoListAutoList.m_Memory.m_pMemory[v5];
+        v5 = ITriggerTractorBeamAutoList::m_ITriggerTractorBeamAutoListAutoList.m_Size - 1;
+      }
+      ITriggerTractorBeamAutoList::m_ITriggerTractorBeamAutoListAutoList.m_Size = v5;
+    }
+    else
+    {
+      while ( ++v4 != ITriggerTractorBeamAutoList::m_ITriggerTractorBeamAutoListAutoList.m_Size )
+      {
+        if ( &this->ITriggerTractorBeamAutoList == ITriggerTractorBeamAutoList::m_ITriggerTractorBeamAutoListAutoList.m_Memory.m_pMemory[v4] )
+        {
+          if ( v4 == -1 )
+            break;
+          goto LABEL_17;
+        }
+      }
+    }
+  }
+  this->_vptr_IHandleEntity = (int (**)(...))off_123AD88;
+  this->_vptr_IClientRenderable = (int (**)(...))off_123B140;
+  this->_vptr_IClientNetworkable = (int (**)(...))off_123B1FC;
+  this->_vptr_IClientThinkable = (int (**)(...))off_123B23C;
+  this->_vptr_IClientModelRenderable = (int (**)(...))&off_123B258;
+  C_BaseEntity::~C_BaseEntity((C_BaseEntity *const)this);
+}

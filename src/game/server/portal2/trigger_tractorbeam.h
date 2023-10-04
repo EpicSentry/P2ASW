@@ -8,7 +8,6 @@
 
 //#include "trigger_tractorbeam_shared.h"
 
-#define NO_CLIENT_TRACTOR_BEAM
 
 class CTrigger_TractorBeam;
 class CPaintBlob;
@@ -19,9 +18,7 @@ class CProjectedTractorBeamEntity : public CBaseProjectedEntity
 public:
 
 	DECLARE_CLASS( CProjectedTractorBeamEntity, CBaseProjectedEntity );
-#ifndef NO_CLIENT_TRACTOR_BEAM
 	DECLARE_SERVERCLASS();
-#endif
 	DECLARE_DATADESC();
     CProjectedTractorBeamEntity();
     ~CProjectedTractorBeamEntity();
@@ -49,12 +46,10 @@ class CTrigger_TractorBeam : public CBaseVPhysicsTrigger, public IMotionEvent, p
 public:
 	DECLARE_CLASS( CTrigger_TractorBeam, CBaseVPhysicsTrigger )
 	DECLARE_DATADESC()
-#ifndef NO_CLIENT_TRACTOR_BEAM
 	DECLARE_SERVERCLASS();
-#endif
+
 	CTrigger_TractorBeam();
-    ~CTrigger_TractorBeam();
-    
+    ~CTrigger_TractorBeam();    
 	void Spawn();
     void Precache();
     void Activate();
@@ -89,9 +84,9 @@ public:
     void RemoveChangedBeamBlobs();
     void RemoveAllBlobsFromBeam();
 
-	float GetBeamRadius();
+	float GetBeamRadius() { return m_flRadius; }
 
-	bool HasGravityScale();
+	bool HasGravityScale() { return m_gravityScale > 0.0; }
 	bool HasAirDensity();
 	bool HasLinearLimit();
 	bool HasLinearScale();

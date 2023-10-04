@@ -1,0 +1,4 @@
+void __cdecl C_Trigger_TractorBeam::PhysicsSimulate(C_Trigger_TractorBeam *const this)
+{
+  C_BaseEntity::PhysicsSimulate((C_BaseEntity *const)this);
+}

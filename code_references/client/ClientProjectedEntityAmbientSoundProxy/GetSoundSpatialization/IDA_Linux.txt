@@ -1,0 +1,126 @@
+bool __cdecl ClientProjectedEntityAmbientSoundProxy::GetSoundSpatialization(
+        ClientProjectedEntityAmbientSoundProxy *const this,
+        SpatializationInfo_t *const info)
+{
+  unsigned int m_Index; // eax
+  char *v3; // edx
+  const C_BaseProjector *v4; // ebx
+  const C_BaseProjectedEntity *FirstProjectedEntity; // eax
+  bool v6; // bl
+  const C_BaseProjectedEntity *v7; // esi
+  unsigned int v8; // eax
+  char *v9; // edx
+  CUtlVector<Vector,CUtlMemory<Vector,int> > *m_pUtlVecMultiOrigins; // esi
+  int v11; // edi
+  int v12; // ecx
+  _DWORD *p_x; // eax
+  _DWORD *v14; // edx
+  int v15; // esi
+  int v17; // ebx
+  int v18; // eax
+  Vector *v19; // eax
+  int num; // [esp+14h] [ebp-44h]
+  const Vector *originsBase_0; // [esp+18h] [ebp-40h]
+  int point; // [esp+1Ch] [ebp-3Ch]
+  const Vector *originsBase[2]; // [esp+20h] [ebp-38h] BYREF
+  int v24; // [esp+28h] [ebp-30h]
+  int elem; // [esp+2Ch] [ebp-2Ch]
+  const Vector *v26; // [esp+30h] [ebp-28h]
+  Vector v27; // [esp+34h] [ebp-24h] BYREF
+
+  m_Index = this->m_pMoveParent.m_Index;
+  if ( m_Index == -1 )
+    return 0;
+  v3 = (char *)g_pEntityList + 16 * (unsigned __int16)m_Index;
+  if ( *((_DWORD *)v3 + 2) != HIWORD(m_Index) )
+    return 0;
+  v4 = (const C_BaseProjector *)*((_DWORD *)v3 + 1);
+  if ( !v4 || !info->pOrigin )
+    return 0;
+  originsBase[0] = 0;
+  v24 = 0;
+  elem = 0;
+  v26 = 0;
+  originsBase[1] = (const Vector *)&loc_3;
+  originsBase[0] = (const Vector *)(*(int (__cdecl **)(_DWORD, int))*g_pMemAlloc)(g_pMemAlloc, 36);
+  v26 = originsBase[0];
+  FirstProjectedEntity = C_BaseProjector::GetFirstProjectedEntity(v4);
+  v6 = 0;
+  v7 = FirstProjectedEntity;
+  if ( FirstProjectedEntity )
+  {
+    do
+    {
+      if ( !(*((unsigned __int8 (__cdecl **)(const C_BaseProjectedEntity *))v7->_vptr_IHandleEntity + 79))(v7) )
+      {
+        ClosestPointOnProjectedEntityToPoint(&v27, v7, &info->info.vListenerOrigin);
+        v17 = elem;
+        CUtlVector<Vector,CUtlMemory<Vector,int>>::GrowVector(
+          (CUtlVector<Vector,CUtlMemory<Vector,int> > *const)originsBase,
+          1);
+        CUtlVector<Vector,CUtlMemory<Vector,int>>::ShiftElementsRight(
+          (CUtlVector<Vector,CUtlMemory<Vector,int> > *const)originsBase,
+          v17,
+          1);
+        v18 = v17;
+        v6 = 1;
+        v19 = (Vector *)&originsBase[0][v18];
+        if ( v19 )
+          *v19 = v27;
+      }
+      v8 = v7->m_hChildSegment.m_Index;
+      if ( v8 == -1 )
+        break;
+      v9 = (char *)g_pEntityList + 16 * (unsigned __int16)v8;
+      if ( *((_DWORD *)v9 + 2) != HIWORD(v8) )
+        break;
+      v7 = (const C_BaseProjectedEntity *)*((_DWORD *)v9 + 1);
+    }
+    while ( v7 );
+    if ( v6 )
+    {
+      *info->pOrigin = *originsBase[0];
+      m_pUtlVecMultiOrigins = info->m_pUtlVecMultiOrigins;
+      if ( m_pUtlVecMultiOrigins )
+      {
+        v11 = elem;
+        if ( elem > 1 )
+        {
+          point = m_pUtlVecMultiOrigins->m_Size;
+          originsBase_0 = originsBase[0];
+          if ( point < elem + point - 1 )
+          {
+            num = elem - 1;
+            CUtlVector<Vector,CUtlMemory<Vector,int>>::GrowVector(m_pUtlVecMultiOrigins, elem - 1);
+            CUtlVector<Vector,CUtlMemory<Vector,int>>::ShiftElementsRight(m_pUtlVecMultiOrigins, point, num);
+            m_pUtlVecMultiOrigins = info->m_pUtlVecMultiOrigins;
+          }
+          v12 = -1431655765 * ((12 * v11 - 12) >> 2);
+          p_x = (_DWORD *)&m_pUtlVecMultiOrigins->m_Memory.m_pMemory[point].x;
+          v14 = (_DWORD *)&originsBase_0[1].x;
+          if ( v12 > 0 )
+          {
+            do
+            {
+              *p_x = *v14;
+              p_x[1] = v14[1];
+              v15 = v14[2];
+              v14 += 3;
+              p_x[2] = v15;
+              p_x += 3;
+              --v12;
+            }
+            while ( v12 );
+          }
+        }
+      }
+    }
+  }
+  elem = 0;
+  if ( v24 >= 0 )
+  {
+    if ( originsBase[0] )
+      (*(void (__cdecl **)(_DWORD, const Vector *))(*g_pMemAlloc + 8))(g_pMemAlloc, originsBase[0]);
+  }
+  return v6;
+}

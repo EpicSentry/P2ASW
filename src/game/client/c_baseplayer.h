@@ -374,6 +374,7 @@ public:
 	// Get the command number associated with the current usercmd we're running (if in predicted code).
 	int CurrentCommandNumber() const;
 	const CUserCmd *GetCurrentUserCommand() const;
+	CUserCmd const *GetLastUserCommand( void );
 
 	virtual const QAngle&	GetPunchAngle();
 	void SetPunchAngle( const QAngle &angle );
@@ -521,7 +522,9 @@ private:
 
 public:
 	EHANDLE					m_hZoomOwner;		// This is a pointer to the entity currently controlling the player's zoom
-private:
+protected:
+
+	CUserCmd					m_LastCmd;
 
 	unsigned int			m_afPhysicsFlags;
 	EHANDLE					m_hVehicle;
@@ -827,5 +830,9 @@ inline bool	C_BasePlayer::IsLocalPlayer( void ) const
 	return m_bIsLocalPlayer;
 }
 
+inline CUserCmd const *C_BasePlayer::GetLastUserCommand( void )
+{
+	return &m_LastCmd;
+}
 
 #endif // C_BASEPLAYER_H

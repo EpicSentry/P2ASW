@@ -1,0 +1,63 @@
+void __cdecl C_PropTractorBeamProjector::RecvProxy_Enabled(
+        const CRecvProxyData *pData,
+        C_PropTractorBeamProjector *pStruct)
+{
+  bool v2; // al
+  float m_flLinearForce; // xmm6_4
+  C_PropTractorBeamProjector *v4; // ecx
+  char *v5; // xmm0_4
+  bool v6; // zf
+
+  v2 = pData->m_Value.m_Int == 1;
+  if ( pStruct->m_bEnabled == v2 )
+    goto LABEL_10;
+  pStruct->m_bEnabled = pData->m_Value.m_Int == 1;
+  if ( !v2 )
+  {
+    pStruct->m_flRotationStart = C_PropTractorBeamProjector::CalculateRotationPose(pStruct);
+    pStruct->m_flRotationStartTime = *(float *)(gpGlobals.m_Index + 12);
+    LODWORD(pStruct->m_flRotationDuration) = FLOAT_1_5;
+    pStruct->m_flRotationTarget = 0.0;
+    pStruct->m_flArmatureStart = C_PropTractorBeamProjector::CalculateArmaturePose(pStruct);
+    LODWORD(pStruct->m_flArmatureTarget) = FLOAT_0_5;
+    LODWORD(pStruct->m_flArmatureDuration) = FLOAT_1_5;
+    pStruct->m_flArmatureStartTime = *(float *)(gpGlobals.m_Index + 12);
+    C_PropTractorBeamProjector::StopEffect(pStruct);
+    goto LABEL_10;
+  }
+  pStruct->m_flRotationStart = C_PropTractorBeamProjector::CalculateRotationPose(pStruct);
+  m_flLinearForce = pStruct->m_flLinearForce;
+  pStruct->m_flRotationStartTime = *(float *)(gpGlobals.m_Index + 12);
+  LODWORD(pStruct->m_flRotationDuration) = FLOAT_0_25;
+  pStruct->m_flRotationTarget = m_flLinearForce * 0.0083333338;
+  pStruct->m_flArmatureStart = C_PropTractorBeamProjector::CalculateArmaturePose(pStruct);
+  v5 = m_flLinearForce <= 0.0 ? 0 : FLOAT_1_0;
+  v6 = !pStruct->m_bEffectsActive;
+  LODWORD(pStruct->m_flArmatureTarget) = v5;
+  pStruct->m_flArmatureDuration = FLOAT_0_75;
+  pStruct->m_flArmatureStartTime = *(float *)(gpGlobals.m_Index + 12);
+  if ( !v6 )
+  {
+LABEL_10:
+    if ( pStruct->m_bActivated )
+      return;
+    goto LABEL_11;
+  }
+  if ( pStruct->m_bActivated )
+  {
+    C_PropTractorBeamProjector::CreateEffect(v4);
+    goto LABEL_10;
+  }
+LABEL_11:
+  if ( !pStruct->m_bEnabled )
+  {
+    pStruct->m_flRotationStart = C_PropTractorBeamProjector::CalculateRotationPose(pStruct);
+    pStruct->m_flRotationStartTime = *(float *)(gpGlobals.m_Index + 12);
+    pStruct->m_flRotationDuration = 0.0;
+    pStruct->m_flRotationTarget = 0.0;
+    pStruct->m_flArmatureStart = C_PropTractorBeamProjector::CalculateArmaturePose(pStruct);
+    LODWORD(pStruct->m_flArmatureTarget) = FLOAT_0_5;
+    pStruct->m_flArmatureDuration = 0.0;
+    pStruct->m_flArmatureStartTime = *(float *)(gpGlobals.m_Index + 12);
+  }
+}

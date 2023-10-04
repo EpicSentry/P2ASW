@@ -1,0 +1,5 @@
+void __thiscall C_PropTractorBeamProjector::UpdateOnRemove(C_PropTractorBeamProjector *this)
+{
+  C_PropTractorBeamProjector::StopEffect(this);
+  C_BaseEntity::UpdateOnRemove(this);
+}

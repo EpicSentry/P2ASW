@@ -1,0 +1,27 @@
+void __thiscall C_Trigger_TractorBeam::~C_Trigger_TractorBeam(C_Trigger_TractorBeam *this)
+{
+  ITriggerTractorBeamAutoList *v2; // ebx
+  CNewParticleEffect *m_pObject; // eax
+
+  v2 = &this->ITriggerTractorBeamAutoList;
+  this->C_BaseVPhysicsTrigger::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable = (C_Trigger_TractorBeam_vtbl *)&C_Trigger_TractorBeam::`vftable'{for `IClientUnknown'};
+  this->C_BaseVPhysicsTrigger::C_BaseEntity::IClientEntity::IClientRenderable::__vftable = (IClientRenderable_vtbl *)&C_Trigger_TractorBeam::`vftable'{for `IClientRenderable'};
+  this->C_BaseVPhysicsTrigger::C_BaseEntity::IClientEntity::IClientNetworkable::__vftable = (IClientNetworkable_vtbl *)&C_Trigger_TractorBeam::`vftable'{for `IClientNetworkable'};
+  this->C_BaseVPhysicsTrigger::C_BaseEntity::IClientEntity::IClientThinkable::__vftable = (IClientThinkable_vtbl *)&C_Trigger_TractorBeam::`vftable'{for `IClientThinkable'};
+  this->C_BaseVPhysicsTrigger::C_BaseEntity::IClientModelRenderable::__vftable = (IClientModelRenderable_vtbl *)&C_Trigger_TractorBeam::`vftable'{for `C_BaseVPhysicsTrigger'};
+  this->IMotionEvent::__vftable = (IMotionEvent_vtbl *)&C_Trigger_TractorBeam::`vftable'{for `IMotionEvent'};
+  this->ITriggerTractorBeamAutoList::__vftable = (ITriggerTractorBeamAutoList_vtbl *)&C_Trigger_TractorBeam::`vftable'{for `ITriggerTractorBeamAutoList'};
+  C_Trigger_TractorBeam::RemoveAllBlobsFromBeam(this);
+  m_pObject = this->m_hCoreEffect.m_pObject;
+  if ( m_pObject )
+  {
+    CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(
+      (CUtlIntrusiveDList<CUtlReference<CSheet> > *)&m_pObject->m_References,
+      (CUtlReference<CSheet> *)&this->m_hCoreEffect);
+    this->m_hCoreEffect.m_pObject = 0;
+  }
+  CUtlVector<VideoPanel *,CUtlMemory<VideoPanel *,int>>::~CUtlVector<VideoPanel *,CUtlMemory<VideoPanel *,int>>((CUtlVector<vgui::CTreeViewListControl::CColumnInfo,CUtlMemory<vgui::CTreeViewListControl::CColumnInfo,int> > *)&this->m_blobs);
+  v2->__vftable = (ITriggerTractorBeamAutoList_vtbl *)&ITriggerTractorBeamAutoList::`vftable';
+  ITriggerTractorBeamAutoList::Remove(v2);
+  C_BaseEntity::~C_BaseEntity(this);
+}

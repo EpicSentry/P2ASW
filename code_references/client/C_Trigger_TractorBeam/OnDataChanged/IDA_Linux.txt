@@ -1,0 +1,48 @@
+void __cdecl C_Trigger_TractorBeam::OnDataChanged(C_Trigger_TractorBeam *const this, DataUpdateType_t updateType)
+{
+  DataUpdateType_t v2; // esi
+  IPhysicsMotionController *v3; // eax
+  CBaseEntityList *v4; // ecx
+  unsigned int m_Index; // eax
+  char *v6; // edx
+  float m_linearForce; // xmm0_4
+  const Vector *v8; // edi
+  const Vector *v9; // eax
+
+  v2 = updateType;
+  C_BaseEntity::OnDataChanged((C_BaseEntity *const)this, updateType);
+  if ( updateType )
+  {
+    if ( !this->m_bRecreateParticles )
+      return;
+    this->m_bRecreateParticles = 0;
+  }
+  else
+  {
+    C_BaseEntity::AddEffects((C_BaseEntity *const)this, 1024);
+    if ( physenv && !this->m_pController )
+    {
+      v3 = (IPhysicsMotionController *)(*((int (__cdecl **)(IPhysicsEnvironment *, IMotionEvent *))physenv->_vptr_IPhysicsEnvironment
+                                        + 30))(
+                                         physenv,
+                                         &this->IMotionEvent);
+      v4 = g_pEntityList;
+      this->m_pController = v3;
+      m_Index = this->m_hOwnerEntity.m_Index;
+      if ( m_Index != -1 )
+      {
+        v6 = (char *)v4 + 16 * (unsigned __int16)m_Index;
+        if ( *((_DWORD *)v6 + 2) == HIWORD(m_Index) )
+          v2 = *((_DWORD *)v6 + 1);
+      }
+      m_linearForce = this->m_linearForce;
+      if ( this->m_bReversed )
+        m_linearForce = -m_linearForce;
+      v8 = (const Vector *)(*(int (__thiscall **)(CBaseEntityList *, DataUpdateType_t))(*(_DWORD *)v2 + 948))(v4, v2);
+      v9 = (const Vector *)(*(int (__cdecl **)(DataUpdateType_t))(*(_DWORD *)v2 + 944))(v2);
+      C_Trigger_TractorBeam::UpdateBeam(this, v9, v8, m_linearForce);
+      this->m_hProxyEntity.m_Index = *(_DWORD *)(*(int (__cdecl **)(DataUpdateType_t))(*(_DWORD *)v2 + 12))(v2);
+    }
+  }
+  C_Trigger_TractorBeam::CreateParticles(this);
+}

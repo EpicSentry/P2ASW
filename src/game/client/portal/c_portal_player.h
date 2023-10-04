@@ -264,7 +264,7 @@ public:
 	bool m_bSilentDropAndPickup;
 	void ForceDropOfCarriedPhysObjects( CBaseEntity *pOnlyIfHoldingThis );
 	void PickupObject(CBaseEntity *pObject, bool bLimitMassAndSize );
-#if 0
+#ifndef NO_TRACTOR_BEAM
 	void SetInTractorBeam( C_Trigger_TractorBeam *pTractorBeam );
 	void SetLeaveTractorBeam( C_Trigger_TractorBeam *pTractorBeam, bool bKeepFloating );
 	C_Trigger_TractorBeam* GetTractorBeam( void ) const { return m_PortalLocal.m_hTractorBeam.Get(); }

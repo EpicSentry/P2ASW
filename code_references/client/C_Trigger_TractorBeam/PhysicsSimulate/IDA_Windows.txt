@@ -1,0 +1,5 @@
+// attributes: thunk
+void __thiscall C_Trigger_TractorBeam::PhysicsSimulate(C_Trigger_TractorBeam *this)
+{
+  C_BaseEntity::PhysicsSimulate(this);
+}

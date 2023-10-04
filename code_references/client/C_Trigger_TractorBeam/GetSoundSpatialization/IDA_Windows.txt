@@ -1,0 +1,58 @@
+char __thiscall C_Trigger_TractorBeam::GetSoundSpatialization(C_Trigger_TractorBeam *this, SpatializationInfo_t *info)
+{
+  C_Trigger_TractorBeam *v2; // edi
+  SpatializationInfo_t *v4; // ebx
+  Vector *pOrigin; // eax
+  float *p_x; // esi
+  const Vector *p_m_vStart; // edi
+  float *v8; // eax
+  double z; // st7
+  float *v10; // esi
+  float *v11; // eax
+  const Vector *p_m_vEnd; // [esp-14h] [ebp-1Ch]
+
+  v2 = this;
+  if ( this->IsDormant(&this->IClientNetworkable) )
+    return 0;
+  v4 = info;
+  pOrigin = info->pOrigin;
+  if ( pOrigin )
+  {
+    p_x = &v2->m_vEnd.x;
+    p_m_vEnd = &v2->m_vEnd;
+    p_m_vStart = &v2->m_vStart;
+    CalcClosestPointOnLine(&info->info.vListenerOrigin, p_m_vStart, p_m_vEnd, pOrigin, (float *)&info);
+    if ( *(float *)&info >= 0.0 )
+    {
+      if ( *(float *)&info <= 1.0 )
+      {
+LABEL_9:
+        v2 = this;
+        goto LABEL_10;
+      }
+      v8 = &v4->pOrigin->x;
+      *v8 = *p_x;
+      v8[1] = p_x[1];
+      z = p_x[2];
+    }
+    else
+    {
+      v8 = &v4->pOrigin->x;
+      *v8 = p_m_vStart->x;
+      v8[1] = p_m_vStart->y;
+      z = p_m_vStart->z;
+    }
+    v8[2] = z;
+    goto LABEL_9;
+  }
+LABEL_10:
+  v10 = &v4->pAngles->x;
+  if ( v10 )
+  {
+    v11 = (float *)v2->m_Collision.GetCollisionAngles(&v2->m_Collision);
+    *v10 = *v11;
+    v10[1] = v11[1];
+    v10[2] = v11[2];
+  }
+  return 1;
+}

@@ -1,0 +1,54 @@
+double __thiscall C_PropTractorBeamProjector::CalculateRotationPose(C_PropTractorBeamProjector *this)
+{
+  float m_flRotationDuration; // xmm2_4
+  float v2; // xmm0_4
+  float m_flRotationStartTime; // xmm3_4
+  float v5; // xmm1_4
+  float m_flRotationStart; // xmm1_4
+  float v7; // xmm0_4
+  bool v8; // cc
+  float flRotationPose; // [esp+0h] [ebp-4h]
+
+  m_flRotationDuration = this->m_flRotationDuration;
+  v2 = *(float *)(gpGlobals.m_Index + 12);
+  if ( v2 > (float)(this->m_flRotationStartTime + m_flRotationDuration) )
+    return this->m_flRotationTarget;
+  m_flRotationStartTime = this->m_flRotationStartTime;
+  v5 = m_flRotationStartTime + m_flRotationDuration;
+  if ( m_flRotationStartTime == (float)(m_flRotationStartTime + m_flRotationDuration) )
+  {
+    if ( v2 < v5 )
+      m_flRotationStart = this->m_flRotationStart;
+    else
+      m_flRotationStart = this->m_flRotationTarget;
+  }
+  else
+  {
+    m_flRotationStart = (float)((float)((float)((float)((float)((float)(v2 - m_flRotationStartTime)
+                                                              / (float)(v5 - m_flRotationStartTime))
+                                                      * (float)((float)(v2 - m_flRotationStartTime)
+                                                              / (float)(v5 - m_flRotationStartTime)))
+                                              * 3.0)
+                                      - (float)((float)((float)((float)((float)(v2 - m_flRotationStartTime)
+                                                                      / (float)(v5 - m_flRotationStartTime))
+                                                              * (float)((float)(v2 - m_flRotationStartTime)
+                                                                      / (float)(v5 - m_flRotationStartTime)))
+                                                      * 2.0)
+                                              * (float)((float)(v2 - m_flRotationStartTime)
+                                                      / (float)(v5 - m_flRotationStartTime))))
+                              * (float)(this->m_flRotationTarget - this->m_flRotationStart))
+                      + this->m_flRotationStart;
+  }
+  v7 = this->m_flLinearForce * 0.0083333338;
+  flRotationPose = m_flRotationStart;
+  if ( v7 != 0.0 )
+  {
+    if ( v7 >= 0.0 )
+      v8 = m_flRotationStart <= v7;
+    else
+      v8 = v7 <= m_flRotationStart;
+    if ( !v8 )
+      return (float)(this->m_flLinearForce * 0.0083333338);
+  }
+  return flRotationPose;
+}

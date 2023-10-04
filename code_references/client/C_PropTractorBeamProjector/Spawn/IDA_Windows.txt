@@ -1,0 +1,7 @@
+void __thiscall C_PropTractorBeamProjector::Spawn(C_PropTractorBeamProjector *this)
+{
+  C_Prop_Portal::Fizzle((vgui::PropertyPage *)this);
+  ((void (__thiscall *)(C_PropTractorBeamProjector *, _DWORD))this->SetNextClientThink)(this, LODWORD(FLOAT_N1293_0));
+  *(_WORD *)&this->m_bEffectsActive = 0;
+  this->m_bNoEmitterParticles = 1;
+}

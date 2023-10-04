@@ -11,7 +11,7 @@
 #endif
 
 #ifdef CLIENT_DLL
-#define NO_TRACTOR_BEAM
+//#define NO_TRACTOR_BEAM
 #endif
 
 

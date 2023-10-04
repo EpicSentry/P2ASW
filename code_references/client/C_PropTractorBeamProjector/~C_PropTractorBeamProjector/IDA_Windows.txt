@@ -1,0 +1,36 @@
+void __thiscall C_PropTractorBeamProjector::~C_PropTractorBeamProjector(C_PropTractorBeamProjector *this)
+{
+  C_PropTractorBeamProjector *v1; // eax
+  int i; // ebx
+  CNewParticleEffect *m_pObject; // esi
+  _DWORD *p_GetIClientUnknown; // edx
+  C_PropTractorBeamProjector_vtbl *v5; // edx
+
+  v1 = this + 1;
+  for ( i = 2; i >= 0; --i )
+  {
+    m_pObject = v1[-1].m_hEmitterEffect[2].m_pObject;
+    v1 = (C_PropTractorBeamProjector *)((char *)v1 - 12);
+    if ( m_pObject )
+    {
+      p_GetIClientUnknown = &v1->GetIClientUnknown;
+      if ( p_GetIClientUnknown )
+      {
+        *p_GetIClientUnknown = v1->C_BaseProjector::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable;
+        if ( v1->C_BaseProjector::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable )
+          v1->SetRefEHandle = (void (__thiscall *)(IHandleEntity *, const CBaseHandle *))v1->C_BaseProjector::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientRenderable::__vftable;
+      }
+      else if ( (C_PropTractorBeamProjector *)m_pObject->m_References.m_pHead == v1 )
+      {
+        v5 = v1->C_BaseProjector::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable;
+        m_pObject->m_References.m_pHead = (CUtlReference<CNewParticleEffect> *)v1->C_BaseProjector::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable;
+        if ( v5 )
+          v5->SetRefEHandle = 0;
+      }
+      v1->C_BaseProjector::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientRenderable::__vftable = 0;
+      v1->C_BaseProjector::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable = 0;
+      v1->C_BaseProjector::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientNetworkable::__vftable = 0;
+    }
+  }
+  C_BaseAnimating::~C_BaseAnimating(this);
+}

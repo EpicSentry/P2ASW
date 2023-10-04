@@ -23,6 +23,7 @@
 	#include "prediction.h"
 	#include "c_weapon_portalgun.h"
 	#include "c_basetoggle.h"
+	#include "trigger_tractorbeam_shared.h"
 	//#include "c_projectedwallentity.h"
 	#define CRecipientFilter C_RecipientFilter
 #else
@@ -681,7 +682,6 @@ void CPortalGameMovement::AirAccelerate( Vector& wishdir, float wishspeed, float
 
 void CPortalGameMovement::TBeamMove( void )
 {
-	// TODO:
 #ifndef NO_TRACTOR_BEAM
 	CPortal_Player *pPortalPlayer = GetPortalPlayer();
 	if ( !pPortalPlayer )

@@ -1,0 +1,259 @@
+void __cdecl C_Trigger_TractorBeam::DrawColumn(
+        C_Trigger_TractorBeam *const this,
+        IMaterial *pMaterial,
+        const Vector *const vecStart,
+        const Vector *const vDir,
+        float flLength,
+        const Vector *const vecXAxis,
+        const Vector *const vecYAxis,
+        float flRadius,
+        float flAlpha,
+        bool bPinchIn,
+        bool bPinchOut,
+        float flTextureOffset)
+{
+  IMatRenderContext *v12; // eax
+  IMatRenderContext *m_pObject; // edi
+  void (__cdecl *v14)(IMatRenderContext *, IMaterial *, int); // ebx
+  int v15; // eax
+  IMesh *v16; // eax
+  IMesh *v17; // ebx
+  CMeshBuilder *m_pTexCoord; // eax
+  int m_nVertexCount; // eax
+  int v20; // esi
+  unsigned int m_nIndexSize; // edx
+  int m_nIndexCount; // ecx
+  int v23; // edx
+  int v24; // esi
+  int vertexFormat; // [esp+34h] [ebp-224h]
+  int m_nCurrentIndex; // [esp+38h] [ebp-220h]
+  CMeshBuilder meshBuilder; // [esp+48h] [ebp-210h] BYREF
+  Vector vStart; // [esp+230h] [ebp-28h] BYREF
+  CMatRenderContextPtr pRenderContext; // [esp+23Ch] [ebp-1Ch]
+
+  v12 = (IMatRenderContext *)(*(int (__cdecl **)(IMaterialSystem *))(*(_DWORD *)materials + 452))(materials);
+  pRenderContext.m_pObject = v12;
+  if ( v12 )
+  {
+    (*(void (__cdecl **)(IMatRenderContext *))(*(_DWORD *)v12 + 8))(v12);
+    m_pObject = pRenderContext.m_pObject;
+  }
+  else
+  {
+    m_pObject = 0;
+  }
+  v14 = *(void (__cdecl **)(IMatRenderContext *, IMaterial *, int))(*(_DWORD *)m_pObject + 36);
+  v15 = (*((int (__cdecl **)(C_Trigger_TractorBeam *const))this->_vptr_IHandleEntity + 6))(this);
+  v14(m_pObject, pMaterial, v15);
+  vertexFormat = (*(int (__cdecl **)(IMaterial *))(*(_DWORD *)pMaterial + 80))(pMaterial);
+  v16 = (IMesh *)(*(int (__cdecl **)(IMatRenderContext *, int, _DWORD, _DWORD, IMaterial *))(*(_DWORD *)pRenderContext.m_pObject
+                                                                                           + 228))(
+                   pRenderContext.m_pObject,
+                   1,
+                   0,
+                   0,
+                   pMaterial);
+  memset(&meshBuilder.m_IndexBuilder.m_pIndexBuffer, 0, 12);
+  v17 = v16;
+  meshBuilder.m_IndexBuilder.m_nCurrentIndex = 0;
+  meshBuilder.m_IndexBuilder.m_nTotalIndexCount = 0;
+  meshBuilder.m_IndexBuilder.m_nBufferOffset = -1;
+  meshBuilder.m_IndexBuilder.m_nBufferFirstIndex = 0;
+  meshBuilder.m_VertexBuilder.m_pVertexBuffer = 0;
+  meshBuilder.m_VertexBuilder.m_nBufferOffset = -1;
+  meshBuilder.m_VertexBuilder.m_nBufferFirstVertex = 0;
+  memset(&meshBuilder.m_VertexBuilder.m_nMaxVertexCount, 0, 12);
+  meshBuilder.m_VertexBuilder.m_nTotalVertexCount = 0;
+  meshBuilder.m_VertexBuilder.m_CompressionType = VERTEX_COMPRESSION_INVALID;
+  meshBuilder.m_pMesh = v16;
+  meshBuilder.m_bGenerateIndices = 1;
+  meshBuilder.m_Type = MATERIAL_QUADS;
+  (*(void (__cdecl **)(IMesh *, int))(*(_DWORD *)v16 + 40))(v16, 2);
+  (*(void (__cdecl **)(IMesh *, int, int, CMeshBuilder *, _DWORD))(*(_DWORD *)meshBuilder.m_pMesh + 68))(
+    meshBuilder.m_pMesh,
+    1024,
+    1536,
+    &meshBuilder,
+    0);
+  meshBuilder.m_IndexBuilder.m_bModify = 0;
+  meshBuilder.m_VertexBuilder.m_pVertexBuffer = v17;
+  meshBuilder.m_IndexBuilder.m_pIndexBuffer = (IMesh *)((char *)v17 + 4);
+  meshBuilder.m_IndexBuilder.m_nIndexCount = 0;
+  meshBuilder.m_IndexBuilder.m_nMaxIndexCount = 1536;
+  meshBuilder.m_IndexBuilder.m_nIndexOffset = meshBuilder.m_nFirstVertex;
+  meshBuilder.m_IndexBuilder.m_pIndices = meshBuilder.m_pIndices;
+  meshBuilder.m_IndexBuilder.m_nCurrentIndex = 0;
+  meshBuilder.m_VertexBuilder.m_nMaxVertexCount = 1024;
+  meshBuilder.m_VertexBuilder.m_nVertexCount = 0;
+  meshBuilder.m_IndexBuilder.m_nIndexSize = meshBuilder.m_nIndexSize;
+  meshBuilder.m_VertexBuilder.m_bModify = 0;
+  qmemcpy(&meshBuilder.m_VertexBuilder, &meshBuilder, 0xA4u);
+  meshBuilder.m_VertexBuilder.m_NumBoneWeights = meshBuilder.m_VertexBuilder.m_NumBoneWeights != 0 ? 2 : 0;
+  if ( meshBuilder.m_VertexBuilder.m_nBufferOffset == -1 )
+  {
+    meshBuilder.m_VertexBuilder.m_nTotalVertexCount = 0;
+    meshBuilder.m_VertexBuilder.m_nBufferFirstVertex = meshBuilder.m_nFirstVertex;
+    meshBuilder.m_VertexBuilder.m_nBufferOffset = meshBuilder.MeshDesc_t::VertexDesc_t::m_nOffset;
+  }
+  meshBuilder.m_VertexBuilder.m_nCurrentVertex = 0;
+  meshBuilder.m_VertexBuilder.m_pCurrPosition = meshBuilder.m_VertexBuilder.m_pPosition;
+  meshBuilder.m_VertexBuilder.m_pCurrNormal = meshBuilder.m_VertexBuilder.m_pNormal;
+  m_pTexCoord = (CMeshBuilder *)meshBuilder.m_VertexBuilder.m_pTexCoord;
+  do
+  {
+    m_pTexCoord->m_pBoneWeight = (float *)m_pTexCoord->m_VertexSize_Position;
+    m_pTexCoord = (CMeshBuilder *)((char *)m_pTexCoord + 4);
+  }
+  while ( m_pTexCoord != (CMeshBuilder *)&meshBuilder.m_VertexBuilder.m_pTangentS );
+  meshBuilder.m_VertexBuilder.m_pCurrColor = meshBuilder.m_VertexBuilder.m_pColor;
+  vStart = *vecStart;
+  C_Trigger_TractorBeam::DrawColumnSegment(
+    this,
+    &meshBuilder,
+    &vStart,
+    vDir,
+    flLength,
+    vecXAxis,
+    vecYAxis,
+    flRadius,
+    flAlpha,
+    flTextureOffset,
+    vertexFormat);
+  if ( meshBuilder.m_bGenerateIndices )
+  {
+    m_nVertexCount = meshBuilder.m_VertexBuilder.m_nVertexCount;
+    switch ( meshBuilder.m_Type )
+    {
+      case MATERIAL_LINE_STRIP:
+        v20 = 2 * meshBuilder.m_VertexBuilder.m_nVertexCount - 2;
+        goto LABEL_10;
+      case MATERIAL_LINE_LOOP:
+        v20 = 2 * meshBuilder.m_VertexBuilder.m_nVertexCount;
+        goto LABEL_10;
+      case MATERIAL_POLYGON:
+        v20 = 3 * meshBuilder.m_VertexBuilder.m_nVertexCount - 6;
+        goto LABEL_10;
+      case MATERIAL_QUADS:
+        v24 = 6 * meshBuilder.m_VertexBuilder.m_nVertexCount + 3;
+        if ( 6 * meshBuilder.m_VertexBuilder.m_nVertexCount >= 0 )
+          v24 = 6 * meshBuilder.m_VertexBuilder.m_nVertexCount;
+        v20 = v24 >> 2;
+        goto LABEL_10;
+      case MATERIAL_INSTANCED_QUADS:
+        m_nIndexSize = meshBuilder.m_IndexBuilder.m_nIndexSize;
+        v20 = 0;
+        if ( !meshBuilder.m_IndexBuilder.m_nIndexSize )
+          goto LABEL_32;
+        goto LABEL_11;
+      default:
+        v20 = meshBuilder.m_VertexBuilder.m_nVertexCount;
+LABEL_10:
+        m_nIndexSize = meshBuilder.m_IndexBuilder.m_nIndexSize;
+        if ( !meshBuilder.m_IndexBuilder.m_nIndexSize )
+          goto LABEL_32;
+LABEL_11:
+        m_nCurrentIndex = meshBuilder.m_IndexBuilder.m_nCurrentIndex;
+        if ( v20 > meshBuilder.m_IndexBuilder.m_nMaxIndexCount - meshBuilder.m_IndexBuilder.m_nCurrentIndex )
+          v20 = meshBuilder.m_IndexBuilder.m_nMaxIndexCount - meshBuilder.m_IndexBuilder.m_nCurrentIndex;
+        if ( v20 )
+        {
+          switch ( meshBuilder.m_Type )
+          {
+            case MATERIAL_POINTS:
+            case MATERIAL_INSTANCED_QUADS:
+              break;
+            case MATERIAL_LINE_STRIP:
+              GenerateLineStripIndexBuffer(
+                &meshBuilder.m_IndexBuilder.m_pIndices[meshBuilder.m_IndexBuilder.m_nCurrentIndex],
+                v20,
+                meshBuilder.m_IndexBuilder.m_nIndexOffset);
+              m_nIndexSize = meshBuilder.m_IndexBuilder.m_nIndexSize;
+              m_nVertexCount = meshBuilder.m_VertexBuilder.m_nVertexCount;
+              m_nCurrentIndex = meshBuilder.m_IndexBuilder.m_nCurrentIndex;
+              break;
+            case MATERIAL_LINE_LOOP:
+              GenerateLineLoopIndexBuffer(
+                &meshBuilder.m_IndexBuilder.m_pIndices[meshBuilder.m_IndexBuilder.m_nCurrentIndex],
+                v20,
+                meshBuilder.m_IndexBuilder.m_nIndexOffset);
+              m_nIndexSize = meshBuilder.m_IndexBuilder.m_nIndexSize;
+              m_nVertexCount = meshBuilder.m_VertexBuilder.m_nVertexCount;
+              m_nCurrentIndex = meshBuilder.m_IndexBuilder.m_nCurrentIndex;
+              break;
+            case MATERIAL_POLYGON:
+              GeneratePolygonIndexBuffer(
+                &meshBuilder.m_IndexBuilder.m_pIndices[meshBuilder.m_IndexBuilder.m_nCurrentIndex],
+                v20,
+                meshBuilder.m_IndexBuilder.m_nIndexOffset);
+              m_nVertexCount = meshBuilder.m_VertexBuilder.m_nVertexCount;
+              m_nCurrentIndex = meshBuilder.m_IndexBuilder.m_nCurrentIndex;
+              m_nIndexSize = meshBuilder.m_IndexBuilder.m_nIndexSize;
+              break;
+            case MATERIAL_QUADS:
+              GenerateQuadIndexBuffer(
+                &meshBuilder.m_IndexBuilder.m_pIndices[meshBuilder.m_IndexBuilder.m_nCurrentIndex],
+                v20,
+                meshBuilder.m_IndexBuilder.m_nIndexOffset);
+              goto LABEL_16;
+            default:
+              GenerateSequentialIndexBuffer(
+                &meshBuilder.m_IndexBuilder.m_pIndices[meshBuilder.m_IndexBuilder.m_nCurrentIndex],
+                v20,
+                meshBuilder.m_IndexBuilder.m_nIndexOffset);
+LABEL_16:
+              m_nIndexSize = meshBuilder.m_IndexBuilder.m_nIndexSize;
+              m_nCurrentIndex = meshBuilder.m_IndexBuilder.m_nCurrentIndex;
+              m_nVertexCount = meshBuilder.m_VertexBuilder.m_nVertexCount;
+              break;
+          }
+          m_nIndexCount = meshBuilder.m_IndexBuilder.m_nIndexCount;
+          v23 = m_nCurrentIndex + v20 * m_nIndexSize;
+          meshBuilder.m_IndexBuilder.m_nCurrentIndex = v23;
+          if ( v23 > meshBuilder.m_IndexBuilder.m_nIndexCount )
+          {
+            meshBuilder.m_IndexBuilder.m_nIndexCount = v23;
+            m_nIndexCount = v23;
+          }
+        }
+        else
+        {
+LABEL_32:
+          m_nIndexCount = meshBuilder.m_IndexBuilder.m_nIndexCount;
+        }
+        break;
+    }
+  }
+  else
+  {
+    m_nIndexCount = meshBuilder.m_IndexBuilder.m_nIndexCount;
+    m_nVertexCount = meshBuilder.m_VertexBuilder.m_nVertexCount;
+  }
+  (*(void (__cdecl **)(IMesh *, int, int, CMeshBuilder *))(*(_DWORD *)meshBuilder.m_pMesh + 80))(
+    meshBuilder.m_pMesh,
+    m_nVertexCount,
+    m_nIndexCount,
+    &meshBuilder);
+  meshBuilder.m_IndexBuilder.m_pIndexBuffer = 0;
+  meshBuilder.m_IndexBuilder.m_nMaxIndexCount = 0;
+  meshBuilder.m_VertexBuilder.m_nMaxVertexCount = 0;
+  meshBuilder.m_VertexBuilder.m_pVertexBuffer = 0;
+  meshBuilder.m_VertexBuilder.m_CompressionType = VERTEX_COMPRESSION_INVALID;
+  meshBuilder.m_pMesh = 0;
+  (*(void (__cdecl **)(IMesh *, int, _DWORD))(*(_DWORD *)v17 + 44))(v17, -1, 0);
+  if ( meshBuilder.m_VertexBuilder.m_pVertexBuffer
+    && (*(unsigned __int8 (__cdecl **)(IVertexBuffer *))(*(_DWORD *)meshBuilder.m_VertexBuilder.m_pVertexBuffer + 8))(meshBuilder.m_VertexBuilder.m_pVertexBuffer) )
+  {
+    (*(void (__cdecl **)(IVertexBuffer *))(*(_DWORD *)meshBuilder.m_VertexBuilder.m_pVertexBuffer + 16))(meshBuilder.m_VertexBuilder.m_pVertexBuffer);
+  }
+  if ( meshBuilder.m_IndexBuilder.m_pIndexBuffer
+    && (*(unsigned __int8 (__cdecl **)(IIndexBuffer *))(*(_DWORD *)meshBuilder.m_IndexBuilder.m_pIndexBuffer + 8))(meshBuilder.m_IndexBuilder.m_pIndexBuffer) )
+  {
+    (*(void (__cdecl **)(IIndexBuffer *))(*(_DWORD *)meshBuilder.m_IndexBuilder.m_pIndexBuffer + 16))(meshBuilder.m_IndexBuilder.m_pIndexBuffer);
+  }
+  if ( pRenderContext.m_pObject )
+  {
+    (*(void (__cdecl **)(IMatRenderContext *))(*(_DWORD *)pRenderContext.m_pObject + 12))(pRenderContext.m_pObject);
+    if ( pRenderContext.m_pObject )
+      (*(void (__cdecl **)(IMatRenderContext *))(*(_DWORD *)pRenderContext.m_pObject + 4))(pRenderContext.m_pObject);
+  }
+}

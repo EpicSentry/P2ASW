@@ -5,8 +5,8 @@
 #include "portal_shareddefs.h"
 #include "c_triggers.h"
 #include "trigger_tractorbeam_shared.h"
-#include "paint/paint_blobs_shared.h"
 #include "vphysics_interface.h"
+#include "c_baseprojectedentity.h"
 
 #ifdef NO_TRACTOR_BEAM
 #error "THIS FILE SHOULDN'T BE INCLUDED"
@@ -14,7 +14,26 @@
 
 #define CTrigger_TractorBeam C_Trigger_TractorBeam
 
-class C_ProjectedTractorBeamEntity;
+DECLARE_AUTO_LIST( ITriggerTractorBeamAutoList )
+
+class C_Trigger_TractorBeam;
+class C_PaintBlob;
+
+class C_ProjectedTractorBeamEntity : public C_BaseProjectedEntity
+{
+public:
+	DECLARE_CLASS( C_ProjectedTractorBeamEntity, C_BaseProjectedEntity );
+	DECLARE_CLIENTCLASS();
+	DECLARE_PREDICTABLE();
+	
+	C_ProjectedTractorBeamEntity();
+	~C_ProjectedTractorBeamEntity();
+	virtual void GetProjectionExtents( Vector &outMins, Vector &outMaxs );
+	virtual void OnProjected();
+    
+private:
+	CHandle<C_Trigger_TractorBeam> m_hTractorBeamTrigger;
+};
 
 class C_Trigger_TractorBeam : public C_BaseVPhysicsTrigger, public IMotionEvent, public ITriggerTractorBeamAutoList
 {	
@@ -45,7 +64,7 @@ public:
 
 	virtual void	UpdatePartitionListEntry( void );
 
-	virtual C_BaseEntity * GetEntity( void ) { return this; } // NOTE: This is just my best guess, could be inaccurate.
+	virtual C_BaseEntity * GetEntity( void ) { return this; }
 
 	void	CalculateFrameMovement( IPhysicsObject *pObject, CBaseEntity *pEntity, float deltaTime, Vector &linear, AngularImpulse &angular );
 	void	UpdateBeam( const Vector& vStartPoint, const Vector& vEndPoint, float flLinearForce );
@@ -58,6 +77,7 @@ public:
 	bool	HasGravityScale( void );
 	bool	HasAirDensity( void );
 	bool	HasLinearLimit( void );
+	bool	HasLinearScale( void );
 	bool	HasAngularLimit( void );
 	bool	HasAngularScale( void );
 	bool	HasLinearForce( void );
@@ -67,44 +87,43 @@ public:
 	virtual void	GetToolRecordingState( KeyValues *msg );
 	virtual void	RestoreToToolRecordedState( KeyValues *msg );
 	virtual bool	GetSoundSpatialization( SpatializationInfo_t& info );
-	
-
-	void	CreateParticles( void );
-	void	RemoveAllBlobsFromBeam( void );
-	
+		
 	virtual void	StartTouch( CBaseEntity *pOther );
 	virtual void	EndTouch( CBaseEntity *pOther );
 	virtual void	PhysicsSimulate();
 	
 	IMotionEvent::simresult_e Simulate( IPhysicsMotionController *pController, IPhysicsObject *pObject, float deltaTime, Vector &linear, AngularImpulse &angular );
-
-	bool	IsFromPortal( void );
-	bool	IsToPortal( void );
-	bool	IsReversed( void );
+	
+	bool	IsReversed( void ) { return m_bReversed; }
+    bool	IsFromPortal( void ) { return m_bFromPortal; }
+	bool	IsToPortal( void ) { return m_bToPortal; }
 
 	int		GetLastUpdateFrame() const;
-
-	float	GetBeamRadius( void );
+	
+	float GetBeamRadius() { return m_flRadius; }
 
 	void	RemoveDeadBlobs( void );
 	void	RemoveChangedBeamBlobs( void );
 	void	RemoveAllBlobsFromBeam( void );
 
-	Vector	GetForceDirection( void );
+	Vector	GetForceDirection() const;
 	Vector	GetStartPoint( void ) const { return m_vStart; }
 	Vector	GetEndPoint( void ) const { return m_vEnd; }
 
-	Vector	GetForceDirection() const;
+
+	//PaintBlobVector_t m_blobs;
+
+	CUtlVector<C_PaintBlob*> m_blobs;
 	
-	PaintBlobVector_t m_blobs;
-
-	int		GetLastUpdateFrame( void );
-
 protected:
 	
 	void CreateParticles();
-	void DrawColumn( IMaterial *pMaterial, Vector &, Vector &, float , Vector &, Vector &, float, float, bool, bool, float );
-	void DrawColumnSegment( CMeshBuilder &meshBuilder, Vector &, Vector &, float, Vector &, Vector &, float, float, float, int );
+
+	void DrawColumn( IMaterial *pMaterial, Vector &vecStart, Vector vDir, float flLength, Vector &vecXAxis, Vector &vecYAxis, 
+										float flRadius, float flAlpha, bool bPinchIn, bool bPinchOut, float flTextureOffset );
+	
+	void DrawColumnSegment( CMeshBuilder &meshBuilder, Vector &vecStart, Vector &vDir, float flLength, Vector &vecXAxis,
+										Vector &vecYAxis, float flRadius, float flAlpha, float flTextureOffset, VertexFormat_t vertexFormat );
 	
 	Vector m_vStart;
 	Vector m_vEnd;
@@ -122,7 +141,7 @@ protected:
 
 	CHandle<C_ProjectedTractorBeamEntity> m_hProxyEntity;
 	CUtlReference<CNewParticleEffect> m_hCoreEffect;
-	IPhysicsMotionController * m_pController;
+	IPhysicsMotionController *m_pController;
 
 	float m_gravityScale;
 	float m_addAirDensity;

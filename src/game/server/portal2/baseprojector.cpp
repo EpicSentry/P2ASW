@@ -145,7 +145,9 @@ CBaseProjectedEntity *CBaseProjector::CreateNewProjectedEntity( void )
 void CBaseProjector::SetTransmit( CCheckTransmitInfo *pInfo, bool bAlways )
 {
 	BaseClass::SetTransmit( pInfo, bAlways );
-	m_hFirstChild->SetTransmit( pInfo, bAlways );
+	
+	if ( m_hFirstChild )
+		m_hFirstChild->SetTransmit( pInfo, bAlways );
 }
 
 void CBaseProjector::InputEnable( inputdata_t &inputdata )

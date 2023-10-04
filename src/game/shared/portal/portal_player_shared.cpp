@@ -5438,12 +5438,13 @@ void CPortal_Player::SetLeaveTractorBeam( CTrigger_TractorBeam *pTractorBeam, bo
 			m_Local.m_bSlowMovement = false;
 			SetGravity( 1.0f );
 
+#ifdef GAME_DLL
 			triggerevent_t event;
 			if ( PhysGetTriggerEvent( &event, pTractorBeam ) && event.pObject )
 			{
 				event.pObject->EnableGravity( true );
 			}
-
+#endif
 		}
 		
 		m_Local.m_fTBeamEndTime = gpGlobals->curtime;

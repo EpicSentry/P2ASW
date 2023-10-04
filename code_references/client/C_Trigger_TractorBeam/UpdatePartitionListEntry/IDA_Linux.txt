@@ -1,0 +1,8 @@
+void __cdecl C_Trigger_TractorBeam::UpdatePartitionListEntry(C_Trigger_TractorBeam *const this)
+{
+  (*(void (__cdecl **)(ISpatialPartition *, int, int, _DWORD))(*(_DWORD *)partition + 20))(
+    partition,
+    140,
+    256,
+    this->m_Collision.m_Partition);
+}

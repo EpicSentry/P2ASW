@@ -1,0 +1,10 @@
+C_BasePlayer *__thiscall C_Trigger_TractorBeam::GetPredictionOwner(C_Trigger_TractorBeam *this)
+{
+  unsigned int m_Index; // ecx
+
+  m_Index = this->m_hPlayerSimulationOwner.m_Index;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+    return 0;
+  else
+    return (C_BasePlayer *)g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+}

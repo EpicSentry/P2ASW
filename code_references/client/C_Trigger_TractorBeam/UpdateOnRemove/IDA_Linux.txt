@@ -1,0 +1,96 @@
+void __cdecl C_Trigger_TractorBeam::UpdateOnRemove(C_Trigger_TractorBeam *const this)
+{
+  IPhysicsMotionController *m_pController; // eax
+  int v2; // edi
+  void *v3; // esp
+  int i; // ebx
+  int v5; // eax
+  CNewParticleEffect *m_pObject; // eax
+  CUtlReference<CNewParticleEffect> *m_pPrev; // edx
+  CUtlReference<CNewParticleEffect> *m_pNext; // eax
+  int j; // ebx
+  const C_Portal_Player *v10; // eax
+  C_Portal_Player *v11; // esi
+  const C_PortalPlayerLocalData *PortalPlayerLocalData; // eax
+  C_Trigger_TractorBeam *v13; // ecx
+  unsigned int m_Index; // eax
+  char *v15; // edx
+  CUtlReference<CNewParticleEffect> *v16; // edx
+  _DWORD v17[6]; // [esp+20h] [ebp-18h] BYREF
+
+  m_pController = this->m_pController;
+  if ( m_pController )
+  {
+    v2 = (*((int (__cdecl **)(IPhysicsMotionController *))m_pController->_vptr_IPhysicsMotionController + 5))(this->m_pController);
+    v3 = alloca(((4 * v2 + 15) & 0xFFFFFFF0) + 16);
+    (*((void (__cdecl **)(IPhysicsMotionController *, _DWORD *))this->m_pController->_vptr_IPhysicsMotionController + 6))(
+      this->m_pController,
+      v17);
+    if ( v2 > 0 )
+    {
+      for ( i = 0; i != v2; ++i )
+      {
+        v5 = v17[i];
+        if ( v5 )
+          (*(void (__cdecl **)(_DWORD))(*(_DWORD *)v5 + 100))(v17[i]);
+      }
+    }
+    (*((void (__cdecl **)(IPhysicsEnvironment *, IPhysicsMotionController *))physenv->_vptr_IPhysicsEnvironment + 31))(
+      physenv,
+      this->m_pController);
+    this->m_pController = 0;
+  }
+  if ( this->m_hCoreEffect.m_pObject )
+  {
+    CParticleProperty::StopEmission(&this->m_Particles, this->m_hCoreEffect.m_pObject, 0, 0, 0, 1);
+    m_pObject = this->m_hCoreEffect.m_pObject;
+    if ( m_pObject )
+    {
+      m_pPrev = this->m_hCoreEffect.m_pPrev;
+      if ( m_pPrev )
+      {
+        m_pPrev->m_pNext = this->m_hCoreEffect.m_pNext;
+        m_pNext = this->m_hCoreEffect.m_pNext;
+        if ( m_pNext )
+          m_pNext->m_pPrev = this->m_hCoreEffect.m_pPrev;
+      }
+      else if ( m_pObject->m_References.m_pHead == &this->m_hCoreEffect )
+      {
+        v16 = this->m_hCoreEffect.m_pNext;
+        m_pObject->m_References.m_pHead = v16;
+        if ( v16 )
+          v16->m_pPrev = 0;
+      }
+      this->m_hCoreEffect.m_pPrev = 0;
+      this->m_hCoreEffect.m_pNext = 0;
+      this->m_hCoreEffect.m_pObject = 0;
+    }
+  }
+  for ( j = 1; j != 34; ++j )
+  {
+    while ( 1 )
+    {
+      v10 = (const C_Portal_Player *)UTIL_PlayerByIndex(j);
+      v11 = (C_Portal_Player *)v10;
+      if ( v10 )
+      {
+        PortalPlayerLocalData = C_Portal_Player::GetPortalPlayerLocalData(v10);
+        v13 = 0;
+        m_Index = PortalPlayerLocalData->m_hTractorBeam.m_Index;
+        if ( m_Index != -1 )
+        {
+          v15 = (char *)g_pEntityList + 16 * (unsigned __int16)m_Index;
+          if ( *((_DWORD *)v15 + 2) == HIWORD(m_Index) )
+            v13 = (C_Trigger_TractorBeam *)*((_DWORD *)v15 + 1);
+        }
+        if ( this == v13 )
+          break;
+      }
+      if ( ++j == 34 )
+        goto LABEL_22;
+    }
+    C_Portal_Player::SetLeaveTractorBeam(v11, this, 0);
+  }
+LABEL_22:
+  C_BaseEntity::UpdateOnRemove((C_BaseEntity *const)this);
+}

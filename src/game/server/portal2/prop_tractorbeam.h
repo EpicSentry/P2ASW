@@ -1,15 +1,11 @@
 #include "baseprojector.h"
 
-#define NO_TRACTORBEAM_CLIENTCLASS
-
 class ProjectedEntityAmbientSoundProxy : public CBaseEntity
 {
 public:
 	
 	DECLARE_CLASS( ProjectedEntityAmbientSoundProxy, CBaseEntity );
-#ifndef NO_TRACTORBEAM_CLIENTCLASS
 	DECLARE_SERVERCLASS();
-#endif
 	ProjectedEntityAmbientSoundProxy();
 	~ProjectedEntityAmbientSoundProxy();
 	
@@ -25,9 +21,8 @@ public:
 
 	DECLARE_CLASS( CPropTractorBeamProjector, CBaseProjector );
 	DECLARE_DATADESC();
-#ifndef NO_TRACTORBEAM_CLIENTCLASS
 	DECLARE_SERVERCLASS();
-#endif
+
 	CPropTractorBeamProjector();
     ~CPropTractorBeamProjector();
     void Spawn();

@@ -1,0 +1,138 @@
+void __cdecl C_PropTractorBeamProjector::CreateEffect(C_PropTractorBeamProjector *const this)
+{
+  int v1; // edi
+  CUtlReference<CNewParticleEffect> *v2; // ebx
+  CNewParticleEffect *m_pObject; // eax
+  CUtlReference<CNewParticleEffect> *m_pPrev; // edx
+  CUtlReference<CNewParticleEffect> *m_pNext; // eax
+  CNewParticleEffect *v6; // eax
+  CNewParticleEffect *v7; // edx
+  CUtlReference<CNewParticleEffect> *v8; // ecx
+  CUtlReference<CNewParticleEffect> *v9; // edx
+  CUtlReference<CNewParticleEffect> *m_pHead; // edx
+  CNewParticleEffect *v11; // eax
+  Vector *v12; // eax
+  vec_t v13; // edx
+  vec_t v14; // eax
+  vec_t v15; // xmm2_4
+  vec_t v16; // xmm0_4
+  CUtlReference<CNewParticleEffect> *v17; // ecx
+  CUtlReference<CNewParticleEffect> *v18; // edx
+  CNewParticleEffect *v19; // [esp+0h] [ebp-B8h]
+  float m_flLinearForce; // [esp+40h] [ebp-78h]
+  C_BaseEntity::NetworkVar_m_Particles *p_m_Particles; // [esp+58h] [ebp-60h]
+  char *pAttachmentNames[3]; // [esp+64h] [ebp-54h]
+  Vector v23; // [esp+70h] [ebp-48h]
+  vec_t x; // [esp+7Ch] [ebp-3Ch]
+  vec_t y; // [esp+80h] [ebp-38h]
+  vec_t z; // [esp+84h] [ebp-34h]
+  Vector color; // [esp+88h] [ebp-30h] BYREF
+  Vector vVelocity; // [esp+94h] [ebp-24h] BYREF
+
+  C_PropTractorBeamProjector::StopEffect(this);
+  if ( !this->m_bNoEmitterParticles )
+  {
+    pAttachmentNames[0] = "emitter1";
+    v1 = 0;
+    pAttachmentNames[1] = "emitter2";
+    pAttachmentNames[2] = "emitter3";
+    p_m_Particles = &this->m_Particles;
+    do
+    {
+      v2 = &this->m_hEmitterEffect[v1];
+      if ( this->m_hEmitterEffect[v1].m_pObject )
+      {
+        CParticleProperty::StopEmission(p_m_Particles, this->m_hEmitterEffect[v1].m_pObject, 0, 0, 0, 1);
+        m_pObject = this->m_hEmitterEffect[v1].m_pObject;
+        if ( m_pObject )
+        {
+          m_pPrev = this->m_hEmitterEffect[v1].m_pPrev;
+          if ( m_pPrev )
+          {
+            m_pPrev->m_pNext = this->m_hEmitterEffect[v1].m_pNext;
+            m_pNext = this->m_hEmitterEffect[v1].m_pNext;
+            if ( m_pNext )
+              m_pNext->m_pPrev = this->m_hEmitterEffect[v1].m_pPrev;
+          }
+          else if ( v2 == m_pObject->m_References.m_pHead )
+          {
+            v18 = this->m_hEmitterEffect[v1].m_pNext;
+            m_pObject->m_References.m_pHead = v18;
+            if ( v18 )
+              v18->m_pPrev = 0;
+          }
+          this->m_hEmitterEffect[v1].m_pPrev = 0;
+          this->m_hEmitterEffect[v1].m_pNext = 0;
+          this->m_hEmitterEffect[v1].m_pObject = 0;
+        }
+      }
+      v6 = CParticleProperty::Create(p_m_Particles, "tractor_beam_arm", PATTACH_POINT_FOLLOW, pAttachmentNames[v1]);
+      v7 = this->m_hEmitterEffect[v1].m_pObject;
+      if ( v6 != v7 )
+      {
+        if ( v7 )
+        {
+          v8 = this->m_hEmitterEffect[v1].m_pPrev;
+          if ( v8 )
+          {
+            v8->m_pNext = this->m_hEmitterEffect[v1].m_pNext;
+            v9 = this->m_hEmitterEffect[v1].m_pNext;
+            if ( v9 )
+              v9->m_pPrev = this->m_hEmitterEffect[v1].m_pPrev;
+          }
+          else if ( v2 == v7->m_References.m_pHead )
+          {
+            v17 = this->m_hEmitterEffect[v1].m_pNext;
+            v7->m_References.m_pHead = v17;
+            if ( v17 )
+              v17->m_pPrev = 0;
+          }
+          this->m_hEmitterEffect[v1].m_pPrev = 0;
+          this->m_hEmitterEffect[v1].m_pNext = 0;
+        }
+        this->m_hEmitterEffect[v1].m_pObject = v6;
+        if ( !v6 )
+          goto LABEL_23;
+        this->m_hEmitterEffect[v1].m_pNext = v6->m_References.m_pHead;
+        m_pHead = v6->m_References.m_pHead;
+        if ( m_pHead )
+          m_pHead->m_pPrev = v2;
+        this->m_hEmitterEffect[v1].m_pPrev = 0;
+        v6->m_References.m_pHead = v2;
+        v7 = this->m_hEmitterEffect[v1].m_pObject;
+      }
+      if ( v7 )
+      {
+        v23 = vec3_origin;
+        CParticleProperty::AddControlPoint(p_m_Particles, v7, 1, this, PATTACH_ABSORIGIN, 0, vec3_origin, 0);
+        x = vec3_origin.x;
+        z = vec3_origin.z;
+        v11 = this->m_hEmitterEffect[v1].m_pObject;
+        y = vec3_origin.y;
+        CParticleProperty::AddControlPoint(p_m_Particles, v11, 2, this, PATTACH_ABSORIGIN, 0, vec3_origin, 0);
+        v12 = &g_vTractorBeamColorForward;
+        if ( this->m_flLinearForce < 0.0 )
+          v12 = &g_vTractorBeamColorReverse;
+        color.x = v12->x;
+        v13 = v12->y;
+        v14 = v12->z;
+        color.y = v13;
+        color.z = v14;
+        CNewParticleEffect::SetControlPoint(this->m_hEmitterEffect[v1].m_pObject, 1, &color);
+        m_flLinearForce = this->m_flLinearForce;
+        C_BaseEntity::CalcAbsolutePosition(this);
+        v15 = this->m_rgflCoordinateFrame.m_flMatVal[1][0] * m_flLinearForce;
+        v16 = this->m_rgflCoordinateFrame.m_flMatVal[2][0] * m_flLinearForce;
+        v19 = this->m_hEmitterEffect[v1].m_pObject;
+        vVelocity.x = this->m_rgflCoordinateFrame.m_flMatVal[0][0] * m_flLinearForce;
+        vVelocity.y = v15;
+        vVelocity.z = v16;
+        CNewParticleEffect::SetControlPoint(v19, 2, &vVelocity);
+      }
+LABEL_23:
+      ++v1;
+    }
+    while ( v1 != 3 );
+  }
+  this->m_bEffectsActive = 1;
+}

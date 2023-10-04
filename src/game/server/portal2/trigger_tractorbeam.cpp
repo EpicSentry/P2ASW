@@ -11,10 +11,11 @@ BEGIN_DATADESC( CProjectedTractorBeamEntity )
 
 END_DATADESC()
 
-#ifndef NO_CLIENT_TRACTOR_BEAM
 IMPLEMENT_SERVERCLASS_ST( CProjectedTractorBeamEntity, DT_ProjectedTractorBeamEntity )
+
+	SendPropEHandle( SENDINFO(m_hTractorBeamTrigger) ),
+
 END_SEND_TABLE()
-#endif
 
 LINK_ENTITY_TO_CLASS( projected_tractor_beam_entity, CProjectedTractorBeamEntity )
 
@@ -28,10 +29,32 @@ BEGIN_DATADESC( CTrigger_TractorBeam )
 
 END_DATADESC()
 
-#ifndef NO_CLIENT_TRACTOR_BEAM
-IMPLEMENT_SERVERCLASS_ST( CTrigger_TractorBeam, DT_TriggerTractorBeam )
+IMPLEMENT_SERVERCLASS_ST( CTrigger_TractorBeam, DT_Trigger_TractorBeam )
+
+	SendPropFloat( SENDINFO( m_gravityScale ) ),
+	SendPropFloat( SENDINFO( m_addAirDensity ) ),
+	SendPropFloat( SENDINFO( m_linearLimit ) ),
+	SendPropFloat( SENDINFO( m_linearLimitDelta ) ),
+	SendPropFloat( SENDINFO( m_linearLimitTime ) ),
+	SendPropFloat( SENDINFO( m_linearLimitStart ) ),
+	SendPropFloat( SENDINFO( m_linearLimitStartTime ) ),
+	SendPropFloat( SENDINFO( m_linearScale ) ),
+	SendPropFloat( SENDINFO( m_angularLimit ) ),
+	SendPropFloat( SENDINFO( m_angularScale ) ),
+	SendPropFloat( SENDINFO( m_linearForce ) ),
+	SendPropFloat( SENDINFO( m_flRadius ) ),
+	
+	SendPropQAngles( SENDINFO( m_linearForceAngles ) ),
+	SendPropVector( SENDINFO( m_vStart ) ),
+	SendPropVector( SENDINFO( m_vEnd ) ),
+	
+	SendPropBool( SENDINFO( m_bDisabled ) ),
+	SendPropBool( SENDINFO( m_bReversed ) ),
+	SendPropBool( SENDINFO( m_bFromPortal ) ),
+	SendPropBool( SENDINFO( m_bToPortal ) ),
+	SendPropBool( SENDINFO( m_bDisablePlayerMove ) ),
+
 END_SEND_TABLE()
-#endif
 
 LINK_ENTITY_TO_CLASS( trigger_tractorbeam, CTrigger_TractorBeam )
 
@@ -78,7 +101,6 @@ void CProjectedTractorBeamEntity::GetProjectionExtents( Vector &outMins, Vector 
 
 void CProjectedTractorBeamEntity::OnProjected( void )
 {
-	Msg("OnProjected\nOnProjected\nOnProjected\nOnProjected\nOnProjected\nOnProjected\n");
 	BaseClass::OnProjected();
 	if ( m_hTractorBeamTrigger )
 	{
@@ -97,7 +119,6 @@ void CProjectedTractorBeamEntity::OnProjected( void )
 		m_hTractorBeamTrigger->UpdateBeam( GetStartPoint(), GetEndPoint(), GetLinearForce() );	
 
 		DebugDrawLine( GetStartPoint(), GetEndPoint(), 0, 0, 255, true, gpGlobals->frametime );
-
 	}
 }
 
@@ -398,11 +419,6 @@ float CTrigger_TractorBeam::GetLinearForce( void )
 	return m_linearForce;
 }
 
-float CTrigger_TractorBeam::GetBeamRadius( void )
-{
-	return m_flRadius;
-}
-
 bool CTrigger_TractorBeam::HasLinearLimit( void )
 {
 	return m_linearLimit > 0.0;
@@ -410,12 +426,12 @@ bool CTrigger_TractorBeam::HasLinearLimit( void )
 
 bool CTrigger_TractorBeam::HasLinearScale( void )
 {
-	return m_linearScale > 0.0;
+	return m_linearScale != 1.0;
 }
 
 bool CTrigger_TractorBeam::HasAngularScale( void )
 {
-	return m_angularScale > 0.0;
+	return m_angularScale != 1.0;
 }
 
 bool CTrigger_TractorBeam::HasAngularLimit( void )

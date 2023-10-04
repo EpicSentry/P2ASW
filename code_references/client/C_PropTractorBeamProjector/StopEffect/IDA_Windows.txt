@@ -1,0 +1,45 @@
+void __thiscall C_PropTractorBeamProjector::StopEffect(C_PropTractorBeamProjector *this)
+{
+  CNewParticleEffect **p_m_pObject; // esi
+  CNewParticleEffect *v3; // eax
+  _DWORD *v4; // ecx
+  int v5; // eax
+  CUtlReference<CNewParticleEffect> *v6; // ecx
+  int v7; // [esp+Ch] [ebp-4h]
+
+  p_m_pObject = &this->m_hEmitterEffect[0].m_pObject;
+  v7 = 3;
+  do
+  {
+    if ( *p_m_pObject )
+    {
+      CParticleProperty::StopEmission(&this->m_Particles, *p_m_pObject, 0, 0, 0, 1);
+      v3 = *p_m_pObject;
+      if ( *p_m_pObject )
+      {
+        v4 = *(p_m_pObject - 1);
+        if ( v4 )
+        {
+          *v4 = *(p_m_pObject - 2);
+          v5 = (int)*(p_m_pObject - 2);
+          if ( v5 )
+            *(_DWORD *)(v5 + 4) = *(p_m_pObject - 1);
+        }
+        else if ( (CNewParticleEffect **)v3->m_References.m_pHead == p_m_pObject - 2 )
+        {
+          v6 = (CUtlReference<CNewParticleEffect> *)*(p_m_pObject - 2);
+          v3->m_References.m_pHead = v6;
+          if ( v6 )
+            v6->m_pPrev = 0;
+        }
+        *(p_m_pObject - 1) = 0;
+        *(p_m_pObject - 2) = 0;
+        *p_m_pObject = 0;
+      }
+    }
+    p_m_pObject += 3;
+    --v7;
+  }
+  while ( v7 );
+  this->m_bEffectsActive = 0;
+}

@@ -1,0 +1,37 @@
+void __cdecl C_PropTractorBeamProjector::RecvProxy_LinearForce(const CRecvProxyData *pData, float *pStruct)
+{
+  float m_Float; // xmm5_4
+  bool v3; // zf
+  double v4; // st7
+  int v5; // edx
+  double v6; // st7
+  int v7; // edx
+  C_PropTractorBeamProjector *v8; // ecx
+  double v9; // st7
+  char *v10; // xmm0_4
+
+  m_Float = pData->m_Value.m_Float;
+  if ( pStruct[880] != m_Float )
+  {
+    v3 = *((_BYTE *)pStruct + 3516) == 0;
+    pStruct[880] = m_Float;
+    if ( !v3 )
+    {
+      v4 = C_PropTractorBeamProjector::CalculateRotationPose((C_PropTractorBeamProjector *)pStruct);
+      *(float *)(v5 + 3556) = v4;
+      v6 = *(float *)(gpGlobals.m_Index + 12);
+      *(_DWORD *)(v5 + 3564) = FLOAT_0_25;
+      *(float *)(v5 + 3568) = v6;
+      *(float *)(v5 + 3560) = m_Float * 0.0083333338;
+      v9 = C_PropTractorBeamProjector::CalculateArmaturePose((C_PropTractorBeamProjector *)v5);
+      *(float *)(v7 + 3540) = v9;
+      v10 = 0;
+      if ( m_Float > 0.0 )
+        v10 = FLOAT_1_0;
+      *(_DWORD *)(v7 + 3544) = v10;
+      *(float *)(v7 + 3548) = FLOAT_0_75;
+      *(float *)(v7 + 3552) = *(float *)(gpGlobals.m_Index + 12);
+      C_PropTractorBeamProjector::UpdateEffect(v8);
+    }
+  }
+}

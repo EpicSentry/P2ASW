@@ -1,0 +1,123 @@
+void __thiscall C_Trigger_TractorBeam::CreateParticles(C_Trigger_TractorBeam *this)
+{
+  CNewParticleEffect *m_pObject; // eax
+  CNewParticleEffect *v3; // eax
+  CNewParticleEffect *v4; // eax
+  CNewParticleEffect *v5; // ecx
+  CUtlReference<CNewParticleEffect> *p_m_hCoreEffect; // ebx
+  CUtlReference<CNewParticleEffect> *m_pHead; // ecx
+  CNewParticleEffect *v8; // ecx
+  CNewParticleEffect *v9; // ecx
+  float m_linearForce; // xmm3_4
+  float v11; // xmm1_4
+  float v12; // xmm2_4
+  CNewParticleEffect *v13; // ecx
+  float v14; // xmm0_4
+  CNewParticleEffect *v15; // ecx
+  Vector vRight; // [esp+Ch] [ebp-4Ch] BYREF
+  Vector vUp; // [esp+18h] [ebp-40h] BYREF
+  Vector vVelocity; // [esp+24h] [ebp-34h] BYREF
+  Vector forward; // [esp+30h] [ebp-28h] BYREF
+  Vector color; // [esp+3Ch] [ebp-1Ch] BYREF
+  Vector vDir; // [esp+48h] [ebp-10h] BYREF
+  CNewParticleEffect *v22; // [esp+54h] [ebp-4h]
+
+  m_pObject = this->m_hCoreEffect.m_pObject;
+  if ( m_pObject )
+  {
+    CParticleProperty::StopEmission(&this->m_Particles, m_pObject, 0, 0, 0, 1);
+    v3 = this->m_hCoreEffect.m_pObject;
+    if ( v3 )
+    {
+      CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(
+        (CUtlIntrusiveDList<CUtlReference<CSheet> > *)&v3->m_References,
+        (CUtlReference<CSheet> *)&this->m_hCoreEffect);
+      this->m_hCoreEffect.m_pObject = 0;
+    }
+  }
+  v4 = CParticleProperty::Create(&this->m_Particles, "tractor_beam_core", PATTACH_CUSTOMORIGIN, -1, vec3_origin, 0);
+  v5 = this->m_hCoreEffect.m_pObject;
+  p_m_hCoreEffect = &this->m_hCoreEffect;
+  v22 = v4;
+  if ( v5 != v4 )
+  {
+    if ( v5 )
+    {
+      CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(
+        (CUtlIntrusiveDList<CUtlReference<CSheet> > *)&v5->m_References,
+        (CUtlReference<CSheet> *)&this->m_hCoreEffect);
+      v4 = v22;
+      this->m_hCoreEffect.m_pObject = 0;
+    }
+    this->m_hCoreEffect.m_pObject = v4;
+    if ( v4 )
+    {
+      p_m_hCoreEffect->m_pNext = v4->m_References.m_pHead;
+      m_pHead = v4->m_References.m_pHead;
+      if ( m_pHead )
+        m_pHead->m_pPrev = p_m_hCoreEffect;
+      this->m_hCoreEffect.m_pPrev = 0;
+      v4->m_References.m_pHead = p_m_hCoreEffect;
+    }
+  }
+  v8 = this->m_hCoreEffect.m_pObject;
+  if ( v8 )
+  {
+    CParticleProperty::AddControlPoint(&this->m_Particles, v8, 1, this, PATTACH_CUSTOMORIGIN, 0, vec3_origin, 0);
+    CParticleProperty::AddControlPoint(
+      &this->m_Particles,
+      this->m_hCoreEffect.m_pObject,
+      2,
+      this,
+      PATTACH_CUSTOMORIGIN,
+      0,
+      vec3_origin,
+      0);
+    CParticleProperty::AddControlPoint(
+      &this->m_Particles,
+      this->m_hCoreEffect.m_pObject,
+      3,
+      this,
+      PATTACH_CUSTOMORIGIN,
+      0,
+      vec3_origin,
+      0);
+    vDir.x = this->m_vEnd.x - this->m_vStart.x;
+    vDir.y = this->m_vEnd.y - this->m_vStart.y;
+    vDir.z = this->m_vEnd.z - this->m_vStart.z;
+    VectorNormalize(&vDir);
+    VectorVectors(&vDir, &vRight, &vUp);
+    CNewParticleEffect::SetControlPoint(this->m_hCoreEffect.m_pObject, 0, &this->m_vStart);
+    CNewParticleEffect::SetControlPointOrientation(this->m_hCoreEffect.m_pObject, 0, &vDir, &vRight, &vUp);
+    CNewParticleEffect::SetControlPoint(this->m_hCoreEffect.m_pObject, 1, &this->m_vEnd);
+    LODWORD(forward.x) = LODWORD(vDir.x) ^ _mask__NegFloat_;
+    v9 = this->m_hCoreEffect.m_pObject;
+    LODWORD(forward.y) = LODWORD(vDir.y) ^ _mask__NegFloat_;
+    LODWORD(forward.z) = LODWORD(vDir.z) ^ _mask__NegFloat_;
+    CNewParticleEffect::SetControlPointOrientation(v9, 1, &forward, &vRight, &vUp);
+    C_BaseEntity::CalcAbsolutePosition(this);
+    m_linearForce = this->m_linearForce;
+    v11 = this->m_rgflCoordinateFrame.m_flMatVal[1][0];
+    v12 = this->m_rgflCoordinateFrame.m_flMatVal[2][0];
+    v13 = this->m_hCoreEffect.m_pObject;
+    vVelocity.x = this->m_rgflCoordinateFrame.m_flMatVal[0][0] * m_linearForce;
+    vVelocity.y = v11 * m_linearForce;
+    vVelocity.z = v12 * m_linearForce;
+    CNewParticleEffect::SetControlPoint(v13, 2, &vVelocity);
+    if ( this->m_bReversed )
+    {
+      color.x = FLOAT_255_0;
+      color.y = FLOAT_56_0;
+      v14 = *(float *)&FLOAT_8_0;
+    }
+    else
+    {
+      color.x = 0.0;
+      color.y = FLOAT_49_0;
+      v14 = FLOAT_189_0;
+    }
+    v15 = this->m_hCoreEffect.m_pObject;
+    color.z = v14;
+    CNewParticleEffect::SetControlPoint(v15, 3, &color);
+  }
+}

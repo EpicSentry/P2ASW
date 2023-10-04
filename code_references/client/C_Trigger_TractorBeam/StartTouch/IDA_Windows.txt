@@ -1,0 +1,20 @@
+void __thiscall C_Trigger_TractorBeam::StartTouch(C_Trigger_TractorBeam *this, C_Portal_Player *pOther)
+{
+  IPhysicsObject *m_pPhysicsObject; // eax
+
+  if ( pOther->IsPlayer(pOther) )
+  {
+    C_Portal_Player::SetInTractorBeam(pOther, this);
+    C_TEBaseBeam::PostDataUpdate((vgui::TreeView *)this, (int)pOther);
+  }
+  else
+  {
+    if ( this->m_pController )
+    {
+      m_pPhysicsObject = pOther->m_pPhysicsObject;
+      if ( m_pPhysicsObject )
+        this->m_pController->AttachObject(this->m_pController, m_pPhysicsObject, 1);
+    }
+    C_TEBaseBeam::PostDataUpdate((vgui::TreeView *)this, (int)pOther);
+  }
+}

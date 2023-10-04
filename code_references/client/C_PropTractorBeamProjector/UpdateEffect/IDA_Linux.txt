@@ -1,0 +1,40 @@
+void __cdecl C_PropTractorBeamProjector::UpdateEffect(C_PropTractorBeamProjector *const this)
+{
+  int i; // esi
+  CNewParticleEffect *m_pObject; // edx
+  Vector *v3; // eax
+  vec_t y; // ecx
+  vec_t z; // eax
+  vec_t v6; // xmm2_4
+  vec_t v7; // xmm0_4
+  CNewParticleEffect *v8; // [esp+0h] [ebp-58h]
+  float m_flLinearForce; // [esp+10h] [ebp-48h]
+  Vector color; // [esp+28h] [ebp-30h] BYREF
+  Vector vVelocity; // [esp+34h] [ebp-24h] BYREF
+
+  for ( i = 0; i != 3; ++i )
+  {
+    m_pObject = this->m_hEmitterEffect[i].m_pObject;
+    if ( m_pObject )
+    {
+      v3 = &g_vTractorBeamColorForward;
+      if ( this->m_flLinearForce < 0.0 )
+        v3 = &g_vTractorBeamColorReverse;
+      color.x = v3->x;
+      y = v3->y;
+      z = v3->z;
+      color.y = y;
+      color.z = z;
+      CNewParticleEffect::SetControlPoint(m_pObject, 1, &color);
+      m_flLinearForce = this->m_flLinearForce;
+      C_BaseEntity::CalcAbsolutePosition(this);
+      v6 = this->m_rgflCoordinateFrame.m_flMatVal[1][0] * m_flLinearForce;
+      v7 = this->m_rgflCoordinateFrame.m_flMatVal[2][0] * m_flLinearForce;
+      v8 = this->m_hEmitterEffect[i].m_pObject;
+      vVelocity.x = this->m_rgflCoordinateFrame.m_flMatVal[0][0] * m_flLinearForce;
+      vVelocity.y = v6;
+      vVelocity.z = v7;
+      CNewParticleEffect::SetControlPoint(v8, 2, &vVelocity);
+    }
+  }
+}

@@ -1,0 +1,334 @@
+void __cdecl C_Trigger_TractorBeam::DrawColumnSegment(
+        C_Trigger_TractorBeam *const this,
+        CMeshBuilder *const meshBuilder,
+        Vector *const vecStart,
+        const Vector *const vDir,
+        float flLength,
+        const Vector *const vecXAxis,
+        const Vector *const vecYAxis,
+        float flRadius,
+        float flAlpha,
+        float flTextureOffset,
+        const int vertexFormat)
+{
+  float x; // xmm7_4
+  float v12; // xmm5_4
+  float v13; // xmm2_4
+  float v14; // xmm1_4
+  int v15; // eax
+  __m128 v16; // xmm0
+  float v17; // xmm3_4
+  float v18; // xmm4_4
+  float v19; // xmm3_4
+  vec_t v20; // eax
+  float v21; // xmm4_4
+  float v22; // xmm3_4
+  float v23; // xmm1_4
+  float v24; // xmm2_4
+  float v25; // xmm0_4
+  float *v26; // eax
+  float *m_pCurrPosition; // eax
+  int v28; // eax
+  bool v29; // cc
+  int m_VertexSize_Color; // edx
+  unsigned __int8 *v31; // eax
+  float v32; // xmm6_4
+  float v33; // xmm5_4
+  float *v34; // eax
+  float *v35; // eax
+  int v36; // eax
+  vec_t v37; // xmm6_4
+  vec_t v38; // xmm5_4
+  float *v39; // eax
+  float *v40; // eax
+  int v41; // eax
+  unsigned __int8 *m_pCurrColor; // ecx
+  unsigned __int8 *v43; // ecx
+  int v44; // eax
+  float *v45; // eax
+  float *v46; // eax
+  int v47; // eax
+  vec_t v48; // xmm0_4
+  vec_t v49; // xmm2_4
+  unsigned __int64 v50; // [esp+18h] [ebp-E0h]
+  float v51; // [esp+74h] [ebp-84h]
+  float v52; // [esp+78h] [ebp-80h]
+  float flLastV; // [esp+7Ch] [ebp-7Ch]
+  float flU; // [esp+80h] [ebp-78h]
+  float flV; // [esp+84h] [ebp-74h]
+  float v56; // [esp+88h] [ebp-70h]
+  int i; // [esp+8Ch] [ebp-6Ch]
+  float v58; // [esp+94h] [ebp-64h]
+  float v59; // [esp+98h] [ebp-60h]
+  float vert; // [esp+9Ch] [ebp-5Ch]
+  float vert_4; // [esp+A0h] [ebp-58h]
+  float y; // [esp+A8h] [ebp-50h]
+  float v63; // [esp+A8h] [ebp-50h]
+  float v64; // [esp+A8h] [ebp-50h]
+  float z; // [esp+ACh] [ebp-4Ch]
+  float v66; // [esp+ACh] [ebp-4Ch]
+  Vector normal; // [esp+B8h] [ebp-40h] BYREF
+  Vector tangents; // [esp+C4h] [ebp-34h] BYREF
+  Vector tangentt; // [esp+D0h] [ebp-28h] BYREF
+  float v70; // [esp+DCh] [ebp-1Ch]
+
+  i = 1;
+  x = vecXAxis->x;
+  y = vecXAxis->y;
+  v12 = vecStart->x;
+  z = vecXAxis->z;
+  v13 = vecStart->y;
+  v14 = vecStart->z;
+  vert = (float)(flRadius * vecXAxis->x) + vecStart->x;
+  v15 = -!this->m_bReversed;
+  LOBYTE(v15) = v15 & 0xB;
+  v59 = (float)(flRadius * y) + v13;
+  flLastV = 0.0;
+  v58 = (float)(flRadius * z) + v14;
+  v52 = (float)(v15 + 255);
+  v51 = (float)(!this->m_bReversed ? 255 : 32);
+  while ( 1 )
+  {
+    v16 = (__m128)0x3DC90FDBu;
+    v16.m128_f32[0] = 0.098174773 * (float)i;
+    v16.m128_f32[0] = _mm_unpacklo_ps(v16, v16).m128_f32[0];
+    *(double *)&v50 = cos(v16.m128_f32[0]);
+    v17 = sin(v16.m128_f32[0]);
+    v16.m128_f32[0] = _mm_unpacklo_pd((__m128d)v50, (__m128d)v50).m128d_f64[0];
+    flV = (float)i * 0.015625;
+    v18 = vecYAxis->y * v17;
+    vert_4 = (float)((float)((float)(x * v16.m128_f32[0]) * flRadius) + v12)
+           + (float)(flRadius * (float)(v17 * vecYAxis->x));
+    v19 = (float)(v17 * vecYAxis->z) * flRadius;
+    tangents.x = vDir->x;
+    v20 = vDir->y;
+    normal.x = v12 - vert_4;
+    v21 = (float)(v18 * flRadius) + (float)((float)((float)(y * v16.m128_f32[0]) * flRadius) + v13);
+    v22 = v19 + (float)((float)((float)(v16.m128_f32[0] * z) * flRadius) + v14);
+    normal.y = v13 - v21;
+    normal.z = v14 - v22;
+    tangents.y = v20;
+    tangents.z = vDir->z;
+    VectorNormalize(&tangents);
+    tangentt.x = (float)(tangents.y * normal.z) - (float)(tangents.z * normal.y);
+    tangentt.y = (float)(tangents.z * normal.x) - (float)(normal.z * tangents.x);
+    tangentt.z = (float)(tangents.x * normal.y) - (float)(normal.x * tangents.y);
+    VectorNormalize(&tangentt);
+    VectorNormalize(&normal);
+    flU = 0.00390625 * flLength;
+    v23 = (float)((float)((float)(v52 / 255.0) * flAlpha) * 255.0) + 8388608.0;
+    v24 = (float)((float)(0.627451 * flAlpha) * 255.0) + 8388608.0;
+    v25 = (float)((float)((float)(v51 / 255.0) * flAlpha) * 255.0) + 8388608.0;
+    v70 = 8388863.0;
+    *(_DWORD *)meshBuilder->m_VertexBuilder.m_pCurrColor = LOBYTE(v23) | (LOBYTE(v25) << 16) | (LOBYTE(v24) << 8) | 0xFF000000;
+    v26 = meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0];
+    *v26 = 0.0;
+    v26[1] = flV;
+    m_pCurrPosition = meshBuilder->m_VertexBuilder.m_pCurrPosition;
+    *m_pCurrPosition = vert_4;
+    m_pCurrPosition[1] = v21;
+    m_pCurrPosition[2] = v22;
+    if ( (vertexFormat & 2) != 0 )
+      *(Vector *)meshBuilder->m_VertexBuilder.m_pCurrNormal = normal;
+    if ( (vertexFormat & 0x10) != 0 )
+      *(Vector *)((char *)meshBuilder->m_VertexBuilder.m_pTangentS
+                + meshBuilder->m_VertexBuilder.m_nCurrentVertex * meshBuilder->m_VertexBuilder.m_VertexSize_TangentS) = tangents;
+    if ( (vertexFormat & 0x20) != 0 )
+      *(Vector *)((char *)meshBuilder->m_VertexBuilder.m_pTangentT
+                + meshBuilder->m_VertexBuilder.m_nCurrentVertex * meshBuilder->m_VertexBuilder.m_VertexSize_TangentT) = tangentt;
+    v28 = meshBuilder->m_VertexBuilder.m_nCurrentVertex + 1;
+    v29 = v28 <= meshBuilder->m_VertexBuilder.m_nVertexCount;
+    meshBuilder->m_VertexBuilder.m_nCurrentVertex = v28;
+    if ( !v29 )
+      meshBuilder->m_VertexBuilder.m_nVertexCount = v28;
+    m_VertexSize_Color = meshBuilder->m_VertexBuilder.m_VertexSize_Color;
+    meshBuilder->m_VertexBuilder.m_pCurrPosition = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrPosition
+                                                           + meshBuilder->m_VertexBuilder.m_VertexSize_Position);
+    meshBuilder->m_VertexBuilder.m_pCurrNormal = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrNormal
+                                                         + meshBuilder->m_VertexBuilder.m_VertexSize_Normal);
+    v31 = &meshBuilder->m_VertexBuilder.m_pCurrColor[m_VertexSize_Color];
+    meshBuilder->m_VertexBuilder.m_pCurrColor = v31;
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[0]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[1]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[2]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[3]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[4]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[5]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[6]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[7]);
+    v63 = (float)(flLength * vDir->x) + vert_4;
+    v70 = (float)((float)(0.627451 * flAlpha) * 255.0) + 8388608.0;
+    v32 = flLength * vDir->y;
+    v33 = flLength * vDir->z;
+    v70 = 8388863.0;
+    *(_DWORD *)v31 = LOBYTE(v23) | (LOBYTE(v25) << 16) | (LOBYTE(v24) << 8) | 0xFF000000;
+    v34 = meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0];
+    *v34 = flU;
+    v34[1] = flV;
+    v35 = meshBuilder->m_VertexBuilder.m_pCurrPosition;
+    *v35 = v63;
+    v35[1] = v32 + v21;
+    v35[2] = v33 + v22;
+    if ( (vertexFormat & 2) != 0 )
+      *(Vector *)meshBuilder->m_VertexBuilder.m_pCurrNormal = normal;
+    if ( (vertexFormat & 0x10) != 0 )
+      *(Vector *)((char *)meshBuilder->m_VertexBuilder.m_pTangentS
+                + meshBuilder->m_VertexBuilder.m_nCurrentVertex * meshBuilder->m_VertexBuilder.m_VertexSize_TangentS) = tangents;
+    if ( (vertexFormat & 0x20) != 0 )
+      *(Vector *)((char *)meshBuilder->m_VertexBuilder.m_pTangentT
+                + meshBuilder->m_VertexBuilder.m_nCurrentVertex * meshBuilder->m_VertexBuilder.m_VertexSize_TangentT) = tangentt;
+    v36 = meshBuilder->m_VertexBuilder.m_nCurrentVertex + 1;
+    v29 = v36 <= meshBuilder->m_VertexBuilder.m_nVertexCount;
+    meshBuilder->m_VertexBuilder.m_nCurrentVertex = v36;
+    if ( !v29 )
+      meshBuilder->m_VertexBuilder.m_nVertexCount = v36;
+    meshBuilder->m_VertexBuilder.m_pCurrPosition = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrPosition
+                                                           + meshBuilder->m_VertexBuilder.m_VertexSize_Position);
+    meshBuilder->m_VertexBuilder.m_pCurrNormal = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrNormal
+                                                         + meshBuilder->m_VertexBuilder.m_VertexSize_Normal);
+    meshBuilder->m_VertexBuilder.m_pCurrColor += meshBuilder->m_VertexBuilder.m_VertexSize_Color;
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[0]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[1]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[2]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[3]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[4]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[5]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[6]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[7]);
+    v66 = (float)(flLength * vDir->x) + vert;
+    v64 = (float)(flLength * vDir->y) + v59;
+    v56 = (float)(flLength * vDir->z) + v58;
+    v37 = vecStart->y - v59;
+    v38 = vecStart->z - v58;
+    normal.x = vecStart->x - vert;
+    normal.y = v37;
+    normal.z = v38;
+    VectorNormalize(&normal);
+    tangentt.x = (float)(tangents.y * normal.z) - (float)(normal.y * tangents.z);
+    tangentt.y = (float)(tangents.z * normal.x) - (float)(normal.z * tangents.x);
+    tangentt.z = (float)(normal.y * tangents.x) - (float)(tangents.y * normal.x);
+    VectorNormalize(&tangentt);
+    v70 = 8388863.0;
+    *(_DWORD *)meshBuilder->m_VertexBuilder.m_pCurrColor = LOBYTE(v23) | (LOBYTE(v25) << 16) | (LOBYTE(v24) << 8) | 0xFF000000;
+    v39 = meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0];
+    *v39 = flU;
+    v39[1] = flLastV;
+    v40 = meshBuilder->m_VertexBuilder.m_pCurrPosition;
+    *v40 = v66;
+    v40[1] = v64;
+    v40[2] = v56;
+    if ( (vertexFormat & 2) != 0 )
+      *(Vector *)meshBuilder->m_VertexBuilder.m_pCurrNormal = normal;
+    if ( (vertexFormat & 0x10) != 0 )
+      *(Vector *)((char *)meshBuilder->m_VertexBuilder.m_pTangentS
+                + meshBuilder->m_VertexBuilder.m_nCurrentVertex * meshBuilder->m_VertexBuilder.m_VertexSize_TangentS) = tangents;
+    if ( (vertexFormat & 0x20) != 0 )
+      *(Vector *)((char *)meshBuilder->m_VertexBuilder.m_pTangentT
+                + meshBuilder->m_VertexBuilder.m_nCurrentVertex * meshBuilder->m_VertexBuilder.m_VertexSize_TangentT) = tangentt;
+    v41 = meshBuilder->m_VertexBuilder.m_nCurrentVertex + 1;
+    v29 = v41 <= meshBuilder->m_VertexBuilder.m_nVertexCount;
+    meshBuilder->m_VertexBuilder.m_nCurrentVertex = v41;
+    if ( !v29 )
+      meshBuilder->m_VertexBuilder.m_nVertexCount = v41;
+    m_pCurrColor = meshBuilder->m_VertexBuilder.m_pCurrColor;
+    meshBuilder->m_VertexBuilder.m_pCurrPosition = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrPosition
+                                                           + meshBuilder->m_VertexBuilder.m_VertexSize_Position);
+    v43 = &m_pCurrColor[meshBuilder->m_VertexBuilder.m_VertexSize_Color];
+    meshBuilder->m_VertexBuilder.m_pCurrNormal = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrNormal
+                                                         + meshBuilder->m_VertexBuilder.m_VertexSize_Normal);
+    v44 = meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[0];
+    meshBuilder->m_VertexBuilder.m_pCurrColor = v43;
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0]
+                                                              + v44);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[1]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[2]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[3]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[4]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[5]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[6]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[7]);
+    v70 = 8388863.0;
+    *(_DWORD *)v43 = LOBYTE(v23) | (LOBYTE(v25) << 16) | (LOBYTE(v24) << 8) | 0xFF000000;
+    v45 = meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0];
+    v45[1] = flLastV;
+    *v45 = 0.0;
+    v46 = meshBuilder->m_VertexBuilder.m_pCurrPosition;
+    *v46 = vert;
+    v46[1] = v59;
+    v46[2] = v58;
+    if ( (vertexFormat & 2) != 0 )
+      *(Vector *)meshBuilder->m_VertexBuilder.m_pCurrNormal = normal;
+    if ( (vertexFormat & 0x10) != 0 )
+      *(Vector *)((char *)meshBuilder->m_VertexBuilder.m_pTangentS
+                + meshBuilder->m_VertexBuilder.m_nCurrentVertex * meshBuilder->m_VertexBuilder.m_VertexSize_TangentS) = tangents;
+    if ( (vertexFormat & 0x20) != 0 )
+      *(Vector *)((char *)meshBuilder->m_VertexBuilder.m_pTangentT
+                + meshBuilder->m_VertexBuilder.m_nCurrentVertex * meshBuilder->m_VertexBuilder.m_VertexSize_TangentT) = tangentt;
+    v47 = meshBuilder->m_VertexBuilder.m_nCurrentVertex + 1;
+    v29 = v47 <= meshBuilder->m_VertexBuilder.m_nVertexCount;
+    meshBuilder->m_VertexBuilder.m_nCurrentVertex = v47;
+    if ( !v29 )
+      meshBuilder->m_VertexBuilder.m_nVertexCount = v47;
+    meshBuilder->m_VertexBuilder.m_pCurrPosition = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrPosition
+                                                           + meshBuilder->m_VertexBuilder.m_VertexSize_Position);
+    meshBuilder->m_VertexBuilder.m_pCurrNormal = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrNormal
+                                                         + meshBuilder->m_VertexBuilder.m_VertexSize_Normal);
+    meshBuilder->m_VertexBuilder.m_pCurrColor += meshBuilder->m_VertexBuilder.m_VertexSize_Color;
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[0]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[1]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[2]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[3]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[4]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[5]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[6]);
+    meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7]
+                                                              + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[7]);
+    if ( ++i == 65 )
+      break;
+    v59 = v21;
+    v58 = v22;
+    flLastV = flV;
+    x = vecXAxis->x;
+    y = vecXAxis->y;
+    z = vecXAxis->z;
+    vert = vert_4;
+    v12 = vecStart->x;
+    v13 = vecStart->y;
+    v14 = vecStart->z;
+  }
+  v48 = (float)(flLength * vDir->z) + vecStart->z;
+  v49 = (float)(flLength * vDir->x) + vecStart->x;
+  vecStart->y = (float)(flLength * vDir->y) + vecStart->y;
+  vecStart->z = v48;
+  vecStart->x = v49;
+}

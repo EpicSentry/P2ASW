@@ -1,0 +1,24 @@
+void __thiscall C_Trigger_TractorBeam::GetToolRecordingState(C_Trigger_TractorBeam *this, KeyValues *msg)
+{
+  KeyValues *NonConformantKeyValues; // esi
+  const char *HandlerIDKeyString; // eax
+  Vector vStart; // [esp+Ch] [ebp-Ch]
+  Vector vStarta; // [esp+Ch] [ebp-Ch]
+
+  C_BaseEntity::GetToolRecordingState(this, msg);
+  NonConformantKeyValues = CIFM_EntityKeyValuesHandler_AutoRegister::FindOrCreateNonConformantKeyValues(msg);
+  HandlerIDKeyString = CIFM_EntityKeyValuesHandler_AutoRegister::GetHandlerIDKeyString();
+  KeyValues::SetString(NonConformantKeyValues, HandlerIDKeyString, "C_Trigger_TractorBeam");
+  KeyValues::SetInt(NonConformantKeyValues, "entIndex", this->index);
+  KeyValues::SetFloat(NonConformantKeyValues, "starttime", this->m_flStartTime);
+  KeyValues::SetInt(NonConformantKeyValues, "reversed", this->m_bReversed);
+  KeyValues::SetFloat(NonConformantKeyValues, "force", this->m_linearForce);
+  vStart = this->m_vStart;
+  KeyValues::SetFloat(NonConformantKeyValues, "sp_x", vStart.x);
+  KeyValues::SetFloat(NonConformantKeyValues, "sp_y", vStart.y);
+  KeyValues::SetFloat(NonConformantKeyValues, "sp_z", vStart.z);
+  vStarta = this->m_vEnd;
+  KeyValues::SetFloat(NonConformantKeyValues, "ep_x", vStarta.x);
+  KeyValues::SetFloat(NonConformantKeyValues, "ep_y", vStarta.y);
+  KeyValues::SetFloat(NonConformantKeyValues, "ep_z", vStarta.z);
+}

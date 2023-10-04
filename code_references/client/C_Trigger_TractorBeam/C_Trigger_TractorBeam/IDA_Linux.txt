@@ -1,0 +1,28 @@
+void __cdecl C_Trigger_TractorBeam::C_Trigger_TractorBeam(C_Trigger_TractorBeam *const this)
+{
+  C_BaseEntity::C_BaseEntity((C_BaseEntity *const)this);
+  this->_vptr_IHandleEntity = (int (**)(...))off_123AD88;
+  this->_vptr_IClientRenderable = (int (**)(...))off_123B140;
+  this->_vptr_IClientNetworkable = (int (**)(...))off_123B1FC;
+  this->_vptr_IClientThinkable = (int (**)(...))off_123B23C;
+  this->_vptr_IClientModelRenderable = (int (**)(...))&off_123B258;
+  this->_vptr_IMotionEvent = (int (**)(...))&off_11EED60;
+  ITriggerTractorBeamAutoList::ITriggerTractorBeamAutoList(&this->ITriggerTractorBeamAutoList, 1);
+  this->_vptr_IHandleEntity = (int (**)(...))off_12E9668;
+  this->_vptr_IClientRenderable = (int (**)(...))off_12E9A2C;
+  this->_vptr_IClientNetworkable = (int (**)(...))off_12E9AE8;
+  this->_vptr_IClientThinkable = (int (**)(...))off_12E9B28;
+  this->_vptr_IClientModelRenderable = (int (**)(...))&off_12E9B44;
+  this->_vptr_IMotionEvent = (int (**)(...))&off_12E9B50;
+  this->_vptr_ITriggerTractorBeamAutoList = (int (**)(...))off_12E9B5C;
+  this->m_blobs.m_Memory.m_pMemory = 0;
+  this->m_blobs.m_Memory.m_nAllocationCount = 0;
+  this->m_blobs.m_Memory.m_nGrowSize = 0;
+  this->m_blobs.m_Size = 0;
+  this->m_blobs.m_pElements = 0;
+  this->m_hProxyEntity.m_Index = -1;
+  this->m_hCoreEffect.m_pPrev = 0;
+  this->m_hCoreEffect.m_pNext = 0;
+  this->m_hCoreEffect.m_pObject = 0;
+  this->m_bDisabled = 0;
+}

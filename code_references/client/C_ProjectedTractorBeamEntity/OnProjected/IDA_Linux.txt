@@ -1,0 +1,53 @@
+void __cdecl C_ProjectedTractorBeamEntity::OnProjected(C_ProjectedTractorBeamEntity *const this)
+{
+  unsigned int m_Index; // eax
+  char *v2; // edx
+  int v3; // esi
+  bool PredictionEligible; // al
+  unsigned int v5; // eax
+  C_BasePlayer_0 *v6; // ecx
+  char *v7; // edx
+  float v8; // xmm0_4
+  const Vector *v9; // edi
+  const Vector *v10; // eax
+
+  C_BaseProjectedEntity::OnProjected(this);
+  m_Index = this->m_hTractorBeamTrigger.m_Index;
+  if ( m_Index != -1 )
+  {
+    v2 = (char *)g_pEntityList + 16 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v2 + 2) == HIWORD(m_Index) )
+    {
+      v3 = *((_DWORD *)v2 + 1);
+      if ( v3 )
+      {
+        PredictionEligible = C_BaseEntity::GetPredictionEligible(this);
+        C_BaseEntity::SetPredictionEligible((C_BaseEntity *const)v3, PredictionEligible);
+        if ( this->m_bIsPlayerSimulated )
+        {
+          v5 = this->m_hPlayerSimulationOwner.m_Index;
+          v6 = 0;
+          if ( v5 != -1 )
+          {
+            v7 = (char *)g_pEntityList + 16 * (unsigned __int16)v5;
+            if ( *((_DWORD *)v7 + 2) == HIWORD(v5) )
+              v6 = (C_BasePlayer_0 *)*((_DWORD *)v7 + 1);
+          }
+          C_BaseEntity::SetPlayerSimulated((C_BaseEntity *const)v3, v6);
+        }
+        else
+        {
+          C_BaseEntity::UnsetPlayerSimulated((C_BaseEntity *const)v3);
+        }
+        v8 = *(float *)(v3 + 2724);
+        if ( *(_BYTE *)(v3 + 2732) )
+          v8 = -v8;
+        v9 = (const Vector *)(*((int (__cdecl **)(C_ProjectedTractorBeamEntity *const))this->_vptr_IHandleEntity + 237))(this);
+        v10 = (const Vector *)(*((int (__cdecl **)(C_ProjectedTractorBeamEntity *const))this->_vptr_IHandleEntity + 236))(this);
+        C_Trigger_TractorBeam::UpdateBeam((C_Trigger_TractorBeam *const)v3, v10, v9, v8);
+        *(_DWORD *)(v3 + 2752) = *(_DWORD *)(*((int (__cdecl **)(C_ProjectedTractorBeamEntity *const))this->_vptr_IHandleEntity
+                                             + 3))(this);
+      }
+    }
+  }
+}

@@ -127,9 +127,9 @@ extern CUtlVector< CHandle<CTriggerMultiple> >	g_hWeaponFireTriggers;
 class CBaseVPhysicsTrigger : public CBaseEntity
 {
 	DECLARE_CLASS( CBaseVPhysicsTrigger , CBaseEntity );
-
 public:
 	DECLARE_DATADESC();
+	DECLARE_SERVERCLASS();
 
 	virtual void Spawn();
 	virtual void UpdateOnRemove();
