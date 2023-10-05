@@ -1,0 +1,34 @@
+void __cdecl C_TriggerPortalCleanser::DestroyParticles(C_TriggerPortalCleanser *const this)
+{
+  CNewParticleEffect *m_pObject; // eax
+  CUtlReference<CNewParticleEffect> *m_pPrev; // edx
+  CUtlReference<CNewParticleEffect> *m_pNext; // eax
+  CUtlReference<CNewParticleEffect> *v4; // edx
+
+  if ( this->m_hCleanserFX.m_pObject )
+  {
+    CNewParticleEffect::StopEmission(this->m_hCleanserFX.m_pObject, 0, 0, 1, 1);
+    m_pObject = this->m_hCleanserFX.m_pObject;
+    if ( m_pObject )
+    {
+      m_pPrev = this->m_hCleanserFX.m_pPrev;
+      if ( m_pPrev )
+      {
+        m_pPrev->m_pNext = this->m_hCleanserFX.m_pNext;
+        m_pNext = this->m_hCleanserFX.m_pNext;
+        if ( m_pNext )
+          m_pNext->m_pPrev = this->m_hCleanserFX.m_pPrev;
+      }
+      else if ( m_pObject->m_References.m_pHead == &this->m_hCleanserFX )
+      {
+        v4 = this->m_hCleanserFX.m_pNext;
+        m_pObject->m_References.m_pHead = v4;
+        if ( v4 )
+          v4->m_pPrev = 0;
+      }
+      this->m_hCleanserFX.m_pPrev = 0;
+      this->m_hCleanserFX.m_pNext = 0;
+      this->m_hCleanserFX.m_pObject = 0;
+    }
+  }
+}

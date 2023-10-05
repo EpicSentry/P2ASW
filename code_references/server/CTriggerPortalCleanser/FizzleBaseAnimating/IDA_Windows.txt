@@ -1,0 +1,187 @@
+void __cdecl CTriggerPortalCleanser::FizzleBaseAnimating(
+        CTriggerPortalCleanser *pFizzler,
+        CBaseAnimating *pBaseAnimating)
+{
+  unsigned int v3; // eax
+  int v4; // edi
+  char **v5; // eax
+  const char *v6; // eax
+  CTriggerPortalCleanser *v7; // ebx
+  IPhysicsObject *m_pPhysicsObject; // ecx
+  CPortal_Player *v9; // edi
+  CBasePlayer *PlayerHoldingEntity; // eax
+  float *v11; // eax
+  Vector *(__thiscall *EyeDirection2D)(CBaseCombatCharacter *, Vector *); // edx
+  const Vector *AbsVelocity; // eax
+  float v14; // xmm1_4
+  float v15; // xmm2_4
+  unsigned int v16; // eax
+  CBaseEntity *v17; // edi
+  IPhysicsObject *v18; // ebx
+  void (__thiscall *SetVelocity)(IPhysicsObject *, const Vector *, const Vector *); // edx
+  CPropWeightedCube *SchrodingerTwin; // eax
+  CBaseEntity *v21; // edi
+  const char *v22; // eax
+  CPortal_Player *fDelay; // [esp+40h] [ebp-54h]
+  Vector v24; // [esp+50h] [ebp-44h] BYREF
+  Vector vAng; // [esp+5Ch] [ebp-38h] BYREF
+  Vector vOldAng; // [esp+68h] [ebp-2Ch] BYREF
+  Vector vOldVel; // [esp+74h] [ebp-20h] BYREF
+  Vector vVel; // [esp+80h] [ebp-14h] BYREF
+  char v29[4]; // [esp+8Ch] [ebp-8h] BYREF
+  char v30[4]; // [esp+90h] [ebp-4h] BYREF
+  const char *pBaseAnimatinga; // [esp+A0h] [ebp+Ch]
+
+  if ( pBaseAnimating && (pBaseAnimating->m_fFlags.m_Value & 0x10000000) == 0 )
+  {
+    if ( pBaseAnimating->m_iClassname.pszValue == "npc_personality_core"
+      || CBaseEntity::ClassMatchesComplex(pBaseAnimating, "npc_personality_core") )
+    {
+      pBaseAnimating->OnFizzled(pBaseAnimating);
+      if ( (pBaseAnimating->m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(pBaseAnimating);
+      fDelay = (CPortal_Player *)GetPlayerHoldingEntity(pBaseAnimating);
+      v3 = pBaseAnimating->GetModelIndex(pBaseAnimating);
+      CPortalGameStats::Event_OnFizzled(&g_PortalGameStats, v3, &pBaseAnimating->m_vecAbsOrigin, fDelay);
+    }
+    else
+    {
+      v4 = 0;
+      if ( g_pszPortalNonCleansable[0] )
+      {
+        v5 = g_pszPortalNonCleansable;
+        while ( 1 )
+        {
+          v6 = *v5;
+          if ( pBaseAnimating->m_iClassname.pszValue == v6 || CBaseEntity::ClassMatchesComplex(pBaseAnimating, v6) )
+            break;
+          v5 = &g_pszPortalNonCleansable[++v4];
+          if ( !*v5 )
+            goto LABEL_13;
+        }
+      }
+      else
+      {
+LABEL_13:
+        v7 = pFizzler;
+        if ( pFizzler && CBaseEntity::NameMatches(pBaseAnimating, "box") )
+          COutputEvent::FireOutput(&pFizzler->m_OnDissolveBox, pBaseAnimating, pFizzler, 0.0);
+        pBaseAnimating->GetVelocity(pBaseAnimating, &vOldVel, &vOldAng);
+        m_pPhysicsObject = pBaseAnimating->m_pPhysicsObject;
+        v9 = 0;
+        if ( m_pPhysicsObject )
+        {
+          if ( (((int (__thiscall *)(IPhysicsObject *))m_pPhysicsObject->GetGameFlags)(m_pPhysicsObject) & 4) != 0 )
+          {
+            PlayerHoldingEntity = GetPlayerHoldingEntity(pBaseAnimating);
+            v9 = (CPortal_Player *)PlayerHoldingEntity;
+            if ( PlayerHoldingEntity )
+            {
+              PlayerHoldingEntity->ForceDropOfCarriedPhysObjects(PlayerHoldingEntity, pBaseAnimating);
+              CBaseEntity::GetAbsVelocity(v9);
+              v11 = (float *)v9->EyeDirection2D(v9, &vAng);
+              EyeDirection2D = v9->EyeDirection2D;
+              vVel.x = *v11 * 4.0;
+              vVel.y = EyeDirection2D(v9, &v24)->y * 4.0;
+              AbsVelocity = CBaseEntity::GetAbsVelocity(v9);
+              v14 = AbsVelocity->y + vVel.y;
+              v15 = AbsVelocity->z - 32.0;
+              vOldVel.x = AbsVelocity->x + vVel.x;
+              vOldVel.y = v14;
+              vOldVel.z = v15;
+            }
+          }
+        }
+        pBaseAnimating->OnFizzled(pBaseAnimating);
+        if ( (pBaseAnimating->m_iEFlags & 0x800) != 0 )
+          CBaseEntity::CalcAbsolutePosition(pBaseAnimating);
+        v16 = pBaseAnimating->GetModelIndex(pBaseAnimating);
+        CPortalGameStats::Event_OnFizzled(&g_PortalGameStats, v16, &pBaseAnimating->m_vecAbsOrigin, v9);
+        v17 = ConvertToDissolvingProp(pBaseAnimating);
+        if ( v17 )
+        {
+          CBaseEntity::SetName(v17, pBaseAnimating->m_iName.m_Value);
+          UTIL_TransferPoseParameters(pBaseAnimating, v17);
+          TransferChildren(pBaseAnimating, v17);
+          CBaseEntity::SetCollisionGroup(v17, 3);
+          CCollisionProperty::SetSolidFlags(
+            &pBaseAnimating->m_Collision,
+            pBaseAnimating->m_Collision.m_usSolidFlags.m_Value | 4);
+          CBaseEntity::AddEffects(pBaseAnimating, 32);
+          if ( pFizzler && pFizzler->m_bVisible.m_Value )
+          {
+            if ( pFizzler->m_bObject1InRange.m_Value
+              && pBaseAnimating == CHandle<CPortal_Base2D>::operator CPortal_Base2D *((CHandle<CBaseEntity> *)&pFizzler->m_hObject1) )
+            {
+              CNetworkHandleBase<CBaseEntity,CTriggerPortalCleanser::NetworkVar_m_hObject1>::Set(
+                &pFizzler->m_hObject1,
+                v17);
+            }
+            else if ( pFizzler->m_bObject2InRange.m_Value
+                   && pBaseAnimating == CHandle<CPortal_Base2D>::operator CPortal_Base2D *((CHandle<CBaseEntity> *)&pFizzler->m_hObject2) )
+            {
+              CNetworkHandleBase<CBaseEntity,CTriggerPortalCleanser::NetworkVar_m_hObject2>::Set(
+                &pFizzler->m_hObject2,
+                v17);
+            }
+          }
+          v18 = v17->m_pPhysicsObject;
+          if ( v18 )
+          {
+            v18->EnableGravity(v18, 0);
+            SetVelocity = v18->SetVelocity;
+            *(_QWORD *)&vAng.x = *(_QWORD *)&vOldAng.x;
+            vVel.x = vOldVel.x * 0.5;
+            vVel.y = vOldVel.y * 0.5;
+            vVel.z = vOldVel.z * 0.5;
+            vAng.z = vOldAng.z + 20.0;
+            SetVelocity(v18, &vVel, &vAng);
+          }
+          CBaseEntity::AddFlag(pBaseAnimating, 0x10000000);
+          SchrodingerTwin = UTIL_GetSchrodingerTwin(pBaseAnimating);
+          if ( SchrodingerTwin )
+            CTriggerPortalCleanser::FizzleBaseAnimating(pFizzler, SchrodingerTwin);
+          UTIL_Remove(pBaseAnimating);
+          v7 = pFizzler;
+        }
+        v21 = (CBaseEntity *)__RTDynamicCast(
+                               v17,
+                               0,
+                               &CBaseEntity `RTTI Type Descriptor',
+                               &CBaseAnimating `RTTI Type Descriptor',
+                               0);
+        if ( v21 )
+        {
+          pBaseAnimatinga = *(const char **)((int (__thiscall *)(CBaseAnimating *, char *))pBaseAnimating->GetModelName)(
+                                              pBaseAnimating,
+                                              v30);
+          if ( !pBaseAnimatinga )
+            pBaseAnimatinga = locale;
+          v22 = *(const char **)((int (__thiscall *)(CBaseEntity *, char *))v21->GetModelName)(v21, v29);
+          if ( !v22 )
+            v22 = locale;
+          if ( _V_strcmp(v22, pBaseAnimatinga) )
+          {
+            FizzlerEffects::Create(v21);
+            CBaseEntity::EmitSound(v21, "Prop.Fizzled", 0.0, 0);
+          }
+          else
+          {
+            ((void (__thiscall *)(CBaseEntity *, const char *, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD))v21->__vftable[1].KeyValue)(
+              v21,
+              locale,
+              LODWORD(gpGlobals->curtime),
+              0,
+              0,
+              LODWORD(vec3_origin.x),
+              LODWORD(vec3_origin.y),
+              LODWORD(vec3_origin.z),
+              0);
+          }
+        }
+        if ( v7 )
+          COutputEvent::FireOutput(&v7->m_OnDissolve, pBaseAnimating, v7, 0.0);
+      }
+    }
+  }
+}

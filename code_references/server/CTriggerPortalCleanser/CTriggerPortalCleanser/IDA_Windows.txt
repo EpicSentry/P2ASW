@@ -1,0 +1,121 @@
+void __thiscall CTriggerPortalCleanser::CTriggerPortalCleanser(CTriggerPortalCleanser *this)
+{
+  edict_t *m_pPev; // ecx
+  edict_t *v3; // ecx
+  edict_t *v4; // ecx
+  edict_t *v5; // ecx
+  edict_t *v6; // ecx
+  unsigned int m_Index; // eax
+  edict_t *v8; // ecx
+  unsigned int v9; // eax
+  edict_t *v10; // ecx
+
+  CBaseTrigger::CBaseTrigger(this);
+  this->ITriggerPortalCleanserAutoList::__vftable = (ITriggerPortalCleanserAutoList_vtbl *)&ITriggerPortalCleanserAutoList::`vftable';
+  ITriggerPortalCleanserAutoList::Add(&this->ITriggerPortalCleanserAutoList);
+  this->ITriggerPortalCleanserAutoList::__vftable = (ITriggerPortalCleanserAutoList_vtbl *)&CTriggerPortalCleanser::`vftable'{for `ITriggerPortalCleanserAutoList'};
+  this->CBaseTrigger::CBaseToggle::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable = (CTriggerPortalCleanser_vtbl *)&CTriggerPortalCleanser::`vftable'{for `CBaseTrigger'};
+  this->m_OnDissolve.m_Value.iVal = 0;
+  this->m_OnDissolve.m_Value.eVal.m_Index = -1;
+  this->m_OnDissolve.m_Value.fieldType = FIELD_VOID;
+  this->m_OnFizzle.m_Value.iVal = 0;
+  this->m_OnFizzle.m_Value.eVal.m_Index = -1;
+  this->m_OnFizzle.m_Value.fieldType = FIELD_VOID;
+  this->m_OnDissolveBox.m_Value.iVal = 0;
+  this->m_OnDissolveBox.m_Value.eVal.m_Index = -1;
+  this->m_OnDissolveBox.m_Value.fieldType = FIELD_VOID;
+  this->m_VortexObjects[0].m_hEnt.m_Index = -1;
+  this->m_VortexObjects[1].m_hEnt.m_Index = -1;
+  this->m_bVisible.m_Value = 0;
+  if ( this->m_Network.m_TimerEvent.m_bRegistered )
+  {
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+  }
+  else
+  {
+    m_pPev = this->m_Network.m_pPev;
+    if ( m_pPev )
+      CBaseEdict::StateChanged(m_pPev, 0x4FCu);
+  }
+  this->m_bObject1InRange.m_Value = 0;
+  if ( this->m_Network.m_TimerEvent.m_bRegistered )
+  {
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+  }
+  else
+  {
+    v3 = this->m_Network.m_pPev;
+    if ( v3 )
+      CBaseEdict::StateChanged(v3, 0x504u);
+  }
+  this->m_bObject2InRange.m_Value = 0;
+  if ( this->m_Network.m_TimerEvent.m_bRegistered )
+  {
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+  }
+  else
+  {
+    v4 = this->m_Network.m_pPev;
+    if ( v4 )
+      CBaseEdict::StateChanged(v4, 0x505u);
+  }
+  this->m_bUseScanline.m_Value = 1;
+  if ( this->m_Network.m_TimerEvent.m_bRegistered )
+  {
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+  }
+  else
+  {
+    v5 = this->m_Network.m_pPev;
+    if ( v5 )
+      CBaseEdict::StateChanged(v5, 0x506u);
+  }
+  this->m_bPlayersPassTriggerFilters.m_Value = 1;
+  if ( this->m_Network.m_TimerEvent.m_bRegistered )
+  {
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+  }
+  else
+  {
+    v6 = this->m_Network.m_pPev;
+    if ( v6 )
+      CBaseEdict::StateChanged(v6, 0x507u);
+  }
+  this->m_hObject1.m_Value.m_Index = -1;
+  this->m_hObject2.m_Value.m_Index = -1;
+  m_Index = this->m_hObject1.m_Value.m_Index;
+  if ( m_Index != -1
+    && g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber == HIWORD(m_Index)
+    && g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      v8 = this->m_Network.m_pPev;
+      if ( v8 )
+        CBaseEdict::StateChanged(v8, 0x508u);
+    }
+    this->m_hObject1.m_Value.m_Index = -1;
+  }
+  v9 = this->m_hObject2.m_Value.m_Index;
+  if ( v9 != -1
+    && g_pEntityList->m_EntPtrArray[(unsigned __int16)v9].m_SerialNumber == HIWORD(v9)
+    && g_pEntityList->m_EntPtrArray[(unsigned __int16)v9].m_pEntity )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+      this->m_hObject2.m_Value.m_Index = -1;
+    }
+    else
+    {
+      v10 = this->m_Network.m_pPev;
+      if ( v10 )
+        CBaseEdict::StateChanged(v10, 0x50Cu);
+      this->m_hObject2.m_Value.m_Index = -1;
+    }
+  }
+}

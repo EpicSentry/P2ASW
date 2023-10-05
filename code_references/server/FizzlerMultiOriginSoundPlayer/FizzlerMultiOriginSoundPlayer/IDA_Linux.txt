@@ -1,0 +1,6 @@
+void __cdecl FizzlerMultiOriginSoundPlayer::FizzlerMultiOriginSoundPlayer(FizzlerMultiOriginSoundPlayer *const this)
+{
+  CBaseEntity::CBaseEntity(this, 0);
+  this->_vptr_IHandleEntity = (int (**)(...))off_C83CE8;
+  this->m_pSound = 0;
+}

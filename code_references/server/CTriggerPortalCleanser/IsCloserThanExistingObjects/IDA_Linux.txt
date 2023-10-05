@@ -1,0 +1,20 @@
+bool __cdecl CTriggerPortalCleanser::IsCloserThanExistingObjects(
+        CTriggerPortalCleanser *const this,
+        const FizzlerVortexObjectInfo_t *const info,
+        int *const iIndex)
+{
+  int v3; // eax
+
+  if ( this->m_VortexObjects[0].m_flDistanceSq >= info->m_flDistanceSq )
+  {
+    v3 = 0;
+  }
+  else
+  {
+    v3 = 1;
+    if ( this->m_VortexObjects[1].m_flDistanceSq < info->m_flDistanceSq )
+      return 0;
+  }
+  *iIndex = v3;
+  return 1;
+}

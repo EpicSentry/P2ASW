@@ -1,0 +1,7 @@
+void __cdecl CTriggerPortalCleanser::ClearVortexObjects(CTriggerPortalCleanser *const this)
+{
+  this->m_VortexObjects[0].m_flDistanceSq = 3.4028235e38;
+  this->m_VortexObjects[0].m_hEnt.m_Index = -1;
+  this->m_VortexObjects[1].m_flDistanceSq = 3.4028235e38;
+  this->m_VortexObjects[1].m_hEnt.m_Index = -1;
+}

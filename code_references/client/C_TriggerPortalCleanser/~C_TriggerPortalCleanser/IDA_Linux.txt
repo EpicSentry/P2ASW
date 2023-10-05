@@ -1,0 +1,72 @@
+void __cdecl C_TriggerPortalCleanser::~C_TriggerPortalCleanser(C_TriggerPortalCleanser *const this)
+{
+  CNewParticleEffect *m_pObject; // ecx
+  CUtlReference<CNewParticleEffect> *m_pPrev; // eax
+  CUtlReference<CNewParticleEffect> *m_pNext; // eax
+  int v4; // eax
+  int v5; // ecx
+  CUtlReference<CNewParticleEffect> *v6; // eax
+
+  m_pObject = this->m_hCleanserFX.m_pObject;
+  this->_vptr_IHandleEntity = (int (**)(...))off_12C7CE8;
+  this->_vptr_IClientRenderable = (int (**)(...))off_12C80A4;
+  this->_vptr_IClientNetworkable = (int (**)(...))off_12C8160;
+  this->_vptr_IClientThinkable = (int (**)(...))off_12C81A0;
+  this->_vptr_IClientModelRenderable = (int (**)(...))&off_12C81BC;
+  this->_vptr_ITriggerPortalCleanserAutoList = (int (**)(...))off_12C81C8;
+  if ( m_pObject )
+  {
+    m_pPrev = this->m_hCleanserFX.m_pPrev;
+    if ( m_pPrev )
+    {
+      m_pPrev->m_pNext = this->m_hCleanserFX.m_pNext;
+      m_pNext = this->m_hCleanserFX.m_pNext;
+      if ( m_pNext )
+        m_pNext->m_pPrev = this->m_hCleanserFX.m_pPrev;
+    }
+    else if ( m_pObject->m_References.m_pHead == &this->m_hCleanserFX )
+    {
+      v6 = this->m_hCleanserFX.m_pNext;
+      m_pObject->m_References.m_pHead = v6;
+      if ( v6 )
+        v6->m_pPrev = 0;
+    }
+    this->m_hCleanserFX.m_pPrev = 0;
+    this->m_hCleanserFX.m_pNext = 0;
+    this->m_hCleanserFX.m_pObject = 0;
+  }
+  this->_vptr_ITriggerPortalCleanserAutoList = (int (**)(...))off_12C81E0;
+  if ( ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Size > 0 )
+  {
+    v4 = 0;
+    if ( &this->ITriggerPortalCleanserAutoList == (ITriggerPortalCleanserAutoList *)*(C_TriggerPortalCleanser *const *)ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Memory.m_pMemory )
+    {
+LABEL_13:
+      v5 = ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Size - 1;
+      if ( v4 != ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Size - 1 )
+      {
+        ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Memory.m_pMemory[v4] = ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Memory.m_pMemory[v5];
+        v5 = ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Size - 1;
+      }
+      ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Size = v5;
+    }
+    else
+    {
+      while ( ++v4 != ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Size )
+      {
+        if ( &this->ITriggerPortalCleanserAutoList == ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Memory.m_pMemory[v4] )
+        {
+          if ( v4 == -1 )
+            break;
+          goto LABEL_13;
+        }
+      }
+    }
+  }
+  this->_vptr_IHandleEntity = (int (**)(...))off_120DDE8;
+  this->_vptr_IClientRenderable = (int (**)(...))off_120E1A0;
+  this->_vptr_IClientNetworkable = (int (**)(...))off_120E25C;
+  this->_vptr_IClientThinkable = (int (**)(...))off_120E29C;
+  this->_vptr_IClientModelRenderable = (int (**)(...))&off_120E2B8;
+  C_BaseEntity::~C_BaseEntity(this);
+}

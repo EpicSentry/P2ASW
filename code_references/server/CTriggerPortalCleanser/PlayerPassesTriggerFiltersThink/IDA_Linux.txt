@@ -1,0 +1,50 @@
+void __cdecl CTriggerPortalCleanser::PlayerPassesTriggerFiltersThink(CTriggerPortalCleanser *const this)
+{
+  CGlobalVars *v1; // eax
+  int v2; // esi
+  CBasePlayer *v3; // eax
+  CBasePlayer *v4; // ebx
+  char v5; // al
+  void (__cdecl *v6)(CTriggerPortalCleanser *const); // [esp+8h] [ebp-40h]
+  float v7; // [esp+10h] [ebp-38h]
+  const char *v8; // [esp+14h] [ebp-34h]
+  bool v9; // [esp+24h] [ebp-24h]
+  BASEPTR v10; // [esp+28h] [ebp-20h] BYREF
+
+  v1 = gpGlobals;
+  if ( gpGlobals->maxClients == 1 )
+  {
+LABEL_9:
+    v6 = CTriggerPortalCleanser::PlayerPassesTriggerFiltersThink;
+    v8 = CTriggerPortalCleanser::s_szPlayerPassesTriggerFiltersThinkContext;
+    v7 = v1->curtime + 1.0;
+  }
+  else
+  {
+    v2 = 1;
+    while ( 1 )
+    {
+      v3 = UTIL_PlayerByIndex(v2);
+      v4 = v3;
+      if ( v3 )
+      {
+        if ( (*((unsigned __int8 (__cdecl **)(CBasePlayer *))v3->_vptr_IHandleEntity + 70))(v3) )
+          break;
+      }
+      v1 = gpGlobals;
+      if ( gpGlobals->maxClients == ++v2 )
+        goto LABEL_9;
+    }
+    v5 = (*((int (__cdecl **)(CTriggerPortalCleanser *const, CBasePlayer *))this->_vptr_IHandleEntity + 208))(this, v4);
+    if ( v5 != this->m_bPlayersPassTriggerFilters.m_Value )
+    {
+      v9 = v5;
+      CBaseEntity::NetworkStateChanged(this, &this->m_bPlayersPassTriggerFilters);
+      this->m_bPlayersPassTriggerFilters.m_Value = v9;
+    }
+    v7 = -1.0;
+    v6 = 0;
+    v8 = CTriggerPortalCleanser::s_szPlayerPassesTriggerFiltersThinkContext;
+  }
+  CBaseEntity::ThinkSet(&v10, this, (BASEPTR)(unsigned int)v6, v7, v8);
+}

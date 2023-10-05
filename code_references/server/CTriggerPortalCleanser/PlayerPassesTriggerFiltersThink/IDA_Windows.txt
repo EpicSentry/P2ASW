@@ -1,0 +1,56 @@
+void __thiscall CTriggerPortalCleanser::PlayerPassesTriggerFiltersThink(CTriggerPortalCleanser *this)
+{
+  CGlobalVars *v1; // eax
+  int v2; // esi
+  CBasePlayer *v4; // edi
+  bool v5; // dl
+  edict_t *m_pPev; // ecx
+  bool v7; // [esp+1Bh] [ebp-1h]
+
+  v1 = gpGlobals;
+  v2 = 1;
+  if ( gpGlobals->maxClients == 1 )
+  {
+LABEL_5:
+    CBaseEntity::ThinkSet(
+      this,
+      (void (__thiscall *)(CBaseEntity *))CTriggerPortalCleanser::PlayerPassesTriggerFiltersThink,
+      v1->curtime + 1.0,
+      CTriggerPortalCleanser::s_szPlayerPassesTriggerFiltersThinkContext);
+  }
+  else
+  {
+    while ( 1 )
+    {
+      v4 = UTIL_PlayerByIndex(v2);
+      if ( v4 )
+      {
+        if ( v4->IsAlive(v4) )
+          break;
+      }
+      v1 = gpGlobals;
+      if ( ++v2 == gpGlobals->maxClients )
+        goto LABEL_5;
+    }
+    v5 = this->PassesTriggerFilters(this, v4);
+    v7 = v5;
+    if ( this->m_bPlayersPassTriggerFilters.m_Value != v5 )
+    {
+      if ( this->m_Network.m_TimerEvent.m_bRegistered )
+      {
+        *((_BYTE *)&this->m_Network + 76) |= 1u;
+      }
+      else
+      {
+        m_pPev = this->m_Network.m_pPev;
+        if ( m_pPev )
+        {
+          CBaseEdict::StateChanged(m_pPev, 0x507u);
+          v5 = v7;
+        }
+      }
+      this->m_bPlayersPassTriggerFilters.m_Value = v5;
+    }
+    CBaseEntity::ThinkSet(this, 0, -1.0, CTriggerPortalCleanser::s_szPlayerPassesTriggerFiltersThinkContext);
+  }
+}

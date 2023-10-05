@@ -49,6 +49,7 @@ BEGIN_NETWORK_TABLE( CWeaponPortalgun, DT_WeaponPortalgun )
 	SendPropEHandle( SENDINFO( m_hSecondaryPortal ) ),
 	SendPropVector( SENDINFO( m_vecBluePortalPos ) ),
 	SendPropVector( SENDINFO( m_vecOrangePortalPos ) ),
+	SendPropInt( SENDINFO( m_iPortalLinkageGroupID ) ),
 END_NETWORK_TABLE()
 
 BEGIN_DATADESC( CWeaponPortalgun )

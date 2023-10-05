@@ -1,0 +1,120 @@
+datamap_t *__cdecl DataMapInit<CTriggerPortalCleanser>()
+{
+  if ( (_S11_37 & 1) == 0 )
+  {
+    _S11_37 |= 1u;
+    nameHolder_551.m_pszBase = "CTriggerPortalCleanser";
+    nameHolder_551.m_Names.m_Memory.m_pMemory = 0;
+    nameHolder_551.m_Names.m_Memory.m_nAllocationCount = 0;
+    nameHolder_551.m_Names.m_Memory.m_nGrowSize = 0;
+    nameHolder_551.m_Names.m_Size = 0;
+    nameHolder_551.m_Names.m_pElements = 0;
+    nameHolder_551.m_nLenBase = 22;
+    atexit(DataMapInit_CTriggerPortalCleanser__::_2_::_dynamic_atexit_destructor_for__nameHolder__);
+  }
+  CTriggerPortalCleanser::m_DataMap.baseMap = &CBaseTrigger::m_DataMap;
+  if ( (_S11_37 & 2) == 0 )
+  {
+    _S11_37 |= 2u;
+    dataDesc_512[10].fieldType = FIELD_CUSTOM;
+    dataDesc_512[11].fieldType = FIELD_CUSTOM;
+    *(_QWORD *)&dataDesc_512[9].inputFunc = 0i64;
+    *(_QWORD *)&dataDesc_512[9].fieldSizeInBytes = 0i64;
+    *(_QWORD *)&dataDesc_512[9].override_count = 0i64;
+    *(_QWORD *)dataDesc_512[9].flatOffset = 0i64;
+    dataDesc_512[10].fieldSize = 1;
+    *(_QWORD *)&dataDesc_512[10].inputFunc = 0i64;
+    *(_QWORD *)&dataDesc_512[10].fieldSizeInBytes = 0i64;
+    *(_QWORD *)&dataDesc_512[10].override_count = 0i64;
+    *(_QWORD *)dataDesc_512[10].flatOffset = 0i64;
+    dataDesc_512[11].fieldSize = 1;
+    dataDesc_512[9].pSaveRestoreOps = eventFuncs;
+    *(_DWORD *)&dataDesc_512[9].flatGroup = 0;
+    dataDesc_512[10].fieldName = "m_OnFizzle";
+    dataDesc_512[10].fieldOffset = 1188;
+    dataDesc_512[10].flags = 22;
+    dataDesc_512[10].externalName = "OnFizzle";
+    dataDesc_512[10].pSaveRestoreOps = eventFuncs;
+    *(_DWORD *)&dataDesc_512[10].flatGroup = 0;
+    dataDesc_512[11].fieldName = "m_OnDissolveBox";
+    dataDesc_512[11].fieldOffset = 1212;
+    dataDesc_512[11].flags = 22;
+    dataDesc_512[11].externalName = "OnDissolveBox";
+    dataDesc_512[11].pSaveRestoreOps = eventFuncs;
+    *(_QWORD *)&dataDesc_512[11].inputFunc = 0i64;
+    *(_QWORD *)&dataDesc_512[11].fieldSizeInBytes = 0i64;
+    *(_QWORD *)&dataDesc_512[11].override_count = 0i64;
+    *(_QWORD *)dataDesc_512[11].flatOffset = 0i64;
+    *(_DWORD *)&dataDesc_512[11].flatGroup = 0;
+    dataDesc_512[12].fieldType = FIELD_VOID;
+    dataDesc_512[12].fieldName = CDatadescGeneratedNameHolder::GenerateName(&nameHolder_551, "SearchThink");
+    dataDesc_512[12].flags = 32;
+    dataDesc_512[12].fieldOffset = 0;
+    dataDesc_512[12].fieldSize = 1;
+    dataDesc_512[12].externalName = 0;
+    dataDesc_512[12].pSaveRestoreOps = 0;
+    dataDesc_512[12].inputFunc = (void (__thiscall *)(CBaseEntity *, inputdata_t *))CTriggerPortalCleanser::SearchThink;
+    *(_QWORD *)&dataDesc_512[12].td = 0i64;
+    *(_QWORD *)&dataDesc_512[12].override_field = 0i64;
+    *(_QWORD *)&dataDesc_512[12].fieldTolerance = 0i64;
+    *(_QWORD *)&dataDesc_512[12].flatOffset[1] = 0i64;
+    dataDesc_512[13].fieldType = FIELD_VOID;
+    dataDesc_512[13].fieldName = CDatadescGeneratedNameHolder::GenerateName(
+                                   &nameHolder_551,
+                                   "PlayerPassesTriggerFiltersThink");
+    dataDesc_512[13].flags = 32;
+    dataDesc_512[13].fieldOffset = 0;
+    dataDesc_512[13].fieldSize = 1;
+    dataDesc_512[13].externalName = 0;
+    dataDesc_512[13].pSaveRestoreOps = 0;
+    dataDesc_512[13].inputFunc = (void (__thiscall *)(CBaseEntity *, inputdata_t *))CTriggerPortalCleanser::PlayerPassesTriggerFiltersThink;
+    *(_QWORD *)&dataDesc_512[13].td = 0i64;
+    *(_QWORD *)&dataDesc_512[13].override_field = 0i64;
+    *(_QWORD *)&dataDesc_512[13].fieldTolerance = 0i64;
+    *(_QWORD *)&dataDesc_512[13].flatOffset[1] = 0i64;
+    dataDesc_512[14].fieldType = FIELD_BOOLEAN;
+    dataDesc_512[14].fieldName = "m_bVisible";
+    dataDesc_512[14].fieldOffset = 1276;
+    dataDesc_512[14].fieldSize = 1;
+    dataDesc_512[14].fieldTolerance = 0.0;
+    dataDesc_512[15].fieldTolerance = 0.0;
+    dataDesc_512[14].flags = 6;
+    *(_QWORD *)dataDesc_512[15].flatOffset = 0i64;
+    dataDesc_512[14].externalName = "Visible";
+    dataDesc_512[14].pSaveRestoreOps = 0;
+    dataDesc_512[14].inputFunc = 0;
+    dataDesc_512[14].td = 0;
+    dataDesc_512[14].fieldSizeInBytes = 1;
+    dataDesc_512[14].override_field = 0;
+    dataDesc_512[14].override_count = 0;
+    *(_QWORD *)dataDesc_512[14].flatOffset = 0i64;
+    *(_DWORD *)&dataDesc_512[14].flatGroup = 0;
+    dataDesc_512[15].fieldType = FIELD_BOOLEAN;
+    dataDesc_512[15].fieldName = "m_bUseScanline";
+    dataDesc_512[15].fieldOffset = 1286;
+    dataDesc_512[15].fieldSize = 1;
+    dataDesc_512[15].flags = 6;
+    dataDesc_512[15].externalName = "UseScanline";
+    dataDesc_512[15].pSaveRestoreOps = 0;
+    dataDesc_512[15].inputFunc = 0;
+    dataDesc_512[15].td = 0;
+    dataDesc_512[15].fieldSizeInBytes = 1;
+    dataDesc_512[15].override_field = 0;
+    dataDesc_512[15].override_count = 0;
+    *(_DWORD *)&dataDesc_512[15].flatGroup = 0;
+    dataDesc_512[16].fieldType = FIELD_VOID;
+    dataDesc_512[16].fieldName = "InputFizzleTouchingPortals";
+    dataDesc_512[16].fieldOffset = 0;
+    *(_DWORD *)&dataDesc_512[16].fieldSize = 524289;
+    dataDesc_512[16].externalName = "FizzleTouchingPortals";
+    dataDesc_512[16].pSaveRestoreOps = 0;
+    dataDesc_512[16].inputFunc = (void (__thiscall *)(CBaseEntity *, inputdata_t *))CTriggerPortalCleanser::InputFizzleTouchingPortals;
+    *(_QWORD *)&dataDesc_512[16].td = 0i64;
+    *(_QWORD *)&dataDesc_512[16].override_field = 0i64;
+    *(_QWORD *)&dataDesc_512[16].fieldTolerance = 0i64;
+    *(_QWORD *)&dataDesc_512[16].flatOffset[1] = 0i64;
+  }
+  CTriggerPortalCleanser::m_DataMap.dataNumFields = 16;
+  CTriggerPortalCleanser::m_DataMap.dataDesc = &dataDesc_512[1];
+  return &CTriggerPortalCleanser::m_DataMap;
+}

@@ -1,0 +1,29 @@
+void __cdecl C_TriggerPortalCleanser::C_TriggerPortalCleanser(C_TriggerPortalCleanser *const this)
+{
+  C_BaseEntity::C_BaseEntity(this);
+  this->_vptr_IHandleEntity = (int (**)(...))off_123A3C8;
+  this->m_hPredictionOwner.m_Index = -1;
+  this->_vptr_IClientRenderable = (int (**)(...))off_123A780;
+  this->_vptr_IClientNetworkable = (int (**)(...))off_123A83C;
+  this->_vptr_IClientThinkable = (int (**)(...))off_123A87C;
+  this->_vptr_IClientModelRenderable = (int (**)(...))&off_123A898;
+  ITriggerPortalCleanserAutoList::ITriggerPortalCleanserAutoList(&this->ITriggerPortalCleanserAutoList, 1);
+  this->_vptr_IHandleEntity = (int (**)(...))off_12C7CE8;
+  this->_vptr_IClientRenderable = (int (**)(...))off_12C80A4;
+  this->_vptr_IClientNetworkable = (int (**)(...))off_12C8160;
+  this->_vptr_IClientThinkable = (int (**)(...))off_12C81A0;
+  this->_vptr_IClientModelRenderable = (int (**)(...))&off_12C81BC;
+  this->_vptr_ITriggerPortalCleanserAutoList = (int (**)(...))off_12C81C8;
+  this->m_bObject1InRange = 0;
+  this->m_bObject2InRange = 0;
+  this->m_hObject1.m_Value.m_Index = -1;
+  this->m_hObject2.m_Value.m_Index = -1;
+  this->m_flPowerUpTimer = 0.0;
+  this->m_flPortalShotTime = 0.0;
+  this->m_flLastShotTime = 0.0;
+  this->m_flShotPulseTimer = 0.0;
+  this->m_flLastUpdateTime = 0.0;
+  this->m_hCleanserFX.m_pPrev = 0;
+  this->m_hCleanserFX.m_pNext = 0;
+  this->m_hCleanserFX.m_pObject = 0;
+}

@@ -1,0 +1,133 @@
+void __cdecl C_WeaponPortalgun::DoCleanseEffect(
+        C_WeaponPortalgun *const this,
+        bool bPortal1Active,
+        bool bPortal2Active)
+{
+  C_BasePlayer_0 *LocalPlayer; // ebx
+  C_BaseViewModel *v4; // eax
+  CNewParticleEffect *v5; // eax
+  CNewParticleEffect *m_pObject; // ecx
+  int v7; // eax
+  C_BaseViewModel *ViewModel; // eax
+  CNewParticleEffect *v9; // eax
+  int v10; // eax
+  CUtlReference<CNewParticleEffect> *m_pNext; // eax
+  bool v12; // zf
+  vec_t x; // eax
+  vec_t which; // [esp+14h] [ebp-44h]
+  Color v15; // [esp+1Ch] [ebp-3Ch] BYREF
+  Vector vColor2; // [esp+28h] [ebp-30h] BYREF
+  CUtlReference<CNewParticleEffect> pEffect2; // [esp+34h] [ebp-24h] BYREF
+
+  LocalPlayer = C_BasePlayer::GetLocalPlayer(-1);
+  if ( LocalPlayer && LocalPlayer == C_BaseCombatWeapon::GetOwner(this) )
+  {
+    if ( C_BasePlayer::GetViewModel(LocalPlayer, 0) )
+    {
+      if ( bPortal1Active )
+      {
+        ViewModel = C_BasePlayer::GetViewModel(LocalPlayer, 0);
+        v9 = CParticleProperty::Create(
+               &ViewModel->m_Particles,
+               "portal_weapon_cleanser",
+               PATTACH_POINT_FOLLOW,
+               "muzzle");
+        vColor2.y = 0.0;
+        vColor2.x = 0.0;
+        LODWORD(vColor2.z) = v9;
+        if ( v9 )
+        {
+          which = *(float *)&v9;
+          LODWORD(vColor2.x) = v9->m_References.m_pHead;
+          if ( LODWORD(vColor2.x) )
+          {
+            *(_DWORD *)(LODWORD(vColor2.x) + 4) = &vColor2;
+            which = vColor2.z;
+          }
+          vColor2.y = 0.0;
+          v9->m_References.m_pHead = (CUtlReference<CNewParticleEffect> *)&vColor2;
+          if ( which != 0.0 )
+          {
+            v10 = (*((int (__cdecl **)(C_WeaponPortalgun *const))this->_vptr_IHandleEntity + 124))(this);
+            UTIL_Portal_Color(&v15, 1, v10);
+            *(float *)&pEffect2.m_pNext = (float)v15._color[0];
+            *(float *)&pEffect2.m_pPrev = (float)v15._color[1];
+            *(float *)&pEffect2.m_pObject = (float)v15._color[2];
+            CNewParticleEffect::SetControlPoint(
+              (CNewParticleEffect *const)LODWORD(vColor2.z),
+              2,
+              (const Vector *const)&pEffect2);
+            if ( LODWORD(vColor2.z) )
+            {
+              if ( LODWORD(vColor2.y) )
+              {
+                *(_DWORD *)LODWORD(vColor2.y) = LODWORD(vColor2.x);
+                if ( LODWORD(vColor2.x) )
+                  *(vec_t *)(LODWORD(vColor2.x) + 4) = vColor2.y;
+              }
+              else if ( *(Vector **)(LODWORD(vColor2.z) + 932) == &vColor2 )
+              {
+                x = vColor2.x;
+                v12 = LODWORD(vColor2.x) == 0;
+                *(vec_t *)(LODWORD(vColor2.z) + 932) = vColor2.x;
+                if ( !v12 )
+                  *(_DWORD *)(LODWORD(x) + 4) = 0;
+              }
+              memset(&vColor2, 0, sizeof(vColor2));
+            }
+          }
+        }
+      }
+      if ( bPortal2Active )
+      {
+        v4 = C_BasePlayer::GetViewModel(LocalPlayer, 0);
+        v5 = CParticleProperty::Create(&v4->m_Particles, "portal_weapon_cleanser", PATTACH_POINT_FOLLOW, "muzzle");
+        pEffect2.m_pPrev = 0;
+        pEffect2.m_pNext = 0;
+        pEffect2.m_pObject = v5;
+        if ( v5 )
+        {
+          m_pObject = v5;
+          pEffect2.m_pNext = v5->m_References.m_pHead;
+          if ( pEffect2.m_pNext )
+          {
+            pEffect2.m_pNext->m_pPrev = &pEffect2;
+            m_pObject = pEffect2.m_pObject;
+          }
+          pEffect2.m_pPrev = 0;
+          v5->m_References.m_pHead = &pEffect2;
+          if ( m_pObject )
+          {
+            v7 = (*((int (__cdecl **)(C_WeaponPortalgun *const))this->_vptr_IHandleEntity + 124))(this);
+            UTIL_Portal_Color(&v15, 2, v7);
+            vColor2.x = (float)v15._color[0];
+            vColor2.y = (float)v15._color[1];
+            vColor2.z = (float)v15._color[2];
+            CNewParticleEffect::SetControlPoint(pEffect2.m_pObject, 2, &vColor2);
+            if ( pEffect2.m_pObject )
+            {
+              if ( pEffect2.m_pPrev )
+              {
+                pEffect2.m_pPrev->m_pNext = pEffect2.m_pNext;
+                if ( pEffect2.m_pNext )
+                  pEffect2.m_pNext->m_pPrev = pEffect2.m_pPrev;
+              }
+              else if ( pEffect2.m_pObject->m_References.m_pHead == &pEffect2 )
+              {
+                m_pNext = pEffect2.m_pNext;
+                v12 = pEffect2.m_pNext == 0;
+                pEffect2.m_pObject->m_References.m_pHead = pEffect2.m_pNext;
+                if ( !v12 )
+                  m_pNext->m_pPrev = 0;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  else
+  {
+    CParticleProperty::Create(&this->m_Particles, "portal_weapon_cleanser", PATTACH_POINT_FOLLOW, "muzzle");
+  }
+}

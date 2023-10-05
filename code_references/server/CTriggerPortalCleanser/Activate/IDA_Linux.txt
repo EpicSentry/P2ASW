@@ -1,0 +1,6 @@
+void __cdecl CTriggerPortalCleanser::Activate(CTriggerPortalCleanser *const this)
+{
+  CBaseTrigger::Activate(this);
+  if ( this->m_bVisible.m_Value )
+    CTriggerPortalCleanser::StartAmbientSounds(this);
+}

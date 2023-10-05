@@ -1,0 +1,10 @@
+void __cdecl ClientFizzlerMultiOriginSoundPlayer::~ClientFizzlerMultiOriginSoundPlayer(
+        ClientFizzlerMultiOriginSoundPlayer *const this)
+{
+  this->_vptr_IHandleEntity = (int (**)(...))off_12DD388;
+  this->_vptr_IClientRenderable = (int (**)(...))off_12DD740;
+  this->_vptr_IClientNetworkable = (int (**)(...))off_12DD7FC;
+  this->_vptr_IClientThinkable = (int (**)(...))off_12DD83C;
+  this->_vptr_IClientModelRenderable = (int (**)(...))&off_12DD858;
+  C_BaseEntity::~C_BaseEntity(this);
+}

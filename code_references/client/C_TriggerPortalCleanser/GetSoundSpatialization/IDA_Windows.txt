@@ -1,0 +1,33 @@
+bool __thiscall C_TriggerPortalCleanser::GetSoundSpatialization(
+        C_TriggerPortalCleanser *this,
+        SpatializationInfo_t *info)
+{
+  bool result; // al
+  C_BaseEntity::NetworkVar_m_Collision *p_m_Collision; // edi
+  QAngle *pAngles; // esi
+  float *v6; // eax
+
+  result = this->IsDormant(&this->IClientNetworkable);
+  if ( result || !this->m_bVisible )
+    return 0;
+  p_m_Collision = &this->m_Collision;
+  if ( this != (C_TriggerPortalCleanser *)-1040 )
+  {
+    if ( info->pOrigin )
+    {
+      CCollisionProperty::CalcNearestPoint(p_m_Collision, &info->info.vListenerOrigin, info->pOrigin);
+      if ( cl_portal_cleanser_debug_sound_location.m_pParent->m_Value.m_nValue )
+        NDebugOverlay::Sphere(info->pOrigin, 5.0, 255, 0, 0, 1, 0.1);
+    }
+    pAngles = info->pAngles;
+    if ( pAngles )
+    {
+      v6 = (float *)p_m_Collision->GetCollisionAngles(p_m_Collision);
+      pAngles->x = *v6;
+      pAngles->y = v6[1];
+      pAngles->z = v6[2];
+    }
+    return 1;
+  }
+  return result;
+}

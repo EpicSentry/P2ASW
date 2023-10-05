@@ -1,0 +1,5 @@
+void __cdecl CTriggerPortalCleanser::UpdateOnRemove(CTriggerPortalCleanser *const this)
+{
+  CTriggerPortalCleanser::StopAmbientSounds(this);
+  CBaseTrigger::UpdateOnRemove(this);
+}

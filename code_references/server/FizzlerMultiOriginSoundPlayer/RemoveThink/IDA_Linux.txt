@@ -1,0 +1,7 @@
+void __cdecl FizzlerMultiOriginSoundPlayer::RemoveThink(FizzlerMultiOriginSoundPlayer *const this)
+{
+  if ( ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Size )
+    CBaseEntity::SetNextThink(this, gpGlobals->curtime, 0);
+  else
+    UTIL_Remove(this);
+}

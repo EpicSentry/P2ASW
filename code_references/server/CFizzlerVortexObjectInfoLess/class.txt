@@ -1,0 +1,4 @@
+class CFizzlerVortexObjectInfoLess
+{
+    public bool Less(struct FizzlerVortexObjectInfo_t & ,struct FizzlerVortexObjectInfo_t & ,void * );
+};

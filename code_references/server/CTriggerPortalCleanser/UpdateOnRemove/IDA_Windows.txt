@@ -1,0 +1,5 @@
+void __thiscall CTriggerPortalCleanser::UpdateOnRemove(CTriggerPortalCleanser *this)
+{
+  CTriggerPortalCleanser::StopAmbientSounds(this);
+  CBaseVPhysicsTrigger::UpdateOnRemove(this);
+}

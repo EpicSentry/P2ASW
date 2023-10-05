@@ -40,6 +40,8 @@ private:
 	CNetworkVar( float,	m_fEffectsMaxSize1 );
 	CNetworkVar( float,	m_fEffectsMaxSize2 );
 
+	unsigned char m_iPortalLinkageGroupID;
+
 public:
 	virtual const Vector& GetBulletSpread( void )
 	{
@@ -103,6 +105,9 @@ public:
 	Vector m_vecBluePortalPos;
 	
 	void UseDeny( void );
+    void DoCleanseEffect( bool bPortal1Active, bool bPortal2Active );
+
+	int GetLinkageGroupID() { return m_iPortalLinkageGroupID; }
 
 protected:
 
@@ -118,8 +123,6 @@ protected:
 	void	DoEffectHolding( void );
 	void	DoEffectNone( void );
 	
-    void DoCleanseEffect(bool ,bool );
-
 
 	CHandle<CProp_Portal> m_hPrimaryPortal;
 	CHandle<CProp_Portal> m_hSecondaryPortal;

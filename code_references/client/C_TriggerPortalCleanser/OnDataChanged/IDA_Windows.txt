@@ -1,0 +1,6 @@
+void __thiscall C_TriggerPortalCleanser::OnDataChanged(C_TriggerPortalCleanser *this, DataUpdateType_t type)
+{
+  C_BaseEntity::OnDataChanged(this, type);
+  if ( type == DATA_UPDATE_CREATED )
+    this->m_flLastShotTime = *(float *)(gpGlobals.m_Index + 12);
+}

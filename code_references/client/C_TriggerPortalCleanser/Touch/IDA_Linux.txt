@@ -1,0 +1,98 @@
+void __cdecl C_TriggerPortalCleanser::Touch(C_TriggerPortalCleanser *const this, C_BaseEntity *pOther)
+{
+  char v2; // di
+  C_WeaponPortalgun *v3; // ebx
+  const void *v4; // eax
+  bool v5; // di
+  bool v6; // si
+  CProp_Portal *v7; // eax
+  CProp_Portal *v8; // esi
+  int (**vptr_IHandleEntity)(...); // eax
+  CProp_Portal *AssociatedPortal; // eax
+  CProp_Portal *v11; // esi
+  CProp_Portal *v12; // [esp+0h] [ebp-28h]
+
+  if ( !this->m_bDisabled && this->m_bPlayersPassTriggerFilters )
+  {
+    if ( !pOther
+      || (v2 = 1,
+          strcmp(
+            (const char *)(*((int (__cdecl **)(C_BaseEntity *))pOther->_vptr_IHandleEntity + 187))(pOther),
+            "weapon_portalgun")) )
+    {
+      v2 = 0;
+    }
+    if ( (*((unsigned __int8 (__cdecl **)(C_BaseEntity *))pOther->_vptr_IHandleEntity + 200))(pOther) || v2 )
+    {
+      if ( (*((unsigned __int8 (__cdecl **)(C_BaseEntity *))pOther->_vptr_IHandleEntity + 200))(pOther) )
+      {
+        if ( gpGlobals->maxClients > 1
+          && !(*((int (__cdecl **)(C_BaseEntity *, const char *, _DWORD))pOther->_vptr_IHandleEntity + 299))(
+                pOther,
+                "weapon_portalgun",
+                0) )
+        {
+          return;
+        }
+        v4 = (const void *)(*((int (__cdecl **)(C_BaseEntity *, const char *, _DWORD))pOther->_vptr_IHandleEntity + 299))(
+                             pOther,
+                             "weapon_portalgun",
+                             0);
+        if ( !v4 )
+          return;
+        v3 = (C_WeaponPortalgun *)_dynamic_cast(
+                                    v4,
+                                    (const struct __class_type_info *)&`typeinfo for'C_BaseCombatWeapon,
+                                    (const struct __class_type_info *)&`typeinfo for'C_WeaponPortalgun,
+                                    0);
+      }
+      else
+      {
+        if ( !v2 )
+          return;
+        v3 = (C_WeaponPortalgun *)_dynamic_cast(
+                                    pOther,
+                                    (const struct __class_type_info *)&`typeinfo for'C_BaseEntity,
+                                    (const struct __class_type_info *)&`typeinfo for'C_WeaponPortalgun,
+                                    0);
+      }
+      if ( !v3 )
+        return;
+      v5 = 0;
+      if ( C_WeaponPortalgun::CanFirePortal1(v3) )
+      {
+        AssociatedPortal = C_WeaponPortalgun::GetAssociatedPortal(v3, 0);
+        v11 = AssociatedPortal;
+        if ( AssociatedPortal
+          && (*((unsigned __int8 (__cdecl **)(CProp_Portal *))AssociatedPortal->_vptr_IHandleEntity + 305))(AssociatedPortal) )
+        {
+          v5 = 1;
+          (*((void (__cdecl **)(CProp_Portal *, _DWORD))v11->_vptr_IHandleEntity + 307))(v11, 0);
+        }
+        else
+        {
+          v5 = 0;
+        }
+      }
+      if ( C_WeaponPortalgun::CanFirePortal2(v3)
+        && (v7 = C_WeaponPortalgun::GetAssociatedPortal(v3, 1), (v8 = v7) != 0)
+        && (*((unsigned __int8 (__cdecl **)(CProp_Portal *))v7->_vptr_IHandleEntity + 305))(v7) )
+      {
+        vptr_IHandleEntity = v8->_vptr_IHandleEntity;
+        v12 = v8;
+        v6 = 1;
+        vptr_IHandleEntity[307](v12, 0);
+      }
+      else
+      {
+        if ( !v5 )
+          return;
+        v6 = 0;
+      }
+      (*((void (__cdecl **)(C_WeaponPortalgun *, int))v3->_vptr_IHandleEntity + 305))(v3, 493);
+      C_WeaponPortalgun::DoCleanseEffect(v3, v5, v6);
+      if ( v3->m_iLastFiredPortal.m_Value )
+        v3->m_iLastFiredPortal.m_Value = 0;
+    }
+  }
+}

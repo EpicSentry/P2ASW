@@ -1,0 +1,6 @@
+void __cdecl CTriggerPortalCleanser::Disable(CTriggerPortalCleanser *const this)
+{
+  CBaseTrigger::Disable(this);
+  if ( this->m_bVisible.m_Value )
+    CTriggerPortalCleanser::StopAmbientSounds(this);
+}

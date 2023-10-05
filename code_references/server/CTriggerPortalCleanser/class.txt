@@ -1,0 +1,63 @@
+class CTriggerPortalCleanser : public CBaseTrigger, public ITriggerPortalCleanserAutoList
+{
+public:
+	DECLARE_CLASS( CTriggerPortalCleanser, CBaseTrigger );   
+	DECLARE_DATADESC();
+	DECLARE_SERVERCLASS();
+	
+    CTriggerPortalCleanser();
+    ~CTriggerPortalCleanser();
+	
+    void Spawn();
+    void Precache();
+    void Activate();
+    void Touch( CBaseEntity *pOther );
+    void UpdateOnRemove();
+    void Enable();
+    void Disable();
+    void SearchThink();
+    void SetPortalShot();
+    void PlayerPassesTriggerFiltersThink();
+		
+    int UpdateTransmitState();
+	
+    bool IsEnabled();
+	
+    CBaseEntity *GetEntity() { return this; }
+	
+	static void FizzleBaseAnimating( CTriggerPortalCleanser *pFizzler, CBaseAnimating *pBaseAnimating );
+    static char *s_szPlayerPassesTriggerFiltersThinkContext;
+	
+	CNetworkVar( bool, m_bDisabled );	
+	
+private:	
+	
+    bool IsCloserThanExistingObjects( FizzlerVortexObjectInfo_t & ,int & );
+    void ClearVortexObjects();
+    void StartAmbientSounds();
+    void StopAmbientSounds();
+    void FizzleTouchingPortals();
+    void InputFizzleTouchingPortals( inputdata_t &inputdata );
+    
+	COutputEvent m_OnDissolve;
+    COutputEvent m_OnFizzle;
+    COutputEvent m_OnDissolveBox;
+    Vector m_vecSearchBoxMins;
+    Vector m_vecSearchBoxMaxs;
+    
+	FizzlerVortexObjectInfo_t m_VortexObjects[2];	
+	
+	CNetworkVar( bool, m_bVisible );
+	
+	CNetworkVar( float, m_flPortalShotTime );
+	
+	CNetworkVar( bool, m_bObject1InRange );
+	CNetworkVar( bool, m_bObject2InRange );
+	CNetworkVar( bool, m_bUseScanline );
+	CNetworkVar( bool, m_bPlayersPassTriggerFilters );
+	
+	CNetworkHandle( CBaseEntity, m_hObject1 );
+	CNetworkHandle( CBaseEntity, m_hObject2 );
+	
+    CHandle<FizzlerMultiOriginSoundPlayer> s_FizzlerAmbientSoundPlayer;
+};

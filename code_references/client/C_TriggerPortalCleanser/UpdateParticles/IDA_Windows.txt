@@ -1,0 +1,126 @@
+void __thiscall C_TriggerPortalCleanser::UpdateParticles(C_TriggerPortalCleanser *this)
+{
+  C_BaseEntity::NetworkVar_m_Collision *p_m_Collision; // edi
+  const Vector *v3; // eax
+  const Vector *v4; // eax
+  CNewParticleEffect *v5; // ebx
+  CNewParticleEffect *m_pObject; // eax
+  CUtlReference<CNewParticleEffect> *p_m_hCleanserFX; // edi
+  CUtlReference<CNewParticleEffect> *m_pHead; // eax
+  CNewParticleEffect *v9; // ecx
+  const Vector *v10; // eax
+  C_BaseCombatWeapon *v11; // eax
+  C_BaseCombatWeapon *v12; // eax
+  CNewParticleEffect *v13; // ecx
+  CNewParticleEffect *v14; // eax
+  CUtlReference<CSheet> *v15; // esi
+  Vector vecPosition2; // [esp+Ch] [ebp-3Ch] BYREF
+  Vector vecPos2; // [esp+18h] [ebp-30h] BYREF
+  Vector vecPos1; // [esp+24h] [ebp-24h] BYREF
+  Vector vecUnused; // [esp+30h] [ebp-18h] BYREF
+  Vector vecMaxs; // [esp+3Ch] [ebp-Ch] BYREF
+
+  if ( !this->m_bDisabled && cl_portal_cleanser_scanline.m_pParent->m_Value.m_nValue && this->m_bUseScanline )
+  {
+    p_m_Collision = &this->m_Collision;
+    if ( this != (C_TriggerPortalCleanser *)-1040 )
+    {
+      if ( this->m_hCleanserFX.m_pObject )
+        goto LABEL_17;
+      v3 = p_m_Collision->OBBMins(&this->m_Collision);
+      CCollisionProperty::CollisionToWorldSpace(&this->m_Collision, v3, &vecUnused);
+      v4 = p_m_Collision->OBBMaxs(&this->m_Collision);
+      CCollisionProperty::CollisionToWorldSpace(&this->m_Collision, v4, &vecMaxs);
+      if ( (float)(vecMaxs.z - vecUnused.z) >= 32.0 )
+      {
+        v5 = CParticleProperty::Create(
+               &this->m_Particles,
+               "cleanser_scanline",
+               PATTACH_CUSTOMORIGIN,
+               -1,
+               vec3_origin,
+               0);
+        m_pObject = this->m_hCleanserFX.m_pObject;
+        p_m_hCleanserFX = &this->m_hCleanserFX;
+        if ( m_pObject != v5 )
+        {
+          if ( m_pObject )
+          {
+            CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(
+              (CUtlIntrusiveDList<CUtlReference<CSheet> > *)&m_pObject->m_References,
+              (CUtlReference<CSheet> *)&this->m_hCleanserFX);
+            this->m_hCleanserFX.m_pObject = 0;
+          }
+          this->m_hCleanserFX.m_pObject = v5;
+          if ( v5 )
+          {
+            p_m_hCleanserFX->m_pNext = v5->m_References.m_pHead;
+            m_pHead = v5->m_References.m_pHead;
+            if ( m_pHead )
+              m_pHead->m_pPrev = p_m_hCleanserFX;
+            this->m_hCleanserFX.m_pPrev = 0;
+            v5->m_References.m_pHead = p_m_hCleanserFX;
+          }
+        }
+        v9 = this->m_hCleanserFX.m_pObject;
+        if ( v9 )
+        {
+          vecPos1 = vecMaxs;
+          vecPos2.x = vecUnused.x;
+          vecPosition2.x = vecMaxs.x;
+          vecPos2.y = vecUnused.y;
+          vecPos2.z = vecMaxs.z;
+          vecPosition2.y = vecMaxs.y;
+          vecPosition2.z = vecUnused.z;
+          CNewParticleEffect::SetControlPoint(v9, 0, &vecPos1);
+          CNewParticleEffect::SetControlPoint(this->m_hCleanserFX.m_pObject, 1, &vecPos2);
+          CNewParticleEffect::SetControlPoint(this->m_hCleanserFX.m_pObject, 2, &vecPosition2);
+        }
+        if ( this->m_hCleanserFX.m_pObject )
+        {
+LABEL_17:
+          v10 = this->m_Collision.OBBMins(&this->m_Collision);
+          CCollisionProperty::CollisionToWorldSpace(&this->m_Collision, v10, &vecUnused);
+          vecUnused.z = vecUnused.z - 512.0;
+          v11 = CHandle<C_PointCommentaryNode>::operator C_PointCommentaryNode *((CHandle<C_BaseCombatWeapon> *)&this->m_hObject1);
+          if ( this->m_bObject1InRange && v11 )
+          {
+            vecPosition2 = *v11->WorldSpaceCenter(v11);
+            CNewParticleEffect::SetControlPoint(this->m_hCleanserFX.m_pObject, 4, &vecPosition2);
+          }
+          else
+          {
+            CNewParticleEffect::SetControlPoint(this->m_hCleanserFX.m_pObject, 4, &vecUnused);
+          }
+          v12 = CHandle<C_PointCommentaryNode>::operator C_PointCommentaryNode *((CHandle<C_BaseCombatWeapon> *)&this->m_hObject2);
+          if ( this->m_bObject2InRange && v12 )
+          {
+            vecPosition2 = *v12->WorldSpaceCenter(v12);
+            CNewParticleEffect::SetControlPoint(this->m_hCleanserFX.m_pObject, 5, &vecPosition2);
+          }
+          else
+          {
+            CNewParticleEffect::SetControlPoint(this->m_hCleanserFX.m_pObject, 5, &vecUnused);
+          }
+        }
+      }
+    }
+  }
+  else
+  {
+    v13 = this->m_hCleanserFX.m_pObject;
+    if ( v13 )
+    {
+      CNewParticleEffect::StopEmission(v13, 0, 0, 1, 1);
+      v14 = this->m_hCleanserFX.m_pObject;
+      v15 = (CUtlReference<CSheet> *)&this->m_hCleanserFX;
+      if ( v14 )
+      {
+        CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(
+          (CUtlIntrusiveDList<CUtlReference<CSheet> > *)&v14->m_References,
+          v15);
+        v15->m_pObject = 0;
+      }
+    }
+  }
+}

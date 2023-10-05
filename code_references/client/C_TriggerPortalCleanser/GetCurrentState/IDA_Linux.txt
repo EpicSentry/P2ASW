@@ -1,0 +1,109 @@
+void __cdecl C_TriggerPortalCleanser::GetCurrentState(
+        C_TriggerPortalCleanser *const this,
+        float *const flIntensity,
+        float *const flPower)
+{
+  ConVar *m_pParent; // edx
+  float v4; // xmm3_4
+  float m_flPortalShotTime; // xmm0_4
+  float v6; // xmm1_4
+  float m_flPowerUpTimer; // xmm0_4
+  ConVar *v8; // eax
+  float v9; // xmm2_4
+  float v10; // xmm0_4
+  float v11; // xmm0_4
+  ConVar *v12; // edx
+  float m_flShotPulseTimer; // xmm2_4
+  float v14; // xmm2_4
+  float m_fValue; // xmm0_4
+  float v16; // xmm2_4
+  float v17; // xmm2_4
+
+  m_pParent = cl_portal_cleanser_default_intensity.m_pParent;
+  v4 = gpGlobals->curtime - this->m_flLastUpdateTime;
+  this->m_flLastUpdateTime = gpGlobals->curtime;
+  *flIntensity = m_pParent->m_Value.m_fValue;
+  m_flPortalShotTime = this->m_flPortalShotTime;
+  if ( m_flPortalShotTime > this->m_flLastShotTime )
+  {
+    this->m_flLastShotTime = m_flPortalShotTime;
+    this->m_flShotPulseTimer = 0.0;
+  }
+  v6 = 0.0;
+  if ( m_flPortalShotTime != 0.0 )
+  {
+    v12 = cl_portal_cleanser_shot_pulse_time.m_pParent;
+    m_flShotPulseTimer = this->m_flShotPulseTimer;
+    if ( (float)(cl_portal_cleanser_shot_pulse_time.m_pParent->m_Value.m_fValue
+               + cl_portal_cleanser_shot_pulse_time.m_pParent->m_Value.m_fValue) >= m_flShotPulseTimer )
+    {
+      v14 = m_flShotPulseTimer + v4;
+      this->m_flShotPulseTimer = v14;
+      m_fValue = v12->m_Value.m_fValue;
+      if ( m_fValue > v14 )
+      {
+        v16 = v14 / m_fValue;
+        if ( v16 >= 0.0 )
+          goto LABEL_16;
+      }
+      else
+      {
+        v16 = 1.0 - (float)((float)(v14 - m_fValue) / m_fValue);
+        if ( v16 >= 0.0 )
+        {
+LABEL_16:
+          v17 = fminf(1.0, v16);
+LABEL_17:
+          *flIntensity = (float)((float)(cl_portal_cleanser_shot_pulse_intensity.m_pParent->m_Value.m_fValue
+                                       - cl_portal_cleanser_default_intensity.m_pParent->m_Value.m_fValue)
+                               * v17)
+                       + cl_portal_cleanser_default_intensity.m_pParent->m_Value.m_fValue;
+          goto LABEL_4;
+        }
+      }
+      v17 = 0.0;
+      goto LABEL_17;
+    }
+  }
+LABEL_4:
+  m_flPowerUpTimer = this->m_flPowerUpTimer;
+  if ( this->m_bDisabled )
+  {
+    if ( m_flPowerUpTimer > 0.0 )
+      this->m_flPowerUpTimer = m_flPowerUpTimer - v4;
+    C_TriggerPortalCleanser::DestroyParticles(this);
+    v8 = cl_portal_cleanser_powerup_time.m_pParent;
+    m_flPowerUpTimer = this->m_flPowerUpTimer;
+    v6 = 0.0;
+    v9 = cl_portal_cleanser_powerup_time.m_pParent->m_Value.m_fValue;
+  }
+  else
+  {
+    v8 = cl_portal_cleanser_powerup_time.m_pParent;
+    v9 = cl_portal_cleanser_powerup_time.m_pParent->m_Value.m_fValue;
+    if ( v9 > m_flPowerUpTimer )
+    {
+      m_flPowerUpTimer = m_flPowerUpTimer + v4;
+      this->m_flPowerUpTimer = m_flPowerUpTimer;
+      v9 = v8->m_Value.m_fValue;
+      if ( m_flPowerUpTimer >= 0.0 )
+        goto LABEL_9;
+      goto LABEL_20;
+    }
+  }
+  if ( m_flPowerUpTimer >= 0.0 )
+  {
+LABEL_9:
+    v10 = fminf(v9, m_flPowerUpTimer);
+    goto LABEL_10;
+  }
+LABEL_20:
+  v10 = 0.0;
+LABEL_10:
+  this->m_flPowerUpTimer = v10;
+  v11 = v10 / v8->m_Value.m_fValue;
+  if ( v11 >= 0.0 )
+    v6 = fminf(1.0, v11);
+  *flPower = v6;
+  C_TriggerPortalCleanser::UpdateParticles(this);
+}

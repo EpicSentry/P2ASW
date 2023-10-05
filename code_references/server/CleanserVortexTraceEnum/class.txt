@@ -1,0 +1,14 @@
+class CleanserVortexTraceEnum : public ICountedPartitionEnumerator
+{
+public:
+	CleanserVortexTraceEnum(class CleanserVortexTraceEnum & );
+	CleanserVortexTraceEnum(class CBaseEntity ** ,int ,class CBaseTrigger * );
+	IterationRetval_t EnumElement( IHandleEntity *pHandleEntity );
+	int GetCount();
+    bool AddToList(class CBaseEntity * );
+private:
+	CBaseEntity **m_pList;
+    int m_listMax;
+    int m_count;
+    CBaseTrigger *m_pCleanser;
+};

@@ -1,0 +1,15 @@
+bool __cdecl CleanserVortexTraceEnum::AddToList(CleanserVortexTraceEnum *const this, CBaseEntity *pEntity)
+{
+  bool result; // al
+  int m_count; // ecx
+
+  result = 0;
+  m_count = this->m_count;
+  if ( m_count < this->m_listMax )
+  {
+    this->m_pList[m_count] = pEntity;
+    result = 1;
+    ++this->m_count;
+  }
+  return result;
+}

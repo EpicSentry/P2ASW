@@ -60,6 +60,7 @@ BEGIN_NETWORK_TABLE( C_WeaponPortalgun, DT_WeaponPortalgun )
 	RecvPropEHandle( RECVINFO( m_hSecondaryPortal ) ),
 	RecvPropVector( RECVINFO( m_vecBluePortalPos ) ),
 	RecvPropVector( RECVINFO( m_vecOrangePortalPos ) ),
+	RecvPropInt( RECVINFO( m_iPortalLinkageGroupID ) ),
 END_NETWORK_TABLE()
 
 BEGIN_PREDICTION_DATA( C_WeaponPortalgun )
@@ -1213,3 +1214,48 @@ void C_WeaponPortalgun::DoEffectIdle( void )
 	}
 }
 #endif
+
+
+void C_WeaponPortalgun::DoCleanseEffect( bool bPortal1Active, bool bPortal2Active )
+{
+	C_BasePlayer *pLocalPlayer = GetSplitScreenViewPlayer();
+	if (pLocalPlayer && pLocalPlayer == GetOwner())
+	{
+		if (pLocalPlayer->GetViewModel())
+		{
+			if (bPortal1Active)
+			{
+				C_BaseViewModel *vm = pLocalPlayer->GetViewModel();
+				CNewParticleEffect *pEffect = vm->ParticleProp()->Create( "portal_weapon_cleanser", PATTACH_POINT_FOLLOW, "muzzle" );
+				if (pEffect)
+				{				
+					Color color = UTIL_Portal_Color( 1, GetTeamNumber() );
+
+					Vector vColor;
+					vColor.x = color.r();
+					vColor.y = color.g();
+					vColor.z = color.b();
+					pEffect->SetControlPoint( 2, vColor );
+				}
+			}
+			if (bPortal2Active)
+			{
+				C_BaseViewModel *vm = pLocalPlayer->GetViewModel();
+				CNewParticleEffect *pEffect = vm->ParticleProp()->Create( "portal_weapon_cleanser", PATTACH_POINT_FOLLOW, "muzzle" );
+				if (pEffect)
+				{
+					Color color = UTIL_Portal_Color( 2, GetTeamNumber() );
+					Vector vColor;
+					vColor.x = color.r();
+					vColor.y = color.g();
+					vColor.z = color.b();
+					pEffect->SetControlPoint( 2, vColor );
+				}
+			}
+		}
+	}
+	else
+	{
+		ParticleProp()->Create( "portal_weapon_cleanser", PATTACH_POINT_FOLLOW, "muzzle" );
+	}
+}

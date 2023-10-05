@@ -1,0 +1,42 @@
+int __thiscall CleanserVortexTraceEnum::EnumElement(CleanserVortexTraceEnum *this, IHandleEntity *pHandleEntity)
+{
+  const CBaseHandle *v3; // eax
+  CBaseEntity *v4; // esi
+  CBaseTrigger *m_pCleanser; // ecx
+  int v6; // edi
+  char **v7; // eax
+  const char *v8; // eax
+  int m_count; // eax
+
+  if ( staticpropmgr->IsStaticProp(staticpropmgr, pHandleEntity) )
+    return 0;
+  v3 = pHandleEntity->__vftable[1].GetRefEHandle(pHandleEntity);
+  v4 = (CBaseEntity *)v3;
+  if ( !v3 )
+    return 0;
+  m_pCleanser = this->m_pCleanser;
+  if ( v3 == (const CBaseHandle *)m_pCleanser
+    || m_pCleanser && !m_pCleanser->PassesTriggerFilters(m_pCleanser, (CBaseEntity *)v3) )
+  {
+    return 0;
+  }
+  v6 = 0;
+  if ( !g_pszFizzlingVortexObjects[0] )
+    return 0;
+  v7 = g_pszFizzlingVortexObjects;
+  while ( 1 )
+  {
+    v8 = *v7;
+    if ( v4->m_iClassname.pszValue == v8 || CBaseEntity::ClassMatchesComplex(v4, v8) )
+      break;
+    v7 = &g_pszFizzlingVortexObjects[++v6];
+    if ( !*v7 )
+      return 0;
+  }
+  m_count = this->m_count;
+  if ( m_count >= this->m_listMax )
+    return 1;
+  this->m_pList[m_count] = v4;
+  ++this->m_count;
+  return 0;
+}

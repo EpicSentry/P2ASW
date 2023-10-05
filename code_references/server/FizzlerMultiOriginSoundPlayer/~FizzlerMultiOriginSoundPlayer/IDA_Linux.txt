@@ -1,0 +1,19 @@
+void __cdecl FizzlerMultiOriginSoundPlayer::~FizzlerMultiOriginSoundPlayer(FizzlerMultiOriginSoundPlayer *const this)
+{
+  CSoundPatch *m_pSound; // ecx
+  CSoundEnvelopeController *Controller; // esi
+
+  m_pSound = this->m_pSound;
+  this->_vptr_IHandleEntity = (int (**)(...))off_C83CE8;
+  if ( m_pSound )
+  {
+    Controller = CSoundEnvelopeController::GetController();
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))Controller->_vptr_CSoundEnvelopeController + 5))(
+      Controller,
+      this->m_pSound);
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))Controller->_vptr_CSoundEnvelopeController + 11))(
+      Controller,
+      this->m_pSound);
+  }
+  CBaseEntity::~CBaseEntity(this);
+}

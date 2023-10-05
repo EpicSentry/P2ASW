@@ -1,0 +1,224 @@
+void __cdecl CTriggerPortalCleanser::FizzleBaseAnimating(
+        CTriggerPortalCleanser *pFizzler,
+        CBaseAnimating *pBaseAnimating)
+{
+  int v2; // edi
+  bool v3; // al
+  const char *v4; // edx
+  IPhysicsObject *m_pPhysicsObject; // eax
+  CBasePlayer *v6; // eax
+  CBasePlayer *v7; // edi
+  float v8; // xmm2_4
+  vec_t v9; // xmm0_4
+  vec_t v10; // xmm2_4
+  uint32 v11; // eax
+  CBaseAnimating *v12; // edi
+  unsigned int v13; // eax
+  char *v14; // edx
+  IPhysicsObject *v15; // eax
+  CPropWeightedCube *SchrodingerTwin; // eax
+  CBaseEntity *v17; // edi
+  const char *v18; // eax
+  const char *v19; // edx
+  unsigned int m_Index; // eax
+  char *v21; // edx
+  CPortal_Player *PlayerHoldingEntity; // esi
+  uint32 v23; // eax
+  float v24; // [esp+30h] [ebp-98h]
+  char *s2a; // [esp+44h] [ebp-84h]
+  char *s2b; // [esp+44h] [ebp-84h]
+  char *s2; // [esp+44h] [ebp-84h]
+  float v28; // [esp+48h] [ebp-80h]
+  void (__cdecl *v29)(CBaseEntity *, const char *, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD); // [esp+48h] [ebp-80h]
+  int v30[4]; // [esp+4Ch] [ebp-7Ch] BYREF
+  Vector vOldVel; // [esp+5Ch] [ebp-6Ch] BYREF
+  AngularImpulse vOldAng; // [esp+68h] [ebp-60h] BYREF
+  float v33[3]; // [esp+74h] [ebp-54h] BYREF
+  char v34[4]; // [esp+80h] [ebp-48h] BYREF
+  float v35; // [esp+84h] [ebp-44h]
+  Vector vVel; // [esp+8Ch] [ebp-3Ch] BYREF
+  AngularImpulse vAng; // [esp+98h] [ebp-30h] BYREF
+  Vector v38; // [esp+A4h] [ebp-24h]
+
+  if ( pBaseAnimating && (pBaseAnimating->m_fFlags.m_Value & 0x10000000) == 0 )
+  {
+    if ( pBaseAnimating->m_iClassname.pszValue == "npc_personality_core"
+      || (v2 = 0, v3 = CBaseEntity::ClassMatchesComplex(pBaseAnimating, "npc_personality_core"), v4 = "func_door", v3) )
+    {
+      (*((void (__cdecl **)(CBaseAnimating *))pBaseAnimating->_vptr_IHandleEntity + 233))(pBaseAnimating);
+      PlayerHoldingEntity = (CPortal_Player *)GetPlayerHoldingEntity(pBaseAnimating);
+      if ( (pBaseAnimating->m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(pBaseAnimating);
+      v23 = (*((int (__cdecl **)(CBaseAnimating *))pBaseAnimating->_vptr_IHandleEntity + 7))(pBaseAnimating);
+      CPortalGameStats::Event_OnFizzled(&g_PortalGameStats, v23, &pBaseAnimating->m_vecAbsOrigin, PlayerHoldingEntity);
+    }
+    else
+    {
+      while ( v4 != pBaseAnimating->m_iClassname.pszValue && !CBaseEntity::ClassMatchesComplex(pBaseAnimating, v4) )
+      {
+        v4 = g_pszPortalNonCleansable[++v2];
+        if ( !v4 )
+        {
+          if ( pFizzler
+            && (pBaseAnimating->m_iName.m_Value.pszValue == "box"
+             || CBaseEntity::NameMatchesComplex(pBaseAnimating, "box")) )
+          {
+            COutputEvent::FireOutput(&pFizzler->m_OnDissolveBox, pBaseAnimating, pFizzler, 0.0);
+          }
+          (*((void (__cdecl **)(CBaseAnimating *, Vector *, AngularImpulse *))pBaseAnimating->_vptr_IHandleEntity + 139))(
+            pBaseAnimating,
+            &vOldVel,
+            &vOldAng);
+          m_pPhysicsObject = pBaseAnimating->m_pPhysicsObject;
+          if ( m_pPhysicsObject
+            && ((*((int (__cdecl **)(IPhysicsObject *))m_pPhysicsObject->_vptr_IPhysicsObject + 20))(pBaseAnimating->m_pPhysicsObject) & 4) != 0 )
+          {
+            v6 = GetPlayerHoldingEntity(pBaseAnimating);
+            v7 = v6;
+            if ( v6 )
+            {
+              (*((void (__cdecl **)(CBasePlayer *, CBaseAnimating *))v6->_vptr_IHandleEntity + 444))(v6, pBaseAnimating);
+              if ( (v7->m_iEFlags & 0x1000) != 0 )
+                CBaseEntity::CalcAbsoluteVelocity(v7);
+              (*((void (__stdcall **)(char *))v7->_vptr_IHandleEntity + 261))(v34);
+              v28 = v35 * 4.0;
+              (*((void (__stdcall **)(float *))v7->_vptr_IHandleEntity + 261))(v33);
+              v8 = v33[0] * 4.0;
+              if ( (v7->m_iEFlags & 0x1000) != 0 )
+              {
+                v24 = v33[0] * 4.0;
+                CBaseEntity::CalcAbsoluteVelocity(v7);
+                v8 = v24;
+              }
+              v9 = v7->m_vecAbsVelocity.z + -32.0;
+              v10 = v8 + v7->m_vecAbsVelocity.x;
+              vOldVel.y = v28 + v7->m_vecAbsVelocity.y;
+              vOldVel.z = v9;
+              vOldVel.x = v10;
+            }
+          }
+          else
+          {
+            v7 = 0;
+          }
+          (*((void (__cdecl **)(CBaseAnimating *))pBaseAnimating->_vptr_IHandleEntity + 233))(pBaseAnimating);
+          if ( (pBaseAnimating->m_iEFlags & 0x800) != 0 )
+            CBaseEntity::CalcAbsolutePosition(pBaseAnimating);
+          v11 = (*((int (__cdecl **)(CBaseAnimating *))pBaseAnimating->_vptr_IHandleEntity + 7))(pBaseAnimating);
+          CPortalGameStats::Event_OnFizzled(
+            &g_PortalGameStats,
+            v11,
+            &pBaseAnimating->m_vecAbsOrigin,
+            (CPortal_Player *)v7);
+          v12 = (CBaseAnimating *)ConvertToDissolvingProp(pBaseAnimating);
+          if ( v12 )
+          {
+            if ( v12->m_iName.m_Value.pszValue != pBaseAnimating->m_iName.m_Value.pszValue )
+            {
+              s2a = (char *)pBaseAnimating->m_iName.m_Value.pszValue;
+              CBaseEntity::NetworkStateChanged(v12, &v12->m_iName);
+              v12->m_iName.m_Value.pszValue = s2a;
+            }
+            CGlobalEntityList::UpdateName(&gEntList, v12);
+            UTIL_TransferPoseParameters(pBaseAnimating, v12);
+            TransferChildren(pBaseAnimating, v12);
+            CBaseEntity::SetCollisionGroup(v12, 3);
+            CCollisionProperty::SetSolidFlags(
+              &pBaseAnimating->m_Collision,
+              pBaseAnimating->m_Collision.m_usSolidFlags.m_Value | 4);
+            CBaseEntity::AddEffects(pBaseAnimating, 32);
+            if ( pFizzler && pFizzler->m_bVisible.m_Value )
+            {
+              if ( pFizzler->m_bObject1InRange.m_Value
+                && (v13 = pFizzler->m_hObject1.m_Value.m_Index, v13 != -1)
+                && (v14 = (char *)g_pEntityList + 24 * (unsigned __int16)v13, *((_DWORD *)v14 + 2) == HIWORD(v13))
+                && pBaseAnimating == *((CBaseAnimating **)v14 + 1) )
+              {
+                if ( pBaseAnimating != v12 )
+                {
+                  CBaseEntity::NetworkStateChanged(pFizzler, &pFizzler->m_hObject1);
+                  pFizzler->m_hObject1.m_Value.m_Index = *(_DWORD *)(*((int (__cdecl **)(CBaseAnimating *))v12->_vptr_IHandleEntity
+                                                                     + 3))(v12);
+                }
+              }
+              else if ( pFizzler->m_bObject2InRange.m_Value )
+              {
+                m_Index = pFizzler->m_hObject2.m_Value.m_Index;
+                if ( m_Index != -1 )
+                {
+                  v21 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+                  if ( *((_DWORD *)v21 + 2) == HIWORD(m_Index)
+                    && pBaseAnimating == *((CBaseAnimating **)v21 + 1)
+                    && pBaseAnimating != v12 )
+                  {
+                    CBaseEntity::NetworkStateChanged(pFizzler, &pFizzler->m_hObject2);
+                    pFizzler->m_hObject2.m_Value.m_Index = *(_DWORD *)(*((int (__cdecl **)(CBaseAnimating *))v12->_vptr_IHandleEntity
+                                                                       + 3))(v12);
+                  }
+                }
+              }
+            }
+            v15 = v12->m_pPhysicsObject;
+            if ( v15 )
+            {
+              s2b = (char *)v12->m_pPhysicsObject;
+              (*((void (__cdecl **)(char *, _DWORD))v15->_vptr_IPhysicsObject + 14))(s2b, 0);
+              vVel.x = vOldVel.x * 0.5;
+              vAng.x = vOldAng.x;
+              vVel.y = vOldVel.y * 0.5;
+              vVel.z = 0.5 * vOldVel.z;
+              vAng.y = vOldAng.y;
+              vAng.z = vOldAng.z + 20.0;
+              (*(void (__cdecl **)(char *, Vector *, AngularImpulse *))(*(_DWORD *)s2b + 204))(s2b, &vVel, &vAng);
+            }
+            CBaseEntity::AddFlag(pBaseAnimating, 0x10000000);
+            SchrodingerTwin = UTIL_GetSchrodingerTwin(pBaseAnimating);
+            if ( SchrodingerTwin )
+              CTriggerPortalCleanser::FizzleBaseAnimating(pFizzler, SchrodingerTwin);
+            UTIL_Remove(pBaseAnimating);
+            v17 = (CBaseEntity *)_dynamic_cast(
+                                   v12,
+                                   (const struct __class_type_info *)&`typeinfo for'CBaseEntity,
+                                   (const struct __class_type_info *)&`typeinfo for'CBaseAnimating,
+                                   0);
+            if ( v17 )
+            {
+              (*((void (__stdcall **)(int *))pBaseAnimating->_vptr_IHandleEntity + 8))(v30);
+              v18 = (const char *)v30[0];
+              if ( !v30[0] )
+                v18 = "";
+              s2 = (char *)v18;
+              (*((void (__stdcall **)(int *))v17->_vptr_IHandleEntity + 8))(v30);
+              v19 = (const char *)v30[0];
+              if ( !v30[0] )
+                v19 = "";
+              if ( _V_strcmp(v19, s2) )
+              {
+                FizzlerEffects::Create(v17);
+                CBaseEntity::EmitSound(v17, "Prop.Fizzled", 0.0, 0);
+              }
+              else
+              {
+                v29 = (void (__cdecl *)(CBaseEntity *, const char *, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD))*((_DWORD *)v17->_vptr_IHandleEntity + 230);
+                v38 = vec3_origin;
+                v29(
+                  v17,
+                  "",
+                  LODWORD(gpGlobals->curtime),
+                  0,
+                  0,
+                  LODWORD(vec3_origin.x),
+                  LODWORD(vec3_origin.y),
+                  LODWORD(vec3_origin.z),
+                  0);
+              }
+            }
+          }
+          if ( pFizzler )
+            COutputEvent::FireOutput(&pFizzler->m_OnDissolve, pBaseAnimating, pFizzler, 0.0);
+          return;
+        }
+      }
+    }
+  }
+}

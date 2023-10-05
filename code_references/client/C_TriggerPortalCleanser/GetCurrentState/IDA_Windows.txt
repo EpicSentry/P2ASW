@@ -1,0 +1,109 @@
+void __thiscall C_TriggerPortalCleanser::GetCurrentState(
+        C_TriggerPortalCleanser *this,
+        float *flIntensity,
+        float *flPower)
+{
+  float v3; // xmm0_4
+  float v5; // xmm2_4
+  float m_flPortalShotTime; // xmm0_4
+  char *v7; // xmm4_4
+  float m_flShotPulseTimer; // xmm0_4
+  float v9; // xmm0_4
+  float m_fValue; // xmm1_4
+  float v11; // xmm1_4
+  float m_flPowerUpTimer; // xmm0_4
+  CNewParticleEffect *m_pObject; // ecx
+  CNewParticleEffect *v14; // eax
+  float v15; // xmm0_4
+  float v16; // xmm0_4
+
+  v3 = *(float *)(gpGlobals.m_Index + 12);
+  v5 = v3 - this->m_flLastUpdateTime;
+  this->m_flLastUpdateTime = v3;
+  *flIntensity = cl_portal_cleanser_default_intensity.m_pParent->m_Value.m_fValue;
+  m_flPortalShotTime = this->m_flPortalShotTime;
+  if ( m_flPortalShotTime > this->m_flLastShotTime )
+  {
+    this->m_flLastShotTime = m_flPortalShotTime;
+    this->m_flShotPulseTimer = 0.0;
+  }
+  v7 = FLOAT_1_0;
+  if ( m_flPortalShotTime != 0.0 )
+  {
+    m_flShotPulseTimer = this->m_flShotPulseTimer;
+    if ( (float)(cl_portal_cleanser_shot_pulse_time.m_pParent->m_Value.m_fValue * 2.0) >= m_flShotPulseTimer )
+    {
+      v9 = m_flShotPulseTimer + v5;
+      this->m_flShotPulseTimer = v9;
+      m_fValue = cl_portal_cleanser_shot_pulse_time.m_pParent->m_Value.m_fValue;
+      if ( m_fValue <= v9 )
+        v11 = 1.0
+            - (float)((float)(v9 - cl_portal_cleanser_shot_pulse_time.m_pParent->m_Value.m_fValue)
+                    / cl_portal_cleanser_shot_pulse_time.m_pParent->m_Value.m_fValue);
+      else
+        v11 = v9 / m_fValue;
+      if ( v11 >= 0.0 )
+      {
+        if ( v11 > 1.0 )
+          v11 = *(float *)&FLOAT_1_0;
+      }
+      else
+      {
+        v11 = 0.0;
+      }
+      *flIntensity = (float)((float)(cl_portal_cleanser_shot_pulse_intensity.m_pParent->m_Value.m_fValue
+                                   - cl_portal_cleanser_default_intensity.m_pParent->m_Value.m_fValue)
+                           * v11)
+                   + cl_portal_cleanser_default_intensity.m_pParent->m_Value.m_fValue;
+    }
+  }
+  m_flPowerUpTimer = this->m_flPowerUpTimer;
+  if ( this->m_bDisabled )
+  {
+    if ( m_flPowerUpTimer > 0.0 )
+      this->m_flPowerUpTimer = m_flPowerUpTimer - v5;
+    m_pObject = this->m_hCleanserFX.m_pObject;
+    if ( m_pObject )
+    {
+      CNewParticleEffect::StopEmission(m_pObject, 0, 0, 1, 1);
+      v14 = this->m_hCleanserFX.m_pObject;
+      if ( v14 )
+      {
+        CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(
+          (CUtlIntrusiveDList<CUtlReference<CSheet> > *)&v14->m_References,
+          (CUtlReference<CSheet> *)&this->m_hCleanserFX);
+        this->m_hCleanserFX.m_pObject = 0;
+      }
+      v7 = FLOAT_1_0;
+    }
+  }
+  else if ( cl_portal_cleanser_powerup_time.m_pParent->m_Value.m_fValue > m_flPowerUpTimer )
+  {
+    this->m_flPowerUpTimer = m_flPowerUpTimer + v5;
+  }
+  v15 = this->m_flPowerUpTimer;
+  if ( v15 >= 0.0 )
+  {
+    if ( v15 > cl_portal_cleanser_powerup_time.m_pParent->m_Value.m_fValue )
+      v15 = cl_portal_cleanser_powerup_time.m_pParent->m_Value.m_fValue;
+  }
+  else
+  {
+    v15 = 0.0;
+  }
+  this->m_flPowerUpTimer = v15;
+  v16 = v15 / cl_portal_cleanser_powerup_time.m_pParent->m_Value.m_fValue;
+  *flPower = v16;
+  if ( v16 >= 0.0 )
+  {
+    if ( v16 > *(float *)&v7 )
+      v16 = *(float *)&v7;
+    *flPower = v16;
+    C_TriggerPortalCleanser::UpdateParticles(this);
+  }
+  else
+  {
+    *flPower = 0.0;
+    C_TriggerPortalCleanser::UpdateParticles(this);
+  }
+}

@@ -1,0 +1,4 @@
+int __cdecl CleanserVortexTraceEnum::GetCount(const CleanserVortexTraceEnum *const this)
+{
+  return this->m_count;
+}

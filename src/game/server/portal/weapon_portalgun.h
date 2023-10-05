@@ -169,7 +169,7 @@ public:
 private:
 	CWeaponPortalgun( const CWeaponPortalgun & );
 
-	unsigned char m_iPortalLinkageGroupID;
+	CNetworkVar( unsigned char, m_iPortalLinkageGroupID );
 
 };
 

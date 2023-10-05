@@ -1,0 +1,8 @@
+void __cdecl FizzlerMultiOriginSoundPlayer::Spawn(FizzlerMultiOriginSoundPlayer *const this)
+{
+  BASEPTR v1; // [esp+28h] [ebp-10h] BYREF
+
+  CBaseEntity::Spawn(this);
+  CBaseEntity::ThinkSet(&v1, this, (BASEPTR)(unsigned int)FizzlerMultiOriginSoundPlayer::RemoveThink, 0.0, 0);
+  CBaseEntity::SetNextThink(this, gpGlobals->curtime, 0);
+}

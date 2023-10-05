@@ -1,0 +1,6 @@
+void __thiscall FizzlerMultiOriginSoundPlayer::Spawn(FizzlerMultiOriginSoundPlayer *this)
+{
+  CFuncTank::FuncTankPreThink((vgui::BaseTooltip *)this);
+  CBaseEntity::ThinkSet(this, (void (__thiscall *)(CBaseEntity *))FizzlerMultiOriginSoundPlayer::RemoveThink, 0.0, 0);
+  CBaseEntity::SetNextThink(this, gpGlobals->curtime, 0);
+}

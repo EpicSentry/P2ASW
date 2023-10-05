@@ -1,0 +1,4 @@
+int __cdecl FizzlerMultiOriginSoundPlayer::UpdateTransmitState(FizzlerMultiOriginSoundPlayer *const this)
+{
+  return CBaseEntity::SetTransmitState(this, 8);
+}

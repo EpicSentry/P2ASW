@@ -1478,7 +1478,7 @@ bool CWeaponPortalgun::PortalTraceClippedByBlockers( ComplexPortalTrace_t *pTrac
 
 				if ( pTrigger && pTrigger->IsEnabled() )
 				{
-#if 0
+#if 1
 #if defined( GAME_DLL )
 					Warning( "CWeaponPortalgun::PortalTraceClippedByBlockers(server) : CLEANSER!!!!!\n" );
 #else
@@ -1522,8 +1522,7 @@ bool CWeaponPortalgun::PortalTraceClippedByBlockers( ComplexPortalTrace_t *pTrac
 			placementInfo.tr.plane.normal = -vecDirection;
 
 #if defined( GAME_DLL )
-			// TODO:
-			//pHitFizzler->SetPortalShot();
+			pHitFizzler->SetPortalShot();
 #endif
 
 			CProp_Portal *pPortal = bIsSecondPortal ? m_hSecondaryPortal.Get() : m_hPrimaryPortal.Get();//CProp_Portal::FindPortal( m_iPortalLinkageGroupID, bIsSecondPortal, true );

@@ -1,0 +1,23 @@
+C_TriggerPortalCleanser *__thiscall C_TriggerPortalCleanser::`scalar deleting destructor'(
+        C_TriggerPortalCleanser *this,
+        char a2)
+{
+  CNewParticleEffect *m_pObject; // eax
+  CUtlReference<CNewParticleEffect> *p_m_hCleanserFX; // esi
+
+  m_pObject = this->m_hCleanserFX.m_pObject;
+  p_m_hCleanserFX = &this->m_hCleanserFX;
+  if ( m_pObject )
+  {
+    CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(
+      (CUtlIntrusiveDList<CUtlReference<CSheet> > *)&m_pObject->m_References,
+      (CUtlReference<CSheet> *)&this->m_hCleanserFX);
+    p_m_hCleanserFX->m_pObject = 0;
+  }
+  this->ITriggerPortalCleanserAutoList::__vftable = (ITriggerPortalCleanserAutoList_vtbl *)&ITriggerPortalCleanserAutoList::`vftable';
+  ITriggerPortalCleanserAutoList::Remove(&this->ITriggerPortalCleanserAutoList);
+  C_BaseEntity::~C_BaseEntity(this);
+  if ( (a2 & 1) != 0 )
+    C_BaseEntity::operator delete(this);
+  return this;
+}

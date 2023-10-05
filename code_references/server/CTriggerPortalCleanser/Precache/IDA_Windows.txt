@@ -1,0 +1,7 @@
+void __thiscall CTriggerPortalCleanser::Precache(CTriggerPortalCleanser *this)
+{
+  CBaseEntity::PrecacheScriptSound("VFX.FizzlerLp");
+  CBaseEntity::PrecacheScriptSound("VFX.FizzlerStart");
+  CBaseEntity::PrecacheScriptSound("VFX.FizzlerDestroy");
+  PrecacheParticleSystem("cleanser_scanline");
+}
