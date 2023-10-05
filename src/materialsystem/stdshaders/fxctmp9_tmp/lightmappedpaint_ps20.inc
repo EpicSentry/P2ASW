@@ -1,12 +1,5 @@
 // ALL SKIP STATEMENTS THAT AFFECT THIS SHADER!!!
-// ( $FLASHLIGHT == 0 ) && ( $FLASHLIGHTSHADOWS == 1 )
-// ( $CUBEMAP == 0 )
 // ( $BUMPMAP == 0 )
-// defined $PIXELFOGTYPE && defined $WRITEWATERFOGTODESTALPHA && ( $PIXELFOGTYPE != 1 ) && $WRITEWATERFOGTODESTALPHA
-// defined $LIGHTING_PREVIEW && defined $FASTPATHENVMAPTINT && $LIGHTING_PREVIEW && $FASTPATHENVMAPTINT
-// defined $LIGHTING_PREVIEW && defined $FASTPATHENVMAPCONTRAST && $LIGHTING_PREVIEW && $FASTPATHENVMAPCONTRAST
-// defined $LIGHTING_PREVIEW && defined $FASTPATH && $LIGHTING_PREVIEW && $FASTPATH
-// ($FLASHLIGHT || $FLASHLIGHTSHADOWS) && $LIGHTING_PREVIEW
 // defined $PIXELFOGTYPE && defined $WRITEWATERFOGTODESTALPHA && ( $PIXELFOGTYPE != 1 ) && $WRITEWATERFOGTODESTALPHA
 // defined $LIGHTING_PREVIEW && defined $FASTPATHENVMAPTINT && $LIGHTING_PREVIEW && $FASTPATHENVMAPTINT
 // defined $LIGHTING_PREVIEW && defined $FASTPATHENVMAPCONTRAST && $LIGHTING_PREVIEW && $FASTPATHENVMAPCONTRAST
@@ -31,6 +24,7 @@ public:
 	}
 	void SetBUMPMAP( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 2 );
 		m_nBUMPMAP = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bBUMPMAP = true;
@@ -52,6 +46,7 @@ public:
 	}
 	void SetCUBEMAP( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 2 );
 		m_nCUBEMAP = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bCUBEMAP = true;
@@ -73,51 +68,32 @@ public:
 	}
 	void SetSEAMLESS( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nSEAMLESS = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bSEAMLESS = true;
 #endif
 	}
 private:
-	int m_nFLASHLIGHT;
+	int m_nTHICKPAINT;
 #ifdef _DEBUG
-	bool m_bFLASHLIGHT;
+	bool m_bTHICKPAINT;
 #endif
 public:
-	void SetFLASHLIGHT( int i )
+	void SetTHICKPAINT( int i )
 	{
 		Assert( i >= 0 && i <= 1 );
-		m_nFLASHLIGHT = i;
+		m_nTHICKPAINT = i;
 #ifdef _DEBUG
-		m_bFLASHLIGHT = true;
+		m_bTHICKPAINT = true;
 #endif
 	}
-	void SetFLASHLIGHT( bool i )
+	void SetTHICKPAINT( bool i )
 	{
-		m_nFLASHLIGHT = i ? 1 : 0;
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
+		m_nTHICKPAINT = i ? 1 : 0;
 #ifdef _DEBUG
-		m_bFLASHLIGHT = true;
-#endif
-	}
-private:
-	int m_nSHADER_SRGB_READ;
-#ifdef _DEBUG
-	bool m_bSHADER_SRGB_READ;
-#endif
-public:
-	void SetSHADER_SRGB_READ( int i )
-	{
-		Assert( i >= 0 && i <= 0 );
-		m_nSHADER_SRGB_READ = i;
-#ifdef _DEBUG
-		m_bSHADER_SRGB_READ = true;
-#endif
-	}
-	void SetSHADER_SRGB_READ( bool i )
-	{
-		m_nSHADER_SRGB_READ = i ? 1 : 0;
-#ifdef _DEBUG
-		m_bSHADER_SRGB_READ = true;
+		m_bTHICKPAINT = true;
 #endif
 	}
 private:
@@ -136,6 +112,7 @@ public:
 	}
 	void SetDOPIXELFOG( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 0 );
 		m_nDOPIXELFOG = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bDOPIXELFOG = true;
@@ -158,13 +135,9 @@ public:
 #endif // _DEBUG
 		m_nSEAMLESS = 0;
 #ifdef _DEBUG
-		m_bFLASHLIGHT = false;
+		m_bTHICKPAINT = false;
 #endif // _DEBUG
-		m_nFLASHLIGHT = 0;
-#ifdef _DEBUG
-		m_bSHADER_SRGB_READ = false;
-#endif // _DEBUG
-		m_nSHADER_SRGB_READ = 0;
+		m_nTHICKPAINT = 0;
 #ifdef _DEBUG
 		m_bDOPIXELFOG = true;
 #endif // _DEBUG
@@ -175,13 +148,13 @@ public:
 		// Asserts to make sure that we aren't using any skipped combinations.
 		// Asserts to make sure that we are setting all of the combination vars.
 #ifdef _DEBUG
-		bool bAllStaticVarsDefined = m_bBUMPMAP && m_bCUBEMAP && m_bSEAMLESS && m_bFLASHLIGHT && m_bSHADER_SRGB_READ && m_bDOPIXELFOG;
+		bool bAllStaticVarsDefined = m_bBUMPMAP && m_bCUBEMAP && m_bSEAMLESS && m_bTHICKPAINT && m_bDOPIXELFOG;
 		Assert( bAllStaticVarsDefined );
 #endif // _DEBUG
-		return ( 8 * m_nBUMPMAP ) + ( 24 * m_nCUBEMAP ) + ( 72 * m_nSEAMLESS ) + ( 144 * m_nFLASHLIGHT ) + ( 288 * m_nSHADER_SRGB_READ ) + ( 288 * m_nDOPIXELFOG ) + 0;
+		return ( 8 * m_nBUMPMAP ) + ( 24 * m_nCUBEMAP ) + ( 72 * m_nSEAMLESS ) + ( 144 * m_nTHICKPAINT ) + ( 288 * m_nDOPIXELFOG ) + 0;
 	}
 };
-#define shaderStaticTest_lightmappedpaint_ps20 psh_forgot_to_set_static_BUMPMAP + psh_forgot_to_set_static_CUBEMAP + psh_forgot_to_set_static_SEAMLESS + psh_forgot_to_set_static_FLASHLIGHT + psh_forgot_to_set_static_SHADER_SRGB_READ + 0
+#define shaderStaticTest_lightmappedpaint_ps20 psh_forgot_to_set_static_BUMPMAP + psh_forgot_to_set_static_CUBEMAP + psh_forgot_to_set_static_SEAMLESS + psh_forgot_to_set_static_THICKPAINT + 0
 class lightmappedpaint_ps20_Dynamic_Index
 {
 private:
@@ -200,6 +173,7 @@ public:
 	}
 	void SetFASTPATHENVMAPCONTRAST( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nFASTPATHENVMAPCONTRAST = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bFASTPATHENVMAPCONTRAST = true;
@@ -221,6 +195,7 @@ public:
 	}
 	void SetFASTPATH( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nFASTPATH = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bFASTPATH = true;
@@ -242,6 +217,7 @@ public:
 	}
 	void SetPIXELFOGTYPE( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nPIXELFOGTYPE = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bPIXELFOGTYPE = true;
@@ -276,3 +252,34 @@ public:
 	}
 };
 #define shaderDynamicTest_lightmappedpaint_ps20 psh_forgot_to_set_dynamic_FASTPATHENVMAPCONTRAST + psh_forgot_to_set_dynamic_FASTPATH + 0
+
+static const ShaderComboInformation_t s_DynamicComboArray_lightmappedpaint_ps20[3] = 
+{
+	{ "FASTPATHENVMAPCONTRAST", 0, 1 },
+	{ "FASTPATH", 0, 1 },
+	{ "PIXELFOGTYPE", 0, 1 },
+};
+
+static const ShaderComboInformation_t s_StaticComboArray_lightmappedpaint_ps20[5] = 
+{
+	{ "BUMPMAP", 0, 2 },
+	{ "CUBEMAP", 0, 2 },
+	{ "SEAMLESS", 0, 1 },
+	{ "THICKPAINT", 0, 1 },
+	{ "DOPIXELFOG", 0, 0 },
+};
+static const ShaderComboSemantics_t lightmappedpaint_ps20_combos =
+{
+	"lightmappedpaint_ps20", s_DynamicComboArray_lightmappedpaint_ps20, 3, s_StaticComboArray_lightmappedpaint_ps20, 5 
+};
+
+class ConstructMe_lightmappedpaint_ps20
+{
+public:
+	ConstructMe_lightmappedpaint_ps20()
+	{
+		GetShaderDLL()->AddShaderComboInformation( &lightmappedpaint_ps20_combos );
+	}
+};
+
+static ConstructMe_lightmappedpaint_ps20 s_ConstructMe_lightmappedpaint_ps20;
