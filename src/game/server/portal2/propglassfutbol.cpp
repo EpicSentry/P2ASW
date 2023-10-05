@@ -114,7 +114,7 @@ public:
 	void OnPhysGunPickup(CBasePlayer* pPhysGunUser, PhysGunDrop_t reason);
 	void SetSpawner(CPropFutbolSpawner* pMySpawner);
 
-	enum futbol_holder_type_t GetHolder { m_Holder };
+	futbol_holder_type_t GetHolder { m_Holder };
 	void SetHolder(futbol_holder_type_t type) { GetHolder = type; }
 	CPortal_Player* GetLastPlayerToHold() { return m_hLastHeldByPlayer; }
 private:
@@ -129,6 +129,7 @@ LINK_ENTITY_TO_CLASS(futbol_catcher, CFutbolCatcher);
 
 BEGIN_DATADESC(CFutbolCatcher)
 DEFINE_THINKFUNC(CatchThink),
+DEFINE_THINKFUNC(CaptureThink),
 END_DATADESC()
 
 LINK_ENTITY_TO_CLASS(prop_glass_futbol_spawner, CPropFutbolSpawner);
@@ -195,7 +196,7 @@ void CFutbolCatcher::CaptureThink()
 
 void CFutbolCatcher::CaptureFutbol(CPropGlassFutbol* pFutbol)
 {
-	IPhysicsObject* pPhysicsObject = VPhysicsGetObject();
+	IPhysicsObject* pPhysicsObject = pFutbol->VPhysicsGetObject();
 
 	if (pFutbol)
 	{
@@ -203,7 +204,7 @@ void CFutbolCatcher::CaptureFutbol(CPropGlassFutbol* pFutbol)
 			pPhysicsObject->EnableMotion(false);
 		pFutbol->Teleport(&m_vecCatchBoxOrig, &vec3_angle, &vec3_origin, true);
 		SetThink(&CFutbolCatcher::CaptureThink);
-		pFutbol->GetHolder = FUTBOL_HELD_BY_CATCHER;
+		pFutbol->SetHolder ( FUTBOL_HELD_BY_CATCHER );
 		m_OnFutbolCaught.FireOutput(pFutbol, pFutbol->GetLastPlayerToHold());
 	}
 }
@@ -253,17 +254,18 @@ void CPropFutbolSpawner::InputForceSpawn(inputdata_t& data)
 
 void CPropFutbolSpawner::SpawnFutbol()
 {
-	Vector vecBallSpawnPoint;
-
-	CBaseEntity* pFutbol = CreateEntityByName("prop_glass_futbol");
+	CPropGlassFutbol* pFutbol = (CPropGlassFutbol*)CreateEntityByName("prop_glass_futbol");
 	if (pFutbol)
 	{
-		m_OnFutbolSpawned.FireOutput(this, this);
-		CBaseAnimating::GetAttachment("ball", vecBallSpawnPoint);
-		SetAbsOrigin(vecBallSpawnPoint);
+		m_OnFutbolSpawned.FireOutput( this, this );
+
+		Vector vecBallSpawnPoint;
+		GetAttachment( "ball", vecBallSpawnPoint );
+		pFutbol->SetAbsOrigin( vecBallSpawnPoint );
+		pFutbol->SetSpawner( this );
 		m_bHasFutbol = true;
-		DispatchSpawn(pFutbol, true);
-		CaptureFutbol((CPropGlassFutbol*)pFutbol);
+		DispatchSpawn( pFutbol );
+		CaptureFutbol( pFutbol );
 	}
 }
 
@@ -278,15 +280,14 @@ void CPropGlassFutbol::Spawn()
 	Precache();
 	KeyValue("model", "models/props/futbol.mdl");
 
-//	if (!m_hSpawner)
-//	{
-//		CBaseEntity* pSpawnerName = gEntList.FindEntityByName(NULL, m_strSpawnerName);
-//		if (pSpawnerName)
-//		{
-//			CBaseEntity* pSpawner = dynamic_cast<CPropFutbolSpawner*>(pSpawnerName);
-//		}
-//
-//	}
+	if (!m_hSpawner)
+	{
+		CPropFutbolSpawner* pSpawner = dynamic_cast<CPropFutbolSpawner*>( gEntList.FindEntityByName(NULL, m_strSpawnerName) );
+		if (pSpawner)
+		{
+			SetSpawner( pSpawner );
+		}
+	}
 	
 	BaseClass::Spawn();
 	ResetSequence(LookupSequence("rot"));
