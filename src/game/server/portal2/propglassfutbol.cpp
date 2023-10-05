@@ -277,6 +277,16 @@ void CPropGlassFutbol::Spawn()
 {
 	Precache();
 	KeyValue("model", "models/props/futbol.mdl");
+
+//	if (!m_hSpawner)
+//	{
+//		CBaseEntity* pSpawnerName = gEntList.FindEntityByName(NULL, m_strSpawnerName);
+//		if (pSpawnerName)
+//		{
+//			CBaseEntity* pSpawner = dynamic_cast<CPropFutbolSpawner*>(pSpawnerName);
+//		}
+//
+//	}
 	
 	BaseClass::Spawn();
 	ResetSequence(LookupSequence("rot"));
