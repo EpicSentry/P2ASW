@@ -84,6 +84,7 @@ BEGIN_DATADESC( CNPC_Portal_FloorTurret )
 	DEFINE_KEYFIELD( m_bUsedAsActor, FIELD_BOOLEAN, "UsedAsActor"),
 	DEFINE_KEYFIELD( m_bGagged, FIELD_BOOLEAN, "Gagged"),
 	DEFINE_KEYFIELD( m_bUseSuperDamageScale, FIELD_BOOLEAN, "UseSuperDamageScale"),
+	DEFINE_KEYFIELD( m_bLoadAlternativeModels, FIELD_BOOLEAN, "LoadAlternativeModels"),
 
 	DEFINE_THINKFUNC( Retire ),
 	DEFINE_THINKFUNC( Deploy ),
