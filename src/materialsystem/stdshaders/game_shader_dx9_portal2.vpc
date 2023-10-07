@@ -19,12 +19,21 @@ $Configuration
 
 $Project "Shaders (Portal 2)"
 {
+	// Portals
 	$File "portal.cpp"
 	$File "portal_refract.cpp"
 	$File "portal_refract_helper.cpp"
 	$File "portalstaticoverlay.cpp"
+	
+	// Paint
 	$File "lightmappedpaint_dx9_helper.h"
 	$File "lightmappedpaint_dx9_helper.cpp"
+	
+	// Solid Energy ( Fizzler Shaders )
 	$File "solidenergy_dx9.cpp"
 	$File "solidenergy_dx9_helper.cpp"
+	
+	// Black Shader	
+	$File "black.cpp"
+
 }

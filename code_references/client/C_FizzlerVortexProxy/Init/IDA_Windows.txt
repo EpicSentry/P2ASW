@@ -1,0 +1,70 @@
+char __thiscall C_FizzlerVortexProxy::Init(C_FizzlerVortexProxy *this, IMaterial *pMaterial, KeyValues *pKeyValues)
+{
+  IMaterial *v4; // ecx
+
+  v4 = pMaterial;
+  this->m_pMaterial = pMaterial;
+  this->m_pPosition1Var = v4->FindVar(v4, "$FLOW_VORTEX_POS1", (bool *)&pMaterial + 3, 1);
+  if ( HIBYTE(pMaterial) )
+  {
+    this->m_pVortex1Var = this->m_pMaterial->FindVar(this->m_pMaterial, "$flow_vortex1", (char *)&pMaterial + 3, 1);
+    if ( HIBYTE(pMaterial) )
+    {
+      this->m_pPosition2Var = this->m_pMaterial->FindVar(
+                                this->m_pMaterial,
+                                "$FLOW_VORTEX_POS2",
+                                (char *)&pMaterial + 3,
+                                1);
+      if ( HIBYTE(pMaterial) )
+      {
+        this->m_pVortex2Var = this->m_pMaterial->FindVar(this->m_pMaterial, "$flow_vortex2", (char *)&pMaterial + 3, 1);
+        if ( HIBYTE(pMaterial) )
+        {
+          this->m_pIntensityVar = this->m_pMaterial->FindVar(
+                                    this->m_pMaterial,
+                                    "$flow_color_intensity",
+                                    (char *)&pMaterial + 3,
+                                    1);
+          if ( HIBYTE(pMaterial) )
+          {
+            this->m_pPowerUpVar = this->m_pMaterial->FindVar(this->m_pMaterial, "$powerup", (char *)&pMaterial + 3, 1);
+            if ( HIBYTE(pMaterial) )
+            {
+              return 1;
+            }
+            else
+            {
+              this->m_pPowerUpVar = 0;
+              return 0;
+            }
+          }
+          else
+          {
+            this->m_pIntensityVar = 0;
+            return 0;
+          }
+        }
+        else
+        {
+          this->m_pVortex2Var = 0;
+          return 0;
+        }
+      }
+      else
+      {
+        this->m_pPosition2Var = 0;
+        return 0;
+      }
+    }
+    else
+    {
+      this->m_pVortex1Var = 0;
+      return 0;
+    }
+  }
+  else
+  {
+    this->m_pPosition1Var = 0;
+    return 0;
+  }
+}

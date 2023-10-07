@@ -1,0 +1,79 @@
+void __userpurge C_FizzlerVortexProxy::OnBind(
+        C_FizzlerVortexProxy *this@<ecx>,
+        int a2@<ebx>,
+        int a3@<edi>,
+        C_BaseEntity *pC_BaseEntity)
+{
+  C_TriggerPortalCleanser *v5; // eax
+  C_TriggerPortalCleanser *v6; // ebx
+  unsigned int m_Index; // ecx
+  IHandleEntity *m_pEntity; // edi
+  _DWORD *v9; // eax
+  unsigned int v10; // ecx
+  IHandleEntity *v11; // edi
+  _DWORD *v12; // eax
+  float flPower; // [esp+2Ch] [ebp-4h] BYREF
+
+  if ( pC_BaseEntity )
+  {
+    v5 = (C_TriggerPortalCleanser *)__RTDynamicCast(
+                                      pC_BaseEntity,
+                                      0,
+                                      &C_BaseEntity `RTTI Type Descriptor',
+                                      &C_TriggerPortalCleanser `RTTI Type Descriptor',
+                                      0);
+    v6 = v5;
+    if ( v5 )
+    {
+      m_Index = v5->m_hObject1.m_Value.m_Index;
+      if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+        m_pEntity = 0;
+      else
+        m_pEntity = g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+      if ( v5->m_bObject1InRange && m_pEntity )
+      {
+        ((void (__thiscall *)(IMaterialVar *, int, int, int))this->m_pVortex1Var->SetIntValue)(
+          this->m_pVortex1Var,
+          1,
+          a3,
+          a2);
+        v9 = (_DWORD *)((int (__thiscall *)(IHandleEntity *))m_pEntity->__vftable[25].SetRefEHandle)(m_pEntity);
+        ((void (__thiscall *)(IMaterialVar *, _DWORD, _DWORD, _DWORD))this->m_pPosition1Var->SetVecValue)(
+          this->m_pPosition1Var,
+          *v9,
+          v9[1],
+          v9[2]);
+      }
+      else
+      {
+        ((void (__thiscall *)(IMaterialVar *, _DWORD, int, int))this->m_pVortex1Var->SetIntValue)(
+          this->m_pVortex1Var,
+          0,
+          a3,
+          a2);
+      }
+      v10 = v6->m_hObject2.m_Value.m_Index;
+      if ( v10 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v10].m_SerialNumber != HIWORD(v10) )
+        v11 = 0;
+      else
+        v11 = g_pEntityList->m_EntPtrArray[(unsigned __int16)v10].m_pEntity;
+      if ( v6->m_bObject2InRange && v11 )
+      {
+        this->m_pVortex2Var->SetIntValue(this->m_pVortex2Var, 1);
+        v12 = (_DWORD *)((int (__thiscall *)(IHandleEntity *))v11->__vftable[25].SetRefEHandle)(v11);
+        ((void (__thiscall *)(IMaterialVar *, _DWORD, _DWORD, _DWORD))this->m_pPosition2Var->SetVecValue)(
+          this->m_pPosition2Var,
+          *v12,
+          v12[1],
+          v12[2]);
+      }
+      else
+      {
+        this->m_pVortex2Var->SetIntValue(this->m_pVortex2Var, 0);
+      }
+      C_TriggerPortalCleanser::GetCurrentState(v6, (float *)&pC_BaseEntity, &flPower);
+      ((void (__cdecl *)(C_BaseEntity *))this->m_pIntensityVar->SetFloatValue)(pC_BaseEntity);
+      ((void (__cdecl *)(_DWORD))this->m_pPowerUpVar->SetFloatValue)(LODWORD(flPower));
+    }
+  }
+}

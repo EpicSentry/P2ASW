@@ -19,6 +19,7 @@
 #include "model_types.h"
 #include "rumble_shared.h"
 #include "c_triggers.h"
+#include "proxyentity.h"
 
 #define CTriggerPortalCleanser C_TriggerPortalCleanser
 
@@ -51,14 +52,15 @@ private:
 
 // NOTE:
 // We would use CEntityMaterialProxy as a baseclass, but Swarm doesn't have this
-class C_FizzlerVortexProxy : public IMaterialProxy
+class C_FizzlerVortexProxy : public CEntityMaterialProxy
 {
+public:
     C_FizzlerVortexProxy();
     ~C_FizzlerVortexProxy();
 	
-	bool Init( IMaterial *pMaterial, KeyValues *pKeyValues );
-    void OnBind( void *pEnt );
-	IMaterial  *GetMaterial() { return m_pMaterial; }
+	virtual bool Init( IMaterial *pMaterial, KeyValues *pKeyValues );
+	virtual void OnBind( C_BaseEntity *pC_BaseEntity );
+	virtual IMaterial  *GetMaterial() { return m_pMaterial; }
     
 private:
     IMaterial  *m_pMaterial;

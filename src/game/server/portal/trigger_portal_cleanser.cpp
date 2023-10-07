@@ -253,7 +253,16 @@ BEGIN_DATADESC( CTriggerPortalCleanser )
 END_DATADESC()
 
 IMPLEMENT_SERVERCLASS_ST( CTriggerPortalCleanser, DT_TriggerPortalCleanser )
-	SendPropBool(SENDINFO(m_bDisabled))
+	SendPropBool( SENDINFO( m_bDisabled ) ),
+	SendPropBool( SENDINFO( m_bVisible ) ),
+	SendPropBool( SENDINFO( m_bObject1InRange ) ),
+	SendPropBool( SENDINFO( m_bObject2InRange ) ),
+	SendPropBool( SENDINFO( m_bPlayersPassTriggerFilters ) ),
+
+	SendPropFloat( SENDINFO( m_flPortalShotTime ) ),
+	
+	SendPropEHandle( SENDINFO( m_hObject1 ) ),	
+	SendPropEHandle( SENDINFO( m_hObject2 ) ),
 END_SEND_TABLE()
 
 
