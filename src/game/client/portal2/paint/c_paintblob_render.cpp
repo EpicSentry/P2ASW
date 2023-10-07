@@ -28,7 +28,7 @@ ConVar r_paintblob_blr_render_radius( "r_paintblob_blr_render_radius", "1.3", FC
 ConVar r_paintblob_blr_cutoff_radius( "r_paintblob_blr_cutoff_radius", "5.5", FCVAR_NONE, "Set cutoff radius (how far field extends from each particle)" );
 
 // No Blob rendering :(
-#if defined ( USE_BLOBULATOR ) || 1
+#if defined ( USE_BLOBULATOR )
 namespace NPaintRenderer
 {
 
