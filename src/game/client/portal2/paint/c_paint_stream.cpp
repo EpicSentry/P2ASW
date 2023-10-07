@@ -258,7 +258,7 @@ void C_PaintStream::DrawBlobs( IMaterial* pMaterial )
 	//setup light for this cube of blobs
 	modelrender->SetupLighting( m_vLightPosition );
 
-#if 0
+#if USE_BLOBULATOR
 
 	C_BasePlayer *pPlayer = GetSplitScreenViewPlayer();
 	if ( !pPlayer )

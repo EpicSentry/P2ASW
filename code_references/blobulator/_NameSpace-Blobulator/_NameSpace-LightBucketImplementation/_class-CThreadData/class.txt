@@ -1,0 +1,33 @@
+class Blobulator::LightBucketImplementation::CThreadData
+{
+    public void CThreadData(class Blobulator::LightBucketImplementation::CThreadData & );
+    public void CThreadData();
+    public void ~CThreadData();
+    public int m_nCurrentJobIndex;
+    public int m_nNumberOfJobs;
+    public class Blobulator::LightBucketImplementation::CThreadData * m_pAllThreadData;
+    public class Blobulator::LightBucketImplementation::CSection ** m_pFirstSection;
+    public int * m_pnSectionIndices;
+    public class Blobulator::LightBucketImplementation::CJobCache * m_pJobCache;
+    public int m_bDone;
+    public bool m_bForceSpuBreak;
+    public class Blobulator::LightBucketImplementation::CLockLessStack<2197> m_SectionStacks[4];
+    public class Blobulator::LightBucketImplementation::CLockLessStack<2197> m_GlobalSectionStack;
+    public int GetBucketIndexFromXYZ(int ,int ,int );
+    public class Blobulator::LightBucketImplementation::CThreadData * GetEaThreadData();
+    public bool ExecuteAllSections(bool ,int );
+    public void SeedFromFlagsYZ(int ,int ,int ,union Blobulator::LightBucketImplementation::CSection::Grid2D & ,class Blobulator::LightBucketImplementation::CSection & );
+    public void SeedFromFlagsXZ(int ,int ,int ,union Blobulator::LightBucketImplementation::CSection::Grid2D & ,class Blobulator::LightBucketImplementation::CSection & );
+    public void SeedFromFlagsXY(int ,int ,int ,union Blobulator::LightBucketImplementation::CSection::Grid2D & ,class Blobulator::LightBucketImplementation::CSection & );
+    public class Blobulator::LightBucketImplementation::CSection & AcquireSection(int );
+    public class Blobulator::LightBucketImplementation::CSection & AcquireSection(int ,int ,int ,int & );
+    public void ReleaseSection(int ,class Blobulator::LightBucketImplementation::CSection & );
+    public bool TryLock(int ,class Blobulator::LightBucketImplementation::CSection & );
+    public void Unlock(int ,class Blobulator::LightBucketImplementation::CSection & );
+    public void SetupInternalCache();
+    public void TeardownInternalCache();
+    public bool ExecuteSections(class Blobulator::LightBucketImplementation::CLockLessStack<2197> & ,class Blobulator::LightBucketImplementation::CLockLessStack<2197> & ,int ,int & );
+    public bool CrawlOneSection(int ,class Blobulator::LightBucketImplementation::CSection & ,class Blobulator::LightBucketImplementation::CLockLessStack<2197> & );
+    public class Blobulator::LightBucketImplementation::CThreadData & operator=(class Blobulator::LightBucketImplementation::CThreadData & );
+    public void * __vecDelDtor(unsigned int );
+};

@@ -1,0 +1,5 @@
+class Blobulator::LightBucketImplementation::CSectionSorter
+{
+    public int m_Axis[3];
+    public bool gt(class Blobulator::LightBucketImplementation::CSection * ,class Blobulator::LightBucketImplementation::CSection * );
+};

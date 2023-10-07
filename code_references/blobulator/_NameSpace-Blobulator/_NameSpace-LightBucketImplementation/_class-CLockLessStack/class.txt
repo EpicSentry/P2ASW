@@ -1,0 +1,20 @@
+class Blobulator::LightBucketImplementation::CLockLessStack<2197>
+{
+    private const int TAG;
+    public const int SIZE;
+    public void CLockLessStack<2197>(class Blobulator::LightBucketImplementation::CLockLessStack<2197> & );
+    public void CLockLessStack<2197>(class Blobulator::LightBucketImplementation::CLockLessStackContainer<2197> * );
+    public void CLockLessStack<2197>();
+    public void ~CLockLessStack<2197>();
+    public class Blobulator::LightBucketImplementation::CLockLessStack<2197> & operator=(class Blobulator::LightBucketImplementation::CLockLessStack<2197> & );
+    public void SetContainer(class Blobulator::LightBucketImplementation::CLockLessStackContainer<2197> * );
+    public class Blobulator::LightBucketImplementation::CLockLessStackContainer<2197> * GetContainer();
+    public void PushToHead(int );
+    public int PopFromHead();
+    public bool IsEmpty();
+    public void Clear();
+    public void ResetToFull();
+    public int GetSize();
+    private class Blobulator::LightBucketImplementation::CLockLessStackContainer<2197> * m_pEaInstance;
+    public void * __vecDelDtor(unsigned int );
+};

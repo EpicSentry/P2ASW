@@ -132,9 +132,10 @@ void C_PropPaintBomb::PostDataUpdate( DataUpdateType_t updateType )
 	{
 		// disable the fast path for these entities so our custom DrawModel() function gets called
 		m_bCanUseFastPath = false;		
-	
+
+#ifndef USE_BLOBULATOR
 		m_pRenderable = new C_PaintBlobRenderable( this, 1.5 );
-		
+#endif
 		//cl_entitylist->AddNonNetworkableEntity( m_pRenderable->GetIClientUnknown() );
 		m_pRenderable->InitializeAsClientEntity( BLOB_MODEL, false );
 		m_pRenderable->Spawn();
@@ -237,7 +238,7 @@ int C_PropPaintBomb::DrawModel( int flags, const RenderableInstance_t &instance 
 
 	//setup light for this cube of blobs
 	modelrender->SetupLighting( vCenter );
-#if 0
+#ifdef USE_BLOBULATOR
 	C_BasePlayer *pPlayer = GetSplitScreenViewPlayer();
 	Vector vecPlayerPos = pPlayer->EyePosition();
 
@@ -272,12 +273,14 @@ int C_PropPaintBomb::DrawModel( int flags, const RenderableInstance_t &instance 
 	return 1;
 }
 
+#ifndef USE_BLOBULATOR
 bool C_PropPaintBomb::Simulate( void )
 {
 	Assert( m_pRenderable );
 	m_pRenderable->PerFrameUpdate();
 	return BaseClass::Simulate();
 }
+#endif
 
 RenderableTranslucencyType_t C_PropPaintBomb::ComputeTranslucencyType( )
 {

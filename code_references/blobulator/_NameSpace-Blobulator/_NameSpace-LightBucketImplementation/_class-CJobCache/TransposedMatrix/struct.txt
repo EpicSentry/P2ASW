@@ -1,0 +1,7 @@
+struct Blobulator::LightBucketImplementation::CJobCache::TransposedMatrix
+{
+    union __m128 m_Translation;
+    union __m128 m_ColumnX;
+    union __m128 m_ColumnY;
+    union __m128 m_ColumnZ;
+};

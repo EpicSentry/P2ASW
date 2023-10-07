@@ -1478,7 +1478,7 @@ bool CWeaponPortalgun::PortalTraceClippedByBlockers( ComplexPortalTrace_t *pTrac
 
 				if ( pTrigger && pTrigger->IsEnabled() )
 				{
-#if 1
+#if 0
 #if defined( GAME_DLL )
 					Warning( "CWeaponPortalgun::PortalTraceClippedByBlockers(server) : CLEANSER!!!!!\n" );
 #else
