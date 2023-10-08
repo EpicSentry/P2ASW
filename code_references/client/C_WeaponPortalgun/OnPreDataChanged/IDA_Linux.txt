@@ -1,0 +1,6 @@
+void __cdecl C_WeaponPortalgun::OnPreDataChanged(C_WeaponPortalgun *const this, DataUpdateType_t updateType)
+{
+  this->m_bOldCanFirePortal1 = this->m_bCanFirePortal1.m_Value;
+  this->m_bOldCanFirePortal2 = this->m_bCanFirePortal2.m_Value;
+  C_BaseAnimating::OnPreDataChanged(this, updateType);
+}

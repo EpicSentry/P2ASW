@@ -1,0 +1,12 @@
+void __cdecl C_WeaponPortalgun::Spawn(C_WeaponPortalgun *const this)
+{
+  __m128d v1; // xmm0
+  float v2; // [esp+4h] [ebp-14h]
+
+  (*((void (__cdecl **)(C_WeaponPortalgun *const))this->_vptr_IHandleEntity + 37))(this);
+  C_BaseCombatWeapon::Spawn(this);
+  v1 = _mm_cvtps_pd((__m128)LODWORD(gpGlobals->curtime));
+  v1.m128d_f64[0] = v1.m128d_f64[0] + 0.1;
+  v2 = _mm_unpacklo_pd(v1, v1).m128d_f64[0];
+  C_BaseEntity::SetNextThink(this, v2, 0);
+}

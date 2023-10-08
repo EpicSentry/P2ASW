@@ -1,0 +1,4 @@
+void __cdecl C_WeaponPortalgun::DestroyEffects(C_WeaponPortalgun *const this)
+{
+  C_WeaponPortalgun::StopEffects(this, 1);
+}

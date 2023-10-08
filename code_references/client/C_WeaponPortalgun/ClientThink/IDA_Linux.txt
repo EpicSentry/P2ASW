@@ -1,0 +1,88 @@
+void __cdecl C_WeaponPortalgun::ClientThink(C_WeaponPortalgun *const this)
+{
+  C_BaseCombatCharacter *Owner; // eax
+  C_BaseCombatCharacter *v2; // esi
+  const void *v3; // eax
+  CNewParticleEffect *m_pObject; // eax
+  CUtlReference<CNewParticleEffect> *m_pPrev; // edx
+  CUtlReference<CNewParticleEffect> *m_pNext; // eax
+  CNewParticleEffect *v7; // eax
+  CUtlReference<CNewParticleEffect> *v8; // edx
+  CUtlReference<CNewParticleEffect> *v9; // eax
+  CUtlReference<CNewParticleEffect> *v10; // edx
+  CUtlReference<CNewParticleEffect> *v11; // edx
+
+  Owner = C_BaseCombatWeapon::GetOwner(this);
+  v2 = Owner;
+  if ( Owner )
+  {
+    if ( (*((unsigned __int8 (__cdecl **)(C_BaseCombatCharacter *))Owner->_vptr_IHandleEntity + 200))(Owner) )
+    {
+      v3 = (const void *)(*((int (__cdecl **)(C_BaseCombatCharacter *))v2->_vptr_IHandleEntity + 303))(v2);
+      if ( v3 )
+      {
+        if ( _dynamic_cast(
+               v3,
+               (const struct __class_type_info *)&`typeinfo for'C_BaseCombatWeapon,
+               (const struct __class_type_info *)&`typeinfo for'C_WeaponPortalgun,
+               0)
+          && this->m_EffectState.m_Value != 2 )
+        {
+          if ( this->m_hPortalGunEffectHoldingFP.m_pObject )
+          {
+            CNewParticleEffect::StopEmission(this->m_hPortalGunEffectHoldingFP.m_pObject, 0, 0, 0, 0);
+            m_pObject = this->m_hPortalGunEffectHoldingFP.m_pObject;
+            if ( m_pObject )
+            {
+              m_pPrev = this->m_hPortalGunEffectHoldingFP.m_pPrev;
+              if ( m_pPrev )
+              {
+                m_pPrev->m_pNext = this->m_hPortalGunEffectHoldingFP.m_pNext;
+                m_pNext = this->m_hPortalGunEffectHoldingFP.m_pNext;
+                if ( m_pNext )
+                  m_pNext->m_pPrev = this->m_hPortalGunEffectHoldingFP.m_pPrev;
+              }
+              else if ( m_pObject->m_References.m_pHead == &this->m_hPortalGunEffectHoldingFP )
+              {
+                v10 = this->m_hPortalGunEffectHoldingFP.m_pNext;
+                m_pObject->m_References.m_pHead = v10;
+                if ( v10 )
+                  v10->m_pPrev = 0;
+              }
+              this->m_hPortalGunEffectHoldingFP.m_pPrev = 0;
+              this->m_hPortalGunEffectHoldingFP.m_pNext = 0;
+              this->m_hPortalGunEffectHoldingFP.m_pObject = 0;
+            }
+          }
+          if ( this->m_hPortalGunEffectHoldingTP.m_pObject )
+          {
+            CNewParticleEffect::StopEmission(this->m_hPortalGunEffectHoldingTP.m_pObject, 0, 0, 0, 0);
+            v7 = this->m_hPortalGunEffectHoldingTP.m_pObject;
+            if ( v7 )
+            {
+              v8 = this->m_hPortalGunEffectHoldingTP.m_pPrev;
+              if ( v8 )
+              {
+                v8->m_pNext = this->m_hPortalGunEffectHoldingTP.m_pNext;
+                v9 = this->m_hPortalGunEffectHoldingTP.m_pNext;
+                if ( v9 )
+                  v9->m_pPrev = this->m_hPortalGunEffectHoldingTP.m_pPrev;
+              }
+              else if ( v7->m_References.m_pHead == &this->m_hPortalGunEffectHoldingTP )
+              {
+                v11 = this->m_hPortalGunEffectHoldingTP.m_pNext;
+                v7->m_References.m_pHead = v11;
+                if ( v11 )
+                  v11->m_pPrev = 0;
+              }
+              this->m_hPortalGunEffectHoldingTP.m_pPrev = 0;
+              this->m_hPortalGunEffectHoldingTP.m_pNext = 0;
+              this->m_hPortalGunEffectHoldingTP.m_pObject = 0;
+            }
+          }
+        }
+      }
+    }
+  }
+  C_WeaponPortalgun::DoEffectIdle(this);
+}

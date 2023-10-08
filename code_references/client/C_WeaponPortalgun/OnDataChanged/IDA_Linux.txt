@@ -1,0 +1,59 @@
+void __cdecl C_WeaponPortalgun::OnDataChanged(C_WeaponPortalgun *const this, DataUpdateType_t updateType)
+{
+  C_BaseCombatCharacter *Owner; // eax
+  C_BasePlayer *v3; // esi
+  C_BaseViewModel *v4; // eax
+  C_BaseViewModel *ViewModel; // eax
+  C_BaseAnimating::AutoAllowBoneAccess boneaccess; // [esp+1Fh] [ebp-9h] BYREF
+
+  C_WeaponPortalBase::OnDataChanged(this, updateType);
+  if ( updateType )
+  {
+    if ( this->m_nOldEffectState != this->m_EffectState.m_Value
+      || this->m_bOldCanFirePortal1 != this->m_bCanFirePortal1.m_Value
+      || this->m_bOldCanFirePortal2 != this->m_bCanFirePortal2.m_Value )
+    {
+      C_WeaponPortalgun::DoEffect(this, this->m_EffectState.m_Value, 0);
+      this->m_nOldEffectState = this->m_EffectState.m_Value;
+      this->m_bOldCanFirePortal1 = this->m_bCanFirePortal1.m_Value;
+      this->m_bOldCanFirePortal2 = this->m_bCanFirePortal2.m_Value;
+    }
+  }
+  else
+  {
+    (*((void (__cdecl **)(C_WeaponPortalgun *const, int))this->_vptr_IHandleEntity + 160))(this, -996040704);
+    C_BaseAnimating::AutoAllowBoneAccess::AutoAllowBoneAccess(&boneaccess, 1, 1);
+    C_WeaponPortalgun::StartEffects(this);
+    C_BaseAnimating::AutoAllowBoneAccess::~AutoAllowBoneAccess(&boneaccess);
+    C_WeaponPortalgun::DoEffect(this, this->m_EffectState.m_Value, 0);
+  }
+  if ( (*((unsigned __int8 (__cdecl **)(C_GameRules *))g_pGameRules->_vptr_IGameSystem + 34))(g_pGameRules) )
+  {
+    Owner = C_BaseCombatWeapon::GetOwner(this);
+    v3 = (C_BasePlayer *)Owner;
+    if ( Owner )
+    {
+      if ( (*((unsigned __int8 (__cdecl **)(C_BaseCombatCharacter *))Owner->_vptr_IHandleEntity + 200))(Owner) )
+      {
+        if ( (*((int (__cdecl **)(C_BasePlayer *))v3->_vptr_IHandleEntity + 124))(v3) == 2 )
+        {
+          C_BaseAnimating::SetSkin(this, 2);
+          if ( C_BasePlayer::GetViewModel(v3, 0) )
+          {
+            ViewModel = C_BasePlayer::GetViewModel(v3, 0);
+            C_BaseAnimating::SetSkin(ViewModel, 2);
+          }
+        }
+        else
+        {
+          C_BaseAnimating::SetSkin(this, 1);
+          if ( C_BasePlayer::GetViewModel(v3, 0) )
+          {
+            v4 = C_BasePlayer::GetViewModel(v3, 0);
+            C_BaseAnimating::SetSkin(v4, 1);
+          }
+        }
+      }
+    }
+  }
+}

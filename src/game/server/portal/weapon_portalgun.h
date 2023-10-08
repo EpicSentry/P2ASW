@@ -143,6 +143,8 @@ public:
 	int m_nStartingTeamNum;
 
 protected:
+	
+	void	ClearPortalPositions( void ) { /*FIXME*/ }
 
 	void	StartEffects( void );	// Initialize all sprites and beams
 	void	StopEffects( bool stopSound = true );	// Hide all effects temporarily

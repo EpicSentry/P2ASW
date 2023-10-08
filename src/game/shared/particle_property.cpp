@@ -579,7 +579,7 @@ void CParticleProperty::UpdateControlPoint( ParticleEffectList_t *pEffect, int i
 						bValid = true;
 						MatrixVectors( attachmentToWorld, &vecForward, &vecRight, &vecUp );
 						MatrixPosition( attachmentToWorld, vecOrigin );
-						
+
 #ifndef PORTAL2 
 						// This is breaking in Portal
 						if ( pEffect->pParticleEffect->m_pDef->IsViewModelEffect() )
@@ -621,8 +621,11 @@ void CParticleProperty::UpdateControlPoint( ParticleEffectList_t *pEffect, int i
 				{
 					bWarned = true;
 					DevWarning( "Attempted to attach particle effect %s to an unknown attachment on entity %s\n",
-						pEffect->pParticleEffect->m_pDef->GetName(), pAnimating->GetClassname() );
+						pEffect->pParticleEffect->m_pDef->GetName(), pAnimating ? pAnimating->GetClassname() : "(null)" );
 				}
+
+				// FIXME: what's the fallback? is it ok to kill the effect if we don't know where to attach it?
+				pEffect->pParticleEffect->StopEmission();
 			}
 			if ( !bValid )
 			{
@@ -670,8 +673,14 @@ void CParticleProperty::UpdateControlPoint( ParticleEffectList_t *pEffect, int i
 		{
 			matrix3x4_t mat;
 			MatrixMultiply( pPoint->hEntity->RenderableToWorldTransform(), pPoint->matOffset, mat );
+			Vector vecForward, vecRight, vecUp;
 			MatrixVectors( mat, &vecForward, &vecRight, &vecUp );
-			vecOrigin = pPoint->hEntity->GetAbsOrigin() + pPoint->vecOriginOffset;
+			MatrixPosition( mat, vecOrigin );
+			pEffect->pParticleEffect->SetControlPointEntity( pPoint->iControlPoint, pPoint->hEntity );
+			pEffect->pParticleEffect->SetControlPoint( pPoint->iControlPoint, vecOrigin );
+			pEffect->pParticleEffect->SetSortOrigin( vecOrigin );
+			pEffect->pParticleEffect->SetControlPointOrientation( pPoint->iControlPoint, vecForward, vecRight, vecUp );
+			return;
 		}
 		break;
 	}

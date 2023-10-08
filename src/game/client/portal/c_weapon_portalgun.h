@@ -110,7 +110,7 @@ public:
 	int GetLinkageGroupID() { return m_iPortalLinkageGroupID; }
 
 protected:
-
+	
 	void	StartEffects( void );	// Initialize all sprites and beams
 	void	StopEffects( bool stopSound = true );	// Hide all effects temporarily
 	void	DestroyEffects( void );	// Destroy all sprites and beams
@@ -192,16 +192,6 @@ protected:
 	#define	NUM_PORTALGUN_BEAMS	6
 
 	Vector			GetEffectColor( int iPalletIndex );
-#if 0
-	void			DrawEffects( bool b3rdPerson );
-	void			GetEffectParameters( EffectType_t effectID, color32 &color, float &scale, IMaterial **pMaterial, Vector &vecAttachment, bool b3rdPerson );
-	void			DrawEffectSprite( EffectType_t effectID, bool b3rdPerson );
-	inline bool		IsEffectVisible( EffectType_t effectID, bool b3rdPerson );
-	void			UpdateElementPosition( void );
-
-	CPortalgunEffect		m_Parameters[NUM_PORTALGUN_PARAMETERS];	// Interpolated parameters for the effects
-	CPortalgunEffectBeam	m_Beams[NUM_PORTALGUN_BEAMS];				// Beams
-#endif
 
 	int				m_nOldEffectState;	// Used for parity checks
 	bool			m_bOldCanFirePortal1;
@@ -214,10 +204,6 @@ protected:
 
 public:
 
-#if 0
-	virtual int		DrawModel( int flags, const RenderableInstance_t& instance );
-	virtual void	ViewModelDrawn( int nFlags, CBaseViewModel *pViewModel );
-#endif
 	virtual void	OnPreDataChanged( DataUpdateType_t updateType );
 	virtual void	OnDataChanged( DataUpdateType_t updateType );
 	virtual void	ClientThink( void );
@@ -228,6 +214,7 @@ public:
 	DECLARE_ACTTABLE();
 
 	C_WeaponPortalgun(void);
+	~C_WeaponPortalgun(void);
 
 private:
 	C_WeaponPortalgun( const C_WeaponPortalgun & );

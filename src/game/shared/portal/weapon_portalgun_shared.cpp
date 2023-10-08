@@ -108,8 +108,7 @@ CWeaponPortalgun::CWeaponPortalgun( void )
 	m_EffectState.Set( EFFECT_NONE );
 
 #ifndef CLIENT_DLL
-	// FIXME:
-	//ClearPortalPositions();
+	ClearPortalPositions();
 #endif // !CLIENT_DLL
 }
 

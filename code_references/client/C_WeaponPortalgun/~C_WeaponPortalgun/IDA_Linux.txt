@@ -1,0 +1,119 @@
+void __cdecl C_WeaponPortalgun::~C_WeaponPortalgun(C_WeaponPortalgun *const this)
+{
+  CNewParticleEffect *m_pObject; // edx
+  CUtlReference<CNewParticleEffect> *m_pPrev; // ecx
+  CUtlReference<CNewParticleEffect> *m_pNext; // edx
+  CNewParticleEffect *v4; // edx
+  CUtlReference<CNewParticleEffect> *v5; // ecx
+  CUtlReference<CNewParticleEffect> *v6; // edx
+  CNewParticleEffect *v7; // edx
+  CUtlReference<CNewParticleEffect> *v8; // ecx
+  CUtlReference<CNewParticleEffect> *v9; // edx
+  CNewParticleEffect *v10; // ecx
+  CUtlReference<CNewParticleEffect> *v11; // edx
+  CUtlReference<CNewParticleEffect> *v12; // edx
+  CUtlReference<CNewParticleEffect> *v13; // edx
+  CUtlReference<CNewParticleEffect> *v14; // ecx
+  CUtlReference<CNewParticleEffect> *v15; // ecx
+  CUtlReference<CNewParticleEffect> *v16; // ecx
+
+  m_pObject = this->m_hPortalGunEffectHoldingTP.m_pObject;
+  this->_vptr_IHandleEntity = (int (**)(...))off_12C8DE8;
+  this->_vptr_IClientRenderable = (int (**)(...))&off_12C94A4;
+  this->_vptr_IClientNetworkable = (int (**)(...))&off_12C9560;
+  this->_vptr_IClientThinkable = (int (**)(...))&off_12C95A0;
+  this->_vptr_IClientModelRenderable = (int (**)(...))&off_12C95BC;
+  if ( m_pObject )
+  {
+    m_pPrev = this->m_hPortalGunEffectHoldingTP.m_pPrev;
+    if ( m_pPrev )
+    {
+      m_pPrev->m_pNext = this->m_hPortalGunEffectHoldingTP.m_pNext;
+      m_pNext = this->m_hPortalGunEffectHoldingTP.m_pNext;
+      if ( m_pNext )
+        m_pNext->m_pPrev = this->m_hPortalGunEffectHoldingTP.m_pPrev;
+    }
+    else if ( m_pObject->m_References.m_pHead == &this->m_hPortalGunEffectHoldingTP )
+    {
+      v14 = this->m_hPortalGunEffectHoldingTP.m_pNext;
+      m_pObject->m_References.m_pHead = v14;
+      if ( v14 )
+        v14->m_pPrev = 0;
+    }
+    this->m_hPortalGunEffectHoldingTP.m_pPrev = 0;
+    this->m_hPortalGunEffectHoldingTP.m_pNext = 0;
+    this->m_hPortalGunEffectHoldingTP.m_pObject = 0;
+  }
+  v4 = this->m_hPortalGunEffectHoldingFP.m_pObject;
+  if ( v4 )
+  {
+    v5 = this->m_hPortalGunEffectHoldingFP.m_pPrev;
+    if ( v5 )
+    {
+      v5->m_pNext = this->m_hPortalGunEffectHoldingFP.m_pNext;
+      v6 = this->m_hPortalGunEffectHoldingFP.m_pNext;
+      if ( v6 )
+        v6->m_pPrev = this->m_hPortalGunEffectHoldingFP.m_pPrev;
+    }
+    else if ( v4->m_References.m_pHead == &this->m_hPortalGunEffectHoldingFP )
+    {
+      v15 = this->m_hPortalGunEffectHoldingFP.m_pNext;
+      v4->m_References.m_pHead = v15;
+      if ( v15 )
+        v15->m_pPrev = 0;
+    }
+    this->m_hPortalGunEffectHoldingFP.m_pPrev = 0;
+    this->m_hPortalGunEffectHoldingFP.m_pNext = 0;
+    this->m_hPortalGunEffectHoldingFP.m_pObject = 0;
+  }
+  v7 = this->m_hPortalGunEffectTP.m_pObject;
+  if ( v7 )
+  {
+    v8 = this->m_hPortalGunEffectTP.m_pPrev;
+    if ( v8 )
+    {
+      v8->m_pNext = this->m_hPortalGunEffectTP.m_pNext;
+      v9 = this->m_hPortalGunEffectTP.m_pNext;
+      if ( v9 )
+        v9->m_pPrev = this->m_hPortalGunEffectTP.m_pPrev;
+    }
+    else if ( v7->m_References.m_pHead == &this->m_hPortalGunEffectTP )
+    {
+      v16 = this->m_hPortalGunEffectTP.m_pNext;
+      v7->m_References.m_pHead = v16;
+      if ( v16 )
+        v16->m_pPrev = 0;
+    }
+    this->m_hPortalGunEffectTP.m_pPrev = 0;
+    this->m_hPortalGunEffectTP.m_pNext = 0;
+    this->m_hPortalGunEffectTP.m_pObject = 0;
+  }
+  v10 = this->m_hPortalGunEffectFP.m_pObject;
+  if ( v10 )
+  {
+    v11 = this->m_hPortalGunEffectFP.m_pPrev;
+    if ( v11 )
+    {
+      v11->m_pNext = this->m_hPortalGunEffectFP.m_pNext;
+      v12 = this->m_hPortalGunEffectFP.m_pNext;
+      if ( v12 )
+        v12->m_pPrev = this->m_hPortalGunEffectFP.m_pPrev;
+    }
+    else if ( v10->m_References.m_pHead == &this->m_hPortalGunEffectFP )
+    {
+      v13 = this->m_hPortalGunEffectFP.m_pNext;
+      v10->m_References.m_pHead = v13;
+      if ( v13 )
+        v13->m_pPrev = 0;
+    }
+    this->m_hPortalGunEffectFP.m_pPrev = 0;
+    this->m_hPortalGunEffectFP.m_pNext = 0;
+    this->m_hPortalGunEffectFP.m_pObject = 0;
+  }
+  this->_vptr_IHandleEntity = (int (**)(...))off_11EBBA8;
+  this->_vptr_IClientRenderable = (int (**)(...))&off_11EC260;
+  this->_vptr_IClientNetworkable = (int (**)(...))&off_11EC31C;
+  this->_vptr_IClientThinkable = (int (**)(...))off_11EC35C;
+  this->_vptr_IClientModelRenderable = (int (**)(...))&off_11EC378;
+  C_BaseCombatWeapon::~C_BaseCombatWeapon(this);
+}

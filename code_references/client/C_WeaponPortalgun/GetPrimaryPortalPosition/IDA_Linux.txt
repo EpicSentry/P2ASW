@@ -1,0 +1,35 @@
+void __cdecl C_WeaponPortalgun::GetPrimaryPortalPosition(
+        C_WeaponPortalgun *const this,
+        Vector *const vOutPos,
+        QAngle *const vOutAng)
+{
+  unsigned int m_Index; // eax
+  char *v4; // edx
+  int v5; // eax
+  int v6; // eax
+  unsigned int v7; // edx
+  char *v8; // ecx
+
+  m_Index = this->m_hPrimaryPortal.m_Index;
+  if ( m_Index != -1 )
+  {
+    v4 = (char *)g_pEntityList + 16 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v4 + 2) == HIWORD(m_Index) )
+    {
+      v5 = *((_DWORD *)v4 + 1);
+      if ( v5 )
+      {
+        *vOutPos = *(Vector *)(*(int (__thiscall **)(CBaseEntityList *, int))(*(_DWORD *)v5 + 48))(g_pEntityList, v5);
+        v6 = 0;
+        v7 = this->m_hPrimaryPortal.m_Index;
+        if ( v7 != -1 )
+        {
+          v8 = (char *)g_pEntityList + 16 * (unsigned __int16)v7;
+          if ( *((_DWORD *)v8 + 2) == HIWORD(v7) )
+            v6 = *((_DWORD *)v8 + 1);
+        }
+        *vOutAng = *(QAngle *)(*(int (__cdecl **)(int))(*(_DWORD *)v6 + 52))(v6);
+      }
+    }
+  }
+}
