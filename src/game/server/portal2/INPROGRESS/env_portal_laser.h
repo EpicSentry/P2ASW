@@ -29,9 +29,9 @@ public:
     bool CreateVPhysics();
     int UpdateTransmitState();
     Vector ClosestPointOnLineSegment( Vector vPos );
-    void InputTurnOn(struct inputdata_t &inputdata );
-    void InputTurnOff(struct inputdata_t &inputdata );
-    void InputToggle(struct inputdata_t &inputdata );
+    void InputTurnOn( inputdata_t &inputdata );
+    void InputTurnOff( inputdata_t &inputdata );
+    void InputToggle( inputdata_t &inputdata );
     CPortalLaser *m_pParentLaser;
     CPortalLaser *m_pChildLaser;
 	
@@ -41,8 +41,12 @@ public:
         Vector vecEnd;
         CUtlVector<CBaseEntity *,CUtlMemory<CBaseEntity *,int> > sortedEntList;
         //PortalLaserInfo_t(struct CPortalLaser::PortalLaserInfo_t & );
-        PortalLaserInfo_t();
-        ~PortalLaserInfo_t();
+		PortalLaserInfo_t()
+		{
+			vecStart.Init();
+			vecEnd.Init();
+		}
+		~PortalLaserInfo_t() {}
         
 	};
 	
@@ -64,7 +68,9 @@ private:
 	
     QAngle m_angPortalExitAngles;
 	
-    CBaseEntity *TraceLaser(bool ,class Vector & ,class Vector & ,float & ,class CGameTrace & ,class CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > & ,class Vector * );
+   //CBaseEntity *TraceLaser(bool ,class Vector & ,class Vector & ,float & ,class CGameTrace & ,class CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > & ,class Vector * );
+	CBaseEntity *TraceLaser( bool bIsFirstTrace, Vector &vecStart, Vector &vecDirection, float &flTotalBeamLength, trace_t &tr, PortalLaserInfoList_t &infoList, Vector *pVecAutoAimOffset );
+
     CBaseEntity *GetEntitiesAlongLaser(class Vector & ,class Vector & ,class Vector * ,class CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > & ,bool );
     void DamageEntitiesAlongLaser( CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > & ,bool );
 	Vector m_vecNearestSoundSource[MAX_PLAYERS];

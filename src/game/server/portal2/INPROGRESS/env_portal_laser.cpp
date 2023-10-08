@@ -40,17 +40,6 @@ BEGIN_DATADESC(CPortalLaser)
 
 END_DATADESC()
 
-
-IMPLEMENT_SERVERCLASS_ST( CPortalLaser, DT_PortalLaser )
-
-SendPropBool( SENDINFO( m_bLaserOn ) ),
-SendPropBool( SENDINFO( m_bShouldSpark ) ),
-SendPropBool( SENDINFO( m_bIsAutoAiming ) ),
-SendPropBool( SENDINFO( m_bIsLethal ) ),
-SendPropBool( SENDINFO( m_bUseParentDir ) ),
-
-END_SEND_TABLE();
-
 LINK_ENTITY_TO_CLASS( env_portal_laser, CPortalLaser );
 
 void UTIL_Portal_Laser_Prevent_Tilting( Vector &vDirection )
@@ -62,16 +51,22 @@ void UTIL_Portal_Laser_Prevent_Tilting( Vector &vDirection )
 	}
 }
 
-/*
 IMPLEMENT_SERVERCLASS_ST(CPortalLaser, DT_EnvPortalLaser)
 
-SendPropBool(SENDINFO(m_bIsHittingPortal)),
-SendPropVector(SENDINFO(v_vHitPos)),
-SendPropVector(SENDINFO(vecNetOrigin)),
-SendPropVector(SENDINFO(vecNetMuzzleDir)),
+	SendPropEHandle( SENDINFO( m_hReflector ) ),
+	
+	SendPropVector( SENDINFO( m_vStartPoint ) ),
+	SendPropVector( SENDINFO( m_vEndPoint ) ),
+	
+	SendPropBool( SENDINFO( m_bLaserOn ) ),
+	SendPropBool( SENDINFO( m_bIsLethal ) ),
+	SendPropBool( SENDINFO( m_bIsAutoAiming ) ),
+	SendPropBool( SENDINFO( m_bShouldSpark ) ),
+	SendPropBool( SENDINFO( m_bUseParentDir ) ),
+	
+	SendPropVector( SENDINFO( m_angParentAngles ) ),
 
 END_SEND_TABLE()
-*/
 
 IMPLEMENT_AUTO_LIST( IPortalLaserAutoList );
 
@@ -540,158 +535,95 @@ void CPortalLaser::TurnOnGlow(void)
 	}
 }
 
-//#define FIRELASER_LINUX
-//#define FIRELASER_MAC
-
 void CPortalLaser::FireLaser( Vector &vecStart, Vector &vecDirection, CBaseEntity *pReflector )
 {
-#if defined ( FIRELASER_LINUX )
-
-	vec_t x; // eax
-	float v5; // xmm2_4
-	bool v6; // zf
-	float y; // xmm3_4
-	float v8; // xmm4_4
-	float v9; // xmm3_4
-	float z; // xmm4_4
-	float v11; // xmm0_4
-	float v12; // xmm2_4
-	float v13; // xmm0_4
-	bool IsShadowClone; // al
-	CBaseEntity *v15; // esi
-	CPropWeightedCube *SchrodingerTwin; // eax
-	CInfoPlacementHelper *m_pPlacementHelper; // eax
-	float v18; // xmm1_4
-	bool v19; // al
-	float v20; // xmm0_4
-	float v21; // xmm4_4
-	float v22; // xmm3_4
-
-	bool v24; // al
-	float v25; // xmm0_4
-	CPropWeightedCube *v28; // eax
-	char *v30; // edx
-	char *v31; // edx
-	vec_t v32; // [esp+20h] [ebp-1D8h]
-	vec_t v33; // [esp+30h] [ebp-1C8h]
-	CBaseEntity *pHitTarget; // [esp+50h] [ebp-1A8h]
-	char bAutoAimSuccess; // [esp+57h] [ebp-1A1h]
-	Ray_t ray; // [esp+60h] [ebp-198h] BYREF
 	trace_t tr; // [esp+BCh] [ebp-13Ch] BYREF
-	Ray_t rayTransformed; // [esp+110h] [ebp-E8h] BYREF
-	CTraceFilterSimpleClassnameList *traceFilter(); // [esp+16Ch] [ebp-8Ch] BYREF
 	Vector vecNewTermPoint; // [esp+190h] [ebp-68h] BYREF
-	int v42; // [esp+19Ch] [ebp-5Ch]
 	Vector vecNewTermPoint_0; // [esp+1A4h] [ebp-54h] BYREF
-	int v45; // [esp+1B0h] [ebp-48h]
-	vec_t v46; // [esp+1B4h] [ebp-44h]
 	Vector vecStartPos; // [esp+1B8h] [ebp-40h] BYREF
 	Vector vecDirection_0; // [esp+1C4h] [ebp-34h] BYREF
-	float flTotalBeamLength; // [esp+1D0h] [ebp-28h] BYREF
-	CPortal_Base2D *pFirstPortal; // [esp+1D4h] [ebp-24h] BYREF
+	float flTotalBeamLength = 0.0; // [esp+1D0h] [ebp-28h] BYREF
+	float flOtherBeamLength = 0.0;
 	EHANDLE v51; // [esp+1D8h] [ebp-20h] BYREF
-
-	if (new_portal_laser.GetBool())
+	EHANDLE v52; // [esp+1DCh] [ebp-1Ch] BYREF
+	Ray_t ray;
+	if ( new_portal_laser.GetInt() )
 	{
-		x = vecDirection.x;
+
+		PortalLaserInfoList_t infoList;
+
+		vec_t x = vecDirection.x;
 		flTotalBeamLength = 0.0;
-		v6 = m_bAutoAimEnabled;
+		bool v6 = !this->m_bAutoAimEnabled;
 		vecDirection_0.x = x;
 		vecDirection_0.y = vecDirection.y;
 		vecDirection_0.z = vecDirection.z;
-		if (v6)
+		if ( v6 )
 			goto LABEL_3;
-		memset(&traceFilter, 0, 20);
-		pHitTarget = TraceLaser( 1, vecStart, vecDirection_0, flTotalBeamLength, (trace_t *const)&ray, (CPortalLaser::PortalLaserInfoList_t *const)&traceFilter, &vecStartPos );
-		bAutoAimSuccess = 0;
-		if ( ShouldAutoAim( pHitTarget ) )
+		
+		CBaseEntity *pHitTarget = TraceLaser( 1, vecStart, vecDirection_0, flTotalBeamLength, tr, infoList, &vecStartPos);
+		bool bAutoAimSuccess = false;
+		if ( ShouldAutoAim(pHitTarget) )
 		{
-			v9 = vecStart.x;
-			z = vecStart.z;
-			v11 = vecDirection.z;
-			v12 = flTotalBeamLength * vecDirection.x;
+			float v9 = vecStart.x;
+			float z = vecStart.z;
+			float v11 = vecDirection.z;
+			float v12 = flTotalBeamLength * vecDirection.x;
 			vecNewTermPoint_0.y = (((vecDirection.y * flTotalBeamLength) + vecStart.y) + vecStartPos.y)
 				- vecStart.y;
 			vecNewTermPoint_0.z = (((v11 * flTotalBeamLength) + z) + vecStartPos.z) - z;
 			vecNewTermPoint_0.x = ((v12 + v9) + vecStartPos.x) - v9;
 			VectorNormalize(vecNewTermPoint_0);
 			memset(&vecNewTermPoint, 0, sizeof(vecNewTermPoint));
-			v42 = 0;
-
+			vec_t v43 = 0.0;
 			bAutoAimSuccess = 0;
-			if (pHitTarget == CPortalLaser::TraceLaser( 0, vecStart, vecNewTermPoint_0, (float *const)&pFirstPortal, &tr, (CPortalLaser::PortalLaserInfoList_t *const)&vecNewTermPoint, 0))
+			if ( pHitTarget == TraceLaser( false, vecStart, vecNewTermPoint_0, flOtherBeamLength, tr, infoList, false ) )
 			{
 
 				ray.Init( tr.startpos, tr.endpos );
 
-
-				ray.m_Start.x = tr.startpos.x;
-				ray.m_Start.y = tr.startpos.y;
-				ray.m_Start.z = tr.startpos.z;
-				*(Vector *)&ray.m_Start.w = tr.endpos;
-				*(cplane_t *)&ray.m_Delta.z = tr.plane;
-				ray.m_StartOffset.w = tr.fraction;
-				ray.m_Extents = *(VectorAligned *)&tr.contents;
-				ray.m_pWorldAxisTransform = *(const matrix3x4_t **)&tr.surface.surfaceProps;
-				flTotalBeamLength = *(float *)&pFirstPortal;
+				flTotalBeamLength = flOtherBeamLength;
 				vecDirection_0 = vecNewTermPoint_0;
-				DamageEntitiesAlongLaser( (const CPortalLaser::PortalLaserInfoList_t *const)&vecNewTermPoint, 1);
+
+				DamageEntitiesAlongLaser( infoList, true );
 				bAutoAimSuccess = 1;
 			}
-			CUtlVector<CPortalLaser::PortalLaserInfo_t, CUtlMemory<CPortalLaser::PortalLaserInfo_t, int>>::RemoveAll((CUtlVector<CPortalLaser::PortalLaserInfo_t, CUtlMemory<CPortalLaser::PortalLaserInfo_t, int> > *const)&vecNewTermPoint);
-			if (vecNewTermPoint.z < 0.0)
+			infoList.RemoveAll();
+			if ( vecNewTermPoint.z < 0.0 )
 			{
-
+				v43 = vecNewTermPoint.x;
 			}
 			else
 			{
-				if (LODWORD(vecNewTermPoint.x))
-				{
-					(*(void(__cdecl **)(_DWORD, _DWORD))(*g_pMemAlloc + 8))(g_pMemAlloc, LODWORD(vecNewTermPoint.x));
-					vecNewTermPoint.x = 0.0;
-				}
-
+				vecNewTermPoint.x = 0.0;
 				vecNewTermPoint.y = 0.0;
+				v43 = 0.0;
+			}
+		}
+		infoList.RemoveAll();
 
-			}
-		}
-		CUtlVector<CPortalLaser::PortalLaserInfo_t, CUtlMemory<CPortalLaser::PortalLaserInfo_t, int>>::RemoveAll((CUtlVector<CPortalLaser::PortalLaserInfo_t, CUtlMemory<CPortalLaser::PortalLaserInfo_t, int> > *const)&traceFilter);
-		if (traceFilter.m_collisionGroup < 0)
-		{
-			traceFilter.m_PassClassnames.m_Memory.m_pMemory = (const char **)traceFilter._vptr_ITraceFilter;
-		}
-		else
-		{
-			if (traceFilter._vptr_ITraceFilter)
-			{
-				(*(void(__cdecl **)(_DWORD, int(**)(...)))(*g_pMemAlloc + 8))(g_pMemAlloc, traceFilter._vptr_ITraceFilter);
-				traceFilter._vptr_ITraceFilter = 0;
-			}
-			traceFilter.m_pPassEnt = 0;
-			traceFilter.m_pMemory = 0;
-		}
-		if (!bAutoAimSuccess)
+		float v5 = 0.0;
+		if ( !bAutoAimSuccess )
 		{
 		LABEL_3:
 			memset(&vecNewTermPoint_0, 0, sizeof(vecNewTermPoint_0));
-			v45 = 0;
-			v46 = 0.0;
-			UTIL_ClearTrace((trace_t *const)&ray);
-			pHitTarget = TraceLaser( 0, vecStart, &vecDirection_0, &flTotalBeamLength, (trace_t *const)&ray, (CPortalLaser::PortalLaserInfoList_t *const)&vecNewTermPoint_0, 0 );
-			CPortalLaser::DamageEntitiesAlongLaser( (const CPortalLaser::PortalLaserInfoList_t *const)&vecNewTermPoint_0, 0);
+			vec_t v46 = 0.0;
+			UTIL_ClearTrace( tr );
 
-			CUtlVector<CPortalLaser::PortalLaserInfo_t, CUtlMemory<CPortalLaser::PortalLaserInfo_t, int>>::RemoveAll((CUtlVector<CPortalLaser::PortalLaserInfo_t, CUtlMemory<CPortalLaser::PortalLaserInfo_t, int> > *const)&vecNewTermPoint_0);
-			if (vecNewTermPoint_0.z >= 0.0)
+			PortalLaserInfoList_t hitInfoList;
+
+			pHitTarget = TraceLaser( 0, vecStart, vecDirection_0, flTotalBeamLength, tr, hitInfoList, 0);
+			DamageEntitiesAlongLaser( hitInfoList, 0 );
+
+			hitInfoList.RemoveAll();
+
+			if ( vecNewTermPoint_0.z >= 0.0 )
 			{
-				if (LODWORD(vecNewTermPoint_0.x))
-				{
-					(*(void(__cdecl **)(_DWORD, _DWORD))(*g_pMemAlloc + 8))(g_pMemAlloc, LODWORD(vecNewTermPoint_0.x));
-					vecNewTermPoint_0.x = 0.0;
-				}
+				vecNewTermPoint_0.x = 0.0;
 				v5 = vecStart.x;
 				vecNewTermPoint_0.y = 0.0;
 				v46 = 0.0;
-				v6 = v5 == m_vStartPoint.m_Value.x;
+				v6 = v5 == this->m_vStartPoint.m_Value.x;
 				bAutoAimSuccess = 0;
 				goto LABEL_21;
 			}
@@ -701,656 +633,300 @@ void CPortalLaser::FireLaser( Vector &vecStart, Vector &vecDirection, CBaseEntit
 		v5 = vecStart.x;
 		v6 = vecStart.x == this->m_vStartPoint.m_Value.x;
 	LABEL_21:
-
+		
 		m_vStartPoint = vecStart;
+		v5 = vecStart.x;
+		float y = vecStart.y;
+		float v8 = vecStart.z;
 
-		v13 = (vecDirection_0.x * flTotalBeamLength) + v5;
-		if ((vecDirection_0.x * flTotalBeamLength) + v5 != m_vEndPoint.m_Value.x
-			|| ((vecDirection_0.y * flTotalBeamLength) + y) != m_vEndPoint.m_Value.y
-			|| ((vecDirection_0.z * flTotalBeamLength ) + v8) != m_vEndPoint.m_Value.z)
-		{
-			v32 = (flTotalBeamLength * vecDirection_0.z) + v8;
-			v33 = (vecDirection_0.y * flTotalBeamLength) + y;
-			CBaseEntity::NetworkStateChanged(this, &this->m_vEndPoint);
-			m_vEndPoint.m_Value.x = (vecDirection_0.x * flTotalBeamLength) + v5;
-			m_vEndPoint.m_Value.y = v33;
-			m_vEndPoint.m_Value.z = v32;
-		}
+		float v13 = (vecDirection_0.x * flTotalBeamLength) + v5;
+	
+		vec_t v32 = (flTotalBeamLength * vecDirection_0.z) + v8;
+		vec_t v33 = (vecDirection_0.y * flTotalBeamLength) + y;
 
-		if (this->m_bIsAutoAiming.m_Value != bAutoAimSuccess)
-		{
-			CBaseEntity::NetworkStateChanged(this, &this->m_bIsAutoAiming);
-			this->m_bIsAutoAiming.m_Value = bAutoAimSuccess;
-		}
-		if (!tr.m_pEnt)
+		Vector vNewEndPoint( v13, v33, v32 );
+		m_vEndPoint = vNewEndPoint;
+
+		m_bIsAutoAiming = bAutoAimSuccess;
+		if ( !tr.m_pEnt )
 			goto LABEL_34;
-		IsShadowClone = CPhysicsShadowClone::IsShadowClone(tr.m_pEnt);
-		v15 = tr.m_pEnt;
-		if (IsShadowClone)
+
+		bool IsShadowClone = CPhysicsShadowClone::IsShadowClone(*(const CBaseEntity **)(&tr.m_pEnt));
+		CBaseEntity *v15 = tr.m_pEnt;
+		if ( IsShadowClone )
 		{
 			v15 = 0;
-			v51 = ( (CPhysicsShadowClone*) tr.m_pEnt)->GetClonedEntity();
-			if (v51.m_Index != -1)
-			{
-				v30 = (char *)g_pEntityList + 24 * LOWORD(v51.m_Index);
-				if (*((_DWORD *)v30 + 2) == HIWORD(v51.m_Index))
-					v15 = (CBaseEntity *)*((_DWORD *)v30 + 1);
-			}
+			v51 = ((CPhysicsShadowClone*)(tr.m_pEnt))->GetClonedEntity();
+
+			v15 = v51;
+
 		}
-		SchrodingerTwin = UTIL_GetSchrodingerTwin(v15);
-		if (SchrodingerTwin)
+		CPropWeightedCube *SchrodingerTwin = UTIL_GetSchrodingerTwin(v15);
+		if ( SchrodingerTwin )
 			v15 = SchrodingerTwin;
-		if (!ReflectLaserFromEntity( v15 ))
+		if ( !ReflectLaserFromEntity(v15) )
 		{
 		LABEL_34:
 			RemoveChildLaser();
-			if (!pHitTarget
-				|| !FClassnameIs(pHitTarget, "point_laser_target" )
-				&& !pHitTarget->ClassMatches( "point_laser_target"))
+			if ( !pHitTarget
+				|| pHitTarget->ClassMatches( "point_laser_target" ) )
 			{
-				m_pPlacementHelper = this->m_pPlacementHelper;
-				if (m_pPlacementHelper)
-					UTIL_SetOrigin( m_pPlacementHelper, ray.m_Start );
-
-				BeamDamage( (trace_t *)&ray );
+				if ( m_pPlacementHelper )
+					UTIL_SetOrigin(m_pPlacementHelper, tr.endpos, 0);
+				BeamDamage( &tr );
 			}
 		}
 		return;
 	}
+	CTraceFilterSimpleClassnameList traceFilter( pReflector, 0 );
 	
 	traceFilter.AddClassnameToIgnore("projected_wall_entity");
 	traceFilter.AddClassnameToIgnore("player");
 	traceFilter.AddClassnameToIgnore("point_laser_target");
 
-	v18 = vecDirection.y;
-	v19 = 1;
-	ray.m_pWorldAxisTransform = 0;
-	v20 = vecDirection.z;
-	ray.m_IsRay = 1;
-	v21 = vecStart.y;
-	ray.m_Start.x = vecStart.x;
-	v22 = vecStart.z;
-	ray.m_Start.y = v21;
-	ray.m_Start.z = v22;
-	ray.m_Delta.y = ((v18 * MAX_TRACE_LENGTH) + v21) - v21;
-	ray.m_Delta.z = ((v20 * MAX_TRACE_LENGTH) + v22) - v22;
-	ray.m_Delta.x = (MAX_TRACE_LENGTH * vecDirection.x + ray.m_Start.x) - ray.m_Start.x;
-	memset(&ray.m_Extents, 0, 12);
-	memset(&ray.m_StartOffset, 0, 12);
-	if ((((ray.m_Delta.x * ray.m_Delta.x) + (ray.m_Delta.y * ray.m_Delta.y))
-		+ (ray.m_Delta.z * ray.m_Delta.z)) == 0.0)
-		v19 = 0;
-	ray.m_IsSwept = v19;
-	enginetrace->TraceRay( ray, 1174421505, &traceFilter, &tr);
+	UTIL_TraceLine( vecStart, vecStart + ( vecDirection * MAX_TRACE_LENGTH ), 1174421505, &traceFilter, &tr );
 
-	if (r_visualizetraces.GetBool())
-		DebugDrawLine(tr.startpos, tr.endpos, 255, 0, 0, 1, -1.0);
-
-	UpdateSoundPosition( tr.startpos, tr.endpos);
-	*(float *)&pFirstPortal = 0.0;
-	if (UTIL_DidTraceTouchPortals(ray, tr, &pFirstPortal, 0)
-		&& *(float *)&pFirstPortal != 0.0
-		&& pFirstPortal->IsActivedAndLinked())
+	CPortalLaser::UpdateSoundPosition( tr.startpos, tr.endpos );
+	flOtherBeamLength = 0.0;
+	
+	CPortal_Base2D *pFirstPortal;
+	if ( UTIL_DidTraceTouchPortals(ray, tr, &pFirstPortal, 0)
+		&& flOtherBeamLength != 0.0
+		&& pFirstPortal->IsActivedAndLinked() )
 	{
-		v24 = StrikeEntitiesAlongLaser( tr.startpos, tr.endpos, &vecNewTermPoint_0 );
-		v25 = vecStart.x;
-		if (v24)
+		bool v24 = StrikeEntitiesAlongLaser( tr.startpos, tr.endpos, &vecNewTermPoint_0 );
+		if ( v24 )
 		{
 			m_vStartPoint = vecStart;
 			m_vEndPoint = vecNewTermPoint_0;
 		}
 		else
 		{
-		
 			m_vStartPoint = vecStart;
 			m_vEndPoint = tr.endpos;
-
+			
 			BeamDamage( &tr );
+
+			Ray_t rayTransformed;
 			rayTransformed.m_pWorldAxisTransform = 0;
 			UTIL_Portal_RayTransform( pFirstPortal->m_matrixThisToLinked, ray, rayTransformed );
 			vecDirection_0 = rayTransformed.m_Delta;
 			VectorNormalize(vecDirection_0);
-			UTIL_Portal_PointTransform(pFirstPortal->m_matrixThisToLinked, tr.endpos, vecStartPos);
+			UTIL_Portal_PointTransform( pFirstPortal->m_matrixThisToLinked, tr.endpos, vecStartPos );
 			UpdateNextLaser( vecStartPos, vecDirection_0, 0 );
 		}
 		goto LABEL_56;
 	}
-	if ( StrikeEntitiesAlongLaser(tr.startpos, tr.endpos, &vecNewTermPoint) )
+	if ( CPortalLaser::StrikeEntitiesAlongLaser( tr.startpos, tr.endpos, &vecNewTermPoint ) )
 	{
 		m_vStartPoint = vecStart;
 		m_vEndPoint = vecNewTermPoint;
 
 		goto LABEL_56;
 	}
-	
+
 	m_vStartPoint = vecStart;
 	m_vEndPoint = tr.endpos;
 
-	if (tr.m_pEnt)
+	if ( tr.m_pEnt )
 	{
-		CBaseEntity *pHitEntity = tr.m_pEnt;
-		if ( CPhysicsShadowClone::IsShadowClone(pHitEntity) )
+		bool v26 = CPhysicsShadowClone::IsShadowClone(tr.m_pEnt);
+		CBaseEntity *m_pEnt = tr.m_pEnt;
+		if ( v26 )
 		{
-			EHANDLE pCloned = ( (CPhysicsShadowClone *)pHitEntity )->GetClonedEntity();
-			pHitEntity = pCloned;
+			v52 = ((CPhysicsShadowClone*)tr.m_pEnt)->GetClonedEntity();
+			m_pEnt = v52;
 		}
-		v28 = UTIL_GetSchrodingerTwin(pHitEntity);
-		if (v28)
-			pHitEntity = v28;
-		if ( ReflectLaserFromEntity( pHitEntity ) )
+		CPropWeightedCube *v28 = UTIL_GetSchrodingerTwin(m_pEnt);
+		if ( v28 )
+			m_pEnt = v28;
+		if ( ReflectLaserFromEntity(m_pEnt) )
 		{
 		LABEL_56:
-			traceFilter.m_PassClassnames.m_Size = 0;
-			traceFilter._vptr_ITraceFilter = (int(**)(...))&off_BBE2C8;
-			if (traceFilter.m_PassClassnames.m_Memory.m_nGrowSize < 0 || !traceFilter.m_PassClassnames.m_Memory.m_pMemory)
-				return;
-		LABEL_58:
-			(*(void(__cdecl **)(_DWORD, const char **))(*g_pMemAlloc + 8))(
-				g_pMemAlloc,
-				traceFilter.m_PassClassnames.m_Memory.m_pMemory);
+		//		return;
+		//LABEL_58:
 			return;
 		}
 	}
-	
 	RemoveChildLaser();
-	if (m_pPlacementHelper)
-		UTIL_SetOrigin(m_pPlacementHelper, tr.endpos);
-
+	
+	if ( m_pPlacementHelper )
+		UTIL_SetOrigin(m_pPlacementHelper, tr.endpos, 0);
 	BeamDamage( &tr );
-	traceFilter.m_PassClassnames.m_Size = 0;
-	traceFilter._vptr_ITraceFilter = (int(**)(...))&off_BBE2C8;
-	if (traceFilter.m_PassClassnames.m_Memory.m_nGrowSize >= 0 && traceFilter.m_PassClassnames.m_Memory.m_pMemory)
-		goto LABEL_58;
-#elif defined ( FIRELASER_MAC )
+}
 
+CBaseEntity *CPortalLaser::TraceLaser( bool bIsFirstTrace, Vector &vecStart, Vector &vecDirection, float &flTotalBeamLength, trace_t &tr, PortalLaserInfoList_t &infoList, Vector *pVecAutoAimOffset )
+{
+	vec_t z; // edx
+	const IHandleEntity *v9; // ecx
+	vec_t v10; // eax
+	CPortal_Base2D *v13; // edx
+	bool v16; // al
+	float v17; // xmm1_4
+	Vector v18; // eax
+	vec_t v20; // xmm0_4
+	vec_t v21; // xmm2_4
+	int v22; // esi
+	int v23; // esi
+	vec_t v29; // xmm0_4
+	vec_t v30; // xmm2_4
+	CBaseEntity *pHitEntity; // [esp+34h] [ebp-144h]
+	int v33; // [esp+3Ch] [ebp-13Ch]
+	Ray_t ray; // [esp+40h] [ebp-138h] BYREF
+	Ray_t rayTransformed; // [esp+90h] [ebp-E8h] BYREF
+	Vector vStart; // [esp+124h] [ebp-54h] BYREF
+	Vector vDir; // [esp+130h] [ebp-48h] BYREF
+	Vector vAutoAimOffset; // [esp+13Ch] [ebp-3Ch] BYREF
+	Vector vStrike_0; // [esp+148h] [ebp-30h] BYREF
+	CPortal_Base2D *pFirstPortal; // [esp+154h] [ebp-24h] BYREF
+	CPortal_Base2D *src; // [esp+158h] [ebp-20h] BYREF
+	EHANDLE v44; // [esp+15Ch] [ebp-1Ch] BYREF
 
-	char *p_vec; // esi
-	CPortalLaser *v9; // edi
-	Vector *p_vNewDirection; // esi
-	CBaseEntity *v11; // eax
-	CBaseEntity *v12; // ecx
-	CBaseEntity *v13; // ebx
-	bool v14; // al
-	int v15; // eax
-	bool v16; // cl
-	float v17; // xmm0_4
-	float v18; // xmm1_4
-	float v19; // xmm2_4
-	float x; // xmm3_4
-	float y; // xmm4_4
-	float z; // xmm5_4
-	float v23; // xmm0_4
-	bool v24; // al
-	bool v25; // al
-	float v26; // xmm0_4
-	float v27; // xmm1_4
-	//CPortalLaser *p_y; // edi
-	float p_y;
-	bool v29; // al
-	float *v30; // ecx
-	float v31; // xmm0_4
-	float v32; // xmm1_4
-	float *v33; // esi
-	float *v34; // esi
-	float *v35; // esi
-	bool IsShadowClone; // al
-	int v37; // ecx
-	int v38; // edx
-	CPropWeightedCube *SchrodingerTwin; // eax
-	CPortalLaser *m_pChildLaser; // eax
-	CBaseEntity *m_pPlacementHelper; // eax
-	vec_t *v42; // eax
-	bool v43; // zf
-	vec_t *v44; // edi
-	vec_t *v45; // ebx
-	Vector *v46; // ebx
-	vec_t v47; // xmm2_4
-	vec_t v48; // xmm0_4
-	CBaseEntity *v49; // ebx
-	char v50; // cl
-	float v51; // xmm0_4
-	trace_t *m_pEnt; // esi
-	float v53; // xmm1_4
-	float v54; // xmm2_4
-	CPortalLaser *v55; // ebx
-	bool v56; // al
-	int v57; // ecx
-	int v58; // edx
-	int v59; // eax
-	CBaseEntity *v60; // eax
-	float v61; // [esp+2Ch] [ebp-2ECh]
-	float v62; // [esp+30h] [ebp-2E8h]
-	float *v63; // [esp+34h] [ebp-2E4h]
-	float v64; // [esp+34h] [ebp-2E4h]
-	char v65; // [esp+38h] [ebp-2E0h]
-	CBaseEntity *pEntity; // [esp+3Ch] [ebp-2DCh]
-	CBaseEntity *pEntitya; // [esp+3Ch] [ebp-2DCh]
-	EHANDLE v68; // [esp+48h] [ebp-2D0h] BYREF
-	Vector vecNewTermPoint; // [esp+50h] [ebp-2C8h] BYREF
-	Vector vecStartPos; // [esp+60h] [ebp-2B8h] BYREF
-	Vector vec; // [esp+70h] [ebp-2A8h] BYREF
-	Ray_t rayTransformed; // [esp+80h] [ebp-298h]
-	Vector vecNewTermPoint_0; // [esp+D8h] [ebp-240h] BYREFpFirstPortal
-	trace_t tr_0; // [esp+E8h] [ebp-230h] BYREF
-	Ray_t ray; // [esp+140h] [ebp-1D8h] BYREF
-	EHANDLE v78; // [esp+1B8h] [ebp-160h] BYREF
-	PortalLaserInfoList_t secondInfoList_0; // [esp+1C0h] [ebp-158h] BYREF
-	PortalLaserInfoList_t secondInfoList; // [esp+1E0h] [ebp-138h] BYREF
-	float flNewBeamLength; // [esp+1FCh] [ebp-11Ch] BYREF
-	Vector vNewDirection; // [esp+200h] [ebp-118h] BYREF
-	trace_t tempTrace; // [esp+210h] [ebp-108h] BYREF
-	PortalLaserInfoList_t firstInfoList; // [esp+270h] [ebp-A8h] BYREF
-	Vector vDir; // [esp+290h] [ebp-88h] BYREF
-	Vector vAutoAimOffset; // [esp+2A0h] [ebp-78h] BYREF
-	trace_t tr; // [esp+2B0h] [ebp-68h] BYREF
-	float flTotalBeamLength; // [esp+304h] [ebp-14h] BYREF
-	Vector a3;
+	flTotalBeamLength = 0.0;
+	vStart.x = vecStart.x;
+	z = vecStart.z;
+	vStart.y = vecStart.y;
+	v9 = 0;
+	vStart.z = z;
+	vDir.x = vecDirection.x;
+	v10 = vecDirection.z;
+	vDir.y = vecDirection.y;
+	vDir.z = v10;
 
-	p_vec = (char *)a2;
-	if (!new_portal_laser.GetBool())
+	v9 = m_hReflector;
+
+	CTraceFilterSimpleClassnameList traceFilter( v9, 0 );
+	traceFilter.AddClassnameToIgnore("projected_wall_entity");
+	traceFilter.AddClassnameToIgnore("player");
+	traceFilter.AddClassnameToIgnore("point_laser_target");
+
+	CUtlVector<CPortal_Base2D*> portalList;
+	do
 	{
-		CTraceFilterSimpleClassnameList traceFilter( this, COLLISION_GROUP_NONE ); // [esp+190h] [ebp-188h] BYREF
-		
-		traceFilter.AddClassnameToIgnore("projected_wall_entity");
-		traceFilter.AddClassnameToIgnore("player");
-		traceFilter.AddClassnameToIgnore("point_laser_target");
-		v17 = *(float *)((char *)&loc_2E513F + 5800977);
-		v18 = *a4 * v17;
-		v19 = a4[1] * v17;
-		x = a3->x;
-		y = a3->y;
-		z = a3->z;
-		v23 = (float)(v17 * a4[2]) + z;
-		ray.m_Delta.x = (float)(v18 + x) - x;
-		ray.m_Delta.y = (float)(v19 + y) - y;
-		ray.m_Delta.z = v23 - z;
-		ray.m_IsSwept = (float)((float)(ray.m_Delta.z * ray.m_Delta.z)
-			+ (float)((float)(ray.m_Delta.y * ray.m_Delta.y) + (float)(ray.m_Delta.x * ray.m_Delta.x))) != 0.0;
-		memset(&ray.m_Extents, 0, 12);
-		ray.m_pWorldAxisTransform = 0;
-		ray.m_IsRay = 1;
-		memset(&ray.m_StartOffset, 0, 12);
-		ray.m_Start.x = x;
-		ray.m_Start.y = y;
-		ray.m_Start.z = z;
-		enginetrace->TraceRay( ray, 1174421505, &traceFilter, &tr_0 );
-
-		if (r_visualizetraces.GetBool())
-			DebugDrawLine(tr_0.startpos, tr_0.endpos, 255, 0, 0, true, 0);
-		
-		UpdateSoundPosition(tr_0.startpos, tr_0.endpos);
-		CPortal_Base2D *pFirstPortal = NULL;
-		v24 = UTIL_DidTraceTouchPortals(ray, tr_0, &pFirstPortal, NULL );
-		if (pFirstPortal != 0 && v24 && pFirstPortal->IsActivedAndLinked())
+		while (1)
 		{
-			v25 = StrikeEntitiesAlongLaser(tr_0.startpos, tr_0.endpos, &vecNewTermPoint_0);
-			v26 = a3->x;
-			v27 = a2->m_vStartPoint.m_Value.x;
-			if (v25)
-			{
-				if (v26 == v27)
-				{
-					p_y = m_vStartPoint.m_Value.y;
-					if (a3->y == a2->m_vStartPoint.m_Value.y && a3->z == a2->m_vStartPoint.m_Value.z)
-						goto LABEL_59;
-				}
-				else
-				{
-					p_y = m_vStartPoint.m_Value.y;
-				}
+			UTIL_ClearTrace(tr);
+			v16 = 1;
 
-				m_vStartPoint = a3;
+			UTIL_TraceLine( vStart, vStart + ( MAX_TRACE_LENGTH * vDir ), 1174421505, &traceFilter, &tr );
 
-			LABEL_59:
-				if (vecNewTermPoint_0.x == a2->m_vEndPoint.m_Value.x)
-				{
-					v44 = &a2->m_vEndPoint.m_Value.y;
-					if (vecNewTermPoint_0.y == a2->m_vEndPoint.m_Value.y && vecNewTermPoint_0.z == a2->m_vEndPoint.m_Value.z)
-						goto LABEL_73;
-				}
-				else
-				{
-					v44 = &a2->m_vEndPoint.m_Value.y;
-				}
-				CBaseEntity::NetworkStateChanged(a2, a2);
-				a2->m_vEndPoint.m_Value.x = vecNewTermPoint_0.x;
-				*v44 = vecNewTermPoint_0.y;
-				a2->m_vEndPoint.m_Value.z = vecNewTermPoint_0.z;
-			LABEL_73:
-				traceFilter._vptr$ITraceFilter = (int(**)(void))(&`vtable for'CTraceFilterSimpleClassnameList + 2);
-					CUtlVector<char const*, CUtlMemory<char const*, int>>::~CUtlVector((CUtlVector<const char *, CUtlMemory<const char *, int> > *)p_vec);
-				return;
-			}
-			if (v26 == v27)
+			UpdateSoundPosition( tr.startpos, tr.endpos );
+			pFirstPortal = 0;
+			if (!UTIL_DidTraceTouchPortals(ray, tr, &pFirstPortal, 0)
+				|| !pFirstPortal
+				|| !pFirstPortal->IsActivedAndLinked())
 			{
-				v42 = &a2->m_vStartPoint.m_Value.y;
-				if (a3->y == a2->m_vStartPoint.m_Value.y && a3->z == a2->m_vStartPoint.m_Value.z)
-				{
-				LABEL_64:
-					if (tr_0.endpos.x == *((float *)p_vec + 482))
-					{
-						v45 = (vec_t *)(p_vec + 1932);
-						if (tr_0.endpos.y == *((float *)p_vec + 483) && tr_0.endpos.z == *((float *)p_vec + 484))
-							goto LABEL_72;
-					}
-					else
-					{
-						v45 = (vec_t *)(p_vec + 1932);
-					}
-					CBaseEntity::NetworkStateChanged((CBaseEntity *)p_vec, p_vec);
-					*((_DWORD *)p_vec + 482) = LODWORD(tr_0.endpos.x);
-					*v45 = tr_0.endpos.y;
-					*((_DWORD *)p_vec + 484) = LODWORD(tr_0.endpos.z);
-				LABEL_72:
-					BeamDamage( &tr_0 );
-					rayTransformed.m_pWorldAxisTransform = 0;
-					UTIL_Portal_RayTransform( pFirstPortal->m_matrixThisToLinked, ray, rayTransformed );
-					vec = rayTransformed.m_Delta;
-					p_vec = (char *)&vec;
-					VectorNormalize(vec);
-					UTIL_Portal_PointTransform(pFirstPortal->m_matrixThisToLinked, tr_0.endpos, vecStartPos);
-					UpdateNextLaser(vecStartPos, vec, 0);
-					goto LABEL_73;
-				}
+				break;
 			}
-			else
+			pHitEntity = GetEntitiesAlongLaser( tr.startpos, tr.endpos, &vAutoAimOffset, infoList, bIsFirstTrace );
+			CalcClosestPointOnLineSegment(vAutoAimOffset, tr.startpos, tr.endpos, vStrike_0, 0);
+			flTotalBeamLength = sqrt(
+				(((vStrike_0.x - tr.startpos.x)
+				* (vStrike_0.x - tr.startpos.x))
+				+ ((vStrike_0.y - tr.startpos.y)
+				* (vStrike_0.y - tr.startpos.y)))
+				+ ((vStrike_0.z - tr.startpos.z) * (vStrike_0.z - tr.startpos.z)))
+				+ flTotalBeamLength;
+			if (pHitEntity)
 			{
-				v42 = &a2->m_vStartPoint.m_Value.y;
+				if (pVecAutoAimOffset)
+				{
+					Vector v28 = pHitEntity->GetLocalOrigin(); // NOTE: This is just a best guess!
+					v29 = v28.z - vStrike_0.z;
+					v30 = v28.x - vStrike_0.x;
+					pVecAutoAimOffset->y = v28.y - vStrike_0.y;
+					pVecAutoAimOffset->z = v29;
+					pVecAutoAimOffset->x = v30;
+				}
+				goto LABEL_25;
 			}
-			pEntitya = (CBaseEntity *)v42;
-			CBaseEntity::NetworkStateChanged(a2, a2);
-			p_vec = (char *)a2;
-			a2->m_vStartPoint.m_Value.x = a3->x;
-			pEntitya->_vptr$IHandleEntity = (int(**)(void))LODWORD(a3->y);
-			a2->m_vStartPoint.m_Value.z = a3->z;
-			goto LABEL_64;
+			rayTransformed.m_pWorldAxisTransform = 0;
+			UTIL_Portal_RayTransform(pFirstPortal->m_matrixThisToLinked, ray, rayTransformed);
+			vDir = rayTransformed.m_Delta;
+			VectorNormalize(vDir);
+			UTIL_Portal_PointTransform(pFirstPortal->m_matrixThisToLinked, tr.endpos, vStart);
+			
+			v13 = pFirstPortal->m_hLinkedPortal;
+			src = v13;
+			portalList.InsertBefore( 0, src);
 		}
-		v29 = CPortalLaser::StrikeEntitiesAlongLaser(a2, &tr_0.startpos, &tr_0.endpos, &vecNewTermPoint);
-		v30 = (float *)((char *)a2 + (_DWORD)&loc_588B8D - 5800977);
-		v31 = a3->x;
-		v32 = *v30;
-		if (v29)
+		pHitEntity = GetEntitiesAlongLaser( tr.startpos, tr.endpos, &vStrike_0, infoList, bIsFirstTrace );
+		if (pHitEntity)
 		{
-			if (v31 == v32)
-			{
-				v33 = (float *)((char *)a2 + (_DWORD)&loc_588B8D - 5800973);
-				if (a3->y == *v33 && a3->z == *(float *)((char *)&a2->_vptr$IHandleEntity + (_DWORD)&loc_588B95 - 5800977))
-					goto LABEL_24;
-			}
-			else
-			{
-				v33 = (float *)((char *)a2 + (_DWORD)&loc_588B8D - 5800973);
-			}
-			CBaseEntity::NetworkStateChanged((CBaseEntity *)(v30 - 479), v30 - 479);
-			*(int(***)(void))((char *)&a2->_vptr$IHandleEntity + (_DWORD)&loc_588B8D - 5800977) = (int(**)(void))LODWORD(a3->x);
-			*v33 = a3->y;
-			*(int(***)(void))((char *)&a2->_vptr$IHandleEntity + (_DWORD)&loc_588B95 - 5800977) = (int(**)(void))LODWORD(a3->z);
-		LABEL_24:
-			if (vecNewTermPoint.x == *(float *)((char *)&a2->_vptr$IHandleEntity + (_DWORD)&loc_588B95 - 5800973))
-			{
-				p_vec = (char *)a2 + (_DWORD)&loc_588B9A - 5800974;
-				if (vecNewTermPoint.y == *(float *)p_vec
-					&& vecNewTermPoint.z == *(float *)((char *)&a2->_vptr$IHandleEntity + (_DWORD)&loc_588B9E - 5800974))
-				{
-					goto LABEL_73;
-				}
-			}
-			else
-			{
-				p_vec = (char *)a2 + (_DWORD)&loc_588B9A - 5800974;
-			}
-			CBaseEntity::NetworkStateChanged(
-				(CBaseEntity *)((char *)a2 + (_DWORD)&loc_588B95 - 5800973 - 1928),
-				(char *)a2 + (_DWORD)&loc_588B95 - 5800973 - 1928);
-			*(int(***)(void))((char *)&a2->_vptr$IHandleEntity + (_DWORD)&loc_588B95 - 5800973) = (int(**)(void))LODWORD(vecNewTermPoint.x);
-			*(vec_t *)p_vec = vecNewTermPoint.y;
-			*(int(***)(void))((char *)&a2->_vptr$IHandleEntity + (_DWORD)&loc_588B9E - 5800974) = (int(**)(void))LODWORD(vecNewTermPoint.z);
-			goto LABEL_73;
+			CalcClosestPointOnLineSegment(vStrike_0, tr.startpos, tr.endpos, vAutoAimOffset, 0);
+			flTotalBeamLength = sqrt(
+				(((vAutoAimOffset.x - tr.startpos.x)
+				* (vAutoAimOffset.x - tr.startpos.x))
+				+ ((vAutoAimOffset.y - tr.startpos.y)
+				* (vAutoAimOffset.y - tr.startpos.y)))
+				+ ((vAutoAimOffset.z - tr.startpos.z)
+				* (vAutoAimOffset.z - tr.startpos.z)))
+				+ flTotalBeamLength;
+			if (pVecAutoAimOffset)
+				goto LABEL_24;
+			goto LABEL_25;
 		}
-		if (v31 == v32)
+		v17 = tr.endpos.z - tr.startpos.z;
+		flTotalBeamLength = sqrt(
+			(((tr.endpos.x - tr.startpos.x)
+			* (tr.endpos.x - tr.startpos.x))
+			+ ((tr.endpos.y - tr.startpos.y)
+			* (tr.endpos.y - tr.startpos.y)))
+			+ (v17 * v17))
+			+ flTotalBeamLength;
+
+	} while (UTIL_Paint_Reflect(tr, vStart, vDir, REFLECT_POWER));
+	if (ShouldAutoAim(tr.m_pEnt))
+	{
+		if (CPhysicsShadowClone::IsShadowClone(tr.m_pEnt))
 		{
-			v34 = (float *)((char *)a2 + (_DWORD)&loc_588B8D - 5800973);
-			if (a3->y == *v34 && a3->z == *(float *)((char *)&a2->_vptr$IHandleEntity + (_DWORD)&loc_588B95 - 5800977))
-			{
-			LABEL_29:
-				if (tr_0.endpos.x == *(float *)((char *)&a2->_vptr$IHandleEntity + (_DWORD)&loc_588B95 - 5800973))
-				{
-					v35 = (float *)((char *)a2 + (_DWORD)&loc_588B9A - 5800974);
-					if (tr_0.endpos.y == *v35
-						&& tr_0.endpos.z == *(float *)((char *)&a2->_vptr$IHandleEntity + (_DWORD)&loc_588B9E - 5800974))
-					{
-						goto LABEL_37;
-					}
-				}
-				else
-				{
-					v35 = (float *)((char *)a2 + (_DWORD)&loc_588B9A - 5800974);
-				}
-				CBaseEntity::NetworkStateChanged(
-					(CBaseEntity *)((char *)a2 + (_DWORD)&loc_588B95 - 5800973 - 1928),
-					(char *)a2 + (_DWORD)&loc_588B95 - 5800973 - 1928);
-				*(int(***)(void))((char *)&a2->_vptr$IHandleEntity + (_DWORD)&loc_588B95 - 5800973) = (int(**)(void))LODWORD(tr_0.endpos.x);
-				*v35 = tr_0.endpos.y;
-				*(int(***)(void))((char *)&a2->_vptr$IHandleEntity + (_DWORD)&loc_588B9E - 5800974) = (int(**)(void))LODWORD(tr_0.endpos.z);
-			LABEL_37:
-				if (!tr_0.m_pEnt)
-					goto LABEL_45;
-				IsShadowClone = CPhysicsShadowClone::IsShadowClone(tr_0.m_pEnt);
-				p_vec = (char *)tr_0.m_pEnt;
-				if (IsShadowClone)
-				{
-					v68 = ((CPhysicsShadowClone *)tr_0.m_pEnt)->CPhysicsShadowClone::GetClonedEntity();
-					p_vec = 0;
-					if (v68.m_Index != -1)
-					{
-						v37 = **(_DWORD **)((char *)&loc_4BCC23 + 5800977);
-						v38 = 24 * LOWORD(v68.m_Index);
-						if (*(_DWORD *)(v37 + v38 + 8) == HIWORD(v68.m_Index))
-							p_vec = *(char **)(v37 + v38 + 4);
-					}
-				}
-				SchrodingerTwin = UTIL_GetSchrodingerTwin((CBaseEntity *)a3);
-				if (SchrodingerTwin)
-					p_vec = (char *)SchrodingerTwin;
-				if (!ReflectLaserFromEntity(a2))
-				{
-				LABEL_45:
-					p_vec = (char *)a2;
-					m_pChildLaser = a2->m_pChildLaser;
-					if (m_pChildLaser)
-					{
-						m_pChildLaser->m_pParentLaser = 0;
-						UTIL_Remove(m_pChildLaser);
-						a2->m_pChildLaser = 0;
-					}
-					m_pPlacementHelper = a2->m_pPlacementHelper;
-					if (m_pPlacementHelper)
-						UTIL_SetOrigin(m_pPlacementHelper, tr_0.endpos, 0);
-					BeamDamage( (trace_t *)a2 );
-				}
-				goto LABEL_73;
-			}
+			v44 = ((CPhysicsShadowClone *)tr.m_pEnt)->GetClonedEntity();
+			pHitEntity = v44;
 		}
 		else
 		{
-			v34 = (float *)((char *)a2 + (_DWORD)&loc_588B8D - 5800973);
+			pHitEntity = tr.m_pEnt;
 		}
-		CBaseEntity::NetworkStateChanged((CBaseEntity *)(v30 - 479), v30 - 479);
-		*(int(***)(void))((char *)&a2->_vptr$IHandleEntity + (_DWORD)&loc_588B8D - 5800977) = (int(**)(void))LODWORD(a3->x);
-		*v34 = a3->y;
-		*(int(***)(void))((char *)&a2->_vptr$IHandleEntity + (_DWORD)&loc_588B95 - 5800977) = (int(**)(void))LODWORD(a3->z);
-		goto LABEL_29;
-	}
-	flTotalBeamLength = 0.0;
-	vDir.z = a4[2];
-	*(_QWORD *)&vDir.x = *(_QWORD *)a4;
-	v9 = a2;
-	if (!a2->m_bAutoAimEnabled)
-	{
-	LABEL_79:
-		memset(&secondInfoList_0, 0, sizeof(secondInfoList_0));
-		UTIL_ClearTrace(&tr);
-		v49 = TraceLaser( 0, a3, &vDir, &flTotalBeamLength, &tr, &secondInfoList_0, 0);
-		DamageEntitiesAlongLaser(secondInfoList_0);
-		pEntity = v49;
-		CUtlVector<CPortalLaser::PortalLaserInfo_t, CUtlMemory<CPortalLaser::PortalLaserInfo_t, int>>::~CUtlVector((CUtlVector<CPortalLaser::PortalLaserInfo_t, CUtlMemory<CPortalLaser::PortalLaserInfo_t, int> > *)v9);
-		v46 = a3;
-		v63 = &a3->y;
-		v50 = 0;
-		goto LABEL_80;
-	}
-	memset(&firstInfoList, 0, sizeof(firstInfoList));
-	p_vNewDirection = a3;
-	v11 = CPortalLaser::TraceLaser(a2, 1, a3, &vDir, &flTotalBeamLength, &tr, &firstInfoList, &vAutoAimOffset);
-	v12 = v11;
-	if (!*((_BYTE *)&a2->_vptr$IHandleEntity + (_DWORD)&loc_588B84 - 5800977))
-	goto LABEL_78;
-	if (!v11)
-	goto LABEL_78;
-	if (v11->m_iClassname.pszValue != "point_laser_target")
-	{
-		v13 = v11;
-		v14 = CBaseEntity::ClassMatchesComplex(v11, (const char *)a3);
-		v12 = v13;
-		if (!v14)
-			goto LABEL_78;
-	}
-	pEntity = v12;
-	v15 = __dynamic_cast(v12, &`typeinfo for'CBaseEntity, *(_DWORD *)&algn_4BD6CA[5800982], 0);
-		v16 = v15 && *(_BYTE *)(v15 + 929) != 0;
-	if (a2->m_bFromReflectedCube && !sv_laser_cube_autoaim.m_pParent->m_Value.m_nValue)
-	{
-		v9 = a2;
-		v43 = ((*((unsigned __int8(__cdecl **)(CGameRules *))g_pGameRules->_vptr$IGameSystem + 34))(g_pGameRules)& v16) == 0;
-	}
-	else
-	{
-		v43 = !v16;
-		v9 = a2;
-	}
-	if (v43)
-	{
-	LABEL_78:
-		CUtlVector<CPortalLaser::PortalLaserInfo_t, CUtlMemory<CPortalLaser::PortalLaserInfo_t, int>>::~CUtlVector((CUtlVector<CPortalLaser::PortalLaserInfo_t, CUtlMemory<CPortalLaser::PortalLaserInfo_t, int> > *)p_vNewDirection);
-		goto LABEL_79;
-	}
-	v46 = a3;
-	v47 = (float)((float)((float)(a4[1] * flTotalBeamLength) + a3->y) + vAutoAimOffset.y) - a3->y;
-	v48 = (float)((float)((float)(flTotalBeamLength * a4[2]) + a3->z) + vAutoAimOffset.z) - a3->z;
-	vNewDirection.x = (float)((float)((float)(*a4 * flTotalBeamLength) + a3->x) + vAutoAimOffset.x) - a3->x;
-	vNewDirection.y = v47;
-	vNewDirection.z = v48;
-	p_vNewDirection = &vNewDirection;
-	VectorNormalize(&vNewDirection);
-	memset(&secondInfoList, 0, sizeof(secondInfoList));
-	if (pEntity != CPortalLaser::TraceLaser(v9, 0, a3, &vNewDirection, &flNewBeamLength, &tempTrace, &secondInfoList, 0))
-	{
-		CUtlVector<CPortalLaser::PortalLaserInfo_t, CUtlMemory<CPortalLaser::PortalLaserInfo_t, int>>::~CUtlVector((CUtlVector<CPortalLaser::PortalLaserInfo_t, CUtlMemory<CPortalLaser::PortalLaserInfo_t, int> > *)&vNewDirection);
-		goto LABEL_78;
-	}
-	tr = tempTrace;
-	flTotalBeamLength = flNewBeamLength;
-	vDir = vNewDirection;
-	CPortalLaser::DamageEntitiesAlongLaser(v9, &secondInfoList, 1);
-	v63 = &a3->y;
-	CUtlVector<CPortalLaser::PortalLaserInfo_t, CUtlMemory<CPortalLaser::PortalLaserInfo_t, int>>::~CUtlVector((CUtlVector<CPortalLaser::PortalLaserInfo_t, CUtlMemory<CPortalLaser::PortalLaserInfo_t, int> > *)&vNewDirection);
-	CUtlVector<CPortalLaser::PortalLaserInfo_t, CUtlMemory<CPortalLaser::PortalLaserInfo_t, int>>::~CUtlVector((CUtlVector<CPortalLaser::PortalLaserInfo_t, CUtlMemory<CPortalLaser::PortalLaserInfo_t, int> > *)&vNewDirection);
-	v50 = 1;
-	LABEL_80:
-	v51 = v46->x;
-	if (v46->x == *(float *)((char *)&v9->_vptr$IHandleEntity + (_DWORD)&loc_588B8D - 5800977))
-	{
-		v65 = v50;
-		v53 = *v63;
-		m_pEnt = (trace_t *)((char *)v9 + (_DWORD)&loc_588B8D - 5800973);
-		if (*v63 == m_pEnt->startpos.x)
+		if (pVecAutoAimOffset)
 		{
-			v54 = v46->z;
-			if (v54 == *(float *)((char *)&v9->_vptr$IHandleEntity + (_DWORD)&loc_588B95 - 5800977))
-				goto LABEL_85;
+			v18 = pHitEntity->GetLocalOrigin(); // NOTE: This is just a best guess!
+			CalcClosestPointOnLine( v18, tr.startpos, tr.endpos, vAutoAimOffset, 0);
+		LABEL_24:
+			Vector v19 = pHitEntity->GetLocalOrigin(); // NOTE: This is just a best guess!
+			v20 = v19.z - vAutoAimOffset.z;
+			v21 = v19.x - vAutoAimOffset.x;
+			pVecAutoAimOffset->y = v19.y - vAutoAimOffset.y;
+			pVecAutoAimOffset->z = v20;
+			pVecAutoAimOffset->x = v21;
 		}
 	}
-	else
+LABEL_25:
+	if (ShouldAutoAim( pHitEntity ) && pVecAutoAimOffset)
 	{
-		v65 = v50;
-		m_pEnt = (trace_t *)((char *)v9 + (_DWORD)&loc_588B8D - 5800973);
-	}
-	CBaseEntity::NetworkStateChanged(
-		(CBaseEntity *)((char *)v9 + (_DWORD)&loc_588B8D - 5800977 - 1916),
-		(char *)v9 + (_DWORD)&loc_588B8D - 5800977 - 1916);
-	*(int(***)(void))((char *)&v9->_vptr$IHandleEntity + (_DWORD)&loc_588B8D - 5800977) = (int(**)(void))LODWORD(v46->x);
-	m_pEnt->startpos.x = v46->y;
-	*(int(***)(void))((char *)&v9->_vptr$IHandleEntity + (_DWORD)&loc_588B95 - 5800977) = (int(**)(void))LODWORD(v46->z);
-	v51 = v46->x;
-	v53 = v46->y;
-	v54 = v46->z;
-	LABEL_85:
-	if ((float)((float)(vDir.x * flTotalBeamLength) + v51) != *(float *)((char *)&v9->_vptr$IHandleEntity
-		+ (_DWORD)&loc_588B95
-		- 5800973)
-		|| (float)((float)(vDir.y * flTotalBeamLength) + v53) != *(float *)((char *)&v9->_vptr$IHandleEntity
-		+ (_DWORD)&loc_588B9A
-		- 5800974)
-		|| (float)((float)(flTotalBeamLength * vDir.z) + v54) != *(float *)((char *)&v9->_vptr$IHandleEntity
-		+ (_DWORD)&loc_588B9E
-		- 5800974))
-	{
-		v64 = (float)(flTotalBeamLength * vDir.z) + v54;
-		v61 = (float)(vDir.x * flTotalBeamLength) + v51;
-		v62 = (float)(vDir.y * flTotalBeamLength) + v53;
-		CBaseEntity::NetworkStateChanged(
-			(CBaseEntity *)((char *)v9 + (_DWORD)&loc_588B95 - 5800973 - 1928),
-			(char *)v9 + (_DWORD)&loc_588B95 - 5800973 - 1928);
-		*(float *)((char *)&v9->_vptr$IHandleEntity + (_DWORD)&loc_588B95 - 5800973) = v61;
-		*(float *)((char *)&v9->_vptr$IHandleEntity + (_DWORD)&loc_588B9A - 5800974) = v62;
-		*(float *)((char *)&v9->_vptr$IHandleEntity + (_DWORD)&loc_588B9E - 5800974) = v64;
-	}
-	v55 = (CPortalLaser *)pEntity;
-	if (*((_BYTE *)&v9->_vptr$IHandleEntity + (_DWORD)&loc_588BA3 - 5800973) != v65)
-	{
-		m_pEnt = (trace_t *)((char *)v9 + (_DWORD)&loc_588BA3 - 5800973);
-		CBaseEntity::NetworkStateChanged((CBaseEntity *)&m_pEnt[-24].worldSurfaceIndex, &m_pEnt[-24].worldSurfaceIndex);
-		LOBYTE(m_pEnt->startpos.x) = v65;
-		v55 = (CPortalLaser *)pEntity;
-	}
-	if (!tr.m_pEnt)
-	goto LABEL_97;
-	v56 = CPhysicsShadowClone::IsShadowClone(tr.m_pEnt);
-	m_pEnt = (trace_t *)tr.m_pEnt;
-	if (v56)
-	{
-		CPhysicsShadowClone::GetClonedEntity(&v78, (CPhysicsShadowClone_0 *)tr.m_pEnt);
-		m_pEnt = 0;
-		if (v78.m_Index != -1)
+		vAutoAimOffset = *pVecAutoAimOffset;
+		if (portalList.Count() > 0)
 		{
-			v57 = **(_DWORD **)((char *)&loc_4BCC23 + 5800977);
-			v58 = 24 * LOWORD(v78.m_Index);
-			if (*(_DWORD *)(v57 + v58 + 8) == HIWORD(v78.m_Index))
-				m_pEnt = *(trace_t **)(v57 + v58 + 4);
+			v22 = 0;
+			do
+				UTIL_Portal_VectorTransform(
+				portalList[v22++]->m_matrixThisToLinked,
+				vAutoAimOffset,
+				vAutoAimOffset);
+			while (portalList.Count() > v22);
 		}
+		*pVecAutoAimOffset = vAutoAimOffset;
 	}
-	UTIL_GetSchrodingerTwin(v55);
-	if (!ReflectLaserFromEntity(v55))
+	this->m_angPortalExitAngles = this->GetAbsAngles();
+	v33 = portalList.Count() - 1;
+	if (portalList.Count() - 1 >= 0)
 	{
-	LABEL_97:
-		v59 = *(int *)((char *)&v9->_vptr$IHandleEntity + (_DWORD)&loc_5888DA - 5800974);
-		if (v59)
+		v23 = portalList.Count() - 1;
+		do
 		{
-			*(_DWORD *)(v59 + 1224) = 0;
-			UTIL_Remove((CBaseEntity *)v59);
-			*(int(***)(void))((char *)&v9->_vptr$IHandleEntity + (_DWORD)&loc_5888DA - 5800974) = 0;
-		}
-		if (!v55
-			|| v55->GetClassname() != "point_laser_target"
-			&& !v55->ClassMatches((const char *)m_pEnt))
-		{
-			v60 = *(CBaseEntity **)((char *)&v9->_vptr$IHandleEntity + (_DWORD)&loc_588B75 - 5800977);
-			if (v60)
-				UTIL_SetOrigin(v60, tr.endpos, 0);
-			BeamDamage(m_pEnt);
-		}
+			UTIL_Portal_AngleTransform( portalList[v23]->m_hLinkedPortal->MatrixThisToLinked(), this->m_angPortalExitAngles, this->m_angPortalExitAngles );
+			--v33;
+			--v23;
+		} while (v33 != -1);
 	}
-	
-
-#endif
+	return pHitEntity;
 }
