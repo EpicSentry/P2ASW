@@ -1,0 +1,42 @@
+void __cdecl C_NPC_Personality_Core::UpdateOnRemove(C_NPC_Personality_Core *const this)
+{
+  CNewParticleEffect *m_pObject; // eax
+  CUtlReference<CNewParticleEffect> *m_pPrev; // edx
+  CUtlReference<CNewParticleEffect> *m_pNext; // eax
+  dlight_t *m_pELight; // eax
+  CUtlReference<CNewParticleEffect> *v5; // edx
+
+  if ( this->m_pFlashlightEffect.m_pObject )
+  {
+    CParticleProperty::StopEmissionAndDestroyImmediately(&this->m_Particles, this->m_pFlashlightEffect.m_pObject);
+    m_pObject = this->m_pFlashlightEffect.m_pObject;
+    if ( m_pObject )
+    {
+      m_pPrev = this->m_pFlashlightEffect.m_pPrev;
+      if ( m_pPrev )
+      {
+        m_pPrev->m_pNext = this->m_pFlashlightEffect.m_pNext;
+        m_pNext = this->m_pFlashlightEffect.m_pNext;
+        if ( m_pNext )
+          m_pNext->m_pPrev = this->m_pFlashlightEffect.m_pPrev;
+      }
+      else if ( m_pObject->m_References.m_pHead == &this->m_pFlashlightEffect )
+      {
+        v5 = this->m_pFlashlightEffect.m_pNext;
+        m_pObject->m_References.m_pHead = v5;
+        if ( v5 )
+          v5->m_pPrev = 0;
+      }
+      this->m_pFlashlightEffect.m_pPrev = 0;
+      this->m_pFlashlightEffect.m_pNext = 0;
+      this->m_pFlashlightEffect.m_pObject = 0;
+    }
+  }
+  m_pELight = this->m_pELight;
+  if ( m_pELight )
+  {
+    m_pELight->die = gpGlobals->curtime;
+    this->m_pELight = 0;
+  }
+  C_BaseEntity::UpdateOnRemove(this);
+}

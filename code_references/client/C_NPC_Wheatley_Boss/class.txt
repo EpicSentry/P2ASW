@@ -1,0 +1,13 @@
+class C_NPC_Wheatley_Boss : public C_AI_BaseNPC
+{
+	DECLARE_CLASS( C_NPC_Wheatley_Boss, C_AI_BaseNPC );
+public:
+
+	DECLARE_CLIENTCLASS();
+    void ControlMouth(class CStudioHdr * );
+    void OnDataChanged(enum DataUpdateType_t );
+    float GetMouthAmount();
+private:
+    float m_flMouthAmount;
+    float m_flInvDim;
+};

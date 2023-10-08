@@ -1,0 +1,239 @@
+void __cdecl C_NPC_Personality_Core::ClientThink(C_NPC_Personality_Core *const this)
+{
+  CNewParticleEffect *v1; // eax
+  CUtlReference<CNewParticleEffect> *v2; // edx
+  CUtlReference<CNewParticleEffect> *v3; // eax
+  dlight_t *v4; // eax
+  char v5; // al
+  CNewParticleEffect *m_pObject; // eax
+  dlight_t *m_pELight; // eax
+  float v8; // xmm0_4
+  float v9; // xmm1_4
+  float v10; // xmm2_4
+  vec_t v11; // xmm0_4
+  vec_t v12; // xmm1_4
+  vec_t v13; // xmm2_4
+  dlight_t *v14; // eax
+  CUtlReference<CNewParticleEffect> *v15; // edx
+  CNewParticleEffect *v16; // eax
+  CNewParticleEffect *v17; // edx
+  CUtlReference<CNewParticleEffect> *m_pPrev; // ecx
+  CUtlReference<CNewParticleEffect> *m_pNext; // edx
+  CUtlReference<CNewParticleEffect> *m_pHead; // edx
+  CNewParticleEffect *v21; // eax
+  CNewParticleEffect *v22; // eax
+  C_BasePlayer_0 *LocalPlayer; // eax
+  int (__cdecl *v24)(IVEfx *, int); // esi
+  int v25; // eax
+  CUtlReference<CNewParticleEffect> *v26; // ecx
+  int iAttachmentPoint; // [esp+38h] [ebp-150h]
+  CUtlReference<CNewParticleEffect> *iAttachmentPointa; // [esp+38h] [ebp-150h]
+  C_BaseEntity::NetworkVar_m_Particles *p_m_Particles; // [esp+3Ch] [ebp-14Ch]
+  Vector v30; // [esp+4Ch] [ebp-13Ch] BYREF
+  Vector vecAbsEnd; // [esp+58h] [ebp-130h] BYREF
+  Vector v32; // [esp+A0h] [ebp-E8h] BYREF
+  float v33; // [esp+B0h] [ebp-D8h]
+  float v34; // [esp+B4h] [ebp-D4h]
+  float v35; // [esp+B8h] [ebp-D0h]
+  int v36; // [esp+C0h] [ebp-C8h]
+  int v37; // [esp+C4h] [ebp-C4h]
+  int v38; // [esp+C8h] [ebp-C0h]
+  int v39; // [esp+D0h] [ebp-B8h]
+  int v40; // [esp+D4h] [ebp-B4h]
+  int v41; // [esp+D8h] [ebp-B0h]
+  int v42; // [esp+E0h] [ebp-A8h]
+  char v43; // [esp+E4h] [ebp-A4h]
+  char v44; // [esp+E5h] [ebp-A3h]
+  CTraceFilterSimple v45; // [esp+F4h] [ebp-94h] BYREF
+  Vector v; // [esp+104h] [ebp-84h] BYREF
+  QAngle v47; // [esp+110h] [ebp-78h] BYREF
+  Vector forward; // [esp+11Ch] [ebp-6Ch] BYREF
+  Vector right; // [esp+128h] [ebp-60h] BYREF
+  Vector up; // [esp+134h] [ebp-54h] BYREF
+  Vector v51; // [esp+140h] [ebp-48h]
+  vec_t x; // [esp+14Ch] [ebp-3Ch]
+  vec_t y; // [esp+150h] [ebp-38h]
+  vec_t z; // [esp+154h] [ebp-34h]
+  vec_t v55; // [esp+158h] [ebp-30h]
+  vec_t v56; // [esp+15Ch] [ebp-2Ch]
+  vec_t v57; // [esp+160h] [ebp-28h]
+  Vector vecOriginOffset; // [esp+164h] [ebp-24h]
+
+  if ( this->m_bFlashlightEnabled )
+  {
+    iAttachmentPoint = (*((int (__cdecl **)(C_NPC_Personality_Core *const, const char *))this->_vptr_IHandleEntity + 117))(
+                         this,
+                         &aRE[2]);
+    (*((void (__cdecl **)(C_NPC_Personality_Core *const, int, Vector *, QAngle *))this->_vptr_IHandleEntity + 120))(
+      this,
+      iAttachmentPoint,
+      &v,
+      &v47);
+    AngleVectors(&v47, &forward, &right, &up);
+    v5 = 1;
+    v43 = 1;
+    v42 = 0;
+    v32 = v;
+    v33 = (float)((float)(forward.x * 256.0) + v.x) - v.x;
+    v34 = (float)((float)(forward.y * 256.0) + v.y) - v.y;
+    v35 = (float)((float)(256.0 * forward.z) + v.z) - v.z;
+    v41 = 0;
+    v40 = 0;
+    v39 = 0;
+    v38 = 0;
+    v37 = 0;
+    v36 = 0;
+    if ( (float)((float)((float)(v33 * v33) + (float)(v34 * v34)) + (float)(v35 * v35)) == 0.0 )
+      v5 = 0;
+    v44 = v5;
+    CTraceFilterSimple::CTraceFilterSimple(&v45, this, 0, 0);
+    (*(void (__cdecl **)(IEngineTrace *, Vector *, int, CTraceFilterSimple *, Vector *))(*(_DWORD *)enginetrace + 20))(
+      enginetrace,
+      &v32,
+      100679683,
+      &v45,
+      &v30);
+    if ( r_visualizetraces.m_pParent->m_Value.m_nValue )
+      DebugDrawLine(&v30, &vecAbsEnd, 255, 0, 0, 1, -1.0);
+    m_pObject = this->m_pFlashlightEffect.m_pObject;
+    if ( m_pObject )
+      goto LABEL_16;
+    v51 = vec3_origin;
+    p_m_Particles = &this->m_Particles;
+    v16 = CParticleProperty::Create(
+            &this->m_Particles,
+            "flashlight_thirdperson",
+            PATTACH_POINT_FOLLOW,
+            iAttachmentPoint,
+            vec3_origin,
+            0);
+    v17 = this->m_pFlashlightEffect.m_pObject;
+    if ( v16 != v17 )
+    {
+      iAttachmentPointa = &this->m_pFlashlightEffect;
+      if ( v17 )
+      {
+        m_pPrev = this->m_pFlashlightEffect.m_pPrev;
+        if ( m_pPrev )
+        {
+          m_pPrev->m_pNext = this->m_pFlashlightEffect.m_pNext;
+          m_pNext = this->m_pFlashlightEffect.m_pNext;
+          if ( m_pNext )
+            m_pNext->m_pPrev = this->m_pFlashlightEffect.m_pPrev;
+        }
+        else if ( iAttachmentPointa == v17->m_References.m_pHead )
+        {
+          v26 = this->m_pFlashlightEffect.m_pNext;
+          v17->m_References.m_pHead = v26;
+          if ( v26 )
+            v26->m_pPrev = 0;
+        }
+        this->m_pFlashlightEffect.m_pPrev = 0;
+        this->m_pFlashlightEffect.m_pNext = 0;
+      }
+      this->m_pFlashlightEffect.m_pObject = v16;
+      if ( v16 )
+      {
+        this->m_pFlashlightEffect.m_pNext = v16->m_References.m_pHead;
+        m_pHead = v16->m_References.m_pHead;
+        if ( m_pHead )
+          m_pHead->m_pPrev = iAttachmentPointa;
+        this->m_pFlashlightEffect.m_pPrev = 0;
+        v16->m_References.m_pHead = iAttachmentPointa;
+      }
+    }
+    y = vec3_origin.y;
+    v21 = this->m_pFlashlightEffect.m_pObject;
+    z = vec3_origin.z;
+    x = vec3_origin.x;
+    CParticleProperty::AddControlPoint(p_m_Particles, v21, 1, this, PATTACH_CUSTOMORIGIN, 0, vec3_origin, 0);
+    v55 = vec3_origin.x;
+    v56 = vec3_origin.y;
+    v22 = this->m_pFlashlightEffect.m_pObject;
+    v57 = vec3_origin.z;
+    CParticleProperty::AddControlPoint(p_m_Particles, v22, 2, this, PATTACH_CUSTOMORIGIN, 0, vec3_origin, 0);
+    vecOriginOffset = vec3_origin;
+    LocalPlayer = C_BasePlayer::GetLocalPlayer(-1);
+    CParticleProperty::AddControlPoint(
+      p_m_Particles,
+      this->m_pFlashlightEffect.m_pObject,
+      3,
+      LocalPlayer,
+      PATTACH_EYES_FOLLOW,
+      0,
+      vecOriginOffset,
+      0);
+    m_pObject = this->m_pFlashlightEffect.m_pObject;
+    if ( m_pObject )
+    {
+LABEL_16:
+      CNewParticleEffect::SetControlPoint(m_pObject, 1, &v);
+      CNewParticleEffect::SetControlPoint(this->m_pFlashlightEffect.m_pObject, 2, &vecAbsEnd);
+      CNewParticleEffect::SetControlPointForwardVector(this->m_pFlashlightEffect.m_pObject, 1, &forward);
+    }
+    m_pELight = this->m_pELight;
+    if ( m_pELight
+      || (v24 = *(int (__cdecl **)(IVEfx *, int))(*(_DWORD *)effects + 20),
+          v25 = (*((int (__cdecl **)(C_NPC_Personality_Core *const))this->_vptr_IHandleEntity + 84))(this),
+          m_pELight = (dlight_t *)v24(effects, v25 + 0x40000000),
+          (this->m_pELight = m_pELight) != 0) )
+    {
+      m_pELight->die = gpGlobals->curtime + 1.0e10;
+      this->m_pELight->flags = 1;
+      v8 = forward.z;
+      v9 = forward.y;
+      v10 = forward.x;
+      this->m_pELight->radius = 64.0;
+      v11 = (float)(v8 + v8) + v.z;
+      v12 = (float)(v9 + v9) + v.y;
+      v13 = (float)(v10 + v10) + v.x;
+      this->m_pELight->style = 0;
+      this->m_pELight->m_pExclusiveLightReceiver = &this->IClientRenderable;
+      this->m_pELight->color.r = -31;
+      this->m_pELight->color.g = -31;
+      this->m_pELight->color.b = -1;
+      this->m_pELight->color.exponent = 0;
+      v14 = this->m_pELight;
+      v14->origin.x = v13;
+      v14->origin.y = v12;
+      v14->origin.z = v11;
+      (*(void (__cdecl **)(IVRenderView *, dlight_t *))(*(_DWORD *)render + 8))(render, this->m_pELight);
+    }
+  }
+  else
+  {
+    if ( this->m_pFlashlightEffect.m_pObject )
+    {
+      CParticleProperty::StopEmissionAndDestroyImmediately(&this->m_Particles, this->m_pFlashlightEffect.m_pObject);
+      v1 = this->m_pFlashlightEffect.m_pObject;
+      if ( v1 )
+      {
+        v2 = this->m_pFlashlightEffect.m_pPrev;
+        if ( v2 )
+        {
+          v2->m_pNext = this->m_pFlashlightEffect.m_pNext;
+          v3 = this->m_pFlashlightEffect.m_pNext;
+          if ( v3 )
+            v3->m_pPrev = this->m_pFlashlightEffect.m_pPrev;
+        }
+        else if ( v1->m_References.m_pHead == &this->m_pFlashlightEffect )
+        {
+          v15 = this->m_pFlashlightEffect.m_pNext;
+          v1->m_References.m_pHead = v15;
+          if ( v15 )
+            v15->m_pPrev = 0;
+        }
+        this->m_pFlashlightEffect.m_pPrev = 0;
+        this->m_pFlashlightEffect.m_pNext = 0;
+        this->m_pFlashlightEffect.m_pObject = 0;
+      }
+    }
+    v4 = this->m_pELight;
+    if ( v4 )
+    {
+      v4->die = gpGlobals->curtime;
+      this->m_pELight = 0;
+    }
+  }
+  (*((void (__cdecl **)(C_NPC_Personality_Core *const, int))this->_vptr_IHandleEntity + 160))(this, -996040704);
+}

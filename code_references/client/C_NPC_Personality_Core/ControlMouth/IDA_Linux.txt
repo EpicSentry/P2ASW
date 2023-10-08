@@ -1,0 +1,13 @@
+void __cdecl C_NPC_Personality_Core::ControlMouth(C_NPC_Personality_Core *const this, CStudioHdr *pStudioHdr)
+{
+  unsigned __int8 *v2; // eax
+
+  C_BaseAnimating::ControlMouth(this, pStudioHdr);
+  if ( this->m_mouth.m_needsEnvelope )
+  {
+    if ( pStudioHdr )
+    {
+      v2 = (unsigned __int8 *)(*((int (__cdecl **)(C_NPC_Personality_Core *const))this->_vptr_IHandleEntity + 14))(this);
+      this->m_flMouthAmount = MouthDecay((float)((float)0 * 65536.0) + (float)*v2, &this->m_flInvDim, 0.80000001);
+    }
+  }

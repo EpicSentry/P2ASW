@@ -1,0 +1,11 @@
+void __thiscall C_NPC_Wheatley_Boss::OnDataChanged(C_NPC_Personality_Core *this, DataUpdateType_t updateType)
+{
+  C_AI_BaseNPC::OnDataChanged(this, updateType);
+  if ( updateType == DATA_UPDATE_CREATED )
+  {
+    ((void (__stdcall *)(_DWORD))LODWORD(this[-1].m_pELight[6].m_InnerAngle))(LODWORD(FLOAT_N1293_0));
+    *(_WORD *)(&this->m_mouth.sndcount + 1) = 1;
+    *(_DWORD *)&this->m_bImportanRagdoll = 0;
+    *((_DWORD *)&this->m_bImportanRagdoll + 1) = 0;
+  }
+}

@@ -1,0 +1,19 @@
+class C_NPC_Personality_Core : public C_AI_BaseNPC
+{
+	DECLARE_CLASS( C_NPC_Personality_Core, C_AI_BaseNPC );
+public:
+
+	DECLARE_CLIENTCLASS();
+	
+    void UpdateOnRemove();
+    void ControlMouth(class CStudioHdr * );
+    void OnDataChanged(enum DataUpdateType_t );
+    void ClientThink();
+    float GetMouthAmount();
+private:
+    float m_flMouthAmount;
+    float m_flInvDim;
+    bool m_bFlashlightEnabled;
+    CUtlReference<CNewParticleEffect> m_pFlashlightEffect;
+    dlight_t * m_pELight;
+};
