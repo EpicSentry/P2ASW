@@ -1,0 +1,27 @@
+void __cdecl CWeaponPortalgun::UnfreezeEntity(CWeaponPortalgun *const this)
+{
+  unsigned int m_Index; // eax
+  char *v2; // edx
+  int v3; // eax
+  int v4; // ebx
+
+  m_Index = this->m_hFreezeEntity.m_Index;
+  if ( m_Index != -1 )
+  {
+    v2 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v2 + 2) == HIWORD(m_Index) )
+    {
+      v3 = *((_DWORD *)v2 + 1);
+      if ( v3 )
+      {
+        v4 = *(_DWORD *)(v3 + 340);
+        if ( v4 )
+        {
+          (*(void (__thiscall **)(CBaseEntityList *, int, int))(*(_DWORD *)v4 + 64))(g_pEntityList, v4, 1);
+          (*(void (__cdecl **)(int))(*(_DWORD *)v4 + 100))(v4);
+        }
+      }
+    }
+  }
+  this->m_hFreezeEntity.m_Index = -1;
+}

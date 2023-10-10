@@ -28,6 +28,8 @@
 #define BLAST_SPEED_NON_PLAYER 1000.0f
 #define BLAST_SPEED 3000.0f
 
+static const char *s_szTogglePotatosThinkContext = "TogglePotatosThinkContext";
+
 CON_COMMAND(give_portalgun, "Give a portalgun... Portal 2 script fix.")
 {
 	CPortal_Player *pPlayer = (CPortal_Player*)UTIL_GetCommandClient();
@@ -224,21 +226,18 @@ void CWeaponPortalgun::Think( void )
 
 void CWeaponPortalgun::TogglePotatosThink( void )
 {
+	SetContextThink( NULL, -1.0, s_szTogglePotatosThinkContext );
 	CBasePlayer *pPlayer = ToPortalPlayer( GetOwner() );
-	
 	if (pPlayer)
 	{	
 		CBaseViewModel *vm = pPlayer->GetViewModel();
 		if ( vm )
 		{
-			m_bShowingPotatos = !m_bShowingPotatos;
-			int iBodyGroup = vm->FindBodygroupByName( "potatos_model" );
-			vm->SetBodygroup( iBodyGroup, m_bShowingPotatos );
+			vm->SetBodygroup( vm->FindBodygroupByName( "potatos_vmodel" ), m_bShowingPotatos );
+			SetBodygroup( FindBodygroupByName( "potatos_vmodel" ), m_bShowingPotatos );
+			
+			Deploy();
 		}
-				
-		int iWMPotatos = FindBodygroupByName( "potatos_model" );
-		SetBodygroup( iWMPotatos, m_bShowingPotatos );
-		Deploy();
 	}
 }
 
@@ -301,7 +300,7 @@ void CWeaponPortalgun::SetPotatosOnPortalgun( bool bShowPotatos )
 	{
 		m_bShowingPotatos = bShowPotatos;
 		Holster( NULL );
-		SetContextThink( &CWeaponPortalgun::TogglePotatosThink, gpGlobals->curtime + 2.0, "TogglePotatosThinkContext" );
+		SetContextThink( &CWeaponPortalgun::TogglePotatosThink, gpGlobals->curtime + 2.0, s_szTogglePotatosThinkContext );
 	}
 }
 
@@ -544,27 +543,19 @@ void CWeaponPortalgun::UpdatePortalAssociation( void )
 	CProp_Portal *pPortal1 = CProp_Portal::FindPortal( m_iPortalLinkageGroupID, false, false );
 	if ( !pPortal1 || !pPortal1->IsActive() )
 	{
-		if ( vec3_invalid.x != m_vecBluePortalPos.m_Value.x ||
-			vec3_invalid.y != m_vecBluePortalPos.m_Value.y ||
-			vec3_invalid.z != m_vecBluePortalPos.m_Value.z )
-		{
-			m_vecBluePortalPos = vec3_invalid;
-		}
+		m_vecBluePortalPos = vec3_invalid;
+		
 		if ( m_iLastFiredPortal.m_Value == 1 )
 		{
 			m_iLastFiredPortal = 0;
 		}
 	}
 	
-	CProp_Portal *pPortal2 = CProp_Portal::FindPortal( m_iPortalLinkageGroupID, false, false );
+	CProp_Portal *pPortal2 = CProp_Portal::FindPortal( m_iPortalLinkageGroupID, true, false );
 	if ( !pPortal2 || !pPortal2->IsActive() )
-	{
-		if ( vec3_invalid.x != m_vecOrangePortalPos.m_Value.x ||
-			vec3_invalid.y != m_vecOrangePortalPos.m_Value.y ||
-			vec3_invalid.z != m_vecOrangePortalPos.m_Value.z )
-		{
-			m_vecOrangePortalPos = vec3_invalid;
-		}
+	{	
+		m_vecOrangePortalPos = vec3_invalid;
+	
 		if ( m_iLastFiredPortal.m_Value == 2 )
 		{
 			m_iLastFiredPortal = 0;
@@ -575,6 +566,18 @@ void CWeaponPortalgun::UpdatePortalAssociation( void )
 void CWeaponPortalgun::ChangeTeam( int iTeamNum )
 {
 	BaseClass::ChangeTeam( iTeamNum );
+
+	if ( m_hPrimaryPortal )
+		m_hPrimaryPortal->ChangeTeam( iTeamNum );
+	
+	if ( m_hSecondaryPortal )
+		m_hSecondaryPortal->ChangeTeam( iTeamNum );
+}
+
+void CWeaponPortalgun::ClearPortalPositions( void )
+{
+	m_vecOrangePortalPos = vec3_invalid;
+	m_vecBluePortalPos = m_vecOrangePortalPos;
 }
 
 ConCommand change_portalgun_linkage_id( "change_portalgun_linkage_id", change_portalgun_linkage_id_f, "Changes the portal linkage ID for the portal gun held by the commanding player.", FCVAR_CHEAT );

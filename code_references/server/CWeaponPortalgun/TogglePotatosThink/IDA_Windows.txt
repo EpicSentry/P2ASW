@@ -1,0 +1,28 @@
+void __thiscall CWeaponPortalgun::TogglePotatosThink(CWeaponPortalgun *this)
+{
+  CBasePlayer *Owner; // eax
+  CBasePlayer *v3; // edi
+  int m_bShowingPotatos; // ebx
+  CBaseViewModel *ViewModel; // eax
+  CBaseViewModel *v6; // eax
+  int v7; // eax
+  int BodygroupByName; // [esp-4h] [ebp-14h]
+
+  CBaseEntity::ThinkSet(this, 0, -1.0, CWeaponPortalgun::s_szTogglePotatosThinkContext);
+  Owner = (CBasePlayer *)CBaseCombatWeapon::GetOwner(this);
+  v3 = Owner;
+  if ( Owner )
+  {
+    if ( CBasePlayer::GetViewModel(Owner, 0) )
+    {
+      m_bShowingPotatos = this->m_bShowingPotatos;
+      ViewModel = CBasePlayer::GetViewModel(v3, 0);
+      BodygroupByName = CBaseAnimating::FindBodygroupByName(ViewModel, "potatos_vmodel");
+      v6 = CBasePlayer::GetViewModel(v3, 0);
+      CBaseAnimating::SetBodygroup(v6, BodygroupByName, m_bShowingPotatos);
+      v7 = CBaseAnimating::FindBodygroupByName(this, "potatos_vmodel");
+      CBaseAnimating::SetBodygroup(this, v7, m_bShowingPotatos);
+      this->Deploy(this);
+    }
+  }
+}

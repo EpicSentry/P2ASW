@@ -1,0 +1,38 @@
+void __cdecl CWeaponPortalgun::ChangeTeam(CWeaponPortalgun *const this, int iTeamNum)
+{
+  unsigned int m_Index; // eax
+  CBaseEntityList *v3; // edx
+  char *v4; // ecx
+  int v5; // eax
+  unsigned int v6; // eax
+  char *v7; // edx
+  int v8; // eax
+
+  CBaseEntity::ChangeTeam(this, iTeamNum);
+  m_Index = this->m_hPrimaryPortal.m_Value.m_Index;
+  v3 = g_pEntityList;
+  if ( m_Index != -1 )
+  {
+    v4 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v4 + 2) == HIWORD(m_Index) )
+    {
+      v5 = *((_DWORD *)v4 + 1);
+      if ( v5 )
+      {
+        (*(void (__cdecl **)(int, int))(*(_DWORD *)v5 + 380))(v5, iTeamNum);
+        v3 = g_pEntityList;
+      }
+    }
+  }
+  v6 = this->m_hSecondaryPortal.m_Value.m_Index;
+  if ( v6 != -1 )
+  {
+    v7 = (char *)v3 + 24 * (unsigned __int16)v6;
+    if ( *((_DWORD *)v7 + 2) == HIWORD(v6) )
+    {
+      v8 = *((_DWORD *)v7 + 1);
+      if ( v8 )
+        (*(void (__cdecl **)(int, int))(*(_DWORD *)v8 + 380))(v8, iTeamNum);
+    }
+  }
+}
