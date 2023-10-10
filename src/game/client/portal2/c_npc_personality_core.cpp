@@ -1,7 +1,6 @@
 #include "cbase.h"
 #include "c_ai_basenpc.h"
 #include "dlight.h"
-#include "tier0/memdbgon.h"
 #include "functionproxy.h"
 #include "imaterialproxydict.h"
 #include "c_portal_player.h"
@@ -17,8 +16,13 @@ public:
 	DECLARE_CLASS(C_NPC_Personality_Core, C_AI_BaseNPC);
 	DECLARE_CLIENTCLASS();
 
+	void UpdateOnRemove();
+	void ControlMouth(CStudioHdr* pStudioHdr);
+	void OnDataChanged(DataUpdateType_t updateType);
 	void ClientThink();
 private:
+	float m_flMouthAmount;
+	float m_flInvDim;
 	bool m_bFlashlightEnabled;
 	CUtlReference<CNewParticleEffect> m_pFlashlightEffect;
 	dlight_t* m_pELight;
@@ -36,12 +40,57 @@ class C_NPC_Wheatley_Boss : public C_AI_BaseNPC
 public:
 	DECLARE_CLASS(C_NPC_Wheatley_Boss, C_AI_BaseNPC);
 	DECLARE_CLIENTCLASS();
+
+	void ControlMouth(CStudioHdr* pStudioHdr);
+	void OnDataChanged(DataUpdateType_t updateType);
+private:
+	float m_flMouthAmount;
+	float m_flInvDim;
 };
 
 IMPLEMENT_CLIENTCLASS_DT(C_NPC_Wheatley_Boss, DT_NPC_Wheatley_Boss, CNPC_Wheatley_Boss)
 END_RECV_TABLE()
 
 LINK_ENTITY_TO_CLASS(npc_wheatley_boss, C_NPC_Wheatley_Boss);
+
+void C_NPC_Personality_Core::UpdateOnRemove()
+{
+	if (m_pFlashlightEffect)
+	{
+		ParticleProp()->StopEmissionAndDestroyImmediately(m_pFlashlightEffect);
+		m_pFlashlightEffect = NULL;
+	}
+
+	if (m_pELight)
+	{
+		m_pELight->die = gpGlobals->curtime;
+		m_pELight = NULL;
+	}
+	BaseClass::UpdateOnRemove();
+}
+
+void C_NPC_Personality_Core::ControlMouth(CStudioHdr* pStudioHdr)
+{
+	BaseClass::ControlMouth(pStudioHdr);
+	if (!MouthInfo().NeedsEnvelope())
+		return;
+	
+	if (!pStudioHdr)
+		return;
+
+	m_flMouthAmount = MouthDecay(GetMouth()->mouthopen, m_flInvDim, 0.8f);
+}
+
+void C_NPC_Personality_Core::OnDataChanged(DataUpdateType_t updateType)
+{
+	BaseClass::OnDataChanged(updateType);
+	if (updateType == DATA_UPDATE_CREATED)
+	{
+		MouthInfo().NeedsEnvelope();
+		m_flMouthAmount = 0.0f;
+		m_flInvDim = 0.0f;
+	}
+}
 
 void C_NPC_Personality_Core::ClientThink()
 {
@@ -88,7 +137,28 @@ void C_NPC_Personality_Core::ClientThink()
 	}
 }
 
+void C_NPC_Wheatley_Boss::ControlMouth(CStudioHdr* pStudioHdr)
+{
+	BaseClass::ControlMouth(pStudioHdr);
+	if (!MouthInfo().NeedsEnvelope())
+		return;
 
+	if (!pStudioHdr)
+		return;
+
+	m_flMouthAmount = MouthDecay(GetMouth()->mouthopen, m_flInvDim, 0.8f);
+}
+
+void C_NPC_Wheatley_Boss::OnDataChanged(DataUpdateType_t updateType)
+{
+	BaseClass::OnDataChanged(updateType);
+	if (updateType == DATA_UPDATE_CREATED)
+	{
+		MouthInfo().NeedsEnvelope();
+		m_flMouthAmount = 0.0;
+		m_flInvDim = 0.0;
+	}
+}
 
 extern C_BaseAnimating *GetGLaDOSActor( void );
 
