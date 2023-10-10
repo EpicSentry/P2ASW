@@ -9,10 +9,15 @@
 #define PORTAL_PLAYER_H
 #pragma once
 
+// WTF!? Including c_portal_player.h causes an error when compiling for release, but this fixes it!
+#ifndef DEBUG
+#undef _malloc_dbg
+#endif
+
 #include "portal_playeranimstate.h"
 #include "c_baseplayer.h"
 #include "portal_player_shared.h"
-#include "c_prop_portal.h"
+#include "c_portal_base2d.h"
 #include "weapon_portalbase.h"
 #include "colorcorrectionmgr.h"
 #include "c_portal_playerlocaldata.h"
@@ -34,8 +39,6 @@ enum PortalScreenSpaceEffect
 
 	PORTAL_SCREEN_SPACE_EFFECT_COUNT
 };
-
-class C_Trigger_TractorBeam;
 
 class C_EntityPortalledNetworkMessage : public CMemZeroOnNew
 {

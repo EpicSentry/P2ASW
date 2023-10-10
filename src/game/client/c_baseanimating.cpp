@@ -184,6 +184,8 @@ IMPLEMENT_CLIENTCLASS_DT(C_BaseAnimating, DT_BaseAnimating, CBaseAnimating)
 
 	RecvPropFloat( RECVINFO( m_flFrozen ) ), 
 	RecvPropInt( RECVINFO( m_ScaleType ) ),
+	
+	RecvPropBool( RECVINFO( m_bSuppressAnimSounds ) )
 
 END_RECV_TABLE()
 
@@ -4165,6 +4167,9 @@ void C_BaseAnimating::FireEvent( const Vector& origin, const QAngle& angles, int
 
 	case AE_CL_PLAYSOUND:
 		{
+			if ( m_bSuppressAnimSounds )
+				return;
+
 			CLocalPlayerFilter filter;
 
 			if ( m_Attachments.Count() > 0)

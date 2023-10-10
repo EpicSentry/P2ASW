@@ -1942,6 +1942,7 @@ BEGIN_DATADESC( CDynamicProp )
 	DEFINE_FIELD(	m_nPendingSequence, FIELD_SHORT ),
 	DEFINE_KEYFIELD( m_bUpdateAttachedChildren, FIELD_BOOLEAN, "updatechildren" ),
 	DEFINE_KEYFIELD( m_bDisableBoneFollowers, FIELD_BOOLEAN, "DisableBoneFollowers" ),
+	DEFINE_FIELD(	m_bAnimationDone, FIELD_BOOLEAN ),
 	DEFINE_KEYFIELD( m_bHoldAnimation, FIELD_BOOLEAN, "HoldAnimation" ),
 	
 	// Inputs
@@ -2295,7 +2296,11 @@ void CDynamicProp::AnimThink( void )
 		else
 		{
 			// Fire output
-			m_pOutputAnimOver.FireOutput(NULL,this);
+			if ( !m_bAnimationDone )
+			{
+				m_bAnimationDone = true;
+				m_pOutputAnimOver.FireOutput(NULL,this);
+			}
 
 			// If I'm a random animator, think again when it's time to change sequence
 			if ( m_bRandomAnimator )
@@ -2319,6 +2324,7 @@ void CDynamicProp::AnimThink( void )
 	}
 	else
 	{
+		m_bAnimationDone = false;
 		SetNextThink( gpGlobals->curtime + 0.1f );
 	}
 

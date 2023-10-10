@@ -297,13 +297,16 @@ void CPortalPlayerAnimState::Update( float eyeYaw, float eyePitch )
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
-void CPortalPlayerAnimState::Teleport( const Vector *pNewOrigin, const QAngle *pNewAngles, CPortal_Player* pPlayer )
+CEG_NOINLINE void CPortalPlayerAnimState::Teleport( const Vector *pNewOrigin, const QAngle *pNewAngles, CPortal_Player* pPlayer )
 {
 	QAngle absangles = pPlayer->GetAbsAngles();
 	m_angRender = absangles;
 	m_angRender.x = m_angRender.z = 0.0f;
 	if ( pPlayer )
 	{
+#if defined GAME_DLL
+		CEG_PROTECT_MEMBER_FUNCTION( CPortalPlayerAnimState_Teleport );
+#endif
 		// Snap the yaw pose parameter lerping variables to face new angles.
 		m_flCurrentFeetYaw = m_flGoalFeetYaw = m_flEyeYaw = pPlayer->EyeAngles()[YAW];
 	}
@@ -333,10 +336,7 @@ bool CPortalPlayerAnimState::ShouldLongFall( void ) const
 
 	return ( m_bWasInTractorBeam || 
 			 m_bBridgeRemovedFromUnder || 
-			 (
-#if 0 // FIXME!!
-			 !pPortalPlayer->GetTractorBeam() && 
-#endif
+			 ( !pPortalPlayer->GetTractorBeam() && 
 			   pPortalPlayer->GetAirTime() > 2.0f && 
 			   pPortalPlayer->GetAbsVelocity().AsVector2D().Length() < 450.0f ) );
 }

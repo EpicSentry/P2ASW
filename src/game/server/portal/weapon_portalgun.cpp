@@ -226,7 +226,7 @@ void CWeaponPortalgun::Think( void )
 
 void CWeaponPortalgun::TogglePotatosThink( void )
 {
-	SetContextThink( NULL, -1.0, s_szTogglePotatosThinkContext );
+	SetContextThink( NULL, TICK_NEVER_THINK, s_szTogglePotatosThinkContext );
 	CBasePlayer *pPlayer = ToPortalPlayer( GetOwner() );
 	if (pPlayer)
 	{	

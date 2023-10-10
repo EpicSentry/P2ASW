@@ -1,0 +1,54 @@
+void __thiscall CLightedMouthProxy::OnBind(CLightedMouthProxy *this, void *pC_BaseEntity)
+{
+  C_BaseEntity *v3; // esi
+  float *v4; // eax
+  C_BaseAnimating *GLaDOSActor; // eax
+  int v6; // esi
+  C_Portal_Player *LocalPlayer; // eax
+  unsigned __int8 *v8; // eax
+  float flBaseLight; // [esp+1Ch] [ebp+8h]
+  float flBaseLighta; // [esp+1Ch] [ebp+8h]
+
+  if ( pC_BaseEntity )
+  {
+    v3 = CResultProxy::BindArgToEntity(this, pC_BaseEntity);
+    flBaseLight = *(float *)&FLOAT_1_0;
+    v4 = (float *)__RTDynamicCast(
+                    v3,
+                    0,
+                    &C_BaseEntity `RTTI Type Descriptor',
+                    &C_NPC_Personality_Core `RTTI Type Descriptor',
+                    0);
+    if ( v4
+      || (v4 = (float *)__RTDynamicCast(
+                          v3,
+                          0,
+                          &C_BaseEntity `RTTI Type Descriptor',
+                          &C_NPC_Wheatley_Boss `RTTI Type Descriptor',
+                          0)) != 0 )
+    {
+      CResultProxy::SetFloatResult(this, v4[1224]);
+    }
+    else
+    {
+      if ( GetGLaDOSActor() )
+      {
+        GLaDOSActor = GetGLaDOSActor();
+        v6 = (int)GLaDOSActor->GetBaseAnimating(GLaDOSActor);
+        if ( v6 )
+        {
+          flBaseLighta = FLOAT_0_2;
+          LocalPlayer = (C_Portal_Player *)C_BasePlayer::GetLocalPlayer(-1);
+          if ( LocalPlayer )
+          {
+            if ( !C_Portal_Player::IsPotatosOn(LocalPlayer) )
+              flBaseLighta = 0.0;
+          }
+          v8 = (unsigned __int8 *)(*(int (__thiscall **)(int))(*(_DWORD *)v6 + 48))(v6);
+          flBaseLight = MouthDecay((float)*v8, &s_GLaDOS_flDimmer, flBaseLighta);
+        }
+      }
+      CResultProxy::SetFloatResult(this, flBaseLight);
+    }
+  }
+}

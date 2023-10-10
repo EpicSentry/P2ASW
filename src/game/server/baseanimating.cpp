@@ -228,6 +228,8 @@ BEGIN_DATADESC( CBaseAnimating )
 #ifdef PORTAL2
 	DEFINE_OUTPUT( m_OnFizzled, "OnFizzled" ),
 #endif // PORTAL2
+	
+	DEFINE_KEYFIELD( m_bSuppressAnimSounds, FIELD_BOOLEAN, "SuppressAnimSounds" ),
 
 	END_DATADESC()
 
@@ -274,6 +276,8 @@ IMPLEMENT_SERVERCLASS_ST(CBaseAnimating, DT_BaseAnimating)
 	SendPropFloat( SENDINFO( m_flFrozen ) ),
 	
 	SendPropInt( SENDINFO( m_ScaleType ) ),
+	
+	SendPropBool( SENDINFO( m_bSuppressAnimSounds ) )
 
 END_SEND_TABLE()
 

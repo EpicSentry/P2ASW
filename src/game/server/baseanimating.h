@@ -439,6 +439,8 @@ protected:
 
 	CNetworkVar( int, m_nNewSequenceParity );
 	CNetworkVar( int, m_nResetEventsParity );
+	
+	CNetworkVar( bool, m_bSuppressAnimSounds );
 
 	// Incremented each time the entity is told to do a muzzle flash.
 	// The client picks up the change and draws the flash.

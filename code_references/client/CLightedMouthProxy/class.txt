@@ -1,0 +1,7 @@
+class CLightedMouthProxy : public CResultProxy
+{
+public:
+    bool Init(class IMaterial * ,class KeyValues * );
+    void OnBind( void * );
+    void CLightedMouthProxy(class CLightedMouthProxy & );
+};

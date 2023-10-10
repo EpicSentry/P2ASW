@@ -320,6 +320,7 @@ public:
 	int					m_iTransitionDirection;
 
 	// Random animations
+	bool				m_bAnimationDone;
 	bool				m_bHoldAnimation;
 	bool				m_bRandomAnimator;
 	bool				m_bDisableBoneFollowers;

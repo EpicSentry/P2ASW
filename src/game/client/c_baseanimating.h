@@ -687,6 +687,8 @@ private:
 
 	static bool						m_bBoneListInUse;
 	static CBoneList				m_recordingBoneList;
+	
+	bool							m_bSuppressAnimSounds;
 
 private:
 	mutable CStudioHdr				*m_pStudioHdr;

@@ -1,0 +1,41 @@
+float __cdecl MouthDecay(float mouthopen, float *const flInvDim, float flBaseLight)
+{
+  float v3; // xmm1_4
+  float v4; // xmm0_4
+  float v5; // xmm3_4
+  float v7; // [esp+1Ch] [ebp-40h]
+
+  v3 = 0.0;
+  v4 = 0.015625 * mouthopen;
+  if ( (float)(0.015625 * mouthopen) < 0.0 )
+  {
+    v4 = 0.0;
+    goto LABEL_7;
+  }
+  if ( v4 > 1.0 )
+  {
+    v4 = 1.0;
+    v3 = 1.0;
+    goto LABEL_7;
+  }
+  if ( v4 < 0.2 )
+  {
+    v4 = 0.0;
+LABEL_7:
+    v5 = *flInvDim;
+    if ( v3 <= *flInvDim )
+      goto LABEL_5;
+LABEL_8:
+    *flInvDim = v3;
+    return fmaxf(v4, flBaseLight * (float)(1.0 - v3));
+  }
+  v5 = *flInvDim;
+  v3 = fminf(3.0 * v4, 1.0);
+  if ( v3 > *flInvDim )
+    goto LABEL_8;
+LABEL_5:
+  v7 = expf(-0.61220264 * gpGlobals->frametime);
+  v3 = v7 * v5;
+  *flInvDim = v7 * v5;
+  return fmaxf(v4, flBaseLight * (float)(1.0 - v3));
+}

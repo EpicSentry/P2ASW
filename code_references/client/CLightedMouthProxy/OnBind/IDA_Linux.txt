@@ -1,0 +1,55 @@
+void __cdecl CLightedMouthProxy::OnBind(CLightedMouthProxy *const this, void *pC_BaseEntity)
+{
+  C_BaseEntity *v2; // eax
+  C_BaseEntity *v3; // esi
+  float *v4; // eax
+  long double v5; // fst7
+  C_BaseAnimating *GLaDOSActor; // eax
+  int v7; // esi
+  C_Portal_Player *LocalPlayer; // eax
+  int v9; // edi
+  unsigned __int8 *v10; // eax
+  float pC_BaseEntitya; // [esp+44h] [ebp+Ch]
+
+  if ( pC_BaseEntity )
+  {
+    v2 = CResultProxy::BindArgToEntity(this, pC_BaseEntity);
+    v3 = v2;
+    if ( v2
+      && ((v4 = (float *)_dynamic_cast(
+                           v2,
+                           (const struct __class_type_info *)&`typeinfo for'C_BaseEntity,
+                           (const struct __class_type_info *)&`typeinfo for'C_NPC_Personality_Core,
+                           0)) != 0
+       || (v4 = (float *)_dynamic_cast(
+                           v3,
+                           (const struct __class_type_info *)&`typeinfo for'C_BaseEntity,
+                           (const struct __class_type_info *)&`typeinfo for'C_NPC_Wheatley_Boss,
+                           0)) != 0) )
+    {
+      v5 = v4[1216];
+    }
+    else
+    {
+      v5 = 1.0;
+      if ( GetGLaDOSActor() )
+      {
+        GLaDOSActor = GetGLaDOSActor();
+        v7 = (*((int (__cdecl **)(C_BaseAnimating *))GLaDOSActor->_vptr_IHandleEntity + 48))(GLaDOSActor);
+        v5 = (float)1.0;
+        if ( v7 )
+        {
+          LocalPlayer = (C_Portal_Player *)C_BasePlayer::GetLocalPlayer(-1);
+          if ( !LocalPlayer || C_Portal_Player::IsPotatosOn(LocalPlayer) )
+            v9 = 1045220557;
+          else
+            v9 = 0;
+          v10 = (unsigned __int8 *)(*(int (__cdecl **)(int))(*(_DWORD *)v7 + 56))(v7);
+          v5 = MouthDecay((float)((float)0 * 65536.0) + (float)*v10, &s_GLaDOS_flDimmer, *(float *)&v9);
+        }
+      }
+    }
+    pC_BaseEntitya = v5;
+    CResultProxy::SetFloatResult(this, pC_BaseEntitya);
+  }
+}

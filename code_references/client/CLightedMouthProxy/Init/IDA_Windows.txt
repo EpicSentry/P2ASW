@@ -1,0 +1,4 @@
+bool __thiscall CLightedMouthProxy::Init(CPlayerTeamMatchProxy *this, IMaterial *pMaterial, KeyValues *pKeyValues)
+{
+  return CResultProxy::Init(this, pMaterial, pKeyValues);
+}

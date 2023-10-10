@@ -1,0 +1,4 @@
+bool __cdecl CLightedMouthProxy::Init(CLightedMouthProxy *const this, IMaterial *pMaterial, KeyValues *pKeyValues)
+{
+  return CResultProxy::Init(this, pMaterial, pKeyValues);
+}

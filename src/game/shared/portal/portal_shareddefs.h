@@ -20,8 +20,6 @@
 
 #define PORTAL_PLAYER_PREDICTION
 
-#include "portal_util_shared.h"
-
 #ifdef DYNAMIC_BOUNDS
 #define PORTAL_HALF_WIDTH portal_half_width.GetInt()
 #define PORTAL_HALF_HEIGHT portal_half_height.GetInt()

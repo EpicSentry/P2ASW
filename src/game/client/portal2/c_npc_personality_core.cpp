@@ -2,6 +2,14 @@
 #include "c_ai_basenpc.h"
 #include "dlight.h"
 #include "tier0/memdbgon.h"
+#include "functionproxy.h"
+#include "imaterialproxydict.h"
+#include "c_portal_player.h"
+
+
+// memdbgon must be the last include file in a .cpp file!!!
+#include "tier0/memdbgon.h"
+
 
 class C_NPC_Personality_Core : public C_AI_BaseNPC
 {
@@ -79,3 +87,107 @@ void C_NPC_Personality_Core::ClientThink()
 		}
 	}
 }
+
+
+
+extern C_BaseAnimating *GetGLaDOSActor( void );
+
+// FIXME: Setting this at 2.0 temporarily, but what is this true value??
+static float s_GLaDOS_flDimmer = 2.0;
+
+class CLightedMouthProxy : public CResultProxy
+{
+public:
+	virtual bool Init( IMaterial *pMaterial, KeyValues *pKeyValues );
+    virtual void OnBind( void *pC_BaseEntity );
+};
+
+
+// TODO: Optimize
+float MouthDecay( float mouthopen, float &flInvDim, float flBaseLight )
+{
+	float v3 = 0.0;
+	float v4 = 0.015625 * mouthopen;
+	if ((0.015625 * mouthopen) < 0.0)
+	{
+		v4 = 0.0;
+		goto LABEL_7;
+	}
+	if (v4 > 1.0)
+	{
+		v4 = 1.0;
+		v3 = 1.0;
+		goto LABEL_7;
+	}
+
+	float v5 = 0.0;
+	if (v4 < 0.2)
+	{
+		v4 = 0.0;
+	LABEL_7:
+		v5 = flInvDim;
+		if (v3 <= flInvDim)
+			goto LABEL_5;
+	LABEL_8:
+		flInvDim = v3;
+		return fmaxf(v4, flBaseLight * (1.0 - v3));
+	}
+	v5 = flInvDim;
+	v3 = fminf(3.0 * v4, 1.0);
+	if (v3 > flInvDim)
+		goto LABEL_8;
+LABEL_5:
+	float v7 = expf(-0.61220264 * gpGlobals->frametime);
+	v3 = v7 * v5;
+	flInvDim = v7 * v5;
+	return fmaxf(v4, flBaseLight * (1.0 - v3));
+}
+
+bool CLightedMouthProxy::Init( IMaterial *pMaterial, KeyValues *pKeyValues )
+{
+	return CResultProxy::Init( pMaterial, pKeyValues );
+}
+
+void CLightedMouthProxy::OnBind( void *pC_BaseEntity )
+{
+	C_AI_BaseNPC *pActor = NULL;
+
+	float flFlashResult;
+
+	if (pC_BaseEntity)
+	{
+		C_BaseEntity *v2 = BindArgToEntity( pC_BaseEntity );
+		if (v2
+			&& ( (pActor = dynamic_cast<C_NPC_Personality_Core*>( v2 ) ) != NULL || (pActor = dynamic_cast<C_NPC_Wheatley_Boss*>( v2 ) ) != NULL ) )
+		{
+			// FIXME:
+			flFlashResult = 1;// pActor[1216];
+		}
+		else
+		{
+			flFlashResult = 1.0;
+			C_BaseAnimating *GLaDOSActor = GetGLaDOSActor();
+			if ( GLaDOSActor )
+			{
+				C_BaseAnimating *pAnimating = GLaDOSActor->GetBaseAnimating();
+
+				flFlashResult = 1.0;
+				if ( pAnimating )
+				{
+					float flBase;
+					C_Portal_Player *LocalPlayer = (C_Portal_Player *)C_BasePlayer::GetLocalPlayer();
+					if (!LocalPlayer || LocalPlayer->IsPotatosOn())
+						flBase = 0.2;
+					else
+						flBase = 0.0;
+					// FIXME:
+					float flOpenAmount = 1;//(float)(*(int(__cdecl **)(int))(pAnimating + 56));
+					flFlashResult = MouthDecay( flOpenAmount, s_GLaDOS_flDimmer, flBase );
+				}
+			}
+		}
+		SetFloatResult( flFlashResult );
+	}
+}
+
+EXPOSE_MATERIAL_PROXY( CLightedMouthProxy, LightedMouthProxy );
