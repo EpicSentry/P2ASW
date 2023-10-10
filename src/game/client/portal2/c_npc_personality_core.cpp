@@ -53,6 +53,46 @@ END_RECV_TABLE()
 
 LINK_ENTITY_TO_CLASS(npc_wheatley_boss, C_NPC_Wheatley_Boss);
 
+// TODO: Optimize
+float MouthDecay(float mouthopen, float& flInvDim, float flBaseLight)
+{
+	float v3 = 0.0;
+	float v4 = 0.015625 * mouthopen;
+	if ((0.015625 * mouthopen) < 0.0)
+	{
+		v4 = 0.0;
+		goto LABEL_7;
+	}
+	if (v4 > 1.0)
+	{
+		v4 = 1.0;
+		v3 = 1.0;
+		goto LABEL_7;
+	}
+
+	float v5 = 0.0;
+	if (v4 < 0.2)
+	{
+		v4 = 0.0;
+	LABEL_7:
+		v5 = flInvDim;
+		if (v3 <= flInvDim)
+			goto LABEL_5;
+	LABEL_8:
+		flInvDim = v3;
+		return fmaxf(v4, flBaseLight * (1.0 - v3));
+	}
+	v5 = flInvDim;
+	v3 = fminf(3.0 * v4, 1.0);
+	if (v3 > flInvDim)
+		goto LABEL_8;
+LABEL_5:
+	float v7 = expf(-0.61220264 * gpGlobals->frametime);
+	v3 = v7 * v5;
+	flInvDim = v7 * v5;
+	return fmaxf(v4, flBaseLight * (1.0 - v3));
+}
+
 void C_NPC_Personality_Core::UpdateOnRemove()
 {
 	if (m_pFlashlightEffect)
@@ -171,47 +211,6 @@ public:
 	virtual bool Init( IMaterial *pMaterial, KeyValues *pKeyValues );
     virtual void OnBind( void *pC_BaseEntity );
 };
-
-
-// TODO: Optimize
-float MouthDecay( float mouthopen, float &flInvDim, float flBaseLight )
-{
-	float v3 = 0.0;
-	float v4 = 0.015625 * mouthopen;
-	if ((0.015625 * mouthopen) < 0.0)
-	{
-		v4 = 0.0;
-		goto LABEL_7;
-	}
-	if (v4 > 1.0)
-	{
-		v4 = 1.0;
-		v3 = 1.0;
-		goto LABEL_7;
-	}
-
-	float v5 = 0.0;
-	if (v4 < 0.2)
-	{
-		v4 = 0.0;
-	LABEL_7:
-		v5 = flInvDim;
-		if (v3 <= flInvDim)
-			goto LABEL_5;
-	LABEL_8:
-		flInvDim = v3;
-		return fmaxf(v4, flBaseLight * (1.0 - v3));
-	}
-	v5 = flInvDim;
-	v3 = fminf(3.0 * v4, 1.0);
-	if (v3 > flInvDim)
-		goto LABEL_8;
-LABEL_5:
-	float v7 = expf(-0.61220264 * gpGlobals->frametime);
-	v3 = v7 * v5;
-	flInvDim = v7 * v5;
-	return fmaxf(v4, flBaseLight * (1.0 - v3));
-}
 
 bool CLightedMouthProxy::Init( IMaterial *pMaterial, KeyValues *pKeyValues )
 {
