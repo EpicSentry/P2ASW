@@ -27,17 +27,28 @@ LINK_ENTITY_TO_CLASS( npc_portal_turret_floor, C_NPC_Portal_FloorTurret )
 C_NPC_Portal_FloorTurret::~C_NPC_Portal_FloorTurret( void )
 {
 	LaserOff();
-	if( m_pBeam )
-		m_pBeam->Remove();
 }
 
 
 void C_NPC_Portal_FloorTurret::Spawn( void )
 {
+	C_Beam *pBeam;
+
 	SetThink( &C_NPC_Portal_FloorTurret::ClientThink );
 	SetNextClientThink( CLIENT_THINK_ALWAYS );
 
-	m_pBeam = NULL;
+	pBeam = C_Beam::BeamCreate("effects/redlaser1.vmt", 0.2);
+	pBeam->SetRenderColor(255, 32, 32);
+	SetRenderAlpha(255);
+	pBeam->GetNoise();
+	pBeam->GetWidth();
+	pBeam->SetEndWidth(0.75f);
+	pBeam->GetScrollRate();
+	pBeam->GetFadeLength();
+	pBeam->SetHaloScale(4.0f);
+	pBeam->SetBeamFlag(FBEAM_REVERSED);
+	m_beamHelper.Init(pBeam);
+
 	m_fPulseOffset = RandomFloat( 0.0f, 2.0f * M_PI );
 
 	m_bBeamFlickerOff = false;
@@ -62,14 +73,13 @@ void C_NPC_Portal_FloorTurret::ClientThink( void )
 
 void C_NPC_Portal_FloorTurret::LaserOff( void )
 {
-	if( m_pBeam )
-	{
-		m_pBeam->AddEffects( EF_NODRAW );
-	}
+	m_beamHelper.TurnOff();
 }
 
 void C_NPC_Portal_FloorTurret::LaserOn( void )
 {
+	C_Beam* pLastBeam;
+
 	if ( !IsBoneAccessAllowed() )
 	{
 		LaserOff();
@@ -87,46 +97,23 @@ void C_NPC_Portal_FloorTurret::LaserOn( void )
 	Vector vecMuzzleDir;
 	AngleVectors( angEyeDir, &vecMuzzleDir );
 
-	if (!m_pBeam)
+	if ((vecMuzzleDir.x - m_vLastMuzzleDir.x) > 0.001f
+		|| (vecMuzzleDir.y - m_vLastMuzzleDir.y) > 0.001f
+		|| (vecMuzzleDir.z - m_vLastMuzzleDir.z) > 0.001f
+		|| (vecMuzzle.x - m_vLastMuzzle.x) > 0.001f
+		|| (vecMuzzle.y - m_vLastMuzzle.y) > 0.001f
+		|| (vecMuzzle.z - m_vLastMuzzle.z) > 0.001f
+		|| gpGlobals->curtime > this->m_flNextBeamUpdate)
 	{
-		m_pBeam = CBeam::BeamCreate( "effects/redlaser1.vmt", 0.2 );
-		m_pBeam->SetColor( 255, 32, 32 );
-		m_pBeam->SetBrightness( 255 );
-		m_pBeam->SetNoise( 0 );
-		m_pBeam->SetWidth( IsX360() ? ( 1.5f ) : ( 0.75f ) );	// On low end TVs these lasers are very hard to see at a distance
-		m_pBeam->SetEndWidth( 0 );
-		m_pBeam->SetScrollRate( 0 );
-		m_pBeam->SetFadeLength( 0 );
-		m_pBeam->SetHaloTexture( m_sLaserHaloSprite );
-		m_pBeam->SetHaloScale( 4.0f );
-		m_pBeam->SetCollisionGroup( COLLISION_GROUP_NONE );
-		m_pBeam->PointsInit( vecMuzzle + vecMuzzleDir, vecMuzzle );
-		m_pBeam->SetBeamFlag( FBEAM_REVERSED );
-		m_pBeam->SetStartEntity( this );
+		UpdateBeam(vecMuzzle, vecMuzzleDir);
+		m_flNextBeamUpdate = gpGlobals->curtime + 0.2;
 	}
-	else
+	if (m_beamHelper.GetLastBeam())
 	{
-		m_pBeam->RemoveEffects( EF_NODRAW );
+		pLastBeam = m_beamHelper.GetLastBeam();
+		pLastBeam->SetHaloScale(LaserEndPointSize());
+		pLastBeam->SetHaloTexture(m_sLaserHaloSprite);
 	}
-
-	// Trace to find an endpoint
-	Vector vEndPoint;
-	float fEndFraction;
-	Ray_t rayPath;
-	rayPath.Init( vecMuzzle, vecMuzzle + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE );
-
-	CTraceFilterSkipClassname traceFilter( this, "prop_energy_ball", COLLISION_GROUP_NONE );
-
-	if ( UTIL_Portal_TraceRay_Beam( rayPath, MASK_SHOT, &traceFilter, &fEndFraction ) )
-		vEndPoint = vecMuzzle + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE;	// Trace went through portal and endpoint is unknown
-	else
-		vEndPoint = vecMuzzle + vecMuzzleDir * FLOOR_TURRET_PORTAL_LASER_RANGE * fEndFraction;	// Trace hit a wall
-
-	// The beam is backwards, sort of. The endpoint is the sniper. This is
-	// so that the beam can be tapered to very thin where it emits from the turret.
-	m_pBeam->PointsInit( vEndPoint, vecMuzzle );
-
-	m_pBeam->SetHaloScale( LaserEndPointSize() );
 }
 
 float C_NPC_Portal_FloorTurret::LaserEndPointSize( void )
@@ -138,4 +125,17 @@ bool C_NPC_Portal_FloorTurret::ShouldPredict()
 {
 	C_BasePlayer* pPredOwner = GetPlayerHoldingEntity(this);
 	return (pPredOwner && pPredOwner->IsLocalPlayer()) ? true : BaseClass::ShouldPredict();
+}
+
+void C_NPC_Portal_FloorTurret::UpdateBeam(Vector& vecMuzzle, Vector& vecMuzzleDir)
+{
+	trace_t tr;
+	Vector vEndPoint;
+
+	CTraceFilterSkipClassname traceFilter(this, "prop_energy_ball", COLLISION_GROUP_NONE);
+	
+	vEndPoint = vecMuzzle + vecMuzzleDir * 8192.0f;
+	m_beamHelper.UpdatePoints(vecMuzzle, vEndPoint, MASK_SHOT, &traceFilter, tr);
+	m_vLastMuzzle = vecMuzzle;
+	m_vLastMuzzleDir = vecMuzzleDir;
 }
