@@ -8,6 +8,10 @@
 #include "choreoevent.h"
 #include "choreoscene.h"
 #include "choreoactor.h"
+#include "env_projectedtexture.h"
+#include "explode.h"
+
+// memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 ConVar sv_personality_core_pca_pitch( "sv_personality_core_pca_pitch", "180", 0, "Pitch value for personality core perferred carry angles." );
@@ -44,6 +48,7 @@ public:
 	void InputSetIdleSequence(inputdata_t& inputdata);
 	void InputClearIdleSequence(inputdata_t& inputdata);
 	void InputClearParent(inputdata_t& inputdata);
+	void InputExplode(inputdata_t& inputdata);
 
 	int	TranslateSchedule(int scheduleType);
 	void GatherConditions();
@@ -105,6 +110,7 @@ DEFINE_INPUTFUNC(FIELD_VOID, "PlayDetach", InputPlayDetach),
 DEFINE_INPUTFUNC(FIELD_VOID, "SetIdleSequence", InputSetIdleSequence),
 DEFINE_INPUTFUNC(FIELD_VOID, "ClearIdleSequence", InputClearIdleSequence),
 DEFINE_INPUTFUNC(FIELD_VOID, "ClearParent", InputClearParent),
+DEFINE_INPUTFUNC(FIELD_VOID, "Explode", InputExplode),
 DEFINE_USEFUNC(Use),
 DEFINE_KEYFIELD(m_bUseAltModel, FIELD_BOOLEAN, "altmodel"),
 DEFINE_OUTPUT(m_OnPlayerPickup, "OnPlayerPickup"),
@@ -131,9 +137,6 @@ void CNPC_PersonalityCore::Precache(void)
 
 void CNPC_PersonalityCore::Spawn(void)
 {
-	Vector vecAttachOrigin;
-	QAngle vecAttachAngles;
-
 	Precache();
 	CapabilitiesClear();
 	if (m_bUseAltModel == false) {
@@ -166,10 +169,13 @@ void CNPC_PersonalityCore::Spawn(void)
 	m_bPickupEnabled = true;
 	m_bAttached = false;
 	m_iIdleOverrideSequence = -1;
+	m_bFlashlightEnabled = false;
 
 	if ( !m_bUseAltModel )
 	{
 		int iAttachmentIndex = LookupAttachment("eyes");
+		Vector vecAttachOrigin;
+		QAngle vecAttachAngles;
 		GetAttachment(iAttachmentIndex, vecAttachOrigin, vecAttachAngles);
 
 		m_hProjectedTexture = CreateEntityByName("env_projectedtexture");
@@ -177,8 +183,10 @@ void CNPC_PersonalityCore::Spawn(void)
 		m_hProjectedTexture->KeyValue("enableshadows", "1");
 		m_hProjectedTexture->KeyValue("texturename", "effects/flashlight001_improved");
 		DispatchSpawn(m_hProjectedTexture);
+		m_hProjectedTexture->AddSpawnFlags(ENV_PROJECTEDTEXTURE_ALWAYSUPDATE);
 		m_hProjectedTexture->SetAbsAngles(vecAttachAngles);
 		m_hProjectedTexture->SetAbsOrigin(vecAttachOrigin);
+		m_hProjectedTexture->SetParent(this, iAttachmentIndex);
 
 		variant_t emptyVariant;
 		m_hProjectedTexture->AcceptInput("TurnOff", NULL, NULL, emptyVariant, 0);
@@ -281,6 +289,21 @@ void CNPC_PersonalityCore::InputClearParent(inputdata_t& inputdata)
 {
 	BaseClass::InputClearParent(inputdata);
 	RemoveSolidFlags(FSOLID_NOT_SOLID);
+}
+
+void CNPC_PersonalityCore::InputExplode(inputdata_t& inputdata)
+{
+	ExplosionCreate(GetAbsOrigin(),GetAbsAngles(), this, 100, 500, (SF_ENVEXPLOSION_NODAMAGE|SF_ENVEXPLOSION_NOSPARKS|SF_ENVEXPLOSION_NODLIGHTS|SF_ENVEXPLOSION_NOSMOKE|SF_ENVEXPLOSION_NOFIREBALLSMOKE), false);
+	UTIL_ScreenShake(GetAbsOrigin(), 10.0f, 150.0f, 1.0f, 750.0f, SHAKE_START);
+	
+	CPVSFilter filter(GetAbsOrigin());
+	for (int i = 0; i < 4; i++)
+	{
+		Vector gibVelocity = RandomVector(-100, 100);
+		int iModelIndex = modelinfo->GetModelIndex(g_PropDataSystem.GetRandomChunkModel("MetalChunks"));
+		te->BreakModel(filter, 0.0, GetAbsOrigin(), GetAbsAngles(), Vector(40, 40, 40), gibVelocity, iModelIndex, 400, 1, 2.5, BREAK_METAL);
+	}
+	SetNextThink(gpGlobals->curtime + 0.1f);
 }
 
 int CNPC_PersonalityCore::TranslateSchedule(int schedule)
