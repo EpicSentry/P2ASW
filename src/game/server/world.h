@@ -96,6 +96,11 @@ private:
 	CNetworkVar( int, m_nMaxBlobCount );
 #endif
 
+	// IVEngineClient is missing the HasPaintMap() function, so we must network it.
+	// Not that it matters much, but this technically doesn't need
+	// to be in a portal 2 ifdef since it's engine controlled.
+	CNetworkVar( bool, m_bHasPaintMap );
+
 };
 
 

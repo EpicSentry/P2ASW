@@ -13,6 +13,9 @@
 
 //#include "projectedwallentity.h"
 #include "paint/paint_database.h"
+#else
+
+#include "c_world.h"
 
 #endif
 

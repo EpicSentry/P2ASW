@@ -27,7 +27,7 @@
 
 // IVEngineClient doesn't have a HasPaintMap() function, so we need a macro.
 #ifdef CLIENT_DLL
-#define HASPAINTMAP true // FIXME: How do we make this accurate?
+#define HASPAINTMAP GetClientWorldEntity()->HasPaintMap()
 #endif
 
 //-----------------------------------------------------------------------------

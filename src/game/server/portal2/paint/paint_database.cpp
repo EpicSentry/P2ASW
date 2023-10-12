@@ -192,7 +192,7 @@ void CPaintDatabase::PaintEntity( CBaseEntity *pPaintedEntity, PaintPowerType ne
 }
 
 // Projected Walls aren't implemented yet
-#if defined (PORTAL2) & 0
+#if defined (PORTAL2) && 0
 void CPaintDatabase::PaintProjectedWall( CProjectedWallEntity *pWall, PaintPowerType powerType, const Vector &vecPosition )
 {
 	const bool bWallPainted = pWall->IsWallPainted( vecPosition );
@@ -224,7 +224,7 @@ void CPaintDatabase::RemoveAllPaint()
 		}
 	}
 	// No projected walls yet
-#if defined (PORTAL2) & 0
+#if defined (PORTAL2) && 0
 	//Remove the paint from all the painted projected walls
 	const int nPaintedProjectedWallCount = m_PaintedProjectedWalls.Count();
 	for( int i = 0; i < nPaintedProjectedWallCount; ++i )
@@ -306,7 +306,7 @@ void CPaintDatabase::RemovePaintedEntity( int index, bool bDeleteData )
 }
 
 // No projected walls yet
-#if defined ( PORTAL2 ) & 0
+#if defined ( PORTAL2 ) && 0
 void CPaintDatabase::RemovePaintedWall( CProjectedWallEntity *pWall, bool bDeleteData )
 {
 	//Get the paint gun to give back the ammo to
