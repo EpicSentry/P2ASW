@@ -1220,38 +1220,40 @@ bool CPortalRender::DrawPortalsUsingStencils_Old( CViewRender *pViewRender )
 {
 	int iDrawFlags = pViewRender->GetDrawFlags();
 
-	if ((iDrawFlags & DF_RENDER_REFLECTION) != 0)
+	if ( (iDrawFlags & DF_RENDER_REFLECTION) != 0 )
 		return false;
 
-	if (((iDrawFlags & DF_CLIP_Z) != 0) && ((iDrawFlags & DF_CLIP_BELOW) == 0)) //clipping above the water height
+	if ( ((iDrawFlags & DF_CLIP_Z) != 0) && ((iDrawFlags & DF_CLIP_BELOW) == 0) ) //clipping above the water height
 		return false;
-	
-	CMatRenderContextPtr pRenderContext(materials);
 
-	if ( m_iViewRecursionLevel == 0 )
-	{
-		m_portalGhostRenderInfos.RemoveAll();
-		C_Prop_Portal::BuildPortalGhostRenderInfo(m_AllPortals, m_portalGhostRenderInfos);
-	}
+	CMatRenderContextPtr pRenderContext( materials );
 
 	int iNumRenderablePortals = m_ActivePortals.Count();
-	
+
 	// This loop is necessary because tools can suppress rendering without telling the portal system
-	CUtlVector< CPortalRenderable* > actualActivePortals(0, iNumRenderablePortals);
-	for (int i = 0; i < iNumRenderablePortals; ++i)
+	CUtlVector< CPortalRenderable* > actualActivePortals( 0, iNumRenderablePortals );
+	for ( int i = 0; i < iNumRenderablePortals; ++i )
 	{
 		CPortalRenderable *pPortalRenderable = m_ActivePortals[i];
 		C_BaseEntity *pPairedEntity = pPortalRenderable->PortalRenderable_GetPairedEntity();
 		bool bIsVisible = (pPairedEntity == NULL) || (pPairedEntity->IsVisible() && pPairedEntity->ShouldDraw()); //either unknown visibility or definitely visible.
 
-		if (!pPortalRenderable->m_bIsPlaybackPortal)
+		// If the portal is associated with an entity, check to see if that entity is even in the PVS before rendering the portal
+		if ( pPairedEntity != NULL && r_portal_use_pvs_optimization.GetBool() )
 		{
-			if (!bIsVisible)
+			IClientRenderable *pCR = pPairedEntity->GetClientRenderable();
+			bool bIsRenderable = g_pClientLeafSystem->IsRenderableInPVS( pCR );
+			bIsVisible &= bIsRenderable;
+		}
+
+		if ( !pPortalRenderable->m_bIsPlaybackPortal )
+		{
+			if ( !bIsVisible )
 			{
 				//can't see through the portal, free up it's view id node for use elsewhere
-				if (m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pPortalRenderable->m_iPortalViewIDNodeIndex] != NULL)
+				if( m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pPortalRenderable->m_iPortalViewIDNodeIndex] != NULL )
 				{
-					FreePortalViewIDNode(m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pPortalRenderable->m_iPortalViewIDNodeIndex]);
+					FreePortalViewIDNode( m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pPortalRenderable->m_iPortalViewIDNodeIndex] );
 					m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pPortalRenderable->m_iPortalViewIDNodeIndex] = NULL;
 				}
 
@@ -1259,55 +1261,65 @@ bool CPortalRender::DrawPortalsUsingStencils_Old( CViewRender *pViewRender )
 			}
 		}
 
-		actualActivePortals.AddToTail(m_ActivePortals[i]);
+		actualActivePortals.AddToTail( m_ActivePortals[i] );
 	}
-
 	iNumRenderablePortals = actualActivePortals.Count();
-	if (iNumRenderablePortals == 0)
+
+#ifdef PORTAL
+	if( !ToolsEnabled() )
+	{
+		VPROF_BUDGET( "PortalGhosts", "PortalGhosts" );
+		pRenderContext->BeginPIXEvent( PIX_VALVE_ORANGE, "Portal Ghosts" );
+		C_Prop_Portal::DrawPortalGhostLocations( pRenderContext ); //we want to show where the portals are through walls, but not if occluded by a portal view, otherwise we're showing the player confusing data. This is the best place to wedge this
+		pRenderContext->EndPIXEvent();
+	}
+#endif
+
+	if( iNumRenderablePortals == 0 )
 		return false;
 
-	const int iMaxDepth = MIN(r_portal_stencil_depth.GetInt(), MIN(MAX_PORTAL_RECURSIVE_VIEWS, (1 << materials->StencilBufferBits())) - 1);
-	
-	if (m_iViewRecursionLevel >= iMaxDepth) //can't support any more views	
+	const int iMaxDepth = MIN( r_portal_stencil_depth.GetInt(), MIN( MAX_PORTAL_RECURSIVE_VIEWS, (1 << materials->StencilBufferBits()) ) - 1 );
+
+	if( m_iViewRecursionLevel >= iMaxDepth ) //can't support any more views	
 	{
 		m_iRemainingPortalViewDepth = 0; //special case handler for max depth 0 cases
-		for (int i = 0; i != iNumRenderablePortals; ++i)
+		pRenderContext->BeginPIXEvent( PIX_VALVE_ORANGE, "Portal_maxrecursion_reached" );
+		for( int i = 0; i != iNumRenderablePortals; ++i )
 		{
 			CPortalRenderable *pCurrentPortal = actualActivePortals[i];
 			pCurrentPortal->DrawPortal( pRenderContext );
 		}
+		pRenderContext->EndPIXEvent();
 		return false;
 	}
 
 	m_iRemainingPortalViewDepth = (iMaxDepth - m_iViewRecursionLevel) - 1;
 
-	pRenderContext->Flush(true); //to prevent screwing up the last opaque object
-
-								 //queued mode makes us pass the barrier of just noticeable difference when using a previous frame's occlusion as a draw skip check
-	bool bIsQueuedMode = (materials->GetThreadMode() == MATERIAL_QUEUED_THREADED);
+	pRenderContext->Flush( true ); //to prevent screwing up the last opaque object
 
 	const CViewSetup *pViewSetup = pViewRender->GetViewSetup();
 	m_RecursiveViewSetups[m_iViewRecursionLevel] = *pViewSetup;
 
 	CViewSetup ViewBackup;// = *pViewSetup; //backup the view, we'll need to restore it
-	memcpy(&ViewBackup, pViewSetup, sizeof(CViewSetup));
+	memcpy( &ViewBackup, pViewSetup, sizeof( CViewSetup ) );
 
 	Vector ptCameraOrigin = pViewSetup->origin;
 	Vector vCameraForward;
-	AngleVectors(pViewSetup->angles, &vCameraForward, NULL, NULL);
+	AngleVectors( pViewSetup->angles, &vCameraForward, NULL, NULL );
 
 	int iX, iY, iWidth, iHeight;
-	pRenderContext->GetViewport(iX, iY, iWidth, iHeight);
+	pRenderContext->GetViewport( iX, iY, iWidth, iHeight );
 #ifndef TEMP_DISABLE_PORTAL_VIS_QUERY
 	int iScreenPixelCount = iWidth * iHeight;
 #endif
 
 	bool bRebuildDrawListsWhenDone = false;
 
+
 	int iParentLevelStencilReferenceValue = m_iViewRecursionLevel;
 	int iStencilReferenceValue = iParentLevelStencilReferenceValue + 1;
-
-	if (m_iViewRecursionLevel == 0) //first entry into the stencil drawing
+	
+	if( m_iViewRecursionLevel == 0 ) //first entry into the stencil drawing
 	{
 		m_StencilState.m_bEnable = true;
 		m_StencilState.m_CompareFunc = SHADER_STENCILFUNC_ALWAYS;
@@ -1320,50 +1332,33 @@ bool CPortalRender::DrawPortalsUsingStencils_Old( CViewRender *pViewRender )
 		pRenderContext->SetStencilState( m_StencilState );
 		pRenderContext->PerformFullScreenStencilOperation();
 
-		m_RecursiveViewComplexFrustums[0].RemoveAll(); //clear any garbage leftover in the complex frustums from last frame
+        m_RecursiveViewComplexFrustums[0].RemoveAll(); //clear any garbage leftover in the complex frustums from last frame
 	}
 
-	if (m_RecursiveViewComplexFrustums[m_iViewRecursionLevel].Count() == 0)
+	if( m_RecursiveViewComplexFrustums[m_iViewRecursionLevel].Count() == 0 )
 	{
 		//nothing in the complex frustum from the current view, copy the standard frustum in
-		m_RecursiveViewComplexFrustums[m_iViewRecursionLevel].AddMultipleToTail(FRUSTUM_NUMPLANES, pViewRender->GetFrustum());
+		m_RecursiveViewComplexFrustums[m_iViewRecursionLevel].AddMultipleToTail( FRUSTUM_NUMPLANES, pViewRender->GetFrustum() );
 	}
-	
-	for (int i = 0; i != iNumRenderablePortals; ++i)
+
+	for( int i = 0; i < iNumRenderablePortals; ++i )
 	{
 		CPortalRenderable *pCurrentPortal = actualActivePortals[i];
 
 		m_RecursiveViewComplexFrustums[m_iViewRecursionLevel + 1].RemoveAll(); //clear any previously stored complex frustum
-
-		if ((pCurrentPortal->GetLinkedPortal() == NULL) ||
+		
+		if( (pCurrentPortal->GetLinkedPortal() == NULL) ||
 			(pCurrentPortal == m_pRenderingViewExitPortal) ||
-			(pCurrentPortal->ShouldUpdatePortalView_BasedOnView(*pViewSetup, m_RecursiveViewComplexFrustums[m_iViewRecursionLevel]) == false))
+			(pCurrentPortal->ShouldUpdatePortalView_BasedOnView( *pViewSetup, m_RecursiveViewComplexFrustums[m_iViewRecursionLevel] ) == false) )
 		{
 			//can't see through the portal, free up it's view id node for use elsewhere
-			if (m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pCurrentPortal->m_iPortalViewIDNodeIndex] != NULL)
+			if( m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pCurrentPortal->m_iPortalViewIDNodeIndex] != NULL )
 			{
-				FreePortalViewIDNode(m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pCurrentPortal->m_iPortalViewIDNodeIndex]);
+				FreePortalViewIDNode( m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pCurrentPortal->m_iPortalViewIDNodeIndex] );
 				m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pCurrentPortal->m_iPortalViewIDNodeIndex] = NULL;
 			}
-			// NOTE: 'pCurrentPortal->ShouldUpdatePortalView_BasedOnView(*pViewSetup, m_RecursiveViewComplexFrustums[m_iViewRecursionLevel]) == false' is what's causing the portal views to not render
-#if 0
-			if (pCurrentPortal->GetLinkedPortal() == NULL)
-			{
-				Warning("pCurrentPortal->GetLinkedPortal() == NULL\n");
-			}
-			if (pCurrentPortal == m_pRenderingViewExitPortal)
-			{
-				Warning("pCurrentPortal == m_pRenderingViewExitPortal\n");
-			}
-			if (pCurrentPortal->ShouldUpdatePortalView_BasedOnView(*pViewSetup, m_RecursiveViewComplexFrustums[m_iViewRecursionLevel]) == false)
-			{
-				Warning("pCurrentPortal->ShouldUpdatePortalView_BasedOnView(*pViewSetup, m_RecursiveViewComplexFrustums[m_iViewRecursionLevel]) == false)\n");
-			}
-#endif
-
 			continue;
 		}
-
 
 		Assert( m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes.Count() > pCurrentPortal->m_iPortalViewIDNodeIndex );
 
@@ -1375,8 +1370,8 @@ bool CPortalRender::DrawPortalsUsingStencils_Old( CViewRender *pViewRender )
 			m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pCurrentPortal->m_iPortalViewIDNodeIndex] = AllocPortalViewIDNode( m_HeadPortalViewIDNode.ChildNodes.Count(), nPortalIndex, nTeamIndex, CurrentViewID() );
 		}
 
-		PortalViewIDNode_t *pCurrentPortalViewNode = m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pCurrentPortal->m_iPortalViewIDNodeIndex];
-
+//		PortalViewIDNode_t *pCurrentPortalViewNode = m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pCurrentPortal->m_iPortalViewIDNodeIndex];
+		
 		// Step 0, Allow for special effects to happen before cutting a hole
 		{
 			pRenderContext->BeginPIXEvent( PIX_VALVE_ORANGE, "Portal_Step0" );
@@ -1413,9 +1408,6 @@ bool CPortalRender::DrawPortalsUsingStencils_Old( CViewRender *pViewRender )
 			pRenderContext->EndPIXEvent();
 		}
 
-		//see if we can skip the heavy lifting due to low visibility
-		if (bIsQueuedMode || //don't use pixel visibly as a skip check in queued mode, the data is simply too old.
-			pCurrentPortal->ShouldUpdatePortalView_BasedOnPixelVisibility(pCurrentPortalViewNode->fScreenFilledByPortalSurfaceLastFrame_Normalized))
 		{
 			//step 2, clear the depth buffer in stencil areas so we can render a new scene to them
 			{
@@ -1428,6 +1420,10 @@ bool CPortalRender::DrawPortalsUsingStencils_Old( CViewRender *pViewRender )
 				pRenderContext->EndPIXEvent();
 			}
 
+#ifdef _PS3
+			// step 2.5
+			ReloadZcullMemory();
+#endif // _PS3
 
 			//step 3, fill in stencil views (remember that in multiple depth situations that any subportals will run through this function again before this section completes, thereby screwing with stencil settings)
 			{
@@ -1514,7 +1510,7 @@ bool CPortalRender::DrawPortalsUsingStencils_Old( CViewRender *pViewRender )
 	}
 
 	//step 6, go back to non-stencil rendering mode in preparation to resume normal scene rendering
-	if (m_iViewRecursionLevel == 0)
+	if( m_iViewRecursionLevel == 0 )
 	{
 		Assert( m_pRenderingViewForPortal == NULL );
 		Assert( m_pRenderingViewExitPortal == NULL );
@@ -1540,15 +1536,15 @@ bool CPortalRender::DrawPortalsUsingStencils_Old( CViewRender *pViewRender )
 		pRenderContext->SetStencilState( m_StencilState );
 	}
 
-	if (bRebuildDrawListsWhenDone)
+	if( bRebuildDrawListsWhenDone )
 	{
-		memcpy((void *)pViewSetup, &ViewBackup, sizeof(CViewSetup)); //if we don't restore this, the view is permanently altered (in mid render of an existing scene)
+		memcpy( (void *)pViewSetup, &ViewBackup, sizeof( CViewSetup ) ); //if we don't restore this, the view is permanently altered (in mid render of an existing scene)
 	}
 
-	pRenderContext->Flush(true); //just in case
+	pRenderContext->Flush( true ); //just in case
 
 	++m_iRemainingPortalViewDepth;
-	
+
 	pRenderContext->BeginPIXEvent( PIX_VALVE_ORANGE, "Portal_DrawPortalsEnd" );
 	for( int i = 0; i < iNumRenderablePortals; ++i )
 	{

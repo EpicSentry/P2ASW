@@ -248,7 +248,9 @@ BEGIN_DATADESC( CTriggerPortalCleanser )
 	DEFINE_OUTPUT( m_OnFizzle, "OnFizzle" ),
 	DEFINE_OUTPUT( m_OnDissolveBox, "OnDissolveBox" ),
 
-	DEFINE_INPUTFUNC( FIELD_VOID, "FizzleTouchingPortals", InputFizzleTouchingPortals )
+	DEFINE_INPUTFUNC( FIELD_VOID, "FizzleTouchingPortals", InputFizzleTouchingPortals ),
+
+	DEFINE_THINKFUNC( SearchThink ),
 
 END_DATADESC()
 
@@ -397,7 +399,8 @@ void CTriggerPortalCleanser::Touch( CBaseEntity *pOther )
 
 	if ( pOther->IsPlayer() )
 	{
-		CPortal_Player *pPlayer = ToPortalPlayer( pOther );
+		// Static cast is slightly more efficient than ToPortalPlayer
+		CPortal_Player *pPlayer = static_cast<CPortal_Player*>( pOther );
 
 		if ( pPlayer )
 		{
@@ -495,6 +498,8 @@ void CTriggerPortalCleanser::Touch( CBaseEntity *pOther )
 				vOldVel = pPlayer->GetAbsVelocity() + Vector( pPlayer->EyeDirection2D().x * 4.0f, pPlayer->EyeDirection2D().y * 4.0f, -32.0f );
 			}
 		}
+		
+        pBaseAnimating->OnFizzled();
 
 		// Swap object with an disolving physics model to avoid touch logic
 		CBaseEntity *pDisolvingObj = ConvertToSimpleProp( pBaseAnimating );
@@ -574,6 +579,9 @@ void CTriggerPortalCleanser::FizzleBaseAnimating( CTriggerPortalCleanser *pFizzl
 		}
 
 		// Swap object with an disolving physics model to avoid touch logic
+		
+        pBaseAnimating->OnFizzled();
+
 		CBaseEntity *pDisolvingObj = ConvertToSimpleProp( pBaseAnimating );
 		if ( pDisolvingObj )
 		{
