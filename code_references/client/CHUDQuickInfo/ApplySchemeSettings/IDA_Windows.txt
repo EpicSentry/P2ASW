@@ -1,0 +1,14 @@
+void __thiscall CHUDQuickInfo::ApplySchemeSettings(CHUDQuickInfo *this, vgui::IScheme *pScheme)
+{
+  CHUDQuickInfo_vtbl *v3; // edx
+  void (__thiscall *LevelShutdown)(CHudElement *); // eax
+
+  vgui::Panel::ApplySchemeSettings((vgui::Panel *)this, pScheme);
+  v3 = this->CHudElement::CGameEventListener::IGameEventListener2::__vftable;
+  *(_DWORD *)&this->m_m_nBgTextureId4_register = 10;
+  *(_DWORD *)&this->m_roundedCorners = 10;
+  LevelShutdown = v3[2].LevelShutdown;
+  this->m_nBgTextureId4 = 6;
+  this->m_pSizer = (vgui::CSizerBase *)FLOAT_1_0;
+  ((void (__thiscall *)(CHUDQuickInfo *, _DWORD))LevelShutdown)(this, 0);
+}

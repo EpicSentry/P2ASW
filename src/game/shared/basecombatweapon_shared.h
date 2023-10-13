@@ -458,6 +458,9 @@ public:
 
 	virtual void			GetToolRecordingState( KeyValues *msg );
 	void					EnsureCorrectRenderingModel();
+	
+	virtual void			GetWeaponCrosshairScale( float &flScale ) { flScale = 1.f; }
+
 	virtual void			GetToolViewModelState( KeyValues *msg ) {} // this is just a stub for viewmodels to request recording of weapon-specific effects, etc
 
 #if !defined ( USES_PERSISTENT_ITEMS )

@@ -1,0 +1,58 @@
+bool __cdecl CHUDQuickInfo::ShouldDraw(CHUDQuickInfo *const this)
+{
+  int (__cdecl *v1)(C_BasePlayer_0 *, int); // esi
+  IClientMode *ClientMode; // eax
+  C_BasePlayer_0 *LocalPlayer; // edi
+  int v5; // eax
+  int v6; // eax
+  unsigned int m_Index; // eax
+  char *v8; // edx
+  C_BasePlayer_0 *v9; // eax
+
+  LOBYTE(v1) = 0;
+  if ( this->m_icon_rb )
+  {
+    if ( this->m_icon_rbn )
+    {
+      if ( this->m_icon_lb )
+      {
+        if ( this->m_icon_lbn )
+        {
+          ClientMode = GetClientMode();
+          if ( (*((unsigned __int8 (__cdecl **)(IClientMode *))ClientMode->_vptr_IClientMode + 29))(ClientMode) )
+          {
+            LocalPlayer = C_BasePlayer::GetLocalPlayer(-1);
+            if ( LocalPlayer )
+            {
+              if ( crosshair.m_pParent->m_Value.m_nValue )
+              {
+                if ( !IsRadialMenuOpen() )
+                {
+                  v1 = (int (__cdecl *)(C_BasePlayer_0 *, int))*((_DWORD *)LocalPlayer->_vptr_IHandleEntity + 387);
+                  v5 = (*(int (__cdecl **)(IVEngineClient *))(*(_DWORD *)engine + 508))(engine);
+                  v6 = v1(LocalPlayer, v5);
+                  LOBYTE(v1) = 0;
+                  if ( v6 != 2 )
+                  {
+                    m_Index = LocalPlayer->m_hViewEntity.m_Index;
+                    if ( m_Index == -1
+                      || (v8 = (char *)g_pEntityList + 16 * (unsigned __int16)m_Index,
+                          *((_DWORD *)v8 + 2) != HIWORD(m_Index))
+                      || (v9 = (C_BasePlayer_0 *)*((_DWORD *)v8 + 1)) == 0
+                      || (LOBYTE(v1) = 0, LocalPlayer == v9) )
+                    {
+                      LOBYTE(v1) = 0;
+                      if ( CHudElement::ShouldDraw(this) )
+                        return (*(int (__cdecl **)(IVEngineClient *))(*(_DWORD *)engine + 108))(engine) ^ 1;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return (char)v1;
+}

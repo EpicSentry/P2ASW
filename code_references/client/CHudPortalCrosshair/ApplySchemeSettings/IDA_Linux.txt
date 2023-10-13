@@ -1,0 +1,9 @@
+void __cdecl CHudPortalCrosshair::ApplySchemeSettings(CHudPortalCrosshair *const this, vgui::IScheme *scheme)
+{
+  CHudIcons *v2; // eax
+
+  vgui::Panel::ApplySchemeSettings(&this->vgui::Panel, scheme);
+  v2 = HudIcons();
+  this->m_pDefaultCrosshair = CHudIcons::GetIcon(v2, "crosshair_default");
+  (*(void (__cdecl **)(vgui::Panel *, _DWORD))(*(_DWORD *)this->gap0 + 288))(&this->vgui::Panel, 0);
+}

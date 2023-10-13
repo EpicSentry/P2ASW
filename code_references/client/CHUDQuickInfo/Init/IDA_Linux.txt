@@ -1,0 +1,21 @@
+void __cdecl CHUDQuickInfo::Init(CHUDQuickInfo *const this)
+{
+  bool v1; // zf
+  int v2; // eax
+  vgui::ISurface *v3; // edx
+
+  v1 = this->m_nArrowTexture == -1;
+  this->m_flLastEventTime = 0.0;
+  if ( v1 )
+  {
+    v2 = (*(int (__cdecl **)(vgui::ISurface *, _DWORD))(*(_DWORD *)g_pVGuiSurface + 164))(g_pVGuiSurface, 0);
+    v3 = g_pVGuiSurface;
+    this->m_nArrowTexture = v2;
+    (*(void (__cdecl **)(vgui::ISurface *, int, const char *, int, _DWORD))(*(_DWORD *)v3 + 140))(
+      v3,
+      v2,
+      "HUD/hud_icon_arrow",
+      1,
+      0);
+  }
+}

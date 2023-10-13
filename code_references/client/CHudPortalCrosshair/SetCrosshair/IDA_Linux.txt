@@ -1,0 +1,5 @@
+void __cdecl CHudPortalCrosshair::SetCrosshair(CHudPortalCrosshair *const this, CHudTexture *texture, Color *const clr)
+{
+  this->m_pCrosshair = texture;
+  this->m_clrCrosshair = *clr;
+}

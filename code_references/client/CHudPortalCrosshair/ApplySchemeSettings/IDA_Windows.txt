@@ -1,0 +1,13 @@
+void __thiscall CHudPortalCrosshair::ApplySchemeSettings(CHudPortalCrosshair *this, vgui::IScheme *scheme)
+{
+  CHudIcons *v3; // eax
+  CHudTexture *Icon; // eax
+  CHudPortalCrosshair_vtbl *v5; // edx
+
+  vgui::Panel::ApplySchemeSettings((vgui::Panel *)this, scheme);
+  v3 = HudIcons();
+  Icon = CHudIcons::GetIcon(v3, "crosshair_default");
+  v5 = this->CHudElement::CGameEventListener::IGameEventListener2::__vftable;
+  *(_DWORD *)&this->m_m_nPaintBackgroundType_register = Icon;
+  ((void (__thiscall *)(CHudPortalCrosshair *, _DWORD))v5[2].LevelShutdown)(this, 0);
+}

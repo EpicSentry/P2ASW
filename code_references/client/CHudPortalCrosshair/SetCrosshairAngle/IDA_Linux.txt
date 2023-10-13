@@ -1,0 +1,4 @@
+void __cdecl CHudPortalCrosshair::SetCrosshairAngle(CHudPortalCrosshair *const this, const QAngle *const angle)
+{
+  this->m_vecCrossHairOffsetAngle = *angle;
+}

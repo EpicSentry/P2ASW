@@ -1,0 +1,5 @@
+void __cdecl CHudPortalCrosshair::ResetCrosshair(CHudPortalCrosshair *const this)
+{
+  this->m_clrCrosshair = (Color)-1;
+  this->m_pCrosshair = this->m_pDefaultCrosshair;
+}

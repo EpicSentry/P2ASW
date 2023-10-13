@@ -1,0 +1,56 @@
+void __thiscall CHUDQuickInfo::CHUDQuickInfo(CHUDQuickInfo *this, const char *pElementName, int a3)
+{
+  int v4; // ecx
+  vgui::PanelMessageMap *v5; // ebx
+  PanelAnimationMap *v6; // ebx
+  vgui::PanelKeyBindingMap *v7; // ebx
+  IClientMode *ClientMode; // eax
+  vgui::Panel *v9; // eax
+
+  if ( a3 )
+  {
+    *((_DWORD *)&this->vgui::Panel::__vftable + 1) = &CSurveyQuestion::`vbtable';
+    *((_DWORD *)&this->m_flPortalIconScale + 2) = &vgui::IClientPanel::`vftable';
+  }
+  CHudElement::CHudElement(this, pElementName);
+  vgui::Panel::Panel(&this->vgui::Panel, 0, "HUDQuickInfo");
+  v4 = *((_DWORD *)&this->vgui::Panel::__vftable + 1);
+  this->CHudElement::CGameEventListener::IGameEventListener2::__vftable = (CHUDQuickInfo_vtbl *)&CHUDQuickInfo::`vftable';
+  this->vgui::Panel::__vftable = (vgui::Panel_vtbl *)&CHUDQuickInfo::`vftable'{for `vgui::Panel'};
+  *(vgui::Panel_vtbl **)((char *)&this->vgui::Panel::__vftable + *(_DWORD *)(v4 + 4) + 4) = (vgui::Panel_vtbl *)&CHUDQuickInfo::`vftable'{for `vgui::IClientPanel'};
+  *(vgui::Panel_vtbl **)((char *)&this->vgui::Panel::__vftable
+                       + *(_DWORD *)(*((_DWORD *)&this->vgui::Panel::__vftable + 1) + 4)) = (vgui::Panel_vtbl *)(*(_DWORD *)(*((_DWORD *)&this->vgui::Panel::__vftable + 1) + 4) - 400);
+  if ( !`CHUDQuickInfo::ChainToMap'::`2'::chained )
+  {
+    `CHUDQuickInfo::ChainToMap'::`2'::chained = 1;
+    v5 = vgui::FindOrAddPanelMessageMap("CHUDQuickInfo");
+    v5->pfnClassName = CHUDQuickInfo::GetPanelClassName;
+    v5->baseMap = vgui::FindOrAddPanelMessageMap("vgui::Panel");
+  }
+  if ( !`CHUDQuickInfo::ChainToAnimationMap'::`2'::chained )
+  {
+    `CHUDQuickInfo::ChainToAnimationMap'::`2'::chained = 1;
+    v6 = FindOrAddPanelAnimationMap("CHUDQuickInfo");
+    v6->pfnClassName = CHUDQuickInfo::GetPanelClassName;
+    v6->baseMap = FindOrAddPanelAnimationMap("vgui::Panel");
+  }
+  if ( !`CHUDQuickInfo::KB_ChainToMap'::`2'::chained )
+  {
+    `CHUDQuickInfo::KB_ChainToMap'::`2'::chained = 1;
+    v7 = vgui::FindOrAddPanelKeyBindingMap("CHUDQuickInfo");
+    v7->pfnClassName = CHUDQuickInfo::GetPanelClassName;
+    v7->baseMap = vgui::FindOrAddPanelKeyBindingMap("vgui::Panel");
+  }
+  ClientMode = GetClientMode();
+  v9 = ClientMode->GetViewport(ClientMode);
+  vgui::Panel::SetParent(&this->vgui::Panel, v9);
+  CTraceFilterSkipTwoEntities::SetPassEntity2(this, 256);
+  this->m_fLastPlacedAlpha[1] = 0.0;
+  this->m_fLastPlacedAlpha[0] = 0.0;
+  this->m_nCursorRadius = 0;
+  this->m_nPortalIconOffsetX = 0;
+  this->m_nPortalIconOffsetY = 0;
+  *(_WORD *)this->m_bLastPlacedAlphaCountingUp = 257;
+  this->m_nArrowTexture = -1;
+  LODWORD(this->m_flPortalIconScale) = FLOAT_1_0;
+}

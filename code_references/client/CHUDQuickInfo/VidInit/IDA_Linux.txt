@@ -1,0 +1,17 @@
+void __cdecl CHUDQuickInfo::VidInit(CHUDQuickInfo *const this)
+{
+  CHudIcons *v1; // eax
+  CHudIcons *v2; // eax
+  CHudIcons *v3; // eax
+  CHudIcons *v4; // eax
+
+  (*((void (__cdecl **)(CHUDQuickInfo *const))this->_vptr_IGameEventListener2 + 5))(this);
+  v1 = HudIcons();
+  this->m_icon_rb = CHudIcons::GetIcon(v1, "portal_crosshair_right_valid");
+  v2 = HudIcons();
+  this->m_icon_lb = CHudIcons::GetIcon(v2, "portal_crosshair_left_valid");
+  v3 = HudIcons();
+  this->m_icon_rbn = CHudIcons::GetIcon(v3, "portal_crosshair_right_invalid");
+  v4 = HudIcons();
+  this->m_icon_lbn = CHudIcons::GetIcon(v4, "portal_crosshair_left_invalid");
+}

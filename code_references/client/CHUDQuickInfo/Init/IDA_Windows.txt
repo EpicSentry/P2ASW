@@ -1,0 +1,14 @@
+void __thiscall CHUDQuickInfo::Init(CHUDQuickInfo *this)
+{
+  bool v2; // zf
+  int v3; // eax
+
+  v2 = this->m_nArrowTexture == -1;
+  *((_DWORD *)&this->m_pSizer + 2) = 0;
+  if ( v2 )
+  {
+    v3 = g_pVGuiSurface->CreateNewTextureID(g_pVGuiSurface, 0);
+    this->m_nArrowTexture = v3;
+    g_pVGuiSurface->DrawSetTextureFile(g_pVGuiSurface, v3, "HUD/hud_icon_arrow", 1, 0);
+  }
+}

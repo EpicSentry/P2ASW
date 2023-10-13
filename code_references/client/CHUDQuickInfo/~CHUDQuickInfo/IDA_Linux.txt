@@ -1,0 +1,15 @@
+void __cdecl CHUDQuickInfo::~CHUDQuickInfo(CHUDQuickInfo *const this)
+{
+  vgui::ISurface *v1; // eax
+
+  this->_vptr_IGameEventListener2 = (int (**)(...))off_12D612C;
+  v1 = g_pVGuiSurface;
+  *(_DWORD *)this->gap0 = off_12D6208;
+  if ( v1 && this->m_nArrowTexture != -1 )
+  {
+    (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)v1 + 564))(v1, this->m_nArrowTexture);
+    this->m_nArrowTexture = -1;
+  }
+  vgui::Panel::~Panel(&this->vgui::Panel, (const void **const)&off_12D60F4);
+  CHudElement::~CHudElement(this);
+}

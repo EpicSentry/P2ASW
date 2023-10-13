@@ -1,0 +1,31 @@
+void __cdecl CHUDQuickInfo::DrawPortalHints(CHUDQuickInfo *const this)
+{
+  C_BasePlayer_0 *LocalPlayer; // eax
+  const void *v2; // eax
+  char *v3; // eax
+  char *v4; // esi
+  Vector vecPosition; // [esp+18h] [ebp-20h] BYREF
+  Vector v6; // [esp+24h] [ebp-14h] BYREF
+
+  LocalPlayer = C_BasePlayer::GetLocalPlayer(-1);
+  if ( LocalPlayer )
+  {
+    v2 = (const void *)(*((int (__cdecl **)(C_BasePlayer_0 *))LocalPlayer->_vptr_IHandleEntity + 303))(LocalPlayer);
+    if ( v2 )
+    {
+      v3 = (char *)_dynamic_cast(
+                     v2,
+                     (const struct __class_type_info *)&`typeinfo for'C_BaseCombatWeapon,
+                     (const struct __class_type_info *)&`typeinfo for'C_WeaponPortalgun,
+                     0);
+      v4 = v3;
+      if ( v3 )
+      {
+        vecPosition = *(Vector *)(v3 + 3736);
+        CHUDQuickInfo::DrawPortalHint(this, &vecPosition, 1);
+        v6 = *(Vector *)(v4 + 3748);
+        CHUDQuickInfo::DrawPortalHint(this, &v6, 0);
+      }
+    }
+  }
+}
