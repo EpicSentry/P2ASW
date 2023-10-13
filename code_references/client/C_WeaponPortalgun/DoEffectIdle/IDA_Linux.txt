@@ -1,0 +1,29 @@
+void __cdecl C_WeaponPortalgun::DoEffectIdle(C_WeaponPortalgun *const this)
+{
+  float m_fPulse; // xmm0_4
+  float v2; // xmm0_4
+  float v3; // xmm0_4
+
+  C_WeaponPortalgun::StartEffects(this);
+  m_fPulse = this->m_fPulse;
+  if ( this->m_bPulseUp )
+  {
+    v2 = m_fPulse + gpGlobals->frametime;
+    this->m_fPulse = v2;
+    if ( v2 > 1.0 )
+    {
+      this->m_fPulse = 1.0;
+      this->m_bPulseUp = 0;
+    }
+  }
+  else
+  {
+    v3 = m_fPulse - gpGlobals->frametime;
+    this->m_fPulse = v3;
+    if ( v3 < 0.0 )
+    {
+      this->m_fPulse = 0.0;
+      this->m_bPulseUp = 1;
+    }
+  }
+}

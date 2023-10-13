@@ -88,6 +88,7 @@ void C_WeaponPortalgun::Spawn( void )
 
 	//SetThink( &C_BaseEntity::Think );
 	SetNextThink( gpGlobals->curtime + 0.1 );
+	SetNextClientThink( CLIENT_THINK_ALWAYS );
 }
 
 //-----------------------------------------------------------------------------
@@ -96,7 +97,7 @@ void C_WeaponPortalgun::Spawn( void )
 void C_WeaponPortalgun::StartEffects( void )
 {
 
-	Vector vColorPortal; // [esp+Ch] [ebp-14h] BYREF
+	Vector vColorPortal = GetEffectColor( m_iLastFiredPortal );
 
 	C_BaseCombatCharacter *pOwner = GetOwner();
 	C_BasePlayer *pPlayer = ToBasePlayer(pOwner); // edi
@@ -104,47 +105,32 @@ void C_WeaponPortalgun::StartEffects( void )
 
 	if (pPlayer)
 		vm = pPlayer->GetViewModel();
-
-	if (!m_hPortalGunEffectFP.IsValid() && vm)
+	
+	if (!m_hPortalGunEffectFP && vm)
 	{
 		m_hPortalGunEffectFP = vm->ParticleProp()->Create( "portalgun_top_light_firstperson", PATTACH_POINT_FOLLOW, "Body_light");
 
+		if ( !m_hPortalGunEffectFP )
+			return;
+		
+		m_hPortalGunEffectFP->SetControlPoint( 1, vColorPortal );
 		vm->ParticleProp()->AddControlPoint( m_hPortalGunEffectFP, 2, pOwner, PATTACH_CUSTOMORIGIN );
 		m_hPortalGunEffectFP->SetControlPointEntity( 2, pOwner );
 		vm->ParticleProp()->AddControlPoint( m_hPortalGunEffectFP, 3, vm, PATTACH_POINT_FOLLOW, "Beam_point1" );
 		vm->ParticleProp()->AddControlPoint( m_hPortalGunEffectFP, 4, vm, PATTACH_POINT_FOLLOW, "Beam_point5" );
 	}
-	if ( m_hPortalGunEffectTP.IsValid() )
+
+
+	if ( !m_hPortalGunEffectTP )
 	{
-	LABEL_28:
-
-		vColorPortal = GetEffectColor( m_iLastFiredPortal.m_Value );
-		if ( m_hPortalGunEffectFP.IsValid() )
-		{
-			m_hPortalGunEffectFP->SetControlPoint( 1, vColorPortal );
-			m_hPortalGunEffectFP->SetControlPointEntity( 2, pOwner );
-		}
-
-		if ( m_hPortalGunEffectTP.IsValid() )
-		{
-			m_hPortalGunEffectTP->SetControlPoint( 1, vColorPortal );
-			m_hPortalGunEffectTP->SetControlPointEntity( 2, pOwner );
-		}
-		return;
-	}
-
-	m_hPortalGunEffectTP = ParticleProp()->Create( "portalgun_top_light_thirdperson", PATTACH_POINT_FOLLOW, "Body_light" );
-
-	if ( m_hPortalGunEffectTP.IsValid() )
-	{
-		ParticleProp()->AddControlPoint( m_hPortalGunEffectTP, 2, pOwner, PATTACH_CUSTOMORIGIN, 0, vec3_origin, 0 );
-
+		m_hPortalGunEffectTP = ParticleProp()->Create( "portalgun_top_light_thirdperson", PATTACH_POINT_FOLLOW, "Body_light" );
+				
+		m_hPortalGunEffectTP->SetControlPoint( 1, vColorPortal );
+		ParticleProp()->AddControlPoint( m_hPortalGunEffectTP, 2, pOwner, PATTACH_CUSTOMORIGIN );
 		m_hPortalGunEffectTP->SetControlPointEntity( 2, pOwner );
-		ParticleProp()->AddControlPoint( m_hPortalGunEffectTP, 3, this, PATTACH_POINT_FOLLOW, "Beam_point1", vec3_origin, 0 );
-		ParticleProp()->AddControlPoint( m_hPortalGunEffectTP, 4, this, PATTACH_POINT_FOLLOW, "Beam_point5", vec3_origin, 0 );
-		goto LABEL_28;
+		ParticleProp()->AddControlPoint( m_hPortalGunEffectTP, 3, this, PATTACH_POINT_FOLLOW, "Beam_point1" );
+		ParticleProp()->AddControlPoint( m_hPortalGunEffectTP, 4, this, PATTACH_POINT_FOLLOW, "Beam_point5" );
 	}
-
 }
 
 void C_WeaponPortalgun::DestroyEffects( void )
@@ -171,8 +157,8 @@ void C_WeaponPortalgun::DoEffectReady( void )
 // Holding effects
 //-----------------------------------------------------------------------------
 void C_WeaponPortalgun::DoEffectHolding( void )
-{  
-	C_BaseViewModel *vm = NULL; // ebx
+{	
+	C_BaseViewModel *vm = NULL;
 	C_BaseCombatCharacter *pOwner = GetOwner();
   
 	C_BasePlayer *pPlayer = ToBasePlayer( pOwner ); // edi
@@ -298,54 +284,55 @@ void C_WeaponPortalgun::OnDataChanged( DataUpdateType_t updateType )
 
 void C_WeaponPortalgun::ClientThink( void )
 {
+	C_BaseCombatCharacter *pOwner = GetOwner();
 
-	CPortal_Player *pPlayer = ToPortalPlayer( GetOwner() );
+	CPortal_Player *pPlayer = ToPortalPlayer( pOwner );
 
-	if ( pPlayer && dynamic_cast<C_WeaponPortalgun*>( pPlayer->GetActiveWeapon() ) )
-	{
-		if ( m_EffectState == EFFECT_NONE )
+	if ( pPlayer )
+	{	
+		C_BaseCombatWeapon *pWeapon = pPlayer->GetActiveWeapon();
+		
+		// This if statement isn't correct, but it's cheaper than doing a dynamic_cast
+		if ( pWeapon == this && m_EffectState != 2 )
 		{
-			if( m_hPortalGunEffectTP.IsValid() )
-			{
-				m_hPortalGunEffectTP->StopEmission();
-				m_hPortalGunEffectTP = NULL;
-			}
-
-			if ( m_hPortalGunEffectHoldingFP.IsValid() )
+			if ( m_hPortalGunEffectHoldingFP )
 			{
 				m_hPortalGunEffectHoldingFP->StopEmission();
 				m_hPortalGunEffectHoldingFP = NULL;
 			}
+			if ( m_hPortalGunEffectHoldingTP )
+			{
+				m_hPortalGunEffectHoldingTP->StopEmission();
+				m_hPortalGunEffectHoldingTP = NULL;
+			}
 		}
 	}
+	DoEffectIdle();
+}
 
-	// Update our effects
-	//DoEffectIdle();
-	
+void C_WeaponPortalgun::DoEffectIdle( void )
+{	
 	StartEffects();
-	
 	if ( m_bPulseUp )
 	{
-		float flNewPulse = gpGlobals->frametime + 16 + m_fPulse;
+		float flNewPulse = m_fPulse + gpGlobals->frametime;
 		m_fPulse = flNewPulse;
 		if ( flNewPulse > 1.0 )
 		{
-		  m_bPulseUp = false;
-		  m_fPulse = 1.0;
+			m_fPulse = 1.0;
+			m_bPulseUp = 0;
 		}
 	}
 	else
 	{
-		float flNewPulse = m_fPulse - gpGlobals->frametime + 16;
+		float flNewPulse = m_fPulse - gpGlobals->frametime;
 		m_fPulse = flNewPulse;
 		if ( flNewPulse < 0.0 )
 		{
-			m_bPulseUp = true;
 			m_fPulse = 0.0;
+			m_bPulseUp = 1;
 		}
 	}
-
-	NetworkStateChanged();
 }
 
 Vector C_WeaponPortalgun::GetEffectColor( int iPalletIndex )
