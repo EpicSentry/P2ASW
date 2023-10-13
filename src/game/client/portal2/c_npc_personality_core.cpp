@@ -259,4 +259,4 @@ void CLightedMouthProxy::OnBind( void *pC_BaseEntity )
 	}
 }
 
-EXPOSE_MATERIAL_PROXY( CLightedMouthProxy, LightedMouthProxy );
+EXPOSE_MATERIAL_PROXY( CLightedMouthProxy, LightedMouth );

@@ -77,6 +77,9 @@ BEGIN_DATADESC( CNPC_Portal_FloorTurret )
 	DEFINE_FIELD( m_iLastState, FIELD_INTEGER ),
 	DEFINE_FIELD( m_fNextTalk, FIELD_FLOAT ),
 	DEFINE_FIELD( m_bDelayTippedTalk, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_bIsDead, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_bIsBurning, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_flBurnExplodeTime, FIELD_FLOAT ),
 
 	DEFINE_KEYFIELD( m_bDamageForce, FIELD_BOOLEAN, "DamageForce" ),
 	DEFINE_KEYFIELD( m_ModelName, FIELD_STRING, "model"), //The custom model used *if unused is selected
@@ -84,7 +87,10 @@ BEGIN_DATADESC( CNPC_Portal_FloorTurret )
 	DEFINE_KEYFIELD( m_bUsedAsActor, FIELD_BOOLEAN, "UsedAsActor"),
 	DEFINE_KEYFIELD( m_bGagged, FIELD_BOOLEAN, "Gagged"),
 	DEFINE_KEYFIELD( m_bUseSuperDamageScale, FIELD_BOOLEAN, "UseSuperDamageScale"),
+	DEFINE_KEYFIELD( m_nCollisionType, FIELD_INTEGER, "CollisionType"),
 	DEFINE_KEYFIELD( m_bLoadAlternativeModels, FIELD_BOOLEAN, "LoadAlternativeModels"),
+	DEFINE_KEYFIELD( m_bPickupEnabled, FIELD_BOOLEAN, "PickupEnabled"),
+	DEFINE_KEYFIELD( m_bDisableMotion, FIELD_BOOLEAN, "DisableMotion"),
 
 	DEFINE_THINKFUNC( Retire ),
 	DEFINE_THINKFUNC( Deploy ),
@@ -197,6 +203,22 @@ void CNPC_Portal_FloorTurret::Spawn( void )
 
 	m_bNoAlarmSounds = true;
 	m_bOutOfAmmo = ( m_spawnflags & SF_FLOOR_TURRET_OUT_OF_AMMO ) != 0;
+
+	if (m_flTurretRange == 0.0f)
+		m_flTurretRange = 1024.0f;
+
+	SetMaxHealth(10);
+
+	m_bIsDead = false;
+
+	if (m_bDisableMotion)
+		if (m_pPhysicsObject)
+			m_pPhysicsObject->EnableMotion(false);
+
+	if (m_nCollisionType == COLLISION_GROUP_DEBRIS)
+		SetCollisionGroup(COLLISION_GROUP_DEBRIS_TRIGGER);
+
+	m_nSkin = m_iKeySkin;
 
 	AddEffects(EF_NOFLASHLIGHT);
 	SetFadeDistance(-1.0f, 0.0f);
