@@ -991,7 +991,7 @@ ConversionErrorType COptionsSubMultiplayer::ConvertJPEGToTGA(const char *jpegpat
 	}
 
 	// start the decompress with the jpeg engine.
-	if (jpeg_start_decompress(&jpegInfo) != TRUE)
+	if (jpeg_start_decompress(&jpegInfo) != 1)
 	{
 		jpeg_destroy_decompress(&jpegInfo);
 		fclose(infile);
@@ -1027,7 +1027,7 @@ ConversionErrorType COptionsSubMultiplayer::ConvertJPEGToTGA(const char *jpegpat
 	while (working && (jpegInfo.output_scanline < jpegInfo.output_height))
 	{
 		row_pointer[0] = &(buf[cur_row * row_stride]);
-		if (jpeg_read_scanlines(&jpegInfo, row_pointer, 1) != TRUE)
+		if (jpeg_read_scanlines(&jpegInfo, row_pointer, 1) != 1)
 		{
 			working = false;
 		}

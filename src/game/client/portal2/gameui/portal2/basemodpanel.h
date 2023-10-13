@@ -20,24 +20,14 @@
 #include "ixboxsystem.h"
 #include "matchmaking/imatchframework.h"
 #include "utlmap.h"
-#include "ugc_workshop_manager.h"
 
-#if defined( PORTAL2_PUZZLEMAKER )
-extern ConVar cm_current_community_map;
-#endif // PORTAL2_PUZZLEMAKER
 
 #define BASEMODPANEL_SINGLETON BaseModUI::CBaseModPanel::GetSingleton()
 
-#if !defined( NO_STEAM )
-extern CWorkshopManager &WorkshopManager( void );
-#endif // 
 
 // must supply some non-trivial time to let the movie startup smoothly
 #define TRANSITION_FROM_OVERLAY_DELAY_TIME	0.5f	// how long to wait before starting the fade
 #define TRANSITION_OVERLAY_FADE_TIME		0.7f	// how fast to fade
-
-#define COMMUNITY_MAP_PATH				"maps/workshop"	// Path to Workshop maps downloaded from Steam
-#define COMMUNITY_MAP_THUMBNAIL_PREFIX	"thumb"			// Prefix for thumbnail filename
 
 enum OverlayResult_t
 {
@@ -47,145 +37,6 @@ enum OverlayResult_t
 	RESULT_FAIL_INVALID_USER_ID,
 	RESULT_FAIL_MISSING_API
 };
-
-enum {
-	UGC_PRIORITY_GENERIC = 0,	// Misc files
-	UGC_PRIORITY_BSP,			// Content
-	UGC_PRIORITY_THUMBNAIL,		// Thumbnails for content
-	UGC_PRIORITY_USER_MAP,		// User created maps
-};
-
-enum ECommunityMapQueueMode {
-	QUEUEMODE_INVALID = -1,		// Nothing has been set, any queue calls are invalid!
-	QUEUEMODE_USER_QUEUE,		// User is moving through their specified queue
-	QUEUEMODE_USER_COOP_QUEUE,	// User is moving through their specified coop queue
-	QUEUEMODE_QUICK_PLAY,		// User is quick playing with a filter
-	QUEUEMODE_COOP_QUICK_PLAY,	// User is quick playing coop maps
-};
-
-#if !defined( NO_STEAM )
-
-// Handle file requests for community maps (downloads thumbnail / content)
-class CBaseCommunityRequest : public CBasePublishedFileRequest
-{
-public:
-	CBaseCommunityRequest( PublishedFileId_t nFileID ) : 
-		CBasePublishedFileRequest( nFileID )
-	{}
-
-	virtual void OnLoaded( PublishedFileInfo_t &info );
-};
-
-// Handle file requests for community maps (downloads thumbnail / content)
-class CCommunityMapRequest : public CBaseCommunityRequest
-{
-public:
-
-	typedef CBaseCommunityRequest BaseClass;
-
-	CCommunityMapRequest( PublishedFileId_t nFileID, uint32 nSubscribeTime ) :
-		BaseClass( nFileID ),
-		m_unSubscribeTime( nSubscribeTime )
-	  {}
-
-
-	virtual void OnLoaded( PublishedFileInfo_t &info );
-	virtual void OnError( EResult nErrorCode );
-
-	uint32 m_unSubscribeTime;
-};
-
-// Handle file requests for partner's community coop maps (downloads thumbnail / content)
-class CCommunityMapCoopRequest : public CBaseCommunityRequest
-{
-public:
-
-	typedef CBaseCommunityRequest BaseClass;
-
-	CCommunityMapCoopRequest( PublishedFileId_t nFileID, UGCHandle_t hFile, UGCHandle_t hPreviewFile ) :
-	BaseClass( nFileID ), m_hCoopFile( hFile ), m_hCoopPreviewFile( hPreviewFile )
-	{}
-
-
-	virtual void OnLoaded( PublishedFileInfo_t &info );
-	virtual void OnError( EResult nErrorCode );
-
-	UGCHandle_t m_hCoopFile;
-	UGCHandle_t	m_hCoopPreviewFile;
-};
-
-class CCommunityMapSPQuickplayRequest : public CBaseCommunityRequest
-{
-public:
-
-	typedef CBaseCommunityRequest BaseClass;
-
-	CCommunityMapSPQuickplayRequest( PublishedFileId_t nFileID ) :
-	BaseClass( nFileID )
-	{}
-
-	virtual void OnLoaded( PublishedFileInfo_t &info );
-	virtual void OnError( EResult nErrorCode );
-};
-
-// Handle file requests for community coop quickplay
-class CCommunityMapCoopQuickplayRequest : public CBaseCommunityRequest
-{
-public:
-
-	typedef CBaseCommunityRequest BaseClass;
-
-	CCommunityMapCoopQuickplayRequest( PublishedFileId_t nFileID ) :
-	BaseClass( nFileID )
-	{}
-
-	virtual void OnLoaded( PublishedFileInfo_t &info );
-	virtual void OnError( EResult nErrorCode );
-};
-
-// Handle file requests for community map queue history (downloads thumbnail)
-class CQueueHistoryEntryRequest : public CBaseCommunityRequest
-{
-public:
-
-	typedef CBaseCommunityRequest BaseClass;
-
-	CQueueHistoryEntryRequest( PublishedFileId_t nFileID ) : 
-		BaseClass( nFileID ),
-		m_unLastPlayedTime( 0 ),
-		m_unCompletionTime( 0 ) 
-	{}
-
-	CQueueHistoryEntryRequest( PublishedFileId_t nFileID, uint32 nLastPlayedTime, uint32 nCompletionTime ) : 
-		BaseClass( nFileID ),
-		m_unLastPlayedTime( nLastPlayedTime ),
-		m_unCompletionTime( nCompletionTime ) 
-	{}
-
-	virtual void OnLoaded( PublishedFileInfo_t &info );
-	virtual void OnError( EResult nErrorCode );
-
-	uint32 m_unLastPlayedTime;
-	uint32 m_unCompletionTime;
-};
-
-// Handle file requests for community maps (downloads thumbnail / content)
-class CUserPublishedFileRequest : public CBaseCommunityRequest
-{
-public:
-
-	typedef CBaseCommunityRequest BaseClass;
-
-	CUserPublishedFileRequest( PublishedFileId_t nFileID ) : 
-		BaseClass( nFileID )
-	{}
-
-
-	virtual void OnLoaded( PublishedFileInfo_t &info );
-	virtual void OnError( EResult nErrorCode );
-};
-
-#endif // !NO_STEAM
 
 struct SaveGameInfo_t
 {
@@ -282,19 +133,6 @@ namespace BaseModUI
 		WT_COOPEXITCHOICE,
 		WT_EXTRAS,
 		WT_FADEOUTTOECONUI,
-#if defined( PORTAL2_PUZZLEMAKER )
-		WT_COMMUNITYMAP,
-		WT_RATEMAP,
-		WT_PLAYTESTDEMOS,
-		WT_PLAYTESTUPLOADWAIT,
-		WT_EDITORMAINMENU,
-		WT_EDITORCHAMBERLIST,
-		WT_PUZZLEMAKEREXITCONRFIRMATION,
-		WT_PUZZLEMAKERSAVEDIALOG,
-		WT_PUZZLEMAKERCOMPILEDIALOG,
-		WT_PUZZLEMAKERPUBLISHPROGRESS,
-		WT_QUICKPLAY,
-#endif // PORTAL2_PUZZLEMAKER
 		WT_WINDOW_COUNT // WT_WINDOW_COUNT must be last in the list!
 	};
 
@@ -444,11 +282,6 @@ namespace BaseModUI
 		vgui::IImage *GetPartnerImage() { return m_pAvatarImage; }
 		char const *GetPartnerDescKey();
 		
-#if defined( PORTAL2_PUZZLEMAKER )
-		void SetupCommunityMapLoad();
-		void SetForceUseAlternateTileSet( bool bUseAlternateTileSet ) { m_bForceUseAlternateTileSet = bUseAlternateTileSet; }
-		bool ForceUseAlternateTileSet( void ) const { return m_bForceUseAlternateTileSet; }
-#endif // PORTAL2_PUZZLEMAKER
 
 		bool IsTransitionEffectEnabled();
 		CBaseModTransitionPanel *GetTransitionEffectPanel();
@@ -460,53 +293,15 @@ namespace BaseModUI
 
 		void ComputeCroppedTexcoords( float flBackgroundSourceAspectRatio /* ie. 16/9, 16/10 */, float flPhysicalAspectRatio /*GetWidth() / GetHeight() */, float &sMin, float &tMin, float &sMax, float &tMax );
 
-		void MoveToCommunityMapQueue( void ) { m_bMoveToCommunityMapQueue = true; }
 		void MoveToEditorMainMenu( void ) { m_bMoveToEditorMainMenu = true; }
 
 #if !defined( NO_STEAM )
-
-		// 
-		// Community map queue methods
-		// 
-
-		bool						RemoveCommunityMap( PublishedFileId_t nID );
-		unsigned int				GetNumCommunityMapsInQueue( void ) const { return m_vecCommunityMapsQueue.Count(); }
-		const PublishedFileInfo_t	*GetCommunityMap( int nIndex );
-		const PublishedFileInfo_t	*GetCommunityMapByFileID( PublishedFileId_t nID ) const;
-		const PublishedFileInfo_t	*GetNextSubscribedMapInQueue() const;
-		float						GetQueueBaselineRequestTime( void ) const { return m_flQueueBaselineRequestTime; }
-		bool						HasReceivedQueueBaseline( void ) const { return m_bReceivedQueueBaseline; }
-		int							GetNumCommunityMapsPlayedThisSession( void ) const { return m_nNumCommunityMapsPlayedThisSession; }
-		void						SetNumCommunityMapsPlayedThisSession( int nNumMapsPlayed );
-		bool						QueueCommunityMapReady( void ) const;
-		bool						IsValidMapForCurrentQueueMode( const PublishedFileInfo_t *pFileInfo ) const;
-#if !defined( _GAMECONSOLE )
-		EWorkshopEnumerationType	GetCurrentQuickPlayEnumerationType() const { return m_eCurrentQuickPlayEnumerationType; }
-		void						SetCurrentQuickPlayEnumerationType( EWorkshopEnumerationType eQuickPlayEnumerationType ) { m_eCurrentQuickPlayEnumerationType = eQuickPlayEnumerationType; }
-#endif
-		const PublishedFileInfo_t	*GetNextCommunityMapInQueueBasedOnQueueMode() const;
-
-		//
-		// User published map methods
-		//
-
-		bool						RemoveUserPublishedMap( PublishedFileId_t nID );
-		const PublishedFileInfo_t	*GetUserPublishedMapByFileID( PublishedFileId_t nID );
-		const PublishedFileInfo_t	*GetUserPublishedMap( int nIndex );
-		float						GetUserPublishedMapsBaselineRequestTime( void ) const { return m_flUserPublishedMapsBaselineRequestTime; }
-		bool						HasReceivedUserPublishedMapsBaseline( void ) const { return m_bReceivedUserPublishedMapsBaseline; }
-		void						AddUserPublishedMap( PublishedFileId_t nMapID );
-		unsigned int				GetNumUserPublishedMaps( void ) const { return m_vecUserPublishedMaps.Count(); }
 
 		//
 		// Queue history methods
 		//
 
 		void						QueryForQueueHistory( void );
-		bool						RemoveQueueHistoryEntry( PublishedFileId_t nID );
-		unsigned int				GetNumQueueHistoryEntries( void ) const { return m_vecQueueHistoryEntries.Count(); }
-		const PublishedFileInfo_t	*GetQueueHistoryEntry( int nIndex );
-		const PublishedFileInfo_t	*GetQueueHistoryEntryByFileID( PublishedFileId_t nID );
 		float						GetQueueHistoryBaselineRequestTime( void ) const { return m_flQueueHistoryBaselineRequestTime; }
 		bool						HasReceivedQueueHistoryBaseline( void ) const { return m_bReceivedQueueHistoryBaseline; }
 		bool						QueueHistoryReady( void ) const;
@@ -517,57 +312,23 @@ namespace BaseModUI
 		
 		bool						LoadLocalMapPlayOrder( void );	// Load the local play order off disk
 		bool						SaveLocalMapPlayOrder( void );
-		int							GetLocalMapIndexByPublishedFileID( PublishedFileId_t unFileID );
-		bool						SetLocalMapPlayed( PublishedFileId_t unFileID );
 
 		// 
 		// UGC methods
 		// 
 
-		bool						CreateThumbnailFileRequest( const PublishedFileInfo_t &info );
-		bool						CreateMapFileRequest( const PublishedFileInfo_t &info, bool bUserMadeMap = false );
-
 		//
 		// Basic queue / history helper functions
 		//
-
-		bool						UnsubscribeFromMap( PublishedFileId_t nMapID );
-		bool						SubscribeToMap( PublishedFileId_t nMapID );
-		bool						MarkCommunityMapPlayedTime( PublishedFileId_t nMapID, uint32 nTime );
-		bool						MarkCommunityMapCompletionTime( PublishedFileId_t nMapID, uint32 nTime );
-		
-		// FIXME: This is totally hosed now once we work past the int range, but I have no easy way to communicate this state to the server!
-		PublishedFileId_t			GetCurrentCommunityMapID( void ) const;
-		void						SetCurrentCommunityMapID( PublishedFileId_t mapID );
-		void						ClearCurrentCommunityMapID( void );
-		int							GetCurrentCommunityMapQueuePosition( void );
-		PublishedFileId_t			GetNextCommunityMapID( void ) const { return m_nNextFileID; }
-		void						SetNextCommunityMapID( PublishedFileId_t nMapID ) { m_nNextFileID = nMapID; }
 		
 		// Quick play options
-		void						SetCommunityMapQueueMode( ECommunityMapQueueMode mode ) { m_eCommunityMapQueueMode = mode; }
-		ECommunityMapQueueMode		GetCommunityMapQueueMode( void ) const { return m_eCommunityMapQueueMode; }
 		float						GetQuickPlayBaselineRequestTime( void ) const { return m_flQuickPlayBaselineRequestTime; }
 		bool						HasReceivedQuickPlayBaseline( void ) const { return m_bReceivedQuickPlayBaseline; }
-		unsigned int				GetNumQuickPlayEntries( void ) const { return m_vecQuickPlayMaps.Count(); }
-		const PublishedFileInfo_t	*GetCurrentCommunityMap( void );
-		const PublishedFileInfo_t	*GetNextQuickPlayMapInQueue() const;
-		bool						RemoveQuickPlayMapFromQueue( PublishedFileId_t nID );
 		bool						QuickPlayEntriesReady( void ) const;
 		bool						QuickPlayEntriesError( void ) const;
-		bool						IsQuickplay( void ) const { return m_eCommunityMapQueueMode == QUEUEMODE_COOP_QUICK_PLAY || m_eCommunityMapQueueMode == QUEUEMODE_QUICK_PLAY; }
-		bool						IsCommunityCoop( void ) const { return m_eCommunityMapQueueMode == QUEUEMODE_COOP_QUICK_PLAY || m_eCommunityMapQueueMode == QUEUEMODE_USER_COOP_QUEUE; }
-
-		// Overlay / Workshop functions
-		OverlayResult_t				ViewAllCommunityMapsInWorkshop( void );
-		OverlayResult_t				ViewCommunityMapInWorkshop( PublishedFileId_t nFileID );
-		OverlayResult_t				ViewAuthorsWorkshop( CSteamID user );
 
 #endif // !NO_STEAM
 
-#if !defined( _GAMECONSOLE )
-		bool						QueryForQuickPlayMaps();
-#endif // !_GAMECONSOLE
 
 		// --------------------------------------
 
@@ -606,56 +367,16 @@ namespace BaseModUI
 		//
 		// Community map files
 		//
-
-		// Enumeration of subscribed files by this user
-		CCallResult<CBaseModPanel, RemoteStorageEnumerateUserSubscribedFilesResult_t> m_callbackEnumerateSubscribedMaps;
-		void Steam_OnEnumerateSubscribedMaps( RemoteStorageEnumerateUserSubscribedFilesResult_t *pResult, bool bError );
-
-		CCallResult<CBaseModPanel, RemoteStorageEnumerateUserPublishedFilesResult_t> m_callbackEnumeratePublishedMaps;
-		void Steam_OnEnumeratePublishedMaps( RemoteStorageEnumerateUserPublishedFilesResult_t *pResult, bool bError );
-
-		void QueryForCommunityMaps( void );
-		void QueryForUserPublishedMaps( void );
-		CUtlVector< PublishedFileId_t >	m_vecCommunityMapsQueue;
-		CUtlVector< PublishedFileId_t >	m_vecUserPublishedMaps;
-
-		void AddCommunityMap( PublishedFileId_t nMapID, uint32 nSubscribeTime );
-		void AddQuickPlayMap( PublishedFileId_t nMapID );
 		// This decides what the next quickplay map ID will be based on the passed in map ID
-		PublishedFileId_t			DetermineNextQuickPlayMapID( PublishedFileId_t nCurrentMap ) const;	
 		
-		int					m_nTotalSubscriptionsLoaded;				// Number of subscriptions we've received from the Steam server. This may not be the total number available, meaning we need to requery.
 		bool				m_bReceivedQueueBaseline;					// Whether or not we've heard back successfully from Steam on our queue status
 		float				m_flQueueBaselineRequestTime;				// Time that the baseline was requested from the GC
 		bool				m_bQueueReady;								// We have all our information from Steam about our queue now
-
-		bool				m_bReceivedUserPublishedMapsBaseline;		// Whether or not we've received a baseline back from Steam on our published files
-		float				m_flUserPublishedMapsBaselineRequestTime;	// Time that the baseline was requested from the GC
-		int					m_nNumCommunityMapsPlayedThisSession;		// How many maps (in sequence) the player has played through this session
-		PublishedFileId_t	m_nNextFileID;
 
 		//
 		// Queue history
 		//
 
-#if !defined( _GAMECONSOLE )
-		
-		CCallResult<CBaseModPanel, RemoteStorageEnumeratePublishedFilesByUserActionResult_t> m_callbackEnumeratePublishedFilesByUserAction;
-		void Steam_OnEnumeratePublishedFilesByUserAction( RemoteStorageEnumeratePublishedFilesByUserActionResult_t *pResult, bool bError );
-		
-		CCallResult<CBaseModPanel, RemoteStorageEnumerateWorkshopFilesResult_t> m_callbackEnumerateWorkshopFiles;
-		void Steam_OnEnumerateWorkshopFiles( RemoteStorageEnumerateWorkshopFilesResult_t*pResult, bool bError );
-
-		bool QueryForQuickPlayMaps_Internal( EWorkshopEnumerationType eEnumerationType );
-
-		EWorkshopEnumerationType		m_eCurrentQuickPlayEnumerationType;
-
-#endif // !_GAMECONSOLE
-
-		void	RequestQueueHistory_Internal( void );
-		void	AddQueueHistoryEntry( PublishedFileId_t nMapID, uint32 nLastPlayedTime, uint32 nCompletionTime );
-
-		CUtlVector< PublishedFileId_t >	m_vecQueueHistoryEntries;			// All queue history entries we've retrieved
 		float							m_flQueueHistoryBaselineRequestTime;// Time that the baseline was requested from the GC
 		bool							m_bReceivedQueueHistoryBaseline;	// Whether or not we've heard back successfully from Steam on our queue history entries
 		int								m_nTotalQueueHistoryEntriesLoaded;	// Number of queue history entries we've received from the Steam server. This may not be the total number available, meaning we need to requery.
@@ -671,8 +392,6 @@ namespace BaseModUI
 		// Quick play queue
 		//
 
-		ECommunityMapQueueMode			m_eCommunityMapQueueMode;
-		CUtlVector< PublishedFileId_t >	m_vecQuickPlayMaps;
 		int32							m_nTotalQuickPlayEntriesLoaded;
 		bool							m_bReceivedQuickPlayBaseline;
 		float							m_flQuickPlayBaselineRequestTime;
@@ -757,7 +476,6 @@ namespace BaseModUI
 		XUID			m_xuidAvatarImage;
 		CUtlString		m_PartnerNameString;
 
-		bool			m_bMoveToCommunityMapQueue;
 		bool			m_bMoveToEditorMainMenu;
 
 		int	m_nActivationCount;

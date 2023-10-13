@@ -231,7 +231,6 @@ CUIGameData::CUIGameData() :
 #if !defined( NO_STEAM )
 	m_CallbackGameOverlayActivated( this, &CUIGameData::Steam_OnGameOverlayActivated ),
 	m_CallbackPersonaStateChanged( this, &CUIGameData::Steam_OnPersonaStateChanged ),
-	m_CallbackAvatarImageLoaded( this, &CUIGameData::Steam_OnAvatarImageLoaded ),
 	m_CallbackUserStatsStored( this, &CUIGameData::Steam_OnUserStatsStored ),
 	m_CallbackUserStatsReceived( this, &CUIGameData::Steam_OnUserStatsReceived ),
 #endif
@@ -316,6 +315,9 @@ CON_COMMAND( ui_fake_connection_problem, "" )
 }
 #endif
 
+
+const char *COM_GetModDirectory();
+
 void CUIGameData::OnSetStorageDeviceId( int iController, uint nDeviceId )
 {
 	// Check to see if there is enough room on this storage device
@@ -325,7 +327,7 @@ void CUIGameData::OnSetStorageDeviceId( int iController, uint nDeviceId )
 		m_pSelectStorageClient->OnDeviceFail( ISelectStorageDeviceClient::FAIL_NOT_SELECTED );
 		m_pSelectStorageClient = NULL;
 	}
-	else if ( IsX360() && xboxsystem && !xboxsystem->DeviceCapacityAdequate( iController, nDeviceId, engine->GetModDirectory() ) )
+	else if ( IsX360() && xboxsystem && !xboxsystem->DeviceCapacityAdequate( iController, nDeviceId, COM_GetModDirectory() ) )
 	{
 		CloseWaitScreen( NULL, "ReportDeviceFull" );
 		m_pSelectStorageClient->OnDeviceFail( ISelectStorageDeviceClient::FAIL_FULL );
@@ -983,25 +985,6 @@ void CUIGameData::Steam_OnUserStatsReceived( UserStatsReceived_t *pParam )
 void CUIGameData::Steam_OnGameOverlayActivated( GameOverlayActivated_t *pParam )
 {
 	m_bSteamOverlayActive = !!pParam->m_bActive;
-}
-
-void CUIGameData::Steam_OnAvatarImageLoaded( AvatarImageLoaded_t *pParam )
-{
-	if ( !pParam->m_steamID.IsValid() )
-		return;
-
-	CGameUiAvatarImage *pImage = NULL;
-	int iIndex = m_mapUserXuidToAvatar.Find( pParam->m_steamID.ConvertToUint64() );
-	if ( iIndex != m_mapUserXuidToAvatar.InvalidIndex() )
-	{
-		pImage = m_mapUserXuidToAvatar.Element( iIndex );
-	}
-
-	// Re-fetch the image if we have it cached
-	if ( pImage )
-	{
-		pImage->SetAvatarXUID( pParam->m_steamID.ConvertToUint64() );
-	}
 }
 
 void CUIGameData::Steam_OnPersonaStateChanged( PersonaStateChange_t *pParam )
@@ -1986,11 +1969,6 @@ void CUIGameData::OnEvent( KeyValues *pEvent )
 	}
 	else if ( !Q_stricmp( "OnInvite", szEvent ) )
 	{
-#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR )
-		// Close the EconUI
-		EconUI()->CloseEconUI();
-#endif
-
 		// Check if the user just accepted invite
 		if ( !Q_stricmp( "accepted", pEvent->GetString( "action" ) ) )
 		{

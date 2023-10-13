@@ -42,6 +42,8 @@ void VGui_OnScreenSizeChanged();
 bool VGui_IsSplitScreen();
 bool VGui_IsSplitScreenPIP();
 
+bool IsWidescreen();
+
 void VGui_OnSplitScreenStateChanged();
 
 #endif // VGUI_INT_H

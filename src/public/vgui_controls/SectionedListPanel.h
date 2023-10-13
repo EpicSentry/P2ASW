@@ -139,6 +139,14 @@ public:
 
 	// gets the local coordinates of a cell
 	virtual bool GetCellBounds(int itemID, int column, int &x, int &y, int &wide, int &tall);
+	
+	//=============================================================================
+	// HPE_BEGIN:
+	// [menglish] Get the bounds of an item or column.
+	//=============================================================================
+
+	// gets the local coordinates of an item
+	virtual bool GetItemBounds(int itemID, int &x, int &y, int &wide, int &tall);
 
 	// set up a field for editing
 	virtual void EnterEditMode(int itemID, int column, vgui::Panel *editPanel);

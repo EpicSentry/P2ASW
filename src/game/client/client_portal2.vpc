@@ -174,8 +174,6 @@ $Project "Client (Portal 2)"
 						"portal2\gameui\portal2\uigamedata_invite.cpp" \
 						"portal2\gameui\portal2\uigamedata_storage.cpp" \
 						"portal2\gameui\portal2\vachievements.cpp" \
-						"portal2\gameui\portal2\vaddonassociation.cpp" \
-						"portal2\gameui\portal2\vaddons.cpp" \
 						"portal2\gameui\portal2\vattractscreen.cpp" \
 						"portal2\gameui\portal2\vaudio.cpp" \
 						"portal2\gameui\portal2\vaudiovideo.cpp" \
@@ -205,8 +203,6 @@ $Project "Client (Portal 2)"
 						"portal2\gameui\portal2\vingamedifficultyselect.cpp" \
 						"portal2\gameui\portal2\vingamekickplayerlist.cpp" \
 						"portal2\gameui\portal2\vingamemainmenu.cpp" \
-						"portal2\gameui\portal2\vjukebox.cpp" \
-						"portal2\gameui\portal2\vkeyboard.cpp" \
 						"portal2\gameui\portal2\vkeyboardmouse.cpp" \
 						"portal2\gameui\portal2\vleaderboard.cpp" \
 						"portal2\gameui\portal2\vloadingprogress.cpp" \

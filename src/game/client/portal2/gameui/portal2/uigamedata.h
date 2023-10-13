@@ -218,7 +218,6 @@ public:
 #if !defined( NO_STEAM )
 	STEAM_CALLBACK( CUIGameData, Steam_OnGameOverlayActivated, GameOverlayActivated_t, m_CallbackGameOverlayActivated );
 	STEAM_CALLBACK( CUIGameData, Steam_OnPersonaStateChanged, PersonaStateChange_t, m_CallbackPersonaStateChanged );
-	STEAM_CALLBACK( CUIGameData, Steam_OnAvatarImageLoaded, AvatarImageLoaded_t, m_CallbackAvatarImageLoaded );
 	STEAM_CALLBACK( CUIGameData, Steam_OnUserStatsReceived, UserStatsReceived_t, m_CallbackUserStatsReceived );
 	STEAM_CALLBACK( CUIGameData, Steam_OnUserStatsStored, UserStatsStored_t, m_CallbackUserStatsStored );
 	bool CanInitiateConnectionToSteam();

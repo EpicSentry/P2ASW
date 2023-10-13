@@ -69,7 +69,7 @@
 	//#include "econ_ui.h"
 #endif
 
-#if defined( /*SWARM_DLL*/ ignorethis )
+#if defined( SWARM_DLL_ )
 
 #include "swarm/basemodpanel.h"
 #include "swarm/basemodui.h"

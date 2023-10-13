@@ -55,7 +55,7 @@
 #include "trigger_catapult.h"
 #include "portal_gamestats.h"
 #include "matchmaking/imatchframework.h"
-//#include "matchmaking/portal2/imatchext_portal2.h"
+#include "matchmaking/portal2/imatchext_portal2.h"
 #include "portal2_research_data_tracker.h"
 #include "pvs_extender.h"
 

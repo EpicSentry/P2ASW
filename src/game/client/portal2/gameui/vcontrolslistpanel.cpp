@@ -409,9 +409,9 @@ void VControlsListPanel::PerformLayout()
 		yPos = GetTall() - m_pLblDownArrow->GetTall();
 		m_pLblDownArrow->SetPos( xPos, yPos );	
 		m_pLblDownArrow->SetAlpha( 100 );
+
 		
 		int x, y;
-		/*
 		if ( GetItemBounds( GetItemIDFromRow( 0 ), x, y, wide, tall ) )
 		{
 			if ( y < 0 )
@@ -427,7 +427,7 @@ void VControlsListPanel::PerformLayout()
 				m_pLblDownArrow->SetAlpha( 255 );
 			}
 		}
-		*/
+		*
 	}
 }
 

@@ -107,25 +107,7 @@
 #include "vfadeouttoeconui.h"
 #include "materialsystem/materialsystem_config.h"
 #include "utlmap.h"
-
-#if defined( PORTAL2_PUZZLEMAKER )
-#include "gc_clientsystem.h"
-#include "econ_gcmessages.h"
-#include "vcommunitymapdialog.h"
-#include "vratemapdialog.h"
-#include "vplaytestdemosdialog.h"
-#include "vplaytestuploadwait.h"
-#include "../gcsdk/steamextra/rtime.h"
-#include "vpuzzlemakermenu.h"
-#include "vpuzzlemakermychambers.h"
-#include "vpuzzlemakerexitconfirmation.h"
-#include "vpuzzlemakersavedialog.h"
-#include "vpuzzlemakercompiledialog.h"
-#include "vpuzzlemakerpublishprogress.h"
-#include "puzzlemaker/puzzlemaker.h"
-#include "vquickplay.h"
-#include "c_community_coop.h"
-#endif // PORTAL2_PUZZLEMAKER
+#include "vgui_int.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -137,9 +119,11 @@ using namespace vgui;
 
 //setup in GameUI_Interface.cpp
 extern class IMatchSystem *matchsystem;
-extern IGameConsole *IGameConsole();
 
 extern CBaseModFrame *OpenPortal2EconUI( vgui::Panel *pParent );
+
+static int playingMusicFromAct = 1;
+extern ConVar portal2_current_act;
 
 #define MAX_QUICK_PLAY_ENTRIES	50	// We want at least this many in the queue to consider ourselves "full"
 
@@ -153,7 +137,8 @@ struct ChapterContext_t
 ChapterContext_t g_ChapterContextNames[] = 
 {
 #define CFG( spmapname, chapternum, subchapter ) { #spmapname, chapternum, subchapter },
-#include "../common/xlast_portal2/inc_sp_maps.inc"
+// Needs fixing?
+//#include "../common/xlast_portal2/inc_sp_maps.inc"
 #undef CFG
       { NULL, 0 },
 };
@@ -161,7 +146,8 @@ ChapterContext_t g_ChapterContextNames[] =
 ChapterContext_t g_ChapterMPContextNames[] = 
 {
 #define CFG( coopmapname, chapternum, subchapter, total ) { #coopmapname, chapternum, subchapter },
-#include "../common/xlast_portal2/inc_coop_maps.inc"
+// Needs fixing?
+//#include "../common/xlast_portal2/inc_coop_maps.inc"
 #undef CFG
 	{ NULL, 0 },
 };
@@ -223,58 +209,6 @@ ConVar ui_fadecloud_time( "ui_fadecloud_time", "1.5", FCVAR_DEVELOPMENTONLY );
 
 ConVar ui_lastact_played( "ui_lastact_played", "0", FCVAR_HIDDEN | FCVAR_ARCHIVE, "", true, 0, true, 99 );
 
-#if !defined( NO_STEAM )
-class CPortal2WorkshopManagerCallbackInterface : public CBaseWorkshopManagerCallbackInterface
-{
-public:
-
-	// File requests
-	virtual void OnFileRequestFinished( UGCHandle_t hFileHandle ) 
-	{
-		Log_Msg( LOG_WORKSHOP, "[BaseModPanel] File request (%llu) finished.", hFileHandle );
-	}
-	
-	virtual void OnFileRequestError( UGCHandle_t hFileHandle )
-	{
-		// FIXME: If this occurs, we may want to do real work to try and evict this from our usable set of maps
-		Log_Warning( LOG_WORKSHOP, "[BaseModPanel] Failed to download file request (%llu).", hFileHandle );
-	}
-
-	// Published files
-	virtual void OnPublishedFileSubscribed( PublishedFileId_t nID )
-	{
-		// Notify the dialog that something has changed underneath it and it needs to refresh
-		KeyValues *pKV = new KeyValues( "CommunityMap_Added" );
-		pKV->SetUint64( "mapID", nID );
-		g_pMatchFramework->GetEventsSubscription()->BroadcastEvent( pKV );
-	}
-
-	virtual void OnPublishedFileUnsubscribed( PublishedFileId_t nID )
-	{
-		// Notify the dialog that something has changed underneath it and it needs to refresh
-		KeyValues *pKV = new KeyValues( "CommunityMap_Removed" );
-		pKV->SetUint64( "mapID", nID );
-		g_pMatchFramework->GetEventsSubscription()->BroadcastEvent( pKV );
-	}
-
-	virtual void OnPublishedFileDeleted( PublishedFileId_t nID ) 
-	{
-		// Notify the dialog that something has changed underneath it and it needs to refresh
-		KeyValues *pKV = new KeyValues( "CommunityMap_Deleted" );
-		pKV->SetUint64( "mapID", nID );
-		g_pMatchFramework->GetEventsSubscription()->BroadcastEvent( pKV );
-	}
-};
-CPortal2WorkshopManagerCallbackInterface g_WorkshopManagerInterface;
-
-CWorkshopManager g_WorkshopManager( &g_WorkshopManagerInterface );
-
-CWorkshopManager &WorkshopManager( void )
-{ 
-	return g_WorkshopManager; 
-}
-#endif // !NO_STEAM
-
 //=============================================================================
 CBaseModPanel::CBaseModPanel(): BaseClass(0, "CBaseModPanel"),
 	m_bClosingAllWindows( false ),
@@ -282,7 +216,6 @@ CBaseModPanel::CBaseModPanel(): BaseClass(0, "CBaseModPanel"),
 	m_bSetup( false ),
 	m_flFadeinDelayAfterOverlay( 0 ),
 	m_bHideAndFadeinLater( false ),
-	m_bMoveToCommunityMapQueue( false ),
 	m_bMoveToEditorMainMenu( false )
 {
 #if !defined( NO_STEAM )
@@ -328,7 +261,7 @@ CBaseModPanel::CBaseModPanel(): BaseClass(0, "CBaseModPanel"),
 	m_FooterPanel = new CBaseModFooterPanel( this, "FooterPanel" );
 
 	m_pTransitionPanel = new CBaseModTransitionPanel( "TransitionPanel" );
-	m_pTransitionPanel->SetParent( enginevguifuncs->GetPanel( PANEL_TRANSITIONEFFECT ) );
+	m_pTransitionPanel->SetParent( enginevguifuncs->GetPanel( PANEL_GAMEUIDLL ) ); // PANEL_TRANSITIONEFFECT doesn't exist :(
 
 	m_hOptionsDialog = NULL;
 
@@ -402,16 +335,6 @@ CBaseModPanel::CBaseModPanel(): BaseClass(0, "CBaseModPanel"),
 	}
 #endif
 
-	if ( IsGameConsole() && 
-		( Sys_IsDebuggerPresent() || 
-		CommandLine()->FindParm( "-nostartupmenu" ) || 
-		CommandLine()->FindParm( "-noattract" ) || 
-		CommandLine()->FindParm( "-dev" ) ) )
-	{
-		// in development, prevent attract mode
-		m_flAttractDemoTimeout = 0;
-	}
-
 	if ( !IsGameConsole() )
 	{
 		// only for game console temporarily
@@ -421,40 +344,26 @@ CBaseModPanel::CBaseModPanel(): BaseClass(0, "CBaseModPanel"),
 #if !defined( NO_STEAM )	
 	
 	m_bUGCRequestsPaused = false;
-	
-	ClearCurrentCommunityMapID();
 
-	m_nTotalSubscriptionsLoaded = 0;
 	m_flQueueHistoryBaselineRequestTime = -1;	// No requests yet made
 	m_bReceivedQueueHistoryBaseline = false;
 	m_bQueueReady = false;
 	
 	m_nTotalQueueHistoryEntriesLoaded = 0;
 	m_flQueueBaselineRequestTime = -1;	// No requests yet made
-	m_flUserPublishedMapsBaselineRequestTime = -1;
 
-	m_bReceivedUserPublishedMapsBaseline = false;
 	m_bReceivedQueueBaseline = false;
-
-	m_vecQuickPlayMaps.Purge();
 
 	m_bQuickPlayQueueReady = false;
 	m_bQuickPlayQueueError = false;
 	m_nTotalQuickPlayEntriesLoaded = 0;
 	m_bReceivedQuickPlayBaseline = false;
 	m_flQuickPlayBaselineRequestTime = -1.0f;
-	m_nNextFileID = 0;
-
-	m_nNumCommunityMapsPlayedThisSession = 0;
-
+	
 	// Start out in an invalid state to ensure that this is being set properly in all cases
-	SetCommunityMapQueueMode( QUEUEMODE_INVALID );
 
 #endif // !NO_STEAM
 
-#if !defined(_GAMECONSOLE )
-	m_eCurrentQuickPlayEnumerationType = k_EWorkshopEnumerationTypeRankedByVote;
-#endif 
 }
 
 //=============================================================================
@@ -553,9 +462,6 @@ CBaseModFrame* CBaseModPanel::OpenWindow( const WINDOW_TYPE & wt, CBaseModFrame 
 	// Get the background state of the old window
 	CBaseModFrame *pOldWindow = m_Frames[ GetActiveWindowType() ].Get();
 	bool bOldWindowUsedAlternateTiles = ( pOldWindow && pOldWindow->UsesAlternateTiles() );
-#ifdef PORTAL2_PUZZLEMAKER
-	bOldWindowUsedAlternateTiles |= ForceUseAlternateTileSet();
-#endif // PORTAL2_PUZZLEMAKER
 	bool bUseAlternateTiles = false;
 
 
@@ -699,13 +605,6 @@ CBaseModFrame* CBaseModPanel::OpenWindow( const WINDOW_TYPE & wt, CBaseModFrame 
 		case WT_MAINMENU:
 			m_Frames[wt] = new MainMenu(this, "MainMenu");
 			SetupBackgroundPresentation();
-#ifdef PORTAL2_PUZZLEMAKER
-			SetForceUseAlternateTileSet( false );
-			if ( !( m_bMoveToCommunityMapQueue || m_bMoveToEditorMainMenu ) )
-			{
-				SetCommunityMapQueueMode( QUEUEMODE_INVALID );
-			}
-#endif // PORTAL2_PUZZLEMAKER
 			break;
 
 		case WT_ENDINGSPLITSCREEN:
@@ -920,43 +819,6 @@ CBaseModFrame* CBaseModPanel::OpenWindow( const WINDOW_TYPE & wt, CBaseModFrame 
 		case WT_FADEOUTTOECONUI:
 			m_Frames[wt] = new CFadeOutToEconUI( this, "FadeOutToEconUI" );
 			break;
-
-#if defined( PORTAL2_PUZZLEMAKER )
-		case WT_COMMUNITYMAP:
-			m_Frames[ wt ] = new CommunityMapDialog( this, "CommunityMapDialog" );
-			break;
-		case WT_RATEMAP:
-			m_Frames[ wt ] = new RateMapDialog( this, "RateMapDialog" );
-			break;
-		case WT_PLAYTESTDEMOS:
-			m_Frames[ wt ] = new CPlaytestDemosDialog( this, "PlaytestDemosDialog" );
-			break;
-		case WT_PLAYTESTUPLOADWAIT:
-			m_Frames[ wt ] = new CPlaytestUploadWait( this, "PlaytestUploadWait" );
-			break;
-		case WT_EDITORMAINMENU:
-			m_Frames[ wt ] = new CPuzzleMakerMenu( this, "PuzzleMakerMenu" );
-			SetForceUseAlternateTileSet( true );
-			break;
-		case WT_EDITORCHAMBERLIST:
-			m_Frames[ wt ] = new CPuzzleMakerMyChambers( this, "PuzzleMakerMyChambers" );
-			break;
-		case WT_PUZZLEMAKEREXITCONRFIRMATION:
-			m_Frames[ wt ] = new CPuzzleMakerExitConfirmation( this, "PuzzleMakerExitConfirmation" );
-			break;
-		case WT_PUZZLEMAKERSAVEDIALOG:
-			m_Frames[ wt ] = new CPuzzleMakerSaveDialog( this, "PuzzleMakerSaveDialog" );
-			break;
-		case WT_PUZZLEMAKERCOMPILEDIALOG:
-			m_Frames[ wt ] = new CPuzzleMakerCompileDialog( this, "PuzzleMakerCompileDialog" );
-			break;
-		case WT_PUZZLEMAKERPUBLISHPROGRESS:
-			m_Frames[ wt ] = new CPuzzleMakerPublishProgress( this, "PuzzleMakerPublishProgress" );
-			break;
-		case WT_QUICKPLAY:
-			m_Frames[ wt ] = new CQuickPlay( this, "QuickPlay" );
-			break;
-#endif // PORTAL2_PUZZLEMAKER
 		default:
 			Assert( false );	// unknown window type
 			break;
@@ -965,11 +827,6 @@ CBaseModFrame* CBaseModPanel::OpenWindow( const WINDOW_TYPE & wt, CBaseModFrame 
 		//
 		// Finish setting up the window
 		//
-
-#if defined( PORTAL2_PUZZLEMAKER )
-		// If we didn't get this through the window's context, check if our parent was using them, or if we're supposed to be using alternate tiles
-		bUseAlternateTiles = ForceUseAlternateTileSet();
-#endif // PORTAL2_PUZZLEMAKER
 
 		newNav = m_Frames[wt].Get();
 		if ( !newNav )
@@ -1456,7 +1313,7 @@ void CBaseModPanel::OnGameUIActivated()
 	{
 		return;
 	}
-	else if ( !IsGameConsole() && WT_LOADINGPROGRESS == currentActiveWindow )
+	else if ( WT_LOADINGPROGRESS == currentActiveWindow )
 	{
 		// Ignore UI activations when loading poster is up
 		return;
@@ -1582,25 +1439,7 @@ void CBaseModPanel::OpenFrontScreen( bool bIgnoreMatchSession )
 		{
 			CloseAllWindows();
 			
-#if defined( PORTAL2_PUZZLEMAKER )
-			// Clear this out!  We're no longer in a community map and might go play the SP campaign.
-			ClearCurrentCommunityMapID();
-
-			CBaseModFrame *pFrontWindow = OpenWindow( frontWindow, NULL );
-			if ( m_bMoveToCommunityMapQueue )
-			{
-				CBaseModFrame *pEditorMainMenu = OpenWindow( WT_EDITORMAINMENU, pFrontWindow, true );
-				OpenWindow( WT_COMMUNITYMAP, pEditorMainMenu, true);
-				m_bMoveToCommunityMapQueue = false;
-			}
-			else if ( m_bMoveToEditorMainMenu )
-			{
-				OpenWindow( WT_EDITORMAINMENU, pFrontWindow, true );
-				m_bMoveToEditorMainMenu = false;
-			}
-#else  // PORTAL2_PUZZLEMAKER
 			OpenWindow( frontWindow, NULL );
-#endif // PORTAL2_PUZZLEMAKER
 		}
 
 		if ( bIgnoreMatchSession )
@@ -1654,7 +1493,7 @@ void CBaseModPanel::SetupBackgroundPresentation()
 	bool bNowAtMainMenu = GetWindow( WT_MAINMENU ) || 
 							GetWindow( WT_ATTRACTSCREEN ) ||
 							GetWindow( WT_ENDINGSPLITSCREEN ) ||
-							( m_bMoveToCommunityMapQueue || m_bMoveToEditorMainMenu );
+							( m_bMoveToEditorMainMenu );
 
 	if ( bNowAtMainMenu )
 	{
@@ -1677,11 +1516,6 @@ void CBaseModPanel::SetupBackgroundPresentation()
 		// unexpected state, no active overlay
 		m_iFadeOutOverlayImageID = -1;
 	}
-
-#if !defined( NO_STEAM )	
-	// Reset this
-	ClearCurrentCommunityMapID();
-#endif // !NO_STEAM
 }
 
 //=============================================================================
@@ -1723,7 +1557,7 @@ void CBaseModPanel::RunFrame()
 		break;
 	}
 
-	if ( !IsGameConsole() && wt == WT_VIDEO )
+	if ( wt == WT_VIDEO )
 	{
 		const MaterialSystem_Config_t &config = materials->GetCurrentConfigForVideoCard();
 		if ( !config.Windowed() )
@@ -1754,69 +1588,13 @@ void CBaseModPanel::RunFrame()
 		engine->SetBlurFade( m_flBlurScale );
 	}
 
-	if ( IsGameConsole() && m_ExitingFrameCount )
-	{
-		CTransitionScreen *pTransitionScreen = static_cast< CTransitionScreen* >( GetWindow( WT_TRANSITIONSCREEN ) );
-		if ( pTransitionScreen && pTransitionScreen->IsTransitionComplete() )
-		{
-			// totally obscured, safe to shutdown movie
-			ShutdownBackgroundMovie();
-
-			if ( m_ExitingFrameCount > 1 )
-			{
-				m_ExitingFrameCount--;
-				if ( m_ExitingFrameCount == 1 )
-				{
-					// enough frames have transpired, send the single shot quit command
-					if ( m_bWarmRestartMode )
-					{
-						// restarts self, skips any intros
-						engine->ClientCmd_Unrestricted( "quit_gameconsole restart\n" );
-					}
-					else
-					{
-						// cold restart, quits to any startup app
-						engine->ClientCmd_Unrestricted( "quit_gameconsole\n" );
-					}
-				}
-			}
-		}
-	}
-
-	if ( IsGameConsole() )
-	{
-		if ( !IsUserIdleForAttractMode() )
-		{
-			// attract mode is not yet allowed
-			ResetAttractDemoTimeout();
-		}
-
-		if ( m_flAttractDemoTimeout  < 0 )
-		{
-			// reset timeout
-			m_flAttractDemoTimeout = Plat_FloatTime() + sys_attract_mode_timeout.GetFloat();
-		}
-		else if ( m_flAttractDemoTimeout > 0 && Plat_FloatTime() > m_flAttractDemoTimeout )
-		{
-			// timeout expired
-			ResetAttractDemoTimeout();
-
-			CBaseModFrame *pWindow = GetWindow( GetActiveWindowType() );
-			if ( pWindow )
-			{
-				// start the attract sequence
-				// the movie player screen fades in/out, so it needs the underlying panel to NOT hide
-				OpenWindow( WT_MOVIEPLAYER, pWindow, false );
-			}
-		}
-	}
-
 	// Implement baseui fadein/out when overlays are active
 	static bool s_bLastFrameVisible = true;
 	static bool s_bVisibility = true;
 	static float s_flVisibilityTime = 0.0f;
 	static int s_nStartingAlpha = 255;
-	bool bVisibility = !IsGameConsole() || !CUIGameData::Get() || !( CUIGameData::Get()->IsXUIOpen() || CUIGameData::Get()->IsSteamOverlayActive() );
+	// This is just a fancy way of saying true since this Swarm mod obviously doesn't run on a game console
+	bool bVisibility =  true;//!IsGameConsole() || !CUIGameData::Get() || !( CUIGameData::Get()->IsXUIOpen() || CUIGameData::Get()->IsSteamOverlayActive() );
 	if ( m_bHideAndFadeinLater )
 	{
 		bVisibility = false;
@@ -1878,7 +1656,7 @@ static void ChatRestrictionsAcknowledged()
 
 
 //=============================================================================
-CEG_NOINLINE void CBaseModPanel::OnLevelLoadingStarted( char const *levelName, bool bShowProgressDialog )
+void CBaseModPanel::OnLevelLoadingStarted( char const *levelName, bool bShowProgressDialog )
 {
 	Assert( !m_LevelLoading );
 
@@ -1920,9 +1698,7 @@ CEG_NOINLINE void CBaseModPanel::OnLevelLoadingStarted( char const *levelName, b
 	}
 
 	LoadingProgress *pLoadingProgress = static_cast<LoadingProgress*>( OpenWindow( WT_LOADINGPROGRESS, 0 ) );
-
-	CEG_PROTECT_MEMBER_FUNCTION( CBaseModPanel_OnLevelLoadingStarted );
-
+	
 	KeyValues *pMissionInfo = NULL;
 	KeyValues *pChapterInfo = NULL;
 	
@@ -1941,19 +1717,6 @@ CEG_NOINLINE void CBaseModPanel::OnLevelLoadingStarted( char const *levelName, b
 		{
 			bIsCoop = true;
 		}
-#if defined ( PORTAL2_PUZZLEMAKER )
-		//Playing a puzzlemaker map, check the puzzle info
-		if ( StringHasPrefix( levelName, "puzzlemaker" ) )
-		{
-			bIsCoop = g_pPuzzleMaker->GetPuzzleInfo().m_bIsCoop;
-			cm_is_current_community_map_coop.SetValue( bIsCoop );
-		}
-		//Playing a community map, check the ConVar
-		else if ( GetCurrentCommunityMapID() != 0 )
-		{
-			bIsCoop = cm_is_current_community_map_coop.GetBool();
-		}
-#endif //PORTAL2_PUZZLEMAKER
 
 		// Derive the mission info from the server game details
 		KeyValues *pGameSettings = g_pMatchFramework->GetMatchNetworkMsgController()->GetActiveServerGameDetails( NULL );
@@ -2081,7 +1844,7 @@ void CBaseModPanel::OnEngineLevelLoadingSession( KeyValues *pEvent )
 }
 
 //=============================================================================
-CEG_NOINLINE void CBaseModPanel::OnLevelLoadingFinished( KeyValues *kvEvent )
+void CBaseModPanel::OnLevelLoadingFinished( KeyValues *kvEvent )
 {
 	int bError = kvEvent->GetInt( "error" );
 	const char *failureReason = kvEvent->GetString( "reason" );
@@ -2111,8 +1874,6 @@ CEG_NOINLINE void CBaseModPanel::OnLevelLoadingFinished( KeyValues *kvEvent )
 	}
 
 	m_LevelLoading = false;
-
-	CEG_PROTECT_MEMBER_FUNCTION( CBaseModPanel_OnLevelLoadingFinished );
 
 	CBaseModFrame *pFrame = CBaseModPanel::GetSingleton().GetWindow( WT_GENERICCONFIRMATION );
 	if ( !pFrame )
@@ -2232,7 +1993,7 @@ void CBaseModPanel::OnClientReady()
 	KeyValues *kvCommand = new KeyValues( "Portal2::ClientReadyToStart" );
 	kvCommand->SetString( "run", "host" );
 	kvCommand->SetUint64( "clxuid", g_pMatchFramework->GetMatchSystem()->GetPlayerManager()->GetLocalPlayer( XBX_GetUserId( 0 ) )->GetXUID() );
-	kvCommand->SetString( "clflags", IsGameConsole() ? "console" : "default" );
+	kvCommand->SetString( "clflags", "default" );
 	g_pMatchFramework->GetMatchSession()->Command( KeyValues::AutoDeleteInline( kvCommand ) );
 }
 
@@ -2300,17 +2061,6 @@ void CBaseModPanel::OnEvent( KeyValues *pEvent )
 			if ( Q_stricmp( "host", g_pMatchFramework->GetMatchSession()
 				->GetSessionSystemData()->GetString( "type", "host" ) ) )
 			{
-#ifdef PORTAL2_PUZZLEMAKER
-				// if we're starting coop queue, let the coop manager handle the flow
-				if ( !V_stricmp( szGameMode, "coop_community" ) )
-				{
-					SetForceUseAlternateTileSet( true );
-					g_CommunityCoopManager.OnClientReady();
-					return;
-				}
-
-				SetForceUseAlternateTileSet( false );
-#endif // PORTAL2_PUZZLEMAKER
 
 				OnClientReady();
 
@@ -2501,7 +2251,7 @@ void CBaseModPanel::OnEvent( KeyValues *pEvent )
 			// Check that maybe a game console is the client who is connecting to us
 			// then as a PC we need to relinquish our host status and let the console
 			// be the server
-			if ( !IsGameConsole() )
+			//if ( !IsGameConsole() )
 			{
 				XUID clxuid = pEvent->GetUint64( "clxuid" );
 				KeyValues *pClMachine = NULL;
@@ -2537,36 +2287,6 @@ void CBaseModPanel::OnEvent( KeyValues *pEvent )
 			}
 		}
 	}
-#if !defined( NO_STEAM )
-	else if ( !V_stricmp( "CommunityMap_Added", szEvent ) )
-	{
-#if !defined( _PS3 )		
-		// Add the new map into the list (use the current time to approximate the subscription time)
-		uint64 mapID = pEvent->GetUint64( "mapID", 0 );
-		CRTime::UpdateRealTime();
-		AddCommunityMap( mapID, CRTime::RTime32TimeCur() );
-		Log_Msg( LOG_WORKSHOP, "[BaseModPanel] Event: Community map added (%llu)\n", mapID );
-#endif // !PS3
-	}
-	else if ( !V_stricmp( "CommunityMap_Removed", szEvent ) )
-	{
-		// Subtraction has happened
-		uint64 mapID = pEvent->GetUint64( "mapID", 0 );
-		RemoveCommunityMap( mapID );
-		Log_Msg( LOG_WORKSHOP, "[BaseModPanel] Event: Community map removed (%llu)\n", mapID );
-	}
-	else if ( !V_stricmp( "CommunityMap_Deleted", szEvent ) )
-	{
-		// Subtraction has happened
-		uint64 mapID = pEvent->GetUint64( "mapID", 0 );
-		Log_Msg( LOG_WORKSHOP, "[BaseModPanel] Event: Community map deleted (%llu)\n", mapID );
-		
-		// FIXME: Is this the right call?
-		m_vecUserPublishedMaps.FindAndRemove( mapID );
-		m_vecCommunityMapsQueue.FindAndRemove( mapID );
-		m_vecQueueHistoryEntries.FindAndRemove( mapID );
-	}
-#endif // !NO_STEAM
 }
 
 void CBaseModPanel::OnKeyCodePressed( KeyCode code )
@@ -2606,7 +2326,7 @@ void CBaseModPanel::MigrateHostToClient( KeyValues *params )
 	KeyValues *kvCommand = new KeyValues( "Portal2::ClientReadyToStart" );
 	kvCommand->SetString( "run", "host" );
 	kvCommand->SetUint64( "clxuid", g_pMatchFramework->GetMatchSystem()->GetPlayerManager()->GetLocalPlayer( XBX_GetUserId( 0 ) )->GetXUID() );
-	kvCommand->SetString( "clflags", IsGameConsole() ? "console" : "default" );
+	kvCommand->SetString( "clflags", "default" );
 	pIMatchSession->Command( KeyValues::AutoDeleteInline( kvCommand ) );
 }
 
@@ -2756,10 +2476,15 @@ void CBaseModPanel::ApplySchemeSettings(IScheme *pScheme)
 	SetBgColor( pScheme->GetColor( "Blank", Color( 0, 0, 0, 0 ) ) );
 
 	// need the startup image instantly to take over from the non-interactive refresh on first paint
+#if 0 // FIXME: We're missing engine functions!
 	char filename[MAX_PATH];
-	engine->GetStartupImage( filename, sizeof( filename ) );
+	engine->GetStartupImage( filename, sizeof( filename ) ); // TODO: There must be a way to do this!
 	m_iStartupImageID = surface()->CreateNewTextureID();
+
 	surface()->DrawSetTextureFile( m_iStartupImageID, filename, true, false );
+#else
+	m_iStartupImageID = surface()->CreateNewTextureID();
+#endif
 
 	m_iProductImageID = surface()->CreateNewTextureID();
 	surface()->DrawSetTextureFile( m_iProductImageID, "vgui/portal2logo", true, false );
@@ -2800,29 +2525,7 @@ void CBaseModPanel::ApplySchemeSettings(IScheme *pScheme)
 
 	// Recalculate the movie parameters at next render
 	m_flU1 = m_flV1 = 0.0f;
-
-#if defined( PORTAL2_PUZZLEMAKER )
-	if ( m_bSetup == false )
-	{
-		// Setup file logging for Workshop activity
-		if ( filelogginglistener != NULL )
-		{
-			s_WorkshopLogHandle = filelogginglistener->BeginLoggingToFile( "workshop_log.txt", "w" );
-			filelogginglistener->AssignLogChannel( LOG_WORKSHOP, s_WorkshopLogHandle );
-
-			CRTime cTime;
-			CRTime::UpdateRealTime();
-			cTime.SetFromCurrentTime( 0 );
-			Log_Msg( LOG_WORKSHOP, "\nWorkshop Log Initiated: (%02u/%02u/%02u - %02u:%02u:%02u)\n-----------------------------------------------------\n", cTime.GetMonth()+1, cTime.GetDayOfMonth(), cTime.GetYear(), cTime.GetHour(), cTime.GetMinute(), cTime.GetSecond() );
-		}
-
-		// Start pulling down community puzzle information
-		QueryForCommunityMaps();
-		QueryForUserPublishedMaps();		
-		QueryForQueueHistory();
-	}
-#endif // PORTAL2_PUZZLEMAKER
-
+	
 	// set up the radial menu to record correctly in playest demos - must be done before demo starts recording
 	engine->RegisterDemoCustomDataCallback( "RadialMenuMouseCallback", RadialMenuMouseCallback );
 
@@ -3005,10 +2708,20 @@ void CBaseModPanel::CalculateMovieParameters( BIKMaterial_t hBIKMaterial, bool b
 	{
 		return;
 	}
-
+	// TODO:
+#if 0
 	const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
 	float flPhysicalFrameRatio = aspectRatioInfo.m_flFrameBuffertoPhysicalScalar * ( ( float ) GetWide() / ( float ) GetTall() );
 
+	float  flFrameBufferRatio = aspectRatioInfo.m_flPhysicalToFrameBufferScalar;
+
+#else
+	// The constructor for AspectRatioInfo_t sets m_flFrameBuffertoPhysicalScalar to 1.0f, let's just use that for now.
+	float flPhysicalFrameRatio = 1.0 * ( ( float ) GetWide() / ( float ) GetTall() );
+
+	float flFrameBufferRatio = 1.0f;
+
+#endif
 	// Assume that the video is authored for square pixels.
 	float flVideoRatio = ( ( float ) nWidth / ( float ) nHeight );
 	
@@ -3021,12 +2734,12 @@ void CBaseModPanel::CalculateMovieParameters( BIKMaterial_t hBIKMaterial, bool b
 		{
 			m_nMoviePlaybackWidth = GetWide();
 			// Have to account for the difference between physical and pixel aspect ratios.
-			m_nMoviePlaybackHeight = ( ( float )GetWide() / aspectRatioInfo.m_flPhysicalToFrameBufferScalar ) / flVideoRatio;
+			m_nMoviePlaybackHeight = ( ( float )GetWide() / flFrameBufferRatio ) / flVideoRatio;
 		}
 		else if ( flVideoRatio < flPhysicalFrameRatio )
 		{
 			// Have to account for the difference between physical and pixel aspect ratios.
-			m_nMoviePlaybackWidth = ( float )GetTall() * flVideoRatio * aspectRatioInfo.m_flPhysicalToFrameBufferScalar;
+			m_nMoviePlaybackWidth = ( float )GetTall() * flVideoRatio * flFrameBufferRatio;
 			m_nMoviePlaybackHeight = GetTall();
 		}
 		else
@@ -3043,7 +2756,7 @@ void CBaseModPanel::CalculateMovieParameters( BIKMaterial_t hBIKMaterial, bool b
 		// Width must be adjusted.  Lop of the left and right.
 		float flImageWidth = ( float )GetTall() * flVideoRatio;
 		// convert from physical to pixels
-		flImageWidth *= aspectRatioInfo.m_flPhysicalToFrameBufferScalar;
+		flImageWidth *= flFrameBufferRatio;
 		const float flSpanScaled = ( m_flU1 - m_flU0 ) * GetWide() / flImageWidth;
 		m_flU0 = ( m_flU1 - flSpanScaled ) / 2.0f;
 		m_flU1 = m_flU0 + flSpanScaled;
@@ -3054,7 +2767,12 @@ void CBaseModPanel::CalculateMovieParameters( BIKMaterial_t hBIKMaterial, bool b
 		float flImageHeight = ( float )GetWide() * ( ( float )nHeight / ( float )nWidth );
 		// convert from physical to pixels
 		// ( would divide by m_flPhysicalToFrameBufferScalar, but m_flFrameBuffertoPhysicalScalar = 1.0f / m_flPhysicalToFrameBufferScalar
+
+		//*= 1.0f is literally useless
+#if 0
 		flImageHeight *= aspectRatioInfo.m_flFrameBuffertoPhysicalScalar;
+#endif
+
 		const float flSpanScaled = ( m_flV1 - m_flV0 ) * GetTall() / flImageHeight;
 		m_flV0 = ( m_flV1 - flSpanScaled ) / 2.0f;
 		m_flV1 = m_flV0 + flSpanScaled;
@@ -3153,20 +2871,6 @@ void CBaseModPanel::ShutdownBackgroundMovie( void )
 //=============================================================================
 bool CBaseModPanel::RenderBackgroundMovie()
 {
-	if ( IsGameConsole() )
-	{
-		if ( !m_bAllowMovie )
-		{
-			return false;
-		}
-		else if ( !engine->GameHasShutdownAndFlushedMemory() )
-		{
-			// Do not actually start the movie until the engine has fully finished unloading the previous map's assets from memory
-			// (this will take several frames, and the total duration is unpredictable - it completes in HostState_GameShutdown).
-			return false;
-		}
-	}
-
 	// Bring up the video if we haven't before or Alt+Tab has made it invalid
 	if ( !ActivateBackgroundEffects() )
 	{
@@ -3565,11 +3269,10 @@ void CBaseModPanel::PostChildPaint()
 		// only the background images (first frame movie snap) that overlay the movies need to adjust their texcoords to match the movie
 		if ( m_iBackgroundImageID != -1 && m_iFadeOutOverlayImageID == m_iBackgroundImageID )
 		{
-			const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
 			float sMin, tMin, sMax, tMax;
 
 			// needs to match image aspect ratio (known to be either 16:9 or 4:3), resolved in SelectBackgroundPresentation()
-			ComputeCroppedTexcoords( aspectRatioInfo.m_bIsWidescreen ? 16.0f/9.0f : 4.0f/3.0f, ( float )GetWide() / ( float )GetTall(), sMin, tMin, sMax, tMax );
+			ComputeCroppedTexcoords( IsWidescreen() ? 16.0f/9.0f : 4.0f/3.0f, ( float )GetWide() / ( float )GetTall(), sMin, tMin, sMax, tMax );
 			surface()->DrawTexturedSubRect( 0, 0, GetWide(), GetTall(), sMin, tMin, sMax, tMax );
 		}
 		else
@@ -3588,10 +3291,6 @@ void CBaseModPanel::OnCommand(const char *command)
 {
 	if ( !Q_stricmp( command, "QuitRestartNoConfirm" ) )
 	{
-		if ( IsGameConsole() )
-		{
-			StartExitingProcess( false );
-		}
 	}
 	else if ( !Q_stricmp( command, "RestartWithNewLanguage" ) )
 	{
@@ -3719,6 +3418,28 @@ void CBaseModPanel::OnMovedPopupToFront()
 
 bool CBaseModPanel::IsBackgroundMusicPlaying()
 {
+	int currentAct = 1;
+	switch (portal2_current_act.GetInt())
+	{
+	default:
+	case 1:
+		currentAct = 1; break;
+	case 2:
+		currentAct = 2; break;
+	case 3:
+		currentAct = 3; break;
+	case 4:
+		currentAct = 4; break;
+	case 5:
+		currentAct = 5; break;
+	}
+
+	if (currentAct != playingMusicFromAct)
+	{
+		ReleaseBackgroundMusic();
+		return false;
+	}
+
 	if ( m_BackgroundMusicString.IsEmpty() )
 		return false;
 
@@ -3743,7 +3464,27 @@ bool CBaseModPanel::StartBackgroundMusic( float fVol )
 	if ( m_ExitingFrameCount )
 		return false;
 	
-	m_nBackgroundMusicGUID = enginesound->EmitAmbientSound( m_BackgroundMusicString, BACKGROUND_MUSIC_DUCK * fVol );
+	switch (portal2_current_act.GetInt())
+	{
+	default:
+	case 1:
+		playingMusicFromAct = 1;
+		enginesound->EmitAmbientSound("music/mainmenu/portal2_background01.wav", 1.0f * fVol, 100); break;
+	case 2:
+		playingMusicFromAct = 2;
+		enginesound->EmitAmbientSound("music/mainmenu/portal2_background02.wav", 1.0f * fVol, 100); break;
+	case 3:
+		playingMusicFromAct = 3;
+		enginesound->EmitAmbientSound("music/mainmenu/portal2_background03.wav", 1.0f * fVol, 100); break;
+	case 4:
+		playingMusicFromAct = 4;
+		enginesound->EmitAmbientSound("music/mainmenu/portal2_background04.wav", 1.0f * fVol, 100); break;
+	case 5:
+		playingMusicFromAct = 5;
+		enginesound->EmitAmbientSound("music/mainmenu/portal2_background05.wav", 1.0f * fVol, 100); break;
+	}
+	m_nBackgroundMusicGUID = enginesound->GetGuidForLastSoundEmitted();
+		
 	return ( m_nBackgroundMusicGUID != 0 );
 }
 
@@ -3766,7 +3507,7 @@ void CBaseModPanel::ReleaseBackgroundMusic()
 
 	// need to stop the sound now, do not queue the stop
 	// we must release the 2-5 MB held by this resource
-	enginesound->StopSoundByGuid( m_nBackgroundMusicGUID, true );
+	enginesound->StopSoundByGuid( m_nBackgroundMusicGUID );
 #if defined( _GAMECONSOLE )
 	enginesound->UnloadSound( m_BackgroundMusicString );
 #endif
@@ -4061,12 +3802,15 @@ int CBaseModPanel::GetChapterProgress()
 	{
 		int nNumChapters = GetNumChapters();
 
+		// No awards in our Swarm mod
+#if 0
 		// Check if player has unlocked "ACH.SHOOT_THE_MOON", then all chapters should be available
 		KeyValues *kvAwards = new KeyValues( "read_awards", "ACH.SHOOT_THE_MOON", int(0) );
 		KeyValues::AutoDelete autodelete_kvAwards( kvAwards );
 		pPlayer->GetAwardsData( kvAwards );
 		if ( kvAwards->GetInt( "ACH.SHOOT_THE_MOON" ) )
 			return nNumChapters; // player has unlocked all chapters
+#endif
 
 		// Read players progress
 		TitleData1 const *pTitleData = ( TitleData1 const * )pPlayer->GetPlayerTitleData( 0 );
@@ -4116,7 +3860,7 @@ void CBaseModPanel::SelectBackgroundPresentation()
 	int nMaxActs = ChapterToAct( GetNumChapters() );
 
 	int nAct;
-	if ( IsGameConsole() || !m_LastLoadedLevelName.IsEmpty() )
+	if ( !m_LastLoadedLevelName.IsEmpty() )
 	{
 		nAct = ChapterToAct( MapNameToChapter( m_LastLoadedLevelName.Get() ) );
 	}
@@ -4150,13 +3894,12 @@ void CBaseModPanel::SelectBackgroundPresentation()
 	nAct = clamp( nAct, 1, nMaxActs );
 	m_nCurrentActPresentation = nAct;
 
-	const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
-	bool bIsWidescreen = aspectRatioInfo.m_bIsWidescreen;
+	bool bIsWidescreen = IsWidescreen();
 
 	// get the substitute movie image, matched to the movie chosen
 	// used to hide long i/o on loading entire menu movie, blends away to reveal movie
 	CFmtStr pFadeFilename("");
-	if ( m_bMoveToCommunityMapQueue || m_bMoveToEditorMainMenu )
+	if ( m_bMoveToEditorMainMenu )
 	{
 		pFadeFilename.AppendFormat( "vgui/backgrounds/community_background%s", ( bIsWidescreen ? "_widescreen" : "" ) );
 	}
@@ -4202,118 +3945,23 @@ extern int SaveReadNameAndComment( FileHandle_t f, char *name, char *comment );
 
 bool CBaseModPanel::GetSaveGameInfos( CUtlVector< SaveGameInfo_t > &saveGameInfos, bool bFindAll )
 {
-	char path[MAX_PATH];
-	char directory[MAX_PATH];
-
 	// clear prior results
 	saveGameInfos.Purge();
+		
+	char directory[MAX_PATH];
 
-#if defined( _PS3 )
+#if 0
+	char path[MAX_PATH];
 	const char *pSaveDir = engine->GetSaveDirName();
-
-	CUtlVector< IPS3SaveRestoreToUI::PS3SaveGameInfo_t > ps3SaveInfos;
-	ps3saveuiapi->GetFileInfoSync( ps3SaveInfos, bFindAll );
-
-	if ( ps3SaveInfos.Count() )
-	{
-		// translate ps3 infos to what callers expect
-		saveGameInfos.SetCount( ps3SaveInfos.Count() );
-		for ( int i = 0; i < ps3SaveInfos.Count(); i++ )
-		{
-			const char *pFilename = ps3SaveInfos[i].m_Filename.Get();
-			const char *pScreenshotFilename = ps3SaveInfos[i].m_ScreenshotFilename.Get();
-			const char *pComment = ps3SaveInfos[i].m_Comment.Get();
-
-			char fullFilename[MAX_PATH];
-			V_ComposeFileName( pSaveDir, pFilename, fullFilename, sizeof( fullFilename ) );
+	V_snprintf( path, sizeof( path ), pSaveDir );
+	V_snprintf( directory, sizeof( directory ), "%s*.sav", pSaveDir );
 	
-			// screenshot may not be available
-			char screenshotFilename[MAX_PATH];
-			screenshotFilename[0] = '\0';
-			if ( pScreenshotFilename[0] )
-			{
-				V_ComposeFileName( pSaveDir, pScreenshotFilename, screenshotFilename, sizeof( screenshotFilename ) );
-			}
-	
-			// recover map name, encoded at head
-			char mapName[MAX_PATH];
-			V_strncpy( mapName, pComment, sizeof( mapName ) );
-			int mapNameLength = strlen( mapName );
-			for ( int j = 0; j < mapNameLength; j++ )
-			{
-				if ( mapName[j] == ' ' )
-				{
-					mapName[j] = '\0';
-					break;
-				}
-			}
-
-			// recover elapsed play time, encoded at tail of comment as 000:00
-			char elapsedTime[32];
-			int nMinutes = 0;
-			int nSeconds = 0;
-			int commentLength = strlen( pComment );
-			if ( commentLength >= 6 )
-			{
-				// format mmm:ss
-				V_strncpy( elapsedTime, &pComment[commentLength - 6], sizeof( elapsedTime ) );
-				elapsedTime[6] = '\0';
-				nMinutes = atoi( elapsedTime );
-				nSeconds = atoi( elapsedTime + 4 );
-			}
-
-			saveGameInfos[i].m_InternalIDname = ps3SaveInfos[i].m_InternalName;
-			saveGameInfos[i].m_Filename = pFilename;
-			saveGameInfos[i].m_FullFilename = fullFilename;
-			saveGameInfos[i].m_MapName = mapName;
-			saveGameInfos[i].m_Comment = pComment;
-			saveGameInfos[i].m_nFileTime = ps3SaveInfos[i].m_nFileTime;
-			saveGameInfos[i].m_nElapsedSeconds = nMinutes * 60 + nSeconds;
-			saveGameInfos[i].m_nChapterNum = MapNameToChapter( mapName );
-			saveGameInfos[i].m_ScreenshotFilename = screenshotFilename;
-			saveGameInfos[i].m_bIsAutoSave = ( V_stristr( pFilename, "autosave" ) != NULL );
-			saveGameInfos[i].m_bIsCloudSave = ( V_stristr( pFilename, "cloudsave" ) != NULL );
-			saveGameInfos[i].m_bIsInCloud = saveGameInfos[i].m_bIsCloudSave ||
-				( g_pGameSteamCloudSync && g_pGameSteamCloudSync->IsFileInCloud( ps3SaveInfos[i].m_InternalName.Get() ) );
-
-			if ( !saveGameInfos[i].m_bIsAutoSave && !pScreenshotFilename[0] )
-			{
-				// On PS3 if there's no screenshot inside compound file then it is an autosave
-				saveGameInfos[i].m_bIsAutoSave = true;
-			}
-		}
-	}
-
-	return ( saveGameInfos.Count() != 0 );
-#endif
-
-#if defined( _X360 )
-	{
-		int iUserSlot = GetLastActiveUserId();
-		int iController = XBX_GetUserId( iUserSlot );
-
-		DWORD nStorageDevice = XBX_GetStorageDeviceId( iController );
-		if ( !XBX_DescribeStorageDevice( nStorageDevice ) )
-		{
-			return false;
-		}
-
-		XBX_MakeStorageContainerRoot( iController, XBX_USER_SAVES_CONTAINER_DRIVE, path, sizeof( path ) );
-		int length = V_strlen( path );
-		V_snprintf( path + length, sizeof( path ) - length, ":\\" );
-		length += 2;
-		V_snprintf( directory, sizeof( directory ), path );
-		V_snprintf( directory + length, sizeof(directory) - length, "*.360.sav" );
-	}
-#else
-	{
-		const char *pSaveDir = engine->GetSaveDirName();
-		V_snprintf( path, sizeof( path ), pSaveDir );
-		V_snprintf( directory, sizeof( directory ), "%s*.sav", pSaveDir );
-	}
-#endif
-
 	V_FixSlashes( path );
+#else // Limited by engine code, use legacy method instead
+	
+	Q_snprintf( directory, sizeof( directory ), "save/*.sav" );
+#endif
+
 	V_FixSlashes( directory );
 
 	// iterate the saved files
@@ -4322,8 +3970,11 @@ bool CBaseModPanel::GetSaveGameInfos( CUtlVector< SaveGameInfo_t > &saveGameInfo
 	while ( pFileName )
 	{
 		char fullFileName[MAX_PATH];
+#if 0
 		V_snprintf( fullFileName, sizeof( fullFileName ), "%s%s", path, pFileName );
-
+#else // Legacy	
+		Q_snprintf(fullFileName, sizeof( fullFileName ), "save/%s", pFileName);
+#endif
 		char szMapName[MAX_PATH];
 		char szComment[MAX_PATH];
 
@@ -4476,26 +4127,6 @@ void CBaseModPanel::ResetAttractDemoTimeout( bool bForce )
 	}
 }
 
-#if defined( PORTAL2_PUZZLEMAKER )
-void CBaseModPanel::SetupCommunityMapLoad()
-{
-	// Release prior results
-	if ( m_pAvatarImage )
-	{
-		CUIGameData::Get()->AccessAvatarImage( m_xuidAvatarImage, CUIGameData::kAvatarImageRelease );
-		m_pAvatarImage = NULL;
-		m_xuidAvatarImage = 0ull;
-	}
-
-	// Get the avatar for the author of this map
-	const PublishedFileInfo_t *pInfo = GetCurrentCommunityMap();
-	if ( pInfo )
-	{
-		m_pAvatarImage = CUIGameData::Get()->AccessAvatarImage( pInfo->m_ulSteamIDOwner, CUIGameData::kAvatarImageRequest );
-	}
-}
-#endif // PORTAL2_PUZZLEMAKER
-
 void CBaseModPanel::SetupPartnerInScience()
 {
 	XUID xuidMachine = 0ull;
@@ -4574,142 +4205,6 @@ char const * CBaseModPanel::GetPartnerDescKey()
 #if !defined( NO_STEAM )
 
 //-----------------------------------------------------------------------------
-// Purpose: Callback for completion of enumerating the subscribed puzzles for the user
-//-----------------------------------------------------------------------------
-void CBaseModPanel::Steam_OnEnumerateSubscribedMaps( RemoteStorageEnumerateUserSubscribedFilesResult_t *pResult, bool bError )
-{
-	// Make sure we succeeded
-	if ( bError || pResult->m_eResult != k_EResultOK )
-	{
-		Warning( "Unable to enumerate user's subscribed puzzles!\n" );
-		return;
-	}
-
-	// Queue up all the known subscribed files to work through over subsequent frames
-	const int nNumMaps = pResult->m_nResultsReturned;
-	for ( int i = 0; i < nNumMaps; i++ )
-	{
-		AddCommunityMap( pResult->m_rgPublishedFileId[i], pResult->m_rgRTimeSubscribed[i] );
-	}
-
-	m_nTotalSubscriptionsLoaded += nNumMaps;
-	m_bReceivedQueueBaseline = true;
-	m_bQueueReady = false;
-
-	// If our queue is bigger than this call could return in one go, call again to receive more
-	if ( m_nTotalSubscriptionsLoaded < pResult->m_nTotalResultCount )
-	{
-		QueryForCommunityMaps();
-	}
-	else
-	{
-		m_bQueueReady = true;
-		Log_Msg( LOG_WORKSHOP, "[BaseModPanel] Queue complete.\n" );
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Callback for completion of enumerating the subscribed puzzles for the user
-//-----------------------------------------------------------------------------
-void CBaseModPanel::Steam_OnEnumeratePublishedMaps( RemoteStorageEnumerateUserPublishedFilesResult_t *pResult, bool bError )
-{
-	// Make sure we succeeded
-	if ( bError || pResult->m_eResult != k_EResultOK )
-	{
-		Warning( "Unable to enumerate user's published puzzles!\n" );
-		return;
-	}
-
-	// Queue up all the known subscribed files to work through over subsequent frames
-	const int nNumMaps = pResult->m_nResultsReturned;
-	for ( int i = 0; i < nNumMaps; i++ )
-	{
-		AddUserPublishedMap( pResult->m_rgPublishedFileId[i] );
-	}
-	
-	m_bReceivedUserPublishedMapsBaseline = true;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Add a new map into the system
-//-----------------------------------------------------------------------------
-void CBaseModPanel::AddCommunityMap( PublishedFileId_t nMapID, uint32 nSubscribeTime )
-{
-	// Queue up a new request for this file's history
-	CCommunityMapRequest *pMapRequest = new CCommunityMapRequest( nMapID, nSubscribeTime );
-	WorkshopManager().AddFileInfoQuery( pMapRequest, true );
-
-	// Add this into our list of history items for this user
-	if ( m_vecCommunityMapsQueue.Find( nMapID ) == m_vecCommunityMapsQueue.InvalidIndex() )
-	{
-		m_vecCommunityMapsQueue.AddToTail( nMapID );
-	}
-
-	// Notify the dialog that something has changed underneath it and it needs to refresh
-	KeyValues *pKV = new KeyValues( "CommunityMapListener_Added" );
-	pKV->SetUint64( "mapID", nMapID );
-	g_pMatchFramework->GetEventsSubscription()->BroadcastEvent( pKV );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Adds a reference to a file the user has published
-//-----------------------------------------------------------------------------
-void CBaseModPanel::AddUserPublishedMap( PublishedFileId_t nMapID )
-{
-	// Queue up a new request for this file's history
-	CUserPublishedFileRequest *pMapRequest = new CUserPublishedFileRequest( nMapID );
-	WorkshopManager().AddFileInfoQuery( pMapRequest, true );
-
-	// Add this into our list of history items for this user
-	if ( m_vecUserPublishedMaps.Find( nMapID ) == m_vecUserPublishedMaps.InvalidIndex() )
-	{
-		m_vecUserPublishedMaps.AddToTail( nMapID );
-	}
-
-	// Notify the dialog that something has changed underneath it and it needs to refresh
-	KeyValues *pKV = new KeyValues( "UserPublishedMapsListener_Added" );
-	pKV->SetUint64( "mapID", nMapID );
-	g_pMatchFramework->GetEventsSubscription()->BroadcastEvent( pKV );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Add a new quickplay map into the system
-//-----------------------------------------------------------------------------
-void CBaseModPanel::AddQuickPlayMap( PublishedFileId_t nMapID )
-{
-	if( cm_community_debug_spew.GetBool() ) ConColorMsg( rgbaCommunityDebug, "Adding quickplay map %llu\n", nMapID );
-
-	switch ( GetCommunityMapQueueMode() )
-	{
-	case QUEUEMODE_QUICK_PLAY:
-		{
-#if !defined( _PS3 )
-			// Queue up a new request for this file's history
-			CCommunityMapSPQuickplayRequest *pMapRequest = new CCommunityMapSPQuickplayRequest( nMapID );
-			WorkshopManager().AddFileInfoQuery( pMapRequest, true );
-
-			// FIXME: What happens to the request?
-#endif // !_PS3
-		}
-		break;
-	case QUEUEMODE_COOP_QUICK_PLAY:
-		{
-			CCommunityMapCoopQuickplayRequest *pRequest = new CCommunityMapCoopQuickplayRequest( nMapID );
-			WorkshopManager().AddFileInfoQuery( pRequest, true );
-		}
-		break;
-	default:
-		Assert( 0 );
-		break;
-	}
-
-	// Notify the dialog that something has changed underneath it and it needs to refresh
-	KeyValues *pKV = new KeyValues( "QuickPlayListener_Added" );
-	pKV->SetUint64( "mapID", nMapID );
-	g_pMatchFramework->GetEventsSubscription()->BroadcastEvent( pKV );
-}
-
-//-----------------------------------------------------------------------------
 // Purpose: Have we received all of our quick play entries?
 //-----------------------------------------------------------------------------
 bool CBaseModPanel::QuickPlayEntriesReady( void ) const 
@@ -4735,202 +4230,6 @@ bool CBaseModPanel::QuickPlayEntriesError( void ) const
 	return m_bQuickPlayQueueError;
 }
 
-#if !defined( _GAMECONSOLE )
-
-//-----------------------------------------------------------------------------
-// Purpose: Return from our enumeration call for the user's played queue
-//-----------------------------------------------------------------------------
-void CBaseModPanel::Steam_OnEnumeratePublishedFilesByUserAction( RemoteStorageEnumeratePublishedFilesByUserActionResult_t *pResult, bool bError )
-{
-	if ( bError || pResult->m_eResult != k_EResultOK )
-	{
-		Assert(0);
-		Log_Warning( LOG_WORKSHOP, "[BaseModPanel] Failed to enumerate published file actions by user (Error: %d)\n", pResult->m_eResult );
-		return;
-	}
-
-	// Mark that Steam has returned something to us
-	m_bReceivedQueueHistoryBaseline = true;
-	m_bQueueHistoryReady = false;
-
-	// FIXME: Hold onto the max number of results so we know to keep querying
-	
-	// Now, add entries for all returned values
-	for ( int i = 0; i < pResult->m_nResultsReturned; i++ )
-	{
-		AddQueueHistoryEntry( pResult->m_rgPublishedFileId[i], pResult->m_rgRTimeUpdated[i], 0 /*FIXME: This is a different call!*/ );
-	}
-
-	// Update the total number of entries we now have
-	m_nTotalQueueHistoryEntriesLoaded += pResult->m_nResultsReturned;
-
-	// If we still have history entries on the server, snag them
-	if ( m_nTotalQueueHistoryEntriesLoaded < pResult->m_nTotalResultCount )
-	{
-		RequestQueueHistory_Internal();
-	}
-	else
-	{
-		// At this point, we're done receiving data from Steam
-		m_bQueueHistoryReady = true;
-		Log_Msg( LOG_WORKSHOP, "[BaseModPanel] Queue history complete.\n" );
-	}
-}
-
-#endif // !_GAMECONSOLE
-
-//-----------------------------------------------------------------------------
-// Purpose: Poll for queue history. This can be called recursively, so this version is protected from outsiders
-//-----------------------------------------------------------------------------
-void CBaseModPanel::RequestQueueHistory_Internal( void )
-{
-#if !defined(_GAMECONSOLE )
-
-	if ( steamapicontext && steamapicontext->SteamRemoteStorage() )
-	{
-		uint32 nStartIndex = ( m_nTotalQueueHistoryEntriesLoaded > 0 ) ? m_nTotalQueueHistoryEntriesLoaded : 0;
-		SteamAPICall_t hSteamAPICall = steamapicontext->SteamRemoteStorage()->EnumeratePublishedFilesByUserAction( k_EWorkshopFileActionPlayed, nStartIndex );
-		Assert( hSteamAPICall != k_uAPICallInvalid );
-		if ( hSteamAPICall == k_uAPICallInvalid )
-		{
-			Log_Warning( LOG_WORKSHOP, "[BaseModPanel] Unable to query for user's played maps!\n" );
-			return;
-		}
-
-		m_callbackEnumeratePublishedFilesByUserAction.Set( hSteamAPICall, this, &CBaseModPanel::Steam_OnEnumeratePublishedFilesByUserAction );
-	}
-
-#endif // !_GAMECONSOLE
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Add a new queue history item to the system
-//-----------------------------------------------------------------------------
-void CBaseModPanel::QueryForQueueHistory( void )
-{
-	// Hold the time we made the request
-	m_flQueueHistoryBaselineRequestTime = gpGlobals->curtime;
-	
-	// This means that we want to requery the system and we're not doing a recursive call
-	m_nTotalQueueHistoryEntriesLoaded = 0;
-
-	// FIXME: JDW - Remove to test timeout
-	// return;
-
-	// Call our protected version
-	RequestQueueHistory_Internal();
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Add a new queue history item to the system
-//-----------------------------------------------------------------------------
-void CBaseModPanel::AddQueueHistoryEntry( PublishedFileId_t nMapID, uint32 nLastPlayedTime, uint32 nCompletionTime )
-{
-	// Queue up a new request for this file's history
-	CQueueHistoryEntryRequest *pHistoryRequest = new CQueueHistoryEntryRequest( nMapID, nLastPlayedTime, nCompletionTime );
-	WorkshopManager().AddFileInfoQuery( pHistoryRequest, true );
-
-	// Add this into our list of history items for this user
-	if ( m_vecQueueHistoryEntries.Find( nMapID ) == m_vecQueueHistoryEntries.InvalidIndex() )
-	{
-		m_vecQueueHistoryEntries.AddToTail( nMapID );
-	}
-
-	// Notify the dialog that something has changed underneath it and it needs to refresh
-	KeyValues *pKV = new KeyValues( "QueueHistoryListener_Added" );
-	pKV->SetUint64( "mapID", nMapID );
-	g_pMatchFramework->GetEventsSubscription()->BroadcastEvent( pKV );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Request all subscribed files for a user
-//-----------------------------------------------------------------------------
-void CBaseModPanel::QueryForUserPublishedMaps( void )
-{
-	Log_Msg( LOG_WORKSHOP, "[BaseModPanel] Querying for published files\n" );
-
-	// Start our call for subscribed puzzles
-	if ( ISteamRemoteStorage *pRemoteStorage = GetISteamRemoteStorage() )
-	{
-		m_flUserPublishedMapsBaselineRequestTime = gpGlobals->curtime;
-
-		// FIXME: JDW - Remove to test timeout
-		// return;
-
-		SteamAPICall_t hSteamAPICall = pRemoteStorage->EnumerateUserPublishedFiles( 0 );
-		m_callbackEnumeratePublishedMaps.Set( hSteamAPICall, this, &CBaseModPanel::Steam_OnEnumeratePublishedMaps );
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Request all subscribed files for a user
-//-----------------------------------------------------------------------------
-void CBaseModPanel::QueryForCommunityMaps( void )
-{
-	Log_Msg( LOG_WORKSHOP, "[BaseModPanel] Querying for subscribed files\n" );
-
-	// Start our call for subscribed puzzles
-	if ( ISteamRemoteStorage *pRemoteStorage = GetISteamRemoteStorage() )
-	{
-		m_flQueueBaselineRequestTime = gpGlobals->curtime;
-
-		// FIXME: JDW - Remove to test timeout
-		// return;
-
-		int nStartIndex = ( m_nTotalSubscriptionsLoaded > 0 ) ? m_nTotalSubscriptionsLoaded : 0;
-		SteamAPICall_t hSteamAPICall = pRemoteStorage->EnumerateUserSubscribedFiles( nStartIndex );
-		m_callbackEnumerateSubscribedMaps.Set( hSteamAPICall, this, &CBaseModPanel::Steam_OnEnumerateSubscribedMaps );
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Get a community map's information by raw index in the map
-//-----------------------------------------------------------------------------
-const PublishedFileInfo_t *CBaseModPanel::GetCommunityMap( int nIndex ) 
-{
-	if ( m_vecCommunityMapsQueue.IsValidIndex( nIndex ) == false )
-		return NULL;
-
-	PublishedFileId_t fileId = m_vecCommunityMapsQueue[nIndex];
-	return GetCommunityMapByFileID( fileId );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Get a community map's information by PublishedFileID
-//-----------------------------------------------------------------------------
-const PublishedFileInfo_t *CBaseModPanel::GetCommunityMapByFileID( PublishedFileId_t nID ) const
-{
-	// The file by this ID must live in our queue
-	if ( m_vecCommunityMapsQueue.Find( nID ) == m_vecCommunityMapsQueue.InvalidIndex() )
-		return NULL;
-
-	return WorkshopManager().GetPublishedFileInfoByID( nID );	
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Get a community map's information by raw index in the map
-//-----------------------------------------------------------------------------
-const PublishedFileInfo_t *CBaseModPanel::GetQueueHistoryEntry( int nIndex ) 
-{
-	if ( m_vecQueueHistoryEntries.IsValidIndex( nIndex ) == false )
-		return NULL;
-
-	PublishedFileId_t fileId = m_vecQueueHistoryEntries[nIndex];
-	return GetQueueHistoryEntryByFileID( fileId );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Get a community map's information by PublishedFileID
-//-----------------------------------------------------------------------------
-const PublishedFileInfo_t *CBaseModPanel::GetQueueHistoryEntryByFileID( PublishedFileId_t nID ) 
-{
-	// The file by this ID must live in our queue
-	if ( m_vecQueueHistoryEntries.Find( nID ) == m_vecQueueHistoryEntries.InvalidIndex() )
-		return NULL;
-
-	return WorkshopManager().GetPublishedFileInfoByID( nID );	
-}
-
 //-----------------------------------------------------------------------------
 // Purpose: Determine if there's already a request for a file
 //-----------------------------------------------------------------------------
@@ -4939,669 +4238,13 @@ bool CBaseModPanel::QueueHistoryReady( void ) const
 	if ( HasReceivedQueueHistoryBaseline() == false )
 		return false;
 
-#if defined ( PORTAL2_PUZZLEMAKER )
-	if( GetCommunityMapQueueMode() == QUEUEMODE_COOP_QUICK_PLAY )
-	{
-		// In community coop quickplay, we're only ready if we have BOTH histories
-		if ( engine->IsClientLocalToActiveServer() )
-			return m_bQueueHistoryReady && g_CommunityCoopManager.HasPartnerHistory();
-		else
-			return m_bQueueHistoryReady;
-	}
-	else
-#endif
 	{
 		return m_bQueueHistoryReady;
 	}
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Delete a file request from the system (optionally removing its downloaded content form the disk)
-//-----------------------------------------------------------------------------
-bool CBaseModPanel::RemoveCommunityMap( PublishedFileId_t nID )
-{
-	/*
-	// FIXME: Grr, we need to handle the current query being the one we're trying to nuke!
-	if ( m_nFilesToQuery.Count() && m_nFilesToQuery.Head() == nID )
-	{
-		Assert(0);
-	}
-	*/
-
-	// Remove this from our queue, but leave the file information intact
-	if ( m_vecCommunityMapsQueue.FindAndFastRemove( nID ) )
-	{
-		// Notify the dialog that something has changed underneath it and it needs to refresh
-		KeyValues *pKV = new KeyValues( "CommunityMapListener_Removed" );
-		pKV->SetUint64( "mapID", nID );
-		g_pMatchFramework->GetEventsSubscription()->BroadcastEvent( pKV );
-		
-		return true;
-	}
-
-	return false;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Receive messages to do with retrieving demo files to delete from cloud
-//-----------------------------------------------------------------------------
-bool CBaseModPanel::RemoveQueueHistoryEntry( PublishedFileId_t nID )
-{
-	if ( m_vecQueueHistoryEntries.FindAndRemove( nID ) ) 
-	{
-		KeyValues *pKV = new KeyValues( "QueueHistoryListener_Removed" );
-		pKV->SetUint64( "mapID", nID );
-		g_pMatchFramework->GetEventsSubscription()->BroadcastEvent( pKV );
-		
-		return true;
-	}
-
-	return false;
-}
-
-// Move all the maps into a sorted list
-struct MapIDSubscribeTime
-{
-	PublishedFileId_t	nMapID;
-	uint32				unSubscribeTime;
-};
-
-int SortMapSubscriptionTimes( const MapIDSubscribeTime *p1, const MapIDSubscribeTime *p2 )
-{
-	// Tie-break on our index if the times are equal
-	if ( p1->unSubscribeTime == p2->unSubscribeTime )
-		return ( p1->nMapID - p2->nMapID );
-
-	return ( p1->unSubscribeTime - p2->unSubscribeTime );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Returns the next map in our queue (depending on queue type)
-//-----------------------------------------------------------------------------
-const PublishedFileInfo_t *CBaseModPanel::GetNextSubscribedMapInQueue() const
-{
-	Assert( !IsQuickplay() );
-
-	PublishedFileId_t nCurrentMap = GetCurrentCommunityMapID();
-
-	CUtlVector<MapIDSubscribeTime> sortedList;
-
-	for ( int i = 0; i < m_vecCommunityMapsQueue.Count(); i++ )
-	{
-		const PublishedFileInfo_t *pInfo = WorkshopManager().GetPublishedFileInfoByID( m_vecCommunityMapsQueue[i] );
-
-		Assert( pInfo!= NULL );
-		if ( pInfo == NULL )
-			continue;
-
-		if ( !IsValidMapForCurrentQueueMode( pInfo ) )
-			continue;
-
-		MapIDSubscribeTime pair = { pInfo->m_nPublishedFileId, pInfo->m_rtimeSubscribed };
-		sortedList.AddToTail( pair );
-	}
-
-	sortedList.Sort( SortMapSubscriptionTimes );
-
-	for ( int i = 0; i < sortedList.Count(); i++ )
-	{
-		if ( sortedList[i].nMapID != nCurrentMap )
-			continue;
-
-		// Found it, what's next in the list?
-		if ( sortedList.IsValidIndex( i+1 ) )
-			return GetCommunityMapByFileID( sortedList[i+1].nMapID );
-
-		return NULL;
-	}
-
-	return NULL;
-}
-
-const PublishedFileInfo_t* CBaseModPanel::GetNextQuickPlayMapInQueue() const
-{
-	Assert( IsQuickplay() );
-
-	return WorkshopManager().GetPublishedFileInfoByID( GetNextCommunityMapID() );
-}
-
-const PublishedFileInfo_t* CBaseModPanel::GetNextCommunityMapInQueueBasedOnQueueMode() const
-{
-	return IsQuickplay() ? GetNextQuickPlayMapInQueue() : GetNextSubscribedMapInQueue();
-}
-
-
-PublishedFileId_t CBaseModPanel::DetermineNextQuickPlayMapID( PublishedFileId_t nCurrentMap ) const
-{
-	switch ( GetCommunityMapQueueMode() )
-	{
-	case QUEUEMODE_QUICK_PLAY:
-	case QUEUEMODE_COOP_QUICK_PLAY:
-		{
-			if( cm_community_debug_spew.GetBool() )
-			{
-				ConColorMsg( rgbaCommunityDebug, "Getting Next Map in Queue.  Dumping m_vecQuickPlayMaps-----\n" );
-				for( int i=0; i<m_vecQuickPlayMaps.Count(); ++i )
-				{
-					ConColorMsg( rgbaCommunityDebug, "%llu\n", m_vecQuickPlayMaps[i] );
-				}
-				ConColorMsg( rgbaCommunityDebug, "----End dumping m_vecQuickPlayMaps\n" );
-				ConColorMsg( rgbaCommunityDebug, "Starting with ID: %llu\n", nCurrentMap );
-			}
-
-			// First, see if we can find the current map in our list
-			PublishedFileId_t nNextMapID = 0;
-			int nIndex = m_vecQuickPlayMaps.Find( nCurrentMap );
-
-			// If not a valid index, use the head
-			if( !m_vecQuickPlayMaps.IsValidIndex( nIndex ) && m_vecQuickPlayMaps.Count() )
-			{
-				if( cm_community_debug_spew.GetBool() ) ConColorMsg( rgbaCommunityDebug,  "Invalid index.  Returning head %d\n", m_vecQuickPlayMaps.Head() ); 
-				return m_vecQuickPlayMaps.Head();
-			}
-
-			// Check if this is the only map left in the list.  If so, return 0
-			if( m_vecQuickPlayMaps.Count() == 1 && m_vecQuickPlayMaps.Head() == nCurrentMap )
-			{
-				if( cm_community_debug_spew.GetBool() ) ConColorMsg( rgbaCommunityDebug, "Starting ID is only ID.  Returning 0\n", m_vecQuickPlayMaps.Head() ); 
-				return 0;
-			}
-
-			// Check if the next map is valid
-			nIndex++;
-			if ( m_vecQuickPlayMaps.IsValidIndex( nIndex ) )
-			{
-				nNextMapID = m_vecQuickPlayMaps[nIndex];
-
-				if( cm_community_debug_spew.GetBool() ) ConColorMsg( rgbaCommunityDebug, "Next map ID is: %llu\n", nNextMapID );
-				return nNextMapID;
-			}
-
-			// Check if we've exhausted the queue and need to fail
-			if( cm_community_debug_spew.GetBool() ) ConColorMsg( rgbaCommunityDebug, "No new map found" );
-
-			if( m_vecQuickPlayMaps.Count() )
-			{
-				if( cm_community_debug_spew.GetBool() ) ConColorMsg( rgbaCommunityDebug, " -- Returning head %d\n", m_vecQuickPlayMaps.Head() );
-				return m_vecQuickPlayMaps.Head();
-			}
-
-			if( cm_community_debug_spew.GetBool() ) ConColorMsg( rgbaCommunityDebug, " -- Returning 0!\n" );
-			return 0;
-	
-		}
-	default:
-		Assert(0);
-	}
-
-	return 0;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Tell the GC to unsubscribe from this map
-//-----------------------------------------------------------------------------
-bool CBaseModPanel::UnsubscribeFromMap( PublishedFileId_t nMapID )
-{
-	if ( steamapicontext == NULL || steamapicontext->SteamRemoteStorage() == NULL )
-		return false;
-
-	if ( steamapicontext->SteamRemoteStorage()->UnsubscribePublishedFile( nMapID ) == k_uAPICallInvalid )
-	{
-		//TODO: Handle the error case
-		Log_Warning( LOG_WORKSHOP, "[BaseModPanel] Failed to unsubscribe from published file: %llu\n", nMapID );
-		return false;
-	}
-
-	Log_Msg( LOG_WORKSHOP, "[BaseModPanel] Unsubscribing from published file: %llu\n", nMapID );
-
-	// NOTE: We listen for unsubscription notifications already, so we'll pick up that case down the road
-
-	return true;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Tell the GC to subscribe to this map
-//-----------------------------------------------------------------------------
-bool CBaseModPanel::SubscribeToMap( PublishedFileId_t nMapID )
-{
-	if ( steamapicontext == NULL || steamapicontext->SteamRemoteStorage() == NULL )
-		return false;
-
-	if ( steamapicontext->SteamRemoteStorage()->SubscribePublishedFile( nMapID ) == k_uAPICallInvalid )
-	{
-		//TODO: Handle the error case
-		Log_Warning( LOG_WORKSHOP, "[BaseModPanel] Failed to subscribe to published file: %llu\n", nMapID );
-		return false;
-	}
-
-	Log_Msg( LOG_WORKSHOP, "[BaseModPanel] Subscribing to published file: %llu\n", nMapID );
-
-	// NOTE: We listen for subscription notifications already, so we'll pick up that case down the road
-
-	return true;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Given a published file, build a thumbnail file request for it
-//-----------------------------------------------------------------------------
-bool CBaseModPanel::MarkCommunityMapPlayedTime( PublishedFileId_t nMapID, uint32 nTime )
-{
-#if !defined( _GAMECONSOLE )
-
-	// Add this map to our history
-	AddQueueHistoryEntry( nMapID, nTime, 0 );
-
-	// Send the action off
-	if ( steamapicontext == NULL || steamapicontext->SteamRemoteStorage() == NULL )
-		return false;
-	
-	SteamAPICall_t hSteamAPICall = steamapicontext->SteamRemoteStorage()->SetUserPublishedFileAction( nMapID, k_EWorkshopFileActionPlayed );
-	Assert( hSteamAPICall != k_uAPICallInvalid );
-	if ( hSteamAPICall == k_uAPICallInvalid )
-	{
-		Log_Warning( LOG_WORKSHOP, "[BaseModPanel] Unable to mark community map (%llu) as played!\n", nMapID );	
-		return false;
-	}
-
-#endif // !_GAMECONSOLE
-
-	Log_Msg( LOG_WORKSHOP, "[BaseModPanel] Added played time entry for (%llu)\n", nMapID );
-
-	return true;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Given a published file, build a thumbnail file request for it
-//-----------------------------------------------------------------------------
-bool CBaseModPanel::MarkCommunityMapCompletionTime( PublishedFileId_t nMapID, uint32 nTime )
-{
-#if !defined( _GAMECONSOLE )
-
-	// Send the action off
-	if ( steamapicontext == NULL || steamapicontext->SteamRemoteStorage() == NULL )
-		return false;
-
-	SteamAPICall_t hSteamAPICall = steamapicontext->SteamRemoteStorage()->SetUserPublishedFileAction( nMapID, k_EWorkshopFileActionCompleted );
-	Assert( hSteamAPICall != k_uAPICallInvalid );
-	if ( hSteamAPICall == k_uAPICallInvalid )
-	{
-		Log_Warning( LOG_WORKSHOP, "[BaseModPanel] Unable to mark community map (%llu) as played!\n", nMapID );	
-		return false;
-	}
-
-#endif // !_GAMECONSOLE
-
-	Log_Msg( LOG_WORKSHOP, "[BaseModPanel] Added Completion time entry for (%llu)\n", nMapID );
-
-	return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// Purpose: Given a published file, build a thumbnail file request for it
-//-----------------------------------------------------------------------------
-bool CBaseModPanel::CreateThumbnailFileRequest( const PublishedFileInfo_t &info ) 
-{
-	// Grab the thumbnail file
-	return WorkshopManager().CreateFileDownloadRequest(	info.m_hPreviewFile,
-														CFmtStr( "%s/%llu", COMMUNITY_MAP_PATH, info.m_hFile ),
-														CFmtStr( "%s%llu.jpg", COMMUNITY_MAP_THUMBNAIL_PREFIX, info.m_nPublishedFileId ),
-														UGC_PRIORITY_THUMBNAIL,
-														info.m_rtimeUpdated );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Given a published file, build a content file request for it
-//-----------------------------------------------------------------------------
-bool CBaseModPanel::CreateMapFileRequest( const PublishedFileInfo_t &info, bool bUserMadeMap /*=false*/ ) 
-{
-	char szFixedFilename[MAX_PATH];
-	V_StrSubst( V_GetFileName( info.m_pchFileName ), " ", "_", szFixedFilename, sizeof(szFixedFilename) );
-
-	// Grab the map file
-	return WorkshopManager().CreateFileDownloadRequest(	info.m_hFile,
-														CFmtStr( "%s/%llu", COMMUNITY_MAP_PATH, info.m_hFile ),
-														szFixedFilename,
-														( bUserMadeMap ) ? UGC_PRIORITY_USER_MAP : UGC_PRIORITY_BSP,
-														info.m_rtimeUpdated );	
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Remove a user published map from our list
-//-----------------------------------------------------------------------------
-bool CBaseModPanel::RemoveUserPublishedMap( PublishedFileId_t nID )
-{
-	// Remove this from our queue, but leave the file information intact
-	if ( m_vecUserPublishedMaps.FindAndFastRemove( nID ) )
-	{
-		// Notify the dialog that something has changed underneath it and it needs to refresh
-		KeyValues *pKV = new KeyValues( "UserPublishedFileListener_Removed" );
-		pKV->SetUint64( "mapID", nID );
-		g_pMatchFramework->GetEventsSubscription()->BroadcastEvent( pKV );
-
-		return true;
-	}
-
-	return false;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Get a user's published file information by its ID
-//-----------------------------------------------------------------------------
-const PublishedFileInfo_t *CBaseModPanel::GetUserPublishedMapByFileID( PublishedFileId_t nID )
-{
-	// The file by this ID must live in our queue
-	if ( m_vecUserPublishedMaps.Find( nID ) == m_vecUserPublishedMaps.InvalidIndex() )
-		return NULL;
-
-	return WorkshopManager().GetPublishedFileInfoByID( nID );	
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Get a user's published file information by its index in our vector
-//-----------------------------------------------------------------------------
-const PublishedFileInfo_t *CBaseModPanel::GetUserPublishedMap( int nIndex )
-{
-	// Make sure we actually have an entry in this range
-	if ( m_vecUserPublishedMaps.IsValidIndex( nIndex ) == false )
-		return NULL;
-
-	return WorkshopManager().GetPublishedFileInfoByID( m_vecUserPublishedMaps[nIndex] );
-}
-
-#if !defined(NO_STEAM)
-
-//-----------------------------------------------------------------------------
-// Purpose: Pop up the overlay showing the requested community map page
-//-----------------------------------------------------------------------------
-OverlayResult_t CBaseModPanel::ViewCommunityMapInWorkshop( PublishedFileId_t nFileID )
-{
-	if ( steamapicontext && steamapicontext->SteamUser() && steamapicontext->SteamUtils() && steamapicontext->SteamFriends() && steamapicontext->SteamUtils() )
-	{
-		// Overlay is disabled
-		if( !steamapicontext->SteamUtils()->IsOverlayEnabled() )
-			return RESULT_FAIL_OVERLAY_DISABLED;
-
-		EUniverse eUniverse = steamapicontext && steamapicontext->SteamUtils()
-			? steamapicontext->SteamUtils()->GetConnectedUniverse()
-			: k_EUniverseInvalid;
-
-		if ( eUniverse == k_EUniverseInvalid )
-			return RESULT_FAIL_INVALID_UNIVERSE;
-
-		char szDestURL[MAX_PATH];
-		const char *lpszDomanPrefix = ( eUniverse == k_EUniverseBeta ) ? "beta" : "www";
-		V_snprintf( szDestURL, ARRAYSIZE(szDestURL), "http://%s.steamcommunity.com/sharedfiles/filedetails/?id=%llu", lpszDomanPrefix, nFileID );
-
-		steamapicontext->SteamFriends()->ActivateGameOverlayToWebPage( szDestURL );
-
-		return RESULT_OK;
-	}	
-
-	return RESULT_FAIL_MISSING_API;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Pop up the overlay to allow users to browse the Workshop
-//-----------------------------------------------------------------------------
-OverlayResult_t CBaseModPanel::ViewAllCommunityMapsInWorkshop( void )
-{
-	if ( steamapicontext && steamapicontext->SteamUser() && steamapicontext->SteamFriends() && steamapicontext->SteamUtils() )
-	{
-		// Overlay is disabled
-		if( !steamapicontext->SteamUtils()->IsOverlayEnabled() )
-			return RESULT_FAIL_OVERLAY_DISABLED;
-
-		EUniverse eUniverse = steamapicontext && steamapicontext->SteamUtils()
-			? steamapicontext->SteamUtils()->GetConnectedUniverse()
-			: k_EUniverseInvalid;
-
-		if ( eUniverse == k_EUniverseInvalid )
-			return RESULT_FAIL_INVALID_UNIVERSE;
-
-		char szDestURL[MAX_PATH];
-		const char *lpszDomanPrefix = ( eUniverse == k_EUniverseBeta ) ? "beta." : "";
-		const char *lpszMode = ( GetCommunityMapQueueMode() == QUEUEMODE_USER_QUEUE ) ? "Singleplayer" : "Cooperative";
-		V_snprintf( szDestURL, ARRAYSIZE(szDestURL), "http://%ssteamcommunity.com/workshop/browse?searchtext=&searchtexthidden=&childpublishedfileid=0&section=items&appid=%d&browsesort=trend&requiredtags[]=%s", lpszDomanPrefix, steamapicontext->SteamUtils()->GetAppID(), lpszMode );
-
-		steamapicontext->SteamFriends()->ActivateGameOverlayToWebPage( szDestURL );
-
-		return RESULT_OK;
-	}	
-
-	return RESULT_FAIL_MISSING_API;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: View the author's workshop in the overlay
-//-----------------------------------------------------------------------------
-OverlayResult_t CBaseModPanel::ViewAuthorsWorkshop( CSteamID userID )
-{
-	if ( steamapicontext && steamapicontext->SteamFriends() && steamapicontext->SteamUtils() )
-	{
-		// Overlay is disabled
-		if( !steamapicontext->SteamUtils()->IsOverlayEnabled() )
-			return RESULT_FAIL_OVERLAY_DISABLED;
-
-		EUniverse eUniverse = steamapicontext && steamapicontext->SteamUtils()
-			? steamapicontext->SteamUtils()->GetConnectedUniverse()
-			: k_EUniverseInvalid;
-
-		if ( eUniverse == k_EUniverseInvalid )
-			return RESULT_FAIL_INVALID_UNIVERSE;
-
-		if ( userID.IsValid() == false )
-			return RESULT_FAIL_INVALID_USER_ID;
-
-		char szDestURL[MAX_PATH];
-		const char *lpszDomanPrefix = ( eUniverse == k_EUniverseBeta ) ? "beta" : "www";
-		V_snprintf( szDestURL, ARRAYSIZE(szDestURL), "http://%s.steamcommunity.com/profiles/%llu/myworkshopfiles?appid=%d", lpszDomanPrefix, userID.ConvertToUint64(), steamapicontext->SteamUtils()->GetAppID() );
-
-		steamapicontext->SteamFriends()->ActivateGameOverlayToWebPage( szDestURL );
-
-		return RESULT_OK;
-	}
-
-	return RESULT_FAIL_MISSING_API;
-}
-
-#if !defined( _GAMECONSOLE )
-
-const int sNumDaysToQuery = 7;
-const int sNumQuickPlayResults = 50;
-
-//-----------------------------------------------------------------------------
-// Purpose: The base class handles book keeping we'd like all of our requests to do
-//-----------------------------------------------------------------------------
-
-void CBaseModPanel::Steam_OnEnumerateWorkshopFiles( RemoteStorageEnumerateWorkshopFilesResult_t *pResult, bool bError )
-{
-	// Now we've got results!
-	if ( bError || pResult->m_eResult != k_EResultOK )
-	{
-		Assert(0);
-		Log_Warning( LOG_WORKSHOP, "[BaseModPanel] Steam_OnEnumerateWorkshopFiles() call failed!\n" );
-		m_bQuickPlayQueueError = true;
-		return;
-	}
-
-	AssertMsg( QueueHistoryReady(), "QueueHistory is NOT ready when getting quickplay maps" );
-	
-
-	m_bReceivedQuickPlayBaseline = true;
-	m_bQuickPlayQueueError = false;
-
-	int32 nNumMaps = pResult->m_nResultsReturned;
-	int32 nNumTotalMaps = pResult->m_nTotalResultCount;
-
-	if( cm_community_debug_spew.GetBool() )
-	{
-		ConColorMsg( rgbaCommunityDebug, "MY HISTORY-----------\n" );
-		for( int i=0; i<m_vecQueueHistoryEntries.Count(); ++i )
-		{
-			ConColorMsg( rgbaCommunityDebug, "%d\n", m_vecQueueHistoryEntries[i] );
-		}
-		ConColorMsg( rgbaCommunityDebug, "-------END MY HISTORY\n" );
-
-		g_CommunityCoopManager.Dev_SpewParterHistory();
-	}
-		
-	// Work through all the returned entries we received
-	for ( int32 i = 0; i < nNumMaps; i++ )
-	{
-		PublishedFileId_t fileID = pResult->m_rgPublishedFileId[i];
-		if( cm_community_debug_spew.GetBool() ) ConColorMsg( rgbaCommunityDebug, "Enumerated: %d\t", fileID );
-
-		if ( cm_filter_quickplay_with_history.GetBool() )
-		{
-			// Filter out maps that the player has already visited
-			if ( m_vecQueueHistoryEntries.Find( fileID ) != m_vecQueueHistoryEntries.InvalidIndex() )
-			{
-				if( cm_community_debug_spew.GetBool() ) ConColorMsg( rgbaCommunityDebug, "DISCARDED - Already in MY history\n");
-				continue;
-			}
-
-			// Filter out maps that the partner has already visited
-			if ( g_CommunityCoopManager.IsInPartnerHistoryQueue( fileID ) )
-			{
-				if( cm_community_debug_spew.GetBool() ) ConColorMsg( rgbaCommunityDebug, "DISCARDED - Already in THEIR history\n");
-				continue;
-			}
-		}
-
-		if( cm_community_debug_spew.GetBool() ) ConColorMsg( rgbaCommunityDebug, "ACCEPTED\n");
-		m_vecQuickPlayMaps.AddToTail( pResult->m_rgPublishedFileId[i] );		
-	}
-
-	// See if we need to retrieve more maps
-	m_nTotalQuickPlayEntriesLoaded += nNumMaps;
-	if ( m_nTotalQuickPlayEntriesLoaded < nNumTotalMaps && m_vecQuickPlayMaps.Count() < sNumQuickPlayResults )
-	{
-		QueryForQuickPlayMaps_Internal( m_eCurrentQuickPlayEnumerationType );
-	}
-	else
-	{
-		// Done
-		m_bQuickPlayQueueReady = true;
-
-		// Start the first map downloading if we have any in the hopper
-		if ( m_vecQuickPlayMaps.Count() )
-		{
-			PublishedFileId_t fileID = m_vecQuickPlayMaps.Head();
-			if( cm_community_debug_spew.GetBool() ) ConColorMsg( rgbaCommunityDebug,"Queuing %d to play!\n", fileID );
-			AddQuickPlayMap( fileID );
-			SetCurrentCommunityMapID( fileID );
-		}
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: potentially Recursive call for quick play map entries
-//-----------------------------------------------------------------------------
-bool CBaseModPanel::QueryForQuickPlayMaps_Internal( EWorkshopEnumerationType eEnumerationType )
-{
-	m_eCurrentQuickPlayEnumerationType = eEnumerationType;
-
-	uint32 nStartIndex = ( m_nTotalQuickPlayEntriesLoaded ) ? m_nTotalQuickPlayEntriesLoaded : 0;
-
-	CUtlVector< const char * >	vecTags;	// Tags for this BSP file
-
-	// query for coop map only
-	switch( GetCommunityMapQueueMode() )
-	{
-	case QUEUEMODE_QUICK_PLAY:
-		{
-			vecTags.AddToTail( "Singleplayer" );
-			break;
-		}
-	case QUEUEMODE_COOP_QUICK_PLAY:
-		{
-			vecTags.AddToTail( "Cooperative" );
-			break;
-		}
-	default:
-		Assert(0);
-	}
-
-	SteamParamStringArray_t strArray;
-	strArray.m_ppStrings = vecTags.Base();
-	strArray.m_nNumStrings = vecTags.Count();
-
-	SteamAPICall_t hSteamAPICall = steamapicontext->SteamRemoteStorage()->EnumeratePublishedWorkshopFiles(  m_eCurrentQuickPlayEnumerationType, 
-																											nStartIndex, 
-																											sNumQuickPlayResults,
-																											sNumDaysToQuery,
-																											&strArray,
-																											NULL );
-	if ( hSteamAPICall == k_uAPICallInvalid )
-	{
-		Assert(0);
-		Log_Warning( LOG_WORKSHOP, "[BaseModPanel] QueryForQuickPlayMaps() call failed!\n" );
-		m_bQuickPlayQueueError = true;
-		return false;
-	}
-
-	// Setup our callback
-	m_callbackEnumerateWorkshopFiles.Set( hSteamAPICall, this, &CBaseModPanel::Steam_OnEnumerateWorkshopFiles );
-
-	return true;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Queries for a collection of quick play maps that we'd like to play through
-//-----------------------------------------------------------------------------
-bool CBaseModPanel::QueryForQuickPlayMaps()
-{
-	m_vecQuickPlayMaps.Purge();
-	m_nTotalQuickPlayEntriesLoaded = 0;
-	m_bReceivedQuickPlayBaseline = false;
-	m_flQuickPlayBaselineRequestTime = gpGlobals->curtime;
-	m_bQuickPlayQueueReady = false;
-	m_nNextFileID = 0;
-	
-	return QueryForQuickPlayMaps_Internal( m_eCurrentQuickPlayEnumerationType );
-}
-
-#endif // !_GAMECONSOLE
 
 #endif // NO_STEAM
-
-//-----------------------------------------------------------------------------
-// Purpose: Get a quick play entry by its index in our list
-//-----------------------------------------------------------------------------
-const PublishedFileInfo_t *CBaseModPanel::GetCurrentCommunityMap( void )
-{
-	return WorkshopManager().GetPublishedFileInfoByID( GetCurrentCommunityMapID() );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Get a quick play entry by its index in our list
-//-----------------------------------------------------------------------------
-bool CBaseModPanel::RemoveQuickPlayMapFromQueue( PublishedFileId_t nID )
-{
-	if( cm_community_debug_spew.GetBool() ) ConColorMsg( rgbaCommunityDebug, "Removing fileId: %llu from quickplay queueu\n", nID );
-
-	PublishedFileId_t nNextFileID = DetermineNextQuickPlayMapID( nID );
-
-	bool bSuccess = m_vecQuickPlayMaps.FindAndRemove( nID );
-
-	// Start the first map downloading
-	if ( bSuccess )
-	{	
-		if( nNextFileID != 0 )
-		{
-			AddQuickPlayMap( nNextFileID );
-		}
-		else
-		{
-			// There are no more maps!
-			SetNextCommunityMapID( 0 );
-		}
-	}
-
-	// Simple call to nuke data
-	return bSuccess;
-}
 
 //-----------------------------------------------------------------------------
 // Purpose: Opens a generic message dialog with an "OK" button and nothing else
@@ -5622,398 +4265,3 @@ bool CBaseModPanel::OpenMessageDialog( const char *lpszTitle, const char *lpszMe
 
 	return true;
 }
-
-//-----------------------------------------------------------------------------
-// Purpose: Get the current community map we've set
-//-----------------------------------------------------------------------------
-PublishedFileId_t CBaseModPanel::GetCurrentCommunityMapID( void ) const 
-{ 
-    const PublishedFileId_t fileID = (PublishedFileId_t) atol(cm_current_community_map.GetString() );
-    return fileID;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Get the current community map we've set
-//-----------------------------------------------------------------------------
-void CBaseModPanel::SetCurrentCommunityMapID( PublishedFileId_t mapID ) 
-{ 
-    char szMapId[256];
-    V_snprintf( szMapId, sizeof(szMapId), "%llu", mapID );
-    cm_current_community_map.SetValue( szMapId );
-
-	if( cm_community_debug_spew.GetBool() ) ConColorMsg( rgbaCommunityDebug, "Current map ID set to %llu\n", mapID );
-
-	//Set if the map is coop or not
-	bool bIsCoopCommunityMap = false;
-	if ( mapID != 0 )
-	{
-		const PublishedFileInfo_t *pFileInfo = WorkshopManager().GetPublishedFileInfoByID( mapID );
-		if ( pFileInfo != NULL && pFileInfo->HasTag( "Cooperative" ) )
-		{
-			bIsCoopCommunityMap = true;
-		}
-	}
-	cm_is_current_community_map_coop.SetValue( bIsCoopCommunityMap );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Get the current community map we've set
-//-----------------------------------------------------------------------------
-void CBaseModPanel::ClearCurrentCommunityMapID( void ) 
-{ 
-	if( cm_community_debug_spew.GetBool() ) ConColorMsg( rgbaCommunityDebug, "Clearing current map ID\n" );
-
-    cm_current_community_map.SetValue( "0" );
-	cm_is_current_community_map_coop.SetValue( "0" );
-
-	SetNumCommunityMapsPlayedThisSession( 0 );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Find out where in the current queue the map is
-//-----------------------------------------------------------------------------
-int CBaseModPanel::GetCurrentCommunityMapQueuePosition( void )
-{
-	// Get the current map we're on
-	PublishedFileId_t nFileID = GetCurrentCommunityMapID();
-	if ( nFileID == 0 )
-		return -1;
-
-	// Now find out where in our queue we are
-	int nQueuePosition = m_vecCommunityMapsQueue.Find( nFileID );
-	if ( nQueuePosition == m_vecCommunityMapsQueue.InvalidIndex() )
-		return -1;
-
-	return (nQueuePosition+1);
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Set the number of maps we've played this session
-//-----------------------------------------------------------------------------
-void CBaseModPanel::SetNumCommunityMapsPlayedThisSession( int nNumMapsPlayed )
-{
-	m_nNumCommunityMapsPlayedThisSession = nNumMapsPlayed;
-}
-
-
-bool CBaseModPanel::QueueCommunityMapReady( void ) const
-{
-	return HasReceivedQueueBaseline() && m_bQueueReady;
-}
-
-
-bool CBaseModPanel::IsValidMapForCurrentQueueMode( const PublishedFileInfo_t *pFileInfo ) const
-{
-	bool bCooperative = GetCommunityMapQueueMode() == QUEUEMODE_USER_COOP_QUEUE;
-
-
-	if ( bCooperative )
-	{
-		// if Coop, ignore SP maps and maps not marked as Coop
-		if ( pFileInfo->HasTag( "Singleplayer" ) || !pFileInfo->HasTag( "Cooperative" ) )
-			return false;
-	}
-	else // Singleplayer
-	{
-		// if SP, ignore coop maps and maps not marked as SP
-		if ( pFileInfo->HasTag( "Cooperative" ) || !pFileInfo->HasTag( "Singleplayer" ) )
-			return false;
-	}
-
-	return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// Purpose: The base class handles book keeping we'd like all of our requests to do
-//-----------------------------------------------------------------------------
-void CBaseCommunityRequest::OnLoaded( PublishedFileInfo_t &info )
-{
-	// Ask Steam for more information about this user, since we'll be displaying their persona / avatar later
-	steamapicontext->SteamFriends()->RequestUserInformation( info.m_ulSteamIDOwner, false );
-
-	// Get voting information about it
-	WorkshopManager().AddPublishedFileVoteInfoRequest( (const PublishedFileInfo_t *) &info);
-
-	// Notify any listeners that this file has completed its data update
-	KeyValues *pKV = new KeyValues( "PublishedFileInfoListener_UpdateComplete" );
-	pKV->SetUint64( "fileID", info.m_nPublishedFileId );
-	g_pMatchFramework->GetEventsSubscription()->BroadcastEvent( pKV );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Grab the thumbnail for our subscribed queue
-//-----------------------------------------------------------------------------
-void CCommunityMapRequest::OnLoaded( PublishedFileInfo_t &info ) 
-{ 
-	// Install our data here
-	info.m_rtimeSubscribed = m_unSubscribeTime;
-
-	BaseClass::OnLoaded( info );
-
-	// Grab the thumbnail
-	bool bCreatedThumbRequest = CBaseModPanel::GetSingleton().CreateThumbnailFileRequest( info );
-	Assert( bCreatedThumbRequest );
-	if ( bCreatedThumbRequest == false )
-	{
-		Log_Warning( LOG_WORKSHOP, "Unable to create thumbnail request for %llu!\n", info.m_nPublishedFileId );
-	}
-
-	// Grab the content file
-	bool bCreateMapRequest = CBaseModPanel::GetSingleton().CreateMapFileRequest( info );
-	Assert( bCreateMapRequest );
-	if ( bCreateMapRequest == false )
-	{
-		Log_Warning( LOG_WORKSHOP, "Unable to create content file request for %llu!\n", info.m_nPublishedFileId );
-	}
-}
-
-
-//-----------------------------------------------------------------------------
-// Purpose: Grab the thumbnail for our partner's coop queue
-//-----------------------------------------------------------------------------
-void CCommunityMapCoopRequest::OnLoaded( PublishedFileInfo_t &info )
-{
-	// Install our data here
-	info.m_hFile = m_hCoopFile;
-	info.m_hPreviewFile = m_hCoopPreviewFile;
-
-	BaseClass::OnLoaded( info );
-
-	// Grab the thumbnail
-	bool bCreatedThumbRequest = CBaseModPanel::GetSingleton().CreateThumbnailFileRequest( info );
-	Assert( bCreatedThumbRequest );
-	if ( bCreatedThumbRequest == false )
-	{
-		Log_Warning( LOG_WORKSHOP, "Unable to create thumbnail request for %llu!\n", info.m_nPublishedFileId );
-	}
-
-	// Grab the content file
-	bool bCreateMapRequest = CBaseModPanel::GetSingleton().CreateMapFileRequest( info );
-	Assert( bCreateMapRequest );
-	if ( bCreateMapRequest == false )
-	{
-		Log_Warning( LOG_WORKSHOP, "Unable to create content file request for %llu!\n", info.m_nPublishedFileId );
-
-		// This map is unplayable!
-		BASEMODPANEL_SINGLETON.RemoveQuickPlayMapFromQueue( info.m_nPublishedFileId );
-	}
-}
-
-void CCommunityMapSPQuickplayRequest::OnLoaded( PublishedFileInfo_t &info )
-{
-	BaseClass::OnLoaded( info );
-		
-	// Grab the thumbnail
-	bool bCreatedThumbRequest = CBaseModPanel::GetSingleton().CreateThumbnailFileRequest( info );
-	Assert( bCreatedThumbRequest );
-	if ( bCreatedThumbRequest == false )
-	{
-		Log_Warning( LOG_WORKSHOP, "Unable to create thumbnail request for %llu!\n", info.m_nPublishedFileId );
-	}
-
-	// Grab the content file
-	bool bCreateMapRequest = CBaseModPanel::GetSingleton().CreateMapFileRequest( info );
-	Assert( bCreateMapRequest );
-	if ( bCreateMapRequest == false )
-	{
-		Log_Warning( LOG_WORKSHOP, "Unable to create content file request for %llu!\n", info.m_nPublishedFileId );
-
-		// This map is unplayable!
-		BASEMODPANEL_SINGLETON.RemoveQuickPlayMapFromQueue( info.m_nPublishedFileId );
-	}
-	else 
-	{
-		BASEMODPANEL_SINGLETON.SetNextCommunityMapID( info.m_nPublishedFileId );
-	}
-}
-
-
-//-----------------------------------------------------------------------------
-// Purpose: Only grab the file info for community coop quickplay
-//-----------------------------------------------------------------------------
-void CCommunityMapCoopQuickplayRequest::OnLoaded( PublishedFileInfo_t &info )
-{
-	BaseClass::OnLoaded( info );
-	BASEMODPANEL_SINGLETON.SetNextCommunityMapID( info.m_nPublishedFileId );
-}
-
-
-//-----------------------------------------------------------------------------
-// Purpose: Grab the thumbnail for our queue history
-//-----------------------------------------------------------------------------
-void CQueueHistoryEntryRequest::OnLoaded( PublishedFileInfo_t &info ) 
-{ 
-	// Install our data here
-	info.m_rtimeLastPlayed = m_unLastPlayedTime;
-	info.m_rtimeCompleted = m_unCompletionTime;
-
-	BaseClass::OnLoaded( info );
-
-	// Grab the thumbnail
-	bool bCreatedThumbRequest = BASEMODPANEL_SINGLETON.CreateThumbnailFileRequest( info );
-	Assert( bCreatedThumbRequest );
-	if ( bCreatedThumbRequest == false )
-	{
-		Log_Warning( LOG_WORKSHOP, "Unable to create thumbnail request for %llu!\n", info.m_nPublishedFileId );
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Grab the thumbnail for our queue history
-//-----------------------------------------------------------------------------
-void CUserPublishedFileRequest::OnLoaded( PublishedFileInfo_t &info ) 
-{ 
-	BaseClass::OnLoaded( info );
-
-	// Grab the thumbnail
-	bool bCreatedThumbRequest = BASEMODPANEL_SINGLETON.CreateThumbnailFileRequest( info );
-	Assert( bCreatedThumbRequest );
-	if ( bCreatedThumbRequest == false )
-	{
-		Log_Warning( LOG_WORKSHOP, "Unable to create thumbnail request for %llu!\n", info.m_nPublishedFileId );
-	}
-	
-	// Grab the content file
-	bool bCreateMapRequest = BASEMODPANEL_SINGLETON.CreateMapFileRequest( info, true );
-	Assert( bCreateMapRequest );
-	if ( bCreateMapRequest == false )
-	{
-		Log_Warning( LOG_WORKSHOP, "Unable to create content file request for %llu!\n", info.m_nPublishedFileId );
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Handle error case for community map requests
-//-----------------------------------------------------------------------------
-void CCommunityMapRequest::OnError( EResult nErrorCode )
-{
-	// If the file is now gone, unsubscribe from it
-	if ( nErrorCode == k_EResultFileNotFound )
-	{
-		BASEMODPANEL_SINGLETON.UnsubscribeFromMap( GetTargetID() );
-	}
-
-	BASEMODPANEL_SINGLETON.RemoveCommunityMap( GetTargetID() );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Handle error case for community map requests
-//-----------------------------------------------------------------------------
-void CCommunityMapCoopRequest::OnError( EResult nErrorCode )
-{
-	// if coop map failed to download, just disconnect the session
-	switch ( nErrorCode )
-	{
-	case k_EResultFileNotFound:
-		{
-			BASEMODPANEL_SINGLETON.UnsubscribeFromMap( GetTargetID() );
-		}
-		break;
-	}
-
-	switch ( BASEMODPANEL_SINGLETON.GetCommunityMapQueueMode() )
-	{
-	case QUEUEMODE_USER_COOP_QUEUE:
-		{
-			BASEMODPANEL_SINGLETON.RemoveCommunityMap( GetTargetID() );
-		}
-		break;
-	case QUEUEMODE_COOP_QUICK_PLAY:
-		{
-			BASEMODPANEL_SINGLETON.RemoveQuickPlayMapFromQueue( GetTargetID() );
-		}
-		break;
-	default:
-		Assert(0);
-		break;
-	}
-}
-
-
-void CCommunityMapSPQuickplayRequest::OnError( EResult nErrorCode )
-{
-	Warning( "Error requesting quickplay info for fileID: %llu\n", GetTargetID() );
-
-	BASEMODPANEL_SINGLETON.RemoveQuickPlayMapFromQueue( GetTargetID() );
-}
-
-void CCommunityMapCoopQuickplayRequest::OnError( EResult nErrorCode )
-{
-	Warning( "Error requesting quickplay info for fileID: %llu\n", GetTargetID() );
-
-	BASEMODPANEL_SINGLETON.RemoveQuickPlayMapFromQueue( GetTargetID() );
-}
-
-
-//-----------------------------------------------------------------------------
-// Purpose: Handle error case for community map queue history requests
-//-----------------------------------------------------------------------------
-void CQueueHistoryEntryRequest::OnError( EResult nErrorCode )
-{
-	BASEMODPANEL_SINGLETON.RemoveQueueHistoryEntry( GetTargetID() );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Handle error case for user published files
-//-----------------------------------------------------------------------------
-void CUserPublishedFileRequest::OnError( EResult nErrorCode )
-{
-	BASEMODPANEL_SINGLETON.RemoveUserPublishedMap( GetTargetID() );
-}
-
-#if !defined( _GAMECONSOLE )
-
-//-----------------------------------------------------------------------------
-// Purpose: Used for adding a queue history event on playing map
-//-----------------------------------------------------------------------------
-class CCommunityMapGameSystem : public CAutoGameSystemPerFrame
-{
-public:
-
-	CCommunityMapGameSystem( void ) : CAutoGameSystemPerFrame( "CCommunityMapGameSystem" ) { }
-
-	// Gets called each frame
-	virtual void Update( float frametime ) 
-	{ 
-		WorkshopManager().Update();
-	}
-
-	virtual void LevelInitPostEntity( void )
-	{
-		static PublishedFileId_t nStoredCurrentMapID = 0;
-		PublishedFileId_t nCurrentMapID = BASEMODPANEL_SINGLETON.GetCurrentCommunityMapID();
-
-		// This function gets called after every death in single player.  Guard against
-		// calling the following functions multiple times for the same map.
-		if( nStoredCurrentMapID != nCurrentMapID )
-		{
-			nStoredCurrentMapID = nCurrentMapID;
-
-			// Send a message to the GC that we've begun a map		
-			PublishedFileId_t nMapID = nCurrentMapID;
-			if ( nMapID != 0 )
-			{
-				CRTime::UpdateRealTime();
-				RTime32 currentTime = CRTime::RTime32TimeCur();
-				Log_Msg( LOG_WORKSHOP, "[AddQueueHistoryEntry] Added entry for (%llu)\n", nMapID );
-
-				BASEMODPANEL_SINGLETON.MarkCommunityMapPlayedTime( nMapID, currentTime );
-			}
-
-			if( BASEMODPANEL_SINGLETON.IsQuickplay() )
-			{
-				// Reset next map to 0.  It will get set to a valid ID after a valid file is pulled down from the workshop.
-				// It will stay at 0 if this never happens.
-				BASEMODPANEL_SINGLETON.SetNextCommunityMapID( 0 );
-				BASEMODPANEL_SINGLETON.RemoveQuickPlayMapFromQueue( nCurrentMapID );
-			}
-		}
-	}
-};
-
-CCommunityMapGameSystem g_CommunityMapGameSystem;
-
-#endif // !_GAMECONSOLE
-
-#endif	// !NO_STEAM
