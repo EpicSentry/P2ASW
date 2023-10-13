@@ -189,6 +189,12 @@ private:
 
 	string_t m_ModelName;
 
+	int m_nCollisionType;
+
+	float m_flTurretRange;
+
+	bool m_bDisableMotion;
+
 protected:
 	float GetFireConeZTolerance();
 };
