@@ -71,6 +71,7 @@ $Project "Client (Portal 2)"
 			$File	"$SRCDIR\game\shared\hl2\hl_gamemovement.h"
 			$File	"hl2\hl_in_main.cpp"
 			$File	"hl2\hl_prediction.cpp"
+			$File	"hl2\c_ar2_explosion.cpp"
 		}
 		
 		$Folder	"Multiplayer"
