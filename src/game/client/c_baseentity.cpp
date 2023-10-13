@@ -2130,6 +2130,15 @@ void C_BaseEntity::SetMoveCollide( MoveCollide_t val )
 	m_MoveCollide = val;
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Get rendermode
+// Output : int - the render mode
+//-----------------------------------------------------------------------------
+bool C_BaseEntity::IsTransparent( void )
+{
+	bool modelIsTransparent = modelinfo->IsTranslucent(model);
+	return modelIsTransparent || (m_nRenderMode != kRenderNormal);
+}
 
 //-----------------------------------------------------------------------------
 // Default implementation of compute translucency type

@@ -14,7 +14,7 @@ $Configuration
 	$Compiler
 	{
 		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\game\shared\portal;$SRCDIR\game\shared\portal2;.\hl2;.\episodic;$SRCDIR\game\shared\multiplayer;$SRCDIR\game\shared\hl2;$SRCDIR\game\shared\portal;.\portal;.\portal2"
-		$PreprocessorDefinitions		"$BASE;PORTAL;USES_SAVERESTORE;SWARM_DLL;PORTAL2;PORTAL2_DLL"
+		$PreprocessorDefinitions		"$BASE;PORTAL;USES_SAVERESTORE;PORTAL2;PORTAL2_DLL"
 		$PreprocessorDefinitions		"$BASE;USE_CEG"								[ $WIN32 && !$NO_CEG ]
 	}
 	

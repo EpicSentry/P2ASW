@@ -25,7 +25,8 @@
 #include "tier2/tier2.h"
 #include "matchmaking/imatchframework.h"
 
-#ifdef SWARM_DLL
+// It's important to have this, otherwise matchmaking would be impossible.
+#if defined ( SWARM_DLL ) || defined ( PORTAL2 )
 #include "matchmaking/swarm/imatchext_swarm.h"
 extern class IMatchExtSwarm *g_pMatchExtSwarm;
 #endif

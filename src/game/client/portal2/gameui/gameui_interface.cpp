@@ -193,9 +193,11 @@ void CGameUI::Initialize( CreateInterfaceFn factory )
 #ifdef _X360
 	xonline = (IXOnline *)factory( XONLINE_INTERFACE_VERSION, NULL );
 #endif
+
 #ifdef SWARM_DLL
 	g_pMatchExtSwarm = ( IMatchExtSwarm * ) factory( IMATCHEXT_SWARM_INTERFACE, NULL );
 #endif
+
 #ifdef SDK_DLL
 	g_pMatchExtSwarm = ( IMatchExtSwarm * ) factory( IMATCHEXT_SWARM_INTERFACE, NULL );
 #endif

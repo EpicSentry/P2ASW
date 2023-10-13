@@ -1815,13 +1815,31 @@ void ConfigureCurrentSystemLevel()
 	{
 		nGPUMemLevel = 360;
 	}
-
-#if defined( SWARM_DLL )
-	char szModName[32] = "swarm";
+	
+#if defined ( TERROR )
+	char szModName[32] = "left4dead";
+#elif defined ( PAINT )
+	char szModName[32] = "paint";
+#elif defined ( PORTAL2 )
+#if 0
+	char szModName[32] = "portal2";
+#else
+	char szModName[32] = "portal2asw"; // This is our mod name.
+#endif
+#elif defined( INFESTED_DLL )
+	char szModName[32] = "infested";
 #elif defined ( HL2_EPISODIC )
 	char szModName[32] = "ep2";
+#elif defined ( TF_CLIENT_DLL )
+	char szModName[32] = "tf";
+#elif defined ( DOTA_CLIENT_DLL )
+	char szModName[32] = "dota";
 #elif defined ( SDK_CLIENT_DLL )
 	char szModName[32] = "sdk";
+#elif defined ( SOB_CLIENT_DLL )
+	char szModName[32] = "ep2";
+#elif defined ( CSTRIKE15 )
+	char szModName[32] = "csgo";
 #endif
 
 	UpdateSystemLevel( nCPULevel, nGPULevel, nMemLevel, nGPUMemLevel, VGui_IsSplitScreen(), szModName );
