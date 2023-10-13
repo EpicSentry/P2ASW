@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -257,7 +257,10 @@ public:
 	void Disable( void );
 	void SetPlayer( CBaseEntity *pPlayer );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void FindAttachment( void );
 	void FollowTarget( void );
+	void ReturnToEyes( void );
+	void MoveViewTo( QAngle vecGoalView );
 	void Move(void);
 	void StartCameraShot( const char *pszShotType, CBaseEntity *pSceneEntity, CBaseEntity *pActor1, CBaseEntity *pActor2, float duration );
 	int ScriptGetFov( void );
@@ -271,6 +274,17 @@ public:
 	// Input handlers
 	void InputEnable( inputdata_t &inputdata );
 	void InputDisable( inputdata_t &inputdata );
+
+	void InputSetTarget( inputdata_t& inputdata );
+	void InputSetTargetAttachment( inputdata_t& inputdata );
+
+	void InputReturnToEyes( inputdata_t& inputdata );
+	void InputTeleportToView( inputdata_t& inputdata );
+
+
+	void InputSetTrackSpeed( inputdata_t& inputdata );
+
+	void InputSetPath(inputdata_t& inputdata);
 
 private:
 	EHANDLE m_hPlayer;
@@ -292,6 +306,7 @@ private:
 
 	float m_fov;
 	float m_fovSpeed;
+	float m_trackSpeed;
 
 	string_t m_iszTargetAttachment;
 	int	  m_iAttachmentIndex;
