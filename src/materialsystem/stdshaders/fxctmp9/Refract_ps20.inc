@@ -29,6 +29,7 @@ public:
 	}
 	void SetMAGNIFY( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nMAGNIFY = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bMAGNIFY = true;
@@ -50,6 +51,7 @@ public:
 	}
 	void SetBLUR( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nBLUR = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bBLUR = true;
@@ -71,6 +73,7 @@ public:
 	}
 	void SetFADEOUTONSILHOUETTE( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nFADEOUTONSILHOUETTE = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bFADEOUTONSILHOUETTE = true;
@@ -92,6 +95,7 @@ public:
 	}
 	void SetCUBEMAP( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nCUBEMAP = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bCUBEMAP = true;
@@ -113,6 +117,7 @@ public:
 	}
 	void SetREFRACTTINTTEXTURE( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nREFRACTTINTTEXTURE = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bREFRACTTINTTEXTURE = true;
@@ -134,6 +139,7 @@ public:
 	}
 	void SetMASKED( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nMASKED = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bMASKED = true;
@@ -155,6 +161,7 @@ public:
 	}
 	void SetCOLORMODULATE( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nCOLORMODULATE = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bCOLORMODULATE = true;
@@ -176,6 +183,7 @@ public:
 	}
 	void SetSECONDARY_NORMAL( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nSECONDARY_NORMAL = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bSECONDARY_NORMAL = true;
@@ -197,9 +205,32 @@ public:
 	}
 	void SetMIRRORABOUTVIEWPORTEDGES( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 0 );
 		m_nMIRRORABOUTVIEWPORTEDGES = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bMIRRORABOUTVIEWPORTEDGES = true;
+#endif
+	}
+private:
+	int m_nLOCALREFRACT;
+#ifdef _DEBUG
+	bool m_bLOCALREFRACT;
+#endif
+public:
+	void SetLOCALREFRACT( int i )
+	{
+		Assert( i >= 0 && i <= 1 );
+		m_nLOCALREFRACT = i;
+#ifdef _DEBUG
+		m_bLOCALREFRACT = true;
+#endif
+	}
+	void SetLOCALREFRACT( bool i )
+	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
+		m_nLOCALREFRACT = i ? 1 : 0;
+#ifdef _DEBUG
+		m_bLOCALREFRACT = true;
 #endif
 	}
 public:
@@ -242,19 +273,23 @@ public:
 		m_bMIRRORABOUTVIEWPORTEDGES = false;
 #endif // _DEBUG
 		m_nMIRRORABOUTVIEWPORTEDGES = 0;
+#ifdef _DEBUG
+		m_bLOCALREFRACT = false;
+#endif // _DEBUG
+		m_nLOCALREFRACT = 0;
 	}
 	int GetIndex()
 	{
 		// Asserts to make sure that we aren't using any skipped combinations.
 		// Asserts to make sure that we are setting all of the combination vars.
 #ifdef _DEBUG
-		bool bAllStaticVarsDefined = m_bMAGNIFY && m_bBLUR && m_bFADEOUTONSILHOUETTE && m_bCUBEMAP && m_bREFRACTTINTTEXTURE && m_bMASKED && m_bCOLORMODULATE && m_bSECONDARY_NORMAL && m_bMIRRORABOUTVIEWPORTEDGES;
+		bool bAllStaticVarsDefined = m_bMAGNIFY && m_bBLUR && m_bFADEOUTONSILHOUETTE && m_bCUBEMAP && m_bREFRACTTINTTEXTURE && m_bMASKED && m_bCOLORMODULATE && m_bSECONDARY_NORMAL && m_bMIRRORABOUTVIEWPORTEDGES && m_bLOCALREFRACT;
 		Assert( bAllStaticVarsDefined );
 #endif // _DEBUG
-		return ( 2 * m_nMAGNIFY ) + ( 4 * m_nBLUR ) + ( 8 * m_nFADEOUTONSILHOUETTE ) + ( 16 * m_nCUBEMAP ) + ( 32 * m_nREFRACTTINTTEXTURE ) + ( 64 * m_nMASKED ) + ( 128 * m_nCOLORMODULATE ) + ( 256 * m_nSECONDARY_NORMAL ) + ( 512 * m_nMIRRORABOUTVIEWPORTEDGES ) + 0;
+		return ( 2 * m_nMAGNIFY ) + ( 4 * m_nBLUR ) + ( 8 * m_nFADEOUTONSILHOUETTE ) + ( 16 * m_nCUBEMAP ) + ( 32 * m_nREFRACTTINTTEXTURE ) + ( 64 * m_nMASKED ) + ( 128 * m_nCOLORMODULATE ) + ( 256 * m_nSECONDARY_NORMAL ) + ( 512 * m_nMIRRORABOUTVIEWPORTEDGES ) + ( 512 * m_nLOCALREFRACT ) + 0;
 	}
 };
-#define shaderStaticTest_refract_ps20 psh_forgot_to_set_static_MAGNIFY + psh_forgot_to_set_static_BLUR + psh_forgot_to_set_static_FADEOUTONSILHOUETTE + psh_forgot_to_set_static_CUBEMAP + psh_forgot_to_set_static_REFRACTTINTTEXTURE + psh_forgot_to_set_static_MASKED + psh_forgot_to_set_static_COLORMODULATE + psh_forgot_to_set_static_SECONDARY_NORMAL + psh_forgot_to_set_static_MIRRORABOUTVIEWPORTEDGES + 0
+#define shaderStaticTest_refract_ps20 psh_forgot_to_set_static_MAGNIFY + psh_forgot_to_set_static_BLUR + psh_forgot_to_set_static_FADEOUTONSILHOUETTE + psh_forgot_to_set_static_CUBEMAP + psh_forgot_to_set_static_REFRACTTINTTEXTURE + psh_forgot_to_set_static_MASKED + psh_forgot_to_set_static_COLORMODULATE + psh_forgot_to_set_static_SECONDARY_NORMAL + psh_forgot_to_set_static_MIRRORABOUTVIEWPORTEDGES + psh_forgot_to_set_static_LOCALREFRACT + 0
 class refract_ps20_Dynamic_Index
 {
 private:
@@ -273,6 +308,7 @@ public:
 	}
 	void SetPIXELFOGTYPE( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nPIXELFOGTYPE = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bPIXELFOGTYPE = true;

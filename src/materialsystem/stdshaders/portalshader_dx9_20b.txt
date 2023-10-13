@@ -31,3 +31,6 @@ solidenergy_ps20b.fxc
 
 black_ps2x.fxc
 black_vs20.fxc
+
+refract_ps2x.fxc
+Refract_vs20.fxc

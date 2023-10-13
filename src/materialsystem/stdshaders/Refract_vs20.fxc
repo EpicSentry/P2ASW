@@ -82,20 +82,33 @@ VS_OUTPUT main( const VS_INPUT v )
 #else
 	DecompressVertex_Normal( v.vNormal, vObjNormal );
 
-	worldPos = mul( v.vPos, cModel[0] );
-	worldTangentS = mul( v.vTangentS, ( const float3x3 )cModel[0] );
-	worldTangentT = mul( v.vTangentT, ( const float3x3 )cModel[0] );
-	worldNormal = mul( vObjNormal, ( float3x3 )cModel[0] );
+	worldPos = mul4x3( v.vPos, cModel[0] );
+	worldTangentS = mul3x3( v.vTangentS, ( const float3x3 )cModel[0] );
+	worldTangentT = mul3x3( v.vTangentT, ( const float3x3 )cModel[0] );
+	worldNormal = mul3x3( vObjNormal, ( float3x3 )cModel[0] );
 #endif
+
+	// Normalize vectors
+	worldNormal.xyz = normalize( worldNormal.xyz );
+	worldTangentS.xyz = normalize( worldTangentS.xyz );
+	worldTangentT.xyz = normalize( worldTangentT.xyz );
 
 	// World normal
 	o.vWorldNormal.xyz = normalize( worldNormal.xyz );
 
 	// Projected position
 	float4 vProjPos = mul( float4( worldPos, 1 ), cViewProj );
+	
 	o.vProjPos_POSITION = vProjPos;
 	o.worldPos_projPosZ = float4( worldPos.xyz, vProjPos.z );
 	//o.projNormal.xyz = mul( worldNormal, cViewProj );
+	
+	
+#ifdef _PS3
+	// Account for OpenGL's flipped y coordinate and expanded z range [-1,1] instead of [0,1]
+	o.vProjPos_POSITION.y = -o.vProjPos_POSITION.y;
+	o.vProjPos_POSITION.z = 2.0f * o.vProjPos_POSITION.z - o.vProjPos_POSITION.w;
+#endif // _PS3
 
 	// Map projected position to the refraction texture
 	float2 vRefractPos;
@@ -104,13 +117,17 @@ VS_OUTPUT main( const VS_INPUT v )
 	vRefractPos = (vRefractPos + vProjPos.w) * 0.5f;
 
 	// Adjust for current viewport
-	vRefractPos.xy = ( ( ( vRefractPos.xy / vProjPos.w ) * g_vViewportMad.xy ) + g_vViewportMad.zw ) * vProjPos.w;
+	#if defined( _X360 ) || defined( _PS3 )
+	{
+		vRefractPos.xy = ( ( ( vRefractPos.xy / vProjPos.w ) * g_vViewportMad.xy ) + g_vViewportMad.zw ) * vProjPos.w;
+	}
+	#endif
 
 	// Refraction transform
 	o.vRefractXYW = float3(vRefractPos.x, vRefractPos.y, vProjPos.w);
 
 	// Compute fog based on the position
-	float3 vWorldPos = mul( v.vPos, cModel[0] );
+	float3 vWorldPos = mul4x3( v.vPos, cModel[0] );
 	
 #if !defined( _X360 ) && !defined( SHADER_MODEL_VS_3_0 )
 	o.fog = CalcFixedFunctionFog( vWorldPos, FOGTYPE_RANGE );
@@ -135,7 +152,7 @@ VS_OUTPUT main( const VS_INPUT v )
 
 
 	// Tangent space transform
-	o.vWorldNormal.xyz = normalize( worldNormal.xyz );
+	o.vWorldNormal.xyz = worldNormal.xyz;
 	o.vWorldTangent.xyz = worldTangentS.xyz;
 	o.vWorldBinormal.xyz = worldTangentT.xyz;
 
