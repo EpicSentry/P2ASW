@@ -3,7 +3,7 @@ class CHUDQuickInfo : public CHudElement, public vgui::Panel
 	DECLARE_CLASS_SIMPLE( CHUDQuickInfo, vgui::Panel );
 public:    
 	CHUDQuickInfo( const char *pElementName );
-    void ~CHUDQuickInfo();
+	~CHUDQuickInfo();
 	void Init( void );
 	void VidInit( void );
 	bool ShouldDraw( void );
