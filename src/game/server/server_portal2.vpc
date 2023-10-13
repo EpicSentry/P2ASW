@@ -79,6 +79,9 @@ $Project "Server (Portal 2)"
 			$File	"$SRCDIR\game\shared\hl2\basehlcombatweapon_shared.h"
 			
 			$File	"hl2\hl_playermove.cpp"
+			$File	"hl2\npc_bullseye.cpp"
+			$File	"hl2\npc_bullseye.h"
+			$File	"hl2\npc_enemyfinder.cpp"
 		}
 		
 		$Folder	"Portal 2"
