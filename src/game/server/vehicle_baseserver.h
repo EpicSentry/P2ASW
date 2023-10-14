@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -260,6 +260,8 @@ public:
 	// Rumble
 	virtual void			StartEngineRumble();
 	virtual void			StopEngineRumble();
+
+	void SetPassengerWeapon(bool bUseWeapon, CBaseCombatCharacter* pPassenger);
 
 public:
 	CBaseEntity			*m_pVehicle;
