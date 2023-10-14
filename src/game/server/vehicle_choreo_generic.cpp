@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -87,18 +87,37 @@ private:
 //-----------------------------------------------------------------------------
 class CChoreoGenericServerVehicle : public CBaseServerVehicle
 {
+	DECLARE_SIMPLE_DATADESC();
 	typedef CBaseServerVehicle BaseClass;
 
 // IServerVehicle
 public:
 	void GetVehicleViewPosition( int nRole, Vector *pAbsOrigin, QAngle *pAbsAngles, float *pFOV = NULL );
 	virtual void ItemPostFrame( CBasePlayer *pPlayer );
+	virtual bool IsPassengerUsingStandardWeapons(int nRole = VEHICLE_ROLE_DRIVER) { return m_bPlayerCanShoot; }
+
+	virtual void SetPlayerCanShoot(bool bCanShoot, int nRole = VEHICLE_ROLE_DRIVER);
 
 protected:
-
+	
+	bool m_bPlayerCanShoot;
 	CPropVehicleChoreoGeneric *GetVehicle( void );
 };
 
+void CChoreoGenericServerVehicle::SetPlayerCanShoot(bool bCanShoot, int nRole /*= VEHICLE_ROLE_DRIVER*/)
+{
+	if (bCanShoot != m_bPlayerCanShoot)
+	{
+		SetPassengerWeapon(bCanShoot, GetPassenger(nRole));
+		m_bPlayerCanShoot = bCanShoot;
+	}
+}
+
+BEGIN_SIMPLE_DATADESC(CChoreoGenericServerVehicle)
+
+DEFINE_FIELD(m_bPlayerCanShoot, FIELD_BOOLEAN),
+
+END_DATADESC()
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -165,6 +184,12 @@ public:
 	void InputOpen( inputdata_t &inputdata );
 	void InputClose( inputdata_t &inputdata );
 	void InputViewlock( inputdata_t &inputdata );
+	void InputSetCanShoot(inputdata_t& inputdata);
+	void InputUseAttachmentEyes(inputdata_t& inputdata);
+	void InputSetMaxPitch(inputdata_t& inputdata);
+	void InputSetMinPitch(inputdata_t& inputdata);
+	void InputSetMaxYaw(inputdata_t& inputdata);
+	void InputSetMinYaw(inputdata_t& inputdata);
 
 	bool ShouldIgnoreParent( void ) { return m_bIgnoreMoveParent; }
 
@@ -220,6 +245,8 @@ private:
 	bool				m_bForcedExit;
 	bool				m_bIgnoreMoveParent;
 	bool				m_bIgnorePlayerCollisions;
+	bool				m_bPlayerCanShoot;
+	CNetworkVar(bool, m_bForceEyesToAttachment);
 
 	// Vehicle script filename
 	string_t			m_vehicleScript;
@@ -243,6 +270,14 @@ BEGIN_DATADESC( CPropVehicleChoreoGeneric )
 	DEFINE_INPUTFUNC( FIELD_VOID, "Open", InputOpen ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "Close", InputClose ),
 	DEFINE_INPUTFUNC( FIELD_BOOLEAN, "Viewlock", InputViewlock ),
+	DEFINE_INPUTFUNC(FIELD_BOOLEAN, "SetCanShoot", InputSetCanShoot),
+	DEFINE_INPUTFUNC(FIELD_BOOLEAN, "UseAttachmentEyes", InputUseAttachmentEyes),
+
+	DEFINE_INPUTFUNC(FIELD_FLOAT, "SetMaxPitch", InputSetMaxPitch),
+	DEFINE_INPUTFUNC(FIELD_FLOAT, "SetMinPitch", InputSetMinPitch),
+	DEFINE_INPUTFUNC(FIELD_FLOAT, "SetMaxYaw", InputSetMaxYaw),
+	DEFINE_INPUTFUNC(FIELD_FLOAT, "SetMinYaw", InputSetMinYaw),
+
 
 	// Keys
 	DEFINE_EMBEDDED( m_ServerVehicle ),
@@ -259,6 +294,8 @@ BEGIN_DATADESC( CPropVehicleChoreoGeneric )
 	DEFINE_KEYFIELD( m_bIgnoreMoveParent, FIELD_BOOLEAN, "ignoremoveparent" ),
 	DEFINE_KEYFIELD( m_bIgnorePlayerCollisions, FIELD_BOOLEAN, "ignoreplayer" ),
 	DEFINE_KEYFIELD( m_bForcePlayerEyePoint, FIELD_BOOLEAN, "useplayereyes" ),
+	DEFINE_KEYFIELD(m_bPlayerCanShoot, FIELD_BOOLEAN, "playercanshoot"),
+	DEFINE_KEYFIELD(m_bForceEyesToAttachment, FIELD_BOOLEAN, "useattachmenteyes"),
 
 	DEFINE_OUTPUT( m_playerOn, "PlayerOn" ),
 	DEFINE_OUTPUT( m_playerOff, "PlayerOff" ),
@@ -274,6 +311,7 @@ IMPLEMENT_SERVERCLASS_ST(CPropVehicleChoreoGeneric, DT_PropVehicleChoreoGeneric)
 	SendPropEHandle(SENDINFO(m_hPlayer)),
 	SendPropBool(SENDINFO(m_bEnterAnimOn)),
 	SendPropBool(SENDINFO(m_bExitAnimOn)),
+	SendPropBool(SENDINFO(m_bForceEyesToAttachment)),
 	SendPropVector(SENDINFO(m_vecEyeExitEndpoint), -1, SPROP_COORD),
 	SendPropBool( SENDINFO_STRUCTELEM( m_vehicleView.bClampEyeAngles ) ),
 	SendPropFloat( SENDINFO_STRUCTELEM( m_vehicleView.flPitchCurveZero ) ),
@@ -940,6 +978,36 @@ bool CPropVehicleChoreoGeneric::ShouldCollide( int collisionGroup, int contentsM
 	return BaseClass::ShouldCollide( collisionGroup, contentsMask );
 }
 
+void CPropVehicleChoreoGeneric::InputSetCanShoot(inputdata_t& inputdata)
+{
+	m_bPlayerCanShoot = inputdata.value.Bool();
+	m_ServerVehicle.SetPlayerCanShoot(m_bPlayerCanShoot);
+}
+
+void CPropVehicleChoreoGeneric::InputUseAttachmentEyes(inputdata_t& inputdata)
+{
+	m_bForceEyesToAttachment = inputdata.value.Bool();
+}
+
+void CPropVehicleChoreoGeneric::InputSetMaxPitch(inputdata_t& inputdata)
+{
+	m_vehicleView.flPitchMax = inputdata.value.Float();
+}
+
+void CPropVehicleChoreoGeneric::InputSetMinPitch(inputdata_t& inputdata)
+{
+	m_vehicleView.flPitchMin = inputdata.value.Float();
+}
+
+void CPropVehicleChoreoGeneric::InputSetMaxYaw(inputdata_t& inputdata)
+{
+	m_vehicleView.flYawMax = inputdata.value.Float();
+}
+
+void CPropVehicleChoreoGeneric::InputSetMinYaw(inputdata_t& inputdata)
+{
+	m_vehicleView.flYawMin = inputdata.value.Float();
+}
 
 CVehicleChoreoViewParser::CVehicleChoreoViewParser( void )
 {
