@@ -1927,20 +1927,21 @@ LINK_ENTITY_TO_CLASS( prop_dynamic, CDynamicProp );
 LINK_ENTITY_TO_CLASS( prop_dynamic_override, CDynamicProp );	
 #endif
 
-BEGIN_DATADESC( CDynamicProp )
+BEGIN_DATADESC(CDynamicProp)
 
 	// Fields
-	DEFINE_KEYFIELD( m_iszDefaultAnim, FIELD_STRING, "DefaultAnim"),	
-	DEFINE_FIELD(	 m_iGoalSequence, FIELD_INTEGER ),
-	DEFINE_FIELD(	 m_iTransitionDirection, FIELD_INTEGER ),
-	DEFINE_KEYFIELD( m_bRandomAnimator, FIELD_BOOLEAN, "RandomAnimation"),	
-	DEFINE_FIELD(	 m_flNextRandAnim, FIELD_TIME ),
-	DEFINE_KEYFIELD( m_flMinRandAnimTime, FIELD_FLOAT, "MinAnimTime"),
-	DEFINE_KEYFIELD( m_flMaxRandAnimTime, FIELD_FLOAT, "MaxAnimTime"),
-	DEFINE_KEYFIELD( m_bStartDisabled, FIELD_BOOLEAN, "StartDisabled" ),
-	DEFINE_FIELD(	 m_bUseHitboxesForRenderBox, FIELD_BOOLEAN ),
-	DEFINE_FIELD(	m_nPendingSequence, FIELD_SHORT ),
-	DEFINE_KEYFIELD( m_bUpdateAttachedChildren, FIELD_BOOLEAN, "updatechildren" ),
+	DEFINE_KEYFIELD(m_iszDefaultAnim, FIELD_STRING, "DefaultAnim"),
+	DEFINE_FIELD(m_iGoalSequence, FIELD_INTEGER),
+	DEFINE_FIELD(m_iTransitionDirection, FIELD_INTEGER),
+	DEFINE_KEYFIELD(m_bRandomAnimator, FIELD_BOOLEAN, "RandomAnimation"),
+	DEFINE_FIELD(m_flNextRandAnim, FIELD_TIME),
+	DEFINE_KEYFIELD(m_flMinRandAnimTime, FIELD_FLOAT, "MinAnimTime"),
+	DEFINE_KEYFIELD(m_flMaxRandAnimTime, FIELD_FLOAT, "MaxAnimTime"),
+	DEFINE_KEYFIELD(m_bStartDisabled, FIELD_BOOLEAN, "StartDisabled"),
+	DEFINE_FIELD(m_bUseHitboxesForRenderBox, FIELD_BOOLEAN),
+	DEFINE_FIELD(m_nPendingSequence, FIELD_SHORT),
+	DEFINE_KEYFIELD( m_bAnimateEveryFrame, FIELD_BOOLEAN, "AnimateEveryFrame" ), 
+	//DEFINE_KEYFIELD( m_bUpdateAttachedChildren, FIELD_BOOLEAN, "updatechildren" ),
 	DEFINE_KEYFIELD( m_bDisableBoneFollowers, FIELD_BOOLEAN, "DisableBoneFollowers" ),
 	DEFINE_FIELD(	m_bAnimationDone, FIELD_BOOLEAN ),
 	DEFINE_KEYFIELD( m_bHoldAnimation, FIELD_BOOLEAN, "HoldAnimation" ),
@@ -1956,6 +1957,8 @@ BEGIN_DATADESC( CDynamicProp )
 	DEFINE_INPUTFUNC( FIELD_VOID,		"EnableCollision",	InputEnableCollision ),
 	DEFINE_INPUTFUNC( FIELD_VOID,		"DisableCollision",	InputDisableCollision ),
 	DEFINE_INPUTFUNC( FIELD_FLOAT,		"SetPlaybackRate",	InputSetPlaybackRate ),
+	DEFINE_INPUTFUNC( FIELD_VOID,		"BecomeRagdoll",	InputBecomeRagdoll ),
+	DEFINE_INPUTFUNC( FIELD_VOID,		"FadeAndKill",	InputFadeAndKill ),
 
 	// Outputs
 	DEFINE_OUTPUT( m_pOutputAnimBegun, "OnAnimationBegun" ),
@@ -2060,6 +2063,11 @@ void CDynamicProp::Spawn( )
 		AddSolidFlags( FSOLID_NOT_SOLID );
 	}
 
+	if (m_bAnimateEveryFrame)
+	{
+		SetAnimatedEveryTick(true);
+	}
+	
 	//m_debugOverlays |= OVERLAY_ABSBOX_BIT;
 }
 
@@ -2328,18 +2336,20 @@ void CDynamicProp::AnimThink( void )
 		SetNextThink( gpGlobals->curtime + 0.1f );
 	}
 
+	if (m_bAnimateEveryFrame)
+	{
+		SetNextThink(gpGlobals->curtime);
+	}
+
 	StudioFrameAdvance();
 	DispatchAnimEvents(this);
 	UpdateBoneFollowers();
 
-	// Update any SetParentAttached children
-	if ( m_bUpdateAttachedChildren )
+	// Queue any SetParentAttached children to update at the end of the frame
+	for ( CBaseEntity *pChild = FirstMoveChild(); pChild; pChild = pChild->NextMovePeer() )
 	{
-		for ( CBaseEntity *pChild = FirstMoveChild(); pChild; pChild = pChild->NextMovePeer() )
-		{
-			pChild->PhysicsTouchTriggers();
-		}		
-	}
+		pChild->PhysicsTouchTriggers();
+	}		
 }
 
 //------------------------------------------------------------------------------
@@ -2472,6 +2482,19 @@ void CDynamicProp::InputDisableCollision( inputdata_t &inputdata )
 void CDynamicProp::InputEnableCollision( inputdata_t &inputdata )
 {
 	RemoveSolidFlags( FSOLID_NOT_SOLID );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CDynamicProp::InputBecomeRagdoll( inputdata_t& inputdata )
+{
+	BecomeRagdollOnClient( vec3_origin );
+}
+
+void CDynamicProp::InputFadeAndKill(inputdata_t& inputdata)
+{
+	SUB_StartFadeOutInstant();
 }
 
 //-----------------------------------------------------------------------------
