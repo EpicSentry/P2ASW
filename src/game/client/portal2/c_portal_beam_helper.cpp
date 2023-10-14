@@ -160,35 +160,20 @@ void C_PortalBeamHelper::UpdatePoints( Vector &vStartPoint, Vector &vEndPoint, u
 
 void C_PortalBeamHelper::TurnOff( void )
 {
-#ifdef DEBUG
-	int iCycleCount = 0;
-#endif
 	for ( int i = 0; i < m_beams.Count(); ++i )
 	{
-#ifdef DEBUG
-		++iCycleCount;
-#endif
-		AssertMsg(iCycleCount < 100, "You're probably stuck in a loop if you managed to get this high");
 
 		Msg("Turn off Beam %i\n", i);
-		m_beams[i]->TurnOff();
+		m_beams[i]->TurnOn();
 	}
 }
 
 void C_PortalBeamHelper::TurnOn( void )
 {
-#ifdef DEBUG
-	int iCycleCount = 0;
-#endif
 	for ( int i = 0; i < m_beams.Count(); ++i )
 	{
-#ifdef DEBUG
-		++iCycleCount;
-#endif
-		AssertMsg(iCycleCount < 100, "You're probably stuck in a loop if you managed to get this high");
-
 		Msg("Turn on Beam %i\n", i);
-		m_beams[i]->TurnOn();
+		m_beams[i]->TurnOff();
 		m_beams[i]->UpdateVisibility();
 		//m_beams[i]->OnDisableShadowDepthRenderingChanged();
 		//m_beams[i]->OnShadowDepthRenderingCacheableStateChanged();
