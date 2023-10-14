@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -435,6 +435,44 @@ const PassengerSeatAnims_t *CBaseServerVehicle::NPC_GetPassengerSeatAnims( CBase
 	}
 
 	return NULL;
+}
+
+void CBaseServerVehicle::SetPassengerWeapon(bool bUseWeapon, CBaseCombatCharacter* pPassenger)
+{
+	CBasePlayer* pPlayer = ToBasePlayer(pPassenger);
+	if (pPlayer == NULL)
+	{
+		return;
+	}
+
+	if (pPassenger != NULL && pPassenger->IsPlayer() == false)
+	{
+		Assert(0);
+		return;
+	}
+
+	CBaseCombatWeapon* pWeapon = pPlayer->GetActiveWeapon();
+	if (pWeapon == NULL)
+	{
+		Assert(0);
+		return;
+	}
+
+	if (bUseWeapon)
+	{
+		pPlayer->ShowCrosshair(true);
+		pWeapon->Deploy();
+#if defined ( PORTAL2 )
+		int iSeq = pWeapon->LookupSequence("end_draw");
+		Assert(iSeq >= 0);
+		pWeapon->SendViewModelAnim(iSeq);
+#endif
+	}
+	else
+	{
+		pWeapon->Holster(NULL);
+		pPlayer->ShowCrosshair(false);
+	}
 }
 
 //-----------------------------------------------------------------------------
