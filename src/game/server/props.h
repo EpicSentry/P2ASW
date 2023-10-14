@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -308,6 +308,8 @@ public:
 	void InputDisableCollision( inputdata_t &inputdata );
 	void InputEnableCollision( inputdata_t &inputdata );
 	void InputSetPlaybackRate( inputdata_t &inputdata );
+	void InputBecomeRagdoll( inputdata_t &inputdata );
+	void InputFadeAndKill( inputdata_t& inputdata );
 
 	void UpdateBoneFollowers( void );
 
@@ -330,7 +332,8 @@ public:
 	short				m_nPendingSequence;
 
 	bool				m_bStartDisabled;
-	bool				m_bUpdateAttachedChildren;	// For props with children on attachment points, update their child touches as we animate
+	bool				m_bAnimateEveryFrame;
+	//bool				m_bUpdateAttachedChildren;	// For props with children on attachment points, update their child touches as we animate (Also this isn't on Portal 2's codebase)
 
 	CNetworkVar( bool, m_bUseHitboxesForRenderBox );
 
