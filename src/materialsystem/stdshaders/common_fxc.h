@@ -372,4 +372,15 @@ float CalcRangeFogFactorNonFixedFunction( float3 worldPos, float3 eyePos, float 
 	return min( flFogMaxDensity, saturate( flFogEndOverRange + ( dist * flFogOORange ) ) );
 }
 
+float4 TransformFlashlightWorldToTexture( float3 vWorldPos, float4x4 vFlashlightWorldToTexture )
+{
+#ifdef _PS3
+	float4 vSpotTexCoord = mul( vFlashlightWorldToTexture, float4( vWorldPos, 1.0f ) );
+#else // _PS3
+	float4 vSpotTexCoord = mul( float4( vWorldPos, 1.0f ), vFlashlightWorldToTexture );
+#endif // !_PS3
+
+	return vSpotTexCoord;
+}
+
 #endif //#ifndef COMMON_FXC_H_

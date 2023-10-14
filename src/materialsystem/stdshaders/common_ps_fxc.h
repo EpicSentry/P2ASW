@@ -186,6 +186,11 @@ float4 DecompressNormal( sampler NormalSampler, float2 tc, int nDecompressionMod
 	return DecompressNormal( NormalSampler, tc, nDecompressionMode, NormalSampler );
 }
 
+float3 NormalizeWithCubemap( samplerCUBE normalizeSampler, float3 input )
+{
+//	return texCUBE( normalizeSampler, input ) * 2.0f - 1.0f;
+	return texCUBE( normalizeSampler, input ).xyz ;
+}
 
 HALF3 NormalizeWithCubemap( sampler normalizeSampler, HALF3 input )
 {

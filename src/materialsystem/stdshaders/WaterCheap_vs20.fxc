@@ -36,24 +36,29 @@ VS_OUTPUT main( const VS_INPUT v )
 	float4 projPos;
 	float3 worldPos;
 
-	projPos = mul( v.vPos, cModelViewProj );
+	worldPos = mul4x3( v.vPos, cModel[0] );
+	projPos = mul( float4( worldPos, 1 ), cViewProj );
 	o.projPos = projPos;
+	
+#ifdef _PS3
+	// Account for OpenGL's flipped y coordinate and expanded z range [-1,1] instead of [0,1]
+	o.projPos.y = -o.projPos.y;
+	o.projPos.z = 2.0f * o.projPos.z - o.projPos.w;
+#endif // _PS3
 
 #if BLEND
 	// Map projected position to the reflection texture
 	o.vRefract_W_ProjZ.x = projPos.x;
 	o.vRefract_W_ProjZ.y = -projPos.y; // invert Y
-	o.vRefract_W_ProjZ.xy = (o.vRefract_W_ProjZ + projPos.w) * 0.5f;
+	o.vRefract_W_ProjZ.xy = ( o.vRefract_W_ProjZ.xy + projPos.ww ) * float2( 0.5f, 0.5f );
 	o.vRefract_W_ProjZ.z = projPos.w;
 #endif
 	
 	o.vRefract_W_ProjZ.w = projPos.z;
 	
-	worldPos = mul( v.vPos, cModel[0] );
-
-	float3 worldTangentS = mul( v.vTangentS, ( const float3x3 )cModel[0] );
-	float3 worldTangentT = mul( v.vTangentT, ( const float3x3 )cModel[0] );
-	float3 worldNormal = mul( vObjNormal, ( float3x3 )cModel[0] );
+	float3 worldTangentS = mul3x3( v.vTangentS, ( const float3x3 )cModel[0] );
+	float3 worldTangentT = mul3x3( v.vTangentT, ( const float3x3 )cModel[0] );
+	float3 worldNormal = mul3x3( vObjNormal, ( float3x3 )cModel[0] );
 	o.tangentSpaceTranspose[0] = worldTangentS;
 	o.tangentSpaceTranspose[1] = worldTangentT;
 	o.tangentSpaceTranspose[2] = worldNormal;

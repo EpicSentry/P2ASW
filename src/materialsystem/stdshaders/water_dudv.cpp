@@ -8,7 +8,10 @@
 
 #include "BaseVSShader.h"
 
-#include "waterdudv_vs11.inc"
+//#include "waterdudv_vs11.inc"
+
+// NOTE: SHADER_TEXTURE_STAGE0 doesn't exist in swarm, doing this instead...
+#define SHADER_TEXTURE_STAGE0 SHADER_SAMPLER0
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -52,7 +55,7 @@ BEGIN_VS_SHADER( Water_DuDv, "Help for Water_DuDv" )
 			pShaderShadow->EnableColorWrites( true );
 			pShaderShadow->EnableTexture( SHADER_TEXTURE_STAGE0, true );
 			int fmt = VERTEX_POSITION | VERTEX_NORMAL;
-			pShaderShadow->VertexShaderVertexFormat( fmt, 1, 0, 0, 0 );
+			pShaderShadow->VertexShaderVertexFormat( fmt, 1, 0, 0 );
 
 			pShaderShadow->SetVertexShader( "WaterDuDv_vs11", 0 );
 			pShaderShadow->SetPixelShader( "WaterDuDv_ps11", 0 );
@@ -60,11 +63,14 @@ BEGIN_VS_SHADER( Water_DuDv, "Help for Water_DuDv" )
 		}
 		DYNAMIC_STATE
 		{
+#if 0
 			waterdudv_vs11_Dynamic_Index vshIndex;
 			vshIndex.SetDOWATERFOG( pShaderAPI->GetSceneFogMode() == MATERIAL_FOG_LINEAR_BELOW_FOG_Z );
 			vshIndex.SetDOFOG( pShaderAPI->GetSceneFogMode() != MATERIAL_FOG_NONE );
 			pShaderAPI->SetVertexShaderIndex( vshIndex.GetIndex() );
-
+#else		// This might be a bad idea
+			pShaderAPI->SetVertexShaderIndex( 0 );
+#endif
 			SetVertexShaderTextureTransform( VERTEX_SHADER_SHADER_SPECIFIC_CONST_1, BUMPTRANSFORM );
 
 			Vector4D vec;

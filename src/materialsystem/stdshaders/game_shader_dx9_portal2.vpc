@@ -39,5 +39,9 @@ $Project "Shaders (Portal 2)"
 	// Refract (for light strips and observation rooms)
 	$File "refract.cpp"
 	$File "refract_dx9_helper.cpp"
+	
+	// Updated Water from CSGO Leak
+	$File "water.cpp"
+	$File "water_dudv.cpp"
 
 }

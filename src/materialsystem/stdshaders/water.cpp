@@ -1,26 +1,27 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright (c) Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
 // $NoKeywords: $
 //=============================================================================//
 
-#include "basevsshader.h"
+#include "BaseVSShader.h"
 #include "mathlib/vmatrix.h"
 #include "common_hlsl_cpp_consts.h" // hack hack hack!
 #include "convar.h"
 
-#include "watercheap_vs20.inc"
-#include "watercheap_ps20.inc"
-#include "watercheap_ps20b.inc"
-#include "water_vs20.inc"
+ConVar r_buildingmapforworld( "r_buildingmapforworld", "0" );
+
+#include "WaterCheap_vs20.inc"
+#include "WaterCheap_ps20.inc"
+#include "WaterCheap_ps20b.inc"
+#include "Water_vs20.inc"
 #include "water_ps20.inc"
 #include "water_ps20b.inc"
 #include "shaderlib/commandbuilder.h"
 
 // NOTE: This has to be the last file included!
 #include "tier0/memdbgon.h"
-
 
 DEFINE_FALLBACK_SHADER( Water, Water_DX9_HDR )
 
@@ -29,6 +30,7 @@ BEGIN_VS_SHADER( Water_DX90,
 
 	BEGIN_SHADER_PARAMS
 		SHADER_PARAM( REFRACTTEXTURE, SHADER_PARAM_TYPE_TEXTURE, "_rt_WaterRefraction", "" )
+		SHADER_PARAM( SCENEDEPTH, SHADER_PARAM_TYPE_TEXTURE, "", "" )
 		SHADER_PARAM( REFLECTTEXTURE, SHADER_PARAM_TYPE_TEXTURE, "_rt_WaterReflection", "" )
 		SHADER_PARAM( REFRACTAMOUNT, SHADER_PARAM_TYPE_FLOAT, "0", "" )
 		SHADER_PARAM( REFRACTTINT, SHADER_PARAM_TYPE_COLOR, "[1 1 1]", "refraction tint" )
@@ -49,35 +51,42 @@ BEGIN_VS_SHADER( Water_DX90,
 		SHADER_PARAM( FOGSTART, SHADER_PARAM_TYPE_FLOAT, "", "" )
 		SHADER_PARAM( FOGEND, SHADER_PARAM_TYPE_FLOAT, "", "" )
 		SHADER_PARAM( ABOVEWATER, SHADER_PARAM_TYPE_BOOL, "", "" )
-		SHADER_PARAM( REFLECTBLENDFACTOR, SHADER_PARAM_TYPE_FLOAT, "1.0", "" )
+		SHADER_PARAM( WATERBLENDFACTOR, SHADER_PARAM_TYPE_FLOAT, "1.0", "" )
 		SHADER_PARAM( NOFRESNEL, SHADER_PARAM_TYPE_BOOL, "0", "" )
 		SHADER_PARAM( NOLOWENDLIGHTMAP, SHADER_PARAM_TYPE_BOOL, "0", "" )
 		SHADER_PARAM( SCROLL1, SHADER_PARAM_TYPE_COLOR, "", "" )
 		SHADER_PARAM( SCROLL2, SHADER_PARAM_TYPE_COLOR, "", "" )
-		SHADER_PARAM( FLOWMAP, SHADER_PARAM_TYPE_TEXTURE, "", "flowmap" )
-		SHADER_PARAM( FLOWMAPFRAME, SHADER_PARAM_TYPE_INTEGER, "0", "frame number for $flowmap" )
-		SHADER_PARAM( FLOWMAPSCROLLRATE, SHADER_PARAM_TYPE_VEC2, "[0 0", "2D rate to scroll $flowmap" )
-		SHADER_PARAM( FLOW_NOISE_TEXTURE, SHADER_PARAM_TYPE_TEXTURE, "", "flow noise texture" )
 
 		SHADER_PARAM( FLASHLIGHTTINT, SHADER_PARAM_TYPE_FLOAT, "0", "" )
 		SHADER_PARAM( LIGHTMAPWATERFOG, SHADER_PARAM_TYPE_BOOL, "0", "" )
 		SHADER_PARAM( FORCEFRESNEL, SHADER_PARAM_TYPE_FLOAT, "0", "" )
 
+		SHADER_PARAM( FORCEENVMAP, SHADER_PARAM_TYPE_BOOL, "0", "" )
+
+		SHADER_PARAM( DEPTH_FEATHER, SHADER_PARAM_TYPE_INTEGER, "0", "" )
+
 		// New flow params
+		SHADER_PARAM( FLOWMAP, SHADER_PARAM_TYPE_TEXTURE, "", "flowmap" )
+		SHADER_PARAM( FLOWMAPFRAME, SHADER_PARAM_TYPE_INTEGER, "0", "frame number for $flowmap" )
+		SHADER_PARAM( FLOWMAPSCROLLRATE, SHADER_PARAM_TYPE_VEC2, "[0 0", "2D rate to scroll $flowmap" )
+		SHADER_PARAM( FLOW_NOISE_TEXTURE, SHADER_PARAM_TYPE_TEXTURE, "", "flow noise texture" )
+
 		SHADER_PARAM( FLOW_WORLDUVSCALE, SHADER_PARAM_TYPE_FLOAT, "", "" )
 		SHADER_PARAM( FLOW_NORMALUVSCALE, SHADER_PARAM_TYPE_FLOAT, "", "" )
 		SHADER_PARAM( FLOW_TIMEINTERVALINSECONDS, SHADER_PARAM_TYPE_FLOAT, "", "" )
 		SHADER_PARAM( FLOW_UVSCROLLDISTANCE, SHADER_PARAM_TYPE_FLOAT, "", "" )
 		SHADER_PARAM( FLOW_BUMPSTRENGTH, SHADER_PARAM_TYPE_FLOAT, "", "" )
-		SHADER_PARAM( FLOW_TIMESCALE, SHADER_PARAM_TYPE_FLOAT, "", "" )
 		SHADER_PARAM( FLOW_NOISE_SCALE, SHADER_PARAM_TYPE_FLOAT, "", "" )
 		SHADER_PARAM( FLOW_DEBUG, SHADER_PARAM_TYPE_BOOL, "0", "" )
 
 		SHADER_PARAM( COLOR_FLOW_UVSCALE, SHADER_PARAM_TYPE_FLOAT, "", "" )
-		SHADER_PARAM( COLOR_FLOW_TIMESCALE, SHADER_PARAM_TYPE_FLOAT, "", "" )
 		SHADER_PARAM( COLOR_FLOW_TIMEINTERVALINSECONDS, SHADER_PARAM_TYPE_FLOAT, "", "" )
 		SHADER_PARAM( COLOR_FLOW_UVSCROLLDISTANCE, SHADER_PARAM_TYPE_FLOAT, "", "" )
 		SHADER_PARAM( COLOR_FLOW_LERPEXP, SHADER_PARAM_TYPE_FLOAT, "", "" )
+		SHADER_PARAM( COLOR_FLOW_DISPLACEBYNORMALSTRENGTH, SHADER_PARAM_TYPE_FLOAT, "", "" )
+
+		SHADER_PARAM( SIMPLEOVERLAY, SHADER_PARAM_TYPE_TEXTURE, "", "simpleoverlay" )
+
 	END_SHADER_PARAMS
 
 	SHADER_INIT_PARAMS()
@@ -113,9 +122,21 @@ BEGIN_VS_SHADER( Water_DX90,
 		{
 			params[REFLECTENTITIES]->SetIntValue( 0 );
 		}
-		if( !params[REFLECTBLENDFACTOR]->IsDefined() )
+		if( !params[WATERBLENDFACTOR]->IsDefined() )
 		{
-			params[REFLECTBLENDFACTOR]->SetFloatValue( 1.0f );
+			params[WATERBLENDFACTOR]->SetFloatValue( 1.0f );
+		}
+
+		if ( IsPS3() && !params[SCENEDEPTH]->IsDefined() )
+		{
+			params[SCENEDEPTH]->SetStringValue( "^PS3^DEPTHBUFFER" );
+		}
+
+		// If there's no envmap or reflection texture, make sure to set the reflection tint to 0 so we don't reflect garbage
+		// (The better change would be to add static combos to support no environment map but this is a lower impact change at this point)
+		if ( !params[ ENVMAP ]->IsDefined() && !params[ REFLECTTEXTURE ]->IsDefined() )
+		{
+			params[ REFLECTTINT ]->SetVecValue( 0.0f, 0.0f, 0.0f, 0.0f );
 		}
 
 		InitFloatParam( FLOW_WORLDUVSCALE, params, 1.0f );
@@ -123,14 +144,15 @@ BEGIN_VS_SHADER( Water_DX90,
 		InitFloatParam( FLOW_TIMEINTERVALINSECONDS, params, 0.4f );
 		InitFloatParam( FLOW_UVSCROLLDISTANCE, params, 0.2f );
 		InitFloatParam( FLOW_BUMPSTRENGTH, params, 1.0f );
-		InitFloatParam( FLOW_TIMESCALE, params, 1.0f );
 		InitFloatParam( FLOW_NOISE_SCALE, params, 0.0002f );
 
 		InitFloatParam( COLOR_FLOW_UVSCALE, params, 1.0f );
-		InitFloatParam( COLOR_FLOW_TIMESCALE, params, 1.0f );
 		InitFloatParam( COLOR_FLOW_TIMEINTERVALINSECONDS, params, 0.4f );
 		InitFloatParam( COLOR_FLOW_UVSCROLLDISTANCE, params, 0.2f );
 		InitFloatParam( COLOR_FLOW_LERPEXP, params, 1.0f );
+		InitFloatParam( COLOR_FLOW_DISPLACEBYNORMALSTRENGTH, params, 0.0025f );
+
+		InitIntParam( FORCEENVMAP, params, 0 );
 
 		InitIntParam( FORCECHEAP, params, 0 );
 		InitFloatParam( FLASHLIGHTTINT, params, 1.0f );
@@ -149,6 +171,11 @@ BEGIN_VS_SHADER( Water_DX90,
 		{
 			SET_FLAGS2( MATERIAL_VAR2_LIGHTING_BUMPED_LIGHTMAP );
 		}
+
+		if ( !params[DEPTH_FEATHER]->IsDefined() )
+		{
+			params[DEPTH_FEATHER]->SetIntValue( 0 );
+		}
 	}
 
 	SHADER_FALLBACK
@@ -163,6 +190,10 @@ BEGIN_VS_SHADER( Water_DX90,
 		if( params[REFRACTTEXTURE]->IsDefined() )
 		{
 			LoadTexture( REFRACTTEXTURE );
+		}
+		if( params[SCENEDEPTH]->IsDefined() )
+		{
+			LoadTexture( SCENEDEPTH );
 		}
 		if( params[REFLECTTEXTURE]->IsDefined() )
 		{
@@ -188,6 +219,10 @@ BEGIN_VS_SHADER( Water_DX90,
 		{
 			LoadTexture( FLOW_NOISE_TEXTURE );
 		}
+		if ( params[SIMPLEOVERLAY]->IsDefined() )
+		{
+			LoadTexture( SIMPLEOVERLAY );
+		}
 	}
 
 	inline void GetVecParam( int constantVar, float *val )
@@ -211,11 +246,11 @@ BEGIN_VS_SHADER( Water_DX90,
 		params[SCROLL1]->GetVecValue( Scroll1.Base(), 4 );
 
 		bool bHasFlowmap = params[FLOWMAP]->IsTexture();
-		bool hasFlashlight = UsingFlashlight( params );
 		bool bHasBaseTexture = params[BASETEXTURE]->IsTexture();
 		bool bHasMultiTexture = fabs( Scroll1.x ) > 0.0f;
+		bool hasFlashlight = !bHasMultiTexture && UsingFlashlight( params );
 		bool bLightmapWaterFog = ( params[LIGHTMAPWATERFOG]->GetIntValue() != 0 );
-
+		bool bHasSimpleOverlay = params[SIMPLEOVERLAY]->IsTexture();
 		bool bForceFresnel = ( params[FORCEFRESNEL]->GetFloatValue() != -1.0f );
 
 		if ( bHasFlowmap )
@@ -247,6 +282,12 @@ BEGIN_VS_SHADER( Water_DX90,
 				// reflect sampler
 				pShaderShadow->EnableTexture( SHADER_SAMPLER1, true );
 				pShaderShadow->EnableSRGBRead( SHADER_SAMPLER1, !IsX360() );
+			}  
+			else
+			{
+				// envmap sampler
+				pShaderShadow->EnableTexture( SHADER_SAMPLER1, true );
+				pShaderShadow->EnableSRGBRead( SHADER_SAMPLER1, false );
 			}
 
 			if ( bHasBaseTexture )
@@ -280,11 +321,33 @@ BEGIN_VS_SHADER( Water_DX90,
 				pShaderShadow->EnableTexture( SHADER_SAMPLER6, true );
 
 				pShaderShadow->EnableTexture( SHADER_SAMPLER7, true );
-				pShaderShadow->SetShadowDepthFiltering( SHADER_SAMPLER7 );
+				//pShaderShadow->SetShadowDepthFiltering( SHADER_SAMPLER7 );
 
 				pShaderShadow->EnableTexture( SHADER_SAMPLER8, true );
 			}
+			
+			if ( IsGameConsole() )
+			{
+				pShaderShadow->EnableTexture( SHADER_SAMPLER9, true );
+			}
 
+			if ( bHasSimpleOverlay )
+			{
+				// SIMPLEOVERLAY
+				pShaderShadow->EnableTexture( SHADER_SAMPLER11, true );
+				pShaderShadow->EnableSRGBRead( SHADER_SAMPLER11, true );
+			}
+
+			// pseudo-translucents don't exist in Swarm
+#if 0
+			// pseudo-translucent water only gets used on platforms which disable refract (as a cheaper substitute for refractive water)
+			if( IS_FLAG_SET( MATERIAL_VAR_PSEUDO_TRANSLUCENT ) )
+			{
+				s_pShaderShadow->EnableBlendingForceOpaque( true );
+				s_pShaderShadow->BlendFunc( SHADER_BLEND_SRC_ALPHA, SHADER_BLEND_ONE_MINUS_SRC_ALPHA );
+				s_pShaderShadow->EnableDepthWrites( true );
+			}
+#endif
 			int fmt = VERTEX_POSITION | VERTEX_NORMAL | VERTEX_TANGENT_S | VERTEX_TANGENT_T;
 
 			// texcoord0 : base texcoord
@@ -322,6 +385,7 @@ BEGIN_VS_SHADER( Water_DX90,
 				SET_STATIC_PIXEL_SHADER_COMBO( FLASHLIGHT, hasFlashlight );
 				SET_STATIC_PIXEL_SHADER_COMBO( LIGHTMAPWATERFOG, bLightmapWaterFog );
 				SET_STATIC_PIXEL_SHADER_COMBO( FORCEFRESNEL, bForceFresnel );
+				SET_STATIC_PIXEL_SHADER_COMBO( SIMPLEOVERLAY, bHasSimpleOverlay );
 				SET_STATIC_PIXEL_SHADER( water_ps20b );
 			}
 			else
@@ -335,6 +399,7 @@ BEGIN_VS_SHADER( Water_DX90,
 //				SET_STATIC_PIXEL_SHADER_COMBO( FLOWMAP, bHasFlowmap );
 				SET_STATIC_PIXEL_SHADER_COMBO( FLOW_DEBUG, clamp( params[ FLOW_DEBUG ]->GetIntValue(), 0, 2 ) );
 				SET_STATIC_PIXEL_SHADER_COMBO( FORCEFRESNEL, bForceFresnel );
+				SET_STATIC_PIXEL_SHADER_COMBO( SIMPLEOVERLAY, bHasSimpleOverlay );
 				SET_STATIC_PIXEL_SHADER( water_ps20 );
 			}
 
@@ -348,15 +413,21 @@ BEGIN_VS_SHADER( Water_DX90,
 		DYNAMIC_STATE
 		{
 			pShaderAPI->SetDefaultState();
-			if( bRefraction )
+			if ( bRefraction )
 			{
 				// HDRFIXME: add comment about binding.. Specify the number of MRTs in the enable
 				BindTexture( SHADER_SAMPLER0, REFRACTTEXTURE, -1 );
 			}
-			if( bReflection )
+
+			if ( bReflection )
 			{
 				BindTexture( SHADER_SAMPLER1, REFLECTTEXTURE, -1 );
 			}
+			else if ( params[ ENVMAP ]->IsDefined() )
+			{
+				BindTexture( SHADER_SAMPLER1, ENVMAP );
+			}
+
 			BindTexture( SHADER_SAMPLER2, NORMALMAP, BUMPFRAME );
 
 			if ( bUsingLightmap )
@@ -378,24 +449,68 @@ BEGIN_VS_SHADER( Water_DX90,
 				vFlowConst1[0] = 1.0f / params[ FLOW_WORLDUVSCALE ]->GetFloatValue();
 				vFlowConst1[1] = 1.0f / params[ FLOW_NORMALUVSCALE ]->GetFloatValue();
 				vFlowConst1[2] = params[ FLOW_BUMPSTRENGTH ]->GetFloatValue();
-				vFlowConst1[3] = params[ FLOW_TIMESCALE ]->GetFloatValue();
+				vFlowConst1[3] = params[ COLOR_FLOW_DISPLACEBYNORMALSTRENGTH ]->GetFloatValue();
 				pShaderAPI->SetPixelShaderConstant( 13, vFlowConst1, 1 );
 
 				float vFlowConst2[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 				vFlowConst2[0] = params[ FLOW_TIMEINTERVALINSECONDS ]->GetFloatValue();
 				vFlowConst2[1] = params[ FLOW_UVSCROLLDISTANCE ]->GetFloatValue();
 				vFlowConst2[2] = params[ FLOW_NOISE_SCALE ]->GetFloatValue();
-				vFlowConst2[3] = params[ COLOR_FLOW_LERPEXP ]->GetFloatValue();
 				pShaderAPI->SetPixelShaderConstant( 14, vFlowConst2, 1 );
 
 				float vColorFlowConst1[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 				vColorFlowConst1[0] = 1.0f / params[ COLOR_FLOW_UVSCALE ]->GetFloatValue();
-				vColorFlowConst1[1] = params[ COLOR_FLOW_TIMESCALE ]->GetFloatValue();
-				vColorFlowConst1[2] = params[ COLOR_FLOW_TIMEINTERVALINSECONDS ]->GetFloatValue();
-				vColorFlowConst1[3] = params[ COLOR_FLOW_UVSCROLLDISTANCE ]->GetFloatValue();
+				vColorFlowConst1[1] = params[ COLOR_FLOW_TIMEINTERVALINSECONDS ]->GetFloatValue();
+				vColorFlowConst1[2] = params[ COLOR_FLOW_UVSCROLLDISTANCE ]->GetFloatValue();
+				vColorFlowConst1[3] = params[ COLOR_FLOW_LERPEXP ]->GetFloatValue();
 				pShaderAPI->SetPixelShaderConstant( 26, vColorFlowConst1, 1 );
 			}
+			
+			if( bHasSimpleOverlay )
+			{
+				BindTexture( SHADER_SAMPLER11, SIMPLEOVERLAY );
+			}
 
+			if ( IsGameConsole() )
+			{
+				if ( IsPS3() )
+				{
+					BindTexture( SHADER_SAMPLER9, SCENEDEPTH, -1 );
+				}
+				else if ( IsX360() )
+				{
+					pShaderAPI->BindStandardTexture( SHADER_SAMPLER9, TEXTURE_FRAME_BUFFER_FULL_DEPTH );
+				}
+				else
+				{
+					Error( "water.cpp: Unsupported console platform.\n" );
+				}
+				
+				VMatrix viewMatrix, projMatrix, worldToProjMatrix, projToWorldMatrix;
+				pShaderAPI->GetMatrix( MATERIAL_VIEW, viewMatrix.m[0] );				
+				pShaderAPI->GetMatrix( MATERIAL_PROJECTION, projMatrix.m[0] );
+								
+				// The view and proj matrices are transposed vs. what you would normally expect, argh.
+				//viewMatrix = viewMatrix.Transpose();
+				//projMatrix = projMatrix.Transpose();
+				//MatrixMultiply( projMatrix, viewMatrix, worldToProjMatrix );
+				//MatrixInverseGeneral( worldToProjMatrix, projToWorldMatrix );
+
+				// One less transpose.
+				MatrixMultiply( viewMatrix, projMatrix, worldToProjMatrix );
+				MatrixInverseGeneral( worldToProjMatrix, projToWorldMatrix );
+				projToWorldMatrix = projToWorldMatrix.Transpose();
+								
+				// Send down rows 2 (Z) and 3 (W), because that's all the water shader needs to recover worldspace Z.
+				pShaderAPI->SetPixelShaderConstant( 33, &projToWorldMatrix.m[2][0], 1 );
+				pShaderAPI->SetPixelShaderConstant( 34, &projToWorldMatrix.m[3][0], 1 );
+				
+				int nDepthFeather = params[DEPTH_FEATHER]->GetIntValue();
+				const float flDepthFeatherDistanceFactor = .16f;
+				Vector4D vEdgeFeatheringParams( flDepthFeatherDistanceFactor, nDepthFeather ? 0.0f : 1.0f, 0.0f, 0.0f );
+				pShaderAPI->SetPixelShaderConstant( 35, vEdgeFeatheringParams.Base(), 1 );
+			}
+			
 			// Time
 			float vTimeConst[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 			float flTime = pShaderAPI->CurrentTime();
@@ -426,26 +541,24 @@ BEGIN_VS_SHADER( Water_DX90,
 			{
 				SetPixelShaderConstantGammaToLinear( 1, REFRACTTINT );
 			}
+
 			// Reflection tint
-			if( bReflection )
+			if ( g_pHardwareConfig->GetHDRType() == HDR_TYPE_INTEGER )
 			{
-				if( g_pHardwareConfig->GetHDRType() == HDR_TYPE_INTEGER )
-				{
-					// Need to multiply by 4 in linear space since we premultiplied into
-					// the render target by .25 to get overbright data in the reflection render target.
-					float gammaReflectTint[3];
-					params[REFLECTTINT]->GetVecValue( gammaReflectTint, 3 );
-					float linearReflectTint[4];
-					linearReflectTint[0] = GammaToLinear( gammaReflectTint[0] ) * 4.0f;
-					linearReflectTint[1] = GammaToLinear( gammaReflectTint[1] ) * 4.0f;
-					linearReflectTint[2] = GammaToLinear( gammaReflectTint[2] ) * 4.0f;
-					linearReflectTint[3] = 1.0f;
-					pShaderAPI->SetPixelShaderConstant( 4, linearReflectTint, 1 );
-				}
-				else
-				{
-					SetPixelShaderConstantGammaToLinear( 4, REFLECTTINT );
-				}
+				// Need to multiply by 4 in linear space since we premultiplied into
+				// the render target by .25 to get overbright data in the reflection render target.
+				float gammaReflectTint[3];
+				params[REFLECTTINT]->GetVecValue( gammaReflectTint, 3 );
+				float linearReflectTint[4];
+				linearReflectTint[0] = GammaToLinear( gammaReflectTint[0] ) * 4.0f;
+				linearReflectTint[1] = GammaToLinear( gammaReflectTint[1] ) * 4.0f;
+				linearReflectTint[2] = GammaToLinear( gammaReflectTint[2] ) * 4.0f;
+				linearReflectTint[3] = params[WATERBLENDFACTOR]->GetFloatValue();
+				pShaderAPI->SetPixelShaderConstant( 4, linearReflectTint, 1 );
+			}
+			else
+			{
+				SetPixelShaderConstantGammaToLinear( 4, REFLECTTINT, WATERBLENDFACTOR );
 			}
 
 			SetVertexShaderTextureTransform( VERTEX_SHADER_SHADER_SPECIFIC_CONST_1, BUMPTRANSFORM );
@@ -518,16 +631,31 @@ BEGIN_VS_SHADER( Water_DX90,
 
 			DECLARE_DYNAMIC_VERTEX_SHADER( water_vs20 );
 			SET_DYNAMIC_VERTEX_SHADER( water_vs20 );
-			
+
+#ifdef _PS3
+			CCommandBufferBuilder< CDynamicCommandStorageBuffer > DynamicCmdsOut;
+#else
 			CCommandBufferBuilder< CFixedCommandStorageBuffer< 1000 > > DynamicCmdsOut;
+#endif
 
 			bool bFlashlightShadows = false;
 			bool bUberlight = false;
 			if( hasFlashlight )
 			{
-				pShaderAPI->GetFlashlightShaderInfo( &bFlashlightShadows, &bUberlight );
+#ifdef _PS3
+				CCommandBufferBuilder< CFixedCommandStorageBuffer< 256 > > flashlightECB;
+#endif
 
-				DynamicCmdsOut.SetVertexShaderFlashlightState( VERTEX_SHADER_SHADER_SPECIFIC_CONST_4 );
+				pShaderAPI->GetFlashlightShaderInfo( &bFlashlightShadows, &bUberlight );
+#ifdef _PS3
+				{
+					flashlightECB.SetVertexShaderFlashlightState( VERTEX_SHADER_SHADER_SPECIFIC_CONST_4 );
+				}
+#endif
+				if( IsX360())
+				{
+					DynamicCmdsOut.SetVertexShaderFlashlightState( VERTEX_SHADER_SHADER_SPECIFIC_CONST_4 );
+				}
 
 				CBCmdSetPixelShaderFlashlightState_t state;
 				state.m_LightSampler = SHADER_SAMPLER6; // FIXME . . don't want this here.
@@ -541,8 +669,19 @@ BEGIN_VS_SHADER( Water_DX90,
 				state.m_nWorldToTextureConstant = -1;
 				state.m_bFlashlightNoLambert = false;
 				state.m_bSinglePassFlashlight = true;
-				DynamicCmdsOut.SetPixelShaderFlashlightState( state );
 
+#ifdef _PS3
+				{
+					flashlightECB.SetPixelShaderFlashlightState( state );
+					flashlightECB.End();
+
+					ShaderApiFast( pShaderAPI )->ExecuteCommandBufferPPU( flashlightECB.Base() );
+				}
+#else
+				{
+					DynamicCmdsOut.SetPixelShaderFlashlightState( state );
+				}
+#endif
 				DynamicCmdsOut.SetPixelShaderConstant( 10, FLASHLIGHTTINT );
 			}
 
@@ -682,7 +821,6 @@ BEGIN_VS_SHADER( Water_DX90,
 				vFlowConst1[0] = 1.0f / params[ FLOW_WORLDUVSCALE ]->GetFloatValue();
 				vFlowConst1[1] = 1.0f / params[ FLOW_NORMALUVSCALE ]->GetFloatValue();
 				vFlowConst1[2] = params[ FLOW_BUMPSTRENGTH ]->GetFloatValue();
-				vFlowConst1[3] = params[ FLOW_TIMESCALE ]->GetFloatValue();
 				pShaderAPI->SetPixelShaderConstant( 13, vFlowConst1, 1 );
 
 				float vFlowConst2[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -716,11 +854,11 @@ BEGIN_VS_SHADER( Water_DX90,
 
 			if( g_pConfig->bShowSpecular )
 			{
-				SetPixelShaderConstant( 2, REFLECTTINT, REFLECTBLENDFACTOR );
+				SetPixelShaderConstant( 2, REFLECTTINT, WATERBLENDFACTOR );
 			}
 			else
 			{
-				float zero[4] = { 0.0f, 0.0f, 0.0f, params[REFLECTBLENDFACTOR]->GetFloatValue() };
+				float zero[4] = { 0.0f, 0.0f, 0.0f, params[WATERBLENDFACTOR]->GetFloatValue() };
 				pShaderAPI->SetPixelShaderConstant( 2, zero );
 			}
 		
@@ -768,11 +906,37 @@ BEGIN_VS_SHADER( Water_DX90,
 	{
 		bool bRefraction = params[REFRACTTEXTURE]->IsTexture();
 		bool bReflection = params[REFLECTTEXTURE]->IsTexture();
+		bool bEnvMap = params[ENVMAP]->IsTexture() && ( params[FORCEENVMAP]->GetIntValue() == 1 );
 		bool bForceCheap = ( params[FORCECHEAP]->GetIntValue() != 0 );
 
-		if ( ( bReflection || bRefraction ) && !UsingEditor( params ) && !bForceCheap )
+		if ( ( bReflection || bRefraction || bEnvMap ) && !UsingEditor( params ) && !bForceCheap )
 		{
+			#ifdef _GAMECONSOLE 
+			{
+				if ( IS_FLAG_SET( MATERIAL_VAR_PSEUDO_TRANSLUCENT ) )
+				{
+					// Do not render pseudo translucent water during the auto Z pass on Xbox 360
+					if ( pShaderAPI )
+					{
+						pShaderAPI->EnablePredication( false, true );
+					}
+				}
+			}
+			#endif // _GAMECONSOLE 
+
 			DrawReflectionRefraction( params, pShaderShadow, pShaderAPI, bReflection, bRefraction );
+
+			#ifdef _GAMECONSOLE 
+			{
+				if ( IS_FLAG_SET( MATERIAL_VAR_PSEUDO_TRANSLUCENT ) )
+				{
+					if ( pShaderAPI )
+					{
+						pShaderAPI->DisablePredication();
+					}
+				}
+			}
+			#endif // _GAMECONSOLE 
 		}
 		else
 		{
