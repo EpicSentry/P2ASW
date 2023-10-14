@@ -20,6 +20,9 @@ public:
 	void ControlMouth(CStudioHdr* pStudioHdr);
 	void OnDataChanged(DataUpdateType_t updateType);
 	void ClientThink();
+
+	float GetMouthAmount() { return m_flMouthAmount; }
+
 private:
 	float m_flMouthAmount;
 	float m_flInvDim;
@@ -43,6 +46,9 @@ public:
 
 	void ControlMouth(CStudioHdr* pStudioHdr);
 	void OnDataChanged(DataUpdateType_t updateType);
+
+	float GetMouthAmount() { return m_flMouthAmount; }
+
 private:
 	float m_flMouthAmount;
 	float m_flInvDim;
@@ -221,26 +227,30 @@ void CLightedMouthProxy::OnBind( void *pC_BaseEntity )
 {
 	C_AI_BaseNPC *pActor = NULL;
 
-	float flFlashResult;
+	float flFlashResult = 1.0;
 
 	if (pC_BaseEntity)
 	{
-		C_BaseEntity *v2 = BindArgToEntity( pC_BaseEntity );
-		if (v2
-			&& ( (pActor = dynamic_cast<C_NPC_Personality_Core*>( v2 ) ) != NULL || (pActor = dynamic_cast<C_NPC_Wheatley_Boss*>( v2 ) ) != NULL ) )
+		C_BaseEntity *pEntity = BindArgToEntity( pC_BaseEntity );
+		if ( pEntity )
 		{
-			// FIXME:
-			flFlashResult = 1;// pActor[1216];
+
+			if ( ( pActor = dynamic_cast<C_NPC_Personality_Core*>( pEntity ) ) != NULL )
+			{
+				flFlashResult = ((C_NPC_Personality_Core*)pEntity)->GetMouthAmount();
+			}
+			else if ( ( pActor = dynamic_cast<C_NPC_Wheatley_Boss*>( pEntity ) ) != NULL )
+			{
+				flFlashResult = ((C_NPC_Wheatley_Boss*)pEntity)->GetMouthAmount();
+			}
 		}
 		else
 		{
-			flFlashResult = 1.0;
 			C_BaseAnimating *GLaDOSActor = GetGLaDOSActor();
 			if ( GLaDOSActor )
 			{
 				C_BaseAnimating *pAnimating = GLaDOSActor->GetBaseAnimating();
 
-				flFlashResult = 1.0;
 				if ( pAnimating )
 				{
 					float flBase;
@@ -249,8 +259,8 @@ void CLightedMouthProxy::OnBind( void *pC_BaseEntity )
 						flBase = 0.2;
 					else
 						flBase = 0.0;
-					// FIXME:
-					float flOpenAmount = 1;//(float)(*(int(__cdecl **)(int))(pAnimating + 56));
+
+					float flOpenAmount = pAnimating->GetMouth()->mouthopen;
 					flFlashResult = MouthDecay( flOpenAmount, s_GLaDOS_flDimmer, flBase );
 				}
 			}

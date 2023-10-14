@@ -19,6 +19,7 @@ public:
 	}
 	void SetVERTEXCOLOR( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nVERTEXCOLOR = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bVERTEXCOLOR = true;
@@ -40,6 +41,7 @@ public:
 	}
 	void SetTRANSFORMVERTS( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nTRANSFORMVERTS = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bTRANSFORMVERTS = true;
@@ -87,3 +89,24 @@ public:
 	}
 };
 #define shaderDynamicTest_screenspaceeffect_vs20 0
+
+static const ShaderComboInformation_t s_StaticComboArray_screenspaceeffect_vs20[2] = 
+{
+	{ "VERTEXCOLOR", 0, 1 },
+	{ "TRANSFORMVERTS", 0, 1 },
+};
+static const ShaderComboSemantics_t screenspaceeffect_vs20_combos =
+{
+	"screenspaceeffect_vs20", NULL, 0, s_StaticComboArray_screenspaceeffect_vs20, 2 
+};
+
+class ConstructMe_screenspaceeffect_vs20
+{
+public:
+	ConstructMe_screenspaceeffect_vs20()
+	{
+		GetShaderDLL()->AddShaderComboInformation( &screenspaceeffect_vs20_combos );
+	}
+};
+
+static ConstructMe_screenspaceeffect_vs20 s_ConstructMe_screenspaceeffect_vs20;

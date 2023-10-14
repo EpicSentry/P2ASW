@@ -253,9 +253,6 @@ public:
 };
 #define shaderDynamicTest_lightmappedpaint_ps20 psh_forgot_to_set_dynamic_FASTPATHENVMAPCONTRAST + psh_forgot_to_set_dynamic_FASTPATH + 0
 
-// Shader combo stuff from csgo...
-#if 0
-
 static const ShaderComboInformation_t s_DynamicComboArray_lightmappedpaint_ps20[3] = 
 {
 	{ "FASTPATHENVMAPCONTRAST", 0, 1 },
@@ -276,4 +273,13 @@ static const ShaderComboSemantics_t lightmappedpaint_ps20_combos =
 	"lightmappedpaint_ps20", s_DynamicComboArray_lightmappedpaint_ps20, 3, s_StaticComboArray_lightmappedpaint_ps20, 5 
 };
 
-#endif
+class ConstructMe_lightmappedpaint_ps20
+{
+public:
+	ConstructMe_lightmappedpaint_ps20()
+	{
+		GetShaderDLL()->AddShaderComboInformation( &lightmappedpaint_ps20_combos );
+	}
+};
+
+static ConstructMe_lightmappedpaint_ps20 s_ConstructMe_lightmappedpaint_ps20;

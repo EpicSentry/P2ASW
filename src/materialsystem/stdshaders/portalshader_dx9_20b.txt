@@ -40,3 +40,5 @@ Water_vs20.fxc
 
 WaterCheap_ps2x.fxc
 WaterCheap_vs20.fxc
+
+screenspaceeffect_vs20.fxc
