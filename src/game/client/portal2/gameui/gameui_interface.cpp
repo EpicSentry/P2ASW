@@ -194,7 +194,7 @@ void CGameUI::Initialize( CreateInterfaceFn factory )
 	xonline = (IXOnline *)factory( XONLINE_INTERFACE_VERSION, NULL );
 #endif
 
-#ifdef SWARM_DLL
+#if defined ( SWARM_DLL ) || defined ( PORTAL2 )
 	g_pMatchExtSwarm = ( IMatchExtSwarm * ) factory( IMATCHEXT_SWARM_INTERFACE, NULL );
 #endif
 
