@@ -113,7 +113,7 @@ BEGIN_DATADESC( CNPC_Portal_FloorTurret )
 	DEFINE_INPUTFUNC( FIELD_VOID, "EnablePickup", InputEnablePickup),
 	DEFINE_INPUTFUNC( FIELD_VOID, "DisablePickup", InputDisablePickup),
 	DEFINE_INPUTFUNC( FIELD_VOID, "SelfDestructImmediately", InputSelfDestructImmediately),
-	DEFINE_INPUTFUNC( FIELD_VOID, "SetModel", InputSetModel),
+	DEFINE_INPUTFUNC( FIELD_INTEGER, "SetModel", InputSetModel),
 
 END_DATADESC()
 
@@ -631,24 +631,27 @@ void CNPC_Portal_FloorTurret::TryEmitSound(const char* soundname)
 
 void CNPC_Portal_FloorTurret::SetTurretType(int nType)
 {
-	switch (m_nModelIndex)
+	m_nModelIndex = nType;
+	switch (nType)
 	{
 	case 0:
+		SetModelName(AllocPooledString("models/npcs/turret/turret.mdl"));
 		SetModel("models/npcs/turret/turret.mdl");
-		DispatchUpdateTransmitState();
 		break;
 	case 2:
+		SetModelName(AllocPooledString("models/npcs/turret/turret_boxed.mdl"));
 		SetModel("models/npcs/turret/turret_boxed.mdl");
-		DispatchUpdateTransmitState();
 		break;
 	case 3:
+		SetModelName(AllocPooledString("models/npcs/turret/turret_backwards.mdl"));
 		SetModel("models/npcs/turret/turret_backwards.mdl");
-		DispatchUpdateTransmitState();
 		break;
 	case 4:
+		SetModelName(AllocPooledString("models/npcs/turret/turret_skeleton.mdl"));
 		SetModel("models/npcs/turret/turret_skeleton.mdl");
-		DispatchUpdateTransmitState();
 		break;
+	default:
+		return;
 	}
 }
 
