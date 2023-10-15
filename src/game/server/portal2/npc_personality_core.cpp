@@ -10,6 +10,7 @@
 #include "choreoactor.h"
 #include "env_projectedtexture.h"
 #include "explode.h"
+#include "portal_grabcontroller_shared.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -28,12 +29,12 @@ public:
 	DECLARE_DATADESC();
 	DECLARE_SERVERCLASS();
 
-	CNPC_PersonalityCore()
-	{
-	}
-
 	void Precache(void);
 	void Spawn(void);
+	void StartTask(const Task_t* pTask) { return; }
+	void RunTask(const Task_t* pTask) { return; }
+	bool ShouldSavePhysics() { return true; }
+	void EnableMotion();
 
 	void InputEnableMotion(inputdata_t& inputdata);
 	void InputDisableMotion(inputdata_t& inputdata);
@@ -47,8 +48,8 @@ public:
 	void InputPlayDetach(inputdata_t& inputdata);
 	void InputSetIdleSequence(inputdata_t& inputdata);
 	void InputClearIdleSequence(inputdata_t& inputdata);
-	void InputClearParent(inputdata_t& inputdata);
 	void InputExplode(inputdata_t& inputdata);
+	void InputClearParent(inputdata_t& inputdata);
 
 	int	TranslateSchedule(int scheduleType);
 	void GatherConditions();
@@ -56,22 +57,11 @@ public:
 	void OnPhysGunDrop(CBasePlayer* pPhysGunUser, PhysGunDrop_t reason);
 	void OnFizzled();
 
-	bool CreateVPhysics(void)
-	{
-		VPhysicsDestroyObject();
-		RemoveSolidFlags(FSOLID_NOT_SOLID);
-		SetSolid(SOLID_BBOX);
-		IPhysicsObject* pPhysicsObject = VPhysicsInitNormal(SOLID_VPHYSICS, GetSolidFlags(), false);
-		if (pPhysicsObject == NULL)
-			return false;
-
-		pPhysicsObject->SetMass(75.0f);
-		SetMoveType(MOVETYPE_VPHYSICS, MOVECOLLIDE_DEFAULT);
-		return true;
-	}
+	bool CreateVPhysics();
 	
 	int ObjectCaps();
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
+	void VPhysicsCollision(int index, gamevcollisionevent_t* pEvent);
 	QAngle PreferredCarryAngles();
 	bool HasPreferredCarryAnglesForPlayer(CBasePlayer* pPlayer) { return true; }
 	CAI_Expresser* CreateExpresser();
@@ -80,6 +70,8 @@ public:
 	void PrescheduleThink(void);
 protected:
 	bool TestRemarkingUpon(CInfoRemarkable* pRemarkable);
+	bool IsBeingHeldByPlayer();
+	float m_flLastPhysicsImpactTime;
 	bool m_bHasBeenPickedUp;
 	bool m_bPickupEnabled;
 	bool m_bAttached;
@@ -107,7 +99,7 @@ DEFINE_INPUTFUNC(FIELD_VOID, "ForcePickup", InputForcePickup),
 DEFINE_INPUTFUNC(FIELD_VOID, "PlayLock", InputPlayLock),
 DEFINE_INPUTFUNC(FIELD_VOID, "PlayAttach", InputPlayAttach),
 DEFINE_INPUTFUNC(FIELD_VOID, "PlayDetach", InputPlayDetach),
-DEFINE_INPUTFUNC(FIELD_VOID, "SetIdleSequence", InputSetIdleSequence),
+DEFINE_INPUTFUNC(FIELD_STRING, "SetIdleSequence", InputSetIdleSequence),
 DEFINE_INPUTFUNC(FIELD_VOID, "ClearIdleSequence", InputClearIdleSequence),
 DEFINE_INPUTFUNC(FIELD_VOID, "ClearParent", InputClearParent),
 DEFINE_INPUTFUNC(FIELD_VOID, "Explode", InputExplode),
@@ -164,6 +156,7 @@ void CNPC_PersonalityCore::Spawn(void)
 	CBaseAnimating::Spawn();
 	SetBlocksLOS(false);
 
+	m_flLastPhysicsImpactTime = 0.0f;
 	m_flAnimResetTime = 0.0f;
 	m_bHasBeenPickedUp = false;
 	m_bPickupEnabled = true;
@@ -196,7 +189,7 @@ void CNPC_PersonalityCore::Spawn(void)
 
 }
 
-void CNPC_PersonalityCore::InputEnableMotion(inputdata_t& inputdata)
+void CNPC_PersonalityCore::EnableMotion()
 {
 	IPhysicsObject* pPhysicsObject = VPhysicsGetObject();
 
@@ -205,6 +198,11 @@ void CNPC_PersonalityCore::InputEnableMotion(inputdata_t& inputdata)
 		pPhysicsObject->EnableMotion(true);
 		pPhysicsObject->Wake();
 	}
+}
+
+void CNPC_PersonalityCore::InputEnableMotion(inputdata_t& inputdata)
+{
+	EnableMotion();
 	CreateVPhysics();
 }
 
@@ -285,17 +283,11 @@ void CNPC_PersonalityCore::InputClearIdleSequence(inputdata_t& inputdata)
 	m_flAnimResetTime = -1.0f;
 }
 
-void CNPC_PersonalityCore::InputClearParent(inputdata_t& inputdata)
-{
-	BaseClass::InputClearParent(inputdata);
-	RemoveSolidFlags(FSOLID_NOT_SOLID);
-}
-
 void CNPC_PersonalityCore::InputExplode(inputdata_t& inputdata)
 {
-	ExplosionCreate(GetAbsOrigin(),GetAbsAngles(), this, 100, 500, (SF_ENVEXPLOSION_NODAMAGE|SF_ENVEXPLOSION_NOSPARKS|SF_ENVEXPLOSION_NODLIGHTS|SF_ENVEXPLOSION_NOSMOKE|SF_ENVEXPLOSION_NOFIREBALLSMOKE), false);
+	ExplosionCreate(GetAbsOrigin(), GetAbsAngles(), this, 100, 500, (SF_ENVEXPLOSION_NODAMAGE | SF_ENVEXPLOSION_NOSPARKS | SF_ENVEXPLOSION_NODLIGHTS | SF_ENVEXPLOSION_NOSMOKE | SF_ENVEXPLOSION_NOFIREBALLSMOKE), false);
 	UTIL_ScreenShake(GetAbsOrigin(), 10.0f, 150.0f, 1.0f, 750.0f, SHAKE_START);
-	
+
 	CPVSFilter filter(GetAbsOrigin());
 	for (int i = 0; i < 4; i++)
 	{
@@ -304,6 +296,12 @@ void CNPC_PersonalityCore::InputExplode(inputdata_t& inputdata)
 		te->BreakModel(filter, 0.0, GetAbsOrigin(), GetAbsAngles(), Vector(40, 40, 40), gibVelocity, iModelIndex, 400, 1, 2.5, BREAK_METAL);
 	}
 	SetNextThink(gpGlobals->curtime + 0.1f);
+}
+
+void CNPC_PersonalityCore::InputClearParent(inputdata_t& inputdata)
+{
+	BaseClass::InputClearParent(inputdata);
+	RemoveSolidFlags(FSOLID_NOT_SOLID);
 }
 
 int CNPC_PersonalityCore::TranslateSchedule(int schedule)
@@ -335,6 +333,20 @@ void CNPC_PersonalityCore::OnFizzled()
 	BaseClass::OnFizzled();
 }
 
+bool CNPC_PersonalityCore::CreateVPhysics()
+{
+	VPhysicsDestroyObject();
+	RemoveSolidFlags(FSOLID_NOT_SOLID);
+	SetSolid(SOLID_BBOX);
+	IPhysicsObject* pPhysicsObject = VPhysicsInitNormal(SOLID_VPHYSICS, GetSolidFlags(), false);
+	if (!pPhysicsObject)
+		return false;
+
+	pPhysicsObject->SetMass(75.0f);
+	SetMoveType(MOVETYPE_VPHYSICS);
+	return true;
+}
+
 int CNPC_PersonalityCore::ObjectCaps()
 {
 	return UsableNPCObjectCaps(BaseClass::ObjectCaps());
@@ -349,6 +361,31 @@ void CNPC_PersonalityCore::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, US
 		SetParent(0,-1);
 		CreateVPhysics();
 		pPlayer->PickupObject(this, true);
+	}
+}
+
+void CNPC_PersonalityCore::VPhysicsCollision(int index, gamevcollisionevent_t* pEvent)
+{
+	BaseClass::VPhysicsCollision(index, pEvent);
+
+	if ((gpGlobals->curtime - m_flLastPhysicsImpactTime) >= 0.1f)
+	{
+		if (pEvent->pEntities[!index]->IsWorld())
+		{
+			if (&CNPC_PersonalityCore::IsBeingHeldByPlayer)
+			{
+				ResponseRules::CRR_Concept::CRR_Concept("TLK_HELD_PHYSICS_IMPACT");
+				m_flLastPhysicsImpactTime = gpGlobals->curtime;
+			}
+			Vector vecVelocity = pEvent->preVelocity[index];
+			if ((vecVelocity.y * vecVelocity.y) + (vecVelocity.x * vecVelocity.x) + (vecVelocity.z * vecVelocity.z) <= 10000.0f)
+				return;
+		}
+		else if (pEvent->pEntities[!index]->IsPlayer())
+		{
+			return;
+		}
+		ResponseRules::CRR_Concept::CRR_Concept("TLK_PHYSICS_IMPACT");
 	}
 }
 
@@ -386,9 +423,10 @@ bool CNPC_PersonalityCore::StartSceneEvent(CSceneEventInfo* info, CChoreoScene* 
 
 	const char* Parameters = event->GetParameters();
 	int ISequence = LookupSequence(Parameters);
+	info->m_nSequence = ISequence;
 
 	if (ISequence < 0)
-		return 0;
+		return false;
 
 	ResetIdealActivity(ACT_SPECIFIC_SEQUENCE);
 	infoa = m_flAnimResetTime;
@@ -405,18 +443,18 @@ bool CNPC_PersonalityCore::StartSceneEvent(CSceneEventInfo* info, CChoreoScene* 
 	else
 	{
 		this->m_flAnimResetTime = infoa;
-		return 1;
+		return true;
 	}
 	return result;
 }
 
 void CNPC_PersonalityCore::PrescheduleThink()
 {
-	float m_flAnimResetTime = this->m_flAnimResetTime;
-	if (gpGlobals->curtime > m_flAnimResetTime && m_flAnimResetTime != 0.0f)
+	float flAnimResetTime = this->m_flAnimResetTime;
+	if (gpGlobals->curtime > flAnimResetTime && flAnimResetTime != 0.0f)
 	{
-		m_iIdleOverrideSequence = this->m_iIdleOverrideSequence;
-		if (m_iIdleOverrideSequence <= -1)
+		int iIdleOverrideSequence = this->m_iIdleOverrideSequence;
+		if (iIdleOverrideSequence <= -1)
 		{
 			if (m_bAttached)
 			{
@@ -432,7 +470,9 @@ void CNPC_PersonalityCore::PrescheduleThink()
 		else
 		{
 			SetIdealActivity(ACT_SPECIFIC_SEQUENCE);
+			SetIdealSequence(iIdleOverrideSequence);
 		}
+		m_flCycle = 0.0f;
 		m_flAnimResetTime = 0.0f;
 	}
 	BaseClass::PrescheduleThink();
@@ -441,5 +481,19 @@ void CNPC_PersonalityCore::PrescheduleThink()
 bool CNPC_PersonalityCore::TestRemarkingUpon(CInfoRemarkable* pRemarkable)
 {
 	return IsLineOfSightClear( pRemarkable, IGNORE_ACTORS );
+}
+
+bool CNPC_PersonalityCore::IsBeingHeldByPlayer()
+{
+	for (int i = 1; i <= gpGlobals->maxClients; ++i)
+	{
+		CBasePlayer* pPlayer = UTIL_PlayerByIndex(i);
+		if (pPlayer)
+		{
+			if ( GetPlayerHeldEntity(pPlayer) == this )
+				break;
+		}
+	}
+	return true;
 }
 
