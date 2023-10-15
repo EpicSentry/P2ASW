@@ -1,4 +1,4 @@
-//===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ======//
+//===== Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ======//
 //
 // Purpose: 
 //
@@ -117,6 +117,13 @@ static ConVar r_shadow_lightpos_lerptime( "r_shadow_lightpos_lerptime", "0.5" );
 static ConVar r_shadowfromworldlights_debug( "r_shadowfromworldlights_debug", "0", FCVAR_CHEAT );
 static ConVar r_shadowfromanyworldlight( "r_shadowfromanyworldlight", "0", FCVAR_CHEAT );
 static ConVar r_shadow_shortenfactor( "r_shadow_shortenfactor", "2" , 0, "Makes shadows cast from local lights shorter" );
+
+// Flashlight culling code isn't Portal-aware, so they pop on/off when viewed through portals.		
+#ifdef PORTAL2
+ConVar r_flashlightenableculling("r_flashlightenableculling", "0", 0, "Enable frustum culling of flashlights");
+#else
+ConVar r_flashlightenableculling("r_flashlightenableculling", "1", 0, "Enable frustum culling of flashlights");
+#endif
 
 static void HalfUpdateRateCallback( IConVar *var, const char *pOldValue, float flOldValue );
 static ConVar r_shadow_half_update_rate( "r_shadow_half_update_rate", IsX360() ? "1" : "0", 0, "Updates shadows at half the framerate", HalfUpdateRateCallback );
@@ -5421,16 +5428,19 @@ int CClientShadowMgr::BuildActiveShadowDepthList( const CViewSetup &viewSetup, i
 		if ( !flashlightState.m_bEnableShadows )
 			continue;
 
-		// Calculate an AABB around the shadow frustum
-		Vector vecAbsMins, vecAbsMaxs;
-		CalculateAABBFromProjectionMatrix( shadow.m_WorldToShadow, &vecAbsMins, &vecAbsMaxs );
-
-		// FIXME: Could do other sorts of culling here, such as frustum-frustum test, distance etc.
-		// If it's not in the view frustum, move on
-		if ( !flashlightState.m_bOrtho && viewFrustum.CullBox( vecAbsMins, vecAbsMaxs ) )
+		if (r_flashlightenableculling.GetBool())
 		{
-			shadowmgr->SetFlashlightDepthTexture( shadow.m_ShadowHandle, NULL, 0 );
-			continue;
+			// Calculate an AABB around the shadow frustum
+			Vector vecAbsMins, vecAbsMaxs;
+			CalculateAABBFromProjectionMatrix(shadow.m_WorldToShadow, &vecAbsMins, &vecAbsMaxs);
+
+			// FIXME: Could do other sorts of culling here, such as frustum-frustum test, distance etc.
+			// If it's not in the view frustum, move on
+			if (!flashlightState.m_bOrtho && viewFrustum.CullBox(vecAbsMins, vecAbsMaxs))
+			{
+				shadowmgr->SetFlashlightDepthTexture(shadow.m_ShadowHandle, NULL, 0);
+				continue;
+			}
 		}
 
 		if ( nActiveDepthShadowCount >= nMaxDepthShadows )
