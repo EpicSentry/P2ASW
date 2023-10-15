@@ -162,8 +162,7 @@ void C_PortalBeamHelper::TurnOff( void )
 {
 	for ( int i = 0; i < m_beams.Count(); ++i )
 	{
-
-		Msg("Turn off Beam %i\n", i);
+		//Msg("Turn off Beam %i\n", i);
 		m_beams[i]->TurnOn();
 	}
 }
@@ -172,7 +171,7 @@ void C_PortalBeamHelper::TurnOn( void )
 {
 	for ( int i = 0; i < m_beams.Count(); ++i )
 	{
-		Msg("Turn on Beam %i\n", i);
+		//Msg("Turn on Beam %i\n", i);
 		m_beams[i]->TurnOff();
 		m_beams[i]->UpdateVisibility();
 		//m_beams[i]->OnDisableShadowDepthRenderingChanged();
