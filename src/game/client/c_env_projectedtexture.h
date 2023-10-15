@@ -43,16 +43,6 @@ public:
 	static float GetVisibleBBoxMinHeight( void ) { return m_flVisibleBBoxMinHeight; }
 	static C_EnvProjectedTexture *Create( );
 
-	bool		m_bState;
-	bool		m_bAlwaysUpdate;
-	float		m_flLightFOV;
-	bool		m_bEnableShadows;
-	bool		m_bSimpleProjection;
-	bool		m_bLightOnlyTarget;
-	bool		m_bLightWorld;
-	bool		m_bCameraSpace;
-	float		m_flBrightnessScale;
-
 private:
 
 	inline bool IsBBoxVisible( void );
@@ -64,6 +54,16 @@ private:
 
 	EHANDLE	m_hTargetEntity;
 
+	bool		m_bState;
+	bool		m_bAlwaysUpdate;
+	float		m_flLightFOV;
+	bool		m_bEnableShadows;
+	bool		m_bSimpleProjection;
+	bool		m_bLightOnlyTarget;
+	bool		m_bLightWorld;
+	bool		m_bCameraSpace;
+	float		m_flBrightnessScale;
+
 	color32		m_LightColor;
 	Vector		m_CurrentLinearFloatLightColor;
 	float		m_flCurrentLinearFloatLightAlpha;
@@ -73,15 +73,16 @@ private:
 	float		m_flFarZ;
 	char		m_SpotlightTextureName[ MAX_PATH ];
 	CTextureReference m_SpotlightTexture;
+	CMaterialReference m_ProjectedMaterial;
 	int			m_nSpotlightTextureFrame;
 	int			m_nShadowQuality;
+	int			m_iStyle;
+	bool		m_bIsCurrentlyProjected;
 
 	// simple projection
 	IMaterial	*m_pMaterial;
 	float		m_flProjectionSize;
 	float		m_flRotation;
-	int			m_iStyle;
-	bool		m_bIsCurrentlyProjected;
 
 	Vector	m_vecExtentsMin;
 	Vector	m_vecExtentsMax;
