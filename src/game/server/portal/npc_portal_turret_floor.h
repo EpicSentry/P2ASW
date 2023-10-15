@@ -195,6 +195,7 @@ private:
 
 	bool m_bDisableMotion;
 
+	bool AllowedToIgnite() { return true; }
 protected:
 	float GetFireConeZTolerance();
 };
