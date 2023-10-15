@@ -142,11 +142,11 @@ void CNPC_Portal_FloorTurret::Precache( void )
 {
 	if (this->m_bLoadAlternativeModels)
 	{
-		PrecacheModel("models/npcs/turret/turret_boxed.mdl");
-		PrecacheModel("models/npcs/turret/turret_backwards.mdl");
-		PrecacheModel("models/npcs/turret/turret_skeleton.mdl");
+		PrecacheModel(BOX_TURRET_MODEL);
+		PrecacheModel(BACKWARDS_TURRET_MODEL);
+		PrecacheModel(DEFECTIVE_TURRET_MODEL);
 	}
-	PrecacheGibsForModel(PrecacheModel("models/npcs/turret/turret.mdl"));
+	PrecacheGibsForModel(PrecacheModel(FLOOR_TURRET_PORTAL_MODEL));
 	BaseClass::Precache();
 
 	ADD_CUSTOM_ACTIVITY( CNPC_FloorTurret, ACT_FLOOR_TURRET_FIRE2 );
@@ -635,20 +635,20 @@ void CNPC_Portal_FloorTurret::SetTurretType(int nType)
 	switch (nType)
 	{
 	case 0:
-		SetModelName(AllocPooledString("models/npcs/turret/turret.mdl"));
-		SetModel("models/npcs/turret/turret.mdl");
+		SetModelName(AllocPooledString(FLOOR_TURRET_PORTAL_MODEL));
+		SetModel(FLOOR_TURRET_PORTAL_MODEL);
 		break;
 	case 2:
-		SetModelName(AllocPooledString("models/npcs/turret/turret_boxed.mdl"));
-		SetModel("models/npcs/turret/turret_boxed.mdl");
+		SetModelName(AllocPooledString(BOX_TURRET_MODEL));
+		SetModel(BOX_TURRET_MODEL);
 		break;
 	case 3:
-		SetModelName(AllocPooledString("models/npcs/turret/turret_backwards.mdl"));
-		SetModel("models/npcs/turret/turret_backwards.mdl");
+		SetModelName(AllocPooledString(BACKWARDS_TURRET_MODEL));
+		SetModel(BACKWARDS_TURRET_MODEL);
 		break;
 	case 4:
-		SetModelName(AllocPooledString("models/npcs/turret/turret_skeleton.mdl"));
-		SetModel("models/npcs/turret/turret_skeleton.mdl");
+		SetModelName(AllocPooledString(DEFECTIVE_TURRET_MODEL));
+		SetModel(DEFECTIVE_TURRET_MODEL);
 		break;
 	default:
 		return;
