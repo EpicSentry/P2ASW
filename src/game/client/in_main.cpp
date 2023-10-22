@@ -630,6 +630,7 @@ void IN_RemoteViewUp( const CCommand &args )
 	g_bRemoteViewKeyWasUp = true;
 	KeyUp( &in_remote_view_toggle, args[1] ); 
 }
+
 void IN_RemoteViewDown( const CCommand &args ) 
 {
 	if ( g_bRemoteViewKeyWasUp )
