@@ -643,7 +643,7 @@ int CNewParticleEffect::DrawModel( int flags, const RenderableInstance_t &instan
 		pRenderContext->PushMatrix();
 		pRenderContext->LoadIdentity();
 		Render( pRenderContext, vecDiffuseModulation, ( flags & STUDIO_TRANSPARENCY ) ? IsTwoPass() : false, pCameraObject );
-		// NOTE: If your call stack leads here, then it likely means pCameraObject is garbage.
+		// NOTE: If your call stack leads here, then it's because C_PortalBlast is being fucky, we need to fix that class asap!
 		pRenderContext->MatrixMode( MATERIAL_MODEL );
 		pRenderContext->PopMatrix();
 	}
