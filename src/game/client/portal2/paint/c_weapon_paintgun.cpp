@@ -581,10 +581,10 @@ static void ChangePaintTo( const CCommand& args )
 		ChangePaintColor( PORTAL_POWER );
 	}
 	// FIXME: Bring back for DLC2
-	/*else if ( V_stricmp( args[1], "reflect" ) == 0 )
+	else if ( V_stricmp( args[1], "reflect" ) == 0 )
 	{
 		ChangePaintColor( REFLECT_POWER );
-	}*/
+	}
 }
 
 static ConCommand changepaintto("changepaintto", ChangePaintTo );

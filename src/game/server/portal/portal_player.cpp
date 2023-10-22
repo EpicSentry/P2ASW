@@ -5390,11 +5390,11 @@ void CPortal_Player::GivePlayerPaintGun( bool bActivatePaintPowers, bool bSwitch
 	{
 		pPaintGun->ActivatePaint(BOUNCE_POWER);
 		pPaintGun->ActivatePaint(SPEED_POWER);
-		//pPaintGun->ActivatePaint(REFLECT_POWER);
+		pPaintGun->ActivatePaint(REFLECT_POWER);
 		pPaintGun->ActivatePaint(PORTAL_POWER);
 		PaintPowerPickup( BOUNCE_POWER, this );
 		PaintPowerPickup( SPEED_POWER, this );
-		//PaintPowerPickup( REFLECT_POWER, this );
+		PaintPowerPickup( REFLECT_POWER, this );
 		PaintPowerPickup( PORTAL_POWER, this );
 	}
 

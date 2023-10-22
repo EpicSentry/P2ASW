@@ -356,11 +356,11 @@ static void GiveAllPaintPowers()
 			pPaintGun->ActivatePaint(BOUNCE_POWER);
 			pPaintGun->ActivatePaint(SPEED_POWER);
 			pPaintGun->ActivatePaint(PORTAL_POWER);
-			//pPaintGun->ActivatePaint(REFLECT_POWER);
+			pPaintGun->ActivatePaint(REFLECT_POWER);
 			PaintPowerPickup( BOUNCE_POWER, pPlayer );
 			PaintPowerPickup( SPEED_POWER, pPlayer );
 			PaintPowerPickup( PORTAL_POWER, pPlayer );
-			//PaintPowerPickup( REFLECT_POWER, pPlayer );
+			PaintPowerPickup( REFLECT_POWER, pPlayer );
 			pPaintGun->SetCurrentPaint( BOUNCE_POWER );
 		}
 
