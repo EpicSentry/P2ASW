@@ -1,3 +1,4 @@
+#include "cbase.h"
 #include "prop_exploding_futbol.h"
 #include "particle_parse.h"
 #include "takedamageinfo.h"
@@ -21,6 +22,8 @@ ConVar exploding_futbol_physics_punt_player("exploding_futbol_physics_punt_playe
 ConVar exploding_futbol_phys_mag("exploding_futbol_phys_mag", "100", FCVAR_CHEAT, "Magnitude of physics force for an exploding futbol");
 ConVar exploding_futbol_phys_rad("exploding_futbol_phys_rad", "45", FCVAR_CHEAT, "Magnitude of physics force for an exploding futbol");
 ConVar sv_futbol_funnel_max_correct("sv_futbol_funnel_max_correct", "128.f", FCVAR_DEVELOPMENTONLY, "Max distance to move our hit-target if there\'s a portal nearby it");
+
+LINK_ENTITY_TO_CLASS(prop_exploding_futbol, CPropExplodingFutbol);
 
 CPropExplodingFutbol::CPropExplodingFutbol()
 {
@@ -69,6 +72,14 @@ void CPropExplodingFutbol::AnimThink()
 	SetNextThink( gpGlobals->curtime + gpGlobals->interval_per_tick, g_szExplodingFutbolAnimThinkContext);
 }
 
+void CPropExplodingFutbol::OnPhysGunDrop(CBasePlayer* pPhysGunUser, PhysGunDrop_t reason)
+{
+	if (pPhysGunUser)
+	{
+		BaseClass::OnPhysGunDrop(pPhysGunUser, reason);
+	}
+}
+
 int CPropExplodingFutbol::OnTakeDamage(const CTakeDamageInfo& info)
 {
 	if (!m_bExplodeOnTouch)
@@ -82,6 +93,17 @@ int CPropExplodingFutbol::OnTakeDamage(const CTakeDamageInfo& info)
 void CPropExplodingFutbol::OnFizzled()
 {
 	BaseClass::OnFizzled();
+}
+
+void CPropExplodingFutbol::VPhysicsCollision(int index, gamevcollisionevent_t* pEvent)
+{
+	if (m_bExplodeOnTouch && m_Holder == EXPLODING_FUTBOL_HELD_BY_NONE)
+		SetContextThink(&CPropExplodingFutbol::KillThink, gpGlobals->interval_per_tick + gpGlobals->curtime, g_szExplodingFutbolKillThinkContext);
+}
+
+void CPropExplodingFutbol::VPhysicsUpdate(IPhysicsObject* pPhysics)
+{
+	BaseClass::VPhysicsUpdate(pPhysics);
 }
 
 void CPropExplodingFutbol::KillFutbol()
