@@ -1,7 +1,14 @@
+#ifndef PROP_EXPLODING_FUTBOL_H
+#define PROP_EXPLODING_FUTBOL_H
+#ifdef _WIN32
+#pragma once
+#endif
+
 #include "cbase.h"
 #include "props.h"
 
 static const char* g_szExplodingFutbolAnimThinkContext = "ExplodingFutbolAnimateThinkContext";
+static const char* g_szExplodingFutbolKillThinkContext = "ExplodingFutbolKillThinkContext";
 
 enum ExplodingFutbolHolderType_t
 {
@@ -15,6 +22,8 @@ enum ExplodingFutbolHolderType_t
 class CPropExplodingFutbol : public CPhysicsProp
 {
 public:
+	DECLARE_CLASS(CPropExplodingFutbol, CPhysicsProp);
+
 	CPropExplodingFutbol();
 	void Precache();
 	void Spawn();
@@ -54,3 +63,4 @@ private:
 	float m_flLastTimerSoundTime;
 	float m_flLastFlashTime;
 };
+#endif //#ifndef PROP_EXPLODING_FUTBOL_H
