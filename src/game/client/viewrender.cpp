@@ -216,6 +216,83 @@ extern ConVar cl_leveloverview;
 
 ConVar r_fastzreject( "r_fastzreject", "0", 0, "Activate/deactivates a fast z-setting algorithm to take advantage of hardware with fast z reject. Use -1 to default to hardware settings" );
 
+// For CSS15, simpleworldmodel_waterreflections don't work.  They were added for Portal 2.  If we want, we can look into making them work, until then, we don't enable it.
+#if defined( _GAMECONSOLE )
+ConVar r_simpleworldmodel_waterreflections_fullscreen( "r_simpleworldmodel_waterreflections_fullscreen", "0" );
+ConVar r_simpleworldmodel_drawforrecursionlevel_fullscreen( "r_simpleworldmodel_drawforrecursionlevel_fullscreen", "-1" );
+ConVar r_simpleworldmodel_drawbeyonddistance_fullscreen( "r_simpleworldmodel_drawbeyonddistance_fullscreen", "-1" );
+
+ConVar r_simpleworldmodel_waterreflections_splitscreen( "r_simpleworldmodel_waterreflections_splitscreen", "0" );
+ConVar r_simpleworldmodel_drawforrecursionlevel_splitscreen( "r_simpleworldmodel_drawforrecursionlevel_splitscreen", "2" );
+ConVar r_simpleworldmodel_drawbeyonddistance_splitscreen( "r_simpleworldmodel_drawbeyonddistance_splitscreen", "600" );
+
+ConVar r_simpleworldmodel_waterreflections_pip( "r_simpleworldmodel_waterreflections_pip", "1" );
+ConVar r_simpleworldmodel_drawforrecursionlevel_pip( "r_simpleworldmodel_drawforrecursionlevel_pip", "2" );
+ConVar r_simpleworldmodel_drawbeyonddistance_pip( "r_simpleworldmodel_drawbeyonddistance_pip", "600" );
+#else
+ConVar r_simpleworldmodel_waterreflections_fullscreen( "r_simpleworldmodel_waterreflections_fullscreen", "0" );
+ConVar r_simpleworldmodel_drawforrecursionlevel_fullscreen( "r_simpleworldmodel_drawforrecursionlevel_fullscreen", "-1" );
+ConVar r_simpleworldmodel_drawbeyonddistance_fullscreen( "r_simpleworldmodel_drawbeyonddistance_fullscreen", "-1" );
+
+ConVar r_simpleworldmodel_waterreflections_splitscreen( "r_simpleworldmodel_waterreflections_splitscreen", "0" );
+ConVar r_simpleworldmodel_drawforrecursionlevel_splitscreen( "r_simpleworldmodel_drawforrecursionlevel_splitscreen", "-1" );
+ConVar r_simpleworldmodel_drawbeyonddistance_splitscreen( "r_simpleworldmodel_drawbeyonddistance_splitscreen", "-1" );
+
+ConVar r_simpleworldmodel_waterreflections_pip( "r_simpleworldmodel_waterreflections_pip", "0" );
+ConVar r_simpleworldmodel_drawforrecursionlevel_pip( "r_simpleworldmodel_drawforrecursionlevel_pip", "-1" );
+ConVar r_simpleworldmodel_drawbeyonddistance_pip( "r_simpleworldmodel_drawbeyonddistance_pip", "-1" );
+#endif
+
+void GetSimpleWorldModelConfiguration( bool &bSimpleWorldModeWaterReflectionOut, int &nSimpleWorldModelRecursionLevelOut, float &flSimpleWorldModelDrawBeyondDistanceOut )
+{
+	// we only load/use the world imposters for multiplayer maps.
+	if ( GameRules()->IsMultiplayer() || IsPC() )
+	{
+		if ( VGui_IsSplitScreen() )
+		{
+			if ( VGui_IsSplitScreenPIP() )
+			{
+				if ( GET_ACTIVE_SPLITSCREEN_SLOT() == 0 )
+				{
+					// We are the main view, so go ahead and use the full screen settings.
+					// We definitely want to use the fullscreen setting here so that we don't pop when split goes off and on.
+					bSimpleWorldModeWaterReflectionOut = r_simpleworldmodel_waterreflections_fullscreen.GetBool();
+					nSimpleWorldModelRecursionLevelOut = r_simpleworldmodel_drawforrecursionlevel_fullscreen.GetInt();
+					flSimpleWorldModelDrawBeyondDistanceOut = r_simpleworldmodel_drawbeyonddistance_fullscreen.GetFloat();
+				}
+				else
+				{
+					// We are not the primary view, so we must be PIP.
+					bSimpleWorldModeWaterReflectionOut = r_simpleworldmodel_waterreflections_pip.GetBool();
+					nSimpleWorldModelRecursionLevelOut = r_simpleworldmodel_drawforrecursionlevel_pip.GetInt();
+					flSimpleWorldModelDrawBeyondDistanceOut = r_simpleworldmodel_drawbeyonddistance_pip.GetFloat();
+				}
+			}
+			else
+			{
+				// We are one of two splitscreen views.
+				bSimpleWorldModeWaterReflectionOut = r_simpleworldmodel_waterreflections_splitscreen.GetBool();
+				nSimpleWorldModelRecursionLevelOut = r_simpleworldmodel_drawforrecursionlevel_splitscreen.GetInt();
+				flSimpleWorldModelDrawBeyondDistanceOut = r_simpleworldmodel_drawbeyonddistance_splitscreen.GetFloat();
+			}
+		}
+		else
+		{
+			// We aren't splitscreen of any sort, so go ahead and use the fullscreen setting.
+			bSimpleWorldModeWaterReflectionOut = r_simpleworldmodel_waterreflections_fullscreen.GetBool();
+			nSimpleWorldModelRecursionLevelOut = r_simpleworldmodel_drawforrecursionlevel_fullscreen.GetInt();
+			flSimpleWorldModelDrawBeyondDistanceOut = r_simpleworldmodel_drawbeyonddistance_fullscreen.GetFloat();
+		}
+	}
+	else
+	{
+		// We aren't multiplayer, so set the options that turn it all off.
+		bSimpleWorldModeWaterReflectionOut = false;
+		nSimpleWorldModelRecursionLevelOut = -1;
+		flSimpleWorldModelDrawBeyondDistanceOut = -1.0f;
+	}
+}
+
 //-----------------------------------------------------------------------------
 // Globals
 //-----------------------------------------------------------------------------
@@ -274,6 +351,47 @@ CON_COMMAND( r_cheapwaterend,  "" )
 
 
 
+static int ComputeSimpleWorldModelDrawFlags()
+{
+#if defined( PORTAL ) 
+#if 0
+	// Some spew to track portal distances
+	static int nLastFrame = -1;
+	static int nCurrentEntryInFrame = 0;
+
+	if ( nLastFrame != gpGlobals->framecount )
+	{
+		nLastFrame = gpGlobals->framecount;
+		nCurrentEntryInFrame = 0;
+	}
+
+	engine->Con_NPrintf( 1 + nCurrentEntryInFrame, "Portal %X distance: %f", g_pPortalRender->GetCurrentViewExitPortal(), g_pPortalRender->GetCurrentPortalDistanceBias() );
+	++ nCurrentEntryInFrame;
+#endif // 0 
+
+	bool bSimpleWorldModeWaterReflection;
+	int nSimpleWorldModelRecursionLevel;
+	float flSimpleWorldModelDrawBeyondDistance;
+	GetSimpleWorldModelConfiguration( bSimpleWorldModeWaterReflection, nSimpleWorldModelRecursionLevel, flSimpleWorldModelDrawBeyondDistance );
+	if ( nSimpleWorldModelRecursionLevel >= 0 && g_pPortalRender->GetViewRecursionLevel() >= nSimpleWorldModelRecursionLevel )
+	{
+		return DF_DRAW_SIMPLE_WORLD_MODEL | DF_DRAW_SIMPLE_WORLD_MODEL_WATER | DF_FAST_ENTITY_RENDERING | DF_DRAW_ENTITITES;
+	}
+	else
+	{
+		if ( flSimpleWorldModelDrawBeyondDistance >= 0.0f )
+		{
+			float flDistanceBias = g_pPortalRender->GetCurrentPortalDistanceBias();
+			if ( flDistanceBias > flSimpleWorldModelDrawBeyondDistance )
+			{
+				return DF_DRAW_SIMPLE_WORLD_MODEL | DF_DRAW_SIMPLE_WORLD_MODEL_WATER | DF_FAST_ENTITY_RENDERING | DF_DRAW_ENTITITES;
+			}
+		}
+	}
+#endif // PORTAL
+
+	return 0;
+}
 
 
 //-----------------------------------------------------------------------------
@@ -620,7 +738,7 @@ public:
 	public:
 		CReflectionView(CViewRender *pMainView) : CBaseWorldView( pMainView ) {}
 
-		void Setup( bool bReflectEntities );
+		void Setup( bool bReflectEntities, bool bReflectOnlyMarkedEntities, bool bReflect2DSkybox );
 		void Draw();
 
 	private:
@@ -806,6 +924,20 @@ static inline unsigned long BuildEngineDrawWorldListFlags( unsigned nDrawFlags )
 	if( nDrawFlags & DF_RENDER_REFLECTION )
 	{
 		nEngineFlags |= DRAWWORLDLISTS_DRAW_REFLECTION;
+	}
+	
+	if ( nDrawFlags & ( DF_DRAW_SIMPLE_WORLD_MODEL | DF_DRAW_SIMPLE_WORLD_MODEL_WATER ) )
+	{
+		nEngineFlags &= ~DRAWWORLDLISTS_DRAW_WORLD_GEOMETRY;
+		nEngineFlags &= ~DRAWWORLDLISTS_DRAW_DECALS_AND_OVERLAYS;
+		if ( nDrawFlags & DF_DRAW_SIMPLE_WORLD_MODEL )
+		{
+			nEngineFlags |= DRAWWORLDLISTS_DRAW_SIMPLE_WORLD_MODEL;
+		}
+		if ( nDrawFlags & DF_DRAW_SIMPLE_WORLD_MODEL_WATER )
+		{
+			nEngineFlags |= DRAWWORLDLISTS_DRAW_SIMPLE_WORLD_MODEL_WATER;
+		}
 	}
 
 	return nEngineFlags;
@@ -2824,8 +2956,10 @@ void CViewRender::DetermineWaterRenderInfo( const VisibleFogVolumeInfo_t &fogVol
 	info.m_bRefract = false;
 	info.m_bReflect = false;
 	info.m_bReflectEntities = false;
+	info.m_bReflectOnlyMarkedEntities = false;
 	info.m_bDrawWaterSurface = false;
 	info.m_bOpaqueWater = true;
+	info.m_bReflect2DSkybox = false;
 
 
 
@@ -2961,7 +3095,32 @@ void CViewRender::DetermineWaterRenderInfo( const VisibleFogVolumeInfo_t &fogVol
 		{
 			IMaterialVar *pReflectEntitiesVar = pWaterMaterial->FindVar( "$reflectentities", NULL, false );
 			info.m_bReflectEntities = pReflectEntitiesVar && (pReflectEntitiesVar->GetIntValueFast() != 0);
+
+			// -- PORTAL 2 console perf hack --
+			//
+			// Force this check on consoles even if the VMT says $reflectentities / $forceexpensive / etc.
+			// Unless you explicitly put "$reflectonlymarkedentities 0" in the VMT, you're going to get this feature...
+			// This may be somewhat confusing but it seems like the most straight-forward way to avoid perf regressions due to people 
+			// making water VMTs naively without considering console performance.
+			if ( !info.m_bReflectEntities || IsGameConsole() )
+			{
+				bool bFound = false;
+				IMaterialVar *pReflectOnlyMarkedEntitiesVar = pWaterMaterial->FindVar( "$reflectonlymarkedentities", &bFound, false );
+				info.m_bReflectOnlyMarkedEntities = IsGameConsole(); // default to using fast reflections on consoles, not on PC
+				if ( pReflectOnlyMarkedEntitiesVar && bFound )
+				{
+					info.m_bReflectOnlyMarkedEntities = ( pReflectOnlyMarkedEntitiesVar->GetIntValueFast() != 0 );
+				}
+
+				if ( IsGameConsole() && info.m_bReflectOnlyMarkedEntities )
+				{
+					info.m_bReflectEntities = false;
+				}
+			}
 		}
+		
+		IMaterialVar *pReflect2DSkybox = pWaterMaterial->FindVar( "$reflect2dskybox", NULL, false );
+		info.m_bReflect2DSkybox = pReflect2DSkybox && ( pReflect2DSkybox->GetIntValueFast() != 0 );
 	}
 
 	info.m_bCheapWater = !info.m_bReflect && !info.m_bRefract;
@@ -3745,7 +3904,7 @@ void CRendering3dView::ReleaseLists()
 //-----------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------
-void CRendering3dView::SetupRenderablesList( int viewID )
+void CRendering3dView::SetupRenderablesList( int viewID, bool bFastEntityRendering, bool bDrawDepthViewNonCachedObjectsOnly )
 {
 //	VPROF( "CViewRender::SetupRenderablesList" );
 
@@ -3775,7 +3934,10 @@ void CRendering3dView::SetupRenderablesList( int viewID )
 	setupInfo.m_nViewID = viewID;
 	setupInfo.m_vecRenderOrigin = origin;
 	setupInfo.m_vecRenderForward = CurrentViewForward();
-
+	// We'll modify the leaf system later... - Wonderland_War
+#if 0
+	setupInfo.m_bFastEntityRendering = bFastEntityRendering;
+#endif
 	float fMaxDist = cl_maxrenderable_dist.GetFloat();
 
 	// Shadowing light typically has a smaller farz than cl_maxrenderable_dist
@@ -3886,7 +4048,7 @@ static inline void UpdateBrushModelLightmap( IClientRenderable *pEnt )
 	render->UpdateBrushModelLightmap( pModel, pEnt );
 }
 
-void CRendering3dView::BuildRenderableRenderLists( int viewID )
+void CRendering3dView::BuildRenderableRenderLists( int viewID, bool bFastEntityRendering, bool bDrawDepthViewNonCachedObjectsOnly )
 {
 	MDLCACHE_CRITICAL_SECTION();
 
@@ -3894,8 +4056,8 @@ void CRendering3dView::BuildRenderableRenderLists( int viewID )
 	{
 		render->BeginUpdateLightmaps();
 	}
-
-	SetupRenderablesList( viewID );
+	
+	SetupRenderablesList( viewID, bFastEntityRendering, bDrawDepthViewNonCachedObjectsOnly );
 
 	if ( viewID != VIEW_SHADOW_DEPTH_TEXTURE )
 	{
@@ -3942,6 +4104,10 @@ void CRendering3dView::Begin360ZPass()
 {
 #ifdef _X360
 
+#if defined( PORTAL )
+	if( g_pPortalRender->GetViewRecursionLevel() != 0 )
+		return;
+#endif
 		// set up command buffer-based fast z rejection for 360
 		if ( r_fastzreject.GetBool() && !( m_DrawFlags & DF_SHADOW_DEPTH_MAP ) )
 		{
@@ -3962,6 +4128,10 @@ void CRendering3dView::End360ZPass()
 #ifdef _X360
 	{
 
+#if defined( PORTAL )
+		if( g_pPortalRender->GetViewRecursionLevel() != 0 )
+			return;
+#endif
 
 		if ( r_fastzreject.GetBool() && !( m_DrawFlags & DF_SHADOW_DEPTH_MAP ) )
 		{
@@ -4532,7 +4702,7 @@ void CRendering3dView::DrawOpaqueRenderables( bool bShadowDepth )
 	End360ZPass();
 
 	//
-	// Draw static props + opaque entities that aren't using the fast path.
+	// Draw static props + opaque entities that aren't using the fast path.UpdateFullScreenDepthTexture
 	//
 	DrawOpaqueRenderables_Range( otherRenderables.Count(), otherRenderables.Base(), bShadowDepth );
 	DrawOpaqueRenderables_DrawStaticProps( staticProps.Count(), staticProps.Base(), bShadowDepth );
@@ -4883,7 +5053,7 @@ void CRendering3dView::DrawTranslucentRenderables( bool bInSkybox, bool bShadowD
 		g_pClientShadowMgr->DrawDeferredShadows( (*this), m_pWorldListInfo->m_LeafCount, m_pWorldListInfo->m_pLeafDataList );
 	}
 
-	if ( !r_drawtranslucentworld.GetBool() )
+	if ( !r_drawtranslucentworld.GetBool() || ( m_DrawFlags & ( DF_DRAW_SIMPLE_WORLD_MODEL | DF_DRAW_SIMPLE_WORLD_MODEL_WATER ) ) )
 	{
 		DrawTranslucentRenderablesNoWorld( bInSkybox );
 		return;
@@ -5526,14 +5696,54 @@ void CShadowDepthView::Draw()
 
 	MDLCACHE_CRITICAL_SECTION();
 
+	bool bFlashlightStaticGeoCacheValid = false;
+	bool bFlashlightStaticGeoCacheEnabled = 0; bFlashlightStaticGeoCacheEnabled;
+#if 0
+	bool bFlashlightStaticGeoCacheEnabled = r_flashlight_staticgeocache.GetBool();
+	if ( bFlashlightStaticGeoCacheEnabled )
 	{
-		VPROF_BUDGET( "BuildWorldRenderLists", VPROF_BUDGETGROUP_SHADOW_DEPTH_TEXTURING );
-		BuildWorldRenderLists( true, -1, true, true ); // @MULTICORE (toml 8/9/2006): Portal problem, not sending custom vis down
+		if ( g_flashlight_staticgeo_cache_valid )
+		{
+			ShadowDepthStaticGeoCacheEntry_t entry( *this );
+			bFlashlightStaticGeoCacheValid = !V_memcmp( &entry, &g_flashlight_staticgeo_cache, sizeof( entry ) );
+			if ( !bFlashlightStaticGeoCacheValid )
+			{
+				if ( r_flashlight_staticgeocache.GetInt() > 1 )
+				{
+					DevMsg( "Shadow Depth View: depth cache is stale [id=%d]\n", g_flashlight_staticgeo_cache_id );
+					DevMsg( "   pos   = %.3f:%.3f:%.3f -> %.3f:%.3f:%.3f\n",
+						g_flashlight_staticgeo_cache.origin.x, g_flashlight_staticgeo_cache.origin.y, g_flashlight_staticgeo_cache.origin.z,
+						entry.origin.x, entry.origin.y, entry.origin.z );
+					DevMsg( "   ang   = %.3f:%.3f:%.3f -> %.3f:%.3f:%.3f\n",
+						g_flashlight_staticgeo_cache.angles.x, g_flashlight_staticgeo_cache.angles.y, g_flashlight_staticgeo_cache.angles.z,
+						entry.angles.x, entry.angles.y, entry.angles.z );
+					DevMsg( "   fov   = %.3f -> %.3f\n", g_flashlight_staticgeo_cache.fov, entry.fov );
+					DevMsg( "   zNear = %.3f -> %.3f\n", g_flashlight_staticgeo_cache.zNear, entry.zNear );
+					DevMsg( "   zFar  = %.3f -> %.3f\n", g_flashlight_staticgeo_cache.zFar, entry.zFar );
+				}
+				V_memcpy( &g_flashlight_staticgeo_cache, &entry, sizeof( entry ) );
+			}
+		}
+		if ( !bFlashlightStaticGeoCacheValid )
+		{
+			++ g_flashlight_staticgeo_cache_id;
+			g_flashlight_staticgeo_cache_valid = true;
+			if ( r_flashlight_staticgeocache.GetInt() > 1 )
+			{
+				DevMsg( "Shadow Depth View: fully refreshing depth cache [id=%d]\n", g_flashlight_staticgeo_cache_id );
+			}
+		}
 	}
+	else
+	{
+		g_flashlight_staticgeo_cache_valid = false;
+	}
+#endif
 
 	{
-		VPROF_BUDGET( "BuildRenderableRenderLists", VPROF_BUDGETGROUP_SHADOW_DEPTH_TEXTURING );
-		BuildRenderableRenderLists( CurrentViewID() );
+		BuildWorldRenderLists( true, -1, true, true ); // @MULTICORE (toml 8/9/2006): Portal problem, not sending custom vis down
+		
+		BuildRenderableRenderLists( CurrentViewID(), false, bFlashlightStaticGeoCacheValid );
 	}
 
 	engine->Sound_ExtraUpdate();	// Make sure sound doesn't stutter
@@ -5858,21 +6068,42 @@ void CBaseWorldView::DrawSetup( float waterHeight, int nSetupFlags, float waterZ
 	{
 		render->Push3DView( *this, 0, NULL, GetFrustum() );
 	}
-
-	render->BeginUpdateLightmaps();
-
-	bool bDrawEntities = ( nSetupFlags & DF_DRAW_ENTITITES ) != 0;
-	bool bDrawReflection = ( nSetupFlags & DF_RENDER_REFLECTION ) != 0;
-	BuildWorldRenderLists( bDrawEntities, iForceViewLeaf, true, false, bDrawReflection ? &waterHeight : NULL );
-
-	PruneWorldListInfo();
-
-	if ( bDrawEntities )
+	
+	if ( ( nSetupFlags & ( DF_DRAW_SIMPLE_WORLD_MODEL | DF_DRAW_SIMPLE_WORLD_MODEL_WATER ) ) == 0 )
 	{
-		BuildRenderableRenderLists( savedViewID );
-	}
+		render->BeginUpdateLightmaps();
 
-	render->EndUpdateLightmaps();
+		bool bDrawEntities = ( nSetupFlags & DF_DRAW_ENTITITES ) != 0;
+		bool bDrawReflection = ( nSetupFlags & DF_RENDER_REFLECTION ) != 0;
+		bool bFastEntityRendering = ( nSetupFlags & DF_FAST_ENTITY_RENDERING ) != 0;
+		BuildWorldRenderLists( bDrawEntities, iForceViewLeaf, true, false, bDrawReflection ? &waterHeight : NULL );
+
+		PruneWorldListInfo();
+		
+		if ( bDrawEntities )
+		{
+			BuildRenderableRenderLists( savedViewID, bFastEntityRendering );
+		}
+
+		render->EndUpdateLightmaps();
+	}
+	else
+	{
+		bool bDrawEntities = ( nSetupFlags & DF_DRAW_ENTITITES ) != 0;
+		bool bFastEntityRendering = ( nSetupFlags & DF_FAST_ENTITY_RENDERING ) != 0;
+		// We require fast water reflections here since the other code path assumes that world lists are built, etc.
+		if ( bDrawEntities && bFastEntityRendering )
+		{
+			// Make sure to cache frustum list as BuildRenderableRenderLists will used the cached frustum
+			// (Frustum normally cached in BuildWorldRenderLists!)
+		//	g_viewBuilder.CacheFrustumData();
+			BuildRenderableRenderLists( savedViewID, bFastEntityRendering );
+		}
+		else
+		{
+			Error( "Bad stuff will happen (crashes, stack corruption, etc) because opaque renderables will attempt to render with junk data" );
+		}
+	}
 
 	if ( bViewChanged )
 	{
@@ -5886,7 +6117,14 @@ void CBaseWorldView::DrawSetup( float waterHeight, int nSetupFlags, float waterZ
 void CBaseWorldView::DrawExecute( float waterHeight, view_id_t viewID, float waterZAdjust )
 {
 	// @MULTICORE (toml 8/16/2006): rethink how, where, and when this is done...
-	g_pClientShadowMgr->ComputeShadowTextures( *this, m_pWorldListInfo->m_LeafCount, m_pWorldListInfo->m_pLeafDataList );
+	if ( !( m_DrawFlags & ( DF_DRAW_SIMPLE_WORLD_MODEL | DF_DRAW_SIMPLE_WORLD_MODEL_WATER ) ) )
+	{
+#if defined(_PS3)
+		g_pClientShadowMgr->ComputeShadowTextures( *this, m_pWorldListInfo[ g_viewBuilder.GetBuildViewID() ]->m_LeafCount, m_pWorldListInfo[ g_viewBuilder.GetBuildViewID() ]->m_pLeafDataList );
+#else
+		g_pClientShadowMgr->ComputeShadowTextures( *this, m_pWorldListInfo->m_LeafCount, m_pWorldListInfo->m_pLeafDataList );
+#endif
+	}
 
 	// Make sure sound doesn't stutter
 	engine->Sound_ExtraUpdate();
@@ -5910,14 +6148,18 @@ void CBaseWorldView::DrawExecute( float waterHeight, view_id_t viewID, float wat
 	pRenderContext->SetFrameBufferCopyTexture( GetPowerOfTwoFrameBufferTexture() );
 	pRenderContext.SafeRelease();
 	
-#if defined PORTAL && 0
+	if ( !( m_DrawFlags & ( DF_DRAW_SIMPLE_WORLD_MODEL | DF_DRAW_SIMPLE_WORLD_MODEL_WATER ) ) )
+	{
+		Begin360ZPass();
+	}
+
+#if defined PORTAL && 1
 	if ( IsMainView( viewID ) )
 	{
 		g_pPortalRender->DrawEarlyZPortals( (CViewRender*)view );
 	}
 #endif // PORTAL
 
-	Begin360ZPass();
 	m_DrawFlags |= DF_SKIP_WORLD_DECALS_AND_OVERLAYS;
 	DrawWorld( waterZAdjust );
 	m_DrawFlags &= ~DF_SKIP_WORLD_DECALS_AND_OVERLAYS;
@@ -5925,13 +6167,20 @@ void CBaseWorldView::DrawExecute( float waterHeight, view_id_t viewID, float wat
 	{
 		DrawOpaqueRenderables( false );
 	}
-	End360ZPass();		// DrawOpaqueRenderables currently already calls End360ZPass. No harm in calling it again to make sure we're always ending it
+	
+	if ( !( m_DrawFlags & ( DF_DRAW_SIMPLE_WORLD_MODEL | DF_DRAW_SIMPLE_WORLD_MODEL_WATER ) ) )
+	{
+		End360ZPass();		// DrawOpaqueRenderables currently already calls EndConsoleZPass. No harm in calling it again to make sure we're always ending it
+	}
 
 	// Only draw decals on opaque surfaces after now. Benefit is two-fold: Early Z benefits on PC, and
 	// we're pulling out stuff that uses the dynamic VB from the 360 Z pass
 	// (which can lead to rendering corruption if we overflow the dyn. VB ring buffer).
 	m_DrawFlags |= DF_SKIP_WORLD;
-	DrawWorld( waterZAdjust );
+	if ( !( m_DrawFlags & ( DF_DRAW_SIMPLE_WORLD_MODEL | DF_DRAW_SIMPLE_WORLD_MODEL_WATER ) ) )
+	{
+		DrawWorld( waterZAdjust );
+	}
 	m_DrawFlags &= ~DF_SKIP_WORLD;
 		
 	if ( !m_bDrawWorldNormal )
@@ -6012,7 +6261,7 @@ void CSimpleWorldView::Setup( const CViewSetup &view, int nClearFlags, bool bDra
 	}
 	
 #if defined( PORTAL2 )
-	//m_DrawFlags |= ComputeSimpleWorldModelDrawFlags();
+	m_DrawFlags |= ComputeSimpleWorldModelDrawFlags();
 #endif // PORTAL2
 
 	m_pCustomVisibility = pCustomVisibility;
@@ -6194,7 +6443,7 @@ void CAboveWaterView::Draw()
 	// render the reflection
 	if( m_waterInfo.m_bReflect )
 	{
-		m_ReflectionView.Setup( m_waterInfo.m_bReflectEntities );
+		m_ReflectionView.Setup( m_waterInfo.m_bReflectEntities, m_waterInfo.m_bReflectOnlyMarkedEntities, m_waterInfo.m_bReflect2DSkybox );
 		m_pMainView->AddViewToScene( &m_ReflectionView );
 	}
 	
@@ -6254,24 +6503,44 @@ void CAboveWaterView::Draw()
 //-----------------------------------------------------------------------------
 // 
 //-----------------------------------------------------------------------------
-void CAboveWaterView::CReflectionView::Setup( bool bReflectEntities )
+void CAboveWaterView::CReflectionView::Setup( bool bReflectEntities, bool bReflectOnlyMarkedEntities, bool bReflect2DSkybox )
 {
 	BaseClass::Setup( *GetOuter() );
 
 	m_ClearFlags = VIEW_CLEAR_DEPTH;
 
-	// NOTE: Clearing the color is unnecessary since we're drawing the skybox
-	// and dest-alpha is never used in the reflection
 	m_DrawFlags = DF_RENDER_REFLECTION | DF_CLIP_Z | DF_CLIP_BELOW | 
 		DF_RENDER_ABOVEWATER;
 
-	// NOTE: This will cause us to draw the 2d skybox in the reflection 
-	// (which we want to do instead of drawing the 3d skybox)
-	m_DrawFlags |= DF_DRAWSKYBOX;
-
-	if( bReflectEntities )
+	if ( bReflect2DSkybox )
 	{
-		m_DrawFlags |= DF_DRAW_ENTITITES;
+		m_DrawFlags |= DF_DRAWSKYBOX;
+	}
+	else
+	{
+		m_ClearFlags |= VIEW_CLEAR_COLOR;
+	}
+
+	bool bSimpleWorldModeWaterReflection;
+	int nSimpleWorldModelRecursionLevel;
+	float flSimpleWorldModelDrawBeyondDistance;
+	GetSimpleWorldModelConfiguration( bSimpleWorldModeWaterReflection, nSimpleWorldModelRecursionLevel, flSimpleWorldModelDrawBeyondDistance );
+
+	if ( bSimpleWorldModeWaterReflection )
+	{
+		m_DrawFlags |= DF_DRAW_SIMPLE_WORLD_MODEL | DF_FAST_ENTITY_RENDERING | DF_DRAW_ENTITITES;
+	}
+	else
+	{
+		if( bReflectEntities )
+		{
+			Assert( !bReflectOnlyMarkedEntities );
+			m_DrawFlags |= DF_DRAW_ENTITITES;
+		}
+		else if ( bReflectOnlyMarkedEntities )
+		{
+			m_DrawFlags |= DF_FAST_ENTITY_RENDERING | DF_DRAW_ENTITITES;
+		}
 	}
 }
 

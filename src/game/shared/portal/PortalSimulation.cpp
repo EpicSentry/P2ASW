@@ -45,20 +45,6 @@ extern IPhysicsConstraintEvent *g_pConstraintEvents;
 
 #define VPHYSICS_SHRINK	(0.5f) //HACK: assume VBSP uses this number until we have time to encode it in the map per model
 
-#ifdef DYNAMIC_BOUNDS
-#define PORTAL_COLLISION_SIM_BOUNDS_X 200 * (PORTAL_HALF_WIDTH / 32)
-#define PORTAL_COLLISION_SIM_BOUNDS_Y 200 * (PORTAL_HALF_HEIGHT / 54)
-#define PORTAL_COLLISION_SIM_BOUNDS_Z (72 + PORTAL_HALF_HEIGHT) * 2
-#else
-static ConVar sv_portal_collision_sim_bounds_x("sv_portal_collision_sim_bounds_x", "200", FCVAR_REPLICATED, "Size of box used to grab collision geometry around placed portals. These should be at the default size or larger only!");
-static ConVar sv_portal_collision_sim_bounds_y("sv_portal_collision_sim_bounds_y", "200", FCVAR_REPLICATED, "Size of box used to grab collision geometry around placed portals. These should be at the default size or larger only!");
-static ConVar sv_portal_collision_sim_bounds_z("sv_portal_collision_sim_bounds_z", "252", FCVAR_REPLICATED, "Size of box used to grab collision geometry around placed portals. These should be at the default size or larger only!");
-
-#define PORTAL_COLLISION_SIM_BOUNDS_X sv_portal_collision_sim_bounds_x.GetInt()
-#define PORTAL_COLLISION_SIM_BOUNDS_Y sv_portal_collision_sim_bounds_y.GetInt()
-#define PORTAL_COLLISION_SIM_BOUNDS_Z sv_portal_collision_sim_bounds_z.GetInt()
-#endif
-
 // scale z (252) is player (height + portal half height) * 2
 
 //#define DEBUG_PORTAL_SIMULATION_CREATION_TIMES //define to output creation timings to developer 2
@@ -74,12 +60,12 @@ static ConVar sv_portal_collision_sim_bounds_z("sv_portal_collision_sim_bounds_z
 void DumpActiveCollision( const CPortalSimulator *pPortalSimulator, const char *szFileName ); //appends to the existing file if it exists
 #endif
 
-#define PORTAL_WALL_FARDIST 200.0f
-#define PORTAL_WALL_TUBE_DEPTH 1.0f
-#define PORTAL_WALL_TUBE_OFFSET 0.01f
-#define PORTAL_WALL_MIN_THICKNESS 0.1f
-#define PORTAL_POLYHEDRON_CUT_EPSILON (1.0f/1099511627776.0f) //    1 / (1<<40)
-#define PORTAL_WORLD_WALL_HALF_SEPARATION_AMOUNT 0.1f //separating the world collision from wall collision by a small amount gets rid of extremely thin erroneous collision at the separating plane
+#define PORTAL_WALL_TUBE_DEPTH (1.0f) //(1.0f/128.0f)
+#define PORTAL_WALL_TUBE_OFFSET (0.01f) //(1.0f/128.0f)
+#define PORTAL_WALL_MIN_THICKNESS (0.1f) //(1.0f/16.0f)
+#define PORTAL_POLYHEDRON_CUT_EPSILON (1.0f/1024.0f) //(1.0f/128.0f)
+#define PORTAL_WORLDCLIP_EPSILON (1.0f/1024.0f) //(1.0f/256.0f)
+#define PORTAL_WORLD_WALL_HALF_SEPARATION_AMOUNT (1.0f/16.0f) //separating the world collision from wall collision by a small amount gets rid of extremely thin erroneous collision at the separating plane
 #define PORTAL_HOLE_HALF_HEIGHT_MOD (0.1f)
 #define PORTAL_HOLE_HALF_WIDTH_MOD (0.1f)
 
@@ -2931,11 +2917,11 @@ void CPortalSimulator::CreatePolyhedrons( void )
 		Vector vOBBForward = -m_InternalData.Placement.vForward;
 		Vector vOBBRight = -m_InternalData.Placement.vRight;
 		Vector vOBBUp = m_InternalData.Placement.vUp;
-
+		
 		//scale the extents to usable sizes
-		vOBBForward *= PORTAL_WALL_FARDIST / 2.0f;
-		vOBBRight *= PORTAL_WALL_FARDIST * 2.0f;
-		vOBBUp *= PORTAL_WALL_FARDIST * 2.0f;
+		vOBBForward *= MAX( m_InternalData.Placement.fHalfHeight, m_InternalData.Placement.fHalfWidth ) * 2.0f;
+		vOBBRight *= m_InternalData.Placement.fHalfWidth * 8.0f;
+		vOBBUp *= m_InternalData.Placement.fHalfHeight * 8.0f;
 
 		Vector ptOBBOrigin = m_InternalData.Placement.ptCenter;
 		ptOBBOrigin -= vOBBRight / 2.0f;
@@ -2999,10 +2985,10 @@ void CPortalSimulator::CreatePolyhedrons( void )
 		fPlanes[(5*4) + 3] = m_InternalData.Placement.vRight.Dot( m_InternalData.Placement.ptCenter + (m_InternalData.Placement.vRight * fHalfHoleWidth) );
 
 		float *fSidePlanesOnly = &fPlanes[(2*4)];
-
+		
 		//these 2 get re-used a bit
-		float fFarRightPlaneDistance = m_InternalData.Placement.vRight.Dot( m_InternalData.Placement.ptCenter + m_InternalData.Placement.vRight * (PORTAL_WALL_FARDIST * 10.0f) );
-		float fFarLeftPlaneDistance = vLeft.Dot( m_InternalData.Placement.ptCenter + vLeft * (PORTAL_WALL_FARDIST * 10.0f) );
+		float fFarRightPlaneDistance = m_InternalData.Placement.vRight.Dot( m_InternalData.Placement.ptCenter + m_InternalData.Placement.vRight * (m_InternalData.Placement.fHalfWidth * 40.0f) );
+		float fFarLeftPlaneDistance = vLeft.Dot( m_InternalData.Placement.ptCenter + vLeft * (m_InternalData.Placement.fHalfHeight * 40.0f) );
 
 
 		CUtlVector<int> WallBrushes;
@@ -3053,8 +3039,8 @@ void CPortalSimulator::CreatePolyhedrons( void )
 			fPlanes[(5*4) + 3] = m_InternalData.Placement.vRight.Dot( m_InternalData.Placement.ptCenter + m_InternalData.Placement.vRight * (fHalfHoleWidth + PORTAL_WALL_MIN_THICKNESS) );
 			
 			//general hole cut
-			//fPlanes[(1*4) + 3] += 2000.0f;
-			fPlanes[(2*4) + 3] = m_InternalData.Placement.vUp.Dot( m_InternalData.Placement.ptCenter + m_InternalData.Placement.vUp * (PORTAL_WALL_FARDIST * 10.0f) );
+			//fPlanes[(1*4) + 3] += 2000.0f;			
+			fPlanes[(2*4) + 3] = m_InternalData.Placement.vUp.Dot( m_InternalData.Placement.ptCenter ) + (m_InternalData.Placement.fHalfHeight * 40.0f);
 			fPlanes[(3*4) + 3] = vDown.Dot( m_InternalData.Placement.ptCenter + m_InternalData.Placement.vUp * (fHalfHoleHeight + PORTAL_WALL_MIN_THICKNESS) );
 			fPlanes[(4*4) + 3] = fFarLeftPlaneDistance;
 			fPlanes[(5*4) + 3] = fFarRightPlaneDistance;
@@ -3075,8 +3061,9 @@ void CPortalSimulator::CreatePolyhedrons( void )
 			
 			//general hole cut
 			//fPlanes[(1*4) + 3] += 2000.0f;
-			fPlanes[(2*4) + 3] = m_InternalData.Placement.vUp.Dot( m_InternalData.Placement.ptCenter + (vDown * (fHalfHoleHeight + PORTAL_WALL_MIN_THICKNESS)) );
-			fPlanes[(3*4) + 3] = vDown.Dot( m_InternalData.Placement.ptCenter + (vDown * (PORTAL_WALL_FARDIST * 10.0f)) );
+			fPlanes[(2*4) + 3] = m_InternalData.Placement.vUp.Dot( m_InternalData.Placement.ptCenter + (vDown * (fHalfHoleHeight + PORTAL_WALL_MIN_THICKNESS)) );			
+			fPlanes[(3*4) + 3] = vDown.Dot( m_InternalData.Placement.ptCenter ) + (m_InternalData.Placement.fHalfHeight * 40.0f);
+
 			fPlanes[(4*4) + 3] = fFarLeftPlaneDistance;
 			fPlanes[(5*4) + 3] = fFarRightPlaneDistance;
 

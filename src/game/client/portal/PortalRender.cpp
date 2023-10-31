@@ -37,6 +37,7 @@ ConVar	r_portal_use_pvs_optimization( "r_portal_use_pvs_optimization", "1", 0, "
 
 ConVar r_portal_fastpath( "r_portal_fastpath", "1", 0 );
 ConVar r_portal_fastpath_max_ghost_recursion( "r_portal_fastpath_max_ghost_recursion", "2", 0 );
+ConVar r_portal_earlyz( "r_portal_earlyz", "1", 0 );
 ConVar r_portalscissor( "r_portalscissor", "0", 0 );
 
 extern ConVar portal_draw_ghosting;
@@ -555,10 +556,154 @@ void CPortalRender::DrawPortalGhostLocations( IMatRenderContext *pRenderContext,
 	}
 }
 
+
+void CPortalRender::DrawEarlyZPortals( CViewRender *pViewRender )
+{	 
+	VPROF_BUDGET( "CPortalRender::DrawEarlyZPortals", "DrawEarlyZPortals" );
+
+	if ( !r_portal_earlyz.GetBool() || !r_portal_fastpath.GetBool() || ( g_pMaterialSystem->GetThreadMode() == MATERIAL_SINGLE_THREADED ) )
+	{
+		return;
+	}
+
+	int iDrawFlags = pViewRender->GetDrawFlags();
+
+	if ( (iDrawFlags & DF_RENDER_REFLECTION) != 0 )
+		return;
+
+	if ( ((iDrawFlags & DF_CLIP_Z) != 0) && ((iDrawFlags & DF_CLIP_BELOW) == 0) ) //clipping above the water height
+		return;
+
+	CMatRenderContextPtr pRenderContext( materials );
+
+	int iNumRenderablePortals = m_ActivePortals.Count();
+
+	if ( iNumRenderablePortals == 0 )
+	{
+		return;
+	}
+
+	if ( m_iViewRecursionLevel > 0 )
+	{
+		return;
+	}
+
+	IMesh *pPortalQuadMesh = NULL;
+
+	pPortalQuadMesh = CPortalRenderable_FlatBasic::CreateMeshForPortals( pRenderContext, m_ActivePortals.Count(), m_ActivePortals.Base(), m_clampedPortalMeshRenderInfos );
+	m_portalIsOpening.SetCount( iNumRenderablePortals );
+	for ( int i = 0; i < m_portalIsOpening.Count(); i++ )
+	{
+		m_portalIsOpening[i] = m_ActivePortals[i]->IsPropPortal() && static_cast<C_Prop_Portal *>( m_ActivePortals[i] )->IsPortalOpening();
+	}
+
+	CUtlVector< CPortalRenderable* > actualActivePortals( 0, iNumRenderablePortals );
+	CUtlVector< int > actualActivePortalQuadVBIndex( 0, iNumRenderablePortals );
+
+	if ( true ) //( ToolsEnabled() )
+	{
+		// This loop is necessary because tools can suppress rendering without telling the portal system
+		for ( int i = 0; i < iNumRenderablePortals; ++i )
+		{
+			CPortalRenderable *pPortalRenderable = m_ActivePortals[i];
+			C_BaseEntity *pPairedEntity = pPortalRenderable->PortalRenderable_GetPairedEntity();
+			bool bIsVisible = (pPairedEntity == NULL) || (pPairedEntity->IsVisible() && pPairedEntity->ShouldDraw()); //either unknown visibility or definitely visible.
+
+			// If the portal is associated with an entity, check to see if that entity is even in the PVS before rendering the portal
+			if ( pPairedEntity != NULL && r_portal_use_pvs_optimization.GetBool() )
+			{
+				IClientRenderable *pCR = pPairedEntity->GetClientRenderable();
+				bool bIsRenderable = g_pClientLeafSystem->IsRenderableInPVS( pCR );
+				bIsVisible &= bIsRenderable;
+			}
+
+			if ( !pPortalRenderable->m_bIsPlaybackPortal )
+			{
+				if ( !bIsVisible )
+				{
+					//can't see through the portal, free up it's view id node for use elsewhere
+					if( m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pPortalRenderable->m_iPortalViewIDNodeIndex] != NULL )
+					{
+						FreePortalViewIDNode( m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pPortalRenderable->m_iPortalViewIDNodeIndex] );
+						m_PortalViewIDNodeChain[m_iViewRecursionLevel]->ChildNodes[pPortalRenderable->m_iPortalViewIDNodeIndex] = NULL;
+					}
+
+					continue;
+				}
+			}
+
+			if ( m_portalIsOpening[i] )
+			{
+				// Don't draw, otherwise the refract effect will have no pixels to pull from
+				continue;
+			}
+
+			actualActivePortals.AddToTail( m_ActivePortals[i] );
+			actualActivePortalQuadVBIndex.AddToTail( i );
+		}
+	}
+	else
+	{
+		// Waste some time on the consoles to make the code below work the same
+		actualActivePortals.AddVectorToTail( m_ActivePortals );
+		for ( int i = 0; i < iNumRenderablePortals; i++ )
+		{
+			actualActivePortalQuadVBIndex.AddToTail( i );
+		}
+	}
+
+	iNumRenderablePortals = actualActivePortals.Count();
+	if( iNumRenderablePortals == 0 )
+	{
+		if ( pPortalQuadMesh )
+		{
+			pPortalQuadMesh->MarkAsDrawn();
+		}
+		return;
+	}
+
+	if( m_RecursiveViewComplexFrustums[m_iViewRecursionLevel].Count() == 0 )
+	{
+		//nothing in the complex frustum from the current view, copy the standard frustum in
+		m_RecursiveViewComplexFrustums[m_iViewRecursionLevel].AddMultipleToTail( FRUSTUM_NUMPLANES, pViewRender->GetFrustum() );
+	}
+
+	//step 1, write out the stencil values (and colors if you want, but really not necessary)
+	{
+		pRenderContext->BeginPIXEvent( PIX_VALVE_ORANGE, "Portal_EarlyZ" );
+
+		for ( int i = 0; i < actualActivePortals.Count(); i++ )
+		{
+			CPortalRenderable *pCurrentPortal = actualActivePortals[i];
+
+			IMaterial *pMat = pCurrentPortal->IsPropPortal() ? C_Prop_Portal::m_Materials.m_Portal_Stencil_Hole : C_Portal_Base2D::m_Materials.m_Portal_Stencil_Hole;
+			pRenderContext->Bind( pMat, assert_cast< CPortalRenderable_FlatBasic* >( pCurrentPortal )->GetClientRenderable() );
+
+			int nStartIndex = actualActivePortalQuadVBIndex[i] * 6;
+			int nIndexCount = 6;
+			pPortalQuadMesh->Draw( nStartIndex, nIndexCount );
+			if ( ( m_iViewRecursionLevel == 0 ) && ( m_clampedPortalMeshRenderInfos[ actualActivePortalQuadVBIndex[i] ].nStartIndex >= 0 ) )
+			{
+				// Draw near plane cap
+				nStartIndex = m_clampedPortalMeshRenderInfos[ actualActivePortalQuadVBIndex[i] ].nStartIndex;
+				nIndexCount = m_clampedPortalMeshRenderInfos[ actualActivePortalQuadVBIndex[i] ].nIndexCount;
+				pPortalQuadMesh->Draw( nStartIndex, nIndexCount );
+			}
+		}
+
+		pRenderContext->EndPIXEvent();
+	}
+
+	if ( pPortalQuadMesh )
+	{
+		pPortalQuadMesh->MarkAsDrawn();
+	}
+}
+
 bool CPortalRender::DrawPortalsUsingStencils( CViewRender *pViewRender )
 {
 	VPROF_BUDGET( "CPortalRender::DrawPortalsUsingStencils", "DrawPortalsUsingStencils" );
-#if 1 
+#if 1
 	return DrawPortalsUsingStencils_Old( pViewRender );
 #else
 	if ( !r_portal_fastpath.GetBool() || 
@@ -676,7 +821,7 @@ bool CPortalRender::DrawPortalsUsingStencils( CViewRender *pViewRender )
 
 	if ( pPortalQuadMesh == NULL )
 	{
-		Assert(0);
+		Assert( m_pCachedPortalQuadMeshData );
 		pPortalQuadMesh = pRenderContext->GetDynamicMeshEx( m_portalQuadMeshVertexFmt );
 	}
 
@@ -819,14 +964,6 @@ bool CPortalRender::DrawPortalsUsingStencils( CViewRender *pViewRender )
 
 		if ( pPortalQuadMesh == NULL )
 		{
-
-#ifdef DEBUG
-			char szAssertMsg[64];
-			Q_snprintf(szAssertMsg, sizeof(szAssertMsg), "m_portalQuadMeshVertexFmt: %i", m_portalQuadMeshVertexFmt);
-#endif
-			AssertMsg(0, szAssertMsg);
-			Assert(0);
-
 			pPortalQuadMesh = pRenderContext->GetDynamicMeshEx( m_portalQuadMeshVertexFmt );
 		}
 
@@ -1634,6 +1771,15 @@ void CPortalRender::ShiftFogForExitPortalView() const
 	{
 		m_pRenderingViewExitPortal->ShiftFogForExitPortalView();
 	}
+}
+
+float CPortalRender::GetCurrentPortalDistanceBias() const
+{
+	if ( m_pRenderingViewExitPortal )
+	{
+		return m_pRenderingViewExitPortal->GetPortalDistanceBias();
+	}
+	return 0.0f;
 }
 
 void CPortalRenderable::ShiftFogForExitPortalView() const

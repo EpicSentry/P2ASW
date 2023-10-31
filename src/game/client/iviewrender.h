@@ -53,7 +53,12 @@ enum DrawFlags_t
 	DF_SAVEGAMESCREENSHOT	= 0x20000,
 	DF_CLIP_SKYBOX			= 0x40000,
 
-	DF_SHADOW_DEPTH_MAP		= 0x100000	// Currently rendering a shadow depth map
+	DF_DRAW_SIMPLE_WORLD_MODEL = 0x80000,	// Draw a singe studio model for the world to save CPU.
+
+	DF_SHADOW_DEPTH_MAP		= 0x100000,	// Currently rendering a shadow depth map
+
+	DF_FAST_ENTITY_RENDERING = 0x200000, // Used with DF_DRAW_ENTITIES to only render marked entities into the water reflection buffer for "fast reflections"
+	DF_DRAW_SIMPLE_WORLD_MODEL_WATER = 0x400000,	// Draw a singe studio model for the world to save CPU.
 };
 
 

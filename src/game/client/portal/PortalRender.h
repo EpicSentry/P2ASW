@@ -60,6 +60,7 @@ public:
 	//-----------------------------------------------------------------------------
 	virtual const Vector&	GetFogOrigin( void ) const { return vec3_origin; };
 	virtual void			ShiftFogForExitPortalView() const;
+	virtual float			GetPortalDistanceBias() const { return 0.0f; }
 
 	//-----------------------------------------------------------------------------
 	//Portal visibility testing
@@ -231,6 +232,7 @@ public:
 
 	// Methods to query about the exit portal associated with the currently rendering portal
 	void ShiftFogForExitPortalView() const;
+	float GetCurrentPortalDistanceBias() const;
 	const Vector &GetExitPortalFogOrigin() const;
 	SkyboxVisibility_t IsSkyboxVisibleFromExitPortal() const;
 	bool DoesExitPortalViewIntersectWaterPlane( float waterZ, int leafWaterDataID ) const;
@@ -249,6 +251,8 @@ public:
 	bool IsPortalViewID( view_id_t id );
 	
 	inline CUtlVector<VPlane> &GetRecursiveViewComplexFrustums( int nIdx ) { return m_RecursiveViewComplexFrustums[ nIdx ]; }
+
+	void DrawEarlyZPortals( CViewRender *pViewRender );
 	
 private:
 	struct RecordedPortalInfo_t
