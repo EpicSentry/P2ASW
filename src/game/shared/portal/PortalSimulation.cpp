@@ -134,6 +134,7 @@ const char *PS_SD_Static_World_StaticProps_ClippedProp_t::szTraceSurfaceName = "
 const int PS_SD_Static_World_StaticProps_ClippedProp_t::iTraceSurfaceFlags = 0;
 CBaseEntity *PS_SD_Static_World_StaticProps_ClippedProp_t::pTraceEntity = NULL;
 
+ConVar portal_clone_displacements ( "portal_clone_displacements", "0", FCVAR_REPLICATED | FCVAR_CHEAT );
 ConVar portal_environment_radius( "portal_environment_radius", "75", FCVAR_REPLICATED | FCVAR_CHEAT );
 ConVar portal_ghost_force_hitbox("portal_ghost_force_hitbox", "0", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "(1 = Legacy behavior) Force potentially ghosted renderables to use their hitboxes to test against portal holes instead of collision AABBs" );
 ConVar portal_ghost_show_bbox("portal_ghost_show_bbox", "0", FCVAR_REPLICATED | FCVAR_CHEAT, "Render AABBs around the bounding box used for ghost renderable bounds checking (either hitbox or collision AABB)" );
@@ -2068,7 +2069,7 @@ void CPortalSimulator::CreateLocalPhysics( void )
 	if( m_InternalData.Simulation.hCollisionEntity )
 		params.pGameData = m_InternalData.Simulation.hCollisionEntity;
 	else
-		GetWorldEntity();
+		params.pGameData = GetWorldEntity();
 
 	//World
 	{
@@ -2081,6 +2082,16 @@ void CPortalSimulator::CreateLocalPhysics( void )
 				m_InternalData.Simulation.hCollisionEntity->VPhysicsSetObject(m_InternalData.Simulation.Static.World.Brushes.pPhysicsObject);
 
 			m_InternalData.Simulation.Static.World.Brushes.pPhysicsObject->RecheckCollisionFilter(); //some filters only work after the variable is stored in the class
+		}
+		
+		if( m_InternalData.Simulation.Static.World.Displacements.pCollideable != NULL )
+		{
+			m_InternalData.Simulation.Static.World.Displacements.pPhysicsObject = m_InternalData.Simulation.pPhysicsEnvironment->CreatePolyObjectStatic( m_InternalData.Simulation.Static.World.Displacements.pCollideable, m_InternalData.Simulation.Static.SurfaceProperties.surface.surfaceProps, vec3_origin, vec3_angle, &params );
+						
+			if( (m_InternalData.Simulation.hCollisionEntity != NULL) )
+				m_InternalData.Simulation.hCollisionEntity->VPhysicsSetObject(m_InternalData.Simulation.Static.World.Displacements.pPhysicsObject);
+			
+			m_InternalData.Simulation.Static.World.Displacements.pPhysicsObject->RecheckCollisionFilter(); //some filters only work after the variable is stored in the class
 		}
 
 		//Assert( m_InternalData.Simulation.Static.World.StaticProps.PhysicsObjects.Count() == 0 ); //Be sure to find graceful fixes for asserts, performance is a big concern with portal simulation
@@ -2315,6 +2326,12 @@ void CPortalSimulator::ClearLocalPhysics( void )
 		m_InternalData.Simulation.pPhysicsEnvironment->DestroyObject( m_InternalData.Simulation.Static.World.Brushes.pPhysicsObject );
 		m_InternalData.Simulation.Static.World.Brushes.pPhysicsObject = NULL;
 	}
+	
+	if( m_InternalData.Simulation.Static.World.Displacements.pPhysicsObject )
+	{
+		m_InternalData.Simulation.pPhysicsEnvironment->DestroyObject( m_InternalData.Simulation.Static.World.Displacements.pPhysicsObject );
+		m_InternalData.Simulation.Static.World.Displacements.pPhysicsObject = NULL;
+	}
 
 	if( m_InternalData.Simulation.Static.World.StaticProps.bPhysicsExists && 
 		(m_InternalData.Simulation.Static.World.StaticProps.ClippedRepresentations.Count() != 0) )
@@ -2538,6 +2555,21 @@ void CPortalSimulator::CreateLocalCollision( void )
 		m_InternalData.Simulation.Static.World.Brushes.pCollideable = ConvertPolyhedronsToCollideable( m_InternalData.Simulation.Static.World.Brushes.Polyhedrons.Base(), m_InternalData.Simulation.Static.World.Brushes.Polyhedrons.Count() );
 	STOPDEBUGTIMER( worldBrushTimer );
 	DEBUGTIMERONLY( DevMsg( 2, "[PSDT:%d] %sWorld Brushes=%fms\n", GetPortalSimulatorGUID(), TABSPACING, worldBrushTimer.GetDuration().GetMillisecondsF() ); );
+	
+	// Displacements
+	if ( portal_clone_displacements.GetBool() )
+	{
+		CREATEDEBUGTIMER( dispTimer );
+		STARTDEBUGTIMER( dispTimer );
+		Assert( m_InternalData.Simulation.Static.World.Displacements.pCollideable == NULL );
+
+
+		CPhysCollide *pDisplacementCollide = enginetrace->GetCollidableFromDisplacementsInAABB( m_InternalData.Placement.vecCurAABBMins, m_InternalData.Placement.vecCurAABBMaxs );
+		m_InternalData.Simulation.Static.World.Displacements.pCollideable = pDisplacementCollide;
+
+		STOPDEBUGTIMER( dispTimer );
+		DEBUGTIMERONLY( DevMsg( 2, "[PSDT:%d] %sDisplacement Surfaces=%fms\n", GetPortalSimulatorGUID(), TABSPACING, dispTimer.GetDuration().GetMillisecondsF() ); );
+	}
 
 	CREATEDEBUGTIMER( worldPropTimer );
 	STARTDEBUGTIMER( worldPropTimer );
@@ -2700,6 +2732,12 @@ void CPortalSimulator::ClearLocalCollision( void )
 		physcollision->DestroyCollide( m_InternalData.Simulation.Static.World.Brushes.pCollideable );
 		m_InternalData.Simulation.Static.World.Brushes.pCollideable = NULL;
 	}
+	
+	if( m_InternalData.Simulation.Static.World.Displacements.pCollideable )
+	{
+		physcollision->DestroyCollide( m_InternalData.Simulation.Static.World.Displacements.pCollideable );
+		m_InternalData.Simulation.Static.World.Displacements.pCollideable = NULL;
+	}
 
 	if( m_InternalData.Simulation.Static.World.StaticProps.bCollisionExists && 
 		(m_InternalData.Simulation.Static.World.StaticProps.ClippedRepresentations.Count() != 0) )
@@ -2772,27 +2810,6 @@ void CPortalSimulator::CreatePolyhedrons( void )
 		Vector vOBBRight = m_InternalData.Placement.vRight;
 		Vector vOBBUp = m_InternalData.Placement.vUp;
 
-#if 0 // Legacy
-		//scale the extents to usable sizes
-		float flScaleX = PORTAL_COLLISION_SIM_BOUNDS_X;
-		if ( flScaleX < 200.0f )
-			flScaleX = 200.0f;
-		float flScaleY = PORTAL_COLLISION_SIM_BOUNDS_Y;
-		if ( flScaleY < 200.0f )
-			flScaleY = 200.0f;
-		float flScaleZ = PORTAL_COLLISION_SIM_BOUNDS_Z;
-		if ( flScaleZ < 252.0f )
-			flScaleZ = 252.0f;
-
-		vOBBForward *= flScaleX;
-		vOBBRight	*= flScaleY;
-		vOBBUp		*= flScaleZ;	// default size for scale z (252) is player (height + portal half height) * 2. Any smaller than this will allow for players to 
-									// reach unsimulated geometry before an end touch with teh portal.
-
-		Vector ptOBBOrigin = m_InternalData.Placement.ptCenter;
-		ptOBBOrigin -= vOBBRight / 2.0f;
-		ptOBBOrigin -= vOBBUp / 2.0f;
-#else
 		vOBBForward *= m_InternalData.Placement.vCollisionCloneExtents.x;
 		vOBBRight *= m_InternalData.Placement.vCollisionCloneExtents.y;
 		vOBBUp *= m_InternalData.Placement.vCollisionCloneExtents.z;
@@ -2803,7 +2820,6 @@ void CPortalSimulator::CreatePolyhedrons( void )
 
 		vOBBRight *= 2.0f;
 		vOBBUp *= 2.0f;
-#endif
 
 		Vector vAABBMins, vAABBMaxs;
 		vAABBMins = vAABBMaxs = ptOBBOrigin;
@@ -2822,6 +2838,9 @@ void CPortalSimulator::CreatePolyhedrons( void )
 			if( ptTest.y > vAABBMaxs.y ) vAABBMaxs.y = ptTest.y;
 			if( ptTest.z > vAABBMaxs.z ) vAABBMaxs.z = ptTest.z;
 		}
+		
+		m_InternalData.Placement.vecCurAABBMins = vAABBMins;
+		m_InternalData.Placement.vecCurAABBMaxs = vAABBMaxs;
 
 		//Brushes
 		{
@@ -3640,6 +3659,14 @@ bool CPortalSimulator::CreatedPhysicsObject( const IPhysicsObject *pObject, PS_P
 
 		return true;
 	}	
+	
+	if( pObject == m_InternalData.Simulation.Static.World.Displacements.pPhysicsObject )
+	{
+		if( pOut_SourceType )
+			*pOut_SourceType = PSPOST_LOCAL_DISPLACEMENT;
+
+		return true;
+	}
 
 	return false;
 }
@@ -4066,6 +4093,14 @@ int CPSCollisionEntity::VPhysicsGetObjectList( IPhysicsObject **pList, int listM
 		if( iRetVal == listMax )
 			return iRetVal;
 	}
+	
+	if( m_pOwningSimulator->GetInternalData().Simulation.Static.World.Displacements.pPhysicsObject != NULL )
+	{
+		pList[iRetVal] = m_pOwningSimulator->GetInternalData().Simulation.Static.World.Displacements.pPhysicsObject;
+		++iRetVal;
+		if( iRetVal == listMax )
+			return iRetVal;
+	}
 
 	return iRetVal;
 #else
@@ -4121,6 +4156,9 @@ void DumpActiveCollision( const CPortalSimulator *pPortalSimulator, const char *
 			PortalSimulatorDumps_DumpCollideToGlView( pPortalSimulator->GetInternalData().Simulation.Static.World.StaticProps.ClippedRepresentations[i].pCollide, vec3_origin, vec3_angle, PSDAC_INTENSITY_LOCALPROP, szFileName );	
 		}
 	}
+	
+	if ( pPortalSimulator->GetInternalData().Simulation.Static.World.Displacements.pCollideable )
+		PortalSimulatorDumps_DumpCollideToGlView( pPortalSimulator->GetInternalData().Simulation.Static.World.Displacements.pCollideable, vec3_origin, vec3_angle, PSDAC_INTENSITY_LOCALBRUSH, szFileName );
 
 	if( pPortalSimulator->GetInternalData().Simulation.Static.Wall.Local.Brushes.pCollideable )
 		PortalSimulatorDumps_DumpCollideToGlView( pPortalSimulator->GetInternalData().Simulation.Static.Wall.Local.Brushes.pCollideable, vec3_origin, vec3_angle, PSDAC_INTENSITY_LOCALBRUSH, szFileName );
@@ -4135,6 +4173,9 @@ void DumpActiveCollision( const CPortalSimulator *pPortalSimulator, const char *
 	{
 		if( pLinkedPortal->GetInternalData().Simulation.Static.World.Brushes.pCollideable )
 			PortalSimulatorDumps_DumpCollideToGlView( pLinkedPortal->GetInternalData().Simulation.Static.World.Brushes.pCollideable, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.ptOriginTransform, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.qAngleTransform, PSDAC_INTENSITY_REMOTEBRUSH, szFileName );
+		
+		if ( pLinkedPortal->GetInternalData().Simulation.Static.World.Displacements.pCollideable )
+			PortalSimulatorDumps_DumpCollideToGlView( pLinkedPortal->GetInternalData().Simulation.Static.World.Displacements.pCollideable, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.ptShrinkAlignedOrigin, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.qAngleTransform, PSDAC_INTENSITY_REMOTEBRUSH, szFileName );
 
 		//for( int i = pPortalSimulator->GetInternalData().Simulation.Static.Wall.RemoteTransformedToLocal.StaticProps.Collideables.Count(); --i >= 0; )
 		//	PortalSimulatorDumps_DumpCollideToGlView( pPortalSimulator->GetInternalData().Simulation.Static.Wall.RemoteTransformedToLocal.StaticProps.Collideables[i], vec3_origin, vec3_angle, PSDAC_INTENSITY_REMOTEPROP, szFileName );	

@@ -41,6 +41,9 @@ ConVar sv_portal_trace_vs_holywall ("sv_portal_trace_vs_holywall", "1", FCVAR_RE
 ConVar sv_portal_trace_vs_staticprops ("sv_portal_trace_vs_staticprops", "1", FCVAR_REPLICATED | FCVAR_CHEAT, "Use traces against portal environment static prop geometry" );
 ConVar sv_use_find_closest_passable_space ("sv_use_find_closest_passable_space", "1", FCVAR_REPLICATED | FCVAR_CHEAT, "Enables heavy-handed player teleporting stuck fix code." );
 ConVar sv_use_transformed_collideables("sv_use_transformed_collideables", "1", FCVAR_REPLICATED | FCVAR_CHEAT, "Disables traces against remote portal moving entities using transforms to bring them into local space." );
+
+extern ConVar portal_clone_displacements;
+
 class CTransformedCollideable : public ICollideable //wraps an existing collideable, but transforms everything that pertains to world space by another transform
 {
 public:
@@ -683,8 +686,22 @@ void UTIL_Portal_TraceRay( const CPortal_Base2D *pPortal, const Ray_t &ray, unsi
 		//enginetrace->TraceRay( ray, fMask, pTraceFilter, &RealTrace );
 		if( portalSimulator.GetInternalData().Simulation.Static.World.Brushes.pCollideable && sv_portal_trace_vs_world.GetBool() )
 		{
-			physcollision->TraceBox( ray, portalSimulator.GetInternalData().Simulation.Static.World.Brushes.pCollideable, vec3_origin, vec3_angle, pTrace );
-			bCopyBackBrushTraceData = true;
+			physcollision->TraceBox( ray, portalSimulator.GetInternalData().Simulation.Static.World.Brushes.pCollideable, vec3_origin, vec3_angle, &TempTrace );
+			if( (TempTrace.startsolid == false) && (TempTrace.fraction < pTrace->fraction) ) //never allow something to be stuck in the tube, it's more of a last-resort guide than a real collideable
+			{
+				*pTrace = TempTrace;
+				bCopyBackBrushTraceData = true;
+			}
+		}
+		
+		if( portalSimulator.GetInternalData().Simulation.Static.World.Displacements.pCollideable && sv_portal_trace_vs_world.GetBool() && portal_clone_displacements.GetBool() )
+		{
+			physcollision->TraceBox( ray, portalSimulator.GetInternalData().Simulation.Static.World.Displacements.pCollideable, vec3_origin, vec3_angle, &TempTrace );
+			if( (TempTrace.startsolid == false) && (TempTrace.fraction < pTrace->fraction) ) //never allow something to be stuck in the tube, it's more of a last-resort guide than a real collideable
+			{
+				*pTrace = TempTrace;
+				bCopyBackBrushTraceData = true;
+			}
 		}
 
 		if( bTraceHolyWall )
@@ -827,6 +844,24 @@ void UTIL_Portal_TraceRay( const CPortal_Base2D *pPortal, const Ray_t &ray, unsi
 						}
 						while( pCurrentProp != pStop );
 					}
+				}
+			}
+
+			if( pLinkedPortalSimulator->GetInternalData().Simulation.Static.World.Displacements.pCollideable && sv_portal_trace_vs_world.GetBool() && portal_clone_displacements.GetBool() )
+			{
+				physcollision->TraceBox( ray, pLinkedPortalSimulator->GetInternalData().Simulation.Static.World.Displacements.pCollideable, vec3_origin, vec3_angle, &TempTrace );
+	#if defined ( PORTAL_TRACE_LOGGING )
+				s_TraceLogger.LogTrace( DISP );
+	#endif
+				if( (TempTrace.fraction < pTrace->fraction) )
+				{
+					*pTrace = TempTrace;
+					bCopyBackBrushTraceData = true;
+					//pTrace->dispFlags |= DISPSURF_FLAG_SURFACE | DISPSURF_FLAG_WALKABLE;
+					Assert( pTrace->startsolid || (pTrace->fraction == 1.0f) || (pTrace->plane.normal.LengthSqr() > 0.5f) );
+	#if defined ( PORTAL_TRACE_LOGGING )
+					keptType = DISP;
+	#endif
 				}
 			}
 		}
@@ -1069,6 +1104,18 @@ void UTIL_Portal_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, c
 					*pTrace = tempTrace;
 				}
 			}
+			
+			if( pPortalSimulator->GetInternalData().Simulation.Static.World.Displacements.pCollideable && 
+				sv_portal_trace_vs_world.GetBool() && 
+				portal_clone_displacements.GetBool() )
+			{
+				physcollision->TraceBox( entRay, MASK_ALL, NULL, pPortalSimulator->GetInternalData().Simulation.Static.World.Displacements.pCollideable, vec3_origin, vec3_angle, &tempTrace );
+								
+				if ( tempTrace.startsolid || (tempTrace.fraction < pTrace->fraction) )
+				{
+					*pTrace = tempTrace;
+				}
+			}
 
 			//if( pPortalSimulator->GetInternalData().Simulation.Static.Wall.RemoteTransformedToLocal.Brushes.pCollideable &&
 			if( pLinkedPortalSimulator &&
@@ -1080,6 +1127,21 @@ void UTIL_Portal_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, c
 				//							pLinkedPortalSimulator->GetInternalData().Simulation.Static.World.Brushes.pCollideable, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.ptOriginTransform, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.qAngleTransform, &tempTrace );
 
 				physcollision->TraceBox( entRay, MASK_ALL, NULL, pLinkedPortalSimulator->GetInternalData().Simulation.Static.World.Brushes.pCollideable, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.ptOriginTransform, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.qAngleTransform, &tempTrace );
+
+				if ( tempTrace.startsolid || (tempTrace.fraction < pTrace->fraction) )
+				{
+					*pTrace = tempTrace;
+				}
+			}
+			
+			//if( pPortalSimulator->GetInternalData().Simulation.Static.Wall.RemoteTransformedToLocal.Brushes.pCollideable &&
+			if( pLinkedPortalSimulator &&
+				pLinkedPortalSimulator->GetInternalData().Simulation.Static.World.Displacements.pCollideable &&
+				sv_portal_trace_vs_world.GetBool() && 
+				sv_portal_trace_vs_holywall.GetBool() && 
+				portal_clone_displacements.GetBool() )
+			{
+				physcollision->TraceBox( entRay, MASK_ALL, NULL, pLinkedPortalSimulator->GetInternalData().Simulation.Static.World.Displacements.pCollideable, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.ptOriginTransform, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.qAngleTransform, &tempTrace );
 
 				if ( tempTrace.startsolid || (tempTrace.fraction < pTrace->fraction) )
 				{
