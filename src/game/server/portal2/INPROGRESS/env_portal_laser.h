@@ -18,7 +18,7 @@ public:
 	DECLARE_SERVERCLASS();
 	DECLARE_DATADESC();
 	
-    CBaseEntity *GetEntity();
+	CBaseEntity *GetEntity() { return this; }
 	CPortalLaser( const CPortalLaser & );
 	CPortalLaser();
     ~CPortalLaser();
@@ -28,7 +28,7 @@ public:
     void UpdateOnRemove();
     bool CreateVPhysics();
     int UpdateTransmitState();
-    Vector ClosestPointOnLineSegment( Vector vPos );
+    Vector ClosestPointOnLineSegment( Vector &vPos );
     void InputTurnOn( inputdata_t &inputdata );
     void InputTurnOff( inputdata_t &inputdata );
     void InputToggle( inputdata_t &inputdata );
@@ -54,7 +54,7 @@ public:
 
 private:
 	
-	CNetworkHandle( CBaseEntity, m_hReflector );
+	CNetworkHandle( CPropWeightedCube, m_hReflector );
 	
 	CNetworkVector( m_vStartPoint );
 	CNetworkVector( m_vEndPoint );
@@ -72,7 +72,7 @@ private:
 	CBaseEntity *TraceLaser( bool bIsFirstTrace, Vector &vecStart, Vector &vecDirection, float &flTotalBeamLength, trace_t &tr, PortalLaserInfoList_t &infoList, Vector *pVecAutoAimOffset );
 
     CBaseEntity *GetEntitiesAlongLaser(class Vector & ,class Vector & ,class Vector * ,class CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > & ,bool );
-    void DamageEntitiesAlongLaser( CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > & ,bool );
+    void DamageEntitiesAlongLaser( const PortalLaserInfoList_t &infoList , bool bAutoAim );
 	Vector m_vecNearestSoundSource[MAX_PLAYERS];
     CBaseEntity *m_pSoundProxy[MAX_PLAYERS];
 	CSoundPatch *m_pAmbientSound[MAX_PLAYERS];
@@ -86,8 +86,8 @@ private:
     bool m_bNoPlacementHelper;
 	
     void RemoveChildLaser();
-    void UpdateNextLaser(class Vector & ,class Vector & ,class CBaseEntity * );
-    void FireLaser( Vector &vecStart, Vector &vecDirection, CBaseEntity *pReflector );
+    void UpdateNextLaser( Vector &vecStart, Vector &vecDirection, CPropWeightedCube *pReflector );
+    void FireLaser( Vector &vecStart, Vector &vecDirection, CPropWeightedCube *pReflector );
     void CreateHelperEntities();
     void CreateSoundProxies();
     void DamageEntity(class CBaseEntity * ,float );
@@ -97,14 +97,14 @@ private:
     void TurnOffGlow();
     void TurnOffLaserSound();
     void StrikeThink();
-    void BeamDamage(class CGameTrace * );
+    void BeamDamage( trace_t &tr );
     void UpdateSoundPosition( Vector &vecStart, Vector &vecEnd );
-    void SetFromReflectedCube(bool );
+    void SetFromReflectedCube( bool bReflect );
 	
     bool StrikeEntitiesAlongLaser(class Vector & ,class Vector & ,class Vector * );
-    bool ShouldAutoAim(class CBaseEntity * );
+    bool ShouldAutoAim( CBaseEntity *pTarget );
     bool IsOn();
-    bool ReflectLaserFromEntity(class CBaseEntity * );
+    bool ReflectLaserFromEntity( CBaseEntity *pTarget );
     bool InPVS();
 };
 
