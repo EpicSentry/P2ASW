@@ -43,5 +43,11 @@ $Project "Shaders (Portal 2)"
 	// Updated Water from CSGO Leak
 	$File "water.cpp"
 	$File "water_dudv.cpp"
+	
+	$folder "Shaders"
+	{
+		$File "portal_ps2x.fxc"
+		$File "portal_vs20.fxc"
+	}
 
 }

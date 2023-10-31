@@ -12,12 +12,12 @@
 #pragma once
 #endif
 
-/*
+#ifdef USE_BLOBULATOR
 #include "../../../common/blobulator/implicit/impdefines.h"
 #include "../../../common/blobulator/implicit/imprenderer.h"
 #include "../../../common/blobulator/implicit/imptiler.h"
 #include "../../../common/blobulator/implicit/userfunctions.h"
-*/
+#endif
 
 //class C_PaintblobRenderer
 namespace NPaintRenderer
@@ -25,8 +25,11 @@ namespace NPaintRenderer
 
 typedef CUtlVector< matrix3x4_t > PortalMatrixList_t;
 
-//void Paintblob_Draw( int renderMode, IMaterial *pMaterial, float flCubeWidth, const PortalMatrixList_t& portalMatrixList, ImpParticleList& particleList );
+#ifdef USE_BLOBULATOR
+void Paintblob_Draw( int renderMode, IMaterial *pMaterial, float flCubeWidth, const PortalMatrixList_t& portalMatrixList, ImpParticleList& particleList );
+#endif
 
 }
+
 
 #endif // C_PAINTBLOB_RENDER_H

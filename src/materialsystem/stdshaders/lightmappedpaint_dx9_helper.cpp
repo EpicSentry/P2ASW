@@ -15,7 +15,6 @@
 #include "lightmappedpaint_ps20b.inc"
 
 #include "tier0/vprof.h"
-#include "shaderapifast.h"
 
 #include "tier0/memdbgon.h"
 
@@ -23,6 +22,8 @@ extern ConVar mat_ambient_light_r;
 extern ConVar mat_ambient_light_g;
 extern ConVar mat_ambient_light_b;
 
+// Prevent compile errors
+#if 0
 
 void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IShaderDynamicAPI *pShaderAPI, IShaderShadow* pShaderShadow, 
 								 LightmappedGeneric_DX9_Vars_t &info, CBasePerMaterialContextData **pContextDataPtr )
@@ -100,13 +101,13 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 				}
 #endif
 
-				staticCmdsBuf.BindStandardTexture( SHADER_SAMPLER1, bHDR ? TEXTURE_BINDFLAGS_NONE : TEXTURE_BINDFLAGS_SRGBREAD, TEXTURE_LIGHTMAP );
+				staticCmdsBuf.BindStandardTexture( SHADER_SAMPLER1, TEXTURE_LIGHTMAP );
 
 				//noise
-				staticCmdsBuf.BindStandardTexture( SHADER_SAMPLER6, TEXTURE_BINDFLAGS_NONE, TEXTURE_SHADOW_NOISE_2D );
+				staticCmdsBuf.BindStandardTexture( SHADER_SAMPLER6, TEXTURE_SHADOW_NOISE_2D );
 
 				//paint map
-				staticCmdsBuf.BindStandardTexture( SHADER_SAMPLER9, TEXTURE_BINDFLAGS_NONE, TEXTURE_PAINT );
+				staticCmdsBuf.BindStandardTexture( SHADER_SAMPLER9, TEXTURE_PAINT );
 
 				if ( bSeamlessMapping )
 				{
@@ -151,7 +152,7 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 				// texcoord2 : lightmap texcoord offset
 				int numTexCoords;
 				
-				// if ( ShaderApiFast( pShaderAPI )->InEditorMode() )
+				// if ( pShaderAPI->InEditorMode() )
 // 				if ( pShader->CanUseEditorMaterials() )
 // 				{
 // 					numTexCoords = 1;
@@ -345,34 +346,34 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 
 			if( params[info.m_nPaintSplatNormal]->IsTexture() )
 			{
-				pContextData->m_SemiStaticCmdsOut.BindTexture( pShader, SHADER_SAMPLER7, TEXTURE_BINDFLAGS_NONE, info.m_nPaintSplatNormal );
+				pContextData->m_SemiStaticCmdsOut.BindTexture( pShader, SHADER_SAMPLER7, info.m_nPaintSplatNormal );
 			}
 			else
 			{
-				pContextData->m_SemiStaticCmdsOut.BindStandardTexture( SHADER_SAMPLER7, TEXTURE_BINDFLAGS_NONE, TEXTURE_NORMALMAP_FLAT );
+				pContextData->m_SemiStaticCmdsOut.BindStandardTexture( SHADER_SAMPLER7, TEXTURE_NORMALMAP_FLAT );
 			}
 
 			if( params[info.m_nPaintSplatBubbleLayout]->IsTexture() )
 			{
-				pContextData->m_SemiStaticCmdsOut.BindTexture( pShader, SHADER_SAMPLER4, TEXTURE_BINDFLAGS_NONE, info.m_nPaintSplatBubbleLayout );
+				pContextData->m_SemiStaticCmdsOut.BindTexture( pShader, SHADER_SAMPLER4,info.m_nPaintSplatBubbleLayout );
 			}
 			else
 			{
-				pContextData->m_SemiStaticCmdsOut.BindStandardTexture( SHADER_SAMPLER4, TEXTURE_BINDFLAGS_NONE, TEXTURE_BLACK );
+				pContextData->m_SemiStaticCmdsOut.BindStandardTexture( SHADER_SAMPLER4, TEXTURE_BLACK );
 			}
 
 			if( params[info.m_nPaintSplatBubble]->IsTexture() )
 			{
-				pContextData->m_SemiStaticCmdsOut.BindTexture( pShader, SHADER_SAMPLER5, TEXTURE_BINDFLAGS_NONE, info.m_nPaintSplatBubble );
+				pContextData->m_SemiStaticCmdsOut.BindTexture( pShader, SHADER_SAMPLER5, info.m_nPaintSplatBubble );
 			}
 			else
 			{
-				pContextData->m_SemiStaticCmdsOut.BindStandardTexture( SHADER_SAMPLER5, TEXTURE_BINDFLAGS_NONE, TEXTURE_NORMALMAP_FLAT );
+				pContextData->m_SemiStaticCmdsOut.BindStandardTexture( SHADER_SAMPLER5, TEXTURE_NORMALMAP_FLAT );
 			}
 
 			if ( bHasBlendModulateTexture )
 			{
-				pContextData->m_SemiStaticCmdsOut.BindTexture( pShader, SHADER_SAMPLER3, TEXTURE_BINDFLAGS_NONE, info.m_nBlendModulateTexture, -1 );
+				pContextData->m_SemiStaticCmdsOut.BindTexture( pShader, SHADER_SAMPLER3, info.m_nBlendModulateTexture, -1 );
 			}
 
 			pContextData->m_SemiStaticCmdsOut.End();
@@ -380,11 +381,11 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 	}
 	DYNAMIC_STATE
 	{
-		ShaderApiFast( pShaderAPI )->SetDefaultState();
+		pShaderAPI->SetDefaultState();
 #ifdef _PS3
 		CCommandBufferBuilder< CDynamicCommandStorageBuffer > DynamicCmdsOut;
-		ShaderApiFast( pShaderAPI )->ExecuteCommandBuffer( pContextData->m_pStaticCmds );
-		ShaderApiFast( pShaderAPI )->ExecuteCommandBuffer( pContextData->m_SemiStaticCmdsOut.Base() );
+		pShaderAPI->ExecuteCommandBuffer( pContextData->m_pStaticCmds );
+		pShaderAPI->ExecuteCommandBuffer( pContextData->m_SemiStaticCmdsOut.Base() );
 #else
 		CCommandBufferBuilder< CFixedCommandStorageBuffer< 1000 > > DynamicCmdsOut;
 		DynamicCmdsOut.Call( pContextData->m_pStaticCmds );
@@ -400,20 +401,20 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 
 		bool bVertexShaderFastPath = pContextData->m_bVertexShaderFastPath;
 
-		int nFixedLightingMode = ShaderApiFast( pShaderAPI )->GetIntRenderingParameter( INT_RENDERPARM_ENABLE_FIXED_LIGHTING );
+		int nFixedLightingMode = pShaderAPI->GetIntRenderingParameter( INT_RENDERPARM_ENABLE_FIXED_LIGHTING );
 		if( nFixedLightingMode != ENABLE_FIXED_LIGHTING_NONE )
 		{
 			bVertexShaderFastPath = false;
 		}
 
 		float vEyePos[4];
-		ShaderApiFast( pShaderAPI )->GetWorldSpaceCameraPosition( vEyePos );
+		pShaderAPI->GetWorldSpaceCameraPosition( vEyePos );
 		DynamicCmdsOut.SetVertexShaderConstant4( 12, vEyePos[0], vEyePos[1], vEyePos[2], 0.0f );
 
 		// These constants are used to rotate the world space water normals around the up axis to align the
 		// normal with the camera and then give us a 2D offset vector to use for reflection and refraction uv's
 		VMatrix mView;
-		ShaderApiFast( pShaderAPI )->GetMatrix( MATERIAL_VIEW, mView.m[0] );
+		pShaderAPI->GetMatrix( MATERIAL_VIEW, mView.m[0] );
 		mView = mView.Transpose3x3();
 
 		Vector4D vCameraRight( mView.m[0][0], mView.m[0][1], mView.m[0][2], 0.0f );
@@ -423,10 +424,10 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 		Vector4D vCameraForward;
 		CrossProduct( Vector( 0.0f, 0.0f, 1.0f ), vCameraRight.AsVector3D(), vCameraForward.AsVector3D() ); // I assume the water surface normal is pointing along z!
 
-		ShaderApiFast( pShaderAPI )->SetPixelShaderConstant( 22, vCameraRight.Base() );
-		ShaderApiFast( pShaderAPI )->SetPixelShaderConstant( 23, vCameraForward.Base() );
+		pShaderAPI->SetPixelShaderConstant( 22, vCameraRight.Base() );
+		pShaderAPI->SetPixelShaderConstant( 23, vCameraForward.Base() );
 
-		MaterialFogMode_t fogType = ShaderApiFast( pShaderAPI )->GetSceneFogMode();
+		MaterialFogMode_t fogType = pShaderAPI->GetSceneFogMode();
 		DECLARE_DYNAMIC_VERTEX_SHADER( lightmappedgeneric_vs20 );
 		SET_DYNAMIC_VERTEX_SHADER_COMBO( FASTPATH,  bVertexShaderFastPath );
 		SET_DYNAMIC_VERTEX_SHADER_CMD( DynamicCmdsOut, lightmappedgeneric_vs20 );
@@ -451,7 +452,7 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 		bool bWriteWaterFogToAlpha;
 		if(  pContextData->m_bFullyOpaque ) 
 		{
-			bWriteDepthToAlpha = ShaderApiFast( pShaderAPI )->ShouldWriteDepthToDestAlpha();
+			bWriteDepthToAlpha = pShaderAPI->ShouldWriteDepthToDestAlpha();
 			bWriteWaterFogToAlpha = (fogType == MATERIAL_FOG_LINEAR_BELOW_FOG_Z);
 			AssertMsg( !(bWriteDepthToAlpha && bWriteWaterFogToAlpha), "Can't write two values to alpha at the same time." );
 		}
@@ -493,9 +494,11 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 
 		DynamicCmdsOut.End();
 #ifdef _PS3
-		ShaderApiFast( pShaderAPI )->SetPixelShaderFogParams( 11 );
+		pShaderAPI->SetPixelShaderFogParams( 11 );
 #endif
-		ShaderApiFast( pShaderAPI )->ExecuteCommandBuffer( DynamicCmdsOut.Base() );
+		pShaderAPI->ExecuteCommandBuffer( DynamicCmdsOut.Base() );
 	}
 	pShader->Draw();
 }
+
+#endif // #if 0

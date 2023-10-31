@@ -5714,7 +5714,6 @@ bool CPortal_Player::PlayGesture( const char *pGestureName )
 
 void CPortal_Player::InitVCollision( const Vector &vecAbsOrigin, const Vector &vecAbsVelocity )
 {
-#if 1
 	// Cleanup any old vphysics stuff.
 	VPhysicsDestroyObject();
 
@@ -5726,9 +5725,6 @@ void CPortal_Player::InitVCollision( const Vector &vecAbsOrigin, const Vector &v
 	CPhysCollide *pCrouchModel = PhysCreateBbox( GetDuckHullMins(), GetDuckHullMaxs() );
 
 	SetupVPhysicsShadow( vecAbsOrigin, vecAbsVelocity, pModel, "player_stand", pCrouchModel, "player_crouch" );
-#else
-	BaseClass::InitVCollision( vecAbsOrigin, vecAbsVelocity );
-#endif
 }
 
 
