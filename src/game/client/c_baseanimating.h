@@ -1,4 +1,4 @@
-//===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ======//
+//===== Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ======//
 //
 // Purpose: 
 //
@@ -659,6 +659,9 @@ protected:
 	
 	virtual bool UpdateBlending( int flags, const RenderableInstance_t &instance );
 
+	void CheckIfEntityShouldForceRTTShadows(void);
+	ShadowType_t GetShadowCastTypeForStudio(CStudioHdr* pStudioHdr);
+	bool m_bForceRTTShadows;
 	CBoneMergeCache					*m_pBoneMergeCache;	// This caches the strcmp lookups that it has to do
 														// when merg
 
