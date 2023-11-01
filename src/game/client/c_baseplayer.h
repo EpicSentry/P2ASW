@@ -1,4 +1,4 @@
-//===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ======//
+//===== Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ======//
 //
 // Purpose: Client-side CBasePlayer.
 //
@@ -749,6 +749,9 @@ public:
 private:
 	void UpdateSplitScreenAndPictureInPicturePlayerList();
 
+	//HACK: always contains the last origin we received through C_BasePlayer::RecvProxy_LocalOriginXY() & C_BasePlayer::RecvProxy_LocalOriginZ(). Intended to fix bug 85693 without as small a scale change as possible
+	//only works because we receive both the local and nonlocal representations of our origin on recreation. It just happens that the nonlocal wins out by default because it comes last
+	Vector m_vecHack_RecvProxy_LocalPlayerOrigin;
 };
 
 EXTERN_RECV_TABLE(DT_BasePlayer);
