@@ -1,4 +1,4 @@
-//===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ======//
+//===== Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ======//
 //
 // Purpose: 
 //
@@ -79,6 +79,7 @@ ConVar RagdollImpactStrength( "z_ragdoll_impact_strength", "500" );
 ConVar cl_disable_ragdolls( "cl_disable_ragdolls", "0", FCVAR_CHEAT );
 
 ConVar cl_ejectbrass( "cl_ejectbrass", "1" );
+ConVar cl_minimal_rtt_shadows("cl_minimal_rtt_shadows", "1", FCVAR_ARCHIVE);
 
 
 // If an NPC is moving faster than this, he should play the running footstep sound
@@ -761,6 +762,7 @@ C_BaseAnimating::C_BaseAnimating() :
 	m_pJiggleBones = NULL;
 	m_isJiggleBonesEnabled = true;
 	AddToEntityList(ENTITY_LIST_SIMULATE);
+	m_bForceRTTShadows = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -833,28 +835,40 @@ int C_BaseAnimating::VPhysicsGetObjectList( IPhysicsObject **pList, int listMax 
 //-----------------------------------------------------------------------------
 ShadowType_t C_BaseAnimating::ShadowCastType()
 {
-	CStudioHdr *pStudioHdr = GetModelPtr();
-	if ( !pStudioHdr || !pStudioHdr->SequencesAvailable() )
+	CStudioHdr* pStudioHdr = GetModelPtr();
+	if (!pStudioHdr || !pStudioHdr->SequencesAvailable())
 		return SHADOWS_NONE;
 
-	if ( IsEffectActive(EF_NODRAW | EF_NOSHADOW) )
+	if (IsEffectActive(EF_NODRAW | EF_NOSHADOW))
 		return SHADOWS_NONE;
 
+	if (cl_minimal_rtt_shadows.GetBool() && m_bForceRTTShadows == false)
+	{
+		return SHADOWS_NONE;
+	}
+	else
+	{
+		return GetShadowCastTypeForStudio(pStudioHdr);
+	}
+}
+
+ShadowType_t C_BaseAnimating::GetShadowCastTypeForStudio(CStudioHdr* pStudioHdr)
+{
 	if (pStudioHdr->GetNumSeq() == 0)
 		return SHADOWS_RENDER_TO_TEXTURE;
-		  
-	if ( !IsRagdoll() )
+
+	if (!IsRagdoll())
 	{
 		// If we have pose parameters, always update
-		if ( pStudioHdr->GetNumPoseParameters() > 0 )
+		if (pStudioHdr->GetNumPoseParameters() > 0)
 			return SHADOWS_RENDER_TO_TEXTURE_DYNAMIC;
-		
+
 		// If we have bone controllers, always update
-		if ( pStudioHdr->numbonecontrollers() > 0 )
+		if (pStudioHdr->numbonecontrollers() > 0)
 			return SHADOWS_RENDER_TO_TEXTURE_DYNAMIC;
 
 		// If we use IK, always update
-		if ( pStudioHdr->numikchains() > 0 )
+		if (pStudioHdr->numikchains() > 0)
 			return SHADOWS_RENDER_TO_TEXTURE_DYNAMIC;
 	}
 
@@ -5169,7 +5183,26 @@ bool C_BaseAnimating::InitAsClientRagdoll( const matrix3x4_t *pDeltaBones0, cons
 	return true;
 }
 
+static const char* g_pszForceRTTClassnames[] =
+{
+	"prop_weighted_cube",
+	"class C_NPC_Portal_FloorTurret",
+	"class C_NPC_Personality_Core",
+	"class C_PhysicsProp",
+	//"prop_box_monster",
+};
 
+void C_BaseAnimating::CheckIfEntityShouldForceRTTShadows(void)
+{
+	for (int i = 0; i < ARRAYSIZE(g_pszForceRTTClassnames); ++i)
+	{
+		if (FClassnameIs(this, g_pszForceRTTClassnames[i]))
+		{
+			m_bForceRTTShadows = true;
+			return;
+		}
+	}
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: 
