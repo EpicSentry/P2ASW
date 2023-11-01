@@ -97,6 +97,8 @@ ConVar	spec_freeze_traveltime( "spec_freeze_traveltime", "0.4", FCVAR_CHEAT | FC
 ConVar	spec_freeze_distance_min( "spec_freeze_distance_min", "96", FCVAR_CHEAT, "Minimum random distance from the target to stop when framing them in observer freeze cam." );
 ConVar	spec_freeze_distance_max( "spec_freeze_distance_max", "200", FCVAR_CHEAT, "Maximum random distance from the target to stop when framing them in observer freeze cam." );
 
+ConVar	cl_player_fullupdate_predicted_origin_fix("cl_player_fullupdate_predicted_origin_fix", "1");
+
 bool IsDemoPolishRecording();
 
 // -------------------------------------------------------------------------------- //
@@ -756,6 +758,18 @@ void C_BasePlayer::PostDataUpdate( DataUpdateType_t updateType )
 
 	if ( IsLocalPlayer( this ) )
 	{
+		if ((updateType == DATA_UPDATE_CREATED) &&
+			g_pGameRules->IsMultiplayer() &&
+			cl_player_fullupdate_predicted_origin_fix.GetBool())
+		{
+			if ((m_vecHack_RecvProxy_LocalPlayerOrigin.x != FLT_MAX) &&
+				(m_vecHack_RecvProxy_LocalPlayerOrigin.y != FLT_MAX) &&
+				(m_vecHack_RecvProxy_LocalPlayerOrigin.z != FLT_MAX))
+			{
+				SetNetworkOrigin(m_vecHack_RecvProxy_LocalPlayerOrigin);
+			}
+		}
+		m_vecHack_RecvProxy_LocalPlayerOrigin.Init(FLT_MAX, FLT_MAX, FLT_MAX);
 		SetSimulatedEveryTick( true );
 	}
 	else
