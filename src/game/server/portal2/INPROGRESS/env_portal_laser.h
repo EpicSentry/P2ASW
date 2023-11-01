@@ -37,20 +37,19 @@ public:
 	
     struct PortalLaserInfo_t
     {
+	public:
         Vector vecStart;
         Vector vecEnd;
-        CUtlVector<CBaseEntity *,CUtlMemory<CBaseEntity *,int> > sortedEntList;
-        //PortalLaserInfo_t(struct CPortalLaser::PortalLaserInfo_t & );
+		CUtlVector<CBaseEntity*, CUtlMemory<CBaseEntity*> > sortedEntList;
 		PortalLaserInfo_t()
 		{
 			vecStart.Init();
 			vecEnd.Init();
 		}
-		~PortalLaserInfo_t() {}
-        
+		~PortalLaserInfo_t() {}        
 	};
 	
-	typedef CUtlVector<CPortalLaser::PortalLaserInfo_t, CUtlMemory<CPortalLaser::PortalLaserInfo_t, int> > PortalLaserInfoList_t;
+	typedef CUtlVector<PortalLaserInfo_t, CUtlMemory<PortalLaserInfo_t> > PortalLaserInfoList_t;
 
 private:
 	
@@ -71,7 +70,7 @@ private:
    //CBaseEntity *TraceLaser(bool ,class Vector & ,class Vector & ,float & ,class CGameTrace & ,class CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > & ,class Vector * );
 	CBaseEntity *TraceLaser( bool bIsFirstTrace, Vector &vecStart, Vector &vecDirection, float &flTotalBeamLength, trace_t &tr, PortalLaserInfoList_t &infoList, Vector *pVecAutoAimOffset );
 
-    CBaseEntity *GetEntitiesAlongLaser(class Vector & ,class Vector & ,class Vector * ,class CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > & ,bool );
+    CBaseEntity *GetEntitiesAlongLaser( Vector &vecStart, Vector &vecEnd, Vector &vecOut, PortalLaserInfoList_t &infoList, bool bIsFirstTrace );
     void DamageEntitiesAlongLaser( const PortalLaserInfoList_t &infoList , bool bAutoAim );
 	Vector m_vecNearestSoundSource[MAX_PLAYERS];
     CBaseEntity *m_pSoundProxy[MAX_PLAYERS];

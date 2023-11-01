@@ -818,7 +818,7 @@ CBaseEntity *CPortalLaser::TraceLaser( bool bIsFirstTrace, Vector &vecStart, Vec
 			{
 				break;
 			}
-			pHitEntity = GetEntitiesAlongLaser( tr.startpos, tr.endpos, &vAutoAimOffset, infoList, bIsFirstTrace );
+			pHitEntity = GetEntitiesAlongLaser( tr.startpos, tr.endpos, vAutoAimOffset, infoList, bIsFirstTrace );
 			CalcClosestPointOnLineSegment(vAutoAimOffset, tr.startpos, tr.endpos, vStrike_0, 0);
 			flTotalBeamLength = sqrt(
 				(((vStrike_0.x - tr.startpos.x)
@@ -850,7 +850,7 @@ CBaseEntity *CPortalLaser::TraceLaser( bool bIsFirstTrace, Vector &vecStart, Vec
 			src = v13;
 			portalList.InsertBefore( 0, src);
 		}
-		pHitEntity = GetEntitiesAlongLaser( tr.startpos, tr.endpos, &vStrike_0, infoList, bIsFirstTrace );
+		pHitEntity = GetEntitiesAlongLaser( tr.startpos, tr.endpos, vStrike_0, infoList, bIsFirstTrace );
 		if (pHitEntity)
 		{
 			CalcClosestPointOnLineSegment(vStrike_0, tr.startpos, tr.endpos, vAutoAimOffset, 0);
@@ -963,7 +963,7 @@ void CPortalLaser::UpdateNextLaser( Vector &vecStart, Vector &vecDirection, CPro
 	}
 }
 
-void __cdecl CPortalLaser::DamageEntitiesAlongLaser( const PortalLaserInfoList_t &infoList, bool bAutoAim )
+void CPortalLaser::DamageEntitiesAlongLaser( const PortalLaserInfoList_t &infoList, bool bAutoAim )
 {
 	vec_t v4; // xmm2_4
 	vec_t v5; // xmm0_4
@@ -971,20 +971,13 @@ void __cdecl CPortalLaser::DamageEntitiesAlongLaser( const PortalLaserInfoList_t
 	vec_t v7; // xmm1_4
 	float x; // xmm4_4
 	float y; // xmm3_4
-	float v10; // xmm0_4
 	bool v11; // zf
 	int v12; // eax
-	int v13; // ebx
-	int v14; // eax
-	int v15; // edi
 	const Vector v16; // eax
 	float v17; // xmm0_4
-	Vector *mins; // [esp+44h] [ebp-84h]
-	Vector *maxs; // [esp+48h] [ebp-80h]
 	Vector vecEnd; // [esp+4Ch] [ebp-7Ch]
 	bool bBlockTarget; // [esp+52h] [ebp-76h]
 	int i; // [esp+54h] [ebp-74h]
-	QAngle *angles; // [esp+58h] [ebp-70h]
 	Vector vecStart; // [esp+5Ch] [ebp-6Ch]
 	Vector vecDirection; // [esp+68h] [ebp-60h] BYREF
 	Vector vecPlayerVelocity; // [esp+74h] [ebp-54h] BYREF
@@ -993,15 +986,16 @@ void __cdecl CPortalLaser::DamageEntitiesAlongLaser( const PortalLaserInfoList_t
 	Vector vecBounce; // [esp+98h] [ebp-30h] BYREF
 	Vector vecPushVelocity; // [esp+A4h] [ebp-24h] BYREF
 	
-	PortalLaserInfo_t v3 = infoList[i];
-
 	if (infoList.Count() > 0)
 	{
 		i = 0;
 		bBlockTarget = 0;
+		
+		PortalLaserInfo_t v3;
 		while (1)
 		{
-			vecEnd = &v3.vecEnd;
+			v3 = infoList[i];
+			vecEnd = v3.vecEnd;
 			v4 = v3.vecEnd.x - v3.vecStart.x;
 			v5 = v3.vecEnd.z - v3.vecStart.z;
 			vecDirection.y = v3.vecEnd.y - v3.vecStart.y;
@@ -1016,19 +1010,23 @@ void __cdecl CPortalLaser::DamageEntitiesAlongLaser( const PortalLaserInfoList_t
 		}
 		v6 = 0;
 		vecStart = v3.vecStart;
+
+		float v10;
+		
+		CBaseEntity *list[1024];
+
+		CFlaggedEntitiesEnum rayEnum( list, 1024, 0 );
+
+		Ray_t ray;
+
+		ray.Init( vecStart, vecEnd );
+
+		partition->EnumerateElementsAlongRay( PARTITION_ENGINE_NON_STATIC_EDICTS, ray, false, &rayEnum );
+
+		int nCount = rayEnum.GetCount();
+
 		while (1)
 		{
-			CBaseEntity *list[1024];
-
-			CFlaggedEntitiesEnum rayEnum( list, 1024, 0 );
-
-			Ray_t ray;
-
-			ray.Init( vecStart, vecEnd );
-
-			partition->EnumerateElementsAlongRay( PARTITION_ENGINE_NON_STATIC_EDICTS, ray, false, &rayEnum );
-
-			int nCount = rayEnum.GetCount();
 
 			CBaseEntity *pEntity = list[i];
 			if ( sv_debug_laser.GetInt() )
@@ -1039,8 +1037,8 @@ void __cdecl CPortalLaser::DamageEntitiesAlongLaser( const PortalLaserInfoList_t
 			{
 				if ( pEntity->ClassMatches("point_laser_target") && !bBlockTarget )
 				{
-					if (!*(_BYTE *)(pEntity + 933) || !this->m_bAutoAimEnabled || bAutoAim || this->m_bFromReflectedCube)
-						CPortalLaser::DamageEntity(this, (CBaseEntity *)pEntity, 1.0);
+					if ( /* !*(_BYTE *)(pEntity + 933) || */ !m_bAutoAimEnabled || bAutoAim || m_bFromReflectedCube)
+						DamageEntity( pEntity, 1.0);
 					goto LABEL_25;
 				}
 				if ( pEntity->ClassMatches( "npc_portal_turret_floor" ) )
@@ -1049,10 +1047,14 @@ void __cdecl CPortalLaser::DamageEntitiesAlongLaser( const PortalLaserInfoList_t
 					goto LABEL_25;
 				}
 			}
-			if (!(*(unsigned __int8(__cdecl **)(int))(*(_DWORD *)pEntity + 344))(pEntity) || *(_BYTE *)(pEntity + 226) == 8)
-				goto LABEL_25;
+
+			// FIXME: This might be important!!
+			//if (!(*(unsigned __int8(__cdecl **)(int))(*(_DWORD *)pEntity + 344))(pEntity) || *(_BYTE *)(pEntity + 226) == 8)
+			//	goto LABEL_25;
+			
 			if (!pEntity->GetGroundEntity())
 				break;
+
 			vecPlayerVelocity = pEntity->GetAbsVelocity();
 			VectorNormalize(vecPlayerVelocity);
 			CalcClosestPointOnLineSegment(pEntity->GetAbsOrigin(), vecStart, vecEnd, vecNearestPoint, 0);
@@ -1062,6 +1064,7 @@ void __cdecl CPortalLaser::DamageEntitiesAlongLaser( const PortalLaserInfoList_t
 			vecLineToLaser.z = vecNearestPoint.z - vecNearestPoint.z;
 			VectorNormalize(vecLineToLaser);
 			vecLineToLaser.z = 0.0;
+			
 			if ((((vecPlayerVelocity.x * vecPlayerVelocity.x)
 				+ (vecPlayerVelocity.y * vecPlayerVelocity.y))
 				+ (vecPlayerVelocity.z * vecPlayerVelocity.z)) < 1.4210855e-14)
@@ -1074,7 +1077,11 @@ void __cdecl CPortalLaser::DamageEntitiesAlongLaser( const PortalLaserInfoList_t
 				vecBounce.x = x;
 				vecBounce.y = y;
 			LABEL_20:
+#if 0
 				v11 = (*(_BYTE *)(pEntity + 212) & 1) == 0;
+#else // NOTE: This is just a best guess!!
+				v11 = ( pEntity->GetFlags() & FL_ONGROUND ) == 0;
+#endif
 				vecPushVelocity.z = v10;
 				vecPushVelocity.x = x * 100.0;
 				vecPushVelocity.y = 100.0 * y;
@@ -1082,9 +1089,7 @@ void __cdecl CPortalLaser::DamageEntitiesAlongLaser( const PortalLaserInfoList_t
 				{
 					pEntity->SetGroundEntity( NULL );
 					pEntity->SetGroundChangeTime( gpGlobals->curtime + 0.5 );
-					vecPushVelocity.x = vecPushVelocity.x + vecPushVelocity.x;
-					vecPushVelocity.y = vecPushVelocity.y + vecPushVelocity.y;
-					vecPushVelocity.z = vecPushVelocity.z + vecPushVelocity.z;
+					vecPushVelocity = vecPushVelocity + vecPushVelocity;
 				}
 				pEntity->SetAbsVelocity( vecPushVelocity );
 				v12 = 1125515264;
@@ -1111,12 +1116,239 @@ void __cdecl CPortalLaser::DamageEntitiesAlongLaser( const PortalLaserInfoList_t
 				goto LABEL_20;
 			}
 		LABEL_25:
-			if (SLODWORD(vecStart[3].x) <= ++v6)
+			if ( nCount < ++v6 )
 				goto LABEL_29;
 		}
 		if (fabs(vecDirection.z) < 0.2000000029802322)
 			goto LABEL_25;
-		if ((*(_BYTE *)(pEntity + 209) & 0x10) == 0)
-			goto LABEL_14;
 	}
+}
+
+CBaseEntity *CPortalLaser::GetEntitiesAlongLaser( Vector &vecStart, Vector &vecEnd, Vector &vecOut, PortalLaserInfoList_t &infoList, bool bIsFirstTrace )
+{
+  float x; // xmm0_4
+  float y; // xmm2_4
+  float z; // xmm3_4
+  float v9; // xmm1_4
+  float v10; // xmm5_4
+  float v11; // xmm4_4
+  float m_fValue; // xmm1_4
+  int m_nValue; // eax
+  bool v14; // al
+  float v15; // xmm1_4
+  float v16; // xmm7_4
+  float v17; // xmm6_4
+  float v18; // xmm5_4
+  float v19; // xmm0_4
+  float v20; // xmm7_4
+  int v21; // eax
+  int v22; // ebx
+  CBaseEntity *v23; // eax
+  bool v24; // zf
+  int v25; // esi
+  bool v26; // al
+  CBaseEntity *v27; // ebx
+  CPortalLaserTarget *v28; // eax
+  Vector *v29; // eax
+  const Vector *v31; // eax
+  float v32; // [esp+4Ch] [ebp-8ECh]
+  float v33; // [esp+50h] [ebp-8E8h]
+  bool bBlockTarget; // [esp+57h] [ebp-8E1h]
+  PortalLaserInfo_t info; // [esp+58h] [ebp-8E0h]
+  int nCount; // [esp+5Ch] [ebp-8DCh]
+  CBaseEntity *list[512]; // [esp+60h] [ebp-8D8h] BYREF
+  Ray_t ray; // [esp+860h] [ebp-D8h] BYREF
+  CUtlSortVector<LaserVictimInfo_t,CLaserVictimLess,CUtlVector<LaserVictimInfo_t,CUtlMemory<LaserVictimInfo_t,int> > > vsrtVictims; // [esp+8BCh] [ebp-7Ch] BYREF
+  Vector vecNearest; // [esp+8D8h] [ebp-60h] BYREF
+  Vector vecDirection; // [esp+8ECh] [ebp-4Ch] BYREF
+  Vector vecMins; // [esp+8F8h] [ebp-40h] BYREF
+  Vector vecMaxs; // [esp+904h] [ebp-34h] BYREF
+  LaserVictimInfo_t victim; // [esp+910h] [ebp-28h] BYREF
+  CBaseEntity *pEntity; // [esp+918h] [ebp-20h] BYREF
+  float flFraction[7]; // [esp+91Ch] [ebp-1Ch] BYREF
+
+  CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int>>::InsertBefore(
+    infoList,
+    infoList->m_Size);
+  info = infoList.Element( infoList.Count() - 1 );
+  info.vecStart = vecStart;
+  info.vecEnd = vecEnd;
+  x = vecEnd.x;
+  y = vecEnd.y;
+  z = vecEnd.z;
+  v9 = vecEnd.x - vecStart.x;
+  v10 = y - vecStart.y;
+  v11 = z - vecStart.z;
+  vecDirection.x = v9;
+  vecDirection.y = v10;
+  vecDirection.z = v11;
+  if ( bIsFirstTrace )
+    m_fValue = (fsqrt(((v9 * v9) + (v10 * v10)) + (v11 * v11)) * 0.00390625) + 16.0;
+  else
+    m_fValue = sv_laser_tight_box.GetFloat();
+  vecMaxs.x = m_fValue;
+  vecMins.x = -m_fValue;
+  vecMins.y = -m_fValue;
+  m_nValue = sv_debug_laser.GetInt();
+  vecMins.z = -m_fValue;
+  vecMaxs.y = m_fValue;
+  vecMaxs.z = m_fValue;
+  if ( m_nValue )
+  {
+    VectorAngles(&vecDirection, (QAngle *const)&vecNearest);
+    if ( bIsFirstTrace )
+      NDebugOverlay::SweptBox(vecStart, vecEnd, &vecMins, &vecMaxs, (const QAngle *const)&vecNearest, 255, 0, 0, 0, 0.1);
+    else
+      NDebugOverlay::SweptBox(vecStart, vecEnd, &vecMins, &vecMaxs, (const QAngle *const)&vecNearest, 0, 255, 0, 0, 0.1);
+    x = vecEnd.x;
+    y = vecEnd.y;
+    z = vecEnd.z;
+  }
+  v14 = 1;
+  ray.m_pWorldAxisTransform = 0;
+  v33 = vecStart.x;
+  v32 = vecStart.y;
+  v15 = vecStart.z;
+  ray.m_Delta.x = x - vecStart.x;
+  ray.m_Delta.y = y - v32;
+  ray.m_Delta.z = z - v15;
+  v16 = (vecMaxs.x + vecMins.x) * 0.5;
+  v17 = (vecMaxs.y + vecMins.y) * 0.5;
+  ray.m_Extents.y = (vecMaxs.y - vecMins.y) * 0.5;
+  v18 = (vecMaxs.z + vecMins.z) * 0.5;
+  ray.m_Extents.z = (vecMaxs.z - vecMins.z) * 0.5;
+  ray.m_Extents.x = (vecMaxs.x - vecMins.x) * 0.5;
+  v19 = v33 + v16;
+  v20 = -v16;
+  if ( (((ray.m_Delta.x * ray.m_Delta.x) + (ray.m_Delta.y * ray.m_Delta.y))
+             + (ray.m_Delta.z * ray.m_Delta.z)) == 0.0 )
+    v14 = 0;
+  ray.m_Start.x = v19;
+  ray.m_IsSwept = v14;
+  ray.m_Start.y = v32 + v17;
+  ray.m_IsRay = (((ray.m_Extents.x * ray.m_Extents.x) + (ray.m_Extents.y * ray.m_Extents.y))
+                      + (ray.m_Extents.z * ray.m_Extents.z)) < 0.000001;
+  ray.m_Start.z = v15 + v18;
+  ray.m_StartOffset.x = v20;
+  ray.m_StartOffset.y = -v17;
+  ray.m_StartOffset.z = -v18;
+  CFlaggedEntitiesEnum::CFlaggedEntitiesEnum((CFlaggedEntitiesEnum *const)&vecNearest, list, 512, 33562752);
+  v21 = UTIL_EntitiesAlongRay(&ray, (CFlaggedEntitiesEnum *)&vecNearest);
+  pEntity = 0;
+  nCount = v21;
+  memset(&vsrtVictims, 0, 25);
+  if ( v21 > 0 )
+  {
+    v22 = 0;
+    while ( 1 )
+    {
+      pEntity = list[v22];
+      v23 = pEntity;
+      if ( pEntity )
+      {
+        if ( pEntity->ClassMatches( "point_laser_target" ) )
+          goto LABEL_16;
+        v24 = !pEntity->ClassMatches( "point_laser_target" );
+        v23 = pEntity;
+        if ( !v24 )
+          goto LABEL_16;
+        if ( pEntity )
+        {
+          if ( pEntity->ClassMatches("npc_portal_turret_floor") )
+            goto LABEL_16;
+          v24 = !pEntity->ClassMatches("npc_portal_turret_floor");
+          v23 = pEntity;
+          if ( !v24 )
+            goto LABEL_16;
+        }
+      }
+      if ( (*((unsigned __int8 (__cdecl **)(CBaseEntity *))v23->_vptr_IHandleEntity + 86))(v23) )
+        break;
+LABEL_17:
+      if ( ++v22 == nCount )
+        goto LABEL_18;
+    }
+    v23 = pEntity;
+LABEL_16:
+    if ( (*((unsigned __int8 (__cdecl **)(CBaseEntity *))v23->_vptr_IHandleEntity + 70))(v23) )
+    {
+      v31 = (const Vector *)(*((int (__cdecl **)(CBaseEntity *))pEntity->_vptr_IHandleEntity + 150))(pEntity);
+      CalcClosestPointOnLineSegment(v31, vecStart, vecEnd, &vecNearest, flFraction);
+      if ( (!(*((unsigned __int8 (__cdecl **)(CBaseEntity *))pEntity->_vptr_IHandleEntity + 86))(pEntity)
+         || sv_player_collide_with_laser.GetInt())
+        && flFraction[0] > 0.0 )
+      {
+        victim.flFraction = flFraction[0];
+        victim.pVictim = pEntity;
+        CUtlSortVector<LaserVictimInfo_t,CLaserVictimLess,CUtlVector<LaserVictimInfo_t,CUtlMemory<LaserVictimInfo_t,int>>>::InsertNoSort(
+          &vsrtVictims,
+          &victim);
+      }
+    }
+    goto LABEL_17;
+  }
+LABEL_18:
+  CUtlSortVector<LaserVictimInfo_t,CLaserVictimLess,CUtlVector<LaserVictimInfo_t,CUtlMemory<LaserVictimInfo_t,int>>>::RedoSort(
+    &vsrtVictims,
+    1);
+  if ( vsrtVictims.m_Size > 0 )
+  {
+    v25 = 0;
+    bBlockTarget = 0;
+    while ( 1 )
+    {
+      pEntity = vsrtVictims.m_Memory.m_pMemory[v25].pVictim;
+      CUtlVector<CBaseEntity *,CUtlMemory<CBaseEntity *,int>>::InsertBefore(
+        &info.sortedEntList,
+        info.sortedEntList.Count(),
+        &pEntity);
+      v27 = pEntity;
+      if ( !pEntity )
+        goto LABEL_24;
+      if ( ((v26 = pEntity->ClassMatches("point_laser_target"), v27 = pEntity, v26))
+        && !bBlockTarget )
+      {
+        if ( v27 )
+        {
+			v28 = dynamic_cast<CPortalLaserTarget*>( v27 );
+          if ( v28 )
+          {
+            if ( v28[933] )
+            {
+              if ( pVecOut )
+              {
+                v29 = (Vector *)(*(int (__cdecl **)(_BYTE *))(*(_DWORD *)v28 + 600))(v28);
+                v27 = pEntity;
+                *pVecOut = *v29;
+              }
+              goto LABEL_33;
+            }
+          }
+        }
+LABEL_24:
+        if ( vsrtVictims.m_Size <= ++v25 )
+          break;
+      }
+      else
+      {
+        if ( !v27
+          || v27->ClassMatches( "npc_portal_turret_floor" ) )
+        {
+          goto LABEL_24;
+        }
+        ++v25;
+        bBlockTarget = 1;
+        if ( vsrtVictims.m_Size <= v25 )
+          break;
+      }
+    }
+  }
+  v27 = 0;
+  if ( pVecOut )
+    *pVecOut = *vecEnd;
+LABEL_33:
+  vsrtVictims.m_Size = 0;
+  if ( vsrtVictims.m_Memory.m_nGrowSize >= 0 && vsrtVictims.m_Memory.m_pMemory )
+    (*(void (__cdecl **)(_DWORD, LaserVictimInfo_t *))(*g_pMemAlloc + 8))(g_pMemAlloc, vsrtVictims.m_Memory.m_pMemory);
+  return v27;
 }
