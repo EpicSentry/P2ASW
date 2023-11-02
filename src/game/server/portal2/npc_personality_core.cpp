@@ -1,3 +1,10 @@
+//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//
+// Purpose: Recreation of the Personality Core entity from Portal 2
+// Recreated by Jordon (JordyPorgie)
+//	
+//=============================================================================//
+
 #include "cbase.h"
 #include "ai_baseactor.h"
 #include "ai_basenpc.h"
@@ -51,6 +58,10 @@ public:
 	void InputExplode(inputdata_t& inputdata);
 	void InputClearParent(inputdata_t& inputdata);
 
+	int SelectSchedule() { return BaseClass::SelectSchedule(); }
+	bool ShouldPlayIdleSound();
+	void IdleSound();
+	void HandleAnimEvent(animevent_t* pEvent) { BaseClass::HandleAnimEvent(pEvent); }
 	int	TranslateSchedule(int scheduleType);
 	void GatherConditions();
 	void OnPhysGunPickup(CBasePlayer* pPhysGunUser, PhysGunPickup_t reason);
@@ -71,6 +82,7 @@ public:
 protected:
 	bool TestRemarkingUpon(CInfoRemarkable* pRemarkable);
 	bool IsBeingHeldByPlayer();
+	float m_flNextIdleSoundTime;
 	float m_flLastPhysicsImpactTime;
 	bool m_bHasBeenPickedUp;
 	bool m_bPickupEnabled;
@@ -89,29 +101,37 @@ private:
 LINK_ENTITY_TO_CLASS(npc_personality_core, CNPC_PersonalityCore);
 
 BEGIN_DATADESC(CNPC_PersonalityCore)
-DEFINE_INPUTFUNC(FIELD_VOID, "EnableMotion", InputEnableMotion),
-DEFINE_INPUTFUNC(FIELD_VOID, "DisableMotion", InputDisableMotion),
-DEFINE_INPUTFUNC(FIELD_VOID, "EnableFlashlight", InputEnableFlashlight),
-DEFINE_INPUTFUNC(FIELD_VOID, "DisableFlashlight", InputDisableFlashlight),
-DEFINE_INPUTFUNC(FIELD_VOID, "EnablePickup", InputEnablePickup),
-DEFINE_INPUTFUNC(FIELD_VOID, "DisablePickup", InputDisablePickup),
-DEFINE_INPUTFUNC(FIELD_VOID, "ForcePickup", InputForcePickup),
-DEFINE_INPUTFUNC(FIELD_VOID, "PlayLock", InputPlayLock),
-DEFINE_INPUTFUNC(FIELD_VOID, "PlayAttach", InputPlayAttach),
-DEFINE_INPUTFUNC(FIELD_VOID, "PlayDetach", InputPlayDetach),
-DEFINE_INPUTFUNC(FIELD_STRING, "SetIdleSequence", InputSetIdleSequence),
-DEFINE_INPUTFUNC(FIELD_VOID, "ClearIdleSequence", InputClearIdleSequence),
-DEFINE_INPUTFUNC(FIELD_VOID, "ClearParent", InputClearParent),
-DEFINE_INPUTFUNC(FIELD_VOID, "Explode", InputExplode),
-DEFINE_USEFUNC(Use),
-DEFINE_KEYFIELD(m_bUseAltModel, FIELD_BOOLEAN, "altmodel"),
-DEFINE_OUTPUT(m_OnPlayerPickup, "OnPlayerPickup"),
-DEFINE_OUTPUT(m_OnPlayerDrop, "OnPlayerDrop"),
-DEFINE_FIELD(m_bFlashlightEnabled, FIELD_BOOLEAN),
+	DEFINE_FIELD(m_flNextIdleSoundTime, FIELD_TIME),
+	DEFINE_FIELD(m_flLastPhysicsImpactTime, FIELD_FLOAT),
+	DEFINE_FIELD(m_flAnimResetTime, FIELD_FLOAT),
+	DEFINE_FIELD(m_bHasBeenPickedUp, FIELD_BOOLEAN),
+	DEFINE_FIELD(m_bPickupEnabled, FIELD_BOOLEAN),
+	DEFINE_FIELD(m_bAttached, FIELD_BOOLEAN),
+	DEFINE_FIELD(m_bFlashlightEnabled, FIELD_BOOLEAN),
+	DEFINE_FIELD(m_iIdleOverrideSequence, FIELD_INTEGER),
+	DEFINE_FIELD(m_hProjectedTexture, FIELD_EHANDLE),
+	DEFINE_KEYFIELD(m_bUseAltModel, FIELD_BOOLEAN, "altmodel"),
+	DEFINE_OUTPUT(m_OnPlayerPickup, "OnPlayerPickup"),
+	DEFINE_OUTPUT(m_OnPlayerDrop, "OnPlayerDrop"),
+	DEFINE_INPUTFUNC(FIELD_VOID, "EnableMotion", InputEnableMotion),
+	DEFINE_INPUTFUNC(FIELD_VOID, "DisableMotion", InputDisableMotion),
+	DEFINE_INPUTFUNC(FIELD_VOID, "EnableFlashlight", InputEnableFlashlight),
+	DEFINE_INPUTFUNC(FIELD_VOID, "DisableFlashlight", InputDisableFlashlight),
+	DEFINE_INPUTFUNC(FIELD_VOID, "ForcePickup", InputForcePickup),
+	DEFINE_INPUTFUNC(FIELD_VOID, "EnablePickup", InputEnablePickup),
+	DEFINE_INPUTFUNC(FIELD_VOID, "DisablePickup", InputDisablePickup),
+	DEFINE_INPUTFUNC(FIELD_VOID, "PlayLock", InputPlayLock),
+	DEFINE_INPUTFUNC(FIELD_VOID, "PlayAttach", InputPlayAttach),
+	DEFINE_INPUTFUNC(FIELD_VOID, "PlayDetach", InputPlayDetach),
+	DEFINE_INPUTFUNC(FIELD_STRING, "SetIdleSequence", InputSetIdleSequence),
+	DEFINE_INPUTFUNC(FIELD_VOID, "ClearIdleSequence", InputClearIdleSequence),
+	DEFINE_INPUTFUNC(FIELD_VOID, "Explode", InputExplode),
+	DEFINE_INPUTFUNC(FIELD_VOID, "ClearParent", InputClearParent),
+	DEFINE_USEFUNC(Use),
 END_DATADESC()
 
 IMPLEMENT_SERVERCLASS_ST(CNPC_PersonalityCore, DT_NPC_Personality_Core)
-SendPropBool( SENDINFO (m_bFlashlightEnabled) ),
+	SendPropBool( SENDINFO (m_bFlashlightEnabled) ),
 END_SEND_TABLE()
 
 void CNPC_PersonalityCore::Precache(void)
@@ -131,19 +151,17 @@ void CNPC_PersonalityCore::Spawn(void)
 {
 	Precache();
 	CapabilitiesClear();
-	if (m_bUseAltModel == false) {
+	if (m_bUseAltModel)
 		SetModel(CORE_MODEL);
-	}
-	else {
+	else
 		SetModel(CORE_SKINS_MODEL);
-	}
 	SetHullType(HULL_SMALL_CENTERED);
 	SetHullSizeNormal();
 	SetDefaultEyeOffset();
 	SetSolid(SOLID_VPHYSICS);
 	SetSolidFlags(FSOLID_NOT_STANDABLE);
 	SetCollisionGroup(COLLISION_GROUP_NONE);
-	SetMoveType(MOVETYPE_VPHYSICS,MOVECOLLIDE_DEFAULT);
+	SetMoveType(MOVETYPE_VPHYSICS);
 	AddFlag(FL_UNBLOCKABLE_BY_PLAYER);
 	CapabilitiesAdd(bits_CAP_ANIMATEDFACE);
 	m_NPCState = NPC_STATE_NONE;
@@ -246,7 +264,7 @@ void CNPC_PersonalityCore::InputForcePickup(inputdata_t& inputdata)
 
 	if (LocalPlayer)
 	{
-		SetParent(0, -1);
+		SetParent(NULL);
 		CreateVPhysics();
 		LocalPlayer->PickupObject(this, true);
 	}
@@ -304,6 +322,21 @@ void CNPC_PersonalityCore::InputClearParent(inputdata_t& inputdata)
 	RemoveSolidFlags(FSOLID_NOT_SOLID);
 }
 
+bool CNPC_PersonalityCore::ShouldPlayIdleSound(void)
+{
+	if ((m_NPCState == NPC_STATE_IDLE || m_NPCState == NPC_STATE_ALERT) && gpGlobals->curtime > m_flNextIdleSoundTime && !HasSpawnFlags(SF_NPC_GAG))
+	{
+		return true;
+	}
+
+	return false;
+}
+
+void CNPC_PersonalityCore::IdleSound()
+{
+	m_flNextIdleSoundTime = gpGlobals->curtime + 0.1;
+}
+
 int CNPC_PersonalityCore::TranslateSchedule(int schedule)
 {
 	return BaseClass::TranslateSchedule(schedule);
@@ -358,7 +391,7 @@ void CNPC_PersonalityCore::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, US
 
 	if (m_bPickupEnabled && pActivator && pPlayer )
 	{
-		SetParent(0,-1);
+		SetParent(NULL);
 		CreateVPhysics();
 		pPlayer->PickupObject(this, true);
 	}
