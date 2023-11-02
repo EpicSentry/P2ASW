@@ -5,6 +5,8 @@
 //	
 //=============================================================================//
 
+//TODO: A fix is needed for whenever the core attempts to clear it's parent.
+
 #include "cbase.h"
 #include "ai_playerally.h"
 #include "props.h"
@@ -156,7 +158,7 @@ void CNPC_PersonalityCore::Spawn(void)
 	SetHullType(HULL_SMALL_CENTERED);
 	SetHullSizeNormal();
 	SetDefaultEyeOffset();
-	SetSolid(SOLID_VPHYSICS);
+	SetSolid(SOLID_BBOX);
 	SetSolidFlags(FSOLID_NOT_STANDABLE);
 	SetCollisionGroup(COLLISION_GROUP_NONE);
 	SetMoveType(MOVETYPE_VPHYSICS);
@@ -200,7 +202,7 @@ void CNPC_PersonalityCore::Spawn(void)
 		variant_t emptyVariant;
 		m_hProjectedTexture->AcceptInput("TurnOff", NULL, NULL, emptyVariant, 0);
 	}
-	if (m_pParent != NULL)
+	if (m_pParent)
 		AddSolidFlags(FSOLID_NOT_SOLID);
 
 }
@@ -301,10 +303,10 @@ void CNPC_PersonalityCore::InputClearIdleSequence(inputdata_t& inputdata)
 
 void CNPC_PersonalityCore::InputExplode(inputdata_t& inputdata)
 {
-	ExplosionCreate(GetAbsOrigin(), GetAbsAngles(), this, 100, 500, (SF_ENVEXPLOSION_NODAMAGE | SF_ENVEXPLOSION_NOSPARKS | SF_ENVEXPLOSION_NODLIGHTS | SF_ENVEXPLOSION_NOSMOKE | SF_ENVEXPLOSION_NOFIREBALLSMOKE), false);
-	UTIL_ScreenShake(GetAbsOrigin(), 10.0f, 150.0f, 1.0f, 750.0f, SHAKE_START);
+	ExplosionCreate(WorldSpaceCenter(), GetAbsAngles(), this, 100, 500, (SF_ENVEXPLOSION_NODAMAGE | SF_ENVEXPLOSION_NOSPARKS | SF_ENVEXPLOSION_NODLIGHTS | SF_ENVEXPLOSION_NOSMOKE | SF_ENVEXPLOSION_NOFIREBALLSMOKE), false);
+	UTIL_ScreenShake(WorldSpaceCenter(), 10.0f, 150.0f, 1.0f, 750.0f, SHAKE_START);
 
-	CPVSFilter filter(GetAbsOrigin());
+	CPVSFilter filter(WorldSpaceCenter());
 	for (int i = 0; i < 4; i++)
 	{
 		Vector gibVelocity = RandomVector(-100, 100);
