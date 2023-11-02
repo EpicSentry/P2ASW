@@ -421,6 +421,28 @@ public:
 		ShaderAPITextureHandle_t hTexture = pShader->GetShaderAPITextureBindHandle( nTextureVar, nFrameVar );
 		BindTexture( nSampler, hTexture );
 	}
+	
+	// Same as BindTexture, except it checks to see if the texture handle is actually the "internal" env_cubemap. If so, it binds it as a standard texture so the proper texture bind flags are 
+	// recorded during instance rendering in CShaderAPIDX8.
+	FORCEINLINE void BindEnvCubemapTexture( CBaseShader *pShader, Sampler_t nSampler, int nTextureVar, int nFrameVar = -1 )
+	{
+#if 0
+		Assert( nTextureVar != -1 );
+		Assert( CBaseShader::GetPPParams() );
+		if ( CBaseShader::GetPPParams()[nTextureVar]->IsTextureValueInternalEnvCubemap() )
+		{
+			BindStandardTexture( nSampler, TEXTURE_LOCAL_ENV_CUBEMAP );
+		}
+		else
+		{
+			ShaderAPITextureHandle_t hTexture = pShader->GetShaderAPITextureBindHandle( nTextureVar, nFrameVar );
+			BindTexture( nSampler, hTexture );
+		}
+#else
+		ShaderAPITextureHandle_t hTexture = pShader->GetShaderAPITextureBindHandle( nTextureVar, nFrameVar );
+		BindTexture( nSampler, hTexture );
+#endif
+	}
 
 	FORCEINLINE void BindMultiTexture( CBaseShader *pShader, Sampler_t nSampler1, Sampler_t nSampler2, int nTextureVar, int nFrameVar )
 	{

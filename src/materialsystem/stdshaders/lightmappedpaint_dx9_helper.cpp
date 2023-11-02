@@ -18,12 +18,22 @@
 
 #include "tier0/memdbgon.h"
 
+#define TEMP_LIGHTMAPGENERIC_DEPENDENCY_FIX
+
+#ifndef TEMP_LIGHTMAPGENERIC_DEPENDENCY_FIX
 extern ConVar mat_ambient_light_r;
 extern ConVar mat_ambient_light_g;
 extern ConVar mat_ambient_light_b;
+#else
+ConVar mat_ambient_light_r( "mat_ambient_light_r", "0.0", FCVAR_CHEAT );
+ConVar mat_ambient_light_g( "mat_ambient_light_g", "0.0", FCVAR_CHEAT );
+ConVar mat_ambient_light_b( "mat_ambient_light_b", "0.0", FCVAR_CHEAT );
+
+static ConVar mat_fullbright( "mat_fullbright", "0", FCVAR_CHEAT ); // get it from the engine
+#endif
 
 // Prevent compile errors
-#if 0
+#if 1
 
 void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IShaderDynamicAPI *pShaderAPI, IShaderShadow* pShaderShadow, 
 								 LightmappedGeneric_DX9_Vars_t &info, CBasePerMaterialContextData **pContextDataPtr )
@@ -35,7 +45,7 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 	
 	CLightmappedGeneric_DX9_Context *pContextData = reinterpret_cast< CLightmappedGeneric_DX9_Context *>( *pContextDataPtr );
 
-	bool bHDR = g_pHardwareConfig->GetHDRType() != HDR_TYPE_NONE;
+//	bool bHDR = g_pHardwareConfig->GetHDRType() != HDR_TYPE_NONE;
 
 	if ( pShaderShadow || ( ! pContextData ) || pContextData->m_bMaterialVarsChanged )
 	{
@@ -72,8 +82,14 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 		if ( pShaderShadow || bNeedRegenStaticCmds )
 		{
 			bool hasVertexColor = IS_FLAG_SET( MATERIAL_VAR_VERTEXCOLOR );
+			bool hasDiffuseBumpmap = hasBump;// && (params[info.m_nNoDiffuseBumpLighting]->GetIntValue() == 0);
 			
-			bool hasEnvmap = params[info.m_nPaintEnvmap]->IsTexture();
+#ifndef TEMP_LIGHTMAPGENERIC_DEPENDENCY_FIX
+			IMaterialVar *pPaintEnvMap = params[info.m_nPaintEnvmap];
+			bool hasEnvmap = !pPaintEnvMap ? false : pPaintEnvMap->IsTexture();
+#else
+			bool hasEnvmap = true;
+#endif
 			int envmap_variant; //0 = no envmap, 1 = regular, 2 = darken in shadow mode
 			if( hasEnvmap )
 			{
@@ -175,23 +191,23 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 				// Pre-cache pixel shaders
 
 				int bumpmap_variant=(hasSSBump) ? 2 : hasBump;
-
+				
 				DECLARE_STATIC_VERTEX_SHADER( lightmappedgeneric_vs20 );
 				SET_STATIC_VERTEX_SHADER_COMBO( ENVMAP_MASK,  hasEnvmapMask );
 				SET_STATIC_VERTEX_SHADER_COMBO( TANGENTSPACE, 1 ); //need tangent transpose matrix for lighting
 				SET_STATIC_VERTEX_SHADER_COMBO( BUMPMAP,  hasBump );
+				SET_STATIC_VERTEX_SHADER_COMBO( DIFFUSEBUMPMAP, hasDiffuseBumpmap );
 				SET_STATIC_VERTEX_SHADER_COMBO( VERTEXCOLOR, IS_FLAG_SET( MATERIAL_VAR_VERTEXCOLOR ) );
 				SET_STATIC_VERTEX_SHADER_COMBO( VERTEXALPHATEXBLENDFACTOR, 0 );
 				SET_STATIC_VERTEX_SHADER_COMBO( BUMPMASK, 0 );
 				SET_STATIC_VERTEX_SHADER_COMBO( LIGHTING_PREVIEW, nLightingPreviewMode );
+				SET_STATIC_VERTEX_SHADER_COMBO( PARALLAX_MAPPING, 0 );
 				SET_STATIC_VERTEX_SHADER_COMBO( SEAMLESS, bSeamlessMapping );
 				SET_STATIC_VERTEX_SHADER_COMBO( DETAILTEXTURE, 0 );
 				SET_STATIC_VERTEX_SHADER_COMBO( FANCY_BLENDING, bHasBlendModulateTexture );
 				SET_STATIC_VERTEX_SHADER_COMBO( SELFILLUM,  hasSelfIllum );
-				SET_STATIC_VERTEX_SHADER_COMBO( PAINT, 1 );
-				SET_STATIC_VERTEX_SHADER_COMBO( ADDBUMPMAPS, 0 );
-#if defined( _X360 ) || defined( _PS3 )
-				SET_STATIC_VERTEX_SHADER_COMBO( FLASHLIGHT, 0);
+#ifdef _X360
+				SET_STATIC_VERTEX_SHADER_COMBO( FLASHLIGHT, hasFlashlight);
 #endif
 				SET_STATIC_VERTEX_SHADER( lightmappedgeneric_vs20 );
 
@@ -290,7 +306,11 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 			float envmapContrast = params[info.m_nEnvmapContrast]->GetFloatValue();
 			float envmapSaturation = params[info.m_nEnvmapSaturation]->GetFloatValue();
 			float fresnelReflection = params[info.m_nFresnelReflection]->GetFloatValue();
+#ifdef TEMP_LIGHTMAPGENERIC_DEPENDENCY_FIX
+			bool hasEnvmap = true;
+#else
 			bool hasEnvmap = params[info.m_nPaintEnvmap]->IsTexture();
+#endif
 			int envmap_variant; //0 = no envmap, 1 = regular, 2 = darken in shadow mode
 			if( hasEnvmap )
 			{
@@ -353,24 +373,6 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 				pContextData->m_SemiStaticCmdsOut.BindStandardTexture( SHADER_SAMPLER7, TEXTURE_NORMALMAP_FLAT );
 			}
 
-			if( params[info.m_nPaintSplatBubbleLayout]->IsTexture() )
-			{
-				pContextData->m_SemiStaticCmdsOut.BindTexture( pShader, SHADER_SAMPLER4,info.m_nPaintSplatBubbleLayout );
-			}
-			else
-			{
-				pContextData->m_SemiStaticCmdsOut.BindStandardTexture( SHADER_SAMPLER4, TEXTURE_BLACK );
-			}
-
-			if( params[info.m_nPaintSplatBubble]->IsTexture() )
-			{
-				pContextData->m_SemiStaticCmdsOut.BindTexture( pShader, SHADER_SAMPLER5, info.m_nPaintSplatBubble );
-			}
-			else
-			{
-				pContextData->m_SemiStaticCmdsOut.BindStandardTexture( SHADER_SAMPLER5, TEXTURE_NORMALMAP_FLAT );
-			}
-
 			if ( bHasBlendModulateTexture )
 			{
 				pContextData->m_SemiStaticCmdsOut.BindTexture( pShader, SHADER_SAMPLER3, info.m_nBlendModulateTexture, -1 );
@@ -391,13 +393,6 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IS
 		DynamicCmdsOut.Call( pContextData->m_pStaticCmds );
 		DynamicCmdsOut.Call( pContextData->m_SemiStaticCmdsOut.Base() );
 #endif
-
-		bool hasEnvmap = params[info.m_nPaintEnvmap]->IsTexture();
-
-		if ( hasEnvmap )
-		{
-			DynamicCmdsOut.BindEnvCubemapTexture( pShader, SHADER_SAMPLER2, bHDR ? TEXTURE_BINDFLAGS_NONE : TEXTURE_BINDFLAGS_SRGBREAD, info.m_nPaintEnvmap, info.m_nEnvmapFrame );
-		}
 
 		bool bVertexShaderFastPath = pContextData->m_bVertexShaderFastPath;
 

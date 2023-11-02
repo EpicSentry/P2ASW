@@ -174,10 +174,8 @@ public:
 		bool m_bSSBump;
 		float m_fSeamlessScale;								// 0.0 = not seamless
 	};
-#ifndef PORTAL_ONLY
 	void DrawFlashlight_dx90( IMaterialVar** params, 
 		IShaderDynamicAPI *pShaderAPI, IShaderShadow* pShaderShadow, DrawFlashlight_dx90_Vars_t &vars );
-#endif
 
 	void HashShadow2DJitter( const float fJitterSeed, float *fU, float* fV );
 

@@ -71,6 +71,8 @@ $Project
 			}
 		}
 		
+		$File	"$SRCDIR\game\shared\weapon_parse_default.cpp"
+		
 		$File	"$SRCDIR\game\shared\ai_criteria.cpp"
 		$File	"$SRCDIR\game\shared\ai_criteria.h"
 		$File	"$SRCDIR\game\shared\ai_responsesystem.cpp"
@@ -144,7 +146,6 @@ $Project
 		$File	"history_resource.cpp"
 		$File	"hud_weapon.cpp"
 		$File	"train.cpp"
-		$File	"$SRCDIR\game\shared\weapon_parse_default.cpp"
 		$File	"$SRCDIR\game\shared\achievement_saverestore.cpp"
 		$File	"$SRCDIR\game\shared\achievement_saverestore.h"
 		$File	"$SRCDIR\game\shared\achievementmgr.cpp"

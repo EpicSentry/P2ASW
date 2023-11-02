@@ -43,11 +43,15 @@ $Project "Shaders (Portal 2)"
 	// Updated Water from CSGO Leak
 	$File "water.cpp"
 	$File "water_dudv.cpp"
+		
+	// Most Common Brush Shader	
+	//$File "lightmappedgeneric_dx9.cpp"
+	//$File "lightmappedgeneric_dx9_helper.cpp"
+	
 	
 	$folder "Shaders"
 	{
 		$File "portal_ps2x.fxc"
 		$File "portal_vs20.fxc"
 	}
-
 }
