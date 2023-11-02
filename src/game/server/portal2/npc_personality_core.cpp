@@ -149,7 +149,7 @@ void CNPC_PersonalityCore::Spawn(void)
 {
 	Precache();
 	CapabilitiesClear();
-	if (m_bUseAltModel)
+	if (m_bUseAltModel == false)
 		SetModel(CORE_MODEL);
 	else
 		SetModel(CORE_SKINS_MODEL);
