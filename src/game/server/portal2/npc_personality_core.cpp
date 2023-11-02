@@ -6,8 +6,6 @@
 //=============================================================================//
 
 #include "cbase.h"
-#include "ai_baseactor.h"
-#include "ai_basenpc.h"
 #include "ai_playerally.h"
 #include "props.h"
 #include "sceneentity.h"
