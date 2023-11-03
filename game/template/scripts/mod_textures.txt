@@ -1,6 +1,0 @@
-"sprites/640_hud"
-{
-	TextureData
-	{
-	}	
-}

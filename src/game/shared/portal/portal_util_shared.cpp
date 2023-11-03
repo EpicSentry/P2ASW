@@ -2575,15 +2575,7 @@ Color GetAveragePaintColorFromVector( CUtlVector<Color> &color )
 	// We really need to get these power colors
 	for (int i = 0; i < color.Count(); ++i)
 	{
-		//Color tColor = color;
 		Color tColor = color.Element(i);
-#if 0
-#ifdef GAME_DLL
-		Msg("(server)tColor: %i %i %i %i\n", tColor.r(), tColor.g(), tColor.b(), tColor.a());
-#else
-		Msg("(client)tColor: %i %i %i %i\n", tColor.r(), tColor.g(), tColor.b(), tColor.a());
-#endif
-#endif
 		// Add up all values
 		r += tColor.r();
 		g += tColor.g();
@@ -2598,17 +2590,10 @@ Color GetAveragePaintColorFromVector( CUtlVector<Color> &color )
 	b = b / color.Count();
 	a = a / color.Count();
 	
-	Assert( r >= 0 || r <= 255 );
-	Assert( b >= 0 || b <= 255 );
-	Assert( g >= 0 || g <= 255 );
-	Assert( a >= 0 || a <= 255 );
-#if 0
-#ifdef GAME_DLL
-	Msg("(server)Average Color: %i %i %i %i\n", r, g, b, a);
-#else
-	Msg("(client)Average Color: %i %i %i %i\n", r, g, b, a);
-#endif
-#endif
+	Assert( r >= 0 && r <= 255 );
+	Assert( b >= 0 && b <= 255 );
+	Assert( g >= 0 && g <= 255 );
+	Assert( a >= 0 && a <= 255 );
 	return Color( r, g, b, a );
 }
 
@@ -2624,22 +2609,8 @@ PaintPowerType UTIL_Paint_TracePower( CBaseEntity* pBrushEntity, const Vector& c
 	// Transform contact point from world to entity space
 	Vector vEntitySpaceContactPoint;
 	pBrushEntity->WorldToEntitySpace( contactPoint, &vEntitySpaceContactPoint );
-
-	// transform contact normal
-	Vector vTransformedContactNormal;
-	VectorRotate( vContactNormal, -pBrushEntity->GetAbsAngles(), vTransformedContactNormal );
-
-	// Doesn't exist in Alien Swarm engine
-	//engine->SphereTracePaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, vTransformedContactNormal, sv_paint_detection_sphere_radius.GetFloat(), color );
 	
 	engine->TracePaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, sv_paint_detection_sphere_radius.GetFloat(), color );
-	
-	//Msg("color.Count(): %i\n", color.Count() );
-	
-	//if ( color.Count() != 0 && &color.Element( 0 ) != NULL )
-		//return MapColorToPower( color.Element(0) );
-	
-	//return NO_POWER;
 
 	return MapColorToPower( GetAveragePaintColorFromVector( color ) );
 

@@ -20,16 +20,16 @@
 
 #define TEMP_LIGHTMAPGENERIC_DEPENDENCY_FIX
 
-#ifndef TEMP_LIGHTMAPGENERIC_DEPENDENCY_FIX
-extern ConVar mat_ambient_light_r;
-extern ConVar mat_ambient_light_g;
-extern ConVar mat_ambient_light_b;
-#else
+#if defined ( TEMP_LIGHTMAPGENERIC_DEPENDENCY_FIX ) && 0
 ConVar mat_ambient_light_r( "mat_ambient_light_r", "0.0", FCVAR_CHEAT );
 ConVar mat_ambient_light_g( "mat_ambient_light_g", "0.0", FCVAR_CHEAT );
 ConVar mat_ambient_light_b( "mat_ambient_light_b", "0.0", FCVAR_CHEAT );
 
 static ConVar mat_fullbright( "mat_fullbright", "0", FCVAR_CHEAT ); // get it from the engine
+#else
+extern ConVar mat_ambient_light_r;
+extern ConVar mat_ambient_light_g;
+extern ConVar mat_ambient_light_b;
 #endif
 
 // Prevent compile errors

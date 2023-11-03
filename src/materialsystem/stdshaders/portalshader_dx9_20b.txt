@@ -43,4 +43,6 @@ WaterCheap_vs20.fxc
 
 screenspaceeffect_vs20.fxc
 
-lightmappedgeneric_vs20.fxc
+SDK_lightmappedgeneric_ps2x.fxc
+SDK_lightmappedgeneric_ps11.fxc
+SDK_lightmappedgeneric_vs20.fxc

@@ -44,9 +44,17 @@ $Project "Shaders (Portal 2)"
 	$File "water.cpp"
 	$File "water_dudv.cpp"
 		
-	// Most Common Brush Shader	
+	// We need to modify these to support the paint shader
+	// TODO: Figure out how to use lightmappedgeneric without catastrophic results
 	//$File "lightmappedgeneric_dx9.cpp"
 	//$File "lightmappedgeneric_dx9_helper.cpp"
+	
+	// Instead of modifying the shader directly, we can try to copy the file instead
+	$File "SDK_lightmappedgeneric_dx9.cpp"
+	$File "SDK_lightmappedgeneric_dx9_helper.cpp"
+	
+	
+	
 	
 	
 	$folder "Shaders"
