@@ -128,21 +128,36 @@ private:
 LINK_ENTITY_TO_CLASS(futbol_catcher, CFutbolCatcher);
 
 BEGIN_DATADESC(CFutbolCatcher)
-DEFINE_THINKFUNC(CatchThink),
-DEFINE_THINKFUNC(CaptureThink),
+	DEFINE_FIELD(m_hCaughtFutbol, FIELD_EHANDLE),
+	DEFINE_FIELD(m_vecCatchBoxMins, FIELD_VECTOR),
+	DEFINE_FIELD(m_vecCatchBoxMaxs, FIELD_VECTOR),
+	DEFINE_FIELD(m_vecCatchBoxOrig, FIELD_VECTOR),
+	DEFINE_FIELD(m_bDisableRecaptureOnPlayerGrab, FIELD_BOOLEAN),
+	DEFINE_OUTPUT(m_OnFutbolReleased, "OnFutbolReleased"),
+	DEFINE_OUTPUT(m_OnFutbolCaught, "OnFutbolCaught"),
+	DEFINE_THINKFUNC(CatchThink),
+	DEFINE_THINKFUNC(CaptureThink),
 END_DATADESC()
 
 LINK_ENTITY_TO_CLASS(prop_glass_futbol_spawner, CPropFutbolSpawner);
 
 BEGIN_DATADESC(CPropFutbolSpawner)
-DEFINE_INPUTFUNC(FIELD_VOID, "ForceSpawn", InputForceSpawn),
+	DEFINE_KEYFIELD(m_bHasFutbol, FIELD_BOOLEAN, "StartWithFutbol"),
+	DEFINE_OUTPUT(m_OnFutbolSpawned, "OnFutbolSpawned"),
+	DEFINE_OUTPUT(m_OnFutbolGrabbed, "OnFutbolGrabbed"),
+	DEFINE_INPUTFUNC(FIELD_VOID, "ForceSpawn", InputForceSpawn),
 END_DATADESC()
 
 LINK_ENTITY_TO_CLASS(prop_glass_futbol, CPropGlassFutbol);
 
 BEGIN_DATADESC(CPropGlassFutbol)
-DEFINE_THINKFUNC(ThrownThink),
-DEFINE_THINKFUNC(AnimThink),
+	DEFINE_KEYFIELD(m_strSpawnerName, FIELD_STRING, "SpawnerName"),
+	DEFINE_FIELD(m_hSpawner, FIELD_EHANDLE),
+	DEFINE_FIELD(m_Holder, FIELD_INTEGER),
+	DEFINE_FIELD(m_vecThrowDirection, FIELD_VECTOR),
+	DEFINE_FIELD(m_hLastHeldByPlayer, FIELD_EHANDLE),
+	DEFINE_THINKFUNC(ThrownThink),
+	DEFINE_THINKFUNC(AnimThink),
 END_DATADESC()
 
 void CFutbolCatcher::Spawn()
