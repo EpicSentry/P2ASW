@@ -55,6 +55,7 @@ private:
 
 	bool	m_bOutOfAmmo;
 	bool	m_bLaserOn;
+	bool	m_bIsFiring;
 	int		m_sLaserHaloSprite;
 	float	m_fPulseOffset;
 
