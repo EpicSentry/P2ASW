@@ -4,6 +4,17 @@
 #include "prop_weightedcube.h"
 
 BEGIN_DATADESC( CBaseProjectedEntity )
+	DEFINE_FIELD( m_hHitPortal, FIELD_EHANDLE ),
+	DEFINE_FIELD( m_hSourcePortal, FIELD_EHANDLE ),
+	DEFINE_FIELD( m_vecSourcePortalCenter, FIELD_VECTOR ),
+	DEFINE_FIELD( m_vecSourcePortalRemoteCenter, FIELD_VECTOR ),
+	DEFINE_FIELD( m_vecSourcePortalAngle, FIELD_VECTOR ),
+	DEFINE_FIELD( m_vecSourcePortalRemoteAngle, FIELD_VECTOR ),
+	DEFINE_FIELD( m_vecStartPoint, FIELD_VECTOR ),
+	DEFINE_FIELD( m_vecEndPoint, FIELD_VECTOR ),
+	DEFINE_FIELD( m_hChildSegment, FIELD_EHANDLE ),
+	DEFINE_FIELD( m_iMaxRemainingRecursions, FIELD_INTEGER ),
+	DEFINE_FIELD( m_bCreatePlacementHelper, FIELD_BOOLEAN ),
 END_DATADESC()
 
 
