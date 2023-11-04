@@ -11,19 +11,29 @@ ConVar sv_monster_turret_velocity( "sv_monster_turret_velocity", "100.0f", FCVAR
 
 BEGIN_DATADESC( CPropMonsterBox )
 
-	DEFINE_KEYFIELD( m_bIsABox, FIELD_BOOLEAN, "StartAsBox" ),
-	DEFINE_KEYFIELD( m_bAllowSilentDissolve, FIELD_BOOLEAN, "AllowSilentDissolve" ),
+	DEFINE_FIELD( m_bHeld, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_bIsABox, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_bIsFlying, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_bIsShortcircuit, FIELD_BOOLEAN ),
+	
+	DEFINE_KEYFIELD( m_bForcedAsBox, FIELD_BOOLEAN, "StartAsBox" ),
 	DEFINE_KEYFIELD( m_flBoxSwitchSpeed, FIELD_FLOAT, "BoxSwitchSpeed" ),
+
+	DEFINE_FIELD( m_flPushStrength, FIELD_FLOAT ),
+	DEFINE_FIELD( m_nBodyGroups, FIELD_INTEGER ),
+	DEFINE_FIELD( m_nDeferredTransform, FIELD_INTEGER ),
+
+	DEFINE_KEYFIELD(m_bAllowSilentDissolve, FIELD_BOOLEAN, "AllowSilentDissolve"),
 
 	DEFINE_INPUTFUNC( FIELD_VOID, "BecomeBox", InputBecomeBox ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "BecomeMonster", InputBecomeMonster ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "BecomeShortcircuit", InputBecomeShortcircuit ),
-	DEFINE_INPUTFUNC( FIELD_VOID, "Dissolve", InputDissolve ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "SilentDissolve", InputSilentDissolve ),
+	DEFINE_INPUTFUNC( FIELD_VOID, "Dissolve", InputDissolve ),
 	
-	DEFINE_THINKFUNC( AnimateThink ),
+	DEFINE_OUTPUT( m_OnFizzled, "OnFizzled" ),
 
-DEFINE_FIELD( m_bIsShortcircuit, FIELD_BOOLEAN ),
+	DEFINE_THINKFUNC( AnimateThink ),
 
 END_DATADESC()
 
