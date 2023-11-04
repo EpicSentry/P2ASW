@@ -22,7 +22,26 @@ LINK_ENTITY_TO_CLASS( projected_tractor_beam_entity, CProjectedTractorBeamEntity
 //-------------------------------------------------//
 
 BEGIN_DATADESC( CTrigger_TractorBeam )
+	DEFINE_SOUNDPATCH( m_sndPlayerInBeam ),
 
+	DEFINE_FIELD( m_gravityScale, FIELD_FLOAT ),
+	DEFINE_FIELD( m_addAirDensity, FIELD_FLOAT ),
+	DEFINE_FIELD( m_linearLimit, FIELD_FLOAT ),
+	DEFINE_FIELD( m_linearLimitDelta, FIELD_FLOAT ),
+	DEFINE_FIELD( m_linearLimitTime, FIELD_FLOAT ),
+	DEFINE_FIELD( m_linearLimitStart, FIELD_TIME ),
+	DEFINE_FIELD( m_linearLimitStartTime, FIELD_TIME ),
+	DEFINE_FIELD( m_linearScale, FIELD_FLOAT ),
+	DEFINE_FIELD( m_angularLimit, FIELD_FLOAT ),
+	DEFINE_FIELD( m_angularScale, FIELD_FLOAT ),
+	DEFINE_FIELD( m_linearForceAngles, FIELD_VECTOR ),
+	DEFINE_FIELD( m_vStart, FIELD_VECTOR ),
+	DEFINE_FIELD( m_vEnd, FIELD_VECTOR ),
+	DEFINE_FIELD( m_bReversed, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_bFromPortal, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_bToPortal, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_bDisablePlayerMove, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_flRadius, FIELD_FLOAT ),
 	DEFINE_FIELD( m_hProxyEntity, FIELD_EHANDLE ),
 
 	DEFINE_THINKFUNC( TractorThink ),
