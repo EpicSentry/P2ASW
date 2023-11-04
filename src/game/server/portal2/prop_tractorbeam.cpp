@@ -42,16 +42,17 @@ void ProjectedEntityAmbientSoundProxy::AttachToEntity( CBaseEntity *pAttachTo )
 
 BEGIN_DATADESC( CPropTractorBeamProjector )
 
-DEFINE_FIELD( m_hAmbientSoundProxy, FIELD_EHANDLE ),
+	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetLinearForce", InputSetLinearForce ),
+	
+	DEFINE_KEYFIELD( m_flLinearForce, FIELD_FLOAT, "linearForce" ),
+	DEFINE_KEYFIELD( m_bNoEmitterParticles, FIELD_BOOLEAN, "noemitterparticles" ),
+	DEFINE_KEYFIELD( m_bUse128Model, FIELD_BOOLEAN, "use128model" ),
 
-DEFINE_KEYFIELD( m_flLinearForce, FIELD_FLOAT, "linearForce" ),
-DEFINE_KEYFIELD( m_bNoEmitterParticles, FIELD_BOOLEAN, "noemitterparticles" ),
-DEFINE_KEYFIELD( m_bUse128Model, FIELD_BOOLEAN, "use128model" ),
+	DEFINE_SOUNDPATCH( m_sndMechanical ),
+	DEFINE_SOUNDPATCH( m_sndAmbientSound ),
+	DEFINE_SOUNDPATCH( m_sndAmbientMusic ),
 
-DEFINE_INPUTFUNC( FIELD_FLOAT, "SetLinearForce", InputSetLinearForce ),
-
-DEFINE_SOUNDPATCH( m_sndAmbientSound ),
-DEFINE_SOUNDPATCH( m_sndAmbientMusic ),
+	DEFINE_FIELD( m_hAmbientSoundProxy, FIELD_EHANDLE ),
 
 END_DATADESC()
 
