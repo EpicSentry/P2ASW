@@ -24,6 +24,8 @@ ConVar sv_portal_turret_burn_time_max("sv_portal_turret_burn_time_max", "1.5f", 
 ConVar sv_portal_turret_shoot_at_death("sv_portal_turret_shoot_at_death", "1", FCVAR_CHEAT, "If the turrets should shoot after they die.");
 ConVar sv_portal_turret_shoot_through_portals_proximity("sv_portal_turret_shoot_through_portals_proximity", "36864", FCVAR_CHEAT, "Only allow turrets to shoot through portals at players this close to portals (in square units)");
 
+extern ConVar player_held_object_collide_with_player;
+
 int ACT_FLOOR_TURRET_FIRE2;
 int ACT_FLOOR_TURRET_DIE;
 int ACT_FLOOR_TURRET_DIE_IDLE;
@@ -326,6 +328,7 @@ void CNPC_Portal_FloorTurret::OnPhysGunPickup( CBasePlayer *pPhysGunUser, PhysGu
 	}
 
 	BaseClass::OnPhysGunPickup( pPhysGunUser, reason );
+	EnableTipController(false);
 }
 
 void CNPC_Portal_FloorTurret::NotifySystemEvent(CBaseEntity *pNotify, notify_system_event_t eventType, const notify_system_event_params_t &params )
@@ -669,6 +672,11 @@ inline bool CNPC_Portal_FloorTurret::OnSide( void )
 	return ( DotProduct( up, Vector(0,0,1) ) < 0.5f );
 }
 
+void CNPC_Portal_FloorTurret::EnableTipController(bool bEnabled)
+{
+	m_pMotionController->Enable(bEnabled);
+}
+
 float CNPC_Portal_FloorTurret::GetAttackDamageScale( CBaseEntity *pVictim )
 {
 	CBaseCombatCharacter *pBCC = pVictim->MyCombatCharacterPointer();
@@ -913,7 +921,7 @@ void CNPC_Portal_FloorTurret::ActiveThink( void )
 		}
 
 		//Fire the gun
-		if ( bCanShoot ) // 10 degree slop XY
+		if ( IsEnemyBehindGlass(pPortal, pEnemy, vecMuzzle, vecDirToEnemy, m_flDistToEnemy ) || bCanShoot ) // 10 degree slop XY
 		{
 			float dot3d = DotProduct( vecDirToEnemy, vecMuzzleDir );
 
@@ -1251,17 +1259,30 @@ void CNPC_Portal_FloorTurret::InactiveThink( void )
 	if ( !OnSide() && VPhysicsGetObject()->GetContactPoint( NULL, NULL ) && m_bEnabled )
 	{
 		// Never return to life!
-		SetCollisionGroup( COLLISION_GROUP_NONE );
+		MakeSolid();
 		//ReturnToLife();
 	}
-	else
-	{
-		IPhysicsObject *pTurretPhys = VPhysicsGetObject();
 
-		if ( !(pTurretPhys->GetGameFlags() & FVPHYSICS_PLAYER_HELD) && pTurretPhys->IsAsleep() )
-			SetCollisionGroup( COLLISION_GROUP_DEBRIS_TRIGGER );
-		else
-			SetCollisionGroup( COLLISION_GROUP_NONE );
+	if (IsOnFire())
+	{
+		MakeSolid();
+		ReturnToLife();
+		LaserOn();
+		PreThink( (turretState_e)PORTAL_TURRET_STARTBURNING );
+	}
+
+	if (m_pPhysicsObject->GetGameFlags() & FVPHYSICS_PLAYER_HELD)
+	{
+		if (player_held_object_collide_with_player.GetBool())
+		{
+			SetCollisionGroup(COLLISION_GROUP_NONE);
+		}
+		SetCollisionGroup(COLLISION_GROUP_PLAYER_HELD);
+	}
+
+	if (m_pPhysicsObject->IsAsleep())
+	{
+		SetCollisionGroup(COLLISION_GROUP_DEBRIS_TRIGGER);
 	}
 }
 
@@ -1610,4 +1631,54 @@ void CNPC_Portal_FloorTurret::Use(CBaseEntity* pActivator, CBaseEntity* pCaller,
 float CNPC_Portal_FloorTurret::GetFireConeZTolerance()
 {
 	return sv_portal_turret_fire_cone_z_tolerance.GetFloat();
+}
+
+bool CNPC_Portal_FloorTurret::IsEnemyBehindGlass(CPortal_Base2D* pPortal, CBaseEntity* pEnemy, Vector& vecMuzzle, Vector& vecDirToEnemy, float flDistToEnemy)
+{
+	bool pTraceFilter;
+
+	Ray_t ray_to_enemy;
+	
+	ray_to_enemy.m_Start = vecMuzzle;
+	ray_to_enemy.m_Delta = vecDirToEnemy * m_flDistToEnemy;
+	ray_to_enemy.m_IsRay = true;
+
+	trace_t tr;
+
+	Vector target;
+
+	CTraceFilterSimple filter(this, COLLISION_GROUP_NONE);
+
+	pTraceFilter = UTIL_Portal_TraceRay_Bullets(pPortal, ray_to_enemy, CONTENTS_WINDOW, &filter, &tr);
+
+	if (g_debug_turret.GetBool())
+	{
+		NDebugOverlay::Line(tr.startpos, tr.endpos, 255, 0, 0, true, 1.0f);
+		if (pTraceFilter)
+		{
+			m_flDistToEnemy * pPortal->GetAbsOrigin() - vecMuzzle;
+			target = vecMuzzle + vecDirToEnemy * m_flDistToEnemy;
+			NDebugOverlay::Line(vecMuzzle, target, 0, 0, 255, true, 1.0f);
+		}
+		NDebugOverlay::Sphere(tr.endpos, 4.0f, 0, 255, 0, true, 1.0);
+	}
+
+	if ((tr.fraction < 1.0 || tr.allsolid) || (tr.startsolid))
+	{
+		return true;
+	}
+
+	return false;
+}
+
+void CNPC_Portal_FloorTurret::MakeSolid()
+{
+	if (!player_held_object_collide_with_player.GetBool() && m_pPhysicsObject->GetGameFlags() & FVPHYSICS_PLAYER_HELD)
+	{
+		SetCollisionGroup(COLLISION_GROUP_PLAYER_HELD);
+	}
+	else
+	{
+		SetCollisionGroup(COLLISION_GROUP_NONE);
+	}
 }
