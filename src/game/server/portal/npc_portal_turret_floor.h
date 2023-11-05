@@ -111,6 +111,7 @@ public:
 	virtual void    TryEmitSound(const char* soundname);
 	virtual void	SetTurretType(int nType);
 	virtual bool	OnSide( void );
+	void			EnableTipController(bool bEnabled);
 
 	virtual float	GetAttackDamageScale( CBaseEntity *pVictim );
 	virtual Vector	GetAttackSpread( CBaseCombatWeapon *pWeapon, CBaseEntity *pTarget );
@@ -164,6 +165,8 @@ protected:
 
 private:
 	
+	bool IsEnemyBehindGlass(CPortal_Base2D* pPortal, CBaseEntity* pEnemy, Vector& vecMuzzle, Vector& vecDirToEnemy, float flDistToEnemy);
+	void MakeSolid();
 	bool AllowedToIgnite() { return true; }
 
 	CNetworkVar( bool, m_bOutOfAmmo );
