@@ -194,7 +194,5 @@ private:
 	bool			m_bGagged;
 	int				m_nModelIndex;
 	bool			m_bUseSuperDamageScale;
-
-	string_t m_ModelName;
 };
 #endif // PORTAL_TURRET_FLOOR_H
