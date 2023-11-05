@@ -67,6 +67,7 @@ BEGIN_DATADESC( CNPC_Portal_FloorTurret )
 
 	DEFINE_FIELD( m_bOutOfAmmo, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_bLaserOn, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_bIsFiring, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_sLaserHaloSprite, FIELD_INTEGER ),
 	DEFINE_FIELD( m_flDistToEnemy, FIELD_FLOAT ),
 
@@ -78,19 +79,17 @@ BEGIN_DATADESC( CNPC_Portal_FloorTurret )
 	DEFINE_FIELD( m_fNextTalk, FIELD_FLOAT ),
 	DEFINE_FIELD( m_bDelayTippedTalk, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_bIsDead, FIELD_BOOLEAN ),
-	DEFINE_FIELD( m_bIsBurning, FIELD_BOOLEAN ),
-	DEFINE_FIELD( m_flBurnExplodeTime, FIELD_FLOAT ),
 
+	DEFINE_KEYFIELD( m_nModelIndex, FIELD_INTEGER, "ModelIndex" ),
 	DEFINE_KEYFIELD( m_bDamageForce, FIELD_BOOLEAN, "DamageForce" ),
-	DEFINE_KEYFIELD( m_ModelName, FIELD_STRING, "model"), //The custom model used *if unused is selected
-	DEFINE_KEYFIELD( m_nModelIndex, FIELD_INTEGER, "modelindex"),
-	DEFINE_KEYFIELD( m_bUsedAsActor, FIELD_BOOLEAN, "UsedAsActor"),
-	DEFINE_KEYFIELD( m_bGagged, FIELD_BOOLEAN, "Gagged"),
-	DEFINE_KEYFIELD( m_bUseSuperDamageScale, FIELD_BOOLEAN, "UseSuperDamageScale"),
-	DEFINE_KEYFIELD( m_nCollisionType, FIELD_INTEGER, "CollisionType"),
-	DEFINE_KEYFIELD( m_bLoadAlternativeModels, FIELD_BOOLEAN, "LoadAlternativeModels"),
-	DEFINE_KEYFIELD( m_bPickupEnabled, FIELD_BOOLEAN, "PickupEnabled"),
-	DEFINE_KEYFIELD( m_bDisableMotion, FIELD_BOOLEAN, "DisableMotion"),
+	DEFINE_KEYFIELD( m_bGagged, FIELD_BOOLEAN, "Gagged" ),
+	DEFINE_KEYFIELD( m_bUsedAsActor, FIELD_BOOLEAN, "UsedAsActor" ),
+	DEFINE_KEYFIELD( m_bPickupEnabled, FIELD_BOOLEAN, "PickupEnabled" ),
+	DEFINE_KEYFIELD( m_bDisableMotion, FIELD_BOOLEAN, "DisableMotion" ),
+	DEFINE_KEYFIELD( m_flTurretRange, FIELD_FLOAT, "TurretRange" ),
+	DEFINE_KEYFIELD( m_nCollisionType, FIELD_INTEGER, "CollisionType" ),
+	DEFINE_KEYFIELD( m_bUseSuperDamageScale, FIELD_BOOLEAN, "UseSuperDamageScale" ),
+	DEFINE_KEYFIELD( m_bLoadAlternativeModels, FIELD_BOOLEAN, "LoadAlternativeModels" ),
 
 	DEFINE_THINKFUNC( Retire ),
 	DEFINE_THINKFUNC( Deploy ),
@@ -135,7 +134,6 @@ CNPC_Portal_FloorTurret::CNPC_Portal_FloorTurret( void )
 	m_bUseSuperDamageScale = false;
 	m_bDamageForce = true;
 	m_bPickupEnabled = true;
-	m_bIsBurning = false;
 }
 
 void CNPC_Portal_FloorTurret::Precache( void )
@@ -202,6 +200,9 @@ void CNPC_Portal_FloorTurret::Spawn( void )
 	m_fMovingTargetThreashold = 20.0f;
 
 	m_bNoAlarmSounds = true;
+
+	m_bIsFiring = false;
+
 	m_bOutOfAmmo = ( m_spawnflags & SF_FLOOR_TURRET_OUT_OF_AMMO ) != 0;
 
 	if (m_flTurretRange == 0.0f)
@@ -352,6 +353,8 @@ bool CNPC_Portal_FloorTurret::PreThink( turretState_e state )
 		SetNextThink(gpGlobals->curtime + 0.1f);
 		return false;
 	}
+
+	m_bIsFiring = state == TURRET_ACTIVE;
 
 	// Working 2 enums into one integer
 	int iNewState = state;
@@ -846,7 +849,7 @@ void CNPC_Portal_FloorTurret::ActiveThink( void )
 	}
 
 	//Current enemy is not visible
-	if ( ( bEnemyVisible == false ) || ( m_flDistToEnemy > PORTAL_FLOOR_TURRET_RANGE ))
+	if ( ( bEnemyVisible == false ) || ( m_flDistToEnemy > m_flTurretRange ))
 	{
 		m_flLastSight = gpGlobals->curtime + 2.0f;
 
@@ -1033,7 +1036,7 @@ void CNPC_Portal_FloorTurret::SearchThink( void )
 		}
 
 		// Give enemies that are farther away a longer grace period
-		float fDistanceRatio = m_flDistToEnemy / PORTAL_FLOOR_TURRET_RANGE;
+		float fDistanceRatio = m_flDistToEnemy / m_flTurretRange;
 		m_flShotTime = gpGlobals->curtime + fDistanceRatio * fDistanceRatio * PORTAL_FLOOR_TURRET_MAX_SHOT_DELAY;
 
 		m_flLastSight = 0;
@@ -1391,48 +1394,8 @@ void CNPC_Portal_FloorTurret::HackFindEnemy( void )
 	// dead enemies are cleared out before new ones are added.
 	GetEnemies()->RefreshMemories();
 
-	GetSenses()->Look( PORTAL_FLOOR_TURRET_RANGE );
-	SetEnemy( BestEnemy() );
-
-	if ( GetEnemy() == NULL )
-	{
-		// Look through the list of sensed objects for possible targets
-		AISightIter_t iter;
-		CBaseEntity *pObject;
-		CBaseEntity	*pNearest = NULL;
-		float flClosestDistSqr = PORTAL_FLOOR_TURRET_RANGE * PORTAL_FLOOR_TURRET_RANGE;
-
-		for ( pObject = GetSenses()->GetFirstSeenEntity( &iter, SEEN_MISC ); pObject; pObject = GetSenses()->GetNextSeenEntity( &iter ) )
-		{
-			Vector vVelocity;
-			pObject->GetVelocity( &vVelocity );
-
-			// Ignore objects going too slowly
-			if ( vVelocity.LengthSqr() < m_fMovingTargetThreashold )
-				continue;
-
-			float flDistSqr = pObject->WorldSpaceCenter().DistToSqr( GetAbsOrigin() );
-			if ( flDistSqr < flClosestDistSqr )
-			{
-				flClosestDistSqr = flDistSqr;
-				pNearest = pObject;
-			}
-		}
-
-		if ( pNearest )
-		{
-			SetEnemy( pNearest );
-			m_fMovingTargetThreashold += gpGlobals->curtime * 15.0f;
-			if ( m_fMovingTargetThreashold > 800.0f )
-			{
-				m_fMovingTargetThreashold = 800.0f;
-			}
-		}
-	}
-	else
-	{
-		m_fMovingTargetThreashold = 20.0f;
-	}
+	GetSenses()->Look( m_flTurretRange );
+	SetEnemy(BestEnemy());
 }
 
 void CNPC_Portal_FloorTurret::StartTouch( CBaseEntity *pOther )
