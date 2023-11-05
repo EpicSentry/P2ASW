@@ -129,9 +129,16 @@ public:
 	virtual void	DieThink( void );
 	virtual void	SuppressThink( void );
 	virtual void	DisabledThink( void );
-	virtual void	BreakThink( void );
-	virtual void	BurnThink( void );
 	virtual void	HackFindEnemy( void );
+	virtual void	BurnThink(void);
+	virtual void	BreakThink(void);
+
+#ifndef NO_TRACTOR_BEAM
+
+	void	OnExitedTractorBeam(void) {}
+	void	OnEnteredTractorBeam(void) {}
+
+#endif
 
 	virtual void	StartTouch( CBaseEntity *pOther );
 
@@ -152,17 +159,16 @@ public:
 
 	virtual void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
-#ifndef NO_TRACTOR_BEAM
-
-	void	OnExitedTractorBeam( void ) {}
-	void	OnEnteredTractorBeam( void ) {}
-
-#endif
+protected:
+	float GetFireConeZTolerance();
 
 private:
 	
+	bool AllowedToIgnite() { return true; }
+
 	CNetworkVar( bool, m_bOutOfAmmo );
 	CNetworkVar( bool, m_bLaserOn );
+	CNetworkVar( bool, m_bIsFiring );
 	CNetworkVar( int, m_sLaserHaloSprite );
 
 	bool	m_bIsDead;
@@ -171,8 +177,10 @@ private:
 	bool	m_bShootWithBottomBarrels;
 	bool	m_bDamageForce;
 	bool	m_bPickupEnabled;
+	bool	m_bDisableMotion;
+	int		m_nCollisionType;
+	float	m_flTurretRange;
 	bool	m_bLoadAlternativeModels;
-	bool	m_bIsBurning;
 
 	float	m_fSearchSpeed;
 	float	m_fMovingTargetThreashold;
@@ -188,15 +196,5 @@ private:
 	bool			m_bUseSuperDamageScale;
 
 	string_t m_ModelName;
-
-	int m_nCollisionType;
-
-	float m_flTurretRange;
-
-	bool m_bDisableMotion;
-
-	bool AllowedToIgnite() { return true; }
-protected:
-	float GetFireConeZTolerance();
 };
 #endif // PORTAL_TURRET_FLOOR_H
