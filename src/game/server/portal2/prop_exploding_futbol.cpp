@@ -2,6 +2,8 @@
 #include "prop_exploding_futbol.h"
 #include "particle_parse.h"
 #include "takedamageinfo.h"
+#include "explode.h"
+#include "physobj.h"
 #include "tier0/memdbgon.h"
 
 ConVar exploding_futbol_explosion_debug("exploding_futbol_explosion_debug", "0", FCVAR_CHEAT, "Debug the explosion of the exploding futbol.");
@@ -61,9 +63,11 @@ void CPropExplodingFutbol::Precache()
 {
 	BaseClass::Precache();
 	PrecacheModel("models/npcs/personality_sphere_angry.mdl");
+	
 	PrecacheScriptSound("NPC_FloorTurret.DeployingKlaxon");
 	PrecacheScriptSound("Portal.room1_TickTock");
 	PrecacheScriptSound("EnergyBall.Explosion");
+	
 	PrecacheParticleSystem("bomb_trail");
 }
 
@@ -167,6 +171,8 @@ int CPropExplodingFutbol::OnTakeDamage(const CTakeDamageInfo& info)
 void CPropExplodingFutbol::OnFizzled()
 {
 	BaseClass::OnFizzled();
+	if (exploding_futbol_explode_on_fizzle.GetBool())
+		ExplodeFutbol();
 }
 
 void CPropExplodingFutbol::VPhysicsCollision(int index, gamevcollisionevent_t* pEvent)
@@ -188,4 +194,20 @@ void CPropExplodingFutbol::KillFutbol()
 	info.SetDamageForce(Vector (500, 500, 500));
 
 	CPropExplodingFutbol::Event_Killed(info);
+}
+
+void CPropExplodingFutbol::DestroyFutbol(bool bExplode)
+{
+	if (bExplode)
+		ExplodeFutbol();
+}
+
+void CPropExplodingFutbol::ExplodeFutbol()
+{
+	ExplosionCreate(GetAbsOrigin(), GetAbsAngles(), GetOwnerEntity(), exploding_futbol_explosion_magnitude.GetInt(), exploding_futbol_explosion_radius.GetFloat(), SF_ENVEXPLOSION_NOSPARKS | SF_ENVEXPLOSION_NODLIGHTS | SF_ENVEXPLOSION_NOSMOKE, exploding_futbol_explosion_damage.GetFloat(), this);
+
+	if (exploding_futbol_physics_punt_player.GetBool())
+	{
+		CreatePhysExplosion(GetAbsOrigin(), exploding_futbol_phys_mag.GetFloat(), exploding_futbol_phys_rad.GetFloat(), NULL_STRING, 25.0f, 31);
+	}
 }
