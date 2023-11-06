@@ -22,9 +22,9 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-ConVar sv_personality_core_pca_pitch( "sv_personality_core_pca_pitch", "180", 0, "Pitch value for personality core perferred carry angles." );
-ConVar sv_personality_core_pca_yaw( "sv_personality_core_pca_yaw", "-90", 0, "Yaw value for personality core perferred carry angles." );
-ConVar sv_personality_core_pca_roll( "sv_personality_core_pca_roll", "195", 0, "Roll value for personality core perferred carry angles." );
+ConVar sv_personality_core_pca_pitch( "sv_personality_core_pca_pitch", "180", FCVAR_NONE, "Pitch value for personality core perferred carry angles." );
+ConVar sv_personality_core_pca_yaw( "sv_personality_core_pca_yaw", "-90", FCVAR_NONE, "Yaw value for personality core perferred carry angles." );
+ConVar sv_personality_core_pca_roll( "sv_personality_core_pca_roll", "195", FCVAR_NONE, "Roll value for personality core perferred carry angles." );
 
 #define	CORE_MODEL "models/npcs/personality_sphere/personality_sphere.mdl"
 #define	CORE_SKINS_MODEL "models/npcs/personality_sphere/personality_sphere_skins.mdl"
@@ -58,7 +58,9 @@ public:
 	void InputExplode(inputdata_t& inputdata);
 	void InputClearParent(inputdata_t& inputdata);
 
+	int	OnTakeDamage_Alive(const CTakeDamageInfo& inputInfo);
 	int SelectSchedule() { return BaseClass::SelectSchedule(); }
+	bool ShouldIgnite(const CTakeDamageInfo& info) { return false; }
 	bool ShouldPlayIdleSound();
 	void IdleSound();
 	void HandleAnimEvent(animevent_t* pEvent) { BaseClass::HandleAnimEvent(pEvent); }
@@ -76,6 +78,7 @@ public:
 	QAngle PreferredCarryAngles();
 	bool HasPreferredCarryAnglesForPlayer(CBasePlayer* pPlayer) { return true; }
 	CAI_Expresser* CreateExpresser();
+	void NotifySystemEvent(CBaseEntity *pNotify, notify_system_event_t eventType, const notify_system_event_params_t &params);
 	bool IsOkToSpeakInResponseToPlayer(void);
 	bool StartSceneEvent(CSceneEventInfo* info, CChoreoScene* scene, CChoreoEvent* event, CChoreoActor* actor, CBaseEntity* pTarget);
 	void PrescheduleThink(void);
@@ -94,8 +97,7 @@ protected:
 	int m_iIdleOverrideSequence;
 	CNetworkVar(bool, m_bFlashlightEnabled);
 	CHandle<CBaseEntity> m_hProjectedTexture;
-private:
-	CAI_Expresser* m_pExpresser;
+	DEFINE_CUSTOM_AI;
 };
 
 LINK_ENTITY_TO_CLASS(npc_personality_core, CNPC_PersonalityCore);
@@ -129,6 +131,10 @@ BEGIN_DATADESC(CNPC_PersonalityCore)
 	DEFINE_INPUTFUNC(FIELD_VOID, "ClearParent", InputClearParent),
 	DEFINE_USEFUNC(Use),
 END_DATADESC()
+
+AI_BEGIN_CUSTOM_NPC(npc_personality_core, CNPC_PersonalityCore)
+
+AI_END_CUSTOM_NPC()
 
 IMPLEMENT_SERVERCLASS_ST(CNPC_PersonalityCore, DT_NPC_Personality_Core)
 	SendPropBool( SENDINFO (m_bFlashlightEnabled) ),
@@ -171,7 +177,7 @@ void CNPC_PersonalityCore::Spawn(void)
 	m_flFieldOfView = -1.0f;
 	m_bRemarkablePolling = true;
 
-	CBaseAnimating::Spawn();
+	BaseClass::Spawn();
 	SetBlocksLOS(false);
 
 	m_flLastPhysicsImpactTime = 0.0f;
@@ -322,6 +328,17 @@ void CNPC_PersonalityCore::InputClearParent(inputdata_t& inputdata)
 	RemoveSolidFlags(FSOLID_NOT_SOLID);
 }
 
+int CNPC_PersonalityCore::OnTakeDamage_Alive(const CTakeDamageInfo& inputInfo)
+{
+	CTakeDamageInfo info = inputInfo;
+
+	if (inputInfo.GetDamageType() & DMG_BURN)
+	{
+		Speak("TLK_BURNED");
+	}
+	return 1;
+}
+
 bool CNPC_PersonalityCore::ShouldPlayIdleSound(void)
 {
 	if ((m_NPCState == NPC_STATE_IDLE || m_NPCState == NPC_STATE_ALERT) && gpGlobals->curtime > m_flNextIdleSoundTime && !HasSpawnFlags(SF_NPC_GAG))
@@ -362,7 +379,7 @@ void CNPC_PersonalityCore::OnPhysGunDrop(CBasePlayer* pPhysGunUser, PhysGunDrop_
 
 void CNPC_PersonalityCore::OnFizzled()
 {
-	ResponseRules::CRR_Concept::CRR_Concept("TLK_FIZZLED");
+	Speak("TLK_FIZZLED");
 	BaseClass::OnFizzled();
 }
 
@@ -407,7 +424,7 @@ void CNPC_PersonalityCore::VPhysicsCollision(int index, gamevcollisionevent_t* p
 		{
 			if (&CNPC_PersonalityCore::IsBeingHeldByPlayer)
 			{
-				ResponseRules::CRR_Concept::CRR_Concept("TLK_HELD_PHYSICS_IMPACT");
+				Speak("TLK_HELD_PHYSICS_IMPACT");
 				m_flLastPhysicsImpactTime = gpGlobals->curtime;
 			}
 			Vector vecVelocity = pEvent->preVelocity[index];
@@ -418,7 +435,7 @@ void CNPC_PersonalityCore::VPhysicsCollision(int index, gamevcollisionevent_t* p
 		{
 			return;
 		}
-		ResponseRules::CRR_Concept::CRR_Concept("TLK_PHYSICS_IMPACT");
+		Speak("TLK_PHYSICS_IMPACT");
 	}
 }
 
@@ -429,12 +446,15 @@ QAngle CNPC_PersonalityCore::PreferredCarryAngles()
 
 CAI_Expresser* CNPC_PersonalityCore::CreateExpresser()
 {
-	m_pExpresser = new CAI_ExpresserWithFollowup(this);
-	if (!m_pExpresser)
-		return NULL;
+	return BaseClass::CreateExpresser();
+}
 
-	m_pExpresser->Connect(this);
-	return m_pExpresser;
+void CNPC_PersonalityCore::NotifySystemEvent(CBaseEntity* pNotify, notify_system_event_t eventType, const notify_system_event_params_t& params)
+{
+	if (eventType == NOTIFY_EVENT_TELEPORT)
+	{
+		Speak("TLK_PORTALED");
+	}
 }
 
 bool CNPC_PersonalityCore::IsOkToSpeakInResponseToPlayer(void)
