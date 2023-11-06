@@ -9,6 +9,7 @@
 
 static const char* g_szExplodingFutbolAnimThinkContext = "ExplodingFutbolAnimateThinkContext";
 static const char* g_szExplodingFutbolKillThinkContext = "ExplodingFutbolKillThinkContext";
+static const char* g_szExplodingFutbolTimerThinkContext = "ExplodingFutbolTimerThinkContext";
 
 enum ExplodingFutbolHolderType_t
 {
@@ -23,6 +24,7 @@ class CPropExplodingFutbol : public CPhysicsProp
 {
 public:
 	DECLARE_CLASS(CPropExplodingFutbol, CPhysicsProp);
+	DECLARE_DATADESC();
 
 	CPropExplodingFutbol();
 	void Precache();
