@@ -25,6 +25,26 @@ ConVar sv_futbol_funnel_max_correct("sv_futbol_funnel_max_correct", "128.f", FCV
 
 LINK_ENTITY_TO_CLASS(prop_exploding_futbol, CPropExplodingFutbol);
 
+BEGIN_DATADESC(CPropExplodingFutbol)
+	DEFINE_KEYFIELD(m_strSpawnerName, FIELD_STRING, "SpawnerName"),
+	DEFINE_KEYFIELD(m_bShouldRespawn, FIELD_BOOLEAN, "ShouldRespawn"),
+	DEFINE_KEYFIELD(m_bExplodeOnTouch, FIELD_BOOLEAN, "ExplodeOnTouch"),
+	
+	DEFINE_FIELD(m_Holder, FIELD_INTEGER),
+	DEFINE_FIELD(m_hLastHeldByPlayer, FIELD_EHANDLE),
+	DEFINE_FIELD(m_bTimerActive, FIELD_BOOLEAN),
+	DEFINE_FIELD(m_flExplosionTimer, FIELD_FLOAT),
+	DEFINE_FIELD(m_flTotalTimer, FIELD_FLOAT),
+	DEFINE_FIELD(m_flLastTickTime, FIELD_TIME),
+	DEFINE_FIELD(m_flLastTimerSoundTime, FIELD_TIME),
+	DEFINE_FIELD(m_flLastFlashTime, FIELD_TIME),
+
+	DEFINE_THINKFUNC(AnimThink),
+	DEFINE_THINKFUNC(TimerThink),
+	DEFINE_THINKFUNC(KillThink),
+
+END_DATADESC()
+
 CPropExplodingFutbol::CPropExplodingFutbol()
 {
 	m_Holder = EXPLODING_FUTBOL_HELD_BY_NONE;
@@ -70,6 +90,60 @@ void CPropExplodingFutbol::AnimThink()
 {
 	StudioFrameAdvance();
 	SetNextThink( gpGlobals->curtime + gpGlobals->interval_per_tick, g_szExplodingFutbolAnimThinkContext);
+}
+
+void CPropExplodingFutbol::TimerThink()
+{
+	if (m_bTimerActive)
+	{
+		if (m_flExplosionTimer <= exploding_futbol_flash_start_time.GetFloat())
+		{
+			EmitSound("NPC_FloorTurret.DeployingKlaxon");
+			if ((gpGlobals->curtime - m_flLastFlashTime) > exploding_futbol_flash_duration.GetFloat())
+				m_flLastFlashTime = gpGlobals->curtime;
+		}
+		
+		if ((gpGlobals->curtime - m_flLastTimerSoundTime) > exploding_futbol_flash_duration.GetFloat())
+		{
+			EmitSound("Portal.room1_TickTock");
+			m_flLastTimerSoundTime = gpGlobals->curtime;
+		}
+
+		if (m_flExplosionTimer <= 0.0f)
+		{
+			EmitSound("EnergyBall.Explosion");
+			KillFutbol();
+			StopFutbolTimer();
+		}
+		if (m_bTimerActive)
+		{
+			SetNextThink(gpGlobals->curtime + gpGlobals->interval_per_tick, g_szExplodingFutbolTimerThinkContext);
+		}
+	}
+}
+
+void CPropExplodingFutbol::ActivateFutbolTimer(float flTimer)
+{
+	m_flTotalTimer = flTimer;
+	m_flExplosionTimer = flTimer;
+
+	if (flTimer > 0.0f)
+	{
+		m_bTimerActive = true;
+		m_flLastTickTime = gpGlobals->curtime;
+		m_flLastTimerSoundTime = gpGlobals->curtime - 1.0f;
+		m_flLastFlashTime = gpGlobals->curtime;
+
+		SetRenderColor(exploding_futbol_start_color.GetBool(), exploding_futbol_start_color.GetBool(), exploding_futbol_start_color.GetBool());
+
+		SetContextThink(&CPropExplodingFutbol::TimerThink, gpGlobals->curtime + gpGlobals->interval_per_tick, g_szExplodingFutbolTimerThinkContext);
+	}
+}
+
+void CPropExplodingFutbol::StopFutbolTimer()
+{
+	m_bTimerActive = false;
+	SetRenderColor(exploding_futbol_start_color.GetBool(), exploding_futbol_start_color.GetBool(), exploding_futbol_start_color.GetBool());
 }
 
 void CPropExplodingFutbol::OnPhysGunDrop(CBasePlayer* pPhysGunUser, PhysGunDrop_t reason)
