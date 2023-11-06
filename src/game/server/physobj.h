@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -116,6 +116,7 @@ public:
 
 	void	Spawn ( void );
 	void	Explode( CBaseEntity *pActivator, CBaseEntity *pCaller );
+	void	ExplodeAndRemove( CBaseEntity* pActivator, CBaseEntity* pCaller );
 
 	CBaseEntity *FindEntity( CBaseEntity *pEntity, CBaseEntity *pActivator, CBaseEntity *pCaller );
 
@@ -123,9 +124,9 @@ public:
 
 	// Input handlers
 	void InputExplode( inputdata_t &inputdata );
+	void InputExplodeAndRemove( inputdata_t& inputdata );
 
 	DECLARE_DATADESC();
-private:
 	
 	float		GetRadius( void );
 
@@ -137,6 +138,7 @@ private:
 	COutputEvent	m_OnPushedPlayer;	
 };
 
+void CreatePhysExplosion(Vector origin, float magnitude, float radius, string_t target, float innerRadius, int flags);
 
 //==================================================
 // CPhysImpact
