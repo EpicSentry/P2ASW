@@ -63,6 +63,15 @@ public:
 	virtual bool ShouldHitEntity(IHandleEntity* pHandleEntity, int contentsMask);
 };
 
+class CPropFutbolSocket : public CFutbolCatcher
+{
+public:
+	DECLARE_CLASS(CPropFutbolSocket, CFutbolCatcher);
+
+	void Precache();
+	void Spawn();
+};
+
 class CPropFutbolSpawner : public CFutbolCatcher
 {
 public:
@@ -377,4 +386,18 @@ void CPropGlassFutbol::OnPhysGunPickup(CBasePlayer* pPhysGunUser, PhysGunDrop_t 
 void CPropGlassFutbol::SetSpawner(CPropFutbolSpawner* pMySpawner)
 {
 	pMySpawner = m_hSpawner;
+}
+
+void CPropFutbolSocket::Precache()
+{
+	PrecacheModel("models/props/futbol_socket.mdl");
+}
+
+void CPropFutbolSocket::Spawn()
+{
+	Precache();
+	SetModel("models/props/futbol_socket.mdl");
+	SetSolid(SOLID_VPHYSICS);
+	SetSequence(LookupSequence("hold"));
+	BaseClass::Spawn();
 }
