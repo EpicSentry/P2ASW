@@ -1,7 +1,5 @@
-void __thiscall CPortalLaser::InputToggle(CPortalLaser *this, inputdata_t *inputdata)
+void __thiscall CPortalLaser::InputTurnOff(CPortalLaser *this, inputdata_t *inputdata)
 {
   if ( this->m_pfnThink )
     CPortalLaser::TurnOff(this);
-  else
-    CPortalLaser::TurnOn(this);
 }

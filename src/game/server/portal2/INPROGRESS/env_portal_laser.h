@@ -49,7 +49,7 @@ public:
 		~PortalLaserInfo_t() {}        
 	};
 	
-	typedef CUtlVector<PortalLaserInfo_t, CUtlMemory<PortalLaserInfo_t> > PortalLaserInfoList_t;
+	typedef CUtlVector<PortalLaserInfo_t> PortalLaserInfoList_t;
 
 private:
 	
@@ -67,7 +67,6 @@ private:
 	
     QAngle m_angPortalExitAngles;
 	
-   //CBaseEntity *TraceLaser(bool ,class Vector & ,class Vector & ,float & ,class CGameTrace & ,class CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > & ,class Vector * );
 	CBaseEntity *TraceLaser( bool bIsFirstTrace, Vector &vecStart, Vector &vecDirection, float &flTotalBeamLength, trace_t &tr, PortalLaserInfoList_t &infoList, Vector *pVecAutoAimOffset );
 
     CBaseEntity *GetEntitiesAlongLaser( Vector &vecStart, Vector &vecEnd, Vector &vecOut, PortalLaserInfoList_t &infoList, bool bIsFirstTrace );
@@ -75,7 +74,7 @@ private:
 	Vector m_vecNearestSoundSource[MAX_PLAYERS];
     CBaseEntity *m_pSoundProxy[MAX_PLAYERS];
 	CSoundPatch *m_pAmbientSound[MAX_PLAYERS];
-    CInfoPlacementHelper * m_pPlacementHelper;
+    CInfoPlacementHelper *m_pPlacementHelper;
     int m_iLaserAttachment;
     string_t m_ModelName;
     bool m_bStartOff;
@@ -89,7 +88,7 @@ private:
     void FireLaser( Vector &vecStart, Vector &vecDirection, CPropWeightedCube *pReflector );
     void CreateHelperEntities();
     void CreateSoundProxies();
-    void DamageEntity(class CBaseEntity * ,float );
+    void DamageEntity( CBaseEntity *pVictim, float flAmount );
     void TurnOn();
     void TurnOff();
     void TurnOnGlow();
@@ -100,8 +99,8 @@ private:
     void UpdateSoundPosition( Vector &vecStart, Vector &vecEnd );
     void SetFromReflectedCube( bool bReflect );
 	
-    bool StrikeEntitiesAlongLaser(class Vector & ,class Vector & ,class Vector * );
-    bool ShouldAutoAim( CBaseEntity *pTarget );
+	bool StrikeEntitiesAlongLaser( Vector &vecStart, Vector &vecEnd, Vector * );
+    bool ShouldAutoAim( CBaseEntity *pEntity );
     bool IsOn();
     bool ReflectLaserFromEntity( CBaseEntity *pTarget );
     bool InPVS();
@@ -116,7 +115,11 @@ struct LaserVictimInfo_t
 class CLaserVictimLess
 {
 public:
-	bool Less( LaserVictimInfo_t &info1, LaserVictimInfo_t &info2, void *pData /*?????*/ );
+	bool Less( LaserVictimInfo_t info1, LaserVictimInfo_t info2, void *pData /*?????*/ )
+	{
+		// FIXME!!!!
+		return false;
+	}
 };
 
 #endif // ENV_PORTAL_LASER_H

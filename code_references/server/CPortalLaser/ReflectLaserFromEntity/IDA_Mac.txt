@@ -1,0 +1,147 @@
+int __usercall CPortalLaser::ReflectLaserFromEntity@<eax>(
+        CPortalLaser *this@<ebx>,
+        CPortalLaser *pEntity,
+        CBaseEntity *a3)
+{
+  Vector *p_vecForward; // esi
+  unsigned int m_Index; // edx
+  IHandleEntity *m_pEntity; // eax
+  int v7; // edi
+  vec_t z; // eax
+  int v9; // edx
+  IHandleEntity *v10; // ecx
+  CBaseEntity *v11; // eax
+  CBaseEntity *m_pChildLaser; // eax
+  unsigned __int8 v13; // bl
+  const QAngle *p_m_angPortalExitAngles; // eax
+  float *v15; // eax
+  CPortalSimulator *SimulatorThatOwnsEntity; // eax
+  float *v17; // esi
+  vec_t v18; // xmm3_4
+  vec_t v19; // xmm2_4
+  vec_t v20; // xmm3_4
+  vec_t v21; // xmm2_4
+  Vector vecOffset; // [esp+20h] [ebp-28h] BYREF
+  Vector vecForward; // [esp+30h] [ebp-18h] BYREF
+
+  p_vecForward = (Vector *)&g_pEntityList;
+  m_Index = pEntity->m_hReflector.m_Value.m_Index;
+  m_pEntity = 0;
+  if ( m_Index != -1 )
+  {
+    v7 = (unsigned __int16)m_Index;
+    if ( g_pEntityList->m_EntPtrArray[v7].m_SerialNumber == HIWORD(m_Index) )
+      m_pEntity = g_pEntityList->m_EntPtrArray[v7].m_pEntity;
+  }
+  if ( m_pEntity == a3 )
+  {
+    m_pChildLaser = pEntity->m_pChildLaser;
+    v13 = 1;
+    if ( m_pChildLaser )
+    {
+      *(int (***)(void))((char *)&m_pChildLaser->_vptr$IHandleEntity + (_DWORD)&loc_589892 - 5805002) = 0;
+      UTIL_Remove(m_pChildLaser);
+      pEntity->m_pChildLaser = 0;
+    }
+  }
+  else if ( a3 )
+  {
+    if ( UTIL_IsReflectiveCube((CBaseEntity *)&g_pEntityList) || UTIL_IsSchrodinger((CBaseEntity *)&g_pEntityList) )
+    {
+      z = a3[2].m_vecAbsOrigin.z;
+      if ( z != NAN
+        && (v9 = LOWORD(z), g_pEntityList->m_EntPtrArray[v9].m_SerialNumber == HIWORD(LODWORD(z)))
+        && (v10 = g_pEntityList->m_EntPtrArray[v9].m_pEntity) != 0 )
+      {
+        v11 = pEntity->m_pChildLaser;
+        if ( v10 != v11 && v11 )
+        {
+          *(int (***)(void))((char *)&v11->_vptr$IHandleEntity + (_DWORD)&loc_589892 - 5805002) = 0;
+          UTIL_Remove(v11);
+          pEntity->m_pChildLaser = 0;
+        }
+      }
+      else
+      {
+        if ( UTIL_GetSchrodingerTwin(pEntity) )
+        {
+          p_m_angPortalExitAngles = &pEntity->m_angPortalExitAngles;
+        }
+        else
+        {
+          if ( (a3->m_iEFlags & 0x800) != 0 )
+            CBaseEntity::CalcAbsolutePosition((CBaseEntity *)&g_pEntityList);
+          p_m_angPortalExitAngles = &a3->m_angAbsRotation;
+        }
+        AngleVectors(p_m_angPortalExitAngles, &vecForward);
+        v15 = (float *)(*(int (__cdecl **)(CBaseEntity *))((char *)&loc_589623
+                                                         + (unsigned int)a3->_vptr$IHandleEntity
+                                                         - 5805003))(a3);
+        vecOffset.x = (float)(vecForward.x * 22.0) + *v15;
+        vecOffset.y = (float)(vecForward.y * 22.0) + v15[1];
+        vecOffset.z = (float)(22.0 * vecForward.z) + v15[2];
+        SimulatorThatOwnsEntity = CPortalSimulator::GetSimulatorThatOwnsEntity(a3);
+        v17 = (float *)SimulatorThatOwnsEntity;
+        if ( SimulatorThatOwnsEntity )
+        {
+          LOBYTE(SimulatorThatOwnsEntity) = CPortalSimulator::EntityIsInPortalHole(SimulatorThatOwnsEntity, a3);
+          if ( (_BYTE)SimulatorThatOwnsEntity )
+          {
+            if ( (float)((float)((float)(vecOffset.z * v17[28])
+                               + (float)((float)(vecOffset.y * v17[27]) + (float)(vecOffset.x * v17[26])))
+                       - v17[29]) < 0.0 )
+            {
+              SimulatorThatOwnsEntity = (CPortalSimulator *)(*(int (__cdecl **)(CBaseEntity *, CBaseEntity *))((char *)&loc_589623 + (unsigned int)a3->_vptr$IHandleEntity - 5805003))(
+                                                              a3,
+                                                              a3);
+              if ( (float)((float)((float)(*(float *)&SimulatorThatOwnsEntity->m_pLinkedPortal * v17[28])
+                                 + (float)((float)(*(float *)&SimulatorThatOwnsEntity->m_bLocalDataIsReady * v17[27])
+                                         + (float)(*(float *)&SimulatorThatOwnsEntity->_vptr$CPortalSimulator * v17[26])))
+                         - v17[29]) > 0.0 )
+              {
+                v18 = (float)((float)(v17[36] * vecOffset.z)
+                            + (float)((float)(v17[35] * vecOffset.y) + (float)(v17[34] * vecOffset.x)))
+                    + v17[37];
+                v19 = (float)((float)(vecOffset.z * v17[40])
+                            + (float)((float)(vecOffset.y * v17[39]) + (float)(vecOffset.x * v17[38])))
+                    + v17[41];
+                vecOffset.x = (float)((float)(v17[32] * vecOffset.z)
+                                    + (float)((float)(v17[31] * vecOffset.y) + (float)(v17[30] * vecOffset.x)))
+                            + v17[33];
+                vecOffset.y = v18;
+                vecOffset.z = v19;
+                v20 = (float)(v17[36] * vecForward.z)
+                    + (float)((float)(v17[35] * vecForward.y) + (float)(v17[34] * vecForward.x));
+                v21 = (float)(vecForward.z * v17[40])
+                    + (float)((float)(vecForward.y * v17[39]) + (float)(vecForward.x * v17[38]));
+                vecForward.x = (float)(v17[32] * vecForward.z)
+                             + (float)((float)(v17[31] * vecForward.y) + (float)(v17[30] * vecForward.x));
+                vecForward.y = v20;
+                vecForward.z = v21;
+              }
+            }
+          }
+        }
+        p_vecForward = &vecForward;
+        UTIL_Portal_Laser_Prevent_Tilting((Vector *)SimulatorThatOwnsEntity);
+        CPortalLaser::UpdateNextLaser(pEntity, &vecOffset, &vecForward, a3);
+      }
+      v13 = 1;
+      if ( !LOBYTE(a3[2].m_pBlocker.m_Index)
+        && reflector_cube_disable_when_on_laser.m_pParent->m_Value.m_nValue
+        && CPropWeightedCube::ShouldEnterDisabledState((CPropWeightedCube *)a3) )
+      {
+        CPropWeightedCube::EnterDisabledState((CPropWeightedCube *)p_vecForward);
+      }
+    }
+    else
+    {
+      return 0;
+    }
+  }
+  else
+  {
+    return 0;
+  }
+  return v13;
+}
