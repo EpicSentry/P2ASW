@@ -247,7 +247,7 @@ ConVar show_player_paint_power_debug( "show_player_paint_power_debug", "0", FCVA
 ConVar mp_should_gib_bots("mp_should_gib_bots", "1", FCVAR_REPLICATED | FCVAR_CHEAT);
 ConVar sv_debug_bounce_reflection("sv_debug_bounce_reflection", "0", FCVAR_REPLICATED );
 ConVar sv_debug_bounce_reflection_time("sv_debug_bounce_reflection_time", "15.f", FCVAR_REPLICATED );
-ConVar paint_compute_contacts_simd("paint_compute_contacts_simd", "1", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Compute the contacts with paint in fast SIMD (1) or with slower FPU (0)." );
+ConVar paint_compute_contacts_simd("paint_compute_contacts_simd", "1", FCVAR_REPLICATED, "Compute the contacts with paint in fast SIMD (1) or with slower FPU (0)." );
 
 ConVar prevent_crouch_jump("prevent_crouch_jump", "1", FCVAR_REPLICATED | FCVAR_CHEAT, "Enable/Disable crouch jump prevention.");
 
@@ -2611,9 +2611,13 @@ void CPortal_Player::DetermineTraceInfo( Vector &vStart, Vector &vEnd, int iTrac
 	}
 }
 
+
+// In Swarm, we're limited by some engine functions that Portal 2 used, but aren't available in Swarm.
+#define USE_NEW_PAINT_DETECTION
+
 void CPortal_Player::AddSurfacePaintPowerInfo( const trace_t& trace, char const* context )
 {
-#if 0
+#if !defined USE_NEW_PAINT_DETECTION
 	if( trace.m_pEnt )
 	{
 		if( trace.m_pEnt->IsBSPModel() )
@@ -2712,7 +2716,7 @@ void CPortal_Player::AddSurfacePaintPowerInfo( const trace_t& trace, char const*
 
 void CPortal_Player::DeterminePaintContacts()
 {
-#if 0
+#if !defined USE_NEW_PAINT_DETECTION
 	if( GetMoveType() == MOVETYPE_NOCLIP )
 	{
 		return;
@@ -4441,7 +4445,7 @@ void ComputeAABBContactsWithBrushEntity( ContactVector& contacts, const Vector& 
 void ComputeAABBContactsWithBrushEntity_Old( ContactVector& contacts, const cplane_t *pClipPlanes, int iClipPlaneCount, const Vector& boxOrigin, const Vector& boxMin, const Vector& boxMax, CBaseEntity* pBrushEntity, int contentsMask)
 {
 	// FIXME: Limited by engine code?
-#if 0
+#ifndef USE_NEW_PAINT_DETECTION
 	//typedef CUtlVector<int>	BrushIndexVector;
 	typedef CUtlVector<uint32> PlaneIndexVector;
 	//typedef CUtlVector<BrushSideInfo_t> BrushSideInfoVector;
@@ -4463,19 +4467,18 @@ void ComputeAABBContactsWithBrushEntity_Old( ContactVector& contacts, const cpla
 
 	// Get the indices of all the colliding brushes
 	//BrushIndexVector brushIndices;
-	CBrushQuery brushQuery;
-	enginetrace->GetBrushesInAABB( queryBoxMin, queryBoxMax, brushQuery, contentsMask, cmodelIndex );
+	CUtlVector<int> WorldBrushes;
+	enginetrace->GetBrushesInAABB( queryBoxMin, queryBoxMax, &WorldBrushes, contentsMask );
 
 	// Find the contact regions
 	//BrushSideInfoVector brushSides;
-	BrushSideInfo_t *brushSides = (BrushSideInfo_t *)stackalloc( sizeof( BrushSideInfo_t ) * brushQuery.MaxBrushSides() );
+	CUtlVector<BrushSideInfo_t> brushSides;
 	//PlaneVector planes;
-	Vector4D *planes = (Vector4D *)stackalloc( sizeof( Vector4D ) * (brushQuery.MaxBrushSides() + 6 /*bbox*/ + iClipPlaneCount) );
-	for( int i = 0; i < brushQuery.Count(); ++i )
+	Vector4D *planes = (Vector4D *)stackalloc( sizeof( Vector4D ) * ( brushSides.Count() + 6 /*bbox*/ + iClipPlaneCount) );
+	for( int i = 0; i < WorldBrushes.Count(); ++i )
 	{
 		// Get the brush side info
-		int iBrushContents;
-		int iNumBrushSides = enginetrace->GetBrushInfo( brushQuery[i], iBrushContents, brushSides, brushQuery.MaxBrushSides() );
+		int iNumBrushSides = enginetrace->GetBrushInfo( WorldBrushes[i], &brushSides, NULL );
 		Assert( iNumBrushSides > 0 );
 		if( iNumBrushSides <= 0 )
 			continue;
@@ -4497,9 +4500,9 @@ void ComputeAABBContactsWithBrushEntity_Old( ContactVector& contacts, const cpla
 		// Transform the planes to world space
 		for( int sideIndex = 0; sideIndex < iNumBrushSides; ++sideIndex )
 		{
-			cplane_t temp;
-			MatrixTransformPlane( entityToWorld, brushSides[sideIndex].plane, temp );
-			planes[sideIndex] = Vector4D( temp.normal.x, temp.normal.y, temp.normal.z, temp.dist );
+			Vector4D temp;
+			Vector4DMultiplyTranspose( entityToWorld, brushSides[sideIndex].plane, temp );
+			planes[sideIndex] = temp; //Vector4D( temp.normal.x, temp.normal.y, temp.normal.z, temp.dist );
 		}
 
 		int iPlaneCount = iNumBrushSides;
@@ -4516,7 +4519,7 @@ void ComputeAABBContactsWithBrushEntity_Old( ContactVector& contacts, const cpla
 			++iPlaneCount;
 		}
 
-		Assert( iPlaneCount <= (brushQuery.MaxBrushSides() + 6 + iClipPlaneCount) );
+		Assert( iPlaneCount <= (WorldBrushes.Count() + 6 + iClipPlaneCount) );
 
 		// Compute the contact region
 		CMesh contactRegion;
@@ -4561,8 +4564,7 @@ void ComputeAABBContactsWithBrushEntity_Old( ContactVector& contacts, const cpla
 
 void ComputeAABBContactsWithBrushEntity_SIMD( ContactVector& contacts, const cplane_t *pClipPlanes, int iClipPlaneCount, const Vector& boxOrigin, const Vector& boxMin, const Vector& boxMax, CBaseEntity* pBrushEntity, int contentsMask)
 {
-	// FIXME: Limited by engine code?
-#if 0
+#ifndef USE_NEW_PAINT_DETECTION
 	//typedef CUtlVector<int>	BrushIndexVector;
 	typedef CUtlVector<uint16> PlaneIndexVector;
 	//typedef CUtlVector<BrushSideInfo_t> BrushSideInfoVector;
@@ -4572,26 +4574,27 @@ void ComputeAABBContactsWithBrushEntity_SIMD( ContactVector& contacts, const cpl
 	ICollideable* pCollideable = enginetrace->GetCollideable( pBrushEntity );
 	const int cmodelIndex = pCollideable->GetCollisionModelIndex() - 1;
 	AssertMsg( !pBrushEntity->IsWorld() || cmodelIndex == 0, "World collision model index should be 0." );
-	const matrix3x4_t& entityToWorld = pBrushEntity->EntityToWorldTransform();
+	const VMatrix& entityToWorld = pBrushEntity->EntityToWorldTransform();
 
 	// The query box must be in local space for non-world brush entities
 	Vector queryBoxMin = boxMin;
 	Vector queryBoxMax = boxMax;
 	if( !pBrushEntity->IsWorld() )
 	{
-		ITransformAABB( entityToWorld, boxMin, boxMax, queryBoxMin, queryBoxMax );
+		ITransformAABB( entityToWorld.As3x4(), boxMin, boxMax, queryBoxMin, queryBoxMax );
 	}
 
 	// Get the indices of all the colliding brushes
 	//BrushIndexVector brushIndices;
-	CBrushQuery brushQuery;
-	enginetrace->GetBrushesInAABB( queryBoxMin, queryBoxMax, brushQuery, contentsMask, cmodelIndex );
+	CUtlVector<int> WorldBrushes;
+	enginetrace->GetBrushesInAABB( queryBoxMin, queryBoxMax, &WorldBrushes, contentsMask );
 
 	// Find the contact regions
-	//BrushSideInfoVector brushSides;
-	BrushSideInfo_t *brushSides = (BrushSideInfo_t *)stackalloc( sizeof( BrushSideInfo_t ) * brushQuery.MaxBrushSides() );
+	//BrushSideInfoVector brushSides;	
+	CUtlVector<BrushSideInfo_t> brushSides;
+
 	//PlaneVector planes;
-	const int NUMBER_OF_FLTX4 = brushQuery.MaxBrushSides() + 6 /*bbox*/ + iClipPlaneCount;
+	const int NUMBER_OF_FLTX4 = ( WorldBrushes.Count() * 8 ) + 6 /*bbox*/ + iClipPlaneCount;
 	fltx4 *planes = (fltx4 *)stackalloc( sizeof( fltx4 ) * ( NUMBER_OF_FLTX4 + 1 ) );		// +1 for VMX alignment
 	planes = (fltx4*)ALIGN_VALUE( (int)planes, sizeof(fltx4) );
 
@@ -4599,11 +4602,10 @@ void ComputeAABBContactsWithBrushEntity_SIMD( ContactVector& contacts, const cpl
 	fltx4 f4BoxMax = LoadUnalignedSIMD( &boxMax.x );
 	fltx4 f4BoxOrigin = LoadUnalignedSIMD( &boxOrigin.x );
 
-	for( int i = 0; i < brushQuery.Count(); ++i )
+	for( int i = 0; i < WorldBrushes.Count(); ++i )
 	{
 		// Get the brush side info
-		int iBrushContents;
-		int iNumBrushSides = enginetrace->GetBrushInfo( brushQuery[i], iBrushContents, brushSides, brushQuery.MaxBrushSides() );
+		int iNumBrushSides = enginetrace->GetBrushInfo( WorldBrushes[i], &brushSides, NULL );
 		Assert( iNumBrushSides > 0 );
 		if( iNumBrushSides <= 0 )
 			continue;
@@ -4625,9 +4627,9 @@ void ComputeAABBContactsWithBrushEntity_SIMD( ContactVector& contacts, const cpl
 		// Transform the planes to world space
 		for( int sideIndex = 0; sideIndex < iNumBrushSides; ++sideIndex )
 		{
-			cplane_t temp;
-			MatrixTransformPlane( entityToWorld, brushSides[sideIndex].plane, temp );		// Could be optimized further here...
-			planes[sideIndex] = LoadUnalignedSIMD(&temp.normal);		// Read XYZ and dist of the plane
+			Vector4D temp;
+			Vector4DMultiplyTranspose( entityToWorld, brushSides[sideIndex].plane, temp );		// Could be optimized further here...
+			planes[sideIndex] = LoadUnalignedSIMD(&temp);		// Read XYZ and dist of the plane
 		}
 
 		int iPlaneCount = iNumBrushSides;

@@ -40,7 +40,7 @@ public:
 	public:
         Vector vecStart;
         Vector vecEnd;
-		CUtlVector<CBaseEntity*, CUtlMemory<CBaseEntity*> > sortedEntList;
+		CUtlVector<CBaseEntity*> sortedEntList;
 		PortalLaserInfo_t()
 		{
 			vecStart.Init();
@@ -105,6 +105,18 @@ private:
     bool IsOn();
     bool ReflectLaserFromEntity( CBaseEntity *pTarget );
     bool InPVS();
+};
+
+struct LaserVictimInfo_t
+{
+    CBaseEntity *pVictim;
+    float flFraction;
+};
+
+class CLaserVictimLess
+{
+public:
+	bool Less( LaserVictimInfo_t &info1, LaserVictimInfo_t &info2, void *pData /*?????*/ );
 };
 
 #endif // ENV_PORTAL_LASER_H

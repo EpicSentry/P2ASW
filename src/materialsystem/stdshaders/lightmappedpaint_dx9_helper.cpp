@@ -33,7 +33,7 @@ extern ConVar mat_ambient_light_b;
 #endif
 
 // Prevent compile errors
-#if 1
+#if 0
 
 void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params, IShaderDynamicAPI *pShaderAPI, IShaderShadow* pShaderShadow, 
 								 LightmappedGeneric_DX9_Vars_t &info, CBasePerMaterialContextData **pContextDataPtr )

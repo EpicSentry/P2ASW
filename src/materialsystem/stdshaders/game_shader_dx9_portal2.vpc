@@ -26,8 +26,8 @@ $Project "Shaders (Portal 2)"
 	$File "portalstaticoverlay.cpp"
 	
 	// Paint
-	$File "lightmappedpaint_dx9_helper.h"
-	$File "lightmappedpaint_dx9_helper.cpp"
+	//$File "lightmappedpaint_dx9_helper.h"
+	//$File "lightmappedpaint_dx9_helper.cpp"
 	
 	// Solid Energy (Fizzler Shaders)
 	$File "solidenergy_dx9.cpp"
@@ -50,8 +50,8 @@ $Project "Shaders (Portal 2)"
 	//$File "lightmappedgeneric_dx9_helper.cpp"
 	
 	// Instead of modifying the shader directly, we can try to copy the file instead
-	$File "SDK_lightmappedgeneric_dx9.cpp"
-	$File "SDK_lightmappedgeneric_dx9_helper.cpp"
+	//$File "SDK_lightmappedgeneric_dx9.cpp"
+	//$File "SDK_lightmappedgeneric_dx9_helper.cpp"
 	
 	
 	

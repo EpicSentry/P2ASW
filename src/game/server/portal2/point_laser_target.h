@@ -52,9 +52,9 @@ public:
 
     virtual int OnTakeDamage( const CTakeDamageInfo &info );
 
-    bool IsTerminalPoint();         // TODO: Virtual?
-    void SetCatcher( CCatcher * );  // TODO: Virtual?
-    bool IsPowered();               // TODO: Virtual?
+    bool IsTerminalPoint();					// TODO: Virtual?
+    void SetCatcher( CCatcher *pCatcher );  // TODO: Virtual?
+    bool IsPowered();						// TODO: Virtual?
 
 protected:
     void DisableThink();
