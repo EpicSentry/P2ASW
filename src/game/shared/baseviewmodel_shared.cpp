@@ -469,7 +469,7 @@ void CBaseViewModel::CalcViewModelView( CBasePlayer *owner, const Vector& eyePos
 	}
 	// Add model-specific bob even if no weapon associated (for head bob for off hand models)
 	AddViewModelBob( owner, vmorigin, vmangles );
-#if !defined ( CSTRIKE_DLL )
+#if !defined ( CSTRIKE_DLL ) && !defined ( PORTAL2 ) // This will also fix an issue in Portal 2 Swarm
 	// This was causing weapon jitter when rotating in updated CS:S; original Source had this in above InPrediction block  07/14/10
 	// Add lag	
 	CalcViewModelLag( vmorigin, vmangles, vmangoriginal );
@@ -477,6 +477,11 @@ void CBaseViewModel::CalcViewModelView( CBasePlayer *owner, const Vector& eyePos
 
 	if ( !prediction->InPrediction() )
 	{
+#ifdef PORTAL2
+		// This fixes viewmodel lag looking weird in multiplayer,
+		// this wasn't in the csgo leak but it's in the modern build of Portal 2.
+		CalcViewModelLag( vmorigin, vmangles, vmangoriginal );
+#endif
 		// Let the viewmodel shake at about 10% of the amplitude of the player's view
 		ACTIVE_SPLITSCREEN_PLAYER_GUARD_ENT( GetOwner() );
 		GetViewEffects()->ApplyShake( vmorigin, vmangles, 0.1 );	
