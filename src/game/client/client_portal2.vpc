@@ -88,6 +88,7 @@ $Project "Client (Portal 2)"
 			$File	"hl2\hl_in_main.cpp"
 			$File	"hl2\hl_prediction.cpp"
 			$File	"hl2\c_ar2_explosion.cpp"
+			$File	"hl2\c_citadel_effects.cpp"
 		}
 		
 		$Folder	"Multiplayer"
