@@ -17,6 +17,7 @@
 //#include "projectedwallentity.h"
 #include "portal_player.h"
 #include "prop_weightedcube.h"
+#include "paint/paint_savelogic.h"
 #endif
 #include "cegclientwrapper.h"
 
@@ -85,6 +86,7 @@ void CPaintDatabase::AddPaint( CBaseEntity* pPaintedEntity, const Vector& vecPai
 		data.flPaintRadius = flPaintRadius;
 		data.flPaintAlphaPercent = flAlphaPercent;
 		data.location = vPushedContactPoint;
+		data.normal = vecNormal;
 
 		for ( int i=0; i<brushEnum.m_BrushEntitiesToPaint.Count(); ++i )
 		{
@@ -535,9 +537,28 @@ void CPaintDatabase::PreClientUpdate()
 	for ( int i=0; i<count; ++i )
 	{
 		const PaintLocationData_t& data = m_PaintThisFrame[i];
-
+	
 		CBaseEntity *pPaintBrush = ( data.hBrushEntity.Get() != NULL ) ? EntityFromEntityHandle( data.hBrushEntity.Get() ) : NULL;
-		float flChangedPaintRadius = UTIL_PaintBrushEntity( pPaintBrush, data.location, data.type, data.flPaintRadius, data.flPaintAlphaPercent );
+
+		bool bSave = false;
+
+		PaintTraceData_t *pTraceData = NULL;
+
+		if ( !g_pGameRules->IsMultiplayer() )
+		{
+			bSave = true;
+			PaintTraceData_t traceData;
+			traceData.pBrushEntity = pPaintBrush;
+			traceData.contactPoint = data.location;
+			traceData.flPaintRadius = data.flPaintRadius;
+			traceData.power = data.type;
+			traceData.normal = data.normal;
+			AddPaintDataToMemory( traceData );
+			
+			pTraceData = &traceData;
+
+		}
+		float flChangedPaintRadius = UTIL_PaintBrushEntity( pPaintBrush, data.location, data.type, data.flPaintRadius, data.flPaintAlphaPercent, pTraceData );
 		boundsCache.AddChangedBounds( data.location, flChangedPaintRadius );
 		//DevMsg("paint pos = %f %f %f\n", XYZ(data.location) );
 	}

@@ -325,6 +325,8 @@ $Project "Server (Portal 2)"
 					$File	"portal2\paint\paint_stream.cpp"
 					$File	"portal2\paint\paint_sphere.h"
 					$File	"portal2\paint\paint_sphere.cpp"
+					$File	"portal2\paint\paint_savelogic.h"
+					$File	"portal2\paint\paint_savelogic.cpp"
 					
 					$File	"$SRCDIR\game\shared\portal2\portal_grabcontroller_shared.h"
 					$File	"$SRCDIR\game\shared\portal2\portal_grabcontroller_shared.cpp"

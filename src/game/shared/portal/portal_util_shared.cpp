@@ -19,6 +19,7 @@
 	#include "NDebugOverlay.h"
 	#include "env_debughistory.h"
 	#include "world.h"
+	#include "paint/paint_savelogic.h"
 #else
 	#include "c_portal_player.h"
 	#include "c_world.h"
@@ -2515,7 +2516,7 @@ bool UTIL_IsPaintableSurface( const csurface_t& surface )
 
 
 
-float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoint, PaintPowerType power, float flPaintRadius, float flAlphaPercent )
+float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoint, PaintPowerType power, float flPaintRadius, float flAlphaPercent, PaintTraceData_t *pTraceData )
 {
 	if ( !pBrushEntity )
 	{
@@ -2534,19 +2535,13 @@ float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoi
 	// Doesn't exist in Alien Swarm engine
 	//if ( !engine->SpherePaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, power, flPaintRadius, flAlphaPercent ) )
 	//	return 0.0f;
-
-#if 0
-	Msg("power: %i\n", power);
-#endif
-
-	Color preColor = MapPowerToColor(power);
 	
-	Color color = preColor;
+	Color color = MapPowerToColor( power );
 
 	//engine->TracePaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, flPaintRadius, color );
 	
 	// We need to run this twice to make sure we have 2 color values.
-	engine->PaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, color, sv_paint_detection_sphere_radius.GetFloat() );
+	engine->PaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, color, flPaintRadius );
 
 #if 0
 #ifdef GAME_DLL
@@ -2557,8 +2552,11 @@ float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoi
 	Warning("(client)Post Painted Color: %i %i %i %i\n", color.r(), preColor.b(), color.g(), color.a());
 #endif
 #endif
-	//if (color == preColor)
-	//	return 0.0f;
+#ifdef GAME_DLL
+	if ( pTraceData )
+		AddPaintDataToMemory( *pTraceData );
+#endif
+
 	return flPaintRadius;
 }
 

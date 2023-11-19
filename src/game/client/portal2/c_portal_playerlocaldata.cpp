@@ -61,7 +61,7 @@ BEGIN_PREDICTION_DATA_NO_BASE( C_PortalPlayerLocalData )
 
 END_PREDICTION_DATA()
 
-#define DEFAULT_SURFACE_NORMAL Vector( 0.0, 0.0, 1.0 ) // Used only in the constructor below
+const Vector DEFAULT_SURFACE_NORMAL( 0.0, 0.0, 1.0 );
 
 C_PortalPlayerLocalData::C_PortalPlayerLocalData()
 {

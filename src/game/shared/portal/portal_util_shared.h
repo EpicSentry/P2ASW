@@ -30,6 +30,8 @@ extern bool g_bBulletPortalTrace;
 	class CBeam;
 	class CBasePlayer;
 #endif
+
+struct PaintTraceData_t;
 	
 //When tracing through portals, a line becomes a discontinuous collection of segments as it travels
 struct ComplexPortalTrace_t
@@ -140,7 +142,7 @@ bool UTIL_Portal_EntityIsInPortalHole( const CPortal_Base2D *pPortal, CBaseEntit
 // PAINT
 bool UTIL_IsPaintableSurface( const csurface_t& surface );
 
-float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoint, PaintPowerType power, float flPaintRadius, float flAlphaPercent );
+float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoint, PaintPowerType power, float flPaintRadius, float flAlphaPercent, PaintTraceData_t *pTraceData );
 PaintPowerType UTIL_Paint_TracePower( CBaseEntity* pBrushEntity, const Vector& contactPoint, const Vector& vContactNormal );
 
 // output start point and reflect dir

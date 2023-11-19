@@ -110,7 +110,6 @@ void CPortalLaser::UpdateLaser()
 	CTraceFilterSimpleClassnameList masterTraceFilter(this, COLLISION_GROUP_NONE);
 	masterTraceFilter.AddClassnameToIgnore("info_placement_helper");
 	masterTraceFilter.AddClassnameToIgnore("player");
-	masterTraceFilter.AddClassnameToIgnore("Player");
 	masterTraceFilter.AddClassnameToIgnore("prop_energy_ball");
 	
 	// Trace from the laser emitter to check if it hits a cube
@@ -401,7 +400,6 @@ void CPortalLaser::DoTraceFromPortal( CPortal_Base2D* pRemotePortal, trace_t &tr
 	CTraceFilterSimpleClassnameList remoteTraceFilter(this, COLLISION_GROUP_NONE);
 	remoteTraceFilter.AddClassnameToIgnore("info_placement_helper");
 	remoteTraceFilter.AddClassnameToIgnore("player");
-	remoteTraceFilter.AddClassnameToIgnore("Player");
 	remoteTraceFilter.AddClassnameToIgnore("prop_energy_ball");
 	remoteTraceFilter.AddClassnameToIgnore("prop_portal");
 	

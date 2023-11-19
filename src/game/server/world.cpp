@@ -38,6 +38,7 @@
 
 #ifdef PORTAL2
 #include "paint/paint_stream_manager.h"
+#include "paint/paint_savelogic.h"
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -618,6 +619,9 @@ int CWorld::Restore( IRestore &restore )
 
 	// world is the first thing that gets loaded, so we want to do our pool allocation here
 	PaintStreamManager.AllocatePaintBlobPool( m_nMaxBlobCount );
+	if ( HASPAINTMAP )
+	RestoreAllPaint();
+
 	return 1;
 }
 #endif

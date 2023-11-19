@@ -573,11 +573,10 @@ private: // PAINT SPECIFIC
 
 	void GivePortalPlayerItems( void );
 
-	void DetermineTraceInfo( Vector &vStart, Vector &vEnd, int iTraceType );
+	void DetermineTraceInfo( Vector &vStart, Vector &vEnd, Vector &vMins, Vector vMaxs, int iTraceType );
 
 	// Find all the contacts
 	void DeterminePaintContacts();
-	void DeterminePaintContactsUnderFeet(); // A hacky way to get the paint power since engine code is limiting us.
 	void PredictPaintContacts( const Vector& contactBoxMin,
 		const Vector& contactBoxMax,
 		const Vector& traceBoxMin,

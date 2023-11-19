@@ -1187,7 +1187,6 @@ static void CarveEntity( PS_PlacementData_t &PlacementData, PS_SD_Dynamic_Carved
 		//CBrushQuery brushQuery;
 		CUtlVector<int> WorldBrushes;
 		enginetrace->GetBrushesInAABB( vAABBMins, vAABBMaxs, &WorldBrushes, MASK_SOLID_BRUSHONLY|CONTENTS_PLAYERCLIP|CONTENTS_MONSTERCLIP );
-		enginetrace->GetBrushesInAABB( vAABBMins, vAABBMaxs, &WorldBrushes, MASK_SOLID_BRUSHONLY|CONTENTS_PLAYERCLIP|CONTENTS_MONSTERCLIP );
 		//enginetrace->GetBrushesInCollideable( pProp, brushQuery );
 
 		//create locally clipped polyhedrons for the world
@@ -2834,7 +2833,7 @@ void CPortalSimulator::CreatePolyhedrons( void )
 
 			CUtlVector<int> WorldBrushes;
 			enginetrace->GetBrushesInAABB( vAABBMins, vAABBMaxs, &WorldBrushes, MASK_SOLID_BRUSHONLY|CONTENTS_PLAYERCLIP|CONTENTS_MONSTERCLIP );
-
+			
 			//create locally clipped polyhedrons for the world
 			{
 				int *pBrushList = WorldBrushes.Base();

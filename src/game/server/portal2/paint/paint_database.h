@@ -19,6 +19,7 @@ struct PaintLocationData_t
 	float			flPaintRadius;
 	float			flPaintAlphaPercent;
 	Vector			location;
+	Vector			normal;
 };
 
 struct PaintEntityData_t

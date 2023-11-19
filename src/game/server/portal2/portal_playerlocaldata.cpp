@@ -112,7 +112,7 @@ DEFINE_FIELD( m_hTractorBeam, FIELD_EHANDLE ),
 
 END_DATADESC()
 
-#define DEFAULT_SURFACE_NORMAL Vector( 0.0, 0.0, 1.0 ) // Used only in the constructor below
+const Vector DEFAULT_SURFACE_NORMAL( 0.0, 0.0, 1.0 );
 
 CPortalPlayerLocalData::CPortalPlayerLocalData()
 {
