@@ -543,7 +543,6 @@ void CPaintDatabase::PreClientUpdate()
 		bool bSave = false;
 
 		PaintTraceData_t *pTraceData = NULL;
-
 		if ( !g_pGameRules->IsMultiplayer() )
 		{
 			bSave = true;
@@ -604,7 +603,8 @@ void CPaintDatabase::PreClientUpdate()
 	for ( int i=1; i<=gpGlobals->maxClients; ++i )
 	{
 		CPortal_Player *pPortalPlayer = ToPortalPlayer( UTIL_PlayerByIndex( i ) );
-		if ( pPortalPlayer && pPortalPlayer->IsFullyConnected() )
+		// FIXME: OnFullyConnected() for CPortal_Player never gets called!!
+		if ( pPortalPlayer /*&& pPortalPlayer->IsFullyConnected()*/ )
 		{
 			filter.AddRecipient( pPortalPlayer );
 		}

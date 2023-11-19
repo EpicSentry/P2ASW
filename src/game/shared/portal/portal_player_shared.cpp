@@ -4492,8 +4492,8 @@ void ComputeAABBContactsWithBrushEntity_Old( ContactVector& contacts, const cpla
 	//typedef BrushSideInfo_t* BrushSideInfoIterator;
 	// Get the collision model index of the brush entity
 	AssertMsg( pBrushEntity->IsBSPModel(), "Your brush entity is not a brush entity." );
-	ICollideable* pCollideable = enginetrace->GetCollideable( pBrushEntity );
 #ifdef DEBUG
+	ICollideable* pCollideable = enginetrace->GetCollideable( pBrushEntity );
 	const int cmodelIndex = pCollideable->GetCollisionModelIndex() - 1;
 	AssertMsg( !pBrushEntity->IsWorld() || cmodelIndex == 0, "World collision model index should be 0." );
 #endif
@@ -4523,7 +4523,11 @@ void ComputeAABBContactsWithBrushEntity_Old( ContactVector& contacts, const cpla
 	{
 		// Get the brush side info
 		int iBrushContents;
+#ifdef DEBUG
 		bool bHasBrushInfo = enginetrace->GetBrushInfo( WorldBrushes[i], &brushSides, &iBrushContents );
+#else // Bleh, unreferenced local variable
+		enginetrace->GetBrushInfo( WorldBrushes[i], &brushSides, &iBrushContents );
+#endif
 		int iNumBrushSides = brushSides.Count();
 		Assert( iNumBrushSides > 0 );
 
