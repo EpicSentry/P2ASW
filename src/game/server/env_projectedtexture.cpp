@@ -15,71 +15,76 @@
 LINK_ENTITY_TO_CLASS(env_projectedtexture, CEnvProjectedTexture);
 
 BEGIN_DATADESC(CEnvProjectedTexture)
-DEFINE_FIELD(m_hTargetEntity, FIELD_EHANDLE),
-DEFINE_FIELD(m_bState, FIELD_BOOLEAN),
-DEFINE_FIELD(m_bSimpleProjection, FIELD_BOOLEAN),
-DEFINE_KEYFIELD(m_flLightFOV, FIELD_FLOAT, "lightfov"),
-DEFINE_KEYFIELD(m_bEnableShadows, FIELD_BOOLEAN, "enableshadows"),
-DEFINE_KEYFIELD(m_bSimpleProjection, FIELD_BOOLEAN, "simpleprojection"),
-DEFINE_KEYFIELD(m_bLightOnlyTarget, FIELD_BOOLEAN, "lightonlytarget"),
-DEFINE_KEYFIELD(m_bLightWorld, FIELD_BOOLEAN, "lightworld"),
-DEFINE_KEYFIELD(m_bCameraSpace, FIELD_BOOLEAN, "cameraspace"),
-DEFINE_KEYFIELD(m_flAmbient, FIELD_FLOAT, "ambient"),
-DEFINE_AUTO_ARRAY_KEYFIELD(m_SpotlightTextureName, FIELD_CHARACTER, "texturename"),
-DEFINE_KEYFIELD(m_nSpotlightTextureFrame, FIELD_INTEGER, "textureframe"),
-DEFINE_KEYFIELD(m_flNearZ, FIELD_FLOAT, "nearz"),
-DEFINE_KEYFIELD(m_flFarZ, FIELD_FLOAT, "farz"),
-DEFINE_KEYFIELD(m_nShadowQuality, FIELD_INTEGER, "shadowquality"),
-DEFINE_KEYFIELD(m_flBrightnessScale, FIELD_FLOAT, "brightnessscale"),
-DEFINE_FIELD(m_LightColor, FIELD_COLOR32),
-DEFINE_KEYFIELD(m_flColorTransitionTime, FIELD_FLOAT, "colortransitiontime"),
-DEFINE_KEYFIELD(m_flProjectionSize, FIELD_FLOAT, "projection_size"),
-DEFINE_KEYFIELD(m_flRotation, FIELD_FLOAT, "projection_rotation"),
-
-DEFINE_INPUTFUNC(FIELD_VOID, "TurnOn", InputTurnOn),
-DEFINE_INPUTFUNC(FIELD_VOID, "TurnOff", InputTurnOff),
-DEFINE_INPUTFUNC(FIELD_VOID, "AlwaysUpdateOn", InputAlwaysUpdateOn),
-DEFINE_INPUTFUNC(FIELD_VOID, "AlwaysUpdateOff", InputAlwaysUpdateOff),
-DEFINE_INPUTFUNC(FIELD_FLOAT, "SetFOV", InputSetFOV),
-DEFINE_INPUTFUNC(FIELD_EHANDLE, "Target", InputSetTarget),
-DEFINE_INPUTFUNC(FIELD_BOOLEAN, "CameraSpace", InputSetCameraSpace),
-DEFINE_INPUTFUNC(FIELD_BOOLEAN, "LightOnlyTarget", InputSetLightOnlyTarget),
-DEFINE_INPUTFUNC(FIELD_BOOLEAN, "LightWorld", InputSetLightWorld),
-DEFINE_INPUTFUNC(FIELD_BOOLEAN, "EnableShadows", InputSetEnableShadows),
-DEFINE_INPUTFUNC(FIELD_COLOR32, "LightColor", InputSetLightColor),
-DEFINE_INPUTFUNC(FIELD_FLOAT, "Ambient", InputSetAmbient),
-DEFINE_INPUTFUNC(FIELD_STRING, "SpotlightTexture", InputSetSpotlightTexture),
-DEFINE_THINKFUNC(InitialThink),
-// Portal 2
-DEFINE_INPUTFUNC(FIELD_INTEGER, "SetLightStyle", InputSetLightStyle),
-DEFINE_INPUTFUNC(FIELD_STRING, "SetPattern", InputSetPattern),
-DEFINE_INPUTFUNC(FIELD_FLOAT, "SetNearZ", InputSetNearZ),
-DEFINE_INPUTFUNC(FIELD_FLOAT, "SetFarZ", InputSetFarZ),
+	DEFINE_FIELD(m_hTargetEntity, FIELD_EHANDLE),
+	DEFINE_FIELD(m_bState, FIELD_BOOLEAN),
+	DEFINE_FIELD(m_bAlwaysUpdate, FIELD_BOOLEAN),
+	DEFINE_FIELD(m_bSimpleProjection, FIELD_BOOLEAN),
+	DEFINE_KEYFIELD(m_flLightFOV, FIELD_FLOAT, "lightfov"),
+	DEFINE_KEYFIELD(m_bEnableShadows, FIELD_BOOLEAN, "enableshadows"),
+	DEFINE_KEYFIELD(m_bSimpleProjection, FIELD_BOOLEAN, "simpleprojection"),
+	DEFINE_KEYFIELD(m_bLightOnlyTarget, FIELD_BOOLEAN, "lightonlytarget"),
+	DEFINE_KEYFIELD(m_bLightWorld, FIELD_BOOLEAN, "lightworld"),
+	DEFINE_KEYFIELD(m_bCameraSpace, FIELD_BOOLEAN, "cameraspace"),
+	DEFINE_KEYFIELD(m_flAmbient, FIELD_FLOAT, "ambient"),
+	DEFINE_AUTO_ARRAY_KEYFIELD(m_SpotlightTextureName, FIELD_CHARACTER, "texturename"),
+	DEFINE_KEYFIELD(m_nSpotlightTextureFrame, FIELD_INTEGER, "textureframe"),
+	DEFINE_KEYFIELD(m_flNearZ, FIELD_FLOAT, "nearz"),
+	DEFINE_KEYFIELD(m_flFarZ, FIELD_FLOAT, "farz"),
+	DEFINE_KEYFIELD(m_nShadowQuality, FIELD_INTEGER, "shadowquality"),
+	DEFINE_KEYFIELD(m_flBrightnessScale, FIELD_FLOAT, "brightnessscale"),
+	DEFINE_FIELD(m_LightColor, FIELD_COLOR32),
+	DEFINE_KEYFIELD(m_flColorTransitionTime, FIELD_FLOAT, "colortransitiontime"),
+	DEFINE_KEYFIELD(m_flProjectionSize, FIELD_FLOAT, "projection_size"),
+	DEFINE_KEYFIELD(m_flRotation, FIELD_FLOAT, "projection_rotation"),
+	
+	DEFINE_KEYFIELD(m_iStyle, FIELD_INTEGER, "style"),
+	DEFINE_KEYFIELD(m_iDefaultStyle, FIELD_INTEGER, "defaultstyle"),
+	DEFINE_KEYFIELD(m_iszPattern, FIELD_STRING, "pattern"),
+	
+	DEFINE_INPUTFUNC(FIELD_VOID, "TurnOn", InputTurnOn),
+	DEFINE_INPUTFUNC(FIELD_VOID, "TurnOff", InputTurnOff),
+	DEFINE_INPUTFUNC(FIELD_VOID, "AlwaysUpdateOn", InputAlwaysUpdateOn),
+	DEFINE_INPUTFUNC(FIELD_VOID, "AlwaysUpdateOff", InputAlwaysUpdateOff),
+	DEFINE_INPUTFUNC(FIELD_FLOAT, "SetFOV", InputSetFOV),
+	DEFINE_INPUTFUNC(FIELD_EHANDLE, "Target", InputSetTarget),
+	DEFINE_INPUTFUNC(FIELD_BOOLEAN, "CameraSpace", InputSetCameraSpace),
+	DEFINE_INPUTFUNC(FIELD_BOOLEAN, "LightOnlyTarget", InputSetLightOnlyTarget),
+	DEFINE_INPUTFUNC(FIELD_BOOLEAN, "LightWorld", InputSetLightWorld),
+	DEFINE_INPUTFUNC(FIELD_BOOLEAN, "EnableShadows", InputSetEnableShadows),
+	DEFINE_INPUTFUNC(FIELD_COLOR32, "LightColor", InputSetLightColor),
+	DEFINE_INPUTFUNC(FIELD_FLOAT, "Ambient", InputSetAmbient),
+	DEFINE_INPUTFUNC(FIELD_STRING, "SpotlightTexture", InputSetSpotlightTexture),
+	DEFINE_THINKFUNC(InitialThink),
+	// Portal 2
+	DEFINE_INPUTFUNC(FIELD_INTEGER, "SetLightStyle", InputSetLightStyle),
+	DEFINE_INPUTFUNC(FIELD_STRING, "SetPattern", InputSetPattern),
+	DEFINE_INPUTFUNC(FIELD_FLOAT, "SetNearZ", InputSetNearZ),
+	DEFINE_INPUTFUNC(FIELD_FLOAT, "SetFarZ", InputSetFarZ),
 
 END_DATADESC()
 
 IMPLEMENT_SERVERCLASS_ST(CEnvProjectedTexture, DT_EnvProjectedTexture)
-		SendPropEHandle(SENDINFO(m_hTargetEntity)),
-		SendPropBool(SENDINFO(m_bState)),
-		SendPropBool(SENDINFO(m_bAlwaysUpdate)),
-		SendPropFloat(SENDINFO(m_flLightFOV)),
-		SendPropBool(SENDINFO(m_bEnableShadows)),
-		SendPropBool(SENDINFO(m_bSimpleProjection)),
-		SendPropBool(SENDINFO(m_bLightOnlyTarget)),
-		SendPropBool(SENDINFO(m_bLightWorld)),
-		SendPropBool(SENDINFO(m_bCameraSpace)),
-		SendPropFloat(SENDINFO(m_flBrightnessScale)),
-		SendPropInt(SENDINFO(m_LightColor), 32, SPROP_UNSIGNED, SendProxy_Color32ToInt32),
-		SendPropFloat(SENDINFO(m_flColorTransitionTime)),
-		SendPropFloat(SENDINFO(m_flAmbient)),
-		SendPropString(SENDINFO(m_SpotlightTextureName)),
-		SendPropInt(SENDINFO(m_nSpotlightTextureFrame)),
-		SendPropFloat(SENDINFO(m_flNearZ)),
-		SendPropFloat(SENDINFO(m_flFarZ)),
-		SendPropInt(SENDINFO(m_nShadowQuality), 1, SPROP_UNSIGNED),  // Just one bit for now
-		SendPropFloat(SENDINFO(m_flProjectionSize)),
-		SendPropFloat(SENDINFO(m_flRotation)),
-		SendPropInt( SENDINFO( m_iStyle ) ),
+	SendPropEHandle(SENDINFO(m_hTargetEntity)),
+	SendPropBool(SENDINFO(m_bState)),
+	SendPropBool(SENDINFO(m_bAlwaysUpdate)),
+	SendPropFloat(SENDINFO(m_flLightFOV)),
+	SendPropBool(SENDINFO(m_bEnableShadows)),
+	SendPropBool(SENDINFO(m_bSimpleProjection)),
+	SendPropBool(SENDINFO(m_bLightOnlyTarget)),
+	SendPropBool(SENDINFO(m_bLightWorld)),
+	SendPropBool(SENDINFO(m_bCameraSpace)),
+	SendPropFloat(SENDINFO(m_flBrightnessScale)),
+	SendPropInt(SENDINFO(m_LightColor), 32, SPROP_UNSIGNED, SendProxy_Color32ToInt32),
+	SendPropFloat(SENDINFO(m_flColorTransitionTime)),
+	SendPropFloat(SENDINFO(m_flAmbient)),
+	SendPropString(SENDINFO(m_SpotlightTextureName)),
+	SendPropInt(SENDINFO(m_nSpotlightTextureFrame)),
+	SendPropFloat(SENDINFO(m_flNearZ)),
+	SendPropFloat(SENDINFO(m_flFarZ)),
+	SendPropInt(SENDINFO(m_nShadowQuality), 1, SPROP_UNSIGNED),  // Just one bit for now
+	SendPropFloat(SENDINFO(m_flProjectionSize)),
+	SendPropFloat(SENDINFO(m_flRotation)),
+	SendPropInt( SENDINFO( m_iStyle ) ),
 END_SEND_TABLE()
 
 //-----------------------------------------------------------------------------
@@ -89,7 +94,6 @@ CEnvProjectedTexture::CEnvProjectedTexture(void)
 {
 	m_bState = true;
 	m_bAlwaysUpdate = false;
-	//m_flLightFOV = 45.0f;
 	m_flLightFOV = 90.0f;
 	m_bEnableShadows = false;
 	m_bSimpleProjection = false;
@@ -124,28 +128,6 @@ void UTIL_ColorStringToLinearFloatColor(Vector &color, const char *pString)
 	color.x = tmp[0] * (1.0f / 255.0f) * tmp[3];
 	color.y = tmp[1] * (1.0f / 255.0f) * tmp[3];
 	color.z = tmp[2] * (1.0f / 255.0f) * tmp[3];
-}
-
-void CEnvProjectedTexture::Spawn()
-{
-	m_bState = ((GetSpawnFlags() & ENV_PROJECTEDTEXTURE_STARTON) != 0);
-	m_bAlwaysUpdate = ((GetSpawnFlags() & ENV_PROJECTEDTEXTURE_ALWAYSUPDATE) != 0);
-
-	if (m_iStyle >= 32)
-	{
-		if (m_iszPattern == NULL_STRING && m_iDefaultStyle > 0)
-		{
-			m_iszPattern = MAKE_STRING(GetDefaultLightstyleString(m_iDefaultStyle));
-		}
-
-		if (m_bState == false)
-			engine->LightStyle(m_iStyle, "a");
-		else if (m_iszPattern != NULL_STRING)
-			engine->LightStyle(m_iStyle, (char*)STRING(m_iszPattern));
-		else
-			engine->LightStyle(m_iStyle, "m");
-	}
-	BaseClass::Spawn();
 }
 
 bool CEnvProjectedTexture::KeyValue(const char *szKeyName, const char *szValue)
@@ -189,7 +171,9 @@ bool CEnvProjectedTexture::GetKeyValue(const char *szKeyName, char *szValue, int
 
 void CEnvProjectedTexture::InputTurnOn(inputdata_t &inputdata)
 {
-	EnforceSingleProjectionRules(false);
+	// Force all other projected textures off
+	EnforceSingleProjectionRules();
+
 	m_bState = true;
 }
 
@@ -248,11 +232,6 @@ void CEnvProjectedTexture::InputSetAmbient(inputdata_t &inputdata)
 	m_flAmbient = inputdata.value.Float();
 }
 
-void CEnvProjectedTexture::InputSetSpotlightTexture(inputdata_t &inputdata)
-{
-	Q_strcpy(m_SpotlightTextureName.GetForModify(), inputdata.value.String());
-}
-
 void CEnvProjectedTexture::InputSetLightStyle(inputdata_t& inputdata)
 {
 	m_iStyle = inputdata.value.Int();
@@ -264,14 +243,69 @@ void CEnvProjectedTexture::InputSetPattern(inputdata_t& inputdata)
 	engine->LightStyle(m_iStyle, (char*)STRING(m_iszPattern));
 }
 
-void CEnvProjectedTexture::InputSetNearZ(inputdata_t &inputdata)
+void CEnvProjectedTexture::InputSetNearZ(inputdata_t& inputdata)
 {
 	m_flNearZ = inputdata.value.Float();
 }
 
-void CEnvProjectedTexture::InputSetFarZ(inputdata_t &inputdata)
+void CEnvProjectedTexture::InputSetFarZ(inputdata_t& inputdata)
 {
 	m_flFarZ = inputdata.value.Float();
+}
+
+void CEnvProjectedTexture::InputSetSpotlightTexture(inputdata_t &inputdata)
+{
+	Assert(0);
+	Warning("SetSpotlightTexture is disabled. If you need this feature reimplemented, tell a programmer.\n");
+	//Q_strcpy(m_SpotlightTextureName.GetForModify(), inputdata.value.String());
+}
+
+void CEnvProjectedTexture::Spawn()
+{
+	m_bState = ((GetSpawnFlags() & ENV_PROJECTEDTEXTURE_STARTON) != 0);
+	m_bAlwaysUpdate = ((GetSpawnFlags() & ENV_PROJECTEDTEXTURE_ALWAYSUPDATE) != 0);
+
+	// Update light styles
+	if (m_iStyle >= 32)
+	{
+		if (m_iszPattern == NULL_STRING && m_iDefaultStyle > 0)
+		{
+			m_iszPattern = MAKE_STRING(GetDefaultLightstyleString(m_iDefaultStyle));
+		}
+
+		if (m_bState == false)
+			engine->LightStyle(m_iStyle, "a");
+		else if (m_iszPattern != NULL_STRING)
+			engine->LightStyle(m_iStyle, (char*)STRING(m_iszPattern));
+		else
+			engine->LightStyle(m_iStyle, "m");
+	}
+
+	BaseClass::Spawn();
+}
+
+void CEnvProjectedTexture::EnforceSingleProjectionRules(bool bWarnOnEnforcement)
+{
+	// Once a light is turned on, turn off all other possible lights in the level
+	CBaseEntity* pFlashlight = NULL;
+	while ((pFlashlight = gEntList.FindEntityByClassname(pFlashlight, "env_projectedtexture")) != NULL)
+	{
+		// Obviously, don't turn yourself off
+		if (pFlashlight == this)
+			continue;
+
+		if (bWarnOnEnforcement)
+		{
+			CEnvProjectedTexture* pProjTex = static_cast<CEnvProjectedTexture*>(pFlashlight);
+			if (pProjTex && pProjTex->m_bState)
+			{
+				Warning("Warning: env_projected_texture (%s) forced off by (%s)\n", pProjTex->GetEntityNameAsCStr(), GetEntityNameAsCStr());
+			}
+		}
+
+		variant_t emptyVariant;
+		pFlashlight->AcceptInput("TurnOff", this, this, emptyVariant, 0);
+	}
 }
 
 void CEnvProjectedTexture::Activate(void)
@@ -298,19 +332,6 @@ int CEnvProjectedTexture::UpdateTransmitState()
 	return SetTransmitState(FL_EDICT_ALWAYS);
 }
 
-void CEnvProjectedTexture::EnforceSingleProjectionRules(bool bWarnOnEnforcement)
-{
-	CEnvProjectedTexture* pEnvProjectedTexture = (CEnvProjectedTexture*)gEntList.FindEntityByClassname(NULL, "env_projectedtexture");
-	if (pEnvProjectedTexture != this) {
-		if (((bWarnOnEnforcement) && (pEnvProjectedTexture != false)) && (m_bState != false)) {
-			Warning("Warning: env_projected_texture (%s) forced off by (%s)\n", GetEntityNameAsCStr());
-		}
-		variant_t emptyVariant;
-		AcceptInput("TurnOff", NULL, NULL, emptyVariant, 0);
-	}
-	return;
-}
-
 // Console command for creating env_projectedtexture entities
 void CC_CreateFlashlight(const CCommand &args)
 {
@@ -326,8 +347,7 @@ void CC_CreateFlashlight(const CCommand &args)
 	{
 		pFlashlight->SetName(AllocPooledString(args[1]));
 	}
-	pFlashlight->m_bEnableShadows = true;
-	pFlashlight->m_bAlwaysUpdate = true;
+
 	pFlashlight->Teleport(&origin, &angles, NULL);
 
 }

@@ -1,0 +1,12 @@
+void __thiscall C_WeaponPortalgun::DoEffectReady(C_WeaponPortalgun *this)
+{
+  C_BasePlayer *Owner; // eax
+  int UserID; // eax
+
+  Owner = (C_BasePlayer *)C_BaseCombatWeapon::GetOwner(this);
+  if ( Owner )
+  {
+    UserID = C_BasePlayer::GetUserID(Owner);
+    RumbleEffect(UserID, 0x14u, 0, 1u);
+  }
+}

@@ -1,0 +1,16 @@
+enum Blobulator::LightBucketImplementation::CSoftwareCacheUnitTest::UnitTest
+{
+    TEST_EMPTY=0,
+    TEST_NOT_EMPTY=1,
+    TEST_CLEAR=2,
+    TEST_RESET_TO_FULL=3,
+    TEST_WITH_ONE_PARAMETER=4,
+    TEST_PUSH_ONE=4,
+    TEST_POP_ONE=5,
+    TEST_PUSH_ALL=6,
+    TEST_POP_ALL=7,
+    TEST_POP_ALL_INVERTED=8,
+    TEST_PUSH_AND_POP_ALL=9,
+    TEST_PULL_FROM_PUSH_TO=10,
+    TEST_PULL_FROM_PUSH_TO_INFINITE=11
+};

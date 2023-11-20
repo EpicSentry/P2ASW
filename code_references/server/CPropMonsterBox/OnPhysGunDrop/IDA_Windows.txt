@@ -1,0 +1,32 @@
+void __thiscall CPropMonsterBox::OnPhysGunDrop(CPropMonsterBox *this, CBasePlayer *pPhysGunUser, PhysGunDrop_t reason)
+{
+  CEventAction *m_ActionList; // eax
+  char *v5; // eax
+  int v6; // eax
+
+  this->m_OnUser3.m_Value.rgbaVal.g = 0;
+  CPhysicsProp::OnPhysGunDrop(this, pPhysGunUser, reason);
+  if ( !this->m_OnUser3.m_Value.bVal )
+  {
+    m_ActionList = this->m_OnUser3.m_ActionList;
+    if ( m_ActionList )
+    {
+      v5 = (char *)&m_ActionList[-1].m_pNext + 3;
+      if ( v5 )
+      {
+        if ( v5 == (char *)1 )
+          CPropMonsterBox::BecomeMonster((CPropMonsterBox *)((char *)this - 1204), 1);
+      }
+      else
+      {
+        CPropMonsterBox::BecomeBox((CPropMonsterBox *)((char *)this - 1204), 1);
+      }
+      this->m_OnUser3.m_ActionList = 0;
+    }
+    if ( !this->m_OnUser3.m_Value.rgbaVal.a )
+    {
+      v6 = CBaseAnimating::LookupSequence((CPropMonsterBox *)((char *)this - 1204), "hermit_out");
+      CBaseAnimating::ResetSequence((CPropMonsterBox *)((char *)this - 1204), v6);
+    }
+  }
+}

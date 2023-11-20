@@ -1,0 +1,57 @@
+class C_BaseProjectedEntity : public C_BaseEntity
+{
+public:
+	
+	DECLARE_CLASS( C_BaseProjectedEntity, C_BaseEntity )
+	DECLARE_CLIENTCLASS();
+	DECLARE_PREDICTABLE();
+	
+	void C_BaseProjectedEntity( C_BaseProjectedEntity & );
+	void C_BaseProjectedEntity();
+	void ~C_BaseProjectedEntity();
+	Vector GetStartPoint();
+	Vector GetEndPoint();
+	Vector GetLengthVector();
+	void RecursiveProjection(bool , C_BaseProjector * , C_Portal_Base2D * , Vector & , QAngle & ,int ,bool );
+	bool IsHittingPortal( Vector * , QAngle * , C_Portal_Base2D ** );
+	void TestForProjectionChanges();
+	void TestForReflectPaint();
+	bool DidRedirectionPortalMove( C_Portal_Base2D * );
+	void FindProjectedEndpoints();
+	void SetHitPortal( C_Portal_Base2D * );
+	C_Portal_Base2D * GetHitPortal();
+	void SetSourcePortal( C_Portal_Base2D * );
+	C_Portal_Base2D * GetSourcePortal();
+	void GetProjectionExtents( Vector & , Vector & );
+	void OnProjected();
+	void HandleDataChange();
+	void HandlePredictionError(bool );
+	void OnPreDataChanged(enum DataUpdateType_t );
+	void OnDataChanged(enum DataUpdateType_t );
+	C_BasePlayer * GetPredictionOwner();
+	bool ShouldPredict();
+	void TestAllForProjectionChanges();
+	
+    struct BaseProjectedEntity_PreDataChanged
+    {
+        Vector vStartPoint;
+        Vector vEndPoint;
+        QAngle qAngles;
+        void BaseProjectedEntity_PreDataChanged();
+    };
+	
+	struct C_BaseProjectedEntity::BaseProjectedEntity_PreDataChanged PreDataChanged;
+	CHandle<C_Portal_Base2D> m_hHitPortal;
+	CHandle<C_Portal_Base2D> m_hSourcePortal;
+	Vector m_vecSourcePortalCenter;
+	Vector m_vecSourcePortalRemoteCenter;
+	QAngle m_vecSourcePortalAngle;
+	QAngle m_vecSourcePortalRemoteAngle;
+	Vector m_vecStartPoint;
+	Vector m_vecEndPoint;
+	CHandle<C_BaseProjectedEntity> m_hChildSegment;
+	CHandle<C_BaseEntity> m_hPlacementHelper;
+	int m_iMaxRemainingRecursions;
+	bool m_bCreatePlacementHelper;
+
+};

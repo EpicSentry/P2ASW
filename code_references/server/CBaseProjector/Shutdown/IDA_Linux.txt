@@ -1,0 +1,4 @@
+void __cdecl CBaseProjector::Shutdown(CBaseProjector *const this)
+{
+  ;
+}

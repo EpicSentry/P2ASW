@@ -1,0 +1,4 @@
+void __cdecl CPropIndicatorPanel::StopTimer(CPropIndicatorPanel *const this)
+{
+  ;
+}

@@ -1,0 +1,16 @@
+C_BasePlayer_0 *__cdecl C_Trigger_TractorBeam::GetPredictionOwner(C_Trigger_TractorBeam *const this)
+{
+  unsigned int m_Index; // edx
+  C_BasePlayer_0 *result; // eax
+  char *v3; // ecx
+
+  m_Index = this->m_hPlayerSimulationOwner.m_Index;
+  result = 0;
+  if ( m_Index != -1 )
+  {
+    v3 = (char *)g_pEntityList + 16 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v3 + 2) == HIWORD(m_Index) )
+      return (C_BasePlayer_0 *)*((_DWORD *)v3 + 1);
+  }
+  return result;
+}

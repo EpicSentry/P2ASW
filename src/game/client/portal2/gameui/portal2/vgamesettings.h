@@ -10,14 +10,11 @@
 #include "basemodui.h"
 #include "VFlyoutMenu.h"
 
+class CNB_Header_Footer;
+
 namespace BaseModUI {
 
 class DropDownMenu;
-
-FlyoutMenu * UpdateChapterFlyout( KeyValues *pSettings, FlyoutMenuListener *pListener, DropDownMenu *pChapterDropDown );
-int GetNumChaptersForMission( KeyValues *pSettings );
-KeyValues *GetMapInfoAllowingAnyChapter( KeyValues *pSettings, KeyValues **ppMissionInfo );
-KeyValues *GetMapInfoRespectingAnyChapter( KeyValues *pSettings, KeyValues **ppMissionInfo );
 
 class GameSettings : public CBaseModFrame, public FlyoutMenuListener
 {
@@ -42,10 +39,6 @@ public:
 	virtual void OnFlyoutMenuClose( vgui::Panel* flyTo );
 	virtual void OnFlyoutMenuCancelled();
 
-public:
-	MESSAGE_FUNC_INT_CHARPTR( MsgOnCustomCampaignSelected, "OnCustomCampaignSelected", chapter, campaign );
-	void SwitchToGameMode( char const *szNewGameMode, bool bConfirmed );
-
 protected:
 	virtual void OnClose();
 
@@ -53,16 +46,17 @@ protected:
 
 	bool IsCustomMatchSearchCriteria();
 	bool IsEditingExistingLobby();
-	bool IsAnyChapterAllowed();
 
 protected:
-	void UpdateChapterImage( int nChapterIdx = -1, char const *szCampaign = NULL );
+	void UpdateMissionImage();
 	int CountChaptersInCurrentCampaign();
 
 	void SelectNetworkAccess( char const *szNetworkType, char const *szAccessType );
 	void DoCustomMatch( char const *szGameState );
 
-	void GenerateDefaultMissionAndChapter( char const *&szMission, int &nChapter );
+	void UpdateSelectMissionButton();
+	void ShowMissionSelect();
+	void ShowStartingMissionSelect();
 
 private:
 	void UpdateFooter();
@@ -75,16 +69,20 @@ private:
 	void UpdateSessionSettings( KeyValues *pUpdate );
 
 	DropDownMenu* m_drpDifficulty;
-	DropDownMenu* m_drpRoundsLimit;
-	DropDownMenu* m_drpMission;
-	DropDownMenu* m_drpChapter;
-	DropDownMenu* m_drpCharacter;
+	DropDownMenu* m_drpGameType;
 	DropDownMenu* m_drpGameAccess;
 	DropDownMenu* m_drpServerType;
+	DropDownMenu* m_drpStartingMission;
+	DropDownMenu* m_drpFriendlyFire;
+	DropDownMenu* m_drpOnslaught;
+	CNB_Header_Footer *m_pHeaderFooter;
+	vgui::Label *m_pTitle;
 
 	bool m_bBackButtonMeansDone;
 	bool m_bCloseSessionOnClose;
 	bool m_bAllowChangeToCustomCampaign;
+
+	vgui::DHANDLE<vgui::Panel> m_hSubScreen;
 };
 
 }

@@ -1,0 +1,21 @@
+void __thiscall C_PropRocketTripwire::OnDataChanged(C_PropRocketTripwire *this, DataUpdateType_t updateType)
+{
+  bool v3; // zf
+  bool *p_m_bDynamicModelAllowed; // ecx
+  float v5; // xmm0_4
+
+  v3 = LOBYTE(this->m_nBeamEndpointTexture) == 0;
+  p_m_bDynamicModelAllowed = &this->m_bDynamicModelAllowed;
+  if ( v3 )
+  {
+    C_PortalBeamHelper::TurnOff((C_PortalBeamHelper *)p_m_bDynamicModelAllowed);
+    v5 = FLOAT_N1_0;
+  }
+  else
+  {
+    C_PortalBeamHelper::TurnOn((C_PortalBeamHelper *)p_m_bDynamicModelAllowed);
+    v5 = FLOAT_N1293_0;
+  }
+  (*((void (__stdcall **)(float))this[-1].m_filterBeams.m_PassClassnames.m_pElements + 116))(COERCE_FLOAT(LODWORD(v5)));
+  C_BaseAnimating::OnDataChanged(this, updateType);
+}

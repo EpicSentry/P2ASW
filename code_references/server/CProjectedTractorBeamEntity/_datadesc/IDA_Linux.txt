@@ -1,0 +1,26 @@
+datamap_t *__cdecl DataMapInit<CProjectedTractorBeamEntity>(CProjectedTractorBeamEntity *a1)
+{
+  datamap_t *result; // eax
+
+  if ( !(_BYTE)`guard variable for'datamap_t * DataMapInit<CProjectedTractorBeamEntity>(CProjectedTractorBeamEntity *)::nameHolder
+    && _cxa_guard_acquire(&`guard variable for'datamap_t * DataMapInit<CProjectedTractorBeamEntity>(CProjectedTractorBeamEntity *)::nameHolder) )
+  {
+    DataMapInit<CProjectedTractorBeamEntity>(CProjectedTractorBeamEntity *)::nameHolder.m_pszBase = "CProjectedTractorBeamEntity";
+    DataMapInit<CProjectedTractorBeamEntity>(CProjectedTractorBeamEntity *)::nameHolder.m_Names.m_Memory.m_pMemory = 0;
+    DataMapInit<CProjectedTractorBeamEntity>(CProjectedTractorBeamEntity *)::nameHolder.m_Names.m_Memory.m_nAllocationCount = 0;
+    DataMapInit<CProjectedTractorBeamEntity>(CProjectedTractorBeamEntity *)::nameHolder.m_Names.m_Memory.m_nGrowSize = 0;
+    DataMapInit<CProjectedTractorBeamEntity>(CProjectedTractorBeamEntity *)::nameHolder.m_Names.m_Size = 0;
+    DataMapInit<CProjectedTractorBeamEntity>(CProjectedTractorBeamEntity *)::nameHolder.m_Names.m_pElements = 0;
+    DataMapInit<CProjectedTractorBeamEntity>(CProjectedTractorBeamEntity *)::nameHolder.m_nLenBase = 27;
+    _cxa_guard_release(&`guard variable for'datamap_t * DataMapInit<CProjectedTractorBeamEntity>(CProjectedTractorBeamEntity *)::nameHolder);
+    _cxa_atexit(
+      (void (__cdecl *)(void *))CDatadescGeneratedNameHolder::~CDatadescGeneratedNameHolder,
+      &DataMapInit<CProjectedTractorBeamEntity>(CProjectedTractorBeamEntity *)::nameHolder,
+      &_dso_handle);
+  }
+  CProjectedTractorBeamEntity::m_DataMap.baseMap = &CBaseProjectedEntity::m_DataMap;
+  result = &CProjectedTractorBeamEntity::m_DataMap;
+  CProjectedTractorBeamEntity::m_DataMap.dataNumFields = 1;
+  CProjectedTractorBeamEntity::m_DataMap.dataDesc = &DataMapInit<CProjectedTractorBeamEntity>(CProjectedTractorBeamEntity *)::dataDesc[1];
+  return result;
+}

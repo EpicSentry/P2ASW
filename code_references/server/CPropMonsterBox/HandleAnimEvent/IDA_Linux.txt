@@ -1,0 +1,132 @@
+void __usercall CPropMonsterBox::HandleAnimEvent(_DWORD *a1@<eax>, CPropMonsterBox *const this)
+{
+  int v3; // esi
+  float v4; // xmm0_4
+  float v5; // xmm4_4
+  float v6; // xmm1_4
+  float v7; // xmm3_4
+  float v8; // xmm5_4
+  float v9; // xmm2_4
+  float v10; // xmm0_4
+  char v11; // al
+  float m_fValue; // xmm4_4
+  float v13; // xmm3_4
+  float v14; // xmm6_4
+  float v15; // [esp+2Ch] [ebp-14Ch]
+  float v16; // [esp+2Ch] [ebp-14Ch]
+  float v17; // [esp+2Ch] [ebp-14Ch]
+  float v18; // [esp+30h] [ebp-148h]
+  float v19; // [esp+30h] [ebp-148h]
+  float v20; // [esp+50h] [ebp-128h]
+  float v21; // [esp+50h] [ebp-128h]
+  trace_t tr; // [esp+7Ch] [ebp-FCh] BYREF
+  int v23[4]; // [esp+D0h] [ebp-A8h] BYREF
+  float v24; // [esp+E0h] [ebp-98h]
+  float v25; // [esp+E4h] [ebp-94h]
+  float v26; // [esp+E8h] [ebp-90h]
+  int v27; // [esp+F0h] [ebp-88h]
+  int v28; // [esp+F4h] [ebp-84h]
+  int v29; // [esp+F8h] [ebp-80h]
+  int v30; // [esp+100h] [ebp-78h]
+  int v31; // [esp+104h] [ebp-74h]
+  int v32; // [esp+108h] [ebp-70h]
+  int v33; // [esp+110h] [ebp-68h]
+  char v34; // [esp+114h] [ebp-64h]
+  char v35; // [esp+115h] [ebp-63h]
+  CTraceFilterSimple v36; // [esp+120h] [ebp-58h] BYREF
+  Vector vecForward; // [esp+130h] [ebp-48h] BYREF
+  Vector vecUp; // [esp+13Ch] [ebp-3Ch] BYREF
+  AngularImpulse angImpulse; // [esp+148h] [ebp-30h] BYREF
+  Vector vecVelocity; // [esp+154h] [ebp-24h] BYREF
+
+  v3 = a1[85];
+  if ( v3 )
+  {
+    (*(void (__cdecl **)(_DWORD *, Vector *, _DWORD, Vector *))(*a1 + 540))(a1, &vecForward, 0, &vecUp);
+    if ( vecUp.z >= 0.1 )
+    {
+      v4 = vecUp.z * 32.0;
+      if ( (*((_BYTE *)a1 + 209) & 8) != 0 )
+      {
+        v19 = vecUp.y * 32.0;
+        v21 = vecUp.x * 32.0;
+        CBaseEntity::CalcAbsolutePosition((CBaseEntity *const)a1);
+        v5 = *((float *)a1 + 117);
+        v6 = v5 - v21;
+        v7 = *((float *)a1 + 118);
+        v8 = v7 - v19;
+        v9 = *((float *)a1 + 119);
+        v14 = v9 - v4;
+        v10 = v9 - v4;
+        if ( (*((_BYTE *)a1 + 209) & 8) != 0 )
+        {
+          CBaseEntity::CalcAbsolutePosition((CBaseEntity *const)a1);
+          v5 = *((float *)a1 + 117);
+          v7 = *((float *)a1 + 118);
+          v9 = *((float *)a1 + 119);
+          v10 = v14;
+        }
+      }
+      else
+      {
+        v5 = *((float *)a1 + 117);
+        v6 = v5 - (float)(vecUp.x * 32.0);
+        v7 = *((float *)a1 + 118);
+        v8 = v7 - (float)(vecUp.y * 32.0);
+        v9 = *((float *)a1 + 119);
+        v10 = v9 - v4;
+      }
+      v11 = 1;
+      v33 = 0;
+      *(float *)v23 = v5;
+      *(float *)&v23[1] = v7;
+      v24 = v6 - v5;
+      v25 = v8 - v7;
+      v26 = v10 - v9;
+      *(float *)&v23[2] = v9;
+      v34 = 1;
+      v32 = 0;
+      v31 = 0;
+      v30 = 0;
+      v29 = 0;
+      v28 = 0;
+      v27 = 0;
+      if ( (float)((float)((float)(v24 * v24) + (float)(v25 * v25)) + (float)(v26 * v26)) == 0.0 )
+        v11 = 0;
+      v35 = v11;
+      CTraceFilterSimple::CTraceFilterSimple(&v36, (const IHandleEntity *)a1, 0, 0);
+      (*(void (__cdecl **)(IEngineTrace *, int *, int, CTraceFilterSimple *, trace_t *))(*(_DWORD *)enginetrace + 20))(
+        enginetrace,
+        v23,
+        33570827,
+        &v36,
+        &tr);
+      if ( r_visualizetraces.m_pParent->m_Value.m_nValue )
+        DebugDrawLine(&tr.startpos, &tr.endpos, 255, 0, 0, 1, -1.0);
+      if ( tr.fraction != 1.0 )
+      {
+        angImpulse.x = RandomFloat(-1090519040, 1056964608);
+        angImpulse.y = RandomFloat(-1090519040, 1056964608);
+        angImpulse.z = RandomFloat(-1090519040, 1056964608);
+        v15 = RandomFloat(1060320051, 1065353216);
+        v20 = v15;
+        v16 = RandomFloat(-1102263091, 1045220557);
+        v18 = v16;
+        v17 = RandomFloat(-1102263091, 1045220557);
+        m_fValue = sv_monster_turret_velocity.m_pParent->m_Value.m_fValue;
+        v13 = *((float *)a1 + 460);
+        vecVelocity.y = (float)((float)(v18 + vecForward.y) * m_fValue) * v13;
+        vecVelocity.z = (float)((float)(v20 + vecForward.z) * m_fValue) * v13;
+        vecVelocity.x = (float)((float)(v17 + vecForward.x) * m_fValue) * v13;
+        CBaseEntity::SetGroundEntity((CBaseEntity *const)a1, 0);
+        (*(void (__cdecl **)(int))(*(_DWORD *)v3 + 100))(v3);
+        (*(void (__cdecl **)(int, const Vector *, AngularImpulse *))(*(_DWORD *)v3 + 208))(
+          v3,
+          &vec3_origin,
+          &angImpulse);
+        (*(void (__cdecl **)(int, Vector *))(*(_DWORD *)v3 + 244))(v3, &vecVelocity);
+        CBaseEntity::ApplyAbsVelocityImpulse((CBaseEntity *const)a1, &vecVelocity);
+      }
+    }
+  }
+}

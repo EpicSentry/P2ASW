@@ -1,0 +1,20 @@
+void __thiscall CProjectedWallEntity::NotifyPortalEvent(
+        CProjectedWallEntity *this,
+        PortalEvent_t nEventType,
+        CPortal_Base2D *pNotifier)
+{
+  CHandle<CBaseEntity> *v3; // eax
+
+  if ( nEventType == PORTALEVENT_LINKED )
+  {
+    if ( this )
+    {
+      v3 = (CHandle<CBaseEntity> *)((int (__thiscall *)(CProjectedWallEntity *, int))this->GetRefEHandle)(this, -1);
+      CPortal_Base2D::RemovePortalEventListener(pNotifier, (CHandle<CBaseEntity>)v3->m_Index);
+    }
+    else
+    {
+      CPortal_Base2D::RemovePortalEventListener(pNotifier, (CHandle<CBaseEntity>)-1);
+    }
+  }
+}

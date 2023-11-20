@@ -1,0 +1,6 @@
+void __thiscall C_WeaponPortalgun::Spawn(C_WeaponPortalgun *this)
+{
+  this->Precache(this);
+  C_BaseCombatWeapon::Spawn(this);
+  C_BaseEntity::SetNextThink(this, *(float *)(gpGlobals.m_Index + 12) + 0.1, 0);
+}

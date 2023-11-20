@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: Bullseyes act as targets for other NPC's to attack and to trigger
 //			events 
@@ -89,6 +89,8 @@ BEGIN_DATADESC( CNPC_Bullseye )
 	DEFINE_KEYFIELD( m_fAutoaimRadius, FIELD_FLOAT, "autoaimradius" ),
 	DEFINE_KEYFIELD( m_flFieldOfView, FIELD_FLOAT, "minangle" ),
 	DEFINE_KEYFIELD( m_flMinDistValidEnemy, FIELD_FLOAT, "mindist" ),
+	DEFINE_KEYFIELD( m_bAlwaysTransmitToClient, FIELD_BOOLEAN, "alwaystransmit" ),
+	DEFINE_KEYFIELD( m_nTargetObjectSize, FIELD_INTEGER, "target_size" ),
 
 
 
@@ -120,6 +122,7 @@ CNPC_Bullseye::CNPC_Bullseye( void )
 	g_BullseyeList.AddToList( this );
 	m_flFieldOfView = 360;
 	m_flMinDistValidEnemy = 0;
+	m_bAlwaysTransmitToClient = false;
 }
 
 CNPC_Bullseye::~CNPC_Bullseye( void )
@@ -374,8 +377,15 @@ bool CNPC_Bullseye::CanBeAnEnemyOf( CBaseEntity *pEnemy )
 	}
 
 
+	return (m_nTargetObjectSize == GetObjectScaleLevel()) && BaseClass::CanBeAnEnemyOf( pEnemy );
+}
 
-	return BaseClass::CanBeAnEnemyOf( pEnemy );
+int CNPC_Bullseye::UpdateTransmitState()
+{
+	if (m_bAlwaysTransmitToClient)
+		return BaseClass::SetTransmitState(FL_EDICT_ALWAYS);
+	
+	return BaseClass::UpdateTransmitState();
 }
 
 //-----------------------------------------------------------------------------

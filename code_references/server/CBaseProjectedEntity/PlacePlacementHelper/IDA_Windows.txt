@@ -1,0 +1,26 @@
+void __thiscall CBaseProjectedEntity::PlacePlacementHelper(CBaseProjectedEntity *this, CInfoPlacementHelper *pHelper)
+{
+  const Vector *v3; // eax
+  __int64 v4; // xmm0_8
+  float z; // eax
+  Vector absOrigin; // [esp+8h] [ebp-24h] BYREF
+  Vector vForward; // [esp+14h] [ebp-18h] BYREF
+  Vector vecPosition; // [esp+20h] [ebp-Ch]
+
+  v3 = this->GetEndPoint(this);
+  v4 = *(_QWORD *)&v3->x;
+  z = v3->z;
+  *(_QWORD *)&vecPosition.x = v4;
+  vecPosition.z = z;
+  if ( pHelper )
+  {
+    this->GetVectors(this, &vForward, 0, 0);
+    absOrigin.x = vecPosition.x - vForward.x;
+    absOrigin.y = vecPosition.y - vForward.y;
+    absOrigin.z = vecPosition.z - vForward.z;
+    CBaseEntity::SetAbsOrigin(pHelper, &absOrigin);
+    pHelper->KeyValue(pHelper, "radius", "52");
+    pHelper->KeyValue(pHelper, "force_placement", "1");
+    pHelper->SetOwnerEntity(pHelper, this);
+  }
+}

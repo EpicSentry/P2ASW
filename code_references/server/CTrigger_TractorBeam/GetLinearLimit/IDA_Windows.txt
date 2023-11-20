@@ -1,0 +1,30 @@
+double __thiscall CTrigger_TractorBeam::GetLinearLimit(CTrigger_TractorBeam *this)
+{
+  float m_Value; // xmm1_4
+  float v3; // xmm0_4
+  edict_t *m_pPev; // ecx
+
+  m_Value = this->m_linearLimitTime.m_Value;
+  if ( m_Value == 0.0 )
+    return this->m_linearLimit.m_Value;
+  v3 = gpGlobals->curtime - this->m_linearLimitStartTime.m_Value;
+  if ( v3 >= m_Value )
+  {
+    if ( m_Value != 0.0 )
+    {
+      if ( this->m_Network.m_TimerEvent.m_bRegistered )
+      {
+        *((_BYTE *)&this->m_Network + 76) |= 1u;
+        this->m_linearLimitTime.m_Value = 0.0;
+        return this->m_linearLimit.m_Value;
+      }
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x398u);
+      this->m_linearLimitTime.m_Value = 0.0;
+    }
+    return this->m_linearLimit.m_Value;
+  }
+  return (float)((float)((float)(this->m_linearLimit.m_Value - this->m_linearLimitStart.m_Value) * (float)(v3 / m_Value))
+               + this->m_linearLimitStart.m_Value);
+}

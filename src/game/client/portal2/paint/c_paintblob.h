@@ -21,11 +21,14 @@ public:
 	virtual void PaintBlobPaint( const trace_t &tr );
 
 	virtual void Init( const Vector &vecOrigin, const Vector &vecVelocity, int paintType, float flMaxStreakTime, float flStreakSpeedDampenRate, CBaseEntity* pOwner, bool bSilent, bool bDrawOnly );
-	
-	C_PaintBlobRenderable *m_pRenderable;
-
-private:
+#ifndef USE_BLOBULATOR
+	CHandle<C_PaintBlobRenderable> m_hRenderable;
+#endif
 };
+
+#ifndef USE_BLOBULATOR
+class C_PropPaintBomb;
+
 //==========================================================================//
 // Purpose: Create models that represents a blob's location
 //==========================================================================//
@@ -33,8 +36,9 @@ private:
 class C_PaintBlobRenderable : public C_BaseAnimating
 {
 public:
-
-	C_PaintBlobRenderable( C_PaintBlob *pSourceBlob );
+	
+	C_PaintBlobRenderable( C_PropPaintBomb *pPaintBomb, float flModelScale );
+	C_PaintBlobRenderable( C_PaintBlob *pSourceBlob, float flModelScale );
 	~C_PaintBlobRenderable();
 
 	virtual void	Spawn( void );
@@ -59,10 +63,10 @@ public:
 private:
 
 	C_PaintBlob *m_pSourceBlob;
+	C_PropPaintBomb *m_pPaintBomb;
 
 };
 
-typedef C_PaintBlob CPaintBlob;
+#endif // USE_BLOBULATOR
 
-
-#endif
+#endif // C_PAINTBLOB_H

@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright (c) Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -27,7 +27,6 @@ void InitParamsRefract_DX9( CBaseVSShader *pShader, IMaterialVar** params, const
 {
 	SET_FLAGS2( MATERIAL_VAR2_NEEDS_TANGENT_SPACES );
 	SET_FLAGS2( MATERIAL_VAR2_SUPPORTS_HW_SKINNING );
-	SET_FLAGS( MATERIAL_VAR_TRANSLUCENT );
 	if( !params[info.m_nEnvmapTint]->IsDefined() )
 	{
 		params[info.m_nEnvmapTint]->SetVecValue( 1.0f, 1.0f, 1.0f );
@@ -80,7 +79,21 @@ void InitParamsRefract_DX9( CBaseVSShader *pShader, IMaterialVar** params, const
 	{
 		params[info.m_nMagnifyScale]->SetIntValue( 0 );
 	}
-	SET_FLAGS2( MATERIAL_VAR2_NEEDS_POWER_OF_TWO_FRAME_BUFFER_TEXTURE );
+	if ( !params[info.m_nLocalRefract]->IsDefined() )
+	{
+		params[info.m_nLocalRefract]->SetIntValue( 0 );
+	}
+	if ( !params[info.m_nLocalRefractDepth]->IsDefined() )
+	{
+		params[info.m_nLocalRefractDepth]->SetFloatValue( 0.05f );
+	}
+
+	// Local refract doesn't need a copy of the frame buffer and doesn't require the translucent flag
+	if ( params[info.m_nLocalRefract]->GetIntValue() == 0 )
+	{
+		SET_FLAGS( MATERIAL_VAR_TRANSLUCENT );
+		SET_FLAGS2( MATERIAL_VAR2_NEEDS_POWER_OF_TWO_FRAME_BUFFER_TEXTURE );
+	}
 }
 
 void InitRefract_DX9( CBaseVSShader *pShader, IMaterialVar** params, Refract_DX9_Vars_t &info )
@@ -179,6 +192,10 @@ void DrawRefract_DX9( CBaseVSShader *pShader, IMaterialVar** params, IShaderDyna
 			pShaderShadow->EnableSRGBRead( SHADER_SAMPLER5, true );
 		}
 
+		// Sampler for nvidia's stereo hackery
+		pShaderShadow->EnableTexture( SHADER_SAMPLER6, true );
+		pShaderShadow->EnableSRGBRead( SHADER_SAMPLER6, false );
+
 		pShaderShadow->EnableSRGBWrite( true );
 
 		unsigned int flags = VERTEX_POSITION | VERTEX_NORMAL;
@@ -208,7 +225,11 @@ void DrawRefract_DX9( CBaseVSShader *pShader, IMaterialVar** params, IShaderDyna
 		SET_STATIC_VERTEX_SHADER_COMBO( COLORMODULATE, bColorModulate );
 		SET_STATIC_VERTEX_SHADER( refract_vs20 );
 
-		if ( g_pHardwareConfig->SupportsPixelShaders_2_b() )
+		// We have to do this in the shader on R500 or Leopard
+
+		bool bShaderSRGBConvert = IsOSX() /* && ( g_pHardwareConfig->FakeSRGBWrite() || !g_pHardwareConfig->CanDoSRGBReadFromRTs() ) */; // I hate these Swarm limitations
+
+		if ( g_pHardwareConfig->SupportsPixelShaders_2_b() /* || g_pHardwareConfig->ShouldAlwaysUseShaderModel2bShaders() */ ) // always send OpenGL down the ps2b path
 		{
 			DECLARE_STATIC_PIXEL_SHADER( refract_ps20b );
 			SET_STATIC_PIXEL_SHADER_COMBO( BLUR,  blurAmount );
@@ -220,6 +241,8 @@ void DrawRefract_DX9( CBaseVSShader *pShader, IMaterialVar** params, IShaderDyna
 			SET_STATIC_PIXEL_SHADER_COMBO( SECONDARY_NORMAL, bSecondaryNormal );
 			SET_STATIC_PIXEL_SHADER_COMBO( MIRRORABOUTVIEWPORTEDGES, bMirrorAboutViewportEdges );
 			SET_STATIC_PIXEL_SHADER_COMBO( MAGNIFY, bUseMagnification );
+			SET_STATIC_PIXEL_SHADER_COMBO( SHADER_SRGB_READ, bShaderSRGBConvert );
+			SET_STATIC_PIXEL_SHADER_COMBO( LOCALREFRACT, ( params[info.m_nLocalRefract]->GetIntValue() != 0 ) );
 			SET_STATIC_PIXEL_SHADER( refract_ps20b );
 		}
 		else
@@ -234,6 +257,7 @@ void DrawRefract_DX9( CBaseVSShader *pShader, IMaterialVar** params, IShaderDyna
 			SET_STATIC_PIXEL_SHADER_COMBO( SECONDARY_NORMAL, bSecondaryNormal );
 			SET_STATIC_PIXEL_SHADER_COMBO( MIRRORABOUTVIEWPORTEDGES, bMirrorAboutViewportEdges );
 			SET_STATIC_PIXEL_SHADER_COMBO( MAGNIFY, bUseMagnification );
+			SET_STATIC_PIXEL_SHADER_COMBO( LOCALREFRACT, ( params[info.m_nLocalRefract]->GetIntValue() != 0 ) );
 			SET_STATIC_PIXEL_SHADER( refract_ps20 );
 		}
 		pShader->DefaultFog();
@@ -251,10 +275,24 @@ void DrawRefract_DX9( CBaseVSShader *pShader, IMaterialVar** params, IShaderDyna
 		if ( params[info.m_nBaseTexture]->IsTexture() )
 		{
 			pShader->BindTexture( SHADER_SAMPLER2, info.m_nBaseTexture, info.m_nFrame );
+
+			// Set refract texture dimensions
+			ITexture *pTarget = params[info.m_nBaseTexture]->GetTextureValue();
+			int nWidth = pTarget->GetActualWidth();
+			int nHeight = pTarget->GetActualHeight();
+			float c7[4] = { nHeight / nWidth, 1.0f, params[info.m_nLocalRefractDepth]->GetFloatValue(), 0.0f };
+			pShaderAPI->SetPixelShaderConstant( 7, c7, 1 );
 		}
 		else
 		{
 			pShaderAPI->BindStandardTexture( SHADER_SAMPLER2, TEXTURE_FRAME_BUFFER_FULL_TEXTURE_0 );
+
+			// Set refract texture dimensions
+			int nWidth = 0;
+			int nHeight = 0;
+			pShaderAPI->GetStandardTextureDimensions( &nWidth, &nHeight, TEXTURE_FRAME_BUFFER_FULL_TEXTURE_0 );
+			float c7[4] = { nHeight / nWidth, 1.0f, params[info.m_nLocalRefractDepth]->GetFloatValue(), 0.0f };
+			pShaderAPI->SetPixelShaderConstant( 7, c7, 1 );
 		}
 
 		pShader->BindTexture( SHADER_SAMPLER3, info.m_nNormalMap, info.m_nBumpFrame );
@@ -273,16 +311,25 @@ void DrawRefract_DX9( CBaseVSShader *pShader, IMaterialVar** params, IShaderDyna
 		{
 			pShader->BindTexture( SHADER_SAMPLER5, info.m_nRefractTintTexture, info.m_nRefractTintTextureFrame );
 		}
-
+#if 0
+		bool bNvidiaStereoActiveThisFrame = pShaderAPI->IsStereoActiveThisFrame();
+		if ( bNvidiaStereoActiveThisFrame )
+		{
+			pShaderAPI->BindStandardTexture( SHADER_SAMPLER6, TEXTURE_STEREO_PARAM_MAP );
+		}
+#else
+		bool bNvidiaStereoActiveThisFrame = false;
+#endif
 		DECLARE_DYNAMIC_VERTEX_SHADER( refract_vs20 );
 		SET_DYNAMIC_VERTEX_SHADER_COMBO( SKINNING,  pShaderAPI->GetCurrentNumBones() > 0 );
 		SET_DYNAMIC_VERTEX_SHADER_COMBO( COMPRESSED_VERTS, (int)vertexCompression );
 		SET_DYNAMIC_VERTEX_SHADER( refract_vs20 );
 
-		if ( g_pHardwareConfig->SupportsPixelShaders_2_b() )
+		if ( g_pHardwareConfig->SupportsPixelShaders_2_b() /*|| g_pHardwareConfig->ShouldAlwaysUseShaderModel2bShaders()*/ ) // always send OpenGL down the ps2b path
 		{
 			DECLARE_DYNAMIC_PIXEL_SHADER( refract_ps20b );
 			SET_DYNAMIC_PIXEL_SHADER_COMBO( WRITE_DEPTH_TO_DESTALPHA, bWriteZ && bFullyOpaque && pShaderAPI->ShouldWriteDepthToDestAlpha() );
+			SET_DYNAMIC_PIXEL_SHADER_COMBO( D_NVIDIA_STEREO, bNvidiaStereoActiveThisFrame );
 			SET_DYNAMIC_PIXEL_SHADER( refract_ps20b );
 		}
 		else

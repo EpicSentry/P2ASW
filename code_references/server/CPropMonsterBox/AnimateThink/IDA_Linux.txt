@@ -1,0 +1,180 @@
+void __cdecl CPropMonsterBox::AnimateThink(CPropMonsterBox *const this)
+{
+  IPhysicsObject *m_pPhysicsObject; // esi
+  int v2; // eax
+  const Vector *v3; // eax
+  float m_fValue; // xmm3_4
+  float v5; // xmm0_4
+  int v6; // eax
+  int v7; // eax
+  int m_iEFlags; // eax
+  int v9; // eax
+  int v10; // eax
+  float v11; // [esp+2Ch] [ebp-13Ch]
+  float v12; // [esp+2Ch] [ebp-13Ch]
+  float v13; // [esp+2Ch] [ebp-13Ch]
+  float v14; // [esp+40h] [ebp-128h]
+  float v15; // [esp+40h] [ebp-128h]
+  float v16; // [esp+50h] [ebp-118h]
+  float v17; // [esp+50h] [ebp-118h]
+  const Vector *v18; // [esp+50h] [ebp-118h]
+  Vector *hullMax; // [esp+64h] [ebp-104h]
+  BASEPTR v20; // [esp+68h] [ebp-100h] BYREF
+  trace_t tr; // [esp+78h] [ebp-F0h] BYREF
+  trace_t tr_0; // [esp+CCh] [ebp-9Ch] BYREF
+  Vector vecVelocity; // [esp+120h] [ebp-48h] BYREF
+  AngularImpulse angImpulse; // [esp+12Ch] [ebp-3Ch] BYREF
+  Vector vecUp_0; // [esp+138h] [ebp-30h] BYREF
+  Vector vecAbsEnd; // [esp+144h] [ebp-24h] BYREF
+
+  (*((void (__cdecl **)(CPropMonsterBox *const))this->_vptr_IHandleEntity + 200))(this);
+  (*((void (__cdecl **)(CPropMonsterBox *const, CPropMonsterBox *const))this->_vptr_IHandleEntity + 213))(this, this);
+  CBaseEntity::ThinkSet(
+    &v20,
+    this,
+    (BASEPTR)(unsigned int)CPropMonsterBox::AnimateThink,
+    gpGlobals->curtime + 0.1,
+    "Animate");
+  if ( this->m_bIsShortcircuit )
+  {
+    if ( !this->m_bSequenceFinished )
+      return;
+    v2 = CBaseAnimating::LookupSequence(this, "shortcircuit");
+LABEL_12:
+    CBaseAnimating::ResetSequence(this, v2);
+    return;
+  }
+  m_pPhysicsObject = this->m_pPhysicsObject;
+  vecVelocity = vec3_origin;
+  if ( m_pPhysicsObject )
+    (*((void (__cdecl **)(IPhysicsObject *, Vector *, _DWORD))m_pPhysicsObject->_vptr_IPhysicsObject + 53))(
+      m_pPhysicsObject,
+      &vecVelocity,
+      0);
+  if ( (float)((float)((float)(vecVelocity.x * vecVelocity.x) + (float)(vecVelocity.y * vecVelocity.y))
+             + (float)(vecVelocity.z * vecVelocity.z)) <= (float)(this->m_flBoxSwitchSpeed * this->m_flBoxSwitchSpeed) )
+  {
+    if ( !this->m_bHeld && this->m_bIsFlying && !this->m_bForcedAsBox )
+    {
+      hullMax = (Vector *)(*((int (__cdecl **)(CBaseEntity::NetworkVar_m_Collision *))this->m_Collision._vptr_ICollideable
+                           + 2))(&this->m_Collision);
+      v3 = (const Vector *)(*((int (__cdecl **)(CBaseEntity::NetworkVar_m_Collision *))this->m_Collision._vptr_ICollideable
+                            + 1))(&this->m_Collision);
+      if ( (this->m_iEFlags & 0x800) != 0 )
+      {
+        v18 = v3;
+        CBaseEntity::CalcAbsolutePosition(this);
+        v3 = v18;
+        if ( (this->m_iEFlags & 0x800) != 0 )
+        {
+          CBaseEntity::CalcAbsolutePosition(this);
+          v3 = v18;
+        }
+      }
+      UTIL_TraceHull(&this->m_vecAbsOrigin, &this->m_vecAbsOrigin, v3, hullMax, 0x200400Bu, this, 0, &tr);
+      if ( tr.startsolid || tr.allsolid )
+      {
+        (*((void (__cdecl **)(CPropMonsterBox *const, _DWORD, _DWORD, trace_t *))this->_vptr_IHandleEntity + 135))(
+          this,
+          0,
+          0,
+          &tr_0);
+        angImpulse.x = RandomFloat(-1090519040, 1056964608);
+        angImpulse.y = RandomFloat(-1090519040, 1056964608);
+        angImpulse.z = RandomFloat(-1090519040, 1056964608);
+        v11 = RandomFloat(1071225242, 0x40000000);
+        v16 = v11;
+        v12 = RandomFloat(-1102263091, 1045220557);
+        v14 = v12;
+        v13 = RandomFloat(-1102263091, 1045220557);
+        m_fValue = sv_monster_turret_velocity.m_pParent->m_Value.m_fValue;
+        vecUp_0.y = (float)(v14 + tr_0.startpos.y) * m_fValue;
+        vecUp_0.z = (float)(v16 + tr_0.startpos.z) * m_fValue;
+        vecUp_0.x = (float)(v13 + tr_0.startpos.x) * m_fValue;
+        CBaseEntity::SetGroundEntity(this, 0);
+        (*((void (__cdecl **)(IPhysicsObject *))m_pPhysicsObject->_vptr_IPhysicsObject + 25))(m_pPhysicsObject);
+        (*((void (__cdecl **)(IPhysicsObject *, const Vector *, AngularImpulse *))m_pPhysicsObject->_vptr_IPhysicsObject
+         + 52))(
+          m_pPhysicsObject,
+          &vec3_origin,
+          &angImpulse);
+        (*((void (__cdecl **)(IPhysicsObject *, Vector *))m_pPhysicsObject->_vptr_IPhysicsObject + 61))(
+          m_pPhysicsObject,
+          &vecUp_0);
+        CBaseEntity::ApplyAbsVelocityImpulse(this, &vecUp_0);
+      }
+      else
+      {
+        this->m_bIsFlying = 0;
+        CPropMonsterBox::BecomeMonster(this, 0);
+      }
+    }
+  }
+  else if ( !this->m_bHeld && !this->m_bIsFlying )
+  {
+    this->m_bIsFlying = 1;
+    CPropMonsterBox::BecomeBox(this, 0);
+  }
+  if ( this->m_bSequenceFinished )
+  {
+    if ( this->m_bHeld || this->m_bForcedAsBox )
+    {
+      v2 = CBaseAnimating::LookupSequence(this, "hermit_idle");
+      goto LABEL_12;
+    }
+    (*((void (__cdecl **)(CPropMonsterBox *const, _DWORD, _DWORD, Vector *))this->_vptr_IHandleEntity + 135))(
+      this,
+      0,
+      0,
+      &vecUp_0);
+    if ( vecUp_0.z < 0.60000002 )
+    {
+      v2 = CBaseAnimating::LookupSequence(this, "fallover_idle");
+      goto LABEL_12;
+    }
+    v5 = vecUp_0.z * 32.0;
+    if ( (this->m_iEFlags & 0x800) != 0 )
+    {
+      v15 = vecUp_0.y * 32.0;
+      v17 = vecUp_0.x * 32.0;
+      CBaseEntity::CalcAbsolutePosition(this);
+      m_iEFlags = this->m_iEFlags;
+      vecAbsEnd.x = this->m_vecAbsOrigin.x - v17;
+      vecAbsEnd.y = this->m_vecAbsOrigin.y - v15;
+      vecAbsEnd.z = this->m_vecAbsOrigin.z - v5;
+      if ( (m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(this);
+    }
+    else
+    {
+      vecAbsEnd.x = this->m_vecAbsOrigin.x - (float)(vecUp_0.x * 32.0);
+      vecAbsEnd.y = this->m_vecAbsOrigin.y - (float)(vecUp_0.y * 32.0);
+      vecAbsEnd.z = this->m_vecAbsOrigin.z - v5;
+    }
+    UTIL_TraceLine(&this->m_vecAbsOrigin, &vecAbsEnd, 0x200400Bu, this, 0, &tr_0);
+    if ( tr_0.fraction == 1.0 )
+    {
+      v2 = CBaseAnimating::LookupSequence(this, "intheair");
+      goto LABEL_12;
+    }
+    v6 = RandomInt(0, 2);
+    switch ( v6 )
+    {
+      case 1:
+        v10 = CBaseAnimating::LookupSequence(this, "straight02");
+        CBaseAnimating::ResetSequence(this, v10);
+        this->m_flPushStrength = 0.69999999;
+        break;
+      case 2:
+        v9 = CBaseAnimating::LookupSequence(this, "straight03");
+        CBaseAnimating::ResetSequence(this, v9);
+        this->m_flPushStrength = 1.1;
+        break;
+      case 0:
+        v7 = CBaseAnimating::LookupSequence(this, "straight01");
+        CBaseAnimating::ResetSequence(this, v7);
+        this->m_flPushStrength = 1.0;
+        break;
+    }
+  }
+}

@@ -1,0 +1,26 @@
+void __thiscall C_Trigger_TractorBeam::RestoreToToolRecordedState(C_Trigger_TractorBeam *this, KeyValues *pKV)
+{
+  _DWORD vecMin[2]; // [esp+Ch] [ebp-18h] BYREF
+  unsigned __int64 vecMin_8; // [esp+14h] [ebp-10h] BYREF
+  float v5; // [esp+1Ch] [ebp-8h]
+  float v6; // [esp+20h] [ebp-4h]
+
+  this->m_flStartTime = KeyValues::GetFloat(pKV, "starttime", 0.0);
+  this->m_bReversed = KeyValues::GetInt(pKV, "reversed", 0) == 1;
+  this->m_linearForce = KeyValues::GetFloat(pKV, "force", 0.0);
+  this->m_vStart.x = KeyValues::GetFloat(pKV, "sp_x", 0.0);
+  this->m_vStart.y = KeyValues::GetFloat(pKV, "sp_y", 0.0);
+  this->m_vStart.z = KeyValues::GetFloat(pKV, "sp_z", 0.0);
+  this->m_vEnd.x = KeyValues::GetFloat(pKV, "ep_x", 0.0);
+  this->m_vEnd.y = KeyValues::GetFloat(pKV, "ep_y", 0.0);
+  this->m_vEnd.z = KeyValues::GetFloat(pKV, "ep_z", 0.0);
+  v5 = FLOAT_16384_0;
+  v6 = FLOAT_16384_0;
+  *(float *)vecMin = FLOAT_N16384_0;
+  *(float *)&vecMin[1] = FLOAT_N16384_0;
+  vecMin_8 = __PAIR64__(LODWORD(FLOAT_16384_0), LODWORD(FLOAT_N16384_0));
+  C_BaseEntity::SetSize(this, (const Vector *)vecMin, (const Vector *)((char *)&vecMin_8 + 4));
+  this->m_pMaterial1 = materials->FindMaterial(materials, "effects/tractor_beam", 0, 0, 0);
+  this->m_pMaterial2 = materials->FindMaterial(materials, "effects/tractor_beam2", 0, 0, 0);
+  this->m_pMaterial3 = materials->FindMaterial(materials, "effects/tractor_beam3", 0, 0, 0);
+}

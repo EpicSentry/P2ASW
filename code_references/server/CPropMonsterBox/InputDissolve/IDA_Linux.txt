@@ -1,0 +1,4 @@
+void __cdecl CPropMonsterBox::InputDissolve(CPropMonsterBox *const this, inputdata_t *const in)
+{
+  CTriggerPortalCleanser::FizzleBaseAnimating(0, this);
+}

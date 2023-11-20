@@ -1,0 +1,16 @@
+void __cdecl CPropIndicatorPanel::ResetTimer(CPropIndicatorPanel *const this)
+{
+  unsigned int m_Index; // eax
+  CLabIndicatorPanel *const *v2; // edx
+
+  m_Index = this->m_hIndicatorPanel.m_Index;
+  if ( m_Index != -1 )
+  {
+    v2 = (CLabIndicatorPanel *const *)((char *)g_pEntityList + 24 * (unsigned __int16)m_Index);
+    if ( *((_DWORD *)v2 + 2) == HIWORD(m_Index) )
+    {
+      if ( *((_DWORD *)v2 + 1) )
+        CLabIndicatorPanel::ResetTimer(v2[1]);
+    }
+  }
+}

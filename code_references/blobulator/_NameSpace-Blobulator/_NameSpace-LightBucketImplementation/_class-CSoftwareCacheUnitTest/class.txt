@@ -1,0 +1,47 @@
+class Blobulator::LightBucketImplementation::CSoftwareCacheUnitTest
+{
+    enum UnitTest
+    {
+        TEST_EMPTY=0,
+        TEST_NOT_EMPTY=1,
+        TEST_CLEAR=2,
+        TEST_RESET_TO_FULL=3,
+        TEST_WITH_ONE_PARAMETER=4,
+        TEST_PUSH_ONE=4,
+        TEST_POP_ONE=5,
+        TEST_PUSH_ALL=6,
+        TEST_POP_ALL=7,
+        TEST_POP_ALL_INVERTED=8,
+        TEST_PUSH_AND_POP_ALL=9,
+        TEST_PULL_FROM_PUSH_TO=10,
+        TEST_PULL_FROM_PUSH_TO_INFINITE=11
+    };
+    public void CSoftwareCacheUnitTest(class Blobulator::LightBucketImplementation::CSoftwareCacheUnitTest & );
+    public void CSoftwareCacheUnitTest();
+    public enum Blobulator::LightBucketImplementation::CSoftwareCacheUnitTest::UnitTest m_Kind;
+    public int m_nData;
+    public class Blobulator::LightBucketImplementation::CLockLessStack<12> m_Stack1;
+    public class Blobulator::LightBucketImplementation::CLockLessStack<12> m_Stack2;
+    public int m_nStopInDebugger;
+    public int m_nPad1;
+    public int m_nPad2;
+    public int m_nPad3;
+    public void SetTestToRun(class Blobulator::LightBucketImplementation::CLockLessStack<12> & ,class Blobulator::LightBucketImplementation::CLockLessStack<12> & ,enum Blobulator::LightBucketImplementation::CSoftwareCacheUnitTest::UnitTest ,int );
+    public void SetTestToRun(class Blobulator::LightBucketImplementation::CLockLessStack<12> & ,enum Blobulator::LightBucketImplementation::CSoftwareCacheUnitTest::UnitTest ,int );
+    public void SetTestToRun(class Blobulator::LightBucketImplementation::CLockLessStack<12> & ,enum Blobulator::LightBucketImplementation::CSoftwareCacheUnitTest::UnitTest );
+    public void RunTest();
+    public void TestEmpty();
+    public void TestNotEmpty();
+    public void TestPushOne(int );
+    public void TestPopOne(int );
+    public void TestPushAll(int );
+    public void TestPopAll(int );
+    public void TestPopAllInverted(int );
+    public void TestPushAndPopAll(int );
+    public void TestClear();
+    public void TestResetToFull();
+    public void TestPullFromPushTo(int ,bool );
+    public void ~CSoftwareCacheUnitTest();
+    public class Blobulator::LightBucketImplementation::CSoftwareCacheUnitTest & operator=(class Blobulator::LightBucketImplementation::CSoftwareCacheUnitTest & );
+    public void * __vecDelDtor(unsigned int );
+};

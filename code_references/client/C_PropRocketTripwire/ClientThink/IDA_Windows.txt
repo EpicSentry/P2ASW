@@ -1,0 +1,35 @@
+void __usercall C_PropRocketTripwire::ClientThink(C_PropRocketTripwire *this@<ecx>, int a2@<esi>)
+{
+  QAngle angMuzzleDir; // [esp+20h] [ebp-30h] BYREF
+  Vector vEndPoint; // [esp+2Ch] [ebp-24h] BYREF
+  Vector vecAimDir; // [esp+38h] [ebp-18h] BYREF
+  Vector vecMuzzle; // [esp+44h] [ebp-Ch] BYREF
+  int savedregs; // [esp+50h] [ebp+0h] BYREF
+
+  if ( C_BaseAnimating::IsBoneAccessAllowed((C_PropRocketTripwire *)((char *)this - 12)) )
+  {
+    (*((void (__thiscall **)(const char ***, int, Vector *, QAngle *, int))this[-1].m_filterBeams.m_PassClassnames.m_pElements
+     + 35))(
+      &this[-1].m_filterBeams.m_PassClassnames.m_pElements,
+      this->m_beamHelper.m_beams.m_Size,
+      &vecMuzzle,
+      &angMuzzleDir,
+      a2);
+    AngleVectors(&angMuzzleDir, &vecAimDir);
+    (*(void (__thiscall **)(int *))(this->m_iMuzzleAttachment + 8))(&this->m_iMuzzleAttachment);
+    vEndPoint.y = vecMuzzle.y + (float)(vecAimDir.y * 8192.0);
+    vEndPoint.x = vecMuzzle.x + (float)(vecAimDir.x * 8192.0);
+    vEndPoint.z = vecMuzzle.z + (float)(vecAimDir.z * 8192.0);
+    C_PortalBeamHelper::UpdatePoints(
+      (C_PortalBeamHelper *)&this->m_vecRenderOriginOverride.z,
+      (int)&savedregs,
+      &vecMuzzle,
+      &vEndPoint,
+      0x46004001u,
+      (ITraceFilter *)&this->m_iMuzzleAttachment,
+      0);
+    (*(void (__thiscall **)(int *, _DWORD))(this[-1].m_filterBeams.m_PassClassnames.m_Size + 464))(
+      &this[-1].m_filterBeams.m_PassClassnames.m_Size,
+      LODWORD(FLOAT_N1293_0));
+  }
+}

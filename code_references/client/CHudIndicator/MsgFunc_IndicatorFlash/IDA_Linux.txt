@@ -1,0 +1,171 @@
+void __cdecl CHudIndicator::MsgFunc_IndicatorFlash(CHudIndicator *const this, bf_read *const msg)
+{
+  int m_nBitsAvail; // ecx
+  uint32 v3; // esi
+  int v4; // ecx
+  int v5; // ebx
+  CGlobalVarsBase *v6; // ebx
+  int v7; // ecx
+  float curtime; // xmm1_4
+  int v9; // ecx
+  float v10; // edi
+  const uint32 *v11; // ecx
+  float v12; // xmm1_4
+  float v13; // xmm2_4
+  const uint32 *m_pDataIn; // ebx
+  const uint32 *v15; // ecx
+  const uint32 *v16; // esi
+  uint32 v17; // edi
+  bool v18; // zf
+  uint32 v19; // edi
+  unsigned int v20; // ebx
+  uint32 v21; // esi
+  uint32 v22; // esi
+  uint32 v23; // [esp+4h] [ebp-14h]
+  uint32 m_nInBufWord; // [esp+8h] [ebp-10h]
+  uint32 v25; // [esp+8h] [ebp-10h]
+
+  m_nBitsAvail = msg->m_nBitsAvail;
+  if ( m_nBitsAvail <= 7 )
+  {
+    m_nInBufWord = msg->m_nInBufWord;
+    m_pDataIn = msg->m_pDataIn;
+    if ( m_pDataIn != msg->m_pBufferEnd )
+    {
+      if ( m_pDataIn <= msg->m_pBufferEnd )
+      {
+        v19 = *m_pDataIn;
+        v18 = !msg->m_bOverflow;
+        msg->m_pDataIn = m_pDataIn + 1;
+        msg->m_nInBufWord = v19;
+        if ( v18 )
+        {
+          v20 = (v19 & CBitBuffer::s_nMaskTable[8 - m_nBitsAvail]) << m_nBitsAvail;
+          msg->m_nBitsAvail = m_nBitsAvail + 24;
+          v5 = m_nInBufWord | v20;
+          msg->m_nInBufWord = v19 >> (8 - m_nBitsAvail);
+          goto LABEL_4;
+        }
+      }
+      else
+      {
+        msg->m_bOverflow = 1;
+        msg->m_nInBufWord = 0;
+      }
+      v5 = 0;
+      goto LABEL_4;
+    }
+    msg->m_nBitsAvail = 1;
+    msg->m_pDataIn = m_pDataIn + 1;
+    v5 = 0;
+    msg->m_nInBufWord = 0;
+    msg->m_bOverflow = 1;
+  }
+  else
+  {
+    v3 = msg->m_nInBufWord;
+    v4 = m_nBitsAvail - 8;
+    msg->m_nBitsAvail = v4;
+    v5 = v3 & CBitBuffer::s_nMaskTable[8];
+    if ( v4 )
+    {
+      msg->m_nInBufWord = v3 >> 8;
+    }
+    else
+    {
+      v15 = msg->m_pDataIn;
+      msg->m_nBitsAvail = 32;
+      if ( v15 == msg->m_pBufferEnd )
+      {
+        msg->m_nBitsAvail = 1;
+        msg->m_nInBufWord = 0;
+        msg->m_pDataIn = v15 + 1;
+      }
+      else if ( v15 <= msg->m_pBufferEnd )
+      {
+        v22 = *v15;
+        msg->m_pDataIn = v15 + 1;
+        msg->m_nInBufWord = v22;
+      }
+      else
+      {
+        msg->m_bOverflow = 1;
+        msg->m_nInBufWord = 0;
+      }
+    }
+  }
+LABEL_4:
+  this->m_nIndicatorType = v5;
+  v6 = gpGlobals;
+  this->m_flStartTime = gpGlobals->curtime;
+  v7 = msg->m_nBitsAvail;
+  curtime = v6->curtime;
+  if ( v7 <= 31 )
+  {
+    v23 = msg->m_nInBufWord;
+    v16 = msg->m_pDataIn;
+    if ( v16 == msg->m_pBufferEnd )
+    {
+      msg->m_nBitsAvail = 1;
+      v10 = 0.0;
+      msg->m_nInBufWord = 0;
+      msg->m_pDataIn = v16 + 1;
+      msg->m_bOverflow = 1;
+      goto LABEL_10;
+    }
+    if ( v16 <= msg->m_pBufferEnd )
+    {
+      v17 = *v16;
+      v18 = !msg->m_bOverflow;
+      msg->m_pDataIn = v16 + 1;
+      v25 = v17;
+      msg->m_nInBufWord = v17;
+      if ( v18 )
+      {
+        msg->m_nBitsAvail = v7;
+        LODWORD(v10) = v23 | ((CBitBuffer::s_nMaskTable[32 - v7] & v17) << v7);
+        msg->m_nInBufWord = v25 >> (32 - v7);
+        goto LABEL_10;
+      }
+    }
+    else
+    {
+      msg->m_bOverflow = 1;
+      msg->m_nInBufWord = 0;
+    }
+    v10 = 0.0;
+  }
+  else
+  {
+    v9 = v7 - 32;
+    msg->m_nBitsAvail = v9;
+    LODWORD(v10) = msg->m_nInBufWord & CBitBuffer::s_nMaskTable[32];
+    if ( !v9 )
+    {
+      v11 = msg->m_pDataIn;
+      msg->m_nBitsAvail = 32;
+      if ( v11 == msg->m_pBufferEnd )
+      {
+        msg->m_nBitsAvail = 1;
+        msg->m_nInBufWord = 0;
+        msg->m_pDataIn = v11 + 1;
+        goto LABEL_10;
+      }
+      if ( v11 <= msg->m_pBufferEnd )
+      {
+        v21 = *v11;
+        msg->m_pDataIn = v11 + 1;
+        msg->m_nInBufWord = v21;
+        goto LABEL_10;
+      }
+      msg->m_bOverflow = 1;
+    }
+    msg->m_nInBufWord = 0;
+  }
+LABEL_10:
+  v12 = curtime + v10;
+  this->m_flDisplayTime = v12;
+  v13 = v6->curtime + 0.2;
+  this->m_flFadeOutTime = v12 - 0.2;
+  this->m_flFadeInTime = v13;
+}

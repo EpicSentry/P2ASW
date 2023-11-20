@@ -1,0 +1,41 @@
+void __cdecl CHUDQuickInfo::DrawCrosshair(CHUDQuickInfo *const this, Color color, float flApparentZ)
+{
+  int v3; // ebx
+  int v4; // esi
+
+  v3 = ScreenWidth() / 2;
+  v4 = ScreenHeight() / 2;
+  (*(void (__cdecl **)(vgui::ISurface *, _DWORD))(*(_DWORD *)g_pVGuiSurface + 80))(g_pVGuiSurface, LODWORD(flApparentZ));
+  (*(void (__cdecl **)(vgui::ISurface *, Color))(*(_DWORD *)g_pVGuiSurface + 56))(g_pVGuiSurface, color);
+  (*(void (__cdecl **)(vgui::ISurface *, int, int, int, int))(*(_DWORD *)g_pVGuiSurface + 60))(
+    g_pVGuiSurface,
+    v3,
+    v4,
+    v3 + 1,
+    v4 + 1);
+  (*(void (__cdecl **)(vgui::ISurface *, int, int, int, int))(*(_DWORD *)g_pVGuiSurface + 60))(
+    g_pVGuiSurface,
+    v3 + this->m_nCursorRadius,
+    v4,
+    v3 + this->m_nCursorRadius + 1,
+    v4 + 1);
+  (*(void (__cdecl **)(vgui::ISurface *, int, int, int, int))(*(_DWORD *)g_pVGuiSurface + 60))(
+    g_pVGuiSurface,
+    v3 - this->m_nCursorRadius,
+    v4,
+    v3 - this->m_nCursorRadius + 1,
+    v4 + 1);
+  (*(void (__cdecl **)(vgui::ISurface *, int, int, int, int))(*(_DWORD *)g_pVGuiSurface + 60))(
+    g_pVGuiSurface,
+    v3,
+    this->m_nCursorRadius + v4,
+    v3 + 1,
+    this->m_nCursorRadius + v4 + 1);
+  (*(void (__cdecl **)(vgui::ISurface *, int, int, int, int))(*(_DWORD *)g_pVGuiSurface + 60))(
+    g_pVGuiSurface,
+    v3,
+    v4 - this->m_nCursorRadius,
+    v3 + 1,
+    v4 - this->m_nCursorRadius + 1);
+  (*(void (__cdecl **)(vgui::ISurface *))(*(_DWORD *)g_pVGuiSurface + 84))(g_pVGuiSurface);
+}

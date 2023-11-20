@@ -1,0 +1,31 @@
+void __usercall CTrigger_TractorBeam::UpdateOnRemove(CTrigger_TractorBeam *this@<ecx>, int a2@<edi>)
+{
+  CTrigger_TractorBeam *v2; // esi
+  IPhysicsMotionController *m_pController; // ecx
+  int v4; // ebx
+  IPhysicsObject **v5; // edi
+  int i; // esi
+  CTrigger_TractorBeam *v7; // [esp+4h] [ebp-4h]
+
+  v2 = this;
+  m_pController = this->m_pController;
+  v7 = v2;
+  if ( m_pController )
+  {
+    v4 = ((int (__thiscall *)(IPhysicsMotionController *, int))m_pController->CountObjects)(m_pController, a2);
+    v5 = (IPhysicsObject **)operator new(4 * v4);
+    v2->m_pController->GetObjects(v2->m_pController, v5);
+    for ( i = 0; i < v4; ++i )
+    {
+      if ( v5[i] )
+        v5[i]->Wake(v5[i]);
+    }
+    v2 = v7;
+    physenv->DestroyMotionController(physenv, v7->m_pController);
+    v7->m_pController = 0;
+    free(v5);
+  }
+  StopParticleEffects(v2);
+  v2->StopLoopingSounds(v2);
+  CBaseVPhysicsTrigger::UpdateOnRemove((CBaseTrigger *)v2);
+}

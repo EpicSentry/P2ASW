@@ -11,13 +11,11 @@
 #include "portal_placement.h"
 #include "weapon_portalgun_shared.h"
 
-#if 0
 #if defined( GAME_DLL )
 #include "baseprojector.h"
 #else
 #include "c_baseprojectedentity.h"
 typedef C_BaseProjectedEntity CBaseProjectedEntity;
-#endif
 #endif
 
 CUtlVector<CProp_Portal *> CProp_Portal_Shared::AllPortals;
@@ -151,7 +149,7 @@ void CProp_Portal::DelayedPlacementThink( void )
 
 	// Move to new location
 	NewLocation( m_vDelayedPosition, m_qDelayedAngles );
-#if 0
+
 #if defined( GAME_DLL )
 	// Test for our surface moving out from behind us
 	SetContextThink( &CProp_Portal::TestRestingSurfaceThink, gpGlobals->curtime + 0.1f, s_szTestRestingSurfaceThinkContext );
@@ -160,11 +158,9 @@ void CProp_Portal::DelayedPlacementThink( void )
 #else
 	CBaseProjectedEntity::TestAllForProjectionChanges();
 #endif
-#endif
 }
 
 // default to sane-looking but incorrect portal height for CEG - Updated in constructor
-bool CProp_Portal::ms_DefaultPortalSizeInitialized = false; // for CEG protection
 float CProp_Portal::ms_DefaultPortalHalfWidth = DEFAULT_PORTAL_HALF_WIDTH;
 float CProp_Portal::ms_DefaultPortalHalfHeight = 0.25 * DEFAULT_PORTAL_HALF_HEIGHT;
 

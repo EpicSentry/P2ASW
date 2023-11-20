@@ -1,0 +1,42 @@
+void __cdecl CPropMonsterBox::BecomeShortcircuit(CPropMonsterBox *const this)
+{
+  IPhysicsObject *m_pPhysicsObject; // eax
+  CBasePlayer *LocalPlayer; // eax
+  int v3; // eax
+  IPhysicsObject *v4; // eax
+  Vector vecVelocity; // [esp+18h] [ebp-30h] BYREF
+  Vector vecAngVelocity; // [esp+24h] [ebp-24h] BYREF
+
+  m_pPhysicsObject = this->m_pPhysicsObject;
+  if ( m_pPhysicsObject )
+  {
+    if ( !this->m_bIsABox )
+    {
+      (*((void (__cdecl **)(IPhysicsObject *, Vector *, Vector *))m_pPhysicsObject->_vptr_IPhysicsObject + 53))(
+        this->m_pPhysicsObject,
+        &vecVelocity,
+        &vecAngVelocity);
+      (*((void (__cdecl **)(CPropMonsterBox *const, const char *))this->_vptr_IHandleEntity + 27))(
+        this,
+        "models/npcs/monsters/monster_A_box.mdl");
+      (*((void (__cdecl **)(CPropMonsterBox *const))this->_vptr_IHandleEntity + 154))(this);
+      (*((void (__cdecl **)(CPropMonsterBox *const))this->_vptr_IHandleEntity + 152))(this);
+      v4 = this->m_pPhysicsObject;
+      if ( v4 )
+        (*((void (__cdecl **)(IPhysicsObject *, Vector *, Vector *))v4->_vptr_IPhysicsObject + 51))(
+          v4,
+          &vecVelocity,
+          &vecAngVelocity);
+    }
+    LocalPlayer = UTIL_GetLocalPlayer();
+    if ( LocalPlayer )
+      (*((void (__cdecl **)(CBasePlayer *, CPropMonsterBox *const))LocalPlayer->_vptr_IHandleEntity + 444))(
+        LocalPlayer,
+        this);
+    v3 = CBaseAnimating::LookupSequence(this, "shortcircuit");
+    CBaseAnimating::ResetSequence(this, v3);
+    CBaseEntity::EmitSound(this, "DoSparkSmaller", 0.0, 0);
+    this->m_bIsABox = 1;
+    this->m_bIsShortcircuit = 1;
+  }
+}

@@ -1,12 +1,12 @@
-..\..\..\game\bin\shadercompile.exe 
-..\..\..\game\bin\shadercompile_dll.dll 
-..\..\..\game\bin\tier0.dll 
-..\..\..\game\bin\vstdlib.dll 
+"E:\Program Files (x86)\Steam\steamapps\common\Alien Swarm\bin"\shadercompile.exe 
+"E:\Program Files (x86)\Steam\steamapps\common\Alien Swarm\bin"\shadercompile_dll.dll 
+"E:\Program Files (x86)\Steam\steamapps\common\Alien Swarm\bin"\tier0.dll 
+"E:\Program Files (x86)\Steam\steamapps\common\Alien Swarm\bin"\vstdlib.dll 
 ..\..\dx9sdk\utilities\dx_proxy.dll 
+Bloom_ps2x.fxc
 common_fxc.h
 common_hlsl_cpp_consts.h
 common_pragmas.h
 common_ps_fxc.h
-common_vertexlitgeneric_dx9.h
-portal_ps2x.fxc
-shader_constant_register_map.h
+common_vs_fxc.h
+screenspaceeffect_vs20.fxc

@@ -1,0 +1,18 @@
+void __cdecl CProjectedTractorBeamEntity::UpdateOnRemove(CProjectedTractorBeamEntity *const this)
+{
+  unsigned int m_Index; // eax
+  CBaseEntity **v2; // edx
+
+  (*((void (__cdecl **)(CProjectedTractorBeamEntity *const))this->_vptr_IHandleEntity + 214))(this);
+  m_Index = this->m_hTractorBeamTrigger.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v2 = (CBaseEntity **)((char *)g_pEntityList + 24 * (unsigned __int16)m_Index);
+    if ( v2[2] == (CBaseEntity *)HIWORD(m_Index) )
+    {
+      if ( v2[1] )
+        UTIL_Remove(v2[1]);
+    }
+  }
+  CBaseProjectedEntity::UpdateOnRemove(this);
+}

@@ -1,0 +1,4 @@
+CBaseEntity *__cdecl CTrigger_TractorBeam::GetEntity(CTrigger_TractorBeam *const this)
+{
+  return this;
+}

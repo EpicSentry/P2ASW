@@ -1,0 +1,31 @@
+void __thiscall CPropIndicatorPanel::ResetTimer(CPropIndicatorPanel *this)
+{
+  unsigned int m_Index; // ecx
+  int v2; // eax
+  CEntInfo *v3; // edx
+  unsigned int v4; // ecx
+  int v5; // eax
+  bool v6; // zf
+  CLabIndicatorPanel **v7; // eax
+
+  m_Index = this->m_hIndicatorPanel.m_Index;
+  if ( m_Index != -1 )
+  {
+    v2 = (unsigned __int16)m_Index;
+    v3 = &g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index];
+    v4 = HIWORD(m_Index);
+    if ( v3->m_SerialNumber == v4 )
+    {
+      if ( v3->m_pEntity )
+      {
+        v5 = v2;
+        v6 = g_pEntityList->m_EntPtrArray[v5].m_SerialNumber == v4;
+        v7 = (CLabIndicatorPanel **)&g_pEntityList->m_EntPtrArray[v5];
+        if ( v6 )
+          CLabIndicatorPanel::ResetTimer(*v7);
+        else
+          CLabIndicatorPanel::ResetTimer(0);
+      }
+    }
+  }
+}

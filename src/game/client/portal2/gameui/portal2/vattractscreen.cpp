@@ -13,61 +13,18 @@
 #include "VGenericConfirmation.h"
 #include "VFooterPanel.h"
 #include "vgui/ISurface.h"
-#include "vgui/ILocalize.h"
 #include "gameui_util.h"
-#include "vmainmenu.h"
 #include "tier0/icommandline.h"
-#include "filesystem.h"
-#include "bitmap/tgaloader.h"
-#include "filesystem/IXboxInstaller.h"
 #ifdef _X360
 #include "xbox/xbox_launch.h"
-#elif defined(_PS3)
-#include "ps3/saverestore_ps3_api_ui.h"
-#include "sysutil/sysutil_savedata.h"
-#include "sysutil/sysutil_gamecontent.h"
-#include "cell/sysmodule.h"
-static int s_nPs3SaveStorageSizeKB = 21*1024;
-static int s_nPs3TrophyStorageSizeKB = 0;
 #endif
 // memdbgon must be the last include file in a .cpp file!!!
-#include "steamoverlay/isteamoverlaymgr.h"
-#include "steamcloudsync.h"
-#include "transitionpanel.h"
 #include "tier0/memdbgon.h"
 
 using namespace vgui;
 using namespace BaseModUI;
 
 extern IVEngineClient *engine;
-
-#if defined( _GAMECONSOLE ) && !defined( _CERT )
-#define IMAGEVIEWER_ENABLED
-#endif
-
-#ifdef IMAGEVIEWER_ENABLED
-ConVar ui_imageviewer_dir( "ui_imageviewer_dir", "", FCVAR_DEVELOPMENTONLY );
-CUtlVector< char * > g_arrImageViewerFiles;
-int g_ImageViewerFileIndex = 0, g_ImageViewerReloadImage = 0, g_ImageViewerReloadImageDir = 1;
-int g_ImageViewerTextureId = -1, g_ImageViewerTextureSize[2];
-void ImageViewerAdvanceIndex()
-{
-	if ( !g_arrImageViewerFiles.Count() ) return;
-	g_ImageViewerFileIndex += g_ImageViewerReloadImageDir;
-	g_ImageViewerFileIndex %= g_arrImageViewerFiles.Count();
-	g_ImageViewerFileIndex += g_arrImageViewerFiles.Count();
-	g_ImageViewerFileIndex %= g_arrImageViewerFiles.Count();
-	g_ImageViewerReloadImage = 1;
-}
-int ImageViewerSortList( char * const *a, char * const *b )
-{
-	return Q_stricmp( *a, *b );
-}
-#endif
-
-ConVar ui_sp_map_default( "ui_sp_map_default", "", FCVAR_DEVELOPMENTONLY );
-ConVar ui_coop_map_default( "ui_coop_map_default", "", FCVAR_DEVELOPMENTONLY );
-ConVar ui_coop_ss_fadeindelay( "ui_coop_ss_fadeindelay", IsPS3() ? "1.5" : "1", FCVAR_DEVELOPMENTONLY );
 
 //
 //	Primary user id is the one who attract screen uses for
@@ -82,18 +39,6 @@ static int s_eStorageUI = 0;
 static int s_iAttractModeRequestCtrlr = -1;
 static int s_iAttractModeRequestPriCtrlr = -1;
 static CAttractScreen::AttractMode_t s_eAttractMode = CAttractScreen::ATTRACT_GAMESTART;
-
-#ifdef _PS3
-static CPS3SaveRestoreAsyncStatus s_PS3SaveAsyncStatus;
-enum SaveInitializeState_t
-{
-	SIS_DEFAULT,
-	SIS_INIT_REQUESTED,
-	SIS_FINISHED
-};
-static SaveInitializeState_t s_ePS3SaveInitState;
-#endif
-
 void CAttractScreen::SetAttractMode( AttractMode_t eMode, int iCtrlr )
 {
 	if ( UI_IsDebug() )
@@ -103,7 +48,7 @@ void CAttractScreen::SetAttractMode( AttractMode_t eMode, int iCtrlr )
 
 	s_eAttractMode = eMode;
 	
-#ifdef _GAMECONSOLE
+#ifdef _X360
 	if ( !XBX_GetNumGameUsers() )
 		return;
 
@@ -152,29 +97,50 @@ static bool IsPrimaryUserSignedInProperly()
 
 static void ChangeGamers();
 
+
+// safe to reset timeout to TCR 003: 120 seconds
+ConVar sys_attract_mode_timeout( "sys_attract_mode_timeout", "120", FCVAR_DEVELOPMENTONLY );
+
+#if defined( _X360 )
+CON_COMMAND_F( ui_force_attract, "", FCVAR_DEVELOPMENTONLY )
+{
+	// for development only testing, force the attract mode to beign its timeout
+	CAttractScreen* pAttractScreen = static_cast< CAttractScreen* >( CBaseModPanel::GetSingleton().GetWindow( WT_ATTRACTSCREEN ) );
+	if ( pAttractScreen )
+	{
+		// enable it, regardles of initial setup
+		pAttractScreen->ResetAttractDemoTimeout();
+	}
+}
+#endif
+
 bool CAttractScreen::IsUserIdleForAttractMode()
 {
-	BladeStatus_t bladeStatus = GetBladeStatus();
-	if ( bladeStatus != BLADE_NOTWAITING )
-	{
-		// there is blade activity
-		return false;
-	}		
-
 	if ( m_bHidePressStart )
-	{
 		// attract screen is in ghost mode
 		return false;
-	}
 
 	if ( m_pPressStartlbl && !m_pPressStartlbl->IsVisible() )
-	{
 		// something is going on and "Press START" is not flashing
 		return false;
-	}
 
+	if ( CBaseModPanel::GetSingleton().GetWindow( WT_GENERICCONFIRMATION ) )
+		// confirmation is up
+		return false;
+
+	if ( CBaseModPanel::GetSingleton().GetWindow( WT_GENERICWAITSCREEN ) )
+		// progress spinner is up
+		return false;
+
+	if ( CUIGameData::Get()->IsXUIOpen() )
+		// X360 blade UI is open
+		return false;
+
+	// All good, can kick off idle countdown
 	return true;
 }
+
+
 
 //////////////////////////////////////////////////////////////////////////
 //
@@ -269,20 +235,15 @@ void CAttractScreenDeviceSelector::AfterDeviceMounted()
 //////////////////////////////////////////////////////////////////////////
 
 CAttractScreen::CAttractScreen( Panel *parent, const char *panelName ):
-	BaseClass( parent, panelName, true, true ),
-	m_bGameBootReady( false )
+	BaseClass( parent, panelName, true, true )
 {
 	SetProportional( true );
-	SetPaintBackgroundEnabled( true );
+	SetPaintBackgroundEnabled( false );
 
 	SetDeleteSelfOnClose( true );
 
-	SetFooterEnabled( true );
-
-	// allows us to get RunFrame() during wait screen occlusion
-	AddFrameListener( this );
-
 	m_pPressStartlbl = NULL;
+	m_pPressStartShadowlbl = NULL;
 	m_bHidePressStart = false;
 	m_msgData = 0;
 	m_pfnMsgChanged = NULL;
@@ -292,30 +253,45 @@ CAttractScreen::CAttractScreen( Panel *parent, const char *panelName ):
 	m_eSignInUI = SIGNIN_NONE;
 	m_eStorageUI = STORAGE_NONE;
 
+	// -1 means reset timer when viable
+	// 0 means NEVER timeout
+	// >0 means enabled, is the high water mark time
+	m_AttractDemoTimeout = -1;
+#if defined( _X360 ) && defined( _DEMO )
+	if ( engine->IsDemoHostedFromShell() )
+	{
+		// there is already a master demo timeout that overrides
+		// prevent any attract mode timeout
+		m_AttractDemoTimeout = 0;
+	}
+#endif
+
+	if ( IsX360() && 
+		( Sys_IsDebuggerPresent() || 
+			CommandLine()->FindParm( "-nostartupmenu" ) || 
+			CommandLine()->FindParm( "-noattract" ) || 
+			CommandLine()->FindParm( "-dev" ) ) )
+	{
+		// in development, prevent attract mode
+		m_AttractDemoTimeout = 0;
+	}
+
 	// Subscribe for the events
 	g_pMatchFramework->GetEventsSubscription()->Subscribe( this );
-	g_pMatchFramework->GetEventsSubscription()->BroadcastEvent( new KeyValues( "OnAttractModeWaitNotification", "state", "" ) );
 }
 
 CAttractScreen::~CAttractScreen()
 {
+	delete m_pPressStartShadowlbl;
+
 	// Unsubscribe for the events
 	g_pMatchFramework->GetEventsSubscription()->Unsubscribe( this );
-
-	RemoveFrameListener( this );
 }
 
-void CAttractScreen::RunFrame()
+void CAttractScreen::ResetAttractDemoTimeout()
 {
-	if ( !IsVisible() )
-	{
-		// This is to handle the case when a generic waitscreen
-		// is visible and hides attract screen,
-		// attract screen needs to have logic running every frame
-		// to take down the generic wait screen.
-		// Don't run OnThink twice when we are visible.
-		OnThink();
-	}
+	// explicity reset
+	m_AttractDemoTimeout = -1;
 }
 
 void CAttractScreen::OnThink()
@@ -337,36 +313,36 @@ void CAttractScreen::OnThink()
 	}
 
 	// image and labels fade in 
-	// press start fade in
-	float flFade = 0;
-	if ( !m_flFadeStart )
-	{
-		// start fade in as soon as overlay has revealed menu
-		if ( !CBaseModPanel::GetSingleton().IsOpaqueOverlayActive() )
-		{
-			m_flFadeStart = Plat_FloatTime() + TRANSITION_FROM_OVERLAY_DELAY_TIME;
-		}
-	}
+	float flFade = 1.0f;
 	if ( m_flFadeStart )
 	{
-		flFade = RemapValClamped( Plat_FloatTime(), m_flFadeStart, m_flFadeStart + TRANSITION_OVERLAY_FADE_TIME, 0.0f, 1.0f );
+		flFade = RemapValClamped( Plat_FloatTime(), m_flFadeStart, m_flFadeStart + TRANSITION_TO_MOVIE_FADE_TIME, 0.0f, 1.0f );
+		if ( flFade >= 1.0f )
+		{
+			// done
+			m_flFadeStart = 0;
+		}
 	}
 
 	if ( m_pPressStartlbl )
 	{
-		int alpha = flFade * ( 80.0f + 50.0f * sin( Plat_FloatTime() * 4.0f ) );
-		m_pPressStartlbl->SetAlpha( alpha );
+		m_pPressStartlbl->SetAlpha( flFade * 255.0f );
 	}
 
-#ifdef _PS3
-	if ( ( s_ePS3SaveInitState == SIS_INIT_REQUESTED ) && s_PS3SaveAsyncStatus.JobDone() )
+	if ( m_pPressStartShadowlbl )
 	{
-		s_PS3SaveAsyncStatus.m_bDone = false;
-		OnGameBootSaveContainerReady();
+		int alpha = flFade * ( 80.0f + 50.0f * sin( Plat_FloatTime() * 4.0f ) );
+		m_pPressStartShadowlbl->SetAlpha( alpha );
 	}
-#endif
 
 	BladeStatus_t bladeStatus = GetBladeStatus();
+	if ( bladeStatus != BLADE_NOTWAITING && m_AttractDemoTimeout )
+	{
+		// there is blade activity
+		// reset the attract timeout
+		m_AttractDemoTimeout = -1;
+	}		
+
 	switch ( bladeStatus )
 	{
 	case BLADE_WAITINGFOROPEN:
@@ -431,6 +407,27 @@ void CAttractScreen::OnThink()
 		}
 		else if ( s_eAttractMode == ATTRACT_GAMESTART )
 		{
+			if ( IsX360() )
+			{
+				if ( !IsUserIdleForAttractMode() && m_AttractDemoTimeout )
+				{
+					m_AttractDemoTimeout = -1;
+				}
+
+				// we are at "press start" and there is no system xui open
+				if ( m_AttractDemoTimeout  < 0 )
+				{
+					// safe to reset timeout to TCR 003: 120 seconds
+					m_AttractDemoTimeout = Plat_FloatTime() + sys_attract_mode_timeout.GetFloat();
+				}
+				else if ( m_AttractDemoTimeout > 0 && Plat_FloatTime() > m_AttractDemoTimeout )
+				{
+					// timeout expired
+					// start the exiting sequence, which cannot be stopped
+					m_AttractDemoTimeout = 0;
+					CBaseModPanel::GetSingleton().StartExitingProcess( false );
+				}
+			}
 		}
 
 		if ( s_eAttractMode == ATTRACT_GOSPLITSCREEN )
@@ -503,23 +500,29 @@ void CAttractScreen::OnThink()
 			m_eSignInUI = SIGNIN_PROMOTETOGUEST;
 			XShowSigninUI( 1, XSSUI_FLAGS_CONVERTOFFLINETOGUEST );
 		}
-#else
-		Assert( 0 );
 #endif
 		break;
 
 	case BLADE_WAITINGTOSHOWSTORAGESELECTUI:
-#ifdef _GAMECONSOLE
+#ifdef _X360
 		if ( !CUIGameData::Get()->IsXUIOpen() )
 		{
 			SetBladeStatus( BLADE_NOTWAITING );
-			ShowStorageDeviceSelectUI();
+
+			int iSlot = m_eStorageUI - 1;
+			int iContorller = XBX_GetUserId( iSlot );
+			DWORD dwDevice = XBX_GetStorageDeviceId( iContorller );
+
+			CUIGameData::Get()->SelectStorageDevice( new CAttractScreenDeviceSelector(
+				iContorller,
+				( dwDevice == XBX_INVALID_STORAGE_ID ) ? true : false, // force the XUI to display
+				true ) );
 		}
 #endif
 		break;
 
 	case BLADE_WAITINGTOSHOWSIGNIN2:
-		if ( IsPS3() || !CUIGameData::Get()->IsXUIOpen() )
+		if ( !CUIGameData::Get()->IsXUIOpen() )
 		{
 			SetAttractMode( ATTRACT_GAMESTART );
 			SetBladeStatus( BLADE_NOTWAITING );
@@ -536,13 +539,15 @@ void CAttractScreen::OnThink()
 
 void CAttractScreen::OnKeyCodePressed( KeyCode code )
 {
-	BaseModUI::CBaseModPanel::GetSingleton().ResetAttractDemoTimeout();
-
-	if ( m_bHidePressStart || !m_bGameBootReady )
+	// any key activity anywhere resets the attract timeout
+	if ( m_AttractDemoTimeout )
 	{
+		m_AttractDemoTimeout = -1;
+	}
+
+	if ( m_bHidePressStart )
 		// Cannot process button presses if PRESS START is not available
 		return;
-	}
 
 	int userId = GetJoystickForCode( code );
 
@@ -556,52 +561,6 @@ void CAttractScreen::OnKeyCodePressed( KeyCode code )
 			ShowSignInDialog( userId, -1 );
 		}	
 		break;
-
-#ifdef IMAGEVIEWER_ENABLED
-	case KEY_XBUTTON_BACK:
-		if ( ui_imageviewer_dir.GetString()[0] )
-		{
-			// Enter image viewer mode
-			CFmtStr keySearch( "%s/*.tga", ui_imageviewer_dir.GetString() );
-			V_FixSlashes( keySearch.Access() );
-
-			// iterate the images
-			g_arrImageViewerFiles.PurgeAndDeleteElements();
-			FileFindHandle_t handle;
-			for ( const char* pfileName = g_pFullFileSystem->FindFirst( keySearch.Access(), &handle );
-				pfileName; pfileName = g_pFullFileSystem->FindNext( handle ) )
-			{
-				if ( Q_strlen( pfileName ) <= 4 ) continue;
-				CFmtStr keyFile( "%s/%s", ui_imageviewer_dir.GetString(), pfileName );
-				V_FixSlashes( keyFile.Access() );
-
-				int nLen = Q_strlen( keyFile.Access() );
-				char *szImgName = new char[ 1 + nLen ];
-				Q_memcpy( szImgName, keyFile.Access(), 1 + nLen );
-				g_arrImageViewerFiles.AddToTail( szImgName );
-			}
-			g_pFullFileSystem->FindClose( handle );
-			g_ImageViewerFileIndex = 0;
-			g_ImageViewerReloadImage = 1;
-			g_ImageViewerReloadImageDir = 1;
-			if ( g_arrImageViewerFiles.Count() )
-			{
-				HidePressStart();
-				g_arrImageViewerFiles.Sort( ImageViewerSortList );
-			}
-		}
-		break;
-
-	case KEY_XBUTTON_LEFT_SHOULDER:
-	case KEY_XBUTTON_RIGHT_SHOULDER:
-		if ( g_arrImageViewerFiles.Count() )
-		{
-			g_ImageViewerReloadImageDir = ((GetBaseButtonCode( code ) == KEY_XBUTTON_RIGHT_SHOULDER)?1:-1);
-			ImageViewerAdvanceIndex();
-		}
-		break;
-#endif
-
 	default:
 		BaseClass::OnKeyCodePressed( code );
 		break;
@@ -610,9 +569,6 @@ void CAttractScreen::OnKeyCodePressed( KeyCode code )
 
 bool CAttractScreen::BypassAttractScreen()
 {
-	if ( IsPS3() )
-		return false; // cannot bypass on PS3 due to trophy install etc.
-
 	// Attract screen can only be bypassed once
 	static bool s_bBypassOnce = false;
 	if ( s_bBypassOnce )
@@ -623,7 +579,7 @@ bool CAttractScreen::BypassAttractScreen()
 	if ( !CommandLine()->FindParm( "-noattractscreen" ) )
 		return false;
 
-#ifdef _GAMECONSOLE
+#ifdef _X360
 	// Check if there's a user signed in properly
 	for ( int k = 0; k < XUSER_MAX_COUNT; ++ k )
 	{
@@ -706,214 +662,16 @@ void CAttractScreen::AcceptInvite()
 #endif
 }
 
-void CAttractScreen::PerformGameBootWork()
-{
-#ifdef _PS3
-	static bool s_bBootOnce = false;
-	if ( s_bBootOnce )
-	{
-		m_bGameBootReady = true;
-		return;
-	}
-	s_bBootOnce = true;
-	m_bHidePressStart = true; // don't show Press START
-
-	// Start prefetching sounds early:
-	bool bSucceeded;
-	bSucceeded = g_pFullFileSystem->PrefetchFile( "/portal2/zip2.ps3.zip", 0, true );	// Average priority, but persistent.
-	Assert( bSucceeded );		// Is the path incorrect?
-
-	// Install PS3 trophies
-	this->PostMessage( this, new KeyValues( "DisplayGameBootProgress", "msg", "#L4D360UI_Boot_Trophies" ) );
-	m_CallbackOnPS3TrophiesInstalled.Register( this, &CAttractScreen::Steam_OnPS3TrophiesInstalled );
-	steamapicontext->SteamUserStats()->InstallPS3Trophies();	
-#else
-	m_bGameBootReady = true;
-#endif
-}
-
-#ifdef _PS3
-void CAttractScreen::ShowFatalError( uint32 unSize )
-{
-	if ( unSize > 0 )
-	{
-		int nKbRequired = int( (unSize + 1023) / 1024 );
-		int nMbRequired = AlignValue( nKbRequired, 1024 )/1024;
-		wchar_t const *szNoSpacePart1 = g_pVGuiLocalize->Find( "#L4D360UI_Boot_Error_NOSPACE1" );
-		wchar_t const *szNoSpacePart2 = g_pVGuiLocalize->Find( "#L4D360UI_Boot_Error_NOSPACE2" );
-		if ( szNoSpacePart1 && szNoSpacePart2 )
-		{
-			int nLen1 = Q_wcslen( szNoSpacePart1 );
-			int nLen2 = Q_wcslen( szNoSpacePart2 );
-			wchar_t *wszBuffer = new wchar_t[ nLen1 + nLen2 + 100 ];
-			Q_wcsncpy( wszBuffer, szNoSpacePart1, 2 * ( nLen1 + nLen2 + 100 ) );
-			Q_snwprintf( wszBuffer + Q_wcslen( wszBuffer ), 2*100, L"%u", nMbRequired );
-			Q_wcsncpy( wszBuffer + Q_wcslen( wszBuffer ), szNoSpacePart2, 2*( nLen2 + 1 ) );
-			char *pchErrorBuffer = new char[16];
-			Q_snprintf( pchErrorBuffer, 16, "$ptr%u", wszBuffer );
-			this->PostMessage( this, new KeyValues( "DisplayGameBootProgress", "msg", pchErrorBuffer ) );
-			return;
-		}
-	}
-
-	this->PostMessage( this, new KeyValues( "DisplayGameBootProgress", "msg", "#L4D360UI_Boot_ErrorFatal" ) );
-}
-
-void CAttractScreen::OnGameBootSaveContainerReady()
-{
-	s_ePS3SaveInitState = SIS_FINISHED;
-	if ( s_PS3SaveAsyncStatus.GetSonyReturnValue() < 0 )
-	{
-		// We've got an error!
-		Warning( "OnGameBootSaveContainerReady error: 0x%X\n", s_PS3SaveAsyncStatus.GetSonyReturnValue() );
-		char const *szFmt = "#L4D360UI_Boot_Error_SAVE_GENERAL";
-		switch ( s_PS3SaveAsyncStatus.GetSonyReturnValue() )
-		{
-		case CELL_SAVEDATA_ERROR_NOSPACE:
-		case CELL_SAVEDATA_CBRESULT_ERR_NOSPACE:
-		case CELL_SAVEDATA_ERROR_SIZEOVER:
-			ShowFatalError( (s_PS3SaveAsyncStatus.m_uiAdditionalDetails ? s_PS3SaveAsyncStatus.m_uiAdditionalDetails : s_nPs3SaveStorageSizeKB ) * 1024 );
-			return;
-		case CELL_SAVEDATA_ERROR_BROKEN:
-		case CELL_SAVEDATA_CBRESULT_ERR_BROKEN:
-			szFmt = "#L4D360UI_Boot_Error_BROKEN";
-			break;
-		case CPS3SaveRestoreAsyncStatus::CELL_SAVEDATA_ERROR_WRONG_USER:
-			szFmt = "#L4D360UI_Boot_Error_WRONG_USER";
-			break;
-		}
-		this->PostMessage( this, new KeyValues( "DisplayGameBootProgress", "msg", szFmt ) );
-		return;
-	}
-	if ( s_PS3SaveAsyncStatus.m_nCurrentOperationTag != kSAVE_TAG_INITIALIZE )
-	{
-		ShowFatalError( s_nPs3TrophyStorageSizeKB );
-		return;
-	}
-
-	// Get the user's Steam stats
-	this->PostMessage( this, new KeyValues( "DisplayGameBootProgress", "msg", "#L4D360UI_Boot_Trophies" ) );
-
-	CUtlBuffer *pInitialDataBuffer = GetPs3SaveSteamInfoProvider()->GetInitialLoadBuffer();
-#ifndef NO_STEAM
-	m_CallbackOnUserStatsReceived.Register( this, &CAttractScreen::Steam_OnUserStatsReceived );
-	steamapicontext->SteamUserStats()->SetUserStatsData( pInitialDataBuffer->Base(), pInitialDataBuffer->TellPut() );
-	steamapicontext->SteamUserStats()->RequestCurrentStats();
-#endif
-	pInitialDataBuffer->Purge();
-}
-#endif
-
-#if !defined(NO_STEAM) && defined(_PS3)
-void CAttractScreen::Steam_OnPS3TrophiesInstalled( PS3TrophiesInstalled_t *pParam )
-{
-	m_CallbackOnPS3TrophiesInstalled.Unregister();
-
-	s_PS3SaveAsyncStatus.m_nCurrentOperationTag = kSAVE_TAG_INITIALIZE;
-	EResult eResult = pParam->m_eResult;
-	if ( eResult == k_EResultDiskFull )
-	{
-		s_PS3SaveAsyncStatus.m_nCurrentOperationTag = kSAVE_TAG_UNKNOWN;
-		s_nPs3TrophyStorageSizeKB += ( pParam->m_ulRequiredDiskSpace + 1023 )/ 1024;
-		s_nPs3SaveStorageSizeKB += s_nPs3TrophyStorageSizeKB;
-		eResult = k_EResultOK; // report cumulative space required after save container gets created
-	}
-
-	if ( eResult == k_EResultOK )
-	{
-		// Prepare the save container
-		this->PostMessage( this, new KeyValues( "DisplayGameBootProgress", "msg", "#L4D360UI_Boot_SaveContainer" ) );
-		ps3saveuiapi->Initialize( &s_PS3SaveAsyncStatus, GetPs3SaveSteamInfoProvider(), true, s_nPs3SaveStorageSizeKB );
-		s_ePS3SaveInitState = SIS_INIT_REQUESTED;
-	}
-	else
-	{
-		ShowFatalError( 0 );
-	}
-
-}
-#endif
-
-#ifndef NO_STEAM
-void CAttractScreen::Steam_OnUserStatsReceived( UserStatsReceived_t *pParam )
-{
-	m_CallbackOnUserStatsReceived.Unregister();
-
-#ifdef _PS3
-	if ( pParam->m_eResult != k_EResultOK )
-	{
-		this->PostMessage( this, new KeyValues( "DisplayGameBootProgress", "msg", "#L4D360UI_Boot_ErrorFatal" ) );
-		return;
-	}
-
-	// Otherwise we have successfully received user stats and installed the trophies
-	this->PostMessage( this, new KeyValues( "DisplayGameBootProgress", "msg", "#L4D360UI_Boot_InviteCheck" ) );
-	m_bGameBootReady = true;
-	// Check Sony game boot message
-	m_CallbackOnPSNGameBootInviteResult.Register( this, &CAttractScreen::Steam_OnPSNGameBootInviteResult );
-	Msg( "CheckForPSNGameBootInvite( 0x%08X )\n", g_pPS3PathInfo->GetGameBootAttributes() );
-	steamapicontext->SteamMatchmaking()->CheckForPSNGameBootInvite( g_pPS3PathInfo->GetGameBootAttributes() );
-#else
-	this->PostMessage( this, new KeyValues( "DisplayGameBootProgress", "msg", "" ) );
-#endif
-}
-
-#ifdef _PS3
-extern uint64 g_uiConnectionToSteamToJoinLobbyId;
-void CAttractScreen::Steam_OnPSNGameBootInviteResult( PSNGameBootInviteResult_t *pParam )
-{
-	m_CallbackOnPSNGameBootInviteResult.Unregister();
-
-	Msg( "Steam_OnPSNGameBootInviteResult( %s: 0x%X )\n", pParam->m_bGameBootInviteExists?"detected":"none", pParam->m_steamIDLobby.ConvertToUint64() );
-
-	uint64 uiLobbyIdToConnect = g_uiConnectionToSteamToJoinLobbyId;
-	if ( !uiLobbyIdToConnect && pParam->m_bGameBootInviteExists )
-		uiLobbyIdToConnect = pParam->m_steamIDLobby.ConvertToUint64();
-	
-	if ( uiLobbyIdToConnect )
-	{
-		CBaseModPanel::GetSingleton().GetTransitionEffectPanel()->SuspendTransitions( false );
-
-		Msg( "Steam_OnPSNGameBootInviteResult( connecting to lobby: 0x%X )\n", uiLobbyIdToConnect );
-		KeyValues *kvEvent = new KeyValues( "OnSteamOverlayCall::LobbyJoin" );
-		kvEvent->SetUint64( "sessionid", uiLobbyIdToConnect );
-		g_pMatchFramework->GetEventsSubscription()->BroadcastEvent( kvEvent );
-	}
-	else
-	{
-		Msg( "Steam_OnPSNGameBootInviteResult( proceeding to Press START screen )\n" );
-		this->PostMessage( this, new KeyValues( "DisplayGameBootProgress", "msg", "" ) );
-	}
-
-	// Let the overlay finally activate
-	if ( g_pISteamOverlayMgr )
-		g_pISteamOverlayMgr->GameBootReady();
-
-	// Cloud sync kick off
-	if ( g_pGameSteamCloudSync )
-		g_pGameSteamCloudSync->Sync( IGameSteamCloudSync::SYNC_GAMEBOOTREADY );
-}
-#endif
-#endif
-
 void CAttractScreen::OnOpen()
 {
 	BaseClass::OnOpen();
 
-	CBaseModFooterPanel *pFooter = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
-	if ( pFooter )
-	{
-		pFooter->SetButtons( FB_NONE );
-	}
-
-#ifdef _GAMECONSOLE
+#ifdef _X360
 	if ( BypassAttractScreen() )
 		return;
 
 	AcceptInvite();
 #endif
-
-	PerformGameBootWork();
 
 	if ( s_eAttractMode == ATTRACT_GAMESTART &&	!m_bHidePressStart )
 	{
@@ -935,15 +693,7 @@ void CAttractScreen::OnOpen()
 
 	if ( s_eAttractMode == ATTRACT_ACCEPTINVITE )
 	{
-#if defined( _PS3 ) && !defined( NO_STEAM )
-		if ( CUIGameData::Get()->CanInitiateConnectionToSteam() )
-		{
-			// "join" notification is required to proceed with the invite
-			CUIGameData::Get()->SetConnectionToSteamReason( "invitejoin", NULL );
-			CUIGameData::Get()->InitiateConnectionToSteam();
-		}
-#endif
-		CUIGameData::Get()->OpenWaitScreen( "#L4D360UI_WaitScreen_JoiningParty", 0.0f );
+		CUIGameData::Get()->OpenWaitScreen( "#L4D360UI_WaitScreen_JoiningParty" );
 	}
 }
 
@@ -958,8 +708,14 @@ void CAttractScreen::OnClose()
 
 void CAttractScreen::OnEvent( KeyValues *pEvent )
 {
-#ifdef _GAMECONSOLE
-	if ( m_eSignInUI == SIGNIN_NONE &&
+#ifdef _X360
+	if ( m_AttractDemoTimeout &&
+		!Q_stricmp( "OnSysXUIEvent", pEvent->GetName() ) )
+	{
+		// XUI blade activity resets the attract demo timeout
+		m_AttractDemoTimeout = -1;
+	}
+	else if ( m_eSignInUI == SIGNIN_NONE &&
 		!Q_stricmp( "OnSysSigninChange", pEvent->GetName() ) &&
 		!Q_stricmp( "signout", pEvent->GetString( "action", "" ) ) )
 	{
@@ -970,13 +726,7 @@ void CAttractScreen::OnEvent( KeyValues *pEvent )
 			int iController = XBX_GetUserId( k );
 			bool bSignedOut = !!( nMask & ( 1 << iController ) );
 			
-			if ( bSignedOut ||
-#ifdef _X360
-				XUserGetSigninState( iController ) == eXUserSigninState_NotSignedIn
-#else
-				IsX360()	// false
-#endif
-				)
+			if ( bSignedOut || XUserGetSigninState( iController ) == eXUserSigninState_NotSignedIn )
 			{
 				if ( UI_IsDebug() )
 				{
@@ -1012,12 +762,7 @@ void CAttractScreen::OnEvent( KeyValues *pEvent )
 			for ( int k = 0; k < XUSER_MAX_COUNT; ++ k )
 			{
 				if ( ( nMask & ( 1 << k ) ) &&
-#ifdef _X360
-					 XUserGetSigninState( k ) == eXUserSigninState_NotSignedIn
-#else
-					IsX360()	// false
-#endif
-					 )
+					 XUserGetSigninState( k ) == eXUserSigninState_NotSignedIn )
 				{
 					Msg( "[GAMEUI] AttractScreen::SYSTEMNOTIFY_USER_SIGNEDIN is actually a sign out, discarded!\n" );
 					return;
@@ -1072,6 +817,8 @@ void CAttractScreen::OnEvent( KeyValues *pEvent )
 						data.bOkButtonEnabled = true;
 
 						m_msgData = confirmation->SetUsageData(data);
+
+						HideFooter();
 					}
 				}
 				break;
@@ -1095,8 +842,7 @@ void CAttractScreen::OnEvent( KeyValues *pEvent )
 					{
 						// Figure out which slot this controller will occupy
 						// int nSlotPrimary = (s_idPrimaryUser < s_idSecondaryUser) ? 0 : 1;
-						int nSlotSecondary;
-						nSlotSecondary = (s_idPrimaryUser < s_idSecondaryUser) ? 1 : 0;
+						int nSlotSecondary = (s_idPrimaryUser < s_idSecondaryUser) ? 1 : 0;
 
 						if ( UI_IsDebug() )
 						{
@@ -1124,76 +870,53 @@ void CAttractScreen::ApplySchemeSettings( vgui::IScheme *pScheme )
 	BaseClass::ApplySchemeSettings( pScheme );
 
 	m_pPressStartlbl = dynamic_cast< vgui::Label* >( FindChildByName( "LblPressStart" ) );
+	if ( m_pPressStartlbl && !m_pPressStartShadowlbl )
+	{
+		// title shadow
+		wchar_t buffer[128];
+		m_pPressStartlbl->GetText( buffer, sizeof( buffer ) );
+
+		m_pPressStartShadowlbl = new CShadowLabel( this, "LblPressStartShadow", buffer );
+		SETUP_PANEL( m_pPressStartShadowlbl );
+		m_pPressStartShadowlbl->SetFont( pScheme->GetFont( "FrameTitleBlur", IsProportional() ) );
+		m_pPressStartShadowlbl->SizeToContents();
+
+		int x, y;
+		m_pPressStartlbl->GetPos( x, y );
+		m_pPressStartShadowlbl->SetPos( x, y );
+		int z;
+		z = m_pPressStartlbl->GetZPos();
+		m_pPressStartShadowlbl->SetZPos( z+1 );
+		int wide, tall;
+		m_pPressStartlbl->GetSize( wide, tall );
+		m_pPressStartShadowlbl->SetSize( wide, tall );
+
+		m_pPressStartShadowlbl->SetContentAlignment( vgui::Label::a_center );
+		m_pPressStartShadowlbl->SetFgColor( Color( 200, 200, 200, 255 ) );
+		m_pPressStartShadowlbl->SetVisible( true );
+	}
 
 	if ( m_pPressStartlbl && m_bHidePressStart )
 	{
 		HidePressStart();
 	}
 
+	// press start and its shadow fade in
+	m_flFadeStart = Plat_FloatTime() + TRANSITION_TO_MOVIE_DELAY_TIME;
 	if ( m_pPressStartlbl )
 	{
 		m_pPressStartlbl->SetAlpha( 0 );
 	}
-}
-
-void CAttractScreen::PaintBackground()
-{
-#ifdef IMAGEVIEWER_ENABLED
-	if ( !g_arrImageViewerFiles.Count() )
-		return;
-
-	if ( g_ImageViewerReloadImage )
+	if ( m_pPressStartShadowlbl )
 	{
-		int idxStart = g_ImageViewerFileIndex;
-		
-		CUtlMemory< unsigned char > mem;
-		int w,h;
-		do {
-			if ( TGALoader::LoadRGBA8888( g_arrImageViewerFiles[g_ImageViewerFileIndex], mem, w, h ) )
-			{
-				g_ImageViewerReloadImage = 0;
-				break;
-			}
-			ImageViewerAdvanceIndex();
-		} while( g_ImageViewerFileIndex != idxStart );
-
-		if ( g_ImageViewerReloadImage )
-		{
-			return;
-		}
-
-		if ( -1 == g_ImageViewerTextureId )
-		{
-			g_ImageViewerTextureId = vgui::surface()->CreateNewTextureID( true );
-		}
-		vgui::surface()->DrawSetTextureRGBA( g_ImageViewerTextureId, mem.Base(), w, h );
-		
-		int screenWide, screenTall;
-		vgui::surface()->GetScreenSize( screenWide, screenTall );
-		g_ImageViewerTextureSize[0] = w; // w * ( ( (float) screenWide ) / 640.0f );
-		g_ImageViewerTextureSize[1] = h; // h * ( ( (float) screenTall ) / 480.0f );
+		m_pPressStartShadowlbl->SetAlpha( 0 );
 	}
-
-	// The texture is loaded, paint it
-	vgui::surface()->DrawSetColor( 255, 255, 255, 255 );
-	vgui::surface()->DrawSetTexture( g_ImageViewerTextureId );
-	vgui::surface()->DrawTexturedRect( 0, 0, g_ImageViewerTextureSize[0], g_ImageViewerTextureSize[1] );
-#endif
 }
 
 void CAttractScreen::OpenMainMenu()
 {
 	m_bHidePressStart = false;
 	CBaseModPanel::GetSingleton().CloseAllWindows();
-#ifdef _GAMECONSOLE
-	if ( XBX_GetNumGameUsers() > 1 )
-	{
-		CUIGameData::Get()->OpenWaitScreen( "#Portal2UI_Matchmaking_JoiningGame", 0.0f );
-		g_pMatchFramework->GetEventsSubscription()->BroadcastEvent( new KeyValues( "OnAttractModeWaitNotification", "state", "splitscreen" ) );
-		return;
-	}
-#endif
-	MainMenu::m_szPreferredControlName = "BtnPlaySolo";
 	CBaseModPanel::GetSingleton().OpenWindow( WT_MAINMENU, NULL, true );
 }
 
@@ -1207,86 +930,6 @@ void CAttractScreen::OpenMainMenuJoinFailed( const char *msg )
 		pMainMenu->PostMessage( pMainMenu, new KeyValues( "OpenMainMenuJoinFailed", "msg", msg ) );
 }
 
-#ifndef _CERT
-class CGameBootProgressOperation : public IMatchAsyncOperation
-{
-public:
-	// Poll if operation has completed
-	virtual bool IsFinished() { return m_eState != AOS_RUNNING; }
-
-	// Operation state
-	virtual AsyncOperationState_t GetState() { return m_eState; }
-
-	// Retrieve a generic completion result for simple operations
-	// that return simple results upon success,
-	// results are operation-specific, may result in undefined behavior
-	// if operation is still in progress.
-	virtual uint64 GetResult() { return 0ull; }
-
-	// Request operation to be aborted
-	virtual void Abort();
-
-	// Release the operation interface and all resources
-	// associated with the operation. Operation callbacks
-	// will not be called after Release. Operation object
-	// cannot be accessed after Release.
-	virtual void Release() { Assert( 0 ); }
-
-public:
-	CGameBootProgressOperation() { m_eState = AOS_FAILED; }
-	IMatchAsyncOperation * Prepare();
-
-public:
-	AsyncOperationState_t m_eState;
-}
-g_GameBootProgressOperation;
-
-IMatchAsyncOperation * CGameBootProgressOperation::Prepare()
-{
-	m_eState = AOS_RUNNING;
-
-	return this;
-}
-
-void CGameBootProgressOperation::Abort()
-{
-	m_eState = AOS_FAILED;
-
-	CAttractScreen *pScreen = ( CAttractScreen * ) CBaseModPanel::GetSingleton().GetWindow( WT_ATTRACTSCREEN );
-	if ( !pScreen )
-		return;
-	pScreen->PostMessage( pScreen, new KeyValues( "DisplayGameBootProgress", "msg", "" ) );
-}
-#endif
-
-void CAttractScreen::DisplayGameBootProgress( const char *msg )
-{
-	if ( msg && *msg )
-	{
-		CBaseModPanel::GetSingleton().GetTransitionEffectPanel()->SuspendTransitions( true );
-
-		HidePressStart();
-		KeyValues *pSettings = NULL;
-#ifndef _CERT
-		if ( CommandLine()->FindParm( "-cancelgameboot" ) )
-		{
-			pSettings = new KeyValues( "WaitScreen" );
-			KeyValues::AutoDelete autodelete_pSettings( pSettings );
-			pSettings->SetPtr( "options/asyncoperation", g_GameBootProgressOperation.Prepare() );
-		}
-#endif
-		CUIGameData::Get()->OpenWaitScreen( msg, 0.0f, pSettings );
-	}
-	else
-	{
-		CBaseModPanel::GetSingleton().GetTransitionEffectPanel()->SuspendTransitions( false );
-
-		CUIGameData::Get()->CloseWaitScreen( 0, 0 );
-		ShowPressStart();
-		m_bGameBootReady = true;
-	}
-}
-
 void CAttractScreen::OnChangeGamersFromMainMenu()
 {
 	CAttractScreen::SetAttractMode( CAttractScreen::ATTRACT_GAMESTART );
@@ -1296,7 +939,7 @@ void CAttractScreen::OnChangeGamersFromMainMenu()
 
 void CAttractScreen::StartWaitingForBlade1()
 {
-#ifdef _GAMECONSOLE
+#ifdef _X360
 	if ( IsPrimaryUserSignedInProperly() )
 	{
 		StartGame( s_idPrimaryUser );
@@ -1305,10 +948,8 @@ void CAttractScreen::StartWaitingForBlade1()
 
 	m_eSignInUI = SIGNIN_SINGLE;
 
-#ifdef _X360
 	XEnableGuestSignin( FALSE );
 	XShowSigninUI( 1, XSSUI_FLAGS_LOCALSIGNINONLY );
-#endif
 
 	SetBladeStatus( BLADE_WAITINGFOROPEN );
 #endif
@@ -1316,28 +957,15 @@ void CAttractScreen::StartWaitingForBlade1()
 
 void CAttractScreen::StartWaitingForBlade2()
 {
-#ifdef _GAMECONSOLE
+#ifdef _X360
 	m_eSignInUI = SIGNIN_DOUBLE;
 
 	// Determine if the primary user is properly signed in to LIVE
 	bool bShowLiveProfiles = IsUserSignedInToLiveWithMultiplayer( s_idPrimaryUser ) &&
 		!IsUserSignedInProperly( s_idSecondaryUser );
 
-#ifdef _X360
 	XEnableGuestSignin( TRUE );
 	XShowSigninUI( 2, bShowLiveProfiles ? XSSUI_FLAGS_SHOWONLYONLINEENABLED : XSSUI_FLAGS_LOCALSIGNINONLY );
-	CBaseModPanel::GetSingleton().AddFadeinDelayAfterOverlay( ui_coop_ss_fadeindelay.GetFloat() );
-#endif
-
-	if ( IsPS3() )
-	{
-		// Double-signin only driven from main menu, controllers already configured
-		Assert( s_idPrimaryUser >= 0 );
-		Assert( s_idSecondaryUser >= 0 );
-		s_bSecondaryUserIsGuest = 1;
-		StartGame( s_idPrimaryUser, s_idSecondaryUser );
-		return;
-	}
 
 	SetBladeStatus( BLADE_WAITINGFOROPEN );
 #endif
@@ -1355,37 +983,7 @@ void CAttractScreen::SetBladeStatus( BladeStatus_t bladeStatus )
 		Msg( "[GAMEUI] CAttractScreen::SetBladeStatus( %d )\n", bladeStatus );
 	}
 
-	if ( IsPS3() && ( bladeStatus == BLADE_WAITINGTOSHOWSTORAGESELECTUI ) )
-	{
-		// Since PS3 doesn't really have storage selection, let's fake it all here
-		ShowStorageDeviceSelectUI();
-		return;
-	}
-
 	m_bladeStatus = bladeStatus;
-}
-
-void CAttractScreen::ShowStorageDeviceSelectUI()
-{
-	if ( IsX360() && !( CUIGameData::Get()->SelectStorageDevicePolicy() & STORAGE_DEVICE_NEED_ATTRACT ) ) // User doesn't care for storage device in attract screen?
-	{
-		// On X360 we don't store anything on storage device, defer
-		// selection until we need to load or save games
-		if ( m_eStorageUI == STORAGE_0 )
-			StartGame_Stage2_Storage2();
-		else
-			StartGame_Stage3_Ready();
-		return;
-	}
-
-	int iSlot = m_eStorageUI - 1;
-	int iContorller = XBX_GetUserId( iSlot );
-	DWORD dwDevice = XBX_GetStorageDeviceId( iContorller );
-
-	CUIGameData::Get()->SelectStorageDevice( new CAttractScreenDeviceSelector(
-		iContorller,
-		( dwDevice == XBX_INVALID_STORAGE_ID ) ? true : false, // force the XUI to display
-		true ) );
 }
 
 void CAttractScreen::HidePressStart()
@@ -1393,6 +991,20 @@ void CAttractScreen::HidePressStart()
 	if ( m_pPressStartlbl )
 	{
 		m_pPressStartlbl->SetVisible( false );
+	}
+
+	if ( m_pPressStartShadowlbl )
+	{
+		m_pPressStartShadowlbl->SetVisible( false );
+	}
+}
+
+void CAttractScreen::HideFooter()
+{
+	// Make sure we hide the footer
+	if ( CBaseModFrame *pFooter = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel() )
+	{
+		pFooter->SetVisible( false );
 	}
 }
 
@@ -1417,7 +1029,7 @@ void CAttractScreen::HideMsgs()
 
 void CAttractScreen::ShowPressStart()
 {
-#ifdef _GAMECONSOLE
+#ifdef _X360
 	if ( UI_IsDebug() )
 	{
 		Msg( "[GAMEUI] CAttractScreen::ShowPressStart\n" );
@@ -1436,6 +1048,11 @@ void CAttractScreen::ShowPressStart()
 		m_pPressStartlbl->SetVisible( true );
 	}
 
+	if ( m_pPressStartShadowlbl )
+	{
+		m_pPressStartShadowlbl->SetVisible( true );
+	}
+
 	m_bHidePressStart = false;
 #endif
 }
@@ -1448,7 +1065,7 @@ void CAttractScreen::ShowSignInDialog( int iPrimaryUser, int iSecondaryUser, Bla
 
 	// Whoever presses start becomes the primary user
 	// and determines who's config we load, etc.
-	XBX_SetPrimaryUserId( iPrimaryUser );
+	g_pInputSystem->SetPrimaryUserId( iPrimaryUser );
 
 	// Lock the UI convar options to a particular splitscreen player slot
 	SetGameUIActiveSplitScreenPlayerSlot( 0 );
@@ -1503,11 +1120,13 @@ void CAttractScreen::StartGameWithTemporaryProfile_Stage1()
 
 	m_msgData = confirmation->SetUsageData(data);
 	m_pfnMsgChanged = ChangeGamers;
+
+	HideFooter();
 }
 
 void CAttractScreen::StartGameWithTemporaryProfile_Real()
 {
-#if defined( _GAMECONSOLE )
+#if defined( _X360 )
 	if ( UI_IsDebug() )
 	{
 		Msg( "[GAMEUI] CAttractScreen::StartGameWithTemporaryProfile_Real - pri=%d\n", s_idPrimaryUser );
@@ -1515,6 +1134,8 @@ void CAttractScreen::StartGameWithTemporaryProfile_Real()
 
 	// Turn off all other controllers
 	XBX_ClearUserIdSlots();
+
+	g_pInputSystem->SetPrimaryUserId( s_idPrimaryUser );
 
 	XBX_SetPrimaryUserId( s_idPrimaryUser );
 	XBX_SetPrimaryUserIsGuest( 1 );		// primary user id is retained
@@ -1526,7 +1147,7 @@ void CAttractScreen::StartGameWithTemporaryProfile_Real()
 	g_pMatchFramework->GetEventsSubscription()->BroadcastEvent( new KeyValues( "OnProfilesChanged", "numProfiles", int(1) ) );
 
 	OpenMainMenu();
-#endif //defined( _GAMECONSOLE )
+#endif //defined( _X360 )
 }
 
 static void ChangeGamers()
@@ -1603,9 +1224,6 @@ bool CAttractScreen::OfferPromoteToLiveGuest()
 		s_bSecondaryUserIsGuest = 1;
 	}
 
-	// Portal 2 doesn't care upgrading profiles, just play splitscreen
-	return false;
-
 	// Now if somebody is Live, then it's the first ctrlr
 	if ( state1 == eXUserSigninState_SignedInToLive && bPriv1 )
 	{
@@ -1648,7 +1266,7 @@ bool CAttractScreen::OfferPromoteToLiveGuest()
 		m_msgData = confirmation->SetUsageData(data);
 		m_pfnMsgChanged = ChangeGamers;
 
-		*/
+		HideFooter();*/
 
 		return true;
 	}
@@ -1660,7 +1278,7 @@ bool CAttractScreen::OfferPromoteToLiveGuest()
 
 void CAttractScreen::StartGame( int idxUser1 /* = -1 */, int idxUser2 /* = -1 */ )
 {
-#if defined( _GAMECONSOLE )
+#if defined( _X360 )
 	if ( UI_IsDebug() )
 	{
 		Msg( "[GAMEUI] CAttractScreen::StartGame - starting for %d and %d.\n", idxUser1, idxUser2 );
@@ -1674,6 +1292,7 @@ void CAttractScreen::StartGame( int idxUser1 /* = -1 */, int idxUser2 /* = -1 */
 	XBX_ClearUserIdSlots();
 
 	// Configure the game type and controller assignments
+	g_pInputSystem->SetPrimaryUserId( idxUser1 );
 	XBX_SetPrimaryUserId( idxUser1 );
 	XBX_SetPrimaryUserIsGuest( 0 );
 
@@ -1686,15 +1305,11 @@ void CAttractScreen::StartGame( int idxUser1 /* = -1 */, int idxUser2 /* = -1 */
 	}
 	else
 	{
-		// Due to the nature of splitscreen activation on PS3
-		// we don't want to reorder controller indices
-		bool bReorderPlayerIndicesMinMax = !IsPS3();
-
 		// Second user's guest status should be remembered earlier if this is the case
-		XBX_SetUserId( 0, bReorderPlayerIndicesMinMax ? MIN( idxUser1, idxUser2 ) : idxUser1 );
-		XBX_SetUserId( 1, bReorderPlayerIndicesMinMax ? MAX( idxUser1, idxUser2 ) : idxUser2 );
+		XBX_SetUserId( 0, min( idxUser1, idxUser2 ) );
+		XBX_SetUserId( 1, max( idxUser1, idxUser2 ) );
 
-		int iSecondaryUserSlot = (bReorderPlayerIndicesMinMax && (idxUser2 < idxUser1)) ? 0 : 1;
+		int iSecondaryUserSlot = (idxUser2 < idxUser1) ? 0 : 1;
 		XBX_SetUserIsGuest( iSecondaryUserSlot, s_bSecondaryUserIsGuest );
 
 		XBX_SetNumGameUsers( 2 );	// Splitscreen
@@ -1715,7 +1330,7 @@ void CAttractScreen::StartGame( int idxUser1 /* = -1 */, int idxUser2 /* = -1 */
 
 	// Select storage device for user1
 	StartGame_Stage1_Storage1();
-#endif //defined( _GAMECONSOLE )
+#endif //defined( _X360 )
 
 }
 
@@ -1824,11 +1439,13 @@ void CAttractScreen::ReportDeviceFail( ISelectStorageDeviceClient::FailReason_t 
 
 	m_msgData = confirmation->SetUsageData(data);
 	m_pfnMsgChanged = ChangeGamers;
+
+	HideFooter();
 }
 
 void CAttractScreen::StartGame_Stage1_Storage1()
 {
-#ifdef _GAMECONSOLE
+#ifdef _X360
 	HideProgress();
 
 	if ( XBX_GetUserIsGuest( 0 ) )
@@ -1850,7 +1467,7 @@ void CAttractScreen::StartGame_Stage1_Storage1()
 
 void CAttractScreen::StartGame_Stage2_Storage2()
 {
-#ifdef _GAMECONSOLE
+#ifdef _X360
 	HideProgress();
 
 	if ( XBX_GetNumGameUsers() < 2 ||
@@ -1879,16 +1496,20 @@ void CAttractScreen::StartGame_Stage3_Ready()
 
 void CAttractScreen::StartGame_Real( int idxUser1 /* = -1 */, int idxUser2 /* = -1 */ )
 {
-#if defined( _GAMECONSOLE )
+#if defined( _X360 )
 	if ( UI_IsDebug() )
 	{
 		Msg( "[GAMEUI] CAttractScreen::StartGame_Real - starting for %d and %d.\n", idxUser1, idxUser2 );
 	}
 
+	extern CUtlString g_CurrentModeIdSave;
+	char const *szDefaultOption = CUIGameData::Get()->SignedInToLive() ? "BtnCoop" : "BtnPlaySolo";
+	g_CurrentModeIdSave = szDefaultOption;
+
 	NavigateFrom();
 
 	OpenMainMenu();
-#endif //defined( _GAMECONSOLE )
+#endif //defined( _X360 )
 }
 
 void CAttractScreen::OnMsgResetCancelFn()

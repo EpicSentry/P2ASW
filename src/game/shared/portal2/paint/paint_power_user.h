@@ -17,7 +17,9 @@
 
 #include "paint_power_info.h"
 #include "CegClientWrapper.h"
-
+#ifdef CLIENT_DLL
+#include "c_world.h"
+#endif
 extern ConVar sv_enable_paint_power_user_debug;
 
 //#define PAINT_POWER_USER_DEBUG

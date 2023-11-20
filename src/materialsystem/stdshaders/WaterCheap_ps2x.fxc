@@ -42,7 +42,7 @@ const float3 g_vFlowParams2			: register( c14 );
 #define g_flNoiseScale                ( g_vFlowParams2.z )
 
 // Textures
-sampler EnvmapSampler		: register( s0 );
+samplerCUBE EnvmapSampler	: register( s0 );
 sampler NormalMapSampler	: register( s1 );
 
 #if REFRACTALPHA
@@ -53,7 +53,7 @@ sampler FlowSampler			: register( s3 );
 
 sampler FlowNoiseSampler	: register( s4 );
 
-sampler NormalizeSampler	: register( s6 );
+samplerCUBE NormalizeSampler	: register( s6 );
 
 struct PS_INPUT
 {
@@ -195,16 +195,16 @@ float4 main( PS_INPUT i ) : COLOR
 	}
 	#elif ( MULTITEXTURE )
 	{
-		vNormal.xyz  = tex2D( NormalMapSampler, normalMapTexCoord );
-		float3 vNormal1 = tex2D( NormalMapSampler, i.vExtraBumpTexCoord.xy );
-		float3 vNormal2 = tex2D( NormalMapSampler, i.vExtraBumpTexCoord.zw );
+		vNormal.xyz     = tex2D( NormalMapSampler, normalMapTexCoord ).xyz;
+		float3 vNormal1 = tex2D( NormalMapSampler, i.vExtraBumpTexCoord.xy ).xyz;
+		float3 vNormal2 = tex2D( NormalMapSampler, i.vExtraBumpTexCoord.zw ).xyz;
 		vNormal = 0.33 * ( vNormal + vNormal1 + vNormal2 );
 	
 		vNormal = 2.0 * vNormal - 1.0;
 	}
 	#else
 	{
-		vNormal.xyz = DecompressNormal( NormalMapSampler, normalMapTexCoord, NORM_DECODE_NONE );
+		vNormal.xyz = DecompressNormal( NormalMapSampler, normalMapTexCoord, NORM_DECODE_NONE ).xyz;
 	}
 	#endif
 
@@ -243,8 +243,8 @@ float4 main( PS_INPUT i ) : COLOR
 	#endif
 	
 	float3 reflectVect = CalcReflectionVectorUnnormalized( worldSpaceNormal, worldSpaceEye );
-	float3 specularLighting = ENV_MAP_SCALE * texCUBE( EnvmapSampler, reflectVect );
-	specularLighting *= g_ReflectTint;
+	float3 specularLighting = ENV_MAP_SCALE * texCUBE( EnvmapSampler, reflectVect ).rgb;
+	specularLighting *= g_ReflectTint.rgb;
 	
 	#if FRESNEL
 		// FIXME: It's unclear that we want to do this for cheap water
@@ -268,7 +268,7 @@ float4 main( PS_INPUT i ) : COLOR
 		#if REFRACTALPHA
 			// Perform division by W only once
 			float ooW = 1.0f / i.vRefract_W_ProjZ.z;
-			float2 unwarpedRefractTexCoord = i.vRefract_W_ProjZ * ooW;
+			float2 unwarpedRefractTexCoord = i.vRefract_W_ProjZ.xy * ooW;
 			float fogDepthValue = tex2D( RefractSampler, unwarpedRefractTexCoord ).a;
 			// Fade on the border between the water and land.
 			flAlpha *= saturate( ( fogDepthValue - .05f ) * 20.0f );

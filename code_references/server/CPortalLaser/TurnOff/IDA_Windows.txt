@@ -1,0 +1,31 @@
+void __thiscall CPortalLaser::TurnOff(CPortalLaser *this)
+{
+  edict_t *m_pPev; // ecx
+  CPortalLaser *m_pChildLaser; // eax
+
+  if ( this->m_bLaserOn.m_Value )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x780u);
+    }
+    this->m_bLaserOn.m_Value = 0;
+  }
+  m_pChildLaser = this->m_pChildLaser;
+  if ( m_pChildLaser )
+  {
+    m_pChildLaser->m_pParentLaser = 0;
+    UTIL_Remove(this->m_pChildLaser);
+    this->m_pChildLaser = 0;
+  }
+  CPortalLaser::TurnOffGlow(this);
+  CPortalLaser::TurnOffLaserSound(this);
+  CBaseEntity::SetNextThink(this, -1.0, 0);
+  CBaseEntity::ThinkSet(this, 0, 0.0, 0);
+}

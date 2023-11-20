@@ -3,7 +3,7 @@
 // Purpose: 
 //
 //=============================================================================
-#include <cbase.h>
+
 #include "CustomTabExplanationDialog.h"
 #include "BasePanel.h"
 #include "convar.h"
@@ -89,4 +89,5 @@ void CCustomTabExplanationDialog::OnCommand( const char *command )
 void CCustomTabExplanationDialog::OnClose( void )
 {
 	BaseClass::OnClose();
+	GameUI().AllowEngineHideGameUI();
 }

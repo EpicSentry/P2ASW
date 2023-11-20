@@ -1,0 +1,23 @@
+void __cdecl CPortalLaser::Precache(CPortalLaser *const this)
+{
+  const char *pszValue; // ecx
+
+  if ( this->m_bIsLethal.m_Value )
+    CBaseEntity::PrecacheScriptSound("LaserGreen.BeamLoop");
+  else
+    CBaseEntity::PrecacheScriptSound("Laser.BeamLoop");
+  CBaseEntity::PrecacheScriptSound("Flesh.LaserBurn");
+  CBaseEntity::PrecacheScriptSound("Player.PainSmall");
+  PrecacheParticleSystem("laser_start_glow");
+  PrecacheParticleSystem("reflector_start_glow");
+  if ( !this->m_bFromReflectedCube )
+  {
+    pszValue = "";
+    if ( this->m_ModelName.pszValue )
+      pszValue = this->m_ModelName.pszValue;
+    if ( *pszValue )
+      CBaseEntity::PrecacheModel(pszValue);
+    else
+      CBaseEntity::PrecacheModel("models/props/laser_emitter.mdl");
+  }
+}

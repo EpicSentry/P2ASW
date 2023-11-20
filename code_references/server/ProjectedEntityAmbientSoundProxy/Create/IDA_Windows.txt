@@ -1,0 +1,16 @@
+ProjectedEntityAmbientSoundProxy *__cdecl ProjectedEntityAmbientSoundProxy::Create(CBaseEntity *pAttachTo)
+{
+  ProjectedEntityAmbientSoundProxy *result; // eax
+  ProjectedEntityAmbientSoundProxy *v2; // esi
+
+  result = (ProjectedEntityAmbientSoundProxy *)CreateEntityByName("projected_entity_ambient_sound_proxy", -1, 1);
+  v2 = result;
+  if ( result )
+  {
+    result->SetParent(result, pAttachTo, -1);
+    CBaseEntity::SetLocalOrigin(v2, &vec3_origin);
+    CBaseEntity::SetLocalAngles(v2, &vec3_angle);
+    return v2;
+  }
+  return result;
+}

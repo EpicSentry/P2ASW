@@ -212,6 +212,9 @@ sky_vs20.fxc
 sky_hdr_compressed_ps2x.fxc
 sky_hdr_compressed_rgbs_ps2x.fxc
 
+solidenergy_vs20.fxc
+solidenergy_ps20b.fxc
+
 splinecard_vsxx.fxc
 
 splinerope_vsxx.fxc

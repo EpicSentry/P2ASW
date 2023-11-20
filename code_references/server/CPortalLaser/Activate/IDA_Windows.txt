@@ -1,0 +1,5 @@
+void __thiscall CPortalLaser::Activate(CPortalLaser *this)
+{
+  CPortalLaser::CreateHelperEntities(this);
+  CBaseAnimating::Activate(this);
+}

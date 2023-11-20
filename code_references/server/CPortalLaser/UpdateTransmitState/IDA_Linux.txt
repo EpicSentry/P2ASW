@@ -1,0 +1,4 @@
+int __cdecl CPortalLaser::UpdateTransmitState(CPortalLaser *const this)
+{
+  return CBaseEntity::SetTransmitState(this, 8);
+}

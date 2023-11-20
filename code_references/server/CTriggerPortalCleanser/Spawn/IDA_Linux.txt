@@ -1,0 +1,72 @@
+void __cdecl CTriggerPortalCleanser::Spawn(CTriggerPortalCleanser *const this)
+{
+  char *v1; // edx
+  int v2; // esi
+  edict_t *m_pPev; // eax
+  FizzlerMultiOriginSoundPlayer *v4; // eax
+  CBaseEntity *v5; // edx
+  char *v6; // ecx
+  BASEPTR v7; // [esp+28h] [ebp-40h] BYREF
+  CReliableBroadcastRecipientFilter filter; // [esp+30h] [ebp-38h] BYREF
+
+  CBaseTrigger::Spawn(this);
+  (*((void (__cdecl **)(CTriggerPortalCleanser *const))this->_vptr_IHandleEntity + 26))(this);
+  if ( !this->m_bClientSidePredicted.m_Value )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_bClientSidePredicted);
+    this->m_bClientSidePredicted.m_Value = 1;
+  }
+  CBaseTrigger::InitTrigger(this);
+  if ( CTriggerPortalCleanser::s_FizzlerAmbientSoundPlayer.m_Index == -1
+    || (v1 = (char *)g_pEntityList + 24 * LOWORD(CTriggerPortalCleanser::s_FizzlerAmbientSoundPlayer.m_Index),
+        *((_DWORD *)v1 + 2) != HIWORD(CTriggerPortalCleanser::s_FizzlerAmbientSoundPlayer.m_Index))
+    || !*((_DWORD *)v1 + 1) )
+  {
+    CRecipientFilter::CRecipientFilter(&filter);
+    filter._vptr_IRecipientFilter = (int (**)(...))off_B986C8;
+    CRecipientFilter::AddAllPlayers(&filter);
+    filter._vptr_IRecipientFilter = (int (**)(...))off_BA41A8;
+    CRecipientFilter::MakeReliable(&filter);
+    v4 = FizzlerMultiOriginSoundPlayer::Create(&filter, "VFX.FizzlerLp");
+    if ( v4 )
+      CTriggerPortalCleanser::s_FizzlerAmbientSoundPlayer.m_Index = *(_DWORD *)(*((int (__cdecl **)(FizzlerMultiOriginSoundPlayer *))v4->_vptr_IHandleEntity
+                                                                                + 3))(v4);
+    else
+      CTriggerPortalCleanser::s_FizzlerAmbientSoundPlayer.m_Index = -1;
+    if ( (this->m_iEFlags & 0x800) != 0 )
+      CBaseEntity::CalcAbsolutePosition(this);
+    v5 = 0;
+    if ( CTriggerPortalCleanser::s_FizzlerAmbientSoundPlayer.m_Index != -1 )
+    {
+      v6 = (char *)g_pEntityList + 24 * LOWORD(CTriggerPortalCleanser::s_FizzlerAmbientSoundPlayer.m_Index);
+      if ( *((_DWORD *)v6 + 2) == HIWORD(CTriggerPortalCleanser::s_FizzlerAmbientSoundPlayer.m_Index) )
+        v5 = (CBaseEntity *)*((_DWORD *)v6 + 1);
+    }
+    CBaseEntity::SetAbsOrigin(v5, &this->m_vecAbsOrigin);
+    filter._vptr_IRecipientFilter = (int (**)(...))off_B986C8;
+    CRecipientFilter::~CRecipientFilter(&filter);
+  }
+  if ( this->m_bVisible.m_Value )
+  {
+    v2 = this->m_fEffects.m_Value & 0xFFFFFFDF;
+    if ( this->m_fEffects.m_Value != v2 )
+    {
+      CBaseEntity::NetworkStateChanged(this, &this->m_fEffects);
+      this->m_fEffects.m_Value = v2;
+    }
+    m_pPev = this->m_Network.m_pPev;
+    if ( m_pPev )
+      m_pPev->m_fStateFlags |= 0x80u;
+    CBaseEntity::DispatchUpdateTransmitState(this);
+    CBaseEntity::SetTransmitState(this, 32);
+    CBaseEntity::ThinkSet(&v7, this, (BASEPTR)(unsigned int)CTriggerPortalCleanser::SearchThink, 0.0, 0);
+    CBaseEntity::SetNextThink(this, gpGlobals->curtime + sv_portal_cleanser_think_rate.m_pParent->m_Value.m_fValue, 0);
+    CTriggerPortalCleanser::StartAmbientSounds(this);
+  }
+  CBaseEntity::ThinkSet(
+    &v7,
+    this,
+    (BASEPTR)(unsigned int)CTriggerPortalCleanser::PlayerPassesTriggerFiltersThink,
+    gpGlobals->curtime + 1.0,
+    CTriggerPortalCleanser::s_szPlayerPassesTriggerFiltersThinkContext);
+}

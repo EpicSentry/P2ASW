@@ -1,0 +1,12 @@
+void __cdecl CBaseProjector::TestProjectionChangesThink(CBaseProjector *const this)
+{
+  BASEPTR v1; // [esp+28h] [ebp-10h] BYREF
+
+  CBaseEntity::ThinkSet(
+    &v1,
+    this,
+    (BASEPTR)(unsigned int)CBaseProjector::TestProjectionChangesThink,
+    gpGlobals->curtime + 0.050000001,
+    "TestProjectionChanges");
+  CBaseProjector::TestAllForProjectionChanges();
+}

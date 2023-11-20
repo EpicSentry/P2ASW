@@ -1,0 +1,96 @@
+void __cdecl CTriggerPortalCleanser::CTriggerPortalCleanser(CTriggerPortalCleanser *const this)
+{
+  bool v2; // zf
+  edict_t *m_pPev; // esi
+  IChangeInfoAccessor *v4; // eax
+  unsigned __int16 m_nChangeInfos; // dx
+  CSharedEdictChangeInfo *v6; // edx
+  char *v7; // eax
+  char *v8; // edi
+  int v9; // edx
+  char *v10; // [esp+18h] [ebp-20h]
+  unsigned __int16 v11; // [esp+1Eh] [ebp-1Ah]
+
+  CBaseTrigger::CBaseTrigger(this);
+  ITriggerPortalCleanserAutoList::ITriggerPortalCleanserAutoList(&this->ITriggerPortalCleanserAutoList, 1);
+  this->_vptr_IHandleEntity = (int (**)(...))off_C805A8;
+  this->_vptr_ITriggerPortalCleanserAutoList = (int (**)(...))off_C80908;
+  this->m_OnDissolve.m_Value._anon_0.iVal = 0;
+  this->m_OnDissolve.m_Value.eVal.m_Index = -1;
+  this->m_OnDissolve.m_Value.fieldType = FIELD_VOID;
+  this->m_OnFizzle.m_Value._anon_0.iVal = 0;
+  this->m_OnFizzle.m_Value.eVal.m_Index = -1;
+  this->m_OnFizzle.m_Value.fieldType = FIELD_VOID;
+  this->m_OnDissolveBox.m_Value._anon_0.iVal = 0;
+  this->m_OnDissolveBox.m_Value.eVal.m_Index = -1;
+  this->m_OnDissolveBox.m_Value.fieldType = FIELD_VOID;
+  this->m_VortexObjects[0].m_hEnt.m_Index = -1;
+  this->m_VortexObjects[1].m_hEnt.m_Index = -1;
+  this->m_bVisible.m_Value = 0;
+  CBaseEntity::NetworkStateChanged(this, &this->m_bVisible);
+  this->m_bObject1InRange.m_Value = 0;
+  CBaseEntity::NetworkStateChanged(this, &this->m_bObject1InRange);
+  this->m_bObject2InRange.m_Value = 0;
+  CBaseEntity::NetworkStateChanged(this, &this->m_bObject2InRange);
+  this->m_bUseScanline.m_Value = 1;
+  CBaseEntity::NetworkStateChanged(this, &this->m_bUseScanline);
+  v2 = !this->m_Network.m_TimerEvent.m_bRegistered;
+  this->m_bPlayersPassTriggerFilters.m_Value = 1;
+  if ( v2 )
+  {
+    m_pPev = this->m_Network.m_pPev;
+    if ( m_pPev && (m_pPev->m_fStateFlags & 0x100) == 0 )
+    {
+      m_pPev->m_fStateFlags |= 1u;
+      v4 = CBaseEdict::GetChangeAccessor(m_pPev);
+      if ( v4->m_iChangeInfoSerialNumber == g_pSharedChangeInfo->m_iSerialNumber )
+      {
+        v10 = (char *)g_pSharedChangeInfo + 40 * v4->m_iChangeInfo;
+        v8 = v10 + 2;
+        v11 = *((_WORD *)v10 + 20);
+        if ( !v11 )
+          goto LABEL_15;
+        if ( *((_WORD *)v10 + 1) == 1311 )
+          goto LABEL_4;
+        v9 = 0;
+        while ( v9 != 2 * (unsigned __int16)(v11 - 1) )
+        {
+          v9 += 2;
+          if ( *(_WORD *)&v8[v9] == 1311 )
+            goto LABEL_4;
+        }
+        if ( v11 != 19 )
+        {
+LABEL_15:
+          *(_WORD *)&v8[2 * v11] = 1311;
+          *((_WORD *)v10 + 20) = v11 + 1;
+          goto LABEL_4;
+        }
+      }
+      else
+      {
+        m_nChangeInfos = g_pSharedChangeInfo->m_nChangeInfos;
+        if ( m_nChangeInfos != 100 )
+        {
+          v4->m_iChangeInfo = m_nChangeInfos;
+          v6 = g_pSharedChangeInfo;
+          ++g_pSharedChangeInfo->m_nChangeInfos;
+          v4->m_iChangeInfoSerialNumber = v6->m_iSerialNumber;
+          v7 = (char *)g_pSharedChangeInfo + 40 * v4->m_iChangeInfo;
+          *((_WORD *)v7 + 1) = 1311;
+          *((_WORD *)v7 + 20) = 1;
+          goto LABEL_4;
+        }
+      }
+      v4->m_iChangeInfoSerialNumber = 0;
+      m_pPev->m_fStateFlags |= 0x100u;
+    }
+  }
+  else
+  {
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+  }
+LABEL_4:
+  this->m_hObject1.m_Value.m_Index = -1;
+  this->m_hObject2.m_Value.m_Index = -1;
+}

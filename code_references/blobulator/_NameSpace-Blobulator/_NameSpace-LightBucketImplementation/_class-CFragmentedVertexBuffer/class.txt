@@ -1,0 +1,41 @@
+class Blobulator::LightBucketImplementation::CFragmentedVertexBuffer
+{
+    public void CFragmentedVertexBuffer(class Blobulator::LightBucketImplementation::CFragmentedVertexBuffer & );
+    public void CFragmentedVertexBuffer();
+    public void ~CFragmentedVertexBuffer();
+    public void BeginFrame(void * );
+    public void EndFrame();
+    public void BeginTile();
+    public void EndTile();
+    public bool DrawFragments(int ,int * );
+    public void ClearFragmentsToDisplay();
+    public void CheckResetState(int );
+    public int RetrievePointers(class Blobulator::LightBucketImplementation::CLockLessStack<128> ** ,class Blobulator::LightBucketImplementation::CLockLessStack<128> ** ,class Blobulator::LightBucketImplementation::CFragmentInfo ** );
+    public const int FRAGMENT_INDEX_BUFFER_SIZE;
+    public const int FRAGMENT_VERTEX_BUFFER_SIZE;
+    struct __Check__58
+    {
+        char Check[1];
+    };
+    struct __Check__59
+    {
+        char Check[1];
+    };
+    public int GetVertexSize();
+    private const int FRAGMENT_INDEX_THRESHOLD;
+    private const int FRAGMENT_VERTEX_THRESHOLD;
+    private const int NUMBER_OF_SLOTS;
+    private const int NUMBER_OF_INDICES_RESERVED;
+    private const int NUMBER_OF_VERTICES_RESERVED;
+    private class Blobulator::LightBucketImplementation::CLockLessStackContainer<128> m_FragmentsAvailableContainer;
+    private class Blobulator::LightBucketImplementation::CLockLessStackContainer<128> m_FragmentsToDisplayContainer[64];
+    private class Blobulator::LightBucketImplementation::CLockLessStack<128> m_FragmentsAvailable;
+    private class Blobulator::LightBucketImplementation::CLockLessStack<128> m_FragmentsToDisplay[64];
+    private class Blobulator::LightBucketImplementation::CFragmentInfo m_Fragments[128];
+    private unsigned int * m_pCachedIndexBuffer;
+    private void * m_pCachedVertexBuffer;
+    private class IndexTriVertexBuffer * m_pVertexBuffer;
+    private int m_nCurrentSlot;
+    public class Blobulator::LightBucketImplementation::CFragmentedVertexBuffer & operator=(class Blobulator::LightBucketImplementation::CFragmentedVertexBuffer & );
+    public void * __vecDelDtor(unsigned int );
+};

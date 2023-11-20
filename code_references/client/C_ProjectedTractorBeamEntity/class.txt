@@ -1,0 +1,15 @@
+class C_ProjectedTractorBeamEntity : public C_BaseProjectedEntity
+{
+public:
+	DECLARE_CLASS( C_ProjectedTractorBeamEntity, C_BaseProjectedEntity );
+	DECLARE_CLIENTCLASS();
+	DECLARE_PREDICTABLE();
+	
+    C_ProjectedTractorBeamEntity();
+    ~C_ProjectedTractorBeamEntity();
+    void GetProjectionExtents(class Vector & ,class Vector & );
+    void OnProjected();
+    
+private:
+    CHandle<C_Trigger_TractorBeam> m_hTractorBeamTrigger;
+};

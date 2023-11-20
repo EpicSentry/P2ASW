@@ -15,6 +15,8 @@
 #include "VGenericConfirmation.h"
 #include "materialsystem/materialsystem_config.h"
 #include "ConfigManager.h"
+#include "cdll_util.h"
+#include "nb_header_footer.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -26,12 +28,21 @@ using namespace BaseModUI;
 Cloud::Cloud(Panel *parent, const char *panelName):
 BaseClass(parent, panelName)
 {
+	GameUI().PreventEngineHideGameUI();
+
 	SetDeleteSelfOnClose(true);
 
 	SetProportional( true );
 
 	SetUpperGarnishEnabled(true);
-	SetFooterEnabled(true);
+	SetLowerGarnishEnabled(true);
+
+	m_pHeaderFooter = new CNB_Header_Footer( this, "HeaderFooter" );
+	m_pHeaderFooter->SetTitle( "" );
+	m_pHeaderFooter->SetHeaderEnabled( false );
+	m_pHeaderFooter->SetFooterEnabled( true );
+	m_pHeaderFooter->SetGradientBarEnabled( true );
+	m_pHeaderFooter->SetGradientBarPos( 120, 160 );
 
 	m_drpCloud = NULL;
 
@@ -41,6 +52,7 @@ BaseClass(parent, panelName)
 //=============================================================================
 Cloud::~Cloud()
 {
+	GameUI().AllowEngineHideGameUI();
 }
 
 //=============================================================================
@@ -91,7 +103,7 @@ void Cloud::UpdateFooter()
 	CBaseModFooterPanel *footer = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
 	if ( footer )
 	{
-		footer->SetButtons( FB_ABUTTON | FB_BBUTTON );
+		footer->SetButtons( FB_ABUTTON | FB_BBUTTON, FF_AB_ONLY, false );
 		footer->SetButtonText( FB_ABUTTON, "#L4D360UI_Select" );
 		footer->SetButtonText( FB_BBUTTON, "#L4D360UI_Controller_Done" );
 	}
@@ -109,11 +121,11 @@ void Cloud::OnThink()
 		needsActivate = true;
 	}
 
-	if( !m_btnCancel )
-	{
-		m_btnCancel = dynamic_cast< BaseModHybridButton* >( FindChildByName( "BtnCancel" ) );
-		needsActivate = true;
-	}
+// 	if( !m_btnCancel )
+// 	{
+// 		m_btnCancel = dynamic_cast< BaseModHybridButton* >( FindChildByName( "BtnCancel" ) );
+// 		needsActivate = true;
+// 	}
 
 	if( needsActivate )
 	{
@@ -188,7 +200,7 @@ Panel* Cloud::NavigateBack()
 
 void Cloud::PaintBackground()
 {
-	BaseClass::DrawDialogBackground( "#L4D360UI_Cloud_Title", NULL, "#L4D360UI_Cloud_Subtitle", NULL, NULL, true );
+	//BaseClass::DrawDialogBackground( "#L4D360UI_Cloud_Title", NULL, "#L4D360UI_Cloud_Subtitle", NULL, NULL, true );
 }
 
 void Cloud::ApplySchemeSettings( vgui::IScheme *pScheme )

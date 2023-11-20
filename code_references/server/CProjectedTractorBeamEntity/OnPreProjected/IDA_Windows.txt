@@ -1,0 +1,11 @@
+void __thiscall CProjectedTractorBeamEntity::OnPreProjected(CProjectedTractorBeamEntity *this)
+{
+  unsigned int m_Index; // edx
+
+  m_Index = this->m_hTractorBeamTrigger.m_Value.m_Index;
+  if ( m_Index != -1 && g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber == HIWORD(m_Index) )
+  {
+    if ( g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity )
+      this->CheckForSettledReflectorCubes(this);
+  }
+}

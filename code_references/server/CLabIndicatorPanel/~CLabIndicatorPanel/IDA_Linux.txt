@@ -1,0 +1,18 @@
+void __cdecl CLabIndicatorPanel::~CLabIndicatorPanel(CLabIndicatorPanel *const this)
+{
+  unsigned int m_Index; // eax
+  CVGuiScreen **v2; // edx
+
+  m_Index = this->m_hScreen.m_Index;
+  this->_vptr_IHandleEntity = (int (**)(...))off_C84A68;
+  if ( m_Index != -1 )
+  {
+    v2 = (CVGuiScreen **)((char *)g_pEntityList + 24 * (unsigned __int16)m_Index);
+    if ( v2[2] == (CVGuiScreen *)HIWORD(m_Index) )
+    {
+      if ( v2[1] )
+        DestroyVGuiScreen(v2[1]);
+    }
+  }
+  CBaseEntity::~CBaseEntity(this);
+}

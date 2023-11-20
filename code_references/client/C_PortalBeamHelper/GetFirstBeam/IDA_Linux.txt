@@ -1,0 +1,9 @@
+C_Beam *__cdecl C_PortalBeamHelper::GetFirstBeam(C_PortalBeamHelper *const this)
+{
+  C_Beam *result; // eax
+
+  result = 0;
+  if ( this->m_beams.m_Size )
+    return *this->m_beams.m_Memory.m_pMemory;
+  return result;
+}

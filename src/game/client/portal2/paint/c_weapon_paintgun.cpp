@@ -93,6 +93,8 @@ void C_WeaponPaintGun::Precache( void )
 	PrecacheParticleSystem( "paint_splat_speed_01" );
 	PrecacheParticleSystem( "paint_splat_erase_01" );
 	PrecacheParticleSystem( "rtube_muzzle" );
+	PrecacheParticleSystem( PAINT_PARTICLE_STREAM );
+
 	
 
 
@@ -269,7 +271,9 @@ void C_WeaponPaintGun::StartHoseEffect()
 		// If there's already a different stream particle effect, get rid of it.
 		if( !m_pStreamEffect.IsValid() )
 		{
-			m_pStreamEffect = pOwner->GetViewModel()->ParticleProp()->Create( particleEffectName, PATTACH_POINT_FOLLOW, "rtube_muzzle" );
+			const char* pAttachmentName = "rtube_muzzle";
+
+			m_pStreamEffect = pOwner->GetViewModel()->ParticleProp()->Create( particleEffectName, PATTACH_POINT_FOLLOW, pAttachmentName );
 		}
 
 		paintColor = m_bFiringPaint ? MapPowerToVisualColor( m_iSubType ) : MapPowerToVisualColor( NO_POWER );
@@ -573,10 +577,10 @@ static void ChangePaintTo( const CCommand& args )
 		ChangePaintColor( PORTAL_POWER );
 	}
 	// FIXME: Bring back for DLC2
-	/*else if ( V_stricmp( args[1], "reflect" ) == 0 )
+	else if ( V_stricmp( args[1], "reflect" ) == 0 )
 	{
 		ChangePaintColor( REFLECT_POWER );
-	}*/
+	}
 }
 
 static ConCommand changepaintto("changepaintto", ChangePaintTo );

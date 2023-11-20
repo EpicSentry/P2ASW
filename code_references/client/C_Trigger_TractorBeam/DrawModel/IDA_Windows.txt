@@ -1,0 +1,102 @@
+int __thiscall C_Trigger_TractorBeam::DrawModel(
+        C_Trigger_TractorBeam *this,
+        int flags,
+        const RenderableInstance_t *instance)
+{
+  bool v4; // zf
+  bool v5; // sf
+  bool v6; // of
+  float v7; // xmm0_4
+  float v8; // xmm1_4
+  float z; // xmm2_4
+  float v10; // xmm0_4
+  float v11; // xmm0_4
+  float v12; // xmm1_4
+  float v13; // xmm2_4
+  matrix3x4_t xform; // [esp+2Ch] [ebp-68h] BYREF
+  QAngle angles; // [esp+5Ch] [ebp-38h] BYREF
+  Vector xAxis; // [esp+68h] [ebp-2Ch] BYREF
+  Vector yAxis; // [esp+74h] [ebp-20h] BYREF
+  Vector vDir; // [esp+80h] [ebp-14h] BYREF
+  float flLength; // [esp+8Ch] [ebp-8h]
+  bool bDrawOuterColumn; // [esp+93h] [ebp-1h]
+
+  if ( (_S11_23 & 1) == 0 )
+  {
+    _S11_23 |= 1u;
+    ConVarRef::ConVarRef(&gpu_level_3, "gpu_level");
+  }
+  v6 = __OFSUB__(gpu_level_3.m_pConVarState->m_Value.m_nValue, 1);
+  v4 = gpu_level_3.m_pConVarState->m_Value.m_nValue == 1;
+  v5 = gpu_level_3.m_pConVarState->m_Value.m_nValue - 1 < 0;
+  vDir.x = this->m_vStart.z - *(float *)&this->m_blobs.m_pElements;
+  vDir.y = this->m_vEnd.x - this->m_vStart.x;
+  v7 = this->m_vEnd.y - this->m_vStart.y;
+  bDrawOuterColumn = !(v5 ^ v6 | v4);
+  vDir.z = v7;
+  flLength = VectorNormalize(&vDir);
+  v8 = *(float *)(gpGlobals.m_Index + 12);
+  if ( (float)(v8 - this->m_linearForceAngles.z) < 0.5 )
+  {
+    z = this->m_linearForceAngles.z;
+    v10 = z + 0.5;
+    if ( z == (float)(z + 0.5) )
+    {
+      if ( v8 < v10 )
+        v11 = 0.0;
+      else
+        v11 = *(float *)&FLOAT_1_0;
+    }
+    else
+    {
+      v12 = (float)(v8 - z) / (float)(v10 - z);
+      if ( v12 >= 0.0 )
+      {
+        if ( v12 <= 1.0 )
+          v13 = v12;
+        else
+          v13 = *(float *)&FLOAT_1_0;
+      }
+      else
+      {
+        v13 = 0.0;
+      }
+      v11 = (float)((float)(v13 * v13) * 3.0) - (float)((float)((float)(v13 * v13) * 2.0) * v13);
+    }
+    flLength = v11 * flLength;
+  }
+  VectorAngles(&vDir, &angles);
+  AngleMatrix(&angles, (const Vector *)&this->m_blobs.m_pElements, &xform);
+  MatrixGetColumn(&xform, 2, &xAxis);
+  MatrixGetColumn(&xform, 1, &yAxis);
+  C_Trigger_TractorBeam::DrawColumn(
+    (C_Trigger_TractorBeam *)((char *)this - 4),
+    (int)this,
+    *(IMaterial **)&this->m_bReversed,
+    (const Vector *)&this->m_blobs.m_pElements,
+    &vDir,
+    flLength,
+    &xAxis,
+    &yAxis,
+    58.0,
+    1.0,
+    BYTE1(this->m_flRadius),
+    BYTE2(this->m_flRadius),
+    0.0);
+  if ( bDrawOuterColumn )
+    C_Trigger_TractorBeam::DrawColumn(
+      (C_Trigger_TractorBeam *)((char *)this - 4),
+      (int)this,
+      this->m_pMaterial1,
+      (const Vector *)&this->m_blobs.m_pElements,
+      &vDir,
+      flLength,
+      &xAxis,
+      &yAxis,
+      60.0,
+      1.0,
+      BYTE1(this->m_flRadius),
+      BYTE2(this->m_flRadius),
+      0.0);
+  return 1;
+}

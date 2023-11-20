@@ -1,0 +1,11 @@
+void __thiscall C_Trigger_TractorBeam::Spawn(C_Trigger_TractorBeam *this)
+{
+  C_Prop_Portal::Fizzle((vgui::PropertyPage *)this);
+  if ( !this->m_pMaterial1 )
+    this->m_pMaterial1 = materials->FindMaterial(materials, "effects/tractor_beam", 0, 0, 0);
+  if ( !this->m_pMaterial2 )
+    this->m_pMaterial2 = materials->FindMaterial(materials, "effects/tractor_beam2", 0, 0, 0);
+  if ( !this->m_pMaterial3 )
+    this->m_pMaterial3 = materials->FindMaterial(materials, "effects/tractor_beam3", 0, 0, 0);
+  ((void (__thiscall *)(C_Trigger_TractorBeam *, _DWORD))this->SetNextClientThink)(this, LODWORD(FLOAT_N1293_0));
+}

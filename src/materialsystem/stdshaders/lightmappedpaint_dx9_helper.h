@@ -15,4 +15,7 @@ void DrawLightmappedPaint_DX9( CBaseVSShader *pShader, IMaterialVar** params,
 								 LightmappedGeneric_DX9_Vars_t &info, CBasePerMaterialContextData **pContextDataPtr );
 
 
+void DrawLightmappedPaint_DX9_FastPath( CBaseVSShader *pShader, IMaterialVar** params, 
+							  IShaderDynamicAPI *pShaderAPI, LightmappedGeneric_DX9_Vars_t &info, CBasePerMaterialContextData **pContextDataPtr );
+
 #endif // LIGHTMAPPEDPAINT_DX9_HELPER_H

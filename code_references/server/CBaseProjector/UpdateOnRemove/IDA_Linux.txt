@@ -1,0 +1,35 @@
+void __cdecl CBaseProjector::UpdateOnRemove(CBaseProjector *const this)
+{
+  int v1; // eax
+  int v2; // edx
+
+  if ( s_AllProjectors.m_Size > 0 )
+  {
+    v1 = 0;
+    if ( this == *s_AllProjectors.m_Memory.m_pMemory )
+    {
+LABEL_8:
+      v2 = s_AllProjectors.m_Size - 1;
+      if ( v1 != s_AllProjectors.m_Size - 1 )
+      {
+        s_AllProjectors.m_Memory.m_pMemory[v1] = s_AllProjectors.m_Memory.m_pMemory[v2];
+        v2 = s_AllProjectors.m_Size - 1;
+      }
+      s_AllProjectors.m_Size = v2;
+    }
+    else
+    {
+      while ( ++v1 != s_AllProjectors.m_Size )
+      {
+        if ( this == s_AllProjectors.m_Memory.m_pMemory[v1] )
+        {
+          if ( v1 == -1 )
+            break;
+          goto LABEL_8;
+        }
+      }
+    }
+  }
+  CBaseProjector::Cleanup(this);
+  CBaseEntity::UpdateOnRemove(this);
+}

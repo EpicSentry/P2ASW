@@ -19,6 +19,7 @@
 	#include "NDebugOverlay.h"
 	#include "env_debughistory.h"
 	#include "world.h"
+	#include "paint/paint_savelogic.h"
 #else
 	#include "c_portal_player.h"
 	#include "c_world.h"
@@ -41,6 +42,9 @@ ConVar sv_portal_trace_vs_holywall ("sv_portal_trace_vs_holywall", "1", FCVAR_RE
 ConVar sv_portal_trace_vs_staticprops ("sv_portal_trace_vs_staticprops", "1", FCVAR_REPLICATED | FCVAR_CHEAT, "Use traces against portal environment static prop geometry" );
 ConVar sv_use_find_closest_passable_space ("sv_use_find_closest_passable_space", "1", FCVAR_REPLICATED | FCVAR_CHEAT, "Enables heavy-handed player teleporting stuck fix code." );
 ConVar sv_use_transformed_collideables("sv_use_transformed_collideables", "1", FCVAR_REPLICATED | FCVAR_CHEAT, "Disables traces against remote portal moving entities using transforms to bring them into local space." );
+
+extern ConVar portal_clone_displacements;
+
 class CTransformedCollideable : public ICollideable //wraps an existing collideable, but transforms everything that pertains to world space by another transform
 {
 public:
@@ -683,8 +687,22 @@ void UTIL_Portal_TraceRay( const CPortal_Base2D *pPortal, const Ray_t &ray, unsi
 		//enginetrace->TraceRay( ray, fMask, pTraceFilter, &RealTrace );
 		if( portalSimulator.GetInternalData().Simulation.Static.World.Brushes.pCollideable && sv_portal_trace_vs_world.GetBool() )
 		{
-			physcollision->TraceBox( ray, portalSimulator.GetInternalData().Simulation.Static.World.Brushes.pCollideable, vec3_origin, vec3_angle, pTrace );
-			bCopyBackBrushTraceData = true;
+			physcollision->TraceBox( ray, portalSimulator.GetInternalData().Simulation.Static.World.Brushes.pCollideable, vec3_origin, vec3_angle, &TempTrace );
+			if( (TempTrace.startsolid == false) && (TempTrace.fraction < pTrace->fraction) ) //never allow something to be stuck in the tube, it's more of a last-resort guide than a real collideable
+			{
+				*pTrace = TempTrace;
+				bCopyBackBrushTraceData = true;
+			}
+		}
+		
+		if( portalSimulator.GetInternalData().Simulation.Static.World.Displacements.pCollideable && sv_portal_trace_vs_world.GetBool() && portal_clone_displacements.GetBool() )
+		{
+			physcollision->TraceBox( ray, portalSimulator.GetInternalData().Simulation.Static.World.Displacements.pCollideable, vec3_origin, vec3_angle, &TempTrace );
+			if( (TempTrace.startsolid == false) && (TempTrace.fraction < pTrace->fraction) ) //never allow something to be stuck in the tube, it's more of a last-resort guide than a real collideable
+			{
+				*pTrace = TempTrace;
+				bCopyBackBrushTraceData = true;
+			}
 		}
 
 		if( bTraceHolyWall )
@@ -827,6 +845,24 @@ void UTIL_Portal_TraceRay( const CPortal_Base2D *pPortal, const Ray_t &ray, unsi
 						}
 						while( pCurrentProp != pStop );
 					}
+				}
+			}
+
+			if( pLinkedPortalSimulator->GetInternalData().Simulation.Static.World.Displacements.pCollideable && sv_portal_trace_vs_world.GetBool() && portal_clone_displacements.GetBool() )
+			{
+				physcollision->TraceBox( ray, pLinkedPortalSimulator->GetInternalData().Simulation.Static.World.Displacements.pCollideable, vec3_origin, vec3_angle, &TempTrace );
+	#if defined ( PORTAL_TRACE_LOGGING )
+				s_TraceLogger.LogTrace( DISP );
+	#endif
+				if( (TempTrace.fraction < pTrace->fraction) )
+				{
+					*pTrace = TempTrace;
+					bCopyBackBrushTraceData = true;
+					//pTrace->dispFlags |= DISPSURF_FLAG_SURFACE | DISPSURF_FLAG_WALKABLE;
+					Assert( pTrace->startsolid || (pTrace->fraction == 1.0f) || (pTrace->plane.normal.LengthSqr() > 0.5f) );
+	#if defined ( PORTAL_TRACE_LOGGING )
+					keptType = DISP;
+	#endif
 				}
 			}
 		}
@@ -1069,6 +1105,18 @@ void UTIL_Portal_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, c
 					*pTrace = tempTrace;
 				}
 			}
+			
+			if( pPortalSimulator->GetInternalData().Simulation.Static.World.Displacements.pCollideable && 
+				sv_portal_trace_vs_world.GetBool() && 
+				portal_clone_displacements.GetBool() )
+			{
+				physcollision->TraceBox( entRay, MASK_ALL, NULL, pPortalSimulator->GetInternalData().Simulation.Static.World.Displacements.pCollideable, vec3_origin, vec3_angle, &tempTrace );
+								
+				if ( tempTrace.startsolid || (tempTrace.fraction < pTrace->fraction) )
+				{
+					*pTrace = tempTrace;
+				}
+			}
 
 			//if( pPortalSimulator->GetInternalData().Simulation.Static.Wall.RemoteTransformedToLocal.Brushes.pCollideable &&
 			if( pLinkedPortalSimulator &&
@@ -1080,6 +1128,21 @@ void UTIL_Portal_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, c
 				//							pLinkedPortalSimulator->GetInternalData().Simulation.Static.World.Brushes.pCollideable, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.ptOriginTransform, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.qAngleTransform, &tempTrace );
 
 				physcollision->TraceBox( entRay, MASK_ALL, NULL, pLinkedPortalSimulator->GetInternalData().Simulation.Static.World.Brushes.pCollideable, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.ptOriginTransform, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.qAngleTransform, &tempTrace );
+
+				if ( tempTrace.startsolid || (tempTrace.fraction < pTrace->fraction) )
+				{
+					*pTrace = tempTrace;
+				}
+			}
+			
+			//if( pPortalSimulator->GetInternalData().Simulation.Static.Wall.RemoteTransformedToLocal.Brushes.pCollideable &&
+			if( pLinkedPortalSimulator &&
+				pLinkedPortalSimulator->GetInternalData().Simulation.Static.World.Displacements.pCollideable &&
+				sv_portal_trace_vs_world.GetBool() && 
+				sv_portal_trace_vs_holywall.GetBool() && 
+				portal_clone_displacements.GetBool() )
+			{
+				physcollision->TraceBox( entRay, MASK_ALL, NULL, pLinkedPortalSimulator->GetInternalData().Simulation.Static.World.Displacements.pCollideable, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.ptOriginTransform, pPortalSimulator->GetInternalData().Placement.ptaap_LinkedToThis.qAngleTransform, &tempTrace );
 
 				if ( tempTrace.startsolid || (tempTrace.fraction < pTrace->fraction) )
 				{
@@ -1583,19 +1646,16 @@ float UTIL_Portal_ShortestDistanceSqr( const Vector &vPoint1, const Vector &vPoi
 						{
 							ptPlaneIntersection = vPoint1Transformed;
 						}
-
-						Vector vRight, vUp;
-						pLinkedPortal->GetVectors( NULL, &vRight, &vUp );
 						
-						Vector ptLinkedCenter = pLinkedPortal->GetAbsOrigin();
+						Vector ptLinkedCenter = pLinkedPortal->m_ptOrigin;
 						Vector vCenterToIntersection = ptPlaneIntersection - ptLinkedCenter;
-						float fRight = vRight.Dot( vCenterToIntersection );
-						float fUp = vUp.Dot( vCenterToIntersection );
+						float fRight = pLinkedPortal->m_vRight.Dot( vCenterToIntersection );
+						float fUp = pLinkedPortal->m_vUp.Dot( vCenterToIntersection );
 
 						float fAbsRight = fabs( fRight );
 						float fAbsUp = fabs( fUp );
-						if( (fAbsRight > PORTAL_HALF_WIDTH) ||
-							(fAbsUp > PORTAL_HALF_HEIGHT) )
+						if( (fAbsRight > pTempPortal->GetHalfWidth()) ||
+							(fAbsUp > pTempPortal->GetHalfHeight()) )
 							bStraightLine = false;
 
 						if( bStraightLine == false )
@@ -1605,20 +1665,20 @@ float UTIL_Portal_ShortestDistanceSqr( const Vector &vPoint1, const Vector &vPoi
 
 							//find the offending extent and shorten both extents to bring it into the portal quad
 							float fNormalizer;
-							if( fAbsRight > PORTAL_HALF_WIDTH )
+							if( fAbsRight > pTempPortal->GetHalfWidth() )
 							{
-								fNormalizer = fAbsRight/PORTAL_HALF_WIDTH;
+								fNormalizer = fAbsRight/pTempPortal->GetHalfWidth();
 
-								if( fAbsUp > PORTAL_HALF_HEIGHT )
+								if( fAbsUp > pTempPortal->GetHalfHeight() )
 								{
-									float fUpNormalizer = fAbsUp/PORTAL_HALF_HEIGHT;
+									float fUpNormalizer = fAbsUp/pTempPortal->GetHalfHeight();
 									if( fUpNormalizer > fNormalizer )
 										fNormalizer = fUpNormalizer;
 								}
 							}
 							else
 							{
-								fNormalizer = fAbsUp/PORTAL_HALF_HEIGHT;
+								fNormalizer = fAbsUp/pTempPortal->GetHalfHeight();
 							}
 
 							vCenterToIntersection *= (1.0f/fNormalizer);
@@ -1629,6 +1689,7 @@ float UTIL_Portal_ShortestDistanceSqr( const Vector &vPoint1, const Vector &vPoi
 							{
 								fMinDist = fWrapDist;
 								pShortestDistPortal = pTempPortal;
+								*pShortestDistPortal_Out = pShortestDistPortal;
 							}
 						}
 						else
@@ -1636,6 +1697,7 @@ float UTIL_Portal_ShortestDistanceSqr( const Vector &vPoint1, const Vector &vPoi
 							//it's a straight shot from point 1 to 2 through the portal
 							fMinDist = fDirectDist;
 							pShortestDistPortal = pTempPortal;
+							*pShortestDistPortal_Out = pShortestDistPortal;
 						}
 					}
 					else
@@ -1646,11 +1708,12 @@ float UTIL_Portal_ShortestDistanceSqr( const Vector &vPoint1, const Vector &vPoi
 						//do some crazy wrapped line intersection algorithm
 
 						//for now, just do the cheap and easy solution
-						float fWrapDist = vPoint1.DistToSqr( pTempPortal->GetAbsOrigin() ) + pLinkedPortal->GetAbsOrigin().DistToSqr( vPoint2 );
+						float fWrapDist = vPoint1.DistToSqr( pTempPortal->m_ptOrigin ) + ((Vector)pLinkedPortal->m_ptOrigin).DistToSqr( vPoint2 );
 						if( fWrapDist < fMinDist )
 						{
 							fMinDist = fWrapDist;
 							pShortestDistPortal = pTempPortal;
+							*pShortestDistPortal_Out = pShortestDistPortal;
 						}
 					}
 				}
@@ -1659,6 +1722,37 @@ float UTIL_Portal_ShortestDistanceSqr( const Vector &vPoint1, const Vector &vPoi
 	}
 
 	return fMinDist;
+}
+
+void UTIL_Portal_VectorToGlobalTransforms( const Vector &vPoint, CUtlVector< Vector > *utlVecPositions )
+{
+
+	int iPortalCount = CPortal_Base2D_Shared::AllPortals.Count();
+	if( iPortalCount == 0 )
+	{
+		return;
+	}
+	CPortal_Base2D **pPortals = CPortal_Base2D_Shared::AllPortals.Base();
+
+	for( int i = 0; i != iPortalCount; ++i )
+	{
+		CPortal_Base2D *pTempPortal = pPortals[i];
+		if( pTempPortal->IsActive() )
+		{
+			CPortal_Base2D *pLinkedPortal = pTempPortal->m_hLinkedPortal.Get();
+			if( pLinkedPortal != NULL )
+			{
+				VMatrix matrixFromPortal;
+				MatrixInverseTR( pTempPortal->MatrixThisToLinked(), matrixFromPortal );
+
+				Vector vPoint1Transformed = matrixFromPortal * vPoint;
+				utlVecPositions->AddToTail( vPoint1Transformed );
+// 				vPositions[i][0] = vPoint1Transformed[0];
+// 				vPositions[i][1] = vPoint1Transformed[1];
+// 				vPositions[i][2] = vPoint1Transformed[2];
+			}
+		}
+	}
 }
 
 void UTIL_Portal_AABB( const CPortal_Base2D *pPortal, Vector &vMin, Vector &vMax )
@@ -1674,8 +1768,8 @@ void UTIL_Portal_AABB( const CPortal_Base2D *pPortal, Vector &vMin, Vector &vMax
 
 	//scale the extents to usable sizes
 	vOBBForward *= PORTAL_HALF_DEPTH;
-	vOBBRight *= PORTAL_HALF_WIDTH;
-	vOBBUp *= PORTAL_HALF_HEIGHT;
+	vOBBRight *= pPortal->GetHalfWidth();
+	vOBBUp *= pPortal->GetHalfHeight();
 
 	vOrigin -= vOBBForward + vOBBRight + vOBBUp;
 
@@ -2144,7 +2238,7 @@ CPortal_Base2D *UTIL_PointIsOnPortalQuad( const Vector vPoint, float fOnPlaneEps
 
 bool UTIL_Portal_EntityIsInPortalHole( const CPortal_Base2D *pPortal, CBaseEntity *pEntity )
 {
-	CCollisionProperty *pCollisionProp = pEntity->CollisionProp();
+	const CCollisionProperty *pCollisionProp = pEntity->CollisionProp();
 	Vector vMins = pCollisionProp->OBBMins();
 	Vector vMaxs = pCollisionProp->OBBMaxs();
 	Vector vForward, vUp, vRight;
@@ -2158,13 +2252,9 @@ bool UTIL_Portal_EntityIsInPortalHole( const CPortal_Base2D *pPortal, CBaseEntit
 	vRight *= vExtents.y;
 	vUp *= vExtents.z;
 
-	Vector vPortalForward, vPortalRight, vPortalUp;
-	pPortal->GetVectors( &vPortalForward, &vPortalRight, &vPortalUp );
-	Vector ptPortalCenter = pPortal->GetAbsOrigin();
-
 	return OBBHasFullyContainedIntersectionWithQuad( vForward, vRight, vUp, ptOBBCenter, 
-		vPortalForward, vPortalForward.Dot( ptPortalCenter ), ptPortalCenter, 
-		vPortalRight, PORTAL_HALF_WIDTH + 1.0f, vPortalUp, PORTAL_HALF_HEIGHT + 1.0f );
+		pPortal->m_vForward, pPortal->m_vForward.Dot( pPortal->m_ptOrigin ), pPortal->m_ptOrigin, 
+		pPortal->m_vRight, pPortal->GetHalfWidth() + 1.0f, pPortal->m_vUp, pPortal->GetHalfHeight() + 1.0f );
 }
 
 const Vector UTIL_ProjectPointOntoPlane( const Vector& point, const cplane_t& plane )
@@ -2181,9 +2271,9 @@ bool UTIL_PointIsNearPortal( const Vector& point, const CPortal_Base2D* pPortal2
 	pPortal2D->WorldToEntitySpace( point, &transformedPt );
 	pPortal2D->WorldToEntitySpace( UTIL_ProjectPointOntoPlane( pPortal2D->WorldSpaceCenter(), portalPlane ), &origin );
 
-	AssertMsg( PORTAL_HALF_WIDTH > radiusReduction && PORTAL_HALF_HEIGHT > radiusReduction, "Reduction of the box is too high." );
-	const float halfWidth = PORTAL_HALF_WIDTH - radiusReduction;
-	const float halfHeight = PORTAL_HALF_HEIGHT - radiusReduction;
+	AssertMsg( pPortal2D->GetHalfWidth() > radiusReduction && pPortal2D->GetHalfHeight() > radiusReduction, "Reduction of the box is too high." );
+	const float halfWidth = pPortal2D->GetHalfWidth() - radiusReduction;
+	const float halfHeight = pPortal2D->GetHalfHeight() - radiusReduction;
 	const Vector boxMin( origin[0] - planeDist, origin[1] - halfWidth, origin[2] - halfHeight );
 	const Vector boxMax( origin[0] + planeDist, origin[1] + halfWidth, origin[2] + halfHeight );
 
@@ -2426,7 +2516,7 @@ bool UTIL_IsPaintableSurface( const csurface_t& surface )
 
 
 
-float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoint, PaintPowerType power, float flPaintRadius, float flAlphaPercent )
+float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoint, PaintPowerType power, float flPaintRadius, float flAlphaPercent, PaintTraceData_t *pTraceData )
 {
 	if ( !pBrushEntity )
 	{
@@ -2445,19 +2535,13 @@ float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoi
 	// Doesn't exist in Alien Swarm engine
 	//if ( !engine->SpherePaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, power, flPaintRadius, flAlphaPercent ) )
 	//	return 0.0f;
-
-#if 0
-	Msg("power: %i\n", power);
-#endif
-
-	Color preColor = MapPowerToColor(power);
 	
-	Color color = preColor;
+	Color color = MapPowerToColor( power );
 
 	//engine->TracePaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, flPaintRadius, color );
 	
 	// We need to run this twice to make sure we have 2 color values.
-	engine->PaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, color, sv_paint_detection_sphere_radius.GetFloat() );
+	engine->PaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, color, flPaintRadius );
 
 #if 0
 #ifdef GAME_DLL
@@ -2468,8 +2552,11 @@ float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoi
 	Warning("(client)Post Painted Color: %i %i %i %i\n", color.r(), preColor.b(), color.g(), color.a());
 #endif
 #endif
-	//if (color == preColor)
-	//	return 0.0f;
+#ifdef GAME_DLL
+	if ( pTraceData )
+		AddPaintDataToMemory( *pTraceData );
+#endif
+
 	return flPaintRadius;
 }
 
@@ -2486,15 +2573,7 @@ Color GetAveragePaintColorFromVector( CUtlVector<Color> &color )
 	// We really need to get these power colors
 	for (int i = 0; i < color.Count(); ++i)
 	{
-		//Color tColor = color;
 		Color tColor = color.Element(i);
-#if 0
-#ifdef GAME_DLL
-		Msg("(server)tColor: %i %i %i %i\n", tColor.r(), tColor.g(), tColor.b(), tColor.a());
-#else
-		Msg("(client)tColor: %i %i %i %i\n", tColor.r(), tColor.g(), tColor.b(), tColor.a());
-#endif
-#endif
 		// Add up all values
 		r += tColor.r();
 		g += tColor.g();
@@ -2509,17 +2588,10 @@ Color GetAveragePaintColorFromVector( CUtlVector<Color> &color )
 	b = b / color.Count();
 	a = a / color.Count();
 	
-	Assert( r >= 0 || r <= 255 );
-	Assert( b >= 0 || b <= 255 );
-	Assert( g >= 0 || g <= 255 );
-	Assert( a >= 0 || a <= 255 );
-#if 0
-#ifdef GAME_DLL
-	Msg("(server)Average Color: %i %i %i %i\n", r, g, b, a);
-#else
-	Msg("(client)Average Color: %i %i %i %i\n", r, g, b, a);
-#endif
-#endif
+	Assert( r >= 0 && r <= 255 );
+	Assert( b >= 0 && b <= 255 );
+	Assert( g >= 0 && g <= 255 );
+	Assert( a >= 0 && a <= 255 );
 	return Color( r, g, b, a );
 }
 
@@ -2535,22 +2607,8 @@ PaintPowerType UTIL_Paint_TracePower( CBaseEntity* pBrushEntity, const Vector& c
 	// Transform contact point from world to entity space
 	Vector vEntitySpaceContactPoint;
 	pBrushEntity->WorldToEntitySpace( contactPoint, &vEntitySpaceContactPoint );
-
-	// transform contact normal
-	Vector vTransformedContactNormal;
-	VectorRotate( vContactNormal, -pBrushEntity->GetAbsAngles(), vTransformedContactNormal );
-
-	// Doesn't exist in Alien Swarm engine
-	//engine->SphereTracePaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, vTransformedContactNormal, sv_paint_detection_sphere_radius.GetFloat(), color );
 	
 	engine->TracePaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, sv_paint_detection_sphere_radius.GetFloat(), color );
-	
-	//Msg("color.Count(): %i\n", color.Count() );
-	
-	//if ( color.Count() != 0 && &color.Element( 0 ) != NULL )
-		//return MapColorToPower( color.Element(0) );
-	
-	//return NO_POWER;
 
 	return MapColorToPower( GetAveragePaintColorFromVector( color ) );
 

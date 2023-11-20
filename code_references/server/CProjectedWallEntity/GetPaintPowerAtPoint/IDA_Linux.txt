@@ -1,0 +1,6 @@
+PaintPowerType __cdecl CProjectedWallEntity::GetPaintPowerAtPoint(
+        const CProjectedWallEntity *const this,
+        const Vector *const worldContactPt)
+{
+  return this->m_PaintPowers.m_Memory.m_pMemory[CProjectedWallEntity::ComputeSegmentIndex(this, worldContactPt)];
+}

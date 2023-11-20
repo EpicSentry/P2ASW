@@ -9,9 +9,10 @@
 
 #include "basemodui.h"
 #include "VFlyoutMenu.h"
+#include <vgui_controls/HTML.h>
 
 namespace BaseModUI {
-
+	class CP2ASWBlog;
 class MainMenu : public CBaseModFrame, public IBaseModFrameListener, public FlyoutMenuListener
 {
 	DECLARE_CLASS_SIMPLE( MainMenu, CBaseModFrame );
@@ -20,13 +21,13 @@ public:
 	MainMenu(vgui::Panel *parent, const char *panelName);
 	~MainMenu();
 
+#ifdef _X360
 	void Activate();
+#endif //_X360
 
 	void UpdateVisibility();
 
 	MESSAGE_FUNC_CHARPTR( OpenMainMenuJoinFailed, "OpenMainMenuJoinFailed", msg );
-	MESSAGE_FUNC( MsgOpenSinglePlayer, "MsgOpenSinglePlayer" );
-	MESSAGE_FUNC( MsgOpenCoopMode, "MsgOpenCoopMode" );
 	
 	//flyout menu listener
 	virtual void OnNotifyChildFocus( vgui::Panel* child );
@@ -41,10 +42,7 @@ protected:
 	virtual void OnOpen();
 	virtual void RunFrame();
 	virtual void PaintBackground();
-	virtual void OnNavigateTo( const char* panelName );
-#if !defined( _GAMECONSOLE )
-	virtual void OnMousePressed( vgui::MouseCode code );
-#endif
+	virtual void OpenChapterSelect();
 
 	void	Demo_DisableButtons( void );
 
@@ -54,7 +52,11 @@ private:
 	static void AcceptVersusSoftLockCallback();
 	static void AcceptQuitGameCallback();
 	void SetFooterState();
-	void MarkTiles();
+	void ShowBlogPanel(bool show);
+	void PerformLayout();
+	void DefaultLayout();
+	CP2ASWBlog		*m_pBlogPanel;
+	vgui::HTML			*m_pHTMLPanel;
 
 	enum MainMenuQuickJoinHelpText
 	{
@@ -63,18 +65,22 @@ private:
 		MMQJHT_QUICKSTART,
 	};
 	
-	int	m_iQuickJoinHelpText;
-
-	int	m_nTileWidth;
-	int m_nTileHeight;
-	int m_nPinFromBottom;
-	int m_nPinFromLeft;
-	int	m_nFooterOffsetY;
+	int					m_iQuickJoinHelpText;
+};
+class CP2ASWBlog : public CBaseModFrame
+{
+	DECLARE_CLASS_SIMPLE(CP2ASWBlog, CBaseModFrame);
 
 public:
-	static char const *m_szPreferredControlName;
-};
+	CP2ASWBlog(vgui::Panel* parent, const char *panelName);
+	virtual ~CP2ASWBlog();
+	void PerformLayout();
+	void ApplySchemeSettings(vgui::IScheme *pScheme);
+	void LoadBlogPost(const char* URL);
 
+private:
+	vgui::HTML			*m_pHTMLPanel;
+};
 }
 
 #endif // __VMAINMENU_H__

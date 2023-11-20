@@ -1,0 +1,74 @@
+void __cdecl CPropMonsterBox::Spawn(CPropMonsterBox *const this)
+{
+  const char *v1; // esi
+  const char *v2; // eax
+  int v3; // eax
+  int v4; // eax
+  int v5; // eax
+  int v6; // esi
+  int v7; // eax
+  IPhysicsObject *m_pPhysicsObject; // eax
+  BASEPTR v9; // [esp+28h] [ebp-20h] BYREF
+
+  v1 = "models/npcs/monsters/monster_A_box.mdl";
+  v2 = "models/npcs/monsters/monster_A_box.mdl";
+  if ( !this->m_bForcedAsBox )
+    v2 = "models/npcs/monsters/monster_a.mdl";
+  this->m_ModelName.pszValue = v2;
+  CBaseEntity::DispatchUpdateTransmitState(this);
+  (*((void (__cdecl **)(CPropMonsterBox *const))this->_vptr_IHandleEntity + 26))(this);
+  if ( !this->m_bForcedAsBox )
+    v1 = "models/npcs/monsters/monster_a.mdl";
+  (*((void (__cdecl **)(CPropMonsterBox *const, const char *))this->_vptr_IHandleEntity + 27))(this, v1);
+  CCollisionProperty::SetSolid(&this->m_Collision, SOLID_BBOX);
+  CBaseEntity::AddEffects(this, 1024);
+  CPortalGameStats::Event_CubeSpawn(&g_PortalGameStats);
+  CPhysicsProp::Spawn((CPhysicsProp *const)this);
+  if ( this->m_bForcedAsBox )
+  {
+    v3 = CBaseAnimating::LookupSequence(this, "hermit_idle");
+    CBaseAnimating::ResetSequence(this, v3);
+    if ( this->m_flCycle.m_Value != 0.0 )
+    {
+      CBaseEntity::NetworkStateChanged(this, &this->m_flCycle);
+      this->m_flCycle.m_Value = 0.0;
+    }
+    this->m_bIsABox = 1;
+  }
+  else
+  {
+    v4 = CBaseAnimating::LookupSequence(this, "straight01");
+    CBaseAnimating::ResetSequence(this, v4);
+    if ( this->m_flCycle.m_Value != 0.0 )
+    {
+      CBaseEntity::NetworkStateChanged(this, &this->m_flCycle);
+      this->m_flCycle.m_Value = 0.0;
+    }
+    this->m_bIsABox = 0;
+  }
+  v5 = RandomInt(0, 15);
+  this->m_nBodyGroups = v5;
+  v6 = v5 | RandomInt(0, 15);
+  this->m_nBodyGroups = v6;
+  v7 = v6 | RandomInt(0, 15);
+  this->m_nBodyGroups = v7;
+  CBaseAnimating::SetBodygroup(this, 1, v7 & 1);
+  CBaseAnimating::SetBodygroup(this, 2, (this->m_nBodyGroups & 2) != 0);
+  CBaseAnimating::SetBodygroup(this, 3, (this->m_nBodyGroups & 4) != 0);
+  CBaseAnimating::SetBodygroup(this, 4, (this->m_nBodyGroups & 8) != 0);
+  CBaseEntity::SetMoveType(this, MOVETYPE_VPHYSICS, MOVECOLLIDE_DEFAULT);
+  CBaseEntity::ThinkSet(
+    &v9,
+    this,
+    (BASEPTR)(unsigned int)CPropMonsterBox::AnimateThink,
+    gpGlobals->curtime + 0.1,
+    "Animate");
+  m_pPhysicsObject = this->m_pPhysicsObject;
+  if ( m_pPhysicsObject )
+    (*((void (__cdecl **)(IPhysicsObject *, int))m_pPhysicsObject->_vptr_IPhysicsObject + 29))(
+      m_pPhysicsObject,
+      1109393408);
+  CBaseEntity::UpdateObjectCapsCache(this);
+  CBaseAnimating::SetFadeDistance(this, -1.0, 0.0);
+  CBaseEntity::SetGlobalFadeScale(this, 0.0);
+}

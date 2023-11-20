@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-#include <cbase.h>
+
 #include "CvarTextEntry.h"
 #include "EngineInterface.h"
 #include <vgui/IVGui.h>
@@ -70,7 +70,7 @@ void CCvarTextEntry::ApplyChanges( bool immediate )
 	else
 	{
 		char szCommand[ 256 ];
-		Q_snprintf( szCommand, ARRAYSIZE( szCommand ), "%s \"%s\"\n", m_pszCvarName, szText );
+		sprintf( szCommand, "%s \"%s\"\n", m_pszCvarName, szText );
 		engine->ClientCmd_Unrestricted( szCommand );
 	}
 

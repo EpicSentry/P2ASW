@@ -1,0 +1,522 @@
+// local variable allocation has failed, the output may be wrong!
+// bad sp value at call has been detected, the output may be wrong!
+void __usercall CHUDQuickInfo::Paint(CHUDQuickInfo *this@<ecx>, Color a2@<ebp>, int a3@<edi>, int a4@<esi>)
+{
+  int v5; // eax
+  C_BasePlayer *SplitScreenViewPlayer; // edi
+  IViewEffects *ViewEffects; // eax
+  float v8; // xmm1_4
+  IMaterialSystem_vtbl *v9; // edx
+  bool (__thiscall *IsStereoActiveThisFrame)(IMaterialSystem *); // eax
+  __int128 v11; // xmm0
+  C_Portal_Base2D *AlongRay; // eax
+  const VMatrix *p_m_matrixThisToLinked; // edi
+  __int128 v14; // xmm0
+  float v15; // xmm0_4
+  void *v16; // edi
+  int v17; // eax
+  C_WeaponPortalgun *v18; // eax
+  C_WeaponPortalgun *v19; // edi
+  bool CanFirePortal2; // al
+  unsigned __int8 (*ControllerModeActive)(void); // eax
+  float v22; // xmm2_4
+  float v23; // xmm1_4
+  float v24; // xmm1_4
+  float v25; // xmm1_4
+  float v26; // xmm1_4
+  float v27; // xmm1_4
+  float v28; // xmm0_4
+  int v29; // edx
+  float v30; // xmm0_4
+  __int64 v31; // xmm0_8
+  bool v32; // al
+  __int64 v33; // xmm0_8
+  float z; // edx
+  bool v35; // al
+  float v36; // ecx
+  bool v37; // al
+  float v38; // xmm0_4
+  float v39; // xmm0_4
+  bool v40; // zf
+  float *p_flApparentZ; // eax
+  float v42; // xmm1_4
+  float v43; // xmm0_4
+  Color v44; // ecx
+  float *p_y; // eax
+  vgui::CSizerBase *m_pSizer; // xmm0_4
+  Color v47; // eax
+  vgui::CSizerBase *v48; // xmm0_4
+  Color v49; // ecx
+  Color v50; // eax
+  vgui::CSizerBase *v51; // xmm0_4
+  Color v52; // ecx
+  int v53; // eax
+  vgui::CSizerBase *v54; // xmm0_4
+  float v55; // ecx
+  int v56; // eax
+  int v57; // edi
+  Color v58; // ecx
+  float *p_fMustBeCloserThan; // eax
+  vgui::CSizerBase *v60; // xmm0_4
+  Color v61; // eax
+  vgui::CSizerBase *v62; // xmm0_4
+  Color v63; // ecx
+  Color v64; // eax
+  vgui::CSizerBase *v65; // xmm0_4
+  Color v66; // ecx
+  int v67; // eax
+  vgui::CSizerBase *v68; // xmm0_4
+  float v69; // ecx
+  int v70; // eax
+  Color v71; // ecx
+  float *p_z; // eax
+  vgui::CSizerBase *v73; // xmm0_4
+  Color v74; // eax
+  vgui::CSizerBase *v75; // xmm0_4
+  Color v76; // ecx
+  Color v77; // eax
+  vgui::CSizerBase *v78; // xmm0_4
+  Color v79; // ecx
+  int v80; // eax
+  vgui::CSizerBase *v81; // xmm0_4
+  float v82; // ecx
+  int v83; // eax
+  Color v84; // ecx
+  Vector *p_vecEnd; // eax
+  vgui::CSizerBase *v86; // xmm0_4
+  Color v87; // eax
+  vgui::CSizerBase *v88; // xmm0_4
+  Color v89; // ecx
+  Color v90; // eax
+  vgui::CSizerBase *v91; // xmm0_4
+  Color v92; // ecx
+  int v93; // eax
+  vgui::CSizerBase *v94; // xmm0_4
+  float v95; // ecx
+  int v96; // eax
+  _BYTE v98[12]; // [esp+40h] [ebp-22Ch] BYREF
+  Ray_t newRay; // [esp+4Ch] [ebp-220h] BYREF
+  Vector up; // [esp+9Ch] [ebp-1D0h] BYREF
+  Vector right; // [esp+A8h] [ebp-1C4h] BYREF
+  CGameTrace tr2; // [esp+B4h] [ebp-1B8h] BYREF
+  CTraceFilterSimple traceFilter; // [esp+10Ch] [ebp-160h] BYREF
+  CGameTrace tr; // [esp+11Ch] [ebp-150h] BYREF
+  Vector newEndPos; // [esp+174h] [ebp-F8h] BYREF
+  __int128 newStartPos; // [esp+180h] [ebp-ECh] OVERLAPPED
+  Vector v107; // [esp+190h] [ebp-DCh] BYREF
+  Ray_t ray_4; // [esp+1A0h] [ebp-CCh] OVERLAPPED BYREF
+  Vector v109; // [esp+1FCh] [ebp-70h] BYREF
+  Vector pos; // [esp+208h] [ebp-64h] BYREF
+  Vector fwd; // [esp+214h] [ebp-58h]
+  C_Portal_Base2D *pIntersectedPortal; // [esp+220h] [ebp-4Ch]
+  C_Portal_Player *pPortalPlayer; // [esp+224h] [ebp-48h] BYREF
+  int v114; // [esp+228h] [ebp-44h]
+  float flFadeAlpha; // [esp+22Ch] [ebp-40h] BYREF
+  __int64 v116; // [esp+230h] [ebp-3Ch] OVERLAPPED BYREF
+  unsigned __int8 color[4]; // [esp+238h] [ebp-34h]
+  Vector vecEnd; // [esp+23Ch] [ebp-30h] BYREF
+  Color lastPlaced2Color; // [esp+248h] [ebp-24h] BYREF
+  Color clrPortal; // [esp+24Ch] [ebp-20h]
+  Color lastPlaced1Color; // [esp+250h] [ebp-1Ch]
+  float fMustBeCloserThan; // [esp+254h] [ebp-18h] BYREF
+  float flApparentZ; // [esp+258h] [ebp-14h] BYREF
+  int yCenter; // [esp+25Ch] [ebp-10h]
+  Color portal2Color; // [esp+260h] [ebp-Ch]
+  Color portal1Color; // [esp+264h] [ebp-8h]
+  Color retaddr; // [esp+26Ch] [ebp+0h]
+
+  portal2Color = a2;
+  portal1Color = retaddr;
+  v5 = ((int (__thiscall *)(IVEngineClient *, int, int))engine->GetActiveSplitScreenPlayerSlot)(engine, a3, a4);
+  SplitScreenViewPlayer = GetSplitScreenViewPlayer(v5);
+  LODWORD(fwd.y) = SplitScreenViewPlayer;
+  if ( SplitScreenViewPlayer )
+  {
+    v114 = (int)SplitScreenViewPlayer->GetActiveWeapon(SplitScreenViewPlayer);
+    ViewEffects = GetViewEffects();
+    ViewEffects->GetFadeParams(
+      ViewEffects,
+      (unsigned __int8 *)&flFadeAlpha,
+      (unsigned __int8 *)&flFadeAlpha + 1,
+      (unsigned __int8 *)&flFadeAlpha + 2,
+      (unsigned __int8 *)&flFadeAlpha + 3,
+      (bool *)&pPortalPlayer + 3);
+    (*(void (__thiscall **)(float *, int))(LODWORD(this[-1].m_fLastPlacedAlpha[0]) + 52))(
+      this[-1].m_fLastPlacedAlpha,
+      1);
+    v8 = (float)HIBYTE(flFadeAlpha);
+    lastPlaced1Color._color[3] = (int)(float)(255.0 - v8);
+    v9 = materials->__vftable;
+    lastPlaced1Color._color[2] = -1;
+    IsStereoActiveThisFrame = v9->IsStereoActiveThisFrame;
+    fwd.z = 255.0 - v8;
+    *(float *)&pIntersectedPortal = v8;
+    *(_WORD *)lastPlaced1Color._color = -1;
+    clrPortal = (Color)FLOAT_1_0;
+    if ( !IsStereoActiveThisFrame(materials) )
+      goto LABEL_8;
+    C_BasePlayer::EyePositionAndVectors(SplitScreenViewPlayer, &v109, &pos, &up, (Vector *)&newRay.m_IsRay);
+    *((float *)&v116 + 1) = (float)(pos.y * 56755.84) + v109.y;
+    *(float *)&v116 = v109.x + (float)(pos.x * 56755.84);
+    ray_4.m_Start.y = *((float *)&v116 + 1) - v109.y;
+    *(float *)color = (float)(pos.z * 56755.84) + v109.z;
+    ray_4.m_Start.x = *(float *)&v116 - v109.x;
+    ray_4.m_Start.z = *(float *)color - v109.z;
+    *(float *)&lastPlaced2Color = (float)((float)(ray_4.m_Start.y * ray_4.m_Start.y)
+                                        + (float)(ray_4.m_Start.x * ray_4.m_Start.x))
+                                + (float)(ray_4.m_Start.z * ray_4.m_Start.z);
+    BYTE1(ray_4.m_Extents.y) = *(float *)&lastPlaced2Color != 0.0;
+    memset(&ray_4.m_StartOffset, 0, 12);
+    ray_4.m_Extents.x = 0.0;
+    LOBYTE(ray_4.m_Extents.y) = 1;
+    memset(&ray_4.m_Delta, 0, 12);
+    v107 = v109;
+    CTraceFilterSimple::CTraceFilterSimple((CTraceFilterSimple *)&tr2.m_pEnt, SplitScreenViewPlayer, 0, 0);
+    enginetrace->TraceRay(
+      enginetrace,
+      (const Ray_t *)&v107,
+      1174421507u,
+      (ITraceFilter *)&tr2.m_pEnt,
+      (CGameTrace *)&traceFilter.m_pPassEnt);
+    if ( tr.plane.pad[0] )
+    {
+      if ( tr.plane.pad[1] )
+        goto LABEL_8;
+    }
+    v11 = 0i64;
+    *(float *)&v11 = fsqrt(
+                       (float)((float)((float)(tr.startpos.y - *(float *)&traceFilter.m_collisionGroup)
+                                     * (float)(tr.startpos.y - *(float *)&traceFilter.m_collisionGroup))
+                             + (float)((float)(tr.startpos.z - *(float *)&traceFilter.m_pExtraShouldHitCheckFunction)
+                                     * (float)(tr.startpos.z - *(float *)&traceFilter.m_pExtraShouldHitCheckFunction)))
+                     + (float)((float)(tr.startpos.x - *(float *)&traceFilter.m_pPassEnt)
+                             * (float)(tr.startpos.x - *(float *)&traceFilter.m_pPassEnt)));
+    newStartPos = v11;
+    clrPortal = (Color)v11;
+    *(float *)&lastPlaced2Color = tr.plane.normal.z + 0.0099999998;
+    AlongRay = UTIL_Portal_FirstAlongRay((const Ray_t *)&v107, (float *)&lastPlaced2Color);
+    LODWORD(fwd.x) = AlongRay;
+    if ( !AlongRay
+      || (p_m_matrixThisToLinked = &AlongRay->m_matrixThisToLinked,
+          UTIL_Portal_PointTransform(&AlongRay->m_matrixThisToLinked, &tr.startpos, &newEndPos),
+          UTIL_Portal_PointTransform(p_m_matrixThisToLinked, (const Vector *)&v116, (Vector *)&tr.m_pEnt),
+          newRay.m_Extents.y = 0.0,
+          Ray_t::Init((Ray_t *)v98, &newEndPos, (const Vector *)&tr.m_pEnt),
+          CTraceFilterSimple::CTraceFilterSimple(
+            (CTraceFilterSimple *)&ray_4.m_pWorldAxisTransform,
+            (const IHandleEntity *)LODWORD(fwd.x),
+            0,
+            0),
+          enginetrace->TraceRay(
+            enginetrace,
+            (const Ray_t *)v98,
+            1174421555u,
+            (ITraceFilter *)&ray_4.m_pWorldAxisTransform,
+            (CGameTrace *)&right),
+          tr2.plane.pad[0]) )
+    {
+LABEL_8:
+      v15 = *(float *)&clrPortal;
+    }
+    else
+    {
+      v14 = 0i64;
+      *(float *)&v14 = fsqrt(
+                         (float)((float)((float)(tr2.startpos.y - right.y) * (float)(tr2.startpos.y - right.y))
+                               + (float)((float)(tr2.startpos.z - right.z) * (float)(tr2.startpos.z - right.z)))
+                       + (float)((float)(tr2.startpos.x - right.x) * (float)(tr2.startpos.x - right.x)));
+      *(_OWORD *)&ray_4.m_pWorldAxisTransform = v14;
+      v15 = *(float *)&v14 + *(float *)&newStartPos;
+      *(float *)&clrPortal = v15;
+    }
+    CHUDQuickInfo::DrawCrosshair((CHUDQuickInfo *)((char *)this - 56), lastPlaced1Color, v15);
+    v16 = (void *)v114;
+    if ( v114 )
+    {
+      v114 = ScreenWidth() / 2;
+      v17 = ScreenHeight();
+      v18 = (C_WeaponPortalgun *)__RTDynamicCast(
+                                   v16,
+                                   0,
+                                   (void *)(v17 / 2),
+                                   &C_WeaponPortalgun `RTTI Type Descriptor',
+                                   0);
+      v19 = v18;
+      if ( hud_quickinfo.m_pParent->m_Value.m_nValue )
+      {
+        if ( v18 && (C_WeaponPortalgun::CanFirePortal1(v18) || C_WeaponPortalgun::CanFirePortal2(v19)) )
+        {
+          *(float *)&lastPlaced2Color = COERCE_FLOAT((*(int (__thiscall **)(_DWORD))(*(_DWORD *)LODWORD(fwd.y) + 340))(LODWORD(fwd.y)));
+          if ( !C_WeaponPortalgun::CanFirePortal1(v19)
+            || (CanFirePortal2 = C_WeaponPortalgun::CanFirePortal2(v19), BYTE2(yCenter) = 1, !CanFirePortal2) )
+          {
+            BYTE2(yCenter) = 0;
+          }
+          ControllerModeActive = (unsigned __int8 (*)(void))input->ControllerModeActive;
+          HIBYTE(yCenter) = hud_quickinfo_swap.m_pParent->m_Value.m_nValue != 0;
+          if ( ControllerModeActive() && BYTE2(yCenter) )
+            HIBYTE(yCenter) = HIBYTE(yCenter) == 0;
+          UTIL_Portal_Color((Color *)&flApparentZ, (HIBYTE(yCenter) != 0) + 1, *(_DWORD *)&lastPlaced2Color);
+          UTIL_Portal_Color((Color *)&fMustBeCloserThan, (HIBYTE(yCenter) == 0) + 1, *(_DWORD *)&lastPlaced2Color);
+          if ( LOBYTE(flApparentZ) >= 5u )
+          {
+            v23 = (float)((float)(1.0 - (float)((float)LOBYTE(flApparentZ) * 0.0039215689)) * 64.0)
+                + (float)LOBYTE(flApparentZ);
+            v22 = FLOAT_255_0;
+            if ( v23 > 255.0 )
+              v23 = FLOAT_255_0;
+          }
+          else
+          {
+            v22 = FLOAT_255_0;
+            v23 = FLOAT_5_0;
+          }
+          LOBYTE(flApparentZ) = (int)v23;
+          if ( BYTE1(flApparentZ) >= 5u )
+          {
+            v24 = (float)((float)(1.0 - (float)((float)BYTE1(flApparentZ) * 0.0039215689)) * 64.0)
+                + (float)BYTE1(flApparentZ);
+            if ( v24 > v22 )
+              v24 = v22;
+          }
+          else
+          {
+            v24 = FLOAT_5_0;
+          }
+          BYTE1(flApparentZ) = (int)v24;
+          if ( BYTE2(flApparentZ) >= 5u )
+          {
+            v25 = (float)((float)(1.0 - (float)((float)BYTE2(flApparentZ) * 0.0039215689)) * 64.0)
+                + (float)BYTE2(flApparentZ);
+            if ( v25 > v22 )
+              v25 = v22;
+          }
+          else
+          {
+            v25 = FLOAT_5_0;
+          }
+          BYTE2(flApparentZ) = (int)v25;
+          if ( LOBYTE(fMustBeCloserThan) >= 5u )
+          {
+            v26 = (float)((float)(1.0 - (float)((float)LOBYTE(fMustBeCloserThan) * 0.0039215689)) * 64.0)
+                + (float)LOBYTE(fMustBeCloserThan);
+            if ( v26 > v22 )
+              v26 = v22;
+          }
+          else
+          {
+            v26 = FLOAT_5_0;
+          }
+          LOBYTE(fMustBeCloserThan) = (int)v26;
+          if ( BYTE1(fMustBeCloserThan) >= 5u )
+          {
+            v27 = (float)((float)(1.0 - (float)((float)BYTE1(fMustBeCloserThan) * 0.0039215689)) * 64.0)
+                + (float)BYTE1(fMustBeCloserThan);
+            if ( v27 > v22 )
+              v27 = v22;
+          }
+          else
+          {
+            v27 = FLOAT_5_0;
+          }
+          BYTE1(fMustBeCloserThan) = (int)v27;
+          if ( BYTE2(fMustBeCloserThan) >= 5u )
+          {
+            v28 = (float)((float)(1.0 - (float)((float)BYTE2(fMustBeCloserThan) * 0.0039215689)) * 64.0)
+                + (float)BYTE2(fMustBeCloserThan);
+            if ( v28 > v22 )
+              v28 = v22;
+          }
+          else
+          {
+            v28 = FLOAT_5_0;
+          }
+          v29 = (int)v28;
+          v30 = 150.0 - *(float *)&pIntersectedPortal;
+          BYTE2(fMustBeCloserThan) = v29;
+          if ( (float)(150.0 - *(float *)&pIntersectedPortal) >= 0.0 )
+          {
+            if ( v30 > v22 )
+              v30 = v22;
+          }
+          else
+          {
+            v30 = 0.0;
+          }
+          HIBYTE(fMustBeCloserThan) = (int)v30;
+          HIBYTE(flApparentZ) = HIBYTE(fMustBeCloserThan);
+          LOWORD(vecEnd.z) = LOWORD(flApparentZ);
+          BYTE2(vecEnd.z) = BYTE2(flApparentZ);
+          BYTE1(vecEnd.x) = (int)v27;
+          HIBYTE(vecEnd.z) = 0x80;
+          LOBYTE(vecEnd.x) = LOBYTE(fMustBeCloserThan);
+          BYTE2(vecEnd.x) = v29;
+          HIBYTE(vecEnd.x) = 0x80;
+          if ( C_WeaponPortalgun::CanFirePortal1(v19) && C_WeaponPortalgun::CanFirePortal2(v19) )
+          {
+            LODWORD(flApparentZ) = &vec3_invalid;
+            if ( HIBYTE(yCenter) )
+            {
+              v31 = *(_QWORD *)&v19->m_vecOrangePortalPos.x;
+              *(float *)color = v19->m_vecOrangePortalPos.z;
+              v116 = v31;
+              v32 = Vector::operator!=((Vector *)&v116, (const Vector *)LODWORD(flApparentZ));
+              v33 = *(_QWORD *)&v19->m_vecBluePortalPos.x;
+              HIBYTE(yCenter) = v32;
+              *(float *)color = v19->m_vecBluePortalPos.z;
+            }
+            else
+            {
+              z = v19->m_vecBluePortalPos.z;
+              v116 = *(_QWORD *)&v19->m_vecBluePortalPos.x;
+              *(float *)color = z;
+              v35 = Vector::operator!=((Vector *)&v116, (const Vector *)LODWORD(flApparentZ));
+              v36 = v19->m_vecOrangePortalPos.z;
+              v33 = *(_QWORD *)&v19->m_vecOrangePortalPos.x;
+              HIBYTE(yCenter) = v35;
+              *(float *)color = v36;
+            }
+            v116 = v33;
+            v37 = Vector::operator!=((Vector *)&v116, &vec3_invalid);
+            if ( HIBYTE(yCenter) )
+              v38 = fwd.z;
+            else
+              v38 = 0.0;
+            HIBYTE(vecEnd.z) = (int)v38;
+            if ( v37 )
+              v39 = fwd.z;
+            else
+              v39 = 0.0;
+            HIBYTE(vecEnd.x) = (int)v39;
+          }
+          v40 = !C_WeaponPortalgun::CanFirePortal1(v19);
+          p_flApparentZ = &flApparentZ;
+          if ( v40 )
+            p_flApparentZ = &fMustBeCloserThan;
+          v42 = 0.0;
+          vecEnd.y = *p_flApparentZ;
+          v43 = (float)HIBYTE(LODWORD(vecEnd.y)) - *(float *)&pIntersectedPortal;
+          if ( v43 < 0.0 || (v42 = FLOAT_255_0, v43 > 255.0) )
+            v43 = v42;
+          v44 = (Color)(int)v43;
+          HIBYTE(vecEnd.y) = (int)v43;
+          p_y = &flApparentZ;
+          if ( !BYTE2(yCenter) )
+            p_y = &vecEnd.y;
+          LODWORD(flApparentZ) = clrPortal;
+          m_pSizer = this->m_pSizer;
+          LODWORD(fMustBeCloserThan) = p_y;
+          lastPlaced1Color = v44;
+          v47 = (Color)CHudTexture::EffectiveHeight(
+                         *(CHudTexture **)&this->m_m_nBgTextureId2_register,
+                         *(float *)&m_pSizer);
+          v48 = this->m_pSizer;
+          lastPlaced1Color = v47;
+          clrPortal = v49;
+          v50 = (Color)CHudTexture::EffectiveWidth(*(CHudTexture **)&this->m_m_nBgTextureId2_register, *(float *)&v48);
+          v51 = this->m_pSizer;
+          clrPortal = v50;
+          lastPlaced2Color = v52;
+          v53 = CHudTexture::EffectiveHeight(*(CHudTexture **)&this->m_m_nBgTextureId2_register, *(float *)&v51);
+          v54 = this->m_pSizer;
+          lastPlaced2Color = (Color)(*(_DWORD *)&lastPlaced1Color - v53 / 2 - *(_DWORD *)&this->m_roundedCorners);
+          vecEnd.z = v55;
+          v56 = CHudTexture::EffectiveWidth(*(CHudTexture **)&this->m_m_nBgTextureId2_register, *(float *)&v54);
+          v57 = v114;
+          CHudTexture::DrawSelf(
+            *(CHudTexture **)&this->m_m_nBgTextureId2_register,
+            v114 - v56 / 2 - this->m_nBgTextureId4,
+            *(_DWORD *)&lastPlaced2Color,
+            *(_DWORD *)&clrPortal,
+            *(_DWORD *)&lastPlaced1Color,
+            (const Color *)LODWORD(fMustBeCloserThan),
+            flApparentZ);
+          p_fMustBeCloserThan = &fMustBeCloserThan;
+          if ( !BYTE2(yCenter) )
+            p_fMustBeCloserThan = &vecEnd.y;
+          LODWORD(flApparentZ) = clrPortal;
+          v60 = this->m_pSizer;
+          LODWORD(fMustBeCloserThan) = p_fMustBeCloserThan;
+          lastPlaced1Color = v58;
+          v61 = (Color)CHudTexture::EffectiveHeight((CHudTexture *)this->m_nBgTextureId1, *(float *)&v60);
+          v62 = this->m_pSizer;
+          lastPlaced1Color = v61;
+          clrPortal = v63;
+          v64 = (Color)CHudTexture::EffectiveWidth((CHudTexture *)this->m_nBgTextureId1, *(float *)&v62);
+          v65 = this->m_pSizer;
+          clrPortal = v64;
+          lastPlaced2Color = v66;
+          v67 = CHudTexture::EffectiveHeight((CHudTexture *)this->m_nBgTextureId1, *(float *)&v65);
+          v68 = this->m_pSizer;
+          lastPlaced2Color = (Color)(*(_DWORD *)&lastPlaced1Color + *(_DWORD *)&this->m_roundedCorners - v67 / 2);
+          vecEnd.z = v69;
+          v70 = CHudTexture::EffectiveWidth((CHudTexture *)this->m_nBgTextureId1, *(float *)&v68);
+          CHudTexture::DrawSelf(
+            (CHudTexture *)this->m_nBgTextureId1,
+            this->m_nBgTextureId4 + v57 - v70 / 2,
+            *(_DWORD *)&lastPlaced2Color,
+            *(_DWORD *)&clrPortal,
+            *(_DWORD *)&lastPlaced1Color,
+            (const Color *)LODWORD(fMustBeCloserThan),
+            flApparentZ);
+          p_z = &vecEnd.z;
+          if ( !BYTE2(yCenter) )
+            p_z = &vecEnd.y;
+          LODWORD(flApparentZ) = clrPortal;
+          v73 = this->m_pSizer;
+          LODWORD(fMustBeCloserThan) = p_z;
+          lastPlaced1Color = v71;
+          v74 = (Color)CHudTexture::EffectiveHeight(*(CHudTexture **)&this->m_m_nBgTextureId3_register, *(float *)&v73);
+          v75 = this->m_pSizer;
+          lastPlaced1Color = v74;
+          clrPortal = v76;
+          v77 = (Color)CHudTexture::EffectiveWidth(*(CHudTexture **)&this->m_m_nBgTextureId3_register, *(float *)&v75);
+          v78 = this->m_pSizer;
+          clrPortal = v77;
+          lastPlaced2Color = v79;
+          v80 = CHudTexture::EffectiveHeight(*(CHudTexture **)&this->m_m_nBgTextureId3_register, *(float *)&v78);
+          v81 = this->m_pSizer;
+          lastPlaced2Color = (Color)(*(_DWORD *)&lastPlaced1Color - v80 / 2 - *(_DWORD *)&this->m_roundedCorners);
+          vecEnd.z = v82;
+          v83 = CHudTexture::EffectiveWidth(*(CHudTexture **)&this->m_m_nBgTextureId3_register, *(float *)&v81);
+          CHudTexture::DrawSelf(
+            *(CHudTexture **)&this->m_m_nBgTextureId3_register,
+            v57 - v83 / 2 - this->m_nBgTextureId4,
+            *(_DWORD *)&lastPlaced2Color,
+            *(_DWORD *)&clrPortal,
+            *(_DWORD *)&lastPlaced1Color,
+            (const Color *)LODWORD(fMustBeCloserThan),
+            flApparentZ);
+          p_vecEnd = &vecEnd;
+          if ( !BYTE2(yCenter) )
+            p_vecEnd = (Vector *)&vecEnd.y;
+          LODWORD(flApparentZ) = clrPortal;
+          v86 = this->m_pSizer;
+          LODWORD(fMustBeCloserThan) = p_vecEnd;
+          lastPlaced1Color = v84;
+          v87 = (Color)CHudTexture::EffectiveHeight((CHudTexture *)this->m_nBgTextureId2, *(float *)&v86);
+          v88 = this->m_pSizer;
+          lastPlaced1Color = v87;
+          clrPortal = v89;
+          v90 = (Color)CHudTexture::EffectiveWidth((CHudTexture *)this->m_nBgTextureId2, *(float *)&v88);
+          v91 = this->m_pSizer;
+          clrPortal = v90;
+          lastPlaced2Color = v92;
+          v93 = CHudTexture::EffectiveHeight((CHudTexture *)this->m_nBgTextureId2, *(float *)&v91);
+          v94 = this->m_pSizer;
+          lastPlaced2Color = (Color)(*(_DWORD *)&lastPlaced1Color + *(_DWORD *)&this->m_roundedCorners - v93 / 2);
+          vecEnd.z = v95;
+          v96 = CHudTexture::EffectiveWidth((CHudTexture *)this->m_nBgTextureId2, *(float *)&v94);
+          CHudTexture::DrawSelf(
+            (CHudTexture *)this->m_nBgTextureId2,
+            this->m_nBgTextureId4 + v57 - v96 / 2,
+            *(_DWORD *)&lastPlaced2Color,
+            *(_DWORD *)&clrPortal,
+            *(_DWORD *)&lastPlaced1Color,
+            (const Color *)LODWORD(fMustBeCloserThan),
+            flApparentZ);
+        }
+      }
+    }
+  }
+}

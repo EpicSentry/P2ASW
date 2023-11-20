@@ -1,0 +1,41 @@
+void __thiscall C_Trigger_TractorBeam::OnDataChanged(C_Trigger_TractorBeam *this, DataUpdateType_t updateType)
+{
+  bool *p_m_bDisabled; // eax
+  C_BaseEntity *OwnerEntity; // eax
+  float flLinearForce; // xmm0_4
+  C_BaseEntity *v6; // edi
+  const Vector *v7; // eax
+  const Vector *v8; // [esp+0h] [ebp-14h]
+
+  C_BaseEntity::OnDataChanged(this, updateType);
+  if ( updateType )
+  {
+    if ( LOBYTE(this->m_pMaterial2) )
+    {
+      LOBYTE(this->m_pMaterial2) = 0;
+      C_Trigger_TractorBeam::CreateParticles((C_Trigger_TractorBeam *)((char *)this - 8));
+    }
+  }
+  else
+  {
+    C_BaseEntity::AddEffects((C_Trigger_TractorBeam *)((char *)this - 8), 1024);
+    if ( physenv && !this->m_hCoreEffect.m_pPrev )
+    {
+      if ( this == (C_Trigger_TractorBeam *)8 )
+        p_m_bDisabled = 0;
+      else
+        p_m_bDisabled = &this->m_bDisabled;
+      this->m_hCoreEffect.m_pPrev = (CUtlReference<CNewParticleEffect> *)((int (__stdcall *)(bool *))physenv->CreateMotionController)(p_m_bDisabled);
+      OwnerEntity = C_BaseEntity::GetOwnerEntity((C_Trigger_TractorBeam *)((char *)this - 8));
+      flLinearForce = this->m_vEnd.y;
+      v6 = OwnerEntity;
+      if ( LOBYTE(this->m_linearForce) )
+        LODWORD(flLinearForce) ^= _mask__NegFloat_;
+      v8 = (const Vector *)((int (__thiscall *)(C_BaseEntity *))OwnerEntity->IClientEntity::IClientUnknown::IHandleEntity::__vftable[1].SetRefEHandle)(OwnerEntity);
+      v7 = (const Vector *)((int (__thiscall *)(C_BaseEntity *))v6->IClientEntity::IClientUnknown::IHandleEntity::__vftable[1].~IHandleEntity)(v6);
+      C_Trigger_TractorBeam::UpdateBeam((C_Trigger_TractorBeam *)((char *)this - 8), v7, v8, flLinearForce);
+      this->m_pMaterial3 = (IMaterial *)v6->GetRefEHandle(v6)->m_Index;
+    }
+    C_Trigger_TractorBeam::CreateParticles((C_Trigger_TractorBeam *)((char *)this - 8));
+  }
+}

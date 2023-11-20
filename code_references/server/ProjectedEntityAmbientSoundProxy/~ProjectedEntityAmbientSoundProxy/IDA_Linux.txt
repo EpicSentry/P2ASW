@@ -1,0 +1,6 @@
+void __cdecl ProjectedEntityAmbientSoundProxy::~ProjectedEntityAmbientSoundProxy(
+        ProjectedEntityAmbientSoundProxy *const this)
+{
+  this->_vptr_IHandleEntity = (int (**)(...))off_C929C8;
+  CBaseEntity::~CBaseEntity(this);
+}

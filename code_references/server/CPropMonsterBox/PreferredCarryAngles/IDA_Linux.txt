@@ -1,0 +1,10 @@
+QAngle *CPropMonsterBox::PreferredCarryAngles(QAngle *retstr, CPropMonsterBox *const this)
+{
+  QAngle *result; // eax
+
+  result = retstr;
+  retstr->x = 180.0;
+  retstr->y = 0.0;
+  retstr->z = 180.0;
+  return result;
+}

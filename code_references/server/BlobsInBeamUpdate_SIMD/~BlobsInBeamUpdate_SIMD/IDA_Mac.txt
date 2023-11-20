@@ -1,0 +1,43 @@
+void __usercall BlobsInBeamUpdate_SIMD::~BlobsInBeamUpdate_SIMD(BlobsInBeamUpdate_SIMD *this@<edi>, int a2)
+{
+  int v2; // eax
+  bool v3; // sf
+  _DWORD *v4; // ecx
+
+  *(_DWORD *)(a2 + 20) = 0;
+  v2 = *(_DWORD *)(a2 + 8);
+  if ( *(int *)(a2 + 16) < 0 )
+  {
+    v4 = (_DWORD *)(a2 + 24);
+    *(_DWORD *)(a2 + 24) = v2;
+    *(_DWORD *)(a2 + 20) = 0;
+  }
+  else
+  {
+    if ( v2 )
+    {
+      (*(void (__cdecl **)(_DWORD *, _DWORD))(*g_pMemAlloc + 8))(g_pMemAlloc, *(_DWORD *)((v2 - 4) & 0xFFFFFFFC));
+      *(_DWORD *)(a2 + 8) = 0;
+      v2 = 0;
+      v3 = *(int *)(a2 + 16) < 0;
+      v4 = (_DWORD *)(a2 + 24);
+      *(_DWORD *)(a2 + 12) = 0;
+      *(_DWORD *)(a2 + 24) = 0;
+      *(_DWORD *)(a2 + 20) = 0;
+      if ( v3 )
+        goto LABEL_8;
+    }
+    else
+    {
+      *(_DWORD *)(a2 + 12) = 0;
+      v4 = (_DWORD *)(a2 + 24);
+      *(_DWORD *)(a2 + 24) = 0;
+      *(_DWORD *)(a2 + 20) = 0;
+    }
+    *(_DWORD *)(a2 + 12) = 0;
+    v2 = 0;
+  }
+LABEL_8:
+  *v4 = v2;
+  CUtlMemoryAligned<BlobsInBeamUpdate_SIMD::BlobBeamUpdateData_t,16>::~CUtlMemoryAligned((CUtlMemoryAligned<BlobsInBeamUpdate_SIMD::BlobBeamUpdateData_t,16> *)(a2 + 8));
+}

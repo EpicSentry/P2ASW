@@ -1,0 +1,40 @@
+void __thiscall CWeaponPortalgun::ClearPortalPositions(CWeaponPortalgun *this)
+{
+  edict_t *m_pPev; // ecx
+  edict_t *v3; // ecx
+
+  if ( vec3_invalid.x != this->m_vecOrangePortalPos.m_Value.x
+    || vec3_invalid.y != this->m_vecOrangePortalPos.m_Value.y
+    || vec3_invalid.z != this->m_vecOrangePortalPos.m_Value.z )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x5F4u);
+    }
+    this->m_vecOrangePortalPos.m_Value = vec3_invalid;
+  }
+  if ( this->m_vecOrangePortalPos.m_Value.x != this->m_vecBluePortalPos.m_Value.x
+    || this->m_vecOrangePortalPos.m_Value.y != this->m_vecBluePortalPos.m_Value.y
+    || this->m_vecOrangePortalPos.m_Value.z != this->m_vecBluePortalPos.m_Value.z )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      v3 = this->m_Network.m_pPev;
+      if ( v3 )
+        CBaseEdict::StateChanged(v3, 0x5E8u);
+    }
+    this->m_vecBluePortalPos.m_Value.x = this->m_vecOrangePortalPos.m_Value.x;
+    this->m_vecBluePortalPos.m_Value.y = this->m_vecOrangePortalPos.m_Value.y;
+    this->m_vecBluePortalPos.m_Value.z = this->m_vecOrangePortalPos.m_Value.z;
+  }
+}

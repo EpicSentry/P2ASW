@@ -1,0 +1,21 @@
+void __thiscall C_PortalBeamHelper::UpdatePointDirection(
+        C_PortalBeamHelper *this,
+        const Vector *vStartPoint,
+        const Vector *vDirection,
+        unsigned int fMask,
+        ITraceFilter *pTraceFilter,
+        CGameTrace *tr)
+{
+  float v6; // xmm2_4
+  float v7; // xmm3_4
+  float v8; // xmm0_4
+  Vector vEndPoint; // [esp+0h] [ebp-Ch] BYREF
+
+  v6 = vDirection->z * 56755.84;
+  v7 = vStartPoint->x + (float)(vDirection->x * 56755.84);
+  vEndPoint.y = vStartPoint->y + (float)(vDirection->y * 56755.84);
+  v8 = vStartPoint->z + v6;
+  vEndPoint.x = v7;
+  vEndPoint.z = v8;
+  C_PortalBeamHelper::UpdatePoints(this, vStartPoint, &vEndPoint, fMask, pTraceFilter, tr);
+}

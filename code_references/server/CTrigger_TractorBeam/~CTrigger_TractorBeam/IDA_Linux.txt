@@ -1,0 +1,55 @@
+void __cdecl CTrigger_TractorBeam::~CTrigger_TractorBeam(CTrigger_TractorBeam *const this)
+{
+  int v1; // eax
+  int v2; // edx
+
+  this->_vptr_IHandleEntity = (int (**)(...))off_CA20C8;
+  this->_vptr_IMotionEvent = (int (**)(...))&off_CA2400;
+  this->_vptr_ITriggerTractorBeamAutoList = (int (**)(...))off_CA240C;
+  CTrigger_TractorBeam::RemoveAllBlobsFromBeam(this);
+  this->m_blobs.m_Size = 0;
+  if ( this->m_blobs.m_Memory.m_nGrowSize < 0 )
+  {
+    this->m_blobs.m_pElements = this->m_blobs.m_Memory.m_pMemory;
+  }
+  else
+  {
+    if ( this->m_blobs.m_Memory.m_pMemory )
+    {
+      (*(void (__cdecl **)(_DWORD, CPaintBlob **))(*g_pMemAlloc + 8))(g_pMemAlloc, this->m_blobs.m_Memory.m_pMemory);
+      this->m_blobs.m_Memory.m_pMemory = 0;
+    }
+    this->m_blobs.m_Memory.m_nAllocationCount = 0;
+    this->m_blobs.m_pElements = 0;
+  }
+  this->_vptr_ITriggerTractorBeamAutoList = (int (**)(...))off_CA1D20;
+  if ( ITriggerTractorBeamAutoList::m_ITriggerTractorBeamAutoListAutoList.m_Size > 0 )
+  {
+    v1 = 0;
+    if ( &this->ITriggerTractorBeamAutoList == (ITriggerTractorBeamAutoList *)*(CTrigger_TractorBeam *const *)ITriggerTractorBeamAutoList::m_ITriggerTractorBeamAutoListAutoList.m_Memory.m_pMemory )
+    {
+LABEL_12:
+      v2 = ITriggerTractorBeamAutoList::m_ITriggerTractorBeamAutoListAutoList.m_Size - 1;
+      if ( v1 != ITriggerTractorBeamAutoList::m_ITriggerTractorBeamAutoListAutoList.m_Size - 1 )
+      {
+        ITriggerTractorBeamAutoList::m_ITriggerTractorBeamAutoListAutoList.m_Memory.m_pMemory[v1] = ITriggerTractorBeamAutoList::m_ITriggerTractorBeamAutoListAutoList.m_Memory.m_pMemory[v2];
+        v2 = ITriggerTractorBeamAutoList::m_ITriggerTractorBeamAutoListAutoList.m_Size - 1;
+      }
+      ITriggerTractorBeamAutoList::m_ITriggerTractorBeamAutoListAutoList.m_Size = v2;
+    }
+    else
+    {
+      while ( ++v1 != ITriggerTractorBeamAutoList::m_ITriggerTractorBeamAutoListAutoList.m_Size )
+      {
+        if ( &this->ITriggerTractorBeamAutoList == ITriggerTractorBeamAutoList::m_ITriggerTractorBeamAutoListAutoList.m_Memory.m_pMemory[v1] )
+        {
+          if ( v1 == -1 )
+            break;
+          goto LABEL_12;
+        }
+      }
+    }
+  }
+  this->_vptr_IHandleEntity = (int (**)(...))off_CC3D28;
+  CBaseEntity::~CBaseEntity(this);
+}

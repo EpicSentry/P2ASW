@@ -1,0 +1,4 @@
+void __thiscall CPropMonsterBox::InputBecomeBox(CPropMonsterBox *this, inputdata_t *inputdata)
+{
+  CPropMonsterBox::BecomeBox(this, 1);
+}

@@ -1,0 +1,18 @@
+void __cdecl CTrigger_TractorBeam::SetDirection(
+        CTrigger_TractorBeam *const this,
+        const Vector *const vStart,
+        const Vector *const vEnd)
+{
+  if ( vStart->x != this->m_vStart.m_Value.x
+    || vStart->y != this->m_vStart.m_Value.y
+    || vStart->z != this->m_vStart.m_Value.z )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_vStart);
+    this->m_vStart.m_Value = *vStart;
+  }
+  if ( vEnd->x != this->m_vEnd.m_Value.x || vEnd->y != this->m_vEnd.m_Value.y || vEnd->z != this->m_vEnd.m_Value.z )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_vEnd);
+    this->m_vEnd.m_Value = *vEnd;
+  }
+}

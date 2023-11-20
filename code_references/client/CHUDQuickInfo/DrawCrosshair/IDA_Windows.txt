@@ -1,0 +1,16 @@
+void __thiscall CHUDQuickInfo::DrawCrosshair(CHUDQuickInfo *this, Color color, float flApparentZ)
+{
+  int v4; // esi
+  int v5; // edi
+
+  v4 = ScreenWidth() / 2;
+  v5 = ScreenHeight() / 2;
+  ((void (__stdcall *)(_DWORD))g_pVGuiSurface->DrawSetApparentDepth)(LODWORD(flApparentZ));
+  ((void (__thiscall *)(_DWORD, _DWORD))g_pVGuiSurface->DrawSetColor)(g_pVGuiSurface, color);
+  g_pVGuiSurface->DrawFilledRect(g_pVGuiSurface, v4, v5, v4 + 1, v5 + 1);
+  g_pVGuiSurface->DrawFilledRect(g_pVGuiSurface, v4 + this->m_nCursorRadius, v5, v4 + this->m_nCursorRadius + 1, v5 + 1);
+  g_pVGuiSurface->DrawFilledRect(g_pVGuiSurface, v4 - this->m_nCursorRadius, v5, v4 - this->m_nCursorRadius + 1, v5 + 1);
+  g_pVGuiSurface->DrawFilledRect(g_pVGuiSurface, v4, v5 + this->m_nCursorRadius, v4 + 1, v5 + this->m_nCursorRadius + 1);
+  g_pVGuiSurface->DrawFilledRect(g_pVGuiSurface, v4, v5 - this->m_nCursorRadius, v4 + 1, v5 - this->m_nCursorRadius + 1);
+  g_pVGuiSurface->DrawClearApparentDepth(g_pVGuiSurface);
+}

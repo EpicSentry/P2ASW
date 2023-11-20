@@ -1,0 +1,93 @@
+void __cdecl C_FizzlerVortexProxy::OnBind(C_FizzlerVortexProxy *const this, C_BaseEntity *pC_BaseEntity)
+{
+  C_TriggerPortalCleanser *v2; // eax
+  C_TriggerPortalCleanser *v3; // ebx
+  unsigned int m_Index; // eax
+  int v5; // edi
+  char *v6; // edx
+  IMaterialVar *m_pVortex1Var; // eax
+  int v8; // edx
+  _DWORD *v9; // eax
+  unsigned int v10; // eax
+  int v11; // edi
+  char *v12; // edx
+  IMaterialVar *m_pVortex2Var; // eax
+  int v14; // edx
+  _DWORD *v15; // eax
+  float flIntensity; // [esp+18h] [ebp-20h] BYREF
+  float flPower[7]; // [esp+1Ch] [ebp-1Ch] BYREF
+
+  if ( pC_BaseEntity )
+  {
+    v2 = (C_TriggerPortalCleanser *)_dynamic_cast(
+                                      pC_BaseEntity,
+                                      (const struct __class_type_info *)&`typeinfo for'C_BaseEntity,
+                                      (const struct __class_type_info *)&`typeinfo for'C_TriggerPortalCleanser,
+                                      0);
+    v3 = v2;
+    if ( v2 )
+    {
+      m_Index = v2->m_hObject1.m_Value.m_Index;
+      v5 = 0;
+      if ( m_Index != -1 )
+      {
+        v6 = (char *)g_pEntityList + 16 * (unsigned __int16)m_Index;
+        if ( *((_DWORD *)v6 + 2) == HIWORD(m_Index) )
+          v5 = *((_DWORD *)v6 + 1);
+      }
+      m_pVortex1Var = this->m_pVortex1Var;
+      v8 = *(_DWORD *)m_pVortex1Var;
+      if ( v3->m_bObject1InRange && v5 )
+      {
+        (*(void (__thiscall **)(CBaseEntityList *, IMaterialVar *, int))(v8 + 20))(
+          g_pEntityList,
+          this->m_pVortex1Var,
+          1);
+        v9 = (_DWORD *)(*(int (__cdecl **)(int))(*(_DWORD *)v5 + 448))(v5);
+        (*(void (__cdecl **)(IMaterialVar *, _DWORD, _DWORD, _DWORD))(*(_DWORD *)this->m_pPosition1Var + 48))(
+          this->m_pPosition1Var,
+          *v9,
+          v9[1],
+          v9[2]);
+      }
+      else
+      {
+        (*(void (__thiscall **)(CBaseEntityList *, IMaterialVar *, _DWORD))(v8 + 20))(g_pEntityList, m_pVortex1Var, 0);
+      }
+      v10 = v3->m_hObject2.m_Value.m_Index;
+      v11 = 0;
+      if ( v10 != -1 )
+      {
+        v12 = (char *)g_pEntityList + 16 * (unsigned __int16)v10;
+        if ( *((_DWORD *)v12 + 2) == HIWORD(v10) )
+          v11 = *((_DWORD *)v12 + 1);
+      }
+      m_pVortex2Var = this->m_pVortex2Var;
+      v14 = *(_DWORD *)m_pVortex2Var;
+      if ( v3->m_bObject2InRange && v11 )
+      {
+        (*(void (__thiscall **)(CBaseEntityList *, IMaterialVar *, int))(v14 + 20))(
+          g_pEntityList,
+          this->m_pVortex2Var,
+          1);
+        v15 = (_DWORD *)(*(int (__cdecl **)(int))(*(_DWORD *)v11 + 448))(v11);
+        (*(void (__cdecl **)(IMaterialVar *, _DWORD, _DWORD, _DWORD))(*(_DWORD *)this->m_pPosition2Var + 48))(
+          this->m_pPosition2Var,
+          *v15,
+          v15[1],
+          v15[2]);
+      }
+      else
+      {
+        (*(void (__thiscall **)(CBaseEntityList *, IMaterialVar *, _DWORD))(v14 + 20))(g_pEntityList, m_pVortex2Var, 0);
+      }
+      C_TriggerPortalCleanser::GetCurrentState(v3, &flIntensity, flPower);
+      (*(void (__cdecl **)(IMaterialVar *, _DWORD))(*(_DWORD *)this->m_pIntensityVar + 16))(
+        this->m_pIntensityVar,
+        LODWORD(flIntensity));
+      (*(void (__cdecl **)(IMaterialVar *, _DWORD))(*(_DWORD *)this->m_pPowerUpVar + 16))(
+        this->m_pPowerUpVar,
+        LODWORD(flPower[0]));
+    }
+  }
+}

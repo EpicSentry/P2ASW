@@ -607,6 +607,8 @@ public:
 	void InputSetParentAttachment( inputdata_t &inputdata );
 	void InputSetParentAttachmentMaintainOffset( inputdata_t &inputdata );
 	void InputClearParent( inputdata_t &inputdata );
+	void InputSetLocalOrigin( inputdata_t &inputdata );
+	void InputSetLocalAngles( inputdata_t& inputdata );
 	void InputSetTeam( inputdata_t &inputdata );
 	void InputUse( inputdata_t &inputdata );
 	void InputKill( inputdata_t &inputdata );
@@ -621,6 +623,12 @@ public:
 	void InputDispatchResponse( inputdata_t& inputdata );
 	void InputDisableShadow( inputdata_t &inputdata );
 	void InputEnableShadow( inputdata_t &inputdata );
+	void InputDisableReceivingFlashlight( inputdata_t &inputdata );
+	void InputEnableReceivingFlashlight( inputdata_t &inputdata );
+	void InputDisableDrawInFastReflection( inputdata_t &inputdata );
+	void InputEnableDrawInFastReflection( inputdata_t &inputdata );
+	void InputDisableDraw( inputdata_t &inputdata );
+	void InputEnableDraw( inputdata_t &inputdata );
 	void InputAddOutput( inputdata_t &inputdata );
 	void InputFireUser1( inputdata_t &inputdata );
 	void InputFireUser2( inputdata_t &inputdata );

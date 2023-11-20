@@ -1,0 +1,41 @@
+void __cdecl CTrigger_TractorBeam::CTrigger_TractorBeam(CTrigger_TractorBeam *const this)
+{
+  float m_Value; // xmm0_4
+  unsigned int m_Index; // eax
+  char *v3; // edx
+
+  CBaseEntity::CBaseEntity(this, 0);
+  this->_vptr_IHandleEntity = (int (**)(...))off_CC3D28;
+  this->m_hFilter.m_Index = -1;
+  this->_vptr_IMotionEvent = (int (**)(...))&off_BB4A30;
+  ITriggerTractorBeamAutoList::ITriggerTractorBeamAutoList(&this->ITriggerTractorBeamAutoList, 1);
+  m_Value = this->m_flRadius.m_Value;
+  this->_vptr_IHandleEntity = (int (**)(...))off_CA20C8;
+  this->_vptr_IMotionEvent = (int (**)(...))&off_CA2400;
+  this->_vptr_ITriggerTractorBeamAutoList = (int (**)(...))off_CA240C;
+  this->m_blobs.m_Memory.m_pMemory = 0;
+  this->m_blobs.m_Memory.m_nAllocationCount = 0;
+  this->m_blobs.m_Memory.m_nGrowSize = 0;
+  this->m_blobs.m_Size = 0;
+  this->m_blobs.m_pElements = 0;
+  this->m_hProxyEntity.m_Value.m_Index = -1;
+  this->m_sndPlayerInBeam = 0;
+  if ( m_Value != 55.0 )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_flRadius);
+    this->m_flRadius.m_Value = 55.0;
+    m_Index = this->m_hProxyEntity.m_Value.m_Index;
+    if ( m_Index != -1 )
+    {
+      v3 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+      if ( *((_DWORD *)v3 + 2) == HIWORD(m_Index) )
+      {
+        if ( *((_DWORD *)v3 + 1) )
+        {
+          CBaseEntity::NetworkStateChanged(this, &this->m_hProxyEntity);
+          this->m_hProxyEntity.m_Value.m_Index = -1;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+void __cdecl C_TriggerPortalCleanser::OnDataChanged(C_TriggerPortalCleanser *const this, DataUpdateType_t type)
+{
+  C_BaseEntity::OnDataChanged(this, type);
+  if ( type == DATA_UPDATE_CREATED )
+    this->m_flLastUpdateTime = gpGlobals->curtime;
+}

@@ -1,0 +1,107 @@
+void __thiscall CPortalLaser::CPortalLaser(CPortalLaser *this)
+{
+  edict_t *m_pPev; // ecx
+  edict_t *v3; // ecx
+  edict_t *v4; // ecx
+  edict_t *v5; // ecx
+  edict_t *v6; // ecx
+  edict_t *v7; // ecx
+  edict_t *v8; // ecx
+
+  CBaseAnimating::CBaseAnimating(this);
+  this->IPortalLaserAutoList::__vftable = (IPortalLaserAutoList_vtbl *)&IPortalLaserAutoList::`vftable';
+  IPortalLaserAutoList::Add(&this->IPortalLaserAutoList);
+  this->CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable = (CPortalLaser_vtbl *)&CPortalLaser::`vftable'{for `CBaseAnimating'};
+  this->IPortalLaserAutoList::__vftable = (IPortalLaserAutoList_vtbl *)&CPortalLaser::`vftable'{for `IPortalLaserAutoList'};
+  this->m_pParentLaser = 0;
+  this->m_pChildLaser = 0;
+  this->m_bFromReflectedCube = 0;
+  *(_WORD *)&this->m_bAutoAimEnabled = 1;
+  this->m_hReflector.m_Value.m_Index = -1;
+  if ( this->m_Network.m_TimerEvent.m_bRegistered )
+  {
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+  }
+  else
+  {
+    m_pPev = this->m_Network.m_pPev;
+    if ( m_pPev )
+      CBaseEdict::StateChanged(m_pPev, 0x764u);
+  }
+  this->m_bLaserOn.m_Value = 0;
+  if ( this->m_Network.m_TimerEvent.m_bRegistered )
+  {
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+  }
+  else
+  {
+    v3 = this->m_Network.m_pPev;
+    if ( v3 )
+      CBaseEdict::StateChanged(v3, 0x780u);
+  }
+  this->m_bIsLethal.m_Value = 0;
+  if ( this->m_Network.m_TimerEvent.m_bRegistered )
+  {
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+  }
+  else
+  {
+    v4 = this->m_Network.m_pPev;
+    if ( v4 )
+      CBaseEdict::StateChanged(v4, 0x781u);
+  }
+  this->m_bIsAutoAiming.m_Value = 0;
+  if ( this->m_Network.m_TimerEvent.m_bRegistered )
+  {
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+  }
+  else
+  {
+    v5 = this->m_Network.m_pPev;
+    if ( v5 )
+      CBaseEdict::StateChanged(v5, 0x782u);
+  }
+  this->m_bShouldSpark.m_Value = 0;
+  if ( this->m_Network.m_TimerEvent.m_bRegistered )
+  {
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+  }
+  else
+  {
+    v6 = this->m_Network.m_pPev;
+    if ( v6 )
+      CBaseEdict::StateChanged(v6, 0x783u);
+  }
+  if ( vec3_origin.x != this->m_vStartPoint.m_Value.x
+    || vec3_origin.y != this->m_vStartPoint.m_Value.y
+    || vec3_origin.z != this->m_vStartPoint.m_Value.z )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      v7 = this->m_Network.m_pPev;
+      if ( v7 )
+        CBaseEdict::StateChanged(v7, 0x768u);
+    }
+    this->m_vStartPoint.m_Value = vec3_origin;
+  }
+  if ( vec3_origin.x != this->m_vEndPoint.m_Value.x
+    || vec3_origin.y != this->m_vEndPoint.m_Value.y
+    || vec3_origin.z != this->m_vEndPoint.m_Value.z )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      v8 = this->m_Network.m_pPev;
+      if ( v8 )
+        CBaseEdict::StateChanged(v8, 0x774u);
+    }
+    this->m_vEndPoint.m_Value = vec3_origin;
+  }
+}

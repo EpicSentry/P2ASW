@@ -1,0 +1,85 @@
+void __thiscall CTrigger_TractorBeam::InputSetVelocityLimitTime(CTrigger_TractorBeam *this, inputdata_t *inputdata)
+{
+  double LinearLimit; // st7
+  edict_t *m_pPev; // ecx
+  CGlobalVars *v5; // edi
+  edict_t *v6; // ecx
+  variant_t *p_value; // ecx
+  const char *iVal; // eax
+  edict_t *v9; // ecx
+  edict_t *v10; // ecx
+  float args[2]; // [esp+8h] [ebp-Ch] BYREF
+  float v12; // [esp+10h] [ebp-4h]
+
+  LinearLimit = CTrigger_TractorBeam::GetLinearLimit(this);
+  v12 = LinearLimit;
+  if ( this->m_linearLimitStart.m_Value != LinearLimit )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x39Cu);
+    }
+    this->m_linearLimitStart.m_Value = v12;
+  }
+  v5 = gpGlobals;
+  if ( this->m_linearLimitStartTime.m_Value != gpGlobals->curtime )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      v6 = this->m_Network.m_pPev;
+      if ( v6 )
+        CBaseEdict::StateChanged(v6, 0x3A0u);
+    }
+    this->m_linearLimitStartTime.m_Value = v5->curtime;
+  }
+  p_value = &inputdata->value;
+  if ( inputdata->value.fieldType == FIELD_STRING )
+  {
+    iVal = (const char *)p_value->iVal;
+    if ( !p_value->iVal )
+      iVal = locale;
+  }
+  else
+  {
+    iVal = variant_t::ToString(p_value);
+  }
+  UTIL_StringToFloatArray(args, 2, iVal);
+  if ( this->m_linearLimit.m_Value != args[0] )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      v9 = this->m_Network.m_pPev;
+      if ( v9 )
+        CBaseEdict::StateChanged(v9, 0x390u);
+    }
+    this->m_linearLimit.m_Value = args[0];
+  }
+  if ( this->m_linearLimitTime.m_Value != args[1] )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      v10 = this->m_Network.m_pPev;
+      if ( v10 )
+        CBaseEdict::StateChanged(v10, 0x398u);
+    }
+    this->m_linearLimitTime.m_Value = args[1];
+  }
+}

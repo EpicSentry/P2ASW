@@ -1,0 +1,74 @@
+void __thiscall CTrigger_TractorBeam::TractorThink(CTrigger_TractorBeam *this)
+{
+  unsigned int m_Index; // ecx
+  int v3; // eax
+  CEntInfo *v4; // edx
+  unsigned int v5; // ecx
+  int v6; // eax
+  bool v7; // zf
+  CEntInfo *v8; // eax
+  IHandleEntity *m_pEntity; // ecx
+  bool v10; // bl
+  edict_t *m_pPev; // ecx
+  unsigned int v12; // eax
+  IHandleEntity *v13; // ecx
+  bool v14; // bl
+  edict_t *v15; // ecx
+
+  m_Index = this->m_hProxyEntity.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v3 = (unsigned __int16)m_Index;
+    v4 = &g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index];
+    v5 = HIWORD(m_Index);
+    if ( v4->m_SerialNumber == v5 )
+    {
+      if ( v4->m_pEntity )
+      {
+        v6 = v3;
+        v7 = g_pEntityList->m_EntPtrArray[v6].m_SerialNumber == v5;
+        v8 = &g_pEntityList->m_EntPtrArray[v6];
+        if ( v7 )
+          m_pEntity = v8->m_pEntity;
+        else
+          m_pEntity = 0;
+        v10 = ((int (__thiscall *)(IHandleEntity *))m_pEntity->__vftable[67].~IHandleEntity)(m_pEntity) != 0;
+        if ( this->m_bFromPortal.m_Value != v10 )
+        {
+          if ( this->m_Network.m_TimerEvent.m_bRegistered )
+          {
+            *((_BYTE *)&this->m_Network + 76) |= 1u;
+          }
+          else
+          {
+            m_pPev = this->m_Network.m_pPev;
+            if ( m_pPev )
+              CBaseEdict::StateChanged(m_pPev, 0x3E1u);
+          }
+          this->m_bFromPortal.m_Value = v10;
+        }
+        v12 = this->m_hProxyEntity.m_Value.m_Index;
+        if ( v12 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v12].m_SerialNumber != HIWORD(v12) )
+          v13 = 0;
+        else
+          v13 = g_pEntityList->m_EntPtrArray[(unsigned __int16)v12].m_pEntity;
+        v14 = ((int (__thiscall *)(IHandleEntity *))v13->__vftable[66].SetRefEHandle)(v13) != 0;
+        if ( this->m_bToPortal.m_Value != v14 )
+        {
+          if ( this->m_Network.m_TimerEvent.m_bRegistered )
+          {
+            *((_BYTE *)&this->m_Network + 76) |= 1u;
+          }
+          else
+          {
+            v15 = this->m_Network.m_pPev;
+            if ( v15 )
+              CBaseEdict::StateChanged(v15, 0x3E2u);
+          }
+          this->m_bToPortal.m_Value = v14;
+        }
+      }
+    }
+  }
+  CBaseEntity::SetNextThink(this, gpGlobals->curtime, 0);
+}

@@ -1,0 +1,436 @@
+void __cdecl CIndicatorScreen::PaintCountdownTimer(CIndicatorScreen *const this)
+{
+  C_LabIndicatorPanel *v1; // ecx
+  unsigned int m_Index; // eax
+  char *v3; // edx
+  __m128 v4; // xmm0
+  float v5; // xmm0_4
+  float v7; // xmm1_4
+  float v8; // xmm1_4
+  int v9; // esi
+  int Tall; // kr00_4
+  int v11; // edi
+  unsigned int v12; // eax
+  int v13; // ecx
+  char *v14; // edx
+  int v15; // edx
+  int Wide; // eax
+  bool v17; // al
+  bool v18; // dl
+  int v19; // eax
+  float curtime; // eax
+  int v21; // eax
+  vgui::ISurface *v22; // ecx
+  bool v23; // dl
+  float m_flFadeUpTime; // xmm0_4
+  float v25; // xmm1_4
+  float v26; // xmm2_4
+  float v27; // xmm2_4
+  int v28; // eax
+  vgui::ISurface *v29; // edi
+  int v30; // eax
+  vgui::ISurface *v31; // edx
+  void (__cdecl *v32)(vgui::ISurface *, int); // ecx
+  int v33; // eax
+  int v34; // eax
+  vgui::ISurface *v35; // edx
+  void (__cdecl *v36)(vgui::ISurface *, int); // ecx
+  int v37; // eax
+  vgui::ISurface *v38; // edi
+  int v39; // eax
+  vgui::ISurface *v40; // edx
+  void (__cdecl *v41)(vgui::ISurface *, int); // ecx
+  int v42; // eax
+  int v43; // eax
+  vgui::ISurface *v44; // edx
+  void (__cdecl *v45)(vgui::ISurface *, int); // ecx
+  int v46; // eax
+  int v47; // eax
+  vgui::ISurface *v48; // edx
+  void (__cdecl *v49)(vgui::ISurface *, int); // ecx
+  int v50; // eax
+  int v51; // eax
+  __m128 v52; // xmm2
+  unsigned __int32 v53; // xmm0_4
+  vgui::ISurface *v54; // edi
+  int v55; // eax
+  float CountdownPercentage; // [esp+34h] [ebp-74h]
+  int v57; // [esp+38h] [ebp-70h]
+  int v58; // [esp+38h] [ebp-70h]
+  vgui::ISurface *v59; // [esp+38h] [ebp-70h]
+  int v60; // [esp+38h] [ebp-70h]
+  vgui::ISurface *v61; // [esp+38h] [ebp-70h]
+  vgui::ISurface *v62; // [esp+38h] [ebp-70h]
+  vgui::ISurface *v63; // [esp+3Ch] [ebp-6Ch]
+  vgui::ISurface *v64; // [esp+3Ch] [ebp-6Ch]
+  bool v65; // [esp+3Ch] [ebp-6Ch]
+  vgui::ISurface *v66; // [esp+3Ch] [ebp-6Ch]
+  vgui::ISurface *v67; // [esp+3Ch] [ebp-6Ch]
+  vgui::ISurface *v68; // [esp+3Ch] [ebp-6Ch]
+  vgui::ISurface *v69; // [esp+3Ch] [ebp-6Ch]
+  vgui::ISurface *v70; // [esp+3Ch] [ebp-6Ch]
+  bool v71; // [esp+3Ch] [ebp-6Ch]
+  bool v72; // [esp+3Ch] [ebp-6Ch]
+  void (__cdecl *v73)(vgui::ISurface *, int, _DWORD, int, int); // [esp+50h] [ebp-58h]
+  void (__cdecl *v74)(vgui::ISurface *, int, _DWORD, int, int); // [esp+50h] [ebp-58h]
+  void (__cdecl *v75)(vgui::ISurface *, int, _DWORD, int, int); // [esp+50h] [ebp-58h]
+  bool v76; // [esp+55h] [ebp-53h]
+  bool v77; // [esp+56h] [ebp-52h]
+  bool v78; // [esp+57h] [ebp-51h]
+  int v79; // [esp+58h] [ebp-50h]
+  int v80; // [esp+58h] [ebp-50h]
+  int v81; // [esp+58h] [ebp-50h]
+  int v82; // [esp+58h] [ebp-50h]
+  bool v83; // [esp+5Ch] [ebp-4Ch]
+  void (__cdecl *v84)(vgui::ISurface *, int, int, int, int, _DWORD, int, int, _DWORD); // [esp+5Ch] [ebp-4Ch]
+  bool v85; // [esp+60h] [ebp-48h]
+  void (__cdecl *v86)(vgui::ISurface *, _DWORD, int, int, int, int, int, _DWORD, _DWORD); // [esp+60h] [ebp-48h]
+  void (__cdecl *v87)(vgui::ISurface *, _DWORD, _DWORD, int, int, int, _DWORD, _DWORD, int); // [esp+60h] [ebp-48h]
+  void (__cdecl *v88)(vgui::ISurface *, _DWORD, int, int, int, int, int, _DWORD, _DWORD); // [esp+60h] [ebp-48h]
+  bool v89; // [esp+64h] [ebp-44h]
+  void (__cdecl *v90)(vgui::ISurface *, _DWORD, _DWORD, int, int); // [esp+64h] [ebp-44h]
+  void (__cdecl *flGlobalAlphaa)(vgui::ISurface *, _DWORD, _DWORD, int, int); // [esp+68h] [ebp-40h]
+  float flGlobalAlpha; // [esp+68h] [ebp-40h]
+  void (__cdecl *flGlobalAlphab)(vgui::ISurface *, _DWORD, _DWORD, int, int); // [esp+68h] [ebp-40h]
+  void (__cdecl *v94)(vgui::ISurface *, int); // [esp+6Ch] [ebp-3Ch]
+  int v95; // [esp+6Ch] [ebp-3Ch]
+  int v96; // [esp+6Ch] [ebp-3Ch]
+  void (__cdecl *v97)(vgui::ISurface *, int, int, int, int, _DWORD, int, int, _DWORD); // [esp+6Ch] [ebp-3Ch]
+  int v98; // [esp+6Ch] [ebp-3Ch]
+  int v99; // [esp+6Ch] [ebp-3Ch]
+  float flAlpha; // [esp+70h] [ebp-38h]
+  void (__cdecl *flAlphaa)(vgui::ISurface *, _DWORD, _DWORD, int, int, int, _DWORD, _DWORD, int); // [esp+70h] [ebp-38h]
+  void (__cdecl *flAlphab)(vgui::ISurface *, _DWORD, _DWORD, int, int, int, _DWORD, _DWORD, int); // [esp+70h] [ebp-38h]
+
+  v1 = 0;
+  m_Index = this->m_hScreenEntity.m_Index;
+  if ( m_Index != -1 )
+  {
+    v3 = (char *)g_pEntityList + 16 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v3 + 2) == HIWORD(m_Index) )
+      v1 = (C_LabIndicatorPanel *)*((_DWORD *)v3 + 1);
+  }
+  CountdownPercentage = C_LabIndicatorPanel::GetCountdownPercentage(v1);
+  v4 = (__m128)LODWORD(CountdownPercentage);
+  v4.m128_f32[0] = CountdownPercentage * 8.0;
+  v5 = _mm_unpacklo_ps(v4, v4).m128_f32[0];
+  _FST7 = v5;
+  __asm { frndint }
+  v7 = (float)(int)(double)_FST7 - v5;
+  if ( v7 < 0.0 )
+    v8 = 0.0;
+  else
+    v8 = fminf(1.0, v7);
+  flAlpha = (float)(v8 * -255.0) + 255.0;
+  v9 = vgui::Panel::GetWide(this) / 2;
+  Tall = vgui::Panel::GetTall(this);
+  v11 = Tall / 2;
+  (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 56))(g_pVGuiSurface, -1);
+  v12 = this->m_hScreenEntity.m_Index;
+  v13 = 0;
+  if ( v12 != -1 )
+  {
+    v14 = (char *)g_pEntityList + 16 * (unsigned __int16)v12;
+    if ( *((_DWORD *)v14 + 2) == HIWORD(v12) )
+      v13 = *((_DWORD *)v14 + 1);
+  }
+  v15 = *(_DWORD *)g_pVGuiSurface;
+  if ( *(_BYTE *)(v13 + 2667) )
+  {
+    if ( v5 > 0.00000011920929 )
+    {
+      (*(void (__cdecl **)(vgui::ISurface *, int))(v15 + 148))(g_pVGuiSurface, this->m_nTimerBackgroundActiveTextureID);
+      v63 = g_pVGuiSurface;
+      flGlobalAlphaa = *(void (__cdecl **)(vgui::ISurface *, _DWORD, _DWORD, int, int))(*(_DWORD *)g_pVGuiSurface + 156);
+      v57 = vgui::Panel::GetTall(this);
+      Wide = vgui::Panel::GetWide(this);
+      flGlobalAlphaa(v63, 0, 0, Wide, v57);
+      goto LABEL_12;
+    }
+    (*(void (__cdecl **)(vgui::ISurface *, int))(v15 + 148))(g_pVGuiSurface, this->m_nTimerBackgroundTextureID);
+    v66 = g_pVGuiSurface;
+    flGlobalAlphab = *(void (__cdecl **)(vgui::ISurface *, _DWORD, _DWORD, int, int))(*(_DWORD *)g_pVGuiSurface + 156);
+    v60 = vgui::Panel::GetTall(this);
+    v28 = vgui::Panel::GetWide(this);
+    flGlobalAlphab(v66, 0, 0, v28, v60);
+    if ( this->m_bWasCounting )
+      goto LABEL_40;
+    goto LABEL_43;
+  }
+  (*(void (__cdecl **)(vgui::ISurface *, int))(v15 + 148))(g_pVGuiSurface, this->m_nTimerBackgroundTextureID);
+  v64 = g_pVGuiSurface;
+  v90 = *(void (__cdecl **)(vgui::ISurface *, _DWORD, _DWORD, int, int))(*(_DWORD *)g_pVGuiSurface + 156);
+  v58 = vgui::Panel::GetTall(this);
+  v19 = vgui::Panel::GetWide(this);
+  v90(v64, 0, 0, v19, v58);
+  if ( v5 <= 0.00000011920929 )
+  {
+    if ( this->m_bWasCounting )
+    {
+LABEL_40:
+      flGlobalAlpha = 0.0;
+      curtime = gpGlobals->curtime;
+      this->m_bWasCounting = 0;
+      this->m_flFadeUpTime = curtime;
+      v21 = 0;
+LABEL_41:
+      v22 = g_pVGuiSurface;
+      v76 = 1;
+      v5 = 8.0;
+      v89 = 1;
+      v77 = 1;
+      v78 = 1;
+      v85 = 1;
+      v83 = 1;
+      v94 = *(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 56);
+      v23 = 1;
+LABEL_42:
+      v65 = v23;
+      v94(v22, (v21 << 24) | 0xFFFFFF);
+      (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 148))(
+        g_pVGuiSurface,
+        this->m_nTimerUpperSliceTextureID);
+      v59 = g_pVGuiSurface;
+      v73 = *(void (__cdecl **)(vgui::ISurface *, int, _DWORD, int, int))(*(_DWORD *)g_pVGuiSurface + 156);
+      v95 = vgui::Panel::GetTall(this);
+      v79 = vgui::Panel::GetWide(this);
+      v73(v59, v9, 0, v9 + v79 / 2, v95 / 2);
+      v17 = 1;
+      v18 = v65;
+      goto LABEL_14;
+    }
+LABEL_43:
+    m_flFadeUpTime = this->m_flFadeUpTime;
+    v25 = m_flFadeUpTime + 0.25;
+    v26 = gpGlobals->curtime;
+    if ( m_flFadeUpTime == (float)(m_flFadeUpTime + 0.25) )
+    {
+      v52.m128_f32[0] = v26 - v25;
+      v21 = -1;
+      v53 = _mm_cmple_ss((__m128)0LL, v52).m128_u32[0];
+      if ( v52.m128_f32[0] < 0.0 )
+        v21 = 0;
+      LODWORD(flGlobalAlpha) = v53 & 0x437F0000;
+    }
+    else
+    {
+      v21 = 0;
+      flGlobalAlpha = 0.0;
+      v27 = (float)(v26 - m_flFadeUpTime) / (float)(v25 - m_flFadeUpTime);
+      if ( v27 >= 0.0 )
+      {
+        v21 = -1;
+        flGlobalAlpha = 255.0;
+        if ( v27 <= 1.0 )
+        {
+          flGlobalAlpha = (float)(v27 * 255.0) + 0.0;
+          v21 = (int)flGlobalAlpha;
+        }
+      }
+    }
+    goto LABEL_41;
+  }
+LABEL_12:
+  this->m_bWasCounting = 1;
+  v17 = v5 > 7.0;
+  if ( v5 > 7.0 )
+  {
+    v22 = g_pVGuiSurface;
+    flGlobalAlpha = 255.0;
+    v23 = v5 > 6.0;
+    v83 = v5 > 5.0;
+    v85 = v5 > 4.0;
+    v78 = v5 > 3.0;
+    v94 = *(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 56);
+    v21 = (int)flAlpha;
+    v77 = v5 > 2.0;
+    v89 = v5 > 1.0;
+    v76 = v5 > 0.0;
+    goto LABEL_42;
+  }
+  flGlobalAlpha = 255.0;
+  v18 = v5 > 6.0;
+  v83 = v5 > 5.0;
+  v85 = v5 > 4.0;
+  v78 = v5 > 3.0;
+  v77 = v5 > 2.0;
+  v89 = v5 > 1.0;
+  v76 = v5 > 0.0;
+LABEL_14:
+  if ( v18 && v5 < 7.0 )
+  {
+    v72 = v18;
+    (*(void (__thiscall **)(vgui::ISurface *, vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 56))(
+      g_pVGuiSurface,
+      g_pVGuiSurface,
+      ((int)flAlpha << 24) | 0xFFFFFF);
+    (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 148))(
+      g_pVGuiSurface,
+      this->m_nTimerLowerSliceTextureID);
+    v62 = g_pVGuiSurface;
+    v75 = *(void (__cdecl **)(vgui::ISurface *, int, _DWORD, int, int))(*(_DWORD *)g_pVGuiSurface + 156);
+    v99 = vgui::Panel::GetTall(this);
+    v82 = vgui::Panel::GetWide(this);
+    v75(v62, v9, 0, v9 + v82 / 2, v99 / 2);
+    v18 = v72;
+  }
+  else if ( v17 )
+  {
+    v71 = v18;
+    (*(void (__thiscall **)(vgui::ISurface *, vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 56))(
+      g_pVGuiSurface,
+      g_pVGuiSurface,
+      ((int)flGlobalAlpha << 24) | 0xFFFFFF);
+    (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 148))(
+      g_pVGuiSurface,
+      this->m_nTimerLowerSliceTextureID);
+    v61 = g_pVGuiSurface;
+    v74 = *(void (__cdecl **)(vgui::ISurface *, int, _DWORD, int, int))(*(_DWORD *)g_pVGuiSurface + 156);
+    v98 = vgui::Panel::GetTall(this);
+    v81 = vgui::Panel::GetWide(this);
+    v74(v61, v9, 0, v9 + v81 / 2, v98 / 2);
+    v18 = v71;
+  }
+  if ( v83 && v5 < 6.0 )
+  {
+    v48 = g_pVGuiSurface;
+    v49 = *(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 56);
+    v50 = (int)flAlpha;
+    goto LABEL_59;
+  }
+  if ( v18 )
+  {
+    v48 = g_pVGuiSurface;
+    v49 = *(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 56);
+    v50 = (int)flGlobalAlpha;
+LABEL_59:
+    v49(v48, (v50 << 24) | 0xFFFFFF);
+    (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 148))(
+      g_pVGuiSurface,
+      this->m_nTimerLowerSliceTextureID);
+    v70 = g_pVGuiSurface;
+    v97 = *(void (__cdecl **)(vgui::ISurface *, int, int, int, int, _DWORD, int, int, _DWORD))(*(_DWORD *)g_pVGuiSurface
+                                                                                             + 412);
+    v80 = v11 + vgui::Panel::GetTall(this) / 2;
+    v51 = vgui::Panel::GetWide(this);
+    v97(v70, v9, Tall / 2, v9 + v51 / 2, v80, 0, 1065353216, 1065353216, 0);
+  }
+  if ( v85 && v5 < 5.0 )
+  {
+    v44 = g_pVGuiSurface;
+    v45 = *(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 56);
+    v46 = (int)flAlpha;
+    goto LABEL_57;
+  }
+  if ( v83 )
+  {
+    v44 = g_pVGuiSurface;
+    v45 = *(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 56);
+    v46 = (int)flGlobalAlpha;
+LABEL_57:
+    v45(v44, (v46 << 24) | 0xFFFFFF);
+    (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 148))(
+      g_pVGuiSurface,
+      this->m_nTimerUpperSliceTextureID);
+    v69 = g_pVGuiSurface;
+    v84 = *(void (__cdecl **)(vgui::ISurface *, int, int, int, int, _DWORD, int, int, _DWORD))(*(_DWORD *)g_pVGuiSurface
+                                                                                             + 412);
+    v96 = v11 + vgui::Panel::GetTall(this) / 2;
+    v47 = vgui::Panel::GetWide(this);
+    v84(v69, v9, Tall / 2, v9 + v47 / 2, v96, 0, 1065353216, 1065353216, 0);
+  }
+  if ( v78 && v5 < 4.0 )
+  {
+    v40 = g_pVGuiSurface;
+    v41 = *(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 56);
+    v42 = (int)flAlpha;
+    goto LABEL_55;
+  }
+  if ( v85 )
+  {
+    v40 = g_pVGuiSurface;
+    v41 = *(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 56);
+    v42 = (int)flGlobalAlpha;
+LABEL_55:
+    v41(v40, (v42 << 24) | 0xFFFFFF);
+    (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 148))(
+      g_pVGuiSurface,
+      this->m_nTimerUpperSliceTextureID);
+    v68 = g_pVGuiSurface;
+    v88 = *(void (__cdecl **)(vgui::ISurface *, _DWORD, int, int, int, int, int, _DWORD, _DWORD))(*(_DWORD *)g_pVGuiSurface
+                                                                                                + 412);
+    v43 = vgui::Panel::GetTall(this);
+    v88(v68, 0, Tall / 2, v9, v11 + v43 / 2, 1065353216, 1065353216, 0, 0);
+  }
+  if ( v77 && v5 < 3.0 )
+  {
+    v31 = g_pVGuiSurface;
+    v32 = *(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 56);
+    v33 = (int)flAlpha;
+    goto LABEL_51;
+  }
+  if ( v78 )
+  {
+    v31 = g_pVGuiSurface;
+    v32 = *(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 56);
+    v33 = (int)flGlobalAlpha;
+LABEL_51:
+    v32(v31, (v33 << 24) | 0xFFFFFF);
+    (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 148))(
+      g_pVGuiSurface,
+      this->m_nTimerLowerSliceTextureID);
+    v67 = g_pVGuiSurface;
+    v86 = *(void (__cdecl **)(vgui::ISurface *, _DWORD, int, int, int, int, int, _DWORD, _DWORD))(*(_DWORD *)g_pVGuiSurface
+                                                                                                + 412);
+    v34 = vgui::Panel::GetTall(this);
+    v86(v67, 0, Tall / 2, v9, v11 + v34 / 2, 1065353216, 1065353216, 0, 0);
+  }
+  if ( v89 && v5 < 2.0 )
+  {
+    v35 = g_pVGuiSurface;
+    v36 = *(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 56);
+    v37 = (int)flAlpha;
+    goto LABEL_53;
+  }
+  if ( v77 )
+  {
+    v35 = g_pVGuiSurface;
+    v36 = *(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 56);
+    v37 = (int)flGlobalAlpha;
+LABEL_53:
+    v36(v35, (v37 << 24) | 0xFFFFFF);
+    (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 148))(
+      g_pVGuiSurface,
+      this->m_nTimerLowerSliceTextureID);
+    v38 = g_pVGuiSurface;
+    v87 = *(void (__cdecl **)(vgui::ISurface *, _DWORD, _DWORD, int, int, int, _DWORD, _DWORD, int))(*(_DWORD *)g_pVGuiSurface + 412);
+    v39 = vgui::Panel::GetTall(this);
+    v87(v38, 0, 0, v9, v39 / 2, 1065353216, 0, 0, 1065353216);
+  }
+  if ( v76 && v5 < 1.0 )
+  {
+    (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 56))(
+      g_pVGuiSurface,
+      ((int)flAlpha << 24) | 0xFFFFFF);
+    (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 148))(
+      g_pVGuiSurface,
+      this->m_nTimerUpperSliceTextureID);
+    v54 = g_pVGuiSurface;
+    flAlphab = *(void (__cdecl **)(vgui::ISurface *, _DWORD, _DWORD, int, int, int, _DWORD, _DWORD, int))(*(_DWORD *)g_pVGuiSurface + 412);
+    v55 = vgui::Panel::GetTall(this);
+    flAlphab(v54, 0, 0, v9, v55 / 2, 1065353216, 0, 0, 1065353216);
+  }
+  else if ( v89 )
+  {
+    (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 56))(
+      g_pVGuiSurface,
+      ((int)flGlobalAlpha << 24) | 0xFFFFFF);
+    (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 148))(
+      g_pVGuiSurface,
+      this->m_nTimerUpperSliceTextureID);
+    v29 = g_pVGuiSurface;
+    flAlphaa = *(void (__cdecl **)(vgui::ISurface *, _DWORD, _DWORD, int, int, int, _DWORD, _DWORD, int))(*(_DWORD *)g_pVGuiSurface + 412);
+    v30 = vgui::Panel::GetTall(this);
+    flAlphaa(v29, 0, 0, v9, v30 / 2, 1065353216, 0, 0, 1065353216);
+  }
+}

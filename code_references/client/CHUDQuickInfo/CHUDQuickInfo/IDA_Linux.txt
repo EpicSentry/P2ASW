@@ -1,0 +1,64 @@
+void __cdecl CHUDQuickInfo::CHUDQuickInfo(
+        CHUDQuickInfo *const this,
+        const void **const __vtt_parm,
+        const char *pElementName)
+{
+  _DWORD *v3; // eax
+  vgui::PanelKeyBindingMap *v4; // eax
+  IClientMode *ClientMode; // eax
+  vgui::Panel *v6; // eax
+  vgui::PanelMessageMap *v7; // eax
+  vgui::PanelMessageMap *v8; // ebx
+  vgui::PanelMessageMap *v9; // eax
+  bool v10; // zf
+  PanelAnimationMap *v11; // eax
+
+  CHudElement::CHudElement(this, pElementName);
+  vgui::Panel::Panel(&this->vgui::Panel, __vtt_parm + 1, 0, "HUDQuickInfo");
+  v3 = *__vtt_parm;
+  this->_vptr_IGameEventListener2 = (int (**)(...))*__vtt_parm;
+  *(_DWORD *)this->gap0 = __vtt_parm[3];
+  *(int (***)(...))((char *)&this->_vptr_IGameEventListener2 + *(v3 - 3)) = (int (**)(...))__vtt_parm[4];
+  if ( CHUDQuickInfo::ChainToMap(void)::chained )
+  {
+    if ( CHUDQuickInfo::ChainToAnimationMap(void)::chained )
+      goto LABEL_3;
+  }
+  else
+  {
+    CHUDQuickInfo::ChainToMap(void)::chained = 1;
+    v7 = vgui::FindOrAddPanelMessageMap("CHUDQuickInfo");
+    v7->pfnClassName = CHUDQuickInfo::GetPanelClassName;
+    v8 = v7;
+    v9 = vgui::FindOrAddPanelMessageMap("vgui::Panel");
+    v10 = CHUDQuickInfo::ChainToAnimationMap(void)::chained == 0;
+    v8->baseMap = v9;
+    if ( !v10 )
+      goto LABEL_3;
+  }
+  CHUDQuickInfo::ChainToAnimationMap(void)::chained = 1;
+  v11 = FindOrAddPanelAnimationMap("CHUDQuickInfo");
+  v11->pfnClassName = CHUDQuickInfo::GetPanelClassName;
+  v11->baseMap = FindOrAddPanelAnimationMap("vgui::Panel");
+LABEL_3:
+  if ( !CHUDQuickInfo::KB_ChainToMap(void)::chained )
+  {
+    CHUDQuickInfo::KB_ChainToMap(void)::chained = 1;
+    v4 = vgui::FindOrAddPanelKeyBindingMap("CHUDQuickInfo");
+    v4->pfnClassName = CHUDQuickInfo::GetPanelClassName;
+    v4->baseMap = vgui::FindOrAddPanelKeyBindingMap("vgui::Panel");
+  }
+  ClientMode = GetClientMode();
+  v6 = (vgui::Panel *)(*((int (__cdecl **)(IClientMode *))ClientMode->_vptr_IClientMode + 10))(ClientMode);
+  vgui::Panel::SetParent(&this->vgui::Panel, v6);
+  CHudElement::SetHiddenBits(this, 256);
+  this->m_fLastPlacedAlpha[1] = 0.0;
+  this->m_fLastPlacedAlpha[0] = 0.0;
+  this->m_bLastPlacedAlphaCountingUp[1] = 1;
+  this->m_bLastPlacedAlphaCountingUp[0] = 1;
+  this->m_nArrowTexture = -1;
+  this->m_nCursorRadius = 0;
+  this->m_nPortalIconOffsetX = 0;
+  this->m_nPortalIconOffsetY = 0;
+  this->m_flPortalIconScale = 1.0;
+}

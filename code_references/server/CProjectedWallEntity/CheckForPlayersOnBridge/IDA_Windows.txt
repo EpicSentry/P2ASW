@@ -1,0 +1,19 @@
+void __thiscall CProjectedWallEntity::CheckForPlayersOnBridge(CProjectedWallEntity *this)
+{
+  int i; // edi
+  CBasePlayer *v3; // eax
+  CPortal_Player *v4; // esi
+
+  for ( i = 1; i <= gpGlobals->maxClients; ++i )
+  {
+    v3 = UTIL_PlayerByIndex(i);
+    v4 = (CPortal_Player *)v3;
+    if ( v3 && CBaseEntity::GetGroundEntity(v3) == this )
+    {
+      if ( CPortalPlayerShared::InCond(&v4->m_Shared, 0) )
+        v4->m_bWasDroppedByOtherPlayerWhileTaunting = 1;
+      CBaseEntity::SetGroundEntity(v4, 0);
+      CPortal_Player::BridgeRemovedFromUnder(v4);
+    }
+  }
+}

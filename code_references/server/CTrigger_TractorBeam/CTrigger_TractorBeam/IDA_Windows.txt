@@ -1,0 +1,55 @@
+void __thiscall CTrigger_TractorBeam::CTrigger_TractorBeam(CTrigger_TractorBeam *this)
+{
+  edict_t *m_pPev; // ecx
+  unsigned int m_Index; // eax
+  edict_t *v4; // ecx
+
+  CBaseEntity::CBaseEntity(this, 0);
+  this->CBaseVPhysicsTrigger::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable = (CTrigger_TractorBeam_vtbl *)&CBaseVPhysicsTrigger::`vftable';
+  this->m_hFilter.m_Index = -1;
+  this->IMotionEvent::__vftable = (IMotionEvent_vtbl *)&IMotionEvent::`vftable';
+  this->ITriggerTractorBeamAutoList::__vftable = (ITriggerTractorBeamAutoList_vtbl *)&ITriggerTractorBeamAutoList::`vftable';
+  ITriggerTractorBeamAutoList::Add(&this->ITriggerTractorBeamAutoList);
+  this->CBaseVPhysicsTrigger::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable = (CTrigger_TractorBeam_vtbl *)&CTrigger_TractorBeam::`vftable'{for `CBaseVPhysicsTrigger'};
+  this->IMotionEvent::__vftable = (IMotionEvent_vtbl *)&CTrigger_TractorBeam::`vftable'{for `IMotionEvent'};
+  this->ITriggerTractorBeamAutoList::__vftable = (ITriggerTractorBeamAutoList_vtbl *)&CTrigger_TractorBeam::`vftable'{for `ITriggerTractorBeamAutoList'};
+  this->m_blobs.m_Memory.m_pMemory = 0;
+  this->m_blobs.m_Memory.m_nAllocationCount = 0;
+  this->m_blobs.m_Memory.m_nGrowSize = 0;
+  this->m_blobs.m_Size = 0;
+  this->m_blobs.m_pElements = 0;
+  this->m_hProxyEntity.m_Value.m_Index = -1;
+  this->m_sndPlayerInBeam = 0;
+  if ( this->m_flRadius.m_Value != 55.0 )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x3DCu);
+    }
+    this->m_flRadius.m_Value = FLOAT_55_0;
+  }
+  m_Index = this->m_hProxyEntity.m_Value.m_Index;
+  if ( m_Index != -1
+    && g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber == HIWORD(m_Index)
+    && g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+      this->m_hProxyEntity.m_Value.m_Index = -1;
+    }
+    else
+    {
+      v4 = this->m_Network.m_pPev;
+      if ( v4 )
+        CBaseEdict::StateChanged(v4, 0x3BCu);
+      this->m_hProxyEntity.m_Value.m_Index = -1;
+    }
+  }
+}

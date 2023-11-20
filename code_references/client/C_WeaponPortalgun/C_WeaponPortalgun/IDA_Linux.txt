@@ -1,0 +1,41 @@
+void __cdecl C_WeaponPortalgun::C_WeaponPortalgun(C_WeaponPortalgun *const this)
+{
+  bool m_Value; // zf
+  int v2; // eax
+
+  C_BasePortalCombatWeapon::C_BasePortalCombatWeapon(this);
+  m_Value = this->m_bCanFirePortal1.m_Value;
+  this->_vptr_IHandleEntity = (int (**)(...))off_12C8DE8;
+  this->_vptr_IClientRenderable = (int (**)(...))&off_12C94A4;
+  this->_vptr_IClientNetworkable = (int (**)(...))&off_12C9560;
+  this->_vptr_IClientThinkable = (int (**)(...))&off_12C95A0;
+  this->_vptr_IClientModelRenderable = (int (**)(...))&off_12C95BC;
+  this->m_hPrimaryPortal.m_Index = -1;
+  this->m_hSecondaryPortal.m_Index = -1;
+  this->m_hPortalGunEffectFP.m_pPrev = 0;
+  this->m_hPortalGunEffectFP.m_pNext = 0;
+  this->m_hPortalGunEffectFP.m_pObject = 0;
+  this->m_hPortalGunEffectTP.m_pPrev = 0;
+  this->m_hPortalGunEffectTP.m_pNext = 0;
+  this->m_hPortalGunEffectTP.m_pObject = 0;
+  this->m_hPortalGunEffectHoldingFP.m_pPrev = 0;
+  this->m_hPortalGunEffectHoldingFP.m_pNext = 0;
+  this->m_hPortalGunEffectHoldingFP.m_pObject = 0;
+  this->m_hPortalGunEffectHoldingTP.m_pPrev = 0;
+  this->m_hPortalGunEffectHoldingTP.m_pNext = 0;
+  this->m_hPortalGunEffectHoldingTP.m_pObject = 0;
+  this->m_bReloadsSingly = 1;
+  if ( !m_Value )
+    this->m_bCanFirePortal1.m_Value = 1;
+  if ( this->m_bCanFirePortal2.m_Value )
+    this->m_bCanFirePortal2.m_Value = 0;
+  if ( this->m_iLastFiredPortal.m_Value )
+    this->m_iLastFiredPortal.m_Value = 0;
+  this->m_fMinRange1 = 0.0;
+  v2 = this->m_EffectState.m_Value;
+  this->m_fMaxRange1 = 56755.84;
+  this->m_fMinRange2 = 0.0;
+  this->m_fMaxRange2 = 56755.84;
+  if ( v2 )
+    this->m_EffectState.m_Value = 0;
+}

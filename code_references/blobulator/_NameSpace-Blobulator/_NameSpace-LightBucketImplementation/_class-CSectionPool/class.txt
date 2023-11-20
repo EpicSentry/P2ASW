@@ -1,0 +1,22 @@
+class Blobulator::LightBucketImplementation::CSectionPool
+{
+    public void CSectionPool(class Blobulator::LightBucketImplementation::CSectionPool & );
+    public void CSectionPool();
+    public void ~CSectionPool();
+    public void Purge();
+    public void AcquireSections(class SmartArray<Blobulator::LightBucketImplementation::CSection *,0,16> & );
+    public void ReleaseSections(class SmartArray<Blobulator::LightBucketImplementation::CSection *,0,16> & ,int );
+    public void FrameUpdate(int );
+    private void Init();
+    private void ResetConfig();
+    private const unsigned int MAX_CACHED_SECTIONS;
+    private class CThreadMutex m_Mutex;
+    private bool m_bEnabled;
+    private unsigned int m_nMaxCachedSections;
+    private unsigned int m_nSectionsToAcquire;
+    private unsigned int m_nExtantSections;
+    private class CUtlVectorFixed<Blobulator::LightBucketImplementation::CSection *,4000> m_SectionCache;
+    private bool m_bInit;
+    public class Blobulator::LightBucketImplementation::CSectionPool & operator=(class Blobulator::LightBucketImplementation::CSectionPool & );
+    public void * __vecDelDtor(unsigned int );
+};

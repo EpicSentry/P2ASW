@@ -1,0 +1,26 @@
+datamap_t *__cdecl DataMapInit<CLabIndicatorPanel>(CLabIndicatorPanel *a1)
+{
+  datamap_t *result; // eax
+
+  if ( !(_BYTE)`guard variable for'datamap_t * DataMapInit<CLabIndicatorPanel>(CLabIndicatorPanel *)::nameHolder
+    && _cxa_guard_acquire(&`guard variable for'datamap_t * DataMapInit<CLabIndicatorPanel>(CLabIndicatorPanel *)::nameHolder) )
+  {
+    DataMapInit<CLabIndicatorPanel>(CLabIndicatorPanel *)::nameHolder.m_pszBase = "CLabIndicatorPanel";
+    DataMapInit<CLabIndicatorPanel>(CLabIndicatorPanel *)::nameHolder.m_Names.m_Memory.m_pMemory = 0;
+    DataMapInit<CLabIndicatorPanel>(CLabIndicatorPanel *)::nameHolder.m_Names.m_Memory.m_nAllocationCount = 0;
+    DataMapInit<CLabIndicatorPanel>(CLabIndicatorPanel *)::nameHolder.m_Names.m_Memory.m_nGrowSize = 0;
+    DataMapInit<CLabIndicatorPanel>(CLabIndicatorPanel *)::nameHolder.m_Names.m_Size = 0;
+    DataMapInit<CLabIndicatorPanel>(CLabIndicatorPanel *)::nameHolder.m_Names.m_pElements = 0;
+    DataMapInit<CLabIndicatorPanel>(CLabIndicatorPanel *)::nameHolder.m_nLenBase = 18;
+    _cxa_guard_release(&`guard variable for'datamap_t * DataMapInit<CLabIndicatorPanel>(CLabIndicatorPanel *)::nameHolder);
+    _cxa_atexit(
+      (void (__cdecl *)(void *))CDatadescGeneratedNameHolder::~CDatadescGeneratedNameHolder,
+      &DataMapInit<CLabIndicatorPanel>(CLabIndicatorPanel *)::nameHolder,
+      &_dso_handle);
+  }
+  CLabIndicatorPanel::m_DataMap.baseMap = &CBaseEntity::m_DataMap;
+  result = &CLabIndicatorPanel::m_DataMap;
+  CLabIndicatorPanel::m_DataMap.dataNumFields = 11;
+  CLabIndicatorPanel::m_DataMap.dataDesc = &DataMapInit<CLabIndicatorPanel>(CLabIndicatorPanel *)::dataDesc[1];
+  return result;
+}

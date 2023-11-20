@@ -1,0 +1,37 @@
+void __cdecl CTrigger_TractorBeam::UpdateOnRemove(CTrigger_TractorBeam *const this)
+{
+  IPhysicsMotionController *m_pController; // eax
+  int v2; // ebx
+  int i; // edi
+  IPhysicsObject *v4; // edx
+  IPhysicsObject **pObjects; // [esp+1Ch] [ebp-1Ch]
+
+  m_pController = this->m_pController;
+  if ( m_pController )
+  {
+    v2 = (*((int (__cdecl **)(IPhysicsMotionController *))m_pController->_vptr_IPhysicsMotionController + 5))(this->m_pController);
+    pObjects = (IPhysicsObject **)operator new[](4 * v2);
+    (*((void (__cdecl **)(IPhysicsMotionController *, IPhysicsObject **))this->m_pController->_vptr_IPhysicsMotionController
+     + 6))(
+      this->m_pController,
+      pObjects);
+    if ( v2 > 0 )
+    {
+      for ( i = 0; i != v2; ++i )
+      {
+        v4 = pObjects[i];
+        if ( v4 )
+          (*((void (__cdecl **)(IPhysicsObject *))v4->_vptr_IPhysicsObject + 25))(pObjects[i]);
+      }
+    }
+    (*((void (__cdecl **)(IPhysicsEnvironment *, IPhysicsMotionController *))physenv->_vptr_IPhysicsEnvironment + 31))(
+      physenv,
+      this->m_pController);
+    this->m_pController = 0;
+    if ( pObjects )
+      operator delete[](pObjects);
+  }
+  StopParticleEffects(this);
+  (*((void (__cdecl **)(CTrigger_TractorBeam *const))this->_vptr_IHandleEntity + 112))(this);
+  CBaseVPhysicsTrigger::UpdateOnRemove(this);
+}

@@ -1,0 +1,44 @@
+void __cdecl CIndicatorScreen::~CIndicatorScreen(CIndicatorScreen *const this, const void **const __vtt_parm)
+{
+  _DWORD *v2; // eax
+
+  v2 = *__vtt_parm;
+  *(_DWORD *)this->gap0 = *__vtt_parm;
+  *(_DWORD *)&this->gap0[*(v2 - 31)] = __vtt_parm[7];
+  if ( g_pVGuiSurface )
+  {
+    if ( this->m_nTimerBackgroundTextureID != -1 )
+      (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 564))(
+        g_pVGuiSurface,
+        this->m_nTimerBackgroundTextureID);
+    if ( this->m_nTimerBackgroundActiveTextureID != -1 )
+      (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 564))(
+        g_pVGuiSurface,
+        this->m_nTimerBackgroundActiveTextureID);
+    if ( this->m_nTimerUpperSliceTextureID != -1 )
+      (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 564))(
+        g_pVGuiSurface,
+        this->m_nTimerUpperSliceTextureID);
+    if ( this->m_nTimerLowerSliceTextureID != -1 )
+      (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 564))(
+        g_pVGuiSurface,
+        this->m_nTimerLowerSliceTextureID);
+    if ( this->m_nCheckTextureID != -1 )
+      (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 564))(
+        g_pVGuiSurface,
+        this->m_nCheckTextureID);
+    if ( this->m_nUncheckedTextureID != -1 )
+      (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 564))(
+        g_pVGuiSurface,
+        this->m_nUncheckedTextureID);
+    if ( this->m_nXTextureID != -1 )
+      (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 564))(
+        g_pVGuiSurface,
+        this->m_nXTextureID);
+    if ( this->m_nOTextureID != -1 )
+      (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 564))(
+        g_pVGuiSurface,
+        this->m_nOTextureID);
+  }
+  CVGuiScreenPanel::~CVGuiScreenPanel(this, __vtt_parm + 1);
+}

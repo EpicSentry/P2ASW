@@ -1,0 +1,425 @@
+void __cdecl CHUDQuickInfo::Paint(CHUDQuickInfo *const this)
+{
+  int v1; // eax
+  C_BasePlayer_0 *SplitScreenViewPlayer; // eax
+  C_BasePlayer *v3; // esi
+  const void *v4; // edi
+  IViewEffects *ViewEffects; // eax
+  char v6; // al
+  int v7; // edx
+  const C_WeaponPortalgun *v8; // edi
+  int v9; // esi
+  char v10; // al
+  char v11; // cl
+  int v12; // eax
+  float v13; // xmm2_4
+  int v14; // edx
+  float v15; // xmm2_4
+  float v16; // xmm2_4
+  float v17; // xmm2_4
+  int v18; // eax
+  float v19; // xmm2_4
+  float v20; // xmm2_4
+  int v21; // esi
+  float v22; // xmm1_4
+  Color *p_portal1Color; // eax
+  float v24; // xmm1_4
+  Color *p_clrPortal; // ecx
+  int v26; // esi
+  int v27; // edi
+  int v28; // eax
+  Color *p_portal2Color; // ecx
+  int v30; // eax
+  Color *p_lastPlaced1Color; // edx
+  int v32; // eax
+  Color *p_lastPlaced2Color; // edx
+  int v34; // eax
+  int v35; // edi
+  int v36; // eax
+  int v37; // esi
+  int v38; // edi
+  int v39; // eax
+  bool v40; // al
+  C_Portal_Base2D *v41; // eax
+  bool v42; // al
+  bool v43; // cl
+  bool v44; // zf
+  float y; // xmm3_4
+  float z; // xmm2_4
+  bool v47; // dl
+  unsigned __int8 v48; // cl
+  unsigned __int8 v49; // dl
+  Ray_t *p_m_matrixThisToLinked; // [esp+2Ch] [ebp-29Ch]
+  const Color *v51; // [esp+4Ch] [ebp-27Ch]
+  const Color *v52; // [esp+4Ch] [ebp-27Ch]
+  const Color *v53; // [esp+4Ch] [ebp-27Ch]
+  const Color *v54; // [esp+4Ch] [ebp-27Ch]
+  unsigned __int8 v55; // [esp+50h] [ebp-278h]
+  unsigned __int8 v56; // [esp+60h] [ebp-268h]
+  unsigned __int8 v57; // [esp+70h] [ebp-258h]
+  int v58; // [esp+84h] [ebp-244h]
+  int v59; // [esp+88h] [ebp-240h]
+  int v60; // [esp+88h] [ebp-240h]
+  int v61; // [esp+88h] [ebp-240h]
+  int v62; // [esp+88h] [ebp-240h]
+  float flApparentZ; // [esp+8Ch] [ebp-23Ch]
+  bool bSwaped; // [esp+90h] [ebp-238h]
+  char bSwapeda; // [esp+90h] [ebp-238h]
+  int bSwapedb; // [esp+90h] [ebp-238h]
+  int bSwapedc; // [esp+90h] [ebp-238h]
+  int bSwapedd; // [esp+90h] [ebp-238h]
+  int h; // [esp+A0h] [ebp-228h]
+  int ha; // [esp+A0h] [ebp-228h]
+  int hb; // [esp+A0h] [ebp-228h]
+  int hc; // [esp+A0h] [ebp-228h]
+  bool pIntersectedPortal; // [esp+B0h] [ebp-218h]
+  C_Portal_Base2D *pIntersectedPortala; // [esp+B0h] [ebp-218h]
+  float flFadeAlpha; // [esp+B4h] [ebp-214h]
+  int flFadeAlphaa; // [esp+B4h] [ebp-214h]
+  int flFadeAlphab; // [esp+B4h] [ebp-214h]
+  int flFadeAlphac; // [esp+B4h] [ebp-214h]
+  int flFadeAlphad; // [esp+B4h] [ebp-214h]
+  int flFadeAlphae; // [esp+B4h] [ebp-214h]
+  int flFadeAlphaf; // [esp+B4h] [ebp-214h]
+  int flFadeAlphag; // [esp+B4h] [ebp-214h]
+  unsigned __int8 v83; // [esp+B8h] [ebp-210h]
+  trace_t tr; // [esp+C8h] [ebp-200h] BYREF
+  trace_t tr2; // [esp+11Ch] [ebp-1ACh] BYREF
+  Ray_t ray; // [esp+170h] [ebp-158h] BYREF
+  Ray_t newRay; // [esp+1C0h] [ebp-108h] BYREF
+  CTraceFilterSimple traceFilter; // [esp+21Ch] [ebp-ACh] BYREF
+  CTraceFilterSimple traceFilter_0; // [esp+22Ch] [ebp-9Ch] BYREF
+  Vector pos; // [esp+23Ch] [ebp-8Ch] BYREF
+  Vector fwd; // [esp+248h] [ebp-80h] BYREF
+  Vector right; // [esp+254h] [ebp-74h] BYREF
+  Vector up; // [esp+260h] [ebp-68h] BYREF
+  Vector vecEnd; // [esp+26Ch] [ebp-5Ch] BYREF
+  Vector newStartPos; // [esp+278h] [ebp-50h] BYREF
+  Vector newEndPos; // [esp+284h] [ebp-44h] BYREF
+  float fMustBeCloserThan; // [esp+290h] [ebp-38h] BYREF
+  unsigned __int8 color[4]; // [esp+297h] [ebp-31h] BYREF
+  Color portal1Color; // [esp+29Bh] [ebp-2Dh] BYREF
+  Color portal2Color; // [esp+29Fh] [ebp-29h] BYREF
+  Color lastPlaced1Color; // [esp+2A3h] [ebp-25h] BYREF
+  Color lastPlaced2Color; // [esp+2A7h] [ebp-21h] BYREF
+  Color clrPortal; // [esp+2ABh] [ebp-1Dh] BYREF
+  bool blend[25]; // [esp+2AFh] [ebp-19h] BYREF
+
+  v1 = (*(int (__cdecl **)(IVEngineClient *))(*(_DWORD *)engine + 508))(engine);
+  SplitScreenViewPlayer = GetSplitScreenViewPlayer(v1);
+  v3 = SplitScreenViewPlayer;
+  if ( SplitScreenViewPlayer )
+  {
+    v4 = (const void *)(*((int (__cdecl **)(C_BasePlayer_0 *))SplitScreenViewPlayer->_vptr_IHandleEntity + 303))(SplitScreenViewPlayer);
+    ViewEffects = GetViewEffects();
+    (*((void (__cdecl **)(IViewEffects *, unsigned __int8 *, unsigned __int8 *, unsigned __int8 *, unsigned __int8 *, bool *))ViewEffects->_vptr_IViewEffects
+     + 2))(
+      ViewEffects,
+      color,
+      &color[1],
+      &color[2],
+      &color[3],
+      blend);
+    (*((void (__cdecl **)(CHUDQuickInfo *const, int))this->_vptr_IGameEventListener2 + 14))(this, 1);
+    flFadeAlpha = (float)color[3] + (float)(65536.0 * (float)0);
+    v6 = (*(int (__cdecl **)(IMaterialSystem *))(*(_DWORD *)materials + 436))(materials);
+    v7 = ((int)(float)(255.0 - flFadeAlpha) << 24) | 0xFFFFFF;
+    flApparentZ = 1.0;
+    if ( v6 )
+    {
+      C_BasePlayer::EyePositionAndVectors(v3, &pos, &fwd, &right, &up);
+      v40 = 1;
+      ray.m_IsRay = 1;
+      ray.m_pWorldAxisTransform = 0;
+      ray.m_Start.Vector = pos;
+      vecEnd.y = (float)(fwd.y * 56755.84) + pos.y;
+      vecEnd.z = (float)(fwd.z * 56755.84) + pos.z;
+      vecEnd.x = (float)(56755.84 * fwd.x) + pos.x;
+      ray.m_Delta.y = vecEnd.y - pos.y;
+      ray.m_Delta.z = vecEnd.z - pos.z;
+      ray.m_Delta.x = vecEnd.x - pos.x;
+      memset(&ray.m_Extents, 0, 12);
+      memset(&ray.m_StartOffset, 0, 12);
+      if ( (float)((float)((float)(ray.m_Delta.x * ray.m_Delta.x) + (float)(ray.m_Delta.y * ray.m_Delta.y))
+                 + (float)(ray.m_Delta.z * ray.m_Delta.z)) == 0.0 )
+        v40 = 0;
+      ray.m_IsSwept = v40;
+      CTraceFilterSimple::CTraceFilterSimple(&traceFilter, v3, 0, 0);
+      (*(void (__cdecl **)(IEngineTrace *, Ray_t *, int, CTraceFilterSimple *, trace_t *))(*(_DWORD *)enginetrace + 20))(
+        enginetrace,
+        &ray,
+        1174421507,
+        &traceFilter,
+        &tr);
+      v7 = ((int)(float)(255.0 - flFadeAlpha) << 24) | 0xFFFFFF;
+      if ( !tr.allsolid || !tr.startsolid )
+      {
+        flApparentZ = fsqrt(
+                        (float)((float)((float)(tr.endpos.x - tr.startpos.x) * (float)(tr.endpos.x - tr.startpos.x))
+                              + (float)((float)(tr.endpos.y - tr.startpos.y) * (float)(tr.endpos.y - tr.startpos.y)))
+                      + (float)((float)(tr.endpos.z - tr.startpos.z) * (float)(tr.endpos.z - tr.startpos.z)));
+        fMustBeCloserThan = tr.fraction + 0.0099999998;
+        v41 = UTIL_Portal_FirstAlongRay(&ray, &fMustBeCloserThan);
+        v7 = ((int)(float)(255.0 - flFadeAlpha) << 24) | 0xFFFFFF;
+        pIntersectedPortala = v41;
+        if ( v41 )
+        {
+          p_m_matrixThisToLinked = (Ray_t *)&v41->m_matrixThisToLinked;
+          UTIL_Portal_PointTransform(&v41->m_matrixThisToLinked, &tr.endpos, &newStartPos);
+          UTIL_Portal_PointTransform((const VMatrix *const)p_m_matrixThisToLinked, &vecEnd, &newEndPos);
+          v42 = 1;
+          newRay.m_IsRay = 1;
+          newRay.m_Start.Vector = newStartPos;
+          newRay.m_pWorldAxisTransform = 0;
+          newRay.m_Delta.x = newEndPos.x - newStartPos.x;
+          newRay.m_Delta.y = newEndPos.y - newStartPos.y;
+          newRay.m_Delta.z = newEndPos.z - newStartPos.z;
+          memset(&newRay.m_Extents, 0, 12);
+          memset(&newRay.m_StartOffset, 0, 12);
+          if ( (float)((float)((float)(newRay.m_Delta.x * newRay.m_Delta.x)
+                             + (float)(newRay.m_Delta.y * newRay.m_Delta.y))
+                     + (float)(newRay.m_Delta.z * newRay.m_Delta.z)) == 0.0 )
+            v42 = 0;
+          newRay.m_IsSwept = v42;
+          CTraceFilterSimple::CTraceFilterSimple(&traceFilter_0, pIntersectedPortala, 0, 0);
+          (*(void (__cdecl **)(IEngineTrace *, Ray_t *, int, CTraceFilterSimple *, trace_t *))(*(_DWORD *)enginetrace
+                                                                                             + 20))(
+            enginetrace,
+            &newRay,
+            1174421555,
+            &traceFilter_0,
+            &tr2);
+          v7 = ((int)(float)(255.0 - flFadeAlpha) << 24) | 0xFFFFFF;
+          if ( !tr2.allsolid )
+            flApparentZ = fsqrt(
+                            (float)((float)((float)(tr2.endpos.x - tr2.startpos.x)
+                                          * (float)(tr2.endpos.x - tr2.startpos.x))
+                                  + (float)((float)(tr2.endpos.y - tr2.startpos.y)
+                                          * (float)(tr2.endpos.y - tr2.startpos.y)))
+                          + (float)((float)(tr2.endpos.z - tr2.startpos.z) * (float)(tr2.endpos.z - tr2.startpos.z)))
+                        + flApparentZ;
+        }
+      }
+    }
+    CHUDQuickInfo::DrawCrosshair(this, (Color)v7, flApparentZ);
+    if ( v4 )
+    {
+      v59 = ScreenWidth();
+      v58 = ScreenHeight();
+      v8 = (const C_WeaponPortalgun *)_dynamic_cast(
+                                        v4,
+                                        (const struct __class_type_info *)&`typeinfo for'C_BaseCombatWeapon,
+                                        (const struct __class_type_info *)&`typeinfo for'C_WeaponPortalgun,
+                                        0);
+      if ( hud_quickinfo.m_pParent->m_Value.m_nValue )
+      {
+        if ( v8 && (C_WeaponPortalgun::CanFirePortal1(v8) || C_WeaponPortalgun::CanFirePortal2(v8)) )
+        {
+          v9 = (*((int (__cdecl **)(C_BasePlayer *))v3->_vptr_IHandleEntity + 124))(v3);
+          pIntersectedPortal = C_WeaponPortalgun::CanFirePortal1(v8) && C_WeaponPortalgun::CanFirePortal2(v8);
+          bSwaped = hud_quickinfo_swap.m_pParent->m_Value.m_nValue != 0;
+          v10 = (*((int (__cdecl **)(IInput *))input->_vptr_IInput + 15))(input);
+          v11 = bSwaped;
+          if ( v10 )
+            v11 = pIntersectedPortal ^ bSwaped;
+          bSwapeda = v11;
+          if ( v11 )
+          {
+            UTIL_Portal_Color(&portal1Color, 2, v9);
+            v12 = 1;
+          }
+          else
+          {
+            UTIL_Portal_Color(&portal1Color, 1, v9);
+            v12 = 2;
+          }
+          UTIL_Portal_Color(&portal2Color, v12, v9);
+          v83 = 5;
+          if ( portal1Color._color[0] > 4u )
+          {
+            v83 = -1;
+            v13 = (float)portal1Color._color[0]
+                + (float)((float)(1.0
+                                - (float)((float)((float)((float)0 * 65536.0) + (float)portal1Color._color[0]) / 255.0))
+                        * 64.0);
+            if ( v13 <= 255.0 )
+              v83 = (int)v13;
+          }
+          LOBYTE(v14) = 5;
+          portal1Color._color[0] = v83;
+          if ( portal1Color._color[1] > 4u )
+          {
+            LOBYTE(v14) = -1;
+            v15 = (float)portal1Color._color[1]
+                + (float)((float)(1.0
+                                - (float)((float)((float)((float)0 * 65536.0) + (float)portal1Color._color[1]) / 255.0))
+                        * 64.0);
+            if ( v15 <= 255.0 )
+              v14 = (int)v15;
+          }
+          portal1Color._color[1] = v14;
+          v56 = 5;
+          if ( portal1Color._color[2] > 4u )
+          {
+            v56 = -1;
+            v16 = (float)portal1Color._color[2]
+                + (float)((float)(1.0
+                                - (float)((float)((float)((float)0 * 65536.0) + (float)portal1Color._color[2]) / 255.0))
+                        * 64.0);
+            if ( v16 <= 255.0 )
+              v56 = (int)v16;
+          }
+          v55 = 5;
+          portal1Color._color[2] = v56;
+          if ( portal2Color._color[0] > 4u )
+          {
+            v55 = -1;
+            v17 = (float)portal2Color._color[0]
+                + (float)((float)(1.0
+                                - (float)((float)((float)((float)0 * 65536.0) + (float)portal2Color._color[0]) / 255.0))
+                        * 64.0);
+            if ( v17 <= 255.0 )
+              v55 = (int)v17;
+          }
+          LOBYTE(v18) = 5;
+          portal2Color._color[0] = v55;
+          if ( portal2Color._color[1] > 4u )
+          {
+            LOBYTE(v18) = -1;
+            v19 = (float)portal2Color._color[1]
+                + (float)((float)(1.0
+                                - (float)((float)((float)((float)0 * 65536.0) + (float)portal2Color._color[1]) / 255.0))
+                        * 64.0);
+            if ( v19 <= 255.0 )
+              v18 = (int)v19;
+          }
+          portal2Color._color[1] = v18;
+          v57 = 5;
+          if ( portal2Color._color[2] > 4u )
+          {
+            v57 = -1;
+            v20 = (float)portal2Color._color[2]
+                + (float)((float)(1.0
+                                - (float)((float)((float)((float)0 * 65536.0) + (float)portal2Color._color[2]) / 255.0))
+                        * 64.0);
+            if ( v20 <= 255.0 )
+              v57 = (int)v20;
+          }
+          LOBYTE(v21) = 0;
+          v22 = 150.0 - flFadeAlpha;
+          portal2Color._color[2] = v57;
+          if ( (float)(150.0 - flFadeAlpha) >= 0.0 )
+          {
+            LOBYTE(v21) = -1;
+            if ( v22 <= 255.0 )
+              v21 = (int)v22;
+          }
+          lastPlaced1Color._color[1] = v14;
+          portal2Color._color[3] = v21;
+          portal1Color._color[3] = v21;
+          lastPlaced2Color._color[1] = v18;
+          lastPlaced1Color._color[2] = v56;
+          lastPlaced1Color._color[0] = v83;
+          lastPlaced1Color._color[3] = 0x80;
+          lastPlaced2Color._color[2] = v57;
+          lastPlaced2Color._color[3] = 0x80;
+          lastPlaced2Color._color[0] = v55;
+          if ( C_WeaponPortalgun::CanFirePortal1(v8) && C_WeaponPortalgun::CanFirePortal2(v8) )
+          {
+            if ( bSwapeda )
+            {
+              v43 = vec3_invalid.x != v8->m_vecOrangePortalPos.x
+                 || v8->m_vecOrangePortalPos.y != vec3_invalid.y
+                 || v8->m_vecOrangePortalPos.z != vec3_invalid.z;
+              v44 = vec3_invalid.x == v8->m_vecBluePortalPos.x;
+              y = v8->m_vecBluePortalPos.y;
+              z = v8->m_vecBluePortalPos.z;
+            }
+            else
+            {
+              v43 = vec3_invalid.x != v8->m_vecBluePortalPos.x
+                 || v8->m_vecBluePortalPos.y != vec3_invalid.y
+                 || v8->m_vecBluePortalPos.z != vec3_invalid.z;
+              v44 = vec3_invalid.x == v8->m_vecOrangePortalPos.x;
+              y = v8->m_vecOrangePortalPos.y;
+              z = v8->m_vecOrangePortalPos.z;
+            }
+            v47 = !v44 || y != vec3_invalid.y || z != vec3_invalid.z;
+            v44 = !v43;
+            v48 = (int)(float)(255.0 - flFadeAlpha);
+            if ( v44 )
+              v48 = 0;
+            v44 = !v47;
+            v49 = (int)(float)(255.0 - flFadeAlpha);
+            lastPlaced1Color._color[3] = v48;
+            if ( v44 )
+              v49 = 0;
+            lastPlaced2Color._color[3] = v49;
+          }
+          v44 = !C_WeaponPortalgun::CanFirePortal1(v8);
+          p_portal1Color = &portal1Color;
+          if ( v44 )
+            p_portal1Color = &portal2Color;
+          clrPortal = *p_portal1Color;
+          LOBYTE(p_portal1Color) = 0;
+          v24 = (float)clrPortal._color[3] - flFadeAlpha;
+          if ( v24 >= 0.0 )
+          {
+            LOBYTE(p_portal1Color) = -1;
+            if ( v24 <= 255.0 )
+              p_portal1Color = (Color *)(int)v24;
+          }
+          clrPortal._color[3] = (unsigned __int8)p_portal1Color;
+          p_clrPortal = &clrPortal;
+          if ( pIntersectedPortal )
+            p_clrPortal = &portal1Color;
+          v51 = p_clrPortal;
+          h = CHudTexture::EffectiveHeight(this->m_icon_lbn, this->m_flPortalIconScale);
+          v26 = v59 / 2;
+          v27 = v58 / 2;
+          bSwapedb = CHudTexture::EffectiveWidth(this->m_icon_lbn, this->m_flPortalIconScale);
+          flFadeAlphaa = v58 / 2 - this->m_nPortalIconOffsetY;
+          flFadeAlphab = flFadeAlphaa - CHudTexture::EffectiveHeight(this->m_icon_lbn, this->m_flPortalIconScale) / 2;
+          v60 = v59 / 2 - this->m_nPortalIconOffsetX;
+          v28 = CHudTexture::EffectiveWidth(this->m_icon_lbn, this->m_flPortalIconScale);
+          CHudTexture::DrawSelf(this->m_icon_lbn, v60 - v28 / 2, flFadeAlphab, bSwapedb, h, v51, flApparentZ);
+          p_portal2Color = &clrPortal;
+          if ( pIntersectedPortal )
+            p_portal2Color = &portal2Color;
+          v52 = p_portal2Color;
+          ha = CHudTexture::EffectiveHeight(this->m_icon_rbn, this->m_flPortalIconScale);
+          bSwapedc = CHudTexture::EffectiveWidth(this->m_icon_rbn, this->m_flPortalIconScale);
+          flFadeAlphac = v27 + this->m_nPortalIconOffsetY;
+          flFadeAlphad = flFadeAlphac - CHudTexture::EffectiveHeight(this->m_icon_rbn, this->m_flPortalIconScale) / 2;
+          v61 = v26 + this->m_nPortalIconOffsetX;
+          v30 = CHudTexture::EffectiveWidth(this->m_icon_rbn, this->m_flPortalIconScale);
+          CHudTexture::DrawSelf(this->m_icon_rbn, v61 - v30 / 2, flFadeAlphad, bSwapedc, ha, v52, flApparentZ);
+          p_lastPlaced1Color = &lastPlaced1Color;
+          if ( !pIntersectedPortal )
+            p_lastPlaced1Color = &clrPortal;
+          v53 = p_lastPlaced1Color;
+          hb = CHudTexture::EffectiveHeight(this->m_icon_lb, this->m_flPortalIconScale);
+          bSwapedd = CHudTexture::EffectiveWidth(this->m_icon_lb, this->m_flPortalIconScale);
+          flFadeAlphae = v27 - this->m_nPortalIconOffsetY;
+          flFadeAlphaf = flFadeAlphae - CHudTexture::EffectiveHeight(this->m_icon_lb, this->m_flPortalIconScale) / 2;
+          v62 = v26 - this->m_nPortalIconOffsetX;
+          v32 = CHudTexture::EffectiveWidth(this->m_icon_lb, this->m_flPortalIconScale);
+          CHudTexture::DrawSelf(this->m_icon_lb, v62 - v32 / 2, flFadeAlphaf, bSwapedd, hb, v53, flApparentZ);
+          p_lastPlaced2Color = &lastPlaced2Color;
+          if ( !pIntersectedPortal )
+            p_lastPlaced2Color = &clrPortal;
+          v54 = p_lastPlaced2Color;
+          flFadeAlphag = CHudTexture::EffectiveHeight(this->m_icon_rb, this->m_flPortalIconScale);
+          v34 = CHudTexture::EffectiveWidth(this->m_icon_rb, this->m_flPortalIconScale);
+          v35 = this->m_nPortalIconOffsetY + v27;
+          hc = v34;
+          v36 = CHudTexture::EffectiveHeight(this->m_icon_rb, this->m_flPortalIconScale);
+          v37 = this->m_nPortalIconOffsetX + v26;
+          v38 = v35 - v36 / 2;
+          v39 = CHudTexture::EffectiveWidth(this->m_icon_rb, this->m_flPortalIconScale);
+          CHudTexture::DrawSelf(this->m_icon_rb, v37 - v39 / 2, v38, hc, flFadeAlphag, v54, flApparentZ);
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+void __cdecl CTrigger_TractorBeam::StopLoopingSounds(CTrigger_TractorBeam *const this)
+{
+  CSoundEnvelopeController *Controller; // esi
+
+  if ( this->m_sndPlayerInBeam )
+  {
+    Controller = CSoundEnvelopeController::GetController();
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))Controller->_vptr_CSoundEnvelopeController + 5))(
+      Controller,
+      this->m_sndPlayerInBeam);
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))Controller->_vptr_CSoundEnvelopeController + 11))(
+      Controller,
+      this->m_sndPlayerInBeam);
+    this->m_sndPlayerInBeam = 0;
+  }
+}

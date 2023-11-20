@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: Spawn, think, and use functions for common brush entities.
 //
@@ -428,6 +428,7 @@ protected:
 
 	// Input handlers
 	void InputSetSpeed( inputdata_t &inputdata );
+	void InputGetSpeed( inputdata_t &inputdata );
 	void InputStart( inputdata_t &inputdata );
 	void InputStop( inputdata_t &inputdata );
 	void InputStartForward( inputdata_t &inputdata );
@@ -451,6 +452,9 @@ protected:
 	bool m_bStopAtStartPos;
 
 	bool m_bSolidBsp;				// Brush is SOLID_BSP
+
+	//outputs
+	COutputFloat m_OnGetSpeed;	// Used for polling the speed value.
 
 public:
 	Vector m_vecClientOrigin;
@@ -485,6 +489,7 @@ BEGIN_DATADESC( CFuncRotating )
 
 	// Inputs
 	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetSpeed", InputSetSpeed ),
+	DEFINE_INPUTFUNC( FIELD_VOID, "GetSpeed", InputGetSpeed ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "Start", InputStart ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "Stop", InputStop ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "Toggle", InputToggle ),
@@ -492,6 +497,9 @@ BEGIN_DATADESC( CFuncRotating )
 	DEFINE_INPUTFUNC( FIELD_VOID, "StartForward", InputStartForward ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "StartBackward", InputStartBackward ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "StopAtStartPos", InputStopAtStartPos ),
+
+	// Outputs
+	DEFINE_OUTPUT( m_OnGetSpeed, "OnGetSpeed" ),
 
 END_DATADESC()
 
@@ -1228,6 +1236,16 @@ void CFuncRotating::InputSetSpeed( inputdata_t &inputdata )
 	SetTargetSpeed( clamp( flSpeed, 0, 1 ) * m_flMaxSpeed );
 }
 
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void CFuncRotating::InputGetSpeed(inputdata_t& inputdata)
+{
+	float flOutValue = m_flSpeed;
+	if (flOutValue < 0)
+		flOutValue *= -1;
+
+	m_OnGetSpeed.Set(flOutValue, inputdata.pActivator, inputdata.pCaller);
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: Input handler to start the rotator spinning.

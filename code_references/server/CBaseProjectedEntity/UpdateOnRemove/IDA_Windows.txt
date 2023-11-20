@@ -1,0 +1,66 @@
+void __thiscall CBaseProjectedEntity::UpdateOnRemove(CBaseProjectedEntity *this)
+{
+  CBaseEntityList *v1; // edx
+  unsigned int m_Index; // ecx
+  int v4; // eax
+  CEntInfo *v5; // esi
+  unsigned int v6; // ecx
+  int v7; // eax
+  bool v8; // zf
+  CBaseEntity **v9; // eax
+  CBaseEntity *v10; // eax
+  unsigned int v11; // ecx
+  int v12; // eax
+  CEntInfo *v13; // esi
+  unsigned int v14; // ecx
+  int v15; // eax
+  CBaseEntity **v16; // eax
+
+  v1 = g_pEntityList;
+  m_Index = this->m_hChildSegment.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v4 = (unsigned __int16)m_Index;
+    v5 = &g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index];
+    v6 = HIWORD(m_Index);
+    if ( v5->m_SerialNumber == v6 )
+    {
+      if ( v5->m_pEntity )
+      {
+        v7 = v4;
+        v8 = g_pEntityList->m_EntPtrArray[v7].m_SerialNumber == v6;
+        v9 = (CBaseEntity **)&g_pEntityList->m_EntPtrArray[v7];
+        if ( v8 )
+          v10 = *v9;
+        else
+          v10 = 0;
+        UTIL_Remove(v10);
+        v1 = g_pEntityList;
+      }
+    }
+  }
+  v11 = this->m_hPlacementHelper.m_Value.m_Index;
+  if ( v11 != -1 )
+  {
+    v12 = (unsigned __int16)v11;
+    v13 = &v1->m_EntPtrArray[(unsigned __int16)v11];
+    v14 = HIWORD(v11);
+    if ( v13->m_SerialNumber == v14 )
+    {
+      if ( v13->m_pEntity )
+      {
+        v15 = v12;
+        v8 = v1->m_EntPtrArray[v15].m_SerialNumber == v14;
+        v16 = (CBaseEntity **)&v1->m_EntPtrArray[v15];
+        if ( v8 )
+        {
+          UTIL_Remove(*v16);
+          CBaseEntity::UpdateOnRemove(this);
+          return;
+        }
+        UTIL_Remove(0);
+      }
+    }
+  }
+  CBaseEntity::UpdateOnRemove(this);
+}

@@ -61,17 +61,53 @@ BEGIN_PREDICTION_DATA_NO_BASE( C_PortalPlayerLocalData )
 
 END_PREDICTION_DATA()
 
-Vector DEFAULT_SURFACE_NORMAL( 0.0, 0.0, 1.0 ); // Used only in the constructor below
+const Vector DEFAULT_SURFACE_NORMAL( 0.0, 0.0, 1.0 );
 
 C_PortalPlayerLocalData::C_PortalPlayerLocalData()
 {
 	m_StickNormal = DEFAULT_SURFACE_NORMAL;
+	m_OldStickNormal = DEFAULT_SURFACE_NORMAL;
 	m_Up = DEFAULT_SURFACE_NORMAL;
-
-	// TODO: Are these the right values? Please check this in IDA or something
-	m_StandHullMin = VEC_HULL_MIN;
-	m_StandHullMax = VEC_HULL_MAX;
+	m_vStickRotationAxis = vec3_origin;
+	m_vLocalUp = DEFAULT_SURFACE_NORMAL;
 	
+	m_StandHullMin = VEC_HULL_MIN;
+	m_StandHullMax = VEC_HULL_MAX;	
 	m_DuckHullMin = VEC_DUCK_HULL_MIN;
 	m_DuckHullMax = VEC_DUCK_HULL_MAX;
+	m_CachedStandHullMinAttempt = VEC_HULL_MIN;
+	m_CachedStandHullMaxAttempt = VEC_HULL_MAX;
+	m_CachedDuckHullMinAttempt = VEC_DUCK_HULL_MIN;
+	m_CachedDuckHullMaxAttempt = VEC_DUCK_HULL_MAX;
+
+	m_vEyeOffset = vec3_origin;
+
+	m_qQuaternionPunch = vec3_angle;
+
+	m_bShowingViewFinder = false;
+	m_bPlacingPhoto = false;
+	m_bDoneStickInterp = false;
+	m_bDoneCorrectPitch = false;
+	m_bJumpedThisFrame = false;
+	m_bBouncedThisFrame = false;
+	m_bDuckedInAir = false;
+	m_bZoomedIn = false;
+	m_bPreventedCrouchJumpThisFrame = false;
+
+	m_vPreUpdateVelocity = vec3_origin;
+
+	m_nStickCameraState = STICK_CAMERA_UPRIGHT;
+	m_PaintedPowerType = NO_POWER;
+	m_InAirState = ON_GROUND;
+
+	m_bAttemptHullResize = false;
+
+	m_flAirControlSupressionTime = 0.0;
+	m_flAirInputScale = 1.0;
+	m_flCurrentStickTime = 0.5;
+	m_fBouncedTime = 0.0;
+
+	m_hTractorBeam = NULL;
+
+	m_nTractorBeamCount = 0;
 }

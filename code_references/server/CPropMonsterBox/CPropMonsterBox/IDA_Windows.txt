@@ -1,0 +1,17 @@
+void __thiscall CPropMonsterBox::CPropMonsterBox(CPropMonsterBox *this)
+{
+  CPhysicsProp::CPhysicsProp(this);
+  this->CPhysicsProp::CBreakableProp::CBaseProp::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable = (CPropMonsterBox_vtbl *)&CPropMonsterBox::`vftable'{for `CBaseProp'};
+  this->CPhysicsProp::CBreakableProp::IBreakableWithPropData::__vftable = (IBreakableWithPropData_vtbl *)&CPropMonsterBox::`vftable'{for `IBreakableWithPropData'};
+  this->CPhysicsProp::CBreakableProp::CDefaultPlayerPickupVPhysics::IPlayerPickupVPhysics::__vftable = (CDefaultPlayerPickupVPhysics_vtbl *)&CPropMonsterBox::`vftable'{for `CDefaultPlayerPickupVPhysics'};
+  this->CPhysicsProp::INavAvoidanceObstacle::__vftable = (INavAvoidanceObstacle_vtbl *)&CPropMonsterBox::`vftable';
+  this->m_OnFizzled.m_Value.iVal = 0;
+  this->m_OnFizzled.m_Value.eVal.m_Index = -1;
+  this->m_OnFizzled.m_Value.fieldType = FIELD_VOID;
+  this->m_flPushStrength = FLOAT_1_0;
+  this->m_bIsShortcircuit = 0;
+  *(_DWORD *)&this->m_bHeld = 0;
+  this->m_nDeferredTransform = 0;
+  this->m_bAllowSilentDissolve = 0;
+  this->m_flBoxSwitchSpeed = FLOAT_400_0;
+}

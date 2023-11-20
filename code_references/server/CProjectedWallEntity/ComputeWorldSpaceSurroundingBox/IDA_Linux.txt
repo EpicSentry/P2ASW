@@ -1,0 +1,23 @@
+void __cdecl CProjectedWallEntity::ComputeWorldSpaceSurroundingBox(
+        CProjectedWallEntity *const this,
+        Vector *pWorldMins,
+        Vector *pWorldMaxs)
+{
+  vec_t y; // esi
+  vec_t z; // ebx
+  vec_t v5; // xmm0_4
+  vec_t v6; // eax
+  vec_t x; // [esp+0h] [ebp-14h]
+
+  y = this->m_vWorldSpace_WallMins.m_Value.y;
+  x = this->m_vWorldSpace_WallMaxs.m_Value.x;
+  z = this->m_vWorldSpace_WallMins.m_Value.z;
+  v5 = this->m_vWorldSpace_WallMaxs.m_Value.y;
+  v6 = this->m_vWorldSpace_WallMaxs.m_Value.z;
+  pWorldMins->x = this->m_vWorldSpace_WallMins.m_Value.x;
+  pWorldMins->y = y;
+  pWorldMins->z = z;
+  pWorldMaxs->x = x;
+  pWorldMaxs->z = v6;
+  pWorldMaxs->y = v5;
+}

@@ -1,0 +1,4 @@
+void __cdecl CPropIndicatorPanel::InputStop(CPropIndicatorPanel *const this, inputdata_t *const indata)
+{
+  ;
+}

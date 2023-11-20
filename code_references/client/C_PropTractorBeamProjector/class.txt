@@ -1,0 +1,45 @@
+class C_PropTractorBeamProjector : public C_BaseProjector
+{
+public:
+	
+	DECLARE_CLASS( C_PropTractorBeamProjector, C_BaseProjector );
+	DECLARE_CLIENTCLASS();
+	DECLARE_PREDICTABLE();
+	
+	virtual void Spawn();
+	virtual void ClientThink();
+	virtual void UpdateOnRemove();
+    void OnToolStartRecording();
+	
+    void RecvProxy_LinearForce(class CRecvProxyData * ,void * ,void * );
+    void RecvProxy_Enabled(class CRecvProxyData * ,void * ,void * );
+	
+    float CalculateRotationPose();
+    float CalculateArmaturePose();
+	
+protected:
+	
+    void CreateEffect();
+    void UpdateEffect();
+    void StopEffect();
+	
+    float m_flLinearForce;
+	
+    bool m_bEffectsActive;
+    bool m_bActivated;
+    bool m_bNoEmitterParticles;
+	
+    float m_flArmatureStart;
+    float m_flArmatureTarget;
+    float m_flArmatureDuration;
+    float m_flArmatureStartTime;
+    float m_flRotationStart;
+    float m_flRotationTarget;
+    float m_flRotationDuration;
+    float m_flRotationStartTime;
+	
+    Vector m_vEndPos;
+	
+    CUtlReference<CNewParticleEffect> m_hEmitterEffect[3];
+	
+};

@@ -453,6 +453,23 @@ public:
 	FORCEINLINE FourQuaternions Slerp( const FourQuaternions &to, const fltx4 &t );
 
 	FORCEINLINE FourQuaternions SlerpNoAlign( const FourQuaternions &originalto, const fltx4 &t );
+	
+#if !defined(__SPU__)
+	/// given an axis and four angles, populate this quaternion with the equivalent rotations
+	/// (ie, make these four quaternions represent four different rotations around the same axis)
+	/// angles should be in RADIANS
+	FORCEINLINE FourQuaternions &FromAxisAndAngles( const fltx4 &axis, 
+		const float &angle0, const float &angle1,	const float &angle2, const float &angle3 );
+	FORCEINLINE FourQuaternions &FromAxisAndAngles( const fltx4 &axis, const fltx4 &angles );
+	// one convenience imp if you're doing this in degrees
+	FORCEINLINE FourQuaternions &FromAxisAndAnglesInDegrees( const fltx4 &axis, const fltx4 &angles )
+	{
+		return FromAxisAndAngles( axis, MulSIMD(angles, Four_DegToRad));
+	}
+#endif
+
+	// rotate (in place) a FourVectors by this quaternion. there's a corresponding RotateBy in FourVectors.
+	FORCEINLINE void RotateFourVectors( FourVectors * RESTRICT vecs ) const RESTRICT ;
 
 	/// LoadAndSwizzleAligned - load 4 QuaternionAligneds into a FourQuaternions, performing transpose op.
 	/// all 4 vectors must be 128 bit boundary
@@ -720,6 +737,34 @@ FORCEINLINE const FourQuaternions QuaternionNormalize( const FourQuaternions &q 
 }
 
 
+#if !defined(__SPU__)
+FORCEINLINE FourQuaternions &FourQuaternions::FromAxisAndAngles( const fltx4 &axis, 
+											   const float &angle0, const float &angle1,	const float &angle2, const float &angle3 )
+{
+	return FromAxisAndAngles( axis, LoadGatherSIMD(angle0,angle1,angle2,angle3) );
+}
+
+FORCEINLINE FourQuaternions &FourQuaternions::FromAxisAndAngles( const fltx4 &axis, 
+																const fltx4 &angles )
+{
+	// compute the half theta 
+	fltx4 theta = MulSIMD( angles, Four_PointFives );
+	// compute the sine and cosine of each angle simultaneously
+	fltx4 vsines; fltx4 vcoses;
+	SinCosSIMD( vsines, vcoses, theta );
+	// now the sines and coses vectors contain the results for four angles.
+	// for each of the angles, splat them out and then swizzle together so
+	// as to get a < cos, sin, sin, sin > coefficient vector
+
+	x = MulSIMD( vsines, SplatXSIMD( axis ) ); // sin(t0) * x, sin(t1) * x, etc 
+	y = MulSIMD( vsines, SplatYSIMD( axis ) );
+	z = MulSIMD( vsines, SplatZSIMD( axis ) );
+	w = vcoses;
+
+
+	return *this;
+}
+#endif
 
 
 
@@ -765,6 +810,43 @@ FORCEINLINE FourQuaternions FourQuaternions::Mul( FourQuaternions const &q ) con
 	ret.z = XorSIMD( signMask, ret.z );
 
 	return ret;
+}
+
+FORCEINLINE void FourQuaternions::RotateFourVectors( FourVectors * RESTRICT vecs ) const RESTRICT
+{
+	fltx4 tmpX, tmpY, tmpZ, tmpW;
+	fltx4 outX, outY, outZ;
+
+	tmpX = SubSIMD( MaddSIMD( w, vecs->x , MulSIMD( y, vecs->z ) ), 
+					MulSIMD( z, vecs->y ) );
+
+	tmpY = SubSIMD( MaddSIMD( w, vecs->y, MulSIMD( z, vecs->x ) ), 
+					MulSIMD( x, vecs->z ) );
+
+	tmpZ = SubSIMD( MaddSIMD( w, vecs->z, MulSIMD( x, vecs->y ) ),
+					MulSIMD( y, vecs->x ) );
+
+	tmpW = AddSIMD( MaddSIMD( x, vecs->x, MulSIMD( y, vecs->y ) ),
+				    MulSIMD( z, vecs->z ) );
+
+
+	outX = AddSIMD( SubSIMD( MaddSIMD( tmpW, x, MulSIMD( tmpX, w ) ), 
+							 MulSIMD( tmpY, z ) ),
+					MulSIMD( tmpZ, y ) );
+
+	outY = AddSIMD( SubSIMD( MaddSIMD( tmpW, y, MulSIMD( tmpY, w ) ), 
+							 MulSIMD( tmpZ, x ) ), 
+					MulSIMD( tmpX, z ) );
+
+	outZ = AddSIMD( SubSIMD( MaddSIMD( tmpW, z, MulSIMD( tmpZ, w ) ), 
+							 MulSIMD( tmpX, y ) ), 
+					MulSIMD( tmpY, x ) );
+
+	// although apparently redundant, assigning the results to intermediate local variables
+	// seems to improve code scheduling slightly in SN.
+	vecs->x = outX;
+	vecs->y = outY;
+	vecs->z = outZ;
 }
 
 /*

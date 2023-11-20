@@ -78,8 +78,6 @@ BEGIN_DATADESC( CSpriteTrail )
 
 END_DATADESC()
 
-LINK_ENTITY_TO_CLASS( env_spritetrail, CSpriteTrail );
-
 
 //-----------------------------------------------------------------------------
 // Networking
@@ -107,6 +105,9 @@ BEGIN_NETWORK_TABLE( CSpriteTrail, DT_SpriteTrail )
 	RecvPropFloat( RECVINFO(m_flSkyboxScale)),
 #endif
 END_NETWORK_TABLE()
+
+
+LINK_ENTITY_TO_CLASS_ALIASED( env_spritetrail, SpriteTrail );
 
 //-----------------------------------------------------------------------------
 // Prediction

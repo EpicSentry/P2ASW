@@ -1,0 +1,91 @@
+void __thiscall C_Trigger_TractorBeam::UpdateBeam(
+        C_Trigger_TractorBeam *this,
+        const Vector *vStartPoint,
+        const Vector *vEndPoint,
+        float flLinearForce)
+{
+  unsigned int m_Index; // ecx
+  Vector *p_m_vStart; // edi
+  double z; // st7
+  const Vector *v8; // eax
+  float v9; // ecx
+  float v10; // eax
+  float m_flRadius; // xmm1_4
+  IPhysicsObject *m_pPhysicsObject; // ecx
+  IPhysicsObject *v13; // ebx
+  Vector vWorldMins; // [esp+4h] [ebp-48h] BYREF
+  Vector vWorldMaxs; // [esp+10h] [ebp-3Ch] BYREF
+  QAngle qBeamAngles; // [esp+1Ch] [ebp-30h] BYREF
+  Vector vDir; // [esp+28h] [ebp-24h] BYREF
+  Vector vMaxs; // [esp+34h] [ebp-18h] BYREF
+  Vector vMins; // [esp+40h] [ebp-Ch] BYREF
+  float flLength; // [esp+54h] [ebp+8h]
+
+  m_Index = this->m_hOwnerEntity.m_Index;
+  if ( m_Index != -1
+    && g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber == HIWORD(m_Index)
+    && g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity )
+  {
+    p_m_vStart = &this->m_vStart;
+    if ( flLinearForce >= 0.0 )
+    {
+      p_m_vStart->x = vStartPoint->x;
+      this->m_vStart.y = vStartPoint->y;
+      z = vStartPoint->z;
+      v8 = vEndPoint;
+    }
+    else
+    {
+      p_m_vStart->x = vEndPoint->x;
+      this->m_vStart.y = vEndPoint->y;
+      z = vEndPoint->z;
+      v8 = vStartPoint;
+    }
+    this->m_vStart.z = z;
+    this->m_vEnd.x = v8->x;
+    this->m_vEnd.y = v8->y;
+    this->m_vEnd.z = v8->z;
+    v9 = this->m_vEnd.z;
+    v10 = this->m_vStart.z;
+    *(_QWORD *)&vMaxs.x = *(_QWORD *)&p_m_vStart->x;
+    *(_QWORD *)&vMins.x = *(_QWORD *)&this->m_vEnd.x;
+    vDir.x = vMins.x - vMaxs.x;
+    vDir.y = vMins.y - vMaxs.y;
+    vMins.z = v9;
+    vMaxs.z = v10;
+    vDir.z = v9 - v10;
+    flLength = VectorNormalize(&vDir);
+    VectorAngles(&vDir, &qBeamAngles);
+    m_flRadius = this->m_flRadius;
+    vMaxs.x = flLength;
+    m_pPhysicsObject = this->m_pPhysicsObject;
+    vMins.x = 0.0;
+    LODWORD(vMins.y) = LODWORD(m_flRadius) ^ _mask__NegFloat_;
+    LODWORD(vMins.z) = LODWORD(m_flRadius) ^ _mask__NegFloat_;
+    vMaxs.y = m_flRadius;
+    vMaxs.z = m_flRadius;
+    if ( m_pPhysicsObject )
+    {
+      m_pPhysicsObject->RemoveTrigger(m_pPhysicsObject);
+      this->VPhysicsDestroyObject(this);
+    }
+    if ( physenv )
+    {
+      v13 = PhysModelCreateOBB(this, &vMins, &vMaxs, &this->m_vStart, &qBeamAngles, 1);
+      C_BaseEntity::VPhysicsSetObject(this, v13);
+      v13->BecomeTrigger(v13);
+      C_BaseEntity::SetAbsOrigin(this, &this->m_vStart);
+      C_BaseEntity::SetAbsAngles(this, &qBeamAngles);
+      CCollisionProperty::SetCollisionBounds(&this->m_Collision, &vMins, &vMaxs);
+      CCollisionProperty::SetSurroundingBoundsType(&this->m_Collision, USE_OBB_COLLISION_BOUNDS, 0, 0);
+      this->m_Collision.WorldSpaceSurroundingBounds(&this->m_Collision, &vWorldMins, &vWorldMaxs);
+      ((void (__stdcall *)(_DWORD, Vector *, Vector *))partition->ElementMoved)(
+        this->m_Collision.m_Partition,
+        &vWorldMins,
+        &vWorldMaxs);
+    }
+    C_Trigger_TractorBeam::CreateParticles(this);
+    C_Trigger_TractorBeam::RemoveAllBlobsFromBeam(this);
+    this->m_nLastUpdateFrame = *(_DWORD *)(gpGlobals.m_Index + 4);
+  }
+}

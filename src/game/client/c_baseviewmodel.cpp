@@ -172,7 +172,10 @@ bool C_BaseViewModel::Interpolate( float currentTime )
 		float curtime = pPlayer ? pPlayer->GetFinalPredictedTime() : gpGlobals->curtime;
 		elapsed_time = curtime - m_flAnimTime;
 		// Adjust for interpolated partial frame
-		elapsed_time += ( gpGlobals->interpolation_amount * TICK_INTERVAL );
+		if ( !engine->IsPaused() )
+		{
+			elapsed_time += ( gpGlobals->interpolation_amount * TICK_INTERVAL );
+		}
 	}
 
 	// Prediction errors?	
@@ -376,7 +379,7 @@ int C_BaseViewModel::DrawModel( int flags, const RenderableInstance_t &instance 
 		// Tell the weapon itself that we've rendered, in case it wants to do something
 		if ( pWeapon )
 		{
-			pWeapon->ViewModelDrawn( this );
+			pWeapon->ViewModelDrawn( flags, this );
 		}
 
 		if ( vm_debug.GetBool() )

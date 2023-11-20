@@ -1,0 +1,92 @@
+bool __thiscall ClientProjectedEntityAmbientSoundProxy::GetSoundSpatialization(
+        ClientProjectedEntityAmbientSoundProxy *this,
+        SpatializationInfo_t *info)
+{
+  unsigned int m_Index; // ecx
+  C_BaseProjector *m_pEntity; // esi
+  bool v4; // al
+  const C_BaseProjectedEntity *FirstProjectedEntity; // esi
+  const QAngle *v6; // eax
+  unsigned int v7; // ecx
+  Vector *m_pMemory; // edi
+  int m_Size; // ebx
+  CUtlVector<Vector,CUtlMemory<Vector,int> > *m_pUtlVecMultiOrigins; // ecx
+  int v11; // esi
+  CUtlVector<Vector,CUtlMemory<Vector,int> > soundOrigins; // [esp+8h] [ebp-24h] BYREF
+  Vector result; // [esp+1Ch] [ebp-10h] BYREF
+  bool didFindOrigin; // [esp+2Bh] [ebp-1h]
+
+  m_Index = this->m_pMoveParent.m_Index;
+  if ( m_Index == -1 )
+  {
+    m_pEntity = 0;
+  }
+  else if ( g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber == HIWORD(m_Index) )
+  {
+    m_pEntity = (C_BaseProjector *)g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+  }
+  else
+  {
+    m_pEntity = 0;
+  }
+  v4 = 0;
+  didFindOrigin = 0;
+  if ( m_pEntity && info->pOrigin )
+  {
+    memset(&soundOrigins, 0, sizeof(soundOrigins));
+    CUtlVector<Vector,CUtlMemory<Vector,int>>::EnsureCapacity(
+      (CUtlVector<QAngle,CUtlMemory<QAngle,int> > *)&soundOrigins,
+      3);
+    FirstProjectedEntity = C_BaseProjector::GetFirstProjectedEntity(m_pEntity);
+    if ( FirstProjectedEntity )
+    {
+      do
+      {
+        if ( !FirstProjectedEntity->IsDormant(&FirstProjectedEntity->IClientNetworkable) )
+        {
+          v6 = (const QAngle *)ClosestPointOnProjectedEntityToPoint(
+                                 &result,
+                                 FirstProjectedEntity,
+                                 &info->info.vListenerOrigin);
+          CUtlVector<Vector,CUtlMemory<Vector,int>>::InsertBefore(
+            (CUtlVector<QAngle,CUtlMemory<QAngle,int> > *)&soundOrigins,
+            soundOrigins.m_Size,
+            v6);
+          didFindOrigin = 1;
+        }
+        v7 = FirstProjectedEntity->m_hChildSegment.m_Index;
+        if ( v7 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v7].m_SerialNumber != HIWORD(v7) )
+          FirstProjectedEntity = 0;
+        else
+          FirstProjectedEntity = (const C_BaseProjectedEntity *)g_pEntityList->m_EntPtrArray[(unsigned __int16)v7].m_pEntity;
+      }
+      while ( FirstProjectedEntity );
+      if ( didFindOrigin )
+      {
+        m_pMemory = soundOrigins.m_Memory.m_pMemory;
+        *info->pOrigin = *soundOrigins.m_Memory.m_pMemory;
+        if ( info->m_pUtlVecMultiOrigins )
+        {
+          m_Size = soundOrigins.m_Size;
+          if ( soundOrigins.m_Size > 1 )
+          {
+            m_pUtlVecMultiOrigins = info->m_pUtlVecMultiOrigins;
+            v11 = m_pUtlVecMultiOrigins->m_Size;
+            if ( v11 < soundOrigins.m_Size + v11 - 1 )
+              CUtlVector<CaptionLookup_t,CUtlMemory<CaptionLookup_t,int>>::InsertMultipleBefore(
+                m_pUtlVecMultiOrigins,
+                v11,
+                soundOrigins.m_Size - 1);
+            std::copy<Vector const *,Vector *>(
+              m_pMemory + 1,
+              &m_pMemory[m_Size],
+              &info->m_pUtlVecMultiOrigins->m_Memory.m_pMemory[v11]);
+          }
+        }
+      }
+    }
+    CUtlVector<VideoPanel *,CUtlMemory<VideoPanel *,int>>::~CUtlVector<VideoPanel *,CUtlMemory<VideoPanel *,int>>((CUtlVector<vgui::CTreeViewListControl::CColumnInfo,CUtlMemory<vgui::CTreeViewListControl::CColumnInfo,int> > *)&soundOrigins);
+    return didFindOrigin;
+  }
+  return v4;
+}

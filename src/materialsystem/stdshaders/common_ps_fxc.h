@@ -186,6 +186,11 @@ float4 DecompressNormal( sampler NormalSampler, float2 tc, int nDecompressionMod
 	return DecompressNormal( NormalSampler, tc, nDecompressionMode, NormalSampler );
 }
 
+float3 NormalizeWithCubemap( samplerCUBE normalizeSampler, float3 input )
+{
+//	return texCUBE( normalizeSampler, input ) * 2.0f - 1.0f;
+	return texCUBE( normalizeSampler, input ).xyz ;
+}
 
 HALF3 NormalizeWithCubemap( sampler normalizeSampler, HALF3 input )
 {
@@ -800,6 +805,25 @@ float DepthFeathering( sampler DepthSampler, const float2 vScreenPos, float fPro
 		return 1.0f;
 	}
 #	endif
+}
+
+
+float ComputeCameraFade( float4 vProjPos, float flNearPlane = 7.0f )
+{
+#if ( defined( _X360 ) || defined ( _PS3 ) )		
+	// Compute viewspace Z and W, just like depth feathering (which is currently only supported on the consoles, 
+	// which is why I'm only computing the factor in viewspace on the consoles as well).
+	float flSurfViewZ = dot( vProjPos, g_vDepthFeatherProjToViewZW[0] );
+	float flSurfViewW = dot( vProjPos, g_vDepthFeatherProjToViewZW[1] );
+	// Project to W=1.
+	flSurfViewZ /= flSurfViewW;
+	// Compute fade factor from viewspace Z.
+	float flFadeFactorScale = .06f;
+	flSurfViewZ = saturate( ( -flSurfViewZ - flNearPlane  ) * flFadeFactorScale );
+	return flSurfViewZ * flSurfViewZ;
+#else
+	return smoothstep( 0.0f, 1.0f, saturate( vProjPos.z * 0.025f ) );
+#endif	
 }
 
 #endif //#ifndef COMMON_PS_FXC_H_

@@ -151,8 +151,10 @@ struct WaterRenderInfo_t
 	bool m_bReflect : 1;
 	bool m_bRefract : 1;
 	bool m_bReflectEntities : 1;
+	bool m_bReflectOnlyMarkedEntities : 1;
 	bool m_bDrawWaterSurface : 1;
 	bool m_bOpaqueWater : 1;
+	bool m_bReflect2DSkybox : 1;
 
 };
 
@@ -218,17 +220,17 @@ protected:
 	// Fog setup
 	void			EnableWorldFog( void );
 	void			SetFogVolumeState( const VisibleFogVolumeInfo_t &fogInfo, bool bUseHeightFog );
-
+	
 	// Draw setup
-	void			SetupRenderablesList( int viewID );
+	void			SetupRenderablesList( int viewID, bool bFastEntityRendering = false, bool bDrawDepthViewNonCachedObjectsOnly = false );
 
 	// If iForceViewLeaf is not -1, then it uses the specified leaf as your starting area for setting up area portal culling.
 	// This is used by water since your reflected view origin is often in solid space, but we still want to treat it as though
 	// the first portal we're looking out of is a water portal, so our view effectively originates under the water.
 	void			BuildWorldRenderLists( bool bDrawEntities, int iForceViewLeaf = -1, bool bUseCacheIfEnabled = true, bool bShadowDepth = false, float *pReflectionWaterHeight = NULL );
-
+	
 	// Purpose: Builds render lists for renderables. Called once for refraction, once for over water
-	void			BuildRenderableRenderLists( int viewID );
+	void			BuildRenderableRenderLists( int viewID, bool bFastEntityRendering = false, bool bDrawDepthViewNonCachedObjectsOnly = false );
 
 	// More concise version of the above BuildRenderableRenderLists().  Called for shadow depth map rendering
 	void			BuildShadowDepthRenderableRenderLists();

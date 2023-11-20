@@ -1,0 +1,144 @@
+bool __cdecl CBaseProjectedEntity::IsHittingPortal(
+        CBaseProjectedEntity *const this,
+        Vector *pOutOrigin,
+        QAngle *pOutAngles,
+        CPortal_Base2D **pOutPortal)
+{
+  bool v4; // al
+  float v5; // xmm3_4
+  float v6; // xmm2_4
+  float v7; // xmm1_4
+  __m128 x_low; // xmm4
+  float v9; // xmm7_4
+  float v10; // xmm4_4
+  float v11; // xmm5_4
+  CPortal_Base2D *v12; // ebx
+  float v13; // eax
+  float v14; // eax
+  float v15; // xmm1_4
+  float v16; // xmm0_4
+  float v17; // xmm2_4
+  float v19; // [esp+28h] [ebp-1A0h]
+  bool v20; // [esp+2Fh] [ebp-199h]
+  trace_t worldTrace; // [esp+3Ch] [ebp-18Ch] BYREF
+  Ray_t ray; // [esp+90h] [ebp-138h] BYREF
+  VMatrix matToLinked; // [esp+E8h] [ebp-E0h] BYREF
+  CTraceFilterSimpleClassnameList traceFilter; // [esp+128h] [ebp-A0h] BYREF
+  QAngle qAngles; // [esp+14Ch] [ebp-7Ch] BYREF
+  Vector vForward; // [esp+158h] [ebp-70h] BYREF
+  Vector mins; // [esp+164h] [ebp-64h] BYREF
+  Vector maxs; // [esp+170h] [ebp-58h] BYREF
+  Vector vHitPoint; // [esp+17Ch] [ebp-4Ch] BYREF
+  Vector vNewWallOrigin; // [esp+188h] [ebp-40h] BYREF
+  QAngle vNewAngles; // [esp+194h] [ebp-34h] BYREF
+  Vector vNewForward; // [esp+1A0h] [ebp-28h] BYREF
+  float flPortalTraceFraction[7]; // [esp+1ACh] [ebp-1Ch] BYREF
+
+  qAngles = (QAngle)this->m_angRotation;
+  AngleVectors(&qAngles, &vForward);
+  (*((void (__cdecl **)(CBaseProjectedEntity *const, Vector *, Vector *))this->_vptr_IHandleEntity + 207))(
+    this,
+    &mins,
+    &maxs);
+  v4 = 1;
+  ray.m_pWorldAxisTransform = 0;
+  v5 = (float)(vForward.x * 25.0) + this->m_vecOrigin.m_Value.x;
+  v6 = (float)(vForward.y * 25.0) + this->m_vecOrigin.m_Value.y;
+  v7 = (float)(25.0 * vForward.z) + this->m_vecOrigin.m_Value.z;
+  ray.m_Delta.x = (float)((float)(vForward.x * 56755.84) + v5) - v5;
+  ray.m_Delta.y = (float)((float)(vForward.y * 56755.84) + v6) - v6;
+  ray.m_Delta.z = (float)((float)(56755.84 * vForward.z) + v7) - v7;
+  x_low = (__m128)LODWORD(maxs.x);
+  if ( (float)((float)((float)(ray.m_Delta.x * ray.m_Delta.x) + (float)(ray.m_Delta.y * ray.m_Delta.y))
+             + (float)(ray.m_Delta.z * ray.m_Delta.z)) == 0.0 )
+    v4 = 0;
+  ray.m_Extents.x = (float)(maxs.x - mins.x) * 0.5;
+  ray.m_Extents.y = (float)(maxs.y - mins.y) * 0.5;
+  ray.m_IsSwept = v4;
+  v9 = (float)(maxs.x + mins.x) * 0.5;
+  ray.m_Extents.z = (float)(maxs.z - mins.z) * 0.5;
+  x_low.m128_f32[0] = (float)((float)(ray.m_Extents.x * ray.m_Extents.x) + (float)(ray.m_Extents.y * ray.m_Extents.y))
+                    + (float)(ray.m_Extents.z * ray.m_Extents.z);
+  ray.m_Start.x = v5 + v9;
+  ray.m_IsRay = _mm_unpacklo_ps(x_low, x_low).m128_f32[0] < 0.000001;
+  v10 = (float)(maxs.y + mins.y) * 0.5;
+  v11 = (float)(maxs.z + mins.z) * 0.5;
+  ray.m_Start.y = v6 + v10;
+  ray.m_Start.z = v7 + v11;
+  ray.m_StartOffset.x = -v9;
+  ray.m_StartOffset.y = -v10;
+  ray.m_StartOffset.z = -v11;
+  flPortalTraceFraction[0] = 1.0;
+  CTraceFilterSimpleClassnameList::CTraceFilterSimpleClassnameList(&traceFilter, this, 0);
+  UTil_ProjectedEntity_Trace_Filter(&traceFilter);
+  (*(void (__cdecl **)(IEngineTrace *, Ray_t *, int, CTraceFilterSimpleClassnameList *, trace_t *))(*(_DWORD *)enginetrace
+                                                                                                  + 20))(
+    enginetrace,
+    &ray,
+    16395,
+    &traceFilter,
+    &worldTrace);
+  if ( r_visualizetraces.m_pParent->m_Value.m_nValue )
+    DebugDrawLine(&worldTrace.startpos, &worldTrace.endpos, 255, 0, 0, 1, -1.0);
+  v12 = UTIL_Portal_FirstAlongRay(&ray, flPortalTraceFraction);
+  if ( pOutOrigin )
+    *pOutOrigin = worldTrace.endpos;
+  if ( pOutAngles )
+    *pOutAngles = qAngles;
+  if ( (float)(flPortalTraceFraction[0] - worldTrace.fraction) > 0.000099999997 )
+    goto LABEL_18;
+  if ( pOutPortal )
+    *pOutPortal = v12;
+  if ( v12 )
+  {
+    v20 = 0;
+    if ( CPortal_Base2D::IsActivedAndLinked(v12) )
+    {
+      v19 = UTIL_IntersectRayWithPortal(&ray, v12);
+      *(_QWORD *)&matToLinked.m[0][0] = *(_QWORD *)&v12->m_matrixThisToLinked.m[0][0];
+      v13 = v12->m_matrixThisToLinked.m[0][2];
+      vHitPoint.y = (float)(ray.m_Delta.y * v19) + ray.m_Start.y;
+      matToLinked.m[0][2] = v13;
+      v14 = v12->m_matrixThisToLinked.m[0][3];
+      vHitPoint.x = (float)(v19 * ray.m_Delta.x) + ray.m_Start.x;
+      vHitPoint.z = (float)(ray.m_Delta.z * v19) + ray.m_Start.z;
+      matToLinked.m[0][3] = v14;
+      *(_QWORD *)&matToLinked.m[1][0] = *(_QWORD *)&v12->m_matrixThisToLinked.m[1][0];
+      *(_QWORD *)&matToLinked.m[1][2] = *(_QWORD *)&v12->m_matrixThisToLinked.m[1][2];
+      *(_QWORD *)&matToLinked.m[2][0] = *(_QWORD *)&v12->m_matrixThisToLinked.m[2][0];
+      *(_QWORD *)&matToLinked.m[2][2] = *(_QWORD *)&v12->m_matrixThisToLinked.m[2][2];
+      *(_QWORD *)&matToLinked.m[3][0] = *(_QWORD *)&v12->m_matrixThisToLinked.m[3][0];
+      *(_QWORD *)&matToLinked.m[3][2] = *(_QWORD *)&v12->m_matrixThisToLinked.m[3][2];
+      UTIL_Portal_PointTransform(&matToLinked, &vHitPoint, &vNewWallOrigin);
+      UTIL_Portal_AngleTransform(&matToLinked, &qAngles, &vNewAngles);
+      AngleVectors(&vNewAngles, &vNewForward, 0, 0);
+      v15 = (float)(vNewForward.y * 0.1) + vNewWallOrigin.y;
+      v16 = (float)(vNewForward.z * 0.1) + vNewWallOrigin.z;
+      v17 = (float)(0.1 * vNewForward.x) + vNewWallOrigin.x;
+      vNewWallOrigin.y = v15;
+      vNewWallOrigin.z = v16;
+      vNewWallOrigin.x = v17;
+      if ( pOutAngles )
+        *pOutAngles = vNewAngles;
+      v20 = 1;
+      if ( pOutOrigin )
+      {
+        pOutOrigin->x = v17;
+        pOutOrigin->y = v15;
+        pOutOrigin->z = v16;
+      }
+    }
+  }
+  else
+  {
+LABEL_18:
+    v20 = 0;
+  }
+  traceFilter._vptr_ITraceFilter = (int (**)(...))&off_BBE2C8;
+  traceFilter.m_PassClassnames.m_Size = 0;
+  if ( traceFilter.m_PassClassnames.m_Memory.m_nGrowSize >= 0 && traceFilter.m_PassClassnames.m_Memory.m_pMemory )
+    (*(void (__cdecl **)(_DWORD, const char **))(*g_pMemAlloc + 8))(
+      g_pMemAlloc,
+      traceFilter.m_PassClassnames.m_Memory.m_pMemory);
+  return v20;
+}

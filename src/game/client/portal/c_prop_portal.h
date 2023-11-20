@@ -97,7 +97,6 @@ public:
 	QAngle					m_qDelayedAngles;
 	int						m_iDelayedFailure;
 
-	static bool				ms_DefaultPortalSizeInitialized; // for CEG protection
 	static float			ms_DefaultPortalHalfWidth;
 	static float			ms_DefaultPortalHalfHeight;
 
@@ -130,6 +129,6 @@ public:
 	int m_nPlacementAttemptParity;
 };
 
-typedef C_Prop_Portal CProp_Portal;
+#define CProp_Portal C_Prop_Portal
 
 #endif //#ifndef C_PROP_PORTAL_H

@@ -1,0 +1,49 @@
+void __thiscall CPropTractorBeamProjector::InputSetLinearForce(CPropTractorBeamProjector *this, inputdata_t *indata)
+{
+  float flVal; // xmm0_4
+  edict_t *m_pPev; // ecx
+  edict_t *v5; // ecx
+
+  if ( indata->value.fieldType == FIELD_FLOAT )
+    flVal = indata->value.flVal;
+  else
+    flVal = 0.0;
+  if ( this->m_flLinearForce.m_Value != flVal )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x4BCu);
+    }
+    this->m_flLinearForce.m_Value = flVal;
+  }
+  if ( this->m_flLinearForce.m_Value == 0.0 )
+  {
+    CBaseProjector::EnableProjection(this, 0);
+    if ( vec3_origin.x != this->m_vEndPos.m_Value.x
+      || vec3_origin.y != this->m_vEndPos.m_Value.y
+      || vec3_origin.z != this->m_vEndPos.m_Value.z )
+    {
+      if ( this->m_Network.m_TimerEvent.m_bRegistered )
+      {
+        *((_BYTE *)&this->m_Network + 76) |= 1u;
+      }
+      else
+      {
+        v5 = this->m_Network.m_pPev;
+        if ( v5 )
+          CBaseEdict::StateChanged(v5, 0x4C0u);
+      }
+      this->m_vEndPos.m_Value = vec3_origin;
+    }
+  }
+  else if ( this->m_bEnabled.m_Value )
+  {
+    this->Project(this);
+  }
+}

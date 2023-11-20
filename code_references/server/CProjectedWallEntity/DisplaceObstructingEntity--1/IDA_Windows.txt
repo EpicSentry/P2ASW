@@ -1,0 +1,91 @@
+// local variable allocation has failed, the output may be wrong!
+// bad sp value at call has been detected, the output may be wrong!
+void __userpurge CProjectedWallEntity::DisplaceObstructingEntity(
+        CProjectedWallEntity *this@<ecx>,
+        float a2@<ebp>,
+        int a3@<edi>,
+        int a4@<esi>,
+        CPortal_Player *pEntity,
+        bool bIgnoreStuck)
+{
+  __int64 v7; // xmm0_8
+  void (__thiscall *GetVectors)(CBaseEntity *, Vector *, Vector *, Vector *); // edx
+  __int128 v9; // xmm0
+  float v10; // xmm1_4
+  float v11; // xmm2_4
+  void (__thiscall *TraceRay)(IEngineTrace *, const Ray_t *, unsigned int, ITraceFilter *, CGameTrace *); // edx
+  Vector v14; // [esp+34h] [ebp-12Ch] BYREF
+  CGameTrace tr; // [esp+40h] [ebp-120h] BYREF
+  Vector vWallUp; // [esp+98h] [ebp-C8h] BYREF
+  __int128 vWallRight; // [esp+A4h] [ebp-BCh] OVERLAPPED
+  CTraceFilterOnlyHitThis v18; // [esp+BCh] [ebp-A4h] BYREF
+  float v19; // [esp+C4h] [ebp-9Ch] BYREF
+  CTraceFilterOnlyHitThis filter; // [esp+C8h] [ebp-98h]
+  Ray_t ray; // [esp+D0h] [ebp-90h] BYREF
+  Vector vLength; // [esp+120h] [ebp-40h] BYREF
+  Vector vWallSweptBoxMins; // [esp+12Ch] [ebp-34h] BYREF
+  Vector vWallForward; // [esp+138h] [ebp-28h] BYREF
+  float v25; // [esp+144h] [ebp-1Ch]
+  Vector vWallSweptBoxMaxs; // [esp+148h] [ebp-18h] BYREF
+  Vector vOrigin; // [esp+154h] [ebp-Ch]
+  float retaddr; // [esp+160h] [ebp+0h]
+
+  vOrigin.x = a2;
+  vOrigin.y = retaddr;
+  v7 = *(_QWORD *)&this->m_vecOrigin.m_Value.x;
+  GetVectors = this->GetVectors;
+  vWallSweptBoxMaxs.z = this->m_vecOrigin.m_Value.z;
+  *(_QWORD *)&vWallSweptBoxMaxs.x = v7;
+  ((void (__thiscall *)(CProjectedWallEntity *, Vector *, Vector *, CBaseEntity **, int, int))GetVectors)(
+    this,
+    &vWallSweptBoxMins,
+    &vWallUp,
+    &tr.m_pEnt,
+    a3,
+    a4);
+  this->GetLengthVector(this, (Vector *)&ray.m_IsRay);
+  CProjectedWallEntity::GetExtents(this, &vLength, (Vector *)&vWallForward.y, 1.0);
+  vWallForward.x = *(float *)(&ray.m_IsSwept + 3) * *(float *)(&ray.m_IsSwept + 3);
+  v9 = 0i64;
+  *(float *)&v9 = fsqrt(
+                    (float)((float)(*(float *)(&ray.m_IsSwept + 3) * *(float *)(&ray.m_IsSwept + 3))
+                          + (float)(*(float *)&ray.m_IsRay * *(float *)&ray.m_IsRay))
+                  + (float)(*(float *)(&ray.m_IsSwept + 7) * *(float *)(&ray.m_IsSwept + 7)));
+  vWallRight = v9;
+  ray.m_Start.z = (float)(vWallSweptBoxMaxs.y + (float)(vWallSweptBoxMins.y * *(float *)&v9)) - vWallSweptBoxMaxs.y;
+  ray.m_Start.y = (float)(vWallSweptBoxMaxs.x + (float)(vWallSweptBoxMins.x * *(float *)&v9)) - vWallSweptBoxMaxs.x;
+  ray.m_Start.w = (float)(vWallSweptBoxMaxs.z + (float)(vWallSweptBoxMins.z * *(float *)&v9)) - vWallSweptBoxMaxs.z;
+  ray.m_Extents.y = 0.0;
+  BYTE1(ray.m_Extents.z) = (float)((float)((float)(ray.m_Start.z * ray.m_Start.z)
+                                         + (float)(ray.m_Start.y * ray.m_Start.y))
+                                 + (float)(ray.m_Start.w * ray.m_Start.w)) != 0.0;
+  ray.m_StartOffset.y = (float)(vWallForward.y - vLength.x) * 0.5;
+  ray.m_StartOffset.z = (float)(vWallForward.z - vLength.y) * 0.5;
+  ray.m_StartOffset.w = (float)(v25 - vLength.z) * 0.5;
+  LOBYTE(ray.m_Extents.z) = (float)((float)((float)(ray.m_StartOffset.z * ray.m_StartOffset.z)
+                                          + (float)(ray.m_StartOffset.y * ray.m_StartOffset.y))
+                                  + (float)(ray.m_StartOffset.w * ray.m_StartOffset.w)) < 0.000001;
+  v10 = (float)(vLength.x + vWallForward.y) * 0.5;
+  v11 = (float)(vLength.y + vWallForward.z) * 0.5;
+  *(float *)&v9 = 0.5 * (float)(vLength.z + v25);
+  v19 = v10 + vWallSweptBoxMaxs.x;
+  *(float *)&filter.__vftable = v11 + vWallSweptBoxMaxs.y;
+  *(float *)&filter.m_pHitEnt = *(float *)&v9 + vWallSweptBoxMaxs.z;
+  ray.m_Delta.y = v10 * -1.0;
+  ray.m_Delta.z = v11 * -1.0;
+  ray.m_Delta.w = *(float *)&v9 * -1.0;
+  CTraceFilterOnlyHitThis::CTraceFilterOnlyHitThis(&v18, pEntity);
+  TraceRay = enginetrace->TraceRay;
+  LODWORD(vWallSweptBoxMaxs.z) = &v14;
+  ((void (__thiscall *)(IEngineTrace *, float *, int, CTraceFilterOnlyHitThis *))TraceRay)(enginetrace, &v19, -1, &v18);
+  if ( r_visualizetraces.m_pParent->m_Value.m_nValue )
+    DebugDrawLine(&v14, &tr.startpos, 255, 0, 0, 1, -1.0);
+  if ( tr.plane.normal.z < 1.0 || tr.plane.pad[0] || tr.plane.pad[1] )
+    CProjectedWallEntity::DisplaceObstructingEntity(
+      this,
+      pEntity,
+      &vWallSweptBoxMaxs,
+      (const Vector *)&tr.m_pEnt,
+      &vWallUp,
+      bIgnoreStuck);
+}

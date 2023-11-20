@@ -1,0 +1,16 @@
+void __thiscall CLabIndicatorPanel::SpawnControlPanels(CLabIndicatorPanel *this)
+{
+  CVGuiScreen *VGuiScreen; // esi
+  CVGuiScreen_vtbl *v3; // ebx
+  int TeamNumber; // eax
+
+  VGuiScreen = CreateVGuiScreen("vgui_screen", "indicator_panel", this, this, -1);
+  v3 = VGuiScreen->__vftable;
+  TeamNumber = CBaseEntity::GetTeamNumber(this);
+  v3->ChangeTeam(VGuiScreen, TeamNumber);
+  CVGuiScreen::SetActualSize(VGuiScreen, 32.0, 32.0);
+  CVGuiScreen::SetActive(VGuiScreen, 1);
+  CVGuiScreen::MakeVisibleOnlyToTeammates(VGuiScreen, 0);
+  CVGuiScreen::SetTransparency(VGuiScreen, 1);
+  this->m_hScreen.m_Index = VGuiScreen->GetRefEHandle(VGuiScreen)->m_Index;
+}

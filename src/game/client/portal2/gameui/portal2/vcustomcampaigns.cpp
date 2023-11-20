@@ -224,11 +224,11 @@ void CustomCampaigns::Activate()
 	m_GplCustomCampaigns->RemoveAllPanelItems();
 
 	// Build a list of campaigns
-	KeyValues *pAllMissions = g_pMatchExt->GetAllMissions();
+	KeyValues *pAllMissions = g_pMatchExtSwarm->GetAllMissions();
 	if ( !pAllMissions )
 		return;
 
-	char const *szGameMode = m_pDataSettings->GetString( "game/mode", "coop" );
+	char const *szGameMode = m_pDataSettings->GetString( "game/mode", "campaign" );
 
 	for ( KeyValues *pMission = pAllMissions->GetFirstTrueSubKey(); pMission; pMission = pMission->GetNextTrueSubKey() )
 	{
@@ -275,7 +275,7 @@ void CustomCampaigns::ApplySchemeSettings(vgui::IScheme *pScheme)
 		{
 			if ( m_SomeAddonNoSupport )
 			{
-				char const *szGameMode = m_pDataSettings->GetString( "game/mode", "coop" );
+				char const *szGameMode = m_pDataSettings->GetString( "game/mode", "campaign" );
 
 				m_lblNoCustomCampaigns->SetVisible( true );
 				m_lblNoCustomCampaigns->SetText( CFmtStr( "#L4D360UI_Some_CustomCampaigns_Installed_%s", szGameMode ) );
@@ -302,7 +302,7 @@ void CustomCampaigns::ApplySchemeSettings(vgui::IScheme *pScheme)
 
 			if ( m_hasAddonCampaign )
 			{
-				char const *szGameMode = m_pDataSettings->GetString( "game/mode", "coop" );
+				char const *szGameMode = m_pDataSettings->GetString( "game/mode", "campaign" );
 
 				m_lblNoCustomCampaigns->SetVisible( true );
 				m_lblNoCustomCampaigns->SetText( CFmtStr( "#L4D360UI_No_CustomCampaigns_Installed_%s", szGameMode ) );
@@ -344,11 +344,11 @@ void CustomCampaigns::Select()
 	if ( !pSelectedItem )
 		return;
 
-	KeyValues *pAllMissions = g_pMatchExt->GetAllMissions();
+	KeyValues *pAllMissions = g_pMatchExtSwarm->GetAllMissions();
 	if ( !pAllMissions )
 		return;
 
-	char const *szGameMode = m_pDataSettings->GetString( "game/mode", "coop" );
+	char const *szGameMode = m_pDataSettings->GetString( "game/mode", "campaign" );
 
 	KeyValues *pFirstChapter = pAllMissions->FindKey( CFmtStr( "%s/modes/%s/1", pSelectedItem->GetCampaignContext(), szGameMode ) );
 	if ( !pFirstChapter )
@@ -392,11 +392,11 @@ void CustomCampaigns::OnItemSelected( const char* panelName )
 	if ( !pSelectedItem )
 		return;
 
-	KeyValues *pAllMissions = g_pMatchExt->GetAllMissions();
+	KeyValues *pAllMissions = g_pMatchExtSwarm->GetAllMissions();
 	if ( !pAllMissions )
 		return;
 
-	char const *szGameMode = m_pDataSettings->GetString( "game/mode", "coop" );
+	char const *szGameMode = m_pDataSettings->GetString( "game/mode", "campaign" );
 
 	KeyValues *pMission = pAllMissions->FindKey( pSelectedItem->GetCampaignContext() );
 	KeyValues *pFirstChapter = pAllMissions->FindKey( CFmtStr( "%s/modes/%s/1", pSelectedItem->GetCampaignContext(), szGameMode ) );
@@ -471,7 +471,7 @@ void CustomCampaigns::OnItemSelected( const char* panelName )
 		}
 		else
 		{
-			m_imgLevelImage->SetImage( "maps/any" );
+			m_imgLevelImage->SetImage( "swarm/MissionPics/addonMissionPic" );
 		}
 	}
 }

@@ -192,6 +192,7 @@ public:
 #ifdef CLIENT_DLL
 
 	virtual bool IsBonusChallengeTimeBased( void );
+	virtual bool AllowThirdPersonCamera() { return true; }
 	
 #else
 

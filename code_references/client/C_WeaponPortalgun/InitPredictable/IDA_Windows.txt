@@ -1,0 +1,63 @@
+void __thiscall C_WeaponPortalgun::InitPredictable(C_WeaponPortalgun *this, C_BasePlayer *pOwner)
+{
+  unsigned int m_Index; // ecx
+  CBaseEntityList *v4; // edx
+  int v5; // eax
+  CEntInfo *v6; // esi
+  unsigned int v7; // ecx
+  int v8; // eax
+  bool v9; // zf
+  C_BaseEntity **v10; // eax
+  C_BaseEntity *v11; // eax
+  unsigned int v12; // ecx
+  int v13; // eax
+  CEntInfo *v14; // esi
+  unsigned int v15; // ecx
+  int v16; // eax
+  C_BaseEntity **v17; // eax
+
+  C_BaseEntity::InitPredictable(this, pOwner);
+  m_Index = this->m_hPrimaryPortal.m_Index;
+  v4 = g_pEntityList;
+  if ( m_Index != -1 )
+  {
+    v5 = (unsigned __int16)m_Index;
+    v6 = &g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index];
+    v7 = HIWORD(m_Index);
+    if ( v6->m_SerialNumber == v7 )
+    {
+      if ( v6->m_pEntity )
+      {
+        v8 = v5;
+        v9 = g_pEntityList->m_EntPtrArray[v8].m_SerialNumber == v7;
+        v10 = (C_BaseEntity **)&g_pEntityList->m_EntPtrArray[v8];
+        if ( v9 )
+          v11 = *v10;
+        else
+          v11 = 0;
+        C_BaseEntity::CheckInitPredictable(v11, "C_WeaponPortalgun::InitPredictable");
+        v4 = g_pEntityList;
+      }
+    }
+  }
+  v12 = this->m_hSecondaryPortal.m_Index;
+  if ( v12 != -1 )
+  {
+    v13 = (unsigned __int16)v12;
+    v14 = &v4->m_EntPtrArray[(unsigned __int16)v12];
+    v15 = HIWORD(v12);
+    if ( v14->m_SerialNumber == v15 )
+    {
+      if ( v14->m_pEntity )
+      {
+        v16 = v13;
+        v9 = v4->m_EntPtrArray[v16].m_SerialNumber == v15;
+        v17 = (C_BaseEntity **)&v4->m_EntPtrArray[v16];
+        if ( v9 )
+          C_BaseEntity::CheckInitPredictable(*v17, "C_WeaponPortalgun::InitPredictable");
+        else
+          C_BaseEntity::CheckInitPredictable(0, "C_WeaponPortalgun::InitPredictable");
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+void __cdecl CPortalLaser::TurnOn(CPortalLaser *const this)
+{
+  float m_fValue; // xmm0_4
+  BASEPTR v2; // [esp+28h] [ebp-10h] BYREF
+
+  if ( !this->m_bLaserOn.m_Value )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_bLaserOn);
+    this->m_bLaserOn.m_Value = 1;
+  }
+  if ( !this->m_pfnThink.__pfn )
+  {
+    CBaseEntity::ThinkSet(&v2, this, (BASEPTR)(unsigned int)CPortalLaser::StrikeThink, 0.0, 0);
+    if ( this->m_bFromReflectedCube )
+      m_fValue = portal_laser_normal_update.m_pParent->m_Value.m_fValue;
+    else
+      m_fValue = portal_laser_high_precision_update.m_pParent->m_Value.m_fValue;
+    CBaseEntity::SetNextThink(this, m_fValue + gpGlobals->curtime, 0);
+  }
+}

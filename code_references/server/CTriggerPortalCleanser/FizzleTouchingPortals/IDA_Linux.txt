@@ -1,0 +1,45 @@
+void __cdecl CTriggerPortalCleanser::FizzleTouchingPortals(CTriggerPortalCleanser *const this)
+{
+  int v1; // ebx
+  CProp_Portal *v2; // esi
+  CProp_Portal **pPortals; // [esp+28h] [ebp-50h]
+  int iPortalCount; // [esp+2Ch] [ebp-4Ch]
+  Vector vMin; // [esp+30h] [ebp-48h] BYREF
+  Vector vMax; // [esp+3Ch] [ebp-3Ch] BYREF
+  Vector vBoxCenter; // [esp+48h] [ebp-30h] BYREF
+  Vector vBoxExtents; // [esp+54h] [ebp-24h] BYREF
+
+  CCollisionProperty::CollisionAABBToWorldAABB(
+    &this->m_Collision,
+    &this->m_Collision.m_vecMins.m_Value,
+    &this->m_Collision.m_vecMaxs.m_Value,
+    &vMin,
+    &vMax);
+  vBoxCenter.x = (float)(vMin.x + vMax.x) * 0.5;
+  vBoxExtents.x = (float)(vMax.x - vMin.x) * 0.5;
+  iPortalCount = CProp_Portal_Shared::AllPortals.m_Size;
+  vBoxCenter.y = (float)(vMin.y + vMax.y) * 0.5;
+  vBoxExtents.y = (float)(vMax.y - vMin.y) * 0.5;
+  vBoxCenter.z = (float)(vMin.z + vMax.z) * 0.5;
+  vBoxExtents.z = (float)(vMax.z - vMin.z) * 0.5;
+  if ( CProp_Portal_Shared::AllPortals.m_Size )
+  {
+    v1 = 0;
+    pPortals = CProp_Portal_Shared::AllPortals.m_Memory.m_pMemory;
+    do
+    {
+      while ( 1 )
+      {
+        v2 = pPortals[v1];
+        if ( UTIL_IsBoxIntersectingPortal(&vBoxCenter, &vBoxExtents, v2, 0.0) )
+          break;
+        if ( iPortalCount == ++v1 )
+          return;
+      }
+      ++v1;
+      CProp_Portal::DoFizzleEffect(v2, 5, 1);
+      CProp_Portal::Fizzle(v2);
+    }
+    while ( iPortalCount != v1 );
+  }
+}

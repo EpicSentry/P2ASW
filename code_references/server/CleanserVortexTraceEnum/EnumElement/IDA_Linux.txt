@@ -1,0 +1,54 @@
+IterationRetval_t __cdecl CleanserVortexTraceEnum::EnumElement(
+        CleanserVortexTraceEnum *const this,
+        IHandleEntity *pHandleEntity)
+{
+  IterationRetval_t v2; // ebx
+  IterationRetval_t result; // eax
+  CBaseEntity *v4; // esi
+  CBaseTrigger *m_pCleanser; // eax
+  int v6; // ebx
+  const char *v7; // eax
+  int m_count; // eax
+
+  v2 = ITERATION_CONTINUE;
+  if ( (*(unsigned __int8 (__cdecl **)(IStaticPropMgrServer *, IHandleEntity *))(*(_DWORD *)staticpropmgr + 8))(
+         staticpropmgr,
+         pHandleEntity) )
+  {
+    return v2;
+  }
+  v4 = (CBaseEntity *)(*((int (__cdecl **)(IHandleEntity *))pHandleEntity->_vptr_IHandleEntity + 6))(pHandleEntity);
+  if ( !v4 )
+    return v2;
+  m_pCleanser = this->m_pCleanser;
+  if ( m_pCleanser == v4
+    || m_pCleanser
+    && !(*((unsigned __int8 (__cdecl **)(CBaseTrigger *, CBaseEntity *))m_pCleanser->_vptr_IHandleEntity + 208))(
+          m_pCleanser,
+          v4) )
+  {
+    return v2;
+  }
+  v6 = 0;
+  v7 = "prop_weighted_cube";
+  if ( v4->m_iClassname.pszValue != "prop_weighted_cube" )
+  {
+    while ( !CBaseEntity::ClassMatchesComplex(v4, v7) )
+    {
+      v7 = g_pszFizzlingVortexObjects[++v6];
+      if ( !v7 )
+        return 0;
+      if ( v7 == v4->m_iClassname.pszValue )
+        break;
+    }
+  }
+  m_count = this->m_count;
+  v2 = ITERATION_STOP;
+  if ( m_count >= this->m_listMax )
+    return v2;
+  LOBYTE(v2) = 0;
+  this->m_pList[m_count] = v4;
+  result = v2;
+  ++this->m_count;
+  return result;
+}

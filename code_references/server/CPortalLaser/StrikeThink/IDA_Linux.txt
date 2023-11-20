@@ -1,0 +1,219 @@
+void __cdecl CPortalLaser::StrikeThink(CPortalLaser *const this)
+{
+  int m_enabled; // eax
+  unsigned int m_TargetThreadId; // ebx
+  int v3; // eax
+  int v4; // edx
+  Vector *v5; // edx
+  unsigned int m_Index; // eax
+  char *v7; // edx
+  int v8; // ebx
+  int i; // ebx
+  CBaseEntity *v10; // eax
+  unsigned int v11; // ebx
+  CPortalLaser *m_pParentLaser; // edi
+  float *v13; // eax
+  vec_t v14; // xmm0_4
+  vec_t v15; // xmm2_4
+  CPortalSimulator *SimulatorThatOwnsEntity; // eax
+  bool v17; // zf
+  CVProfNode *v18; // eax
+  CVProfNode *m_pCurNode; // eax
+  CVProfile::CBudgetGroup *v20; // eax
+  float *v21; // eax
+  float v22; // xmm3_4
+  float v23; // xmm6_4
+  float v24; // xmm5_4
+  float v25; // xmm4_4
+  float v26; // xmm0_4
+  float v27; // xmm7_4
+  float x; // xmm1_4
+  float v29; // xmm3_4
+  float v30; // xmm2_4
+  float v31; // xmm7_4
+  vec_t v32; // xmm1_4
+  float v33; // [esp+2Ch] [ebp-5Ch]
+  float v34; // [esp+30h] [ebp-58h]
+  float v35; // [esp+34h] [ebp-54h]
+  float v36; // [esp+38h] [ebp-50h]
+  float v37; // [esp+3Ch] [ebp-4Ch]
+  float z; // [esp+40h] [ebp-48h]
+  float y; // [esp+44h] [ebp-44h]
+  bool VProf_; // [esp+4Bh] [ebp-3Dh]
+  CNetworkVectorBase<QAngle,CPortalLaser::NetworkVar_m_angParentAngles> *pSimulator; // [esp+4Ch] [ebp-3Ch]
+  float pSimulatorb; // [esp+4Ch] [ebp-3Ch]
+  CPortalSimulator *pSimulatora; // [esp+4Ch] [ebp-3Ch]
+  Vector vecDir; // [esp+58h] [ebp-30h] BYREF
+  Vector vecOrigin; // [esp+64h] [ebp-24h] BYREF
+
+  m_enabled = g_VProfCurrentProfile.m_enabled;
+  VProf_ = m_enabled != 0;
+  if ( !m_enabled
+    || (m_TargetThreadId = g_VProfCurrentProfile.m_TargetThreadId, m_TargetThreadId != ThreadGetCurrentId()) )
+  {
+    if ( !this->m_bShouldSpark.m_Value )
+      goto LABEL_4;
+LABEL_22:
+    CBaseEntity::NetworkStateChanged(this, &this->m_bShouldSpark);
+    this->m_bShouldSpark.m_Value = 0;
+    goto LABEL_4;
+  }
+  m_pCurNode = g_VProfCurrentProfile.m_pCurNode;
+  if ( m_pCurNode->m_pszName != "CPortalLaser::StrikeThink" )
+  {
+    m_pCurNode = (CVProfNode *)CVProfNode::GetSubNode(m_pCurNode, "CPortalLaser::StrikeThink", 0, "Game", 4);
+    g_VProfCurrentProfile.m_pCurNode = m_pCurNode;
+  }
+  v20 = &g_VProfCurrentProfile.m_pBudgetGroups[m_pCurNode->m_BudgetGroupID];
+  v20->m_BudgetFlags |= 4u;
+  CVProfNode::EnterScope(g_VProfCurrentProfile.m_pCurNode);
+  g_VProfCurrentProfile.m_fAtRoot = 0;
+  if ( this->m_bShouldSpark.m_Value )
+    goto LABEL_22;
+LABEL_4:
+  v3 = 0;
+  do
+  {
+    v4 = v3++;
+    v5 = &this->m_vecNearestSoundSource[v4];
+    v5->x = vec3_invalid.x;
+    v5->y = vec3_invalid.y;
+    v5->z = vec3_invalid.z;
+  }
+  while ( v3 != 33 );
+  m_Index = this->m_hReflector.m_Value.m_Index;
+  if ( m_Index == -1
+    || (v7 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index, *((_DWORD *)v7 + 2) != HIWORD(m_Index)) )
+  {
+    v8 = 0;
+LABEL_10:
+    CBaseAnimating::GetAttachment(this, this->m_iLaserAttachment, &vecOrigin, &vecDir, 0, 0);
+    CBaseEntity::SetNextThink(this, gpGlobals->curtime + portal_laser_normal_update.m_pParent->m_Value.m_fValue, 0);
+    goto LABEL_11;
+  }
+  v8 = *((_DWORD *)v7 + 1);
+  if ( !v8 || !this->m_bFromReflectedCube )
+    goto LABEL_10;
+  if ( UTIL_GetSchrodingerTwin(*((CBaseEntity **)v7 + 1)) )
+  {
+    if ( !this->m_bUseParentDir.m_Value )
+    {
+      CBaseEntity::NetworkStateChanged(this, &this->m_bUseParentDir);
+      this->m_bUseParentDir.m_Value = 1;
+    }
+    m_pParentLaser = this->m_pParentLaser;
+    if ( m_pParentLaser->m_angPortalExitAngles.x == this->m_angParentAngles.m_Value.x
+      && m_pParentLaser->m_angPortalExitAngles.y == this->m_angParentAngles.m_Value.y
+      && m_pParentLaser->m_angPortalExitAngles.z == this->m_angParentAngles.m_Value.z )
+    {
+      pSimulator = &this->m_angParentAngles;
+    }
+    else
+    {
+      pSimulator = &this->m_angParentAngles;
+      CBaseEntity::NetworkStateChanged(this, &this->m_angParentAngles);
+      this->m_angParentAngles = (CNetworkVectorBase<QAngle,CPortalLaser::NetworkVar_m_angParentAngles>)m_pParentLaser->m_angPortalExitAngles;
+    }
+    AngleVectors(&pSimulator->m_Value, &vecDir);
+  }
+  else
+  {
+    if ( this->m_bUseParentDir.m_Value )
+    {
+      CBaseEntity::NetworkStateChanged(this, &this->m_bUseParentDir);
+      this->m_bUseParentDir.m_Value = 0;
+    }
+    if ( (*(_BYTE *)(v8 + 209) & 8) != 0 )
+      CBaseEntity::CalcAbsolutePosition((CBaseEntity *const)v8);
+    AngleVectors((const QAngle *const)(v8 + 480), &vecDir);
+  }
+  pSimulatorb = vecDir.x;
+  y = vecDir.y;
+  z = vecDir.z;
+  v13 = (float *)(*(int (__cdecl **)(int))(*(_DWORD *)v8 + 600))(v8);
+  v14 = (float)(z * 22.0) + v13[2];
+  v15 = (float)(22.0 * pSimulatorb) + *v13;
+  vecOrigin.y = (float)(y * 22.0) + v13[1];
+  vecOrigin.z = v14;
+  vecOrigin.x = v15;
+  SimulatorThatOwnsEntity = CPortalSimulator::GetSimulatorThatOwnsEntity((const CBaseEntity *)v8);
+  pSimulatora = SimulatorThatOwnsEntity;
+  if ( SimulatorThatOwnsEntity )
+  {
+    if ( CPortalSimulator::EntityIsInPortalHole(SimulatorThatOwnsEntity, (CBaseEntity *)v8)
+      && (float)((float)((float)((float)(vecOrigin.x * pSimulatora->m_InternalData.Placement.PortalPlane.m_Normal.x)
+                               + (float)(vecOrigin.y * pSimulatora->m_InternalData.Placement.PortalPlane.m_Normal.y))
+                       + (float)(vecOrigin.z * pSimulatora->m_InternalData.Placement.PortalPlane.m_Normal.z))
+               - pSimulatora->m_InternalData.Placement.PortalPlane.m_Dist) < 0.0 )
+    {
+      v21 = (float *)(*(int (__cdecl **)(int))(*(_DWORD *)v8 + 600))(v8);
+      if ( (float)((float)((float)((float)(*v21 * pSimulatora->m_InternalData.Placement.PortalPlane.m_Normal.x)
+                                 + (float)(v21[1] * pSimulatora->m_InternalData.Placement.PortalPlane.m_Normal.y))
+                         + (float)(v21[2] * pSimulatora->m_InternalData.Placement.PortalPlane.m_Normal.z))
+                 - pSimulatora->m_InternalData.Placement.PortalPlane.m_Dist) > 0.0 )
+      {
+        v37 = pSimulatora->m_InternalData.Placement.matThisToLinked.m[1][1];
+        v22 = pSimulatora->m_InternalData.Placement.matThisToLinked.m[1][0];
+        v36 = pSimulatora->m_InternalData.Placement.matThisToLinked.m[1][2];
+        v23 = pSimulatora->m_InternalData.Placement.matThisToLinked.m[0][0];
+        v24 = pSimulatora->m_InternalData.Placement.matThisToLinked.m[0][1];
+        v25 = pSimulatora->m_InternalData.Placement.matThisToLinked.m[0][2];
+        v35 = pSimulatora->m_InternalData.Placement.matThisToLinked.m[2][0];
+        v34 = pSimulatora->m_InternalData.Placement.matThisToLinked.m[2][1];
+        v33 = pSimulatora->m_InternalData.Placement.matThisToLinked.m[2][2];
+        v26 = (float)((float)(v35 * vecOrigin.x) + (float)(vecOrigin.y * v34)) + (float)(vecOrigin.z * v33);
+        v27 = vecOrigin.y;
+        vecOrigin.y = (float)((float)((float)(vecOrigin.x * v22) + (float)(vecOrigin.y * v37))
+                            + (float)(vecOrigin.z * v36))
+                    + pSimulatora->m_InternalData.Placement.matThisToLinked.m[1][3];
+        x = vecDir.x;
+        v29 = v22 * vecDir.x;
+        v30 = (float)(v23 * vecOrigin.x) + (float)(v27 * v24);
+        v31 = vecOrigin.z;
+        vecOrigin.z = v26 + pSimulatora->m_InternalData.Placement.matThisToLinked.m[2][3];
+        vecOrigin.x = (float)(v30 + (float)(v31 * v25)) + pSimulatora->m_InternalData.Placement.matThisToLinked.m[0][3];
+        vecDir.x = (float)((float)(v23 * vecDir.x) + (float)(v24 * vecDir.y)) + (float)(v25 * vecDir.z);
+        v32 = (float)((float)(x * v35) + (float)(vecDir.y * v34)) + (float)(vecDir.z * v33);
+        vecDir.y = (float)(v29 + (float)(v37 * vecDir.y)) + (float)(v36 * vecDir.z);
+        vecDir.z = v32;
+      }
+    }
+  }
+  CBaseEntity::SetNextThink(
+    this,
+    gpGlobals->curtime + portal_laser_high_precision_update.m_pParent->m_Value.m_fValue,
+    0);
+LABEL_11:
+  UTIL_Portal_Laser_Prevent_Tilting(&vecDir);
+  CPortalLaser::TurnOnGlow(this);
+  CPortalLaser::FireLaser(this, &vecOrigin, &vecDir, (CBaseEntity *)v8);
+  CPortalLaser::CreateSoundProxies(this);
+  for ( i = 0; i != 33; ++i )
+  {
+    v10 = this->m_pSoundProxy[i];
+    if ( v10 )
+      UTIL_SetOrigin(v10, &this->m_vecNearestSoundSource[i], 0);
+  }
+  if ( sv_debug_laser.m_pParent->m_Value.m_nValue )
+    (*((void (**)(CUtlCachedFileData<CModelSoundsCache> *, _DWORD, const char *, ...))engine->_vptr_CUtlCachedFileData
+     + 47))(
+      engine,
+      0,
+      "num lasers = %d",
+      IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Size);
+  if ( VProf_ && (!g_VProfCurrentProfile.m_fAtRoot || g_VProfCurrentProfile.m_enabled) )
+  {
+    v11 = g_VProfCurrentProfile.m_TargetThreadId;
+    if ( v11 == ThreadGetCurrentId() )
+    {
+      v17 = (unsigned __int8)CVProfNode::ExitScope(g_VProfCurrentProfile.m_pCurNode) == 0;
+      v18 = g_VProfCurrentProfile.m_pCurNode;
+      if ( !v17 )
+      {
+        v18 = v18->m_pParent;
+        g_VProfCurrentProfile.m_pCurNode = v18;
+      }
+      g_VProfCurrentProfile.m_fAtRoot = v18 == &g_VProfCurrentProfile.m_Root;
+    }
+  }
+}

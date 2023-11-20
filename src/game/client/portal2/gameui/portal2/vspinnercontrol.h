@@ -64,10 +64,10 @@ public:
 
 	virtual void OnKeyCodePressed(vgui::KeyCode code);
 
-#ifdef _GAMECONSOLE
+#ifdef _X360
 	virtual void NavigateTo();
 	virtual void NavigateFrom();
-#endif // _GAMECONSOLE
+#endif // _X360
 
 	virtual void PaintBackground();
 

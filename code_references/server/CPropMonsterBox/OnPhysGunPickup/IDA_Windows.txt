@@ -1,0 +1,20 @@
+void __thiscall CPropMonsterBox::OnPhysGunPickup(
+        CPropMonsterBox *this,
+        CBasePlayer *pPhysGunUser,
+        PhysGunPickup_t reason)
+{
+  bool v4; // zf
+  int v5; // eax
+
+  if ( !this->m_OnUser3.m_Value.rgbaVal.g )
+  {
+    v4 = !this->m_OnUser3.m_Value.bVal;
+    this->m_OnUser3.m_Value.rgbaVal.g = 1;
+    if ( v4 )
+    {
+      v5 = CBaseAnimating::LookupSequence((CPropMonsterBox *)((char *)this - 1204), "hermit_in");
+      CBaseAnimating::ResetSequence((CPropMonsterBox *)((char *)this - 1204), v5);
+    }
+    CPhysicsProp::OnPhysGunPickup(this, pPhysGunUser, reason);
+  }
+}

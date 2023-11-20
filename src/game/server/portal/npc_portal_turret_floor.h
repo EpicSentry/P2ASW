@@ -9,8 +9,6 @@
 #include "ammodef.h"
 #include "ai_senses.h"
 #include "ai_memory.h"
-#include "rope.h"
-#include "rope_shared.h"
 #include "prop_portal_shared.h"
 #include "sprite.h"
 #include "paint/player_pickup_paint_power_user.h"
@@ -40,8 +38,6 @@
 #define TURRET_FLOOR_BULLET_FORCE_MULTIPLIER 0.4f
 #define TURRET_FLOOR_PHYSICAL_FORCE_MULTIPLIER 135.0f
 
-#define PORTAL_FLOOR_TURRET_NUM_ROPES 4
-
 //Turret states
 enum portalTurretState_e
 {
@@ -51,6 +47,8 @@ enum portalTurretState_e
 	PORTAL_TURRET_SHOTAT,
 	PORTAL_TURRET_DISSOLVED,
 	PORTAL_TURRET_FLUNG,
+	PORTAL_TURRET_STARTBURNING,
+	PORTAL_TURRET_BURNED,
 
 	PORTAL_TURRET_STATE_TOTAL
 };
@@ -75,6 +73,8 @@ extern int ACT_FLOOR_TURRET_OPEN_IDLE;
 extern int ACT_FLOOR_TURRET_CLOSED_IDLE;
 extern int ACT_FLOOR_TURRET_FIRE;
 extern int ACT_FLOOR_TURRET_FIRE2;
+extern int ACT_FLOOR_TURRET_DIE;
+extern int ACT_FLOOR_TURRET_DIE_IDLE;
 
 
 
@@ -109,7 +109,9 @@ public:
 	virtual void	SetEyeState( eyeState_t state );
 
 	virtual void    TryEmitSound(const char* soundname);
+	virtual void	SetTurretType(int nType);
 	virtual bool	OnSide( void );
+	void			EnableTipController(bool bEnabled);
 
 	virtual float	GetAttackDamageScale( CBaseEntity *pVictim );
 	virtual Vector	GetAttackSpread( CBaseCombatWeapon *pWeapon, CBaseEntity *pTarget );
@@ -125,17 +127,25 @@ public:
 	virtual void	TippedThink( void );
 	virtual void	HeldThink( void );
 	virtual void	InactiveThink( void );
+	virtual void	DieThink( void );
 	virtual void	SuppressThink( void );
 	virtual void	DisabledThink( void );
 	virtual void	HackFindEnemy( void );
+	virtual void	BurnThink(void);
+	virtual void	BreakThink(void);
+
+#ifndef NO_TRACTOR_BEAM
+
+	void	OnExitedTractorBeam(void) {}
+	void	OnEnteredTractorBeam(void) {}
+
+#endif
 
 	virtual void	StartTouch( CBaseEntity *pOther );
 
 	bool	IsLaserOn( void ) { return m_bLaserOn; }
 	void	LaserOff( void );
 	void	LaserOn( void );
-	void	RopesOn();
-	void	RopesOff();
 
 	void	FireBullet( const char *pTargetName );
 
@@ -145,35 +155,47 @@ public:
 	void	InputDisableGagging(inputdata_t& inputdata);
 	void	InputEnablePickup(inputdata_t& inputdata);
 	void	InputDisablePickup(inputdata_t& inputdata);
+	void	InputSelfDestructImmediately(inputdata_t& inputdata);
+	void	InputSetModel(inputdata_t& inputdata);
 
 	virtual void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-private:
 
-	CHandle<CRopeKeyframe>	m_hRopes[ PORTAL_FLOOR_TURRET_NUM_ROPES ];
+protected:
+	float GetFireConeZTolerance();
+
+private:
+	
+	bool IsEnemyBehindGlass(CPortal_Base2D* pPortal, CBaseEntity* pEnemy, Vector& vecMuzzle, Vector& vecDirToEnemy, float flDistToEnemy);
+	void MakeSolid();
+	bool AllowedToIgnite() { return true; }
 
 	CNetworkVar( bool, m_bOutOfAmmo );
 	CNetworkVar( bool, m_bLaserOn );
+	CNetworkVar( bool, m_bIsFiring );
 	CNetworkVar( int, m_sLaserHaloSprite );
 
+	bool	m_bIsDead;
 	int		m_iBarrelAttachments[ 4 ];
+	int		m_iNextShootingBarrel;
 	bool	m_bShootWithBottomBarrels;
 	bool	m_bDamageForce;
 	bool	m_bPickupEnabled;
+	bool	m_bDisableMotion;
+	int		m_nCollisionType;
+	float	m_flTurretRange;
+	bool	m_bLoadAlternativeModels;
 
 	float	m_fSearchSpeed;
 	float	m_fMovingTargetThreashold;
 	float	m_flDistToEnemy;
+	float	m_flBurnExplodeTime;
 
 	turretState_e	m_iLastState;
 	float			m_fNextTalk;
 	bool			m_bDelayTippedTalk;
 	bool			m_bUsedAsActor;
 	bool			m_bGagged;
+	int				m_nModelIndex;
 	bool			m_bUseSuperDamageScale;
-
-	string_t m_ModelName;
-
-	short m_nModelIndex;
-
 };
 #endif // PORTAL_TURRET_FLOOR_H

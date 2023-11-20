@@ -1,0 +1,4 @@
+bool __cdecl C_Trigger_TractorBeam::ShouldDraw(C_Trigger_TractorBeam *const this)
+{
+  return 1;
+}

@@ -1,0 +1,12 @@
+class C_TEWallPaintedEvent : public C_BaseTempEntity
+{
+public:
+	DECLARE_CLIENTCLASS();
+	
+	void C_TEWallPaintedEvent();
+	void ~C_TEWallPaintedEvent();
+	void PostDataUpdate( DataUpdateType_t datatype );
+	class CBaseHandle m_hEntity;
+	int m_colorIndex;
+	int m_nSegment;
+};

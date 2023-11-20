@@ -1,0 +1,4 @@
+int __cdecl CBaseProjector::DrawDebugTextOverlays(CBaseProjector *const this)
+{
+  return CBaseAnimating::DrawDebugTextOverlays(this);
+}

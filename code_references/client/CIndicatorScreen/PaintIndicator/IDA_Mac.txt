@@ -1,0 +1,47 @@
+int __cdecl CIndicatorScreen::PaintIndicator(CIndicatorScreen *this)
+{
+  int v1; // ecx
+  int v2; // edx
+  char *v3; // ecx
+  _DWORD *v4; // ebx
+  int (__cdecl *v5)(_DWORD *, _DWORD, _DWORD, int, int); // eax
+  int v6; // esi
+  int Wide; // esi
+  int Tall; // eax
+  int (__cdecl *v10)(_DWORD *, _DWORD, _DWORD, int, int); // [esp+20h] [ebp-18h]
+
+  v1 = *((_DWORD *)g_pEntityList + 4 * *((unsigned __int16 *)this + 218) + 1);
+  v2 = *(_DWORD *)(v1 + 2672);
+  if ( v2 == 2 )
+  {
+    v3 = (char *)this + 404;
+    goto LABEL_10;
+  }
+  if ( v2 == 1 )
+  {
+    v3 = (char *)this + 400;
+LABEL_10:
+    v6 = *(_DWORD *)v3;
+    (*(void (__cdecl **)(_DWORD *, int))(*g_pVGuiSurface + 56))(g_pVGuiSurface, -1);
+    (*(void (__cdecl **)(_DWORD *, int))(*g_pVGuiSurface + 148))(g_pVGuiSurface, v6);
+    v4 = g_pVGuiSurface;
+    v5 = *(int (__cdecl **)(_DWORD *, _DWORD, _DWORD, int, int))((char *)&loc_5FF384 + *g_pVGuiSurface - 6288104);
+    goto LABEL_11;
+  }
+  if ( v2 )
+  {
+    if ( *(_BYTE *)(v1 + 2669) )
+      v3 = (char *)this + 392;
+    else
+      v3 = (char *)this + 396;
+    goto LABEL_10;
+  }
+  (*(void (__cdecl **)(_DWORD *, int))(*g_pVGuiSurface + 56))(g_pVGuiSurface, -14145496);
+  v4 = g_pVGuiSurface;
+  v5 = *(int (__cdecl **)(_DWORD *, _DWORD, _DWORD, int, int))(*g_pVGuiSurface + 60);
+LABEL_11:
+  v10 = v5;
+  Wide = vgui::Panel::GetWide(this);
+  Tall = vgui::Panel::GetTall(this);
+  return v10(v4, 0, 0, Wide, Tall);
+}

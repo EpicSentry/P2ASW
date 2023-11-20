@@ -352,6 +352,10 @@ void CNPC_FloorTurret::Spawn( void )
 	CreateVPhysics();
 
 	SetState(NPC_STATE_IDLE);
+
+
+	//HACK: The activate function isn't being called for some reason, so just do this:
+	Activate();
 }
 
 //-----------------------------------------------------------------------------
@@ -1515,6 +1519,8 @@ bool CNPC_FloorTurret::PreThink( turretState_e state )
 			//Stop being targetted
 			SetState( NPC_STATE_DEAD );
 			m_lifeState = LIFE_DEAD;
+
+			AssertMsg(m_pMotionController, "NOTE: If you get this assert then it means our Activate() function wasn't called, this also means you're about to crash.");
 
 			//Disable the tip controller
 			m_pMotionController->Enable( false );

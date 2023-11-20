@@ -1,0 +1,219 @@
+void __cdecl CTrigger_TractorBeam::EndTouch(CTrigger_TractorBeam *const this, CBaseEntity *pOther)
+{
+  unsigned int m_Index; // eax
+  int v3; // ebx
+  char *v4; // edx
+  unsigned int v5; // edx
+  int v6; // eax
+  int v7; // eax
+  unsigned int v8; // edx
+  char *v9; // ecx
+  CPortal_Base2D *v10; // edi
+  const Vector *v11; // eax
+  int v12; // eax
+  unsigned int v13; // edx
+  CSoundEnvelopeController *Controller; // eax
+  unsigned int v15; // ebx
+  unsigned __int16 v16; // ax
+  int v17; // eax
+  CTrigger_TractorBeam *v18; // ecx
+  unsigned int v19; // edx
+  char *v20; // ebx
+  unsigned int v21; // eax
+  char *v22; // edx
+  CTrigger_TractorBeam *v23; // eax
+  EntityBeamHistory_t *beamHistory; // [esp+20h] [ebp-98h]
+  int v25; // [esp+24h] [ebp-94h]
+  UtlRBTreeNode_t<CUtlMap<CHandle<CBaseEntity>,EntityBeamHistory_t>::Node_t,short unsigned int> *v26; // [esp+24h] [ebp-94h]
+  CBaseEntityList *v27; // [esp+28h] [ebp-90h]
+  char *v28; // [esp+2Ch] [ebp-8Ch]
+  char *v29; // [esp+2Ch] [ebp-8Ch]
+  int m_Size; // [esp+2Ch] [ebp-8Ch]
+  CUtlMap<CHandle<CBaseEntity>,EntityBeamHistory_t,short unsigned int>::Node_t search; // [esp+38h] [ebp-80h] BYREF
+  triggerevent_t event; // [esp+74h] [ebp-44h] BYREF
+  int v33[3]; // [esp+88h] [ebp-30h] BYREF
+  int v34[9]; // [esp+94h] [ebp-24h] BYREF
+
+  if ( (*((unsigned __int8 (__cdecl **)(CTrigger_TractorBeam *const, CBaseEntity *))this->_vptr_IHandleEntity + 198))(
+         this,
+         pOther) )
+  {
+    CBaseVPhysicsTrigger::EndTouch(this, pOther);
+    if ( pOther
+      && (pOther->m_iClassname.pszValue == "npc_portal_turret_floor"
+       || CBaseEntity::ClassMatchesComplex(pOther, "npc_portal_turret_floor")) )
+    {
+      CNPC_Portal_FloorTurret::OnExitedTractorBeam((CNPC_Portal_FloorTurret *const)pOther);
+    }
+    else if ( UTIL_IsReflectiveCube(pOther) && pOther )
+    {
+      CPropWeightedCube::OnExitedTractorBeam((CPropWeightedCube *const)pOther);
+    }
+    if ( (*((unsigned __int8 (__cdecl **)(CBaseEntity *))pOther->_vptr_IHandleEntity + 86))(pOther) )
+    {
+      m_Index = this->m_hProxyEntity.m_Value.m_Index;
+      v3 = 0;
+      if ( m_Index != -1 )
+      {
+        v4 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+        if ( *((_DWORD *)v4 + 2) == HIWORD(m_Index) )
+        {
+          if ( *((_DWORD *)v4 + 1) )
+          {
+            (*((void (__thiscall **)(CBaseEntityList *, int *))pOther->_vptr_IHandleEntity + 365))(g_pEntityList, v34);
+            (*((void (__stdcall **)(int *))pOther->_vptr_IHandleEntity + 366))(v33);
+            *(float *)&event.pTriggerEntity = *(float *)v33 - *(float *)v34;
+            *(float *)&event.pTriggerPhysics = *(float *)&v33[1] - *(float *)&v34[1];
+            *(float *)&event.pEntity = *(float *)&v33[2] - *(float *)&v34[2];
+            if ( CPortal_Base2D_Shared::AllPortals.m_Size > 0 )
+            {
+              do
+              {
+                v10 = CPortal_Base2D_Shared::AllPortals.m_Memory.m_pMemory[v3];
+                if ( v10 )
+                {
+                  v11 = (const Vector *)(*((int (__cdecl **)(CBaseEntity *))pOther->_vptr_IHandleEntity + 150))(pOther);
+                  if ( UTIL_IsBoxIntersectingPortal(v11, (const Vector *const)&event, v10, 0.0) )
+                  {
+                    if ( this->m_bReversed.m_Value )
+                    {
+                      v5 = this->m_hProxyEntity.m_Value.m_Index;
+                      v6 = 0;
+                      if ( v5 != -1 )
+                      {
+                        v28 = (char *)g_pEntityList + 24 * (unsigned __int16)v5;
+                        if ( *((_DWORD *)v28 + 2) == HIWORD(this->m_hProxyEntity.m_Value.m_Index) )
+                          v6 = *((_DWORD *)v28 + 1);
+                      }
+                      v7 = (*(int (__cdecl **)(int))(*(_DWORD *)v6 + 808))(v6);
+                      if ( (CPortal_Base2D *)v7 == v10 )
+                      {
+LABEL_29:
+                        LOBYTE(v3) = 1;
+                        goto LABEL_30;
+                      }
+                    }
+                    else
+                    {
+                      v12 = 0;
+                      v13 = this->m_hProxyEntity.m_Value.m_Index;
+                      if ( v13 != -1 )
+                      {
+                        v29 = (char *)g_pEntityList + 24 * (unsigned __int16)v13;
+                        if ( *((_DWORD *)v29 + 2) == HIWORD(this->m_hProxyEntity.m_Value.m_Index) )
+                          v12 = *((_DWORD *)v29 + 1);
+                      }
+                      v7 = (*(int (__cdecl **)(int))(*(_DWORD *)v12 + 800))(v12);
+                      if ( (CPortal_Base2D *)v7 == v10 )
+                        goto LABEL_29;
+                    }
+                    v25 = 0;
+                    v8 = v10->m_hLinkedPortal.m_Value.m_Index;
+                    if ( v8 != -1 )
+                    {
+                      v9 = (char *)g_pEntityList + 24 * (unsigned __int16)v8;
+                      if ( *((_DWORD *)v9 + 2) == HIWORD(v8) )
+                        v25 = *((_DWORD *)v9 + 1);
+                    }
+                    if ( v7 == v25 )
+                      goto LABEL_29;
+                  }
+                }
+                ++v3;
+              }
+              while ( CPortal_Base2D_Shared::AllPortals.m_Size > v3 );
+              LOBYTE(v3) = 0;
+            }
+          }
+        }
+      }
+LABEL_30:
+      CPortal_Player::SetLeaveTractorBeam((CPortal_Player *const)pOther, this, v3);
+      if ( this->m_sndPlayerInBeam )
+      {
+        Controller = CSoundEnvelopeController::GetController();
+        (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *, int, _DWORD))Controller->_vptr_CSoundEnvelopeController
+         + 14))(
+          Controller,
+          this->m_sndPlayerInBeam,
+          1056964608,
+          0);
+      }
+    }
+    else
+    {
+      if ( PhysGetTriggerEvent(&event, this) && event.pObject && this->m_pController )
+      {
+        (*((void (__cdecl **)(IPhysicsObject *))event.pObject->_vptr_IPhysicsObject + 25))(event.pObject);
+        (*((void (__cdecl **)(IPhysicsMotionController *, IPhysicsObject *))this->m_pController->_vptr_IPhysicsMotionController
+         + 4))(
+          this->m_pController,
+          event.pObject);
+      }
+      v15 = *(_DWORD *)(*((int (__cdecl **)(CBaseEntity *))pOther->_vptr_IHandleEntity + 3))(pOther);
+      search.elem.m_beams.m_Size = 0;
+      search.elem.m_beams.m_pElements = (BeamInfo_t *)&search.elem;
+      search.key.m_Index = v15;
+      v16 = CUtlRBTree<CUtlMap<CHandle<CBaseEntity>,EntityBeamHistory_t,unsigned short>::Node_t,unsigned short,CUtlMap<CHandle<CBaseEntity>,EntityBeamHistory_t,unsigned short>::CKeyLess,CUtlMemory<UtlRBTreeNode_t<CUtlMap<CHandle<CBaseEntity>,EntityBeamHistory_t,unsigned short>::Node_t,unsigned short>,unsigned short>>::Find(
+              &g_TractorBeamManager.m_entityBeamHistories.m_Tree,
+              &search);
+      if ( v16 == 0xFFFF )
+      {
+        search.elem.m_beams.m_Size = 0;
+        search.elem.m_beams.m_pElements = (BeamInfo_t *)&search.elem;
+        search.key.m_Index = v15;
+        v16 = CUtlRBTree<CUtlMap<CHandle<CBaseEntity>,EntityBeamHistory_t,unsigned short>::Node_t,unsigned short,CUtlMap<CHandle<CBaseEntity>,EntityBeamHistory_t,unsigned short>::CKeyLess,CUtlMemory<UtlRBTreeNode_t<CUtlMap<CHandle<CBaseEntity>,EntityBeamHistory_t,unsigned short>::Node_t,unsigned short>,unsigned short>>::Insert(
+                &g_TractorBeamManager.m_entityBeamHistories.m_Tree,
+                &search);
+      }
+      v26 = &g_TractorBeamManager.m_entityBeamHistories.m_Tree.m_Elements.m_pMemory[v16];
+      m_Size = v26->m_Data.elem.m_beams.m_Size;
+      if ( m_Size > 0 )
+      {
+        v17 = 0;
+        v27 = g_pEntityList;
+        beamHistory = &v26->m_Data.elem;
+        while ( 1 )
+        {
+          v18 = 0;
+          v19 = *(_DWORD *)&beamHistory->m_beams.m_Memory.m_Memory[8 * v17];
+          if ( v19 != -1 )
+          {
+            v20 = (char *)g_pEntityList + 24 * (unsigned __int16)v19;
+            if ( *((_DWORD *)v20 + 2) == HIWORD(v19) )
+              v18 = (CTrigger_TractorBeam *)*((_DWORD *)v20 + 1);
+          }
+          if ( this == v18 )
+            break;
+          if ( ++v17 == m_Size )
+            goto LABEL_53;
+        }
+        if ( m_Size - v17 - 1 > 0 )
+        {
+          _V_memmove(
+            (char *)beamHistory + 8 * v17,
+            &beamHistory->m_beams.m_Memory.m_Memory[8 * v17 + 8],
+            8 * (m_Size - v17 - 1));
+          m_Size = v26->m_Data.elem.m_beams.m_Size;
+        }
+        v26->m_Data.elem.m_beams.m_Size = --m_Size;
+      }
+      if ( m_Size )
+      {
+        v27 = g_pEntityList;
+LABEL_53:
+        v21 = *(_DWORD *)v26->m_Data.elem.m_beams.m_Memory.m_Memory;
+        if ( v21 != -1 )
+        {
+          v22 = (char *)v27 + 24 * (unsigned __int16)v21;
+          if ( *((_DWORD *)v22 + 2) == HIWORD(v21) )
+          {
+            v23 = (CTrigger_TractorBeam *)*((_DWORD *)v22 + 1);
+            if ( v23 )
+              CTrigger_TractorBeam::ForceAttachEntity(v23, pOther);
+          }
+        }
+      }
+    }
+  }
+}

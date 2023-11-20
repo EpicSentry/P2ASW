@@ -1,0 +1,3 @@
+class Blobulator::LightBucketImplementation::CBucket
+{
+};

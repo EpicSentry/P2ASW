@@ -481,6 +481,8 @@ $Project
 		$File	"lights.cpp"
 		$File	"lights.h"
 		$File	"locksounds.h"
+		$File	"logic_eventlistener.cpp"
+		$File	"logic_eventlistener.h"
 		$File	"logic_measure_movement.cpp"
 		$File	"logic_navigation.cpp"
 		$File	"logicauto.cpp"

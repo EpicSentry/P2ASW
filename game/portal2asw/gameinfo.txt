@@ -3,7 +3,7 @@
 	"game"		"Portal 2 In Alien Swarm"
 	"title"		"    "	// asw - leave this blank as we have a texture logo
 	"type"		"multiplayer_only"
-	GameData	"swarm.fgd"
+	GameData	"portal2.fgd"
 	InstancePath "tilegen/instances/"
 	
 	SupportsDX8     0

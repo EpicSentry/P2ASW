@@ -1,0 +1,235 @@
+void __cdecl CTrigger_TractorBeam::StartTouch(CTrigger_TractorBeam *const this, CBaseEntity *pOther)
+{
+  const CTrigger_TractorBeam *v2; // ebx
+  bool v3; // cc
+  const char *v4; // eax
+  bool v5; // zf
+  edict_t *m_pPev; // ecx
+  signed int v7; // eax
+  CSoundPatch *v8; // eax
+  CBaseEntity *v9; // ecx
+  unsigned __int16 v10; // ax
+  bool IsDifferentBeam; // al
+  UtlRBTreeNode_t<CUtlMap<CHandle<CBaseEntity>,EntityBeamHistory_t>::Node_t,short unsigned int> *v12; // edx
+  bool TriggerEvent; // al
+  unsigned int v14; // eax
+  char *v15; // ecx
+  int i; // eax
+  unsigned int v17; // ecx
+  CTrigger_TractorBeam *v18; // esi
+  char *v19; // edi
+  CTrigger_TractorBeam *v20; // [esp+28h] [ebp-C0h]
+  CBaseEntity *v21; // [esp+2Ch] [ebp-BCh]
+  UtlRBTreeNode_t<CUtlMap<CHandle<CBaseEntity>,EntityBeamHistory_t>::Node_t,short unsigned int> *v22; // [esp+30h] [ebp-B8h]
+  UtlRBTreeNode_t<CUtlMap<CHandle<CBaseEntity>,EntityBeamHistory_t>::Node_t,short unsigned int> *v23; // [esp+30h] [ebp-B8h]
+  UtlRBTreeNode_t<CUtlMap<CHandle<CBaseEntity>,EntityBeamHistory_t>::Node_t,short unsigned int> *v24; // [esp+30h] [ebp-B8h]
+  UtlRBTreeNode_t<CUtlMap<CHandle<CBaseEntity>,EntityBeamHistory_t>::Node_t,short unsigned int> *v25; // [esp+30h] [ebp-B8h]
+  EntityBeamHistory_t *beamHistory; // [esp+34h] [ebp-B4h]
+  CSoundEnvelopeController *controller; // [esp+38h] [ebp-B0h]
+  CSoundEnvelopeController *controllera; // [esp+38h] [ebp-B0h]
+  EmitSound_t ep; // [esp+4Ch] [ebp-9Ch] BYREF
+  triggerevent_t event; // [esp+94h] [ebp-54h] BYREF
+  int v31; // [esp+C8h] [ebp-20h]
+  IPhysicsObject **p_pTriggerPhysics; // [esp+CCh] [ebp-1Ch]
+
+  v2 = this;
+  CBaseVPhysicsTrigger::StartTouch(this, pOther);
+  if ( (*((unsigned __int8 (__cdecl **)(const CTrigger_TractorBeam *, CBaseEntity *))v2->_vptr_IHandleEntity + 198))(
+         v2,
+         pOther) )
+  {
+    if ( pOther
+      && (pOther->m_iClassname.pszValue == "npc_portal_turret_floor"
+       || CBaseEntity::ClassMatchesComplex(pOther, "npc_portal_turret_floor")) )
+    {
+      CNPC_Portal_FloorTurret::OnEnteredTractorBeam((CNPC_Portal_FloorTurret *const)pOther);
+    }
+    else if ( UTIL_IsReflectiveCube(pOther) && pOther )
+    {
+      CPropWeightedCube::OnEnteredTractorBeam((CPropWeightedCube *const)pOther);
+    }
+    if ( (*((unsigned __int8 (__cdecl **)(CBaseEntity *))pOther->_vptr_IHandleEntity + 86))(pOther) )
+    {
+      CPortal_Player::SetInTractorBeam((CPortal_Player *const)pOther, this);
+      controller = CSoundEnvelopeController::GetController();
+      if ( this->m_sndPlayerInBeam )
+      {
+        (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))controller->_vptr_CSoundEnvelopeController + 5))(
+          controller,
+          this->m_sndPlayerInBeam);
+        (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))controller->_vptr_CSoundEnvelopeController + 11))(
+          controller,
+          this->m_sndPlayerInBeam);
+        this->m_sndPlayerInBeam = 0;
+      }
+      ep.m_bEmitCloseCaption = 1;
+      ep.m_nPitch = 100;
+      memset(&ep.m_pOrigin, 0, 12);
+      ep.m_bWarnOnMissingCloseCaption = 0;
+      ep.m_bWarnOnDirectWaveReference = 0;
+      ep.m_nSpeakerEntity = -1;
+      memset(&ep.m_UtlVecSoundOrigin, 0, sizeof(ep.m_UtlVecSoundOrigin));
+      ep.m_hSoundScriptHash = -1;
+      ep.m_nSoundEntryVersion = 1;
+      ep.m_pSoundName = 0;
+      v3 = gpGlobals->maxClients <= 1;
+      ep.m_flVolume = 1.0;
+      ep.m_SoundLevel = SNDLVL_NONE;
+      ep.m_nFlags = 0;
+      ep.m_nChannel = 6;
+      if ( !v3
+        && (CBasePlayer::HasAttachedSplitScreenPlayers((const CBasePlayer *const)pOther)
+         || CBasePlayer::IsSplitScreenPlayer((const CBasePlayer *const)pOther)) )
+      {
+        v4 = "VFX.PlayerEnterTbeam_SS";
+      }
+      else
+      {
+        v4 = "VFX.PlayerEnterTbeam";
+      }
+      v5 = (this->m_iEFlags & 0x800) == 0;
+      ep.m_pSoundName = v4;
+      ep.m_flVolume = 1.0;
+      ep.m_SoundLevel = SNDLVL_NORM;
+      if ( !v5 )
+        CBaseEntity::CalcAbsolutePosition(this);
+      CRecipientFilter::CRecipientFilter((CRecipientFilter *const)&event);
+      event.pTriggerEntity = (CBaseEntity *)off_B98108;
+      CRecipientFilter::AddRecipientsByPAS((CRecipientFilter *const)&event, &this->m_vecAbsOrigin);
+      event.pTriggerEntity = (CBaseEntity *)off_B98128;
+      CPASAttenuationFilter::Filter((CPASAttenuationFilter *const)&event, &this->m_vecAbsOrigin, 0.80000001);
+      CRecipientFilter::MakeReliable((CRecipientFilter *const)&event);
+      CRecipientFilter::RemoveAllRecipients((CRecipientFilter *const)&event);
+      CRecipientFilter::AddRecipient((CRecipientFilter *const)&event, (CBasePlayer *)pOther);
+      m_pPev = this->m_Network.m_pPev;
+      v7 = 0;
+      if ( m_pPev )
+        v7 = m_pPev - gpGlobals->pEdicts;
+      v8 = (CSoundPatch *)(*((int (__cdecl **)(CSoundEnvelopeController *, triggerevent_t *, signed int, EmitSound_t *))controller->_vptr_CSoundEnvelopeController
+                           + 10))(
+                            controller,
+                            &event,
+                            v7,
+                            &ep);
+      this->m_sndPlayerInBeam = v8;
+      (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *, int, int, _DWORD))controller->_vptr_CSoundEnvelopeController
+       + 2))(
+        controller,
+        v8,
+        1065353216,
+        1120403456,
+        0);
+      event.pTriggerEntity = (CBaseEntity *)off_B98108;
+      CRecipientFilter::~CRecipientFilter((CRecipientFilter *const)&event);
+      ep.m_UtlVecSoundOrigin.m_Size = 0;
+      if ( ep.m_UtlVecSoundOrigin.m_Memory.m_nGrowSize >= 0 )
+      {
+        if ( ep.m_UtlVecSoundOrigin.m_Memory.m_pMemory )
+          (*(void (__cdecl **)(_DWORD, Vector *))(*g_pMemAlloc + 8))(
+            g_pMemAlloc,
+            ep.m_UtlVecSoundOrigin.m_Memory.m_pMemory);
+      }
+    }
+    else
+    {
+      v9 = *(CBaseEntity **)(*((int (__cdecl **)(CBaseEntity *))pOther->_vptr_IHandleEntity + 3))(pOther);
+      p_pTriggerPhysics = &event.pTriggerPhysics;
+      v31 = 0;
+      event.pTriggerEntity = v9;
+      v21 = v9;
+      v10 = CUtlRBTree<CUtlMap<CHandle<CBaseEntity>,EntityBeamHistory_t,unsigned short>::Node_t,unsigned short,CUtlMap<CHandle<CBaseEntity>,EntityBeamHistory_t,unsigned short>::CKeyLess,CUtlMemory<UtlRBTreeNode_t<CUtlMap<CHandle<CBaseEntity>,EntityBeamHistory_t,unsigned short>::Node_t,unsigned short>,unsigned short>>::Find(
+              &g_TractorBeamManager.m_entityBeamHistories.m_Tree,
+              (const CUtlMap<CHandle<CBaseEntity>,EntityBeamHistory_t,short unsigned int>::Node_t *const)&event);
+      if ( v10 == 0xFFFF )
+      {
+        v31 = 0;
+        p_pTriggerPhysics = &event.pTriggerPhysics;
+        event.pTriggerEntity = v21;
+        v10 = CUtlRBTree<CUtlMap<CHandle<CBaseEntity>,EntityBeamHistory_t,unsigned short>::Node_t,unsigned short,CUtlMap<CHandle<CBaseEntity>,EntityBeamHistory_t,unsigned short>::CKeyLess,CUtlMemory<UtlRBTreeNode_t<CUtlMap<CHandle<CBaseEntity>,EntityBeamHistory_t,unsigned short>::Node_t,unsigned short>,unsigned short>>::Insert(
+                &g_TractorBeamManager.m_entityBeamHistories.m_Tree,
+                (const CUtlMap<CHandle<CBaseEntity>,EntityBeamHistory_t,short unsigned int>::Node_t *const)&event);
+      }
+      v22 = &g_TractorBeamManager.m_entityBeamHistories.m_Tree.m_Elements.m_pMemory[v10];
+      beamHistory = &v22->m_Data.elem;
+      IsDifferentBeam = EntityBeamHistory_t::IsDifferentBeam(&v22->m_Data.elem, this);
+      v12 = v22;
+      if ( IsDifferentBeam )
+      {
+        if ( this->m_pController )
+        {
+          TriggerEvent = PhysGetTriggerEvent(&event, this);
+          v12 = v22;
+          if ( TriggerEvent )
+          {
+            if ( event.pObject )
+            {
+              (*((void (__cdecl **)(IPhysicsObject *))event.pObject->_vptr_IPhysicsObject + 25))(event.pObject);
+              (*((void (__cdecl **)(IPhysicsMotionController *, IPhysicsObject *, int))this->m_pController->_vptr_IPhysicsMotionController
+               + 3))(
+                this->m_pController,
+                event.pObject,
+                1);
+              v12 = v22;
+            }
+          }
+        }
+        controllera = 0;
+        if ( v12->m_Data.elem.m_beams.m_Size )
+        {
+          v20 = 0;
+          v14 = *(_DWORD *)v12->m_Data.elem.m_beams.m_Memory.m_Memory;
+          if ( v14 != -1 )
+          {
+            v15 = (char *)g_pEntityList + 24 * (unsigned __int16)v14;
+            if ( *((_DWORD *)v15 + 2) == HIWORD(v14) )
+              v20 = (CTrigger_TractorBeam *)*((_DWORD *)v15 + 1);
+          }
+          v24 = v12;
+          CTrigger_TractorBeam::ForceDetachEntity(v20, pOther);
+          v12 = v24;
+          controllera = (CSoundEnvelopeController *)v24->m_Data.elem.m_beams.m_Size;
+          if ( (int)controllera > 0 )
+          {
+            for ( i = 0; (CSoundEnvelopeController *)i != controllera; ++i )
+            {
+              v17 = *(_DWORD *)&v24->m_Data.elem.m_beams.m_Memory.m_Memory[8 * i];
+              v18 = 0;
+              if ( v17 != -1 )
+              {
+                v19 = (char *)g_pEntityList + 24 * (unsigned __int16)v17;
+                if ( *((_DWORD *)v19 + 2) == HIWORD(v17) )
+                  v18 = (CTrigger_TractorBeam *)*((_DWORD *)v19 + 1);
+              }
+              if ( this == v18 )
+              {
+                v2 = this;
+                CUtlVector<BeamInfo_t,CUtlMemoryFixed<BeamInfo_t,6u,0>>::Remove(&beamHistory->m_beams, i);
+                v12 = v24;
+                controllera = (CSoundEnvelopeController *)v24->m_Data.elem.m_beams.m_Size;
+                goto LABEL_44;
+              }
+            }
+            v2 = this;
+LABEL_44:
+            if ( controllera == (CSoundEnvelopeController *)&loc_6 )
+            {
+              v25 = v12;
+              CUtlVector<BeamInfo_t,CUtlMemoryFixed<BeamInfo_t,6u,0>>::Remove(&beamHistory->m_beams, 5);
+              v12 = v25;
+              controllera = (CSoundEnvelopeController *)v25->m_Data.elem.m_beams.m_Size;
+            }
+          }
+        }
+        v12->m_Data.elem.m_beams.m_pElements = (BeamInfo_t *)beamHistory;
+        v12->m_Data.elem.m_beams.m_Size = (int)&controllera->_vptr_CSoundEnvelopeController + 1;
+        v23 = v12;
+        CUtlVector<BeamInfo_t,CUtlMemoryFixed<BeamInfo_t,6u,0>>::ShiftElementsRight(&beamHistory->m_beams, 0, 1);
+        *(_DWORD *)v23->m_Data.elem.m_beams.m_Memory.m_Memory = -1;
+        *(_DWORD *)&v23->m_Data.elem.m_beams.m_Memory.m_Memory[4] = 0;
+        *(_DWORD *)v23->m_Data.elem.m_beams.m_Memory.m_Memory = *(_DWORD *)(*((int (__cdecl **)(const CTrigger_TractorBeam *))v2->_vptr_IHandleEntity
+                                                                            + 3))(v2);
+        *(_DWORD *)&v23->m_Data.elem.m_beams.m_Memory.m_Memory[4] = CTrigger_TractorBeam::GetLastUpdateFrame(v2);
+      }
+    }
+  }
+}

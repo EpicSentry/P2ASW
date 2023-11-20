@@ -1,0 +1,142 @@
+bool __thiscall CIndicatorScreen::Init(CIndicatorScreen *this, KeyValues *pKeyValues, VGuiScreenInitData_t *pInitData)
+{
+  vgui::IVGui *v4; // edi
+  vgui::IVGui_vtbl *v5; // ebx
+  int v6; // eax
+  bool result; // al
+  unsigned int v8; // ecx
+  IHandleEntity *m_pEntity; // eax
+  void *v10; // eax
+  unsigned int m_Index; // ecx
+  int v12; // eax
+  CEntInfo *v13; // edx
+  unsigned int v14; // ecx
+  int v15; // eax
+  bool v16; // zf
+  CEntInfo *v17; // eax
+  IHandleEntity *v18; // eax
+  IHandleEntity_vtbl *v19; // ecx
+  IHandleEntity *v20; // eax
+  void *v21; // eax
+  int v22; // eax
+  int v23; // eax
+  int v24; // eax
+  int v25; // eax
+  int v26; // eax
+  int v27; // eax
+  int v28; // eax
+  int v29; // eax
+
+  v4 = g_pVGui;
+  v5 = g_pVGui->__vftable;
+  v6 = (**(int (__thiscall ***)(char *, _DWORD))((char *)&this->__vftable
+                                               + *(_DWORD *)(*((_DWORD *)&this->__vftable + 1) + 4)
+                                               + 4))(
+         (char *)&this->__vftable + *(_DWORD *)(*((_DWORD *)&this->__vftable + 1) + 4) + 4,
+         0);
+  ((void (__thiscall *)(vgui::IVGui *, int))v5->AddTickSignal)(v4, v6);
+  result = CVGuiScreenPanel::Init(this, pKeyValues, pInitData);
+  if ( result )
+  {
+    v8 = *(&this->m_iConfigID + 1);
+    if ( v8 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v8].m_SerialNumber != HIWORD(v8) )
+      m_pEntity = 0;
+    else
+      m_pEntity = g_pEntityList->m_EntPtrArray[(unsigned __int16)v8].m_pEntity;
+    v10 = __RTDynamicCast(m_pEntity, 0, &C_BaseEntity `RTTI Type Descriptor', &C_VGuiScreen `RTTI Type Descriptor', 0);
+    if ( v10 )
+      this->m_hVGUIScreen.m_Index = *(_DWORD *)(*(int (__thiscall **)(void *))(*(_DWORD *)v10 + 8))(v10);
+    else
+      this->m_hVGUIScreen.m_Index = -1;
+    m_Index = this->m_hVGUIScreen.m_Index;
+    if ( m_Index != -1 )
+    {
+      v12 = (unsigned __int16)m_Index;
+      v13 = &g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index];
+      v14 = HIWORD(m_Index);
+      if ( v13->m_SerialNumber == v14 )
+      {
+        if ( v13->m_pEntity )
+        {
+          v15 = v12;
+          v16 = g_pEntityList->m_EntPtrArray[v15].m_SerialNumber == v14;
+          v17 = &g_pEntityList->m_EntPtrArray[v15];
+          if ( v16 )
+            v18 = v17->m_pEntity;
+          else
+            v18 = 0;
+          v19 = v18[80].__vftable;
+          if ( v19 == (IHandleEntity_vtbl *)-1
+            || g_pEntityList->m_EntPtrArray[(unsigned __int16)v19].m_SerialNumber != (unsigned int)v19 >> 16 )
+          {
+            v20 = 0;
+          }
+          else
+          {
+            v20 = g_pEntityList->m_EntPtrArray[(unsigned __int16)v19].m_pEntity;
+          }
+          v21 = __RTDynamicCast(
+                  v20,
+                  0,
+                  &C_BaseEntity `RTTI Type Descriptor',
+                  &C_LabIndicatorPanel `RTTI Type Descriptor',
+                  0);
+          if ( v21 )
+            this->m_hScreenEntity.m_Index = *(_DWORD *)(*(int (__thiscall **)(void *))(*(_DWORD *)v21 + 8))(v21);
+          else
+            this->m_hScreenEntity.m_Index = -1;
+        }
+      }
+    }
+    if ( this->m_nTimerBackgroundTextureID == -1 )
+    {
+      v22 = g_pVGuiSurface->CreateNewTextureID(g_pVGuiSurface, 0);
+      this->m_nTimerBackgroundTextureID = v22;
+      g_pVGuiSurface->DrawSetTextureFile(g_pVGuiSurface, v22, "vgui/signage/vgui_countdown_background", 1, 0);
+    }
+    if ( this->m_nTimerBackgroundActiveTextureID == -1 )
+    {
+      v23 = g_pVGuiSurface->CreateNewTextureID(g_pVGuiSurface, 0);
+      this->m_nTimerBackgroundActiveTextureID = v23;
+      g_pVGuiSurface->DrawSetTextureFile(g_pVGuiSurface, v23, "vgui/signage/vgui_countdown_background_on", 1, 0);
+    }
+    if ( this->m_nTimerUpperSliceTextureID == -1 )
+    {
+      v24 = g_pVGuiSurface->CreateNewTextureID(g_pVGuiSurface, 0);
+      this->m_nTimerUpperSliceTextureID = v24;
+      g_pVGuiSurface->DrawSetTextureFile(g_pVGuiSurface, v24, "vgui/signage/vgui_countdown_slice1", 1, 0);
+    }
+    if ( this->m_nTimerLowerSliceTextureID == -1 )
+    {
+      v25 = g_pVGuiSurface->CreateNewTextureID(g_pVGuiSurface, 0);
+      this->m_nTimerLowerSliceTextureID = v25;
+      g_pVGuiSurface->DrawSetTextureFile(g_pVGuiSurface, v25, "vgui/signage/vgui_countdown_slice2", 1, 0);
+    }
+    if ( *(&this->m_iConfigID + 2) == -1 )
+    {
+      v26 = g_pVGuiSurface->CreateNewTextureID(g_pVGuiSurface, 0);
+      *(&this->m_iConfigID + 2) = v26;
+      g_pVGuiSurface->DrawSetTextureFile(g_pVGuiSurface, v26, "vgui/signage/vgui_indicator_checked", 1, 0);
+    }
+    if ( *(_DWORD *)this->gap190 == -1 )
+    {
+      v27 = g_pVGuiSurface->CreateNewTextureID(g_pVGuiSurface, 0);
+      *(_DWORD *)this->gap190 = v27;
+      g_pVGuiSurface->DrawSetTextureFile(g_pVGuiSurface, v27, "vgui/signage/vgui_indicator_unchecked", 1, 0);
+    }
+    if ( this->m_nXTextureID == -1 )
+    {
+      v28 = g_pVGuiSurface->CreateNewTextureID(g_pVGuiSurface, 0);
+      this->m_nXTextureID = v28;
+      g_pVGuiSurface->DrawSetTextureFile(g_pVGuiSurface, v28, "vgui/signage/vgui_shape04", 1, 0);
+    }
+    if ( this->m_nOTextureID == -1 )
+    {
+      v29 = g_pVGuiSurface->CreateNewTextureID(g_pVGuiSurface, 0);
+      this->m_nOTextureID = v29;
+      g_pVGuiSurface->DrawSetTextureFile(g_pVGuiSurface, v29, "vgui/signage/vgui_shape05", 1, 0);
+    }
+    return 1;
+  }
+  return result;
+}

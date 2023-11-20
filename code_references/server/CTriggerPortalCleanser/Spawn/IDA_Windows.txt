@@ -1,0 +1,96 @@
+void __thiscall CTriggerPortalCleanser::Spawn(CTriggerPortalCleanser *this)
+{
+  edict_t *m_pPev; // ecx
+  FizzlerMultiOriginSoundPlayer *v3; // eax
+  unsigned int m_Index; // eax
+  int v5; // edx
+  CBaseEntity **v6; // eax
+  CBaseEntity *v7; // eax
+  int m_Value; // eax
+  int v9; // ebx
+  edict_t *v10; // ecx
+  CReliableBroadcastRecipientFilter filter; // [esp+10h] [ebp-20h] BYREF
+
+  CBaseTrigger::Spawn(this);
+  this->Precache(this);
+  if ( !this->m_bClientSidePredicted.m_Value )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x484u);
+    }
+    this->m_bClientSidePredicted.m_Value = 1;
+  }
+  CBaseTrigger::InitTrigger(this);
+  if ( CTriggerPortalCleanser::s_FizzlerAmbientSoundPlayer.m_Index == -1
+    || g_pEntityList->m_EntPtrArray[LOWORD(CTriggerPortalCleanser::s_FizzlerAmbientSoundPlayer.m_Index)].m_SerialNumber != HIWORD(CTriggerPortalCleanser::s_FizzlerAmbientSoundPlayer.m_Index)
+    || !g_pEntityList->m_EntPtrArray[LOWORD(CTriggerPortalCleanser::s_FizzlerAmbientSoundPlayer.m_Index)].m_pEntity )
+  {
+    CRecipientFilter::CRecipientFilter(&filter);
+    filter.__vftable = (CReliableBroadcastRecipientFilter_vtbl *)&CBroadcastRecipientFilter::`vftable';
+    CRecipientFilter::AddAllPlayers(&filter);
+    filter.__vftable = (CReliableBroadcastRecipientFilter_vtbl *)&CReliableBroadcastRecipientFilter::`vftable';
+    CRecipientFilter::MakeReliable((CFmtStrN<256> *)&filter);
+    v3 = FizzlerMultiOriginSoundPlayer::Create(&filter, "VFX.FizzlerLp");
+    if ( v3 )
+      m_Index = v3->GetRefEHandle(v3)->m_Index;
+    else
+      m_Index = -1;
+    CTriggerPortalCleanser::s_FizzlerAmbientSoundPlayer.m_Index = m_Index;
+    if ( (this->m_iEFlags & 0x800) != 0 )
+    {
+      CBaseEntity::CalcAbsolutePosition(this);
+      m_Index = CTriggerPortalCleanser::s_FizzlerAmbientSoundPlayer.m_Index;
+    }
+    if ( m_Index == -1
+      || (v5 = (unsigned __int16)m_Index,
+          v6 = (CBaseEntity **)&g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index],
+          g_pEntityList->m_EntPtrArray[v5].m_SerialNumber != HIWORD(CTriggerPortalCleanser::s_FizzlerAmbientSoundPlayer.m_Index)) )
+    {
+      v7 = 0;
+    }
+    else
+    {
+      v7 = *v6;
+    }
+    CBaseEntity::SetAbsOrigin(v7, &this->m_vecAbsOrigin);
+    CRecipientFilter::~CRecipientFilter(&filter);
+  }
+  if ( this->m_bVisible.m_Value )
+  {
+    m_Value = this->m_fEffects.m_Value;
+    v9 = m_Value & 0xFFFFFFDF;
+    if ( m_Value != (m_Value & 0xFFFFFFDF) )
+    {
+      if ( this->m_Network.m_TimerEvent.m_bRegistered )
+      {
+        *((_BYTE *)&this->m_Network + 76) |= 1u;
+      }
+      else
+      {
+        v10 = this->m_Network.m_pPev;
+        if ( v10 )
+          CBaseEdict::StateChanged(v10, 0xA8u);
+      }
+      this->m_fEffects.m_Value = v9;
+    }
+    if ( this->m_Network.m_pPev )
+      this->m_Network.m_pPev->m_fStateFlags |= 0x80u;
+    CBaseEntity::DispatchUpdateTransmitState(this);
+    CBaseEntity::SetTransmitState(this, 32);
+    CBaseEntity::ThinkSet(this, (void (__thiscall *)(CBaseEntity *))CTriggerPortalCleanser::SearchThink, 0.0, 0);
+    CBaseEntity::SetNextThink(this, sv_portal_cleanser_think_rate.m_pParent->m_Value.m_fValue + gpGlobals->curtime, 0);
+    CTriggerPortalCleanser::StartAmbientSounds(this);
+  }
+  CBaseEntity::ThinkSet(
+    this,
+    (void (__thiscall *)(CBaseEntity *))CTriggerPortalCleanser::PlayerPassesTriggerFiltersThink,
+    gpGlobals->curtime + 1.0,
+    CTriggerPortalCleanser::s_szPlayerPassesTriggerFiltersThinkContext);
+}

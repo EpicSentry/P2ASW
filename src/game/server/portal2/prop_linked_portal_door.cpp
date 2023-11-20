@@ -11,8 +11,6 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-#define LINKED_DOOR_CLIENT_NOT_IMPLEMENTED
-
 //=============================================================================
 // Non-animated linked portal door
 //=============================================================================
@@ -566,9 +564,7 @@ class CPropLinkedPortalDoor : public CLinkedPortalDoor
 {
 public:
 	DECLARE_CLASS( CPropLinkedPortalDoor, CLinkedPortalDoor );
-#ifndef LINKED_DOOR_CLIENT_NOT_IMPLEMENTED
 	DECLARE_SERVERCLASS();
-#endif
 	DECLARE_DATADESC();
 	DECLARE_ENT_SCRIPTDESC();
 
@@ -617,10 +613,9 @@ protected:
 	CBoneFollowerManager	m_BoneFollowerManager;
 };
 
-#ifndef LINKED_DOOR_CLIENT_NOT_IMPLEMENTED
 IMPLEMENT_SERVERCLASS_ST( CPropLinkedPortalDoor, DT_PropLinkedPortalDoor )
 END_SEND_TABLE()
-#endif
+
 
 BEGIN_DATADESC( CPropLinkedPortalDoor )
 	

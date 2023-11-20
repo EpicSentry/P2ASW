@@ -1,0 +1,29 @@
+void __thiscall C_PortalLaser::CreateSparkEffect(C_PortalLaser *this)
+{
+  CUtlReference<CSheet> *p_m_pSparkEffect; // esi
+  CNewParticleEffect *v2; // edi
+  CUtlIntrusiveDList<CUtlReference<CSheet> > *p_m_References; // eax
+  CUtlReference<CNewParticleEffect> *m_pHead; // eax
+
+  p_m_pSparkEffect = (CUtlReference<CSheet> *)&this->m_pSparkEffect;
+  v2 = CParticleProperty::Create(&this->m_Particles, LASER_SPARK_EFFECT_NAME, PATTACH_CUSTOMORIGIN, -1, vec3_origin, 0);
+  p_m_References = &p_m_pSparkEffect->m_pObject->m_References;
+  if ( p_m_References != (CUtlIntrusiveDList<CUtlReference<CSheet> > *)v2 )
+  {
+    if ( p_m_References )
+    {
+      CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(p_m_References + 232, p_m_pSparkEffect);
+      p_m_pSparkEffect->m_pObject = 0;
+    }
+    p_m_pSparkEffect->m_pObject = (CSheet *)v2;
+    if ( v2 )
+    {
+      p_m_pSparkEffect->m_pNext = (CUtlReference<CSheet> *)v2->m_References.m_pHead;
+      m_pHead = v2->m_References.m_pHead;
+      if ( m_pHead )
+        m_pHead->m_pPrev = (CUtlReference<CNewParticleEffect> *)p_m_pSparkEffect;
+      p_m_pSparkEffect->m_pPrev = 0;
+      v2->m_References.m_pHead = (CUtlReference<CNewParticleEffect> *)p_m_pSparkEffect;
+    }
+  }
+}

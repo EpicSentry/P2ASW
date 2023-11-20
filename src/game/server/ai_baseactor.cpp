@@ -827,20 +827,15 @@ bool CAI_BaseActor::ValidEyeTarget(const Vector &lookTargetPos)
 //-----------------------------------------------------------------------------
 // Purpose: Returns true if target is in legal range of possible head movements
 //-----------------------------------------------------------------------------
-bool CAI_BaseActor::ValidHeadTarget(const Vector &lookTargetPos)
+bool CAI_BaseActor::ValidHeadTarget(const Vector& vLookTargetDir, float flDistance)
 {
-	Vector vFacing = BodyDirection3D();
-	Vector lookTargetDir = lookTargetPos - EyePosition();
-	float flDist = VectorNormalize(lookTargetDir);
-
-	if (flDist < MIN_LOOK_TARGET_DIST)
-	{
+	if (flDistance < MIN_LOOK_TARGET_DIST)
 		return false;
-	}
 
+	Vector vFacing = BodyDirection3D();
 	// Only look if it doesn't crank my head too far
-	float dotPr = DotProduct(lookTargetDir, vFacing);
-	if (dotPr > 0 && fabs( lookTargetDir.z ) < 0.7) // +- 90 degrees side to side, +- 45 up/down
+	float dotPr = DotProduct(vLookTargetDir, vFacing);
+	if (dotPr > 0 && fabs(vLookTargetDir.z) < 0.7) // +- 90 degrees side to side, +- 45 up/down
 	{
 		return true;
 	}
@@ -1256,7 +1251,10 @@ bool CAI_BaseActor::PickTacticalLookTarget( AILookTargetArgs_t *pArgs )
 
 	if (pEnemy != NULL)
 	{
-		if ( ( FVisible( pEnemy ) || random->RandomInt(0, 3) == 0 ) && ValidHeadTarget(pEnemy->EyePosition()))
+		Vector vLookTargetDir = pEnemy->EyePosition() - EyePosition();
+		float flDist = VectorNormalize(vLookTargetDir);
+
+		if (ValidHeadTarget(vLookTargetDir, flDist) && (FVisible(pEnemy) || random->RandomInt(0, 3) == 0))
 		{
 			// look at enemy closer
 			pArgs->hTarget = pEnemy;
@@ -1364,9 +1362,13 @@ bool CAI_BaseActor::PickRandomLookTarget( AILookTargetArgs_t *pArgs )
 		// keep track of number of interesting things
 		iConsidered++;
 
+		Vector vLookTargetDir = (pEntity->EyePosition() - EyePosition());
+		float flDist = VectorNormalize(vLookTargetDir);
+
+
 		if ((pEntity->GetFlags() & FL_CLIENT) && (pEntity->IsMoving() || random->RandomInt( 0, 2) == 0))
 		{
-			if (FVisible( pEntity ) && ValidHeadTarget(pEntity->EyePosition()))
+			if (ValidHeadTarget(vLookTargetDir, flDist) && FVisible(pEntity))
 			{
 				pArgs->flDuration = random->RandomFloat( 1.0, 4.0 );
 				pBestEntity = pEntity;
@@ -1398,7 +1400,7 @@ bool CAI_BaseActor::PickRandomLookTarget( AILookTargetArgs_t *pArgs )
 
 		if ( iImportance > iHighestImportance )
 		{
-			if (FVisible( pEntity ) && ValidHeadTarget(pEntity->EyePosition()))
+			if ( ValidHeadTarget(vLookTargetDir, flDist) && FVisible( pEntity ) )
 			{
 				iHighestImportance = iImportance;
 				pBestEntity	= pEntity; 

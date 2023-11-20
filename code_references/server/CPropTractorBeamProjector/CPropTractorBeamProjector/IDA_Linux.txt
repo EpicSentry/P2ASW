@@ -1,0 +1,9 @@
+void __cdecl CPropTractorBeamProjector::CPropTractorBeamProjector(CPropTractorBeamProjector *const this)
+{
+  CBaseProjector::CBaseProjector(this);
+  this->_vptr_IHandleEntity = (int (**)(...))off_C9E828;
+  this->m_bUse128Model = 0;
+  this->m_sndMechanical = 0;
+  this->m_sndAmbientMusic = 0;
+  this->m_hAmbientSoundProxy.m_Index = -1;
+}

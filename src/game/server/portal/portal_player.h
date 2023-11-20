@@ -33,6 +33,10 @@ class CPortal_Player;
 	#include "portal2_item_inventory.h"
 #endif
 
+#ifndef NO_TRACTOR_BEAM 
+
+#endif
+
 extern bool UTIL_TimeScaleIsNonStandard( void );
 
 
@@ -70,6 +74,7 @@ public:
 };
 
 class CMoveData;
+class CTrigger_TractorBeam;
 
 //=============================================================================
 // >> Portal_Player
@@ -354,7 +359,7 @@ public:
 	bool FlashlightTurnOn( bool playSound /*= false*/ );
 	void FlashlightTurnOff( bool playSound /*= false*/ );
 	
-#if 0
+#ifndef NO_TRACTOR_BEAM
 	void SetInTractorBeam( CTrigger_TractorBeam *pTractorBeam );
 	void SetLeaveTractorBeam( CTrigger_TractorBeam *pTractorBeam, bool bKeepFloating );
 	CTrigger_TractorBeam* GetTractorBeam( void ) const { return m_PortalLocal.m_hTractorBeam.Get(); }
@@ -568,11 +573,10 @@ private: // PAINT SPECIFIC
 
 	void GivePortalPlayerItems( void );
 
-	void DetermineTraceInfo( Vector &vStart, Vector &vEnd, int iTraceType );
+	void DetermineTraceInfo( Vector &vStart, Vector &vEnd, Vector &vMins, Vector vMaxs, int iTraceType );
 
 	// Find all the contacts
 	void DeterminePaintContacts();
-	void DeterminePaintContactsUnderFeet(); // A hacky way to get the paint power since engine code is limiting us.
 	void PredictPaintContacts( const Vector& contactBoxMin,
 		const Vector& contactBoxMax,
 		const Vector& traceBoxMin,

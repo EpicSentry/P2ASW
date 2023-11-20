@@ -17,7 +17,8 @@
 #include "beam_shared.h"
 #include "prop_portal_shared.h"
 #include "player_pickup.h"
-#include <portal_grabcontroller_shared.h>
+#include "portal_grabcontroller_shared.h"
+#include "c_portal_beam_helper.h"
 
 #define FLOOR_TURRET_PORTAL_EYE_ATTACHMENT 1
 #define FLOOR_TURRET_PORTAL_LASER_ATTACHMENT 2
@@ -37,7 +38,7 @@ public:
 	virtual void	Spawn( void );
 	virtual void	ClientThink( void );
 
-	bool	IsLaserOn( void ) { return m_pBeam != NULL; }
+	bool	IsLaserOn( void );
 	void	LaserOff( void );
 	void	LaserOn( void );
 	float	LaserEndPointSize( void );
@@ -46,17 +47,23 @@ public:
 	QAngle	PreferredCarryAngles() { return QAngle(-45.0f,0.0f,0.0f); }
 	bool	ShouldPredict();
 	C_BasePlayer* GetPredictionOwner() { return GetPlayerHoldingEntity(this); }
+	bool	PredictionErrorShouldResetLatchedForAllPredictables() { return false; }
+	void	UpdateBeam(Vector& vecMuzzle, Vector& vecMuzzleDir);
 
 private:
-	CBeam	*m_pBeam;
+	C_PortalBeamHelper m_beamHelper;
 
 	bool	m_bOutOfAmmo;
 	bool	m_bLaserOn;
+	bool	m_bIsFiring;
 	int		m_sLaserHaloSprite;
 	float	m_fPulseOffset;
 
 	float	m_bBeamFlickerOff;
 	float	m_fBeamFlickerTime;
+	Vector m_vLastMuzzle;
+	Vector m_vLastMuzzleDir;
+	float m_flNextBeamUpdate;
 
 };
 

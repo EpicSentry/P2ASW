@@ -1740,8 +1740,7 @@ void CPortal_Base2D::Resize( float fHalfWidth, float fHalfHeight )
 	
 	UpdatePortalLinkage();
 	
-	//FIXME:
-	//CBaseProjector::TestAllForProjectionChanges();
+	CBaseProjector::TestAllForProjectionChanges();
 }
 
 
@@ -1779,8 +1778,7 @@ void CPortal_Base2D::OnPortalDeactivated( void )
 {
 	BroadcastPortalEvent( PORTALEVENT_FIZZLE );
 	
-	//FIXME:
-	//CBaseProjector::TestAllForProjectionChanges();
+	CBaseProjector::TestAllForProjectionChanges();
 }
 
 //-----------------------------------------------------------------------------

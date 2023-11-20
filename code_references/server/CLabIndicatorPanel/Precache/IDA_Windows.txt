@@ -1,0 +1,4 @@
+void __thiscall CLabIndicatorPanel::Precache(CLabIndicatorPanel *this)
+{
+  PrecacheVGuiScreen("indicator_panel");
+}

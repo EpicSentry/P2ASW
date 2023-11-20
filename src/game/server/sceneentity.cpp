@@ -481,6 +481,11 @@ public:
 
 	void					InputScriptPlayerDeath( inputdata_t &inputdata );
 
+	void					InputSetTarget1( inputdata_t& inputdata );
+	void					InputSetTarget2( inputdata_t& inputdata );
+	void					InputSetTarget3( inputdata_t& inputdata );
+	void					InputSetTarget4( inputdata_t& inputdata );
+
 	void					AddBroadcastTeamTarget( int nTeamIndex );
 	void					RemoveBroadcastTeamTarget( int nTeamIndex );
 
@@ -736,6 +741,11 @@ BEGIN_DATADESC( CSceneEntity )
 
 	DEFINE_KEYFIELD( m_iPlayerDeathBehavior, FIELD_INTEGER, "onplayerdeath" ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "ScriptPlayerDeath", InputScriptPlayerDeath ),
+
+	DEFINE_INPUTFUNC( FIELD_STRING, "SetTarget1", InputSetTarget1 ),
+	DEFINE_INPUTFUNC( FIELD_STRING, "SetTarget2", InputSetTarget2 ),
+	DEFINE_INPUTFUNC( FIELD_STRING, "SetTarget3", InputSetTarget3 ),
+	DEFINE_INPUTFUNC( FIELD_STRING, "SetTarget4", InputSetTarget4 ),
 
 	// Outputs
 	DEFINE_OUTPUT( m_OnStart, "OnStart"),
@@ -2152,6 +2162,37 @@ void CSceneEntity::InputScriptPlayerDeath( inputdata_t &inputdata )
 	}
 }
 
+void CSceneEntity::InputSetTarget1(inputdata_t& inputdata)
+{
+	m_iszTarget1 = MAKE_STRING(inputdata.value.String());
+	m_hActorList.Purge();
+	NetworkProp()->NetworkStateForceUpdate();
+	m_hTarget1 = FindNamedTarget(m_iszTarget1, false);
+}
+
+void CSceneEntity::InputSetTarget2(inputdata_t& inputdata)
+{
+	m_iszTarget2 = MAKE_STRING(inputdata.value.String());
+	m_hActorList.Purge();
+	NetworkProp()->NetworkStateForceUpdate();
+	m_hTarget2 = FindNamedTarget(m_iszTarget2, false);
+}
+
+void CSceneEntity::InputSetTarget3(inputdata_t& inputdata)
+{
+	m_iszTarget3 = MAKE_STRING(inputdata.value.String());
+	m_hActorList.Purge();
+	NetworkProp()->NetworkStateForceUpdate();
+	m_hTarget3 = FindNamedTarget(m_iszTarget3, false);
+}
+
+void CSceneEntity::InputSetTarget4(inputdata_t& inputdata)
+{
+	m_iszTarget4 = MAKE_STRING(inputdata.value.String());
+	m_hActorList.Purge();
+	NetworkProp()->NetworkStateForceUpdate();
+	m_hTarget4 = FindNamedTarget(m_iszTarget4, false);
+}
 
 void CSceneEntity::InputCancelAtNextInterrupt( inputdata_t &inputdata )
 {

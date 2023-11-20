@@ -1,0 +1,16 @@
+void __thiscall C_BaseProjectedEntity::OnPreDataChanged(C_BaseProjectedEntity *this, DataUpdateType_t updateType)
+{
+  int v3; // eax
+  float *v4; // eax
+
+  C_BaseEntity::OnPreDataChanged(this, updateType);
+  v3 = (*(int (__thiscall **)(bool *))(*(_DWORD *)&this[-1].m_bCreatePlacementHelper + 700))(&this[-1].m_bCreatePlacementHelper);
+  this->m_CalcAbsoluteVelocityMutex.m_depth = *(int *)v3;
+  *(float *)&this->m_bIsBlurred = *(float *)(v3 + 4);
+  this->PreDataChanged.vStartPoint.x = *(float *)(v3 + 8);
+  v4 = (float *)(*(int (__thiscall **)(bool *))(*(_DWORD *)&this[-1].m_bCreatePlacementHelper + 704))(&this[-1].m_bCreatePlacementHelper);
+  this->PreDataChanged.vStartPoint.y = *v4;
+  this->PreDataChanged.vStartPoint.z = v4[1];
+  this->PreDataChanged.vEndPoint.x = v4[2];
+  *(QAngle *)&this->PreDataChanged.vEndPoint.y = *C_BaseEntity::GetNetworkAngles((C_BaseProjectedEntity *)((char *)this - 8));
+}

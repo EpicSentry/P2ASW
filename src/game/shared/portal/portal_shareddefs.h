@@ -10,19 +10,19 @@
 #pragma once
 #endif
 
+#ifdef CLIENT_DLL
+//#define NO_TRACTOR_BEAM
+#endif
+
+
 #define PORTAL2_MP_SAVE_FILE "coop_data.txt"
 #define PORTAL2_MP_TEAM_TAUNT_FORCE_LENGTH 64
 
 #define PORTAL_PLAYER_PREDICTION
 
-#include "portal_util_shared.h"
-
 #ifdef DYNAMIC_BOUNDS
 #define PORTAL_HALF_WIDTH portal_half_width.GetInt()
 #define PORTAL_HALF_HEIGHT portal_half_height.GetInt()
-#else
-#define PORTAL_HALF_WIDTH 32
-#define PORTAL_HALF_HEIGHT 54
 #endif
 
 #define PORTAL_HALF_DEPTH 2.0f

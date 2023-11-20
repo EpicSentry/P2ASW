@@ -1,0 +1,5 @@
+// attributes: thunk
+void __thiscall CPropIndicatorPanel::InputStart(CPropIndicatorPanel *this, inputdata_t *indata)
+{
+  CPropIndicatorPanel::StartTimer(this);
+}

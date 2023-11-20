@@ -13,9 +13,8 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-LINK_ENTITY_TO_CLASS( predicted_viewmodel, CPredictedViewModel );
-
 IMPLEMENT_NETWORKCLASS_ALIASED( PredictedViewModel, DT_PredictedViewModel )
+LINK_ENTITY_TO_CLASS_ALIASED( predicted_viewmodel, PredictedViewModel );
 
 BEGIN_NETWORK_TABLE( CPredictedViewModel, DT_PredictedViewModel )
 END_NETWORK_TABLE()
@@ -79,7 +78,7 @@ void CPredictedViewModel::CalcViewModelLag( Vector& origin, QAngle& angles, QAng
 	AngleVectors( -angleDiff, &vLaggedForward, 0, 0 );
 	Vector vForwardDiff = Vector(1,0,0) - vLaggedForward;
 
-	//if ( ShouldFlipModel() )
+	//if ( ShouldFlipViewModel() )
 	//	right = -right;
 
 	// Now offset the origin using that.

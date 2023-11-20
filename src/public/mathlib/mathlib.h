@@ -1781,6 +1781,7 @@ void RotationDeltaAxisAngle( const QAngle &srcAngles, const QAngle &destAngles, 
 void RotationDelta( const QAngle &srcAngles, const QAngle &destAngles, QAngle *out );
 
 typedef __m128 fltx4;
+typedef fltx4 bi32x4;
 
 //-----------------------------------------------------------------------------
 // Clips a line segment such that only the portion in the positive half-space

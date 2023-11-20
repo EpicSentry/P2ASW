@@ -1,0 +1,6 @@
+void __cdecl CTriggerPortalCleanser::InputFizzleTouchingPortals(
+        CTriggerPortalCleanser *const this,
+        inputdata_t *const data)
+{
+  CTriggerPortalCleanser::FizzleTouchingPortals(this);
+}

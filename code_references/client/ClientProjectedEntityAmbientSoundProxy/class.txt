@@ -1,0 +1,11 @@
+class ClientProjectedEntityAmbientSoundProxy : public C_BaseEntity
+{
+	DECLARE_CLASS( ClientProjectedEntityAmbientSoundProxy, C_BaseEntity );
+	DECLARE_CLIENTCLASS();
+public:
+
+	ClientProjectedEntityAmbientSoundProxy();
+	~ClientProjectedEntityAmbientSoundProxy();
+
+	virtual bool	GetSoundSpatialization( SpatializationInfo_t& info );
+};

@@ -1,0 +1,41 @@
+void __cdecl CProjectedWallEntity::DrawWallBoundsHighlight(CProjectedWallEntity *const this)
+{
+  CPhysCollide *m_pWallCollideable; // eax
+  int v2; // ebx
+  int v3; // edi
+  int v4; // edx
+  const Vector *v5; // ecx
+  const Vector *v6; // eax
+  const Vector *v7; // [esp+8h] [ebp-60h]
+  int v8; // [esp+3Ch] [ebp-2Ch]
+  Vector *outVerts; // [esp+4Ch] [ebp-1Ch] BYREF
+
+  m_pWallCollideable = this->m_pWallCollideable;
+  if ( m_pWallCollideable )
+  {
+    v2 = (*((int (__cdecl **)(IPhysicsCollision *, CPhysCollide *, Vector **))physcollision->_vptr_IPhysicsCollision + 42))(
+           physcollision,
+           m_pWallCollideable,
+           &outVerts);
+    if ( v2 / 3 > 0 )
+    {
+      v3 = 0;
+      v4 = 0;
+      do
+      {
+        v8 = v4;
+        v7 = &outVerts[v3 + 2];
+        v5 = &outVerts[v3 + 1];
+        v6 = &outVerts[v3];
+        v3 += 3;
+        NDebugOverlay::Triangle(v6, v5, v7, 42, 82, 190, 128, 0, 0.5);
+        v4 = v8 + 1;
+      }
+      while ( v8 + 1 != v2 / 3 );
+    }
+    (*((void (__cdecl **)(IPhysicsCollision *, int, Vector *))physcollision->_vptr_IPhysicsCollision + 43))(
+      physcollision,
+      v2,
+      outVerts);
+  }
+}

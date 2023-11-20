@@ -1,0 +1,55 @@
+void __cdecl CPortalLaser::Spawn(CPortalLaser *const this)
+{
+  bool v1; // zf
+  const char *pszValue; // eax
+  const char *v3; // ecx
+  int v4; // eax
+  const char *v5; // edx
+  const char *v6; // eax
+  int i; // eax
+
+  CBaseAnimating::Spawn(this);
+  (*((void (__cdecl **)(CPortalLaser *const))this->_vptr_IHandleEntity + 26))(this);
+  v1 = !this->m_bFromReflectedCube;
+  this->m_bGlowInitialized = 0;
+  if ( v1 )
+  {
+    pszValue = this->m_ModelName.pszValue;
+    v3 = "";
+    if ( pszValue )
+      v3 = this->m_ModelName.pszValue;
+    if ( *v3 )
+    {
+      if ( !pszValue )
+        pszValue = "";
+      (*((void (__cdecl **)(CPortalLaser *const, const char *))this->_vptr_IHandleEntity + 27))(this, pszValue);
+    }
+    else
+    {
+      (*((void (__cdecl **)(CPortalLaser *const, const char *))this->_vptr_IHandleEntity + 27))(
+        this,
+        "models/props/laser_emitter.mdl");
+    }
+    CCollisionProperty::SetSolid(&this->m_Collision, SOLID_VPHYSICS);
+    v4 = CBaseAnimating::LookupAttachment(this, "laser_attachment");
+    this->m_iLaserAttachment = v4;
+    if ( !v4 )
+    {
+      v5 = this->m_ModelName.pszValue;
+      v6 = this->m_iName.m_Value.pszValue;
+      if ( !v5 )
+        v5 = "";
+      if ( !v6 )
+        v6 = "";
+      Warning("env_portal_laser '%s' : model named '%s' does not have attachment 'laser_attachment'\n", v6, v5);
+    }
+    (*((void (__cdecl **)(CPortalLaser *const))this->_vptr_IHandleEntity + 152))(this);
+  }
+  for ( i = 0; i != 33; ++i )
+    this->m_pAmbientSound[i] = 0;
+  CPortalLaser::CreateHelperEntities(this);
+  if ( !this->m_bStartOff )
+    CPortalLaser::TurnOn(this);
+  CBaseAnimating::SetFadeDistance(this, -1.0, 0.0);
+  CBaseEntity::SetGlobalFadeScale(this, 0.0);
+}

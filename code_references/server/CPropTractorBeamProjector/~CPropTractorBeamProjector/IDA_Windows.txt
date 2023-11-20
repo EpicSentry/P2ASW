@@ -1,0 +1,48 @@
+void __thiscall CPropTractorBeamProjector::~CPropTractorBeamProjector(CPropTractorBeamProjector *this)
+{
+  CSoundEnvelopeController *Controller; // esi
+  unsigned int m_Index; // ecx
+  int v4; // eax
+  CEntInfo *v5; // edx
+  unsigned int v6; // ecx
+  int v7; // eax
+  bool v8; // zf
+  CBaseEntity **v9; // eax
+
+  this->__vftable = (CPropTractorBeamProjector_vtbl *)&CPropTractorBeamProjector::`vftable';
+  Controller = CSoundEnvelopeController::GetController();
+  if ( this->m_sndMechanical )
+  {
+    Controller->Shutdown(Controller, this->m_sndMechanical);
+    Controller->SoundDestroy(Controller, this->m_sndMechanical);
+  }
+  if ( this->m_sndAmbientMusic )
+  {
+    Controller->Shutdown(Controller, this->m_sndAmbientMusic);
+    Controller->SoundDestroy(Controller, this->m_sndAmbientMusic);
+  }
+  m_Index = this->m_hAmbientSoundProxy.m_Index;
+  if ( m_Index != -1 )
+  {
+    v4 = (unsigned __int16)m_Index;
+    v5 = &g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index];
+    v6 = HIWORD(m_Index);
+    if ( v5->m_SerialNumber == v6 )
+    {
+      if ( v5->m_pEntity )
+      {
+        v7 = v4;
+        v8 = g_pEntityList->m_EntPtrArray[v7].m_SerialNumber == v6;
+        v9 = (CBaseEntity **)&g_pEntityList->m_EntPtrArray[v7];
+        if ( v8 )
+        {
+          UTIL_Remove(*v9);
+          CBaseProjector::~CBaseProjector(this);
+          return;
+        }
+        UTIL_Remove(0);
+      }
+    }
+  }
+  CBaseProjector::~CBaseProjector(this);
+}

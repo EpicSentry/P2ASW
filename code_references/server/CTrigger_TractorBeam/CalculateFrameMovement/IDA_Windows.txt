@@ -1,0 +1,563 @@
+// local variable allocation has failed, the output may be wrong!
+// bad sp value at call has been detected, the output may be wrong!
+void __userpurge CTrigger_TractorBeam::CalculateFrameMovement(
+        CTrigger_TractorBeam *this@<ecx>,
+        float a2@<ebp>,
+        int a3@<edi>,
+        int a4@<esi>,
+        IPhysicsObject *pObject,
+        CBaseEntity *pEntity,
+        float deltaTime,
+        Vector *linear,
+        Vector *angular)
+{
+  CBaseEntity *v10; // esi
+  Vector *v11; // eax
+  int m_iEFlags; // ecx
+  bool v13; // al
+  unsigned int m_Index; // ecx
+  CBaseEntityList *v15; // esi
+  int v16; // eax
+  CEntInfo *v17; // edx
+  unsigned int v18; // ecx
+  int v19; // eax
+  bool v20; // zf
+  CEntInfo *v21; // eax
+  IHandleEntity *m_pEntity; // ecx
+  int v23; // eax
+  unsigned int v24; // ecx
+  int v25; // eax
+  CEntInfo *v26; // edx
+  unsigned int v27; // ecx
+  int v28; // eax
+  CEntInfo *v29; // eax
+  IHandleEntity *v30; // eax
+  bool v31; // al
+  CPortal_Player *v32; // eax
+  CBaseEntity *v33; // esi
+  const Vector *AbsVelocity; // eax
+  float x; // xmm0_4
+  float y; // xmm1_4
+  float z; // xmm2_4
+  const Vector *(__thiscall *WorldSpaceCenter)(CBaseEntity *); // eax
+  float *v39; // eax
+  float v40; // xmm0_4
+  int v41; // esi
+  int v42; // eax
+  __int128 v43; // xmm1
+  __int128 v44; // xmm1
+  __int128 v45; // xmm1
+  float v46; // ecx
+  float v47; // edx
+  float v48; // xmm0_4
+  float v49; // xmm2_4
+  float v50; // xmm0_4
+  float v51; // xmm1_4
+  float v52; // xmm0_4
+  float v53; // xmm1_4
+  float v54; // xmm2_4
+  float m_Value; // xmm1_4
+  double v56; // st7
+  float v57; // xmm1_4
+  float (__thiscall *CalculateAngularDrag)(IPhysicsObject *, const Vector *); // edx
+  double v59; // st7
+  float v60; // xmm1_4
+  double LinearLimit; // st7
+  double v62; // st7
+  float v63; // xmm0_4
+  float v64; // xmm0_4
+  float v65; // xmm1_4
+  float v66; // xmm2_4
+  float v67; // xmm1_4
+  float v68; // xmm4_4
+  float v69; // xmm1_4
+  float v70; // xmm3_4
+  float v71; // xmm1_4
+  CBasePlayer *v72; // xmm2_4
+  float v73; // xmm0_4
+  float v74; // xmm1_4
+  float v75; // xmm1_4
+  float v76; // xmm2_4
+  float v77; // xmm0_4
+  CBaseEntity_vtbl *v78; // edx
+  const QAngle *(__thiscall *EyeAngles)(CBaseEntity *); // eax
+  const QAngle *v80; // eax
+  float v81; // xmm0_4
+  float v82; // xmm7_4
+  float v83; // xmm4_4
+  float v84; // xmm5_4
+  float v85; // xmm3_4
+  float v86; // xmm0_4
+  double v87; // st6
+  float v88; // xmm7_4
+  float v89; // xmm1_4
+  float v90; // xmm6_4
+  float v91; // xmm0_4
+  float v92; // edi
+  float v93; // xmm6_4
+  float v94; // xmm1_4
+  float v95; // xmm5_4
+  float v96; // xmm0_4
+  float v97; // xmm3_4
+  float v98; // xmm4_4
+  float v99; // xmm1_4
+  float v100; // xmm5_4
+  float v101; // xmm0_4
+  float v102; // xmm3_4
+  float v103; // xmm2_4
+  float v104; // eax
+  float v105; // xmm1_4
+  float v106; // xmm3_4
+  float v107; // xmm0_4
+  float v108; // xmm2_4
+  __int128 v111; // [esp+2Ch] [ebp-DCh] BYREF
+  Vector vForward; // [esp+3Ch] [ebp-CCh] BYREF
+  _BYTE vMidPoint[20]; // [esp+48h] [ebp-C0h] OVERLAPPED BYREF
+  Vector temp; // [esp+5Ch] [ebp-ACh] BYREF
+  Vector vWorldPos; // [esp+68h] [ebp-A0h] BYREF
+  float flPathPerc; // [esp+74h] [ebp-94h]
+  Vector angVel; // [esp+78h] [ebp-90h] BYREF
+  Vector vCenteringPos; // [esp+84h] [ebp-84h] BYREF
+  Vector vRight; // [esp+90h] [ebp-78h] BYREF
+  Vector vUp; // [esp+9Ch] [ebp-6Ch] BYREF
+  float angDrag; // [esp+A8h] [ebp-60h]
+  Vector vShoveDir; // [esp+ACh] [ebp-5Ch] BYREF
+  Vector vecForceDir; // [esp+B8h] [ebp-50h] BYREF
+  float angSpeed; // [esp+C4h] [ebp-44h]
+  CBasePlayer *pPlayer; // [esp+C8h] [ebp-40h]
+  Vector vel; // [esp+CCh] [ebp-3Ch] BYREF
+  __int64 flLinearScale; // [esp+D8h] [ebp-30h] OVERLAPPED BYREF
+  float flAirControlMod; // [esp+E0h] [ebp-28h]
+  _BYTE origin_2[14]; // [esp+E6h] [ebp-22h] OVERLAPPED BYREF
+  float speedScale; // [esp+F4h] [ebp-14h]
+  Vector vSubDir; // [esp+F8h] [ebp-10h]
+  float retaddr; // [esp+108h] [ebp+0h]
+
+  vSubDir.y = a2;
+  vSubDir.z = retaddr;
+  if ( pObject )
+  {
+    ((void (__thiscall *)(IPhysicsObject *, Vector *, _DWORD, int, int))pObject->GetPosition)(pObject, &temp, 0, a3, a4);
+    pObject->GetVelocity(pObject, (Vector *)&vecForceDir.z, (Vector *)&vWorldPos.y);
+    v10 = pEntity;
+  }
+  else
+  {
+    v10 = pEntity;
+    v11 = (Vector *)((int (__thiscall *)(CBaseEntity *, int, int))pEntity->WorldSpaceCenter)(pEntity, a3, a4);
+    m_iEFlags = pEntity->m_iEFlags;
+    temp = *v11;
+    if ( (m_iEFlags & 0x1000) != 0 )
+      CBaseEntity::CalcAbsoluteVelocity(pEntity);
+    vecForceDir.z = pEntity->m_vecAbsVelocity.x;
+    angSpeed = pEntity->m_vecAbsVelocity.y;
+    pPlayer = (CBasePlayer *)LODWORD(pEntity->m_vecAbsVelocity.z);
+    vWorldPos.y = 0.0;
+    vWorldPos.z = 0.0;
+    flPathPerc = 0.0;
+  }
+  v10->IsPlayer(v10);
+  *(float *)&flLinearScale = this->m_vEnd.m_Value.x - this->m_vStart.m_Value.x;
+  *((float *)&flLinearScale + 1) = this->m_vEnd.m_Value.y - this->m_vStart.m_Value.y;
+  flAirControlMod = this->m_vEnd.m_Value.z - this->m_vStart.m_Value.z;
+  *(_QWORD *)&vShoveDir.x = flLinearScale;
+  vShoveDir.z = flAirControlMod;
+  VectorNormalize(&vShoveDir);
+  vel.x = FLOAT_1_0;
+  angVel.x = (float)((float)(vecForceDir.z * deltaTime) * 5.0) + temp.x;
+  angVel.y = (float)((float)(angSpeed * deltaTime) * 5.0) + temp.y;
+  angVel.z = (float)((float)(*(float *)&pPlayer * deltaTime) * 5.0) + temp.z;
+  CalcClosestPointOnLineSegment(&angVel, &this->m_vStart.m_Value, &this->m_vEnd.m_Value, &vForward, &vWorldPos.x);
+  vecForceDir.y = 0.0;
+  if ( origin_2[0] )
+  {
+    v13 = pEntity->IsPlayer(pEntity);
+    m_Index = this->m_hProxyEntity.m_Value.m_Index;
+    v15 = g_pEntityList;
+    LODWORD(vecForceDir.y) = v13 ? pEntity : 0;
+    if ( m_Index != -1
+      && (v16 = (unsigned __int16)m_Index,
+          v17 = &g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index],
+          v18 = HIWORD(m_Index),
+          v17->m_SerialNumber == v18)
+      && v17->m_pEntity )
+    {
+      v19 = v16;
+      v20 = g_pEntityList->m_EntPtrArray[v19].m_SerialNumber == v18;
+      v21 = &g_pEntityList->m_EntPtrArray[v19];
+      if ( v20 )
+        m_pEntity = v21->m_pEntity;
+      else
+        m_pEntity = 0;
+      v23 = ((int (__thiscall *)(IHandleEntity *))m_pEntity->__vftable[67].~IHandleEntity)(m_pEntity);
+      v15 = g_pEntityList;
+      HIBYTE(vSubDir.x) = v23 != 0;
+    }
+    else
+    {
+      HIBYTE(vSubDir.x) = 0;
+    }
+    v24 = this->m_hProxyEntity.m_Value.m_Index;
+    if ( v24 != -1
+      && (v25 = (unsigned __int16)v24,
+          v26 = &v15->m_EntPtrArray[(unsigned __int16)v24],
+          v27 = HIWORD(v24),
+          v26->m_SerialNumber == v27)
+      && v26->m_pEntity )
+    {
+      v28 = v25;
+      v20 = v15->m_EntPtrArray[v28].m_SerialNumber == v27;
+      v29 = &v15->m_EntPtrArray[v28];
+      if ( v20 )
+        v30 = v29->m_pEntity;
+      else
+        v30 = 0;
+      v31 = ((int (__thiscall *)(IHandleEntity *))v30->__vftable[66].SetRefEHandle)(v30) != 0;
+    }
+    else
+    {
+      v31 = 0;
+    }
+    if ( this->m_bReversed.m_Value )
+      origin_2[1] = HIBYTE(vSubDir.x);
+    else
+      origin_2[1] = v31;
+    *(_DWORD *)&origin_2[2] = 0;
+    v20 = tbeam_prevent_players_from_colliding.m_pParent->m_Value.m_nValue == 0;
+    HIBYTE(vSubDir.x) = 0;
+    vel.y = 0.0;
+    if ( !v20 && g_pGameRules->IsMultiplayer(g_pGameRules) )
+    {
+      v32 = (CPortal_Player *)UTIL_OtherPlayer((const CBasePlayer *)LODWORD(vecForceDir.y));
+      v33 = v32;
+      if ( v32 )
+      {
+        if ( CPortal_Player::GetTractorBeam(v32) == this )
+        {
+          AbsVelocity = CBaseEntity::GetAbsVelocity(v33);
+          x = AbsVelocity->x;
+          y = AbsVelocity->y;
+          z = AbsVelocity->z;
+          WorldSpaceCenter = v33->WorldSpaceCenter;
+          *(float *)&flLinearScale = (float)(x * deltaTime) * 5.0;
+          *((float *)&flLinearScale + 1) = (float)(y * deltaTime) * 5.0;
+          flAirControlMod = (float)(z * deltaTime) * 5.0;
+          v39 = (float *)WorldSpaceCenter(v33);
+          vCenteringPos.x = *v39 + *(float *)&flLinearScale;
+          v40 = v39[1] + *((float *)&flLinearScale + 1);
+          speedScale = COERCE_FLOAT((Vector *)&vel.z);
+          vCenteringPos.y = v40;
+          vCenteringPos.z = v39[2] + flAirControlMod;
+          CalcClosestPointOnLineSegment(&vCenteringPos, &this->m_vStart.m_Value, &this->m_vEnd.m_Value, &vRight, &vel.z);
+          if ( vWorldPos.x != vel.z )
+          {
+            if ( vel.z <= vWorldPos.x )
+            {
+              HIBYTE(vSubDir.x) = 0;
+              goto LABEL_33;
+            }
+            HIBYTE(vSubDir.x) = 1;
+            goto LABEL_32;
+          }
+          v41 = CBaseEntity::entindex(v33);
+          v42 = CBaseEntity::entindex((CBaseEntity *)LODWORD(vecForceDir.y));
+          HIBYTE(vSubDir.x) = v42 > v41;
+          if ( v42 > v41 )
+          {
+LABEL_32:
+            CalcClosestPointOnLineSegment(
+              &angVel,
+              &this->m_vStart.m_Value,
+              COERCE_CONST_VECTOR_(vRight.x - (float)(vShoveDir.x * 18.0)),
+              COERCE_VECTOR_(vRight.y - (float)(vShoveDir.y * 18.0)),
+              COERCE_FLOAT_(vRight.z - (float)(vShoveDir.z * 18.0)));
+            v43 = 0i64;
+            *(float *)&v43 = fsqrt(
+                               (float)((float)((float)(*(float *)&origin_2[6] - this->m_vStart.m_Value.x)
+                                             * (float)(*(float *)&origin_2[6] - this->m_vStart.m_Value.x))
+                                     + (float)((float)(*(float *)&origin_2[10] - this->m_vStart.m_Value.y)
+                                             * (float)(*(float *)&origin_2[10] - this->m_vStart.m_Value.y)))
+                             + (float)((float)(speedScale - this->m_vStart.m_Value.z)
+                                     * (float)(speedScale - this->m_vStart.m_Value.z)));
+            *(_OWORD *)&vMidPoint[4] = v43;
+            LODWORD(vel.y) = v43;
+          }
+        }
+      }
+    }
+LABEL_33:
+    if ( !origin_2[1] && !this->m_bDisablePlayerMove.m_Value || HIBYTE(vSubDir.x) )
+    {
+      CCollisionProperty::NormalizedToCollisionSpace(&pEntity->m_Collision, &vec3_origin, &vCenteringPos);
+      CCollisionProperty::NormalizedToCollisionSpace(&pEntity->m_Collision, &vShoveDir, &vRight);
+      v44 = 0i64;
+      *(float *)&v44 = fsqrt(
+                         (float)((float)((float)(vRight.x - vCenteringPos.x) * (float)(vRight.x - vCenteringPos.x))
+                               + (float)((float)(vRight.y - vCenteringPos.y) * (float)(vRight.y - vCenteringPos.y)))
+                       + (float)((float)(vRight.z - vCenteringPos.z) * (float)(vRight.z - vCenteringPos.z)));
+      v111 = v44;
+      if ( HIBYTE(vSubDir.x) )
+      {
+        *(float *)&v45 = vel.y;
+      }
+      else
+      {
+        v46 = this->m_vEnd.m_Value.z;
+        v47 = this->m_vStart.m_Value.z;
+        *(_QWORD *)&origin_2[6] = *(_QWORD *)&this->m_vStart.m_Value.x;
+        flLinearScale = *(_QWORD *)&this->m_vEnd.m_Value.x;
+        flAirControlMod = v46;
+        speedScale = v47;
+        v45 = 0i64;
+        *(float *)&v45 = fsqrt(
+                           (float)((float)((float)(*(float *)&flLinearScale - *(float *)&origin_2[6])
+                                         * (float)(*(float *)&flLinearScale - *(float *)&origin_2[6]))
+                                 + (float)((float)(*((float *)&flLinearScale + 1) - *(float *)&origin_2[10])
+                                         * (float)(*((float *)&flLinearScale + 1) - *(float *)&origin_2[10])))
+                         + (float)((float)(v46 - speedScale) * (float)(v46 - speedScale)));
+        *(_OWORD *)&vMidPoint[4] = v45;
+      }
+      v48 = *(float *)&v111 / *(float *)&v45;
+      v49 = HIBYTE(vSubDir.x) ? *(float *)&origin_2[2] : vWorldPos.x;
+      if ( v49 >= v48 )
+        vel.x = RemapValClamped(v49, 1.0 - (float)(v48 * 2.0), 1.0 - v48, 1.0, 0.0);
+    }
+  }
+  v50 = (float)(this->m_linearForce.m_Value * 2.0) * vel.x;
+  linear->x = (float)(v50 * vShoveDir.x) + linear->x;
+  v51 = vShoveDir.y * v50;
+  v52 = (float)(v50 * vShoveDir.z) + linear->z;
+  linear->y = v51 + linear->y;
+  linear->z = v52;
+  if ( this->m_addAirDensity.m_Value != 0.0
+    || CTrigger_TractorBeam::GetLinearLimit(this) != 0.0
+    || this->m_linearScale.m_Value != 1.0
+    || this->m_angularLimit.m_Value != 0.0
+    || this->m_angularScale.m_Value != 1.0 )
+  {
+    v53 = (float)(linear->y * deltaTime) + angSpeed;
+    v54 = (float)(deltaTime * linear->z) + *(float *)&pPlayer;
+    vecForceDir.z = (float)(linear->x * deltaTime) + vecForceDir.z;
+    angSpeed = v53;
+    *(float *)&pPlayer = v54;
+    *(float *)&origin_2[6] = vecForceDir.z;
+    flLinearScale = *(_QWORD *)&vWorldPos.y;
+    flAirControlMod = flPathPerc;
+    vel.z = VectorNormalize((Vector *)LODWORD(v54));
+    vecForceDir.x = VectorNormalize((Vector *)&flLinearScale);
+    m_Value = this->m_addAirDensity.m_Value;
+    *(_DWORD *)&origin_2[2] = 0;
+    vel.y = 0.0;
+    if ( m_Value != 0.0 && pObject )
+    {
+      v56 = ((double (__thiscall *)(IPhysicsObject *, _BYTE *, _DWORD))pObject->CalculateLinearDrag)(
+              pObject,
+              &origin_2[6],
+              LODWORD(vSubDir.x))
+          * (this->m_addAirDensity.m_Value
+           * -0.5)
+          * deltaTime;
+      vUp.x = v56;
+      if ( v56 >= -1.0 )
+        v57 = vUp.x;
+      else
+        v57 = FLOAT_N1_0;
+      CalculateAngularDrag = pObject->CalculateAngularDrag;
+      *(float *)vMidPoint = 1.0 / deltaTime;
+      *(float *)&origin_2[2] = (float)(1.0 / deltaTime) * v57;
+      v59 = ((double (__thiscall *)(IPhysicsObject *, __int64 *))CalculateAngularDrag)(pObject, &flLinearScale)
+          * (this->m_addAirDensity.m_Value
+           * -0.5)
+          * deltaTime;
+      vUp.x = v59;
+      if ( v59 >= -1.0 )
+        v60 = vUp.x;
+      else
+        v60 = FLOAT_N1_0;
+      vel.y = *(float *)vMidPoint * v60;
+    }
+    if ( CTrigger_TractorBeam::GetLinearLimit(this) != 0.0 && vel.z > (float)(this->m_linearLimit.m_Value * vel.x) )
+    {
+      LinearLimit = CTrigger_TractorBeam::GetLinearLimit(this);
+      v62 = (LinearLimit * vel.x - vel.z) / deltaTime;
+      linear->x = *(float *)&origin_2[6] * v62 + linear->x;
+      linear->y = *(float *)&origin_2[10] * v62 + linear->y;
+      linear->z = v62 * speedScale + linear->z;
+    }
+    v63 = this->m_angularLimit.m_Value;
+    if ( v63 != 0.0 && vecForceDir.x > v63 )
+    {
+      v64 = (float)(v63 - vecForceDir.x) / deltaTime;
+      v65 = (float)(*((float *)&flLinearScale + 1) * v64) + angular->y;
+      v66 = (float)(flAirControlMod * v64) + angular->z;
+      angular->x = (float)(*(float *)&flLinearScale * v64) + angular->x;
+      angular->y = v65;
+      angular->z = v66;
+    }
+    v67 = this->m_linearScale.m_Value;
+    v68 = *(float *)&origin_2[2];
+    if ( v67 != 1.0 )
+      v68 = (float)((float)(*(float *)&origin_2[2] + 1.0) * v67) - 1.0;
+    v69 = this->m_angularScale.m_Value;
+    v70 = vel.y;
+    if ( v69 != 1.0 )
+      v70 = (float)((float)(vel.y + 1.0) * v69) - 1.0;
+    v71 = angSpeed;
+    v72 = pPlayer;
+    linear->x = (float)(vecForceDir.z * v68) + linear->x;
+    v73 = vWorldPos.y;
+    linear->y = (float)(v71 * v68) + linear->y;
+    v74 = vWorldPos.z;
+    linear->z = (float)(*(float *)&v72 * v68) + linear->z;
+    v75 = (float)(v74 * v70) + angular->y;
+    v76 = (float)(flPathPerc * v70) + angular->z;
+    angular->x = (float)(v73 * v70) + angular->x;
+    angular->y = v75;
+    angular->z = v76;
+  }
+  vUp.y = vForward.x - angVel.x;
+  vUp.z = vForward.y - angVel.y;
+  angDrag = vForward.z - angVel.z;
+  vecForceDir.x = VectorNormalize((Vector *)&vUp.y);
+  v77 = vecForceDir.x * 0.03125;
+  if ( (float)(vecForceDir.x * 0.03125) >= 0.0 )
+  {
+    if ( v77 > 1.0 )
+      v77 = FLOAT_1_0;
+  }
+  else
+  {
+    v77 = 0.0;
+  }
+  *(float *)&origin_2[2] = v77;
+  if ( !origin_2[0] )
+  {
+    v105 = vUp.z;
+    v106 = (float)(v77 * 16.0) / deltaTime;
+    v107 = (float)(v106 * vUp.y) + linear->x;
+    v108 = (float)(angDrag * v106) + linear->z;
+    linear->z = v108;
+    linear->x = v107;
+    linear->y = (float)(v105 * v106) + linear->y;
+    linear->z = v108 - (float)((float)(this->m_gravityScale.m_Value - 1.0) * sv_gravity.m_pParent->m_Value.m_fValue);
+    return;
+  }
+  speedScale = COERCE_FLOAT(&vRight);
+  *(_DWORD *)&origin_2[10] = &vCenteringPos;
+  v78 = pEntity->__vftable;
+  *(_DWORD *)&origin_2[6] = (char *)&v111 + 4;
+  EyeAngles = v78->EyeAngles;
+  HIBYTE(vSubDir.x) = 0;
+  v80 = EyeAngles(pEntity);
+  AngleVectors(v80, *(Vector **)&origin_2[6], *(Vector **)&origin_2[10], (Vector *)LODWORD(speedScale));
+  *(_QWORD *)&origin_2[6] = *(_QWORD *)&vec3_origin.x;
+  speedScale = vec3_origin.z;
+  vel.z = FLOAT_1_0;
+  if ( LODWORD(vecForceDir.y) != -3596 && !this->m_bDisablePlayerMove.m_Value )
+  {
+    v81 = *(float *)(LODWORD(vecForceDir.y) + 3628);
+    v82 = *(float *)(LODWORD(vecForceDir.y) + 3620);
+    v83 = vRight.y * v81;
+    v84 = vRight.z * v81;
+    v85 = vRight.x * v81;
+    v86 = *(float *)(LODWORD(vecForceDir.y) + 3624);
+    *((float *)&flLinearScale + 1) = vCenteringPos.y * v86;
+    flAirControlMod = vCenteringPos.z * v86;
+    *(float *)&origin_2[6] = (float)((float)(*((float *)&v111 + 1) * v82) + (float)(vCenteringPos.x * v86)) + v85;
+    *(float *)&origin_2[10] = (float)((float)(*((float *)&v111 + 2) * v82) + (float)(vCenteringPos.y * v86)) + v83;
+    speedScale = (float)((float)(*((float *)&v111 + 3) * v82) + (float)(vCenteringPos.z * v86)) + v84;
+    vecForceDir.x = tbeam_air_ctrl_threshold.m_pParent->m_Value.m_fValue;
+    v87 = VectorNormalize((Vector *)&origin_2[6]);
+    HIBYTE(vSubDir.x) = v87 > vecForceDir.x;
+    v88 = *(float *)&origin_2[6];
+    v89 = *(float *)&origin_2[10];
+    v90 = speedScale;
+    v91 = (float)((float)(*(float *)&origin_2[6] * vShoveDir.x) + (float)(*(float *)&origin_2[10] * vShoveDir.y))
+        + (float)(speedScale * vShoveDir.z);
+    if ( tbeam_allow_player_struggle.m_pParent->m_Value.m_nValue )
+    {
+      if ( v91 < 0.0 )
+      {
+        v88 = *(float *)&origin_2[6] - (float)(vShoveDir.x * v91);
+        v89 = *(float *)&origin_2[10] - (float)(vShoveDir.y * v91);
+        v90 = speedScale - (float)(vShoveDir.z * v91);
+        *(float *)&origin_2[6] = v88;
+        *(float *)&origin_2[10] = v89;
+        speedScale = v90;
+      }
+      if ( COERCE_FLOAT(LODWORD(vShoveDir.z) & _mask__AbsFloat_) <= 0.707106781187 )
+        goto LABEL_89;
+      VectorNormalize((Vector *)&origin_2[6]);
+    }
+    else
+    {
+      *(float *)&origin_2[10] = *(float *)&origin_2[10] - (float)(vShoveDir.y * v91);
+      *(float *)&origin_2[6] = *(float *)&origin_2[6] - (float)(vShoveDir.x * v91);
+      speedScale = speedScale - (float)(vShoveDir.z * v91);
+      if ( speedScale > 0.0 && (float)(angVel.z - vForward.z) > 30.0 )
+        speedScale = 0.0;
+      vel.z = RemapValClamped(COERCE_FLOAT(LODWORD(v91) & _mask__AbsFloat_), 1.0, 0.86602539, 0.0, 1.0);
+    }
+  }
+  v90 = speedScale;
+  v89 = *(float *)&origin_2[10];
+  v88 = *(float *)&origin_2[6];
+LABEL_89:
+  if ( this->m_bDisablePlayerMove.m_Value )
+  {
+    v92 = vecForceDir.y;
+    CBasePlayer::ForceButtons((CBasePlayer *)LODWORD(vecForceDir.y), 4);
+    CBaseEntity::SetGroundEntity((CBaseEntity *)LODWORD(v92), 0);
+    v90 = speedScale;
+    v89 = *(float *)&origin_2[10];
+    v88 = *(float *)&origin_2[6];
+  }
+  if ( HIBYTE(vSubDir.x) )
+  {
+    if ( tbeam_allow_player_struggle.m_pParent->m_Value.m_nValue )
+    {
+      v93 = (float)((float)(v90 * 64.0) * (float)(1.0 / deltaTime)) + linear->z;
+      v94 = (float)(v89 * 64.0) * (float)(1.0 / deltaTime);
+      linear->x = (float)((float)(1.0 / deltaTime) * (float)(v88 * 64.0)) + linear->x;
+      linear->z = v93;
+    }
+    else
+    {
+      v95 = (float)(*(float *)&origin_2[2] * 24.0) * (float)(1.0 / deltaTime);
+      v96 = (float)((float)(1.0 / deltaTime) * 84.0) * vel.z;
+      v97 = vUp.z * v95;
+      v98 = angDrag * v95;
+      v99 = v89 * v96;
+      v100 = (float)((float)(v96 * v88) + (float)((float)(v95 * vUp.y) * vel.x)) + linear->x;
+      v101 = (float)((float)(v96 * v90) + (float)(v98 * vel.x)) + linear->z;
+      v94 = v99 + (float)(v97 * vel.x);
+      linear->x = v100;
+      linear->z = v101;
+    }
+  }
+  else
+  {
+    v102 = (float)(*(float *)&origin_2[2] * 24.0) / deltaTime;
+    v103 = (float)((float)(angDrag * v102) * vel.x) + linear->z;
+    v94 = (float)(vUp.z * v102) * vel.x;
+    linear->x = (float)((float)(v102 * vUp.y) * vel.x) + linear->x;
+    linear->z = v103;
+  }
+  linear->y = v94 + linear->y;
+  if ( (pEntity->m_fFlags.m_Value & 1) != 0 )
+  {
+    CBaseEntity::SetGroundEntity(pEntity, 0);
+    if ( (pEntity->m_iEFlags & 0x800) != 0 )
+      CBaseEntity::CalcAbsolutePosition(pEntity);
+    v104 = pEntity->m_vecAbsOrigin.z;
+    flLinearScale = *(_QWORD *)&pEntity->m_vecAbsOrigin.x;
+    flAirControlMod = v104 + 1.0;
+    CBaseEntity::SetAbsOrigin(pEntity, (const Vector *)&flLinearScale);
+    CBaseEntity::AddFlag(pEntity, 0x800000);
+    *(_DWORD *)&vMidPoint[8] = 0;
+    *(_DWORD *)&vMidPoint[12] = 0;
+    *(float *)&vMidPoint[16] = FLOAT_1000_0;
+    CBaseEntity::SetBaseVelocity(pEntity, (const Vector *)&vMidPoint[8]);
+    linear->z = linear->z + 5000.0;
+  }
+}

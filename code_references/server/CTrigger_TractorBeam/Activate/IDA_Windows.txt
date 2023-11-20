@@ -1,0 +1,5 @@
+// attributes: thunk
+void __thiscall CTrigger_TractorBeam::Activate(CTrigger_TractorBeam *this)
+{
+  CBaseVPhysicsTrigger::Activate((CPointEntityFinder *)this);
+}

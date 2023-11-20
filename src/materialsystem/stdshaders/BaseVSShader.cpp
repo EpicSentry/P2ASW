@@ -14,14 +14,12 @@
 #include "ConVar.h"
 #include "tier0/icommandline.h"
 
-#ifndef PORTAL_ONLY
-
 #ifdef HDR
 #include "vertexlit_and_unlit_generic_hdr_ps20.inc"
 #include "vertexlit_and_unlit_generic_hdr_ps20b.inc"
 #endif
 
-#ifndef _X360
+#if !defined ( _X360 ) && !defined ( PORTAL_ONLY ) // FixMe?
 #include "lightmappedgeneric_flashlight_vs30.inc"
 #include "flashlight_ps30.inc"
 #endif
@@ -29,8 +27,8 @@
 #include "lightmappedgeneric_flashlight_vs20.inc"
 #include "flashlight_ps20.inc"
 #include "flashlight_ps20b.inc"
+#if !defined ( PORTAL_ONLY ) // FixMe?
 #include "vertexlitgeneric_flashlight_vs20.inc"
-
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -751,7 +749,6 @@ void CBaseVSShader::SetFlashlightVertexShaderConstants( bool bBump, int bumpTran
 	}
 }
 
-#ifndef PORTAL_ONLY
 void CBaseVSShader::DrawFlashlight_dx90( IMaterialVar** params, IShaderDynamicAPI *pShaderAPI, 
 										IShaderShadow* pShaderShadow, DrawFlashlight_dx90_Vars_t &vars )
 {
@@ -836,7 +833,7 @@ void CBaseVSShader::DrawFlashlight_dx90( IMaterialVar** params, IShaderDynamicAP
 
 		if( vars.m_bLightmappedGeneric )
 		{
-#ifndef _X360
+#if !defined ( _X360 ) && !defined ( PORTAL_ONLY )
 			if ( g_pHardwareConfig->HasFastVertexTextures() )
 			{
 				DECLARE_STATIC_VERTEX_SHADER( lightmappedgeneric_flashlight_vs30 );
@@ -875,9 +872,11 @@ void CBaseVSShader::DrawFlashlight_dx90( IMaterialVar** params, IShaderDynamicAP
 
 			// Need a 3.0 vs here?
 
+#if !defined ( _X360 ) && !defined ( PORTAL_ONLY )
 			DECLARE_STATIC_VERTEX_SHADER( vertexlitgeneric_flashlight_vs20 );
 			SET_STATIC_VERTEX_SHADER_COMBO( TEETH, vars.m_bTeeth );
 			SET_STATIC_VERTEX_SHADER( vertexlitgeneric_flashlight_vs20 );
+#endif
 
 			unsigned int flags = VERTEX_POSITION | VERTEX_NORMAL;
 			int numTexCoords = 1;
@@ -890,7 +889,7 @@ void CBaseVSShader::DrawFlashlight_dx90( IMaterialVar** params, IShaderDynamicAP
 			nBumpMapVariant = ( vars.m_bSSBump ) ? 2 : 1;
 		}
 
-#ifndef _X360
+#if !defined ( _X360 ) && !defined ( PORTAL_ONLY )
 		if ( g_pHardwareConfig->HasFastVertexTextures() )
 		{
 			int nShadowFilterMode = g_pHardwareConfig->GetShadowFilterMode();
@@ -1016,7 +1015,7 @@ void CBaseVSShader::DrawFlashlight_dx90( IMaterialVar** params, IShaderDynamicAP
 
 		if( vars.m_bLightmappedGeneric )
 		{
-#ifndef _X360
+#if !defined ( _X360 ) && !defined ( PORTAL_ONLY )
 			if ( g_pHardwareConfig->HasFastVertexTextures() )
 			{
 				DECLARE_DYNAMIC_VERTEX_SHADER( lightmappedgeneric_flashlight_vs30 );
@@ -1054,10 +1053,11 @@ void CBaseVSShader::DrawFlashlight_dx90( IMaterialVar** params, IShaderDynamicAP
 		}
 		else
 		{
+#if !defined ( PORTAL_ONLY )
 			DECLARE_DYNAMIC_VERTEX_SHADER( vertexlitgeneric_flashlight_vs20 );
 			SET_DYNAMIC_VERTEX_SHADER_COMBO( SKINNING, pShaderAPI->GetCurrentNumBones() > 0 );
 			SET_DYNAMIC_VERTEX_SHADER( vertexlitgeneric_flashlight_vs20 );
-
+#endif
 			if( vars.m_bTeeth )
 			{
 				Assert( vars.m_nTeethForwardVar >= 0 );
@@ -1076,7 +1076,7 @@ void CBaseVSShader::DrawFlashlight_dx90( IMaterialVar** params, IShaderDynamicAP
 		vEyePos_SpecExponent[3] = 0.0f;
 		pShaderAPI->SetPixelShaderConstant( PSREG_EYEPOS_SPEC_EXPONENT, vEyePos_SpecExponent, 1 );
 
-#ifndef _X360
+#if !defined ( _X360 ) && !defined ( PORTAL_ONLY )
 		if ( g_pHardwareConfig->HasFastVertexTextures() )
 		{
 			DECLARE_DYNAMIC_PIXEL_SHADER( flashlight_ps30 );
@@ -1118,8 +1118,6 @@ void CBaseVSShader::DrawFlashlight_dx90( IMaterialVar** params, IShaderDynamicAP
 	}
 	Draw();
 }
-
-#endif
 
 // Take 0..1 seed and map to (u, v) coordinate to be used in shadow filter jittering...
 void CBaseVSShader::HashShadow2DJitter( const float fJitterSeed, float *fU, float* fV )

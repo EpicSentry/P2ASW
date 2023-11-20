@@ -1,0 +1,5 @@
+void __cdecl C_PortalLaser::Precache(C_PortalLaser *const this)
+{
+  PrecacheParticleSystem(LASER_SPARK_EFFECT_NAME);
+  C_BaseEntity::Precache(this);
+}

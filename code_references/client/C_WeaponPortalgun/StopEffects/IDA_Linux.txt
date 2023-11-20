@@ -1,0 +1,4 @@
+void __cdecl C_WeaponPortalgun::StopEffects(C_WeaponPortalgun *const this, bool stopSound)
+{
+  C_WeaponPortalgun::DoEffect(this, 0, 0);
+}

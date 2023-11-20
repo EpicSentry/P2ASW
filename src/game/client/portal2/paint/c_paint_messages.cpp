@@ -24,7 +24,7 @@ void __MsgFunc_PaintWorld( bf_read &msg )
 {
 	// if client is local to active server, don't do paint in client
 	// because the paintmap is shared in the same engine
-	//if( !engine->IsClientLocalToActiveServer() )
+	if( !engine->IsClientLocalToActiveServer() )
 	{
 		// Get the color index and number of paint locations
 		PaintPowerType power = static_cast< PaintPowerType >( msg.ReadByte() );
@@ -49,7 +49,7 @@ void __MsgFunc_PaintWorld( bf_read &msg )
 			vContactPoint.y = vCenter.y + msg.ReadShort();
 			vContactPoint.z = vCenter.z + msg.ReadShort();
 
-			UTIL_PaintBrushEntity( pBrushEntity, vContactPoint, power, flPaintRadius, flAlphaPercent );
+			UTIL_PaintBrushEntity( pBrushEntity, vContactPoint, power, flPaintRadius, flAlphaPercent, NULL );
 		}
 	}
 }

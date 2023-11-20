@@ -1,0 +1,29 @@
+void __thiscall C_Trigger_TractorBeam::C_Trigger_TractorBeam(C_Trigger_TractorBeam *this)
+{
+  C_BaseEntity::C_BaseEntity(this);
+  this->C_BaseVPhysicsTrigger::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable = (C_Trigger_TractorBeam_vtbl *)&C_BaseVPhysicsTrigger::`vftable'{for `IClientUnknown'};
+  this->C_BaseVPhysicsTrigger::C_BaseEntity::IClientEntity::IClientRenderable::__vftable = (IClientRenderable_vtbl *)&C_BaseVPhysicsTrigger::`vftable'{for `IClientRenderable'};
+  this->C_BaseVPhysicsTrigger::C_BaseEntity::IClientEntity::IClientNetworkable::__vftable = (IClientNetworkable_vtbl *)&C_BaseVPhysicsTrigger::`vftable'{for `IClientNetworkable'};
+  this->C_BaseVPhysicsTrigger::C_BaseEntity::IClientEntity::IClientThinkable::__vftable = (IClientThinkable_vtbl *)&C_BaseVPhysicsTrigger::`vftable'{for `IClientThinkable'};
+  this->C_BaseVPhysicsTrigger::C_BaseEntity::IClientModelRenderable::__vftable = (IClientModelRenderable_vtbl *)&C_BaseVPhysicsTrigger::`vftable';
+  this->IMotionEvent::__vftable = (IMotionEvent_vtbl *)&IMotionEvent::`vftable';
+  this->ITriggerTractorBeamAutoList::__vftable = (ITriggerTractorBeamAutoList_vtbl *)&ITriggerTractorBeamAutoList::`vftable';
+  ITriggerTractorBeamAutoList::Add(&this->ITriggerTractorBeamAutoList);
+  this->C_BaseVPhysicsTrigger::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable = (C_Trigger_TractorBeam_vtbl *)&C_Trigger_TractorBeam::`vftable'{for `IClientUnknown'};
+  this->C_BaseVPhysicsTrigger::C_BaseEntity::IClientEntity::IClientRenderable::__vftable = (IClientRenderable_vtbl *)&C_Trigger_TractorBeam::`vftable'{for `IClientRenderable'};
+  this->C_BaseVPhysicsTrigger::C_BaseEntity::IClientEntity::IClientNetworkable::__vftable = (IClientNetworkable_vtbl *)&C_Trigger_TractorBeam::`vftable'{for `IClientNetworkable'};
+  this->C_BaseVPhysicsTrigger::C_BaseEntity::IClientEntity::IClientThinkable::__vftable = (IClientThinkable_vtbl *)&C_Trigger_TractorBeam::`vftable'{for `IClientThinkable'};
+  this->C_BaseVPhysicsTrigger::C_BaseEntity::IClientModelRenderable::__vftable = (IClientModelRenderable_vtbl *)&C_Trigger_TractorBeam::`vftable'{for `C_BaseVPhysicsTrigger'};
+  this->IMotionEvent::__vftable = (IMotionEvent_vtbl *)&C_Trigger_TractorBeam::`vftable'{for `IMotionEvent'};
+  this->ITriggerTractorBeamAutoList::__vftable = (ITriggerTractorBeamAutoList_vtbl *)&C_Trigger_TractorBeam::`vftable'{for `ITriggerTractorBeamAutoList'};
+  this->m_blobs.m_Memory.m_pMemory = 0;
+  this->m_blobs.m_Memory.m_nAllocationCount = 0;
+  this->m_blobs.m_Memory.m_nGrowSize = 0;
+  this->m_blobs.m_Size = 0;
+  this->m_blobs.m_pElements = 0;
+  this->m_hProxyEntity.m_Index = -1;
+  this->m_hCoreEffect.m_pPrev = 0;
+  this->m_hCoreEffect.m_pNext = 0;
+  this->m_hCoreEffect.m_pObject = 0;
+  this->m_bDisabled = 0;
+}

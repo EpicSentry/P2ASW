@@ -1,0 +1,6 @@
+void __thiscall C_BaseProjectedEntity::HandlePredictionError(C_BaseProjectedEntity *this, int bErrorInThisEntity)
+{
+  C_TEBaseBeam::PostDataUpdate((vgui::TreeView *)this, bErrorInThisEntity);
+  if ( (_BYTE)bErrorInThisEntity )
+    C_BaseProjectedEntity::HandleDataChange(this);
+}

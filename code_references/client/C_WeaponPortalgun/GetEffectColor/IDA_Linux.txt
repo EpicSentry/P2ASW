@@ -1,0 +1,37 @@
+Vector *__userpurge C_WeaponPortalgun::GetEffectColor@<eax>(
+        Vector *retstr,
+        C_WeaponPortalgun *const this,
+        int iPalletIndex)
+{
+  int m_Value; // edx
+  Color v4; // eax
+  vec_t v5; // xmm0_4
+  Vector *result; // eax
+  int v7; // eax
+  int v8; // eax
+  Color v9; // [esp+1Ch] [ebp-Ch] BYREF
+
+  m_Value = this->m_iLastFiredPortal.m_Value;
+  if ( m_Value == 1 )
+  {
+    v7 = (*((int (__cdecl **)(C_WeaponPortalgun *const))this->_vptr_IHandleEntity + 124))(this);
+    UTIL_Portal_Color_Particles(&v9, 1, v7);
+    v4 = v9;
+  }
+  else
+  {
+    v4 = (Color)-16777216;
+    if ( m_Value == 2 )
+    {
+      v8 = (*((int (__cdecl **)(C_WeaponPortalgun *const))this->_vptr_IHandleEntity + 124))(this);
+      UTIL_Portal_Color_Particles(&v9, 2, v8);
+      v4 = v9;
+    }
+  }
+  retstr->x = (float)v4._color[0];
+  retstr->y = (float)v4._color[1];
+  v5 = (float)v4._color[2];
+  result = retstr;
+  retstr->z = v5;
+  return result;
+}

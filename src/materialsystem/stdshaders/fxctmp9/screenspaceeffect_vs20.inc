@@ -19,6 +19,7 @@ public:
 	}
 	void SetVERTEXCOLOR( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nVERTEXCOLOR = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bVERTEXCOLOR = true;
@@ -40,6 +41,7 @@ public:
 	}
 	void SetTRANSFORMVERTS( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nTRANSFORMVERTS = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bTRANSFORMVERTS = true;

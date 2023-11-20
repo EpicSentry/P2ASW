@@ -1,0 +1,29 @@
+void __thiscall C_TriggerPortalCleanser::C_TriggerPortalCleanser(C_TriggerPortalCleanser *this)
+{
+  C_BaseEntity::C_BaseEntity(this);
+  this->m_hPredictionOwner.m_Index = -1;
+  this->C_BaseTrigger::C_BaseToggle::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable = (C_TriggerPortalCleanser_vtbl *)&C_BaseTrigger::`vftable'{for `IClientUnknown'};
+  this->C_BaseTrigger::C_BaseToggle::C_BaseEntity::IClientEntity::IClientRenderable::__vftable = (IClientRenderable_vtbl *)&C_BaseTrigger::`vftable'{for `IClientRenderable'};
+  this->C_BaseTrigger::C_BaseToggle::C_BaseEntity::IClientEntity::IClientNetworkable::__vftable = (IClientNetworkable_vtbl *)&C_BaseTrigger::`vftable'{for `IClientNetworkable'};
+  this->C_BaseTrigger::C_BaseToggle::C_BaseEntity::IClientEntity::IClientThinkable::__vftable = (IClientThinkable_vtbl *)&C_BaseTrigger::`vftable'{for `IClientThinkable'};
+  this->C_BaseTrigger::C_BaseToggle::C_BaseEntity::IClientModelRenderable::__vftable = (IClientModelRenderable_vtbl *)&C_BaseTrigger::`vftable';
+  this->ITriggerPortalCleanserAutoList::__vftable = (ITriggerPortalCleanserAutoList_vtbl *)&ITriggerPortalCleanserAutoList::`vftable';
+  ITriggerPortalCleanserAutoList::Add(&this->ITriggerPortalCleanserAutoList);
+  *(_WORD *)&this->m_bObject1InRange = 0;
+  this->C_BaseTrigger::C_BaseToggle::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable = (C_TriggerPortalCleanser_vtbl *)&C_TriggerPortalCleanser::`vftable'{for `IClientUnknown'};
+  this->C_BaseTrigger::C_BaseToggle::C_BaseEntity::IClientEntity::IClientRenderable::__vftable = (IClientRenderable_vtbl *)&C_TriggerPortalCleanser::`vftable'{for `IClientRenderable'};
+  this->C_BaseTrigger::C_BaseToggle::C_BaseEntity::IClientEntity::IClientNetworkable::__vftable = (IClientNetworkable_vtbl *)&C_TriggerPortalCleanser::`vftable'{for `IClientNetworkable'};
+  this->C_BaseTrigger::C_BaseToggle::C_BaseEntity::IClientEntity::IClientThinkable::__vftable = (IClientThinkable_vtbl *)&C_TriggerPortalCleanser::`vftable'{for `IClientThinkable'};
+  this->C_BaseTrigger::C_BaseToggle::C_BaseEntity::IClientModelRenderable::__vftable = (IClientModelRenderable_vtbl *)&C_TriggerPortalCleanser::`vftable'{for `C_BaseTrigger'};
+  this->ITriggerPortalCleanserAutoList::__vftable = (ITriggerPortalCleanserAutoList_vtbl *)&C_TriggerPortalCleanser::`vftable'{for `ITriggerPortalCleanserAutoList'};
+  this->m_hObject1.m_Value.m_Index = -1;
+  this->m_hObject2.m_Value.m_Index = -1;
+  this->m_flPowerUpTimer = 0.0;
+  this->m_flPortalShotTime = 0.0;
+  this->m_flLastShotTime = 0.0;
+  this->m_flShotPulseTimer = 0.0;
+  this->m_flLastUpdateTime = 0.0;
+  this->m_hCleanserFX.m_pPrev = 0;
+  this->m_hCleanserFX.m_pNext = 0;
+  this->m_hCleanserFX.m_pObject = 0;
+}

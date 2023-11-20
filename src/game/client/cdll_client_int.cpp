@@ -163,8 +163,6 @@ extern void ProcessPortalTeleportations( void );
 #include "tier1/UtlDict.h"
 #include "keybindinglistener.h"
 
-#include "vgui_controls/SectionedListPanel.h"
-
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -1817,13 +1815,31 @@ void ConfigureCurrentSystemLevel()
 	{
 		nGPUMemLevel = 360;
 	}
-
-#if defined( SWARM_DLL )
-	char szModName[32] = "swarm";
+	
+#if defined ( TERROR )
+	char szModName[32] = "left4dead";
+#elif defined ( PAINT )
+	char szModName[32] = "paint";
+#elif defined ( PORTAL2 )
+#if 0
+	char szModName[32] = "portal2";
+#else
+	char szModName[32] = "portal2asw"; // This is our mod name.
+#endif
+#elif defined( INFESTED_DLL )
+	char szModName[32] = "infested";
 #elif defined ( HL2_EPISODIC )
 	char szModName[32] = "ep2";
+#elif defined ( TF_CLIENT_DLL )
+	char szModName[32] = "tf";
+#elif defined ( DOTA_CLIENT_DLL )
+	char szModName[32] = "dota";
 #elif defined ( SDK_CLIENT_DLL )
 	char szModName[32] = "sdk";
+#elif defined ( SOB_CLIENT_DLL )
+	char szModName[32] = "ep2";
+#elif defined ( CSTRIKE15 )
+	char szModName[32] = "csgo";
 #endif
 
 	UpdateSystemLevel( nCPULevel, nGPULevel, nMemLevel, nGPUMemLevel, VGui_IsSplitScreen(), szModName );
@@ -3347,16 +3363,6 @@ bool CHLClient::SupportsRandomMaps()
 #endif
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Spew application info (primarily for log file data mining)
-//-----------------------------------------------------------------------------
-void SpewInstallStatus( void )
-{
-#if defined( _X360 )
-	g_pXboxInstaller->SpewStatus();
-#endif
-}
-
 extern IViewRender *view;
 
 //-----------------------------------------------------------------------------
@@ -3391,27 +3397,3 @@ static CClientMaterialSystem s_ClientMaterialSystem;
 IClientMaterialSystem *g_pClientMaterialSystem = &s_ClientMaterialSystem;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CClientMaterialSystem, IClientMaterialSystem, VCLIENTMATERIALSYSTEM_INTERFACE_VERSION, s_ClientMaterialSystem );
 
-// vgui_controls is stored in a lib file, so to add more functions, it needs to go somewhere, let's put it here...
-
-//-----------------------------------------------------------------------------
-// Purpose: gets the local coordinates of a cell
-//-----------------------------------------------------------------------------
-bool vgui::SectionedListPanel::GetItemBounds(int itemID, int &x, int &y, int &wide, int &tall)
-{
-	x = y = wide = tall = 0;
-	if ( !IsItemIDValid(itemID) )
-		return false;
-
-	// get the item
-#if 0
-	CItemButton *item = m_Items[itemID];
-#else
-	Label *item = (Label*)( m_Items[itemID] );
-#endif
-	if ( !item->IsVisible() )
-		return false;
-
-	//!! ignores column for now
-	item->GetBounds(x, y, wide, tall);
-	return true;
-}

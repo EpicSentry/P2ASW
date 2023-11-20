@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: Implements visual effects entities: sprites, beams, bubbles, etc.
 //
@@ -26,6 +26,10 @@ private:
 
 	DECLARE_DATADESC();
 
+	float m_flFadeStartTime;
+	float m_flReverseFadeStartTime;
+	float m_flReverseFadeDuration;
+
 public:
 	DECLARE_CLASS( CEnvFade, CLogicalEntity );
 
@@ -41,6 +45,7 @@ public:
 
 	// Inputs
 	void InputFade( inputdata_t &inputdata );
+	void InputReverseFade(inputdata_t& inputdata);
 };
 
 LINK_ENTITY_TO_CLASS( env_fade, CEnvFade );
@@ -49,8 +54,10 @@ BEGIN_DATADESC( CEnvFade )
 
 	DEFINE_KEYFIELD( m_Duration, FIELD_FLOAT, "duration" ),
 	DEFINE_KEYFIELD( m_HoldTime, FIELD_FLOAT, "holdtime" ),
+	DEFINE_KEYFIELD( m_flReverseFadeDuration, FIELD_FLOAT, "ReverseFadeDuration" ),
 
 	DEFINE_INPUTFUNC( FIELD_VOID, "Fade", InputFade ),
+	DEFINE_INPUTFUNC( FIELD_VOID, "FadeReverse", InputReverseFade ),
 
 	DEFINE_OUTPUT( m_OnBeginFade, "OnBeginFade"),
 
@@ -121,7 +128,62 @@ void CEnvFade::InputFade( inputdata_t &inputdata )
 		UTIL_ScreenFadeAll( m_clrRender, Duration(), HoldTime(), fadeFlags|FFADE_PURGE );
 	}
 
+	m_flFadeStartTime = gpGlobals->curtime;
+
 	m_OnBeginFade.FireOutput( inputdata.pActivator, this );
+}
+
+void CEnvFade::InputReverseFade(inputdata_t& inputdata)
+{
+	int fadeFlags = 0;
+
+	if (m_spawnflags & SF_FADE_IN)
+	{
+		fadeFlags |= FFADE_OUT;
+	}
+	else
+	{
+		fadeFlags |= FFADE_IN;
+	}
+
+	if (m_spawnflags & SF_FADE_MODULATE)
+	{
+		fadeFlags |= FFADE_MODULATE;
+	}
+
+	if (m_spawnflags & SF_FADE_STAYOUT)
+	{
+		fadeFlags |= FFADE_STAYOUT;
+	}
+
+	color32 fadeColor = m_clrRender;
+
+	if (m_flFadeStartTime != 0.0f)
+	{
+		float flCurrentFadeTime = gpGlobals->curtime - m_flFadeStartTime;
+
+		//Change the fade alpha to match the alpha of the current fade to prevent a pop
+		if (flCurrentFadeTime < m_Duration)
+		{
+			fadeColor.a = m_clrRender.GetA() * (flCurrentFadeTime) / m_Duration;
+		}
+	}
+
+	if (m_spawnflags & SF_FADE_ONLYONE)
+	{
+		if (inputdata.pActivator->IsNetClient())
+		{
+			UTIL_ScreenFade(inputdata.pActivator, fadeColor, m_flReverseFadeDuration, HoldTime(), fadeFlags);
+		}
+	}
+	else
+	{
+		UTIL_ScreenFadeAll(fadeColor, m_flReverseFadeDuration, HoldTime(), fadeFlags | FFADE_PURGE);
+	}
+
+	m_flReverseFadeStartTime = gpGlobals->curtime;
+
+	m_OnBeginFade.FireOutput(inputdata.pActivator, this);
 }
 
 

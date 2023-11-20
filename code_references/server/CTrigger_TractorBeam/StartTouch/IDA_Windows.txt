@@ -1,0 +1,99 @@
+void __thiscall CTrigger_TractorBeam::StartTouch(CTrigger_TractorBeam *this, CNPC_Portal_FloorTurret *pOther)
+{
+  CNPC_Portal_FloorTurret *v2; // edi
+  CSoundEnvelopeController *Controller; // ebx
+  unsigned int v5; // ecx
+  edict_t *m_pPev; // eax
+  CSoundPatch *v7; // eax
+  CHandle<CBaseEntity> *HistoryFromEnt; // ebx
+  CTrigger_TractorBeam *v9; // eax
+  EmitSound_t ep; // [esp+30h] [ebp-68h] BYREF
+  triggerevent_t event; // [esp+78h] [ebp-20h] BYREF
+  IPhysicsObject *v12; // [esp+90h] [ebp-8h]
+
+  v2 = pOther;
+  CAI_ActBusyGoal::NPCMovingToBusy((vgui::TreeView *)this, (int)pOther);
+  if ( this->PassesTriggerFilters(this, v2) )
+  {
+    if ( v2
+      && (v2->m_iClassname.pszValue == "npc_portal_turret_floor"
+       || CBaseEntity::ClassMatchesComplex(v2, "npc_portal_turret_floor")) )
+    {
+      CNPC_Portal_FloorTurret::OnEnteredTractorBeam(v2);
+    }
+    else if ( UTIL_IsReflectiveCube(v2) && v2 )
+    {
+      CPropWeightedCube::OnEnteredTractorBeam((CPropWeightedCube *)v2);
+    }
+    if ( v2->IsPlayer(v2) )
+    {
+      CPortal_Player::SetInTractorBeam((CPortal_Player *)v2, this);
+      Controller = CSoundEnvelopeController::GetController();
+      if ( this->m_sndPlayerInBeam )
+      {
+        Controller->Shutdown(Controller, this->m_sndPlayerInBeam);
+        Controller->SoundDestroy(Controller, this->m_sndPlayerInBeam);
+        this->m_sndPlayerInBeam = 0;
+      }
+      EmitSound_t::EmitSound_t(&ep);
+      ep.m_nChannel = 6;
+      if ( gpGlobals->maxClients > 1
+        && (CBasePlayer::HasAttachedSplitScreenPlayers((CBasePlayer *)v2)
+         || CBasePlayer::IsSplitScreenPlayer((CBasePlayer *)v2)) )
+      {
+        ep.m_pSoundName = "VFX.PlayerEnterTbeam_SS";
+      }
+      else
+      {
+        ep.m_pSoundName = "VFX.PlayerEnterTbeam";
+      }
+      v5 = (unsigned int)this->m_iEFlags >> 11;
+      ep.m_flVolume = FLOAT_1_0;
+      ep.m_SoundLevel = SNDLVL_NORM;
+      if ( (v5 & 1) != 0 )
+        CBaseEntity::CalcAbsolutePosition(this);
+      CRecipientFilter::CRecipientFilter((CRecipientFilter *)&event);
+      event.pTriggerEntity = (CBaseEntity *)&CPASFilter::`vftable';
+      CRecipientFilter::AddRecipientsByPAS((CRecipientFilter *)&event, &this->m_vecAbsOrigin);
+      event.pTriggerEntity = (CBaseEntity *)&CPASAttenuationFilter::`vftable';
+      CPASAttenuationFilter::Filter((CPASAttenuationFilter *)&event, &this->m_vecAbsOrigin, 0.80000001);
+      CRecipientFilter::MakeReliable((CFmtStrN<256> *)&event);
+      CRecipientFilter::RemoveAllRecipients((CRecipientFilter *)&event);
+      CRecipientFilter::AddRecipient((CRecipientFilter *)&event, (CBasePlayer *)v2);
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        m_pPev -= (int)gpGlobals->pEdicts;
+      v7 = Controller->SoundCreate(Controller, (IRecipientFilter *)&event, (int)m_pPev, &ep);
+      this->m_sndPlayerInBeam = v7;
+      ((void (__thiscall *)(CSoundEnvelopeController *, CSoundPatch *, _DWORD, _DWORD, _DWORD))Controller->Play)(
+        Controller,
+        v7,
+        LODWORD(FLOAT_1_0),
+        LODWORD(FLOAT_100_0),
+        0);
+      CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&event);
+      CUtlVector<ITriggerTractorBeamAutoList *,CUtlMemory<ITriggerTractorBeamAutoList *,int>>::~CUtlVector<ITriggerTractorBeamAutoList *,CUtlMemory<ITriggerTractorBeamAutoList *,int>>((CUtlVector<__m128,CUtlMemory<__m128,int> > *)&ep.m_UtlVecSoundOrigin);
+    }
+    else
+    {
+      pOther = (CNPC_Portal_FloorTurret *)v2->GetRefEHandle(v2)->m_Index;
+      HistoryFromEnt = (CHandle<CBaseEntity> *)CTractorBeam_Manager::GetHistoryFromEnt(
+                                                 &g_TractorBeamManager,
+                                                 (const CHandle<CBaseEntity> *)&pOther);
+      if ( EntityBeamHistory_t::IsDifferentBeam((EntityBeamHistory_t *)HistoryFromEnt, this) )
+      {
+        if ( this->m_pController && PhysGetTriggerEvent((triggerevent_t *)&event.pObject, this) && v12 )
+        {
+          v12->Wake(v12);
+          this->m_pController->AttachObject(this->m_pController, v12, 1);
+        }
+        if ( HistoryFromEnt[12].m_Index )
+        {
+          v9 = (CTrigger_TractorBeam *)CHandle<CPortal_Base2D>::operator CPortal_Base2D *(HistoryFromEnt);
+          CTrigger_TractorBeam::ForceDetachEntity(v9, v2);
+        }
+        EntityBeamHistory_t::UpdateBeam((EntityBeamHistory_t *)HistoryFromEnt, this);
+      }
+    }
+  }
+}

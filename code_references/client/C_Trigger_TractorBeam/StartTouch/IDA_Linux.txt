@@ -1,0 +1,25 @@
+void __cdecl C_Trigger_TractorBeam::StartTouch(C_Trigger_TractorBeam *const this, C_BaseEntity *pOther)
+{
+  IPhysicsMotionController *m_pController; // eax
+  IPhysicsObject *m_pPhysicsObject; // edx
+
+  if ( (*((unsigned __int8 (__cdecl **)(C_BaseEntity *))pOther->_vptr_IHandleEntity + 200))(pOther) )
+  {
+    C_Portal_Player::SetInTractorBeam((C_Portal_Player *const)pOther, this);
+  }
+  else
+  {
+    m_pController = this->m_pController;
+    if ( m_pController )
+    {
+      m_pPhysicsObject = pOther->m_pPhysicsObject;
+      if ( m_pPhysicsObject )
+        (*((void (__cdecl **)(IPhysicsMotionController *, IPhysicsObject *, int))m_pController->_vptr_IPhysicsMotionController
+         + 3))(
+          m_pController,
+          m_pPhysicsObject,
+          1);
+    }
+  }
+  C_BaseEntity::StartTouch((C_BaseEntity *const)this, pOther);
+}

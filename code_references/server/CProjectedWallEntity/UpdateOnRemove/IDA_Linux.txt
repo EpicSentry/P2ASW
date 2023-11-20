@@ -1,0 +1,7 @@
+void __cdecl CProjectedWallEntity::UpdateOnRemove(CProjectedWallEntity *const this)
+{
+  CProjectedWallEntity::CheckForPlayersOnBridge(this);
+  (*((void (__cdecl **)(CProjectedWallEntity *const))this->_vptr_IHandleEntity + 214))(this);
+  CProjectedWallEntity::CleanupWall(this);
+  CBaseProjectedEntity::UpdateOnRemove(this);
+}

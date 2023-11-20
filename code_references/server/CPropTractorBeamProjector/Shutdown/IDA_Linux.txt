@@ -1,0 +1,36 @@
+void __cdecl CPropTractorBeamProjector::Shutdown(CPropTractorBeamProjector *const this)
+{
+  CSoundEnvelopeController *Controller; // esi
+  CSoundPatch *m_sndMechanical; // eax
+
+  CBaseProjector::Shutdown(this);
+  Controller = CSoundEnvelopeController::GetController();
+  m_sndMechanical = this->m_sndMechanical;
+  if ( m_sndMechanical )
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *, int, _DWORD))Controller->_vptr_CSoundEnvelopeController
+     + 14))(
+      Controller,
+      m_sndMechanical,
+      1069547520,
+      0);
+  if ( this->m_sndAmbientMusic )
+  {
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))Controller->_vptr_CSoundEnvelopeController + 5))(
+      Controller,
+      this->m_sndAmbientMusic);
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))Controller->_vptr_CSoundEnvelopeController + 11))(
+      Controller,
+      this->m_sndAmbientMusic);
+    this->m_sndAmbientMusic = 0;
+  }
+  if ( this->m_sndAmbientSound )
+  {
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))Controller->_vptr_CSoundEnvelopeController + 5))(
+      Controller,
+      this->m_sndAmbientSound);
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))Controller->_vptr_CSoundEnvelopeController + 11))(
+      Controller,
+      this->m_sndAmbientSound);
+    this->m_sndAmbientSound = 0;
+  }
+}

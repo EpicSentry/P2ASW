@@ -1,0 +1,25 @@
+class BlobsInBeamUpdate_SIMD
+{
+public:
+    
+	BlobsInBeamUpdate_SIMD(class CTrigger_TractorBeam * );
+    ~BlobsInBeamUpdate_SIMD();
+    struct BlobBeamUpdateData_t
+    {
+        class Vector m_vPosition;
+        class Vector m_vVelocity;
+        float m_flCurrentVortexRadius;
+        float m_flCurrentVortexSpeed;
+        float m_flDestVortexRadius;
+        float m_flVortexDirection;
+        void BlobBeamUpdateData_t();
+        struct BlobsInBeamUpdate_SIMD::BlobBeamUpdateData_t & operator=(struct BlobsInBeamUpdate_SIMD::BlobBeamUpdateData_t & );
+    };
+
+private:
+    
+	UpdateBlobsInBeam_SIMD();
+    float m_flDeltaTime;
+    CTrigger_TractorBeam *m_pBeam;
+    CUtlVector<BlobsInBeamUpdate_SIMD::BlobBeamUpdateData_t,CUtlMemoryAligned<BlobsInBeamUpdate_SIMD::BlobBeamUpdateData_t,16> > m_data;
+};

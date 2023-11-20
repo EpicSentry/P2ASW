@@ -1,0 +1,14 @@
+class ClientFizzlerMultiOriginSoundPlayer : public C_BaseEntity
+{
+	DECLARE_CLASS( ClientFizzlerMultiOriginSoundPlayer, C_BaseEntity );
+	DECLARE_CLIENTCLASS();
+public:
+   ClientFizzlerMultiOriginSoundPlayer();
+   ~ClientFizzlerMultiOriginSoundPlayer();
+	
+   bool GetSoundSpatialization(struct SpatializationInfo_t & );
+   
+private:
+   bool GetSoundSpatializationFromFizzler(struct SpatializationInfo_t & ,class C_TriggerPortalCleanser * );
+		
+};

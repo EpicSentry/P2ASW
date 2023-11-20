@@ -1,0 +1,8 @@
+void __cdecl UTIL_Portal_Laser_Prevent_Tilting(Vector *const vDirection)
+{
+  if ( fabs(vDirection->z) < 0.1 )
+  {
+    vDirection->z = 0.0;
+    VectorNormalize(vDirection);
+  }
+}

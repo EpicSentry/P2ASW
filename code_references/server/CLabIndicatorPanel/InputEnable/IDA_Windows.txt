@@ -1,0 +1,5 @@
+// attributes: thunk
+void __thiscall CLabIndicatorPanel::InputEnable(CLabIndicatorPanel *this, inputdata_t *inputdata)
+{
+  CLabIndicatorPanel::Enable(this);
+}

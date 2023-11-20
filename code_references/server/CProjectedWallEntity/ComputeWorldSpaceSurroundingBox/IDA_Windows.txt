@@ -1,0 +1,19 @@
+void __thiscall CProjectedWallEntity::ComputeWorldSpaceSurroundingBox(
+        CProjectedWallEntity *this,
+        Vector *pWorldMins,
+        Vector *pWorldMaxs)
+{
+  float z; // eax
+  __int64 v4; // xmm0_8
+  float v5; // ecx
+  __int64 vMins; // [esp+Ch] [ebp-Ch]
+
+  z = this->m_vWorldSpace_WallMins.m_Value.z;
+  vMins = *(_QWORD *)&this->m_vWorldSpace_WallMins.m_Value.x;
+  v4 = *(_QWORD *)&this->m_vWorldSpace_WallMaxs.m_Value.x;
+  v5 = this->m_vWorldSpace_WallMaxs.m_Value.z;
+  *(_QWORD *)&pWorldMins->x = vMins;
+  pWorldMins->z = z;
+  *(_QWORD *)&pWorldMaxs->x = v4;
+  pWorldMaxs->z = v5;
+}

@@ -1,0 +1,186 @@
+void __thiscall CTriggerPortalCleanser::Touch(CTriggerPortalCleanser *this, CBaseEntity *pOther)
+{
+  CBaseEntity *v3; // edi
+  CBaseAnimating *v4; // eax
+  CBaseEntity *v5; // ebx
+  CWeaponPortalgun *v6; // eax
+  CWeaponPortalgun *v7; // esi
+  CProp_Portal *AssociatedPortal; // eax
+  CProp_Portal *v9; // edi
+  CBaseEdict *m_pPev; // ecx
+  CBaseEdict *v11; // ecx
+  CProp_Portal *v12; // edi
+  CBaseEdict *v13; // ecx
+  CBaseEdict *v14; // ecx
+  void *v15; // [esp+4h] [ebp-30h]
+  float thinkTime; // [esp+2Ch] [ebp-8h]
+  float curtime; // [esp+2Ch] [ebp-8h]
+  bool bFizzledPortal; // [esp+33h] [ebp-1h]
+  bool bFizzledPortala; // [esp+33h] [ebp-1h]
+
+  v3 = pOther;
+  if ( this->PassesTriggerFilters(this, pOther) )
+  {
+    bFizzledPortal = pOther
+                  && (pOther->m_iClassname.pszValue == "weapon_portalgun"
+                   || CBaseEntity::ClassMatchesComplex(pOther, "weapon_portalgun"));
+    if ( !pOther->IsPlayer(pOther) && !bFizzledPortal )
+    {
+      v4 = pOther->GetBaseAnimating(pOther);
+      CTriggerPortalCleanser::FizzleBaseAnimating(this, v4);
+      return;
+    }
+    v5 = pOther->IsPlayer(pOther) ? pOther : 0;
+    if ( gpGlobals->maxClients > 1 )
+    {
+      if ( !v5 )
+        goto LABEL_14;
+      if ( !((int (__thiscall *)(CBaseEntity *, const char *, _DWORD))v5->__vftable[1].HasTarget)(
+              v5,
+              "weapon_portalgun",
+              0) )
+        return;
+    }
+    if ( v5 )
+    {
+      v15 = (void *)((int (__thiscall *)(CBaseEntity *, const char *, _DWORD))v5->__vftable[1].HasTarget)(
+                      v5,
+                      "weapon_portalgun",
+                      0);
+      v6 = (CWeaponPortalgun *)__RTDynamicCast(
+                                 v15,
+                                 0,
+                                 &CBaseCombatWeapon `RTTI Type Descriptor',
+                                 &CWeaponPortalgun `RTTI Type Descriptor',
+                                 0);
+      goto LABEL_18;
+    }
+LABEL_14:
+    if ( !bFizzledPortal )
+      return;
+    v6 = (CWeaponPortalgun *)__RTDynamicCast(
+                               pOther,
+                               0,
+                               &CBaseEntity `RTTI Type Descriptor',
+                               &CWeaponPortalgun `RTTI Type Descriptor',
+                               0);
+LABEL_18:
+    v7 = v6;
+    if ( !v6 )
+      return;
+    bFizzledPortala = 0;
+    if ( CWeaponPortalgun::CanFirePortal1(v6) )
+    {
+      AssociatedPortal = CWeaponPortalgun::GetAssociatedPortal(v7, 0);
+      v9 = AssociatedPortal;
+      if ( AssociatedPortal )
+      {
+        if ( AssociatedPortal->IsActive(AssociatedPortal) )
+        {
+          CProp_Portal::DoFizzleEffect(v9, 5, 0);
+          CProp_Portal::Fizzle(v9);
+          if ( v7->m_fEffectsMaxSize1.m_Value != 50.0 )
+          {
+            if ( v7->m_Network.m_TimerEvent.m_bRegistered )
+            {
+              *((_BYTE *)&v7->m_Network + 76) |= 1u;
+            }
+            else
+            {
+              m_pPev = v7->m_Network.m_pPev;
+              if ( m_pPev )
+                CBaseEdict::StateChanged(m_pPev, 0x608u);
+            }
+            v7->m_fEffectsMaxSize1.m_Value = FLOAT_60_0.y;
+          }
+          bFizzledPortala = 1;
+        }
+        thinkTime = gpGlobals->curtime;
+        if ( CBaseEntity::GetNextThink(v9, CProp_Portal::s_szDelayedPlacementThinkContext) > (double)thinkTime )
+        {
+          CBaseEntity::ThinkSet(v9, 0, thinkTime, CProp_Portal::s_szDelayedPlacementThinkContext);
+          if ( v7->m_fEffectsMaxSize2.m_Value != 50.0 )
+          {
+            if ( v7->m_Network.m_TimerEvent.m_bRegistered )
+            {
+              *((_BYTE *)&v7->m_Network + 76) |= 1u;
+            }
+            else
+            {
+              v11 = v7->m_Network.m_pPev;
+              if ( v11 )
+                CBaseEdict::StateChanged(v11, 0x60Cu);
+            }
+            v7->m_fEffectsMaxSize2.m_Value = FLOAT_60_0.y;
+          }
+          bFizzledPortala = 1;
+        }
+      }
+      v3 = pOther;
+    }
+    if ( CWeaponPortalgun::CanFirePortal2(v7) )
+    {
+      v12 = CWeaponPortalgun::GetAssociatedPortal(v7, 1);
+      if ( v12 )
+      {
+        if ( v12->IsActive(v12) )
+        {
+          CProp_Portal::DoFizzleEffect(v12, 5, 0);
+          CProp_Portal::Fizzle(v12);
+          if ( v7->m_fEffectsMaxSize2.m_Value != 50.0 )
+          {
+            if ( v7->m_Network.m_TimerEvent.m_bRegistered )
+            {
+              *((_BYTE *)&v7->m_Network + 76) |= 1u;
+            }
+            else
+            {
+              v13 = v7->m_Network.m_pPev;
+              if ( v13 )
+                CBaseEdict::StateChanged(v13, 0x60Cu);
+            }
+            v7->m_fEffectsMaxSize2.m_Value = FLOAT_60_0.y;
+          }
+          bFizzledPortala = 1;
+        }
+        curtime = gpGlobals->curtime;
+        if ( CBaseEntity::GetNextThink(v12, CProp_Portal::s_szDelayedPlacementThinkContext) > (double)curtime )
+        {
+          CBaseEntity::ThinkSet(v12, 0, curtime, CProp_Portal::s_szDelayedPlacementThinkContext);
+          if ( v7->m_fEffectsMaxSize2.m_Value != 50.0 )
+          {
+            if ( v7->m_Network.m_TimerEvent.m_bRegistered )
+            {
+              *((_BYTE *)&v7->m_Network + 76) |= 1u;
+            }
+            else
+            {
+              v14 = v7->m_Network.m_pPev;
+              if ( v14 )
+                CBaseEdict::StateChanged(v14, 0x60Cu);
+            }
+            v7->m_fEffectsMaxSize2.m_Value = FLOAT_60_0.y;
+          }
+          v3 = pOther;
+LABEL_56:
+          v7->SendWeaponAnim(v7, 493);
+          CBaseEntity::EmitSound(v7, "Portal.FizzlerShimmy", 0.0, 0);
+          CWeaponPortalgun::SetLastFiredPortal(v7, 0);
+          CWeaponPortalgun::ClearPortalPositions(v7);
+          COutputEvent::FireOutput(&this->m_OnFizzle, v3, this, 0.0);
+          if ( v5 )
+            ((void (__thiscall *)(CBaseEntity *, int, _DWORD, int))v5->__vftable[1].NetworkStateChanged_m_vecVelocity)(
+              v5,
+              8,
+              0,
+              4);
+          return;
+        }
+      }
+      v3 = pOther;
+    }
+    if ( !bFizzledPortala )
+      return;
+    goto LABEL_56;
+  }
+}

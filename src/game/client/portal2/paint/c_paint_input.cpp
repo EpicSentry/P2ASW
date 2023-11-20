@@ -98,7 +98,7 @@ void C_Paint_Input::ApplyMouse( int nSlot, QAngle& viewangles, CUserCmd *cmd, fl
 
 	if ( !((in_strafe.GetPerUser( nSlot ).state & 1) || lookstrafe.GetInt()) )
 	{
-		/*
+		
 		if ( CAM_IsThirdPerson() && pPlayer->IsTaunting() )
 		{
 			if ( mouse_x && !pPlayer->IsInterpolatingTauntAngles() )
@@ -114,7 +114,7 @@ void C_Paint_Input::ApplyMouse( int nSlot, QAngle& viewangles, CUserCmd *cmd, fl
 				}
 			}
 		}
-		else*/
+		else
 		{
 			// Otherwize, use mouse to spin around vertical axis
 			{
@@ -136,7 +136,7 @@ void C_Paint_Input::ApplyMouse( int nSlot, QAngle& viewangles, CUserCmd *cmd, fl
 	//  to adjust view pitch.
 	if (!(in_strafe.GetPerUser( nSlot ).state & 1))
 	{
-		/*
+		
 		if ( CAM_IsThirdPerson() && pPlayer->IsTaunting() )
 		{
 			if ( mouse_y && !pPlayer->IsInterpolatingTauntAngles() )
@@ -155,7 +155,7 @@ void C_Paint_Input::ApplyMouse( int nSlot, QAngle& viewangles, CUserCmd *cmd, fl
 				g_ThirdPersonManager.SetCameraOffsetAngles( vAngle );
 			}
 		}
-		else*/
+		else
 		{
 			float pitch =  90.0f - RAD2DEG( acos( clamp( DotProduct( vForward, vPlayerUp ), -1.f, 1.f ) ) );
 			pitch += -m_pitch->GetFloat() * mouse_y;
@@ -205,7 +205,7 @@ void C_Paint_Input::JoyStickTurn( CUserCmd *cmd, float &yaw, float &pitch, float
 	CPortal_Player *pPlayer = C_Portal_Player::GetLocalPortalPlayer();
 	if ( !pPlayer )
 		return;
-	/*
+	
 	if ( CAM_IsThirdPerson() && pPlayer->IsTaunting() )
 	{
 		if ( yaw != 0.0f && !pPlayer->IsInterpolatingTauntAngles() )
@@ -236,5 +236,5 @@ void C_Paint_Input::JoyStickTurn( CUserCmd *cmd, float &yaw, float &pitch, float
 			g_ThirdPersonManager.SetCameraOffsetAngles( vAngle );
 		}
 	}
-	*/
+	
 }

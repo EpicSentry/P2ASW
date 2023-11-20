@@ -1,0 +1,25 @@
+bool __thiscall EntityBeamHistory_t::IsDifferentBeam(EntityBeamHistory_t *this, CTrigger_TractorBeam *pNewBeam)
+{
+  int m_Size; // edi
+  int v3; // esi
+  unsigned int v4; // eax
+  CTrigger_TractorBeam *m_pEntity; // edx
+
+  m_Size = this->m_beams.m_Size;
+  v3 = 0;
+  if ( m_Size <= 0 )
+    return 1;
+  while ( 1 )
+  {
+    v4 = *(_DWORD *)&this->m_beams.m_Memory.m_Memory[8 * v3];
+    if ( v4 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v4].m_SerialNumber != HIWORD(v4) )
+      m_pEntity = 0;
+    else
+      m_pEntity = (CTrigger_TractorBeam *)g_pEntityList->m_EntPtrArray[(unsigned __int16)v4].m_pEntity;
+    if ( m_pEntity == pNewBeam )
+      break;
+    if ( ++v3 >= m_Size )
+      return 1;
+  }
+  return *(_DWORD *)&this->m_beams.m_Memory.m_Memory[8 * v3 + 4] != pNewBeam->m_nLastUpdateFrame;
+}

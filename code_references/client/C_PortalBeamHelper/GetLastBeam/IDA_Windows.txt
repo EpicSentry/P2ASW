@@ -1,0 +1,10 @@
+C_Beam *__thiscall C_PortalBeamHelper::GetLastBeam(C_PortalBeamHelper *this)
+{
+  int m_Size; // eax
+
+  m_Size = this->m_beams.m_Size;
+  if ( m_Size )
+    return this->m_beams.m_Memory.m_pMemory[m_Size - 1];
+  else
+    return 0;
+}

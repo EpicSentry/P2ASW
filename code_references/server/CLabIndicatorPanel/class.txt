@@ -1,0 +1,86 @@
+class CLabIndicatorPanel : public CBaseEntity
+{
+	DECLARE_DATADESC();
+	DECLARE_SERVERCLASS();
+	
+public:
+	
+    CLabIndicatorPanel(class CLabIndicatorPanel & );
+    CLabIndicatorPanel();
+    ~CLabIndicatorPanel();
+    int UpdateTransmitState();
+    void SetTransmit(class CCheckTransmitInfo * ,bool );
+    void Spawn();
+    void Precache();
+    void OnRestore();
+    void ScreenVisible(bool );
+    void Disable();
+    void Enable();
+    void InputDisable(struct inputdata_t & );
+    void InputEnable(struct inputdata_t & );
+    void StartTimer(float );
+    void ResetTimer();
+    void SetChecked(bool );
+    void SetPlayerPinged(int );
+    void SetIsTimer(bool );
+    class CLabIndicatorPanel & operator=(class CLabIndicatorPanel & );
+    void __local_vftable_ctor_closure();
+    void * __vecDelDtor(unsigned int );
+	
+private:
+
+    private void GetControlPanelInfo(int ,char &** );
+    private void GetControlPanelClassName(int ,char &** );
+    private void SpawnControlPanels();
+    private void RestoreControlPanels();
+    class NetworkVar_m_bEnabled
+    {
+        public void NetworkStateChanged(void * );
+        public void NetworkStateChanged(void * ,void * );
+    };
+    private class CNetworkVarBase<bool,CLabIndicatorPanel::NetworkVar_m_bEnabled> m_bEnabled;
+    class NetworkVar_m_bStopped
+    {
+        public void NetworkStateChanged(void * );
+        public void NetworkStateChanged(void * ,void * );
+    };
+    private class CNetworkVarBase<bool,CLabIndicatorPanel::NetworkVar_m_bStopped> m_bStopped;
+    class NetworkVar_m_bCountingDown
+    {
+        public void NetworkStateChanged(void * );
+        public void NetworkStateChanged(void * ,void * );
+    };
+    private class CNetworkVarBase<bool,CLabIndicatorPanel::NetworkVar_m_bCountingDown> m_bCountingDown;
+    class NetworkVar_m_bIsCountdownTimer
+    {
+        public void NetworkStateChanged(void * );
+        public void NetworkStateChanged(void * ,void * );
+    };
+    private class CNetworkVarBase<bool,CLabIndicatorPanel::NetworkVar_m_bIsCountdownTimer> m_bIsCountdownTimer;
+    class NetworkVar_m_bIsChecked
+    {
+        public void NetworkStateChanged(void * );
+        public void NetworkStateChanged(void * ,void * );
+    };
+    private class CNetworkVarBase<bool,CLabIndicatorPanel::NetworkVar_m_bIsChecked> m_bIsChecked;
+    class NetworkVar_m_iPlayerPinged
+    {
+        public void NetworkStateChanged(void * );
+        public void NetworkStateChanged(void * ,void * );
+    };
+    private class CNetworkVarBase<int,CLabIndicatorPanel::NetworkVar_m_iPlayerPinged> m_iPlayerPinged;
+    class NetworkVar_m_flTimerDuration
+    {
+        public void NetworkStateChanged(void * );
+        public void NetworkStateChanged(void * ,void * );
+    };
+    private class CNetworkVarBase<float,CLabIndicatorPanel::NetworkVar_m_flTimerDuration> m_flTimerDuration;
+    class NetworkVar_m_flTimerStart
+    {
+        public void NetworkStateChanged(void * );
+        public void NetworkStateChanged(void * ,void * );
+    };
+    private class CNetworkVarBase<float,CLabIndicatorPanel::NetworkVar_m_flTimerStart> m_flTimerStart;
+    private class CHandle<CVGuiScreen> m_hScreen;
+	
+};

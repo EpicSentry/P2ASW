@@ -1,0 +1,40 @@
+float __cdecl C_PropTractorBeamProjector::CalculateArmaturePose(C_PropTractorBeamProjector *const this)
+{
+  float m_flArmatureStartTime; // xmm1_4
+  __m128 v2; // xmm3
+  __m128 m_flArmatureDuration_low; // xmm2
+  __m128 m_flArmatureTarget_low; // xmm5
+  float m_flArmatureStart; // xmm0_4
+  float v6; // xmm3_4
+  float v7; // xmm0_4
+  __m128 v9; // xmm2
+
+  m_flArmatureStartTime = this->m_flArmatureStartTime;
+  m_flArmatureDuration_low = (__m128)LODWORD(this->m_flArmatureDuration);
+  v2.m128_i32[0] = LODWORD(gpGlobals->curtime);
+  m_flArmatureDuration_low.m128_f32[0] = m_flArmatureDuration_low.m128_f32[0] + m_flArmatureStartTime;
+  if ( v2.m128_f32[0] <= m_flArmatureDuration_low.m128_f32[0] )
+  {
+    m_flArmatureTarget_low = (__m128)LODWORD(this->m_flArmatureTarget);
+    m_flArmatureStart = this->m_flArmatureStart;
+    if ( m_flArmatureStartTime == m_flArmatureDuration_low.m128_f32[0] )
+    {
+      v9 = _mm_cmpgt_ss(m_flArmatureDuration_low, v2);
+      LODWORD(v7) = _mm_andnot_ps(v9, m_flArmatureTarget_low).m128_u32[0] | LODWORD(m_flArmatureStart) & v9.m128_i32[0];
+      if ( v7 < 0.0 )
+        return 0.0;
+    }
+    else
+    {
+      v6 = (float)(v2.m128_f32[0] - m_flArmatureStartTime)
+         / (float)(m_flArmatureDuration_low.m128_f32[0] - m_flArmatureStartTime);
+      v7 = m_flArmatureStart
+         + (float)((float)(m_flArmatureTarget_low.m128_f32[0] - m_flArmatureStart)
+                 * (float)((float)(3.0 * (float)(v6 * v6)) - (float)((float)((float)(v6 * v6) + (float)(v6 * v6)) * v6)));
+      if ( v7 < 0.0 )
+        return 0.0;
+    }
+    return fminf(1.0, v7);
+  }
+  return this->m_flArmatureTarget;
+}

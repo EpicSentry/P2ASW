@@ -76,12 +76,9 @@ namespace BaseModUI
 		vgui::ProgressBar* m_prgValue;
 		vgui::Panel* m_defaultMark;
 
-		Color m_MarkColor;
-		Color m_MarkFocusColor;
-		Color m_ForegroundColor;
-		Color m_ForegroundFocusColor;
-		Color m_BackgroundColor;
-		Color m_BackgroundFocusColor;
+		Color m_focusColor;
+		Color m_unfocusColor;
+		Color m_backgroundFocusColor;
 
 		bool m_inverse;
 
@@ -92,8 +89,7 @@ namespace BaseModUI
 		CGameUIConVarRef* m_conVarRef;
 		CGameUIConVarRef* m_conVarDefaultRef;
 
-		bool	m_bDirty;
-		int		m_InsetX;
+		bool m_bDirty;
 	};
 };
 

@@ -1,0 +1,38 @@
+void __cdecl CPropTractorBeamProjector::~CPropTractorBeamProjector(CPropTractorBeamProjector *const this)
+{
+  CSoundEnvelopeController *Controller; // esi
+  unsigned int m_Index; // eax
+  CBaseEntity **v3; // edx
+
+  this->_vptr_IHandleEntity = (int (**)(...))off_C9E828;
+  Controller = CSoundEnvelopeController::GetController();
+  if ( this->m_sndMechanical )
+  {
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))Controller->_vptr_CSoundEnvelopeController + 5))(
+      Controller,
+      this->m_sndMechanical);
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))Controller->_vptr_CSoundEnvelopeController + 11))(
+      Controller,
+      this->m_sndMechanical);
+  }
+  if ( this->m_sndAmbientMusic )
+  {
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))Controller->_vptr_CSoundEnvelopeController + 5))(
+      Controller,
+      this->m_sndAmbientMusic);
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))Controller->_vptr_CSoundEnvelopeController + 11))(
+      Controller,
+      this->m_sndAmbientMusic);
+  }
+  m_Index = this->m_hAmbientSoundProxy.m_Index;
+  if ( m_Index != -1 )
+  {
+    v3 = (CBaseEntity **)((char *)g_pEntityList + 24 * (unsigned __int16)m_Index);
+    if ( v3[2] == (CBaseEntity *)HIWORD(m_Index) )
+    {
+      if ( v3[1] )
+        UTIL_Remove(v3[1]);
+    }
+  }
+  CBaseProjector::~CBaseProjector(this);
+}

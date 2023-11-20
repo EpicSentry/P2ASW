@@ -1,0 +1,33 @@
+void __cdecl CIndicatorScreen::CIndicatorScreen(
+        CIndicatorScreen *const this,
+        const void **const __vtt_parm,
+        vgui::Panel *parent,
+        const char *panelName)
+{
+  vgui::ISchemeManager *v4; // edi
+  int v5; // eax
+  vgui::HScheme v6; // eax
+  _DWORD *v7; // eax
+  int (__cdecl *v8)(vgui::ISchemeManager *, int, const char *, const char *); // [esp+2Ch] [ebp-1Ch]
+
+  v4 = g_pVGuiSchemeManager;
+  v8 = *(int (__cdecl **)(vgui::ISchemeManager *, int, const char *, const char *))(*(_DWORD *)g_pVGuiSchemeManager + 52);
+  v5 = (*((int (__cdecl **)(IEngineVGui *, int))enginevgui->_vptr_IEngineVGui + 2))(enginevgui, 2);
+  v6 = v8(v4, v5, "scripts/screens/indicator_panel.res", "IndicatorPanelScreen");
+  CVGuiScreenPanel::CVGuiScreenPanel(this, __vtt_parm + 1, parent, "CIndicatorScreen", v6);
+  v7 = *__vtt_parm;
+  *(_DWORD *)this->gap0 = *__vtt_parm;
+  *(_DWORD *)&this->gap0[*(v7 - 31)] = __vtt_parm[7];
+  this->m_hVGUIScreen.m_Index = -1;
+  this->m_hScreenEntity.m_Index = -1;
+  this->m_bWasCounting = 0;
+  this->m_flFadeUpTime = 0.0;
+  this->m_nTimerBackgroundTextureID = -1;
+  this->m_nTimerBackgroundActiveTextureID = -1;
+  this->m_nTimerUpperSliceTextureID = -1;
+  this->m_nTimerLowerSliceTextureID = -1;
+  this->m_nCheckTextureID = -1;
+  this->m_nUncheckedTextureID = -1;
+  this->m_nXTextureID = -1;
+  this->m_nOTextureID = -1;
+}

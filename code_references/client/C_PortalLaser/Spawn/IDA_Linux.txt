@@ -1,0 +1,22 @@
+void __cdecl C_PortalLaser::Spawn(C_PortalLaser *const this)
+{
+  C_Beam *v1; // eax
+
+  (*((void (__cdecl **)(C_PortalLaser *const))this->_vptr_IHandleEntity + 37))(this);
+  if ( this->m_bIsLethal )
+  {
+    v1 = C_Beam::BeamCreate("sprites/laserbeam.vmt", 2.0);
+    if ( v1->m_clrRender.m_Value.r != 100 )
+      v1->m_clrRender.m_Value.r = 100;
+    if ( v1->m_clrRender.m_Value.g != 0xFF )
+      v1->m_clrRender.m_Value.g = -1;
+    if ( v1->m_clrRender.m_Value.b != 100 )
+      v1->m_clrRender.m_Value.b = 100;
+  }
+  else
+  {
+    v1 = C_Beam::BeamCreate("sprites/purplelaser1.vmt", 32.0);
+  }
+  C_PortalBeamHelper::Init(&this->m_beamHelper, v1);
+  C_BaseEntity::Spawn(this);
+}

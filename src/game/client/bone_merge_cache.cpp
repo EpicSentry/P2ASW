@@ -147,7 +147,7 @@ void CBoneMergeCache::MergeMatchingBones( int boneMask, CBoneBitList &boneComput
 		AngleMatrix( QAngle( 15, 0, 0 ), matPitchUp );
 		ConcatTransforms( m_pFollow->GetBone( iParentBone ), matPitchUp, m_pOwner->GetBoneForWrite( iOwnerBone ) );
 #else
-		MatrixCopy(m_pFollow->GetBone(iParentBone), m_pOwner->GetBoneForWrite(iOwnerBone));
+		MatrixCopy( m_pFollow->GetBone( iParentBone ), m_pOwner->GetBoneForWrite( iOwnerBone ) );
 #endif
 
 		boneComputed.Set( i );

@@ -1,0 +1,4 @@
+RenderableTranslucencyType_t __cdecl C_Trigger_TractorBeam::ComputeTranslucencyType(C_Trigger_TractorBeam *const this)
+{
+  return 1;
+}

@@ -1,0 +1,4 @@
+void __thiscall CBaseProjector::InputEnable(CBaseProjector *this, inputdata_t *data)
+{
+  CBaseProjector::EnableProjection(this, 1);
+}

@@ -1,0 +1,24 @@
+void __thiscall EntityBeamHistory_t::UpdateBeam(EntityBeamHistory_t *this, CTrigger_TractorBeam *pBeam)
+{
+  int v3; // eax
+
+  EntityBeamHistory_t::LeaveBeam(this, pBeam);
+  if ( this->m_beams.m_Size == 6 )
+    this->m_beams.m_Size = 5;
+  v3 = this->m_beams.m_Size++;
+  this->m_beams.m_pElements = (BeamInfo_t *)this;
+  if ( v3 > 0 )
+    _V_memmove(&this->m_beams.m_Memory.m_Memory[8], this, 8 * v3);
+  *(_DWORD *)this->m_beams.m_Memory.m_Memory = -1;
+  *(_DWORD *)&this->m_beams.m_Memory.m_Memory[4] = 0;
+  if ( pBeam )
+  {
+    *(_DWORD *)this->m_beams.m_Memory.m_Memory = pBeam->GetRefEHandle(pBeam)->m_Index;
+    *(_DWORD *)&this->m_beams.m_Memory.m_Memory[4] = CTrigger_TractorBeam::GetLastUpdateFrame(pBeam);
+  }
+  else
+  {
+    *(_DWORD *)this->m_beams.m_Memory.m_Memory = -1;
+    *(_DWORD *)&this->m_beams.m_Memory.m_Memory[4] = CTrigger_TractorBeam::GetLastUpdateFrame(0);
+  }
+}

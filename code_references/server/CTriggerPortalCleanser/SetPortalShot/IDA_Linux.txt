@@ -1,0 +1,11 @@
+void __cdecl CTriggerPortalCleanser::SetPortalShot(CTriggerPortalCleanser *const this)
+{
+  float curtime; // xmm0_4
+
+  curtime = gpGlobals->curtime;
+  if ( curtime != this->m_flPortalShotTime.m_Value )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_flPortalShotTime);
+    this->m_flPortalShotTime.m_Value = curtime;
+  }
+}

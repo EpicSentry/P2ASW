@@ -1,0 +1,7 @@
+void __thiscall C_PortalBeamHelper::TurnOff(C_PortalBeamHelper *this)
+{
+  int i; // esi
+
+  for ( i = 0; i < this->m_beams.m_Size; ++i )
+    C_BaseEntity::AddEffects(this->m_beams.m_Memory.m_pMemory[i], 32);
+}

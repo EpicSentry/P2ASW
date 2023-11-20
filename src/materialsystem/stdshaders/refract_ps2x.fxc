@@ -1,4 +1,4 @@
-//========== Copyright (c) Valve Corporation, All rights reserved. ==========//
+//===================== Copyright (c) Valve Corporation. All Rights Reserved. ======================
 
 // STATIC: "MAGNIFY"						"0..1"
 // STATIC: "BLUR"							"0..1"
@@ -8,20 +8,27 @@
 // STATIC: "MASKED"							"0..1"
 // STATIC: "COLORMODULATE"					"0..1"
 // STATIC: "SECONDARY_NORMAL"				"0..1"
-// STATIC: "MIRRORABOUTVIEWPORTEDGES"		"0..1"	[XBOX]
 // STATIC: "MIRRORABOUTVIEWPORTEDGES"		"0..0"	[PC]
+// STATIC: "SHADER_SRGB_READ"				"0..1"	[ps20b]
+// STATIC: "LOCALREFRACT"					"0..1"
 
 #include "common_fog_ps_fxc.h"
 // DYNAMIC: "WRITE_DEPTH_TO_DESTALPHA"		"0..1"	[ps20b] [PC]
-// DYNAMIC: "WRITE_DEPTH_TO_DESTALPHA"		"0..0"	[ps20b] [XBOX]
+// DYNAMIC: "D_NVIDIA_STEREO"				"0..1"	[ps20b] [PC]
 
 // SKIP: $MASKED && $BLUR
 
 #if defined( SHADER_MODEL_PS_2_0 )
-#	define WRITE_DEPTH_TO_DESTALPHA 0
+	#ifdef WRITE_DEPTH_TO_DESTALPHA
+		#undef WRITE_DEPTH_TO_DESTALPHA
+	#endif
+	#define WRITE_DEPTH_TO_DESTALPHA 0
 #endif
 
 #ifdef _X360
+	#ifdef SHADER_SRGB_READ
+		#undef SHADER_SRGB_READ
+	#endif
 	#define SHADER_SRGB_READ 1
 #endif
 
@@ -31,11 +38,17 @@
 sampler NormalSampler2				: register( s1 );
 sampler RefractSampler				: register( s2 );
 sampler NormalSampler				: register( s3 );
+
 #if CUBEMAP
-sampler EnvmapSampler				: register( s4 );
+	samplerCUBE EnvmapSampler			: register( s4 );
 #endif
+
 #if REFRACTTINTTEXTURE
-sampler RefractTintSampler			: register( s5 );
+	sampler RefractTintSampler			: register( s5 );
+#endif
+
+#if D_NVIDIA_STEREO
+	sampler StereoParamSampler          : register( s6 );
 #endif
 
 const float3 g_EnvmapTint					: register( c0 );
@@ -43,7 +56,7 @@ const float3 g_RefractTint					: register( c1 );
 const float3 g_EnvmapContrast				: register( c2 );
 const float3 g_EnvmapSaturation				: register( c3 );
 const float4 g_NormalizedViewportMinXYMaxWZ	: register( c4 );
-const float4  g_c5							: register( c5 );
+const float4 g_c5							: register( c5 );
 #define g_RefractScale g_c5.x
 #define g_flTime g_c5.w
 
@@ -51,97 +64,124 @@ const float4 g_c6							: register( c6 );
 #define g_vMagnifyCenter g_c6.xy
 #define g_flInverseMagnifyScale g_c6.z
 
+const float3 g_c7							: register( c7 );
+#define g_vRefractTextureAspectFixup ( g_c7.xy )
+#define g_flRefractDepth ( g_c7.z )
+
 const float4 g_FogParams					: register( PSREG_FOG_PARAMS );
 const float4 g_EyePos_SpecExponent			: register( PSREG_EYEPOS_SPEC_EXPONENT );
 
 static const int g_BlurCount = BLUR;
 static const float g_BlurFraction = 1.0f / 512.0f;
-static const float g_HalfBlurFraction = 0.5 * g_BlurFraction;
-static const float4 g_BlurFractionVec = float4( g_BlurFraction, g_HalfBlurFraction, 
-                                               -g_BlurFraction,-g_HalfBlurFraction );
+static const float g_HalfBlurFraction = 0.5f * g_BlurFraction;
 
 struct PS_INPUT
 {
-	float4 vBumpTexCoord			: TEXCOORD0;			// NormalMap1 in xy, NormalMap2 in wz
+	float4 vBumpTexCoord			: TEXCOORD0; // NormalMap1 in xy, NormalMap2 in wz
 	float3 vTangentVertToEyeVector	: TEXCOORD1;
 	float3 vWorldNormal				: TEXCOORD2;
-	float3 vWorldTangent			: TEXCOORD3; 
-	float3 vWorldBinormal			: TEXCOORD4; 
-	float3 vRefractXYW				: TEXCOORD5; 
+	float3 vWorldTangent			: TEXCOORD3;
+	float3 vWorldBinormal			: TEXCOORD4;
+	float3 vRefractXYW				: TEXCOORD5;
 	float3 vWorldViewVector			: TEXCOORD6;
 	#if COLORMODULATE
 		float4 ColorModulate		: COLOR0;
 	#endif
 
-	float4 worldPos_projPosZ		: TEXCOORD7;		// Necessary for pixel fog	
+	float4 worldPos_projPosZ		: TEXCOORD7; // Necessary for pixel fog	
 };
 
-float4 main( PS_INPUT i ) : COLOR
+// NVIDIA's function to convert mono refract UV to the correct stereo UV for each eye
+float2 MonoTostereoClipPosXY( float3 vMonoClipPos ) // .z is actually .w
 {
-	float3 result;
-	
-	float pixelFogFactor = CalcPixelFogFactor( PIXELFOGTYPE, g_FogParams, g_EyePos_SpecExponent.xyz, i.worldPos_projPosZ.xyz, i.worldPos_projPosZ.w );
-
-	#if FADEOUTONSILHOUETTE || CUBEMAP
-		float3 vWorldNormal = i.vWorldNormal;
-	#endif
-
-
-	#if FADEOUTONSILHOUETTE
-		//float blend = -i.projNormal.z;
-		float blend = saturate( dot( -i.vWorldViewVector.xyz, vWorldNormal.xyz ) );
-		blend = blend * blend * blend;
-	#else
-		float blend = 1.0f;
-	#endif
-
-	// Sample normal
-	float4 normalTexel = tex2D( NormalSampler, i.vBumpTexCoord.xy );
-	float4 vNormal = float4( normalTexel.xyz * 2.0f - 1.0f, normalTexel.a );
-
-	#if SECONDARY_NORMAL
-		float3 vNormal2 = tex2D( NormalSampler, i.vBumpTexCoord.wz ).xyz * 2.0f - 1.0f;
-		vNormal.xyz = normalize( vNormal.xyz + vNormal2.xyz );
-	#endif
-	
-	#if REFRACTTINTTEXTURE
-		float3 refractTintColor = 2.0 * g_RefractTint * tex2D( RefractTintSampler, i.vBumpTexCoord.xy );
-	#else
-		float3 refractTintColor = g_RefractTint;
-	#endif
-	
-	#if COLORMODULATE
-		refractTintColor *= i.ColorModulate.rgb;
-	#endif
-
-	// Perform division by W only once
-	float ooW = 1.0f / i.vRefractXYW.z;
-	
-	// Compute coordinates for sampling refraction
-	float2 vRefractTexCoordNoWarp = i.vRefractXYW.xy * ooW;
-	float2 vRefractTexCoord = vNormal.xy;
-	float scale = vNormal.a * g_RefractScale;
-	#if COLORMODULATE
-		scale *= i.ColorModulate.a;
-	#endif
-	vRefractTexCoord *= scale;
-	
-	#if ( MAGNIFY )
+	#if ( !D_NVIDIA_STEREO )
 	{
-		vRefractTexCoord += float2( 0.5, 0.5 ) + float2( g_vMagnifyCenter.x, g_vMagnifyCenter.y );
-		vRefractTexCoord += ( vRefractTexCoordNoWarp - float2( 0.5, 0.5 ) - float2( g_vMagnifyCenter.x, g_vMagnifyCenter.y ) ) * g_flInverseMagnifyScale;
+		return vMonoClipPos.xy;
 	}
 	#else
 	{
-		vRefractTexCoord += vRefractTexCoordNoWarp;
-	}	
+		// 0th pixel = 1/16 == 1/16 + 1/8 * 0
+		float flEyeSep = tex2D( StereoParamSampler, float2( 0.0625f, 0 ) ).x; // 0.19 * 0.1316;
+
+		// 1st pixel = 3/16 == 1/16 + 1/8 * 1
+		float flConvergence = tex2D( StereoParamSampler, float2( 0.1875, 0 ) ).x; // 4;
+		float3 vStereoClipPos = vMonoClipPos.xyz;
+
+		// Undo the stereo transform
+		vStereoClipPos.x += flEyeSep * ( vMonoClipPos.z - flConvergence );
+		return vStereoClipPos.xy;
+	}
+	#endif
+}
+
+float4 main( PS_INPUT i ) : COLOR
+{
+	// AlexV - Don't delete this line. I will remove it in a few days.
+	//i.vBumpTexCoord.x = ( i.vBumpTexCoord.x - 98.0/255.0 ) / ( 158.0/255.0-98.0/255.0 );
+
+	float3 vResult;
+
+	float flPixelFogFactor = CalcPixelFogFactor( PIXELFOGTYPE, g_FogParams, g_EyePos_SpecExponent.xyz, i.worldPos_projPosZ.xyz, i.worldPos_projPosZ.w );
+
+	float flBlend = 1.0f;
+	#if ( FADEOUTONSILHOUETTE )
+	{
+		//flBlend = -i.projNormal.z;
+		flBlend = saturate( dot( -i.vWorldViewVector.xyz, i.vWorldNormal.xyz ) );
+		flBlend = flBlend * flBlend * flBlend;
+	}
+	#endif
+
+	// Sample normal
+	float4 vNormalTexel = tex2D( NormalSampler, i.vBumpTexCoord.xy );
+	float4 vNormalTs = float4( vNormalTexel.xyz * 2.0f - 1.0f, vNormalTexel.a );
+
+	#if ( SECONDARY_NORMAL )
+	{
+		float3 vNormal2Ts = tex2D( NormalSampler, i.vBumpTexCoord.wz ).xyz * 2.0f - 1.0f;
+		vNormalTs.xyz = normalize( vNormalTs.xyz + vNormal2Ts.xyz );
+	}
+	#endif
+
+	#if ( REFRACTTINTTEXTURE )
+		float3 vRefractTintColor = 2.0 * g_RefractTint * tex2D( RefractTintSampler, i.vBumpTexCoord.xy ).rgb;
+	#else
+		float3 vRefractTintColor = g_RefractTint;
+	#endif
+
+	#if ( COLORMODULATE )
+	{
+		vRefractTintColor.rgb *= i.ColorModulate.rgb;
+	}
+	#endif
+
+	// Compute coordinates for sampling refraction
+	float2 vRefractTexCoordNoWarp = MonoTostereoClipPosXY( i.vRefractXYW.xyz ) / i.vRefractXYW.z; // Divide by w
+	float2 vRefractTexCoord = vNormalTs.xy; // This normal should be in screen space!
+	float flScale = vNormalTs.a * g_RefractScale;
+	#if COLORMODULATE
+	{
+		flScale *= i.ColorModulate.a;
+	}
+	#endif
+	vRefractTexCoord.xy *= flScale;
+
+	#if ( MAGNIFY )
+	{
+		vRefractTexCoord.xy += float2( 0.5, 0.5 ) + float2( g_vMagnifyCenter.x, g_vMagnifyCenter.y );
+		vRefractTexCoord.xy += ( vRefractTexCoordNoWarp.xy - float2( 0.5, 0.5 ) - float2( g_vMagnifyCenter.x, g_vMagnifyCenter.y ) ) * g_flInverseMagnifyScale;
+	}
+	#else
+	{
+		vRefractTexCoord.xy += vRefractTexCoordNoWarp.xy;
+	}
 	#endif
 
 	#if ( MIRRORABOUTVIEWPORTEDGES )
 	{
 		//
 		// need to mirror the texcoords on every border so that one splitscreen viewport doesn't bleed into another one.
-		// 
+		//
 
 		// mirror on the min viewport in both dimensions
 		vRefractTexCoord.xy -= g_NormalizedViewportMinXYMaxWZ.xy;
@@ -155,8 +195,25 @@ float4 main( PS_INPUT i ) : COLOR
 	}
 	#endif
 
-	#if (BLUR==1)  // use polyphase magic to convert 9 lookups into 4
-	
+	#if ( BLUR == 0 )
+	{
+		#if ( MASKED )
+		{
+			float4 vMaskedResult = tex2Dsrgb( RefractSampler, vRefractTexCoord.xy );
+			return FinalOutput( vMaskedResult, flPixelFogFactor, PIXELFOGTYPE, TONEMAP_SCALE_NONE );
+		}
+		#else
+		{
+			float3 vColorWarp = tex2Dsrgb( RefractSampler, vRefractTexCoord.xy ).rgb;
+			float3 vColorNoWarp = tex2Dsrgb( RefractSampler, vRefractTexCoordNoWarp.xy ).rgb;
+
+			vColorWarp.rgb *= vRefractTintColor.rgb;
+			vResult.rgb = lerp( vColorNoWarp.rgb, vColorWarp.rgb, flBlend );
+		}
+		#endif
+	}
+	#elif ( BLUR == 1 )  // use polyphase magic to convert 9 lookups into 4
+	{
 		//  basic principle behind this transformation:
 		//  [ A  B  C ]
 		//  [ D  E  F ]
@@ -168,81 +225,148 @@ float4 main( PS_INPUT i ) : COLOR
 		//  use bilinear filtering hardware to weight lower 2x1 samples evenly (0.5*[G + H])
 		//  scale bottom 2x1 by 2/9
 		//  fetch last sample (I) and scale by 1/9.
-		
-		float2 upper_2x2_loc = vRefractTexCoord.xy - float2(g_HalfBlurFraction, g_HalfBlurFraction);
-		float2 right_1x2_loc = vRefractTexCoord.xy + float2(g_BlurFraction, -g_HalfBlurFraction);
-		float2 lower_2x1_loc = vRefractTexCoord.xy + float2(-g_HalfBlurFraction, g_BlurFraction);
-		float2 singleton_loc = vRefractTexCoord.xy + float2(g_BlurFraction, g_BlurFraction);
-		result  = tex2D(RefractSampler, upper_2x2_loc) * 0.4444444;
-		result += tex2D(RefractSampler, right_1x2_loc) * 0.2222222;
-		result += tex2D(RefractSampler, lower_2x1_loc) * 0.2222222;
-		result += tex2D(RefractSampler, singleton_loc) * 0.1111111;
-	
-		if ( IsX360() )
-		{
-			result.rgb = X360GammaToLinear( result.rgb );
-		}
 
-		float3 unblurredColor = tex2Dsrgb(RefractSampler, vRefractTexCoordNoWarp.xy);
-		result = lerp(unblurredColor, result * refractTintColor, blend);
-	
-	#elif (BLUR>0)  // iteratively step through render target
-		int x, y;
-	
-		result = float3( 0.0f, 0.0f, 0.0f );
-		for( x = -g_BlurCount; x <= g_BlurCount; x++ )
+		float2 upper_2x2_loc = vRefractTexCoord.xy - float2( g_HalfBlurFraction, g_HalfBlurFraction );
+		float2 right_1x2_loc = vRefractTexCoord.xy + float2( g_BlurFraction, -g_HalfBlurFraction );
+		float2 lower_2x1_loc = vRefractTexCoord.xy + float2( -g_HalfBlurFraction, g_BlurFraction );
+		float2 singleton_loc = vRefractTexCoord.xy + float2( g_BlurFraction, g_BlurFraction );
+		vResult.rgb  = tex2D( RefractSampler, upper_2x2_loc ).rgb * 0.4444444;
+		vResult.rgb += tex2D( RefractSampler, right_1x2_loc ).rgb * 0.2222222;
+		vResult.rgb += tex2D( RefractSampler, lower_2x1_loc ).rgb * 0.2222222;
+		vResult.rgb += tex2D( RefractSampler, singleton_loc ).rgb * 0.1111111;
+
+		#if ( SHADER_SRGB_READ )
 		{
-			for( y = -g_BlurCount; y <= g_BlurCount; y++ )
+			// Just do this once rather than after every blur step, which is wrong, but much more efficient
+			if ( IsX360() )
 			{
-				result += tex2D( RefractSampler, vRefractTexCoord.xy + float2( g_BlurFraction * x, g_BlurFraction * y ) );
+				#if defined( CSTRIKE15 )
+					// [mariod] - RT's are all 2.2 gamma in CSTRIKE15
+					vResult.rgb = GammaToLinear( vResult.rgb );
+				#else
+					vResult.rgb = X360GammaToLinear( vResult.rgb );
+				#endif
+			}
+			else
+			{
+				vResult.rgb = SrgbGammaToLinear( vResult.rgb );
+			}
+		}
+		#endif
+
+		float3 vUnblurredColor = tex2Dsrgb( RefractSampler, vRefractTexCoordNoWarp.xy ).rgb;
+		vResult.rgb = lerp( vUnblurredColor.rgb, vResult.rgb * vRefractTintColor.rgb, flBlend );
+	}
+	#elif ( BLUR > 1 )  // iteratively step through render target
+	{
+		int x, y;
+
+		vResult.rgb = float3( 0.0f, 0.0f, 0.0f );
+		for ( x = -g_BlurCount; x <= g_BlurCount; x++ )
+		{
+			for ( y = -g_BlurCount; y <= g_BlurCount; y++ )
+			{
+				vResult.rgb += tex2D( RefractSampler, vRefractTexCoord.xy + float2( g_BlurFraction * x, g_BlurFraction * y ) ).rgb;
 			}
 		}
 
-		if ( IsX360() )
+		#if ( SHADER_SRGB_READ )
 		{
-			result.rgb = X360GammaToLinear( result.rgb );
+			// Just do this once rather than after every blur step, which is wrong, but much more efficient
+			if ( IsX360() )
+			{
+				#if defined( CSTRIKE15 )
+					// [mariod] - RT's are all 2.2 gamma in CSTRIKE15
+					vResult.rgb = GammaToLinear( vResult.rgb );
+				#else
+					vResult.rgb = X360GammaToLinear( vResult.rgb );
+				#endif
+			}
+			else
+			{
+				vResult.rgb = SrgbGammaToLinear( vResult.rgb );
+			}
 		}
-
-		int width = g_BlurCount * 2 + 1;
-		result *= 1.0f / ( width * width );
-	
-		// result is the blurred one now. . .now lerp.
-		float3 unblurredColor = tex2Dsrgb( RefractSampler, vRefractTexCoordNoWarp.xy );
-		result = lerp( unblurredColor, result * refractTintColor, blend );
-	#else
-		#if MASKED
-			float4 fMaskedResult = tex2Dsrgb( RefractSampler, vRefractTexCoord.xy );
-			return FinalOutput( fMaskedResult, pixelFogFactor, PIXELFOGTYPE, TONEMAP_SCALE_NONE );
-		#else
-			float3 colorWarp = tex2Dsrgb( RefractSampler, vRefractTexCoord.xy );
-			float3 colorNoWarp = tex2Dsrgb( RefractSampler, vRefractTexCoordNoWarp.xy );
-		
-			colorWarp *= refractTintColor;
-			result = lerp( colorNoWarp, colorWarp, blend );
 		#endif
+
+		int nWidth = g_BlurCount * 2 + 1;
+		vResult.rgb *= 1.0f / ( nWidth * nWidth );
+
+		// vResult is the blurred one now. . .now lerp.
+		float3 vUnblurredColor = tex2Dsrgb( RefractSampler, vRefractTexCoordNoWarp.xy );
+		vResult.rgb = lerp( vUnblurredColor.rgb, vResult.rgb * vRefractTintColor.rgb, flBlend );
+	}
 	#endif
 
-	#if CUBEMAP
-		float specularFactor = vNormal.a;
-	
-		float3 worldSpaceNormal = Vec3TangentToWorld( vNormal.xyz, vWorldNormal, i.vWorldTangent, i.vWorldBinormal );
-	
-		float3 reflectVect = CalcReflectionVectorUnnormalized( worldSpaceNormal, i.vTangentVertToEyeVector );
-		float3 specularLighting = texCUBE( EnvmapSampler, reflectVect );
-		specularLighting *= specularFactor;
-		specularLighting *= g_EnvmapTint;
-		float3 specularLightingSquared = specularLighting * specularLighting;
-		specularLighting = lerp( specularLighting, specularLightingSquared, g_EnvmapContrast );
-		float3 greyScale = dot( specularLighting, float3( 0.299f, 0.587f, 0.114f ) );
-		specularLighting = lerp( greyScale, specularLighting, g_EnvmapSaturation );
-		result += specularLighting;
+	#if ( LOCALREFRACT )
+	{
+		float2 vTexCoord = i.vBumpTexCoord.xy;
+
+		// The interpolaged tangent space vert to eye vector isn't good enough, so compute a higher quality vector here
+		float3 vVertexToEyeDirWs = g_EyePos_SpecExponent.xyz - i.worldPos_projPosZ.xyz;
+		float3 vVertexToEyeDirTs = Vec3WorldToTangentNormalized( vVertexToEyeDirWs.xyz, i.vWorldNormal.xyz, i.vWorldTangent.xyz, i.vWorldBinormal.xyz );
+
+		//float3 vRefractTs = refract( -vVertexToEyeDirTs.xyz, vNormalTs.xyz, 0.66 );
+		float3 vRefractTs = vVertexToEyeDirTs.xyz; // Just use the vert to eye vector as the refract vector
+
+		float flRDotN = -vRefractTs.z; // This is R.GeometricNormal, so just use tangent z
+
+		float2 vRefractedUv = vRefractTs.xy / flRDotN;
+		vRefractedUv.xy += vNormalTs.xy;
+		vRefractedUv.xy += ( 1.0f - vNormalTs.z ) * vRefractTs.xy / flRDotN;
+		vRefractedUv.xy *= g_vRefractTextureAspectFixup.xy * g_flRefractDepth;
+
+		// Original uv's
+		vRefractedUv.xy += vTexCoord.xy;
+
+		float4 vRefract = tex2Dsrgb( RefractSampler, saturate( vRefractedUv.xy ) );
+		float4 vRefract2 = tex2Dsrgb( RefractSampler, saturate( vTexCoord.xy + vNormalTs.xy*0.1 ) );
+		vRefract.rgb = lerp( vRefract.rgb, vRefract2.aaa, 0.025 );
+
+		float flFresnel = pow( vNormalTs.z, 3.0f );
+		vResult.rgb = vRefract.rgb * flFresnel * vRefractTintColor.rgb;
+
+		float3 vUnblurredColor = tex2Dsrgb( RefractSampler, vTexCoord.xy ).rgb;
+		vResult.rgb = lerp( vUnblurredColor.rgb, vResult.rgb, flBlend );
+	}
 	#endif
-	
-	#if COLORMODULATE
-		float resultAlpha = i.ColorModulate.a * vNormal.a;
+
+	#if ( CUBEMAP )
+	{
+		float3 vNormalWs = Vec3TangentToWorld( vNormalTs.xyz, i.vWorldNormal.xyz, i.vWorldTangent.xyz, i.vWorldBinormal.xyz );
+
+		float3 vReflectRayWs = CalcReflectionVectorUnnormalized( vNormalWs.xyz, i.vTangentVertToEyeVector.xyz );
+		float3 vSpecularLighting = ENV_MAP_SCALE * texCUBE( EnvmapSampler, vReflectRayWs.xyz ).rgb;
+
+		// Spec mask
+		float flSpecularMask = vNormalTs.a;
+		vSpecularLighting.rgb *= flSpecularMask;
+
+		// Tint
+		vSpecularLighting.rgb *= g_EnvmapTint.rgb;
+
+		// Contrast
+		float3 vSpecularLightingSquared = vSpecularLighting.rgb * vSpecularLighting.rgb;
+		vSpecularLighting.rgb = lerp( vSpecularLighting.rgb, vSpecularLightingSquared.rgb, g_EnvmapContrast );
+
+		// Saturation
+		float3 vSpecularLuminance = dot( vSpecularLighting.rgb, float3( 0.299f, 0.587f, 0.114f ) );
+		vSpecularLighting.rgb = lerp( vSpecularLuminance.rgb, vSpecularLighting.rgb, g_EnvmapSaturation );
+
+		// Fresnel
+		float flNdotV = saturate( dot( vNormalTs.xyz, i.vTangentVertToEyeVector.xyz ) );
+		float g_flReflectance = 0.6f;
+		float flFresnel = g_flReflectance + ( ( 1.0f - g_flReflectance ) * pow( 1.0f - flNdotV, 1.0f ) );
+
+		vResult.rgb += vSpecularLighting.rgb * flFresnel;
+	}
+	#endif
+
+	#if ( COLORMODULATE )
+		float flResultAlpha = i.ColorModulate.a * vNormalTs.a;
 	#else
-		float resultAlpha = vNormal.a;
+		float flResultAlpha = vNormalTs.a;
 	#endif
 
-	return FinalOutput( float4( result, resultAlpha ), pixelFogFactor, PIXELFOGTYPE, TONEMAP_SCALE_NONE, (WRITE_DEPTH_TO_DESTALPHA != 0), i.worldPos_projPosZ.w );
+	return FinalOutput( float4( vResult, flResultAlpha ), flPixelFogFactor, PIXELFOGTYPE, TONEMAP_SCALE_NONE, ( WRITE_DEPTH_TO_DESTALPHA != 0 ), i.worldPos_projPosZ.w );
 }

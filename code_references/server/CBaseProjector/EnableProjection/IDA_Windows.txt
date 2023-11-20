@@ -1,0 +1,30 @@
+void __thiscall CBaseProjector::EnableProjection(CBaseProjector *this, bool bEnable)
+{
+  edict_t *m_pPev; // ecx
+  CBaseProjector_vtbl *v4; // eax
+
+  if ( this->m_bEnabled.m_Value != bEnable )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x4B0u);
+    }
+    this->m_bEnabled.m_Value = bEnable;
+  }
+  v4 = this->__vftable;
+  if ( this->m_bEnabled.m_Value )
+  {
+    v4->Project(this);
+  }
+  else
+  {
+    v4->Shutdown(this);
+    CBaseProjector::Cleanup(this);
+  }
+}

@@ -1,0 +1,173 @@
+void __thiscall C_NPC_Personality_Core::ClientThink(C_NPC_Personality_Core *this)
+{
+  int v2; // ebx
+  CNewParticleEffect *v3; // eax
+  CUtlIntrusiveDList<CUtlReference<CSheet> > *v4; // ecx
+  float *p_m_flMouthAmount; // ebx
+  CUtlReference<CNewParticleEffect> *m_pHead; // ecx
+  CNewParticleEffect *v7; // ebx
+  C_BasePlayer *LocalPlayer; // eax
+  CNewParticleEffect *v9; // ecx
+  IVEfx_vtbl *v10; // edi
+  int v11; // eax
+  CUtlReference<CNewParticleEffect> *m_pNext; // eax
+  float *v13; // eax
+  float v14; // xmm1_4
+  float v15; // xmm2_4
+  CUtlIntrusiveDList<CUtlReference<CSheet> > *v16; // eax
+  CUtlReference<CNewParticleEffect> *v17; // eax
+  Vector v18; // [esp-Ch] [ebp-BCh]
+  CGameTrace tr; // [esp+10h] [ebp-A0h] BYREF
+  Vector vRight; // [esp+64h] [ebp-4Ch] BYREF
+  Vector vUp; // [esp+70h] [ebp-40h] BYREF
+  QAngle angles; // [esp+7Ch] [ebp-34h] BYREF
+  Vector vecAbsEnd; // [esp+88h] [ebp-28h] BYREF
+  CNewParticleEffect *v24; // [esp+94h] [ebp-1Ch]
+  Vector vForward; // [esp+98h] [ebp-18h] BYREF
+  Vector vecOrigin; // [esp+A4h] [ebp-Ch] BYREF
+
+  if ( *(&this->m_bImportanRagdoll + 4) )
+  {
+    v2 = ((int (__thiscall *)(dlight_t **, const char *))this[-1].m_pELight[1].m_pExclusiveLightReceiver)(
+           &this[-1].m_pELight,
+           "eyes");
+    ((void (__thiscall *)(dlight_t **, int, Vector *, QAngle *))LODWORD(this[-1].m_pELight[2].origin.x))(
+      &this[-1].m_pELight,
+      v2,
+      &vecOrigin,
+      &angles);
+    AngleVectors(&angles, &vForward, &vRight, &vUp);
+    vecAbsEnd.y = vecOrigin.y + (float)(vForward.y * 256.0);
+    vecAbsEnd.x = vecOrigin.x + (float)(vForward.x * 256.0);
+    vecAbsEnd.z = vecOrigin.z + (float)(vForward.z * 256.0);
+    UTIL_TraceLine(&vecOrigin, &vecAbsEnd, 0x6004003u, (C_NPC_Personality_Core *)((char *)this - 12), 0, &tr);
+    if ( !*(_DWORD *)&this->m_bFlashlightEnabled )
+    {
+      v3 = CParticleProperty::Create(
+             (CParticleProperty *)&this->m_Collision.m_vecSurroundingMaxs,
+             "flashlight_thirdperson",
+             PATTACH_POINT_FOLLOW,
+             v2,
+             vec3_origin,
+             0);
+      v4 = *(CUtlIntrusiveDList<CUtlReference<CSheet> > **)&this->m_bFlashlightEnabled;
+      p_m_flMouthAmount = &this->m_flMouthAmount;
+      v24 = v3;
+      if ( v4 != (CUtlIntrusiveDList<CUtlReference<CSheet> > *)v3 )
+      {
+        if ( v4 )
+        {
+          CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(
+            v4 + 232,
+            (CUtlReference<CSheet> *)&this->m_flMouthAmount);
+          v3 = v24;
+          *(_DWORD *)&this->m_bFlashlightEnabled = 0;
+        }
+        *(_DWORD *)&this->m_bFlashlightEnabled = v3;
+        if ( v3 )
+        {
+          *p_m_flMouthAmount = *(float *)&v3->m_References.m_pHead;
+          m_pHead = v3->m_References.m_pHead;
+          if ( m_pHead )
+            m_pHead->m_pPrev = (CUtlReference<CNewParticleEffect> *)p_m_flMouthAmount;
+          this->m_flInvDim = 0.0;
+          v3->m_References.m_pHead = (CUtlReference<CNewParticleEffect> *)p_m_flMouthAmount;
+        }
+      }
+      CParticleProperty::AddControlPoint(
+        (CParticleProperty *)&this->m_Collision.m_vecSurroundingMaxs,
+        *(CNewParticleEffect **)&this->m_bFlashlightEnabled,
+        1,
+        (C_NPC_Personality_Core *)((char *)this - 12),
+        PATTACH_CUSTOMORIGIN,
+        0,
+        vec3_origin,
+        0);
+      CParticleProperty::AddControlPoint(
+        (CParticleProperty *)&this->m_Collision.m_vecSurroundingMaxs,
+        *(CNewParticleEffect **)&this->m_bFlashlightEnabled,
+        2,
+        (C_NPC_Personality_Core *)((char *)this - 12),
+        PATTACH_CUSTOMORIGIN,
+        0,
+        vec3_origin,
+        0);
+      v7 = *(CNewParticleEffect **)&this->m_bFlashlightEnabled;
+      v18 = vec3_origin;
+      LocalPlayer = C_BasePlayer::GetLocalPlayer(-1);
+      CParticleProperty::AddControlPoint(
+        (CParticleProperty *)&this->m_Collision.m_vecSurroundingMaxs,
+        v7,
+        3,
+        LocalPlayer,
+        PATTACH_EYES_FOLLOW,
+        0,
+        v18,
+        0);
+    }
+    v9 = *(CNewParticleEffect **)&this->m_bFlashlightEnabled;
+    if ( v9 )
+    {
+      CNewParticleEffect::SetControlPoint(v9, 1, &vecOrigin);
+      CNewParticleEffect::SetControlPoint(*(CNewParticleEffect **)&this->m_bFlashlightEnabled, 2, &tr.endpos);
+      CNewParticleEffect::SetControlPointForwardVector(
+        *(CNewParticleEffect **)&this->m_bFlashlightEnabled,
+        1,
+        &vForward);
+    }
+    if ( !this->m_pFlashlightEffect.m_pNext )
+    {
+      v10 = effects->__vftable;
+      v11 = (*(int (__thiscall **)(dlight_t **))(*((_DWORD *)&this[-1].m_pELight + 1) + 40))(&this[-1].m_pELight + 1);
+      this->m_pFlashlightEffect.m_pNext = (CUtlReference<CNewParticleEffect> *)v10->CL_AllocElight(
+                                                                                 effects,
+                                                                                 v11 + 0x40000000);
+    }
+    m_pNext = this->m_pFlashlightEffect.m_pNext;
+    if ( m_pNext )
+    {
+      *(float *)&m_pNext[2].m_pNext = *(float *)(gpGlobals.m_Index + 12) + 1.0e10;
+      this->m_pFlashlightEffect.m_pNext->m_pNext = (CUtlReference<CNewParticleEffect> *)1;
+      *(float *)&this->m_pFlashlightEffect.m_pNext[1].m_pPrev = FLOAT_64_0;
+      this->m_pFlashlightEffect.m_pNext[3].m_pPrev = 0;
+      this->m_pFlashlightEffect.m_pNext[5].m_pPrev = this != (C_NPC_Personality_Core *)12
+                                                   ? (CUtlReference<CNewParticleEffect> *)&this[-1].m_pELight
+                                                   : 0;
+      LOBYTE(this->m_pFlashlightEffect.m_pNext[1].m_pObject) = -31;
+      BYTE1(this->m_pFlashlightEffect.m_pNext[1].m_pObject) = -31;
+      BYTE2(this->m_pFlashlightEffect.m_pNext[1].m_pObject) = -1;
+      HIBYTE(this->m_pFlashlightEffect.m_pNext[1].m_pObject) = 0;
+      v13 = (float *)this->m_pFlashlightEffect.m_pNext;
+      v14 = (float)(vForward.y * 2.0) + vecOrigin.y;
+      v15 = (float)(vForward.z * 2.0) + vecOrigin.z;
+      v13[1] = (float)(vForward.x * 2.0) + vecOrigin.x;
+      v13[2] = v14;
+      v13[3] = v15;
+      render->TouchLight(render, (dlight_t *)this->m_pFlashlightEffect.m_pNext);
+    }
+  }
+  else
+  {
+    if ( *(_DWORD *)&this->m_bFlashlightEnabled )
+    {
+      CParticleProperty::StopEmissionAndDestroyImmediately(
+        (CParticleProperty *)&this->m_Collision.m_vecSurroundingMaxs,
+        *(CNewParticleEffect **)&this->m_bFlashlightEnabled);
+      v16 = *(CUtlIntrusiveDList<CUtlReference<CSheet> > **)&this->m_bFlashlightEnabled;
+      if ( v16 )
+      {
+        CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(
+          v16 + 232,
+          (CUtlReference<CSheet> *)&this->m_flMouthAmount);
+        *(_DWORD *)&this->m_bFlashlightEnabled = 0;
+      }
+    }
+    v17 = this->m_pFlashlightEffect.m_pNext;
+    if ( v17 )
+    {
+      v17[2].m_pNext = *(CUtlReference<CNewParticleEffect> **)(gpGlobals.m_Index + 12);
+      this->m_pFlashlightEffect.m_pNext = 0;
+    }
+  }
+  ((void (__stdcall *)(_DWORD))this[-1].m_pFlashlightEffect.m_pObject->m_ParticleInitialAttributes.m_pAttributes[8])(LODWORD(FLOAT_N1293_0));
+}

@@ -1,0 +1,27 @@
+void __thiscall C_NPC_Personality_Core::UpdateOnRemove(C_NPC_Personality_Core *this)
+{
+  CNewParticleEffect *m_pObject; // eax
+  CNewParticleEffect *v3; // eax
+  dlight_t *m_pELight; // eax
+
+  m_pObject = this->m_pFlashlightEffect.m_pObject;
+  if ( m_pObject )
+  {
+    CParticleProperty::StopEmissionAndDestroyImmediately(&this->m_Particles, m_pObject);
+    v3 = this->m_pFlashlightEffect.m_pObject;
+    if ( v3 )
+    {
+      CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(
+        (CUtlIntrusiveDList<CUtlReference<CSheet> > *)&v3->m_References,
+        (CUtlReference<CSheet> *)&this->m_pFlashlightEffect);
+      this->m_pFlashlightEffect.m_pObject = 0;
+    }
+  }
+  m_pELight = this->m_pELight;
+  if ( m_pELight )
+  {
+    m_pELight->die = *(float *)(gpGlobals.m_Index + 12);
+    this->m_pELight = 0;
+  }
+  C_BaseEntity::UpdateOnRemove(this);
+}

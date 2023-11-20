@@ -1,0 +1,4 @@
+void __cdecl CBaseProjectedEntity::OnPreProjected(CBaseProjectedEntity *const this)
+{
+  ;
+}

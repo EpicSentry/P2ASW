@@ -1,0 +1,42 @@
+void __thiscall CLabIndicatorPanel::SetTransmit(CLabIndicatorPanel *this, CCheckTransmitInfo *pInfo, BOOL bAlways)
+{
+  edict_t *m_pPev; // eax
+  unsigned int m_Index; // ecx
+  int v6; // eax
+  CEntInfo *v7; // edx
+  unsigned int v8; // ecx
+  int v9; // eax
+  bool v10; // zf
+  CEntInfo *v11; // eax
+
+  m_pPev = this->m_Network.m_pPev;
+  if ( m_pPev )
+    m_pPev -= (int)gpGlobals->pEdicts;
+  if ( ((1 << ((unsigned __int8)m_pPev & 0x1F)) & pInfo->m_pTransmitEdict->m_Ints[(unsigned int)m_pPev >> 5]) == 0 )
+  {
+    CBaseEntity::SetTransmit(this, pInfo, bAlways);
+    m_Index = this->m_hScreen.m_Index;
+    if ( m_Index != -1 )
+    {
+      v6 = (unsigned __int16)m_Index;
+      v7 = &g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index];
+      v8 = HIWORD(m_Index);
+      if ( v7->m_SerialNumber == v8 )
+      {
+        if ( v7->m_pEntity )
+        {
+          v9 = v6;
+          v10 = g_pEntityList->m_EntPtrArray[v9].m_SerialNumber == v8;
+          v11 = &g_pEntityList->m_EntPtrArray[v9];
+          if ( v10 )
+            ((void (__thiscall *)(IHandleEntity *, CCheckTransmitInfo *, BOOL))v11->m_pEntity->__vftable[7].SetRefEHandle)(
+              v11->m_pEntity,
+              pInfo,
+              bAlways);
+          else
+            (*(void (__stdcall **)(CCheckTransmitInfo *, BOOL))(MEMORY[0] + 88))(pInfo, bAlways);
+        }
+      }
+    }
+  }
+}

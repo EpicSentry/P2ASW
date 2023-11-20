@@ -1,0 +1,18 @@
+class C_FizzlerVortexProxy : public CEntityMaterialProxy
+{
+    C_FizzlerVortexProxy();
+    ~C_FizzlerVortexProxy();
+	
+	bool Init(class IMaterial  ,class KeyValues  );
+    void OnBind(class C_BaseEntity  );
+    IMaterial  GetMaterial();
+    
+private:
+    IMaterial  m_pMaterial;
+    IMaterialVar  m_pPosition1Var;
+    IMaterialVar  m_pVortex1Var;
+    IMaterialVar  m_pPosition2Var;
+    IMaterialVar  m_pVortex2Var;
+    IMaterialVar  m_pIntensityVar;
+    IMaterialVar  m_pPowerUpVar;
+};

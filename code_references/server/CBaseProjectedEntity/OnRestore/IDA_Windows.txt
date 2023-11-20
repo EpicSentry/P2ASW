@@ -1,0 +1,42 @@
+void __thiscall CBaseProjectedEntity::OnRestore(CBaseProjectedEntity *this)
+{
+  unsigned int m_Index; // eax
+  IHandleEntity *m_pEntity; // ecx
+  bool v4; // bl
+  const CInfoPlacementHelper *EntityByName; // eax
+  unsigned int v6; // eax
+  CInfoPlacementHelper *v7; // ecx
+  unsigned int v8; // eax
+
+  CBaseEntity::OnRestore(this);
+  if ( this->m_bCreatePlacementHelper )
+  {
+    m_Index = this->m_hPlacementHelper.m_Value.m_Index;
+    if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+      m_pEntity = 0;
+    else
+      m_pEntity = g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+    v4 = m_pEntity == 0;
+    if ( !m_pEntity )
+    {
+      EntityByName = (const CInfoPlacementHelper *)CreateEntityByName("info_placement_helper", -1, 1);
+      CNetworkHandleBase<CInfoPlacementHelper,CBaseProjectedEntity::NetworkVar_m_hPlacementHelper>::Set(
+        &this->m_hPlacementHelper,
+        EntityByName);
+    }
+    v6 = this->m_hPlacementHelper.m_Value.m_Index;
+    if ( v6 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v6].m_SerialNumber != HIWORD(v6) )
+      v7 = 0;
+    else
+      v7 = (CInfoPlacementHelper *)g_pEntityList->m_EntPtrArray[(unsigned __int16)v6].m_pEntity;
+    this->PlacePlacementHelper(this, v7);
+    if ( v4 )
+    {
+      v8 = this->m_hPlacementHelper.m_Value.m_Index;
+      if ( v8 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v8].m_SerialNumber != HIWORD(v8) )
+        DispatchSpawn(0, 1);
+      else
+        DispatchSpawn((CBaseEntity *)g_pEntityList->m_EntPtrArray[(unsigned __int16)v8].m_pEntity, 1);
+    }
+  }
+}

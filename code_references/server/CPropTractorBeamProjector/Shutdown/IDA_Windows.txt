@@ -1,0 +1,27 @@
+void __thiscall CPropTractorBeamProjector::Shutdown(CPropTractorBeamProjector *this)
+{
+  CSoundEnvelopeController *Controller; // esi
+  CSoundPatch *m_sndMechanical; // eax
+
+  CFuncTank::FuncTankPreThink((vgui::BaseTooltip *)this);
+  Controller = CSoundEnvelopeController::GetController();
+  m_sndMechanical = this->m_sndMechanical;
+  if ( m_sndMechanical )
+    ((void (__thiscall *)(CSoundEnvelopeController *, CSoundPatch *, _DWORD, _DWORD))Controller->SoundFadeOut)(
+      Controller,
+      m_sndMechanical,
+      LODWORD(FLOAT_1_5),
+      0);
+  if ( this->m_sndAmbientMusic )
+  {
+    Controller->Shutdown(Controller, this->m_sndAmbientMusic);
+    Controller->SoundDestroy(Controller, this->m_sndAmbientMusic);
+    this->m_sndAmbientMusic = 0;
+  }
+  if ( this->m_sndAmbientSound )
+  {
+    Controller->Shutdown(Controller, this->m_sndAmbientSound);
+    Controller->SoundDestroy(Controller, this->m_sndAmbientSound);
+    this->m_sndAmbientSound = 0;
+  }
+}

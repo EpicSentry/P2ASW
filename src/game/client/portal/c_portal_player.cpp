@@ -2233,9 +2233,7 @@ void C_Portal_Player::OnDataChanged( DataUpdateType_t type )
 		if ( IsLocalPlayer() )
 		{
 			ACTIVE_SPLITSCREEN_PLAYER_GUARD_ENT( this );
-#if 0
 			g_ThirdPersonManager.Init();
-#endif
 			bRespawn = true;
 
 			CPortalMPGameRules *pRules = PortalMPGameRules();
@@ -3214,12 +3212,11 @@ void C_Portal_Player::TurnOnTauntCam( void )
 			pitch = angle[PITCH];
 		}
 
-#if 0
 		g_ThirdPersonManager.UseCameraOffsets( true );
 		g_ThirdPersonManager.SetCameraOffsetAngles( Vector( pitch, angle[YAW], m_flTauntCamCurrentDist ) );
 		g_ThirdPersonManager.SetDesiredCameraOffset( Vector( pitch, angle[YAW], m_flTauntCamTargetDist ) );
 		g_ThirdPersonManager.SetOverridingThirdPerson( true );
-#endif
+
 
 		input->CAM_ToThirdPerson();
 		ThirdPersonSwitch( true );
@@ -3249,9 +3246,7 @@ void C_Portal_Player::TurnOffTauntCam( void )
 		m_flTauntCamTargetDist = 0.f;
 		m_TauntCameraData.m_flDist = m_flTauntCamTargetDist;
 
-#if 0
 		g_ThirdPersonManager.SetOverridingThirdPerson( false );
-#endif
 
 		m_bTauntInterpolating = true;
 
@@ -3274,7 +3269,6 @@ void C_Portal_Player::TurnOffTauntCam_Finish()
 
 	ACTIVE_SPLITSCREEN_PLAYER_GUARD_ENT( this );
 
-#if 0
 	Vector vecOffset = g_ThirdPersonManager.GetCameraOffsetAngles();
 	portal_tauntcam_pitch.SetValue( vecOffset[PITCH] - m_angTauntPredViewAngles[PITCH] );
 	portal_tauntcam_yaw.SetValue( vecOffset[YAW] - m_angTauntPredViewAngles[YAW] );
@@ -3302,7 +3296,7 @@ void C_Portal_Player::TurnOffTauntCam_Finish()
 	RANDOM_CEG_TEST_SECRET_PERIOD( 12, 19 )
 
 	input->CAM_SetCameraThirdData( NULL, angles );
-#endif
+
 
 	// Force the feet to line up with the view direction post taunt.
 	m_PlayerAnimState->m_bForceAimYaw = true;
@@ -3341,9 +3335,9 @@ void C_Portal_Player::TauntCamInterpolation()
 		}
 
 		Vector vecOrigin = pLocalPlayer->GetThirdPersonViewPosition();
-#if 0
+
 		Vector vecCamOffset = g_ThirdPersonManager.GetCameraOffsetAngles();
-#endif
+
 		CTraceFilterSkipTwoEntities filter( pLocalPlayer, NULL );
 		if ( pLocalPlayer->GetTeamTauntState() >= TEAM_TAUNT_HAS_PARTNER )
 		{
@@ -3360,7 +3354,6 @@ void C_Portal_Player::TauntCamInterpolation()
 			}
 		}
 
-#if 0
 		if ( m_bTauntInterpolatingAngles )
 		{
 			m_flTauntCamTargetPitch = m_TauntCameraData.m_flPitch;
@@ -3404,7 +3397,7 @@ void C_Portal_Player::TauntCamInterpolation()
 				 fabsf( AngleDiff( m_flTauntCamTargetYaw, vecCamOffset[ YAW ] ) ) <= 1.0f )
 			{
 				m_bTauntInterpolatingAngles = false;
-			
+			}
 		}
 		Vector vecForward;
 		AngleVectors( QAngle( vecCamOffset[PITCH], vecCamOffset[YAW], 0 ), &vecForward, NULL, NULL );
@@ -3427,7 +3420,6 @@ void C_Portal_Player::TauntCamInterpolation()
 				TurnOffTauntCam_Finish();
 			}
 		}
-#endif
 	}
 }
 
@@ -3937,7 +3929,6 @@ void C_Portal_Player::ClientPlayerRespawn()
 		{
 			ACTIVE_SPLITSCREEN_PLAYER_GUARD_ENT( this );
 
-#if 0
 			g_ThirdPersonManager.SetOverridingThirdPerson( false );
 
 			if ( g_ThirdPersonManager.WantToUseGameThirdPerson() == false )
@@ -3947,7 +3938,6 @@ void C_Portal_Player::ClientPlayerRespawn()
 				input->CAM_SetCameraThirdData( NULL, vec3_angle );
 				g_ThirdPersonManager.UseCameraOffsets( false );
 			}
-#endif
 			m_bTauntInterpolating = false;
 			m_bTauntInterpolatingAngles = false;
 		}

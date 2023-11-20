@@ -1,0 +1,79 @@
+bool __cdecl ClientFizzlerMultiOriginSoundPlayer::GetSoundSpatialization(
+        ClientFizzlerMultiOriginSoundPlayer *const this,
+        SpatializationInfo_t *const info)
+{
+  C_TriggerPortalCleanser *v2; // eax
+  bool SoundSpatializationFromFizzler; // al
+  int m_Size; // edx
+  CUtlVector<Vector,CUtlMemory<Vector,int> > *m_pUtlVecMultiOrigins; // ebx
+  int v6; // eax
+  int m_pMemory; // eax
+  int v8; // ebx
+  ITriggerPortalCleanserAutoList *v9; // edx
+  C_TriggerPortalCleanser *v10; // eax
+  Vector *v12; // edx
+  char didFindOrigin; // [esp+1Bh] [ebp-9Dh]
+  SpatializationInfo_t v14; // [esp+20h] [ebp-98h] BYREF
+  Vector src; // [esp+94h] [ebp-24h] BYREF
+
+  didFindOrigin = 0;
+  if ( ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Size > 0
+    && info->m_pUtlVecMultiOrigins )
+  {
+    v2 = 0;
+    if ( *ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Memory.m_pMemory )
+      v2 = (C_TriggerPortalCleanser *)&(*ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Memory.m_pMemory)[-678];
+    SoundSpatializationFromFizzler = ClientFizzlerMultiOriginSoundPlayer::GetSoundSpatializationFromFizzler(
+                                       this,
+                                       info,
+                                       v2);
+    m_Size = ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Size;
+    didFindOrigin = SoundSpatializationFromFizzler;
+    m_pUtlVecMultiOrigins = info->m_pUtlVecMultiOrigins;
+    v6 = ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Size - 1;
+    if ( ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Size - 1 <= m_pUtlVecMultiOrigins->m_Memory.m_nAllocationCount
+      || m_pUtlVecMultiOrigins->m_Memory.m_nGrowSize < 0 )
+    {
+      m_pMemory = (int)m_pUtlVecMultiOrigins->m_Memory.m_pMemory;
+    }
+    else
+    {
+      v12 = m_pUtlVecMultiOrigins->m_Memory.m_pMemory;
+      m_pUtlVecMultiOrigins->m_Memory.m_nAllocationCount = v6;
+      m_pMemory = v12
+                ? (*(int (__cdecl **)(_DWORD, Vector *, int))(*g_pMemAlloc + 4))(g_pMemAlloc, v12, 12 * v6)
+                : (*(int (__cdecl **)(_DWORD, int))*g_pMemAlloc)(g_pMemAlloc, 12 * v6);
+      m_pUtlVecMultiOrigins->m_Memory.m_pMemory = (Vector *)m_pMemory;
+      m_Size = ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Size;
+    }
+    m_pUtlVecMultiOrigins->m_pElements = (Vector *)m_pMemory;
+    if ( m_Size > 1 )
+    {
+      v8 = 1;
+      do
+      {
+        while ( 1 )
+        {
+          v9 = ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Memory.m_pMemory[v8];
+          qmemcpy(&v14, info, sizeof(v14));
+          v14.pOrigin = &src;
+          v10 = (C_TriggerPortalCleanser *)&v9[-678];
+          if ( !v9 )
+            v10 = 0;
+          if ( ClientFizzlerMultiOriginSoundPlayer::GetSoundSpatializationFromFizzler(this, &v14, v10) )
+            break;
+          if ( ++v8 >= ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Size )
+            return didFindOrigin;
+        }
+        ++v8;
+        CUtlVector<Vector,CUtlMemory<Vector,int>>::InsertBefore(
+          info->m_pUtlVecMultiOrigins,
+          info->m_pUtlVecMultiOrigins->m_Size,
+          &src);
+        didFindOrigin = 1;
+      }
+      while ( v8 < ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Size );
+    }
+  }
+  return didFindOrigin;
+}

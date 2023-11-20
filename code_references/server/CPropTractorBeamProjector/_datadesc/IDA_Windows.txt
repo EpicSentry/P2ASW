@@ -1,0 +1,70 @@
+datamap_t *__cdecl DataMapInit<CPropTractorBeamProjector>()
+{
+  ISaveRestoreOps *SoundSaveRestoreOps; // eax
+
+  if ( (_S9_52 & 1) == 0 )
+  {
+    _S9_52 |= 1u;
+    nameHolder_616.m_pszBase = "CPropTractorBeamProjector";
+    nameHolder_616.m_Names.m_Memory.m_pMemory = 0;
+    nameHolder_616.m_Names.m_Memory.m_nAllocationCount = 0;
+    nameHolder_616.m_Names.m_Memory.m_nGrowSize = 0;
+    nameHolder_616.m_Names.m_Size = 0;
+    nameHolder_616.m_Names.m_pElements = 0;
+    nameHolder_616.m_nLenBase = 25;
+    atexit(DataMapInit_CPropTractorBeamProjector__::_2_::_dynamic_atexit_destructor_for__nameHolder__);
+  }
+  CPropTractorBeamProjector::m_DataMap.baseMap = &CBaseProjector::m_DataMap;
+  if ( (_S9_52 & 2) == 0 )
+  {
+    _S9_52 |= 2u;
+    dataDesc_563[5].pSaveRestoreOps = GetSoundSaveRestoreOps();
+    dataDesc_563[5].inputFunc = 0;
+    *(_QWORD *)&dataDesc_563[5].td = 0i64;
+    *(_QWORD *)&dataDesc_563[5].override_field = 0i64;
+    *(_QWORD *)&dataDesc_563[5].fieldTolerance = 0i64;
+    *(_QWORD *)&dataDesc_563[5].flatOffset[1] = 0i64;
+    dataDesc_563[6].fieldType = FIELD_CUSTOM;
+    dataDesc_563[6].fieldName = "m_sndAmbientSound";
+    dataDesc_563[6].fieldOffset = 1240;
+    dataDesc_563[6].fieldSize = 1;
+    dataDesc_563[6].flags = 2;
+    dataDesc_563[6].externalName = 0;
+    dataDesc_563[6].pSaveRestoreOps = GetSoundSaveRestoreOps();
+    dataDesc_563[6].inputFunc = 0;
+    *(_QWORD *)&dataDesc_563[6].td = 0i64;
+    *(_QWORD *)&dataDesc_563[6].override_field = 0i64;
+    *(_QWORD *)&dataDesc_563[6].fieldTolerance = 0i64;
+    *(_QWORD *)&dataDesc_563[6].flatOffset[1] = 0i64;
+    dataDesc_563[7].fieldType = FIELD_CUSTOM;
+    dataDesc_563[7].fieldName = "m_sndAmbientMusic";
+    dataDesc_563[7].fieldOffset = 1236;
+    dataDesc_563[7].fieldSize = 1;
+    dataDesc_563[7].flags = 2;
+    dataDesc_563[7].externalName = 0;
+    SoundSaveRestoreOps = GetSoundSaveRestoreOps();
+    *(_QWORD *)&dataDesc_563[7].td = 0i64;
+    *(_QWORD *)&dataDesc_563[7].override_field = 0i64;
+    *(_QWORD *)&dataDesc_563[7].fieldTolerance = 0i64;
+    *(_QWORD *)&dataDesc_563[7].flatOffset[1] = 0i64;
+    dataDesc_563[8].fieldTolerance = 0.0;
+    dataDesc_563[7].pSaveRestoreOps = SoundSaveRestoreOps;
+    dataDesc_563[7].inputFunc = 0;
+    dataDesc_563[8].fieldType = FIELD_EHANDLE;
+    dataDesc_563[8].fieldName = "m_hAmbientSoundProxy";
+    dataDesc_563[8].fieldOffset = 1244;
+    *(_DWORD *)&dataDesc_563[8].fieldSize = 131073;
+    dataDesc_563[8].externalName = 0;
+    dataDesc_563[8].pSaveRestoreOps = 0;
+    dataDesc_563[8].inputFunc = 0;
+    dataDesc_563[8].td = 0;
+    dataDesc_563[8].fieldSizeInBytes = 4;
+    dataDesc_563[8].override_field = 0;
+    dataDesc_563[8].override_count = 0;
+    *(_QWORD *)dataDesc_563[8].flatOffset = 0i64;
+    *(_DWORD *)&dataDesc_563[8].flatGroup = 0;
+  }
+  CPropTractorBeamProjector::m_DataMap.dataNumFields = 8;
+  CPropTractorBeamProjector::m_DataMap.dataDesc = &dataDesc_563[1];
+  return &CPropTractorBeamProjector::m_DataMap;
+}

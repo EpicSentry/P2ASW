@@ -1,0 +1,20 @@
+class CPropWallProjector : public CBaseProjector
+{
+public:
+	DECLARE_DATADESC();
+    CPropWallProjector();
+    ~CPropWallProjector();
+    void Spawn();
+    void Precache();
+    void Project();
+    void Shutdown();
+
+protected:
+    CBaseProjectedEntity *CreateNewProjectedEntity();
+
+private:
+    CSoundPatch *m_pAmbientSound;
+    CSoundPatch *m_pAmbientMusic;
+    CHandle<ProjectedEntityAmbientSoundProxy> m_hAmbientSoundProxy;
+    static char s_AmbientBridgeMusic[64];
+};

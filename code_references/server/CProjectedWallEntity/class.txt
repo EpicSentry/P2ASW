@@ -1,0 +1,80 @@
+class CProjectedWallEntity : public CPaintableEntity<CBaseProjectedEntity>, public IProjectedWallEntityAutoList
+{
+	DECLARE_CLASS( CProjectedWallEntity, CPaintableEntity<CBaseProjectedEntity> );
+public:
+    CProjectedWallEntity();
+    ~CProjectedWallEntity();
+	
+	DECLARE_DATADESC();	
+	DECLARE_SERVERCLASS();
+	
+    virtual void Spawn();
+    virtual void Precache();
+    virtual void OnRestore();
+	virtual void UpdateOnRemove();
+    virtual void SetSourcePortal( CPortal_Base2D * );
+    virtual void SetHitPortal( CPortal_Base2D * );
+    virtual void Touch( CBaseEntity *pOther );
+    virtual void GetProjectionExtents( Vector &, Vector & );
+    virtual void GetExtents( Vector &, Vector &, float );
+    virtual void Paint( PaintPowerType, Vector & );
+    virtual void CleansePaint();
+    virtual void OnPreProjected();
+    virtual void OnProjected();
+	
+    virtual bool CreateVPhysics();
+	virtual bool ShouldSavePhysics();
+    virtual bool TestCollision( Ray_t &, unsigned int, trace_t & );
+	
+    void ProjectWall();
+    void ComputeWorldSpaceSurroundingBox( Vector *, Vector * );
+    void NotifyPortalEvent( PortalEvent_t, CPortal_Base2D * );
+    void PlacePlacementHelper( CInfoPlacementHelper * );
+    void DisplaceObstructingEntity( CBaseEntity *, bool ); // DisplaceObstructingEntity--1
+	
+    bool IsWallPainted( Vector & );
+    bool IsHorizontal();
+	
+    virtual int ObjectCaps();
+    int GetNumSegments();
+    float GetSegmentLength();
+	
+    virtual PaintPowerType GetPaintPowerAtSegment( int );
+    virtual PaintPowerType GetPaintPowerAtPoint( Vector & );
+	
+    CProjectedWallEntity *CreateNewInstance();
+    CBaseProjectedEntity *CreateNewProjectedEntity();
+	
+    virtual CBaseEntity *GetEntity();
+	
+private:
+    	
+	void DisplaceObstructingEntity( CBaseEntity *, Vector &, Vector &, Vector &, bool ); // DisplaceObstructingEntity--2
+	
+    void CleanupWall();
+    void DisplaceObstructingEntities();
+    void TraceForWallEndpoint( Vector * );
+    void DrawWallBoundsHighlight();
+    CPhysCollide *m_pWallCollideable;
+    void CheckForPlayersOnBridge();
+	
+	CNetworkVector( m_vWorldSpace_WallMins );
+	CNetworkVector( m_vWorldSpace_WallMaxs );
+	
+	CNetworkHandle( CPortal_Base2D, m_hColorPortal );
+	
+	CNetworkVar( float, m_flLength );
+	CNetworkVar( float, m_flHeight );
+	CNetworkVar( float, m_flWidth );
+	
+	CNetworkVar( bool, m_bIsHorizontal );
+	
+	CNetworkVar( int, m_nNumSegments );
+	
+	CNetworkVar( float, m_flSegmentLength );
+	CNetworkVar( float, m_flParticleUpdateTime );
+	
+    CUtlVector<PaintPowerType,CUtlMemory<PaintPowerType,int> > m_PaintPowers;
+    int ComputeSegmentIndex( Vector & );
+    static int s_HardLightBridgeSurfaceProps;
+};

@@ -1,0 +1,41 @@
+void __cdecl CPortalLaser::TurnOnGlow(CPortalLaser *const this)
+{
+  unsigned int m_Index; // eax
+  CBaseEntity *v2; // edx
+  char *v3; // ecx
+  unsigned int v4; // eax
+  CBaseEntity *v5; // edx
+  char *v6; // ecx
+
+  if ( !this->m_bGlowInitialized )
+  {
+    m_Index = this->m_hReflector.m_Value.m_Index;
+    v2 = 0;
+    this->m_bGlowInitialized = 1;
+    if ( m_Index != -1 )
+    {
+      v3 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+      if ( *((_DWORD *)v3 + 2) == HIWORD(m_Index) )
+        v2 = (CBaseEntity *)*((_DWORD *)v3 + 1);
+    }
+    if ( !UTIL_IsSchrodinger(v2) )
+    {
+      if ( this->m_bFromReflectedCube )
+      {
+        v4 = this->m_hReflector.m_Value.m_Index;
+        v5 = 0;
+        if ( v4 != -1 )
+        {
+          v6 = (char *)g_pEntityList + 24 * (unsigned __int16)v4;
+          if ( *((_DWORD *)v6 + 2) == HIWORD(v4) )
+            v5 = (CBaseEntity *)*((_DWORD *)v6 + 1);
+        }
+        DispatchParticleEffect("reflector_start_glow", PATTACH_ABSORIGIN_FOLLOW, v5, 0, 1, -1, 0, 1);
+      }
+      else
+      {
+        DispatchParticleEffect("laser_start_glow", PATTACH_POINT_FOLLOW, this, this->m_iLaserAttachment, 1, -1, 0, 1);
+      }
+    }
+  }
+}

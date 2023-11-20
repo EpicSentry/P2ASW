@@ -554,6 +554,7 @@ public:
 	virtual const QAngle&			GetRenderAngles( void );
 	virtual Vector					GetObserverCamOrigin( void ) { return GetRenderOrigin(); }	// Return the origin for player observers tracking this target
 	virtual const matrix3x4_t &		RenderableToWorldTransform();
+	virtual bool					IsTransparent( void );
 	virtual int 					GetRenderFlags( void );
 	virtual const model_t			*GetModel( void ) const;
 	virtual int						DrawModel( int flags, const RenderableInstance_t &instance );

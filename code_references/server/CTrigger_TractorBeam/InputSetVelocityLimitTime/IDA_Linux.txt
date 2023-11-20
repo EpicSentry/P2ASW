@@ -1,0 +1,48 @@
+
+void __cdecl CTrigger_TractorBeam::InputSetVelocityLimitTime(
+        CTrigger_TractorBeam *const this,
+        inputdata_t *const inputdata)
+{
+  const char *pszValue; // eax
+  float LinearLimit; // [esp+1Ch] [ebp-2Ch]
+  float v4; // [esp+20h] [ebp-28h]
+  float v5; // [esp+20h] [ebp-28h]
+  float curtime; // [esp+20h] [ebp-28h]
+  float args[2]; // [esp+38h] [ebp-10h] BYREF
+
+  LinearLimit = CTrigger_TractorBeam::GetLinearLimit(this);
+  if ( LinearLimit != this->m_linearLimitStart.m_Value )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_linearLimitStart);
+    this->m_linearLimitStart.m_Value = LinearLimit;
+  }
+  if ( gpGlobals->curtime != this->m_linearLimitStartTime.m_Value )
+  {
+    curtime = gpGlobals->curtime;
+    CBaseEntity::NetworkStateChanged(this, &this->m_linearLimitStartTime);
+    this->m_linearLimitStartTime.m_Value = curtime;
+  }
+  if ( inputdata->value.fieldType == FIELD_STRING )
+  {
+    pszValue = inputdata->value._anon_0.iszVal.pszValue;
+    if ( !pszValue )
+      pszValue = "";
+  }
+  else
+  {
+    pszValue = variant_t::ToString(&inputdata->value);
+  }
+  UTIL_StringToFloatArray(args, 2, pszValue);
+  if ( args[0] != this->m_linearLimit.m_Value )
+  {
+    v5 = args[0];
+    CBaseEntity::NetworkStateChanged(this, &this->m_linearLimit);
+    this->m_linearLimit.m_Value = v5;
+  }
+  if ( args[1] != this->m_linearLimitTime.m_Value )
+  {
+    v4 = args[1];
+    CBaseEntity::NetworkStateChanged(this, &this->m_linearLimitTime);
+    this->m_linearLimitTime.m_Value = v4;
+  }
+}

@@ -68,8 +68,10 @@ void CHLPlayerMove::SetupMove( CBasePlayer *player, CUserCmd *ucmd, IMoveHelper 
 	BaseClass::SetupMove( player, ucmd, pHelper, move );
 
 	// Convert to HL2 data.
+#ifdef DEBUG
 	CPortal_Player *pHLPlayer = static_cast<CPortal_Player*>(player);
 	Assert( pHLPlayer );
+#endif
 
 	CHLMoveData *pHLMove = static_cast<CHLMoveData*>( move );
 	Assert( pHLMove );

@@ -1,0 +1,8 @@
+void __cdecl CLabIndicatorPanel::SetIsTimer(CLabIndicatorPanel *const this, bool bIsTimer)
+{
+  if ( this->m_bIsCountdownTimer.m_Value != bIsTimer )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_bIsCountdownTimer);
+    this->m_bIsCountdownTimer.m_Value = bIsTimer;
+  }
+}

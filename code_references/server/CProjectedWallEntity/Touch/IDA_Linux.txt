@@ -1,0 +1,60 @@
+void __cdecl CProjectedWallEntity::Touch(CProjectedWallEntity *const this, CBaseEntity *pOther)
+{
+  void *v2; // esi
+  const trace_t *TouchTrace; // edi
+  int v4; // eax
+  PaintPowerType v5; // ecx
+  Vector *vWorldPositionOnWall; // [esp+20h] [ebp-88h]
+  float v7; // [esp+24h] [ebp-84h]
+  float z; // [esp+28h] [ebp-80h]
+  float v9; // [esp+2Ch] [ebp-7Ch]
+  float y; // [esp+30h] [ebp-78h]
+  float v11; // [esp+34h] [ebp-74h]
+  float x; // [esp+38h] [ebp-70h]
+  void (__cdecl *v13)(void *, PaintPowerInfo_t *, _DWORD); // [esp+38h] [ebp-70h]
+  PaintPowerInfo_t v14; // [esp+40h] [ebp-68h] BYREF
+  Vector vecWallUp; // [esp+6Ch] [ebp-3Ch] BYREF
+  Vector vecWorldSpaceCenter; // [esp+78h] [ebp-30h] BYREF
+  Vector vecTouchPoint; // [esp+84h] [ebp-24h] BYREF
+
+  v2 = 0;
+  if ( pOther )
+    v2 = _dynamic_cast(
+           pOther,
+           (const struct __class_type_info *)&`typeinfo for'CBaseEntity,
+           (const struct __class_type_info *)&`typeinfo for'IPaintPowerUser,
+           -2);
+  if ( (*((unsigned __int8 (__cdecl **)(CUtlCachedFileData<CModelSoundsCache> *))engine->_vptr_CUtlCachedFileData + 129))(engine) )
+  {
+    if ( v2 )
+    {
+      AngleVectors(&this->m_angRotation.m_Value, 0, 0, &vecWallUp);
+      TouchTrace = CBaseEntity::GetTouchTrace();
+      x = vecWallUp.x;
+      v11 = TouchTrace->plane.normal.x;
+      y = vecWallUp.y;
+      v9 = TouchTrace->plane.normal.y;
+      z = vecWallUp.z;
+      v7 = TouchTrace->plane.normal.z;
+      vecWorldSpaceCenter = *(Vector *)(*((int (__cdecl **)(CBaseEntity *))pOther->_vptr_IHandleEntity + 150))(pOther);
+      UTIL_ProjectPointOntoPlane(&vecTouchPoint, &vecWorldSpaceCenter, &TouchTrace->plane);
+      v4 = CProjectedWallEntity::ComputeSegmentIndex(this, &vecTouchPoint);
+      if ( v4 < this->m_nNumSegments.m_Value )
+      {
+        v5 = this->m_PaintPowers.m_Memory.m_pMemory[v4];
+        if ( debug_paintable_projected_wall.m_pParent->m_Value.m_nValue )
+        {
+          vWorldPositionOnWall = (Vector *)this->m_PaintPowers.m_Memory.m_pMemory[v4];
+          DevMsg("Segment: %d, Power: %d\n", v4, vWorldPositionOnWall);
+          v5 = (PaintPowerType)vWorldPositionOnWall;
+        }
+        if ( fabs((float)((float)((float)(x * v11) + (float)(y * v9)) + (float)(z * v7))) > 0.001000000047497451 )
+        {
+          v13 = *(void (__cdecl **)(void *, PaintPowerInfo_t *, _DWORD))(*(_DWORD *)v2 + 20);
+          PaintPowerInfo_t::PaintPowerInfo_t(&v14, &TouchTrace->plane.normal, &TouchTrace->endpos, this, v5, 0);
+          v13(v2, &v14, 0);
+        }
+      }
+    }
+  }
+}

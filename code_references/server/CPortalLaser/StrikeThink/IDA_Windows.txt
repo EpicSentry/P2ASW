@@ -1,0 +1,204 @@
+void __thiscall CPortalLaser::StrikeThink(CPortalLaser *this)
+{
+  edict_t *m_pPev; // ecx
+  float *p_z; // eax
+  int v4; // ecx
+  unsigned int m_Index; // ecx
+  float thinkTime; // xmm0_4
+  CBaseEntity **m_pSoundProxy; // edi
+  Vector *m_vecNearestSoundSource; // esi
+  int v9; // ebx
+  CBaseEntity *m_pEntity; // eax
+  CBaseEntity *v11; // edi
+  edict_t *v12; // ecx
+  CPortalLaser *m_pParentLaser; // edi
+  edict_t *v14; // ecx
+  edict_t *v15; // ecx
+  float *v16; // eax
+  float v17; // xmm1_4
+  float v18; // xmm2_4
+  CPortalSimulator *SimulatorThatOwnsEntity; // eax
+  float *v20; // esi
+  float *v21; // eax
+  float v22; // xmm0_4
+  float v23; // xmm2_4
+  float v24; // xmm1_4
+  float v25; // xmm2_4
+  float v26; // [esp+28h] [ebp-2Ch]
+  float v27; // [esp+2Ch] [ebp-28h]
+  float v28; // [esp+30h] [ebp-24h]
+  Vector vecOrigin; // [esp+34h] [ebp-20h] BYREF
+  Vector vecDir; // [esp+40h] [ebp-14h] BYREF
+  CBaseEntity *pReflector; // [esp+4Ch] [ebp-8h]
+  CVProfScope VProf_; // [esp+53h] [ebp-1h]
+  int savedregs; // [esp+54h] [ebp+0h] BYREF
+
+  VProf_.m_bEnabled = CVProfile::IsEnabled(*(CVProfile **)&_g_VProfCurrentProfile.m_bVTuneGroupEnabled);
+  if ( VProf_.m_bEnabled )
+    CVProfile::EnterScope(
+      *(CVProfile **)&_g_VProfCurrentProfile.m_bVTuneGroupEnabled,
+      "CPortalLaser::StrikeThink",
+      0,
+      "Game",
+      0,
+      4);
+  if ( this->m_bShouldSpark.m_Value )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x783u);
+    }
+    this->m_bShouldSpark.m_Value = 0;
+  }
+  p_z = &this->m_vecNearestSoundSource[0].z;
+  v4 = 33;
+  do
+  {
+    *(Vector *)(p_z - 2) = vec3_invalid;
+    p_z += 3;
+    --v4;
+  }
+  while ( v4 );
+  m_Index = this->m_hReflector.m_Value.m_Index;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+  {
+    pReflector = 0;
+LABEL_13:
+    CBaseAnimating::GetAttachment(this, this->m_iLaserAttachment, &vecOrigin, &vecDir, 0, 0);
+    thinkTime = portal_laser_normal_update.m_pParent->m_Value.m_fValue + gpGlobals->curtime;
+    goto LABEL_14;
+  }
+  m_pEntity = (CBaseEntity *)g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+  pReflector = m_pEntity;
+  if ( !m_pEntity || !this->m_bFromReflectedCube )
+    goto LABEL_13;
+  v11 = m_pEntity;
+  if ( UTIL_GetSchrodingerTwin(m_pEntity) )
+  {
+    if ( !this->m_bUseParentDir.m_Value )
+    {
+      if ( this->m_Network.m_TimerEvent.m_bRegistered )
+      {
+        *((_BYTE *)&this->m_Network + 76) |= 1u;
+      }
+      else
+      {
+        v12 = this->m_Network.m_pPev;
+        if ( v12 )
+          CBaseEdict::StateChanged(v12, 0x784u);
+      }
+      this->m_bUseParentDir.m_Value = 1;
+    }
+    m_pParentLaser = this->m_pParentLaser;
+    if ( m_pParentLaser->m_angPortalExitAngles.x != this->m_angParentAngles.m_Value.x
+      || m_pParentLaser->m_angPortalExitAngles.y != this->m_angParentAngles.m_Value.y
+      || m_pParentLaser->m_angPortalExitAngles.z != this->m_angParentAngles.m_Value.z )
+    {
+      if ( this->m_Network.m_TimerEvent.m_bRegistered )
+      {
+        *((_BYTE *)&this->m_Network + 76) |= 1u;
+      }
+      else
+      {
+        v14 = this->m_Network.m_pPev;
+        if ( v14 )
+          CBaseEdict::StateChanged(v14, 0x788u);
+      }
+      this->m_angParentAngles.m_Value.x = m_pParentLaser->m_angPortalExitAngles.x;
+      this->m_angParentAngles.m_Value.y = m_pParentLaser->m_angPortalExitAngles.y;
+      this->m_angParentAngles.m_Value.z = m_pParentLaser->m_angPortalExitAngles.z;
+    }
+    AngleVectors(&this->m_angParentAngles.m_Value, &vecDir);
+    v11 = pReflector;
+  }
+  else
+  {
+    if ( this->m_bUseParentDir.m_Value )
+    {
+      if ( this->m_Network.m_TimerEvent.m_bRegistered )
+      {
+        *((_BYTE *)&this->m_Network + 76) |= 1u;
+      }
+      else
+      {
+        v15 = this->m_Network.m_pPev;
+        if ( v15 )
+          CBaseEdict::StateChanged(v15, 0x784u);
+      }
+      this->m_bUseParentDir.m_Value = 0;
+    }
+    if ( (v11->m_iEFlags & 0x800) != 0 )
+      CBaseEntity::CalcAbsolutePosition(v11);
+    AngleVectors(&v11->m_angAbsRotation, &vecDir);
+  }
+  v26 = vecDir.x * 22.0;
+  v27 = vecDir.y * 22.0;
+  v28 = vecDir.z * 22.0;
+  v16 = (float *)v11->WorldSpaceCenter(v11);
+  v17 = v16[1] + v27;
+  v18 = v16[2] + v28;
+  vecOrigin.x = *v16 + v26;
+  vecOrigin.y = v17;
+  vecOrigin.z = v18;
+  SimulatorThatOwnsEntity = CPortalSimulator::GetSimulatorThatOwnsEntity(v11);
+  v20 = (float *)SimulatorThatOwnsEntity;
+  if ( SimulatorThatOwnsEntity )
+  {
+    if ( CPortalSimulator::EntityIsInPortalHole(SimulatorThatOwnsEntity, v11)
+      && (float)((float)((float)((float)(v20[26] * vecOrigin.x) + (float)(v20[27] * vecOrigin.y))
+                       + (float)(v20[28] * vecOrigin.z))
+               - v20[29]) < 0.0 )
+    {
+      v21 = (float *)v11->WorldSpaceCenter(v11);
+      if ( (float)((float)((float)((float)(v21[1] * v20[27]) + (float)(*v21 * v20[26])) + (float)(v21[2] * v20[28]))
+                 - v20[29]) > 0.0 )
+      {
+        v22 = (float)((float)((float)(vecOrigin.y * v20[35]) + (float)(vecOrigin.x * v20[34]))
+                    + (float)(vecOrigin.z * v20[36]))
+            + v20[37];
+        v23 = (float)((float)((float)(v20[38] * vecOrigin.x) + (float)(v20[39] * vecOrigin.y))
+                    + (float)(v20[40] * vecOrigin.z))
+            + v20[41];
+        vecOrigin.x = (float)((float)((float)(v20[30] * vecOrigin.x) + (float)(vecOrigin.y * v20[31]))
+                            + (float)(vecOrigin.z * v20[32]))
+                    + v20[33];
+        vecOrigin.z = v23;
+        vecOrigin.y = v22;
+        v24 = (float)((float)(v20[35] * vecDir.y) + (float)(vecDir.x * v20[34])) + (float)(vecDir.z * v20[36]);
+        v25 = (float)((float)(v20[39] * vecDir.y) + (float)(v20[38] * vecDir.x)) + (float)(v20[40] * vecDir.z);
+        vecDir.x = (float)((float)(v20[30] * vecDir.x) + (float)(vecDir.y * v20[31])) + (float)(vecDir.z * v20[32]);
+        vecDir.y = v24;
+        vecDir.z = v25;
+      }
+    }
+  }
+  thinkTime = portal_laser_high_precision_update.m_pParent->m_Value.m_fValue + gpGlobals->curtime;
+LABEL_14:
+  CBaseEntity::SetNextThink(this, thinkTime, 0);
+  UTIL_Portal_Laser_Prevent_Tilting(&vecDir);
+  CPortalLaser::TurnOnGlow(this);
+  CPortalLaser::FireLaser(this, (int)&savedregs, &vecOrigin, &vecDir, pReflector);
+  CPortalLaser::CreateSoundProxies(this);
+  m_pSoundProxy = this->m_pSoundProxy;
+  m_vecNearestSoundSource = this->m_vecNearestSoundSource;
+  v9 = 33;
+  do
+  {
+    if ( *m_pSoundProxy )
+      UTIL_SetOrigin(*m_pSoundProxy, m_vecNearestSoundSource, 0);
+    ++m_vecNearestSoundSource;
+    ++m_pSoundProxy;
+    --v9;
+  }
+  while ( v9 );
+  if ( sv_debug_laser.m_pParent->m_Value.m_nValue )
+    engine->Con_NPrintf(engine, 0, "num lasers = %d", IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Size);
+  if ( VProf_.m_bEnabled )
+    CVProfile::ExitScope(*(CVProfile **)&_g_VProfCurrentProfile.m_bVTuneGroupEnabled);
+}

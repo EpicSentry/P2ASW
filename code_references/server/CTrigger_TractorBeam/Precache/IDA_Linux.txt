@@ -1,0 +1,8 @@
+void __cdecl CTrigger_TractorBeam::Precache(CTrigger_TractorBeam *const this)
+{
+  PrecacheMaterial("effects/tractor_beam");
+  PrecacheMaterial("effects/tractor_beam2");
+  PrecacheMaterial("effects/tractor_beam3");
+  CBaseEntity::PrecacheScriptSound("VFX.PlayerEnterTbeam");
+  CBaseEntity::PrecacheScriptSound("VFX.PlayerEnterTbeam_SS");
+}

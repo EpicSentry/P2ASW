@@ -94,12 +94,12 @@ BaseClass(parent, panelName, true, true)
 		m_SpnLookSensitivity->AddItem( gLookSensitivityItems[i] );
 
 	SetUpperGarnishEnabled( true );
-	SetFooterEnabled( true );
+	SetLowerGarnishEnabled( true );
 
 	CBaseModFooterPanel *footer = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
 	if ( footer )
 	{
-		footer->SetButtons( FB_ABUTTON | FB_BBUTTON );
+		footer->SetButtons( FB_ABUTTON | FB_BBUTTON, FF_AB_ONLY, true );
 		footer->SetButtonText( FB_ABUTTON, "#L4D360UI_Select" );
 		footer->SetButtonText( FB_BBUTTON, "#L4D360UI_Cancel" );
 	}

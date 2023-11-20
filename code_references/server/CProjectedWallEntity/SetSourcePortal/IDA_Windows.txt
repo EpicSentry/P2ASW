@@ -1,0 +1,81 @@
+void __thiscall CProjectedWallEntity::SetSourcePortal(CProjectedWallEntity *this, CPortal_Base2D *pPortal)
+{
+  CProjectedWallEntity *v2; // ebx
+  CProjectedWallEntity_vtbl *v3; // eax
+  float v4; // xmm0_4
+  CBaseEdict *m_pPev; // ecx
+  CNetworkVarBase<CHandle<CPortal_Base2D>,CProjectedWallEntity::NetworkVar_m_hColorPortal> *p_m_hColorPortal; // edi
+  unsigned int m_Index; // esi
+  IHandleEntity *m_pEntity; // edx
+  unsigned int v9; // eax
+  IHandleEntity *v10; // ecx
+  CNetworkVarBase<CHandle<CPortal_Base2D>,CProjectedWallEntity::NetworkVar_m_hColorPortal> *v11; // eax
+  CBaseEdict *v12; // ecx
+
+  v2 = this;
+  v3 = this->CPaintableEntity<CBaseProjectedEntity>::CBaseProjectedEntity::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+  if ( pPortal )
+  {
+    if ( !((unsigned __int8 (__stdcall *)(CPortal_Base2D *))v3->DidRedirectionPortalMove)(pPortal) )
+      goto LABEL_11;
+  }
+  else if ( !((int (*)(void))v3->GetSourcePortal)() )
+  {
+    goto LABEL_11;
+  }
+  v4 = gpGlobals->curtime + 0.5;
+  if ( v2->m_flParticleUpdateTime.m_Value != v4 )
+  {
+    if ( v2->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&v2->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      m_pPev = v2->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x400u);
+    }
+    v2->m_flParticleUpdateTime.m_Value = v4;
+  }
+LABEL_11:
+  p_m_hColorPortal = &v2->m_hColorPortal;
+  if ( !pPortal )
+  {
+    m_Index = -1;
+LABEL_16:
+    m_pEntity = 0;
+    goto LABEL_17;
+  }
+  m_Index = pPortal->GetRefEHandle(pPortal)->m_Index;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+    goto LABEL_16;
+  m_pEntity = g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+LABEL_17:
+  v9 = p_m_hColorPortal->m_Value.m_Index;
+  if ( p_m_hColorPortal->m_Value.m_Index == -1
+    || (v2 = this, g_pEntityList->m_EntPtrArray[(unsigned __int16)v9].m_SerialNumber != HIWORD(v9)) )
+  {
+    v10 = 0;
+  }
+  else
+  {
+    v10 = g_pEntityList->m_EntPtrArray[(unsigned __int16)v9].m_pEntity;
+  }
+  if ( v10 != m_pEntity )
+  {
+    v11 = p_m_hColorPortal - 249;
+    if ( LOBYTE(p_m_hColorPortal[-227].m_Value.m_Index) )
+    {
+      LOBYTE(v11[23].m_Value.m_Index) |= 1u;
+    }
+    else
+    {
+      v12 = (CBaseEdict *)v11[7].m_Value.m_Index;
+      if ( v12 )
+        CBaseEdict::StateChanged(v12, 0x3E4u);
+    }
+    p_m_hColorPortal->m_Value.m_Index = m_Index;
+  }
+  CBaseProjectedEntity::SetSourcePortal(v2, pPortal);
+}

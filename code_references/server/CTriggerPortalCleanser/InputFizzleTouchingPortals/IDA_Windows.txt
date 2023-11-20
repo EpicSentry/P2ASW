@@ -1,0 +1,5 @@
+// attributes: thunk
+void __thiscall CTriggerPortalCleanser::InputFizzleTouchingPortals(CTriggerPortalCleanser *this, inputdata_t *data)
+{
+  CTriggerPortalCleanser::FizzleTouchingPortals(this);
+}

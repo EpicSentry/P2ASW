@@ -1,0 +1,27 @@
+void __thiscall C_PortalLaser::Spawn(C_PortalLaser *this)
+{
+  C_Beam *v2; // eax
+
+  this->Precache(this);
+  if ( this->m_bIsLethal )
+  {
+    v2 = C_Beam::BeamCreate("sprites/laserbeam.vmt", 2.0);
+    if ( v2->m_clrRender.m_Value.r != 100 )
+      v2->m_clrRender.m_Value.r = 100;
+    if ( v2->m_clrRender.m_Value.g != 0xFF )
+      v2->m_clrRender.m_Value.g = -1;
+    if ( v2->m_clrRender.m_Value.b != 100 )
+    {
+      v2->m_clrRender.m_Value.b = 100;
+      C_PortalBeamHelper::Init(&this->m_beamHelper, v2);
+      C_Prop_Portal::Fizzle((vgui::PropertyPage *)this);
+      return;
+    }
+  }
+  else
+  {
+    v2 = C_Beam::BeamCreate("sprites/purplelaser1.vmt", 32.0);
+  }
+  C_PortalBeamHelper::Init(&this->m_beamHelper, v2);
+  C_Prop_Portal::Fizzle((vgui::PropertyPage *)this);
+}

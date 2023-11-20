@@ -55,7 +55,7 @@
 #include "trigger_catapult.h"
 #include "portal_gamestats.h"
 #include "matchmaking/imatchframework.h"
-#include "matchmaking/portal2/imatchext_portal2.h"
+//#include "matchmaking/portal2/imatchext_portal2.h"
 #include "portal2_research_data_tracker.h"
 #include "pvs_extender.h"
 
@@ -5390,11 +5390,11 @@ void CPortal_Player::GivePlayerPaintGun( bool bActivatePaintPowers, bool bSwitch
 	{
 		pPaintGun->ActivatePaint(BOUNCE_POWER);
 		pPaintGun->ActivatePaint(SPEED_POWER);
-		//pPaintGun->ActivatePaint(REFLECT_POWER);
+		pPaintGun->ActivatePaint(REFLECT_POWER);
 		pPaintGun->ActivatePaint(PORTAL_POWER);
 		PaintPowerPickup( BOUNCE_POWER, this );
 		PaintPowerPickup( SPEED_POWER, this );
-		//PaintPowerPickup( REFLECT_POWER, this );
+		PaintPowerPickup( REFLECT_POWER, this );
 		PaintPowerPickup( PORTAL_POWER, this );
 	}
 
@@ -5714,7 +5714,6 @@ bool CPortal_Player::PlayGesture( const char *pGestureName )
 
 void CPortal_Player::InitVCollision( const Vector &vecAbsOrigin, const Vector &vecAbsVelocity )
 {
-#if 1
 	// Cleanup any old vphysics stuff.
 	VPhysicsDestroyObject();
 
@@ -5726,9 +5725,6 @@ void CPortal_Player::InitVCollision( const Vector &vecAbsOrigin, const Vector &v
 	CPhysCollide *pCrouchModel = PhysCreateBbox( GetDuckHullMins(), GetDuckHullMaxs() );
 
 	SetupVPhysicsShadow( vecAbsOrigin, vecAbsVelocity, pModel, "player_stand", pCrouchModel, "player_crouch" );
-#else
-	BaseClass::InitVCollision( vecAbsOrigin, vecAbsVelocity );
-#endif
 }
 
 

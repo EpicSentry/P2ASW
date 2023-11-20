@@ -1,0 +1,45 @@
+bool __cdecl C_Trigger_TractorBeam::GetSoundSpatialization(
+        C_Trigger_TractorBeam *const this,
+        SpatializationInfo_t *const info)
+{
+  bool v2; // di
+  QAngle *pAngles; // esi
+  vec_t *v4; // eax
+  float outT[4]; // [esp+2Ch] [ebp-1Ch] BYREF
+
+  v2 = 0;
+  if ( !(*((unsigned __int8 (__cdecl **)(C_Trigger_TractorBeam *const))this->_vptr_IHandleEntity + 79))(this) )
+  {
+    if ( info->pOrigin )
+    {
+      CalcClosestPointOnLine(&info->info.vListenerOrigin, &this->m_vStart, &this->m_vEnd, info->pOrigin, outT);
+      if ( outT[0] >= 0.0 )
+      {
+        if ( outT[0] > 1.0 )
+        {
+          v2 = 1;
+          *info->pOrigin = this->m_vEnd;
+          pAngles = info->pAngles;
+          if ( !pAngles )
+            return v2;
+          goto LABEL_6;
+        }
+      }
+      else
+      {
+        *info->pOrigin = this->m_vStart;
+      }
+    }
+    pAngles = info->pAngles;
+    v2 = 1;
+    if ( pAngles )
+    {
+LABEL_6:
+      v4 = (vec_t *)(*((int (__cdecl **)(C_BaseEntity::NetworkVar_m_Collision *))this->m_Collision._vptr_ICollideable + 9))(&this->m_Collision);
+      pAngles->x = *v4;
+      pAngles->y = v4[1];
+      pAngles->z = v4[2];
+    }
+  }
+  return v2;
+}

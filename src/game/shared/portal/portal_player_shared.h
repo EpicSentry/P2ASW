@@ -197,6 +197,8 @@ struct BrushContact
 
 typedef CUtlVector<BrushContact> ContactVector;
 typedef CUtlVector<cplane_t> CollisionPlaneVector;
+
+#define CONTENTS_BRUSH_PAINT MASK_SOLID_BRUSHONLY
 void ComputeAABBContactsWithBrushEntity( ContactVector& contacts, const Vector& boxOrigin, const Vector& boxMin, const Vector& boxMax, CBaseEntity* pBrushEntity, int contentsMask = CONTENTS_BRUSH_PAINT );
 void ComputeAABBContactsWithBrushEntity( ContactVector& contacts, const cplane_t *pClipPlanes, int iClipPlaneCount, const Vector& boxOrigin, const Vector& boxMin, const Vector& boxMax, CBaseEntity* pBrushEntity, int contentsMask = CONTENTS_BRUSH_PAINT );
 

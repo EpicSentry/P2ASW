@@ -1,0 +1,57 @@
+double __usercall MouthDecay@<st0>(int a1@<esi>, float mouthopen, float *flInvDim, float flBaseLight)
+{
+  float v4; // xmm1_4
+  char *v5; // xmm0_4
+  float v6; // xmm2_4
+  float v7; // xmm1_4
+  float v9; // xmm0_4
+  float v10; // xmm0_4
+  long double _FFFFFFFC; // [esp-4h] [ebp-4h]
+  float v13; // [esp-4h] [ebp-4h]
+  float flOpenAmount; // [esp+8h] [ebp+8h]
+  float flInvDima; // [esp+Ch] [ebp+Ch]
+
+  v4 = mouthopen * 0.015625;
+  v5 = FLOAT_1_0;
+  if ( (float)(mouthopen * 0.015625) < 0.0 )
+  {
+LABEL_5:
+    v6 = 0.0;
+    goto LABEL_6;
+  }
+  if ( v4 <= 1.0 )
+  {
+    v6 = mouthopen * 0.015625;
+    flOpenAmount = mouthopen * 0.015625;
+    if ( v4 >= 0.2 )
+      goto LABEL_7;
+    goto LABEL_5;
+  }
+  v6 = *(float *)&FLOAT_1_0;
+LABEL_6:
+  flOpenAmount = v6;
+LABEL_7:
+  v7 = v6 * 3.0;
+  if ( (float)(v6 * 3.0) >= 1.0 )
+    v7 = *(float *)&FLOAT_1_0;
+  LODWORD(_FFFFFFFC) = a1;
+  flInvDima = *flInvDim;
+  if ( v7 <= flInvDima )
+  {
+    __libm_sse2_log(_FFFFFFFC);
+    v9 = (float)((float)0.9800000190734863 * 30.30303) * *(float *)(gpGlobals.m_Index + 16);
+    __libm_sse2_expf(v13);
+    v6 = flOpenAmount;
+    *flInvDim = v9 * flInvDima;
+    v5 = FLOAT_1_0;
+  }
+  else
+  {
+    *flInvDim = v7;
+  }
+  v10 = (float)(*(float *)&v5 - *flInvDim) * flBaseLight;
+  if ( v6 <= v10 )
+    return v10;
+  else
+    return v6;
+}

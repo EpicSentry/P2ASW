@@ -1,0 +1,186 @@
+void __cdecl C_TriggerPortalCleanser::UpdateParticles(C_TriggerPortalCleanser *const this)
+{
+  int v1; // edi
+  unsigned __int8 m_Value; // al
+  float *v3; // eax
+  const matrix3x4_t *v4; // eax
+  float z; // xmm0_4
+  unsigned int m_Index; // edx
+  int v7; // eax
+  char *v8; // ecx
+  Vector *p_vecPosition1; // eax
+  unsigned int v10; // eax
+  int v11; // edx
+  char *v12; // ecx
+  Vector *p_vecUnused; // eax
+  float *v14; // eax
+  int v15; // edi
+  unsigned __int8 v16; // al
+  float *v17; // eax
+  const matrix3x4_t *v18; // eax
+  const Vector *v19; // eax
+  CNewParticleEffect *v20; // eax
+  CNewParticleEffect *m_pObject; // edx
+  CUtlReference<CNewParticleEffect> *p_m_hCleanserFX; // ecx
+  CUtlReference<CNewParticleEffect> *m_pPrev; // edi
+  CUtlReference<CNewParticleEffect> *m_pNext; // edx
+  CUtlReference<CNewParticleEffect> *m_pHead; // edx
+  float *v26; // eax
+  CUtlReference<CNewParticleEffect> *v27; // edi
+  Vector vecMins; // [esp+28h] [ebp-60h] BYREF
+  Vector vecMaxs; // [esp+34h] [ebp-54h] BYREF
+  Vector v30; // [esp+40h] [ebp-48h]
+  Vector vecPos1; // [esp+4Ch] [ebp-3Ch] BYREF
+  Vector vecPosition1; // [esp+58h] [ebp-30h] BYREF
+  Vector vecUnused; // [esp+64h] [ebp-24h] BYREF
+
+  if ( this->m_bDisabled || !cl_portal_cleanser_scanline.m_pParent->m_Value.m_nValue || !this->m_bUseScanline )
+  {
+    C_TriggerPortalCleanser::DestroyParticles(this);
+    return;
+  }
+  if ( this->m_hCleanserFX.m_pObject )
+  {
+LABEL_7:
+    v1 = (*((int (__cdecl **)(C_BaseEntity::NetworkVar_m_Collision *))this->m_Collision._vptr_ICollideable + 1))(&this->m_Collision);
+    if ( (this->m_Collision.m_usSolidFlags.m_Value & 0x40) != 0
+      || (m_Value = this->m_Collision.m_nSolidType.m_Value, m_Value == 2)
+      || !m_Value
+      || (v3 = (float *)(*((int (__cdecl **)(C_BaseEntity::NetworkVar_m_Collision *))this->m_Collision._vptr_ICollideable
+                         + 9))(&this->m_Collision),
+          vec3_angle.x == *v3 && vec3_angle.y == v3[1] && vec3_angle.z == v3[2]) )
+    {
+      v14 = (float *)(*((int (__cdecl **)(C_BaseEntity::NetworkVar_m_Collision *))this->m_Collision._vptr_ICollideable
+                      + 8))(&this->m_Collision);
+      vecUnused.x = *(float *)v1 + *v14;
+      vecUnused.y = *(float *)(v1 + 4) + v14[1];
+      z = *(float *)(v1 + 8) + v14[2];
+    }
+    else
+    {
+      v4 = (const matrix3x4_t *)(*((int (__cdecl **)(C_BaseEntity::NetworkVar_m_Collision *))this->m_Collision._vptr_ICollideable
+                                 + 10))(&this->m_Collision);
+      VectorTransform((const float *)v1, v4, &vecUnused.x);
+      z = vecUnused.z;
+    }
+    m_Index = this->m_hObject1.m_Value.m_Index;
+    v7 = 0;
+    vecUnused.z = z - 512.0;
+    if ( m_Index != -1 )
+    {
+      v8 = (char *)g_pEntityList + 16 * (unsigned __int16)m_Index;
+      if ( *((_DWORD *)v8 + 2) == HIWORD(m_Index) )
+        v7 = *((_DWORD *)v8 + 1);
+    }
+    if ( this->m_bObject1InRange && v7 )
+    {
+      vecPosition1 = *(Vector *)(*(int (__cdecl **)(int))(*(_DWORD *)v7 + 448))(v7);
+      p_vecPosition1 = &vecPosition1;
+    }
+    else
+    {
+      p_vecPosition1 = &vecUnused;
+    }
+    CNewParticleEffect::SetControlPoint(this->m_hCleanserFX.m_pObject, 4, p_vecPosition1);
+    v10 = this->m_hObject2.m_Value.m_Index;
+    v11 = 0;
+    if ( v10 != -1 )
+    {
+      v12 = (char *)g_pEntityList + 16 * (unsigned __int16)v10;
+      if ( *((_DWORD *)v12 + 2) == HIWORD(v10) )
+        v11 = *((_DWORD *)v12 + 1);
+    }
+    if ( this->m_bObject2InRange && v11 )
+    {
+      vecPosition1 = *(Vector *)(*(int (__cdecl **)(int))(*(_DWORD *)v11 + 448))(v11);
+      p_vecUnused = &vecPosition1;
+    }
+    else
+    {
+      p_vecUnused = &vecUnused;
+    }
+    CNewParticleEffect::SetControlPoint(this->m_hCleanserFX.m_pObject, 5, p_vecUnused);
+    return;
+  }
+  v15 = (*((int (__cdecl **)(C_BaseEntity::NetworkVar_m_Collision *))this->m_Collision._vptr_ICollideable + 1))(&this->m_Collision);
+  if ( (this->m_Collision.m_usSolidFlags.m_Value & 0x40) != 0
+    || (v16 = this->m_Collision.m_nSolidType.m_Value, v16 == 2)
+    || !v16
+    || (v17 = (float *)(*((int (__cdecl **)(C_BaseEntity::NetworkVar_m_Collision *))this->m_Collision._vptr_ICollideable
+                        + 9))(&this->m_Collision),
+        vec3_angle.x == *v17)
+    && vec3_angle.y == v17[1]
+    && vec3_angle.z == v17[2] )
+  {
+    v26 = (float *)(*((int (__cdecl **)(C_BaseEntity::NetworkVar_m_Collision *))this->m_Collision._vptr_ICollideable + 8))(&this->m_Collision);
+    vecMins.x = *(float *)v15 + *v26;
+    vecMins.y = *(float *)(v15 + 4) + v26[1];
+    vecMins.z = *(float *)(v15 + 8) + v26[2];
+  }
+  else
+  {
+    v18 = (const matrix3x4_t *)(*((int (__cdecl **)(C_BaseEntity::NetworkVar_m_Collision *))this->m_Collision._vptr_ICollideable
+                                + 10))(&this->m_Collision);
+    VectorTransform((const float *)v15, v18, &vecMins.x);
+  }
+  v19 = (const Vector *)(*((int (__cdecl **)(C_BaseEntity::NetworkVar_m_Collision *))this->m_Collision._vptr_ICollideable
+                         + 2))(&this->m_Collision);
+  CCollisionProperty::CollisionToWorldSpace(&this->m_Collision, v19, &vecMaxs);
+  if ( (float)(vecMaxs.z - vecMins.z) < 32.0 )
+    return;
+  v30 = vec3_origin;
+  v20 = CParticleProperty::Create(&this->m_Particles, "cleanser_scanline", PATTACH_CUSTOMORIGIN, -1, vec3_origin, 0);
+  m_pObject = this->m_hCleanserFX.m_pObject;
+  if ( v20 == m_pObject )
+  {
+LABEL_49:
+    if ( !m_pObject )
+      return;
+    vecPos1 = vecMaxs;
+    vecUnused.y = vecMaxs.y;
+    vecPosition1.x = vecMins.x;
+    vecPosition1.y = vecMins.y;
+    vecUnused.z = vecMins.z;
+    vecUnused.x = vecMaxs.x;
+    vecPosition1.z = vecMaxs.z;
+    CNewParticleEffect::SetControlPoint(m_pObject, 0, &vecPos1);
+    CNewParticleEffect::SetControlPoint(this->m_hCleanserFX.m_pObject, 1, &vecPosition1);
+    CNewParticleEffect::SetControlPoint(this->m_hCleanserFX.m_pObject, 2, &vecUnused);
+    if ( !this->m_hCleanserFX.m_pObject )
+      return;
+    goto LABEL_7;
+  }
+  p_m_hCleanserFX = &this->m_hCleanserFX;
+  if ( m_pObject )
+  {
+    m_pPrev = this->m_hCleanserFX.m_pPrev;
+    if ( m_pPrev )
+    {
+      m_pPrev->m_pNext = this->m_hCleanserFX.m_pNext;
+      m_pNext = this->m_hCleanserFX.m_pNext;
+      if ( m_pNext )
+        m_pNext->m_pPrev = this->m_hCleanserFX.m_pPrev;
+    }
+    else if ( p_m_hCleanserFX == m_pObject->m_References.m_pHead )
+    {
+      v27 = this->m_hCleanserFX.m_pNext;
+      m_pObject->m_References.m_pHead = v27;
+      if ( v27 )
+        v27->m_pPrev = 0;
+    }
+    this->m_hCleanserFX.m_pPrev = 0;
+    this->m_hCleanserFX.m_pNext = 0;
+  }
+  this->m_hCleanserFX.m_pObject = v20;
+  if ( v20 )
+  {
+    this->m_hCleanserFX.m_pNext = v20->m_References.m_pHead;
+    m_pHead = v20->m_References.m_pHead;
+    if ( m_pHead )
+      m_pHead->m_pPrev = p_m_hCleanserFX;
+    this->m_hCleanserFX.m_pPrev = 0;
+    v20->m_References.m_pHead = p_m_hCleanserFX;
+    m_pObject = this->m_hCleanserFX.m_pObject;
+    goto LABEL_49;
+  }
+}

@@ -1,0 +1,25 @@
+class Blobulator::LightBucketImplementation::CFragmentInfo
+{
+    public void CFragmentInfo();
+    public int GetVerticesOutput();
+    public char * GetPositionBuffer();
+    public unsigned int * GetIndexBuffer();
+    public int GetVertexSize();
+    public void UpdateInternals(int ,unsigned int * );
+    public void CheckIndices();
+    public bool IsOverThreshold(int ,unsigned int * );
+    public void Reset();
+    public class Blobulator::LightBucketImplementation::CFragmentInfo & operator=(class Blobulator::LightBucketImplementation::CFragmentInfo & );
+    public bool m_bUsable;
+    public unsigned int * m_pCachedIndexBuffer;
+    public int m_nIndexBuffer_StartIndex;
+    public int m_nIndexBuffer_EndIndex;
+    public int m_nIndexBuffer_CurrentIndex;
+    public void * m_pCachedVertexBuffer;
+    public int m_nVertexBuffer_StartIndex;
+    public int m_nVertexBuffer_EndIndex;
+    public int m_nVertexBuffer_CurrentIndex;
+    public int m_nVertexSize;
+    public unsigned int * m_pThresholdIndexBuffer;
+    public int m_nThresholdVerticesOutput;
+};

@@ -1,0 +1,10 @@
+void __cdecl C_FizzlerVortexProxy::C_FizzlerVortexProxy(C_FizzlerVortexProxy *const this)
+{
+  this->_vptr_IMaterialProxy = (int (**)(...))&off_12C8208;
+  this->m_pMaterial = 0;
+  this->m_pPosition1Var = 0;
+  this->m_pVortex1Var = 0;
+  this->m_pPosition2Var = 0;
+  this->m_pVortex2Var = 0;
+  this->m_pIntensityVar = 0;
+}

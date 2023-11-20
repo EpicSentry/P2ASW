@@ -1,0 +1,106 @@
+bool __cdecl C_FizzlerVortexProxy::Init(C_FizzlerVortexProxy *const this, IMaterial *pMaterial, KeyValues *pKeyValues)
+{
+  IMaterialVar *v3; // eax
+  bool v4; // zf
+  bool result; // al
+  IMaterialVar *v6; // eax
+  IMaterialVar *v7; // eax
+  IMaterialVar *v8; // eax
+  IMaterialVar *v9; // eax
+  IMaterialVar *v10; // eax
+  bool found[9]; // [esp+1Fh] [ebp-9h] BYREF
+
+  this->m_pMaterial = pMaterial;
+  v3 = (IMaterialVar *)(*(int (__cdecl **)(IMaterial *, const char *, bool *, int))(*(_DWORD *)pMaterial + 44))(
+                         pMaterial,
+                         "$FLOW_VORTEX_POS1",
+                         found,
+                         1);
+  v4 = !found[0];
+  this->m_pPosition1Var = v3;
+  if ( v4 )
+  {
+    this->m_pPosition1Var = 0;
+    return 0;
+  }
+  else
+  {
+    v6 = (IMaterialVar *)(*(int (__cdecl **)(IMaterial *, const char *, bool *, int))(*(_DWORD *)this->m_pMaterial + 44))(
+                           this->m_pMaterial,
+                           "$flow_vortex1",
+                           found,
+                           1);
+    v4 = !found[0];
+    this->m_pVortex1Var = v6;
+    if ( v4 )
+    {
+      this->m_pVortex1Var = 0;
+      return 0;
+    }
+    else
+    {
+      v7 = (IMaterialVar *)(*(int (__cdecl **)(IMaterial *, const char *, bool *, int))(*(_DWORD *)this->m_pMaterial + 44))(
+                             this->m_pMaterial,
+                             "$FLOW_VORTEX_POS2",
+                             found,
+                             1);
+      v4 = !found[0];
+      this->m_pPosition2Var = v7;
+      if ( v4 )
+      {
+        this->m_pPosition2Var = 0;
+        return 0;
+      }
+      else
+      {
+        v8 = (IMaterialVar *)(*(int (__cdecl **)(IMaterial *, const char *, bool *, int))(*(_DWORD *)this->m_pMaterial
+                                                                                        + 44))(
+                               this->m_pMaterial,
+                               "$flow_vortex2",
+                               found,
+                               1);
+        v4 = !found[0];
+        this->m_pVortex2Var = v8;
+        if ( v4 )
+        {
+          this->m_pVortex2Var = 0;
+          return 0;
+        }
+        else
+        {
+          v9 = (IMaterialVar *)(*(int (__cdecl **)(IMaterial *, const char *, bool *, int))(*(_DWORD *)this->m_pMaterial
+                                                                                          + 44))(
+                                 this->m_pMaterial,
+                                 "$flow_color_intensity",
+                                 found,
+                                 1);
+          v4 = !found[0];
+          this->m_pIntensityVar = v9;
+          if ( v4 )
+          {
+            this->m_pIntensityVar = 0;
+            return 0;
+          }
+          else
+          {
+            v10 = (IMaterialVar *)(*(int (__cdecl **)(IMaterial *, const char *, bool *, int))(*(_DWORD *)this->m_pMaterial
+                                                                                             + 44))(
+                                    this->m_pMaterial,
+                                    "$powerup",
+                                    found,
+                                    1);
+            v4 = !found[0];
+            this->m_pPowerUpVar = v10;
+            result = 1;
+            if ( v4 )
+            {
+              this->m_pPowerUpVar = 0;
+              return 0;
+            }
+          }
+        }
+      }
+    }
+  }
+  return result;
+}

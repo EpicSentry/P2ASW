@@ -45,6 +45,8 @@ static ConVar cam_idealdelta( "cam_idealdelta", "4.0", FCVAR_ARCHIVE, "Controls 
 ConVar cam_idealyaw( "cam_idealyaw", "0", FCVAR_ARCHIVE );	 // thirdperson yaw
 ConVar cam_idealpitch( "cam_idealpitch", "0", FCVAR_ARCHIVE );	 // thirperson pitch
 ConVar cam_idealdist( "cam_idealdist", "150", FCVAR_ARCHIVE );	 // thirdperson distance
+ConVar cam_idealdistright( "cam_idealdistright", "0", FCVAR_ARCHIVE | FCVAR_SERVER_CAN_EXECUTE );	 // thirdperson distance right;
+ConVar cam_idealdistup( "cam_idealdistup", "0", FCVAR_ARCHIVE | FCVAR_SERVER_CAN_EXECUTE );	 // thirdperson distance up;
 static ConVar cam_collision( "cam_collision", "1", FCVAR_ARCHIVE, "When in thirdperson and cam_collision is set to 1, an attempt is made to keep the camera from passing though walls." );
 static ConVar cam_showangles( "cam_showangles", "0", FCVAR_CHEAT, "When in thirdperson, print viewangles/idealangles/cameraoffsets to the console." );
 static ConVar c_maxpitch( "c_maxpitch", "90", FCVAR_ARCHIVE );
@@ -80,6 +82,22 @@ CON_COMMAND_F( cam_command, "Tells camera to change modes", FCVAR_CHEAT )
 // ==============================
 // CAM_ToThirdPerson
 // ==============================
+void CAM_ToThirdPerson(void)
+{
+	ASSERT_LOCAL_PLAYER_RESOLVABLE();
+	input->CAM_ToThirdPerson();
+
+	// Let the local player know
+	C_BasePlayer *localPlayer = C_BasePlayer::GetLocalPlayer();
+	if ( localPlayer )
+	{
+		localPlayer->ThirdPersonSwitch( true );
+	}
+}
+
+// ==============================
+// CAM_ToThirdPerson
+// ==============================
 void Cmd_CAM_ToThirdPerson(void)
 {
 	ASSERT_LOCAL_PLAYER_RESOLVABLE();
@@ -103,6 +121,24 @@ void CAM_ToThirdPerson_MayaMode(void)
 	ASSERT_LOCAL_PLAYER_RESOLVABLE();
 	bool &rb = Is_CAM_ThirdPerson_MayaMode();
 	rb = !rb;
+}
+
+// ==============================
+// CAM_ToFirstPerson
+// ==============================
+void CAM_ToFirstPerson(void) 
+{ 
+	ASSERT_LOCAL_PLAYER_RESOLVABLE();
+	input->CAM_ToFirstPerson();
+
+	// Let the local player know
+	C_BasePlayer *localPlayer = C_BasePlayer::GetLocalPlayer();
+	if ( localPlayer )
+	{
+		localPlayer->ThirdPersonSwitch( false );
+	}
+	c_thirdpersonshoulder.SetValue( false );
+	cam_idealdist.SetValue( cam_idealdist.GetDefault() );
 }
 
 // ==============================

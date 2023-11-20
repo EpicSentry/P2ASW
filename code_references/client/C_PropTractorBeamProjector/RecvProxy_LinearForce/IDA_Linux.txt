@@ -1,0 +1,30 @@
+void __cdecl C_PropTractorBeamProjector::RecvProxy_LinearForce(const CRecvProxyData *pData, void *pStruct, void *pOut)
+{
+  float m_Float; // xmm0_4
+  bool v4; // zf
+  long double v5; // fst7
+  CGlobalVarsBase *v6; // esi
+  float curtime; // eax
+
+  m_Float = pData->m_Value._anon_0.m_Float;
+  if ( m_Float != *((float *)pStruct + 874) )
+  {
+    v4 = *((_BYTE *)pStruct + 3492) == 0;
+    *((float *)pStruct + 874) = m_Float;
+    if ( !v4 )
+    {
+      v5 = C_PropTractorBeamProjector::CalculateRotationPose((C_PropTractorBeamProjector *const)pStruct);
+      v6 = gpGlobals;
+      *((float *)pStruct + 883) = v5;
+      curtime = v6->curtime;
+      *((_DWORD *)pStruct + 885) = 1048576000;
+      *((float *)pStruct + 886) = curtime;
+      *((float *)pStruct + 884) = m_Float / 120.0;
+      *((float *)pStruct + 879) = C_PropTractorBeamProjector::CalculateArmaturePose((C_PropTractorBeamProjector *const)pStruct);
+      *((_DWORD *)pStruct + 881) = 1061158912;
+      *((_DWORD *)pStruct + 880) = _mm_cmplt_ss((__m128)0LL, (__m128)LODWORD(m_Float)).m128_u32[0] & 0x3F800000;
+      *((_DWORD *)pStruct + 882) = LODWORD(v6->curtime);
+      C_PropTractorBeamProjector::UpdateEffect((C_PropTractorBeamProjector *const)pStruct);
+    }
+  }
+}

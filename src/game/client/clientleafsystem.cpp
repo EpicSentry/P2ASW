@@ -960,6 +960,8 @@ void CClientLeafSystem::RenderWithViewModels( ClientRenderHandle_t handle, bool 
 		{
 			info.m_Flags &= ~RENDER_FLAGS_RENDER_WITH_VIEWMODELS; 
 			RemoveFromViewModelList( handle );
+			info.m_vecBloatedAbsMins.Init( FLT_MAX, FLT_MAX, FLT_MAX );
+			info.m_vecBloatedAbsMaxs.Init( -FLT_MAX, -FLT_MAX, -FLT_MAX );
 			RenderableChanged( handle );
 		}
 	}

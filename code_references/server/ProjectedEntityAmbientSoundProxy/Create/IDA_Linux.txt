@@ -1,0 +1,9 @@
+ProjectedEntityAmbientSoundProxy *__cdecl ProjectedEntityAmbientSoundProxy::Create(CBaseEntity *pAttachTo)
+{
+  ProjectedEntityAmbientSoundProxy *EntityByName; // ebx
+
+  EntityByName = (ProjectedEntityAmbientSoundProxy *)CreateEntityByName("projected_entity_ambient_sound_proxy", -1, 1);
+  if ( EntityByName )
+    ProjectedEntityAmbientSoundProxy::AttachToEntity(EntityByName, pAttachTo);
+  return EntityByName;
+}

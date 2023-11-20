@@ -22,6 +22,7 @@
 #include "materialsystem/imaterialvar.h"
 #include "materialsystem/imaterial.h"
 #include "BaseShader.h"
+#include "shaderlib/shadercombosemantics.h"
 
 #include "materialsystem/itexture.h"
 

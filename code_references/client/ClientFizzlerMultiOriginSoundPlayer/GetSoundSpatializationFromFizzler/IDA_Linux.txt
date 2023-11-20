@@ -1,0 +1,10 @@
+bool __cdecl ClientFizzlerMultiOriginSoundPlayer::GetSoundSpatializationFromFizzler(
+        const ClientFizzlerMultiOriginSoundPlayer *const this,
+        SpatializationInfo_t *const info,
+        C_TriggerPortalCleanser *pFizzler)
+{
+  if ( !pFizzler || pFizzler->m_bDisabled )
+    return 0;
+  else
+    return (*((int (__cdecl **)(C_TriggerPortalCleanser *))pFizzler->_vptr_IHandleEntity + 15))(pFizzler);
+}

@@ -1,0 +1,7 @@
+void __thiscall CTrigger_TractorBeam::OnRestore(CTrigger_TractorBeam *this)
+{
+  CBaseEntity::OnRestore(this);
+  if ( this->m_pController )
+    this->m_pController->SetEventHandler(this->m_pController, &this->IMotionEvent);
+  CBaseEntity::SetTransmitState(this, 32);
+}

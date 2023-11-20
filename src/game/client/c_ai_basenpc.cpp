@@ -19,6 +19,22 @@
 
 #define PING_MAX_TIME	2.0
 
+//
+// Global accessors for GLaDOS for lighted mouth proxy
+//
+
+CHandle<C_BaseAnimating> g_GLaDOSActor;
+
+void SetGLaDOSActor( C_BaseAnimating *pActor )
+{
+	g_GLaDOSActor = pActor;
+}
+
+C_BaseAnimating *GetGLaDOSActor( void )
+{
+	return g_GLaDOSActor;
+}
+
 IMPLEMENT_CLIENTCLASS_DT( C_AI_BaseNPC, DT_AI_BaseNPC, CAI_BaseNPC )
 	RecvPropInt( RECVINFO( m_lifeState ) ),
 	RecvPropBool( RECVINFO( m_bPerformAvoidance ) ),
@@ -145,6 +161,17 @@ void C_AI_BaseNPC::ClientThink( void )
 void C_AI_BaseNPC::OnDataChanged( DataUpdateType_t type )
 {
 	BaseClass::OnDataChanged( type );
+	
+	// Make sure we're thinking
+	if ( type == DATA_UPDATE_CREATED )
+	{
+		// If this is the GLaDOS actor, then setup a handle to it, globally
+		if ( FStrEq( STRING( GetEntityName() ), "@glados" ) || FStrEq( STRING( GetEntityName() ), "@actor_potatos" ) )
+		{
+			SetGLaDOSActor( this );
+			MouthInfo().ActivateEnvelope();
+		}
+	}
 
 	if ( ( ShouldModifyPlayerSpeed() == true ) || ( m_flTimePingEffect > gpGlobals->curtime ) )
 	{

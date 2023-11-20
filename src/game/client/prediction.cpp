@@ -877,6 +877,7 @@ void CPrediction::StartCommand( C_BasePlayer *player, CUserCmd *cmd )
 #endif
 
 	player->m_pCurrentCommand = cmd;
+	player->m_LastCmd = *cmd;
 	C_BaseEntity::SetPredictionRandomSeed( cmd );
 	C_BaseEntity::SetPredictionPlayer( player );
 #endif
@@ -1112,8 +1113,11 @@ void CPrediction::RunCommand( C_BasePlayer *player, CUserCmd *ucmd, IMoveHelper 
 	g_pGameMovement->FinishTrackPredictionErrors( player );
 
 	FinishCommand( player );
-
-	player->m_nTickBase++;
+	
+	if( !m_bEnginePaused && gpGlobals->frametime > 0 )
+	{
+		player->m_nTickBase++;
+	}
 #endif
 }
 

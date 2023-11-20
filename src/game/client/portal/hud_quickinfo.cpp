@@ -46,38 +46,42 @@ using namespace vgui;
 class CHUDQuickInfo : public CHudElement, public vgui::Panel
 {
 	DECLARE_CLASS_SIMPLE( CHUDQuickInfo, vgui::Panel );
-public:
+public:    
 	CHUDQuickInfo( const char *pElementName );
+    ~CHUDQuickInfo();
 	void Init( void );
 	void VidInit( void );
 	bool ShouldDraw( void );
 	//virtual void OnThink();
 	virtual void Paint();
 	
-	virtual void ApplySchemeSettings( IScheme *scheme );
+	virtual void ApplySchemeSettings( IScheme *scheme );	
 private:
-	
-	void	DrawWarning( int x, int y, CHudTexture *icon, float &time );
-	void	UpdateEventTime( void );
-	bool	EventTimeElapsed( void );
 
+	void 	DrawCrosshair(class Color ,float );
+    void 	DrawPortalHint(class Vector & ,bool );
+    void 	DrawPortalHints();
+	void	DrawWarning( int x, int y, CHudTexture *icon, float &time );
+    void 	UpdateEventTime();
+    bool 	EventTimeElapsed();
+		
 	float	m_flLastEventTime;
 	
 	float	m_fLastPlacedAlpha[2];
 	bool	m_bLastPlacedAlphaCountingUp[2];
-
-	CHudTexture	*m_icon_c;
 
 	CHudTexture	*m_icon_rbn;	// right bracket
 	CHudTexture	*m_icon_lbn;	// left bracket
 
 	CHudTexture	*m_icon_rb;		// right bracket, full
 	CHudTexture	*m_icon_lb;		// left bracket, full
-	CHudTexture	*m_icon_rbe;	// right bracket, empty
-	CHudTexture	*m_icon_lbe;	// left bracket, empty
-
-	CHudTexture	*m_icon_rbnone;	// right bracket
-	CHudTexture	*m_icon_lbnone;	// left bracket
+	
+    int m_nArrowTexture;
+    int m_nCursorRadius;
+    int m_nPortalIconOffsetX;
+    int m_nPortalIconOffsetY;
+	
+    float m_flPortalIconScale;
 };
 
 DECLARE_HUDELEMENT( CHUDQuickInfo );
@@ -92,6 +96,15 @@ CHUDQuickInfo::CHUDQuickInfo( const char *pElementName ) :
 
 	m_fLastPlacedAlpha[0] = m_fLastPlacedAlpha[1] = 80;
 	m_bLastPlacedAlphaCountingUp[0] = m_bLastPlacedAlphaCountingUp[1] = true;
+}
+
+CHUDQuickInfo::~CHUDQuickInfo()
+{
+	if (vgui::surface() && m_nArrowTexture != -1)
+	{
+		vgui::surface()->DestroyTextureID( m_nArrowTexture );
+		m_nArrowTexture = -1;
+	}
 }
 
 void CHUDQuickInfo::ApplySchemeSettings( IScheme *scheme )
@@ -111,29 +124,11 @@ void CHUDQuickInfo::Init( void )
 void CHUDQuickInfo::VidInit( void )
 {
 	Init();
-
-	m_icon_c = HudIcons().GetIcon( "crosshair" );
-
-	if ( IsX360() )
-	{
-		m_icon_rb = HudIcons().GetIcon( "portal_crosshair_right_valid_x360" );
-		m_icon_lb = HudIcons().GetIcon( "portal_crosshair_left_valid_x360" );
-		m_icon_rbe = HudIcons().GetIcon( "portal_crosshair_last_placed_x360" );
-		m_icon_lbe = HudIcons().GetIcon( "portal_crosshair_last_placed_x360" );
-		m_icon_rbn = HudIcons().GetIcon( "portal_crosshair_right_invalid_x360" );
-		m_icon_lbn = HudIcons().GetIcon( "portal_crosshair_left_invalid_x360" );
-	}
-	else
-	{
-		m_icon_rb = HudIcons().GetIcon( "portal_crosshair_right_valid" );
-		m_icon_lb = HudIcons().GetIcon( "portal_crosshair_left_valid" );
-		m_icon_rbe = HudIcons().GetIcon( "portal_crosshair_last_placed" );
-		m_icon_lbe = HudIcons().GetIcon( "portal_crosshair_last_placed" );
-		m_icon_rbn = HudIcons().GetIcon( "portal_crosshair_right_invalid" );
-		m_icon_lbn = HudIcons().GetIcon( "portal_crosshair_left_invalid" );
-		m_icon_rbnone = HudIcons().GetIcon( "crosshair_right" );
-		m_icon_lbnone = HudIcons().GetIcon( "crosshair_left" );
-	}
+	
+	m_icon_rb = HudIcons().GetIcon( "portal_crosshair_right_valid" );
+	m_icon_lb = HudIcons().GetIcon( "portal_crosshair_left_valid" );
+	m_icon_rbn = HudIcons().GetIcon( "portal_crosshair_right_invalid" );
+	m_icon_lbn = HudIcons().GetIcon( "portal_crosshair_left_invalid" );
 }
 
 
@@ -171,7 +166,7 @@ void CHUDQuickInfo::DrawWarning( int x, int y, CHudTexture *icon, float &time )
 //-----------------------------------------------------------------------------
 bool CHUDQuickInfo::ShouldDraw( void )
 {
-	if ( !m_icon_c || !m_icon_rb || !m_icon_rbe || !m_icon_lb || !m_icon_lbe )
+	if (!m_icon_rb || !m_icon_rbn || !m_icon_lb || !m_icon_lbn)
 		return false;
 
 	C_BasePlayer *player = C_BasePlayer::GetLocalPlayer();
@@ -194,16 +189,16 @@ void CHUDQuickInfo::Paint()
 	C_BaseCombatWeapon *pWeapon = pPortalPlayer->GetActiveWeapon();
 	if ( pWeapon == NULL )
 		return;
-
-	int		xCenter	= ( ScreenWidth() - m_icon_c->Width() ) / 2;
-	int		yCenter = ( ScreenHeight() - m_icon_c->Height() ) / 2;
+	
+	int		xCenter	= ( ScreenWidth() ) / 2;
+	int		yCenter = ( ScreenHeight() ) / 2;
 
 	Color clrNormal = GetHud().m_clrNormal;
 	clrNormal[3] = 255;
 
 	SetActive( true );
 
-	m_icon_c->DrawSelf( xCenter, yCenter, clrNormal );
+	//m_icon_c->DrawSelf( xCenter, yCenter, clrNormal );
 
 	// adjust center for the bigger crosshairs
 	xCenter	= ScreenWidth() / 2;
@@ -213,8 +208,19 @@ void CHUDQuickInfo::Paint()
 
 	bool bPortalPlacability[2];
 
+	// NOTE: This may not be accurate, but it's good enough for now.
 	if ( pPortalgun )
 	{
+		// Crosshair hides when an object is picked up in Portal 2
+		if (pPortalgun->IsHoldingObject())
+			return;
+
+		if ( pPortalgun->GetAssociatedPortal( false ) )
+			bPortalPlacability[0] = pPortalgun->GetAssociatedPortal( false )->IsActive();
+
+		if ( pPortalgun->GetAssociatedPortal( true ) )
+		bPortalPlacability[1] = pPortalgun->GetAssociatedPortal( true )->IsActive();
+
 		//bPortalPlacability[0] = pPortalgun->GetPortal1Placablity() > 0.5f;
 		//bPortalPlacability[1] = pPortalgun->GetPortal2Placablity() > 0.5f;
 	}
@@ -223,8 +229,8 @@ void CHUDQuickInfo::Paint()
 	{
 		// no quickinfo or we can't fire either portal, just draw the small versions of the crosshairs
 		clrNormal[3] = 196;
-		m_icon_lbnone->DrawSelf(xCenter - (m_icon_lbnone->Width() * 2), yCenter, clrNormal);
-		m_icon_rbnone->DrawSelf(xCenter + m_icon_rbnone->Width(), yCenter, clrNormal);
+		//m_icon_lbnone->DrawSelf(xCenter - (m_icon_lbnone->Width() * 2), yCenter, clrNormal);
+		//m_icon_rbnone->DrawSelf(xCenter + m_icon_rbnone->Width(), yCenter, clrNormal);
 		return;
 	}
 
@@ -316,14 +322,7 @@ void CHUDQuickInfo::Paint()
 		lastPlaced2Color[3] = 0.0f;
 		bPortalPlacability[1] = bPortalPlacability[0];
 	}
-
-	if ( pPortalgun->IsHoldingObject() )
-	{
-		// Change the middle to orange 
-		portal1Color = portal2Color = UTIL_Portal_Color( 0 );
-		bPortalPlacability[0] = bPortalPlacability[1] = false;
-	}
-	
+		
 	if ( !hud_quickinfo_swap.GetBool() )
 	{
 		if ( bPortalPlacability[0] )
@@ -335,10 +334,6 @@ void CHUDQuickInfo::Paint()
 			m_icon_rb->DrawSelf(xCenter + ( m_icon_rb->Width() * -0.35f ), yCenter + ( m_icon_rb->Height() * 0.17f ), portal2Color);
 		else
 			m_icon_rbn->DrawSelf(xCenter + ( m_icon_rbn->Width() * -0.35f ), yCenter + ( m_icon_rb->Height() * 0.17f ), portal2Color);
-
-		//last placed portal indicator
-		m_icon_lbe->DrawSelf( xCenter - (m_icon_lbe->Width() * 1.85f), yCenter, lastPlaced1Color );
-		m_icon_rbe->DrawSelf( xCenter + (m_icon_rbe->Width() * 0.75f), yCenter, lastPlaced2Color );
 	}
 	else
 	{
@@ -351,10 +346,6 @@ void CHUDQuickInfo::Paint()
 			m_icon_rb->DrawSelf(xCenter + ( m_icon_rb->Width() * -0.35f ), yCenter + ( m_icon_rb->Height() * 0.17f ), portal1Color);
 		else
 			m_icon_rbn->DrawSelf(xCenter + ( m_icon_rbn->Width() * -0.35f ), yCenter + ( m_icon_rb->Height() * 0.17f ), portal1Color);
-
-		//last placed portal indicator
-		m_icon_lbe->DrawSelf( xCenter - (m_icon_lbe->Width() * 1.85f), yCenter, lastPlaced2Color );
-		m_icon_rbe->DrawSelf( xCenter + (m_icon_rbe->Width() * 0.75f), yCenter, lastPlaced1Color );
 	}
 }
 

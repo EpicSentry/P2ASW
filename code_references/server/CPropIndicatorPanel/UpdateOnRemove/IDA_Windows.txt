@@ -1,0 +1,16 @@
+void __thiscall CPropIndicatorPanel::UpdateOnRemove(CPropIndicatorPanel *this)
+{
+  unsigned int m_Index; // ecx
+
+  m_Index = this->m_hIndicatorPanel.m_Index;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+  {
+    UTIL_Remove(0);
+    CBaseEntity::UpdateOnRemove(this);
+  }
+  else
+  {
+    UTIL_Remove((CBaseEntity *)g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity);
+    CBaseEntity::UpdateOnRemove(this);
+  }
+}

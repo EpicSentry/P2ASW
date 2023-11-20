@@ -1,0 +1,105 @@
+void __cdecl CBaseProjectedEntity::FindProjectedEndpoints(CBaseProjectedEntity *const this)
+{
+  bool v1; // al
+  float x; // xmm0_4
+  float v3; // xmm3_4
+  float v4; // xmm2_4
+  float v5; // xmm1_4
+  __m128 x_low; // xmm4
+  float v7; // xmm7_4
+  float v8; // xmm4_4
+  float v9; // xmm5_4
+  float z; // [esp+2Ch] [ebp-14Ch]
+  float y; // [esp+30h] [ebp-148h]
+  float v12; // [esp+34h] [ebp-144h]
+  float v13; // [esp+38h] [ebp-140h]
+  float v14; // [esp+3Ch] [ebp-13Ch]
+  trace_t tr; // [esp+4Ch] [ebp-12Ch] BYREF
+  Ray_t ray; // [esp+A0h] [ebp-D8h] BYREF
+  CTraceFilterSimpleClassnameList traceFilter; // [esp+F4h] [ebp-84h] BYREF
+  QAngle qAngles; // [esp+118h] [ebp-60h] BYREF
+  Vector vecForward; // [esp+124h] [ebp-54h] BYREF
+  Vector vecRight; // [esp+130h] [ebp-48h] BYREF
+  Vector vecUp; // [esp+13Ch] [ebp-3Ch] BYREF
+  Vector mins; // [esp+148h] [ebp-30h] BYREF
+  Vector maxs; // [esp+154h] [ebp-24h] BYREF
+
+  qAngles = (QAngle)this->m_angRotation;
+  AngleVectors(&qAngles, &vecForward, &vecRight, &vecUp);
+  (*((void (__cdecl **)(CBaseProjectedEntity *const, Vector *, Vector *))this->_vptr_IHandleEntity + 207))(
+    this,
+    &mins,
+    &maxs);
+  v1 = 1;
+  x = this->m_vecOrigin.m_Value.x;
+  ray.m_pWorldAxisTransform = 0;
+  y = this->m_vecOrigin.m_Value.y;
+  z = this->m_vecOrigin.m_Value.z;
+  v3 = (float)(vecForward.x * 25.0) + x;
+  v4 = (float)(vecForward.y * 25.0) + y;
+  v5 = (float)(25.0 * vecForward.z) + z;
+  ray.m_Delta.x = (float)((float)(vecForward.x * 4096.0) + v3) - v3;
+  ray.m_Delta.y = (float)((float)(vecForward.y * 4096.0) + v4) - v4;
+  ray.m_Delta.z = (float)((float)(4096.0 * vecForward.z) + v5) - v5;
+  x_low = (__m128)LODWORD(maxs.x);
+  if ( (float)((float)((float)(ray.m_Delta.x * ray.m_Delta.x) + (float)(ray.m_Delta.y * ray.m_Delta.y))
+             + (float)(ray.m_Delta.z * ray.m_Delta.z)) == 0.0 )
+    v1 = 0;
+  ray.m_Extents.y = (float)(maxs.y - mins.y) * 0.5;
+  ray.m_Extents.z = (float)(maxs.z - mins.z) * 0.5;
+  ray.m_Extents.x = (float)(maxs.x - mins.x) * 0.5;
+  ray.m_IsSwept = v1;
+  v7 = (float)(maxs.x + mins.x) * 0.5;
+  x_low.m128_f32[0] = (float)((float)(ray.m_Extents.x * ray.m_Extents.x) + (float)(ray.m_Extents.y * ray.m_Extents.y))
+                    + (float)(ray.m_Extents.z * ray.m_Extents.z);
+  ray.m_IsRay = _mm_unpacklo_ps(x_low, x_low).m128_f32[0] < 0.000001;
+  ray.m_Start.x = v3 + v7;
+  v8 = (float)(maxs.y + mins.y) * 0.5;
+  v9 = (float)(maxs.z + mins.z) * 0.5;
+  ray.m_StartOffset.x = -v7;
+  ray.m_StartOffset.y = -v8;
+  ray.m_StartOffset.z = -v9;
+  ray.m_Start.y = v4 + v8;
+  ray.m_Start.z = v5 + v9;
+  CTraceFilterSimpleClassnameList::CTraceFilterSimpleClassnameList(&traceFilter, this, 0);
+  UTil_ProjectedEntity_Trace_Filter(&traceFilter);
+  (*(void (__cdecl **)(IEngineTrace *, Ray_t *, int, CTraceFilterSimpleClassnameList *, trace_t *))(*(_DWORD *)enginetrace
+                                                                                                  + 20))(
+    enginetrace,
+    &ray,
+    16395,
+    &traceFilter,
+    &tr);
+  if ( r_visualizetraces.m_pParent->m_Value.m_nValue )
+    DebugDrawLine(&tr.startpos, &tr.endpos, 255, 0, 0, 1, -1.0);
+  if ( x != this->m_vecStartPoint.m_Value.x
+    || y != this->m_vecStartPoint.m_Value.y
+    || z != this->m_vecStartPoint.m_Value.z )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_vecStartPoint);
+    this->m_vecStartPoint.m_Value.x = x;
+    this->m_vecStartPoint.m_Value.y = y;
+    this->m_vecStartPoint.m_Value.z = z;
+  }
+  v14 = (float)(tr.plane.normal.x * 0.1) + tr.endpos.x;
+  v13 = (float)(tr.plane.normal.y * 0.1) + tr.endpos.y;
+  v12 = (float)(0.1 * tr.plane.normal.z) + tr.endpos.z;
+  if ( v14 != this->m_vecEndPoint.m_Value.x
+    || (float)((float)(tr.plane.normal.y * 0.1) + tr.endpos.y) != this->m_vecEndPoint.m_Value.y
+    || v12 != this->m_vecEndPoint.m_Value.z )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_vecEndPoint);
+    this->m_vecEndPoint.m_Value.x = v14;
+    this->m_vecEndPoint.m_Value.y = v13;
+    this->m_vecEndPoint.m_Value.z = v12;
+  }
+  traceFilter.m_PassClassnames.m_Size = 0;
+  traceFilter._vptr_ITraceFilter = (int (**)(...))&off_BBE2C8;
+  if ( traceFilter.m_PassClassnames.m_Memory.m_nGrowSize >= 0 )
+  {
+    if ( traceFilter.m_PassClassnames.m_Memory.m_pMemory )
+      (*(void (__cdecl **)(_DWORD, const char **))(*g_pMemAlloc + 8))(
+        g_pMemAlloc,
+        traceFilter.m_PassClassnames.m_Memory.m_pMemory);
+  }
+}

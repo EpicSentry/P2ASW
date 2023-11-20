@@ -1,0 +1,124 @@
+void __thiscall CPropIndicatorPanel::CreateIndicatorPanel(CPropIndicatorPanel *this)
+{
+  CBaseEntity *EntityByName; // eax
+  unsigned int m_Index; // eax
+  float z; // eax
+  unsigned int v5; // eax
+  CBaseEntity *m_pEntity; // ecx
+  unsigned int v7; // eax
+  unsigned int v8; // eax
+  CBaseEntity *v9; // ecx
+  unsigned int v10; // eax
+  IHandleEntity *v11; // ecx
+  unsigned int v12; // eax
+  CLabIndicatorPanel *v13; // ecx
+  unsigned int v14; // eax
+  CLabIndicatorPanel *v15; // ecx
+  unsigned int v16; // eax
+  IHandleEntity *v17; // ecx
+  char m_bIsCountdownTimer; // bl
+  _BYTE *v19; // edi
+  CBaseEdict *v20; // ecx
+  unsigned int v21; // esi
+  VMatrix tmp; // [esp+8h] [ebp-108h] BYREF
+  VMatrix mat; // [esp+48h] [ebp-C8h] BYREF
+  VMatrix rotation; // [esp+88h] [ebp-88h] BYREF
+  Vector vecRight; // [esp+C8h] [ebp-48h] BYREF
+  Vector vecUp; // [esp+D4h] [ebp-3Ch] BYREF
+  Vector absOrigin; // [esp+E0h] [ebp-30h] BYREF
+  Vector vecForward; // [esp+ECh] [ebp-24h] BYREF
+  QAngle angles; // [esp+F8h] [ebp-18h] BYREF
+  Vector vecOffset; // [esp+104h] [ebp-Ch] BYREF
+
+  EntityByName = CreateEntityByName("vgui_indicator_panel", -1, 1);
+  if ( EntityByName )
+    this->m_hIndicatorPanel.m_Index = EntityByName->GetRefEHandle(EntityByName)->m_Index;
+  else
+    this->m_hIndicatorPanel.m_Index = -1;
+  m_Index = this->m_hIndicatorPanel.m_Index;
+  if ( m_Index != -1
+    && g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber == HIWORD(m_Index)
+    && g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity )
+  {
+    if ( (this->m_iEFlags & 0x800) != 0 )
+      CBaseEntity::CalcAbsolutePosition(this);
+    z = this->m_angAbsRotation.z;
+    *(_QWORD *)&angles.x = *(_QWORD *)&this->m_angAbsRotation.x;
+    angles.z = z;
+    MatrixFromAngles(&angles, &mat);
+    vecOffset.x = 0.0;
+    vecOffset.z = 0.0;
+    vecOffset.y = FLOAT_1_0;
+    MatrixBuildRotationAboutAxis(&rotation, &vecOffset, 90.0);
+    MatrixMultiply(&mat, &rotation, &tmp);
+    MatrixBuildRotateZ(&rotation, 90.0);
+    MatrixMultiply(&tmp, &rotation, &mat);
+    MatrixAngles(&mat, &angles);
+    v5 = this->m_hIndicatorPanel.m_Index;
+    if ( v5 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v5].m_SerialNumber != HIWORD(v5) )
+      m_pEntity = 0;
+    else
+      m_pEntity = (CBaseEntity *)g_pEntityList->m_EntPtrArray[(unsigned __int16)v5].m_pEntity;
+    CBaseEntity::SetAbsAngles(m_pEntity, &angles);
+    this->GetVectors(this, &vecForward, &vecRight, &vecUp);
+    v7 = (unsigned int)this->m_iEFlags >> 11;
+    vecOffset.x = (float)((float)(vecForward.x * -1.0) + (float)(vecRight.x * 16.0)) + (float)(vecUp.x * -16.0);
+    vecOffset.y = (float)((float)(vecForward.y * -1.0) + (float)(vecRight.y * 16.0)) + (float)(vecUp.y * -16.0);
+    vecOffset.z = (float)((float)(vecForward.z * -1.0) + (float)(vecRight.z * 16.0)) + (float)(vecUp.z * -16.0);
+    if ( (v7 & 1) != 0 )
+      CBaseEntity::CalcAbsolutePosition(this);
+    v8 = this->m_hIndicatorPanel.m_Index;
+    absOrigin.x = this->m_vecAbsOrigin.x + vecOffset.x;
+    absOrigin.y = this->m_vecAbsOrigin.y + vecOffset.y;
+    absOrigin.z = this->m_vecAbsOrigin.z + vecOffset.z;
+    if ( v8 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v8].m_SerialNumber != HIWORD(v8) )
+      v9 = 0;
+    else
+      v9 = (CBaseEntity *)g_pEntityList->m_EntPtrArray[(unsigned __int16)v8].m_pEntity;
+    CBaseEntity::SetAbsOrigin(v9, &absOrigin);
+    v10 = this->m_hIndicatorPanel.m_Index;
+    if ( v10 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v10].m_SerialNumber != HIWORD(v10) )
+      v11 = 0;
+    else
+      v11 = g_pEntityList->m_EntPtrArray[(unsigned __int16)v10].m_pEntity;
+    ((void (__thiscall *)(IHandleEntity *, CPropIndicatorPanel *, int))v11->__vftable[12].GetRefEHandle)(v11, this, -1);
+    v12 = this->m_hIndicatorPanel.m_Index;
+    if ( v12 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v12].m_SerialNumber != HIWORD(v12) )
+      v13 = 0;
+    else
+      v13 = (CLabIndicatorPanel *)g_pEntityList->m_EntPtrArray[(unsigned __int16)v12].m_pEntity;
+    CLabIndicatorPanel::SetPlayerPinged(v13, -1);
+    v14 = this->m_hIndicatorPanel.m_Index;
+    if ( v14 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v14].m_SerialNumber != HIWORD(v14) )
+      v15 = 0;
+    else
+      v15 = (CLabIndicatorPanel *)g_pEntityList->m_EntPtrArray[(unsigned __int16)v14].m_pEntity;
+    CLabIndicatorPanel::SetChecked(v15, this->m_bIsChecked);
+    v16 = this->m_hIndicatorPanel.m_Index;
+    if ( v16 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v16].m_SerialNumber != HIWORD(v16) )
+      v17 = 0;
+    else
+      v17 = g_pEntityList->m_EntPtrArray[(unsigned __int16)v16].m_pEntity;
+    m_bIsCountdownTimer = this->m_bIsCountdownTimer;
+    v19 = (char *)&v17[215].__vftable + 3;
+    if ( HIBYTE(v17[215].__vftable) != m_bIsCountdownTimer )
+    {
+      if ( LOBYTE(v17[22].__vftable) )
+      {
+        LOBYTE(v17[23].__vftable) |= 1u;
+      }
+      else
+      {
+        v20 = (CBaseEdict *)v17[7].__vftable;
+        if ( v20 )
+          CBaseEdict::StateChanged(v20, 0x35Fu);
+      }
+      *v19 = m_bIsCountdownTimer;
+    }
+    v21 = this->m_hIndicatorPanel.m_Index;
+    if ( v21 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v21].m_SerialNumber != HIWORD(v21) )
+      DispatchSpawn(0, 1);
+    else
+      DispatchSpawn((CBaseEntity *)g_pEntityList->m_EntPtrArray[(unsigned __int16)v21].m_pEntity, 1);
+  }
+}

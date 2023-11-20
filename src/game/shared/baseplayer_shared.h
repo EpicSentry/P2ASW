@@ -90,6 +90,24 @@ enum PlayerPhysFlag_e
 	// overwriting phys flags in the HL2 of TF2 player classes
 };
 
+
+// useful cosines
+#define DOT_1DEGREE   0.9998476951564
+#define DOT_2DEGREE   0.9993908270191
+#define DOT_3DEGREE   0.9986295347546
+#define DOT_4DEGREE   0.9975640502598
+#define DOT_5DEGREE   0.9961946980917
+#define DOT_6DEGREE   0.9945218953683
+#define DOT_7DEGREE   0.9925461516413
+#define DOT_8DEGREE   0.9902680687416
+#define DOT_9DEGREE   0.9876883405951
+#define DOT_10DEGREE  0.9848077530122
+#define DOT_15DEGREE  0.9659258262891
+#define DOT_20DEGREE  0.9396926207859
+#define DOT_25DEGREE  0.9063077870367
+#define DOT_30DEGREE  0.866025403784
+#define DOT_45DEGREE  0.707106781187
+
 // Shared header file for players
 #if defined( CLIENT_DLL )
 #define CBasePlayer C_BasePlayer

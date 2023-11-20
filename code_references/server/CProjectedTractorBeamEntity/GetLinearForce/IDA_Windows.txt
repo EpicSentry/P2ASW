@@ -1,0 +1,26 @@
+double __thiscall CProjectedTractorBeamEntity::GetLinearForce(CProjectedTractorBeamEntity *this)
+{
+  unsigned int m_Index; // ecx
+  int v2; // eax
+  CEntInfo *v3; // edx
+  unsigned int v4; // ecx
+  int v6; // eax
+  bool v7; // zf
+  CEntInfo *v8; // eax
+
+  m_Index = this->m_hOwnerEntity.m_Value.m_Index;
+  if ( m_Index == -1 )
+    return -1.0;
+  v2 = (unsigned __int16)m_Index;
+  v3 = &g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index];
+  v4 = HIWORD(m_Index);
+  if ( v3->m_SerialNumber != v4 || !v3->m_pEntity )
+    return -1.0;
+  v6 = v2;
+  v7 = g_pEntityList->m_EntPtrArray[v6].m_SerialNumber == v4;
+  v8 = &g_pEntityList->m_EntPtrArray[v6];
+  if ( v7 )
+    return *(float *)&v8->m_pEntity[303].__vftable;
+  else
+    return MEMORY[0x4BC];
+}

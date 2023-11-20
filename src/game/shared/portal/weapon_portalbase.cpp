@@ -8,7 +8,6 @@
 #include "cbase.h"
 #include "in_buttons.h"
 #include "takedamageinfo.h"
-#include "shareddefs.h"
 #include "ammodef.h"
 #include "portal_gamerules.h"
 
@@ -27,7 +26,8 @@ extern IVModelInfo* modelinfo;
 	#include "c_portal_player.h"
 	#include "hud_crosshair.h"
 	#include "portalrender.h"
-
+	#include "vgui_int.h"
+	#include "model_types.h"
 #else
 
 	#include "portal_player.h"
@@ -80,7 +80,7 @@ END_NETWORK_TABLE()
 BEGIN_PREDICTION_DATA( CWeaponPortalBase ) 
 END_PREDICTION_DATA()
 
-LINK_ENTITY_TO_CLASS( weapon_portal_base, CWeaponPortalBase );
+LINK_ENTITY_TO_CLASS_ALIASED( weapon_portal_base, WeaponPortalBase );
 
 
 #ifdef GAME_DLL
@@ -105,7 +105,7 @@ CWeaponPortalBase::CWeaponPortalBase()
 
 bool CWeaponPortalBase::IsPredicted() const
 { 
-	return false;
+	return g_pGameRules->IsMultiplayer();
 }
 
 void CWeaponPortalBase::WeaponSound( WeaponSound_t sound_type, float soundtime /* = 0.0f */ )
@@ -148,16 +148,45 @@ void CWeaponPortalBase::OnDataChanged( DataUpdateType_t type )
 		ShutdownPredictable();
 }
 
-int CWeaponPortalBase::DrawModel( int flags, const RenderableInstance_t& instance )
+// opt out of the model fast path for now.  Since this model is "drawn" when in first person
+// and not looking through a portal and drawing is aborted in DrawModel() the fast path can
+// skip this and cause an extra copy of this entity to be visible
+IClientModelRenderable*	CWeaponPortalBase::GetClientModelRenderable()	
+{ 
+	// NOTE: This should work but doesn't.  It makes the object invisible in the portal pass
+	// I suspect the IsRenderingPortal() test isn't getting re-entered while building the list for the frame
+	// but I haven't tracked it down.  For now I'll just have weapons opt out of the fast path and render
+	// correctly at lower performance.
+#if 0
+	C_BasePlayer *pOwner = ToBasePlayer( GetOwner() );
+
+	if ( pOwner && C_BasePlayer::IsLocalPlayer( pOwner ) )
+	{
+		ACTIVE_SPLITSCREEN_PLAYER_GUARD_ENT( pOwner );
+		if  ( !g_pPortalRender->IsRenderingPortal() && !pOwner->ShouldDrawLocalPlayer() )
+			return 0;
+	}
+
+	return this; 
+#else
+	return NULL;
+#endif
+}
+
+
+int CWeaponPortalBase::DrawModel( int flags, const RenderableInstance_t &instance )
 {
 	if ( !m_bReadyToDraw )
 		return 0;
 
-	C_BasePlayer* pBasePlayer = (C_BasePlayer*)GetOwner();
-	C_Portal_Player* pPlayer = (C_Portal_Player*)GetOwner();
+	C_BasePlayer *pOwner = ToBasePlayer( GetOwner() );
 
-	if (pBasePlayer && pPlayer && (pBasePlayer == C_BasePlayer::GetLocalPlayer()) && !g_pPortalRender->IsRenderingPortal() && pPlayer->ShouldDrawLocalPlayer())
-		return 0;
+	if ( pOwner && C_BasePlayer::IsLocalPlayer( pOwner ) )
+	{
+		ACTIVE_SPLITSCREEN_PLAYER_GUARD_ENT( pOwner );
+		if ( !g_pPortalRender->IsRenderingPortal() && !pOwner->ShouldDrawLocalPlayer() && !VGui_IsSplitScreen() )
+			return 0;
+	}
 
 	//Sometimes the return value of ShouldDrawLocalPlayer() fluctuates too often to draw the correct model all the time, so this is a quick fix if it's changed too fast
 	int iOriginalIndex = GetModelIndex();
@@ -178,23 +207,9 @@ int CWeaponPortalBase::DrawModel( int flags, const RenderableInstance_t& instanc
 	return iRetVal;
 }
 
-bool CWeaponPortalBase::ShouldDraw( void )
-{
-	if ( !GetOwner() || GetOwner() != C_BasePlayer::GetLocalPlayer() )
-		return true;
-
-	if ( !IsActiveByLocalPlayer() )
-		return false;
-
-	//if ( GetOwner() && GetOwner() == C_BasePlayer::GetLocalPlayer() && materials->GetRenderTarget() == 0 )
-	//	return false;
-
-	return true;
-}
-
 bool CWeaponPortalBase::ShouldPredict()
 {
-	if ( GetOwner() && GetOwner() == C_BasePlayer::GetLocalPlayer() )
+	if ( C_BasePlayer::IsLocalPlayer( GetOwner() ) )
 		return true;
 
 	return BaseClass::ShouldPredict();
@@ -225,7 +240,7 @@ void CWeaponPortalBase::DrawCrosshair()
 	}
 
 	// Find out if this weapon's auto-aimed onto a target
-	bool bOnTarget = ( m_iState == WEAPON_IS_ONTARGET );
+	bool bOnTarget = ( m_iState == WEAPON_IS_ACTIVE ) && player->m_fOnTarget;
 
 	if ( player->GetFOV() >= 90 )
 	{ 

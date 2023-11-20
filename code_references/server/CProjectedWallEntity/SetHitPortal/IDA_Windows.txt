@@ -1,0 +1,34 @@
+void __thiscall CProjectedWallEntity::SetHitPortal(CProjectedWallEntity *this, CPortal_Base2D *pPortal)
+{
+  CProjectedWallEntity_vtbl *v3; // eax
+  float v4; // xmm0_4
+  edict_t *m_pPev; // ecx
+
+  v3 = this->CPaintableEntity<CBaseProjectedEntity>::CBaseProjectedEntity::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+  if ( pPortal )
+  {
+    if ( !((unsigned __int8 (__stdcall *)(CPortal_Base2D *))v3->DidRedirectionPortalMove)(pPortal) )
+      goto LABEL_11;
+  }
+  else if ( !((int (*)(void))v3->GetHitPortal)() )
+  {
+    goto LABEL_11;
+  }
+  v4 = gpGlobals->curtime + 0.5;
+  if ( this->m_flParticleUpdateTime.m_Value != v4 )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x400u);
+    }
+    this->m_flParticleUpdateTime.m_Value = v4;
+  }
+LABEL_11:
+  CBaseProjectedEntity::SetHitPortal(this, pPortal);
+}

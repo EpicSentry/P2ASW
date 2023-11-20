@@ -1,0 +1,7 @@
+void __cdecl CProjectedWallEntity::GetProjectionExtents(
+        CProjectedWallEntity *const this,
+        Vector *const outMins,
+        Vector *const outMaxs)
+{
+  CProjectedWallEntity::GetExtents(this, outMins, outMaxs, 0.5);
+}

@@ -7,7 +7,9 @@
 #include "cbase.h"
 
 #include "c_paintblob_render.h"
-//#include "blobulator/iblob_renderer.h"
+#ifdef USE_BLOBULATOR
+#include "blobulator/iblob_renderer.h"
+#endif
 
 #include "view.h"
 #include "viewrender.h"
@@ -26,7 +28,7 @@ ConVar r_paintblob_blr_render_radius( "r_paintblob_blr_render_radius", "1.3", FC
 ConVar r_paintblob_blr_cutoff_radius( "r_paintblob_blr_cutoff_radius", "5.5", FCVAR_NONE, "Set cutoff radius (how far field extends from each particle)" );
 
 // No Blob rendering :(
-#if 0
+#if defined ( USE_BLOBULATOR )
 namespace NPaintRenderer
 {
 

@@ -1,0 +1,4 @@
+void __thiscall CBaseProjectedEntity::OnProjected(CBaseProjectedEntity *this)
+{
+  CBaseEntity::AddEffects(this, 8);
+}

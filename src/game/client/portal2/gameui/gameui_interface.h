@@ -71,7 +71,7 @@ public:
 
  	virtual void SetProgressOnStart();
  
-#if defined( _GAMECONSOLE ) && defined( _DEMO )
+#if defined( _X360 ) && defined( _DEMO )
 	virtual void OnDemoTimeout();
 #endif
 
@@ -86,12 +86,6 @@ public:
  	void ShowLoadingBackgroundDialog();
 	void HideLoadingBackgroundDialog();
 	bool HasLoadingBackgroundDialog();
-
-	virtual bool LoadingProgressWantsIsolatedRender( bool bContextValid );
-
-	virtual bool IsPlayingFullScreenVideo();
-
-	virtual bool IsTransitionEffectEnabled();
 
 private:
 	void SendConnectedToGameMessage();

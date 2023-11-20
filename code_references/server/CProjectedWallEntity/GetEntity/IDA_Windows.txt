@@ -1,0 +1,4 @@
+CProjectedWallEntity *__thiscall CProjectedWallEntity::GetEntity(CProjectedWallEntity *this)
+{
+  return (CProjectedWallEntity *)((char *)this - 964);
+}

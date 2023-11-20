@@ -1,0 +1,18 @@
+class FizzlerMultiOriginSoundPlayer : public CBaseEntity
+{
+	DECLARE_CLASS( FizzlerMultiOriginSoundPlayer, CBaseEntity );
+	DECLARE_DATADESC();
+public:
+	DECLARE_SERVERCLASS();
+    
+	FizzlerMultiOriginSoundPlayer();
+    ~FizzlerMultiOriginSoundPlayer();
+    void Spawn();
+    
+	static FizzlerMultiOriginSoundPlayer * Create(class IRecipientFilter & ,char * );
+    int UpdateTransmitState();
+
+private:
+    CSoundPatch *m_pSound;
+    void RemoveThink();	
+};

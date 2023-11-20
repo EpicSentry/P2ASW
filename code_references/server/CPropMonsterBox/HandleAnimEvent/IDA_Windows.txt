@@ -1,0 +1,134 @@
+// bad sp value at call has been detected, the output may be wrong!
+void __thiscall CPropMonsterBox::HandleAnimEvent(CPropMonsterBox *this, animevent_t *pEvent)
+{
+  int event_lowword; // ecx
+  IPhysicsObject *m_pPhysicsObject; // edi
+  unsigned int v5; // ecx
+  float v6; // xmm0_4
+  float v7; // xmm1_4
+  int m_iEFlags; // edx
+  float v9; // xmm2_4
+  float v10; // xmm0_4
+  IUniformRandomStream *v11; // ecx
+  IUniformRandomStream *v12; // ecx
+  IUniformRandomStream *v13; // ecx
+  float m_fValue; // xmm3_4
+  float v15; // xmm0_4
+  float v16; // xmm1_4
+  float v17; // xmm2_4
+  float m_flPushStrength; // xmm3_4
+  CGameTrace tr; // [esp+1Ch] [ebp-A0h] BYREF
+  Vector angImpulse; // [esp+70h] [ebp-4Ch] BYREF
+  Vector vecForward; // [esp+7Ch] [ebp-40h] BYREF
+  Vector vecUp; // [esp+88h] [ebp-34h] BYREF
+  float v23; // [esp+94h] [ebp-28h]
+  Vector vecAbsEnd; // [esp+98h] [ebp-24h] BYREF
+  float v25; // [esp+A4h] [ebp-18h]
+  float v26; // [esp+A8h] [ebp-14h]
+  float v27; // [esp+ACh] [ebp-10h]
+  Vector vecVelocity; // [esp+B0h] [ebp-Ch] BYREF
+  int savedregs; // [esp+BCh] [ebp+0h]
+  float pEventa; // [esp+C4h] [ebp+8h]
+
+  if ( (pEvent->type & 0x400) != 0 )
+    event_lowword = pEvent->_event_lowword;
+  else
+    event_lowword = *(_DWORD *)&pEvent->_event_highword;
+  if ( event_lowword != 1100 || this->m_bHeld )
+  {
+    CBaseAnimating::HandleAnimEvent(this, pEvent);
+  }
+  else
+  {
+    m_pPhysicsObject = this->m_pPhysicsObject;
+    if ( m_pPhysicsObject )
+    {
+      this->GetVectors(this, &vecForward, 0, &vecUp);
+      if ( vecUp.z >= 0.1 )
+      {
+        v5 = (unsigned int)this->m_iEFlags >> 11;
+        v6 = vecUp.x * 32.0;
+        v7 = vecUp.y * 32.0;
+        v25 = vecUp.x * 32.0;
+        v26 = vecUp.y * 32.0;
+        v27 = vecUp.z * 32.0;
+        if ( (v5 & 1) != 0 )
+        {
+          CBaseEntity::CalcAbsolutePosition(this);
+          v6 = v25;
+          v7 = v26;
+        }
+        m_iEFlags = this->m_iEFlags;
+        v9 = this->m_vecAbsOrigin.x - v6;
+        vecAbsEnd.y = this->m_vecAbsOrigin.y - v7;
+        v10 = this->m_vecAbsOrigin.z - v27;
+        vecAbsEnd.x = v9;
+        vecAbsEnd.z = v10;
+        if ( (m_iEFlags & 0x800) != 0 )
+          CBaseEntity::CalcAbsolutePosition(this);
+        UTIL_TraceLine(&this->m_vecAbsOrigin, &vecAbsEnd, 0x200400Bu, this, 0, &tr);
+        if ( tr.fraction != 1.0 )
+        {
+          RandomAngularImpulse(&angImpulse, -0.5, 0.5);
+          pEventa = _RandomFloat(v11, -0.2, 0.2);
+          v23 = _RandomFloat(v12, -0.2, 0.2);
+          vecAbsEnd.z = _RandomFloat(v13, 0.69999999, 1.0);
+          vecVelocity.x = vecForward.x + pEventa;
+          vecVelocity.y = vecForward.y + v23;
+          vecVelocity.z = vecForward.z + vecAbsEnd.z;
+          m_fValue = sv_monster_turret_velocity.m_pParent->m_Value.m_fValue;
+          v15 = (float)(vecForward.x + pEventa) * m_fValue;
+          v16 = (float)(vecForward.y + v23) * m_fValue;
+          v17 = (float)(vecForward.z + vecAbsEnd.z) * m_fValue;
+          m_flPushStrength = this->m_flPushStrength;
+          vecVelocity.x = v15 * m_flPushStrength;
+          vecVelocity.y = v16 * m_flPushStrength;
+          vecVelocity.z = v17 * m_flPushStrength;
+          CBaseEntity::SetGroundEntity(this, 0);
+          ((void (__thiscall *)(IPhysicsObject *, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, int, _DWORD, _DWORD, const char *, _DWORD, int, _DWORD, CBaseEntity *, int, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, float, _DWORD, _DWORD, _DWORD, float, float, float, _DWORD, _DWORD, _DWORD, int))m_pPhysicsObject->Wake)(
+            m_pPhysicsObject,
+            LODWORD(tr.endpos.y),
+            LODWORD(tr.endpos.z),
+            LODWORD(tr.plane.normal.x),
+            LODWORD(tr.plane.normal.y),
+            LODWORD(tr.plane.normal.z),
+            LODWORD(tr.plane.dist),
+            *(_DWORD *)&tr.plane.type,
+            LODWORD(tr.fraction),
+            tr.contents,
+            *(_DWORD *)&tr.dispFlags,
+            LODWORD(tr.fractionleftsolid),
+            tr.surface.name,
+            *(_DWORD *)&tr.surface.surfaceProps,
+            tr.hitgroup,
+            *(_DWORD *)&tr.physicsbone,
+            tr.m_pEnt,
+            tr.hitbox,
+            LODWORD(angImpulse.x),
+            LODWORD(angImpulse.y),
+            LODWORD(angImpulse.z),
+            LODWORD(vecForward.x),
+            LODWORD(vecForward.y),
+            LODWORD(vecForward.z),
+            LODWORD(vecUp.x),
+            LODWORD(vecUp.y),
+            LODWORD(vecUp.z),
+            COERCE_FLOAT(LODWORD(v23)),
+            LODWORD(vecAbsEnd.x),
+            LODWORD(vecAbsEnd.y),
+            LODWORD(vecAbsEnd.z),
+            COERCE_FLOAT(LODWORD(v25)),
+            COERCE_FLOAT(LODWORD(v26)),
+            COERCE_FLOAT(LODWORD(v27)),
+            LODWORD(vecVelocity.x),
+            LODWORD(vecVelocity.y),
+            LODWORD(vecVelocity.z),
+            savedregs);
+          m_pPhysicsObject->SetVelocityInstantaneous(m_pPhysicsObject, &vec3_origin, &angImpulse);
+          m_pPhysicsObject->ApplyForceCenter(m_pPhysicsObject, &vecVelocity);
+          CBaseEntity::ApplyAbsVelocityImpulse(this, &vecVelocity);
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,35 @@
+void __thiscall CLabIndicatorPanel::SetPlayerPinged(CLabIndicatorPanel *this, int iPlayerPinged)
+{
+  edict_t *m_pPev; // ecx
+  edict_t *v4; // ecx
+
+  if ( this->m_iPlayerPinged.m_Value != iPlayerPinged )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x364u);
+    }
+    this->m_iPlayerPinged.m_Value = iPlayerPinged;
+  }
+  if ( this->m_bIsCountdownTimer.m_Value )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+      this->m_bIsCountdownTimer.m_Value = 0;
+    }
+    else
+    {
+      v4 = this->m_Network.m_pPev;
+      if ( v4 )
+        CBaseEdict::StateChanged(v4, 0x35Fu);
+      this->m_bIsCountdownTimer.m_Value = 0;
+    }
+  }
+}

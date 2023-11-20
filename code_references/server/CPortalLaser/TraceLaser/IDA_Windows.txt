@@ -1,0 +1,326 @@
+// local variable allocation has failed, the output may be wrong!
+CBaseEntity *__userpurge CPortalLaser::TraceLaser@<eax>(
+        CPortalLaser *this@<ecx>,
+        int a2@<ebp>,
+        bool bIsFirstTrace,
+        const Vector *vecStart,
+        const Vector *vecDirection,
+        float *flTotalBeamLength,
+        CGameTrace *tr,
+        CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > *infoList,
+        Vector *pVecAutoAimOffset)
+{
+  float z; // edx
+  unsigned int m_Index; // eax
+  IHandleEntity *m_pEntity; // eax
+  bool v12; // al
+  bool IsActivedAndLinked; // al
+  __int128 v14; // xmm1
+  float v15; // xmm0_4
+  bool v16; // zf
+  unsigned int v17; // eax
+  __int128 v18; // xmm0
+  int v19; // eax
+  float x; // edi
+  Vector *v21; // esi
+  float *v22; // eax
+  float v23; // xmm1_4
+  float v24; // xmm2_4
+  __int128 v25; // xmm1
+  float v26; // xmm0_4
+  float *v27; // eax
+  float v28; // xmm1_4
+  float v29; // xmm2_4
+  unsigned int v30; // eax
+  float v31; // esi
+  const Vector *v32; // eax
+  float v33; // edx
+  int v34; // edi
+  float y; // edi
+  float v36; // eax
+  QAngle *v37; // edi
+  int v38; // esi
+  unsigned int v39; // eax
+  IHandleEntity *v40; // ecx
+  IHandleEntity *m_pPassEnt; // eax
+  int v43; // [esp+24h] [ebp-15Ch] BYREF
+  Ray_t rayTransformed_4; // [esp+34h] [ebp-14Ch] OVERLAPPED
+  Vector v45; // [esp+8Ch] [ebp-F4h] BYREF
+  Vector v46; // [esp+98h] [ebp-E8h] BYREF
+  Vector vStrike; // [esp+A4h] [ebp-DCh] BYREF
+  Ray_t ray; // [esp+B0h] [ebp-D0h] BYREF
+  CTraceFilterSimpleClassnameList traceFilter; // [esp+100h] [ebp-80h] BYREF
+  Vector vStart; // [esp+124h] [ebp-5Ch] BYREF
+  Vector vPointOnLine; // [esp+130h] [ebp-50h] BYREF
+  Vector vDir; // [esp+13Ch] [ebp-44h] BYREF
+  _BYTE portalList[28]; // [esp+148h] [ebp-38h] OVERLAPPED BYREF
+  Vector vAutoAimOffset; // [esp+164h] [ebp-1Ch] BYREF
+  CPortal_Base2D *pFirstPortal; // [esp+170h] [ebp-10h]
+  int v56; // [esp+174h] [ebp-Ch] BYREF
+  CBaseEntity *pHitEntity; // [esp+178h] [ebp-8h]
+  CBaseEntity *retaddr; // [esp+180h] [ebp+0h]
+
+  v56 = a2;
+  pHitEntity = retaddr;
+  *flTotalBeamLength = 0.0;
+  z = vecStart->z;
+  *(_QWORD *)&traceFilter.m_PassClassnames.m_Memory.m_nGrowSize = *(_QWORD *)&vecStart->x;
+  vPointOnLine.z = vecDirection->z;
+  m_Index = this->m_hReflector.m_Value.m_Index;
+  LODWORD(vAutoAimOffset.y) = this;
+  *(float *)&traceFilter.m_PassClassnames.m_pElements = z;
+  *(_QWORD *)&vPointOnLine.x = *(_QWORD *)&vecDirection->x;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+    m_pEntity = 0;
+  else
+    m_pEntity = g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+  CTraceFilterSimpleClassnameList::CTraceFilterSimpleClassnameList(
+    (CTraceFilterSimpleClassnameList *)&ray.m_IsRay,
+    m_pEntity,
+    0);
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore(
+    (CTraceFilterSimpleClassnameList *)&ray.m_IsRay,
+    "projected_wall_entity");
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore((CTraceFilterSimpleClassnameList *)&ray.m_IsRay, "player");
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore(
+    (CTraceFilterSimpleClassnameList *)&ray.m_IsRay,
+    "point_laser_target");
+  v12 = 0;
+  memset(&vDir, 0, sizeof(vDir));
+  *(_DWORD *)portalList = 0;
+  *(_DWORD *)&portalList[4] = 0;
+  vAutoAimOffset.z = 0.0;
+  HIBYTE(pFirstPortal) = 1;
+LABEL_6:
+  BYTE2(pFirstPortal) = v12;
+  while ( 1 )
+  {
+    if ( !HIWORD(pFirstPortal) )
+    {
+      if ( CPortalLaser::ShouldAutoAim((CPortalLaser *)LODWORD(vAutoAimOffset.y), tr->m_pEnt) )
+      {
+        if ( CPhysicsShadowClone::IsShadowClone(tr->m_pEnt) )
+        {
+          v30 = CPhysicsShadowClone::GetClonedEntity(
+                  (CPhysicsShadowClone *)tr->m_pEnt,
+                  (CHandle<CBaseEntity> *)&portalList[8])->m_Index;
+          if ( v30 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v30].m_SerialNumber != HIWORD(v30) )
+            vAutoAimOffset.z = 0.0;
+          else
+            LODWORD(vAutoAimOffset.z) = g_pEntityList->m_EntPtrArray[(unsigned __int16)v30].m_pEntity;
+        }
+        else
+        {
+          LODWORD(vAutoAimOffset.z) = tr->m_pEnt;
+        }
+        if ( pVecAutoAimOffset )
+        {
+          v31 = vAutoAimOffset.z;
+          v32 = (const Vector *)(*(int (__thiscall **)(_DWORD))(*(_DWORD *)LODWORD(vAutoAimOffset.z) + 596))(LODWORD(vAutoAimOffset.z));
+          CalcClosestPointOnLine(v32, &tr->startpos, &tr->endpos, (Vector *)&portalList[16], 0);
+          v27 = (float *)(*(int (__thiscall **)(float))(*(_DWORD *)LODWORD(v31) + 596))(COERCE_FLOAT(LODWORD(v31)));
+          goto LABEL_32;
+        }
+      }
+      goto LABEL_42;
+    }
+    UTIL_ClearTrace(tr);
+    ray.m_Start.z = (float)(*(float *)&traceFilter.m_PassClassnames.m_Size + (float)(vPointOnLine.y * 56755.84))
+                  - *(float *)&traceFilter.m_PassClassnames.m_Size;
+    ray.m_Start.y = (float)(*(float *)&traceFilter.m_PassClassnames.m_Memory.m_nGrowSize
+                          + (float)(vPointOnLine.x * 56755.84))
+                  - *(float *)&traceFilter.m_PassClassnames.m_Memory.m_nGrowSize;
+    ray.m_Start.w = (float)(*(float *)&traceFilter.m_PassClassnames.m_pElements + (float)(vPointOnLine.z * 56755.84))
+                  - *(float *)&traceFilter.m_PassClassnames.m_pElements;
+    BYTE1(ray.m_Extents.z) = (float)((float)((float)(ray.m_Start.z * ray.m_Start.z)
+                                           + (float)(ray.m_Start.y * ray.m_Start.y))
+                                   + (float)(ray.m_Start.w * ray.m_Start.w)) != 0.0;
+    memset(&ray.m_StartOffset.y, 0, 12);
+    ray.m_Extents.y = 0.0;
+    LOBYTE(ray.m_Extents.z) = 1;
+    memset(&ray.m_Delta.y, 0, 12);
+    vStrike = *(Vector *)&traceFilter.m_PassClassnames.m_Memory.m_nGrowSize;
+    enginetrace->TraceRay(enginetrace, (const Ray_t *)&vStrike, 1174421505u, (ITraceFilter *)&ray.m_IsRay, tr);
+    if ( r_visualizetraces.m_pParent->m_Value.m_nValue )
+      DebugDrawLine(&tr->startpos, &tr->endpos, 255, 0, 0, 1, -1.0);
+    CPortalLaser::UpdateSoundPosition((CPortalLaser *)LODWORD(vAutoAimOffset.y), &tr->startpos, &tr->endpos);
+    vAutoAimOffset.x = 0.0;
+    if ( !UTIL_DidTraceTouchPortals((const Ray_t *)&vStrike, tr, (CPortal_Base2D **)&vAutoAimOffset, 0)
+      || !LODWORD(vAutoAimOffset.x)
+      || (IsActivedAndLinked = CPortal_Base2D::IsActivedAndLinked((CPortal_Base2D *)LODWORD(vAutoAimOffset.x)),
+          HIBYTE(pFirstPortal) = 1,
+          !IsActivedAndLinked) )
+    {
+      HIBYTE(pFirstPortal) = 0;
+    }
+    BYTE2(pFirstPortal) = 0;
+    if ( !HIBYTE(pFirstPortal) )
+    {
+      LODWORD(vAutoAimOffset.z) = CPortalLaser::GetEntitiesAlongLaser(
+                                    (CPortalLaser *)LODWORD(vAutoAimOffset.y),
+                                    COERCE_FLOAT(&v56),
+                                    &tr->startpos,
+                                    &tr->endpos,
+                                    &v45,
+                                    infoList,
+                                    bIsFirstTrace);
+      if ( !LODWORD(vAutoAimOffset.z) )
+      {
+        v18 = 0i64;
+        *(float *)&v18 = fsqrt(
+                           (float)((float)((float)(tr->endpos.y - tr->startpos.y)
+                                         * (float)(tr->endpos.y - tr->startpos.y))
+                                 + (float)((float)(tr->endpos.z - tr->startpos.z)
+                                         * (float)(tr->endpos.z - tr->startpos.z)))
+                         + (float)((float)(tr->endpos.x - tr->startpos.x) * (float)(tr->endpos.x - tr->startpos.x)));
+        *(_OWORD *)&portalList[12] = v18;
+        *flTotalBeamLength = *flTotalBeamLength + *(float *)&v18;
+        v12 = UTIL_Paint_Reflect(
+                tr,
+                (Vector *)&traceFilter.m_PassClassnames.m_Memory.m_nGrowSize,
+                &vPointOnLine,
+                REFLECT_POWER);
+        goto LABEL_6;
+      }
+      CalcClosestPointOnLineSegment(&v45, &tr->startpos, &tr->endpos, (Vector *)&portalList[16], 0);
+      v25 = 0i64;
+      v26 = *flTotalBeamLength;
+      *(float *)&v25 = fsqrt(
+                         (float)((float)((float)(*(float *)&portalList[16] - tr->startpos.x)
+                                       * (float)(*(float *)&portalList[16] - tr->startpos.x))
+                               + (float)((float)(*(float *)&portalList[20] - tr->startpos.y)
+                                       * (float)(*(float *)&portalList[20] - tr->startpos.y)))
+                       + (float)((float)(*(float *)&portalList[24] - tr->startpos.z)
+                               * (float)(*(float *)&portalList[24] - tr->startpos.z)));
+      *(_OWORD *)&rayTransformed_4.m_pWorldAxisTransform = v25;
+      *flTotalBeamLength = v26 + *(float *)&v25;
+      if ( pVecAutoAimOffset )
+      {
+        v27 = (float *)(*(int (__thiscall **)(_DWORD))(*(_DWORD *)LODWORD(vAutoAimOffset.z) + 596))(LODWORD(vAutoAimOffset.z));
+LABEL_32:
+        v28 = v27[1] - *(float *)&portalList[20];
+        v29 = v27[2] - *(float *)&portalList[24];
+        pVecAutoAimOffset->x = *v27 - *(float *)&portalList[16];
+        pVecAutoAimOffset->y = v28;
+        pVecAutoAimOffset->z = v29;
+        v21 = pVecAutoAimOffset;
+        goto LABEL_43;
+      }
+LABEL_42:
+      v21 = pVecAutoAimOffset;
+      goto LABEL_43;
+    }
+    LODWORD(vAutoAimOffset.z) = CPortalLaser::GetEntitiesAlongLaser(
+                                  (CPortalLaser *)LODWORD(vAutoAimOffset.y),
+                                  COERCE_FLOAT(&v56),
+                                  &tr->startpos,
+                                  &tr->endpos,
+                                  &v46,
+                                  infoList,
+                                  bIsFirstTrace);
+    CalcClosestPointOnLineSegment(&v46, &tr->startpos, &tr->endpos, &vStart, 0);
+    v14 = 0i64;
+    v15 = *flTotalBeamLength;
+    *(float *)&v14 = fsqrt(
+                       (float)((float)((float)(vStart.x - tr->startpos.x) * (float)(vStart.x - tr->startpos.x))
+                             + (float)((float)(vStart.y - tr->startpos.y) * (float)(vStart.y - tr->startpos.y)))
+                     + (float)((float)(vStart.z - tr->startpos.z) * (float)(vStart.z - tr->startpos.z)));
+    v16 = LODWORD(vAutoAimOffset.z) == 0;
+    *(_OWORD *)&portalList[12] = v14;
+    *flTotalBeamLength = v15 + *(float *)&v14;
+    if ( !v16 )
+      break;
+    rayTransformed_4.m_Extents.x = 0.0;
+    UTIL_Portal_RayTransform(
+      (const VMatrix *)(LODWORD(vAutoAimOffset.x) + 1220),
+      (const Ray_t *)&vStrike,
+      (Ray_t *)&v43);
+    vPointOnLine = rayTransformed_4.m_Start.Vector;
+    VectorNormalize(&vPointOnLine);
+    UTIL_Portal_PointTransform(
+      (const VMatrix *)(LODWORD(vAutoAimOffset.x) + 1220),
+      &tr->endpos,
+      (Vector *)&traceFilter.m_PassClassnames.m_Memory.m_nGrowSize);
+    v17 = *(_DWORD *)(LODWORD(vAutoAimOffset.x) + 1216);
+    if ( v17 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v17].m_SerialNumber != HIWORD(v17) )
+      *(_DWORD *)&portalList[8] = 0;
+    else
+      *(_DWORD *)&portalList[8] = g_pEntityList->m_EntPtrArray[(unsigned __int16)v17].m_pEntity;
+    v19 = *(_DWORD *)portalList;
+    if ( *(_DWORD *)portalList + 1 > SLODWORD(vDir.y) )
+    {
+      CUtlMemory<CNavLadder *,int>::Grow(
+        (CUtlMemory<vgui::TreeNode *,int> *)&vDir,
+        *(_DWORD *)portalList - LODWORD(vDir.y) + 1);
+      v19 = *(_DWORD *)portalList;
+    }
+    x = vDir.x;
+    *(_DWORD *)portalList = v19 + 1;
+    *(float *)&portalList[4] = vDir.x;
+    if ( v19 > 0 )
+      _V_memmove((void *)(LODWORD(vDir.x) + 4), (const void *)LODWORD(vDir.x), 4 * v19);
+    if ( x != 0.0 )
+      *(_DWORD *)LODWORD(vDir.x) = *(_DWORD *)&portalList[8];
+  }
+  v21 = pVecAutoAimOffset;
+  if ( pVecAutoAimOffset )
+  {
+    v22 = (float *)(*(int (__thiscall **)(_DWORD))(*(_DWORD *)LODWORD(vAutoAimOffset.z) + 596))(LODWORD(vAutoAimOffset.z));
+    v23 = v22[1] - vStart.y;
+    v24 = v22[2] - vStart.z;
+    pVecAutoAimOffset->x = *v22 - vStart.x;
+    pVecAutoAimOffset->y = v23;
+    pVecAutoAimOffset->z = v24;
+  }
+LABEL_43:
+  if ( CPortalLaser::ShouldAutoAim((CPortalLaser *)LODWORD(vAutoAimOffset.y), (CBaseEntity *)LODWORD(vAutoAimOffset.z))
+    && v21 )
+  {
+    v33 = v21->z;
+    v34 = 0;
+    *(_QWORD *)&portalList[16] = *(_QWORD *)&v21->x;
+    for ( *(float *)&portalList[24] = v33; v34 < *(int *)portalList; ++v34 )
+      UTIL_Portal_VectorTransform(
+        (const VMatrix *)(*(_DWORD *)(LODWORD(vDir.x) + 4 * v34) + 1220),
+        (const Vector *)&portalList[16],
+        (Vector *)&portalList[16]);
+    v21->x = *(float *)&portalList[16];
+    v21->y = *(float *)&portalList[20];
+    v21->z = *(float *)&portalList[24];
+  }
+  y = vAutoAimOffset.y;
+  if ( (*(_DWORD *)(LODWORD(vAutoAimOffset.y) + 200) & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition((CBaseEntity *)LODWORD(vAutoAimOffset.y));
+  v36 = vAutoAimOffset.y;
+  v37 = (QAngle *)(LODWORD(y) + 1940);
+  v38 = *(_DWORD *)portalList - 1;
+  v37->x = *(float *)(LODWORD(vAutoAimOffset.y) + 472);
+  v37->y = *(float *)(LODWORD(v36) + 476);
+  for ( v37->z = *(float *)(LODWORD(v36) + 480); v38 >= 0; --v38 )
+  {
+    v39 = *(_DWORD *)(*(_DWORD *)(LODWORD(vDir.x) + 4 * v38) + 1216);
+    if ( v39 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v39].m_SerialNumber != HIWORD(v39) )
+      v40 = 0;
+    else
+      v40 = g_pEntityList->m_EntPtrArray[(unsigned __int16)v39].m_pEntity;
+    UTIL_Portal_AngleTransform((const VMatrix *)&v40[305], v37, v37);
+  }
+  if ( vDir.z >= 0.0 && LODWORD(vDir.x) )
+    _g_pMemAlloc->Free(_g_pMemAlloc, (void *)LODWORD(vDir.x));
+  m_pPassEnt = (IHandleEntity *)traceFilter.m_pPassEnt;
+  traceFilter.m_PassClassnames.m_Memory.m_pMemory = 0;
+  if ( (int)traceFilter.m_pExtraShouldHitCheckFunction >= 0 )
+  {
+    if ( traceFilter.m_pPassEnt )
+    {
+      _g_pMemAlloc->Free(_g_pMemAlloc, (void *)traceFilter.m_pPassEnt);
+      m_pPassEnt = 0;
+      traceFilter.m_pPassEnt = 0;
+    }
+    traceFilter.m_collisionGroup = 0;
+  }
+  traceFilter.m_PassClassnames.m_Memory.m_nAllocationCount = (int)m_pPassEnt;
+  if ( (int)traceFilter.m_pExtraShouldHitCheckFunction >= 0 && m_pPassEnt )
+    _g_pMemAlloc->Free(_g_pMemAlloc, m_pPassEnt);
+  return (CBaseEntity *)LODWORD(vAutoAimOffset.z);
+}

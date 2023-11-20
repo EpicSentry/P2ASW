@@ -1,0 +1,108 @@
+void __cdecl CBasePaintBlob::SetTractorBeam(CBasePaintBlob *const this, CTrigger_TractorBeam *pBeam)
+{
+  int m_Size; // edi
+  int v3; // eax
+  unsigned int v4; // edx
+  char *v5; // ecx
+  int v6; // edi
+  float v7; // xmm2_4
+  float v8; // xmm0_4
+  float v9; // xmm1_4
+  __m128 v10; // xmm0
+  __m128 v11; // xmm4
+  float v12; // xmm1_4
+  float v13; // xmm0_4
+  float v14; // xmm0_4
+  BeamInfo_t *src; // [esp+28h] [ebp-30h]
+  Vector vClosest; // [esp+34h] [ebp-24h] BYREF
+
+  if ( pBeam )
+  {
+    this->m_MoveState = PAINT_BLOB_TRACTOR_BEAM_MOVE;
+    src = (BeamInfo_t *)&this->m_beamHistory;
+    if ( EntityBeamHistory_t::IsDifferentBeam(&this->m_beamHistory, pBeam) )
+    {
+      m_Size = this->m_beamHistory.m_beams.m_Size;
+      if ( m_Size <= 0 )
+      {
+        this->m_beamHistory.m_beams.m_Size = m_Size + 1;
+        this->m_beamHistory.m_beams.m_pElements = src;
+      }
+      else
+      {
+        v3 = 0;
+        while ( 1 )
+        {
+          v4 = *(_DWORD *)&this->m_beamHistory.m_beams.m_Memory.m_Memory[8 * v3];
+          if ( v4 != -1 )
+          {
+            v5 = (char *)g_pEntityList + 24 * (unsigned __int16)v4;
+            if ( *((_DWORD *)v5 + 2) == HIWORD(v4) && pBeam == *((CTrigger_TractorBeam **)v5 + 1) )
+              break;
+          }
+          if ( ++v3 == this->m_beamHistory.m_beams.m_Size )
+          {
+            v6 = this->m_beamHistory.m_beams.m_Size;
+            goto LABEL_10;
+          }
+        }
+        CUtlVector<BeamInfo_t,CUtlMemoryFixed<BeamInfo_t,6u,0>>::Remove(
+          (CUtlVector<BeamInfo_t,CUtlMemoryFixed<BeamInfo_t,6u,0> > *const)src,
+          v3);
+        v6 = this->m_beamHistory.m_beams.m_Size;
+LABEL_10:
+        if ( v6 == 6 )
+        {
+          CUtlVector<BeamInfo_t,CUtlMemoryFixed<BeamInfo_t,6u,0>>::Remove(
+            (CUtlVector<BeamInfo_t,CUtlMemoryFixed<BeamInfo_t,6u,0> > *const)src,
+            5);
+          v6 = this->m_beamHistory.m_beams.m_Size;
+        }
+        this->m_beamHistory.m_beams.m_Size = v6 + 1;
+        this->m_beamHistory.m_beams.m_pElements = src;
+        if ( v6 > 0 )
+          _V_memmove(&this->m_beamHistory.m_beams.m_Memory.m_Memory[8], src, 8 * v6);
+      }
+      *(_DWORD *)this->m_beamHistory.m_beams.m_Memory.m_Memory = -1;
+      *(_DWORD *)&this->m_beamHistory.m_beams.m_Memory.m_Memory[4] = 0;
+      *(_DWORD *)this->m_beamHistory.m_beams.m_Memory.m_Memory = *(_DWORD *)(*((int (__cdecl **)(CTrigger_TractorBeam *))pBeam->_vptr_IHandleEntity
+                                                                             + 3))(pBeam);
+      *(_DWORD *)&this->m_beamHistory.m_beams.m_Memory.m_Memory[4] = CTrigger_TractorBeam::GetLastUpdateFrame(pBeam);
+      CalcClosestPointOnLineSegment(
+        &this->m_vecPosition,
+        &pBeam->m_vStart.m_Value,
+        &pBeam->m_vEnd.m_Value,
+        &vClosest,
+        0);
+      v7 = pBeam->m_flRadius.m_Value - paintblob_beam_radius_offset.m_pParent->m_Value.m_fValue;
+      v8 = fsqrt(
+             (float)((float)((float)(this->m_vecPosition.x - vClosest.x) * (float)(this->m_vecPosition.x - vClosest.x))
+                   + (float)((float)(this->m_vecPosition.y - vClosest.y) * (float)(this->m_vecPosition.y - vClosest.y)))
+           + (float)((float)(this->m_vecPosition.z - vClosest.z) * (float)(this->m_vecPosition.z - vClosest.z)));
+      v9 = 1.0;
+      if ( v7 <= 0.0 || (v9 = 1.0 / v7, v7 == 1.0) )
+      {
+        v10.m128_f32[0] = v8 - 1.0;
+        v11 = _mm_cmpgt_ss((__m128)0LL, v10);
+        LODWORD(v12) = _mm_andnot_ps(v11, (__m128)0x3F800000u).m128_u32[0] | LODWORD(v9) & v11.m128_i32[0];
+      }
+      else
+      {
+        v13 = (float)(v8 - 1.0) / (float)(v7 - 1.0);
+        if ( v13 < 0.0 )
+          v14 = 0.0;
+        else
+          v14 = fminf(1.0, v13);
+        v12 = v9 + (float)((float)(1.0 - v9) * v14);
+      }
+      this->m_flCurrentVortexRadius = v12;
+    }
+  }
+  else
+  {
+    if ( this->m_MoveState != PAINT_BLOB_STREAK_MOVE )
+      this->m_MoveState = PAINT_BLOB_AIR_MOVE;
+    this->m_beamHistory.m_beams.m_Size = 0;
+    this->m_beamHistory.m_beams.m_pElements = (BeamInfo_t *)&this->m_beamHistory;
+  }
+}

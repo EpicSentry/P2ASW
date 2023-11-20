@@ -1,0 +1,123 @@
+void __userpurge C_Trigger_TractorBeam::DrawColumn(
+        C_Trigger_TractorBeam *this@<ecx>,
+        int a2@<esi>,
+        IMaterial *pMaterial,
+        const Vector *vecStart,
+        const Vector *vDir,
+        float flLength,
+        const Vector *vecXAxis,
+        const Vector *vecYAxis,
+        float flRadius,
+        float flAlpha,
+        bool bPinchIn,
+        bool bPinchOut,
+        float flTextureOffset)
+{
+  IMatRenderContext *(__thiscall *GetRenderContext)(IMaterialSystem *); // edx
+  int v15; // edi
+  int v16; // esi
+  int v17; // eax
+  IMesh *v18; // esi
+  float z; // edx
+  int m_nVertexCount; // eax
+  CMeshBuilder meshBuilder; // [esp+54h] [ebp-1F8h] BYREF
+  Vector vStart; // [esp+23Ch] [ebp-10h] BYREF
+  C_Trigger_TractorBeam *v25; // [esp+248h] [ebp-4h]
+  char vertexFormat; // [esp+254h] [ebp+8h]
+
+  GetRenderContext = materials->GetRenderContext;
+  v25 = this;
+  v15 = (int)GetRenderContext(materials);
+  if ( v15 )
+    (*(void (__thiscall **)(int))(*(_DWORD *)v15 + 8))(v15);
+  v16 = *(_DWORD *)v15;
+  v17 = ((int (__thiscall *)(C_Trigger_TractorBeam *, int))this->GetClientRenderable)(this, a2);
+  (*(void (__thiscall **)(int, IMaterial *, int))(v16 + 36))(v15, pMaterial, v17);
+  vertexFormat = pMaterial->GetVertexFormat(pMaterial);
+  v18 = (IMesh *)(*(int (__thiscall **)(int, int, _DWORD, _DWORD, IMaterial *))(*(_DWORD *)v15 + 228))(
+                   v15,
+                   1,
+                   0,
+                   0,
+                   pMaterial);
+  CMeshBuilder::CMeshBuilder(&meshBuilder);
+  meshBuilder.m_pMesh = v18;
+  meshBuilder.m_bGenerateIndices = 1;
+  meshBuilder.m_Type = MATERIAL_QUADS;
+  v18->SetPrimitiveType(v18, MATERIAL_TRIANGLES);
+  meshBuilder.m_pMesh->LockMesh(meshBuilder.m_pMesh, 1024, 1536, &meshBuilder, 0);
+  meshBuilder.m_IndexBuilder.m_nIndexOffset = meshBuilder.m_nFirstVertex;
+  meshBuilder.m_IndexBuilder.m_pIndexBuffer = &v18->IIndexBuffer;
+  meshBuilder.m_IndexBuilder.m_nIndexCount = 0;
+  meshBuilder.m_IndexBuilder.m_nMaxIndexCount = 1536;
+  meshBuilder.m_IndexBuilder.m_bModify = 0;
+  meshBuilder.m_IndexBuilder.m_pIndices = meshBuilder.m_pIndices;
+  meshBuilder.m_IndexBuilder.m_nIndexSize = meshBuilder.m_nIndexSize;
+  meshBuilder.m_IndexBuilder.m_nCurrentIndex = 0;
+  CVertexBuilder::AttachBegin(&meshBuilder.m_VertexBuilder, v18, 1024, &meshBuilder);
+  meshBuilder.m_IndexBuilder.m_nCurrentIndex = 0;
+  CVertexBuilder::Reset(&meshBuilder.m_VertexBuilder);
+  z = vecStart->z;
+  *(_QWORD *)&vStart.x = *(_QWORD *)&vecStart->x;
+  vStart.z = z;
+  C_Trigger_TractorBeam::DrawColumnSegment(
+    v25,
+    &meshBuilder,
+    &vStart,
+    vDir,
+    flLength,
+    vecXAxis,
+    vecYAxis,
+    flRadius,
+    flAlpha,
+    flTextureOffset,
+    vertexFormat);
+  if ( meshBuilder.m_bGenerateIndices )
+  {
+    switch ( meshBuilder.m_Type )
+    {
+      case MATERIAL_LINE_STRIP:
+        m_nVertexCount = 2 * meshBuilder.m_VertexBuilder.m_nVertexCount - 2;
+        break;
+      case MATERIAL_LINE_LOOP:
+        m_nVertexCount = 2 * meshBuilder.m_VertexBuilder.m_nVertexCount;
+        break;
+      case MATERIAL_POLYGON:
+        m_nVertexCount = 3 * meshBuilder.m_VertexBuilder.m_nVertexCount - 6;
+        break;
+      case MATERIAL_QUADS:
+        m_nVertexCount = 6 * meshBuilder.m_VertexBuilder.m_nVertexCount / 4;
+        break;
+      case MATERIAL_INSTANCED_QUADS:
+        m_nVertexCount = 0;
+        break;
+      default:
+        m_nVertexCount = meshBuilder.m_VertexBuilder.m_nVertexCount;
+        break;
+    }
+    CIndexBuilder::GenerateIndices(&meshBuilder.m_IndexBuilder, meshBuilder.m_Type, m_nVertexCount);
+  }
+  ((void (__thiscall *)(IMesh *, int, int))meshBuilder.m_pMesh->UnlockMesh)(
+    meshBuilder.m_pMesh,
+    meshBuilder.m_VertexBuilder.m_nVertexCount,
+    meshBuilder.m_IndexBuilder.m_nIndexCount);
+  meshBuilder.m_IndexBuilder.m_pIndexBuffer = 0;
+  meshBuilder.m_IndexBuilder.m_nMaxIndexCount = 0;
+  meshBuilder.m_VertexBuilder.m_nMaxVertexCount = 0;
+  meshBuilder.m_VertexBuilder.m_pVertexBuffer = 0;
+  meshBuilder.m_VertexBuilder.m_CompressionType = VERTEX_COMPRESSION_INVALID;
+  meshBuilder.m_pMesh = 0;
+  v18->Draw(v18, -1, 0);
+  if ( meshBuilder.m_VertexBuilder.m_pVertexBuffer
+    && meshBuilder.m_VertexBuilder.m_pVertexBuffer->IsDynamic(meshBuilder.m_VertexBuilder.m_pVertexBuffer) )
+  {
+    meshBuilder.m_VertexBuilder.m_pVertexBuffer->EndCastBuffer(meshBuilder.m_VertexBuilder.m_pVertexBuffer);
+  }
+  if ( meshBuilder.m_IndexBuilder.m_pIndexBuffer
+    && meshBuilder.m_IndexBuilder.m_pIndexBuffer->IsDynamic(meshBuilder.m_IndexBuilder.m_pIndexBuffer) )
+  {
+    meshBuilder.m_IndexBuilder.m_pIndexBuffer->EndCastBuffer(meshBuilder.m_IndexBuilder.m_pIndexBuffer);
+  }
+  (*(void (__thiscall **)(int))(*(_DWORD *)v15 + 12))(v15);
+  (*(void (__thiscall **)(int))(*(_DWORD *)v15 + 4))(v15);
+}

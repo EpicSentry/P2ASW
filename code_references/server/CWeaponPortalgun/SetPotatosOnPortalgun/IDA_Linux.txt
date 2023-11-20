@@ -1,0 +1,16 @@
+void __cdecl CWeaponPortalgun::SetPotatosOnPortalgun(CWeaponPortalgun *const this, bool bShowPotatos)
+{
+  BASEPTR v2; // [esp+28h] [ebp-10h] BYREF
+
+  if ( this->m_bShowingPotatos != bShowPotatos )
+  {
+    this->m_bShowingPotatos = bShowPotatos;
+    (*((void (__cdecl **)(CWeaponPortalgun *const, _DWORD))this->_vptr_IHandleEntity + 267))(this, 0);
+    CBaseEntity::ThinkSet(
+      &v2,
+      this,
+      (BASEPTR)(unsigned int)CWeaponPortalgun::TogglePotatosThink,
+      gpGlobals->curtime + 2.0,
+      CWeaponPortalgun::s_szTogglePotatosThinkContext);
+  }
+}

@@ -1,0 +1,42 @@
+IMotionEvent::simresult_e __cdecl CTrigger_TractorBeam::Simulate(
+        CTrigger_TractorBeam *const this,
+        IPhysicsMotionController *pController,
+        IPhysicsObject *pObject,
+        float deltaTime,
+        Vector *const linear,
+        AngularImpulse *const angular)
+{
+  IMotionEvent::simresult_e v6; // edx
+  char v7; // al
+  int v8; // eax
+
+  v6 = SIM_NOTHING;
+  if ( !this->m_bDisabled.m_Value )
+  {
+    linear->x = 0.0;
+    linear->y = 0.0;
+    linear->z = 0.0;
+    angular->x = 0.0;
+    angular->y = 0.0;
+    angular->z = 0.0;
+    if ( pObject )
+    {
+      v7 = (*((int (__cdecl **)(IPhysicsObject *))pObject->_vptr_IPhysicsObject + 20))(pObject);
+      v6 = SIM_NOTHING;
+      if ( (v7 & 4) == 0 )
+      {
+        v8 = (*((int (__cdecl **)(IPhysicsObject *))pObject->_vptr_IPhysicsObject + 18))(pObject);
+        (*((void (__cdecl **)(CTrigger_TractorBeam *const, IPhysicsObject *, int, _DWORD, Vector *const, AngularImpulse *const))this->_vptr_IHandleEntity
+         + 203))(
+          this,
+          pObject,
+          v8,
+          LODWORD(deltaTime),
+          linear,
+          angular);
+        return 3;
+      }
+    }
+  }
+  return v6;
+}

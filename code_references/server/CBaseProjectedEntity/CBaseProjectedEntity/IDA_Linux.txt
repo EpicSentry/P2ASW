@@ -1,0 +1,9 @@
+void __cdecl CBaseProjectedEntity::CBaseProjectedEntity(CBaseProjectedEntity *const this)
+{
+  CBaseEntity::CBaseEntity(this, 0);
+  this->_vptr_IHandleEntity = (int (**)(...))off_C81808;
+  this->m_hHitPortal.m_Value.m_Index = -1;
+  this->m_hSourcePortal.m_Value.m_Index = -1;
+  this->m_hChildSegment.m_Value.m_Index = -1;
+  this->m_hPlacementHelper.m_Value.m_Index = -1;
+}

@@ -82,14 +82,8 @@ LINK_ENTITY_TO_CLASS( prop_portal, CProp_Portal );
 
 CProp_Portal::CProp_Portal( void )
 {	
-
-	if( !ms_DefaultPortalSizeInitialized )
-	{
-		ms_DefaultPortalSizeInitialized = true; // for CEG protection
-	
-		ms_DefaultPortalHalfHeight = DEFAULT_PORTAL_HALF_HEIGHT;// CEG_GET_CONSTANT_VALUE(DefaultPortalHalfHeight); // only protecting one to reduce the cost of first-portal check
+	ms_DefaultPortalHalfHeight = DEFAULT_PORTAL_HALF_HEIGHT;
 		
-	}
 	m_FizzleEffect = PORTAL_FIZZLE_KILLED;
 	CProp_Portal_Shared::AllPortals.AddToTail( this );
 }
@@ -759,8 +753,7 @@ void CProp_Portal::ActivatePortal( void )
 
 	UpdatePortalLinkage();
 	
-	//TODO:
-	//CBaseProjector::TestAllForProjectionChanges();
+	CBaseProjector::TestAllForProjectionChanges();
 }
 
 //-----------------------------------------------------------------------------
@@ -781,8 +774,7 @@ void CProp_Portal::DeactivatePortal( void )
 
 	UpdatePortalLinkage();
 
-	//TODO:
-	//CBaseProjector::TestAllForProjectionChanges();
+	CBaseProjector::TestAllForProjectionChanges();
 }
 
 void CProp_Portal::InputSetActivatedState( inputdata_t &inputdata )

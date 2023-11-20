@@ -1,0 +1,30 @@
+void __thiscall C_NPC_Portal_FloorTurret::UpdateBeam(
+        C_NPC_Portal_FloorTurret *this,
+        const Vector *vecMuzzle,
+        const Vector *vecMuzzleDir)
+{
+  float v4; // xmm2_4
+  float v5; // xmm3_4
+  float v6; // xmm0_4
+  CTraceFilterSkipClassname traceFilter; // [esp+Ch] [ebp-20h] BYREF
+  Vector vEndPoint; // [esp+20h] [ebp-Ch] BYREF
+  int savedregs; // [esp+2Ch] [ebp+0h] BYREF
+
+  CTraceFilterSkipClassname::CTraceFilterSkipClassname(&traceFilter, this, "prop_energy_ball", 0);
+  v4 = vecMuzzleDir->z * 8192.0;
+  v5 = vecMuzzle->x + (float)(vecMuzzleDir->x * 8192.0);
+  vEndPoint.y = vecMuzzle->y + (float)(vecMuzzleDir->y * 8192.0);
+  v6 = vecMuzzle->z + v4;
+  vEndPoint.x = v5;
+  vEndPoint.z = v6;
+  C_PortalBeamHelper::UpdatePoints(
+    &this->m_beamHelper,
+    (int)&savedregs,
+    vecMuzzle,
+    &vEndPoint,
+    0x46004003u,
+    &traceFilter,
+    0);
+  this->m_vLastMuzzle = *vecMuzzle;
+  this->m_vLastMuzzleDir = *vecMuzzleDir;
+}

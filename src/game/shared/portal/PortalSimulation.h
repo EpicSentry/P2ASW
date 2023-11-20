@@ -41,7 +41,8 @@ enum PS_PhysicsObjectSourceType_t
 	PSPOST_REMOTE_BRUSHES,
 	PSPOST_LOCAL_STATICPROPS,
 	PSPOST_REMOTE_STATICPROPS,
-	PSPOST_HOLYWALL_TUBE
+	PSPOST_HOLYWALL_TUBE,
+	PSPOST_LOCAL_DISPLACEMENT,
 };
 
 enum RayInPortalHoleResult_t
@@ -116,6 +117,8 @@ struct PS_PlacementData_t //stuff useful for geometric operations
 	CPhysCollide *pHoleShapeCollideable; //used to test if a collideable is in the hole, should NOT be collided against in general
 	CPhysCollide *pInvHoleShapeCollideable; //A very thin, but wide wall with the portal hole cut out in the middle. Used to test if traces are fully encapsulated in a portal hole
 	CPhysCollide *pAABBAngleTransformCollideable; //used for player traces so we can slide into the portal gracefully if there's an angular difference such that our transformed AABB is in solid until the center reaches the plane
+	Vector vecCurAABBMins;
+	Vector vecCurAABBMaxs;
 	Vector vCollisionCloneExtents; //how far in each direction (in front of the portal) we clone collision data from the real world.
 	EHANDLE hPortalPlacementParent;
 	bool bParentIsVPhysicsSolidBrush; //VPhysics solid brushes present an interesting collision challenge where their visuals are separated 0.5 inches from their collision
@@ -124,8 +127,8 @@ struct PS_PlacementData_t //stuff useful for geometric operations
 		memset( this, 0, sizeof( PS_PlacementData_t ) );
 
 		// Hacks
-		fHalfHeight = PORTAL_HALF_HEIGHT;
-		fHalfWidth = PORTAL_HALF_WIDTH;
+		//fHalfHeight = PORTAL_HALF_HEIGHT;
+		//fHalfWidth = PORTAL_HALF_WIDTH;
 	}
 };
 
@@ -142,6 +145,16 @@ struct PS_SD_Static_World_Brushes_t
 	
 };
 
+struct PS_SD_Static_World_Displacements_t
+{
+	CPhysCollide *pCollideable;
+#ifndef CLIENT_DLL
+	IPhysicsObject *pPhysicsObject;
+	PS_SD_Static_World_Displacements_t() : pCollideable(NULL), pPhysicsObject(NULL) {};
+#else
+	PS_SD_Static_World_Displacements_t() : pCollideable(NULL) {};
+#endif
+};
 
 struct PS_SD_Static_World_StaticProps_ClippedProp_t
 {
@@ -171,6 +184,7 @@ struct PS_SD_Static_World_StaticProps_t
 struct PS_SD_Static_World_t //stuff in front of the portal
 {
 	PS_SD_Static_World_Brushes_t Brushes;
+	PS_SD_Static_World_Displacements_t Displacements;
 	PS_SD_Static_World_StaticProps_t StaticProps;
 };
 
@@ -307,6 +321,13 @@ class CPortalSimulator;
 class CPSCollisionEntity : public CBaseEntity
 {
 	DECLARE_CLASS( CPSCollisionEntity, CBaseEntity );
+	
+#ifdef GAME_DLL
+	DECLARE_SERVERCLASS();
+#else
+	DECLARE_CLIENTCLASS();
+#endif
+
 private:
 	CPortalSimulator *m_pOwningSimulator;
 

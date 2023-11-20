@@ -197,6 +197,7 @@ protected:
 	bool	UpdateFacing( void );
 	void	DryFire( void );
 	void	UpdateMuzzleMatrix();
+	float	GetFireConeZTolerance() { return 28.0f; }
 
 protected:
 	matrix3x4_t m_muzzleToWorld;
@@ -232,7 +233,6 @@ protected:
 	CHandle<CSprite>		m_hEyeGlow;
 	CHandle<CBeam>			m_hLaser;
 	CHandle<CTurretTipController>	m_pMotionController;
-
 	CHandle<CParticleSystem>	m_hFizzleEffect;
 	Vector	m_vecEnemyLKP;
 

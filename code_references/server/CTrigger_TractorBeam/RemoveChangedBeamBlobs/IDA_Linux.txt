@@ -1,0 +1,50 @@
+void __cdecl CTrigger_TractorBeam::RemoveChangedBeamBlobs(CTrigger_TractorBeam *const this)
+{
+  int m_Size; // eax
+  CPaintBlob **m_pMemory; // edx
+  const CBasePaintBlob **v3; // edi
+  const CBasePaintBlob **v4; // ebx
+  const CBasePaintBlob *v5; // eax
+  const CBasePaintBlob **v6; // [esp+14h] [ebp-24h]
+  CPaintBlob **end; // [esp+18h] [ebp-20h]
+  CPaintBlob **v8; // [esp+1Ch] [ebp-1Ch]
+
+  m_Size = this->m_blobs.m_Size;
+  if ( m_Size )
+  {
+    m_pMemory = this->m_blobs.m_Memory.m_pMemory;
+    end = &m_pMemory[m_Size];
+    v3 = (const CBasePaintBlob **)end;
+    if ( m_pMemory != end )
+    {
+      v4 = (const CBasePaintBlob **)&m_pMemory[m_Size];
+      v8 = m_pMemory + 1;
+      do
+      {
+        v6 = (const CBasePaintBlob **)v8;
+        v3 = (const CBasePaintBlob **)(v8 - 1);
+        if ( this != CBasePaintBlob::GetCurrentBeam(*(v8 - 1)) )
+        {
+          do
+          {
+            if ( --v4 == v3 )
+            {
+              m_Size = this->m_blobs.m_Size;
+              goto LABEL_9;
+            }
+          }
+          while ( this != CBasePaintBlob::GetCurrentBeam(*v4) );
+          v5 = *(v8 - 1);
+          *(v8 - 1) = (CPaintBlob *)*v4;
+          *v4 = v5;
+        }
+        ++v8;
+      }
+      while ( v4 != v6 );
+      m_Size = this->m_blobs.m_Size;
+      v3 = v4;
+    }
+LABEL_9:
+    this->m_blobs.m_Size = m_Size - (((char *)end - (char *)v3) >> 2);
+  }
+}

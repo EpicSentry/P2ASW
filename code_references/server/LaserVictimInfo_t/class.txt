@@ -1,0 +1,5 @@
+struct LaserVictimInfo_t
+{
+    class CBaseEntity * pVictim;
+    float flFraction;
+};

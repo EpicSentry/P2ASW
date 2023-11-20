@@ -1,0 +1,5 @@
+// attributes: thunk
+CBaseProjectedEntity *__thiscall CPropWallProjector::CreateNewProjectedEntity(CPropWallProjector *this)
+{
+  return CProjectedWallEntity::CreateNewProjectedEntity((CProjectedWallEntity *)this);
+}

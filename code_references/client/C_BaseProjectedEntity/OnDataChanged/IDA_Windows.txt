@@ -1,0 +1,38 @@
+void __thiscall C_BaseProjectedEntity::OnDataChanged(C_BaseProjectedEntity *this, DataUpdateType_t updateType)
+{
+  C_BaseEntity *v3; // edi
+  float z; // ecx
+  CEntInfo *v5; // eax
+  IHandleEntity *m_pEntity; // esi
+  IHandleEntity_vtbl *v7; // ecx
+
+  C_BaseEntity::OnDataChanged(this, updateType);
+  v3 = (C_BaseProjectedEntity *)((char *)this - 8);
+  C_BaseProjectedEntity::HandleDataChange((C_BaseProjectedEntity *)((char *)this - 8));
+  z = this->PreDataChanged.qAngles.z;
+  if ( z == NAN
+    || (v5 = &g_pEntityList->m_EntPtrArray[LOWORD(z)],
+        g_pEntityList->m_EntPtrArray[LOWORD(z)].m_SerialNumber != HIWORD(LODWORD(z)))
+    || (m_pEntity = v5->m_pEntity) == 0 )
+  {
+    C_BaseEntity::SetPredictionEligible(v3, 0);
+    goto LABEL_10;
+  }
+  C_BaseEntity::SetPredictionEligible(v3, 1);
+  if ( !BYTE1(m_pEntity[651].__vftable) )
+  {
+LABEL_10:
+    C_BaseEntity::UnsetPlayerSimulated(v3);
+    return;
+  }
+  v7 = m_pEntity[655].__vftable;
+  if ( v7 == (IHandleEntity_vtbl *)-1
+    || g_pEntityList->m_EntPtrArray[(unsigned __int16)v7].m_SerialNumber != (unsigned int)v7 >> 16 )
+  {
+    C_BaseEntity::SetPlayerSimulated(v3, 0);
+  }
+  else
+  {
+    C_BaseEntity::SetPlayerSimulated(v3, (C_BasePlayer *)g_pEntityList->m_EntPtrArray[(unsigned __int16)v7].m_pEntity);
+  }
+}

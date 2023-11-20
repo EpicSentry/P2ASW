@@ -1,0 +1,57 @@
+void __thiscall CHudPortalCrosshair::Paint(CHudPortalCrosshair *this)
+{
+  int v2; // eax
+  float v3; // xmm0_4
+  unsigned __int8 *v4; // xmm1_4
+  float v5; // xmm2_4
+  float v6; // xmm1_4
+  float v7; // xmm2_4
+  float m_flAlpha; // ecx
+  Vector screen; // [esp+8h] [ebp-38h] BYREF
+  Vector point; // [esp+14h] [ebp-2Ch] BYREF
+  Vector forward; // [esp+20h] [ebp-20h] BYREF
+  QAngle angles; // [esp+2Ch] [ebp-14h] BYREF
+  float y; // [esp+38h] [ebp-8h]
+  float x; // [esp+3Ch] [ebp-4h]
+
+  if ( LODWORD(this->m_flAlpha) && IsCurrentViewAccessAllowed() )
+  {
+    *(QAngle *)&this->m_nBgTextureId2 = *CurrentViewAngles();
+    *(Vector *)&this->m_m_nBgTextureId4_register = *CurrentViewOrigin();
+    x = (float)(ScreenWidth() / 2);
+    v2 = ScreenHeight();
+    v3 = *(float *)&this->m_m_nBgTextureId1_register;
+    v4 = FLOAT_0_5;
+    v5 = (float)(v2 / 2);
+    y = v5;
+    if ( vec3_angle.x != v3
+      || vec3_angle.y != *(float *)&this->m_nBgTextureId1
+      || vec3_angle.z != *(float *)&this->m_m_nBgTextureId2_register )
+    {
+      v6 = *(float *)&this->m_nBgTextureId1 + *(float *)&this->m_m_nBgTextureId3_register;
+      v7 = *(float *)&this->m_m_nBgTextureId2_register + *(float *)&this->m_nBgTextureId3;
+      angles.x = v3 + *(float *)&this->m_nBgTextureId2;
+      angles.y = v6;
+      angles.z = v7;
+      AngleVectors(&angles, &forward);
+      point.x = *(float *)&this->m_m_nBgTextureId4_register + forward.x;
+      point.y = *(float *)&this->m_nBgTextureId4 + forward.y;
+      point.z = *(float *)&this->m_roundedCorners + forward.z;
+      ScreenTransform(&point, &screen);
+      x = (float)((float)((float)ScreenWidth() * (float)(screen.x * 0.5)) + 0.5) + x;
+      v4 = FLOAT_0_5;
+      v5 = (float)((float)((float)ScreenHeight() * (float)(screen.y * 0.5)) + 0.5) + y;
+    }
+    m_flAlpha = this->m_flAlpha;
+    CHudTexture::DrawSelf(
+      (CHudTexture *)LODWORD(m_flAlpha),
+      (int)(float)(x
+                 - (float)((float)(*(_DWORD *)(LODWORD(m_flAlpha) + 164) - *(_DWORD *)(LODWORD(m_flAlpha) + 160))
+                         * *(float *)&v4)),
+      (int)(float)(v5
+                 - (float)((float)(*(_DWORD *)(LODWORD(m_flAlpha) + 172) - *(_DWORD *)(LODWORD(m_flAlpha) + 168))
+                         * *(float *)&v4)),
+      (const Color *)&this->m_nPaintBackgroundType,
+      1.0);
+  }
+}

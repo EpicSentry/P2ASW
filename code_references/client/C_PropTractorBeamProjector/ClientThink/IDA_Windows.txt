@@ -1,0 +1,37 @@
+void __thiscall C_PropTractorBeamProjector::ClientThink(C_PropTractorBeamProjector *this)
+{
+  CStudioHdr *m_pElements; // eax
+  int v3; // ebx
+  CStudioHdr *v4; // eax
+  float flArmPose; // [esp+10h] [ebp-4h]
+
+  if ( this->m_bDynamicModelAllowed
+    && !LOBYTE(this->m_vEndPos.x)
+    && *(float *)(&this->m_bDynamicModelPending + 3) != 0.0
+    && *(float *)(gpGlobals.m_Index + 12) > 0.5 )
+  {
+    C_PropTractorBeamProjector::CreateEffect((C_PropTractorBeamProjector *)((char *)this - 12));
+    BYTE1(this->m_vEndPos.x) = 1;
+  }
+  flArmPose = C_PropTractorBeamProjector::CalculateArmaturePose((C_PropTractorBeamProjector *)((char *)this - 12));
+  if ( !this->m_Attachments.m_pElements
+    && ((int (__thiscall *)(CUtlReference<CNewParticleEffect> **))this[-1].m_hEmitterEffect[2].m_pPrev[2].m_pObject)(&this[-1].m_hEmitterEffect[2].m_pPrev) )
+  {
+    C_BaseAnimating::LockStudioHdr((C_PropTractorBeamProjector *)((char *)this - 12));
+  }
+  m_pElements = (CStudioHdr *)this->m_Attachments.m_pElements;
+  if ( !m_pElements || !m_pElements->m_pStudioHdr )
+    m_pElements = 0;
+  v3 = C_BaseAnimating::LookupPoseParameter((C_PropTractorBeamProjector *)((char *)this - 12), m_pElements, "reversal");
+  if ( !this->m_Attachments.m_pElements
+    && ((int (__thiscall *)(CUtlReference<CNewParticleEffect> **))this[-1].m_hEmitterEffect[2].m_pPrev[2].m_pObject)(&this[-1].m_hEmitterEffect[2].m_pPrev) )
+  {
+    C_BaseAnimating::LockStudioHdr((C_PropTractorBeamProjector *)((char *)this - 12));
+  }
+  v4 = (CStudioHdr *)this->m_Attachments.m_pElements;
+  if ( !v4 || !v4->m_pStudioHdr )
+    v4 = 0;
+  C_BaseAnimating::SetPoseParameter((C_PropTractorBeamProjector *)((char *)this - 12), v4, v3, flArmPose);
+  *(float *)&this->m_SequenceTransitioner.m_animationQueue.m_pElements = C_PropTractorBeamProjector::CalculateRotationPose((C_PropTractorBeamProjector *)((char *)this - 12));
+  ((void (__thiscall *)(CUtlReference<CNewParticleEffect> *))this[-1].m_hEmitterEffect[2].m_pNext[67].m_pObject)(&this[-1].m_hEmitterEffect[2]);
+}

@@ -1,0 +1,7 @@
+void __thiscall CProjectedWallEntity::CleansePaint(CProjectedWallEntity *this)
+{
+  int i; // eax
+
+  for ( i = 0; i < *(_DWORD *)&this->m_Network.m_PVSInfo.m_pClustersInline[2]; ++i )
+    *((_DWORD *)&this->m_Network.m_TimerEvent.m_pEventMgr->m_Events.m_heap.m_Memory.m_pMemory + i) = 4;
+}

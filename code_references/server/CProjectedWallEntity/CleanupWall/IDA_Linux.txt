@@ -1,0 +1,99 @@
+void __cdecl CProjectedWallEntity::CleanupWall(CProjectedWallEntity *const this)
+{
+  float x; // xmm0_4
+  bool v2; // zf
+  float m_Value; // xmm0_4
+  bool v4; // zf
+  float v5; // xmm1_4
+  bool v6; // zf
+  bool v7; // zf
+  unsigned int m_Index; // eax
+  char *v9; // edx
+  vec_t y; // eax
+
+  if ( this->m_pPhysicsObject )
+  {
+    CPhysicsShadowClone::NotifyDestroy(this->m_pPhysicsObject, this);
+    (*((void (__cdecl **)(CProjectedWallEntity *const))this->_vptr_IHandleEntity + 154))(this);
+  }
+  if ( this->m_pWallCollideable )
+  {
+    CPhysicsShadowClone::NotifyDestroy(this->m_pWallCollideable, this);
+    (*((void (__cdecl **)(IPhysicsEnvironment *, CPhysCollide *))physenv->_vptr_IPhysicsEnvironment + 78))(
+      physenv,
+      this->m_pWallCollideable);
+    this->m_pWallCollideable = 0;
+  }
+  x = this->m_vWorldSpace_WallMins.m_Value.x;
+  if ( x == vec3_origin.x
+    && vec3_origin.y == this->m_vWorldSpace_WallMins.m_Value.y
+    && vec3_origin.z == this->m_vWorldSpace_WallMins.m_Value.z )
+  {
+    v2 = x == this->m_vWorldSpace_WallMaxs.m_Value.x;
+  }
+  else
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_vWorldSpace_WallMins);
+    y = vec3_origin.y;
+    v2 = vec3_origin.x == this->m_vWorldSpace_WallMaxs.m_Value.x;
+    this->m_vWorldSpace_WallMins.m_Value.x = vec3_origin.x;
+    this->m_vWorldSpace_WallMins.m_Value.y = y;
+    this->m_vWorldSpace_WallMins.m_Value.z = vec3_origin.z;
+  }
+  if ( v2
+    && this->m_vWorldSpace_WallMins.m_Value.y == this->m_vWorldSpace_WallMaxs.m_Value.y
+    && this->m_vWorldSpace_WallMins.m_Value.z == this->m_vWorldSpace_WallMaxs.m_Value.z )
+  {
+    m_Value = this->m_flHeight.m_Value;
+    v4 = m_Value == 0.0;
+  }
+  else
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_vWorldSpace_WallMaxs);
+    m_Value = this->m_flHeight.m_Value;
+    v4 = m_Value == 0.0;
+    this->m_vWorldSpace_WallMaxs = (CNetworkVectorBase<Vector,CProjectedWallEntity::NetworkVar_m_vWorldSpace_WallMaxs>)this->m_vWorldSpace_WallMins;
+  }
+  if ( v4 )
+  {
+    v5 = this->m_flWidth.m_Value;
+    v6 = v5 == m_Value;
+  }
+  else
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_flHeight);
+    this->m_flHeight.m_Value = 0.0;
+    m_Value = 0.0;
+    v5 = this->m_flWidth.m_Value;
+    v6 = v5 == 0.0;
+  }
+  if ( v6 )
+  {
+    v7 = v5 == this->m_flLength.m_Value;
+  }
+  else
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_flWidth);
+    v5 = m_Value;
+    this->m_flWidth.m_Value = m_Value;
+    v7 = m_Value == this->m_flLength.m_Value;
+  }
+  if ( !v7 )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_flLength);
+    this->m_flLength.m_Value = v5;
+  }
+  m_Index = this->m_hHitPortal.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v9 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v9 + 2) == HIWORD(m_Index) )
+    {
+      if ( *((_DWORD *)v9 + 1) )
+      {
+        CBaseEntity::NetworkStateChanged(this, &this->m_hHitPortal);
+        this->m_hHitPortal.m_Value.m_Index = -1;
+      }
+    }
+  }
+}

@@ -1,0 +1,58 @@
+void __thiscall CProjectedWallEntity::Touch(CProjectedWallEntity *this, CBaseEntity *pOther)
+{
+  IPaintPowerUser *v3; // esi
+  bool (__thiscall *HasPaintmap)(IVEngineServer *); // eax
+  const CGameTrace *TouchTrace; // ebx
+  const Vector *(__thiscall *WorldSpaceCenter)(CBaseEntity *); // edx
+  int v7; // eax
+  PaintPowerType v8; // ecx
+  const PaintPowerInfo_t *v9; // eax
+  PaintPowerInfo_t v10; // [esp+8h] [ebp-58h] BYREF
+  Vector vecTouchPoint; // [esp+34h] [ebp-2Ch] BYREF
+  Vector vecWorldSpaceCenter; // [esp+40h] [ebp-20h] BYREF
+  Vector vecWallUp; // [esp+4Ch] [ebp-14h] BYREF
+  float flDot; // [esp+58h] [ebp-8h]
+  IPaintPowerUser *pPowerUser; // [esp+5Ch] [ebp-4h]
+  PaintPowerType power; // [esp+68h] [ebp+8h]
+  IPaintPowerUser_vtbl *powera; // [esp+68h] [ebp+8h]
+
+  v3 = (IPaintPowerUser *)__RTDynamicCast(
+                            pOther,
+                            0,
+                            &CBaseEntity `RTTI Type Descriptor',
+                            &IPaintPowerUser `RTTI Type Descriptor',
+                            0);
+  HasPaintmap = engine->HasPaintmap;
+  pPowerUser = v3;
+  if ( HasPaintmap(engine) )
+  {
+    if ( v3 )
+    {
+      AngleVectors(&this->m_angRotation.m_Value, 0, 0, &vecWallUp);
+      TouchTrace = CBaseEntity::GetTouchTrace();
+      WorldSpaceCenter = pOther->WorldSpaceCenter;
+      flDot = (float)((float)(TouchTrace->plane.normal.y * vecWallUp.y)
+                    + (float)(vecWallUp.x * TouchTrace->plane.normal.x))
+            + (float)(TouchTrace->plane.normal.z * vecWallUp.z);
+      vecWorldSpaceCenter = *WorldSpaceCenter(pOther);
+      UTIL_ProjectPointOntoPlane(&vecTouchPoint, &vecWorldSpaceCenter, &TouchTrace->plane);
+      v7 = CProjectedWallEntity::ComputeSegmentIndex(this, &vecTouchPoint);
+      if ( v7 < this->m_nNumSegments.m_Value )
+      {
+        v8 = this->m_PaintPowers.m_Memory.m_pMemory[v7];
+        power = v8;
+        if ( debug_paintable_projected_wall.m_pParent->m_Value.m_nValue )
+        {
+          DevMsg("Segment: %d, Power: %d\n", v7, v8);
+          v8 = power;
+        }
+        if ( COERCE_FLOAT(LODWORD(flDot) & _mask__AbsFloat_) > 0.001 )
+        {
+          powera = pPowerUser->__vftable;
+          PaintPowerInfo_t::PaintPowerInfo_t(&v10, &TouchTrace->plane.normal, &TouchTrace->endpos, this, v8, 0);
+          powera->AddSurfacePaintPowerInfo(pPowerUser, v9, 0);
+        }
+      }
+    }
+  }
+}

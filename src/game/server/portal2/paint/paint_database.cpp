@@ -14,9 +14,10 @@
 
 #ifdef PORTAL2
 #include "weapon_paintgun.h"
-//#include "projectedwallentity.h"
+#include "projectedwallentity.h"
 #include "portal_player.h"
 #include "prop_weightedcube.h"
+#include "paint/paint_savelogic.h"
 #endif
 #include "cegclientwrapper.h"
 
@@ -85,6 +86,7 @@ void CPaintDatabase::AddPaint( CBaseEntity* pPaintedEntity, const Vector& vecPai
 		data.flPaintRadius = flPaintRadius;
 		data.flPaintAlphaPercent = flAlphaPercent;
 		data.location = vPushedContactPoint;
+		data.normal = vecNormal;
 
 		for ( int i=0; i<brushEnum.m_BrushEntitiesToPaint.Count(); ++i )
 		{
@@ -101,8 +103,8 @@ void CPaintDatabase::AddPaint( CBaseEntity* pPaintedEntity, const Vector& vecPai
 	// Not the world
 	else if ( !( pPaintedEntity->GetFlags() & FL_UNPAINTABLE ) ) //If this entity is not flagged as unpaintable
 	{
-		/*
-#ifdef PORTAL2
+		
+#if defined ( PORTAL2 ) && !defined ( NO_PROJECTED_WALL )
 		// If this hit a paintable projected wall
 		CProjectedWallEntity *pPaintableWall = dynamic_cast< CProjectedWallEntity* >( pPaintedEntity );
 		if( pPaintableWall )
@@ -111,7 +113,7 @@ void CPaintDatabase::AddPaint( CBaseEntity* pPaintedEntity, const Vector& vecPai
 		}
 		// Not a wall
 		else
-#endif*/
+#endif
 		{
 			PaintDatabase.PaintEntity( pPaintedEntity, powerType, vecPaintLocation );
 		}
@@ -126,13 +128,11 @@ void CPaintDatabase::PaintEntity( CBaseEntity *pPaintedEntity, PaintPowerType ne
 	PaintPowerType paintedPowerType = NO_POWER;
 	if( pPaintableEntity )
 	{
-		Msg("pPaintableEntity\n");
 		paintedPowerType = pPaintableEntity->GetPaintPowerAtPoint( vecPosition );
 
 		// Client player's need to handle getting painted
 		if( pPaintedEntity->IsPlayer() )
 		{
-			Msg("pPaintedEntity->IsPlayer()\n");
 			CBroadcastRecipientFilter filter;
 			filter.MakeReliable();
 			UserMessageBegin( filter, "PaintEntity" );
@@ -194,7 +194,7 @@ void CPaintDatabase::PaintEntity( CBaseEntity *pPaintedEntity, PaintPowerType ne
 }
 
 // Projected Walls aren't implemented yet
-#if defined (PORTAL2) & 0
+#if defined (PORTAL2) && !defined ( NO_PROJECTED_WALL )
 void CPaintDatabase::PaintProjectedWall( CProjectedWallEntity *pWall, PaintPowerType powerType, const Vector &vecPosition )
 {
 	const bool bWallPainted = pWall->IsWallPainted( vecPosition );
@@ -226,7 +226,7 @@ void CPaintDatabase::RemoveAllPaint()
 		}
 	}
 	// No projected walls yet
-#if defined (PORTAL2) & 0
+#if defined (PORTAL2) && 1
 	//Remove the paint from all the painted projected walls
 	const int nPaintedProjectedWallCount = m_PaintedProjectedWalls.Count();
 	for( int i = 0; i < nPaintedProjectedWallCount; ++i )
@@ -308,7 +308,7 @@ void CPaintDatabase::RemovePaintedEntity( int index, bool bDeleteData )
 }
 
 // No projected walls yet
-#if defined ( PORTAL2 ) & 0
+#if defined ( PORTAL2 ) && 1
 void CPaintDatabase::RemovePaintedWall( CProjectedWallEntity *pWall, bool bDeleteData )
 {
 	//Get the paint gun to give back the ammo to
@@ -414,7 +414,7 @@ void CPaintDatabase::ClearPaintData()
 	m_PaintThisFrame.RemoveAll();
 	m_PaintedEntities.RemoveAll();
 #ifdef PORTAL2
-	//m_PaintedProjectedWalls.RemoveAll();
+	m_PaintedProjectedWalls.RemoveAll();
 #endif
 }
 
@@ -537,9 +537,27 @@ void CPaintDatabase::PreClientUpdate()
 	for ( int i=0; i<count; ++i )
 	{
 		const PaintLocationData_t& data = m_PaintThisFrame[i];
-
+	
 		CBaseEntity *pPaintBrush = ( data.hBrushEntity.Get() != NULL ) ? EntityFromEntityHandle( data.hBrushEntity.Get() ) : NULL;
-		float flChangedPaintRadius = UTIL_PaintBrushEntity( pPaintBrush, data.location, data.type, data.flPaintRadius, data.flPaintAlphaPercent );
+
+		bool bSave = false;
+
+		PaintTraceData_t *pTraceData = NULL;
+		if ( !g_pGameRules->IsMultiplayer() )
+		{
+			bSave = true;
+			PaintTraceData_t traceData;
+			traceData.pBrushEntity = pPaintBrush;
+			traceData.contactPoint = data.location;
+			traceData.flPaintRadius = data.flPaintRadius;
+			traceData.power = data.type;
+			traceData.normal = data.normal;
+			AddPaintDataToMemory( traceData );
+			
+			pTraceData = &traceData;
+
+		}
+		float flChangedPaintRadius = UTIL_PaintBrushEntity( pPaintBrush, data.location, data.type, data.flPaintRadius, data.flPaintAlphaPercent, pTraceData );
 		boundsCache.AddChangedBounds( data.location, flChangedPaintRadius );
 		//DevMsg("paint pos = %f %f %f\n", XYZ(data.location) );
 	}
@@ -585,7 +603,8 @@ void CPaintDatabase::PreClientUpdate()
 	for ( int i=1; i<=gpGlobals->maxClients; ++i )
 	{
 		CPortal_Player *pPortalPlayer = ToPortalPlayer( UTIL_PlayerByIndex( i ) );
-		if ( pPortalPlayer && pPortalPlayer->IsFullyConnected() )
+		// FIXME: OnFullyConnected() for CPortal_Player never gets called!!
+		if ( pPortalPlayer /*&& pPortalPlayer->IsFullyConnected()*/ )
 		{
 			filter.AddRecipient( pPortalPlayer );
 		}

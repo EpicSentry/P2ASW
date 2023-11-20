@@ -1,0 +1,24 @@
+void __cdecl CProjectedWallEntity::SetHitPortal(CProjectedWallEntity *const this, CPortal_Base2D *pPortal)
+{
+  int (**vptr_IHandleEntity)(...); // eax
+  float v3; // [esp+1Ch] [ebp-Ch]
+
+  vptr_IHandleEntity = this->_vptr_IHandleEntity;
+  if ( pPortal )
+  {
+    if ( !(unsigned __int8)vptr_IHandleEntity[203](this, pPortal) )
+      goto LABEL_3;
+  }
+  else if ( !vptr_IHandleEntity[200](this) )
+  {
+    goto LABEL_3;
+  }
+  v3 = gpGlobals->curtime + 0.5;
+  if ( v3 != this->m_flParticleUpdateTime.m_Value )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_flParticleUpdateTime);
+    this->m_flParticleUpdateTime.m_Value = v3;
+  }
+LABEL_3:
+  CBaseProjectedEntity::SetHitPortal(this, pPortal);
+}

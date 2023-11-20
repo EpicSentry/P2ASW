@@ -1,0 +1,6 @@
+void __thiscall CBaseProjector::~CBaseProjector(CBaseProjector *this)
+{
+  this->__vftable = (CBaseProjector_vtbl *)&CBaseProjector::`vftable';
+  CBaseProjector::Cleanup(this);
+  CBaseAnimating::~CBaseAnimating(this);
+}

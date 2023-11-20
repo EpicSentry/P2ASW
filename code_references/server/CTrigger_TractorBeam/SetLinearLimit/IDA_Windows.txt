@@ -1,0 +1,32 @@
+void __thiscall CTrigger_TractorBeam::SetLinearForce(CTrigger_TractorBeam *this, const Vector *vForward, float flSpeed)
+{
+  edict_t *m_pPev; // ecx
+  edict_t *v5; // ecx
+
+  if ( this->m_linearForce.m_Value != flSpeed )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x3D8u);
+    }
+    this->m_linearForce.m_Value = flSpeed;
+  }
+  if ( this->m_Network.m_TimerEvent.m_bRegistered )
+  {
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+    VectorAngles(vForward, &this->m_linearForceAngles.m_Value);
+  }
+  else
+  {
+    v5 = this->m_Network.m_pPev;
+    if ( v5 )
+      CBaseEdict::StateChanged(v5, 0x3B0u);
+    VectorAngles(vForward, &this->m_linearForceAngles.m_Value);
+  }
+}

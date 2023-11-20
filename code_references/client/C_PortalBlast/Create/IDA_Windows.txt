@@ -1,0 +1,24 @@
+void __cdecl C_PortalBlast::Create( CBaseHandle hOwner, bool bIsPortal2, PortalPlacedBy_t ePlacedBy, const Vector *vStart, const Vector *vEnd, const QAngle *qAngles, float fDeathTime )
+{
+  C_BaseEntity *v7; // eax
+  C_PortalBlast *v8; // esi
+  C_PortalBlast *v9; // ecx
+
+  v7 = (C_BaseEntity *)C_BaseEntity::operator new(0xAB0u);
+  v8 = (C_PortalBlast *)v7;
+  if ( v7 )
+  {
+    C_BaseEntity::C_BaseEntity(v7);
+    v8->C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable = (C_PortalBlast_vtbl *)&C_PortalBlast::`vftable'{for `IClientUnknown'};
+    v8->C_BaseEntity::IClientEntity::IClientRenderable::__vftable = (IClientRenderable_vtbl *)&C_PortalBlast::`vftable'{for `IClientRenderable'};
+    v8->C_BaseEntity::IClientEntity::IClientNetworkable::__vftable = (IClientNetworkable_vtbl *)&C_PortalBlast::`vftable'{for `IClientNetworkable'};
+    v8->C_BaseEntity::IClientEntity::IClientThinkable::__vftable = (IClientThinkable_vtbl *)&C_PortalBlast::`vftable'{for `IClientThinkable'};
+    v8->C_BaseEntity::IClientModelRenderable::__vftable = (IClientModelRenderable_vtbl *)&C_PortalBlast::`vftable';
+    v9 = v8;
+  }
+  else
+  {
+    v9 = 0;
+  }
+  C_PortalBlast::Init(v9, hOwner, bIsPortal2, ePlacedBy, vStart, vEnd, qAngles, fDeathTime);
+}

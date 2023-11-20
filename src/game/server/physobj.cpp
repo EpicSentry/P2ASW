@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -875,6 +875,7 @@ BEGIN_DATADESC( CPhysExplosion )
 
 	// Inputs
 	DEFINE_INPUTFUNC( FIELD_VOID, "Explode", InputExplode ),
+	DEFINE_INPUTFUNC( FIELD_VOID, "ExplodeAndRemove", InputExplodeAndRemove ),
 
 	// Outputs 
 	DEFINE_OUTPUT( m_OnPushedPlayer, "OnPushedPlayer" ),
@@ -928,6 +929,10 @@ void CPhysExplosion::InputExplode( inputdata_t &inputdata )
 	Explode( inputdata.pActivator, inputdata.pCaller );
 }
 
+void CPhysExplosion::InputExplodeAndRemove( inputdata_t& inputdata )
+{
+	ExplodeAndRemove( inputdata.pActivator, inputdata.pCaller );
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -1058,6 +1063,13 @@ void CPhysExplosion::Explode( CBaseEntity *pActivator, CBaseEntity *pCaller )
 	}
 }
 
+
+void CPhysExplosion::ExplodeAndRemove(CBaseEntity* pActivator, CBaseEntity* pCaller)
+{
+	Explode(pActivator, pCaller);
+	UTIL_Remove(this);
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: Draw any debug text overlays
 // Output : Current text offset from the top
@@ -1083,6 +1095,23 @@ int CPhysExplosion::DrawDebugTextOverlays( void )
 	return text_offset;
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Create a CPhysExplosion entity on the fly and call the explode method.
+//-----------------------------------------------------------------------------
+void CreatePhysExplosion(Vector origin, float magnitude, float radius, string_t target, float innerRadius, int flags)
+{
+	CPhysExplosion* pExplosion = (CPhysExplosion*)CBaseEntity::Create("env_physexplosion", origin, vec3_angle, NULL);
+
+	pExplosion->m_damage = magnitude;
+	pExplosion->m_radius = radius;
+	pExplosion->m_flInnerRadius = innerRadius;
+	pExplosion->m_targetEntityName = target;
+	pExplosion->AddSpawnFlags(flags);
+
+	variant_t emptyVariant;
+	pExplosion->Spawn();
+	pExplosion->AcceptInput("ExplodeAndRemove", NULL, NULL, emptyVariant, 0);
+}
 
 //==================================================
 // CPhysImpact

@@ -1,0 +1,7 @@
+void __thiscall CProjectedWallEntity::UpdateOnRemove(CProjectedWallEntity *this)
+{
+  CProjectedWallEntity::CheckForPlayersOnBridge(this);
+  this->CheckForSettledReflectorCubes(this);
+  CProjectedWallEntity::CleanupWall(this);
+  CBaseProjectedEntity::UpdateOnRemove(this);
+}

@@ -1,0 +1,42 @@
+void __cdecl CPropWallProjector::~CPropWallProjector(CPropWallProjector *const this)
+{
+  CSoundPatch *m_pAmbientSound; // eax
+  CSoundEnvelopeController *Controller; // esi
+  CSoundEnvelopeController *v3; // esi
+  unsigned int m_Index; // eax
+  CBaseEntity **v5; // edx
+
+  m_pAmbientSound = this->m_pAmbientSound;
+  this->_vptr_IHandleEntity = (int (**)(...))off_C94448;
+  if ( m_pAmbientSound )
+  {
+    Controller = CSoundEnvelopeController::GetController();
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))Controller->_vptr_CSoundEnvelopeController + 5))(
+      Controller,
+      this->m_pAmbientSound);
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))Controller->_vptr_CSoundEnvelopeController + 11))(
+      Controller,
+      this->m_pAmbientSound);
+  }
+  if ( this->m_pAmbientMusic )
+  {
+    v3 = CSoundEnvelopeController::GetController();
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))v3->_vptr_CSoundEnvelopeController + 5))(
+      v3,
+      this->m_pAmbientMusic);
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))v3->_vptr_CSoundEnvelopeController + 11))(
+      v3,
+      this->m_pAmbientMusic);
+  }
+  m_Index = this->m_hAmbientSoundProxy.m_Index;
+  if ( m_Index != -1 )
+  {
+    v5 = (CBaseEntity **)((char *)g_pEntityList + 24 * (unsigned __int16)m_Index);
+    if ( v5[2] == (CBaseEntity *)HIWORD(m_Index) )
+    {
+      if ( v5[1] )
+        UTIL_Remove(v5[1]);
+    }
+  }
+  CBaseProjector::~CBaseProjector(this);
+}

@@ -1,0 +1,15 @@
+struct Blobulator::Constants
+{
+    int s_SIMD_000Mask[4];
+    int s_SIMD_001Mask[4];
+    int s_SIMD_010Mask[4];
+    int s_SIMD_011Mask[4];
+    int s_SIMD_100Mask[4];
+    int s_SIMD_101Mask[4];
+    int s_SIMD_110Mask[4];
+    int s_SIMD_111Mask[4];
+    float s_flByteToFloat[256];
+    unsigned int s_FlagShifts[8];
+    unsigned int s_FlagsLists[256];
+    void InitializeConstants();
+};

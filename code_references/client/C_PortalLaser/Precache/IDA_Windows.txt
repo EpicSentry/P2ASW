@@ -1,0 +1,5 @@
+void __thiscall C_PortalLaser::Precache(C_PortalLaser *this)
+{
+  PrecacheParticleSystem(LASER_SPARK_EFFECT_NAME);
+  C_Prop_Portal::Fizzle((vgui::PropertyPage *)this);
+}

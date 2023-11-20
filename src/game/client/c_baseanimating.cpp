@@ -1,4 +1,4 @@
-//===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ======//
+//===== Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ======//
 //
 // Purpose: 
 //
@@ -58,7 +58,7 @@
 #include "replay_ragdoll.h"
 
 #if defined ( PORTAL2 )
-#include "c_portal_player.h"
+//#include "c_portal_player.h"
 #include "portal2/portal_grabcontroller_shared.h"
 #endif
 
@@ -79,6 +79,7 @@ ConVar RagdollImpactStrength( "z_ragdoll_impact_strength", "500" );
 ConVar cl_disable_ragdolls( "cl_disable_ragdolls", "0", FCVAR_CHEAT );
 
 ConVar cl_ejectbrass( "cl_ejectbrass", "1" );
+ConVar cl_minimal_rtt_shadows("cl_minimal_rtt_shadows", "1", FCVAR_ARCHIVE);
 
 
 // If an NPC is moving faster than this, he should play the running footstep sound
@@ -184,6 +185,8 @@ IMPLEMENT_CLIENTCLASS_DT(C_BaseAnimating, DT_BaseAnimating, CBaseAnimating)
 
 	RecvPropFloat( RECVINFO( m_flFrozen ) ), 
 	RecvPropInt( RECVINFO( m_ScaleType ) ),
+	
+	RecvPropBool( RECVINFO( m_bSuppressAnimSounds ) )
 
 END_RECV_TABLE()
 
@@ -193,13 +196,12 @@ BEGIN_PREDICTION_DATA( C_BaseAnimating )
 	DEFINE_PRED_FIELD( m_nBody, FIELD_INTEGER, FTYPEDESC_INSENDTABLE ),
 //	DEFINE_PRED_FIELD( m_nHitboxSet, FIELD_INTEGER, FTYPEDESC_INSENDTABLE ),
 //	DEFINE_PRED_FIELD( m_flModelScale, FIELD_FLOAT, FTYPEDESC_INSENDTABLE ),
-	DEFINE_PRED_FIELD( m_nSequence, FIELD_INTEGER, FTYPEDESC_INSENDTABLE | FTYPEDESC_NOERRORCHECK ),
+	//DEFINE_PRED_FIELD( m_nSequence, FIELD_INTEGER, FTYPEDESC_INSENDTABLE | FTYPEDESC_NOERRORCHECK ),
 	DEFINE_PRED_FIELD( m_flPlaybackRate, FIELD_FLOAT, FTYPEDESC_INSENDTABLE | FTYPEDESC_NOERRORCHECK ),
-	DEFINE_PRED_FIELD( m_flCycle, FIELD_FLOAT, FTYPEDESC_INSENDTABLE | FTYPEDESC_NOERRORCHECK ),
+	//DEFINE_PRED_FIELD( m_flCycle, FIELD_FLOAT, FTYPEDESC_INSENDTABLE | FTYPEDESC_NOERRORCHECK ),
 //	DEFINE_PRED_ARRAY( m_flPoseParameter, FIELD_FLOAT, MAXSTUDIOPOSEPARAM, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_ARRAY_TOL( m_flEncodedController, FIELD_FLOAT, MAXSTUDIOBONECTRLS, FTYPEDESC_INSENDTABLE, 0.02f ),
 
-	DEFINE_FIELD( m_nPrevSequence, FIELD_INTEGER ),
 	//DEFINE_FIELD( m_flPrevEventCycle, FIELD_FLOAT ),
 	//DEFINE_FIELD( m_flEventCycle, FIELD_FLOAT ),
 	//DEFINE_FIELD( m_nEventSequence, FIELD_INTEGER ),
@@ -234,7 +236,7 @@ BEGIN_PREDICTION_DATA( C_BaseAnimating )
 
 END_PREDICTION_DATA()
 
-LINK_ENTITY_TO_CLASS( client_ragdoll, C_ClientRagdoll );
+LINK_ENTITY_TO_CLASS_CLIENTONLY( client_ragdoll, C_ClientRagdoll );
 
 BEGIN_DATADESC( C_ClientRagdoll )
 	DEFINE_FIELD( m_bFadeOut, FIELD_BOOLEAN ),
@@ -760,6 +762,7 @@ C_BaseAnimating::C_BaseAnimating() :
 	m_pJiggleBones = NULL;
 	m_isJiggleBonesEnabled = true;
 	AddToEntityList(ENTITY_LIST_SIMULATE);
+	m_bForceRTTShadows = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -832,28 +835,40 @@ int C_BaseAnimating::VPhysicsGetObjectList( IPhysicsObject **pList, int listMax 
 //-----------------------------------------------------------------------------
 ShadowType_t C_BaseAnimating::ShadowCastType()
 {
-	CStudioHdr *pStudioHdr = GetModelPtr();
-	if ( !pStudioHdr || !pStudioHdr->SequencesAvailable() )
+	CStudioHdr* pStudioHdr = GetModelPtr();
+	if (!pStudioHdr || !pStudioHdr->SequencesAvailable())
 		return SHADOWS_NONE;
 
-	if ( IsEffectActive(EF_NODRAW | EF_NOSHADOW) )
+	if (IsEffectActive(EF_NODRAW | EF_NOSHADOW))
 		return SHADOWS_NONE;
 
+	if (cl_minimal_rtt_shadows.GetBool() && m_bForceRTTShadows == false)
+	{
+		return SHADOWS_NONE;
+	}
+	else
+	{
+		return GetShadowCastTypeForStudio(pStudioHdr);
+	}
+}
+
+ShadowType_t C_BaseAnimating::GetShadowCastTypeForStudio(CStudioHdr* pStudioHdr)
+{
 	if (pStudioHdr->GetNumSeq() == 0)
 		return SHADOWS_RENDER_TO_TEXTURE;
-		  
-	if ( !IsRagdoll() )
+
+	if (!IsRagdoll())
 	{
 		// If we have pose parameters, always update
-		if ( pStudioHdr->GetNumPoseParameters() > 0 )
+		if (pStudioHdr->GetNumPoseParameters() > 0)
 			return SHADOWS_RENDER_TO_TEXTURE_DYNAMIC;
-		
+
 		// If we have bone controllers, always update
-		if ( pStudioHdr->numbonecontrollers() > 0 )
+		if (pStudioHdr->numbonecontrollers() > 0)
 			return SHADOWS_RENDER_TO_TEXTURE_DYNAMIC;
 
 		// If we use IK, always update
-		if ( pStudioHdr->numikchains() > 0 )
+		if (pStudioHdr->numikchains() > 0)
 			return SHADOWS_RENDER_TO_TEXTURE_DYNAMIC;
 	}
 
@@ -1601,6 +1616,8 @@ void C_BaseAnimating::BuildTransformations( CStudioHdr *hdr, Vector *pos, Quater
 		}
 	}
 	
+	PostBuildTransformations( hdr, pos, q );
+
 	// If a nonhierarchical scale is being applied
 	const float scale = GetModelScale();
 	if( GetModelScaleType() == NONHIERARCHICAL_MODEL_SCALE &&
@@ -4163,6 +4180,9 @@ void C_BaseAnimating::FireEvent( const Vector& origin, const QAngle& angles, int
 
 	case AE_CL_PLAYSOUND:
 		{
+			if ( m_bSuppressAnimSounds )
+				return;
+
 			CLocalPlayerFilter filter;
 
 			if ( m_Attachments.Count() > 0)
@@ -5163,7 +5183,26 @@ bool C_BaseAnimating::InitAsClientRagdoll( const matrix3x4_t *pDeltaBones0, cons
 	return true;
 }
 
+static const char* g_pszForceRTTClassnames[] =
+{
+	"prop_weighted_cube",
+	"class C_NPC_Portal_FloorTurret",
+	"class C_NPC_Personality_Core",
+	"class C_PhysicsProp",
+	//"prop_box_monster",
+};
 
+void C_BaseAnimating::CheckIfEntityShouldForceRTTShadows(void)
+{
+	for (int i = 0; i < ARRAYSIZE(g_pszForceRTTClassnames); ++i)
+	{
+		if (FClassnameIs(this, g_pszForceRTTClassnames[i]))
+		{
+			m_bForceRTTShadows = true;
+			return;
+		}
+	}
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -6919,6 +6958,180 @@ void C_BaseAnimating::SetReceivedSequence( void )
 bool C_BaseAnimating::ShouldResetSequenceOnNewModel( void )
 {
 	return ( m_bReceivedSequence == false );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void C_BaseAnimating::UpdateBoneAttachments( void )
+{
+	if ( !m_pAttachedTo )
+		return;
+
+	//	Assert( IsFollowingEntity() );
+	//	Assert( m_boneIndexAttached >= 0 );
+
+	C_BaseAnimating *follow = FindFollowedEntity();
+	if ( follow && (m_boneIndexAttached >= 0) )
+	{
+		matrix3x4_t boneToWorld, localSpace;
+		follow->GetCachedBoneMatrix( m_boneIndexAttached, boneToWorld );
+		AngleMatrix( m_boneAngles, m_bonePosition, localSpace );
+		ConcatTransforms( boneToWorld, localSpace, GetBoneForWrite( 0 ) );
+
+		Vector absOrigin;
+		MatrixGetColumn( GetBone( 0 ), 3, absOrigin );
+		SetAbsOrigin( absOrigin );
+
+		QAngle absAngle;
+		MatrixAngles( GetBone( 0 ), absAngle );
+		SetAbsAngles( absAngle);
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void C_BaseAnimating::AttachEntityToBone( C_BaseAnimating* attachTarget, int boneIndexAttached, Vector bonePosition, QAngle boneAngles )
+{
+	if ( !attachTarget )
+		return;
+
+	SetCollisionGroup( COLLISION_GROUP_DEBRIS );
+
+	FollowEntity( attachTarget );
+	SetOwnerEntity( attachTarget );
+
+	//	Assert( boneIndexAttached >= 0 );		// We should be attaching to a bone.
+
+	if ( boneIndexAttached >= 0 )
+	{
+		m_boneIndexAttached = boneIndexAttached;
+		m_bonePosition = bonePosition;
+		m_boneAngles = boneAngles;
+	}
+
+	m_BoneAccessor.SetReadableBones( BONE_USED_BY_ANYTHING );
+	m_BoneAccessor.SetWritableBones( BONE_USED_BY_ANYTHING );
+
+	attachTarget->AddBoneAttachment( this );
+
+	NotifyBoneAttached( attachTarget );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void C_BaseAnimating::NotifyBoneAttached( C_BaseAnimating* attachTarget )
+{
+	// If we're already attached to something, remove us from it.
+	if ( m_pAttachedTo )
+	{
+		m_pAttachedTo->RemoveBoneAttachment( this );
+		m_pAttachedTo = NULL;
+	}
+
+	// Remember the new attach target.
+	m_pAttachedTo = attachTarget;
+
+	// Special case: if we just attached to the local player and he is hidden, hide us as well.
+	C_BasePlayer *pPlayer = dynamic_cast< C_BasePlayer* >( attachTarget );
+	if ( pPlayer && pPlayer->IsLocalPlayer() )
+	{
+		if ( !pPlayer->ShouldDrawLocalPlayer() )
+		{
+			AddEffects( EF_NODRAW );
+		}
+	}
+	else
+	{
+		RemoveEffects( EF_NODRAW );
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void C_BaseAnimating::AddBoneAttachment( C_BaseAnimating* newBoneAttachment )
+{
+	if ( !newBoneAttachment )
+		return;
+
+	m_BoneAttachments.AddToTail( newBoneAttachment );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void C_BaseAnimating::RemoveBoneAttachment( C_BaseAnimating* boneAttachment )
+{
+	if ( !boneAttachment )
+		return;
+
+	m_BoneAttachments.FindAndRemove( boneAttachment );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+int C_BaseAnimating::GetNumBoneAttachments()
+{
+	return m_BoneAttachments.Count();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+C_BaseAnimating* C_BaseAnimating::GetBoneAttachment( int i )
+{
+	if ( m_BoneAttachments.IsValidIndex(i) )
+	{
+		return m_BoneAttachments[i];
+	}
+	return NULL;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void C_BaseAnimating::DestroyBoneAttachments()
+{
+	while ( GetNumBoneAttachments() )
+	{
+		C_BaseAnimating *pAttachment = GetBoneAttachment(0);
+		if ( pAttachment )
+		{
+			pAttachment->Release();
+		}
+		else
+		{
+			m_BoneAttachments.Remove(0);
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void C_BaseAnimating::MoveBoneAttachments( C_BaseAnimating* attachTarget )
+{
+	if ( !attachTarget )
+		return;
+
+	// Move all of our bone attachments to this new object.
+	// Preserves the specific bone and attachment location information.
+	while ( GetNumBoneAttachments() )
+	{
+		C_BaseAnimating *pAttachment = GetBoneAttachment(0);
+		if ( pAttachment )
+		{
+			pAttachment->AttachEntityToBone( attachTarget );
+		}
+		else
+		{
+			m_BoneAttachments.Remove(0);
+		}
+	}
 }
 
 bool C_BaseAnimating::m_bBoneListInUse = false;

@@ -1,0 +1,33 @@
+class C_PortalLaser : public C_BaseAnimating
+{
+	DECLARE_CLASS( C_PortalLaser, C_BaseAnimating );
+public:
+	
+	DECLARE_CLIENTCLASS();
+    
+	C_PortalLaser(class C_PortalLaser & );
+	C_PortalLaser();
+    void Precache();
+	void Spawn();
+    void UpdateOnRemove();
+    void OnDataChanged(enum DataUpdateType_t );
+    void ClientThink();
+	~C_PortalLaser();
+	
+private:
+	
+    void CreateSparkEffect( void );
+    //void UpdateSparkEffect(class Vector & ,class Vector & ); // NOTE: Unused in portal 2 code.
+    C_PortalBeamHelper m_beamHelper;
+    EHANDLE m_hReflector;
+    CUtlReference<CNewParticleEffect> m_pSparkEffect;
+    Vector m_vStartPoint;
+    Vector m_vEndPoint;
+    bool m_bLaserOn;
+    bool m_bIsLethal;
+    bool m_bIsAutoAiming;
+    bool m_bShouldSpark;
+    bool m_bUseParentDir;
+    QAngle m_angParentAngles;
+	
+};

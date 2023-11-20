@@ -1,0 +1,58 @@
+void __cdecl CProjectedWallEntity::~CProjectedWallEntity(CProjectedWallEntity *const this)
+{
+  int v1; // eax
+  int v2; // edx
+
+  this->_vptr_IHandleEntity = (int (**)(...))off_C920A8;
+  this->_vptr_IPaintableEntity = (int (**)(...))off_C92420;
+  this->_vptr_IProjectedWallEntityAutoList = (int (**)(...))off_C92440;
+  CProjectedWallEntity::CleanupWall(this);
+  CPaintDatabase::RemovePaintedWall(&PaintDatabase, this, 1);
+  this->m_PaintPowers.m_Size = 0;
+  if ( this->m_PaintPowers.m_Memory.m_nGrowSize < 0 )
+  {
+    this->m_PaintPowers.m_pElements = this->m_PaintPowers.m_Memory.m_pMemory;
+  }
+  else
+  {
+    if ( this->m_PaintPowers.m_Memory.m_pMemory )
+    {
+      (*(void (__cdecl **)(_DWORD, PaintPowerType *))(*g_pMemAlloc + 8))(
+        g_pMemAlloc,
+        this->m_PaintPowers.m_Memory.m_pMemory);
+      this->m_PaintPowers.m_Memory.m_pMemory = 0;
+    }
+    this->m_PaintPowers.m_Memory.m_nAllocationCount = 0;
+    this->m_PaintPowers.m_pElements = 0;
+  }
+  this->_vptr_IProjectedWallEntityAutoList = (int (**)(...))off_C92090;
+  if ( IProjectedWallEntityAutoList::m_IProjectedWallEntityAutoListAutoList.m_Size <= 0 )
+  {
+LABEL_10:
+    CPaintableEntity<CBaseProjectedEntity>::~CPaintableEntity(this);
+    return;
+  }
+  v1 = 0;
+  if ( &this->IProjectedWallEntityAutoList != (IProjectedWallEntityAutoList *)*(CProjectedWallEntity *const *)IProjectedWallEntityAutoList::m_IProjectedWallEntityAutoListAutoList.m_Memory.m_pMemory )
+  {
+    while ( ++v1 != IProjectedWallEntityAutoList::m_IProjectedWallEntityAutoListAutoList.m_Size )
+    {
+      if ( &this->IProjectedWallEntityAutoList == IProjectedWallEntityAutoList::m_IProjectedWallEntityAutoListAutoList.m_Memory.m_pMemory[v1] )
+      {
+        if ( v1 == -1 )
+          goto LABEL_10;
+        goto LABEL_12;
+      }
+    }
+    goto LABEL_10;
+  }
+LABEL_12:
+  v2 = IProjectedWallEntityAutoList::m_IProjectedWallEntityAutoListAutoList.m_Size - 1;
+  if ( v1 != IProjectedWallEntityAutoList::m_IProjectedWallEntityAutoListAutoList.m_Size - 1 )
+  {
+    IProjectedWallEntityAutoList::m_IProjectedWallEntityAutoListAutoList.m_Memory.m_pMemory[v1] = IProjectedWallEntityAutoList::m_IProjectedWallEntityAutoListAutoList.m_Memory.m_pMemory[v2];
+    v2 = IProjectedWallEntityAutoList::m_IProjectedWallEntityAutoListAutoList.m_Size - 1;
+  }
+  IProjectedWallEntityAutoList::m_IProjectedWallEntityAutoListAutoList.m_Size = v2;
+  CPaintableEntity<CBaseProjectedEntity>::~CPaintableEntity(this);
+}

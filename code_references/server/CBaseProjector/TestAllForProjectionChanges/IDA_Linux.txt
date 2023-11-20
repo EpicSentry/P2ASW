@@ -1,0 +1,28 @@
+void CBaseProjector::TestAllForProjectionChanges()
+{
+  int v0; // ebx
+  unsigned int m_Index; // eax
+  char *v2; // edx
+  int v3; // eax
+
+  if ( s_AllProjectors.m_Size > 0 )
+  {
+    v0 = 0;
+    do
+    {
+      m_Index = s_AllProjectors.m_Memory.m_pMemory[v0]->m_hFirstChild.m_Value.m_Index;
+      if ( m_Index != -1 )
+      {
+        v2 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+        if ( *((_DWORD *)v2 + 2) == HIWORD(m_Index) )
+        {
+          v3 = *((_DWORD *)v2 + 1);
+          if ( v3 )
+            (*(void (__thiscall **)(CBaseEntityList *, int))(*(_DWORD *)v3 + 836))(g_pEntityList, v3);
+        }
+      }
+      ++v0;
+    }
+    while ( s_AllProjectors.m_Size > v0 );
+  }
+}

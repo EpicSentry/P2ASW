@@ -1,0 +1,5 @@
+void __cdecl CBaseProjectedEntity::~CBaseProjectedEntity(CBaseProjectedEntity *const this)
+{
+  this->_vptr_IHandleEntity = (int (**)(...))off_C81808;
+  CBaseEntity::~CBaseEntity(this);
+}

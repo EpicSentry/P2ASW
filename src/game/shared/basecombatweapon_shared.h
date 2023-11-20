@@ -426,7 +426,7 @@ public:
 	virtual void			OnRestore();
 
 	virtual void			Redraw(void);
-	virtual void			ViewModelDrawn( CBaseViewModel *pViewModel );
+	virtual void			ViewModelDrawn( int nFlags, CBaseViewModel *pViewModel );
 	// Get the position that bullets are seen coming out. Note: the returned values are different
 	// for first person and third person.
 	bool					GetShootPosition( Vector &vOrigin, QAngle &vAngles );
@@ -458,6 +458,9 @@ public:
 
 	virtual void			GetToolRecordingState( KeyValues *msg );
 	void					EnsureCorrectRenderingModel();
+	
+	virtual void			GetWeaponCrosshairScale( float &flScale ) { flScale = 1.f; }
+
 	virtual void			GetToolViewModelState( KeyValues *msg ) {} // this is just a stub for viewmodels to request recording of weapon-specific effects, etc
 
 #if !defined ( USES_PERSISTENT_ITEMS )

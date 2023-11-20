@@ -1,4 +1,4 @@
-//========= Copyright 1996-2009, Valve Corporation, All rights reserved. ============//
+//========= Copyright © 1996-2009, Valve Corporation, All rights reserved. ============//
 //
 //=============================================================================//
 #include "cbase.h"
@@ -8,10 +8,6 @@
 
 #include <functional>
 #include <algorithm>
-
-#ifndef DEDICATED
-#include "cegclientwrapper.h"
-#endif
 
 #include "paint_power_user.h"
 #include "vstdlib/jobthread.h"
@@ -117,9 +113,11 @@ void CPaintStream::QueuePaintEffect()
 	if ( engine->IsDedicatedServer() )
 		return;
 #else
+#if 0
 	// if we are listen server, don't do anything on client
-	//if ( engine->IsClientLocalToActiveServer() )
-	//	return;
+	if ( engine->IsClientLocalToActiveServer() )
+		return;
+#endif
 #endif
 
 	// Update how many channels are in use

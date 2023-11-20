@@ -1,0 +1,56 @@
+class Blobulator::LightBucketImplementation::CSection
+{
+    public void CSection();
+    public void PushSeed(unsigned int );
+    public void ResetXYZ(int ,int ,int );
+    public void ClearDoneState();
+    public void ClearCrawlingState();
+    public void CheckCrawlingInfoIsReset();
+    public void CheckSectionIsReset();
+    public void CheckInsideXYZ(unsigned int );
+    public void CheckInsideXYZ(int ,int ,int );
+    public void CheckOutsideXYZ(unsigned int );
+    public void CheckOutsideXYZ(int ,int ,int );
+    union Grid2D
+    {
+        unsigned int m_nFlags64;
+        unsigned int m_nFlags32[2];
+        unsigned int m_nFlags8[8];
+    };
+    public union Blobulator::LightBucketImplementation::CSection::Grid2D m_SectionXM;
+    public union Blobulator::LightBucketImplementation::CSection::Grid2D m_SectionXP;
+    public union Blobulator::LightBucketImplementation::CSection::Grid2D m_SectionYM;
+    public union Blobulator::LightBucketImplementation::CSection::Grid2D m_SectionYP;
+    public union Blobulator::LightBucketImplementation::CSection::Grid2D m_SectionZM;
+    public union Blobulator::LightBucketImplementation::CSection::Grid2D m_SectionZP;
+    public union Blobulator::LightBucketImplementation::CSection::Grid2D m_InternalDoneState[8];
+    public class FixedArray<unsigned int,64> m_SeedList;
+    public int m_nSoftLock;
+    public bool TryLock();
+    public void Unlock();
+    public void Initialize();
+    public const int BUCKETS_PER_SECTION_X;
+    public const int BUCKETS_PER_SECTION_Y;
+    public const int BUCKETS_PER_SECTION_Z;
+    public const int BUCKETS_PER_SECTION_X_MASK;
+    public const int BUCKETS_PER_SECTION_Y_MASK;
+    public const int BUCKETS_PER_SECTION_Z_MASK;
+    public const int NUMBER_OF_BUCKETS_IN_SECTION;
+    public int GetBucketIndexX(int );
+    public int GetBucketIndexY(int );
+    public int GetBucketIndexZ(int );
+    public int m_nX;
+    public int m_nY;
+    public int m_nZ;
+    public int m_nInit;
+    public class Blobulator::LightBucketImplementation::CSection * m_pEaSection;
+    public int m_nSectionIndex;
+    public int m_nOnAStack;
+    public int m_nCornerIndices[4][125];
+    public int GetSizeToDmaOut();
+    public int m_nNumberOfParticles;
+    public const int MAX_NUMBER_OF_PARTICLES_IN_SECTION;
+    public unsigned int m_nParticleIndices[256];
+    public void Log();
+    public void LogAndCheck(class Blobulator::LightBucketImplementation::CSection & ,class Blobulator::LightBucketImplementation::CSection * ,bool );
+};

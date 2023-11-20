@@ -1,0 +1,6 @@
+void __cdecl CBaseProjector::~CBaseProjector(CBaseProjector *const this)
+{
+  this->_vptr_IHandleEntity = (int (**)(...))off_C81C48;
+  CBaseProjector::Cleanup(this);
+  CBaseAnimating::~CBaseAnimating(this);
+}

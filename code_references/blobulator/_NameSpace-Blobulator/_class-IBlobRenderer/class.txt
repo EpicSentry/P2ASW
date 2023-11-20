@@ -1,0 +1,29 @@
+class Blobulator::IBlobRenderer
+{
+    public void ~IBlobRenderer();
+    public void BeginFrame(bool ,void * );
+    public void EndFrame();
+    public void BeginTile(class Point3D & );
+    public void DrawTile();
+    public void EndTile();
+    public void AddParticle(class ImpParticle & ,bool );
+    public void SetCubeWidth(float );
+    public float GetCubeWidth();
+    public void SetRenderRadius(float );
+    public float GetRenderRadius();
+    public void SetCutoffRadius(float );
+    public float GetCutoffRadius();
+    public class Point3D & GetInnerDimensions();
+    public float GetMarginWidth();
+    public void SetPortalMatrices(struct matrix3x4_t * ,int );
+    public void SetDebugMode(bool );
+    public bool GetDebugMode();
+    public int GetNumberOfDebugInfo();
+    public void DrawDebugInfo(class IVDebugOverlay & ,int );
+    public int GetDebugId();
+    private void IBlobRenderer(class Blobulator::IBlobRenderer & );
+    protected void IBlobRenderer();
+    private class Blobulator::IBlobRenderer & operator=(class Blobulator::IBlobRenderer & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};

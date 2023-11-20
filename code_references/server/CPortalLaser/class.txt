@@ -1,0 +1,89 @@
+class CPortalLaser : public CBaseAnimating, public IPortalLaserAutoList
+{
+public:
+
+	DECLARE_CLASS( CPortalLaser, CBaseAnimating );
+	DECLARE_SERVERCLASS();
+	DECLARE_DATADESC();
+	
+    CBaseEntity *GetEntity();
+    void CPortalLaser(class CPortalLaser & );
+    void CPortalLaser();
+    void ~CPortalLaser();
+    void Spawn();
+    void Precache();
+    void Activate();
+    void UpdateOnRemove();
+    bool CreateVPhysics();
+    int UpdateTransmitState();
+    Vector ClosestPointOnLineSegment(class Vector & );
+    void InputTurnOn(struct inputdata_t &inputdata );
+    void InputTurnOff(struct inputdata_t &inputdata );
+    void InputToggle(struct inputdata_t &inputdata );
+    CPortalLaser *m_pParentLaser;
+    CPortalLaser *m_pChildLaser;
+	
+    struct PortalLaserInfo_t
+    {
+        class Vector vecStart;
+        class Vector vecEnd;
+        class CUtlVector<CBaseEntity *,CUtlMemory<CBaseEntity *,int> > sortedEntList;
+        void PortalLaserInfo_t(struct CPortalLaser::PortalLaserInfo_t & );
+        void PortalLaserInfo_t();
+        void ~PortalLaserInfo_t();
+        struct CPortalLaser::PortalLaserInfo_t & operator=(struct CPortalLaser::PortalLaserInfo_t & );
+    };
+	
+private:
+	
+	CNetworkHandle( CBaseEntity, m_hReflector );
+	
+	CNetworkVector( m_vStartPoint );
+	CNetworkVector( m_vEndPoint );
+	
+	CNetworkVar( bool, m_bLaserOn );
+	CNetworkVar( bool, m_bIsLethal );
+	CNetworkVar( bool, m_bIsAutoAiming );
+	CNetworkVar( bool, m_bShouldSpark );
+	CNetworkVar( bool, m_bUseParentDir );
+	CNetworkQAngle( m_angParentAngles );
+	
+    QAngle m_angPortalExitAngles;
+	
+    private class CBaseEntity * TraceLaser(bool ,class Vector & ,class Vector & ,float & ,class CGameTrace & ,class CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > & ,class Vector * );
+    private class CBaseEntity * GetEntitiesAlongLaser(class Vector & ,class Vector & ,class Vector * ,class CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > & ,bool );
+    void DamageEntitiesAlongLaser(class CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > & ,bool );
+    Vector m_vecNearestSoundSource[33];
+    CBaseEntity *m_pSoundProxy[33];
+    CSoundPatch *m_pAmbientSound[33];
+    CInfoPlacementHelper * m_pPlacementHelper;
+    int m_iLaserAttachment;
+    string_t m_ModelName;
+    bool m_bStartOff;
+    bool m_bFromReflectedCube;
+    bool m_bGlowInitialized;
+    bool m_bAutoAimEnabled;
+    bool m_bNoPlacementHelper;
+	
+    void RemoveChildLaser();
+    void UpdateNextLaser(class Vector & ,class Vector & ,class CBaseEntity * );
+    void FireLaser(class Vector & ,class Vector & ,class CBaseEntity * );
+    void CreateHelperEntities();
+    void CreateSoundProxies();
+    void DamageEntity(class CBaseEntity * ,float );
+    void TurnOn();
+    void TurnOff();
+    void TurnOnGlow();
+    void TurnOffGlow();
+    void TurnOffLaserSound();
+    void StrikeThink();
+    void BeamDamage(class CGameTrace * );
+    void UpdateSoundPosition(class Vector & ,class Vector & );
+    void SetFromReflectedCube(bool );
+	
+    bool StrikeEntitiesAlongLaser(class Vector & ,class Vector & ,class Vector * );
+    bool ShouldAutoAim(class CBaseEntity * );
+    bool IsOn();
+    bool ReflectLaserFromEntity(class CBaseEntity * );
+    bool InPVS();
+};

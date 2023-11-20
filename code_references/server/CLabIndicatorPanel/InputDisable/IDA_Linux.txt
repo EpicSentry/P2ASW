@@ -1,0 +1,4 @@
+void __cdecl CLabIndicatorPanel::InputDisable(CLabIndicatorPanel *const this, inputdata_t *const inputdata)
+{
+  CLabIndicatorPanel::Disable(this);
+}

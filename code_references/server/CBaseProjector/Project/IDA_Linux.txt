@@ -1,0 +1,147 @@
+void __cdecl CBaseProjector::Project(CBaseProjector *const this)
+{
+  CBaseEntityList *v1; // edx
+  unsigned int m_Index; // eax
+  char *v3; // ecx
+  bool v4; // si
+  bool m_bDisablePlacementHelper; // di
+  unsigned int v6; // eax
+  CBaseProjectedEntity *v7; // ecx
+  char *v8; // edx
+  int v9; // eax
+  QAngle *v10; // esi
+  unsigned int v11; // eax
+  char *v12; // edi
+  edict_t *m_pPev; // edi
+  unsigned int *v14; // eax
+  char *v15; // ecx
+  IChangeInfoAccessor *v16; // eax
+  unsigned __int16 m_nChangeInfos; // dx
+  CSharedEdictChangeInfo *v18; // edx
+  char *v19; // eax
+  int v20; // edx
+  char *v21; // [esp+20h] [ebp-28h]
+  QAngle *qProjectAngles; // [esp+24h] [ebp-24h]
+  char *bShouldSpawn; // [esp+28h] [ebp-20h]
+  unsigned __int16 vProjectOrigin; // [esp+2Ch] [ebp-1Ch]
+
+  v1 = g_pEntityList;
+  m_Index = this->m_hFirstChild.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v3 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v3 + 2) == HIWORD(m_Index) )
+    {
+      v4 = 0;
+      if ( *((_DWORD *)v3 + 1) )
+        goto LABEL_4;
+    }
+  }
+  v9 = (*((int (__cdecl **)(CBaseProjector *const))this->_vptr_IHandleEntity + 235))(this);
+  v1 = g_pEntityList;
+  qProjectAngles = 0;
+  v10 = (QAngle *)v9;
+  v11 = this->m_hFirstChild.m_Value.m_Index;
+  if ( v11 != -1 )
+  {
+    v12 = (char *)g_pEntityList + 24 * (unsigned __int16)v11;
+    if ( *((_DWORD *)v12 + 2) == HIWORD(v11) )
+      qProjectAngles = (QAngle *)*((_DWORD *)v12 + 1);
+  }
+  if ( v10 != qProjectAngles )
+  {
+    if ( !this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( !m_pPev || (m_pPev->m_fStateFlags & 0x100) != 0 )
+        goto LABEL_17;
+      m_pPev->m_fStateFlags |= 1u;
+      v16 = CBaseEdict::GetChangeAccessor(m_pPev);
+      if ( v16->m_iChangeInfoSerialNumber == g_pSharedChangeInfo->m_iSerialNumber )
+      {
+        bShouldSpawn = (char *)g_pSharedChangeInfo + 40 * v16->m_iChangeInfo;
+        v21 = bShouldSpawn + 2;
+        vProjectOrigin = *((_WORD *)bShouldSpawn + 20);
+        if ( !vProjectOrigin )
+          goto LABEL_37;
+        if ( *((_WORD *)bShouldSpawn + 1) == 1228 )
+          goto LABEL_17;
+        v20 = 0;
+        while ( v20 != 2 * (unsigned __int16)(vProjectOrigin - 1) )
+        {
+          v20 += 2;
+          if ( *(_WORD *)&v21[v20] == 1228 )
+            goto LABEL_17;
+        }
+        if ( vProjectOrigin != 19 )
+        {
+LABEL_37:
+          *(_WORD *)&v21[2 * vProjectOrigin] = 1228;
+          *((_WORD *)bShouldSpawn + 20) = vProjectOrigin + 1;
+          goto LABEL_17;
+        }
+      }
+      else
+      {
+        m_nChangeInfos = g_pSharedChangeInfo->m_nChangeInfos;
+        if ( m_nChangeInfos != 100 )
+        {
+          v16->m_iChangeInfo = m_nChangeInfos;
+          v18 = g_pSharedChangeInfo;
+          ++g_pSharedChangeInfo->m_nChangeInfos;
+          v16->m_iChangeInfoSerialNumber = v18->m_iSerialNumber;
+          v19 = (char *)g_pSharedChangeInfo + 40 * v16->m_iChangeInfo;
+          *((_WORD *)v19 + 1) = 1228;
+          *((_WORD *)v19 + 20) = 1;
+          goto LABEL_17;
+        }
+      }
+      v16->m_iChangeInfoSerialNumber = 0;
+      m_pPev->m_fStateFlags |= 0x100u;
+      goto LABEL_17;
+    }
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+LABEL_17:
+    if ( !v10 )
+    {
+      this->m_hFirstChild.m_Value.m_Index = -1;
+      return;
+    }
+    v14 = (unsigned int *)(*(int (__cdecl **)(QAngle *))(LODWORD(v10->x) + 12))(v10);
+    v1 = g_pEntityList;
+    v11 = *v14;
+    this->m_hFirstChild.m_Value.m_Index = v11;
+  }
+  if ( v11 == -1 )
+    return;
+  v15 = (char *)v1 + 24 * (unsigned __int16)v11;
+  if ( *((_DWORD *)v15 + 2) != HIWORD(v11) || !*((_DWORD *)v15 + 1) )
+    return;
+  v4 = 1;
+LABEL_4:
+  m_bDisablePlacementHelper = this->m_bDisablePlacementHelper;
+  if ( (this->m_iEFlags & 0x800) != 0 )
+  {
+    CBaseEntity::CalcAbsolutePosition(this);
+    if ( (this->m_iEFlags & 0x800) != 0 )
+      CBaseEntity::CalcAbsolutePosition(this);
+    v1 = g_pEntityList;
+  }
+  v6 = this->m_hFirstChild.m_Value.m_Index;
+  v7 = 0;
+  if ( v6 != -1 )
+  {
+    v8 = (char *)v1 + 24 * (unsigned __int16)v6;
+    if ( *((_DWORD *)v8 + 2) == HIWORD(v6) )
+      v7 = (CBaseProjectedEntity *)*((_DWORD *)v8 + 1);
+  }
+  CBaseProjectedEntity::RecursiveProjection(
+    v7,
+    v4,
+    this,
+    0,
+    &this->m_vecAbsOrigin,
+    &this->m_angAbsRotation,
+    16,
+    m_bDisablePlacementHelper);
+}

@@ -1,0 +1,187 @@
+void __cdecl CHUDQuickInfo::DrawPortalHint(
+        CHUDQuickInfo *const this,
+        const Vector *const vecPosition,
+        bool bBluePortal)
+{
+  int v3; // eax
+  int v4; // ebx
+  __m128 v5; // xmm6
+  __m128d v6; // xmm1
+  __m128 v7; // xmm5
+  __m128d v8; // xmm2
+  int v9; // ebx
+  float v10; // xmm1_4
+  float v11; // xmm2_4
+  float v12; // xmm0_4
+  __m128 v13; // xmm1
+  float v14; // xmm1_4
+  float v15; // xmm2_4
+  int v16; // eax
+  C_BasePlayer_0 *SplitScreenViewPlayer; // eax
+  int v18; // eax
+  int v19; // edx
+  float v20; // xmm5_4
+  int v21; // edi
+  float v22; // xmm5_4
+  int v23; // esi
+  float v24; // xmm5_4
+  unsigned int v25; // eax
+  int v26; // ebx
+  float v27; // xmm0_4
+  float v28; // xmm1_4
+  float v29; // xmm4_4
+  unsigned __int64 v30; // [esp+28h] [ebp-E0h]
+  double v31; // [esp+30h] [ebp-D8h]
+  unsigned int v32; // [esp+50h] [ebp-B8h]
+  unsigned int v33; // [esp+60h] [ebp-A8h]
+  double v34; // [esp+70h] [ebp-98h]
+  float v35; // [esp+70h] [ebp-98h]
+  char v36; // [esp+70h] [ebp-98h]
+  float v37; // [esp+84h] [ebp-84h]
+  float ca; // [esp+8Ch] [ebp-7Ch]
+  float sa; // [esp+90h] [ebp-78h]
+  float v40; // [esp+98h] [ebp-70h]
+  Color v41; // [esp+9Ch] [ebp-6Ch] BYREF
+  float v42; // [esp+A4h] [ebp-64h] BYREF
+  float v43; // [esp+A8h] [ebp-60h]
+  int v44; // [esp+ACh] [ebp-5Ch]
+  int v45; // [esp+B0h] [ebp-58h]
+  float v46; // [esp+B4h] [ebp-54h]
+  float v47; // [esp+B8h] [ebp-50h]
+  int v48; // [esp+BCh] [ebp-4Ch]
+  int v49; // [esp+C0h] [ebp-48h]
+  float v50; // [esp+C4h] [ebp-44h]
+  float v51; // [esp+C8h] [ebp-40h]
+  int v52; // [esp+CCh] [ebp-3Ch]
+  int v53; // [esp+D0h] [ebp-38h]
+  float v54; // [esp+D4h] [ebp-34h]
+  float v55; // [esp+D8h] [ebp-30h]
+  int v56; // [esp+DCh] [ebp-2Ch]
+  int v57; // [esp+E0h] [ebp-28h]
+  Vector screen; // [esp+E4h] [ebp-24h] BYREF
+
+  if ( vec3_invalid.x != vecPosition->x || vec3_invalid.y != vecPosition->y || vec3_invalid.z != vecPosition->z )
+  {
+    ScreenTransform(vecPosition, &screen);
+    *(float *)&v33 = (float)(ScreenWidth() / 2);
+    v3 = ScreenHeight();
+    v34 = screen.x * 0.5;
+    *(float *)&v32 = (float)(v3 / 2);
+    v4 = ScreenWidth();
+    v31 = screen.y * 0.5;
+    v5 = _mm_unpacklo_ps((__m128)v33, (__m128)v33);
+    v6 = _mm_cvtps_pd(v5);
+    v7 = _mm_unpacklo_ps((__m128)v32, (__m128)v32);
+    v8 = _mm_cvtps_pd(v7);
+    v6.m128d_f64[0] = v6.m128d_f64[0] + (double)v4 * v34 + 0.5;
+    *(float *)v6.m128d_f64 = _mm_unpacklo_pd(v6, v6).m128d_f64[0];
+    v8.m128d_f64[0] = v8.m128d_f64[0] - ((double)ScreenHeight() * v31 + 0.5);
+    *(float *)v8.m128d_f64 = _mm_unpacklo_pd(v8, v8).m128d_f64[0];
+    v40 = fsqrt(
+            (float)((float)(*(float *)v6.m128d_f64 - v5.m128_f32[0]) * (float)(*(float *)v6.m128d_f64 - v5.m128_f32[0]))
+          + (float)((float)(*(float *)v8.m128d_f64 - v7.m128_f32[0]) * (float)(*(float *)v8.m128d_f64 - v7.m128_f32[0])));
+    v9 = ScreenWidth();
+    v10 = *(float *)v6.m128d_f64 - v5.m128_f32[0];
+    v11 = *(float *)v8.m128d_f64 - v7.m128_f32[0];
+    if ( v9 < ScreenHeight() )
+      v12 = (float)((float)ScreenWidth() * 0.89999998) * 0.5;
+    else
+      v12 = (float)((float)ScreenHeight() * 0.89999998) * 0.5;
+    v13 = _mm_cvtpd_ps((__m128d)COERCE_UNSIGNED_INT64(atan2(v11, v10)));
+    v13.m128_f32[0] = _mm_unpacklo_ps(v13, v13).m128_f32[0];
+    *(double *)&v30 = cos(v13.m128_f32[0]);
+    sa = sin(v13.m128_f32[0]);
+    ca = _mm_unpacklo_pd((__m128d)v30, (__m128d)v30).m128d_f64[0];
+    v14 = (float)(ScreenWidth() / 2);
+    if ( v12 > (float)(v40 * 0.5) )
+    {
+      v37 = v14 + (float)(ca * (float)(v40 * 0.5));
+      v15 = v40 * 0.5;
+    }
+    else
+    {
+      v37 = v14 + (float)(ca * v12);
+      v15 = v12;
+    }
+    v35 = (float)(v15 * sa) + (float)(ScreenHeight() / 2);
+    v16 = (*(int (__cdecl **)(IVEngineClient *))(*(_DWORD *)engine + 508))(engine);
+    SplitScreenViewPlayer = GetSplitScreenViewPlayer(v16);
+    v18 = (*((int (__cdecl **)(C_BasePlayer_0 *))SplitScreenViewPlayer->_vptr_IHandleEntity + 124))(SplitScreenViewPlayer);
+    UTIL_Portal_Color(&v41, 2 - bBluePortal, v18);
+    LOBYTE(v19) = 5;
+    if ( v41._color[0] > 4u )
+    {
+      LOBYTE(v19) = -1;
+      v20 = (float)v41._color[0]
+          + (float)((float)(1.0 - (float)((float)((float)((float)0 * 65536.0) + (float)v41._color[0]) / 255.0)) * 64.0);
+      if ( v20 <= 255.0 )
+        v19 = (int)v20;
+    }
+    LOBYTE(v21) = 5;
+    if ( v41._color[1] > 4u )
+    {
+      LOBYTE(v21) = -1;
+      v22 = (float)v41._color[1]
+          + (float)((float)(1.0 - (float)((float)((float)((float)0 * 65536.0) + (float)v41._color[1]) / 255.0)) * 64.0);
+      if ( v22 <= 255.0 )
+        v21 = (int)v22;
+    }
+    LOBYTE(v23) = 5;
+    if ( v41._color[2] > 4u )
+    {
+      LOBYTE(v23) = -1;
+      v24 = (float)v41._color[2]
+          + (float)((float)(1.0 - (float)((float)((float)((float)0 * 65536.0) + (float)v41._color[2]) / 255.0)) * 64.0);
+      if ( v24 <= 255.0 )
+        v23 = (int)v24;
+    }
+    if ( v12 == (float)(0.5 * v12) )
+    {
+      v25 = (float)(v40 - v12) >= 0.0 ? 0xFFFFFF80 : 0;
+    }
+    else
+    {
+      v25 = 0;
+      v29 = (float)(v40 - (float)(0.5 * v12)) / (float)(v12 - (float)(0.5 * v12));
+      if ( v29 >= 0.0 )
+      {
+        v25 = -128;
+        if ( v29 <= 1.0 )
+          v25 = (int)(float)((float)(v29 * 128.0) + 0.0);
+      }
+    }
+    v44 = 0;
+    v26 = (v25 << 24) | *(_DWORD *)&v41 & 0xFFFFFF;
+    v45 = 0;
+    v48 = 1065353216;
+    v49 = 0;
+    v52 = 1065353216;
+    v53 = 1065353216;
+    v56 = 0;
+    v57 = 1065353216;
+    v27 = (float)(v37 + (float)(ca * -32.0)) + (float)((float)-sa * -32.0);
+    v42 = v27;
+    v28 = 64.0 * (float)-sa;
+    v43 = (float)((float)(-32.0 * sa) + v35) + (float)(ca * -32.0);
+    v46 = v27 + (float)(ca * 64.0);
+    v47 = (float)(sa * 64.0) + v43;
+    v55 = v43 + (float)(ca * 64.0);
+    v50 = v46 + v28;
+    v54 = v28 + v27;
+    v51 = v47 + (float)(ca * 64.0);
+    v36 = v19;
+    (*(void (__cdecl **)(vgui::ISurface *, int))(*(_DWORD *)g_pVGuiSurface + 148))(
+      g_pVGuiSurface,
+      this->m_nArrowTexture);
+    LOBYTE(v26) = v36;
+    BYTE1(v26) = v21;
+    (*(void (__cdecl **)(vgui::ISurface *, unsigned int))(*(_DWORD *)g_pVGuiSurface + 56))(
+      g_pVGuiSurface,
+      ((unsigned __int8)v23 << 16) | v26 & 0xFF00FFFF);
+    (*(void (__cdecl **)(vgui::ISurface *, int, float *, int))(*(_DWORD *)g_pVGuiSurface + 416))(
+      g_pVGuiSurface,
+      4,
+      &v42,
+      1);
+  }
+}

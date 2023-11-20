@@ -1,0 +1,16 @@
+void __thiscall C_PropRocketTripwire::C_PropRocketTripwire(C_PropRocketTripwire *this)
+{
+  C_BaseAnimating::C_BaseAnimating(this);
+  this->C_BaseAnimating::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable = (C_PropRocketTripwire_vtbl *)&C_PropRocketTripwire::`vftable'{for `IClientUnknown'};
+  this->C_BaseAnimating::C_BaseEntity::IClientEntity::IClientRenderable::__vftable = (IClientRenderable_vtbl *)&C_PropRocketTripwire::`vftable'{for `IClientRenderable'};
+  this->C_BaseAnimating::C_BaseEntity::IClientEntity::IClientNetworkable::__vftable = (IClientNetworkable_vtbl *)&C_PropRocketTripwire::`vftable'{for `IClientNetworkable'};
+  this->C_BaseAnimating::C_BaseEntity::IClientEntity::IClientThinkable::__vftable = (IClientThinkable_vtbl *)&C_PropRocketTripwire::`vftable'{for `IClientThinkable'};
+  this->C_BaseAnimating::C_BaseEntity::IClientModelRenderable::__vftable = (IClientModelRenderable_vtbl *)&C_PropRocketTripwire::`vftable';
+  C_PortalBeamHelper::C_PortalBeamHelper(&this->m_beamHelper);
+  this->m_hRocket.m_Index = -1;
+  CTraceFilterSimpleClassnameList::CTraceFilterSimpleClassnameList(&this->m_filterBeams, this, 1);
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore(&this->m_filterBeams, "projected_wall_entity");
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore(&this->m_filterBeams, "point_laser_target");
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore(&this->m_filterBeams, "player");
+  this->m_filterBeams.SetCollisionGroup(&this->m_filterBeams, 0);
+}

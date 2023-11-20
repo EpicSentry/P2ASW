@@ -39,6 +39,11 @@ CBaseViewModel::CBaseViewModel()
 	m_nOldAnimationParity = 0;
 	m_EntClientFlags |= ENTCLIENTFLAG_ALWAYS_INTERPOLATE;
 	RenderWithViewModels( true );
+	
+	m_flCamDriverAppliedTime = 0;
+	m_flCamDriverWeight = 0;
+	m_vecCamDriverLastPos.Init();
+	m_angCamDriverLastAng.Init();
 #endif
 
 	SetRenderColor( 255, 255, 255 );
@@ -370,6 +375,26 @@ void CBaseViewModel::SendViewModelMatchingSequence( int sequence )
 #include "ivieweffects.h"
 #endif
 
+#ifdef CLIENT_DLL
+void CBaseViewModel::PostBuildTransformations( CStudioHdr *pStudioHdr, BoneVector *pos, BoneQuaternion q[] )
+{
+	int nCamDriverBone = LookupBone( "cam_driver" );
+	if ( nCamDriverBone != -1 )
+	{
+		m_flCamDriverAppliedTime = gpGlobals->curtime;		
+		VectorCopy( pos[nCamDriverBone], m_vecCamDriverLastPos );
+		QuaternionAngles( q[nCamDriverBone], m_angCamDriverLastAng );
+
+		if ( ShouldFlipViewModel() )
+		{
+			m_angCamDriverLastAng[YAW] = -m_angCamDriverLastAng[YAW];
+			m_vecCamDriverLastPos.y = -m_vecCamDriverLastPos.y;
+		}
+
+	}
+}
+#endif
+
 void CBaseViewModel::CalcViewModelView( CBasePlayer *owner, const Vector& eyePosition, const QAngle& eyeAngles )
 {
 
@@ -444,7 +469,7 @@ void CBaseViewModel::CalcViewModelView( CBasePlayer *owner, const Vector& eyePos
 	}
 	// Add model-specific bob even if no weapon associated (for head bob for off hand models)
 	AddViewModelBob( owner, vmorigin, vmangles );
-#if !defined ( CSTRIKE_DLL )
+#if !defined ( CSTRIKE_DLL ) && !defined ( PORTAL2 ) // This will also fix an issue in Portal 2 Swarm
 	// This was causing weapon jitter when rotating in updated CS:S; original Source had this in above InPrediction block  07/14/10
 	// Add lag	
 	CalcViewModelLag( vmorigin, vmangles, vmangoriginal );
@@ -452,6 +477,11 @@ void CBaseViewModel::CalcViewModelView( CBasePlayer *owner, const Vector& eyePos
 
 	if ( !prediction->InPrediction() )
 	{
+#ifdef PORTAL2
+		// This fixes viewmodel lag looking weird in multiplayer,
+		// this wasn't in the csgo leak but it's in the modern build of Portal 2.
+		CalcViewModelLag( vmorigin, vmangles, vmangoriginal );
+#endif
 		// Let the viewmodel shake at about 10% of the amplitude of the player's view
 		ACTIVE_SPLITSCREEN_PLAYER_GUARD_ENT( GetOwner() );
 		GetViewEffects()->ApplyShake( vmorigin, vmangles, 0.1 );	
@@ -550,8 +580,6 @@ static void RecvProxy_Weapon( const CRecvProxyData *pData, void *pStruct, void *
 #endif
 
 
-LINK_ENTITY_TO_CLASS( viewmodel, CBaseViewModel );
-
 IMPLEMENT_NETWORKCLASS_ALIASED( BaseViewModel, DT_BaseViewModel )
 
 BEGIN_NETWORK_TABLE_NOBASE(CBaseViewModel, DT_BaseViewModel)
@@ -589,6 +617,8 @@ BEGIN_NETWORK_TABLE_NOBASE(CBaseViewModel, DT_BaseViewModel)
 
 #endif
 END_NETWORK_TABLE()
+
+LINK_ENTITY_TO_CLASS_ALIASED( viewmodel, BaseViewModel );
 
 #ifdef CLIENT_DLL
 

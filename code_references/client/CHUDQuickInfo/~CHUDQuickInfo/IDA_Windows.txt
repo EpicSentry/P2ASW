@@ -1,0 +1,18 @@
+void __thiscall CHUDQuickInfo::~CHUDQuickInfo(CHUDQuickInfo *this)
+{
+  int v2; // eax
+
+  v2 = *((_DWORD *)&this->vgui::Panel::__vftable + 1);
+  this->CHudElement::CGameEventListener::IGameEventListener2::__vftable = (CHUDQuickInfo_vtbl *)&CHUDQuickInfo::`vftable';
+  this->vgui::Panel::__vftable = (vgui::Panel_vtbl *)&CHUDQuickInfo::`vftable'{for `vgui::Panel'};
+  *(vgui::Panel_vtbl **)((char *)&this->vgui::Panel::__vftable + *(_DWORD *)(v2 + 4) + 4) = (vgui::Panel_vtbl *)&CHUDQuickInfo::`vftable'{for `vgui::IClientPanel'};
+  *(vgui::Panel_vtbl **)((char *)&this->vgui::Panel::__vftable
+                       + *(_DWORD *)(*((_DWORD *)&this->vgui::Panel::__vftable + 1) + 4)) = (vgui::Panel_vtbl *)(*(_DWORD *)(*((_DWORD *)&this->vgui::Panel::__vftable + 1) + 4) - 400);
+  if ( g_pVGuiSurface && this->m_nArrowTexture != -1 )
+  {
+    ((void (__stdcall *)(int))g_pVGuiSurface->DestroyTextureID)(this->m_nArrowTexture);
+    this->m_nArrowTexture = -1;
+  }
+  vgui::Panel::~Panel(&this->vgui::Panel);
+  CHudElement::~CHudElement(this);
+}

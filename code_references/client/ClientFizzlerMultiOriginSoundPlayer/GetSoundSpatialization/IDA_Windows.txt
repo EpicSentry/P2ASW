@@ -1,0 +1,63 @@
+char __thiscall ClientFizzlerMultiOriginSoundPlayer::GetSoundSpatialization(
+        ClientFizzlerMultiOriginSoundPlayer *this,
+        SpatializationInfo_t *info)
+{
+  char result; // al
+  ITriggerPortalCleanserAutoList *v4; // ecx
+  int v5; // eax
+  ITriggerPortalCleanserAutoList *v6; // eax
+  ITriggerPortalCleanserAutoList *v7; // eax
+  SpatializationInfo_t fizzlerInfo; // [esp+0h] [ebp-84h] BYREF
+  Vector origin; // [esp+74h] [ebp-10h] BYREF
+  int i; // [esp+80h] [ebp-4h]
+  char didFindOrigin_3; // [esp+8Fh] [ebp+Bh]
+
+  result = 0;
+  if ( ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Size > 0
+    && info->m_pUtlVecMultiOrigins )
+  {
+    if ( !*ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Memory.m_pMemory
+      || (v4 = *ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Memory.m_pMemory - 686,
+          *ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Memory.m_pMemory == (ITriggerPortalCleanserAutoList *)2744)
+      || LOBYTE(v4[690].__vftable) )
+    {
+      didFindOrigin_3 = 0;
+    }
+    else
+    {
+      didFindOrigin_3 = ((int (__thiscall *)(ITriggerPortalCleanserAutoList *, SpatializationInfo_t *))v4->__vftable[6].GetEntity)(
+                          v4,
+                          info);
+    }
+    CUtlVector<Vector,CUtlMemory<Vector,int>>::EnsureCapacity(
+      (CUtlVector<QAngle,CUtlMemory<QAngle,int> > *)info->m_pUtlVecMultiOrigins,
+      ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Size - 1);
+    v5 = 1;
+    for ( i = 1; v5 < ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Size; i = v5 )
+    {
+      v6 = ITriggerPortalCleanserAutoList::m_ITriggerPortalCleanserAutoListAutoList.m_Memory.m_pMemory[v5];
+      if ( v6 )
+        v7 = v6 - 686;
+      else
+        v7 = 0;
+      qmemcpy(&fizzlerInfo, info, sizeof(fizzlerInfo));
+      fizzlerInfo.pOrigin = &origin;
+      if ( v7 && !LOBYTE(v7[690].__vftable) )
+      {
+        if ( ((unsigned __int8 (__thiscall *)(ITriggerPortalCleanserAutoList *, SpatializationInfo_t *))v7->__vftable[6].GetEntity)(
+               v7,
+               &fizzlerInfo) )
+        {
+          CUtlVector<Vector,CUtlMemory<Vector,int>>::InsertBefore(
+            (CUtlVector<QAngle,CUtlMemory<QAngle,int> > *)info->m_pUtlVecMultiOrigins,
+            info->m_pUtlVecMultiOrigins->m_Size,
+            (const QAngle *)&origin);
+          didFindOrigin_3 = 1;
+        }
+      }
+      v5 = i + 1;
+    }
+    return didFindOrigin_3;
+  }
+  return result;
+}

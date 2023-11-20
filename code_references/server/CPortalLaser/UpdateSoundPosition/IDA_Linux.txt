@@ -1,0 +1,60 @@
+void __cdecl CPortalLaser::UpdateSoundPosition(
+        CPortalLaser *const this,
+        const Vector *const vecStart,
+        const Vector *const vecEnd)
+{
+  int i; // ebx
+  CBasePlayer *v4; // eax
+  float x; // xmm6_4
+  float v6; // xmm7_4
+  Vector *v7; // eax
+  vec_t z; // [esp+20h] [ebp-48h]
+  vec_t y; // [esp+24h] [ebp-44h]
+  float v10; // [esp+2Ch] [ebp-3Ch]
+  Vector vecPlayer; // [esp+38h] [ebp-30h] BYREF
+  Vector vecNearestPoint; // [esp+44h] [ebp-24h] BYREF
+
+  for ( i = 0; ; ++i )
+  {
+    v4 = UTIL_PlayerByIndex(i + 1);
+    if ( !v4 || v4->m_iConnected == PlayerDisconnected )
+    {
+      if ( (this->m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(this);
+      v7 = &this->m_vecNearestSoundSource[i];
+      v7->x = this->m_vecAbsOrigin.x;
+      v7->y = this->m_vecAbsOrigin.y;
+      v7->z = this->m_vecAbsOrigin.z;
+      goto LABEL_3;
+    }
+    (*((void (__stdcall **)(Vector *))v4->_vptr_IHandleEntity + 129))(&vecPlayer);
+    CalcClosestPointOnLineSegment(&vecPlayer, vecStart, vecEnd, &vecNearestPoint, 0);
+    y = vecNearestPoint.y;
+    x = this->m_vecNearestSoundSource[i].x;
+    v6 = this->m_vecNearestSoundSource[i].y;
+    z = vecNearestPoint.z;
+    v10 = this->m_vecNearestSoundSource[i].z;
+    if ( (float)((float)((float)((float)(vecPlayer.x - x) * (float)(vecPlayer.x - x))
+                       + (float)((float)(vecPlayer.y - v6) * (float)(vecPlayer.y - v6)))
+               + (float)((float)(vecPlayer.z - v10) * (float)(vecPlayer.z - v10))) > (float)((float)((float)((float)(vecPlayer.x - vecNearestPoint.x) * (float)(vecPlayer.x - vecNearestPoint.x)) + (float)((float)(vecPlayer.y - vecNearestPoint.y) * (float)(vecPlayer.y - vecNearestPoint.y)))
+                                                                                           + (float)((float)(vecPlayer.z - vecNearestPoint.z) * (float)(vecPlayer.z - vecNearestPoint.z))) )
+      goto LABEL_2;
+    if ( x == vec3_invalid.x && v6 == vec3_invalid.y )
+      break;
+LABEL_3:
+    if ( i == 32 )
+      return;
+LABEL_4:
+    ;
+  }
+  if ( v10 == vec3_invalid.z )
+  {
+LABEL_2:
+    this->m_vecNearestSoundSource[i].x = vecNearestPoint.x;
+    this->m_vecNearestSoundSource[i].y = y;
+    this->m_vecNearestSoundSource[i].z = z;
+    goto LABEL_3;
+  }
+  if ( i != 32 )
+    goto LABEL_4;
+}

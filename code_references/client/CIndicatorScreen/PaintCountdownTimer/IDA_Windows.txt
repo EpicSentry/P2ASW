@@ -1,0 +1,549 @@
+void __thiscall CIndicatorScreen::PaintCountdownTimer(CIndicatorScreen *this)
+{
+  unsigned int m_Index; // ecx
+  C_LabIndicatorPanel *m_pEntity; // eax
+  double X; // st7
+  float v5; // xmm0_4
+  int Wide; // kr34_4
+  int v7; // edi
+  unsigned int v8; // ecx
+  IHandleEntity *v9; // eax
+  int v10; // eax
+  float v11; // xmm1_4
+  float v12; // xmm0_4
+  float v13; // xmm0_4
+  float m_flFadeUpTime; // xmm2_4
+  float v15; // xmm1_4
+  float v16; // xmm0_4
+  char *v17; // xmm1_4
+  float v18; // xmm0_4
+  int v19; // eax
+  int v20; // eax
+  vgui::ISurface_vtbl *v21; // ecx
+  int v22; // eax
+  vgui::ISurface_vtbl *v23; // edx
+  int v24; // eax
+  int v25; // eax
+  vgui::ISurface_vtbl *v26; // edx
+  int v27; // eax
+  int v28; // eax
+  vgui::ISurface_vtbl *v29; // edx
+  int v30; // eax
+  int Tall; // eax
+  vgui::ISurface_vtbl *v32; // edx
+  int v33; // kr38_4
+  int v34; // eax
+  vgui::ISurface_vtbl *v35; // ecx
+  int v36; // eax
+  int v37; // kr3C_4
+  int v38; // eax
+  vgui::ISurface_vtbl *v39; // edx
+  int v40; // kr40_4
+  int v41; // eax
+  vgui::ISurface_vtbl *v42; // ecx
+  int v43; // eax
+  int v44; // kr44_4
+  int v45; // eax
+  vgui::ISurface_vtbl *v46; // ecx
+  int v47; // eax
+  vgui::ISurface_vtbl *v48; // edx
+  int v49; // eax
+  vgui::ISurface *v50; // ebx
+  int v51; // eax
+  int v52; // eax
+  vgui::ISurface_vtbl *v53; // edx
+  int v54; // eax
+  int X_4; // [esp+124h] [ebp-2Ch]
+  int X_4a; // [esp+124h] [ebp-2Ch]
+  int v57; // [esp+128h] [ebp-28h]
+  char *v58; // [esp+12Ch] [ebp-24h]
+  char *v59; // [esp+130h] [ebp-20h]
+  vgui::ISurface_vtbl *v60; // [esp+134h] [ebp-1Ch]
+  vgui::ISurface_vtbl *v61; // [esp+134h] [ebp-1Ch]
+  vgui::ISurface_vtbl *v62; // [esp+134h] [ebp-1Ch]
+  vgui::ISurface *v63; // [esp+138h] [ebp-18h]
+  int v64; // [esp+138h] [ebp-18h]
+  vgui::ISurface *v65; // [esp+138h] [ebp-18h]
+  int v66; // [esp+138h] [ebp-18h]
+  vgui::ISurface_vtbl *v67; // [esp+138h] [ebp-18h]
+  int v68; // [esp+138h] [ebp-18h]
+  vgui::ISurface_vtbl *v69; // [esp+138h] [ebp-18h]
+  int v70; // [esp+138h] [ebp-18h]
+  vgui::ISurface_vtbl *v71; // [esp+138h] [ebp-18h]
+  int v72; // [esp+138h] [ebp-18h]
+  vgui::ISurface_vtbl *v73; // [esp+138h] [ebp-18h]
+  int v74; // [esp+138h] [ebp-18h]
+  vgui::ISurface_vtbl *v75; // [esp+138h] [ebp-18h]
+  int v76; // [esp+138h] [ebp-18h]
+  vgui::ISurface_vtbl *v77; // [esp+138h] [ebp-18h]
+  int v78; // [esp+138h] [ebp-18h]
+  vgui::ISurface_vtbl *v79; // [esp+138h] [ebp-18h]
+  int v80; // [esp+138h] [ebp-18h]
+  vgui::ISurface_vtbl *v81; // [esp+138h] [ebp-18h]
+  int v82; // [esp+138h] [ebp-18h]
+  vgui::ISurface_vtbl *v83; // [esp+138h] [ebp-18h]
+  int v84; // [esp+138h] [ebp-18h]
+  vgui::ISurface_vtbl *v85; // [esp+138h] [ebp-18h]
+  int v86; // [esp+138h] [ebp-18h]
+  vgui::ISurface_vtbl *v87; // [esp+138h] [ebp-18h]
+  int v88; // [esp+138h] [ebp-18h]
+  vgui::ISurface_vtbl *v89; // [esp+138h] [ebp-18h]
+  int v90; // [esp+138h] [ebp-18h]
+  int v91; // [esp+138h] [ebp-18h]
+  float flAlpha; // [esp+13Ch] [ebp-14h]
+  vgui::ISurface_vtbl *flGlobalAlphaa; // [esp+140h] [ebp-10h]
+  float flGlobalAlpha; // [esp+140h] [ebp-10h]
+  int cy; // [esp+144h] [ebp-Ch]
+  float flPerc; // [esp+148h] [ebp-8h]
+
+  m_Index = this->m_hScreenEntity.m_Index;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+    m_pEntity = 0;
+  else
+    m_pEntity = (C_LabIndicatorPanel *)g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+  X = C_LabIndicatorPanel::GetCountdownPercentage(m_pEntity) * 8.0;
+  flPerc = X;
+  v5 = (float)(int)ceil(X) - flPerc;
+  if ( v5 >= 0.0 )
+  {
+    if ( v5 > 1.0 )
+      v5 = *(float *)&FLOAT_1_0;
+  }
+  else
+  {
+    v5 = 0.0;
+  }
+  flAlpha = 255.0 - (float)(v5 * 255.0);
+  Wide = vgui::Panel::GetWide(this);
+  v7 = Wide / 2;
+  cy = vgui::Panel::GetTall(this) / 2;
+  ((void (__thiscall *)(vgui::ISurface *, int))g_pVGuiSurface->DrawSetColor)(g_pVGuiSurface, -1);
+  v8 = this->m_hScreenEntity.m_Index;
+  if ( v8 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v8].m_SerialNumber != HIWORD(v8) )
+    v9 = 0;
+  else
+    v9 = g_pEntityList->m_EntPtrArray[(unsigned __int16)v8].m_pEntity;
+  if ( BYTE2(v9[672].__vftable) && flPerc > 0.00000011920929 )
+    g_pVGuiSurface->DrawSetTexture(g_pVGuiSurface, this->m_nTimerBackgroundActiveTextureID);
+  else
+    g_pVGuiSurface->DrawSetTexture(g_pVGuiSurface, this->m_nTimerBackgroundTextureID);
+  v63 = g_pVGuiSurface;
+  flGlobalAlphaa = g_pVGuiSurface->__vftable;
+  X_4 = vgui::Panel::GetTall(this);
+  v10 = vgui::Panel::GetWide(this);
+  flGlobalAlphaa->DrawTexturedRect(v63, 0, 0, v10, X_4);
+  v11 = FLOAT_7_0;
+  flGlobalAlpha = FLOAT_255_0;
+  if ( flPerc <= 0.00000011920929 )
+  {
+    flPerc = *(float *)&FLOAT_8_0;
+    if ( this->m_bWasCounting )
+    {
+      v12 = 0.0;
+      this->m_flFadeUpTime = *(float *)(gpGlobals.m_Index + 12);
+      flGlobalAlpha = 0.0;
+      this->m_bWasCounting = 0;
+    }
+    else
+    {
+      v13 = *(float *)(gpGlobals.m_Index + 12);
+      m_flFadeUpTime = this->m_flFadeUpTime;
+      v15 = m_flFadeUpTime + 0.25;
+      if ( m_flFadeUpTime == (float)(m_flFadeUpTime + 0.25) )
+      {
+        if ( (float)(v13 - v15) < 0.0 )
+        {
+          v12 = 0.0;
+          flGlobalAlpha = 0.0;
+        }
+        else
+        {
+          v12 = FLOAT_255_0;
+          flGlobalAlpha = FLOAT_255_0;
+        }
+      }
+      else
+      {
+        v16 = (float)(v13 - m_flFadeUpTime) / (float)(v15 - m_flFadeUpTime);
+        v17 = 0;
+        if ( v16 < 0.0 || (v17 = FLOAT_1_0, v16 > 1.0) )
+          v16 = *(float *)&v17;
+        v12 = v16 * 255.0;
+        flGlobalAlpha = v12;
+      }
+    }
+    goto LABEL_30;
+  }
+  v18 = flPerc;
+  this->m_bWasCounting = 1;
+  if ( flPerc > 7.0 )
+  {
+    v12 = flAlpha;
+LABEL_30:
+    HIBYTE(v64) = (int)v12;
+    LOWORD(v64) = -1;
+    BYTE2(v64) = -1;
+    ((void (__thiscall *)(vgui::ISurface *, int))g_pVGuiSurface->DrawSetColor)(g_pVGuiSurface, v64);
+    g_pVGuiSurface->DrawSetTexture(g_pVGuiSurface, this->m_nTimerUpperSliceTextureID);
+    v60 = g_pVGuiSurface->__vftable;
+    v65 = g_pVGuiSurface;
+    X_4a = vgui::Panel::GetTall(this) / 2;
+    v19 = vgui::Panel::GetWide(this);
+    v60->DrawTexturedRect(v65, Wide / 2, 0, v7 + v19 / 2, X_4a);
+    v18 = flPerc;
+    v11 = FLOAT_7_0;
+  }
+  if ( v18 > 6.0 && v11 > v18 )
+  {
+    HIBYTE(v66) = (int)flAlpha;
+    LOWORD(v66) = -1;
+    BYTE2(v66) = -1;
+    ((void (__thiscall *)(vgui::ISurface *, int))g_pVGuiSurface->DrawSetColor)(g_pVGuiSurface, v66);
+    g_pVGuiSurface->DrawSetTexture(g_pVGuiSurface, this->m_nTimerLowerSliceTextureID);
+    v60 = (vgui::ISurface_vtbl *)g_pVGuiSurface;
+    v67 = g_pVGuiSurface->__vftable;
+    v57 = vgui::Panel::GetTall(this) / 2;
+    v20 = vgui::Panel::GetWide(this);
+    v21 = v60;
+    v22 = v20 - (v20 >> 31);
+    v23 = v67;
+LABEL_36:
+    ((void (__thiscall *)(vgui::ISurface_vtbl *, int, _DWORD, int))v23->DrawTexturedRect)(
+      v21,
+      Wide / 2,
+      0,
+      v7 + (v22 >> 1));
+    v18 = flPerc;
+    goto LABEL_37;
+  }
+  if ( v18 > v11 )
+  {
+    HIBYTE(v68) = (int)flGlobalAlpha;
+    LOWORD(v68) = -1;
+    BYTE2(v68) = -1;
+    ((void (__thiscall *)(vgui::ISurface *, int))g_pVGuiSurface->DrawSetColor)(g_pVGuiSurface, v68);
+    g_pVGuiSurface->DrawSetTexture(g_pVGuiSurface, this->m_nTimerLowerSliceTextureID);
+    v60 = (vgui::ISurface_vtbl *)g_pVGuiSurface;
+    v69 = g_pVGuiSurface->__vftable;
+    v57 = vgui::Panel::GetTall(this) / 2;
+    v24 = vgui::Panel::GetWide(this);
+    v21 = v60;
+    v22 = v24 - (v24 >> 31);
+    v23 = v69;
+    goto LABEL_36;
+  }
+LABEL_37:
+  if ( v18 > 5.0 && v18 < 6.0 )
+  {
+    HIBYTE(v70) = (int)flAlpha;
+    LOWORD(v70) = -1;
+    BYTE2(v70) = -1;
+    ((void (__thiscall *)(vgui::ISurface *, int, int))g_pVGuiSurface->DrawSetColor)(g_pVGuiSurface, v70, v57);
+    g_pVGuiSurface->DrawSetTexture(g_pVGuiSurface, this->m_nTimerLowerSliceTextureID);
+    flGlobalAlpha = 0.0;
+    flAlpha = *(float *)&FLOAT_1_0;
+    v71 = g_pVGuiSurface->__vftable;
+    v60 = 0;
+    v59 = (char *)(cy + vgui::Panel::GetTall(this) / 2);
+    v25 = vgui::Panel::GetWide(this);
+    v26 = v71;
+    v58 = (char *)(v7 + v25 / 2);
+    v57 = cy;
+LABEL_42:
+    ((void (__thiscall *)(_DWORD, int))v26->DrawTexturedSubRect)(0, Wide / 2);
+    v18 = flPerc;
+    goto LABEL_43;
+  }
+  if ( v18 > 6.0 )
+  {
+    HIBYTE(v72) = (int)flGlobalAlpha;
+    LOWORD(v72) = -1;
+    BYTE2(v72) = -1;
+    ((void (__thiscall *)(vgui::ISurface *, int, int))g_pVGuiSurface->DrawSetColor)(g_pVGuiSurface, v72, v57);
+    g_pVGuiSurface->DrawSetTexture(g_pVGuiSurface, this->m_nTimerLowerSliceTextureID);
+    flGlobalAlpha = 0.0;
+    flAlpha = *(float *)&FLOAT_1_0;
+    v73 = g_pVGuiSurface->__vftable;
+    v60 = 0;
+    v59 = (char *)(cy + vgui::Panel::GetTall(this) / 2);
+    v27 = vgui::Panel::GetWide(this);
+    v26 = v73;
+    v58 = (char *)(v7 + v27 / 2);
+    v57 = cy;
+    goto LABEL_42;
+  }
+LABEL_43:
+  if ( v18 > 4.0 && v18 < 5.0 )
+  {
+    HIBYTE(v74) = (int)flAlpha;
+    LOWORD(v74) = -1;
+    BYTE2(v74) = -1;
+    ((void (__thiscall *)(vgui::ISurface *, int, int, char *, char *, vgui::ISurface_vtbl *, int, _DWORD, _DWORD))g_pVGuiSurface->DrawSetColor)(
+      g_pVGuiSurface,
+      v74,
+      v57,
+      v58,
+      v59,
+      v60,
+      v74,
+      LODWORD(flAlpha),
+      LODWORD(flGlobalAlpha));
+    g_pVGuiSurface->DrawSetTexture(g_pVGuiSurface, this->m_nTimerUpperSliceTextureID);
+    flGlobalAlpha = 0.0;
+    flAlpha = *(float *)&FLOAT_1_0;
+    v75 = g_pVGuiSurface->__vftable;
+    v60 = 0;
+    v59 = (char *)(cy + vgui::Panel::GetTall(this) / 2);
+    v28 = vgui::Panel::GetWide(this);
+    v29 = v75;
+    v58 = (char *)(v7 + v28 / 2);
+    v57 = cy;
+LABEL_48:
+    ((void (__thiscall *)(_DWORD, int))v29->DrawTexturedSubRect)(0, Wide / 2);
+    v18 = flPerc;
+    goto LABEL_49;
+  }
+  if ( v18 > 5.0 )
+  {
+    HIBYTE(v76) = (int)flGlobalAlpha;
+    LOWORD(v76) = -1;
+    BYTE2(v76) = -1;
+    ((void (__thiscall *)(vgui::ISurface *, int, int, char *, char *, vgui::ISurface_vtbl *, int, _DWORD, _DWORD))g_pVGuiSurface->DrawSetColor)(
+      g_pVGuiSurface,
+      v76,
+      v57,
+      v58,
+      v59,
+      v60,
+      v76,
+      LODWORD(flAlpha),
+      LODWORD(flGlobalAlpha));
+    g_pVGuiSurface->DrawSetTexture(g_pVGuiSurface, this->m_nTimerUpperSliceTextureID);
+    flGlobalAlpha = 0.0;
+    flAlpha = *(float *)&FLOAT_1_0;
+    v77 = g_pVGuiSurface->__vftable;
+    v60 = 0;
+    v59 = (char *)(cy + vgui::Panel::GetTall(this) / 2);
+    v30 = vgui::Panel::GetWide(this);
+    v29 = v77;
+    v58 = (char *)(v7 + v30 / 2);
+    v57 = cy;
+    goto LABEL_48;
+  }
+LABEL_49:
+  if ( v18 > 3.0 && v18 < 4.0 )
+  {
+    HIBYTE(v78) = (int)flAlpha;
+    LOWORD(v78) = -1;
+    BYTE2(v78) = -1;
+    ((void (__thiscall *)(vgui::ISurface *, int, int, char *, char *, vgui::ISurface_vtbl *, int))g_pVGuiSurface->DrawSetColor)(
+      g_pVGuiSurface,
+      v78,
+      v57,
+      v58,
+      v59,
+      v60,
+      v78);
+    g_pVGuiSurface->DrawSetTexture(g_pVGuiSurface, this->m_nTimerUpperSliceTextureID);
+    v60 = (vgui::ISurface_vtbl *)g_pVGuiSurface;
+    v59 = FLOAT_1_0;
+    v79 = g_pVGuiSurface->__vftable;
+    v58 = FLOAT_1_0;
+    Tall = vgui::Panel::GetTall(this);
+    v32 = v79;
+    v33 = Tall;
+    v34 = cy;
+    v57 = cy + v33 / 2;
+    v35 = v60;
+LABEL_54:
+    ((void (__thiscall *)(vgui::ISurface_vtbl *, _DWORD, int, int))v32->DrawTexturedSubRect)(v35, 0, v34, Wide / 2);
+    v18 = flPerc;
+    goto LABEL_55;
+  }
+  if ( v18 > 4.0 )
+  {
+    HIBYTE(v80) = (int)flGlobalAlpha;
+    LOWORD(v80) = -1;
+    BYTE2(v80) = -1;
+    ((void (__thiscall *)(vgui::ISurface *, int, int, char *, char *, vgui::ISurface_vtbl *, int))g_pVGuiSurface->DrawSetColor)(
+      g_pVGuiSurface,
+      v80,
+      v57,
+      v58,
+      v59,
+      v60,
+      v80);
+    g_pVGuiSurface->DrawSetTexture(g_pVGuiSurface, this->m_nTimerUpperSliceTextureID);
+    v60 = (vgui::ISurface_vtbl *)g_pVGuiSurface;
+    v59 = FLOAT_1_0;
+    v81 = g_pVGuiSurface->__vftable;
+    v58 = FLOAT_1_0;
+    v36 = vgui::Panel::GetTall(this);
+    v32 = v81;
+    v37 = v36;
+    v34 = cy;
+    v57 = cy + v37 / 2;
+    v35 = v60;
+    goto LABEL_54;
+  }
+LABEL_55:
+  if ( v18 > 2.0 && v18 < 3.0 )
+  {
+    HIBYTE(v82) = (int)flAlpha;
+    LOWORD(v82) = -1;
+    BYTE2(v82) = -1;
+    ((void (__thiscall *)(vgui::ISurface *, int, int, char *, char *, vgui::ISurface_vtbl *, int))g_pVGuiSurface->DrawSetColor)(
+      g_pVGuiSurface,
+      v82,
+      v57,
+      v58,
+      v59,
+      v60,
+      v82);
+    g_pVGuiSurface->DrawSetTexture(g_pVGuiSurface, this->m_nTimerLowerSliceTextureID);
+    v60 = (vgui::ISurface_vtbl *)g_pVGuiSurface;
+    v59 = FLOAT_1_0;
+    v83 = g_pVGuiSurface->__vftable;
+    v58 = FLOAT_1_0;
+    v38 = vgui::Panel::GetTall(this);
+    v39 = v83;
+    v40 = v38;
+    v41 = cy;
+    v57 = cy + v40 / 2;
+    v42 = v60;
+LABEL_60:
+    ((void (__thiscall *)(vgui::ISurface_vtbl *, _DWORD, int, int))v39->DrawTexturedSubRect)(v42, 0, v41, Wide / 2);
+    v18 = flPerc;
+    goto LABEL_61;
+  }
+  if ( v18 > 3.0 )
+  {
+    HIBYTE(v84) = (int)flGlobalAlpha;
+    LOWORD(v84) = -1;
+    BYTE2(v84) = -1;
+    ((void (__thiscall *)(vgui::ISurface *, int, int, char *, char *, vgui::ISurface_vtbl *, int))g_pVGuiSurface->DrawSetColor)(
+      g_pVGuiSurface,
+      v84,
+      v57,
+      v58,
+      v59,
+      v60,
+      v84);
+    g_pVGuiSurface->DrawSetTexture(g_pVGuiSurface, this->m_nTimerLowerSliceTextureID);
+    v60 = (vgui::ISurface_vtbl *)g_pVGuiSurface;
+    v59 = FLOAT_1_0;
+    v85 = g_pVGuiSurface->__vftable;
+    v58 = FLOAT_1_0;
+    v43 = vgui::Panel::GetTall(this);
+    v39 = v85;
+    v44 = v43;
+    v41 = cy;
+    v57 = cy + v44 / 2;
+    v42 = v60;
+    goto LABEL_60;
+  }
+LABEL_61:
+  if ( v18 > 1.0 && v18 < 2.0 )
+  {
+    HIBYTE(v86) = (int)flAlpha;
+    LOWORD(v86) = -1;
+    BYTE2(v86) = -1;
+    ((void (__thiscall *)(vgui::ISurface *, int, int, char *, char *, vgui::ISurface_vtbl *))g_pVGuiSurface->DrawSetColor)(
+      g_pVGuiSurface,
+      v86,
+      v57,
+      v58,
+      v59,
+      v60);
+    g_pVGuiSurface->DrawSetTexture(g_pVGuiSurface, this->m_nTimerLowerSliceTextureID);
+    v60 = (vgui::ISurface_vtbl *)g_pVGuiSurface;
+    v59 = 0;
+    v58 = 0;
+    v87 = g_pVGuiSurface->__vftable;
+    v57 = (int)FLOAT_1_0;
+    v45 = vgui::Panel::GetTall(this);
+    v46 = v60;
+    v47 = v45 - (v45 >> 31);
+    v48 = v87;
+LABEL_66:
+    ((void (__thiscall *)(vgui::ISurface_vtbl *, _DWORD, _DWORD, int, int))v48->DrawTexturedSubRect)(
+      v46,
+      0,
+      0,
+      Wide / 2,
+      v47 >> 1);
+    v18 = flPerc;
+    goto LABEL_67;
+  }
+  if ( v18 > 2.0 )
+  {
+    HIBYTE(v88) = (int)flGlobalAlpha;
+    LOWORD(v88) = -1;
+    BYTE2(v88) = -1;
+    ((void (__thiscall *)(vgui::ISurface *, int, int, char *, char *, vgui::ISurface_vtbl *))g_pVGuiSurface->DrawSetColor)(
+      g_pVGuiSurface,
+      v88,
+      v57,
+      v58,
+      v59,
+      v60);
+    g_pVGuiSurface->DrawSetTexture(g_pVGuiSurface, this->m_nTimerLowerSliceTextureID);
+    v60 = (vgui::ISurface_vtbl *)g_pVGuiSurface;
+    v59 = 0;
+    v58 = 0;
+    v89 = g_pVGuiSurface->__vftable;
+    v57 = (int)FLOAT_1_0;
+    v49 = vgui::Panel::GetTall(this);
+    v46 = v60;
+    v47 = v49 - (v49 >> 31);
+    v48 = v89;
+    goto LABEL_66;
+  }
+LABEL_67:
+  if ( v18 <= 0.0 || v18 >= 1.0 )
+  {
+    if ( v18 <= 1.0 )
+      return;
+    HIBYTE(v91) = (int)flGlobalAlpha;
+    LOWORD(v91) = -1;
+    BYTE2(v91) = -1;
+    ((void (__thiscall *)(vgui::ISurface *, int, int, char *, char *, vgui::ISurface_vtbl *))g_pVGuiSurface->DrawSetColor)(
+      g_pVGuiSurface,
+      v91,
+      v57,
+      v58,
+      v59,
+      v60);
+    g_pVGuiSurface->DrawSetTexture(g_pVGuiSurface, this->m_nTimerUpperSliceTextureID);
+    v50 = g_pVGuiSurface;
+    v62 = g_pVGuiSurface->__vftable;
+    v54 = vgui::Panel::GetTall(this);
+    v52 = v54 - (v54 >> 31);
+    v53 = v62;
+  }
+  else
+  {
+    HIBYTE(v90) = (int)flAlpha;
+    LOWORD(v90) = -1;
+    BYTE2(v90) = -1;
+    ((void (__thiscall *)(vgui::ISurface *, int, int, char *, char *, vgui::ISurface_vtbl *))g_pVGuiSurface->DrawSetColor)(
+      g_pVGuiSurface,
+      v90,
+      v57,
+      v58,
+      v59,
+      v60);
+    g_pVGuiSurface->DrawSetTexture(g_pVGuiSurface, this->m_nTimerUpperSliceTextureID);
+    v50 = g_pVGuiSurface;
+    v61 = g_pVGuiSurface->__vftable;
+    v51 = vgui::Panel::GetTall(this);
+    v52 = v51 - (v51 >> 31);
+    v53 = v61;
+  }
+  ((void (__thiscall *)(vgui::ISurface *, _DWORD, _DWORD, int, int))v53->DrawTexturedSubRect)(
+    v50,
+    0,
+    0,
+    Wide / 2,
+    v52 >> 1);
+}

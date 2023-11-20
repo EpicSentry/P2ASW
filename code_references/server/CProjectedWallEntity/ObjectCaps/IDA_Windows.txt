@@ -1,0 +1,4 @@
+int __thiscall CProjectedWallEntity::ObjectCaps(CProjectedWallEntity *this)
+{
+  return CBaseEntity::ObjectCaps(this) & 1;
+}

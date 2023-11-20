@@ -1,0 +1,4 @@
+void __cdecl CProjectedWallEntity::Precache(CProjectedWallEntity *const this)
+{
+  PrecacheParticleSystem("projected_wall_impact");
+}

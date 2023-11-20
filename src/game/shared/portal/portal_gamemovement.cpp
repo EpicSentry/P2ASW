@@ -23,6 +23,8 @@
 	#include "prediction.h"
 	#include "c_weapon_portalgun.h"
 	#include "c_basetoggle.h"
+	#include "trigger_tractorbeam_shared.h"
+	#include "c_projectedwallentity.h"
 	//#include "c_projectedwallentity.h"
 	#define CRecipientFilter C_RecipientFilter
 #else
@@ -37,6 +39,7 @@
 	#include "paint/paint_power_info.h"
 	#include "particle_parse.h"
 	#include "platform.h"
+	#include "projectedwallentity.h"
 #endif
 
 #include "coordsize.h" // for DIST_EPSILON
@@ -65,7 +68,7 @@ ConVar coop_sink_speed_decay("coop_sink_speed_decay","0.02f", FCVAR_REPLICATED |
 
 ConVar coop_impact_velocity_threshold("coop_impact_velocity_threshold", "250.0", FCVAR_REPLICATED | FCVAR_CHEAT );
 
-#define sv_can_carry_both_guns			0	//extern ConVar sv_can_carry_both_guns;
+extern ConVar sv_can_carry_both_guns;
 
 ConVar sv_portal_new_player_trace( "sv_portal_new_player_trace", "1", FCVAR_REPLICATED | FCVAR_CHEAT );
 
@@ -486,7 +489,7 @@ void CPortalGameMovement::ProcessMovement( CBasePlayer *pPlayer, CMoveData *pMov
 		pPlayer->UnforceButtons( IN_JUMP );
 
 		// Try to collide with thrown weapons if we don't currently have a weapon
-		if( pPlayer->HasWeapons() == false || sv_can_carry_both_guns )
+		if( pPlayer->HasWeapons() == false || sv_can_carry_both_guns.GetBool() )
 		{
 			// Trace for the portal and paint guns
 			trace_t pm;
@@ -681,8 +684,7 @@ void CPortalGameMovement::AirAccelerate( Vector& wishdir, float wishspeed, float
 
 void CPortalGameMovement::TBeamMove( void )
 {
-	// TODO:
-#if 0
+#ifndef NO_TRACTOR_BEAM
 	CPortal_Player *pPortalPlayer = GetPortalPlayer();
 	if ( !pPortalPlayer )
 		return;
@@ -2598,8 +2600,6 @@ void CPortalGameMovement::HandlePortalling( void )
 
 #if defined( CLIENT_DLL )
 
-			Msg("attempt fix eye angles\n");
-
 			//engine view angles (for mouse input smoothness)
 			{
 				QAngle qEngineAngles;
@@ -3729,7 +3729,7 @@ void CPortalGameMovement::WalkMove()
 	float wishVelShoveDampenFactor = 0;
 	Vector shoveVector = vec3_origin;
 	// FIXME!!!
-#if 0
+#if !defined ( NO_PROJECTED_WALL )
 	CProjectedWallEntity *pProjectedWall = dynamic_cast< CProjectedWallEntity* >( pOldGround );
 	if ( pProjectedWall )
 	{

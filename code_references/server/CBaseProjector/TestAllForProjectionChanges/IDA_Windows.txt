@@ -1,0 +1,17 @@
+void __cdecl CBaseProjector::TestAllForProjectionChanges()
+{
+  int i; // esi
+  unsigned int m_Index; // eax
+  IHandleEntity *m_pEntity; // ecx
+
+  for ( i = 0; i < s_AllProjectors.m_Size; ++i )
+  {
+    m_Index = s_AllProjectors.m_Memory.m_pMemory[i]->m_hFirstChild.m_Value.m_Index;
+    if ( m_Index != -1 && g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber == HIWORD(m_Index) )
+    {
+      m_pEntity = g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+      if ( m_pEntity )
+        ((void (__thiscall *)(IHandleEntity *))m_pEntity->__vftable[69].SetRefEHandle)(m_pEntity);
+    }
+  }
+}

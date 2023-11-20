@@ -1,0 +1,41 @@
+class CPropIndicatorPanel : public CBaseAnimating
+{
+	DECLARE_DATADESC();	
+	
+    void CPropIndicatorPanel();
+    void ~CPropIndicatorPanel();
+    void Precache();
+    void Spawn();
+    void UpdateOnRemove();
+    void SetTimerDuration(float );
+    void StartTimer();
+    void StopTimer();
+    void ResetTimer();
+    void InputStart( inputdata_t &inputdata );
+    void InputStop( inputdata_t &inputdata );
+    void InputReset( inputdata_t &inputdata );
+    void InputCheck( inputdata_t &inputdata );
+    void InputUncheck( inputdata_t &inputdata );	
+	
+private:
+
+    void CreateIndicatorPanel();
+    void ToggleIndicatorLights(bool );
+    void ToggleThink();
+	
+    bool m_bEnabled;
+    bool m_bStopped;
+    bool m_bCountingDown;
+    bool m_bIsCountdownTimer;
+    bool m_bIsChecked;
+	
+    float m_flTimerDuration;
+    float m_flTimerStart;
+	
+    string_t m_strIndicatorLights;
+	
+protected:
+
+    CHandle<CLabIndicatorPanel> m_hIndicatorPanel;
+	
+};

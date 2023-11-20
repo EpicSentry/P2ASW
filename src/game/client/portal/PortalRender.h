@@ -60,6 +60,7 @@ public:
 	//-----------------------------------------------------------------------------
 	virtual const Vector&	GetFogOrigin( void ) const { return vec3_origin; };
 	virtual void			ShiftFogForExitPortalView() const;
+	virtual float			GetPortalDistanceBias() const { return 0.0f; }
 
 	//-----------------------------------------------------------------------------
 	//Portal visibility testing
@@ -78,6 +79,7 @@ public:
 	const VMatrix&	MatrixThisToLinked() const;
 	virtual bool	ShouldUpdateDepthDoublerTexture( const CViewSetup &viewSetup ) { return false; };
 	virtual void	DrawPortal( IMatRenderContext *pRenderContext ) { }; //sort of like what you'd expect to happen in C_BaseAnimating::DrawModel() if portals were fully compatible with models
+	virtual int		BindPortalMaterial( IMatRenderContext *pRenderContext, int nPassIndex, bool *pAllowRingMeshOptimizationOut ) { Assert( 0 ); return 0; }
 
 	virtual C_BaseEntity *PortalRenderable_GetPairedEntity( void ) { return NULL; }; //Pairing a portal with an entity is common but not required. Accessing that entity allows the CPortalRender system to better optimize.
 	VMatrix			m_matrixThisToLinked; //Always going to need a matrix
@@ -214,7 +216,8 @@ public:
 	void WaterRenderingHandler_PostRefraction() const;
 
 	// return value indicates that something was done, and render lists should be rebuilt afterwards
-	bool DrawPortalsUsingStencils( CViewRender *pViewRender ); 
+	bool DrawPortalsUsingStencils( CViewRender *pViewRender );
+	bool DrawPortalsUsingStencils_Old( CViewRender *pViewRender );
 	
 	void OverlayPortalRenderTargets( float w, float h );
 	
@@ -229,6 +232,7 @@ public:
 
 	// Methods to query about the exit portal associated with the currently rendering portal
 	void ShiftFogForExitPortalView() const;
+	float GetCurrentPortalDistanceBias() const;
 	const Vector &GetExitPortalFogOrigin() const;
 	SkyboxVisibility_t IsSkyboxVisibleFromExitPortal() const;
 	bool DoesExitPortalViewIntersectWaterPlane( float waterZ, int leafWaterDataID ) const;
@@ -247,6 +251,8 @@ public:
 	bool IsPortalViewID( view_id_t id );
 	
 	inline CUtlVector<VPlane> &GetRecursiveViewComplexFrustums( int nIdx ) { return m_RecursiveViewComplexFrustums[ nIdx ]; }
+
+	void DrawEarlyZPortals( CViewRender *pViewRender );
 	
 private:
 	struct RecordedPortalInfo_t
@@ -274,7 +280,14 @@ private:
 	PortalRenderingMaterials_t	m_Materials;
 	int							m_iViewRecursionLevel;
 	int							m_iRemainingPortalViewDepth; //let's portals know that they should do "end of the line" kludges to cover up that portals don't go infinitely recursive
-		
+
+	// Data that's only valid while inside DrawPortalsUsingStencil()
+	CUtlStack<int>				m_stencilValueStack;
+	CUtlStack<int>				m_parentPortalIdStack;
+	VertexFormat_t				m_portalQuadMeshVertexFmt;
+	CUtlVector< ClampedPortalMeshRenderInfo_t > m_clampedPortalMeshRenderInfos;
+	CUtlVector< bool >			m_portalIsOpening;
+
 	CPortalRenderable			*m_pRenderingViewForPortal; //the specific pointer for the portal that we're rending a view for
 	CPortalRenderable			*m_pRenderingViewExitPortal; //the specific pointer for the portal that our view exits from
 

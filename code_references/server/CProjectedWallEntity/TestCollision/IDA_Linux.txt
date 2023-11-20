@@ -1,0 +1,34 @@
+bool __cdecl CProjectedWallEntity::TestCollision(
+        CProjectedWallEntity *const this,
+        const Ray_t *const ray,
+        unsigned int mask,
+        trace_t *const trace)
+{
+  bool result; // al
+  __int16 v5; // ax
+  bool v6; // cc
+
+  result = 0;
+  if ( this->m_pWallCollideable )
+  {
+    (*((void (__cdecl **)(IPhysicsCollision *, const Ray_t *const, unsigned int, _DWORD, CPhysCollide *, const Vector *, const QAngle *, trace_t *const))physcollision->_vptr_IPhysicsCollision
+     + 34))(
+      physcollision,
+      ray,
+      mask,
+      0,
+      this->m_pWallCollideable,
+      &vec3_origin,
+      &vec3_angle,
+      trace);
+    trace->surface.name = "hard_light_bridge";
+    v5 = CProjectedWallEntity::s_HardLightBridgeSurfaceProps;
+    trace->surface.flags = 0;
+    v6 = trace->fraction >= 1.0;
+    trace->surface.surfaceProps = v5;
+    result = 1;
+    if ( v6 && !trace->allsolid )
+      return trace->startsolid;
+  }
+  return result;
+}

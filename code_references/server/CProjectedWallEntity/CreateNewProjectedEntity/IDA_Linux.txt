@@ -1,0 +1,4 @@
+CBaseProjectedEntity *__cdecl CProjectedWallEntity::CreateNewProjectedEntity(CProjectedWallEntity *const this)
+{
+  return CProjectedWallEntity::CreateNewInstance();
+}

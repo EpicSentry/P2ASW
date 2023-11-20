@@ -9,9 +9,11 @@
 
 #include "basemodui.h"
 #include "VGenericPanelList.h"
+#include "vgui_controls/ProgressBar.h"
 
 class IAchievement;
 
+/*
 // TODO: this is a temporary merge workaround until achievment interfaces get merged properly
 // REMOVE THIS BLOCK AFTER ACHIEVEMENTS GET MERGED
 class CBaseAchievement;
@@ -50,7 +52,7 @@ public:
 	virtual const CUtlVector<int>& GetAchievedDuringCurrentGame( int nPlayerSlot ) = 0;
 };
 // -- END TODO
-
+*/
 
 namespace BaseModUI {
 
@@ -98,7 +100,7 @@ private:
 	vgui::Divider* m_DivTitleDivider;
 	vgui::ImagePanel* m_ImgAchievementIcon;
 	vgui::Label* m_LblHowTo;
-	vgui::ProgressBar* m_PrgProgress;
+	vgui::ContinuousProgressBar* m_PrgProgress;
 	vgui::Label* m_LblCurrProgress;
 	vgui::Label* m_LblGamerscore;
 
@@ -146,7 +148,7 @@ public:
 	void OnCommand(const char *command);
 	void OnKeyCodePressed(vgui::KeyCode code);
 
-#ifdef _GAMECONSOLE
+#ifdef _X360
 	virtual void NavigateTo();
 	virtual void NavigateFrom();
 #endif
@@ -169,7 +171,7 @@ private:
 	vgui::Label* m_LblGamerscore;
 	vgui::Label* m_LblScrollProgress;
 	AchievementGenericPanelList* m_GplAchievements;
-	vgui::ProgressBar* m_pProgressBar;
+	vgui::ContinuousProgressBar* m_pProgressBar;
 	ACHIEVEMENT_FILTER m_AchievementFilter;
 	ACHIEVEMENT_SORT m_AchievementSort;
 

@@ -38,22 +38,22 @@ LINK_ENTITY_TO_CLASS( point_laser_target, CPortalLaserTarget );
 #define LASER_CATCHER_CENTER_NAME "models/props/laser_catcher_center.mdl"
 #define LASER_RELAY_NAME "models/props/laser_receptacle.mdl"
 
-Vector vLaserCatcherExtents( 11.0, 11.0, 11.0 );    // CLaserCatcher default extent
+Vector vLaserCatcherExtents( 16.0, 16.0, 16.0 );    // Vector vLaserCatcherExtents( 11.0, 11.0, 11.0 ); // TODO: This is the original value for CLaserCatcher default extent
 Vector vRelayExtents( 10.0, 10.0, 17.0 );           // CLaserRelay default extent
 
 //-----------------------------------------------------------------------------
 // Purpose: Functionally completely restored
 //-----------------------------------------------------------------------------
 void CPortalLaserTarget::Spawn()
-{ // Line 48
-    BaseClass::Spawn(); // Line 49
-    AddFlag( FL_OBJECT ); // Line 50
+{
+    BaseClass::Spawn();
+    AddFlag( FL_OBJECT );
     m_bPowered = false;
     Vector vExtents;
 
     if ( IsTerminalPoint() ) // Replaced with optimized function "IsTerminalPoint" (Line 54)
     {
-		CLaserCatcher *pLaserCatcher = (CLaserCatcher *)GetParent(); // Line 56
+		/*CLaserCatcher *pLaserCatcher = (CLaserCatcher *)GetParent(); // Line 56
 
         if ( pLaserCatcher && !Q_strcmp( pLaserCatcher->GetCatcherModelName(), LASER_CATCHER_CENTER_NAME ) ) // Line 58
         {
@@ -64,7 +64,7 @@ void CPortalLaserTarget::Spawn()
 			vExtents = vExtents * 20.0;
 			vExtents = vExtents + ( vForward * 15.0 );
         }
-        else
+        else*/
         {
             vExtents = vLaserCatcherExtents; // Line 69
         }
@@ -73,18 +73,14 @@ void CPortalLaserTarget::Spawn()
     {
         vExtents = vRelayExtents; // Line 74
     }
-
-	// NOTE: Doing -vExtents gives an engine error, and this needs fixing - Wonderland_War
-    //UTIL_SetSize( this, -vExtents, vExtents ); // Line 76
-    UTIL_SetSize( this, vExtents, vExtents ); // Line 76
-
+    UTIL_SetSize( this, -vExtents, vExtents ); // Line 76
 } // Line 77
 
 //-----------------------------------------------------------------------------
 // Purpose: Completely restored. env_portal_laser "attacks" the target, and fires an output
 //-----------------------------------------------------------------------------
 int CPortalLaserTarget::OnTakeDamage( const CTakeDamageInfo &info )
-{ // Line 83
+{
     if ( IsPowered() ) // Replaced with optimized function "IsPowered" (Line 84)
     {
         // Continue thinking
@@ -233,6 +229,7 @@ void CLaserCatcher::Spawn()
 
 	SetFadeDistance( -1.0f, 0.0f ); // Line 230
 	SetGlobalFadeScale( 0.0f ); // Line 231
+
 } // Line 232
 
 //-----------------------------------------------------------------------------

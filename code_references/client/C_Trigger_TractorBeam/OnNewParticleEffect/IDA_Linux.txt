@@ -1,0 +1,8 @@
+void __cdecl C_Trigger_TractorBeam::OnNewParticleEffect(
+        C_Trigger_TractorBeam *const this,
+        const char *pszParticleName,
+        CNewParticleEffect *pNewParticleEffect)
+{
+  if ( !_V_stricmp(pszParticleName, "tractor_beam_src") )
+    CNewParticleEffect::SetControlPoint(pNewParticleEffect, 2, &this->m_vEnd);
+}

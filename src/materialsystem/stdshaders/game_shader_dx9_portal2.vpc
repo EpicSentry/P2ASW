@@ -19,8 +19,47 @@ $Configuration
 
 $Project "Shaders (Portal 2)"
 {
+	// Portals
 	$File "portal.cpp"
 	$File "portal_refract.cpp"
 	$File "portal_refract_helper.cpp"
 	$File "portalstaticoverlay.cpp"
+	
+	// Paint
+	//$File "lightmappedpaint_dx9_helper.h"
+	//$File "lightmappedpaint_dx9_helper.cpp"
+	
+	// Solid Energy (Fizzler Shaders)
+	$File "solidenergy_dx9.cpp"
+	$File "solidenergy_dx9_helper.cpp"
+	
+	// Black Shader	
+	$File "black.cpp"
+	
+	// Refract (for light strips and observation rooms)
+	$File "refract.cpp"
+	$File "refract_dx9_helper.cpp"
+	
+	// Updated Water from CSGO Leak
+	$File "water.cpp"
+	$File "water_dudv.cpp"
+		
+	// We need to modify these to support the paint shader
+	// TODO: Figure out how to use lightmappedgeneric without catastrophic results
+	//$File "lightmappedgeneric_dx9.cpp"
+	//$File "lightmappedgeneric_dx9_helper.cpp"
+	
+	// Instead of modifying the shader directly, we can try to copy the file instead
+	//$File "SDK_lightmappedgeneric_dx9.cpp"
+	//$File "SDK_lightmappedgeneric_dx9_helper.cpp"
+	
+	
+	
+	
+	
+	$folder "Shaders"
+	{
+		$File "portal_ps2x.fxc"
+		$File "portal_vs20.fxc"
+	}
 }

@@ -1,0 +1,54 @@
+void __thiscall CHudPortalCrosshair::CHudPortalCrosshair(CHudPortalCrosshair *this, const char *pElementName, int a3)
+{
+  int v4; // ecx
+  vgui::PanelMessageMap *v5; // ebx
+  PanelAnimationMap *v6; // ebx
+  vgui::PanelKeyBindingMap *v7; // ebx
+  IClientMode *ClientMode; // eax
+  vgui::Panel *v9; // eax
+
+  if ( a3 )
+  {
+    *((_DWORD *)&this->vgui::Panel::__vftable + 1) = &CVGuiScreenPanel::`vbtable';
+    *(_DWORD *)&this->gap1C4[4] = &vgui::IClientPanel::`vftable';
+  }
+  CHudElement::CHudElement(this, pElementName);
+  vgui::Panel::Panel(&this->vgui::Panel, 0, "HudPortalCrosshair");
+  v4 = *((_DWORD *)&this->vgui::Panel::__vftable + 1);
+  this->CHudElement::CGameEventListener::IGameEventListener2::__vftable = (CHudPortalCrosshair_vtbl *)&CHudPortalCrosshair::`vftable';
+  this->vgui::Panel::__vftable = (vgui::Panel_vtbl *)&CHudPortalCrosshair::`vftable'{for `vgui::Panel'};
+  *(vgui::Panel_vtbl **)((char *)&this->vgui::Panel::__vftable + *(_DWORD *)(v4 + 4) + 4) = (vgui::Panel_vtbl *)&CHudPortalCrosshair::`vftable'{for `vgui::IClientPanel'};
+  *(vgui::Panel_vtbl **)((char *)&this->vgui::Panel::__vftable
+                       + *(_DWORD *)(*((_DWORD *)&this->vgui::Panel::__vftable + 1) + 4)) = (vgui::Panel_vtbl *)(*(_DWORD *)(*((_DWORD *)&this->vgui::Panel::__vftable + 1) + 4) - 396);
+  if ( !`CHudPortalCrosshair::ChainToMap'::`2'::chained )
+  {
+    `CHudPortalCrosshair::ChainToMap'::`2'::chained = 1;
+    v5 = vgui::FindOrAddPanelMessageMap("CHudPortalCrosshair");
+    v5->pfnClassName = CHudPortalCrosshair::GetPanelClassName;
+    v5->baseMap = vgui::FindOrAddPanelMessageMap("vgui::Panel");
+  }
+  if ( !`CHudPortalCrosshair::ChainToAnimationMap'::`2'::chained )
+  {
+    `CHudPortalCrosshair::ChainToAnimationMap'::`2'::chained = 1;
+    v6 = FindOrAddPanelAnimationMap("CHudPortalCrosshair");
+    v6->pfnClassName = CHudPortalCrosshair::GetPanelClassName;
+    v6->baseMap = FindOrAddPanelAnimationMap("vgui::Panel");
+  }
+  if ( !`CHudPortalCrosshair::KB_ChainToMap'::`2'::chained )
+  {
+    `CHudPortalCrosshair::KB_ChainToMap'::`2'::chained = 1;
+    v7 = vgui::FindOrAddPanelKeyBindingMap("CHudPortalCrosshair");
+    v7->pfnClassName = CHudPortalCrosshair::GetPanelClassName;
+    v7->baseMap = vgui::FindOrAddPanelKeyBindingMap("vgui::Panel");
+  }
+  this->m_clrCrosshair = 0;
+  ClientMode = GetClientMode();
+  v9 = ClientMode->GetViewport(ClientMode);
+  vgui::Panel::SetParent(&this->vgui::Panel, v9);
+  *((_DWORD *)&this->m_pSizer + 2) = 0;
+  this->m_clrCrosshair = 0;
+  this->m_vecCrossHairOffsetAngle.x = 0.0;
+  this->m_vecCrossHairOffsetAngle.y = 0.0;
+  this->m_vecCrossHairOffsetAngle.z = 0.0;
+  CTraceFilterSkipTwoEntities::SetPassEntity2(this, 272);
+}

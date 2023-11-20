@@ -155,3 +155,7 @@ Debug_*
 Release_*
 !src/common/debug_dll_check.cpp
 !game/portal2asw/pak01_dir.vpk
+game/portal2asw/bin/game_shader_dx9.dll
+game/portal2asw/cfg/video.txt
+src/portal2_client_vpc.lnk
+src/portal2_server_vpc.lnk

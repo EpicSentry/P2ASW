@@ -1,0 +1,477 @@
+// local variable allocation has failed, the output may be wrong!
+void __userpurge CPortalLaser::FireLaser(
+        CPortalLaser *this@<ecx>,
+        int a2@<ebp>,
+        const Vector *vecStart,
+        const Vector *vecDirection,
+        CBaseEntity *pReflector)
+{
+  float z; // edx
+  unsigned int v6; // xmm2_4
+  unsigned int v7; // xmm3_4
+  float x; // edi
+  CBaseEntity *v9; // eax
+  float v10; // edi
+  float v11; // edi
+  CBaseEdict *v12; // ecx
+  float y; // xmm0_4
+  bool v14; // zf
+  float v15; // xmm1_4
+  float v16; // xmm2_4
+  CBaseEdict *v17; // ecx
+  CBaseEdict *v18; // ecx
+  unsigned int m_Index; // ecx
+  CBaseEntity *m_pEntity; // esi
+  CPropWeightedCube *SchrodingerTwin; // eax
+  int v22; // eax
+  CBaseEntity *v23; // eax
+  float v24; // xmm1_4
+  float v25; // xmm4_4
+  float v26; // xmm5_4
+  float v27; // xmm2_4
+  float v28; // edi
+  bool v29; // al
+  float v30; // xmm0_4
+  CBaseEdict *v31; // ecx
+  CBaseEdict *v32; // ecx
+  CBaseEdict *v33; // ecx
+  CBaseEdict *v34; // ecx
+  bool v35; // al
+  CBaseEdict *v36; // ecx
+  CBaseEdict *v37; // ecx
+  CHandle<CBaseEntity> *ClonedEntity; // eax
+  CBaseEntity *v39; // esi
+  CPropWeightedCube *v40; // eax
+  int v41; // eax
+  CBaseEntity *v42; // eax
+  _BYTE v43[12]; // [esp+24h] [ebp-17Ch] BYREF
+  Ray_t rayTransformed; // [esp+30h] [ebp-170h]
+  _DWORD v45[3]; // [esp+84h] [ebp-11Ch] BYREF
+  Ray_t ray; // [esp+90h] [ebp-110h] BYREF
+  CGameTrace tr; // [esp+E0h] [ebp-C0h] BYREF
+  _BYTE v48[12]; // [esp+140h] [ebp-60h] BYREF
+  CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > firstInfoList; // [esp+14Ch] [ebp-54h] BYREF
+  CBaseEntity *pHitTarget; // [esp+160h] [ebp-40h]
+  __int128 vecStartPos; // [esp+164h] [ebp-3Ch] OVERLAPPED BYREF
+  float w; // [esp+174h] [ebp-2Ch]
+  Vector vecDirectiona; // [esp+178h] [ebp-28h] BYREF
+  float flNewBeamLength; // [esp+184h] [ebp-1Ch]
+  Vector vecNewTermPoint; // [esp+188h] [ebp-18h] BYREF
+  int v56; // [esp+194h] [ebp-Ch]
+  CPortal_Base2D *pFirstPortal; // [esp+198h] [ebp-8h]
+  CPortal_Base2D *retaddr; // [esp+1A0h] [ebp+0h]
+
+  v56 = a2;
+  pFirstPortal = retaddr;
+  LODWORD(vecNewTermPoint.x) = this;
+  if ( new_portal_laser.m_pParent->m_Value.m_nValue )
+  {
+    z = vecDirection->z;
+    vecNewTermPoint.y = 0.0;
+    *(_QWORD *)&firstInfoList.m_Size = *(_QWORD *)&vecDirection->x;
+    *(float *)&pHitTarget = z;
+    HIBYTE(vecNewTermPoint.z) = 0;
+    if ( !this->m_bAutoAimEnabled )
+      goto LABEL_8;
+    memset(v48, 0, sizeof(v48));
+    firstInfoList.m_Memory.m_pMemory = 0;
+    firstInfoList.m_Memory.m_nAllocationCount = 0;
+    firstInfoList.m_Memory.m_nGrowSize = (int)CPortalLaser::TraceLaser(
+                                                this,
+                                                1,
+                                                vecStart,
+                                                (const Vector *)&firstInfoList.m_Size,
+                                                &vecNewTermPoint.y,
+                                                (CGameTrace *)&ray.m_IsRay,
+                                                (CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > *)v48,
+                                                (Vector *)((char *)&vecStartPos + 8));
+    if ( CPortalLaser::ShouldAutoAim(
+           (CPortalLaser *)LODWORD(vecNewTermPoint.x),
+           (CBaseEntity *)firstInfoList.m_Memory.m_nGrowSize) )
+    {
+      *(float *)&v6 = (float)(*((float *)&vecStartPos + 2)
+                            + (float)(vecStart->x + (float)(vecDirection->x * vecNewTermPoint.y)))
+                    - vecStart->x;
+      *(float *)&v7 = (float)(*((float *)&vecStartPos + 3)
+                            + (float)((float)(vecDirection->y * vecNewTermPoint.y) + vecStart->y))
+                    - vecStart->y;
+      w = (float)(w + (float)((float)(vecDirection->z * vecNewTermPoint.y) + vecStart->z)) - vecStart->z;
+      *((_QWORD *)&vecStartPos + 1) = __PAIR64__(v7, v6);
+      *(_QWORD *)&vecDirectiona.y = __PAIR64__(v7, v6);
+      flNewBeamLength = w;
+      VectorNormalize((Vector *)&vecDirectiona.y);
+      x = vecNewTermPoint.x;
+      vecStartPos = 0ui64;
+      w = 0.0;
+      v9 = CPortalLaser::TraceLaser(
+             (CPortalLaser *)LODWORD(vecNewTermPoint.x),
+             0,
+             vecStart,
+             (Vector *)&vecDirectiona.y,
+             &vecDirectiona.x,
+             (CGameTrace *)v43,
+             (CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > *)&vecStartPos,
+             0);
+      if ( (CBaseEntity *)firstInfoList.m_Memory.m_nGrowSize == v9 )
+      {
+        CGameTrace::operator=((CGameTrace *)&ray.m_IsRay, (const CGameTrace *)v43);
+        vecNewTermPoint.y = vecDirectiona.x;
+        firstInfoList.m_Size = LODWORD(vecDirectiona.y);
+        firstInfoList.m_pElements = (CPortalLaser::PortalLaserInfo_t *)LODWORD(vecDirectiona.z);
+        *(float *)&pHitTarget = flNewBeamLength;
+        CPortalLaser::DamageEntitiesAlongLaser(
+          (CPortalLaser *)LODWORD(x),
+          (const CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > *)&vecStartPos,
+          1);
+        HIBYTE(vecNewTermPoint.z) = 1;
+      }
+      CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int>>::~CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int>>((CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > *)&vecStartPos);
+    }
+    CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int>>::~CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int>>((CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > *)v48);
+    if ( !HIBYTE(vecNewTermPoint.z) )
+    {
+LABEL_8:
+      vecStartPos = 0ui64;
+      w = 0.0;
+      UTIL_ClearTrace((CGameTrace *)&ray.m_IsRay);
+      v10 = vecNewTermPoint.x;
+      firstInfoList.m_Memory.m_nGrowSize = (int)CPortalLaser::TraceLaser(
+                                                  (CPortalLaser *)LODWORD(vecNewTermPoint.x),
+                                                  0,
+                                                  vecStart,
+                                                  (const Vector *)&firstInfoList.m_Size,
+                                                  &vecNewTermPoint.y,
+                                                  (CGameTrace *)&ray.m_IsRay,
+                                                  (CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > *)&vecStartPos,
+                                                  0);
+      CPortalLaser::DamageEntitiesAlongLaser(
+        (CPortalLaser *)LODWORD(v10),
+        (const CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > *)&vecStartPos,
+        0);
+      CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int>>::~CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int>>((CUtlVector<CPortalLaser::PortalLaserInfo_t,CUtlMemory<CPortalLaser::PortalLaserInfo_t,int> > *)&vecStartPos);
+    }
+    v11 = vecNewTermPoint.x;
+    if ( vecStart->x != *(float *)(LODWORD(vecNewTermPoint.x) + 1896)
+      || vecStart->y != *(float *)(LODWORD(vecNewTermPoint.x) + 1900)
+      || vecStart->z != *(float *)(LODWORD(vecNewTermPoint.x) + 1904) )
+    {
+      if ( *(_BYTE *)(LODWORD(vecNewTermPoint.x) + 88) )
+      {
+        *(_BYTE *)(LODWORD(vecNewTermPoint.x) + 92) |= 1u;
+      }
+      else
+      {
+        v12 = *(CBaseEdict **)(LODWORD(vecNewTermPoint.x) + 28);
+        if ( v12 )
+          CBaseEdict::StateChanged(v12, 0x768u);
+      }
+      *(Vector *)(LODWORD(v11) + 1896) = *vecStart;
+    }
+    y = vecStart->x + (float)(*(float *)&firstInfoList.m_Size * vecNewTermPoint.y);
+    v14 = y == *(float *)(LODWORD(v11) + 1908);
+    v15 = (float)(*(float *)&firstInfoList.m_pElements * vecNewTermPoint.y) + vecStart->y;
+    v16 = (float)(*(float *)&pHitTarget * vecNewTermPoint.y) + vecStart->z;
+    vecDirectiona.y = y;
+    vecDirectiona.z = v15;
+    flNewBeamLength = v16;
+    if ( !v14 || v15 != *(float *)(LODWORD(v11) + 1912) || v16 != *(float *)(LODWORD(v11) + 1916) )
+    {
+      if ( *(_BYTE *)(LODWORD(v11) + 88) )
+      {
+        *(_BYTE *)(LODWORD(v11) + 92) |= 1u;
+      }
+      else
+      {
+        v17 = *(CBaseEdict **)(LODWORD(v11) + 28);
+        if ( v17 )
+        {
+          CBaseEdict::StateChanged(v17, 0x774u);
+          v16 = flNewBeamLength;
+          v15 = vecDirectiona.z;
+          y = vecDirectiona.y;
+        }
+      }
+      *(float *)(LODWORD(v11) + 1908) = y;
+      *(float *)(LODWORD(v11) + 1912) = v15;
+      *(float *)(LODWORD(v11) + 1916) = v16;
+    }
+    if ( *(_BYTE *)(LODWORD(v11) + 1922) != HIBYTE(vecNewTermPoint.z) )
+    {
+      if ( *(_BYTE *)(LODWORD(v11) + 88) )
+      {
+        *(_BYTE *)(LODWORD(v11) + 92) |= 1u;
+      }
+      else
+      {
+        v18 = *(CBaseEdict **)(LODWORD(v11) + 28);
+        if ( v18 )
+          CBaseEdict::StateChanged(v18, 0x782u);
+      }
+      *(_BYTE *)(LODWORD(v11) + 1922) = HIBYTE(vecNewTermPoint.z);
+    }
+    if ( !*(_DWORD *)&tr.surface.surfaceProps )
+      goto LABEL_41;
+    if ( CPhysicsShadowClone::IsShadowClone(*(const CBaseEntity **)&tr.surface.surfaceProps) )
+    {
+      m_Index = CPhysicsShadowClone::GetClonedEntity(
+                  *(CPhysicsShadowClone **)&tr.surface.surfaceProps,
+                  (CHandle<CBaseEntity> *)&vecDirectiona)->m_Index;
+      if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+        m_pEntity = 0;
+      else
+        m_pEntity = (CBaseEntity *)g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+    }
+    else
+    {
+      m_pEntity = *(CBaseEntity **)&tr.surface.surfaceProps;
+    }
+    SchrodingerTwin = UTIL_GetSchrodingerTwin(m_pEntity);
+    if ( SchrodingerTwin )
+      m_pEntity = SchrodingerTwin;
+    if ( !CPortalLaser::ReflectLaserFromEntity((CPortalLaser *)LODWORD(v11), m_pEntity) )
+    {
+LABEL_41:
+      v22 = *(_DWORD *)(LODWORD(v11) + 1208);
+      if ( v22 )
+      {
+        *(_DWORD *)(v22 + 1204) = 0;
+        UTIL_Remove(*(CBaseEntity **)(LODWORD(v11) + 1208));
+        *(_DWORD *)(LODWORD(v11) + 1208) = 0;
+      }
+      if ( !firstInfoList.m_Memory.m_nGrowSize
+        || *(const char **)(firstInfoList.m_Memory.m_nGrowSize + 96) != "point_laser_target"
+        && !CBaseEntity::ClassMatchesComplex((CBaseEntity *)firstInfoList.m_Memory.m_nGrowSize, "point_laser_target") )
+      {
+        v23 = *(CBaseEntity **)(LODWORD(v11) + 1872);
+        if ( v23 )
+          UTIL_SetOrigin(v23, &tr.startpos, 0);
+        CPortalLaser::BeamDamage((CPortalLaser *)LODWORD(v11), (CGameTrace *)&ray.m_IsRay);
+      }
+    }
+    return;
+  }
+  CTraceFilterSimpleClassnameList::CTraceFilterSimpleClassnameList(
+    (CTraceFilterSimpleClassnameList *)&tr.hitbox,
+    pReflector,
+    0);
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore(
+    (CTraceFilterSimpleClassnameList *)&tr.hitbox,
+    "projected_wall_entity");
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore((CTraceFilterSimpleClassnameList *)&tr.hitbox, "player");
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore(
+    (CTraceFilterSimpleClassnameList *)&tr.hitbox,
+    "point_laser_target");
+  v24 = vecDirection->z;
+  v25 = vecStart->x;
+  v26 = vecStart->z;
+  v27 = vecStart->x + (float)(vecDirection->x * 56755.84);
+  ray.m_Start.z = (float)((float)(vecDirection->y * 56755.84) + vecStart->y) - vecStart->y;
+  ray.m_Start.y = v27 - v25;
+  ray.m_Start.w = (float)((float)(v24 * 56755.84) + v26) - v26;
+  vecDirectiona.x = (float)((float)(ray.m_Start.z * ray.m_Start.z) + (float)(ray.m_Start.y * ray.m_Start.y))
+                  + (float)(ray.m_Start.w * ray.m_Start.w);
+  BYTE1(ray.m_Extents.z) = vecDirectiona.x != 0.0;
+  memset(&ray.m_StartOffset.y, 0, 12);
+  memset(&ray.m_Delta.y, 0, 12);
+  v45[1] = LODWORD(vecStart->y);
+  ray.m_Extents.y = 0.0;
+  LOBYTE(ray.m_Extents.z) = 1;
+  *(float *)v45 = v25;
+  *(float *)&v45[2] = v26;
+  enginetrace->TraceRay(
+    enginetrace,
+    (const Ray_t *)v45,
+    1174421505u,
+    (ITraceFilter *)&tr.hitbox,
+    (CGameTrace *)&ray.m_IsRay);
+  if ( r_visualizetraces.m_pParent->m_Value.m_nValue )
+    DebugDrawLine((const Vector *)&ray.m_IsRay, &tr.startpos, 255, 0, 0, 1, -1.0);
+  v28 = vecNewTermPoint.x;
+  CPortalLaser::UpdateSoundPosition(
+    (CPortalLaser *)LODWORD(vecNewTermPoint.x),
+    (const Vector *)&ray.m_IsRay,
+    &tr.startpos);
+  vecNewTermPoint.y = 0.0;
+  if ( !UTIL_DidTraceTouchPortals(
+          (const Ray_t *)v45,
+          (const CGameTrace *)&ray.m_IsRay,
+          (CPortal_Base2D **)&vecNewTermPoint.y,
+          0)
+    || !LODWORD(vecNewTermPoint.y)
+    || !CPortal_Base2D::IsActivedAndLinked((CPortal_Base2D *)LODWORD(vecNewTermPoint.y)) )
+  {
+    v35 = CPortalLaser::StrikeEntitiesAlongLaser(
+            (CPortalLaser *)LODWORD(v28),
+            (const Vector *)&ray.m_IsRay,
+            &tr.startpos,
+            (Vector *)&vecDirectiona.y);
+    v30 = vecStart->x;
+    if ( !v35 )
+    {
+      if ( v30 != *(float *)(LODWORD(v28) + 1896)
+        || vecStart->y != *(float *)(LODWORD(v28) + 1900)
+        || vecStart->z != *(float *)(LODWORD(v28) + 1904) )
+      {
+        if ( *(_BYTE *)(LODWORD(v28) + 88) )
+        {
+          *(_BYTE *)(LODWORD(v28) + 92) |= 1u;
+        }
+        else
+        {
+          v36 = *(CBaseEdict **)(LODWORD(v28) + 28);
+          if ( v36 )
+            CBaseEdict::StateChanged(v36, 0x768u);
+        }
+        *(Vector *)(LODWORD(v28) + 1896) = *vecStart;
+      }
+      if ( tr.startpos.x != *(float *)(LODWORD(v28) + 1908)
+        || tr.startpos.y != *(float *)(LODWORD(v28) + 1912)
+        || tr.startpos.z != *(float *)(LODWORD(v28) + 1916) )
+      {
+        if ( *(_BYTE *)(LODWORD(v28) + 88) )
+        {
+          *(_BYTE *)(LODWORD(v28) + 92) |= 1u;
+        }
+        else
+        {
+          v37 = *(CBaseEdict **)(LODWORD(v28) + 28);
+          if ( v37 )
+            CBaseEdict::StateChanged(v37, 0x774u);
+        }
+        *(float *)(LODWORD(v28) + 1908) = tr.startpos.x;
+        *(float *)(LODWORD(v28) + 1912) = tr.startpos.y;
+        *(float *)(LODWORD(v28) + 1916) = tr.startpos.z;
+      }
+      if ( !*(_DWORD *)&tr.surface.surfaceProps )
+        goto LABEL_112;
+      if ( CPhysicsShadowClone::IsShadowClone(*(const CBaseEntity **)&tr.surface.surfaceProps) )
+      {
+        ClonedEntity = CPhysicsShadowClone::GetClonedEntity(
+                         *(CPhysicsShadowClone **)&tr.surface.surfaceProps,
+                         (CHandle<CBaseEntity> *)&vecDirectiona);
+        v39 = CHandle<CPortal_Base2D>::operator CPortal_Base2D *(ClonedEntity);
+      }
+      else
+      {
+        v39 = *(CBaseEntity **)&tr.surface.surfaceProps;
+      }
+      v40 = UTIL_GetSchrodingerTwin(v39);
+      if ( v40 )
+        v39 = v40;
+      if ( !CPortalLaser::ReflectLaserFromEntity((CPortalLaser *)LODWORD(v28), v39) )
+      {
+LABEL_112:
+        v41 = *(_DWORD *)(LODWORD(v28) + 1208);
+        if ( v41 )
+        {
+          *(_DWORD *)(v41 + 1204) = 0;
+          UTIL_Remove(*(CBaseEntity **)(LODWORD(v28) + 1208));
+          *(_DWORD *)(LODWORD(v28) + 1208) = 0;
+        }
+        v42 = *(CBaseEntity **)(LODWORD(v28) + 1872);
+        if ( v42 )
+          UTIL_SetOrigin(v42, &tr.startpos, 0);
+        CPortalLaser::BeamDamage((CPortalLaser *)LODWORD(v28), (CGameTrace *)&ray.m_IsRay);
+      }
+      goto LABEL_117;
+    }
+LABEL_55:
+    if ( v30 != *(float *)(LODWORD(v28) + 1896)
+      || vecStart->y != *(float *)(LODWORD(v28) + 1900)
+      || vecStart->z != *(float *)(LODWORD(v28) + 1904) )
+    {
+      if ( *(_BYTE *)(LODWORD(v28) + 88) )
+      {
+        *(_BYTE *)(LODWORD(v28) + 92) |= 1u;
+      }
+      else
+      {
+        v31 = *(CBaseEdict **)(LODWORD(v28) + 28);
+        if ( v31 )
+          CBaseEdict::StateChanged(v31, 0x768u);
+      }
+      *(Vector *)(LODWORD(v28) + 1896) = *vecStart;
+    }
+    if ( vecDirectiona.y != *(float *)(LODWORD(v28) + 1908)
+      || vecDirectiona.z != *(float *)(LODWORD(v28) + 1912)
+      || flNewBeamLength != *(float *)(LODWORD(v28) + 1916) )
+    {
+      if ( *(_BYTE *)(LODWORD(v28) + 88) )
+      {
+        *(_BYTE *)(LODWORD(v28) + 92) |= 1u;
+      }
+      else
+      {
+        v32 = *(CBaseEdict **)(LODWORD(v28) + 28);
+        if ( v32 )
+          CBaseEdict::StateChanged(v32, 0x774u);
+      }
+      *(float *)(LODWORD(v28) + 1908) = vecDirectiona.y;
+      *(float *)(LODWORD(v28) + 1912) = vecDirectiona.z;
+      *(float *)(LODWORD(v28) + 1916) = flNewBeamLength;
+      CUtlVector<ITriggerTractorBeamAutoList *,CUtlMemory<ITriggerTractorBeamAutoList *,int>>::~CUtlVector<ITriggerTractorBeamAutoList *,CUtlMemory<ITriggerTractorBeamAutoList *,int>>((CUtlVector<__m128,CUtlMemory<__m128,int> > *)v48);
+      return;
+    }
+LABEL_117:
+    CUtlVector<ITriggerTractorBeamAutoList *,CUtlMemory<ITriggerTractorBeamAutoList *,int>>::~CUtlVector<ITriggerTractorBeamAutoList *,CUtlMemory<ITriggerTractorBeamAutoList *,int>>((CUtlVector<__m128,CUtlMemory<__m128,int> > *)v48);
+    return;
+  }
+  v29 = CPortalLaser::StrikeEntitiesAlongLaser(
+          (CPortalLaser *)LODWORD(v28),
+          (const Vector *)&ray.m_IsRay,
+          &tr.startpos,
+          (Vector *)&vecDirectiona.y);
+  v30 = vecStart->x;
+  if ( v29 )
+    goto LABEL_55;
+  if ( v30 != *(float *)(LODWORD(v28) + 1896)
+    || vecStart->y != *(float *)(LODWORD(v28) + 1900)
+    || vecStart->z != *(float *)(LODWORD(v28) + 1904) )
+  {
+    if ( *(_BYTE *)(LODWORD(v28) + 88) )
+    {
+      *(_BYTE *)(LODWORD(v28) + 92) |= 1u;
+    }
+    else
+    {
+      v33 = *(CBaseEdict **)(LODWORD(v28) + 28);
+      if ( v33 )
+        CBaseEdict::StateChanged(v33, 0x768u);
+    }
+    *(Vector *)(LODWORD(v28) + 1896) = *vecStart;
+  }
+  if ( tr.startpos.x != *(float *)(LODWORD(v28) + 1908)
+    || tr.startpos.y != *(float *)(LODWORD(v28) + 1912)
+    || tr.startpos.z != *(float *)(LODWORD(v28) + 1916) )
+  {
+    if ( *(_BYTE *)(LODWORD(v28) + 88) )
+    {
+      *(_BYTE *)(LODWORD(v28) + 92) |= 1u;
+    }
+    else
+    {
+      v34 = *(CBaseEdict **)(LODWORD(v28) + 28);
+      if ( v34 )
+        CBaseEdict::StateChanged(v34, 0x774u);
+    }
+    *(float *)(LODWORD(v28) + 1908) = tr.startpos.x;
+    *(float *)(LODWORD(v28) + 1912) = tr.startpos.y;
+    *(float *)(LODWORD(v28) + 1916) = tr.startpos.z;
+  }
+  CPortalLaser::BeamDamage((CPortalLaser *)LODWORD(v28), (CGameTrace *)&ray.m_IsRay);
+  rayTransformed.m_Extents.y = 0.0;
+  UTIL_Portal_RayTransform((const VMatrix *)(LODWORD(vecNewTermPoint.y) + 1220), (const Ray_t *)v45, (Ray_t *)v43);
+  *((_QWORD *)&vecStartPos + 1) = *(_QWORD *)&rayTransformed.m_Start.y;
+  w = rayTransformed.m_Start.w;
+  VectorNormalize((Vector *)((char *)&vecStartPos + 8));
+  UTIL_Portal_PointTransform(
+    (const VMatrix *)(LODWORD(vecNewTermPoint.y) + 1220),
+    &tr.startpos,
+    (Vector *)&firstInfoList.m_Size);
+  CPortalLaser::UpdateNextLaser(
+    (CPortalLaser *)LODWORD(v28),
+    (const Vector *)&firstInfoList.m_Size,
+    (const Vector *)((char *)&vecStartPos + 8),
+    0);
+  CUtlVector<ITriggerTractorBeamAutoList *,CUtlMemory<ITriggerTractorBeamAutoList *,int>>::~CUtlVector<ITriggerTractorBeamAutoList *,CUtlMemory<ITriggerTractorBeamAutoList *,int>>((CUtlVector<__m128,CUtlMemory<__m128,int> > *)v48);
+}

@@ -14,7 +14,7 @@ $Configuration
 	$Compiler
 	{
 		$AdditionalIncludeDirectories	".\hl2;.\hl2\elements;.\portal;.\portal2;.\portal\vgui;.\portal2\gameui;.\portal2\vgui;$SRCDIR\game\shared\hl2;$SRCDIR\game\shared\multiplayer;$SRCDIR\game\shared\portal;$SRCDIR\game\shared\portal2;$BASE"
-		$PreprocessorDefinitions		"$BASE;PORTAL;SWARM_DLL;PORTAL2;PORTAL2_DLL;GAMEUI_EMBEDDED;GAMEUI_EXPORTS"
+		$PreprocessorDefinitions		"$BASE;PORTAL;PORTAL2;PORTAL2_DLL;GAMEUI_EMBEDDED;GAMEUI_EXPORTS"
 		$PreprocessorDefinitions		"$BASE;USE_CEG"								[ $WIN32 && !$NO_CEG ]
 	}
 	
@@ -28,6 +28,22 @@ $Project "Client (Portal 2)"
 {
 	$Folder	"Source Files"
 	{
+		$File	"$SRCDIR\game\shared\predicted_viewmodel.cpp"
+		$File	"$SRCDIR\game\shared\predicted_viewmodel.h"
+		
+		-$File	"$SRCDIR\game\shared\weapon_parse_default.cpp"
+		$File	"$SRCDIR\game\shared\portal\portal_weapon_parse.cpp"
+		-$File	"geiger.cpp"
+		-$File	"hud_animationinfo.cpp"
+		-$File	"hud_basetimer.cpp"
+		-$File	"hud_bitmapnumericdisplay.cpp"
+		//-$File	"hl2\hud_filmdemo.cpp"
+		//-$File	"hl2\hud_hdrdemo.cpp"
+		-$File	"hud_hintdisplay.cpp"
+		-$File	"hud_numericdisplay.cpp"
+		-$File	"hud_vehicle.cpp"
+		//-$File	"c_mod_lesson_stubs.cpp"
+			
 		$File	"c_team_objectiveresource.cpp"
 		$File	"c_team_objectiveresource.h"
 		
@@ -59,6 +75,10 @@ $Project "Client (Portal 2)"
 			$File	"hl2\c_corpse.h"
 			$File	"hl2\c_func_tankmortar.cpp"
 			
+			$File	"$SRCDIR\game\shared\hl2\basehlcombatweapon_shared.cpp"
+			$File	"hl2\c_basehlcombatweapon.cpp"
+			$File	"hl2\c_basehlcombatweapon.h"
+			
 			$File	"$SRCDIR\game\shared\hl2\hl2_gamerules.cpp"
 			$File	"$SRCDIR\game\shared\hl2\hl2_gamerules.h"
 			
@@ -67,6 +87,8 @@ $Project "Client (Portal 2)"
 			$File	"$SRCDIR\game\shared\hl2\hl_gamemovement.h"
 			$File	"hl2\hl_in_main.cpp"
 			$File	"hl2\hl_prediction.cpp"
+			$File	"hl2\c_ar2_explosion.cpp"
+			$File	"hl2\c_citadel_effects.cpp"
 		}
 		
 		$Folder	"Multiplayer"
@@ -80,15 +102,33 @@ $Project "Client (Portal 2)"
 		
 		$Folder "Portal 2"
 		{
+			$File "portal2/c_projectedwallentity.cpp"
+			$File "portal2/c_projectedwallentity.h"
 			$File "portal2/c_prop_floor_button.cpp"
-			//$File "portal2/c_prop_linked_portal_door.cpp"
+			$File "portal2/c_prop_linked_portal_door.cpp"
 			$File "portal2/c_prop_weightedcube.cpp"
 			$File "portal2/c_prop_weightedcube.h"
+			$File "portal2/c_indicator_panel.cpp"
+			$File "portal2/c_indicator_panel.h"
 			$File "portal2/c_fizzler_effects.cpp"
 			$File "portal2/c_fizzler_effects.h"
-			$File "portal2/c_npc_wheatley_boss.cpp"
-			//$File "portal2\c_trigger_tractorbeam.h"
-			//$File "portal2\c_trigger_tractorbeam.cpp"
+			$File "portal2/c_portal_beam_helper.h"
+			$File "portal2/c_portal_beam_helper.cpp"
+			$File "portal2/c_npc_personality_core.cpp"
+			$File "portal2/c_info_placement_helper.h"
+			$File "portal2/c_info_placement_helper.cpp"
+			$File "portal2/c_env_portal_laser.cpp"
+			
+			$File "portal2\c_baseprojectedentity.h"
+			$File "portal2\c_baseprojectedentity.cpp"
+			$File "portal2\c_baseprojector.h"
+			$File "portal2\c_baseprojector.cpp"
+			
+			$File "portal2\c_prop_tractorbeam.cpp"
+			
+			$File "$SRCDIR\game\shared\portal\baseprojectedentity_shared.h"
+			$File "$SRCDIR\game\shared\portal\baseprojectedentity_shared.cpp"
+			$File "$SRCDIR\game\shared\portal\projectedwallentity_shared.cpp"
 
 			// Radial Menu preparations for when we get to work on coop.
 			/*
@@ -103,9 +143,14 @@ $Project "Client (Portal 2)"
 			$File	"portal2\c_portal2_lesson.cpp"
 			$File	"portal2\c_sdk_jukebox.cpp"
 			$File	"portal2\vgui_rootpanel_portal2.cpp"
-			$File	"$SRCDIR\game\shared\predicted_viewmodel.cpp"
+
+			$File	"$SRCDIR\game\shared\cam_thirdperson.cpp"
+			$File	"$SRCDIR\game\shared\cam_thirdperson.h"
 			
-			//$File	"$SRCDIR\game\shared\portal\trigger_tractorbeam_shared.cpp" // NOTE: Portal 2's Server VPC doesn't have this.
+			$File "portal2\c_trigger_tractorbeam.h"
+			$File "portal2\c_trigger_tractorbeam.cpp"
+			
+			$File	"$SRCDIR\game\shared\portal\trigger_tractorbeam_shared.cpp" // NOTE: Portal 2's Server VPC doesn't have this.
 		
 			$Folder	"VGUI"
 			{
@@ -120,8 +165,10 @@ $Project "Client (Portal 2)"
 				$File	"portal2\vgui\sdk_loading_panel.cpp"
 				$File	"portal2\vgui\sdk_logo_panel.cpp"
 				$File	"portal2\vgui\sdk_vgui_music_importer.cpp"
-				$file	"portal2\vgui\portal2_vgui_ingame_panel.cpp"
-				$file	"portal2\vgui\portal2_vgui_ingame_panel.h"
+				$File	"portal2\vgui\portal2_vgui_ingame_panel.cpp"
+				$File	"portal2\vgui\portal2_vgui_ingame_panel.h"
+				
+				$File	"portal2\vgui\vgui_indicator_panel.cpp"
 			}
 
 			$Folder	"GameUI"
@@ -174,6 +221,8 @@ $Project "Client (Portal 2)"
 						"portal2\gameui\portal2\uigamedata_invite.cpp" \
 						"portal2\gameui\portal2\uigamedata_storage.cpp" \
 						"portal2\gameui\portal2\vachievements.cpp" \
+						"portal2\gameui\portal2\vaddonassociation.cpp" \
+						"portal2\gameui\portal2\vaddons.cpp" \
 						"portal2\gameui\portal2\vattractscreen.cpp" \
 						"portal2\gameui\portal2\vaudio.cpp" \
 						"portal2\gameui\portal2\vaudiovideo.cpp" \
@@ -203,6 +252,8 @@ $Project "Client (Portal 2)"
 						"portal2\gameui\portal2\vingamedifficultyselect.cpp" \
 						"portal2\gameui\portal2\vingamekickplayerlist.cpp" \
 						"portal2\gameui\portal2\vingamemainmenu.cpp" \
+						"portal2\gameui\portal2\vjukebox.cpp" \
+						"portal2\gameui\portal2\vkeyboard.cpp" \
 						"portal2\gameui\portal2\vkeyboardmouse.cpp" \
 						"portal2\gameui\portal2\vleaderboard.cpp" \
 						"portal2\gameui\portal2\vloadingprogress.cpp" \
@@ -251,10 +302,13 @@ $Project "Client (Portal 2)"
 			$File	"portal\C_PortalGhostRenderable.cpp"
 			$File	"portal\C_PortalGhostRenderable.h"
 			$File	"portal\c_prop_energy_ball.cpp"
+			$File	"portal\c_prop_mirror.cpp"
 			$File	"portal\c_prop_portal.cpp"
 			$File	"portal\c_prop_portal.h"
 			$File	"portal\c_portal_base2d.cpp"
 			$File	"portal\c_portal_base2d.h"
+			$File	"portal\c_portal_gamestats.cpp"
+			$File	"portal\c_portal_gamestats.h"	
 			$File	"portal\c_prop_portal_stats_display.cpp"
 			$File	"portal\c_prop_portal_stats_display.h"
 			$File	"portal\clientmode_portal.cpp"
@@ -274,6 +328,8 @@ $Project "Client (Portal 2)"
 			$File	"portal\Portal_DynamicMeshRenderingUtils.h"
 			$File	"$SRCDIR\game\shared\portal\portal_gamemovement.cpp"
 			$File	"$SRCDIR\game\shared\portal\portal_gamemovement.h"
+			$File	"$SRCDIR\game\shared\portal\portal_gamestats_shared.cpp"
+			$File	"$SRCDIR\game\shared\portal\portal_gamestats_shared.h"	
 			$File	"$SRCDIR\game\shared\portal\portal_gamerules.cpp"
 			$File	"$SRCDIR\game\shared\portal\portal_gamerules.h"
 			$File	"$SRCDIR\game\shared\portal\portal_mp_gamerules.cpp"

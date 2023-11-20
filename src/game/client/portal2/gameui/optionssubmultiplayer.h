@@ -1,4 +1,4 @@
-//========= Copyright (c) 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -155,7 +155,9 @@ private:
 	int	m_nLogoG;
 	int	m_nLogoB;
 
+#ifndef _XBOX
 	vgui::DHANDLE<CMultiplayerAdvancedDialog> m_hMultiplayerAdvancedDialog;
+#endif
 	vgui::FileOpenDialog *m_hImportSprayDialog;
 };
 

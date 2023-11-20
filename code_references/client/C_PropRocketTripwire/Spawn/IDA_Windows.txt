@@ -1,0 +1,47 @@
+void __usercall C_PropRocketTripwire::Spawn(C_PropRocketTripwire *this@<ecx>, int a2@<edi>, int a3@<esi>)
+{
+  C_Beam *v4; // esi
+  int m_nBeamEndpointTexture; // eax
+  __int64 v7[2]; // [esp+10h] [ebp-10h] BYREF
+
+  LODWORD(v7[0]) =  __thiscall C_Prop_Portal::`vcall'{4,{flat}};
+  HIDWORD(v7[0]) = 12;
+  v7[1] = 0i64;
+  C_BaseEntity::ThinkSet(this, v7, (unsigned __int64)v7[0], 0.0, 0);
+  ((void (__thiscall *)(C_PropRocketTripwire *, _DWORD, int, int))this->SetNextClientThink)(
+    this,
+    LODWORD(FLOAT_N1293_0),
+    a2,
+    a3);
+  v4 = C_Beam::BeamCreate("effects/bluelaser1.vmt", 0.1);
+  m_nBeamEndpointTexture = this->m_nBeamEndpointTexture;
+  if ( v4->m_nHaloIndex.m_Value != m_nBeamEndpointTexture )
+    v4->m_nHaloIndex.m_Value = m_nBeamEndpointTexture;
+  if ( v4->m_clrRender.m_Value.r != 100 )
+    v4->m_clrRender.m_Value.r = 100;
+  if ( v4->m_clrRender.m_Value.g != 100 )
+    v4->m_clrRender.m_Value.g = 100;
+  if ( v4->m_clrRender.m_Value.b != 0xFF )
+    v4->m_clrRender.m_Value.b = -1;
+  C_BaseEntity::SetRenderAlpha(v4, 0x64u);
+  if ( v4->m_fAmplitude.m_Value != 0.0 )
+    v4->m_fAmplitude.m_Value = 0.0;
+  if ( v4->m_fWidth.m_Value != 2.0 )
+    LODWORD(v4->m_fWidth.m_Value) = FLOAT_2_0;
+  if ( v4->m_fEndWidth.m_Value != 2.0 )
+    LODWORD(v4->m_fEndWidth.m_Value) = FLOAT_2_0;
+  if ( v4->m_fSpeed.m_Value != 0.0 )
+    v4->m_fSpeed.m_Value = 0.0;
+  if ( v4->m_fFadeLength.m_Value != 0.0 )
+    v4->m_fFadeLength.m_Value = 0.0;
+  if ( v4->m_fHaloScale.m_Value != 16.0 )
+    v4->m_fHaloScale.m_Value = FLOAT_16_0;
+  C_BaseEntity::SetCollisionGroup(v4, 0);
+  C_Beam::SetBeamFlag(v4, 0x10000);
+  if ( v4->m_fSpeed.m_Value != 0.0 )
+    v4->m_fSpeed.m_Value = 0.0;
+  if ( v4->m_fHaloScale.m_Value != 25.0 )
+    v4->m_fHaloScale.m_Value = FLOAT_25_0;
+  C_PortalBeamHelper::Init(&this->m_beamHelper, v4);
+  C_Prop_Portal::Fizzle((vgui::PropertyPage *)this);
+}

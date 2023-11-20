@@ -1,0 +1,154 @@
+void __thiscall CTrigger_TractorBeam::UpdateBeam(
+        CTrigger_TractorBeam *this,
+        const Vector *vStartPoint,
+        const Vector *vEndPoint,
+        float flLinearForce)
+{
+  unsigned int m_Index; // ecx
+  int m_Value; // eax
+  int v7; // edi
+  edict_t *m_pPev; // ecx
+  const Vector *v9; // eax
+  const Vector *v10; // ecx
+  edict_t *v11; // ecx
+  edict_t *v12; // ecx
+  float z; // eax
+  float v14; // edx
+  float v15; // xmm1_4
+  IPhysicsObject *m_pPhysicsObject; // ecx
+  IPhysicsObject *v17; // edi
+  float v18; // xmm0_4
+  bool v19; // zf
+  edict_t *v20; // ecx
+  QAngle qBeamAngles; // [esp+10h] [ebp-48h] BYREF
+  Vector vMins; // [esp+1Ch] [ebp-3Ch] BYREF
+  Vector vMaxs; // [esp+28h] [ebp-30h] BYREF
+  Vector vStart; // [esp+34h] [ebp-24h]
+  Vector vEnd; // [esp+40h] [ebp-18h]
+  Vector vDir; // [esp+4Ch] [ebp-Ch] BYREF
+  int savedregs; // [esp+58h] [ebp+0h] BYREF
+  float flLength; // [esp+64h] [ebp+Ch]
+  float flLinearForcea; // [esp+68h] [ebp+10h]
+
+  m_Index = this->m_hOwnerEntity.m_Value.m_Index;
+  if ( m_Index == -1
+    || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index)
+    || !g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity )
+  {
+    return;
+  }
+  m_Value = this->m_spawnflags.m_Value;
+  v7 = m_Value | 0x40;
+  if ( m_Value != (m_Value | 0x40) )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x2FCu);
+    }
+    this->m_spawnflags.m_Value = v7;
+  }
+  if ( flLinearForce >= 0.0 )
+  {
+    if ( this->m_bReversed.m_Value )
+    {
+      if ( this->m_Network.m_TimerEvent.m_bRegistered )
+      {
+        *((_BYTE *)&this->m_Network + 76) |= 1u;
+      }
+      else
+      {
+        v12 = this->m_Network.m_pPev;
+        if ( v12 )
+          CBaseEdict::StateChanged(v12, 0x3E0u);
+      }
+      this->m_bReversed.m_Value = 0;
+    }
+    v9 = vEndPoint;
+    v10 = vStartPoint;
+    goto LABEL_25;
+  }
+  LODWORD(flLinearForce) &= _mask__AbsFloat_;
+  if ( this->m_bReversed.m_Value )
+    goto LABEL_17;
+  if ( !this->m_Network.m_TimerEvent.m_bRegistered )
+  {
+    v11 = this->m_Network.m_pPev;
+    if ( v11 )
+      CBaseEdict::StateChanged(v11, 0x3E0u);
+    this->m_bReversed.m_Value = 1;
+LABEL_17:
+    v9 = vStartPoint;
+    v10 = vEndPoint;
+    goto LABEL_25;
+  }
+  *((_BYTE *)&this->m_Network + 76) |= 1u;
+  v9 = vStartPoint;
+  v10 = vEndPoint;
+  this->m_bReversed.m_Value = 1;
+LABEL_25:
+  CTrigger_TractorBeam::SetDirection(this, v10, v9);
+  z = this->m_vEnd.m_Value.z;
+  v14 = this->m_vStart.m_Value.z;
+  *(_QWORD *)&vStart.x = *(_QWORD *)&this->m_vStart.m_Value.x;
+  *(_QWORD *)&vEnd.x = *(_QWORD *)&this->m_vEnd.m_Value.x;
+  vDir.x = vEnd.x - vStart.x;
+  vDir.y = vEnd.y - vStart.y;
+  vEnd.z = z;
+  vStart.z = v14;
+  vDir.z = z - v14;
+  flLength = VectorNormalize(&vDir);
+  VectorAngles(&vDir, &qBeamAngles);
+  v15 = this->m_flRadius.m_Value;
+  vMaxs.x = flLength;
+  m_pPhysicsObject = this->m_pPhysicsObject;
+  vMins.x = 0.0;
+  LODWORD(vMins.y) = LODWORD(v15) ^ _mask__NegFloat_;
+  LODWORD(vMins.z) = LODWORD(v15) ^ _mask__NegFloat_;
+  vMaxs.y = v15;
+  vMaxs.z = v15;
+  if ( m_pPhysicsObject )
+  {
+    m_pPhysicsObject->RemoveTrigger(m_pPhysicsObject);
+    this->VPhysicsDestroyObject(this);
+  }
+  if ( physenv )
+  {
+    v17 = PhysModelCreateOBB(this, &vMins, &vMaxs, &this->m_vStart.m_Value, &qBeamAngles, 1);
+    CBaseEntity::VPhysicsSetObject(this, v17);
+    v17->BecomeTrigger(v17);
+    CBaseEntity::SetAbsOrigin(this, &this->m_vStart.m_Value);
+    CBaseEntity::SetAbsAngles(this, &qBeamAngles);
+    CCollisionProperty::SetCollisionBounds(&this->m_Collision, &vMins, &vMaxs);
+    CCollisionProperty::SetSurroundingBoundsType(&this->m_Collision, USE_OBB_COLLISION_BOUNDS, 0, 0);
+  }
+  CTrigger_TractorBeam::SetLinearForce(this, &vDir, flLinearForce);
+  v18 = flLinearForce * 0.5;
+  v19 = this->m_linearLimit.m_Value == (float)(flLinearForce * 0.5);
+  flLinearForcea = flLinearForce * 0.5;
+  if ( !v19 )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      v20 = this->m_Network.m_pPev;
+      if ( v20 )
+      {
+        CBaseEdict::StateChanged(v20, 0x390u);
+        v18 = flLinearForcea;
+      }
+    }
+    this->m_linearLimit.m_Value = v18;
+  }
+  CTrigger_TractorBeam::WakeTouchingObjects(this, COERCE_FLOAT(&savedregs));
+  CTrigger_TractorBeam::RemoveAllBlobsFromBeam(this, COERCE_FLOAT(&savedregs));
+  this->m_nLastUpdateFrame = gpGlobals->framecount;
+}

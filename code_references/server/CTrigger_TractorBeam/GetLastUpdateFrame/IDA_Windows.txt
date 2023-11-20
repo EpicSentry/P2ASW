@@ -1,0 +1,4 @@
+int __thiscall CTrigger_TractorBeam::GetLastUpdateFrame(CTrigger_TractorBeam *this)
+{
+  return this->m_nLastUpdateFrame;
+}

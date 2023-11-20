@@ -9,16 +9,15 @@ Anyone is free to contribute to the project!
 
 ## Building
 ### Windows
-Follow the instructions here https://developer.valvesoftware.com/wiki/Source_SDK_2013 
-The VPC files have not been updated to include any new Portal 2 scripts or paint code, you must add them back manually after creating the project with the bat files.
+Follow the instructions here for setting up Visual Studio 2013 https://developer.valvesoftware.com/wiki/Source_SDK_2013 
+Once complete, clone the repo and execute `create-portal2-2013.bat` inside `src\` to generate the Visual Studio project.
+Open the newly created `Game_Portal2-2013.sln` and have fun!
 ### MacOS
 Todo.
 ### Linux
 Todo.
 
 ## Installing/Running the mod
-1. Download Alien Swarm if you don't have it already http://store.steampowered.com/app/620/<br>
-2. Download Portal 2 as well https://store.steampowered.com/app/620/Portal_2/<br>
-3. Edit gameinfo.txt in the `game\mod_portal2` folder to point to your Portal 2 game files.<br>
-4. Copy the `mod_portal2` to Steam's SourceMods folder and restart Steam.<br>
+1. Download Alien Swarm [here](http://store.steampowered.com/app/620/) and Portal 2 [here](https://store.steampowered.com/app/620/Portal_2).<br>
+2. Copy the `portal2asw` folder from `game\` into your SourceMods folder and restart Steam.<br>
 The mod should now show up in your Steam library.

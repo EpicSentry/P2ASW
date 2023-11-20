@@ -1,0 +1,8 @@
+void __thiscall CPropMonsterBox::InputSilentDissolve(CPropMonsterBox *this, inputdata_t *in)
+{
+  if ( this->m_bAllowSilentDissolve )
+  {
+    this->OnFizzled(this);
+    UTIL_Remove(this);
+  }
+}

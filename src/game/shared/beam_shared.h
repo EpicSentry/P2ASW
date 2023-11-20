@@ -121,10 +121,12 @@ public:
 	virtual const Vector &WorldSpaceCenter( void ) const;
 
 	int GetTexture( void );
+	int GetHaloTexture( void ) const;
 	float GetWidth( void ) const;
 	float GetEndWidth( void ) const;
 	float GetFadeLength( void ) const;
 	float GetNoise( void ) const;
+	float GetHaloScale( void ) const;
 	int GetBrightness( void ) const;
 	float GetFrame( void ) const;
 	float GetScrollRate( void ) const;
@@ -397,6 +399,11 @@ inline int CBeam::GetTexture( void )
 	return GetModelIndex(); 
 }
 
+inline int CBeam::GetHaloTexture( void ) const
+{
+	return m_nHaloIndex;
+}
+
 inline float CBeam::GetWidth( void ) const		
 {
 	return m_fWidth; 
@@ -415,6 +422,11 @@ inline float CBeam::GetFadeLength( void ) const
 inline float CBeam::GetNoise( void ) const		
 { 
 	return m_fAmplitude; 
+}
+
+inline float CBeam::GetHaloScale( void ) const
+{
+	return m_fHaloScale;
 }
 
 inline int CBeam::GetBrightness( void ) const	

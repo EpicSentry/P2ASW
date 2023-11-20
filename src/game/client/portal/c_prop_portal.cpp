@@ -50,7 +50,11 @@
 #include "filesystem.h"
 #endif
 
+#include "c_baseprojectedentity.h"
+
 #include "debugoverlay_shared.h"
+
+#undef CProp_Portal
 
 IMPLEMENT_CLIENTCLASS_DT( C_Prop_Portal, DT_Prop_Portal, CProp_Portal )
 	RecvPropEHandle( RECVINFO( m_hFiredByPlayer ) ),
@@ -184,14 +188,8 @@ C_Prop_Portal::C_Prop_Portal( void )
 	m_fSecondaryStaticAmount( 0.0f ),
 	m_fOpenAmount( 0.0f )
 {
-	if( !ms_DefaultPortalSizeInitialized )
-	{
-		ms_DefaultPortalSizeInitialized = true; // for CEG protection
-
-		//CEG_GCV_PRE();
-		ms_DefaultPortalHalfHeight = DEFAULT_PORTAL_HALF_HEIGHT;// CEG_GET_CONSTANT_VALUE(DefaultPortalHalfHeight); // only protecting one to reduce the cost of first-portal check
-		//CEG_GCV_POST();
-	}
+	
+	ms_DefaultPortalHalfHeight = DEFAULT_PORTAL_HALF_HEIGHT;// CEG_GET_CONSTANT_VALUE(DefaultPortalHalfHeight); // only protecting one to reduce the cost of first-portal check
 	m_bIsPropPortal = true;	// Member of CPortalRenderable
 	TransformedLighting.m_LightShadowHandle = CLIENTSHADOW_INVALID_HANDLE;
 	CProp_Portal_Shared::AllPortals.AddToTail( this );
@@ -309,10 +307,10 @@ void C_Prop_Portal::OnNewParticleEffect( const char *pszParticleName, CNewPartic
 		int iPortalCount = CProp_Portal_Shared::AllPortals.Count();
 		if( iPortalCount != 0 )
 		{
-			CProp_Portal **pPortals = CProp_Portal_Shared::AllPortals.Base();
+			C_Prop_Portal **pPortals = CProp_Portal_Shared::AllPortals.Base();
 			for( int i = 0; i != iPortalCount; ++i )
 			{
-				CProp_Portal *pTempPortal = pPortals[i];
+				C_Prop_Portal *pTempPortal = pPortals[i];
 				if ( pTempPortal != this && pTempPortal->IsActive() )
 				{
 					Vector vPosition = pTempPortal->GetAbsOrigin();
@@ -414,8 +412,7 @@ void C_Prop_Portal::OnPortalMoved( void )
 
 		UpdateTransformedLighting();
 
-		//FIXME:
-		//C_BaseProjectedEntity::TestAllForProjectionChanges();
+		C_BaseProjectedEntity::TestAllForProjectionChanges();
 	}
 
 	BaseClass::OnPortalMoved();

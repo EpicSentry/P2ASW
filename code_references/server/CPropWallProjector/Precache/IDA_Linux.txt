@@ -1,0 +1,27 @@
+void __cdecl CPropWallProjector::Precache(CPropWallProjector *const this)
+{
+  const char *pszValue; // eax
+  const char *v2; // eax
+
+  CBaseEntity::PrecacheModel("models/props/wall_emitter.mdl");
+  CBaseEntity::PrecacheScriptSound("VFX.BridgeGlow");
+  pszValue = gpGlobals->mapname.pszValue;
+  if ( !pszValue )
+    pszValue = "";
+  if ( V_stristr(pszValue, "puzzlemaker") )
+  {
+    V_snprintf(CPropWallProjector::s_AmbientBridgeMusic, 64, "music.ctc_lbout");
+  }
+  else
+  {
+    v2 = gpGlobals->mapname.pszValue;
+    if ( !v2 )
+      v2 = "";
+    V_snprintf(CPropWallProjector::s_AmbientBridgeMusic, 64, "music.%s_lbout", v2);
+  }
+  if ( CBaseEntity::PrecacheScriptSound(CPropWallProjector::s_AmbientBridgeMusic) == -1 )
+  {
+    V_snprintf(CPropWallProjector::s_AmbientBridgeMusic, 64, "music.sp_all_maps_lbout");
+    CBaseEntity::PrecacheScriptSound(CPropWallProjector::s_AmbientBridgeMusic);
+  }
+}

@@ -66,6 +66,8 @@ BEGIN_RECV_TABLE( C_World, DT_World )
 #ifdef PORTAL2
 	RecvPropInt(RECVINFO(m_nMaxBlobCount)),
 #endif
+	
+	RecvPropBool	(RECVINFO(m_bHasPaintMap) ),
 
 END_RECV_TABLE()
 

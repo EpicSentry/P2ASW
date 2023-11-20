@@ -1,0 +1,39 @@
+void __cdecl CLabIndicatorPanel::SetTransmit(CLabIndicatorPanel *const this, CCheckTransmitInfo *pInfo, bool bAlways)
+{
+  unsigned int v3; // edx
+  int v4; // eax
+  edict_t *m_pPev; // ecx
+  unsigned int v6; // ecx
+  unsigned int m_Index; // eax
+  char *v8; // edx
+  int v9; // eax
+
+  v3 = 0;
+  v4 = 1;
+  m_pPev = this->m_Network.m_pPev;
+  if ( m_pPev )
+  {
+    v6 = m_pPev - gpGlobals->pEdicts;
+    v4 = 1 << v6;
+    v3 = v6 >> 5;
+  }
+  if ( (v4 & pInfo->m_pTransmitEdict->m_Ints[v3]) == 0 )
+  {
+    CBaseEntity::SetTransmit(this, pInfo, bAlways);
+    m_Index = this->m_hScreen.m_Index;
+    if ( m_Index != -1 )
+    {
+      v8 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+      if ( *((_DWORD *)v8 + 2) == HIWORD(m_Index) )
+      {
+        v9 = *((_DWORD *)v8 + 1);
+        if ( v9 )
+          (*(void (__thiscall **)(CBaseEntityList *, int, CCheckTransmitInfo *, bool))(*(_DWORD *)v9 + 92))(
+            g_pEntityList,
+            v9,
+            pInfo,
+            bAlways);
+      }
+    }
+  }
+}

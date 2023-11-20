@@ -147,7 +147,7 @@ char const *const PowerTypeToString( PaintPowerType type )
 			return "Speed";
 
 		case REFLECT_POWER:
-			return "Speed";// FIXME: Bring this back for DLC2 "Reflect";
+			return "Reflect";// FIXME: Bring this back for DLC2 "Reflect";
 
 		case PORTAL_POWER:
 			return "Portal";

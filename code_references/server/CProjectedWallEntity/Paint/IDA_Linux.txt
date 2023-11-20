@@ -1,0 +1,14 @@
+void __cdecl CProjectedWallEntity::Paint(
+        CProjectedWallEntity *const this,
+        PaintPowerType type,
+        const Vector *const worldContactPt)
+{
+  int v3; // eax
+
+  v3 = CProjectedWallEntity::ComputeSegmentIndex(this, worldContactPt);
+  if ( v3 < this->m_PaintPowers.m_Size )
+  {
+    this->m_PaintPowers.m_Memory.m_pMemory[v3] = type;
+    WallPainted(type, v3, this);
+  }
+}

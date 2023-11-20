@@ -1,0 +1,69 @@
+void __cdecl CTrigger_TractorBeam::WakeTouchingObjects(CTrigger_TractorBeam *const this)
+{
+  float x; // xmm6_4
+  float y; // xmm5_4
+  float v3; // xmm3_4
+  float z; // xmm4_4
+  float v5; // xmm2_4
+  __m128 m_Value_low; // xmm7
+  bool v7; // al
+  __m128 v8; // xmm0
+  __m128 v9; // xmm1
+  float v10; // xmm0_4
+  int v11; // edi
+  int i; // ebx
+  IPhysicsObject *m_pPhysicsObject; // eax
+  CPropWeightedCube *v14; // esi
+  CBaseEntity *list[256]; // [esp+10h] [ebp-48Ch] BYREF
+  Ray_t ray; // [esp+410h] [ebp-8Ch] BYREF
+  CFlaggedEntitiesEnum v17[2]; // [esp+46Ch] [ebp-30h] BYREF
+
+  ray.m_pWorldAxisTransform = 0;
+  x = this->m_vStart.m_Value.x;
+  y = this->m_vStart.m_Value.y;
+  v3 = this->m_vEnd.m_Value.y;
+  z = this->m_vStart.m_Value.z;
+  v5 = this->m_vEnd.m_Value.z;
+  m_Value_low = (__m128)LODWORD(this->m_flRadius.m_Value);
+  v7 = 1;
+  ray.m_Delta.x = this->m_vEnd.m_Value.x - x;
+  ray.m_Delta.y = v3 - y;
+  ray.m_Delta.z = v5 - z;
+  v8 = m_Value_low;
+  v8.m128_f32[0] = (float)(m_Value_low.m128_f32[0] + m_Value_low.m128_f32[0]) * 0.5;
+  if ( (float)((float)((float)(ray.m_Delta.x * ray.m_Delta.x) + (float)(ray.m_Delta.y * ray.m_Delta.y))
+             + (float)(ray.m_Delta.z * ray.m_Delta.z)) == 0.0 )
+    v7 = 0;
+  ray.m_IsSwept = v7;
+  ray.m_Extents.x = (float)(m_Value_low.m128_f32[0] + m_Value_low.m128_f32[0]) * 0.5;
+  ray.m_Extents.y = ray.m_Extents.x;
+  ray.m_Extents.z = ray.m_Extents.x;
+  v8.m128_f32[0] = v8.m128_f32[0] * v8.m128_f32[0];
+  v9 = v8;
+  v9.m128_f32[0] = (float)(v8.m128_f32[0] + v8.m128_f32[0]) + v8.m128_f32[0];
+  ray.m_IsRay = _mm_unpacklo_ps(v9, v9).m128_f32[0] < 0.000001;
+  v10 = (float)(m_Value_low.m128_f32[0] - m_Value_low.m128_f32[0]) * 0.5;
+  ray.m_StartOffset.x = -v10;
+  ray.m_Start.x = x + v10;
+  ray.m_Start.y = y + v10;
+  ray.m_Start.z = z + v10;
+  ray.m_StartOffset.y = -v10;
+  ray.m_StartOffset.z = -v10;
+  CFlaggedEntitiesEnum::CFlaggedEntitiesEnum(v17, list, 256, 0);
+  v11 = UTIL_EntitiesAlongRay(&ray, v17);
+  if ( v11 > 0 )
+  {
+    for ( i = 0; i != v11; ++i )
+    {
+      v14 = (CPropWeightedCube *)list[i];
+      if ( v14 )
+      {
+        if ( UTIL_IsReflectiveCube(list[i]) || UTIL_IsSchrodinger(v14) )
+          CPropWeightedCube::ExitDisabledState(v14);
+        m_pPhysicsObject = v14->m_pPhysicsObject;
+        if ( m_pPhysicsObject )
+          (*((void (__cdecl **)(IPhysicsObject *))m_pPhysicsObject->_vptr_IPhysicsObject + 25))(v14->m_pPhysicsObject);
+      }
+    }
+  }
+}

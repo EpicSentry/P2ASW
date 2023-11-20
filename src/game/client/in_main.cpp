@@ -595,6 +595,10 @@ void IN_GraphDown( const CCommand &args ) {KeyDown(&in_graph, args[1] );}
 void IN_GraphUp( const CCommand &args ) {KeyUp(&in_graph, args[1] );}
 void IN_ZoomDown( const CCommand &args ) {KeyDown(&in_zoom, args[1] );}
 void IN_ZoomUp( const CCommand &args ) {KeyUp(&in_zoom, args[1] );}
+void IN_ZoomInDown( const CCommand &args ) {KeyDown(&in_grenade1, args[1] );}
+void IN_ZoomInUp( const CCommand &args ) {KeyUp(&in_grenade1, args[1] );}
+void IN_ZoomOutDown( const CCommand &args ) {KeyDown(&in_grenade2, args[1] );}
+void IN_ZoomOutUp( const CCommand &args ) {KeyUp(&in_grenade2, args[1] );}
 void IN_Grenade1Up( const CCommand &args ) { KeyUp( &in_grenade1, args[1] ); }
 void IN_Grenade1Down( const CCommand &args ) { KeyDown( &in_grenade1, args[1] ); }
 void IN_Grenade2Up( const CCommand &args ) { KeyUp( &in_grenade2, args[1] ); }
@@ -626,6 +630,7 @@ void IN_RemoteViewUp( const CCommand &args )
 	g_bRemoteViewKeyWasUp = true;
 	KeyUp( &in_remote_view_toggle, args[1] ); 
 }
+
 void IN_RemoteViewDown( const CCommand &args ) 
 {
 	if ( g_bRemoteViewKeyWasUp )
@@ -1859,6 +1864,10 @@ static ConCommand force_centerview("force_centerview", IN_CenterView_f);
 static ConCommand joyadvancedupdate("joyadvancedupdate", IN_Joystick_Advanced_f, "", FCVAR_CLIENTCMD_CAN_EXECUTE);
 static ConCommand startzoom("+zoom", IN_ZoomDown);
 static ConCommand endzoom("-zoom", IN_ZoomUp);
+static ConCommand startzoomin("+zoom_in", IN_ZoomInDown);
+static ConCommand endzoomin("-zoom_in", IN_ZoomInUp);
+static ConCommand startzoomout("+zoom_out", IN_ZoomOutDown);
+static ConCommand endzoomout("-zoom_out", IN_ZoomOutUp);
 static ConCommand endgrenade1( "-grenade1", IN_Grenade1Up );
 static ConCommand startgrenade1( "+grenade1", IN_Grenade1Down );
 static ConCommand endgrenade2( "-grenade2", IN_Grenade2Up );

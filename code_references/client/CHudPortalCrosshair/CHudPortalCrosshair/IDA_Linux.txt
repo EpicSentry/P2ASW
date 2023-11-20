@@ -1,0 +1,56 @@
+void __cdecl CHudPortalCrosshair::CHudPortalCrosshair(CHudPortalCrosshair *const this, const char *pElementName)
+{
+  bool v2; // zf
+  vgui::PanelKeyBindingMap *v3; // eax
+  IClientMode *ClientMode; // eax
+  vgui::Panel *v5; // eax
+  vgui::PanelMessageMap *v6; // eax
+  vgui::PanelMessageMap *v7; // ebx
+  vgui::PanelMessageMap *v8; // eax
+  PanelAnimationMap *v9; // eax
+
+  *(_DWORD *)this->gap0 = off_11D71C8;
+  CHudElement::CHudElement(this, pElementName);
+  vgui::Panel::Panel(&this->vgui::Panel, (const void **const)&off_12D86B4, 0, "HudPortalCrosshair");
+  this->_vptr_IGameEventListener2 = (int (**)(...))off_12D86EC;
+  v2 = CHudPortalCrosshair::ChainToMap(void)::chained == 0;
+  *(_DWORD *)this->gap0 = off_12D87C8;
+  if ( v2 )
+  {
+    CHudPortalCrosshair::ChainToMap(void)::chained = 1;
+    v6 = vgui::FindOrAddPanelMessageMap("CHudPortalCrosshair");
+    v6->pfnClassName = CHudPortalCrosshair::GetPanelClassName;
+    v7 = v6;
+    v8 = vgui::FindOrAddPanelMessageMap("vgui::Panel");
+    v2 = CHudPortalCrosshair::ChainToAnimationMap(void)::chained == 0;
+    v7->baseMap = v8;
+    if ( !v2 )
+      goto LABEL_3;
+  }
+  else if ( CHudPortalCrosshair::ChainToAnimationMap(void)::chained )
+  {
+    goto LABEL_3;
+  }
+  CHudPortalCrosshair::ChainToAnimationMap(void)::chained = 1;
+  v9 = FindOrAddPanelAnimationMap("CHudPortalCrosshair");
+  v9->pfnClassName = CHudPortalCrosshair::GetPanelClassName;
+  v9->baseMap = FindOrAddPanelAnimationMap("vgui::Panel");
+LABEL_3:
+  if ( !CHudPortalCrosshair::KB_ChainToMap(void)::chained )
+  {
+    CHudPortalCrosshair::KB_ChainToMap(void)::chained = 1;
+    v3 = vgui::FindOrAddPanelKeyBindingMap("CHudPortalCrosshair");
+    v3->pfnClassName = CHudPortalCrosshair::GetPanelClassName;
+    v3->baseMap = vgui::FindOrAddPanelKeyBindingMap("vgui::Panel");
+  }
+  this->m_clrCrosshair = 0;
+  ClientMode = GetClientMode();
+  v5 = (vgui::Panel *)(*((int (__cdecl **)(IClientMode *))ClientMode->_vptr_IClientMode + 10))(ClientMode);
+  vgui::Panel::SetParent(&this->vgui::Panel, v5);
+  this->m_pCrosshair = 0;
+  this->m_clrCrosshair = 0;
+  this->m_vecCrossHairOffsetAngle.x = 0.0;
+  this->m_vecCrossHairOffsetAngle.y = 0.0;
+  this->m_vecCrossHairOffsetAngle.z = 0.0;
+  CHudElement::SetHiddenBits(this, 272);
+}

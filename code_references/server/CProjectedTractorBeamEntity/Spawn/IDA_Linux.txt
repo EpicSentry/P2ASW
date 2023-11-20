@@ -1,0 +1,33 @@
+void __cdecl CProjectedTractorBeamEntity::Spawn(CProjectedTractorBeamEntity *const this)
+{
+  CTrigger_TractorBeam *TractorBeam; // eax
+  CTrigger_TractorBeam *v2; // edx
+  CTrigger_TractorBeam *v3; // esi
+  unsigned int m_Index; // eax
+  char *v5; // ecx
+
+  CBaseProjectedEntity::Spawn(this);
+  TractorBeam = CTrigger_TractorBeam::CreateTractorBeam(
+                  &this->m_vecStartPoint.m_Value,
+                  &this->m_vecEndPoint.m_Value,
+                  this);
+  v2 = 0;
+  v3 = TractorBeam;
+  m_Index = this->m_hTractorBeamTrigger.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v5 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v5 + 2) == HIWORD(m_Index) )
+      v2 = (CTrigger_TractorBeam *)*((_DWORD *)v5 + 1);
+  }
+  if ( v3 != v2 )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_hTractorBeamTrigger);
+    if ( v3 )
+      this->m_hTractorBeamTrigger.m_Value.m_Index = *(_DWORD *)(*((int (__cdecl **)(CTrigger_TractorBeam *))v3->_vptr_IHandleEntity
+                                                                + 3))(v3);
+    else
+      this->m_hTractorBeamTrigger.m_Value.m_Index = -1;
+  }
+  CBaseEntity::SetTransmitState(this, 8);
+}

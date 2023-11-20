@@ -1,0 +1,44 @@
+class C_TriggerPortalCleanser : public C_BaseTrigger, public ITriggerPortalCleanserAutoList
+{
+	DECLARE_CLASS( C_TriggerPortalCleanser, C_BaseTrigger );
+	DECLARE_CLIENTCLASS();
+public:
+    	
+	C_TriggerPortalCleanser();
+    ~C_TriggerPortalCleanser();
+    
+	void OnDataChanged( DataUpdateType_t dataType );
+    
+	bool IsEnabled() { return !m_bDisabled; }
+    bool UsesScanline();
+    void GetCurrentState( float & ,float & );
+    bool GetSoundSpatialization( SpatializationInfo_t & );
+    void UpdateParticles();
+    void DestroyParticles();
+    
+	void Touch( C_BaseEntity *pOther );
+    void UpdatePartitionListEntry();
+	
+    bool m_bObject1InRange;
+    bool m_bObject2InRange;
+	
+	CNetworkHandle( C_BaseEntity, m_hObject1 );
+	CNetworkHandle( C_BaseEntity, m_hObject2 );
+	
+    C_BaseEntity *GetEntity() { return this; }
+	
+private:
+
+    bool m_bDisabled;
+    bool m_bVisible;
+    bool m_bUseScanline;
+    bool m_bPlayersPassTriggerFilters;
+	
+    float m_flPowerUpTimer;
+    float m_flPortalShotTime;
+    float m_flLastShotTime;
+    float m_flShotPulseTimer;
+    float m_flLastUpdateTime;
+	
+    CUtlReference<CNewParticleEffect> m_hCleanserFX;
+};

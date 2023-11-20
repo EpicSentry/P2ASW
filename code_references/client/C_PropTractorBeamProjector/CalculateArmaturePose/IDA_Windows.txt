@@ -1,0 +1,39 @@
+double __thiscall C_PropTractorBeamProjector::CalculateArmaturePose(C_PropTractorBeamProjector *this)
+{
+  float m_flArmatureDuration; // xmm2_4
+  float v2; // xmm0_4
+  float m_flArmatureStartTime; // xmm3_4
+  float v5; // xmm1_4
+  float m_flArmatureStart; // xmm0_4
+  float v7; // xmm3_4
+  float v8; // xmm1_4
+
+  m_flArmatureDuration = this->m_flArmatureDuration;
+  v2 = *(float *)(gpGlobals.m_Index + 12);
+  if ( v2 > (float)(this->m_flArmatureStartTime + m_flArmatureDuration) )
+    return this->m_flArmatureTarget;
+  m_flArmatureStartTime = this->m_flArmatureStartTime;
+  v5 = m_flArmatureStartTime + m_flArmatureDuration;
+  if ( m_flArmatureStartTime == (float)(m_flArmatureStartTime + m_flArmatureDuration) )
+  {
+    if ( v2 < v5 )
+      m_flArmatureStart = this->m_flArmatureStart;
+    else
+      m_flArmatureStart = this->m_flArmatureTarget;
+  }
+  else
+  {
+    v7 = (float)(v2 - m_flArmatureStartTime) / (float)(v5 - m_flArmatureStartTime);
+    m_flArmatureStart = (float)((float)((float)((float)(v7 * v7) * 3.0) - (float)((float)((float)(v7 * v7) * 2.0) * v7))
+                              * (float)(this->m_flArmatureTarget - this->m_flArmatureStart))
+                      + this->m_flArmatureStart;
+  }
+  v8 = 0.0;
+  if ( m_flArmatureStart < 0.0 )
+    return v8;
+  v8 = *(float *)&FLOAT_1_0;
+  if ( m_flArmatureStart > 1.0 )
+    return v8;
+  else
+    return m_flArmatureStart;
+}

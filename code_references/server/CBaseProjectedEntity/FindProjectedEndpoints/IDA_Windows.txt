@@ -1,0 +1,136 @@
+// bad sp value at call has been detected, the output may be wrong!
+void __usercall CBaseProjectedEntity::FindProjectedEndpoints(
+        CBaseProjectedEntity *this@<ecx>,
+        float a2@<ebp>,
+        int a3@<edi>,
+        int a4@<esi>)
+{
+  __int64 v5; // xmm0_8
+  float z; // eax
+  float v7; // xmm1_4
+  float v8; // xmm2_4
+  float v9; // xmm5_4
+  float v10; // xmm3_4
+  void (__thiscall *TraceRay)(IEngineTrace *, const Ray_t *, unsigned int, ITraceFilter *, CGameTrace *); // edx
+  edict_t *m_pPev; // ecx
+  float x; // xmm0_4
+  bool v14; // zf
+  float y; // xmm1_4
+  float v16; // xmm2_4
+  edict_t *v17; // ecx
+  Vector v19; // [esp+24h] [ebp-134h] BYREF
+  Vector vecUp; // [esp+30h] [ebp-128h] BYREF
+  Vector vecRight; // [esp+3Ch] [ebp-11Ch] BYREF
+  CGameTrace tr; // [esp+48h] [ebp-110h] BYREF
+  CTraceFilterSimpleClassnameList traceFilter; // [esp+A4h] [ebp-B4h] BYREF
+  Ray_t ray; // [esp+C8h] [ebp-90h] BYREF
+  QAngle qAngles; // [esp+118h] [ebp-40h] BYREF
+  Vector vecForward; // [esp+124h] [ebp-34h] BYREF
+  float v27; // [esp+130h] [ebp-28h]
+  Vector mins; // [esp+134h] [ebp-24h] BYREF
+  Vector maxs; // [esp+140h] [ebp-18h]
+  Vector vStart; // [esp+14Ch] [ebp-Ch]
+  float retaddr; // [esp+158h] [ebp+0h]
+
+  vStart.x = a2;
+  vStart.y = retaddr;
+  v5 = *(_QWORD *)&this->m_angRotation.m_Value.x;
+  *(float *)(&ray.m_IsSwept + 7) = this->m_angRotation.m_Value.z;
+  *(_QWORD *)&ray.m_IsRay = v5;
+  AngleVectors((const QAngle *)&ray.m_IsRay, (Vector *)&qAngles, &vecUp, &v19);
+  ((void (__thiscall *)(CBaseProjectedEntity *, float *, Vector *, int, int))this->GetProjectionExtents)(
+    this,
+    &vecForward.y,
+    &mins,
+    a3,
+    a4);
+  z = this->m_vecOrigin.m_Value.z;
+  *(_QWORD *)&maxs.x = *(_QWORD *)&this->m_vecOrigin.m_Value.x;
+  *(float *)&v5 = (float)(qAngles.x * 25.0) + maxs.x;
+  v7 = maxs.y + (float)(qAngles.y * 25.0);
+  v8 = z + (float)(qAngles.z * 25.0);
+  ray.m_Start.z = (float)((float)(qAngles.y * 4096.0) + v7) - v7;
+  ray.m_Start.y = (float)((float)(qAngles.x * 4096.0) + *(float *)&v5) - *(float *)&v5;
+  ray.m_Start.w = (float)((float)(qAngles.z * 4096.0) + v8) - v8;
+  ray.m_Extents.y = 0.0;
+  BYTE1(ray.m_Extents.z) = (float)((float)((float)(ray.m_Start.z * ray.m_Start.z)
+                                         + (float)(ray.m_Start.y * ray.m_Start.y))
+                                 + (float)(ray.m_Start.w * ray.m_Start.w)) != 0.0;
+  ray.m_StartOffset.y = (float)(mins.x - vecForward.y) * 0.5;
+  ray.m_StartOffset.z = (float)(mins.y - vecForward.z) * 0.5;
+  vecForward.x = (float)(ray.m_StartOffset.y * ray.m_StartOffset.y) + (float)(ray.m_StartOffset.z * ray.m_StartOffset.z);
+  ray.m_StartOffset.w = (float)(mins.z - v27) * 0.5;
+  LOBYTE(ray.m_Extents.z) = (float)(vecForward.x + (float)(ray.m_StartOffset.w * ray.m_StartOffset.w)) < 0.000001;
+  v9 = (float)(vecForward.z + mins.y) * 0.5;
+  v10 = 0.5 * (float)(v27 + mins.z);
+  *(float *)&traceFilter.m_PassClassnames.m_Size = v9 + v7;
+  *(float *)&traceFilter.m_PassClassnames.m_pElements = v10 + v8;
+  *(float *)&traceFilter.m_PassClassnames.m_Memory.m_nGrowSize = (float)((float)(vecForward.y + mins.x) * 0.5)
+                                                               + *(float *)&v5;
+  ray.m_Delta.y = (float)((float)(vecForward.y + mins.x) * 0.5) * -1.0;
+  ray.m_Delta.z = v9 * -1.0;
+  ray.m_Delta.w = v10 * -1.0;
+  CTraceFilterSimpleClassnameList::CTraceFilterSimpleClassnameList(
+    (CTraceFilterSimpleClassnameList *)&tr.hitbox,
+    this,
+    0);
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore((CTraceFilterSimpleClassnameList *)&tr.hitbox, "prop_physics");
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore((CTraceFilterSimpleClassnameList *)&tr.hitbox, "func_physbox");
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore(
+    (CTraceFilterSimpleClassnameList *)&tr.hitbox,
+    "simple_physics_brush");
+  TraceRay = enginetrace->TraceRay;
+  LODWORD(maxs.z) = &vecRight;
+  ((void (__thiscall *)(IEngineTrace *, int *, int, int *))TraceRay)(
+    enginetrace,
+    &traceFilter.m_PassClassnames.m_Memory.m_nGrowSize,
+    16395,
+    &tr.hitbox);
+  if ( r_visualizetraces.m_pParent->m_Value.m_nValue )
+    DebugDrawLine(&vecRight, &tr.startpos, 255, 0, 0, 1, -1.0);
+  if ( maxs.x != this->m_vecStartPoint.m_Value.x
+    || maxs.y != this->m_vecStartPoint.m_Value.y
+    || maxs.z != this->m_vecStartPoint.m_Value.z )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x394u);
+    }
+    this->m_vecStartPoint.m_Value = maxs;
+  }
+  x = tr.startpos.x + (float)(tr.endpos.x * 0.1);
+  v14 = x == this->m_vecEndPoint.m_Value.x;
+  y = tr.startpos.y + (float)(tr.endpos.y * 0.1);
+  v16 = tr.startpos.z + (float)(tr.endpos.z * 0.1);
+  maxs.x = x;
+  maxs.y = y;
+  maxs.z = v16;
+  if ( !v14 || y != this->m_vecEndPoint.m_Value.y || v16 != this->m_vecEndPoint.m_Value.z )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      v17 = this->m_Network.m_pPev;
+      if ( v17 )
+      {
+        CBaseEdict::StateChanged(v17, 0x3A0u);
+        v16 = maxs.z;
+        y = maxs.y;
+        x = maxs.x;
+      }
+    }
+    this->m_vecEndPoint.m_Value.x = x;
+    this->m_vecEndPoint.m_Value.y = y;
+    this->m_vecEndPoint.m_Value.z = v16;
+  }
+  CUtlVector<ITriggerTractorBeamAutoList *,CUtlMemory<ITriggerTractorBeamAutoList *,int>>::~CUtlVector<ITriggerTractorBeamAutoList *,CUtlMemory<ITriggerTractorBeamAutoList *,int>>((CUtlVector<__m128,CUtlMemory<__m128,int> > *)&traceFilter.m_pPassEnt);
+}

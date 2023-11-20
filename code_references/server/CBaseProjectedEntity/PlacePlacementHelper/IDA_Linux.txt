@@ -1,0 +1,39 @@
+void __cdecl CBaseProjectedEntity::PlacePlacementHelper(
+        CBaseProjectedEntity *const this,
+        CInfoPlacementHelper *pHelper)
+{
+  float *v2; // eax
+  float v3; // xmm2_4
+  float v4; // xmm1_4
+  float v5; // xmm0_4
+  Vector vForward; // [esp+48h] [ebp-20h] BYREF
+  Vector absOrigin; // [esp+54h] [ebp-14h] BYREF
+
+  v2 = (float *)(*((int (__cdecl **)(CBaseProjectedEntity *const))this->_vptr_IHandleEntity + 205))(this);
+  v3 = *v2;
+  v4 = v2[1];
+  v5 = v2[2];
+  if ( pHelper )
+  {
+    (*((void (__cdecl **)(CBaseProjectedEntity *const, Vector *, _DWORD, _DWORD))this->_vptr_IHandleEntity + 135))(
+      this,
+      &vForward,
+      0,
+      0);
+    absOrigin.x = v3 - vForward.x;
+    absOrigin.y = v4 - vForward.y;
+    absOrigin.z = v5 - vForward.z;
+    CBaseEntity::SetAbsOrigin(pHelper, &absOrigin);
+    (*((void (__cdecl **)(CInfoPlacementHelper *, const char *, void *))pHelper->_vptr_IHandleEntity + 33))(
+      pHelper,
+      "radius",
+      &unk_BBEDFD);
+    (*((void (__cdecl **)(CInfoPlacementHelper *, const char *, const char *))pHelper->_vptr_IHandleEntity + 33))(
+      pHelper,
+      "force_placement",
+      "1");
+    (*((void (__cdecl **)(CInfoPlacementHelper *, CBaseProjectedEntity *const))pHelper->_vptr_IHandleEntity + 19))(
+      pHelper,
+      this);
+  }
+}

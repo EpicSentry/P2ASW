@@ -1,0 +1,21 @@
+void __cdecl CTriggerPortalCleanser::StartAmbientSounds(CTriggerPortalCleanser *const this)
+{
+  edict_t *m_pPev; // edx
+  int v2; // eax
+  CPASFilter filter; // [esp+20h] [ebp-38h] BYREF
+
+  if ( (this->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(this);
+  CRecipientFilter::CRecipientFilter(&filter);
+  filter._vptr_IRecipientFilter = (int (**)(...))off_B98108;
+  CRecipientFilter::AddRecipientsByPAS(&filter, &this->m_vecAbsOrigin);
+  if ( (this->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(this);
+  m_pPev = this->m_Network.m_pPev;
+  v2 = 0;
+  if ( m_pPev )
+    v2 = m_pPev - gpGlobals->pEdicts;
+  CBaseEntity::EmitSound(&filter, v2, "VFX.FizzlerStart", &this->m_vecAbsOrigin, 0.0, 0);
+  filter._vptr_IRecipientFilter = (int (**)(...))off_B98108;
+  CRecipientFilter::~CRecipientFilter(&filter);
+}

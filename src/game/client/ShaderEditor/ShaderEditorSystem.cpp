@@ -23,18 +23,13 @@
 #include "rendertexture.h"
 #include "c_rope.h"
 #include "model_types.h"
-#ifdef SWARM_DLL
+#if defined ( SWARM_DLL ) || defined ( PORTAL2 )
 #include "modelrendersystem.h"
 #endif
 
 
-#if SWARM_DLL
 #define Editor_MainViewOrigin MainViewOrigin( 0 )
 #define Editor_MainViewForward MainViewForward( 0 )
-#else
-#define Editor_MainViewOrigin MainViewOrigin()
-#define Editor_MainViewForward MainViewForward()
-#endif
 
 
 ShaderEditorHandler __g_ShaderEditorSystem( "ShEditUpdate" );
@@ -527,7 +522,7 @@ protected:
 		if ( bParticles )
 			g_pParticleSystemMgr->ResetRenderCache();
 
-#ifdef SWARM_DLL
+#if defined ( SWARM_DLL ) || defined ( PORTAL2 )
 
 		extern ConVar cl_modelfastpath;
 		extern ConVar r_drawothermodels;
@@ -750,7 +745,7 @@ protected:
 			g_pParticleSystemMgr->DrawRenderCache( bShadowDepth );
 	};
 
-#ifdef SWARM_DLL
+#if defined ( SWARM_DLL ) || defined ( PORTAL2 )
 	void	DrawOpaqueRenderables_ModelRenderables( int nCount, ModelRenderSystemData_t* pModelRenderables, bool bShadowDepth )
 	{
 		g_pModelRenderSystem->DrawModels( pModelRenderables, nCount, bShadowDepth ? MODEL_RENDER_MODE_SHADOW_DEPTH : MODEL_RENDER_MODE_NORMAL );
@@ -873,7 +868,7 @@ protected:
 	};
 #endif
 
-#ifdef SWARM_DLL
+#if defined ( SWARM_DLL ) || defined ( PORTAL2 )
 	void DrawOpaqueRenderables_DrawBrushModels( int nCount, CClientRenderablesList::CEntry **ppEntities, bool bShadowDepth )
 	{
 		for( int i = 0; i < nCount; ++i )
@@ -887,7 +882,7 @@ protected:
 	};
 #endif
 
-#ifdef SWARM_DLL
+#if defined ( SWARM_DLL ) || defined ( PORTAL2 )
 	void DrawOpaqueRenderables_DrawStaticProps( int nCount, CClientRenderablesList::CEntry **ppEntities, bool bShadowDepth )
 	{
 		if ( nCount == 0 )
@@ -960,7 +955,7 @@ protected:
 	};
 #endif
 
-#ifdef SWARM_DLL
+#if defined ( SWARM_DLL ) || defined ( PORTAL2 )
 	void DrawOpaqueRenderables_Range( int nCount, CClientRenderablesList::CEntry **ppEntities, bool bShadowDepth )
 	{
 		for ( int i = 0; i < nCount; ++i )
@@ -1178,6 +1173,8 @@ public:
 						bRemove = !settings.bDrawWeapons;
 #ifdef SWARM_DLL
 					else if ( pEntity->ComputeTranslucencyType() != RENDERABLE_IS_OPAQUE )
+#elif defined ( PORTAL2 )
+					else if ( pEntity->IsTransparent() )
 #else
 					else if ( pEntry->m_pRenderable->IsTransparent() )
 #endif
@@ -1189,7 +1186,7 @@ public:
 				if ( bRemove )
 				{
 					pEntry->m_pRenderable = NULL;
-#ifndef SWARM_DLL
+#if !defined ( SWARM_DLL ) && !defined ( PORTAL2 )
 					pEntry->m_RenderHandle = NULL;
 #endif
 				}
@@ -1201,7 +1198,7 @@ public:
 				CClientRenderablesList::CEntry *pEntry = m_pRenderablesList->m_RenderGroups[i] + e;
 
 				if ( !pEntry || !pEntry->m_pRenderable
-#ifndef SWARM_DLL
+#if !defined ( SWARM_DLL ) && !defined ( PORTAL2 )
 					|| !pEntry->m_RenderHandle
 #endif
 					)
@@ -1210,7 +1207,7 @@ public:
 					{
 						CClientRenderablesList::CEntry *pEntry2 = m_pRenderablesList->m_RenderGroups[i] + e2;
 						if ( pEntry2 && pEntry2->m_pRenderable
-#ifndef SWARM_DLL
+#if !defined ( SWARM_DLL ) && !defined ( PORTAL2 )
 							&& pEntry2->m_RenderHandle
 #endif
 							)
@@ -1224,7 +1221,7 @@ public:
 				}
 
 				if ( pEntry && pEntry->m_pRenderable
-#ifndef SWARM_DLL
+#if !defined ( SWARM_DLL ) && !defined ( PORTAL2 )
 					&& pEntry->m_RenderHandle
 #endif
 					)
@@ -1265,7 +1262,7 @@ private:
 
 };
 
-#ifdef SWARM_DLL
+#if defined ( SWARM_DLL )  || defined ( PORTAL2 )
 bool UpdateRefractIfNeededByList( CViewModelRenderablesList::RenderGroups_t &list )
 {
 	int nCount = list.Count();
@@ -1464,7 +1461,7 @@ pFnVrCallback_Declare( VrCallback_ViewModel )
 	viewModelSetup.zNear = view.zNearViewmodel;
 	viewModelSetup.zFar = view.zFarViewmodel;
 	viewModelSetup.fov = view.fovViewmodel;
-#ifdef SWARM_DLL
+#if defined ( SWARM_DLL )  || defined ( PORTAL2 )
 	viewModelSetup.m_flAspectRatio = engine->GetScreenAspectRatio( view.width, view.height );
 #else
 	viewModelSetup.m_flAspectRatio = engine->GetScreenAspectRatio();
@@ -1491,7 +1488,7 @@ pFnVrCallback_Declare( VrCallback_ViewModel )
 	if( bUseDepthHack )
 		pRenderContext->DepthRange( 0.0f, 0.1f );
 	
-#ifdef SWARM_DLL
+#if defined ( SWARM_DLL )  || defined ( PORTAL2 )
 	CViewModelRenderablesList list;
 	ClientLeafSystem()->CollateViewModelRenderables( &list );
 	CViewModelRenderablesList::RenderGroups_t &opaqueViewModelList = list.m_RenderGroups[ CViewModelRenderablesList::VM_GROUP_OPAQUE ];

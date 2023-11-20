@@ -1,0 +1,25 @@
+void __thiscall CPropWallProjector::Spawn(CPropWallProjector *this)
+{
+  unsigned int m_Index; // eax
+  ProjectedEntityAmbientSoundProxy *v3; // eax
+
+  CBaseProjector::Spawn(this);
+  this->Precache(this);
+  this->SetModel(this, "models/props/wall_emitter.mdl");
+  CCollisionProperty::SetSolid(&this->m_Collision, SOLID_VPHYSICS);
+  m_Index = this->m_hAmbientSoundProxy.m_Index;
+  if ( m_Index == -1
+    || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index)
+    || !g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity )
+  {
+    v3 = ProjectedEntityAmbientSoundProxy::Create(this);
+    if ( v3 )
+    {
+      this->m_hAmbientSoundProxy.m_Index = v3->GetRefEHandle(v3)->m_Index;
+      CBaseEntity::AddEffects(this, 1024);
+      return;
+    }
+    this->m_hAmbientSoundProxy.m_Index = -1;
+  }
+  CBaseEntity::AddEffects(this, 1024);
+}

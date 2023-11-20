@@ -269,7 +269,7 @@ void C_BaseCombatWeapon::DrawCrosshair()
 //-----------------------------------------------------------------------------
 // Purpose: This weapon is the active weapon, and the viewmodel for it was just drawn.
 //-----------------------------------------------------------------------------
-void C_BaseCombatWeapon::ViewModelDrawn( C_BaseViewModel *pViewModel )
+void C_BaseCombatWeapon::ViewModelDrawn( int nFlags, C_BaseViewModel *pViewModel )
 {
 }
 

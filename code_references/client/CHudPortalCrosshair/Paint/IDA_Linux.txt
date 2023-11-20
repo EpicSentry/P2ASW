@@ -1,0 +1,59 @@
+void __cdecl CHudPortalCrosshair::Paint(CHudPortalCrosshair *const this)
+{
+  int v1; // eax
+  float x; // xmm0_4
+  float y; // xmm1_4
+  float v4; // xmm2_4
+  float z; // xmm3_4
+  vec_t v6; // xmm1_4
+  vec_t v7; // xmm0_4
+  float v8; // [esp+48h] [ebp-40h]
+  float v9; // [esp+48h] [ebp-40h]
+  float v10; // [esp+4Ch] [ebp-3Ch]
+  QAngle angles; // [esp+50h] [ebp-38h] BYREF
+  Vector forward; // [esp+5Ch] [ebp-2Ch] BYREF
+  Vector point; // [esp+68h] [ebp-20h] BYREF
+  Vector screen; // [esp+74h] [ebp-14h] BYREF
+
+  if ( this->m_pCrosshair && IsCurrentViewAccessAllowed() )
+  {
+    this->m_curViewAngles = *CurrentViewAngles();
+    this->m_curViewOrigin = *CurrentViewOrigin();
+    v10 = (float)(ScreenWidth() / 2);
+    v1 = ScreenHeight();
+    x = this->m_vecCrossHairOffsetAngle.x;
+    y = this->m_vecCrossHairOffsetAngle.y;
+    v4 = (float)(v1 / 2);
+    if ( x == vec3_angle.x )
+    {
+      z = this->m_vecCrossHairOffsetAngle.z;
+      if ( y == vec3_angle.y && z == vec3_angle.z )
+        goto LABEL_7;
+    }
+    else
+    {
+      z = this->m_vecCrossHairOffsetAngle.z;
+    }
+    v6 = y + this->m_curViewAngles.y;
+    v7 = x + this->m_curViewAngles.x;
+    angles.z = z + this->m_curViewAngles.z;
+    angles.y = v6;
+    angles.x = v7;
+    AngleVectors(&angles, &forward);
+    point.x = this->m_curViewOrigin.x + forward.x;
+    point.y = this->m_curViewOrigin.y + forward.y;
+    point.z = this->m_curViewOrigin.z + forward.z;
+    ScreenTransform(&point, &screen);
+    v8 = screen.x * 0.5;
+    v10 = (float)((float)((float)ScreenWidth() * v8) + 0.5) + v10;
+    v9 = screen.y * 0.5;
+    v4 = v4 + (float)((float)((float)ScreenHeight() * v9) + 0.5);
+LABEL_7:
+    CHudTexture::DrawSelf(
+      this->m_pCrosshair,
+      (int)(float)(v10 - (float)((float)(this->m_pCrosshair->rc.right - this->m_pCrosshair->rc.left) * 0.5)),
+      (int)(float)(v4 - (float)((float)(this->m_pCrosshair->rc.bottom - this->m_pCrosshair->rc.top) * 0.5)),
+      &this->m_clrCrosshair,
+      1.0);
+  }
+}

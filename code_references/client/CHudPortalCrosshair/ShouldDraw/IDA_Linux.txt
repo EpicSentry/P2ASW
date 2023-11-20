@@ -1,0 +1,4 @@
+bool __cdecl CHudPortalCrosshair::ShouldDraw(CHudPortalCrosshair *const this)
+{
+  return 0;
+}

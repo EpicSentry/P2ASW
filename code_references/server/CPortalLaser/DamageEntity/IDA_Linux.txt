@@ -1,0 +1,14 @@
+void __cdecl CPortalLaser::DamageEntity(CPortalLaser *const this, CBaseEntity *pVictim, float flAmount)
+{
+  const Vector *v3; // eax
+  CTakeDamageInfo info; // [esp+24h] [ebp-64h] BYREF
+  Vector vecMeleeDir; // [esp+74h] [ebp-14h] BYREF
+
+  CTakeDamageInfo::CTakeDamageInfo(&info, this, this, flAmount * gpGlobals->frametime, 8, 0);
+  v3 = (const Vector *)(*((int (__cdecl **)(CBaseEntity *))pVictim->_vptr_IHandleEntity + 150))(pVictim);
+  vecMeleeDir.x = 1.0;
+  vecMeleeDir.y = 0.0;
+  vecMeleeDir.z = 0.0;
+  CalculateMeleeDamageForce(&info, &vecMeleeDir, v3, 1.0);
+  CBaseEntity::TakeDamage(pVictim, &info);
+}

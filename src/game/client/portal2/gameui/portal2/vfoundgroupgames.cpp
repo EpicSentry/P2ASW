@@ -15,7 +15,7 @@
 using namespace vgui;
 using namespace BaseModUI;
 
-extern ConVar ui_foundgames_spinner_time;
+const char *COM_GetModDirectory();
 
 //=============================================================================
 FoundGroupGames::FoundGroupGames( Panel *parent, const char *panelName ) : BaseClass( parent, panelName )
@@ -40,6 +40,7 @@ void FoundGroupGames::OnEvent( KeyValues *pEvent )
 		char const *szUpdate = pEvent->GetString( "update", "" );
 		if ( !Q_stricmp( "searchstarted", szUpdate ) )
 		{
+			extern ConVar ui_foundgames_spinner_time;
 			m_flSearchStartedTime = Plat_FloatTime();
 			m_flSearchEndTime = m_flSearchStartedTime + ui_foundgames_spinner_time.GetFloat();
 			OnThink();
@@ -109,8 +110,18 @@ void FoundGroupGames::AddServersToList( void )
 
 		fi.mFriendXUID = item->GetOnlineId();
 
+		const char *szModDir = pGameDetails->GetString( "game/dir", "swarm" );
+		if ( Q_stricmp( szModDir, COM_GetModDirectory() ) )
+		{
+			Q_snprintf( fi.mchOtherTitle, sizeof( fi.mchOtherTitle ), szModDir );
+		}
+
 		// Check if this is actually a non-joinable game
-		if ( fi.IsDownloadable() )
+		if ( fi.IsOtherTitle() )
+		{
+			fi.mIsJoinable = false;
+		}
+		else if ( fi.IsDownloadable() )
 		{
 			fi.mIsJoinable = false;
 		}
@@ -153,7 +164,7 @@ bool FoundGroupGames::IsADuplicateServer( FoundGameListItem *item, FoundGameList
 	// Only check server address
 	FoundGameListItem::Info const &ii = item->GetFullInfo();
 	if ( ii.mFriendXUID == fi.mFriendXUID &&
-#if defined( _GAMECONSOLE )
+#if defined( _X360 )
 		1
 #else
 		ii.mpGameDetails->GetUint64( "player/xuidOnline" ) == fi.mpGameDetails->GetUint64( "player/xuidOnline" )

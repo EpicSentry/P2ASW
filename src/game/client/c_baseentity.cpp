@@ -2130,6 +2130,15 @@ void C_BaseEntity::SetMoveCollide( MoveCollide_t val )
 	m_MoveCollide = val;
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Get rendermode
+// Output : int - the render mode
+//-----------------------------------------------------------------------------
+bool C_BaseEntity::IsTransparent( void )
+{
+	bool modelIsTransparent = modelinfo->IsTranslucent(model);
+	return modelIsTransparent || (m_nRenderMode != kRenderNormal);
+}
 
 //-----------------------------------------------------------------------------
 // Default implementation of compute translucency type
@@ -4904,6 +4913,10 @@ const char *C_BaseEntity::GetClassname( void )
 	static char outstr[ 256 ];
 	outstr[ 0 ] = 0;
 	bool gotname = false;
+	ClientClass *pClientClass = GetClientClass();
+	if ( pClientClass && pClientClass->m_pMapClassname )
+		return pClientClass->m_pMapClassname;
+
 #ifndef NO_ENTITY_PREDICTION
 	if ( GetPredDescMap() )
 	{

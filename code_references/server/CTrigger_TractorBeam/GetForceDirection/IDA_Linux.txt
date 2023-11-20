@@ -1,0 +1,13 @@
+Vector *CTrigger_TractorBeam::GetForceDirection(Vector *retstr, const CTrigger_TractorBeam *const this)
+{
+  vec_t v2; // xmm0_4
+  vec_t v3; // xmm2_4
+
+  v2 = this->m_vEnd.m_Value.z - this->m_vStart.m_Value.z;
+  v3 = this->m_vEnd.m_Value.x - this->m_vStart.m_Value.x;
+  retstr->y = this->m_vEnd.m_Value.y - this->m_vStart.m_Value.y;
+  retstr->z = v2;
+  retstr->x = v3;
+  VectorNormalize(retstr);
+  return retstr;
+}

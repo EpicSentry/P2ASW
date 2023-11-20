@@ -108,8 +108,11 @@
 #ifdef INFESTED_DLL
 #include "missionchooser/iasw_mission_chooser.h"
 #include "missionchooser/iasw_mission_chooser_source.h"
-#include "matchmaking/swarm/imatchext_swarm.h"
 #include "asw_gamerules.h"
+#endif
+
+#if defined ( INFESTED_DLL ) || defined ( PORTAL2 )
+#include "matchmaking/swarm/imatchext_swarm.h"
 #endif
 
 #ifdef PORTAL
@@ -194,6 +197,9 @@ IBlackBox *blackboxrecorder = NULL;
 
 #ifdef INFESTED_DLL
 IASW_Mission_Chooser *missionchooser = NULL;
+#endif
+
+#if defined ( INFESTED_DLL ) || defined ( PORTAL2 )
 IMatchExtSwarm *g_pMatchExtSwarm = NULL;
 #endif
 
@@ -631,21 +637,21 @@ static bool InitGameSystems( CreateInterfaceFn appSystemFactory )
 CServerGameDLL g_ServerGameDLL;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CServerGameDLL, IServerGameDLL, INTERFACEVERSION_SERVERGAMEDLL, g_ServerGameDLL);
 
-bool CServerGameDLL::DLLInit( CreateInterfaceFn appSystemFactory, 
-		CreateInterfaceFn physicsFactory, CreateInterfaceFn fileSystemFactory, 
-		CGlobalVars *pGlobals)
+bool CServerGameDLL::DLLInit(CreateInterfaceFn appSystemFactory,
+	CreateInterfaceFn physicsFactory, CreateInterfaceFn fileSystemFactory,
+	CGlobalVars *pGlobals)
 {
 
-	COM_TimestampedLog( "ConnectTier1/2/3Libraries - Start" );
+	COM_TimestampedLog("ConnectTier1/2/3Libraries - Start");
 
-	ConnectTier1Libraries( &appSystemFactory, 1 );
-	ConnectTier2Libraries( &appSystemFactory, 1 );
-	ConnectTier3Libraries( &appSystemFactory, 1 );
+	ConnectTier1Libraries(&appSystemFactory, 1);
+	ConnectTier2Libraries(&appSystemFactory, 1);
+	ConnectTier3Libraries(&appSystemFactory, 1);
 
-	COM_TimestampedLog( "ConnectTier1/2/3Libraries - Finish" );
+	COM_TimestampedLog("ConnectTier1/2/3Libraries - Finish");
 
 	// Connected in ConnectTier1Libraries
-	if ( cvar == NULL )
+	if (cvar == NULL)
 		return false;
 
 #if !defined( SWDS ) && !defined(NO_STEAM)
@@ -656,68 +662,68 @@ bool CServerGameDLL::DLLInit( CreateInterfaceFn appSystemFactory,
 	s_SteamGameServerAPIContext.Init();
 #endif
 
-	COM_TimestampedLog( "Factories - Start" );
+	COM_TimestampedLog("Factories - Start");
 
 	// init each (seperated for ease of debugging)
-	if ( (engine = (IVEngineServer*)appSystemFactory(INTERFACEVERSION_VENGINESERVER, NULL)) == NULL )
+	if ((engine = (IVEngineServer*)appSystemFactory(INTERFACEVERSION_VENGINESERVER, NULL)) == NULL)
 		return false;
-	if ( (g_pVoiceServer = (IVoiceServer*)appSystemFactory(INTERFACEVERSION_VOICESERVER, NULL)) == NULL )
+	if ((g_pVoiceServer = (IVoiceServer*)appSystemFactory(INTERFACEVERSION_VOICESERVER, NULL)) == NULL)
 		return false;
-	if ( (networkstringtable = (INetworkStringTableContainer *)appSystemFactory(INTERFACENAME_NETWORKSTRINGTABLESERVER,NULL)) == NULL )
+	if ((networkstringtable = (INetworkStringTableContainer *)appSystemFactory(INTERFACENAME_NETWORKSTRINGTABLESERVER, NULL)) == NULL)
 		return false;
-	if ( (staticpropmgr = (IStaticPropMgrServer *)appSystemFactory(INTERFACEVERSION_STATICPROPMGR_SERVER,NULL)) == NULL )
+	if ((staticpropmgr = (IStaticPropMgrServer *)appSystemFactory(INTERFACEVERSION_STATICPROPMGR_SERVER, NULL)) == NULL)
 		return false;
-	if ( (random = (IUniformRandomStream *)appSystemFactory(VENGINE_SERVER_RANDOM_INTERFACE_VERSION, NULL)) == NULL )
+	if ((random = (IUniformRandomStream *)appSystemFactory(VENGINE_SERVER_RANDOM_INTERFACE_VERSION, NULL)) == NULL)
 		return false;
-	if ( (enginesound = (IEngineSound *)appSystemFactory(IENGINESOUND_SERVER_INTERFACE_VERSION, NULL)) == NULL )
+	if ((enginesound = (IEngineSound *)appSystemFactory(IENGINESOUND_SERVER_INTERFACE_VERSION, NULL)) == NULL)
 		return false;
-	if ( (partition = (ISpatialPartition *)appSystemFactory(INTERFACEVERSION_SPATIALPARTITION, NULL)) == NULL )
+	if ((partition = (ISpatialPartition *)appSystemFactory(INTERFACEVERSION_SPATIALPARTITION, NULL)) == NULL)
 		return false;
-	if ( (modelinfo = (IVModelInfo *)appSystemFactory(VMODELINFO_SERVER_INTERFACE_VERSION, NULL)) == NULL )
+	if ((modelinfo = (IVModelInfo *)appSystemFactory(VMODELINFO_SERVER_INTERFACE_VERSION, NULL)) == NULL)
 		return false;
-	if ( (enginetrace = (IEngineTrace *)appSystemFactory(INTERFACEVERSION_ENGINETRACE_SERVER,NULL)) == NULL )
+	if ((enginetrace = (IEngineTrace *)appSystemFactory(INTERFACEVERSION_ENGINETRACE_SERVER, NULL)) == NULL)
 		return false;
-	if ( (filelogginglistener = (IFileLoggingListener *)appSystemFactory(FILELOGGINGLISTENER_INTERFACE_VERSION, NULL)) == NULL )
+	if ((filelogginglistener = (IFileLoggingListener *)appSystemFactory(FILELOGGINGLISTENER_INTERFACE_VERSION, NULL)) == NULL)
 		return false;
-	if ( (filesystem = (IFileSystem *)fileSystemFactory(FILESYSTEM_INTERFACE_VERSION,NULL)) == NULL )
+	if ((filesystem = (IFileSystem *)fileSystemFactory(FILESYSTEM_INTERFACE_VERSION, NULL)) == NULL)
 		return false;
-	if ( (gameeventmanager = (IGameEventManager2 *)appSystemFactory(INTERFACEVERSION_GAMEEVENTSMANAGER2,NULL)) == NULL )
+	if ((gameeventmanager = (IGameEventManager2 *)appSystemFactory(INTERFACEVERSION_GAMEEVENTSMANAGER2, NULL)) == NULL)
 		return false;
-	if ( (datacache = (IDataCache*)appSystemFactory(DATACACHE_INTERFACE_VERSION, NULL )) == NULL )
+	if ((datacache = (IDataCache*)appSystemFactory(DATACACHE_INTERFACE_VERSION, NULL)) == NULL)
 		return false;
-	if ( (soundemitterbase = (ISoundEmitterSystemBase *)appSystemFactory(SOUNDEMITTERSYSTEM_INTERFACE_VERSION, NULL)) == NULL )
+	if ((soundemitterbase = (ISoundEmitterSystemBase *)appSystemFactory(SOUNDEMITTERSYSTEM_INTERFACE_VERSION, NULL)) == NULL)
 		return false;
-	if ( (gamestatsuploader = (IUploadGameStats *)appSystemFactory( INTERFACEVERSION_UPLOADGAMESTATS, NULL )) == NULL )
+	if ((gamestatsuploader = (IUploadGameStats *)appSystemFactory(INTERFACEVERSION_UPLOADGAMESTATS, NULL)) == NULL)
 		return false;
-	if ( !mdlcache )
+	if (!mdlcache)
 		return false;
-	if ( (serverpluginhelpers = (IServerPluginHelpers *)appSystemFactory(INTERFACEVERSION_ISERVERPLUGINHELPERS, NULL)) == NULL )
+	if ((serverpluginhelpers = (IServerPluginHelpers *)appSystemFactory(INTERFACEVERSION_ISERVERPLUGINHELPERS, NULL)) == NULL)
 		return false;
-	if ( (scenefilecache = (ISceneFileCache *)appSystemFactory( SCENE_FILE_CACHE_INTERFACE_VERSION, NULL )) == NULL )
+	if ((scenefilecache = (ISceneFileCache *)appSystemFactory(SCENE_FILE_CACHE_INTERFACE_VERSION, NULL)) == NULL)
 		return false;
-	if ( (blackboxrecorder = (IBlackBox *)appSystemFactory(BLACKBOX_INTERFACE_VERSION, NULL)) == NULL )
+	if ((blackboxrecorder = (IBlackBox *)appSystemFactory(BLACKBOX_INTERFACE_VERSION, NULL)) == NULL)
 		return false;
-	if ( (xboxsystem = (IXboxSystem *)appSystemFactory( XBOXSYSTEM_INTERFACE_VERSION, NULL )) == NULL )
+	if ((xboxsystem = (IXboxSystem *)appSystemFactory(XBOXSYSTEM_INTERFACE_VERSION, NULL)) == NULL)
 		return false;
 
-	if ( !CommandLine()->CheckParm( "-noscripting") )
+	if (!CommandLine()->CheckParm("-noscripting"))
 	{
-		scriptmanager = (IScriptManager *)appSystemFactory( VSCRIPT_INTERFACE_VERSION, NULL );
+		scriptmanager = (IScriptManager *)appSystemFactory(VSCRIPT_INTERFACE_VERSION, NULL);
 	}
 
 
 #ifdef SERVER_USES_VGUI
 	// If not running dedicated, grab the engine vgui interface
-	if ( !engine->IsDedicatedServer() )
+	if (!engine->IsDedicatedServer())
 	{
 #ifdef _WIN32
-		if ( ( enginevgui = ( IEngineVGui * )appSystemFactory(VENGINE_VGUI_VERSION, NULL)) == NULL )
+		if ((enginevgui = (IEngineVGui *)appSystemFactory(VENGINE_VGUI_VERSION, NULL)) == NULL)
 			return false;
-		
+
 		// This interface is optional, and is only valid when running with -tools
-		serverenginetools = ( IServerEngineTools * )appSystemFactory( VSERVERENGINETOOLS_INTERFACE_VERSION, NULL );
-		
-		gameuifuncs = (IGameUIFuncs * )appSystemFactory( VENGINE_GAMEUIFUNCS_VERSION, NULL );
+		serverenginetools = (IServerEngineTools *)appSystemFactory(VSERVERENGINETOOLS_INTERFACE_VERSION, NULL);
+
+		gameuifuncs = (IGameUIFuncs *)appSystemFactory(VENGINE_GAMEUIFUNCS_VERSION, NULL);
 #endif
 	}
 #endif // SERVER_USES_VGUI
@@ -725,6 +731,9 @@ bool CServerGameDLL::DLLInit( CreateInterfaceFn appSystemFactory,
 #ifdef INFESTED_DLL
 	if ( (missionchooser = (IASW_Mission_Chooser *)appSystemFactory(ASW_MISSION_CHOOSER_VERSION, NULL)) == NULL )
 		return false;
+#endif
+
+#if defined ( INFESTED_DLL ) || defined ( PORTAL2 )
 	if ( (g_pMatchExtSwarm = (IMatchExtSwarm *)appSystemFactory(IMATCHEXT_SWARM_INTERFACE, NULL)) == NULL )
 		return false;
 #endif

@@ -1,0 +1,206 @@
+// local variable allocation has failed, the output may be wrong!
+// bad sp value at call has been detected, the output may be wrong!
+
+// Will be cleaning this up a bit to make it more comprehensible.
+
+void __userpurge C_PortalBlast::Init(
+        C_PortalBlast *this@<ecx>,
+        float a2@<ebp>,
+        int a3@<edi>,
+        int a4@<esi>,
+        CBaseHandle hOwner,
+        bool bIsPortal2,
+        PortalPlacedBy_t ePlacedBy,
+        const Vector *vStart,
+        const Vector *vEnd,
+        const QAngle *qAngles,
+        float fDeathTime)
+{
+
+  float m_fValue; // xmm0_4
+  float v14; // xmm1_4
+  float y; // xmm2_4
+  float z; // xmm4_4
+  float x; // xmm0_4
+  __int128 v18; // xmm1
+  float v19; // xmm2_4
+  float v20; // xmm4_4
+  IHandleEntity *m_pEntity; // eax
+  void *v22; // eax
+  int v23; // edi
+  CNewParticleEffect *v24; // eax
+  float v25; // esi
+  const char *v26; // ecx
+  
+  float v28; // esi
+  float v29; // esi
+  __int128 v30; // [esp-10h] [ebp-74h]
+  Vector v32; // [esp+10h] [ebp-54h] BYREF
+  Vector vecRight; // [esp+1Ch] [ebp-48h] BYREF
+  __int128 vecUp; // [esp+28h] [ebp-3Ch] OVERLAPPED BYREF
+  Vector v35; // [esp+38h] [ebp-2Ch] BYREF
+  Vector vColor; // [esp+44h] [ebp-20h] BYREF
+  Vector vForward; // [esp+50h] [ebp-14h] BYREF
+  Color colorPortal; // [esp+5Ch] [ebp-8h]
+  Color retaddr; // [esp+64h] [ebp+0h]
+
+  vForward.z = a2;
+  colorPortal = retaddr;
+  CBaseEntityList::AddNonNetworkableEntity((CBaseEntityList *)cl_entitylist.m_Index, (CBaseHandle *)&vForward, this);
+  CClientThinkList::SetNextClientThink(&g_ClientThinkList, this->m_RefEHandle, -1293.0);
+  C_BaseEntity::AddToLeafSystem(this, 0);
+  *((_QWORD *)&vecUp + 1) = 0i64;
+  LODWORD(vecUp) =  __thiscall C_Prop_Portal::`vcall'{4,{flat}};
+  DWORD1(vecUp) = 12;
+  *(_QWORD *)&v30 = vecUp;
+  *((_QWORD *)&v30 + 1) = 0i64;
+  C_BaseEntity::ThinkSet(this, &vecUp, v30, 0.0, 0);
+  ((void (__thiscall *)(C_PortalBlast *, _DWORD, int, int, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD))this->SetNextClientThink)(
+    this,
+    LODWORD(FLOAT_N1293_0),
+    a3,
+    a4,
+    LODWORD(v32.x),
+    LODWORD(v32.y),
+    LODWORD(v32.z),
+    LODWORD(vecRight.x),
+    LODWORD(vecRight.y),
+    LODWORD(vecRight.z),
+    vecUp,
+    DWORD1(vecUp),
+    DWORD2(vecUp),
+    HIDWORD(vecUp),
+    LODWORD(v35.x),
+    LODWORD(v35.y),
+    LODWORD(v35.z),
+    LODWORD(vColor.x),
+    LODWORD(vColor.y),
+    LODWORD(vColor.z),
+    LODWORD(vForward.x));
+  this->m_ptCreationPoint = &this->m_ptCreationPoint;
+  this->m_ptCreationPoint.x = vStart->x;
+  LODWORD(vForward.x) = &this->m_ptCreationPoint;
+  this->m_ptCreationPoint.y = vStart->y;
+  this->m_ptCreationPoint.z = vStart->z;
+  this->m_ptDeathPoint = *vEnd;
+  C_BaseEntity::SetAbsOrigin(this, (const Vector *)LODWORD(vForward.x));
+  m_fValue = cl_portal_projectile_delay_sp.m_pParent->m_Value.m_fValue;
+  vForward.x = m_fValue;
+  if ( g_pGameRules )
+  {
+    if ( g_pGameRules->IsMultiplayer(g_pGameRules) )
+      m_fValue = cl_portal_projectile_delay_mp.m_pParent->m_Value.m_fValue;
+    else
+      m_fValue = vForward.x;
+  }
+  v14 = *(float *)(gpGlobals.m_Index + 12) + m_fValue;
+  this->m_fDeathTime = fDeathTime;
+  this->m_fCreationTime = v14;
+  if ( v14 > (float)(fDeathTime - 0.1) )
+    this->m_fDeathTime = v14 + 0.1;
+  AngleVectors(qAngles, &vColor, &v32, &vecRight);
+  y = this->m_ptCreationPoint.y;
+  z = this->m_ptCreationPoint.z;
+  x = this->m_ptCreationPoint->x;
+  v18 = 0i64;
+  *(float *)&v18 = fsqrt(
+                     (float)((float)((float)(y - this->m_ptDeathPoint.y) * (float)(y - this->m_ptDeathPoint.y))
+                           + (float)((float)(z - this->m_ptDeathPoint.z) * (float)(z - this->m_ptDeathPoint.z)))
+                   + (float)((float)(this->m_ptCreationPoint->x - this->m_ptDeathPoint.x)
+                           * (float)(this->m_ptCreationPoint->x - this->m_ptDeathPoint.x)));
+  vecUp = v18;
+  v19 = y + (float)(vColor.y * *(float *)&v18);
+  v20 = z + (float)(vColor.z * *(float *)&v18);
+  this->m_ptAimPoint.x = x + (float)(vColor.x * *(float *)&v18);
+  this->m_ptAimPoint.y = v19;
+  this->m_ptAimPoint.z = v20;
+  vForward.y = 0.0;
+  if ( ePlacedBy == PORTAL_PLACED_BY_PLAYER )
+  {
+    if ( hOwner.m_Index == -1
+      || g_pEntityList->m_EntPtrArray[LOWORD(hOwner.m_Index)].m_SerialNumber != HIWORD(hOwner.m_Index) )
+    {
+      m_pEntity = 0;
+      vForward.x = 0.0;
+      LODWORD(vColor.z) = &C_Portal_Player `RTTI Type Descriptor';
+    }
+    else
+    {
+      m_pEntity = g_pEntityList->m_EntPtrArray[LOWORD(hOwner.m_Index)].m_pEntity;
+      vForward.x = 0.0;
+      LODWORD(vColor.z) = &C_Portal_Player `RTTI Type Descriptor';
+    }
+  }
+  else
+  {
+    if ( ePlacedBy != PORTAL_PLACED_BY_PEDESTAL )
+      goto LABEL_23;
+    if ( hOwner.m_Index == -1
+      || g_pEntityList->m_EntPtrArray[LOWORD(hOwner.m_Index)].m_SerialNumber != HIWORD(hOwner.m_Index) )
+    {
+      m_pEntity = 0;
+    }
+    else
+    {
+      m_pEntity = g_pEntityList->m_EntPtrArray[LOWORD(hOwner.m_Index)].m_pEntity;
+    }
+    vForward.x = 0.0;
+    LODWORD(vColor.z) = &C_WeaponPortalgun `RTTI Type Descriptor';
+  }
+  v22 = __RTDynamicCast(
+          m_pEntity,
+          0,
+          &IHandleEntity `RTTI Type Descriptor',
+          (void *)LODWORD(vColor.z),
+          SLODWORD(vForward.x));
+  if ( v22 )
+  {
+    v23 = (*(int (__thiscall **)(void *))(*(_DWORD *)v22 + 340))(v22);
+    if ( v23 != -1 )
+    {
+      v24 = CParticleProperty::Create(
+              &this->m_Particles,
+              "portal_projectile_stream",
+              PATTACH_ABSORIGIN_FOLLOW,
+              -1,
+              vec3_origin,
+              0);
+      v25 = *(float *)&v24;
+      if ( v24 )
+      {
+        CNewParticleEffect::AddRef(v24);
+        vForward.y = v25;
+      }
+      UTIL_Portal_Color_Particles((Color *)&vForward, bIsPortal2 + 1, v23);
+      v35.x = (float)LOBYTE(vForward.x);
+      v35.y = (float)BYTE1(vForward.x);
+      v35.z = (float)BYTE2(vForward.x);
+      CNewParticleEffect::SetControlPoint((CNewParticleEffect *)LODWORD(vForward.y), 2, &v35);
+      goto LABEL_27;
+    }
+  }
+LABEL_23:
+  v26 = "portal_2_projectile_stream_pedestal";
+  if ( !bIsPortal2 )
+    v26 = "portal_1_projectile_stream_pedestal";
+  CNewParticleEffect *v27 = CParticleProperty::Create(&this->m_Particles, v26, PATTACH_ABSORIGIN_FOLLOW, -1, vec3_origin, 0);
+  v28 = *(float *)&v27;
+  if ( v27 )
+  {
+    CNewParticleEffect::AddRef(v27);
+    vForward.y = v28;
+  }
+LABEL_27:
+  v29 = vForward.y;
+  DWORD1(vecUp) = LODWORD(vColor.x) ^ _mask__NegFloat_;
+  DWORD2(vecUp) = LODWORD(vColor.y) ^ _mask__NegFloat_;
+  HIDWORD(vecUp) = (unsigned int)&v32 ^ _mask__NegFloat_;
+  CNewParticleEffect::SetControlPointOrientation(
+    (CNewParticleEffect *)LODWORD(vForward.y),
+    1,
+    (const Vector *)((char *)&vecUp + 4),
+    &v32,
+    &vecRight);
+  if ( v29 != 0.0 )
+    CNewParticleEffect::Release((CNewParticleEffect *)LODWORD(v29));
+}

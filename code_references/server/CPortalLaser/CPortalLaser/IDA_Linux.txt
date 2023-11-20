@@ -1,0 +1,47 @@
+void __cdecl CPortalLaser::CPortalLaser(CPortalLaser *const this)
+{
+  float y; // xmm1_4
+  float z; // xmm2_4
+  bool v4; // zf
+
+  CBaseAnimating::CBaseAnimating(this);
+  IPortalLaserAutoList::IPortalLaserAutoList(&this->IPortalLaserAutoList, 1);
+  this->_vptr_IHandleEntity = (int (**)(...))off_C83388;
+  this->_vptr_IPortalLaserAutoList = (int (**)(...))off_C8373C;
+  this->m_pParentLaser = 0;
+  this->m_pChildLaser = 0;
+  this->m_bFromReflectedCube = 0;
+  this->m_bAutoAimEnabled = 1;
+  this->m_bNoPlacementHelper = 0;
+  this->m_hReflector.m_Value.m_Index = -1;
+  CBaseEntity::NetworkStateChanged(this, &this->m_hReflector);
+  this->m_bLaserOn.m_Value = 0;
+  CBaseEntity::NetworkStateChanged(this, &this->m_bLaserOn);
+  this->m_bIsLethal.m_Value = 0;
+  CBaseEntity::NetworkStateChanged(this, &this->m_bIsLethal);
+  this->m_bIsAutoAiming.m_Value = 0;
+  CBaseEntity::NetworkStateChanged(this, &this->m_bIsAutoAiming);
+  this->m_bShouldSpark.m_Value = 0;
+  CBaseEntity::NetworkStateChanged(this, &this->m_bShouldSpark);
+  if ( vec3_origin.x == this->m_vStartPoint.m_Value.x
+    && (y = vec3_origin.y, vec3_origin.y == this->m_vStartPoint.m_Value.y)
+    && (z = vec3_origin.z, vec3_origin.z == this->m_vStartPoint.m_Value.z) )
+  {
+    v4 = vec3_origin.x == this->m_vEndPoint.m_Value.x;
+  }
+  else
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_vStartPoint);
+    y = vec3_origin.y;
+    v4 = vec3_origin.x == this->m_vEndPoint.m_Value.x;
+    this->m_vStartPoint.m_Value.x = vec3_origin.x;
+    z = vec3_origin.z;
+    this->m_vStartPoint.m_Value.y = y;
+    this->m_vStartPoint.m_Value.z = z;
+  }
+  if ( !v4 || y != this->m_vEndPoint.m_Value.y || z != this->m_vEndPoint.m_Value.z )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_vEndPoint);
+    this->m_vEndPoint.m_Value = vec3_origin;
+  }
+}

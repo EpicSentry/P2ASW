@@ -1,0 +1,4 @@
+long double LaserDamageAmount()
+{
+  return 150.0;
+}

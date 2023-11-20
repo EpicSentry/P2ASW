@@ -1,0 +1,11 @@
+void __thiscall CPortalLaserTarget::DisableThink(CPortalLaserTarget *this)
+{
+  CCatcher *m_pCatcher; // ecx
+
+  this->m_bPowered = 0;
+  COutputEvent::FireOutput(&this->m_OnUnpowered, this, this, 0.0);
+  m_pCatcher = this->m_pCatcher;
+  if ( m_pCatcher )
+    m_pCatcher->OnUnPowered(m_pCatcher);
+  CBaseEntity::ThinkSet(this, 0, 0.0, 0);
+}

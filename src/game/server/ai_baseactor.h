@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: Hooks and classes for the support of humanoid NPCs with 
 //			groovy facial animation capabilities, aka, "Actors"
@@ -134,7 +134,6 @@ public:
 
 	virtual void			MaintainLookTargets( float flInterval );
 	virtual bool			ValidEyeTarget(const Vector &lookTargetPos);
-	virtual bool			ValidHeadTarget(const Vector &lookTargetPos);
 	virtual float			HeadTargetValidity(const Vector &lookTargetPos);
 
 	virtual void			StartTaskRangeAttack1( const Task_t *pTask );
@@ -149,6 +148,7 @@ public:
 
 	virtual void			GatherConditions( void );
 
+	bool					ValidHeadTarget(const Vector& lookTargetDir, float flDist);
 	void					AccumulateIdealYaw( float flYaw, float flIntensity );
 	bool					SetAccumulatedYawAndUpdate( void );
 

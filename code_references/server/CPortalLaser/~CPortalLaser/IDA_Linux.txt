@@ -1,0 +1,37 @@
+void __cdecl CPortalLaser::~CPortalLaser(CPortalLaser *const this)
+{
+  int v1; // eax
+  int v2; // edx
+
+  this->_vptr_IHandleEntity = (int (**)(...))off_C83388;
+  this->_vptr_IPortalLaserAutoList = (int (**)(...))off_C83368;
+  if ( IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Size <= 0 )
+  {
+LABEL_6:
+    CBaseAnimating::~CBaseAnimating(this);
+    return;
+  }
+  v1 = 0;
+  if ( &this->IPortalLaserAutoList != (IPortalLaserAutoList *)*(CPortalLaser *const *)IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Memory.m_pMemory )
+  {
+    while ( ++v1 != IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Size )
+    {
+      if ( &this->IPortalLaserAutoList == IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Memory.m_pMemory[v1] )
+      {
+        if ( v1 == -1 )
+          goto LABEL_6;
+        goto LABEL_8;
+      }
+    }
+    goto LABEL_6;
+  }
+LABEL_8:
+  v2 = IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Size - 1;
+  if ( v1 != IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Size - 1 )
+  {
+    IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Memory.m_pMemory[v1] = IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Memory.m_pMemory[v2];
+    v2 = IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Size - 1;
+  }
+  IPortalLaserAutoList::m_IPortalLaserAutoListAutoList.m_Size = v2;
+  CBaseAnimating::~CBaseAnimating(this);
+}

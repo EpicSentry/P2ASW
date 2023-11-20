@@ -1,0 +1,4 @@
+IMaterial *__cdecl C_FizzlerVortexProxy::GetMaterial(C_FizzlerVortexProxy *const this)
+{
+  return this->m_pMaterial;
+}

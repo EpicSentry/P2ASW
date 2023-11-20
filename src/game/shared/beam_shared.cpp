@@ -146,8 +146,6 @@ REGISTER_SEND_PROXY_NON_MODIFIED_POINTER( SendProxy_SendPredictableId );
 #endif
 #endif
 
-LINK_ENTITY_TO_CLASS( beam, CBeam );
-
 // This table encodes the CBeam data.
 IMPLEMENT_NETWORKCLASS_ALIASED( Beam, DT_Beam )
 
@@ -249,6 +247,8 @@ BEGIN_NETWORK_TABLE_NOBASE( CBeam, DT_Beam )
 
 #endif
 END_NETWORK_TABLE()
+
+LINK_ENTITY_TO_CLASS_ALIASED( beam, Beam );
 
 #if !defined( CLIENT_DLL )
 BEGIN_DATADESC( CBeam )

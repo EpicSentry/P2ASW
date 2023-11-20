@@ -1,0 +1,4 @@
+void __cdecl CHUDQuickInfo::UpdateEventTime(CHUDQuickInfo *const this)
+{
+  this->m_flLastEventTime = gpGlobals->curtime;
+}

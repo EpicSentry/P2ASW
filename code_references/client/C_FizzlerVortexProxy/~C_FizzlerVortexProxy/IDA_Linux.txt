@@ -1,0 +1,4 @@
+void __cdecl C_FizzlerVortexProxy::~C_FizzlerVortexProxy(C_FizzlerVortexProxy *const this)
+{
+  this->_vptr_IMaterialProxy = (int (**)(...))off_11FE068;
+}

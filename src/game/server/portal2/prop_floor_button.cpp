@@ -8,10 +8,10 @@
 #include "props.h"
 #include "triggers.h"
 #include "prop_weightedcube.h"
-#ifdef PORTAL_MP
+
 #include "portal_mp_gamerules.h"
-#endif
-//#include "prop_monster_box.h"
+
+#include "prop_monster_box.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -349,7 +349,6 @@ void CPropFloorButton::InputPressOut( inputdata_t &inputdata )
 //-----------------------------------------------------------------------------
 void CPropFloorButton::OnPressed( CBaseEntity* pActivator )
 {
-	/*
 	if ( pActivator != NULL )
 	{
 		CBaseEntity *pOther = dynamic_cast<CBaseEntity*>(pActivator);
@@ -371,7 +370,7 @@ void CPropFloorButton::OnPressed( CBaseEntity* pActivator )
 			pMonsterBox->BecomeBox( false );
 		}
 	}
-	*/
+
 	// If this button was pressed without touching the player, fire the special output used for the 'hole in one' achievement.
 	if ( UTIL_IsWeightedCube( pActivator ) )
 	{
@@ -395,7 +394,7 @@ void CPropFloorButton::OnPressed( CBaseEntity* pActivator )
 //-----------------------------------------------------------------------------
 void CPropFloorButton::OnUnPressed( CBaseEntity* pActivator )
 {
-#if 0
+#if 1
 	if( pActivator && FClassnameIs( pActivator, "prop_monster_box" ) )
 	{
 		CPropMonsterBox* pMonsterBox = static_cast<CPropMonsterBox*>( pActivator );

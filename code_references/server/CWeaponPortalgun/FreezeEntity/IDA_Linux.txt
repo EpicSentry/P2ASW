@@ -1,0 +1,17 @@
+void __cdecl CWeaponPortalgun::FreezeEntity(CWeaponPortalgun *const this, CBaseEntity *pFreezeEntity)
+{
+  IPhysicsObject *m_pPhysicsObject; // eax
+
+  if ( pFreezeEntity->m_MoveType.m_Value == 6 )
+  {
+    m_pPhysicsObject = pFreezeEntity->m_pPhysicsObject;
+    if ( m_pPhysicsObject )
+    {
+      (*((void (__cdecl **)(IPhysicsObject *, _DWORD))m_pPhysicsObject->_vptr_IPhysicsObject + 16))(
+        pFreezeEntity->m_pPhysicsObject,
+        0);
+      this->m_hFreezeEntity.m_Index = *(_DWORD *)(*((int (__cdecl **)(CBaseEntity *))pFreezeEntity->_vptr_IHandleEntity
+                                                  + 3))(pFreezeEntity);
+    }
+  }
+}

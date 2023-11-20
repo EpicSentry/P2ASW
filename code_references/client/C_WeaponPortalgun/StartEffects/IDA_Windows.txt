@@ -1,0 +1,193 @@
+void __thiscall C_WeaponPortalgun::StartEffects(C_WeaponPortalgun *this)
+{
+  C_BasePlayer *Owner; // edi
+  C_BaseViewModel *vm; // eax
+  CParticleProperty *p_m_Particles; // edi
+  CNewParticleEffect *pEffectFP; // eax
+  CNewParticleEffect *pPortalgunEffectFP; // ecx
+  CUtlReference<CNewParticleEffect> *p_m_hPortalGunEffectFP; // ebx
+  CUtlReference<CNewParticleEffect> *m_pHead; // ecx
+  CNewParticleEffect *m_pObject; // ebx
+  C_BaseCombatCharacter *v10; // eax
+  CNewParticleEffect *v11; // ebx
+  C_BaseCombatCharacter *v12; // eax
+  CNewParticleEffect *v13; // eax
+  CNewParticleEffect *v14; // ecx
+  CUtlReference<CNewParticleEffect> *p_m_hPortalGunEffectTP; // ebx
+  CUtlReference<CNewParticleEffect> *v16; // ecx
+  CNewParticleEffect *v17; // ebx
+  C_BaseCombatCharacter *v18; // eax
+  CNewParticleEffect *v19; // ebx
+  C_BaseCombatCharacter *v20; // eax
+  CNewParticleEffect *v21; // ecx
+  CNewParticleEffect *v22; // edi
+  C_BaseCombatCharacter *v23; // eax
+  CNewParticleEffect *v24; // ecx
+  CNewParticleEffect *v25; // edi
+  C_BaseCombatCharacter *v26; // eax
+  Vector v27; // [esp-10h] [ebp-30h]
+  Vector v28; // [esp-10h] [ebp-30h]
+  Vector vColorPortal; // [esp+Ch] [ebp-14h] BYREF
+  CNewParticleEffect *pVisibleEffect; // [esp+18h] [ebp-8h]
+  C_BaseEntity *pModelView; // [esp+1Ch] [ebp-4h]
+
+  if ( C_BaseCombatWeapon::GetOwner(this) )
+  {
+    Owner = (C_BasePlayer *)C_BaseCombatWeapon::GetOwner(this);
+    if ( Owner && Owner->IsPlayer(Owner) )
+    {
+      vm = C_BasePlayer::GetViewModel(Owner, 0);
+      pModelView = vm;
+    }
+    else
+    {
+      vm = C_BasePlayer::GetViewModel(0, 0);
+      pModelView = vm;
+    }
+  }
+  else
+  {
+    pModelView = 0;
+    vm = 0;
+  }
+  if ( !this->m_hPortalGunEffectFP.m_pObject && vm )
+  {
+    p_m_Particles = &vm->m_Particles;
+    pEffectFP = CParticleProperty::Create(
+                  &vm->m_Particles,
+                  "portalgun_top_light_firstperson",
+                  PATTACH_POINT_FOLLOW,
+                  "Body_light");
+    pPortalgunEffectFP = this->m_hPortalGunEffectFP.m_pObject;
+    p_m_hPortalGunEffectFP = &this->m_hPortalGunEffectFP;
+    pVisibleEffect = pEffectFP;
+    if ( pPortalgunEffectFP != pEffectFP )
+    {
+      if ( pPortalgunEffectFP )
+      {
+        CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(
+          (CUtlIntrusiveDList<CUtlReference<CSheet> > *)&pPortalgunEffectFP->m_References,
+          (CUtlReference<CSheet> *)&this->m_hPortalGunEffectFP);
+        pEffectFP = pVisibleEffect;
+        this->m_hPortalGunEffectFP.m_pObject = 0;
+      }
+      this->m_hPortalGunEffectFP.m_pObject = pEffectFP;
+      if ( pEffectFP )
+      {
+        p_m_hPortalGunEffectFP->m_pNext = pEffectFP->m_References.m_pHead;
+        m_pHead = pEffectFP->m_References.m_pHead;
+        if ( m_pHead )
+          m_pHead->m_pPrev = p_m_hPortalGunEffectFP;
+        this->m_hPortalGunEffectFP.m_pPrev = 0;
+        pEffectFP->m_References.m_pHead = p_m_hPortalGunEffectFP;
+      }
+    }
+    m_pObject = this->m_hPortalGunEffectFP.m_pObject;
+    if ( !m_pObject )
+      return;
+    v27 = vec3_origin;
+    v10 = C_BaseCombatWeapon::GetOwner(this);
+    CParticleProperty::AddControlPoint(p_m_Particles, m_pObject, 2, v10, PATTACH_CUSTOMORIGIN, 0, v27, 0);
+    v11 = this->m_hPortalGunEffectFP.m_pObject;
+    v12 = C_BaseCombatWeapon::GetOwner(this);
+    CNewParticleEffect::SetControlPointEntity(v11, 2, v12);
+    CParticleProperty::AddControlPoint(
+      p_m_Particles,
+      this->m_hPortalGunEffectFP.m_pObject,
+      3,
+      pModelView,
+      PATTACH_POINT_FOLLOW,
+      "Beam_point1",
+      vec3_origin,
+      0);
+    CParticleProperty::AddControlPoint(
+      p_m_Particles,
+      this->m_hPortalGunEffectFP.m_pObject,
+      4,
+      pModelView,
+      PATTACH_POINT_FOLLOW,
+      "Beam_point5",
+      vec3_origin,
+      0);
+  }
+  if ( this->m_hPortalGunEffectTP.m_pObject )
+  {
+LABEL_28:
+    C_WeaponPortalgun::GetEffectColor(this, &vColorPortal, this->m_iLastFiredPortal.m_Value);
+    v21 = this->m_hPortalGunEffectFP.m_pObject;
+    if ( v21 )
+    {
+      CNewParticleEffect::SetControlPoint(v21, 1, &vColorPortal);
+      v22 = this->m_hPortalGunEffectFP.m_pObject;
+      v23 = C_BaseCombatWeapon::GetOwner(this);
+      CNewParticleEffect::SetControlPointEntity(v22, 2, v23);
+    }
+    v24 = this->m_hPortalGunEffectTP.m_pObject;
+    if ( v24 )
+    {
+      CNewParticleEffect::SetControlPoint(v24, 1, &vColorPortal);
+      v25 = this->m_hPortalGunEffectTP.m_pObject;
+      v26 = C_BaseCombatWeapon::GetOwner(this);
+      CNewParticleEffect::SetControlPointEntity(v25, 2, v26);
+    }
+    return;
+  }
+  v13 = CParticleProperty::Create(
+          &this->m_Particles,
+          "portalgun_top_light_thirdperson",
+          PATTACH_POINT_FOLLOW,
+          "Body_light");
+  v14 = this->m_hPortalGunEffectTP.m_pObject;
+  p_m_hPortalGunEffectTP = &this->m_hPortalGunEffectTP;
+  pVisibleEffect = v13;
+  if ( v14 != v13 )
+  {
+    if ( v14 )
+    {
+      CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(
+        (CUtlIntrusiveDList<CUtlReference<CSheet> > *)&v14->m_References,
+        (CUtlReference<CSheet> *)&this->m_hPortalGunEffectTP);
+      v13 = pVisibleEffect;
+      this->m_hPortalGunEffectTP.m_pObject = 0;
+    }
+    this->m_hPortalGunEffectTP.m_pObject = v13;
+    if ( v13 )
+    {
+      p_m_hPortalGunEffectTP->m_pNext = v13->m_References.m_pHead;
+      v16 = v13->m_References.m_pHead;
+      if ( v16 )
+        v16->m_pPrev = p_m_hPortalGunEffectTP;
+      this->m_hPortalGunEffectTP.m_pPrev = 0;
+      v13->m_References.m_pHead = p_m_hPortalGunEffectTP;
+    }
+  }
+  v17 = this->m_hPortalGunEffectTP.m_pObject;
+  if ( v17 )
+  {
+    v28 = vec3_origin;
+    v18 = C_BaseCombatWeapon::GetOwner(this);
+    CParticleProperty::AddControlPoint(&this->m_Particles, v17, 2, v18, PATTACH_CUSTOMORIGIN, 0, v28, 0);
+    v19 = this->m_hPortalGunEffectTP.m_pObject;
+    v20 = C_BaseCombatWeapon::GetOwner(this);
+    CNewParticleEffect::SetControlPointEntity(v19, 2, v20);
+    CParticleProperty::AddControlPoint(
+      &this->m_Particles,
+      this->m_hPortalGunEffectTP.m_pObject,
+      3,
+      this,
+      PATTACH_POINT_FOLLOW,
+      "Beam_point1",
+      vec3_origin,
+      0);
+    CParticleProperty::AddControlPoint(
+      &this->m_Particles,
+      this->m_hPortalGunEffectTP.m_pObject,
+      4,
+      this,
+      PATTACH_POINT_FOLLOW,
+      "Beam_point5",
+      vec3_origin,
+      0);
+    goto LABEL_28;
+  }
+}

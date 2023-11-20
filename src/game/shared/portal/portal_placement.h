@@ -16,7 +16,7 @@ struct CPortalCornerFitData;
 
 #if defined( CLIENT_DLL )
 class C_Prop_Portal;
-typedef C_Prop_Portal CProp_Portal;
+#define CProp_Portal C_Prop_Portal
 #else
 class CProp_Portal;
 #endif

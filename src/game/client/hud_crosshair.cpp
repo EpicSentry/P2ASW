@@ -10,20 +10,29 @@
 #include "hud_crosshair.h"
 #include "iclientmode.h"
 #include "view.h"
-#include "vgui_controls/controls.h"
+#include "vgui_controls/Controls.h"
 #include "vgui/ISurface.h"
-#include "IVRenderView.h"
+#include "ivrenderview.h"
 
 #ifdef PORTAL2
 #include "ivieweffects.h"
 #include "c_portal_player.h"
 #endif // PORTAL2
 
+#ifdef SIXENSE
+#include "sixense/in_sixense.h"
+#endif
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
+#if !defined( CSTRIKE15 )
+
 ConVar crosshair( "crosshair", "1", FCVAR_ARCHIVE );
 ConVar cl_observercrosshair( "cl_observercrosshair", "1", FCVAR_ARCHIVE );
+
+#endif
+
 
 using namespace vgui;
 
@@ -50,7 +59,7 @@ void CHudCrosshair::ApplySchemeSettings( IScheme *scheme )
 {
 	BaseClass::ApplySchemeSettings( scheme );
 
-	m_pDefaultCrosshair = HudIcons().GetIcon("crosshair_default");
+	m_pDefaultCrosshair = HudIcons().GetIcon( "crosshair_default" );
 	SetPaintBackgroundEnabled( false );
 
     SetSize( ScreenWidth(), ScreenHeight() );
@@ -63,6 +72,10 @@ void CHudCrosshair::ApplySchemeSettings( IScheme *scheme )
 //-----------------------------------------------------------------------------
 bool CHudCrosshair::ShouldDraw( void )
 {
+#if defined ( CSTRIKE15 )
+	return false;
+#else
+
 	bool bNeedsDraw;
 
 	if ( m_bHideCrosshair )
@@ -76,13 +89,6 @@ bool CHudCrosshair::ShouldDraw( void )
 	if ( pWeapon && !pWeapon->ShouldDrawCrosshair() )
 		return false;
 
-#ifdef PORTAL
-	/*C_Portal_Player *portalPlayer = ToPortalPlayer(pPlayer);
-	// TODO(Preston): Fix me!
-	if (portalPlayer && portalPlayer->IsSuppressingCrosshair())
-		return false;*/
-#endif // PORTAL
-
 	/* disabled to avoid assuming it's an HL2 player.
 	// suppress crosshair in zoom.
 	if ( pPlayer->m_HL2Local.m_bZooming )
@@ -90,11 +96,11 @@ bool CHudCrosshair::ShouldDraw( void )
 	*/
 
 	// draw a crosshair only if alive or spectating in eye
-	if ( IsX360() )
+	if ( IsGameConsole() )
 	{
-		bNeedsDraw = m_pCrosshair && 
+		bNeedsDraw = m_pCrosshair &&
 			!engine->IsDrawingLoadingImage() &&
-			!engine->IsPaused() && 
+			!engine->IsPaused() &&
 			( !pPlayer->IsSuitEquipped() || g_pGameRules->IsMultiplayer() ) &&
 			GetClientMode()->ShouldDrawCrosshair() &&
 			!( pPlayer->GetFlags() & FL_FROZEN ) &&
@@ -103,10 +109,10 @@ bool CHudCrosshair::ShouldDraw( void )
 	}
 	else
 	{
-		bNeedsDraw = m_pCrosshair && 
+		bNeedsDraw = m_pCrosshair &&
 			crosshair.GetInt() &&
 			!engine->IsDrawingLoadingImage() &&
-			!engine->IsPaused() && 
+			!engine->IsPaused() &&
 			GetClientMode()->ShouldDrawCrosshair() &&
 			!( pPlayer->GetFlags() & FL_FROZEN ) &&
 			( pPlayer->IsViewEntity() ) &&
@@ -115,6 +121,7 @@ bool CHudCrosshair::ShouldDraw( void )
 	}
 
 	return ( bNeedsDraw && CHudElement::ShouldDraw() );
+#endif
 }
 
 void CHudCrosshair::Paint( void )
@@ -125,9 +132,51 @@ void CHudCrosshair::Paint( void )
 	if ( !IsCurrentViewAccessAllowed() )
 		return;
 
+#ifdef SIXENSE
+	float x=0, y=0;
+
+	if( g_pSixenseInput->IsEnabled() && C_BasePlayer::GetLocalPlayer() && (C_BasePlayer::GetLocalPlayer()->GetObserverMode()==OBS_MODE_NONE) )
+	{
+		C_BasePlayer *player = C_BasePlayer::GetLocalPlayer();
+		if ( player != NULL )
+		{
+
+			// Never autoaim a predicted weapon (for now)
+			Vector	aimVector;
+			AngleVectors( CurrentViewAngles() - g_pSixenseInput->GetViewAngleOffset(), &aimVector );
+
+			// calculate where the bullet would go so we can draw the cross appropriately
+			Vector vecStart = player->Weapon_ShootPosition();
+			Vector vecEnd = player->Weapon_ShootPosition() + aimVector * MAX_TRACE_LENGTH;
+
+
+			trace_t tr;
+			UTIL_TraceLine( vecStart, vecEnd, MASK_SHOT, player, COLLISION_GROUP_NONE, &tr );
+
+			Vector screen;
+			screen.Init();
+			ScreenTransform(tr.endpos, screen);
+
+			x = ScreenWidth() / 2;
+			y = ScreenHeight() / 2;
+
+			x += 0.5 * screen[0] * ScreenWidth() + 0.5;
+			y += 0.5 * screen[1] * ScreenHeight() + 0.5;
+			y = ScreenHeight() - y;
+		}
+
+	} 
+	else 
+	{
+		x = ScreenWidth() / 2;
+		y = ScreenHeight() / 2;
+	}
+
+#else
 	float x, y;
 	x = ScreenWidth()/2;
 	y = ScreenHeight()/2;
+#endif
 
 	m_curViewAngles = CurrentViewAngles();
 	m_curViewOrigin = CurrentViewOrigin();
@@ -167,18 +216,19 @@ void CHudCrosshair::Paint( void )
 		//VectorAdd( m_curViewOrigin, forward, point );
 		//ScreenTransform( point, screen );
 
-		ScreenTransform(tr.endpos, screen);
+		ScreenTransform( tr.endpos, screen );
 	}
 	// TrackIR
 	else
 	{
+		Vector forward;
+
 		// MattB - m_vecCrossHairOffsetAngle is the autoaim angle.
 		// if we're not using autoaim, just draw in the middle of the 
 		// screen
 		if ( m_vecCrossHairOffsetAngle != vec3_angle )
 		{
 			QAngle angles;
-			Vector forward;
 			Vector point;
 
 			// this code is wrong
@@ -187,11 +237,15 @@ void CHudCrosshair::Paint( void )
 			VectorAdd( m_curViewOrigin, forward, point );
 			ScreenTransform( point, screen );
 		}
+		else
+		{
+			AngleVectors( m_curViewAngles, &forward );
+		}
 	}
 
 	x += 0.5f * screen[0] * ScreenWidth() + 0.5f;
 	y += 0.5f * screen[1] * ScreenHeight() + 0.5f;
-	
+
 #ifdef PORTAL2
 	// Find any full-screen fades
 	byte color[4];
@@ -200,10 +254,24 @@ void CHudCrosshair::Paint( void )
 	m_clrCrosshair[3] = SimpleSplineRemapValClamped( color[3], 0, 64, 255, 0 );
 #endif // PORTAL2
 
-	m_pCrosshair->DrawSelf( 
-			x - 0.5f * m_pCrosshair->Width(), 
-			y - 0.5f * m_pCrosshair->Height(),
-			m_clrCrosshair );
+	C_BasePlayer* pPlayer = C_BasePlayer::GetLocalPlayer();
+	if ( !pPlayer )
+		return;
+
+	float flWeaponScale = 1.f;
+	float flW = m_pCrosshair->Width();
+	float flH = m_pCrosshair->Height();
+	C_BaseCombatWeapon *pWeapon = pPlayer->GetActiveWeapon();
+	if ( pWeapon )
+	{
+		pWeapon->GetWeaponCrosshairScale( flWeaponScale );
+	}
+
+	m_pCrosshair->DrawSelfCropped( 
+		x - 0.5f * m_pCrosshair->Width() * flWeaponScale + 0.5, 
+		y - 0.5f * m_pCrosshair->Height() * flWeaponScale + 0.5,
+		0, 0, flW, flH, flW*flWeaponScale, flH*flWeaponScale,
+		m_clrCrosshair );
 }
 
 //-----------------------------------------------------------------------------
@@ -228,5 +296,5 @@ void CHudCrosshair::SetCrosshair( CHudTexture *texture, const Color& clr )
 //-----------------------------------------------------------------------------
 void CHudCrosshair::ResetCrosshair()
 {
-	SetCrosshair( m_pDefaultCrosshair, Color(255, 255, 255, 255) );
+	SetCrosshair( m_pDefaultCrosshair, Color( 255, 255, 255, 255 ) );
 }

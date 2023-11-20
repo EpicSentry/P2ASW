@@ -1,0 +1,6 @@
+union Blobulator::LightBucketImplementation::CSection::Grid2D
+{
+    unsigned int m_nFlags64;
+    unsigned int m_nFlags32[2];
+    unsigned int m_nFlags8[8];
+};

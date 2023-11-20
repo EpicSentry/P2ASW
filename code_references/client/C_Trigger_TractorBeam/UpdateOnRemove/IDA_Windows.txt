@@ -1,0 +1,64 @@
+void __thiscall C_Trigger_TractorBeam::UpdateOnRemove(C_Trigger_TractorBeam *this)
+{
+  C_Trigger_TractorBeam *v1; // esi
+  IPhysicsMotionController *m_pController; // ecx
+  int v3; // ebx
+  void *v4; // esp
+  int i; // esi
+  CNewParticleEffect *m_pObject; // eax
+  CUtlIntrusiveDList<CUtlReference<CSheet> > *v7; // eax
+  int j; // ebx
+  C_Portal_Player *v9; // eax
+  C_Portal_Player *v10; // edi
+  unsigned int m_Index; // ecx
+  IHandleEntity *m_pEntity; // eax
+  _DWORD v13[3]; // [esp+0h] [ebp-10h] BYREF
+  C_Trigger_TractorBeam *v14; // [esp+Ch] [ebp-4h]
+
+  v1 = this;
+  m_pController = this->m_pController;
+  v14 = v1;
+  if ( m_pController )
+  {
+    v3 = m_pController->CountObjects(m_pController);
+    v4 = alloca(4 * v3);
+    v1->m_pController->GetObjects(v1->m_pController, (IPhysicsObject **)v13);
+    for ( i = 0; i < v3; ++i )
+    {
+      if ( v13[i] )
+        (*(void (__thiscall **)(_DWORD))(*(_DWORD *)v13[i] + 96))(v13[i]);
+    }
+    v1 = v14;
+    physenv->DestroyMotionController(physenv, v14->m_pController);
+    v1->m_pController = 0;
+  }
+  m_pObject = v1->m_hCoreEffect.m_pObject;
+  if ( m_pObject )
+  {
+    CParticleProperty::StopEmission(&v1->m_Particles, m_pObject, 0, 0, 0, 1);
+    v7 = (CUtlIntrusiveDList<CUtlReference<CSheet> > *)v1->m_hCoreEffect.m_pObject;
+    if ( v7 )
+    {
+      CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(
+        v7 + 232,
+        (CUtlReference<CSheet> *)&v1->m_hCoreEffect);
+      v1->m_hCoreEffect.m_pObject = 0;
+    }
+  }
+  for ( j = 1; j <= 33; ++j )
+  {
+    v9 = (C_Portal_Player *)UTIL_PlayerByIndex(j);
+    v10 = v9;
+    if ( v9 )
+    {
+      m_Index = C_Portal_Player::GetPortalPlayerLocalData(v9)->m_hTractorBeam.m_Index;
+      if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+        m_pEntity = 0;
+      else
+        m_pEntity = g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+      if ( m_pEntity == v1 )
+        C_Portal_Player::SetLeaveTractorBeam(v10, v1, 0);
+    }
+  }
+  C_BaseEntity::UpdateOnRemove(v1);
+}

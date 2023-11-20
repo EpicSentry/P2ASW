@@ -1,0 +1,12 @@
+void __cdecl CleanserVortexTraceEnum::CleanserVortexTraceEnum(
+        CleanserVortexTraceEnum *const this,
+        CBaseEntity **pList,
+        int listMax,
+        CBaseTrigger *pCleanser)
+{
+  this->_vptr_IPartitionEnumerator = (int (**)(...))&off_C80938;
+  this->m_pList = pList;
+  this->m_count = 0;
+  this->m_listMax = listMax;
+  this->m_pCleanser = pCleanser;
+}

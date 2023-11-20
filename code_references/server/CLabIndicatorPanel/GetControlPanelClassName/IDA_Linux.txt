@@ -1,0 +1,7 @@
+void __cdecl CLabIndicatorPanel::GetControlPanelClassName(
+        CLabIndicatorPanel *const this,
+        int nPanelIndex,
+        const char **const pPanelName)
+{
+  *pPanelName = "vgui_screen";
+}

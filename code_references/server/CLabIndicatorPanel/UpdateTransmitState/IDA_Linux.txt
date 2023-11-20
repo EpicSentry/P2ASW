@@ -1,0 +1,4 @@
+int __cdecl CLabIndicatorPanel::UpdateTransmitState(CLabIndicatorPanel *const this)
+{
+  return CBaseEntity::SetTransmitState(this, 0);
+}

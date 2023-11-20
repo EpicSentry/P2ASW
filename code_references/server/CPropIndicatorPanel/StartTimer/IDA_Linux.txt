@@ -1,0 +1,24 @@
+void __cdecl CPropIndicatorPanel::StartTimer(CPropIndicatorPanel *const this)
+{
+  unsigned int m_Index; // eax
+  char *v2; // edx
+  CLabIndicatorPanel *v3; // eax
+  BASEPTR v4; // [esp+28h] [ebp-10h] BYREF
+
+  m_Index = this->m_hIndicatorPanel.m_Index;
+  if ( m_Index != -1 )
+  {
+    v2 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v2 + 2) == HIWORD(m_Index) )
+    {
+      v3 = (CLabIndicatorPanel *)*((_DWORD *)v2 + 1);
+      if ( v3 )
+      {
+        CLabIndicatorPanel::StartTimer(v3, this->m_flTimerDuration);
+        CPropIndicatorPanel::ToggleIndicatorLights(this, 1);
+        CBaseEntity::ThinkSet(&v4, this, (BASEPTR)(unsigned int)CPropIndicatorPanel::ToggleThink, 0.0, 0);
+        CBaseEntity::SetNextThink(this, gpGlobals->curtime + this->m_flTimerDuration, 0);
+      }
+    }
+  }
+}

@@ -148,10 +148,6 @@ void PrecacheMovie( const char *pMovieName );
 //-----------------------------------------------------------------------------
 void PrecacheEffect( const char *pEffectName );
 
-//-----------------------------------------------------------------------------
-// Spew application info (primarily for log file data mining)
-//-----------------------------------------------------------------------------
-void SpewInstallStatus( void );
 
 //-----------------------------------------------------------------------------
 // Called during bone setup to test perf

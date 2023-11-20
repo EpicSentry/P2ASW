@@ -1,0 +1,26 @@
+void __cdecl C_Trigger_TractorBeam::Spawn(C_Trigger_TractorBeam *const this)
+{
+  C_BaseEntity::Spawn((C_BaseEntity *const)this);
+  if ( !this->m_pMaterial1 )
+    this->m_pMaterial1 = (IMaterial *)(*(int (__cdecl **)(IMaterialSystem *, void *, _DWORD, _DWORD, _DWORD))(*(_DWORD *)materials + 328))(
+                                        materials,
+                                        &unk_12E8D9C,
+                                        0,
+                                        0,
+                                        0);
+  if ( !this->m_pMaterial2 )
+    this->m_pMaterial2 = (IMaterial *)(*(int (__cdecl **)(IMaterialSystem *, const char *, _DWORD, _DWORD, _DWORD))(*(_DWORD *)materials + 328))(
+                                        materials,
+                                        "effects/tractor_beam2",
+                                        0,
+                                        0,
+                                        0);
+  if ( !this->m_pMaterial3 )
+    this->m_pMaterial3 = (IMaterial *)(*(int (__cdecl **)(IMaterialSystem *, const char *, _DWORD, _DWORD, _DWORD))(*(_DWORD *)materials + 328))(
+                                        materials,
+                                        "effects/tractor_beam3",
+                                        0,
+                                        0,
+                                        0);
+  (*((void (__cdecl **)(C_Trigger_TractorBeam *const, int))this->_vptr_IHandleEntity + 160))(this, -996040704);
+}

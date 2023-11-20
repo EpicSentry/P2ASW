@@ -58,12 +58,18 @@ public:
 	bool	m_bColdWorld;
 	int		m_iTimeOfDay;
 
+	// This is a workaround for the HasPaintMap() function not being available in IVEngineClient
+	bool	HasPaintMap( void ) { return m_bHasPaintMap; }
+
 private:
 	char	m_iszDetailSpriteMaterial[MAX_DETAIL_SPRITE_MATERIAL_NAME_LENGTH];
 	
 #ifdef PORTAL2
 	int		m_nMaxBlobCount;
 #endif
+
+	bool m_bHasPaintMap;
+
 };
 
 inline float C_World::GetWaveHeight() const

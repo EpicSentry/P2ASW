@@ -76,13 +76,18 @@ public:
 	virtual bool IsSelfAnimating() { return false; };
 
 private:
-
+	void UpdateViewClamps();
+	float m_flPitchMaxCurrent;
+	float m_flPitchMinCurrent;
+	float m_flYawMaxCurrent;
+	float m_flYawMinCurrent;
 	CHandle<C_BasePlayer>	m_hPlayer;
 	CHandle<C_BasePlayer>	m_hPrevPlayer;
 
 	bool					m_bEnterAnimOn;
 	bool					m_bExitAnimOn;
 	Vector					m_vecEyeExitEndpoint;
+	bool					m_bForceEyesToAttachment;
 	float					m_flFOV;				// The current FOV (changes during entry/exit anims).
 
 	ViewSmoothingData_t		m_ViewSmoothingData;
@@ -94,6 +99,7 @@ IMPLEMENT_CLIENTCLASS_DT(C_PropVehicleChoreoGeneric, DT_PropVehicleChoreoGeneric
 	RecvPropEHandle( RECVINFO(m_hPlayer) ),
 	RecvPropBool( RECVINFO( m_bEnterAnimOn ) ),
 	RecvPropBool( RECVINFO( m_bExitAnimOn ) ),
+	RecvPropBool( RECVINFO( m_bForceEyesToAttachment ) ),
 	RecvPropVector( RECVINFO( m_vecEyeExitEndpoint ) ),
 	RecvPropBool( RECVINFO( m_vehicleView.bClampEyeAngles ) ),
 	RecvPropFloat( RECVINFO( m_vehicleView.flPitchCurveZero ) ),
@@ -212,6 +218,8 @@ void C_PropVehicleChoreoGeneric::UpdateViewAngles( C_BasePlayer *pLocalPlayer, C
 	QAngle vehicleEyeAngles;
 	GetAttachmentLocal( eyeAttachmentIndex, vehicleEyeOrigin, vehicleEyeAngles );
 
+	UpdateViewClamps();
+
 	// Limit the yaw.
 	float flAngleDiff = AngleDiff( pCmd->viewangles.y, vehicleEyeAngles.y );
 	flAngleDiff = clamp( flAngleDiff, m_vehicleView.flYawMin, m_vehicleView.flYawMax );
@@ -241,4 +249,24 @@ void C_PropVehicleChoreoGeneric::DrawHudElements( )
 {
 }
 
+float InterpolateViewClamp(float flValue, float flDesired)
+{
+	if (CloseEnough(flValue, flDesired, 1e-3) == false)
+	{
+		float delta = flDesired - flValue;
+		delta = delta * ExponentialDecay(0.2, 0.5, gpGlobals->frametime);
+		return flDesired - delta;
+	}
+	else
+	{
+		return flDesired;
+	}
+}
 
+void C_PropVehicleChoreoGeneric::UpdateViewClamps(void)
+{
+	m_flPitchMaxCurrent = InterpolateViewClamp(m_flPitchMaxCurrent, m_vehicleView.flPitchMax);
+	m_flPitchMinCurrent = InterpolateViewClamp(m_flPitchMinCurrent, m_vehicleView.flPitchMin);
+	m_flYawMaxCurrent = InterpolateViewClamp(m_flYawMaxCurrent, m_vehicleView.flYawMax);
+	m_flYawMinCurrent = InterpolateViewClamp(m_flYawMinCurrent, m_vehicleView.flYawMin);
+}

@@ -1,0 +1,35 @@
+datamap_t *__cdecl DataMapInit<CBaseProjector>()
+{
+  if ( (_S9_44 & 1) == 0 )
+  {
+    _S9_44 |= 1u;
+    nameHolder_561.m_pszBase = "CBaseProjector";
+    nameHolder_561.m_Names.m_Memory.m_pMemory = 0;
+    nameHolder_561.m_Names.m_Memory.m_nAllocationCount = 0;
+    nameHolder_561.m_Names.m_Memory.m_nGrowSize = 0;
+    nameHolder_561.m_Names.m_Size = 0;
+    nameHolder_561.m_Names.m_pElements = 0;
+    nameHolder_561.m_nLenBase = 14;
+    atexit(DataMapInit_CBaseProjector__::_2_::_dynamic_atexit_destructor_for__nameHolder__);
+  }
+  CBaseProjector::m_DataMap.baseMap = &CBaseAnimating::m_DataMap;
+  if ( (_S9_44 & 2) == 0 )
+  {
+    _S9_44 |= 2u;
+    dataDesc_520[6].fieldName = CDatadescGeneratedNameHolder::GenerateName(
+                                  &nameHolder_561,
+                                  "TestProjectionChangesThink");
+    dataDesc_520[6].fieldOffset = 0;
+    *(_DWORD *)&dataDesc_520[6].fieldSize = 2097153;
+    dataDesc_520[6].externalName = 0;
+    dataDesc_520[6].pSaveRestoreOps = 0;
+    dataDesc_520[6].inputFunc = (void (__thiscall *)(CBaseEntity *, inputdata_t *))CBaseProjector::TestProjectionChangesThink;
+    *(_QWORD *)&dataDesc_520[6].td = 0i64;
+    *(_QWORD *)&dataDesc_520[6].override_field = 0i64;
+    *(_QWORD *)&dataDesc_520[6].fieldTolerance = 0i64;
+    *(_QWORD *)&dataDesc_520[6].flatOffset[1] = 0i64;
+  }
+  CBaseProjector::m_DataMap.dataNumFields = 6;
+  CBaseProjector::m_DataMap.dataDesc = &dataDesc_520[1];
+  return &CBaseProjector::m_DataMap;
+}

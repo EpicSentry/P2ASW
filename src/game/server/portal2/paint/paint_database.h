@@ -8,7 +8,7 @@
 
 #ifdef PORTAL2
 class CWeaponPaintGun;
-//class CProjectedWallEntity;
+class CProjectedWallEntity;
 #endif
 
 
@@ -19,6 +19,7 @@ struct PaintLocationData_t
 	float			flPaintRadius;
 	float			flPaintAlphaPercent;
 	Vector			location;
+	Vector			normal;
 };
 
 struct PaintEntityData_t
@@ -33,7 +34,7 @@ typedef PaintLocationData_t const* PaintLocationConstIter;
 typedef CUtlVector<PaintLocationData_t> PaintLocationVector_t;
 typedef CUtlVector<PaintEntityData_t> PaintEntityVector_t;
 #ifdef PORTAL2
-//typedef CUtlVector<CProjectedWallEntity*> ProjectedWallVector_t;
+typedef CUtlVector<CProjectedWallEntity*> ProjectedWallVector_t;
 #endif
 typedef CUtlVector< uint32 > PaintmapData_t;
 struct PaintRestoreData_t
@@ -62,7 +63,7 @@ public:
 	void RemovePaintedEntity( const CBaseEntity *pPaintedEntity );
 	void RemovePaintedEntity( const CBaseEntity *pPaintedEntity, bool bDeleteData );
 #ifdef PORTAL2
-	//	void RemovePaintedWall( CProjectedWallEntity *pWall, bool bDeleteData = true );
+	void RemovePaintedWall( CProjectedWallEntity *pWall, bool bDeleteData = true );
 #endif
 
 	void RemoveAllPaint();
@@ -70,7 +71,7 @@ public:
 	virtual void PreClientUpdate();
 
 #ifdef PORTAL2
-	//	const ProjectedWallVector_t* GetPaintedProjectedWalls() const { return &m_PaintedProjectedWalls; }
+		const ProjectedWallVector_t* GetPaintedProjectedWalls() const { return &m_PaintedProjectedWalls; }
 #endif
 
 	void SavePaintmapData( ISave* pSave );
@@ -80,7 +81,7 @@ public:
 
 private:
 #ifdef PORTAL2
-	//	void PaintProjectedWall( CProjectedWallEntity *pWall, PaintPowerType powerType, const Vector &vecPosition );
+		void PaintProjectedWall( CProjectedWallEntity *pWall, PaintPowerType powerType, const Vector &vecPosition );
 #endif
 
 	void ClearPaintData();
@@ -93,7 +94,7 @@ private:
 	PaintEntityVector_t m_PaintedEntities;
 
 #ifdef PORTAL2
-	//	ProjectedWallVector_t m_PaintedProjectedWalls;
+		ProjectedWallVector_t m_PaintedProjectedWalls;
 #endif
 
 	bool m_bCanPaint;

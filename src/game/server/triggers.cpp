@@ -1,4 +1,4 @@
-//===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ======//
+//===== Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ======//
 //
 // Purpose: Spawn and use functions for editor-placed triggers.
 //
@@ -2961,15 +2961,27 @@ BEGIN_DATADESC( CTriggerCamera )
 	DEFINE_FIELD( m_nPlayerButtons, FIELD_INTEGER ),
 	DEFINE_FIELD( m_nOldTakeDamage, FIELD_INTEGER ),
 
+	DEFINE_KEYFIELD( m_trackSpeed, FIELD_FLOAT, "trackspeed" ),
+
 	DEFINE_KEYFIELD( m_fov, FIELD_FLOAT, "fov" ),
 	DEFINE_KEYFIELD( m_fovSpeed, FIELD_FLOAT, "fov_rate" ),
 
 	// Inputs
 	DEFINE_INPUTFUNC( FIELD_VOID, "Enable", InputEnable ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "Disable", InputDisable ),
+	DEFINE_INPUTFUNC( FIELD_STRING, "SetTarget", InputSetTarget ),
+	DEFINE_INPUTFUNC( FIELD_STRING, "SetTargetAttachment", InputSetTargetAttachment ),
+	DEFINE_INPUTFUNC( FIELD_VOID, "ReturnToEyes", InputReturnToEyes ),
+	DEFINE_INPUTFUNC( FIELD_VOID, "TeleportToView", InputTeleportToView ),
+
+	DEFINE_INPUTFUNC( FIELD_STRING, "SetPath", InputSetPath ),
+
+	DEFINE_INPUTFUNC(FIELD_FLOAT, "SetTrackSpeed", InputSetTrackSpeed),
 
 	// Function Pointers
 	DEFINE_FUNCTION( FollowTarget ),
+	DEFINE_FUNCTION( ReturnToEyes ),
+
 	DEFINE_OUTPUT( m_OnEndFollow, "OnEndFollow" ),
 
 END_DATADESC()
@@ -2987,6 +2999,7 @@ CTriggerCamera::CTriggerCamera()
 {
 	m_fov = 90;
 	m_fovSpeed = 1;
+	m_trackSpeed = 40;
 }
 
 //-----------------------------------------------------------------------------
@@ -3071,6 +3084,102 @@ void CTriggerCamera::InputEnable( inputdata_t &inputdata )
 void CTriggerCamera::InputDisable( inputdata_t &inputdata )
 { 
 	Disable();
+}
+
+//------------------------------------------------------------------------------
+// Purpose: Input handler to return the view to the player eyes
+//------------------------------------------------------------------------------
+void CTriggerCamera::InputReturnToEyes( inputdata_t& inputdata )
+{
+	if (m_hPlayer && HasSpawnFlags(SF_CAMERA_PLAYER_SETFOV))
+	{
+		CBasePlayer* pBasePlayer = (CBasePlayer*)m_hPlayer.Get();
+		pBasePlayer->SetFOV(this, 0, m_fovSpeed);
+	}
+
+	SetThink(&CTriggerCamera::ReturnToEyes);
+	SetNextThink(gpGlobals->curtime);
+}
+
+//------------------------------------------------------------------------------
+// Purpose: Input handler to return the view to the player eyes
+//------------------------------------------------------------------------------
+void CTriggerCamera::InputSetTrackSpeed(inputdata_t& inputdata)
+{
+	m_trackSpeed = inputdata.value.Float();
+}
+
+//------------------------------------------------------------------------------
+// Purpose: Input handler to set a new target
+//------------------------------------------------------------------------------
+void CTriggerCamera::InputSetTarget(inputdata_t& inputdata)
+{
+	m_target = MAKE_STRING(inputdata.value.String());
+	m_hTarget = gEntList.FindEntityByName(NULL, inputdata.value.String());
+	m_iAttachmentIndex = 0;
+
+	// Only track if we have a target
+	if (m_hTarget)
+	{
+		// follow the player down
+		SetThink(&CTriggerCamera::FollowTarget);
+		SetNextThink(gpGlobals->curtime);
+	}
+}
+
+//------------------------------------------------------------------------------
+// Purpose: Input handler to look at a new attachment
+//------------------------------------------------------------------------------
+void CTriggerCamera::InputSetTargetAttachment(inputdata_t& inputdata)
+{
+	m_iszTargetAttachment = MAKE_STRING(inputdata.value.String());
+	FindAttachment();
+}
+
+//------------------------------------------------------------------------------
+// Purpose: Input handler to set a new target
+//------------------------------------------------------------------------------
+void CTriggerCamera::InputSetPath(inputdata_t& inputdata)
+{
+	m_pPath = gEntList.FindEntityByName(NULL, inputdata.value.String());
+
+	m_flStopTime = gpGlobals->curtime;
+	if (m_pPath)
+	{
+		if (m_pPath->m_flSpeed != 0)
+			m_targetSpeed = m_pPath->m_flSpeed;
+
+		m_vecMoveDir = m_pPath->GetLocalOrigin() - GetLocalOrigin();
+		m_moveDistance = VectorNormalize(m_vecMoveDir);
+		m_flStopTime = gpGlobals->curtime + m_pPath->GetDelay();
+	}
+}
+
+//------------------------------------------------------------------------------
+// Purpose: Input handler to turn off this trigger.
+//------------------------------------------------------------------------------
+void CTriggerCamera::FindAttachment()
+{
+	// If we don't have a target, ignore the attachment / etc
+	if (m_hTarget)
+	{
+		m_iAttachmentIndex = 0;
+		if (m_iszTargetAttachment != NULL_STRING)
+		{
+			if (!m_hTarget->GetBaseAnimating())
+			{
+				Warning("%s tried to target an attachment (%s) on target %s, which has no model.\n", GetClassname(), STRING(m_iszTargetAttachment), STRING(m_hTarget->GetEntityName()));
+			}
+			else
+			{
+				m_iAttachmentIndex = m_hTarget->GetBaseAnimating()->LookupAttachment(STRING(m_iszTargetAttachment));
+				if (!m_iAttachmentIndex)
+				{
+					Warning("%s could not find attachment %s on target %s.\n", GetClassname(), STRING(m_iszTargetAttachment), STRING(m_hTarget->GetEntityName()));
+				}
+			}
+		}
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -3183,26 +3292,7 @@ void CTriggerCamera::Enable( void )
 		m_hTarget = GetNextTarget();
 	}
 
-	// If we don't have a target, ignore the attachment / etc
-	if ( m_hTarget )
-	{
-		m_iAttachmentIndex = 0;
-		if ( m_iszTargetAttachment != NULL_STRING )
-		{
-			if ( !m_hTarget->GetBaseAnimating() )
-			{
-				Warning("%s tried to target an attachment (%s) on target %s, which has no model.\n", GetClassname(), STRING(m_iszTargetAttachment), STRING(m_hTarget->GetEntityName()) );
-			}
-			else
-			{
-				m_iAttachmentIndex = m_hTarget->GetBaseAnimating()->LookupAttachment( STRING(m_iszTargetAttachment) );
-				if ( !m_iAttachmentIndex )
-				{
-					Warning("%s could not find attachment %s on target %s.\n", GetClassname(), STRING(m_iszTargetAttachment), STRING(m_hTarget->GetEntityName()) );
-				}
-			}
-		}
-	}
+	FindAttachment();
 
 	if (HasSpawnFlags(SF_CAMERA_PLAYER_TAKECONTROL ) )
 	{
@@ -3370,6 +3460,103 @@ void CTriggerCamera::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
+void CTriggerCamera::MoveViewTo( QAngle vecGoalView )
+{
+	if (m_hPlayer == NULL)
+		return;
+
+	QAngle angles = GetLocalAngles();
+
+	if (angles.y > 360)
+		angles.y -= 360;
+
+	if (angles.y < 0)
+		angles.y += 360;
+
+	SetLocalAngles(angles);
+
+	float dx = vecGoalView.x - GetLocalAngles().x;
+	float dy = vecGoalView.y - GetLocalAngles().y;
+
+	if (dx < -180)
+		dx += 360;
+	if (dx > 180)
+		dx = dx - 360;
+
+	if (dy < -180)
+		dy += 360;
+	if (dy > 180)
+		dy = dy - 360;
+
+	QAngle vecAngVel;
+	vecAngVel.Init(dx * m_trackSpeed * gpGlobals->frametime, dy * m_trackSpeed * gpGlobals->frametime, GetLocalAngularVelocity().z);
+	SetLocalAngularVelocity(vecAngVel);
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTriggerCamera::InputTeleportToView(inputdata_t& inputdata)
+{
+	if (m_hPlayer)
+	{
+		CBasePlayer* pBasePlayer = (CBasePlayer*)m_hPlayer.Get();
+
+		QAngle vecPlayerView = GetAbsAngles();
+		Vector vecEyeOffset = pBasePlayer->EyePosition() - pBasePlayer->GetAbsOrigin(); // is there better way to get this? - just want standing eye height
+		Vector vecTeleportPosition = GetAbsOrigin() - vecEyeOffset;
+
+		// try to find a position on the ground - this will prevent a pop
+		trace_t tr;
+		UTIL_TraceLine(GetAbsOrigin(), GetAbsOrigin() - 1.02f * vecEyeOffset, MASK_SOLID, pBasePlayer, COLLISION_GROUP_NONE, &tr);
+		if (tr.fraction != 1.0)
+		{
+			vecTeleportPosition = tr.endpos;
+		}
+
+		pBasePlayer->SetGroundEntity(NULL);
+		pBasePlayer->Teleport(&vecTeleportPosition, &vecPlayerView, NULL);
+	}
+	Disable();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTriggerCamera::ReturnToEyes( void )
+{
+	if (m_hPlayer == NULL)
+		return;
+
+	// get back to our original position
+	Vector vecPositionDiff = m_hPlayer->EyePosition() - GetAbsOrigin();
+	UTIL_SetOrigin(this, GetAbsOrigin() + 0.1f * vecPositionDiff);
+
+	// and our eye angles
+	QAngle vecPlayerView = QAngle(m_hPlayer->LocalEyeAngles().x, m_hPlayer->LocalEyeAngles().y, 0);
+	MoveViewTo(vecPlayerView);
+
+	const float epsilon = 1.0f;
+	float distance = fabs((vecPlayerView - QAngle(GetLocalAngles().x, GetLocalAngles().y, 0)).Length());
+
+	if (distance > 180.f)
+	{
+		distance -= 360.f;
+	}
+
+	if (fabs(distance) < epsilon)
+	{
+		Disable();
+	}
+	else
+	{
+		SetNextThink(gpGlobals->curtime);
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
 void CTriggerCamera::FollowTarget( )
 {
 	if (m_hPlayer == NULL)
@@ -3415,33 +3602,7 @@ void CTriggerCamera::FollowTarget( )
 	}
 	else
 	{
-		// UNDONE: Can't we just use UTIL_AngleDiff here?
-		QAngle angles = GetLocalAngles();
-
-		if (angles.y > 360)
-			angles.y -= 360;
-
-		if (angles.y < 0)
-			angles.y += 360;
-
-		SetLocalAngles( angles );
-
-		float dx = vecGoal.x - GetLocalAngles().x;
-		float dy = vecGoal.y - GetLocalAngles().y;
-
-		if (dx < -180) 
-			dx += 360;
-		if (dx > 180) 
-			dx = dx - 360;
-		
-		if (dy < -180) 
-			dy += 360;
-		if (dy > 180) 
-			dy = dy - 360;
-
-		QAngle vecAngVel;
-		vecAngVel.Init( dx * 40 * gpGlobals->frametime, dy * 40 * gpGlobals->frametime, GetLocalAngularVelocity().z );
-		SetLocalAngularVelocity(vecAngVel);
+		MoveViewTo( vecGoal );
 	}
 
 	if (!HasSpawnFlags(SF_CAMERA_PLAYER_TAKECONTROL))	
@@ -5466,6 +5627,9 @@ void CTriggerSoundOperator::EndTouch( CBaseEntity *pOther )
 //------------------------------------------------------------------------------
 // Base VPhysics trigger implementation
 //------------------------------------------------------------------------------
+IMPLEMENT_SERVERCLASS_ST( CBaseVPhysicsTrigger, DT_BaseVPhysicsTrigger )
+	//RecvPropBool	( RECVINFO( m_bDisabled ) )
+END_SEND_TABLE()
 //------------------------------------------------------------------------------
 // Save/load
 //------------------------------------------------------------------------------

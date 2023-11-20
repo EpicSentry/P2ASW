@@ -1,0 +1,5 @@
+CNetworkVectorBase<Vector,CBaseProjectedEntity::NetworkVar_m_vecEndPoint> *__thiscall CBaseProjectedEntity::GetEndPoint(
+        CBaseProjectedEntity *this)
+{
+  return &this->m_vecEndPoint;
+}

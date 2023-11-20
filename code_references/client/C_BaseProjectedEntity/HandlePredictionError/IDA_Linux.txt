@@ -1,0 +1,6 @@
+void __cdecl C_BaseProjectedEntity::HandlePredictionError(C_BaseProjectedEntity *const this, bool bErrorInThisEntity)
+{
+  C_BaseEntity::HandlePredictionError(this, bErrorInThisEntity);
+  if ( bErrorInThisEntity )
+    C_BaseProjectedEntity::HandleDataChange(this);
+}

@@ -1,0 +1,86 @@
+void __thiscall CPortalLaser::BeamDamage(CPortalLaser *this, CGameTrace *ptr)
+{
+  CBaseEntity *m_pEnt; // ebx
+  CBaseEntity *v4; // eax
+  CBaseEntity *v5; // esi
+  void (__thiscall *Event_Killed)(CBaseEntity *, const CTakeDamageInfo *); // edx
+  void *v7; // eax
+  edict_t *m_pPev; // ecx
+  CTakeDamageInfo info; // [esp+1Ch] [ebp-ACh] BYREF
+  CTakeDamageInfo v10; // [esp+6Ch] [ebp-5Ch] BYREF
+  Vector dir; // [esp+BCh] [ebp-Ch] BYREF
+
+  if ( (_S13_19 & 1) == 0 )
+  {
+    _S13_19 |= 1u;
+    CEG_LASER_DAMAGE_AMOUNT = LaserDamageAmount();
+  }
+  if ( ptr->fraction != 1.0 )
+  {
+    m_pEnt = ptr->m_pEnt;
+    if ( m_pEnt )
+    {
+      ClearMultiDamage();
+      if ( (this->m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(this);
+      dir.x = ptr->endpos.x - this->m_vecAbsOrigin.x;
+      dir.y = ptr->endpos.y - this->m_vecAbsOrigin.y;
+      dir.z = ptr->endpos.z - this->m_vecAbsOrigin.z;
+      VectorNormalize(&dir);
+      CTakeDamageInfo::CTakeDamageInfo(&info, this, this, gpGlobals->frametime * CEG_LASER_DAMAGE_AMOUNT, 8, 0);
+      CalculateMeleeDamageForce(&info, &dir, &ptr->endpos, 1.0);
+      CBaseEntity::DispatchTraceAttack(m_pEnt, &info, &dir, ptr);
+      ApplyMultiDamage();
+      v4 = m_pEnt->GetBaseAnimating(m_pEnt);
+      v5 = v4;
+      if ( v4 && (FClassnameIs(v4, "npc_portal_turret_floor") || FClassnameIs(v5, "npc_hover_turret")) )
+      {
+        if ( hitbox_damage_enabled.m_pParent->m_Value.m_nValue )
+        {
+          CTakeDamageInfo::CTakeDamageInfo(&v10);
+          Event_Killed = v5->Event_Killed;
+          v10.m_flDamage = FLOAT_1_0;
+          v10.m_bitsDamageType = 1;
+          Event_Killed(v5, &v10);
+          ((void (__thiscall *)(CBaseEntity *))v5->__vftable[3].AcceptInput)(v5);
+          CBaseEntity::ThinkSet(v5, 0, 0.0, 0);
+        }
+        else
+        {
+          ((void (__thiscall *)(CBaseEntity *, _DWORD, int, _DWORD, _DWORD))v5->__vftable[1].Precache)(
+            v5,
+            LODWORD(FLOAT_30_0),
+            1,
+            0,
+            0);
+        }
+      }
+      else if ( m_pEnt->m_MoveType.m_Value == 6 )
+      {
+        v7 = __RTDynamicCast(m_pEnt, 0, &CBaseEntity `RTTI Type Descriptor', &CPhysicsProp `RTTI Type Descriptor', 0);
+        if ( v7 )
+          (*(void (__thiscall **)(void *, _DWORD, _DWORD, _DWORD, _DWORD))(*(_DWORD *)v7 + 888))(
+            v7,
+            LODWORD(FLOAT_30_0),
+            0,
+            0,
+            0);
+      }
+      if ( !this->m_bShouldSpark.m_Value )
+      {
+        if ( this->m_Network.m_TimerEvent.m_bRegistered )
+        {
+          *((_BYTE *)&this->m_Network + 76) |= 1u;
+          this->m_bShouldSpark.m_Value = 1;
+        }
+        else
+        {
+          m_pPev = this->m_Network.m_pPev;
+          if ( m_pPev )
+            CBaseEdict::StateChanged(m_pPev, 0x783u);
+          this->m_bShouldSpark.m_Value = 1;
+        }
+      }
+    }
+  }
+}

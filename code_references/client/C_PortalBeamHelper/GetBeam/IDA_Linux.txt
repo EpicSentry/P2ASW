@@ -1,0 +1,4 @@
+C_Beam *__cdecl C_PortalBeamHelper::GetBeam(C_PortalBeamHelper *const this, int i)
+{
+  return this->m_beams.m_Memory.m_pMemory[i];
+}

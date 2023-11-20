@@ -1,0 +1,279 @@
+void __cdecl CTriggerPortalCleanser::SearchThink(CTriggerPortalCleanser *const this)
+{
+  int v1; // eax
+  vec_t v2; // edx
+  int v3; // edi
+  CBaseEntity *v4; // esi
+  const Vector *v5; // eax
+  int m_Size; // ecx
+  FizzlerVortexObjectInfo_t *m_pMemory; // ebx
+  float m_flDistanceSq; // xmm2_4
+  int v9; // eax
+  FizzlerVortexObjectInfo_t *v10; // edx
+  float v11; // xmm0_4
+  int v12; // edi
+  int v13; // esi
+  unsigned int m_Index; // eax
+  char *v15; // edx
+  unsigned int v16; // eax
+  int v17; // edx
+  char *v18; // ecx
+  int v19; // esi
+  unsigned int v20; // eax
+  char *v21; // edx
+  unsigned int v22; // eax
+  int v23; // edx
+  char *v24; // ecx
+  int v25; // edi
+  unsigned int v26; // edx
+  float m_fValue; // esi
+  int v28; // eax
+  char *v29; // ecx
+  const Vector *v30; // eax
+  unsigned int v31; // edx
+  float v32; // esi
+  int v33; // eax
+  char *v34; // ecx
+  const Vector *v35; // eax
+  float flVortexRange; // [esp+24h] [ebp-104h]
+  float flVortexRangea; // [esp+24h] [ebp-104h]
+  int count; // [esp+2Ch] [ebp-FCh]
+  CBaseEntity *pList[32]; // [esp+30h] [ebp-F8h] BYREF
+  CUtlSortVector<FizzlerVortexObjectInfo_t,CFizzlerVortexObjectInfoLess,CUtlVector<FizzlerVortexObjectInfo_t,CUtlMemory<FizzlerVortexObjectInfo_t,int> > > vortexEntsSorted; // [esp+B0h] [ebp-78h] BYREF
+  CleanserVortexTraceEnum vortexEnum; // [esp+CCh] [ebp-5Ch] BYREF
+  Vector vecCenter; // [esp+E0h] [ebp-48h] BYREF
+  Vector vMins; // [esp+ECh] [ebp-3Ch] BYREF
+  Vector vMaxs; // [esp+F8h] [ebp-30h] BYREF
+  FizzlerVortexObjectInfo_t vortexObjectInfo; // [esp+104h] [ebp-24h] BYREF
+  char v46; // [esp+10Fh] [ebp-19h] BYREF
+
+  v1 = (*((int (__cdecl **)(CTriggerPortalCleanser *const))this->_vptr_IHandleEntity + 150))(this);
+  v2 = *(float *)v1;
+  memset(&vortexEntsSorted, 0, 25);
+  vecCenter.x = v2;
+  vecCenter.y = *(vec_t *)(v1 + 4);
+  vecCenter.z = *(vec_t *)(v1 + 8);
+  flVortexRange = sv_portal_cleanser_vortex_distance.m_pParent->m_Value.m_fValue;
+  CCollisionProperty::CollisionAABBToWorldAABB(
+    &this->m_Collision,
+    &this->m_Collision.m_vecMins.m_Value,
+    &this->m_Collision.m_vecMaxs.m_Value,
+    &vMins,
+    &vMaxs);
+  vortexEnum._vptr_IPartitionEnumerator = (int (**)(...))&off_C80938;
+  vortexEnum.m_pList = pList;
+  vortexEnum.m_listMax = 32;
+  vortexEnum.m_count = 0;
+  vortexEnum.m_pCleanser = this;
+  vMins.x = vMins.x - flVortexRange;
+  vMins.y = vMins.y - flVortexRange;
+  vMins.z = vMins.z - flVortexRange;
+  vMaxs.x = flVortexRange + vMaxs.x;
+  vMaxs.y = flVortexRange + vMaxs.y;
+  vMaxs.z = flVortexRange + vMaxs.z;
+  (*(void (__cdecl **)(ISpatialPartition *, int, Vector *, Vector *, _DWORD, CleanserVortexTraceEnum *))(*(_DWORD *)partition + 48))(
+    partition,
+    16,
+    &vMins,
+    &vMaxs,
+    0,
+    &vortexEnum);
+  count = vortexEnum.m_count;
+  if ( vortexEnum.m_count > 0 )
+  {
+    v3 = 0;
+    do
+    {
+      v4 = pList[v3];
+      if ( v4 )
+      {
+        vortexObjectInfo.m_hEnt.m_Index = -1;
+        v5 = (const Vector *)(*((int (__cdecl **)(CBaseEntity *))v4->_vptr_IHandleEntity + 150))(v4);
+        vortexObjectInfo.m_flDistanceSq = CCollisionProperty::CalcSqrDistanceFromPoint(&this->m_Collision, v5);
+        vortexObjectInfo.m_hEnt.m_Index = *(_DWORD *)(*((int (__cdecl **)(CBaseEntity *))v4->_vptr_IHandleEntity + 3))(v4);
+        CUtlSortVector<FizzlerVortexObjectInfo_t,CFizzlerVortexObjectInfoLess,CUtlVector<FizzlerVortexObjectInfo_t,CUtlMemory<FizzlerVortexObjectInfo_t,int>>>::InsertNoSort(
+          &vortexEntsSorted,
+          &vortexObjectInfo);
+      }
+      ++v3;
+    }
+    while ( v3 != count );
+  }
+  vortexEntsSorted.m_bNeedsSort = 0;
+  if ( vortexEntsSorted.m_Size > 1 )
+  {
+    LODWORD(vortexObjectInfo.m_flDistanceSq) = vortexEntsSorted.m_pLessContext;
+    vortexObjectInfo.m_hEnt.m_Index = (unsigned int)&v46;
+    g_pUtlSortVectorQSortContext = &vortexObjectInfo;
+    qsort(
+      vortexEntsSorted.m_Memory.m_pMemory,
+      vortexEntsSorted.m_Size,
+      8u,
+      (__compar_fn_t)CUtlSortVector<FizzlerVortexObjectInfo_t,CFizzlerVortexObjectInfoLess,CUtlVector<FizzlerVortexObjectInfo_t,CUtlMemory<FizzlerVortexObjectInfo_t,int>>>::CompareHelper);
+  }
+  CTriggerPortalCleanser::ClearVortexObjects(this);
+  m_Size = vortexEntsSorted.m_Size;
+  if ( vortexEntsSorted.m_Size > 0 )
+  {
+    m_pMemory = vortexEntsSorted.m_Memory.m_pMemory;
+    m_flDistanceSq = this->m_VortexObjects[0].m_flDistanceSq;
+    v9 = 0;
+    while ( 1 )
+    {
+      v10 = &m_pMemory[v9];
+      v11 = v10->m_flDistanceSq;
+      if ( m_flDistanceSq >= v10->m_flDistanceSq )
+        break;
+      v12 = 1;
+      if ( this->m_VortexObjects[1].m_flDistanceSq >= v11 )
+        goto LABEL_49;
+LABEL_12:
+      if ( ++v9 == m_Size )
+        goto LABEL_13;
+    }
+    v12 = 0;
+LABEL_49:
+    v25 = v12 + 160;
+    *((float *)&this->m_iObjectCapsCache.m_Value + 2 * v25) = v11;
+    *((_DWORD *)&this->m_pfnMoveDone.__pfn + 2 * v25) = v10->m_hEnt.m_Index;
+    m_flDistanceSq = this->m_VortexObjects[0].m_flDistanceSq;
+    goto LABEL_12;
+  }
+  m_flDistanceSq = this->m_VortexObjects[0].m_flDistanceSq;
+LABEL_13:
+  flVortexRangea = flVortexRange * flVortexRange;
+  if ( flVortexRangea <= m_flDistanceSq )
+  {
+    if ( this->m_bObject1InRange.m_Value )
+    {
+      CBaseEntity::NetworkStateChanged(this, &this->m_bObject1InRange);
+      this->m_bObject1InRange.m_Value = 0;
+    }
+  }
+  else
+  {
+    if ( !this->m_bObject1InRange.m_Value )
+    {
+      CBaseEntity::NetworkStateChanged(this, &this->m_bObject1InRange);
+      this->m_bObject1InRange.m_Value = 1;
+    }
+    v13 = 0;
+    m_Index = this->m_VortexObjects[0].m_hEnt.m_Index;
+    if ( m_Index != -1 )
+    {
+      v15 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+      if ( *((_DWORD *)v15 + 2) == HIWORD(m_Index) )
+        v13 = *((_DWORD *)v15 + 1);
+    }
+    v16 = this->m_hObject1.m_Value.m_Index;
+    v17 = 0;
+    if ( v16 != -1 )
+    {
+      v18 = (char *)g_pEntityList + 24 * (unsigned __int16)v16;
+      if ( *((_DWORD *)v18 + 2) == HIWORD(v16) )
+        v17 = *((_DWORD *)v18 + 1);
+    }
+    if ( v13 != v17 )
+    {
+      CBaseEntity::NetworkStateChanged(this, &this->m_hObject1);
+      if ( v13 )
+        this->m_hObject1.m_Value.m_Index = *(_DWORD *)(*(int (__cdecl **)(int))(*(_DWORD *)v13 + 12))(v13);
+      else
+        this->m_hObject1.m_Value.m_Index = -1;
+    }
+  }
+  if ( flVortexRangea <= this->m_VortexObjects[1].m_flDistanceSq )
+  {
+    if ( this->m_bObject2InRange.m_Value )
+    {
+      CBaseEntity::NetworkStateChanged(this, &this->m_bObject2InRange);
+      this->m_bObject2InRange.m_Value = 0;
+    }
+  }
+  else
+  {
+    if ( !this->m_bObject2InRange.m_Value )
+    {
+      CBaseEntity::NetworkStateChanged(this, &this->m_bObject2InRange);
+      this->m_bObject2InRange.m_Value = 1;
+    }
+    v19 = 0;
+    v20 = this->m_VortexObjects[1].m_hEnt.m_Index;
+    if ( v20 != -1 )
+    {
+      v21 = (char *)g_pEntityList + 24 * (unsigned __int16)v20;
+      if ( *((_DWORD *)v21 + 2) == HIWORD(v20) )
+        v19 = *((_DWORD *)v21 + 1);
+    }
+    v22 = this->m_hObject2.m_Value.m_Index;
+    v23 = 0;
+    if ( v22 != -1 )
+    {
+      v24 = (char *)g_pEntityList + 24 * (unsigned __int16)v22;
+      if ( *((_DWORD *)v24 + 2) == HIWORD(v22) )
+        v23 = *((_DWORD *)v24 + 1);
+    }
+    if ( v19 != v23 )
+    {
+      CBaseEntity::NetworkStateChanged(this, &this->m_hObject2);
+      if ( v19 )
+        this->m_hObject2.m_Value.m_Index = *(_DWORD *)(*(int (__cdecl **)(int))(*(_DWORD *)v19 + 12))(v19);
+      else
+        this->m_hObject2.m_Value.m_Index = -1;
+    }
+  }
+  if ( debug_portal_cleanser_search_box.m_pParent->m_Value.m_nValue )
+  {
+    NDebugOverlay::Box(
+      &vec3_origin,
+      &vMins,
+      &vMaxs,
+      255,
+      0,
+      0,
+      64,
+      sv_portal_cleanser_think_rate.m_pParent->m_Value.m_fValue);
+    if ( !this->m_bObject1InRange.m_Value )
+    {
+      if ( !this->m_bObject2InRange.m_Value )
+        goto LABEL_40;
+      goto LABEL_54;
+    }
+    v26 = this->m_hObject1.m_Value.m_Index;
+    m_fValue = sv_portal_cleanser_think_rate.m_pParent->m_Value.m_fValue;
+    v28 = 0;
+    if ( v26 != -1 )
+    {
+      v29 = (char *)g_pEntityList + 24 * (unsigned __int16)v26;
+      if ( *((_DWORD *)v29 + 2) == HIWORD(v26) )
+        v28 = *((_DWORD *)v29 + 1);
+    }
+    v30 = (const Vector *)(*(int (__cdecl **)(int))(*(_DWORD *)v28 + 600))(v28);
+    NDebugOverlay::Line(&vecCenter, v30, 0, 255, 0, 1, m_fValue);
+    if ( this->m_bObject2InRange.m_Value )
+    {
+LABEL_54:
+      v31 = this->m_hObject2.m_Value.m_Index;
+      v32 = sv_portal_cleanser_think_rate.m_pParent->m_Value.m_fValue;
+      v33 = 0;
+      if ( v31 != -1 )
+      {
+        v34 = (char *)g_pEntityList + 24 * (unsigned __int16)v31;
+        if ( *((_DWORD *)v34 + 2) == HIWORD(v31) )
+          v33 = *((_DWORD *)v34 + 1);
+      }
+      v35 = (const Vector *)(*(int (__cdecl **)(int))(*(_DWORD *)v33 + 600))(v33);
+      NDebugOverlay::Line(&vecCenter, v35, 0, 0, 255, 1, v32);
+    }
+  }
+LABEL_40:
+  CBaseEntity::SetNextThink(this, gpGlobals->curtime + sv_portal_cleanser_think_rate.m_pParent->m_Value.m_fValue, 0);
+  vortexEntsSorted.m_Size = 0;
+  if ( vortexEntsSorted.m_Memory.m_nGrowSize >= 0 )
+  {
+    if ( vortexEntsSorted.m_Memory.m_pMemory )
+      (*(void (__cdecl **)(_DWORD, FizzlerVortexObjectInfo_t *))(*g_pMemAlloc + 8))(
+        g_pMemAlloc,
+        vortexEntsSorted.m_Memory.m_pMemory);
+  }
+}

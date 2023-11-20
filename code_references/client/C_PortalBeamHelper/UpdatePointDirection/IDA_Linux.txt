@@ -1,0 +1,19 @@
+void __cdecl C_PortalBeamHelper::UpdatePointDirection(
+        C_PortalBeamHelper *const this,
+        const Vector *const vStartPoint,
+        const Vector *const vDirection,
+        unsigned int fMask,
+        ITraceFilter *pTraceFilter,
+        trace_t *tr)
+{
+  vec_t v6; // xmm0_4
+  vec_t v7; // xmm2_4
+  Vector vEndPoint; // [esp+24h] [ebp-14h] BYREF
+
+  v6 = (float)(vDirection->z * 56755.84) + vStartPoint->z;
+  v7 = (float)(56755.84 * vDirection->x) + vStartPoint->x;
+  vEndPoint.y = (float)(vDirection->y * 56755.84) + vStartPoint->y;
+  vEndPoint.x = v7;
+  vEndPoint.z = v6;
+  C_PortalBeamHelper::UpdatePoints(this, vStartPoint, &vEndPoint, fMask, pTraceFilter, tr);
+}

@@ -1,0 +1,4 @@
+void __cdecl CPropIndicatorPanel::Precache(CPropIndicatorPanel *const this)
+{
+  UTIL_PrecacheOther("vgui_indicator_panel", 0);
+}

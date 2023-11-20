@@ -14,6 +14,7 @@ IMPLEMENT_CLIENTCLASS_DT(C_PhysBox, DT_PhysBox, CPhysBox)
 	RecvPropFloat(RECVINFO(m_mass), 0), // Test..
 END_RECV_TABLE()
 
+LINK_ENTITY_TO_CLASS( func_physbox, C_PhysBox );
 
 C_PhysBox::C_PhysBox()
 {

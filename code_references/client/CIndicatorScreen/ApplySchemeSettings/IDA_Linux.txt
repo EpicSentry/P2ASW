@@ -1,0 +1,4 @@
+void __cdecl CIndicatorScreen::ApplySchemeSettings(CIndicatorScreen *const this, vgui::IScheme *pScheme)
+{
+  ;
+}

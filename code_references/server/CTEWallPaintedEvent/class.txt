@@ -1,0 +1,29 @@
+class CTEWallPaintedEvent : public CBaseTempEntity
+{
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+    public void CTEWallPaintedEvent(class CTEWallPaintedEvent & );
+    public void CTEWallPaintedEvent(char * );
+    class NetworkVar_m_hEntity
+    {
+        public void NetworkStateChanged(void * );
+        public void NetworkStateChanged(void * ,void * );
+    };
+    public class CNetworkHandleBase<CBaseEntity,CTEWallPaintedEvent::NetworkVar_m_hEntity> m_hEntity;
+    class NetworkVar_m_colorIndex
+    {
+        public void NetworkStateChanged(void * );
+        public void NetworkStateChanged(void * ,void * );
+    };
+    public class CNetworkVarBase<int,CTEWallPaintedEvent::NetworkVar_m_colorIndex> m_colorIndex;
+    class NetworkVar_m_nSegment
+    {
+        public void NetworkStateChanged(void * );
+        public void NetworkStateChanged(void * ,void * );
+    };
+    public class CNetworkVarBase<int,CTEWallPaintedEvent::NetworkVar_m_nSegment> m_nSegment;
+    public void ~CTEWallPaintedEvent();
+    public class CTEWallPaintedEvent & operator=(class CTEWallPaintedEvent & );
+    public void * __vecDelDtor(unsigned int );
+};

@@ -24,9 +24,7 @@
 extern int	g_sModelIndexFireball;		// (in combatweapon.cpp) holds the index for the fireball 
 extern int	g_sModelIndexWExplosion;	// (in combatweapon.cpp) holds the index for the underwater explosion
 extern int	g_sModelIndexSmoke;			// (in combatweapon.cpp) holds the index for the smoke cloud
-#ifndef PORTAL2_DLL
 extern ConVar    sk_plr_dmg_grenade;
-#endif
 
 #if !defined( CLIENT_DLL )
 
@@ -87,7 +85,7 @@ BEGIN_NETWORK_TABLE( CBaseGrenade, DT_BaseGrenade )
 #endif
 END_NETWORK_TABLE()
 
-LINK_ENTITY_TO_CLASS( grenade, CBaseGrenade );
+LINK_ENTITY_TO_CLASS_ALIASED( grenade, BaseGrenade );
 
 #if defined( CLIENT_DLL )
 

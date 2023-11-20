@@ -15,9 +15,9 @@
 #include "tier1/keyvalues.h"
 #include "tier1/fmtstr.h"
 
-#ifndef NO_STEAM
+#ifndef _X360
 #include "steam/steam_api.h"
-#endif // NO_STEAM
+#endif // _X360
 
 #include "matchmaking/imatchframework.h"
 #include "matchmaking/imatchsystem.h"
@@ -36,22 +36,11 @@
 
 #include "matchmaking/mm_helpers.h"
 
-#ifdef PORTAL2
-#include "matchmaking/portal2/imatchext_portal2.h"
-#endif
-
 namespace BaseModUI {
 
 class CAsyncCtxUIOnDeviceAttached;
 
 extern const tokenset_t< const char * > s_characterPortraits[];
-
-enum SelectStorageDevicePolicy_t
-{
-	STORAGE_DEVICE_ASYNC			=	( 1 << 0 ),
-	STORAGE_DEVICE_NEED_ATTRACT		=	( 1 << 1 ),
-	STORAGE_DEVICE_NEED_INVITE		=	( 1 << 2 ),
-};
 
 //=============================================================================
 //
@@ -148,10 +137,8 @@ public:
 	void RunFrame_Invite();
 
 	void Invite_Confirm();
-	bool Invite_Connecting();
+	void Invite_Connecting();
 	bool Invite_IsStorageDeviceValid();
-	void Invite_Approved();
-	void Invite_Declined();
 
 	void OnGameUIPostInit();
 
@@ -159,20 +146,15 @@ public:
 
 	void OpenFriendRequestPanel(int index, uint64 playerXuid);
 	void OpenInviteUI( char const *szInviteUiType );
-	void ExecuteOverlayCommand( char const *szCommand, char const *szErrorText = NULL );
+	void ExecuteOverlayCommand( char const *szCommand );
 
 	// Listening for match events
 	virtual void OnEvent( KeyValues *pEvent );
 
-	bool IsNetworkCableConnected();
 	bool SignedInToLive();
 	bool AnyUserSignedInToLiveWithMultiplayerDisabled();
-	bool IsUserLIVEEnabled( int nController );
-	bool AnyUserConnectedToLIVE();	// One of the players has a connection to LIVE... this doesn't mean they're allowed to play multiplayer!
-	bool IsGuestOrOfflinePlayerWhenSomePlayersAreOnline( int nSlot );
 	bool CheckAndDisplayErrorIfNotSignedInToLive( CBaseModFrame *pCallerFrame );
 	bool CheckAndDisplayErrorIfOffline( CBaseModFrame *pCallerFrame, char const *szMsg );
-	bool CanSendLiveGameInviteToUser( XUID xuid );
 
 	void DisplayOkOnlyMsgBox( CBaseModFrame *pCallerFrame, const char *szTitle, const char *szMsg );
 	CBaseModFrame * GetParentWindowForSystemMessageBox();
@@ -182,7 +164,6 @@ public:
 	bool SelectStorageDevice( ISelectStorageDeviceClient *pSelectClient );
 	void OnDeviceAttached();
 	void OnCompletedAsyncDeviceAttached( CAsyncCtxUIOnDeviceAttached * job );
-	uint32 SelectStorageDevicePolicy();
 
 	void OnGameUIHidden();
 
@@ -190,48 +171,22 @@ public:
 	float GetLookSensitivity();
 
 	bool IsXUIOpen();
-	bool IsSteamOverlayActive();
 
-	bool OpenWaitScreen( const char * messageText, float minDisplayTime = 3.0f, KeyValues *pSettings = NULL );
+	void OpenWaitScreen( const char * messageText, float minDisplayTime = 3.0f, KeyValues *pSettings = NULL, float maxDisplayTime = 0.0f );
 	void UpdateWaitPanel( const char * messageText, float minDisplayTime = 3.0f );
 	void UpdateWaitPanel( const wchar_t * messageText, float minDisplayTime = 3.0f );
-#if defined( PORTAL2_PUZZLEMAKER )
-	void UpdateWaitPanel( UGCHandle_t hFileHandle, float flCustomProgress = -1.f );
-#endif // PORTAL2_PUZZLEMAKER 
-	bool CloseWaitScreen( vgui::Panel * callbackPanel, const char * messageName );
+	void CloseWaitScreen( vgui::Panel * callbackPanel, const char * messageName );
 
 	void NeedConnectionProblemWaitScreen( void );
 	void ShowPasswordUI( char const *pchCurrentPW );
 	void FinishPasswordUI( bool bOk );
 
-	void GetDownloadableContent( char const *szContent );
-
-	enum UiAvatarImageAccessType_t
-	{
-		kAvatarImageNull,
-		kAvatarImageRequest,
-		kAvatarImageRelease
-	};
-	vgui::IImage * AccessAvatarImage( XUID playerID, UiAvatarImageAccessType_t eAccess, CGameUiAvatarImage::AvatarSize_t nAvatarSize = CGameUiAvatarImage::MEDIUM );
+	vgui::IImage * GetAvatarImage( XUID playerID );
 	char const * GetPlayerName( XUID playerID, char const *szPlayerNameSpeculative );
 
-#if !defined( NO_STEAM )
-	STEAM_CALLBACK( CUIGameData, Steam_OnGameOverlayActivated, GameOverlayActivated_t, m_CallbackGameOverlayActivated );
+#if !defined( _X360 ) && !defined( NO_STEAM )
 	STEAM_CALLBACK( CUIGameData, Steam_OnPersonaStateChanged, PersonaStateChange_t, m_CallbackPersonaStateChanged );
-	STEAM_CALLBACK( CUIGameData, Steam_OnUserStatsReceived, UserStatsReceived_t, m_CallbackUserStatsReceived );
-	STEAM_CALLBACK( CUIGameData, Steam_OnUserStatsStored, UserStatsStored_t, m_CallbackUserStatsStored );
-	bool CanInitiateConnectionToSteam();
-	bool InitiateConnectionToSteam( char const *szUserName = NULL, char const *szPwd = NULL );
-	void SetConnectionToSteamReason( char const *szReason = NULL, char const *szGameMode = NULL );
 #endif
-	int GetNumOnlineFriends() const { return m_numOnlineFriends; }
-
-	void InitiateOnlineCoopPlay( CBaseModFrame *pCaller, char const *szType, char const *szGameMode, char const *szMapName = NULL );
-	void InitiateSplitscreenPartnerDetection( const char* szGameMode, char const *szMapName = NULL );
-	bool AllowSplitscreenMainMenu();
-
-	void InitiateSinglePlayerPlay( const char *pMapName, const char *pSaveName, const char *szPlayType );
-	void InitiateSplitscreenPlay();
 
 	void ReloadScheme();
 
@@ -259,11 +214,6 @@ public:
 	CAsyncJobContext *m_pAsyncJob;
 	void ExecuteAsync( CAsyncJobContext *pAsync );
 
-	//
-	// Gamestats
-	//
-	void GameStats_ReportAction( char const *szReportAction, char const *szMapName, uint64 uiFlags );
-
 private:
 	bool IsActiveSplitScreenPlayerSpectating( void );
 
@@ -272,23 +222,17 @@ protected:
 	static bool m_bModuleShutDown;
 	bool m_CGameUIPostInit;
 
-	int m_numOnlineFriends;
-
 	float m_LookSensitivity;
 
 	float m_flShowConnectionProblemTimer;
 	float m_flTimeLastFrame;
 	bool  m_bShowConnectionProblemActive;
-	bool  m_bNeedUpdateMatchMutelist;
 
 	CUtlMap< XUID, CGameUiAvatarImage * > m_mapUserXuidToAvatar;
 	CUtlMap< XUID, CUtlString > m_mapUserXuidToName;
 
 	//XUI info
-	bool m_bXUIOpen, m_bSteamOverlayActive;
-	char m_chNotificationMode[128];
-
-	bool			m_bPendingMapVoteRequest;
+	bool m_bXUIOpen;
 
 	//storage device info
 	bool			m_bWaitingForStorageDeviceHandle;
@@ -301,23 +245,17 @@ protected:
 
 }
 
+extern ConVar x360_audio_english;
+
 extern ConVar demo_ui_enable;
 extern ConVar demo_connect_string;
+
+uint64 GetDlcInstalledMask();
 
 bool GameModeHasDifficulty( char const *szGameMode );
 bool GameModeHasRoundLimit( char const *szGameMode );
 bool GameModeIsSingleChapter( char const *szGameMode );
 char const * GameModeGetDefaultDifficulty( char const *szGameMode );
-
-#ifdef _PS3
-class IPS3SaveSteamInfoProviderUiGameData : public IPS3SaveSteamInfoProvider
-{
-public:
-	virtual void RunFrame() = 0;
-	virtual void WriteSteamStats() = 0;
-};
-IPS3SaveSteamInfoProviderUiGameData * GetPs3SaveSteamInfoProvider();
-#endif
 
 
 // 

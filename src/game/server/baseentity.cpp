@@ -2384,6 +2384,8 @@ BEGIN_DATADESC_NO_BASE( CBaseEntity )
 	DEFINE_INPUTFUNC( FIELD_STRING, "SetParentAttachment", InputSetParentAttachment ),
 	DEFINE_INPUTFUNC( FIELD_STRING, "SetParentAttachmentMaintainOffset", InputSetParentAttachmentMaintainOffset ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "ClearParent", InputClearParent ),
+	DEFINE_INPUTFUNC( FIELD_STRING, "SetLocalOrigin", InputSetLocalOrigin ),
+	DEFINE_INPUTFUNC( FIELD_STRING, "SetLocalAngles", InputSetLocalAngles ),
 	DEFINE_INPUTFUNC( FIELD_STRING, "SetDamageFilter", InputSetDamageFilter ),
 
 	DEFINE_INPUTFUNC( FIELD_VOID, "EnableDamageForces", InputEnableDamageForces ),
@@ -2398,6 +2400,15 @@ BEGIN_DATADESC_NO_BASE( CBaseEntity )
 
 	DEFINE_INPUTFUNC( FIELD_VOID, "DisableShadow", InputDisableShadow ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "EnableShadow", InputEnableShadow ),
+	
+	DEFINE_INPUTFUNC( FIELD_VOID, "DisableDraw", InputDisableDraw ),
+	DEFINE_INPUTFUNC( FIELD_VOID, "EnableDraw", InputEnableDraw ),
+
+	DEFINE_INPUTFUNC( FIELD_VOID, "DisableReceivingFlashlight", InputDisableReceivingFlashlight ),
+	DEFINE_INPUTFUNC( FIELD_VOID, "EnableReceivingFlashlight", InputEnableReceivingFlashlight),
+	
+	DEFINE_INPUTFUNC( FIELD_VOID, "DisableDrawInFastReflection", InputDisableDrawInFastReflection),
+	DEFINE_INPUTFUNC( FIELD_VOID, "EnableDrawInFastReflection", InputEnableDrawInFastReflection),
 
 	DEFINE_INPUTFUNC( FIELD_STRING, "AddOutput", InputAddOutput ),
 
@@ -4779,6 +4790,40 @@ void CBaseEntity::InputClearParent( inputdata_t &inputdata )
 	SetParent( NULL );
 }
 
+//------------------------------------------------------------------------------
+// Purpose: Input handler for setting the entities local origin
+//------------------------------------------------------------------------------
+void CBaseEntity::InputSetLocalOrigin( inputdata_t& inputdata )
+{
+	Vector tmpVec;
+
+	if (sscanf(inputdata.value.String(), "[%f %f %f]", &tmpVec[0], &tmpVec[1], &tmpVec[2]) == 0)
+	{
+		// Try sucking out 3 floats with no []s
+		sscanf(inputdata.value.String(), "%f %f %f", &tmpVec[0], &tmpVec[1], &tmpVec[2]);
+	}
+
+	// DevMsg("%s : InputSetLocalOrigin( %f %f %f )\n", GetDebugName(), tmpVec.x, tmpVec.y, tmpVec.z );
+	SetLocalOrigin(tmpVec);
+}
+
+//------------------------------------------------------------------------------
+// Purpose: Input handler for setting the entities local angles
+//------------------------------------------------------------------------------
+void CBaseEntity::InputSetLocalAngles( inputdata_t& inputdata )
+{
+	Vector tmpVec;
+
+	if (sscanf(inputdata.value.String(), "[%f %f %f]", &tmpVec[0], &tmpVec[1], &tmpVec[2]) == 0)
+	{
+		// Try sucking out 3 floats with no []s
+		sscanf(inputdata.value.String(), "%f %f %f", &tmpVec[0], &tmpVec[1], &tmpVec[2]);
+	}
+
+	// DevMsg("%s : InputSetLocalAngles( %f %f %f )\n", GetDebugName(), tmpVec.x, tmpVec.y, tmpVec.z );
+	QAngle angles(tmpVec.x, tmpVec.y, tmpVec.z);
+	SetLocalAngles(angles);
+}
 
 //------------------------------------------------------------------------------
 // Purpose : Returns velcocity of base entity.  If physically simulated gets
@@ -7522,6 +7567,48 @@ void CBaseEntity::InputDisableShadow( inputdata_t &inputdata )
 void CBaseEntity::InputEnableShadow( inputdata_t &inputdata )
 {
 	RemoveEffects( EF_NOSHADOW );
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void CBaseEntity::InputDisableReceivingFlashlight( inputdata_t& inputdata )
+{
+	AddEffects( EF_NOFLASHLIGHT );
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void CBaseEntity::InputEnableReceivingFlashlight( inputdata_t& inputdata )
+{
+	RemoveEffects( EF_NOFLASHLIGHT );
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void CBaseEntity::InputDisableDrawInFastReflection( inputdata_t& inputdata )
+{
+	RemoveEffects( EF_MARKED_FOR_FAST_REFLECTION );
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void CBaseEntity::InputEnableDrawInFastReflection( inputdata_t& inputdata )
+{
+	AddEffects( EF_MARKED_FOR_FAST_REFLECTION );
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void CBaseEntity::InputDisableDraw( inputdata_t& inputdata )
+{
+	AddEffects( EF_NODRAW );
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void CBaseEntity::InputEnableDraw( inputdata_t& inputdata )
+{
+	RemoveEffects( EF_NODRAW );
 }
 
 //-----------------------------------------------------------------------------

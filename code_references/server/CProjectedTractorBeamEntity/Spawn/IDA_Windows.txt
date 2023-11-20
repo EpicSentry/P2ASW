@@ -1,0 +1,14 @@
+void __thiscall CProjectedTractorBeamEntity::Spawn(CProjectedTractorBeamEntity *this)
+{
+  CTrigger_TractorBeam *TractorBeam; // eax
+
+  CBaseProjectedEntity::Spawn(this);
+  TractorBeam = CTrigger_TractorBeam::CreateTractorBeam(
+                  &this->m_vecStartPoint.m_Value,
+                  &this->m_vecEndPoint.m_Value,
+                  this);
+  CNetworkHandleBase<CTrigger_TractorBeam,CProjectedTractorBeamEntity::NetworkVar_m_hTractorBeamTrigger>::Set(
+    &this->m_hTractorBeamTrigger,
+    TractorBeam);
+  CBaseEntity::SetTransmitState(this, 8);
+}

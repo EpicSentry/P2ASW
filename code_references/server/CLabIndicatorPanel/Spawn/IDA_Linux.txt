@@ -1,0 +1,27 @@
+void __cdecl CLabIndicatorPanel::Spawn(CLabIndicatorPanel *const this)
+{
+  (*((void (__cdecl **)(CLabIndicatorPanel *const))this->_vptr_IHandleEntity + 26))(this);
+  CBaseEntity::Spawn(this);
+  CLabIndicatorPanel::SpawnControlPanels(this);
+  if ( !this->m_bEnabled.m_Value )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_bEnabled);
+    this->m_bEnabled.m_Value = 1;
+  }
+  CLabIndicatorPanel::ScreenVisible(this, 1);
+  if ( this->m_bCountingDown.m_Value )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_bCountingDown);
+    this->m_bCountingDown.m_Value = 0;
+  }
+  if ( this->m_bStopped.m_Value )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_bStopped);
+    this->m_bStopped.m_Value = 0;
+  }
+  if ( this->m_flTimerStart.m_Value != 0.0 )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_flTimerStart);
+    this->m_flTimerStart.m_Value = 0.0;
+  }
+}

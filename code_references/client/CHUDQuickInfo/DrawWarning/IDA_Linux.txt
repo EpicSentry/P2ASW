@@ -1,0 +1,30 @@
+void __cdecl CHUDQuickInfo::DrawWarning(CHUDQuickInfo *const this, int x, int y, CHudTexture *icon, float *const time)
+{
+  CGlobalVarsBase *v5; // esi
+  float frametime; // xmm1_4
+  float v7; // xmm0_4
+  float v8; // xmm3_4
+  double v9; // [esp+28h] [ebp-30h]
+  Color caution; // [esp+4Ch] [ebp-Ch] BYREF
+
+  v5 = gpGlobals;
+  v9 = sin((float)(8.0 * gpGlobals->curtime));
+  frametime = v5->frametime;
+  v7 = *time;
+  v8 = (float)(int)(fabs(v9) * 128.0);
+  if ( (float)(frametime * 200.0) < *time )
+    goto LABEL_4;
+  if ( v8 >= 40.0 )
+  {
+    v7 = v7 + (float)(frametime * 200.0);
+    *time = v7;
+    frametime = gpGlobals->frametime;
+LABEL_4:
+    *time = v7 - (float)(200.0 * frametime);
+    caution = GetHud(-1)->m_clrCaution;
+    caution._color[3] = (int)(float)(v8 * 255.0);
+    CHudTexture::DrawSelf(icon, x, y, &caution, 1.0);
+    return;
+  }
+  *time = 0.0;
+}

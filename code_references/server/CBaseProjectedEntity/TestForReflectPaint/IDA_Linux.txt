@@ -1,0 +1,171 @@
+void __cdecl CBaseProjectedEntity::TestForReflectPaint(CBaseProjectedEntity *const this)
+{
+  float *v2; // ebx
+  float *v3; // eax
+  float *v4; // eax
+  vec_t *v5; // eax
+  bool v6; // dl
+  vec_t v7; // xmm0_4
+  vec_t v8; // edx
+  vec_t v9; // eax
+  unsigned int m_Index; // eax
+  CBaseEntity **v11; // edx
+  unsigned int v12; // eax
+  char *v13; // edx
+  float v14; // xmm4_4
+  float v15; // xmm0_4
+  CBaseProjectedEntity *v16; // ebx
+  IHandleEntity *v17; // ebx
+  CBaseProjector *v18; // eax
+  float v19; // [esp+2Ch] [ebp-1BCh]
+  float v20; // [esp+30h] [ebp-1B8h]
+  float v21; // [esp+30h] [ebp-1B8h]
+  float v22; // [esp+40h] [ebp-1A8h]
+  float v23; // [esp+40h] [ebp-1A8h]
+  float v24; // [esp+50h] [ebp-198h]
+  float v25; // [esp+50h] [ebp-198h]
+  bool bCreateNew; // [esp+6Fh] [ebp-179h]
+  trace_t tr; // [esp+7Ch] [ebp-16Ch] BYREF
+  Ray_t ray; // [esp+D0h] [ebp-118h] BYREF
+  matrix3x4_t matRotation; // [esp+128h] [ebp-C0h] BYREF
+  CTraceFilterSimpleClassnameList traceFilter; // [esp+158h] [ebp-90h] BYREF
+  Vector vDir; // [esp+17Ch] [ebp-6Ch] BYREF
+  Vector vNewProjectedEntityOrigin; // [esp+188h] [ebp-60h] BYREF
+  Vector vOldDir; // [esp+194h] [ebp-54h] BYREF
+  Vector vOldUp; // [esp+1A0h] [ebp-48h] BYREF
+  Vector vRotAxis; // [esp+1ACh] [ebp-3Ch] BYREF
+  Vector vNewUp; // [esp+1B8h] [ebp-30h] BYREF
+  QAngle qNewProjectedEntityAngles; // [esp+1C4h] [ebp-24h] BYREF
+
+  ray.m_pWorldAxisTransform = 0;
+  v2 = (float *)(*((int (__cdecl **)(CBaseProjectedEntity *const))this->_vptr_IHandleEntity + 204))(this);
+  v3 = (float *)(*((int (__cdecl **)(CBaseProjectedEntity *const))this->_vptr_IHandleEntity + 205))(this);
+  v24 = (float)(*v3 - *v2) + (float)(*v3 - *v2);
+  v22 = (float)(v3[1] - v2[1]) + (float)(v3[1] - v2[1]);
+  v20 = (float)(v3[2] - v2[2]) + (float)(v3[2] - v2[2]);
+  v4 = (float *)(*((int (__cdecl **)(CBaseProjectedEntity *const))this->_vptr_IHandleEntity + 204))(this);
+  v25 = v24 + *v4;
+  v23 = v22 + v4[1];
+  v21 = v20 + v4[2];
+  v5 = (vec_t *)(*((int (__cdecl **)(CBaseProjectedEntity *const))this->_vptr_IHandleEntity + 204))(this);
+  v6 = 1;
+  ray.m_Delta.x = v25 - *v5;
+  ray.m_Delta.y = v23 - v5[1];
+  v7 = v21 - v5[2];
+  ray.m_IsRay = 1;
+  ray.m_pWorldAxisTransform = 0;
+  ray.m_Delta.z = v7;
+  memset(&ray.m_Extents, 0, 12);
+  memset(&ray.m_StartOffset, 0, 12);
+  if ( (float)((float)((float)(ray.m_Delta.x * ray.m_Delta.x) + (float)(ray.m_Delta.y * ray.m_Delta.y))
+             + (float)(v7 * v7)) == 0.0 )
+    v6 = 0;
+  ray.m_IsSwept = v6;
+  ray.m_Start.x = *v5;
+  v8 = v5[1];
+  v9 = v5[2];
+  ray.m_Start.y = v8;
+  ray.m_Start.z = v9;
+  CTraceFilterSimpleClassnameList::CTraceFilterSimpleClassnameList(&traceFilter, this, 0);
+  UTil_ProjectedEntity_Trace_Filter(&traceFilter);
+  UTIL_ClearTrace(&tr);
+  (*(void (__cdecl **)(IEngineTrace *, Ray_t *, int, CTraceFilterSimpleClassnameList *, trace_t *))(*(_DWORD *)enginetrace
+                                                                                                  + 20))(
+    enginetrace,
+    &ray,
+    16395,
+    &traceFilter,
+    &tr);
+  if ( r_visualizetraces.m_pParent->m_Value.m_nValue )
+    DebugDrawLine(&tr.startpos, &tr.endpos, 255, 0, 0, 1, -1.0);
+  if ( UTIL_Paint_Reflect(&tr, &vNewProjectedEntityOrigin, &vDir, REFLECT_POWER) )
+  {
+    (*((void (__cdecl **)(CBaseProjectedEntity *const, Vector *, _DWORD, Vector *))this->_vptr_IHandleEntity + 135))(
+      this,
+      &vOldDir,
+      0,
+      &vOldUp);
+    vRotAxis.x = (float)(vOldDir.y * vDir.z) - (float)(vDir.y * vOldDir.z);
+    vRotAxis.y = (float)(vDir.x * vOldDir.z) - (float)(vOldDir.x * vDir.z);
+    v14 = (float)((float)(vDir.x * vOldDir.x) + (float)(vOldDir.y * vDir.y)) + (float)(vDir.z * vOldDir.z);
+    v15 = 180.0;
+    vRotAxis.z = (float)(vOldDir.x * vDir.y) - (float)(vOldDir.y * vDir.x);
+    if ( v14 >= -1.0 )
+    {
+      v15 = 0.0;
+      if ( v14 <= 1.0 )
+      {
+        v19 = acosf((float)((float)(vDir.x * vOldDir.x) + (float)(vOldDir.y * vDir.y)) + (float)(vDir.z * vOldDir.z));
+        v15 = v19 * 57.295776;
+      }
+    }
+    MatrixBuildRotationAboutAxis(&vRotAxis, v15, &matRotation);
+    VectorRotate(&vOldUp.x, &matRotation, &vNewUp.x);
+    VectorAngles(&vDir, &vNewUp, &qNewProjectedEntityAngles);
+    v16 = (CBaseProjectedEntity *)CBaseHandle::Get(&this->m_hChildSegment.m_Value);
+    bCreateNew = v16 == 0;
+    if ( v16 )
+      goto LABEL_22;
+    v17 = (IHandleEntity *)(*((int (__cdecl **)(CBaseProjectedEntity *const))this->_vptr_IHandleEntity + 210))(this);
+    if ( v17 != CBaseHandle::Get(&this->m_hChildSegment.m_Value) )
+    {
+      CBaseEntity::NetworkStateChanged(this, &this->m_hChildSegment);
+      if ( v17 )
+      {
+        this->m_hChildSegment.m_Value.m_Index = *(_DWORD *)(*((int (__cdecl **)(IHandleEntity *))v17->_vptr_IHandleEntity
+                                                            + 3))(v17);
+        v16 = (CBaseProjectedEntity *)CBaseHandle::Get(&this->m_hChildSegment.m_Value);
+LABEL_22:
+        v18 = (CBaseProjector *)CBaseHandle::Get(&this->m_hOwnerEntity.m_Value);
+        CBaseProjectedEntity::RecursiveProjection(
+          v16,
+          bCreateNew,
+          v18,
+          0,
+          &vNewProjectedEntityOrigin,
+          &qNewProjectedEntityAngles,
+          this->m_iMaxRemainingRecursions.m_Value - 1,
+          this->m_bCreatePlacementHelper);
+        goto LABEL_13;
+      }
+      this->m_hChildSegment.m_Value.m_Index = -1;
+    }
+    v16 = (CBaseProjectedEntity *)CBaseHandle::Get(&this->m_hChildSegment.m_Value);
+    goto LABEL_22;
+  }
+  m_Index = this->m_hChildSegment.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v11 = (CBaseEntity **)((char *)g_pEntityList + 24 * (unsigned __int16)m_Index);
+    if ( v11[2] == (CBaseEntity *)HIWORD(m_Index) )
+    {
+      if ( v11[1] )
+      {
+        UTIL_Remove(v11[1]);
+        v12 = this->m_hChildSegment.m_Value.m_Index;
+        if ( v12 != -1 )
+        {
+          v13 = (char *)g_pEntityList + 24 * (unsigned __int16)v12;
+          if ( *((_DWORD *)v13 + 2) == HIWORD(v12) )
+          {
+            if ( *((_DWORD *)v13 + 1) )
+            {
+              CBaseEntity::NetworkStateChanged(this, &this->m_hChildSegment);
+              this->m_hChildSegment.m_Value.m_Index = -1;
+            }
+          }
+        }
+      }
+    }
+  }
+LABEL_13:
+  traceFilter.m_PassClassnames.m_Size = 0;
+  traceFilter._vptr_ITraceFilter = (int (**)(...))&off_BBE2C8;
+  if ( traceFilter.m_PassClassnames.m_Memory.m_nGrowSize >= 0 )
+  {
+    if ( traceFilter.m_PassClassnames.m_Memory.m_pMemory )
+      (*(void (__cdecl **)(_DWORD, const char **))(*g_pMemAlloc + 8))(
+        g_pMemAlloc,
+        traceFilter.m_PassClassnames.m_Memory.m_pMemory);
+  }
+}

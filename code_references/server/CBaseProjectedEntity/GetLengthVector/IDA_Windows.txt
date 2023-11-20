@@ -1,0 +1,10 @@
+Vector *__thiscall CBaseProjectedEntity::GetLengthVector(CBaseProjectedEntity *this, Vector *result)
+{
+  Vector *v2; // eax
+
+  v2 = result;
+  result->x = this->m_vecEndPoint.m_Value.x - this->m_vecStartPoint.m_Value.x;
+  result->y = this->m_vecEndPoint.m_Value.y - this->m_vecStartPoint.m_Value.y;
+  result->z = this->m_vecEndPoint.m_Value.z - this->m_vecStartPoint.m_Value.z;
+  return v2;
+}

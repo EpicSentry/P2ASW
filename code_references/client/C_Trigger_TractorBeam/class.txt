@@ -1,0 +1,109 @@
+class C_Trigger_TractorBeam : public C_BaseVPhysicsTrigger, public IMotionEvent, public ITriggerTractorBeamAutoList
+{
+public:
+	DECLARE_CLASS( C_Trigger_TractorBeam, C_BaseVPhysicsTrigger )
+	DECLARE_PREDICTABLE();
+	DECLARE_CLIENTCLASS();
+	
+    class C_BaseEntity * GetEntity();
+    void C_Trigger_TractorBeam();
+    void ~C_Trigger_TractorBeam();
+    void Spawn();
+    void OnNewParticleEffect(char * ,class CNewParticleEffect * );
+    int DrawModel(int ,struct RenderableInstance_t & );
+    bool ShouldDraw();
+    void UpdateOnRemove();
+    void OnDataChanged(enum DataUpdateType_t );
+    class C_BasePlayer * GetPredictionOwner();
+    bool ShouldPredict();
+    void UpdatePartitionListEntry();
+    void StartTouch(class C_BaseEntity * );
+    void EndTouch(class C_BaseEntity * );
+    void PhysicsSimulate();
+    
+	IMotionEvent::simresult_e Simulate(class IPhysicsMotionController * ,class IPhysicsObject * ,float ,class Vector & ,class Vector & );
+    
+	void CalculateFrameMovement(class IPhysicsObject * ,class C_BaseEntity * ,float ,class Vector & ,class Vector & );
+    void UpdateBeam(class Vector & ,class Vector & ,float );
+    void SetDirection(class Vector & ,class Vector & );
+    
+	RenderableTranslucencyType_t ComputeTranslucencyType();
+    float GetSpeed();
+    void RecvProxy_Start(class CRecvProxyData * ,void * ,void * );
+    void RecvProxy_End(class CRecvProxyData * ,void * ,void * );
+    void SetProxyEntity(class C_ProjectedTractorBeamEntity * );
+    
+	Vector GetForceDirection();
+    Vector GetStartPoint();
+    Vector GetEndPoint();
+	
+    float GetBeamRadius();
+    float GetLinearForce();
+    float GetLinearLimit();
+	
+    int GetLastUpdateFrame();
+	
+    bool HasGravityScale();
+    bool HasAirDensity();
+    bool HasLinearLimit();
+    bool HasLinearScale();
+    bool HasAngularLimit();
+    bool HasAngularScale();
+    bool HasLinearForce();
+    bool IsReversed();
+    bool IsFromPortal();
+    bool IsToPortal();
+	
+    void GetToolRecordingState(class KeyValues * );
+    void RestoreToToolRecordedState(class KeyValues * );
+    bool GetSoundSpatialization(struct SpatializationInfo_t & );
+    void RemoveDeadBlobs();
+    void RemoveChangedBeamBlobs();
+    void RemoveAllBlobsFromBeam();
+    class CUtlVector<C_PaintBlob *,CUtlMemory<C_PaintBlob *,int> > m_blobs;
+	
+protected:
+    
+	void CreateParticles();
+    void DrawColumn(class IMaterial * ,class Vector & ,class Vector & ,float ,class Vector & ,class Vector & ,float ,float ,bool ,bool ,float );
+    void DrawColumnSegment(class CMeshBuilder & ,class Vector & ,class Vector & ,float ,class Vector & ,class Vector & ,float ,float ,float ,int );
+    
+	Vector m_vStart;
+    Vector m_vEnd;
+	
+    QAngle m_linearForceAngles;
+	
+    float m_linearForce;
+    float m_flRadius;
+    float m_gravityScale;
+    float m_addAirDensity;
+    float m_linearLimit;
+    float m_linearLimitDelta;
+    float m_linearLimitTime;
+    float m_linearLimitStart;
+    float m_linearLimitStartTime;
+    float m_linearScale;
+    float m_angularLimit;
+    float m_angularScale;
+	
+    bool m_bReversed;
+    bool m_bFromPortal;
+    bool m_bToPortal;
+    bool m_bDisablePlayerMove;
+    bool m_bRecreateParticles;
+	
+    IMaterial *m_pMaterial1;
+    IMaterial *m_pMaterial2;
+    IMaterial *m_pMaterial3;
+	
+    CHandle<C_ProjectedTractorBeamEntity> m_hProxyEntity;
+    
+	CUtlReference<CNewParticleEffect> m_hCoreEffect;
+    	
+	IPhysicsMotionController *m_pController;
+	
+private:
+	float m_flStartTime;
+    int m_nLastUpdateFrame;
+	
+};

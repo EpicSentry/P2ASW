@@ -1,0 +1,71 @@
+char __cdecl UTIL_Paint_Reflect(const CGameTrace *tr, Vector *vStart, Vector *vDir, PaintPowerType reflectPower)
+{
+  CBaseEntity *m_pEnt; // ecx
+  cplane_t *p_plane; // esi
+  Vector *p_endpos; // edi
+  float y; // xmm5_4
+  float x; // xmm1_4
+  float z; // xmm6_4
+  float v10; // xmm2_4
+  float v11; // xmm3_4
+  float v12; // xmm0_4
+  Vector *v13; // eax
+  float v14; // xmm1_4
+  float v15; // xmm0_4
+  Vector vecReflect; // [esp+Ch] [ebp-18h] BYREF
+  Vector vecIn; // [esp+18h] [ebp-Ch] BYREF
+
+  if ( !engine->HasPaintmap(engine) )
+    return 0;
+  m_pEnt = tr->m_pEnt;
+  if ( !m_pEnt )
+    return 0;
+  if ( !CBaseEntity::IsBSPModel(m_pEnt) )
+    return 0;
+  p_plane = &tr->plane;
+  p_endpos = &tr->endpos;
+  if ( UTIL_Paint_TracePower(tr->m_pEnt, &tr->endpos, &tr->plane.normal) != reflectPower )
+    return 0;
+  vecIn.x = p_endpos->x - tr->startpos.x;
+  vecIn.y = tr->endpos.y - tr->startpos.y;
+  vecIn.z = tr->endpos.z - tr->startpos.z;
+  vecReflect = vecIn;
+  VectorNormalize(&vecReflect);
+  y = tr->plane.normal.y;
+  x = p_plane->normal.x;
+  z = tr->plane.normal.z;
+  if ( (float)((float)((float)(y * vecReflect.y) + (float)(p_plane->normal.x * vecReflect.x)) + (float)(z * vecReflect.z)) <= -0.99000001 )
+    return 0;
+  v10 = vecIn.x;
+  vStart->x = p_endpos->x;
+  v11 = vecIn.y;
+  vStart->y = tr->endpos.y;
+  vStart->z = tr->endpos.z;
+  v12 = (float)((float)((float)(x * v10) + (float)(y * v11)) + (float)(z * vecIn.z)) * 2.0;
+  vecReflect.x = v10 - (float)(x * v12);
+  vecReflect.y = v11 - (float)(y * v12);
+  vecReflect.z = vecIn.z - (float)(z * v12);
+  v13 = Vector::Normalized(&vecReflect, &vecIn);
+  vDir->x = v13->x;
+  vDir->y = v13->y;
+  v14 = v13->z;
+  vDir->z = v14;
+  v15 = (float)((float)(p_plane->normal.x + tr->plane.normal.y) * 0.0) + tr->plane.normal.z;
+  if ( v14 <= 0.1 || v15 <= 0.0 || v15 >= 1.0 )
+  {
+    if ( v14 < -0.1 && v15 > 0.0 && v15 < 1.0 )
+    {
+      vDir->z = FLOAT_N1_0;
+      vDir->y = 0.0;
+      vDir->x = 0.0;
+    }
+    return 1;
+  }
+  else
+  {
+    vDir->z = FLOAT_1_0;
+    vDir->y = 0.0;
+    vDir->x = 0.0;
+    return 1;
+  }
+}

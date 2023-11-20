@@ -1,0 +1,24 @@
+float __cdecl CTrigger_TractorBeam::GetLinearLimit(CTrigger_TractorBeam *const this)
+{
+  float m_Value; // xmm1_4
+  float v2; // xmm0_4
+
+  m_Value = this->m_linearLimitTime.m_Value;
+  if ( m_Value == 0.0 )
+  {
+    return this->m_linearLimit.m_Value;
+  }
+  else
+  {
+    v2 = gpGlobals->curtime - this->m_linearLimitStartTime.m_Value;
+    if ( v2 < m_Value )
+      return (float)((float)(v2 / m_Value) * (float)(this->m_linearLimit.m_Value - this->m_linearLimitStart.m_Value))
+           + this->m_linearLimitStart.m_Value;
+    if ( m_Value != 0.0 )
+    {
+      CBaseEntity::NetworkStateChanged(this, &this->m_linearLimitTime);
+      this->m_linearLimitTime.m_Value = 0.0;
+    }
+    return this->m_linearLimit.m_Value;
+  }
+}

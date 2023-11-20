@@ -1,0 +1,4 @@
+class CLaserVictimLess
+{
+    public bool Less(struct LaserVictimInfo_t & ,struct LaserVictimInfo_t & ,void * );
+};

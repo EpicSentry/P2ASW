@@ -1,0 +1,23 @@
+void __cdecl CBaseProjector::SetTransmit(CBaseProjector *const this, CCheckTransmitInfo *pInfo, bool bAlways)
+{
+  unsigned int m_Index; // eax
+  char *v4; // edx
+  int v5; // eax
+
+  CBaseAnimating::SetTransmit(this, pInfo, bAlways);
+  m_Index = this->m_hFirstChild.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v4 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v4 + 2) == HIWORD(m_Index) )
+    {
+      v5 = *((_DWORD *)v4 + 1);
+      if ( v5 )
+        (*(void (__thiscall **)(CBaseEntityList *, int, CCheckTransmitInfo *, bool))(*(_DWORD *)v5 + 92))(
+          g_pEntityList,
+          v5,
+          pInfo,
+          bAlways);
+    }
+  }
+}

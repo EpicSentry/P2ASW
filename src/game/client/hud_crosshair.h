@@ -26,7 +26,7 @@ class CHudCrosshair : public CHudElement, public vgui::Panel
 {
 	DECLARE_CLASS_SIMPLE( CHudCrosshair, vgui::Panel );
 public:
-	CHudCrosshair( const char *pElementName );
+	explicit CHudCrosshair( const char *pElementName );
 
 	void			SetCrosshairAngle( const QAngle& angle );
 	void			SetCrosshair( CHudTexture *texture, const Color& clr );
@@ -52,9 +52,10 @@ private:
 	CPanelAnimationVar( bool, m_bHideCrosshair, "never_draw", "false" );
 };
 
-
+#if !defined( CSTRIKE15 )
 // Enable/disable crosshair rendering.
 extern ConVar crosshair;
+#endif
 
 
 #endif // HUD_CROSSHAIR_H

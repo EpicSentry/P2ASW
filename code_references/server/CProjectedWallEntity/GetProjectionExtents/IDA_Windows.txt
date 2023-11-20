@@ -1,0 +1,7 @@
+void __thiscall CProjectedWallEntity::GetProjectionExtents(
+        CProjectedWallEntity *this,
+        Vector *outMins,
+        Vector *outMaxs)
+{
+  CProjectedWallEntity::GetExtents(this, outMins, outMaxs, 0.5);
+}

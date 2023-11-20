@@ -1,0 +1,4 @@
+void __thiscall CPropIndicatorPanel::SetTimerDuration(CPropIndicatorPanel *this, float flDuration)
+{
+  this->m_flTimerDuration = flDuration;
+}

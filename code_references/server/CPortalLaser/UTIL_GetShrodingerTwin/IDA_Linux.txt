@@ -1,0 +1,24 @@
+CPropWeightedCube *__cdecl UTIL_GetSchrodingerTwin(CBaseEntity *pEntity)
+{
+  bool IsSchrodinger; // al
+  CPropWeightedCube *v2; // ecx
+  unsigned int m_Index; // edx
+  char *v4; // eax
+
+  IsSchrodinger = UTIL_IsSchrodinger(pEntity);
+  v2 = 0;
+  if ( IsSchrodinger )
+  {
+    if ( pEntity )
+    {
+      m_Index = pEntity[2].m_pBlocker.m_Index;
+      if ( m_Index != -1 )
+      {
+        v4 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+        if ( *((_DWORD *)v4 + 2) == HIWORD(m_Index) )
+          return (CPropWeightedCube *)*((_DWORD *)v4 + 1);
+      }
+    }
+  }
+  return v2;
+}

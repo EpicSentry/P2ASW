@@ -1,0 +1,21 @@
+void __cdecl CPropIndicatorPanel::InputCheck(CPropIndicatorPanel *const this, inputdata_t *const indata)
+{
+  unsigned int m_Index; // eax
+  char *v3; // edx
+  CLabIndicatorPanel *v4; // eax
+  BASEPTR v5; // [esp+28h] [ebp-10h] BYREF
+
+  m_Index = this->m_hIndicatorPanel.m_Index;
+  if ( m_Index != -1 )
+  {
+    v3 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v3 + 2) == HIWORD(m_Index) )
+    {
+      v4 = (CLabIndicatorPanel *)*((_DWORD *)v3 + 1);
+      if ( v4 )
+        CLabIndicatorPanel::SetChecked(v4, 1);
+    }
+  }
+  CBaseEntity::ThinkSet(&v5, this, 0LL, 0.0, 0);
+  CPropIndicatorPanel::ToggleIndicatorLights(this, 1);
+}

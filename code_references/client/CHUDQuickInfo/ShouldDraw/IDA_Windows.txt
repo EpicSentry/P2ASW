@@ -1,0 +1,34 @@
+bool __thiscall CHUDQuickInfo::ShouldDraw(CHUDQuickInfo *this)
+{
+  IClientMode *ClientMode; // eax
+  C_BasePlayer *LocalPlayer; // esi
+  C_BasePlayer_vtbl *v5; // ebx
+  int v6; // eax
+
+  if ( !this->m_icon_rb )
+    return 0;
+  if ( !this->m_icon_rbn )
+    return 0;
+  if ( !this->m_icon_lb )
+    return 0;
+  if ( !this->m_icon_lbn )
+    return 0;
+  ClientMode = GetClientMode();
+  if ( !ClientMode->ShouldDrawCrosshair(ClientMode) )
+    return 0;
+  LocalPlayer = C_BasePlayer::GetLocalPlayer(-1);
+  if ( !LocalPlayer )
+    return 0;
+  if ( !crosshair.m_pParent->m_Value.m_nValue )
+    return 0;
+  if ( IsRadialMenuOpen() )
+    return 0;
+  v5 = LocalPlayer->C_BaseCombatCharacter::C_BaseFlex::C_BaseAnimatingOverlay::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable;
+  v6 = engine->GetActiveSplitScreenPlayerSlot(engine);
+  if ( v5->GetPlayerRenderMode(LocalPlayer, v6) == PLAYER_RENDER_THIRDPERSON
+    || C_BasePlayer::GetViewEntity(LocalPlayer) && C_BasePlayer::GetViewEntity(LocalPlayer) != LocalPlayer )
+  {
+    return 0;
+  }
+  return CHudElement::ShouldDraw(this) && !engine->IsDrawingLoadingImage(engine);
+}

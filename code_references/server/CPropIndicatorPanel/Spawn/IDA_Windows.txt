@@ -1,0 +1,9 @@
+void __thiscall CPropIndicatorPanel::Spawn(CPropIndicatorPanel *this)
+{
+  this->Precache(this);
+  CCollisionProperty::SetSolidFlags(&this->m_Collision, this->m_Collision.m_usSolidFlags.m_Value | 4);
+  CBaseEntity::SetMoveType(this, MOVETYPE_NONE, MOVECOLLIDE_DEFAULT);
+  this->m_iEFlags |= 0x80u;
+  CBaseEntity::DispatchUpdateTransmitState(this);
+  CPropIndicatorPanel::CreateIndicatorPanel(this);
+}

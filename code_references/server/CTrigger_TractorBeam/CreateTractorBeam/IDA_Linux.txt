@@ -1,0 +1,57 @@
+CTrigger_TractorBeam *__cdecl CTrigger_TractorBeam::CreateTractorBeam(
+        const Vector *const vStart,
+        const Vector *const vEnd,
+        CBaseEntity *pOwner)
+{
+  CBaseEntity *EntityByName; // eax
+  CTrigger_TractorBeam *v4; // ebx
+  int v5; // edi
+  unsigned int m_Index; // eax
+  char *v7; // edx
+  int v8; // eax
+  const Vector *v9; // eax
+  unsigned int v10; // eax
+  CBaseEntity *v11; // edx
+  char *v12; // ecx
+  Vector *vEndPoint; // [esp+1Ch] [ebp-1Ch]
+
+  EntityByName = CreateEntityByName("trigger_tractorbeam", -1, 1);
+  v4 = (CTrigger_TractorBeam *)EntityByName;
+  if ( EntityByName )
+  {
+    v5 = -1082130432;
+    (*((void (__cdecl **)(CBaseEntity *, CBaseEntity *))EntityByName->_vptr_IHandleEntity + 19))(EntityByName, pOwner);
+    (*((void (__cdecl **)(CTrigger_TractorBeam *))v4->_vptr_IHandleEntity + 26))(v4);
+    m_Index = pOwner->m_hOwnerEntity.m_Value.m_Index;
+    if ( m_Index != -1 )
+    {
+      v7 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+      if ( *((_DWORD *)v7 + 2) == HIWORD(m_Index) )
+      {
+        v8 = *((_DWORD *)v7 + 1);
+        if ( v8 )
+          v5 = *(_DWORD *)(v8 + 1236);
+      }
+    }
+    vEndPoint = (Vector *)(*((int (__thiscall **)(CBaseEntityList *, CBaseEntity *))pOwner->_vptr_IHandleEntity + 205))(
+                            g_pEntityList,
+                            pOwner);
+    v9 = (const Vector *)(*((int (__cdecl **)(CBaseEntity *))pOwner->_vptr_IHandleEntity + 204))(pOwner);
+    CTrigger_TractorBeam::UpdateBeam(v4, v9, vEndPoint, *(float *)&v5);
+    v10 = v4->m_hProxyEntity.m_Value.m_Index;
+    v11 = 0;
+    if ( v10 != -1 )
+    {
+      v12 = (char *)g_pEntityList + 24 * (unsigned __int16)v10;
+      if ( *((_DWORD *)v12 + 2) == HIWORD(v10) )
+        v11 = (CBaseEntity *)*((_DWORD *)v12 + 1);
+    }
+    if ( pOwner != v11 )
+    {
+      CBaseEntity::NetworkStateChanged(v4, &v4->m_hProxyEntity);
+      v4->m_hProxyEntity.m_Value.m_Index = *(_DWORD *)(*((int (__cdecl **)(CBaseEntity *))pOwner->_vptr_IHandleEntity + 3))(pOwner);
+    }
+    DispatchSpawn(v4, 1);
+  }
+  return v4;
+}

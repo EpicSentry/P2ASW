@@ -1,0 +1,12 @@
+void __thiscall CProjectedTractorBeamEntity::GetProjectionExtents(
+        CProjectedTractorBeamEntity *this,
+        Vector *outMins,
+        Vector *outMaxs)
+{
+  outMins->x = FLOAT_N2_0;
+  outMins->y = FLOAT_N2_0;
+  outMins->z = 0.0;
+  outMaxs->x = FLOAT_2_0;
+  outMaxs->y = FLOAT_2_0;
+  outMaxs->z = 0.0;
+}

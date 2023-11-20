@@ -1,0 +1,34 @@
+void __cdecl CPropMonsterBox::OnPhysGunDrop(
+        CPropMonsterBox *const this,
+        CBasePlayer *pPhysGunUser,
+        PhysGunDrop_t reason)
+{
+  int m_nDeferredTransform; // eax
+  int v4; // eax
+
+  this->m_bHeld = 0;
+  CPhysicsProp::OnPhysGunDrop((CPhysicsProp *const)this, pPhysGunUser, reason);
+  if ( !this->m_bIsShortcircuit )
+  {
+    m_nDeferredTransform = this->m_nDeferredTransform;
+    if ( m_nDeferredTransform )
+    {
+      if ( m_nDeferredTransform == 1 )
+      {
+        CPropMonsterBox::BecomeBox(this, 1);
+        this->m_nDeferredTransform = 0;
+      }
+      else
+      {
+        if ( m_nDeferredTransform == 2 )
+          CPropMonsterBox::BecomeMonster(this, 1);
+        this->m_nDeferredTransform = 0;
+      }
+    }
+    if ( !this->m_bForcedAsBox )
+    {
+      v4 = CBaseAnimating::LookupSequence(this, "hermit_out");
+      CBaseAnimating::ResetSequence(this, v4);
+    }
+  }
+}

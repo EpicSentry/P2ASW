@@ -1,0 +1,4 @@
+void __cdecl CPropMonsterBox::InputBecomeShortcircuit(CPropMonsterBox *const this, inputdata_t *const inputdata)
+{
+  CPropMonsterBox::BecomeShortcircuit(this);
+}

@@ -1,0 +1,5 @@
+void __cdecl C_PropTractorBeamProjector::OnToolStartRecording(C_PropTractorBeamProjector *const this)
+{
+  if ( this->m_bEffectsActive )
+    C_PropTractorBeamProjector::CreateEffect(this);
+}

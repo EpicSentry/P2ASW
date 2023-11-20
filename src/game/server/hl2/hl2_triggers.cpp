@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -6,7 +6,6 @@
 
 #include "cbase.h"
 #include "weapon_physcannon.h"
-#include "hl2_player.h"
 #include "saverestore_utlvector.h"
 #include "triggers.h"
 
@@ -245,7 +244,6 @@ void CTriggerWeaponDissolve::DissolveThink( void )
 				CreateBeam( m_pConduitPoints[i]->GetAbsOrigin(), pWeapon, 4.0f );
 			}
 
-			PhysCannonBeginUpgrade( pWeapon );
 			m_OnChargingPhyscannon.FireOutput( this, this );
 
 			EmitSound( "WeaponDissolve.Beam" );

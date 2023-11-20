@@ -1,0 +1,34 @@
+FizzlerMultiOriginSoundPlayer *__usercall FizzlerMultiOriginSoundPlayer::Create@<eax>(
+        int a1@<edi>,
+        IRecipientFilter *filter)
+{
+  FizzlerMultiOriginSoundPlayer *result; // eax
+  FizzlerMultiOriginSoundPlayer *v3; // esi
+  CSoundEnvelopeController *Controller; // edi
+  signed int m_pPev; // eax
+  int v6; // eax
+
+  result = (FizzlerMultiOriginSoundPlayer *)CreateEntityByName("fizzler_multiorigin_sound_player", -1, 1);
+  v3 = result;
+  if ( result )
+  {
+    ((void (__thiscall *)(FizzlerMultiOriginSoundPlayer *, int))result->Spawn)(result, a1);
+    Controller = CSoundEnvelopeController::GetController();
+    m_pPev = (signed int)v3->m_Network.m_pPev;
+    if ( m_pPev )
+      m_pPev = (signed int)(m_pPev - (unsigned int)gpGlobals->pEdicts) >> 4;
+    v6 = ((int (__thiscall *)(CSoundEnvelopeController *, IRecipientFilter *, signed int))Controller->SoundCreate)(
+           Controller,
+           filter,
+           m_pPev);
+    v3->m_pSound = (CSoundPatch *)v6;
+    ((void (__thiscall *)(CSoundEnvelopeController *, int, _DWORD, _DWORD, _DWORD))Controller->Play)(
+      Controller,
+      v6,
+      LODWORD(FLOAT_1_0),
+      LODWORD(FLOAT_100_0),
+      0);
+    return v3;
+  }
+  return result;
+}

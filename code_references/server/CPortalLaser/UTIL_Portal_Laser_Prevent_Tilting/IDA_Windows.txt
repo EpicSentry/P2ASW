@@ -1,0 +1,8 @@
+void __cdecl UTIL_Portal_Laser_Prevent_Tilting(Vector *vDirection)
+{
+  if ( COERCE_FLOAT(LODWORD(vDirection->z) & _mask__AbsFloat_) < 0.1 )
+  {
+    vDirection->z = 0.0;
+    VectorNormalize(vDirection);
+  }
+}

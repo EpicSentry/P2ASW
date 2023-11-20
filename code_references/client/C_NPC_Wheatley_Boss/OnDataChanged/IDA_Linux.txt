@@ -1,0 +1,11 @@
+void __cdecl C_NPC_Wheatley_Boss::OnDataChanged(C_NPC_Wheatley_Boss *const this, DataUpdateType_t updateType)
+{
+  C_AI_BaseNPC::OnDataChanged(this, updateType);
+  if ( updateType == DATA_UPDATE_CREATED )
+  {
+    (*((void (__cdecl **)(C_NPC_Wheatley_Boss *const, int))this->_vptr_IHandleEntity + 160))(this, -996040704);
+    this->m_mouth.m_needsEnvelope = 1;
+    this->m_flMouthAmount = 0.0;
+    this->m_flInvDim = 0.0;
+  }
+}

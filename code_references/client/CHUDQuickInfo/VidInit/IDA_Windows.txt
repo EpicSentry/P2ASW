@@ -1,0 +1,17 @@
+void __thiscall CHUDQuickInfo::VidInit(CHUDQuickInfo *this)
+{
+  CHudIcons *v2; // eax
+  CHudIcons *v3; // eax
+  CHudIcons *v4; // eax
+  CHudIcons *v5; // eax
+
+  this->Init(this);
+  v2 = HudIcons();
+  this->m_icon_rb = CHudIcons::GetIcon(v2, "portal_crosshair_right_valid");
+  v3 = HudIcons();
+  this->m_icon_lb = CHudIcons::GetIcon(v3, "portal_crosshair_left_valid");
+  v4 = HudIcons();
+  this->m_icon_rbn = CHudIcons::GetIcon(v4, "portal_crosshair_right_invalid");
+  v5 = HudIcons();
+  this->m_icon_lbn = CHudIcons::GetIcon(v5, "portal_crosshair_left_invalid");
+}

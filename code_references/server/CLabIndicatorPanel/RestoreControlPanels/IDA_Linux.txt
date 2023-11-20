@@ -1,0 +1,17 @@
+void __cdecl CLabIndicatorPanel::RestoreControlPanels(CLabIndicatorPanel *const this)
+{
+  unsigned int m_Index; // eax
+  CBaseEntity **v2; // edx
+
+  m_Index = this->m_hScreen.m_Index;
+  if ( m_Index != -1 )
+  {
+    v2 = (CBaseEntity **)((char *)g_pEntityList + 24 * (unsigned __int16)m_Index);
+    if ( v2[2] == (CBaseEntity *)HIWORD(m_Index) )
+    {
+      if ( v2[1] )
+        UTIL_RemoveImmediate(v2[1]);
+    }
+  }
+  CLabIndicatorPanel::SpawnControlPanels(this);
+}

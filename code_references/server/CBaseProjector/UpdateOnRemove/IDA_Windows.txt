@@ -1,0 +1,28 @@
+void __thiscall CBaseProjector::UpdateOnRemove(CBaseProjector *this)
+{
+  int m_Size; // ecx
+  int v3; // eax
+
+  m_Size = s_AllProjectors.m_Size;
+  v3 = 0;
+  if ( s_AllProjectors.m_Size > 0 )
+  {
+    while ( s_AllProjectors.m_Memory.m_pMemory[v3] != this )
+    {
+      if ( ++v3 >= s_AllProjectors.m_Size )
+        goto LABEL_10;
+    }
+    if ( v3 != -1 && s_AllProjectors.m_Size > 0 )
+    {
+      if ( v3 != s_AllProjectors.m_Size - 1 )
+      {
+        s_AllProjectors.m_Memory.m_pMemory[v3] = s_AllProjectors.m_Memory.m_pMemory[s_AllProjectors.m_Size - 1];
+        m_Size = s_AllProjectors.m_Size;
+      }
+      s_AllProjectors.m_Size = m_Size - 1;
+    }
+  }
+LABEL_10:
+  CBaseProjector::Cleanup(this);
+  CBaseEntity::UpdateOnRemove(this);
+}

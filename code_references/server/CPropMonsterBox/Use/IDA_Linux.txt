@@ -1,0 +1,16 @@
+void __cdecl CPropMonsterBox::Use(
+        CPropMonsterBox *const this,
+        CBaseEntity *pActivator,
+        CBaseEntity *pCaller,
+        USE_TYPE useType,
+        float value)
+{
+  if ( pActivator )
+  {
+    if ( (*((unsigned __int8 (__cdecl **)(CBaseEntity *))pActivator->_vptr_IHandleEntity + 86))(pActivator) )
+      (*((void (__cdecl **)(CBaseEntity *, CPropMonsterBox *const, int))pActivator->_vptr_IHandleEntity + 443))(
+        pActivator,
+        this,
+        1);
+  }
+}

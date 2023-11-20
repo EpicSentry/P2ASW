@@ -35,8 +35,7 @@ private:
 
 public:
 	unsigned char GetLinkageGroupID() { return m_iPortalLinkageGroupID; }
-	void SetLinkageGroupID( int ID ) { m_iPortalLinkageGroupID = ID; }
-	unsigned char m_iPortalLinkageGroupID; //which portal linkage group this gun is tied to, usually set by mapper, or inherited from owning player's index
+	void SetLinkageGroupID( int iNewID );
 	
 	// HACK HACK! Used to make the gun visually change when going through a cleanser!
 	CNetworkVar( float,	m_fEffectsMaxSize1 );
@@ -88,6 +87,9 @@ public:
 
 	virtual bool PreThink( void );
 	virtual void Think( void );
+	
+	void GunEffectsThink( void );
+	void TogglePotatosThink( void );
 
 	void OpenProngs( bool bOpenProngs );
 	
@@ -106,20 +108,17 @@ public:
 
 	bool TraceFirePortal( const Vector &vTraceStart, const Vector &vDirection, bool bPortal2, PortalPlacedBy_t ePlacedBy, TracePortalPlacementInfo_t &placementInfo );
 	PortalPlacementResult_t FirePortal( bool bPortal2, Vector *pVector = 0 );
-
-	// FIXME:
-	//{
-	void PortalPlaced( void ) {}
-	void UpdatePortalAssociation( void ) {}
-	//}
+	
+	void PortalPlaced( void );
+	void UpdatePortalAssociation( void );
 
 	bool  PortalTraceClippedByBlockers( ComplexPortalTrace_t *pTraceResults, int nNumResultSegments, const Vector &vecDirection, bool bIsSecondPortal, TracePortalPlacementInfo_t &placementInfo );
 	bool AttemptStealCoopPortal( TracePortalPlacementInfo_t &placementInfo );
 	bool AttemptSnapToPlacementHelper( CProp_Portal *pPortal, ComplexPortalTrace_t *pTraceResults, int nNumResultSegments, PortalPlacedBy_t ePlacedBy, TracePortalPlacementInfo_t &placementInfo );
 	CProp_Portal *GetAssociatedPortal( bool bPortal2 );
 
-	Vector m_vecOrangePortalPos;
-	Vector m_vecBluePortalPos;
+	CNetworkVector( m_vecOrangePortalPos );
+	CNetworkVector( m_vecBluePortalPos );
 
 	CSoundPatch		*m_pMiniGravHoldSound;
 
@@ -133,13 +132,19 @@ public:
 
 	int GetWeaponID( void ) const { return WEAPON_PORTALGUN; }
 
-	void SetPotatosOnPortalgun( bool bPotatos );
+	void SetPotatosOnPortalgun( bool bShowPotatos );
 	
 	void PostAttack( void );
 
 	void UseDeny( void );
+	
+	virtual void	ChangeTeam( int iTeamNum );
+
+	int m_nStartingTeamNum;
 
 protected:
+	
+	void	ClearPortalPositions( void );
 
 	void	StartEffects( void );	// Initialize all sprites and beams
 	void	StopEffects( bool stopSound = true );	// Hide all effects temporarily
@@ -153,6 +158,8 @@ protected:
 	void	DoEffectHolding( void );
 	void	DoEffectNone( void );
 
+	bool	m_bShowingPotatos;
+
 	CNetworkVar( int,	m_EffectState );		// Current state of the effects on the gun
 
 public:
@@ -163,6 +170,8 @@ public:
 
 private:
 	CWeaponPortalgun( const CWeaponPortalgun & );
+
+	CNetworkVar( unsigned char, m_iPortalLinkageGroupID );
 
 };
 

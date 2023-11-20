@@ -103,7 +103,6 @@ public:
 
 	//inline void SetFuncPortalled( CFunc_Portalled *pPortalledEnt = NULL ) { m_NotifyOnPortalled = pPortalledEnt; }
 
-	static bool				ms_DefaultPortalSizeInitialized; // for CEG protection
 	static float			ms_DefaultPortalHalfWidth;
 	static float			ms_DefaultPortalHalfHeight;
 

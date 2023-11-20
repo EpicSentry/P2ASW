@@ -28,7 +28,7 @@
 #	include "trigger_portal_cleanser.h"
 //#	include "portal_mp_stats.h"
 #else
-//#	include "c_info_placement_helper.h"
+#	include "c_info_placement_helper.h"
 #	include "c_te_effect_dispatch.h"
 #	include "c_portal_player.h"
 #	include "igameevents.h"
@@ -108,8 +108,7 @@ CWeaponPortalgun::CWeaponPortalgun( void )
 	m_EffectState.Set( EFFECT_NONE );
 
 #ifndef CLIENT_DLL
-	// FIXME:
-	//ClearPortalPositions();
+	ClearPortalPositions();
 #endif // !CLIENT_DLL
 }
 
@@ -1522,8 +1521,7 @@ bool CWeaponPortalgun::PortalTraceClippedByBlockers( ComplexPortalTrace_t *pTrac
 			placementInfo.tr.plane.normal = -vecDirection;
 
 #if defined( GAME_DLL )
-			// TODO:
-			//pHitFizzler->SetPortalShot();
+			pHitFizzler->SetPortalShot();
 #endif
 
 			CProp_Portal *pPortal = bIsSecondPortal ? m_hSecondaryPortal.Get() : m_hPrimaryPortal.Get();//CProp_Portal::FindPortal( m_iPortalLinkageGroupID, bIsSecondPortal, true );
@@ -1636,8 +1634,6 @@ bool CWeaponPortalgun::AttemptStealCoopPortal( TracePortalPlacementInfo_t &place
 //-----------------------------------------------------------------------------
 bool CWeaponPortalgun::AttemptSnapToPlacementHelper( CProp_Portal *pPortal, ComplexPortalTrace_t *pTraceResults, int nNumResultSegments, PortalPlacedBy_t ePlacedBy, TracePortalPlacementInfo_t &placementInfo )
 {
-	// We need more CInfoPlacementHelper code before we can use this
-#if 0
 	// First, find a helper in the general area we hit
 	CInfoPlacementHelper *pHelper = UTIL_FindPlacementHelper( placementInfo.vecFinalPosition, (GetOwner() && GetOwner()->IsPlayer()) ? (CBasePlayer *)GetOwner() : NULL );
 	if ( pHelper == NULL )
@@ -1734,7 +1730,6 @@ bool CWeaponPortalgun::AttemptSnapToPlacementHelper( CProp_Portal *pPortal, Comp
 		placementInfo.ePlacementResult	= PORTAL_PLACEMENT_USED_HELPER;
 		return true;
 	}
-#endif
 
 	return false;
 }

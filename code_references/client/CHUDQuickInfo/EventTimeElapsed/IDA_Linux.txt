@@ -1,0 +1,4 @@
+bool __cdecl CHUDQuickInfo::EventTimeElapsed(CHUDQuickInfo *const this)
+{
+  return (float)(gpGlobals->curtime - this->m_flLastEventTime) > 1.0;
+}

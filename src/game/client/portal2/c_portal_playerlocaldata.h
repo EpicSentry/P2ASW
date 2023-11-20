@@ -6,6 +6,8 @@
 
 #define CPortalPlayerLocalData C_PortalPlayerLocalData
 
+class C_Trigger_TractorBeam;
+
 class C_PortalPlayerLocalData
 {
 public:
@@ -60,7 +62,11 @@ public:
 
 	QAngle m_qQuaternionPunch;
 
+#ifdef NO_TRACTOR_BEAM
 	EHANDLE m_hTractorBeam; // Was probably CHandle<> instead
+#else
+	CHandle<C_Trigger_TractorBeam> m_hTractorBeam;
+#endif
 	int m_nTractorBeamCount;
 
 	// Client only

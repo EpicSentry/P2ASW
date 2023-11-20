@@ -1,0 +1,24 @@
+void __thiscall CTriggerPortalCleanser::SetPortalShot(CTriggerPortalCleanser *this)
+{
+  CGlobalVars *v1; // edi
+  CNetworkVarBase<float,CTriggerPortalCleanser::NetworkVar_m_flPortalShotTime> *p_m_flPortalShotTime; // esi
+  edict_t *m_pPev; // ecx
+
+  v1 = gpGlobals;
+  p_m_flPortalShotTime = &this->m_flPortalShotTime;
+  if ( this->m_flPortalShotTime.m_Value != gpGlobals->curtime )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+      p_m_flPortalShotTime->m_Value = v1->curtime;
+    }
+    else
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x500u);
+      p_m_flPortalShotTime->m_Value = v1->curtime;
+    }
+  }
+}

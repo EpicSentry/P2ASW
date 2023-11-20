@@ -1,0 +1,44 @@
+void __usercall CTrigger_TractorBeam::WakeTouchingObjects(CTrigger_TractorBeam *this@<ecx>, float a2@<ebp>)
+{
+  int v2; // edi
+  CPropWeightedCube *v3; // esi
+  IPhysicsObject *m_pPhysicsObject; // ecx
+  CBaseEntity *v5[3]; // [esp-Ch] [ebp-48Ch] BYREF
+  CBaseEntity *list[256]; // [esp+0h] [ebp-480h] BYREF
+  Ray_t ray; // [esp+400h] [ebp-80h]
+  CFlaggedEntitiesEnum v8; // [esp+450h] [ebp-30h] BYREF
+  Vector v9; // [esp+464h] [ebp-1Ch] BYREF
+  Vector vExtents; // [esp+470h] [ebp-10h]
+  float retaddr; // [esp+480h] [ebp+0h]
+
+  vExtents.y = a2;
+  vExtents.z = retaddr;
+  v9.x = this->m_flRadius.m_Value;
+  v9.y = v9.x;
+  v9.z = v9.x;
+  v2 = 0;
+  ray.m_Extents.y = 0.0;
+  v8.m_listMax = LODWORD(v9.x) ^ _mask__NegFloat_;
+  v8.m_flagMask = LODWORD(v9.x) ^ _mask__NegFloat_;
+  v8.m_count = LODWORD(v9.x) ^ _mask__NegFloat_;
+  Ray_t::Init((Ray_t *)&list[253], &this->m_vStart.m_Value, &this->m_vEnd.m_Value, (const Vector *)&v8.m_listMax, &v9);
+  CFlaggedEntitiesEnum::CFlaggedEntitiesEnum(&v8, v5, 256, 0);
+  LODWORD(vExtents.x) = UTIL_EntitiesAlongRay((const Ray_t *)&list[253], &v8);
+  if ( SLODWORD(vExtents.x) > 0 )
+  {
+    do
+    {
+      v3 = (CPropWeightedCube *)v5[v2];
+      if ( v3 )
+      {
+        if ( UTIL_IsReflectiveCube(v5[v2]) || UTIL_IsSchrodinger(v3) )
+          CPropWeightedCube::ExitDisabledState(v3);
+        m_pPhysicsObject = v3->m_pPhysicsObject;
+        if ( m_pPhysicsObject )
+          m_pPhysicsObject->Wake(m_pPhysicsObject);
+      }
+      ++v2;
+    }
+    while ( v2 < SLODWORD(vExtents.x) );
+  }
+}

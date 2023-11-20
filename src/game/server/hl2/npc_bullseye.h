@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -51,6 +51,7 @@ public:
 	bool	CanBecomeServerRagdoll( void ) { return false;	}
 
 	bool	CanBeAnEnemyOf( CBaseEntity *pEnemy );
+	int		UpdateTransmitState();
 
 
 protected:
@@ -61,6 +62,8 @@ protected:
 	bool			m_bPerfectAccuracy;	// Entities that shoot at me should be perfectly accurate
 	float			m_fAutoaimRadius;	// How much to influence player's autoaim.
 	float			m_flMinDistValidEnemy;
+	bool			m_bAlwaysTransmitToClient;
+	int				m_nTargetObjectSize;
 
 
 

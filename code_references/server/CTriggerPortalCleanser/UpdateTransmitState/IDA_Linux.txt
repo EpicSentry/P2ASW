@@ -1,0 +1,4 @@
+int __cdecl CTriggerPortalCleanser::UpdateTransmitState(CTriggerPortalCleanser *const this)
+{
+  return CBaseEntity::SetTransmitState(this, 32);
+}

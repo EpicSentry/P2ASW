@@ -1,0 +1,187 @@
+void __cdecl CTriggerPortalCleanser::Touch(CTriggerPortalCleanser *const this, CBaseEntity *pOther)
+{
+  bool v2; // di
+  bool v3; // zf
+  int (**vptr_IHandleEntity)(...); // eax
+  CWeaponPortalgun *v5; // edi
+  CBaseAnimating *v6; // eax
+  const void *v7; // eax
+  float x; // xmm0_4
+  vec_t y; // eax
+  CProp_Portal *AssociatedPortal; // eax
+  char v11; // al
+  CBaseEntity *v12; // edx
+  CProp_Portal *v13; // eax
+  char v14; // al
+  CBaseEntity *v15; // edx
+  float NextThink; // [esp+28h] [ebp-30h]
+  float v17; // [esp+28h] [ebp-30h]
+  CProp_Portal *v18; // [esp+2Ch] [ebp-2Ch]
+  CProp_Portal *v19; // [esp+2Ch] [ebp-2Ch]
+  CProp_Portal *v20; // [esp+2Ch] [ebp-2Ch]
+  CProp_Portal *v21; // [esp+2Ch] [ebp-2Ch]
+  CBaseEntity *v22; // [esp+30h] [ebp-28h]
+  char v23; // [esp+37h] [ebp-21h]
+  BASEPTR v24; // [esp+38h] [ebp-20h] BYREF
+
+  if ( !(*((unsigned __int8 (__cdecl **)(CTriggerPortalCleanser *const, CBaseEntity *))this->_vptr_IHandleEntity + 208))(
+          this,
+          pOther) )
+    return;
+  v2 = 0;
+  if ( pOther )
+  {
+    v2 = 1;
+    if ( pOther->m_iClassname.pszValue != "weapon_portalgun" )
+      v2 = CBaseEntity::ClassMatchesComplex(pOther, "weapon_portalgun");
+  }
+  v3 = (*((unsigned __int8 (__cdecl **)(CBaseEntity *))pOther->_vptr_IHandleEntity + 86))(pOther) == 0;
+  vptr_IHandleEntity = pOther->_vptr_IHandleEntity;
+  if ( v3 && !v2 )
+  {
+    v6 = (CBaseAnimating *)vptr_IHandleEntity[55](pOther);
+    CTriggerPortalCleanser::FizzleBaseAnimating(this, v6);
+    return;
+  }
+  if ( (unsigned __int8)vptr_IHandleEntity[86](pOther) )
+  {
+    if ( gpGlobals->maxClients > 1
+      && !(*((int (__cdecl **)(CBaseEntity *, const char *, _DWORD))pOther->_vptr_IHandleEntity + 282))(
+            pOther,
+            "weapon_portalgun",
+            0) )
+    {
+      return;
+    }
+    v7 = (const void *)(*((int (__cdecl **)(CBaseEntity *, const char *, _DWORD))pOther->_vptr_IHandleEntity + 282))(
+                         pOther,
+                         "weapon_portalgun",
+                         0);
+    if ( !v7 )
+      return;
+    v22 = pOther;
+    v5 = (CWeaponPortalgun *)_dynamic_cast(
+                               v7,
+                               (const struct __class_type_info *)&`typeinfo for'CBaseCombatWeapon,
+                               (const struct __class_type_info *)&`typeinfo for'CWeaponPortalgun,
+                               0);
+  }
+  else
+  {
+    if ( !v2 )
+      return;
+    v22 = 0;
+    v5 = (CWeaponPortalgun *)_dynamic_cast(
+                               pOther,
+                               (const struct __class_type_info *)&`typeinfo for'CBaseEntity,
+                               (const struct __class_type_info *)&`typeinfo for'CWeaponPortalgun,
+                               0);
+  }
+  if ( !v5 )
+    return;
+  v23 = 0;
+  if ( CWeaponPortalgun::CanFirePortal1(v5) )
+  {
+    AssociatedPortal = CWeaponPortalgun::GetAssociatedPortal(v5, 0);
+    if ( AssociatedPortal )
+    {
+      v18 = AssociatedPortal;
+      v11 = (*((int (__cdecl **)(CProp_Portal *))AssociatedPortal->_vptr_IHandleEntity + 234))(AssociatedPortal);
+      v12 = v18;
+      if ( v11 )
+      {
+        CProp_Portal::DoFizzleEffect(v18, 5, 0);
+        CProp_Portal::Fizzle(v18);
+        v12 = v18;
+        if ( v5->m_fEffectsMaxSize1.m_Value != 50.0 )
+        {
+          CBaseEntity::NetworkStateChanged(v5, &v5->m_fEffectsMaxSize1);
+          v5->m_fEffectsMaxSize1.m_Value = 50.0;
+          v12 = v18;
+        }
+        v23 = 1;
+      }
+      v19 = (CProp_Portal *)v12;
+      NextThink = CBaseEntity::GetNextThink(v12, CProp_Portal::s_szDelayedPlacementThinkContext);
+      if ( NextThink > gpGlobals->curtime )
+      {
+        CBaseEntity::ThinkSet(&v24, v19, 0LL, gpGlobals->curtime, CProp_Portal::s_szDelayedPlacementThinkContext);
+        if ( v5->m_fEffectsMaxSize2.m_Value != 50.0 )
+        {
+          CBaseEntity::NetworkStateChanged(v5, &v5->m_fEffectsMaxSize2);
+          v5->m_fEffectsMaxSize2.m_Value = 50.0;
+        }
+        v23 = 1;
+      }
+    }
+  }
+  if ( !CWeaponPortalgun::CanFirePortal2(v5) )
+    goto LABEL_18;
+  v13 = CWeaponPortalgun::GetAssociatedPortal(v5, 1);
+  if ( !v13 )
+    goto LABEL_18;
+  v20 = v13;
+  v14 = (*((int (__cdecl **)(CProp_Portal *))v13->_vptr_IHandleEntity + 234))(v13);
+  v15 = v20;
+  if ( v14 )
+  {
+    CProp_Portal::DoFizzleEffect(v20, 5, 0);
+    CProp_Portal::Fizzle(v20);
+    v15 = v20;
+    if ( v5->m_fEffectsMaxSize2.m_Value != 50.0 )
+    {
+      CBaseEntity::NetworkStateChanged(v5, &v5->m_fEffectsMaxSize2);
+      v5->m_fEffectsMaxSize2.m_Value = 50.0;
+      v15 = v20;
+    }
+    v23 = 1;
+  }
+  v21 = (CProp_Portal *)v15;
+  v17 = CBaseEntity::GetNextThink(v15, CProp_Portal::s_szDelayedPlacementThinkContext);
+  if ( v17 > gpGlobals->curtime )
+  {
+    CBaseEntity::ThinkSet(&v24, v21, 0LL, gpGlobals->curtime, CProp_Portal::s_szDelayedPlacementThinkContext);
+    if ( v5->m_fEffectsMaxSize2.m_Value != 50.0 )
+    {
+      CBaseEntity::NetworkStateChanged(v5, &v5->m_fEffectsMaxSize2);
+      v5->m_fEffectsMaxSize2.m_Value = 50.0;
+    }
+  }
+  else
+  {
+LABEL_18:
+    if ( !v23 )
+      return;
+  }
+  (*((void (__cdecl **)(CWeaponPortalgun *, int))v5->_vptr_IHandleEntity + 254))(v5, 493);
+  CBaseEntity::EmitSound(v5, "Portal.FizzlerShimmy", 0.0, 0);
+  if ( v5->m_iLastFiredPortal.m_Value )
+  {
+    CBaseEntity::NetworkStateChanged(v5, &v5->m_iLastFiredPortal);
+    v5->m_iLastFiredPortal.m_Value = 0;
+  }
+  x = v5->m_vecOrangePortalPos.m_Value.x;
+  if ( x != vec3_invalid.x
+    || vec3_invalid.y != v5->m_vecOrangePortalPos.m_Value.y
+    || vec3_invalid.z != v5->m_vecOrangePortalPos.m_Value.z )
+  {
+    CBaseEntity::NetworkStateChanged(v5, &v5->m_vecOrangePortalPos);
+    y = vec3_invalid.y;
+    x = vec3_invalid.x;
+    v5->m_vecOrangePortalPos.m_Value.x = vec3_invalid.x;
+    v5->m_vecOrangePortalPos.m_Value.y = y;
+    v5->m_vecOrangePortalPos.m_Value.z = vec3_invalid.z;
+  }
+  if ( x != v5->m_vecBluePortalPos.m_Value.x
+    || v5->m_vecOrangePortalPos.m_Value.y != v5->m_vecBluePortalPos.m_Value.y
+    || v5->m_vecOrangePortalPos.m_Value.z != v5->m_vecBluePortalPos.m_Value.z )
+  {
+    CBaseEntity::NetworkStateChanged(v5, &v5->m_vecBluePortalPos);
+    v5->m_vecBluePortalPos.m_Value.x = v5->m_vecOrangePortalPos.m_Value.x;
+    v5->m_vecBluePortalPos.m_Value.y = v5->m_vecOrangePortalPos.m_Value.y;
+    v5->m_vecBluePortalPos.m_Value.z = v5->m_vecOrangePortalPos.m_Value.z;
+  }
+  COutputEvent::FireOutput(&this->m_OnFizzle, pOther, this, 0.0);
+  if ( v22 )
+    (*((void (__cdecl **)(CBaseEntity *, int, _DWORD, int))v22->_vptr_IHandleEntity + 380))(v22, 8, 0, 4);
+}

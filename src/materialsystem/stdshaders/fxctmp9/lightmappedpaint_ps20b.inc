@@ -252,34 +252,3 @@ public:
 	}
 };
 #define shaderDynamicTest_lightmappedpaint_ps20b psh_forgot_to_set_dynamic_FASTPATHENVMAPCONTRAST + psh_forgot_to_set_dynamic_FASTPATH + 0
-
-static const ShaderComboInformation_t s_DynamicComboArray_lightmappedpaint_ps20b[3] = 
-{
-	{ "FASTPATHENVMAPCONTRAST", 0, 1 },
-	{ "FASTPATH", 0, 1 },
-	{ "PIXELFOGTYPE", 0, 1 },
-};
-
-static const ShaderComboInformation_t s_StaticComboArray_lightmappedpaint_ps20b[5] = 
-{
-	{ "BUMPMAP", 0, 2 },
-	{ "CUBEMAP", 0, 2 },
-	{ "SEAMLESS", 0, 1 },
-	{ "THICKPAINT", 0, 1 },
-	{ "DOPIXELFOG", 0, 1 },
-};
-static const ShaderComboSemantics_t lightmappedpaint_ps20b_combos =
-{
-	"lightmappedpaint_ps20b", s_DynamicComboArray_lightmappedpaint_ps20b, 3, s_StaticComboArray_lightmappedpaint_ps20b, 5 
-};
-
-class ConstructMe_lightmappedpaint_ps20b
-{
-public:
-	ConstructMe_lightmappedpaint_ps20b()
-	{
-		GetShaderDLL()->AddShaderComboInformation( &lightmappedpaint_ps20b_combos );
-	}
-};
-
-static ConstructMe_lightmappedpaint_ps20b s_ConstructMe_lightmappedpaint_ps20b;

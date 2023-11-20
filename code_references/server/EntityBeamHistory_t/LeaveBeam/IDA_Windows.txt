@@ -1,0 +1,30 @@
+void __thiscall EntityBeamHistory_t::LeaveBeam(EntityBeamHistory_t *this, CTrigger_TractorBeam *pBeam)
+{
+  int m_Size; // edi
+  int v4; // edx
+  unsigned int v5; // eax
+  CTrigger_TractorBeam *m_pEntity; // ecx
+  int v7; // eax
+
+  m_Size = this->m_beams.m_Size;
+  v4 = 0;
+  if ( m_Size > 0 )
+  {
+    while ( 1 )
+    {
+      v5 = *(_DWORD *)&this->m_beams.m_Memory.m_Memory[8 * v4];
+      if ( v5 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v5].m_SerialNumber != HIWORD(v5) )
+        m_pEntity = 0;
+      else
+        m_pEntity = (CTrigger_TractorBeam *)g_pEntityList->m_EntPtrArray[(unsigned __int16)v5].m_pEntity;
+      if ( m_pEntity == pBeam )
+        break;
+      if ( ++v4 >= m_Size )
+        return;
+    }
+    v7 = m_Size - v4 - 1;
+    if ( v7 > 0 )
+      _V_memmove((char *)this + 8 * v4, &this->m_beams.m_Memory.m_Memory[8 * v4 + 8], 8 * v7);
+    --this->m_beams.m_Size;
+  }
+}

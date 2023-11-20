@@ -1,0 +1,15 @@
+void __cdecl CProjectedWallEntity::NotifyPortalEvent(
+        CProjectedWallEntity *const this,
+        PortalEvent_t nEventType,
+        CPortal_Base2D *pNotifier)
+{
+  EHANDLE p_hListener; // [esp+1Ch] [ebp-Ch] BYREF
+
+  if ( nEventType == PORTALEVENT_LINKED )
+  {
+    p_hListener.m_Index = -1;
+    if ( this )
+      p_hListener.m_Index = *(_DWORD *)(*((int (__cdecl **)(CProjectedWallEntity *const))this->_vptr_IHandleEntity + 3))(this);
+    CPortal_Base2D::RemovePortalEventListener(pNotifier, &p_hListener);
+  }
+}

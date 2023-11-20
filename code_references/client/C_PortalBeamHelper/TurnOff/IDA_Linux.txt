@@ -1,0 +1,16 @@
+void __cdecl C_PortalBeamHelper::TurnOff(C_PortalBeamHelper *const this)
+{
+  int v1; // ebx
+  C_Beam *v2; // eax
+
+  if ( this->m_beams.m_Size > 0 )
+  {
+    v1 = 0;
+    do
+    {
+      v2 = this->m_beams.m_Memory.m_pMemory[v1++];
+      C_BaseEntity::AddEffects(v2, 32);
+    }
+    while ( this->m_beams.m_Size > v1 );
+  }
+}

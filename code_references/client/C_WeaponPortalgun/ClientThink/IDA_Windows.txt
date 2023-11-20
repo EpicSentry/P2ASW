@@ -1,0 +1,82 @@
+void __thiscall C_WeaponPortalgun::ClientThink(C_WeaponPortalgun *this)
+{
+  C_WeaponPortalgun *v2; // ebx
+  C_BaseCombatCharacter *Owner; // edi
+  C_BaseCombatWeapon *v4; // eax
+  CNewParticleEffect *m_pObject; // ecx
+  CNewParticleEffect *v6; // eax
+  CNewParticleEffect *v7; // ecx
+  CNewParticleEffect *v8; // eax
+  CUtlReference<CSheet> *p_m_hPortalGunEffectHoldingFP; // esi
+  float v10; // xmm0_4
+  float v11; // xmm0_4
+
+  v2 = (C_WeaponPortalgun *)((char *)this - 12);
+  Owner = C_BaseCombatWeapon::GetOwner((C_WeaponPortalgun *)((char *)this - 12));
+  if ( Owner )
+  {
+    if ( Owner->IsPlayer(Owner) )
+    {
+      v4 = Owner->GetActiveWeapon(Owner);
+      if ( __RTDynamicCast(
+             v4,
+             0,
+             &C_BaseCombatWeapon `RTTI Type Descriptor',
+             &C_WeaponPortalgun `RTTI Type Descriptor',
+             0) )
+      {
+        if ( LODWORD(this->m_vecOrangePortalPos.y) != 2 )
+        {
+          m_pObject = this->m_hPortalGunEffectTP.m_pObject;
+          if ( m_pObject )
+          {
+            CNewParticleEffect::StopEmission(m_pObject, 0, 0, 0, 0);
+            v6 = this->m_hPortalGunEffectTP.m_pObject;
+            if ( v6 )
+            {
+              CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(
+                (CUtlIntrusiveDList<CUtlReference<CSheet> > *)&v6->m_References,
+                (CUtlReference<CSheet> *)&this->m_hPortalGunEffectTP);
+              this->m_hPortalGunEffectTP.m_pObject = 0;
+            }
+          }
+          v7 = this->m_hPortalGunEffectHoldingFP.m_pObject;
+          if ( v7 )
+          {
+            CNewParticleEffect::StopEmission(v7, 0, 0, 0, 0);
+            v8 = this->m_hPortalGunEffectHoldingFP.m_pObject;
+            p_m_hPortalGunEffectHoldingFP = (CUtlReference<CSheet> *)&this->m_hPortalGunEffectHoldingFP;
+            if ( v8 )
+            {
+              CUtlIntrusiveDList<CUtlReference<CNewParticleEffect>>::RemoveNode(
+                (CUtlIntrusiveDList<CUtlReference<CSheet> > *)&v8->m_References,
+                p_m_hPortalGunEffectHoldingFP);
+              p_m_hPortalGunEffectHoldingFP->m_pObject = 0;
+            }
+          }
+        }
+      }
+    }
+  }
+  C_WeaponPortalgun::StartEffects(v2);
+  if ( v2->m_bPulseUp )
+  {
+    v10 = *(float *)(gpGlobals.m_Index + 16) + v2->m_fPulse;
+    v2->m_fPulse = v10;
+    if ( v10 > 1.0 )
+    {
+      v2->m_bPulseUp = 0;
+      LODWORD(v2->m_fPulse) = FLOAT_1_0;
+    }
+  }
+  else
+  {
+    v11 = v2->m_fPulse - *(float *)(gpGlobals.m_Index + 16);
+    v2->m_fPulse = v11;
+    if ( v11 < 0.0 )
+    {
+      v2->m_bPulseUp = 1;
+      v2->m_fPulse = 0.0;
+    }
+  }
+}

@@ -1,0 +1,9 @@
+void __thiscall C_WeaponPortalgun::OnPreDataChanged(C_WeaponPortalgun *this, DataUpdateType_t updateType)
+{
+  char v2; // dl
+
+  v2 = BYTE1(this->m_pLastOwner);
+  LOBYTE(this->m_fEffectsMaxSize2.m_Value) = this->m_pLastOwner;
+  BYTE1(this->m_fEffectsMaxSize2.m_Value) = v2;
+  C_BaseAnimating::OnPreDataChanged(this, updateType);
+}
