@@ -599,10 +599,12 @@ void CBaseModFrame::LoadControlSettings( const char *dialogResourceName, const c
 		if ( !IsX360() && !pathID )
 		{
 			bSuccess = rDat->LoadFromFile( g_pFullFileSystem, dialogResourceName, "SKIN" );
+			//bSuccess = rDat->LoadFromFileEX( g_pFullFileSystem, dialogResourceName, "SKIN" );
 		}
 		if ( !bSuccess )
 		{
-			bSuccess = rDat->LoadFromFile( g_pFullFileSystem, dialogResourceName, pathID );
+			//bSuccess = rDat->LoadFromFile( g_pFullFileSystem, dialogResourceName, pathID );
+			bSuccess = rDat->LoadFromFile(g_pFullFileSystem, dialogResourceName, pathID);
 		}
 		if ( bSuccess )
 		{

@@ -98,8 +98,13 @@ void CBaseModTransitionPanel::BuildTiles()
 	int screenWide, screenTall;
 	surface()->GetScreenSize( screenWide, screenTall );
 
+<<<<<<< Updated upstream
 	const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
 	float flInverseAspect = 1.0f/aspectRatioInfo.m_flFrameBufferAspectRatio;
+=======
+	//const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
+	float flInverseAspect = 1.0f / 1.0f;// aspectRatioInfo.m_flFrameBufferAspectRatio; // TODO: get an actual value for this
+>>>>>>> Stashed changes
 
 	m_nNumColumns = ( screenWide + m_nTileWidth - 1 ) / m_nTileWidth;
 	m_nNumRows = ( screenTall + m_nTileHeight - 1 ) / m_nTileHeight;
@@ -427,7 +432,11 @@ void CBaseModTransitionPanel::ScanTilesForTransition()
 			m_nNumTransitions++;
 
 			vgui::input()->SetModalSubTree( GetVPanel(), GetVPanel(), true );
+<<<<<<< Updated upstream
 			vgui::input()->SetModalSubTreeShowMouse( true );
+=======
+			//vgui::input()->SetModalSubTreeShowMouse( true );
+>>>>>>> Stashed changes
 
 			// snap off the current expected direction
 			m_flDirection = m_bForwardHint ? 1.0f : -1.0f;
@@ -483,8 +492,13 @@ bool CBaseModTransitionPanel::IsEffectEnabled()
 		GameUI().IsInLevel() || 
 		engine->IsConnected() ||
 		CBaseModPanel::GetSingleton().IsLevelLoading() ||
+<<<<<<< Updated upstream
 		( !IsGameConsole() && GameConsole().IsConsoleVisible() ) ||
 		materials->IsStereoActiveThisFrame() ) // Disable effect when in nvidia's stereo mode
+=======
+		( !IsGameConsole() && GameConsole().IsConsoleVisible() ) /*||
+		materials->IsStereoActiveThisFrame()*/ ) // Disable effect when in nvidia's stereo mode
+>>>>>>> Stashed changes
 	{
 		// effect not allowed in game or loading into game
 		if ( m_bTransitionActive )
@@ -626,8 +640,13 @@ void CBaseModTransitionPanel::StartPaint3D()
 	pRenderContext->PushMatrix();
 	pRenderContext->LoadIdentity();
 
+<<<<<<< Updated upstream
 	const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
 	pRenderContext->PerspectiveX( 90, aspectRatioInfo.m_flFrameBufferAspectRatio, TILE_NEAR_PLANE, TILE_FAR_PLANE );
+=======
+	//const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo(); // TODO: get an actual value for this
+	pRenderContext->PerspectiveX( 90, /*aspectRatioInfo.m_flFrameBufferAspectRatio*/ 1.0f, TILE_NEAR_PLANE, TILE_FAR_PLANE );
+>>>>>>> Stashed changes
 
 	pRenderContext->CullMode( MATERIAL_CULLMODE_CCW );
 
@@ -637,7 +656,11 @@ void CBaseModTransitionPanel::StartPaint3D()
 	pRenderContext->SetStencilState( state );
 
 	pRenderContext->ClearBuffers( false, true, true );
+<<<<<<< Updated upstream
 	pRenderContext->OverrideDepthEnable( true, true, true );
+=======
+	pRenderContext->OverrideDepthEnable(true, true);// , true );
+>>>>>>> Stashed changes
 }
 
 void CBaseModTransitionPanel::EndPaint3D()
@@ -647,7 +670,11 @@ void CBaseModTransitionPanel::EndPaint3D()
 
 	if ( !IsGameConsole() )
 	{
+<<<<<<< Updated upstream
 		pRenderContext->OverrideDepthEnable( false, true, true );
+=======
+		pRenderContext->OverrideDepthEnable(false, true);// , true );
+>>>>>>> Stashed changes
 	}
 
 	ShaderStencilState_t state;

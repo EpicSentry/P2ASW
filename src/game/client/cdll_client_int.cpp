@@ -63,6 +63,7 @@
 #include "gamerules_register.h"
 #include "game/client/iviewport.h"
 #include "vgui_controls/AnimationController.h"
+#include "vgui_controls/SectionedListPanel.h"
 #include "bitmap/tgawriter.h"
 #include "c_world.h"
 #include "perfvisualbenchmark.h"	
@@ -3390,6 +3391,28 @@ class CClientMaterialSystem : public IClientMaterialSystem
 	}
 };
 
+//-----------------------------------------------------------------------------
+// Purpose: gets the local coordinates of a cell
+//-----------------------------------------------------------------------------
+bool vgui::SectionedListPanel::GetItemBounds(int itemID, int &x, int &y, int &wide, int &tall)
+{
+	x = y = wide = tall = 0;
+	if (!IsItemIDValid(itemID))
+		return false;
+
+	// get the item
+#if 0
+	CItemButton *item = m_Items[itemID];
+#else
+	Label *item = (Label*)(m_Items[itemID]);
+#endif
+	if (!item->IsVisible())
+		return false;
+
+	//!! ignores column for now
+	item->GetBounds(x, y, wide, tall);
+	return true;
+}
 //-----------------------------------------------------------------------------
 // Singleton instance
 //-----------------------------------------------------------------------------

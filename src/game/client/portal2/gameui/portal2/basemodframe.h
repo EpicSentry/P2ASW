@@ -12,6 +12,9 @@
 #include "tier1/utllinkedlist.h"
 
 #include "basemodpanel.h"
+#include "vstdlib/random.h"
+
+class CUniformRandomStream;
 
 namespace BaseModUI {
 

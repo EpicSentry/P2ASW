@@ -4628,6 +4628,8 @@ void ComputeAABBContactsWithBrushEntity_SIMD( ContactVector& contacts, const cpl
 	// Get the collision model index of the brush entity
 	AssertMsg( pBrushEntity->IsBSPModel(), "Your brush entity is not a brush entity." );
 	ICollideable* pCollideable = enginetrace->GetCollideable( pBrushEntity );
+	//This file is causing a C4189 error and I dont want to break anything in here so I have gone ahead and disabled the warning for the time being.
+#pragma warning( disable : 4189 )
 	const int cmodelIndex = pCollideable->GetCollisionModelIndex() - 1;
 	AssertMsg( !pBrushEntity->IsWorld() || cmodelIndex == 0, "World collision model index should be 0." );
 	const VMatrix& entityToWorld = pBrushEntity->EntityToWorldTransform();
