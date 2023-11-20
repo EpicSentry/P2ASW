@@ -49,6 +49,10 @@ void CTransitionScreen::ApplySchemeSettings( vgui::IScheme *pScheme )
 
 	char filename[MAX_PATH];
 	engine->GetStartupImage( filename, sizeof( filename ) );
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 	m_iImageID = surface()->CreateNewTextureID();
 	surface()->DrawSetTextureFile( m_iImageID, filename, true, false );
 

@@ -25,7 +25,11 @@
 #include "tier2/tier2.h"
 #include "matchmaking/imatchframework.h"
 
+<<<<<<< Updated upstream
 #ifdef SWARM_DLL
+=======
+#ifdef PORTAL2
+>>>>>>> Stashed changes
 #include "matchmaking/swarm/imatchext_swarm.h"
 extern class IMatchExtSwarm *g_pMatchExt;
 #endif

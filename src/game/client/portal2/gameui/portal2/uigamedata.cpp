@@ -51,7 +51,11 @@
 	#include "econ_ui.h"
 #endif
 
+<<<<<<< Updated upstream
 #include "netmessages.h"
+=======
+//#include "netmessages.h"
+>>>>>>> Stashed changes
 #include "cegclientwrapper.h"
 
 #ifndef NO_STEAM
@@ -1807,6 +1811,7 @@ CEG_NOINLINE void CUIGameData::InitiateSplitscreenPlay()
 {
 	CEG_PROTECT_MEMBER_FUNCTION( CUIGameData_InitiateSplitscreenPlay );
 
+<<<<<<< Updated upstream
 	// Start a splitscreen game
 	KeyValues *pSettings = KeyValues::FromString(
 		"settings",
@@ -1855,6 +1860,56 @@ CEG_NOINLINE void CUIGameData::InitiateSplitscreenPlay()
 			pMatchSession->Command( KeyValues::AutoDeleteInline( new KeyValues( "Start" ) ) );
 		}
 	}
+=======
+//	// Start a splitscreen game
+//	KeyValues *pSettings = KeyValues::FromString(
+//		"settings",
+//		PORTAL2_LOBBY_CONFIG_COOP( "offline", "public" )
+//		" options { "
+//		" action create "
+//		" } "
+//		);
+//
+//	bool bImmediateStart = true;
+//	const char *pchGameMode = CStartCoopGame::CoopGameMode();
+//	if ( pchGameMode && pchGameMode[ 0 ] != '\0' )
+//	{
+//		pSettings->SetString( "game/mode", pchGameMode );
+//		const char *pchChallengeMap = CStartCoopGame::CoopChallengeMap();
+//		if ( pchGameMode && !V_stricmp( pchGameMode, "coop_challenge" ) )
+//		{
+//			if ( IsX360() )
+//			{
+//				// must be "lan" so Silver account can play challenge mode
+//				pSettings->SetString( "system/network", "lan" );
+//				bImmediateStart = false;
+//			}
+//			pSettings->SetString( "game/map", pchChallengeMap );
+//		}
+//	}
+//
+//#ifndef _CERT
+//	if ( ui_coop_map_default.GetString()[0] )
+//		pSettings->SetString( "game/map", ui_coop_map_default.GetString() );
+//#endif
+//
+//	if ( bImmediateStart )
+//	{
+//		CBaseModPanel::GetSingleton().GetTransitionEffectPanel()->PreventTransitions( true );
+//	}
+//
+//	KeyValues::AutoDelete autodelete( pSettings );
+//	g_pMatchFramework->CreateSession( pSettings );
+//
+//	// Automatically start the splitscreen session, no configuration required
+//	if ( IMatchSession *pMatchSession = g_pMatchFramework->GetMatchSession() )
+//	{
+//		if ( bImmediateStart )
+//		{
+//			pMatchSession->Command( KeyValues::AutoDeleteInline( new KeyValues( "Start" ) ) );
+//		}
+//	}
+>>>>>>> Stashed changes
 }
 
 CON_COMMAND_F( ui_reloadscheme, "Reloads the resource files for the active UI window", 0 )

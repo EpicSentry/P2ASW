@@ -113,8 +113,17 @@ void Video::ApplySchemeSettings( vgui::IScheme *pScheme )
 
 	if ( m_drpSplitScreenDirection )
 	{
+<<<<<<< Updated upstream
 		const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
 		bool bWidescreen = aspectRatioInfo.m_bIsWidescreen;
+=======
+		//const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
+		//bool bWidescreen = aspectRatioInfo.m_bIsWidescreen;
+		int screenWide, screenTall;
+		surface()->GetScreenSize(screenWide, screenTall);
+		float aspectRatio = (float)screenWide / (float)screenTall;
+		bool bWidescreen = aspectRatio >= 1.5999f;
+>>>>>>> Stashed changes
 
 		if ( !bWidescreen )
 		{

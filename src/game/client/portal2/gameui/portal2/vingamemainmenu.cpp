@@ -8,7 +8,11 @@
 
 #include "VInGameMainMenu.h"
 #include "VGenericConfirmation.h"
+<<<<<<< Updated upstream
 #include "vportalleaderboard.h"
+=======
+//#include "vportalleaderboard.h"
+>>>>>>> Stashed changes
 #include "VFooterPanel.h"
 #include "VFlyoutMenu.h"
 #include "VHybridButton.h"
@@ -332,7 +336,11 @@ static void LoadLastSaveOkCallback()
 			pSelf->Close();
 		}
 
+<<<<<<< Updated upstream
 		const char *szMostRecentSave = engine->GetMostRecentSaveGame( true );
+=======
+		const char* szMostRecentSave = engine->GetMostRecentSaveGame();// true );
+>>>>>>> Stashed changes
 		CUIGameData::Get()->GameStats_ReportAction( "loadlast", engine->GetLevelNameShort(), !!( szMostRecentSave && szMostRecentSave[0] ) );
 
 		engine->ExecuteClientCmd( "load_recent_checkpoint" );
@@ -696,6 +704,7 @@ void InGameMainMenu::OnCommand( const char *command )
 			CUIGameData::Get()->ExecuteOverlayCommand( "LobbyInvite" );
 		}
 	}
+<<<<<<< Updated upstream
 	else if ( char const *szLeaderboards = StringAfterPrefix( command, "Leaderboards_" ) )
 	{
 #ifdef PORTAL2
@@ -782,6 +791,94 @@ void InGameMainMenu::OnCommand( const char *command )
 	}
 	else if ( !V_stricmp( command, "Storage" ) )
 	{
+=======
+//	else if ( char const *szLeaderboards = StringAfterPrefix( command, "Leaderboards_" ) )
+//	{
+//#ifdef PORTAL2
+//		if ( CheckAndDisplayErrorIfNotLoggedIn() ||
+//			CUIGameData::Get()->CheckAndDisplayErrorIfOffline( this,
+//			"#PORTAL2_LeaderboardOnlineWarning" ) )
+//			return;
+//		// check if in the hub
+//		bool bInHub = false;
+//		bool bMultiplayer = GameRules() && GameRules()->IsMultiplayer();
+//		if ( bMultiplayer && V_stricmp("mp_coop_lobby_3", engine->GetLevelNameShort() ) == 0 )
+//		{
+//			bInHub = true;
+//		}
+//		// PC's not crossplaying with a PS3 and in the Hub gets full map selection leaderboard
+//		if ( (IsPC() && !ClientIsCrossplayingWithConsole()) || bInHub )
+//		{
+//			KeyValues *pLeaderboardValues = new KeyValues( "leaderboard" );
+//			if ( bInHub || IsPC() && bMultiplayer )
+//			{
+//				pLeaderboardValues->SetInt( "state", STATE_PAUSE_MENU );
+//				BASEMODPANEL_SINGLETON.OpenWindow( WT_PORTALCOOPLEADERBOARD, this, true, pLeaderboardValues );
+//			}
+//			else
+//			{
+//				pLeaderboardValues->SetInt( "state", STATE_PAUSE_MENU );
+//				BASEMODPANEL_SINGLETON.OpenWindow( WT_PORTALLEADERBOARD, this, true, pLeaderboardValues );
+//			}
+//			pLeaderboardValues->deleteThis();
+//		}
+//		else
+//		{
+//			// use the limited HUD
+//			KeyValues *pLeaderboardValues = new KeyValues( "leaderboard" );
+//			pLeaderboardValues->SetInt( "LevelState", (int)STATE_PAUSE_MENU );
+//			BASEMODPANEL_SINGLETON.OpenWindow( BaseModUI::WT_PORTALLEADERBOARDHUD, this, true, pLeaderboardValues );
+//		}
+//
+//		
+//#else
+//
+//		if ( CheckAndDisplayErrorIfNotLoggedIn() ||
+//			CUIGameData::Get()->CheckAndDisplayErrorIfOffline( this,
+//			"#L4D360UI_MainMenu_SurvivalLeaderboards_Tip_Disabled" ) )
+//			return;
+//
+//		KeyValues *pSettings = NULL;
+//		if ( *szLeaderboards )
+//		{
+//			pSettings = KeyValues::FromString(
+//				"settings",
+//				" game { "
+//					" mode = "
+//				" } "
+//				);
+//			pSettings->SetString( "game/mode", szLeaderboards );
+//		}
+//		else
+//		{
+//			pSettings = g_pMatchFramework->GetMatchNetworkMsgController()->GetActiveServerGameDetails( NULL );
+//		}
+//		
+//		if ( !pSettings )
+//			return;
+//		
+//		KeyValues::AutoDelete autodelete( pSettings );
+//		
+//		m_ActiveControl->NavigateFrom();
+//
+//		GameUI().PreventEngineHideGameUI();
+//		BASEMODPANEL_SINGLETON.OpenWindow( WT_LEADERBOARD, this, true, pSettings );
+//#endif
+//	}
+	else if ( !V_stricmp( command, "AudioVideo" ) )
+	{
+		GameUI().PreventEngineHideGameUI();
+		BASEMODPANEL_SINGLETON.OpenWindow( WT_AUDIOVIDEO, this, true );
+	}
+	else if ( !V_stricmp( command, "Controller" ) )
+	{
+		GameUI().PreventEngineHideGameUI();
+		BASEMODPANEL_SINGLETON.OpenWindow( WT_CONTROLLER, this, true,
+			KeyValues::AutoDeleteInline( new KeyValues( "Settings", "slot", iUserSlot ) ) );
+	}
+	else if ( !V_stricmp( command, "Storage" ) )
+	{
+>>>>>>> Stashed changes
 #ifdef _GAMECONSOLE
 		if ( XBX_GetUserIsGuest( iUserSlot ) )
 		{

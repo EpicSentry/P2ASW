@@ -1159,9 +1159,16 @@ void SaveLoadGameDialog::ScreenshotLoaded( const FileAsyncRequest_t &asyncReques
 		return;
 	}
 
+<<<<<<< Updated upstream
 	// compare only the filename portion
 	// the path portion could be different because we play games with containers and this makes the logic simpler
 	if ( V_stricmp( V_GetFileName( asyncRequest.pszFilename ), V_GetFileName( pSaveGameInfo->m_ScreenshotFilename.Get() ) ) )
+=======
+	// V_UnqualifiedFileName == V_GetFileName -Klax
+	// compare only the filename portion
+	// the path portion could be different because we play games with containers and this makes the logic simpler
+	if ( V_stricmp(V_UnqualifiedFileName( asyncRequest.pszFilename ), V_UnqualifiedFileName( pSaveGameInfo->m_ScreenshotFilename.Get() ) ) )
+>>>>>>> Stashed changes
 	{
 		// this isn't the screenshot we are expecting, there could have been more than 1 in flight
 		// ignore it
@@ -1196,8 +1203,14 @@ void SaveLoadGameDialog::ScreenshotLoaded( const FileAsyncRequest_t &asyncReques
 				m_nSaveGameScreenshotId = vgui::surface()->CreateNewTextureID( true );
 			}
 
+<<<<<<< Updated upstream
 			surface()->DrawSetTextureRGBALinear( m_nSaveGameScreenshotId, rawBuffer.Base(), nWidth, nHeight );
 			nSaveGameImageId = m_nSaveGameScreenshotId;
+=======
+			// TODO: find a suitable replacement for this code, as this line is p2 specific. -Klax
+			//surface()->DrawSetTextureRGBALinear( m_nSaveGameScreenshotId, rawBuffer.Base(), nWidth, nHeight );
+			//nSaveGameImageId = m_nSaveGameScreenshotId;
+>>>>>>> Stashed changes
 		}
 	}
 
@@ -1704,6 +1717,7 @@ void SaveLoadGameDialog::ConfirmOverwriteSaveGame()
 
 		char fullSaveFilename[MAX_PATH];
 		char comment[MAX_PATH];
+<<<<<<< Updated upstream
 
 		m_bSaveInProgress = engine->SaveGame( 
 			savename.Get(), 
@@ -1712,6 +1726,17 @@ void SaveLoadGameDialog::ConfirmOverwriteSaveGame()
 			sizeof( fullSaveFilename ),
 			comment,
 			sizeof( comment ) );
+=======
+		
+		//m_bSaveInProgress = engine->SaveGame( 
+		//	savename.Get(), 
+		//	IsX360(), 
+		//	fullSaveFilename, 
+		//	sizeof( fullSaveFilename ),
+		//	comment,
+		//	sizeof( comment ) );
+		// TODO URGENT: create a new save game system :/ -Klax
+>>>>>>> Stashed changes
 
 		// use the full savename to determin the full screenshot name
 		char screenshotFilename[MAX_PATH];

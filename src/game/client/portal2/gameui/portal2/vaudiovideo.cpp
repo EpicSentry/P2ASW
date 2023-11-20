@@ -58,7 +58,12 @@ AudioVideo::~AudioVideo()
 	CGameUIConVarRef force_audio_english( "force_audio_english" );
 	if ( m_bOldForceEnglishAudio != force_audio_english.GetBool() )
 	{
+<<<<<<< Updated upstream
 		engine->AudioLanguageChanged();
+=======
+		//engine->AudioLanguageChanged();
+		PostMessage(&(CBaseModPanel::GetSingleton()), new KeyValues("command", "command", "QuitRestartNoConfirm"), 0.0f);
+>>>>>>> Stashed changes
 	}
 }
 
@@ -264,8 +269,18 @@ void AudioVideo::ApplySchemeSettings( vgui::IScheme *pScheme )
 
 	if ( m_drpSplitScreenDirection )
 	{
+<<<<<<< Updated upstream
 		const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
 		bool bWidescreen = aspectRatioInfo.m_bIsWidescreen;
+=======
+		//const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
+		//bool bWidescreen = aspectRatioInfo.m_bIsWidescreen;
+
+		int screenWide, screenTall;
+		surface()->GetScreenSize(screenWide, screenTall);
+		float aspectRatio = (float)screenWide / (float)screenTall;
+		bool bWidescreen = aspectRatio >= 1.5999f;
+>>>>>>> Stashed changes
 
 		if ( !bWidescreen )
 		{

@@ -427,7 +427,11 @@ void VControlsListPanel::PerformLayout()
 				m_pLblDownArrow->SetAlpha( 255 );
 			}
 		}
+<<<<<<< Updated upstream
 		*
+=======
+		
+>>>>>>> Stashed changes
 	}
 }
 

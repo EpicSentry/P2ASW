@@ -13,7 +13,11 @@
 #include "gameui_util.h"
 #include "vgui/ISurface.h"
 #include "VGenericConfirmation.h"
+<<<<<<< Updated upstream
 #include "vportalleaderboard.h"
+=======
+//#include "vportalleaderboard.h"
+>>>>>>> Stashed changes
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -22,7 +26,11 @@ using namespace vgui;
 using namespace BaseModUI;
 
 extern int g_nPortalScoreTempUpdate;
+<<<<<<< Updated upstream
 extern int g_nTimeScoreTempUpdate;
+=======
+/*extern */int g_nTimeScoreTempUpdate = 0;
+>>>>>>> Stashed changes
 
 //=============================================================================
 static void LeaveGameOkCallback()
@@ -31,6 +39,7 @@ static void LeaveGameOkCallback()
 
 	CUIGameData::Get()->GameStats_ReportAction( "challenge_quit", engine->GetLevelNameShort(), g_nTimeScoreTempUpdate );
 
+<<<<<<< Updated upstream
 	CPortalLeaderboardPanel* self = 
 		static_cast< CPortalLeaderboardPanel* >( CBaseModPanel::GetSingleton().GetWindow( WT_PORTALLEADERBOARDHUD ) );
 
@@ -38,6 +47,15 @@ static void LeaveGameOkCallback()
 	{
 		self->Close();
 	}
+=======
+	//CPortalLeaderboardPanel* self = 
+	//	static_cast< CPortalLeaderboardPanel* >( CBaseModPanel::GetSingleton().GetWindow( WT_PORTALLEADERBOARDHUD ) );
+
+	//if ( self )
+	//{
+	//	self->Close();
+	//}
+>>>>>>> Stashed changes
 
 	GameUI().HideGameUI();
 
@@ -69,6 +87,7 @@ static void LeaveGameOkCallback()
 static void GoToHubOkCallback()
 {
 	GameUI().AllowEngineHideGameUI();
+<<<<<<< Updated upstream
 	CPortalLeaderboardPanel* pSelf = 
 		static_cast< CPortalLeaderboardPanel* >( CBaseModPanel::GetSingleton().GetWindow( WT_COOPEXITCHOICE ) );
 
@@ -77,6 +96,16 @@ static void GoToHubOkCallback()
 		bool bWaitScreen =  CUIGameData::Get()->OpenWaitScreen( "#PORTAL2_WaitScreen_GoingToHub", 0.0f, NULL );
 		pSelf->PostMessage( pSelf, new KeyValues( "MsgPreGoToHub" ), bWaitScreen ? 2.0f : 0.0f );
 	}
+=======
+	//CPortalLeaderboardPanel* pSelf = 
+	//	static_cast< CPortalLeaderboardPanel* >( CBaseModPanel::GetSingleton().GetWindow( WT_COOPEXITCHOICE ) );
+
+	//if ( pSelf )
+	//{
+	//	bool bWaitScreen =  CUIGameData::Get()->OpenWaitScreen( "#PORTAL2_WaitScreen_GoingToHub", 0.0f, NULL );
+	//	pSelf->PostMessage( pSelf, new KeyValues( "MsgPreGoToHub" ), bWaitScreen ? 2.0f : 0.0f );
+	//}
+>>>>>>> Stashed changes
 }
 
 

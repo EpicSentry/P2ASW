@@ -15,6 +15,11 @@
 #include <vgui/VGUI.h>
 #include <vgui_controls/Frame.h>
 
+#ifdef PORTAL2
+#undef PropertySheet
+#include "PropertySheet.h"
+#endif
+
 namespace vgui
 {
 

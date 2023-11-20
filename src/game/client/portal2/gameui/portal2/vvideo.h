@@ -10,6 +10,7 @@
 #include "basemodui.h"
 #include "VFlyoutMenu.h"
 #include "OptionsSubVideo.h"
+#include "..\public\modes.h"
 
 // Matched to number of entries in .RES file
 #define MAX_DYNAMIC_VIDEO_MODES 43

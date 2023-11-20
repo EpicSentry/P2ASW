@@ -13,7 +13,11 @@
 #include "matchmaking/imatchframework.h"
 #include "filesystem.h"
 #include "fmtstr.h"
+<<<<<<< Updated upstream
 #include "c_portal_gamestats.h"
+=======
+//#include "c_portal_gamestats.h"
+>>>>>>> Stashed changes
 #ifndef NO_STEAM
 #include "steam/steam_api.h"
 #endif
@@ -810,6 +814,7 @@ static int GameStats_GetActionIndex( char const *szReportAction )
 
 static int GameStats_GetReportMapNameIndex( char const *szMapName )
 {
+<<<<<<< Updated upstream
 	int nCounter = 1000; // resolve it as single player map
 #define CFG( spmap, ... ) ++ nCounter; if ( !V_stricmp( szMapName, #spmap ) ) return nCounter;
 #include "xlast_portal2/inc_sp_maps.inc"
@@ -818,11 +823,22 @@ static int GameStats_GetReportMapNameIndex( char const *szMapName )
 #define CFG( mpcoopmap, ... ) ++ nCounter; if ( !V_stricmp( szMapName, #mpcoopmap ) ) return nCounter;
 #include "xlast_portal2/inc_coop_maps.inc"
 #undef CFG
+=======
+//	int nCounter = 1000; // resolve it as single player map
+//#define CFG( spmap, ... ) ++ nCounter; if ( !V_stricmp( szMapName, #spmap ) ) return nCounter;
+//#include "xlast_portal2/inc_sp_maps.inc"
+//#undef CFG
+//	nCounter = 0; // resolve it as coop map
+//#define CFG( mpcoopmap, ... ) ++ nCounter; if ( !V_stricmp( szMapName, #mpcoopmap ) ) return nCounter;
+//#include "xlast_portal2/inc_coop_maps.inc"
+//#undef CFG
+>>>>>>> Stashed changes
 	return 0;
 }
 
 void CUIGameData::GameStats_ReportAction( char const *szReportAction, char const *szMapName, uint64 uiFlags )
 {
+<<<<<<< Updated upstream
 	KeyValues *kv = new KeyValues( "gamestat_action" );
 	KeyValues::AutoDelete autodelete_kv( kv );
 	kv->SetInt( "version", 1 );
@@ -846,6 +862,31 @@ void CUIGameData::GameStats_ReportAction( char const *szReportAction, char const
 	// Send these stats to OGS
 	g_PortalGameStats.Event_UIEvent( xuid, szReportAction, uiFlags, szMapName );
 #endif //!defined( _GAMECONSOLE )
+=======
+//	KeyValues *kv = new KeyValues( "gamestat_action" );
+//	KeyValues::AutoDelete autodelete_kv( kv );
+//	kv->SetInt( "version", 1 );
+//	uint64 xuid = 0ull;
+//	if ( IPlayerLocal *pPlayerLocal = g_pMatchFramework->GetMatchSystem()->GetPlayerManager()->GetLocalPlayer( 0 ) )
+//	{
+//		xuid = pPlayerLocal->GetXUID();
+//	}
+//	kv->SetUint64( "xuid", xuid );
+//	kv->SetUint64( "*mac", 0ull ); // this will be filled out with console MAC-address
+//	kv->SetInt( "game_action", GameStats_GetActionIndex( szReportAction ) );
+//	kv->SetInt( "game_mapid", GameStats_GetReportMapNameIndex( szMapName ) );
+//	kv->SetUint64( "game_flags", uiFlags );
+//
+//	IDatacenterCmdBatch *pBatch = g_pMatchFramework->GetMatchSystem()->GetDatacenter()->CreateCmdBatch();
+//	pBatch->SetDestroyWhenFinished( true );
+//	pBatch->SetRetryCmdTimeout( 30.0f );
+//	pBatch->AddCommand( kv );
+//
+//#if !defined( _GAMECONSOLE ) && !defined( NO_STEAM )
+//	// Send these stats to OGS
+//	g_PortalGameStats.Event_UIEvent( xuid, szReportAction, uiFlags, szMapName );
+//#endif //!defined( _GAMECONSOLE )
+>>>>>>> Stashed changes
 }
 
 

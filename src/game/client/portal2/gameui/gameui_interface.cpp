@@ -5,11 +5,19 @@
 // $NoKeywords: $
 //===========================================================================//
 #include <cbase.h>
+<<<<<<< Updated upstream
 /*
 #ifdef( _WIN32 ) && !defined( _X360 )
 #include <windows.h>
 #endif
 */
+=======
+
+#if !defined( _X360 )
+#include <windows.h>
+#endif
+
+>>>>>>> Stashed changes
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
@@ -247,7 +255,11 @@ void CGameUI::Initialize( CreateInterfaceFn factory )
 #ifdef _X360
 	xonline = (IXOnline *)factory( XONLINE_INTERFACE_VERSION, NULL );
 #endif
+<<<<<<< Updated upstream
 #ifdef SWARM_DLL
+=======
+#ifdef PORTAL2
+>>>>>>> Stashed changes
 	g_pMatchExt = ( IMatchExtSwarm * ) factory( IMATCHEXT_SWARM_INTERFACE, NULL );
 #endif
 	bFailed = !enginesurfacefuncs || !gameuifuncs || !enginevguifuncs ||
@@ -255,7 +267,11 @@ void CGameUI::Initialize( CreateInterfaceFn factory )
 #ifdef _X360
 		!xonline ||
 #endif
+<<<<<<< Updated upstream
 #ifdef SWARM_DLL
+=======
+#ifdef PORTAL2
+>>>>>>> Stashed changes
 		!g_pMatchExt ||
 #endif
 		!g_pMatchFramework;
@@ -751,7 +767,11 @@ void CGameUI::OnDisconnectFromServer( uint8 eSteamLoginFailure )
 	m_iGameConnectionPort = 0;
 	m_iGameQueryPort = 0;
 
+<<<<<<< Updated upstream
 	VGui_ClearTransitionVideoPanels();
+=======
+	//VGui_ClearTransitionVideoPanels();
+>>>>>>> Stashed changes
 
 	if ( g_hLoadingBackgroundDialog )
 	{
@@ -1074,7 +1094,11 @@ bool CGameUI::LoadingProgressWantsIsolatedRender( bool bContextValid )
 
 bool CGameUI::IsPlayingFullScreenVideo()
 {
+<<<<<<< Updated upstream
 	return VGui_IsPlayingFullScreenVideo();
+=======
+	return false;// VGui_IsPlayingFullScreenVideo();
+>>>>>>> Stashed changes
 }
 
 bool CGameUI::IsTransitionEffectEnabled()

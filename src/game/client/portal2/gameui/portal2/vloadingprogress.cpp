@@ -439,13 +439,27 @@ void LoadingProgress::SetupControlStates()
 		}
 		else
 		{
+<<<<<<< Updated upstream
 			const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
+=======
+			//const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
+>>>>>>> Stashed changes
 			// determine image sequence
 			CUtlString filename;
 			while ( 1 )
 			{
+<<<<<<< Updated upstream
 				int nImageIndex = imageNames.Count();
 				filename = CFmtStr( "%s_%d%s", filenamePrefix.Get(), nImageIndex + 1, ( aspectRatioInfo.m_bIsWidescreen ? "_widescreen" : "" ) );
+=======
+				int screenWide, screenTall;
+				surface()->GetScreenSize(screenWide, screenTall);
+				float aspectRatio = (float)screenWide / (float)screenTall;
+				bool bIsWidescreen = aspectRatio >= 1.5999f;
+
+				int nImageIndex = imageNames.Count();
+				filename = CFmtStr( "%s_%d%s", filenamePrefix.Get(), nImageIndex + 1, (bIsWidescreen ? "_widescreen" : "" ) );
+>>>>>>> Stashed changes
 				if ( !g_pFullFileSystem->FileExists( CFmtStr( "materials/%s.vmt", filename.Get() ), "GAME" ) )
 				{
 					// end of list
