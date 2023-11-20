@@ -4505,7 +4505,7 @@ void ComputeAABBContactsWithBrushEntity( ContactVector& contacts, const Vector& 
 	ComputeAABBContactsWithBrushEntity( contacts, NULL, 0, boxOrigin, boxMin, boxMax, pBrushEntity, contentsMask );
 }
 
-#define COMMON_BRUSH_SIDES 8
+#define COMMON_BRUSH_SIDES 8 // Or 6? It's counting planes...
 void ComputeAABBContactsWithBrushEntity_Old( ContactVector& contacts, const cplane_t *pClipPlanes, int iClipPlaneCount, const Vector& boxOrigin, const Vector& boxMin, const Vector& boxMax, CBaseEntity* pBrushEntity, int contentsMask)
 {
 	//typedef CUtlVector<int>	BrushIndexVector;
@@ -4561,7 +4561,7 @@ void ComputeAABBContactsWithBrushEntity_Old( ContactVector& contacts, const cpla
 			Assert( !bHasBrushInfo );
 
 		if ( !pBrushEntity->IsWorld() )
-			Msg("This entity is world!!");
+			Msg("This entity is not the world!! Whoohoo!!");
 #endif
 
 		if( iNumBrushSides <= 0 )
