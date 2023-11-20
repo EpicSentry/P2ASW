@@ -1,0 +1,92 @@
+void __thiscall CProjectedWallEntity::GetExtents(
+        CProjectedWallEntity *this,
+        Vector *outMins,
+        Vector *outMaxs,
+        float flWidthScale)
+{
+  __int64 v5; // xmm0_8
+  float v6; // xmm1_4
+  float v7; // xmm5_4
+  float v8; // xmm4_4
+  float v9; // xmm6_4
+  float v10; // xmm1_4
+  float v11; // xmm2_4
+  double x; // xmm4_8
+  float v13; // xmm3_4
+  float v14; // xmm4_4
+  double y; // xmm4_8
+  float v16; // xmm4_4
+  double z; // xmm4_8
+  double v18; // xmm0_8
+  double v19; // xmm1_8
+  float v20; // xmm5_4
+  float v21; // xmm4_4
+  double v22; // xmm0_8
+  float v23; // xmm2_4
+  double v24; // xmm0_8
+  Vector vWallSweptBoxMins; // [esp+4h] [ebp-34h] BYREF
+  QAngle qAngles; // [esp+10h] [ebp-28h] BYREF
+  Vector vTmpExtent1; // [esp+1Ch] [ebp-1Ch] BYREF
+  Vector vecForward; // [esp+28h] [ebp-10h] BYREF
+  float v29; // [esp+34h] [ebp-4h]
+  float flWidthScalea; // [esp+48h] [ebp+10h]
+
+  v5 = *(_QWORD *)&this->m_angRotation.m_Value.x;
+  qAngles.z = this->m_angRotation.m_Value.z;
+  *(_QWORD *)&qAngles.x = v5;
+  AngleVectors(&qAngles, &vecForward, &vTmpExtent1, &vWallSweptBoxMins);
+  *(float *)&v5 = (float)(this->m_flWidth.m_Value * flWidthScale) * 0.5;
+  v6 = this->m_flHeight.m_Value * 0.5;
+  v7 = vTmpExtent1.y * *(float *)&v5;
+  v8 = vTmpExtent1.x * *(float *)&v5;
+  v9 = vTmpExtent1.z * *(float *)&v5;
+  flWidthScalea = vWallSweptBoxMins.y * v6;
+  v29 = vWallSweptBoxMins.z * v6;
+  vTmpExtent1.y = (float)((float)(COERCE_FLOAT(LODWORD(vecForward.y) ^ _mask__NegFloat_) * 0.00000011920929)
+                        - (float)(vWallSweptBoxMins.y * v6))
+                - (float)(vTmpExtent1.y * *(float *)&v5);
+  vTmpExtent1.z = (float)((float)(COERCE_FLOAT(LODWORD(vecForward.z) ^ _mask__NegFloat_) * 0.00000011920929)
+                        - (float)(vWallSweptBoxMins.z * v6))
+                - (float)(vTmpExtent1.z * *(float *)&v5);
+  vTmpExtent1.x = (float)((float)(COERCE_FLOAT(LODWORD(vecForward.x) ^ _mask__NegFloat_) * 0.00000011920929)
+                        - (float)(vWallSweptBoxMins.x * v6))
+                - (float)(vTmpExtent1.x * *(float *)&v5);
+  qAngles.x = v8;
+  qAngles.y = v7;
+  v10 = (float)((float)(vecForward.x * 0.00000011920929) + (float)(vWallSweptBoxMins.x * v6)) + v8;
+  v11 = (float)((float)(vecForward.y * 0.00000011920929) + flWidthScalea) + v7;
+  x = vTmpExtent1.x;
+  qAngles.z = v9;
+  v13 = (float)((float)(0.00000011920929 * vecForward.z) + v29) + v9;
+  if ( vTmpExtent1.x > (double)v10 )
+    x = v10;
+  v14 = x;
+  vWallSweptBoxMins.x = v14;
+  y = vTmpExtent1.y;
+  if ( vTmpExtent1.y > (double)v11 )
+    y = v11;
+  v16 = y;
+  vWallSweptBoxMins.y = v16;
+  z = vTmpExtent1.z;
+  if ( vTmpExtent1.z > (double)v13 )
+    z = v13;
+  v18 = vTmpExtent1.x;
+  v19 = v10;
+  v20 = z;
+  if ( vTmpExtent1.x < v19 )
+    v18 = v19;
+  v21 = v18;
+  v22 = vTmpExtent1.y;
+  if ( vTmpExtent1.y < (double)v11 )
+    v22 = v11;
+  v23 = v22;
+  v24 = vTmpExtent1.z;
+  if ( vTmpExtent1.z < (double)v13 )
+    v24 = v13;
+  outMins->x = vWallSweptBoxMins.x;
+  outMins->y = vWallSweptBoxMins.y;
+  outMins->z = v20;
+  outMaxs->x = v21;
+  outMaxs->y = v23;
+  outMaxs->z = v24;
+}

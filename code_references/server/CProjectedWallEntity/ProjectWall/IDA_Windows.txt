@@ -1,0 +1,372 @@
+// local variable allocation has failed, the output may be wrong!
+// bad sp value at call has been detected, the output may be wrong!
+void __usercall CProjectedWallEntity::ProjectWall(
+        CProjectedWallEntity *this@<ecx>,
+        float a2@<ebp>,
+        int a3@<edi>,
+        int a4@<esi>)
+{
+  int v5; // eax
+  __int64 v6; // xmm0_8
+  CProjectedWallEntity_vtbl *v7; // edx
+  const Vector *(__thiscall *GetEndPoint)(CBaseProjectedEntity *); // eax
+  int v9; // eax
+  __int64 v10; // xmm0_8
+  void (__thiscall *GetVectors)(CBaseEntity *, Vector *, Vector *, Vector *); // edx
+  struct CPhysCollide *v12; // eax
+  const CPolyhedron *PolyhedronFromPlanes; // edi
+  struct CPhysCollide *m_pWallCollideable; // eax
+  IPhysicsObject *Custom; // edi
+  const struct CPhysCollide *(__thiscall *GetCollide)(IPhysicsObject *); // edx
+  int v17; // eax
+  float x; // xmm1_4
+  float z; // xmm4_4
+  float y; // xmm5_4
+  edict_t *m_pPev; // ecx
+  float v22; // xmm0_4
+  float v23; // xmm2_4
+  float v24; // xmm3_4
+  edict_t *v25; // ecx
+  __int128 v26; // xmm0
+  edict_t *v27; // ecx
+  edict_t *v28; // ecx
+  edict_t *v29; // ecx
+  edict_t *v30; // ecx
+  float v31; // eax
+  edict_t *v32; // ecx
+  int v34; // [esp+40h] [ebp-754h] BYREF
+  solid_t solid; // [esp+4Ch] [ebp-748h] BYREF
+  Vector vRight; // [esp+68Ch] [ebp-108h] BYREF
+  Vector vUp; // [esp+698h] [ebp-FCh] BYREF
+  Vector vecForward; // [esp+6A4h] [ebp-F0h] BYREF
+  Vector vecUp; // [esp+6B0h] [ebp-E4h] BYREF
+  float v40; // [esp+6BCh] [ebp-D8h]
+  Vector v41; // [esp+6C0h] [ebp-D4h]
+  float v42; // [esp+6CCh] [ebp-C8h]
+  float v43; // [esp+6D0h] [ebp-C4h]
+  float v44; // [esp+6D4h] [ebp-C0h]
+  float v45; // [esp+6D8h] [ebp-BCh]
+  float v46; // [esp+6DCh] [ebp-B8h]
+  float v47; // [esp+6E0h] [ebp-B4h] BYREF
+  float v48; // [esp+6E4h] [ebp-B0h]
+  float v49; // [esp+6E8h] [ebp-ACh]
+  Vector vVerts[4]; // [esp+6ECh] [ebp-A8h] BYREF
+  float v51; // [esp+71Ch] [ebp-78h]
+  Vector vecRight; // [esp+720h] [ebp-74h] BYREF
+  Vector vMaxs; // [esp+72Ch] [ebp-68h]
+  float v54; // [esp+738h] [ebp-5Ch]
+  Vector vWallEndPoint; // [esp+73Ch] [ebp-58h] BYREF
+  __int128 vMins; // [esp+748h] [ebp-4Ch] OVERLAPPED BYREF
+  float v57; // [esp+764h] [ebp-30h]
+  __int64 v58; // [esp+768h] [ebp-2Ch]
+  float v59; // [esp+770h] [ebp-24h]
+  Vector vWallStartPoint; // [esp+774h] [ebp-20h] BYREF
+  CPhysConvex *pTempConvex; // [esp+780h] [ebp-14h]
+  Vector vSetMins; // [esp+784h] [ebp-10h]
+  float retaddr; // [esp+794h] [ebp+0h]
+
+  vSetMins.y = a2;
+  vSetMins.z = retaddr;
+  CProjectedWallEntity::CleanupWall(this);
+  CBaseEntity::AddEffects(this, 8);
+  CProjectedWallEntity::CheckForPlayersOnBridge(this);
+  v5 = ((int (__thiscall *)(CProjectedWallEntity *, int, int))this->GetStartPoint)(this, a3, a4);
+  v6 = *(_QWORD *)v5;
+  v7 = this->CPaintableEntity<CBaseProjectedEntity>::CBaseProjectedEntity::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+  v59 = *(float *)(v5 + 8);
+  GetEndPoint = v7->GetEndPoint;
+  v58 = v6;
+  v9 = (int)GetEndPoint(this);
+  v10 = *(_QWORD *)v9;
+  GetVectors = this->GetVectors;
+  v54 = *(float *)(v9 + 8);
+  *(_QWORD *)&vMaxs.y = v10;
+  GetVectors(this, &vUp, (Vector *)&vVerts[3].y, &vecForward);
+  if ( sv_thinnerprojectedwalls.m_pParent->m_Value.m_nValue )
+  {
+    v47 = *(float *)&v58 + (float)(vVerts[3].y * 32.0);
+    vVerts[0].x = *(float *)&v58 - (float)(vVerts[3].y * 32.0);
+    v48 = *((float *)&v58 + 1) + (float)(vVerts[3].z * 32.0);
+    v49 = v59 + (float)(v51 * 32.0);
+    vVerts[1].x = vMaxs.y - (float)(vVerts[3].y * 32.0);
+    vVerts[0].y = *((float *)&v58 + 1) - (float)(vVerts[3].z * 32.0);
+    LODWORD(vMins) = &v47;
+    vVerts[0].z = v59 - (float)(v51 * 32.0);
+    HIDWORD(vMins) = &vVerts[2];
+    DWORD1(vMins) = vVerts;
+    DWORD2(vMins) = &vVerts[1];
+    vVerts[1].y = vMaxs.z - (float)(vVerts[3].z * 32.0);
+    vVerts[1].z = v54 - (float)(v51 * 32.0);
+    vVerts[2].x = vMaxs.y + (float)(vVerts[3].y * 32.0);
+    vVerts[2].y = vMaxs.z + (float)(vVerts[3].z * 32.0);
+    vVerts[2].z = v54 + (float)(v51 * 32.0);
+    LODWORD(vWallStartPoint.x) = physcollision->ConvexFromVerts(physcollision, &vMins, 4);
+    v12 = physcollision->ConvertConvexToCollide(physcollision, &vWallStartPoint, 1);
+LABEL_7:
+    this->m_pWallCollideable = v12;
+    if ( v12 )
+    {
+      V_strncpy(&solid.parent[500], "hard_light_bridge", 512);
+      m_pWallCollideable = this->m_pWallCollideable;
+      *(_QWORD *)&solid.massCenterOverride.z = *(_QWORD *)&g_PhysDefaultObjectParams.massCenterOverride;
+      *(_QWORD *)&solid.contents = *(_QWORD *)&g_PhysDefaultObjectParams.inertia;
+      *(_QWORD *)&solid.params.mass = *(_QWORD *)&g_PhysDefaultObjectParams.rotdamping;
+      LODWORD(solid.params.damping) = g_PhysDefaultObjectParams.pName;
+      *(_QWORD *)&solid.params.rotInertiaLimit = *(_QWORD *)&g_PhysDefaultObjectParams.volume;
+      solid.params.pGameData = *(void **)&g_PhysDefaultObjectParams.enableCollisions;
+      LODWORD(solid.params.rotdamping) = this;
+      Custom = PhysModelCreateCustom(
+                 this,
+                 m_pWallCollideable,
+                 &vec3_origin,
+                 &vec3_angle,
+                 "hard_light_bridge",
+                 1,
+                 (solid_t *)&v34);
+      if ( Custom )
+      {
+        if ( this->m_pPhysicsObject )
+          this->VPhysicsDestroyObject(this);
+        CBaseEntity::VPhysicsSetObject(this, Custom);
+        Custom->RecheckContactPoints(Custom, 1);
+        if ( Custom->GetCollide(Custom) )
+        {
+          vecRight = vec3_origin;
+          vWallEndPoint = vec3_origin;
+          GetCollide = Custom->GetCollide;
+          v57 = *(float *)&physcollision->__vftable;
+          v17 = ((int (__thiscall *)(IPhysicsObject *, Vector *, QAngle *))GetCollide)(
+                  Custom,
+                  &vec3_origin,
+                  &vec3_angle);
+          (*(void (__thiscall **)(IPhysicsCollision *, Vector *, Vector *, int))(LODWORD(v57) + 92))(
+            physcollision,
+            &vWallEndPoint,
+            &vecRight,
+            v17);
+          x = vWallEndPoint.x;
+          z = vWallEndPoint.z;
+          y = vWallEndPoint.y;
+          if ( vWallEndPoint.x != this->m_vWorldSpace_WallMins.m_Value.x
+            || vWallEndPoint.y != this->m_vWorldSpace_WallMins.m_Value.y
+            || vWallEndPoint.z != this->m_vWorldSpace_WallMins.m_Value.z )
+          {
+            if ( this->m_Network.m_TimerEvent.m_bRegistered )
+            {
+              *((_BYTE *)&this->m_Network + 76) |= 1u;
+            }
+            else
+            {
+              m_pPev = this->m_Network.m_pPev;
+              if ( m_pPev )
+              {
+                CBaseEdict::StateChanged(m_pPev, 0x3CCu);
+                z = vWallEndPoint.z;
+                y = vWallEndPoint.y;
+                x = vWallEndPoint.x;
+              }
+            }
+            this->m_vWorldSpace_WallMins.m_Value.x = x;
+            this->m_vWorldSpace_WallMins.m_Value.y = y;
+            this->m_vWorldSpace_WallMins.m_Value.z = z;
+          }
+          v22 = vecRight.x;
+          v23 = vecRight.z;
+          v24 = vecRight.y;
+          if ( vecRight.x != this->m_vWorldSpace_WallMaxs.m_Value.x
+            || vecRight.y != this->m_vWorldSpace_WallMaxs.m_Value.y
+            || vecRight.z != this->m_vWorldSpace_WallMaxs.m_Value.z )
+          {
+            if ( this->m_Network.m_TimerEvent.m_bRegistered )
+            {
+              *((_BYTE *)&this->m_Network + 76) |= 1u;
+            }
+            else
+            {
+              v25 = this->m_Network.m_pPev;
+              if ( v25 )
+              {
+                CBaseEdict::StateChanged(v25, 0x3D8u);
+                z = vWallEndPoint.z;
+                y = vWallEndPoint.y;
+                x = vWallEndPoint.x;
+                v23 = vecRight.z;
+                v24 = vecRight.y;
+                v22 = vecRight.x;
+              }
+            }
+            this->m_vWorldSpace_WallMaxs.m_Value.x = v22;
+            this->m_vWorldSpace_WallMaxs.m_Value.y = v24;
+            this->m_vWorldSpace_WallMaxs.m_Value.z = v23;
+          }
+          vWallStartPoint.y = x - *(float *)&v58;
+          CBaseEntity::SetSize(this, COERCE_CONST_VECTOR_(y - *((float *)&v58 + 1)), COERCE_CONST_VECTOR_(z - v59));
+          v26 = 0i64;
+          *(float *)&v26 = fsqrt(
+                             (float)((float)((float)(*((float *)&v58 + 1) - vMaxs.z)
+                                           * (float)(*((float *)&v58 + 1) - vMaxs.z))
+                                   + (float)((float)(v59 - v54) * (float)(v59 - v54)))
+                           + (float)((float)(*(float *)&v58 - vMaxs.y) * (float)(*(float *)&v58 - vMaxs.y)));
+          vMins = v26;
+          if ( this->m_flLength.m_Value != *(float *)&v26 )
+          {
+            if ( this->m_Network.m_TimerEvent.m_bRegistered )
+            {
+              *((_BYTE *)&this->m_Network + 76) |= 1u;
+            }
+            else
+            {
+              v27 = this->m_Network.m_pPev;
+              if ( v27 )
+                CBaseEdict::StateChanged(v27, 0x3E8u);
+            }
+            LODWORD(this->m_flLength.m_Value) = vMins;
+          }
+          if ( this->m_flWidth.m_Value != 64.0 )
+          {
+            if ( this->m_Network.m_TimerEvent.m_bRegistered )
+            {
+              *((_BYTE *)&this->m_Network + 76) |= 1u;
+            }
+            else
+            {
+              v28 = this->m_Network.m_pPev;
+              if ( v28 )
+                CBaseEdict::StateChanged(v28, 0x3F0u);
+            }
+            this->m_flWidth.m_Value = FLOAT_64_0;
+          }
+          if ( this->m_flHeight.m_Value != 0.015625 )
+          {
+            if ( this->m_Network.m_TimerEvent.m_bRegistered )
+            {
+              *((_BYTE *)&this->m_Network + 76) |= 1u;
+            }
+            else
+            {
+              v29 = this->m_Network.m_pPev;
+              if ( v29 )
+                CBaseEdict::StateChanged(v29, 0x3ECu);
+            }
+            this->m_flHeight.m_Value = FLOAT_0_015625;
+          }
+          CCollisionProperty::MarkSurroundingBoundsDirty(&this->m_Collision);
+          CCollisionProperty::MarkPartitionHandleDirty(&this->m_Collision);
+          CCollisionProperty::UpdatePartition(&this->m_Collision);
+          if ( (this->m_iEFlags & 0x800) != 0 )
+            CBaseEntity::CalcAbsolutePosition(this);
+          AngleVectors(&this->m_angAbsRotation, 0, (Vector *)&solid.params.volume, &vRight);
+          if ( vRight.z <= 0.69999999 && vRight.z >= -0.69999999
+            || *(float *)&solid.params.enableCollisions <= -0.69999999
+            || (HIBYTE(vSetMins.x) = 1, *(float *)&solid.params.enableCollisions >= 0.69999999) )
+          {
+            HIBYTE(vSetMins.x) = 0;
+          }
+          if ( this->m_bIsHorizontal.m_Value != HIBYTE(vSetMins.x) )
+          {
+            if ( this->m_Network.m_TimerEvent.m_bRegistered )
+            {
+              *((_BYTE *)&this->m_Network + 76) |= 1u;
+            }
+            else
+            {
+              v30 = this->m_Network.m_pPev;
+              if ( v30 )
+                CBaseEdict::StateChanged(v30, 0x3F4u);
+            }
+            this->m_bIsHorizontal.m_Value = HIBYTE(vSetMins.x);
+          }
+          CProjectedWallEntity::DisplaceObstructingEntities(this);
+          LODWORD(v31) = (int)ceil((float)(this->m_flLength.m_Value / this->m_flSegmentLength.m_Value));
+          v57 = v31;
+          if ( this->m_nNumSegments.m_Value != LODWORD(v31) )
+          {
+            if ( this->m_Network.m_TimerEvent.m_bRegistered )
+            {
+              *((_BYTE *)&this->m_Network + 76) |= 1u;
+            }
+            else
+            {
+              v32 = this->m_Network.m_pPev;
+              if ( v32 )
+              {
+                CBaseEdict::StateChanged(v32, 0x3F8u);
+                v31 = v57;
+              }
+            }
+            *(float *)&this->m_nNumSegments.m_Value = v31;
+          }
+          pTempConvex = (CPhysConvex *)this->m_nNumSegments.m_Value;
+          vWallStartPoint.z = 0.0;
+          this->m_PaintPowers.m_Size = 0;
+          CUtlVector<char const *,CUtlMemory<char const *,int>>::InsertMultipleBefore(
+            (CUtlVector<CParticleSystemDefinition *,CUtlMemory<CParticleSystemDefinition *,int> > *)&this->m_PaintPowers,
+            SLODWORD(vWallStartPoint.z),
+            (int)pTempConvex);
+          this->CleansePaint(&this->IPaintableEntity);
+        }
+      }
+    }
+    return;
+  }
+  LODWORD(vecUp.x) = LODWORD(vUp.x) ^ _mask__NegFloat_;
+  LODWORD(vecUp.y) = LODWORD(vUp.y) ^ _mask__NegFloat_;
+  LODWORD(vecUp.z) = LODWORD(vUp.z) ^ _mask__NegFloat_;
+  v40 = (float)((float)(*(float *)&v58 * COERCE_FLOAT(LODWORD(vUp.x) ^ _mask__NegFloat_))
+              + (float)(*((float *)&v58 + 1) * COERCE_FLOAT(LODWORD(vUp.y) ^ _mask__NegFloat_)))
+      + (float)(v59 * COERCE_FLOAT(LODWORD(vUp.z) ^ _mask__NegFloat_));
+  v42 = (float)((float)(vMaxs.y * vUp.x) + (float)(vMaxs.z * vUp.y)) + (float)(v54 * vUp.z);
+  v41 = vUp;
+  vWallStartPoint.z = (float)((float)(vVerts[3].z * 64.0) * 0.5) + *((float *)&v58 + 1);
+  *(float *)&pTempConvex = (float)((float)(v51 * 64.0) * 0.5) + v59;
+  v46 = (float)((float)((float)((float)((float)(vVerts[3].y * 64.0) * 0.5) + *(float *)&v58) * vVerts[3].y)
+              + (float)(vWallStartPoint.z * vVerts[3].z))
+      + (float)(*(float *)&pTempConvex * v51);
+  v43 = vVerts[3].y;
+  v44 = vVerts[3].z;
+  v45 = v51;
+  vWallStartPoint.y = (float)(vVerts[3].y * 64.0) * 0.5;
+  vWallStartPoint.z = (float)(vVerts[3].z * 64.0) * 0.5;
+  LODWORD(v47) = LODWORD(vVerts[3].y) ^ _mask__NegFloat_;
+  LODWORD(v48) = LODWORD(vVerts[3].z) ^ _mask__NegFloat_;
+  LODWORD(v49) = LODWORD(v51) ^ _mask__NegFloat_;
+  vVerts[0].x = (float)((float)(COERCE_FLOAT(LODWORD(vVerts[3].y) ^ _mask__NegFloat_)
+                              * (float)(*(float *)&v58 - vWallStartPoint.y))
+                      + (float)(COERCE_FLOAT(LODWORD(vVerts[3].z) ^ _mask__NegFloat_)
+                              * (float)(*((float *)&v58 + 1) - vWallStartPoint.z)))
+              + (float)(COERCE_FLOAT(LODWORD(v51) ^ _mask__NegFloat_) * (float)(v59 - (float)((float)(v51 * 64.0) * 0.5)));
+  v57 = vecForward.x * 0.015625;
+  vMaxs.x = vecForward.y * 0.015625;
+  vWallStartPoint.y = (float)(vecForward.x * 0.015625) * 0.5;
+  *(float *)&pTempConvex = (float)(vecForward.z * 0.015625) * 0.5;
+  *((float *)&vMins + 1) = vWallStartPoint.y + *(float *)&v58;
+  *((float *)&vMins + 3) = *(float *)&pTempConvex + v59;
+  vVerts[1].y = (float)((float)((float)((float)((float)(vecForward.y * 0.015625) * 0.5) + *((float *)&v58 + 1))
+                              * vecForward.y)
+                      + (float)((float)(vWallStartPoint.y + *(float *)&v58) * vecForward.x))
+              + (float)((float)(*(float *)&pTempConvex + v59) * vecForward.z);
+  *((float *)&vMins + 2) = vecForward.y * 0.015625;
+  *(Vector *)&vVerts[0].y = vecForward;
+  LODWORD(vVerts[1].z) = LODWORD(vecForward.x) ^ _mask__NegFloat_;
+  vWallStartPoint.z = (float)(vecForward.y * 0.015625) * 0.5;
+  LODWORD(vVerts[2].y) = LODWORD(vecForward.z) ^ _mask__NegFloat_;
+  vVerts[2].z = (float)((float)(COERCE_FLOAT(LODWORD(vecForward.y) ^ _mask__NegFloat_)
+                              * (float)(*((float *)&v58 + 1) - vWallStartPoint.z))
+                      + (float)(COERCE_FLOAT(LODWORD(vecForward.x) ^ _mask__NegFloat_)
+                              * (float)(*(float *)&v58 - vWallStartPoint.y)))
+              + (float)(COERCE_FLOAT(LODWORD(vecForward.z) ^ _mask__NegFloat_) * (float)(v59 - *(float *)&pTempConvex));
+  LODWORD(vVerts[2].x) = LODWORD(vecForward.y) ^ _mask__NegFloat_;
+  PolyhedronFromPlanes = GeneratePolyhedronFromPlanes(&vecUp.x, 6, 0.0, 0);
+  if ( !PolyhedronFromPlanes )
+  {
+    _Warning("CProjectedWallEntity: GeneratePolyhedronFromPlanes failed! Get a save game for me!.\n");
+    return;
+  }
+  LODWORD(vWallStartPoint.x) = physcollision->ConvexFromConvexPolyhedron(physcollision, PolyhedronFromPlanes);
+  PolyhedronFromPlanes->Release((CPolyhedron *)PolyhedronFromPlanes);
+  if ( LODWORD(vWallStartPoint.x) )
+  {
+    v12 = physcollision->ConvertConvexToCollide(physcollision, &vWallStartPoint, 1);
+    goto LABEL_7;
+  }
+}

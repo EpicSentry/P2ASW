@@ -1,0 +1,51 @@
+void __thiscall CPropWallProjector::~CPropWallProjector(CPropWallProjector *this)
+{
+  bool v2; // zf
+  CSoundEnvelopeController *Controller; // edi
+  CSoundEnvelopeController *v4; // edi
+  unsigned int m_Index; // ecx
+  int v6; // eax
+  CEntInfo *v7; // edx
+  unsigned int v8; // ecx
+  int v9; // eax
+  CBaseEntity **v10; // eax
+
+  v2 = this->m_pAmbientSound == 0;
+  this->__vftable = (CPropWallProjector_vtbl *)&CPropWallProjector::`vftable';
+  if ( !v2 )
+  {
+    Controller = CSoundEnvelopeController::GetController();
+    Controller->Shutdown(Controller, this->m_pAmbientSound);
+    Controller->SoundDestroy(Controller, this->m_pAmbientSound);
+  }
+  if ( this->m_pAmbientMusic )
+  {
+    v4 = CSoundEnvelopeController::GetController();
+    v4->Shutdown(v4, this->m_pAmbientMusic);
+    v4->SoundDestroy(v4, this->m_pAmbientMusic);
+  }
+  m_Index = this->m_hAmbientSoundProxy.m_Index;
+  if ( m_Index != -1 )
+  {
+    v6 = (unsigned __int16)m_Index;
+    v7 = &g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index];
+    v8 = HIWORD(m_Index);
+    if ( v7->m_SerialNumber == v8 )
+    {
+      if ( v7->m_pEntity )
+      {
+        v9 = v6;
+        v2 = g_pEntityList->m_EntPtrArray[v9].m_SerialNumber == v8;
+        v10 = (CBaseEntity **)&g_pEntityList->m_EntPtrArray[v9];
+        if ( v2 )
+        {
+          UTIL_Remove(*v10);
+          CBaseProjector::~CBaseProjector(this);
+          return;
+        }
+        UTIL_Remove(0);
+      }
+    }
+  }
+  CBaseProjector::~CBaseProjector(this);
+}

@@ -1,0 +1,4 @@
+CBaseProjectedEntity *__thiscall CProjectedWallEntity::CreateNewProjectedEntity(CProjectedWallEntity *this)
+{
+  return (CBaseProjectedEntity *)CreateEntityByName("projected_wall_entity", -1, 1);
+}

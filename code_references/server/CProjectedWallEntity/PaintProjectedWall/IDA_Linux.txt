@@ -1,0 +1,45 @@
+void __cdecl CPaintDatabase::PaintProjectedWall(
+        CPaintDatabase *const this,
+        CProjectedWallEntity *pWall,
+        PaintPowerType powerType,
+        const Vector *const vecPosition)
+{
+  const Vector *v4; // ebx
+  PaintPowerType v5; // esi
+  int m_Size; // edx
+  CProjectedWallEntity **m_pMemory; // ecx
+  int v8; // eax
+  bool IsWallPainted; // [esp+1Ch] [ebp-1Ch]
+
+  v4 = vecPosition;
+  v5 = powerType;
+  IsWallPainted = CProjectedWallEntity::IsWallPainted(pWall, vecPosition);
+  (*((void (__cdecl **)(CProjectedWallEntity *, PaintPowerType, const Vector *))pWall->_vptr_IHandleEntity + 216))(
+    pWall,
+    v5,
+    v4);
+  if ( !IsWallPainted && v5 != NO_POWER )
+  {
+    m_Size = this->m_PaintedProjectedWalls.m_Size;
+    if ( m_Size > 0 )
+    {
+      m_pMemory = this->m_PaintedProjectedWalls.m_Memory.m_pMemory;
+      v8 = 0;
+      if ( *m_pMemory == pWall )
+        return;
+      while ( ++v8 != m_Size )
+      {
+        if ( m_pMemory[v8] == pWall )
+        {
+          if ( v8 == -1 )
+            break;
+          return;
+        }
+      }
+    }
+    CUtlVector<CProjectedWallEntity *,CUtlMemory<CProjectedWallEntity *,int>>::InsertBefore(
+      &this->m_PaintedProjectedWalls,
+      m_Size,
+      &pWall);
+  }
+}

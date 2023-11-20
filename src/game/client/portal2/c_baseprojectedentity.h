@@ -2,6 +2,7 @@
 #define C_BASEPROJECTEDENTITY_H
 
 #include "cbase.h"
+#include "paint/paintable_entity.h"
 
 class C_BaseProjector;
 

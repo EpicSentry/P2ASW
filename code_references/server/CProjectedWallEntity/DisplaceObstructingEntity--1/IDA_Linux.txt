@@ -1,0 +1,66 @@
+void __cdecl CProjectedWallEntity::DisplaceObstructingEntity(
+        CProjectedWallEntity *const this,
+        CBaseEntity *pEntity,
+        bool bIgnoreStuck)
+{
+  int (**vptr_IHandleEntity)(...); // eax
+  bool v4; // al
+  float v5; // xmm0_4
+  __m128 x_low; // xmm1
+  float v7; // xmm7_4
+  float v8; // xmm1_4
+  float v9; // xmm2_4
+  trace_t tr; // [esp+3Ch] [ebp-11Ch] BYREF
+  Ray_t ray; // [esp+90h] [ebp-C8h]
+  Vector vOrigin; // [esp+E4h] [ebp-74h] BYREF
+  Vector vWallForward; // [esp+F0h] [ebp-68h] BYREF
+  Vector vWallRight; // [esp+FCh] [ebp-5Ch] BYREF
+  Vector vWallUp; // [esp+108h] [ebp-50h] BYREF
+  Vector vLength; // [esp+114h] [ebp-44h] BYREF
+  Vector vWallSweptBoxMins; // [esp+120h] [ebp-38h] BYREF
+  Vector vWallSweptBoxMaxs; // [esp+12Ch] [ebp-2Ch] BYREF
+  CTraceFilterOnlyHitThis filter; // [esp+138h] [ebp-20h] BYREF
+
+  vOrigin = (Vector)this->m_vecOrigin;
+  (*((void (__cdecl **)(CProjectedWallEntity *const, Vector *, Vector *, Vector *))this->_vptr_IHandleEntity + 135))(
+    this,
+    &vWallForward,
+    &vWallRight,
+    &vWallUp);
+  vptr_IHandleEntity = this->_vptr_IHandleEntity;
+  ray.m_pWorldAxisTransform = 0;
+  vptr_IHandleEntity[206](&vLength, this);
+  CProjectedWallEntity::GetExtents(this, &vWallSweptBoxMins, &vWallSweptBoxMaxs, 1.0);
+  v4 = 1;
+  ray.m_pWorldAxisTransform = 0;
+  v5 = fsqrt((float)((float)(vLength.x * vLength.x) + (float)(vLength.y * vLength.y)) + (float)(vLength.z * vLength.z));
+  ray.m_Delta.y = (float)((float)(vWallForward.y * v5) + vOrigin.y) - vOrigin.y;
+  ray.m_Delta.z = (float)((float)(vWallForward.z * v5) + vOrigin.z) - vOrigin.z;
+  ray.m_Delta.x = (float)((float)(v5 * vWallForward.x) + vOrigin.x) - vOrigin.x;
+  x_low = (__m128)LODWORD(vWallSweptBoxMaxs.x);
+  if ( (float)((float)((float)(ray.m_Delta.x * ray.m_Delta.x) + (float)(ray.m_Delta.y * ray.m_Delta.y))
+             + (float)(ray.m_Delta.z * ray.m_Delta.z)) == 0.0 )
+    v4 = 0;
+  ray.m_Extents.y = (float)(vWallSweptBoxMaxs.y - vWallSweptBoxMins.y) * 0.5;
+  ray.m_Extents.z = (float)(vWallSweptBoxMaxs.z - vWallSweptBoxMins.z) * 0.5;
+  ray.m_Extents.x = (float)(vWallSweptBoxMaxs.x - vWallSweptBoxMins.x) * 0.5;
+  ray.m_IsSwept = v4;
+  v7 = (float)(vWallSweptBoxMaxs.x + vWallSweptBoxMins.x) * 0.5;
+  x_low.m128_f32[0] = (float)((float)(ray.m_Extents.x * ray.m_Extents.x) + (float)(ray.m_Extents.y * ray.m_Extents.y))
+                    + (float)(ray.m_Extents.z * ray.m_Extents.z);
+  ray.m_Start.x = vOrigin.x + v7;
+  ray.m_IsRay = _mm_unpacklo_ps(x_low, x_low).m128_f32[0] < 0.000001;
+  v8 = (float)(vWallSweptBoxMaxs.y + vWallSweptBoxMins.y) * 0.5;
+  v9 = (float)(vWallSweptBoxMaxs.z + vWallSweptBoxMins.z) * 0.5;
+  ray.m_Start.y = vOrigin.y + v8;
+  ray.m_Start.z = vOrigin.z + v9;
+  ray.m_StartOffset.x = -v7;
+  ray.m_StartOffset.y = -v8;
+  ray.m_StartOffset.z = -v9;
+  CTraceFilterOnlyHitThis::CTraceFilterOnlyHitThis(&filter, pEntity);
+  (*(void (__stdcall **)(IEngineTrace *))(*(_DWORD *)enginetrace + 20))(enginetrace);
+  if ( r_visualizetraces.m_pParent->m_Value.m_nValue )
+    DebugDrawLine(&tr.startpos, &tr.endpos, 255, 0, 0, 1, -1.0);
+  if ( tr.fraction < 1.0 || tr.allsolid || tr.startsolid )
+    CProjectedWallEntity::DisplaceObstructingEntity(this, pEntity, &vOrigin, &vWallUp, &vWallRight, bIgnoreStuck);
+}

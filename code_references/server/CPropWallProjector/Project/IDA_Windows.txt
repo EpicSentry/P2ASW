@@ -1,0 +1,68 @@
+void __thiscall CPropWallProjector::Project(CPropWallProjector *this)
+{
+  CSoundEnvelopeController *Controller; // edi
+  unsigned int m_Index; // eax
+  IHandleEntity *m_pEntity; // ecx
+  signed int v5; // eax
+  CSoundPatch *v6; // eax
+  CSoundEnvelopeController *v7; // edi
+  unsigned int v8; // eax
+  IHandleEntity *v9; // ecx
+  signed int v10; // eax
+  CSoundPatch *v11; // eax
+  CReliableBroadcastRecipientFilter filter; // [esp+3Ch] [ebp-20h] BYREF
+
+  CBaseProjector::Project(this);
+  if ( !this->m_pAmbientSound )
+  {
+    Controller = CSoundEnvelopeController::GetController();
+    CRecipientFilter::CRecipientFilter(&filter);
+    filter.__vftable = (CReliableBroadcastRecipientFilter_vtbl *)&CBroadcastRecipientFilter::`vftable';
+    CRecipientFilter::AddAllPlayers(&filter);
+    filter.__vftable = (CReliableBroadcastRecipientFilter_vtbl *)&CReliableBroadcastRecipientFilter::`vftable';
+    CRecipientFilter::MakeReliable((CFmtStrN<256> *)&filter);
+    m_Index = this->m_hAmbientSoundProxy.m_Index;
+    if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+      m_pEntity = 0;
+    else
+      m_pEntity = g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+    v5 = (signed int)m_pEntity[7].__vftable;
+    if ( v5 )
+      v5 = (signed int)(v5 - (unsigned int)gpGlobals->pEdicts) >> 4;
+    v6 = Controller->SoundCreate(Controller, &filter, v5, "VFX.BridgeGlow");
+    this->m_pAmbientSound = v6;
+    ((void (__thiscall *)(CSoundEnvelopeController *, CSoundPatch *, _DWORD, _DWORD, _DWORD))Controller->Play)(
+      Controller,
+      v6,
+      LODWORD(FLOAT_1_0),
+      LODWORD(FLOAT_100_0),
+      0);
+    CRecipientFilter::~CRecipientFilter(&filter);
+  }
+  if ( !this->m_pAmbientMusic )
+  {
+    v7 = CSoundEnvelopeController::GetController();
+    CRecipientFilter::CRecipientFilter(&filter);
+    filter.__vftable = (CReliableBroadcastRecipientFilter_vtbl *)&CBroadcastRecipientFilter::`vftable';
+    CRecipientFilter::AddAllPlayers(&filter);
+    filter.__vftable = (CReliableBroadcastRecipientFilter_vtbl *)&CReliableBroadcastRecipientFilter::`vftable';
+    CRecipientFilter::MakeReliable((CFmtStrN<256> *)&filter);
+    v8 = this->m_hAmbientSoundProxy.m_Index;
+    if ( v8 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v8].m_SerialNumber != HIWORD(v8) )
+      v9 = 0;
+    else
+      v9 = g_pEntityList->m_EntPtrArray[(unsigned __int16)v8].m_pEntity;
+    v10 = (signed int)v9[7].__vftable;
+    if ( v10 )
+      v10 = (signed int)(v10 - (unsigned int)gpGlobals->pEdicts) >> 4;
+    v11 = v7->SoundCreate(v7, &filter, v10, CPropWallProjector::s_AmbientBridgeMusic);
+    this->m_pAmbientMusic = v11;
+    ((void (__thiscall *)(CSoundEnvelopeController *, CSoundPatch *, _DWORD, _DWORD, _DWORD))v7->Play)(
+      v7,
+      v11,
+      LODWORD(FLOAT_1_0),
+      LODWORD(FLOAT_100_0),
+      0);
+    CRecipientFilter::~CRecipientFilter(&filter);
+  }
+}

@@ -1,0 +1,4 @@
+unsigned int __thiscall CEntityFactory<CProjectedWallEntity>::GetEntitySize(CEntityFactory<CProjectedWallEntity> *this)
+{
+  return 1048;
+}

@@ -1,0 +1,26 @@
+void __thiscall CProjectedWallEntity::PlacePlacementHelper(CProjectedWallEntity *this, CInfoPlacementHelper *pHelper)
+{
+  float v3; // xmm0_4
+  const Vector *(__thiscall *GetEndPoint)(CBaseProjectedEntity *); // edx
+  float *v5; // eax
+  Vector vecPosition; // [esp+8h] [ebp-10h] BYREF
+  float flZOffset; // [esp+14h] [ebp-4h]
+
+  if ( this->m_bIsHorizontal.m_Value )
+    v3 = FLOAT_32_0;
+  else
+    v3 = 0.0;
+  GetEndPoint = this->GetEndPoint;
+  flZOffset = v3;
+  v5 = (float *)GetEndPoint(this);
+  vecPosition.x = *v5;
+  vecPosition.y = v5[1];
+  vecPosition.z = v5[2] + v3;
+  if ( pHelper )
+  {
+    CBaseEntity::SetAbsOrigin(pHelper, &vecPosition);
+    pHelper->KeyValue(pHelper, "radius", "52");
+    pHelper->KeyValue(pHelper, "force_placement", "1");
+    pHelper->SetOwnerEntity(pHelper, this);
+  }
+}

@@ -1,0 +1,12 @@
+void __cdecl CProjectedWallEntity::CleansePaint(CProjectedWallEntity *const this)
+{
+  int v1; // eax
+
+  if ( this->m_nNumSegments.m_Value > 0 )
+  {
+    v1 = 0;
+    do
+      this->m_PaintPowers.m_Memory.m_pMemory[v1++] = NO_POWER;
+    while ( this->m_nNumSegments.m_Value > v1 );
+  }
+}

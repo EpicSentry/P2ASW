@@ -1,0 +1,4 @@
+bool __cdecl CProjectedWallEntity::ShouldSavePhysics(CProjectedWallEntity *const this)
+{
+  return 0;
+}

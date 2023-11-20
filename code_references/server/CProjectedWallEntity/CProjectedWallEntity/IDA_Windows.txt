@@ -1,0 +1,104 @@
+void __thiscall CProjectedWallEntity::CProjectedWallEntity(CProjectedWallEntity *this)
+{
+  edict_t *m_pPev; // ecx
+  edict_t *v3; // ecx
+  edict_t *v4; // ecx
+  edict_t *v5; // ecx
+  edict_t *v6; // ecx
+  edict_t *v7; // ecx
+  edict_t *v8; // ecx
+
+  CBaseProjectedEntity::CBaseProjectedEntity(this);
+  this->CPaintableEntity<CBaseProjectedEntity>::IPaintableEntity::__vftable = (IPaintableEntity_vtbl *)&IPaintableEntity::`vftable';
+  this->CPaintableEntity<CBaseProjectedEntity>::CBaseProjectedEntity::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable = (CProjectedWallEntity_vtbl *)&CPaintableEntity<CBaseProjectedEntity>::`vftable'{for `CBaseProjectedEntity'};
+  this->CPaintableEntity<CBaseProjectedEntity>::IPaintableEntity::__vftable = (IPaintableEntity_vtbl *)&CPaintableEntity<CBaseProjectedEntity>::`vftable'{for `IPaintableEntity'};
+  this->m_iPaintPower = NO_POWER;
+  this->IProjectedWallEntityAutoList::__vftable = (IProjectedWallEntityAutoList_vtbl *)&IProjectedWallEntityAutoList::`vftable';
+  IProjectedWallEntityAutoList::Add(&this->IProjectedWallEntityAutoList);
+  this->CPaintableEntity<CBaseProjectedEntity>::CBaseProjectedEntity::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable = (CProjectedWallEntity_vtbl *)&CProjectedWallEntity::`vftable'{for `CBaseProjectedEntity'};
+  this->CPaintableEntity<CBaseProjectedEntity>::IPaintableEntity::__vftable = (IPaintableEntity_vtbl *)&CProjectedWallEntity::`vftable'{for `IPaintableEntity'};
+  this->IProjectedWallEntityAutoList::__vftable = (IProjectedWallEntityAutoList_vtbl *)&CProjectedWallEntity::`vftable';
+  this->m_hColorPortal.m_Value.m_Index = -1;
+  this->m_flLength.m_Value = 0.0;
+  if ( this->m_Network.m_TimerEvent.m_bRegistered )
+  {
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+  }
+  else
+  {
+    m_pPev = this->m_Network.m_pPev;
+    if ( m_pPev )
+      CBaseEdict::StateChanged(m_pPev, 0x3E8u);
+  }
+  this->m_flHeight.m_Value = FLOAT_0_015625;
+  if ( this->m_Network.m_TimerEvent.m_bRegistered )
+  {
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+  }
+  else
+  {
+    v3 = this->m_Network.m_pPev;
+    if ( v3 )
+      CBaseEdict::StateChanged(v3, 0x3ECu);
+  }
+  this->m_flWidth.m_Value = FLOAT_64_0;
+  if ( this->m_Network.m_TimerEvent.m_bRegistered )
+  {
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+  }
+  else
+  {
+    v4 = this->m_Network.m_pPev;
+    if ( v4 )
+      CBaseEdict::StateChanged(v4, 0x3F0u);
+  }
+  this->m_bIsHorizontal.m_Value = 0;
+  if ( this->m_Network.m_TimerEvent.m_bRegistered )
+  {
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+  }
+  else
+  {
+    v5 = this->m_Network.m_pPev;
+    if ( v5 )
+      CBaseEdict::StateChanged(v5, 0x3F4u);
+  }
+  this->m_nNumSegments.m_Value = 0;
+  if ( this->m_Network.m_TimerEvent.m_bRegistered )
+  {
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+  }
+  else
+  {
+    v6 = this->m_Network.m_pPev;
+    if ( v6 )
+      CBaseEdict::StateChanged(v6, 0x3F8u);
+  }
+  this->m_flSegmentLength.m_Value = FLOAT_64_0;
+  if ( this->m_Network.m_TimerEvent.m_bRegistered )
+  {
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+  }
+  else
+  {
+    v7 = this->m_Network.m_pPev;
+    if ( v7 )
+      CBaseEdict::StateChanged(v7, 0x3FCu);
+  }
+  this->m_flParticleUpdateTime.m_Value = 0.0;
+  if ( this->m_Network.m_TimerEvent.m_bRegistered )
+  {
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+  }
+  else
+  {
+    v8 = this->m_Network.m_pPev;
+    if ( v8 )
+      CBaseEdict::StateChanged(v8, 0x400u);
+  }
+  this->m_PaintPowers.m_Memory.m_pMemory = 0;
+  this->m_PaintPowers.m_Memory.m_nAllocationCount = 0;
+  this->m_PaintPowers.m_Memory.m_nGrowSize = 0;
+  this->m_PaintPowers.m_Size = 0;
+  this->m_PaintPowers.m_pElements = 0;
+}

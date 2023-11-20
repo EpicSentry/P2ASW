@@ -1,0 +1,94 @@
+void __cdecl CPropWallProjector::Project(CPropWallProjector *const this)
+{
+  CSoundEnvelopeController *v1; // edi
+  unsigned int v2; // eax
+  char *v3; // ecx
+  signed int v4; // eax
+  int v5; // edx
+  CSoundPatch *v6; // eax
+  CSoundEnvelopeController *Controller; // edi
+  unsigned int m_Index; // eax
+  char *v9; // edx
+  int v10; // edx
+  signed int v11; // eax
+  CSoundPatch *v12; // eax
+  int v13; // [esp+20h] [ebp-48h]
+  int v14; // [esp+20h] [ebp-48h]
+  CReliableBroadcastRecipientFilter filter; // [esp+30h] [ebp-38h] BYREF
+
+  CBaseProjector::Project(this);
+  if ( !this->m_pAmbientSound )
+  {
+    Controller = CSoundEnvelopeController::GetController();
+    CRecipientFilter::CRecipientFilter(&filter);
+    filter._vptr_IRecipientFilter = (int (**)(...))off_B986C8;
+    CRecipientFilter::AddAllPlayers(&filter);
+    filter._vptr_IRecipientFilter = (int (**)(...))off_BA41A8;
+    CRecipientFilter::MakeReliable(&filter);
+    v14 = 0;
+    m_Index = this->m_hAmbientSoundProxy.m_Index;
+    if ( m_Index != -1 )
+    {
+      v9 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index;
+      if ( *((_DWORD *)v9 + 2) == HIWORD(m_Index) )
+        v14 = *((_DWORD *)v9 + 1);
+    }
+    v10 = *(_DWORD *)(v14 + 36);
+    v11 = 0;
+    if ( v10 )
+      v11 = (signed int)(v10 - (unsigned int)gpGlobals->pEdicts) >> 4;
+    v12 = (CSoundPatch *)(*((int (__cdecl **)(CSoundEnvelopeController *, CReliableBroadcastRecipientFilter *, signed int, const char *))Controller->_vptr_CSoundEnvelopeController
+                          + 6))(
+                           Controller,
+                           &filter,
+                           v11,
+                           "VFX.BridgeGlow");
+    this->m_pAmbientSound = v12;
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *, int, int, _DWORD))Controller->_vptr_CSoundEnvelopeController
+     + 2))(
+      Controller,
+      v12,
+      1065353216,
+      1120403456,
+      0);
+    filter._vptr_IRecipientFilter = (int (**)(...))off_B986C8;
+    CRecipientFilter::~CRecipientFilter(&filter);
+  }
+  if ( !this->m_pAmbientMusic )
+  {
+    v1 = CSoundEnvelopeController::GetController();
+    CRecipientFilter::CRecipientFilter(&filter);
+    filter._vptr_IRecipientFilter = (int (**)(...))off_B986C8;
+    CRecipientFilter::AddAllPlayers(&filter);
+    filter._vptr_IRecipientFilter = (int (**)(...))off_BA41A8;
+    CRecipientFilter::MakeReliable(&filter);
+    v13 = 0;
+    v2 = this->m_hAmbientSoundProxy.m_Index;
+    if ( v2 != -1 )
+    {
+      v3 = (char *)g_pEntityList + 24 * (unsigned __int16)v2;
+      if ( *((_DWORD *)v3 + 2) == HIWORD(v2) )
+        v13 = *((_DWORD *)v3 + 1);
+    }
+    v4 = 0;
+    v5 = *(_DWORD *)(v13 + 36);
+    if ( v5 )
+      v4 = (signed int)(v5 - (unsigned int)gpGlobals->pEdicts) >> 4;
+    v6 = (CSoundPatch *)(*((int (__cdecl **)(CSoundEnvelopeController *, CReliableBroadcastRecipientFilter *, signed int, char *))v1->_vptr_CSoundEnvelopeController
+                         + 6))(
+                          v1,
+                          &filter,
+                          v4,
+                          CPropWallProjector::s_AmbientBridgeMusic);
+    this->m_pAmbientMusic = v6;
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *, int, int, _DWORD))v1->_vptr_CSoundEnvelopeController
+     + 2))(
+      v1,
+      v6,
+      1065353216,
+      1120403456,
+      0);
+    filter._vptr_IRecipientFilter = (int (**)(...))off_B986C8;
+    CRecipientFilter::~CRecipientFilter(&filter);
+  }
+}

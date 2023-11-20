@@ -1,0 +1,29 @@
+void __cdecl CPropWallProjector::Shutdown(CPropWallProjector *const this)
+{
+  CSoundEnvelopeController *Controller; // esi
+  CSoundEnvelopeController *v2; // esi
+
+  CBaseProjector::Shutdown(this);
+  if ( this->m_pAmbientSound )
+  {
+    Controller = CSoundEnvelopeController::GetController();
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))Controller->_vptr_CSoundEnvelopeController + 5))(
+      Controller,
+      this->m_pAmbientSound);
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))Controller->_vptr_CSoundEnvelopeController + 11))(
+      Controller,
+      this->m_pAmbientSound);
+    this->m_pAmbientSound = 0;
+  }
+  if ( this->m_pAmbientMusic )
+  {
+    v2 = CSoundEnvelopeController::GetController();
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))v2->_vptr_CSoundEnvelopeController + 5))(
+      v2,
+      this->m_pAmbientMusic);
+    (*((void (__cdecl **)(CSoundEnvelopeController *, CSoundPatch *))v2->_vptr_CSoundEnvelopeController + 11))(
+      v2,
+      this->m_pAmbientMusic);
+    this->m_pAmbientMusic = 0;
+  }
+}

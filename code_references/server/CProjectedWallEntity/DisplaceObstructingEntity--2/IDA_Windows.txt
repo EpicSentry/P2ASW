@@ -1,0 +1,941 @@
+void __thiscall CProjectedWallEntity::DisplaceObstructingEntity(
+        CProjectedWallEntity *this,
+        CPortal_Player *pEntity,
+        const Vector *vOrigin,
+        const Vector *vWallUp,
+        const Vector *vWallRight,
+        bool bIgnoreStuck)
+{
+  const Vector *(__thiscall *OBBMins)(ICollideable *); // edx
+  Vector *v8; // eax
+  CBaseEntity::NetworkVar_m_Collision_vtbl *v9; // edx
+  Vector *v10; // eax
+  int m_iEFlags; // edx
+  float z; // eax
+  unsigned int v13; // ecx
+  float v14; // edx
+  unsigned int v15; // eax
+  __int64 v16; // xmm0_8
+  CBaseEntity::NetworkVar_m_Collision_vtbl *v17; // edx
+  const QAngle *(__thiscall *GetCollisionAngles)(ICollideable *); // eax
+  const QAngle *v19; // eax
+  Vector *v20; // ebx
+  const Vector *(__thiscall *GetCollisionOrigin)(ICollideable *); // eax
+  float *v22; // eax
+  float v23; // xmm3_4
+  float v24; // xmm7_4
+  Vector *v25; // ebx
+  CBaseEntity *v26; // ebx
+  unsigned int v27; // eax
+  float x; // xmm0_4
+  float y; // xmm1_4
+  float v30; // xmm2_4
+  float v31; // xmm0_4
+  int v32; // edx
+  const Vector *p_m_vecAbsOrigin; // ebx
+  float v35; // xmm2_4
+  float v36; // xmm6_4
+  float v37; // xmm1_4
+  float v38; // xmm7_4
+  float v39; // xmm0_4
+  float v40; // xmm1_4
+  float v41; // xmm6_4
+  float *p_z; // eax
+  int v43; // edx
+  float v44; // xmm1_4
+  float v45; // xmm5_4
+  float v46; // xmm2_4
+  float v47; // xmm3_4
+  float v48; // xmm1_4
+  float v49; // xmm5_4
+  float v50; // xmm2_4
+  float v51; // xmm3_4
+  float v52; // xmm1_4
+  float v53; // xmm5_4
+  float v54; // xmm2_4
+  float v55; // xmm3_4
+  float v56; // xmm1_4
+  float v57; // xmm5_4
+  float v58; // xmm2_4
+  float v59; // xmm3_4
+  bool v60; // zf
+  float v61; // xmm2_4
+  float v62; // xmm3_4
+  float v63; // xmm6_4
+  float v64; // xmm4_4
+  float v65; // xmm2_4
+  float v66; // xmm7_4
+  float v67; // xmm1_4
+  float v68; // xmm1_4
+  float v69; // xmm6_4
+  float v70; // xmm3_4
+  float v71; // xmm2_4
+  float v72; // xmm4_4
+  float v73; // xmm5_4
+  float v74; // xmm3_4
+  float v75; // xmm3_4
+  float v76; // xmm3_4
+  float v77; // xmm0_4
+  float v78; // xmm3_4
+  float v79; // xmm4_4
+  float v81; // xmm1_4
+  float v82; // xmm2_4
+  float v83; // xmm3_4
+  float v84; // xmm0_4
+  float v85; // xmm0_4
+  float v86; // xmm3_4
+  float v87; // xmm6_4
+  float v88; // xmm4_4
+  float v89; // xmm3_4
+  float v90; // xmm7_4
+  float v91; // xmm4_4
+  float v92; // xmm3_4
+  float v93; // xmm4_4
+  float v94; // xmm3_4
+  float v95; // xmm7_4
+  float v96; // xmm4_4
+  float v97; // xmm3_4
+  float v98; // xmm4_4
+  float v99; // xmm3_4
+  float v100; // xmm7_4
+  float m_fValue; // xmm4_4
+  float v102; // xmm1_4
+  float v103; // xmm2_4
+  float v104; // xmm4_4
+  float v105; // xmm3_4
+  float v106; // xmm0_4
+  float v107; // xmm1_4
+  float v108; // xmm3_4
+  float v109; // xmm1_4
+  float *v110; // ebx
+  const QAngle *v111; // eax
+  const QAngle *v112; // eax
+  IEngineTrace_vtbl *v113; // ebx
+  int v114; // eax
+  const CViewVectors *v115; // eax
+  unsigned int v116; // edx
+  float v117; // xmm1_4
+  float v118; // xmm2_4
+  float v119; // xmm3_4
+  float v120; // xmm0_4
+  float v121; // xmm1_4
+  float v122; // xmm2_4
+  const CViewVectors *v123; // eax
+  const CViewVectors *v124; // eax
+  const CViewVectors *v125; // eax
+  const CViewVectors *v126; // eax
+  const CViewVectors *v127; // eax
+  unsigned int v128; // edx
+  float v129; // xmm1_4
+  float v130; // xmm2_4
+  float v131; // xmm3_4
+  float v132; // xmm0_4
+  float v133; // xmm1_4
+  float v134; // xmm2_4
+  IEngineTrace_vtbl *v135; // ebx
+  int v136; // eax
+  const QAngle *v137; // eax
+  Vector *width; // [esp+30h] [ebp-1D8h]
+  Vector *widtha; // [esp+30h] [ebp-1D8h]
+  const QAngle *radius; // [esp+34h] [ebp-1D4h]
+  const QAngle *radiusa; // [esp+34h] [ebp-1D4h]
+  float flDuration; // [esp+48h] [ebp-1C0h]
+  float flDurationa; // [esp+48h] [ebp-1C0h]
+  float flDurationb; // [esp+48h] [ebp-1C0h]
+  float flDurationc; // [esp+48h] [ebp-1C0h]
+  float flDurationd; // [esp+48h] [ebp-1C0h]
+  float flDuratione; // [esp+48h] [ebp-1C0h]
+  Vector *flDurationf; // [esp+48h] [ebp-1C0h]
+  Vector *flDurationg; // [esp+48h] [ebp-1C0h]
+  float flDurationh; // [esp+48h] [ebp-1C0h]
+  Vector *flDurationi; // [esp+48h] [ebp-1C0h]
+  float flDurationj; // [esp+48h] [ebp-1C0h]
+  Vector *flDurationk; // [esp+48h] [ebp-1C0h]
+  float flDurationl; // [esp+48h] [ebp-1C0h]
+  CGameTrace stuckTrace; // [esp+58h] [ebp-1B0h] BYREF
+  CTraceFilterSimple filter; // [esp+ACh] [ebp-15Ch] BYREF
+  Vector ptOBB[8]; // [esp+BCh] [ebp-14Ch] BYREF
+  float v158; // [esp+11Ch] [ebp-ECh]
+  Vector vEntRight; // [esp+120h] [ebp-E8h] BYREF
+  Vector vEntUp; // [esp+12Ch] [ebp-DCh] BYREF
+  Vector vNewVel; // [esp+138h] [ebp-D0h] BYREF
+  Vector vObstructionMaxs; // [esp+144h] [ebp-C4h] BYREF
+  Vector vObstructionMins; // [esp+150h] [ebp-B8h] BYREF
+  QAngle vNewAngles; // [esp+15Ch] [ebp-ACh] BYREF
+  Vector ptOBBCenter; // [esp+168h] [ebp-A0h] BYREF
+  Vector vEntForward; // [esp+174h] [ebp-94h] BYREF
+  CBaseEntity *v167; // [esp+180h] [ebp-88h]
+  float v168; // [esp+184h] [ebp-84h]
+  float v169; // [esp+188h] [ebp-80h]
+  float v170; // [esp+18Ch] [ebp-7Ch]
+  float v171; // [esp+194h] [ebp-74h]
+  float v172; // [esp+198h] [ebp-70h]
+  Vector vBackMaxPos; // [esp+19Ch] [ebp-6Ch] BYREF
+  Vector vBumpAxis; // [esp+1A8h] [ebp-60h] BYREF
+  Vector vFrontMaxPos; // [esp+1B4h] [ebp-54h] BYREF
+  float flDot; // [esp+1C0h] [ebp-48h]
+  Vector vNewPos; // [esp+1C4h] [ebp-44h] BYREF
+  VPlane plWallPlane; // [esp+1D0h] [ebp-38h] BYREF
+  float v179; // [esp+1E0h] [ebp-28h]
+  float v180; // [esp+1E4h] [ebp-24h]
+  float v181; // [esp+1E8h] [ebp-20h]
+  float v182; // [esp+1ECh] [ebp-1Ch]
+  Vector side2; // [esp+1F0h] [ebp-18h] BYREF
+  Vector vPosOffset; // [esp+1FCh] [ebp-Ch]
+  int flFrontMax; // [esp+210h] [ebp+8h]
+  float flFrontMaxa; // [esp+210h] [ebp+8h]
+  float flFrontMaxb; // [esp+210h] [ebp+8h]
+  float flBackMax; // [esp+214h] [ebp+Ch]
+  float flBumpAmount; // [esp+218h] [ebp+10h]
+  float flBumpAmounta; // [esp+218h] [ebp+10h]
+  float flBumpAmountb; // [esp+218h] [ebp+10h]
+  int flBumpAmountc; // [esp+218h] [ebp+10h]
+  float flBumpAmountd; // [esp+218h] [ebp+10h]
+  float flInvBumpAmount; // [esp+21Ch] [ebp+14h]
+  float flInvBumpAmounta; // [esp+21Ch] [ebp+14h]
+  float flInvBumpAmountb; // [esp+21Ch] [ebp+14h]
+
+  OBBMins = pEntity->m_Collision.OBBMins;
+  v167 = this;
+  v8 = (Vector *)OBBMins(&pEntity->m_Collision);
+  v9 = pEntity->m_Collision.PaintPowerUser<CPaintableEntity<CBaseMultiplayerPlayer> >::CPaintableEntity<CBaseMultiplayerPlayer>::CBaseMultiplayerPlayer::CAI_ExpresserHost<CBasePlayer>::CBasePlayer::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::__vftable;
+  vObstructionMaxs = *v8;
+  v10 = (Vector *)v9->OBBMaxs(&pEntity->m_Collision);
+  m_iEFlags = pEntity->m_iEFlags;
+  vObstructionMins = *v10;
+  if ( (m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(pEntity);
+  z = pEntity->m_vecAbsOrigin.z;
+  v13 = (unsigned int)pEntity->m_iEFlags >> 11;
+  *(_QWORD *)&vNewPos.x = *(_QWORD *)&pEntity->m_vecAbsOrigin.x;
+  vNewPos.z = z;
+  if ( (v13 & 1) != 0 )
+    CBaseEntity::CalcAbsolutePosition(pEntity);
+  v14 = pEntity->m_angAbsRotation.z;
+  v15 = (unsigned int)pEntity->m_iEFlags >> 12;
+  *(_QWORD *)&vNewAngles.x = *(_QWORD *)&pEntity->m_angAbsRotation.x;
+  vNewAngles.z = v14;
+  if ( (v15 & 1) != 0 )
+    CBaseEntity::CalcAbsoluteVelocity(pEntity);
+  v16 = *(_QWORD *)&pEntity->m_vecAbsVelocity.x;
+  v17 = pEntity->m_Collision.PaintPowerUser<CPaintableEntity<CBaseMultiplayerPlayer> >::CPaintableEntity<CBaseMultiplayerPlayer>::CBaseMultiplayerPlayer::CAI_ExpresserHost<CBasePlayer>::CBasePlayer::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::__vftable;
+  vNewVel.z = pEntity->m_vecAbsVelocity.z;
+  GetCollisionAngles = v17->GetCollisionAngles;
+  *(_QWORD *)&vNewVel.x = v16;
+  v19 = GetCollisionAngles(&pEntity->m_Collision);
+  AngleVectors(v19, &vEntForward, &vEntRight, &vEntUp);
+  v20 = AllocTempVector();
+  GetCollisionOrigin = pEntity->m_Collision.GetCollisionOrigin;
+  v20->x = (float)((float)(pEntity->m_Collision.m_vecMaxs.m_Value.x - pEntity->m_Collision.m_vecMins.m_Value.x) * 0.5)
+         + pEntity->m_Collision.m_vecMins.m_Value.x;
+  v20->y = (float)((float)(pEntity->m_Collision.m_vecMaxs.m_Value.y - pEntity->m_Collision.m_vecMins.m_Value.y) * 0.5)
+         + pEntity->m_Collision.m_vecMins.m_Value.y;
+  v20->z = (float)((float)(pEntity->m_Collision.m_vecMaxs.m_Value.z - pEntity->m_Collision.m_vecMins.m_Value.z) * 0.5)
+         + pEntity->m_Collision.m_vecMins.m_Value.z;
+  v22 = (float *)GetCollisionOrigin(&pEntity->m_Collision);
+  ptOBBCenter.x = v20->x + *v22;
+  ptOBBCenter.y = v22[1] + v20->y;
+  v23 = (float)(vObstructionMaxs.y - vObstructionMins.y) * 0.5;
+  ptOBBCenter.z = v22[2] + v20->z;
+  *(float *)&v16 = (float)(vObstructionMaxs.x - vObstructionMins.x) * 0.5;
+  vEntForward.x = vEntForward.x * *(float *)&v16;
+  vEntForward.y = vEntForward.y * *(float *)&v16;
+  v24 = (float)(vObstructionMaxs.z - vObstructionMins.z) * 0.5;
+  vEntForward.z = vEntForward.z * *(float *)&v16;
+  vEntRight.x = vEntRight.x * v23;
+  vEntRight.y = vEntRight.y * v23;
+  vEntRight.z = vEntRight.z * v23;
+  vEntUp.x = vEntUp.x * v24;
+  ptOBB[0].x = (float)((float)(ptOBBCenter.x - vEntForward.x) - vEntRight.x) - vEntUp.x;
+  ptOBB[0].y = (float)((float)(ptOBBCenter.y - vEntForward.y) - vEntRight.y) - (float)(vEntUp.y * v24);
+  ptOBB[0].z = (float)((float)(ptOBBCenter.z - vEntForward.z) - vEntRight.z) - (float)(vEntUp.z * v24);
+  ptOBB[1].x = (float)((float)(ptOBBCenter.x - vEntForward.x) - vEntRight.x) + vEntUp.x;
+  ptOBB[1].y = (float)((float)(ptOBBCenter.y - vEntForward.y) - vEntRight.y) + (float)(vEntUp.y * v24);
+  ptOBB[1].z = (float)((float)(ptOBBCenter.z - vEntForward.z) - vEntRight.z) + (float)(vEntUp.z * v24);
+  vEntUp.y = vEntUp.y * v24;
+  vEntUp.z = vEntUp.z * v24;
+  ptOBB[2].x = (float)((float)(ptOBBCenter.x - vEntForward.x) + vEntRight.x) + vEntUp.x;
+  ptOBB[2].y = (float)((float)(ptOBBCenter.y - vEntForward.y) + vEntRight.y) + vEntUp.y;
+  ptOBB[2].z = (float)((float)(ptOBBCenter.z - vEntForward.z) + vEntRight.z) + vEntUp.z;
+  plWallPlane.m_Normal.z = (float)(ptOBBCenter.y - vEntForward.y) + vEntRight.y;
+  ptOBB[3].x = (float)((float)(ptOBBCenter.x - vEntForward.x) + vEntRight.x) - vEntUp.x;
+  ptOBB[3].y = plWallPlane.m_Normal.z - vEntUp.y;
+  ptOBB[3].z = (float)((float)(ptOBBCenter.z - vEntForward.z) + vEntRight.z) - vEntUp.z;
+  v180 = vEntForward.y + ptOBBCenter.y;
+  ptOBB[4].x = (float)((float)(ptOBBCenter.x + vEntForward.x) - vEntRight.x) - vEntUp.x;
+  ptOBB[4].y = (float)((float)(vEntForward.y + ptOBBCenter.y) - vEntRight.y) - vEntUp.y;
+  ptOBB[4].z = (float)((float)(vEntForward.z + ptOBBCenter.z) - vEntRight.z) - vEntUp.z;
+  ptOBB[5].x = (float)((float)(ptOBBCenter.x + vEntForward.x) - vEntRight.x) + vEntUp.x;
+  ptOBB[5].y = (float)((float)(vEntForward.y + ptOBBCenter.y) - vEntRight.y) + vEntUp.y;
+  ptOBB[5].z = (float)((float)(vEntForward.z + ptOBBCenter.z) - vEntRight.z) + vEntUp.z;
+  side2.x = (float)(ptOBBCenter.x + vEntForward.x) + vEntRight.x;
+  side2.y = (float)(vEntForward.y + ptOBBCenter.y) + vEntRight.y;
+  side2.z = (float)(vEntForward.z + ptOBBCenter.z) + vEntRight.z;
+  vPosOffset.y = side2.y + vEntUp.y;
+  ptOBB[6].x = side2.x + vEntUp.x;
+  ptOBB[6].y = side2.y + vEntUp.y;
+  ptOBB[6].z = side2.z + vEntUp.z;
+  vPosOffset.x = ptOBBCenter.x + vEntForward.x;
+  vPosOffset.z = vEntForward.z + ptOBBCenter.z;
+  ptOBB[7].x = side2.x - vEntUp.x;
+  ptOBB[7].y = side2.y - vEntUp.y;
+  ptOBB[7].z = side2.z - vEntUp.z;
+  if ( wall_debug.m_pParent->m_Value.m_nValue )
+  {
+    NDebugOverlay::Sphere(&ptOBBCenter, 5.0, 255, 0, 0, 1, wall_debug_time.m_pParent->m_Value.m_fValue);
+    v25 = ptOBB;
+    flFrontMax = 8;
+    do
+    {
+      NDebugOverlay::Sphere(v25++, 2.0, 255, 0, 0, 1, wall_debug_time.m_pParent->m_Value.m_fValue);
+      --flFrontMax;
+    }
+    while ( flFrontMax );
+    v26 = v167;
+    flFrontMaxa = wall_debug_time.m_pParent->m_Value.m_fValue;
+    v27 = (unsigned int)v167->m_iEFlags >> 11;
+    x = vWallUp->x * 50.0;
+    y = vWallUp->y * 50.0;
+    v30 = vWallUp->z * 50.0;
+    vPosOffset.x = x;
+    vPosOffset.y = y;
+    vPosOffset.z = v30;
+    if ( (v27 & 1) != 0 )
+    {
+      CBaseEntity::CalcAbsolutePosition(v167);
+      v30 = vPosOffset.z;
+      y = vPosOffset.y;
+      x = vPosOffset.x;
+    }
+    v31 = x + v26->m_vecAbsOrigin.x;
+    v32 = v167->m_iEFlags;
+    p_m_vecAbsOrigin = &v26->m_vecAbsOrigin;
+    side2.x = v31;
+    side2.y = p_m_vecAbsOrigin->y + y;
+    side2.z = p_m_vecAbsOrigin->z + v30;
+    if ( (v32 & 0x800) != 0 )
+      CBaseEntity::CalcAbsolutePosition(v167);
+    NDebugOverlay::VertArrow(p_m_vecAbsOrigin, &side2, 2.0, 255, 0, 0, 128, 1, flFrontMaxa);
+  }
+  v35 = vWallUp->x;
+  v36 = vOrigin->x;
+  v37 = vWallUp->z;
+  v38 = FLOAT_0_0099999998;
+  plWallPlane.m_Normal.y = vWallUp->y;
+  v39 = plWallPlane.m_Normal.y * vOrigin->y;
+  v169 = v36;
+  plWallPlane.m_Normal.z = v37;
+  v40 = v37 * vOrigin->z;
+  flFrontMaxb = 0.0;
+  flBackMax = 0.0;
+  v180 = v35;
+  plWallPlane.m_Normal.x = v35;
+  v41 = (float)((float)(v36 * v35) + v39) + v40;
+  p_z = &ptOBB[0].z;
+  v43 = 2;
+  do
+  {
+    v44 = *(p_z - 1);
+    v45 = *p_z;
+    v46 = (float)((float)((float)(v44 * plWallPlane.m_Normal.y) + (float)(plWallPlane.m_Normal.x * *(p_z - 2)))
+                + (float)(plWallPlane.m_Normal.z * *p_z))
+        - v41;
+    LODWORD(v47) = LODWORD(v46) & _mask__AbsFloat_;
+    if ( v46 < v38 )
+    {
+      if ( v47 > flBackMax )
+      {
+        LODWORD(flBackMax) = LODWORD(v46) & _mask__AbsFloat_;
+        vBackMaxPos.x = *(p_z - 2);
+        vBackMaxPos.y = v44;
+        vBackMaxPos.z = v45;
+      }
+    }
+    else if ( v47 > flFrontMaxb )
+    {
+      LODWORD(flFrontMaxb) = LODWORD(v46) & _mask__AbsFloat_;
+      vFrontMaxPos.x = *(p_z - 2);
+      vFrontMaxPos.y = v44;
+      vFrontMaxPos.z = v45;
+    }
+    v48 = p_z[2];
+    v49 = p_z[3];
+    v50 = (float)((float)((float)(v48 * plWallPlane.m_Normal.y) + (float)(plWallPlane.m_Normal.x * p_z[1]))
+                + (float)(v49 * plWallPlane.m_Normal.z))
+        - v41;
+    LODWORD(v51) = LODWORD(v50) & _mask__AbsFloat_;
+    if ( v50 < 0.0099999998 )
+    {
+      if ( v51 > flBackMax )
+      {
+        LODWORD(flBackMax) = LODWORD(v50) & _mask__AbsFloat_;
+        vBackMaxPos.x = p_z[1];
+        vBackMaxPos.y = v48;
+        vBackMaxPos.z = v49;
+      }
+    }
+    else if ( v51 > flFrontMaxb )
+    {
+      LODWORD(flFrontMaxb) = LODWORD(v50) & _mask__AbsFloat_;
+      vFrontMaxPos.x = p_z[1];
+      vFrontMaxPos.y = v48;
+      vFrontMaxPos.z = v49;
+    }
+    v52 = p_z[5];
+    v53 = p_z[6];
+    v54 = (float)((float)((float)(v52 * plWallPlane.m_Normal.y) + (float)(plWallPlane.m_Normal.x * p_z[4]))
+                + (float)(v53 * plWallPlane.m_Normal.z))
+        - v41;
+    LODWORD(v55) = LODWORD(v54) & _mask__AbsFloat_;
+    if ( v54 < 0.0099999998 )
+    {
+      if ( v55 > flBackMax )
+      {
+        LODWORD(flBackMax) = LODWORD(v54) & _mask__AbsFloat_;
+        vBackMaxPos.x = p_z[4];
+        vBackMaxPos.y = v52;
+        vBackMaxPos.z = v53;
+      }
+    }
+    else if ( v55 > flFrontMaxb )
+    {
+      LODWORD(flFrontMaxb) = LODWORD(v54) & _mask__AbsFloat_;
+      vFrontMaxPos.x = p_z[4];
+      vFrontMaxPos.y = v52;
+      vFrontMaxPos.z = v53;
+    }
+    v56 = p_z[8];
+    v57 = p_z[9];
+    v38 = FLOAT_0_0099999998;
+    v58 = (float)((float)((float)(v56 * plWallPlane.m_Normal.y) + (float)(plWallPlane.m_Normal.x * p_z[7]))
+                + (float)(v57 * plWallPlane.m_Normal.z))
+        - v41;
+    LODWORD(v59) = LODWORD(v58) & _mask__AbsFloat_;
+    if ( v58 < 0.0099999998 )
+    {
+      if ( v59 > flBackMax )
+      {
+        LODWORD(flBackMax) = LODWORD(v58) & _mask__AbsFloat_;
+        vBackMaxPos.x = p_z[7];
+        vBackMaxPos.y = v56;
+        vBackMaxPos.z = v57;
+      }
+    }
+    else if ( v59 > flFrontMaxb )
+    {
+      LODWORD(flFrontMaxb) = LODWORD(v58) & _mask__AbsFloat_;
+      vFrontMaxPos.x = p_z[7];
+      vFrontMaxPos.y = v56;
+      vFrontMaxPos.z = v57;
+    }
+    p_z += 12;
+    --v43;
+  }
+  while ( v43 );
+  v60 = LOBYTE(v167[1].m_ResponseContexts.m_Size) == 0;
+  v61 = *(float *)&v167[1].m_ResponseContexts.m_Memory.m_nGrowSize * 0.5;
+  v62 = vWallRight->x * v61;
+  v63 = vWallRight->z * v61;
+  v64 = vWallRight->y * v61;
+  v65 = vOrigin->y;
+  vPosOffset.x = v169 + v62;
+  vPosOffset.y = v65 + v64;
+  v66 = vOrigin->z + v63;
+  v67 = vOrigin->z - v63;
+  vPosOffset.z = v66;
+  side2.x = v169 - v62;
+  side2.y = v65 - v64;
+  side2.z = v67;
+  if ( v60 )
+  {
+    v81 = vWallUp->y;
+    vBumpAxis.x = v180;
+    vBumpAxis.y = v81;
+    vBumpAxis.z = 0.0;
+    VectorNormalize(&vBumpAxis);
+    v82 = vWallUp->x;
+    v68 = vBumpAxis.y;
+    v73 = vBumpAxis.x;
+    v83 = vWallUp->z;
+    v158 = vWallUp->y;
+    v180 = v82;
+    v84 = (float)(v158 * vBumpAxis.y) + (float)(v82 * vBumpAxis.x);
+    v71 = vBumpAxis.z;
+    v169 = v83;
+    v85 = v84 + (float)(v83 * vBumpAxis.z);
+    v86 = FLOAT_N1_0;
+    if ( v85 >= -1.0 )
+    {
+      if ( v85 <= 1.0 )
+        v86 = v85;
+      else
+        v86 = FLOAT_1_0;
+    }
+    v87 = side2.z - vBackMaxPos.z;
+    LODWORD(v168) = LODWORD(v86) & _mask__AbsFloat_;
+    v170 = vPosOffset.x - vBackMaxPos.x;
+    v171 = vPosOffset.z - vBackMaxPos.z;
+    v181 = vPosOffset.z - vBackMaxPos.z;
+    plWallPlane.m_Normal.y = side2.x - vBackMaxPos.x;
+    v182 = side2.x - vBackMaxPos.x;
+    v179 = side2.y - vBackMaxPos.y;
+    plWallPlane.m_Dist = side2.z - vBackMaxPos.z;
+    if ( COERCE_FLOAT(COERCE_UNSIGNED_INT(
+                        (float)((float)((float)(vPosOffset.y - vBackMaxPos.y) * vBumpAxis.y)
+                              + (float)((float)(vPosOffset.x - vBackMaxPos.x) * vBumpAxis.x))
+                      + (float)((float)(vPosOffset.z - vBackMaxPos.z) * vBumpAxis.z)) & _mask__AbsFloat_) <= COERCE_FLOAT(COERCE_UNSIGNED_INT((float)((float)((float)(side2.y - vBackMaxPos.y) * vBumpAxis.y) + (float)((float)(side2.x - vBackMaxPos.x) * vBumpAxis.x)) + (float)((float)(side2.z - vBackMaxPos.z) * vBumpAxis.z)) & _mask__AbsFloat_) )
+    {
+      v88 = v182;
+      v89 = v179;
+      v90 = side2.z - vBackMaxPos.z;
+    }
+    else
+    {
+      v88 = vPosOffset.x - vBackMaxPos.x;
+      v89 = vPosOffset.y - vBackMaxPos.y;
+      v90 = v181;
+    }
+    v168 = 1.0 / v168;
+    if ( COERCE_FLOAT(COERCE_UNSIGNED_INT((float)((float)(v89 * vBumpAxis.y) + (float)(v88 * vBumpAxis.x)) + (float)(v90 * vBumpAxis.z)) & _mask__AbsFloat_) <= (float)(v168 * flBackMax) )
+    {
+      v171 = v181;
+      plWallPlane.m_Normal.y = v182;
+      plWallPlane.m_Dist = side2.z - vBackMaxPos.z;
+      if ( COERCE_FLOAT(COERCE_UNSIGNED_INT(
+                          (float)((float)((float)(vPosOffset.y - vBackMaxPos.y) * vBumpAxis.y)
+                                + (float)((float)(vPosOffset.x - vBackMaxPos.x) * vBumpAxis.x))
+                        + (float)(v181 * vBumpAxis.z)) & _mask__AbsFloat_) <= COERCE_FLOAT(COERCE_UNSIGNED_INT(
+                                                                                             (float)((float)(v179 * vBumpAxis.y) + (float)(v182 * vBumpAxis.x))
+                                                                                           + (float)(v87 * vBumpAxis.z)) & _mask__AbsFloat_) )
+      {
+        v91 = v182;
+        v92 = v179;
+      }
+      else
+      {
+        v91 = vPosOffset.x - vBackMaxPos.x;
+        v92 = vPosOffset.y - vBackMaxPos.y;
+        v87 = v181;
+      }
+      LODWORD(flBumpAmountb) = COERCE_UNSIGNED_INT(
+                                 (float)((float)(v92 * vBumpAxis.y) + (float)(v91 * vBumpAxis.x))
+                               + (float)(v87 * vBumpAxis.z)) & _mask__AbsFloat_;
+    }
+    else
+    {
+      flBumpAmountb = v168 * flBackMax;
+    }
+    plWallPlane.m_Normal.y = vPosOffset.x - vFrontMaxPos.x;
+    plWallPlane.m_Dist = vPosOffset.z - vFrontMaxPos.z;
+    v181 = side2.z - vFrontMaxPos.z;
+    v171 = side2.z - vFrontMaxPos.z;
+    v179 = vPosOffset.z - vFrontMaxPos.z;
+    v172 = vPosOffset.y - vFrontMaxPos.y;
+    v170 = side2.x - vFrontMaxPos.x;
+    v182 = side2.x - vFrontMaxPos.x;
+    flDot = side2.y - vFrontMaxPos.y;
+    if ( COERCE_FLOAT(COERCE_UNSIGNED_INT(
+                        (float)((float)((float)(vPosOffset.y - vFrontMaxPos.y) * vBumpAxis.y)
+                              + (float)((float)(vPosOffset.x - vFrontMaxPos.x) * vBumpAxis.x))
+                      + (float)((float)(vPosOffset.z - vFrontMaxPos.z) * vBumpAxis.z)) & _mask__AbsFloat_) <= COERCE_FLOAT(COERCE_UNSIGNED_INT((float)((float)((float)(side2.y - vFrontMaxPos.y) * vBumpAxis.y) + (float)((float)(side2.x - vFrontMaxPos.x) * vBumpAxis.x)) + (float)((float)(side2.z - vFrontMaxPos.z) * vBumpAxis.z)) & _mask__AbsFloat_) )
+    {
+      v93 = v182;
+      v94 = flDot;
+      v95 = v181;
+    }
+    else
+    {
+      v93 = vPosOffset.x - vFrontMaxPos.x;
+      v94 = v172;
+      v95 = v179;
+    }
+    LODWORD(v96) = COERCE_UNSIGNED_INT((float)((float)(v94 * vBumpAxis.y) + (float)(v93 * vBumpAxis.x)) + (float)(v95 * vBumpAxis.z)) & _mask__AbsFloat_;
+    v97 = flFrontMaxb;
+    if ( v96 <= (float)(v168 * flFrontMaxb) )
+    {
+      v171 = v181;
+      plWallPlane.m_Normal.y = vPosOffset.x - vFrontMaxPos.x;
+      plWallPlane.m_Dist = v179;
+      v170 = v182;
+      if ( COERCE_FLOAT(COERCE_UNSIGNED_INT(
+                          (float)((float)(v172 * vBumpAxis.y)
+                                + (float)((float)(vPosOffset.x - vFrontMaxPos.x) * vBumpAxis.x))
+                        + (float)(v179 * vBumpAxis.z)) & _mask__AbsFloat_) <= COERCE_FLOAT(COERCE_UNSIGNED_INT(
+                                                                                             (float)((float)(flDot * vBumpAxis.y) + (float)(v182 * vBumpAxis.x))
+                                                                                           + (float)(v181 * vBumpAxis.z)) & _mask__AbsFloat_) )
+      {
+        v98 = v182;
+        v99 = flDot;
+        v100 = v181;
+      }
+      else
+      {
+        v98 = vPosOffset.x - vFrontMaxPos.x;
+        v99 = v172;
+        v100 = v179;
+      }
+      LODWORD(v77) = _mask__AbsFloat_ & COERCE_UNSIGNED_INT(
+                                          (float)((float)(v99 * vBumpAxis.y) + (float)(v98 * vBumpAxis.x))
+                                        + (float)(v100 * vBumpAxis.z));
+      v97 = flFrontMaxb;
+    }
+    else
+    {
+      v77 = v168 * flFrontMaxb;
+    }
+    if ( wall_debug.m_pParent->m_Value.m_nValue )
+    {
+      flDuration = wall_debug_time.m_pParent->m_Value.m_fValue;
+      plWallPlane.m_Normal.y = vFrontMaxPos.x - (float)(v180 * v97);
+      plWallPlane.m_Normal.z = vFrontMaxPos.y - (float)(v158 * v97);
+      plWallPlane.m_Dist = vFrontMaxPos.z - (float)(v97 * v169);
+      NDebugOverlay::VertArrow(
+        (const Vector *)&plWallPlane.m_Normal.y,
+        &vFrontMaxPos,
+        2.0,
+        255,
+        0,
+        0,
+        255,
+        1,
+        flDuration);
+      flDurationa = wall_debug_time.m_pParent->m_Value.m_fValue;
+      plWallPlane.m_Normal.z = vFrontMaxPos.y - (float)(vBumpAxis.y * v77);
+      plWallPlane.m_Dist = vFrontMaxPos.z - (float)(vBumpAxis.z * v77);
+      plWallPlane.m_Normal.y = vFrontMaxPos.x - (float)(v77 * vBumpAxis.x);
+      NDebugOverlay::VertArrow(
+        &vFrontMaxPos,
+        (const Vector *)&plWallPlane.m_Normal.y,
+        2.0,
+        255,
+        0,
+        0,
+        255,
+        1,
+        flDurationa);
+      m_fValue = wall_debug_time.m_pParent->m_Value.m_fValue;
+      v102 = (float)(vWallUp->y * flBackMax) + vBackMaxPos.y;
+      v103 = (float)(vWallUp->z * flBackMax) + vBackMaxPos.z;
+      plWallPlane.m_Normal.y = (float)(vWallUp->x * flBackMax) + vBackMaxPos.x;
+      plWallPlane.m_Normal.z = v102;
+      plWallPlane.m_Dist = v103;
+      NDebugOverlay::VertArrow((const Vector *)&plWallPlane.m_Normal.y, &vBackMaxPos, 2.0, 0, 0, 255, 255, 1, m_fValue);
+      flDurationb = wall_debug_time.m_pParent->m_Value.m_fValue;
+      plWallPlane.m_Normal.y = (float)(flBumpAmountb * vBumpAxis.x) + vBackMaxPos.x;
+      plWallPlane.m_Normal.z = (float)(vBumpAxis.y * flBumpAmountb) + vBackMaxPos.y;
+      plWallPlane.m_Dist = (float)(vBumpAxis.z * flBumpAmountb) + vBackMaxPos.z;
+      NDebugOverlay::VertArrow(
+        &vBackMaxPos,
+        (const Vector *)&plWallPlane.m_Normal.y,
+        2.0,
+        0,
+        0,
+        255,
+        255,
+        1,
+        flDurationb);
+      v71 = vBumpAxis.z;
+      v68 = vBumpAxis.y;
+      v73 = vBumpAxis.x;
+      v97 = flFrontMaxb;
+    }
+    v79 = flBumpAmountb;
+    if ( flBackMax > v97 )
+    {
+      LODWORD(v73) ^= _mask__NegFloat_;
+      LODWORD(v68) ^= _mask__NegFloat_;
+      LODWORD(v71) ^= _mask__NegFloat_;
+      v79 = v77;
+      vBumpAxis.x = v73;
+      vBumpAxis.y = v68;
+      vBumpAxis.z = v71;
+      v77 = flBumpAmountb;
+    }
+  }
+  else
+  {
+    v68 = 0.0;
+    v69 = vWallUp->z;
+    v70 = FLOAT_N1_0;
+    v71 = FLOAT_1_0;
+    v72 = (float)((float)(v180 + vWallUp->y) * 0.0) + v69;
+    v73 = 0.0;
+    vBumpAxis.x = 0.0;
+    vBumpAxis.y = 0.0;
+    vBumpAxis.z = FLOAT_1_0;
+    v169 = v69;
+    if ( v72 >= -1.0 )
+    {
+      if ( v72 <= 1.0 )
+        v70 = v72;
+      else
+        v70 = FLOAT_1_0;
+    }
+    LODWORD(flDot) = LODWORD(v70) & _mask__AbsFloat_;
+    v171 = v66 - vBackMaxPos.z;
+    v181 = v66 - vBackMaxPos.z;
+    flBumpAmount = vPosOffset.x - vBackMaxPos.x;
+    v170 = vPosOffset.x - vBackMaxPos.x;
+    v182 = side2.x - vBackMaxPos.x;
+    plWallPlane.m_Normal.y = side2.x - vBackMaxPos.x;
+    flInvBumpAmount = vPosOffset.y - vBackMaxPos.y;
+    v179 = side2.y - vBackMaxPos.y;
+    v180 = side2.z - vBackMaxPos.z;
+    if ( COERCE_FLOAT(COERCE_UNSIGNED_INT(
+                        (float)((float)((float)(vPosOffset.y - vBackMaxPos.y) + (float)(vPosOffset.x - vBackMaxPos.x))
+                              * 0.0)
+                      + (float)(v66 - vBackMaxPos.z)) & _mask__AbsFloat_) <= COERCE_FLOAT(COERCE_UNSIGNED_INT(
+                                                                                            (float)((float)((float)(side2.y - vBackMaxPos.y) + (float)(side2.x - vBackMaxPos.x))
+                                                                                                  * 0.0)
+                                                                                          + (float)(side2.z
+                                                                                                  - vBackMaxPos.z)) & _mask__AbsFloat_) )
+      v74 = (float)((float)(v179 + v182) * 0.0) + v180;
+    else
+      v74 = (float)((float)(flInvBumpAmount + flBumpAmount) * 0.0) + v181;
+    v168 = 1.0 / flDot;
+    if ( COERCE_FLOAT(LODWORD(v74) & _mask__AbsFloat_) <= (float)((float)(1.0 / flDot) * flBackMax) )
+    {
+      plWallPlane.m_Dist = v181;
+      v170 = v182;
+      if ( COERCE_FLOAT(COERCE_UNSIGNED_INT((float)((float)(flInvBumpAmount + flBumpAmount) * 0.0) + v181) & _mask__AbsFloat_) <= COERCE_FLOAT(COERCE_UNSIGNED_INT((float)((float)(v179 + v182) * 0.0) + v180) & _mask__AbsFloat_) )
+        v75 = (float)((float)(v179 + v182) * 0.0) + v180;
+      else
+        v75 = (float)((float)(flInvBumpAmount + flBumpAmount) * 0.0) + v181;
+      LODWORD(flBumpAmounta) = LODWORD(v75) & _mask__AbsFloat_;
+    }
+    else
+    {
+      flBumpAmounta = (float)(1.0 / flDot) * flBackMax;
+    }
+    v179 = vPosOffset.z - vFrontMaxPos.z;
+    v182 = side2.x - vFrontMaxPos.x;
+    flDot = side2.y - vFrontMaxPos.y;
+    plWallPlane.m_Normal.z = side2.y - vFrontMaxPos.y;
+    flInvBumpAmounta = vPosOffset.x - vFrontMaxPos.x;
+    v181 = side2.z - vFrontMaxPos.z;
+    v172 = vPosOffset.y - vFrontMaxPos.y;
+    if ( COERCE_FLOAT(COERCE_UNSIGNED_INT(
+                        (float)((float)((float)(vPosOffset.y - vFrontMaxPos.y) + (float)(vPosOffset.x - vFrontMaxPos.x))
+                              * 0.0)
+                      + (float)(vPosOffset.z - vFrontMaxPos.z)) & _mask__AbsFloat_) <= COERCE_FLOAT(COERCE_UNSIGNED_INT((float)((float)((float)(side2.y - vFrontMaxPos.y) + (float)(side2.x - vFrontMaxPos.x)) * 0.0) + (float)(side2.z - vFrontMaxPos.z)) & _mask__AbsFloat_) )
+      v76 = (float)((float)(flDot + v182) * 0.0) + v181;
+    else
+      v76 = (float)((float)(v172 + flInvBumpAmounta) * 0.0) + v179;
+    if ( COERCE_FLOAT(LODWORD(v76) & _mask__AbsFloat_) <= (float)(v168 * flFrontMaxb) )
+    {
+      plWallPlane.m_Dist = v179;
+      v170 = v182;
+      if ( COERCE_FLOAT(COERCE_UNSIGNED_INT((float)((float)(v172 + flInvBumpAmounta) * 0.0) + v179) & _mask__AbsFloat_) <= COERCE_FLOAT(COERCE_UNSIGNED_INT((float)((float)(flDot + v182) * 0.0) + v181) & _mask__AbsFloat_) )
+        v78 = (float)((float)(flDot + v182) * 0.0) + v181;
+      else
+        v78 = (float)((float)(v172 + flInvBumpAmounta) * 0.0) + v179;
+      LODWORD(v77) = LODWORD(v78) & _mask__AbsFloat_;
+    }
+    else
+    {
+      v77 = v168 * flFrontMaxb;
+    }
+    if ( v169 >= 0.0 )
+    {
+      v79 = flBumpAmounta;
+    }
+    else
+    {
+      v79 = v77;
+      v77 = flBumpAmounta;
+    }
+  }
+  v104 = v79 + 0.1;
+  flInvBumpAmountb = v77 + 0.1;
+  v105 = vNewPos.y + (float)(v68 * v104);
+  v106 = (float)(v104 * v73) + vNewPos.x;
+  v107 = vNewPos.z + (float)(v71 * v104);
+  vNewPos.x = v106;
+  vNewPos.y = v105;
+  vNewPos.z = v107;
+  if ( wall_debug.m_pParent->m_Value.m_nValue )
+  {
+    if ( (pEntity->m_iEFlags & 0x800) != 0 )
+    {
+      CBaseEntity::CalcAbsolutePosition(pEntity);
+      v107 = vNewPos.z;
+      v105 = vNewPos.y;
+      v106 = vNewPos.x;
+    }
+    v108 = v105 - pEntity->m_vecAbsOrigin.y;
+    v109 = v107 - pEntity->m_vecAbsOrigin.z;
+    flDurationc = wall_debug_time.m_pParent->m_Value.m_fValue;
+    vPosOffset.x = v106 - pEntity->m_vecAbsOrigin.x;
+    vPosOffset.y = v108;
+    vPosOffset.z = v109;
+    plWallPlane.m_Normal.y = ptOBBCenter.x + vPosOffset.x;
+    plWallPlane.m_Normal.z = v108 + ptOBBCenter.y;
+    plWallPlane.m_Dist = v109 + ptOBBCenter.z;
+    NDebugOverlay::Sphere((const Vector *)&plWallPlane.m_Normal.y, 5.0, 0, 0, 255, 1, flDurationc);
+    v110 = &ptOBB[0].z;
+    flBumpAmountc = 8;
+    do
+    {
+      flDurationd = wall_debug_time.m_pParent->m_Value.m_fValue;
+      plWallPlane.m_Normal.y = *(v110 - 2) + vPosOffset.x;
+      plWallPlane.m_Normal.z = *(v110 - 1) + vPosOffset.y;
+      plWallPlane.m_Dist = *v110 + vPosOffset.z;
+      NDebugOverlay::Sphere((const Vector *)&plWallPlane.m_Normal.y, 2.0, 0, 0, 255, 1, flDurationd);
+      v110 += 3;
+      --flBumpAmountc;
+    }
+    while ( flBumpAmountc );
+    flBumpAmountd = wall_debug_time.m_pParent->m_Value.m_fValue;
+    if ( (pEntity->m_iEFlags & 0x800) != 0 )
+      CBaseEntity::CalcAbsolutePosition(pEntity);
+    v111 = pEntity->m_Collision.GetCollisionAngles(&pEntity->m_Collision);
+    NDebugOverlay::BoxAngles(
+      &pEntity->m_vecAbsOrigin,
+      &vObstructionMins,
+      &vObstructionMaxs,
+      v111,
+      0,
+      255,
+      255,
+      64,
+      flBumpAmountd);
+    flDuratione = wall_debug_time.m_pParent->m_Value.m_fValue;
+    v112 = pEntity->m_Collision.GetCollisionAngles(&pEntity->m_Collision);
+    NDebugOverlay::BoxAngles(&vNewPos, &vObstructionMins, &vObstructionMaxs, v112, 255, 255, 0, 64, flDuratione);
+  }
+  CTraceFilterSimple::CTraceFilterSimple(&filter, pEntity, 0, 0);
+  v113 = enginetrace->__vftable;
+  v114 = ((int (__thiscall *)(CPortal_Player *, Vector *, Vector *, QAngle *, int, CTraceFilterSimple *, CGameTrace *))pEntity->GetCollideable)(
+           pEntity,
+           &vNewPos,
+           &vNewPos,
+           &vNewAngles,
+           33570827,
+           &filter,
+           &stuckTrace);
+  ((void (__thiscall *)(IEngineTrace *, int))v113->SweepCollideable)(enginetrace, v114);
+  if ( !stuckTrace.startsolid || bIgnoreStuck )
+  {
+    pEntity->Teleport(pEntity, &vNewPos, &vNewAngles, &vNewVel, 1);
+    return;
+  }
+  if ( pEntity->IsPlayer(pEntity) && LOBYTE(v167[1].m_ResponseContexts.m_Size) )
+  {
+    if ( !pEntity->IsPlayer(pEntity) )
+      return;
+    if ( pEntity->m_Local.m_bDucked.m_Value
+      || (flDurationf = &g_pGameRules->GetViewVectors(g_pGameRules)->m_vDuckHullMax,
+          v115 = g_pGameRules->GetViewVectors(g_pGameRules),
+          TracePlayerBoxAgainstCollidables(&stuckTrace, pEntity, &vNewPos, &vNewPos, &v115->m_vDuckHullMin, flDurationf),
+          stuckTrace.startsolid) )
+    {
+      v116 = (unsigned int)pEntity->m_iEFlags >> 11;
+      v117 = flInvBumpAmountb * vBumpAxis.x;
+      v118 = vBumpAxis.y * flInvBumpAmountb;
+      v119 = vBumpAxis.z * flInvBumpAmountb;
+      vPosOffset.x = flInvBumpAmountb * vBumpAxis.x;
+      vPosOffset.y = vBumpAxis.y * flInvBumpAmountb;
+      vPosOffset.z = vBumpAxis.z * flInvBumpAmountb;
+      if ( (v116 & 1) != 0 )
+      {
+        CBaseEntity::CalcAbsolutePosition(pEntity);
+        v117 = vPosOffset.x;
+        v118 = vPosOffset.y;
+        v119 = vPosOffset.z;
+      }
+      v60 = !pEntity->m_Local.m_bDucked.m_Value;
+      v120 = pEntity->m_vecAbsOrigin.x - v117;
+      v121 = pEntity->m_vecAbsOrigin.y - v118;
+      v122 = pEntity->m_vecAbsOrigin.z - v119;
+      vNewPos.x = v120;
+      vNewPos.y = v121;
+      vNewPos.z = v122;
+      if ( !v60 )
+      {
+        flDurationk = &g_pGameRules->GetViewVectors(g_pGameRules)->m_vDuckHullMax;
+        v127 = g_pGameRules->GetViewVectors(g_pGameRules);
+        TracePlayerBoxAgainstCollidables(&stuckTrace, pEntity, &vNewPos, &vNewPos, &v127->m_vDuckHullMin, flDurationk);
+        if ( stuckTrace.startsolid )
+          return;
+        pEntity->ForceDuckThisFrame(pEntity);
+        pEntity->Teleport(pEntity, &vNewPos, &vNewAngles, &vNewVel, 1);
+        goto LABEL_109;
+      }
+      flDurationg = &g_pGameRules->GetViewVectors(g_pGameRules)->m_vHullMax;
+      v123 = g_pGameRules->GetViewVectors(g_pGameRules);
+      TracePlayerBoxAgainstCollidables(&stuckTrace, pEntity, &vNewPos, &vNewPos, &v123->m_vHullMin, flDurationg);
+      if ( !stuckTrace.startsolid )
+      {
+        pEntity->Teleport(pEntity, &vNewPos, &vNewAngles, &vNewVel, 1);
+LABEL_109:
+        if ( wall_debug.m_pParent->m_Value.m_nValue )
+        {
+          flDurationh = wall_debug_time.m_pParent->m_Value.m_fValue;
+          radius = pEntity->m_Collision.GetCollisionAngles(&pEntity->m_Collision);
+          width = &g_pGameRules->GetViewVectors(g_pGameRules)->m_vHullMax;
+          v124 = g_pGameRules->GetViewVectors(g_pGameRules);
+          NDebugOverlay::BoxAngles(&vNewPos, &v124->m_vHullMin, width, radius, 255, 0, 0, 64, flDurationh);
+        }
+        return;
+      }
+      vNewPos.z = vNewPos.z + 36.0;
+      flDurationi = &g_pGameRules->GetViewVectors(g_pGameRules)->m_vDuckHullMax;
+      v125 = g_pGameRules->GetViewVectors(g_pGameRules);
+      TracePlayerBoxAgainstCollidables(&stuckTrace, pEntity, &vNewPos, &vNewPos, &v125->m_vDuckHullMin, flDurationi);
+      if ( stuckTrace.startsolid )
+        return;
+    }
+    pEntity->ForceDuckThisFrame(pEntity);
+    pEntity->Teleport(pEntity, &vNewPos, &vNewAngles, &vNewVel, 1);
+    if ( wall_debug.m_pParent->m_Value.m_nValue )
+    {
+      flDurationj = wall_debug_time.m_pParent->m_Value.m_fValue;
+      radiusa = pEntity->m_Collision.GetCollisionAngles(&pEntity->m_Collision);
+      widtha = &g_pGameRules->GetViewVectors(g_pGameRules)->m_vDuckHullMax;
+      v126 = g_pGameRules->GetViewVectors(g_pGameRules);
+      NDebugOverlay::BoxAngles(&vNewPos, &v126->m_vDuckHullMin, widtha, radiusa, 255, 0, 0, 64, flDurationj);
+    }
+  }
+  else
+  {
+    v128 = (unsigned int)pEntity->m_iEFlags >> 11;
+    v129 = flInvBumpAmountb * vBumpAxis.x;
+    v130 = vBumpAxis.y * flInvBumpAmountb;
+    v131 = vBumpAxis.z * flInvBumpAmountb;
+    vPosOffset.x = flInvBumpAmountb * vBumpAxis.x;
+    vPosOffset.y = vBumpAxis.y * flInvBumpAmountb;
+    vPosOffset.z = vBumpAxis.z * flInvBumpAmountb;
+    if ( (v128 & 1) != 0 )
+    {
+      CBaseEntity::CalcAbsolutePosition(pEntity);
+      v129 = vPosOffset.x;
+      v130 = vPosOffset.y;
+      v131 = vPosOffset.z;
+    }
+    v132 = pEntity->m_vecAbsOrigin.x - v129;
+    v133 = pEntity->m_vecAbsOrigin.y - v130;
+    v134 = pEntity->m_vecAbsOrigin.z - v131;
+    vNewPos.x = v132;
+    vNewPos.y = v133;
+    vNewPos.z = v134;
+    UTIL_ClearTrace(&stuckTrace);
+    v135 = enginetrace->__vftable;
+    v136 = ((int (__thiscall *)(CPortal_Player *, Vector *, Vector *, QAngle *, int, CTraceFilterSimple *, CGameTrace *))pEntity->GetCollideable)(
+             pEntity,
+             &vNewPos,
+             &vNewPos,
+             &vNewAngles,
+             33570827,
+             &filter,
+             &stuckTrace);
+    ((void (__thiscall *)(IEngineTrace *, int))v135->SweepCollideable)(enginetrace, v136);
+    if ( !stuckTrace.startsolid )
+      pEntity->Teleport(pEntity, &vNewPos, &vNewAngles, &vNewVel, 1);
+    if ( wall_debug.m_pParent->m_Value.m_nValue )
+    {
+      flDurationl = wall_debug_time.m_pParent->m_Value.m_fValue;
+      v137 = pEntity->m_Collision.GetCollisionAngles(&pEntity->m_Collision);
+      NDebugOverlay::BoxAngles(&vNewPos, &vObstructionMins, &vObstructionMaxs, v137, 255, 0, 0, 64, flDurationl);
+    }
+  }
+}

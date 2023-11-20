@@ -14,7 +14,7 @@
 
 #ifdef PORTAL2
 #include "weapon_paintgun.h"
-//#include "projectedwallentity.h"
+#include "projectedwallentity.h"
 #include "portal_player.h"
 #include "prop_weightedcube.h"
 #include "paint/paint_savelogic.h"
@@ -103,8 +103,8 @@ void CPaintDatabase::AddPaint( CBaseEntity* pPaintedEntity, const Vector& vecPai
 	// Not the world
 	else if ( !( pPaintedEntity->GetFlags() & FL_UNPAINTABLE ) ) //If this entity is not flagged as unpaintable
 	{
-		/*
-#ifdef PORTAL2
+		
+#if defined ( PORTAL2 ) && !defined ( NO_PROJECTED_WALL )
 		// If this hit a paintable projected wall
 		CProjectedWallEntity *pPaintableWall = dynamic_cast< CProjectedWallEntity* >( pPaintedEntity );
 		if( pPaintableWall )
@@ -113,7 +113,7 @@ void CPaintDatabase::AddPaint( CBaseEntity* pPaintedEntity, const Vector& vecPai
 		}
 		// Not a wall
 		else
-#endif*/
+#endif
 		{
 			PaintDatabase.PaintEntity( pPaintedEntity, powerType, vecPaintLocation );
 		}
@@ -194,7 +194,7 @@ void CPaintDatabase::PaintEntity( CBaseEntity *pPaintedEntity, PaintPowerType ne
 }
 
 // Projected Walls aren't implemented yet
-#if defined (PORTAL2) && 0
+#if defined (PORTAL2) && !defined ( NO_PROJECTED_WALL )
 void CPaintDatabase::PaintProjectedWall( CProjectedWallEntity *pWall, PaintPowerType powerType, const Vector &vecPosition )
 {
 	const bool bWallPainted = pWall->IsWallPainted( vecPosition );
@@ -226,7 +226,7 @@ void CPaintDatabase::RemoveAllPaint()
 		}
 	}
 	// No projected walls yet
-#if defined (PORTAL2) && 0
+#if defined (PORTAL2) && 1
 	//Remove the paint from all the painted projected walls
 	const int nPaintedProjectedWallCount = m_PaintedProjectedWalls.Count();
 	for( int i = 0; i < nPaintedProjectedWallCount; ++i )
@@ -308,7 +308,7 @@ void CPaintDatabase::RemovePaintedEntity( int index, bool bDeleteData )
 }
 
 // No projected walls yet
-#if defined ( PORTAL2 ) && 0
+#if defined ( PORTAL2 ) && 1
 void CPaintDatabase::RemovePaintedWall( CProjectedWallEntity *pWall, bool bDeleteData )
 {
 	//Get the paint gun to give back the ammo to
@@ -414,7 +414,7 @@ void CPaintDatabase::ClearPaintData()
 	m_PaintThisFrame.RemoveAll();
 	m_PaintedEntities.RemoveAll();
 #ifdef PORTAL2
-	//m_PaintedProjectedWalls.RemoveAll();
+	m_PaintedProjectedWalls.RemoveAll();
 #endif
 }
 

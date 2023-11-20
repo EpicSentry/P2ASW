@@ -76,5 +76,5 @@ private:
 	
     CUtlVector<PaintPowerType,CUtlMemory<PaintPowerType,int> > m_PaintPowers;
     int ComputeSegmentIndex( Vector & );
-    int s_HardLightBridgeSurfaceProps;
+    static int s_HardLightBridgeSurfaceProps;
 };

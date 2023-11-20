@@ -1,0 +1,16 @@
+void __cdecl CProjectedWallEntity::Spawn(CProjectedWallEntity *const this)
+{
+  CBaseProjectedEntity::Spawn(this);
+  (*((void (__cdecl **)(CProjectedWallEntity *const))this->_vptr_IHandleEntity + 26))(this);
+  CCollisionProperty::SetSolid(&this->m_Collision, SOLID_CUSTOM);
+  CCollisionProperty::SetSolidFlags(&this->m_Collision, 67);
+  CCollisionProperty::SetSurroundingBoundsType(&this->m_Collision, USE_GAME_CODE, 0, 0);
+  CBaseEntity::SetMoveType(this, MOVETYPE_NONE, MOVECOLLIDE_DEFAULT);
+  (*((void (__cdecl **)(CProjectedWallEntity *const))this->_vptr_IHandleEntity + 152))(this);
+  CBaseEntity::SetTransmitState(this, 8);
+  if ( CProjectedWallEntity::s_HardLightBridgeSurfaceProps == -1 )
+    CProjectedWallEntity::s_HardLightBridgeSurfaceProps = (*((int (__cdecl **)(IPhysicsSurfaceProps *, const char *))physprops->_vptr_IPhysicsSurfaceProps
+                                                           + 4))(
+                                                            physprops,
+                                                            "hard_light_bridge");
+}

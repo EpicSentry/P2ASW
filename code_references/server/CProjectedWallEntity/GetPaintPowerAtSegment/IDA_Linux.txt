@@ -1,0 +1,4 @@
+PaintPowerType __cdecl CProjectedWallEntity::GetPaintPowerAtSegment(const CProjectedWallEntity *const this, int i)
+{
+  return this->m_PaintPowers.m_Memory.m_pMemory[i];
+}

@@ -1,0 +1,4 @@
+bool __thiscall CProjectedWallEntity::IsWallPainted(CProjectedWallEntity *this, const Vector *vecPosition)
+{
+  return CProjectedWallEntity::GetPaintPowerAtPoint((CProjectedWallEntity *)&this->IPaintableEntity, vecPosition) != NO_POWER;
+}

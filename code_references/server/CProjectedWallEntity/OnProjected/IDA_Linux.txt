@@ -1,0 +1,13 @@
+void __cdecl CProjectedWallEntity::OnProjected(CProjectedWallEntity *const this)
+{
+  float v1; // xmm0_4
+
+  CBaseProjectedEntity::OnProjected(this);
+  CProjectedWallEntity::ProjectWall(this);
+  v1 = gpGlobals->curtime + 0.5;
+  if ( v1 != this->m_flParticleUpdateTime.m_Value )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_flParticleUpdateTime);
+    this->m_flParticleUpdateTime.m_Value = v1;
+  }
+}

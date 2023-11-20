@@ -1,0 +1,4 @@
+float __cdecl CProjectedWallEntity::GetSegmentLength(const CProjectedWallEntity *const this)
+{
+  return this->m_flSegmentLength.m_Value;
+}

@@ -1,0 +1,26 @@
+void __cdecl CPropWallProjector::Spawn(CPropWallProjector *const this)
+{
+  unsigned int m_Index; // eax
+  char *v3; // edx
+  ProjectedEntityAmbientSoundProxy *v4; // eax
+
+  CBaseProjector::Spawn(this);
+  (*((void (__cdecl **)(CPropWallProjector *const))this->_vptr_IHandleEntity + 26))(this);
+  (*((void (__cdecl **)(CPropWallProjector *const, const char *))this->_vptr_IHandleEntity + 27))(
+    this,
+    "models/props/wall_emitter.mdl");
+  CCollisionProperty::SetSolid(&this->m_Collision, SOLID_VPHYSICS);
+  m_Index = this->m_hAmbientSoundProxy.m_Index;
+  if ( m_Index == -1
+    || (v3 = (char *)g_pEntityList + 24 * (unsigned __int16)m_Index, *((_DWORD *)v3 + 2) != HIWORD(m_Index))
+    || !*((_DWORD *)v3 + 1) )
+  {
+    v4 = ProjectedEntityAmbientSoundProxy::Create(this);
+    if ( v4 )
+      this->m_hAmbientSoundProxy.m_Index = *(_DWORD *)(*((int (__cdecl **)(ProjectedEntityAmbientSoundProxy *))v4->_vptr_IHandleEntity
+                                                       + 3))(v4);
+    else
+      this->m_hAmbientSoundProxy.m_Index = -1;
+  }
+  CBaseEntity::AddEffects(this, 1024);
+}

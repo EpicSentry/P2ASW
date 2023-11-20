@@ -1,0 +1,76 @@
+void __cdecl CProjectedWallEntity::GetExtents(
+        CProjectedWallEntity *const this,
+        Vector *const outMins,
+        Vector *const outMaxs,
+        float flWidthScale)
+{
+  float v4; // xmm5_4
+  float v5; // xmm0_4
+  float v6; // xmm7_4
+  float v7; // xmm5_4
+  __m128d v8; // xmm3
+  __m128d v9; // xmm1
+  __m128d v10; // xmm0
+  float v11; // xmm6_4
+  __m128d v12; // xmm4
+  __m128d v13; // xmm6
+  __m128d v14; // xmm5
+  __m128d v15; // xmm2
+  __m128d v16; // xmm7
+  __m128d v17; // xmm5
+  __m128d v18; // xmm2
+  __m128d v19; // xmm5
+  __m128d v20; // xmm3
+  __m128d v21; // xmm1
+  __m128d v22; // xmm6
+  float v23; // [esp+18h] [ebp-60h]
+  double v24; // [esp+18h] [ebp-60h]
+  float v25; // [esp+20h] [ebp-58h]
+  double v26; // [esp+20h] [ebp-58h]
+  float v27; // [esp+28h] [ebp-50h]
+  double v28; // [esp+28h] [ebp-50h]
+  Vector vecForward; // [esp+30h] [ebp-48h] BYREF
+  Vector vecRight; // [esp+3Ch] [ebp-3Ch] BYREF
+  Vector vecUp; // [esp+48h] [ebp-30h] BYREF
+  QAngle qAngles; // [esp+54h] [ebp-24h] BYREF
+
+  qAngles = (QAngle)this->m_angRotation;
+  AngleVectors(&qAngles, &vecForward, &vecRight, &vecUp);
+  v4 = this->m_flHeight.m_Value * 0.5;
+  v5 = (float)(flWidthScale * this->m_flWidth.m_Value) * 0.5;
+  v6 = vecUp.y * v4;
+  v23 = vecUp.x * v4;
+  v27 = vecRight.x * v5;
+  v7 = v4 * vecUp.z;
+  v25 = v5 * vecRight.z;
+  v8.m128d_f64[0] = (float)((float)((float)(vecForward.y * 0.00000011920929) + v6) + (float)(vecRight.y * v5));
+  v8.m128d_f64[1] = v8.m128d_f64[0];
+  v9.m128d_f64[0] = (float)((float)((float)((float)-vecForward.y * 0.00000011920929) - v6) - (float)(vecRight.y * v5));
+  v9.m128d_f64[1] = v9.m128d_f64[0];
+  v10.m128d_f64[0] = (float)((float)((float)((float)-vecForward.z * 0.00000011920929) - v7) - (float)(v5 * vecRight.z));
+  v10.m128d_f64[1] = v10.m128d_f64[0];
+  v11 = (float)((float)(vecForward.z * 0.00000011920929) + v7) + v25;
+  v26 = fmin(v8.m128d_f64[0], v9.m128d_f64[0]);
+  v12.m128d_f64[0] = (float)((float)((float)((float)-vecForward.x * 0.00000011920929) - v23) - v27);
+  v12.m128d_f64[1] = v12.m128d_f64[0];
+  v13.m128d_f64[0] = v11;
+  v13.m128d_f64[1] = v13.m128d_f64[0];
+  v14.m128d_f64[0] = (float)((float)((float)(vecForward.x * 0.00000011920929) + v23) + v27);
+  v14.m128d_f64[1] = v14.m128d_f64[0];
+  v28 = fmin(v14.m128d_f64[0], v12.m128d_f64[0]);
+  v24 = fmin(v13.m128d_f64[0], v10.m128d_f64[0]);
+  v15 = _mm_cmpgt_sd(v14, v12);
+  v16 = _mm_and_pd(v14, v15);
+  v17 = v15;
+  v18 = _mm_cmpgt_sd(v8, v9);
+  v19 = _mm_or_pd(_mm_andn_pd(v17, v12), v16);
+  outMins->x = v28;
+  v20 = _mm_or_pd(_mm_andn_pd(v18, v9), _mm_and_pd(v8, v18));
+  v21 = _mm_cmpgt_sd(v13, v10);
+  v22 = _mm_or_pd(_mm_andn_pd(v21, v10), _mm_and_pd(v13, v21));
+  outMins->y = v26;
+  outMins->z = v24;
+  outMaxs->x = _mm_unpacklo_pd(v19, v19).m128d_f64[0];
+  outMaxs->y = _mm_unpacklo_pd(v20, v20).m128d_f64[0];
+  outMaxs->z = _mm_unpacklo_pd(v22, v22).m128d_f64[0];
+}

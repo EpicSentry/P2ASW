@@ -155,8 +155,9 @@ $Project "Server (Portal 2)"
 				$File "portal2/baseprojectedentity.h"
 				$File "portal2/baseprojectedentity.cpp"
 				
-				$File	"$SRCDIR\game\shared\portal\baseprojectedentity_shared.h"
-				$File	"$SRCDIR\game\shared\portal\baseprojectedentity_shared.cpp"
+				$File "$SRCDIR\game\shared\portal\baseprojectedentity_shared.h"
+				$File "$SRCDIR\game\shared\portal\baseprojectedentity_shared.cpp"
+				$File "$SRCDIR\game\shared\portal\projectedwallentity_shared.cpp"
 				
 
 			$File	"portal2\portal2_eventlog.cpp"
@@ -355,6 +356,10 @@ $Project "Server (Portal 2)"
 				
 				$File	"portal2\portal_playerlocaldata.cpp"
 				$File	"portal2\portal_playerlocaldata.h"
+				$File	"portal2\projectedwallentity.cpp"
+				$File	"portal2\projectedwallentity.h"
+				$File	"portal2\propwallprojector.cpp"
+				$File	"portal2\propwallprojector.h"
 		}
 	}
 }

@@ -1,0 +1,41 @@
+void __cdecl CPaintDatabase::RemovePaintedWall(
+        CPaintDatabase *const this,
+        CProjectedWallEntity *pWall,
+        bool bDeleteData)
+{
+  int m_Size; // edx
+  CProjectedWallEntity **m_pMemory; // ecx
+  int v5; // eax
+
+  if ( bDeleteData )
+  {
+    m_Size = this->m_PaintedProjectedWalls.m_Size;
+    if ( m_Size > 0 )
+    {
+      m_pMemory = this->m_PaintedProjectedWalls.m_Memory.m_pMemory;
+      v5 = 0;
+      if ( *m_pMemory == pWall )
+      {
+LABEL_9:
+        if ( m_Size - v5 - 1 > 0 )
+        {
+          _V_memmove(&m_pMemory[v5], &m_pMemory[v5 + 1], 4 * (m_Size - v5 - 1));
+          m_Size = this->m_PaintedProjectedWalls.m_Size;
+        }
+        this->m_PaintedProjectedWalls.m_Size = m_Size - 1;
+      }
+      else
+      {
+        while ( ++v5 != m_Size )
+        {
+          if ( m_pMemory[v5] == pWall )
+          {
+            if ( v5 == -1 )
+              return;
+            goto LABEL_9;
+          }
+        }
+      }
+    }
+  }
+}

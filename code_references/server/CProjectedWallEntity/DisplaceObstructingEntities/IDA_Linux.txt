@@ -1,0 +1,95 @@
+void __cdecl CProjectedWallEntity::DisplaceObstructingEntities(CProjectedWallEntity *const this)
+{
+  bool v1; // al
+  float v2; // xmm0_4
+  __m128 x_low; // xmm1
+  float v4; // xmm7_4
+  float v5; // xmm1_4
+  float v6; // xmm2_4
+  CBaseEntity **v7; // eax
+  int v8; // esi
+  int v9; // ebx
+  Ray_t ray; // [esp+20h] [ebp-E8h] BYREF
+  CProjectorCollideList enumerator; // [esp+78h] [ebp-90h] BYREF
+  Vector vOrigin; // [esp+9Ch] [ebp-6Ch] BYREF
+  Vector vWallForward; // [esp+A8h] [ebp-60h] BYREF
+  Vector vWallRight; // [esp+B4h] [ebp-54h] BYREF
+  Vector vWallUp; // [esp+C0h] [ebp-48h] BYREF
+  Vector vLength; // [esp+CCh] [ebp-3Ch] BYREF
+  Vector vWallSweptBoxMins; // [esp+D8h] [ebp-30h] BYREF
+  Vector vWallSweptBoxMaxs; // [esp+E4h] [ebp-24h] BYREF
+
+  vOrigin = (Vector)this->m_vecOrigin;
+  (*((void (__cdecl **)(CProjectedWallEntity *const, Vector *, Vector *, Vector *))this->_vptr_IHandleEntity + 135))(
+    this,
+    &vWallForward,
+    &vWallRight,
+    &vWallUp);
+  ray.m_pWorldAxisTransform = 0;
+  (*((void (__cdecl **)(Vector *, CProjectedWallEntity *const))this->_vptr_IHandleEntity + 206))(&vLength, this);
+  CProjectedWallEntity::GetExtents(this, &vWallSweptBoxMins, &vWallSweptBoxMaxs, 1.0);
+  v1 = 1;
+  ray.m_pWorldAxisTransform = 0;
+  v2 = fsqrt((float)((float)(vLength.x * vLength.x) + (float)(vLength.y * vLength.y)) + (float)(vLength.z * vLength.z));
+  ray.m_Delta.y = (float)((float)(vWallForward.y * v2) + vOrigin.y) - vOrigin.y;
+  ray.m_Delta.z = (float)((float)(vWallForward.z * v2) + vOrigin.z) - vOrigin.z;
+  ray.m_Delta.x = (float)((float)(v2 * vWallForward.x) + vOrigin.x) - vOrigin.x;
+  x_low = (__m128)LODWORD(vWallSweptBoxMaxs.x);
+  if ( (float)((float)((float)(ray.m_Delta.x * ray.m_Delta.x) + (float)(ray.m_Delta.y * ray.m_Delta.y))
+             + (float)(ray.m_Delta.z * ray.m_Delta.z)) == 0.0 )
+    v1 = 0;
+  ray.m_Extents.y = (float)(vWallSweptBoxMaxs.y - vWallSweptBoxMins.y) * 0.5;
+  ray.m_Extents.z = (float)(vWallSweptBoxMaxs.z - vWallSweptBoxMins.z) * 0.5;
+  ray.m_Extents.x = (float)(vWallSweptBoxMaxs.x - vWallSweptBoxMins.x) * 0.5;
+  ray.m_IsSwept = v1;
+  v4 = (float)(vWallSweptBoxMaxs.x + vWallSweptBoxMins.x) * 0.5;
+  x_low.m128_f32[0] = (float)((float)(ray.m_Extents.x * ray.m_Extents.x) + (float)(ray.m_Extents.y * ray.m_Extents.y))
+                    + (float)(ray.m_Extents.z * ray.m_Extents.z);
+  ray.m_Start.x = vOrigin.x + v4;
+  ray.m_IsRay = _mm_unpacklo_ps(x_low, x_low).m128_f32[0] < 0.000001;
+  v5 = (float)(vWallSweptBoxMaxs.y + vWallSweptBoxMins.y) * 0.5;
+  v6 = (float)(vWallSweptBoxMaxs.z + vWallSweptBoxMins.z) * 0.5;
+  ray.m_Start.y = vOrigin.y + v5;
+  ray.m_Start.z = vOrigin.z + v6;
+  enumerator._vptr_IEntityEnumerator = (int (**)(...))&off_BB1C28;
+  ray.m_StartOffset.x = -v4;
+  ray.m_StartOffset.y = -v5;
+  ray.m_StartOffset.z = -v6;
+  enumerator.m_Entities.m_Memory.m_pMemory = 0;
+  enumerator.m_Entities.m_Memory.m_nAllocationCount = 32;
+  enumerator.m_Entities.m_Memory.m_nGrowSize = 0;
+  v7 = (CBaseEntity **)(*(int (__stdcall **)(_DWORD))*g_pMemAlloc)(g_pMemAlloc);
+  enumerator.m_Entities.m_Size = 0;
+  enumerator.m_Entities.m_Memory.m_pMemory = v7;
+  enumerator.m_Entities.m_pElements = v7;
+  enumerator.m_nContentsMask = 1174421507;
+  enumerator.m_pRay = &ray;
+  enumerator.m_pIgnoreEntity = this;
+  (*(void (__cdecl **)(IEngineTrace *, Ray_t *, _DWORD, CProjectorCollideList *))(*(_DWORD *)enginetrace + 40))(
+    enginetrace,
+    &ray,
+    0,
+    &enumerator);
+  v8 = enumerator.m_Entities.m_Size - 1;
+  v9 = enumerator.m_Entities.m_Size - 1;
+  while ( v8 >= 0 )
+  {
+    CProjectedWallEntity::DisplaceObstructingEntity(
+      this,
+      enumerator.m_Entities.m_Memory.m_pMemory[v9--],
+      &vOrigin,
+      &vWallUp,
+      &vWallRight,
+      0);
+    --v8;
+  }
+  enumerator.m_Entities.m_Size = 0;
+  enumerator._vptr_IEntityEnumerator = (int (**)(...))&off_BB1C28;
+  if ( enumerator.m_Entities.m_Memory.m_nGrowSize >= 0 )
+  {
+    if ( enumerator.m_Entities.m_Memory.m_pMemory )
+      (*(void (__cdecl **)(_DWORD, CBaseEntity **))(*g_pMemAlloc + 8))(
+        g_pMemAlloc,
+        enumerator.m_Entities.m_Memory.m_pMemory);
+  }
+}

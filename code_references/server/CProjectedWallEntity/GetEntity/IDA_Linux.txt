@@ -1,0 +1,4 @@
+CBaseEntity *__cdecl CProjectedWallEntity::GetEntity(CProjectedWallEntity *const this)
+{
+  return this;
+}

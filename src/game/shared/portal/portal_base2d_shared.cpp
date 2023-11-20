@@ -19,6 +19,7 @@
 #else
 #include "portal_player.h"
 #include "portal_physics_collisionevent.h"
+#include "projectedwallentity.h"
 #endif
 
 #ifdef CLIENT_DLL
@@ -756,7 +757,7 @@ void CPortal_Base2D::TeleportTouchingEntity( CBaseEntity *pOther )
 		}
 
 		//FIXME:
-#if 0
+#if !defined ( NO_PROJECTED_WALL )
 		for ( int i = 0; i < IProjectedWallEntityAutoList::AutoList().Count(); ++i )
 		{
 			CProjectedWallEntity *pWall = static_cast< CProjectedWallEntity* >( IProjectedWallEntityAutoList::AutoList()[i] );

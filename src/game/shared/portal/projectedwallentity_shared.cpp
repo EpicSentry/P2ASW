@@ -3,7 +3,7 @@
 //===========================================================================//
 #include "cbase.h"
 
-#include "paint_power_user.h"
+#include "paint/paint_power_user.h"
 
 #ifdef CLIENT_DLL
 #include "c_projectedwallentity.h"
@@ -21,6 +21,7 @@ extern void WallPainted( int colorIndex, int nSegment, CBaseEntity *pWall );
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
+#ifndef NO_PROJECTED_WALL
 
 #if defined( GAME_DLL )
 ConVar wall_debug_time("wall_debug_time", "5.f");
@@ -34,7 +35,7 @@ void CProjectedWallEntity::Touch( CBaseEntity* pOther )
 {
 	//Check if the touched entity is a paint power user
 	IPaintPowerUser* pPowerUser = dynamic_cast< IPaintPowerUser* >( pOther );
-	if( engine->HasPaintmap() && pPowerUser )
+	if( HASPAINTMAP && pPowerUser )
 	{
 		//Get the up vector of the wall
 		Vector vecWallUp;
@@ -43,7 +44,6 @@ void CProjectedWallEntity::Touch( CBaseEntity* pOther )
 #else
 		AngleVectors( GetNetworkAngles(), NULL, NULL, &vecWallUp );
 #endif
-
 		const trace_t& trace = BaseClass::GetTouchTrace();
 		float flDot = DotProduct( vecWallUp, trace.plane.normal );
 
@@ -556,7 +556,7 @@ void CProjectedWallEntity::GetExtents( Vector &outMins, Vector &outMaxs, float f
 
 	AngleVectors( qAngles, &vecForward, &vecRight, &vecUp );
 
-#if defined( GAME_DLL ) && !defined( _PS3 )
+#if defined( GAME_DLL ) && !defined( _PS3 ) && 0 // Swarm: FIXME!!!!
 	// we're assuming it's oblong, and that height is the larger
 	COMPILE_TIME_ASSERT( WALL_PROJECTOR_THICKNESS > WALL_PROJECTOR_HEIGHT );
 #endif
@@ -575,3 +575,5 @@ void CProjectedWallEntity::GetExtents( Vector &outMins, Vector &outMaxs, float f
 	outMins = vWallSweptBoxMins;
 	outMaxs = vWallSweptBoxMaxs;
 }
+
+#endif // NO_PROJECTED_WALL

@@ -1,0 +1,280 @@
+void __cdecl CProjectedWallEntity::ProjectWall(CProjectedWallEntity *const this)
+{
+  float *v2; // eax
+  float *v3; // eax
+  CPhysCollide *v4; // eax
+  IPhysicsObject *v5; // esi
+  int v6; // eax
+  float x; // xmm0_4
+  float y; // xmm2_4
+  float z; // xmm4_4
+  float v10; // xmm1_4
+  bool v11; // zf
+  float v12; // xmm3_4
+  float v13; // xmm5_4
+  float v14; // xmm0_4
+  bool v15; // si
+  int v17; // esi
+  float v18; // xmm5_4
+  float v19; // xmm4_4
+  float v20; // xmm3_4
+  float v21; // xmm5_4
+  float v22; // xmm4_4
+  float v23; // xmm5_4
+  float v24; // xmm3_4
+  CPolyhedron *PolyhedronFromPlanes; // esi
+  int v26; // [esp+4h] [ebp-784h]
+  int v27; // [esp+8h] [ebp-780h]
+  float v28; // [esp+38h] [ebp-750h]
+  float v29; // [esp+3Ch] [ebp-74Ch]
+  float v30; // [esp+40h] [ebp-748h]
+  float v31; // [esp+44h] [ebp-744h]
+  float v32; // [esp+48h] [ebp-740h]
+  void (__cdecl *v33)(IPhysicsCollision *, Vector *, Vector *, int, const Vector *, const QAngle *); // [esp+4Ch] [ebp-73Ch]
+  float v34; // [esp+50h] [ebp-738h]
+  solid_t solid; // [esp+64h] [ebp-724h] BYREF
+  Vector vSetMaxs; // [esp+6A4h] [ebp-E4h] BYREF
+  float v37; // [esp+6B0h] [ebp-D8h] BYREF
+  Vector v38; // [esp+6B4h] [ebp-D4h] BYREF
+  float v39; // [esp+6C0h] [ebp-C8h]
+  Vector v40; // [esp+6C4h] [ebp-C4h] BYREF
+  float v41; // [esp+6D0h] [ebp-B8h]
+  unsigned int v42; // [esp+6D4h] [ebp-B4h]
+  unsigned int v43; // [esp+6D8h] [ebp-B0h]
+  unsigned int v44; // [esp+6DCh] [ebp-ACh]
+  float v45; // [esp+6E0h] [ebp-A8h]
+  Vector v46; // [esp+6E4h] [ebp-A4h]
+  float v47; // [esp+6F0h] [ebp-98h]
+  unsigned int v48; // [esp+6F4h] [ebp-94h]
+  float v49; // [esp+6F8h] [ebp-90h]
+  float v50; // [esp+6FCh] [ebp-8Ch]
+  float v51; // [esp+700h] [ebp-88h]
+  Vector vSetMins; // [esp+704h] [ebp-84h] BYREF
+  Vector *p_y; // [esp+710h] [ebp-78h]
+  Vector vecForward; // [esp+714h] [ebp-74h] BYREF
+  Vector vecRight; // [esp+720h] [ebp-68h] BYREF
+  Vector vecUp; // [esp+72Ch] [ebp-5Ch] BYREF
+  Vector vMins; // [esp+738h] [ebp-50h] BYREF
+  Vector vMaxs; // [esp+744h] [ebp-44h] BYREF
+  Vector vUp; // [esp+750h] [ebp-38h] BYREF
+  Vector vRight; // [esp+75Ch] [ebp-2Ch] BYREF
+  CPhysConvex *pTempConvex; // [esp+768h] [ebp-20h] BYREF
+  __int16 v62; // [esp+76Eh] [ebp-1Ah]
+
+  CProjectedWallEntity::CleanupWall(this);
+  CBaseEntity::AddEffects(this, 8);
+  CProjectedWallEntity::CheckForPlayersOnBridge(this);
+  v2 = (float *)(*((int (__cdecl **)(CProjectedWallEntity *const))this->_vptr_IHandleEntity + 204))(this);
+  v31 = *v2;
+  v32 = v2[1];
+  v34 = v2[2];
+  v3 = (float *)(*((int (__cdecl **)(CProjectedWallEntity *const))this->_vptr_IHandleEntity + 205))(this);
+  v28 = *v3;
+  v29 = v3[1];
+  v30 = v3[2];
+  (*((void (__cdecl **)(CProjectedWallEntity *const, Vector *, Vector *, Vector *))this->_vptr_IHandleEntity + 135))(
+    this,
+    &vecForward,
+    &vecRight,
+    &vecUp);
+  if ( sv_thinnerprojectedwalls.m_pParent->m_Value.m_nValue )
+  {
+    LODWORD(vSetMins.y) = &v37;
+    LODWORD(vSetMins.z) = &v38.z;
+    p_y = (Vector *)&v40.y;
+    LODWORD(vSetMins.x) = &vSetMaxs;
+    vSetMaxs.x = v31 + (float)(vecRight.x * 32.0);
+    vSetMaxs.y = v32 + (float)(vecRight.y * 32.0);
+    vSetMaxs.z = v34 + (float)(32.0 * vecRight.z);
+    v37 = v31 - (float)(vecRight.x * 32.0);
+    v38.x = v32 - (float)(vecRight.y * 32.0);
+    v38.y = v34 - (float)(32.0 * vecRight.z);
+    v38.z = v28 - (float)(vecRight.x * 32.0);
+    v40.y = (float)(vecRight.x * 32.0) + v28;
+    v39 = v29 - (float)(vecRight.y * 32.0);
+    v40.z = (float)(vecRight.y * 32.0) + v29;
+    v40.x = v30 - (float)(32.0 * vecRight.z);
+    v41 = (float)(32.0 * vecRight.z) + v30;
+    pTempConvex = (CPhysConvex *)(*((int (__cdecl **)(IPhysicsCollision *, Vector *, int))physcollision->_vptr_IPhysicsCollision
+                                  + 2))(
+                                   physcollision,
+                                   &vSetMins,
+                                   4);
+LABEL_3:
+    v4 = (CPhysCollide *)(*((int (__cdecl **)(IPhysicsCollision *, CPhysConvex **, int))physcollision->_vptr_IPhysicsCollision
+                          + 15))(
+                           physcollision,
+                           &pTempConvex,
+                           1);
+    this->m_pWallCollideable = v4;
+    if ( v4 )
+    {
+      V_strncpy(solid.surfaceprop, "hard_light_bridge", 512);
+      solid.params.massCenterOverride = g_PhysDefaultObjectParams.massCenterOverride;
+      solid.params.pGameData = this;
+      solid.params.mass = g_PhysDefaultObjectParams.mass;
+      solid.params.inertia = g_PhysDefaultObjectParams.inertia;
+      solid.params.damping = g_PhysDefaultObjectParams.damping;
+      solid.params.rotdamping = g_PhysDefaultObjectParams.rotdamping;
+      solid.params.rotInertiaLimit = g_PhysDefaultObjectParams.rotInertiaLimit;
+      solid.params.pName = g_PhysDefaultObjectParams.pName;
+      solid.params.volume = g_PhysDefaultObjectParams.volume;
+      solid.params.dragCoefficient = g_PhysDefaultObjectParams.dragCoefficient;
+      *(_DWORD *)&solid.params.enableCollisions = *(_DWORD *)&g_PhysDefaultObjectParams.enableCollisions;
+      v5 = PhysModelCreateCustom(
+             this,
+             this->m_pWallCollideable,
+             &vec3_origin,
+             &vec3_angle,
+             "hard_light_bridge",
+             1,
+             &solid);
+      if ( v5 )
+      {
+        if ( this->m_pPhysicsObject )
+          (*((void (__cdecl **)(CProjectedWallEntity *const))this->_vptr_IHandleEntity + 154))(this);
+        CBaseEntity::VPhysicsSetObject(this, v5);
+        (*((void (__cdecl **)(IPhysicsObject *, int))v5->_vptr_IPhysicsObject + 28))(v5, 1);
+        if ( (*((int (__cdecl **)(IPhysicsObject *))v5->_vptr_IPhysicsObject + 75))(v5) )
+        {
+          vMaxs = vec3_origin;
+          vMins = vec3_origin;
+          v33 = (void (__cdecl *)(IPhysicsCollision *, Vector *, Vector *, int, const Vector *, const QAngle *))*((_DWORD *)physcollision->_vptr_IPhysicsCollision + 24);
+          v6 = (*((int (__cdecl **)(IPhysicsObject *))v5->_vptr_IPhysicsObject + 75))(v5);
+          v33(physcollision, &vMins, &vMaxs, v6, &vec3_origin, &vec3_angle);
+          x = vMins.x;
+          if ( vMins.x == this->m_vWorldSpace_WallMins.m_Value.x
+            && (y = vMins.y, vMins.y == this->m_vWorldSpace_WallMins.m_Value.y)
+            && (z = vMins.z, vMins.z == this->m_vWorldSpace_WallMins.m_Value.z) )
+          {
+            v10 = vMaxs.x;
+            v11 = vMaxs.x == this->m_vWorldSpace_WallMaxs.m_Value.x;
+          }
+          else
+          {
+            CBaseEntity::NetworkStateChanged(this, &this->m_vWorldSpace_WallMins);
+            v10 = vMaxs.x;
+            x = vMins.x;
+            v11 = vMaxs.x == this->m_vWorldSpace_WallMaxs.m_Value.x;
+            y = vMins.y;
+            this->m_vWorldSpace_WallMins.m_Value.x = vMins.x;
+            z = vMins.z;
+            this->m_vWorldSpace_WallMins.m_Value.y = y;
+            this->m_vWorldSpace_WallMins.m_Value.z = z;
+          }
+          if ( !v11
+            || (v12 = vMaxs.y, vMaxs.y != this->m_vWorldSpace_WallMaxs.m_Value.y)
+            || (v13 = vMaxs.z, vMaxs.z != this->m_vWorldSpace_WallMaxs.m_Value.z) )
+          {
+            CBaseEntity::NetworkStateChanged(this, &this->m_vWorldSpace_WallMaxs);
+            v10 = vMaxs.x;
+            v12 = vMaxs.y;
+            v13 = vMaxs.z;
+            this->m_vWorldSpace_WallMaxs.m_Value.x = vMaxs.x;
+            this->m_vWorldSpace_WallMaxs.m_Value.y = v12;
+            x = vMins.x;
+            this->m_vWorldSpace_WallMaxs.m_Value.z = v13;
+            y = vMins.y;
+            z = vMins.z;
+          }
+          vSetMins.x = x - v31;
+          vSetMins.y = y - v32;
+          vSetMaxs.x = v10 - v31;
+          vSetMins.z = z - v34;
+          vSetMaxs.y = v12 - v32;
+          vSetMaxs.z = v13 - v34;
+          CBaseEntity::SetSize(this, &vSetMins, &vSetMaxs);
+          v14 = fsqrt(
+                  (float)((float)((float)(v31 - v28) * (float)(v31 - v28))
+                        + (float)((float)(v32 - v29) * (float)(v32 - v29)))
+                + (float)((float)(v34 - v30) * (float)(v34 - v30)));
+          if ( v14 != this->m_flLength.m_Value )
+          {
+            CBaseEntity::NetworkStateChanged(this, &this->m_flLength);
+            this->m_flLength.m_Value = v14;
+          }
+          if ( this->m_flWidth.m_Value != 64.0 )
+          {
+            CBaseEntity::NetworkStateChanged(this, &this->m_flWidth);
+            this->m_flWidth.m_Value = 64.0;
+          }
+          if ( this->m_flHeight.m_Value != 0.015625 )
+          {
+            CBaseEntity::NetworkStateChanged(this, &this->m_flHeight);
+            this->m_flHeight.m_Value = 0.015625;
+          }
+          CCollisionProperty::MarkSurroundingBoundsDirty(&this->m_Collision);
+          CCollisionProperty::MarkPartitionHandleDirty(&this->m_Collision);
+          CCollisionProperty::UpdatePartition(&this->m_Collision);
+          if ( (this->m_iEFlags & 0x800) != 0 )
+            CBaseEntity::CalcAbsolutePosition(this);
+          AngleVectors(&this->m_angAbsRotation, 0, &vRight, &vUp);
+          v15 = (vUp.z > 0.69999999 || vUp.z < -0.69999999) && vRight.z > -0.69999999 && vRight.z < 0.69999999;
+          if ( v15 != this->m_bIsHorizontal.m_Value )
+          {
+            CBaseEntity::NetworkStateChanged(this, &this->m_bIsHorizontal);
+            this->m_bIsHorizontal.m_Value = v15;
+          }
+          CProjectedWallEntity::DisplaceObstructingEntities(this);
+          _FST7 = (float)(this->m_flLength.m_Value / this->m_flSegmentLength.m_Value);
+          v62 = (unsigned __int16)pTempConvex & 0xF3FF | 0x800;
+          __asm { frndint }
+          v17 = (int)(double)_FST7;
+          if ( v17 != this->m_nNumSegments.m_Value )
+          {
+            CBaseEntity::NetworkStateChanged(this, &this->m_nNumSegments);
+            this->m_nNumSegments.m_Value = v17;
+          }
+          CUtlVector<PaintPowerType,CUtlMemory<PaintPowerType,int>>::SetCount(&this->m_PaintPowers, (int)(double)_FST7);
+          (*((void (__cdecl **)(CProjectedWallEntity *const))this->_vptr_IHandleEntity + 217))(this);
+        }
+      }
+    }
+    return;
+  }
+  v38 = vecForward;
+  LODWORD(vSetMaxs.x) = LODWORD(vecForward.x) ^ 0x80000000;
+  LODWORD(vSetMaxs.y) = LODWORD(vecForward.y) ^ 0x80000000;
+  LODWORD(vSetMaxs.z) = LODWORD(vecForward.z) ^ 0x80000000;
+  v40 = vecRight;
+  v39 = (float)((float)(vecForward.x * v28) + (float)(vecForward.y * v29)) + (float)(vecForward.z * v30);
+  v37 = (float)((float)(COERCE_FLOAT(LODWORD(vecForward.x) ^ 0x80000000) * v31)
+              + (float)(COERCE_FLOAT(LODWORD(vecForward.y) ^ 0x80000000) * v32))
+      + (float)(COERCE_FLOAT(LODWORD(vecForward.z) ^ 0x80000000) * v34);
+  v18 = (float)(vecRight.x * 64.0) * 0.5;
+  v19 = (float)(vecRight.y * 64.0) * 0.5;
+  v20 = (float)(64.0 * vecRight.z) * 0.5;
+  v41 = (float)((float)((float)(v31 + v18) * vecRight.x) + (float)((float)(v32 + v19) * vecRight.y))
+      + (float)((float)(v34 + v20) * vecRight.z);
+  v44 = LODWORD(vecRight.z) ^ 0x80000000;
+  v43 = LODWORD(vecRight.y) ^ 0x80000000;
+  v42 = LODWORD(vecRight.x) ^ 0x80000000;
+  v46 = vecUp;
+  v21 = (float)((float)(v31 - v18) * COERCE_FLOAT(LODWORD(vecRight.x) ^ 0x80000000))
+      + (float)((float)(v32 - v19) * COERCE_FLOAT(LODWORD(vecRight.y) ^ 0x80000000));
+  v22 = (float)(vecUp.y * 0.015625) * 0.5;
+  v45 = v21 + (float)((float)(v34 - v20) * COERCE_FLOAT(LODWORD(vecRight.z) ^ 0x80000000));
+  v23 = (float)(vecUp.x * 0.015625) * 0.5;
+  v24 = (float)(0.015625 * vecUp.z) * 0.5;
+  v49 = -vecUp.y;
+  v50 = -vecUp.z;
+  v47 = (float)((float)((float)(v31 + v23) * vecUp.x) + (float)((float)(v32 + v22) * vecUp.y))
+      + (float)((float)(v34 + v24) * vecUp.z);
+  v48 = LODWORD(vecUp.x) ^ 0x80000000;
+  v51 = (float)((float)((float)(v31 - v23) * COERCE_FLOAT(LODWORD(vecUp.x) ^ 0x80000000))
+              + (float)((float)(v32 - v22) * (float)-vecUp.y))
+      + (float)((float)(v34 - v24) * (float)-vecUp.z);
+  PolyhedronFromPlanes = GeneratePolyhedronFromPlanes(&vSetMaxs.x, 6, 0.0, 0);
+  if ( !PolyhedronFromPlanes )
+  {
+    Warning("CProjectedWallEntity: GeneratePolyhedronFromPlanes failed! Get a save game for me!.\n", v26, v27);
+    return;
+  }
+  pTempConvex = (CPhysConvex *)(*((int (__cdecl **)(IPhysicsCollision *, CPolyhedron *))physcollision->_vptr_IPhysicsCollision
+                                + 9))(
+                                 physcollision,
+                                 PolyhedronFromPlanes);
+  (*((void (__cdecl **)(CPolyhedron *))PolyhedronFromPlanes->_vptr_CPolyhedron + 2))(PolyhedronFromPlanes);
+  if ( pTempConvex )
+    goto LABEL_3;
+}

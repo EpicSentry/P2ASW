@@ -1,0 +1,8 @@
+void __cdecl CPropWallProjector::CPropWallProjector(CPropWallProjector *const this)
+{
+  CBaseProjector::CBaseProjector(this);
+  this->_vptr_IHandleEntity = (int (**)(...))off_C94448;
+  this->m_pAmbientSound = 0;
+  this->m_pAmbientMusic = 0;
+  this->m_hAmbientSoundProxy.m_Index = -1;
+}

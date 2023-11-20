@@ -1,0 +1,4 @@
+void __cdecl CProjectedWallEntity::OnPreProjected(CProjectedWallEntity *const this)
+{
+  (*((void (**)(void))this->_vptr_IHandleEntity + 214))();
+}

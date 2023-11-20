@@ -1,0 +1,24 @@
+PaintPowerType __thiscall CProjectedWallEntity::GetPaintPowerAtPoint(
+        CProjectedWallEntity *this,
+        const Vector *worldContactPt)
+{
+  float v2; // xmm1_4
+  float v3; // xmm0_4
+  int v4; // eax
+
+  v2 = 0.0;
+  v3 = (float)((float)((float)((float)((float)(worldContactPt->x - this[-1].m_flWidth.m_Value)
+                                     * (float)(this[-1].m_flSegmentLength.m_Value - this[-1].m_flWidth.m_Value))
+                             + (float)((float)(worldContactPt->y - *(float *)&this[-1].m_bIsHorizontal.m_Value)
+                                     * (float)(this[-1].m_flParticleUpdateTime.m_Value
+                                             - *(float *)&this[-1].m_bIsHorizontal.m_Value)))
+                     + (float)((float)(worldContactPt->z - *(float *)&this[-1].m_nNumSegments.m_Value)
+                             * (float)(*(float *)&this[-1].m_PaintPowers.m_Memory.m_pMemory
+                                     - *(float *)&this[-1].m_nNumSegments.m_Value)))
+             / this->m_Network.m_PVSInfo.m_vCenter[0])
+     / *(float *)&this->m_Network.m_pServerClass;
+  v4 = *(_DWORD *)&this->m_Network.m_PVSInfo.m_pClustersInline[2] - 1;
+  if ( v3 < 0.0 || (v2 = (float)v4, v3 > (float)v4) )
+    v3 = v2;
+  return *((_DWORD *)&this->m_Network.m_TimerEvent.m_pEventMgr->m_Events.m_heap.m_Memory.m_pMemory + (int)v3);
+}

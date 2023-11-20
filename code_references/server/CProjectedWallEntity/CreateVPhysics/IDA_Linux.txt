@@ -1,0 +1,5 @@
+bool __cdecl CProjectedWallEntity::CreateVPhysics(CProjectedWallEntity *const this)
+{
+  CProjectedWallEntity::ProjectWall(this);
+  return 1;
+}

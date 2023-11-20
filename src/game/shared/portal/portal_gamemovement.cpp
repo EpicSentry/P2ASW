@@ -24,6 +24,7 @@
 	#include "c_weapon_portalgun.h"
 	#include "c_basetoggle.h"
 	#include "trigger_tractorbeam_shared.h"
+	#include "c_projectedwallentity.h"
 	//#include "c_projectedwallentity.h"
 	#define CRecipientFilter C_RecipientFilter
 #else
@@ -38,6 +39,7 @@
 	#include "paint/paint_power_info.h"
 	#include "particle_parse.h"
 	#include "platform.h"
+	#include "projectedwallentity.h"
 #endif
 
 #include "coordsize.h" // for DIST_EPSILON
@@ -3727,7 +3729,7 @@ void CPortalGameMovement::WalkMove()
 	float wishVelShoveDampenFactor = 0;
 	Vector shoveVector = vec3_origin;
 	// FIXME!!!
-#if 0
+#if !defined ( NO_PROJECTED_WALL )
 	CProjectedWallEntity *pProjectedWall = dynamic_cast< CProjectedWallEntity* >( pOldGround );
 	if ( pProjectedWall )
 	{

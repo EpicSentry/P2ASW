@@ -1,0 +1,21 @@
+void __thiscall CPropWallProjector::Shutdown(CPropWallProjector *this)
+{
+  CSoundEnvelopeController *Controller; // edi
+  CSoundEnvelopeController *v3; // edi
+
+  CFuncTank::FuncTankPreThink((vgui::BaseTooltip *)this);
+  if ( this->m_pAmbientSound )
+  {
+    Controller = CSoundEnvelopeController::GetController();
+    Controller->Shutdown(Controller, this->m_pAmbientSound);
+    Controller->SoundDestroy(Controller, this->m_pAmbientSound);
+    this->m_pAmbientSound = 0;
+  }
+  if ( this->m_pAmbientMusic )
+  {
+    v3 = CSoundEnvelopeController::GetController();
+    v3->Shutdown(v3, this->m_pAmbientMusic);
+    v3->SoundDestroy(v3, this->m_pAmbientMusic);
+    this->m_pAmbientMusic = 0;
+  }
+}

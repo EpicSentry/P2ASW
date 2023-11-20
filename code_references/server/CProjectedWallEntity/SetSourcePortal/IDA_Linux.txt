@@ -1,0 +1,66 @@
+void __cdecl CProjectedWallEntity::SetSourcePortal(CProjectedWallEntity *const this, CPortal_Base2D *pPortal)
+{
+  int (**vptr_IHandleEntity)(...); // eax
+  unsigned int v3; // edi
+  char *v4; // eax
+  unsigned int m_Index; // eax
+  char *v6; // edx
+  int v7; // [esp+18h] [ebp-40h]
+  float v8; // [esp+20h] [ebp-38h]
+  CBaseEntityList *v9; // [esp+38h] [ebp-20h]
+  int v10; // [esp+3Ch] [ebp-1Ch]
+
+  vptr_IHandleEntity = this->_vptr_IHandleEntity;
+  if ( pPortal )
+  {
+    if ( !(unsigned __int8)vptr_IHandleEntity[203](this, pPortal) )
+      goto LABEL_3;
+  }
+  else if ( !vptr_IHandleEntity[202](this) )
+  {
+    goto LABEL_13;
+  }
+  if ( (float)(gpGlobals->curtime + 0.5) != this->m_flParticleUpdateTime.m_Value )
+  {
+    v8 = gpGlobals->curtime + 0.5;
+    CBaseEntity::NetworkStateChanged(this, &this->m_flParticleUpdateTime);
+    this->m_flParticleUpdateTime.m_Value = v8;
+  }
+LABEL_3:
+  if ( !pPortal )
+  {
+LABEL_13:
+    v3 = -1;
+    v7 = 0;
+    v9 = g_pEntityList;
+    goto LABEL_7;
+  }
+  v3 = *(_DWORD *)(*((int (__cdecl **)(CPortal_Base2D *))pPortal->_vptr_IHandleEntity + 3))(pPortal);
+  v9 = g_pEntityList;
+  if ( v3 == -1 )
+  {
+    v7 = 0;
+  }
+  else
+  {
+    v7 = 0;
+    v4 = (char *)g_pEntityList + 24 * (unsigned __int16)v3;
+    if ( *((_DWORD *)v4 + 2) == HIWORD(v3) )
+      v7 = *((_DWORD *)v4 + 1);
+  }
+LABEL_7:
+  m_Index = this->m_hColorPortal.m_Value.m_Index;
+  v10 = 0;
+  if ( m_Index != -1 )
+  {
+    v6 = (char *)v9 + 24 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v6 + 2) == HIWORD(m_Index) )
+      v10 = *((_DWORD *)v6 + 1);
+  }
+  if ( v7 != v10 )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_hColorPortal);
+    this->m_hColorPortal.m_Value.m_Index = v3;
+  }
+  CBaseProjectedEntity::SetSourcePortal(this, pPortal);
+}

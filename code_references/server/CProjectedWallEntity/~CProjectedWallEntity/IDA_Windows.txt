@@ -1,0 +1,17 @@
+void __thiscall CProjectedWallEntity::~CProjectedWallEntity(CProjectedWallEntity *this)
+{
+  IProjectedWallEntityAutoList *v2; // edi
+
+  v2 = &this->IProjectedWallEntityAutoList;
+  this->CPaintableEntity<CBaseProjectedEntity>::CBaseProjectedEntity::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable = (CProjectedWallEntity_vtbl *)&CProjectedWallEntity::`vftable'{for `CBaseProjectedEntity'};
+  this->CPaintableEntity<CBaseProjectedEntity>::IPaintableEntity::__vftable = (IPaintableEntity_vtbl *)&CProjectedWallEntity::`vftable'{for `IPaintableEntity'};
+  this->IProjectedWallEntityAutoList::__vftable = (IProjectedWallEntityAutoList_vtbl *)&CProjectedWallEntity::`vftable';
+  CProjectedWallEntity::CleanupWall(this);
+  CPaintDatabase::RemovePaintedWall(&PaintDatabase, this, 1);
+  CUtlVector<ITriggerTractorBeamAutoList *,CUtlMemory<ITriggerTractorBeamAutoList *,int>>::~CUtlVector<ITriggerTractorBeamAutoList *,CUtlMemory<ITriggerTractorBeamAutoList *,int>>((CUtlVector<__m128,CUtlMemory<__m128,int> > *)&this->m_PaintPowers);
+  v2->__vftable = (IProjectedWallEntityAutoList_vtbl *)&IProjectedWallEntityAutoList::`vftable';
+  IProjectedWallEntityAutoList::Remove(v2);
+  this->CPaintableEntity<CBaseProjectedEntity>::CBaseProjectedEntity::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable = (CProjectedWallEntity_vtbl *)&CPaintableEntity<CBaseProjectedEntity>::`vftable'{for `CBaseProjectedEntity'};
+  this->CPaintableEntity<CBaseProjectedEntity>::IPaintableEntity::__vftable = (IPaintableEntity_vtbl *)&IPaintableEntity::`vftable';
+  CBaseEntity::~CBaseEntity(this);
+}

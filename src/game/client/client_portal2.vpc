@@ -102,6 +102,8 @@ $Project "Client (Portal 2)"
 		
 		$Folder "Portal 2"
 		{
+			$File "portal2/c_projectedwallentity.cpp"
+			$File "portal2/c_projectedwallentity.h"
 			$File "portal2/c_prop_floor_button.cpp"
 			$File "portal2/c_prop_linked_portal_door.cpp"
 			$File "portal2/c_prop_weightedcube.cpp"
@@ -113,9 +115,9 @@ $Project "Client (Portal 2)"
 			$File "portal2/c_portal_beam_helper.h"
 			$File "portal2/c_portal_beam_helper.cpp"
 			$File "portal2/c_npc_personality_core.cpp"
-			$File "portal2\c_info_placement_helper.h"
-			$File "portal2\c_info_placement_helper.cpp"
-			$File "portal2\c_env_portal_laser.cpp"
+			$File "portal2/c_info_placement_helper.h"
+			$File "portal2/c_info_placement_helper.cpp"
+			$File "portal2/c_env_portal_laser.cpp"
 			
 			$File "portal2\c_baseprojectedentity.h"
 			$File "portal2\c_baseprojectedentity.cpp"
@@ -126,6 +128,7 @@ $Project "Client (Portal 2)"
 			
 			$File "$SRCDIR\game\shared\portal\baseprojectedentity_shared.h"
 			$File "$SRCDIR\game\shared\portal\baseprojectedentity_shared.cpp"
+			$File "$SRCDIR\game\shared\portal\projectedwallentity_shared.cpp"
 
 			// Radial Menu preparations for when we get to work on coop.
 			/*

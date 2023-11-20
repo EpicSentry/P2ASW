@@ -1,0 +1,4 @@
+void __thiscall CProjectedWallEntity::OnPreProjected(CProjectedWallEntity *this)
+{
+  this->CheckForSettledReflectorCubes(this);
+}

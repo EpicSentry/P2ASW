@@ -1,0 +1,35 @@
+void __cdecl CProjectedWallEntity::PlacePlacementHelper(
+        CProjectedWallEntity *const this,
+        CInfoPlacementHelper *pHelper)
+{
+  float v2; // xmm1_4
+  float *v3; // eax
+  vec_t v4; // xmm1_4
+  vec_t v5; // xmm0_4
+  Vector vecPosition; // [esp+34h] [ebp-18h] BYREF
+
+  v2 = 0.0;
+  if ( this->m_bIsHorizontal.m_Value )
+    v2 = 32.0;
+  v3 = (float *)(*((int (__cdecl **)(CProjectedWallEntity *const))this->_vptr_IHandleEntity + 205))(this);
+  v4 = v2 + v3[2];
+  v5 = v3[1] + 0.0;
+  vecPosition.x = *v3 + 0.0;
+  vecPosition.z = v4;
+  vecPosition.y = v5;
+  if ( pHelper )
+  {
+    CBaseEntity::SetAbsOrigin(pHelper, &vecPosition);
+    (*((void (__cdecl **)(CInfoPlacementHelper *, const char *, void *))pHelper->_vptr_IHandleEntity + 33))(
+      pHelper,
+      "radius",
+      &unk_BBEDFD);
+    (*((void (__cdecl **)(CInfoPlacementHelper *, const char *, const char *))pHelper->_vptr_IHandleEntity + 33))(
+      pHelper,
+      "force_placement",
+      "1");
+    (*((void (__cdecl **)(CInfoPlacementHelper *, CProjectedWallEntity *const))pHelper->_vptr_IHandleEntity + 19))(
+      pHelper,
+      this);
+  }
+}

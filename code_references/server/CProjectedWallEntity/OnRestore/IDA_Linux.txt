@@ -1,0 +1,5 @@
+void __cdecl CProjectedWallEntity::OnRestore(CProjectedWallEntity *const this)
+{
+  CBaseProjectedEntity::OnRestore(this);
+  CBaseEntity::SetTransmitState(this, 8);
+}

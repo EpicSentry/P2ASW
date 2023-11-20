@@ -1,0 +1,23 @@
+char __thiscall CProjectedWallEntity::TestCollision(
+        CProjectedWallEntity *this,
+        const Ray_t *ray,
+        unsigned int mask,
+        CGameTrace *trace)
+{
+  struct CPhysCollide *m_pWallCollideable; // eax
+  char result; // al
+  bool v6; // cc
+
+  m_pWallCollideable = this->m_pWallCollideable;
+  if ( !m_pWallCollideable )
+    return 0;
+  physcollision->TraceBox(physcollision, ray, mask, 0, m_pWallCollideable, &vec3_origin, &vec3_angle, trace);
+  result = 0;
+  v6 = trace->fraction >= 1.0;
+  trace->surface.name = "hard_light_bridge";
+  trace->surface.flags = 0;
+  trace->surface.surfaceProps = CProjectedWallEntity::s_HardLightBridgeSurfaceProps;
+  if ( !v6 || trace->allsolid || trace->startsolid )
+    return 1;
+  return result;
+}

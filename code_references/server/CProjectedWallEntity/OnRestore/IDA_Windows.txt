@@ -1,0 +1,5 @@
+void __thiscall CProjectedWallEntity::OnRestore(CProjectedWallEntity *this)
+{
+  CBaseProjectedEntity::OnRestore(this);
+  CBaseEntity::SetTransmitState(this, 8);
+}

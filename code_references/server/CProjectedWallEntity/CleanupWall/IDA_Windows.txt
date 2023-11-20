@@ -1,0 +1,120 @@
+void __thiscall CProjectedWallEntity::CleanupWall(CProjectedWallEntity *this)
+{
+  IPhysicsObject *m_pPhysicsObject; // eax
+  struct CPhysCollide *m_pWallCollideable; // eax
+  edict_t *m_pPev; // ecx
+  edict_t *v5; // ecx
+  edict_t *v6; // ecx
+  edict_t *v7; // ecx
+  edict_t *v8; // ecx
+  unsigned int m_Index; // eax
+  edict_t *v10; // ecx
+
+  m_pPhysicsObject = this->m_pPhysicsObject;
+  if ( m_pPhysicsObject )
+  {
+    CPhysicsShadowClone::NotifyDestroy(m_pPhysicsObject, this);
+    this->VPhysicsDestroyObject(this);
+  }
+  m_pWallCollideable = this->m_pWallCollideable;
+  if ( m_pWallCollideable )
+  {
+    CPhysicsShadowClone::NotifyDestroy(m_pWallCollideable, this);
+    physenv->DestroyCollideOnDeadObjectFlush(physenv, this->m_pWallCollideable);
+    this->m_pWallCollideable = 0;
+  }
+  if ( vec3_origin.x != this->m_vWorldSpace_WallMins.m_Value.x
+    || vec3_origin.y != this->m_vWorldSpace_WallMins.m_Value.y
+    || vec3_origin.z != this->m_vWorldSpace_WallMins.m_Value.z )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x3CCu);
+    }
+    this->m_vWorldSpace_WallMins.m_Value = vec3_origin;
+  }
+  if ( this->m_vWorldSpace_WallMins.m_Value.x != this->m_vWorldSpace_WallMaxs.m_Value.x
+    || this->m_vWorldSpace_WallMins.m_Value.y != this->m_vWorldSpace_WallMaxs.m_Value.y
+    || this->m_vWorldSpace_WallMins.m_Value.z != this->m_vWorldSpace_WallMaxs.m_Value.z )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      v5 = this->m_Network.m_pPev;
+      if ( v5 )
+        CBaseEdict::StateChanged(v5, 0x3D8u);
+    }
+    this->m_vWorldSpace_WallMaxs.m_Value.x = this->m_vWorldSpace_WallMins.m_Value.x;
+    this->m_vWorldSpace_WallMaxs.m_Value.y = this->m_vWorldSpace_WallMins.m_Value.y;
+    this->m_vWorldSpace_WallMaxs.m_Value.z = this->m_vWorldSpace_WallMins.m_Value.z;
+  }
+  if ( this->m_flHeight.m_Value != 0.0 )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      v6 = this->m_Network.m_pPev;
+      if ( v6 )
+        CBaseEdict::StateChanged(v6, 0x3ECu);
+    }
+    this->m_flHeight.m_Value = 0.0;
+  }
+  if ( this->m_flWidth.m_Value != this->m_flHeight.m_Value )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      v7 = this->m_Network.m_pPev;
+      if ( v7 )
+        CBaseEdict::StateChanged(v7, 0x3F0u);
+    }
+    this->m_flWidth.m_Value = this->m_flHeight.m_Value;
+  }
+  if ( this->m_flLength.m_Value != this->m_flWidth.m_Value )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      v8 = this->m_Network.m_pPev;
+      if ( v8 )
+        CBaseEdict::StateChanged(v8, 0x3E8u);
+    }
+    this->m_flLength.m_Value = this->m_flWidth.m_Value;
+  }
+  m_Index = this->m_hHitPortal.m_Value.m_Index;
+  if ( m_Index != -1
+    && g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber == HIWORD(m_Index)
+    && g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+      this->m_hHitPortal.m_Value.m_Index = -1;
+    }
+    else
+    {
+      v10 = this->m_Network.m_pPev;
+      if ( v10 )
+        CBaseEdict::StateChanged(v10, 0x35Cu);
+      this->m_hHitPortal.m_Value.m_Index = -1;
+    }
+  }
+}

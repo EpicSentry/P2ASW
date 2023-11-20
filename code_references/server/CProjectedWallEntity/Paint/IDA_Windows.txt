@@ -1,0 +1,26 @@
+void __thiscall CProjectedWallEntity::Paint(CProjectedWallEntity *this, int type, const Vector *worldContactPt)
+{
+  float v3; // xmm1_4
+  float v4; // xmm0_4
+  int v5; // edx
+
+  v3 = 0.0;
+  v4 = (float)((float)((float)((float)((float)(worldContactPt->x - this[-1].m_flWidth.m_Value)
+                                     * (float)(this[-1].m_flSegmentLength.m_Value - this[-1].m_flWidth.m_Value))
+                             + (float)((float)(worldContactPt->y - *(float *)&this[-1].m_bIsHorizontal.m_Value)
+                                     * (float)(this[-1].m_flParticleUpdateTime.m_Value
+                                             - *(float *)&this[-1].m_bIsHorizontal.m_Value)))
+                     + (float)((float)(worldContactPt->z - *(float *)&this[-1].m_nNumSegments.m_Value)
+                             * (float)(*(float *)&this[-1].m_PaintPowers.m_Memory.m_pMemory
+                                     - *(float *)&this[-1].m_nNumSegments.m_Value)))
+             / *((float *)&this[-1].m_Network + 269))
+     / *((float *)&this[-1].m_Network + 274);
+  v5 = *((_DWORD *)&this[-1].m_Network + 273) - 1;
+  if ( v4 < 0.0 || (v3 = (float)v5, v4 > (float)v5) )
+    v4 = v3;
+  if ( (int)v4 < (int)this->m_Network.m_TimerEvent.m_pCallback )
+  {
+    *((_DWORD *)&this->m_Network.m_TimerEvent.m_pEventMgr->m_Events.m_heap.m_Memory.m_pMemory + (int)v4) = type;
+    WallPainted(type, (int)v4, (CProjectedWallEntity *)((char *)this - 956));
+  }
+}

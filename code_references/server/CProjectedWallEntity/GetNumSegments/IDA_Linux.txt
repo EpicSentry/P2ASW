@@ -1,0 +1,4 @@
+int __cdecl CProjectedWallEntity::GetNumSegments(const CProjectedWallEntity *const this)
+{
+  return this->m_nNumSegments.m_Value;
+}
