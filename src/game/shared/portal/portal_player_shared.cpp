@@ -2478,12 +2478,21 @@ void CPortal_Player::AddSurfacePaintPowerInfo( const BrushContact& contact, char
 // In Swarm, we're limited by some engine functions that Portal 2 used, but aren't available in Swarm.
 
 // This fires 8 hull traces from the center of the player ending at each of the player's bounding box vertices.
-//#define USE_NEW_PAINT_DETECTION
+#define PAINT_DETECTION_8TRACES 1
 
 // This method fires 6 hull traces from the bottom, up, forward, backwards, left, right, the hull size is the same as the player's hull.
-//#define USE_NEW_PAINT_DETECTION2 // TODO:
+#define PAINT_DETECTION_6TRACES 2 // Unfinished
 
-#if defined ( USE_NEW_PAINT_DETECTION )
+// Normal Portal 2 detection, can't detect brush *entities* at the moment.
+#define PAINT_DETECTION_BRUSHCONTACTS 3
+
+// Normal Portal 2 detection combined with 8 hull traces, used to work around the brush entity issue.
+#define PAINT_DETECTION_BRUSHCONTACTS_AND_8TRACES 4
+
+
+#define PAINT_DETECTION_METHOD PAINT_DETECTION_BRUSHCONTACTS_AND_8TRACES
+
+#if ( PAINT_DETECTION_METHOD == PAINT_DETECTION_8TRACES ) || ( PAINT_DETECTION_METHOD == PAINT_DETECTION_BRUSHCONTACTS_AND_8TRACES )
 enum
 {
 	//PAINT_TRACE_ABSORIGIN,
@@ -2497,7 +2506,7 @@ enum
 	PAINT_TRACE_TOP_CORNER4,
 	PAINT_TRACE_COUNT
 };
-#elif defined ( USE_NEW_PAINT_DETECTION2 )
+#elif ( PAINT_DETECTION_METHOD == PAINT_DETECTION_6TRACES )
 enum
 {
 #if 0
@@ -2514,11 +2523,11 @@ enum
 };
 #endif
 
-#if !defined ( USE_NEW_PAINT_DETECTION2 )
+#if ( PAINT_DETECTION_METHOD == PAINT_DETECTION_8TRACES ) || ( PAINT_DETECTION_METHOD == PAINT_DETECTION_BRUSHCONTACTS_AND_8TRACES )
 #define PAINT_TRACE_EXTENTS_VALUE 1
 #define PAINT_TRACE_MINS Vector( -PAINT_TRACE_EXTENTS_VALUE, -PAINT_TRACE_EXTENTS_VALUE, -PAINT_TRACE_EXTENTS_VALUE )
 #define PAINT_TRACE_MAXS Vector( PAINT_TRACE_EXTENTS_VALUE, PAINT_TRACE_EXTENTS_VALUE, PAINT_TRACE_EXTENTS_VALUE )
-#else
+#elif ( PAINT_DETECTION_METHOD == PAINT_DETECTION_6TRACES )
 #define PAINT_TRACE_MINS GetPlayerMins()
 #define PAINT_TRACE_MAXS GetPlayerMaxs()
 #endif
@@ -2528,7 +2537,7 @@ const Vector DEFAULT_SURFACE_NORMAL;
 #define FORGIVENESS_MULTIPLIER 0.03
 void CPortal_Player::DetermineTraceInfo( Vector &vStart, Vector &vEnd, Vector &vMins, Vector vMaxs, int iTraceType )
 {
-#ifdef USE_NEW_PAINT_DETECTION
+#if ( PAINT_DETECTION_METHOD == PAINT_DETECTION_8TRACES ) || ( PAINT_DETECTION_METHOD == PAINT_DETECTION_BRUSHCONTACTS_AND_8TRACES )
 	vMins = PAINT_TRACE_MINS;
 	vMaxs = PAINT_TRACE_MAXS;
 	// Set the start to the center
@@ -2642,7 +2651,7 @@ void CPortal_Player::DetermineTraceInfo( Vector &vStart, Vector &vEnd, Vector &v
 		vEnd.y = vOrigin.y - (flHalfHullWidth + flRightForgiveness);
 		vEnd.z = vOrigin.z + GetHullHeight() + flTopForgiveness;
 	}
-#elif defined ( USE_NEW_PAINT_DETECTION2 )
+#elif ( PAINT_DETECTION_METHOD == PAINT_DETECTION_6TRACES )
 	// Set the start to the center
 	vStart = GetAbsOrigin();
 	Vector vOrigin = GetAbsOrigin();
@@ -2695,7 +2704,8 @@ void CPortal_Player::DetermineTraceInfo( Vector &vStart, Vector &vEnd, Vector &v
 
 void CPortal_Player::AddSurfacePaintPowerInfo( const trace_t& trace, char const* context )
 {
-#if !defined ( USE_NEW_PAINT_DETECTION ) && !defined ( USE_NEW_PAINT_DETECTION2 )
+#if ( PAINT_DETECTION_METHOD == PAINT_DETECTION_BRUSHCONTACTS ) || ( PAINT_DETECTION_METHOD == PAINT_DETECTION_BRUSHCONTACTS_AND_8TRACES )
+
 	if( trace.m_pEnt )
 	{
 		if( trace.m_pEnt->IsBSPModel() )
@@ -2728,13 +2738,23 @@ void CPortal_Player::AddSurfacePaintPowerInfo( const trace_t& trace, char const*
 														context );	
 		}
 	}
-#else //#elif defined ( USE_NEW_PAINT_DETECTION )
+
+#endif // PAINT_DETECTION_BRUSHCONTACTS || PAINT_DETECTION_BRUSHCONTACTS_AND_8TRACES
+#if ( PAINT_DETECTION_METHOD == PAINT_DETECTION_8TRACES ) || ( PAINT_DETECTION_METHOD == PAINT_DETECTION_BRUSHCONTACTS_AND_8TRACES )
 	// Hacks since we're limited by the engine code
+	
+#if ( PAINT_DETECTION_METHOD == PAINT_DETECTION_BRUSHCONTACTS_AND_8TRACES )
+	if ( ( !trace.DidHitWorld() || !trace.DidHit() ) && m_PortalLocal.m_PaintedPowerType != NO_POWER )
+		return;
+
+	UTIL_ClearTrace( *(trace_t*)&trace );
+
+#else
 
 	m_PortalLocal.m_PaintedPowerType = NO_POWER;
-	
 
-	if (GetMoveType() == MOVETYPE_NOCLIP)
+#endif
+		if (GetMoveType() == MOVETYPE_NOCLIP)
 		return;
 
 	CTraceFilterNoPlayers filter;
@@ -2756,8 +2776,12 @@ void CPortal_Player::AddSurfacePaintPowerInfo( const trace_t& trace, char const*
 	
 		if ( !trace.m_pEnt )
 			continue;
+
+#if ( PAINT_DETECTION_METHOD == PAINT_DETECTION_BRUSHCONTACTS_AND_8TRACES )
+		if ( trace.DidHitWorld() )
+			continue;
+#endif
 	
-		//Trace for paint on the surface if it is the world
 		if( trace.m_pEnt->IsBSPModel() )
 		{
 			m_PortalLocal.m_PaintedPowerType = UTIL_Paint_TracePower( trace.m_pEnt, trace.endpos, trace.plane.normal );
@@ -2773,12 +2797,10 @@ void CPortal_Player::AddSurfacePaintPowerInfo( const trace_t& trace, char const*
 
 			AddSurfacePaintPowerInfo( powerInfo, context );
 
-			m_PortalLocal.m_PaintedPowerType = m_PortalLocal.m_PaintedPowerType;
-
 			return; // Don't fire new traces if we found a paint power.
 
-		}
-		else
+		}		
+		/*else
 		{
 			CPaintableEntity* pPaintableEnt = dynamic_cast<CPaintableEntity*>( trace.m_pEnt );
 
@@ -2787,7 +2809,7 @@ void CPortal_Player::AddSurfacePaintPowerInfo( const trace_t& trace, char const*
 				m_PortalLocal.m_PaintedPowerType = pPaintableEnt->GetPaintedPower();
 				return; // Don't fire new traces if we found a paint power.
 			}
-		}
+		}*/
 	}
 #endif
 }
@@ -2795,7 +2817,7 @@ void CPortal_Player::AddSurfacePaintPowerInfo( const trace_t& trace, char const*
 
 void CPortal_Player::DeterminePaintContacts()
 {
-#if !defined ( USE_NEW_PAINT_DETECTION )
+#if ( PAINT_DETECTION_METHOD == PAINT_DETECTION_BRUSHCONTACTS ) || ( PAINT_DETECTION_METHOD == PAINT_DETECTION_BRUSHCONTACTS_AND_8TRACES )
 
 	if( GetMoveType() == MOVETYPE_NOCLIP )
 	{
@@ -4507,6 +4529,9 @@ void ComputeAABBContactsWithBrushEntity_Old( ContactVector& contacts, const cpla
 		ITransformAABB( entityToWorld, boxMin, boxMax, queryBoxMin, queryBoxMax );
 	}
 
+	// Draw bbox lines if necessary
+	//DebugDrawLine( queryBoxMin, queryBoxMax, 0, 255, 0, false, 0.25 );
+
 	// Get the indices of all the colliding brushes
 	//BrushIndexVector brushIndices;
 	//CBrushQuery brushQuery;
@@ -4534,6 +4559,9 @@ void ComputeAABBContactsWithBrushEntity_Old( ContactVector& contacts, const cpla
 #ifdef DEBUG // If this triggers, we need to rewrite the condition
 		if ( iNumBrushSides <= 0 )
 			Assert( !bHasBrushInfo );
+
+		if ( !pBrushEntity->IsWorld() )
+			Msg("This entity is world!!");
 #endif
 
 		if( iNumBrushSides <= 0 )
@@ -4620,7 +4648,7 @@ void ComputeAABBContactsWithBrushEntity_Old( ContactVector& contacts, const cpla
 
 void ComputeAABBContactsWithBrushEntity_SIMD( ContactVector& contacts, const cplane_t *pClipPlanes, int iClipPlaneCount, const Vector& boxOrigin, const Vector& boxMin, const Vector& boxMax, CBaseEntity* pBrushEntity, int contentsMask)
 {
-#ifndef USE_NEW_PAINT_DETECTION
+#if ( PAINT_DETECTION_METHOD == PAINT_DETECTION_BRUSHCONTACTS )
 	//typedef CUtlVector<int>	BrushIndexVector;
 	typedef CUtlVector<uint16> PlaneIndexVector;
 	//typedef CUtlVector<BrushSideInfo_t> BrushSideInfoVector;
