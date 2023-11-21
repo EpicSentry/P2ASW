@@ -4,6 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================//
+#include <cbase.h>
 #include <assert.h>
 #include <vgui_controls/ScrollBar.h>
 #include <vgui_controls/Label.h>

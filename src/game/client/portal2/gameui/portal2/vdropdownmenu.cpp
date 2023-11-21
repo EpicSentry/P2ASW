@@ -19,15 +19,14 @@ BaseClass( parent, panelName )
 	SetProportional( true );
 
 	m_pButton = NULL;
-	m_hCurrentFlyout = NULL;
+	m_currentFlyout = NULL;
 	m_pnlBackground = NULL;
 	m_curSelText[0] = '\0';
 	m_openCallback = 0;
 	m_SelectedTextEnabled = true;
-
+	m_bNoBlindNavigation = false;
+	
 	SetConsoleStylePanel( true );
-
-	//	LoadControlSettings( "Resource/UI/BaseModUI/DropDownMenu.res" );
 }
 
 DropDownMenu::~DropDownMenu()
@@ -73,7 +72,7 @@ void DropDownMenu::SetCurrentSelection( const char *selection )
 	FlyoutMenu *pFlyout = GetCurrentFlyout();
 	if ( pFlyout )
 	{
-		Button *pCurrentButton = m_hCurrentFlyout->FindChildButtonByCommand( selection );
+		Button *pCurrentButton = m_currentFlyout->FindChildButtonByCommand( selection );
 
 		if ( pCurrentButton )
 		{
@@ -89,10 +88,13 @@ void DropDownMenu::SetCurrentSelection( const char *selection )
 		V_strncpy( szDescription, selection, sizeof( szDescription ) );
 	}
 
+//APS
+#if 0
 	if ( m_pButton && m_SelectedTextEnabled )
 	{
 		m_pButton->SetDropdownSelection( szDescription );
 	}
+#endif
 
 	//when we set a new selection make sure we notify the parent
 	GetParent()->OnCommand( selection );
@@ -109,9 +111,17 @@ void DropDownMenu::ChangeSelection( SelectionChange_t eNext )
 	FlyoutMenu *pFlyout = GetCurrentFlyout();
 	if ( pFlyout )
 	{
-		Button *pCurrentButton = m_hCurrentFlyout->FindChildButtonByCommand( m_curSelText );
+		// Check if the flyout prevents us from doing blind navigation
+		if ( m_bNoBlindNavigation || !pFlyout->SupportsBlidNavigation() )
+		{
+			// Need to pop the flyout open
+			OnCommand( NULL );	// use currently set flyout
+			return;
+		}
 
-		Button *pButton = ( eNext == SELECT_PREV ) ? ( m_hCurrentFlyout->FindPrevChildButtonByCommand( m_curSelText ) ) : ( m_hCurrentFlyout->FindNextChildButtonByCommand( m_curSelText ) );
+		Button *pCurrentButton = m_currentFlyout->FindChildButtonByCommand( m_curSelText );
+
+		Button *pButton = ( eNext == SELECT_PREV ) ? ( m_currentFlyout->FindPrevChildButtonByCommand( m_curSelText ) ) : ( m_currentFlyout->FindNextChildButtonByCommand( m_curSelText ) );
 
 		if ( pButton )
 		{
@@ -122,7 +132,7 @@ void DropDownMenu::ChangeSelection( SelectionChange_t eNext )
 		while ( pButton && pButton->GetCommand() && !( pButton == pCurrentButton || pButton->IsEnabled() ) )
 		{
 			const char *pCommand = pButton->GetCommand()->GetString( "command", NULL );
-			pButton = ( eNext == SELECT_PREV ) ? ( m_hCurrentFlyout->FindPrevChildButtonByCommand( pCommand ) ) : ( m_hCurrentFlyout->FindNextChildButtonByCommand( pCommand ) );
+			pButton = ( eNext == SELECT_PREV ) ? ( m_currentFlyout->FindPrevChildButtonByCommand( pCommand ) ) : ( m_currentFlyout->FindNextChildButtonByCommand( pCommand ) );
 
 			if ( pButton )
 			{
@@ -164,30 +174,34 @@ void DropDownMenu::OnCommand( const char* command )
 {
 	//if the command is the name of a flyout then launch the flyout menu
 	bool relayCommand = true;
-	m_hCurrentFlyout = dynamic_cast< FlyoutMenu* >( FindSiblingByName( command ) );
-	if ( m_hCurrentFlyout.Get() )
+	if ( command )
+	{
+		// Allow to send NULL command to use the existing flyout menu
+		m_currentFlyout = dynamic_cast< FlyoutMenu* >( FindSiblingByName( command ) );
+	}
+	if ( m_currentFlyout )
 	{		
-		if ( !m_hCurrentFlyout->IsVisible() )
+		if ( !m_currentFlyout->IsVisible() )
 		{
 			// open flyout if not visible
-			vgui::Panel* initialSelection = m_hCurrentFlyout->FindChildButtonByCommand( GetCurrentSelection() );
+			vgui::Panel* initialSelection = m_currentFlyout->FindChildButtonByCommand( GetCurrentSelection() );
 			//RequestFocus();
-			m_hCurrentFlyout->OpenMenu( m_pButton, initialSelection );
+			m_currentFlyout->OpenMenu( m_pButton, initialSelection );
 
 			if( m_openCallback )
-				m_openCallback( this, m_hCurrentFlyout );
+				m_openCallback( this, m_currentFlyout );
 		}
 		else
 		{
 			// if flyout for this menu is already open, close it
-			m_hCurrentFlyout->CloseMenu( m_pButton );
+			m_currentFlyout->CloseMenu( m_pButton );
 		}
 
 		relayCommand = false;
 	}
 
 	//if we do not handle the command by throwing out a flyout then assume it was a selection
-	if( relayCommand )
+	if( relayCommand && command )
 	{
 		SetCurrentSelection( command );
 	}
@@ -195,15 +209,15 @@ void DropDownMenu::OnCommand( const char* command )
 
 BaseModUI::FlyoutMenu* DropDownMenu::GetCurrentFlyout()
 {
-	if ( m_hCurrentFlyout.Get() == NULL )
+	if ( m_currentFlyout == NULL )
 	{
 		if ( m_pButton && m_pButton->GetCommand() )
 		{
-			m_hCurrentFlyout = dynamic_cast< FlyoutMenu* >( FindSiblingByName( m_pButton->GetCommand()->GetString( "command", NULL ) ) );
+			m_currentFlyout = dynamic_cast< FlyoutMenu* >( FindSiblingByName( m_pButton->GetCommand()->GetString( "command", NULL ) ) );
 		}
 	}
 
-	return m_hCurrentFlyout;
+	return m_currentFlyout;
 }
 
 void DropDownMenu::SetEnabled( bool state )
@@ -211,9 +225,12 @@ void DropDownMenu::SetEnabled( bool state )
 	if ( m_pButton )
 	{
 		m_pButton->SetEnabled( state );
+//APS
+#if 0
 		m_pButton->EnableDropdownSelection( state );
+#endif
 	}
-
+	
 	BaseClass::SetEnabled( state );
 }
 
@@ -223,18 +240,21 @@ void DropDownMenu::SetSelectedTextEnabled( bool state )
 	if ( !m_SelectedTextEnabled )
 	{
 		m_curSelText[0] = '\0';
+//APS
+#if 0
 		if ( m_pButton )
 		{
 			m_pButton->SetDropdownSelection( m_curSelText );
 		}
+#endif
 	}
 }
 
 void DropDownMenu::SetFlyoutItemEnabled( const char* selection, bool state )
 {
-	if ( m_hCurrentFlyout.Get() )
+	if ( m_currentFlyout )
 	{
-		vgui::Panel* btnFlyoutItem = m_hCurrentFlyout->FindChildByName( selection );
+		vgui::Panel* btnFlyoutItem = m_currentFlyout->FindChildByName( selection );
 		if ( btnFlyoutItem )
 		{
 			btnFlyoutItem->SetEnabled( state );
@@ -249,7 +269,7 @@ void DropDownMenu::SetFlyout( const char* flyoutName )
 		m_pButton->SetCommand( flyoutName );
 	}
 
-	m_hCurrentFlyout = dynamic_cast< FlyoutMenu* >( FindSiblingByName( flyoutName ) );
+	m_currentFlyout = dynamic_cast< FlyoutMenu* >( FindSiblingByName( flyoutName ) );
 }
 
 void DropDownMenu::SetOpenCallback( Callback_t callBack )
@@ -276,9 +296,11 @@ void DropDownMenu::ApplySettings( KeyValues* inResourceData )
 		SetFlyout( command );
 	}
 
-	if ( m_hCurrentFlyout.Get() )
+	m_bNoBlindNavigation = inResourceData->GetBool( "noblindnavigation" );
+
+	if ( m_currentFlyout )
 	{
-		m_pnlBackground = m_hCurrentFlyout->FindChildByName( "PnlBackground" );
+		m_pnlBackground = m_currentFlyout->FindChildByName( "PnlBackground" );
 	}
 
 	if ( m_pButton )
@@ -304,11 +326,11 @@ void DropDownMenu::OnKeyCodePressed( vgui::KeyCode code )
 
 	switch( basecode )
 	{
-	case KEY_XSTICK1_RIGHT:
-	case KEY_XSTICK2_RIGHT:
-	case KEY_XBUTTON_RIGHT:
-	case KEY_XBUTTON_RIGHT_SHOULDER:
-	case KEY_RIGHT:
+		case KEY_XSTICK1_RIGHT:
+		case KEY_XSTICK2_RIGHT:
+		case KEY_XBUTTON_RIGHT:
+		case KEY_XBUTTON_RIGHT_SHOULDER:
+		case KEY_RIGHT:
 		{
 			if ( m_SelectedTextEnabled )
 			{
@@ -319,11 +341,11 @@ void DropDownMenu::OnKeyCodePressed( vgui::KeyCode code )
 			break;
 		}
 
-	case KEY_XSTICK1_LEFT:
-	case KEY_XSTICK2_LEFT:
-	case KEY_XBUTTON_LEFT:
-	case KEY_XBUTTON_LEFT_SHOULDER:
-	case KEY_LEFT:
+		case KEY_XSTICK1_LEFT:
+		case KEY_XSTICK2_LEFT:
+		case KEY_XBUTTON_LEFT:
+		case KEY_XBUTTON_LEFT_SHOULDER:
+		case KEY_LEFT:
 		{
 			if ( m_SelectedTextEnabled )
 			{

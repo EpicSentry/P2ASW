@@ -6,7 +6,7 @@
 //=============================================================================//
 
 // Author: Matthew D. Campbell (matt@turtlerockstudios.com), 2003
-
+#include <cbase.h>
 #include <vgui/KeyCode.h>
 
 #include "CvarTextEntry.h"

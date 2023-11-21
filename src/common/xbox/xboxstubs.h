@@ -108,7 +108,7 @@ typedef unsigned __int64 ULONGLONG;
 typedef int32 COLORREF;
 #endif
 
-#ifndef INVALID_HANDLE_VALUE
+#if !defined(INVALID_HANDLE_VALUE) && !defined(PORTAL2) 
 #define INVALID_HANDLE_VALUE ((HANDLE)-1)
 #endif
 

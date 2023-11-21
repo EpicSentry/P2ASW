@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-
+#include <cbase.h>
 #include "BitmapImagePanel.h"
 #include <vgui/ISurface.h>
 
@@ -25,6 +25,15 @@ CBitmapImagePanel::CBitmapImagePanel( Panel *parent, char const *panelName,
 	if ( filename && filename[ 0 ] )
 	{
 		Q_strncpy( m_szTexture, filename, sizeof( m_szTexture ) );
+	}
+}
+
+CBitmapImagePanel::~CBitmapImagePanel()
+{
+	if ( vgui::surface() && m_nTextureId != -1 )
+	{
+		vgui::surface()->DestroyTextureID( m_nTextureId );
+		m_nTextureId = -1;
 	}
 }
 

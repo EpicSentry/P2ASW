@@ -6,6 +6,7 @@
 //===========================================================================//
 
 #ifndef IMATCHEXT_SWARM_H
+//#if !defined (IMATCHEXT_SWARM_H)
 #define IMATCHEXT_SWARM_H
 
 #ifdef _WIN32
@@ -67,7 +68,7 @@ struct TitleData3
 };
 
 
-abstract_class IMatchExtSwarm
+class IMatchExtSwarm
 {
 public:
 	// Get server map information for the session settings

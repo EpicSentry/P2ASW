@@ -84,31 +84,6 @@ void OptionsCloud::OnKeyCodePressed( vgui::KeyCode code )
 {
 	int iUserSlot = GetJoystickForCode( code );
 	CBaseModPanel::GetSingleton().SetLastActiveUserId( iUserSlot );
-<<<<<<< Updated upstream
-	switch( GetBaseButtonCode( code ) )
-	{
-	case KEY_XBUTTON_B:
-		{
-			GameSteamCloudPreferences_t gscp;
-			g_pGameSteamCloudSync->GetPreferences( gscp );
-			if ( m_numSavesSelected != gscp.m_numSaveGamesToSync )
-			{
-				TitleDataFieldsDescription_t const *fields = g_pMatchFramework->GetMatchTitle()->DescribeTitleDataStorage();
-				if ( TitleDataFieldsDescription_t const *pCloudSaves = TitleDataFieldsDescriptionFindByString( fields, "CFG.sys.cloud_saves" ) )
-				{
-					TitleDataFieldsDescriptionSetValue<uint8>( pCloudSaves, g_pMatchFramework->GetMatchSystem()
-						->GetPlayerManager()->GetLocalPlayer( XBX_GetPrimaryUserId() ), m_numSavesSelected + 1 );
-
-					// Force the Steam cloud manager to update with latest setting
-					KeyValues *kvUpdate = new KeyValues( "OnProfileDataLoaded" );
-					KeyValues::AutoDelete autodelete( kvUpdate );
-					g_pGameSteamCloudSync->OnEvent( kvUpdate );
-				}
-			}
-		}
-		break;
-	}
-=======
 	//switch( GetBaseButtonCode( code ) )
 	//{
 	//case KEY_XBUTTON_B:
@@ -132,7 +107,6 @@ void OptionsCloud::OnKeyCodePressed( vgui::KeyCode code )
 	//	}
 	//	break;
 	//}
->>>>>>> Stashed changes
 	BaseClass::OnKeyCodePressed( code );
 }
 

@@ -11,11 +11,7 @@
 #include "KeyValues.h"
 #include "vgenericconfirmation.h"
 #include "filesystem.h"
-<<<<<<< Updated upstream
-#include "vportalleaderboard.h"
-=======
 //#include "vportalleaderboard.h"
->>>>>>> Stashed changes
 #include "uigamedata.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -65,15 +61,6 @@ void CCoopMode::OnCommand( char const *pCommand )
 #endif
 		return;
 	}
-<<<<<<< Updated upstream
-	else if ( !V_stricmp( pCommand, "OpenChallengeModeDialog" ) )
-	{
-		KeyValues *pSettings = new KeyValues( "Setting" );
-		pSettings->SetInt( "state", STATE_MAIN_MENU );
-		CBaseModPanel::GetSingleton().OpenWindow( WT_PORTALCOOPLEADERBOARD, this, true, KeyValues::AutoDeleteInline( pSettings ) );
-		return;
-	}
-=======
 	//else if ( !V_stricmp( pCommand, "OpenChallengeModeDialog" ) )
 	//{
 	//	KeyValues *pSettings = new KeyValues( "Setting" );
@@ -81,7 +68,6 @@ void CCoopMode::OnCommand( char const *pCommand )
 	//	CBaseModPanel::GetSingleton().OpenWindow( WT_PORTALCOOPLEADERBOARD, this, true, KeyValues::AutoDeleteInline( pSettings ) );
 	//	return;
 	//}
->>>>>>> Stashed changes
 	else if ( !V_stricmp( pCommand, "Back" ) )
 	{
 		// Act as though 360 back button was pressed

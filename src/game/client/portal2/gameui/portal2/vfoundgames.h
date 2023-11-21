@@ -10,8 +10,6 @@
 #include "basemodui.h"
 #include "matchmaking/imatchframework.h"
 
-class CNB_Header_Footer;
-
 namespace BaseModUI {
 
 class GenericPanelList;
@@ -37,7 +35,7 @@ public:
 		char Name[64];
 		bool mIsJoinable;
 		bool mbDLC;
-		char mchOtherTitle[64];
+		char *mchOtherTitle;
 		bool mbInGame; // If I have a presence party
 
 		enum GAME_PING { GP_LOW, GP_MEDIUM, GP_HIGH, GP_SYSTEMLINK, GP_NONE } mPing;
@@ -51,7 +49,7 @@ public:
 		{
 			mInfoType = FGT_UNKNOWN;
 			Name[0] = 0;
-			mchOtherTitle[0] = 0;
+			mchOtherTitle = NULL;
 			mIsJoinable = false;
 			mbDLC = false;
 			mbInGame = false;
@@ -84,7 +82,6 @@ public:
 
 	void SetGamePing( Info::GAME_PING ping );
 	void SetGameDifficulty( const char* difficultyName );
-	void SetSwarmState( const char* szSwarmStateText );
 	void SetGamePlayerCount( int current, int max );
 
 	void DrawListItemLabel( vgui::Label* label, bool bSmallFont, bool bEastAligned = false );
@@ -134,15 +131,11 @@ private:
 	vgui::Label			*m_pLblPing;
 	vgui::Label			*m_pLblPlayerGamerTag;
 	vgui::Label			*m_pLblDifficulty;
-	vgui::Label			*m_pLblSwarmState;
 	vgui::Label			*m_pLblPlayers;
 	vgui::Label			*m_pLblNotJoinable;
 
 	vgui::HFont	m_hTextFont;
-	vgui::HFont	m_hTextBlurFont;
-
 	vgui::HFont	m_hSmallTextFont;
-	vgui::HFont	m_hSmallTextBlurFont;
 
 	CPanelAnimationVar( Color, m_SelectedColor, "selected_color", "255 0 0 128" );
 	bool m_sweep : 1;
@@ -175,11 +168,10 @@ public:
 	void LoadLayout();
 
 	void UpdateFooterButtons();
-	virtual void UpdateTitle();
 
-#ifdef _X360
+#ifdef _GAMECONSOLE
 	void NavigateTo();
-#endif // _X360
+#endif // _GAMECONSOLE
 	
 	void SetFoundDesiredText( bool bFoundGame );
 
@@ -225,9 +217,6 @@ protected:
 	FoundGameListItem *m_pPreviousSelectedItem;
 
 	KeyValues *m_pDataSettings;
-
-	vgui::Label *m_pTitle;
-	CNB_Header_Footer *m_pHeaderFooter;
 };
 
 };

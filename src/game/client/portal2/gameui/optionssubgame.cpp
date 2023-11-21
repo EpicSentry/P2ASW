@@ -3,7 +3,7 @@
 // Purpose: 
 //
 //=============================================================================//
-
+#include <cbase.h>
 #include "OptionsSubGame.h"
 #include "BasePanel.h"
 

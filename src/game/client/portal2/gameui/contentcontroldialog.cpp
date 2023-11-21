@@ -1,14 +1,14 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright (c) 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
 // $NoKeywords: $
 //=============================================================================//
 
-
+#include <cbase.h>
 #include <stdio.h>
+#ifdef IS_WINDOWS_PC
 #include <memory.h>
-#if !defined( _X360 )
 #include <windows.h>
 #endif
 
@@ -30,6 +30,11 @@
 
 #if defined( _X360 )
 #include "xbox/xbox_win32stubs.h"
+#endif
+
+#if defined( _PS3 )
+#include "ps3/ps3_core.h"
+#include "ps3/ps3_win32stubs.h"
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -98,7 +103,7 @@ void CContentControlDialog::Activate()
 void CContentControlDialog::ResetPassword()
 {
 	// Set initial value
-#ifndef _XBOX
+#if defined(_WIN32)
 	HKEY key;
 	if ( ERROR_SUCCESS == RegOpenKeyEx(HKEY_CURRENT_USER, "Software\\Valve\\Half-Life\\Settings", 0, KEY_READ, &key))
 	{
@@ -207,7 +212,7 @@ void CContentControlDialog::OnClose()
 void CContentControlDialog::WriteToken( const char *str )
 {
 	// Set initial value
-#ifndef _XBOX
+#ifdef IS_WINDOWS_PC
 	HKEY key;
 	if ( ERROR_SUCCESS == RegOpenKeyEx(HKEY_CURRENT_USER, "Software\\Valve\\Half-Life\\Settings", 0, KEY_WRITE, &key))
 	{
@@ -234,7 +239,7 @@ void CContentControlDialog::HashPassword(const char *newPW, char *hashBuffer, in
 	MD5Context_t ctx;
 
 	MD5Init( &ctx );
-	MD5Update( &ctx, (unsigned char const *)(LPCSTR)newPW, strlen( newPW ) );
+	MD5Update( &ctx, (unsigned char const *)newPW, strlen( newPW ) );
 	MD5Final( md5_hash, &ctx );
 
 	char hex[ 128 ];

@@ -42,20 +42,16 @@ namespace BaseModUI {
 		virtual bool IsADuplicateServer( FoundGameListItem *item, FoundGameListItem::Info const &fi );
 		virtual char const * GetListHeaderText();
 
-		virtual void UpdateTitle();
-
 	private:
 		bool ShouldShowPublicGame( KeyValues *pGameDetails );
 		void UpdateFilters( bool newState );
-		bool CanCreateGame();
 
-#if !defined( _X360 ) && !defined( NO_STEAM )
+#if !defined( NO_STEAM )
 		CCallResult<FoundPublicGames, NumberOfCurrentPlayers_t> m_callbackNumberOfCurrentPlayers;
 		void Steam_OnNumberOfCurrentPlayers( NumberOfCurrentPlayers_t *pResult, bool bError );
 #endif
 
 		DropDownMenu* m_drpDifficulty;
-		DropDownMenu* m_drpOnslaught;
 		DropDownMenu* m_drpGameStatus;
 		DropDownMenu* m_drpCampaign;
 		BaseModUI::BaseModHybridButton *m_btnFilters;
