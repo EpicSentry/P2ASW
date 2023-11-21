@@ -3,9 +3,12 @@
 
 #include "baseprojectedentity.h"
 #include "paint/paintable_entity.h"
+#include "basetempentity.h"
 
 #define NO_PROJECTED_WALL
 #ifndef NO_PROJECTED_WALL
+
+#define PROJECTED_WALL_SERVERONLY
 
 DECLARE_AUTO_LIST( IProjectedWallEntityAutoList )
 
@@ -16,9 +19,11 @@ public:
     CProjectedWallEntity();
     ~CProjectedWallEntity();
 	
-	//DECLARE_DATADESC();	
-	//DECLARE_SERVERCLASS();
-	
+	DECLARE_DATADESC();	
+#ifndef PROJECTED_WALL_SERVERONLY
+	DECLARE_SERVERCLASS();
+#endif
+
     virtual void Spawn();
     virtual void Precache();
     virtual void OnRestore();
@@ -87,20 +92,24 @@ private:
 	
     CUtlVector<PaintPowerType,CUtlMemory<PaintPowerType,int> > m_PaintPowers;
 	int ComputeSegmentIndex( const Vector& vWorldPositionOnWall ) const;
-    int s_HardLightBridgeSurfaceProps;
+    static int s_HardLightBridgeSurfaceProps;
 };
 
 class CTEWallPaintedEvent : public CBaseTempEntity
 {
 public:
-	//DECLARE_SERVERCLASS();
+
+	DECLARE_CLASS( CTEWallPaintedEvent, CBaseTempEntity );
+#ifndef PROJECTED_WALL_SERVERONLY
+	DECLARE_SERVERCLASS();
+#endif
 	CTEWallPaintedEvent( const char *name ) : CBaseTempEntity( name )
 	{
 
 	}
 	~CTEWallPaintedEvent();
-#if 0
-	CNetworkHandleInternal( CBaseEntity, m_hEntity );
+#if 1
+	CNetworkHandle( CBaseEntity, m_hEntity );
 
 	CNetworkVar( int, m_colorIndex );
 	CNetworkVar( int, m_nSegment );

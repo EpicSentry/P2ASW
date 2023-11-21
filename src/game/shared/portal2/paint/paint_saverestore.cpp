@@ -7,11 +7,9 @@
 #include "isaverestore.h"
 #include "paint_stream_manager.h"
 
-//#define SAVE_PAINT_BRIDGE
-
 #ifdef GAME_DLL
 
-//#include "projectedwallentity.h"
+#include "projectedwallentity.h"
 #include "paint/paint_database.h"
 #else
 
@@ -39,7 +37,7 @@ class CPaintSaveRestoreBlockHandler : public CDefSaveRestoreBlockHandler
 		// save paintmap data
 		PaintDatabase.SavePaintmapData( pSave );
 
-#ifdef SAVE_PAINT_BRIDGE
+#ifndef NO_PROJECTED_WALL
 		// save painted projected walls
 		const ProjectedWallVector_t* pProjectedWalls = PaintDatabase.GetPaintedProjectedWalls();
 		if ( pProjectedWalls )
@@ -134,7 +132,7 @@ class CPaintSaveRestoreBlockHandler : public CDefSaveRestoreBlockHandler
 		// restore paintmap data
 		PaintDatabase.RestorePaintmapData( pRestore );
 
-#ifdef SAVE_PAINT_BRIDGE
+#ifndef NO_PROJECTED_WALL
 		// find all projected walls in the world
 		ProjectedWallVector_t projectedWalls;
 		CBaseEntity* pEnt = NULL;
@@ -190,8 +188,14 @@ class CPaintSaveRestoreBlockHandler : public CDefSaveRestoreBlockHandler
 				{
 					type = (PaintPowerType)pRestore->ReadInt();
 					pRestore->ReadVector( &tr.endpos, 1 );
-					
+#if 0 // Swarm Consistency, ugh. We need to change the AddPaint function eventually.
 					PaintDatabase.AddPaint( tr, type );
+#else
+					const float flPaintRadius = ( type == NO_POWER ) ? sv_erase_surface_sphere_radius.GetFloat() : sv_paint_surface_sphere_radius.GetFloat();
+					const float flAlphaPercent = sv_paint_alpha_coat.GetFloat();
+
+					PaintDatabase.AddPaint( tr.m_pEnt, tr.endpos, tr.plane.normal, type, flPaintRadius, flAlphaPercent );
+#endif
 				}
 			}
 			pRestore->EndBlock();
