@@ -164,7 +164,7 @@ protected:
 	float GetFireConeZTolerance();
 
 private:
-	
+	bool IsMovingSuddenly();
 	bool IsEnemyBehindGlass(CPortal_Base2D* pPortal, CBaseEntity* pEnemy, Vector& vecMuzzle, Vector& vecDirToEnemy, float flDistToEnemy);
 	void MakeSolid();
 	bool AllowedToIgnite() { return true; }
@@ -188,6 +188,7 @@ private:
 	float	m_fSearchSpeed;
 	float	m_fMovingTargetThreashold;
 	float	m_flDistToEnemy;
+	float	m_flPreviousVelocity;
 	float	m_flBurnExplodeTime;
 
 	turretState_e	m_iLastState;
