@@ -350,7 +350,7 @@ bool CNPC_Portal_FloorTurret::PreThink( turretState_e state )
 		{
 			if (!m_bGagged)
 				EmitSound(GetTurretTalkName(PORTAL_TURRET_STARTBURNING));
-			this->m_fNextTalk = gpGlobals->curtime + 1.0;
+			m_fNextTalk = gpGlobals->curtime + 1.0;
 		}
 		SetThink(&CNPC_Portal_FloorTurret::BurnThink);
 		SetNextThink(gpGlobals->curtime + 0.1f);
@@ -358,6 +358,11 @@ bool CNPC_Portal_FloorTurret::PreThink( turretState_e state )
 	}
 
 	m_bIsFiring = state == TURRET_ACTIVE;
+
+	if (IsMovingSuddenly())
+		if (!this->m_bGagged)
+			EmitSound(GetTurretTalkName(PORTAL_TURRET_FLUNG));
+		m_fNextTalk = gpGlobals->curtime + 1.0;
 
 	// Working 2 enums into one integer
 	int iNewState = state;
@@ -1631,6 +1636,27 @@ void CNPC_Portal_FloorTurret::Use(CBaseEntity* pActivator, CBaseEntity* pCaller,
 float CNPC_Portal_FloorTurret::GetFireConeZTolerance()
 {
 	return sv_portal_turret_fire_cone_z_tolerance.GetFloat();
+}
+
+bool CNPC_Portal_FloorTurret::IsMovingSuddenly()
+{
+	Vector vVelocity;
+
+	if (m_pPhysicsObject)
+	{
+		if (m_pPhysicsObject->GetGameFlags() & FVPHYSICS_PLAYER_HELD)
+		{
+			m_pPhysicsObject->GetVelocity(&vVelocity, NULL);
+			m_flPreviousVelocity = (vVelocity.x * vVelocity.x + vVelocity.y * vVelocity.y + vVelocity.z * vVelocity.z);	
+		
+			if (200.0f < m_flPreviousVelocity)
+			{
+				return true;
+			}
+		}
+	}
+	
+	return false;
 }
 
 bool CNPC_Portal_FloorTurret::IsEnemyBehindGlass(CPortal_Base2D* pPortal, CBaseEntity* pEnemy, Vector& vecMuzzle, Vector& vecDirToEnemy, float flDistToEnemy)
