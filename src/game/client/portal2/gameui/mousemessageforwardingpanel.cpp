@@ -3,7 +3,7 @@
 // Purpose: 
 //
 //=============================================================================//
-
+#include <cbase.h>
 #include "MouseMessageForwardingPanel.h"
 #include "KeyValues.h"
 

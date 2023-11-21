@@ -12,24 +12,7 @@
 
 namespace BaseModUI {
 
-class CShadowLabel : public vgui::Label
-{
-	DECLARE_CLASS_SIMPLE( CShadowLabel, vgui::Label );
-public:
-	CShadowLabel( vgui::Panel *pParent, const char *pName, const wchar_t *pText ) : BaseClass( pParent, pName, pText ) 
-	{
-		SetPaintBackgroundEnabled( false );
-	}
-
-	virtual void Paint( void )
-	{
-		BaseClass::Paint();
-		BaseClass::Paint();
-		BaseClass::Paint();
-	}
-};
-
-class CAttractScreen : public CBaseModFrame, public IMatchEventsSink
+class CAttractScreen : public CBaseModFrame, public IMatchEventsSink, public IBaseModFrameListener
 {
 	DECLARE_CLASS_SIMPLE( CAttractScreen, CBaseModFrame );
 
@@ -64,12 +47,15 @@ public:
 	virtual void OnClose();
 	virtual void OnThink();
 	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );
+	virtual void PaintBackground();
+	virtual void RunFrame();
 
 	MESSAGE_FUNC( OpenMainMenu, "OpenMainMenu" );
 	MESSAGE_FUNC_CHARPTR( OpenMainMenuJoinFailed, "OpenMainMenuJoinFailed", msg );
 	MESSAGE_FUNC( OnChangeGamersFromMainMenu, "ChangeGamers" );
 	MESSAGE_FUNC( StartWaitingForBlade1, "StartWaitingForBlade1" );
 	MESSAGE_FUNC( StartWaitingForBlade2, "StartWaitingForBlade2" );
+	MESSAGE_FUNC_CHARPTR( DisplayGameBootProgress, "DisplayGameBootProgress", msg );
 
 	void ReportDeviceFail( ISelectStorageDeviceClient::FailReason_t eReason );
 
@@ -79,7 +65,6 @@ public:
 	void AcceptInvite();
 	bool BypassAttractScreen();
 	
-	void HideFooter();
 	void HideProgress();
 	void HideMsgs();
 
@@ -99,14 +84,13 @@ public:
 	bool OfferPromoteToLiveGuest();
 
 	bool IsUserIdleForAttractMode();
-
-	void ResetAttractDemoTimeout();
+	bool IsGameBootReady() { return m_bGameBootReady; }
 
 private:
-	CShadowLabel		*m_pPressStartShadowlbl;
 	vgui::Label			*m_pPressStartlbl;
 	float				m_flFadeStart;
 	bool				m_bHidePressStart;
+	bool				m_bGameBootReady;
 	
 	enum BladeSignInUI_t
 	{
@@ -129,11 +113,24 @@ private:
 	int				m_msgData;
 	void			( *m_pfnMsgChanged )();
 	BladeStatus_t	m_bladeStatus;
-	float			m_AttractDemoTimeout;
 
 private:
 	void SetBladeStatus( BladeStatus_t bladeStatus );
 	void ShowSignInDialog( int iPrimaryUser, int iSecondaryUser, BladeSignInUI_t eForceSignin = SIGNIN_NONE );
+	void ShowStorageDeviceSelectUI();
+	void PerformGameBootWork();
+	void ShowFatalError( uint32 unSize );
+
+#ifndef NO_STEAM
+	STEAM_CALLBACK_MANUAL( CAttractScreen, Steam_OnUserStatsReceived, UserStatsReceived_t, m_CallbackOnUserStatsReceived );	
+#ifdef _PS3
+	STEAM_CALLBACK_MANUAL( CAttractScreen, Steam_OnPSNGameBootInviteResult, PSNGameBootInviteResult_t, m_CallbackOnPSNGameBootInviteResult );
+	STEAM_CALLBACK_MANUAL( CAttractScreen, Steam_OnPS3TrophiesInstalled, PS3TrophiesInstalled_t, m_CallbackOnPS3TrophiesInstalled );
+#endif
+#endif
+#ifdef _PS3
+	void OnGameBootSaveContainerReady();
+#endif
 };
 
 };

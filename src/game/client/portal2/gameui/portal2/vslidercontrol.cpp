@@ -22,16 +22,14 @@ DECLARE_BUILD_FACTORY( SliderControl );
 SliderControl::SliderControl( vgui::Panel* parent, const char* panelName ):
 BaseClass( parent, panelName )
 {
+	SetProportional( true );
+
 	m_bDragging = false;
 
 	m_button = NULL;
 	m_lblSliderText = NULL;
 	m_prgValue = NULL;
 	m_defaultMark = NULL;
-
-	m_focusColor = Color( 255, 255, 255, 255 );
-	m_unfocusColor = Color( 100, 100, 100, 255 );
-	m_backgroundFocusColor = Color( 200, 200, 200, 255 );
 
 	m_min = 0.0f;
 	m_max = 1.0f;
@@ -41,6 +39,15 @@ BaseClass( parent, panelName )
 	m_conVarDefaultRef = NULL;
 
 	m_bDirty = false;
+
+	m_MarkColor = Color( 255, 255, 255, 255 );
+	m_MarkFocusColor = Color( 255, 255, 255, 255 );
+	m_ForegroundColor = Color( 255, 255, 255, 255 );
+	m_ForegroundFocusColor = Color( 255, 255, 255, 255 );
+	m_BackgroundColor = Color( 255, 255, 255, 255 );
+	m_BackgroundFocusColor = Color( 255, 255, 255, 255 );
+
+	m_InsetX = 0;
 
 	LoadControlSettings( "Resource/UI/BaseModUI/SliderControl.res" );
 }
@@ -53,7 +60,7 @@ SliderControl::~SliderControl()
 
 void SliderControl::SetEnabled(bool state)
 {
-	if( m_button )
+	if ( m_button )
 	{
 		m_button->SetEnabled( state );
 	}
@@ -182,9 +189,9 @@ void SliderControl::SetConCommand( const char* conCommand )
 
 void SliderControl::SetConCommandDefault( const char* conCommand )
 {
-	if( conCommand )
+	if ( conCommand )
 	{
-		if( m_conVarDefaultRef )
+		if ( m_conVarDefaultRef )
 		{
 			delete m_conVarDefaultRef;
 		}
@@ -193,7 +200,7 @@ void SliderControl::SetConCommandDefault( const char* conCommand )
 	}
 	else
 	{
-		if( m_conVarDefaultRef )
+		if ( m_conVarDefaultRef )
 		{
 			delete m_conVarDefaultRef;
 		}
@@ -232,7 +239,7 @@ bool SliderControl::GetInversed()
 void SliderControl::Reset()
 {
 	CGameUIConVarRef* conVar = GetConVarRef();
-	if( conVar && conVar->IsValid() )
+	if ( conVar && conVar->IsValid() )
 	{
 		SetCurrentValue( conVar->GetFloat(), true );
 	}
@@ -242,26 +249,27 @@ void SliderControl::Reset()
 
 void SliderControl::ResetSliderPosAndDefaultMarkers()
 {
-	if( m_prgValue )
+	if ( m_prgValue )
 	{
 		int centery = GetTall() / 2;
 
 		int xpos, ypos;
 		ypos = centery - m_prgValue->GetTall() / 2;
-		xpos = GetWide() - m_prgValue->GetWide();
+		xpos = GetWide() - m_prgValue->GetWide() + m_InsetX;
 		m_prgValue->SetPos( xpos, ypos );
 
 		if ( m_defaultMark )
 		{
 			float fInterp = ( GetConCommandDefault() - m_min ) / ( m_max - m_min );
-
+			fInterp = clamp( fInterp, 0.0f, 1.0f );
 			if ( m_inverse )
 			{
 				fInterp = 1.0f - fInterp;
 			}
 
-			m_defaultMark->SetPos( xpos + ( m_prgValue->GetWide() - m_defaultMark->GetWide() ) * fInterp, ypos - 3 );
-			m_defaultMark->SetBgColor( m_unfocusColor );
+			m_defaultMark->SetPos( 
+				xpos + ( m_prgValue->GetWide() - m_defaultMark->GetWide() ) * fInterp, 
+				IsGameConsole() ? centery - m_defaultMark->GetTall() / 2 : 0 );
 			m_defaultMark->SetVisible( IsEnabled() );
 		}
 
@@ -278,22 +286,29 @@ void SliderControl::ResetSliderPosAndDefaultMarkers()
 
 void SliderControl::ApplySettings( KeyValues* inResourceData )
 {
+	m_button = dynamic_cast< BaseModHybridButton* >( FindChildByName( "BtnDropButton" ) );
+
+	CBaseModFrame *pParent = dynamic_cast<CBaseModFrame *>(GetParent());
+	if ( pParent && pParent->UsesAlternateTiles() )
+	{
+		m_button->SetUseAlternateTiles( true );
+	}
+
 	BaseClass::ApplySettings( inResourceData );
 
-	m_button = dynamic_cast< BaseModHybridButton* >( FindChildByName( "BtnDropButton" ) );
 	m_lblSliderText = dynamic_cast< vgui::Label* >( FindChildByName( "LblSliderText" ) );
 	m_prgValue = dynamic_cast< vgui::ProgressBar* >( FindChildByName( "PrgValue" ) );
 	m_defaultMark = dynamic_cast< vgui::Panel* >( FindChildByName( "PnlDefaultMark" ) );
 
-#ifdef _X360
-	if( m_button )
+#ifdef _GAMECONSOLE
+	if ( m_button )
 	{
-		if( !HasFocus() && !m_button->HasFocus() )
+		if ( !HasFocus() && !m_button->HasFocus() )
 		{
-			m_button->NavigateFrom( );
+			m_button->NavigateFrom();
 		}
 	}
-#endif //_X360
+#endif //_GAMECONSOLE
 
 	SetStepSize( inResourceData->GetFloat( "stepSize", 1.0f ) );
 	SetMin( inResourceData->GetFloat( "minValue", 0.0f ) );
@@ -305,16 +320,16 @@ void SliderControl::ApplySettings( KeyValues* inResourceData )
 
 	int labelTall = 0;
 	int labelWide = 0;
-	if( m_lblSliderText )
+	if ( m_lblSliderText )
 	{
 		vgui::IScheme *scheme = vgui::scheme()->GetIScheme( GetScheme() );
-		if( scheme )
+		if ( scheme )
 		{
 			const char* fontName = inResourceData->GetString( "font", NULL );
-			if( fontName )
+			if ( fontName )
 			{
 				vgui::HFont font = scheme->GetFont( fontName , true );
-				if( font )
+				if ( font )
 				{
 					m_lblSliderText->SetFont( font );
 				}
@@ -325,16 +340,15 @@ void SliderControl::ApplySettings( KeyValues* inResourceData )
 		labelWide = m_lblSliderText->GetWide();
 
 		m_lblSliderText->SetEnabled( IsEnabled() );
-
 		m_lblSliderText->SetTall( GetTall() );
 	}
 
-	if( m_button )
+	if ( m_button )
 	{
-		int x, y, wide, tall;
-		int newTall = m_button->GetTall();
-		GetBounds( x, y, wide, tall );
 		// move the y up so the control stays up when we make it taller
+		int x, y, wide, tall;
+		GetBounds( x, y, wide, tall );
+		int newTall = m_button->GetTall();
 		SetBounds( x, y - (newTall-tall)/2, wide, newTall );
 	}
 
@@ -345,7 +359,49 @@ void SliderControl::ApplySchemeSettings( vgui::IScheme *pScheme )
 {
 	BaseClass::ApplySchemeSettings( pScheme );
 
-	m_focusColor = pScheme->GetColor( "HybridButton.BorderColor", m_focusColor );
+	CBaseModFrame *pParent = dynamic_cast<CBaseModFrame *>(GetParent());
+	if ( pParent && pParent->UsesAlternateTiles() )
+	{
+		m_MarkColor = pScheme->GetColor( "SliderControl.MarkColorAlt", m_MarkColor );
+		m_MarkFocusColor = pScheme->GetColor( "SliderControl.MarkFocusColorAlt", m_MarkFocusColor );
+		m_ForegroundColor = pScheme->GetColor( "SliderControl.ForegroundColorAlt", m_ForegroundColor );
+		m_ForegroundFocusColor = pScheme->GetColor( "SliderControl.ForegroundFocusColorAlt", m_ForegroundFocusColor );
+		m_BackgroundColor = pScheme->GetColor( "SliderControl.BackgroundColorAlt", m_BackgroundColor );
+		m_BackgroundFocusColor = pScheme->GetColor( "SliderControl.BackgroundFocusColorAlt", m_BackgroundFocusColor );		
+		
+		m_button->SetUseAlternateTiles( true );
+	}
+	else
+	{
+		m_MarkColor = pScheme->GetColor( "SliderControl.MarkColor", m_MarkColor );
+		m_MarkFocusColor = pScheme->GetColor( "SliderControl.MarkFocusColor", m_MarkFocusColor );
+		m_ForegroundColor = pScheme->GetColor( "SliderControl.ForegroundColor", m_ForegroundColor );
+		m_ForegroundFocusColor = pScheme->GetColor( "SliderControl.ForegroundFocusColor", m_ForegroundFocusColor );
+		m_BackgroundColor = pScheme->GetColor( "SliderControl.BackgroundColor", m_BackgroundColor );
+		m_BackgroundFocusColor = pScheme->GetColor( "SliderControl.BackgroundFocusColor", m_BackgroundFocusColor );
+	}
+
+	m_InsetX = vgui::scheme()->GetProportionalScaledValue( atoi( pScheme->GetResourceString( "SliderControl.InsetX" ) ) );
+
+	if ( m_prgValue )
+	{
+		m_prgValue->SetFgColor( m_ForegroundColor );
+		m_prgValue->SetBgColor( m_BackgroundColor );
+
+		m_prgValue->SetBorder( NULL );
+	}
+
+	if ( m_defaultMark )
+	{
+		if ( IsGameConsole() )
+		{
+			m_defaultMark->SetBgColor( m_MarkColor );
+		}
+		else
+		{
+			m_defaultMark->SetFgColor( m_MarkColor );
+		}
+	}
 }
 
 //=============================================================================
@@ -365,7 +421,7 @@ void SliderControl::PerformLayout()
 	SetDragEnabled( true );
 	SetShowDragHelper( false );
 
-	if( m_prgValue )
+	if ( m_prgValue )
 	{
 		m_prgValue->InvalidateLayout( true );
 	}
@@ -468,6 +524,9 @@ void SliderControl::OnFinishDragging( bool mousereleased, vgui::MouseCode code, 
 {
 	BaseClass::OnFinishDragging( mousereleased, code, aborted );
 
+	if ( !m_bDragging )
+		return;
+
 	m_bDragging = false;
 
 	int iClickPosX;
@@ -517,7 +576,7 @@ void SliderControl::OnCursorExited()
 
 void SliderControl::NavigateToChild( Panel *pNavigateTo )
 {
-	if( GetParent() )
+	if ( GetParent() )
 		GetParent()->NavigateToChild( this ); //pass it up the chain
 	else
 		BaseClass::NavigateToChild( pNavigateTo );
@@ -567,7 +626,7 @@ void SliderControl::HandleMouseInput( bool bDrag )
 void SliderControl::NavigateTo()
 {
 	BaseClass::NavigateTo();
-	if( m_button )
+	if ( m_button )
 	{
 		//m_button->RequestFocus();
 		m_button->NavigateTo();
@@ -575,12 +634,20 @@ void SliderControl::NavigateTo()
 
 	if ( m_defaultMark )
 	{
-		m_defaultMark->SetBgColor( m_focusColor );
+		if ( IsGameConsole() )
+		{
+			m_defaultMark->SetBgColor( m_MarkFocusColor );
+		}
+		else
+		{
+			m_defaultMark->SetFgColor( m_MarkFocusColor );
+		}
 	}
 
 	if ( m_prgValue )
 	{
-		m_prgValue->SetFgColor( m_backgroundFocusColor );
+		m_prgValue->SetFgColor( m_ForegroundFocusColor );
+		m_prgValue->SetBgColor( m_BackgroundFocusColor );
 	}
 }
 
@@ -590,12 +657,20 @@ void SliderControl::NavigateFrom()
 
 	if ( m_defaultMark )
 	{
-		m_defaultMark->SetBgColor( m_unfocusColor );
+		if ( IsGameConsole() )
+		{
+			m_defaultMark->SetBgColor( m_MarkColor );
+		}
+		else
+		{
+			m_defaultMark->SetFgColor( m_MarkColor );
+		}
 	}
 
 	if ( m_prgValue )
 	{
-		m_prgValue->SetFgColor( m_unfocusColor );
+		m_prgValue->SetFgColor( m_ForegroundColor );
+		m_prgValue->SetBgColor( m_BackgroundColor );
 	}
 }
 
@@ -607,12 +682,12 @@ CGameUIConVarRef* SliderControl::GetConVarRef()
 float SliderControl::UpdateProgressBar()
 {
 	float percentage = ( GetCurrentValue() - GetMin() ) / ( GetMax() - GetMin() );
-	if( GetInversed() )
+	if ( GetInversed() )
 	{
 		percentage = 1.0f - percentage;
 	}
 
-	if( m_prgValue )
+	if ( m_prgValue )
 	{
 		m_prgValue->SetProgress( percentage );
 	}
@@ -624,7 +699,7 @@ float SliderControl::UpdateProgressBar()
 void SliderControl::UpdateConVar()
 {
 	CGameUIConVarRef* conVar = GetConVarRef();
-	if( conVar && conVar->IsValid() )
+	if ( conVar && conVar->IsValid() )
 	{
 		conVar->SetValue( GetCurrentValue() );
 	}

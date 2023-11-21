@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-
+#include <cbase.h>
 #include "BackgroundMenuButton.h"
 
 #include <KeyValues.h>

@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-
+#include <cbase.h>
 #include "CreateMultiplayerGameDialog.h"
 #include "CreateMultiplayerGameServerPage.h"
 #include "CreateMultiplayerGameGameplayPage.h"

@@ -121,7 +121,7 @@ void CGameLobbyChatEntry::OnKeyCodeTyped(vgui::KeyCode code)
 							KeyValues::AutoDelete autodelete( pRequest );
 
 							int iController = 0;
-#ifdef _X360
+#ifdef _GAMECONSOLE
 							int iSlot = CBaseModPanel::GetSingleton().GetLastActiveUserId();
 							iController = XBX_GetUserId( iSlot );
 #endif

@@ -15,6 +15,12 @@
 #include <vgui/VGUI.h>
 #include <vgui_controls/Frame.h>
 
+// this undefs a windows specific thingy -Klax
+#ifdef PORTAL2
+#undef PropertySheet
+#include "PropertySheet.h"
+#endif
+
 namespace vgui
 {
 

@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-
+#include <cbase.h>
 #include "CommandCheckButton.h"
 #include "EngineInterface.h"
 

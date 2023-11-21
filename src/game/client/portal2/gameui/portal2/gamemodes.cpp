@@ -91,9 +91,9 @@ void GameModes::ApplySchemeSettings( vgui::IScheme *pScheme )
 
 void GameModes::OnKeyCodePressed( vgui::KeyCode code )
 {
-	if ( IsX360() )
+	if ( IsGameConsole() )
 	{
-		return BaseClass::OnKeyCodeTyped( code );
+		return BaseClass::OnKeyCodePressed( code );
 	}
 
 	bool bHandled = false;
@@ -149,7 +149,7 @@ void GameModes::ApplySettings( KeyValues *pInResourceData )
 {
 	BaseClass::ApplySettings( pInResourceData );
 
-	vgui::HScheme hScheme = vgui::scheme()->GetScheme( "SwarmScheme" );
+	vgui::HScheme hScheme = vgui::scheme()->GetScheme( GAMEUI_BASEMODPANEL_SCHEME );
 	vgui::IScheme *pScheme = vgui::scheme()->GetIScheme( hScheme );
 	if ( !pScheme )
 		return;
@@ -255,7 +255,7 @@ void GameModes::ApplySettings( KeyValues *pInResourceData )
 		pKV->SetInt( "visible", 0 );
 		pKV->SetInt( "enabled", m_GameModeInfos[iIndex].m_bEnabled );
 		pKV->SetInt( "tabPosition", 0 );
-		if ( IsX360() )
+		if ( IsGameConsole() )
 		{
 			pKV->SetString( "navUp", pNavUp );
 			pKV->SetString( "navDown", pNavDown );
@@ -431,7 +431,7 @@ void GameModes::PaintBackground()
 	int nActivePicY = 0;
 	int nActivePicW = m_nPicWidth;
 	int nActivePicH = m_nPicHeight;
-	float nActiveAngle = 0; //-3;
+	//float nActiveAngle = -3;
 
 	int x, y;
 	int w, h;
@@ -472,6 +472,8 @@ void GameModes::PaintBackground()
 				vgui::surface()->DrawSetColor( picColor );
 				vgui::surface()->DrawSetTexture( m_GameModeInfos[m_nActive].m_nImageId );
 
+				// TODO: DrawTexturedRectEx/DrawTexturedRectParms_t
+				/*
 				DrawTexturedRectParms_t parms;
 				parms.x0 = x;
 				parms.y0 = y;
@@ -490,7 +492,8 @@ void GameModes::PaintBackground()
 				}
 				vgui::surface()->DrawSetColor( picColor );
 				vgui::surface()->DrawSetTexture( m_nBorderImageId );
-				//vgui::surface()->DrawTexturedRectEx( &parms );
+				vgui::surface()->DrawTexturedRectEx( &parms );
+				*/
 			}
 			else
 			{
@@ -509,13 +512,15 @@ void GameModes::PaintBackground()
 				w = (float)nOffscreenSubPicW + tt * ( (float)nActivePicW - nOffscreenSubPicW );
 				h = (float)nOffscreenSubPicH + tt * ( (float)nActivePicH - nOffscreenSubPicH );
 				float a = tt * 255.0f;
-				float ang = tt * nActiveAngle;
+				//float ang = tt * nActiveAngle;
 
 				Color picColor;
 				picColor.SetColor( 255, 255, 255, a );
 				vgui::surface()->DrawSetColor( picColor );
 				vgui::surface()->DrawSetTexture( m_GameModeInfos[iMode].m_nImageId );
 
+				// TODO: DrawTexturedRectEx/DrawTexturedRectParms_t
+				/*
 				DrawTexturedRectParms_t parms;
 				parms.x0 = x;
 				parms.y0 = y;
@@ -525,7 +530,7 @@ void GameModes::PaintBackground()
 				vgui::surface()->DrawTexturedRectEx( &parms );
 
 				vgui::surface()->DrawSetTexture( m_nBorderImageId );
-				//vgui::surface()->DrawTexturedRectEx( &parms );
+				vgui::surface()->DrawTexturedRectEx( &parms );
 
 				// lerp active pic to sub pic on right edge	
 				iMode = iNextActiveMode;
@@ -557,6 +562,7 @@ void GameModes::PaintBackground()
 				parms.t1 = 1;
 				parms.angle = ang;
 				vgui::surface()->DrawTexturedRectEx( &parms );
+				*/
 			}
 		}
 		else if ( !bSkipSubPicDraw )
@@ -619,11 +625,11 @@ void GameModes::PaintBackground()
 	{
 		// pc always shows the arrows because mouse can move over them at any time
 		// xbox hides the arrows when the control does not have focus
-		if ( IsPC() || ( IsX360() && bHasFocus && !bIsOpen ) )
+		if ( IsPC() || ( IsGameConsole() && bHasFocus && !bIsOpen ) )
 		{
 			// xbox highlight when scroll active
-			bool bLeftHighlight = IsX360() && m_startScrollTime && !m_bLeftScroll;
-			bool bRightHightlight = IsX360() && m_startScrollTime && m_bLeftScroll;
+			bool bLeftHighlight = IsGameConsole() && m_startScrollTime && !m_bLeftScroll;
+			bool bRightHightlight = IsGameConsole() && m_startScrollTime && m_bLeftScroll;
 
 			// pc highlights when mouse over
 			if ( IsPC() && !m_startScrollTime )
@@ -822,17 +828,14 @@ void GameModes::NavigateTo()
 #define BOTTOM_BORDER_HEIGHT	21
 int GameModes::DrawSmearBackgroundFade( int x0, int y0, int x1, int y1 )
 {
-	// TODO: enable when we have appropriate art
-	return 0;
-
-	int wide = x1 - x0;
+	//int wide = x1 - x0;
 	int tall = y1 - y0;
 
 	int topTall = scheme()->GetProportionalScaledValue( TOP_BORDER_HEIGHT );
 	int bottomTall = scheme()->GetProportionalScaledValue( BOTTOM_BORDER_HEIGHT );
 
-	float f1 = 0.05f;
-	float f2 = 0.20f;
+	//float f1 = 0.05f;
+	//float f2 = 0.20f;
 
 	topTall  = 1.00f * topTall;
 	bottomTall = 1.00f * bottomTall;
@@ -844,10 +847,12 @@ int GameModes::DrawSmearBackgroundFade( int x0, int y0, int x1, int y1 )
 	}
 
 	surface()->DrawSetColor( m_smearColor );
-	
+
 	// top
 	surface()->DrawSetTexture( m_nTopBorderImageId );
 
+	// TODO: DrawTexturedRectEx/DrawTexturedRectParms_t
+	/*
 	DrawTexturedRectParms_t parms;
 	parms.x0 = x0;
 	parms.y0 = y0;
@@ -914,6 +919,7 @@ int GameModes::DrawSmearBackgroundFade( int x0, int y0, int x1, int y1 )
 	parms.alpha_ur = parms.alpha_lr = 0;
 	y0 += bottomTall;
 	vgui::surface()->DrawTexturedRectEx( &parms );
+	*/
 
 	return topTall + middleTall + bottomTall;
 }

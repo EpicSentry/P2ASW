@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-
+#include <cbase.h>
 #include <stdio.h>
 #include <UtlSymbol.h>
 
@@ -17,6 +17,7 @@
 #include <vgui/MouseCode.h>
 #include <vgui/KeyCode.h>
 #include <KeyValues.h>
+#include <cbase.h>
 
 #include "URLButton.h"
 #include <vgui_controls/FocusNavGroup.h>

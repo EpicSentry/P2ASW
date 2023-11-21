@@ -15,7 +15,7 @@ namespace BaseModUI {
 class SliderControl;
 class DropDownMenu;
 
-class ControllerOptions : public CBaseModFrame, public FlyoutMenuListener
+class ControllerOptions : public CBaseModFrame
 {
 	DECLARE_CLASS_SIMPLE( ControllerOptions, CBaseModFrame );
 
@@ -23,44 +23,40 @@ public:
 	ControllerOptions(vgui::Panel *parent, const char *panelName);
 	~ControllerOptions();
 
-	void Activate();
 	void ResetControlValues( void );
-	void OnThink();
-
 	void ResetToDefaults( void );
-
 	void ChangeToDuckMode( int iDuckMode );
 
-	//FloutMenuListener
-	virtual void OnNotifyChildFocus( vgui::Panel* child );
-	virtual void OnFlyoutMenuClose( vgui::Panel* flyTo );
-	virtual void OnFlyoutMenuCancelled();
-
-	Panel* NavigateBack();
+	Panel	*NavigateBack();
 
 protected:
-	virtual void PaintBackground();
 	virtual void ApplySchemeSettings( vgui::IScheme* pScheme );
 	virtual void OnCommand(const char *command);
 	virtual void OnKeyCodePressed(vgui::KeyCode code);
+	virtual void OnNotifyChildFocus( vgui::Panel* child );
+	virtual void OnFlyoutMenuClose( vgui::Panel* flyTo );
+	virtual void OnFlyoutMenuCancelled();
+	virtual void Activate();
+	virtual void OnThink();
+	virtual void SetDataSettings( KeyValues *pSettings );
 
 private:
 	void UpdateFooter();
-
-	int m_iActiveUserSlot;
+	void ConfirmUseDefaults();
 
 	SliderControl		*m_pVerticalSensitivity;
 	SliderControl		*m_pHorizontalSensitivity;
-	DropDownMenu		*m_pLookType;
-	DropDownMenu		*m_pDuckMode;
+	BaseModHybridButton	*m_pHorizontalLookType;
+	BaseModHybridButton	*m_pVerticalLookType;
+	BaseModHybridButton	*m_pDuckMode;
 	BaseModHybridButton	*m_pEditButtons;
 	BaseModHybridButton	*m_pEditSticks;
-	wchar_t				m_Title[128];
+	BaseModHybridButton	*m_pVibration;
+	BaseModHybridButton	*m_pController;
 
-	bool m_bDirty;
-	bool m_bNeedsActivate;
-
-	int m_nResetControlValuesTicks; // used to delay polling the values until we've flushed the command buffer 
+	int		m_iActiveUserSlot;
+	bool	m_bDirty;
+	int		m_nResetControlValuesTicks; // used to delay polling the values until we've flushed the command buffer 
 };
 
 };

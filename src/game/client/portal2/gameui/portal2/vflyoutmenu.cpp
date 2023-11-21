@@ -15,6 +15,7 @@
 
 #include "filesystem.h"
 #include "fmtstr.h"
+#include "vstdlib/random.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -29,9 +30,8 @@ DECLARE_BUILD_FACTORY( FlyoutMenu );
 // Fix up spacing
 // Everything is tighter spacing on PC
 // Instead of changing all the resources we're going to make the conversion here
-//#define FLYOUTMENU_TALL_SCALE ( ( IsPC() ) ? ( 0.7f ) :( 1.0f ) )
-
-#define FLYOUTMENU_TALL_SCALE 1.0f
+// #define FLYOUTMENU_TALL_SCALE ( ( IsPC() ) ? ( 0.7f ) :( 1.0f ) )
+#define FLYOUTMENU_TALL_SCALE 1
 
 
 //=============================================================================
@@ -56,6 +56,10 @@ FlyoutMenu::FlyoutMenu( vgui::Panel *parent, const char* panelName )
 	m_bOnlyActiveUser = false;
 	m_bExpandUp = false;
 	m_bUsingWideAtOpen = false;
+	m_bStandalonePositioning = false;
+	m_bDirectCommandTarget = false;
+	m_bNoBlindNavigation = false;
+	m_bSolidFill = false;
 }
 
 FlyoutMenu::~FlyoutMenu()
@@ -87,8 +91,31 @@ void FlyoutMenu::PaintBackground()
 		fadePoint = 245;
 	}
 
-	surface()->DrawSetColor(Color(80, 80, 80, 128));
-	surface()->DrawFilledRectFade( 0, 0, wide, tall, 128, 128, true);
+	surface()->DrawSetColor( Color( 0, 0, 0, 255 ) );
+	surface()->DrawFilledRect( 0, 0, iHalfWide, tall );
+	if ( m_bSolidFill )
+	{
+		surface()->DrawFilledRect( iHalfWide, 0, wide, tall );
+	}
+	else
+	{
+		surface()->DrawFilledRectFade( iHalfWide, 0, iHalfWide + iFourthWide, tall, 255, fadePoint, true );
+		surface()->DrawFilledRectFade( iHalfWide + iFourthWide, 0, wide, tall, fadePoint, 0, true );
+	}
+
+	// draw border lines
+	surface()->DrawSetColor( borderColor );
+	surface()->DrawFilledRectFade( 0, 0, wide, 2, 255, 0, true );
+	surface()->DrawFilledRectFade( 0, tall-2, wide, tall, 255, 0, true );
+
+	if ( m_bExpandUp )
+	{
+		surface()->DrawFilledRect( 0, 0, 2, tall-m_FromOriginalTall+2 );
+	}
+	else
+	{
+		surface()->DrawFilledRect( 0, m_FromOriginalTall-2, 2, tall );
+	}
 }
 
 void FlyoutMenu::SetInitialSelection( const char *szInitialSelection )
@@ -113,7 +140,7 @@ void FlyoutMenu::SetBGTall( int iTall )
 	}
 }
 
-void FlyoutMenu::OpenMenu( vgui::Panel * flyFrom, vgui::Panel* initialSelection, bool reloadRes )
+void FlyoutMenu::OpenMenu( vgui::Panel * flyFrom, vgui::Panel* initialSelection, bool reloadRes, vgui::Panel *pPositionAnchor )
 {
 	if ( GetActiveMenu() == this )
 	{
@@ -130,24 +157,26 @@ void FlyoutMenu::OpenMenu( vgui::Panel * flyFrom, vgui::Panel* initialSelection,
 	}
 
 	m_navFrom = flyFrom;
-	if ( m_navFrom )
+	if ( !pPositionAnchor )
+		pPositionAnchor = flyFrom;
+	if ( pPositionAnchor )
 	{
 		int x, y, wide, tall = 0;
-		m_navFrom->GetBounds( x, y , wide, tall );
+		pPositionAnchor->GetBounds( x, y , wide, tall );
 
 		// we don't want our parenting to be messed up if we are created from a dropdown, but we do want to get the same positioning.
 		// Since the button that we naved from is inside the dropdown control it's x and y are going to be 0,0, we actually want
 		// to get the x,y of it's parent.
-		if ( m_navFrom->GetParent() )
+		if ( pPositionAnchor->GetParent() && !m_bStandalonePositioning )
 		{
 			int xParent, yParent;
-			m_navFrom->GetParent()->GetPos( xParent, yParent );
+			pPositionAnchor->GetParent()->GetPos( xParent, yParent );
 			x += xParent;
 			y += yParent;
 		}
 
 		int yButtonCompensate = 0;
-		BaseModHybridButton *button = dynamic_cast< BaseModHybridButton* >( m_navFrom );
+		BaseModHybridButton *button = dynamic_cast< BaseModHybridButton* >( pPositionAnchor );
 		if ( button )
 		{
 			button->SetOpen();
@@ -175,7 +204,10 @@ void FlyoutMenu::OpenMenu( vgui::Panel * flyFrom, vgui::Panel* initialSelection,
 			y -= ( GetTall() - m_FromOriginalTall );
 		}
 
-		SetPos( x+wide+m_offsetX, y+m_offsetY+yButtonCompensate );
+		x += wide + m_offsetX;
+		y += m_offsetY + yButtonCompensate;
+
+		SetPos( x, y );
 	}	
 	else
 	{
@@ -204,14 +236,7 @@ void FlyoutMenu::OpenMenu( vgui::Panel * flyFrom, vgui::Panel* initialSelection,
 	CBaseModFooterPanel *footer = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
 	if ( footer )
 	{
-		FooterFormat_t format = footer->GetFormat();
-		if ( format == FF_MAINMENU )
-		{
-			// change to main menu format with flyout open
-			format = FF_MAINMENU_FLYOUT;
-		}
-
-		footer->SetButtons( FB_ABUTTON | FB_BBUTTON, format, footer->GetHelpTextEnabled() );
+		footer->SetButtons( FB_ABUTTON | FB_BBUTTON );
 		footer->SetButtonText( FB_ABUTTON, "#L4D360UI_Select" );
 		footer->SetButtonText( FB_BBUTTON, "#L4D360UI_Cancel" );
 	}
@@ -285,6 +310,8 @@ void FlyoutMenu::ApplySettings( KeyValues* inResourceData )
 	m_bOnlyActiveUser = ( inResourceData->GetInt( "OnlyActiveUser", 0 ) != 0 );
 
 	m_bExpandUp = ( inResourceData->GetInt( "ExpandUp", 0 ) != 0 );
+	m_bStandalonePositioning  = ( inResourceData->GetInt( "StandalonePositioning", 0 ) != 0 );
+	m_bDirectCommandTarget = ( inResourceData->GetInt( "DirectCommandTarget", 0 ) != 0 );
 }
 
 void FlyoutMenu::ApplySchemeSettings( vgui::IScheme* pScheme )
@@ -353,7 +380,7 @@ void FlyoutMenu::LoadControlSettings( const char *dialogResourceName, const char
 		rDat = new KeyValues( dialogResourceName );
 
 		bool bSuccess = false;
-		if ( !IsX360() && !pathID )
+		if ( !IsGameConsole() && !pathID )
 		{
 			bSuccess = rDat->LoadFromFile(g_pFullFileSystem, szLoadFile, "SKIN");
 		}
@@ -361,14 +388,6 @@ void FlyoutMenu::LoadControlSettings( const char *dialogResourceName, const char
 		{
 			bSuccess = rDat->LoadFromFile(g_pFullFileSystem, szLoadFile, pathID);
 		}
-		if ( bSuccess )
-		{
-			if ( IsX360() )
-			{
-				rDat->ProcessResolutionKeys( surface()->GetResolutionKey() );
-			}
-		}
-
 
 		// Find the auto-generated-chapter hook
 		if ( KeyValues *pHook = rDat->FindKey( "BtnChapter" ) )
@@ -406,10 +425,106 @@ void FlyoutMenu::LoadControlSettings( const char *dialogResourceName, const char
 		}
 	}
 
+	// Load the setting for whether left-right blind navigation is supported
+	bool bNoLeftRightAutoNavigation = false;
+	bool bRandomizeItems = false;
+	if ( KeyValues *pFlMenuSettings = new KeyValues( dialogResourceName ) )
+	{
+		if ( pFlMenuSettings->LoadFromFile(g_pFullFileSystem, dialogResourceName, pathID) )
+		{
+			m_bNoBlindNavigation = pFlMenuSettings->GetBool( "FlyoutMenuSettings/noblindnavigation" );
+			bNoLeftRightAutoNavigation = pFlMenuSettings->GetBool( "FlyoutMenuSettings/noleftrightautonav" );
+			m_bSolidFill = pFlMenuSettings->GetBool( "FlyoutMenuSettings/solidfill" );
+			bRandomizeItems = pFlMenuSettings->GetBool( "FlyoutMenuSettings/randomizeitems" );
+		}
+		pFlMenuSettings->deleteThis();
+	}
+
 	BaseClass::LoadControlSettings( dialogResourceName, pathID, rDat, pConditions );
 	if ( rDat != pPreloadedKeyValues )
 	{
 		rDat->deleteThis();
+	}
+
+	// After the settings have been loaded, adjust left/right navigation
+	// if it hasn't been set on children that have navup/navdown
+	if ( !bNoLeftRightAutoNavigation )
+	{
+		for( int i = 0; i < GetChildCount(); ++i )
+		{
+			class FriendlyButton : public vgui::Panel
+			{
+				friend class BaseModUI::FlyoutMenu;
+			}
+			*button = (FriendlyButton*) GetChild( i );
+			if( !button )
+				continue;
+
+			if ( button->m_sNavLeftName.IsEmpty() )
+			{
+				button->m_sNavLeftName = button->m_sNavUpName;
+			}
+			if ( button->m_sNavRightName.IsEmpty() )
+			{
+				button->m_sNavRightName = button->m_sNavDownName;
+			}
+		}
+	}
+
+	if ( bRandomizeItems )
+	{
+		CUtlVector< vgui::Button * > arrButtons;
+
+		for( int i = 0; i < GetChildCount(); ++i )
+		{
+			vgui::Button *button = dynamic_cast< vgui::Button* >( GetChild( i ) );
+			if( !button )
+				continue;
+
+			if ( !button->IsVisible() || !button->IsEnabled() )
+				continue;
+
+			arrButtons.AddToTail( button );
+		}
+
+		CUtlVector< vgui::Button * > arrOriginalButtons;
+		CUtlVector< vgui::Button * > arrRandomButtons;
+		arrOriginalButtons.AddMultipleToTail( arrButtons.Count(), arrButtons.Base() );
+		for ( int i = 0; i < arrOriginalButtons.Count(); ++ i )
+		{
+			int iRandomIdx = RandomInt( 0, arrButtons.Count() - 1 );
+			arrRandomButtons.AddToTail( arrButtons[ iRandomIdx ] );
+			arrButtons.Remove( iRandomIdx );
+		}
+
+		//
+		// Extract data from original buttons
+		//
+		struct ButtonData_t
+		{
+			wchar_t wchBuffer[128];
+			KeyValues *kv;
+		};
+		CUtlVector< void * > arrBtnData;
+		for ( int i = 0; i < arrOriginalButtons.Count(); ++ i )
+		{
+			ButtonData_t *pbd = new ButtonData_t;
+			arrOriginalButtons[i]->GetText( pbd->wchBuffer, 128 );
+			KeyValues *kv = arrOriginalButtons[i]->GetCommand();
+			pbd->kv = kv ? kv->MakeCopy() : NULL;
+			arrBtnData.AddToTail( pbd );
+		}
+
+		//
+		// Store data into random buttons
+		//
+		for ( int i = 0; i < arrBtnData.Count(); ++ i )
+		{
+			ButtonData_t *pbd = reinterpret_cast< ButtonData_t * >( arrBtnData[i] );
+			arrRandomButtons[i]->SetText( pbd->wchBuffer );
+			arrRandomButtons[i]->SetCommand( pbd->kv );
+			delete pbd;
+		}
 	}
 }
 
@@ -559,7 +674,11 @@ void FlyoutMenu::OnCommand( const char* command )
 	{
 		s_NavLock = 2;
 		CloseMenu( m_navFrom );
-		if ( m_navFrom->GetParent() )
+		if ( m_bDirectCommandTarget )
+		{
+			m_navFrom->OnCommand( command );
+		}
+		else if ( m_navFrom->GetParent() )
 		{
 			m_navFrom->GetParent()->OnCommand( command );
 		}

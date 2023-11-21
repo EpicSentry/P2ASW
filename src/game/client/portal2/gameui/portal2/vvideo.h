@@ -1,8 +1,8 @@
-//========= Copyright © 1996-2008, Valve Corporation, All rights reserved. ============//
+//========= Copyright (c) 1996-2008, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
-//=====================================================================================//
+//=======================================================================================//
 
 #ifndef __VVIDEO_H__
 #define __VVIDEO_H__
@@ -10,24 +10,15 @@
 #include "basemodui.h"
 #include "VFlyoutMenu.h"
 #include "OptionsSubVideo.h"
+#include "..\public\modes.h"
 
-
-#define MAX_DYNAMIC_AA_MODES 10
-#define MAX_DYNAMIC_VIDEO_MODES 15
-
-class CNB_Header_Footer;
+// Matched to number of entries in .RES file
+#define MAX_DYNAMIC_VIDEO_MODES 43
 
 namespace BaseModUI {
 
 class DropDownMenu;
 class SliderControl;
-
-
-struct AAMode_t
-{
-	int m_nNumSamples;
-	int m_nQualityLevel;
-};
 
 struct ResolutionMode_t
 {
@@ -35,8 +26,7 @@ struct ResolutionMode_t
 	int m_nHeight;
 };
 
-
-class Video : public CBaseModFrame, public FlyoutMenuListener
+class Video : public CBaseModFrame
 {
 	DECLARE_CLASS_SIMPLE( Video, CBaseModFrame );
 
@@ -44,95 +34,66 @@ public:
 	Video(vgui::Panel *parent, const char *panelName);
 	~Video();
 
-	//FloutMenuListener
-	virtual void OnNotifyChildFocus( vgui::Panel* child );
-	virtual void OnFlyoutMenuClose( vgui::Panel* flyTo );
-	virtual void OnFlyoutMenuCancelled();
-
-	virtual void PerformLayout();
-
-	Panel* NavigateBack();
-
-	void OpenPagedPoolMem( void );
+	void SetDefaults();
+	void DiscardChangesAndClose();
+	void AcceptPowerSavingsWarningCallback( void );
 
 protected:
-	virtual void Activate( bool bRecommendedSettings = false );
-	virtual void OnThink();
-	virtual void PaintBackground();
-	virtual void ApplySchemeSettings( vgui::IScheme* pScheme );
-	virtual void OnKeyCodePressed(vgui::KeyCode code);
-	virtual void OnCommand( const char *command );
-
-	int FindMSAAMode( int nAASamples, int nAAQuality );
-	void PrepareResolutionList();
-	void ApplyChanges();
+	virtual void	Activate();
+	virtual void	ApplySchemeSettings( vgui::IScheme* pScheme );
+	virtual void	OnKeyCodePressed(vgui::KeyCode code);
+	virtual void	OnCommand( const char *command );
+	virtual void	OnThink();
 
 private:
-	void SetupActivateData( void );
-	bool SetupRecommendedActivateData( void );
-	void UpdateFooter();
-
-	void OpenThirdPartyVideoCreditsDialog();
+	void	GetSettings( bool bRecommendedSettings );
+	bool	GetRecommendedSettings( void );
+	void	SetupState( bool bRecommendedSettings );
+	void	UpdateFooter();
+	void	PrepareResolutionList();
+	void	ApplyChanges();
+	void	GetResolutionName( vmode_t *pMode, char *pOutBuffer, int nOutBufferSize, bool &bIsNative );
+	void	ShowPowerSavingsWarning();
+	void	SetPowerSavingsState();
 
 private:
-	int					m_nNumAAModes;
-	AAMode_t			m_nAAModes[ MAX_DYNAMIC_AA_MODES ];
-
 	int					m_nNumResolutionModes;
 	ResolutionMode_t	m_nResolutionModes[ MAX_DYNAMIC_VIDEO_MODES ];
 
-	DropDownMenu		*m_drpAspectRatio;
-	DropDownMenu		*m_drpResolution;
-	DropDownMenu		*m_drpDisplayMode;
-	DropDownMenu		*m_drpLockMouse;
-	SliderControl		*m_sldFilmGrain;
+	KeyValues::AutoDelete m_autodelete_pResourceLoadConditions;
 
-	BaseModHybridButton	*m_btnAdvanced;
-
-	DropDownMenu		*m_drpModelDetail;
-	DropDownMenu		*m_drpPagedPoolMem;
-	DropDownMenu		*m_drpAntialias;
-	DropDownMenu		*m_drpFiltering;
-	DropDownMenu		*m_drpVSync;
-	DropDownMenu		*m_drpQueuedMode;
-	DropDownMenu		*m_drpShaderDetail;
-	DropDownMenu		*m_drpCPUDetail;
-
-	CNB_Header_Footer *m_pHeaderFooter;
-
-	BaseModHybridButton	*m_btnUseRecommended;
-	BaseModHybridButton	*m_btnCancel;
-	BaseModHybridButton	*m_btnDone;
-
-	BaseModHybridButton	*m_btn3rdPartyCredits;
-
-	int iBtnUseRecommendedYPos;
-	int iBtnCancelYPos;
-	int iBtnDoneYPos;
-
+	SliderControl			*m_sldBrightness;
+	BaseModHybridButton		*m_drpAspectRatio;
+	BaseModHybridButton		*m_drpResolution;
+	BaseModHybridButton		*m_drpDisplayMode;
+	BaseModHybridButton		*m_drpPowerSavingsMode;
+	BaseModHybridButton		*m_drpSplitScreenDirection;
+	BaseModHybridButton		*m_btnAdvanced;
+	
 	bool	m_bDirtyValues;
+	bool	m_bEnableApply;
+	bool	m_bPreferRecommendedResolution;
 	int		m_iAspectRatio;
 	int		m_iResolutionWidth;
 	int		m_iResolutionHeight;
 	bool	m_bWindowed;
 	bool	m_bNoBorder;
-	int		m_iModelTextureDetail;
-	int		m_iPagedPoolMem;
-	int		m_iAntiAlias;
-	int		m_iFiltering;
-	int		m_nAASamples;
-	int		m_nAAQuality;
-	bool	m_bVSync;
-	bool	m_bTripleBuffered;
-	int		m_iQueuedMode;
-	int		m_iGPUDetail;
-	int		m_iCPUDetail;
-	int		m_flFilmGrain;
-	bool	m_bLockMouse;
+	int		m_nPowerSavingsMode;
 
-	float	m_flFilmGrainInitialValue;
+	int		m_iCurrentResolutionWidth;
+	int		m_iCurrentResolutionHeight;
+	bool	m_bCurrentWindowed;
 
-	vgui::DHANDLE<class COptionsSubVideoThirdPartyCreditsDlg> m_OptionsSubVideoThirdPartyCreditsDlg;
+	int		m_iRecommendedAspectRatio;
+	int		m_iRecommendedResolutionWidth;
+	int		m_iRecommendedResolutionHeight;
+	bool	m_bRecommendedWindowed;
+	bool	m_bRecommendedNoBorder;
+	int		m_nRecommendedPowerSavingsMode;
+
+	float	m_flOriginalGamma;
+
+	bool	m_bAcceptPowerSavingsWarning;
 };
 
 };
