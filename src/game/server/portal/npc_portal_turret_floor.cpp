@@ -134,6 +134,7 @@ CNPC_Portal_FloorTurret::CNPC_Portal_FloorTurret( void )
 
 	m_nModelIndex = 0;
 	m_bUseSuperDamageScale = false;
+	m_flPreviousVelocity = 0.0f;
 	m_bDamageForce = true;
 	m_bPickupEnabled = true;
 }
