@@ -4543,6 +4543,9 @@ void ComputeAABBContactsWithBrushEntity_Old( ContactVector& contacts, const cpla
 	//BrushSideInfo_t *brushSides = (BrushSideInfo_t *)stackalloc( sizeof( BrushSideInfo_t ) * COMMON_BRUSH_SIDES );
 	//PlaneVector planes;
 	Vector4D *planes = (Vector4D *)stackalloc( sizeof( Vector4D ) * (COMMON_BRUSH_SIDES + 6 /*bbox*/ + iClipPlaneCount) );
+	
+	//if ( !pBrushEntity->IsWorld() )
+	//	Msg("Not the world..?\n");
 
 	for( int i = 0; i < WorldBrushes.Count(); ++i )
 	{
@@ -4560,8 +4563,8 @@ void ComputeAABBContactsWithBrushEntity_Old( ContactVector& contacts, const cpla
 		if ( iNumBrushSides <= 0 )
 			Assert( !bHasBrushInfo );
 
-		if ( !pBrushEntity->IsWorld() )
-			Msg("This entity is not the world!! Whoohoo!!");
+		//if ( !pBrushEntity->IsWorld() )
+		//	Msg("This entity is not the world!! Whoohoo!!\n");
 #endif
 
 		if( iNumBrushSides <= 0 )
@@ -4648,7 +4651,7 @@ void ComputeAABBContactsWithBrushEntity_Old( ContactVector& contacts, const cpla
 
 void ComputeAABBContactsWithBrushEntity_SIMD( ContactVector& contacts, const cplane_t *pClipPlanes, int iClipPlaneCount, const Vector& boxOrigin, const Vector& boxMin, const Vector& boxMax, CBaseEntity* pBrushEntity, int contentsMask)
 {
-#if ( PAINT_DETECTION_METHOD == PAINT_DETECTION_BRUSHCONTACTS )
+#if ( PAINT_DETECTION_METHOD == PAINT_DETECTION_BRUSHCONTACTS ) && 0
 	//typedef CUtlVector<int>	BrushIndexVector;
 	typedef CUtlVector<uint16> PlaneIndexVector;
 	//typedef CUtlVector<BrushSideInfo_t> BrushSideInfoVector;
@@ -4658,27 +4661,26 @@ void ComputeAABBContactsWithBrushEntity_SIMD( ContactVector& contacts, const cpl
 	ICollideable* pCollideable = enginetrace->GetCollideable( pBrushEntity );
 	const int cmodelIndex = pCollideable->GetCollisionModelIndex() - 1;
 	AssertMsg( !pBrushEntity->IsWorld() || cmodelIndex == 0, "World collision model index should be 0." );
-	const VMatrix& entityToWorld = pBrushEntity->EntityToWorldTransform();
+	const matrix3x4_t& entityToWorld = pBrushEntity->EntityToWorldTransform();
 
 	// The query box must be in local space for non-world brush entities
-	Vector queryBoxMin = boxMin + Vector(-512,-512,-512);
-	Vector queryBoxMax = boxMax + Vector(512,512,512);
+	Vector queryBoxMin = boxMin;
+	Vector queryBoxMax = boxMax;
 	if( !pBrushEntity->IsWorld() )
 	{
-		ITransformAABB( entityToWorld.As3x4(), boxMin, boxMax, queryBoxMin, queryBoxMax );
+		ITransformAABB( entityToWorld, boxMin, boxMax, queryBoxMin, queryBoxMax );
 	}
 
 	// Get the indices of all the colliding brushes
 	//BrushIndexVector brushIndices;
-	CUtlVector<int> WorldBrushes;
-	enginetrace->GetBrushesInAABB( queryBoxMin, queryBoxMax, &WorldBrushes, contentsMask );
+	CBrushQuery brushQuery;
+	enginetrace->GetBrushesInAABB( queryBoxMin, queryBoxMax, brushQuery, contentsMask, cmodelIndex );
 
 	// Find the contact regions
-	//BrushSideInfoVector brushSides;	
-	CUtlVector<BrushSideInfo_t> brushSides;
-
+	//BrushSideInfoVector brushSides;
+	BrushSideInfo_t *brushSides = (BrushSideInfo_t *)stackalloc( sizeof( BrushSideInfo_t ) * brushQuery.MaxBrushSides() );
 	//PlaneVector planes;
-	const int NUMBER_OF_FLTX4 = ( WorldBrushes.Count() * 8 ) + 6 /*bbox*/ + iClipPlaneCount;
+	const int NUMBER_OF_FLTX4 = brushQuery.MaxBrushSides() + 6 /*bbox*/ + iClipPlaneCount;
 	fltx4 *planes = (fltx4 *)stackalloc( sizeof( fltx4 ) * ( NUMBER_OF_FLTX4 + 1 ) );		// +1 for VMX alignment
 	planes = (fltx4*)ALIGN_VALUE( (int)planes, sizeof(fltx4) );
 
@@ -4686,10 +4688,11 @@ void ComputeAABBContactsWithBrushEntity_SIMD( ContactVector& contacts, const cpl
 	fltx4 f4BoxMax = LoadUnalignedSIMD( &boxMax.x );
 	fltx4 f4BoxOrigin = LoadUnalignedSIMD( &boxOrigin.x );
 
-	for( int i = 0; i < WorldBrushes.Count(); ++i )
+	for( int i = 0; i < brushQuery.Count(); ++i )
 	{
 		// Get the brush side info
-		int iNumBrushSides = enginetrace->GetBrushInfo( WorldBrushes[i], &brushSides, NULL );
+		int iBrushContents;
+		int iNumBrushSides = enginetrace->GetBrushInfo( brushQuery[i], iBrushContents, brushSides, brushQuery.MaxBrushSides() );
 		Assert( iNumBrushSides > 0 );
 		if( iNumBrushSides <= 0 )
 			continue;
@@ -4711,9 +4714,9 @@ void ComputeAABBContactsWithBrushEntity_SIMD( ContactVector& contacts, const cpl
 		// Transform the planes to world space
 		for( int sideIndex = 0; sideIndex < iNumBrushSides; ++sideIndex )
 		{
-			Vector4D temp;
-			Vector4DMultiplyTranspose( entityToWorld, brushSides[sideIndex].plane, temp );		// Could be optimized further here...
-			planes[sideIndex] = LoadUnalignedSIMD(&temp);		// Read XYZ and dist of the plane
+			cplane_t temp;
+			MatrixTransformPlane( entityToWorld, brushSides[sideIndex].plane, temp );		// Could be optimized further here...
+			planes[sideIndex] = LoadUnalignedSIMD(&temp.normal);		// Read XYZ and dist of the plane
 		}
 
 		int iPlaneCount = iNumBrushSides;
