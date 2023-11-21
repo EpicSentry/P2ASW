@@ -997,19 +997,18 @@ private:
 
 	bool			m_bWorldPositionCurrentFrame;		// if set, Panel gets PerformLayout called after the camera and the renderer's m_matrixWorldToScreen has been setup, so panels can be correctly attached to entities in the world
 
-protected:
-
 	CUtlString	m_sNavUpName;
 	PHandle		m_NavUp;
 
 	CUtlString m_sNavDownName;
 	PHandle m_NavDown;
+
 	CUtlString m_sNavLeftName;
 	PHandle m_NavLeft;
 
 	CUtlString m_sNavRightName;
 	PHandle m_NavRight;
-
+protected:
 	static int s_NavLock; 
 
 private:

@@ -14,15 +14,15 @@
 #include "tier1/UtlVector.h"
 #include "tier1/UtlSymbol.h"
 
-#include "vgui_controls/PropertyPage.h"
+#include "vgui_controls/EditablePanel.h"
 class VControlsListPanel;
 
 //-----------------------------------------------------------------------------
 // Purpose: Keyboard Details, Part of OptionsDialog
 //-----------------------------------------------------------------------------
-class COptionsSubKeyboard : public vgui::PropertyPage
+class COptionsSubKeyboard : public vgui::EditablePanel
 {
-	DECLARE_CLASS_SIMPLE( COptionsSubKeyboard, vgui::PropertyPage );
+	DECLARE_CLASS_SIMPLE( COptionsSubKeyboard, vgui::EditablePanel );
 
 public:
 	COptionsSubKeyboard(vgui::Panel *parent);
@@ -35,6 +35,8 @@ public:
 
 	// Trap row selection message
 	MESSAGE_FUNC_INT( ItemSelected, "ItemSelected", itemID );
+
+	VControlsListPanel* GetControlsList( void ) { return m_pKeyBindList; }
 
 private:
 	void Finish( ButtonCode_t code );

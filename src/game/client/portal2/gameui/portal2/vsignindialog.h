@@ -19,19 +19,27 @@ public:
 	SignInDialog(vgui::Panel *parent, const char *panelName);
 	~SignInDialog();
 
-protected:
-	virtual void OnCommand(const char *command);
-	virtual void OnThink();
-	virtual void OnKeyCodePressed( vgui::KeyCode code );
-	virtual void LoadLayout();
-	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );
+	void OnCommand(const char *command);
+	void OnThink();
+
+	void OnKeyCodePressed( vgui::KeyCode code );
+
+	void LoadLayout();
+	virtual void PaintBackground();
+
+	void ApplySettings( KeyValues * inResourceData );
+	void ApplySchemeSettings( vgui::IScheme *pScheme );
+
+
+	void SetSignInTitle( const wchar_t* title );
+	void SetSignInTitle( const char* title );
 
 private:
 	vgui::Panel* NavigateBack( int numSlotsRequested );
-	void UpdateFooter();
 
-	float			m_flTimeAutoClose;
-	vgui::Panel		*m_pBtnSignIn;
+private:
+	bool m_bSignedIn;
+	float m_flTimeAutoClose;
 };
 
 }

@@ -5,7 +5,7 @@
 // $NoKeywords: $
 //===========================================================================//
 
-#include <cbase.h>
+
 #include "IRunGameEngine.h"
 #include "EngineInterface.h"
 #include "tier1/strtools.h"
@@ -101,7 +101,6 @@ public:
 	// gets the in-game name of another user, returns NULL if that user doesn't exists
 	virtual const char *GetPlayerName(int trackerID)
 	{
-#if 0	// this code is unused, but returns a pointer to a local array - fix this if you need the function
 		// find the player by their friendsID
 		player_info_t pi;
 		for (int i = 0; i < engine->GetMaxClients(); i++)
@@ -114,13 +113,12 @@ public:
 				}
 			}
 		}
-#endif
+
 		return NULL;
 	}
 
 	virtual const char *GetPlayerFriendsName(int trackerID)
 	{
-#if 0	// this code is unused, but returns a pointer to a local array - fix this if you need the function
 		// find the player by their friendsID
 		player_info_t pi;
 		for (int i = 0; i < engine->GetMaxClients(); i++)
@@ -133,7 +131,7 @@ public:
 				}
 			}
 		}
-#endif
+
 		return NULL;
 	}
 
@@ -198,6 +196,8 @@ EXPOSE_SINGLE_INTERFACE(CRunGameEngine, IRunGameEngine, RUNGAMEENGINE_INTERFACE_
 //
 //#define RUNGAMEENGINE_INTERFACE_VERSION_OLD "RunGameEngine004"
 //
+//#ifndef _XBOX
 //EXPOSE_SINGLE_INTERFACE(CRunGameEngine, IRunGameEngine_Old, RUNGAMEENGINE_INTERFACE_VERSION_OLD);
+//#endif
 //}
 

@@ -1226,10 +1226,6 @@ inline const char *GetPlatformExt( void )
 	return IsPlatformX360() ? ".360" : "";
 }
 
-#ifdef PORTAL2
-#define PLATFORM_EXT ""
-#endif
-
 // flat view, 6 hw threads
 #define XBOX_PROCESSOR_0			( 1<<0 )
 #define XBOX_PROCESSOR_1			( 1<<1 )

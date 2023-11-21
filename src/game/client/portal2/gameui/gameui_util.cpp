@@ -5,7 +5,7 @@
 // $Workfile:     $
 // $NoKeywords: $
 //=============================================================================//
-#include <cbase.h>
+
 #include <stdarg.h>
 #include "gameui_util.h"
 #include "strtools.h"

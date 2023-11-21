@@ -561,20 +561,5 @@ inline BinString_t<T> MakeBinString( const T& that )
 
 #endif // !defined( VSTDLIB_DLL_EXPORT )
 
-#ifdef PORTAL2
-
-#if defined(_PS3) || defined(POSIX)
-#define PRI_WS_FOR_WS L"%ls"
-#define PRI_WS_FOR_S "%ls"
-#define PRI_S_FOR_WS L"%s"
-#define PRI_S_FOR_S "%s"
-#else
-#define PRI_WS_FOR_WS L"%s"
-#define PRI_WS_FOR_S "%S"
-#define PRI_S_FOR_WS L"%S"
-#define PRI_S_FOR_S "%s"
-#endif
-
-#endif
 
 #endif	// TIER1_STRTOOLS_H

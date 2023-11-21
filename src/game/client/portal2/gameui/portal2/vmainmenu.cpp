@@ -9,20 +9,19 @@
 #include "VFooterPanel.h"
 #include "VHybridButton.h"
 #include "VFlyoutMenu.h"
-#include "VGenericConfirmation.h"
-#include "VGenericWaitScreen.h"
+#include "vGenericConfirmation.h"
 #include "VQuickJoin.h"
 #include "basemodpanel.h"
 #include "UIGameData.h"
 #include "VGameSettings.h"
 #include "VSteamCloudConfirmation.h"
 #include "vaddonassociation.h"
+#include "nb_select_chapter_panel.h"
 
 #include "VSignInDialog.h"
 #include "VGuiSystemModuleLoader.h"
 #include "VAttractScreen.h"
 #include "gamemodes.h"
-#include "transitionpanel.h"
 
 #include "vgui/ILocalize.h"
 #include "vgui_controls/Label.h"
@@ -31,17 +30,16 @@
 #include "vgui_controls/ImagePanel.h"
 #include "vgui_controls/Image.h"
 
-#include "filesystem.h"
-#include "cegclientwrapper.h"
-
-#ifndef NO_STEAM
 #include "steam/isteamremotestorage.h"
-#endif
 #include "materialsystem/materialsystem_config.h"
 
+#include "ienginevgui.h"
+#include "basepanel.h"
 #include "vgui/ISurface.h"
 #include "tier0/icommandline.h"
 #include "fmtstr.h"
+
+#include "matchmaking/swarm/imatchext_swarm.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -53,7 +51,6 @@ using namespace BaseModUI;
 static ConVar connect_lobby( "connect_lobby", "", FCVAR_HIDDEN, "Sets the lobby ID to connect to on start." );
 static ConVar ui_old_options_menu( "ui_old_options_menu", "0", FCVAR_HIDDEN, "Brings up the old tabbed options dialog from Keyboard/Mouse when set to 1." );
 static ConVar ui_play_online_browser( "ui_play_online_browser",
-
 #if defined( _DEMO ) && !defined( _X360 )
 									 "0",
 									 FCVAR_NONE,
@@ -63,81 +60,105 @@ static ConVar ui_play_online_browser( "ui_play_online_browser",
 #endif
 									 "Whether play online displays a browser or plain search dialog." );
 
-#ifndef _CERT
-extern ConVar ui_sp_map_default;
-#endif
-
-ConVar cm_play_intro_video( "cm_play_intro_video", "1", FCVAR_ARCHIVE );
+ConVar asw_show_all_singleplayer_maps( "asw_show_all_singleplayer_maps", "0", FCVAR_NONE, "If set, offline practice option on the main menu will show all maps." );
+#define BLOG_URL "http://epicteleporter.xyz/p2asw/blog.html"
 
 void Demo_DisableButton( Button *pButton );
 void OpenGammaDialog( VPANEL parent );
 
-class CPlaySPSelectStorageDevice : public CChangeStorageDevice
-{
-public:
-	explicit CPlaySPSelectStorageDevice();
-
-public:
-	virtual void DeviceChangeCompleted( bool bChanged );
-};
-
-CPlaySPSelectStorageDevice:: CPlaySPSelectStorageDevice () :
-	CChangeStorageDevice( XBX_GetPrimaryUserId() )
-{
-	// Allow non-involved controller
-	m_bAnyController = false;
-
-	// Don't force to re-select, just reload configs
-	m_bForce = false;
-}
-
-void CPlaySPSelectStorageDevice::DeviceChangeCompleted( bool bChanged )
-{
-	CChangeStorageDevice::DeviceChangeCompleted( bChanged );
-
-	CBaseModFrame *pWnd = CBaseModPanel::GetSingleton().GetWindow( WT_MAINMENU );
-	if ( pWnd )
-	{
-		pWnd->PostMessage( pWnd, new KeyValues( "MsgOpenSinglePlayer" ) );
-	}
-}
-
 //=============================================================================
-char const * MainMenu::m_szPreferredControlName = "BtnPlaySolo";
-CEG_NOINLINE MainMenu::MainMenu( Panel *parent, const char *panelName ):
+MainMenu::MainMenu( Panel *parent, const char *panelName ):
 	BaseClass( parent, panelName, true, true, false, false )
 {
 	SetProportional( true );
-	SetDeleteSelfOnClose( true );
-	SetPaintBackgroundEnabled( true );
-
-	CEG_PROTECT_MEMBER_FUNCTION( MainMenu_MainMenu );
-
 	SetTitle( "", false );
 	SetMoveable( false );
 	SetSizeable( false );
 
-	SetFooterEnabled( true );
+	SetLowerGarnishEnabled( true );
 
 	AddFrameListener( this );
 
 	m_iQuickJoinHelpText = MMQJHT_NONE;
 
-	m_nTileWidth = 0;
-	m_nTileHeight = 0;
-	m_nPinFromLeft = 0;
-	m_nPinFromBottom = 0;
-	m_nFooterOffsetY = 0;
+	SetDeleteSelfOnClose( true );
+	m_pBlogPanel = new CP2ASWBlog(this, "BlogPanel");
+}
+
+void MainMenu::PerformLayout()
+{
+	BaseClass::PerformLayout();
+	ShowBlogPanel(1);
+};
+
+void MainMenu::ShowBlogPanel(bool show)
+{
+	if (m_pBlogPanel)
+	{
+		m_pBlogPanel->SetVisible(show);
+		if (show)
+		{
+			m_pBlogPanel->LoadBlogPost(BLOG_URL);
+		}
+	}
+}
+void MainMenu::DefaultLayout()
+{
+	ShowBlogPanel(1);
+};
+/*
+CP2ASWBlog::CP2ASWBlog(vgui::Panel* parent, const char *panelName) : CBaseModFrame(parent, panelName, true, true, false, false)
+{
+	m_pHTMLPanel = new vgui::HTML(this, "HTMLPanel");
+}
+*/
+//-----------------------------------------------------------------------------
+// Purpose: Constructor
+//-----------------------------------------------------------------------------
+CP2ASWBlog::CP2ASWBlog(vgui::Panel* parent, const char *panelName) : CBaseModFrame(parent, panelName)
+{
+	m_pHTMLPanel = new vgui::HTML(this, "HTMLPanel");
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Destructor
+//-----------------------------------------------------------------------------
+CP2ASWBlog::~CP2ASWBlog()
+{
+}
+
+void CP2ASWBlog::ApplySchemeSettings(vgui::IScheme *pScheme)
+{
+	BaseClass::ApplySchemeSettings(pScheme);
+
+	LoadControlSettings("resource/UI/main_menu/BlogPanel.res");
+}
+
+void CP2ASWBlog::PerformLayout()
+{
+	BaseClass::PerformLayout();
+
+	LoadBlogPost(BLOG_URL);
+}
+
+void CP2ASWBlog::LoadBlogPost(const char* URL)
+{
+	if (m_pHTMLPanel)
+	{
+		m_pHTMLPanel->SetVisible(true);
+		m_pHTMLPanel->OpenURL(URL, NULL);
+	}
 }
 
 //=============================================================================
 MainMenu::~MainMenu()
 {
 	RemoveFrameListener( this );
+
 }
 
 //=============================================================================
-CEG_NOINLINE void MainMenu::OnCommand( const char *command )
+void MainMenu::OnCommand( const char *command )
 {
 	int iUserSlot = CBaseModPanel::GetSingleton().GetLastActiveUserId();
 
@@ -148,8 +169,6 @@ CEG_NOINLINE void MainMenu::OnCommand( const char *command )
 	}
 
 	bool bOpeningFlyout = false;
-
-	CEG_PROTECT_MEMBER_FUNCTION( MainMenu_OnCommand );
 
 	if ( char const *szQuickMatch = StringAfterPrefix( command, "QuickMatch_" ) )
 	{
@@ -225,6 +244,10 @@ CEG_NOINLINE void MainMenu::OnCommand( const char *command )
 
 		pSettings->SetString( "game/mode", szFriendsMatch );
 
+		if ( m_ActiveControl )
+		{
+			m_ActiveControl->NavigateFrom( );
+		}
 		CBaseModPanel::GetSingleton().OpenWindow( WT_ALLGAMESEARCHRESULTS, this, true, pSettings );
 	}	
 	else if ( char const *szGroupServer = StringAfterPrefix( command, "GroupServer_" ) )
@@ -246,6 +269,10 @@ CEG_NOINLINE void MainMenu::OnCommand( const char *command )
 		if ( *szGroupServer )
 			pSettings->SetString( "game/mode", szGroupServer );
 
+		if ( m_ActiveControl )
+		{
+			m_ActiveControl->NavigateFrom( );
+		}
 		CBaseModPanel::GetSingleton().OpenWindow( WT_STEAMGROUPSERVERS, this, true, pSettings );
 	}
 	else if ( char const *szLeaderboards = StringAfterPrefix( command, "Leaderboards_" ) )
@@ -265,6 +292,10 @@ CEG_NOINLINE void MainMenu::OnCommand( const char *command )
 
 		pSettings->SetString( "game/mode", szLeaderboards );
 
+		if ( m_ActiveControl )
+		{
+			m_ActiveControl->NavigateFrom( );
+		}
 		CBaseModPanel::GetSingleton().OpenWindow( WT_LEADERBOARD, this, true, pSettings );
 	}
 	else if( !Q_strcmp( command, "VersusSoftLock" ) )
@@ -284,48 +315,12 @@ CEG_NOINLINE void MainMenu::OnCommand( const char *command )
 	}
 	else if ( !Q_strcmp( command, "SoloPlay" ) )
 	{
-		m_szPreferredControlName = "BtnPlaySolo";
-
-#ifdef _GAMECONSOLE
-		DWORD dwDevice = XBX_GetStorageDeviceId( XBX_GetPrimaryUserId() );
-		if ( !XBX_GetPrimaryUserIsGuest() && ( dwDevice == XBX_INVALID_STORAGE_ID ) )
-		{
-			// Trigger storage device selector
-			CUIGameData::Get()->SelectStorageDevice( new CPlaySPSelectStorageDevice() );
-		}
-		else
-#endif
-		{
-			MsgOpenSinglePlayer();
-		}
-	}
-	else if ( !Q_strcmp( command, "CoopPlay" ) )
-	{
-		m_szPreferredControlName = "BtnCoOp";
-
-		if ( !IsGameConsole() || g_pFullFileSystem->IsSpecificDLCPresent( 1 ) )
-		{
-			// They have the DLC!
-			MsgOpenCoopMode();
-		}
-		else
-		{
-#ifdef _GAMECONSOLE
-			// They don't have the DLC!
-			if ( XBX_GetPrimaryUserIsGuest() )
-			{
-				CUIGameData::Get()->InitiateSplitscreenPartnerDetection( "coop" );
-			}
-			else
-#endif
-			{
-				CBaseModPanel::GetSingleton().OpenWindow( WT_STARTCOOPGAME, this );
-			}
-		}
+		OpenChapterSelect();
+		return;
 	}
 	else if ( !Q_strcmp( command, "DeveloperCommentary" ) )
 	{
-#ifdef _GAMECONSOLE
+#ifdef _X360
 		if ( XBX_GetNumGameUsers() > 1 )
 		{
 			GenericConfirmation* confirmation = 
@@ -360,14 +355,13 @@ CEG_NOINLINE void MainMenu::OnCommand( const char *command )
 		confirmation->SetUsageData(data);
 		NavigateFrom();
 	}
-#if 0
 	else if ( !Q_strcmp( command, "StatsAndAchievements" ) )
 	{
 		// If PC make sure that the Steam user is logged in
 		if ( CheckAndDisplayErrorIfNotLoggedIn() )
 			return;
 
-#ifdef _GAMECONSOLE
+#ifdef _X360
 		// If 360 make sure that the user is not a guest
 		if ( XBX_GetUserIsGuest( CBaseModPanel::GetSingleton().GetLastActiveUserId() ) )
 		{
@@ -381,13 +375,17 @@ CEG_NOINLINE void MainMenu::OnCommand( const char *command )
 
 			return;
 		}
-#endif //_GAMECONSOLE
+#endif //_X360
+		if ( m_ActiveControl )
+		{
+			m_ActiveControl->NavigateFrom( );
+		}
+
 		CBaseModPanel::GetSingleton().OpenWindow( WT_ACHIEVEMENTS, this, true );
 	}
-#endif
 	else if ( !Q_strcmp( command, "FlmExtrasFlyoutCheck" ) )
 	{
-		if ( IsGameConsole() && CUIGameData::Get()->SignedInToLive() )
+		if ( IsX360() && CUIGameData::Get()->SignedInToLive() )
 			OnCommand( "FlmExtrasFlyout_Live" );
 		else
 			OnCommand( "FlmExtrasFlyout_Simple" );
@@ -395,7 +393,7 @@ CEG_NOINLINE void MainMenu::OnCommand( const char *command )
 	}
 	else if ( char const *szInviteType = StringAfterPrefix( command, "InviteUI_" ) )
 	{
-		if ( IsGameConsole() )
+		if ( IsX360() )
 		{
 			CUIGameData::Get()->OpenInviteUI( szInviteType );
 		}
@@ -406,36 +404,48 @@ CEG_NOINLINE void MainMenu::OnCommand( const char *command )
 	}
 	else if (!Q_strcmp(command, "Game"))
 	{
+		if ( m_ActiveControl )
+		{
+			m_ActiveControl->NavigateFrom( );
+		}
 		CBaseModPanel::GetSingleton().OpenWindow(WT_GAMEOPTIONS, this, true );
 	}
 	else if (!Q_strcmp(command, "AudioVideo"))
 	{
-		m_szPreferredControlName = "BtnOptions";
+		if ( m_ActiveControl )
+		{
+			m_ActiveControl->NavigateFrom( );
+		}
 		CBaseModPanel::GetSingleton().OpenWindow(WT_AUDIOVIDEO, this, true );
 	}
 	else if (!Q_strcmp(command, "Controller"))
 	{
-		m_szPreferredControlName = "BtnOptions";
-		CBaseModPanel::GetSingleton().OpenWindow(WT_CONTROLLER, this, true,
-			KeyValues::AutoDeleteInline( new KeyValues( "Settings", "slot", iUserSlot ) ) );
+		if ( m_ActiveControl )
+		{
+			m_ActiveControl->NavigateFrom( );
+		}
+		CBaseModPanel::GetSingleton().OpenWindow(WT_CONTROLLER, this, true );
 	}
 	else if (!Q_strcmp(command, "Storage"))
 	{
-		m_szPreferredControlName = "BtnOptions";
-
-#ifdef _GAMECONSOLE
+#ifdef _X360
 		if ( XBX_GetUserIsGuest( iUserSlot ) )
 		{
 			CBaseModPanel::GetSingleton().PlayUISound( UISOUND_INVALID );
 			return;
 		}
 #endif
+		if ( m_ActiveControl )
+		{
+			m_ActiveControl->NavigateFrom( );
+		}
+
 		// Trigger storage device selector
 		CUIGameData::Get()->SelectStorageDevice( new CChangeStorageDevice( XBX_GetUserId( iUserSlot ) ) );
 	}
 	else if (!Q_strcmp(command, "Credits"))
 	{
-#ifdef _GAMECONSOLE
+#ifdef _X360
 		if ( XBX_GetNumGameUsers() > 1 )
 		{
 			GenericConfirmation* confirmation = 
@@ -460,8 +470,7 @@ CEG_NOINLINE void MainMenu::OnCommand( const char *command )
 				" network offline "
 			" } "
 			" game { "
-				" mode coop "
-				" map credits "
+				" mode single_mission "
 			" } "
 			" options { "
 				" play credits "
@@ -470,6 +479,12 @@ CEG_NOINLINE void MainMenu::OnCommand( const char *command )
 		KeyValues::AutoDelete autodelete( pSettings );
 
 		g_pMatchFramework->CreateSession( pSettings );
+
+		// Automatically start the credits session, no configuration required
+		if ( IMatchSession *pMatchSession = g_pMatchFramework->GetMatchSession() )
+		{
+			pMatchSession->Command( KeyValues::AutoDeleteInline( new KeyValues( "Start" ) ) );
+		}
 	}
 	else if (!Q_strcmp(command, "QuitGame"))
 	{
@@ -485,7 +500,6 @@ CEG_NOINLINE void MainMenu::OnCommand( const char *command )
 
 			data.bOkButtonEnabled = true;
 			data.pfnOkCallback = &AcceptQuitGameCallback;
-			data.pOkButtonText = "#PORTAL2_ButtonAction_Quit";
 			data.bCancelButtonEnabled = true;
 
 			confirmation->SetUsageData(data);
@@ -493,7 +507,7 @@ CEG_NOINLINE void MainMenu::OnCommand( const char *command )
 			NavigateFrom();
 		}
 
-		if ( IsGameConsole() )
+		if ( IsX360() )
 		{
 			engine->ExecuteClientCmd( "demo_exit" );
 		}
@@ -543,7 +557,7 @@ CEG_NOINLINE void MainMenu::OnCommand( const char *command )
 	}
 	else if (!Q_strcmp(command, "ActivateAttractScreen"))
 	{
-		if ( IsGameConsole() )
+		if ( IsX360() )
 		{
 			Close();
 			CBaseModPanel::GetSingleton().CloseAllWindows();
@@ -564,6 +578,10 @@ CEG_NOINLINE void MainMenu::OnCommand( const char *command )
 		else
 		{
 			// audio options dialog, PC only
+			if ( m_ActiveControl )
+			{
+				m_ActiveControl->NavigateFrom( );
+			}
 			CBaseModPanel::GetSingleton().OpenWindow(WT_AUDIO, this, true );
 		}
 	}
@@ -576,6 +594,10 @@ CEG_NOINLINE void MainMenu::OnCommand( const char *command )
 		else
 		{
 			// video options dialog, PC only
+			if ( m_ActiveControl )
+			{
+				m_ActiveControl->NavigateFrom( );
+			}
 			CBaseModPanel::GetSingleton().OpenWindow(WT_VIDEO, this, true );
 		}
 	}
@@ -600,8 +622,17 @@ CEG_NOINLINE void MainMenu::OnCommand( const char *command )
 		else
 		{
 			// standalone keyboard/mouse dialog, PC only
+			if ( m_ActiveControl )
+			{
+				m_ActiveControl->NavigateFrom( );
+			}
 			CBaseModPanel::GetSingleton().OpenWindow(WT_KEYBOARDMOUSE, this, true );
 		}
+	}
+	else if( Q_stricmp( "#L4D360UI_Controller_Edit_Keys_Buttons", command ) == 0 )
+	{
+		FlyoutMenu::CloseActiveMenu();
+		CBaseModPanel::GetSingleton().OpenKeyBindingsDialog( this );
 	}
 	else if (!Q_strcmp(command, "MultiplayerSettings"))
 	{
@@ -612,12 +643,20 @@ CEG_NOINLINE void MainMenu::OnCommand( const char *command )
 		else
 		{
 			// standalone multiplayer settings dialog, PC only
+			if ( m_ActiveControl )
+			{
+				m_ActiveControl->NavigateFrom( );
+			}
 			CBaseModPanel::GetSingleton().OpenWindow(WT_MULTIPLAYER, this, true );
 		}
 	}
 	else if (!Q_strcmp(command, "CloudSettings"))
 	{
 		// standalone cloud settings dialog, PC only
+		if ( m_ActiveControl )
+		{
+			m_ActiveControl->NavigateFrom( );
+		}
 		CBaseModPanel::GetSingleton().OpenWindow(WT_CLOUD, this, true );
 	}
 	else if (!Q_strcmp(command, "SeeAll"))
@@ -633,6 +672,10 @@ CEG_NOINLINE void MainMenu::OnCommand( const char *command )
 			);
 		KeyValues::AutoDelete autodelete( pSettings );
 
+		if ( m_ActiveControl )
+		{
+			m_ActiveControl->NavigateFrom( );
+		}
 		CBaseModPanel::GetSingleton().OpenWindow( WT_ALLGAMESEARCHRESULTS, this, true, pSettings );
 		CBaseModPanel::GetSingleton().PlayUISound( UISOUND_ACCEPT );
 	}
@@ -658,63 +701,58 @@ CEG_NOINLINE void MainMenu::OnCommand( const char *command )
 	{
 		CBaseModPanel::GetSingleton().OpenWindow( WT_ADDONS, this, true );
 	}
-	else if ( !V_stricmp( command, "Options" ) )
+	else if( !Q_strcmp( command, "CreateGame" ) )
 	{
-		m_szPreferredControlName = "BtnOptions";
-		CBaseModPanel::GetSingleton().OpenWindow( WT_OPTIONS, this, true );
-	}
-	else if ( !V_stricmp( command, "Extras" ) )
-	{
-		m_szPreferredControlName = "BtnExtras";
-		CBaseModPanel::GetSingleton().OpenWindow( WT_EXTRAS, this, true );
-	}
-	else if ( !V_stricmp( command, "EconUI" ) )
-	{
-		m_szPreferredControlName = "BtnEconUI";
-		CBaseModPanel::GetSingleton().OpenWindow( WT_FADEOUTTOECONUI, this, false );
-	}
-#if defined( PORTAL2_PUZZLEMAKER )
-	else if ( !V_stricmp( command, "CommunityPlay" ) )
-	{
-		m_szPreferredControlName = "BtnPlayCommunityMaps";
-		CBaseModPanel::GetSingleton().OpenWindow( WT_COMMUNITYMAP, this, true );
-	}
-	else if ( !V_stricmp( command, "PlaytestDemos" ) )
-	{
-		m_szPreferredControlName = "BtnPlaytestDemos";
-		CBaseModPanel::GetSingleton().OpenWindow( WT_PLAYTESTDEMOS, this, true );
-	}
-	else if ( !V_stricmp( command, "CreateChambers" ) )
-	{
-		// Play a video
-		if ( cm_play_intro_video.GetBool() )
+		KeyValues *pSettings = KeyValues::FromString(
+			"settings",
+			" system { "
+			" network LIVE "
+			" access public "
+			" } "
+			" game { "
+			" mode = "
+			" sdk = "
+			" mission = "
+			" } "
+			" options { "
+			" action create "
+			" } "
+			);
+		KeyValues::AutoDelete autodelete( pSettings );
+
+		char const *szGameMode = "sdk";
+		pSettings->SetString( "game/mode", szGameMode );
+		pSettings->SetString( "game/campaign", "jacob" );
+		pSettings->SetString( "game/mission", "sdk_teams_hdr" );
+
+		if ( !CUIGameData::Get()->SignedInToLive() )
 		{
-			KeyValues *pSettings = new KeyValues( "MoviePlayer" );
-			KeyValues::AutoDelete autodelete_pSettings( pSettings );
-			pSettings->SetString( "video", "media/intro_movie.bik" );
-			pSettings->SetBool( "letterbox", true );
-			pSettings->SetBool( "editormenu_onclose", true );
-			CBaseModPanel::GetSingleton().OpenWindow( WT_MOVIEPLAYER, this, false, pSettings );
-			cm_play_intro_video.SetValue( 0 );
+			pSettings->SetString( "system/network", "lan" );
+			pSettings->SetString( "system/access", "public" );
 		}
-		else
-		{		
-			m_szPreferredControlName = "BtnCreateChambers";
-			CBaseModPanel::GetSingleton().OpenWindow( WT_EDITORMAINMENU, this, true );
+
+		if ( StringHasPrefix( szGameMode, "team" ) )
+		{
+			pSettings->SetString( "system/netflag", "teamlobby" );
 		}
-	}
-#endif // PORTAL2_PUZZLEMAKER
-	else if ( char const *szContentName = StringAfterPrefix( command, "GetDownloadableContent_" ) )
-	{
-		CUIGameData::Get()->GetDownloadableContent( szContentName );
+// 		else if ( !Q_stricmp( "custommatch", m_pDataSettings->GetString( "options/action", "" ) ) )
+// 		{
+// 			pSettings->SetString( "system/access", "public" );
+// 		}
+
+		// TCR: We need to respect the default difficulty
+		pSettings->SetString( "game/difficulty", GameModeGetDefaultDifficulty( szGameMode ) );
+
+		CBaseModPanel::GetSingleton().PlayUISound( UISOUND_ACCEPT );
+		CBaseModPanel::GetSingleton().CloseAllWindows();
+		CBaseModPanel::GetSingleton().OpenWindow( WT_GAMESETTINGS, NULL, true, pSettings );
 	}
 	else
 	{
 		const char *pchCommand = command;
 		if ( !Q_strcmp(command, "FlmOptionsFlyout") )
 		{
-			m_szPreferredControlName = "BtnOptions";
-#ifdef _GAMECONSOLE
+#ifdef _X360
 			if ( XBX_GetPrimaryUserIsGuest() )
 			{
 				pchCommand = "FlmOptionsGuestFlyout";
@@ -793,19 +831,6 @@ CEG_NOINLINE void MainMenu::OnCommand( const char *command )
 	}
 }
 
-void MainMenu::OnNavigateTo( const char* panelName )
-{
-	BaseClass::OnNavigateTo( panelName );
-
-	static char const * arrControlsPersist[] = { "BtnPlaySolo", "BtnCoOp", "BtnOptions", "BtnQuit" };
-	m_szPreferredControlName = arrControlsPersist[0];
-	for ( int k = 1; k < ARRAYSIZE( arrControlsPersist ); ++ k )
-	{
-		if ( !Q_stricmp( panelName, arrControlsPersist[k] ) )
-			m_szPreferredControlName = arrControlsPersist[k];
-	}
-}
-
 //=============================================================================
 void MainMenu::OpenMainMenuJoinFailed( const char *msg )
 {
@@ -829,36 +854,30 @@ void MainMenu::OnFlyoutMenuCancelled()
 }
 
 //=============================================================================
-CEG_NOINLINE void MainMenu::OnKeyCodePressed( KeyCode code )
+void MainMenu::OnKeyCodePressed( KeyCode code )
 {
-	BaseModUI::CBaseModPanel::GetSingleton().ResetAttractDemoTimeout();
-
 	int userId = GetJoystickForCode( code );
 	BaseModUI::CBaseModPanel::GetSingleton().SetLastActiveUserId( userId );
-
-	CEG_PROTECT_VIRTUAL_FUNCTION( MainMenu_OnKeyCodePressed );
 
 	switch( GetBaseButtonCode( code ) )
 	{
 	case KEY_XBUTTON_B:
 		// Capture the B key so it doesn't play the cancel sound effect
 		break;
-
-	case KEY_XBUTTON_Y:
+	case KEY_XBUTTON_X:
 		{
-#if defined( _X360 )
-			CBaseModFooterPanel *pFooter = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
-			if ( pFooter && ( pFooter->GetButtons() & FB_YBUTTON ) )
+			QuickJoinPanel *pQuickJoin = dynamic_cast<QuickJoinPanel*>( FindChildByName( "PnlQuickJoin" ) );
+			if ( pQuickJoin && pQuickJoin->ShouldBeVisible() )
 			{
-				// Trigger storage device selector
-				CUIGameData::Get()->SelectStorageDevice( new CChangeStorageDevice( XBX_GetPrimaryUserId() ) );
+				// X shortcut only works if the panel is showing
+				OnCommand( "SeeAll" );
 			}
-#endif
+
+			break;
 		}
-		break;
 
 	case KEY_XBUTTON_BACK:
-#ifdef _GAMECONSOLE
+#ifdef _X360
 		if ( XBX_GetNumGameUsers() > 1 )
 		{
 			OnCommand( "DisableSplitscreen" );
@@ -867,7 +886,7 @@ CEG_NOINLINE void MainMenu::OnKeyCodePressed( KeyCode code )
 		break;
 
 	case KEY_XBUTTON_INACTIVE_START:
-#ifdef _GAMECONSOLE
+#ifdef _X360
 		if ( !XBX_GetPrimaryUserIsGuest() &&
 			 userId != (int) XBX_GetPrimaryUserId() &&
 			 userId >= 0 &&
@@ -903,6 +922,7 @@ void MainMenu::OnThink()
 				pButton->SetText( "#L4D360UI_QuickStart" );
 				if ( m_iQuickJoinHelpText != MMQJHT_QUICKSTART )
 				{
+					pButton->SetHelpText( "#L4D360UI_QuickMatch_Offline_Tip" );
 					m_iQuickJoinHelpText = MMQJHT_QUICKSTART;
 				}
 			}
@@ -911,6 +931,7 @@ void MainMenu::OnThink()
 				pButton->SetText( "#L4D360UI_QuickMatch" );
 				if ( m_iQuickJoinHelpText != MMQJHT_QUICKMATCH )
 				{
+					pButton->SetHelpText( "#L4D360UI_QuickMatch_Tip" );
 					m_iQuickJoinHelpText = MMQJHT_QUICKMATCH;
 				}
 			}
@@ -927,42 +948,41 @@ void MainMenu::OnThink()
 		}
 	}
 
-	if ( IsGameConsole() )
-	{
-		// Need to keep updating since attract movie panel can change state
-		SetFooterState();
-	}
-
 	BaseClass::OnThink();
 }
 
 //=============================================================================
 void MainMenu::OnOpen()
 {
-	static bool s_bConnectLobbyChecked = false;
-	if ( IsPC() && connect_lobby.GetString()[0] && !s_bConnectLobbyChecked )
+	if ( IsPC() && connect_lobby.GetString()[0] )
 	{
 		// if we were launched with "+connect_lobby <lobbyid>" on the command line, join that lobby immediately
-		uint64 nLobbyID = 0ull;
-		sscanf( connect_lobby.GetString(), "%llu", &nLobbyID );
+		uint64 nLobbyID = _atoi64( connect_lobby.GetString() );
 		if ( nLobbyID != 0 )
 		{
-			Msg( "Connecting to lobby: 0x%llX\n", nLobbyID );
-			KeyValues *kvEvent = new KeyValues( "OnSteamOverlayCall::LobbyJoin" );
-			kvEvent->SetUint64( "sessionid", nLobbyID );
-			g_pMatchFramework->GetEventsSubscription()->BroadcastEvent( kvEvent );
+			KeyValues *pSettings = KeyValues::FromString(
+				"settings",
+				" system { "
+					" network LIVE "
+				" } "
+				" options { "
+					" action joinsession "
+				" } "
+				);
+			pSettings->SetUint64( "options/sessionid", nLobbyID );
+			KeyValues::AutoDelete autodelete( pSettings );
+
+			g_pMatchFramework->MatchSession( pSettings );
 		}
 		// clear the convar so we don't try to join that lobby every time we return to the main menu
 		connect_lobby.SetValue( "" );
 	}
-	s_bConnectLobbyChecked = true;
 
 	BaseClass::OnOpen();
 
 	SetFooterState();
 
-#if !defined( _GAMECONSOLE ) && !defined( PORTAL2 )
-	// Portal 2 clouds config by default
+#ifndef _X360
 	bool bSteamCloudVisible = false;
 
 	{
@@ -991,86 +1011,55 @@ void MainMenu::RunFrame()
 }
 
 //=============================================================================
-CEG_NOINLINE void MainMenu::Activate()
+#ifdef _X360
+void MainMenu::Activate()
 {
-	CEG_PROTECT_MEMBER_FUNCTION( MainMenu_Activate );
-
 	BaseClass::Activate();
-
-#ifdef _GAMECONSOLE
 	OnFlyoutMenuClose( NULL );
-#endif
-
-	vgui::Panel *firstPanel = FindChildByName( m_szPreferredControlName );
-	if ( firstPanel )
-	{
-		if ( m_ActiveControl )
-		{
-			m_ActiveControl->NavigateFrom();
-		}
-		firstPanel->NavigateTo();
-	}
 }
+#endif
 
 //=============================================================================
 void MainMenu::PaintBackground() 
 {
-	MarkTiles();
 }
 
 void MainMenu::SetFooterState()
 {
-	CBaseModFooterPanel *pFooter = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
-	if ( pFooter )
+	CBaseModFooterPanel *footer = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
+	if ( footer )
 	{
-		int screenWide, screenTall;
-		surface()->GetScreenSize( screenWide, screenTall );
-
-		pFooter->SetPosition( m_nPinFromLeft, screenTall - m_nPinFromBottom + m_nFooterOffsetY );
-
-		FooterButtons_t buttons = 0;
-			
-		if ( IsGameConsole() )
-		{
-			buttons |= FB_ABUTTON;
-		}
-		
+		CBaseModFooterPanel::FooterButtons_t buttons = FB_ABUTTON;
 #if defined( _X360 )
-		DWORD dwDevice = XBX_GetStorageDeviceId( XBX_GetPrimaryUserId() );
-		if ( !XBX_GetPrimaryUserIsGuest() &&
-			!V_stricmp( m_szPreferredControlName, "BtnPlaySolo" ) &&
-			( dwDevice != XBX_INVALID_STORAGE_ID ) )
+		if ( XBX_GetPrimaryUserIsGuest() == 0 )
 		{
-			buttons |= FB_YBUTTON;
+			buttons |= FB_XBUTTON;
 		}
 #endif
 
-		buttons |= FB_STEAM_SELECT;
-
-		pFooter->SetButtons( buttons );
-		pFooter->SetButtonText( FB_ABUTTON, "#L4D360UI_Select" );
-		
-		if ( IsX360() )
-		{
-			pFooter->SetButtonText( FB_YBUTTON, "#PORTAL2_ChangeStorageDevice" );
-		}
+		footer->SetButtons( buttons, FF_MAINMENU, false );
+		footer->SetButtonText( FB_ABUTTON, "#L4D360UI_Select" );
+		footer->SetButtonText( FB_XBUTTON, "#L4D360UI_MainMenu_SeeAll" );
 	}
 }
 
 //=============================================================================
-CEG_NOINLINE void MainMenu::ApplySchemeSettings( IScheme *pScheme )
+void MainMenu::ApplySchemeSettings( IScheme *pScheme )
 {
 	BaseClass::ApplySchemeSettings( pScheme );
 
-	GetDialogTileSize( m_nTileWidth, m_nTileHeight );
+	const char *pSettings = "Resource/UI/BaseModUI/MainMenu.res";
 
-	m_nPinFromBottom = vgui::scheme()->GetProportionalScaledValue( atoi( pScheme->GetResourceString( "Dialog.PinFromBottom" ) ) );
-	m_nPinFromLeft = vgui::scheme()->GetProportionalScaledValue( atoi( pScheme->GetResourceString( "Dialog.PinFromLeft" ) ) );
-	m_nFooterOffsetY = vgui::scheme()->GetProportionalScaledValue( atoi( pScheme->GetResourceString( "FooterPanel.OffsetY" ) ) );
-
-	const char *pSettings = "Resource/UI/BaseModUI/mainmenu_new.res";
-#if !defined( _GAMECONSOLE )
-	if ( !g_pMatchFramework->GetMatchSystem()->GetPlayerManager()->GetLocalPlayer( XBX_GetPrimaryUserId() ) )
+#if !defined( _X360 )
+	if ( !g_pMatchFramework->GetMatchSystem() )
+	{
+		Msg( "BAD!\n" );
+	}
+	if ( !g_pMatchFramework->GetMatchSystem()->GetPlayerManager() )
+	{
+		Msg( "BAD PLAYER MANAGER!\n" );
+	}
+	if ( !g_pMatchFramework->GetMatchSystem()->GetPlayerManager()->GetLocalPlayer( 0 ) )
 	{
 		pSettings = "Resource/UI/BaseModUI/MainMenuStub.res";
 	}
@@ -1078,9 +1067,16 @@ CEG_NOINLINE void MainMenu::ApplySchemeSettings( IScheme *pScheme )
 
 	LoadControlSettings( pSettings );
 
-	CEG_PROTECT_MEMBER_FUNCTION( MainMenu_ApplySchemeSettings );
+	BaseModHybridButton *button = dynamic_cast< BaseModHybridButton* >( FindChildByName( "BtnPlaySolo" ) );
+	if ( button )
+	{
+#ifdef _X360
+		button->SetText( ( XBX_GetNumGameUsers() > 1 ) ? ( "#L4D360UI_MainMenu_PlaySplitscreen" ) : ( "#L4D360UI_MainMenu_PlaySolo" ) );
+		button->SetHelpText( ( XBX_GetNumGameUsers() > 1 ) ? ( "#L4D360UI_MainMenu_OfflineCoOp_Tip" ) : ( "#L4D360UI_MainMenu_PlaySolo_Tip" ) );
+#endif
+	}
 
-#ifdef _GAMECONSOLE
+#ifdef _X360
 	if ( !XBX_GetPrimaryUserIsGuest() )
 	{
 		wchar_t wszListText[ 128 ];
@@ -1147,13 +1143,12 @@ CEG_NOINLINE void MainMenu::ApplySchemeSettings( IScheme *pScheme )
 		{
 			bool bUsesCloud = false;
 
-#ifndef NO_STEAM
-			ISteamRemoteStorage *pRemoteStorage =
-#ifdef _PS3
-				::SteamRemoteStorage();
-#else
-				SteamClient()?(ISteamRemoteStorage *)SteamClient()->GetISteamGenericInterface(
+#ifdef IS_WINDOWS_PC
+			ISteamRemoteStorage *pRemoteStorage = SteamClient()?(ISteamRemoteStorage *)SteamClient()->GetISteamGenericInterface(
 				SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), STEAMREMOTESTORAGE_INTERFACE_VERSION ):NULL;
+#else
+			ISteamRemoteStorage *pRemoteStorage =  NULL; 
+			AssertMsg( false, "This branch run on a PC build without IS_WINDOWS_PC defined." );
 #endif
 
 			int32 availableBytes, totalBytes = 0;
@@ -1164,9 +1159,6 @@ CEG_NOINLINE void MainMenu::ApplySchemeSettings( IScheme *pScheme )
 					bUsesCloud = true;
 				}
 			}
-#else
-			AssertMsg( false, "This branch run on a PC build without IS_WINDOWS_PC defined." );
-#endif
 
 			pFlyout->SetControlEnabled( "BtnCloud", bUsesCloud );
 		}
@@ -1174,14 +1166,35 @@ CEG_NOINLINE void MainMenu::ApplySchemeSettings( IScheme *pScheme )
 
 	SetFooterState();
 
-	vgui::Panel *firstPanel = FindChildByName( m_szPreferredControlName );
-	if ( firstPanel )
-	{
-		if ( m_ActiveControl )
+	if ( IsX360() )
+	{		
+		GameModes *pGameModes =  dynamic_cast< GameModes* >( FindChildByName( "BtnGameModes" ) );	
+		if ( pGameModes )
 		{
-			m_ActiveControl->NavigateFrom();
+			char lastActive[MAX_PATH];
+			if ( pGameModes->GetLastActiveNameId( lastActive, sizeof( lastActive ) ) )
+			{
+				pGameModes->SetActive( lastActive, true );
+			}
+			else
+			{
+				pGameModes->SetActive( "BtnPlaySolo", true );
+			}
+			m_ActiveControl = pGameModes;
 		}
-		firstPanel->NavigateTo();
+	}
+
+	if ( IsPC() )
+	{
+		vgui::Panel *firstPanel = FindChildByName( "BtnCoOp" );
+		if ( firstPanel )
+		{
+			if ( m_ActiveControl )
+			{
+				m_ActiveControl->NavigateFrom( );
+			}
+			firstPanel->NavigateTo();
+		}
 	}
 
 #if defined( _X360 ) && defined( _DEMO )
@@ -1190,7 +1203,7 @@ CEG_NOINLINE void MainMenu::ApplySchemeSettings( IScheme *pScheme )
 #endif
 
 	// CERT CATCH ALL JUST IN CASE!
-#ifdef _GAMECONSOLE
+#ifdef _X360
 	bool bAllUsersCorrectlySignedIn = ( XBX_GetNumGameUsers() > 0 );
 	for ( int k = 0; k < ( int ) XBX_GetNumGameUsers(); ++ k )
 	{
@@ -1207,27 +1220,6 @@ CEG_NOINLINE void MainMenu::ApplySchemeSettings( IScheme *pScheme )
 		Warning( "======= SIGNIN RESET SIGNIN RESET SIGNIN RESET SIGNIN RESET ==========\n" );
 	}
 #endif
-}
-
-void MainMenu::MarkTiles()
-{
-	// determine bounds if menu was tile based
-	if ( m_nTileWidth && m_nTileHeight )
-	{
-		for ( int i = 0; i < GetChildCount(); i++ )
-		{
-			BaseModHybridButton *pButton = dynamic_cast< BaseModHybridButton* >( GetChild( i ) );
-			if ( pButton && pButton->IsEnabled() && pButton->IsVisible() )
-			{
-				int x, y, wide, tall;
-				pButton->GetBounds( x, y, wide, tall );
-				if ( wide && tall )
-				{
-					CBaseModPanel::GetSingleton().GetTransitionEffectPanel()->MarkTilesInRect( x, y, wide, tall, WT_MAINMENU );
-				}
-			}
-		}
-	}
 }
 
 const char *pDemoDisabledButtons[] = { "BtnVersus", "BtnSurvival", "BtnStatsAndAchievements", "BtnExtras" };
@@ -1255,8 +1247,7 @@ void MainMenu::AcceptCommentaryRulesCallback()
 				" network offline "
 			" } "
 			" game { "
-				" mode coop "
-				" map devtest "
+				" mode single_mission "
 			" } "
 			" options { "
 				" play commentary "
@@ -1293,8 +1284,19 @@ void MainMenu::AcceptVersusSoftLockCallback()
 	}
 }
 
+void MainMenu::OpenChapterSelect()
+{
+	vgui::Panel *pPanel = new CNB_Select_Chapter_Panel(nullptr, "Select_Chapter_Panel");
+	if (pPanel)
+	{
+		pPanel->MakePopup(true);
+		pPanel->SetVisible(true);
+		pPanel->InvalidateLayout(true, true);
+	}
+}
 
-#ifndef NO_STEAM
+
+#ifndef _X360
 CON_COMMAND_F( openserverbrowser, "Opens server browser", 0 )
 {
 	bool isSteam = IsPC() && steamapicontext->SteamFriends() && steamapicontext->SteamUtils();
@@ -1310,102 +1312,16 @@ CON_COMMAND_F( openserverbrowser, "Opens server browser", 0 )
 			pKV->SetInt( "page", atoi( args[1] ) );
 			g_VModuleLoader.PostMessageToAllModules( pKV );
 		}
-	}
-}
-#endif
 
-void MainMenu::MsgOpenCoopMode()
-{
-	GenericConfirmation *pGenericConfirmation = static_cast< GenericConfirmation* >( CBaseModPanel::GetSingleton().GetWindow( WT_GENERICCONFIRMATION ) );
-	GenericWaitScreen *pWaitScreen = static_cast< GenericWaitScreen* >( CBaseModPanel::GetSingleton().GetWindow( WT_GENERICWAITSCREEN ) );
-	if ( pWaitScreen || pGenericConfirmation )
-	{
-		// have to wait
-		PostMessage( this, new KeyValues( "MsgOpenCoopMode" ), 0.001f );
-		return;
-	}
-
-	//KeyValues *pSettings = new KeyValues( "CoopModeSelect" );		// ?
-	//KeyValues::AutoDelete autodelete_pSettings( pSettings );		// ?
-	CBaseModPanel::GetSingleton().OpenWindow( WT_COOPMODESELECT, this, true );
-
-}
-
-void MainMenu::MsgOpenSinglePlayer()
-{
-	bool bFoundSaveGame = false;
-
-	GenericConfirmation *pGenericConfirmation = static_cast< GenericConfirmation* >( CBaseModPanel::GetSingleton().GetWindow( WT_GENERICCONFIRMATION ) );
-	GenericWaitScreen *pWaitScreen = static_cast< GenericWaitScreen* >( CBaseModPanel::GetSingleton().GetWindow( WT_GENERICWAITSCREEN ) );
-	if ( pWaitScreen || pGenericConfirmation )
-	{
-		// have to wait
-		PostMessage( this, new KeyValues( "MsgOpenSinglePlayer" ), 0.001f );
-		return;
-	}
-
-	//
-	// Storage SHOULD have already been mounted
-	//
-	DWORD dwDevice = XBX_GetStorageDeviceId( XBX_GetPrimaryUserId() );
-	if ( XBX_DescribeStorageDevice( dwDevice ) )
-	{
-		// check storage
-		CUtlVector< SaveGameInfo_t > saveGameInfos;
-		bFoundSaveGame = CBaseModPanel::GetSingleton().GetSaveGameInfos( saveGameInfos, false );
-	}
-
-	if ( bFoundSaveGame || BaseModUI::CBaseModPanel::GetSingleton().GetChapterProgress() > 0 )
-	{
-		// have save game or detected progress, must let user into SP menu 
-		// send the save game detection through, avoids a redundant scan by the SP menu
-		KeyValues *pSettings = new KeyValues( "SinglePlayer" );
-		KeyValues::AutoDelete autodelete_pSettings( pSettings );
-		pSettings->SetBool( "foundsavegame", bFoundSaveGame );
-		CBaseModPanel::GetSingleton().OpenWindow( WT_SINGLEPLAYER, this, true, pSettings );
-	}
-#ifdef _GAMECONSOLE
-	else if ( XBX_GetPrimaryUserIsGuest() )
+#ifdef INFESTED_DLL
+		KeyValues *pSchemeKV = new KeyValues( "SetCustomScheme" );
+		pSchemeKV->SetString( "SchemeName", "SwarmServerBrowserScheme" );
+		g_VModuleLoader.PostMessageToAllModules( pSchemeKV );
 #else
-	else if ( !IsGameConsole() )
+		KeyValues *pSchemeKV = new KeyValues( "SetCustomScheme" );
+		pSchemeKV->SetString( "SchemeName", "SourceScheme" );
+		g_VModuleLoader.PostMessageToAllModules( pSchemeKV );
 #endif
-	{
-		// autosave notice not applicable, start the single player game immediately
-		KeyValues *pSettings = new KeyValues( "FadeOutStartGame" );
-		KeyValues::AutoDelete autodelete_pSettings( pSettings );
-		pSettings->SetString( "map", CBaseModPanel::GetSingleton().ChapterToMapName( 1 ) );
-		pSettings->SetString( "reason", "newgame" );
-		CBaseModPanel::GetSingleton().OpenWindow( WT_FADEOUTSTARTGAME, this, true, pSettings );
 	}
-	else
-	{
-		// no saves or chapter progress, start the single player game immediately after the autosave notice
-		KeyValues *pSettings = new KeyValues( "NewGame" );
-		KeyValues::AutoDelete autodelete_pSettings( pSettings );
-		pSettings->SetString( "map", CBaseModPanel::GetSingleton().ChapterToMapName( 1 ) );
-		pSettings->SetString( "reason", "newgame" );
-		CBaseModPanel::GetSingleton().OpenWindow( WT_AUTOSAVENOTICE, this, true, pSettings );
-	}
-}
-
-#if !defined( _GAMECONSOLE )
-CEG_NOINLINE void MainMenu::OnMousePressed( vgui::MouseCode code )
-{
-	BaseClass::OnMousePressed( code );
-
-	if ( m_ActiveControl )
-	{
-		m_ActiveControl->NavigateTo();
-	}
-	else
-	{
-		vgui::Panel *pFirstPanel = FindChildByName( m_szPreferredControlName );
-		if ( pFirstPanel )
-		{
-			pFirstPanel->NavigateTo();
-		}
-	}
-
-	CEG_PROTECT_VIRTUAL_FUNCTION( MainMenu_OnMousePressed );
 }
 #endif

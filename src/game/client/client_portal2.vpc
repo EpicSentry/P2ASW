@@ -14,7 +14,7 @@ $Configuration
 	$Compiler
 	{
 		$AdditionalIncludeDirectories	".\hl2;.\hl2\elements;.\portal;.\portal2;.\portal\vgui;.\portal2\gameui;.\portal2\vgui;$SRCDIR\game\shared\hl2;$SRCDIR\game\shared\multiplayer;$SRCDIR\game\shared\portal;$SRCDIR\game\shared\portal2;$BASE"
-		$PreprocessorDefinitions		"$BASE;PORTAL;PORTAL2;PORTAL2_DLL;GAMEUI_EMBEDDED;GAMEUI_EXPORTS;NO_STEAM_GAMECOORDINATOR"
+		$PreprocessorDefinitions		"$BASE;PORTAL;PORTAL2;PORTAL2_DLL;GAMEUI_EMBEDDED;GAMEUI_EXPORTS"
 		$PreprocessorDefinitions		"$BASE;USE_CEG"								[ $WIN32 && !$NO_CEG ]
 	}
 	
@@ -216,12 +216,13 @@ $Project "Client (Portal 2)"
 						"portal2\gameui\portal2\basemodframe.cpp" \
 						"portal2\gameui\portal2\basemodpanel.cpp" \
 						"portal2\gameui\portal2\gamemodes.cpp" \
-						"portal2\gameui\portal2\transitionpanel.cpp" \
 						"portal2\gameui\portal2\uiavatarimage.cpp" \
 						"portal2\gameui\portal2\uigamedata.cpp" \
 						"portal2\gameui\portal2\uigamedata_invite.cpp" \
 						"portal2\gameui\portal2\uigamedata_storage.cpp" \
 						"portal2\gameui\portal2\vachievements.cpp" \
+						"portal2\gameui\portal2\vaddonassociation.cpp" \
+						"portal2\gameui\portal2\vaddons.cpp" \
 						"portal2\gameui\portal2\vattractscreen.cpp" \
 						"portal2\gameui\portal2\vaudio.cpp" \
 						"portal2\gameui\portal2\vaudiovideo.cpp" \
@@ -251,6 +252,8 @@ $Project "Client (Portal 2)"
 						"portal2\gameui\portal2\vingamedifficultyselect.cpp" \
 						"portal2\gameui\portal2\vingamekickplayerlist.cpp" \
 						"portal2\gameui\portal2\vingamemainmenu.cpp" \
+						"portal2\gameui\portal2\vjukebox.cpp" \
+						"portal2\gameui\portal2\vkeyboard.cpp" \
 						"portal2\gameui\portal2\vkeyboardmouse.cpp" \
 						"portal2\gameui\portal2\vleaderboard.cpp" \
 						"portal2\gameui\portal2\vloadingprogress.cpp" \
@@ -268,23 +271,6 @@ $Project "Client (Portal 2)"
 						"portal2\gameui\portal2\vtransitionscreen.cpp" \
 						"portal2\gameui\portal2\vvideo.cpp" \
 						"portal2\gameui\portal2\vvoteoptions.cpp" \
-						"portal2\gameui\portal2\vmovieplayer.cpp" \
-						"portal2\gameui\portal2\vsaveloadgamedialog.cpp" \
-						"portal2\gameui\portal2\vchallengemodedialog.cpp" \
-						"portal2\gameui\portal2\vnewgamedialog.cpp" \
-						"portal2\gameui\portal2\vcoopmode.cpp" \
-						"portal2\gameui\portal2\vsingleplayer.cpp" \
-						"portal2\gameui\portal2\vstartcoopgame.cpp" \
-						"portal2\gameui\portal2\vcoopexitchoice.cpp" \
-						"portal2\gameui\portal2\voptionscloud.cpp" \
-						"portal2\gameui\portal2\vendingsplitscreen.cpp" \
-						"portal2\gameui\portal2\vadvancedvideo.cpp" \
-						"portal2\gameui\portal2\vfadeoutstartgame.cpp" \
-						"portal2\gameui\portal2\vkeybindings.cpp" \
-						"portal2\gameui\portal2\vsoundtest.cpp" \
-						"portal2\gameui\portal2\vextrasdialog.cpp" \
-						"portal2\gameui\portal2\vfadeouttoeconui.cpp" \
-						"portal2\gameui\portal2\vautosavenotice.cpp" \
 						"portal2\gameui\sys_utils.cpp" \
 						"portal2\gameui\textentrybox.cpp" \
 						"portal2\gameui\urlbutton.cpp" \

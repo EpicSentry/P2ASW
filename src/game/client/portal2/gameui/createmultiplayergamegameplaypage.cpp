@@ -5,7 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include <cbase.h>
+
 #include <stdio.h>
 #include <time.h>
 
@@ -26,14 +26,6 @@ using namespace vgui;
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
-
-#ifdef _PS3
-//!!BUG!! "PS3 doesn't support wcsicmp!"
-#ifdef _wcsicmp
-#undef _wcsicmp
-#endif
-#define _wcsicmp wcscmp
-#endif
 
 #define OPTIONS_DIR "cfg"
 #define DEFAULT_OPTIONS_FILE OPTIONS_DIR "/settings_default.scr"

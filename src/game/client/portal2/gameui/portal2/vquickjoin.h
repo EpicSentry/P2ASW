@@ -81,10 +81,10 @@ namespace BaseModUI
 		QuickJoinPanelItem( vgui::Panel* parent, const char* panelName );
 		virtual ~QuickJoinPanelItem();
 
-#ifdef _GAMECONSOLE
+#ifdef _X360
 		virtual void NavigateTo();
 		virtual void NavigateFrom();
-#endif // _GAMECONSOLE
+#endif // _X360
 
 		void SetInfo( QuickJoinPanel::QuickInfo const &qi );
 		const wchar_t *GetName() const;

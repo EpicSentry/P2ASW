@@ -3,7 +3,7 @@
 // Purpose: Tip display during level loads.
 //
 //===========================================================================//
-#include <cbase.h>
+
 #include "loadingtippanel.h"
 #include "filesystem.h"
 #include "keyvalues.h"

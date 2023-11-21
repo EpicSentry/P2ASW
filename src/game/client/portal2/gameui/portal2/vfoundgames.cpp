@@ -4,6 +4,7 @@
 //
 //=====================================================================================//
 
+#include "cbase.h"
 #include "VFoundGames.h"
 #include "VGenericPanelList.h"
 #include "EngineInterface.h"
@@ -24,17 +25,19 @@
 #include "VGenericConfirmation.h"
 #include "VGameSettings.h"
 #include "vgetlegacydata.h"
-
+#include "cdll_util.h"
+#include "nb_header_footer.h"
+#include "nb_button.h"
 #include "fmtstr.h"
 #include "smartptr.h"
+#include "missionchooser/iasw_mission_chooser.h"
+#include "missionchooser/iasw_mission_chooser_source.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 using namespace vgui;
 using namespace BaseModUI;
-
-extern ConVar ui_public_lobby_filter_status;
 
 ConVar ui_foundgames_spinner_time( "ui_foundgames_spinner_time", "1", FCVAR_DEVELOPMENTONLY );
 ConVar ui_foundgames_update_time( "ui_foundgames_update_time", "1", FCVAR_DEVELOPMENTONLY );
@@ -43,15 +46,13 @@ ConVar ui_foundgames_fake_count( "ui_foundgames_fake_count", "0", FCVAR_DEVELOPM
 
 void Demo_DisableButton( Button *pButton );
 
+const char *COM_GetModDirectory();
+
 static bool IsUserLIVEEnabled( int nUserID )
 {
 #ifdef _X360
 	return ( eXUserSigninState_SignedInToLive == XUserGetSigninState( nUserID ) );
 #endif // _X360
-
-#ifdef _PS3
-	return true;
-#endif
 
 	return false;
 }
@@ -64,10 +65,6 @@ static bool AnyUserConnectedToLIVE()
 		if ( IsUserLIVEEnabled( XBX_GetUserId( idx ) ) )
 			return true;
 	}
-#endif
-
-#ifdef _PS3
-	return true;
 #endif
 
 	return false;
@@ -88,7 +85,7 @@ bool BaseModUI::FoundGameListItem::Info::IsJoinable() const
 
 bool BaseModUI::FoundGameListItem::Info::IsDLC() const
 {
-	if ( IsGameConsole() )
+	if ( IsX360() )
 		return mbDLC;
 
 	return false;
@@ -96,7 +93,7 @@ bool BaseModUI::FoundGameListItem::Info::IsDLC() const
 
 char const * BaseModUI::FoundGameListItem::Info::IsOtherTitle() const
 {
-	if ( IsGameConsole() )
+	if ( mchOtherTitle[0] )
 		return mchOtherTitle;
 
 	return NULL;
@@ -104,28 +101,36 @@ char const * BaseModUI::FoundGameListItem::Info::IsOtherTitle() const
 
 bool BaseModUI::FoundGameListItem::Info::IsDownloadable() const
 {
-	if ( IsGameConsole() )
+	if ( IsX360() )
 		return false;
 
+#if 0
 	if ( mbInGame && mpGameDetails )
 	{
-		KeyValues *pMissionInfo = NULL;
-		KeyValues *pMapInfo = GetMapInfoRespectingAnyChapter( mpGameDetails, &pMissionInfo );
-		// char const *szWebsite = mpGameDetails->GetString( "game/missioninfo/website", NULL );
-		if ( !pMapInfo || !pMissionInfo ||
-			( *pMissionInfo->GetName() &&
-			 Q_stricmp( pMissionInfo->GetString( "version", "" ),
-						mpGameDetails->GetString( "game/missioninfo/version", "" ) ) ) )
-			// return ( szWebsite && *szWebsite );
-			return true;
+		IASW_Mission_Chooser_Source *pSource = missionchooser ? missionchooser->LocalMissionSource() : NULL;
+		if ( pSource )
+		{
+			const char *szMissionName = mpGameDetails->GetString( "game/mission", "" );
+			KeyValues *pMissionKeys = pSource->GetMissionDetails( szMissionName );
+			char const *szWebsite = mpGameDetails->GetString( "game/missioninfo/website", NULL );
+			if ( ( !pMissionKeys || Q_stricmp( pMissionKeys->GetString( "version", "" ),
+				mpGameDetails->GetString( "game/missioninfo/version", "" ) ) )
+				&& ( szWebsite && *szWebsite ) )
+				return true;
+		}
 	}
+#endif // 0
 
 	return false;
 }
 
 const char * BaseModUI::FoundGameListItem::Info::GetJoinButtonHint() const
 {
-	if ( IsDLC() || IsOtherTitle() || IsDownloadable() )
+	if ( IsOtherTitle() )
+	{
+		return "#L4D360UI_FoundGames_Join_Modded";
+	}
+	if ( IsDLC() || IsDownloadable() )
 	{
 		return "#L4D360UI_FoundGames_Join_Download";
 	}
@@ -156,7 +161,7 @@ const char * BaseModUI::FoundGameListItem::Info::GetNonJoinableShortHint() const
 	int numPlayers = mpGameDetails->GetInt( "members/numPlayers", 0 );
 
 	if ( !numSlots )
-		return "";
+		return ""; //#L4D360UI_Lobby_NotInJoinableGame";
 
 	if ( numPlayers >= numSlots )
 		return "#L4D360UI_WaitScreen_GameFull";
@@ -178,6 +183,7 @@ FoundGameListItem::FoundGameListItem( vgui::Panel *parent, const char *panelName
 	m_pLblPing = NULL;
 	m_pLblPlayerGamerTag = NULL;
 	m_pLblDifficulty = NULL;
+	m_pLblSwarmState = NULL;
 	m_pLblPlayers = NULL;
 	m_pLblNotJoinable = NULL;
 
@@ -216,25 +222,31 @@ void FoundGameListItem::SetAvatarXUID( XUID xuid )
 		{
 			SetControlVisible( "ImgAvatarBG", false );
 
+			// TODO: Show wrench icon for custom missions/campaigns
+			/*
 			char const *szCampaign = GetFullInfo().mpGameDetails->GetString( "game/campaign", "" );
-			KeyValues *pCampaignInfo = ( szCampaign && *szCampaign ) ? g_pMatchExt->GetAllMissions()->FindKey( szCampaign ) : NULL;
+			KeyValues *pCampaignInfo = ( szCampaign && *szCampaign ) ? g_pMatchExtSwarm->GetAllMissions()->FindKey( szCampaign ) : NULL;
 			if ( pCampaignInfo )
 			{
 				if ( pCampaignInfo->GetInt( "builtin" ) )
 				{
-					pnlModPic->SetImage( "icon_l4d" );
+					//pnlModPic->SetImage( "icon_l4d" );
+					pnlModPic->SetVisible( false );
 				}
 				else
 				{
 					pnlModPic->SetImage( "icon_modwrench" );
+					pnlModPic->SetVisible( true );
 				}
 			}
 			else
 			{
 				pnlModPic->SetImage( "icon_download" );
+				pnlModPic->SetVisible( true );
 			}
+			*/
 
-			pnlModPic->SetVisible( true );
+			
 			imgAvatar->SetVisible( false );
 		}
 		else if ( imgAvatar )
@@ -244,7 +256,7 @@ void FoundGameListItem::SetAvatarXUID( XUID xuid )
 				IImage *pImage = NULL;
 				
 				if ( m_FullInfo.mInfoType == FoundGameListItem::FGT_PLAYER )
-					pImage = CUIGameData::Get()->AccessAvatarImage( xuid, CUIGameData::kAvatarImageNull ); // this doesn't have proper image resource tracking! <<unused code from l4d>>
+					pImage = CUIGameData::Get()->GetAvatarImage( xuid );
 
 				if ( pImage )
 				{
@@ -316,16 +328,23 @@ void FoundGameListItem::SetGameIndex( const Info& fi )
 
 		SetGamePlayerCount( 0, 0 );
 		SetGameDifficulty( "" );
+		SetSwarmState( "" );
 	}
 	else if ( char const *szOtherTitle = fi.IsOtherTitle() )
 	{
 		if( m_pLblNotJoinable )
 		{
-			m_pLblNotJoinable->SetText( CFmtStr( "#L4D2360_NotJoinable_OtherTitle_%s", szOtherTitle ) );
+			wchar_t convertedString[64];
+			g_pVGuiLocalize->ConvertANSIToUnicode( szOtherTitle, convertedString, sizeof( convertedString ) );
+			wchar_t finalString[128];
+			g_pVGuiLocalize->ConstructString( finalString, sizeof( finalString ), g_pVGuiLocalize->Find( "#L4D360UI_Not_Joinable_Mod" ), 1, convertedString );
+
+			m_pLblNotJoinable->SetText( finalString ); 
 		}
 
 		SetGamePlayerCount( 0, 0 );
 		SetGameDifficulty( "" );
+		SetSwarmState( "" );
 	}
 	else if ( fi.IsJoinable() || fi.IsDownloadable() )
 	{
@@ -334,7 +353,7 @@ void FoundGameListItem::SetGameIndex( const Info& fi )
 
 		SetGamePlayerCount( numPlayers , numSlots );
 
-		char const *szMode = fi.mpGameDetails->GetString( "game/mode", "coop" );
+		char const *szMode = fi.mpGameDetails->GetString( "game/mode", "campaign" );
 		
 		if ( !Q_stricmp( "finale", fi.mpGameDetails->GetString( "game/state", "" ) ) )
 		{
@@ -350,8 +369,20 @@ void FoundGameListItem::SetGameIndex( const Info& fi )
 		{
 			char const *szDiff = fi.mpGameDetails->GetString( "game/difficulty", "normal" );
 			char chDiffBuffer[64];
-			Q_snprintf( chDiffBuffer, sizeof( chDiffBuffer ), "#L4D360UI_DifficultyAbb_%s_%s", szDiff, szMode );
+			Q_snprintf( chDiffBuffer, sizeof( chDiffBuffer ), "#L4D360UI_Difficulty_%s_%s", szDiff, szMode );
 			SetGameDifficulty( chDiffBuffer );
+		}
+
+		char const *szDiff = fi.mpGameDetails->GetString( "game/swarmstate", "ingame" );
+		Msg( "Adding a server to the list:\n" );
+		KeyValuesDumpAsDevMsg( fi.mpGameDetails );
+		if ( !Q_stricmp( szDiff, "ingame" ) )
+		{
+			SetSwarmState( "#L4D360UI_ingame" );
+		}
+		else
+		{
+			SetSwarmState( "#L4D360UI_briefing" );
 		}
 	}
 	else
@@ -425,6 +456,15 @@ void FoundGameListItem::SetGameDifficulty( const char *difficultyName )
 }
 
 //=============================================================================
+void FoundGameListItem::SetSwarmState( const char *szSwarmStateText )
+{
+	if( m_pLblSwarmState )
+	{
+		m_pLblSwarmState->SetText( szSwarmStateText ? szSwarmStateText : "" );
+	}
+}
+
+//=============================================================================
 void FoundGameListItem::SetGamePlayerCount( int current, int max )
 {
 	if( m_pLblPlayers )
@@ -438,6 +478,7 @@ void FoundGameListItem::SetGamePlayerCount( int current, int max )
 
 			const wchar_t *countText = NULL;
 
+			extern ConVar ui_public_lobby_filter_status;
 			if ( !Q_stricmp( ui_public_lobby_filter_status.GetString(), "lobby" ) )
 			{
 				countText = ( max == 1 ) ? 
@@ -496,6 +537,7 @@ void FoundGameListItem::DrawListItemLabel( vgui::Label* label, bool bSmallFont, 
 		label->GetPos( x, y );
 
 		HFont drawFont = ( bSmallFont ) ? ( m_hSmallTextFont ) : ( m_hTextFont );
+		HFont blurFont = ( bSmallFont ) ? ( m_hSmallTextBlurFont ) : ( m_hTextBlurFont );
 
 		int len = V_wcslen( szUnicode );
 		int textWide, textTall;
@@ -508,7 +550,7 @@ void FoundGameListItem::DrawListItemLabel( vgui::Label* label, bool bSmallFont, 
 		if ( labelWide > 0 )
 		{
 			textWide = 0;
-			HFont wideFont = drawFont;
+			HFont wideFont = bHasFocus ? blurFont : drawFont;
 			for ( int i=0;i<len;i++ )
 			{
 				textWide += surface()->GetCharacterWidth( wideFont, szUnicode[i] );
@@ -546,7 +588,6 @@ void FoundGameListItem::DrawListItemLabel( vgui::Label* label, bool bSmallFont, 
 		vgui::surface()->DrawSetTextColor( col );
 		vgui::surface()->DrawPrintText( szUnicode, len );
 
-#if 0
 		if ( bHasFocus )
 		{
 			// draw glow
@@ -556,7 +597,6 @@ void FoundGameListItem::DrawListItemLabel( vgui::Label* label, bool bSmallFont, 
 			vgui::surface()->DrawSetTextPos( x, y );
 			vgui::surface()->DrawPrintText( szUnicode, len );
 		}
-#endif
 	}
 }
 
@@ -577,7 +617,7 @@ void FoundGameListItem::PaintBackground()
 		int wide = GetWide();
 
 		// draw border lines
-		surface()->DrawSetColor( Color( 240, 0, 0, 255 ) );
+		surface()->DrawSetColor( Color( 65, 74, 96, 255 ) );
 		surface()->DrawFilledRectFade( x, y, x + 0.5f * wide, y+2, 0, 255, true );
 		surface()->DrawFilledRectFade( x + 0.5f * wide, y, x + wide, y+2, 255, 0, true );
 		surface()->DrawFilledRectFade( x, y+tall-2, x + 0.5f * wide, y+tall, 0, 255, true );
@@ -591,7 +631,7 @@ void FoundGameListItem::PaintBackground()
 
 	DrawListItemLabel( m_pLblPing, true, !IsPC() );
 
-	DrawListItemLabel( m_pLblPlayerGamerTag, false );
+	DrawListItemLabel( m_pLblPlayerGamerTag, true );
 
 	// Depending on the game info different labels get rendered in the list
 	const Info &fi = m_FullInfo;
@@ -604,6 +644,7 @@ void FoundGameListItem::PaintBackground()
 	{
 		DrawListItemLabel( m_pLblDifficulty, true );
 		DrawListItemLabel( m_pLblPlayers, true );
+		DrawListItemLabel( m_pLblSwarmState, true );
 	}
 	else
 	{
@@ -623,7 +664,7 @@ void FoundGameListItem::CmdJoinGame()
 
 		if ( char const *szOtherTitle = m_FullInfo.IsOtherTitle() )
 		{
-			szShortHint = "#L4D2360_JoinError_OtherTitle_left4dead1";	// waitscreen needs a static str ptr
+			szShortHint = "#L4D2360_JoinError_OtherTitle_Modded";	// waitscreen needs a static str ptr
 		}
 		
 		CBaseModPanel::GetSingleton().PlayUISound( UISOUND_DENY );
@@ -650,7 +691,7 @@ void FoundGameListItem::CmdJoinGame()
 //=============================================================================
 void FoundGameListItem::CmdViewGamercard()
 {
-#ifdef _GAMECONSOLE
+#ifdef _X360
 	int iUserSlot = CBaseModPanel::GetSingleton().GetLastActiveUserId();
 	int iUserId = XBX_GetUserId( iUserSlot );
 
@@ -685,12 +726,10 @@ void FoundGameListItem::CmdViewGamercard()
 		if ( xuidView )
 		{
 			CBaseModPanel::GetSingleton().PlayUISound( UISOUND_ACCEPT );
-#ifdef _X360
 			XShowGamerCardUI( iUserId, xuidView );
-#endif
 		}
 	}
-#endif // _GAMECONSOLE
+#endif // _X360
 }
 
 //=============================================================================
@@ -823,6 +862,11 @@ void FoundGameListItem::ApplySchemeSettings( IScheme *pScheme )
 	{
 		m_pLblDifficulty->SetVisible( false );
 	}
+	m_pLblSwarmState = dynamic_cast< vgui::Label * > ( FindChildByName( "LblSwarmState" ) );
+	if ( m_pLblSwarmState )
+	{
+		m_pLblSwarmState->SetVisible( false );
+	}
 	m_pLblPlayers = dynamic_cast< vgui::Label * > ( FindChildByName( "LblNumPlayers" ) );
 	if ( m_pLblPlayers )
 	{
@@ -835,9 +879,11 @@ void FoundGameListItem::ApplySchemeSettings( IScheme *pScheme )
 		m_pLblNotJoinable->SetVisible( false );
 	}
 	
-	m_hTextFont = pScheme->GetFont( "DefaultBold", true );
+	m_hTextFont = pScheme->GetFont( "Default", true );
+	m_hTextBlurFont = pScheme->GetFont( "DefaultBlur", true );
 
 	m_hSmallTextFont = pScheme->GetFont( "DefaultMedium", true );
+	m_hSmallTextBlurFont = pScheme->GetFont( "DefaultMediumBlur", true );
 
 	// Parse our own info again now that we have controls
 	SetGameIndex( m_FullInfo );
@@ -873,7 +919,7 @@ void FoundGameListItem::OnCursorEntered()
 
 void FoundGameListItem::NavigateTo( void )
 {
-#ifdef _GAMECONSOLE
+#ifdef _X360
 	m_pListCtrlr->SelectPanelItemByPanel( this );
 #else
 	SetHasMouseover( true );
@@ -886,13 +932,13 @@ void FoundGameListItem::NavigateFrom( void )
 {
 	SetHasMouseover( false );
 	BaseClass::NavigateFrom();
-#ifdef _GAMECONSOLE
+#ifdef _X360
 	OnClose();
 #endif
 }
 
 
-#ifdef _GAMECONSOLE
+#ifdef _X360
 void FoundGames::NavigateTo()
 {
 	BaseClass::NavigateTo();
@@ -917,13 +963,23 @@ FoundGames::FoundGames( Panel *parent, const char *panelName ):
 	SetProportional( true );
 	SetPaintBackgroundEnabled( true );
 
+	m_pHeaderFooter = new CNB_Header_Footer( this, "HeaderFooter" );
+	m_pHeaderFooter->SetTitle( "" );
+	m_pHeaderFooter->SetHeaderEnabled( false );
+	m_pHeaderFooter->SetFooterEnabled( true );
+	m_pHeaderFooter->SetGradientBarEnabled( true );
+	m_pHeaderFooter->SetGradientBarPos( 80, 315 );
+
+	m_pTitle = new vgui::Label( this, "Title", "" );
+
+
 	m_GplGames = new GenericPanelList( this, "GplGames", GenericPanelList::ISM_PERITEM );
-	m_GplGames->SetPaintBackgroundEnabled( false );
+	m_GplGames->SetPaintBackgroundEnabled( true );
 
 	m_LastEngineSpinnerTime = 0.0f;
 	m_CurrentSpinnerValue = 0;
 
-	SetFooterEnabled( true );
+	SetLowerGarnishEnabled( true );
 
 	OnItemSelected( NULL );
 
@@ -959,7 +1015,12 @@ void FoundGames::Activate()
 	if ( BaseModHybridButton *pWndCreateGame = dynamic_cast< BaseModHybridButton * >( FindChildByName( "DrpCreateGame" ) ) )
 	{
 		pWndCreateGame->SetVisible( CanCreateGame() );
-		pWndCreateGame->SetText( CFmtStr( "#L4D360UI_FoudGames_CreateNew_%s", m_pDataSettings->GetString( "game/mode", "" ) ) );
+		pWndCreateGame->SetText( CFmtStr( "#L4D360UI_FoudGames_CreateNew_%s", "campaign" ) );
+	}
+	if ( CNB_Button *pWndCreateGame = dynamic_cast< CNB_Button * >( FindChildByName( "BtnCreateNewGame" ) ) )
+	{
+		pWndCreateGame->SetVisible( CanCreateGame() );
+		pWndCreateGame->SetText( CFmtStr( "#L4D360UI_FoudGames_CreateNew_%s", "campaign" ) );
 	}
 
 	if ( Panel *pLabelX = FindChildByName( "LblPressX" ) )
@@ -990,7 +1051,8 @@ void FoundGames::OnCommand( const char *command )
 			" } "
 			" game { "
 				" mode = "
-				" map mp_coop_lobby_2 "
+				" campaign = "
+				" mission = "
 			" } "
 			" options { "
 				" action create "
@@ -998,8 +1060,10 @@ void FoundGames::OnCommand( const char *command )
 			);
 		KeyValues::AutoDelete autodelete( pSettings );
 
-		char const *szGameMode = m_pDataSettings->GetString( "game/mode", "coop" );
+		char const *szGameMode = "campaign";
 		pSettings->SetString( "game/mode", szGameMode );
+		pSettings->SetString( "game/campaign", "jacob" );
+		pSettings->SetString( "game/mission", "asi-jac1-landingbay_01" );
 
 		if ( !CUIGameData::Get()->SignedInToLive() )
 		{
@@ -1020,7 +1084,8 @@ void FoundGames::OnCommand( const char *command )
 		pSettings->SetString( "game/difficulty", GameModeGetDefaultDifficulty( szGameMode ) );
 
 		CBaseModPanel::GetSingleton().PlayUISound( UISOUND_ACCEPT );
-		g_pMatchFramework->CreateSession( pSettings );
+		CBaseModPanel::GetSingleton().CloseAllWindows();
+		CBaseModPanel::GetSingleton().OpenWindow( WT_GAMESETTINGS, NULL, true, pSettings );
 	}
 	else if ( V_strcmp( command, "JoinSelected" ) == 0 )
 	{
@@ -1173,16 +1238,34 @@ void FoundGames::OnKeyCodePressed( KeyCode code )
 
 bool FoundGames::CanCreateGame()
 {
-	char const *szGameMode = m_pDataSettings->GetString( "game/mode", NULL );
+	//char const *szGameMode = m_pDataSettings->GetString( "game/mode", NULL );
 	bool bGroupServerList = !Q_stricmp( "groupserver", m_pDataSettings->GetString( "options/action", "" ) );
 
-	return ( szGameMode && *szGameMode && !bGroupServerList );
+	//return ( szGameMode && *szGameMode && !bGroupServerList );
+	return !bGroupServerList;
+}
+
+void FoundGames::UpdateTitle()
+{
+	if ( const char *gameMode = m_pDataSettings->GetString( "game/mode", NULL ) )
+	{
+		gameMode = NoTeamGameMode( gameMode );
+		m_pTitle->SetText( CFmtStr( "#L4D360UI_FoundFriendGames_Title_%s", gameMode ) );
+		//BaseClass::DrawDialogBackground( CFmtStr( "#L4D360UI_FoundFriendGames_Title_%s", gameMode ), NULL, "#L4D360UI_FoundGames_Description", NULL, NULL );
+	}
+	else
+	{
+		m_pTitle->SetText( CFmtStr( "#L4D360UI_FoundGames_AllGames" ) );
+		//BaseClass::DrawDialogBackground( "#L4D360UI_FoundGames_AllGames", NULL, "#L4D360UI_FoundGames_Description", NULL, NULL );
+	}
 }
 
 //=============================================================================
 void FoundGames::OnThink()
 {
 	BaseClass::OnThink();
+
+	UpdateTitle();
 
 	if ( m_flScheduledUpdateGameDetails && m_flScheduledUpdateGameDetails + ui_foundgames_update_time.GetFloat() < Plat_FloatTime() )
 	{
@@ -1248,6 +1331,7 @@ void FoundGames::OnThink()
 //=============================================================================
 void FoundGames::PaintBackground()
 {
+	/*
 	if ( const char *gameMode = m_pDataSettings->GetString( "game/mode", NULL ) )
 	{
 		gameMode = NoTeamGameMode( gameMode );
@@ -1257,6 +1341,7 @@ void FoundGames::PaintBackground()
 	{
 		BaseClass::DrawDialogBackground( "#L4D360UI_FoundGames_AllGames", NULL, "#L4D360UI_FoundGames_Description", NULL, NULL );
 	}
+	*/
 }
 
 //=============================================================================
@@ -1270,7 +1355,7 @@ void FoundGames::LoadLayout()
 
 void FoundGames::UpdateFooterButtons()
 {
-#ifdef _GAMECONSOLE
+#ifdef _X360
 	CBaseModFooterPanel *footer = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
 	if( footer )
 	{
@@ -1294,7 +1379,7 @@ void FoundGames::UpdateFooterButtons()
 			}
 		}
 
-		footer->SetButtons( FB_ABUTTON | FB_BBUTTON | ( bShouldShowGamerCard ? FB_YBUTTON : FB_NONE ) );
+		footer->SetButtons( FB_ABUTTON | FB_BBUTTON | ( bShouldShowGamerCard ? FB_YBUTTON : FB_NONE ), FF_ABY_ONLY, false );
 		footer->SetButtonText( FB_BBUTTON, bNotSelectingListItem ? "#L4D360UI_Cancel" : "#L4D360UI_Back" );
 		footer->SetButtonText( FB_ABUTTON, "#L4D360UI_Select" );
 		footer->SetButtonText( FB_YBUTTON, "#L4D360UI_ViewGamerCard" );
@@ -1388,7 +1473,7 @@ bool FoundGames::IsADuplicateServer( FoundGameListItem *item, FoundGameListItem:
 {
 	FoundGameListItem::Info const &ii = item->GetFullInfo();
 
-	if ( IsGameConsole() )
+	if ( IsX360() )
 	{
 		if( ii.mFriendXUID == fi.mFriendXUID ||
 			ii.mpGameDetails->GetUint64( "player/xuidOnline", 0ull ) == fi.mFriendXUID ||
@@ -1420,7 +1505,7 @@ void FoundGames::SetDetailsPanelVisible( bool bIsVisible )
 	SetControlVisible( "LblNumPlayersText", bIsVisible );
 	SetControlVisible( "LblViewingGames", bIsVisible );
 	SetControlVisible( "LblGameStatus", bIsVisible );
-	if ( IsGameConsole() )
+	if ( IsX360() )
 	{
 		SetControlVisible( "LblGameStatus2", bIsVisible );
 	}
@@ -1600,14 +1685,11 @@ void FoundGames::AddServersToList()
 
 		// On X360 check against our registered missions
 		KeyValues *pMissionMapInfo = NULL; pMissionMapInfo;
-		uint64 uiOtherTitleID = pGameDetails->GetUint64( "titleid" ); uiOtherTitleID;
-		if ( IsX360() && uiOtherTitleID == 0x45410830 )
+
+		const char *szModDir = pGameDetails->GetString( "game/dir", "swarm" );
+		if ( Q_stricmp( szModDir, COM_GetModDirectory() ) )
 		{
-			fi.mchOtherTitle = "left4dead1";
-		}
-		else if ( IsGameConsole() && !GetMapInfoRespectingAnyChapter( pGameDetails, &pMissionMapInfo ) )
-		{
-			fi.mbDLC = true;
+			Q_snprintf( fi.mchOtherTitle, sizeof( fi.mchOtherTitle ), szModDir );
 		}
 
 		//
@@ -1618,13 +1700,20 @@ void FoundGames::AddServersToList()
 		{
 			fi.mIsJoinable = false;
 		}
-		else if ( fi.mbInGame && numSlots > 0 && !fi.IsDownloadable() )
+		else if ( fi.mbInGame && numSlots > 0 )
 		{
-			char const *szHint = fi.GetNonJoinableShortHint();
-			if ( !*szHint )
+			if ( !fi.IsDownloadable() )
 			{
-				fi.mIsJoinable = true;
-				fi.mpfnJoinGame = HandleJoinPlayerSession;
+				char const *szHint = fi.GetNonJoinableShortHint();
+				if ( !*szHint )
+				{
+					fi.mIsJoinable = true;
+					fi.mpfnJoinGame = HandleJoinPlayerSession;
+				}
+			}
+			else
+			{
+				fi.mIsJoinable = false;
 			}
 		}
 		else
@@ -1649,9 +1738,8 @@ void FoundGames::AddFakeServersToList()
 			" access public "
 		" } "
 		" game { "
-			" mode coop "
-			" campaign L4D2C1 "
-			" chapter #int#1 "
+			" mode campaign "
+			" campaign jacob "
 			" difficulty normal "
 			" state lobby "
 		" } "
@@ -1681,10 +1769,9 @@ void FoundGames::AddFakeServersToList()
 		fi.mpGameDetails = pDetails;
 
 		fi.mpGameDetails->SetInt( "members/numPlayers", 1 + n%3 );
-		fi.mpGameDetails->SetString( "game/campaign", CFmtStr( "L4D2C%d", 1 + n%4 ) );
-		fi.mpGameDetails->SetInt( "game/chapter", 1 + n%3 );
+		fi.mpGameDetails->SetString( "game/mission", "asi-jac2-deima" );
 
-		char const *szGameModes[] = { "coop", "versus" };
+		char const *szGameModes[] = { "campaign", "single_mission" };
 		fi.mpGameDetails->SetString( "game/mode", szGameModes[ n % ARRAYSIZE( szGameModes ) ] );
 
 		AddGameFromDetails( fi );
@@ -1749,13 +1836,14 @@ void FoundGames::UpdateGameDetails()
 		{
 			const FoundGameListItem::Info &fullInfo = item->GetFullInfo();
 			
-			char const *szListPreferredMode = m_pDataSettings->GetString( "game/mode", "coop" );
+			char const *szListPreferredMode = m_pDataSettings->GetString( "game/mode", "campaign" );
 			szListPreferredMode = NoTeamGameMode( szListPreferredMode );
 			
 			char const *szGameItemMode = fullInfo.mpGameDetails->GetString( "game/mode", "" );
 			szGameItemMode = NoTeamGameMode( szGameItemMode );
 
-			foundDesiredGame = fullInfo.mbInGame && !Q_stricmp( szListPreferredMode, szGameItemMode );
+			// just need a game in progress.  Not filtering by game mode yet.
+			foundDesiredGame = fullInfo.mbInGame;	// && !Q_stricmp( szListPreferredMode, szGameItemMode );
 		}
 		SetFoundDesiredText( foundDesiredGame );
 	}
@@ -1779,7 +1867,7 @@ void FoundGames::OnItemSelected( const char* panelName )
 	bool bChangedSelection = ( gameListItem != m_pPreviousSelectedItem );
 	m_pPreviousSelectedItem = gameListItem;
 
-#if !defined( _GAMECONSOLE )
+#if !defined( _X360 )
 
 	// Set active state
 	for ( int i = 0; i < m_GplGames->GetPanelItemCount(); /* */ )
@@ -1799,12 +1887,12 @@ void FoundGames::OnItemSelected( const char* panelName )
 	
 	const char* chapterName = "#L4D360UI_LevelName_Unknown";
 	
-	char chDifficultyBuffer[64] = {0};
+//	char chDifficultyBuffer[64] = {0};
 	const char* currentDifficulty = "#L4D360UI_Unknown";
 	
 	const char* currentSurvivorAccess = "#L4D360UI_Unknown";
 	char chImageBuffer[64] = {0};
-	const char* chapterImage = NULL;
+	const char* chapterImage = "swarm/MissionPics/UnknownMissionPic";
 
 	const char *szDownloadAuthor = NULL;
 	const char *szDownloadWebsite = "";
@@ -1819,13 +1907,13 @@ void FoundGames::OnItemSelected( const char* panelName )
 	vgui::Label *lblChapter = dynamic_cast< vgui::Label* >( FindChildByName( "LblChapter" ) );
 	vgui::Label *lblGameStatus = dynamic_cast< vgui::Label* >( FindChildByName( "LblGameStatus" ) );
 	vgui::Label *lblGameStatus2 = NULL;
-	if ( IsGameConsole() )
+	if ( IsX360() )
 	{
 		lblGameStatus2 = dynamic_cast< vgui::Label* >( FindChildByName( "LblGameStatus2" ) );
 	}
 	vgui::Label* lblGameDifficulty = dynamic_cast< vgui::Label* >( FindChildByName( "LblGameDifficulty" ) );
 	
-	BaseModUI::BaseModHybridButton *joinButton = dynamic_cast< BaseModUI::BaseModHybridButton* >( FindChildByName( "BtnJoinSelected" ) );
+	CNB_Button *joinButton = dynamic_cast< CNB_Button* >( FindChildByName( "BtnJoinSelected" ) );
 	BaseModUI::BaseModHybridButton *downloadButton = dynamic_cast< BaseModUI::BaseModHybridButton* >( FindChildByName( "BtnDownloadSelected" ) );
 	vgui::Label *downloadVersionLabel = dynamic_cast< vgui::Label* >( FindChildByName( "LblNewVersion" ) );
 	vgui::ImagePanel *imgAvatar = dynamic_cast< vgui::ImagePanel* >( FindChildByName( "ImgSelectedAvatar" ) );																						   
@@ -1892,7 +1980,7 @@ void FoundGames::OnItemSelected( const char* panelName )
 				IImage *pImage = NULL;
 
 				if ( fi.mInfoType == FoundGameListItem::FGT_PLAYER )
-					pImage = CUIGameData::Get()->AccessAvatarImage( fi.mFriendXUID, CUIGameData::kAvatarImageNull ); // this doesn't have proper image resource tracking! <<unused code from l4d>>
+					pImage = CUIGameData::Get()->GetAvatarImage( fi.mFriendXUID );
 
 				if ( pImage )
 				{
@@ -1917,7 +2005,8 @@ void FoundGames::OnItemSelected( const char* panelName )
 		{
 			currentDifficulty = NULL;
 			currentSurvivorAccess = NULL;
-			chapterImage = "maps/addon";
+			// TODO:
+			//chapterImage = "maps/addon";
 			if ( lblGameStatus )
 				lblGameStatus->SetText( "" );
 		}
@@ -1928,42 +2017,43 @@ void FoundGames::OnItemSelected( const char* panelName )
 
 			currentDifficulty = NULL;
 			currentSurvivorAccess = NULL;
-			Q_snprintf( chImageBuffer, sizeof( chImageBuffer ), "maps/%s", szOtherTitle );
+			Q_snprintf( chImageBuffer, sizeof( chImageBuffer ), "swarm/MissionPics/addonMissionPic" );
 			chapterImage = chImageBuffer;
 			if ( lblGameStatus )
 				lblGameStatus->SetText( "" );
 		}
 		else if( fi.mbInGame )
 		{
-			KeyValues *pInfoMission = NULL;
-			KeyValues *pInfoChapter = GetMapInfoRespectingAnyChapter( fi.mpGameDetails, &pInfoMission );
-
-			if ( pInfoChapter && pInfoMission )
+#if 0
+			chapterName = "";
+			IASW_Mission_Chooser_Source *pSource = missionchooser ? missionchooser->LocalMissionSource() : NULL;
+			const char *szDetailsMissionName = fi.mpGameDetails->GetString( "game/mission", "" );
+			KeyValues *pMissionKeys = NULL;
+			if ( pSource && szDetailsMissionName && szDetailsMissionName[0] )
 			{
-				chapterName = pInfoChapter->GetString( "displayname" );
-				chapterImage = pInfoChapter->GetString( "image" );
-				campaignName = pInfoMission->GetString( "displaytitle" );
-				bBuiltIn = pInfoMission->GetInt( "builtin" );
-				szDownloadAuthor = pInfoMission->GetString( "author", szDownloadAuthor );
-				szDownloadWebsite = pInfoMission->GetString( "website", szDownloadWebsite );
+				pMissionKeys = pSource->GetMissionDetails( szDetailsMissionName );
+			}
+
+			if ( pMissionKeys )
+			{
+				if ( pMissionKeys->GetString( "image", NULL ) )
+				{
+					chapterImage = pMissionKeys->GetString( "image" );
+				}
+				campaignName = pMissionKeys->GetString( "displaytitle" );
+				szDownloadAuthor = pMissionKeys->GetString( "author", szDownloadAuthor );
+				szDownloadWebsite = pMissionKeys->GetString( "website", szDownloadWebsite );
 			}
 			else
 			{
-				chapterName = "";
-				chapterImage = "maps/unknown";
 				campaignName = fi.mpGameDetails->GetString( "game/missioninfo/displaytitle", "#L4D360UI_CampaignName_Unknown" );
 				bDownloadableCampaign = true;
-			}
-
-			if ( fi.mpGameDetails->GetInt( "UI/nochapter" ) )
-			{
-				chapterName = "";
-				chapterImage = pInfoMission->GetString( "image" );
 			}
 
 			campaignName = fi.mpGameDetails->GetString( "game/missioninfo/displaytitle", campaignName );
 			szDownloadAuthor = fi.mpGameDetails->GetString( "game/missioninfo/author", szDownloadAuthor );
 			szDownloadWebsite = fi.mpGameDetails->GetString( "game/missioninfo/website", szDownloadWebsite );
+			bBuiltIn = fi.mpGameDetails->GetInt( "game/missioninfo/builtin", 0 );
 
 			if ( bBuiltIn )
 				szDownloadWebsite = "";	// no website access for builtin campaigns
@@ -2034,7 +2124,7 @@ void FoundGames::OnItemSelected( const char* panelName )
 					g_pVGuiLocalize->ConstructString( gamesString, sizeof( gamesString ), countText, 1, numInGame );
 				}
 
-				if ( IsGameConsole() )
+				if ( IsX360() )
 				{
 					// Split games and lobbies into two lines
 					lblGameStatus->SetText( lobbyString );
@@ -2063,6 +2153,7 @@ void FoundGames::OnItemSelected( const char* panelName )
 						lblGameStatus2->SetText( "" );
 					}
 				}
+
 			}
 			else if( lblGameStatus )
 			{
@@ -2078,15 +2169,16 @@ void FoundGames::OnItemSelected( const char* panelName )
 					szGameState );
 				lblGameStatus->SetText( chStatusTextBuffer );
 			}
+#endif // 0
 		}
-		
 		if ( !fi.mbInGame || ( eDetails == DETAILS_PRESENCE ) )
 		{
 			// Friend not in game or in a private game, resort to presence only display
 			eDetails = DETAILS_PRESENCE;
 			
-			if ( !fi.IsOtherTitle() )
-				chapterImage = "maps/any";
+			// TODO?
+			//if ( !fi.IsOtherTitle() )
+				//chapterImage = "maps/any";
 
 			currentDifficulty = NULL;
 			currentSurvivorAccess = NULL;
@@ -2130,6 +2222,7 @@ void FoundGames::OnItemSelected( const char* panelName )
 			{
 				downloadButton->SetVisible( true );
 				downloadButton->SetEnabled( !!*szDownloadWebsite );
+				//downloadButton->SetHelpText( fi.GetJoinButtonHint(), true );
 			}
 			if ( downloadVersionLabel )
 			{
@@ -2149,14 +2242,15 @@ void FoundGames::OnItemSelected( const char* panelName )
 
 			bool bGameJoinable = fi.IsJoinable();
 			if ( !playerCountText[0] )
-				bGameJoinable = false;	// single player games or offline coop
+				bGameJoinable = false;	// single player games or offline
 
 			joinButton->SetVisible( true );
 			joinButton->SetEnabled( bGameJoinable );
+			//joinButton->SetHelpText( fi.GetJoinButtonHint(), bGameJoinable );
 
 			SetControlVisible( "IconForwardArrow", bGameJoinable );
 		}
-		else if ( !IsGameConsole() )
+		else if ( !IsX360() )
 		{
 			eDetails = DETAILS_NONE;
 
@@ -2224,6 +2318,13 @@ void FoundGames::OnItemSelected( const char* panelName )
 		
 		lblAuthor->SetText( finalString );
 		lblAuthor->SetVisible( finalString[0] != 0 );
+		
+
+		//lblAuthor->SetText( "test" );
+		//lblAuthor->SetFgColor( Color( 255, 255, 255, 255 ) );
+		//lblAuthor->SetVisible( true );
+
+		//Msg( "author zpos = %d\n", lblAuthor->GetZPos() );
 	}
 
 	BaseModHybridButton *btnWebsite = dynamic_cast< BaseModHybridButton* >( FindChildByName( "BtnWebsite" ) );
@@ -2297,7 +2398,7 @@ void FoundGames::OnItemSelected( const char* panelName )
 		eDetails = DETAILS_NONE;
 	}
 
-#ifndef _GAMECONSOLE
+#ifndef _X360
 	// Are we on the "Play Online" menus?
 	if ( CBaseModPanel::GetSingleton().GetWindow( WT_FOUNDPUBLICGAMES ) )
 	{

@@ -1,9 +1,9 @@
-//========= Copyright (c) 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
 //=============================================================================//
-#include <cbase.h>
+
 #include <stdio.h>
 
 #include "VGuiSystemModuleLoader.h"
@@ -74,7 +74,7 @@ bool CVGuiSystemModuleLoader::IsPlatformReady()
 //-----------------------------------------------------------------------------
 bool CVGuiSystemModuleLoader::InitializeAllModules(CreateInterfaceFn *factorylist, int factorycount)
 {
-	if ( IsGameConsole() )
+	if ( IsX360() )
 	{
 		// not valid for 360
 		return false;
@@ -125,7 +125,7 @@ bool CVGuiSystemModuleLoader::InitializeAllModules(CreateInterfaceFn *factorylis
 //-----------------------------------------------------------------------------
 bool CVGuiSystemModuleLoader::LoadPlatformModules(CreateInterfaceFn *factorylist, int factorycount, bool useSteamModules)
 {
-	if ( IsGameConsole() )
+	if ( IsX360() )
 	{
 		// not valid for 360
 		return false;
@@ -156,21 +156,8 @@ bool CVGuiSystemModuleLoader::LoadPlatformModules(CreateInterfaceFn *factorylist
 			continue;
 
 		// get copy out of steam cache
-		const char *dllPath = NULL;
-		if ( IsOSX() )
-		{
-			dllPath = it->GetString("dll_osx");
-		}
-		else if ( IsLinux() )
-		{
-			dllPath = it->GetString("dll_linux");
-		}
-		else 
-		{
-			dllPath = it->GetString("dll");
-		}
-		
-		
+		const char *dllPath = it->GetString("dll");
+
 		// load the module (LoadModule calls GetLocalCopy() under steam)
 		CSysModule *mod = g_pFullFileSystem->LoadModule(dllPath, "EXECUTABLE_PATH");
 		if (!mod)
@@ -205,7 +192,7 @@ bool CVGuiSystemModuleLoader::LoadPlatformModules(CreateInterfaceFn *factorylist
 //-----------------------------------------------------------------------------
 void CVGuiSystemModuleLoader::ShutdownPlatformModules()
 {
-	if ( IsGameConsole() )
+	if ( IsX360() )
 	{
 		// not valid for 360
 		return;

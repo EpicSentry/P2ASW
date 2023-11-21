@@ -4,7 +4,7 @@
 //
 //===========================================================================//
 
-#include <cbase.h>
+
 #include "OptionsSubKeyboard.h"
 #include "EngineInterface.h"
 #include "VControlsListPanel.h"
@@ -13,6 +13,7 @@
 #include "vgui_controls/Label.h"
 #include "vgui_controls/ListPanel.h"
 #include "vgui_controls/QueryBox.h"
+#include "vgui_controls/ScrollBar.h"
 
 #include "vgui/Cursor.h"
 #include "vgui/IVGui.h"
@@ -41,14 +42,17 @@ using namespace vgui;
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-COptionsSubKeyboard::COptionsSubKeyboard(vgui::Panel *parent) : PropertyPage(parent, NULL)
+COptionsSubKeyboard::COptionsSubKeyboard(vgui::Panel *parent) : EditablePanel(parent, "OptionsSubKeyboard" )
 {
+	vgui::HScheme scheme = vgui::scheme()->LoadSchemeFromFile("resource/SwarmFrameScheme.res", "SwarmFrameScheme");
+	SetScheme(scheme);
+
 	Q_memset( m_Bindings, 0, sizeof( m_Bindings ));
 
 	m_nSplitScreenUser = 0;
 
 	// For joystick buttons, controls which user are binding/unbinding
-	if ( !IsGameConsole() )
+	if ( !IsX360() )
 	{
 		//HACK HACK:  Probably the entire gameui needs to have a splitscrene context for which player the settings apply to, but this is only
 		// on the PC...
@@ -78,6 +82,7 @@ COptionsSubKeyboard::COptionsSubKeyboard(vgui::Panel *parent) : PropertyPage(par
 
 	m_pSetBindingButton->SetEnabled(false);
 	m_pClearBindingButton->SetEnabled(false);
+	SetPaintBackgroundEnabled( false );
 }
 
 //-----------------------------------------------------------------------------
@@ -107,6 +112,9 @@ void COptionsSubKeyboard::OnResetData()
 void COptionsSubKeyboard::OnApplyChanges()
 {
 	ApplyAllBindings();
+
+	CGameUIConVarRef con_enable( "con_enable" );
+	con_enable.SetValue( GetControlInt( "ConsoleCheck", 0 ) );
 }
 
 //-----------------------------------------------------------------------------
@@ -116,6 +124,7 @@ void COptionsSubKeyboard::CreateKeyBindingList()
 {
 	// Create the control
 	m_pKeyBindList = new VControlsListPanel(this, "listpanel_keybindlist");
+	m_pKeyBindList->GetScrollBar()->UseImages( "scroll_up", "scroll_down", "scroll_line", "scroll_box" );
 }
 
 //-----------------------------------------------------------------------------
@@ -430,6 +439,12 @@ void COptionsSubKeyboard::FillInCurrentBindings( void )
 		bJoystick = var.GetBool();
 	}
 
+	CGameUIConVarRef con_enable( "con_enable" );
+	if ( con_enable.IsValid() )
+	{
+		SetControlInt("ConsoleCheck", con_enable.GetInt() ? 1 : 0);
+	}
+
 	for ( int i = 0; i < BUTTON_CODE_LAST; i++ )
 	{
 		ButtonCode_t bc = ( ButtonCode_t )i;
@@ -600,10 +615,13 @@ void COptionsSubKeyboard::FillInDefaultBindings( void )
 	// L4D: also unbind other keys
 	engine->ClientCmd_Unrestricted( "unbindall\n" );
 
-	int size = g_pFullFileSystem->Size(fh);
+	int size = g_pFullFileSystem->Size(fh) + 1;
 	CUtlBuffer buf( 0, size, CUtlBuffer::TEXT_BUFFER );
 	g_pFullFileSystem->Read( buf.Base(), size, fh );
 	g_pFullFileSystem->Close(fh);
+
+	// NULL terminate!
+	((char*)buf.Base())[ size - 1 ] = '\0';
 
 	// Clear out all current bindings
 	ClearBindItems();
@@ -755,6 +773,8 @@ void COptionsSubKeyboard::Finish( ButtonCode_t code )
 void COptionsSubKeyboard::OnThink()
 {
 	BaseClass::OnThink();
+
+	m_pKeyBindList->GetScrollBar()->UseImages( "scroll_up", "scroll_down", "scroll_line", "scroll_box" );
 
 	if ( m_pKeyBindList->IsCapturing() )
 	{

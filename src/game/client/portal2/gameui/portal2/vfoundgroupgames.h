@@ -27,6 +27,8 @@ namespace BaseModUI {
 	
 		virtual void PaintBackground();
 		virtual void OnEvent( KeyValues *pEvent );
+
+		virtual bool CanCreateGame() { return false; }
 		
 	protected:
 

@@ -44,6 +44,8 @@ public:
 	typedef void (*Callback_t)( DropDownMenu *pDropDownMenu, FlyoutMenu *pFlyoutMenu );
 	void SetOpenCallback( Callback_t callBack );
 
+	BaseModHybridButton	*GetButton() { return m_pButton; }
+
 protected:
 	virtual void ApplySettings( KeyValues* inResourceData );
 	virtual void OnKeyCodePressed( vgui::KeyCode code );
@@ -51,11 +53,10 @@ protected:
 
 	BaseModHybridButton	*m_pButton;
 	vgui::Panel			*m_pnlBackground;
-	FlyoutMenu			*m_currentFlyout;
+	vgui::DHANDLE<FlyoutMenu>			m_hCurrentFlyout;
 
 	char m_curSelText[ MAX_PATH ];
 	bool m_SelectedTextEnabled;
-	bool m_bNoBlindNavigation;
 
 	Callback_t			m_openCallback;
 };

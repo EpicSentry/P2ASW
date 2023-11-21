@@ -5,7 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include <cbase.h>
+
 #include "LoadingDialog.h"
 #include "EngineInterface.h"
 #include "igameuifuncs.h"
@@ -511,7 +511,7 @@ bool CLoadingDialog::SetProgressPoint( float fraction )
 			m_flProgressFraction = fraction;
 			return true;
 		}
-		return IsGameConsole();
+		return IsX360();
 	}
 
 	if ( !m_bShowingVACInfo && gameuifuncs->IsConnectedToVACSecureServer() )
@@ -522,7 +522,7 @@ bool CLoadingDialog::SetProgressPoint( float fraction )
 	int nOldDrawnSegments = m_pProgress->GetDrawnSegmentCount();
 	m_pProgress->SetProgress( fraction );
 	int nNewDrawSegments = m_pProgress->GetDrawnSegmentCount();
-	return (nOldDrawnSegments != nNewDrawSegments) || IsGameConsole();
+	return (nOldDrawnSegments != nNewDrawSegments) || IsX360();
 }
 
 //-----------------------------------------------------------------------------

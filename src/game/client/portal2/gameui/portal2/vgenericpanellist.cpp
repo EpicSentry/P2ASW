@@ -60,7 +60,7 @@ m_ItemSelectionModeMask( selectionModeMask ),
 m_LastItemAdded( 0 )
 {
 	m_SchemeBgColorName[0] = '\0';
-	m_CurrentSelectedItem = NULL;
+	m_CurrentSelectedItem = 0;
 	m_PanelItemBorder = vgui::scheme()->GetProportionalScaledValueEx( GetScheme(), 4 );
 	m_bShowScrollProgress = false;
 
@@ -69,6 +69,7 @@ m_LastItemAdded( 0 )
 	m_ScrVerticalScroll = new ScrollBar( this, "ScrVerticalScroll", true );
 	m_ScrVerticalScroll->AddActionSignalTarget(this);
 	m_ScrVerticalScroll->SetVisible( false );
+	m_ScrVerticalScroll->UseImages( "scroll_up", "scroll_down", "scroll_line", "scroll_box" );
 
 	m_LblDownArrow = new Label( this, "LblDownArrow", "#GameUI_Icons_DOWN_ARROW" );
 	m_LblUpArrow = new Label( this, "LblUpArrow", "#GameUI_Icons_UP_ARROW" );
@@ -95,8 +96,6 @@ GenericPanelList::~GenericPanelList()
 			}
 		}
 	}
-
-	m_CurrentSelectedItem = NULL;
 }
 
 
@@ -114,7 +113,7 @@ void GenericPanelList::OnKeyCodePressed( KeyCode code )
 		if( !s_NavLock && ( m_ItemSelectionModeMask & GenericPanelList::ISM_PERITEM ) )
 		{
 			s_NavLock = 1;
-			// CBaseModPanel::GetSingleton().PlayUISound( UISOUND_FOCUS );
+			CBaseModPanel::GetSingleton().PlayUISound( UISOUND_FOCUS );
 			if( !m_CurrentSelectedItem && m_PanelItems.Count() > 0 )
 			{
 				itemSelected = SelectPanelItem( 0, GenericPanelList::SD_DOWN );
@@ -124,20 +123,20 @@ void GenericPanelList::OnKeyCodePressed( KeyCode code )
 				// if we are at the bottom of the list, navigate to the next control
 				if( m_CurrentSelectedItem == m_PanelItems[m_PanelItems.Count() - 1] )
 				{
-#ifdef _GAMECONSOLE
+#ifdef _X360
 					if( GetNavDown() != 0 )
 					{
 						BaseClass::OnKeyCodePressed( code );
 					}
 					else if ( m_bWrap )
-#endif // _GAMECONSOLE
+#endif // _X360
 					{
 						SelectPanelItem( 0, GenericPanelList::SD_DOWN );
 					}
 				}
 				else // otherwise navigate to the next item in the list
 				{
-					unsigned short index = 0;
+					unsigned short index;
 					GetPanelItemIndex( m_CurrentSelectedItem, index );
 					itemSelected = SelectPanelItem( index + 1, GenericPanelList::SD_DOWN );
 				}
@@ -162,7 +161,7 @@ void GenericPanelList::OnKeyCodePressed( KeyCode code )
 		if( !s_NavLock && ( m_ItemSelectionModeMask & GenericPanelList::ISM_PERITEM ) )
 		{
 			s_NavLock = 1;
-			// CBaseModPanel::GetSingleton().PlayUISound( UISOUND_FOCUS );
+			CBaseModPanel::GetSingleton().PlayUISound( UISOUND_FOCUS );
 			if( !m_CurrentSelectedItem && m_PanelItems.Count() > 0 )
 			{
 				itemSelected = SelectPanelItem( m_PanelItems.Count() - 1, GenericPanelList::SD_UP );
@@ -172,20 +171,20 @@ void GenericPanelList::OnKeyCodePressed( KeyCode code )
 				// if we are at the top of the list, navigate to the next control
 				if( m_CurrentSelectedItem == m_PanelItems[0] )
 				{
-#ifdef _GAMECONSOLE
+#ifdef _X360
 					if( GetNavUp() != 0 )
 					{
 						BaseClass::OnKeyCodePressed( code );
 					}
 					else if ( m_bWrap )
-#endif // _GAMECONSOLE
+#endif // _X360
 					{
 						SelectPanelItem( m_PanelItems.Count() - 1, GenericPanelList::SD_UP );
 					}
 				}
 				else // otherwise navigate to the next item in the list
 				{
-					unsigned short index = 0;
+					unsigned short index;
 					GetPanelItemIndex( m_CurrentSelectedItem, index );
 					itemSelected = SelectPanelItem( index - 1, GenericPanelList::SD_UP );
 				}
@@ -223,9 +222,9 @@ bool GenericPanelList::RemovePanelItem( unsigned short index, bool bDeletePanel 
 
 		if( selectNew )
 		{
-			if ( index == 0 || !SelectPanelItem( index - 1, GenericPanelList::SD_UP, true, false ) )
+			if( !SelectPanelItem( ( 0 < index ) ? ( index - 1 ) : 0, GenericPanelList::SD_DOWN, true, false ) )
 			{
-				if ( index == ( m_PanelItems.Count() - 1 ) || !SelectPanelItem( index + 1, GenericPanelList::SD_DOWN, true, false ) )
+				if( !SelectPanelItem( ( index < ( m_PanelItems.Count() - 1 ) ) ? ( index + 1 ) : ( m_PanelItems.Count() - 1 ), GenericPanelList::SD_UP, true, false ) )
 				{
 					m_CurrentSelectedItem = NULL;
 				}
@@ -260,7 +259,7 @@ void GenericPanelList::RemoveAllPanelItems( )
 	}
 
 	m_PanelItems.RemoveAll( );
-	m_CurrentSelectedItem = NULL;
+	m_CurrentSelectedItem = 0;
 
 	InvalidateLayout( );
 }
@@ -304,7 +303,7 @@ bool GenericPanelList::GetPanelItemIndex( vgui::Panel* panelItem, unsigned short
 }
 
 //=============================================================================
-bool GenericPanelList::SelectPanelItem( unsigned short index, SEARCH_DIRECTION direction, bool scrollToItem, bool bAllowStealFocus, bool bSuppressSelectionSound )
+bool GenericPanelList::SelectPanelItem( unsigned short index, SEARCH_DIRECTION direction, bool scrollToItem, bool bAllowStealFocus )
 {
 	bool itemSelected = false;
 
@@ -331,11 +330,7 @@ bool GenericPanelList::SelectPanelItem( unsigned short index, SEARCH_DIRECTION d
 					m_PanelItems[i]->NavigateFrom();
 			}
 
-			CBaseModPanel::GetSingletonPtr()->SafeNavigateTo( previousNav ? previousNav : GetParent(), // if no item is selected, then assume parent has focus
-				// this is needed when panel list is the only control on the console and all items are removed due to some
-				// data source event and later new items get automatically inserted, so SafeNavigateTo doesn't really know
-				// what could be having focus to steal from and assumes it's the parent dialog that is not a real control
-				m_CurrentSelectedItem ? m_CurrentSelectedItem : GetParent(), bAllowStealFocus );
+			CBaseModPanel::GetSingletonPtr()->SafeNavigateTo( previousNav, m_CurrentSelectedItem, bAllowStealFocus );
 
 			if( scrollToItem )
 			{
@@ -361,11 +356,7 @@ bool GenericPanelList::SelectPanelItem( unsigned short index, SEARCH_DIRECTION d
 				}
 			}
 
-			if ( !bSuppressSelectionSound )
-			{
-				CBaseModPanel::GetSingleton().PlayUISound( UISOUND_FOCUS );
-			}
-			
+			CBaseModPanel::GetSingleton().PlayUISound( UISOUND_FOCUS );
 
 			PostMessage( m_CurrentSelectedItem->GetVPanel(), new KeyValues("PanelSelected") );
 
@@ -378,7 +369,6 @@ bool GenericPanelList::SelectPanelItem( unsigned short index, SEARCH_DIRECTION d
 	return itemSelected;
 }
 
-//=============================================================================
 bool GenericPanelList::SelectPanelItemByPanel( Panel *pPanelItem )
 {
 	unsigned short idx = 0;
@@ -386,16 +376,6 @@ bool GenericPanelList::SelectPanelItemByPanel( Panel *pPanelItem )
 		return SelectPanelItem( idx, GenericPanelList::SD_DOWN, true );
 	else
 		return false;
-}
-
-//=============================================================================
-void GenericPanelList::ClearPanelSelection()
-{
-	if ( m_CurrentSelectedItem ) 
-	{
-		PostMessage( m_CurrentSelectedItem->GetVPanel(), new KeyValues("PanelUnSelected") );
-		m_CurrentSelectedItem = NULL;
-	}
 }
 
 //=============================================================================
@@ -488,7 +468,7 @@ void GenericPanelList::SortPanelItems( int (__cdecl *pfnCompare)( vgui::Panel* c
 	InvalidateLayout( true );
 
 	unsigned short nCurrentlySelectedIndex = 0;
-	if ( IsGameConsole() && m_CurrentSelectedItem && GetPanelItemIndex( m_CurrentSelectedItem, nCurrentlySelectedIndex ) )
+	if ( IsX360() && m_CurrentSelectedItem && GetPanelItemIndex( m_CurrentSelectedItem, nCurrentlySelectedIndex ) )
 	{
 		ScrollToPanelItem( nCurrentlySelectedIndex );
 	}
@@ -518,7 +498,7 @@ void GenericPanelList::PerformLayout()
 	int nextItemY = 0, visibleCount = 0;
 	int itemWide = GetWide() - ( m_PanelItemBorder * 2 );
 	
-#ifdef _GAMECONSOLE
+#ifdef _X360
 	int firstVisi = GetFirstVisibleItemNumber();
 	if( firstVisi > 0 )
 	{
@@ -537,8 +517,6 @@ void GenericPanelList::PerformLayout()
 	int nTotalContentHeight = 0;
 	for( int i = 0; i < m_PanelItems.Count(); ++i )
 	{
-		nextItemY += m_PanelItemBorder;
-
 		m_PanelItems[i]->SetPos( m_PanelItemBorder, nextItemY );
 		m_PanelItems[i]->SetWide( itemWide );
 
@@ -548,6 +526,8 @@ void GenericPanelList::PerformLayout()
 		nTotalContentHeight += m_PanelItemBorder + m_PanelItems[i]->GetTall();
 		nextItemY = itemY + m_PanelItems[i]->GetTall();
 		++visibleCount;
+
+		nextItemY += m_PanelItemBorder;
 	}
 
 	m_ScrVerticalScroll->SetPos( GetWide( ) - m_ScrVerticalScroll->GetWide(), 0 );
@@ -577,12 +557,12 @@ void GenericPanelList::PerformLayout()
 	UpdateArrows();
 	UpdatePanels();
 
-#ifdef _GAMECONSOLE
+#ifdef _X360 
 	if( m_CurrentSelectedItem != NULL && ( HasFocus() || m_CurrentSelectedItem->HasFocus() ) )
 	{
 		m_CurrentSelectedItem->NavigateTo();
 	}
-#endif // _GAMECONSOLE
+#endif // _X360
 }
 
 //=============================================================================
@@ -633,7 +613,7 @@ void GenericPanelList::ApplySettings( KeyValues* inResourceData )
 	m_PanelItemBorder =  scheme()->GetProportionalScaledValueEx( GetScheme(), inResourceData->GetInt( "panelBorder", 4 ) );
 
 	// Never show arrows on PC.  Show arrows on 360 unless specified not to in .res file.
-	bool isArrowVisible = IsGameConsole() ? ( inResourceData->GetInt( "arrowsVisible", 1 ) == 1 ) : false;
+	bool isArrowVisible = IsX360() ? ( inResourceData->GetInt( "arrowsVisible", 1 ) == 1 ) : false;
 	SetScrollArrowsVisible( isArrowVisible );
 
 	m_bWrap = inResourceData->GetInt( "NoWrap", 0 ) == 0;
@@ -642,44 +622,46 @@ void GenericPanelList::ApplySettings( KeyValues* inResourceData )
 //=============================================================================
 void GenericPanelList::UpdateArrows()
 {
-	if ( GetScrollArrowsVisible() )
+	if( GetScrollArrowsVisible() )
 	{
 		m_LblUpArrow->SetText( "#GameUI_Icons_UP_ARROW" );
-		m_LblUpArrow->SetAlpha( 100 );
-
 		m_LblDownArrow->SetText( "#GameUI_Icons_DOWN_ARROW" );
-		m_LblDownArrow->SetAlpha( 100 );
 
 		int firstVisiItem = GetFirstVisibleItemNumber();
 		int lastVisiItem = GetLastVisibleItemNumber();
 
 		if ( firstVisiItem > 0 )
 		{
-			m_LblUpArrow->SetAlpha( 255 );
+			m_LblUpArrow->SetText( "#GameUI_Icons_UP_ARROW_HIGHLIGHT" );
 		}
 		
 		if ( lastVisiItem < m_PanelItems.Count() - 1 )
 		{
-			m_LblDownArrow->SetAlpha( 255 );
+			m_LblDownArrow->SetText( "#GameUI_Icons_DOWN_ARROW_HIGHLIGHT" );
 		}
 
-		// Update the scroll progress
-		wchar_t localizedScrollProgress[128]; 
-		wchar_t wFirstInView[64];
-		wchar_t wLastInView[64];
-		wchar_t wTotalAchievements[64];
-		int nLabelCount = GetPanelItemCount();
-		int nLabelFirst = GetFirstVisibleItemNumber();
-		int nLabelLast = GetLastVisibleItemNumber();
-
-		// Construct achievement progress string
-		Q_snwprintf( wTotalAchievements, sizeof( wTotalAchievements ), L"%d", nLabelCount );
-		Q_snwprintf( wFirstInView, sizeof( wFirstInView ), L"%d", nLabelFirst + 1 );
-		Q_snwprintf( wLastInView, sizeof( wLastInView ), L"%d", nLabelLast + 1 );
-
-		g_pVGuiLocalize->ConstructString( localizedScrollProgress, sizeof( localizedScrollProgress ), g_pVGuiLocalize->Find( "#L4D360UI_Scroll_Progress" ), 3, wFirstInView, wLastInView, wTotalAchievements );
-		m_LblScrollProgress->SetText( localizedScrollProgress );
 	}
+
+	// Update the scroll progress
+	wchar_t localizedScrollProgress[128]; 
+	char buffer[64];
+	wchar_t wFirstInView[64];
+	wchar_t wLastInView[64];
+	wchar_t wTotalAchievements[64];
+	int nLabelCount = GetPanelItemCount();
+	int nLabelFirst = GetFirstVisibleItemNumber();
+	int nLabelLast = GetLastVisibleItemNumber();
+
+	// Construct achievement progress string
+	itoa( nLabelCount, buffer, 10 );
+	V_UTF8ToUnicode( buffer, wTotalAchievements, sizeof( wTotalAchievements ) );
+	itoa( ( nLabelCount == 0 ) ? 0 : nLabelFirst + 1, buffer, 10 );
+	V_UTF8ToUnicode( buffer, wFirstInView, sizeof( wFirstInView ) );
+	itoa( ( nLabelCount == 0 ) ? 0 : nLabelLast + 1, buffer, 10 );
+	V_UTF8ToUnicode( buffer, wLastInView, sizeof( wLastInView ) );
+
+	g_pVGuiLocalize->ConstructString( localizedScrollProgress, sizeof( localizedScrollProgress ), g_pVGuiLocalize->Find( "#L4D360UI_Scroll_Progress" ), 3, wFirstInView, wLastInView, wTotalAchievements );
+	m_LblScrollProgress->SetText( localizedScrollProgress );
 }
 
 void GenericPanelList::UpdatePanels()
@@ -703,7 +685,7 @@ void GenericPanelList::UpdatePanels()
 		{
 			if( i < firstVisi || i > lastVisi )
 			{
-				panel->SetVisible( IsGameConsole() && ( m_ItemSelectionModeMask & GenericPanelList::ISM_PERITEM ) );
+				panel->SetVisible( IsX360() && ( m_ItemSelectionModeMask & GenericPanelList::ISM_PERITEM ) );
 				if ( m_ItemSelectionModeMask & ISM_ALPHA_INVISIBLE )
 					panel->SetAlpha( 0 );
 			}
@@ -783,7 +765,7 @@ void GenericPanelList::NavigateToChild( Panel *pNavigateTo )
 	return BaseClass::NavigateToChild( pNavigateTo );
 }
 
-#ifndef _GAMECONSOLE
+#ifndef _X360
 void GenericPanelList::NavigateTo()
 {
 	for( int i = 0; i != m_PanelItems.Count(); ++i )
@@ -803,7 +785,7 @@ void GenericPanelList::NavigateFrom()
 #endif
 
 
-#ifdef _GAMECONSOLE
+#ifdef _X360
 //=============================================================================
 void GenericPanelList::NavigateTo()
 {
@@ -820,7 +802,7 @@ void GenericPanelList::NavigateTo()
 		}
 	}
 
-	m_CurrentSelectedItem = NULL;
+	m_CurrentSelectedItem = 0;
 
 	if( m_PanelItems.Count() > 0 )
 	{
@@ -934,13 +916,13 @@ void GenericPanelList::NavigateFrom()
 	if( m_CurrentSelectedItem != 0 )
 	{
 		m_CurrentSelectedItem->NavigateFrom();
-		m_CurrentSelectedItem = NULL;
+		m_CurrentSelectedItem = 0;
 	}
 
 	BaseClass::NavigateFrom();
 }
 
-#endif // _GAMECONSOLE
+#endif // _X360
 
 //=============================================================================
 void GenericPanelList::Sort( GPL_LHS_less_RHS* sortFunction )
@@ -1028,6 +1010,7 @@ void GenericPanelList::ElevatorScroll( bool bScrollUp )
 		else
 		{
 			CBaseModPanel::GetSingleton().PlayUISound( UISOUND_DENY );
+
 		}
 	}
 }
@@ -1133,9 +1116,9 @@ void GenericPanelList::RelinkNavigation( void )
 		Panel *pLastValid = NULL;
 		Panel *pFirstValid = NULL;
 
-		for ( i = 0; i != m_PanelItems.Count(); ++i )
+		for( i = 0; i != m_PanelItems.Count(); ++i )
 		{
-			if ( m_PanelItems[i]->IsVisible() )
+			if( m_PanelItems[i]->IsVisible() )
 			{
 				pFirstValid = m_PanelItems[i];
 				pLastValid = pFirstValid;
@@ -1144,7 +1127,7 @@ void GenericPanelList::RelinkNavigation( void )
 			}
 		}
 
-		for ( ; i != m_PanelItems.Count(); ++i )
+		for( ; i != m_PanelItems.Count(); ++i )
 		{
 			Panel *pCurrentPanel = m_PanelItems[i];
 			if( pCurrentPanel->IsVisible() )
@@ -1155,14 +1138,14 @@ void GenericPanelList::RelinkNavigation( void )
 			}
 		}
 
-		if ( pFirstValid && m_bWrap )
+		if( pFirstValid )
 		{
 			pFirstValid->SetNavUp( pLastValid );
 			pLastValid->SetNavDown( pFirstValid );
 		}
 	}
 
-	if ( m_pItemNavigationChangedCallback )
+	if( m_pItemNavigationChangedCallback )
 	{
 		for( i = 0; i != m_PanelItems.Count(); ++i )
 		{

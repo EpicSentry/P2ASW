@@ -21,18 +21,13 @@
 #include "string_t.h"
 #include "toolframework/itoolentity.h"
 
-#ifdef PORTAL2
-#include "vgui/ISurface.h"
-#include "..\public\vgui_controls\Controls.h"
-#endif
-
 #if !defined( _X360 )
 #include "xbox/xboxstubs.h"
 #endif
 
 // IVEngineClient doesn't have a HasPaintMap() function, so we need a macro.
 #ifdef CLIENT_DLL
-#define HASPAINTMAP true // FIXME: How do we make this accurate?
+#define HASPAINTMAP GetClientWorldEntity()->HasPaintMap()
 #endif
 
 //-----------------------------------------------------------------------------
@@ -676,25 +671,6 @@ public:
 
 	// let client lock mouse to the window bounds
 	virtual void SetMouseWindowLock( bool bLockToWindow ) = 0;
-
-#ifdef PORTAL2
-	// in p2 branch, this calls into engine. i made this 'stub'
-	// so that the portal 2 ui can keeps it's clean code
-	// and so that the correct startup image can be grabbed 
-	// whether we're using widescreen or not. -Klax
-	inline void GetStartupImage(char* pOut, int size) {
-
-		int screenWide, screenTall;
-		vgui::surface()->GetScreenSize(screenWide, screenTall);
-		float aspectRatio = (float)screenWide / (float)screenTall;
-		bool bWidescreen = aspectRatio >= 1.5999f;
-
-		if(bWidescreen)
-			V_snprintf(pOut, size, "../console/background01_widescreen");
-		else
-			V_snprintf(pOut, size, "../console/background01");
-	}
-#endif
 };
 
 

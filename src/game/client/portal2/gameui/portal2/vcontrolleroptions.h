@@ -15,7 +15,7 @@ namespace BaseModUI {
 class SliderControl;
 class DropDownMenu;
 
-class ControllerOptions : public CBaseModFrame
+class ControllerOptions : public CBaseModFrame, public FlyoutMenuListener
 {
 	DECLARE_CLASS_SIMPLE( ControllerOptions, CBaseModFrame );
 
@@ -23,40 +23,44 @@ public:
 	ControllerOptions(vgui::Panel *parent, const char *panelName);
 	~ControllerOptions();
 
+	void Activate();
 	void ResetControlValues( void );
+	void OnThink();
+
 	void ResetToDefaults( void );
+
 	void ChangeToDuckMode( int iDuckMode );
 
-	Panel	*NavigateBack();
-
-protected:
-	virtual void ApplySchemeSettings( vgui::IScheme* pScheme );
-	virtual void OnCommand(const char *command);
-	virtual void OnKeyCodePressed(vgui::KeyCode code);
+	//FloutMenuListener
 	virtual void OnNotifyChildFocus( vgui::Panel* child );
 	virtual void OnFlyoutMenuClose( vgui::Panel* flyTo );
 	virtual void OnFlyoutMenuCancelled();
-	virtual void Activate();
-	virtual void OnThink();
-	virtual void SetDataSettings( KeyValues *pSettings );
+
+	Panel* NavigateBack();
+
+protected:
+	virtual void PaintBackground();
+	virtual void ApplySchemeSettings( vgui::IScheme* pScheme );
+	virtual void OnCommand(const char *command);
+	virtual void OnKeyCodePressed(vgui::KeyCode code);
 
 private:
 	void UpdateFooter();
-	void ConfirmUseDefaults();
+
+	int m_iActiveUserSlot;
 
 	SliderControl		*m_pVerticalSensitivity;
 	SliderControl		*m_pHorizontalSensitivity;
-	BaseModHybridButton	*m_pHorizontalLookType;
-	BaseModHybridButton	*m_pVerticalLookType;
-	BaseModHybridButton	*m_pDuckMode;
+	DropDownMenu		*m_pLookType;
+	DropDownMenu		*m_pDuckMode;
 	BaseModHybridButton	*m_pEditButtons;
 	BaseModHybridButton	*m_pEditSticks;
-	BaseModHybridButton	*m_pVibration;
-	BaseModHybridButton	*m_pController;
+	wchar_t				m_Title[128];
 
-	int		m_iActiveUserSlot;
-	bool	m_bDirty;
-	int		m_nResetControlValuesTicks; // used to delay polling the values until we've flushed the command buffer 
+	bool m_bDirty;
+	bool m_bNeedsActivate;
+
+	int m_nResetControlValuesTicks; // used to delay polling the values until we've flushed the command buffer 
 };
 
 };

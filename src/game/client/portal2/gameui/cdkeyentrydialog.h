@@ -12,9 +12,6 @@
 #endif
 
 #include "vgui_controls/Frame.h"
-#ifdef PORTAL2
-#undef MessageBox
-#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: 

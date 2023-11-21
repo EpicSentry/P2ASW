@@ -36,7 +36,7 @@ public:
 	FlyoutMenu( vgui::Panel *parent, const char* panelName );
 	~FlyoutMenu();
 
-	void OpenMenu( vgui::Panel* flyFrom , vgui::Panel* initialSelection = NULL, bool reloadRes = false, vgui::Panel *pPositionAnchor = NULL );
+	void OpenMenu( vgui::Panel* flyFrom , vgui::Panel* initialSelection = NULL, bool reloadRes = false );
 	void CloseMenu( vgui::Panel* flyTo );
 
 	void SetListener( FlyoutMenuListener *listener );
@@ -60,8 +60,6 @@ public:
 	int GetOriginalTall() const;
 	void SetOriginalTall( int t );
 
-	bool SupportsBlidNavigation() const { return !m_bNoBlindNavigation; }
-
 protected:
 	virtual void ApplySettings( KeyValues *inResourceData );
 	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );
@@ -84,10 +82,6 @@ protected:
 	bool m_bOnlyActiveUser;
 	bool m_bExpandUp;
 	bool m_bUsingWideAtOpen;
-	bool m_bStandalonePositioning;
-	bool m_bDirectCommandTarget;
-	bool m_bNoBlindNavigation;
-	bool m_bSolidFill;
 };
 
 };

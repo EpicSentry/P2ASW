@@ -47,7 +47,7 @@ PasswordEntry::PasswordEntry( Panel *parent, const char *panelName ):
 
 	SetTitle( "", false );
 	SetDeleteSelfOnClose( true );
-	SetFooterEnabled( false );
+	SetLowerGarnishEnabled( false );
 }
 
 //=============================================================================
@@ -119,7 +119,7 @@ void PasswordEntry::OnKeyCodePressed( KeyCode keycode )
 	}
 }
 
-#ifndef _GAMECONSOLE
+#ifndef _X360
 void PasswordEntry::OnKeyCodeTyped( vgui::KeyCode code )
 {
 	// For PC, this maps space bar to OK and esc to cancel
@@ -202,7 +202,7 @@ void PasswordEntry::LoadLayout()
 	// In the Xbox, OK/Cancel xbox buttons use the same font and are the same size, use the OK button
 	int buttonWide = 0;
 	int buttonTall = 0;
-	if ( IsGameConsole() )
+	if ( IsX360() )
 	{
 		m_pLblOkButton->GetContentSize( buttonWide, buttonTall );
 	}

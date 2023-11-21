@@ -18,15 +18,17 @@ class Options : public CBaseModFrame
 	DECLARE_CLASS_SIMPLE( Options, CBaseModFrame );
 
 public:
-	Options( vgui::Panel *pParent, const char *pPanelName );
+	Options(vgui::Panel *parent, const char *panelName);
 	~Options();
 
-protected:
-	virtual void OnCommand( const char *pCommand );
-	virtual void Activate();
+	void OnCommand(const char *command);
 
 private:
-	void UpdateFooter();
+	BaseModHybridButton* m_BtnGame;
+	BaseModHybridButton* m_BtnAudioVideo;
+	BaseModHybridButton* m_BtnController;
+	BaseModHybridButton* m_BtnStorage;
+	BaseModHybridButton* m_BtnCredits;
 };
 
 };

@@ -18,7 +18,8 @@
 #include "EngineInterface.h"
 #include "filesystem.h"
 #include "fmtstr.h"
-
+#include "cdll_util.h"
+#include "nb_header_footer.h"
 #include "materialsystem/materialsystem_config.h"
 
 #ifdef _X360
@@ -52,12 +53,21 @@ bool SelectCustomLogoFile(const char *fullpath, const char *finalpathSubfolder =
 Multiplayer::Multiplayer(Panel *parent, const char *panelName):
 BaseClass(parent, panelName)
 {
+	GameUI().PreventEngineHideGameUI();
+
 	SetDeleteSelfOnClose(true);
 
 	SetProportional( true );
 
 	SetUpperGarnishEnabled(true);
-	SetFooterEnabled(true);
+	SetLowerGarnishEnabled(true);
+
+	m_pHeaderFooter = new CNB_Header_Footer( this, "HeaderFooter" );
+	m_pHeaderFooter->SetTitle( "" );
+	m_pHeaderFooter->SetHeaderEnabled( false );
+	m_pHeaderFooter->SetFooterEnabled( true );
+	m_pHeaderFooter->SetGradientBarEnabled( true );
+	m_pHeaderFooter->SetGradientBarPos( 150, 120 );
 
 	m_drpAllowLanGames = NULL;
 	m_drpAllowCustomContent = NULL;
@@ -78,6 +88,8 @@ BaseClass(parent, panelName)
 //=============================================================================
 Multiplayer::~Multiplayer()
 {
+	GameUI().AllowEngineHideGameUI();
+
 	if ( m_hImportSprayDialog )
 	{
 		m_hImportSprayDialog->DeletePanel();
@@ -91,6 +103,13 @@ Multiplayer::~Multiplayer()
 	}
 
 	UpdateFooter( false );
+}
+
+void Multiplayer::PerformLayout()
+{
+	BaseClass::PerformLayout();
+
+	SetBounds( 0, 0, ScreenWidth(), ScreenHeight() );
 }
 
 //=============================================================================
@@ -226,7 +245,7 @@ void Multiplayer::UpdateFooter( bool bEnableCloud )
 	CBaseModFooterPanel *footer = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
 	if ( footer )
 	{
-		footer->SetButtons( FB_ABUTTON | FB_BBUTTON );
+		footer->SetButtons( FB_ABUTTON | FB_BBUTTON, FF_AB_ONLY, false );
 		footer->SetButtonText( FB_ABUTTON, "#L4D360UI_Select" );
 		footer->SetButtonText( FB_BBUTTON, "#L4D360UI_Controller_Done" );
 
@@ -288,11 +307,11 @@ void Multiplayer::OnThink()
 		needsActivate = true;
 	}
 
-	if ( !m_btnCancel )
-	{
-		m_btnCancel = dynamic_cast< BaseModHybridButton* >( FindChildByName( "BtnCancel" ) );
-		needsActivate = true;
-	}
+// 	if ( !m_btnCancel )
+// 	{
+// 		m_btnCancel = dynamic_cast< BaseModHybridButton* >( FindChildByName( "BtnCancel" ) );
+// 		needsActivate = true;
+// 	}
 
 	if ( !m_drpGore )
 	{
@@ -412,7 +431,7 @@ void Multiplayer::OnCommand(const char *command)
 		}
 		else
 		{
-			char const *pchCustomPath = ( ( m_nSpraypaint[ iLogo ].m_bCustom ) ? ( MULTIPLAYER_CUSTOM_SPRAY_FOLDER ) : ( "" ) );
+			char *pchCustomPath = ( ( m_nSpraypaint[ iLogo ].m_bCustom ) ? ( MULTIPLAYER_CUSTOM_SPRAY_FOLDER ) : ( "" ) );
 
 			char rootFilename[MAX_PATH];
 			Q_snprintf( rootFilename, sizeof(rootFilename), MULTIPLAYER_SPRAY_FOLDER "%s%s.vtf", pchCustomPath, m_nSpraypaint[ iLogo ].m_szFilename );
@@ -526,7 +545,7 @@ void Multiplayer::InitLogoList()
 				m_nSpraypaint[ m_nNumSpraypaintLogos ].m_bCustom = false;
 
 				szCurrentButton[ iCommandNumberPosition ] = m_nNumSpraypaintLogos + '0';
-//				SetFlyoutButtonText( szCurrentButton, pFlyout, pSprayKey->GetName() );
+				SetFlyoutButtonText( szCurrentButton, pFlyout, pSprayKey->GetName() );
 
 				// check to see if this is the one we have set
 				Q_snprintf( filename, sizeof(filename), MULTIPLAYER_SPRAY_FOLDER "%s", pSprayKey->GetString() );
@@ -559,7 +578,7 @@ void Multiplayer::InitLogoList()
 		{
 			// Found at least one custom logo
 			szCurrentButton[ iCommandNumberPosition ] = m_nNumSpraypaintLogos + '0';
-//			SetFlyoutButtonText( szCurrentButton, pFlyout, "#L4D360UI_Multiplayer_Cutsom_Logo" );
+			SetFlyoutButtonText( szCurrentButton, pFlyout, "#L4D360UI_Multiplayer_Cutsom_Logo" );
 			m_nSpraypaint[ m_nNumSpraypaintLogos ].m_szFilename[ 0 ] = '\0';
 			m_nSpraypaint[ m_nNumSpraypaintLogos ].m_bCustom = true;
 
@@ -670,7 +689,7 @@ Panel* Multiplayer::NavigateBack()
 
 void Multiplayer::PaintBackground()
 {
-	BaseClass::DrawDialogBackground( "#GameUI_Multiplayer", NULL, "#L4D360UI_Multiplayer_Desc", NULL, NULL, true );
+	//BaseClass::DrawDialogBackground( "#GameUI_Multiplayer", NULL, "#L4D360UI_Multiplayer_Desc", NULL, NULL, true );
 }
 
 void Multiplayer::ApplySchemeSettings( vgui::IScheme *pScheme )

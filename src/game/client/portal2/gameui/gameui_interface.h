@@ -11,14 +11,6 @@
 
 #include "GameUI/IGameUI.h"
 
-// we need both of these for now -Klax
-#ifdef PORTAL2
-#include "matchmaking/swarm/imatchext_swarm.h"
-#include "matchmaking/portal2/imatchext_portal2.h"
-
-extern IMatchExtSwarm* g_pMatchExt;
-#endif
-
 #include "vgui_controls/Panel.h"
 #include "vgui_controls/PHandle.h"
 #include "convar.h"
@@ -79,7 +71,7 @@ public:
 
  	virtual void SetProgressOnStart();
  
-#if defined( _GAMECONSOLE ) && defined( _DEMO )
+#if defined( _X360 ) && defined( _DEMO )
 	virtual void OnDemoTimeout();
 #endif
 
@@ -94,12 +86,6 @@ public:
  	void ShowLoadingBackgroundDialog();
 	void HideLoadingBackgroundDialog();
 	bool HasLoadingBackgroundDialog();
-
-	virtual bool LoadingProgressWantsIsolatedRender( bool bContextValid );
-
-	virtual bool IsPlayingFullScreenVideo();
-
-	virtual bool IsTransitionEffectEnabled();
 
 private:
 	void SendConnectedToGameMessage();

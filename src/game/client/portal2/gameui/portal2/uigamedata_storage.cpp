@@ -13,12 +13,9 @@
 #include "matchmaking/imatchframework.h"
 #include "filesystem.h"
 #include "fmtstr.h"
-//#include "c_portal_gamestats.h"
-#ifndef NO_STEAM
+#ifndef _X360
 #include "steam/steam_api.h"
 #endif
-#include "vattractscreen.h"
-#include "steamcloudsync.h"
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -75,7 +72,7 @@ CAsyncCtxUIOnDeviceAttached::~CAsyncCtxUIOnDeviceAttached()
 void CAsyncCtxUIOnDeviceAttached::ExecuteAsync()
 {
 	// Asynchronously do the tasks that don't interact with the command buffer
-	// g_pFullFileSystem->DiscoverDLC( GetController() ); - don't call DiscoverDLC here
+	g_pFullFileSystem->DiscoverDLC( GetController() );
 
 	// Open user settings and save game container here
 	m_ContainerOpenResult = engine->OnStorageDeviceAttached( GetController() );
@@ -146,13 +143,6 @@ CON_COMMAND_F( ui_pump_dlc_mount_content, "", FCVAR_DEVELOPMENTONLY )
 			continue;
 		}
 
-		// set the installed DLC key values resolution key
-		if ( int iDlcNumber = DLC_LICENSE_ID( ulMask ) )
-		{
-			CFmtStr sDlc( "DLC%u_INSTALLED", iDlcNumber );
-			KeyValuesSystem()->SetKeyValuesExpressionSymbol( sDlc, 1 );
-		}
-
 		// information text
 		if ( wchar_t *wszExplanation = g_pVGuiLocalize->Find( "#L4D360UI_MsgBx_DlcMountedTxt" ) )
 		{
@@ -191,8 +181,6 @@ CON_COMMAND_F( ui_pump_dlc_mount_stage, "", FCVAR_DEVELOPMENTONLY )
 		"rr_reloadresponsesystems",
 		"cl_soundemitter_reload",
 		"sv_soundemitter_reload",
-		"cl_modemanager_reload",
-		"sv_reload_node_position_keys"
 	};
 
 	if ( nStage >= 0 && nStage < ARRAYSIZE( s_arrClientCmdsDlcMount ) )
@@ -217,11 +205,6 @@ void CAsyncCtxUIOnDeviceAttached::Completed()
 	if ( GetContainerOpenResult() == ERROR_SUCCESS &&
 		 g_pFullFileSystem->IsAnyDLCPresent( &bDLCSearchPathMounted ) )
 	{
-		if ( !( CUIGameData::Get()->SelectStorageDevicePolicy() & STORAGE_DEVICE_ASYNC ) )
-		{
-			Warning( "<vitaliy> DLC discovered during sync storage mount (not mounted)!\n" );
-			goto completed_done;
-		}
 		if ( !bDLCSearchPathMounted )
 		{
 			// add the DLC search paths if they exist
@@ -238,18 +221,12 @@ void CAsyncCtxUIOnDeviceAttached::Completed()
 	// No valid DLC was discovered, check if we discovered some corrupt DLC
 	if ( g_pFullFileSystem->IsAnyCorruptDLC() )
 	{
-		if ( !( CUIGameData::Get()->SelectStorageDevicePolicy() & STORAGE_DEVICE_ASYNC ) )
-		{
-			Warning( "<vitaliy> DLC discovered during sync storage mount (corrupt)!\n" );
-			goto completed_done;
-		}
 		// need to show just corrupt DLC information
 		engine->ClientCmd( CFmtStr( "ui_pump_dlc_mount_corrupt %d", 0 ) );
 		return;
 	}
 
 	// Otherwise we are done attaching storage right now
-completed_done:
 	CUIGameData::Get()->OnCompletedAsyncDeviceAttached( this );
 }
 
@@ -430,7 +407,7 @@ private:
 
 void OnStorageDevicesChangedSelectNewDevice()
 {
-#ifdef _GAMECONSOLE
+#ifdef _X360
 	int numChangedCtrlrs = 0;
 	int nChangedCtrlrs[2] = { -1, -1 };	// We can only have two users (split-screen)
 	for ( DWORD i = 0; i < XBX_GetNumGameUsers(); ++ i )
@@ -438,7 +415,7 @@ void OnStorageDevicesChangedSelectNewDevice()
 		int iController = XBX_GetUserId( i );
 
 		// Guests can't choose a storage device!
-		if ( XBX_GetUserIsGuest( i ) )
+		if ( XBX_GetUserIsGuest( iController ) )
 			continue;
 
 		int nStorageID = XBX_GetStorageDeviceId( iController );
@@ -455,7 +432,7 @@ void OnStorageDevicesChangedSelectNewDevice()
 	{
 		CUIGameData::Get()->SelectStorageDevice( new CChangeStorageDeviceChained( nChangedCtrlrs ) );
 	}
-#endif // _GAMECONSOLE
+#endif // _X360
 }
 
 void CUIGameData::RunFrame_Storage()
@@ -495,18 +472,11 @@ void CUIGameData::RunFrame_Storage()
 			}
 		}
 	}
-
-#ifdef _PS3
-	GetPs3SaveSteamInfoProvider()->RunFrame();
-#endif
-
-	if ( g_pGameSteamCloudSync )
-		g_pGameSteamCloudSync->RunFrame();
 }
 
 void StorageDevice_SelectAllNow()
 {
-#ifdef _GAMECONSOLE
+#ifdef _X360
 	int numChangedCtrlrs = 0;
 	int nChangedCtrlrs[2] = { -1, -1 };	// We can only have two users (split-screen)
 	for ( DWORD i = 0; i < XBX_GetNumGameUsers(); ++ i )
@@ -514,7 +484,7 @@ void StorageDevice_SelectAllNow()
 		int iController = XBX_GetUserId( i );
 
 		// Guests can't choose a storage device!
-		if ( XBX_GetUserIsGuest( i ) )
+		if ( XBX_GetUserIsGuest( iController ) )
 			continue;
 
 		int nStorageID = XBX_GetStorageDeviceId( iController );
@@ -531,14 +501,14 @@ void StorageDevice_SelectAllNow()
 	{
 		CUIGameData::Get()->SelectStorageDevice( new CChangeStorageDeviceChained( nChangedCtrlrs ) );
 	}
-#endif // _GAMECONSOLE
+#endif // _X360
 }
 
 //=============================================================================
 //This is where we open the XUI pannel to let the user select the current storage device.
 bool CUIGameData::SelectStorageDevice( ISelectStorageDeviceClient *pSelectClient )
 {
-#ifdef _GAMECONSOLE
+#ifdef _X360 
 
 	if ( !pSelectClient )
 		return false;
@@ -587,7 +557,6 @@ bool CUIGameData::SelectStorageDevice( ISelectStorageDeviceClient *pSelectClient
 		}
 	}
 
-#ifdef _X360
 	// Is the controller signed in?
 	if( XUserGetSigninState( iController ) == eXUserSigninState_NotSignedIn )
 	{
@@ -612,7 +581,6 @@ bool CUIGameData::SelectStorageDevice( ISelectStorageDeviceClient *pSelectClient
 		pSelectClient->OnDeviceFail( ISelectStorageDeviceClient::FAIL_ERROR );
 		return false; // failed to obtain XUID?
 	}
-#endif
 
 	//
 	// Prevent reentry
@@ -624,9 +592,9 @@ bool CUIGameData::SelectStorageDevice( ISelectStorageDeviceClient *pSelectClient
 		return false;	// Somebody already selecting a device
 	}
 
-#if defined( _DEMO ) && defined( _GAMECONSOLE )
+#if defined( _DEMO ) && defined( _X360 )
 	// Demo mode cannot have access to storage devices anyway
-	if ( IsGameConsole() )
+	if ( IsX360() )
 	{
 		m_iStorageID = XBX_STORAGE_DECLINED;
 		m_iStorageController = iController;
@@ -636,17 +604,6 @@ bool CUIGameData::SelectStorageDevice( ISelectStorageDeviceClient *pSelectClient
 		return true;
 	}
 #endif
-
-	if ( IsPS3() )
-	{
-		// PS3 will have only two storage partitions: primary and secondary
-		if ( iController == (int) XBX_GetPrimaryUserId() )
-			XBX_SetStorageDeviceId( iController, 1 );
-		else
-			XBX_SetStorageDeviceId( iController, 2 );
-		
-		bForceDisplay = false; // PS3 doesn't display anything, so don't force it
-	}
 
 	// Check if we already have a valid storage device
 	if ( XBX_GetStorageDeviceId( iController ) != XBX_INVALID_STORAGE_ID &&
@@ -660,8 +617,7 @@ bool CUIGameData::SelectStorageDevice( ISelectStorageDeviceClient *pSelectClient
 		}
 
 		// Put up a progress that we are loading profile...
-		if ( SelectStorageDevicePolicy() & STORAGE_DEVICE_ASYNC )
-			OpenWaitScreen( "#L4D360UI_WaitScreen_SigningOn" );
+		OpenWaitScreen( "#L4D360UI_WaitScreen_SigningOn" );
 
 		m_iStorageID = XBX_GetStorageDeviceId( iController );
 		m_iStorageController = iController;
@@ -689,13 +645,6 @@ bool CUIGameData::SelectStorageDevice( ISelectStorageDeviceClient *pSelectClient
 	return false;
 }
 
-uint32 CUIGameData::SelectStorageDevicePolicy()
-{
-	return
-		( IsX360() ? STORAGE_DEVICE_ASYNC : 0 )
-		;
-}
-
 //=============================================================================
 void CUIGameData::OnDeviceAttached()
 {
@@ -709,11 +658,25 @@ void CUIGameData::OnCompletedAsyncDeviceAttached( CAsyncCtxUIOnDeviceAttached * 
 	ISelectStorageDeviceClient *pStorageDeviceClient = m_pSelectStorageClient;
 	m_pSelectStorageClient = NULL;
 
+	static ConVarRef mm_dlcs_mask_extras( "mm_dlcs_mask_extras" );
+	if ( mm_dlcs_mask_extras.IsValid() )
+	{
+#ifdef _X360
+		int iDLCmask = mm_dlcs_mask_extras.GetInt();
+
+		if ( engine->IsLowViolence() && XGetGameRegion() == XC_GAME_REGION_EUROPE_REST )
+		{
+			// iDLCmask |= ( 1 << ? );
+		}
+
+		mm_dlcs_mask_extras.SetValue( iDLCmask );
+#endif
+	}
+
 	uint nRet = job ? job->GetContainerOpenResult() : ERROR_SUCCESS;
 	if ( nRet != ERROR_SUCCESS )
 	{
-		if ( SelectStorageDevicePolicy() & STORAGE_DEVICE_ASYNC )
-			CloseWaitScreen( NULL, "ReportDeviceCorrupt" );
+		CloseWaitScreen( NULL, "ReportDeviceCorrupt" );
 		pStorageDeviceClient->OnDeviceFail( ISelectStorageDeviceClient::FAIL_CORRUPT );
 	}
 	else
@@ -725,8 +688,7 @@ void CUIGameData::OnCompletedAsyncDeviceAttached( CAsyncCtxUIOnDeviceAttached * 
 		if ( m_pSelectStorageClient == NULL )
 		{
 			// Close down the waiting screen
-			if ( SelectStorageDevicePolicy() & STORAGE_DEVICE_ASYNC )
-				CloseWaitScreen( NULL, "OnCompletedAsyncDeviceAttached" );
+			CloseWaitScreen( NULL, "OnCompletedAsyncDeviceAttached" );
 		}
 	}
 }
@@ -775,213 +737,9 @@ void CUIGameData::ExecuteAsync( CAsyncJobContext *pAsync )
 #endif
 
 #else
-	// Since we are not running on a separate thread, just fire it all here
-	m_pAsyncJob = NULL;
 	pAsync->ExecuteAsync();
-	pAsync->Completed();
-	delete pAsync;
 #endif
 }
-
-//////////////////////////////////////////////////////////////////////////
-//
-// Gamestats reporting
-//
-
-static int GameStats_GetActionIndex( char const *szReportAction )
-{
-	char const * arrActions[] =
-	{
-		"", "newgame", "commentary",
-		"load", "loadlast",
-		"continuenew", "continueload",
-		"saveover", "savenew", "savedel",
-		"changelevel", "changelevelcomm",
-		"bonusmap",
-		"challenge_continue", "challenge_retry", "challenge_quit", "challenge_hub"
-	};
-	for ( int k = 0; k < ARRAYSIZE( arrActions ); ++ k )
-	{
-		if ( !V_stricmp( arrActions[k], szReportAction ) )
-			return k + 1;
-	}
-	return 0;
-}
-
-static int GameStats_GetReportMapNameIndex( char const *szMapName )
-{
-//	int nCounter = 1000; // resolve it as single player map
-//#define CFG( spmap, ... ) ++ nCounter; if ( !V_stricmp( szMapName, #spmap ) ) return nCounter;
-//#include "xlast_portal2/inc_sp_maps.inc"
-//#undef CFG
-//	nCounter = 0; // resolve it as coop map
-//#define CFG( mpcoopmap, ... ) ++ nCounter; if ( !V_stricmp( szMapName, #mpcoopmap ) ) return nCounter;
-//#include "xlast_portal2/inc_coop_maps.inc"
-//#undef CFG
-	return 0;
-}
-
-void CUIGameData::GameStats_ReportAction( char const *szReportAction, char const *szMapName, uint64 uiFlags )
-{
-//	KeyValues *kv = new KeyValues( "gamestat_action" );
-//	KeyValues::AutoDelete autodelete_kv( kv );
-//	kv->SetInt( "version", 1 );
-//	uint64 xuid = 0ull;
-//	if ( IPlayerLocal *pPlayerLocal = g_pMatchFramework->GetMatchSystem()->GetPlayerManager()->GetLocalPlayer( 0 ) )
-//	{
-//		xuid = pPlayerLocal->GetXUID();
-//	}
-//	kv->SetUint64( "xuid", xuid );
-//	kv->SetUint64( "*mac", 0ull ); // this will be filled out with console MAC-address
-//	kv->SetInt( "game_action", GameStats_GetActionIndex( szReportAction ) );
-//	kv->SetInt( "game_mapid", GameStats_GetReportMapNameIndex( szMapName ) );
-//	kv->SetUint64( "game_flags", uiFlags );
-//
-//	IDatacenterCmdBatch *pBatch = g_pMatchFramework->GetMatchSystem()->GetDatacenter()->CreateCmdBatch();
-//	pBatch->SetDestroyWhenFinished( true );
-//	pBatch->SetRetryCmdTimeout( 30.0f );
-//	pBatch->AddCommand( kv );
-//
-//#if !defined( _GAMECONSOLE ) && !defined( NO_STEAM )
-//	// Send these stats to OGS
-//	g_PortalGameStats.Event_UIEvent( xuid, szReportAction, uiFlags, szMapName );
-//#endif //!defined( _GAMECONSOLE )
-}
-
-
-#ifdef _PS3
-
-//////////////////////////////////////////////////////////////////////////
-//
-// Steam info provider implementation
-//
-//////////////////////////////////////////////////////////////////////////
-
-class CPS3SaveSteamInfoProvider : public IPS3SaveSteamInfoProviderUiGameData
-{
-public:
-	virtual CUtlBuffer * GetInitialLoadBuffer()
-	{
-		GetBufferForSaveUtil().EnsureCapacity( 512*1024 - 128 );
-		return &GetBufferForSaveUtil();
-	}
-	virtual CUtlBuffer * GetSaveBufferForCommit()
-	{
-		// called inside the saveutil callback (cannot cause allocations)
-		return &GetBufferForSaveUtil();
-	}
-	virtual CUtlBuffer * PrepareSaveBufferForCommit()
-	{
-		// called on the main thread
-		if ( !FillSteamBuffer() )
-		{
-			m_uiState &=~ ( STATE_DIRTY | STATE_INITIATED | STATE_COMMITTING );
-			return NULL;
-		}
-		m_uiState |= STATE_COMMITTING; // flipping the committing flag early
-		++ m_idxSaveUtilOwned;	// now saveutil owns the buffer we were writing into
-		m_uiState &=~ STATE_DIRTY; // mark the steam data buffer as not yet dirty
-		return &GetBufferForSaveUtil();
-	}
-
-	virtual void RunFrame();
-	virtual void WriteSteamStats();
-
-protected:
-	CUtlBuffer m_arrBuffers[2];
-	int m_idxSaveUtilOwned;
-	inline CUtlBuffer& GetBufferForSaveUtil() { return m_arrBuffers[ m_idxSaveUtilOwned%2 ]; }
-	inline CUtlBuffer& GetBufferForSteamData() { return m_arrBuffers[ !(m_idxSaveUtilOwned%2) ]; }
-	bool FillSteamBuffer();
-
-	CPS3SaveRestoreAsyncStatus m_ps3AsyncSaveStatus;
-	enum AsyncSaveState_t
-	{
-		STATE_DEFAULT		= 0x00,		// default state, no save data ready, no save pending
-		STATE_DIRTY			= 0x01,		// save data ready, will trigger saveutil when possible
-		STATE_INITIATED		= 0x10,		// saveutil triggered, can still slipstream updated data
-		STATE_COMMITTING	= 0x20,		// saveutil committing data, new updates must wait
-	};
-	uint32 m_uiState;
-	uint32 m_numDirtyFrames;
-}
-g_ps3saveSteamInfoProvider;
-
-IPS3SaveSteamInfoProviderUiGameData * GetPs3SaveSteamInfoProvider()
-{
-	return &g_ps3saveSteamInfoProvider;
-}
-
-bool CPS3SaveSteamInfoProvider::FillSteamBuffer()
-{
-	// Write the data into save buffer
-	CUtlBuffer &buf = GetBufferForSteamData();
-#ifndef NO_STEAM
-	uint32 uiSizeRequired = buf.Size();
-	bool bResult = steamapicontext->SteamUserStats()->GetUserStatsData( buf.Base(), buf.Size(), &uiSizeRequired );
-	if ( !bResult && uiSizeRequired > buf.Size() )
-	{
-		buf.EnsureCapacity( uiSizeRequired );
-		bResult = steamapicontext->SteamUserStats()->GetUserStatsData( buf.Base(), buf.Size(), &uiSizeRequired );
-	}
-	if ( !bResult )
-	{
-		buf.Purge();
-		return false;
-	}
-	else
-	{
-		buf.SeekPut( CUtlBuffer::SEEK_HEAD, uiSizeRequired );
-		return true;
-	}
-#else
-	buf.Purge();
-	return true;
-#endif
-}
-
-void CPS3SaveSteamInfoProvider::RunFrame()
-{
-	// if save has been initiated, see if it has completed already
-	if ( m_uiState & STATE_INITIATED )
-	{
-		if ( m_ps3AsyncSaveStatus.JobDone() )
-		{
-			m_uiState &=~( STATE_INITIATED | STATE_COMMITTING );
-			Msg( "%.3f  CPS3SaveSteamInfoProvider::WriteSteamStats completed!\n", Plat_FloatTime() );
-			
-			GetBufferForSaveUtil().Purge();
-		}
-	}
-
-	// if we have some new dirty data, then see if we can kick off a save
-	if ( ( m_uiState & STATE_DIRTY ) && !( m_uiState & STATE_INITIATED ) )
-	{
-		if ( m_numDirtyFrames )
-			-- m_numDirtyFrames;
-		if ( ps3saveuiapi && !ps3saveuiapi->IsSaveUtilBusy() &&
-			!m_numDirtyFrames &&
-			( !CBaseModPanel::GetSingleton().GetWindow( WT_ATTRACTSCREEN ) ||
-			( ( CAttractScreen * ) CBaseModPanel::GetSingleton().GetWindow( WT_ATTRACTSCREEN ) )->IsGameBootReady() ) )
-		{
-			m_ps3AsyncSaveStatus.m_nCurrentOperationTag = kSAVE_TAG_WRITE_STEAMINFO;
-			ps3saveuiapi->WriteSteamInfo( &m_ps3AsyncSaveStatus );
-
-			Msg( "%.3f  CPS3SaveSteamInfoProvider::WriteSteamStats kicked off saveutil work\n", Plat_FloatTime() );
-			m_uiState |= STATE_INITIATED; // we kicked off a save operation successfully
-		}
-	}
-}
-
-void CPS3SaveSteamInfoProvider::WriteSteamStats()
-{
-	Msg( "%.3f  CPS3SaveSteamInfoProvider::WriteSteamStats prepared data\n", Plat_FloatTime() );
-
-	m_uiState |= STATE_DIRTY;
-	m_numDirtyFrames = 3;
-}
-
-#endif
 
 
 
