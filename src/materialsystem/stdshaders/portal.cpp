@@ -255,8 +255,8 @@ BEGIN_VS_SHADER( Portal_DX90,
 
 				pShaderAPI->SetVertexShaderConstant( VERTEX_SHADER_SHADER_SPECIFIC_CONST_4, vViewportMad, 1 );
 			}
-#if 0
-			int nPortalRecursionDepth = ShaderApiFast( pShaderAPI )->GetIntRenderingParameter( INT_RENDERPARM_PORTAL_RECURSION_DEPTH );
+
+			int nPortalRecursionDepth = pShaderAPI->GetIntRenderingParameter( INT_RENDERPARM_PORTAL_RECURSION_DEPTH );
 			float vPackedConst4[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 			if( g_pHardwareConfig->UseFastClipping() )
 			{
@@ -266,14 +266,8 @@ BEGIN_VS_SHADER( Portal_DX90,
 			{
 				vPackedConst4[0] = ( nPortalRecursionDepth > 1 )? 1.0f : 0.0f;
 			}
-			ShaderApiFast( pShaderAPI )->SetVertexShaderConstant( VERTEX_SHADER_SHADER_SPECIFIC_CONST_5, vPackedConst4, 1 );
+			pShaderAPI->SetVertexShaderConstant( VERTEX_SHADER_SHADER_SPECIFIC_CONST_5, vPackedConst4, 1 );
 
-			bool bNvidiaStereoActiveThisFrame = pShaderAPI->IsStereoActiveThisFrame();
-			if ( bNvidiaStereoActiveThisFrame )
-			{
-				pShaderAPI->BindStandardTexture( SHADER_SAMPLER3, TEXTURE_BINDFLAGS_NONE, TEXTURE_STEREO_PARAM_MAP );
-			}
-#endif
 			DECLARE_DYNAMIC_VERTEX_SHADER( portal_vs20 );
 			SET_DYNAMIC_VERTEX_SHADER_COMBO( SKINNING, pShaderAPI->GetCurrentNumBones() > 0 );
 			SET_DYNAMIC_VERTEX_SHADER_COMBO( ADDSTATIC, bHasStatic );
@@ -283,17 +277,12 @@ BEGIN_VS_SHADER( Portal_DX90,
 			{
 				DECLARE_DYNAMIC_PIXEL_SHADER( portal_ps20b );
 				SET_DYNAMIC_PIXEL_SHADER_COMBO( ADDSTATIC, bHasStatic );
-				SET_DYNAMIC_PIXEL_SHADER_COMBO( HDRENABLED, IsHDREnabled() );
-				SET_DYNAMIC_PIXEL_SHADER_COMBO( PIXELFOGTYPE, pShaderAPI->GetPixelFogCombo() );
-				//SET_DYNAMIC_PIXEL_SHADER_COMBO( D_NVIDIA_STEREO, bNvidiaStereoActiveThisFrame );
 				SET_DYNAMIC_PIXEL_SHADER( portal_ps20b );
 			}
 			else
 			{
 				DECLARE_DYNAMIC_PIXEL_SHADER( portal_ps20 );
 				SET_DYNAMIC_PIXEL_SHADER_COMBO( ADDSTATIC, bHasStatic );
-				SET_DYNAMIC_PIXEL_SHADER_COMBO( HDRENABLED, IsHDREnabled() );
-				SET_DYNAMIC_PIXEL_SHADER_COMBO( PIXELFOGTYPE, pShaderAPI->GetPixelFogCombo() );
 				SET_DYNAMIC_PIXEL_SHADER( portal_ps20 );
 			}
 		}

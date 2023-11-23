@@ -19,6 +19,7 @@ public:
 	}
 	void SetHASALPHAMASK( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nHASALPHAMASK = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bHASALPHAMASK = true;
@@ -40,6 +41,7 @@ public:
 	}
 	void SetHASSTATICTEXTURE( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nHASSTATICTEXTURE = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bHASSTATICTEXTURE = true;
@@ -61,6 +63,7 @@ public:
 	}
 	void SetUSEALTERNATEVIEW( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nUSEALTERNATEVIEW = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bUSEALTERNATEVIEW = true;
@@ -113,6 +116,7 @@ public:
 	}
 	void SetSKINNING( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nSKINNING = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bSKINNING = true;
@@ -134,6 +138,7 @@ public:
 	}
 	void SetADDSTATIC( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nADDSTATIC = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bADDSTATIC = true;

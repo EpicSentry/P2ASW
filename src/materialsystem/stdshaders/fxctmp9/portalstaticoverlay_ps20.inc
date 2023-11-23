@@ -28,6 +28,7 @@ public:
 	}
 	void SetHASALPHAMASK( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nHASALPHAMASK = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bHASALPHAMASK = true;
@@ -49,9 +50,32 @@ public:
 	}
 	void SetHASSTATICTEXTURE( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nHASSTATICTEXTURE = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bHASSTATICTEXTURE = true;
+#endif
+	}
+private:
+	int m_nPORTALGHOSTOVERLAY;
+#ifdef _DEBUG
+	bool m_bPORTALGHOSTOVERLAY;
+#endif
+public:
+	void SetPORTALGHOSTOVERLAY( int i )
+	{
+		Assert( i >= 0 && i <= 1 );
+		m_nPORTALGHOSTOVERLAY = i;
+#ifdef _DEBUG
+		m_bPORTALGHOSTOVERLAY = true;
+#endif
+	}
+	void SetPORTALGHOSTOVERLAY( bool i )
+	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
+		m_nPORTALGHOSTOVERLAY = i ? 1 : 0;
+#ifdef _DEBUG
+		m_bPORTALGHOSTOVERLAY = true;
 #endif
 	}
 public:
@@ -66,42 +90,25 @@ public:
 		m_bHASSTATICTEXTURE = false;
 #endif // _DEBUG
 		m_nHASSTATICTEXTURE = 0;
+#ifdef _DEBUG
+		m_bPORTALGHOSTOVERLAY = false;
+#endif // _DEBUG
+		m_nPORTALGHOSTOVERLAY = 0;
 	}
 	int GetIndex()
 	{
 		// Asserts to make sure that we aren't using any skipped combinations.
 		// Asserts to make sure that we are setting all of the combination vars.
 #ifdef _DEBUG
-		bool bAllStaticVarsDefined = m_bHASALPHAMASK && m_bHASSTATICTEXTURE;
+		bool bAllStaticVarsDefined = m_bHASALPHAMASK && m_bHASSTATICTEXTURE && m_bPORTALGHOSTOVERLAY;
 		Assert( bAllStaticVarsDefined );
 #endif // _DEBUG
-		return ( 4 * m_nHASALPHAMASK ) + ( 8 * m_nHASSTATICTEXTURE ) + 0;
+		return ( 2 * m_nHASALPHAMASK ) + ( 4 * m_nHASSTATICTEXTURE ) + ( 8 * m_nPORTALGHOSTOVERLAY ) + 0;
 	}
 };
-#define shaderStaticTest_portalstaticoverlay_ps20 psh_forgot_to_set_static_HASALPHAMASK + psh_forgot_to_set_static_HASSTATICTEXTURE + 0
+#define shaderStaticTest_portalstaticoverlay_ps20 psh_forgot_to_set_static_HASALPHAMASK + psh_forgot_to_set_static_HASSTATICTEXTURE + psh_forgot_to_set_static_PORTALGHOSTOVERLAY + 0
 class portalstaticoverlay_ps20_Dynamic_Index
 {
-private:
-	int m_nHDRENABLED;
-#ifdef _DEBUG
-	bool m_bHDRENABLED;
-#endif
-public:
-	void SetHDRENABLED( int i )
-	{
-		Assert( i >= 0 && i <= 1 );
-		m_nHDRENABLED = i;
-#ifdef _DEBUG
-		m_bHDRENABLED = true;
-#endif
-	}
-	void SetHDRENABLED( bool i )
-	{
-		m_nHDRENABLED = i ? 1 : 0;
-#ifdef _DEBUG
-		m_bHDRENABLED = true;
-#endif
-	}
 private:
 	int m_nPIXELFOGTYPE;
 #ifdef _DEBUG
@@ -118,6 +125,7 @@ public:
 	}
 	void SetPIXELFOGTYPE( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nPIXELFOGTYPE = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bPIXELFOGTYPE = true;
@@ -128,23 +136,19 @@ public:
 	portalstaticoverlay_ps20_Dynamic_Index( IShaderDynamicAPI *pShaderAPI )
 	{
 #ifdef _DEBUG
-		m_bHDRENABLED = false;
+		m_bPIXELFOGTYPE = true;
 #endif // _DEBUG
-		m_nHDRENABLED = 0;
-#ifdef _DEBUG
-		m_bPIXELFOGTYPE = false;
-#endif // _DEBUG
-		m_nPIXELFOGTYPE = 0;
+		m_nPIXELFOGTYPE = ( pShaderAPI->GetSceneFogMode() == MATERIAL_FOG_LINEAR_BELOW_FOG_Z ) ;
 	}
 	int GetIndex()
 	{
 		// Asserts to make sure that we aren't using any skipped combinations.
 		// Asserts to make sure that we are setting all of the combination vars.
 #ifdef _DEBUG
-		bool bAllDynamicVarsDefined = m_bHDRENABLED && m_bPIXELFOGTYPE;
+		bool bAllDynamicVarsDefined = m_bPIXELFOGTYPE;
 		Assert( bAllDynamicVarsDefined );
 #endif // _DEBUG
-		return ( 1 * m_nHDRENABLED ) + ( 2 * m_nPIXELFOGTYPE ) + 0;
+		return ( 1 * m_nPIXELFOGTYPE ) + 0;
 	}
 };
-#define shaderDynamicTest_portalstaticoverlay_ps20 psh_forgot_to_set_dynamic_HDRENABLED + psh_forgot_to_set_dynamic_PIXELFOGTYPE + 0
+#define shaderDynamicTest_portalstaticoverlay_ps20 0

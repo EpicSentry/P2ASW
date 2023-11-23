@@ -177,6 +177,7 @@ class CPortalRender	: public CAutoGameSystem
 {
 public:
 	CPortalRender();
+	~CPortalRender();
 
 	// Inherited from IGameSystem
 	virtual void LevelInitPreEntity();
@@ -251,8 +252,6 @@ public:
 	bool IsPortalViewID( view_id_t id );
 	
 	inline CUtlVector<VPlane> &GetRecursiveViewComplexFrustums( int nIdx ) { return m_RecursiveViewComplexFrustums[ nIdx ]; }
-
-	void DrawEarlyZPortals( CViewRender *pViewRender );
 	
 private:
 	struct RecordedPortalInfo_t

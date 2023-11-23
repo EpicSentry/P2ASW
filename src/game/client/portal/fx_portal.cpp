@@ -62,7 +62,7 @@ void C_PortalBlast::Init(CBaseHandle hOwner, bool bIsPortal2, PortalPlacedBy_t e
 	ClientThinkList()->SetNextClientThink( GetClientHandle(), CLIENT_THINK_ALWAYS );
 
 	AddToLeafSystem( false );
-
+	
 	SetThink( &C_PortalBlast::ClientThink );
 	SetNextClientThink( CLIENT_THINK_ALWAYS );
 
@@ -71,83 +71,50 @@ void C_PortalBlast::Init(CBaseHandle hOwner, bool bIsPortal2, PortalPlacedBy_t e
 
 	SetAbsOrigin( m_ptCreationPoint );
 
-	if (g_pGameRules)
-	{
-		if (g_pGameRules->IsMultiplayer())
-			cl_portal_projectile_delay_mp.GetFloat();
-		else
-			cl_portal_projectile_delay_sp.GetFloat();
-	}
-
-	m_fDeathTime = fDeathTime;
 	m_fCreationTime = gpGlobals->curtime;
+	m_fDeathTime = fDeathTime;
 
-	if (gpGlobals->curtime > (fDeathTime - 0.1f))
-		m_fDeathTime = gpGlobals->curtime + 0.1f;
+	if ( m_fDeathTime - 0.1f < m_fCreationTime )
+	{
+		m_fDeathTime = m_fCreationTime + 0.1f;
+	}
 
 	Vector vForward;
 	AngleVectors( qAngles, &vForward );
 
 	m_ptAimPoint = m_ptCreationPoint + vForward * m_ptCreationPoint.DistTo( m_ptDeathPoint );
 
-	CUtlReference<CNewParticleEffect> pEffect;
-	if (hOwner == false)
-		return;
-
 	if ( ePlacedBy == PORTAL_PLACED_BY_PLAYER )
-		pEffect = ParticleProp()->Create( ( ( bIsPortal2 ) ? ( "portal_projectile_stream" ) : ( "portal_projectile_stream" ) ), PATTACH_ABSORIGIN_FOLLOW );
-		
-		Color portalcolor;
-	
-		portalcolor = UTIL_Portal_Color_Particles((bIsPortal2) ? (2) : (1));
-
-		Vector vColor;
-		vColor.x = portalcolor.r();
-		vColor.y = portalcolor.g();
-		vColor.z = portalcolor.b();
-
-		pEffect->SetControlPoint(2, vColor);
+		ParticleProp()->Create( ( ( bIsPortal2 ) ? ( "portal_2_projectile_stream" ) : ( "portal_1_projectile_stream" ) ), PATTACH_ABSORIGIN_FOLLOW );
+	else
+		ParticleProp()->Create( ( ( bIsPortal2 ) ? ( "portal_2_projectile_stream_pedestal" ) : ( "portal_1_projectile_stream_pedestal" ) ), PATTACH_ABSORIGIN_FOLLOW );
 }
 
 void C_PortalBlast::ClientThink( void )
 {
-	float x = m_ptAimPoint.x;
-	
-	//if ( m_fCreationTime == 0.0f && m_fDeathTime == 0.0f )
-	if ( x == 0.0 && m_ptAimPoint.y == 0.0 )
+	if ( m_fCreationTime == 0.0f && m_fDeathTime == 0.0f )
 	{
 		// Die!
 		Remove();
 		return;
 	}
 
-	//float fT = ( gpGlobals->curtime - m_fCreationTime ) / ( m_fDeathTime - m_fCreationTime );
-	float fT = ( gpGlobals->curtime - x ) / ( m_ptAimPoint.y - x );
-	
-	if ( fT < 0.0 )
+	float fT = ( gpGlobals->curtime - m_fCreationTime ) / ( m_fDeathTime - m_fCreationTime );
+
+	if ( fT >= 1.0f )
 	{
-		fT = 0.0;
+		// Ready to die! But we want one more frame in the final position
+		SetAbsOrigin( m_ptDeathPoint );
 
-Spot:
-		float flTargetHelper = 1.0f - fT;
+		m_fCreationTime = 0.0f;
+		m_fDeathTime = 0.0f;
 
-		// Set the interpolated position
-		Vector vTarget; //= m_ptAimPoint * flTargetHelper + m_ptDeathPoint * fT;
-		vTarget.x = ( m_CalcAbsoluteVelocityMutex.GetOwnerId() * (1.0 - fT) ) + (m_ptDeathPoint.x * (1.0 - fT) ) + (fT * m_ptCreationPoint.x);
-		vTarget.y = ( m_CalcAbsoluteVelocityMutex.GetDepth() * (1.0 - fT)) + ((m_ptCreationPoint.y * fT) + (m_ptDeathPoint.y * (1.0 - fT)) * fT);
-		vTarget.z = ( IsBlurred() * (1.0 - fT)) + (((m_ptDeathPoint.z * (1.0 - fT)) + (m_ptCreationPoint.z * fT)) * fT);
-	
-		SetAbsOrigin( m_ptCreationPoint * flTargetHelper + vTarget * fT );
 		return;
 	}
-	if ( fT <= 1.0 && fT < 1.0 )
-		goto Spot;
-		
-	// Ready to die! But we want one more frame in the final position
-	SetAbsOrigin( m_ptCreationPoint );
 
-	m_ptAimPoint.x = 0.0;
-	m_ptAimPoint.y = 0.0;
+	// Set the interpolated position
+	Vector vTarget = m_ptAimPoint * ( 1.0f - fT ) + m_ptDeathPoint * fT;
+	SetAbsOrigin( m_ptCreationPoint * ( 1.0f - fT ) + vTarget * fT );
 	
 }
 

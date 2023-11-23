@@ -1,6 +1,8 @@
-//========= Copyright © 1996-2006, Valve Corporation, All rights reserved. ============//
+//========== Copyright (c) Valve Corporation, All rights reserved. ==========//
 
 // STATIC: "STAGE" "0..2"
+// STATIC: "USEONSTATICPROP" "0..1"
+// DYNAMIC: "COMPRESSED_VERTS"				"0..1"
 
 // Includes
 #include "common_vs_fxc.h"
@@ -13,13 +15,20 @@ const float2 g_vConst3 : register( SHADER_SPECIFIC_CONST_3 );
 #define g_flPortalOpenAmount g_vConst3.x
 #define g_flPortalStaticAmount g_vConst3.y
 
+const float g_vIsRecursivePortalView : register( SHADER_SPECIFIC_CONST_4 );
+
 // Structs
 struct VS_INPUT
 {
 	float4 vPos					: POSITION;		// Position
-	float4 vNormal				: NORMAL;		// Normal
-	float4 vTexCoord0			: TEXCOORD0;	// Base texture coordinates
-	float4 vTangent				: TANGENT;		// Flip in w
+	#if ( USEONSTATICPROP == 0 )
+		float4 vNormal				: NORMAL;		// Normal
+	#endif
+	float2 vTexCoord0			: TEXCOORD0;	// Base texture coordinates
+	#if ( USEONSTATICPROP == 0 )
+		float  flDecalOffset		: TEXCOORD1;	// How far to move each vertex along the normal
+		float4 vTangent				: TANGENT;		// Flip in w
+	#endif
 };
 
 struct VS_OUTPUT
@@ -31,6 +40,10 @@ struct VS_OUTPUT
 	float4 vWorldPosition		: TEXCOORD3; // Proj pos z in w
 	float3 vProjPosForRefract	: TEXCOORD4;
 	float4 vNoiseTexCoord		: TEXCOORD5;
+	
+#if !defined( _X360 ) && !defined( SHADER_MODEL_VS_3_0 )
+	float fog					: FOG;
+#endif
 };
 
 // Main
@@ -38,16 +51,42 @@ VS_OUTPUT main( const VS_INPUT i )
 {
 	float kFlPortalOuterBorder = 0.075f; // Must match PS!
 
-	VS_OUTPUT o;
+	VS_OUTPUT o = (VS_OUTPUT)0;
 
 	float3 vObjNormal;
-	DecompressVertex_Normal( i.vNormal, vObjNormal );
+	#if ( USEONSTATICPROP == 0 )
+	{
+		DecompressVertex_Normal( i.vNormal, vObjNormal );
+	}
+	#endif
+
+	// Move the portal decal away from the base surface a bit to avoid z fighting
+	float4 vObjPos = i.vPos.xyzw;
+
+	#if ( USEONSTATICPROP == 0 )
+	{
+		float flDecalOffset = 1.0f;	// This offset is used in recursive portal views when using fast clipping (e.g. on the PS3).
+									// It prevents ugly Z fighting between the portal and the surface it's on due to reduced Z precision when
+									// a player is really really close to a portal.
+		if ( g_vIsRecursivePortalView == 0.0f )
+		{
+			flDecalOffset = i.flDecalOffset;
+		}
+		vObjPos.xyz += flDecalOffset * vObjNormal.xyz;
+	}
+	#endif
 
 	// Transform the position
-	float3 vWorldPosition = mul( i.vPos, cModel[0] );
-	float3 vWorldNormal = normalize( mul( vObjNormal, ( float3x3 )cModel[0] ) );
-	float3 vWorldTangent = normalize( mul( i.vTangent, ( float3x3 )cModel[0] ) );
-	float3 vWorldBinormal = normalize( cross( vWorldNormal, vWorldTangent ) * i.vTangent.w );
+	float3 vWorldPosition = mul4x3( vObjPos, cModel[0] );
+	#if ( USEONSTATICPROP == 0 )
+		float3 vWorldNormal = normalize( mul3x3( vObjNormal, ( float3x3 )cModel[0] ) );
+		float3 vWorldTangent = normalize( mul3x3( i.vTangent.xyz, ( float3x3 )cModel[0] ) );
+		float3 vWorldBinormal = normalize( cross( vWorldNormal, vWorldTangent ) * i.vTangent.w );
+	#else
+		float3 vWorldNormal = float3( 0.0f, 0.0f, 1.0f );
+		float3 vWorldTangent = float3( 1.0f, 0.0f, 0.0f );
+		float3 vWorldBinormal = float3( 0.0f, 1.0f, 0.0f );
+	#endif
 
 	o.vWorldPosition.xyz = vWorldPosition.xyz;
 	//o.vWorldNormal.xyz = vWorldNormal.xyz;
@@ -56,8 +95,6 @@ VS_OUTPUT main( const VS_INPUT i )
 
 	// Transform into projection space
 	float4 vProjPosition = mul( float4( vWorldPosition, 1.0f ), cViewProj );
-	o.vProjPosition.xyzw = vProjPosition.xyzw;
-	o.vWorldPosition.w = vProjPosition.z;
 
 	// Map projected position to the refraction texture
 	float2 vRefractPos;
@@ -66,13 +103,26 @@ VS_OUTPUT main( const VS_INPUT i )
 	vRefractPos = ( vRefractPos + vProjPosition.w ) * 0.5f;
 	o.vProjPosForRefract.xyz = float3(vRefractPos.x, vRefractPos.y, vProjPosition.w);
 
+#ifdef _PS3
+	// Account for OpenGL's flipped y coordinate and expanded z range [-1,1] instead of [0,1]
+	vProjPosition.y = -vProjPosition.y;
+	vProjPosition.z = 2.0f * vProjPosition.z - vProjPosition.w;
+#endif // _PS3
+
+	o.vProjPosition.xyzw = vProjPosition.xyzw;
+	o.vWorldPosition.w = vProjPosition.z;
+	
+#if !defined( _X360 ) && !defined( SHADER_MODEL_VS_3_0 )
+	o.fog = CalcFixedFunctionFog( vWorldPosition, FOGTYPE_RANGE );
+#endif
+
 	// View vector
 	float3 vWorldViewVector = normalize (vWorldPosition.xyz - cEyePos.xyz);
 
 	// Texture coordinates
 	float2 vBaseUv;
-	vBaseUv.x = dot( i.vTexCoord0.xy, cBaseTexCoordTransform[0] );
-	vBaseUv.y = dot( i.vTexCoord0.xy, cBaseTexCoordTransform[1] );
+	vBaseUv.x = dot( i.vTexCoord0.xy, cBaseTexCoordTransform[0].xy );
+	vBaseUv.y = dot( i.vTexCoord0.xy, cBaseTexCoordTransform[1].xy );
 	//o.vUv0.xy = vBaseUv.xy;
 	o.vUv0.xy = vBaseUv.xy * ( 1.0f + kFlPortalOuterBorder ) - ( kFlPortalOuterBorder * 0.5f ); // Adjust uv's for shrunken portal
 

@@ -19,9 +19,32 @@ public:
 	}
 	void SetMODEL( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nMODEL = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bMODEL = true;
+#endif
+	}
+private:
+	int m_nPORTALGHOSTOVERLAY;
+#ifdef _DEBUG
+	bool m_bPORTALGHOSTOVERLAY;
+#endif
+public:
+	void SetPORTALGHOSTOVERLAY( int i )
+	{
+		Assert( i >= 0 && i <= 2 );
+		m_nPORTALGHOSTOVERLAY = i;
+#ifdef _DEBUG
+		m_bPORTALGHOSTOVERLAY = true;
+#endif
+	}
+	void SetPORTALGHOSTOVERLAY( bool i )
+	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 2 );
+		m_nPORTALGHOSTOVERLAY = i ? 1 : 0;
+#ifdef _DEBUG
+		m_bPORTALGHOSTOVERLAY = true;
 #endif
 	}
 public:
@@ -32,19 +55,23 @@ public:
 		m_bMODEL = false;
 #endif // _DEBUG
 		m_nMODEL = 0;
+#ifdef _DEBUG
+		m_bPORTALGHOSTOVERLAY = false;
+#endif // _DEBUG
+		m_nPORTALGHOSTOVERLAY = 0;
 	}
 	int GetIndex()
 	{
 		// Asserts to make sure that we aren't using any skipped combinations.
 		// Asserts to make sure that we are setting all of the combination vars.
 #ifdef _DEBUG
-		bool bAllStaticVarsDefined = m_bMODEL;
+		bool bAllStaticVarsDefined = m_bMODEL && m_bPORTALGHOSTOVERLAY;
 		Assert( bAllStaticVarsDefined );
 #endif // _DEBUG
-		return ( 2 * m_nMODEL ) + 0;
+		return ( 2 * m_nMODEL ) + ( 4 * m_nPORTALGHOSTOVERLAY ) + 0;
 	}
 };
-#define shaderStaticTest_portalstaticoverlay_vs20 vsh_forgot_to_set_static_MODEL + 0
+#define shaderStaticTest_portalstaticoverlay_vs20 vsh_forgot_to_set_static_MODEL + vsh_forgot_to_set_static_PORTALGHOSTOVERLAY + 0
 class portalstaticoverlay_vs20_Dynamic_Index
 {
 private:
@@ -63,6 +90,7 @@ public:
 	}
 	void SetSKINNING( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nSKINNING = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bSKINNING = true;

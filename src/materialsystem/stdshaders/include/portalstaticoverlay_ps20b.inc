@@ -14,20 +14,15 @@
 #include "shaderlib/cshader.h"
 class portalstaticoverlay_ps20b_Static_Index
 {
-	unsigned int m_nCONVERT_TO_SRGB : 2;
 	unsigned int m_nHASALPHAMASK : 2;
 	unsigned int m_nHASSTATICTEXTURE : 2;
+	unsigned int m_nPORTALGHOSTOVERLAY : 2;
 #ifdef _DEBUG
 	bool m_bHASALPHAMASK : 1;
 	bool m_bHASSTATICTEXTURE : 1;
+	bool m_bPORTALGHOSTOVERLAY : 1;
 #endif	// _DEBUG
 public:
-	void SetCONVERT_TO_SRGB( int i )
-	{
-		Assert( i >= 0 && i <= 1 );
-		m_nCONVERT_TO_SRGB = i;
-	}
-
 	void SetHASALPHAMASK( int i )
 	{
 		Assert( i >= 0 && i <= 1 );
@@ -46,70 +41,57 @@ public:
 #endif	// _DEBUG
 	}
 
+	void SetPORTALGHOSTOVERLAY( int i )
+	{
+		Assert( i >= 0 && i <= 1 );
+		m_nPORTALGHOSTOVERLAY = i;
+#ifdef _DEBUG
+		m_bPORTALGHOSTOVERLAY = true;
+#endif	// _DEBUG
+	}
+
 	portalstaticoverlay_ps20b_Static_Index( IShaderShadow* pShaderShadow, IMaterialVar** params )
 	{
-		m_nCONVERT_TO_SRGB = g_pHardwareConfig->NeedsShaderSRGBConversion();
 		m_nHASALPHAMASK = 0;
 		m_nHASSTATICTEXTURE = 0;
+		m_nPORTALGHOSTOVERLAY = 0;
 #ifdef _DEBUG
 		m_bHASALPHAMASK = false;
 		m_bHASSTATICTEXTURE = false;
+		m_bPORTALGHOSTOVERLAY = false;
 #endif	// _DEBUG
 	}
 
 	int GetIndex() const
 	{
-		Assert( m_bHASALPHAMASK && m_bHASSTATICTEXTURE );
-		return ( 4 * m_nCONVERT_TO_SRGB ) + ( 8 * m_nHASALPHAMASK ) + ( 16 * m_nHASSTATICTEXTURE ) + 0;
+		Assert( m_bHASALPHAMASK && m_bHASSTATICTEXTURE && m_bPORTALGHOSTOVERLAY );
+		return ( 2 * m_nHASALPHAMASK ) + ( 4 * m_nHASSTATICTEXTURE ) + ( 8 * m_nPORTALGHOSTOVERLAY ) + 0;
 	}
 };
 
-#define shaderStaticTest_portalstaticoverlay_ps20b psh_forgot_to_set_static_HASALPHAMASK + psh_forgot_to_set_static_HASSTATICTEXTURE
+#define shaderStaticTest_portalstaticoverlay_ps20b psh_forgot_to_set_static_HASALPHAMASK + psh_forgot_to_set_static_HASSTATICTEXTURE + psh_forgot_to_set_static_PORTALGHOSTOVERLAY
 
 
 class portalstaticoverlay_ps20b_Dynamic_Index
 {
-	unsigned int m_nHDRENABLED : 2;
 	unsigned int m_nPIXELFOGTYPE : 2;
-#ifdef _DEBUG
-	bool m_bHDRENABLED : 1;
-	bool m_bPIXELFOGTYPE : 1;
-#endif	// _DEBUG
 public:
-	void SetHDRENABLED( int i )
-	{
-		Assert( i >= 0 && i <= 1 );
-		m_nHDRENABLED = i;
-#ifdef _DEBUG
-		m_bHDRENABLED = true;
-#endif	// _DEBUG
-	}
-
 	void SetPIXELFOGTYPE( int i )
 	{
 		Assert( i >= 0 && i <= 1 );
 		m_nPIXELFOGTYPE = i;
-#ifdef _DEBUG
-		m_bPIXELFOGTYPE = true;
-#endif	// _DEBUG
 	}
 
 	portalstaticoverlay_ps20b_Dynamic_Index( IShaderDynamicAPI* pShaderAPI )
 	{
-		m_nHDRENABLED = 0;
-		m_nPIXELFOGTYPE = 0;
-#ifdef _DEBUG
-		m_bHDRENABLED = false;
-		m_bPIXELFOGTYPE = false;
-#endif	// _DEBUG
+		m_nPIXELFOGTYPE = ( pShaderAPI->GetSceneFogMode() == MATERIAL_FOG_LINEAR_BELOW_FOG_Z ) ;
 	}
 
 	int GetIndex() const
 	{
-		Assert( m_bHDRENABLED && m_bPIXELFOGTYPE );
-		return ( 1 * m_nHDRENABLED ) + ( 2 * m_nPIXELFOGTYPE ) + 0;
+		return ( 1 * m_nPIXELFOGTYPE ) + 0;
 	}
 };
 
-#define shaderDynamicTest_portalstaticoverlay_ps20b psh_forgot_to_set_dynamic_HDRENABLED + psh_forgot_to_set_dynamic_PIXELFOGTYPE
+#define shaderDynamicTest_portalstaticoverlay_ps20b 1
 

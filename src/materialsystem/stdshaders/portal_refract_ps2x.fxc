@@ -1,13 +1,21 @@
-//========= Copyright © 1996-2007, Valve Corporation, All rights reserved. ============//
+//========== Copyright (c) Valve Corporation, All rights reserved. ==========//
 
-// STATIC: "CONVERT_TO_SRGB"	"0..1"	[ps20b][= g_pHardwareConfig->NeedsShaderSRGBConversion()] [PC]
-// STATIC: "CONVERT_TO_SRGB"	"0..0"	[= 0] [XBOX]
 // STATIC:  "STAGE"				"0..2"
-// DYNAMIC: "PIXELFOGTYPE"		"0..1"	[ps20b]
+// STATIC:	"TINTED"			"0..1"
+// STATIC: "SHADER_SRGB_READ"	"0..1" [ps20b] [PC]
+// STATIC: "SHADER_SRGB_READ"	"0..0" [ps20b] [CONSOLE]
 
-#if defined(SHADER_MODEL_PS_2_0)
-	#define PIXELFOGTYPE PIXEL_FOG_TYPE_NONE
+// DYNAMIC: "D_NVIDIA_STEREO"				"0..1"	[ps20b] [PC]
+// DYNAMIC: "D_NVIDIA_STEREO"				"0..0"	[ps20b] [CONSOLE]
+
+//  SKIP: ( $STAGE != 2 ) && ( $TINTED == 1 )
+
+#if defined( _X360 )
+	#undef SHADER_SRGB_READ
+	#define SHADER_SRGB_READ 1
 #endif
+
+#include "common_fog_ps_supportsvertexfog_fxc.h"
 
 // Includes =======================================================================================
 #include "common_vertexlitgeneric_dx9.h"
@@ -16,6 +24,10 @@
 sampler g_tRefractionSampler		: register( s0 );
 sampler g_tPortalNoiseSampler		: register( s1 );
 sampler g_tPortalColorSampler		: register( s2 );
+
+#if D_NVIDIA_STEREO
+	sampler StereoParamSampler		: register( s3 );
+#endif
 
 // Shaders Constants and Globals ==================================================================
 const float4 g_mViewProj0			: register( c0 );	// 1st row of matrix
@@ -28,6 +40,13 @@ const float3 g_vConst4				: register( c4 );
 #define g_flPortalColorScale   g_vConst4.z
 const float4 g_vCameraPosition		: register( c5 );
 const float4 g_vFogParams			: register( c6 );
+
+#if ( TINTED == 1 )
+	const float4 g_vGradientDark	: register( c7 ); //the dark side of a color gradient when not using a color texture
+	const float4 g_vGradientLight	: register( c8 ); //the bright side of a color gradient when not using a color texture
+#endif
+
+const float4 g_vViewportMad : register( c9 );
 
 // Interpolated values ============================================================================
 struct PS_INPUT
@@ -44,6 +63,29 @@ struct PS_INPUT
 float linearstep( float iMin, float iMax, float iValue )
 {
 	return saturate( ( iValue - iMin ) / ( iMax - iMin ) );
+}
+
+// NVIDIA's function to convert mono refract UV to the correct stereo UV for each eye
+float2 MonoToStereoClipPosXY( float3 vMonoClipPos ) // .z is actually .w
+{
+	#if ( !D_NVIDIA_STEREO )
+	{
+		return vMonoClipPos.xy;
+	}
+	#else
+	{
+	    // 0th pixel = 1/16 == 1/16 + 1/8 * 0
+	    float flEyeSep = tex2D( StereoParamSampler, float2( 0.0625f, 0 ) ).x; // 0.19 * 0.1316;
+
+	    // 1st pixel = 3/16 == 1/16 + 1/8 * 1
+	    float flConvergence = tex2D( StereoParamSampler, float2( 0.1875, 0 ) ).x; // 4;
+	    float3 vStereoClipPos = vMonoClipPos.xyz;
+
+	    // Undo the stereo transform
+	    vStereoClipPos.x += flEyeSep * ( vMonoClipPos.z - flConvergence );
+	    return vStereoClipPos.xy;
+	}
+	#endif
 }
 
 // Main ===========================================================================================
@@ -105,12 +147,19 @@ float4 main( PS_INPUT i ) : COLOR
 		vTangentRefract.xy *= kPortalRadius.xy;
 
 		// Generate refracteds screen-space uv
-		float2 vRefractTexCoord = vRefractTexCoordNoWarp.xy;
+		float2 vRefractTexCoord = MonoToStereoClipPosXY( i.vProjPosForRefract.xyz ) / i.vProjPosForRefract.z;
 		vRefractTexCoord.xy += vTangentRefract.x * vProjTangent.xy;
 		vRefractTexCoord.xy -= vTangentRefract.y * vProjBinormal.xy;
 
+		// Adjust for current viewport
+		#if defined( _X360 ) || defined( _PS3 )
+		{
+			vRefractTexCoord.xy = ( vRefractTexCoord.xy * g_vViewportMad.xy ) + g_vViewportMad.zw;
+		}
+		#endif
+
 		// Fetch color from texture
-		float3 cRefract = tex2D( g_tRefractionSampler, vRefractTexCoord.xy );
+		float3 cRefract = tex2Dsrgb( g_tRefractionSampler, vRefractTexCoord.xy ).rgb;
 
 		// Darken the ring around the portal as it's opening to help it stand out on plain walls
 		float flHoleEdge = flPortalOpenAmountSquared;
@@ -183,14 +232,24 @@ float4 main( PS_INPUT i ) : COLOR
 		float flTransparancy = saturate( flEffectMask + ( flStencilCutout * ( 1.0f - flPortalActiveWithNoise ) ) ) * 1.5f; // Magic number at the end will make the flames thicker with larger numbers
 
 		// This will make the portals shift in color from bottom to top (Set to 1.0f to disable)
-		//float flBottomToTopBrightnessShift = ( pow( i.vUv0.y, 1.5f ) * 0.9f ) + 0.1f; // More extreme
-		//float flBottomToTopBrightnessShift = ( pow( i.vUv0.y, 1.5f ) * 0.85f ) + 0.15f;
-		float flBottomToTopBrightnessShift = ( pow( i.vUv0.y, 1.5f ) * 0.8f ) + 0.2f;
-		//float flBottomToTopBrightnessShift = ( pow( i.vUv0.y, 1.5f ) * 0.75f ) + 0.25f; // More subtle (needs higher color scale below)
+		//float flBottomToTopBrightnessShift = ( pow( abs(i.vUv0.y), 1.5f ) * 0.9f ) + 0.1f; // More extreme
+		//float flBottomToTopBrightnessShift = ( pow( abs(i.vUv0.y), 1.5f ) * 0.85f ) + 0.15f;
+		float flBottomToTopBrightnessShift = ( pow( abs(i.vUv0.y), 1.5f ) * 0.8f ) + 0.2f;
+		//float flBottomToTopBrightnessShift = ( pow( abs(i.vUv0.y), 1.5f ) * 0.75f ) + 0.25f; // More subtle (needs higher color scale below)
 		//float flBottomToTopBrightnessShift = 1.0f; // Disabled
 
-		// Fetch color from 1D texture
-		float4 cFlameColor = tex1D( g_tPortalColorSampler, pow( flNoise, 0.5f ) * flBottomToTopBrightnessShift * flTransparancy );
+		float3 cFlameColor;
+		float flGradientSampleLocation = pow( flNoise, 0.5f ) * flBottomToTopBrightnessShift * flTransparancy;
+		#if ( TINTED == 0 )
+		{
+			// Fetch color from 1D texture
+			cFlameColor.rgb = tex1D( g_tPortalColorSampler, flGradientSampleLocation ).rgb;
+		}
+		#else
+		{
+			cFlameColor.rgb = lerp( g_vGradientDark.rgb, g_vGradientLight.rgb, flGradientSampleLocation );
+		}
+		#endif
 		cFlameColor.rgb *= g_flPortalColorScale; // Brighten colors to make it look more emissive
 
 		// Generate final color result
@@ -208,8 +267,16 @@ float4 main( PS_INPUT i ) : COLOR
 		//result.rgba = flPortalActive * flStencilCutout;
 
 		// Apply fog and deal with HDR
-		float fogFactor = CalcPixelFogFactor( PIXELFOGTYPE, g_vFogParams, g_vCameraPosition.z, i.vWorldPosition.z, i.vWorldPosition.w );
-		return FinalOutput( result, fogFactor, PIXELFOGTYPE, TONEMAP_SCALE_LINEAR );
+		float fogFactor = 0.0f;
+		#if !defined( SHADER_MODEL_PS_2_0 )
+		{
+			fogFactor = CalcPixelFogFactor( PIXELFOGTYPE, g_vFogParams, g_vCameraPosition.xyz, i.vWorldPosition.xyz, i.vWorldPosition.w );
+		}
+		#endif
+		
+		// Limit tonemap scalar to 0.0-1.0 so the colors don't oversaturate, but let it drop down to 0 in case we're fading
+		float flTonemapScalar = saturate( LINEAR_LIGHT_SCALE );
+		return FinalOutput( result, fogFactor, PIXELFOGTYPE, TONEMAP_SCALE_NONE ) * flTonemapScalar;
 	}
 	#endif
 }

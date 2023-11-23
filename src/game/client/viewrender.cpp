@@ -729,7 +729,7 @@ public:
 		m_IntersectionView( pMainView )
 	{}
 
-	void Setup(  const CViewSetup &view, bool bDrawSkybox, const VisibleFogVolumeInfo_t &fogInfo, const WaterRenderInfo_t& waterInfo );
+	void Setup(  const CViewSetup &view, bool bDrawSkybox, const VisibleFogVolumeInfo_t &fogInfo, const WaterRenderInfo_t& waterInfo, ViewCustomVisibility_t *pCustomVisibility = NULL );
 	void			Draw();
 
 	class CReflectionView : public CBaseWorldView
@@ -796,7 +796,7 @@ public:
 		m_RefractionView( pMainView )
 	{}
 
-	void			Setup( const CViewSetup &view, bool bDrawSkybox, const VisibleFogVolumeInfo_t &fogInfo, const WaterRenderInfo_t& info );
+	void			Setup( const CViewSetup &view, bool bDrawSkybox, const VisibleFogVolumeInfo_t &fogInfo, const WaterRenderInfo_t& info, ViewCustomVisibility_t *pCustomVisibility = NULL );
 	void			Draw();
 
 	class CRefractionView : public CBaseWorldView
@@ -3291,114 +3291,105 @@ bool DoesViewPlaneIntersectWater( float waterZ, int leafWaterDataID )
 //-----------------------------------------------------------------------------
 void CViewRender::ViewDrawScene_PortalStencil(const CViewSetup &viewIn, ViewCustomVisibility_t *pCustomVisibility)
 {
-	
-	VPROF("CViewRender::ViewDrawScene_PortalStencil");
+	VPROF_BUDGET( "CViewRender::ViewDrawScene_PortalStencil", "ViewDrawScene_PortalStencil" );
 
-	CViewSetup view(viewIn);
+	CViewSetup view( viewIn );
 
 	// Record old view stats
 	Vector vecOldOrigin = CurrentViewOrigin();
 	QAngle vecOldAngles = CurrentViewAngles();
 
 	int iCurrentViewID = g_CurrentViewID;
+#if defined( DBGFLAG_ASSERT )
 	int iRecursionLevel = g_pPortalRender->GetViewRecursionLevel();
-	Assert(iRecursionLevel > 0);
-
-	//get references to reflection textures
-	CTextureReference pPrimaryWaterReflectionTexture;
-	pPrimaryWaterReflectionTexture.Init(GetWaterReflectionTexture());
-	CTextureReference pReplacementWaterReflectionTexture;
-	pReplacementWaterReflectionTexture.Init(portalrendertargets->GetWaterReflectionTextureForStencilDepth(iRecursionLevel));
-	//pReplacementWaterReflectionTexture.Init(GetWaterReflectionTexture());
-
-	//get references to refraction textures
-	CTextureReference pPrimaryWaterRefractionTexture;
-	pPrimaryWaterRefractionTexture.Init(GetWaterRefractionTexture());
-	CTextureReference pReplacementWaterRefractionTexture;
-	pReplacementWaterRefractionTexture.Init(portalrendertargets->GetWaterRefractionTextureForStencilDepth(iRecursionLevel));
-	//pReplacementWaterRefractionTexture.Init(GetWaterReflectionTexture());
-
-
-	//swap texture contents for the primary render targets with those we set aside for this recursion level
-	if (pReplacementWaterReflectionTexture != NULL)
-		pPrimaryWaterReflectionTexture->SwapContents(pReplacementWaterReflectionTexture);
-
-	if (pReplacementWaterRefractionTexture != NULL)
-		pPrimaryWaterRefractionTexture->SwapContents(pReplacementWaterRefractionTexture);
+	Assert( iRecursionLevel > 0 );
+#endif
 
 	bool bDrew3dSkybox = false;
 	SkyboxVisibility_t nSkyboxVisible = SKYBOX_NOT_VISIBLE;
 	int iClearFlags = 0;
 
-	Draw3dSkyboxworld_Portal(view, iClearFlags, bDrew3dSkybox, nSkyboxVisible);
+	Draw3dSkyboxworld_Portal( view, iClearFlags, bDrew3dSkybox, nSkyboxVisible );
 
 	bool drawSkybox = r_skybox.GetBool();
-	if (bDrew3dSkybox || (nSkyboxVisible == SKYBOX_NOT_VISIBLE))
+	if ( bDrew3dSkybox || ( nSkyboxVisible == SKYBOX_NOT_VISIBLE ) )
 	{
 		drawSkybox = false;
 	}
 
 	//generate unique view ID's for each stencil view
 	view_id_t iNewViewID = (view_id_t)g_pPortalRender->GetCurrentViewId();
-	SetupCurrentView(view.origin, view.angles, (view_id_t)iNewViewID);
-
+	SetupCurrentView( view.origin, view.angles, (view_id_t)iNewViewID );
+	
 	// update vis data
 	unsigned int visFlags;
-	SetupVis(view, visFlags, pCustomVisibility);
+	SetupVis( view, visFlags, pCustomVisibility );
 
 	VisibleFogVolumeInfo_t fogInfo;
-	if (g_pPortalRender->GetViewRecursionLevel() == 0)
+	if( g_pPortalRender->GetViewRecursionLevel() == 0 )
 	{
-		render->GetVisibleFogVolume(view.origin, &fogInfo);
+		render->GetVisibleFogVolume( view.origin, &fogInfo );
 	}
 	else
 	{
-		render->GetVisibleFogVolume(g_pPortalRender->GetExitPortalFogOrigin(), &fogInfo);
+		render->GetVisibleFogVolume( g_pPortalRender->GetExitPortalFogOrigin(), &fogInfo );
 	}
 
 	WaterRenderInfo_t waterInfo;
-	DetermineWaterRenderInfo(fogInfo, waterInfo);
+	DetermineWaterRenderInfo( fogInfo, waterInfo );
 
-	if (waterInfo.m_bCheapWater)
-	{
-		cplane_t glassReflectionPlane;
-		if (IsReflectiveGlassInView(viewIn, glassReflectionPlane))
+	if ( waterInfo.m_bCheapWater )
+	{		     
+		// Only bother to enable depth feathering with water seen through up to a single portal when cheap_water is active.
+		if ( g_pPortalRender->GetViewRecursionLevel() <= 1)
 		{
-			CRefPtr<CReflectiveGlassView> pGlassReflectionView = new CReflectiveGlassView(this);
-			pGlassReflectionView->Setup(viewIn, VIEW_CLEAR_DEPTH | VIEW_CLEAR_COLOR | VIEW_CLEAR_OBEY_STENCIL, drawSkybox, fogInfo, waterInfo, glassReflectionPlane);
-			AddViewToScene(pGlassReflectionView);
+			//EnableWaterDepthFeathing( fogInfo.m_pFogVolumeMaterial, true );
+		}
+		
+		cplane_t glassReflectionPlane;
+		if ( IsReflectiveGlassInView( viewIn, glassReflectionPlane ) )
+		{								    
+			CRefPtr<CReflectiveGlassView> pGlassReflectionView = new CReflectiveGlassView( this );
+			pGlassReflectionView->Setup( viewIn, VIEW_CLEAR_DEPTH | VIEW_CLEAR_COLOR | VIEW_CLEAR_OBEY_STENCIL, drawSkybox, fogInfo, waterInfo, glassReflectionPlane );
+			AddViewToScene( pGlassReflectionView );
 
-			CRefPtr<CRefractiveGlassView> pGlassRefractionView = new CRefractiveGlassView(this);
-			pGlassRefractionView->Setup(viewIn, VIEW_CLEAR_DEPTH | VIEW_CLEAR_COLOR | VIEW_CLEAR_OBEY_STENCIL, drawSkybox, fogInfo, waterInfo, glassReflectionPlane);
-			AddViewToScene(pGlassRefractionView);
+			CRefPtr<CRefractiveGlassView> pGlassRefractionView = new CRefractiveGlassView( this );
+			pGlassRefractionView->Setup( viewIn, VIEW_CLEAR_DEPTH | VIEW_CLEAR_COLOR | VIEW_CLEAR_OBEY_STENCIL, drawSkybox, fogInfo, waterInfo, glassReflectionPlane );
+			AddViewToScene( pGlassRefractionView );
 		}
 
-		CSimpleWorldView *pClientView = new CSimpleWorldView(this);
-		pClientView->Setup(view, VIEW_CLEAR_OBEY_STENCIL, drawSkybox, fogInfo, waterInfo, pCustomVisibility);
-		AddViewToScene(pClientView);
-		SafeRelease(pClientView);
+		CSimpleWorldView *pClientView = new CSimpleWorldView( this );
+		pClientView->Setup( view, VIEW_CLEAR_OBEY_STENCIL, drawSkybox, fogInfo, waterInfo, pCustomVisibility );
+		AddViewToScene( pClientView );
+		SafeRelease( pClientView );
+
+		//EnableWaterDepthFeathing( fogInfo.m_pFogVolumeMaterial, false );
 	}
 	else
 	{
+		//EnableWaterDepthFeathing( fogInfo.m_pFogVolumeMaterial, true );
+		
 		// We can see water of some sort
-		if (!fogInfo.m_bEyeInFogVolume)
+		if ( !fogInfo.m_bEyeInFogVolume )
 		{
-			CRefPtr<CAboveWaterView> pAboveWaterView = new CAboveWaterView(this);
-			pAboveWaterView->Setup(viewIn, drawSkybox, fogInfo, waterInfo);
-			AddViewToScene(pAboveWaterView);
+			CRefPtr<CAboveWaterView> pAboveWaterView = new CAboveWaterView( this );
+			pAboveWaterView->Setup( viewIn, drawSkybox, fogInfo, waterInfo, pCustomVisibility );
+			AddViewToScene( pAboveWaterView );
 		}
 		else
 		{
-			CRefPtr<CUnderWaterView> pUnderWaterView = new CUnderWaterView(this);
-			pUnderWaterView->Setup(viewIn, drawSkybox, fogInfo, waterInfo);
-			AddViewToScene(pUnderWaterView);
+			CRefPtr<CUnderWaterView> pUnderWaterView = new CUnderWaterView( this );
+			pUnderWaterView->Setup( viewIn, drawSkybox, fogInfo, waterInfo, pCustomVisibility );
+			AddViewToScene( pUnderWaterView );
 		}
-	}
 
+		//EnableWaterDepthFeathing( fogInfo.m_pFogVolumeMaterial, false );
+	}
+	
 	// Disable fog for the rest of the stuff
 	DisableFog();
 
-	CGlowOverlay::DrawOverlays(view.m_bCacheFullSceneState);
+	CGlowOverlay::DrawOverlays( view.m_bCacheFullSceneState );
 
 	// Draw rain..
 	DrawPrecipitation();
@@ -3411,20 +3402,11 @@ void CViewRender::ViewDrawScene_PortalStencil(const CViewSetup &viewIn, ViewCust
 	engine->Sound_ExtraUpdate();
 
 	// Debugging info goes over the top
-	CDebugViewRender::Draw3DDebuggingInfo(view);
+	CDebugViewRender::Draw3DDebuggingInfo( view );
 
 	// Return to the previous view
-	SetupCurrentView(vecOldOrigin, vecOldAngles, (view_id_t)iCurrentViewID);
+	SetupCurrentView( vecOldOrigin, vecOldAngles, (view_id_t)iCurrentViewID );
 	g_CurrentViewID = iCurrentViewID; //just in case the cast to view_id_t screwed up the id #
-
-
-									  //swap back the water render targets
-	if (pReplacementWaterReflectionTexture != NULL)
-		pPrimaryWaterReflectionTexture->SwapContents(pReplacementWaterReflectionTexture);
-
-	if (pReplacementWaterRefractionTexture != NULL)
-		pPrimaryWaterRefractionTexture->SwapContents(pReplacementWaterRefractionTexture);
-		
 }
 
 void CViewRender::Draw3dSkyboxworld_Portal(const CViewSetup &view, int &nClearFlags, bool &bDrew3dSkybox, SkyboxVisibility_t &nSkyboxVisible, ITexture *pRenderTarget)
@@ -6153,7 +6135,7 @@ void CBaseWorldView::DrawExecute( float waterHeight, view_id_t viewID, float wat
 		Begin360ZPass();
 	}
 
-#if defined PORTAL && 1
+#if defined PORTAL && 0
 	if ( IsMainView( viewID ) )
 	{
 		g_pPortalRender->DrawEarlyZPortals( (CViewRender*)view );
@@ -6261,7 +6243,7 @@ void CSimpleWorldView::Setup( const CViewSetup &view, int nClearFlags, bool bDra
 	}
 	
 #if defined( PORTAL2 )
-	m_DrawFlags |= ComputeSimpleWorldModelDrawFlags();
+	//m_DrawFlags |= ComputeSimpleWorldModelDrawFlags();
 #endif // PORTAL2
 
 	m_pCustomVisibility = pCustomVisibility;
@@ -6376,7 +6358,7 @@ void CBaseWaterView::CSoftwareIntersectionView::Draw()
 //-----------------------------------------------------------------------------
 // Draws the scene when the view point is above the level of the water
 //-----------------------------------------------------------------------------
-void CAboveWaterView::Setup( const CViewSetup &view, bool bDrawSkybox, const VisibleFogVolumeInfo_t &fogInfo, const WaterRenderInfo_t& waterInfo )
+void CAboveWaterView::Setup( const CViewSetup &view, bool bDrawSkybox, const VisibleFogVolumeInfo_t &fogInfo, const WaterRenderInfo_t& waterInfo, ViewCustomVisibility_t *pCustomVisibility )
 {
 	BaseClass::Setup( view );
 
@@ -6426,6 +6408,7 @@ void CAboveWaterView::Setup( const CViewSetup &view, bool bDrawSkybox, const Vis
 
 	m_fogInfo = fogInfo;
 	m_waterInfo = waterInfo;
+	m_pCustomVisibility = pCustomVisibility;
 }
 
 		 
@@ -6556,6 +6539,8 @@ void CAboveWaterView::CReflectionView::Draw()
 
 	// Store off view origin and angles and set the new view
 	int nSaveViewID = CurrentViewID();
+	Vector vecOldOrigin = CurrentViewOrigin();
+	QAngle vecOldAngles = CurrentViewAngles();
 	SetupCurrentView( origin, angles, VIEW_REFLECTION );
 
 	// Disable occlusion visualization in reflection
@@ -6573,9 +6558,9 @@ void CAboveWaterView::CReflectionView::Draw()
 	// deal with stencil
 	g_pPortalRender->WaterRenderingHandler_PostReflection();
 #endif
-
+	
 	// finish off the view and restore the previous view.
-	SetupCurrentView( origin, angles, ( view_id_t )nSaveViewID );
+	SetupCurrentView( vecOldOrigin, vecOldAngles, ( view_id_t )nSaveViewID );
 
 	// This is here for multithreading
 	CMatRenderContextPtr pRenderContext( materials );
@@ -6609,6 +6594,8 @@ void CAboveWaterView::CRefractionView::Draw()
 
 	// Store off view origin and angles and set the new view
 	int nSaveViewID = CurrentViewID();
+	Vector vecOldOrigin = CurrentViewOrigin();
+	QAngle vecOldAngles = CurrentViewAngles();
 	SetupCurrentView( origin, angles, VIEW_REFRACTION );
 
 	DrawSetup( GetOuter()->m_waterHeight, m_DrawFlags, GetOuter()->m_waterZAdjust );
@@ -6621,9 +6608,9 @@ void CAboveWaterView::CRefractionView::Draw()
 	// deal with stencil
 	g_pPortalRender->WaterRenderingHandler_PostRefraction();
 #endif
-
+	
 	// finish off the view.  restore the previous view.
-	SetupCurrentView( origin, angles, ( view_id_t )nSaveViewID );
+	SetupCurrentView( vecOldOrigin, vecOldAngles, ( view_id_t )nSaveViewID );
 
 	// This is here for multithreading
 	CMatRenderContextPtr pRenderContext( materials );
@@ -6660,7 +6647,7 @@ void CAboveWaterView::CIntersectionView::Draw()
 //-----------------------------------------------------------------------------
 // Draws the scene when the view point is under the level of the water
 //-----------------------------------------------------------------------------
-void CUnderWaterView::Setup( const CViewSetup &view, bool bDrawSkybox, const VisibleFogVolumeInfo_t &fogInfo, const WaterRenderInfo_t& waterInfo )
+void CUnderWaterView::Setup( const CViewSetup &view, bool bDrawSkybox, const VisibleFogVolumeInfo_t &fogInfo, const WaterRenderInfo_t& waterInfo, ViewCustomVisibility_t *pCustomVisibility )
 {
 	BaseClass::Setup( view );
 
@@ -6707,6 +6694,7 @@ void CUnderWaterView::Setup( const CViewSetup &view, bool bDrawSkybox, const Vis
 	m_fogInfo = fogInfo;
 	m_waterInfo = waterInfo;
 	m_bDrawSkybox = bDrawSkybox;
+	m_pCustomVisibility = pCustomVisibility;
 }
 
 

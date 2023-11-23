@@ -6,8 +6,10 @@
 class portalstaticoverlay_vs20_Static_Index
 {
 	unsigned int m_nMODEL : 2;
+	unsigned int m_nPORTALGHOSTOVERLAY : 2;
 #ifdef _DEBUG
 	bool m_bMODEL : 1;
+	bool m_bPORTALGHOSTOVERLAY : 1;
 #endif	// _DEBUG
 public:
 	void SetMODEL( int i )
@@ -19,22 +21,33 @@ public:
 #endif	// _DEBUG
 	}
 
+	void SetPORTALGHOSTOVERLAY( int i )
+	{
+		Assert( i >= 0 && i <= 2 );
+		m_nPORTALGHOSTOVERLAY = i;
+#ifdef _DEBUG
+		m_bPORTALGHOSTOVERLAY = true;
+#endif	// _DEBUG
+	}
+
 	portalstaticoverlay_vs20_Static_Index( IShaderShadow* pShaderShadow, IMaterialVar** params )
 	{
 		m_nMODEL = 0;
+		m_nPORTALGHOSTOVERLAY = 0;
 #ifdef _DEBUG
 		m_bMODEL = false;
+		m_bPORTALGHOSTOVERLAY = false;
 #endif	// _DEBUG
 	}
 
 	int GetIndex() const
 	{
-		Assert( m_bMODEL );
-		return ( 2 * m_nMODEL ) + 0;
+		Assert( m_bMODEL && m_bPORTALGHOSTOVERLAY );
+		return ( 2 * m_nMODEL ) + ( 4 * m_nPORTALGHOSTOVERLAY ) + 0;
 	}
 };
 
-#define shaderStaticTest_portalstaticoverlay_vs20 vsh_forgot_to_set_static_MODEL
+#define shaderStaticTest_portalstaticoverlay_vs20 vsh_forgot_to_set_static_MODEL + vsh_forgot_to_set_static_PORTALGHOSTOVERLAY
 
 
 class portalstaticoverlay_vs20_Dynamic_Index

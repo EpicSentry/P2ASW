@@ -13,27 +13,6 @@
 class portal_ps20b_Static_Index
 {
 private:
-	int m_nCONVERT_TO_SRGB;
-#ifdef _DEBUG
-	bool m_bCONVERT_TO_SRGB;
-#endif
-public:
-	void SetCONVERT_TO_SRGB( int i )
-	{
-		Assert( i >= 0 && i <= 1 );
-		m_nCONVERT_TO_SRGB = i;
-#ifdef _DEBUG
-		m_bCONVERT_TO_SRGB = true;
-#endif
-	}
-	void SetCONVERT_TO_SRGB( bool i )
-	{
-		m_nCONVERT_TO_SRGB = i ? 1 : 0;
-#ifdef _DEBUG
-		m_bCONVERT_TO_SRGB = true;
-#endif
-	}
-private:
 	int m_nHASALPHAMASK;
 #ifdef _DEBUG
 	bool m_bHASALPHAMASK;
@@ -49,6 +28,7 @@ public:
 	}
 	void SetHASALPHAMASK( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nHASALPHAMASK = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bHASALPHAMASK = true;
@@ -70,6 +50,7 @@ public:
 	}
 	void SetHASSTATICTEXTURE( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nHASSTATICTEXTURE = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bHASSTATICTEXTURE = true;
@@ -79,10 +60,6 @@ public:
 	// CONSTRUCTOR
 	portal_ps20b_Static_Index( IShaderShadow *pShaderShadow, IMaterialVar **params )
 	{
-#ifdef _DEBUG
-		m_bCONVERT_TO_SRGB = true;
-#endif // _DEBUG
-		m_nCONVERT_TO_SRGB = g_pHardwareConfig->NeedsShaderSRGBConversion();
 #ifdef _DEBUG
 		m_bHASALPHAMASK = false;
 #endif // _DEBUG
@@ -97,10 +74,10 @@ public:
 		// Asserts to make sure that we aren't using any skipped combinations.
 		// Asserts to make sure that we are setting all of the combination vars.
 #ifdef _DEBUG
-		bool bAllStaticVarsDefined = m_bCONVERT_TO_SRGB && m_bHASALPHAMASK && m_bHASSTATICTEXTURE;
+		bool bAllStaticVarsDefined = m_bHASALPHAMASK && m_bHASSTATICTEXTURE;
 		Assert( bAllStaticVarsDefined );
 #endif // _DEBUG
-		return ( 8 * m_nCONVERT_TO_SRGB ) + ( 16 * m_nHASALPHAMASK ) + ( 32 * m_nHASSTATICTEXTURE ) + 0;
+		return ( 8 * m_nHASALPHAMASK ) + ( 16 * m_nHASSTATICTEXTURE ) + 0;
 	}
 };
 #define shaderStaticTest_portal_ps20b psh_forgot_to_set_static_HASALPHAMASK + psh_forgot_to_set_static_HASSTATICTEXTURE + 0
@@ -122,30 +99,10 @@ public:
 	}
 	void SetADDSTATIC( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nADDSTATIC = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bADDSTATIC = true;
-#endif
-	}
-private:
-	int m_nHDRENABLED;
-#ifdef _DEBUG
-	bool m_bHDRENABLED;
-#endif
-public:
-	void SetHDRENABLED( int i )
-	{
-		Assert( i >= 0 && i <= 1 );
-		m_nHDRENABLED = i;
-#ifdef _DEBUG
-		m_bHDRENABLED = true;
-#endif
-	}
-	void SetHDRENABLED( bool i )
-	{
-		m_nHDRENABLED = i ? 1 : 0;
-#ifdef _DEBUG
-		m_bHDRENABLED = true;
 #endif
 	}
 private:
@@ -164,6 +121,7 @@ public:
 	}
 	void SetPIXELFOGTYPE( bool i )
 	{
+		Assert( ( i ? 1 : 0 ) >= 0 && ( i ? 1 : 0 ) <= 1 );
 		m_nPIXELFOGTYPE = i ? 1 : 0;
 #ifdef _DEBUG
 		m_bPIXELFOGTYPE = true;
@@ -178,23 +136,16 @@ public:
 #endif // _DEBUG
 		m_nADDSTATIC = 0;
 #ifdef _DEBUG
-		m_bHDRENABLED = false;
+		m_bPIXELFOGTYPE = true;
 #endif // _DEBUG
-		m_nHDRENABLED = 0;
-#ifdef _DEBUG
-		m_bPIXELFOGTYPE = false;
-#endif // _DEBUG
-		m_nPIXELFOGTYPE = 0;
+		m_nPIXELFOGTYPE = ( pShaderAPI->GetSceneFogMode() == MATERIAL_FOG_LINEAR_BELOW_FOG_Z ) ;
 	}
 	int GetIndex()
 	{
 		// Asserts to make sure that we aren't using any skipped combinations.
 		// Asserts to make sure that we are setting all of the combination vars.
-#ifdef _DEBUG
-		bool bAllDynamicVarsDefined = m_bADDSTATIC && m_bHDRENABLED && m_bPIXELFOGTYPE;
-		Assert( bAllDynamicVarsDefined );
-#endif // _DEBUG
-		return ( 1 * m_nADDSTATIC ) + ( 2 * m_nHDRENABLED ) + ( 4 * m_nPIXELFOGTYPE ) + 0;
+		return ( 1 * m_nADDSTATIC ) + ( 4 * m_nPIXELFOGTYPE ) + 0;
 	}
 };
-#define shaderDynamicTest_portal_ps20b psh_forgot_to_set_dynamic_ADDSTATIC + psh_forgot_to_set_dynamic_HDRENABLED + psh_forgot_to_set_dynamic_PIXELFOGTYPE + 0
+
+#define shaderDynamicTest_portal_ps20b psh_forgot_to_set_dynamic_ADDSTATIC + 0

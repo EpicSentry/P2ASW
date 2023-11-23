@@ -5,7 +5,7 @@
 // DYNAMIC: "SKINNING"			"0..1"
 // DYNAMIC: "ADDSTATIC"			"0..1" 
 
-#define USESTATICTEXTURE (((ADDSTATIC == 1) && (HASSTATICTEXTURE == 1))?(1):(0))
+#define USESTATICTEXTURE (((ADDSTATIC == 1) && (HASSTATICTEXTURE == 1)))
 
 #include "common_vs_fxc.h"
 
@@ -15,13 +15,17 @@ static const bool g_bSkinning = SKINNING ? true : false;
 const float4x4 g_CustomViewProj	: register( SHADER_SPECIFIC_CONST_0 );
 #endif
 
+const float4 g_vViewportMad : register( SHADER_SPECIFIC_CONST_4 );
+const float g_vIsRecursivePortalView : register( SHADER_SPECIFIC_CONST_5 );
+
 struct VS_INPUT
 {
 	float4 vPos							: POSITION;
-
+	float4 vNormal						: NORMAL;
 	float4 vBoneWeights					: BLENDWEIGHT;
 	float4 vBoneIndices					: BLENDINDICES;
 	float2 vMappingTexCoord				: TEXCOORD0;
+	float  flDecalOffset				: TEXCOORD1;	// How far to move each vertex along the normal
 };
 
 
@@ -30,16 +34,16 @@ struct VS_OUTPUT
 	float4 vProjPos					: POSITION;
 	float3 vPortalTexCoord			: TEXCOORD0;
 
-#	if( (HASALPHAMASK == 1) || (USESTATICTEXTURE == 1) )
+	#if( (HASALPHAMASK == 1) || (USESTATICTEXTURE) )
 		float2 vSecondaryTexCoord		: TEXCOORD1;
-#		if( (HASALPHAMASK == 1) && (USESTATICTEXTURE == 1) )
+		#if( (HASALPHAMASK == 1) && (USESTATICTEXTURE) )
 			float2 vTertiaryTexCoord		: TEXCOORD2;
-#		endif
-#	endif
+		#endif
+	#endif
 
-#	if !defined( _X360  )
-		float vFog						: FOG;
-#	endif
+	#if !defined( _X360  ) && !defined( SHADER_MODEL_VS_3_0 )
+		float fog						: FOG;
+	#endif
 
 	float4 worldPos_projPosZ		: TEXCOORD7;		// Necessary for pixel fog
 };
@@ -51,9 +55,22 @@ VS_OUTPUT main( const VS_INPUT v )
 	
 	float3 worldPos;
 	
+	// Move the portal decal away from the base surface a bit to avoid z fighting
+	float3 vObjNormal;
+	DecompressVertex_Normal( v.vNormal, vObjNormal );
+	float4 vObjPos = v.vPos.xyzw;
+	float flDecalOffset = 1.0f;	// This offset is used in recursive portal views when using fast clipping (e.g. on the PS3).
+								// It prevents ugly Z fighting between the portal and the surface it's on due to reduced Z precision when
+								// a player is really really close to a portal.
+	if ( g_vIsRecursivePortalView == 0.0f )
+	{
+		flDecalOffset = v.flDecalOffset;
+	}
+	vObjPos.xyz += flDecalOffset * vObjNormal.xyz;
+
 	SkinPosition( 
 			g_bSkinning, 
-			v.vPos,
+			vObjPos,
 			v.vBoneWeights, v.vBoneIndices,
 			worldPos );
 			
@@ -61,15 +78,30 @@ VS_OUTPUT main( const VS_INPUT v )
 			
 	o.vProjPos = mul( float4( worldPos, 1 ), cViewProj );
 	
-#if ( USEALTERNATEVIEW == 1 )
-	vTextureProjectedPos = mul( float4( worldPos, 1 ), g_CustomViewProj );	
-#else	
-	vTextureProjectedPos = o.vProjPos;
-#endif
+	#ifdef _PS3
+	{
+		// Account for OpenGL's flipped y coordinate and expanded z range [-1,1] instead of [0,1]
+		o.vProjPos.y = -o.vProjPos.y;
+		o.vProjPos.z = 2.0f * o.vProjPos.z - o.vProjPos.w;
+	}
+	#endif // _PS3
+
+	#if ( USEALTERNATEVIEW == 1 )
+	{
+		vTextureProjectedPos = mul( float4( worldPos, 1 ), g_CustomViewProj );	
+	}
+	#else	
+	{
+		vTextureProjectedPos = o.vProjPos;
+	}
+	#endif
 	
-#if !defined( _X360 )
-	o.vFog = CalcFixedFunctionFog( worldPos, FOGTYPE_RANGE );
-#endif
+	#if !defined( _X360 ) && !defined( SHADER_MODEL_VS_3_0 )
+	{
+		o.fog = CalcFixedFunctionFog( worldPos, FOGTYPE_RANGE );
+	}
+	#endif
+
 	o.worldPos_projPosZ = float4( worldPos.xyz, o.vProjPos.z );
 	
 	//Screen coordinates mapped back to texture coordinates for the portal texture
@@ -78,18 +110,25 @@ VS_OUTPUT main( const VS_INPUT v )
 	o.vPortalTexCoord.xy = (o.vPortalTexCoord.xy + vTextureProjectedPos.w) * 0.5f;
 	o.vPortalTexCoord.z = vTextureProjectedPos.w;
 	
-#if ( USEALTERNATEVIEW == 1 )
-	o.vPortalTexCoord.xy = saturate( o.vPortalTexCoord.xy / vTextureProjectedPos.w ) * vTextureProjectedPos.w; //stretch instead of clipping.
-#endif
+	#if ( USEALTERNATEVIEW == 1 )
+	{
+		o.vPortalTexCoord.xy = saturate( o.vPortalTexCoord.xy / vTextureProjectedPos.w ) * vTextureProjectedPos.w; //stretch instead of clipping.
+	}
+	#endif
 	
-#	if( (HASALPHAMASK == 1) || (USESTATICTEXTURE == 1) )
+	//handle non-fullscreen viewports
+	o.vPortalTexCoord.xy = ( ( ( o.vPortalTexCoord.xy / vTextureProjectedPos.w ) * g_vViewportMad.xy ) + g_vViewportMad.zw ) * vTextureProjectedPos.w; //handle non-fullscreen viewports	
+	
+	#if( (HASALPHAMASK == 1) || (USESTATICTEXTURE) )
 	{
 		o.vSecondaryTexCoord = v.vMappingTexCoord.xy;
-#		if( (HASALPHAMASK == 1) && (USESTATICTEXTURE == 1) )
+		#if( (HASALPHAMASK == 1) && (USESTATICTEXTURE) )
+		{
 			o.vTertiaryTexCoord = v.vMappingTexCoord.xy;
-#		endif
+		}
+		#endif
 	}
-#	endif
+	#endif
 
 	return o;
 }
