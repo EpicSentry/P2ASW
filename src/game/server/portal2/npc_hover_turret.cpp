@@ -4,6 +4,44 @@
 #include "smoke_trail.h"
 #include "tier0/memdbgon.h"
 
+enum hoverTurretState_e
+{
+	HOVER_TURRET_TARGETING = 0,
+	HOVER_TURRET_SEARCHING = 1,
+	HOVER_TURRET_TIPPED = 2,
+	HOVER_TURRET_DISABLED = 3,
+	HOVER_TURRET_COLLIDE = 4,
+	HOVER_TURRET_PICKUP = 5,
+	HOVER_TURRET_SHOTAT = 6,
+	HOVER_TURRET_DESTRUCTING = 7,
+	HOVER_TURRET_STATE_TOTAL = 8
+};
+
+const char* g_HoverTurretTalkNames[HOVER_TURRET_STATE_TOTAL] =
+{
+	"NPC_HoverTurret.TalkActive",
+	"NPC_HoverTurret.TalkSearch",
+	"NPC_FloorTurret.TalkTipped",
+	"NPC_FloorTurret.TalkDisabled",
+	"NPC_FloorTurret.TalkCollide",
+	"NPC_HoverTurret.TalkPickup",
+	"NPC_FloorTurret.TalkShotAt",
+	"NPC_HoverTurret.TalkDissolved"
+};
+
+enum HoverTurretTasks
+{
+	TASK_HOVER_TURRET_HOVER = LAST_SHARED_TASK
+};
+
+enum hoverTurretAttackState_e
+{
+	HOVER_TURRET_FIND_TARGET = 0,
+	HOVER_TURRET_AIM_TARGET = 1,
+	HOVER_TURRET_SHOT_DISABLED = 2,
+	HOVER_TURRET_HIT_WITH_PHYSICS = 3
+};
+
 ConVar sk_hover_turret_health("sk_hover_turret_health", "150", FCVAR_NONE);
 
 int ACT_HOVER_TURRET_SEARCH;
@@ -17,21 +55,39 @@ public:
 	DECLARE_CLASS(CNPC_HoverTurret, CNPCBaseInteractive<CAI_BasePhysicsFlyingBot>);
 	//DECLARE_SERVERCLASS();
 	DECLARE_DATADESC();
+	DEFINE_CUSTOM_AI;
 
+	void Event_Killed(const CTakeDamageInfo& info);
 	void TraceAttack(const CTakeDamageInfo& info, const Vector& vecDir, trace_t* ptr) { return BaseClass::TraceAttack(info, vecDir, ptr); }
+	
+	void UpdateOnRemove();
+	void MoveToTarget(float flInterval, const Vector& vMoveTarget);
 	void CreateSmokeTrail();
 	void Precache();
+	void RunTask(const Task_t* pTask);
 	void Spawn();
+	void StartTask(const Task_t* pTask);
 	void StartDeathSequence();
 private:
 	//CNetworkVar(int, m_sLaserHaloSprite);
 	bool m_bCarriedByPlayer;
+
 	Vector m_vForceVelocity;
 	Vector m_vForceMoveTarget;
 	Vector m_vTargetBanking;
+
+	float m_fSparkTime;
 	float m_flDeathTime;
+
 	CHandle<SmokeTrail> m_hSmokeTrail;
+	CHandle<CBaseEntity> m_hTether;
+
+	float m_flEngineStallTime;
+
+	hoverTurretAttackState_e m_iFiringState;
+
 	int m_iMuzzleAttachment;
+
 	QAngle m_vecGoalAngles;
 	QAngle m_vInitialLookAngles;
 };
@@ -42,11 +98,49 @@ BEGIN_DATADESC(CNPC_HoverTurret)
 
 END_DATADESC()
 
+AI_BEGIN_CUSTOM_NPC(npc_hover_turret, CNPC_HoverTurret)
+	DECLARE_TASK(TASK_HOVER_TURRET_HOVER)
+AI_END_CUSTOM_NPC()
+
 //IMPLEMENT_SERVERCLASS_ST(CNPC_HoverTurret, DT_NPC_HoverTurret)
 
 //SendPropInt(SENDINFO(m_sLaserHaloSprite)),
 
 //END_SEND_TABLE()
+
+void CNPC_HoverTurret::Event_Killed(const CTakeDamageInfo& info)
+{
+	if (m_hSmokeTrail)
+	{
+		CreateSmokeTrail();
+		m_fSparkTime = gpGlobals->curtime + 0.1f;
+	}
+
+	if (m_pMotionController)
+	{
+		physenv->DestroyMotionController(m_pMotionController);
+	}
+
+	if (!m_bCarriedByPlayer)
+		StartDeathSequence();
+	
+	m_iHealth = 0;
+
+	m_OnDeath.FireOutput(this, this);
+}
+
+void CNPC_HoverTurret::UpdateOnRemove()
+{
+	BaseClass::UpdateOnRemove();
+}
+
+void CNPC_HoverTurret::MoveToTarget(float flInterval, const Vector& vMoveTarget)
+{
+	if (flInterval > 0.0f && m_flEngineStallTime <= gpGlobals->curtime && m_iFiringState != HOVER_TURRET_SHOT_DISABLED)
+	{
+
+	}
+}
 
 void CNPC_HoverTurret::CreateSmokeTrail()
 {
@@ -80,20 +174,38 @@ void CNPC_HoverTurret::Precache()
 	PrecacheModel("models/props/futbol_Gib03.mdl");
 	PrecacheModel("models/props/futbol_Gib04.mdl");
 	PrecacheModel("models/npcs/hover_turret.mdl");
+
 	ADD_CUSTOM_ACTIVITY(CNPC_HoverTurret, ACT_HOVER_TURRET_SEARCH);
 	ADD_CUSTOM_ACTIVITY(CNPC_HoverTurret, ACT_HOVER_TURRET_ALERT);
 	ADD_CUSTOM_ACTIVITY(CNPC_HoverTurret, ACT_HOVER_TURRET_ANGRY);
 	ADD_CUSTOM_ACTIVITY(CNPC_HoverTurret, ACT_HOVER_TURRET_DISABLED);
+
 	PrecacheScriptSound("NPC_RocketTurret.LockingBeep");
 	PrecacheScriptSound("NPC_FloorTurret.LockedBeep");
 	PrecacheScriptSound("HL2Player.BurnPain");
 	PrecacheScriptSound("NPC_HoverTurret.Snap");
+
 	UTIL_PrecacheDecal("decals/scorchfade");
+
 	PrecacheModel("models/props_bts/rocket_sentry.mdl");
 	PrecacheModel("effects/bluelaser1.vmt");
+
 	//m_sLaserHaloSprite = PrecacheModel("sprites/redlaserglow.vmt");
+
 	UTIL_PrecacheOther("prop_glass_futbol");
+
 	BaseClass::Precache();
+}
+
+void CNPC_HoverTurret::RunTask(const Task_t* pTask)
+{
+	switch (pTask->iTask)
+	{
+
+	case TASK_HOVER_TURRET_HOVER:
+		BaseClass::RunTask(pTask);
+
+	}
 }
 
 void CNPC_HoverTurret::Spawn()
@@ -135,6 +247,17 @@ void CNPC_HoverTurret::Spawn()
 	m_vInitialLookAngles = GetAbsAngles();
 	m_bCarriedByPlayer = false;
 	m_flDeathTime = 0.0f;
+}
+
+void CNPC_HoverTurret::StartTask(const Task_t* pTask)
+{
+	switch (pTask->iTask)
+	{
+
+	case TASK_HOVER_TURRET_HOVER:
+		BaseClass::StartTask(pTask);
+
+	}
 }
 
 void CNPC_HoverTurret::StartDeathSequence()
