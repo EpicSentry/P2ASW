@@ -2,6 +2,8 @@
 #include "ai_basenpc_physicsflyer.h"
 #include "player_pickup.h"
 #include "smoke_trail.h"
+#include "IEffects.h"
+#include "Sprite.h"
 #include "tier0/memdbgon.h"
 
 extern ConVar sv_gravity;
@@ -59,29 +61,51 @@ public:
 	DECLARE_DATADESC();
 	DEFINE_CUSTOM_AI;
 
+	Class_T Classify(void) { return CLASS_COMBINE; }
 	void Event_Killed(const CTakeDamageInfo& info);
 	void TraceAttack(const CTakeDamageInfo& info, const Vector& vecDir, trace_t* ptr) { return BaseClass::TraceAttack(info, vecDir, ptr); }
 	void UpdateOnRemove();
 	void MoveToTarget(float flInterval, const Vector& vMoveTarget);
 	void MoveExecute_Alive(float flInterval);
+	void MoveExecute_Dead(float flInterval);
+
 	Vector BodyTarget(const Vector& posSrc, bool bNoisy);
+
 	float GetHeadTurnRate() { return 45.0f; }
+
 	void TurnHeadToTarget(float flInterval, const Vector& MoveTarget);
+
 	bool UpdateFacing();
+
 	void UpdateMuzzleMatrix();
 	void CreateSmokeTrail();
+	void DestroySmokeTrail();
 	void Precache();
 	void RunTask(const Task_t* pTask);
 	void Spawn();
 	void StartTask(const Task_t* pTask);
 	void StartDeathSequence();
+	void ClampMotorForces(Vector& linear, AngularImpulse& angular);
 private:
 	//CNetworkVar(int, m_sLaserHaloSprite);
-	bool m_bCarriedByPlayer;
+	float m_fNextTalk;
 
+	int m_iDesiredState;
+	int m_iLastState;
+
+	bool m_bAimingAtTarget;
+	bool m_bCarriedByPlayer;
+	bool m_bUseCarryAngles;
+
+	Vector m_vecTargetPos;
+	float m_flAimStartTime;
 	Vector m_vForceVelocity;
 	Vector m_vForceMoveTarget;
 	Vector m_vTargetBanking;
+	
+	CHandle<CBaseEntity> m_hAttachTarget;
+
+	string_t m_strAttachName;
 
 	float m_fSparkTime;
 	float m_flDeathTime;
@@ -89,10 +113,21 @@ private:
 	CHandle<SmokeTrail> m_hSmokeTrail;
 	CHandle<CBaseEntity> m_hTether;
 
+	float m_flSentryTurnSpeed;
+
+	bool m_bCanPushPlayer;
+
 	float m_flEngineStallTime;
+
+	bool m_bInitialPositionSet;
+
+	COutputEvent m_OnPhysGunPickup;
+	COutputEvent m_OnPhysGunDrop;
 
 	hoverTurretAttackState_e m_iFiringState;
 	
+	CHandle<CSprite> m_hEyeGlow;
+
 	matrix3x4_t m_muzzleToWorld;
 
 	int m_iMuzzleAttachment;
@@ -105,7 +140,35 @@ private:
 LINK_ENTITY_TO_CLASS(npc_hover_turret, CNPC_HoverTurret);
 
 BEGIN_DATADESC(CNPC_HoverTurret)
-
+	DEFINE_FIELD(m_bAimingAtTarget, FIELD_BOOLEAN),
+	DEFINE_FIELD(m_vecTargetPos, FIELD_VECTOR),
+	DEFINE_FIELD(m_flAimStartTime, FIELD_FLOAT),
+	DEFINE_FIELD(m_iFiringState, FIELD_INTEGER),
+	DEFINE_FIELD(m_vForceVelocity, FIELD_VECTOR),
+	DEFINE_FIELD(m_bInitialPositionSet, FIELD_BOOLEAN),
+	DEFINE_FIELD(m_vecGoalAngles, FIELD_VECTOR),
+	DEFINE_FIELD(m_vInitialLookAngles, FIELD_VECTOR),
+	DEFINE_FIELD(m_vForceMoveTarget, FIELD_VECTOR),
+	DEFINE_FIELD(m_vTargetBanking, FIELD_VECTOR),
+	DEFINE_FIELD(m_flEngineStallTime, FIELD_TIME),
+	DEFINE_FIELD(m_fNextTalk, FIELD_TIME),
+	DEFINE_FIELD(m_iDesiredState, FIELD_INTEGER),
+	DEFINE_FIELD(m_iLastState, FIELD_INTEGER),
+	DEFINE_FIELD(m_bCarriedByPlayer, FIELD_BOOLEAN),
+	DEFINE_FIELD(m_bUseCarryAngles, FIELD_BOOLEAN),
+	DEFINE_FIELD(m_iMuzzleAttachment, FIELD_INTEGER),
+	DEFINE_FIELD(m_muzzleToWorldTick, FIELD_INTEGER),
+	DEFINE_FIELD(m_hEyeGlow, FIELD_EHANDLE),
+	DEFINE_FIELD(m_flDeathTime, FIELD_FLOAT),
+	DEFINE_FIELD(m_fSparkTime, FIELD_FLOAT),
+	DEFINE_FIELD(m_hSmokeTrail, FIELD_EHANDLE),
+	DEFINE_FIELD(m_hTether, FIELD_EHANDLE),
+	DEFINE_FIELD(m_hAttachTarget, FIELD_EHANDLE),
+	DEFINE_KEYFIELD(m_strAttachName, FIELD_STRING, "attachTarget"),
+	DEFINE_KEYFIELD(m_flSentryTurnSpeed, FIELD_FLOAT, "sentryRotateSpeed"),
+	DEFINE_KEYFIELD(m_bCanPushPlayer, FIELD_BOOLEAN, "canPushPlayer"),
+	DEFINE_OUTPUT(m_OnPhysGunPickup, "OnPhysGunPickup"),
+	DEFINE_OUTPUT(m_OnPhysGunDrop, "OnPhysGunDrop"),
 END_DATADESC()
 
 AI_BEGIN_CUSTOM_NPC(npc_hover_turret, CNPC_HoverTurret)
@@ -148,7 +211,23 @@ void CNPC_HoverTurret::MoveToTarget(float flInterval, const Vector& vMoveTarget)
 {
 	if (flInterval > 0.0f && m_flEngineStallTime <= gpGlobals->curtime && m_iFiringState != HOVER_TURRET_SHOT_DISABLED)
 	{
+		if ( GetEnemy() && BaseClass::HasCondition(COND_SEE_ENEMY) )
+		{
 
+		}
+
+		float yawSpeedPerSec = m_flSentryTurnSpeed;
+		if (yawSpeedPerSec == 0.0f)
+		{
+			Vector vecMoveDir, vecLookDir;
+
+			vecMoveDir = vMoveTarget - GetLocalOrigin();
+			VectorNormalize(vecMoveDir);
+
+			AngleVectors(m_vInitialLookAngles,&vecLookDir);
+
+			vecLookDir* (vecLookDir * 5.0) + vecMoveDir;
+		}
 	}
 }
 
@@ -167,6 +246,23 @@ void CNPC_HoverTurret::MoveExecute_Alive(float flInterval)
 	m_vCurrentVelocity.x = m_vForceVelocity.x;
 	m_vCurrentVelocity.y = m_vForceVelocity.y;
 	m_vCurrentVelocity.z = m_vForceVelocity.z - (flInterval * 0.1) * sv_gravity.GetFloat();
+	m_vForceVelocity = vec3_origin;
+}
+
+void CNPC_HoverTurret::MoveExecute_Dead(float flInterval)
+{
+	Vector forward, up;
+	Vector newVelocity;
+	
+	GetVectors(&forward, NULL, &up);
+
+	if (gpGlobals->curtime > m_fSparkTime)
+	{
+		g_pEffects->Sparks(GetAbsOrigin());
+		m_fSparkTime = random->RandomFloat(0.05f,0.1f) + gpGlobals->curtime;
+	}
+
+	m_vCurrentVelocity = m_vForceVelocity + newVelocity;
 	m_vForceVelocity = vec3_origin;
 }
 
@@ -261,6 +357,12 @@ void CNPC_HoverTurret::CreateSmokeTrail()
 		m_hSmokeTrail->SetLifetime(-1.0f);
 		m_hSmokeTrail->FollowEntity(this, "0");
 	}
+}
+
+void CNPC_HoverTurret::DestroySmokeTrail()
+{
+	if (m_hSmokeTrail != NULL)
+		UTIL_Remove(m_hSmokeTrail);
 }
 
 void CNPC_HoverTurret::Precache()
@@ -368,5 +470,35 @@ void CNPC_HoverTurret::StartDeathSequence()
 		EmitSound("NPC_RocketTurret.LockingBeep", gpGlobals->curtime + 1.0f);
 		EmitSound("NPC_RocketTurret.LockingBeep", gpGlobals->curtime + 1.5f);
 		EmitSound("NPC_FloorTurret.LockedBeep", gpGlobals->curtime + 2.0f);
+	}
+}
+
+void CNPC_HoverTurret::ClampMotorForces(Vector& linear, AngularImpulse& angular)
+{
+	if (m_iHealth > 0)
+	{
+		linear.x = 0.0f;
+		linear.y = 0.0f;
+		linear.z = 0.0f;
+		if (!m_bAimingAtTarget)
+		{
+			angular.x = angular.x * 0.0099999998f;
+			angular.y = angular.y * 0.0099999998f;
+			if (m_flSentryTurnSpeed == 0.0f)
+			{
+				linear.x = random->RandomFloat(-50.0f,60.0f);
+				linear.y = random->RandomFloat(-50.0f,60.0f);
+				linear.z = random->RandomFloat(-150.0f,150.0f);
+			}
+		}
+	}
+	else
+	{
+		linear.x = 0.0f;
+		linear.y = 0.0f;
+		linear.z = 0.0f;
+		angular.x = 0.0f;
+		angular.y = 0.0f;
+		angular.z = 0.0f;
 	}
 }
