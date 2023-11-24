@@ -4,6 +4,8 @@
 #include "smoke_trail.h"
 #include "IEffects.h"
 #include "Sprite.h"
+#include "ai_memory.h"
+#include "ai_senses.h"
 #include "tier0/memdbgon.h"
 
 extern ConVar sv_gravity;
@@ -48,10 +50,10 @@ enum hoverTurretAttackState_e
 
 ConVar sk_hover_turret_health("sk_hover_turret_health", "150", FCVAR_NONE);
 
-int ACT_HOVER_TURRET_SEARCH;
-int ACT_HOVER_TURRET_ALERT;
-int ACT_HOVER_TURRET_ANGRY;
-int ACT_HOVER_TURRET_DISABLED;
+Activity ACT_HOVER_TURRET_SEARCH;
+Activity ACT_HOVER_TURRET_ALERT;
+Activity ACT_HOVER_TURRET_ANGRY;
+Activity ACT_HOVER_TURRET_DISABLED;
 
 class CNPC_HoverTurret : public CNPCBaseInteractive<CAI_BasePhysicsFlyingBot>, public CDefaultPlayerPickupVPhysics
 {
@@ -64,6 +66,9 @@ public:
 	Class_T Classify(void) { return CLASS_COMBINE; }
 	void Event_Killed(const CTakeDamageInfo& info);
 	void TraceAttack(const CTakeDamageInfo& info, const Vector& vecDir, trace_t* ptr) { return BaseClass::TraceAttack(info, vecDir, ptr); }
+	void TalkThink();
+	void FindTargetThink();
+	void AimThink();
 	void UpdateOnRemove();
 	void MoveToTarget(float flInterval, const Vector& vMoveTarget);
 	void MoveExecute_Alive(float flInterval);
@@ -202,8 +207,114 @@ void CNPC_HoverTurret::Event_Killed(const CTakeDamageInfo& info)
 	m_OnDeath.FireOutput(this, this);
 }
 
+void CNPC_HoverTurret::TalkThink()
+{
+	if (IsDissolving() || IsOnFire())
+	{
+		m_iDesiredState = HOVER_TURRET_DESTRUCTING;
+	}
+
+	if (m_iLastState != m_iDesiredState && (m_iDesiredState == HOVER_TURRET_TIPPED || m_iDesiredState == HOVER_TURRET_DESTRUCTING || m_iDesiredState == HOVER_TURRET_PICKUP))
+		m_fNextTalk = gpGlobals->curtime - 1.0f;
+
+	if (gpGlobals->curtime > m_fNextTalk && m_iLastState != m_iDesiredState)
+	{
+		const char* soundname = g_HoverTurretTalkNames[m_iDesiredState];
+
+		switch (m_iDesiredState)
+		{
+			case HOVER_TURRET_TARGETING:
+				EmitSound(soundname);
+				m_fNextTalk = gpGlobals->curtime + 1.75f;
+				break;
+
+			case HOVER_TURRET_SEARCHING:
+				EmitSound(soundname);
+				m_fNextTalk = gpGlobals->curtime + 2.75f;
+				break;
+				
+			case HOVER_TURRET_TIPPED:
+				EmitSound(soundname);
+				m_fNextTalk = gpGlobals->curtime + 1.15f;
+				break;
+				
+			case HOVER_TURRET_PICKUP:
+				EmitSound(soundname);
+				m_fNextTalk = gpGlobals->curtime + 5.0f;
+				break;
+				
+			case HOVER_TURRET_DESTRUCTING:
+				EmitSound(soundname);
+				m_fNextTalk = gpGlobals->curtime + 10.0f;
+				break;
+
+			default:
+				return;
+		}
+	}
+}
+
+void CNPC_HoverTurret::FindTargetThink()
+{
+	if (m_flEngineStallTime <= gpGlobals->curtime && m_iFiringState != HOVER_TURRET_SHOT_DISABLED)
+	{
+		GetEnemies()->RefreshMemories();
+
+		GetSenses()->Look( 8192 );
+		SetEnemy(BestEnemy());
+
+		if (BaseClass::HasCondition(COND_SEE_ENEMY))
+		{
+			if (GetEnemy() && IsAlive())
+			{
+				bool bEnemyInFOV = FInViewCone(GetEnemy());
+				bool bEnemyVisible = FVisible(GetEnemy());
+				bool v6 = false;
+
+				CPortal_Base2D* pPortal = FInViewConeThroughPortal(GetEnemy());
+			
+				if (pPortal && FVisibleThroughPortal(pPortal, GetEnemy()))
+					v6 = true;
+
+				if (bEnemyInFOV && bEnemyVisible || v6)
+				{
+					UpdateFacing();
+					return;
+				}
+			}
+		}
+		else
+		{
+			m_vecGoalAngles = GetAbsAngles();
+			m_flFieldOfView = 0.4f;
+		}
+		UpdateFacing();
+	}
+}
+
+void CNPC_HoverTurret::AimThink()
+{
+	if (((!BaseClass::HasCondition(COND_SEE_ENEMY) || m_flEngineStallTime > gpGlobals->curtime)) || (m_iFiringState == HOVER_TURRET_SHOT_DISABLED))
+	{
+		m_vecGoalAngles = GetAbsAngles();
+		UpdateFacing();
+		if (m_bAimingAtTarget)
+			return;
+	}
+	else
+	{
+		if (!GetEnemy())
+		{
+		}
+	UpdateFacing();
+	if (GetActivity() != ACT_HOVER_TURRET_ALERT)
+		SetActivity(ACT_HOVER_TURRET_ALERT); 
+	}
+}
+
 void CNPC_HoverTurret::UpdateOnRemove()
 {
+	TalkThink();
 	BaseClass::UpdateOnRemove();
 }
 
