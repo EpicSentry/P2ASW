@@ -60,8 +60,6 @@ class CNPC_HoverTurret : public CNPCBaseInteractive<CAI_BasePhysicsFlyingBot>, p
 public:
 	//DECLARE_SERVERCLASS();
 	DECLARE_CLASS(CNPC_HoverTurret, CNPCBaseInteractive<CAI_BasePhysicsFlyingBot>);
-	DECLARE_DATADESC();
-	DEFINE_CUSTOM_AI;
 
 	Class_T Classify(void) { return CLASS_COMBINE; }
 	void Event_Killed(const CTakeDamageInfo& info);
@@ -91,6 +89,9 @@ public:
 	void StartTask(const Task_t* pTask);
 	void StartDeathSequence();
 	void ClampMotorForces(Vector& linear, AngularImpulse& angular);
+
+	DEFINE_CUSTOM_AI;
+	DECLARE_DATADESC();
 private:
 	//CNetworkVar(int, m_sLaserHaloSprite);
 	float m_fNextTalk;
