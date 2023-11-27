@@ -128,8 +128,6 @@ bool CProjectedWallEntity::CreateVPhysics( void )
 
 void CProjectedWallEntity::ProjectWall( void )
 {
-	CPhysCollide *v4; // eax
-	IPhysicsObject *v5; // esi
 	float x; // xmm0_4
 	float y; // xmm2_4
 	float z; // xmm4_4
@@ -137,13 +135,11 @@ void CProjectedWallEntity::ProjectWall( void )
 	bool v11; // zf
 	float v12; // xmm3_4
 	float v13; // xmm5_4
-	float v14; // xmm0_4
 	float v18; // xmm5_4
 	float v19; // xmm4_4
 	float v20; // xmm3_4
 	float v21; // xmm5_4
 	float v22; // xmm4_4
-	float v23; // xmm5_4
 	float v24; // xmm3_4
 	solid_t solid; // [esp+64h] [ebp-724h] BYREF
 	Vector vSetMaxs; // [esp+6A4h] [ebp-E4h] BYREF
@@ -153,7 +149,6 @@ void CProjectedWallEntity::ProjectWall( void )
 	Vector v40; // [esp+6C4h] [ebp-C4h] BYREF
 	float v41; // [esp+6D0h] [ebp-B8h]
 	float v45; // [esp+6E0h] [ebp-A8h]
-	float v47; // [esp+6F0h] [ebp-98h]
 	float v51; // [esp+700h] [ebp-88h]
 	Vector vSetMins; // [esp+704h] [ebp-84h] BYREF
 	Vector vecForward; // [esp+714h] [ebp-74h] BYREF
@@ -204,9 +199,8 @@ void CProjectedWallEntity::ProjectWall( void )
 
 		pTempConvex = physcollision->ConvexFromVerts( vVerts, 4 );
 	LABEL_3:
-		v4 = physcollision->ConvertConvexToCollide( &pTempConvex, 1 );
-		m_pWallCollideable = v4;
-		if (v4)
+		m_pWallCollideable = physcollision->ConvertConvexToCollide( &pTempConvex, 1 );
+		if (m_pWallCollideable)
 		{
 			V_strncpy(solid.surfaceprop, "hard_light_bridge", 512);
 			solid.params.massCenterOverride = g_PhysDefaultObjectParams.massCenterOverride;
@@ -221,7 +215,7 @@ void CProjectedWallEntity::ProjectWall( void )
 			solid.params.dragCoefficient = g_PhysDefaultObjectParams.dragCoefficient;
 			// Swarm: FIXME!!
 			//*(_DWORD *)&solid.params.enableCollisions = *(_DWORD *)&g_PhysDefaultObjectParams.enableCollisions;
-			v5 = PhysModelCreateCustom( this, m_pWallCollideable, vec3_origin, vec3_angle, "hard_light_bridge", true, &solid );
+			IPhysicsObject *v5 = PhysModelCreateCustom( this, m_pWallCollideable, vec3_origin, vec3_angle, "hard_light_bridge", true, &solid );
 			if (v5)
 			{
 				if ( VPhysicsGetObject() )
@@ -277,7 +271,7 @@ void CProjectedWallEntity::ProjectWall( void )
 					vSetMaxs.y = v12 - flStartPointY;
 					vSetMaxs.z = v13 - flStartPointZ;
 					SetSize( vSetMins, vSetMaxs );
-					v14 = sqrt(
+					float v14 = sqrt(
 						(((flStartPointX - flEndPointX) * (flStartPointX - flEndPointX))
 						+ ((flStartPointY - flEndPointY) * (flStartPointY - flEndPointY)))
 						+ ((flStartPointZ - flEndPointZ) * (flStartPointZ - flEndPointZ)));
@@ -301,30 +295,31 @@ void CProjectedWallEntity::ProjectWall( void )
 	}
 	v38 = vecForward;
 
-	vSetMaxs.x = ((int)vecForward.x ^ 0x80000000);
-	vSetMaxs.y = ((int)vecForward.y ^ 0x80000000);
-	vSetMaxs.z = ((int)vecForward.z ^ 0x80000000);
+	// This is dumb, stupid, and dumb!!!
+	//vSetMaxs.x = ((int)vecForward.x ^ 0x80000000);
+	//vSetMaxs.y = ((int)vecForward.y ^ 0x80000000);
+	//vSetMaxs.z = ((int)vecForward.z ^ 0x80000000);
 	v40 = vecRight;
 	v39 = ((vecForward.x * flEndPointX) + (vecForward.y * flEndPointY)) + (vecForward.z * flEndPointZ);
 
-	v37 = ((((int)(vecForward.x) ^ 0x80000000) * flStartPointX)
-		+ (((int)(vecForward.y) ^ 0x80000000) * flStartPointY))
-		+ (((int)(vecForward.z) ^ 0x80000000) * flStartPointZ);
+	v37 = (vecForward.x * flStartPointX)
+		+ (vecForward.y * flStartPointY)
+		+ (vecForward.z * flStartPointZ);
 	v18 = (vecRight.x * 64.0) * 0.5;
 	v19 = (vecRight.y * 64.0) * 0.5;
 	v20 = (64.0 * vecRight.z) * 0.5;
 	v41 = (((flStartPointX + v18) * vecRight.x) + ((flStartPointY + v19) * vecRight.y))
 		+ ((flStartPointZ + v20) * vecRight.z);
-	v21 = ((flStartPointX - v18) * ((int)vecRight.x ^ 0x80000000))
-		+ ((flStartPointY - v19) * ((int)vecRight.y ^ 0x80000000));
-	v45 = v21 + ((flStartPointZ - v20) * ((int)vecRight.z ^ 0x80000000));
-	v23 = (vecUp.x * 0.015625) * 0.5;
+	v21 = ((flStartPointX - v18) * (vecRight.x))
+		+ ((flStartPointY - v19) * (vecRight.y));
+	v45 = v21 + ((flStartPointZ - v20) * (vecRight.z));
+	float v23 = (vecUp.x * 0.015625) * 0.5;
 	v22 = (vecUp.y * 0.015625) * 0.5;
 	v24 = (0.015625 * vecUp.z) * 0.5;
-	v47 = (((flStartPointX + v23) * vecUp.x) + ((flStartPointY + v22) * vecUp.y))
+	float v47 = (((flStartPointX + v23) * vecUp.x) + ((flStartPointY + v22) * vecUp.y))
 		+ ((flStartPointZ + v24) * vecUp.z);
 
-	v51 = (((flStartPointX - v23) * ((int)vecUp.x ^ 0x80000000))
+	v51 = (((flStartPointX - v23) * -vecUp.x)
 		+ ((flStartPointY - v22) * -vecUp.y))
 		+ ((flStartPointZ - v24) * -vecUp.z);
 

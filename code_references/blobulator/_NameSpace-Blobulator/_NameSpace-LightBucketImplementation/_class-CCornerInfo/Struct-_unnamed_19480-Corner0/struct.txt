@@ -1,0 +1,5 @@
+struct Blobulator::LightBucketImplementation::CCornerInfo::_unnamed_19481::<unnamed-type-Corner0>
+{
+    int m_nSectionIndex;
+    int m_nBucketIndex;
+};

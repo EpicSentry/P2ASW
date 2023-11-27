@@ -949,6 +949,36 @@ penetrateevent_t &CCollisionEvent::FindOrAddPenetrateEvent(CBaseEntity *pEntity0
 	return event;
 }
 
+void CCollisionEvent::RemovePenetrationEvents( CBaseEntity *pEntity )
+{
+	for ( int i = m_penetrateEvents.Count()-1; i >= 0; --i )
+	{
+		penetrateevent_t &event = m_penetrateEvents[i];
+		CBaseEntity *pEntity0 = event.hEntity0;
+		CBaseEntity *pEntity1 = event.hEntity1;
+		if ( (pEntity0 == pEntity) || (pEntity1 == pEntity) )
+		{
+			if ( event.collisionState == COLLSTATE_DISABLED )
+			{
+				IPhysicsObject *pObj0 = pEntity0->VPhysicsGetObject();
+				if ( pObj0 )
+				{
+					pObj0->Wake();
+				}
+
+				IPhysicsObject *pObj1 = pEntity1->VPhysicsGetObject();
+				if ( pObj1 )
+				{
+					pObj1->Wake();
+				}                                              
+			}
+
+			m_penetrateEvents.FastRemove(i);
+			UpdateEntityPenetrationFlag( pEntity0, false );
+			UpdateEntityPenetrationFlag( pEntity1, false );
+		}
+	}
+}
 
 
 static ConVar phys_penetration_error_time("phys_penetration_error_time", "10", 0, "Controls the duration of vphysics penetration error boxes.");

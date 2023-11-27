@@ -153,14 +153,6 @@ void C_PortalLaser::UpdateSparkEffect( const Vector &vSparkPosition, const Vecto
 		m_pSparkEffect->SetControlPointOrientation( 0, vSparkNormal, vecRight, vecUp );
 	}
 }
-void UTIL_Portal_Laser_Prevent_Tilting( Vector &vDirection )
-{
-	if ( fabs(vDirection.z) < 0.1 )
-	{
-		vDirection.z = 0.0;
-		VectorNormalize( vDirection );
-	}
-}
 
 void C_PortalLaser::ClientThink( void )
 {

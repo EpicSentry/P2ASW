@@ -1,0 +1,4 @@
+void __cdecl Blobulator::FrameUpdate(int renderFrame)
+{
+  ImpRendererFactory::FrameUpdate(ImpRendererFactory::s_pInstance, renderFrame);
+}

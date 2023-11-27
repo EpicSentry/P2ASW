@@ -181,9 +181,9 @@ void CPortalLaser::Precache( void )
 	if ( !m_bFromReflectedCube )
 	{
 		if ( GetModelName().ToCStr() )
-			CBaseEntity::PrecacheModel( GetModelName().ToCStr() );
+			PrecacheModel( GetModelName().ToCStr() );
 		else
-			CBaseEntity::PrecacheModel("models/props/laser_emitter.mdl");
+			PrecacheModel("models/props/laser_emitter.mdl");
 	}
 }
 void CPortalLaser::UpdateOnRemove( void )
@@ -207,14 +207,10 @@ bool CPortalLaser::CreateVPhysics( void )
 }
 
 void CPortalLaser::CreateSoundProxies( void )
-{
-	CBasePlayer *pPlayer; // eax
-	
-	CSoundEnvelopeController &controller = CSoundEnvelopeController::GetController();
-	
+{		
 	for (int i = 0; i < MAX_PLAYERS; ++i)
 	{
-		pPlayer = UTIL_PlayerByIndex( i );
+		CBasePlayer *pPlayer = UTIL_PlayerByIndex( i );
 		if (pPlayer && pPlayer->IsConnected() && !pPlayer->IsSplitScreenPlayer())
 		{
 			if (!m_pSoundProxy[i])
@@ -233,7 +229,8 @@ void CPortalLaser::CreateSoundProxies( void )
 			{
 				CSingleUserRecipientFilter filter( pPlayer ); // [esp+24h] [ebp-28h] BYREF
 				//filter.__vftable = (CSingleUserRecipientFilter_vtbl *)&CSingleUserRecipientFilter::`vftable';
-				
+
+				CSoundEnvelopeController &controller = CSoundEnvelopeController::GetController();
 				if ( m_bIsLethal )
 				{
 					m_pAmbientSound[i] = controller.SoundCreate( filter, pSoundProxy->entindex(), "LaserGreen.BeamLoop" );
@@ -254,6 +251,7 @@ void CPortalLaser::CreateSoundProxies( void )
 		}
 	}
 }
+
 void CPortalLaser::UpdateSoundPosition( Vector &vecStart, Vector &vecEnd )
 {
 	CBasePlayer *pPlayer; // eax
@@ -387,7 +385,7 @@ void CPortalLaser::TurnOffLaserSound( void )
 	{
 		if ( m_pAmbientSound[i] )
 		{
-			CSoundEnvelopeController &Controller = CSoundEnvelopeController::GetController();
+			CSoundEnvelopeController &controller = CSoundEnvelopeController::GetController();
 
 			Controller.SoundDestroy( m_pAmbientSound[i] );
 			m_pAmbientSound[i] = NULL;
@@ -563,7 +561,6 @@ void CPortalLaser::FireLaser( Vector &vecStart, Vector &vecDirection, CPropWeigh
 	Ray_t ray;
 	if ( new_portal_laser.GetInt() )
 	{
-
 		PortalLaserInfoList_t infoList;
 
 		flTotalBeamLength = 0.0;
@@ -696,7 +693,7 @@ void CPortalLaser::FireLaser( Vector &vecStart, Vector &vecDirection, CPropWeigh
 
 	UTIL_TraceLine( vecStart, vecStart + ( vecDirection * MAX_TRACE_LENGTH ), 1174421505, &traceFilter, &tr );
 
-	CPortalLaser::UpdateSoundPosition( tr.startpos, tr.endpos );
+	UpdateSoundPosition( tr.startpos, tr.endpos );
 	flOtherBeamLength = 0.0;
 	
 	CPortal_Base2D *pFirstPortal;
@@ -818,8 +815,8 @@ CBaseEntity *CPortalLaser::TraceLaser( bool bIsFirstTrace, Vector &vecStart, Vec
 			UTIL_TraceLine( vStart, vStart + ( MAX_TRACE_LENGTH * vDir ), 1174421505, &traceFilter, &tr );
 
 			UpdateSoundPosition( tr.startpos, tr.endpos );
-			pFirstPortal = 0;
-			if (!UTIL_DidTraceTouchPortals(ray, tr, &pFirstPortal, 0)
+			pFirstPortal = NULL;
+			if (!UTIL_DidTraceTouchPortals(ray, tr, &pFirstPortal, NULL)
 				|| !pFirstPortal
 				|| !pFirstPortal->IsActivedAndLinked())
 			{

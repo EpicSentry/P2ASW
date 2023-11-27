@@ -1,0 +1,48 @@
+void __thiscall ImpRendererFactory::ClearRenderers(ImpRendererFactory *this)
+{
+  CThreadFastMutex *p_m_Mutex; // ebx
+  signed __int32 CurrentThreadId; // ecx
+  Blobulator::IBlobRenderer **a; // ecx
+  Blobulator::IBlobRenderer *v5; // ecx
+  Blobulator::IBlobRenderer *v6; // ecx
+  Blobulator::LightBucketImplementation::CFragmentedVertexBuffer *m_pFragmentedVertexBuffer; // edi
+
+  p_m_Mutex = &this->m_Mutex;
+  CurrentThreadId = GetCurrentThreadId();
+  if ( CurrentThreadId != p_m_Mutex->m_ownerID
+    && _InterlockedCompareExchange((volatile signed __int32 *)p_m_Mutex, CurrentThreadId, 0) )
+  {
+    _mm_pause();
+    CThreadFastMutex::Lock(p_m_Mutex, CurrentThreadId, 0);
+  }
+  else
+  {
+    ++p_m_Mutex->m_depth;
+  }
+  while ( this->m_TilerRenderers.size > 0 )
+  {
+    a = this->m_TilerRenderers.a;
+    v5 = a[--this->m_TilerRenderers.size];
+    if ( v5 )
+      ((void (__thiscall *)(Blobulator::IBlobRenderer *, int))v5->~IBlobRenderer)(v5, 1);
+  }
+  while ( this->m_TileRenderers.size > 0 )
+  {
+    v6 = this->m_TileRenderers.a[--this->m_TileRenderers.size];
+    if ( v6 )
+      ((void (__thiscall *)(Blobulator::IBlobRenderer *, int))v6->~IBlobRenderer)(v6, 1);
+  }
+  if ( !this->m_nNumberOfAcquiredTilerRenderers && !this->m_nNumberOfAcquiredTileRenderers )
+  {
+    m_pFragmentedVertexBuffer = this->m_pFragmentedVertexBuffer;
+    if ( m_pFragmentedVertexBuffer )
+    {
+      Blobulator::LightBucketImplementation::CFragmentedVertexBuffer::~CFragmentedVertexBuffer(this->m_pFragmentedVertexBuffer);
+      C_BaseEntity::operator delete(m_pFragmentedVertexBuffer);
+    }
+    this->m_pFragmentedVertexBuffer = 0;
+  }
+  Blobulator::LightBucketImplementation::CSectionPool::Purge(this->m_pCSectionPool);
+  if ( p_m_Mutex->m_depth-- == 1 )
+    _InterlockedExchange((volatile __int32 *)p_m_Mutex, 0);
+}

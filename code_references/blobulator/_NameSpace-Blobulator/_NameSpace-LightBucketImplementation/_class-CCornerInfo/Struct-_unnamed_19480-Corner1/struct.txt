@@ -1,0 +1,7 @@
+struct Blobulator::LightBucketImplementation::CCornerInfo::_unnamed_19480::<unnamed-type-Corner1>
+{
+    int m_nX;
+    int m_nY;
+    int m_nZ;
+    int m_Pad;
+};

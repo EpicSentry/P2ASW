@@ -1,0 +1,4 @@
+void __thiscall ImpRendererFactory::FrameUpdate(ImpRendererFactory *this, int renderFrame)
+{
+  Blobulator::LightBucketImplementation::CSectionPool::FrameUpdate(this->m_pCSectionPool, renderFrame);
+}

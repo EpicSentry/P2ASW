@@ -1,0 +1,41 @@
+void __cdecl Blobulator::Constants::InitializeConstants()
+{
+  int j; // eax
+  int v1; // ecx
+  int v2; // eax
+  int v3; // edx
+  int v4; // esi
+  int k; // ebx
+  int i; // [esp+0h] [ebp-8h]
+  int nFlag; // [esp+4h] [ebp-4h]
+
+  if ( bFirstTime_1 )
+  {
+    for ( j = 0; j < 256; ++j )
+      Blobulator::Constants::s_flByteToFloat[j] = (float)j;
+    v1 = 0;
+    i = 0;
+    do
+    {
+      v2 = 0;
+      v3 = 0;
+      nFlag = 0;
+      v4 = 4;
+      for ( k = v1; k; k >>= 1 )
+      {
+        if ( (k & 1) != 0 )
+        {
+          v1 = i;
+          ++v2;
+          nFlag |= v3 << v4;
+          v4 += 3;
+        }
+        ++v3;
+      }
+      dword_10A25C14[++v1] = nFlag | v2;
+      i = v1;
+    }
+    while ( v1 < 256 );
+    bFirstTime_1 = 0;
+  }
+}

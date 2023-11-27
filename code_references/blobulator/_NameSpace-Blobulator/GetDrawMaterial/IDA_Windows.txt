@@ -1,0 +1,112 @@
+IMaterial *__cdecl Blobulator::GetDrawMaterial()
+{
+  const Color *m_pszString; // eax
+  const Color *v1; // eax
+  IMaterial *result; // eax
+  IMaterial *(__thiscall *FindMaterial)(IMaterialSystem *, const char *, const char *, bool, const char *); // eax
+
+  if ( (_S1_8 & 1) == 0 )
+  {
+    _S1_8 |= 1u;
+    ConVarRef::ConVarRef(&mat_wireframe, "mat_wireframe");
+  }
+  if ( r_paintblob_wireframe.m_pParent->m_Value.m_nValue || mat_wireframe.m_pConVarState->m_Value.m_nValue )
+  {
+    FindMaterial = materials->FindMaterial;
+    if ( r_paintblob_material.m_pParent->m_Value.m_nValue >= 0 )
+      return (IMaterial *)((int (__stdcall *)(const char *, const char *, int, _DWORD))FindMaterial)(
+                            "shadertest/wireframevertexcolornocull",
+                            "Other textures",
+                            1,
+                            0);
+    else
+      return (IMaterial *)((int (__stdcall *)(const char *, const char *, int, _DWORD))FindMaterial)(
+                            "shadertest/wireframe",
+                            "Other textures",
+                            1,
+                            0);
+  }
+  else
+  {
+    if ( (r_paintblob_shader.m_nFlags & 0x1000) != 0 )
+    {
+      m_pszString = &extra;
+    }
+    else
+    {
+      m_pszString = (const Color *)r_paintblob_shader.m_pParent->m_Value.m_pszString;
+      if ( !m_pszString )
+        m_pszString = (const Color *)&prType;
+    }
+    if ( strlen((const char *)m_pszString) )
+    {
+      if ( (r_paintblob_shader.m_nFlags & 0x1000) != 0 )
+      {
+        v1 = &extra;
+      }
+      else
+      {
+        v1 = (const Color *)r_paintblob_shader.m_pParent->m_Value.m_pszString;
+        if ( !v1 )
+          v1 = (const Color *)&prType;
+      }
+      return materials->FindMaterial(materials, v1, "Other textures", 1, 0);
+    }
+    else
+    {
+      switch ( r_paintblob_material.m_pParent->m_Value.m_nValue )
+      {
+        case 0:
+          result = materials->FindMaterial(materials, "models/debug/debugwhite", "Other textures", 1, 0);
+          break;
+        case 1:
+          result = materials->FindMaterial(materials, "models/debug/debugwhite2", "Other textures", 1, 0);
+          break;
+        case 2:
+          result = materials->FindMaterial(materials, "models/debug/debugwhite3", "Other textures", 1, 0);
+          break;
+        case 3:
+          result = materials->FindMaterial(materials, "debug/debugvertexcolor", "Other textures", 1, 0);
+          break;
+        case 4:
+          result = materials->FindMaterial(materials, "debug/env_cubemap_model", "Other textures", 1, 0);
+          break;
+        case 5:
+          result = materials->FindMaterial(
+                     materials,
+                     "models/blob/env_cubemap_model_translucent_fountain",
+                     "Other textures",
+                     1,
+                     0);
+          break;
+        case 6:
+          result = materials->FindMaterial(materials, "models/debug/debugmesh", "Other textures", 1, 0);
+          break;
+        case 7:
+          result = materials->FindMaterial(materials, "models/debug/debugmesh_transparent", "Other textures", 1, 0);
+          break;
+        case 8:
+          result = materials->FindMaterial(materials, "models/ihvtest/tongue_bumped", "Other textures", 1, 0);
+          break;
+        case 9:
+          result = materials->FindMaterial(materials, "models/debug/debugbumps", "Other textures", 1, 0);
+          break;
+        case 0xA:
+          result = materials->FindMaterial(
+                     materials,
+                     "debug/env_cubemap_model_translucent_no_bumps",
+                     "Other textures",
+                     1,
+                     0);
+          break;
+        case 0xB:
+          result = materials->FindMaterial(materials, "models/shadertest/predator", "Other textures", 1, 0);
+          break;
+        default:
+          result = 0;
+          break;
+      }
+    }
+  }
+  return result;
+}

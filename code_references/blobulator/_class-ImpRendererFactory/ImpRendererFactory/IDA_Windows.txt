@@ -1,0 +1,31 @@
+void __thiscall ImpRendererFactory::ImpRendererFactory(ImpRendererFactory *this)
+{
+  CThreadMutex *v2; // eax
+  Blobulator::LightBucketImplementation::CSectionPool *v3; // edi
+
+  this->m_TileRenderers.size = 0;
+  this->m_TileRenderers.capacity = 16;
+  this->m_TileRenderers.a = (Blobulator::IBlobRenderer **)MemAlloc_Alloc(0x40u);
+  this->m_TilerRenderers.size = 0;
+  this->m_TilerRenderers.capacity = 16;
+  this->m_TilerRenderers.a = (Blobulator::IBlobRenderer **)MemAlloc_Alloc(0x40u);
+  this->m_Mutex.m_ownerID = 0;
+  this->m_Mutex.m_depth = 0;
+  this->m_pFragmentedVertexBuffer = 0;
+  this->m_nNumberOfAcquiredTilerRenderers = 0;
+  this->m_nNumberOfAcquiredTileRenderers = 0;
+  v2 = (CThreadMutex *)MemAlloc_Alloc(0x3EBCu);
+  v3 = (Blobulator::LightBucketImplementation::CSectionPool *)v2;
+  if ( v2 )
+  {
+    CThreadMutex::CThreadMutex(v2);
+    v3->m_SectionCache.m_Size = 0;
+    v3->m_SectionCache.m_pElements = (Blobulator::LightBucketImplementation::CSection **)&v3->m_SectionCache;
+    v3->m_nExtantSections = 0;
+    this->m_pCSectionPool = v3;
+  }
+  else
+  {
+    this->m_pCSectionPool = 0;
+  }
+}

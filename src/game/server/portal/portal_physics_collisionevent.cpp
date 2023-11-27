@@ -519,10 +519,7 @@ void CPortal_CollisionEvent::AddDamageEvent( CBaseEntity *pEntity, const CTakeDa
 	BaseClass::AddDamageEvent( pEntity, *pPassDownInfo, pInflictorPhysics, bRestoreVelocity, savedVel, savedAngVel );
 }
 
-void CPortal_CollisionEvent::RemovePenetrationEvents( CBaseEntity *pOther )
-{
-	// Please fix this function, it could lead to bad things if we do nothing.
-}
+
 
 
 

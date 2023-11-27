@@ -30,9 +30,6 @@ public:
 
 	static void DisablePenetrationSolving_Push( bool bDisable );
 	static void DisablePenetrationSolving_Pop( void );
-
-	static void RemovePenetrationEvents( CBaseEntity *pOther );
-
 };
 
 #endif //#ifndef PORTAL_PHYSICS_COLLISIONEVENT_H

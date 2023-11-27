@@ -54,7 +54,6 @@ CPortal_Base2D* UTIL_Portal_FirstAlongRay( const Ray_t &ray, float &fMustBeClose
 
 bool UTIL_Portal_TraceRay_Bullets( const CPortal_Base2D *pPortal, const Ray_t &ray, unsigned int fMask, ITraceFilter *pTraceFilter, trace_t *pTrace, bool bTraceHolyWall = true );
 CPortal_Base2D* UTIL_Portal_TraceRay_Beam( const Ray_t &ray, unsigned int fMask, ITraceFilter *pTraceFilter, float *pfFraction );
-bool UTIL_Portal_Trace_Beam( const CBeam *pBeam, Vector &vecStart, Vector &vecEnd, Vector &vecIntersectionStart, Vector &vecIntersectionEnd, ITraceFilter *pTraceFilter );
 
 void UTIL_Portal_TraceRay_With( const CPortal_Base2D *pPortal, const Ray_t &ray, unsigned int fMask, ITraceFilter *pTraceFilter, trace_t *pTrace, bool bTraceHolyWall = true );
 CPortal_Base2D* UTIL_Portal_TraceRay( const Ray_t &ray, unsigned int fMask, ITraceFilter *pTraceFilter, trace_t *pTrace, bool bTraceHolyWall = true ); //traces a ray normally, then sees if portals have anything to say about it
@@ -181,6 +180,27 @@ extern const Vector UTIL_ProjectPointOntoPlane( const Vector& point, const cplan
 bool UTIL_PointIsNearPortal( const Vector& point, const CPortal_Base2D* pPortal2D, float planeDist, float radiusReduction = 0.0f );
 
 bool UTIL_IsEntityMovingOrRotating( CBaseEntity* pEntity );
+
+
+//To extend radius's through portals (for explosions, etc.)
+struct PortalRadiusExtension_t
+{
+	CPortal_Base2D *pPortalFrom;
+	CPortal_Base2D *pPortalTo;
+	Vector vecOrigin;
+	QAngle vecAngles;
+};
+typedef CUtlVector<PortalRadiusExtension_t> PortalRadiusExtensionVector;
+void ExtendRadiusThroughPortals( const Vector &vecOrigin, const QAngle &vecAngles, float flRadius, PortalRadiusExtensionVector &portalRadiusExtensions );
+
+void UTIL_Portal_Laser_Prevent_Tilting( Vector& vDirection );
+
+class CPolyhedron;
+class CPhysCollide;
+void UTIL_DebugOverlay_Polyhedron( const CPolyhedron *pPolyhedron, int red, int green, int blue, bool noDepthTest, float flDuration, const matrix3x4_t *pTransform = NULL );
+void UTIL_DebugOverlay_CPhysCollide( const CPhysCollide *pCollide, int red, int green, int blue, bool noDepthTest, float flDuration, const matrix3x4_t *pTransform = NULL );
+
+bool UTIL_IsCollideableIntersectingPhysCollide( ICollideable *pCollideable, const CPhysCollide *pCollide, const Vector &vPhysCollideOrigin, const QAngle &qPhysCollideAngles );
 
 #endif //#ifndef PORTAL_UTIL_SHARED_H
 

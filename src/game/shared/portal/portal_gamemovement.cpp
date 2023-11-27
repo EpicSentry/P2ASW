@@ -10,23 +10,20 @@
 #include "movevars_shared.h"
 #include "portal_shareddefs.h"
 #include "portal_collideable_enumerator.h"
-#include "prop_portal_shared.h"
+#include "portal_base2d_shared.h"
 #include "rumble_shared.h"
 #include "portal_mp_gamerules.h"
-//#include "tier0/stacktools.h"
 #include "portal_util_shared.h"
-//#include "iclient.h" // This causes a compile error
+#include "trigger_tractorbeam_shared.h"
 
 #if defined( CLIENT_DLL )
 	#include "c_portal_player.h"
 	#include "c_rumble.h"
 	#include "prediction.h"
 	#include "c_weapon_portalgun.h"
-	#include "c_basetoggle.h"
-	#include "trigger_tractorbeam_shared.h"
 	#include "c_projectedwallentity.h"
-	//#include "c_projectedwallentity.h"
-	#define CRecipientFilter C_RecipientFilter
+	#include "c_basetoggle.h"
+#define CRecipientFilter C_RecipientFilter
 #else
 	#include "portal_player.h"
 	#include "env_player_surface_trigger.h"
@@ -35,11 +32,9 @@
 	#include "recipientfilter.h"
 	#include "SoundEmitterSystem/isoundemittersystembase.h"
 	#include "weapon_portalgun.h"
-	//#include "projectedwallentity.h"
+	#include "projectedwallentity.h"
 	#include "paint/paint_power_info.h"
 	#include "particle_parse.h"
-	#include "platform.h"
-	#include "projectedwallentity.h"
 #endif
 
 #include "coordsize.h" // for DIST_EPSILON
@@ -68,7 +63,7 @@ ConVar coop_sink_speed_decay("coop_sink_speed_decay","0.02f", FCVAR_REPLICATED |
 
 ConVar coop_impact_velocity_threshold("coop_impact_velocity_threshold", "250.0", FCVAR_REPLICATED | FCVAR_CHEAT );
 
-extern ConVar sv_can_carry_both_guns;
+#define sv_can_carry_both_guns			0	//extern ConVar sv_can_carry_both_guns;
 
 ConVar sv_portal_new_player_trace( "sv_portal_new_player_trace", "1", FCVAR_REPLICATED | FCVAR_CHEAT );
 
@@ -467,7 +462,7 @@ void CPortalGameMovement::ProcessMovement( CBasePlayer *pPlayer, CMoveData *pMov
 		// Use this player's max speed (dependent on whether he's on speed paint)
 		const float maxSpeed = pPlayer->MaxSpeed();
 		mv->m_flClientMaxSpeed = mv->m_flMaxSpeed = maxSpeed;
-		
+
 		// Run the command.
 		PlayerMove();
 		HandlePortalling();
@@ -482,14 +477,13 @@ void CPortalGameMovement::ProcessMovement( CBasePlayer *pPlayer, CMoveData *pMov
 		//	DevMsg( "Eye Offset: (%f, %f, %f)\n", XYZ( pPlayer->GetViewOffset() ) );
 		//	DevMsg( "Final Player Velocity: (%f, %f, %f)\n", XYZ( player->GetAbsVelocity() ) );
 		//}
-		
-		
+
 #ifndef CLIENT_DLL
 		pPlayer->UnforceButtons( IN_DUCK );
 		pPlayer->UnforceButtons( IN_JUMP );
 
 		// Try to collide with thrown weapons if we don't currently have a weapon
-		if( pPlayer->HasWeapons() == false || sv_can_carry_both_guns.GetBool() )
+		if( pPlayer->HasWeapons() == false || sv_can_carry_both_guns )
 		{
 			// Trace for the portal and paint guns
 			trace_t pm;
@@ -684,7 +678,6 @@ void CPortalGameMovement::AirAccelerate( Vector& wishdir, float wishspeed, float
 
 void CPortalGameMovement::TBeamMove( void )
 {
-#ifndef NO_TRACTOR_BEAM
 	CPortal_Player *pPortalPlayer = GetPortalPlayer();
 	if ( !pPortalPlayer )
 		return;
@@ -705,7 +698,6 @@ void CPortalGameMovement::TBeamMove( void )
 	}
 
 	TryPlayerMove( 0, 0 );
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1087,7 +1079,7 @@ void CPortalGameMovement::GroundPortalFunnel( Vector& wishdir,
 }
 
 
-void CPortalGameMovement::PlayerRoughLandingEffects( float fvol )
+CEG_NOINLINE void CPortalGameMovement::PlayerRoughLandingEffects( float fvol )
 {
 	if ( fvol > 0.0 )
 	{
@@ -1126,7 +1118,11 @@ void CPortalGameMovement::PlayerRoughLandingEffects( float fvol )
 			EmitSound_t ep( params );
 			ep.m_nPitch = 125.0f - player->m_Local.m_flFallVelocity * 0.03f;					// lower pitch the harder they land
 			ep.m_flVolume = MIN( player->m_Local.m_flFallVelocity * 0.00075f - 0.38, 1.0f );	// louder the harder they land
-			
+
+#if defined GAME_DLL
+			CEG_PROTECT_MEMBER_FUNCTION( CPortalGameMovement_PlayerRoughLandingEffects );
+#endif
+
 			CBaseEntity::EmitSound( filter, player->entindex(), ep );
 		}
 	}
@@ -2333,10 +2329,9 @@ void CPortalGameMovement::HandlePortalling( void )
 	}
 	//CPortal_Base2D *pPortal = UTIL_IntersectEntityExtentsWithPortal( player );
 	CPortal_Base2D *pPlayerTouchingPortal = pPortal;
-	
 
 	if( pPortal != NULL )
-	{		
+	{
 		CPortal_Base2D *pExitPortal = pPortal->m_hLinkedPortal;
 		bool bMobile = pPortal->IsMobile() || pPortal->m_hLinkedPortal->IsMobile();
 		float fPlaneDist = pPortal->m_plane_Origin.normal.Dot( vMoveCenter ) - pPortal->m_plane_Origin.dist;
@@ -2599,7 +2594,6 @@ void CPortalGameMovement::HandlePortalling( void )
 			}
 
 #if defined( CLIENT_DLL )
-
 			//engine view angles (for mouse input smoothness)
 			{
 				QAngle qEngineAngles;
@@ -3442,9 +3436,7 @@ void CPortalGameMovement::Friction()
 
 		// Bleed off some speed, but if we have less than the bleed
 		//  threshold, bleed the threshold amount.
-
-		// Probably not necessary - Wonderland_War
-#if 0
+#if 0 // No cross platform in Swarm!
 		if ( IsCrossPlayPlatformAConsole( player->GetCrossPlayPlatform() ) )
 		{
 			if( player->m_Local.m_bDucked )
@@ -3728,8 +3720,7 @@ void CPortalGameMovement::WalkMove()
 	bool shouldShovePlayer = false;
 	float wishVelShoveDampenFactor = 0;
 	Vector shoveVector = vec3_origin;
-	// FIXME!!!
-#if !defined ( NO_PROJECTED_WALL )
+#ifndef NO_PROJECTED_WALL
 	CProjectedWallEntity *pProjectedWall = dynamic_cast< CProjectedWallEntity* >( pOldGround );
 	if ( pProjectedWall )
 	{
@@ -3978,7 +3969,7 @@ void CPortalGameMovement::FullWalkMove()
 		CheckVelocity();
 
 		CPortal_Player *pPortalPlayer = static_cast< CPortal_Player* >( player );
-		if ( pPortalPlayer->GetPortalPlayerLocalData().m_hTractorBeam.Get() )
+		if ( pPortalPlayer->m_PortalLocal.m_hTractorBeam.Get() )
 		{
 			TBeamMove();
 		}
@@ -4930,7 +4921,7 @@ void CPortalGameMovement::Duck()
 		if ( ( mv->m_nButtons & IN_DUCK ) || bDuckJump )
 		{
 			// XBOX SERVER ONLY
-#if !defined(CLIENT_DLL) && 0
+#if !defined(CLIENT_DLL)
 			if ( IsGameConsole() && buttonsPressed & IN_DUCK )
 			{
 				// Hinting logic

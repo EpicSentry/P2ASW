@@ -1,0 +1,65 @@
+Point3D *__cdecl Blobulator::CalculateCenter(Point3D *result, ImpParticle *pParticles, unsigned int nNumberOfParticles)
+{
+  int v3; // ecx
+  __m128 v4; // xmm1
+  unsigned int v6; // edx
+  __m128 v7; // xmm0
+  __m128 v8; // xmm3
+  unsigned int v9; // edx
+  __m128 v10; // xmm0
+  __m128 v11; // xmm1
+  Point3D *v12; // eax
+  __m128 v13; // xmm0
+
+  v3 = nNumberOfParticles;
+  v4 = Four_Zeros;
+  if ( (int)nNumberOfParticles >= 16 )
+  {
+    v6 = nNumberOfParticles >> 4;
+    v3 = nNumberOfParticles - 16 * (nNumberOfParticles >> 4);
+    do
+    {
+      v7 = _mm_add_ps(
+             _mm_add_ps(pParticles[11].center.sse_vec, pParticles[10].center.sse_vec),
+             _mm_add_ps(pParticles[3].center.sse_vec, pParticles[2].center.sse_vec));
+      v8 = _mm_add_ps(
+             _mm_add_ps(
+               _mm_add_ps(pParticles[9].center.sse_vec, pParticles[8].center.sse_vec),
+               _mm_add_ps(pParticles[1].center.sse_vec, pParticles->center.sse_vec)),
+             v7);
+      pParticles += 16;
+      --v6;
+      v4 = _mm_add_ps(_mm_add_ps(v4, v8), v7);
+    }
+    while ( v6 );
+  }
+  if ( v3 >= 4 )
+  {
+    v9 = (unsigned int)v3 >> 2;
+    v3 -= 4 * ((unsigned int)v3 >> 2);
+    do
+    {
+      v10 = _mm_add_ps(_mm_add_ps(pParticles[1].center.sse_vec, pParticles->center.sse_vec), v4);
+      v11 = _mm_add_ps(pParticles[3].center.sse_vec, pParticles[2].center.sse_vec);
+      pParticles += 4;
+      --v9;
+      v4 = _mm_add_ps(v11, v10);
+    }
+    while ( v9 );
+  }
+  if ( v3 >= 1 )
+  {
+    do
+    {
+      v4 = _mm_add_ps(v4, pParticles->center.sse_vec);
+      ++pParticles;
+      --v3;
+    }
+    while ( v3 );
+  }
+  v12 = result;
+  v13 = 0i64;
+  v13.m128_f32[0] = (float)(int)nNumberOfParticles;
+  result->sse_vec = _mm_mul_ps(_mm_rcp_ps(_mm_shuffle_ps(v13, v13, 0)), v4);
+  return v12;
+}

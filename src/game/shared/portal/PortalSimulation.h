@@ -32,6 +32,7 @@ enum PortalSimulationEntityFlags_t
 	PSEF_OWNS_PHYSICS = (1 << 1),
 	PSEF_IS_IN_PORTAL_HOLE = (1 << 2), //updated per-phyframe
 	PSEF_CLONES_ENTITY_FROM_MAIN = (1 << 3), //entity is close enough to the portal to affect objects intersecting the portal
+	PSEF_CLONES_ENTITY_ACROSS_PORTAL_FROM_MAIN = (1 << 4), //the entity is not "owned" by the portal, but creates a physics clone across the portal anyway
 	//PSEF_HAS_LINKED_CLONE = (1 << 1), //this environment has a clone of the entity which is transformed from its linked portal
 };
 
@@ -56,6 +57,8 @@ struct PortalTransformAsAngledPosition_t //a matrix transformation from this por
 {
 	Vector ptOriginTransform;
 	QAngle qAngleTransform;
+
+	Vector ptShrinkAlignedOrigin; //when there's a discrepancy between visual surface and collision surface, this is adjusted to compensate in traces
 };
 
 inline bool LessFunc_Integer( const int &a, const int &b ) { return a < b; };
@@ -132,17 +135,35 @@ struct PS_PlacementData_t //stuff useful for geometric operations
 	}
 };
 
-struct PS_SD_Static_World_Brushes_t
+struct PS_SD_Static_CarvedBrushCollection_t
 {
 	CUtlVector<CPolyhedron *> Polyhedrons; //the building blocks of more complex collision
 	CPhysCollide *pCollideable;
 #ifndef CLIENT_DLL
 	IPhysicsObject *pPhysicsObject;
-	PS_SD_Static_World_Brushes_t() : pCollideable(NULL), pPhysicsObject(NULL) {};
+	PS_SD_Static_CarvedBrushCollection_t() : pCollideable(NULL), pPhysicsObject(NULL) {};
 #else
-	PS_SD_Static_World_Brushes_t() : pCollideable(NULL) {};
+	PS_SD_Static_CarvedBrushCollection_t() : pCollideable(NULL) {};
 #endif
-	
+};
+
+struct PS_SD_Static_BrushSet_t : public PS_SD_Static_CarvedBrushCollection_t
+{
+	PS_SD_Static_BrushSet_t() : iSolidMask(0) {};
+	int iSolidMask;
+};
+
+struct PS_SD_Static_World_Brushes_t
+{
+	PS_SD_Static_BrushSet_t BrushSets[4];
+
+	PS_SD_Static_World_Brushes_t()
+	{
+		BrushSets[0].iSolidMask = MASK_SOLID_BRUSHONLY & ~CONTENTS_GRATE;
+		BrushSets[1].iSolidMask = CONTENTS_GRATE;
+		BrushSets[2].iSolidMask = CONTENTS_PLAYERCLIP;
+		BrushSets[3].iSolidMask = CONTENTS_MONSTERCLIP;
+	}
 };
 
 struct PS_SD_Static_World_Displacements_t
@@ -203,15 +224,18 @@ struct PS_SD_Static_Wall_Local_Tube_t //a minimal tube, an object must fit insid
 
 struct PS_SD_Static_Wall_Local_Brushes_t 
 {
-	CUtlVector<CPolyhedron *> Polyhedrons; //the building blocks of more complex collision
-	CPhysCollide *pCollideable;
-
-#ifndef CLIENT_DLL
-	IPhysicsObject *pPhysicsObject;
-	PS_SD_Static_Wall_Local_Brushes_t() : pCollideable(NULL), pPhysicsObject(NULL) {};
-#else
-	PS_SD_Static_Wall_Local_Brushes_t() : pCollideable(NULL) {};
+	PS_SD_Static_BrushSet_t BrushSets[4];
+#if defined( GAME_DLL )
+	PS_SD_Static_CarvedBrushCollection_t Carved_func_clip_vphysics; //physics only, no tracing
 #endif
+
+	PS_SD_Static_Wall_Local_Brushes_t()
+	{
+		BrushSets[0].iSolidMask = MASK_SOLID_BRUSHONLY & ~CONTENTS_GRATE;
+		BrushSets[1].iSolidMask = CONTENTS_GRATE;
+		BrushSets[2].iSolidMask = CONTENTS_PLAYERCLIP;
+		BrushSets[3].iSolidMask = CONTENTS_MONSTERCLIP;
+	}
 };
 
 struct PS_SD_Static_Wall_Local_t //things in the wall that are completely independant of having a linked portal
@@ -222,8 +246,14 @@ struct PS_SD_Static_Wall_Local_t //things in the wall that are completely indepe
 
 struct PS_SD_Static_Wall_RemoteTransformedToLocal_Brushes_t
 {
-	IPhysicsObject *pPhysicsObject;
-	PS_SD_Static_Wall_RemoteTransformedToLocal_Brushes_t() : pPhysicsObject(NULL) {};
+	IPhysicsObject *pPhysicsObjects[ARRAYSIZE(((PS_SD_Static_World_Brushes_t *)NULL)->BrushSets)];
+	PS_SD_Static_Wall_RemoteTransformedToLocal_Brushes_t()
+	{
+		for( int i = 0; i != ARRAYSIZE(pPhysicsObjects); ++i )
+		{
+			pPhysicsObjects[i] = NULL;
+		}
+	};
 };
 
 struct PS_SD_Static_Wall_RemoteTransformedToLocal_StaticProps_t
@@ -267,6 +297,8 @@ struct PS_SD_Dynamic_PhysicsShadowClones_t
 													//in single-environment mode, this helps us track who should collide with who
 	
 	CUtlVector<CPhysicsShadowClone *> FromLinkedPortal;
+
+	CUtlVector<CBaseEntity *> ShouldCloneToRemotePortal; //non-owned entities that we should push a clone for
 };
 
 struct PS_SD_Dynamic_CarvedEntities_CarvedEntity_t
@@ -338,7 +370,6 @@ public:
 	virtual void	Spawn( void );
 	virtual void	Activate( void );
 	virtual int		ObjectCaps( void );
-	virtual IPhysicsObject *VPhysicsGetObject( void );
 	virtual int		VPhysicsGetObjectList( IPhysicsObject **pList, int listMax );
 	virtual void	UpdateOnRemove( void );
 	virtual	bool	ShouldCollide( int collisionGroup, int contentsMask ) const;
@@ -444,6 +475,7 @@ public:
 	
 	bool				IsEntityCarvedByPortal( int iEntIndex ) const;
 	inline bool			IsEntityCarvedByPortal( CBaseEntity *pEntity ) const { return IsEntityCarvedByPortal( pEntity->entindex() ); };
+	CPhysCollide *		GetCollideForCarvedEntity( CBaseEntity *pEntity ) const;
 
 #ifndef CLIENT_DLL
 	int				GetMoveableOwnedEntities( CBaseEntity **pEntsOut, int iEntOutLimit ); //gets owned entities that aren't either world or static props. Excludes fake portal ents such as physics clones

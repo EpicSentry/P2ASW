@@ -18,6 +18,7 @@
 #include "shareddefs.h"
 #include "portal_shareddefs.h"
 #include "effect_color_tables.h"
+#include "c_weapon_portalgun.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -71,7 +72,12 @@ void C_PortalBlast::Init(CBaseHandle hOwner, bool bIsPortal2, PortalPlacedBy_t e
 
 	SetAbsOrigin( m_ptCreationPoint );
 
-	m_fCreationTime = gpGlobals->curtime;
+	float flProjectileDelay = cl_portal_projectile_delay_sp.GetBool();
+
+	if ( g_pGameRules->IsMultiplayer() )
+		flProjectileDelay = cl_portal_projectile_delay_mp.GetFloat();
+
+	m_fCreationTime = flProjectileDelay + gpGlobals->curtime;
 	m_fDeathTime = fDeathTime;
 
 	if ( m_fDeathTime - 0.1f < m_fCreationTime )
@@ -79,15 +85,42 @@ void C_PortalBlast::Init(CBaseHandle hOwner, bool bIsPortal2, PortalPlacedBy_t e
 		m_fDeathTime = m_fCreationTime + 0.1f;
 	}
 
-	Vector vForward;
-	AngleVectors( qAngles, &vForward );
+	Vector vForward, vecRight, vecUp;
+	AngleVectors(qAngles, &vForward, &vecRight, &vecUp);
 
 	m_ptAimPoint = m_ptCreationPoint + vForward * m_ptCreationPoint.DistTo( m_ptDeathPoint );
 
+	CNewParticleEffect *pParticle = NULL;
+
 	if ( ePlacedBy == PORTAL_PLACED_BY_PLAYER )
-		ParticleProp()->Create( ( ( bIsPortal2 ) ? ( "portal_2_projectile_stream" ) : ( "portal_1_projectile_stream" ) ), PATTACH_ABSORIGIN_FOLLOW );
-	else
-		ParticleProp()->Create( ( ( bIsPortal2 ) ? ( "portal_2_projectile_stream_pedestal" ) : ( "portal_1_projectile_stream_pedestal" ) ), PATTACH_ABSORIGIN_FOLLOW );
+	{
+		C_BasePlayer *pPlayer = assert_cast<C_BasePlayer*>( ClientEntityList().GetBaseEntityFromHandle( hOwner ) );
+
+		if ( pPlayer )
+		{
+			pParticle = ParticleProp()->Create( "portal_projectile_stream", PATTACH_ABSORIGIN_FOLLOW );
+			//pParticle = ParticleProp()->Create( ( ( bIsPortal2 ) ? ( "portal_2_projectile_stream" ) : ( "portal_1_projectile_stream" ) ), PATTACH_ABSORIGIN_FOLLOW );
+			
+			int nTeam = pPlayer->GetTeamNumber();
+			Color color = UTIL_Portal_Color_Particles( bIsPortal2 + 1, nTeam );
+
+			Vector vColor;
+			vColor.x = color.r();
+			vColor.y = color.g();
+			vColor.z = color.b();
+
+			pParticle->SetControlPoint( 2, vColor );
+
+		}
+	}
+	else // ePlacedBy == PORTAL_PLACED_BY_PEDESTAL
+	{
+		pParticle = ParticleProp()->Create( ( ( bIsPortal2 ) ? ( "portal_2_projectile_stream_pedestal" ) : ( "portal_1_projectile_stream_pedestal" ) ), PATTACH_ABSORIGIN_FOLLOW );
+	}
+
+	Assert( pParticle );
+
+	pParticle->SetControlPointOrientation( 1, -vForward, vecRight, vecUp );
 }
 
 void C_PortalBlast::ClientThink( void )

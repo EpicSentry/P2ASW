@@ -1,0 +1,22 @@
+void __cdecl C_PortalBlast::Create(
+        ClientEntityHandle_t *p_hOwner,
+        bool bIsPortal2,
+        PortalPlacedBy_t ePlacedBy,
+        const Vector *const vStart,
+        const Vector *const vEnd,
+        const QAngle *const qAngles,
+        float fDeathTime)
+{
+  C_PortalBlast *v7; // ebx
+  ClientEntityHandle_t v8; // [esp+2Ch] [ebp-Ch] BYREF
+
+  v7 = (C_PortalBlast *)C_BaseEntity::operator new(0xA98u);
+  C_BaseEntity::C_BaseEntity(v7);
+  v7->_vptr_IHandleEntity = (int (**)(...))off_12D5728;
+  v7->_vptr_IClientRenderable = (int (**)(...))off_12D5AE0;
+  v7->_vptr_IClientNetworkable = (int (**)(...))off_12D5B9C;
+  v7->_vptr_IClientThinkable = (int (**)(...))&off_12D5BDC;
+  v7->_vptr_IClientModelRenderable = (int (**)(...))&off_12D5BF8;
+  v8.m_Index = p_hOwner->m_Index;
+  C_PortalBlast::Init(v7, &v8, bIsPortal2, ePlacedBy, vStart, vEnd, qAngles, fDeathTime);
+}

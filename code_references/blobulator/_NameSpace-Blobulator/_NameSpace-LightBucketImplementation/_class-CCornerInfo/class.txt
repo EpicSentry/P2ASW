@@ -1,11 +1,12 @@
 class Blobulator::LightBucketImplementation::CCornerInfo
 {
-    public float normal[3];
-    public float value;
-    public int valueAsInt;
-    public struct vbId_t edges[3];
-    public int edgesAsInt[3];
-    public float edgesAsFloat[3];
-    public struct Blobulator::LightBucketImplementation::CCornerInfo::_unnamed_19481::<unnamed-type-Corner0> Corner0;
-    public struct Blobulator::LightBucketImplementation::CCornerInfo::_unnamed_19480::<unnamed-type-Corner1> Corner1;
+public:
+    float normal[3];
+    float value;
+    int valueAsInt;
+    struct vbId_t edges[3];
+    int edgesAsInt[3];
+    float edgesAsFloat[3];
+    struct Blobulator::LightBucketImplementation::CCornerInfo::_unnamed_19481::<unnamed-type-Corner0> Corner0;
+    struct Blobulator::LightBucketImplementation::CCornerInfo::_unnamed_19480::<unnamed-type-Corner1> Corner1;
 };

@@ -1,0 +1,39 @@
+void __cdecl Blobulator::PaintBlob_WaitEndOfDraw(
+        IMaterial *pMaterial,
+        Blobulator::CDrawInfo *pDrawInfo,
+        bool bUseTwoPassesToDraw)
+{
+  ImpTiler *m_pTiler; // edi
+  IMatRenderContext *m_pObject; // ecx
+  IMatRenderContext *v5; // ecx
+  IMatRenderContext *v6; // ecx
+  IMatRenderContext *v7; // ecx
+
+  m_pTiler = pDrawInfo->m_pTiler;
+  if ( bUseTwoPassesToDraw )
+  {
+    Blobulator::SetupRenderContext(pMaterial, pDrawInfo);
+    ImpTiler::SetRenderContext(m_pTiler, &pDrawInfo->m_pRenderContext);
+  }
+  ImpTiler::endFrame(m_pTiler, bUseTwoPassesToDraw);
+  ImpTilerFactory::ReleaseTiler(ImpTilerFactory::s_pInstance, m_pTiler);
+  pDrawInfo->m_pRenderContext.m_pObject->PopMatrix(pDrawInfo->m_pRenderContext.m_pObject);
+  m_pObject = pDrawInfo->m_pRenderContext.m_pObject;
+  if ( m_pObject )
+  {
+    m_pObject->EndRender(m_pObject);
+    v5 = pDrawInfo->m_pRenderContext.m_pObject;
+    if ( v5 )
+      v5->Release(v5);
+  }
+  pDrawInfo->m_pRenderContext.m_pObject = 0;
+  v6 = pDrawInfo->m_pRenderContext.m_pObject;
+  if ( v6 )
+  {
+    v6->EndRender(v6);
+    v7 = pDrawInfo->m_pRenderContext.m_pObject;
+    if ( v7 )
+      v7->Release(v7);
+  }
+  C_BaseEntity::operator delete(pDrawInfo);
+}

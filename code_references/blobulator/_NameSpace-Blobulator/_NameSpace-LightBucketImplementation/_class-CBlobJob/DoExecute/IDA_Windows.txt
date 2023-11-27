@@ -1,0 +1,6 @@
+int __thiscall Blobulator::LightBucketImplementation::CBlobJob::DoExecute(
+        Blobulator::LightBucketImplementation::CBlobJob *this)
+{
+  Blobulator::LightBucketImplementation::CThreadData::ExecuteAllSections(this->m_pThreadData, 1, 0x7FFFFFFF);
+  return 0;
+}

@@ -1,0 +1,35 @@
+void __thiscall ImpRendererFactory::ReleaseTilerRenderer(
+        ImpRendererFactory *this,
+        Blobulator::IBlobRenderer *pRenderer)
+{
+  CThreadFastMutex *p_m_Mutex; // edi
+  signed __int32 CurrentThreadId; // ecx
+  int size; // eax
+  Blobulator::IBlobRenderer **a; // ecx
+  int v7; // eax
+
+  p_m_Mutex = &this->m_Mutex;
+  CurrentThreadId = GetCurrentThreadId();
+  if ( CurrentThreadId != p_m_Mutex->m_ownerID
+    && _InterlockedCompareExchange((volatile signed __int32 *)p_m_Mutex, CurrentThreadId, 0) )
+  {
+    _mm_pause();
+    CThreadFastMutex::Lock(p_m_Mutex, CurrentThreadId, 0);
+  }
+  else
+  {
+    ++p_m_Mutex->m_depth;
+  }
+  --this->m_nNumberOfAcquiredTilerRenderers;
+  size = this->m_TilerRenderers.size;
+  if ( size >= this->m_TilerRenderers.capacity )
+  {
+    a = this->m_TilerRenderers.a;
+    v7 = 2 * size + 2;
+    this->m_TilerRenderers.capacity = v7;
+    this->m_TilerRenderers.a = (Blobulator::IBlobRenderer **)_realloc_crt(a, 4 * v7);
+  }
+  this->m_TilerRenderers.a[this->m_TilerRenderers.size++] = pRenderer;
+  if ( p_m_Mutex->m_depth-- == 1 )
+    _InterlockedExchange((volatile __int32 *)p_m_Mutex, 0);
+}

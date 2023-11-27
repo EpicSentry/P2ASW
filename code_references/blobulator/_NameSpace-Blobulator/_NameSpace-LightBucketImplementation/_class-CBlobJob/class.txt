@@ -1,11 +1,8 @@
 class Blobulator::LightBucketImplementation::CBlobJob : public CJob
 {
-    public class Blobulator::LightBucketImplementation::CThreadData * m_pThreadData;
-    public int DoExecute();
-    public void CBlobJob(class Blobulator::LightBucketImplementation::CBlobJob & );
-    public void CBlobJob();
-    public void ~CBlobJob();
-    public class Blobulator::LightBucketImplementation::CBlobJob & operator=(class Blobulator::LightBucketImplementation::CBlobJob & );
-    public void __local_vftable_ctor_closure();
-    public void * __vecDelDtor(unsigned int );
+public:
+    Blobulator::LightBucketImplementation::CThreadData *m_pThreadData;
+    int DoExecute();
+    CBlobJob();
+    ~CBlobJob();
 };

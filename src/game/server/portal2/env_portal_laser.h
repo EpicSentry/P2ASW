@@ -4,6 +4,7 @@
 #include "cbase.h"
 #include "beam_shared.h"
 #include "baseanimating.h"
+#include "info_placement_helper.h"
 
 class CPropWeightedCube;
 
@@ -17,14 +18,24 @@ public:
 	CPortalLaser();
 	
 	virtual void Spawn( void );
+	virtual void Activate( void );
 	virtual void Precache( void );
 	virtual void UpdateOnRemove( void );
-	virtual void Think( void );
-	virtual void LaserOff( void );
-	virtual void LaserOn( void );
-	virtual void UpdateLaser( void );
-	virtual void DoTraceFromPortal( CPortal_Base2D* pRemotePortal, trace_t &tr, Vector vecMuzzleDir );
-	virtual float LaserEndPointSize( void );
+    virtual bool CreateVPhysics();
+	virtual int UpdateTransmitState();
+	virtual void TurnOff( void );
+	virtual void TurnOn( void );
+	
+	void StrikeThink( void );
+    void BeamDamage( trace_t &tr );
+    void UpdateSoundPosition( Vector &vecStart, Vector &vecEnd );
+
+	void TurnOnGlow();
+	void TurnOffGlow();
+    void TurnOffLaserSound();
+	void UpdateLaser( void );
+	void DoTraceFromPortal( CPortal_Base2D* pRemotePortal, trace_t &tr, Vector vecMuzzleDir );
+	float LaserEndPointSize( void );
 	void NotifyCubeLaserContact( CBaseEntity* pCube );
 	// Input functions
 	void InputTurnOn(inputdata_t& inputdata);
@@ -56,20 +67,25 @@ public:
 	CNetworkVar(Vector, vecNetOrigin);
 	CNetworkVar(Vector, vecNetMuzzleDir);
 	*/
-
-	bool m_bLaserOnly;
-	bool m_bIsLaserExtender;
+	bool m_bGlowInitialized;
+	bool m_bNoPlacementHelper;
+	
+    void CreateHelperEntities();
+    void CreateSoundProxies();
+	
+	Vector m_vecNearestSoundSource[MAX_PLAYERS];
+    CBaseEntity *m_pSoundProxy[MAX_PLAYERS];
+	CSoundPatch *m_pAmbientSound[MAX_PLAYERS];
+    CInfoPlacementHelper *m_pPlacementHelper;
 
 private:
-	CBeam* m_pBeam;
-
 	bool m_bStartOff; // To check the start state
 	CNetworkVar( bool, m_bLaserOn );
+	CNetworkVar( bool, m_bIsLethal );
 	CNetworkVar( bool, m_bShouldSpark );
 	CNetworkVar( bool, m_bUseParentDir );
-	int m_iLaserAttachmentIndex;
+	int m_iLaserAttachment;
 	static const int LASER_ATTACHMENT;
-	static const int LASER_EYE_ATTACHMENT;
 	static const float LASER_RANGE;
 	static const char* LASER_ATTACHMENT_NAME; // The name of the laser attachment.
 	float m_fPulseOffset;

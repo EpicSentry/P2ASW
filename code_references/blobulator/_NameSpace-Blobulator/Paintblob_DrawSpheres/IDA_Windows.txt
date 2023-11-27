@@ -1,0 +1,176 @@
+void __cdecl Blobulator::Paintblob_DrawSpheres(
+        const Point3D *vEyePosition,
+        IMaterial *pMaterial,
+        const Blobulator::BlobRenderInfo_t *blobRenderInfo,
+        ImpParticle *pParticles,
+        int nParticleCount,
+        const matrix3x4_t *pPortalMatrices,
+        int nPortalMatrixCount)
+{
+  Blobulator::PaintBlob_DrawSpheres_sortParticles_t *v7; // esi
+  int v8; // eax
+  float *v9; // ecx
+  int no; // eax
+  float dist; // ecx
+  IMatRenderContext *v12; // eax
+  IMatRenderContext *m_pObject; // esi
+  int v14; // edi
+  int v15; // eax
+  int v16; // esi
+  const Vector *v17; // eax
+  float y; // xmm0_4
+  int m_nVertexCount; // eax
+  void (__thiscall *Draw)(IMesh *, int, int); // edx
+  Blobulator::PaintBlob_DrawSpheres_sortParticles_t *sort_particles; // [esp+34h] [ebp-20Ch]
+  Blobulator::PaintBlob_DrawSpheres_sortParticles_t::CSorter pRenderContext; // [esp+4Ch] [ebp-1F4h]
+  CMatRenderContextPtr pRenderContexta; // [esp+4Ch] [ebp-1F4h]
+  IMesh *pMesh; // [esp+50h] [ebp-1F0h]
+  CMeshBuilder meshBuilder; // [esp+54h] [ebp-1ECh] BYREF
+
+  v7 = (Blobulator::PaintBlob_DrawSpheres_sortParticles_t *)MemAlloc_Alloc(0x80u);
+  sort_particles = v7;
+  if ( nParticleCount > 16 )
+  {
+    sort_particles = (Blobulator::PaintBlob_DrawSpheres_sortParticles_t *)_realloc_crt(v7, 16 * nParticleCount);
+    v7 = sort_particles;
+  }
+  v8 = 0;
+  if ( nParticleCount > 0 )
+  {
+    v9 = &pParticles->center.sse_vec.m128_f32[2];
+    do
+    {
+      v7[v8].no = v8;
+      v7[v8++].dist = fsqrt(
+                        (float)((float)(*v9 - vEyePosition->sse_vec.m128_f32[2])
+                              * (float)(*v9 - vEyePosition->sse_vec.m128_f32[2]))
+                      + (float)((float)((float)(*(v9 - 1) - vEyePosition->sse_vec.m128_f32[1])
+                                      * (float)(*(v9 - 1) - vEyePosition->sse_vec.m128_f32[1]))
+                              + (float)((float)(*(v9 - 2) - vEyePosition->sse_vec.m128_f32[0])
+                                      * (float)(*(v9 - 2) - vEyePosition->sse_vec.m128_f32[0]))));
+      v9 += 8;
+    }
+    while ( v8 < nParticleCount );
+  }
+  if ( nParticleCount == 2 )
+  {
+    no = v7->no;
+    dist = v7->dist;
+    if ( v7[1].dist > dist )
+    {
+      v7->no = v7[1].no;
+      v7->dist = v7[1].dist;
+      v7[1].no = no;
+      v7[1].dist = dist;
+    }
+  }
+  else if ( nParticleCount > 2 )
+  {
+    Helper::sort_Blobulator::PaintBlob_DrawSpheres_sortParticles_t_Blobulator::PaintBlob_DrawSpheres_sortParticles_t::CSorter_(
+      pRenderContext,
+      v7,
+      0,
+      nParticleCount - 1);
+  }
+  v12 = materials->GetRenderContext(materials);
+  m_pObject = v12;
+  pRenderContexta.m_pObject = v12;
+  if ( v12 )
+    v12->BeginRender(v12);
+  m_pObject->MatrixMode(m_pObject, MATERIAL_MODEL);
+  m_pObject->Bind(m_pObject, pMaterial, 0);
+  pMesh = m_pObject->GetDynamicMesh(m_pObject, 1, 0, 0, 0);
+  Blobulator::SetPortalMatrices(pPortalMatrices, nPortalMatrixCount);
+  v14 = 0;
+  if ( nParticleCount > 0 )
+  {
+    do
+    {
+      v15 = nParticleCount - v14;
+      if ( nParticleCount - v14 >= 130 )
+        v15 = 130;
+      meshBuilder.m_IndexBuilder.m_nBufferOffset = -1;
+      meshBuilder.m_VertexBuilder.m_nBufferOffset = -1;
+      meshBuilder.m_VertexBuilder.m_CompressionType = VERTEX_COMPRESSION_INVALID;
+      meshBuilder.m_pMesh = 0;
+      meshBuilder.m_bGenerateIndices = 0;
+      memset(&meshBuilder.m_IndexBuilder.m_pIndexBuffer, 0, 12);
+      meshBuilder.m_IndexBuilder.m_nCurrentIndex = 0;
+      meshBuilder.m_IndexBuilder.m_nTotalIndexCount = 0;
+      meshBuilder.m_IndexBuilder.m_nBufferFirstIndex = 0;
+      meshBuilder.m_VertexBuilder.m_pVertexBuffer = 0;
+      meshBuilder.m_VertexBuilder.m_nBufferFirstVertex = 0;
+      memset(&meshBuilder.m_VertexBuilder.m_nMaxVertexCount, 0, 12);
+      meshBuilder.m_VertexBuilder.m_nTotalVertexCount = 0;
+      CMeshBuilder::Begin(&meshBuilder, pMesh, MATERIAL_TRIANGLES, 51 * v15, 252 * v15, 0);
+      v16 = 0;
+      do
+      {
+        if ( v14 >= nParticleCount )
+          break;
+        v17 = (const Vector *)&pParticles[sort_particles[v14].no];
+        y = v17[1].y;
+        if ( y > 0.01 )
+        {
+          Blobulator::Paintblob_DrawFastSphere(&meshBuilder, v17, blobRenderInfo->m_flCubeWidth * y);
+          ++v16;
+        }
+        ++v14;
+      }
+      while ( v16 < 130 );
+      if ( meshBuilder.m_bGenerateIndices )
+      {
+        switch ( meshBuilder.m_Type )
+        {
+          case MATERIAL_LINE_STRIP:
+            m_nVertexCount = 2 * meshBuilder.m_VertexBuilder.m_nVertexCount - 2;
+            break;
+          case MATERIAL_LINE_LOOP:
+            m_nVertexCount = 2 * meshBuilder.m_VertexBuilder.m_nVertexCount;
+            break;
+          case MATERIAL_POLYGON:
+            m_nVertexCount = 3 * meshBuilder.m_VertexBuilder.m_nVertexCount - 6;
+            break;
+          case MATERIAL_QUADS:
+            m_nVertexCount = 6 * meshBuilder.m_VertexBuilder.m_nVertexCount / 4;
+            break;
+          case MATERIAL_INSTANCED_QUADS:
+            m_nVertexCount = 0;
+            break;
+          default:
+            m_nVertexCount = meshBuilder.m_VertexBuilder.m_nVertexCount;
+            break;
+        }
+        CIndexBuilder::GenerateIndices(&meshBuilder.m_IndexBuilder, meshBuilder.m_Type, m_nVertexCount);
+      }
+      meshBuilder.m_pMesh->UnlockMesh(
+        meshBuilder.m_pMesh,
+        meshBuilder.m_VertexBuilder.m_nVertexCount,
+        meshBuilder.m_IndexBuilder.m_nIndexCount,
+        &meshBuilder);
+      Draw = pMesh->Draw;
+      meshBuilder.m_IndexBuilder.m_pIndexBuffer = 0;
+      meshBuilder.m_IndexBuilder.m_nMaxIndexCount = 0;
+      meshBuilder.m_VertexBuilder.m_nMaxVertexCount = 0;
+      meshBuilder.m_VertexBuilder.m_pVertexBuffer = 0;
+      meshBuilder.m_VertexBuilder.m_CompressionType = VERTEX_COMPRESSION_INVALID;
+      meshBuilder.m_pMesh = 0;
+      Draw(pMesh, -1, 0);
+      if ( meshBuilder.m_VertexBuilder.m_pVertexBuffer
+        && meshBuilder.m_VertexBuilder.m_pVertexBuffer->IsDynamic(meshBuilder.m_VertexBuilder.m_pVertexBuffer) )
+      {
+        meshBuilder.m_VertexBuilder.m_pVertexBuffer->EndCastBuffer(meshBuilder.m_VertexBuilder.m_pVertexBuffer);
+      }
+      if ( meshBuilder.m_IndexBuilder.m_pIndexBuffer
+        && meshBuilder.m_IndexBuilder.m_pIndexBuffer->IsDynamic(meshBuilder.m_IndexBuilder.m_pIndexBuffer) )
+      {
+        meshBuilder.m_IndexBuilder.m_pIndexBuffer->EndCastBuffer(meshBuilder.m_IndexBuilder.m_pIndexBuffer);
+      }
+    }
+    while ( v14 < nParticleCount );
+    m_pObject = pRenderContexta.m_pObject;
+  }
+  m_pObject->EndRender(m_pObject);
+  m_pObject->Release(m_pObject);
+  C_BaseEntity::operator delete(sort_particles);
+}

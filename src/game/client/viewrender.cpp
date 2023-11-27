@@ -585,7 +585,7 @@ public:
 		m_pRenderTarget(NULL)
 	{}
 
-	bool			Setup(const CViewSetup &view, int *pClearFlags, SkyboxVisibility_t *pSkyboxVisible, ITexture *pRenderTarget = NULL);
+	  bool			Setup( const CViewSetup &view, int *pClearFlags, SkyboxVisibility_t *pSkyboxVisible, ITexture *pRenderTarget = NULL );
 
 	//Skybox drawing through portals with workarounds to fix area bits, position/scaling, view id's..........
 	void			Draw();
@@ -1113,7 +1113,7 @@ view_id_t CurrentViewID()
 bool IsMainView ( view_id_t id )
 {
 #if defined(PORTAL)
-	return ((id == VIEW_MAIN) || g_pPortalRender->IsPortalViewID(id));
+	return ( (id == VIEW_MAIN) || g_pPortalRender->IsPortalViewID( id ) );
 #else
 	return (id == VIEW_MAIN);
 #endif
@@ -3139,15 +3139,14 @@ void CViewRender::DrawWorldAndEntities( bool bDrawSkybox, const CViewSetup &view
 	MDLCACHE_CRITICAL_SECTION();
 
 	VisibleFogVolumeInfo_t fogVolumeInfo;
-
 #ifdef PORTAL //in portal, we can't use the fog volume for the camera since it's almost never in the same fog volume as what's in front of the portal
-	if (g_pPortalRender->GetViewRecursionLevel() == 0)
+	if( g_pPortalRender->GetViewRecursionLevel() == 0 )
 	{
-		render->GetVisibleFogVolume(viewIn.origin, &fogVolumeInfo);
+		render->GetVisibleFogVolume( viewIn.origin, &fogVolumeInfo );
 	}
 	else
 	{
-		render->GetVisibleFogVolume(g_pPortalRender->GetExitPortalFogOrigin(), &fogVolumeInfo);
+		render->GetVisibleFogVolume( g_pPortalRender->GetExitPortalFogOrigin(), &fogVolumeInfo );
 	}
 #else
 	render->GetVisibleFogVolume( viewIn.origin, &fogVolumeInfo );
@@ -5576,7 +5575,7 @@ void CSkyboxView::Draw()
 //-----------------------------------------------------------------------------
 bool CPortalSkyboxView::Setup(const CViewSetup &view, int *pClearFlags, SkyboxVisibility_t *pSkyboxVisible, ITexture *pRenderTarget)
 {
-	if (!BaseClass::Setup(view, pClearFlags, pSkyboxVisible))
+	if ( !BaseClass::Setup( view, pClearFlags, pSkyboxVisible ) )
 		return false;
 
 	m_pRenderTarget = pRenderTarget;

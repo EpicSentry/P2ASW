@@ -1,0 +1,54 @@
+Blobulator::IBlobRenderer *__thiscall ImpRendererFactory::AcquireTilerRenderer(ImpRendererFactory *this)
+{
+  CThreadFastMutex *p_m_Mutex; // edi
+  signed __int32 CurrentThreadId; // ecx
+  Blobulator::IBlobRenderer *result; // eax
+  Blobulator::LightBucketImplementation::LightweightRenderer *v5; // ebx
+  Blobulator::LightBucketImplementation::CFragmentedVertexBuffer *v6; // eax
+  Blobulator::LightBucketImplementation::CFragmentedVertexBuffer *v7; // eax
+
+  p_m_Mutex = &this->m_Mutex;
+  CurrentThreadId = GetCurrentThreadId();
+  if ( CurrentThreadId != p_m_Mutex->m_ownerID
+    && _InterlockedCompareExchange((volatile signed __int32 *)p_m_Mutex, CurrentThreadId, 0) )
+  {
+    _mm_pause();
+    CThreadFastMutex::Lock(p_m_Mutex, CurrentThreadId, 0);
+  }
+  else
+  {
+    ++p_m_Mutex->m_depth;
+  }
+  ++this->m_nNumberOfAcquiredTilerRenderers;
+  if ( this->m_TilerRenderers.size <= 0 )
+  {
+    v5 = (Blobulator::LightBucketImplementation::LightweightRenderer *)MemAlloc_Alloc(0xD0u);
+    if ( v5 )
+    {
+      if ( !this->m_pFragmentedVertexBuffer )
+      {
+        v6 = (Blobulator::LightBucketImplementation::CFragmentedVertexBuffer *)MemAlloc_Alloc(0x5E30u);
+        if ( v6 )
+          Blobulator::LightBucketImplementation::CFragmentedVertexBuffer::CFragmentedVertexBuffer(v6);
+        else
+          v7 = 0;
+        this->m_pFragmentedVertexBuffer = v7;
+      }
+      Blobulator::LightBucketImplementation::LightweightRenderer::LightweightRenderer(
+        v5,
+        this->m_pFragmentedVertexBuffer,
+        1);
+    }
+    else
+    {
+      result = 0;
+    }
+  }
+  else
+  {
+    result = this->m_TilerRenderers.a[--this->m_TilerRenderers.size];
+  }
+  if ( p_m_Mutex->m_depth-- == 1 )
+    _InterlockedExchange((volatile __int32 *)p_m_Mutex, 0);
+  return result;
+}

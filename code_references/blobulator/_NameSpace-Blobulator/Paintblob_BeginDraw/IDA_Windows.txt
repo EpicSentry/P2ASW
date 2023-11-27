@@ -1,0 +1,130 @@
+Blobulator::CDrawInfo *__usercall Blobulator::Paintblob_BeginDraw@<eax>(
+        float a1@<ebp>,
+        IMaterial *pMaterial,
+        const Blobulator::BlobRenderInfo_t *blobRenderInfo,
+        ImpParticle *pParticles,
+        int nNumberOfParticles,
+        const matrix3x4_t *pMatrices,
+        int nNumberOfMatrices,
+        bool bUseTwoPassesToDraw)
+{
+  CVProfile *v8; // ecx
+  bool v9; // zf
+  char v10; // al
+  float m_fValue; // xmm0_4
+  ConVar *m_pParent; // eax
+  ImpTiler *v14; // esi
+  Blobulator::CDrawInfo *v15; // eax
+  Blobulator::CDrawInfo *v16; // edi
+  ImpParticle *v17; // edi
+  int i; // edi
+  _BYTE v19[12]; // [esp+28h] [ebp-2Ch] BYREF
+  Point3D center; // [esp+34h] [ebp-20h]
+  char v21; // [esp+47h] [ebp-Dh]
+  float flPaintResolution; // [esp+48h] [ebp-Ch]
+  Blobulator::CDrawInfo *pDrawInfo; // [esp+4Ch] [ebp-8h]
+  Blobulator::CDrawInfo *retaddr; // [esp+54h] [ebp+0h]
+
+  flPaintResolution = a1;
+  pDrawInfo = retaddr;
+  v8 = *(CVProfile **)&_g_VProfCurrentProfile.m_bVTuneGroupEnabled;
+  v9 = *(_DWORD *)(*(_DWORD *)&_g_VProfCurrentProfile.m_bVTuneGroupEnabled + 4108) == 0;
+  v10 = *(_DWORD *)(*(_DWORD *)&_g_VProfCurrentProfile.m_bVTuneGroupEnabled + 4108) != 0;
+  v21 = v10;
+  if ( !v9 )
+  {
+    CVProfile::EnterScope(
+      *(CVProfile **)&_g_VProfCurrentProfile.m_bVTuneGroupEnabled,
+      "Paintblob_DrawIsoSurface",
+      0,
+      "Paintblob_render",
+      0,
+      4);
+    v8 = *(CVProfile **)&_g_VProfCurrentProfile.m_bVTuneGroupEnabled;
+    v10 = v21;
+  }
+  m_fValue = r_paintblob_highres_cube.m_pParent->m_Value.m_fValue * 2.5;
+  if ( !blobRenderInfo->m_nViewID )
+  {
+    m_pParent = r_paintblob_mainview_highres.m_pParent;
+LABEL_10:
+    if ( m_pParent->m_Value.m_nValue )
+      m_fValue = r_paintblob_highres_cube.m_pParent->m_Value.m_fValue;
+    center.sse_vec.m128_f32[2] = blobRenderInfo->m_flViewScale * m_fValue;
+    v14 = ImpTilerFactory::AcquireTiler(ImpTilerFactory::s_pInstance);
+    ImpTiler::SetCubeWidth(
+      v14,
+      (float)(r_paintblob_blr_scale.m_pParent->m_Value.m_fValue * blobRenderInfo->m_flCubeWidth)
+    * center.sse_vec.m128_f32[2]);
+    ImpTiler::SetRenderRadius(
+      v14,
+      (float)(r_paintblob_blr_scale.m_pParent->m_Value.m_fValue * blobRenderInfo->m_flCubeWidth)
+    * blobRenderInfo->m_flRenderRadius);
+    ImpTiler::SetCutoffRadius(
+      v14,
+      (float)(r_paintblob_blr_scale.m_pParent->m_Value.m_fValue * blobRenderInfo->m_flCubeWidth)
+    * blobRenderInfo->m_flCutoffRadius);
+    v14->m_nTileIndexToDraw = r_paintblob_tile_index_to_draw.m_pParent->m_Value.m_nValue;
+    v15 = (Blobulator::CDrawInfo *)MemAlloc_Alloc(0xCu);
+    if ( v15 )
+    {
+      v16 = v15;
+      v15->m_pTiler = v14;
+      v15->m_fAngle = 0.0;
+      v15->m_pRenderContext.m_pObject = 0;
+      center.sse_vec.m128_i32[3] = (int)v15;
+    }
+    else
+    {
+      center.sse_vec.m128_i32[3] = 0;
+      v16 = 0;
+    }
+    if ( !bUseTwoPassesToDraw )
+    {
+      Blobulator::SetupRenderContext(pMaterial, v16);
+      ImpTiler::SetRenderContext(v14, &v16->m_pRenderContext);
+    }
+    v17 = pParticles;
+    Blobulator::CalculateCenter((Point3D *)v19, pParticles, nNumberOfParticles);
+    ImpTiler::beginFrame(
+      v14,
+      (const Point3D *)v19,
+      r_paintblob_debug_draw_margin.m_pParent->m_Value.m_nValue == 0,
+      bUseTwoPassesToDraw);
+    ImpTiler::SetPortalMatrices(v14, pMatrices, nNumberOfMatrices);
+    if ( nNumberOfParticles > 0 )
+    {
+      center.sse_vec.m128_i32[2] = nNumberOfParticles;
+      do
+      {
+        ImpTiler::insertParticle(v14, v17++);
+        --center.sse_vec.m128_i32[2];
+      }
+      while ( center.sse_vec.m128_i32[2] );
+    }
+    if ( r_paintblob_rotate.m_pParent->m_Value.m_nValue )
+      ImpTiler::drawSurfaceSorted(v14, (const Point3D *)v19, bUseTwoPassesToDraw);
+    else
+      ImpTiler::drawSurface(v14, bUseTwoPassesToDraw);
+    if ( r_paintblob_debug_draw_tile_boundaries.m_pParent->m_Value.m_nValue )
+    {
+      for ( i = 0;
+            i < (int)CParticleOperatorDefinition<C_OP_RemapModelVolumetoCP>::GetName((CParticleOperatorDefinition<C_OP_RenderProjected> *)v14);
+            ++i )
+      {
+        ;
+      }
+    }
+    if ( v21 )
+      CVProfile::ExitScope(*(CVProfile **)&_g_VProfCurrentProfile.m_bVTuneGroupEnabled);
+    return (Blobulator::CDrawInfo *)center.sse_vec.m128_i32[3];
+  }
+  if ( !r_paintblob_only_mainview_displayed.m_pParent->m_Value.m_nValue )
+  {
+    m_pParent = r_paintblob_otherviews_highres.m_pParent;
+    goto LABEL_10;
+  }
+  if ( v10 )
+    CVProfile::ExitScope(v8);
+  return 0;
+}

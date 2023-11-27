@@ -1,0 +1,46 @@
+void __cdecl Blobulator::SetupRenderContext(IMaterial *pMaterial, Blobulator::CDrawInfo *drawInfo)
+{
+  IMatRenderContext *v3; // eax
+  IMatRenderContext *m_pObject; // ecx
+  IMatRenderContext *v5; // edi
+  IMatRenderContext *v6; // ecx
+  IMatRenderContext *v7; // edi
+  IMaterial *DrawMaterial; // eax
+  IMaterial *v9; // ebx
+
+  v3 = materials->GetRenderContext(materials);
+  m_pObject = drawInfo->m_pRenderContext.m_pObject;
+  v5 = v3;
+  if ( m_pObject )
+  {
+    m_pObject->EndRender(m_pObject);
+    v6 = drawInfo->m_pRenderContext.m_pObject;
+    if ( v6 )
+      v6->Release(v6);
+  }
+  drawInfo->m_pRenderContext.m_pObject = 0;
+  if ( v5 )
+    v5->AddRef(v5);
+  drawInfo->m_pRenderContext.m_pObject = v5;
+  v5->BeginRender(v5);
+  drawInfo->m_pRenderContext.m_pObject->MatrixMode(drawInfo->m_pRenderContext.m_pObject, MATERIAL_MODEL);
+  v7 = drawInfo->m_pRenderContext.m_pObject;
+  DrawMaterial = Blobulator::GetDrawMaterial();
+  v9 = DrawMaterial;
+  if ( DrawMaterial && !DrawMaterial->IsErrorMaterial(DrawMaterial) )
+    pMaterial = v9;
+  v7->Bind(v7, pMaterial, 0);
+  drawInfo->m_pRenderContext.m_pObject->PushMatrix(drawInfo->m_pRenderContext.m_pObject);
+  drawInfo->m_pRenderContext.m_pObject->LoadIdentity(drawInfo->m_pRenderContext.m_pObject);
+  ((void (__thiscall *)(IMatRenderContext *, _DWORD, _DWORD, _DWORD))drawInfo->m_pRenderContext.m_pObject->Translate)(
+    drawInfo->m_pRenderContext.m_pObject,
+    0,
+    0,
+    0);
+  ((void (__thiscall *)(IMatRenderContext *, _DWORD, _DWORD, _DWORD, char *const))drawInfo->m_pRenderContext.m_pObject->Rotate)(
+    drawInfo->m_pRenderContext.m_pObject,
+    LODWORD(drawInfo->m_fAngle),
+    0,
+    0,
+    FLOAT_1_0);
+}

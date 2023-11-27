@@ -9,6 +9,7 @@
 #include "prop_weightedcube.h"
 #include "point_laser_target.h"
 #include "physicsshadowclone.h"
+#include "soundenvelope.h"
 
 
 ConVar portal_laser_normal_update( "portal_laser_normal_update", "0.05f", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
@@ -17,27 +18,30 @@ ConVar sv_debug_laser( "sv_debug_laser", "0", FCVAR_REPLICATED | FCVAR_DEVELOPME
 ConVar new_portal_laser( "new_portal_laser", "1", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
 ConVar sv_laser_cube_autoaim( "sv_laser_cube_autoaim", "1", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
 
+ConVar hitbox_damage_enabled( "hitbox_damage_enabled", "0", FCVAR_DEVELOPMENTONLY, "Enable/disable hitbox damage." ); // FIXME: IDA shows that the flags are "8194"!!
+ConVar sv_player_collide_with_laser( "sv_player_collide_with_laser", "1", FCVAR_DEVELOPMENTONLY ); // FIXME: IDA shows that the flags are "0x4000"!!
+
 // constants
-const int CPortalLaser::LASER_EYE_ATTACHMENT = 1;
 const float CPortalLaser::LASER_RANGE = 8192;
 const char* CPortalLaser::LASER_ATTACHMENT_NAME = "laser_attachment";
 const float CPortalLaser::LASER_END_POINT_PULSE_SCALE = 4.0f;
 const int CPortalLaser::LASER_ATTACHMENT = 1;
 
 BEGIN_DATADESC(CPortalLaser)
-DEFINE_KEYFIELD(m_modelName, FIELD_STRING, "model"),
-DEFINE_KEYFIELD(m_bStartOff, FIELD_BOOLEAN, "StartState"),
-DEFINE_INPUTFUNC(FIELD_VOID, "TurnOn", InputTurnOn),
-DEFINE_INPUTFUNC(FIELD_VOID, "TurnOff", InputTurnOff),
-DEFINE_INPUTFUNC(FIELD_VOID, "Toggle", InputToggle),
-DEFINE_THINKFUNC( Think ),
+	DEFINE_KEYFIELD( m_bNoPlacementHelper, FIELD_BOOLEAN, "NoPlacementHelper" ),
+	DEFINE_KEYFIELD(m_modelName, FIELD_STRING, "model"),
+	DEFINE_KEYFIELD(m_bStartOff, FIELD_BOOLEAN, "StartState"),
+	DEFINE_KEYFIELD( m_bIsLethal, FIELD_BOOLEAN, "LethalDamage" ),
+	DEFINE_INPUTFUNC(FIELD_VOID, "TurnOn", InputTurnOn),
+	DEFINE_INPUTFUNC(FIELD_VOID, "TurnOff", InputTurnOff),
+	DEFINE_INPUTFUNC(FIELD_VOID, "Toggle", InputToggle),
+	DEFINE_THINKFUNC( StrikeThink ),
 
-DEFINE_FIELD( m_bLaserOn, FIELD_BOOLEAN ),
-DEFINE_FIELD( m_hReflector, FIELD_EHANDLE ),
-DEFINE_FIELD( m_hTouchingReflector, FIELD_EHANDLE ),
-DEFINE_FIELD( m_vStartPoint, FIELD_VECTOR ),
-DEFINE_FIELD( m_vEndPoint, FIELD_VECTOR ),
-
+	DEFINE_FIELD( m_bLaserOn, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_hReflector, FIELD_EHANDLE ),
+	DEFINE_FIELD( m_hTouchingReflector, FIELD_EHANDLE ),
+	DEFINE_FIELD( m_vStartPoint, FIELD_VECTOR ),
+	DEFINE_FIELD( m_vEndPoint, FIELD_VECTOR ),
 
 //DEFINE_FIELD(m_bIsHittingPortal, FIELD_BOOLEAN),
 END_DATADESC()
@@ -63,16 +67,44 @@ CPortalLaser::CPortalLaser()
 {
 	m_flLastDamageTime = 0.0;
 	m_flLastDamageSoundTime = 0.0;
-	m_bLaserOnly = false;
+	m_bFromReflectedCube = false;
 	m_bStartOff = false;
 	m_flLastSparkTime = false;
-	m_bIsLaserExtender = false;
 
 	m_hTouchingReflector = NULL;
 	m_hReflector = NULL;
 }
 
-void CPortalLaser::Think()
+void CPortalLaser::TurnOffGlow( void )
+{
+	m_bGlowInitialized = false;
+
+	if ( !m_bFromReflectedCube )
+	{
+		StopParticleEffects( this );
+	}
+	else
+	{
+		StopParticleEffects( m_hReflector );
+	}
+}
+
+void CPortalLaser::TurnOffLaserSound( void )
+{
+	for ( int i = 0; i < MAX_PLAYERS; ++i )
+	{
+		if ( m_pAmbientSound[i] )
+		{
+			CSoundEnvelopeController &controller = CSoundEnvelopeController::GetController();
+
+			controller.SoundDestroy( m_pAmbientSound[i] );
+			m_pAmbientSound[i] = NULL;
+		}
+	}
+}
+
+
+void CPortalLaser::StrikeThink()
 {
 	float flValue;
 	// Schedule the next think
@@ -81,12 +113,15 @@ void CPortalLaser::Think()
 	else
 		flValue = portal_laser_high_precision_update.GetFloat();
 		
-	SetNextThink( flValue + gpGlobals->curtime, 0);
+	SetNextThink( flValue + gpGlobals->curtime );
 
 	if (m_bLaserOn)
 	{
 		UpdateLaser(); // Update the laser position if it's on
 	}
+
+	TurnOnGlow();
+	CreateSoundProxies();
 }
 
 void CPortalLaser::UpdateLaser()
@@ -102,7 +137,7 @@ void CPortalLaser::UpdateLaser()
 
 	Vector vecEye;
 	QAngle angEyeDir;
-	GetAttachment(LASER_EYE_ATTACHMENT, vecEye, angEyeDir);
+	GetAttachment(m_iLaserAttachment, vecEye, angEyeDir);
 
 	Vector vecMuzzleDir;
 	AngleVectors(angEyeDir, &vecMuzzleDir);
@@ -132,16 +167,28 @@ void CPortalLaser::UpdateLaser()
 			bShouldSpark = false;
 
 			m_hTouchingReflector = pCube;
-			m_bFromReflectedCube = true;
 
 			if (!pCube->HasLaser())
 			{
 				CPortalLaser *pNewLaser = (CPortalLaser*)CreateEntityByName("env_portal_laser");
-				pNewLaser->m_bLaserOnly = true;
-				pNewLaser->m_bIsLaserExtender = true;
-				pNewLaser->SetParent( pCube );
-				pNewLaser->SetAbsOrigin( pCube->GetAbsOrigin() );
-				pNewLaser->SetAbsAngles( pCube->GetAbsAngles() );
+				pNewLaser->m_bFromReflectedCube = true;
+				pNewLaser->SetParent(pCube);
+				pNewLaser->SetAbsOrigin(pCube->GetAbsOrigin());
+				pNewLaser->SetAbsAngles(pCube->GetAbsAngles());
+
+				if (m_hReflector)
+				{
+					CPortalLaser *pLaser = static_cast<CPortalLaser*>( m_hReflector->GetLaser() );
+					Assert( pLaser );
+					
+					// Don't do this check, pCube->HasLaser() does this for us!
+					//if ( pLaser )
+					{
+						UTIL_Remove( pLaser );
+					}
+					m_hReflector->SetLaser( NULL );
+				}
+
 				pNewLaser->m_hReflector = pCube;
 				pNewLaser->m_angParentAngles = pCube->GetAbsAngles();
 				pNewLaser->m_bUseParentDir = true;
@@ -231,35 +278,12 @@ void CPortalLaser::UpdateLaser()
 			if (gpGlobals->curtime - m_flLastDamageSoundTime >= 0.55f) // Play sound every 0.55 seconds
 			{
 				m_flLastDamageSoundTime = gpGlobals->curtime;
-				pPlayerTraceEnt->EmitSound( "HL2Player.BurnPain" );
+				pPlayerTraceEnt->EmitSound( "Flesh.LaserBurn" );
 			}
 			m_flLastDamageTime = gpGlobals->curtime;
 		}
 	}
 
-	if (!m_pBeam)
-	{
-		//m_pBeam = CBeam::BeamCreate("sprites/purplelaser1.vmt", 0.2);
-		m_pBeam = CBeam::BeamCreate("", 0.2); // NOTE: We don't want this to render on the client because the client creates its own laser
-		m_pBeam->SetBrightness(92);
-		m_pBeam->SetNoise(0);
-		m_pBeam->SetWidth(10.0f);
-		m_pBeam->SetEndWidth(0);
-		m_pBeam->SetScrollRate(0);
-		m_pBeam->SetFadeLength(0);
-		m_pBeam->SetCollisionGroup(COLLISION_GROUP_NONE);
-		m_pBeam->PointsInit(m_vStartPoint + vecMuzzleDir * LASER_RANGE, m_vStartPoint);
-		m_pBeam->SetBeamFlag(FBEAM_REVERSED);
-		m_pBeam->SetStartEntity(this);
-	}
-	else
-	{
-		m_pBeam->SetStartPos(m_vStartPoint + vecMuzzleDir * LASER_RANGE);
-		m_pBeam->SetEndPos(m_vStartPoint);
-		m_pBeam->RemoveEffects(EF_NODRAW);
-	}
-
-	float fEndFraction;
 	Ray_t rayPath;
 	rayPath.Init(m_vStartPoint, m_vStartPoint + vecMuzzleDir * LASER_RANGE);
 
@@ -269,15 +293,17 @@ void CPortalLaser::UpdateLaser()
 	//UTIL_Portal_TraceRay( ray , MASK_SHOT, &masterTraceFilter, &trace);
 
 	enginetrace->TraceRay( rayPath, MASK_PORTAL_LASER, &masterTraceFilter, &trace );
+	
+	UpdateSoundPosition( trace.startpos, trace.endpos );
 
-	if (UTIL_Portal_TraceRay_Beam(rayPath, MASK_PORTAL_LASER, &masterTraceFilter, &fEndFraction))
-	{
-	}
+	//if (UTIL_Portal_TraceRay_Beam(rayPath, MASK_PORTAL_LASER, &masterTraceFilter, &fEndFraction))
+	//{
+	//}
 
 	m_vEndPoint = trace.endpos;
 	
 	// Note: This gives us an assert, but we need it for turrets
-	m_pBeam->BeamDamageInstant( &trace, 0 );
+	//m_pBeam->BeamDamageInstant( &trace, 0 );
 
 	// Check if the trace hits any portals
 	CPortal_Base2D* pLocalPortal = NULL;
@@ -305,8 +331,6 @@ void CPortalLaser::UpdateLaser()
 	}
 
 	//v_vHitPos = vEndPoint;
-	m_pBeam->PointsInit(m_vEndPoint, m_vStartPoint);
-
 	
 	m_bShouldSpark = bShouldSpark;
 
@@ -323,19 +347,76 @@ void CPortalLaser::UpdateLaser()
 	{
 		// laser_cutter_sparks doesn't work for some reason
 
-		m_pBeam->PointsInit(m_vEndPoint, m_vStartPoint);
-
 		g_pEffects->Sparks(m_vEndPoint, 2, 2, &vecMuzzleDir);
 
 		m_flLastSparkTime = gpGlobals->curtime;
 	}
 #endif
+		
+	if ( m_pPlacementHelper )
+		UTIL_SetOrigin(m_pPlacementHelper, trace.endpos, 0);
 
 	Ray_t targetRay;
 	targetRay.Init( trace.startpos, trace.endpos );
 
 	DamageAllTargetsInRay( targetRay );
 
+}
+
+
+float LaserDamageAmount()
+{
+	return 150.0;
+}
+
+void CPortalLaser::BeamDamage( trace_t &tr )
+{
+	static float CEG_LASER_DAMAGE_AMOUNT = LaserDamageAmount();
+
+	if (tr.fraction != 1.0)
+	{
+		CBaseEntity *pEntity = tr.m_pEnt;
+		if (pEntity)
+		{
+			ClearMultiDamage();
+			Vector vecCenter = tr.endpos - GetAbsOrigin();
+			VectorNormalize( vecCenter );
+
+			CTakeDamageInfo info( this, this, gpGlobals->frametime * CEG_LASER_DAMAGE_AMOUNT, 8, 0 );
+			CalculateMeleeDamageForce( &info, vecCenter, tr.endpos, 1.0 );
+			pEntity->DispatchTraceAttack(info, vecCenter, &tr );
+			ApplyMultiDamage();
+
+			CBaseAnimating *pAnimating = pEntity->GetBaseAnimating();
+
+			if ( pAnimating && ( (pAnimating->ClassMatches("npc_portal_turret_floor"))
+				|| pAnimating->ClassMatches("npc_hover_turret") ) )
+			{
+				if (hitbox_damage_enabled.GetInt())
+				{
+					CTakeDamageInfo v8;
+					v8.SetDamage( 1.0 );
+					v8.SetDamageType( DMG_CRUSH ); // 1
+
+					pAnimating->Event_Killed( v8 );
+					pAnimating->SetThink( NULL );
+
+				}
+				else
+				{
+					// BEST GUESS!! MAY NOT BE ACCURATE!!
+					pAnimating->Ignite( 30.0, true ); 
+				}
+			}
+			else if ( pEntity->GetMoveType() == MOVETYPE_VPHYSICS )
+			{
+				CPhysicsProp *pPhysProp = dynamic_cast<CPhysicsProp*>(pEntity);
+				if (pPhysProp)
+					pPhysProp->Ignite( 30.0, false );
+			}
+			m_bShouldSpark = true;
+		}
+	}
 }
 
 void CPortalLaser::DamageAllTargetsInRay( Ray_t &ray )
@@ -466,14 +547,19 @@ void CPortalLaser::Spawn(void)
 	
 	m_angParentAngles = vec3_angle;
 
-	if (!m_bLaserOnly)
+	if (!m_bFromReflectedCube)
 	{
-		SetSolid( SOLID_BBOX );
+		SetSolid( SOLID_VPHYSICS );
 	}
 	else
 	{
 		AddEffects( EF_NODRAW );
 	}
+
+	for ( int i = 0; i != 33; ++i )
+		m_pAmbientSound[i] = 0;
+
+	CreateHelperEntities();
 
 	// Note: We must have a model for angMuzzleDir
 	SetModel("models/props/laser_emitter_center.mdl"); // Default model if it is not defined as a keyvalue
@@ -487,53 +573,203 @@ void CPortalLaser::Spawn(void)
 			SetModel(pszModelName);
 		}
 	}
+	
+	m_iLaserAttachment = LookupAttachment( "laser_attachment" );
+
+	m_bGlowInitialized = false;
 
 	if (m_bStartOff)
 	{
-		LaserOff();
+		TurnOff();
 	}
 	else
 	{
-		LaserOn();
+		TurnOn();
 	}
 
 
-	SetThink(&CPortalLaser::Think);
+	SetThink(&CPortalLaser::StrikeThink);
 	SetNextThink(gpGlobals->curtime + 0.1f);
 
 	BaseClass::Spawn();
 }
 
+void CPortalLaser::Activate( void )
+{
+	CreateHelperEntities();
+	BaseClass::Activate();
+}
+
 void CPortalLaser::UpdateOnRemove( void )
 {
-	LaserOff();
-	UTIL_Remove(m_pBeam);
+	if ( m_pPlacementHelper )
+		UTIL_Remove( m_pPlacementHelper );
+	for ( int i = 0; i != 33; ++i)
+	{
+		if (m_pSoundProxy[i])
+			UTIL_Remove( m_pSoundProxy[i] );
+	}
+
+	TurnOff();
 	BaseClass::UpdateOnRemove();
 }
 
-void CPortalLaser::Precache(void)
+bool CPortalLaser::CreateVPhysics( void )
 {
+	VPhysicsInitStatic();
+	return 1;
+}
+
+void CPortalLaser::CreateSoundProxies( void )
+{		
+	for (int i = 0; i < MAX_PLAYERS; ++i)
+	{
+		CBasePlayer *pPlayer = UTIL_PlayerByIndex( i );
+		if (pPlayer && pPlayer->IsConnected() && !pPlayer->IsSplitScreenPlayer())
+		{
+			if (!m_pSoundProxy[i])
+			{
+				m_pSoundProxy[i] = CreateEntityByName("info_target", -1, 1);
+				
+
+				m_pSoundProxy[i]->SetAbsOrigin( GetAbsOrigin() );
+				m_pSoundProxy[i]->AddEFlags( 0x80u );
+				m_pSoundProxy[i]->DispatchUpdateTransmitState();
+			}
+
+			CBaseEntity *pSoundProxy = m_pSoundProxy[i];
+
+			if (!m_pSoundProxy[MAX_PLAYERS])
+			{
+				CSingleUserRecipientFilter filter( pPlayer ); // [esp+24h] [ebp-28h] BYREF
+				//filter.__vftable = (CSingleUserRecipientFilter_vtbl *)&CSingleUserRecipientFilter::`vftable';
+
+				CSoundEnvelopeController &controller = CSoundEnvelopeController::GetController();
+				if ( m_bIsLethal )
+				{
+					m_pAmbientSound[i] = controller.SoundCreate( filter, pSoundProxy->entindex(), "LaserGreen.BeamLoop" );
+				}
+				else
+				{
+
+					if ( pSoundProxy )
+						m_pAmbientSound[i] = controller.SoundCreate( filter, pSoundProxy->entindex(), "Laser.BeamLoop" );
+					else
+						m_pAmbientSound[i] = controller.SoundCreate( filter, 0, "Laser.BeamLoop");
+				}
+
+				//pSoundProxy[33] = (CBaseEntity *)m_pSoundProxy;
+
+				controller.Play( m_pAmbientSound[i], 1.0, 100.0, 0 );
+			}
+		}
+	}
+}
+
+
+void CPortalLaser::UpdateSoundPosition( Vector &vecStart, Vector &vecEnd )
+{
+	CBasePlayer *pPlayer; // eax
+	Vector vEyePosition; // [esp+38h] [ebp-30h] BYREF
+	Vector vecNearestPoint; // [esp+44h] [ebp-24h] BYREF
+
+	int i;
+	for ( i = 1;; ++i)
+	{
+		pPlayer = UTIL_PlayerByIndex( i );
+		if (!pPlayer || !pPlayer->IsConnected())
+		{						
+			goto LABEL_3;
+		}
+
+		vEyePosition = pPlayer->EyePosition();
+		
+		CalcClosestPointOnLineSegment( vEyePosition, vecStart, vecEnd, vecNearestPoint, 0 );
+		
+		if ( ( ( vEyePosition.x - m_vecNearestSoundSource[i].x ) * ( vEyePosition.x - m_vecNearestSoundSource[i].x )
+			+ ( vEyePosition.y - m_vecNearestSoundSource[i].y ) * ( vEyePosition.y - m_vecNearestSoundSource[i].y )
+			+ ( vEyePosition.z - m_vecNearestSoundSource[i].z ) * ( vEyePosition.z - m_vecNearestSoundSource[i].z ) )
+				> 
+			( ( vEyePosition.x - vecNearestPoint.x) * (vEyePosition.x - vecNearestPoint.x )
+			+ ( vEyePosition.y - vecNearestPoint.y) * (vEyePosition.y - vecNearestPoint.y )
+			+ ( vEyePosition.z - vecNearestPoint.z) * (vEyePosition.z - vecNearestPoint.z ) ) )
+	
+			goto LABEL_2;
+		if (m_vecNearestSoundSource[i].x == vec3_invalid.x && m_vecNearestSoundSource[i].y == vec3_invalid.y)
+			break;
+	LABEL_3:
+		if (i == 32)
+			return;
+	LABEL_4:
+		;
+	}
+	if (m_vecNearestSoundSource[i].z == vec3_invalid.z)
+	{
+	LABEL_2:
+		m_vecNearestSoundSource[i].x = vecNearestPoint.x;
+		m_vecNearestSoundSource[i].y = vecNearestPoint.y;
+		m_vecNearestSoundSource[i].z = vecNearestPoint.z;
+		goto LABEL_3;
+	}
+	if (i != 32)
+		goto LABEL_4;
+}
+
+void CPortalLaser::Precache(void)
+{	
+	if ( m_bIsLethal )
+		PrecacheScriptSound("LaserGreen.BeamLoop");
+	else
+		PrecacheScriptSound("Laser.BeamLoop");
+
 	// Precache the model using the stored model path
 	PrecacheModel(STRING(m_modelName));
 	PrecacheModel("models/props/laser_emitter_center.mdl");
 
-	PrecacheScriptSound( "HL2Player.BurnPain" );
-	if (!m_bIsLaserExtender)
-		PrecacheParticleSystem( "laser_start_glow" );
-	else		
-		PrecacheParticleSystem( "reflector_start_glow" );
+	PrecacheScriptSound( "Flesh.LaserBurn" );
+	
+	PrecacheParticleSystem("laser_start_glow");
+	PrecacheParticleSystem("reflector_start_glow");
+	
+	if ( !m_bFromReflectedCube )
+	{
+		if ( GetModelName().ToCStr() )
+			PrecacheModel( GetModelName().ToCStr() );
+		else
+			PrecacheModel("models/props/laser_emitter.mdl");
+	}
+}
+
+int CPortalLaser::UpdateTransmitState( void )
+{
+	return SetTransmitState( FL_EDICT_ALWAYS );
+}
+
+void CPortalLaser::CreateHelperEntities( void )
+{
+	if ( !m_bNoPlacementHelper && !m_pPlacementHelper )
+	{
+		m_pPlacementHelper = (CInfoPlacementHelper *)CreateEntityByName("info_placement_helper", -1, 1);
+
+		m_pPlacementHelper->SetAbsOrigin( GetAbsOrigin() );
+
+		m_pPlacementHelper->SetAbsAngles( GetAbsAngles() );
+
+		m_pPlacementHelper->KeyValue("radius", "16");
+		m_pPlacementHelper->KeyValue("hide_until_placed", "0");
+
+		DispatchSpawn( m_pPlacementHelper, 1 );
+	}
+	
+	CreateSoundProxies();
 
 }
 
-void CPortalLaser::LaserOff(void)
+void CPortalLaser::TurnOff(void)
 {
 	m_bShouldSpark = false;
 	m_bLaserOn = false;
 	//Msg("Laser Deactivating\n");
-	if (m_pBeam)
-	{
-		m_pBeam->AddEffects(EF_NODRAW);
-	}
 	
 	StopParticleEffects( this );
 	
@@ -543,72 +779,23 @@ void CPortalLaser::LaserOff(void)
 	{			
 		StopParticleEffects( pReflectorCube );
 	}
+
+	TurnOffGlow();
+	TurnOffLaserSound();
 }
 //start laseron
-void CPortalLaser::LaserOn(void)
+void CPortalLaser::TurnOn(void)
 {
 	m_bLaserOn = true;
 	//Msg("Laser Activating\n");
 
-	Vector m_vStartPoint = GetAbsOrigin();
 	QAngle angMuzzleDir;
-	CBaseAnimating* pBaseAnimating = dynamic_cast<CBaseAnimating*>(this);
-	bool bFoundAttachment = false;
-	if (pBaseAnimating)
-	{
-		int lensBone = pBaseAnimating->LookupBone("lens");
-		if (lensBone != -1)
-		{
-			pBaseAnimating->GetBonePosition(lensBone, m_vStartPoint, angMuzzleDir);
-			bFoundAttachment = true;
-		}
-	}
-
-	if (!bFoundAttachment)
-	{
-		int laserAttachmentIndex = LookupAttachment("laser_attachment");
-		if (laserAttachmentIndex > 0)
-		{
-			GetAttachmentLocal(laserAttachmentIndex, m_vStartPoint, angMuzzleDir);
-			bFoundAttachment = true;
-		}
-	}
-
-	if (!bFoundAttachment)
-	{
-		LaserOff();
-		return;
-	}
 
 	Vector vecEye;
 	QAngle angEyeDir;
-	GetAttachment(LASER_EYE_ATTACHMENT, vecEye, angEyeDir);
 
 	Vector vecMuzzleDir;
 	AngleVectors(angEyeDir, &vecMuzzleDir);
-
-	if (!m_pBeam)
-	{
-		//m_pBeam = CBeam::BeamCreate("sprites/purplelaser1.vmt", 0.2);
-		m_pBeam = CBeam::BeamCreate("", 0.2); // NOTE: We don't want this to render on the client because the client creates its own laser
-		//m_pBeam->SetColor(255, 32, 32);
-		m_pBeam->SetBrightness(92);
-		m_pBeam->SetNoise(0);
-		m_pBeam->SetWidth(24.0f);
-		m_pBeam->SetEndWidth(0);
-		m_pBeam->SetScrollRate(0);
-		m_pBeam->SetFadeLength(0);
-		m_pBeam->SetCollisionGroup(COLLISION_GROUP_NONE);
-		m_pBeam->PointsInit(m_vStartPoint + vecMuzzleDir * LASER_RANGE, m_vStartPoint);
-		m_pBeam->SetBeamFlag(FBEAM_REVERSED);
-		m_pBeam->SetStartEntity(this);
-	}
-	else
-	{
-		m_pBeam->SetStartPos(m_vStartPoint + vecMuzzleDir * LASER_RANGE);
-		m_pBeam->SetEndPos(m_vStartPoint);
-		m_pBeam->RemoveEffects(EF_NODRAW);
-	}
 
 	// Trace to find an endpoint
 	float fEndFraction;
@@ -621,21 +808,6 @@ void CPortalLaser::LaserOn(void)
 		m_vEndPoint = m_vStartPoint + vecMuzzleDir * LASER_RANGE;
 	else
 		m_vEndPoint = m_vStartPoint + vecMuzzleDir * LASER_RANGE * fEndFraction;
-
-	m_pBeam->PointsInit(m_vEndPoint, m_vStartPoint);
-	
-	if (!m_bIsLaserExtender)
-		DispatchParticleEffect( "laser_start_glow", PATTACH_POINT_FOLLOW, this, "laser_attachment", true, -1 );
-	else
-	{
-		CPropWeightedCube *pReflectorCube = dynamic_cast<CPropWeightedCube*>(GetParent());
-
-		if (pReflectorCube)
-		{
-			DispatchParticleEffect( "reflector_start_glow", PATTACH_ABSORIGIN_FOLLOW, pReflectorCube );
-		}
-	}
-	
 	
 	CPropWeightedCube *pCube = assert_cast<CPropWeightedCube*>( m_hTouchingReflector.Get() );	
 	if ( pCube )
@@ -658,21 +830,41 @@ void CPortalLaser::LaserOn(void)
 void CPortalLaser::InputTurnOn(inputdata_t& inputdata)
 {
 	if (!m_bLaserOn)
-		LaserOn();
+		TurnOn();
 }
 
 void CPortalLaser::InputTurnOff(inputdata_t& inputdata)
 {
 	if (m_bLaserOn)
-		LaserOff();
+		TurnOff();
+}
+
+void CPortalLaser::TurnOnGlow(void)
+{
+	if (!m_bGlowInitialized)
+	{
+		m_bGlowInitialized = true;
+
+		if (!UTIL_IsSchrodinger(m_hReflector))
+		{
+			if (m_bFromReflectedCube)
+			{
+				DispatchParticleEffect("reflector_start_glow", PATTACH_ABSORIGIN_FOLLOW, m_hReflector, 0, 1, -1, 0, 1);
+			}
+			else
+			{
+				DispatchParticleEffect("laser_start_glow", PATTACH_POINT_FOLLOW, this, m_iLaserAttachment, 1, -1, 0, 1);
+			}
+		}
+	}
 }
 
 void CPortalLaser::InputToggle(inputdata_t& inputdata)
 {
 	if (m_bLaserOn)
-		LaserOff();
+		TurnOff();
 	else
-		LaserOn();
+		TurnOn();
 }
 
 // Misc

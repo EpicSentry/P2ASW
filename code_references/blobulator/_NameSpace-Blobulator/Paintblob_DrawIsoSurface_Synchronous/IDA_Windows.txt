@@ -1,0 +1,49 @@
+void __cdecl Blobulator::Paintblob_DrawIsoSurface_Synchronous(
+        IMaterial *pMaterial,
+        const Blobulator::BlobRenderInfo_t *blobRenderInfo,
+        ImpParticle *particles,
+        int blobCount,
+        CUtlEnvelope<matrix3x4_t> *matrices,
+        int nMatrixCount,
+        bool bUseTwoPassesToDraw)
+{
+  int m_nBytes; // eax
+  CUtlEnvelope<matrix3x4_t> *m_pData; // edx
+  ImpParticle *v9; // eax
+  int v10; // ecx
+  Blobulator::CDrawInfo *v11; // eax
+
+  m_nBytes = matrices->m_nBytes;
+  if ( m_nBytes )
+  {
+    if ( m_nBytes <= 4 )
+      m_pData = matrices;
+    else
+      m_pData = (CUtlEnvelope<matrix3x4_t> *)matrices->m_pData;
+  }
+  else
+  {
+    m_pData = 0;
+  }
+  v9 = particles;
+  v10 = particles->center.sse_vec.m128_i32[1];
+  if ( v10 )
+  {
+    if ( v10 > 4 )
+      v9 = (ImpParticle *)particles->center.sse_vec.m128_i32[0];
+  }
+  else
+  {
+    v9 = 0;
+  }
+  v11 = Blobulator::Paintblob_BeginDraw(
+          pMaterial,
+          blobRenderInfo,
+          v9,
+          blobCount,
+          (const matrix3x4_t *)m_pData,
+          nMatrixCount,
+          bUseTwoPassesToDraw);
+  if ( v11 )
+    Blobulator::PaintBlob_WaitEndOfDraw(pMaterial, v11, bUseTwoPassesToDraw);
+}

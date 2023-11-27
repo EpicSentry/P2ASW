@@ -116,6 +116,8 @@ public:
 
 	void GetListOfPenetratingEntities( CBaseEntity *pSearch, CUtlVector<CBaseEntity *> &list );
 	bool IsInCallback() { return m_inCallback > 0 ? true : false; }
+	
+	void RemovePenetrationEvents( CBaseEntity *pEntity );
 
 private:
 #if _DEBUG

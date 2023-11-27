@@ -1,0 +1,27 @@
+class ImpRendererFactory
+{
+public:
+	ImpRendererFactory *CreateInstance();
+	void ReleaseInstance();
+	ImpRendererFactory *GetInstance();
+	void ClearRenderers();
+	Blobulator::IBlobRenderer *AcquireTilerRenderer();
+	void ReleaseTilerRenderer( Blobulator::IBlobRenderer * );
+	Blobulator::IBlobRenderer *AcquireTileRenderer();
+	void ReleaseTileRenderer( Blobulator::IBlobRenderer * );
+	int GetNumberOfAcquiredTileRenderers();
+	void FrameUpdate( int );
+private:
+	ImpRendererFactory();
+	~ImpRendererFactory();
+	ImpRendererFactory & operator=(class ImpRendererFactory & );
+	Blobulator::LightBucketImplementation::CFragmentedVertexBuffer *GetFragmentedVertexBuffer();
+	SmartArray<Blobulator::IBlobRenderer *,0,16> m_TileRenderers;
+	SmartArray<Blobulator::IBlobRenderer *,0,16> m_TilerRenderers;
+	CThreadFastMutex m_Mutex;
+	Blobulator::LightBucketImplementation::CFragmentedVertexBuffer *m_pFragmentedVertexBuffer;
+	Blobulator::LightBucketImplementation::CSectionPool *m_pCSectionPool;
+	int m_nNumberOfAcquiredTilerRenderers;
+	int m_nNumberOfAcquiredTileRenderers;
+	ImpRendererFactory *s_pInstance;
+};

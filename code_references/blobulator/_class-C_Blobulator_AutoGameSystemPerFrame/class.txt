@@ -1,0 +1,8 @@
+class NPaintRenderer::C_Blobulator_AutoGameSystemPerFrame : public CAutoGameSystemPerFrame
+{
+public:
+    void C_Blobulator_AutoGameSystemPerFrame();
+    void ~C_Blobulator_AutoGameSystemPerFrame();
+private:
+    void Update( float );
+};

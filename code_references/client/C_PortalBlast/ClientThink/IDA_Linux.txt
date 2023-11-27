@@ -1,0 +1,47 @@
+void __cdecl C_PortalBlast::ClientThink(C_PortalBlast *const this)
+{
+  float m_fCreationTime; // xmm2_4
+  float m_fDeathTime; // xmm3_4
+  float v3; // xmm0_4
+  float v4; // xmm7_4
+  float v5; // xmm5_4
+  float v6; // xmm4_4
+  float v7; // xmm1_4
+  float x; // xmm3_4
+  Vector absOrigin; // [esp+14h] [ebp-18h] BYREF
+
+  m_fCreationTime = this->m_fCreationTime;
+  m_fDeathTime = this->m_fDeathTime;
+  if ( m_fCreationTime != 0.0 || m_fDeathTime != 0.0 )
+  {
+    v3 = (float)(gpGlobals->curtime - m_fCreationTime) / (float)(m_fDeathTime - m_fCreationTime);
+    if ( v3 >= 0.0 )
+    {
+      if ( v3 > 1.0 || v3 >= 1.0 )
+      {
+        C_BaseEntity::SetAbsOrigin(this, &this->m_ptDeathPoint);
+        this->m_fCreationTime = 0.0;
+        this->m_fDeathTime = 0.0;
+        return;
+      }
+    }
+    else
+    {
+      v3 = 0.0;
+    }
+    v4 = this->m_ptAimPoint.x * (float)(1.0 - v3);
+    v5 = this->m_ptCreationPoint.z * (float)(1.0 - v3);
+    v6 = (float)(1.0 - v3) * this->m_ptCreationPoint.x;
+    v7 = (float)(this->m_ptDeathPoint.z * v3) + (float)(this->m_ptAimPoint.z * (float)(1.0 - v3));
+    x = this->m_ptDeathPoint.x;
+    absOrigin.y = (float)((float)((float)(this->m_ptDeathPoint.y * v3)
+                                + (float)(this->m_ptAimPoint.y * (float)(1.0 - v3)))
+                        * v3)
+                + (float)(this->m_ptCreationPoint.y * (float)(1.0 - v3));
+    absOrigin.z = (float)(v7 * v3) + v5;
+    absOrigin.x = (float)((float)((float)(x * v3) + v4) * v3) + v6;
+    C_BaseEntity::SetAbsOrigin(this, &absOrigin);
+    return;
+  }
+  C_BaseEntity::Remove(this);
+}

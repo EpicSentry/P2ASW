@@ -1,0 +1,6 @@
+void __thiscall NPaintRenderer::C_Blobulator_AutoGameSystemPerFrame::Update(
+        NPaintRenderer::C_Blobulator_AutoGameSystemPerFrame *this,
+        float frametime)
+{
+  Blobulator::FrameUpdate(*(_DWORD *)(gpGlobals.m_Index + 4));
+}

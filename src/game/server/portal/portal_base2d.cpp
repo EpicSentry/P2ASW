@@ -1158,7 +1158,6 @@ void CPortal_Base2D::ForceEntityToFitInPortalWall( CBaseEntity *pEntity )
 			iTestMask |= CONTENTS_MONSTERCLIP;
 		}
 
-#if 0
 		for( int i = 0; i != ARRAYSIZE( WallBrushes.BrushSets ); ++i )
 		{
 			if( (WallBrushes.BrushSets[i].iSolidMask & iTestMask) != 0 )
@@ -1171,13 +1170,6 @@ void CPortal_Base2D::ForceEntityToFitInPortalWall( CBaseEntity *pEntity )
 				}
 			}
 		}
-#else
-		// Let's use legacy behavior for now because that's easier
-		if( m_PortalSimulator.GetInternalData().Simulation.Static.Wall.Local.Brushes.pCollideable )
-		{
-			physcollision->TraceBox( ray, WallBrushes.pCollideable, vec3_origin, vec3_angle, &ShortestTrace );
-		}	
-#endif
 
 		if( ShortestTrace.fraction < 2.0f )
 		{
