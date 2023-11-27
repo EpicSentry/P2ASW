@@ -642,5 +642,16 @@ inline PS_DebuggingData_t &CPortalSimulator::EditDebuggingData()
 	return m_InternalData.Debugging;
 }
 
+#if defined ( GAME_DLL )
+struct VPhysicsClipEntry_t
+{
+	EHANDLE hEnt;
+	Vector vAABBMins;
+	Vector vAABBMaxs;
+};
+CUtlVector<VPhysicsClipEntry_t>& GetVPhysicsClipList ( void );
+
+#endif // GAME_DLL
+
 #endif //#ifndef PORTALSIMULATION_H
 

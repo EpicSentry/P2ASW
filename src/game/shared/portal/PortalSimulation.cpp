@@ -134,6 +134,59 @@ ConVar portal_ghost_force_hitbox("portal_ghost_force_hitbox", "0", FCVAR_REPLICA
 ConVar portal_ghost_show_bbox("portal_ghost_show_bbox", "0", FCVAR_REPLICATED | FCVAR_CHEAT, "Render AABBs around the bounding box used for ghost renderable bounds checking (either hitbox or collision AABB)" );
 
 
+#if defined( GAME_DLL )
+ConVar portal_carve_vphysics_clips( "portal_carve_vphysics_clips", "1" );
+
+class CFunc_VPhysics_Clip_Watcher : public CAutoGameSystem
+{
+public:
+	CFunc_VPhysics_Clip_Watcher( void )
+	{
+		m_bHaveCached = false;
+	}
+	virtual void LevelInitPostEntity()
+	{
+		Cache();
+	}
+
+	virtual void LevelShutdownPostEntity()
+	{
+		m_VPhysicsClipEntities.RemoveAll();
+		m_bHaveCached = false;
+	}
+
+	void Cache( void )
+	{
+		if( m_bHaveCached )
+			return;
+
+		CBaseEntity *pIterateEntities = NULL;
+		while( (pIterateEntities = gEntList.FindEntityByClassname( pIterateEntities, "func_clip_vphysics" )) != NULL )
+		{
+			CCollisionProperty *pProp = pIterateEntities->CollisionProp();
+
+			VPhysicsClipEntry_t tempEntry;
+			tempEntry.hEnt = pIterateEntities;
+
+			pProp->WorldSpaceAABB( &tempEntry.vAABBMins, &tempEntry.vAABBMaxs );
+			m_VPhysicsClipEntities.AddToTail( tempEntry );
+		}
+
+		m_bHaveCached = true;
+	}
+
+
+	CUtlVector<VPhysicsClipEntry_t> m_VPhysicsClipEntities;
+	bool m_bHaveCached;
+};
+static CFunc_VPhysics_Clip_Watcher s_VPhysicsClipWatcher;
+
+CUtlVector<VPhysicsClipEntry_t>& GetVPhysicsClipList ( void )
+{
+	return s_VPhysicsClipWatcher.m_VPhysicsClipEntities;
+}
+#endif
+
 #if defined( CLIENT_DLL )
 //copy/paste from game/server/hierarchy.cpp
 static void GetAllChildren_r( CBaseEntity *pEntity, CUtlVector<CBaseEntity *> &list )
@@ -2566,6 +2619,13 @@ void CPortalSimulator::ClearLocalPhysics( void )
 			m_InternalData.Simulation.Static.Wall.Local.Brushes.BrushSets[iBrushSet].pPhysicsObject = NULL;
 		}
 	}
+	
+	//clipped func_clip_vphysics
+	if( m_InternalData.Simulation.Static.Wall.Local.Brushes.Carved_func_clip_vphysics.pPhysicsObject )
+	{
+		m_InternalData.Simulation.pPhysicsEnvironment->DestroyObject( m_InternalData.Simulation.Static.Wall.Local.Brushes.Carved_func_clip_vphysics.pPhysicsObject );
+		m_InternalData.Simulation.Static.Wall.Local.Brushes.Carved_func_clip_vphysics.pPhysicsObject = NULL;
+	}
 
 	//wall tube props
 	if( m_InternalData.Simulation.Static.Wall.Local.Tube.pPhysicsObject )
@@ -2865,6 +2925,20 @@ void CPortalSimulator::CreateLocalCollision( void )
 	STOPDEBUGTIMER( wallBrushTimer );
 	DEBUGTIMERONLY( DevMsg( 2, "[PSDT:%d] %sWall Brushes=%fms\n", GetPortalSimulatorGUID(), TABSPACING, wallBrushTimer.GetDuration().GetMillisecondsF() ); );
 	
+
+#if defined( GAME_DLL )
+	CREATEDEBUGTIMER( func_clip_vphysics_timer );
+	STARTDEBUGTIMER( func_clip_vphysics_timer );	
+	Assert( m_InternalData.Simulation.Static.Wall.Local.Brushes.Carved_func_clip_vphysics.pCollideable == NULL ); //Be sure to find graceful fixes for asserts, performance is a big concern with portal simulation
+	if( m_InternalData.Simulation.Static.Wall.Local.Brushes.Carved_func_clip_vphysics.Polyhedrons.Count() != 0 )
+	{
+		m_InternalData.Simulation.Static.Wall.Local.Brushes.Carved_func_clip_vphysics.pCollideable = ConvertPolyhedronsToCollideable( m_InternalData.Simulation.Static.Wall.Local.Brushes.Carved_func_clip_vphysics.Polyhedrons.Base(), m_InternalData.Simulation.Static.Wall.Local.Brushes.Carved_func_clip_vphysics.Polyhedrons.Count() );
+	}
+	STOPDEBUGTIMER( func_clip_vphysics_timer );
+	DEBUGTIMERONLY( DevMsg( 2, "[PSDT:%d] %sfunc_clip_vphysics Brushes=%fms\n", GetPortalSimulatorGUID(), TABSPACING, func_clip_vphysics_timer.GetDuration().GetMillisecondsF() ); );
+#endif
+
+
 	CREATEDEBUGTIMER( wallTubeTimer );
 	STARTDEBUGTIMER( wallTubeTimer );
 	Assert( m_InternalData.Simulation.Static.Wall.Local.Tube.pCollideable == NULL ); //Be sure to find graceful fixes for asserts, performance is a big concern with portal simulation
@@ -2974,22 +3048,19 @@ void CPortalSimulator::ClearLocalCollision( void )
 		DestroyCollideable( &m_InternalData.Simulation.Static.Wall.Local.Brushes.BrushSets[iBrushSet].pCollideable );
 	}
 
-	if( m_InternalData.Simulation.Static.Wall.Local.Tube.pCollideable )
-	{
-		physcollision->DestroyCollide( m_InternalData.Simulation.Static.Wall.Local.Tube.pCollideable );
-		m_InternalData.Simulation.Static.Wall.Local.Tube.pCollideable = NULL;
-	}
-	
+#if defined( GAME_DLL )
+	DestroyCollideable( &m_InternalData.Simulation.Static.Wall.Local.Brushes.Carved_func_clip_vphysics.pCollideable );
+#endif
+
+	DestroyCollideable( &m_InternalData.Simulation.Static.Wall.Local.Tube.pCollideable );
+
 	for( int iBrushSet = 0; iBrushSet != ARRAYSIZE( m_InternalData.Simulation.Static.World.Brushes.BrushSets ); ++iBrushSet )
 	{
 		DestroyCollideable( &m_InternalData.Simulation.Static.World.Brushes.BrushSets[iBrushSet].pCollideable );
 	}
-	
-	if( m_InternalData.Simulation.Static.World.Displacements.pCollideable )
-	{
-		physcollision->DestroyCollide( m_InternalData.Simulation.Static.World.Displacements.pCollideable );
-		m_InternalData.Simulation.Static.World.Displacements.pCollideable = NULL;
-	}
+
+	DestroyCollideable( &m_InternalData.Simulation.Static.World.Displacements.pCollideable );
+
 
 	if( m_InternalData.Simulation.Static.World.StaticProps.bCollisionExists && 
 		(m_InternalData.Simulation.Static.World.StaticProps.ClippedRepresentations.Count() != 0) )
@@ -2997,15 +3068,11 @@ void CPortalSimulator::ClearLocalCollision( void )
 		for( int i = m_InternalData.Simulation.Static.World.StaticProps.ClippedRepresentations.Count(); --i >= 0; )
 		{
 			PS_SD_Static_World_StaticProps_ClippedProp_t &Representation = m_InternalData.Simulation.Static.World.StaticProps.ClippedRepresentations[i];
-			if( Representation.pCollide )
-			{
-				physcollision->DestroyCollide( Representation.pCollide );
-				Representation.pCollide = NULL;
-			}
+			DestroyCollideable( &Representation.pCollide );
 		}
 	}
 	m_InternalData.Simulation.Static.World.StaticProps.bCollisionExists = false;
-	
+
 	//carved entities
 	if( m_InternalData.Simulation.Dynamic.CarvedEntities.bCollisionExists && 
 		(m_InternalData.Simulation.Dynamic.CarvedEntities.CarvedRepresentations.Count() != 0) )
@@ -3292,8 +3359,7 @@ void CPortalSimulator::CreatePolyhedrons( void )
 		collisionClip[1].m_Dist = fWallClipPlane_Forward[3];
 
 		CUtlVector<int> WallBrushes;
-		CUtlVector<CPolyhedron *> WallBrushPolyhedrons_ClippedToWall;
-		
+		CUtlVector<CPolyhedron *> WallBrushPolyhedrons_ClippedToWall;		
 		
 		for( int iBrushSet = 0; iBrushSet != ARRAYSIZE( m_InternalData.Simulation.Static.Wall.Local.Brushes.BrushSets ); ++iBrushSet )
 		{
@@ -3313,16 +3379,89 @@ void CPortalSimulator::CreatePolyhedrons( void )
 
 			WallBrushPolyhedrons_ClippedToWall.RemoveAll();
 		}
-
-
 		
-		CreateTubePolyhedrons();
+#if defined( GAME_DLL )
+		//func_clip_vphysics
+		if( portal_carve_vphysics_clips.GetBool() )
+		{
+			s_VPhysicsClipWatcher.Cache();
+			for( int i = 0; i != s_VPhysicsClipWatcher.m_VPhysicsClipEntities.Count(); ++i )
+			{
+				VPhysicsClipEntry_t &checkEntry = s_VPhysicsClipWatcher.m_VPhysicsClipEntities[i];
 
-		for( int i = WallBrushPolyhedrons_ClippedToWall.Count(); --i >= 0; )
-			WallBrushPolyhedrons_ClippedToWall[i]->Release();
+				if( !((checkEntry.vAABBMins.x >= vAABBMaxs.x) ||
+					(checkEntry.vAABBMins.y >= vAABBMaxs.y) ||
+					(checkEntry.vAABBMins.z >= vAABBMaxs.z) ||
+					(checkEntry.vAABBMaxs.x <= vAABBMins.x) ||
+					(checkEntry.vAABBMaxs.y <= vAABBMins.y) ||
+					(checkEntry.vAABBMaxs.z <= vAABBMins.z)) )
+				{
+					CBaseEntity *pClip = checkEntry.hEnt;
+					if( pClip && (pClip->GetMoveParent() == NULL) )
+					{
 
-		WallBrushPolyhedrons_ClippedToWall.RemoveAll();
+						CCollisionProperty *pProp = pClip->CollisionProp();
+						if( pProp )
+						{
+							SolidType_t solidType = pClip->GetSolid();
+							if( solidType == SOLID_VPHYSICS )
+							{
+								vcollide_t *pCollide = modelinfo->GetVCollide( pProp->GetCollisionModelIndex() );
+								Assert( pCollide != NULL );
+								if( pCollide != NULL )
+								{
+									CPhysConvex *ConvexesArray[1024];
+									int iConvexCount = 0;
+									for( int i = 0; i != pCollide->solidCount; ++i )
+									{
+										iConvexCount += physcollision->GetConvexesUsedInCollideable( pCollide->solids[i], ConvexesArray, 1024 - iConvexCount );
+									}
+
+									for( int j = 0; j != iConvexCount; ++j )
+									{
+										CPolyhedron *pFullPolyhedron = physcollision->PolyhedronFromConvex( ConvexesArray[j], true );
+										if( pFullPolyhedron != NULL )
+										{
+											CPolyhedron *pClippedPolyhedron = ClipPolyhedron( pFullPolyhedron, (float *)collisionClip, ARRAYSIZE( collisionClip ), PORTAL_POLYHEDRON_CUT_EPSILON, false );
+											if( pClippedPolyhedron )
+											{
+												WallBrushPolyhedrons_ClippedToWall.AddToTail( pClippedPolyhedron );
+											}
+											pFullPolyhedron->Release();
+										}
+									}
+								}
+							}
+							else if( solidType == SOLID_BSP )
+							{
+								//CBrushQuery brushQuery;
+								//enginetrace->GetBrushesInCollideable( pProp, brushQuery );
+																
+								for( int iBrushSet = 0; iBrushSet != ARRAYSIZE( m_InternalData.Simulation.Static.Wall.Local.Brushes.BrushSets ); ++iBrushSet )
+								{
+									CUtlVector<int> WallBrushes;						
+									enginetrace->GetBrushesInAABB( vAABBMins, vAABBMaxs, &WallBrushes, m_InternalData.Simulation.Static.Wall.Local.Brushes.BrushSets[iBrushSet].iSolidMask );
+									
+									if( WallBrushes.Count() != 0 )
+										ConvertBrushListToClippedPolyhedronList( WallBrushes.Base(), WallBrushes.Count(), (float *)collisionClip, ARRAYSIZE( collisionClip ), PORTAL_POLYHEDRON_CUT_EPSILON, &WallBrushPolyhedrons_ClippedToWall );
+								}
+							}
+						}
+					}
+				}
+			}
+
+			CarveWallBrushes_Sub( fPlanes, WallBrushPolyhedrons_ClippedToWall, m_InternalData, m_InternalData.Simulation.Static.Wall.Local.Brushes.Carved_func_clip_vphysics.Polyhedrons, fFarRightPlaneDistance, fFarLeftPlaneDistance, vLeft, vDown );
+
+			for( int i = WallBrushPolyhedrons_ClippedToWall.Count(); --i >= 0; )
+				WallBrushPolyhedrons_ClippedToWall[i]->Release();
+
+			WallBrushPolyhedrons_ClippedToWall.RemoveAll();
+		}
+#endif
 	}
+	
+	CreateTubePolyhedrons();
 
 	STOPDEBUGTIMER( functionTimer );
 	DECREMENTTABSPACING();
@@ -3613,6 +3752,16 @@ void CPortalSimulator::ClearPolyhedrons( void )
 			m_InternalData.Simulation.Static.Wall.Local.Brushes.BrushSets[iBrushSet].Polyhedrons.RemoveAll();
 		}
 	}
+	
+#if defined( GAME_DLL )
+	if( m_InternalData.Simulation.Static.Wall.Local.Brushes.Carved_func_clip_vphysics.Polyhedrons.Count() != 0 )
+	{
+		for( int i = m_InternalData.Simulation.Static.Wall.Local.Brushes.Carved_func_clip_vphysics.Polyhedrons.Count(); --i >= 0; )
+			m_InternalData.Simulation.Static.Wall.Local.Brushes.Carved_func_clip_vphysics.Polyhedrons[i]->Release();
+
+		m_InternalData.Simulation.Static.Wall.Local.Brushes.Carved_func_clip_vphysics.Polyhedrons.RemoveAll();
+	}
+#endif
 
 	//wall tube props
 	if( m_InternalData.Simulation.Static.Wall.Local.Tube.Polyhedrons.Count() != 0 )
@@ -3632,8 +3781,6 @@ void CPortalSimulator::ClearPolyhedrons( void )
 
 void CPortalSimulator::DebugCollisionOverlay( bool noDepthTest, float flDuration ) const
 {
-	// I don't even want to begin to fix this right now
-#if 0
 	if( m_InternalData.Simulation.Static.Wall.Local.Tube.pCollideable )
 	{
 		UTIL_DebugOverlay_CPhysCollide( m_InternalData.Simulation.Static.Wall.Local.Tube.pCollideable, 255, 255, 255, noDepthTest, flDuration );
@@ -3698,7 +3845,6 @@ void CPortalSimulator::DebugCollisionOverlay( bool noDepthTest, float flDuration
 			UTIL_DebugOverlay_CPhysCollide( m_pLinkedPortal->m_InternalData.Simulation.Static.World.StaticProps.ClippedRepresentations[i].pCollide, 255, 0, 255, noDepthTest, flDuration, &linkedToThis.As3x4() );
 		}
 	}
-#endif
 }
 
 
@@ -3952,6 +4098,16 @@ bool CPortalSimulator::CreatedPhysicsObject( const IPhysicsObject *pObject, PS_P
 		}
 	}
 	
+#if defined( GAME_DLL )
+	if( pObject == m_InternalData.Simulation.Static.Wall.Local.Brushes.Carved_func_clip_vphysics.pPhysicsObject )
+	{
+		if( pOut_SourceType )
+			*pOut_SourceType = PSPOST_LOCAL_BRUSHES;
+
+		return true;
+	}
+#endif
+
 	for( int iBrushSet = 0; iBrushSet != ARRAYSIZE( m_InternalData.Simulation.Static.Wall.RemoteTransformedToLocal.Brushes.pPhysicsObjects ); ++iBrushSet )
 	{
 		if( pObject == m_InternalData.Simulation.Static.Wall.RemoteTransformedToLocal.Brushes.pPhysicsObjects[iBrushSet] )
@@ -4394,7 +4550,7 @@ int CPSCollisionEntity::VPhysicsGetObjectList( IPhysicsObject **pList, int listM
 				return iRetVal;
 		}
 	}
-
+	
 	if( m_pOwningSimulator->GetInternalData().Simulation.Static.Wall.Local.Brushes.Carved_func_clip_vphysics.pPhysicsObject != NULL )
 	{
 		pList[iRetVal] = m_pOwningSimulator->GetInternalData().Simulation.Static.Wall.Local.Brushes.Carved_func_clip_vphysics.pPhysicsObject;
@@ -4402,7 +4558,7 @@ int CPSCollisionEntity::VPhysicsGetObjectList( IPhysicsObject **pList, int listM
 		if( iRetVal == listMax )
 			return iRetVal;
 	}
-
+	
 	if( m_pOwningSimulator->GetInternalData().Simulation.Static.Wall.Local.Tube.pPhysicsObject != NULL )
 	{
 		pList[iRetVal] = m_pOwningSimulator->GetInternalData().Simulation.Static.Wall.Local.Tube.pPhysicsObject;
@@ -4521,6 +4677,11 @@ void DumpActiveCollision( const CPortalSimulator *pPortalSimulator, const char *
 		if( pPortalSimulator->GetInternalData().Simulation.Static.Wall.Local.Brushes.BrushSets[iBrushSet].pCollideable )
 			PortalSimulatorDumps_DumpCollideToGlView( pPortalSimulator->GetInternalData().Simulation.Static.Wall.Local.Brushes.BrushSets[iBrushSet].pCollideable, vec3_origin, vec3_angle, PSDAC_INTENSITY_LOCALBRUSH, szFileName );
 	}
+	
+#if defined( GAME_DLL )
+	if( pPortalSimulator->GetInternalData().Simulation.Static.Wall.Local.Brushes.Carved_func_clip_vphysics.pCollideable )
+		PortalSimulatorDumps_DumpCollideToGlView( pPortalSimulator->GetInternalData().Simulation.Static.Wall.Local.Brushes.Carved_func_clip_vphysics.pCollideable, vec3_origin, vec3_angle, PSDAC_INTENSITY_LOCALBRUSH, szFileName );
+#endif
 
 	if( pPortalSimulator->GetInternalData().Simulation.Static.Wall.Local.Tube.pCollideable )
 		PortalSimulatorDumps_DumpCollideToGlView( pPortalSimulator->GetInternalData().Simulation.Static.Wall.Local.Tube.pCollideable, vec3_origin, vec3_angle, PSDAC_INTENSITY_LOCALBRUSH, szFileName );

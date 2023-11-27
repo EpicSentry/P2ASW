@@ -17,22 +17,19 @@ extern bool g_bBulletPortalTrace;
 
 #ifdef CLIENT_DLL
 	#include "client_class.h"
-	#include "interpolatedvar.h"
+	#include "tier1/interpolatedvar.h"
+	class CPortalRenderable_FlatBasic;
 	class C_Portal_Base2D;
 	#define CPortal_Base2D C_Portal_Base2D
-	class C_Beam;
-	class CPortalRenderable_FlatBasic;
-	typedef C_Beam CBeam;
 	class C_BasePlayer;
 	typedef C_BasePlayer CBasePlayer;
 #else
 	class CPortal_Base2D;
-	class CBeam;
 	class CBasePlayer;
 #endif
 
 struct PaintTraceData_t;
-	
+
 //When tracing through portals, a line becomes a discontinuous collection of segments as it travels
 struct ComplexPortalTrace_t
 {
@@ -42,7 +39,6 @@ struct ComplexPortalTrace_t
 	trace_t trSegment;
 };
 
-	
 #if defined ( CLIENT_DLL )
 Color UTIL_Portal_Color( int iPortal, int iTeamNumber = 0 );
 Color UTIL_Portal_Color_Particles( int iPortal, int iTeamNumber = 0 );
@@ -50,6 +46,7 @@ Color UTIL_Portal_Color_Particles( int iPortal, int iTeamNumber = 0 );
 
 void UTIL_Portal_Trace_Filter( class CTraceFilterSimpleClassnameList *traceFilterPortalShot );
 
+CPortal_Base2D* UTIL_Portal_FirstAlongRay( const Ray_t &ray, float &fMustBeCloserThan, CPortal_Base2D **pSearchArray, int iSearchArrayCount );
 CPortal_Base2D* UTIL_Portal_FirstAlongRay( const Ray_t &ray, float &fMustBeCloserThan );
 
 bool UTIL_Portal_TraceRay_Bullets( const CPortal_Base2D *pPortal, const Ray_t &ray, unsigned int fMask, ITraceFilter *pTraceFilter, trace_t *pTrace, bool bTraceHolyWall = true );
@@ -73,7 +70,6 @@ public:
 
 int UTIL_Portal_EntitiesAlongRayComplex( int *entSegmentIndices, int *segCount, int maxEntities, ComplexPortalTrace_t *pResultSegmentArray, int maxSegments, const Ray_t& ray, ICountedPartitionEnumerator* pEnum, ITraceFilter* pTraceFilter, int fStopTraceContents );
 
-
 // tests if a ray's trace hits any portals
 bool UTIL_DidTraceTouchPortals ( const Ray_t& ray, const trace_t& trace, CPortal_Base2D** pOutLocal = NULL, CPortal_Base2D** pOutRemote = NULL );
 
@@ -84,12 +80,12 @@ void UTIL_Portal_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, c
 //Starts off as a normal trace, but as it hits portals it adds segments up to the limit. Returns number of segments used. Assumes a ray only travels through a portal if the ray's center hits the quad
 int UTIL_Portal_ComplexTraceRay( const Ray_t &ray, unsigned int mask, ITraceFilter *pTraceFilter, ComplexPortalTrace_t *pResultSegmentArray, int iMaxSegments );
 
-void UTIL_Portal_PointTransform( const VMatrix matThisToLinked, const Vector &ptSource, Vector &ptTransformed );
-void UTIL_Portal_VectorTransform( const VMatrix matThisToLinked, const Vector &vSource, Vector &vTransformed );
-void UTIL_Portal_AngleTransform( const VMatrix matThisToLinked, const QAngle &qSource, QAngle &qTransformed );
-void UTIL_Portal_RayTransform( const VMatrix matThisToLinked, const Ray_t &raySource, Ray_t &rayTransformed );
-void UTIL_Portal_PlaneTransform( const VMatrix matThisToLinked, const cplane_t &planeSource, cplane_t &planeTransformed );
-void UTIL_Portal_PlaneTransform( const VMatrix matThisToLinked, const VPlane &planeSource, VPlane &planeTransformed );
+void UTIL_Portal_PointTransform( const VMatrix &matThisToLinked, const Vector &ptSource, Vector &ptTransformed );
+void UTIL_Portal_VectorTransform( const VMatrix &matThisToLinked, const Vector &vSource, Vector &vTransformed );
+void UTIL_Portal_AngleTransform( const VMatrix &matThisToLinked, const QAngle &qSource, QAngle &qTransformed );
+void UTIL_Portal_RayTransform( const VMatrix &matThisToLinked, const Ray_t &raySource, Ray_t &rayTransformed );
+void UTIL_Portal_PlaneTransform( const VMatrix &matThisToLinked, const cplane_t &planeSource, cplane_t &planeTransformed );
+void UTIL_Portal_PlaneTransform( const VMatrix &matThisToLinked, const VPlane &planeSource, VPlane &planeTransformed );
 
 void UTIL_Portal_Triangles( const Vector &ptPortalCenter, const QAngle &qPortalAngles, float fHalfWidth, float fHalfHeight, Vector pvTri1[ 3 ], Vector pvTri2[ 3 ] );
 void UTIL_Portal_Triangles( const CPortal_Base2D *pPortal, Vector pvTri1[ 3 ], Vector pvTri2[ 3 ] );
@@ -99,6 +95,8 @@ float UTIL_Portal_DistanceThroughPortal( const CPortal_Base2D *pPortal, const Ve
 float UTIL_Portal_DistanceThroughPortalSqr( const CPortal_Base2D *pPortal, const Vector &vPoint1, const Vector &vPoint2 );
 float UTIL_Portal_ShortestDistance( const Vector &vPoint1, const Vector &vPoint2, CPortal_Base2D **pShortestDistPortal_Out = NULL, bool bRequireStraightLine = false );
 float UTIL_Portal_ShortestDistanceSqr( const Vector &vPoint1, const Vector &vPoint2, CPortal_Base2D **pShortestDistPortal_Out = NULL, bool bRequireStraightLine = false );
+
+void UTIL_Portal_VectorToGlobalTransforms( const Vector &vPoint2, CUtlVector< Vector > *utlVecPositions );
 
 //-----------------------------------------------------------------------------
 //
@@ -121,8 +119,6 @@ CPortal_Base2D *UTIL_IntersectEntityExtentsWithPortal( const CBaseEntity *pEntit
 void UTIL_Portal_NDebugOverlay( const Vector &ptPortalCenter, const QAngle &qPortalAngles, float fHalfWidth, float fHalfHeight, int r, int g, int b, int a, bool noDepthTest, float duration );
 void UTIL_Portal_NDebugOverlay( const CPortal_Base2D *pPortal, int r, int g, int b, int a, bool noDepthTest, float duration );
 
-bool UTIL_IsCollideableIntersectingPhysCollide( ICollideable *pCollideable, const CPhysCollide *pCollide, const Vector &vPhysCollideOrigin, const QAngle &qPhysCollideAngles );
-
 bool UTIL_FindClosestPassableSpace_InPortal( const CPortal_Base2D *pPortal, const Vector &vCenter, const Vector &vExtents, const Vector &vIndecisivePush, ITraceFilter *pTraceFilter, unsigned int fMask, unsigned int iIterations, Vector &vCenterOut );
 bool UTIL_FindClosestPassableSpace_InPortal_CenterMustStayInFront( const CPortal_Base2D *pPortal, const Vector &vCenter, const Vector &vExtents, const Vector &vIndecisivePush, ITraceFilter *pTraceFilter, unsigned int fMask, unsigned int iIterations, Vector &vCenterOut );
 bool FindClosestPassableSpace( CBaseEntity *pEntity, const Vector &vIndecisivePush, unsigned int fMask = MASK_SOLID ); //assumes the object is already in a mostly passable space
@@ -135,7 +131,22 @@ void UTIL_TransformInterpolatedAngle( CInterpolatedVar< QAngle > &qInterped, mat
 void UTIL_TransformInterpolatedPosition( CInterpolatedVar< Vector > &vInterped, const VMatrix& matTransform, float fUpToTime );
 #endif
 
-bool UTIL_Portal_EntityIsInPortalHole( const CPortal_Base2D *pPortal, CBaseEntity *pEntity );
+bool UTIL_Portal_EntityIsInPortalHole( const CPortal_Base2D *pPortal, const CBaseEntity *pEntity );
+
+extern const Vector UTIL_ProjectPointOntoPlane( const Vector& point, const cplane_t& plane );
+bool UTIL_PointIsNearPortal( const Vector& point, const CPortal_Base2D* pPortal2D, float planeDist, float radiusReduction = 0.0f );
+
+bool UTIL_IsEntityMovingOrRotating( CBaseEntity* pEntity );
+
+
+// mainly use for stick camera
+void UTIL_NormalizedAngleDiff( const QAngle& start, const QAngle& end, QAngle* result );
+
+#if defined( CLIENT_DLL )
+void UTIL_Portal_ComputeMatrix( CPortalRenderable_FlatBasic *pLocalPortal, CPortalRenderable_FlatBasic *pRemotePortal );
+#else
+void UTIL_Portal_ComputeMatrix( CPortal_Base2D *pLocalPortal, CPortal_Base2D *pRemotePortal );
+#endif
 
 
 // PAINT
@@ -147,39 +158,6 @@ PaintPowerType UTIL_Paint_TracePower( CBaseEntity* pBrushEntity, const Vector& c
 // output start point and reflect dir
 bool UTIL_Paint_Reflect( const trace_t& tr, Vector& vStart, Vector& vDir, PaintPowerType reflectPower = REFLECT_POWER );
 
-// mainly use for stick camera
-void UTIL_NormalizedAngleDiff( const QAngle& start, const QAngle& end, QAngle* result );
-
-#if defined( CLIENT_DLL )
-void UTIL_Portal_ComputeMatrix( CPortalRenderable_FlatBasic *pLocalPortal, CPortalRenderable_FlatBasic *pRemotePortal );
-#else
-void UTIL_Portal_ComputeMatrix( CPortal_Base2D *pLocalPortal, CPortal_Base2D *pRemotePortal );
-#endif
-
-CBasePlayer* UTIL_OtherPlayer( CBasePlayer const* pPlayer );
-
-#ifdef GAME_DLL
-CBasePlayer* UTIL_OtherConnectedPlayer( CBasePlayer const* pPlayer );
-#endif
-
-#ifdef GAME_DLL
-
-class CBrushEntityList : public IEntityEnumerator
-{
-public:
-	virtual bool EnumEntity( IHandleEntity *pHandleEntity );
-
-	CUtlVectorFixedGrowable< CBaseEntity*, 32 > m_BrushEntitiesToPaint;
-};
-
-void UTIL_FindBrushEntitiesInSphere( CBrushEntityList& brushEnum, const Vector& vCenter, float flRadius );
-
-#endif
-
-extern const Vector UTIL_ProjectPointOntoPlane( const Vector& point, const cplane_t& plane );
-bool UTIL_PointIsNearPortal( const Vector& point, const CPortal_Base2D* pPortal2D, float planeDist, float radiusReduction = 0.0f );
-
-bool UTIL_IsEntityMovingOrRotating( CBaseEntity* pEntity );
 
 
 //To extend radius's through portals (for explosions, etc.)
@@ -202,5 +180,24 @@ void UTIL_DebugOverlay_CPhysCollide( const CPhysCollide *pCollide, int red, int 
 
 bool UTIL_IsCollideableIntersectingPhysCollide( ICollideable *pCollideable, const CPhysCollide *pCollide, const Vector &vPhysCollideOrigin, const QAngle &qPhysCollideAngles );
 
-#endif //#ifndef PORTAL_UTIL_SHARED_H
+CBasePlayer* UTIL_OtherPlayer( CBasePlayer const* pPlayer );
 
+#ifdef GAME_DLL
+CBasePlayer* UTIL_OtherConnectedPlayer( CBasePlayer const* pPlayer );
+#endif
+
+#ifdef GAME_DLL
+
+class CBrushEntityList : public IEntityEnumerator
+{
+public:
+	virtual bool EnumEntity( IHandleEntity *pHandleEntity );
+
+	CUtlVectorFixedGrowable< CBaseEntity*, 32 > m_BrushEntitiesToPaint;
+};
+
+void UTIL_FindBrushEntitiesInSphere( CBrushEntityList& brushEnum, const Vector& vCenter, float flRadius );
+
+#endif
+
+#endif //#ifndef PORTAL_UTIL_SHARED_H

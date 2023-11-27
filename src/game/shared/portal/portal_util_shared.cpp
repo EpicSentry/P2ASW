@@ -6,14 +6,17 @@
 //=============================================================================//
 
 #include "cbase.h"
+#include <algorithm>
 #include "portal_util_shared.h"
-#include "prop_portal_shared.h"
+#include "portal_base2d_shared.h"
 #include "portal_shareddefs.h"
 #include "portal_collideable_enumerator.h"
 #include "beam_shared.h"
 #include "CollisionUtils.h"
 #include "util_shared.h"
+#include "portal_mp_gamerules.h"
 #include "coordsize.h"
+
 #ifndef CLIENT_DLL
 	#include "Util.h"
 	#include "NDebugOverlay.h"
@@ -22,16 +25,17 @@
 	#include "paint/paint_savelogic.h"
 #else
 	#include "c_portal_player.h"
+	#include "c_prop_portal.h"
+	#include "materialsystem/imaterialvar.h"
 	#include "c_world.h"
 #endif
 #include "PortalSimulation.h"
-#include "paint/paint_color_manager.h"
 #include "CegClientWrapper.h"
-#include "portal_mp_gamerules.h"
 
 bool g_bAllowForcePortalTrace = false;
 bool g_bForcePortalTrace = false;
 bool g_bBulletPortalTrace = false;
+
 // paint convars
 ConVar sv_paint_detection_sphere_radius( "sv_paint_detection_sphere_radius", "16.f", FCVAR_REPLICATED | FCVAR_CHEAT, "The radius of the query sphere used to find the color of a light map at a contact point in world space." );
 
@@ -45,8 +49,70 @@ ConVar sv_use_transformed_collideables("sv_use_transformed_collideables", "1", F
 
 ConVar portal_trace_shrink_ray_each_query("portal_trace_shrink_ray_each_query", "0", FCVAR_REPLICATED | FCVAR_CHEAT );
 ConVar portal_beamtrace_optimization ("portal_beamtrace_optimization", "1", FCVAR_REPLICATED | FCVAR_CHEAT );
+// FIXME: Bring this back for DLC2
+//ConVar reflect_paint_vertical_snap( "reflect_paint_vertical_snap", "1", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
 
 extern ConVar portal_clone_displacements;
+
+const float COS_PI_OVER_SIX = 0.86602540378443864676372317075294f; // cos( 30 degrees ) in radians
+
+//#define PORTAL_TRACE_LOGGING
+
+#if defined PORTAL_TRACE_LOGGING
+enum eTraceType
+{
+	BRUSHES,
+	DISP,
+	HOLYWALL_BRUSHES,
+	HOLYWALL_TUBE,
+	HOLYWALL_TRANSLATED_BRUSHES,
+	ENTITIES,
+	STATIC_PROPS,
+	REMOTE_STATIC_PROPS,
+	TRACE_TYPE_COUNT,
+};
+class CPortalTraceLogger 
+{
+public:
+	CPortalTraceLogger::CPortalTraceLogger():m_nTotalTraces(0), m_nTotalKept(0)
+	{
+		for (int i=0; i<TRACE_TYPE_COUNT;++i)
+		{
+			m_nCallCounts[i] = 0;
+			m_nKeptCounts[i] = 0;
+		}
+	}
+
+	void LogTrace( eTraceType type ) { m_nCallCounts[type]++; m_nTotalTraces++; }
+	void LogTypeKept( eTraceType type ) { m_nKeptCounts[type]++; m_nTotalKept++; }
+	void Display()
+	{
+		char row = 20;
+		for ( int i = 0; i < TRACE_TYPE_COUNT; ++i )
+		{
+			engine->Con_NPrintf( row++, "Calls(%d): %d [%f.2]", i, m_nCallCounts[i], 100.0f * ((float)m_nCallCounts[i]/(float)m_nTotalTraces) );
+			engine->Con_NPrintf( row++, "Keeps(%d): %d [%f.2]", i, m_nKeptCounts[i], 100.0f * ((float)m_nKeptCounts[i]/(float)m_nTotalKept) );
+		}
+	}
+	uint32	m_nCallCounts[TRACE_TYPE_COUNT];	
+	uint32	m_nKeptCounts[TRACE_TYPE_COUNT];	
+	uint64	m_nTotalTraces;
+	uint64	m_nTotalKept;
+};
+
+static CPortalTraceLogger s_TraceLogger;
+
+CON_COMMAND( dump_portal_trace_log, "Spew current trace data to the console" )
+{
+	for ( int i = 0; i < TRACE_TYPE_COUNT; ++i )
+	{
+		Msg( "Calls(%d): %d [%f.2]\n", i, s_TraceLogger.m_nCallCounts[i], 100.0f * ((float)s_TraceLogger.m_nCallCounts[i]/(float)s_TraceLogger.m_nTotalTraces) );
+		Msg( "Keeps(%d): %d [%f.2]\n", i, s_TraceLogger.m_nKeptCounts[i], 100.0f * ((float)s_TraceLogger.m_nKeptCounts[i]/(float)s_TraceLogger.m_nTotalKept) );
+	}
+}
+
+#endif // PORTAL_TRACE_LOGGING
+
 
 class CTransformedCollideable : public ICollideable //wraps an existing collideable, but transforms everything that pertains to world space by another transform
 {
@@ -208,6 +274,7 @@ Color UTIL_Portal_Color_Particles( int iPortal, int iTeamNumber /*= 0*/ )
 		return (iPortal - 1)?( Color( 233, 78, 2, 255 ) ):( Color( 0, 60, 255, 255 ) );
 }
 #endif
+
 void UTIL_Portal_Trace_Filter( CTraceFilterSimpleClassnameList *traceFilterPortalShot )
 {
 	traceFilterPortalShot->AddClassnameToIgnore( "prop_physics" );
@@ -230,30 +297,24 @@ void UTIL_Portal_Trace_Filter( CTraceFilterSimpleClassnameList *traceFilterPorta
 }
 
 
-CPortal_Base2D* UTIL_Portal_FirstAlongRay( const Ray_t &ray, float &fMustBeCloserThan )
+CPortal_Base2D* UTIL_Portal_FirstAlongRay( const Ray_t &ray, float &fMustBeCloserThan, CPortal_Base2D **pSearchArray, int iSearchArrayCount )
 {
 	CPortal_Base2D *pIntersectedPortal = NULL;
 
-	int iPortalCount = CPortal_Base2D_Shared::AllPortals.Count();
-	if( iPortalCount != 0 )
+	for( int i = 0; i != iSearchArrayCount; ++i )
 	{
-		CPortal_Base2D **pPortals = CPortal_Base2D_Shared::AllPortals.Base();
-
-		for( int i = 0; i != iPortalCount; ++i )
+		CPortal_Base2D *pTempPortal = pSearchArray[i];
+		if( pTempPortal->IsActivedAndLinked() )
 		{
-			CPortal_Base2D *pTempPortal = pPortals[i];
-			if( pTempPortal->IsActivedAndLinked() )
+			float fIntersection = UTIL_IntersectRayWithPortal( ray, pTempPortal );
+			if( fIntersection >= 0.0f && fIntersection < fMustBeCloserThan )
 			{
-				float fIntersection = UTIL_IntersectRayWithPortal( ray, pTempPortal );
-				if( fIntersection >= 0.0f && fIntersection < fMustBeCloserThan )
+				//within range, now check directionality
+				if( pTempPortal->m_plane_Origin.normal.Dot( ray.m_Delta ) < 0.0f )
 				{
-					//within range, now check directionality
-					if( pTempPortal->m_plane_Origin.normal.Dot( ray.m_Delta ) < 0.0f )
-					{
-						//qualifies for consideration, now it just has to compete for closest
-						pIntersectedPortal = pTempPortal;
-						fMustBeCloserThan = fIntersection;
-					}
+					//qualifies for consideration, now it just has to compete for closest
+					pIntersectedPortal = pTempPortal;
+					fMustBeCloserThan = fIntersection;
 				}
 			}
 		}
@@ -262,40 +323,18 @@ CPortal_Base2D* UTIL_Portal_FirstAlongRay( const Ray_t &ray, float &fMustBeClose
 	return pIntersectedPortal;
 }
 
-static const Ray_t *AdjustRayToPlane( const Ray_t &originalRay, Ray_t &alterableRay, const Vector &vExtentSigns, const VPlane &Plane, float &fDeltaScale )
+
+CPortal_Base2D* UTIL_Portal_FirstAlongRay( const Ray_t &ray, float &fMustBeCloserThan )
 {
-	Vector vExtentShift;
-	vExtentShift.x = originalRay.m_Extents.x * vExtentSigns.x;
-	vExtentShift.y = originalRay.m_Extents.y * vExtentSigns.y;
-	vExtentShift.z = originalRay.m_Extents.z * vExtentSigns.z;
-	float fExtentShiftDist = Plane.m_Normal.Dot( vExtentShift );
-
-	if( (Plane.DistTo( originalRay.m_Start ) + fExtentShiftDist) < 0.0f )
+	int iPortalCount = CPortal_Base2D_Shared::AllPortals.Count();
+	if( iPortalCount != 0 )
 	{
-		//start solid
-		NULL;
+		CPortal_Base2D **pPortals = CPortal_Base2D_Shared::AllPortals.Base();
+		return UTIL_Portal_FirstAlongRay( ray, fMustBeCloserThan, pPortals, iPortalCount );
 	}
-	else if( (Plane.DistTo( originalRay.m_Start + originalRay.m_Delta ) + fExtentShiftDist) < 0.0f )
-	{
-		//end will be behind shifted plane, shorten the delta now, then expand the results on the tail end
-		alterableRay = originalRay;
 
-		float fEndDist = (Plane.DistTo( originalRay.m_Start + originalRay.m_Delta ) + fExtentShiftDist);
-		float fDeltaLength = originalRay.m_Delta.Length();
-		Vector vDeltaNormalized = originalRay.m_Delta / fDeltaLength;
-		float fNewDeltaLength = fDeltaLength - (Plane.m_Normal.Dot( vDeltaNormalized ) * fEndDist);
-		alterableRay.m_Delta = vDeltaNormalized * fNewDeltaLength;
-
-		fDeltaScale = fNewDeltaLength / fDeltaLength;
-		return &alterableRay;
-	}
-	else
-	{
-		fDeltaScale = 1.0f;
-	}
-	return &originalRay;
+	return NULL;
 }
-
 
 bool UTIL_Portal_TraceRay_Bullets( const CPortal_Base2D *pPortal, const Ray_t &ray, unsigned int fMask, ITraceFilter *pTraceFilter, trace_t *pTrace, bool bTraceHolyWall )
 {
@@ -378,6 +417,7 @@ CPortal_Base2D* UTIL_Portal_TraceRay_Beam( const Ray_t &ray, unsigned int fMask,
 	*pfFraction = fMustBeCloserThan; //will be real trace distance if it didn't hit a portal
 	return pIntersectedPortal;
 }
+
 
 void UTIL_Portal_TraceRay_With( const CPortal_Base2D *pPortal, const Ray_t &ray, unsigned int fMask, ITraceFilter *pTraceFilter, trace_t *pTrace, bool bTraceHolyWall )
 {
@@ -651,10 +691,8 @@ void UTIL_Portal_TraceRay( const CPortal_Base2D *pPortal, const Ray_t &ray, unsi
 				if( ((pBrushSet->iSolidMask & fMask) != 0) && pBrushSet->pCollideable )
 				{
 					physcollision->TraceBox( queryRay, pBrushSet->pCollideable, vec3_origin, vec3_angle, &TempTrace );
-					if( (TempTrace.startsolid == false) && (TempTrace.fraction < pTrace->fraction) ) //never allow something to be stuck in the tube, it's more of a last-resort guide than a real collideable
-					{
-						bCopyBackBrushTraceData = true;
-					}
+
+					bCopyBackBrushTraceData = true;
 
 					bool bIsCloser = (portal_trace_shrink_ray_each_query.GetBool() ) ? (TempTrace.DidHit()) : (TempTrace.fraction < pTrace->fraction);
 					if( (TempTrace.startsolid && !pTrace->startsolid) || (queryRay.m_IsSwept && bIsCloser) )
@@ -697,7 +735,6 @@ void UTIL_Portal_TraceRay( const CPortal_Base2D *pPortal, const Ray_t &ray, unsi
 						if( ( !bFilterStaticProps || pTraceFilter->ShouldHitEntity( pCurrentProp->pSourceProp, fMask ) ) )
 						{
 							physcollision->TraceBox( queryRay, pCurrentProp->pCollide, vec3_origin, vec3_angle, &TempTrace );
-
 #if defined ( PORTAL_TRACE_LOGGING )
 							s_TraceLogger.LogTrace( STATIC_PROPS );
 #endif
@@ -1106,6 +1143,7 @@ int UTIL_Portal_EntitiesAlongRayComplex( int *entSegmentIndices, int *segCount, 
 	return pEnum->GetCount();
 }
 
+
 struct CollideableTraceData_t
 {
 	Vector vecAbsStart;
@@ -1124,6 +1162,7 @@ void TraceFunc_Ray( void *pData, CPhysCollide *pCollide, const Vector &vOrigin, 
 {
 	physcollision->TraceBox( *(Ray_t *)pData, MASK_ALL, NULL, pCollide, vOrigin, qAngle, pTrace );
 }
+
 
 
 //-----------------------------------------------------------------------------
@@ -1435,22 +1474,22 @@ void UTIL_Portal_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, c
 	}	
 }
 
-void UTIL_Portal_PointTransform( const VMatrix matThisToLinked, const Vector &ptSource, Vector &ptTransformed )
+void UTIL_Portal_PointTransform( const VMatrix &matThisToLinked, const Vector &ptSource, Vector &ptTransformed )
 {
 	ptTransformed = matThisToLinked * ptSource;
 }
 
-void UTIL_Portal_VectorTransform( const VMatrix matThisToLinked, const Vector &vSource, Vector &vTransformed )
+void UTIL_Portal_VectorTransform( const VMatrix &matThisToLinked, const Vector &vSource, Vector &vTransformed )
 {
 	vTransformed = matThisToLinked.ApplyRotation( vSource );
 }
 
-void UTIL_Portal_AngleTransform( const VMatrix matThisToLinked, const QAngle &qSource, QAngle &qTransformed )
+void UTIL_Portal_AngleTransform( const VMatrix &matThisToLinked, const QAngle &qSource, QAngle &qTransformed )
 {
 	qTransformed = TransformAnglesToWorldSpace( qSource, matThisToLinked.As3x4() );
 }
 
-void UTIL_Portal_RayTransform( const VMatrix matThisToLinked, const Ray_t &raySource, Ray_t &rayTransformed )
+void UTIL_Portal_RayTransform( const VMatrix &matThisToLinked, const Ray_t &raySource, Ray_t &rayTransformed )
 {
 	rayTransformed = raySource;
 
@@ -1654,7 +1693,7 @@ int UTIL_Portal_ComplexTraceRay( const Ray_t &ray, unsigned int mask, ITraceFilt
 	return iMaxSegments;
 }
 
-void UTIL_Portal_PlaneTransform( const VMatrix matThisToLinked, const cplane_t &planeSource, cplane_t &planeTransformed )
+void UTIL_Portal_PlaneTransform( const VMatrix &matThisToLinked, const cplane_t &planeSource, cplane_t &planeTransformed )
 {
 	planeTransformed = planeSource;
 
@@ -1664,7 +1703,7 @@ void UTIL_Portal_PlaneTransform( const VMatrix matThisToLinked, const cplane_t &
 	planeTransformed.dist += DotProduct( planeTransformed.normal, matThisToLinked.GetTranslation( vTrans ) );
 }
 
-void UTIL_Portal_PlaneTransform( const VMatrix matThisToLinked, const VPlane &planeSource, VPlane &planeTransformed )
+void UTIL_Portal_PlaneTransform( const VMatrix &matThisToLinked, const VPlane &planeSource, VPlane &planeTransformed )
 {
 	Vector vTranformedNormal;
 	float fTransformedDist;
@@ -1676,6 +1715,7 @@ void UTIL_Portal_PlaneTransform( const VMatrix matThisToLinked, const VPlane &pl
 
 	planeTransformed.Init( vTranformedNormal, fTransformedDist );
 }
+
 
 ConVar portal_triangles_overlap("portal_triangles_overlap", "0.1f", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY);
 void UTIL_Portal_Triangles( const Vector &ptPortalCenter, const QAngle &qPortalAngles, float fHalfWidth, float fHalfHeight, Vector pvTri1[ 3 ], Vector pvTri2[ 3 ] )
@@ -1737,7 +1777,7 @@ float UTIL_Portal_DistanceThroughPortalSqr( const CPortal_Base2D *pPortal, const
 	if ( !pPortalLinked || !pPortalLinked->IsActive() )
 		return -1.0f;
 
-	return vPoint1.DistToSqr( pPortal->GetAbsOrigin() ) + pPortalLinked->GetAbsOrigin().DistToSqr( vPoint2 );
+	return vPoint1.DistToSqr( pPortal->m_ptOrigin ) + ((Vector)pPortalLinked->m_ptOrigin).DistToSqr( vPoint2 );
 }
 
 float UTIL_Portal_ShortestDistance( const Vector &vPoint1, const Vector &vPoint2, CPortal_Base2D **pShortestDistPortal_Out /*= NULL*/, bool bRequireStraightLine /*= false*/ )
@@ -1952,11 +1992,8 @@ float UTIL_IntersectRayWithPortal( const Ray_t &ray, const CPortal_Base2D *pPort
 		return -1.0f;
 	}
 
-	Vector vForward;
-	pPortal->GetVectors( &vForward, NULL, NULL );
-
 	// Discount rays not coming from the front of the portal
-	float fDot = DotProduct( vForward, ray.m_Delta );
+	float fDot = DotProduct( pPortal->m_vForward, ray.m_Delta );
 	if ( fDot > 0.0f  )
 	{
 		return -1.0f;
@@ -2070,45 +2107,160 @@ void UTIL_Portal_NDebugOverlay( const CPortal_Base2D *pPortal, int r, int g, int
 #endif //#ifndef CLIENT_DLL
 }
 
-bool UTIL_IsCollideableIntersectingPhysCollide( ICollideable *pCollideable, const CPhysCollide *pCollide, const Vector &vPhysCollideOrigin, const QAngle &qPhysCollideAngles )
+
+struct FindClosestPassableSpace_TraceAdapter_Portal_t : public FindClosestPassableSpace_TraceAdapter_t
 {
-	vcollide_t *pVCollide = modelinfo->GetVCollide( pCollideable->GetCollisionModel() );
-	trace_t Trace;
+	const CPortal_Base2D *pPortal;
+};
 
-	if( pVCollide != NULL )
+static void PortalTraceFunc( const Ray_t &ray, trace_t *pResult, FindClosestPassableSpace_TraceAdapter_t *pTraceAdapter )
+{
+	UTIL_Portal_TraceRay( ((FindClosestPassableSpace_TraceAdapter_Portal_t *)pTraceAdapter)->pPortal, ray, pTraceAdapter->fMask, pTraceAdapter->pTraceFilter, pResult, true );
+}
+
+static bool PortalPointOutsideWorldFunc( const Vector &vTest, FindClosestPassableSpace_TraceAdapter_t *pTraceAdapter )
+{
+	trace_t tr;
+	Ray_t testRay;
+	testRay.Init( vTest, vTest );
+
+	CTraceFilterWorldOnly traceFilter;
+
+	UTIL_Portal_TraceRay( ((FindClosestPassableSpace_TraceAdapter_Portal_t *)pTraceAdapter)->pPortal, testRay, MASK_SOLID_BRUSHONLY, &traceFilter, &tr );
+	return tr.startsolid;
+}
+
+bool UTIL_FindClosestPassableSpace_InPortal( const CPortal_Base2D *pPortal, const Vector &vCenter, const Vector &vExtents, const Vector &vIndecisivePush, ITraceFilter *pTraceFilter, unsigned int fMask, unsigned int iIterations, Vector &vCenterOut )
+{
+	FindClosestPassableSpace_TraceAdapter_Portal_t adapter;
+	adapter.pTraceFunc = PortalTraceFunc;
+	adapter.pPointOutsideWorldFunc = PortalPointOutsideWorldFunc;
+	adapter.pTraceFilter = pTraceFilter;
+	adapter.fMask = fMask;
+
+	adapter.pPortal = pPortal;
+
+	return UTIL_FindClosestPassableSpace( vCenter, vExtents, vIndecisivePush, iIterations, vCenterOut, FL_AXIS_DIRECTION_NONE, &adapter );
+}
+
+
+struct FindClosestPassableSpace_TraceAdapter_Portal_StayInFront_t : FindClosestPassableSpace_TraceAdapter_Portal_t
+{
+	VPlane shiftedPlane;//we only want the center of the starting box to stay in front, not every trace. So we create a plane of solidity that is not necessarily coplanar with the portal quad
+	Vector vExtentSigns; //when testing planar distance we need to use the extent closest to the solidity plane, multiply the ray extents by these to get that point.
+};
+
+static const Ray_t *AdjustRayToPlane( const Ray_t &originalRay, Ray_t &alterableRay, const Vector &vExtentSigns, const VPlane &Plane, float &fDeltaScale )
+{
+	Vector vExtentShift;
+	vExtentShift.x = originalRay.m_Extents.x * vExtentSigns.x;
+	vExtentShift.y = originalRay.m_Extents.y * vExtentSigns.y;
+	vExtentShift.z = originalRay.m_Extents.z * vExtentSigns.z;
+	float fExtentShiftDist = Plane.m_Normal.Dot( vExtentShift );
+
+	if( (Plane.DistTo( originalRay.m_Start ) + fExtentShiftDist) < 0.0f )
 	{
-		Vector ptEntityPosition = pCollideable->GetCollisionOrigin();
-		QAngle qEntityAngles = pCollideable->GetCollisionAngles();
+		//start solid
+		NULL;
+	}
+	else if( (Plane.DistTo( originalRay.m_Start + originalRay.m_Delta ) + fExtentShiftDist) < 0.0f )
+	{
+		//end will be behind shifted plane, shorten the delta now, then expand the results on the tail end
+		alterableRay = originalRay;
 
-		for( int i = 0; i != pVCollide->solidCount; ++i )
-		{
-			physcollision->TraceCollide( ptEntityPosition, ptEntityPosition, pVCollide->solids[i], qEntityAngles, pCollide, vPhysCollideOrigin, qPhysCollideAngles, &Trace );
+		float fEndDist = (Plane.DistTo( originalRay.m_Start + originalRay.m_Delta ) + fExtentShiftDist);
+		float fDeltaLength = originalRay.m_Delta.Length();
+		Vector vDeltaNormalized = originalRay.m_Delta / fDeltaLength;
+		float fNewDeltaLength = fDeltaLength - (Plane.m_Normal.Dot( vDeltaNormalized ) * fEndDist);
+		alterableRay.m_Delta = vDeltaNormalized * fNewDeltaLength;
 
-			if( Trace.startsolid )
-				return true;
-		}
+		fDeltaScale = fNewDeltaLength / fDeltaLength;
+		return &alterableRay;
 	}
 	else
 	{
-		//use AABB
-		Vector vMins, vMaxs, ptCenter;
-		pCollideable->WorldSpaceSurroundingBounds( &vMins, &vMaxs );
-		ptCenter = (vMins + vMaxs) * 0.5f;
-		vMins -= ptCenter;
-		vMaxs -= ptCenter;
-		physcollision->TraceBox( ptCenter, ptCenter, vMins, vMaxs, pCollide, vPhysCollideOrigin, qPhysCollideAngles, &Trace );
+		fDeltaScale = 1.0f;
+	}
+	return &originalRay;
+}
 
-		return Trace.startsolid;
+static void PortalTraceFunc_CenterMustStayInFront( const Ray_t &ray, trace_t *pResult, FindClosestPassableSpace_TraceAdapter_t *pTraceAdapter )
+{
+	const FindClosestPassableSpace_TraceAdapter_Portal_StayInFront_t *pCastedData = (const FindClosestPassableSpace_TraceAdapter_Portal_StayInFront_t *)pTraceAdapter;
+	
+	float fDeltaScale;
+	Ray_t alterableRay;
+	const Ray_t *pUseRay = AdjustRayToPlane( ray, alterableRay, pCastedData->vExtentSigns, pCastedData->shiftedPlane, fDeltaScale );
+	if( pUseRay == NULL )
+	{
+		//start solid
+		UTIL_ClearTrace( *pResult );
+		pResult->startsolid = true;
+		pResult->fraction = 0.0f;
+		pResult->allsolid = true; //TODO: bother calculating if it leaves solid?
+		return;
 	}
 
-	return false;
+	UTIL_Portal_TraceRay( pCastedData->pPortal, *pUseRay, pTraceAdapter->fMask, pTraceAdapter->pTraceFilter, pResult, true );
+
+	if( pUseRay == &alterableRay )
+	{
+		//fixup any abnormalities from using a shortened ray
+		if( !pResult->DidHit() )
+		{
+			pResult->m_pEnt = (CPortal_Base2D *)pCastedData->pPortal;
+			pResult->plane	= pCastedData->pPortal->m_plane_Origin;
+			pResult->plane.dist = pCastedData->shiftedPlane.m_Dist;
+		}
+		
+		pResult->fraction *= fDeltaScale;
+		pResult->fractionleftsolid *= fDeltaScale;		
+	}
 }
+
+static bool PortalPointOutsideWorldFunc_CenterMustStayInFront( const Vector &vTest, FindClosestPassableSpace_TraceAdapter_t *pTraceAdapter )
+{
+	const FindClosestPassableSpace_TraceAdapter_Portal_StayInFront_t *pCastedData = (const FindClosestPassableSpace_TraceAdapter_Portal_StayInFront_t *)pTraceAdapter;
+	if( pCastedData->shiftedPlane.DistTo( vTest ) < 0.0f )
+		return true;
+
+	return PortalPointOutsideWorldFunc( vTest, pTraceAdapter );
+}
+
+bool UTIL_FindClosestPassableSpace_InPortal_CenterMustStayInFront( const CPortal_Base2D *pPortal, const Vector &vCenter, const Vector &vExtents, const Vector &vIndecisivePush, ITraceFilter *pTraceFilter, unsigned int fMask, unsigned int iIterations, Vector &vCenterOut )
+{
+	FindClosestPassableSpace_TraceAdapter_Portal_StayInFront_t adapter;
+	adapter.pTraceFunc = PortalTraceFunc_CenterMustStayInFront;
+	adapter.pPointOutsideWorldFunc = PortalPointOutsideWorldFunc_CenterMustStayInFront;
+	adapter.pTraceFilter = pTraceFilter;
+	adapter.fMask = fMask;
+
+	adapter.pPortal = pPortal;
+
+	adapter.vExtentSigns.x = -Sign( pPortal->m_plane_Origin.normal.x );
+	adapter.vExtentSigns.y = -Sign( pPortal->m_plane_Origin.normal.y );
+	adapter.vExtentSigns.z = -Sign( pPortal->m_plane_Origin.normal.z );
+	
+	//when caclulating the shift plane, all we need to be sure of is that the most penetrating extent is coplanar with the shift plane when the center would be coplanar with the original plane
+	Vector vCoplanarExtent;
+	vCoplanarExtent.x = vExtents.x * adapter.vExtentSigns.x;
+	vCoplanarExtent.y = vExtents.y * adapter.vExtentSigns.y;
+	vCoplanarExtent.z = vExtents.z * adapter.vExtentSigns.z;
+
+	adapter.shiftedPlane.m_Normal = pPortal->m_plane_Origin.normal;
+	adapter.shiftedPlane.m_Dist = pPortal->m_plane_Origin.dist + (pPortal->m_plane_Origin.normal.Dot( vCoplanarExtent ) ); //the dot is known to be negative, shifting the plane back so the extent is coplanar with it.
+	
+	return UTIL_FindClosestPassableSpace( vCenter, vExtents, vIndecisivePush, iIterations, vCenterOut, FL_AXIS_DIRECTION_NONE, &adapter );
+}
+
+
 
 struct FindClosestPassableSpace_TraceAdapter_Engine_StayInFront_t : FindClosestPassableSpace_TraceAdapter_t
 {
 	VPlane shiftedPlane;//we only want the center of the starting box to stay in front, not every trace. So we create a plane of solidity that is not necessarily coplanar with the portal quad
 	Vector vExtentSigns; //when testing planar distance we need to use the extent closest to the solidity plane, multiply the ray extents by these to get that point.
 };
+
 
 static void EngineTraceFunc_CenterMustStayInFront( const Ray_t &ray, trace_t *pResult, FindClosestPassableSpace_TraceAdapter_t *pTraceAdapter )
 {
@@ -2346,7 +2498,7 @@ bool FindClosestPassableSpace( CBaseEntity *pEntity, const Vector &vIndecisivePu
 	}
 
 	// X360TBD: Hits in portal devtest
-	AssertMsg( IsX360() || iFailCount != 100, "FindClosestPassableSpace() failure." );
+	AssertMsg( IsGameConsole() || iFailCount != 100, "FindClosestPassableSpace() failure." );
 	return false;
 }
 
@@ -2386,7 +2538,7 @@ CPortal_Base2D *UTIL_PointIsOnPortalQuad( const Vector vPoint, float fOnPlaneEps
 	return NULL;
 }
 
-bool UTIL_Portal_EntityIsInPortalHole( const CPortal_Base2D *pPortal, CBaseEntity *pEntity )
+bool UTIL_Portal_EntityIsInPortalHole( const CPortal_Base2D *pPortal, const CBaseEntity *pEntity )
 {
 	const CCollisionProperty *pCollisionProp = pEntity->CollisionProp();
 	Vector vMins = pCollisionProp->OBBMins();
@@ -2412,6 +2564,7 @@ const Vector UTIL_ProjectPointOntoPlane( const Vector& point, const cplane_t& pl
 	return point - (DotProduct( point, plane.normal ) - plane.dist) * plane.normal;
 }
 
+
 bool UTIL_PointIsNearPortal( const Vector& point, const CPortal_Base2D* pPortal2D, float planeDist, float radiusReduction )
 {
 	AssertMsg( pPortal2D != NULL, "Null pointers are bad, and you should feel bad." );
@@ -2431,6 +2584,7 @@ bool UTIL_PointIsNearPortal( const Vector& point, const CPortal_Base2D* pPortal2
 		   (transformedPt[1] >= boxMin[1] && transformedPt[1] <= boxMax[1]) &&
 		   (transformedPt[2] >= boxMin[2] && transformedPt[2] <= boxMax[2]);
 }
+
 
 bool UTIL_IsEntityMovingOrRotating( CBaseEntity* pEntity )
 {
@@ -2482,6 +2636,7 @@ bool UTIL_IsEntityMovingOrRotating( CBaseEntity* pEntity )
 
 	return false;
 }
+
 
 #ifdef CLIENT_DLL
 void UTIL_TransformInterpolatedAngle( CInterpolatedVar< QAngle > &qInterped, matrix3x4_t matTransform, float fUpToTime )
@@ -2572,6 +2727,74 @@ void CC_Debug_FixMyPosition( void )
 static ConCommand debug_fixmyposition("debug_fixmyposition", CC_Debug_FixMyPosition, "Runs FindsClosestPassableSpace() on player.", FCVAR_CHEAT );
 #endif
 
+
+bool IsIn180( float f )
+{
+	return f >= 0.f && f <= 180.f;
+}
+
+bool IsInNeg180( float f )
+{
+	return f < 0.f && f >= -180.f;
+}
+
+
+float DistTo180( float f )
+{
+	if ( IsIn180( f ) )
+	{
+		return 180.f - f;
+	}
+	else if ( IsInNeg180( f ) )
+	{
+		return -180 - f;
+	}
+	else
+	{
+		Assert("We are out of bound [-180,180]");
+		return 0.f;
+	}
+}
+
+
+void UTIL_NormalizedAngleDiff( const QAngle& start, const QAngle& end, QAngle* result )
+{
+	if ( result )
+	{
+		QAngle angles;
+		for ( int i=0; i<3; ++i )
+		{
+			float a = start[ i ];
+			float b = end[ i ];
+
+			float distAto180 = DistTo180( a );
+			float distBto180 = DistTo180( b );
+
+			bool bUse180 = ( fabs( distAto180 ) + fabs( distBto180 ) ) < ( fabs( a ) + fabs( b ) );
+			bool bDiffSign = Sign( a ) * Sign( b ) < 0;
+
+			if ( bDiffSign )
+			{
+				if ( bUse180 )
+				{
+					angles[ i ] = distBto180 - distAto180;
+				}
+				else
+				{
+					angles[ i ] = a - b;
+				}
+			}
+			else
+			{
+				angles[ i ] = a - b;
+			}
+		}
+		
+		*result = -angles;
+	}
+}
+
+
 //it turns out that using MatrixInverseTR() is theoretically correct. But we need to ensure that these matrices match exactly on the client/server. 
 //And computing inverses screws that up just enough (differences of ~0.00005 in the translation some times) to matter. So we compute each from scratch every time
 #if defined( CLIENT_DLL )
@@ -2580,10 +2803,6 @@ void UTIL_Portal_ComputeMatrix_ForReal( CPortalRenderable_FlatBasic *pLocalPorta
 void UTIL_Portal_ComputeMatrix_ForReal( CPortal_Base2D *pLocalPortal, CPortal_Base2D *pRemotePortal )
 #endif
 {
-	// FIXME:
-#ifdef GAME_DLL
-#define m_ptOrigin GetAbsOrigin()
-#endif
 	VMatrix worldToLocal_Rotated;
 	worldToLocal_Rotated.m[0][0] = -pLocalPortal->m_vForward.x;
 	worldToLocal_Rotated.m[0][1] = -pLocalPortal->m_vForward.y;
@@ -2610,8 +2829,6 @@ void UTIL_Portal_ComputeMatrix_ForReal( CPortal_Base2D *pLocalPortal, CPortal_Ba
 
 	//final
 	pLocalPortal->m_matrixThisToLinked = remoteToWorld * worldToLocal_Rotated;
-
-#undef m_ptOrigin
 }
 
 //MUST be a shared function to prevent floating point precision weirdness in the 100,000th decimal place between client/server that we're attributing to differing register usage.
@@ -2632,34 +2849,8 @@ void UTIL_Portal_ComputeMatrix( CPortal_Base2D *pLocalPortal, CPortal_Base2D *pR
 	}
 }
 
-CBasePlayer* UTIL_OtherPlayer( CBasePlayer const* pPlayer )
-{
-	for( int i = 1; i <= gpGlobals->maxClients; ++i )
-	{
-		CBasePlayer* pOtherPlayer = UTIL_PlayerByIndex( i );
-		if ( pOtherPlayer != NULL && pOtherPlayer != pPlayer )
-			return pOtherPlayer;
-	}
 
-	return NULL;
-}
-
-#ifdef GAME_DLL
-
-CBasePlayer* UTIL_OtherConnectedPlayer( CBasePlayer const* pPlayer )
-{
-	CBasePlayer *pOtherPlayer = UTIL_OtherPlayer( pPlayer );
-	if ( pOtherPlayer && pOtherPlayer->IsConnected() )
-	{
-		return pOtherPlayer;
-	}
-
-	return NULL;
-}
-
-#endif
-
-bool UTIL_IsPaintableSurface( const csurface_t& surface )
+CEG_NOINLINE bool UTIL_IsPaintableSurface( const csurface_t& surface )
 {
 	return !( surface.flags & SURF_NOPAINT );
 }
@@ -2709,6 +2900,7 @@ float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoi
 
 	return flPaintRadius;
 }
+
 
 Color GetAveragePaintColorFromVector( CUtlVector<Color> &color )
 {
@@ -2803,6 +2995,7 @@ bool UTIL_Paint_Reflect( const trace_t& tr, Vector& vStart, Vector& vDir, PaintP
 
 	return false;
 }
+
 
 
 //Extends a radius through portals. For various radius effects like explosions and pushing
@@ -3186,73 +3379,125 @@ void UTIL_Portal_Laser_Prevent_Tilting( Vector& vDirection )
 
 
 
-bool IsIn180( float f )
+void UTIL_DebugOverlay_Polyhedron( const CPolyhedron *pPolyhedron, int red, int green, int blue, bool noDepthTest, float flDuration, const matrix3x4_t *pTransform )
 {
-	return f >= 0.f && f <= 180.f;
-}
-
-bool IsInNeg180( float f )
-{
-	return f < 0.f && f >= -180.f;
-}
-
-
-float DistTo180( float f )
-{
-	if ( IsIn180( f ) )
+	const Vector *pPoints;
+	if( pTransform )
 	{
-		return 180.f - f;
-	}
-	else if ( IsInNeg180( f ) )
-	{
-		return -180 - f;
+		Vector *pPointsTransform;
+		pPoints = pPointsTransform = (Vector *)stackalloc( sizeof( Vector ) * pPolyhedron->iVertexCount );
+
+		for( int i = 0; i != pPolyhedron->iVertexCount; ++i )
+		{
+			VectorTransform( pPolyhedron->pVertices[i], *pTransform, pPointsTransform[i] );
+		}
 	}
 	else
 	{
-		Assert("We are out of bound [-180,180]");
-		return 0.f;
+		pPoints = pPolyhedron->pVertices;
+	}
+
+	for( int i = 0; i != pPolyhedron->iLineCount; ++i )
+	{
+		NDebugOverlay::Line( pPoints[pPolyhedron->pLines[i].iPointIndices[0]], pPoints[pPolyhedron->pLines[i].iPointIndices[1]], red, green, blue, noDepthTest, flDuration );
 	}
 }
 
 
-void UTIL_NormalizedAngleDiff( const QAngle& start, const QAngle& end, QAngle* result )
+void UTIL_DebugOverlay_CPhysCollide( const CPhysCollide *pCollide, int red, int green, int blue, bool noDepthTest, float flDuration, const matrix3x4_t *pTransform )
 {
-	if ( result )
+	Vector *outVerts;
+	int vertCount = physcollision->CreateDebugMesh( pCollide, &outVerts );
+	int triCount = vertCount / 3;
+	
+	const Vector *pPoints;
+	if( pTransform )
 	{
-		QAngle angles;
-		for ( int i=0; i<3; ++i )
+		Vector *pPointsTransform;
+		pPoints = pPointsTransform = (Vector *)stackalloc( sizeof( Vector ) * vertCount );
+
+		for( int i = 0; i != vertCount; ++i )
 		{
-			float a = start[ i ];
-			float b = end[ i ];
-
-			float distAto180 = DistTo180( a );
-			float distBto180 = DistTo180( b );
-
-			bool bUse180 = ( fabs( distAto180 ) + fabs( distBto180 ) ) < ( fabs( a ) + fabs( b ) );
-			bool bDiffSign = Sign( a ) * Sign( b ) < 0;
-
-			if ( bDiffSign )
-			{
-				if ( bUse180 )
-				{
-					angles[ i ] = distBto180 - distAto180;
-				}
-				else
-				{
-					angles[ i ] = a - b;
-				}
-			}
-			else
-			{
-				angles[ i ] = a - b;
-			}
+			VectorTransform( outVerts[i], *pTransform, pPointsTransform[i] );
 		}
-		
-		*result = -angles;
 	}
+	else
+	{
+		pPoints = outVerts;
+	}
+
+	for( int i = 0; i != triCount; ++i )
+	{
+		int iStartVert = (i * 3);
+		NDebugOverlay::Line( pPoints[iStartVert], pPoints[iStartVert + 1], red, green, blue, noDepthTest, flDuration );
+		NDebugOverlay::Line( pPoints[iStartVert + 1], pPoints[iStartVert + 2], red, green, blue, noDepthTest, flDuration );
+		NDebugOverlay::Line( pPoints[iStartVert + 2], pPoints[iStartVert], red, green, blue, noDepthTest, flDuration );
+	}
+
+	physcollision->DestroyDebugMesh( vertCount, outVerts );
+}
+
+
+bool UTIL_IsCollideableIntersectingPhysCollide( ICollideable *pCollideable, const CPhysCollide *pCollide, const Vector &vPhysCollideOrigin, const QAngle &qPhysCollideAngles )
+{
+	vcollide_t *pVCollide = modelinfo->GetVCollide( pCollideable->GetCollisionModel() );
+	trace_t Trace;
+
+	if( pVCollide != NULL )
+	{
+		Vector ptEntityPosition = pCollideable->GetCollisionOrigin();
+		QAngle qEntityAngles = pCollideable->GetCollisionAngles();
+
+		for( int i = 0; i != pVCollide->solidCount; ++i )
+		{
+			physcollision->TraceCollide( ptEntityPosition, ptEntityPosition, pVCollide->solids[i], qEntityAngles, pCollide, vPhysCollideOrigin, qPhysCollideAngles, &Trace );
+
+			if( Trace.startsolid )
+				return true;
+		}
+	}
+	else
+	{
+		//use AABB
+		Vector vMins, vMaxs, ptCenter;
+		pCollideable->WorldSpaceSurroundingBounds( &vMins, &vMaxs );
+		ptCenter = (vMins + vMaxs) * 0.5f;
+		vMins -= ptCenter;
+		vMaxs -= ptCenter;
+		physcollision->TraceBox( ptCenter, ptCenter, vMins, vMaxs, pCollide, vPhysCollideOrigin, qPhysCollideAngles, &Trace );
+
+		return Trace.startsolid;
+	}
+
+	return false;
+}
+
+CBasePlayer* UTIL_OtherPlayer( CBasePlayer const* pPlayer )
+{
+	for( int i = 1; i <= gpGlobals->maxClients; ++i )
+	{
+		CBasePlayer* pOtherPlayer = UTIL_PlayerByIndex( i );
+		if ( pOtherPlayer != NULL && pOtherPlayer != pPlayer )
+			return pOtherPlayer;
+	}
+
+	return NULL;
 }
 
 #ifdef GAME_DLL
+
+CBasePlayer* UTIL_OtherConnectedPlayer( CBasePlayer const* pPlayer )
+{
+	CBasePlayer *pOtherPlayer = UTIL_OtherPlayer( pPlayer );
+	if ( pOtherPlayer && pOtherPlayer->IsConnected() )
+	{
+		return pOtherPlayer;
+	}
+
+	return NULL;
+}
+
+
 bool CBrushEntityList::EnumEntity( IHandleEntity *pHandleEntity )
 {
 	if ( !pHandleEntity )
@@ -3276,113 +3521,5 @@ void UTIL_FindBrushEntitiesInSphere( CBrushEntityList& brushEnum, const Vector& 
 	Vector vExtents = flRadius * Vector( 1.f, 1.f, 1.f );
 	enginetrace->EnumerateEntities( vCenter - vExtents, vCenter + vExtents, &brushEnum );
 }
+
 #endif
-
-struct FindClosestPassableSpace_TraceAdapter_Portal_t : public FindClosestPassableSpace_TraceAdapter_t
-{
-	const CPortal_Base2D *pPortal;
-};
-
-static void PortalTraceFunc( const Ray_t &ray, trace_t *pResult, FindClosestPassableSpace_TraceAdapter_t *pTraceAdapter )
-{
-	UTIL_Portal_TraceRay( ((FindClosestPassableSpace_TraceAdapter_Portal_t *)pTraceAdapter)->pPortal, ray, pTraceAdapter->fMask, pTraceAdapter->pTraceFilter, pResult, true );
-}
-
-struct FindClosestPassableSpace_TraceAdapter_Portal_StayInFront_t : FindClosestPassableSpace_TraceAdapter_Portal_t
-{
-	VPlane shiftedPlane;//we only want the center of the starting box to stay in front, not every trace. So we create a plane of solidity that is not necessarily coplanar with the portal quad
-	Vector vExtentSigns; //when testing planar distance we need to use the extent closest to the solidity plane, multiply the ray extents by these to get that point.
-};
-
-static bool PortalPointOutsideWorldFunc( const Vector &vTest, FindClosestPassableSpace_TraceAdapter_t *pTraceAdapter )
-{
-	trace_t tr;
-	Ray_t testRay;
-	testRay.Init( vTest, vTest );
-
-	CTraceFilterWorldOnly traceFilter;
-
-	UTIL_Portal_TraceRay( ((FindClosestPassableSpace_TraceAdapter_Portal_t *)pTraceAdapter)->pPortal, testRay, MASK_SOLID_BRUSHONLY, &traceFilter, &tr );
-	return tr.startsolid;
-}
-
-bool UTIL_FindClosestPassableSpace_InPortal( const CPortal_Base2D *pPortal, const Vector &vCenter, const Vector &vExtents, const Vector &vIndecisivePush, ITraceFilter *pTraceFilter, unsigned int fMask, unsigned int iIterations, Vector &vCenterOut )
-{
-	FindClosestPassableSpace_TraceAdapter_Portal_t adapter;
-	adapter.pTraceFunc = PortalTraceFunc;
-	adapter.pPointOutsideWorldFunc = PortalPointOutsideWorldFunc;
-	adapter.pTraceFilter = pTraceFilter;
-	adapter.fMask = fMask;
-
-	adapter.pPortal = pPortal;
-
-	return UTIL_FindClosestPassableSpace( vCenter, vExtents, vIndecisivePush, iIterations, vCenterOut, FL_AXIS_DIRECTION_NONE, &adapter );
-}
-
-static bool PortalPointOutsideWorldFunc_CenterMustStayInFront( const Vector &vTest, FindClosestPassableSpace_TraceAdapter_t *pTraceAdapter )
-{
-	const FindClosestPassableSpace_TraceAdapter_Portal_StayInFront_t *pCastedData = (const FindClosestPassableSpace_TraceAdapter_Portal_StayInFront_t *)pTraceAdapter;
-	if( pCastedData->shiftedPlane.DistTo( vTest ) < 0.0f )
-		return true;
-
-	return PortalPointOutsideWorldFunc( vTest, pTraceAdapter );
-}
-static void PortalTraceFunc_CenterMustStayInFront( const Ray_t &ray, trace_t *pResult, FindClosestPassableSpace_TraceAdapter_t *pTraceAdapter )
-{
-	const FindClosestPassableSpace_TraceAdapter_Portal_StayInFront_t *pCastedData = (const FindClosestPassableSpace_TraceAdapter_Portal_StayInFront_t *)pTraceAdapter;
-	
-	float fDeltaScale;
-	Ray_t alterableRay;
-	const Ray_t *pUseRay = AdjustRayToPlane( ray, alterableRay, pCastedData->vExtentSigns, pCastedData->shiftedPlane, fDeltaScale );
-	if( pUseRay == NULL )
-	{
-		//start solid
-		UTIL_ClearTrace( *pResult );
-		pResult->startsolid = true;
-		pResult->fraction = 0.0f;
-		pResult->allsolid = true; //TODO: bother calculating if it leaves solid?
-		return;
-	}
-
-	UTIL_Portal_TraceRay( pCastedData->pPortal, *pUseRay, pTraceAdapter->fMask, pTraceAdapter->pTraceFilter, pResult, true );
-
-	if( pUseRay == &alterableRay )
-	{
-		//fixup any abnormalities from using a shortened ray
-		if( !pResult->DidHit() )
-		{
-			pResult->m_pEnt = (CPortal_Base2D *)pCastedData->pPortal;
-			pResult->plane	= pCastedData->pPortal->m_plane_Origin;
-			pResult->plane.dist = pCastedData->shiftedPlane.m_Dist;
-		}
-		
-		pResult->fraction *= fDeltaScale;
-		pResult->fractionleftsolid *= fDeltaScale;		
-	}
-}
-
-bool UTIL_FindClosestPassableSpace_InPortal_CenterMustStayInFront( const CPortal_Base2D *pPortal, const Vector &vCenter, const Vector &vExtents, const Vector &vIndecisivePush, ITraceFilter *pTraceFilter, unsigned int fMask, unsigned int iIterations, Vector &vCenterOut )
-{
-	FindClosestPassableSpace_TraceAdapter_Portal_StayInFront_t adapter;
-	adapter.pTraceFunc = PortalTraceFunc_CenterMustStayInFront;
-	adapter.pPointOutsideWorldFunc = PortalPointOutsideWorldFunc_CenterMustStayInFront;
-	adapter.pTraceFilter = pTraceFilter;
-	adapter.fMask = fMask;
-
-	adapter.pPortal = pPortal;
-
-	adapter.vExtentSigns.x = -Sign( pPortal->m_plane_Origin.normal.x );
-	adapter.vExtentSigns.y = -Sign( pPortal->m_plane_Origin.normal.y );
-	adapter.vExtentSigns.z = -Sign( pPortal->m_plane_Origin.normal.z );
-	
-	//when caclulating the shift plane, all we need to be sure of is that the most penetrating extent is coplanar with the shift plane when the center would be coplanar with the original plane
-	Vector vCoplanarExtent;
-	vCoplanarExtent.x = vExtents.x * adapter.vExtentSigns.x;
-	vCoplanarExtent.y = vExtents.y * adapter.vExtentSigns.y;
-	vCoplanarExtent.z = vExtents.z * adapter.vExtentSigns.z;
-
-	adapter.shiftedPlane.m_Normal = pPortal->m_plane_Origin.normal;
-	adapter.shiftedPlane.m_Dist = pPortal->m_plane_Origin.dist + (pPortal->m_plane_Origin.normal.Dot( vCoplanarExtent ) ); //the dot is known to be negative, shifting the plane back so the extent is coplanar with it.
-	
-	return UTIL_FindClosestPassableSpace( vCenter, vExtents, vIndecisivePush, iIterations, vCenterOut, FL_AXIS_DIRECTION_NONE, &adapter );
-}
