@@ -4505,7 +4505,6 @@ void ComputeAABBContactsWithBrushEntity( ContactVector& contacts, const Vector& 
 	ComputeAABBContactsWithBrushEntity( contacts, NULL, 0, boxOrigin, boxMin, boxMax, pBrushEntity, contentsMask );
 }
 
-#define COMMON_BRUSH_SIDES 8 // Or 6? It's counting planes...
 void ComputeAABBContactsWithBrushEntity_Old( ContactVector& contacts, const cplane_t *pClipPlanes, int iClipPlaneCount, const Vector& boxOrigin, const Vector& boxMin, const Vector& boxMax, CBaseEntity* pBrushEntity, int contentsMask)
 {
 	//typedef CUtlVector<int>	BrushIndexVector;
@@ -4542,7 +4541,6 @@ void ComputeAABBContactsWithBrushEntity_Old( ContactVector& contacts, const cpla
 	CUtlVector<BrushSideInfo_t> brushSides;
 	//BrushSideInfo_t *brushSides = (BrushSideInfo_t *)stackalloc( sizeof( BrushSideInfo_t ) * COMMON_BRUSH_SIDES );
 	//PlaneVector planes;
-	Vector4D *planes = (Vector4D *)stackalloc( sizeof( Vector4D ) * (COMMON_BRUSH_SIDES + 6 /*bbox*/ + iClipPlaneCount) );
 	
 	//if ( !pBrushEntity->IsWorld() )
 	//	Msg("Not the world..?\n");
@@ -4569,6 +4567,8 @@ void ComputeAABBContactsWithBrushEntity_Old( ContactVector& contacts, const cpla
 
 		if( iNumBrushSides <= 0 )
 			continue;
+		
+		Vector4D *planes = (Vector4D *)stackalloc( sizeof( Vector4D ) * (brushSides.Count() + 6 /*bbox*/ + iClipPlaneCount) );
 		
 		//remove bevel planes
 		{
@@ -4607,7 +4607,7 @@ void ComputeAABBContactsWithBrushEntity_Old( ContactVector& contacts, const cpla
 			++iPlaneCount;
 		}
 
-		Assert( iPlaneCount <= (COMMON_BRUSH_SIDES + 6 + iClipPlaneCount) );
+		Assert( iPlaneCount <= (brushSides.Count() + 6 + iClipPlaneCount) );
 
 		// Compute the contact region
 		CMesh contactRegion;
