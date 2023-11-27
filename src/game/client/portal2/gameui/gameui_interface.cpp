@@ -250,6 +250,9 @@ void CGameUI::Initialize( CreateInterfaceFn factory )
 #ifdef SWARM_DLL
 	g_pMatchExt = ( IMatchExtSwarm * ) factory( IMATCHEXT_SWARM_INTERFACE, NULL );
 #endif
+#ifdef PORTAL2
+	g_pMatchExt = (IMatchExtSwarm *)factory(IMATCHEXT_SWARM_INTERFACE, NULL);
+#endif
 	bFailed = !enginesurfacefuncs || !gameuifuncs || !enginevguifuncs ||
 		!xboxsystem ||
 #ifdef _X360
