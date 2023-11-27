@@ -26,11 +26,15 @@ public:
 	void Shutdown( void );
 
 	const CPolyhedron *GetBrushPolyhedron( int iBrushNumber );
-	int GetStaticPropPolyhedrons( ICollideable *pStaticProp, CPolyhedron **pOutputPolyhedronArray, int iOutputArraySize );
+	void ReleaseBrushPolyhedron( int iBrushNumber, const CPolyhedron *pPolyhedron );
 
+	int GetStaticPropPolyhedrons( ICollideable *pStaticProp, const CPolyhedron **pOutputPolyhedronArray, int iOutputArraySize );
+	void ReleaseStaticPropPolyhedrons( ICollideable *pStaticProp, const CPolyhedron **pPolyhedrons, int iPolyhedronCount );
+
+	void ForceRefreshOnMapLoad( void ) { m_CachedMap.Clear(); };
 private:
 	// See comments in LevelInitPreEntity for why these members are commented out
-//	CUtlString	m_CachedMap;
+	CUtlString	m_CachedMap;
 
 	CUtlVector<CPolyhedron *> m_BrushPolyhedrons;
 
@@ -38,11 +42,10 @@ private:
 	{
 		int iStartIndex;
 		int iNumPolyhedrons;
-		int iStaticPropIndex; //helps us remap ICollideable pointers when the map is restarted
 	};
 
 	CUtlVector<CPolyhedron *> m_StaticPropPolyhedrons;
-	CUtlMap<ICollideable *, StaticPropPolyhedronCacheInfo_t> m_CollideableIndicesMap;
+	CUtlMap<vcollide_t *, StaticPropPolyhedronCacheInfo_t> m_CollideableIndicesMap;
 
 
 	void Clear( void );
