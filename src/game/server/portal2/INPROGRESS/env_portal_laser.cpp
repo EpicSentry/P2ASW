@@ -1467,7 +1467,6 @@ bool CPortalLaser::StrikeEntitiesAlongLaser( Vector &vecStart, Vector &vecEnd, V
 
 	bool bBestIsTurreta;
 
-	bool bReturn;
 	if (vsrtVictims.Count() > 0)
 	{
 		bBestIsTurreta = false;
@@ -1483,12 +1482,10 @@ bool CPortalLaser::StrikeEntitiesAlongLaser( Vector &vecStart, Vector &vecEnd, V
 				CPortalLaserTarget *pLaserTarget = dynamic_cast<CPortalLaserTarget*>(pVictim);
 				if ( pLaserTarget && pLaserTarget->IsTerminalPoint() ) // Was pVictim[933]...
 				{
-					bReturn = true;
-					
 					// Note; WorldSpaceCenter() is just a best guess!
 					if (pVecOut)
 						*pVecOut = pLaserTarget->WorldSpaceCenter(); //*(Vector *)(*(int(__cdecl **)(_BYTE *))(*(_DWORD *)v25 + 600))(v25);
-					goto LABEL_41;
+					return true;
 				}
 			}
 			
@@ -1571,13 +1568,11 @@ bool CPortalLaser::StrikeEntitiesAlongLaser( Vector &vecStart, Vector &vecEnd, V
 			}
 		}
 	}
-	bReturn = false;
 	if (pVecOut)
 		*pVecOut = vecEnd;
-LABEL_41:
 	//vsrtVictims.m_Size = 0;
 	//if (vsrtVictims.m_Memory.m_nGrowSize >= 0 && vsrtVictims.m_Memory.m_pMemory)
 	//	(*(void(__cdecl **)(_DWORD, LaserVictimInfo_t *))(*g_pMemAlloc + 8))(g_pMemAlloc, vsrtVictims.m_Memory.m_pMemory);
 
-	return bReturn;
+	return false;
 }
