@@ -428,7 +428,7 @@ void CLaserCatcher::OnRestore()
     if ( m_pCatcherLaserTarget ) // Line 429
     {
         // Assign new catcher
-        m_pCatcherLaserTarget->SetCatcher( (CCatcher *)this ); // Line 432
+        m_pCatcherLaserTarget->SetCatcher( this ); // Line 432
 
         // Check power state
         if ( m_pCatcherLaserTarget->IsPowered() ) // Replaced with optimized function "IsPowered"

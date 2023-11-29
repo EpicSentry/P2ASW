@@ -230,11 +230,11 @@ void C_PortalLaser::ClientThink( void )
 		}
 
 		// MASK: 0x46004001u
-		m_beamHelper.UpdatePointDirection( vStart, vDir, MASK_SHOT, &traceFilter, tr );
+		m_beamHelper.UpdatePointDirection( vStart, vDir, 0x46004001u, &traceFilter, tr );
 	}
 	else
 	{
-		m_beamHelper.UpdatePoints( m_vStartPoint, m_vEndPoint, MASK_SHOT, &traceFilter, tr );
+		m_beamHelper.UpdatePoints( m_vStartPoint, m_vEndPoint, 0x46004001u, &traceFilter, tr );
 	}
 
 	if (m_bShouldSpark)
