@@ -149,7 +149,6 @@ void CProjectedWallEntity::ProjectWall( void )
 	Vector v40; // [esp+6C4h] [ebp-C4h] BYREF
 	float v41; // [esp+6D0h] [ebp-B8h]
 	float v45; // [esp+6E0h] [ebp-A8h]
-	float v51; // [esp+700h] [ebp-88h]
 	Vector vSetMins; // [esp+704h] [ebp-84h] BYREF
 	Vector vecForward; // [esp+714h] [ebp-74h] BYREF
 	Vector vecRight; // [esp+720h] [ebp-68h] BYREF
@@ -184,7 +183,7 @@ void CProjectedWallEntity::ProjectWall( void )
 		vVerts[0] = &vSetMaxs;
 		vSetMaxs.x = flStartPointX + (vecRight.x * 32.0);
 		vSetMaxs.y = flStartPointY + (vecRight.y * 32.0);
-		vSetMaxs.z = flStartPointZ + (32.0 * vecRight.z);
+		vSetMaxs.z = flStartPointZ + (vecRight.z * 32.0);
 		v37 = flStartPointX - (vecRight.x * 32.0);
 		v38.x = flStartPointY - (vecRight.y * 32.0);
 		v38.z = flEndPointX - (vecRight.x * 32.0);
@@ -194,9 +193,7 @@ void CProjectedWallEntity::ProjectWall( void )
 		v40.z = (vecRight.y * 32.0) + flEndPointY;
 		v40.x = flEndPointZ - (32.0 * vecRight.z);
 		v41 = (32.0 * vecRight.z) + flEndPointZ;
-
-
-
+		
 		pTempConvex = physcollision->ConvexFromVerts( vVerts, 4 );
 	LABEL_3:
 		m_pWallCollideable = physcollision->ConvertConvexToCollide( &pTempConvex, 1 );
@@ -308,28 +305,59 @@ void CProjectedWallEntity::ProjectWall( void )
 	v18 = (vecRight.x * 64.0) * 0.5;
 	v19 = (vecRight.y * 64.0) * 0.5;
 	v20 = (64.0 * vecRight.z) * 0.5;
+
 	v41 = (((flStartPointX + v18) * vecRight.x) + ((flStartPointY + v19) * vecRight.y))
 		+ ((flStartPointZ + v20) * vecRight.z);
+
 	v21 = ((flStartPointX - v18) * (vecRight.x))
 		+ ((flStartPointY - v19) * (vecRight.y));
+
 	v45 = v21 + ((flStartPointZ - v20) * (vecRight.z));
 	float v23 = (vecUp.x * 0.015625) * 0.5;
 	v22 = (vecUp.y * 0.015625) * 0.5;
 	v24 = (0.015625 * vecUp.z) * 0.5;
+
 	float v47 = (((flStartPointX + v23) * vecUp.x) + ((flStartPointY + v22) * vecUp.y))
 		+ ((flStartPointZ + v24) * vecUp.z);
 
-	v51 = (((flStartPointX - v23) * -vecUp.x)
+	float v51 = (((flStartPointX - v23) * -vecUp.x)
 		+ ((flStartPointY - v22) * -vecUp.y))
 		+ ((flStartPointZ - v24) * -vecUp.z);
 
-	float fPlanes[6];
-	fPlanes[0] = v39;
-	fPlanes[1] = v41;
-	fPlanes[2] = v21;
-	fPlanes[3] = v45;
-	fPlanes[4] = v47;
-	fPlanes[5] = v51;
+	float fPlanes[6 * 4];
+
+	// Forward plane
+	fPlanes[(0 * 4) + 0] = vecForward.x;
+	fPlanes[(0 * 4) + 1] = vecForward.y;
+	fPlanes[(0 * 4) + 2] = vecForward.z;
+	fPlanes[(0 * 4) + 3] = v37;
+
+	fPlanes[(1 * 4) + 0] = -vecForward.x;
+	fPlanes[(1 * 4) + 1] = -vecForward.y;
+	fPlanes[(1 * 4) + 2] = -vecForward.z;
+	fPlanes[(1 * 4) + 3] = v39;
+
+	// Up plane
+	fPlanes[(2 * 4) + 0] = vecUp.x;
+	fPlanes[(2 * 4) + 1] = vecUp.y;
+	fPlanes[(2 * 4) + 2] = vecUp.z;
+	fPlanes[(2 * 4) + 3] = v47;
+
+	fPlanes[(3 * 4) + 0] = -vecUp.x;
+	fPlanes[(3 * 4) + 1] = -vecUp.y;
+	fPlanes[(3 * 4) + 2] = -vecUp.z;
+	fPlanes[(3 * 4) + 3] = v51;
+	
+	// Right plane
+	fPlanes[(4 * 4) + 0] = vecRight.x;
+	fPlanes[(4 * 4) + 1] = vecRight.y;
+	fPlanes[(4 * 4) + 2] = vecRight.z;
+	fPlanes[(4 * 4) + 3] = v41;
+
+	fPlanes[(5 * 4) + 0] = -vecRight.x;
+	fPlanes[(5 * 4) + 1] = -vecRight.y;
+	fPlanes[(5 * 4) + 2] = -vecRight.z;
+	fPlanes[(5 * 4) + 3] = v45;
 
 	CPolyhedron *pPolyhedron = GeneratePolyhedronFromPlanes( fPlanes, 6, 0.0 );
 	if (!pPolyhedron)

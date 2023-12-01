@@ -1655,16 +1655,16 @@ void PortalPhysFrame(float deltaTime) //small wrapper for PhysFrame that simulat
 {
 	CPortalSimulator::PrePhysFrame();
 
-	if (sv_fullsyncclones.GetBool())
+	if( sv_fullsyncclones.GetBool() )
 		CPhysicsShadowClone::FullSyncAllClones();
 
-	g_Collisions.BufferTouchEvents(true);
+	g_Collisions.BufferTouchEvents( true );
 
-	PhysFrame(deltaTime);
+	PhysFrame( deltaTime );
 
 	g_Collisions.PortalPostSimulationFrame();
 
-	g_Collisions.BufferTouchEvents(false);
+	g_Collisions.BufferTouchEvents( false );
 	g_Collisions.FrameUpdate();
 
 	CPortalSimulator::PostPhysFrame();
