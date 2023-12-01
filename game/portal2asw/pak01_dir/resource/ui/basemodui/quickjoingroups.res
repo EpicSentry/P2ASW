@@ -19,7 +19,7 @@
 		"Font"					"DefaultMedium"
 		"fgcolor_override"		"255 255 255 255"
 		
-		"style"						"AlienSwarmMenuButtonSmall"
+		"style"						"MainMenuSmallButton"
 		"command"					"GroupServer_"
 		"ActivationType"			"1"				
 		"FocusDisabledBorderSize"	"1"				

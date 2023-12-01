@@ -9,7 +9,7 @@
 		"zpos"					"-1"
 		"wide"					"180" [$ENGLISH]
 		"wide"					"270" [!$ENGLISH]
-		"tall"					"85" [$X360]
+		"tall"					"85" [$GAMECONSOLE]
 		"tall"					"105" [$WIN32]
 		"visible"				"1"
 		"enabled"				"1"
@@ -56,7 +56,7 @@
 		"wrap"					"1"
 		"navUp"					"BtnQuickMatch"
 		"navDown"				"BtnPlayScavengeWithFriends"
-		"labelText"				"#L4D360UI_CustomMatch"	[$X360]
+		"labelText"				"#L4D360UI_CustomMatch"	[$GAMECONSOLE]
 		"labelText"				"#L4D360UI_MainMenu_PlayOnline" [$WIN32]
 		"tooltiptext"			"#L4D360UI_MainMenu_PlayScavengeWithAnyone_Tip"
 		"disabled_tooltiptext"	"#L4D360UI_MainMenu_PlayScavengeWithAnyone_Tip_Disabled"
@@ -121,7 +121,7 @@
 		"autoResize"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"		[$WIN32]
-		"visible"				"0"		[$X360]
+		"visible"				"0"		[$GAMECONSOLE]
 		"enabled"				"1"
 		"tabPosition"			"0"
 		"wrap"					"1"

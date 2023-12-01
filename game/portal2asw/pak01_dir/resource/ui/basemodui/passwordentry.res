@@ -81,7 +81,7 @@
 		"tall"					"20"
 		"autoResize"			"0"
 		"pinCorner"				"0"
-		"visible"				"0" [$X360]
+		"visible"				"0" [$GAMECONSOLE]
 		"enabled"				"1"
 		"tabPosition"			"0"
 		"labelText"				"#GameUI_OK"
@@ -99,7 +99,7 @@
 		"tall"					"20"
 		"autoResize"			"0"
 		"pinCorner"				"0"
-		"visible"				"0" [$X360]
+		"visible"				"0" [$GAMECONSOLE]
 		"enabled"				"1"
 		"tabPosition"			"0"
 		"labelText"				"#GameUI_Cancel"

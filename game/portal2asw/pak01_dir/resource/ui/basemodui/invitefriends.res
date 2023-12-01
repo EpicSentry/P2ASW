@@ -7,7 +7,7 @@
 		"xpos"			"c-250"
 		"ypos"			"c-150"
 		"wide"			"500"
-		"tall"			"300" [$X360]
+		"tall"			"300" [$GAMECONSOLE]
 		"tall"			"325" [$WIN32]
 		"autoResize"		"0"
 		"pinCorner"		"0"

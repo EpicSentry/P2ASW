@@ -7,7 +7,7 @@
 		"xpos"							"0"
 		"ypos"							"0"
 		"wide"							"f0"
-		"tall"							"375"  [$X360]
+		"tall"							"375"  [$GAMECONSOLE]
 		"tall"							"450"  [$WIN32]
 		"autoResize"					"0"
 		"pinCorner"						"0"
@@ -55,7 +55,7 @@
 		"ControlName"			"Label"
 		"fieldName"				"LblMapName"
 		"xpos"					"c-245" [$WIN32]
-		"xpos"					"c-242" [$X360]
+		"xpos"					"c-242" [$GAMECONSOLE]
 		"ypos"					"105"
 		"zpos"					"2"
 		"wide"					"139"
@@ -70,7 +70,7 @@
 		"Font"					"Default"
 	}
 	
-	"ImgLeftMapArrow" [$X360]
+	"ImgLeftMapArrow" [$GAMECONSOLE]
 	{
 		"ControlName"			"ImagePanel"
 		"fieldName"				"ImgLeftMapArrow"
@@ -88,7 +88,7 @@
 		"scaleImage"			"1"
 	}
 	
-	"ImgRightMapArrow" [$X360]
+	"ImgRightMapArrow" [$GAMECONSOLE]
 	{
 		"ControlName"			"ImagePanel"
 		"fieldName"				"ImgRightMapArrow"
@@ -111,7 +111,7 @@
 		"ControlName"			"ImagePanel"
 		"fieldName"				"SearchingIcon"
 		"xpos"					"c214"
-		"ypos"					"45"	[$X360]
+		"ypos"					"45"	[$GAMECONSOLE]
 		"ypos"					"25"	[$WIN32]
 		"zpos"					"2"
 		"wide"					"32"
@@ -121,7 +121,7 @@
 		"enabled"				"1"
 		"tabPosition"			"0"
 		"scaleImage"			"1"
-		"image"					"common/swarm_cycle"
+		"image"					"spinner"
 	}
 		
 	// Column headers
@@ -130,8 +130,8 @@
 	{
 		"ControlName"			"Label"
 		"fieldName"				"LblRankHeader"
-		"xpos"					"c-94"	[$X360HIDEF || $WIN32]
-		"xpos"					"c-104"	[$X360LODEF]
+		"xpos"					"c-94"	[$GAMECONSOLEHIDEF || $WIN32]
+		"xpos"					"c-104"	[$GAMECONSOLELODEF]
 		"ypos"					"105"
 		"zpos"					"2"
 		"wide"					"100"
@@ -150,8 +150,8 @@
 	{
 		"ControlName"			"Label"
 		"fieldName"				"LblGamerTagHeader"
-		"xpos"					"c26"	[$X360HIDEF || $WIN32]
-		"xpos"					"c16"	[$X360LODEF]
+		"xpos"					"c26"	[$GAMECONSOLEHIDEF || $WIN32]
+		"xpos"					"c16"	[$GAMECONSOLELODEF]
 		"ypos"					"105"
 		"zpos"					"2"
 		"wide"					"200"
@@ -170,8 +170,8 @@
 	{
 		"ControlName"			"Label"
 		"fieldName"				"LblTimeHeader"
-		"xpos"					"c220"	[$X360HIDEF || $WIN32]
-		"xpos"					"c210"	[$X360LODEF]
+		"xpos"					"c220"	[$GAMECONSOLEHIDEF || $WIN32]
+		"xpos"					"c210"	[$GAMECONSOLELODEF]
 		"ypos"					"105"
 		"zpos"					"2"
 		"wide"					"100"
@@ -186,12 +186,12 @@
 		"Font"					"Default"
 	}
 	
-	"ImgTopDivider" [$X360]
+	"ImgTopDivider" [$GAMECONSOLE]
 	{
 		"ControlName"			"Panel"
 		"fieldName"				"ImgTopDivider"
-		"xpos"					"c-57"		[$X360HIDEF]
-		"xpos"					"c-67"		[$X360LODEF]
+		"xpos"					"c-57"		[$GAMECONSOLEHIDEF]
+		"xpos"					"c-67"		[$GAMECONSOLELODEF]
 		"ypos"					"128"
 		"zpos"					"1"
 		"wide"					"323"
@@ -249,11 +249,11 @@
 		"fieldName"						"LblNoEntriesFound"
 		"xpos"							"c-50" [$WIN32]
 		"ypos"							"130"  [$WIN32]
-		"xpos"							"c-50" [$X360]
-		"ypos"							"130"  [$X360]
+		"xpos"							"c-50" [$GAMECONSOLE]
+		"ypos"							"130"  [$GAMECONSOLE]
 		"wide"							"290"
 		"tall"							"60" [$WIN32]
-		"tall"							"60"  [$X360]
+		"tall"							"60"  [$GAMECONSOLE]
 		"zpos"							"2"
 		"autoResize"					"0"
 		"pinCorner"						"0"
@@ -270,15 +270,15 @@
 	{
 		"ControlName"			"GenericPanelList"
 		"fieldName"				"PanelList"
-		"xpos"					"c-60"		[$X360HIDEF || $WIN32]
-		"xpos"					"c-70"		[$X360LODEF]
+		"xpos"					"c-60"		[$GAMECONSOLEHIDEF || $WIN32]
+		"xpos"					"c-70"		[$GAMECONSOLELODEF]
 		"ypos"					"126"	
 		"zpos"					"0"
 		"wide"					"340"		[$WIN32]
-		"wide"					"330"		[$X360]
+		"wide"					"330"		[$GAMECONSOLE]
 		"tall"					"290"		[$WIN32]
-		"tall"					"228"		[$X360LODEF]
-		"tall"					"244"		[$X360HIDEF]
+		"tall"					"228"		[$GAMECONSOLELODEF]
+		"tall"					"244"		[$GAMECONSOLEHIDEF]
 		"autoResize"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"
@@ -292,14 +292,14 @@
 		"navDown"				"DrpCreateGame"		[$WIN32]
 	}
 	
-	"ImgBottomDivider" [$X360]
+	"ImgBottomDivider" [$GAMECONSOLE]
 	{
 		"ControlName"			"Panel"
 		"fieldName"				"ImgBottomDivider"
-		"xpos"					"c-57"		[$X360HIDEF]
-		"xpos"					"c-67"		[$X360LODEF]
-		"ypos"					"328"		[$X360LODEF]
-		"ypos"					"345"		[$X360HIDEF]
+		"xpos"					"c-57"		[$GAMECONSOLEHIDEF]
+		"xpos"					"c-67"		[$GAMECONSOLELODEF]
+		"ypos"					"328"		[$GAMECONSOLELODEF]
+		"ypos"					"345"		[$GAMECONSOLEHIDEF]
 		"zpos"					"1"
 		"wide"					"323"
 		"tall"					"1"
@@ -311,12 +311,12 @@
 		"bgcolor_override"		"80 80 80 255"
 	}
 	
-	"LblLeftTriggerIcon" [$X360]
+	"LblLeftTriggerIcon" [$GAMECONSOLE]
 	{
 		"ControlName"					"Label"
 		"fieldName"						"LblLeftTriggerIcon"
-		"xpos"							"c-288"		[!$ENGLISH && $X360LODEF]
-		"xpos"							"c-285"		[!$ENGLISH && $X360HIDEF]
+		"xpos"							"c-288"		[!$ENGLISH && $GAMECONSOLELODEF]
+		"xpos"							"c-285"		[!$ENGLISH && $GAMECONSOLEHIDEF]
 		"xpos"							"c-254"		[$ENGLISH]
 		"ypos"							"c50"
 		"wide"							"50"
@@ -331,12 +331,12 @@
 		"labelText"						"#GameUI_Icons_L_TRIGGER"
 	}
 	
-	"LblJumpToTop" [$X360]
+	"LblJumpToTop" [$GAMECONSOLE]
 	{
 		"ControlName"					"Label"
 		"fieldName"						"LblJumpToTop"
-		"xpos"							"c-262"		[!$ENGLISH && $X360LODEF]
-		"xpos"							"c-260"		[!$ENGLISH && $X360HIDEF]
+		"xpos"							"c-262"		[!$ENGLISH && $GAMECONSOLELODEF]
+		"xpos"							"c-260"		[!$ENGLISH && $GAMECONSOLEHIDEF]
 		"xpos"							"c-228"		[$ENGLISH]
 		"ypos"							"c50"
 		"wide"							"250"
@@ -352,12 +352,12 @@
 		"Font"							"DefaultBold"
 	}
 	
-	"LblRightTriggerIcon" [$X360]
+	"LblRightTriggerIcon" [$GAMECONSOLE]
 	{
 		"ControlName"					"Label"
 		"fieldName"						"LblRightTriggerIcon"
-		"xpos"							"c-288"		[!$ENGLISH && $X360LODEF]
-		"xpos"							"c-285"		[!$ENGLISH && $X360HIDEF]
+		"xpos"							"c-288"		[!$ENGLISH && $GAMECONSOLELODEF]
+		"xpos"							"c-285"		[!$ENGLISH && $GAMECONSOLEHIDEF]
 		"xpos"							"c-254"		[$ENGLISH]
 		"ypos"							"c78"
 		"wide"							"50"
@@ -372,12 +372,12 @@
 		"labelText"						"#GameUI_Icons_R_TRIGGER"
 	}
 	
-	"LblJumpToMe" [$X360]
+	"LblJumpToMe" [$GAMECONSOLE]
 	{
 		"ControlName"					"Label"
 		"fieldName"						"LblJumpToMe"
-		"xpos"							"c-262"		[!$ENGLISH && $X360LODEF]
-		"xpos"							"c-260"		[!$ENGLISH && $X360HIDEF]
+		"xpos"							"c-262"		[!$ENGLISH && $GAMECONSOLELODEF]
+		"xpos"							"c-260"		[!$ENGLISH && $GAMECONSOLEHIDEF]
 		"xpos"							"c-228"		[$ENGLISH]
 		"ypos"							"c78"
 		"wide"							"200"
@@ -399,7 +399,7 @@
 		"fieldName"						"ImgGoldMedal"
 		"xpos"							"c-244"
 		"ypos"							"c-12"	[$WIN32]
-		"ypos"							"c-10"	[$X360]
+		"ypos"							"c-10"	[$GAMECONSOLE]
 		"zpos"							"2"
 		"wide"							"20"
 		"tall"							"20"
@@ -417,7 +417,7 @@
 		"fieldName"						"LblGoldMedalTime"
 		"xpos"							"c-220"
 		"ypos"							"c-12"	[$WIN32]
-		"ypos"							"c-10"	[$X360]
+		"ypos"							"c-10"	[$GAMECONSOLE]
 		"wide"							"50"
 		"tall"							"20"
 		"zpos"							"2"
@@ -437,7 +437,7 @@
 		"fieldName"						"ImgSilverMedal"
 		"xpos"							"c-244"
 		"ypos"							"c5"	[$WIN32]
-		"ypos"							"c7"	[$X360]
+		"ypos"							"c7"	[$GAMECONSOLE]
 		"zpos"							"2"
 		"wide"							"20"
 		"tall"							"20"
@@ -455,7 +455,7 @@
 		"fieldName"						"LblSilverMedalTime"
 		"xpos"							"c-220"
 		"ypos"							"c5"	[$WIN32]
-		"ypos"							"c7"	[$X360]
+		"ypos"							"c7"	[$GAMECONSOLE]
 		"wide"							"50"
 		"tall"							"20"
 		"zpos"							"2"
@@ -475,7 +475,7 @@
 		"fieldName"						"ImgBronzeMedal"
 		"xpos"							"c-244"
 		"ypos"							"c22"	[$WIN32]
-		"ypos"							"c24"	[$X360]
+		"ypos"							"c24"	[$GAMECONSOLE]
 		"zpos"							"2"
 		"wide"							"20"
 		"tall"							"20"
@@ -493,7 +493,7 @@
 		"fieldName"						"LblBronzeMedalTime"
 		"xpos"							"c-220"
 		"ypos"							"c22"	[$WIN32]
-		"ypos"							"c24"	[$X360]
+		"ypos"							"c24"	[$GAMECONSOLE]
 		"wide"							"50"
 		"tall"							"20"
 		"zpos"							"2"
@@ -543,7 +543,7 @@
 			"disabled_tooltiptext"			""
 			"style"							"DropDownButton"
 			"command"						"FlmMissionSurvival"
-			"ActivationType"				"1" [$X360]
+			"ActivationType"				"1" [$GAMECONSOLE]
 		}
 	}
 	
@@ -596,7 +596,7 @@
 			"disabled_tooltiptext"			""
 			"style"							"DropDownButton"
 			"command"						""
-			"ActivationType"				"1" [$X360]
+			"ActivationType"				"1" [$GAMECONSOLE]
 		}
 	}
 	

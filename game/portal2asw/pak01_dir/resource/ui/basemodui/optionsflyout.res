@@ -8,14 +8,83 @@
 		"ypos"				"0"
 		"zpos"				"-1"
 		"wide"				"156"
-		"tall"				"65" [$X360]
-		"tall"				"145" [$WIN32]
+		"tall"				"65" [$GAMECONSOLE]
+		"tall"				"125" [$WIN32]
 		"visible"			"1"
 		"enabled"			"1"
 		"paintbackground"	"1"
 		"paintborder"		"1"
 	}
 
+	"BtnAudioVideo"	[$GAMECONSOLE]
+	{
+		"ControlName"			"BaseModHybridButton"
+		"fieldName"				"BtnAudioVideo"
+		"xpos"					"0"
+		"ypos"					"0"
+		"wide"					"150"
+		"tall"					"20"
+		"autoResize"			"1"
+		"pinCorner"				"0"
+		"visible"				"1"
+		"enabled"				"1"
+		"tabPosition"			"0"
+		"navUp"					"BtnStorage"
+		"navDown"				"BtnController"
+		"tooltiptext"			"#L4D360UI_Options_AudioVideo"
+		"disabled_tooltiptext"	"#L4D360UI_Options_AudioVideo_Disabled"
+		"labelText"				"#L4D360UI_AudioVideo"
+		"style"					"FlyoutMenuButton"
+		"command"				"AudioVideo"
+	}
+	
+	"BtnController"	[$GAMECONSOLE]
+	{
+		"ControlName"			"BaseModHybridButton"
+		"fieldName"				"BtnController"
+		"xpos"					"0"
+		"ypos"					"20"
+		"wide"					"150"
+		"tall"					"20"
+		"autoResize"			"1"
+		"pinCorner"				"0"
+		"visible"				"1"
+		"enabled"				"1"
+		"tabPosition"			"0"
+		"proportionalToParent"	"1"
+		"navUp"					"BtnAudioVideo"
+		"navDown"				"BtnStorage"
+		"tooltiptext"			"#L4D360UI_Options_Controller"
+		"disabled_tooltiptext"	"#L4D360UI_Options_Controller_Disabled"
+		"labelText"				"#L4D360UI_Controller"
+		"style"					"FlyoutMenuButton"
+		"command"				"Controller"
+	}
+
+	"BtnStorage"	[$GAMECONSOLE]
+	{
+		"ControlName"			"BaseModHybridButton"
+		"fieldName"				"BtnStorage"
+		"xpos"					"0"
+		"ypos"					"40"
+		"wide"					"150"
+		"tall"					"20"
+		"autoResize"			"1"
+		"pinCorner"				"0"
+		"visible"				"1"
+		"enabled"				"1"
+		"EnableCondition"		"Never" [$DEMO]
+		"tabPosition"			"0"
+		"proportionalToParent"	"1"
+		"navUp"					"BtnController"
+		"navDown"				"BtnAudioVideo"
+		"tooltiptext"			"#L4D360UI_Options_Storage"
+		"disabled_tooltiptext"	"#L4D360UI_Options_Storage_Disabled"
+		"labelText"				"#L4D360UI_Storage"
+		"style"					"FlyoutMenuButton"
+		"command"				"Storage"
+	}
+	
 	"BtnVideo"	[$WIN32]
 	{
 		"ControlName"			"BaseModHybridButton"
@@ -23,7 +92,7 @@
 		"xpos"					"0"
 		"ypos"					"0"
 		"wide"					"150"
-		"tall"					"24"
+		"tall"					"20"
 		"autoResize"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"
@@ -36,15 +105,15 @@
 		"style"					"FlyoutMenuButton"
 		"command"				"Video"
 	}
-
+	
 	"BtnBrightness"	[$WIN32]
 	{
 		"ControlName"			"BaseModHybridButton"
 		"fieldName"				"BtnBrightness"
 		"xpos"					"0"
-		"ypos"					"24"
+		"ypos"					"20"
 		"wide"					"150"
-		"tall"					"24"
+		"tall"					"20"
 		"autoResize"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"
@@ -58,15 +127,15 @@
 		"style"					"FlyoutMenuButton"
 		"command"				"Brightness"
 	}
-
+	
 	"BtnAudio"	[$WIN32]
 	{
 		"ControlName"			"BaseModHybridButton"
 		"fieldName"				"BtnAudio"
 		"xpos"					"0"
-		"ypos"					"48"
+		"ypos"					"40"
 		"wide"					"150"
-		"tall"					"24"
+		"tall"					"20"
 		"autoResize"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"
@@ -79,15 +148,15 @@
 		"style"					"FlyoutMenuButton"
 		"command"				"Audio"
 	}
-
+	
 	"BtnController"	[$WIN32]
 	{
 		"ControlName"			"BaseModHybridButton"
 		"fieldName"				"BtnController"
 		"xpos"					"0"
-		"ypos"					"72"
+		"ypos"					"60"
 		"wide"					"150"
-		"tall"					"24"
+		"tall"					"20"
 		"autoResize"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"
@@ -101,15 +170,15 @@
 		"style"					"FlyoutMenuButton"
 		"command"				"KeyboardMouse"
 	}
-
+	
 	"BtnMultiplayer"	[$WIN32]
 	{
 		"ControlName"			"BaseModHybridButton"
 		"fieldName"				"BtnMultiplayer"
 		"xpos"					"0"
-		"ypos"					"96"
+		"ypos"					"80"
 		"wide"					"150"
-		"tall"					"24"
+		"tall"					"20"
 		"autoResize"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"
@@ -123,15 +192,15 @@
 		"style"					"FlyoutMenuButton"
 		"command"				"MultiplayerSettings"
 	}
-
+	
 	"BtnCloud"	[$WIN32]
 	{
 		"ControlName"			"BaseModHybridButton"
 		"fieldName"				"BtnCloud"
 		"xpos"					"0"
-		"ypos"					"120"
+		"ypos"					"100"
 		"wide"					"150"
-		"tall"					"24"
+		"tall"					"20"
 		"autoResize"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"

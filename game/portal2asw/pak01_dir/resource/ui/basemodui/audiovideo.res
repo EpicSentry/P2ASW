@@ -6,26 +6,24 @@
 		"fieldName"			"AudioVideo"
 		"xpos"				"0"
 		"ypos"				"0"
-		"wide"				"f0"
-		"tall"				"330"	[$WIN32]
-		// matches the audio localizations to enable the extra height for language dropdown
-		"tall"				"330"	[$X360 && !( $FRENCH || $GERMAN || $RUSSIAN || $SPANISH )]
-		"tall"				"350"	[$X360 && ( $FRENCH || $GERMAN || $RUSSIAN || $SPANISH )]
+		"wide"				"0"
+		"tall"				"0"
 		"autoResize"		"0"
 		"pinCorner"			"0"
 		"visible"			"1"
 		"enabled"			"1"
 		"tabPosition"		"0"
+		"dialogstyle"		"1"
 	}
 		
 	"SldBrightness"
 	{
 		"ControlName"			"SliderControl"
 		"fieldName"				"SldBrightness"
-		"xpos"					"c-175"
-		"ypos"					"110"
+		"xpos"					"0"
+		"ypos"					"25"
 		"zpos"					"3"
-		"wide"					"350"
+		"wide"					"0"
 		"tall"					"20"
 		"visible"				"1"
 		"enabled"				"1"
@@ -48,191 +46,80 @@
 			"xpos"					"0"
 			"ypos"					"0"
 			"zpos"					"0"
-			"wide"					"350"
-			"tall"					"20"
+			"wide"					"0"
+			"tall"					"0"
 			"autoResize"			"1"
 			"pinCorner"				"0"
 			"visible"				"1"
 			"enabled"				"1"
-			"tabPosition"			"1"
+			"tabPosition"			"0"
 			"labelText"				"#L4D360UI_VideoOptions_Brightness"
-			"tooltiptext"			"#L4D360UI_VideoOptions_Tooltip_Brightness"
-			"disabled_tooltiptext"	"#L4D360UI_VideoOptions_Tooltip_Brightness_Disabled"
-			"style"					"DefaultButton"
+			"style"					"LeftDialogButton"
 			"command"				""
 			"ActivationType"		"1"
-			"OnlyActiveUser"		"1"
 			"usablePlayerIndex"		"nobody"
 		}
 	}
 
 	"DrpColorMode"
 	{
-		"ControlName"		"DropDownMenu"
+		"ControlName"		"BaseModHybridButton"
 		"fieldName"			"DrpColorMode"
-		"xpos"				"c-175"
-		"ypos"				"135"
+		"xpos"				"0"
+		"ypos"				"50"
 		"zpos"				"1"
-		"wide"				"350"
+		"wide"				"0"
 		"tall"				"20"
-		"visible"			"1"
+		"visible"			"1" [!$PS3]
+		"visible"			"0" [$PS3]
 		"enabled"			"1"
 		"tabPosition"		"0"
 		"navUp"				"SldBrightness"
-		"navDown"			"SldFilmGrain"
-				
-		//button and label
-		"BtnDropButton"
+		"navDown"			"DrpSplitScreenDirection"
+		"labelText"			"#L4D360UI_VideoOptions_ColorMode"
+		"style"				"DialogListButton"
+		"list"
 		{
-			"ControlName"			"BaseModHybridButton"
-			"fieldName"				"BtnDropButton"
-			"xpos"					"0"
-			"ypos"					"0"
-			"zpos"					"2"
-			"wide"					"350"
-			"wideatopen"			"280"	[$X360 && !$X360WIDE]
-			"tall"					"20"
-			"autoResize"			"1"
-			"pinCorner"				"0"
-			"visible"				"1"
-			"enabled"				"1"
-			"tabPosition"			"1"
-			"labelText"				"#L4D360UI_VideoOptions_ColorMode"
-			"tooltiptext"			"#L4D360UI_VideoOptions_Tooltip_ColorMode"
-			"disabled_tooltiptext"	"#L4D360UI_VideoOptions_Tooltip_ColorMode_Disabled"
-			"style"					"DropDownButton"
-			"command"				"FlmColorMode"
-			"ActivationType"		"1"	
-			"OnlyActiveUser"		"1"
+			"#L4D360UI_ColorMode_Television"	"#L4D360UI_ColorMode_Television"
+			"#L4D360UI_ColorMode_LCD"			"#L4D360UI_ColorMode_LCD"
 		}
 	}
-	
-	//flyouts		
-	"FlmColorMode"
-	{
-		"ControlName"			"FlyoutMenu"
-		"fieldName"				"FlmColorMode"
-		"visible"				"0"
-		"wide"					"0"
-		"tall"					"0"
-		"zpos"					"4"
-		"InitialFocus"			"BtnTelevision"
-		"ResourceFile"			"resource/UI/basemodui/DropDownColorMode.res"
-		"OnlyActiveUser"		"1"
-	}
-	
-	"SldFilmGrain"
-	{
-		"ControlName"			"SliderControl"
-		"fieldName"				"SldFilmGrain"
-		"xpos"					"c-175"
-		"ypos"					"160"
-		"zpos"					"3"
-		"wide"					"350"
-		"tall"					"20"
-		"visible"				"1"
-		"enabled"				"1"
-		"usetitlesafe"			"0"
-		"tabPosition"			"0"
-		"minValue"				"0.0"
-		"maxValue"				"3.0"
-		"stepSize"				"0.2"
-		"navUp"					"DrpColorMode"
-		"navDown"				"DrpSplitScreenDirection"
-		"conCommand"			"mat_grain_scale_override"
-		"usetitlesafe"			"0"
-		"inverseFill"			"0"
 		
-		//button and label
-		"BtnDropButton"
-		{
-			"ControlName"			"BaseModHybridButton"
-			"fieldName"				"BtnDropButton"
-			"xpos"					"0"
-			"ypos"					"0"
-			"zpos"					"0"
-			"wide"					"350"
-			"tall"					"20"
-			"autoResize"			"1"
-			"pinCorner"				"0"
-			"visible"				"1"
-			"enabled"				"1"
-			"tabPosition"			"1"
-			"labelText"				"#L4D360UI_VideoOptions_FilmGrain"
-			"tooltiptext"			"#L4D360UI_VideoOptions_Tooltip_FilmGrain"
-			"disabled_tooltiptext"	"#L4D360UI_VideoOptions_Tooltip_FilmGrain_Disabled"
-			"style"					"DefaultButton"
-			"command"				""
-			"ActivationType"		"1"	
-			"OnlyActiveUser"		"1"
-			"usablePlayerIndex"		"nobody"
-		}
-	}
-	
 	"DrpSplitScreenDirection"
 	{
-		"ControlName"		"DropDownMenu"
+		"ControlName"		"BaseModHybridButton"
 		"fieldName"			"DrpSplitScreenDirection"
-		"xpos"				"c-175"
-		"ypos"				"185"
+		"xpos"				"0"
+		"ypos"				"75" [!$PS3]
+		"ypos"				"50" [$PS3]
 		"zpos"				"1"
-		"wide"				"350"
+		"wide"				"0"
 		"tall"				"20"
 		"visible"			"1"
 		"enabled"			"1"
 		"usetitlesafe"		"0"
 		"tabPosition"		"0"
-		"navUp"				"SldFilmGrain"
+		"navUp"				"DrpColorMode"
 		"navDown"			"SldGameVolume"
-				
-		//button and label
-		"BtnDropButton"
+		"labelText"			"#L4D360UI_VideoOptions_SplitScreenDirection"
+		"style"				"DialogListButton"
+		"list"
 		{
-			"ControlName"			"BaseModHybridButton"
-			"fieldName"				"BtnDropButton"
-			"xpos"					"0"
-			"ypos"					"0"
-			"zpos"					"0"
-			"wide"					"350"
-			"wideatopen"			"280"	[$X360 && !$X360WIDE]
-			"tall"					"20"
-			"autoResize"			"1"
-			"pinCorner"				"0"
-			"visible"				"1"
-			"enabled"				"1"
-			"tabPosition"			"1"
-			"labelText"				"#L4D360UI_VideoOptions_SplitScreenDirection"
-			"tooltiptext"			"#L4D360UI_VideoOptions_Tooltip_SplitScreenDirection"
-			"disabled_tooltiptext"	"#L4D360UI_VideoOptions_Tooltip_SplitScreenDirection_Disabled"
-			"style"					"DropDownButton"
-			"command"				"FlmSplitScreenDirection"
-			"ActivationType"		"1"
-			"OnlyActiveUser"		"1"
+			"#L4D360UI_SplitScreenDirection_Default"	"#L4D360UI_SplitScreenDirection_Default"
+			"#L4D360UI_SplitScreenDirection_Horizontal"	"#L4D360UI_SplitScreenDirection_Horizontal"
+			"#L4D360UI_SplitScreenDirection_Vertical"	"#L4D360UI_SplitScreenDirection_Vertical"
 		}
 	}
-	
-	//flyouts		
-	"FlmSplitScreenDirection"
-	{
-		"ControlName"			"FlyoutMenu"
-		"fieldName"				"FlmSplitScreenDirection"
-		"visible"				"0"
-		"wide"					"0"
-		"tall"					"0"
-		"zpos"					"4"
-		"InitialFocus"			"BtnDefault"
-		"ResourceFile"			"resource/UI/basemodui/DropDownSplitScreenDirection.res"
-		"OnlyActiveUser"		"1"
-	}
-	
+		
 	"SldGameVolume"
 	{
 		"ControlName"			"SliderControl"
 		"fieldName"				"SldGameVolume"
-		"xpos"					"c-175"
-		"ypos"					"210"
+		"xpos"					"0"
+		"ypos"					"100" [!$PS3]
+		"ypos"					"75" [$PS3]
 		"zpos"					"3"
-		"wide"					"350"
+		"wide"					"0"
 		"tall"					"20"
 		"visible"				"1"
 		"enabled"				"1"
@@ -253,20 +140,17 @@
 			"xpos"					"0"
 			"ypos"					"0"
 			"zpos"					"0"
-			"wide"					"350"
+			"wide"					"0"
 			"tall"					"20"
 			"autoResize"			"1"
 			"pinCorner"				"0"
 			"visible"				"1"
 			"enabled"				"1"
-			"tabPosition"			"1"
+			"tabPosition"			"0"
 			"labelText"				"#L4D360UI_AudioOptions_Volume"
-			"tooltiptext"			"#L4D360UI_AudioOptions_Tooltip_Volume"
-			"disabled_tooltiptext"	"#L4D360UI_AudioOptions_Tooltip_Volume_Disabled"
-			"style"					"DefaultButton"
+			"style"					"LeftDialogButton"
 			"command"				""
 			"ActivationType"		"1"
-			"OnlyActiveUser"		"1"
 			"usablePlayerIndex"		"nobody"
 		}
 	}
@@ -275,10 +159,11 @@
 	{
 		"ControlName"			"SliderControl"
 		"fieldName"				"SldMusicVolume"
-		"xpos"					"c-175"
-		"ypos"					"235"
+		"xpos"					"0"
+		"ypos"					"125" [!$PS3]
+		"ypos"					"100" [$PS3]
 		"zpos"					"3"
-		"wide"					"350"
+		"wide"					"0"
 		"tall"					"20"
 		"visible"				"1"
 		"enabled"				"1"
@@ -300,188 +185,69 @@
 			"xpos"					"0"
 			"ypos"					"0"
 			"zpos"					"0"
-			"wide"					"350"
+			"wide"					"0"
 			"tall"					"20"
 			"autoResize"			"1"
 			"pinCorner"				"0"
 			"visible"				"1"
 			"enabled"				"1"
-			"tabPosition"			"1"
+			"tabPosition"			"0"
 			"labelText"				"#L4D360UI_AudioOptions_MusicVolume"
-			"tooltiptext"			"#L4D360UI_AudioOptions_Tooltip_MusicVolume"
-			"disabled_tooltiptext"	"#L4D360UI_AudioOptions_Tooltip_MusicVolume_Disabled"
-			"style"					"DefaultButton"
+			"style"					"LeftDialogButton"
 			"command"				""
 			"ActivationType"		"1"
-			"OnlyActiveUser"		"1"
 			"usablePlayerIndex"		"nobody"
 		}
 	}
 	
 	"DrpCaptioning"
 	{
-		"ControlName"		"DropDownMenu"
+		"ControlName"		"BaseModHybridButton"
 		"fieldName"			"DrpCaptioning"
-		"xpos"				"c-175"
-		"ypos"				"260"
+		"xpos"				"0"
+		"ypos"				"150" [!$PS3]
+		"ypos"				"125" [$PS3]
 		"zpos"				"3"
-		"wide"				"350"
+		"wide"				"0"
 		"tall"				"20"
 		"visible"			"1"
 		"enabled"			"1"
 		"usetitlesafe"		"0"
 		"tabPosition"		"0"
 		"navUp"				"SldMusicVolume"
-		"navDown"			"DrpGore"
-				
-		//button and label
-		"BtnDropButton"
-		{
-			"ControlName"				"BaseModHybridButton"
-			"fieldName"					"BtnDropButton"
-			"xpos"						"0"
-			"ypos"						"0"
-			"zpos"						"0"
-			"wide"						"350"
-			"wideatopen"				"280"	[$X360 && !$X360WIDE]
-			"tall"						"20"
-			"autoResize"				"1"
-			"pinCorner"					"0"
-			"visible"					"1"
-			"enabled"					"1"
-			"tabPosition"				"1"
-			"labelText"					"#L4D360UI_AudioOptions_Caption"
-			"tooltiptext"				"#L4D360UI_AudioOptions_Tooltip_Caption"
-			"disabled_tooltiptext"		"#L4D360UI_AudioOptions_Tooltip_Caption_Disabled"
-			"style"						"DropDownButton"
-			"command"					"FlmCaption"
-			"ActivationType"			"1"
-			"OnlyActiveUser"			"1"
-		}
-	}
-	
-	//flyouts		
-	"FlmCaption"
-	{
-		"ControlName"			"FlyoutMenu"
-		"fieldName"				"FlmCaption"
-		"visible"				"0"
-		"wide"					"0"
-		"tall"					"0"
-		"zpos"					"4"
-		"InitialFocus"			"BtnOff"
-		"ResourceFile"			"resource/UI/basemodui/DropDownCaption.res"
-		"OnlyActiveUser"		"1"
-	}
-	
-	"DrpGore"
-	{
-		"ControlName"		"DropDownMenu"
-		"fieldName"			"DrpGore"
-		"xpos"				"c-175"
-		"ypos"				"285"
-		"zpos"				"1"
-		"wide"				"350"
-		"tall"				"20"
-		"visible"			"1"
-		"enabled"			"1"
-		"tabPosition"		"0"
-		"navUp"				"DrpCaptioning"
 		"navDown"			"DrpLanguage"
-				
-		//button and label
-		"BtnDropButton"
+		"labelText"			"#L4D360UI_AudioOptions_Caption"
+		"style"				"DialogListButton"
+		"list"
 		{
-			"ControlName"			"BaseModHybridButton"
-			"fieldName"				"BtnDropButton"
-			"xpos"					"0"
-			"ypos"					"0"
-			"zpos"					"2"
-			"wide"					"350"
-			"wideatopen"			"280"	[$X360 && !$X360WIDE]
-			"tall"					"20"
-			"autoResize"			"1"
-			"pinCorner"				"0"
-			"visible"				"1"
-			"enabled"				"1"
-			"tabPosition"			"1"
-			"labelText"				"#L4D360UI_VideoOptions_Gore"
-			"tooltiptext"			"#L4D360UI_VideoOptions_Tooltip_Gore"
-			"disabled_tooltiptext"	"#L4D360UI_VideoOptions_Tooltip_Gore_Disabled"
-			"style"					"DropDownButton"
-			"command"				"FlmGore"
-			"ActivationType"		"1"	
-			"OnlyActiveUser"		"1"
+			"#L4D360UI_AudioOptions_CaptionOff"			"#L4D360UI_AudioOptions_CaptionOff"
+			"#L4D360UI_AudioOptions_CaptionSubtitles"	"#L4D360UI_AudioOptions_CaptionSubtitles"
+			"#L4D360UI_AudioOptions_CaptionOn"			"#L4D360UI_AudioOptions_CaptionOn"
 		}
 	}
-	
-	//flyouts		
-	"FlmGore"
-	{
-		"ControlName"			"FlyoutMenu"
-		"fieldName"				"FlmGore"
-		"visible"				"0"
-		"wide"					"0"
-		"tall"					"0"
-		"zpos"					"4"
-		"InitialFocus"			"BtnGoreHigh"
-		"ResourceFile"			"resource/UI/basemodui/DropDownGore.res"
-		"OnlyActiveUser"		"1"
-	}
-	
+		
 	"DrpLanguage"
 	{
-		"ControlName"			"DropDownMenu"
+		"ControlName"			"BaseModHybridButton"
 		"fieldName"				"DrpLanguage"
-		"xpos"					"c-175"
-		"ypos"					"310"
+		"xpos"					"0"
+		"ypos"					"175" [!$PS3]
+		"ypos"					"150" [$PS3]
 		"zpos"					"3"
-		"wide"					"350"
+		"wide"					"0"
 		"tall"					"20"
 		"visible"				"1"
 		"enabled"				"1"
 		"usetitlesafe"			"0"
 		"tabPosition"			"0"
-		"navUp"					"DrpGore"
+		"navUp"					"DrpCaptioning"
 		"navDown"				"SldBrightness"
-				
-		//button and label
-		"BtnDropButton"
+		"labelText"				"#L4D360UI_AudioOptions_Language"
+		"style"					"DialogListButton"
+		"list"
 		{
-			"ControlName"				"BaseModHybridButton"
-			"fieldName"					"BtnDropButton"
-			"xpos"						"0"
-			"ypos"						"0"
-			"zpos"						"0"
-			"wide"						"350"
-			"wideatopen"				"280"	[$X360 && !$X360WIDE]
-			"tall"						"20"
-			"autoResize"				"1"
-			"pinCorner"					"0"
-			"visible"					"1"
-			"enabled"					"1"
-			"tabPosition"				"1"
-			"labelText"					"#L4D360UI_AudioOptions_Language"
-			"tooltiptext"				"#L4D360UI_AudioOptions_Tooltip_Language"
-			"disabled_tooltiptext"		"#L4D360UI_AudioOptions_Tooltip_Language_Disabled"
-			"style"						"DropDownButton"
-			"command"					"FlmLanguage"
-			"ActivationType"			"1"
-			"OnlyActiveUser"			"1"
+			"#GameUI_Language_English"	"CurrentXBXLanguage"
+			"#GameUI_Language_English"	"CurrentXBXLanguage_English"
 		}
-	}
-
-	//flyouts		
-	"FlmLanguage"
-	{
-		"ControlName"			"FlyoutMenu"
-		"fieldName"				"FlmLanguage"
-		"visible"				"0"
-		"wide"					"0"
-		"tall"					"0"
-		"zpos"					"4"
-		"InitialFocus"			"BtnOtherLanguage"
-		"ResourceFile"			"resource/UI/basemodui/DropDownLanguage.res"
-		"OnlyActiveUser"		"1"
 	}
 }

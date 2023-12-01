@@ -27,11 +27,6 @@
 		"password"	"bool"		// true if password protected
 	}
 	
-	"server_pre_shutdown" 		// server is about to be shut down	
-	{
-		"reason"	"string"	// reason why server is about to be shut down
-	}
-	
 	"server_shutdown" 			// server shut down	
 	{
 		"reason"	"string"	// reason why server was shut down
@@ -95,12 +90,6 @@
 	"player_activate"
 	{
 		"userid"	"short"		// user ID on server
-	}
-	
-	"player_connect_full"			// player has sent final message in the connection sequence
-	{
-		"userid"	"short"		// user ID on server
-		"index"		"byte"		// player slot (entity index-1)
 	}
 
 	"player_say"

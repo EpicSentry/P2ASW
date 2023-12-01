@@ -66,9 +66,9 @@
 		"wrap"					"1"
 		"navUp"					"BtnPlayCoopWithAnyone"
 		"navDown"				"BtnPlaySolo"
-		"labelText"				"#L4D360UI_MainMenu_PlayCoopWithSystemLink" [$X360]
+		"labelText"				"#L4D360UI_MainMenu_PlayCoopWithSystemLink" [$GAMECONSOLE]
 		"labelText"				"#L4D360UI_MainMenu_PlayCoopLAN" [$WIN32]
-		"tooltiptext"			"#L4D360UI_MainMenu_PlayCoopWithSystemLink_Tip" [$X360]
+		"tooltiptext"			"#L4D360UI_MainMenu_PlayCoopWithSystemLink_Tip" [$GAMECONSOLE]
 		"tooltiptext"			"#L4D360UI_MainMenu_PlayCoopLAN_Tip" [$WIN32]
 		"style"					"FlyoutMenuButton"
 		"command"				"PlaySysLink"

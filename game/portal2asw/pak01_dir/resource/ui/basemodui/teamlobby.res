@@ -8,7 +8,7 @@
 		"ypos"					"0"
 		"wide"					"f0"
 		"tall"					"420"		[$WIN32]
-		"tall"					"380"		[$X360]
+		"tall"					"380"		[$GAMECONSOLE]
 		"autoResize"			"0"
 		"pinCorner"				"0"
 		"visible"				"1"
@@ -29,7 +29,7 @@
 		"autoResize"		"0"
 		"pinCorner"			"0"
 		"visible"			"1"		[$WIN32]
-		"visible"			"0"		[$X360]
+		"visible"			"0"		[$GAMECONSOLE]
 		"enabled"			"1"
 		"tabPosition"		"0"
 		"fillColor"			"0 0 0 0"
@@ -40,7 +40,7 @@
 		"ControlName"			"ImagePanel"
 		"fieldName"				"WorkingAnim"
 		"xpos"					"c214"		[$WIN32]
-		"xpos"					"r128"		[$X360]
+		"xpos"					"r128"		[$GAMECONSOLE]
 		"ypos"					"27"
 		"zpos"					"2"
 		"wide"					"32"
@@ -50,7 +50,7 @@
 		"enabled"				"1"
 		"tabPosition"			"0"
 		"scaleImage"			"1"
-		"image"					"common/swarm_cycle"
+		"image"					"spinner"
 	}	
 
 	"GplSurvivors"
@@ -107,8 +107,8 @@
 		"zpos"					"2"
 		"wide"					"275"	[$WIN32 && $ENGLISH]
 		"wide"					"300"	[$WIN32 && !$ENGLISH]
-		"xpos"					"c-260" [$X360]
-		"wide"					"275"	[$X360]
+		"xpos"					"c-260" [$GAMECONSOLE]
+		"wide"					"275"	[$GAMECONSOLE]
 		"tall"					"32"
 		"autoResize"			"1"
 		"pinCorner"				"0"
@@ -141,7 +141,7 @@
 		"xpos"					"c-244" [$WIN32 && $ENGLISH]
 		"xpos"					"c-264" [$WIN32 && !$ENGLISH]
 		"ypos"					"132"
-		"xpos"					"c-254" [$X360]
+		"xpos"					"c-254" [$GAMECONSOLE]
 		"zpos"					"2"
 		"wide"					"125"
 		"tall"					"65"
@@ -160,7 +160,7 @@
 		"xpos"					"c-250" [$WIN32 && $ENGLISH]
 		"xpos"					"c-270" [$WIN32 && !$ENGLISH]
 		"ypos"					"125"
-		"xpos"					"c-260" [$X360]
+		"xpos"					"c-260" [$GAMECONSOLE]
 		"zpos"					"3"
 		"wide"					"158"
 		"tall"					"79"
@@ -180,7 +180,7 @@
 		"xpos"					"c-105" [$WIN32 && $ENGLISH]
 		"xpos"					"c-128" [$WIN32 && !$ENGLISH]
 		"ypos"					"128"
-		"xpos"					"c-115" [$X360]
+		"xpos"					"c-115" [$GAMECONSOLE]
 		"zpos"					"2"
 		"wide"					"240"
 		"tall"					"32"
@@ -203,7 +203,7 @@
 		"xpos"					"c-105" [$WIN32 && $ENGLISH]
 		"xpos"					"c-128" [$WIN32 && !$ENGLISH]
 		"ypos"					"143"
-		"xpos"					"c-115" [$X360]
+		"xpos"					"c-115" [$GAMECONSOLE]
 		"zpos"					"2"
 		"wide"					"240"
 		"tall"					"32"
@@ -225,7 +225,7 @@
 		"xpos"					"c-105" [$WIN32 && $ENGLISH]
 		"xpos"					"c-128" [$WIN32 && !$ENGLISH]
 		"ypos"					"158"
-		"xpos"					"c-115" [$X360]
+		"xpos"					"c-115" [$GAMECONSOLE]
 		"zpos"					"2"
 		"wide"					"240"
 		"tall"					"32"
@@ -247,7 +247,7 @@
 		"xpos"					"c-105" [$WIN32 && $ENGLISH]
 		"xpos"					"c-128" [$WIN32 && !$ENGLISH]
 		"ypos"					"173"
-		"xpos"					"c-115" [$X360]
+		"xpos"					"c-115" [$GAMECONSOLE]
 		"zpos"					"2"
 		"wide"					"240"
 		"tall"					"32"
@@ -269,7 +269,7 @@
 		"xpos"					"c-105" [$WIN32 && $ENGLISH]
 		"xpos"					"c-128" [$WIN32 && !$ENGLISH]
 		"ypos"					"188"
-		"xpos"					"c-115" [$X360]
+		"xpos"					"c-115" [$GAMECONSOLE]
 		"zpos"					"2"
 		"wide"					"240"
 		"tall"					"32"
@@ -293,10 +293,10 @@
 		"ypos"					"206"		[$WIN32]
 		"wide"					"15"		[$WIN32]
 		"tall"					"15"		[$WIN32]
-		"xpos"					"c-285"		[$X360]
-		"ypos"					"210"		[$X360]
-		"wide"					"20"		[$X360]
-		"tall"					"20"		[$X360]
+		"xpos"					"c-285"		[$GAMECONSOLE]
+		"ypos"					"210"		[$GAMECONSOLE]
+		"wide"					"20"		[$GAMECONSOLE]
+		"tall"					"20"		[$GAMECONSOLE]
 		"scaleImage"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"
@@ -316,17 +316,17 @@
 		"wide"					"180"		[$WIN32 && $ENGLISH]
 		"wide"					"260"		[$WIN32 && !$ENGLISH]
 		"tall"					"15"		[$WIN32]
-		"xpos"					"c-260"		[$X360]
-		"ypos"					"210"		[$X360]
-		"wide"					"180"		[$X360]
-		"tall"					"20"		[$X360]
+		"xpos"					"c-260"		[$GAMECONSOLE]
+		"ypos"					"210"		[$GAMECONSOLE]
+		"wide"					"180"		[$GAMECONSOLE]
+		"tall"					"20"		[$GAMECONSOLE]
 		"autoResize"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"
 		"enabled"				"1"
 		"tabPosition"			"0"
 		"navUp"					"BtnVoiceButton"			[$WIN32]
-		"navUp"					"BtnCancelDedicatedSearch"	[$X360]
+		"navUp"					"BtnCancelDedicatedSearch"	[$GAMECONSOLE]
 		"navDown"				"DrpCharacter"
 		"navRight"				"GplSurvivors"
 		"tooltiptext"			"#L4D360UI_Lobby_Change_GameSettings_Tip"
@@ -344,10 +344,10 @@
 		"ypos"					"226"		[$WIN32]
 		"wide"					"15"		[$WIN32]
 		"tall"					"15"		[$WIN32]
-		"xpos"					"c-285"		[$X360]
-		"ypos"					"235"		[$X360]
-		"wide"					"20"		[$X360]
-		"tall"					"20"		[$X360]
+		"xpos"					"c-285"		[$GAMECONSOLE]
+		"ypos"					"235"		[$GAMECONSOLE]
+		"wide"					"20"		[$GAMECONSOLE]
+		"tall"					"20"		[$GAMECONSOLE]
 		"scaleImage"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"
@@ -366,10 +366,10 @@
 		"wide"					"180"		[$WIN32 && $ENGLISH]
 		"wide"					"260"		[$WIN32 && !$ENGLISH]
 		"tall"					"15"		[$WIN32]
-		"xpos"					"c-260"		[$X360]
-		"ypos"					"235"		[$X360]
-		"wide"					"180"		[$X360]
-		"tall"					"20"		[$X360]
+		"xpos"					"c-260"		[$GAMECONSOLE]
+		"ypos"					"235"		[$GAMECONSOLE]
+		"wide"					"180"		[$GAMECONSOLE]
+		"tall"					"20"		[$GAMECONSOLE]
 		"visible"				"1"
 		"enabled"				"1"
 		"tabPosition"			"0"
@@ -387,8 +387,8 @@
 			"wide"					"180"	[$WIN32 && $ENGLISH]
 			"wide"					"260"	[$WIN32 && !$ENGLISH]
 			"tall"					"15"	[$WIN32]
-			"wide"					"180"	[$X360]
-			"tall"					"20"	[$X360]
+			"wide"					"180"	[$GAMECONSOLE]
+			"tall"					"20"	[$GAMECONSOLE]
 			"autoResize"			"1"
 			"pinCorner"				"0"
 			"visible"				"1"
@@ -401,7 +401,7 @@
 			"command"				"FlmCharacterFlyout"
 			"FocusButtonWidth"		"230"
 			"OpenButtonWidth"		"230"
-			"ActivationType"		"1" [$X360]
+			"ActivationType"		"1" [$GAMECONSOLE]
 		}
 	}			
 	
@@ -426,10 +426,10 @@
 		"ypos"					"226"		[$WIN32]
 		"wide"					"15"		[$WIN32]
 		"tall"					"15"		[$WIN32]
-		"xpos"					"c-285"		[$X360]
-		"ypos"					"235"		[$X360]
-		"wide"					"20"		[$X360]
-		"tall"					"20"		[$X360]
+		"xpos"					"c-285"		[$GAMECONSOLE]
+		"ypos"					"235"		[$GAMECONSOLE]
+		"wide"					"20"		[$GAMECONSOLE]
+		"tall"					"20"		[$GAMECONSOLE]
 		"scaleImage"			"1"
 		"pinCorner"				"0"
 		"visible"				"0"
@@ -448,10 +448,10 @@
 		"wide"					"180"		[$WIN32 && $ENGLISH]
 		"wide"					"260"		[$WIN32 && !$ENGLISH]
 		"tall"					"15"		[$WIN32]
-		"xpos"					"c-260"		[$X360]
-		"ypos"					"235"		[$X360]
-		"wide"					"180"		[$X360]
-		"tall"					"20"		[$X360]
+		"xpos"					"c-260"		[$GAMECONSOLE]
+		"ypos"					"235"		[$GAMECONSOLE]
+		"wide"					"180"		[$GAMECONSOLE]
+		"tall"					"20"		[$GAMECONSOLE]
 		"visible"				"0"
 		"enabled"				"1"
 		"tabPosition"			"0"
@@ -469,8 +469,8 @@
 			"wide"					"180"	[$WIN32 && $ENGLISH]
 			"wide"					"260"	[$WIN32 && !$ENGLISH]
 			"tall"					"15"	[$WIN32]
-			"wide"					"180"	[$X360]
-			"tall"					"20"	[$X360]
+			"wide"					"180"	[$GAMECONSOLE]
+			"tall"					"20"	[$GAMECONSOLE]
 			"autoResize"			"1"
 			"pinCorner"				"0"
 			"visible"				"1"
@@ -483,7 +483,7 @@
 			"command"				"FlmVersusCharacterFlyout"
 			"FocusButtonWidth"		"230"
 			"OpenButtonWidth"		"230"
-			"ActivationType"		"1" [$X360]
+			"ActivationType"		"1" [$GAMECONSOLE]
 		}
 	}
 	
@@ -508,10 +508,10 @@
 		"ypos"					"246"		[$WIN32]
 		"wide"					"15"		[$WIN32]
 		"tall"					"15"		[$WIN32]
-		"xpos"					"c-285"		[$X360]
-		"ypos"					"260"		[$X360]
-		"wide"					"20"		[$X360]
-		"tall"					"20"		[$X360]
+		"xpos"					"c-285"		[$GAMECONSOLE]
+		"ypos"					"260"		[$GAMECONSOLE]
+		"wide"					"20"		[$GAMECONSOLE]
+		"tall"					"20"		[$GAMECONSOLE]
 		"scaleImage"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"
@@ -531,14 +531,14 @@
 		"wide"					"180"		[$WIN32 && $ENGLISH]
 		"wide"					"260"		[$WIN32 && !$ENGLISH]
 		"tall"					"15"		[$WIN32]
-		"xpos"					"c-260"		[$X360]
-		"ypos"					"260"		[$X360]
-		"wide"					"180"		[$X360]
-		"tall"					"20"		[$X360]
+		"xpos"					"c-260"		[$GAMECONSOLE]
+		"ypos"					"260"		[$GAMECONSOLE]
+		"wide"					"180"		[$GAMECONSOLE]
+		"tall"					"20"		[$GAMECONSOLE]
 		"autoResize"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"			[$WIN32]
-		"visible"				"0"			[$X360]
+		"visible"				"0"			[$GAMECONSOLE]
 		"enabled"				"1"
 		"tabPosition"			"0"
 		"navUp"					"DrpVersusCharacter"
@@ -559,12 +559,12 @@
 		"wide"					"180"		[$WIN32 && $ENGLISH]
 		"wide"					"260"		[$WIN32 && !$ENGLISH]
 		"tall"					"15"		[$WIN32]
-		"xpos"					"c-260"		[$X360]
-		"ypos"					"260"		[$X360]
-		"wide"					"180"		[$X360]
-		"tall"					"20"		[$X360]
+		"xpos"					"c-260"		[$GAMECONSOLE]
+		"ypos"					"260"		[$GAMECONSOLE]
+		"wide"					"180"		[$GAMECONSOLE]
+		"tall"					"20"		[$GAMECONSOLE]
 		"visible"				"0"			[$WIN32]
-		"visible"				"1"			[$X360]
+		"visible"				"1"			[$GAMECONSOLE]
 		"enabled"				"1"
 		"tabPosition"			"0"
 		"navUp"					"BtnInviteFriends"
@@ -581,8 +581,8 @@
 			"wide"					"180"	[$WIN32 && $ENGLISH]
 			"wide"					"260"	[$WIN32 && !$ENGLISH]
 			"tall"					"15"	[$WIN32]
-			"wide"					"180"	[$X360]
-			"tall"					"20"	[$X360]
+			"wide"					"180"	[$GAMECONSOLE]
+			"tall"					"20"	[$GAMECONSOLE]
 			"autoResize"			"1"
 			"pinCorner"				"0"
 			"visible"				"1"
@@ -595,7 +595,7 @@
 			"command"				"FlmInviteFriends"
 			"FocusButtonWidth"		"230"
 			"OpenButtonWidth"		"230"
-			"ActivationType"		"1" [$X360]
+			"ActivationType"		"1" [$GAMECONSOLE]
 		}
 	}			
 	"FlmInviteFriends"
@@ -619,13 +619,13 @@
 		"ypos"					"266"		[$WIN32]
 		"wide"					"15"		[$WIN32]
 		"tall"					"15"		[$WIN32]
-		"xpos"					"c-285"		[$X360]
-		"ypos"					"285"		[$X360]
-		"wide"					"20"		[$X360]
-		"tall"					"20"		[$X360]
+		"xpos"					"c-285"		[$GAMECONSOLE]
+		"ypos"					"285"		[$GAMECONSOLE]
+		"wide"					"20"		[$GAMECONSOLE]
+		"tall"					"20"		[$GAMECONSOLE]
 		"scaleImage"			"1"
 		"pinCorner"				"0"
-		"visible"				"1"		[$X360]
+		"visible"				"1"		[$GAMECONSOLE]
 		"visible"				"0"		[$WIN32]
 		"enabled"				"1"
 		"tabPosition"			"0"
@@ -642,16 +642,16 @@
 		"wide"					"180"		[$WIN32 && $ENGLISH]
 		"wide"					"260"		[$WIN32 && !$ENGLISH]
 		"tall"					"15"		[$WIN32]
-		"xpos"					"c-260"		[$X360]
-		"ypos"					"285"		[$X360]
-		"wide"					"180"		[$X360]
-		"tall"					"20"		[$X360]
-		"visible"				"1"		[$X360]
+		"xpos"					"c-260"		[$GAMECONSOLE]
+		"ypos"					"285"		[$GAMECONSOLE]
+		"wide"					"180"		[$GAMECONSOLE]
+		"tall"					"20"		[$GAMECONSOLE]
+		"visible"				"1"		[$GAMECONSOLE]
 		"visible"				"0"		[$WIN32]
 		"enabled"				"1"
 		"tabPosition"			"0"
 		"navUp"					"DrpInviteFriends"
-		"navDown"				"BtnStartGame" [$X360]
+		"navDown"				"BtnStartGame" [$GAMECONSOLE]
 		"navDown"				"BtnLeaveLobby" [$WIN32]
 		"navRight"				"GplSurvivors"
 				
@@ -665,8 +665,8 @@
 			"wide"					"180"	[$WIN32 && $ENGLISH]
 			"wide"					"260"	[$WIN32 && !$ENGLISH]
 			"tall"					"15"	[$WIN32]
-			"wide"					"180"	[$X360]
-			"tall"					"20"	[$X360]
+			"wide"					"180"	[$GAMECONSOLE]
+			"tall"					"20"	[$GAMECONSOLE]
 			"autoResize"			"1"
 			"pinCorner"				"0"
 			"visible"				"1"
@@ -679,7 +679,7 @@
 			"command"				"FlmGameAccess"
 			"FocusButtonWidth"		"230"
 			"OpenButtonWidth"		"230"
-			"ActivationType"		"1" [$X360]
+			"ActivationType"		"1" [$GAMECONSOLE]
 		}
 	}			
 	
@@ -704,10 +704,10 @@
 		"ypos"					"286"		[$WIN32]
 		"wide"					"15"		[$WIN32]
 		"tall"					"15"		[$WIN32]
-		"xpos"					"c-285"		[$X360]
-		"ypos"					"310"		[$X360]
-		"wide"					"20"		[$X360]
-		"tall"					"20"		[$X360]
+		"xpos"					"c-285"		[$GAMECONSOLE]
+		"ypos"					"310"		[$GAMECONSOLE]
+		"wide"					"20"		[$GAMECONSOLE]
+		"tall"					"20"		[$GAMECONSOLE]
 		"scaleImage"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"
@@ -727,18 +727,18 @@
 		"wide"					"180"		[$WIN32 && $ENGLISH]
 		"wide"					"260"		[$WIN32 && !$ENGLISH]
 		"tall"					"15"		[$WIN32]
-		"xpos"					"c-260"		[$X360]
-		"ypos"					"310"		[$X360]
-		"wide"					"180"		[$X360]
-		"tall"					"20"		[$X360]
+		"xpos"					"c-260"		[$GAMECONSOLE]
+		"ypos"					"310"		[$GAMECONSOLE]
+		"wide"					"180"		[$GAMECONSOLE]
+		"tall"					"20"		[$GAMECONSOLE]
 		"autoResize"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"
 		"enabled"				"1"
 		"tabPosition"			"0"
-		"navUp"					"DrpGameAccess" [$X360]
+		"navUp"					"DrpGameAccess" [$GAMECONSOLE]
 		"navUp"					"BtnLeaveLobby" [$WIN32]
-		"navDown"				"BtnCancelDedicatedSearch" [$X360]
+		"navDown"				"BtnCancelDedicatedSearch" [$GAMECONSOLE]
 		"navDown"				"BtnCancelDedicatedSearch" [$WIN32]
 		"navLeft"				"BtnCancelDedicatedSearch"
 		"navRight"				"GplSurvivors"
@@ -777,10 +777,10 @@
 		"wide"					"180"		[$WIN32 && $ENGLISH]
 		"wide"					"260"		[$WIN32 && !$ENGLISH]
 		"tall"					"15"		[$WIN32]
-		"xpos"					"c-260"		[$X360]
-		"ypos"					"310"		[$X360]
-		"wide"					"180"		[$X360]
-		"tall"					"20"		[$X360]
+		"xpos"					"c-260"		[$GAMECONSOLE]
+		"ypos"					"310"		[$GAMECONSOLE]
+		"wide"					"180"		[$GAMECONSOLE]
+		"tall"					"20"		[$GAMECONSOLE]
 		"autoResize"			"1"
 		"pinCorner"				"0"
 		"visible"				"0"
@@ -788,7 +788,7 @@
 		"tabPosition"			"0"
 		"navUp"					"BtnStartGame"
 		"navDown"				"ChatInputLine" [$WIN32]
-		"navDown"				"BtnChangeGameSettings" [$X360]
+		"navDown"				"BtnChangeGameSettings" [$GAMECONSOLE]
 		"navRight"				"GplSurvivors"
 		"tooltiptext"			"#L4D360UI_Lobby_CancelMatchmacking_Tip"
 		"labelText"				"#L4D360UI_Lobby_CancelMatchmacking"

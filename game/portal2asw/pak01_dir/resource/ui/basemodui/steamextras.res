@@ -1,0 +1,57 @@
+"Resource/UI/steamextras.res"
+{
+	"XboxLIVE"
+	{
+		"ControlName"		"Frame"
+		"fieldName"			"XboxLIVE"
+		"xpos"				"0"
+		"ypos"				"0"
+		"wide"				"6"
+		"tall"				"2"
+		"autoResize"		"0"
+		"visible"			"1"
+		"enabled"			"1"
+		"tabPosition"		"0"
+		"dialogstyle"		"1"
+	}
+	
+	"BtnRedeemCode"
+	{
+		"ControlName"				"BaseModHybridButton"
+		"fieldName"					"BtnRedeemCode"
+		"xpos"						"0"
+		"ypos"						"25"
+		"wide"						"0"
+		"tall"						"20"
+		"autoResize"				"0"
+		"visible"					"1"
+		"enabled"					"1"
+		"tabPosition"				"0"
+		"navUp"						"BtnQuickMatch"
+		"navDown"					"BtnQuickMatch"
+		"labelText"					"#L4D360UI_Steam_RedeemToken"
+		"style"						"DefaultButton"
+		"command"					"RedeemSteamCode"
+		"ActivationType"			"1"
+	}
+
+	"BtnQuickMatch"
+	{
+		"ControlName"				"BaseModHybridButton"
+		"fieldName"					"BtnQuickMatch"
+		"xpos"						"0"
+		"ypos"						"50"
+		"wide"						"0"
+		"tall"						"20"
+		"autoResize"				"0"
+		"visible"					"1"
+		"enabled"					"1"
+		"tabPosition"				"0"
+		"navUp"						"BtnRedeemCode"
+		"navDown"					"BtnRedeemCode"
+		"labelText"					"#Portal2UI_pvp_QuickMatch_caps"
+		"style"						"DefaultButton"
+		"command"					"BtnQuickMatch"
+		"ActivationType"			"1"
+	}
+}

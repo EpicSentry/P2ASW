@@ -25,11 +25,11 @@
 		"zpos"				"-1"
 		"wide"				"f0"
 		"tall"				"170"	[$WIN32]
-		"tall"				"245"	[$X360]
+		"tall"				"245"	[$GAMECONSOLE]
 		"visible"			"1"
 		"enabled"			"1"
 		"fillColor"			"0 0 0 240"	[$WIN32]
-		"fillColor"			"0 0 0 200"	[$X360]
+		"fillColor"			"0 0 0 200"	[$GAMECONSOLE]
 	}
 			
 	"BtnReturnToGame"
@@ -39,9 +39,9 @@
 		"xpos"					"100"
 		"ypos"					"135"
 		"wide"					"220"	[$WIN32]
-		"wide"					"180"	[$X360]
+		"wide"					"180"	[$GAMECONSOLE]
 		"tall"					"15"	[$WIN32]
-		"tall"					"20"	[$X360]
+		"tall"					"20"	[$GAMECONSOLE]
 		"autoResize"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"
@@ -62,11 +62,11 @@
 		"fieldName"				"BtnGoIdle"
 		"xpos"					"100"
 		"ypos"					"150"	[$WIN32]
-		"ypos"					"160"	[$X360]
+		"ypos"					"160"	[$GAMECONSOLE]
 		"wide"					"220"	[$WIN32]
-		"wide"					"180"	[$X360]
+		"wide"					"180"	[$GAMECONSOLE]
 		"tall"					"15"	[$WIN32]
-		"tall"					"20"	[$X360]
+		"tall"					"20"	[$GAMECONSOLE]
 		"autoResize"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"
@@ -87,11 +87,11 @@
 		"fieldName"				"BtnCallAVoteNotAvailableInDemo"
 		"xpos"					"100"
 		"ypos"					"165"	[$WIN32]
-		"ypos"					"185"	[$X360]
+		"ypos"					"185"	[$GAMECONSOLE]
 		"wide"					"220"	[$WIN32]
-		"wide"					"180"	[$X360]
+		"wide"					"180"	[$GAMECONSOLE]
 		"tall"					"15"	[$WIN32]
-		"tall"					"20"	[$X360]
+		"tall"					"20"	[$GAMECONSOLE]
 		"autoResize"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"
@@ -112,11 +112,11 @@
 		"fieldName"				"BtnInviteAFriendNotAvailableInDemo"
 		"xpos"					"100"
 		"ypos"					"180"	[$WIN32]
-		"ypos"					"210"	[$X360]
+		"ypos"					"210"	[$GAMECONSOLE]
 		"wide"					"220"	[$WIN32]
-		"wide"					"180"	[$X360]
+		"wide"					"180"	[$GAMECONSOLE]
 		"tall"					"15"	[$WIN32]
-		"tall"					"20"	[$X360]
+		"tall"					"20"	[$GAMECONSOLE]
 		"autoResize"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"
@@ -137,9 +137,9 @@
 		"fieldName"				"BtnLeaderboardNotAvailableInDemo"
 		"xpos"					"100"
 		"ypos"					"195"	[$WIN32]
-		"ypos"					"235"	[$X360]
+		"ypos"					"235"	[$GAMECONSOLE]
 		"wide"					"220"	[$WIN32]
-		"wide"					"180"	[$X360]
+		"wide"					"180"	[$GAMECONSOLE]
 		"tall"					"20"	
 		"autoResize"			"1"		
 		"pinCorner"				"0"
@@ -161,11 +161,11 @@
 		"fieldName"				"BtnStatsAndAchievementsNotAvailableInDemo"
 		"xpos"					"100"
 		"ypos"					"210"	[$WIN32]
-		"ypos"					"260"	[$X360]
+		"ypos"					"260"	[$GAMECONSOLE]
 		"wide"					"220"	[$WIN32]
-		"wide"					"180"	[$X360]
+		"wide"					"180"	[$GAMECONSOLE]
 		"tall"					"15"	[$WIN32]
-		"tall"					"20"	[$X360]
+		"tall"					"20"	[$GAMECONSOLE]
 		"autoResize"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"
@@ -175,7 +175,7 @@
 		"navDown"				"BtnOptions"
 		"labelText"				"#L4D360UI_MainMenu_StatsAndAchievements"
 		"tooltiptext"			"#L4D360UI_MainMenu_PCStatsAndAchievements_Tip"	[$WIN32]
-		"tooltiptext"			"#L4D360UI_MainMenu_StatsAndAchievements_Tip"	[$X360]
+		"tooltiptext"			"#L4D360UI_MainMenu_StatsAndAchievements_Tip"	[$GAMECONSOLE]
 		"style"					"MainMenuButton"
 		"command"				"NotAvailableInDemo"
 		"ActivationType"		"1"
@@ -187,11 +187,11 @@
 		"fieldName"				"BtnOptions"
 		"xpos"					"100"
 		"ypos"					"225"	[$WIN32]
-		"ypos"					"285"	[$X360]
+		"ypos"					"285"	[$GAMECONSOLE]
 		"wide"					"220"	[$WIN32]
-		"wide"					"180"	[$X360]
+		"wide"					"180"	[$GAMECONSOLE]
 		"tall"					"15"	[$WIN32]
-		"tall"					"20"	[$X360]
+		"tall"					"20"	[$GAMECONSOLE]
 		"autoResize"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"
@@ -203,7 +203,7 @@
 		"tooltiptext"			"#L4D360UI_MainMenu_Options_Tip"
 		"style"					"MainMenuButton"
 		"command"				"FlmOptionsFlyout"	[$WIN32]
-		"command"				"FlmOptionsGuestFlyout"	[$X360]
+		"command"				"FlmOptionsGuestFlyout"	[$GAMECONSOLE]
 		"ActivationType"		"1"
 	}
 
@@ -213,11 +213,11 @@
 		"fieldName"				"BtnExitToMainMenu"
 		"xpos"					"100"
 		"ypos"					"250"	[$WIN32]
-		"ypos"					"322"	[$X360]
+		"ypos"					"322"	[$GAMECONSOLE]
 		"wide"					"220"	[$WIN32]
-		"wide"					"180"	[$X360]
+		"wide"					"180"	[$GAMECONSOLE]
 		"tall"					"15"	[$WIN32]
-		"tall"					"20"	[$X360]
+		"tall"					"20"	[$GAMECONSOLE]
 		"autoResize"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"
@@ -241,9 +241,9 @@
 		"tall"					"0"
 		"zpos"					"3"
 		"InitialFocus"			"BtnVideo" [$WIN32]
-		"InitialFocus"			"BtnAudioVideo" [$X360]
+		"InitialFocus"			"BtnAudioVideo" [$GAMECONSOLE]
 		"ResourceFile"			"resource/UI/basemodui/OptionsFlyout.res"		[$WIN32]
-		"ResourceFile"			"resource/UI/basemodui/OptionsGuestFlyout.res"	[$X360]
+		"ResourceFile"			"resource/UI/basemodui/OptionsGuestFlyout.res"	[$GAMECONSOLE]
 	}
 	
 	"FlmOptionsGuestFlyout"

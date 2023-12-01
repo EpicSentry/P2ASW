@@ -9,7 +9,7 @@
 		"zpos"					"-1"
 		"wide"					"180" [$ENGLISH]
 		"wide"					"270" [!$ENGLISH]
-		"tall"					"65"  [$X360]
+		"tall"					"65"  [$GAMECONSOLE]
 		"tall"					"85"  [$WIN32]
 		"visible"				"1"
 		"enabled"				"1"
@@ -31,7 +31,7 @@
 		"enabled"				"1"
 		"tabPosition"			"0"
 		"wrap"					"1"
-		"navUp"					"BtnPlayRealismWithFriends"	[$X360]
+		"navUp"					"BtnPlayRealismWithFriends"	[$GAMECONSOLE]
 		"navUp"					"BtnPlayOnGroupServer"		[$WIN32]
 		"navDown"				"BtnPlayRealismWithAnyone"
 		"labelText"				"#L4D360UI_QuickMatch"
@@ -57,7 +57,7 @@
 		"wrap"					"1"
 		"navUp"					"BtnQuickMatch"
 		"navDown"				"BtnPlayRealismWithFriends"
-		"labelText"				"#L4D360UI_CustomMatch"	[$X360]
+		"labelText"				"#L4D360UI_CustomMatch"	[$GAMECONSOLE]
 		"labelText"				"#L4D360UI_MainMenu_PlayOnline" [$WIN32]
 		"tooltiptext"			"#L4D360UI_MainMenu_PlayRealismWithAnyone_Tip"
 		"disabled_tooltiptext"	"#L4D360UI_MainMenu_PlayRealismWithAnyone_Tip_Disabled"
@@ -80,7 +80,7 @@
 		"tabPosition"			"0"
 		"wrap"					"1"
 		"navUp"					"BtnPlayRealismWithAnyone"
-		"navDown"				"BtnQuickMatch"			[$X360]
+		"navDown"				"BtnQuickMatch"			[$GAMECONSOLE]
 		"navDown"				"BtnPlayOnGroupServer"	[$WIN32]
 		"labelText"				"#L4D360UI_MainMenu_PlayRealismWithFriends"
 		"tooltiptext"			"#L4D360UI_MainMenu_PlayRealismWithFriends_Tip"

@@ -18,7 +18,7 @@
 		"ControlName"			"ImagePanel"
 		"fieldName"				"ImgPlayerPortrait"
 		"xpos"					"20"	[$WIN32]
-		"xpos"					"40"	[$X360]
+		"xpos"					"40"	[$GAMECONSOLE]
 		"ypos"					"0"
 		"wide"					"28"
 		"tall"					"28"
@@ -46,7 +46,7 @@
 		"ControlName"			"Label"
 		"fieldName"				"LblPlayerVoiceStatus"
 		"xpos"					"0"		[$WIN32]
-		"xpos"					"20"	[$X360]
+		"xpos"					"20"	[$GAMECONSOLE]
 		"ypos"					"10"
 		"visible"				"0"
 		"enabled"				"1"
@@ -62,7 +62,7 @@
 		"xpos"				"71"
 		"ypos" 				"12"
 		"wide"				"180"	[$WIN32]
-		"wide"				"150"	[$X360]
+		"wide"				"150"	[$GAMECONSOLE]
 		"tall"				"15"
 		"visible"			"1"
 		"enabled"			"1"
@@ -76,7 +76,7 @@
 			"ypos" 				"0"
 			"tall"				"15"
 			"wide"				"180"	[$WIN32]
-			"wide"				"150"	[$X360]
+			"wide"				"150"	[$GAMECONSOLE]
 			"visible"			"0"
 			"enabled"			"1"
 			"tabPosition"		"0"

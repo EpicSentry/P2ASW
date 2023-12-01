@@ -8,7 +8,7 @@
 		"ypos"						"0"
 		"wide"						"f0"
 		"tall"						"260"		[$WIN32]
-		"tall"						"260"		[$X360]
+		"tall"						"260"		[$GAMECONSOLE]
 		"autoResize"				"0"
 		"pinCorner"					"0"
 		"visible"					"1"
@@ -28,7 +28,7 @@
 		"autoResize"			"0"
 		"pinCorner"				"0"
 		"visible"				"1"				[$WIN32]
-		"visible"				"0"				[$X360]
+		"visible"				"0"				[$GAMECONSOLE]
 		"enabled"				"1"
 		"tabPosition"			"0"
 		"fillColor"				"0 0 0 0"
@@ -77,7 +77,7 @@
 		"zpos"					"1"
 		"wide"					"280"
 		"tall"					"15"			[$WIN32]
-		"tall"					"20"			[$X360]
+		"tall"					"20"			[$GAMECONSOLE]
 		"visible"				"1"
 		"enabled"				"1"
 		"navUp"					"BtnCancel"
@@ -94,7 +94,7 @@
 			"wide"							"280"
 			"wideatopen"					"160"
 			"tall"							"15"	[$WIN32]
-			"tall"							"20"	[$X360]
+			"tall"							"20"	[$GAMECONSOLE]
 			"autoResize"					"1"
 			"pinCorner"						"0"
 			"visible"						"1"
@@ -105,7 +105,7 @@
 			"disabled_tooltiptext"			"#L4D360UI_GameSettings_Tooltip_Mission_Disabled"
 			"style"							"DropDownButton"
 			"command"						"FlmMission"
-			"ActivationType"				"1"		[$X360]
+			"ActivationType"				"1"		[$GAMECONSOLE]
 			"EnableCondition"				"Never" [$DEMO]
 		}
 	}
@@ -208,11 +208,11 @@
 		"fieldName"				"DrpChapter"
 		"xpos"					"c-250"
 		"ypos"					"140"			[$WIN32]
-		"ypos"					"145"			[$X360]
+		"ypos"					"145"			[$GAMECONSOLE]
 		"zpos"					"1"
 		"wide"					"280"
 		"tall"					"15"			[$WIN32]
-		"tall"					"20"			[$X360]
+		"tall"					"20"			[$GAMECONSOLE]
 		"visible"				"1"
 		"enabled"				"1"
 		"navUp"					"DrpMission"
@@ -229,7 +229,7 @@
 			"wide"							"280"
 			"wideatopen"					"160"
 			"tall"							"15"	[$WIN32]
-			"tall"							"20"	[$X360]
+			"tall"							"20"	[$GAMECONSOLE]
 			"autoResize"					"1"
 			"pinCorner"						"0"
 			"visible"						"1"
@@ -240,7 +240,7 @@
 			"disabled_tooltiptext"			"#L4D360UI_GameSettings_Tooltip_Chapter_Disabled"
 			"style"							"DropDownButton"
 			"command"						""
-			"ActivationType"				"1" [$X360]
+			"ActivationType"				"1" [$GAMECONSOLE]
 		}
 	}
 	
@@ -262,13 +262,13 @@
 		"ControlName"			"ImagePanel"
 		"fieldName"				"IconForwardArrow"
 		"xpos"					"c-265"		[$WIN32]	
-		"xpos"					"c-275"		[$X360]
+		"xpos"					"c-275"		[$GAMECONSOLE]
 		"ypos"					"160"		[$WIN32]
-		"ypos"					"170"		[$X360]
+		"ypos"					"170"		[$GAMECONSOLE]
 		"wide"					"15"        [$WIN32]
 		"tall"					"15"        [$WIN32]
-		"wide"					"20"        [$X360]
-		"tall"					"20"        [$X360]
+		"wide"					"20"        [$GAMECONSOLE]
+		"tall"					"20"        [$GAMECONSOLE]
 		"scaleImage"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"
@@ -283,10 +283,10 @@
 		"fieldName"				"BtnSelect"
 		"xpos"					"c-250"
 		"ypos"					"160"			[$WIN32]
-		"ypos"					"170"			[$X360]
+		"ypos"					"170"			[$GAMECONSOLE]
 		"wide"					"220"
 		"tall"					"15"			[$WIN32]
-		"tall"					"20"			[$X360]
+		"tall"					"20"			[$GAMECONSOLE]
 		"zpos"					"0"
 		"autoResize"			"1"
 		"pinCorner"				"0"
@@ -311,16 +311,16 @@
 		"ControlName"			"ImagePanel"
 		"fieldName"				"IconBackArrow"
 		"xpos"					"c-265"		[$WIN32]
-		"xpos"					"c-275"		[$X360]
+		"xpos"					"c-275"		[$GAMECONSOLE]
 		"ypos"					"180"		[$WIN32]
-		"ypos"					"191"		[$X360]
+		"ypos"					"191"		[$GAMECONSOLE]
 		"wide"					"15"		[$WIN32]
 		"tall"					"15"		[$WIN32]
-		"wide"					"20"		[$X360]
-		"tall"					"20"		[$X360]
+		"wide"					"20"		[$GAMECONSOLE]
+		"tall"					"20"		[$GAMECONSOLE]
 		"scaleImage"			"1"
 		"pinCorner"				"0"
-		"visible"				"0"			[$X360]
+		"visible"				"0"			[$GAMECONSOLE]
 		"visible"				"1"			[$WIN32]
 		"enabled"				"1"
 		"tabPosition"			"0"
@@ -334,10 +334,10 @@
 		"fieldName"				"BtnCancel"
 		"xpos"					"c-250"
 		"ypos"					"180"		[$WIN32]
-		"ypos"					"195"		[$X360]
+		"ypos"					"195"		[$GAMECONSOLE]
 		"wide"					"220"
 		"tall"					"15"		[$WIN32]
-		"tall"					"20"		[$X360]
+		"tall"					"20"		[$GAMECONSOLE]
 		"autoResize"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"

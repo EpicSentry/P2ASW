@@ -46,12 +46,12 @@
 		"labelText"						"9,999,999"
 		"textAlignment"					"east"
 		"Font"							"DefaultMedium"		[$WIN32]
-		"Font"							"Default"			[$X360HIDEF]
-		"Font"							"DefaultMedium"		[$X360LODEF]
+		"Font"							"Default"			[$GAMECONSOLEHIDEF]
+		"Font"							"DefaultMedium"		[$GAMECONSOLELODEF]
 		"fgcolor_override"				"Label.DisabledFgColor1"
 	}
 			
-	"ImgLocalPlayer" [$X360]
+	"ImgLocalPlayer" [$GAMECONSOLE]
 	{
 		"ControlName"					"ImagePanel"
 		"fieldName"						"ImgLocalPlayer"
@@ -69,7 +69,7 @@
 		"image"							""
 	}
 		
- 	"LblGamerTag" [$X360]
+ 	"LblGamerTag" [$GAMECONSOLE]
  	{
  		"ControlName"					"Label"
  		"fieldName"						"LblGamerTag"

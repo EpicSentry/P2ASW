@@ -1,20 +1,5 @@
 "Resource/UI/RadialMenu.res"
 {
-	"radialmenu"
-	{
-		"ControlName"		"Frame"
-		"fieldName"		"radialmenu"
-		"xpos"		"0"
-		"ypos"		"0"
-		"wide"		"f0"
-		"tall"		"f0"
-		"autoResize"		"0"
-		"pinCorner"		"0"
-		"visible"		"1"
-		"enabled"		"1"
-		"tabPosition"		"0"
-		"settitlebarvisible"		"0"
-	}
 	"Center"
 	{
 		"ControlName"		"PolygonButton"
@@ -28,7 +13,6 @@
 		"visible"		"1"
 		"enabled"		"1"
 		"tabPosition"		"0"
-		"labelText"		"#L4D_btn_cancel"
 		"textAlignment"		"center"
 		"dulltext"		"0"
 		"brighttext"		"0"
@@ -92,8 +76,8 @@
 	{
 		"ControlName"		"PolygonButton"
 		"fieldName"		"NorthEast"
-		"xpos"		"c-320"
-		"ypos"		"c-240"
+		"xpos"		"c-330"
+		"ypos"		"c-255"
 		"wide"		"640"
 		"tall"		"480"
 		"autoResize"		"0"
@@ -166,8 +150,8 @@
 	{
 		"ControlName"		"PolygonButton"
 		"fieldName"		"SouthEast"
-		"xpos"		"c-320"
-		"ypos"		"c-240"
+		"xpos"		"c-330"
+		"ypos"		"c-225"
 		"wide"		"640"
 		"tall"		"480"
 		"autoResize"		"0"
@@ -240,8 +224,8 @@
 	{
 		"ControlName"		"PolygonButton"
 		"fieldName"		"SouthWest"
-		"xpos"		"c-320"
-		"ypos"		"c-240"
+		"xpos"		"c-310"
+		"ypos"		"c-225"
 		"wide"		"640"
 		"tall"		"480"
 		"autoResize"		"0"
@@ -314,8 +298,8 @@
 	{
 		"ControlName"		"PolygonButton"
 		"fieldName"		"NorthWest"
-		"xpos"		"c-320"
-		"ypos"		"c-240"
+		"xpos"		"c-310"
+		"ypos"		"c-255"
 		"wide"		"640"
 		"tall"		"480"
 		"autoResize"		"0"
@@ -343,5 +327,5 @@
 			"1"		"0.483	0.46"
 			"1"		"0.465	0.4855"
 		}
-	}
+	}	
 }

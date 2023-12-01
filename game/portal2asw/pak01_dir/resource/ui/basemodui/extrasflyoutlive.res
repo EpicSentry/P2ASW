@@ -9,7 +9,7 @@
 		"zpos"				"-1"
 		"wide"				"156" [$ENGLISH]
 		"wide"				"236" [!$ENGLISH]
-		"tall"				"65" [$X360]
+		"tall"				"65" [$GAMECONSOLE]
 		"tall"				"65" [$WIN32]
 		"visible"			"1"
 		"enabled"			"1"
@@ -23,13 +23,13 @@
 		"fieldName"				"BtnCommunity"
 		"xpos"					"0"
 		"ypos"					"0"		[$WIN32]
-		"ypos"					"0"		[$X360]
+		"ypos"					"0"		[$GAMECONSOLE]
 		"wide"					"150"
 		"tall"					"20"
 		"autoResize"			"1"
 		"pinCorner"				"0"
 		"visible"				"0"		[$WIN32]
-		"visible"				"1"		[$X360]
+		"visible"				"1"		[$GAMECONSOLE]
 		"enabled"				"1"
 		"tabPosition"			"0"
 		"navUp"					"BtnAddons"
@@ -47,7 +47,7 @@
 		"fieldName"				"BtnCommentary"
 		"xpos"					"0"
 		"ypos"					"0"		[$WIN32]
-		"ypos"					"20"	[$X360]
+		"ypos"					"20"	[$GAMECONSOLE]
 		"wide"					"150"
 		"tall"					"20"
 		"autoResize"			"1"
@@ -69,7 +69,7 @@
 		"fieldName"				"BtnCredits"
 		"xpos"					"0"
 		"ypos"					"20"	[$WIN32]
-		"ypos"					"40"	[$X360]
+		"ypos"					"40"	[$GAMECONSOLE]
 		"wide"					"150"
 		"tall"					"20"
 		"autoResize"			"1"
@@ -91,13 +91,13 @@
 		"fieldName"				"BtnAddons"
 		"xpos"					"0"
 		"ypos"					"40"	[$WIN32]
-		"ypos"					"60"	[$X360]
+		"ypos"					"60"	[$GAMECONSOLE]
 		"wide"					"150"
 		"tall"					"20"
 		"autoResize"			"1"
 		"pinCorner"				"0"
 		"visible"				"1"		[$WIN32]
-		"visible"				"0"		[$X360]
+		"visible"				"0"		[$GAMECONSOLE]
 		"enabled"				"1"
 		"tabPosition"			"0"
 		"proportionalToParent"	"1"

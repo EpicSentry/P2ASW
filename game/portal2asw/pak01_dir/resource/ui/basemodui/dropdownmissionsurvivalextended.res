@@ -8,7 +8,7 @@
 		"ypos"					"0"
 		"zpos"					"-1"
 		"wide"					"156"
-		"tall"					"125" [$X360]
+		"tall"					"125" [$GAMECONSOLE]
 		"tall"					"145" [$WIN32]
 		"visible"				"1"
 		"enabled"				"1"
@@ -30,7 +30,7 @@
 		"enabled"				"1"
 		"tabPosition"			"0"
 		"wrap"					"1"
-		"navUp"					"BtnAny" [$X360]
+		"navUp"					"BtnAny" [$GAMECONSOLE]
 		"navUp"					"BtnCampaignCustom" [$WIN32]
 		"navDown"				"BtnCampaign2"
 		"labelText"				"#L4D360UI_CampaignName_C1"
@@ -147,7 +147,7 @@
 		"tabPosition"			"0"
 		"wrap"					"1"
 		"navUp"					"BtnCampaign5"
-		"navDown"				"BtnCampaign1" [$X360]
+		"navDown"				"BtnCampaign1" [$GAMECONSOLE]
 		"navDown"				"BtnCampaignCustom" [$WIN32]
 		"labelText"				"#L4D360UI_Campaign_Any"
 		"tooltiptext"			"#L4D360UI_Campaign_Tooltip_Any"

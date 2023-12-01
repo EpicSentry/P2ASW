@@ -1,6 +1,7 @@
 "poster"
 {
-	"posterImage"		"swarm/loading/Loading_LandingBay"
+	"posterImage"		"LoadingScreen_default"
+	"posterImage_coop"	"LoadingScreen_coop"
 	
 	"posterTitle_y"		"340"
 	

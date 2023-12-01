@@ -8,7 +8,7 @@
 		"ypos"					"0"
 		"zpos"					"-1"
 		"wide"					"156"
-		"tall"					"105" [$X360]
+		"tall"					"105" [$GAMECONSOLE]
 		"tall"					"125" [$WIN32]
 		"visible"				"1"
 		"enabled"				"1"
@@ -30,7 +30,7 @@
 		"enabled"				"1"
 		"tabPosition"			"0"
 		"wrap"					"1"
-		"navUp"					"BtnCampaign5" [$X360]
+		"navUp"					"BtnCampaign5" [$GAMECONSOLE]
 		"navUp"					"BtnCampaignCustom" [$WIN32]
 		"navDown"				"BtnCampaign2"
 		"labelText"				"#L4D360UI_CampaignName_C1"
@@ -54,7 +54,7 @@
 		"enabled"				"1"
 		"tabPosition"			"0"
 		"wrap"					"1"
-		"navUp"					"BtnCampaign5" [$X360]
+		"navUp"					"BtnCampaign5" [$GAMECONSOLE]
 		"navUp"					"BtnCampaignCustom" [$WIN32]
 		"navDown"				"BtnCampaign2"
 		"labelText"				"#L4D360UI_CampaignName_C1"
@@ -88,28 +88,28 @@
 		"command"				"cmd_campaign_L4D2C2"
 	}	
 
-	"BtnCampaign3"
-	{
-		"ControlName"			"BaseModHybridButton"
-		"fieldName"				"BtnCampaign3"
-		"xpos"					"0"
-		"ypos"					"40"
-		"wide"					"150"
-		"tall"					"20"
-		"autoResize"			"1"
-		"pinCorner"				"0"
-		"visible"				"1"
-		"enabled"				"1"
-		"tabPosition"			"0"
-		"wrap"					"1"
-		"navUp"					"BtnCampaign2"
-		"navDown"				"BtnCampaign4"
-		"labelText"				"#L4D360UI_CampaignName_C3"
-		"tooltiptext"			""
-		"disabled_tooltiptext"	""
-		"style"					"FlyoutMenuButton"
-		"command"				"cmd_campaign_L4D2C3"
-	}	
+// 	"BtnCampaign3"
+// 	{
+// 		"ControlName"			"BaseModHybridButton"
+// 		"fieldName"				"BtnCampaign3"
+// 		"xpos"					"0"
+// 		"ypos"					"40"
+// 		"wide"					"150"
+// 		"tall"					"20"
+// 		"autoResize"			"1"
+// 		"pinCorner"				"0"
+// 		"visible"				"1"
+// 		"enabled"				"1"
+// 		"tabPosition"			"0"
+// 		"wrap"					"1"
+// 		"navUp"					"BtnCampaign2"
+// 		"navDown"				"BtnCampaign4"
+// 		"labelText"				"#L4D360UI_CampaignName_C3"
+// 		"tooltiptext"			""
+// 		"disabled_tooltiptext"	""
+// 		"style"					"FlyoutMenuButton"
+// 		"command"				"cmd_campaign_L4D2C3"
+// 	}	
 // 
 // 	"BtnCampaign4"
 // 	{
@@ -149,7 +149,7 @@
 // 		"tabPosition"			"0"
 // 		"wrap"					"1"
 // 		"navUp"					"BtnCampaign4"
-// 		"navDown"				"BtnCampaign1" [$X360]
+// 		"navDown"				"BtnCampaign1" [$GAMECONSOLE]
 // 		"navDown"				"BtnCampaignCustom" [$WIN32]
 // 		"labelText"				"#L4D360UI_CampaignName_C5"
 // 		"tooltiptext"			""

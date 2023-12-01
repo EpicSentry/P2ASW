@@ -8,307 +8,254 @@
 
 // No spaces in event names, max length 32
 // All strings are case sensitive
-// total game event byte length must be < 1024
 //
 // valid data key types are:
-//   none   : value is not networked
 //   string : a zero terminated string
 //   bool   : unsigned int, 1 bit
 //   byte   : unsigned int, 8 bit
 //   short  : signed int, 16 bit
 //   long   : signed int, 32 bit
 //   float  : float, 32 bit
+//   local  : any data, but not networked to clients
+//
+// following key names are reserved:
+//   local      : if set to 1, event is not networked to clients
+//   unreliable : networked, but unreliable
+//   suppress   : never fire this event
+//   time	: firing server time
+//   eventid	: holds the event ID
 
-"infestedevents"
+"ModEvents"
 {
-	"asw_mission_restart"				// marines are restarting the mission
+	"portal_player_touchedground"	// player landed
 	{
-		"restartcount"		"short"		// number of restarts in this play session
+		"userid"	"short"		// user ID on server
+	}
+
+	"portal_player_ping"	// player pinged
+	{
+		"userid"	"short"		// user ID on server
+		"ping_x"	"float"
+		"ping_y"	"float"
+		"ping_z"	"float"
 	}
 	
-	"gameui_activated"
+	"portal_player_portaled"		// player traveled through a portal
+	{
+		"userid"	"short"		// user ID on server
+		"portal2"	"bool"		// false for portal1 (blue)
+	}
+	"turret_hit_turret"
+	{
+	}
+	"security_camera_detached"
+	{
+	}
+	"challenge_map_complete"
+	{
+		"numbronze"	"short"
+		"numsilver"	"short"
+		"numgold"	"short"
+	}
+	"advanced_map_complete"
+	{
+		"numadvanced"	"short"
+	}
+	"quicksave"
+	{
+	}
+	"autosave"
+	{
+	}
+	"slowtime"
 	{
 	}
 	
-	"gameui_hidden"
+	"portal_enabled"
+	{
+		"userid"		"short"		// user ID on server
+		"leftportal"	"bool"
+	}
+	
+	"portal_fired"
+	{
+		"userid"		"short"		// user ID on server
+		"leftportal"	"bool"
+	}
+	
+	"gesture_earned"
+	{
+		"userid"	"short"		// user ID on server
+		"teamtaunt"		"bool"
+	}
+	
+	"player_gesture"
+	{
+		"userid"	"short"		// user ID on server
+		"air"		"bool"
+	}
+
+	"player_zoomed"
+	{
+		"userid" "short"
+	}
+
+	"player_unzoomed"
+	{
+		"userid" "short"
+	}
+	
+	"player_countdown"
+	{
+		"userid"	"short"		// user ID on server
+	}
+	
+	"player_touched_ground"
+	{
+		"userid"	"short"
+	}
+	
+	"player_long_fling"
+	{
+		"userid"	"short"
+	}
+	
+	"remote_view_activated"
+	{
+	}
+	
+	"touched_paint"
+	{
+		"userid" "short"
+		"painttype" "short"
+		"surfacedir" "short"
+	}
+	"player_paint_jumped"
+	{
+		"userid" "short"
+	}
+	"move_hint_visible"
+	{
+		"userid"	"short"	//The player who sees the entity
+		"subject"	"long"	//Entindex of the entity they see
+	}
+	"movedone_hint_visible"
+	{
+		"userid"	"short"	//The player who sees the entity
+		"subject"	"long"	//Entindex of the entity they see
+	}
+	"counter_hint_visible"
+	{
+		"userid"	"short"	//The player who sees the entity
+		"subject"	"long"	//Entindex of the entity they see
+	}
+	"zoom_hint_visible"
+	{
+		"userid"	"short"	//The player who sees the entity
+		"subject"	"long"	//Entindex of the entity they see
+	}
+	"jump_hint_visible"
+	{
+		"userid"	"short"	//The player who sees the entity
+		"subject"	"long"	//Entindex of the entity they see
+	}
+	"partnerview_hint_visible"
+	{
+		"userid"	"short"	//The player who sees the entity
+		"subject"	"long"	//Entindex of the entity they see
+	}
+	"paint_cleanser_visible"
+	{
+		"userid"	"short"	//The player who sees the entity
+		"subject"	"long"	//Entindex of the entity they see
+	}
+	"paint_cleanser_not_visible"
+	{
+		"userid"	"short"
+	}
+	"player_touch_paint_cleanser"
+	{
+		"userid"	"short"
+		"subject"	"long"	//Entindex of the cleanser
+	}
+	"bounce_count"
+	{
+		"userid"	"short"
+		"bouncecount"	"short"
+	}
+	"player_landed"
+	{
+		"userid"	"short"
+	}
+	"player_suppressed_bounce"
+	{
+		"userid"	"short"
+	}
+	"OpenRadialMenu"
+	{
+		"target" "string"
+	}
+	"AddLocator"
+	{
+		"userid" "short"
+		"subject" "short"
+		"caption" "string"
+	}
+	"player_spawn_blue"
+	{
+	}
+	"player_spawn_orange"
+	{
+	}
+	"map_already_completed"
+	{
+	}
+	
+	"achievement_earned"
+	{
+		"player"	"byte"		// entindex of the player
+		"achievement"	"short"		// achievement ID
+	}
+	
+	"replay_status"
+	{
+	}
+	
+	"spec_target_updated"
 	{
 	}
 	
 	"player_fullyjoined"
 	{
-		"userid"	"short"		// user ID on server
-		"name"		"string"	// player name
+		"userid"	"byte"		// entindex of the player
+		"name" "string"
 	}
 	
-	"player_should_switch"
-	{
-		"userid"		"short"		// user ID on server
-	}
-	
-	"player_commanding"
-	{
-		"userid"		"short"		// user ID on server
-		"new_marine"	"long"		// new marine entindex
-		"new_index"		"byte"		// index of the new marine
-		"count"			"byte"		// number of marines commanded
-	}
-	
-	"player_command_follow"
-	{
-		"userid"		"short"		// user ID on server
-	}
-	
-	"player_command_hold"
-	{
-		"userid"		"short"		// user ID on server
-	}
-	
-	"player_alt_fire"
-	{
-		"userid"		"short"		// user ID on server
-	}
-	
-	"player_heal_target"
-	{
-		"userid"		"short"		// user ID on server
-		"entindex"		"long"		// entindex of of the target marine
-	}
-	
-	"player_heal_target_none"
-	{
-		"userid"		"short"		// user ID on server
-	}
-	
-	"player_heal"
-	{
-		"userid"		"short"		// user ID on server
-		"entindex"		"long"		// entindex of of the target marine
-	}
-	
-	"player_give_ammo"
-	{
-		"userid"		"short"		// user ID on server
-		"entindex"		"long"		// entindex of of the target marine
-	}
-	
-	"player_deploy_ammo"
-	{
-		"userid"		"short"		// user ID on server
-	}
-	
-	"player_dropped_weapon"
-	{
-		"userid"		"short"		// user ID on server
-	}
-	
-	"marine_selected"
-	{
-		"userid"		"short"		// user ID on server
-		"new_marine"	"long"		// new marine entindex
-		"old_marine"	"long"		// old marine entindex
-		"old_index"		"byte"		// index of the current marine
-		"count"			"byte"		// number of marines commanded
-	}
-	
-	"marine_ignited"
-	{
-		"entindex"		"long"		// entindex of of the target marine
-	}
-	
-	"marine_extinguished"
-	{
-		"entindex"		"long"		// entindex of of the target marine
-		"extinguisher"	"short"		// user ID of extinguisher
-	}
-	
-	"marine_infested"
-	{
-		"entindex"		"long"		// entindex of of the target marine
-	}
-	
-	"marine_infested_cured"
-	{
-		"entindex"		"long"		// entindex of of the target marine
-		"curer"			"short"		// user ID of the curer
-	}
-	
-	"marine_infested_killed"
-	{
-		"userid"		"short"		// user ID on server
-		"entindex"		"long"		// entindex of of the target marine
-	}
-	
-	"marine_no_ammo"
-	{
-		"userid"		"short"		// user ID on server
-		"entindex"		"long"		// entindex of of the target marine
-		"count"			"byte"		// number of marines commanded
-	}
-	
-	"ammo_pickup"
-	{
-		"userid"	"short"		// user ID on server
-		"entindex"	"long"		// entindex of of the marine that picked it up
-	}
-	
-	"item_pickup"
-	{
-		"userid"	"short"		// user ID on server
-		"entindex"	"long"		// item entindex
-		"classname"	"string"	// item name
-		"slot"		"short"		// slot the item was put in
-		"replace"	"bool"		// did it replace another weapon
-		"offhand"	"bool"		// can it be offhanded?
-	}
-	
-	"weapon_reload"
-	{
-		"userid"			"short"		// user ID on server
-		"marine"			"long"		// entindex of the marine
-		"lost"				"short"		// ammo lost in the clip
-		"clipsize"			"short"		// max ammo for that weapon
-		"clipsremaining"	"short"		// remaining clips
-		"clipsmax"			"short"		// remaining clips
-	}
-	
-	"weapon_offhanded"
-	{
-		"userid"	"short"		// user ID on server
-	}
-	
-	"door_recommend_destroy"
-	{
-		"userid"	"short"		// user ID on server
-		"entindex"	"long"		// door entindex
-	}
-	
-	"door_destroyed"
-	{
-		"userid"	"short"		// user ID on server
-		"entindex"	"long"		// door entindex
-	}
-	
-	"door_welded_visible"
-	{
-		"userid"	"short"		// user ID on server
-		"subject"	"long"		// door entindex
-		"entityname"	"string"	// name of the entity they see
-	}
-	
-	"door_unwelded"
-	{
-		"userid"	"short"		// user ID on server
-		"entindex"	"long"		// door entindex
-	}
-	
-	"door_recommend_weld"
-	{
-		"entindex"	"long"		// door entindex
-	}
-	
-	"door_welded"
-	{
-		"userid"	"short"		// user ID on server
-		"entindex"	"long"		// door entindex
-		"inhabited" "bool"		// is the marine inhabited
-	}
-	
-	"sentry_placed"
-	{
-		"userid"	"short"		// user ID on server
-	}
-	
-	"sentry_start_building"
-	{
-		"userid"	"short"		// user ID on server
-		"entindex"	"long"		// sentry entindex
-	}
-	
-	"sentry_stop_building"
-	{
-		"userid"	"short"		// user ID on server
-		"entindex"	"long"		// sentry entindex
-	}
-	
-	"sentry_complete"
-	{
-		"userid"	"short"		// user ID on server
-		"entindex"	"long"		// sentry entindex
-		"marine"	"long"   	// marine entindex who made the sentry
-	}
-	
-	"sentry_rotated"
-	{
-		"userid"	"short"		// user ID on server
-		"entindex"	"long"		// sentry entindex
-	}
-	
-	"sentry_dismantled"
-	{
-		"userid"	"short"		// user ID on server
-		"entindex"	"long"		// sentry entindex
-	}
-	
-	"alien_ignited"
-	{
-		"userid"	"short"		// user ID on server
-		"entindex"	"long"		// thing that got burned
-	}
-	
-	"boulder_lasered"
-	{
-		"userid"	"short"		// user ID on server
-		"entindex"	"long"		// thing that got burned
-	}
-	
-	"physics_visible"
-	{
-		"userid"		"short"		// The player who sees the entity
-		"subject"		"long"		// Entindex of the entity they see
-		"type"			"string"	// Type of the entity they see
-		"entityname"	"string"	// name of the entity they see
-	}
-	
-	"physics_melee"
-	{
-		"attacker"		"short"		// The player who sees the entity
-		"entindex"		"long"		// Entindex of the entity they kicked
-	}
-	
-	"recommend_hold_position"
+	"achievement_write_failed"
 	{
 	}
 	
-	"scanner_important"
+	"player_stats_updated"
+	{
+		"forceupload" "bool"
+	}
+	
+	"round_start_pre_entity"
 	{
 	}
 	
-	"general_hint"
+	"teamplay_round_start"			// round restart
 	{
-		"userid"		"short"		// The player who activated it
+		"full_reset"	"bool"		// is this a full reset of the map
 	}
 	
-	"movement_hint"
+	"client_disconnect"
 	{
-		"userid"		"short"		// The player who needs the hint
 	}
 	
-	"movement_hint_success"
+	"server_pre_shutdown" 		// server is about to be shut down	
 	{
-		"userid"		"short"		// The player succeeded
-	}
-	
-	"alien_died"
-	{
-		"alien"			"short"		// Alien Classify() number
-		"marine"		"short"		// entindex of the marine that killed the alien (0 if none)
-		"weapon"		"short"		// Classify() of the weapon that killed the alien (0 if none)
-	}
-	
-	"fast_reload"
-	{	
-		"marine"		"short"		// entindex of the marine reloading
-		"reloads"		"byte"		// number of fast reloads the marine has done in a row
+		"reason"	"string"	// reason why server is about to be shut down
 	}
 	
 	"difficulty_changed"
@@ -318,83 +265,52 @@
 		"strDifficulty" "string" // new difficulty as string
 	}
 	
-	"achievement_earned"
+	"finale_start"
 	{
-		"player"	"byte"		// entindex of the player
-		"achievement"	"short"		// achievement ID
+		"rushes"		"short"
 	}
-	
-	"mission_success"
-	{
-		"strMapName" "string"
-	}
-	
-// CLIENTSIDE
 
-	"alien_hurt"
+	"finale_win"
 	{
-		"attacker"			"short"		// user ID on server
-		"entindex"			"long"		// the alien
-		"amount"			"float"		// damage done
+		"map_name"		"string"
+		"difficulty"	"short"
 	}
-	
-	"marine_hurt"
+
+	"vote_passed"
 	{
-		"userid"	"short"   	// player index who was hurt				
-		"entindex"	"long"   	// marine entindex who was hurt	
-		"attacker"	"short"	 	// player index who attacked
-		"attackerindex"	"long"	// entindex of entity who attacked
-		"health"	"float"		// remaining percent health points
+		"details"		"string"
+		"param1"		"string"
+		"team"			"byte"
+		"reliable"		"1"		// this event is reliable
 	}
-	
-	"pickup_selected"
+
+//////////////////////////////////////////////////////////////////////
+// Economy events
+//////////////////////////////////////////////////////////////////////
+	"inventory_updated"
 	{
-		"entindex"	"long"		// item entindex
-		"classname"	"string"	// classname of the entity
 	}
-	
-	"sentry_selected"
+	"cart_updated"
 	{
-		"entindex"	"long"		// sentry entindex
 	}
-	
-	"button_area_active"
+	"store_pricesheet_updated"
 	{
-		"userid"	"short"   	// player who sees the active button
-		"entindex"	"long"		// trigger entindex
-		"prop"		"long"		// prop entindex
-		"locked"	"bool"		// does it need hacking?
 	}
-	
-	"button_area_inactive"
+	"gc_connected"
 	{
-		"entindex"	"long"		// trigger entindex
 	}
-	
-	"button_area_used"
+	"item_schema_initialized"
 	{
-		"userid"	"short"		// user ID on server
-		"entindex"	"long"		// item entindex
 	}
-	"jukebox_play_random"
+	"client_loadout_changed"
 	{
-		"fadeintime"	"float"
-		"defaulttrack"	"string"
 	}
-	"jukebox_stop"
+	"gameui_activated"
 	{
-		"fadeouttime"	"float"
 	}
-	"level_up"
+	"gameui_hidden"
 	{
-		"level"	"byte"
 	}
-	"campaign_changed"
-	{
-		"campaign" "string"
-	}
-	"swarm_state_changed"
-	{
-		"state" "short"
-	}
+
 }
+

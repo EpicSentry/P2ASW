@@ -9,7 +9,7 @@
 		"zpos"				"1"
 		"wide"				"156" [$WIN32 && $ENGLISH]
 		"wide"				"176" [$WIN32 && !$ENGLISH]
-		"wide"				"156" [$X360]
+		"wide"				"156" [$GAMECONSOLE]
 		"tall"				"125"
 		"visible"			"1"
 		"enabled"			"1"
@@ -162,7 +162,7 @@
 		"image"					"select_Random"
 		"xpos"					"12"
 		"ypos"					"12"	[$WIN32]
-		"ypos"					"30"	[$X360]
+		"ypos"					"30"	[$GAMECONSOLE]
 		"zpos"					"5"
 		"wide"					"64"
 		"tall"					"64"

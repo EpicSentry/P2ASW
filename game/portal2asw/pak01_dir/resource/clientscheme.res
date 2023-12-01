@@ -113,6 +113,29 @@ Scheme
 	// controls use these to determine their settings
 	BaseSettings
 	{
+		Label.TextDullColor				"TanDark"
+		Label.TextColor					"TanLight"
+		Label.TextBrightColor			"TanLight"
+		Label.SelectedTextColor			"White"
+		Label.BgColor					"Blank"
+		Label.DisabledFgColor1			"Blank"
+		Label.DisabledFgColor2			"LightOrange"
+	
+		Rosette.DefaultFgColor			"White"
+		Rosette.DefaultBgColor			"Blank"
+		Rosette.ArmedBgColor			"Blank"
+		Rosette.DisabledBgColor			"Blank"
+		Rosette.DisabledBorderColor		"Blank"
+		Rosette.LineColor				"192 192 192 128"
+		Rosette.DrawBorder				"1"
+		Rosette.DefaultFont				DefaultSmall
+		Rosette.ArmedFont				Default
+
+		Frame.TopBorderImage				"vgui/menu_backgroud_top"
+		Frame.BottomBorderImage				"vgui/menu_backgroud_bottom"
+		Frame.SmearColor					"0 0 0 225"		[$X360]
+		Frame.SmearColor					"0 0 0 180"		[$WIN32]
+
 		"FgColor"			"255 220 0 100"
 		"BgColor"			"0 0 0 76"
 
@@ -125,6 +148,14 @@ Scheme
 		"DamagedFg"			"180 0 0 230"
 		"BrightDamagedFg"		"255 0 0 255"
 
+		// checkboxes and radio buttons
+		"BaseText"					"OffWhite"
+		"BrightControlText"			"White"
+		"CheckBgColor"				"TransparentBlack"
+		"CheckButtonBorder1" 			"Border.Dark" 		// the left checkbutton border
+		"CheckButtonBorder2"  			"Border.Bright"		// the right checkbutton border
+		"CheckButtonCheck"				"White"				// color of the check itself
+		
 		// weapon selection colors
 		"SelectionNumberFg"		"255 220 0 255"
 		"SelectionTextFg"		"255 220 0 255"
@@ -140,34 +171,42 @@ Scheme
 		"Caution"			"255 48 0 255"
 
 		// Top-left corner of the "Half-Life 2" on the main screen
-		"Main.Title1.X"		"76"
-		"Main.Title1.Y"		"184"
-		"Main.Title1.Color"	"255 255 255 255"
+		"Main.Title1.X"				"32"
+		"Main.Title1.Y"				"280"
+		"Main.Title1.Y_hidef"		"130"
+		"Main.Title1.Color"	"255 255 255 0"
 
 		// Top-left corner of secondary title e.g. "DEMO" on the main screen
-		"Main.Title2.X"		"314"
-		"Main.Title2.Y"		"242"
-		"Main.Title2.Color"	"255 255 255 200"
+		"Main.Title2.X"				"76"
+		"Main.Title2.Y"				"190"
+		"Main.Title2.Y_hidef"		"174"
+		"Main.Title2.Color"	"255 255 255 0"
 
 		// Top-left corner of the menu on the main screen
-		"Main.Menu.X"		"76"
-		"Main.Menu.Y"		"240"
+		"Main.Menu.X"			"32"
+		"Main.Menu.X_hidef"		"76"
+		"Main.Menu.Y"			"340"
+		"Main.Menu.Color"		"168 97 64 255"
+		"Menu.TextColor"		"0 0 0 255"
+		"Menu.BgColor"			"125 125 125 255"
 
 		// Blank space to leave beneath the menu on the main screen
 		"Main.BottomBorder"	"32"
-		
-		// asw
-		Chat.TypingText					"Orange"
-		
-		Rosetta.DefaultFgColor			"White"
-		Rosetta.DefaultBgColor			"Blank"
-		Rosetta.ArmedBgColor			"Blank"
-		Rosetta.DisabledBgColor			"Blank"
-		Rosetta.DisabledBorderColor		"Blank"
-		Rosetta.LineColor				"192 192 192 128"
-		Rosetta.DrawBorder				"0"
-		Rosetta.DefaultFont				RosettaSmall
-		Rosetta.ArmedFont				RosettaLarge
+
+		ScrollBar.Wide						"12"
+
+		ScrollBarButton.FgColor				"Black"
+		ScrollBarButton.BgColor				"Blank"
+		ScrollBarButton.ArmedFgColor		"White"
+		ScrollBarButton.ArmedBgColor		"Blank"
+		ScrollBarButton.DepressedFgColor	"White"
+		ScrollBarButton.DepressedBgColor	"Blank"
+
+		ScrollBarSlider.FgColor				"0 0 0 255"			// nob color
+		ScrollBarSlider.BgColor				"0 0 0 40"			// slider background color
+		ScrollBarSlider.NobFocusColor		"White"
+		ScrollBarSlider.NobDragColor		"White"
+		ScrollBarSlider.Inset				"3"
 	}
 	
 	//////////////////////// FONTS /////////////////////////////
@@ -176,19 +215,22 @@ Scheme
 	Fonts
 	{
 		// fonts are used in order that they are listed
-		// fonts are used in order that they are listed
+		// fonts listed later in the order will only be used if they fulfill a range not already filled
+		// if a font fails to load then the subsequent fonts will replace
+
 		"DebugFixed"
 		{
 			"1"
 			{
 				"name"		"Courier New"
-				"tall"		"14"
+				"tall"		"14"	[!$GAMECONSOLE]
+				"tall"		"18"	[$GAMECONSOLE]
 				"weight"	"400"
 				"antialias" "1"
 			}
 		}
-		// fonts are used in order that they are listed
-		"DebugFixedSmall"
+
+		"DebugFixedSmall" [!$GAMECONSOLE]
 		{
 			"1"
 			{
@@ -198,9 +240,19 @@ Scheme
 				"antialias" "1"
 			}
 		}
-		// fonts listed later in the order will only be used if they fulfill a range not already filled
-		// if a font fails to load then the subsequent fonts will replace
-		Default
+
+		DebugOverlay [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Courier New"
+				"tall"		"14"
+				"weight"	"400"
+				"outline"	"1"
+			}
+		}
+
+		Default [!$GAMECONSOLE]
 		{
 			"1"
 			{
@@ -244,7 +296,8 @@ Scheme
 				"additive"	"1"
 			}
 		}
-		"DefaultSmall"
+
+		"DefaultSmall" [!$GAMECONSOLE]
 		{
 			"1"
 			{
@@ -297,7 +350,8 @@ Scheme
 				"weight"		"0"
 			}
 		}
-		"DefaultVerySmall"
+
+		"DefaultVerySmall" [!$GAMECONSOLE]
 		{
 			"1"
 			{
@@ -357,85 +411,28 @@ Scheme
 				"weight"		"0"
 			}
 		}
-		// asw - infested small font for mission chooser
-		"MissionChooserFont"
-		{
-			"1"
-			{
-				"name"		"Verdana"
-				"tall"		"9"
-				"weight"	"0"
-				"range"		"0x0000 0x017F" //	Basic Latin, Latin-1 Supplement, Latin Extended-A
-				"yres"	"480 599"
-			}
-			"2"
-			{
-				"name"		"Verdana"
-				"tall"		"10"
-				"weight"	"0"
-				"range"		"0x0000 0x017F" //	Basic Latin, Latin-1 Supplement, Latin Extended-A
-				"yres"	"600 767"
-			}
-			"3"
-			{
-				"name"		"Verdana"
-				"tall"		"11"
-				"weight"	"0"
-				"range"		"0x0000 0x017F" //	Basic Latin, Latin-1 Supplement, Latin Extended-A
-				"yres"	"768 1023"
-				"antialias"	"1"
-			}
-			"4"
-			{
-				"name"		"Verdana"
-				"tall"		"17"
-				"weight"	"0"
-				"range"		"0x0000 0x017F" //	Basic Latin, Latin-1 Supplement, Latin Extended-A
-				"yres"	"1024 1199"
-				"antialias"	"1"
-			}
-			"5"
-			{
-				"name"		"Verdana"
-				"tall"		"21"
-				"weight"	"0"
-				"range"		"0x0000 0x017F" //	Basic Latin, Latin-1 Supplement, Latin Extended-A
-				"yres"	"1200 6000"
-				"antialias"	"1"
-			}
-			"6"
-			{
-				"name"		"Verdana"
-				"tall"		"9"
-				"range" 		"0x0000 0x00FF"
-				"weight"		"0"
-			}
-			"7"
-			{
-				"name"		"Arial"
-				"tall"		"8"
-				"range" 		"0x0000 0x00FF"
-				"weight"		"0"
-			}
-		}
-		WeaponIcons
+
+		WeaponIcons [!$GAMECONSOLE]
 		{
 			"1"
 			{
 				"name"		"HalfLife2"
 				"tall"		"64"
+				"tall_hidef"	"58"
 				"weight"	"0"
 				"antialias" "1"
 				"additive"	"1"
 				"custom"	"1"
 			}
 		}
-		WeaponIconsSelected
+
+		WeaponIconsSelected [!$GAMECONSOLE]
 		{
 			"1"
 			{
 				"name"		"HalfLife2"
 				"tall"		"64"
+				"tall_hidef"	"58"
 				"weight"	"0"
 				"antialias" "1"
 				"blur"		"5"
@@ -444,6 +441,20 @@ Scheme
 				"custom"	"1"
 			}
 		}
+
+		WeaponIconsSmall [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"HalfLife2"
+				"tall"		"32"
+				"weight"	"0"
+				"antialias" "1"
+				"additive"	"1"
+				"custom"	"1"
+			}
+		}
+
 		Crosshairs [!$GAMECONSOLE]
 		{
 			"1"
@@ -454,7 +465,7 @@ Scheme
 				"scaley"	"1"
 			}
 		}
-		
+
 		QuickInfo [!$GAMECONSOLE]
 		{
 			"1"
@@ -468,7 +479,8 @@ Scheme
 				"custom"	"1" [!$OSX]
 			}
 		}
-		HudNumbers
+
+		HudNumbers [!$GAMECONSOLE]
 		{
 			"1"
 			{
@@ -480,7 +492,21 @@ Scheme
 				"custom"	"1"
 			}
 		}
-		HudNumbersGlow
+
+		SquadIcon	[!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"HalfLife2"
+				"tall"		"50"
+				"weight"	"0"
+				"antialias" "1"
+				"additive"	"1"
+				"custom"	"1"
+			}
+		}
+
+		HudNumbersGlow [!$GAMECONSOLE]
 		{
 			"1"
 			{
@@ -494,7 +520,8 @@ Scheme
 				"custom"	"1"
 			}
 		}
-		HudNumbersSmall
+
+		HudNumbersSmall [!$GAMECONSOLE]
 		{
 			"1"
 			{
@@ -506,7 +533,8 @@ Scheme
 				"custom"	"1"
 			}
 		}
-		HudSelectionNumbers
+
+		HudSelectionNumbers [!$GAMECONSOLE]
 		{
 			"1"
 			{
@@ -517,7 +545,8 @@ Scheme
 				"additive"	"1"
 			}
 		}
-		HudHintTextLarge
+
+		HudHintTextLarge [!$GAMECONSOLE]
 		{
 			"1"
 			{
@@ -528,7 +557,8 @@ Scheme
 				"additive"	"1"
 			}
 		}
-		HudHintTextSmall
+
+		HudHintTextSmall [!$GAMECONSOLE]
 		{
 			"1"
 			{
@@ -539,7 +569,8 @@ Scheme
 				"additive"	"1"
 			}
 		}
-		HudSelectionText
+
+		HudSelectionText [!$GAMECONSOLE]
 		{
 			"1"
 			{
@@ -582,7 +613,8 @@ Scheme
 				"yres"	"1200 10000"
 			}
 		}
-		BudgetLabel
+
+		BudgetLabel [!$GAMECONSOLE]
 		{
 			"1"
 			{
@@ -592,144 +624,9 @@ Scheme
 				"outline"	"1"
 			}
 		}
-		DebugOverlay
-		{
-			"1"
-			{
-				"name"		"Courier New"
-				"tall"		"14"
-				"weight"	"400"
-				"outline"	"1"
-			}
-		}
-		"CloseCaption_Normal"
-		{
-			"1"
-			{
-				"name"		"Tahoma"
-				"tall"		"26"
-				"weight"	"500"
-			}
-		}
-		"CloseCaption_Italic"
-		{
-			"1"
-			{
-				"name"		"Tahoma"
-				"tall"		"26"
-				"weight"	"500"
-				"italic"	"1"
-			}
-		}
-		"CloseCaption_Bold"
-		{
-			"1"
-			{
-				"name"		"Tahoma"
-				"tall"		"26"
-				"weight"	"900"
-			}
-		}
-		"CloseCaption_BoldItalic"
-		{
-			"1"
-			{
-				"name"		"Tahoma"
-				"tall"		"26"
-				"weight"	"900"
-				"italic"	"1"
-			}
-		}
-		"RosettaSmall"
-		{
-			"1"
-			{
-				"Name"			"Neo Sans"
-				"tall"			"14"
-				"weight"	"100"
-				"antialias" "1"
-				//"dropshadow"	"1"
-			}
-		}
-		"RosettaLarge"
-		{
-			"1"
-			{
-				"Name"			"Neo Sans"
-				"tall"			"18"
-				"weight"	"100"
-				"antialias" "1"
-				//"dropshadow"	"1"
-			}
-		}
-		"InstructorTitle"
-		{
-			"1"
-			{
-				"Name"			"Neo Sans"
-				"tall"			"16"
-				"weight"	"100"
-				"antialias" "1"
-				//"dropshadow"	"1"
-			}
-		}
-		"InstructorTitle_ss"
-		{
-			"1"
-			{
-				"Name"			"Neo Sans"
-				"tall"			"16"
-				"weight"	"100"
-				"antialias" "1"
-				//"dropshadow"	"1"
-			}
-		}
-		"InstructorTitleGlow"
-		{
-			"1"
-			{
-				"Name"			"Neo Sans"
-				"tall"			"16"
-				"weight"	"100"
-				"antialias" "1"
-				//"dropshadow"	"1"
-				"blur"	"2"
-			}
-		}
-		"InstructorTitleGlow_ss"
-		{
-			"1"
-			{
-				"Name"			"Neo Sans"
-				"tall"			"16"
-				"weight"	"100"
-				"antialias" "1"
-				//"dropshadow"	"1"
-				"blur"	"2"
-			}
-		}
-		InstructorButtons
-		{
-			"1"
-			{
-				"bitmap"	"1"
-				"name"		"Buttons"
-				"scalex"	"0.65"
-				"scaley"	"0.65"
-			}
-		}
-		"InstructorKeyBindings"
-		{
-			"1"
-			{
-				"name"		"Trade Gothic"
-				"tall"		"11"
-				"weight"	"500"
-				"antialias" "1"
-			}
-		}
+
 		// this is the symbol font
-		"Marlett"
+		"Marlett" [!$GAMECONSOLE]
 		{
 			"1"
 			{
@@ -739,7 +636,8 @@ Scheme
 				"symbol"	"1"
 			}
 		}
-		"Trebuchet24"
+
+		"Trebuchet24" [!$GAMECONSOLE]
 		{
 			"1"
 			{
@@ -751,7 +649,8 @@ Scheme
 				"additive"	"1"
 			}
 		}
-		"Trebuchet18"
+
+		"Trebuchet18" [!$GAMECONSOLE]
 		{
 			"1"
 			{
@@ -760,75 +659,21 @@ Scheme
 				"weight"	"900"
 			}
 		}
-		ClientTitleFont
+
+		ClientTitleFont [!$GAMECONSOLE]
 		{
 			"1"
 			{
-				"name"  "HalfLife2"
-				"tall"  "46"
+				"name"  "Impact"
+				"tall"			"64"
+				"tall_hidef"	"72"
 				"weight" "0"
 				"additive" "0"
 				"antialias" "1"
 			}
 		}
-		CreditsLogo
-		{
-			"1"
-			{
-				"name"		"HalfLife2"
-				"tall"		"128"
-				"weight"	"0"
-				"antialias" "1"
-				"additive"	"1"
-				"custom"	"1"
-			}
-		}
-		CreditsText
-		{
-			"1"
-			{
-				"name"		"Trebuchet MS"
-				"tall"		"20"
-				"weight"	"900"
-				"antialias" "1"
-				"additive"	"1"
-			}
-		}
-		CreditsOutroLogos
-		{
-			"1"
-			{
-				"name"		"HalfLife2"
-				"tall"		"48"
-				"weight"	"0"
-				"antialias" "1"
-				"additive"	"1"
-				"custom"	"1"
-			}
-		}
-		CreditsOutroText
-		{
-			"1"
-			{
-				"name"		"Verdana"
-				"tall"		"9"
-				"weight"	"900"
-				"antialias" "1"
-			}
-		}
-		CenterPrintText
-		{
-			// note that this scales with the screen resolution
-			"1"
-			{
-				"name"		"Trebuchet MS"
-				"tall"		"18"
-				"weight"	"900"
-				"antialias" "1"
-				"additive"	"1"
-			}
-		}
-		HDRDemoText
+
+		HDRDemoText [!$GAMECONSOLE]
 		{
 			// note that this scales with the screen resolution
 			"1"
@@ -840,57 +685,618 @@ Scheme
 				"additive"	"1"
 			}
 		}
-		// asw
-		"ChatFont"
+				
+		"LargeHUDTitle" [!$GAMECONSOLE]
 		{
 			"1"
 			{
-				"name"		"Verdana"
-				"tall"		"12"
-				"weight"	"700"
-				"yres"	"480 599"
-				"dropshadow"	"1"
+				"name"		"Trade Gothic Bold"
+				"tall"		"20"
+				"weight"	"400"
+				"antialias" "1"
+			}
+		}
+
+		"ItemFontNameSmallest"
+		{
+			"1"
+			{
+				"name"		"UniversLTStd-Cn" [$OSX]
+				"name"		"UniversLTStd-BoldCn" [!$OSX]
+				"tall"		"10"
+				"weight"	"500"
+				"additive"	"0"
+				"antialias" "1"
+			}
+		}
+		"ItemFontNameSmall"
+		{
+			"1"
+			{
+				"name"		"UniversLTStd-Cn" [$OSX]
+				"name"		"UniversLTStd-BoldCn" [!$OSX]
+				"tall"		"11"
+				"weight"	"500"
+				"additive"	"0"
+				"antialias" "1"
+			}
+		}
+		"ItemFontNameLarge"
+		{
+			"1"
+			{
+				"name"		"UniversLTStd-Cn" [$OSX]
+				"name"		"UniversLTStd-BoldCn" [!$OSX]
+				"tall"		"15"
+				"weight"	"400"
+				"antialias"	"1"
+				"yres"	"501 6000" [$OSX]
+			}
+		}
+		"ItemFontAttribSmallest"
+		{
+			"1"
+			{
+				"name"		"UniversLTStd-Cn" [$OSX]
+				"name"		"UniversLTStd-BoldCn" [!$OSX]
+				"tall"		"7"
+				"weight"	"500"
+				"additive"	"0"
+				"antialias" 	"1"
+			}
+		}
+		"ItemFontAttribSmall"
+		{
+			"1"
+			{
+				"name"		"UniversLTStd-Cn" [$OSX]
+				"name"		"UniversLTStd-BoldCn" [!$OSX]
+				"tall"		"8"
+				"weight"	"500"
+				"additive"	"0"
+				"antialias" 	"1"
+			}
+		}
+		"ItemFontAttribLarge"
+		{
+			"1"
+			{
+				"name"		"UniversLTStd-Cn" [$OSX]
+				"name"		"UniversLTStd-BoldCn" [!$OSX]
+				"tall"		"11"
+				"weight"	"500"
+				"additive"	"0"
+				"antialias" 	"1"
+			}
+		}	
+
+		"EconButtonTextLargeTitle"
+		{
+			"isproportional"	"only"		
+			"1"
+			{
+				"name"		"UniversLTStd-BoldCn"
+				"tall"		"30"
+				"weight"	"400"
+				"antialias"	"1"
+			}
+		}
+
+		"EconButtonTextLarge"
+		{
+			"isproportional"	"only"		
+			"1"
+			{
+				"name"		"UniversLTStd-Cn" [$OSX]
+				"name"		"UniversLTStd-BoldCn" [!$OSX]
+				"tall"		"22"
+				"weight"	"400"
+				"antialias"	"1"
+			}
+		}
+
+		"EconButtonText" [$GAMECONSOLE]
+		{
+			"isproportional"	"only"		
+			"1"
+			{
+				"name"		"UniversLTStd-Cn"
+				"tall"		"18"
+				"weight"	"400"
+				"antialias"	"1"
+			}
+		}
+	
+		"EconButtonText" [!$GAMECONSOLE]
+		{
+			"isproportional"	"only"		
+			"1" [$OSX]
+			{
+				"name"		"UniversLTStd-Cn"
+				"tall"		"16"
+				"weight"	"400"
+				"antialias"	"1"
+				"yres"	"1 500"
 			}
 			"2"
 			{
-				"name"		"Verdana"
-				"tall"		"13"
-				"weight"	"700"
-				"yres"	"600 767"
-				"dropshadow"	"1"
+				"name"		"UniversLTStd-BoldCn" [!$OSX]
+				"name"		"UniversLTStd-Cn" [$OSX]
+				"tall"		"15"
+				"weight"	"400"
+				"antialias"	"1"
+				"yres"	"501 6000" [$OSX]
 			}
-			"3"
+		}
+
+		"EconCartPrice"
+		{
+			"isproportional"	"only"		
+			"1"
 			{
-				"name"		"Verdana"
-				"tall"		"14"
-				"weight"	"700"
-				"yres"	"768 1023"
-				"dropshadow"	"1"
+				"name"		"UniversLTStd-Cn" [$OSX]
+				"name"		"UniversLTStd-BoldCn" [!$OSX]
+				"tall"		"16"
+				"weight"	"400"
+				"antialias"	"1"
 			}
-			"4"
+		}
+
+		"EconCartTotal"
+		{
+			"isproportional"	"only"		
+			"1"
 			{
-				"name"		"Verdana"
+				"name"		"UniversLTStd-Cn" [$OSX]
+				"name"		"UniversLTStd-BoldCn" [!$OSX]
 				"tall"		"20"
-				"weight"	"700"
-				"yres"	"1024 1199"
-				"dropshadow"	"1"
+				"weight"	"400"
+				"antialias"	"1"
 			}
-			"5"
+		}
+
+		"EconStorePrice"
+		{
+			"isproportional"	"only"		
+			"1"
 			{
-				"name"		"Verdana"
-				"tall"		"24"
-				"weight"	"700"
-				"yres"	"1200 10000"
-				"dropshadow"	"1"
+				"name"		"UniversLTStd-Cn" [$OSX]
+				"name"		"UniversLTStd-BoldCn" [!$OSX]
+				"tall"		"18"
+				"weight"	"400"
+				"antialias"	"1"
 			}
+		}
+
+		"EconStorePriceOriginal"
+		{
+			"isproportional"	"only"		
+			"1"
+			{
+				"name"		"UniversLTStd-Cn" [$OSX]
+				"name"		"UniversLTStd-BoldCn" [!$OSX]
+				"tall"		"18"
+				"weight"	"400"
+				"antialias"	"1"
+			}
+		}
+
+		"EconFontStoreTitle"
+		{
+			"isproportional"	"only"		
+			"1"
+			{
+				"name"		"UniversLTStd-Cn"
+				"tall"		"34"
+				"weight"	"0"
+				"antialias"	"1"
+			}
+		}
+
+		"EconFontMediumBold"
+		{
+			"isproportional"	"only"		
+			"1"
+			{
+				"name"		"UniversLTStd-Cn" [$OSX]
+				"name"		"UniversLTStd-BoldCn" [!$OSX]
+				"tall"		"24"
+				"weight"	"400"
+				"antialias"	"1"
+			}
+		}
+
+		"EconFontMediumSmallBold"
+		{
+			"isproportional"	"only"		
+			"1"
+			{
+				"name"		"UniversLTStd-Cn" [$OSX]
+				"name"		"UniversLTStd-BoldCn" [!$OSX]
+				"tall"		"14"
+				"weight"	"400"
+				"antialias"	"1"
+			}
+		}
+
+		"EconFontSmall"
+		{
+			"isproportional"	"only"		
+			"1"
+			{
+				"name"		"UniversLTStd-Cn"
+				"tall"		"14"
+				"weight"	"400"
+				"antialias"	"1"
+			}
+		}
+
+		"EconFontSmallBold"
+		{
+			"isproportional"	"only"		
+			"1"
+			{
+				"name"		"UniversLTStd-Cn" [$OSX]
+				"name"		"UniversLTStd-BoldCn" [!$OSX]
+				"tall"		"14"
+				"weight"	"400"
+				"antialias"	"1"
+			}
+		}
+
+		"EconFontSmallestBold"
+		{
+			"isproportional"	"only"		
+			"1"
+			{
+				"name"		"UniversLTStd-Cn" [$OSX]
+				"name"		"UniversLTStd-BoldCn" [!$OSX]
+				"tall"		"12"
+				"weight"	"400"
+				"antialias"	"1"
+			}
+		}
+
+		"EconFontSmallest"
+		{
+			"isproportional"	"only"		
+			"1"
+			{
+				"name"		"UniversLTStd-Cn"
+				"tall"		"12"
+				"weight"	"400"
+				"antialias"	"1"
+			}
+		}
+
+	}
+
+	//
+	//////////////////// BORDERS //////////////////////////////
+	//
+	// describes all the border types
+	Borders
+	{
+		LoadoutItemBorder
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"store/store_item_bg"
+			"src_corner_height"		"16"				// pixels inside the image
+			"src_corner_width"		"16"
+			"draw_corner_width"		"8"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"8"	
+		}
+		LoadoutItemMouseOverBorder
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"store/store_item_bg_highlight"
+			"src_corner_height"		"16"				// pixels inside the image
+			"src_corner_width"		"16"
+			"draw_corner_width"		"8"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"8"	
+		}
+		ItemSelectionBorder
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"store/store_item_sel_bg"
+			"src_corner_height"		"16"				// pixels inside the image
+			"src_corner_width"		"16"
+			"draw_corner_width"		"8"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"8"	
+		}
+		ItemPickupBorder
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"store/store_item_pickup_bg"
+			"src_corner_height"		"16"				// pixels inside the image
+			"src_corner_width"		"16"
+			"draw_corner_width"		"8"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"8"	
+		}
+		LoadoutItemPopupBorder
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"store/store_preview_bg"
+		}
+		EconButtonDefault
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"btn_bg"
+			"src_corner_height"		"16"				// pixels inside the image
+			"src_corner_width"		"16"
+			"draw_corner_width"		"2"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"2"	
+		}
+		EconButtonMouseOver
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"btn_bg_over"
+			"src_corner_height"		"16"				// pixels inside the image
+			"src_corner_width"		"16"
+			"draw_corner_width"		"4"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"4"	
+		}
+		EconFooterButtonBorder
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"store/store_bottom_bar_button_bg"
+			"src_corner_height"		"16"				// pixels inside the image
+			"src_corner_width"		"16"
+			"draw_corner_width"		"8"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"8"	
+		}
+		EconFooterButtonMouseOverBorder
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"store/store_bottom_bar_button_highlight_bg"
+			"src_corner_height"		"16"				// pixels inside the image
+			"src_corner_width"		"16"
+			"draw_corner_width"		"4"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"4"	
+		}
+		EconDialogBorder
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"store/store_default_dialog"
+			"src_corner_height"		"16"				// pixels inside the image
+			"src_corner_width"		"16"
+			"draw_corner_width"		"8"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"8"
+		}
+		BackpackItemBorder
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"store/store_backpack_bg"
+			"src_corner_height"		"24"				// pixels inside the image
+			"src_corner_width"		"24"
+			"draw_corner_width"		"11"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"11"	
+		}
+		BackpackItemMouseOverBorder
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"store/store_backpack_bg_highlight"
+			"src_corner_height"		"24"				// pixels inside the image
+			"src_corner_width"		"24"
+			"draw_corner_width"		"11"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"11"	
+		}
+		BackpackItemSelectedBorder
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"store/store_backpack_bg_highlight"
+			"src_corner_height"		"24"				// pixels inside the image
+			"src_corner_width"		"24"
+			"draw_corner_width"		"11"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"11"	
+		}
+		GrayDialogBorder
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"btn_bg"
+			"src_corner_height"		"16"				// pixels inside the image
+			"src_corner_width"		"16"
+			"draw_corner_width"		"8"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"8"
+		}
+		OutlinedGreyBox
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"btn_bg"
+			"src_corner_height"		"16"				// pixels inside the image
+			"src_corner_width"		"16"
+			"draw_corner_width"		"8"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"8"
+		}
+		OutlinedDullGreyBox
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"btn_bg"
+			"src_corner_height"		"16"				// pixels inside the image
+			"src_corner_width"		"16"
+			"draw_corner_width"		"8"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"8"
+		}
+		StorePreviewTabSelected
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"btn_bg"
+			"src_corner_height"		"16"				// pixels inside the image
+			"src_corner_width"		"16"
+			"draw_corner_width"		"8"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"8"
+		}
+		StorePreviewTabUnselected
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"btn_bg"
+			"src_corner_height"		"16"				// pixels inside the image
+			"src_corner_width"		"16"
+			"draw_corner_width"		"8"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"8"
+		}
+		StoreDiscountBorder
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"			
+			"image"					"store/store_discount_corner"
+			"src_corner_height"		"32"				// pixels inside the image
+			"src_corner_width"		"32"
+			"draw_corner_width"		"4"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"4"	
+		}
+		StorePreviewBorder
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"btn_bg"
+		}
+		StoreIconPreviewBorder
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"store/store_preview_bg"
+		}
+		StorePreviewTooltip
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"store/store_tooltip_bg"
+		}
+		ItemBaseBorder
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"btn_bg"
+			"src_corner_height"		"23"				// pixels inside the image
+			"src_corner_width"		"23"
+			"draw_corner_width"		"5"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"5"	
+		}
+		StoreTabActive
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"store/store_tab_selected"
+			"src_corner_height"		"16"				// pixels inside the image
+			"src_corner_width"		"16"
+			"draw_corner_width"		"4"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"4"	
+		}
+		StoreTabNormal
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"store/store_tab_unselected"
+			"src_corner_height"		"16"				// pixels inside the image
+			"src_corner_width"		"16"
+			"draw_corner_width"		"4"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"4"	
+		}
+		StoreBlueButton
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"btn_econ_blue"
+			"src_corner_height"		"16"				// pixels inside the image
+			"src_corner_width"		"16"
+			"draw_corner_width"		"4"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"4"	
+		}
+		StoreBlueOverButton
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"store/button_econ_blue_over"
+			"src_corner_height"		"16"				// pixels inside the image
+			"src_corner_width"		"16"
+			"draw_corner_width"		"4"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"4"	
+		}
+
+		StoreItemBorder
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"store/store_backpack_bg"
+			"src_corner_height"		"24"				// pixels inside the image
+			"src_corner_width"		"24"
+			"draw_corner_width"		"11"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"11"	
+		}
+		StoreItemMouseOverBorder
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"store/store_backpack_bg_highlight"
+			"src_corner_height"		"24"				// pixels inside the image
+			"src_corner_width"		"24"
+			"draw_corner_width"		"11"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"11"	
+		}
+		StoreItemSelectedBorder
+		{
+			"bordertype"			"scalable_image"
+			"backgroundtype"		"2"
+			
+			"image"					"store/store_backpack_bg_highlight"
+			"src_corner_height"		"24"				// pixels inside the image
+			"src_corner_width"		"24"
+			"draw_corner_width"		"11"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"11"	
 		}
 	}
 
-	
 	//////////////////////// CUSTOM FONT FILES /////////////////////////////
 	//
 	// specifies all the custom (non-system) font files that need to be loaded to service the above described fonts
-	CustomFontFiles
+	CustomFontFiles [!$GAMECONSOLE]
 	{
 		"1"		"resource/HALFLIFE2.vfont"
 		"2"		"resource/HL2crosshairs.vfont"

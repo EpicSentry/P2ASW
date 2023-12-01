@@ -8,7 +8,7 @@
 		"ypos"				"0"
 		"zpos"				"1"
 		"wide"				"146"
-		"tall"				"85"	[$X360]
+		"tall"				"85"	[$GAMECONSOLE]
 		"tall"				"45"	[$WIN32]
 		"visible"			"1"
 		"enabled"			"1"
@@ -16,7 +16,7 @@
 		"paintborder"		"1"
 	}
 
-	"BtnPrivate"	[$X360]
+	"BtnPrivate"	[$GAMECONSOLE]
 	{
 		"ControlName"			"BaseModHybridButton"
 		"fieldName"				"BtnPrivate"
@@ -46,7 +46,7 @@
 		"ControlName"			"BaseModHybridButton"
 		"fieldName"				"BtnFriends"
 		"xpos"					"0"
-		"ypos"					"20"	[$X360]
+		"ypos"					"20"	[$GAMECONSOLE]
 		"ypos"					"0"		[$WIN32]
 		"zpos"					"2"
 		"wide"					"140"
@@ -57,7 +57,7 @@
 		"enabled"				"1"
 		"tabPosition"			"0"
 		"wrap"					"1"
-		"navUp"					"BtnPrivate"	[$X360]
+		"navUp"					"BtnPrivate"	[$GAMECONSOLE]
 		"navUp"					"BtnPublic"		[$WIN32]
 		"navDown"				"BtnPublic"
 		"labelText"				"#L4D360UI_Access_Friends"
@@ -73,7 +73,7 @@
 		"ControlName"			"BaseModHybridButton"
 		"fieldName"				"BtnPublic"
 		"xpos"					"0"
-		"ypos"					"40"	[$X360]
+		"ypos"					"40"	[$GAMECONSOLE]
 		"ypos"					"20"	[$WIN32]
 		"zpos"					"2"
 		"wide"					"140"
@@ -85,7 +85,7 @@
 		"tabPosition"			"0"
 		"wrap"					"1"
 		"navUp"					"BtnFriends"
-		"navDown"				"BtnSyslink"	[$X360]
+		"navDown"				"BtnSyslink"	[$GAMECONSOLE]
 		"navDown"				"BtnFriends"	[$WIN32]
 		"labelText"				"#L4D360UI_Access_Public"
 		"tooltiptext"			"#L4D360UI_Lobby_OpenToPublic_Tip"
@@ -95,7 +95,7 @@
 		"EnableCondition" 		"LiveRequired"		
 	}
 	
- 	"BtnSyslink"	[$X360]
+ 	"BtnSyslink"	[$GAMECONSOLE]
  	{
  		"ControlName"			"BaseModHybridButton"
  		"fieldName"				"BtnSyslink"

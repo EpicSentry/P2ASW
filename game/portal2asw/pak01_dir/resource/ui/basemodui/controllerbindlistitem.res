@@ -50,7 +50,7 @@
 		"tabPosition"					"0"
 		"proportionalToParent"			"1"
 		"Font"							"DefaultLarge"
-		"labelText"						"#L4D360UI_Controller_PressAButton"	[$X360]
+		"labelText"						"#L4D360UI_Controller_PressAButton"	[$GAMECONSOLE]
 		"labelText"						"#L4D360UI_Controller_PressAKey"	[$WIN32]
 	}
 	

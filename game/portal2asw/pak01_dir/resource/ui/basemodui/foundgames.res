@@ -7,27 +7,13 @@
 		"xpos"							"0"
 		"ypos"							"0"
 		"wide"							"f0"
-		"tall"							"f0"	[$WIN32]
-		"tall"							"360"	[$X360]
+		"tall"							"425"	[$WIN32]
+		"tall"							"360"	[$GAMECONSOLE]
 		"autoResize"					"0"
 		"pinCorner"						"0"
 		"visible"						"1"
 		"enabled"						"1"
 		"tabPosition"					"0"
-	}
-	
-	"Title"
-	{
-		"fieldName"		"Title"
-		"xpos"		"c-266"
-		"ypos"		"61"
-		"wide"		"250"
-		"tall"		"19"
-		"zpos"		"5"
-		"font"		"DefaultExtraLarge"
-		"textAlignment"		"west"
-		"ControlName"		"Label"
-		"fgcolor_override"		"224 224 224 255"
 	}
 	
 	"ImgBackground" [$WIN32]
@@ -133,9 +119,9 @@
 		"ControlName"					"Label"
 		"fieldName"						"LblCampaign"
 		"xpos"							"c90"	[$WIN32]
-		"ypos"							"245"	[$WIN32]
-		"xpos"							"c107"	[$X360]
-		"ypos"							"110"	[$X360]
+		"ypos"							"235"	[$WIN32]
+		"xpos"							"c107"	[$GAMECONSOLE]
+		"ypos"							"110"	[$GAMECONSOLE]
 		"zpos"							"2"
 		"wide"							"200"
 		"tall"							"12"
@@ -147,18 +133,19 @@
 		"labelText"						""
 		"textAlignment"					"north-west"
 		"Font"							"DefaultMedium"
-		//"fgcolor_override"				"TextYellow"
+		"fgcolor_override"				"TextYellow"
 	}
 		
 	"ImgLevelImage"
 	{
 		"ControlName"			"ImagePanel"
 		"fieldName"				"ImgLevelImage"
-		"xpos"					"c91"
-		"ypos"					"139"
-		"wide"					"133"
-		"tall"					"100"
-		"zois"					"1"
+		"xpos"					"c90"	[$WIN32]
+		"ypos"					"142"	[$WIN32]
+		"xpos"					"c107"	[$GAMECONSOLE]
+		"ypos"					"135"	[$GAMECONSOLE]
+		"wide"					"160"
+		"tall"					"80"
 		"scaleImage"			"1"
 		"pinCorner"				"0"
 		"visible"				"0"
@@ -169,20 +156,43 @@
 	}	
 	"ImgFrame"
 	{
-		"ControlName"			"Panel"
+		"ControlName"			"ImagePanel"
 		"fieldName"				"ImgFrame"
-		"xpos"					"c90"
-		"ypos"					"138"
-		"wide"					"135"
-		"tall"					"102"
+		"xpos"					"c85"	[$WIN32]
+		"ypos"					"132"	[$WIN32]
+		"xpos"					"c102"	[$GAMECONSOLE]
+		"ypos"					"125"	[$GAMECONSOLE]
+		"wide"					"196"
+		"tall"					"98"
 		"scaleImage"			"1"
 		"pinCorner"				"0"
-		"visible"				"0"
-		"enabled"				"0"
+		"visible"				"1"
+		"enabled"				"1"
 		"tabPosition"			"0"
-		"bgcolor_override"		"0 0 0 128"
-		//"image"					"campaignFrame"
-		//"scaleImage"			"1"
+		"image"					"campaignFrame"
+		"scaleImage"			"1"
+	}
+	
+	"LblChapter"
+	{
+		"ControlName"					"Label"
+		"fieldName"						"LblChapter"
+		"xpos"							"c90"	[$WIN32]
+		"ypos"							"250"	[$WIN32]
+		"xpos"							"c107"	[$GAMECONSOLE]
+		"ypos"							"230"	[$GAMECONSOLE]
+		"zpos"							"2"
+		"wide"							"200"
+		"tall"							"12"
+		"autoResize"					"0"
+		"pinCorner"						"0"
+		"visible"						"0"
+		"enabled"						"1"
+		"tabPosition"					"0"
+		"labelText"						""
+		"textAlignment"					"north-west"
+		"Font"							"DefaultMedium"
+		"fgcolor_override"				"TextYellow"
 	}
 
 	"LblAuthor"	[$WIN32]
@@ -191,17 +201,40 @@
 		"fieldName"						"LblAuthor"
 		"xpos"							"c90"
 		"zpos"							"2"
-		"ypos"							"258"
+		"ypos"							"265"
 		"wide"							"200"
 		"tall"							"12"
-		"visible"						"1"
+		"autoResize"					"0"
+		"pinCorner"						"0"
+		"visible"						"0"
 		"enabled"						"1"
 		"tabPosition"					"0"
 		"labelText"						""
 		"textAlignment"					"north-west"
-		"Font"							"Default"
-		//"fgcolor_override"				"255 255 255 255"
-		//"fgcolor_override"				"TextYellow"
+		"Font"							"DefaultMedium"
+		"fgcolor_override"				"TextYellow"
+	}
+	
+	"LblGameStatus"
+	{
+		"ControlName"					"Label"
+		"fieldName"						"LblGameStatus"
+		"xpos"							"c90"	[$WIN32]
+		"ypos"							"280"	[$WIN32]
+		"xpos"							"c107"	[$GAMECONSOLE]	
+		"ypos"							"270"	[$GAMECONSOLE]
+		"zpos"							"2"
+		"wide"							"200"
+		"tall"							"12"
+		"autoResize"					"0"
+		"pinCorner"						"0"
+		"visible"						"0"
+		"enabled"						"1"
+		"tabPosition"					"0"
+		"labelText"						""
+		"textAlignment"					"north-west"
+		"Font"							"DefaultMedium"
+		"fgcolor_override"				"TextYellow"
 	}
 	
 	"LblPlayerAccess"
@@ -209,9 +242,9 @@
 		"ControlName"					"Label"
 		"fieldName"						"LblPlayerAccess"
 		"xpos"							"c90"	[$WIN32]
-		"ypos"							"280"	[$WIN32]
-		"xpos"							"c107"	[$X360]
-		"ypos"							"290"	[$X360]
+		"ypos"							"295"	[$WIN32]
+		"xpos"							"c107"	[$GAMECONSOLE]
+		"ypos"							"290"	[$GAMECONSOLE]
 		"zpos"							"2"
 		"wide"							"200"
 		"tall"							"12"
@@ -222,8 +255,8 @@
 		"tabPosition"					"0"
 		"labelText"						""
 		"textAlignment"					"north-west"
-		"Font"							"Default"
-		//"fgcolor_override"				"TextYellow"
+		"Font"							"DefaultMedium"
+		"fgcolor_override"				"TextYellow"
 	}
 	
 	"LblGameDifficulty"
@@ -231,9 +264,9 @@
 		"ControlName"					"Label"
 		"fieldName"						"LblGameDifficulty"
 		"xpos"							"c90"	[$WIN32]
-		"ypos"							"292"	[$WIN32]
-		"xpos"							"c107"	[$X360]	
-		"ypos"							"250"	[$X360]
+		"ypos"							"310"	[$WIN32]
+		"xpos"							"c107"	[$GAMECONSOLE]	
+		"ypos"							"250"	[$GAMECONSOLE]
 		"zpos"							"2"
 		"wide"							"200"
 		"tall"							"12"
@@ -244,8 +277,8 @@
 		"tabPosition"					"0"
 		"labelText"						""
 		"textAlignment"					"north-west"
-		"Font"							"Default"
-		//"fgcolor_override"				"TextYellow"
+		"Font"							"DefaultMedium"
+		"fgcolor_override"				"TextYellow"
 	}
 	
 	"LblNumPlayers"
@@ -253,9 +286,9 @@
 		"ControlName"					"Label"
 		"fieldName"						"LblNumPlayers"
 		"xpos"							"c90"	[$WIN32]
-		"ypos"							"304"	[$WIN32]
-		"xpos"							"c107"	[$X360]
-		"ypos"							"310"	[$X360]
+		"ypos"							"325"	[$WIN32]
+		"xpos"							"c107"	[$GAMECONSOLE]
+		"ypos"							"310"	[$GAMECONSOLE]
 		"zpos"							"2"
 		"wide"							"200"
 		"tall"							"12"
@@ -266,8 +299,8 @@
 		"tabPosition"					"0"
 		"labelText"						""
 		"textAlignment"					"north-west"
-		"Font"							"Default"
-		//"fgcolor_override"				"TextYellow"
+		"Font"							"DefaultMedium"
+		"fgcolor_override"				"TextYellow"
 	}
 
 	"LblNewVersion"	[$WIN32]
@@ -275,7 +308,7 @@
 		"ControlName"					"Label"
 		"fieldName"						"LblNewVersion"
 		"xpos"							"c90"
-		"ypos"							"355"
+		"ypos"							"375"
 		"zpos"							"2"
 		"wide"							"200"
 		"tall"							"12"
@@ -286,16 +319,16 @@
 		"tabPosition"					"0"
 		"labelText"						"#L4D360UI_FoundGames_DownloadNewVersion"
 		"textAlignment"					"north-west"
-		"Font"							"Default"
-		//"fgcolor_override"				"TextYellow"
+		"Font"							"DefaultMedium"
+		"fgcolor_override"				"TextYellow"
 	}
 	
 	"BtnWebsite" [$WIN32]
 	{
 		"ControlName"					"BaseModHybridButton"
 		"fieldName"						"BtnWebsite"
-		"xpos"							"c82"
-		"ypos"							"340"
+		"xpos"							"c90"
+		"ypos"							"360"
 		"zpos"							"2"
 		"wide"							"200"
 		"tall"							"15"
@@ -307,58 +340,58 @@
 		"command"						"Website"
 		"labelText"						""
 		"textAlignment"					"north-west"
-		"style"							"FlyoutMenuButton" //MainMenuSmallButton"
+		"style"							"MainMenuSmallButton"
 	}
     
-// 	"IconForwardArrow" [$WIN32]
-// 	{
-// 		"ControlName"			"ImagePanel"
-// 		"fieldName"				"IconForwardArrow"
-// 		"xpos"					"c75"
-// 		"ypos"					"345"
-// 		"wide"					"15"
-// 		"tall"					"15"
-// 		"scaleImage"			"1"
-// 		"pinCorner"				"0"
-// 		"visible"				"0"
-// 		"enabled"				"1"
-// 		"tabPosition"			"0"
-// 		"image"					"icon_button_arrow_right"
-// 		"scaleImage"			"1"
-// 	}
-// 	"BtnJoinSelected" [$WIN32]
-// 	{
-// 		"ControlName"			"BaseModHybridButton"
-// 		"fieldName"				"BtnJoinSelected"
-// 		"xpos"					"c90"
-// 		"ypos"					"345"
-// 		"zpos"					"2"
-// 		"wide"					"200"
-// 		"tall"					"15"
-// 		"autoResize"			"1"
-// 		"pinCorner"				"0"
-// 		"visible"				"0"
-// 		"enabled"				"1"
-// 		"tabPosition"			"0"
-// 		"wrap"					"1"
-// 		"labelText"				"#L4D360UI_FoundGames_JoinGame"
-// 		"tooltiptext"			"#L4D360UI_JoinGame"
-// 		"style"					"MainMenuSmallButton"
-// 		"command"				"JoinSelected"
-// 		EnabledTextInsetX		"2"
-// 		DisabledTextInsetX		"2"
-// 		FocusTextInsetX			"2"
-// 		OpenTextInsetX			"2"
-// 		"navLeft"				"DrpCreateGame"
-// 		"navUp"					"GplGames"
-// 	}
+	"IconForwardArrow" [$WIN32]
+	{
+		"ControlName"			"ImagePanel"
+		"fieldName"				"IconForwardArrow"
+		"xpos"					"c75"
+		"ypos"					"345"
+		"wide"					"15"
+		"tall"					"15"
+		"scaleImage"			"1"
+		"pinCorner"				"0"
+		"visible"				"0"
+		"enabled"				"1"
+		"tabPosition"			"0"
+		"image"					"icon_button_arrow_right"
+		"scaleImage"			"1"
+	}
+	"BtnJoinSelected" [$WIN32]
+	{
+		"ControlName"			"BaseModHybridButton"
+		"fieldName"				"BtnJoinSelected"
+		"xpos"					"c90"
+		"ypos"					"345"
+		"zpos"					"2"
+		"wide"					"200"
+		"tall"					"15"
+		"autoResize"			"1"
+		"pinCorner"				"0"
+		"visible"				"0"
+		"enabled"				"1"
+		"tabPosition"			"0"
+		"wrap"					"1"
+		"labelText"				"#L4D360UI_FoundGames_JoinGame"
+		"tooltiptext"			"#L4D360UI_JoinGame"
+		"style"					"MainMenuSmallButton"
+		"command"				"JoinSelected"
+		EnabledTextInsetX		"2"
+		DisabledTextInsetX		"2"
+		FocusTextInsetX			"2"
+		OpenTextInsetX			"2"
+		"navLeft"				"DrpCreateGame"
+		"navUp"					"GplGames"
+	}
 
 	"BtnDownloadSelected" [$WIN32]
 	{
 		"ControlName"			"BaseModHybridButton"
 		"fieldName"				"BtnDownloadSelected"
 		"xpos"					"c90"
-		"ypos"					"325"
+		"ypos"					"345"
 		"zpos"					"2"
 		"wide"					"140"
 		"tall"					"15"
@@ -385,20 +418,20 @@
 		"ControlName"			"ImagePanel"
 		"fieldName"				"SearchingIcon"
 		"xpos"					"c214"		[$WIN32]
-		"xpos"					"r128"		[$X360]
+		"xpos"					"r128"		[$GAMECONSOLE]
 		"ypos"					"27"
 		"zpos"					"2"
 		"wide"					"32"
 		"tall"					"32"
 		"pinCorner"				"0"
-		"visible"				"0"
+		"visible"				"1"
 		"enabled"				"1"
 		"tabPosition"			"0"
 		"scaleImage"			"1"
-		"image"					"common/swarm_cycle"
+		"image"					"spinner"
 	}
 	
-	"LblPressX"		[$X360]
+	"LblPressX"		[$GAMECONSOLE]
 	{
 		"ControlName"					"Label"
 		"fieldName"						"LblPressX"
@@ -422,8 +455,8 @@
 		"fieldName"						"LblNoGamesFound"
 		"xpos"							"c-142"		[$WIN32]
 		"ypos"							"90"		[$WIN32]
-		"xpos"							"c-285"		[$X360]
-		"ypos"							"110"		[$X360]
+		"xpos"							"c-285"		[$GAMECONSOLE]
+		"ypos"							"110"		[$GAMECONSOLE]
 		"wide"							"380"
 		"tall"							"20"
 		"zpos"							"2"
@@ -433,7 +466,7 @@
 		"enabled"						"1"
 		"tabPosition"					"0"
 		"labelText"						""	//"No Campaign Games Found"
-		"textAlignment"					"center"	[$X360]
+		"textAlignment"					"center"	[$GAMECONSOLE]
 		"textAlignment"					"west"		[$WIN32]
 		"Font"							"DefaultBold"
 	}
@@ -444,11 +477,11 @@
 		"fieldName"						"LblSearching"
 		"xpos"							"c-320"		[$WIN32]
 		"ypos"							"38"		[$WIN32]
-		"xpos"							"80"		[$X360]
-		"ypos"							"95"		[$X360]
+		"xpos"							"80"		[$GAMECONSOLE]
+		"ypos"							"95"		[$GAMECONSOLE]
 		"zpos"							"0"
 		"wide"							"380"		[$WIN32]
-		"wide"							"370"		[$X360]
+		"wide"							"370"		[$GAMECONSOLE]
 		"tall"							"195"
 		"zpos"							"2"
 		"autoResize"					"0"
@@ -459,7 +492,7 @@
 		"labelText"						""
 		"textAlignment"					"center"
 		"Font"							"MainBold"		[$WIN32]
-		"Font"							"FrameTitle"	[$X360]
+		"Font"							"FrameTitle"	[$GAMECONSOLE]
 	}
 	
 	// top line
@@ -500,140 +533,84 @@
 		"scaleImage"			"1"
 	}
 	
-// 	"DrpCreateGame"
-// 	{
-// 		"ControlName"			"BaseModHybridButton"
-// 		"fieldName"				"DrpCreateGame"
-// 		"xpos"					"c-250" [$WIN32]
-// 		"ypos"					"375"	[$WIN32]
-// 		"wide"					"290"	[$WIN32]
-// 		"tall"					"15"	[$WIN32]
-// 		"xpos"					"100"	[$X360]
-// 		"ypos"					"317"	[$X360]
-// 		"wide"					"180"	[$X360]
-// 		"tall"					"20"	[$X360]
-// 		"autoResize"			"1"
-// 		"pinCorner"				"0"
-// 		"visible"				"1"
-// 		"enabled"				"1"
-// 		"tabPosition"			"0"
-// 		"wrap"					"1"
-// 		EnabledTextInsetX		"2"	[$WIN32]
-// 		DisabledTextInsetX		"2"	[$WIN32]
-// 		FocusTextInsetX			"2"	[$WIN32]
-// 		OpenTextInsetX			"2"	[$WIN32]
-// 		"navRight"				"BtnJoinSelected" [$WIN32]
-// 		"navLeft"				"GplGames" [$WIN32]
-// 		"navUp"					"GplGames" [$WIN32]
-// 		"navDown"				"BtnCancel" [$WIN32]
-// 		//button and label
-// 		"labelText"				"#L4D360UI_GameSettings_Create_Lobby"
-// 		"style"					"DropDownButton" [$X360]
-// 		"style"					"MainMenuSmallButton" [$WIN32]
-// 		"command"				"CreateGame"
-// 		"ActivationType"		"1" [$X360]
-// 		"allcaps"				"1" [$WIN32]
-// 	}
-
-//     "IconBackArrow" [$WIN32]
-// 	{
-// 		"ControlName"			"ImagePanel"
-// 		"fieldName"				"IconBackArrow"
-// 		"xpos"					"c-265"
-// 		"ypos"					"390"
-// 		"wide"					"15"
-// 		"tall"					"15"
-// 		"scaleImage"			"1"
-// 		"pinCorner"				"0"
-// 		"visible"				"1"
-// 		"enabled"				"1"
-// 		"tabPosition"			"0"
-// 		"image"					"icon_button_arrow_left"
-// 		"scaleImage"			"1"
-// 	}
-// 	"BtnCancel" [$WIN32]
-// 	{
-// 		"ControlName"			"BaseModHybridButton"
-// 		"fieldName"				"BtnCancel"
-// 		"xpos"					"c-250"
-// 		"ypos"					"390"
-// 		"zpos"					"1"
-// 		"wide"					"180"
-// 		"tall"					"15"
-// 		"autoResize"			"1"
-// 		"pinCorner"				"0"
-// 		"visible"				"1"
-// 		"enabled"				"1"
-// 		"tabPosition"			"0"
-// 		"wrap"					"1"
-// 		"labelText"				"#L4D360UI_Back_Caps"
-// 		"tooltiptext"			"#L4D360UI_Tooltip_Back"
-// 		"style"					"MainMenuSmallButton"
-// 		"command"				"Back"
-// 		EnabledTextInsetX		"2"
-// 		DisabledTextInsetX		"2"
-// 		FocusTextInsetX			"2"
-// 		OpenTextInsetX			"2"
-// 		"navRight"				"BtnJoinSelected"
-// 		"navLeft"				"GplGames"
-// 		"navUp"					"DrpCreateGame"
-// 	}	
-
-	"BtnCreateNewGame" [$WIN32]
+	"DrpCreateGame"
 	{
-		"ControlName"			"CNB_Button"
-		"fieldName"				"BtnCreateNewGame"
-		"xpos"		"c147"
-		"ypos"		"r23"
-		"wide"		"117"
-		"tall"		"27"
-		"zpos"		"1"
+		"ControlName"			"BaseModHybridButton"
+		"fieldName"				"DrpCreateGame"
+		"xpos"					"c-250" [$WIN32]
+		"ypos"					"375"	[$WIN32]
+		"wide"					"290"	[$WIN32]
+		"tall"					"15"	[$WIN32]
+		"xpos"					"100"	[$GAMECONSOLE]
+		"ypos"					"317"	[$GAMECONSOLE]
+		"wide"					"180"	[$GAMECONSOLE]
+		"tall"					"20"	[$GAMECONSOLE]
+		"autoResize"			"1"
+		"pinCorner"				"0"
 		"visible"				"1"
 		"enabled"				"1"
 		"tabPosition"			"0"
+		"wrap"					"1"
+		EnabledTextInsetX		"2"	[$WIN32]
+		DisabledTextInsetX		"2"	[$WIN32]
+		FocusTextInsetX			"2"	[$WIN32]
+		OpenTextInsetX			"2"	[$WIN32]
+		"navRight"				"BtnJoinSelected" [$WIN32]
+		"navLeft"				"GplGames" [$WIN32]
+		"navUp"					"GplGames" [$WIN32]
+		"navDown"				"BtnCancel" [$WIN32]
+		//button and label
+		"labelText"				"#L4D360UI_GameSettings_Create_Lobby"
+		"style"					"DropDownButton" [$GAMECONSOLE]
+		"style"					"MainMenuSmallButton" [$WIN32]
 		"command"				"CreateGame"
-		"textAlignment"		"center"
-		"font"		"DefaultMedium"
-		"fgcolor_override"		"113 142 181 255"
+		"ActivationType"		"1" [$GAMECONSOLE]
+		"allcaps"				"1" [$WIN32]
 	}
-	
-	"BtnJoinSelected" [$WIN32]
+
+    "IconBackArrow" [$WIN32]
 	{
-		"ControlName"			"CNB_Button"
-		"fieldName"				"BtnJoinSelected"
-		"xpos"		"c10"
-		"ypos"		"r23"
-		"wide"		"117"
-		"tall"		"27"
-		"zpos"		"1"
+		"ControlName"			"ImagePanel"
+		"fieldName"				"IconBackArrow"
+		"xpos"					"c-265"
+		"ypos"					"390"
+		"wide"					"15"
+		"tall"					"15"
+		"scaleImage"			"1"
+		"pinCorner"				"0"
 		"visible"				"1"
 		"enabled"				"1"
 		"tabPosition"			"0"
-		"command"				"JoinSelected"
-		"textAlignment"		"center"
-		"font"		"DefaultMedium"
-		"labelText"	"#L4D360UI_FoundGames_JoinGame"
-		"fgcolor_override"		"113 142 181 255"
-	}		
-
+		"image"					"icon_button_arrow_left"
+		"scaleImage"			"1"
+	}
 	"BtnCancel" [$WIN32]
 	{
-		"ControlName"			"CNB_Button"
+		"ControlName"			"BaseModHybridButton"
 		"fieldName"				"BtnCancel"
-		"xpos"		"c-264"
-		"ypos"		"r23"
-		"wide"		"117"
-		"tall"		"27"
-		"zpos"		"1"
+		"xpos"					"c-250"
+		"ypos"					"390"
+		"zpos"					"1"
+		"wide"					"180"
+		"tall"					"15"
+		"autoResize"			"1"
+		"pinCorner"				"0"
 		"visible"				"1"
 		"enabled"				"1"
 		"tabPosition"			"0"
-		"labelText"				"#nb_back"
+		"wrap"					"1"
+		"labelText"				"#L4D360UI_Back_Caps"
+		"tooltiptext"			"#L4D360UI_Tooltip_Back"
+		"style"					"MainMenuSmallButton"
 		"command"				"Back"
-		"textAlignment"		"center"
-		"font"		"DefaultMedium"
-		"fgcolor_override"		"113 142 181 255"
-	}
+		EnabledTextInsetX		"2"
+		DisabledTextInsetX		"2"
+		FocusTextInsetX			"2"
+		OpenTextInsetX			"2"
+		"navRight"				"BtnJoinSelected"
+		"navLeft"				"GplGames"
+		"navUp"					"DrpCreateGame"
+	}	
 	
 	"GplGames"
 	{
@@ -641,21 +618,21 @@
 		"fieldName"						"GplGames"
 		"xpos"							"c-320"		[$WIN32]
 		"ypos"							"110"		[$WIN32]
-		"zpos"							"1"
+		"zpos"							"0"
 		"wide"							"380"		[$WIN32]
 		"tall"							"250"		[$WIN32]
-		"xpos"							"45"		[$X360 && $X360WIDE]
-		"xpos"							"20"		[$X360 && !$X360WIDE]
-		"ypos"							"125"		[$X360]
-		"wide"							"440"		[$X360 && $X360WIDE]
-		"wide"							"405"		[$X360 && !$X360WIDE]
-		"tall"							"210"		[$X360]
+		"xpos"							"45"		[$GAMECONSOLE && $GAMECONSOLEWIDE]
+		"xpos"							"20"		[$GAMECONSOLE && !$GAMECONSOLEWIDE]
+		"ypos"							"125"		[$GAMECONSOLE]
+		"wide"							"440"		[$GAMECONSOLE && $GAMECONSOLEWIDE]
+		"wide"							"405"		[$GAMECONSOLE && !$GAMECONSOLEWIDE]
+		"tall"							"210"		[$GAMECONSOLE]
 		"autoResize"					"1"
 		"pinCorner"						"0"
 		"visible"						"1"
 		"enabled"						"1"
 		"tabPosition"					"0"
-		"bgcolor_override" 				"0 0 0 128"
+		"bgcolor_override" 				"32 32 32 255"
 		"NoWrap"						"1"
 		"panelBorder"					"2"					[$WIN32]
 		"navRight"						"BtnJoinSelected"	[$WIN32]

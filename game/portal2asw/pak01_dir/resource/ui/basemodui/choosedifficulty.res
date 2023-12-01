@@ -145,7 +145,7 @@
 		"tooltiptext"			"#L4D360UI_Difficulty_Tooltip_Impossible"
 		"disabled_tooltiptext"	"#L4D360UI_Difficulty_Tooltip_Impossible_Disabled"
 		"style"					"DefaultButton"
-		"command"				"Insane"
+		"command"				"Impossible"
 		"proportionalToParent"	"1"
 		"usetitlesafe" 			"1"
 		EnabledTextInsetX		"10"

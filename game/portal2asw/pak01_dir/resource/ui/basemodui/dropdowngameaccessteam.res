@@ -8,7 +8,7 @@
 		"ypos"				"0"
 		"zpos"				"1"
 		"wide"				"146"
-		"tall"				"45"	[$X360]
+		"tall"				"45"	[$GAMECONSOLE]
 		"tall"				"45"	[$WIN32]
 		"visible"			"1"
 		"enabled"			"1"

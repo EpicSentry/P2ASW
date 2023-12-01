@@ -8,7 +8,8 @@
 		"ypos"					"0"
 		"zpos"					"-1"
 		"wide"					"156"
-		"tall"					"65"
+		"tall"					"65" [!$OSX]
+		"tall"					"45" [$OSX]
 		"visible"				"1"
 		"enabled"				"1"
 		"paintbackground"		"1"
@@ -54,7 +55,8 @@
 		"tabPosition"			"0"
 		"wrap"					"1"
 		"navUp"					"BtnFullscreen"
-		"navDown"				"BtnWindowedNoBorder"
+		"navDown"				"BtnWindowedNoBorder" [!$OSX]
+		"navDown"				"BtnFullscreen" [$OSX]
 		"labelText"				"#GameUI_Windowed"
 		"tooltiptext"			"#GameUI_Windowed"
 		"disabled_tooltiptext"	"#GameUI_Windowed"
@@ -63,7 +65,7 @@
 		"OnlyActiveUser"		"1"
 	}
 	
-	"BtnWindowedNoBorder"
+	"BtnWindowedNoBorder" [!$OSX]
 	{
 		"ControlName"			"BaseModHybridButton"
 		"fieldName"				"BtnWindowedNoBorder"

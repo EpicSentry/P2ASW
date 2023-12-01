@@ -86,7 +86,7 @@
 		"ypos"						"55"
 		"xpos"						"15"
 		"wide"						"230"
-		"tall"						"20"	[$X360]
+		"tall"						"20"	[$GAMECONSOLE]
 		"tall"						"15"	[$WIN32]
 		"autoResize"				"1"
 		"pinCorner"					"0"
@@ -111,7 +111,7 @@
 		"ypos"						"70"
 		"xpos"						"15"
 		"wide"						"230"
-		"tall"						"20"	[$X360]
+		"tall"						"20"	[$GAMECONSOLE]
 		"tall"						"15"	[$WIN32]
 		"autoResize"				"1"
 		"pinCorner"					"0"
@@ -136,7 +136,7 @@
 		"ypos"						"85"
 		"xpos"						"15"
 		"wide"						"230"
-		"tall"						"20"	[$X360]
+		"tall"						"20"	[$GAMECONSOLE]
 		"tall"						"15"	[$WIN32]
 		"autoResize"				"1"
 		"pinCorner"					"0"
@@ -161,7 +161,7 @@
 		"ypos"						"100"
 		"xpos"						"15"
 		"wide"						"230"
-		"tall"						"20"	[$X360]
+		"tall"						"20"	[$GAMECONSOLE]
 		"tall"						"15"	[$WIN32]
 		"autoResize"				"1"
 		"pinCorner"					"0"
@@ -174,7 +174,7 @@
 		"labelText"					"#L4D360UI_Difficulty_Impossible"
 		"tooltiptext"				"#L4D360UI_Difficulty_Tooltip_Impossible"
 		"style"						"MainMenuSmallButton"
-		"command"					"Insane"
+		"command"					"Impossible"
 		"proportionalToParent"		"1"
 		"usetitlesafe" 				"1"
 	}
@@ -186,7 +186,7 @@
 		"ypos"						"125"
 		"xpos"						"15"
 		"wide"						"230"
-		"tall"						"20"	[$X360]
+		"tall"						"20"	[$GAMECONSOLE]
 		"tall"						"15"	[$WIN32]
 		"autoResize"				"1"
 		"pinCorner"					"0"

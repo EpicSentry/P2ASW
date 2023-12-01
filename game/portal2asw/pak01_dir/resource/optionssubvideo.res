@@ -138,22 +138,6 @@
 		"NumericInputOnly"		"0"
 		"unicode"		"0"
 	}
-	"ATI"
-	{
-		"ControlName"		"ImagePanel"
-		"fieldName"		"ATI"
-		"xpos"		"36"
-		"ypos"		"184"
-		"wide"		"164"
-		"tall"		"112"
-		"autoResize"		"0"
-		"pinCorner"		"0"
-		"visible"		"1"
-		"enabled"		"1"
-		"tabPosition"		"0"
-		"image"		"resource/best_with_ATI"
-		"scaleImage"		"0"
-	}
 	"Gamma label"
 	{
 		"ControlName"		"Label"

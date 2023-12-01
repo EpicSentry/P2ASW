@@ -5,7 +5,7 @@
 		"ControlName"					"Frame"
 		"fieldName"						"FoundGameListItem"
 		"wide"							"f8"
-		"tall"							"30" [$X360]
+		"tall"							"30" [$GAMECONSOLE]
 		"tall"							"25" [$WIN32]
 		"autoResize"					"0"
 		"pinCorner"						"0"
@@ -51,7 +51,7 @@
 		"bgcolor_override"		"80 80 80 255"
 	}
 	
-	"PnlGamerPic" [$X360]
+	"PnlGamerPic" [$GAMECONSOLE]
 	{
 		"ControlName"					"ImagePanel"
 		"fieldName"						"PnlGamerPic"
@@ -94,10 +94,10 @@
 	{
 		"ControlName"					"Label"
 		"fieldName"						"LblGamerTag"
-		"xpos"							"40" [$X360]
-		"ypos"							"0"  [$X360]
-		"wide"							"200" [$X360]
-		"tall"							"30" [$X360]
+		"xpos"							"40" [$GAMECONSOLE]
+		"ypos"							"0"  [$GAMECONSOLE]
+		"wide"							"200" [$GAMECONSOLE]
+		"tall"							"30" [$GAMECONSOLE]
 		"xpos"							"41" [$WIN32]
 		"ypos"							"20" [$WIN32]
 		"wide"							"123" [$WIN32]
@@ -117,13 +117,13 @@
 	{
 		"ControlName"					"Label"
 		"fieldName"						"LblDifficulty"
-		"xpos"							"252" [$X360 && $X360WIDE]
-		"xpos"							"225" [$X360 && !$X360WIDE]
+		"xpos"							"252" [$GAMECONSOLE && $GAMECONSOLEWIDE]
+		"xpos"							"225" [$GAMECONSOLE && !$GAMECONSOLEWIDE]
 		"xpos"							"175" [$WIN32]
-		"ypos"							"0" [$X360]
+		"ypos"							"0" [$GAMECONSOLE]
 		"ypos"							"2" [$WIN32]
 		"wide"							"200"
-		"tall"							"30" [$X360]
+		"tall"							"30" [$GAMECONSOLE]
 		"tall"							"20" [$WIN32]
 		"autoResize"					"0"
 		"pinCorner"						"0"
@@ -139,13 +139,13 @@
 	{
 		"ControlName"					"Label"
 		"fieldName"						"LblNotJoinable"
-		"xpos"							"252" [$X360 && $X360WIDE]
-		"xpos"							"225" [$X360 && !$X360WIDE]
+		"xpos"							"252" [$GAMECONSOLE && $GAMECONSOLEWIDE]
+		"xpos"							"225" [$GAMECONSOLE && !$GAMECONSOLEWIDE]
 		"xpos"							"175" [$WIN32]
-		"ypos"							"0" [$X360]
+		"ypos"							"0" [$GAMECONSOLE]
 		"ypos"							"2" [$WIN32]
 		"wide"							"200"
-		"tall"							"30" [$X360]
+		"tall"							"30" [$GAMECONSOLE]
 		"tall"							"20" [$WIN32]
 		"autoResize"					"0"
 		"pinCorner"						"0"
@@ -157,35 +157,17 @@
 		"textAlignment"					"west" [$WIN32]
 	}
 	
-	"LblSwarmState"
-	{
-		"ControlName"					"Label"
-		"fieldName"						"LblSwarmState"
-		"xpos"							"240" [$WIN32]
-		"ypos"							"2" [$WIN32]
-		"wide"							"100"
-		"tall"							"20" [$WIN32]
-		"autoResize"					"0"
-		"pinCorner"						"0"
-		"visible"						"1"
-		"enabled"						"1"
-		"tabPosition"					"0"
-		"labelText"						""
-		"Font"							"DefaultSmall"
-		"textAlignment"					"west" [$WIN32]
-	}
-	
 	"LblNumPlayers"
 	{
 		"ControlName"					"Label"
 		"fieldName"						"LblNumPlayers"
-		"xpos"							"400" [$X360 && $X360WIDE]
-		"xpos"							"365" [$X360 && !$X360WIDE]
-		"xpos"							"320" [$WIN32]
-		"ypos"							"0" [$X360]
+		"xpos"							"400" [$GAMECONSOLE && $GAMECONSOLEWIDE]
+		"xpos"							"365" [$GAMECONSOLE && !$GAMECONSOLEWIDE]
+		"xpos"							"300" [$WIN32]
+		"ypos"							"0" [$GAMECONSOLE]
 		"ypos"							"2" [$WIN32]
 		"wide"							"200"
-		"tall"							"30" [$X360]
+		"tall"							"30" [$GAMECONSOLE]
 		"tall"							"20" [$WIN32]
 		"autoResize"					"0"
 		"pinCorner"						"0"
@@ -201,11 +183,11 @@
 	{
 		"ControlName"					"Label"
 		"fieldName"						"LblPing"
-		"xpos"							"5" [$X360]
-		"ypos"							"3" [$X360]
-		"wide"							"24" [$X360]
-		"tall"							"24" [$X360]
-		"xpos"							"360" [$WIN32]
+		"xpos"							"5" [$GAMECONSOLE]
+		"ypos"							"3" [$GAMECONSOLE]
+		"wide"							"24" [$GAMECONSOLE]
+		"tall"							"24" [$GAMECONSOLE]
+		"xpos"							"340" [$WIN32]
 		"ypos"							"4" [$WIN32]
 		"wide"							"32" [$WIN32]
 		"tall"							"16" [$WIN32]
@@ -214,7 +196,7 @@
 		"visible"						"1"
 		"enabled"						"1"
 		"tabPosition"					"0"
-		"Font"							"GameUIButtons" [$X360]
+		"Font"							"GameUIButtons" [$GAMECONSOLE]
 		"labelText"						""
 		"textAlignment"					"west" [$WIN32]
 	}
@@ -223,7 +205,7 @@
 	{
 		"ControlName"					"ImagePanel"
 		"fieldName"						"ImgPingSmall"
-		"xpos"							"350"
+		"xpos"							"330"
 		"ypos"							"9"
 		"wide"							"8"
 		"tall"							"8"

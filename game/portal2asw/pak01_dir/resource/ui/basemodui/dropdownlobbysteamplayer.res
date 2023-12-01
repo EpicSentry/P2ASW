@@ -30,7 +30,7 @@
 		"enabled"			"1"
 		"tabPosition"			"0"
 		"wrap"				"1"
-		"navUp"				"BtnViewStats"
+		"navUp"				"BtnMute"
 		"navDown"			"BtnViewSteamID"
 		"labelText"			"#L4D360UI_SendMessage"
 		"style"				"FlyoutMenuButton"
@@ -53,16 +53,16 @@
 		"tabPosition"			"0"
 		"wrap"				"1"
 		"navUp"				"BtnSendMessage"
-		"navDown"			"BtnViewStats"
+		"navDown"			"BtnMute"
 		"labelText"			"#L4D360UI_ViewSteamID"
 		"style"				"FlyoutMenuButton"
 		"command"			"#L4D360UI_ViewSteamID"
 	}	
 	
-	"BtnViewStats"
+	"BtnMute"
 	{
 		"ControlName"			"BaseModHybridButton"
-		"fieldName"			"BtnViewStats"
+		"fieldName"			"BtnMute"
 		"xpos"				"0"
 		"ypos"				"40"
 		"zpos"				"2"
@@ -71,14 +71,14 @@
 		"autoResize"			"1"
 		"pinCorner"			"0"
 		"visible"			"1"
-		"enabled"			"1"
+		"enabled"			"0"
 		"tabPosition"			"0"
 		"wrap"				"1"
 		"navUp"				"BtnViewSteamID"
 		"navDown"			"BtnSendMessage"
-		"labelText"			"#L4D360UI_ViewSteamStats"
+		"labelText"			"#L4D360UI_MutePlayer"
 		"style"				"FlyoutMenuButton"
-		"command"			"#L4D360UI_ViewSteamStats"
+		"command"			"#L4D360UI_MutePlayer"
 	}	
 
 }

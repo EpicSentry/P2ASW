@@ -8,249 +8,217 @@
 		"ypos"					"0"
 		"wide"					"f0"
 		"tall"					"f0"
-		"autoResize"			"0"
-		"pinCorner"				"0"
 		"visible"				"1"
 		"enabled"				"1"
 		"tabPosition"			"0"
 	}
-
-	"ProTotalProgress"
-	{
-		"ControlName"			"ContinuousProgressBar"
-		"fieldName"				"ProTotalProgress"
-		"xpos"					"r158" [$WIN32]
-		"xpos"					"r158" [$X360HIDEF]
-		"xpos"					"r140" [$X360LODEF]
-		"ypos"					"r45"
-		"wide"					"135" [$WIN32]
-		"wide"					"135" [$X360HIDEF]
-		"wide"					"120" [$X360LODEF]
-		"tall"					"33" [$WIN32]
-		"tall"					"33" [$X360HIDEF]	// texture is 4:1 w:h ratio
-		"tall"					"30" [$X360LODEF]
-		"zpos"					"5"
-		"autoResize"			"0"
-		"pinCorner"				"0"
-		"visible"				"1"
-		"enabled"				"1"
-		"tabPosition"			"0"
-		"usetitlesafe"		"1"
-	}
-	
+			
+	// used as an anchor hint to resolve where the titlesafe boundary is
 	"WorkingAnim"
 	{
 		"ControlName"			"ImagePanel"
 		"fieldName"				"WorkingAnim"
-		"xpos"					"0"
-		"ypos"					"0"
-		"zpos"					"5"
-		"wide"					"40"
-		"tall"					"40"
+		"xpos"					"r75"		[!$DECK]
+		"ypos"					"10"		[!$DECK]
+		"xpos"					"r95"		[$DECK]
+		"ypos"					"15"		[$DECK]
+		"wide"					"80"		[$DECK]
+		"tall"					"80"		[$DECK]
+		"wide"					"65"		[!$DECK]
+		"tall"					"65"		[!$DECK]
 		"visible"				"0"
 		"enabled"				"1"
 		"tabPosition"			"0"
 		"scaleImage"			"1"
 		"image"					"spinner"
 		"frame"					"0"
-	}	
-	
-	"LoadingText"
+		"usetitlesafe"			"1"
+	}
+
+	// used as an anchor hint to resolve where the titlesafe boundary is
+	"LoadingProgess"
 	{
 		"ControlName"			"Label"
-		"fieldName"				"LoadingText"
-		"xpos"					"r223" [$WIN32]
-		"xpos"					"r223" [$X360HIDEF]
-		"xpos"					"r220" [$X360LODEF]
-		"ypos"					"r55"
-		"zpos"					"5"
-		"wide"					"200"
-		"tall"					"20"
-		"autoResize"			"1"
-		"pinCorner"				"0"
-		"visible"				"1"
+		"fieldName"				"LoadingProgess"
+		"xpos"					"r11"	[!$DECK]
+		"ypos"					"r11"	[!$DECK]
+		"xpos"					"r22"	[$DECK]
+		"ypos"					"r16"	[$DECK]
+		"wide"					"0"
+		"tall"					"0"
+		"visible"				"0"
 		"enabled"				"1"
 		"tabPosition"			"0"
-		"Font"					"DefaultBold"
-		"labelText"				"#L4D360UI_Loading"
-		"textAlignment"			"east"
 		"usetitlesafe"			"1"
-	}	
-	
-	"BGImage"
-	{
-		"ControlName"		"ImagePanel"
-		"fieldName"			"BGImage"
-		"xpos"				"0"
-		"ypos"				"0"
-		"wide"				"f0"
-		"tall"				"f0"
-		"zpos"				"2"
-		"scaleImage"		"1"
-		"visible"			"0"
-		"enabled"			"1"
 	}
-	
-	"Poster"
+
+
+
+	"LblGamerTag"
 	{
-		"ControlName"		"ImagePanel"
-		"fieldName"			"Poster"
-		"xpos"				"c-240"
-		"ypos"				"0"
-		"wide"				"480"
-		"tall"				"f0"
-		"zpos"				"3"
-		"scaleImage"		"1"
-		"visible"			"0"
-		"enabled"			"1"
-		// APS: THESE ARE NOW DYNAMIC - DON"T PUT A DEFAULT IMAGE HERE!
-		"image"				""
-	}
-	
-	"LocalizedCampaignName"
-	{
-		"ControlName"				"Label"
-		"fieldName"				"LocalizedCampaignName"
-		"xpos"					"22"
-		"ypos"					"0"		[$WIN32]
-		"ypos"					"r100"		[$X360]
-		"zpos"					"5"
-		"wide"					"f0"
-		"tall"					"20"
-		"pinCorner"				"0"
-		"visible"				"1"
-		"enabled"				"1"
-		"tabPosition"				"0"
-		"Font"					"DefaultLarge"
-		"labelText"				""
-		"textAlignment"				"south-west"
-		"noshortcutsyntax"			"1"
-		"usetitlesafe"				"1"
-	}
-	
-	"LocalizedCampaignTagline"
-	{
-		"ControlName"				"Label"
-		"fieldName"				"LocalizedCampaignTagline"
-		"xpos"					"0"
-		"ypos"					"0"
-		"zpos"					"5"
-		"wide"					"f0"
-		"tall"					"20"
-		"pinCorner"				"0"
-		"visible"				"1"
-		"enabled"				"1"
-		"tabPosition"				"0"
-		"Font"					"DefaultMedium"
-		"labelText"				""
-		"textAlignment"				"north-west"
-		"noshortcutsyntax"			"1"
-		"pin_to_sibling"			"LocalizedCampaignName"
-		"pin_corner_to_sibling"			"0"	
-		"pin_to_sibling_corner"			"2"	
-	}
-	
-	
-	"GameModeLabel"
-	{
-		"ControlName"				"Label"
-		"fieldName"				"GameModeLabel"
-		"xpos"					"22"
-		"ypos"					"r55"
-		"zpos"					"5"
-		"wide"					"f0"
-		"tall"					"20"
-		"autoResize"				"1"
-		"pinCorner"				"0"
+		"ControlName"			"Label"
+		"fieldName"				"LblGamerTag"
+		"xpos"					"45"	[$GAMECONSOLE]
+		"ypos"					"r43"	[$GAMECONSOLE]
+		"xpos"					"55"	[!$GAMECONSOLE]
+		"ypos"					"r53"	[!$GAMECONSOLE]
+		"wide"					"300"
+		"tall"					"25"
 		"visible"				"0"
 		"enabled"				"1"
-		"tabPosition"				"0"
-		"Font"					"DefaultLarge"
-		"textAlignment"				"north-west"
-		"noshortcutsyntax"			"1"
-		"usetitlesafe"				"1"
-	}	
-	
-	"StarringLabel"
-	{
-		"ControlName"				"Label"
-		"fieldName"				"StarringLabel"
-		"xpos"					"22"
-		"ypos"					"r39"
-		"zpos"					"5"
-		"wide"					"60"
-		"tall"					"16"
-		"autoResize"				"1"
-		"pinCorner"				"0"
-		"visible"				"1"
-		"enabled"				"1"
-		"tabPosition"				"0"
-		"Font"					"DefaultMedium"
-		"textAlignment"				"north-west"
-		"labelText"				"#L4D360UI_Loading_Starring"
-		"noshortcutsyntax"			"1"
-		"usetitlesafe"				"1"
-		"auto_wide_tocontents"			"1"
-	}	
-
-	"LoadingTipPanel"	[$X360]
-	{
-		"ControlName"			"EditablePanel"
-		"fieldName"			"LoadingTipPanel"
-		"xpos"				"0"
-		"ypos"				"17"
-		"wide"				"450"
-		"tall"				"80"
-		"visible"			"0"
-		"enabled"			"0"
-		"usetitlesafe"				"1"
-		"enabled"			"1"
-		"zpos"				"50"
+		"tabPosition"			"0"
+		"Font"					"GamerTag"
+		"labelText"				""
+		"textAlignment"			"west"
+		"fgcolor_override"		"255 255 255 255"
+		"usetitlesafe"			"1"
+		"noshortcutsyntax"		"1"
 	}
-
-	"PlayerNames"
+	
+	"LblGamerTagStatus"
 	{
-		"ControlName"				"Label"
-		"fieldName"				"PlayerNames"
-		"xpos"					"0"
-		"ypos"					"0"
-		"zpos"					"5"
-		"wide"					"475" [$WIN32]
-		"wide"					"475" [$X360HIDEF]
-		"wide"					"350" [$X360LODEF]
-		"tall"					"32"
-		"wrap"					"1"
-		"autoResize"				"1"
-		"pinCorner"				"0"
+		"ControlName"			"Label"
+		"fieldName"				"LblGamerTagStatus"
+		"xpos"					"45"	[$GAMECONSOLE]
+		"ypos"					"r22"	[$GAMECONSOLE]
+		"xpos"					"55"	[!$GAMECONSOLE]
+		"ypos"					"r32"	[!$GAMECONSOLE]
+		"wide"					"200"
+		"tall"					"25"
 		"visible"				"0"
 		"enabled"				"1"
-		"tabPosition"				"0"
-		"Font"					"DefaultMedium"
-		"textAlignment"				"north-west"
-		"labelText"				""
-		"noshortcutsyntax"			"1"
+		"tabPosition"			"0"
+		"Font"					"GamerTagStatus"
+		"labelText"				"#PORTAL2_Coop_YourPartnerInScience"
+		"textAlignment"			"west"
+		"fgcolor_override"		"255 255 255 255"
+		"usetitlesafe"			"1"
+	}
 
-		"pin_to_sibling"			"StarringLabel"
-		"pin_corner_to_sibling"			"0"	
-		"pin_to_sibling_corner"			"1"	
-	}	
-	
-	"CampaignFooter"
+	"LblMapTitle"
 	{
-		"ControlName"		"EditablePanel"
-		"fieldName"		"CampaignFooter"
-		"xpos"			"0"
-		"ypos"			"r60"
-		"wide"			"f0"
-		"tall"			"200"
-		"autoResize"		"0"
-		"pinCorner"		"0"
-		"visible"		"0"
-		"enabled"		"1"
-		"textAlignment"		"west"
-		"dulltext"		"0"
-		"brighttext"		"1"
-		"bgcolor_override"	"0 0 0 175"
-		"usetitlesafe"		"1"
+		"ControlName"			"Label"
+		"fieldName"				"LblMapTitle"
+		"xpos"					"1"	[$GAMECONSOLE]
+		"ypos"					"r73"	[$GAMECONSOLE]
+		"xpos"					"110"	[$DECK]
+		"ypos"					"r67"	[$DECK]
+		"xpos"					"90"	[!$GAMECONSOLE]
+		"ypos"					"r67"	[!$GAMECONSOLE]
+		"zpos"					"999"
+		"wide"					"500"
+		"tall"					"30"
+		"visible"				"0"
+		"enabled"				"1"
+		"tabPosition"			"0"
+		"Font"					"DialogTitle"
+		"labelText"				""
+		"textAlignment"			"west"
+		"fgcolor_override"		"255 255 255 255"
+		"usetitlesafe"			"1"
+		"noshortcutsyntax"		"1"
+	}
+	
+	"LblMapTitleDesc"
+	{
+		"ControlName"			"Label"
+		"fieldName"				"LblMapTitleDesc"
+		"xpos"					"45"	[$GAMECONSOLE]
+		"ypos"					"r22"	[$GAMECONSOLE]
+		"xpos"					"111"	[$DECK]
+		"ypos"					"r43"	[$DECK]
+		"xpos"					"91"	[!$GAMECONSOLE]
+		"ypos"					"r43"	[!$GAMECONSOLE]
+		"zpos"					"999"
+		"wide"					"200"
+		"tall"					"25"
+		"visible"				"0"
+		"enabled"				"1"
+		"tabPosition"			"0"
+		"Font"					"GamerTagStatus"
+		"labelText"				""
+		"textAlignment"			"west"
+		"fgcolor_override"		"255 255 255 255"
+		"usetitlesafe"			"1"
+	}
+	
+	
+	"ImgEmployeeBadge"
+	{
+		"ControlName"					"ImagePanel"
+		"fieldName"						"ImgEmployeeBadge"
+		"xpos"							"20"
+		"ypos"							"r131" [$DECK]
+		"ypos"							"r120"
+		"zpos"							"900"
+		"wide"							"160" [$DECK]
+		"tall"							"160" [$DECK]
+		"wide"							"136"
+		"tall"							"136"
+		"visible"						"0"
+		"enabled"						"1"
+		"tabPosition"					"0"
+		"scaleImage"					"1"
+		"image"							"badgeBg"
+	}
+
+	"ImgBadgeOverlay"
+	{
+		"ControlName"					"ImagePanel"
+		"fieldName"						"ImgBadgeOverlay"
+		"xpos"							"20"
+		"ypos"							"r131" [$DECK]
+		"ypos"							"r120"
+		"zpos"							"999"
+		"wide"							"160" [$DECK]
+		"tall"							"160" [$DECK]
+		"wide"							"136"
+		"tall"							"136"
+		"visible"						"0"
+		"enabled"						"1"
+		"tabPosition"					"0"
+		"scaleImage"					"1"
+		"image"							"badgeOverlay"
+	}
+
+	"PnlGamerPic"
+	{
+		"ControlName"			"ImagePanel"
+		"fieldName"				"PnlGamerPic"
+		"xpos"					"11"		[$GAMECONSOLE]
+		"ypos"					"r36"	[$GAMECONSOLE]
+		"xpos"					"32"	[!$GAMECONSOLE]
+		"ypos"					"r112"	[$DECK]
+		"ypos"					"r102"	[!$GAMECONSOLE]
+		"zpos"							"910"
+		"wide"					"60" [$DECK]
+		"tall"					"60" [$DECK]
+		"wide"					"48"
+		"tall"					"48"
+		"visible"				"0"
+		"enabled"				"1"
+		"tabPosition"			"0"
+		"scaleImage"			"1"
+		"image"					"icon_lobby"
+		"usetitlesafe"			"1"
+	}
+	
+	"ImgBadgeLogo"
+	{
+		"ControlName"					"ImagePanel"
+		"fieldName"						"ImgBadgeLogo"
+		"xpos"							"17"
+		"ypos"							"r54" [$DECK]
+		"ypos"							"r43"
+		"zpos"							"910"
+		"wide"							"80" [$DECK]
+		"tall"							"20" [$DECK]
+		"wide"							"64"
+		"tall"							"16"
+		"visible"						"0"
+		"enabled"						"1"
+		"tabPosition"					"0"
+		"scaleImage"					"1"
+		"image"							"logo_aperture_badge"
 	}
 }

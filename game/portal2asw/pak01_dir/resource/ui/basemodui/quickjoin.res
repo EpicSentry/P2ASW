@@ -2,14 +2,14 @@
 {
 	"LblTitle"
 	{
-		"ControlName"			"Label"					[$X360]
+		"ControlName"			"Label"					[$GAMECONSOLE]
 		"ControlName"			"BaseModHybridButton"	[$WIN32]
 		"fieldName"				"LblTitle"
 
-		"xpos"					"0"		[$X360]
-		"ypos"					"0"		[$X360]
-		"wide"					"210"	[$X360]
-		"tall"					"40"	[$X360]
+		"xpos"					"0"		[$GAMECONSOLE]
+		"ypos"					"0"		[$GAMECONSOLE]
+		"wide"					"210"	[$GAMECONSOLE]
+		"tall"					"40"	[$GAMECONSOLE]
 
 		"xpos"					"21"	[$WIN32]
 		"ypos"					"0"		[$WIN32]
@@ -27,7 +27,7 @@
 		"Font"					"DefaultMedium"
 		"fgcolor_override"		"255 255 255 255"
 		
-		"style"						"AlienSwarmMenuButtonSmall"[$WIN32]
+		"style"						"MainMenuSmallButton"[$WIN32]
 		"command"					"SeeAll"		[$WIN32]
 		"ActivationType"			"1"				[$WIN32]
 		"FocusDisabledBorderSize"	"1"				[$WIN32]

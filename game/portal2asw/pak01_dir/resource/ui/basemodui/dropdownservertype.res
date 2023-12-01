@@ -7,11 +7,11 @@
 		"xpos"				"0"
 		"ypos"				"0"
 		"zpos"				"1"
-		"wide"				"146"	[$X360]
+		"wide"				"146"	[$GAMECONSOLE]
 		"wide"				"146"	[$WIN32 && $ENGLISH]
 		"wide"				"166"	[$WIN32 && !$ENGLISH]
 		"tall"				"65" [$WIN32]
-		"tall"				"45" [$X360]
+		"tall"				"45" [$GAMECONSOLE]
 		"visible"			"1"
 		"enabled"			"1"
 		"paintbackground"	"1"
@@ -35,7 +35,7 @@
 		"wrap"				"1"
 		"navUp"				"BtnListen"
 		"navDown"			"BtnDedicated" [$WIN32]
-		"navDown"			"BtnListen" [$X360]
+		"navDown"			"BtnListen" [$GAMECONSOLE]
 		"labelText"			"#L4D360UI_ServerType_Official"
 		"tooltiptext"			"#L4D360UI_Lobby_Change_ServerType_Official_Tip"
 		"disabled_tooltiptext"		"#L4D360UI_Lobby_Change_ServerType_Dedicated_Disabled_Tip"
@@ -76,7 +76,7 @@
 		"fieldName"				"BtnListen"
 		"xpos"					"0"
 		"ypos"					"40" [$WIN32]
-		"ypos"					"20" [$X360]
+		"ypos"					"20" [$GAMECONSOLE]
 		"zpos"					"2"
 		"wide"					"140"
 		"tall"					"20"
@@ -87,7 +87,7 @@
 		"tabPosition"			"0"
 		"wrap"					"1"
 		"navUp"					"BtnDedicated" [$WIN32]
-		"navUp"					"BtnOfficial" [$X360]
+		"navUp"					"BtnOfficial" [$GAMECONSOLE]
 		"navDown"				"BtnOfficial"
 		"labelText"		"#L4D360UI_ServerType_Listen"
 		"tooltiptext"		"#L4D360UI_Lobby_Change_ServerType_Listen_Tip"

@@ -8,7 +8,7 @@
 		"ypos"				"0"
 		"zpos"				"-1"
 		"wide"				"156"
-		"tall"				"120"
+		"tall"				"110"
 		"visible"			"1"
 		"enabled"			"1"
 		"paintbackground"		"1"
@@ -122,28 +122,6 @@
 		"labelText"			"#L4D360UI_FoundPublicGames_Filter_Difficulty_Expert"
 		"tooltiptext"			"#L4D360UI_FoundPublicGames_Filter_Difficulty_Expert_Tip"
 		"style"				"FlyoutMenuButton"
-		"command"			"filter_difficulty_insane"
+		"command"			"filter_difficulty_impossible"
 	}	
-	
-	"BtnImba"
-	{
-		"ControlName"			"BaseModHybridButton"
-		"fieldName"			"BtnExpert"
-		"xpos"				"0"
-		"ypos"				"100"
-		"wide"				"150"
-		"tall"				"20"
-		"autoResize"			"1"
-		"pinCorner"			"0"
-		"visible"			"1"
-		"enabled"			"1"
-		"tabPosition"			"0"
-		"wrap"				"1"
-		"navUp"				"BtnAdvanced"
-		"navDown"			"BtnAny"
-		"labelText"			"#L4D360UI_FoundPublicGames_Filter_Difficulty_Imba"
-		"tooltiptext"			"#L4D360UI_FoundPublicGames_Filter_Difficulty_Imba_Tip"
-		"style"				"FlyoutMenuButton"
-		"command"			"filter_difficulty_imba"
-	}
 }
