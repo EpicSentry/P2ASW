@@ -2922,7 +2922,7 @@ void CPortalSimulator::CreateLocalCollision( void )
 	// Displacements
 	if ( portal_clone_displacements.GetBool() )
 	{
-#if 0
+#if 1
 		VPlane displacementRejectRegions[6];
 		displacementRejectRegions[0].m_Normal = -m_InternalData.Placement.vForward;
 		displacementRejectRegions[0].m_Dist = displacementRejectRegions[0].m_Normal.Dot( m_InternalData.Placement.ptCenter );
@@ -2940,9 +2940,11 @@ void CPortalSimulator::CreateLocalCollision( void )
 		CREATEDEBUGTIMER( dispTimer );
 		STARTDEBUGTIMER( dispTimer );
 		Assert( m_InternalData.Simulation.Static.World.Displacements.pCollideable == NULL );
-		virtualmeshlist_t DisplacementMeshes[32];
 
-		int iMeshes = enginetrace->GetMeshesFromDisplacementsInAABB( m_InternalData.Placement.vecCurAABBMins, m_InternalData.Placement.vecCurAABBMaxs, DisplacementMeshes, ARRAYSIZE(DisplacementMeshes) );
+		//int iMeshes = enginetrace->GetMeshesFromDisplacementsInAABB( m_InternalData.Placement.vecCurAABBMins, m_InternalData.Placement.vecCurAABBMaxs, DisplacementMeshes, ARRAYSIZE(DisplacementMeshes) );
+		
+		int iMeshes = enginetrace->GetNumDisplacements();
+		
 		if( iMeshes > 0 )
 		{
 			CPhysPolysoup *pDispCollideSoup = physcollision->PolysoupCreate();
@@ -2952,7 +2954,10 @@ void CPortalSimulator::CreateLocalCollision( void )
 
 			for( int i = 0; (i != iMeshes) && (iTriCount < 65535); ++i )
 			{
-				virtualmeshlist_t *pMesh = &DisplacementMeshes[i];
+				virtualmeshlist_t DisplacementMeshes;
+				enginetrace->GetDisplacementMesh( i, &DisplacementMeshes );
+				
+				virtualmeshlist_t *pMesh = &DisplacementMeshes;
 
 				for ( int j = 0; j < pMesh->indexCount; j+=3 )
 				{
