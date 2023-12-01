@@ -18,6 +18,7 @@
 #include "gamerules.h"
 #include "igamesystem.h"
 #include "paint/paint_stream_shared.h"
+#include "particles/particles.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -27,11 +28,50 @@ ConVar r_paintblob_display_clip_box("r_paintblob_display_clip_box", "0", FCVAR_N
 ConVar r_paintblob_blr_render_radius( "r_paintblob_blr_render_radius", "1.3", FCVAR_NONE, "Set render radius (how far from particle center surface will be)" );
 ConVar r_paintblob_blr_cutoff_radius( "r_paintblob_blr_cutoff_radius", "5.5", FCVAR_NONE, "Set cutoff radius (how far field extends from each particle)" );
 
+#ifdef USE_PARTICLE_BLOBULATOR
+
+CParticleCollection *g_pBlobParticles = NULL;
+
+class CParticleBlobulatorHacks
+{
+public:
+
+	CParticleBlobulatorHacks( C_OP_RenderBlobs *pBlobs, IMatRenderContext *pRenderContext, CParticleCollection *pParticles, const Vector4D &vecDiffuseModulation, void *pContext )
+	{
+		g_pBlobParticles->m_pRenderOp = pBlobs;
+		pBlobs->Render( pRenderContext, pParticles, vecDiffuseModulation, pContext );
+	}
+
+	CParticleBlobulatorHacks()
+	{
+	}
+};
+
+static CParticleBlobulatorHacks s_ParticleBlobulatorHack();
+
+
+class C_ParticleBlobulator_AutoGameSystemPerFrame : public CAutoGameSystemPerFrame
+{
+	virtual void LevelInitPostEntity( void )
+	{
+		Msg("Initiate blobs\n");
+		Assert( g_pBlobParticles == NULL );
+		// WHY TF DOES THIS CRASH!!?!??!
+		g_pBlobParticles = g_pParticleSystemMgr->CreateParticleCollection( "global_blob" );
+		Assert( g_pBlobParticles );
+	}
+};
+
+C_ParticleBlobulator_AutoGameSystemPerFrame g_ParticleBlobulatorGameSystem;
+
+#endif
+
 // No Blob rendering :(
-#if defined ( USE_BLOBULATOR )
+#if defined ( USE_BLOBULATOR ) || defined ( USE_PARTICLE_BLOBULATOR )
 namespace NPaintRenderer
 {
 
+#ifndef USE_PARTICLE_BLOBULATOR
 // Note: This culling is too aggressive, we can see particles being removed when the blob is paused and we move the view
 void Paintblob_CullOutOfViewParticles( ImpParticleList& particleList )
 {
@@ -57,7 +97,7 @@ void Paintblob_CullOutOfViewParticles( ImpParticleList& particleList )
 		particleList.SetCountNonDestructively( particleList.Count() - iParticlesRemoved );
 	}
 }
-
+#endif
 
 //#define ENABLE_DEBUG_BLOB	1
 #ifdef ENABLE_DEBUG_BLOB
@@ -161,7 +201,7 @@ void SetupParticles( ImpParticleList& particleList )
 }
 #endif
 
-
+#ifndef USE_PARTICLE_BLOBULATOR
 void DisplayClipBox( const PortalMatrixList_t & portalMatrixList )
 {
 	Vector backwardPortalMins( Blobulator::g_ExclusionXMin, Blobulator::g_ExclusionYMin, Blobulator::g_ExclusionZMin );
@@ -201,21 +241,30 @@ void DumpParticles( const ImpParticleList& particleList )
 	}
 	DevMsg("};\n");
 }
+#endif
 
 // Note that there is way too many parameters passed.
 // TODO: Consider creating a structure to pass all these parameters.
+#ifndef USE_PARTICLE_BLOBULATOR
 void Paintblob_Draw( int renderMode, IMaterial *pMaterial, float flCubeWidth, const PortalMatrixList_t& portalMatrixList, ImpParticleList& particleList )
+#else
+void Paintblob_Draw( int renderMode, IMaterial *pMaterial, float flCubeWidth, const PortalMatrixList_t& portalMatrixList )
+#endif
 {
+#ifndef USE_PARTICLE_BLOBULATOR
 	if ( r_paintblob_display_clip_box.GetBool() )
 	{
 		DisplayClipBox( portalMatrixList );
 	}
+#endif
 
 #ifdef ENABLE_DEBUG_BLOB
 	SetupParticles();
 #else
+#ifndef USE_PARTICLE_BLOBULATOR
 	// Reduce the complexity by first removing particles that won't visibly affect the view
 	Paintblob_CullOutOfViewParticles( particleList );
+#endif
 #endif
 
 	float flViewScale = 1.f;
@@ -240,6 +289,22 @@ void Paintblob_Draw( int renderMode, IMaterial *pMaterial, float flCubeWidth, co
 #endif
 
 	CMatRenderContextPtr pRenderContext( materials );
+
+	C_OP_RenderBlobs renderblobs;
+
+	Vector4D vecDiffuseModulation;
+
+	CParticleVisibilityData visData;
+
+	visData.m_bUseVisibility = true;
+	visData.m_flAlphaVisibility = 255;
+	visData.m_flRadiusVisibility = 64;
+	
+	// Draw the blobs
+	CParticleBlobulatorHacks( &renderblobs, pRenderContext, g_pBlobParticles, vecDiffuseModulation, &visData );
+	
+
+#ifndef USE_PARTICLE_BLOBULATOR
 	bool bUseBlobulator = renderMode == BLOB_RENDER_BLOBULATOR;
 
 	Blobulator::BlobRenderInfo_t blobRenderInfo;
@@ -250,8 +315,10 @@ void Paintblob_Draw( int renderMode, IMaterial *pMaterial, float flCubeWidth, co
 	blobRenderInfo.m_nViewID = CurrentViewID(); // We assume that the main view is 0 so we can use high res blobs
 
 	Blobulator::RenderBlob( bUseBlobulator, pRenderContext, pMaterial, blobRenderInfo, portalMatrixList.Base(), portalMatrixList.Count(), particleList.Base(), particleList.Count() );
+#endif // USE_PARTICLE_BLOBULATOR
 }
 
+#ifndef USE_PARTICLE_BLOBULATOR
 // This gamesystem provides a location to call higher-level management functions in the blobulator:
 class C_Blobulator_AutoGameSystemPerFrame : public CAutoGameSystemPerFrame
 {
@@ -261,6 +328,8 @@ class C_Blobulator_AutoGameSystemPerFrame : public CAutoGameSystemPerFrame
 	}
 };
 C_Blobulator_AutoGameSystemPerFrame g_BlobulatorGameSystem;
+
+#endif // USE_PARTICLE_BLOBULATOR
 
 } // NPaintRenderer
 #endif // #if 0

@@ -617,6 +617,17 @@ int CNewParticleEffect::DrawModel( int flags, const RenderableInstance_t &instan
 		if ( ( CalcSqrDistanceToAABB( m_MinBounds, m_MaxBounds, vecCamera ) > ( m_pDef->m_flMaxDrawDistance * m_pDef->m_flMaxDrawDistance ) ) )
 			return 0;
 	}
+	
+	if ( m_pDef->IsViewModelEffect() )
+	{
+		C_BasePlayer* pPlayer = C_BasePlayer::GetLocalPlayer();
+		if ( !pPlayer || !pPlayer->IsAlive() )
+			return 0;
+
+		C_BaseAnimating *pRenderedWeaponModel = pPlayer->GetRenderedWeaponModel();
+		if ( !pRenderedWeaponModel || !pRenderedWeaponModel->IsViewModel() )
+			return 0;
+	}
 
 	if ( ( flags & STUDIO_TRANSPARENCY ) || !IsBatchable() || !m_pDef->IsDrawnThroughLeafSystem() )
 	{

@@ -209,7 +209,7 @@ void CPaintStream::UpdateRenderBoundsAndOriginWorldspace( void )
 }
 
 
-void BuildPortalMatrixListInAABB( const Vector& vCenter, const Vector& vExtents, NPaintRenderer::PortalMatrixList_t& portalMatrixList )
+void BuildPortalMatrixListInAABB( const Vector& vCenter, const Vector& vExtents, PortalMatrixList_t& portalMatrixList )
 {
 	//Tony; no portal? no portalMatrixList . empty list is okay in blobulator.
 #ifdef PORTAL2
@@ -230,7 +230,7 @@ void BuildPortalMatrixListInAABB( const Vector& vCenter, const Vector& vExtents,
 
 void C_PaintStream::DrawBlobs( IMaterial* pMaterial )
 {
-	NPaintRenderer::PortalMatrixList_t portalMatrixList;
+	PortalMatrixList_t portalMatrixList;
 	BuildPortalMatrixListInAABB( m_vCachedRenderOrigin, 0.5f * ( m_vCachedWorldMaxs - m_vCachedWorldMins ), portalMatrixList );
 
 	//bool bListenServer = engine->IsClientLocalToActiveServer();
@@ -258,8 +258,9 @@ void C_PaintStream::DrawBlobs( IMaterial* pMaterial )
 	//setup light for this cube of blobs
 	modelrender->SetupLighting( m_vLightPosition );
 
-#if USE_BLOBULATOR
+#if defined ( USE_BLOBULATOR ) || defined ( USE_PARTICLE_BLOBULATOR )
 
+#ifndef USE_PARTICLE_BLOBULATOR
 	C_BasePlayer *pPlayer = GetSplitScreenViewPlayer();
 	if ( !pPlayer )
 		return;
@@ -312,11 +313,19 @@ void C_PaintStream::DrawBlobs( IMaterial* pMaterial )
 		}
 	}
 	particleList.SetCountNonDestructively( iNumParticles );
+	
 	NPaintRenderer::Paintblob_Draw( m_nRenderMode, pMaterial, paintblob_isosurface_box_width.GetFloat(), portalMatrixList, particleList );
+#else
+
+	NPaintRenderer::Paintblob_Draw( m_nRenderMode, pMaterial, paintblob_isosurface_box_width.GetFloat(), portalMatrixList );
+
+#endif // USE_PARTICLE_BLOBULATOR
+
 #else
 
 	//Msg("m_blobs.Count(): %i\n", m_blobs.Count());
 
+#if !defined ( USE_BLOBULATOR ) && !defined ( USE_PARTICLE_BLOBULATOR )
 	for (int i = 0; i < m_blobs.Count(); ++i)
 	{		
 		if (!m_blobs[i])
@@ -325,7 +334,7 @@ void C_PaintStream::DrawBlobs( IMaterial* pMaterial )
 		m_blobs[i]->m_hRenderable->PerFrameUpdate();
 		
 	}
-
+#endif
 
 #endif
 

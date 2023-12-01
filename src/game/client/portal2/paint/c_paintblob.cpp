@@ -19,11 +19,13 @@ C_PaintBlob::C_PaintBlob()
 
 C_PaintBlob::~C_PaintBlob()
 {
+#if !defined ( USE_BLOBULATOR ) && !defined ( USE_PARTICLE_BLOBULATOR )
 	if (m_hRenderable && m_hRenderable.Get())
 	{
 		delete m_hRenderable.Get();
 		m_hRenderable = NULL;
 	}
+#endif
 }
 
 
@@ -42,7 +44,8 @@ void C_PaintBlob::PaintBlobPaint( const trace_t &tr )
 void C_PaintBlob::Init( const Vector &vecOrigin, const Vector &vecVelocity, int paintType, float flMaxStreakTime, float flStreakSpeedDampenRate, CBaseEntity* pOwner, bool bSilent, bool bDrawOnly )
 {
 	CBasePaintBlob::Init( vecOrigin, vecVelocity, paintType, flMaxStreakTime, flStreakSpeedDampenRate, pOwner, bSilent, bDrawOnly );
-		
+
+#if !defined ( USE_BLOBULATOR ) && !defined ( USE_PARTICLE_BLOBULATOR )
 	C_PaintBlobRenderable *pRenderable = new C_PaintBlobRenderable( this, 0.75 );
 		
 	//cl_entitylist->AddNonNetworkableEntity( m_pRenderable->GetIClientUnknown() );
@@ -51,8 +54,10 @@ void C_PaintBlob::Init( const Vector &vecOrigin, const Vector &vecVelocity, int 
 	pRenderable->Spawn();
 
 	m_hRenderable = pRenderable;
+#endif
 }
 
+#if !defined ( USE_BLOBULATOR ) && !defined ( USE_PARTICLE_BLOBULATOR )
 C_PaintBlobRenderable::C_PaintBlobRenderable( C_PropPaintBomb *pPaintBomb, float flModelScale )
 {
 	SetModelScale( flModelScale );
@@ -205,3 +210,5 @@ void C_PaintBlobRenderable::GetRenderBoundsWorldspace( Vector& mins, Vector& max
 	
 	//BaseClass::GetRenderBoundsWorldspace( mins, maxs );
 }
+
+#endif // USE_BLOBULATOR

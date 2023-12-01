@@ -65,8 +65,10 @@ void C_PropPaintBomb::UpdateOnRemove( void )
 {
 	m_blobs.Purge();
 
+#if !defined ( USE_BLOBULATOR ) && !defined ( USE_PARTICLE_BLOBULATOR )
 	if ( m_pRenderable )
 		delete m_pRenderable;
+#endif
 
 	BaseClass::UpdateOnRemove();
 }
@@ -133,12 +135,12 @@ void C_PropPaintBomb::PostDataUpdate( DataUpdateType_t updateType )
 		// disable the fast path for these entities so our custom DrawModel() function gets called
 		m_bCanUseFastPath = false;		
 
-#ifndef USE_BLOBULATOR
+#if !defined ( USE_BLOBULATOR ) && !defined ( USE_PARTICLE_BLOBULATOR )
 		m_pRenderable = new C_PaintBlobRenderable( this, 1.5 );
-#endif
 		//cl_entitylist->AddNonNetworkableEntity( m_pRenderable->GetIClientUnknown() );
 		m_pRenderable->InitializeAsClientEntity( BLOB_MODEL, false );
 		m_pRenderable->Spawn();
+#endif
 	}
 }
 
@@ -238,7 +240,9 @@ int C_PropPaintBomb::DrawModel( int flags, const RenderableInstance_t &instance 
 
 	//setup light for this cube of blobs
 	modelrender->SetupLighting( vCenter );
-#ifdef USE_BLOBULATOR
+
+#if defined ( USE_BLOBULATOR ) || defined ( USE_PARTICLE_BLOBULATOR )
+#ifndef USE_PARTICLE_BLOBULATOR
 	C_BasePlayer *pPlayer = GetSplitScreenViewPlayer();
 	Vector vecPlayerPos = pPlayer->EyePosition();
 
@@ -259,21 +263,26 @@ int C_PropPaintBomb::DrawModel( int flags, const RenderableInstance_t &instance 
 	}
 
 	particleList.SetCountNonDestructively( iNumParticles );
-
+#endif // USE_PARTICLE_BLOBULATOR
 	IMaterial *pMaterial = materials->FindMaterial( PaintStreamManager.GetPaintMaterialName( m_nPaintPowerType ), TEXTURE_GROUP_OTHER, true );
-	NPaintRenderer::PortalMatrixList_t portalMatrixList;
+	PortalMatrixList_t portalMatrixList;
+#ifndef USE_PARTICLE_BLOBULATOR
 	NPaintRenderer::Paintblob_Draw( BLOB_RENDER_BLOBULATOR, pMaterial, paintblob_isosurface_box_width.GetFloat(), portalMatrixList, particleList );
+#else
+	NPaintRenderer::Paintblob_Draw( BLOB_RENDER_BLOBULATOR, pMaterial, paintblob_isosurface_box_width.GetFloat(), portalMatrixList );
+#endif
 #else // No paint blob render
 
+#if !defined ( USE_BLOBULATOR ) && !defined ( USE_PARTICLE_BLOBULATOR )
 	Assert( m_pRenderable );
 	m_pRenderable->PerFrameUpdate();
-
+#endif
 #endif
 
 	return 1;
 }
 
-#ifndef USE_BLOBULATOR
+#if !defined ( USE_BLOBULATOR ) && !defined ( USE_PARTICLE_BLOBULATOR )
 bool C_PropPaintBomb::Simulate( void )
 {
 	Assert( m_pRenderable );

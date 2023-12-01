@@ -21,12 +21,12 @@ public:
 	virtual void PaintBlobPaint( const trace_t &tr );
 
 	virtual void Init( const Vector &vecOrigin, const Vector &vecVelocity, int paintType, float flMaxStreakTime, float flStreakSpeedDampenRate, CBaseEntity* pOwner, bool bSilent, bool bDrawOnly );
-#ifndef USE_BLOBULATOR
+#if !defined ( USE_BLOBULATOR ) && !defined ( USE_PARTICLE_BLOBULATOR )
 	CHandle<C_PaintBlobRenderable> m_hRenderable;
 #endif
 };
 
-#ifndef USE_BLOBULATOR
+#if !defined ( USE_BLOBULATOR ) && !defined ( USE_PARTICLE_BLOBULATOR )
 class C_PropPaintBomb;
 
 //==========================================================================//

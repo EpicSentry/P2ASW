@@ -15,7 +15,7 @@ struct PaintBombBlob_t
 
 typedef CUtlVector< PaintBombBlob_t > PaintBombBlobVector_t;
 
-#ifndef USE_BLOBULATOR
+#if !defined ( USE_BLOBULATOR ) && !defined ( USE_PARTICLE_BLOBULATOR )
 class C_PaintBlobRenderable;
 #endif
 
@@ -40,8 +40,8 @@ public:
 	virtual int DrawModel( int flags, const RenderableInstance_t &instance );
 
 	virtual void ClientThink( void );
-	
-#ifndef USE_BLOBULATOR
+
+#if !defined ( USE_BLOBULATOR ) && !defined ( USE_PARTICLE_BLOBULATOR )
 	virtual bool Simulate();
 #endif
 
@@ -64,7 +64,7 @@ private:
 	Vector m_vPrevPosition;
 	float m_flAccumulatedTime;
 	float m_flLastUpdateTime;
-#ifndef USE_BLOBULATOR
+#if !defined ( USE_BLOBULATOR ) && !defined ( USE_PARTICLE_BLOBULATOR )
 	C_PaintBlobRenderable *m_pRenderable;
 #endif
 };
