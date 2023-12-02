@@ -2102,7 +2102,7 @@ private:
 	friend class CParticleSystemDefinition;
 	friend class C4VInterpolatedAttributeIterator;
 	friend class CM128InterpolatedAttributeIterator;
-	friend class CParticleBlobulatorHacks;
+	friend class C_OP_RenderBlobs_Access;
 };
 
 

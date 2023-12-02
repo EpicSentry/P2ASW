@@ -30,24 +30,22 @@ ConVar r_paintblob_blr_cutoff_radius( "r_paintblob_blr_cutoff_radius", "5.5", FC
 
 #ifdef USE_PARTICLE_BLOBULATOR
 
-CParticleCollection *g_pBlobParticles = NULL;
+CNewParticleEffect *g_pBlobParticles = NULL;
 
-class CParticleBlobulatorHacks
+CParticleProperty g_BlobParticleProp;
+
+class C_OP_RenderBlobs_Access // Use this class for when we need to call functions for C_OP_RenderBlobs
 {
 public:
 
-	CParticleBlobulatorHacks( C_OP_RenderBlobs *pBlobs, IMatRenderContext *pRenderContext, CParticleCollection *pParticles, const Vector4D &vecDiffuseModulation, void *pContext )
+	static void Render( C_OP_RenderBlobs *pBlobs, IMatRenderContext *pRenderContext, CParticleCollection *pParticles, const Vector4D &vecDiffuseModulation, void *pContext )
 	{
 		g_pBlobParticles->m_pRenderOp = pBlobs;
 		pBlobs->Render( pRenderContext, pParticles, vecDiffuseModulation, pContext );
 	}
-
-	CParticleBlobulatorHacks()
-	{
-	}
 };
 
-static CParticleBlobulatorHacks s_ParticleBlobulatorHack();
+static C_OP_RenderBlobs_Access s_ParticleBlobulatorHack();
 
 
 class C_ParticleBlobulator_AutoGameSystemPerFrame : public CAutoGameSystemPerFrame
@@ -57,7 +55,7 @@ class C_ParticleBlobulator_AutoGameSystemPerFrame : public CAutoGameSystemPerFra
 		Msg("Initiate blobs\n");
 		Assert( g_pBlobParticles == NULL );
 		// WHY TF DOES THIS CRASH!!?!??!
-		g_pBlobParticles = g_pParticleSystemMgr->CreateParticleCollection( "global_blob" );
+		g_pBlobParticles = g_BlobParticleProp.Create( "global_blob", PATTACH_ABSORIGIN );
 		Assert( g_pBlobParticles );
 	}
 };
@@ -292,16 +290,15 @@ void Paintblob_Draw( int renderMode, IMaterial *pMaterial, float flCubeWidth, co
 
 	C_OP_RenderBlobs renderblobs;
 
-	Vector4D vecDiffuseModulation;
+	Vector4D vecDiffuseModulation( 1.0f, 1.0f, 1.0f, 1.0f );
 
 	CParticleVisibilityData visData;
-
 	visData.m_bUseVisibility = true;
 	visData.m_flAlphaVisibility = 255;
 	visData.m_flRadiusVisibility = 64;
 	
 	// Draw the blobs
-	CParticleBlobulatorHacks( &renderblobs, pRenderContext, g_pBlobParticles, vecDiffuseModulation, &visData );
+	C_OP_RenderBlobs_Access::Render( &renderblobs, pRenderContext, g_pBlobParticles, vecDiffuseModulation, &visData );
 	
 
 #ifndef USE_PARTICLE_BLOBULATOR

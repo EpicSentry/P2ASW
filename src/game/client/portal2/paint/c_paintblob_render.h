@@ -37,7 +37,6 @@ void Paintblob_Draw( int renderMode, IMaterial *pMaterial, float flCubeWidth, co
 
 }
 
-
 // Recreated from CSGO leak and with the use of IDA
 // This is needed so we can hack our way to creating a blobulator effect
 class C_OP_RenderBlobs : public CParticleRenderOperatorInstance
@@ -58,7 +57,7 @@ class C_OP_RenderBlobs : public CParticleRenderOperatorInstance
 	
 	virtual bool IsBatchable() const;
 
-	friend class CParticleBlobulatorHacks;
+	friend class C_OP_RenderBlobs_Access;
 };
 
 #endif // C_PAINTBLOB_RENDER_H
