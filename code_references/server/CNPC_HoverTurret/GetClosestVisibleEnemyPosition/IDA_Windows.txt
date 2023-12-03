@@ -1,0 +1,96 @@
+Vector *__thiscall CNPC_HoverTurret::GetClosestVisibleEnemyPosition(CNPC_HoverTurret *this, Vector *result)
+{
+  CBaseEntity *v3; // edi
+  int tickcount; // eax
+  int m_iMuzzleAttachment; // ecx
+  bool (__thiscall *GetAttachment)(CBaseAnimating *, int, matrix3x4_t *); // edx
+  Vector *v7; // eax
+  Vector *v8; // eax
+  float v9; // ecx
+  float v11; // xmm1_4
+  float v12; // xmm2_4
+  bool v13; // al
+  CNPC_HoverTurret_vtbl *v14; // edx
+  const CPortal_Base2D *v15; // eax
+  unsigned int v16; // ecx
+  IHandleEntity *m_pEntity; // eax
+  Vector vecBody; // [esp+Ch] [ebp-60h] BYREF
+  Vector vecMid; // [esp+18h] [ebp-54h] BYREF
+  QAngle vecAnglesToEnemy; // [esp+24h] [ebp-48h] BYREF
+  Vector vecDirToEnemyTransformed; // [esp+30h] [ebp-3Ch] BYREF
+  Vector vecMidEnemyTransformed; // [esp+3Ch] [ebp-30h] BYREF
+  Vector vecMuzzlePos; // [esp+48h] [ebp-24h] BYREF
+  Vector vecDirToEnemy; // [esp+54h] [ebp-18h] BYREF
+  float flDistToEnemy; // [esp+60h] [ebp-Ch]
+  float flDistToEnemyTransformed; // [esp+64h] [ebp-8h]
+  bool bEnemyInFOV; // [esp+6Bh] [ebp-1h]
+  bool bEnemyVisible; // [esp+77h] [ebp+Bh]
+
+  v3 = this->GetEnemy(this);
+  tickcount = gpGlobals->tickcount;
+  if ( tickcount != this->m_muzzleToWorldTick )
+  {
+    m_iMuzzleAttachment = this->m_iMuzzleAttachment;
+    GetAttachment = this->GetAttachment;
+    this->m_muzzleToWorldTick = tickcount;
+    GetAttachment(this, m_iMuzzleAttachment, &this->m_muzzleToWorld);
+  }
+  MatrixGetColumn(&this->m_muzzleToWorld, 3, &vecMuzzlePos);
+  v7 = v3->BodyTarget(v3, &vecMidEnemyTransformed, &vecMuzzlePos, 0);
+  vecDirToEnemyTransformed.x = v7->x * 0.64999998;
+  vecDirToEnemyTransformed.y = v7->y * 0.64999998;
+  vecDirToEnemyTransformed.z = v7->z * 0.64999998;
+  flDistToEnemyTransformed = COERCE_FLOAT(AllocTempVector());
+  v8 = AllocTempVector();
+  v9 = flDistToEnemyTransformed;
+  v8->x = (float)((float)(v3->m_Collision.m_vecMaxs.m_Value.x - v3->m_Collision.m_vecMins.m_Value.x) * 0.5)
+        + v3->m_Collision.m_vecMins.m_Value.x;
+  v8->y = (float)((float)(v3->m_Collision.m_vecMaxs.m_Value.y - v3->m_Collision.m_vecMins.m_Value.y) * 0.5)
+        + v3->m_Collision.m_vecMins.m_Value.y;
+  v8->z = (float)((float)(v3->m_Collision.m_vecMaxs.m_Value.z - v3->m_Collision.m_vecMins.m_Value.z) * 0.5)
+        + v3->m_Collision.m_vecMins.m_Value.z;
+  CCollisionProperty::CollisionToWorldSpace(&v3->m_Collision, v8, (Vector *)LODWORD(v9));
+  v11 = (float)(*(float *)(LODWORD(flDistToEnemyTransformed) + 4) * 0.34999999) + vecDirToEnemyTransformed.y;
+  v12 = (float)(*(float *)(LODWORD(flDistToEnemyTransformed) + 8) * 0.34999999) + vecDirToEnemyTransformed.z;
+  result->x = (float)(*(float *)LODWORD(flDistToEnemyTransformed) * 0.34999999) + vecDirToEnemyTransformed.x;
+  result->y = v11;
+  result->z = v12;
+  this->EyePosition(this, &vecMid);
+  v3->BodyTarget(v3, &vecBody, &vecMid, 1);
+  v13 = this->FInViewCone(this, v3);
+  v14 = this->CNPCBaseInteractive<CAI_BasePhysicsFlyingBot>::CAI_BasePhysicsFlyingBot::CAI_BaseNPC::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+  bEnemyInFOV = v13;
+  if ( !v14->FVisible(this, v3, 16449, 0) || (bEnemyVisible = 1, !v3->IsAlive(v3)) )
+    bEnemyVisible = 0;
+  vecDirToEnemy.x = result->x - vecMuzzlePos.x;
+  vecDirToEnemy.y = result->y - vecMuzzlePos.y;
+  vecDirToEnemy.z = result->z - vecMuzzlePos.z;
+  flDistToEnemy = VectorNormalize(&vecDirToEnemy);
+  if ( v3->IsAlive(v3) )
+  {
+    *(float *)&v15 = COERCE_FLOAT((int)this->FInViewConeThroughPortal(this, v3));
+    flDistToEnemyTransformed = *(float *)&v15;
+    if ( *(float *)&v15 != 0.0 && this->FVisibleThroughPortal(this, v15, v3, 16449, 0) )
+    {
+      v16 = *(_DWORD *)(LODWORD(flDistToEnemyTransformed) + 1216);
+      if ( v16 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v16].m_SerialNumber != HIWORD(v16) )
+        m_pEntity = 0;
+      else
+        m_pEntity = g_pEntityList->m_EntPtrArray[(unsigned __int16)v16].m_pEntity;
+      UTIL_Portal_PointTransform((const VMatrix *)&m_pEntity[305], result, &vecMidEnemyTransformed);
+      vecDirToEnemyTransformed.x = vecMidEnemyTransformed.x - vecMuzzlePos.x;
+      vecDirToEnemyTransformed.y = vecMidEnemyTransformed.y - vecMuzzlePos.y;
+      vecDirToEnemyTransformed.z = vecMidEnemyTransformed.z - vecMuzzlePos.z;
+      flDistToEnemyTransformed = VectorNormalize(&vecDirToEnemyTransformed);
+      if ( !bEnemyInFOV || !bEnemyVisible || flDistToEnemy > flDistToEnemyTransformed )
+      {
+        *result = vecMidEnemyTransformed;
+        vecDirToEnemy = vecDirToEnemyTransformed;
+      }
+    }
+  }
+  VectorNormalize(&vecDirToEnemy);
+  VectorAngles(&vecDirToEnemy, &vecAnglesToEnemy);
+  this->m_vecGoalAngles = vecAnglesToEnemy;
+  return result;
+}
