@@ -1,0 +1,191 @@
+Vector *CNPC_HoverTurret::GetClosestVisibleEnemyPosition(Vector *retstr, CNPC_HoverTurret *const this)
+{
+  int v2; // ebx
+  int v3; // edx
+  volatile int m_value; // ett
+  int v5; // edx
+  volatile int v6; // ett
+  Vector *v7; // edx
+  char v8; // al
+  float *v9; // eax
+  float x; // xmm2_4
+  float y; // xmm1_4
+  float z; // xmm0_4
+  int (**vptr_IHandleEntity)(...); // edx
+  int v15; // edx
+  unsigned int v16; // edx
+  int v17; // ecx
+  char *v18; // eax
+  long double v19; // fst7
+  float *v20; // eax
+  const matrix3x4_t *v21; // eax
+  int v22; // [esp+24h] [ebp-A4h]
+  float v23; // [esp+2Ch] [ebp-9Ch]
+  float *in1b; // [esp+34h] [ebp-94h]
+  float *in1; // [esp+34h] [ebp-94h]
+  float *in1a; // [esp+34h] [ebp-94h]
+  float v27; // [esp+38h] [ebp-90h]
+  float v28; // [esp+3Ch] [ebp-8Ch]
+  float v29; // [esp+40h] [ebp-88h]
+  int flDistToEnemy; // [esp+44h] [ebp-84h]
+  float flDistToEnemya; // [esp+44h] [ebp-84h]
+  int bEnemyInFOV; // [esp+48h] [ebp-80h]
+  char bEnemyInFOVa; // [esp+48h] [ebp-80h]
+  Vector *bEnemyVisible; // [esp+4Ch] [ebp-7Ch]
+  bool bEnemyVisiblea; // [esp+4Ch] [ebp-7Ch]
+  Vector vecMuzzlePos; // [esp+50h] [ebp-78h] BYREF
+  int v37[3]; // [esp+5Ch] [ebp-6Ch] BYREF
+  Vector vecMid; // [esp+68h] [ebp-60h] BYREF
+  Vector vecBody; // [esp+74h] [ebp-54h] BYREF
+  Vector vecDirToEnemy; // [esp+80h] [ebp-48h] BYREF
+  Vector vecMidEnemyTransformed; // [esp+8Ch] [ebp-3Ch] BYREF
+  Vector vecDirToEnemyTransformed; // [esp+98h] [ebp-30h] BYREF
+  QAngle vecAnglesToEnemy; // [esp+A4h] [ebp-24h] BYREF
+
+  v2 = (*((int (__stdcall **)(CNPC_HoverTurret *const))this->_vptr_IHandleEntity + 99))(this);
+  CNPC_HoverTurret::UpdateMuzzleMatrix(this);
+  MatrixGetColumn(&this->m_muzzleToWorld, 3, &vecMuzzlePos);
+  (*(void (__cdecl **)(int *, int, Vector *, _DWORD))(*(_DWORD *)v2 + 532))(v37, v2, &vecMuzzlePos, 0);
+  flDistToEnemy = v2 + 240;
+  v29 = *(float *)v37 * 0.64999998;
+  v28 = *(float *)&v37[1] * 0.64999998;
+  v27 = 0.64999998 * *(float *)&v37[2];
+  if ( !(_BYTE)`guard variable for'AllocTempVector(void)::s_vecTemp
+    && _cxa_guard_acquire(&`guard variable for'AllocTempVector(void)::s_vecTemp) )
+  {
+    _cxa_guard_release(&`guard variable for'AllocTempVector(void)::s_vecTemp);
+  }
+  if ( !(_BYTE)`guard variable for'AllocTempVector(void)::s_nIndex
+    && _cxa_guard_acquire(&`guard variable for'AllocTempVector(void)::s_nIndex) )
+  {
+    AllocTempVector(void)::s_nIndex.m_value = 0;
+    _cxa_guard_release(&`guard variable for'AllocTempVector(void)::s_nIndex);
+  }
+  while ( 1 )
+  {
+    v3 = (LOBYTE(AllocTempVector(void)::s_nIndex.m_value) + 1) & 0x7F;
+    m_value = AllocTempVector(void)::s_nIndex.m_value;
+    if ( m_value == _InterlockedCompareExchange(
+                      &AllocTempVector(void)::s_nIndex.m_value,
+                      v3,
+                      AllocTempVector(void)::s_nIndex.m_value) )
+      break;
+    _mm_pause();
+  }
+  bEnemyInFOV = v3;
+  bEnemyVisible = &AllocTempVector(void)::s_vecTemp[v3];
+  if ( !(_BYTE)`guard variable for'AllocTempVector(void)::s_vecTemp
+    && _cxa_guard_acquire(&`guard variable for'AllocTempVector(void)::s_vecTemp) )
+  {
+    _cxa_guard_release(&`guard variable for'AllocTempVector(void)::s_vecTemp);
+  }
+  if ( !(_BYTE)`guard variable for'AllocTempVector(void)::s_nIndex
+    && _cxa_guard_acquire(&`guard variable for'AllocTempVector(void)::s_nIndex) )
+  {
+    AllocTempVector(void)::s_nIndex.m_value = 0;
+    _cxa_guard_release(&`guard variable for'AllocTempVector(void)::s_nIndex);
+  }
+  while ( 1 )
+  {
+    v5 = (LOBYTE(AllocTempVector(void)::s_nIndex.m_value) + 1) & 0x7F;
+    v6 = AllocTempVector(void)::s_nIndex.m_value;
+    if ( v6 == _InterlockedCompareExchange(
+                 &AllocTempVector(void)::s_nIndex.m_value,
+                 v5,
+                 AllocTempVector(void)::s_nIndex.m_value) )
+      break;
+    _mm_pause();
+  }
+  v22 = v5;
+  v7 = &AllocTempVector(void)::s_vecTemp[v5];
+  AllocTempVector(void)::s_vecTemp[v22].x = (float)((float)(*(float *)(v2 + 260) - *(float *)(v2 + 248)) * 0.5)
+                                          + *(float *)(v2 + 248);
+  v7->y = (float)((float)(*(float *)(v2 + 264) - *(float *)(v2 + 252)) * 0.5) + *(float *)(v2 + 252);
+  v7->z = (float)((float)(*(float *)(v2 + 268) - *(float *)(v2 + 256)) * 0.5) + *(float *)(v2 + 256);
+  if ( (*(_BYTE *)(v2 + 272) & 0x40) != 0
+    || (v8 = *(_BYTE *)(v2 + 274), v8 == 2)
+    || !v8
+    || (in1a = &v7->x,
+        v20 = (float *)(*(int (__cdecl **)(int))(*(_DWORD *)(v2 + 240) + 36))(flDistToEnemy),
+        v7 = (Vector *)in1a,
+        vec3_angle.x == *v20)
+    && vec3_angle.y == v20[1]
+    && vec3_angle.z == v20[2] )
+  {
+    in1b = &v7->x;
+    v9 = (float *)(*(int (__cdecl **)(int))(*(_DWORD *)(v2 + 240) + 32))(flDistToEnemy);
+    x = AllocTempVector(void)::s_vecTemp[v22].x + *v9;
+    AllocTempVector(void)::s_vecTemp[bEnemyInFOV].x = x;
+    y = in1b[1] + v9[1];
+    bEnemyVisible->y = y;
+    z = in1b[2] + v9[2];
+    bEnemyVisible->z = z;
+  }
+  else
+  {
+    v21 = (const matrix3x4_t *)(*(int (__cdecl **)(int))(*(_DWORD *)(v2 + 240) + 40))(flDistToEnemy);
+    VectorTransform(in1a, v21, &bEnemyVisible->x);
+    x = AllocTempVector(void)::s_vecTemp[bEnemyInFOV].x;
+    y = bEnemyVisible->y;
+    z = bEnemyVisible->z;
+  }
+  vptr_IHandleEntity = this->_vptr_IHandleEntity;
+  retstr->x = (float)(x * 0.34999999) + v29;
+  retstr->y = (float)(y * 0.34999999) + v28;
+  retstr->z = (float)(z * 0.34999999) + v27;
+  vptr_IHandleEntity[129](&vecMid, this);
+  (*(void (__stdcall **)(Vector *))(*(_DWORD *)v2 + 532))(&vecBody);
+  bEnemyInFOVa = (*((int (__stdcall **)(CNPC_HoverTurret *const))this->_vptr_IHandleEntity + 247))(this);
+  bEnemyVisiblea = 0;
+  if ( (*((unsigned __int8 (__cdecl **)(CNPC_HoverTurret *const, int, int, _DWORD))this->_vptr_IHandleEntity + 141))(
+         this,
+         v2,
+         16449,
+         0) )
+  {
+    bEnemyVisiblea = (*(unsigned __int8 (__cdecl **)(int))(*(_DWORD *)v2 + 280))(v2) != 0;
+  }
+  vecDirToEnemy.x = retstr->x - vecMuzzlePos.x;
+  vecDirToEnemy.y = retstr->y - vecMuzzlePos.y;
+  vecDirToEnemy.z = retstr->z - vecMuzzlePos.z;
+  flDistToEnemya = VectorNormalize(&vecDirToEnemy);
+  if ( (*(unsigned __int8 (__cdecl **)(int))(*(_DWORD *)v2 + 280))(v2) )
+  {
+    v15 = (*((int (__cdecl **)(CNPC_HoverTurret *const, int))this->_vptr_IHandleEntity + 249))(this, v2);
+    if ( v15 )
+    {
+      in1 = (float *)v15;
+      if ( (*((unsigned __int8 (__cdecl **)(CNPC_HoverTurret *const, int, int, int, _DWORD))this->_vptr_IHandleEntity
+            + 246))(
+             this,
+             v15,
+             v2,
+             16449,
+             0) )
+      {
+        v16 = *((_DWORD *)in1 + 310);
+        v17 = 0;
+        if ( v16 != -1 )
+        {
+          v18 = (char *)g_pEntityList + 24 * (unsigned __int16)v16;
+          if ( *((_DWORD *)v18 + 2) == HIWORD(v16) )
+            v17 = *((_DWORD *)v18 + 1);
+        }
+        UTIL_Portal_PointTransform((const VMatrix *const)(v17 + 1244), retstr, &vecMidEnemyTransformed);
+        vecDirToEnemyTransformed.x = vecMidEnemyTransformed.x - vecMuzzlePos.x;
+        vecDirToEnemyTransformed.y = vecMidEnemyTransformed.y - vecMuzzlePos.y;
+        vecDirToEnemyTransformed.z = vecMidEnemyTransformed.z - vecMuzzlePos.z;
+        v19 = VectorNormalize(&vecDirToEnemyTransformed);
+        if ( !bEnemyInFOVa || !bEnemyVisiblea || (v23 = v19, flDistToEnemya > v23) )
+        {
+          *retstr = vecMidEnemyTransformed;
+          vecDirToEnemy = vecDirToEnemyTransformed;
+        }
+      }
+    }
+  }
+  VectorNormalize(&vecDirToEnemy);
+  VectorAngles(&vecDirToEnemy, &vecAnglesToEnemy);
+  this->m_vecGoalAngles = vecAnglesToEnemy;
+  return retstr;
+}
