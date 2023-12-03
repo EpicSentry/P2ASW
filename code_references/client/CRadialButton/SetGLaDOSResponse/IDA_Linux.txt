@@ -1,0 +1,4 @@
+void __cdecl CRadialButton::SetGLaDOSResponse(CRadialButton *const this, int nResponse)
+{
+  this->m_nGLaDOSResponse = nResponse;
+}

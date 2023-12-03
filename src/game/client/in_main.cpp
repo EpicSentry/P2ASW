@@ -1931,6 +1931,8 @@ void CInput::Init_All (void)
 
 	m_fMouseParmsValid	= false;
 	m_fJoystickAdvancedInit = false;
+	m_bControllerMode = !IsPC();
+	m_fAccumulatedMouseMove = 0.0f;
 
 	// Initialize inputs
 	if ( IsPC() )

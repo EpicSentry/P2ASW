@@ -673,6 +673,22 @@ void CInput::MouseMove( int nSlot, CUserCmd *cmd )
 
 		// Filter, etc. the delta values and place into mouse_x and mouse_y
 		GetMouseDelta( nSlot, mx, my, &mouse_x, &mouse_y );
+		
+		if ( IsPC() )
+		{
+			if ( ControllerModeActive() )
+			{
+				// accumulate mouse movements and if we go over a certain threshold, switch out of controller mode
+				m_fAccumulatedMouseMove += fabsf( mouse_x ) + fabsf( mouse_y );
+
+				//Msg( "total_mouse_move = %f\n", m_fAccumulatedMouseMove );
+				if ( m_fAccumulatedMouseMove > 30.0f )
+				{
+					m_bControllerMode = false;
+					m_fAccumulatedMouseMove = 0.0f;
+				}
+			}
+		}
 
 		// Apply scaling factor
 		ScaleMouse( nSlot, &mouse_x, &mouse_y );

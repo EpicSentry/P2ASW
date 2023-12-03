@@ -1,0 +1,20 @@
+void __cdecl UTIL_WorldToScreenCoords(const Vector *const vecWorld, int *pScreenX, int *pScreenY)
+{
+  int v3; // edi
+  int v4; // esi
+  float v5; // [esp+1Ch] [ebp-2Ch]
+  float v6; // [esp+1Ch] [ebp-2Ch]
+  Vector vecTransform; // [esp+24h] [ebp-24h] BYREF
+
+  *pScreenX = 0;
+  *pScreenY = 0;
+  if ( !ScreenTransform(vecWorld, &vecTransform) )
+  {
+    v3 = ScreenWidth();
+    v5 = 0.5 * vecTransform.x;
+    *pScreenX = (int)(float)((float)((float)(v3 / 2) + (float)((float)ScreenWidth() * v5)) + 0.5);
+    v4 = ScreenHeight();
+    v6 = 0.5 * vecTransform.y;
+    *pScreenY = (int)(float)((float)((float)(v4 / 2) - (float)((float)ScreenHeight() * v6)) + 0.5);
+  }
+}

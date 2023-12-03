@@ -28,6 +28,7 @@
 #include "math.h"
 #include "tier1/convar_serverbounded.h"
 #include "c_baseplayer.h"
+#include "ienginevgui.h"
 #include "inputsystem/iinputstacksystem.h"
 #if defined( _X360 )
 #include "xbox/xbox_win32stubs.h"
@@ -36,7 +37,7 @@
 #endif
 
 #ifdef PORTAL2
-//#include "radialmenu.h"
+#include "radialmenu.h"
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -752,13 +753,30 @@ void CInput::Joystick_SetSampleTime(float frametime)
 	}
 }
 
+void CInput::Joystick_Querry( float &forward, float &side, float &pitch, float &yaw )
+{
+	bool bAbsoluteYaw, bAbsolutePitch;
+	JoyStickSampleAxes( forward, side, pitch, yaw, bAbsoluteYaw, bAbsolutePitch );
+}
+
+void CInput::Joystick_ForceRecentering( int nStick, bool bSet /*= true*/ )
+{
+	if ( nStick < 0 || nStick > 1 )
+		return;
+
+	int nSlot = GET_ACTIVE_SPLITSCREEN_SLOT();
+	PerUserInput_t &user = GetPerUser( nSlot );
+
+	user.m_bForceJoystickRecentering[ nStick ] = bSet;
+}
+
 extern void IN_ForceSpeedUp( );
 extern void IN_ForceSpeedDown( );
 
 
 bool CInput::ControllerModeActive( void )
 {
-	return ( in_joystick.GetInt() != 0 );
+	return ( in_joystick.GetInt() != 0 && m_bControllerMode );
 }
 
 //--------------------------------------------------------------------
@@ -1086,38 +1104,90 @@ void CInput::JoyStickMove( float frametime, CUserCmd *cmd )
 		Joystick_Advanced( false );
 	}
 
-	if ( !JoyStickActive() )
+	// verify joystick is available and that the user wants to use it
+	if ( !in_joystick.GetInt() || 0 == inputsystem->GetJoystickCount() )
+		return; 
+
+	// Skip out if vgui is active
+	if ( vgui::surface()->IsCursorVisible() )
 		return;
-	
+
+	// Don't move if GameUI is visible
+	if ( enginevgui->IsGameUIVisible() )
+		return;
+
 #ifdef PORTAL2
-	//if ( IsRadialMenuOpen() )
-	//	return;
+	if ( IsRadialMenuOpen() )
+		return;
 #endif
 
 	int nSlot = GET_ACTIVE_SPLITSCREEN_SLOT();
+
+#if defined( INCLUDE_SCALEFORM )
+	if ( g_pScaleformUI->SlotDeniesInputToGame( SF_SS_SLOT( nSlot ) ) )
+		return;
+#endif
+
 	PerUserInput_t &user = GetPerUser( nSlot );
 
-	if ( user.m_flRemainingJoystickSampleTime <= 0 )
-		return;
-	frametime = MIN(user.m_flRemainingJoystickSampleTime, frametime);
-	user.m_flRemainingJoystickSampleTime -= frametime;	
-
-	float forward, side, pitch, yaw;
-	bool bAbsoluteYaw, bAbsolutePitch;
-	JoyStickSampleAxes( forward, side, pitch, yaw, bAbsoluteYaw, bAbsolutePitch );
-		
-	if ( CAM_IsThirdPerson() && thirdperson_platformer.GetInt() )
+	// Sample the axes, apply the input, and consume sample time.
+	if ( user.m_flRemainingJoystickSampleTime > 0 )
 	{
-		JoyStickThirdPersonPlatformer( cmd, forward, side, pitch, yaw );
-		return;
+		frametime = MIN(user.m_flRemainingJoystickSampleTime, frametime);
+		user.m_flRemainingJoystickSampleTime -= frametime;
+
+		float forward, side, pitch, yaw;
+		bool bAbsoluteYaw, bAbsolutePitch;
+
+		JoyStickSampleAxes( forward, side, pitch, yaw, bAbsoluteYaw, bAbsolutePitch );
+		
+		if ( !m_bControllerMode )
+		{
+			if ( fabsf(forward) > 0.1f || fabsf(side) > 0.1f || fabsf(pitch) > 0.1f || fabsf(yaw) > 0.1f )
+			{
+				m_bControllerMode = true;
+			}
+		}
+			
+		if ( CAM_IsThirdPerson() && thirdperson_platformer.GetInt() )
+		{
+			JoyStickThirdPersonPlatformer( cmd, forward, side, pitch, yaw );
+			return;
+		}
+
+		float	joyForwardMove, joySideMove;
+		JoyStickForwardSideControl( forward, side, joyForwardMove, joySideMove );
+
+		// Cache off the input sample values in case we run out of sample time.
+		user.m_flPreviousJoystickForwardMove = joyForwardMove;
+		user.m_flPreviousJoystickSideMove = joySideMove;
+		user.m_flPreviousJoystickYaw = yaw;
+		user.m_flPreviousJoystickPitch = pitch;
+		user.m_bPreviousJoystickUseAbsoluteYaw = bAbsoluteYaw;
+		user.m_bPreviousJoystickUseAbsolutePitch = bAbsolutePitch;
 	}
 
-	float	joyForwardMove, joySideMove;
-	JoyStickForwardSideControl( forward, side, joyForwardMove, joySideMove );
+	if ( JoyStickActive() )
+	{
+		// If we are using a motion controller, then we use the pointing device for updating the look direction.
+		/*if( inputsystem->MotionControllerActive())
+		{
+			MotionControllerMove( frametime, cmd );
+		}
+		else*/ // No motion controller in Swarm!
+		{
+			JoyStickTurn( cmd,
+				user.m_flPreviousJoystickYaw,
+				user.m_flPreviousJoystickPitch,
+				frametime,
+				user.m_bPreviousJoystickUseAbsoluteYaw,
+				user.m_bPreviousJoystickUseAbsolutePitch );
+		}
 
-	JoyStickTurn( cmd, yaw, pitch, frametime, bAbsoluteYaw, bAbsolutePitch );	
-
-	JoyStickApplyMovement( cmd, joyForwardMove, joySideMove );
+		JoyStickApplyMovement( cmd,
+			user.m_flPreviousJoystickForwardMove,
+			user.m_flPreviousJoystickSideMove );
+	}
 }
 
 //--------------------------------------------------------------

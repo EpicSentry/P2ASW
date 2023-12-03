@@ -1,0 +1,41 @@
+char __cdecl UTIL_EntityBoundsToSizes(C_BaseEntity *pTarget, int *pMinX, int *pMinY, int *pMaxX, int *pMaxY)
+{
+  const Vector *v5; // eax
+  C_BaseEntity_vtbl *v6; // edx
+  float v7; // xmm0_4
+  const Vector *(__thiscall *GetAbsOrigin)(IClientEntity *); // eax
+  float *v9; // eax
+  float v10; // xmm0_4
+  const Vector *(__thiscall *v11)(IClientEntity *); // eax
+  const Vector *v12; // eax
+  Vector vOBBMins; // [esp+4h] [ebp-28h] BYREF
+  Vector vOBBMaxs; // [esp+10h] [ebp-1Ch] BYREF
+  Vector2D maxs; // [esp+1Ch] [ebp-10h] BYREF
+  Vector2D mins; // [esp+24h] [ebp-8h] BYREF
+
+  pTarget->m_Collision.WorldSpaceSurroundingBounds(&pTarget->m_Collision, &vOBBMins, &vOBBMaxs);
+  v5 = pTarget->GetAbsOrigin(pTarget);
+  v6 = pTarget->IClientEntity::IClientUnknown::IHandleEntity::__vftable;
+  vOBBMaxs.x = vOBBMaxs.x - v5->x;
+  vOBBMaxs.y = vOBBMaxs.y - v5->y;
+  v7 = vOBBMaxs.z - v5->z;
+  GetAbsOrigin = v6->GetAbsOrigin;
+  vOBBMaxs.z = v7;
+  v9 = (float *)GetAbsOrigin(pTarget);
+  vOBBMins.x = vOBBMins.x - *v9;
+  vOBBMins.y = vOBBMins.y - v9[1];
+  v10 = vOBBMins.z - v9[2];
+  v11 = pTarget->GetAbsOrigin;
+  vOBBMins.z = v10;
+  v12 = v11(pTarget);
+  UTIL_WorldSpaceToScreensSpaceBounds(v12, &vOBBMins, &vOBBMaxs, &mins, &maxs);
+  if ( pMinX )
+    *pMinX = (int)mins.x;
+  if ( pMinY )
+    *pMinY = (int)mins.y;
+  if ( pMaxX )
+    *pMaxX = (int)maxs.x;
+  if ( pMaxY )
+    *pMaxY = (int)maxs.y;
+  return 1;
+}

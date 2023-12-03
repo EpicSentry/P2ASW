@@ -1,0 +1,8 @@
+void __thiscall CRadialButton::SetImage(CRadialButton *this, const char *lpszImage)
+{
+  if ( *((_DWORD *)this + 171) )
+  {
+    (*(void (__thiscall **)(_DWORD, const char *))(**((_DWORD **)this + 171) + 732))(*((_DWORD *)this + 171), lpszImage);
+    (*(void (__thiscall **)(_DWORD, int))(**((_DWORD **)this + 171) + 20))(*((_DWORD *)this + 171), 1);
+  }
+}

@@ -1,0 +1,67 @@
+bool __cdecl UTIL_WorldSpaceToScreensSpaceBounds(
+        const Vector *const vecCenter,
+        const Vector *const mins,
+        const Vector *const maxs,
+        Vector2D *pMins,
+        Vector2D *pMaxs)
+{
+  int v5; // esi
+  int v6; // ebx
+  int v7; // edi
+  int v8; // ebx
+  int v9; // eax
+  int nMinY; // [esp+18h] [ebp-90h]
+  int nMaxY; // [esp+1Ch] [ebp-8Ch]
+  Vector vecBoxVerts[8]; // [esp+28h] [ebp-80h] BYREF
+  int nX; // [esp+88h] [ebp-20h] BYREF
+  int nY[7]; // [esp+8Ch] [ebp-1Ch] BYREF
+
+  v5 = 0;
+  UTIL_GenerateBoxVertices(vecCenter, mins, maxs, vecBoxVerts);
+  v6 = ScreenWidth();
+  nMaxY = 0;
+  nMinY = ScreenHeight();
+  v7 = v6;
+  v8 = 0;
+  do
+  {
+    while ( 1 )
+    {
+      UTIL_WorldToScreenCoords(&vecBoxVerts[v5], &nX, nY);
+      if ( nX <= v8 )
+        break;
+      v8 = nX;
+      v9 = nY[0];
+      if ( nY[0] <= nMaxY )
+        goto LABEL_5;
+LABEL_10:
+      ++v5;
+      nMaxY = v9;
+      if ( v5 == 8 )
+        goto LABEL_11;
+    }
+    if ( nX < v7 )
+      v7 = nX;
+    v9 = nY[0];
+    if ( nY[0] > nMaxY )
+      goto LABEL_10;
+LABEL_5:
+    if ( v9 >= nMinY )
+      v9 = nMinY;
+    ++v5;
+    nMinY = v9;
+  }
+  while ( v5 != 8 );
+LABEL_11:
+  if ( pMins )
+  {
+    pMins->x = (float)v7;
+    pMins->y = (float)nMinY;
+  }
+  if ( pMaxs )
+  {
+    pMaxs->x = (float)v8;
+    pMaxs->y = (float)nMaxY;
+  }
+  return 1;
+}

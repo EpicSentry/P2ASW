@@ -1,0 +1,11 @@
+void __cdecl CRadialButton::SetImage(CRadialButton *const this, const char *lpszImage)
+{
+  vgui::ImagePanel *m_pIcon; // eax
+
+  m_pIcon = this->m_pIcon;
+  if ( m_pIcon )
+  {
+    (*(void (__cdecl **)(vgui::ImagePanel *, const char *))(*(_DWORD *)m_pIcon->gap0 + 852))(m_pIcon, lpszImage);
+    (*(void (__cdecl **)(vgui::ImagePanel *, int))(*(_DWORD *)this->m_pIcon + 136))(this->m_pIcon, 1);
+  }
+}

@@ -1,0 +1,110 @@
+void __cdecl CRadialButton::CRadialButton(CRadialButton *const this, vgui::Panel *parent, const char *panelName)
+{
+  ConVar *m_pParent; // eax
+  int v4; // eax
+  vgui::ISurface *v5; // edx
+  CRadialMenu *v6; // eax
+  vgui::ImagePanel *v7; // ebx
+  vgui::PanelMessageMap *v8; // eax
+  vgui::PanelMessageMap *v9; // ebx
+  vgui::PanelMessageMap *v10; // eax
+  bool v11; // zf
+  PanelAnimationMap *v12; // eax
+  PanelAnimationMap *v13; // ebx
+  PanelAnimationMap *v14; // eax
+  vgui::PanelKeyBindingMap *v15; // eax
+
+  *(_DWORD *)this->baseclass_0 = off_11D71C8;
+  CPolygonButton::CPolygonButton(this, (const void **const)&off_13E59E4, parent, panelName);
+  *(_DWORD *)this->baseclass_0 = off_13E5A9C;
+  if ( CRadialButton::ChainToMap(void)::chained )
+  {
+    if ( CRadialButton::ChainToAnimationMap(void)::chained )
+      goto LABEL_3;
+LABEL_11:
+    CRadialButton::ChainToAnimationMap(void)::chained = 1;
+    v12 = FindOrAddPanelAnimationMap("CRadialButton");
+    v12->pfnClassName = CRadialButton::GetPanelClassName;
+    v13 = v12;
+    v14 = FindOrAddPanelAnimationMap("CPolygonButton");
+    v11 = CRadialButton::KB_ChainToMap(void)::chained == 0;
+    v13->baseMap = v14;
+    if ( !v11 )
+      goto LABEL_4;
+    goto LABEL_12;
+  }
+  CRadialButton::ChainToMap(void)::chained = 1;
+  v8 = vgui::FindOrAddPanelMessageMap("CRadialButton");
+  v8->pfnClassName = CRadialButton::GetPanelClassName;
+  v9 = v8;
+  v10 = vgui::FindOrAddPanelMessageMap("CPolygonButton");
+  v11 = CRadialButton::ChainToAnimationMap(void)::chained == 0;
+  v9->baseMap = v10;
+  if ( v11 )
+    goto LABEL_11;
+LABEL_3:
+  if ( CRadialButton::KB_ChainToMap(void)::chained )
+    goto LABEL_4;
+LABEL_12:
+  CRadialButton::KB_ChainToMap(void)::chained = 1;
+  v15 = vgui::FindOrAddPanelKeyBindingMap("CRadialButton");
+  v15->pfnClassName = CRadialButton::GetPanelClassName;
+  v15->baseMap = vgui::FindOrAddPanelKeyBindingMap("CPolygonButton");
+LABEL_4:
+  this->m_unscaledSubmenuPoints.m_Memory.m_pMemory = 0;
+  m_pParent = RadialMenuDebug.m_pParent;
+  this->m_unscaledSubmenuPoints.m_Memory.m_nAllocationCount = 0;
+  this->m_unscaledSubmenuPoints.m_Memory.m_nGrowSize = 0;
+  this->m_unscaledSubmenuPoints.m_Size = 0;
+  this->m_unscaledSubmenuPoints.m_pElements = 0;
+  this->m_disabledBgColor = 0;
+  this->m_disabledFgColor = 0;
+  this->m_chosenBgColor = 0;
+  this->m_chosenFgColor = 0;
+  this->m_armedBgColor = 0;
+  this->m_armedFgColor = 0;
+  if ( m_pParent->m_Value.m_nValue )
+    vgui::Panel::SetCursor((vgui::Panel *const)this, 6u);
+  else
+    vgui::Panel::SetCursor((vgui::Panel *const)this, 0);
+  v4 = (*(int (__cdecl **)(vgui::ISurface *, _DWORD))(*(_DWORD *)g_pVGuiSurface + 164))(g_pVGuiSurface, 0);
+  v5 = g_pVGuiSurface;
+  this->m_nMainMaterial = v4;
+  (*(void (__cdecl **)(vgui::ISurface *, int, const char *, int, _DWORD))(*(_DWORD *)v5 + 140))(
+    v5,
+    v4,
+    "vgui/white",
+    1,
+    0);
+  v6 = 0;
+  this->m_chosen = 0;
+  this->m_hasBorders = 1;
+  this->m_defaultFont = 0;
+  this->m_armedFont = 0;
+  this->m_unscaledSubmenuPoints.m_Size = 0;
+  this->m_submenuPoints = 0;
+  this->m_numSubmenuPoints = 0;
+  this->m_hasSubmenu = 0;
+  this->m_fakeArmed = 0;
+  this->m_fMaxScale = 1.0;
+  this->m_bPulse = 0;
+  this->m_nGLaDOSResponse = 0;
+  this->m_passthru = 0;
+  if ( parent )
+    v6 = (CRadialMenu *)_dynamic_cast(
+                          parent,
+                          (const struct __class_type_info *)&`typeinfo for'vgui::Panel,
+                          (const struct __class_type_info *)&`typeinfo for'CRadialMenu,
+                          52);
+  this->m_parent = v6;
+  v7 = (vgui::ImagePanel *)operator new(0x194u);
+  vgui::ImagePanel::ImagePanel(v7, (vgui::Panel *)this, "RadialButtonImage");
+  this->m_pIcon = v7;
+  (*(void (__cdecl **)(vgui::ImagePanel *, _DWORD))(*(_DWORD *)v7->gap0 + 136))(v7, 0);
+  vgui::Panel::SetPos(this->m_pIcon, 0, 0);
+  vgui::Panel::SetZPos(this->m_pIcon, 2);
+  (*(void (__cdecl **)(vgui::ImagePanel *, int))(*(_DWORD *)this->m_pIcon + 224))(this->m_pIcon, 1);
+  vgui::ImagePanel::SetShouldScaleImage(this->m_pIcon, 1);
+  vgui::Panel::SetSize(this->m_pIcon, 128, 128);
+  (*(void (__cdecl **)(vgui::ImagePanel *, _DWORD))(*(_DWORD *)this->m_pIcon + 544))(this->m_pIcon, 0);
+}

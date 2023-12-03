@@ -1,0 +1,4 @@
+int __cdecl CRadialButton::GetGLaDOSResponse(const CRadialButton *const this)
+{
+  return this->m_nGLaDOSResponse;
+}

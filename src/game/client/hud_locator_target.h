@@ -33,6 +33,8 @@
 #define LOCATOR_ICON_FX_FORCE_CAPTION	0x00000400	// Always draw the caption, even when the icon is occluded.
 #define LOCATOR_ICON_FX_FADE_OUT		0x00000800	// Set when deactivated so it can smoothly vanish
 #define LOCATOR_ICON_FX_FADE_IN			0x00001000	// Set when activated so it can smoothly appear
+#define LOCATOR_ICON_FX_SCALE_BY_DIST	0x00002000	// Scales the icon in the world by how far away it is
+#define LOCATOR_ICON_FX_SCALE_LARGE		0x00004000	// Scales the icon triple the normal size
 
 #include "tier1/UtlSymbol.h"
 
@@ -109,6 +111,8 @@ public:
 	void AddIconEffects( int add )			{ m_iEffectsFlags |= add; }
 	void RemoveIconEffects( int remove )	{ m_iEffectsFlags &= ~remove; }
 	int GetIconEffectsFlags()				{ return m_iEffectsFlags; }
+	void SetIconColor( Color color )		{ m_rgbaIconColor = color; }
+	Color GetIconColor( void ) const		{ return m_rgbaIconColor; }
 	void SetCaptionColor( Color col )		{ m_captionColor = col; }
 	void SetCaptionColor( const char *pszCaptionColor );
 	bool IsStatic();
@@ -166,6 +170,7 @@ private:
 	const char	*m_pchDrawBindingName;
 	const char	*m_pchDrawBindingNameOffscreen;
 	int			m_iEffectsFlags;
+	Color		m_rgbaIconColor;
 	CUtlVector< wchar_t > m_wszCaption;
 
 public:

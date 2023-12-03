@@ -1,0 +1,4 @@
+void __thiscall CRadialButton::SetGLaDOSResponse(CRadialButton *this, int nResponse)
+{
+  *((_DWORD *)this + 166) = nResponse;
+}

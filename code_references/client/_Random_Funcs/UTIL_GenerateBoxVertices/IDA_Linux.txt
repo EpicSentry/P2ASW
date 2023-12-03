@@ -1,0 +1,54 @@
+void __cdecl UTIL_GenerateBoxVertices(
+        const Vector *const vOrigin,
+        const Vector *const vMins,
+        const Vector *const vMaxs,
+        Vector *pVerts)
+{
+  int v4; // eax
+  float x; // xmm2_4
+  float y; // xmm1_4
+  float z; // xmm0_4
+  vec_t v9; // xmm0_4
+  vec_t v10; // xmm2_4
+
+  v4 = 0;
+  do
+  {
+    if ( (v4 & 1) != 0 )
+    {
+      x = vMaxs->x;
+      if ( (v4 & 2) != 0 )
+        goto LABEL_3;
+    }
+    else
+    {
+      x = vMins->x;
+      if ( (v4 & 2) != 0 )
+      {
+LABEL_3:
+        y = vMaxs->y;
+        if ( (v4 & 4) != 0 )
+          goto LABEL_4;
+        goto LABEL_9;
+      }
+    }
+    y = vMins->y;
+    if ( (v4 & 4) != 0 )
+    {
+LABEL_4:
+      z = vMaxs->z;
+      goto LABEL_5;
+    }
+LABEL_9:
+    z = vMins->z;
+LABEL_5:
+    ++v4;
+    v9 = z + vOrigin->z;
+    v10 = x + vOrigin->x;
+    pVerts->y = y + vOrigin->y;
+    pVerts->z = v9;
+    pVerts->x = v10;
+    ++pVerts;
+  }
+  while ( v4 != 8 );
+}

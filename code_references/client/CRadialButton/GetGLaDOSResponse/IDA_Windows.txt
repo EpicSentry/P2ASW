@@ -1,0 +1,4 @@
+int __thiscall CRadialButton::GetGLaDOSResponse(CRadialButton *this)
+{
+  return *((_DWORD *)this + 166);
+}

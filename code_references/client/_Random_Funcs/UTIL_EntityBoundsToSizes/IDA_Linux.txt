@@ -1,0 +1,43 @@
+bool __cdecl UTIL_EntityBoundsToSizes(C_BaseEntity *pTarget, int *pMinX, int *pMinY, int *pMaxX, int *pMaxY)
+{
+  float *v5; // eax
+  vec_t v6; // xmm0_4
+  int (**vptr_IHandleEntity)(...); // eax
+  float *v8; // eax
+  vec_t v9; // xmm0_4
+  int (**v10)(...); // eax
+  const Vector *v11; // eax
+  Vector vOBBMins; // [esp+28h] [ebp-40h] BYREF
+  Vector vOBBMaxs; // [esp+34h] [ebp-34h] BYREF
+  Vector2D mins; // [esp+40h] [ebp-28h] BYREF
+  Vector2D maxs; // [esp+48h] [ebp-20h] BYREF
+
+  (*((void (__cdecl **)(C_BaseEntity::NetworkVar_m_Collision *, Vector *, Vector *))pTarget->m_Collision._vptr_ICollideable
+   + 15))(
+    &pTarget->m_Collision,
+    &vOBBMins,
+    &vOBBMaxs);
+  v5 = (float *)(*((int (__cdecl **)(C_BaseEntity *))pTarget->_vptr_IHandleEntity + 12))(pTarget);
+  vOBBMaxs.x = vOBBMaxs.x - *v5;
+  vOBBMaxs.y = vOBBMaxs.y - v5[1];
+  v6 = vOBBMaxs.z - v5[2];
+  vptr_IHandleEntity = pTarget->_vptr_IHandleEntity;
+  vOBBMaxs.z = v6;
+  v8 = (float *)vptr_IHandleEntity[12](pTarget);
+  vOBBMins.x = vOBBMins.x - *v8;
+  vOBBMins.y = vOBBMins.y - v8[1];
+  v9 = vOBBMins.z - v8[2];
+  v10 = pTarget->_vptr_IHandleEntity;
+  vOBBMins.z = v9;
+  v11 = (const Vector *)v10[12](pTarget);
+  UTIL_WorldSpaceToScreensSpaceBounds(v11, &vOBBMins, &vOBBMaxs, &mins, &maxs);
+  if ( pMinX )
+    *pMinX = (int)mins.x;
+  if ( pMinY )
+    *pMinY = (int)mins.y;
+  if ( pMaxX )
+    *pMaxX = (int)maxs.x;
+  if ( pMaxY )
+    *pMaxY = (int)maxs.y;
+  return 1;
+}

@@ -59,6 +59,8 @@ public:
 	virtual bool		ControllerModeActive() = 0;
 	virtual void		Joystick_Advanced( bool bSilent ) = 0;
 	virtual void		Joystick_SetSampleTime( float frametime ) = 0;
+	virtual void		Joystick_Querry( float &forward, float &side, float &pitch, float &yaw ) = 0;
+	virtual void		Joystick_ForceRecentering( int nStick, bool bSet = true ) = 0;
 	virtual void		IN_SetSampleTime( float frametime ) = 0;
 
 	// Accumulate mouse delta

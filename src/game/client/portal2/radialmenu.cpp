@@ -31,7 +31,7 @@
 #include "soundemittersystem/isoundemittersystembase.h"
 #include "c_prop_portal.h"
 #include "c_trigger_tractorbeam.h"
-//#include "c_projectedwallentity.h" Add this when we have projected walls finished
+#include "c_projectedwallentity.h"
 #include "portal_mp_gamerules.h"
 
 #include "vgui/cursor.h"
@@ -40,8 +40,14 @@
 #include "vgui/IVgui.h"
 #include <game/client/iviewport.h>
 
+#include "IGameUIFuncs.h"
+
+//#define TAUNTMENU
+
 #include "radialmenu.h"
-//#include "radialmenu_taunt.h" TODO: ADD THIS FILE!
+#ifdef TAUNTMENU
+//#include "radialmenu_taunt.h"
+#endif
 #include "radialbutton.h"
 
 #include "cegclientwrapper.h"
@@ -151,7 +157,7 @@ int AddGlowToObject( C_BaseEntity *pObject, int nTeamNumber )
 	Vector vColor;
 	TeamPingColor( nTeamNumber, vColor );
 
-	return g_GlowObjectManager.RegisterGlowObject( pObject, vColor, GLOW_OUTLINE_ALPHA, GET_ACTIVE_SPLITSCREEN_SLOT() );
+	return g_GlowObjectManager.RegisterGlowObject( pObject, vColor, GLOW_OUTLINE_ALPHA, false, false, GET_ACTIVE_SPLITSCREEN_SLOT() );
 }
 
 void RadialMenuMouseCallback( uint8* pData, size_t iSize )
@@ -300,8 +306,7 @@ void CRadialMenuPanel::ShowPanel( bool bShow )
 
 
 
-//float CRadialMenu::m_fLastPingTime[ MAX_SPLITSCREEN_PLAYERS ][ 2 ] = { { 0.0f, 0.0f }, { 0.0f, 0.0f } }; we need to set MAX_SPLITSCREEN_PLAYERS back to 2 whenever were all ready for that, doing this for one temporarily
-float CRadialMenu::m_fLastPingTime[MAX_SPLITSCREEN_PLAYERS][1] = { { 0.0f} };
+float CRadialMenu::m_fLastPingTime[ MAX_SPLITSCREEN_PLAYERS ][ 2 ] = { { 0.0f, 0.0f }, { 0.0f, 0.0f } };
 int CRadialMenu::m_nNumPings[ MAX_SPLITSCREEN_PLAYERS ][ 2 ] = { { 0, 0 }, { 0, 0 } };
 
 DECLARE_HUDELEMENT( CRadialMenu );
@@ -513,11 +518,10 @@ void CRadialMenu::EndDrag( void )
 
 	if ( nSwap != -1 && nSwap != CENTER )
 	{
-		/* Fix this!
+#ifdef TAUNTMENU
 		CUtlVector< TauntStatusData > *pTauntData = GetClientMenuManagerTaunt().GetTauntData();
 		TauntStatusData *pData = &((*pTauntData)[ m_nDraggingTaunt ]);
-		*/
-
+#endif
 		const char *pDir = "empty";
 
 		switch ( nSwap )
@@ -554,16 +558,15 @@ void CRadialMenu::EndDrag( void )
 			pDir = "SouthEast";
 			break;
 		}
-
-		//GetClientMenuManagerTaunt().SetTauntPosition( pData->szName, pDir );
+#ifdef TAUNTMENU
+		GetClientMenuManagerTaunt().SetTauntPosition( pData->szName, pDir );
 		//GetClientMenuManagerTaunt().UpdateStorageChange( pData, GetClientMenuManagerTaunt().UPDATE_STORAGE_EQUIPSLOT );
-		/*
 		KeyValues *menuKey = GetClientMenuManagerTaunt().FindMenu( "Default" );
-		if (menuKey)
+		if ( menuKey )
 		{
-			SetData(menuKey); Fix this!
+			SetData( menuKey );
 		}
-		*/
+#endif
 	}
 
 	m_bDragging = false;
@@ -663,7 +666,7 @@ void CRadialMenu::PaintBackground( void )
 		else
 		{
 			float fJoyForward, fJoySide, fJoyPitch, fJoyYaw = 0.0f;
-			//input->Joystick_Querry( fJoyForward, fJoySide, fJoyPitch, fJoyYaw ); Fix this!
+			input->Joystick_Querry( fJoyForward, fJoySide, fJoyPitch, fJoyYaw );
 
 			// Replace if the other stick was pushed further
 			// We need to use both sticks because they might have southpaw or legacy set
@@ -1254,7 +1257,7 @@ void CRadialMenu::OnThink( void )
 
 		if ( input->ControllerModeActive() )
 		{
-			//input->Joystick_Querry( fJoyForward, fJoySide, fJoyPitch, fJoyYaw ); fix this!
+			input->Joystick_Querry( fJoyForward, fJoySide, fJoyPitch, fJoyYaw );
 
 			// Replace if the other stick was pushed further
 			// We need to use both sticks because they might have southpaw or legacy set
@@ -1411,13 +1414,16 @@ int	CRadialMenu::KeyInput( int down, ButtonCode_t keynum, const char *pszCurrent
 		ButtonCode_t key;
 		do 
 		{
-			/*
+#if 1		// TODO: Is this correct?
+			key = gameuifuncs->GetButtonCodeForBind( s_pszRadialMenuIgnoreActions[i], nSlot );
+#else
 			key = (ButtonCode_t)engine->Key_CodeForBinding( s_pszRadialMenuIgnoreActions[i], nSlot, count, -1 );
+#endif
 			if ( IsJoystickCode( key ) )
 			{
-				key = GetBaseButtonCode( key );		Key_CodeForBinding is missing in the asw engine.
+				key = GetBaseButtonCode( key );
 			}
-			*/
+
 			if ( keynum == key )
 			{
 				return 0;
@@ -1446,7 +1452,7 @@ void CRadialMenu::SendCommand( const char *commandStr )
 
 	bool bDelayed = false;
 	bool bIsTaunt = false;
-
+#ifdef TAUNTMENU
 	if ( StringHasPrefix( commandStr, "taunt" ) )
 	{
 		bIsTaunt = true;
@@ -1458,11 +1464,12 @@ void CRadialMenu::SendCommand( const char *commandStr )
 		{
 			pchTaunt++;
 
-			//GetClientMenuManagerTaunt().IsTauntTeam( pchTaunt );
-			//GetClientMenuManagerTaunt().SetTauntUsed( pchTaunt ); fix me!
+			GetClientMenuManagerTaunt().IsTauntTeam( pchTaunt );
+			GetClientMenuManagerTaunt().SetTauntUsed( pchTaunt );
 		}
 	}
 	else
+#endif
 	{
 		if ( V_strcmp( commandStr, "countdown" ) == 0 )
 		{
@@ -1747,11 +1754,12 @@ void FlushClientMenus( void )
 	TheClientMenuManager.Flush();
 
 	TheClientMenuManagerPlaytest.Flush();
-
+#ifdef TAUNTMENU
 	for ( int i = 0; i < MAX_SPLITSCREEN_PLAYERS; ++i )
 	{
-		//GetClientMenuManagerTaunt( i ).Flush();
+		GetClientMenuManagerTaunt( i ).Flush();
 	}
+#endif
 }
 
 
@@ -1798,11 +1806,14 @@ void OpenRadialMenu( const char *lpszTargetClassification, EHANDLE hTargetEntity
 	// Msg("Hit: %s\n", pchTarget );
 
 	ClientMenuManager *pMM;
+#ifdef TAUNTMENU
 	if ( menuType == MENU_TAUNT )
 	{
-		//pMM = &GetClientMenuManagerTaunt();
+		pMM = &GetClientMenuManagerTaunt();
 	}
-	else if ( menuType == MENU_PING )
+	else
+#endif  
+	/*else*/ if ( menuType == MENU_PING )
 	{
 		pMM = &TheClientMenuManager;
 	}
@@ -1941,7 +1952,6 @@ bool LaunchRadialMenu( int nPlayerSlot, RadialMenuTypes_t menuType )
 		}
 		else
 		{
-			/*
 			// See if we passed through a tractor bream
 			Ray_t ray;
 
@@ -1973,7 +1983,7 @@ bool LaunchRadialMenu( int nPlayerSlot, RadialMenuTypes_t menuType )
 						tr.endpos = vPointOnPath + tr.plane.normal * pTractorBeam->GetBeamRadius();
 					}
 				}
-
+#ifndef NO_PROJECTED_WALL
 				// See if we passed through a light bridge
 				for ( int i = 0; i < IProjectedWallEntityAutoList::AutoList().Count(); ++i )
 				{
@@ -2004,8 +2014,9 @@ bool LaunchRadialMenu( int nPlayerSlot, RadialMenuTypes_t menuType )
 						}
 					}
 				}
-			}	Get these implemented first
-			*/
+#endif // NO_PROJECTED_WALL
+			}
+
 			// If it's an entity, just return that
 			if ( tr.m_pEnt && tr.DidHitNonWorldEntity() && !tr.m_pEnt->IsBrushModel() )
 			{
@@ -2193,8 +2204,8 @@ void CloseRadialMenuCommand( RadialMenuTypes_t menuType, bool bForceClose /*= fa
 
 		if ( !bForceClose )
 		{
-			//input->Joystick_ForceRecentering( 0 );
-			//input->Joystick_ForceRecentering( 1 );
+			input->Joystick_ForceRecentering( 0 );
+			input->Joystick_ForceRecentering( 1 );
 		}
 	}
 	else if ( !pRadialMenu->IsVisible() )
@@ -2225,6 +2236,154 @@ static ConCommand mouse_menu_playtest_close( "-mouse_menu_playtest", closeradial
 
 extern bool UTIL_EntityBoundsToSizes( C_BaseEntity *pTarget, int *pMinX, int *pMinY, int *pMaxX, int *pMaxY );
 extern bool UTIL_WorldSpaceToScreensSpaceBounds( const Vector &vecCenter, const Vector &mins, const Vector &maxs, Vector2D *pMins, Vector2D *pMaxs );
+
+bool UTIL_EntityBoundsToSizes( C_BaseEntity *pTarget, int *pMinX, int *pMinY, int *pMaxX, int *pMaxY )
+{
+	Vector vOBBMins;
+	Vector vOBBMaxs;
+	Vector2D maxs;
+	Vector2D mins;
+
+	Vector vOrigin = pTarget->GetAbsOrigin();
+	pTarget->CollisionProp()->WorldSpaceSurroundingBounds( &vOBBMins, &vOBBMaxs);
+	vOBBMaxs = vOBBMaxs - vOrigin;
+	vOBBMins = vOBBMins - vOrigin;
+
+	UTIL_WorldSpaceToScreensSpaceBounds( vOrigin, vOBBMins, vOBBMaxs, &mins, &maxs);
+	if (pMinX)
+		*pMinX = (int)mins.x;
+	if (pMinY)
+		*pMinY = (int)mins.y;
+	if (pMaxX)
+		*pMaxX = (int)maxs.x;
+	if (pMaxY)
+		*pMaxY = (int)maxs.y;
+	return true;
+}
+
+void UTIL_GenerateBoxVertices( const Vector &vOrigin, const Vector &vMins, const Vector &vMaxs, Vector *pVerts )
+{
+	float x; // xmm2_4
+	float y; // xmm1_4
+	float z; // xmm0_4
+	vec_t v9; // xmm0_4
+	vec_t v10; // xmm2_4
+
+	int v4 = 0;
+	do
+	{
+		if ((v4 & 1) != 0)
+		{
+			x = vMaxs.x;
+			if ((v4 & 2) != 0)
+				goto LABEL_3;
+		}
+		else
+		{
+			x = vMins.x;
+			if ((v4 & 2) != 0)
+			{
+			LABEL_3:
+				y = vMaxs.y;
+				if ((v4 & 4) != 0)
+					goto LABEL_4;
+				goto LABEL_9;
+			}
+		}
+		y = vMins.y;
+		if ((v4 & 4) != 0)
+		{
+		LABEL_4:
+			z = vMaxs.z;
+			goto LABEL_5;
+		}
+	LABEL_9:
+		z = vMins.z;
+	LABEL_5:
+		++v4;
+		v9 = z + vOrigin.z;
+		v10 = x + vOrigin.x;
+		pVerts->y = y + vOrigin.y;
+		pVerts->z = v9;
+		pVerts->x = v10;
+		++pVerts;
+	} while (v4 != 8);
+}
+
+extern int ScreenTransform( const Vector& point, Vector& screen );
+
+void UTIL_WorldToScreenCoords( const Vector &vecWorld, int *pScreenX, int *pScreenY )
+{
+	Vector vecTransform;
+
+	*pScreenX = 0;
+	*pScreenY = 0;
+	if ( !ScreenTransform( vecWorld, vecTransform ) )
+	{
+		int v3 = ScreenWidth();
+		float v5 = 0.5 * vecTransform.x;
+		*pScreenX = (int)(float)((float)((float)(v3 / 2) + (float)((float)ScreenWidth() * v5)) + 0.5);
+		int v4 = ScreenHeight();
+		float v6 = 0.5 * vecTransform.y;
+		*pScreenY = (int)(float)((float)((float)(v4 / 2) - (float)((float)ScreenHeight() * v6)) + 0.5);
+	}
+}
+
+bool UTIL_WorldSpaceToScreensSpaceBounds( const Vector &vecCenter, const Vector &mins, const Vector &maxs, Vector2D *pMins, Vector2D *pMaxs )
+{
+	int v9;
+	Vector vecBoxVerts[8];
+	int nX;
+	int nY[7];
+
+	int v5 = 0;
+	UTIL_GenerateBoxVertices( vecCenter, mins, maxs, vecBoxVerts );
+	int v6 = ScreenWidth();
+	int nMaxY = 0;
+	int nMinY = ScreenHeight();
+	int v7 = v6;
+	int v8 = 0;
+	do
+	{
+		while (1)
+		{
+			UTIL_WorldToScreenCoords( vecBoxVerts[v5], &nX, nY );
+			if (nX <= v8)
+				break;
+			v8 = nX;
+			v9 = nY[0];
+			if (nY[0] <= nMaxY)
+				goto LABEL_5;
+		LABEL_10:
+			++v5;
+			nMaxY = v9;
+			if (v5 == 8)
+				goto LABEL_11;
+		}
+		if (nX < v7)
+			v7 = nX;
+		v9 = nY[0];
+		if (nY[0] > nMaxY)
+			goto LABEL_10;
+	LABEL_5:
+		if (v9 >= nMinY)
+			v9 = nMinY;
+		++v5;
+		nMinY = v9;
+	} while (v5 != 8);
+LABEL_11:
+	if (pMins)
+	{
+		pMins->x = (float)v7;
+		pMins->y = (float)nMinY;
+	}
+	if (pMaxs)
+	{
+		pMaxs->x = (float)v8;
+		pMaxs->y = (float)nMaxY;
+	}
+	return true;
+}
 
 void cc_quickping( const CCommand &args )
 {

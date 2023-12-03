@@ -1,0 +1,82 @@
+class CRadialButton : public CPolygonButton, public vgui::IClientPanel
+{
+    public void AddToMap(char * ,void  ( * )(),int ,int ,char * ,int ,char * );
+    public void ChainToMap();
+    class CRadialButton_RegisterMap
+    {
+        public void CRadialButton_RegisterMap();
+    };
+    public class CRadialButton::CRadialButton_RegisterMap m_RegisterClass;
+    public struct vgui::PanelMessageMap * GetMessageMap();
+    public void AddToAnimationMap(char * ,char * ,char * ,char * ,bool ,void *  ( * )(class vgui::Panel * ));
+    public void ChainToAnimationMap();
+    class CRadialButton_Register
+    {
+        public void CRadialButton_Register();
+    };
+    public class CRadialButton::CRadialButton_Register m_RegisterAnimationClass;
+    public struct PanelAnimationMap * GetAnimMap();
+    public void KB_AddToMap(char * ,enum ButtonCode_t ,int ,void  ( * )(),char * ,char * ,bool );
+    public void KB_ChainToMap();
+    public void KB_AddBoundKey(char * ,int ,int );
+    class CRadialButton_RegisterKBMap
+    {
+        public void CRadialButton_RegisterKBMap();
+    };
+    public class CRadialButton::CRadialButton_RegisterKBMap m_RegisterClassKB;
+    public struct vgui::PanelKeyBindingMap * GetKBMap();
+    public char * GetPanelClassName();
+    public char * GetPanelBaseClassName();
+    public void CRadialButton(class CRadialButton & );
+    public void CRadialButton(class vgui::Panel * ,char * );
+    public void ~CRadialButton();
+    public void ShowSubmenuIndicator(bool );
+    public void SetPassthru(class CRadialButton * );
+    public void SetImage(char * );
+    public void GetImagePos(int & ,int & );
+    public class vgui::ImagePanel * GetIcon();
+    public class CRadialButton * GetPassthru();
+    public void UpdateHotspots(class KeyValues * );
+    public class Color GetRadialFgColor();
+    public class Color GetRadialBgColor();
+    public void SetMaxScale(float );
+    public void GetHotspotBounds(int * ,int * ,int * ,int * );
+    public void PerformLayout();
+    public void PaintBackground();
+    public void PaintBorder();
+    public void Paint();
+    public void ApplySchemeSettings(class vgui::IScheme * );
+    public void SetChosen(bool );
+    public void SetFakeArmed(bool );
+    public bool IsFakeArmed();
+    public void OnCursorEntered();
+    public void OnMousePressed(enum ButtonCode_t );
+    public bool IsChosen();
+    public void SetPulse(bool );
+    public int GetGLaDOSResponse();
+    public void SetGLaDOSResponse(int );
+    private class CUtlVector<Vector2D,CUtlMemory<Vector2D,int> > m_unscaledSubmenuPoints;
+    private struct FontVertex_t * m_submenuPoints;
+    private int m_numSubmenuPoints;
+    private int m_nMainMaterial;
+    private bool m_hasBorders;
+    private class Color m_disabledBgColor;
+    private class Color m_disabledFgColor;
+    private class Color m_chosenBgColor;
+    private class Color m_chosenFgColor;
+    private bool m_chosen;
+    private class Color m_armedBgColor;
+    private class Color m_armedFgColor;
+    private bool m_fakeArmed;
+    private bool m_hasSubmenu;
+    private float m_fMaxScale;
+    private bool m_bPulse;
+    private int m_nGLaDOSResponse;
+    private unsigned long m_armedFont;
+    private unsigned long m_defaultFont;
+    private class CRadialButton * m_passthru;
+    private class CRadialMenu * m_parent;
+    private class vgui::ImagePanel * m_pIcon;
+    public class CRadialButton & operator=(class CRadialButton & );
+    public void * __vecDelDtor(unsigned int );
+};

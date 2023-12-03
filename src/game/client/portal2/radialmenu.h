@@ -177,7 +177,7 @@ public:
 	bool m_bFirstCentering;
 
 	// static float m_fLastPingTime[ MAX_SPLITSCREEN_PLAYERS ][ 2 ]; fix this once MAX_SPLITSCREEN_PLAYERS is set back!
-	static float m_fLastPingTime[MAX_SPLITSCREEN_PLAYERS][1];
+	static float m_fLastPingTime[MAX_SPLITSCREEN_PLAYERS][ 2 ];
 	static int m_nNumPings[ MAX_SPLITSCREEN_PLAYERS ][ 2 ];
 
 	void SetRadialMenuEnabled( bool bEnable ) { m_bEnabled = bEnable; }

@@ -1,0 +1,124 @@
+char __cdecl UTIL_WorldSpaceToScreensSpaceBounds(
+        const Vector *vecCenter,
+        const Vector *mins,
+        const Vector *maxs,
+        Vector2D *pMins,
+        Vector2D *pMaxs)
+{
+  float z; // xmm5_4
+  float x; // xmm3_4
+  float y; // xmm4_4
+  float v8; // xmm0_4
+  float v9; // xmm1_4
+  float v10; // xmm2_4
+  float v11; // xmm5_4
+  Vector *v12; // ebx
+  int v13; // esi
+  int v14; // edi
+  Vector vecBoxVerts[8]; // [esp+Ch] [ebp-94h] BYREF
+  float v17; // [esp+6Ch] [ebp-34h]
+  float v18; // [esp+70h] [ebp-30h]
+  Vector screen; // [esp+74h] [ebp-2Ch] BYREF
+  int v20; // [esp+80h] [ebp-20h]
+  int nMinX; // [esp+84h] [ebp-1Ch]
+  int nMinY; // [esp+88h] [ebp-18h]
+  float v23; // [esp+8Ch] [ebp-14h]
+  float v24; // [esp+90h] [ebp-10h]
+  int nMaxY; // [esp+98h] [ebp-8h]
+  int nMaxX; // [esp+9Ch] [ebp-4h]
+
+  z = mins->z;
+  x = mins->x;
+  y = mins->y;
+  v8 = vecCenter->x;
+  v23 = vecCenter->x + mins->x;
+  v9 = vecCenter->y;
+  vecBoxVerts[0].x = v23;
+  v24 = v9 + y;
+  v10 = vecCenter->z;
+  vecBoxVerts[0].y = v9 + y;
+  vecBoxVerts[0].z = v10 + z;
+  v23 = v8 + maxs->x;
+  v24 = v9 + y;
+  vecBoxVerts[1].z = v10 + z;
+  vecBoxVerts[1].x = v23;
+  v23 = v8 + x;
+  vecBoxVerts[1].y = v9 + y;
+  v24 = v9 + maxs->y;
+  vecBoxVerts[2].z = v10 + z;
+  nMaxY = SLODWORD(maxs->x);
+  vecBoxVerts[2].x = v8 + x;
+  screen.z = z;
+  vecBoxVerts[2].y = v24;
+  screen.y = maxs->y;
+  nMaxX = LODWORD(screen.y);
+  v24 = v9 + screen.y;
+  vecBoxVerts[3].x = v8 + *(float *)&nMaxY;
+  vecBoxVerts[3].y = v9 + screen.y;
+  v23 = v8 + x;
+  vecBoxVerts[3].z = v10 + z;
+  v11 = maxs->z;
+  vecBoxVerts[4].x = v8 + x;
+  vecBoxVerts[4].y = v9 + y;
+  vecBoxVerts[4].z = v10 + v11;
+  v24 = v9 + y;
+  vecBoxVerts[5].x = v8 + *(float *)&nMaxY;
+  vecBoxVerts[5].z = v10 + v11;
+  vecBoxVerts[5].y = v9 + y;
+  vecBoxVerts[6].x = v8 + x;
+  vecBoxVerts[6].y = v9 + screen.y;
+  vecBoxVerts[6].z = v10 + v11;
+  vecBoxVerts[7].x = v8 + *(float *)&nMaxY;
+  vecBoxVerts[7].y = v9 + screen.y;
+  vecBoxVerts[7].z = v10 + v11;
+  nMaxX = 0;
+  nMinX = ScreenWidth();
+  *(float *)&nMaxY = 0.0;
+  nMinY = ScreenHeight();
+  v12 = vecBoxVerts;
+  v20 = 8;
+  do
+  {
+    v13 = 0;
+    v14 = 0;
+    if ( !ScreenTransform(v12, &screen) )
+    {
+      v18 = (float)ScreenWidth() * (float)(screen.x * 0.5);
+      v13 = (int)(float)((float)((float)(ScreenWidth() / 2) + v18) + 0.5);
+      v17 = (float)(ScreenHeight() / 2);
+      v14 = (int)(float)((float)(v17 - (float)((float)ScreenHeight() * (float)(screen.y * 0.5))) + 0.5);
+    }
+    if ( v13 <= nMaxX )
+    {
+      if ( v13 < nMinX )
+        nMinX = v13;
+    }
+    else
+    {
+      nMaxX = v13;
+    }
+    if ( v14 <= nMaxY )
+    {
+      if ( v14 < nMinY )
+        nMinY = v14;
+    }
+    else
+    {
+      nMaxY = v14;
+    }
+    ++v12;
+    --v20;
+  }
+  while ( v20 );
+  if ( pMins )
+  {
+    pMins->x = (float)nMinX;
+    pMins->y = (float)nMinY;
+  }
+  if ( pMaxs )
+  {
+    pMaxs->x = (float)nMaxX;
+    pMaxs->y = (float)nMaxY;
+  }
+  return 1;
+}

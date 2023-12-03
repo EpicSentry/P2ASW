@@ -14,16 +14,16 @@
 #include "portal2_vgui_ingame_panel.h"
 #include "polygonbutton.h"
 
-
+#ifndef PANEL_RADIAL_MENU
 #define PANEL_RADIAL_MENU			"RadialMenu"
-
-// NOTE: I copied CRadialButton from swarm's radialmenu.cpp file, which doesn't exist in Portal 2's, but we still need to modify it
+#endif
+// NOTE: I copied CRadialButton from swarm's radialmenu.cpp file, which doesn't exist in Portal 2's leak, so we need to modify it
 
 //--------------------------------------------------------------------------------------------------------
 /**
  * A radial menu-specific subclass of CPolygonButton
  */
-class CRadialButton : public CPolygonButton, public CPortal2_VGUI_Ingame_Panel
+class CRadialButton : public CPolygonButton
 {
 	DECLARE_CLASS_SIMPLE( CRadialButton, CPolygonButton );
 
@@ -38,10 +38,10 @@ public:
 	void SetMaxScale(float flMaxScale) { m_flMaxScale = flMaxScale; }
 
 	// Stub for GetGLaDOSResponse, implement this whenever you can, this isnt a very important function atm
-	int GetGLaDOSResponse() { return 0; }
+	int GetGLaDOSResponse();
 
 	// Stub for SetGLaDOSResponse
-	void SetGLaDOSResponse(int nResponse) { /* Implement this whenever you can! */ }
+	void SetGLaDOSResponse( int nResponse );
 
 	// Set whether the button should pulse
 	void SetPulse(bool bPulse) { m_bPulse = bPulse; }
@@ -58,6 +58,8 @@ public:
 
 	Color GetRadialFgColor( void );
 	Color GetRadialBgColor( void );	
+
+	void SetImage( const char* lpszImage );
 
 	void GetHotspotBounds( int *minX, int *minY, int *maxX, int *maxY );
 	
@@ -108,6 +110,9 @@ private:
 
 	CRadialButton *m_passthru;
 	CRadialMenu *m_parent;
+
+	int m_nGladosResponse;
+
 };
 
 

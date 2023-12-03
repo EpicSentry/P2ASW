@@ -4,7 +4,6 @@
 #include "cbase.h"
 #include "portal_shareddefs.h"
 #include "c_triggers.h"
-#include "trigger_tractorbeam_shared.h"
 #include "vphysics_interface.h"
 #include "c_baseprojectedentity.h"
 

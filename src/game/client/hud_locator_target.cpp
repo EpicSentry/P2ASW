@@ -32,9 +32,9 @@
 
 #define OFFSCREEN_ICON_POSITION_RADIUS 100
 
-#define CAPTION_FONT_HANDLE		( ( VGui_IsSplitScreen() ) ? ( m_hCaptionFont_ss ) : ( m_hCaptionFont ) )
-#define CAPTION_GLOW_FONT_HANDLE		( ( VGui_IsSplitScreen() ) ? ( m_hCaptionGlowFont_ss ) : ( m_hCaptionGlowFont ) )
-#define BUTTON_FONT_HANDLE		( ( VGui_IsSplitScreen() ) ? ( m_hButtonFont_ss ) : ( m_hButtonFont ) )
+#define CAPTION_FONT_HANDLE		( ( IsLocatorSplitscreen() ) ? ( m_hCaptionFont_ss ) : ( m_hCaptionFont ) )
+#define CAPTION_GLOW_FONT_HANDLE		( ( IsLocatorSplitscreen() ) ? ( m_hCaptionGlowFont_ss ) : ( m_hCaptionGlowFont ) )
+#define BUTTON_FONT_HANDLE		( ( IsLocatorSplitscreen() ) ? ( m_hButtonFont_ss ) : ( m_hButtonFont ) )
 
 #define ICON_DIST_TOO_FAR	(60.0f * 12.0f)
 
@@ -44,8 +44,8 @@
 ConVar locator_icon_min_size_non_ss( "locator_icon_min_size_non_ss", "1.0", FCVAR_NONE, "Minimum scale of the icon on the screen" );
 ConVar locator_icon_max_size_non_ss( "locator_icon_max_size_non_ss", "1.75", FCVAR_NONE, "Maximum scale of the icon on the screen" );
 
-#define MIN_ICON_SCALE			( ( VGui_IsSplitScreen() && !ss_verticalsplit.GetBool() ) ? ( locator_icon_min_size_non_ss.GetFloat() * 0.78 ) : ( locator_icon_min_size_non_ss.GetFloat() ) )
-#define MAX_ICON_SCALE			( ( VGui_IsSplitScreen() && !ss_verticalsplit.GetBool() ) ? ( locator_icon_max_size_non_ss.GetFloat() * 0.78 ) : ( locator_icon_max_size_non_ss.GetFloat() ) )
+#define MIN_ICON_SCALE			( ( IsLocatorSplitscreen() && !ss_verticalsplit.GetBool() ) ? ( locator_icon_min_size_non_ss.GetFloat() * 0.78 ) : ( locator_icon_min_size_non_ss.GetFloat() ) )
+#define MAX_ICON_SCALE			( ( IsLocatorSplitscreen() && !ss_verticalsplit.GetBool() ) ? ( locator_icon_max_size_non_ss.GetFloat() * 0.78 ) : ( locator_icon_max_size_non_ss.GetFloat() ) )
 
 #define LOCATOR_OCCLUSION_TEST_RATE 0.25f
 
@@ -85,6 +85,23 @@ ConVar locator_text_glow_color( "locator_text_glow_color", "255 255 255 255", FC
 
 ConVar locator_split_maxwide_percent( "locator_split_maxwide_percent", "0.80f", FCVAR_CHEAT );
 ConVar locator_split_len( "locator_split_len", "0.5f", FCVAR_CHEAT );
+
+bool IsLocatorSplitscreen( void )
+{
+	if ( !VGui_IsSplitScreen() )
+		return false;
+
+	ASSERT_LOCAL_PLAYER_RESOLVABLE();
+	int nSlot = GET_ACTIVE_SPLITSCREEN_SLOT();
+
+	C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer( nSlot );
+	if ( pPlayer )
+	{
+		return ( pPlayer->GetSplitScreenPlayers().Count() > 0 || pPlayer->IsSplitScreenPlayer() );
+	}
+
+	return true;
+}
 
 
 //Precahce the effects
@@ -160,6 +177,7 @@ void CLocatorTarget::Deactivate( bool bNoFade )
 		m_bDrawControllerButton = false;
 		m_bDrawControllerButtonOffscreen = false;
 		m_iEffectsFlags = LOCATOR_ICON_FX_NONE;
+		m_rgbaIconColor = Color( 255, 255, 255, 255 );
 		m_captionWide = 0;
 
 		m_pchDrawBindingName = NULL;
@@ -733,7 +751,7 @@ public:
 	void	CollectGarbage();
 
 	// Animation
-	void	AnimateIconSize( int flags, int *wide, int *tall, float fPulseStart );
+	void	AnimateIconSize( int flags, int *wide, int *tall, float fPulseStart, float flDistFromPlayer );
 	void	AnimateIconPosition( int flags, int *x, int *y );
 	void	AnimateIconAlpha( int flags, int *alpha, float fadeStart );
 
@@ -972,7 +990,7 @@ void CLocatorPanel::CollectGarbage()
 // Purpose: Provide simple animation by modifying the width and height of the
 // icon before it is drawn.
 //-----------------------------------------------------------------------------
-void CLocatorPanel::AnimateIconSize( int flags, int *wide, int *tall, float fPulseStart )
+void CLocatorPanel::AnimateIconSize( int flags, int *wide, int *tall, float fPulseStart, float flDistFromPlayer )
 {
 	static ConVarRef ss_verticalsplit( "ss_verticalsplit" );
 
@@ -1004,6 +1022,26 @@ void CLocatorPanel::AnimateIconSize( int flags, int *wide, int *tall, float fPul
 
 	newWide = newWide * flScale;
 	newTall = newTall * flScale;
+	
+	if ( flags & LOCATOR_ICON_FX_SCALE_BY_DIST )
+	{
+		const float flMaxDist = 1800.0f;
+		const float flMinDist = 64.0f;
+		const float flMaxIconScaler = 4.0f;
+		const float flMinIconScaler = IsLocatorSplitscreen() ? 2.0f : 1.0f;
+		float flInterp = 1.0f - clamp( (flDistFromPlayer - flMinDist) / (flMaxDist - flMinDist), 0.0f, 1.0f );
+		float flScaler = (((flMaxIconScaler - flMinIconScaler) * (flInterp*flInterp) ) + flMinIconScaler) * 0.45f;
+		newTall *= flScaler;
+		newWide *= flScaler;
+
+		//Msg( "SCALER = %f, dist = %f, wide = %f, tall = %f\n", flScaler, flDistFromPlayer, newWide, newTall );
+	}
+
+	if ( flags & LOCATOR_ICON_FX_SCALE_LARGE )
+	{
+		newTall *= 3.0f;
+		newWide *= 3.0f;
+	}
 
 	*wide = newWide;
 	*tall = newTall;
@@ -1468,7 +1506,7 @@ void CLocatorPanel::ComputeTargetIconPosition( CLocatorTarget *pTarget, bool bSe
 		int wide = tall * pTarget->m_widthScale_onscreen;
 
 		// Animate the icon
-		AnimateIconSize( pTarget->GetIconEffectsFlags(), &wide, &tall, pTarget->m_pulseStart );
+		AnimateIconSize( pTarget->GetIconEffectsFlags(), &wide, &tall, pTarget->m_pulseStart, pTarget->m_distFromPlayer );
 		AnimateIconPosition( pTarget->GetIconEffectsFlags(), &iconX, &iconY );
 		AnimateIconAlpha( pTarget->GetIconEffectsFlags(), &pTarget->m_alpha, pTarget->m_fadeStart );
 
@@ -1562,7 +1600,7 @@ void CLocatorPanel::PaintTarget( CLocatorTarget *pTarget )
 		int tall = ScreenWidth() * ICON_SIZE;
 		int wide = tall * pTarget->m_widthScale_onscreen;
 
-		AnimateIconSize( pTarget->GetIconEffectsFlags(), &wide, &tall, pTarget->m_pulseStart );
+		AnimateIconSize( pTarget->GetIconEffectsFlags(), &wide, &tall, pTarget->m_pulseStart, pTarget->m_distFromPlayer );
 
 		pTarget->m_wide = wide;
 		pTarget->m_tall = tall;
@@ -1637,7 +1675,7 @@ void CLocatorPanel::DrawStaticIcon( CLocatorTarget *pTarget )
 	pTarget->m_centerY = centerY;
 
 	// Animate the icon
-	AnimateIconSize( pTarget->GetIconEffectsFlags(), &iconWide, &iconTall, pTarget->m_pulseStart );
+	AnimateIconSize(pTarget->GetIconEffectsFlags(), &iconWide, &iconTall, pTarget->m_pulseStart, pTarget->m_distFromPlayer);
 	AnimateIconPosition( pTarget->GetIconEffectsFlags(), &centerX, &centerY );
 	AnimateIconAlpha( pTarget->GetIconEffectsFlags(), &pTarget->m_alpha, pTarget->m_fadeStart );
 
@@ -1735,7 +1773,9 @@ void CLocatorPanel::DrawStaticIcon( CLocatorTarget *pTarget )
 		if ( !pTarget->m_bDrawControllerButton )
 		{
 			// Don't draw the icon if we're on 360 and have a binding to draw
-			pTarget->m_pIcon_onscreen->DrawSelf( pTarget->GetIconX(), pTarget->GetIconY(), iconWide, iconTall, Color( 255, 255, 255, pTarget->m_alpha ) );
+			Color colorIcon = pTarget->GetIconColor();
+			colorIcon[ 3 ] = pTarget->m_alpha * static_cast< float >( colorIcon[ 3 ] ) / 255.0f;
+			pTarget->m_pIcon_onscreen->DrawSelf( pTarget->GetIconX(), pTarget->GetIconY(), iconWide, iconTall, colorIcon );
 		}
 	}
 
@@ -1889,14 +1929,18 @@ void CLocatorPanel::DrawDynamicIcon( CLocatorTarget *pTarget, bool bDrawCaption,
 	{
 		if ( !pTarget->m_bDrawControllerButton )
 		{
-			pTarget->m_pIcon_onscreen->DrawSelf( pTarget->GetIconX(), pTarget->GetIconY(), iWide, pTarget->m_tall, Color( 255, 255, 255, alpha ) );
+			Color colorIcon = pTarget->GetIconColor();
+			colorIcon[ 3 ] = pTarget->m_alpha * static_cast< float >( colorIcon[ 3 ] ) / 255.0f;
+			pTarget->m_pIcon_onscreen->DrawSelf( pTarget->GetIconX(), pTarget->GetIconY(), iWide, pTarget->m_tall, colorIcon );
 		}
 	}
 	else if ( pTarget->m_pIcon_offscreen )
 	{
 		if ( !pTarget->m_bDrawControllerButtonOffscreen )
 		{
-			pTarget->m_pIcon_offscreen->DrawSelf( pTarget->GetIconX(), pTarget->GetIconY(), iWide, pTarget->m_tall, Color( 255, 255, 255, alpha ) );
+			Color colorIcon = pTarget->GetIconColor();
+			colorIcon[ 3 ] = pTarget->m_alpha * static_cast< float >( colorIcon[ 3 ] ) / 255.0f;
+			pTarget->m_pIcon_offscreen->DrawSelf( pTarget->GetIconX(), pTarget->GetIconY(), iWide, pTarget->m_tall, colorIcon );
 		}
 	}
 

@@ -58,6 +58,12 @@ CRadialButton::CRadialButton( vgui::Panel *parent, const char *panelName )
 
 	m_passthru = NULL;
 	m_parent = dynamic_cast< CRadialMenu * >(parent);
+
+	m_pIcon = new vgui::ImagePanel( this, "RadialButtonImage" );
+	m_pIcon->SetPos( 0, 0 );
+	m_pIcon->SetZPos( 2 );
+	m_pIcon->SetShouldScaleImage( true );
+	m_pIcon->SetSize( 128, 128 );
 }
 
 void CRadialButton::ShowSubmenuIndicator( bool state )
@@ -420,4 +426,20 @@ bool CRadialButton::MouseClick(int x, int y, bool bRightClick, bool bDown)
 	BaseClass::OnMousePressed( bRightClick ? MOUSE_RIGHT : MOUSE_LEFT );
 
 	return true;
+}
+
+void CRadialButton::SetImage( const char *lpszImage )
+{
+	m_pIcon->SetImage( lpszImage );
+	m_pIcon->SetFrame( 1 ); // TODO: Is this correct?
+}
+
+void CRadialButton::SetGLaDOSResponse( int nResponse )
+{
+	m_nGladosResponse = nResponse;
+}
+
+int CRadialButton::GetGLaDOSResponse( void )
+{
+	return m_nGladosResponse;
 }

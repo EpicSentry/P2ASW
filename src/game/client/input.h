@@ -75,6 +75,8 @@ public:
 	virtual		void		ControllerCommands( void );
 	virtual		void		Joystick_Advanced( bool bSilent );
 	virtual		void		Joystick_SetSampleTime(float frametime);
+	virtual		void		Joystick_Querry( float &forward, float &side, float &pitch, float &yaw );
+	virtual		void		Joystick_ForceRecentering( int nStick, bool bSet = true );
 	virtual		void		IN_SetSampleTime( float frametime );
 
 	virtual		void		AccumulateMouse( int nSlot );
@@ -220,6 +222,10 @@ protected:
 	bool		m_fMouseActive;
 	// Has the joystick advanced initialization been run?
 	bool		m_fJoystickAdvancedInit;
+	// Between controller and mouse, what's the primary input
+	bool		m_bControllerMode;
+	float		m_fAccumulatedMouseMove;
+
 	// Accumulated mouse deltas
 
 	struct PerUserInput_t
@@ -267,6 +273,15 @@ protected:
 			m_nClearInputState = 0;
 			m_pCameraThirdData = NULL;
 			m_nCamCommand = 0;
+
+			m_flPreviousJoystickForwardMove = 0;
+			m_flPreviousJoystickSideMove = 0;
+			m_flPreviousJoystickYaw = 0;
+			m_flPreviousJoystickPitch = 0;
+			m_bPreviousJoystickUseAbsoluteYaw = 0;
+			m_bPreviousJoystickUseAbsolutePitch = 0;
+			m_bForceJoystickRecentering[0] = false;
+			m_bForceJoystickRecentering[1] = false;
 		}
 
 		float		m_flAccumulatedMouseXMovement;
@@ -321,6 +336,17 @@ protected:
 
 		CameraThirdData_t	*m_pCameraThirdData;
 		int					m_nCamCommand;
+		
+		// Cached movement from the previous sample
+		// Note: To be used when we run out of sample time,
+		//		 instead of leaving zeros in CUserCmd's.
+		float	m_flPreviousJoystickForwardMove;
+		float	m_flPreviousJoystickSideMove;
+		float	m_flPreviousJoystickYaw;
+		float	m_flPreviousJoystickPitch;
+		bool	m_bPreviousJoystickUseAbsoluteYaw;
+		bool	m_bPreviousJoystickUseAbsolutePitch;
+		bool	m_bForceJoystickRecentering[ 2 ];
 	};
 
 	PerUserInput_t &GetPerUser( int nSlot = -1 );
