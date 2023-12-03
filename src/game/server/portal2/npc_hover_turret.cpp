@@ -6,6 +6,7 @@
 #include "Sprite.h"
 #include "ai_memory.h"
 #include "ai_senses.h"
+#include "collisionproperty.h"
 #include "tier0/memdbgon.h"
 
 extern ConVar sv_gravity;
@@ -81,6 +82,7 @@ public:
 	bool UpdateFacing();
 
 	void UpdateMuzzleMatrix();
+	Vector GetClosestVisibleEnemyPosition();
 	void CreateSmokeTrail();
 	void DestroySmokeTrail();
 	void Precache();
@@ -446,6 +448,24 @@ void CNPC_HoverTurret::UpdateMuzzleMatrix()
 		m_muzzleToWorldTick = gpGlobals->tickcount;
 		GetAttachment(m_iMuzzleAttachment, m_muzzleToWorld);
 	}
+}
+
+Vector CNPC_HoverTurret::GetClosestVisibleEnemyPosition()
+{
+	//this will need serious fixing up. idk why tf the decompilations for this always look weird for me.
+
+	CBaseEntity* pEnemy = GetEnemy();
+	UpdateMuzzleMatrix();
+
+	Vector vecMuzzlePos, vecMidEnemyTransformed, vecDirToEnemyTransformed;
+	MatrixGetColumn(m_muzzleToWorld, 3, vecMuzzlePos);
+
+	Vector v7 = pEnemy->BodyTarget(vecMidEnemyTransformed, &vecMuzzlePos);
+	vecDirToEnemyTransformed = v7 * 0.65f;
+	
+	Vector flDistToEnemyTransformed = AllocTempVector();
+	Vector v8 = AllocTempVector();
+	CollisionProp()->CollisionToWorldSpace(v8, &flDistToEnemyTransformed);
 }
 
 void CNPC_HoverTurret::CreateSmokeTrail()
