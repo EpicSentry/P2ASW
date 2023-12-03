@@ -418,7 +418,6 @@ void CPortalLaser::StrikeThink(void)
 	}
 	else
 	{
-		Msg("USE ABS!!!!!\n");
 		m_bUseParentDir = false;
 		AngleVectors( m_hReflector->GetAbsAngles(), &vecDir );
 	}

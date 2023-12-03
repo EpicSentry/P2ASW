@@ -26,7 +26,7 @@ public:
 
     FizzlerEffects();
 
-    FizzlerEffects *Create( CBaseEntity *pAttachTo );
+    static FizzlerEffects *Create( CBaseEntity *pAttachTo );
 
     virtual void Spawn();
     virtual int UpdateTransmitState();

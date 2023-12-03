@@ -50,8 +50,6 @@ private:
 		
 };
 
-// NOTE:
-// We would use CEntityMaterialProxy as a baseclass, but Swarm doesn't have this
 class C_FizzlerVortexProxy : public CEntityMaterialProxy
 {
 public:

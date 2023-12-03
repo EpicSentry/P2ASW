@@ -16,6 +16,8 @@
 
 #include "shaderlib/commandbuilder.h"
 
+#define SOLID_ENERGY_FEATHER
+
 void InitParamsSolidEnergy( CBaseVSShader *pShader, IMaterialVar** params, const char *pMaterialName, SolidEnergyVars_t &info )
 {
 	static ConVarRef gpu_level( "gpu_level" );
@@ -342,8 +344,8 @@ void DrawSolidEnergy(  CBaseVSShader *pShader, IMaterialVar** params, IShaderDyn
 				memcpy( flConsts, kDefaultFalloffRanges, sizeof( kDefaultFalloffRanges ) );
 			pContextData->m_SemiStaticCmdsOut.SetPixelShaderConstant( 2, flConsts, 1 );
 
-#ifndef _PS3
-			//pContextData->m_SemiStaticCmdsOut.SetDepthFeatheringShaderConstants( 4, params[info.m_nDepthBlendScale]->GetFloatValue() );
+#if !defined ( _PS3 ) && defined ( SOLID_ENERGY_FEATHER )
+			pContextData->m_SemiStaticCmdsOut.SetDepthFeatheringPixelShaderConstant( 4, params[info.m_nDepthBlendScale]->GetFloatValue() );
 #endif
 
 			float flOutputIntensity = params[ info.m_nOutputIntensity ]->GetFloatValue();
@@ -463,8 +465,9 @@ void DrawSolidEnergy(  CBaseVSShader *pShader, IMaterialVar** params, IShaderDyn
 		flConsts[1] = -.5f * ( ( float )nViewportHeight / ( float )nRtHeight );
 		flConsts[2] =  flConsts[0] + ( ( float )nViewportX / ( float )nRtWidth );
 		flConsts[3] = -flConsts[1] + ( ( float )nViewportY / ( float )nRtHeight );
-		DynamicCmdsOut.SetPixelShaderConstant( 15, flConsts, 1);
-
+#if defined ( SOLID_ENERGY_FEATHER )
+		DynamicCmdsOut.SetPixelShaderConstant( 15, flConsts, 1 ); // 15 = DEPTH_FEATHER_VIEWPORT_MAD
+#endif
 		if( bHasFlowmap )
 		{
 			float vFlowConst1[4] =  { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -527,8 +530,8 @@ void DrawSolidEnergy(  CBaseVSShader *pShader, IMaterialVar** params, IShaderDyn
 		DynamicCmdsOut.End();
 
 		// end dynamic block
-#ifdef _PS3
-		pShaderAPI->SetDepthFeatheringShaderConstants( 4, params[info.m_nDepthBlendScale]->GetFloatValue() );
+#if defined ( _PS3 ) && defined ( SOLID_ENERGY_FEATHER )
+		pShaderAPI->SetDepthFeatheringPixelShaderConstant( 4, params[info.m_nDepthBlendScale]->GetFloatValue() );
 #endif
 		pShaderAPI->ExecuteCommandBuffer( DynamicCmdsOut.Base() );
 

@@ -20,6 +20,9 @@
 #include "trigger_portal_cleanser.h"
 #include "soundenvelope.h"
 #include "UtlSortVector.h"
+#include "fizzler_effects.h"
+#include "prop_weightedcube.h"
+#include "portal_gamestats.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -28,6 +31,8 @@ char* CTriggerPortalCleanser::s_szPlayerPassesTriggerFiltersThinkContext = "Play
 
 
 ConVar sv_portal_cleanser_think_rate( "sv_portal_cleanser_think_rate", "0.25", FCVAR_DEVELOPMENTONLY, "How often, in seconds should the portal cleanser think." );
+ConVar sv_portal_cleanser_vortex_distance( "sv_portal_cleanser_vortex_distance", "96", FCVAR_DEVELOPMENTONLY, "The distance from the fizzler at which an object is within range to create a vortex." );
+ConVar debug_portal_cleanser_search_box( "debug_portal_cleanser_search_box", "0", FCVAR_DEVELOPMENTONLY );
 
 BEGIN_DATADESC( FizzlerMultiOriginSoundPlayer )
 
@@ -389,7 +394,122 @@ void CTriggerPortalCleanser::FizzleTouchingPortals( void )
 
 void CTriggerPortalCleanser::SearchThink( void )
 {
-	// TODO:
+	CUtlSortVector<FizzlerVortexObjectInfo_t, CFizzlerVortexObjectInfoLess > vortexEntsSorted; // [esp+CCh] [ebp-4Ch] BYREF
+	FizzlerVortexObjectInfo_t vortexObjectInfo;
+	float flVortexRange;
+
+	Vector vecCenter = WorldSpaceCenter();
+	flVortexRange = sv_portal_cleanser_vortex_distance.GetFloat();
+	memset(&vortexEntsSorted, 0, 25);
+
+	Vector vMaxs;
+	Vector vMins;
+	CollisionProp()->WorldSpaceAABB( &vMins, &vMaxs );
+
+	vMins.x = vMins.x + -flVortexRange;
+	vMins.y = vMins.y + -flVortexRange;
+	vMins.z = vMins.z + -flVortexRange;
+	vMaxs.x = vMaxs.x + flVortexRange;
+	vMaxs.y = vMaxs.y + flVortexRange;
+	vMaxs.z = vMaxs.z + flVortexRange;
+
+	CBaseEntity *pList[32];
+	CleanserVortexTraceEnum vortexEnum( pList, 32, this );
+
+	flVortexRange = flVortexRange * flVortexRange;
+	partition->EnumerateElementsInBox( 16, vMins, vMaxs, 0, &vortexEnum );
+	int v6 = 0;
+
+	int count = vortexEnum.GetCount();
+	int i = 0;
+
+
+	int nSize = 0;
+	if (vortexEnum.GetCount() > 0)
+	{
+		do
+		{
+			CBaseEntity *pEntity = pList[v6];
+			if (pEntity)
+			{
+				vortexObjectInfo.m_flDistanceSq = CollisionProp()->CalcSqrDistanceFromPoint( pEntity->WorldSpaceCenter() );
+				vortexObjectInfo.m_hEnt = pEntity->GetRefEHandle();
+
+				vortexEntsSorted.InsertNoSort( vortexObjectInfo );
+				nSize = vortexEntsSorted.Count();
+
+				//if (&vortexEntsSorted[v9])
+				{
+					vortexEntsSorted[nSize].m_flDistanceSq = vortexObjectInfo.m_flDistanceSq;
+					vortexEntsSorted[nSize].m_hEnt = vortexObjectInfo.m_hEnt;
+				}
+			}
+			v6 = i + 1;
+			i = v6;
+		} while (v6 < count);
+
+		//vortexEntsSorted.RedoSort();
+	}
+	//m_VortexObjects[0].m_flDistanceSq = 3.4028235e38;
+	m_VortexObjects[0].m_hEnt = NULL;
+
+	int v13 = 0;
+	//m_VortexObjects[1].m_flDistanceSq = 3.4028235e38;
+
+	int v14;
+	for ( m_VortexObjects[1].m_hEnt = NULL; v13 < nSize; ++v13)
+	{
+		v14 = 0;
+		while ( m_VortexObjects[0].m_flDistanceSq < vortexEntsSorted[v13].m_flDistanceSq)
+		{
+			++v14;
+			m_VortexObjects[0].m_flDistanceSq += 2;
+			if (v14 >= 2)
+				goto LABEL_19; //continue; ?
+		}
+		m_VortexObjects[v14].m_flDistanceSq = vortexEntsSorted[v13].m_flDistanceSq;
+		m_VortexObjects[v14].m_hEnt = vortexEntsSorted[v13].m_hEnt;
+	LABEL_19:
+		;
+	}
+	if (flVortexRange <= m_VortexObjects[0].m_flDistanceSq)
+	{
+		m_bObject1InRange = false;
+	}
+	else
+	{
+		m_bObject1InRange = true;
+		m_hObject1.Set(m_VortexObjects[0].m_hEnt);
+	}
+	if (flVortexRange <= m_VortexObjects[1].m_flDistanceSq)
+	{
+		m_bObject2InRange = false;
+	}
+	else
+	{
+		m_bObject2InRange = true;
+		m_hObject2 = m_VortexObjects[1].m_hEnt;
+	}
+	if ( debug_portal_cleanser_search_box.GetInt() )
+	{
+		NDebugOverlay::Box( vec3_origin, vMins, vMaxs, 255, 0, 0, 64, sv_portal_cleanser_think_rate.GetFloat() );
+		if ( m_bObject1InRange )
+		{
+			NDebugOverlay::Line( vecCenter, m_hObject1->WorldSpaceCenter(), 0, 255, 0, 1, sv_portal_cleanser_think_rate.GetFloat() );
+		}
+		if ( m_bObject2InRange )
+		{
+			NDebugOverlay::Line( vecCenter, m_hObject1->WorldSpaceCenter(), 0, 255, 0, 1, sv_portal_cleanser_think_rate.GetFloat() );
+		}
+	}
+	SetNextThink( sv_portal_cleanser_think_rate.GetFloat() + gpGlobals->curtime );
+	/*
+	if (vortexEntsSorted.m_Memory.m_nGrowSize >= 0)
+	{
+		if (vortexEntsSorted.m_Memory.m_pMemory)
+			_g_pMemAlloc->Free(_g_pMemAlloc, vortexEntsSorted.m_Memory.m_pMemory);
+	}
+	*/
 }
 
 void CTriggerPortalCleanser::Touch( CBaseEntity *pOther )
@@ -458,88 +578,7 @@ void CTriggerPortalCleanser::Touch( CBaseEntity *pOther )
 
 	CBaseAnimating *pBaseAnimating = dynamic_cast<CBaseAnimating*>( pOther );
 
-	if ( pBaseAnimating && !pBaseAnimating->IsDissolving() )
-	{
-		int i = 0;
-
-		while ( g_pszPortalNonCleansable[ i ] )
-		{
-			if ( FClassnameIs( pBaseAnimating, g_pszPortalNonCleansable[ i ] ) )
-			{
-				// Don't dissolve non cleansable objects
-				return;
-			}
-
-			++i;
-		}
-
-		// The portal weight box, used for puzzles in the portal mod is differentiated by its name
-		// always being 'box'. We use special logic when the cleanser dissolves a box so this is a special output for it.
-		if ( pBaseAnimating->NameMatches( "box" ) )
-		{
-			m_OnDissolveBox.FireOutput( pOther, this );
-		}
-
-		Vector vOldVel;
-		AngularImpulse vOldAng;
-		pBaseAnimating->GetVelocity( &vOldVel, &vOldAng );
-
-		IPhysicsObject* pOldPhys = pBaseAnimating->VPhysicsGetObject();
-
-		if ( pOldPhys && ( pOldPhys->GetGameFlags() & FVPHYSICS_PLAYER_HELD ) )
-		{
-			CPortal_Player *pPlayer = (CPortal_Player *)GetPlayerHoldingEntity( pBaseAnimating );
-			if( pPlayer )
-			{
-				// Modify the velocity for held objects so it gets away from the player
-				pPlayer->ForceDropOfCarriedPhysObjects( pBaseAnimating );
-
-				pPlayer->GetAbsVelocity();
-				vOldVel = pPlayer->GetAbsVelocity() + Vector( pPlayer->EyeDirection2D().x * 4.0f, pPlayer->EyeDirection2D().y * 4.0f, -32.0f );
-			}
-		}
-		
-        pBaseAnimating->OnFizzled();
-
-		// Swap object with an disolving physics model to avoid touch logic
-		CBaseEntity *pDisolvingObj = ConvertToSimpleProp( pBaseAnimating );
-		if ( pDisolvingObj )
-		{
-			// Remove old prop, transfer name and children to the new simple prop
-			pDisolvingObj->SetName( pBaseAnimating->GetEntityName() );
-			UTIL_TransferPoseParameters( pBaseAnimating, pDisolvingObj );
-			TransferChildren( pBaseAnimating, pDisolvingObj );
-			pDisolvingObj->SetCollisionGroup( COLLISION_GROUP_INTERACTIVE_DEBRIS );
-			pBaseAnimating->AddSolidFlags( FSOLID_NOT_SOLID );
-			pBaseAnimating->AddEffects( EF_NODRAW );
-
-			IPhysicsObject* pPhys = pDisolvingObj->VPhysicsGetObject();
-			if ( pPhys )
-			{
-				pPhys->EnableGravity( false );
-
-				Vector vVel = vOldVel;
-				AngularImpulse vAng = vOldAng;
-
-				// Disolving hurts, damp and blur the motion a little
-				vVel *= 0.5f;
-				vAng.z += 20.0f;
-
-				pPhys->SetVelocity( &vVel, &vAng );
-			}
-
-			pBaseAnimating->AddFlag( FL_DISSOLVING );
-			UTIL_Remove( pBaseAnimating );
-		}
-		
-		CBaseAnimating *pDisolvingAnimating = dynamic_cast<CBaseAnimating*>( pDisolvingObj );
-		if ( pDisolvingAnimating ) 
-		{
-			pDisolvingAnimating->Dissolve( "", gpGlobals->curtime, false, ENTITY_DISSOLVE_NORMAL );
-		}
-
-		m_OnDissolve.FireOutput( pOther, this );
-	}
+	CTriggerPortalCleanser::FizzleBaseAnimating( this, pBaseAnimating );
 }
 
 void CTriggerPortalCleanser::FizzleBaseAnimating( CTriggerPortalCleanser *pFizzler, CBaseAnimating *pBaseAnimating )
@@ -558,16 +597,24 @@ void CTriggerPortalCleanser::FizzleBaseAnimating( CTriggerPortalCleanser *pFizzl
 
 			++i;
 		}
+		
+		// The portal weight box, used for puzzles in the portal mod is differentiated by its name
+		// always being 'box'. We use special logic when the cleanser dissolves a box so this is a special output for it.
+		if ( pBaseAnimating->NameMatches( "box" ) )
+		{
+			pFizzler->m_OnDissolveBox.FireOutput( pBaseAnimating, pFizzler );
+		}
 
 		Vector vOldVel;
 		AngularImpulse vOldAng;
 		pBaseAnimating->GetVelocity( &vOldVel, &vOldAng );
 
 		IPhysicsObject* pOldPhys = pBaseAnimating->VPhysicsGetObject();
+		
+		CPortal_Player *pPlayer = (CPortal_Player *)GetPlayerHoldingEntity( pBaseAnimating );
 
 		if ( pOldPhys && ( pOldPhys->GetGameFlags() & FVPHYSICS_PLAYER_HELD ) )
 		{
-			CPortal_Player *pPlayer = (CPortal_Player *)GetPlayerHoldingEntity( pBaseAnimating );
 			if( pPlayer )
 			{
 				// Modify the velocity for held objects so it gets away from the player
@@ -582,6 +629,8 @@ void CTriggerPortalCleanser::FizzleBaseAnimating( CTriggerPortalCleanser *pFizzl
 		
         pBaseAnimating->OnFizzled();
 
+		//g_PortalGameStats.Event_OnFizzled( pBaseAnimating->GetModelIndex(), pBaseAnimating->GetAbsOrigin(), pPlayer );
+
 		CBaseEntity *pDisolvingObj = ConvertToSimpleProp( pBaseAnimating );
 		if ( pDisolvingObj )
 		{
@@ -592,6 +641,18 @@ void CTriggerPortalCleanser::FizzleBaseAnimating( CTriggerPortalCleanser *pFizzl
 			pDisolvingObj->SetCollisionGroup( COLLISION_GROUP_INTERACTIVE_DEBRIS );
 			pBaseAnimating->AddSolidFlags( FSOLID_NOT_SOLID );
 			pBaseAnimating->AddEffects( EF_NODRAW );
+
+			if ( pFizzler && pFizzler->m_bVisible )
+			{
+				if ( pFizzler->m_bObject1InRange && pBaseAnimating == pFizzler->m_hObject1.Get() )
+				{
+					pFizzler->m_hObject1.Set( pDisolvingObj );
+				}
+				else if ( pFizzler->m_bObject2InRange && pBaseAnimating == pFizzler->m_hObject2.Get() )
+				{
+					pFizzler->m_hObject2.Set( pDisolvingObj );
+				}
+			}
 
 			IPhysicsObject* pPhys = pDisolvingObj->VPhysicsGetObject();
 			if ( pPhys )
@@ -609,14 +670,24 @@ void CTriggerPortalCleanser::FizzleBaseAnimating( CTriggerPortalCleanser *pFizzl
 			}
 
 			pBaseAnimating->AddFlag( FL_DISSOLVING );
+         CPropWeightedCube *pTwin = UTIL_GetSchrodingerTwin(pBaseAnimating);
+          if ( pTwin )
+			  CTriggerPortalCleanser::FizzleBaseAnimating( pFizzler, pTwin );
 			UTIL_Remove( pBaseAnimating );
 		}
 		
 		CBaseAnimating *pDisolvingAnimating = dynamic_cast<CBaseAnimating*>( pDisolvingObj );
 		if ( pDisolvingAnimating ) 
 		{
+#if 0
+			FizzlerEffects::Create( pDisolvingAnimating );
+			pDisolvingAnimating->EmitSound( "Prop.Fizzled" );
+#else
 			pDisolvingAnimating->Dissolve( "", gpGlobals->curtime, false, ENTITY_DISSOLVE_NORMAL );
-		}
+#endif
+		}		
+		if ( pFizzler )
+			pFizzler->m_OnDissolve.FireOutput( pDisolvingAnimating, pFizzler );
 	}
 }
 
