@@ -38,7 +38,6 @@
 //Datatable
 BEGIN_DATADESC( CNPC_SecurityCamera )
 
-	DEFINE_ARRAY( m_hRopes, FIELD_EHANDLE, SECURITY_CAMERA_NUM_ROPES ),
 	DEFINE_FIELD( m_hEyeGlow,		FIELD_EHANDLE ),
 
 	DEFINE_FIELD( m_bAutoStart,			FIELD_BOOLEAN ),
@@ -191,7 +190,6 @@ void CNPC_SecurityCamera::Activate( void )
 
 	CreateSounds();
 
-	RopesOn();
 	EyeOn();
 }
 
@@ -208,7 +206,6 @@ bool CNPC_SecurityCamera::CreateVPhysics( void )
 
 void CNPC_SecurityCamera::UpdateOnRemove( void )
 {
-	RopesOff();
 	EyeOff();
 
 	BaseClass::UpdateOnRemove();
@@ -216,13 +213,6 @@ void CNPC_SecurityCamera::UpdateOnRemove( void )
 
 void CNPC_SecurityCamera::NotifySystemEvent(CBaseEntity *pNotify, notify_system_event_t eventType, const notify_system_event_params_t &params )
 {
-	// On teleport, we record a pointer to the portal we are arriving at
-	if ( eventType == NOTIFY_EVENT_TELEPORT )
-	{
-		RopesOff();
-		RopesOn();
-	}
-
 	BaseClass::NotifySystemEvent( pNotify, eventType, params );
 }
 
@@ -616,15 +606,6 @@ void CNPC_SecurityCamera::ActiveThink( void )
 
 	//Turn to face
 	UpdateFacing();
-
-	// Update rope positions
-	for ( int iRope = 0; iRope < SECURITY_CAMERA_NUM_ROPES; ++iRope )
-	{
-		if ( m_hRopes[ iRope ] )
-		{
-			m_hRopes[ iRope ]->EndpointsChanged();
-		}
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -779,44 +760,6 @@ void CNPC_SecurityCamera::Disable( void )
 	SetEnemy( NULL );
 	SetThink( &CNPC_SecurityCamera::Retire );
 	SetNextThink( gpGlobals->curtime + 0.1f );
-}
-
-void CNPC_SecurityCamera::RopesOn( void )
-{
-	for ( int iRope = 0; iRope < SECURITY_CAMERA_NUM_ROPES; ++iRope )
-	{
-		// Make a rope if it doesn't exist
-		if ( !m_hRopes[ iRope ] )
-		{
-			CFmtStr str;
-
-			int iStartIndex = LookupAttachment( str.sprintf( "Wire%i_A", iRope + 1 ) );
-			int iEndIndex = LookupAttachment( str.sprintf( "Wire%i_B", iRope + 1 ) );
-
-			m_hRopes[ iRope ] = CRopeKeyframe::Create( this, this, iStartIndex, iEndIndex );
-			if ( m_hRopes[ iRope ] )
-			{
-				m_hRopes[ iRope ]->m_Width = 0.7;
-				m_hRopes[ iRope ]->m_nSegments = ROPE_MAX_SEGMENTS;
-				m_hRopes[ iRope ]->EnableWind( false );
-				m_hRopes[ iRope ]->SetupHangDistance( 9.0f );
-				m_hRopes[ iRope ]->m_bConstrainBetweenEndpoints = true;
-			}
-		}
-	}
-}
-
-void CNPC_SecurityCamera::RopesOff( void )
-{
-	for ( int iRope = 0; iRope < SECURITY_CAMERA_NUM_ROPES; ++iRope )
-	{
-		// Remove rope if it's alive
-		if ( m_hRopes[ iRope ] )
-		{
-			UTIL_Remove( m_hRopes[ iRope ] );
-			m_hRopes[ iRope ] = NULL;
-		}
-	}
 }
 
 void CNPC_SecurityCamera::EyeOn( void )

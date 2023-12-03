@@ -236,8 +236,8 @@ void CHUDQuickInfo::Paint()
 
 	const unsigned char iAlphaStart = 150;	   
 
-	Color portal1Color = UTIL_Portal_Color( 1 );
-	Color portal2Color = UTIL_Portal_Color( 2 );
+	Color portal1Color = UTIL_Portal_Color( 1, pPortalPlayer->GetTeamNumber() );
+	Color portal2Color = UTIL_Portal_Color( 2, pPortalPlayer->GetTeamNumber() );
 
 	portal1Color[ 3 ] = iAlphaStart;
 	portal2Color[ 3 ] = iAlphaStart;

@@ -20,8 +20,6 @@
 #include "IEffects.h"
 #include "animation.h"
 #include "props.h"
-#include "rope.h"
-#include "rope_shared.h"
 #include "basehlcombatweapon_shared.h"
 #include "iservervehicle.h"
 #include "physics_prop_ragdoll.h"
@@ -40,7 +38,6 @@
 #define	SECURITY_CAMERA_MAX_WAIT	5
 #define	SECURITY_CAMERA_PING_TIME	1.0f	//LPB!!
 
-#define SECURITY_CAMERA_NUM_ROPES 2
 #define SECURITY_CAMERA_GLOW_SPRITE	"sprites/glow1.vmt"
 
 //Aiming variables
@@ -163,8 +160,6 @@ protected:
 	void	Enable( void );
 	void	Disable( void );
 
-	void	RopesOn( void );
-	void	RopesOff( void );
 	void	EyeOn( void );
 	void	EyeOff( void );
 
@@ -172,7 +167,6 @@ protected:
 
 private:
 
-	CHandle<CRopeKeyframe>	m_hRopes[ SECURITY_CAMERA_NUM_ROPES ];
 	CHandle<CSprite>		m_hEyeGlow;
 
 	bool	m_bAutoStart;
