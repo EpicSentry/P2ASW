@@ -1,0 +1,30 @@
+void __cdecl CRadialButton::Paint(CRadialButton *const this)
+{
+  int v1; // eax
+  float v2; // [esp+1Ch] [ebp-3Ch]
+  float v3; // [esp+20h] [ebp-38h]
+  float v4; // [esp+4Ch] [ebp-Ch]
+
+  vgui::Button::Paint((vgui::Button *const)this);
+  if ( ((*(unsigned __int8 (__cdecl **)(CRadialButton *const))(*(_DWORD *)this->baseclass_0 + 1008))(this)
+     || this->m_fakeArmed)
+    && vgui::ImagePanel::GetNumFrames(this->m_pIcon) > 1 )
+  {
+    v2 = sinf(gpGlobals->curtime * 7.5);
+    v3 = (float)((float)(v2 + 1.0) * 0.5) * (float)vgui::ImagePanel::GetNumFrames(this->m_pIcon);
+    if ( (float)(vgui::ImagePanel::GetNumFrames(this->m_pIcon) - 1) <= v3 )
+    {
+      v1 = (int)(float)(vgui::ImagePanel::GetNumFrames(this->m_pIcon) - 1);
+    }
+    else
+    {
+      v4 = sinf(7.5 * gpGlobals->curtime);
+      v1 = (int)(float)((float)((float)(v4 + 1.0) * 0.5) * (float)vgui::ImagePanel::GetNumFrames(this->m_pIcon));
+    }
+    vgui::ImagePanel::SetFrame(this->m_pIcon, v1);
+  }
+  else
+  {
+    vgui::ImagePanel::SetFrame(this->m_pIcon, 0);
+  }
+}

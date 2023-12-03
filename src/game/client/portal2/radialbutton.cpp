@@ -282,6 +282,33 @@ void CRadialButton::PaintBorder( void )
 		vgui::surface()->DrawTexturedPolyLine( m_submenuPoints, m_numSubmenuPoints );
 	}
 }
+void CRadialButton::Paint( void )
+{
+	BaseClass::Paint();
+		// FIXME: What is this gibberish???		
+	if ((//(*(unsigned __int8(__cdecl **)(CRadialButton *const))(*(_DWORD *)this->baseclass_0 + 1008))(this) ||
+		m_fakeArmed)
+		&& m_pIcon->GetNumFrames() > 1)
+	{
+		int nFrame; // eax
+		float v2 = sinf(gpGlobals->curtime * 7.5);
+		float v3 = (float)((float)(v2 + 1.0) * 0.5) * (float)m_pIcon->GetNumFrames();
+		if ((float)(m_pIcon->GetNumFrames() - 1) <= v3)
+		{
+			nFrame = (int)(float)(m_pIcon->GetNumFrames() - 1);
+		}
+		else
+		{
+			float v4 = sinf(7.5 * gpGlobals->curtime);
+			nFrame = (int)(float)((float)((float)(v4 + 1.0) * 0.5) * (float)m_pIcon->GetNumFrames());
+		}
+		m_pIcon->SetFrame( nFrame );
+	}
+	else
+	{
+		m_pIcon->SetFrame( 0 );
+	}
+}
 
 
 void CRadialButton::ApplySchemeSettings( vgui::IScheme *scheme )

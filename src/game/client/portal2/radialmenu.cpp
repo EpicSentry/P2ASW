@@ -1410,11 +1410,12 @@ int	CRadialMenu::KeyInput( int down, ButtonCode_t keynum, const char *pszCurrent
 	int numIgnore = ARRAYSIZE( s_pszRadialMenuIgnoreActions );
 	for ( int i=0; i<numIgnore; ++i )
 	{
-		int count = 0;
+		// Removing the loop code for Swarm, it works fine the way it is now and fixes a "crash".
+		//int count = 0;
 		ButtonCode_t key;
-		do 
-		{
-#if 1		// TODO: Is this correct?
+		//do 
+		//{
+#if 1
 			key = gameuifuncs->GetButtonCodeForBind( s_pszRadialMenuIgnoreActions[i], nSlot );
 #else
 			key = (ButtonCode_t)engine->Key_CodeForBinding( s_pszRadialMenuIgnoreActions[i], nSlot, count, -1 );
@@ -1428,8 +1429,9 @@ int	CRadialMenu::KeyInput( int down, ButtonCode_t keynum, const char *pszCurrent
 			{
 				return 0;
 			}
-			++count;
-		} while ( key != BUTTON_CODE_INVALID );
+			
+		//	++count;
+		//} while ( key != BUTTON_CODE_INVALID );
 	}
 
 	return 1;

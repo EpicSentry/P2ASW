@@ -1,0 +1,37 @@
+void __thiscall CRadialButton::Paint(CRadialButton *this)
+{
+  float v2; // xmm0_4
+  float v3; // xmm0_4
+  int v4; // eax
+  int NumFrames; // eax
+  float v6; // [esp+0h] [ebp-8h]
+  float v7; // [esp+0h] [ebp-8h]
+  float v8; // [esp+4h] [ebp-4h]
+
+  vgui::Button::Paint((vgui::Button *)this);
+  if ( ((*(unsigned __int8 (__thiscall **)(CRadialButton *))(*(_DWORD *)this + 892))(this) || *((_BYTE *)this + 654))
+    && vgui::ImagePanel::GetNumFrames(*((vgui::ImagePanel **)this + 171)) > 1 )
+  {
+    v2 = *(float *)(gpGlobals.m_Index + 12) * 7.5;
+    __libm_sse2_sinf(v6);
+    v8 = (float)vgui::ImagePanel::GetNumFrames(*((vgui::ImagePanel **)this + 171)) * (float)((float)(v2 + 1.0) * 0.5);
+    if ( (float)(vgui::ImagePanel::GetNumFrames(*((vgui::ImagePanel **)this + 171)) - 1) <= v8 )
+    {
+      NumFrames = vgui::ImagePanel::GetNumFrames(*((vgui::ImagePanel **)this + 171));
+      vgui::ImagePanel::SetFrame(*((vgui::ImagePanel **)this + 171), (int)(float)(NumFrames - 1));
+    }
+    else
+    {
+      v3 = *(float *)(gpGlobals.m_Index + 12) * 7.5;
+      __libm_sse2_sinf(v7);
+      v4 = vgui::ImagePanel::GetNumFrames(*((vgui::ImagePanel **)this + 171));
+      vgui::ImagePanel::SetFrame(
+        *((vgui::ImagePanel **)this + 171),
+        (int)(float)((float)v4 * (float)((float)(v3 + 1.0) * 0.5)));
+    }
+  }
+  else
+  {
+    vgui::ImagePanel::SetFrame(*((vgui::ImagePanel **)this + 171), 0);
+  }
+}

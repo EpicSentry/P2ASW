@@ -65,6 +65,7 @@ public:
 	
 	virtual void PaintBackground( void );
 	virtual void PaintBorder( void );
+	virtual void Paint( void );
 	virtual void ApplySchemeSettings( vgui::IScheme *scheme );
 
 	void SetChosen( bool chosen );
