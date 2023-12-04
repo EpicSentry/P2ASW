@@ -648,27 +648,8 @@ struct struct_this
 	char gap5[0x1dc];
 	CUtlVector<CPackedStore*, CUtlMemory<CPackedStore*, int> > m_VPKFiles;
 };
-bool bHasBeenCalled = false;
 void __fastcall CBaseFileSystem__AddVPKFile(struct_this* thisptr, void* edx, char const* pBasename, SearchPathAdd_t addType)
 {
-	if (!bHasBeenCalled) {
-		bHasBeenCalled = true;
-		CUtlVector<CUtlString> m_VPKPaths;
-
-		for (int i = 0; i < thisptr->m_VPKFiles.Count(); ++i) {
-			m_VPKPaths.AddToTail(thisptr->m_VPKFiles.Element(i)->FullPathName());
-		}
-		thisptr->m_VPKFiles.RemoveAll();
-		for (int i = 0; i < m_VPKPaths.Count(); ++i) {
-			CBaseFileSystem__AddVPKFile(thisptr, 0, m_VPKPaths.Element(i), PATH_ADD_TO_TAIL_ATINDEX);
-		}
-		char path[260];
-		filesystem->GetSearchPath("MOD", false, path, 260);
-		V_strcat(path, "portal2asw.vpk", 260);
-		CBaseFileSystem__AddVPKFile(thisptr, 0, path, PATH_ADD_TO_HEAD);
-	}
-
-	bHasBeenCalled = true;
 	// Ensure that the passed in file name has a .vpk extension. If not present, append it.
 	const char* pExtension = strrchr(pBasename, '.');
 	char modifiedBasename[260]; // Assuming max path length
@@ -888,7 +869,6 @@ bool CServerGameDLL::DLLInit(CreateInterfaceFn appSystemFactory,
 	MH_CreateHook(g_mFileSystemDLL.FindPatternSIMD("53 55 56 57 8B F9 8B 87 1C 02 00 00").RCast<LPVOID>(), void_cast(&CPackedStore::DPackedStore), NULL);
 	MH_CreateHook(&Studio_BuildMatrices, (void*)(&Studio_BuildMatricesHook), NULL);
 	MH_EnableHook(MH_ALL_HOOKS);
-
 	COM_TimestampedLog("ConnectTier1/2/3Libraries - Start");
 
 	ConnectTier1Libraries(&appSystemFactory, 1);
@@ -896,6 +876,7 @@ bool CServerGameDLL::DLLInit(CreateInterfaceFn appSystemFactory,
 	ConnectTier3Libraries(&appSystemFactory, 1);
 
 	COM_TimestampedLog("ConnectTier1/2/3Libraries - Finish");
+
 
 	// Connected in ConnectTier1Libraries
 	if (cvar == NULL)
@@ -1098,6 +1079,19 @@ bool CServerGameDLL::DLLInit(CreateInterfaceFn appSystemFactory,
 	// init the gamestatsupload connection
 	gamestatsuploader->InitConnection();
 
+	CUtlVector<CUtlString> m_VPKPaths;
+
+	for (int i = 0; i < ((struct_this*)(filesystem))->m_VPKFiles.Count(); ++i) {
+		m_VPKPaths.AddToTail(((struct_this*)(filesystem))->m_VPKFiles.Element(i)->FullPathName());
+	}
+	((struct_this*)(filesystem))->m_VPKFiles.RemoveAll();
+	for (int i = 0; i < m_VPKPaths.Count(); ++i) {
+		CBaseFileSystem__AddVPKFile(((struct_this*)(filesystem)), 0, m_VPKPaths.Element(i), PATH_ADD_TO_TAIL_ATINDEX);
+	}
+	char path[260];
+	filesystem->GetSearchPath("MOD", false, path, 260);
+	V_strcat(path, "portal2asw.vpk", 260);
+	CBaseFileSystem__AddVPKFile(((struct_this*)(filesystem)), 0, path, PATH_ADD_TO_HEAD);
 
 	return true;
 }

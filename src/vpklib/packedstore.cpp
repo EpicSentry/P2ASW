@@ -650,7 +650,7 @@ CPackedStoreFileHandle CPackedStore::OpenFile(char const *pFileName)
 	{
 		ret.m_nFileNumber = -1;
 		ret.m_pOwner = NULL;
-		Warning("CPackedStore::OpenFile: %s NOT found, dirName %s, baseName %s, extName %s\n", pFileName, dirName, baseName, extName);
+		//Warning("CPackedStore::OpenFile: %s NOT found, dirName %s, baseName %s, extName %s\n", pFileName, dirName, baseName, extName);
 		if (!recursive) {
 			recursive = true;
 			if (V_strlen(pFileName) > 0)
