@@ -121,6 +121,11 @@ public:
 		if (ret != size )
 			Error("failed to read %d bytes\n", size );
 	}
+
+	unsigned int Tell()
+	{
+		return g_pFullFileSystem->Tell(m_FileHandle);
+	}
 	
 	int Write( void const* pInput, int size)
 	{
