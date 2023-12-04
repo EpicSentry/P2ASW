@@ -1437,7 +1437,7 @@ void CUtlRBTree<T, I, L, M>::SetLessFunc( const typename CUtlRBTree<T, I, L, M>:
 	else if ( Count() > 0 )
 	{
 		// need to re-sort the tree here....
-		Assert(0);
+		//Assert(0);
 	}
 }
 

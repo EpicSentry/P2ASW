@@ -2792,6 +2792,9 @@ bool C_BaseAnimating::InThreadedBoneSetup()
 
 bool C_BaseAnimating::SetupBones( matrix3x4a_t *pBoneToWorldOut, int nMaxBones, int boneMask, float currentTime )
 {
+	if (nMaxBones > MAXSTUDIOBONES)
+		return false;
+
 	VPROF_BUDGET( "C_BaseAnimating::SetupBones", ( !g_bInThreadedBoneSetup ) ? VPROF_BUDGETGROUP_CLIENT_ANIMATION : "Client_Animation_Threaded" );
 
 	if ( !IsBoneAccessAllowed() )

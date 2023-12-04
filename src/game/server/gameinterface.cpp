@@ -7,6 +7,11 @@
 //===========================================================================//
 
 #include "cbase.h"
+#include <cstdint>
+#include "MinHook.h"
+#include "../silver-bun/memaddr.h"
+#include "../silver-bun/module.h"
+#include "../silver-bun/utils.h"
 #include "gamestringpool.h"
 #include "mapentities_shared.h"
 #include "game.h"
@@ -340,6 +345,7 @@ void			UpdateAllClientData( void );
 void			DrawMessageEntities();
 
 #include "ai_network.h"
+#include <vpklib/packedstore.h>
 
 // For now just using one big AI network
 extern ConVar think_limit;
@@ -636,11 +642,143 @@ static bool InitGameSystems( CreateInterfaceFn appSystemFactory )
 
 CServerGameDLL g_ServerGameDLL;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CServerGameDLL, IServerGameDLL, INTERFACEVERSION_SERVERGAMEDLL, g_ServerGameDLL);
+struct struct_this
+{
+	char gap5[0x1dc];
+	CUtlVector<CPackedStore*, CUtlMemory<CPackedStore*, int> > m_VPKFiles;
+};
+bool bHasBeenCalled = false;
+void __fastcall CBaseFileSystem__AddVPKFile(struct_this* thisptr, void* edx, char const* pBasename, SearchPathAdd_t addType)
+{
+	if (!bHasBeenCalled) {
+		bHasBeenCalled = true;
+		CUtlVector<CUtlString> m_VPKPaths;
+
+		for (int i = 0; i < thisptr->m_VPKFiles.Count(); ++i) {
+			m_VPKPaths.AddToTail(thisptr->m_VPKFiles.Element(i)->FullPathName());
+		}
+		thisptr->m_VPKFiles.RemoveAll();
+		for (int i = 0; i < m_VPKPaths.Count(); ++i) {
+			CBaseFileSystem__AddVPKFile(thisptr, 0, m_VPKPaths.Element(i), PATH_ADD_TO_HEAD);
+		}
+
+	}
+	bHasBeenCalled = true;
+	// Ensure that the passed in file name has a .vpk extension. If not present, append it.
+	const char* pExtension = strrchr(pBasename, '.');
+	char modifiedBasename[260]; // Assuming max path length
+
+	if (!pExtension || V_strcmp(pExtension, ".vpk") != 0)
+	{
+		// If .vpk is not present, append it
+		Q_snprintf(modifiedBasename, sizeof(modifiedBasename), "%s.vpk", pBasename);
+		pBasename = modifiedBasename;
+	}
+
+
+	char nameBuf[MAX_PATH];
+	Q_MakeAbsolutePath(nameBuf, sizeof(nameBuf), pBasename);
+#ifdef _WIN32
+	Q_strlower(nameBuf);
+#endif
+	Q_FixSlashes(nameBuf);
+	// see if we already have this vpk file
+	for (int i = 0; i < thisptr->m_VPKFiles.Count(); i++)
+	{
+		if (!V_strcmp(thisptr->m_VPKFiles[i]->FullPathName(), nameBuf))
+		{
+			return;											// already have this one
+		}
+	}
+	char pszFName[MAX_PATH];
+	CPackedStore* pNew = new CPackedStore(nameBuf, (IBaseFileSystem*)thisptr, false);
+	//pNew->RegisterFileTracker((IThreadedFileMD5Processor*)&m_FileTracker2);
+	if (pNew->IsEmpty())
+	{
+		delete pNew;
+	}
+	else
+	{
+		if (PATH_ADD_TO_TAIL == addType)
+		{
+			thisptr->m_VPKFiles.AddToTail(pNew);
+		}
+		else
+		{
+			thisptr->m_VPKFiles.AddToHead(pNew);
+		}
+		char szRelativePathName[512];
+		Assert(V_IsAbsolutePath(pNew->FullPathName()));
+		char szBasePath[MAX_PATH];
+		V_strncpy(szBasePath, pNew->FullPathName(), sizeof(szBasePath));
+		V_StripFilename(szBasePath);
+		V_StripLastDir(szBasePath, sizeof(szBasePath));
+		V_MakeRelativePath(pNew->FullPathName(), szBasePath, szRelativePathName, sizeof(szRelativePathName));
+		//pNew->m_PackFileID = m_FileTracker2.NotePackFileOpened(pszFName, szRelativePathName, "GAME", 0);
+	}
+}
+CModule g_mFileSystemDLL;
+
+void InitializeFileSystemModule() {
+	HMODULE hModule;
+
+	// Check if "filesystem_stdio.dll" is loaded
+	hModule = GetModuleHandle("filesystem_stdio.dll");
+	if (hModule != nullptr) {
+		g_mFileSystemDLL = CModule("filesystem_stdio.dll");
+		return;
+	}
+
+	// Check if "dedicated.dll" is loaded
+	hModule = GetModuleHandle("dedicated.dll");
+	if (hModule != nullptr) {
+		g_mFileSystemDLL = CModule("dedicated.dll");
+		return;
+	}
+
+	// Check if "launcher.dll" is loaded
+	hModule = GetModuleHandle("launcher.dll");
+	if (hModule != nullptr) {
+		g_mFileSystemDLL = CModule("launcher.dll");
+		return;
+	}
+
+	// If none of the modules are loaded, g_mFileSystemDLL remains as it is
+}
+template<typename T, typename R, typename... Args>
+void* void_cast(R(T::* f)(Args...))
+{
+	union
+	{
+		R(T::* pf)(Args...);
+		void* p;
+	};
+	pf = f;
+	return p;
+}
 
 bool CServerGameDLL::DLLInit(CreateInterfaceFn appSystemFactory,
 	CreateInterfaceFn physicsFactory, CreateInterfaceFn fileSystemFactory,
 	CGlobalVars *pGlobals)
 {
+	int sizeOfPackedStore = sizeof(CPackedStore);
+
+	std::vector<uint8_t> sizeBytes = {
+		static_cast<uint8_t>(sizeOfPackedStore & 0xFF),
+		static_cast<uint8_t>((sizeOfPackedStore >> 8) & 0xFF),
+		static_cast<uint8_t>((sizeOfPackedStore >> 16) & 0xFF),
+		static_cast<uint8_t>((sizeOfPackedStore >> 24) & 0xFF)
+	};
+
+	InitializeFileSystemModule();
+	g_mFileSystemDLL.FindPatternSIMD("68 ? ? ? ? E8 ? ? ? ? 83 C4 ? 85 C0 74 ? 6A ? 8D 56 04").OffsetSelf(1).Patch(sizeBytes);
+	MH_Initialize();
+	MH_CreateHook(g_mFileSystemDLL.FindPatternSIMD("81 EC ? ? ? ? 53 8B 9C 24 10 01 00 00").RCast<LPVOID>(), (LPVOID)(&CBaseFileSystem__AddVPKFile), NULL);
+	MH_CreateHook(g_mFileSystemDLL.FindPatternSIMD("81 EC ? ? ? ? 56 57 8D 84 24 0C 01 00 00").RCast<LPVOID>(), void_cast(&CPackedStore::OpenFile), NULL);
+	MH_CreateHook(g_mFileSystemDLL.FindPatternSIMD("83 EC ? 53 8B 5C 24 1C").RCast<LPVOID>(), void_cast(&CPackedStore::ReadData), NULL);
+	MH_CreateHook(g_mFileSystemDLL.FindPatternSIMD("55 8B EC 83 E4 ? 81 EC ? ? ? ? 53 55").RCast<LPVOID>(), void_cast(&CPackedStore::BuildFindFirstCache), NULL);
+	MH_CreateHook(g_mFileSystemDLL.FindPatternSIMD("53 55 56 57 8B F9 8B 87 1C 02 00 00").RCast<LPVOID>(), void_cast(&CPackedStore::DPackedStore), NULL);
+	MH_EnableHook(MH_ALL_HOOKS);
 
 	COM_TimestampedLog("ConnectTier1/2/3Libraries - Start");
 
@@ -969,6 +1107,7 @@ bool CServerGameDLL::GameInit( void )
 	engine->ServerExecute( );
 	CBaseEntity::sm_bAccurateTriggerBboxChecks = true;
 
+#undef CreateEvent
 	IGameEvent *event = gameeventmanager->CreateEvent( "game_init" );
 	if ( event )
 	{
