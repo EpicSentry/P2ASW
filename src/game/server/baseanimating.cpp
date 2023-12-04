@@ -1992,6 +1992,7 @@ int CBaseAnimating::LookupAttachment( const char *szName )
 	{
 		AssertMsg3( studioAttachmentNum >= 0, "Couldn't find attachment %s on skeleton %s for object %s\n",
 			szName, pStudioHdr->pszName(), GetDebugName() );
+
 	}
 #endif
 	return studioAttachmentNum + 1;

@@ -137,6 +137,8 @@ struct FileHandleTracker_t
 	FileHandleTracker_t(void)
 	{
 		m_nFileNumber = -1;
+		m_hFileHandle = 0x0;
+		m_nCurOfs = 0;
 	}
 };
 
