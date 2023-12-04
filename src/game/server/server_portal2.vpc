@@ -53,6 +53,18 @@ $Project "Server (Portal 2)"
 		//$File	"$SRCDIR\game\shared\weapon_parse_default.cpp"
 		$File	"env_speaker.cpp"
 
+		$Folder	"VPK Workaround"
+		{
+		$File	"$SRCDIR\silver-bun\memaddr.cpp"
+		$File	"$SRCDIR\silver-bun\module.cpp"
+		$File	"$SRCDIR\silver-bun\memaddr.h"
+		$File	"$SRCDIR\silver-bun\module.h"
+		$File	"$SRCDIR\silver-bun\tebpeb64.h"
+		$File	"$SRCDIR\silver-bun\utils.h"
+		$File	"$SRCDIR\vpklib\packedstore.cpp"
+		$File	"$SRCDIR\vpklib\packedstore_internal.h"
+		}
+
 		$Folder	"HL2 DLL"
 		{
 			$File	"hl2\info_darknessmode_lightsource.cpp"
@@ -93,18 +105,6 @@ $Project "Server (Portal 2)"
 			$File	"hl2\vehicle_viewcontroller.cpp"
 		}
 
-		$Folder	"VPK Workaround"
-		{
-		$File	"$SRCDIR\silver-bun\memaddr.cpp"
-		$File	"$SRCDIR\silver-bun\module.cpp"
-		$File	"$SRCDIR\silver-bun\memaddr.h"
-		$File	"$SRCDIR\silver-bun\module.h"
-		$File	"$SRCDIR\silver-bun\tebpeb64.h"
-		$File	"$SRCDIR\silver-bun\utils.h"
-		$File	"$SRCDIR\silver-bun\utils.cpp"
-		$File	"$SRCDIR\vpklib\packedstore.cpp"
-		$File	"$SRCDIR\vpklib\packedstore_internal.h"
-		}		
 
 		$Folder	"Portal 2"
 		{

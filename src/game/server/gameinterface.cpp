@@ -77,6 +77,7 @@
 #include "env_debughistory.h"
 #include "util_shared.h"
 #include "player_voice_listener.h"
+#include "bone_setup.h"
 
 #ifdef _WIN32
 #include "ienginevgui.h"
@@ -659,10 +660,14 @@ void __fastcall CBaseFileSystem__AddVPKFile(struct_this* thisptr, void* edx, cha
 		}
 		thisptr->m_VPKFiles.RemoveAll();
 		for (int i = 0; i < m_VPKPaths.Count(); ++i) {
-			CBaseFileSystem__AddVPKFile(thisptr, 0, m_VPKPaths.Element(i), PATH_ADD_TO_HEAD);
+			CBaseFileSystem__AddVPKFile(thisptr, 0, m_VPKPaths.Element(i), PATH_ADD_TO_TAIL_ATINDEX);
 		}
-
+		char path[260];
+		filesystem->GetSearchPath("MOD", false, path, 260);
+		V_strcat(path, "portal2asw.vpk", 260);
+		CBaseFileSystem__AddVPKFile(thisptr, 0, path, PATH_ADD_TO_HEAD);
 	}
+
 	bHasBeenCalled = true;
 	// Ensure that the passed in file name has a .vpk extension. If not present, append it.
 	const char* pExtension = strrchr(pBasename, '.');
@@ -756,6 +761,109 @@ void* void_cast(R(T::* f)(Args...))
 	pf = f;
 	return p;
 }
+void Studio_BuildMatricesHook(
+	const CStudioHdr *pStudioHdr,
+	const QAngle& angles,
+	const Vector& origin,
+	const BoneVector pos[],
+	const BoneQuaternion q[],
+	int iBone,
+	float flScale,
+	matrix3x4a_t bonetoworld[MAXSTUDIOBONES],
+	int boneMask
+	)
+{
+	int i, j;
+
+	int					chain[MAXSTUDIOBONES] = {};
+	int					chainlength = 0;
+
+	if (iBone < -1 || iBone >= pStudioHdr->numbones())
+		iBone = 0;
+
+	// build list of what bones to use
+	if (iBone == -1)
+	{
+		// all bones
+		chainlength = pStudioHdr->numbones();
+		for (i = 0; i < pStudioHdr->numbones(); i++)
+		{
+			chain[chainlength - i - 1] = i;
+		}
+	}
+	else
+	{
+		// only the parent bones
+		i = iBone;
+		while (i != -1)
+		{
+			chain[chainlength++] = i;
+			i = pStudioHdr->boneParent(i);
+		}
+	}
+
+	matrix3x4a_t bonematrix;
+	matrix3x4a_t rotationmatrix; // model to world transformation
+	AngleMatrix(angles, origin, rotationmatrix);
+
+	// Account for a change in scale
+	if (flScale < 1.0f - FLT_EPSILON || flScale > 1.0f + FLT_EPSILON)
+	{
+		Vector vecOffset;
+		MatrixGetColumn(rotationmatrix, 3, vecOffset);
+		vecOffset -= origin;
+		vecOffset *= flScale;
+		vecOffset += origin;
+		MatrixSetColumn(vecOffset, 3, rotationmatrix);
+
+		// Scale it uniformly
+		VectorScale(rotationmatrix[0], flScale, rotationmatrix[0]);
+		VectorScale(rotationmatrix[1], flScale, rotationmatrix[1]);
+		VectorScale(rotationmatrix[2], flScale, rotationmatrix[2]);
+	}
+
+	// check for 16 byte alignment
+	if ((((size_t)bonetoworld) % 16) != 0)
+	{
+		for (j = chainlength - 1; j >= 0; j--)
+		{
+			i = chain[j];
+			if (pStudioHdr->boneFlags(i) & boneMask)
+			{
+				QuaternionMatrix(q[i], pos[i], bonematrix);
+
+				if (pStudioHdr->boneParent(i) == -1)
+				{
+					ConcatTransforms(rotationmatrix, bonematrix, bonetoworld[i]);
+				}
+				else
+				{
+					ConcatTransforms(bonetoworld[pStudioHdr->boneParent(i)], bonematrix, bonetoworld[i]);
+				}
+			}
+		}
+	}
+	else
+	{
+		for (j = chainlength - 1; j >= 0; j--)
+		{
+			i = chain[j];
+			if (pStudioHdr->boneFlags(i) & boneMask)
+			{
+				QuaternionMatrix(q[i], pos[i], bonematrix);
+
+				if (pStudioHdr->boneParent(i) == -1)
+				{
+					ConcatTransforms_Aligned(rotationmatrix, bonematrix, bonetoworld[i]);
+				}
+				else
+				{
+					ConcatTransforms_Aligned(bonetoworld[pStudioHdr->boneParent(i)], bonematrix, bonetoworld[i]);
+				}
+			}
+		}
+	}
+}
 
 bool CServerGameDLL::DLLInit(CreateInterfaceFn appSystemFactory,
 	CreateInterfaceFn physicsFactory, CreateInterfaceFn fileSystemFactory,
@@ -769,7 +877,7 @@ bool CServerGameDLL::DLLInit(CreateInterfaceFn appSystemFactory,
 		static_cast<uint8_t>((sizeOfPackedStore >> 16) & 0xFF),
 		static_cast<uint8_t>((sizeOfPackedStore >> 24) & 0xFF)
 	};
-
+	CModule ThisDLL("server.dll");
 	InitializeFileSystemModule();
 	g_mFileSystemDLL.FindPatternSIMD("68 ? ? ? ? E8 ? ? ? ? 83 C4 ? 85 C0 74 ? 6A ? 8D 56 04").OffsetSelf(1).Patch(sizeBytes);
 	MH_Initialize();
@@ -778,6 +886,7 @@ bool CServerGameDLL::DLLInit(CreateInterfaceFn appSystemFactory,
 	MH_CreateHook(g_mFileSystemDLL.FindPatternSIMD("83 EC ? 53 8B 5C 24 1C").RCast<LPVOID>(), void_cast(&CPackedStore::ReadData), NULL);
 	MH_CreateHook(g_mFileSystemDLL.FindPatternSIMD("55 8B EC 83 E4 ? 81 EC ? ? ? ? 53 55").RCast<LPVOID>(), void_cast(&CPackedStore::BuildFindFirstCache), NULL);
 	MH_CreateHook(g_mFileSystemDLL.FindPatternSIMD("53 55 56 57 8B F9 8B 87 1C 02 00 00").RCast<LPVOID>(), void_cast(&CPackedStore::DPackedStore), NULL);
+	MH_CreateHook(&Studio_BuildMatrices, (void*)(&Studio_BuildMatricesHook), NULL);
 	MH_EnableHook(MH_ALL_HOOKS);
 
 	COM_TimestampedLog("ConnectTier1/2/3Libraries - Start");
