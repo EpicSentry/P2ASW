@@ -3345,8 +3345,8 @@ void CTriggerCamera::Enable( void )
 		SetAbsVelocity( vec3_origin );
 	}
 
-
-	pPlayer->SetViewEntity( this );
+	
+	pPlayer->SetViewEntity( this, false ); //HACK: drawing the local player should probably be an entity option.
 
 	// Hide the player's viewmodel
 	if ( pPlayer->GetActiveWeapon() )
@@ -4383,7 +4383,7 @@ void CTriggerViewProxy::Enable( void )
 	}
 	
 	SetAbsVelocity( vec3_origin );
-	pPlayer->SetViewEntity( this ); //HACK: drawing the local player should probably be an entity option.
+	pPlayer->SetViewEntity( this, false ); //HACK: drawing the local player should probably be an entity option.
 
 	// Hide the player's viewmodel
 	if ( pPlayer->GetActiveWeapon() )

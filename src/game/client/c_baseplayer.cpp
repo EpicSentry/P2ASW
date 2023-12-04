@@ -243,6 +243,7 @@ END_RECV_TABLE()
 		RecvPropEHandle( RECVINFO(m_hUseEntity) ),
 
 		RecvPropEHandle		( RECVINFO( m_hViewEntity ) ),		// L4D: send view entity to everyone for first-person spectating
+		RecvPropBool		( RECVINFO( m_bShouldDrawPlayerWhileUsingViewEntity ) ),
 		RecvPropEHandle		( RECVINFO( m_hGroundEntity ) ),
 
 		RecvPropInt		(RECVINFO(m_iHealth)),
@@ -389,6 +390,7 @@ C_BasePlayer::C_BasePlayer() : m_iv_vecViewOffset( "C_BasePlayer::m_iv_vecViewOf
 	m_vecOldViewAngles.Init();
 #endif
 	m_hViewEntity = NULL;
+	m_bShouldDrawPlayerWhileUsingViewEntity = false;
 
 	for ( int i = 0; i < MAX_SPLITSCREEN_PLAYERS; i++ )
 	{
@@ -1428,24 +1430,29 @@ bool C_BasePlayer::ShouldSuppressForSplitScreenPlayer( int nSlot )
 PlayerRenderMode_t C_BasePlayer::GetPlayerRenderMode( int nSlot )
 {
 	// check if local player chases owner of this weapon in first person
-	C_BasePlayer *pLocalPlayer = GetSplitScreenViewPlayer( nSlot );
-	if ( !pLocalPlayer )
+	C_BasePlayer *pSplitscreenPlayer = GetSplitScreenViewPlayer( nSlot );
+	if ( !pSplitscreenPlayer )
 		return PLAYER_RENDER_THIRDPERSON;
 
-	if ( pLocalPlayer->IsObserver() )
+	if ( pSplitscreenPlayer->IsObserver() )
 	{
-		if ( pLocalPlayer->GetObserverTarget() != this )
+		if ( pSplitscreenPlayer->GetObserverTarget() != this )
 			return PLAYER_RENDER_THIRDPERSON;
-		if ( pLocalPlayer->GetObserverMode() != OBS_MODE_IN_EYE )
+		if ( pSplitscreenPlayer->GetObserverMode() != OBS_MODE_IN_EYE )
 			return PLAYER_RENDER_THIRDPERSON;
 	}
 	else
 	{
-		if ( pLocalPlayer != this )
+		if ( pSplitscreenPlayer != this )
 			return PLAYER_RENDER_THIRDPERSON;
 	}
 
 	if ( input->CAM_IsThirdPerson( nSlot ) )
+		return PLAYER_RENDER_THIRDPERSON;
+	
+	if ( (pSplitscreenPlayer->GetViewEntity() != NULL) && 
+		(pSplitscreenPlayer->GetViewEntity() != pSplitscreenPlayer) &&
+		pSplitscreenPlayer->m_bShouldDrawPlayerWhileUsingViewEntity )
 		return PLAYER_RENDER_THIRDPERSON;
 
 //	if ( IsInThirdPersonView() )

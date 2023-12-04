@@ -552,6 +552,7 @@ public:
 	CUserCmd		*m_pCurrentCommand;
 
 	EHANDLE			m_hViewEntity;
+	bool			m_bShouldDrawPlayerWhileUsingViewEntity;
 
 	// Movement constraints
 	EHANDLE			m_hConstraintEntity;

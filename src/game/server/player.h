@@ -565,8 +565,8 @@ public:
 
 	virtual bool			ShouldAutoaim( void );
 	void					SetTargetInfo( Vector &vecSrc, float flDist );
-
-	void					SetViewEntity( CBaseEntity *pEntity );
+	
+	void					SetViewEntity( CBaseEntity *pEntity, bool bShouldDrawPlayer = true );
 	CBaseEntity				*GetViewEntity( void ) { return m_hViewEntity; }
 
 	virtual void			ForceClientDllUpdate( void );  // Forces all client .dll specific data to be resent to client.
@@ -1118,6 +1118,7 @@ private:
 	bool					m_bPlayerUnderwater;
 
 	CNetworkHandle( CBaseEntity, m_hViewEntity );
+	CNetworkVar( bool, m_bShouldDrawPlayerWhileUsingViewEntity );
 
 	// Movement constraints
 	CNetworkHandle( CBaseEntity, m_hConstraintEntity );

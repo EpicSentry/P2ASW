@@ -3643,8 +3643,7 @@ void C_Portal_Player::ApplyPredictedPortalTeleportation( C_Portal_Base2D *pEnter
 	}
 
 	m_fLatestServerTeleport = gpGlobals->curtime;
-	// TODO: Update Ghost Renderable code
-#if 0
+
 	C_PortalGhostRenderable *pGhost = pEnteredPortal->GetGhostRenderableForEntity( this );
 	if( !pGhost )
 	{
@@ -3663,7 +3662,19 @@ void C_Portal_Player::ApplyPredictedPortalTeleportation( C_Portal_Base2D *pEnter
 	{
 		C_PortalGhostRenderable::CreateInversion( pGhost, pEnteredPortal, gpGlobals->curtime );
 	}
-#endif
+	
+	// p2asw: This fixes an issue where the viewmodel's last facing doesn't reorient in multiplayer when teleporting
+	//{
+	for ( int i = 0; i < MAX_VIEWMODELS; i++ )
+	{
+		CBaseViewModel *pViewModel = GetViewModel( i );
+		if ( !pViewModel )
+			continue;
+
+		pViewModel->m_vecLastFacing = pEnteredPortal->m_matrixThisToLinked.ApplyRotation( pViewModel->m_vecLastFacing );
+	}
+	//}
+
 	//Warning( "C_Portal_Player::ApplyPredictedPortalTeleportation() ent:%i slot:%i\n", entindex(), engine->GetActiveSplitScreenPlayerSlot() );
 	ApplyTransformToInterpolators( pEnteredPortal->m_matrixThisToLinked, gpGlobals->curtime, false, bForcedDuck );
 

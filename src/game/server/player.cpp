@@ -408,6 +408,7 @@ BEGIN_DATADESC( CBasePlayer )
 	DEFINE_FIELD( m_flOldPlayerViewOffsetZ, FIELD_FLOAT ),
 	DEFINE_FIELD( m_bPlayerUnderwater, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_hViewEntity, FIELD_EHANDLE ),
+	DEFINE_FIELD( m_bShouldDrawPlayerWhileUsingViewEntity, FIELD_BOOLEAN ),
 
 	DEFINE_FIELD( m_hConstraintEntity, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_vecConstraintCenter, FIELD_POSITION_VECTOR ),
@@ -5258,7 +5259,7 @@ void CBasePlayer::OnRestore( void )
 {
 	BaseClass::OnRestore();
 
-	SetViewEntity( m_hViewEntity );
+	SetViewEntity( m_hViewEntity, m_bShouldDrawPlayerWhileUsingViewEntity );
 	SetDefaultFOV(m_iDefaultFOV);		// force this to reset if zero
 
 	// Calculate this immediately
@@ -8011,6 +8012,7 @@ REGISTER_SEND_PROXY_NON_MODIFIED_POINTER( SendProxy_SendNonLocalDataTable );
 		SendPropEHandle( SENDINFO_STRUCTELEM( m_PlayerFog.m_hCtrl ) ),
 
 		SendPropEHandle	(SENDINFO( m_hViewEntity)),
+		SendPropBool	(SENDINFO( m_bShouldDrawPlayerWhileUsingViewEntity )),
 
 		// Data that only gets sent to the local player.
 		SendPropDataTable( "localdata", 0, &REFERENCE_SEND_TABLE(DT_LocalPlayerExclusive), SendProxy_SendLocalDataTable ),
@@ -8854,9 +8856,10 @@ void CBasePlayer::InputSetColorCorrectionController( inputdata_t &inputdata )
 // Purpose: 
 // Input  : *pEntity - 
 //-----------------------------------------------------------------------------
-void CBasePlayer::SetViewEntity( CBaseEntity *pEntity ) 
+void CBasePlayer::SetViewEntity( CBaseEntity *pEntity, bool bShouldDrawPlayer /*= true*/ ) 
 { 
 	m_hViewEntity = pEntity; 
+	m_bShouldDrawPlayerWhileUsingViewEntity = bShouldDrawPlayer;
 
 	if ( m_hViewEntity )
 	{
