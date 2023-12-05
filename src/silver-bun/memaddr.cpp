@@ -6,7 +6,6 @@
 #include "cbase.h"
 #include "memaddr.h"
 #include "utils.h"
-#include <cstdint>
 #pragma warning( disable : 4018 05 )
 
 
@@ -15,14 +14,14 @@
 // Input  : &vOpcodeArray - 
 // Output : true if equal, false otherwise
 //-----------------------------------------------------------------------------
-bool CMemory::CheckOpCodes(const std::vector<uint8_t>& vOpcodeArray) const
+bool CMemory::CheckOpCodes(const std::vector<uint8>& vOpcodeArray) const
 {
 	uintptr_t ref = ptr;
 
 	// Loop forward in the ptr class member.
 	for (size_t i = 0; i < vOpcodeArray.size(); i++, ref++)
 	{
-		uint8_t byteAtCurrentAddress = *reinterpret_cast<uint8_t*>(ref);
+		uint8 byteAtCurrentAddress = *reinterpret_cast<uint8*>(ref);
 
 		// If byte at ptr doesn't equal the byte in the array, return false.
 		if (byteAtCurrentAddress != vOpcodeArray[i])
@@ -36,7 +35,7 @@ bool CMemory::CheckOpCodes(const std::vector<uint8_t>& vOpcodeArray) const
 // Purpose: patch array of opcodes starting from current address
 // Input  : &vOpcodeArray - 
 //-----------------------------------------------------------------------------
-void CMemory::Patch(const std::vector<uint8_t>& vOpcodeArray) const
+void CMemory::Patch(const std::vector<uint8>& vOpcodeArray) const
 {
 	DWORD oldProt = NULL;
 
@@ -45,7 +44,7 @@ void CMemory::Patch(const std::vector<uint8_t>& vOpcodeArray) const
 
 	for (size_t i = 0; i < vOpcodeArray.size(); i++)
 	{
-		*reinterpret_cast<uint8_t*>(ptr + i) = vOpcodeArray[i]; // Write opcodes to Address.
+		*reinterpret_cast<uint8*>(ptr + i) = vOpcodeArray[i]; // Write opcodes to Address.
 	}
 
 	dwSize = vOpcodeArray.size();
@@ -65,7 +64,7 @@ void CMemory::PatchString(const char* szString) const
 
 	for (size_t i = 0; i < dwSize; i++)
 	{
-		*reinterpret_cast<uint8_t*>(ptr + i) = szString[i]; // Write string to Address.
+		*reinterpret_cast<uint8*>(ptr + i) = szString[i]; // Write string to Address.
 	}
 
 	VirtualProtect(reinterpret_cast<void*>(ptr), dwSize, oldProt, &oldProt); // Restore protection.
@@ -81,7 +80,7 @@ void CMemory::PatchString(const char* szString) const
 //-----------------------------------------------------------------------------
 CMemory CMemory::FindPattern(const char* szPattern, const Direction searchDirect, const int opCodesToScan, const ptrdiff_t occurrence) const
 {
-	uint8_t* pScanBytes = reinterpret_cast<uint8_t*>(ptr); // Get the base of the module.
+	uint8* pScanBytes = reinterpret_cast<uint8*>(ptr); // Get the base of the module.
 
 	const std::vector<int> PatternBytes = Utils::PatternToBytes(szPattern); // Convert our pattern to a byte array.
 	const std::pair<size_t, const int*> bytesInfo = std::make_pair<size_t, const int*>(PatternBytes.size(), PatternBytes.data()); // Get the size and data of our bytes.
@@ -96,8 +95,8 @@ CMemory CMemory::FindPattern(const char* szPattern, const Direction searchDirect
 		{
 			// If either the current byte equals to the byte in our pattern or our current byte in the pattern is a wildcard
 			// our if clause will be false.
-			uint8_t currentByte = *(pScanBytes + nMemOffset + j);
-			_mm_prefetch(reinterpret_cast<const CHAR*>(static_cast<int64_t>(currentByte + nMemOffset + 64)), _MM_HINT_T0); // precache some data in L1.
+			uint8 currentByte = *(pScanBytes + nMemOffset + j);
+			_mm_prefetch(reinterpret_cast<const CHAR*>(static_cast<int64>(currentByte + nMemOffset + 64)), _MM_HINT_T0); // precache some data in L1.
 			if (currentByte != bytesInfo.second[j] && bytesInfo.second[j] != -1)
 			{
 				bFound = false;
@@ -128,7 +127,7 @@ CMemory CMemory::FindPattern(const char* szPattern, const Direction searchDirect
 //-----------------------------------------------------------------------------
 CMemory CMemory::FindPatternSelf(const char* szPattern, const Direction searchDirect, const int opCodesToScan, const ptrdiff_t occurrence)
 {
-	uint8_t* pScanBytes = reinterpret_cast<uint8_t*>(ptr); // Get the base of the module.
+	uint8* pScanBytes = reinterpret_cast<uint8*>(ptr); // Get the base of the module.
 
 	const std::vector<int> PatternBytes = Utils::PatternToBytes(szPattern); // Convert our pattern to a byte array.
 	const std::pair<size_t, const int*> bytesInfo = std::make_pair<size_t, const int*>(PatternBytes.size(), PatternBytes.data()); // Get the size and data of our bytes.
@@ -143,8 +142,8 @@ CMemory CMemory::FindPatternSelf(const char* szPattern, const Direction searchDi
 		{
 			// If either the current byte equals to the byte in our pattern or our current byte in the pattern is a wildcard
 			// our if clause will be false.
-			uint8_t currentByte = *(pScanBytes + nMemOffset + j);
-			_mm_prefetch(reinterpret_cast<const CHAR*>(static_cast<int64_t>(currentByte + nMemOffset + 64)), _MM_HINT_T0); // precache some data in L1.
+			uint8 currentByte = *(pScanBytes + nMemOffset + j);
+			_mm_prefetch(reinterpret_cast<const CHAR*>(static_cast<int64>(currentByte + nMemOffset + 64)), _MM_HINT_T0); // precache some data in L1.
 			if (currentByte != bytesInfo.second[j] && bytesInfo.second[j] != -1)
 			{
 				bFound = false;
@@ -201,7 +200,7 @@ CMemory CMemory::ResolveRelativeAddress(const ptrdiff_t registerOffset, const pt
 	const uintptr_t skipRegister = ptr + registerOffset;
 
 	// Get 4-byte long relative Address.
-	const int32_t relativeAddress = *reinterpret_cast<int32_t*>(skipRegister);
+	const int32 relativeAddress = *reinterpret_cast<int32*>(skipRegister);
 
 	// Get location of next instruction.
 	const uintptr_t nextInstruction = ptr + nextInstructionOffset;
@@ -222,7 +221,7 @@ CMemory CMemory::ResolveRelativeAddressSelf(const ptrdiff_t registerOffset, cons
 	const uintptr_t skipRegister = ptr + registerOffset;
 
 	// Get 4-byte long relative Address.
-	const int32_t relativeAddress = *reinterpret_cast<int32_t*>(skipRegister);
+	const int32 relativeAddress = *reinterpret_cast<int32*>(skipRegister);
 
 	// Get location of next instruction.
 	const uintptr_t nextInstruction = ptr + nextInstructionOffset;
@@ -243,7 +242,7 @@ std::vector<CMemory> CMemory::FindAllCallReferences(const uintptr_t sectionBase,
 {
 	std::vector <CMemory> referencesInfo = {};
 
-	uint8_t* pTextStart = reinterpret_cast<uint8_t*>(sectionBase);
+	uint8* pTextStart = reinterpret_cast<uint8*>(sectionBase);
 	for (size_t i = 0ull; i < sectionSize - 0x5; i++, _mm_prefetch(reinterpret_cast<const char*>(pTextStart + 64), _MM_HINT_NTA))
 	{
 		if (pTextStart[i] == 0xE8)

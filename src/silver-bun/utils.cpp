@@ -34,12 +34,12 @@ namespace Utils
     //----------------------------------------------------------------------------------------
     // Purpose: For converting a string pattern with wildcards to an array of bytes and mask.
     //----------------------------------------------------------------------------------------
-    std::pair<std::vector<uint8_t>, std::string> PatternToMaskedBytes(const char* szInput)
+    std::pair<std::vector<uint8>, std::string> PatternToMaskedBytes(const char* szInput)
     {
         const char* pszPatternStart = const_cast<char*>(szInput);
         const char* pszPatternEnd = pszPatternStart + strlen(szInput);
 
-        std::vector<uint8_t> vBytes;
+        std::vector<uint8> vBytes;
         std::string svMask;
 
         for (const char* pszCurrentByte = pszPatternStart; pszCurrentByte < pszPatternEnd; ++pszCurrentByte)
@@ -56,7 +56,7 @@ namespace Utils
             }
             else
             {
-                vBytes.push_back(uint8_t(strtoul(pszCurrentByte, const_cast<char**>(&pszCurrentByte), 16)));
+                vBytes.push_back(uint8(strtoul(pszCurrentByte, const_cast<char**>(&pszCurrentByte), 16)));
                 svMask += 'x';
             }
         }
@@ -88,11 +88,11 @@ namespace Utils
     //----------------------------------------------------------------------------------------
     // Purpose: For converting a string to an array of masked bytes.
     //----------------------------------------------------------------------------------------
-    std::pair<std::vector<uint8_t>, std::string> StringToMaskedBytes(const char* szInput, bool bNullTerminator)
+    std::pair<std::vector<uint8>, std::string> StringToMaskedBytes(const char* szInput, bool bNullTerminator)
     {
         const char* pszStringStart = const_cast<char*>(szInput);
         const char* pszStringEnd = pszStringStart + strlen(szInput);
-        std::vector<uint8_t> vBytes;
+        std::vector<uint8> vBytes;
         std::string svMask;
 
         for (const char* pszCurrentByte = pszStringStart; pszCurrentByte < pszStringEnd; ++pszCurrentByte)

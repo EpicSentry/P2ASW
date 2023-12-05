@@ -37,7 +37,7 @@ public:
 	void LoadSections();
 
 	CMemory FindPatternSIMD(const char* szPattern, const ModuleSections_t* moduleSection = nullptr) const;
-	CMemory FindPatternSIMD(const uint8_t* pPattern, const char* szMask,
+	CMemory FindPatternSIMD(const uint8* pPattern, const char* szMask,
 		const ModuleSections_t* moduleSection = nullptr, const size_t nOccurrence = 0) const;
 
 	CMemory FindString(const char* szString, const ptrdiff_t occurrence = 1, bool nullTerminator = false) const;

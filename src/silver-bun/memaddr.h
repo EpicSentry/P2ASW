@@ -6,7 +6,7 @@
 #include <vector>
 #include <windows.h>
 #include <psapi.h>
-#include <cstdint>
+#include "platform.h"
 #else
 #pragma message("ADD PRECOMPILED HEADERS TO SILVER-BUN.")
 #endif // !USE_PRECOMPILED_HEADERS
@@ -126,8 +126,8 @@ public:
 		return *this;
 	}
 
-	bool CheckOpCodes(const std::vector<uint8_t>& vOpcodeArray) const;
-	void Patch(const std::vector<uint8_t>& vOpcodeArray) const;
+	bool CheckOpCodes(const std::vector<uint8>& vOpcodeArray) const;
+	void Patch(const std::vector<uint8>& vOpcodeArray) const;
 	void PatchString(const char* szString) const;
 
 	CMemory FindPattern(const char* szPattern, const Direction searchDirect = Direction::DOWN, const int opCodesToScan = 512, const ptrdiff_t occurrence = 1) const;

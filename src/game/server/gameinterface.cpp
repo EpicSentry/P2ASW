@@ -7,8 +7,7 @@
 //===========================================================================//
 
 #include "cbase.h"
-#include <cstdint>
-#include "MinHook.h"
+#include "../packages/minhook.1.3.3/lib/native/include/MinHook.h"
 #include "../silver-bun/memaddr.h"
 #include "../silver-bun/module.h"
 #include "../silver-bun/utils.h"
@@ -695,7 +694,7 @@ void __fastcall CBaseFileSystem__AddVPKFile(struct_this* thisptr, void* edx, cha
 			return;											// already have this one
 		}
 	}
-	char pszFName[MAX_PATH];
+	//char pszFName[MAX_PATH];
 	CPackedStore* pNew = new CPackedStore(nameBuf, (IBaseFileSystem*)thisptr, false);
 	//pNew->RegisterFileTracker((IThreadedFileMD5Processor*)&m_FileTracker2);
 	if (pNew->IsEmpty())
@@ -871,11 +870,11 @@ bool CServerGameDLL::DLLInit(CreateInterfaceFn appSystemFactory,
 {
 	int sizeOfPackedStore = sizeof(CPackedStore);
 
-	std::vector<uint8_t> sizeBytes = {
-		static_cast<uint8_t>(sizeOfPackedStore & 0xFF),
-		static_cast<uint8_t>((sizeOfPackedStore >> 8) & 0xFF),
-		static_cast<uint8_t>((sizeOfPackedStore >> 16) & 0xFF),
-		static_cast<uint8_t>((sizeOfPackedStore >> 24) & 0xFF)
+	std::vector<uint8> sizeBytes = {
+		static_cast<uint8>(sizeOfPackedStore & 0xFF),
+		static_cast<uint8>((sizeOfPackedStore >> 8) & 0xFF),
+		static_cast<uint8>((sizeOfPackedStore >> 16) & 0xFF),
+		static_cast<uint8>((sizeOfPackedStore >> 24) & 0xFF)
 	};
 	CModule ThisDLL("server.dll");
 	InitializeFileSystemModule();

@@ -408,7 +408,7 @@ void ParticleEffectStopCallback( const CEffectData &data )
 			}
 			else
 			{
-				pEnt->ParticleProp()->StopEmission();
+				pEnt->ParticleProp()->StopEmission( NULL, true, true, false, true );
 			}
 		}
 	}

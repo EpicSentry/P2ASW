@@ -6,7 +6,6 @@
 #include "cbase.h"
 #include "module.h"
 #include "utils.h"
-#include <cstdint>
 
 
 #if _WIN64 
@@ -79,7 +78,7 @@ void CModule::LoadSections()
 //          nOccurrence    - 
 // Output : CMemory
 //-----------------------------------------------------------------------------
-CMemory CModule::FindPatternSIMD(const uint8_t* pPattern, const char* szMask,
+CMemory CModule::FindPatternSIMD(const uint8* pPattern, const char* szMask,
 	const ModuleSections_t* moduleSection, const size_t nOccurrence) const
 {
 	if (!m_ExecutableCode.IsSectionValid())
@@ -91,8 +90,8 @@ CMemory CModule::FindPatternSIMD(const uint8_t* pPattern, const char* szMask,
 	const uintptr_t nSize = bSectionValid ? moduleSection->m_nSectionSize : m_ExecutableCode.m_nSectionSize;
 
 	const size_t nMaskLen = strlen(szMask);
-	const uint8_t* pData = reinterpret_cast<uint8_t*>(nBase);
-	const uint8_t* pEnd = pData + nSize - nMaskLen;
+	const uint8* pData = reinterpret_cast<uint8*>(nBase);
+	const uint8* pEnd = pData + nSize - nMaskLen;
 
 	size_t nOccurrenceCount = 0;
 	int nMasks[64]; // 64*16 = enough masks for 1024 bytes.
@@ -126,11 +125,11 @@ CMemory CModule::FindPatternSIMD(const uint8_t* pPattern, const char* szMask,
 					msks = _mm_cmpeq_epi8(xmm2, xmm3);
 					if ((_mm_movemask_epi8(msks) & nMasks[i]) == nMasks[i])
 					{
-						if ((i + 1) == iNumMasks)
+						if ((i + 1) == static_cast<uintptr_t>(iNumMasks))
 						{
 							if (nOccurrenceCount == nOccurrence)
 							{
-								return static_cast<CMemory>(const_cast<uint8_t*>(pData));
+								return static_cast<CMemory>(const_cast<uint8*>(pData));
 							}
 							nOccurrenceCount++;
 						}
@@ -142,7 +141,7 @@ CMemory CModule::FindPatternSIMD(const uint8_t* pPattern, const char* szMask,
 				}
 				if (nOccurrenceCount == nOccurrence)
 				{
-					return static_cast<CMemory>((&*(const_cast<uint8_t*>(pData))));
+					return static_cast<CMemory>((&*(const_cast<uint8*>(pData))));
 				}
 				nOccurrenceCount++;
 			}
@@ -159,7 +158,7 @@ CMemory CModule::FindPatternSIMD(const uint8_t* pPattern, const char* szMask,
 //-----------------------------------------------------------------------------
 CMemory CModule::FindPatternSIMD(const char* szPattern, const ModuleSections_t* moduleSection) const
 {
-	const std::pair<std::vector<uint8_t>, std::string> patternInfo = Utils::PatternToMaskedBytes(szPattern);
+	const std::pair<std::vector<uint8>, std::string> patternInfo = Utils::PatternToMaskedBytes(szPattern);
 	return FindPatternSIMD(patternInfo.first.data(), patternInfo.second.c_str(), moduleSection);
 }
 
@@ -179,8 +178,8 @@ CMemory CModule::FindString(const char* szString, const ptrdiff_t nOccurrence, b
 	if (!stringAddress)
 		return CMemory();
 
-	uint8_t* pLatestOccurrence = nullptr;
-	uint8_t* pTextStart = reinterpret_cast<uint8_t*>(m_ExecutableCode.m_pSectionBase); // Get the start of the .text section.
+	uint8* pLatestOccurrence = nullptr;
+	uint8* pTextStart = reinterpret_cast<uint8*>(m_ExecutableCode.m_pSectionBase); // Get the start of the .text section.
 	ptrdiff_t dOccurrencesFound = 0;
 	CMemory resultAddress;
 
@@ -190,7 +189,7 @@ CMemory CModule::FindString(const char* szString, const ptrdiff_t nOccurrence, b
 		if (byte == 0x8D) // 0x8D = LEA
 		{
 			const CMemory skipOpCode = CMemory(reinterpret_cast<uintptr_t>(&pTextStart[i])).OffsetSelf(0x2); // Skip next 2 opcodes, those being the instruction and the register.
-			const int32_t relativeAddress = skipOpCode.GetValue<int32_t>();                                  // Get 4-byte long string relative Address
+			const int32 relativeAddress = skipOpCode.GetValue<int32>();                                  // Get 4-byte long string relative Address
 			const uintptr_t nextInstruction = skipOpCode.Offset(0x4).GetPtr();                               // Get location of next instruction.
 			const CMemory potentialLocation = CMemory(nextInstruction + relativeAddress);                    // Get potential string location.
 
@@ -224,7 +223,7 @@ CMemory CModule::FindStringReadOnly(const char* szString, bool bNullTerminator) 
 	const std::vector<int> vBytes = Utils::StringToBytes(szString, bNullTerminator); // Convert our string to a byte array.
 	const std::pair<size_t, const int*> bytesInfo = std::make_pair<size_t, const int*>(vBytes.size(), vBytes.data()); // Get the size and data of our bytes.
 
-	const uint8_t* pBase = reinterpret_cast<uint8_t*>(m_ReadOnlyData.m_pSectionBase); // Get start of .rdata section.
+	const uint8* pBase = reinterpret_cast<uint8*>(m_ReadOnlyData.m_pSectionBase); // Get start of .rdata section.
 
 	for (size_t i = 0ull; i < m_ReadOnlyData.m_nSectionSize - bytesInfo.first; i++)
 	{
@@ -258,7 +257,7 @@ CMemory CModule::FindStringData(const char* szString, bool bNullTerminator) cons
 	const std::vector<int> vBytes = Utils::StringToBytes(szString, bNullTerminator); // Convert our string to a byte array.
 	const std::pair<size_t, const int*> bytesInfo = std::make_pair<size_t, const int*>(vBytes.size(), vBytes.data()); // Get the size and data of our bytes.
 
-	const uint8_t* pBase = reinterpret_cast<uint8_t*>(m_RunTimeData.m_pSectionBase); // Get start of .rdata section.
+	const uint8* pBase = reinterpret_cast<uint8*>(m_RunTimeData.m_pSectionBase); // Get start of .rdata section.
 
 	for (size_t i = 0ull; i < m_RunTimeData.m_nSectionSize - bytesInfo.first; i++)
 	{
@@ -315,11 +314,11 @@ CMemory CModule::FindFreeDataPage(const size_t nSize) const
 		if (*reinterpret_cast<uintptr_t*>(currAddr) == 0 && checkDataSection(reinterpret_cast<void*>(currAddr), nSize))
 		{
 			bool bIsGoodPage = true;
-			uint32_t nPageCount = 0;
+			uint32 nPageCount = 0;
 
 			for (; nPageCount < nSize && bIsGoodPage; nPageCount += sizeof(uintptr_t))
 			{
-				const uintptr_t pageData = *reinterpret_cast<std::uintptr_t*>(currAddr + nPageCount);
+				const uintptr_t pageData = *reinterpret_cast<uintptr_t*>(currAddr + nPageCount);
 				if (pageData != 0)
 					bIsGoodPage = false;
 			}
@@ -340,7 +339,7 @@ std::vector<CMemory> CModule::GetXrefsTo(const uintptr_t address, const ModuleSe
 		return xrefs;
 
 	// Convert the address to a byte array and a mask
-	const uint8_t* pPattern = reinterpret_cast<const uint8_t*>(&address);
+	const uint8* pPattern = reinterpret_cast<const uint8*>(&address);
 	const char* szMask = "xxxx"; // 4 bytes for x86, 8 bytes for x64
 
 	// Get the start and end of the section
@@ -395,7 +394,7 @@ CMemory CModule::GetVirtualMethodTable(const char* szTableName, const size_t nRe
 		return CMemory();
 	for (const CMemory xref : xrefs) {
 		// The offset of the vtable in the complete class is 8 bytes before the xref
-		const int32_t offset_from_class = xref.Offset(-8).GetValue<int32_t>();
+		const int32 offset_from_class = xref.Offset(-8).GetValue<int32>();
 
 		// If the offset is not 0, it means the vtable belongs to a base class, not the class we want
 		if (offset_from_class != 0)
