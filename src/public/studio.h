@@ -435,7 +435,7 @@ private:
 #define BONE_HAS_SAVEFRAME_POS		0x00200000	// Vector48
 #define BONE_HAS_SAVEFRAME_ROT64	0x00400000	// Quaternion64
 #define BONE_HAS_SAVEFRAME_ROT32	0x00800000	// Quaternion32
-
+#define BONE_HAS_SAVEFRAME_ROT      BONE_HAS_SAVEFRAME_ROT64
 // bone controllers
 struct mstudiobonecontroller_t
 {
@@ -698,7 +698,7 @@ struct mstudio_rle_anim_t
 	inline mstudio_rle_anim_t	*pNext( void ) const { if (nextoffset != 0) return  (mstudio_rle_anim_t *)(((byte *)this) + nextoffset); else return NULL; };
 };
 
-
+#define mstudioanim_t mstudio_rle_anim_t
 #define STUDIO_FRAME_RAWPOS		0x01 // Vector48 in constants
 #define STUDIO_FRAME_RAWROT		0x02 // Quaternion48 in constants
 #define STUDIO_FRAME_ANIMPOS	0x04 // Vector48 in framedata
