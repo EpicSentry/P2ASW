@@ -363,6 +363,8 @@ $Project "Server (Portal 2)"
 					$Folder	"Additional Link Libraries"
 					{
 					//	$Lib	"$LIBPUBLIC\meshutils"
+						$Lib	"$LIBPUBLIC\minhook\libMinHook-x86-v120-mt"
+						$Lib	"$LIBPUBLIC\minhook\libMinHook-x86-v120-mtd"
 						$Lib	"$LIBCOMMON\fileextd"	[$WIN32 && !$NO_CEG]
 					}
 				}
