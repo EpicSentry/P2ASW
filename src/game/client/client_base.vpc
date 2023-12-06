@@ -174,7 +174,6 @@ $Project
 		$File	"beamdraw.cpp"
 		$File	"$SRCDIR\game\shared\beam_shared.cpp"
 		$File	"$SRCDIR\public\bone_accessor.cpp"
-		$File	"$SRCDIR\public\bone_setup.cpp"
 		$File	"$SRCDIR\public\bone_setup.h"
 		$File	"bone_merge_cache.cpp"
 		$File	"c_ai_basehumanoid.cpp"
@@ -1171,6 +1170,7 @@ $Project
 	$Folder	"Link Libraries"
 	{
 		$Lib		bitmap
+		$Lib		bonesetup
 		$Lib		choreoobjects
 		$Lib		dmxloader
 		$Lib		mathlib

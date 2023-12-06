@@ -31,3 +31,8 @@ $Project "game_shader"
 {
 	"materialsystem\stdshaders\game_shader_dx9.vpc"
 }
+
+$Project "bonesetup"
+{
+	"bonesetup\bonesetup.vpc"
+}

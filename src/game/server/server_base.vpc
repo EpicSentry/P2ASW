@@ -868,7 +868,6 @@ $Project
 		$File	"$SRCDIR\public\tier1\bitbuf.h"
 		$File	"$SRCDIR\public\bitvec.h"
 		$File	"$SRCDIR\public\bone_accessor.h"
-		$File	"$SRCDIR\public\bone_setup.cpp"
 		$File	"$SRCDIR\public\bone_setup.h"
 		$File	"$SRCDIR\public\bspfile.h"
 		$File	"$SRCDIR\public\bspflags.h"
@@ -1075,6 +1074,7 @@ $Project
 	
 	$Folder	"Link Libraries" 
 	{
+		$Lib	bonesetup
 		$Lib	choreoobjects
 		$Lib	dmxloader
 		$Lib	mathlib
