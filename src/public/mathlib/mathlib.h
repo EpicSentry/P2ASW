@@ -46,6 +46,14 @@ private:
 #endif
 };
 
+// P2ASW: For Portal 2 / CSGO compatibility
+// Converts cplane_t to Vector4D and vice versa
+//{
+class Vector4D;
+void Vector4DPlane( const Vector4D &v4D, cplane_t *plane );
+void PlaneVector4D( const cplane_t plane, Vector4D *v4D );
+//}
+
 // structure offset for asm code
 #define CPLANE_NORMAL_X			0
 #define CPLANE_NORMAL_Y			4

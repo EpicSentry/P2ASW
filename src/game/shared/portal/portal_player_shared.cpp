@@ -4651,7 +4651,7 @@ void ComputeAABBContactsWithBrushEntity_Old( ContactVector& contacts, const cpla
 
 void ComputeAABBContactsWithBrushEntity_SIMD( ContactVector& contacts, const cplane_t *pClipPlanes, int iClipPlaneCount, const Vector& boxOrigin, const Vector& boxMin, const Vector& boxMax, CBaseEntity* pBrushEntity, int contentsMask)
 {
-#if ( PAINT_DETECTION_METHOD == PAINT_DETECTION_BRUSHCONTACTS ) && 0
+#if ( ( PAINT_DETECTION_METHOD == PAINT_DETECTION_BRUSHCONTACTS ) || ( PAINT_DETECTION_METHOD == PAINT_DETECTION_BRUSHCONTACTS_AND_8TRACES ) ) && 1
 	//typedef CUtlVector<int>	BrushIndexVector;
 	typedef CUtlVector<uint16> PlaneIndexVector;
 	//typedef CUtlVector<BrushSideInfo_t> BrushSideInfoVector;
@@ -4673,29 +4673,49 @@ void ComputeAABBContactsWithBrushEntity_SIMD( ContactVector& contacts, const cpl
 
 	// Get the indices of all the colliding brushes
 	//BrushIndexVector brushIndices;
-	CBrushQuery brushQuery;
-	enginetrace->GetBrushesInAABB( queryBoxMin, queryBoxMax, brushQuery, contentsMask, cmodelIndex );
+	//CBrushQuery brushQuery;
+	CUtlVector<int> WorldBrushes;
+	enginetrace->GetBrushesInAABB( queryBoxMin, queryBoxMax, &WorldBrushes, contentsMask );
 
 	// Find the contact regions
 	//BrushSideInfoVector brushSides;
-	BrushSideInfo_t *brushSides = (BrushSideInfo_t *)stackalloc( sizeof( BrushSideInfo_t ) * brushQuery.MaxBrushSides() );
+	//BrushSideInfo_t *brushSides = (BrushSideInfo_t *)stackalloc( sizeof( BrushSideInfo_t ) * brushQuery.MaxBrushSides() );
+	CUtlVector<BrushSideInfo_t> brushSides;
 	//PlaneVector planes;
-	const int NUMBER_OF_FLTX4 = brushQuery.MaxBrushSides() + 6 /*bbox*/ + iClipPlaneCount;
-	fltx4 *planes = (fltx4 *)stackalloc( sizeof( fltx4 ) * ( NUMBER_OF_FLTX4 + 1 ) );		// +1 for VMX alignment
-	planes = (fltx4*)ALIGN_VALUE( (int)planes, sizeof(fltx4) );
-
 	fltx4 f4BoxMin = LoadUnalignedSIMD( &boxMin.x );
 	fltx4 f4BoxMax = LoadUnalignedSIMD( &boxMax.x );
 	fltx4 f4BoxOrigin = LoadUnalignedSIMD( &boxOrigin.x );
 
-	for( int i = 0; i < brushQuery.Count(); ++i )
+	for( int i = 0; i < WorldBrushes.Count(); ++i )
 	{
 		// Get the brush side info
 		int iBrushContents;
-		int iNumBrushSides = enginetrace->GetBrushInfo( brushQuery[i], iBrushContents, brushSides, brushQuery.MaxBrushSides() );
+#ifdef DEBUG
+		bool bHasBrushInfo = enginetrace->GetBrushInfo( WorldBrushes[i], &brushSides, &iBrushContents );
+#else // Bleh, unreferenced local variable
+		enginetrace->GetBrushInfo( WorldBrushes[i], &brushSides, &iBrushContents );
+#endif
+		int iNumBrushSides = brushSides.Count();
 		Assert( iNumBrushSides > 0 );
-		if( iNumBrushSides <= 0 )
-			continue;
+
+#ifdef DEBUG // If this triggers, we need to rewrite the condition
+		if ( iNumBrushSides <= 0 )
+			Assert( !bHasBrushInfo );
+
+		//if ( !pBrushEntity->IsWorld() )
+		//	Msg("This entity is not the world!! Whoohoo!!\n");
+#endif
+		
+#if 0
+		const int NUMBER_OF_FLTX4 = brushSides.Count() + 6 /*bbox*/ + iClipPlaneCount;
+
+		Vector4D *planes = (Vector4D *)stackalloc( sizeof( Vector4D ) * ( NUMBER_OF_FLTX4 + 1 ) );
+#else
+		const int NUMBER_OF_FLTX4 = brushSides.Count() + 6 /*bbox*/ + iClipPlaneCount;
+
+		fltx4 *planes = (fltx4 *)stackalloc( sizeof( fltx4 ) * ( NUMBER_OF_FLTX4 + 1 ) );		// +1 for VMX alignment
+		planes = (fltx4*)ALIGN_VALUE( (int)planes, sizeof(fltx4) );
+#endif
 
 		//remove bevel planes
 		{
@@ -4714,9 +4734,16 @@ void ComputeAABBContactsWithBrushEntity_SIMD( ContactVector& contacts, const cpl
 		// Transform the planes to world space
 		for( int sideIndex = 0; sideIndex < iNumBrushSides; ++sideIndex )
 		{
+#if 1
+			cplane_t planeConverted;
+			Vector4DPlane( brushSides[sideIndex].plane, &planeConverted );
+
 			cplane_t temp;
-			MatrixTransformPlane( entityToWorld, brushSides[sideIndex].plane, temp );		// Could be optimized further here...
+			MatrixTransformPlane( entityToWorld, planeConverted, temp );		// Could be optimized further here...
 			planes[sideIndex] = LoadUnalignedSIMD(&temp.normal);		// Read XYZ and dist of the plane
+#else
+			planes[sideIndex] = brushSides[sideIndex].plane;
+#endif
 		}
 
 		int iPlaneCount = iNumBrushSides;
@@ -4808,7 +4835,7 @@ void ComputeAABBContactsWithBrushEntity( ContactVector& contacts, const cplane_t
 	if ( paint_compute_contacts_simd.GetBool() )
 	{
 		ComputeAABBContactsWithBrushEntity_SIMD( contacts, pClipPlanes, iClipPlaneCount, boxOrigin, boxMin, boxMax, pBrushEntity, contentsMask );
-#if _DEBUG
+#if _DEBUG && 1
 		ContactVector fpuContacts;
 		ComputeAABBContactsWithBrushEntity_Old( fpuContacts, pClipPlanes, iClipPlaneCount, boxOrigin, boxMin, boxMax, pBrushEntity, contentsMask );
 

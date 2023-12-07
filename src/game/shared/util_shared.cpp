@@ -2495,3 +2495,20 @@ const fltx4 g_SIMD_Identity[4] =
 };
 
 const fltx4 Four_DegToRad = { ((float)(M_PI_F / 180.f)), ((float)(M_PI_F / 180.f)), ((float)(M_PI_F / 180.f)), ((float)(M_PI_F / 180.f)) };
+
+
+void Vector4DPlane( const Vector4D &v4D, cplane_t *plane )
+{
+	plane->normal.x = v4D.x;
+	plane->normal.y = v4D.y;
+	plane->normal.z = v4D.z;
+	plane->dist = v4D.w;
+}
+
+void PlaneVector4D( const cplane_t plane, Vector4D *v4D )
+{
+	v4D->x = plane.normal.x;
+	v4D->y = plane.normal.y;
+	v4D->z = plane.normal.z;
+	v4D->w = plane.dist;
+}
