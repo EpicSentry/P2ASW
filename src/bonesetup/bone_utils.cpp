@@ -248,14 +248,15 @@ void Studio_DestroyBoneCache( memhandle_t cacheHandle )
 	AUTO_LOCK( g_StudioBoneCache.AccessMutex() );
 	g_StudioBoneCache.DestroyResource( cacheHandle );
 }
+
+// This function was restored with the help of IDA and the "Studio_InvalidateBoneCacheIfNotMatching" function.
 void Studio_InvalidateBoneCache( memhandle_t cacheHandle )
 {
 	AUTO_LOCK( g_StudioBoneCache.AccessMutex() );
-	g_StudioBoneCache.Lock();
-
-	float *Resource_NoLock = (float *)g_StudioBoneCache.GetResource_NoLock( cacheHandle );
-	if (Resource_NoLock)
-		*Resource_NoLock = -1.0;
+	
+	CBoneCache *pCache = g_StudioBoneCache.GetResource_NoLock( cacheHandle );
+	if ( pCache )
+		pCache->m_timeValid = -1.0f;
 }
 
 void Studio_InvalidateBoneCacheIfNotMatching( memhandle_t cacheHandle, float flTimeValid )
