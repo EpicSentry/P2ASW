@@ -250,6 +250,7 @@ void Studio_DestroyBoneCache( memhandle_t cacheHandle )
 }
 void Studio_InvalidateBoneCache( memhandle_t cacheHandle )
 {
+	AUTO_LOCK( g_StudioBoneCache.AccessMutex() );
 	g_StudioBoneCache.Lock();
 
 	float *Resource_NoLock = (float *)g_StudioBoneCache.GetResource_NoLock( cacheHandle );
