@@ -3,7 +3,6 @@
 //
 //
 //==================================================================================================
-#include "cbase.h"
 #include "meshutils/mesh.h"
 #include "tier1/mempool.h"
 #include "utlintrusivelist.h"

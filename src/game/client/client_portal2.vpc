@@ -447,22 +447,9 @@ $Project "Client (Portal 2)"
 
 					$File	"$SRCDIR\common\ps3\vjobutils.cpp"		[$PS3]
 					
-					$Folder	"Additional Public Header Files"
-					{
-						$File	"$SRCDIR\public\meshutils\mesh.h"
-					}
-					
-					$File	"$SRCDIR\meshutils\atlas.cpp"
-					$File	"$SRCDIR\meshutils\clipmesh.cpp"
-					$File	"$SRCDIR\meshutils\convexhull.cpp"
-					$File	"$SRCDIR\meshutils\mesh.cpp"
-					$File	"$SRCDIR\meshutils\simplify.cpp"
-					$File	"$SRCDIR\meshutils\uvparam.cpp"
-					$File	"$SRCDIR\meshutils\vertexops.cpp"
-					
 					$Folder	"Additional Link Libraries"
 					{
-					//	$Lib	"$LIBPUBLIC\meshutils"
+						$Lib	"$LIBPUBLIC\meshutils"
 						$Lib	"$LIBCOMMON\fileextd"	[$WIN32 && !$NO_CEG]
 					}
 

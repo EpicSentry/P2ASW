@@ -36,3 +36,8 @@ $Project "bonesetup"
 {
 	"bonesetup\bonesetup.vpc"
 }
+
+$Project "meshutils"
+{
+	"meshutils\meshutils.vpc"
+}

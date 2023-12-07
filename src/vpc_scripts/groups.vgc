@@ -22,4 +22,5 @@ $Group "everything"
 	"shaderlib"
 	"portal_shader"
 	"bonesetup"
+	"meshutils"
 }

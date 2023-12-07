@@ -3,7 +3,6 @@
 // Purpose: Mesh simplification routines.
 //
 //===========================================================================//
-#include "cbase.h"
 #include "mathlib/vector.h"
 #include "meshutils/simplify.h"
 #include "tier1/utlpriorityqueue.h"

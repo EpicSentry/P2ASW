@@ -3,7 +3,6 @@
 // Purpose: Mesh class UV parameterization operations.
 //
 //===========================================================================//
-#include "cbase.h"
 #include "meshutils/mesh.h"
 #include "tier1/utlbuffer.h"
 

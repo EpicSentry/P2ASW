@@ -3,7 +3,6 @@
 // Purpose: Mesh clipping operations.
 //
 //===========================================================================//
-#include "cbase.h"
 #include "meshutils/mesh.h"
 
 void CopyVertex( float *pOut, const float *pIn, int nFloats )
