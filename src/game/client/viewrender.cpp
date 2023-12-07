@@ -6134,7 +6134,7 @@ void CBaseWorldView::DrawExecute( float waterHeight, view_id_t viewID, float wat
 		Begin360ZPass();
 	}
 
-#if defined PORTAL && 0
+#if defined PORTAL && 1
 	if ( IsMainView( viewID ) )
 	{
 		g_pPortalRender->DrawEarlyZPortals( (CViewRender*)view );

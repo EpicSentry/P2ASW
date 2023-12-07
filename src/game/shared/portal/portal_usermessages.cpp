@@ -93,8 +93,5 @@ void RegisterUserMessages()
 	//usermessages->Register( "MPVSGameStart", sizeof( char ) );
 	//usermessages->Register( "MPVSGameOver", sizeof( BYTE ) );
 	//usermessages->Register( "MPVSRoundEnd", sizeof( BYTE ) );
-
-	//new stuff for portal
-	usermessages->Register( "KillCam", -1 );	
 #endif // PORTAL2
 }

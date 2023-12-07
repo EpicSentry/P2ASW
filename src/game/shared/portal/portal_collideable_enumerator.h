@@ -14,13 +14,6 @@
 
 #include "ISpatialPartition.h"
 
-#ifdef CLIENT_DLL
-class C_Portal_Base2D;
-#define CPortal_Base2D C_Portal_Base2D
-#else
-class CPortal_Base2D;
-#endif
-
 //only enumerates entities in front of the associated portal and are solid (as in a player would get stuck in them)
 class CPortalCollideableEnumerator : public IPartitionEnumerator
 {

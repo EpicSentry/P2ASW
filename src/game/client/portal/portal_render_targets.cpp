@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright (c) 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: Portal mod render targets are specified by and accessable through this singleton
 //
@@ -6,7 +6,7 @@
 //=============================================================================//
 #include "cbase.h"
 #include "portal_render_targets.h"
-#include "materialsystem\imaterialsystem.h"
+#include "materialsystem/imaterialsystem.h"
 #include "rendertexture.h"
 
 //-----------------------------------------------------------------------------
@@ -17,7 +17,7 @@
 //-----------------------------------------------------------------------------
 ITexture* CPortalRenderTargets::InitPortal1Texture( IMaterialSystem* pMaterialSystem )
 {
-	if ( IsX360() )
+	if ( IsGameConsole() )
 	{
 		// shouldn't be using
 		Assert( 0 );
@@ -47,7 +47,7 @@ ITexture* CPortalRenderTargets::GetPortal1Texture()
 //-----------------------------------------------------------------------------
 ITexture* CPortalRenderTargets::InitPortal2Texture( IMaterialSystem* pMaterialSystem )
 {
-	if ( IsX360() )
+	if ( IsGameConsole() )
 	{
 		// shouldn't be using
 		Assert( 0 );
@@ -80,11 +80,11 @@ ITexture* CPortalRenderTargets::InitDepthDoublerTexture( IMaterialSystem* pMater
 {
 	return pMaterialSystem->CreateNamedRenderTargetTextureEx2(
 		"_rt_DepthDoubler",
-		512, 512, RT_SIZE_DEFAULT,
+		1, 1, RT_SIZE_FULL_FRAME_BUFFER,
 		pMaterialSystem->GetBackBufferFormat(),
 		MATERIAL_RT_DEPTH_SHARED, 
 		0,
-		CREATERENDERTARGETFLAGS_HDR );
+		CREATERENDERTARGETFLAGS_HDR | (IsX360() ? CREATERENDERTARGETFLAGS_NOEDRAM : 0) );
 }
 
 ITexture* CPortalRenderTargets::GetDepthDoublerTexture()
@@ -95,83 +95,21 @@ ITexture* CPortalRenderTargets::GetDepthDoublerTexture()
 
 void CPortalRenderTargets::InitPortalWaterTextures( IMaterialSystem* pMaterialSystem )
 {
-	if ( IsX360() )
+// This code does not work on ATI or newer nVidia chips (probably an issue with mismatched depth buffer configuration?) -- disabling it for now
+// since we probably don't need it to ship either (first 2 levels use full res buffer, 3rd level uses cheap water, low end PC will just 
+// use cheap water everywhere)
+#if 0
+	if( !IsGameConsole() )
 	{
-		return;
+		//Reflections
+		GetWaterReflectionTexture()->AddDownsizedSubTarget( GetSubTargetNameForPortalRecursionLevel( 1 ), 2, MATERIAL_RT_DEPTH_SEPARATE );
+		GetWaterReflectionTexture()->AddDownsizedSubTarget( GetSubTargetNameForPortalRecursionLevel( 2 ), 4, MATERIAL_RT_DEPTH_SEPARATE );
+
+		//Refractions
+		GetWaterRefractionTexture()->AddDownsizedSubTarget( GetSubTargetNameForPortalRecursionLevel( 1 ), 2, MATERIAL_RT_DEPTH_SEPARATE );
+		GetWaterRefractionTexture()->AddDownsizedSubTarget( GetSubTargetNameForPortalRecursionLevel( 2 ), 4, MATERIAL_RT_DEPTH_SEPARATE );
 	}
-
-	//Reflections
-	m_WaterReflectionTextures[0].Init( 
-		pMaterialSystem->CreateNamedRenderTargetTextureEx2(
-			"_rt_PortalWaterReflection_Depth1",
-			512, 512, RT_SIZE_PICMIP,
-			pMaterialSystem->GetBackBufferFormat(), 
-			MATERIAL_RT_DEPTH_SEPARATE, 
-			TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT,
-			CREATERENDERTARGETFLAGS_HDR ) );
-
-	m_WaterReflectionTextures[1].Init( 
-		pMaterialSystem->CreateNamedRenderTargetTextureEx2(
-			"_rt_PortalWaterReflection_Depth2",
-			256, 256, RT_SIZE_PICMIP,
-			pMaterialSystem->GetBackBufferFormat(), 
-			MATERIAL_RT_DEPTH_SEPARATE,
-			TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT,
-			CREATERENDERTARGETFLAGS_HDR ) );
-
-
-	//Refractions
-	m_WaterRefractionTextures[0].Init( 
-		pMaterialSystem->CreateNamedRenderTargetTextureEx2(
-			"_rt_PortalWaterRefraction_Depth1",
-			512, 512, RT_SIZE_PICMIP,
-			// This is different than reflection because it has to have alpha for fog factor.
-			IMAGE_FORMAT_RGBA8888, 
-			MATERIAL_RT_DEPTH_SEPARATE,
-			TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT,
-			CREATERENDERTARGETFLAGS_HDR ) );
-
-	m_WaterRefractionTextures[1].Init( 
-		pMaterialSystem->CreateNamedRenderTargetTextureEx2(
-			"_rt_PortalWaterRefraction_Depth2",
-			256, 256, RT_SIZE_PICMIP,
-			// This is different than reflection because it has to have alpha for fog factor.
-			IMAGE_FORMAT_RGBA8888, 
-			MATERIAL_RT_DEPTH_SEPARATE,
-			TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT,
-			CREATERENDERTARGETFLAGS_HDR ) );
-}
-
-ITexture* CPortalRenderTargets::GetWaterReflectionTextureForStencilDepth( int iStencilDepth )
-{
-	if ( IsX360() )
-	{
-		return NULL;
-	}
-
-	if ( iStencilDepth > 2 )
-		return NULL;
-
-	if ( iStencilDepth == 0 )
-		return m_WaterReflectionTexture; //from CBaseClientRenderTargets
-
-	return m_WaterReflectionTextures[ iStencilDepth - 1 ];
-}
-
-ITexture* CPortalRenderTargets::GetWaterRefractionTextureForStencilDepth( int iStencilDepth )
-{
-	if ( IsX360() )
-	{
-		return NULL;
-	}
-
-	if ( iStencilDepth > 2 )
-		return NULL;
-
-	if ( iStencilDepth == 0 )
-		return m_WaterRefractionTexture; //from CBaseClientRenderTargets
-
-	return m_WaterRefractionTextures[ iStencilDepth - 1 ];
+#endif
 }
 
 
@@ -182,11 +120,29 @@ ITexture* CPortalRenderTargets::GetWaterRefractionTextureForStencilDepth( int iS
 //-----------------------------------------------------------------------------
 void CPortalRenderTargets::InitClientRenderTargets( IMaterialSystem* pMaterialSystem, IMaterialSystemHardwareConfig* pHardwareConfig )
 {
+	static ConVarRef gpu_level( "gpu_level" );
+	int nWaterRenderTargetResolution = 512;
+	
+	// If we're at a decent GPU level, check back buffer dimensions and increase water texture resolution accordingly
+ 	if ( !IsGameConsole() && ( gpu_level.GetInt() > 1 ) )
+	{
+		int nWidth, nHeight;
+		pMaterialSystem->GetBackBufferDimensions( nWidth, nHeight );
+
+		if ( nHeight >= 1024 )
+		{
+			nWaterRenderTargetResolution = 1024;
+		}
+	}
+
+	// Water effects & camera from the base class (standard HL2 targets)
+	BaseClass::SetupClientRenderTargets( pMaterialSystem, pHardwareConfig, nWaterRenderTargetResolution, 256 );
+
 	// If they don't support stencils, allocate render targets for drawing portals.
 	// TODO: When stencils are default, do the below check before bothering to allocate the RTs
 	//		and make sure that switching from Stencil<->RT mode reinits the material system.
 //	if ( materials->StencilBufferBits() == 0 )
-	if ( IsPC() || !IsX360() )
+	if ( IsPC() || !IsGameConsole() )
 	{
 		m_Portal1Texture.Init( InitPortal1Texture( pMaterialSystem ) );
 		m_Portal2Texture.Init( InitPortal2Texture( pMaterialSystem ) );
@@ -194,13 +150,10 @@ void CPortalRenderTargets::InitClientRenderTargets( IMaterialSystem* pMaterialSy
 
 	m_DepthDoublerTexture.Init( InitDepthDoublerTexture( pMaterialSystem ) );
 
-	if ( IsPC() || !IsX360() )
+	//if ( IsPC() || !IsGameConsole() )
 	{
 		InitPortalWaterTextures( pMaterialSystem );
 	}
-
-	// Water effects & camera from the base class (standard HL2 targets)
-	BaseClass::InitClientRenderTargets( pMaterialSystem, pHardwareConfig );
 }
 
 //-----------------------------------------------------------------------------
@@ -213,16 +166,24 @@ void CPortalRenderTargets::ShutdownClientRenderTargets()
 	m_Portal2Texture.Shutdown();
 	m_DepthDoublerTexture.Shutdown();
 
-	for ( int i = 0; i < 2; ++i )
-	{
-		m_WaterReflectionTextures[i].Shutdown();
-		m_WaterRefractionTextures[i].Shutdown();
-	}
 
 	// Clean up standard HL2 RTs (camera and water)
 	BaseClass::ShutdownClientRenderTargets();
 }
 
+const char *GetSubTargetNameForPortalRecursionLevel( int iRecursionLevel )
+{
+	switch( iRecursionLevel )
+	{
+	default:
+	case 0:
+		return NULL;
+	case 1:
+		return "Depth_1";
+	case 2:
+		return "Depth_2";
+	}
+}
 
 static CPortalRenderTargets g_PortalRenderTargets;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CPortalRenderTargets, IClientRenderTargets, CLIENTRENDERTARGETS_INTERFACE_VERSION, g_PortalRenderTargets );

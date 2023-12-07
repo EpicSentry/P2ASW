@@ -23,7 +23,7 @@ public:
 	
 	CPortalSWeaponInfo();
 	
-	virtual void Parse( ::KeyValues *pKeyValuesData, const char *szWeaponName );
+	virtual void Parse( KeyValues *pKeyValuesData, const char *szWeaponName );
 
 
 public:
