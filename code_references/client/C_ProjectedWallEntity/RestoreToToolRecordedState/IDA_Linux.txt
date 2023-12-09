@@ -1,0 +1,54 @@
+void __cdecl C_ProjectedWallEntity::RestoreToToolRecordedState(C_ProjectedWallEntity *const this, KeyValues *pKV)
+{
+  long double Float; // fst7
+  const matrix3x4_t *Ptr; // eax
+  vec_t *v4; // esi
+  vec_t v5; // eax
+  vec_t v6; // eax
+  float v7; // [esp+14h] [ebp-44h]
+  float v8; // [esp+18h] [ebp-40h]
+  float qKVAngles; // [esp+1Ch] [ebp-3Ch]
+  Vector vPos; // [esp+28h] [ebp-30h] BYREF
+  QAngle qAngles; // [esp+34h] [ebp-24h] BYREF
+
+  this->m_vecStartPoint.x = KeyValues::GetFloat(pKV, "sp_x", 0.0);
+  this->m_vecStartPoint.y = KeyValues::GetFloat(pKV, "sp_y", 0.0);
+  this->m_vecStartPoint.z = KeyValues::GetFloat(pKV, "sp_z", 0.0);
+  this->m_flWidth = KeyValues::GetFloat(pKV, "width", 0.0);
+  this->m_flHeight = KeyValues::GetFloat(pKV, "height", 0.0);
+  this->m_nNumSegments = KeyValues::GetInt(pKV, "numSegments", 0);
+  this->m_flSegmentLength = KeyValues::GetFloat(pKV, "segLength", 0.0);
+  Float = KeyValues::GetFloat(pKV, "dispLength", 0.0);
+  this->m_vWorldSpace_WallMins.x = -16384.0;
+  this->m_flCurDisplayLength = Float;
+  this->m_vWorldSpace_WallMins.y = -16384.0;
+  this->m_vWorldSpace_WallMins.z = -16384.0;
+  this->m_vWorldSpace_WallMaxs.x = 16384.0;
+  this->m_vWorldSpace_WallMaxs.y = 16384.0;
+  this->m_vWorldSpace_WallMaxs.z = 16384.0;
+  C_BaseEntity::SetSize(this, &this->m_vWorldSpace_WallMins, &this->m_vWorldSpace_WallMaxs);
+  qKVAngles = KeyValues::GetFloat(pKV, "na_y", 0.0);
+  v8 = KeyValues::GetFloat(pKV, "na_p", 0.0);
+  v7 = KeyValues::GetFloat(pKV, "na_r", 0.0);
+  Ptr = (const matrix3x4_t *)KeyValues::GetPtr(pKV, "worldTransform", 0);
+  v4 = (vec_t *)Ptr;
+  if ( Ptr )
+  {
+    MatrixAngles(Ptr, &qAngles.x);
+    v5 = v4[3];
+    qAngles.x = v8;
+    vPos.x = v5;
+    v6 = v4[7];
+    qAngles.y = qKVAngles;
+    qAngles.z = v7;
+    vPos.y = v6;
+    vPos.z = v4[11];
+    C_BaseEntity::SetNetworkOrigin(this, &vPos);
+    C_BaseEntity::SetAbsOrigin(this, &vPos);
+    C_BaseEntity::SetLocalOrigin(this, &vPos);
+    C_BaseEntity::SetNetworkAngles(this, &qAngles);
+    C_BaseEntity::SetAbsAngles(this, &qAngles);
+    C_BaseEntity::SetLocalAngles(this, &qAngles);
+  }
+  this->m_VisibilityBits.m_Ints[0] = -1;
+}

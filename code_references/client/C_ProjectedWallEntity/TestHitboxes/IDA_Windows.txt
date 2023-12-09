@@ -1,0 +1,12 @@
+int __thiscall C_ProjectedWallEntity::TestHitboxes(
+        C_ProjectedWallEntity *this,
+        const Ray_t *ray,
+        unsigned int fContentsMask,
+        CGameTrace *tr)
+{
+  return ((int (__thiscall *)(C_ProjectedWallEntity *, const Ray_t *, unsigned int, CGameTrace *))this->TestCollision)(
+           this,
+           ray,
+           fContentsMask,
+           tr);
+}

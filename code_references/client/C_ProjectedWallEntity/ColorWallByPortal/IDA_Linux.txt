@@ -1,0 +1,61 @@
+void __cdecl C_ProjectedWallEntity::ColorWallByPortal(C_ProjectedWallEntity *const this, IMaterial *pBody)
+{
+  CBaseEntityList *v2; // ecx
+  unsigned int m_Index; // eax
+  char *v4; // edx
+  int v5; // esi
+  unsigned int v6; // eax
+  int v7; // eax
+  Color v8; // [esp+1Ch] [ebp-1Ch] BYREF
+  float flColors[3]; // [esp+24h] [ebp-14h] BYREF
+
+  flColors[0] = 1.0;
+  flColors[1] = 1.0;
+  flColors[2] = 1.0;
+  v2 = g_pEntityList;
+  m_Index = this->m_hColorPortal.m_Index;
+  if ( m_Index != -1 )
+  {
+    v4 = (char *)g_pEntityList + 16 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v4 + 2) == HIWORD(m_Index) )
+    {
+      v5 = *((_DWORD *)v4 + 1);
+      if ( v5 )
+      {
+        v6 = *(_DWORD *)(v5 + 13564);
+        if ( v6 != -1 )
+        {
+          v2 = (CBaseEntityList *)((char *)g_pEntityList + 16 * (unsigned __int16)v6);
+          if ( v2->m_EntPtrArray[0].m_SerialNumber == HIWORD(v6) )
+          {
+            if ( v2->m_EntPtrArray[0].m_pEntity )
+            {
+              v7 = (*(int (__cdecl **)(int))(*(_DWORD *)v5 + 496))(v5);
+              UTIL_Portal_Color(&v8, 2 - (*(_BYTE *)(v5 + 4152) == 0), v7);
+              flColors[0] = (float)v8._color[0] / 255.0;
+              flColors[1] = (float)v8._color[1] / 255.0;
+              flColors[2] = (float)v8._color[2] / 255.0;
+            }
+          }
+        }
+      }
+    }
+  }
+  (*(void (__thiscall **)(CBaseEntityList *, IMaterialVar *, float *, int))(*(_DWORD *)this->m_pPaintColorMid + 40))(
+    v2,
+    this->m_pPaintColorMid,
+    flColors,
+    3);
+  (*(void (__cdecl **)(IMaterialVar *, float *, int))(*(_DWORD *)this->m_pPaintColorEnd1 + 40))(
+    this->m_pPaintColorEnd1,
+    flColors,
+    3);
+  (*(void (__cdecl **)(IMaterialVar *, float *, int))(*(_DWORD *)this->m_pPaintColorEnd2 + 40))(
+    this->m_pPaintColorEnd2,
+    flColors,
+    3);
+  (*(void (__cdecl **)(IMaterialVar *, float *, int))(*(_DWORD *)this->m_pPaintColorSing + 40))(
+    this->m_pPaintColorSing,
+    flColors,
+    3);
+}

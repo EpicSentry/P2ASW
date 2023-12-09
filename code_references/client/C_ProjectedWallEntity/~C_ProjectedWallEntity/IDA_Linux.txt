@@ -1,0 +1,79 @@
+void __cdecl C_ProjectedWallEntity::~C_ProjectedWallEntity(C_ProjectedWallEntity *const this)
+{
+  int m_nGrowSize; // eax
+  bool v2; // sf
+  PaintPowerType *m_pMemory; // eax
+  C_ProjectedWallEntity::WallCollideableAtTime_t *v4; // eax
+  int v5; // eax
+  int v6; // edx
+
+  m_nGrowSize = this->m_PaintPowers.m_Memory.m_nGrowSize;
+  this->_vptr_IHandleEntity = (int (**)(...))off_12E4808;
+  this->_vptr_IClientRenderable = (int (**)(...))off_12E4C0C;
+  this->_vptr_IClientNetworkable = (int (**)(...))off_12E4CC8;
+  this->_vptr_IClientThinkable = (int (**)(...))&off_12E4D08;
+  v2 = m_nGrowSize < 0;
+  m_pMemory = this->m_PaintPowers.m_Memory.m_pMemory;
+  this->_vptr_IClientModelRenderable = (int (**)(...))&off_12E4D24;
+  this->_vptr_IPaintableEntity = (int (**)(...))off_12E4D30;
+  this->_vptr_IProjectedWallEntityAutoList = (int (**)(...))off_12E4D50;
+  this->m_PaintPowers.m_Size = 0;
+  if ( !v2 )
+  {
+    if ( m_pMemory )
+    {
+      (*(void (__cdecl **)(_DWORD, PaintPowerType *))(*g_pMemAlloc + 8))(g_pMemAlloc, m_pMemory);
+      this->m_PaintPowers.m_Memory.m_pMemory = 0;
+    }
+    this->m_PaintPowers.m_Memory.m_nAllocationCount = 0;
+    m_pMemory = 0;
+  }
+  this->m_PaintPowers.m_pElements = m_pMemory;
+  CUtlMemory<PaintPowerType,int>::~CUtlMemory(&this->m_PaintPowers.m_Memory);
+  this->m_WallCollideables.m_Size = 0;
+  v4 = this->m_WallCollideables.m_Memory.m_pMemory;
+  if ( this->m_WallCollideables.m_Memory.m_nGrowSize >= 0 )
+  {
+    if ( v4 )
+    {
+      (*(void (__cdecl **)(_DWORD, C_ProjectedWallEntity::WallCollideableAtTime_t *))(*g_pMemAlloc + 8))(
+        g_pMemAlloc,
+        this->m_WallCollideables.m_Memory.m_pMemory);
+      this->m_WallCollideables.m_Memory.m_pMemory = 0;
+    }
+    this->m_WallCollideables.m_Memory.m_nAllocationCount = 0;
+    v4 = 0;
+  }
+  this->m_WallCollideables.m_pElements = v4;
+  CUtlMemory<C_ProjectedWallEntity::WallCollideableAtTime_t,int>::~CUtlMemory(&this->m_WallCollideables.m_Memory);
+  this->_vptr_IProjectedWallEntityAutoList = (int (**)(...))off_12E47E0;
+  if ( IProjectedWallEntityAutoList::m_IProjectedWallEntityAutoListAutoList.m_Size <= 0 )
+  {
+LABEL_14:
+    CPaintableEntity<C_BaseProjectedEntity>::~CPaintableEntity(this);
+    return;
+  }
+  v5 = 0;
+  if ( &this->IProjectedWallEntityAutoList != (IProjectedWallEntityAutoList *)*(C_ProjectedWallEntity *const *)IProjectedWallEntityAutoList::m_IProjectedWallEntityAutoListAutoList.m_Memory.m_pMemory )
+  {
+    while ( ++v5 != IProjectedWallEntityAutoList::m_IProjectedWallEntityAutoListAutoList.m_Size )
+    {
+      if ( &this->IProjectedWallEntityAutoList == IProjectedWallEntityAutoList::m_IProjectedWallEntityAutoListAutoList.m_Memory.m_pMemory[v5] )
+      {
+        if ( v5 == -1 )
+          goto LABEL_14;
+        goto LABEL_16;
+      }
+    }
+    goto LABEL_14;
+  }
+LABEL_16:
+  v6 = IProjectedWallEntityAutoList::m_IProjectedWallEntityAutoListAutoList.m_Size - 1;
+  if ( v5 != IProjectedWallEntityAutoList::m_IProjectedWallEntityAutoListAutoList.m_Size - 1 )
+  {
+    IProjectedWallEntityAutoList::m_IProjectedWallEntityAutoListAutoList.m_Memory.m_pMemory[v5] = IProjectedWallEntityAutoList::m_IProjectedWallEntityAutoListAutoList.m_Memory.m_pMemory[v6];
+    v6 = IProjectedWallEntityAutoList::m_IProjectedWallEntityAutoListAutoList.m_Size - 1;
+  }
+  IProjectedWallEntityAutoList::m_IProjectedWallEntityAutoListAutoList.m_Size = v6;
+  CPaintableEntity<C_BaseProjectedEntity>::~CPaintableEntity(this);
+}

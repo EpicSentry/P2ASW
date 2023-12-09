@@ -1,0 +1,7 @@
+void __cdecl C_ProjectedWallEntity::Spawn(C_ProjectedWallEntity *const this)
+{
+  BASEPTR v1; // [esp+28h] [ebp-10h] BYREF
+
+  C_BaseEntity::ThinkSet(&v1, this, (BASEPTR)349LL, 0.0, 0);
+  C_BaseEntity::Spawn(this);
+}

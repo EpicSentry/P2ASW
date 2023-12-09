@@ -4,7 +4,7 @@
 #include "cbase.h"
 #include "c_baseprojectedentity.h"
 
-#define NO_PROJECTED_WALL
+//#define NO_PROJECTED_WALL
 #ifndef NO_PROJECTED_WALL
 
 #define CProjectedWallEntity C_ProjectedWallEntity
@@ -18,7 +18,7 @@ public:
 
 	DECLARE_CLIENTCLASS();
 	DECLARE_PREDICTABLE();
-	C_BaseEntity *GetEntity();
+	C_BaseEntity *GetEntity() { return this; }
 	C_ProjectedWallEntity();
 	
 	virtual void Spawn();
@@ -28,20 +28,20 @@ public:
 	virtual void Touch( C_BaseEntity *pOther );
 	
 	virtual CollideType_t GetCollideType();
-	virtual int DrawModel( int flags,RenderableInstance_t &instance );
+	virtual int DrawModel( int flags, const RenderableInstance_t &instance );
 	virtual bool ShouldDraw();
-	virtual void GetRenderBounds( Vector &, Vector & );
-	virtual QAngle &GetRenderAngles();
+	virtual void GetRenderBounds( Vector& mins, Vector& maxs );
+	virtual QAngle const& GetRenderAngles( void );
 	
 	virtual RenderableTranslucencyType_t ComputeTranslucencyType();
-	virtual void ComputeWorldSpaceSurroundingBox( Vector * , Vector * );
+	virtual void ComputeWorldSpaceSurroundingBox( Vector *mins, Vector *maxs );
 	
 	virtual void OnPreDataChanged( DataUpdateType_t datatype );
 	virtual void OnDataChanged( DataUpdateType_t datatype );
 	virtual void PostDataUpdate( DataUpdateType_t datatype );
 	
-	virtual bool TestCollision( Ray_t & ,unsigned int , trace_t &tr );
-	virtual bool TestHitboxes( Ray_t & ,unsigned int , trace_t &tr );
+	virtual bool TestCollision( const Ray_t &ray, unsigned int mask, trace_t& trace );
+	virtual bool TestHitboxes( const Ray_t &ray, unsigned int fContentsMask, trace_t& tr );
 	
 	virtual void OnProjected();
 	virtual void GetProjectionExtents( Vector &, Vector & );
@@ -52,7 +52,7 @@ public:
 	virtual void Paint( PaintPowerType type, const Vector& worldContactPt );
 	virtual void CleansePaint();
 	virtual void SetPaintPower(int ,PaintPowerType );
-	virtual void GetToolRecordingState( KeyValues * );
+	virtual void GetToolRecordingState( KeyValues *msg );
 	virtual void RestoreToToolRecordedState( KeyValues * );
 	void DisplaceObstructingEntity( CBaseEntity *pEntity, bool bIgnoreStuck );
 private:

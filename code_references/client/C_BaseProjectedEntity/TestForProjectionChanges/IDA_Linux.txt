@@ -1,0 +1,118 @@
+void __cdecl C_BaseProjectedEntity::TestForProjectionChanges(C_BaseProjectedEntity *const this)
+{
+  int (**vptr_IHandleEntity)(...); // eax
+  char v2; // al
+  unsigned int m_Index; // edx
+  char *v4; // ecx
+  C_Portal_Base2D *v5; // eax
+  unsigned int v6; // edx
+  char *v7; // eax
+  unsigned int v8; // eax
+  CBaseProjector *v9; // edx
+  char *v10; // ecx
+  float *v11; // eax
+  float *v12; // eax
+  float *v13; // eax
+  float *v14; // eax
+  float v15; // [esp+20h] [ebp-68h]
+  float v16; // [esp+38h] [ebp-50h]
+  int iRemainingProjections; // [esp+3Ch] [ebp-4Ch]
+  float bDisablePlacementHelper; // [esp+40h] [ebp-48h]
+  float v19; // [esp+44h] [ebp-44h]
+  C_BaseProjectedEntity *pChild; // [esp+48h] [ebp-40h]
+  C_Portal_Base2D *pExitPortal; // [esp+4Ch] [ebp-3Ch]
+  float pExitPortala; // [esp+4Ch] [ebp-3Ch]
+  Vector vNewPosition; // [esp+54h] [ebp-34h] BYREF
+  QAngle qNewAngles; // [esp+60h] [ebp-28h] BYREF
+  C_Portal_Base2D *pHitPortal; // [esp+6Ch] [ebp-1Ch] BYREF
+
+  if ( !cl_predict_projected_entities.m_pParent->m_Value.m_nValue )
+    return;
+  vptr_IHandleEntity = this->_vptr_IHandleEntity;
+  pHitPortal = 0;
+  v2 = vptr_IHandleEntity[239](this, &vNewPosition, &qNewAngles, &pHitPortal);
+  pChild = 0;
+  m_Index = this->m_hChildSegment.m_Index;
+  if ( m_Index != -1 )
+  {
+    v4 = (char *)g_pEntityList + 16 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v4 + 2) == HIWORD(m_Index) )
+      pChild = (C_BaseProjectedEntity *)*((_DWORD *)v4 + 1);
+  }
+  if ( !v2 )
+    goto LABEL_22;
+  if ( !pHitPortal )
+  {
+    v5 = 0;
+    goto LABEL_10;
+  }
+  if ( !C_Portal_Base2D::IsActivedAndLinked(pHitPortal) )
+  {
+LABEL_22:
+    (*((void (__cdecl **)(C_BaseProjectedEntity *const, _DWORD))this->_vptr_IHandleEntity + 243))(this, 0);
+    return;
+  }
+  v5 = pHitPortal;
+LABEL_10:
+  if ( C_Portal_Base2D::IsActivedAndLinked(v5)
+    && (*((unsigned __int8 (__cdecl **)(C_BaseProjectedEntity *const, C_Portal_Base2D *))this->_vptr_IHandleEntity + 241))(
+         this,
+         pHitPortal)
+    && pChild )
+  {
+    if ( C_BaseEntity::GetPredictable(this) )
+    {
+      v11 = (float *)(*((int (__cdecl **)(C_BaseProjectedEntity *const))this->_vptr_IHandleEntity + 236))(this);
+      pExitPortala = v11[1];
+      v15 = *v11;
+      v19 = v11[2];
+      v12 = (float *)(*((int (__cdecl **)(C_BaseProjectedEntity *const))this->_vptr_IHandleEntity + 237))(this);
+      iRemainingProjections = *(int *)v12;
+      bDisablePlacementHelper = v12[1];
+      v16 = v12[2];
+      (*((void (__cdecl **)(C_BaseProjectedEntity *const))this->_vptr_IHandleEntity + 242))(this);
+      v13 = (float *)(*((int (__cdecl **)(C_BaseProjectedEntity *const))this->_vptr_IHandleEntity + 236))(this);
+      if ( v15 != *v13
+        || pExitPortala != v13[1]
+        || v19 != v13[2]
+        || (v14 = (float *)(*((int (__cdecl **)(C_BaseProjectedEntity *const))this->_vptr_IHandleEntity + 237))(this),
+            *(float *)&iRemainingProjections != *v14)
+        || bDisablePlacementHelper != v14[1]
+        || v16 != v14[2] )
+      {
+        (*((void (__cdecl **)(C_BaseProjectedEntity *const))this->_vptr_IHandleEntity + 248))(this);
+      }
+      (*((void (__cdecl **)(C_BaseProjectedEntity *const, C_Portal_Base2D *))this->_vptr_IHandleEntity + 243))(
+        this,
+        pHitPortal);
+    }
+    if ( C_BaseEntity::GetPredictable(pChild) )
+    {
+      pExitPortal = 0;
+      v6 = pHitPortal->m_hLinkedPortal.m_Index;
+      if ( v6 != -1 )
+      {
+        v7 = (char *)g_pEntityList + 16 * (unsigned __int16)v6;
+        if ( *((_DWORD *)v7 + 2) == HIWORD(v6) )
+          pExitPortal = (C_Portal_Base2D *)*((_DWORD *)v7 + 1);
+      }
+      v8 = this->m_hOwnerEntity.m_Index;
+      v9 = 0;
+      if ( v8 != -1 )
+      {
+        v10 = (char *)g_pEntityList + 16 * (unsigned __int16)v8;
+        if ( *((_DWORD *)v10 + 2) == HIWORD(v8) )
+          v9 = (CBaseProjector *)*((_DWORD *)v10 + 1);
+      }
+      C_BaseProjectedEntity::RecursiveProjection(
+        pChild,
+        0,
+        v9,
+        pExitPortal,
+        &vNewPosition,
+        &qNewAngles,
+        this->m_iMaxRemainingRecursions - 1,
+        this->m_bCreatePlacementHelper);
+    }
+  }
+}

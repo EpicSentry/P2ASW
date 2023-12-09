@@ -1,0 +1,7 @@
+bool __thiscall C_BaseProjectedEntity::ShouldPredict(C_BaseProjectedEntity *this)
+{
+  C_BasePlayer *v1; // eax
+
+  v1 = this->GetPredictionOwner(this);
+  return v1 && v1->m_bIsLocalPlayer;
+}

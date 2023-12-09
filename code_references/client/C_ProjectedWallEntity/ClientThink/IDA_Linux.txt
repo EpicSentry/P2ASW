@@ -1,0 +1,31 @@
+void __cdecl C_ProjectedWallEntity::ClientThink(C_ProjectedWallEntity *const this)
+{
+  float v1; // xmm0_4
+  float v2; // xmm1_4
+  float m_fValue; // xmm2_4
+  float v4; // xmm1_4
+  int (**vptr_IHandleEntity)(...); // eax
+  float m_flParticleUpdateTime; // xmm0_4
+
+  C_BaseEntity::ClientThink(this);
+  v1 = 0.0;
+  v2 = 0.0;
+  m_fValue = cl_projected_wall_projection_speed.m_pParent->m_Value.m_fValue;
+  if ( m_fValue >= 0.0 )
+    v2 = fminf(this->m_flLength, m_fValue);
+  v4 = v2 + this->m_flCurDisplayLength;
+  if ( v4 >= 0.0 )
+    v1 = fminf(this->m_flLength, v4);
+  vptr_IHandleEntity = this->_vptr_IHandleEntity;
+  this->m_flCurDisplayLength = v1;
+  vptr_IHandleEntity[240](this);
+  m_flParticleUpdateTime = this->m_flParticleUpdateTime;
+  if ( m_flParticleUpdateTime != this->m_flPrevParticleUpdateTime )
+  {
+    this->m_flPrevParticleUpdateTime = m_flParticleUpdateTime;
+    C_ProjectedWallEntity::SetupWallParticles(this);
+  }
+  (*((void (__cdecl **)(C_ProjectedWallEntity *const, _DWORD))this->_vptr_IHandleEntity + 160))(
+    this,
+    gpGlobals->curtime + 0.016000001);
+}

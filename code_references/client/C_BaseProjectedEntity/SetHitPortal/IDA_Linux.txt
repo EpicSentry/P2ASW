@@ -1,0 +1,12 @@
+void __cdecl C_BaseProjectedEntity::SetHitPortal(C_BaseProjectedEntity *const this, C_Portal_Base2D *pPortal)
+{
+  if ( pPortal )
+  {
+    this->m_hHitPortal.m_Index = *(_DWORD *)(*((int (__cdecl **)(C_Portal_Base2D *))pPortal->_vptr_IHandleEntity + 3))(pPortal);
+    C_Portal_Base2D::IsActivedAndLinked(pPortal);
+  }
+  else
+  {
+    this->m_hHitPortal.m_Index = -1;
+  }
+}

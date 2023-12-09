@@ -1,0 +1,94 @@
+void __cdecl C_BaseProjectedEntity::RecursiveProjection(
+        C_BaseProjectedEntity *const this,
+        bool bShouldSpawn,
+        CBaseProjector *pParentProjector,
+        C_Portal_Base2D *pExitPortal,
+        const Vector *const vProjectOrigin,
+        const QAngle *const qProjectAngles,
+        int iRemainingProjections,
+        bool bDisablePlacementHelper)
+{
+  float v8; // xmm0_4
+  int (**vptr_IHandleEntity)(...); // eax
+  int (**v10)(...); // eax
+  unsigned int m_Index; // edx
+  char *v12; // eax
+  unsigned int v13; // eax
+  char *v14; // edx
+  C_BaseProjectedEntity *v15; // eax
+  char v16; // [esp+24h] [ebp-64h]
+  C_Portal_Base2D *v17; // [esp+2Ch] [ebp-5Ch]
+  Vector org; // [esp+3Ch] [ebp-4Ch] BYREF
+  QAngle ang; // [esp+48h] [ebp-40h] BYREF
+  Vector v20; // [esp+54h] [ebp-34h] BYREF
+  QAngle v21; // [esp+60h] [ebp-28h] BYREF
+  C_Portal_Base2D *v22; // [esp+6Ch] [ebp-1Ch] BYREF
+
+  if ( (*((unsigned __int8 (__cdecl **)(CPrediction *))prediction->_vptr_IPrediction + 15))(prediction)
+    && C_BaseEntity::GetPredictable(this) )
+  {
+    C_BaseEntity::AddEffects(this, 8);
+    org = *vProjectOrigin;
+    (*((void (__cdecl **)(C_BaseProjectedEntity *const))this->_vptr_IHandleEntity + 12))(this);
+    ang.x = (float)(unsigned __int16)(int)(float)(qProjectAngles->x * 182.04445) * 0.0054931641;
+    v8 = 182.04445 * qProjectAngles->z;
+    ang.y = (float)(unsigned __int16)(int)(float)(qProjectAngles->y * 182.04445) * 0.0054931641;
+    ang.z = (float)(unsigned __int16)(int)v8 * 0.0054931641;
+    C_BaseEntity::SetNetworkOrigin(this, &org);
+    C_BaseEntity::SetNetworkAngles(this, &ang);
+    vptr_IHandleEntity = this->_vptr_IHandleEntity;
+    this->m_iMaxRemainingRecursions = iRemainingProjections;
+    vptr_IHandleEntity[242](this);
+    if ( pExitPortal )
+      (*((void (__cdecl **)(C_BaseProjectedEntity *const, C_Portal_Base2D *))this->_vptr_IHandleEntity + 245))(
+        this,
+        pExitPortal);
+    (*((void (__cdecl **)(C_BaseProjectedEntity *const))this->_vptr_IHandleEntity + 248))(this);
+    if ( cl_predict_projected_entities.m_pParent->m_Value.m_nValue )
+    {
+      if ( iRemainingProjections > 1 )
+      {
+        v10 = this->_vptr_IHandleEntity;
+        v22 = 0;
+        v16 = v10[239](this, &v20, &v21, &v22);
+        (*((void (__cdecl **)(C_BaseProjectedEntity *const, C_Portal_Base2D *))this->_vptr_IHandleEntity + 243))(
+          this,
+          v22);
+        if ( v16 )
+        {
+          if ( v22 && C_Portal_Base2D::IsActivedAndLinked(v22) )
+          {
+            v17 = 0;
+            m_Index = v22->m_hLinkedPortal.m_Index;
+            if ( m_Index != -1 )
+            {
+              v12 = (char *)g_pEntityList + 16 * (unsigned __int16)m_Index;
+              if ( *((_DWORD *)v12 + 2) == HIWORD(m_Index) )
+                v17 = (C_Portal_Base2D *)*((_DWORD *)v12 + 1);
+            }
+            v13 = this->m_hChildSegment.m_Index;
+            if ( v13 != -1 )
+            {
+              v14 = (char *)g_pEntityList + 16 * (unsigned __int16)v13;
+              if ( *((_DWORD *)v14 + 2) == HIWORD(v13) )
+              {
+                v15 = (C_BaseProjectedEntity *)*((_DWORD *)v14 + 1);
+                if ( v15 )
+                  C_BaseProjectedEntity::RecursiveProjection(
+                    v15,
+                    0,
+                    pParentProjector,
+                    v17,
+                    &v20,
+                    &v21,
+                    iRemainingProjections - 1,
+                    bDisablePlacementHelper);
+              }
+            }
+          }
+        }
+      }
+      C_BaseEntity::AddEffects(this, 1024);
+    }
+  }
+}

@@ -1,0 +1,33 @@
+bool __cdecl C_ProjectedWallEntity::ShouldSpawnParticles(C_ProjectedWallEntity *const this, C_Portal_Base2D *pPortal)
+{
+  bool v2; // si
+  const QAngle *v3; // eax
+  const QAngle *v4; // eax
+  float v5; // xmm0_4
+  Vector up; // [esp+18h] [ebp-30h] BYREF
+  Vector v8; // [esp+24h] [ebp-24h] BYREF
+
+  v2 = 1;
+  if ( C_Portal_Base2D::IsActivedAndLinked(pPortal)
+    && (v2 = 0, pPortal)
+    && _dynamic_cast(
+         pPortal,
+         (const struct __class_type_info *)&`typeinfo for'C_Portal_Base2D,
+         (const struct __class_type_info *)&`typeinfo for'C_Prop_Portal,
+         0)
+    && (v2 = 1,
+        v3 = (const QAngle *)(*((int (__cdecl **)(C_Portal_Base2D *))pPortal->_vptr_IHandleEntity + 13))(pPortal),
+        AngleVectors(v3, 0, 0, &up),
+        v4 = (const QAngle *)(*((int (__cdecl **)(C_ProjectedWallEntity *const))this->_vptr_IHandleEntity + 13))(this),
+        AngleVectors(v4, 0, 0, &v8),
+        v5 = (float)((float)(up.x * v8.x) + (float)(up.y * v8.y)) + (float)(up.z * v8.z),
+        v5 >= -1.0)
+    && v5 <= 1.0 )
+  {
+    return fabs(v5) > 0.7;
+  }
+  else
+  {
+    return v2;
+  }
+}

@@ -1,0 +1,7 @@
+void __cdecl C_BaseProjectedEntity::TestAllForProjectionChanges()
+{
+  int i; // esi
+
+  for ( i = 0; i < s_AllProjectedEntities.m_Size; ++i )
+    s_AllProjectedEntities.m_Memory.m_pMemory[i]->TestForProjectionChanges(s_AllProjectedEntities.m_Memory.m_pMemory[i]);
+}

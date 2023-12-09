@@ -1,0 +1,152 @@
+bool __cdecl C_BaseProjectedEntity::IsHittingPortal(
+        C_BaseProjectedEntity *const this,
+        Vector *pOutOrigin,
+        QAngle *pOutAngles,
+        C_Portal_Base2D **pOutPortal)
+{
+  const Vector *NetworkOrigin; // eax
+  float x; // xmm2_4
+  float z; // xmm0_4
+  float y; // xmm7_4
+  bool v8; // al
+  float v9; // xmm3_4
+  float v10; // xmm2_4
+  float v11; // xmm1_4
+  __m128 x_low; // xmm4
+  float v13; // xmm7_4
+  float v14; // xmm4_4
+  float v15; // xmm5_4
+  C_Portal_Base2D *v16; // ebx
+  float v17; // eax
+  float v18; // eax
+  float v19; // xmm1_4
+  float v20; // xmm0_4
+  float v21; // xmm2_4
+  float v23; // [esp+28h] [ebp-1A0h]
+  bool v24; // [esp+2Fh] [ebp-199h]
+  trace_t worldTrace; // [esp+3Ch] [ebp-18Ch] BYREF
+  Ray_t ray; // [esp+90h] [ebp-138h] BYREF
+  VMatrix matToLinked; // [esp+E8h] [ebp-E0h] BYREF
+  CTraceFilterSimpleClassnameList traceFilter; // [esp+128h] [ebp-A0h] BYREF
+  QAngle qAngles; // [esp+14Ch] [ebp-7Ch] BYREF
+  Vector vForward; // [esp+158h] [ebp-70h] BYREF
+  Vector mins; // [esp+164h] [ebp-64h] BYREF
+  Vector maxs; // [esp+170h] [ebp-58h] BYREF
+  Vector vHitPoint; // [esp+17Ch] [ebp-4Ch] BYREF
+  Vector vNewWallOrigin; // [esp+188h] [ebp-40h] BYREF
+  QAngle vNewAngles; // [esp+194h] [ebp-34h] BYREF
+  Vector vNewForward; // [esp+1A0h] [ebp-28h] BYREF
+  float flPortalTraceFraction[7]; // [esp+1ACh] [ebp-1Ch] BYREF
+
+  qAngles = *C_BaseEntity::GetNetworkAngles(this);
+  AngleVectors(&qAngles, &vForward);
+  (*((void (__cdecl **)(C_BaseProjectedEntity *const, Vector *, Vector *))this->_vptr_IHandleEntity + 247))(
+    this,
+    &mins,
+    &maxs);
+  NetworkOrigin = C_BaseEntity::GetNetworkOrigin(this);
+  x = NetworkOrigin->x;
+  z = NetworkOrigin->z;
+  y = NetworkOrigin->y;
+  v8 = 1;
+  ray.m_pWorldAxisTransform = 0;
+  v9 = (float)(vForward.x * 25.0) + x;
+  v10 = (float)(vForward.y * 25.0) + y;
+  v11 = (float)(25.0 * vForward.z) + z;
+  ray.m_Delta.x = (float)((float)(vForward.x * 56755.84) + v9) - v9;
+  ray.m_Delta.y = (float)((float)(vForward.y * 56755.84) + v10) - v10;
+  ray.m_Delta.z = (float)((float)(56755.84 * vForward.z) + v11) - v11;
+  x_low = (__m128)LODWORD(maxs.x);
+  if ( (float)((float)((float)(ray.m_Delta.x * ray.m_Delta.x) + (float)(ray.m_Delta.y * ray.m_Delta.y))
+             + (float)(ray.m_Delta.z * ray.m_Delta.z)) == 0.0 )
+    v8 = 0;
+  ray.m_Extents.x = (float)(maxs.x - mins.x) * 0.5;
+  ray.m_Extents.y = (float)(maxs.y - mins.y) * 0.5;
+  ray.m_IsSwept = v8;
+  v13 = (float)(maxs.x + mins.x) * 0.5;
+  ray.m_Extents.z = (float)(maxs.z - mins.z) * 0.5;
+  x_low.m128_f32[0] = (float)((float)(ray.m_Extents.x * ray.m_Extents.x) + (float)(ray.m_Extents.y * ray.m_Extents.y))
+                    + (float)(ray.m_Extents.z * ray.m_Extents.z);
+  ray.m_Start.x = v9 + v13;
+  ray.m_IsRay = _mm_unpacklo_ps(x_low, x_low).m128_f32[0] < 0.000001;
+  v14 = (float)(maxs.y + mins.y) * 0.5;
+  v15 = (float)(maxs.z + mins.z) * 0.5;
+  ray.m_Start.y = v10 + v14;
+  ray.m_Start.z = v11 + v15;
+  ray.m_StartOffset.x = -v13;
+  ray.m_StartOffset.y = -v14;
+  ray.m_StartOffset.z = -v15;
+  flPortalTraceFraction[0] = 1.0;
+  CTraceFilterSimpleClassnameList::CTraceFilterSimpleClassnameList(&traceFilter, this, 0);
+  UTil_ProjectedEntity_Trace_Filter(&traceFilter);
+  (*(void (__cdecl **)(IEngineTrace *, Ray_t *, int, CTraceFilterSimpleClassnameList *, trace_t *))(*(_DWORD *)enginetrace
+                                                                                                  + 20))(
+    enginetrace,
+    &ray,
+    16395,
+    &traceFilter,
+    &worldTrace);
+  if ( r_visualizetraces.m_pParent->m_Value.m_nValue )
+    DebugDrawLine(&worldTrace.startpos, &worldTrace.endpos, 255, 0, 0, 1, -1.0);
+  v16 = UTIL_Portal_FirstAlongRay(&ray, flPortalTraceFraction);
+  if ( pOutOrigin )
+    *pOutOrigin = worldTrace.endpos;
+  if ( pOutAngles )
+    *pOutAngles = qAngles;
+  if ( (float)(flPortalTraceFraction[0] - worldTrace.fraction) > 0.000099999997 )
+    goto LABEL_18;
+  if ( pOutPortal )
+    *pOutPortal = v16;
+  if ( v16 )
+  {
+    v24 = 0;
+    if ( C_Portal_Base2D::IsActivedAndLinked(v16) )
+    {
+      v23 = UTIL_IntersectRayWithPortal(&ray, v16);
+      *(_QWORD *)&matToLinked.m[0][0] = *(_QWORD *)&v16->m_matrixThisToLinked.m[0][0];
+      v17 = v16->m_matrixThisToLinked.m[0][2];
+      vHitPoint.y = (float)(ray.m_Delta.y * v23) + ray.m_Start.y;
+      matToLinked.m[0][2] = v17;
+      v18 = v16->m_matrixThisToLinked.m[0][3];
+      vHitPoint.x = (float)(v23 * ray.m_Delta.x) + ray.m_Start.x;
+      vHitPoint.z = (float)(ray.m_Delta.z * v23) + ray.m_Start.z;
+      matToLinked.m[0][3] = v18;
+      *(_QWORD *)&matToLinked.m[1][0] = *(_QWORD *)&v16->m_matrixThisToLinked.m[1][0];
+      *(_QWORD *)&matToLinked.m[1][2] = *(_QWORD *)&v16->m_matrixThisToLinked.m[1][2];
+      *(_QWORD *)&matToLinked.m[2][0] = *(_QWORD *)&v16->m_matrixThisToLinked.m[2][0];
+      *(_QWORD *)&matToLinked.m[2][2] = *(_QWORD *)&v16->m_matrixThisToLinked.m[2][2];
+      *(_QWORD *)&matToLinked.m[3][0] = *(_QWORD *)&v16->m_matrixThisToLinked.m[3][0];
+      *(_QWORD *)&matToLinked.m[3][2] = *(_QWORD *)&v16->m_matrixThisToLinked.m[3][2];
+      UTIL_Portal_PointTransform(&matToLinked, &vHitPoint, &vNewWallOrigin);
+      UTIL_Portal_AngleTransform(&matToLinked, &qAngles, &vNewAngles);
+      AngleVectors(&vNewAngles, &vNewForward, 0, 0);
+      v19 = (float)(vNewForward.y * 0.1) + vNewWallOrigin.y;
+      v20 = (float)(vNewForward.z * 0.1) + vNewWallOrigin.z;
+      v21 = (float)(0.1 * vNewForward.x) + vNewWallOrigin.x;
+      vNewWallOrigin.y = v19;
+      vNewWallOrigin.z = v20;
+      vNewWallOrigin.x = v21;
+      if ( pOutAngles )
+        *pOutAngles = vNewAngles;
+      v24 = 1;
+      if ( pOutOrigin )
+      {
+        pOutOrigin->x = v21;
+        pOutOrigin->y = v19;
+        pOutOrigin->z = v20;
+      }
+    }
+  }
+  else
+  {
+LABEL_18:
+    v24 = 0;
+  }
+  traceFilter._vptr_ITraceFilter = (int (**)(...))&off_11FA768;
+  traceFilter.m_PassClassnames.m_Size = 0;
+  if ( traceFilter.m_PassClassnames.m_Memory.m_nGrowSize >= 0 && traceFilter.m_PassClassnames.m_Memory.m_pMemory )
+    (*(void (__cdecl **)(_DWORD, const char **))(*g_pMemAlloc + 8))(
+      g_pMemAlloc,
+      traceFilter.m_PassClassnames.m_Memory.m_pMemory);
+  return v24;
+}

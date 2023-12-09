@@ -1,0 +1,92 @@
+void __usercall C_BaseProjectedEntity::TestForProjectionChanges(C_BaseProjectedEntity *this@<ecx>, int a2@<edi>)
+{
+  bool (__thiscall *IsHittingPortal)(C_BaseProjectedEntity *, Vector *, QAngle *, C_Portal_Base2D **); // edx
+  bool v4; // al
+  unsigned int m_Index; // edx
+  C_BaseProjectedEntity *m_pEntity; // edi
+  C_Portal_Base2D *v7; // ecx
+  int v8; // eax
+  __int64 v9; // xmm0_8
+  C_BaseProjectedEntity_vtbl *v10; // edx
+  const Vector *(__thiscall *GetEndPoint)(C_BaseProjectedEntity *); // eax
+  int v12; // eax
+  float v13; // ecx
+  __int64 v14; // xmm0_8
+  void (__thiscall *FindProjectedEndpoints)(C_BaseProjectedEntity *); // eax
+  const Vector *v16; // eax
+  const Vector *v17; // eax
+  C_BaseProjector *OwnerEntity; // eax
+  C_Portal_Base2D *v19; // [esp-18h] [ebp-50h]
+  int v20; // [esp-Ch] [ebp-44h]
+  bool m_bCreatePlacementHelper; // [esp-8h] [ebp-40h]
+  Vector vNewPosition; // [esp+4h] [ebp-34h] BYREF
+  QAngle qNewAngles; // [esp+10h] [ebp-28h] BYREF
+  Vector vPrevEnd; // [esp+1Ch] [ebp-1Ch] BYREF
+  Vector vPrevStart; // [esp+28h] [ebp-10h] BYREF
+  C_Portal_Base2D *pHitPortal; // [esp+34h] [ebp-4h] BYREF
+
+  if ( !cl_predict_projected_entities.m_pParent->m_Value.m_nValue )
+    return;
+  IsHittingPortal = this->IsHittingPortal;
+  pHitPortal = 0;
+  v4 = IsHittingPortal(this, &vNewPosition, &qNewAngles, &pHitPortal);
+  m_Index = this->m_hChildSegment.m_Index;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+    m_pEntity = 0;
+  else
+    m_pEntity = (C_BaseProjectedEntity *)g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+  if ( !v4 )
+    goto LABEL_20;
+  v7 = pHitPortal;
+  if ( pHitPortal )
+  {
+    if ( C_Portal_Base2D::IsActivedAndLinked(pHitPortal) )
+    {
+      v7 = pHitPortal;
+      goto LABEL_10;
+    }
+LABEL_20:
+    this->SetHitPortal(this, 0);
+    return;
+  }
+LABEL_10:
+  if ( C_Portal_Base2D::IsActivedAndLinked(v7) && this->DidRedirectionPortalMove(this, pHitPortal) && m_pEntity )
+  {
+    if ( C_BaseEntity::GetPredictable(this) )
+    {
+      v8 = ((int (__thiscall *)(C_BaseProjectedEntity *, int))this->GetStartPoint)(this, a2);
+      v9 = *(_QWORD *)v8;
+      v10 = this->C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable;
+      vPrevStart.z = *(float *)(v8 + 8);
+      GetEndPoint = v10->GetEndPoint;
+      *(_QWORD *)&vPrevStart.x = v9;
+      v12 = (int)GetEndPoint(this);
+      v13 = *(float *)(v12 + 8);
+      v14 = *(_QWORD *)v12;
+      FindProjectedEndpoints = this->FindProjectedEndpoints;
+      vPrevEnd.z = v13;
+      *(_QWORD *)&vPrevEnd.x = v14;
+      FindProjectedEndpoints(this);
+      v16 = this->GetStartPoint(this);
+      if ( Vector::operator!=(&vPrevStart, v16) || (v17 = this->GetEndPoint(this), Vector::operator!=(&vPrevEnd, v17)) )
+        this->OnProjected(this);
+      this->SetHitPortal(this, pHitPortal);
+    }
+    if ( C_BaseEntity::GetPredictable(m_pEntity) )
+    {
+      m_bCreatePlacementHelper = this->m_bCreatePlacementHelper;
+      v20 = this->m_iMaxRemainingRecursions - 1;
+      v19 = (C_Portal_Base2D *)CHandle<C_PointCommentaryNode>::operator C_PointCommentaryNode *((CHandle<C_BaseCombatWeapon> *)&pHitPortal->m_hLinkedPortal);
+      OwnerEntity = (C_BaseProjector *)C_BaseEntity::GetOwnerEntity(this);
+      C_BaseProjectedEntity::RecursiveProjection(
+        m_pEntity,
+        0,
+        OwnerEntity,
+        v19,
+        (C_Portal_Base2D *)&vNewPosition,
+        &qNewAngles,
+        v20,
+        m_bCreatePlacementHelper);
+    }
+  }
+}

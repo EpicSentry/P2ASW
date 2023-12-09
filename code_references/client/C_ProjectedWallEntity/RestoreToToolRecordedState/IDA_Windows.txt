@@ -1,0 +1,43 @@
+void __thiscall C_ProjectedWallEntity::RestoreToToolRecordedState(C_ProjectedWallEntity *this, KeyValues *pKV)
+{
+  const VMatrix *Ptr; // edi
+  Vector vPos; // [esp+Ch] [ebp-24h] BYREF
+  QAngle qKVAngles; // [esp+18h] [ebp-18h]
+  QAngle qAngles; // [esp+24h] [ebp-Ch] BYREF
+
+  this->m_vecStartPoint.x = KeyValues::GetFloat(pKV, "sp_x", 0.0);
+  this->m_vecStartPoint.y = KeyValues::GetFloat(pKV, "sp_y", 0.0);
+  this->m_vecStartPoint.z = KeyValues::GetFloat(pKV, "sp_z", 0.0);
+  this->m_flWidth = KeyValues::GetFloat(pKV, "width", 0.0);
+  this->m_flHeight = KeyValues::GetFloat(pKV, "height", 0.0);
+  this->m_nNumSegments = KeyValues::GetInt(pKV, "numSegments", 0);
+  this->m_flSegmentLength = KeyValues::GetFloat(pKV, "segLength", 0.0);
+  this->m_flCurDisplayLength = KeyValues::GetFloat(pKV, "dispLength", 0.0);
+  this->m_vWorldSpace_WallMins.x = FLOAT_N16384_0;
+  this->m_vWorldSpace_WallMins.y = FLOAT_N16384_0;
+  this->m_vWorldSpace_WallMins.z = FLOAT_N16384_0;
+  this->m_vWorldSpace_WallMaxs.x = FLOAT_16384_0;
+  this->m_vWorldSpace_WallMaxs.y = FLOAT_16384_0;
+  this->m_vWorldSpace_WallMaxs.z = FLOAT_16384_0;
+  C_BaseEntity::SetSize(this, &this->m_vWorldSpace_WallMins, &this->m_vWorldSpace_WallMaxs);
+  qKVAngles.y = KeyValues::GetFloat(pKV, "na_y", 0.0);
+  qKVAngles.x = KeyValues::GetFloat(pKV, "na_p", 0.0);
+  qKVAngles.z = KeyValues::GetFloat(pKV, "na_r", 0.0);
+  Ptr = (const VMatrix *)KeyValues::GetPtr(pKV, "worldTransform", 0);
+  if ( Ptr )
+  {
+    MatrixAngles(Ptr, &qAngles);
+    vPos.x = Ptr->m[0][3];
+    vPos.y = Ptr->m[1][3];
+    vPos.z = Ptr->m[2][3];
+    qAngles = qKVAngles;
+    C_BaseEntity::SetNetworkOrigin(this, &vPos);
+    C_BaseEntity::SetAbsOrigin(this, &vPos);
+    C_BaseEntity::SetLocalOrigin(this, &vPos);
+    C_BaseEntity::SetNetworkAngles(this, &qAngles);
+    C_BaseEntity::SetAbsAngles(this, &qAngles);
+    C_BaseEntity::SetLocalAngles(this, &qAngles);
+  }
+  if ( this != (C_ProjectedWallEntity *)-876 )
+    this->m_VisibilityBits.m_Ints[0] = -1;
+}

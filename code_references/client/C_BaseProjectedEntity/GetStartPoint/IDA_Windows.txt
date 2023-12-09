@@ -1,0 +1,4 @@
+const Vector *__thiscall C_BaseProjectedEntity::GetStartPoint(C_BaseProjectedEntity *this)
+{
+  return &this->m_vecStartPoint;
+}

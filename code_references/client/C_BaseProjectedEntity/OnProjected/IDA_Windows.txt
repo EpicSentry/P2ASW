@@ -1,0 +1,15 @@
+void __thiscall C_BaseProjectedEntity::OnProjected(C_BaseProjectedEntity *this)
+{
+  const Vector *v2; // eax
+  const Vector *v3; // eax
+
+  C_BaseEntity::AddEffects(this, 8);
+  v2 = this->GetStartPoint(this);
+  C_BaseEntity::SetNetworkOrigin(this, v2);
+  v3 = this->GetStartPoint(this);
+  this->PreDataChanged.vStartPoint.x = v3->x;
+  this->PreDataChanged.vStartPoint.y = v3->y;
+  this->PreDataChanged.vStartPoint.z = v3->z;
+  this->PreDataChanged.vEndPoint = *this->GetEndPoint(this);
+  this->PreDataChanged.qAngles = *C_BaseEntity::GetNetworkAngles(this);
+}

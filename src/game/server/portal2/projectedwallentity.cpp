@@ -32,6 +32,17 @@ BEGIN_DATADESC( CProjectedWallEntity )
 
 END_DATADESC()
 
+IMPLEMENT_SERVERCLASS_ST( CProjectedWallEntity, DT_ProjectedWallEntity )
+	SendPropFloat( SENDINFO( m_flLength ) ),
+	SendPropFloat( SENDINFO( m_flHeight ) ),
+	SendPropFloat( SENDINFO( m_flWidth ) ),
+	SendPropFloat( SENDINFO( m_flSegmentLength ) ),
+	SendPropFloat( SENDINFO( m_flParticleUpdateTime ) ),
+	
+	SendPropBool( SENDINFO( m_bIsHorizontal ) ),
+	SendPropInt( SENDINFO( m_nNumSegments ) ),
+END_SEND_TABLE()
+
 LINK_ENTITY_TO_CLASS( projected_wall_entity, CProjectedWallEntity )
 
 CProjectedWallEntity::CProjectedWallEntity()
@@ -500,7 +511,7 @@ void WallPainted( int colorIndex, int nSegment, CBaseEntity *pWall )
 	g_TEWallPaintedEvent.Create( filter, 0.0 );
 }
 
-#ifndef PROJECTED_WALL_SERVERONLY
+#ifndef PROJECTED_WALL_EVENT_SERVERONLY
 IMPLEMENT_SERVERCLASS_ST( CTEWallPaintedEvent, DT_TEWallPaintedEvent )
 
 	SendPropEHandle( SENDINFO( m_hEntity ) ),

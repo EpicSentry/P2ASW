@@ -1,0 +1,110 @@
+void __thiscall C_ProjectedWallEntity::SetupWallParticles(C_ProjectedWallEntity *this)
+{
+  unsigned int m_Index; // eax
+  C_Portal_Base2D *m_pEntity; // edi
+  unsigned int v4; // ecx
+  C_Portal_Base2D *v5; // ebx
+  const Vector *v6; // eax
+  __int64 v7; // xmm0_8
+  C_ProjectedWallEntity_vtbl *v8; // edx
+  const Vector *(__thiscall *GetStartPoint)(C_BaseProjectedEntity *); // eax
+  void *v10; // eax
+  float *v11; // eax
+  float v12; // xmm0_4
+  void *v13; // eax
+  float z; // xmm3_4
+  float y; // xmm4_4
+  float x; // xmm5_4
+  float *v17; // eax
+  float v18; // xmm0_4
+  Vector v19; // [esp-24h] [ebp-90h]
+  Vector v20; // [esp-24h] [ebp-90h]
+  Vector vecRight; // [esp+Ch] [ebp-60h] BYREF
+  Vector vecUp; // [esp+18h] [ebp-54h] BYREF
+  Vector v23; // [esp+24h] [ebp-48h]
+  QAngle qAngles; // [esp+30h] [ebp-3Ch] BYREF
+  Vector vecForward; // [esp+3Ch] [ebp-30h] BYREF
+  Vector vWallEndPoint; // [esp+48h] [ebp-24h]
+  Vector vWallStartPoint; // [esp+54h] [ebp-18h]
+  Vector vecPortalPos; // [esp+60h] [ebp-Ch]
+
+  StopParticleEffects(this);
+  m_Index = this->m_hSourcePortal.m_Index;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+    m_pEntity = 0;
+  else
+    m_pEntity = (C_Portal_Base2D *)g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+  v4 = this->m_hHitPortal.m_Index;
+  if ( v4 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v4].m_SerialNumber != HIWORD(v4) )
+    v5 = 0;
+  else
+    v5 = (C_Portal_Base2D *)g_pEntityList->m_EntPtrArray[(unsigned __int16)v4].m_pEntity;
+  v6 = this->GetEndPoint(this);
+  v7 = *(_QWORD *)&v6->x;
+  v8 = this->CPaintableEntity<C_BaseProjectedEntity>::C_BaseProjectedEntity::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable;
+  vWallEndPoint.z = v6->z;
+  GetStartPoint = v8->GetStartPoint;
+  *(_QWORD *)&vWallEndPoint.x = v7;
+  vWallStartPoint = *GetStartPoint(this);
+  qAngles = *C_BaseEntity::GetNetworkAngles(this);
+  AngleVectors(&qAngles, &vecForward, &vecRight, &vecUp);
+  if ( m_pEntity && C_ProjectedWallEntity::ShouldSpawnParticles(this, m_pEntity) )
+  {
+    v10 = __RTDynamicCast(
+            m_pEntity,
+            0,
+            &C_Portal_Base2D `RTTI Type Descriptor',
+            &C_Prop_Portal `RTTI Type Descriptor',
+            0);
+    if ( v10 )
+    {
+      v11 = (float *)(*(int (__thiscall **)(void *))(*(_DWORD *)v10 + 40))(v10);
+      vecPortalPos.x = *v11;
+      vecPortalPos.y = v11[1];
+      v12 = v11[2];
+    }
+    else
+    {
+      v12 = vWallStartPoint.z + 512.0;
+      vecPortalPos.x = vWallStartPoint.x;
+      vecPortalPos.y = vWallStartPoint.y;
+    }
+    vecPortalPos.z = v12;
+    v23.x = (float)(vecForward.x * 3.125) + vWallStartPoint.x;
+    *(_QWORD *)&v19.x = *(_QWORD *)&vecPortalPos.x;
+    v19.z = v12;
+    v23.y = (float)(vecForward.y * 3.125) + vWallStartPoint.y;
+    v23.z = (float)(vecForward.z * 3.125) + vWallStartPoint.z;
+    DispatchParticleEffect("projected_wall_impact", v23, v19, qAngles, this, -1, 0);
+  }
+  if ( !v5 || C_ProjectedWallEntity::ShouldSpawnParticles(this, v5) )
+  {
+    v13 = __RTDynamicCast(v5, 0, &C_Portal_Base2D `RTTI Type Descriptor', &C_Prop_Portal `RTTI Type Descriptor', 0);
+    z = vWallEndPoint.z;
+    y = vWallEndPoint.y;
+    x = vWallEndPoint.x;
+    if ( v13 )
+    {
+      v17 = (float *)(*(int (__thiscall **)(void *))(*(_DWORD *)v13 + 40))(v13);
+      x = vWallEndPoint.x;
+      y = vWallEndPoint.y;
+      z = vWallEndPoint.z;
+      vecPortalPos.x = *v17;
+      vecPortalPos.y = v17[1];
+      v18 = v17[2];
+    }
+    else
+    {
+      v18 = vWallEndPoint.z + 512.0;
+      vecPortalPos.x = vWallEndPoint.x;
+      vecPortalPos.y = vWallEndPoint.y;
+    }
+    vecPortalPos.z = v18;
+    *(_QWORD *)&v20.x = *(_QWORD *)&vecPortalPos.x;
+    v20.z = v18;
+    v23.x = x - (float)(vecForward.x * 3.125);
+    v23.y = y - (float)(vecForward.y * 3.125);
+    v23.z = z - (float)(vecForward.z * 3.125);
+    DispatchParticleEffect("projected_wall_impact", v23, v20, qAngles, this, -1, 0);
+  }
+}

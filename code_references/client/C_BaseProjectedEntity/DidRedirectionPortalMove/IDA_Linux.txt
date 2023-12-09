@@ -1,0 +1,81 @@
+bool __cdecl C_BaseProjectedEntity::DidRedirectionPortalMove(
+        C_BaseProjectedEntity *const this,
+        C_Portal_Base2D *pPortal)
+{
+  bool v2; // si
+  unsigned int m_Index; // eax
+  char *v4; // edx
+  unsigned int v6; // eax
+  char *v7; // edx
+  float *v8; // eax
+  unsigned int v9; // edx
+  float *v10; // ebx
+  char *v11; // esi
+  float *v12; // ebx
+  char *v13; // ecx
+
+  v2 = 1;
+  if ( pPortal )
+  {
+    if ( C_Portal_Base2D::IsActivedAndLinked(pPortal) )
+    {
+      m_Index = this->m_hHitPortal.m_Index;
+      if ( m_Index != -1 )
+      {
+        v4 = (char *)g_pEntityList + 16 * (unsigned __int16)m_Index;
+        if ( *((_DWORD *)v4 + 2) == HIWORD(m_Index) && pPortal == *((C_Portal_Base2D **)v4 + 1) )
+        {
+          v6 = this->m_hChildSegment.m_Index;
+          if ( v6 != -1 )
+          {
+            v7 = (char *)g_pEntityList + 16 * (unsigned __int16)v6;
+            if ( *((_DWORD *)v7 + 2) == HIWORD(v6) )
+            {
+              v8 = (float *)*((_DWORD *)v7 + 1);
+              if ( v8 )
+              {
+                if ( fabs(v8[681] - pPortal->m_ptOrigin.x) <= 0.0 && fabs(v8[682] - pPortal->m_ptOrigin.y) <= 0.0 )
+                {
+                  if ( fabs(v8[683] - pPortal->m_ptOrigin.z) > 0.0 )
+                  {
+                    return 1;
+                  }
+                  else if ( fabs(v8[687] - pPortal->m_qAbsAngle.x) <= 0.0
+                         && fabs(v8[688] - pPortal->m_qAbsAngle.y) <= 0.0
+                         && fabs(v8[689] - pPortal->m_qAbsAngle.z) <= 0.0 )
+                  {
+                    v9 = pPortal->m_hLinkedPortal.m_Index;
+                    v10 = 0;
+                    if ( v9 != -1 )
+                    {
+                      v11 = (char *)g_pEntityList + 16 * (unsigned __int16)v9;
+                      if ( *((_DWORD *)v11 + 2) == HIWORD(v9) )
+                        v10 = (float *)*((_DWORD *)v11 + 1);
+                    }
+                    v2 = 1;
+                    if ( fabs(v8[678] - v10[1023]) <= 0.0
+                      && fabs(v8[679] - v10[1024]) <= 0.0
+                      && fabs(v8[680] - v10[1025]) <= 0.0 )
+                    {
+                      v12 = 0;
+                      if ( v9 != -1 )
+                      {
+                        v13 = (char *)g_pEntityList + 16 * (unsigned __int16)v9;
+                        if ( *((_DWORD *)v13 + 2) == HIWORD(v9) )
+                          v12 = (float *)*((_DWORD *)v13 + 1);
+                      }
+                      v2 = 1;
+                      if ( fabs(v8[684] - v12[1035]) <= 0.0 && fabs(v8[685] - v12[1036]) <= 0.0 )
+                        return fabs(v8[686] - v12[1037]) > 0.0;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return v2;
+}

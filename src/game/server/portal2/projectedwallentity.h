@@ -5,10 +5,10 @@
 #include "paint/paintable_entity.h"
 #include "basetempentity.h"
 
-#define NO_PROJECTED_WALL
+//#define NO_PROJECTED_WALL
 #ifndef NO_PROJECTED_WALL
 
-#define PROJECTED_WALL_SERVERONLY
+//#define PROJECTED_WALL_SERVERONLY
 
 DECLARE_AUTO_LIST( IProjectedWallEntityAutoList )
 
@@ -95,12 +95,14 @@ private:
     static int s_HardLightBridgeSurfaceProps;
 };
 
+#define PROJECTED_WALL_EVENT_SERVERONLY
+
 class CTEWallPaintedEvent : public CBaseTempEntity
 {
 public:
 
 	DECLARE_CLASS( CTEWallPaintedEvent, CBaseTempEntity );
-#ifndef PROJECTED_WALL_SERVERONLY
+#ifndef PROJECTED_WALL_EVENT_SERVERONLY
 	DECLARE_SERVERCLASS();
 #endif
 	CTEWallPaintedEvent( const char *name ) : CBaseTempEntity( name )

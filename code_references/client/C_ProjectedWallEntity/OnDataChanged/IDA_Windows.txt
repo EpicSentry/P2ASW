@@ -1,0 +1,28 @@
+void __thiscall C_ProjectedWallEntity::OnDataChanged(C_ProjectedWallEntity *this, DataUpdateType_t updateType)
+{
+  PaintPowerType *m_Size; // xmm0_4
+
+  C_BaseProjectedEntity::OnDataChanged(this, updateType);
+  if ( updateType == DATA_UPDATE_CREATED )
+  {
+    (*(void (__thiscall **)(float *))(LODWORD(this[-1].m_flParticleUpdateTime) + 752))(&this[-1].m_flParticleUpdateTime);
+    C_ProjectedWallEntity::SetupWallParticles((C_ProjectedWallEntity *)((char *)this - 8));
+  }
+  m_Size = (PaintPowerType *)this->m_PaintPowers.m_Size;
+  if ( *(float *)&this->m_PaintPowers.m_pElements != *(float *)&m_Size )
+  {
+    this->m_PaintPowers.m_pElements = m_Size;
+    C_ProjectedWallEntity::SetupWallParticles((C_ProjectedWallEntity *)((char *)this - 8));
+  }
+  if ( COERCE_FLOAT(COERCE_UNSIGNED_INT(*(float *)&this->m_hColorPortal.m_Index - this->m_vecSourcePortalRemoteAngle.y) & _mask__AbsFloat_) > 0.1
+    || COERCE_FLOAT(COERCE_UNSIGNED_INT(this->m_flCurDisplayLength - this->m_vecSourcePortalRemoteAngle.z) & _mask__AbsFloat_) > 0.1
+    || COERCE_FLOAT(COERCE_UNSIGNED_INT(this->m_vLastStartpos.x - this->m_vecStartPoint.x) & _mask__AbsFloat_) > 0.1 )
+  {
+    *(_DWORD *)&this->m_bIsHorizontal = 0;
+    *(float *)&this->m_hColorPortal.m_Index = this->m_vecSourcePortalRemoteAngle.y;
+    this->m_flCurDisplayLength = this->m_vecSourcePortalRemoteAngle.z;
+    this->m_vLastStartpos.x = this->m_vecStartPoint.x;
+  }
+  CCollisionProperty::MarkSurroundingBoundsDirty((CCollisionProperty *)&this->m_hOldMoveParent);
+  CCollisionProperty::MarkPartitionHandleDirty((CCollisionProperty *)&this->m_hOldMoveParent);
+}

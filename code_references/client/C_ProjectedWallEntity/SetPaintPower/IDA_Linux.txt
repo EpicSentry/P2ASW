@@ -1,0 +1,8 @@
+void __cdecl C_ProjectedWallEntity::SetPaintPower(
+        C_ProjectedWallEntity *const this,
+        int nSegment,
+        PaintPowerType power)
+{
+  if ( this->m_PaintPowers.m_Size > nSegment )
+    this->m_PaintPowers.m_Memory.m_pMemory[nSegment] = power;
+}

@@ -1,0 +1,27 @@
+bool __cdecl C_ProjectedWallEntity::TestCollision(
+        C_ProjectedWallEntity *const this,
+        const Ray_t *const ray,
+        unsigned int mask,
+        trace_t *const trace)
+{
+  bool result; // al
+
+  result = 0;
+  if ( this->m_pActiveCollideable )
+  {
+    (*((void (__cdecl **)(IPhysicsCollision *, const Ray_t *const, unsigned int, _DWORD, CPhysCollide *, const Vector *, const QAngle *, trace_t *const))physcollision->_vptr_IPhysicsCollision
+     + 34))(
+      physcollision,
+      ray,
+      mask,
+      0,
+      this->m_pActiveCollideable,
+      &vec3_origin,
+      &vec3_angle,
+      trace);
+    result = 1;
+    if ( trace->fraction >= 1.0 && !trace->allsolid )
+      return trace->startsolid;
+  }
+  return result;
+}

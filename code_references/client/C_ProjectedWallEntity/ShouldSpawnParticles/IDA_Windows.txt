@@ -1,0 +1,23 @@
+bool __thiscall C_ProjectedWallEntity::ShouldSpawnParticles(C_ProjectedWallEntity *this, C_Portal_Base2D *pPortal)
+{
+  const QAngle *v4; // eax
+  const QAngle *v5; // eax
+  float v6; // xmm0_4
+  float v7; // xmm1_4
+  Vector vWallUp; // [esp+8h] [ebp-18h] BYREF
+  Vector vPortalUp; // [esp+14h] [ebp-Ch] BYREF
+
+  if ( !C_Portal_Base2D::IsActivedAndLinked(pPortal) )
+    return 1;
+  if ( !__RTDynamicCast(pPortal, 0, &C_Portal_Base2D `RTTI Type Descriptor', &C_Prop_Portal `RTTI Type Descriptor', 0) )
+    return 0;
+  v4 = pPortal->GetAbsAngles(pPortal);
+  AngleVectors(v4, 0, 0, &vPortalUp);
+  v5 = this->GetAbsAngles(this);
+  AngleVectors(v5, 0, 0, &vWallUp);
+  v6 = (float)((float)(vPortalUp.y * vWallUp.y) + (float)(vWallUp.x * vPortalUp.x)) + (float)(vPortalUp.z * vWallUp.z);
+  v7 = FLOAT_N1_0;
+  if ( v6 < -1.0 || (v7 = *(float *)&FLOAT_1_0, v6 > 1.0) )
+    v6 = v7;
+  return COERCE_FLOAT(LODWORD(v6) & _mask__AbsFloat_) > 0.7;
+}

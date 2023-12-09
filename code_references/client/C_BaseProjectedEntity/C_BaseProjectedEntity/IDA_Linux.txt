@@ -1,0 +1,20 @@
+void __cdecl C_BaseProjectedEntity::C_BaseProjectedEntity(C_BaseProjectedEntity *const this)
+{
+  C_BaseProjectedEntity *src; // [esp+2Ch] [ebp-Ch] BYREF
+
+  C_BaseEntity::C_BaseEntity(this);
+  this->_vptr_IHandleEntity = (int (**)(...))off_12DB1A8;
+  this->_vptr_IClientRenderable = (int (**)(...))off_12DB594;
+  this->_vptr_IClientNetworkable = (int (**)(...))off_12DB650;
+  this->_vptr_IClientThinkable = (int (**)(...))off_12DB690;
+  this->_vptr_IClientModelRenderable = (int (**)(...))&off_12DB6AC;
+  this->m_hHitPortal.m_Index = -1;
+  this->m_hSourcePortal.m_Index = -1;
+  this->m_hChildSegment.m_Index = -1;
+  this->m_hPlacementHelper.m_Index = -1;
+  src = this;
+  CUtlVector<C_BaseProjectedEntity *,CUtlMemory<C_BaseProjectedEntity *,int>>::InsertBefore(
+    &s_AllProjectedEntities,
+    s_AllProjectedEntities.m_Size,
+    &src);
+}

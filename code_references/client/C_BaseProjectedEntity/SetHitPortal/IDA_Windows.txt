@@ -1,0 +1,12 @@
+void __thiscall C_BaseProjectedEntity::SetHitPortal(C_BaseProjectedEntity *this, C_Portal_Base2D *pPortal)
+{
+  if ( pPortal )
+  {
+    this->m_hHitPortal.m_Index = pPortal->GetRefEHandle(pPortal)->m_Index;
+    C_Portal_Base2D::IsActivedAndLinked(pPortal);
+  }
+  else
+  {
+    this->m_hHitPortal.m_Index = -1;
+  }
+}

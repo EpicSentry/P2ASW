@@ -1,0 +1,8 @@
+void __thiscall C_ProjectedWallEntity::ComputeWorldSpaceSurroundingBox(
+        C_ProjectedWallEntity *this,
+        Vector *pWorldMins,
+        Vector *pWorldMaxs)
+{
+  *pWorldMins = this->m_vWorldSpace_WallMins;
+  *pWorldMaxs = this->m_vWorldSpace_WallMaxs;
+}

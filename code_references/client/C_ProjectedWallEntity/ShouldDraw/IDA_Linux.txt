@@ -1,0 +1,4 @@
+bool __cdecl C_ProjectedWallEntity::ShouldDraw(C_ProjectedWallEntity *const this)
+{
+  return 1;
+}

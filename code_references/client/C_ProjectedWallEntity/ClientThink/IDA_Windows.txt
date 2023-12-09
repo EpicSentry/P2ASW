@@ -1,0 +1,44 @@
+void __thiscall C_ProjectedWallEntity::ClientThink(C_ProjectedWallEntity *this)
+{
+  float m_fValue; // xmm0_4
+  float v3; // xmm1_4
+  int m_Size; // xmm0_4
+  void (__thiscall *v5)(PaintPowerType **); // eax
+  int m_nGrowSize; // xmm0_4
+
+  C_Prop_Portal::Fizzle((vgui::PropertyPage *)this);
+  m_fValue = cl_projected_wall_projection_speed.m_pParent->m_Value.m_fValue;
+  if ( m_fValue >= 0.0 )
+  {
+    if ( m_fValue > *(float *)&this->m_WallCollideables.m_Size )
+      m_fValue = *(float *)&this->m_WallCollideables.m_Size;
+  }
+  else
+  {
+    m_fValue = 0.0;
+  }
+  v3 = this->m_flHeight + m_fValue;
+  m_Size = LODWORD(v3);
+  this->m_flHeight = v3;
+  if ( v3 >= 0.0 )
+  {
+    if ( v3 > *(float *)&this->m_WallCollideables.m_Size )
+      m_Size = this->m_WallCollideables.m_Size;
+  }
+  else
+  {
+    m_Size = 0;
+  }
+  v5 = (void (__thiscall *)(PaintPowerType **))*((_DWORD *)this[-1].m_PaintPowers.m_pElements + 179);
+  LODWORD(this->m_flHeight) = m_Size;
+  v5(&this[-1].m_PaintPowers.m_pElements);
+  m_nGrowSize = this->m_PaintPowers.m_Memory.m_nGrowSize;
+  if ( *(float *)&this->m_PaintPowers.m_Size != *(float *)&m_nGrowSize )
+  {
+    this->m_PaintPowers.m_Size = m_nGrowSize;
+    C_ProjectedWallEntity::SetupWallParticles((C_ProjectedWallEntity *)((char *)this - 12));
+  }
+  (*((void (__thiscall **)(PaintPowerType **, _DWORD))this[-1].m_PaintPowers.m_pElements + 116))(
+    &this[-1].m_PaintPowers.m_pElements,
+    *(float *)(gpGlobals.m_Index + 12) + 0.016000001);
+}

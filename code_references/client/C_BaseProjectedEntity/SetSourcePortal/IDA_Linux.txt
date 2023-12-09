@@ -1,0 +1,84 @@
+void __cdecl C_BaseProjectedEntity::SetSourcePortal(C_BaseProjectedEntity *const this, C_Portal_Base2D *pPortal)
+{
+  CBaseEntityList *v2; // edx
+  Vector *v3; // eax
+  unsigned int m_Index; // ecx
+  char *v5; // edi
+  QAngle *v6; // eax
+  unsigned int v7; // ecx
+  char *v8; // edi
+  unsigned int v9; // eax
+  char *v10; // edx
+  C_BasePlayer_0 *v11; // eax
+  vec_t x; // ecx
+  vec_t y; // edx
+  vec_t z; // eax
+  vec_t v15; // ecx
+  vec_t v16; // edx
+  vec_t v17; // eax
+
+  if ( pPortal )
+  {
+    this->m_hSourcePortal.m_Index = *(_DWORD *)(*((int (__cdecl **)(C_Portal_Base2D *))pPortal->_vptr_IHandleEntity + 3))(pPortal);
+    C_BaseEntity::SetPredictionEligible(this, 1);
+    v2 = g_pEntityList;
+    this->m_vecSourcePortalCenter = pPortal->m_ptOrigin;
+    v3 = 0;
+    m_Index = pPortal->m_hLinkedPortal.m_Index;
+    if ( m_Index != -1 )
+    {
+      v5 = (char *)v2 + 16 * (unsigned __int16)m_Index;
+      if ( *((_DWORD *)v5 + 2) == HIWORD(m_Index) )
+        v3 = (Vector *)*((_DWORD *)v5 + 1);
+    }
+    this->m_vecSourcePortalRemoteCenter = v3[341];
+    this->m_vecSourcePortalAngle = pPortal->m_qAbsAngle;
+    v6 = 0;
+    v7 = pPortal->m_hLinkedPortal.m_Index;
+    if ( v7 != -1 )
+    {
+      v8 = (char *)v2 + 16 * (unsigned __int16)v7;
+      if ( *((_DWORD *)v8 + 2) == HIWORD(v7) )
+        v6 = (QAngle *)*((_DWORD *)v8 + 1);
+    }
+    this->m_vecSourcePortalRemoteAngle = v6[345];
+    v9 = pPortal->m_hPlayerSimulationOwner.m_Index;
+    if ( v9 != -1 )
+    {
+      v10 = (char *)v2 + 16 * (unsigned __int16)v9;
+      if ( *((_DWORD *)v10 + 2) == HIWORD(v9) )
+      {
+        v11 = (C_BasePlayer_0 *)*((_DWORD *)v10 + 1);
+        if ( v11 )
+        {
+          C_BaseEntity::SetPlayerSimulated(this, v11);
+          return;
+        }
+      }
+    }
+  }
+  else
+  {
+    this->m_hSourcePortal.m_Index = -1;
+    C_BaseEntity::SetPredictionEligible(this, 0);
+    x = vec3_origin.x;
+    y = vec3_origin.y;
+    z = vec3_origin.z;
+    this->m_vecSourcePortalCenter.x = vec3_origin.x;
+    this->m_vecSourcePortalCenter.y = y;
+    this->m_vecSourcePortalCenter.z = z;
+    this->m_vecSourcePortalRemoteCenter.x = x;
+    v15 = vec3_angle.x;
+    this->m_vecSourcePortalRemoteCenter.y = y;
+    v16 = vec3_angle.y;
+    this->m_vecSourcePortalRemoteCenter.z = z;
+    v17 = vec3_angle.z;
+    this->m_vecSourcePortalAngle.x = v15;
+    this->m_vecSourcePortalAngle.y = v16;
+    this->m_vecSourcePortalAngle.z = v17;
+    this->m_vecSourcePortalRemoteAngle.x = v15;
+    this->m_vecSourcePortalRemoteAngle.y = v16;
+    this->m_vecSourcePortalRemoteAngle.z = v17;
+  }
+  C_BaseEntity::UnsetPlayerSimulated(this);
+}

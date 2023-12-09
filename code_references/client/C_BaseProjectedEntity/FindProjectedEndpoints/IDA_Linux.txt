@@ -1,0 +1,97 @@
+void __cdecl C_BaseProjectedEntity::FindProjectedEndpoints(C_BaseProjectedEntity *const this)
+{
+  const Vector *NetworkOrigin; // eax
+  float z; // xmm0_4
+  bool v3; // al
+  float v4; // xmm3_4
+  float v5; // xmm2_4
+  float v6; // xmm1_4
+  __m128 x_low; // xmm4
+  float v8; // xmm7_4
+  float v9; // xmm4_4
+  float v10; // xmm5_4
+  float v11; // xmm1_4
+  int m_nGrowSize; // eax
+  vec_t v13; // xmm0_4
+  vec_t v14; // xmm2_4
+  float x; // [esp+24h] [ebp-144h]
+  float y; // [esp+28h] [ebp-140h]
+  trace_t tr; // [esp+3Ch] [ebp-12Ch] BYREF
+  Ray_t ray; // [esp+90h] [ebp-D8h] BYREF
+  CTraceFilterSimpleClassnameList traceFilter; // [esp+E4h] [ebp-84h] BYREF
+  QAngle qAngles; // [esp+108h] [ebp-60h] BYREF
+  Vector vecForward; // [esp+114h] [ebp-54h] BYREF
+  Vector vecRight; // [esp+120h] [ebp-48h] BYREF
+  Vector vecUp; // [esp+12Ch] [ebp-3Ch] BYREF
+  Vector mins; // [esp+138h] [ebp-30h] BYREF
+  Vector maxs; // [esp+144h] [ebp-24h] BYREF
+
+  qAngles = *C_BaseEntity::GetNetworkAngles(this);
+  AngleVectors(&qAngles, &vecForward, &vecRight, &vecUp);
+  (*((void (__cdecl **)(C_BaseProjectedEntity *const, Vector *, Vector *))this->_vptr_IHandleEntity + 247))(
+    this,
+    &mins,
+    &maxs);
+  NetworkOrigin = C_BaseEntity::GetNetworkOrigin(this);
+  x = NetworkOrigin->x;
+  y = NetworkOrigin->y;
+  z = NetworkOrigin->z;
+  v3 = 1;
+  ray.m_pWorldAxisTransform = 0;
+  v4 = (float)(vecForward.x * 25.0) + x;
+  v5 = (float)(vecForward.y * 25.0) + y;
+  v6 = (float)(25.0 * vecForward.z) + z;
+  ray.m_Delta.x = (float)((float)(vecForward.x * 4096.0) + v4) - v4;
+  ray.m_Delta.y = (float)((float)(vecForward.y * 4096.0) + v5) - v5;
+  ray.m_Delta.z = (float)((float)(4096.0 * vecForward.z) + v6) - v6;
+  x_low = (__m128)LODWORD(maxs.x);
+  if ( (float)((float)((float)(ray.m_Delta.x * ray.m_Delta.x) + (float)(ray.m_Delta.y * ray.m_Delta.y))
+             + (float)(ray.m_Delta.z * ray.m_Delta.z)) == 0.0 )
+    v3 = 0;
+  ray.m_Extents.y = (float)(maxs.y - mins.y) * 0.5;
+  ray.m_Extents.z = (float)(maxs.z - mins.z) * 0.5;
+  ray.m_Extents.x = (float)(maxs.x - mins.x) * 0.5;
+  ray.m_IsSwept = v3;
+  v8 = (float)(maxs.x + mins.x) * 0.5;
+  x_low.m128_f32[0] = (float)((float)(ray.m_Extents.x * ray.m_Extents.x) + (float)(ray.m_Extents.y * ray.m_Extents.y))
+                    + (float)(ray.m_Extents.z * ray.m_Extents.z);
+  ray.m_IsRay = _mm_unpacklo_ps(x_low, x_low).m128_f32[0] < 0.000001;
+  ray.m_Start.x = v4 + v8;
+  v9 = (float)(maxs.y + mins.y) * 0.5;
+  v10 = (float)(maxs.z + mins.z) * 0.5;
+  ray.m_StartOffset.x = -v8;
+  ray.m_StartOffset.y = -v9;
+  ray.m_StartOffset.z = -v10;
+  ray.m_Start.y = v5 + v9;
+  ray.m_Start.z = v6 + v10;
+  CTraceFilterSimpleClassnameList::CTraceFilterSimpleClassnameList(&traceFilter, this, 0);
+  UTil_ProjectedEntity_Trace_Filter(&traceFilter);
+  (*(void (__cdecl **)(IEngineTrace *, Ray_t *, int, CTraceFilterSimpleClassnameList *, trace_t *))(*(_DWORD *)enginetrace
+                                                                                                  + 20))(
+    enginetrace,
+    &ray,
+    16395,
+    &traceFilter,
+    &tr);
+  if ( r_visualizetraces.m_pParent->m_Value.m_nValue )
+    DebugDrawLine(&tr.startpos, &tr.endpos, 255, 0, 0, 1, -1.0);
+  traceFilter.m_PassClassnames.m_Size = 0;
+  traceFilter._vptr_ITraceFilter = (int (**)(...))&off_11FA768;
+  this->m_vecStartPoint.x = x;
+  v11 = tr.plane.normal.y;
+  this->m_vecStartPoint.y = y;
+  m_nGrowSize = traceFilter.m_PassClassnames.m_Memory.m_nGrowSize;
+  this->m_vecStartPoint.z = z;
+  v13 = (float)(tr.plane.normal.z * 0.1) + tr.endpos.z;
+  v14 = (float)(0.1 * tr.plane.normal.x) + tr.endpos.x;
+  this->m_vecEndPoint.y = (float)(v11 * 0.1) + tr.endpos.y;
+  this->m_vecEndPoint.z = v13;
+  this->m_vecEndPoint.x = v14;
+  if ( m_nGrowSize >= 0 )
+  {
+    if ( traceFilter.m_PassClassnames.m_Memory.m_pMemory )
+      (*(void (__cdecl **)(_DWORD, const char **))(*g_pMemAlloc + 8))(
+        g_pMemAlloc,
+        traceFilter.m_PassClassnames.m_Memory.m_pMemory);
+  }
+}

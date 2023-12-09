@@ -1,0 +1,34 @@
+void __cdecl C_ProjectedWallEntity::OnDataChanged(C_ProjectedWallEntity *const this, DataUpdateType_t updateType)
+{
+  float m_flParticleUpdateTime; // xmm0_4
+  float x; // xmm2_4
+  float y; // xmm3_4
+  vec_t z; // eax
+
+  C_BaseProjectedEntity::OnDataChanged(this, updateType);
+  if ( updateType == DATA_UPDATE_CREATED )
+  {
+    (*((void (__cdecl **)(C_ProjectedWallEntity *const))this->_vptr_IHandleEntity + 254))(this);
+    C_ProjectedWallEntity::SetupWallParticles(this);
+  }
+  m_flParticleUpdateTime = this->m_flParticleUpdateTime;
+  if ( m_flParticleUpdateTime != this->m_flPrevParticleUpdateTime )
+  {
+    this->m_flPrevParticleUpdateTime = m_flParticleUpdateTime;
+    C_ProjectedWallEntity::SetupWallParticles(this);
+  }
+  x = this->m_vecStartPoint.x;
+  y = this->m_vecStartPoint.y;
+  if ( fabs(this->m_vLastStartpos.x - x) > 0.1
+    || fabs(this->m_vLastStartpos.y - y) > 0.1
+    || fabs(this->m_vLastStartpos.z - this->m_vecStartPoint.z) > 0.1 )
+  {
+    z = this->m_vecStartPoint.z;
+    this->m_vLastStartpos.x = x;
+    this->m_flCurDisplayLength = 0.0;
+    this->m_vLastStartpos.y = y;
+    this->m_vLastStartpos.z = z;
+  }
+  CCollisionProperty::MarkSurroundingBoundsDirty(&this->m_Collision);
+  CCollisionProperty::MarkPartitionHandleDirty(&this->m_Collision);
+}

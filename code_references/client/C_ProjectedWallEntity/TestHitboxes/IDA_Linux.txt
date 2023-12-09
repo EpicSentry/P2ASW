@@ -1,0 +1,8 @@
+bool __cdecl C_ProjectedWallEntity::TestHitboxes(
+        C_ProjectedWallEntity *const this,
+        const Ray_t *const ray,
+        unsigned int fContentsMask,
+        trace_t *const tr)
+{
+  return (*((int (**)(void))this->_vptr_IHandleEntity + 70))();
+}

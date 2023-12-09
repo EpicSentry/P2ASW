@@ -1,0 +1,22 @@
+void __thiscall C_ProjectedWallEntity::GetRenderBounds(C_ProjectedWallEntity *this, Vector *vecMins, Vector *vecMaxs)
+{
+  float *v4; // eax
+  float v5; // xmm1_4
+  float v6; // xmm2_4
+  float *v7; // eax
+  float v8; // xmm1_4
+  float v9; // xmm2_4
+
+  v4 = (float *)((int (__thiscall *)(C_ProjectedWallEntity *))this->SetRefEHandle)(this);
+  v5 = this->m_vWorldSpace_WallMins.x - v4[1];
+  v6 = this->m_vWorldSpace_WallMins.y - v4[2];
+  vecMins->x = *(float *)&this->m_pSideRailMaterial - *v4;
+  vecMins->y = v5;
+  vecMins->z = v6;
+  v7 = (float *)((int (__thiscall *)(C_ProjectedWallEntity *))this->SetRefEHandle)(this);
+  v8 = this->m_vWorldSpace_WallMaxs.x - v7[1];
+  v9 = this->m_vWorldSpace_WallMaxs.y - v7[2];
+  vecMaxs->x = this->m_vWorldSpace_WallMins.z - *v7;
+  vecMaxs->y = v8;
+  vecMaxs->z = v9;
+}

@@ -1,0 +1,10 @@
+void __thiscall C_ProjectedWallEntity::Spawn(C_ProjectedWallEntity *this)
+{
+  __int64 v2[2]; // [esp+Ch] [ebp-10h] BYREF
+
+  v2[1] = 0i64;
+  LODWORD(v2[0]) =  __thiscall C_Prop_Portal::`vcall'{4,{flat}};
+  HIDWORD(v2[0]) = 12;
+  C_BaseEntity::ThinkSet(this, v2, (unsigned __int64)v2[0], 0.0, 0);
+  C_Prop_Portal::Fizzle((vgui::PropertyPage *)this);
+}

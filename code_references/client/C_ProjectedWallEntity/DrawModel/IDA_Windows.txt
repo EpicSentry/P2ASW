@@ -1,0 +1,293 @@
+int __userpurge C_ProjectedWallEntity::DrawModel@<eax>(
+        C_ProjectedWallEntity *this@<ecx>,
+        int a2@<ebx>,
+        int flags,
+        const RenderableInstance_t *instance)
+{
+  C_ProjectedWallEntity *v5; // edi
+  IMatRenderContext *v7; // eax
+  IMatRenderContext *v8; // ebx
+  float z; // ecx
+  float m_flSegmentLength; // eax
+  int v11; // edx
+  int v12; // eax
+  const QAngle *NetworkAngles; // eax
+  float v14; // xmm3_4
+  const Vector *(__thiscall *GetStartPoint)(C_BaseProjectedEntity *); // edx
+  float *v16; // eax
+  IMatRenderContext *(__thiscall *GetRenderContext)(IMaterialSystem *); // edx
+  IMatRenderContext *v18; // ebx
+  IMesh *v19; // ebx
+  float m_flLength; // xmm5_4
+  float v21; // xmm0_4
+  float v22; // xmm4_4
+  float v23; // xmm0_4
+  float v24; // xmm0_4
+  float v25; // xmm1_4
+  float v26; // xmm2_4
+  float m_flWidth; // xmm5_4
+  void (__thiscall *SetPrimitiveType)(IMesh *, MaterialPrimitiveType_t); // edx
+  int m_nVertexCount; // eax
+  IMatRenderContext *m_pObject; // ebx
+  IMesh *v31; // esi
+  int v32; // eax
+  CMeshBuilder meshBuilder; // [esp+70h] [ebp-258h] BYREF
+  Vector vRight; // [esp+258h] [ebp-70h] BYREF
+  Vector vHalfLength; // [esp+264h] [ebp-64h] BYREF
+  Vector vUp; // [esp+270h] [ebp-58h] BYREF
+  Vector vForward; // [esp+27Ch] [ebp-4Ch] BYREF
+  Vector vHalfHeight; // [esp+288h] [ebp-40h] BYREF
+  Vector v39; // [esp+294h] [ebp-34h] BYREF
+  Vector vOrigin; // [esp+2A0h] [ebp-28h]
+  bool bHasPaintPower[5]; // [esp+2ACh] [ebp-1Ch] BYREF
+  Vector vHalfWidth; // [esp+2B4h] [ebp-14h] BYREF
+  CMatRenderContextPtr pRenderContext; // [esp+2C0h] [ebp-8h]
+  float flLengthTexRate; // [esp+2C4h] [ebp-4h]
+
+  v5 = (C_ProjectedWallEntity *)((char *)this - 4);
+  if ( !(*(unsigned __int8 (__thiscall **)(float *))(LODWORD(this[-1].m_flPrevParticleUpdateTime) + 752))(&this[-1].m_flPrevParticleUpdateTime) )
+    return 0;
+  if ( engine->HasPaintmap(engine)
+    && cl_draw_projected_wall_with_paint.m_pParent->m_Value.m_nValue
+    && this->m_PaintPowers.m_Memory.m_nGrowSize == LODWORD(this->m_vLastStartpos.z) )
+  {
+    v7 = materials->GetRenderContext(materials);
+    v8 = v7;
+    if ( v7 )
+      v7->BeginRender(v7);
+    C_ProjectedWallEntity::PaintWallWithPaint<0>(
+      v5,
+      (IMaterial *)this->IProjectedWallEntityAutoList::__vftable,
+      v8,
+      NO_POWER);
+    C_ProjectedWallEntity::PaintWallWithPaint<1>(v5, (IMaterial *)this->m_pPaintColorSing, v8, NO_POWER);
+    z = this->m_vLastStartpos.z;
+    memset(bHasPaintPower, 0, sizeof(bHasPaintPower));
+    if ( SLODWORD(z) > 0 )
+    {
+      m_flSegmentLength = this->m_flSegmentLength;
+      do
+      {
+        v11 = *(_DWORD *)LODWORD(m_flSegmentLength);
+        LODWORD(m_flSegmentLength) += 4;
+        --LODWORD(z);
+        bHasPaintPower[v11] = 1;
+      }
+      while ( z != 0.0 );
+    }
+    v12 = 0;
+    flLengthTexRate = 0.0;
+    pRenderContext.m_pObject = (IMatRenderContext *)&this->m_pPaintMaterialsMid[3];
+    do
+    {
+      if ( bHasPaintPower[v12] )
+      {
+        C_ProjectedWallEntity::PaintWallWithPaint<4>(
+          v5,
+          (IMaterial *)pRenderContext.m_pObject[-4].__vftable,
+          v8,
+          (PaintPowerType)v12);
+        C_ProjectedWallEntity::PaintWallWithPaint<2>(
+          v5,
+          (IMaterial *)pRenderContext.m_pObject->__vftable,
+          v8,
+          SLODWORD(flLengthTexRate));
+        C_ProjectedWallEntity::PaintWallWithPaint<3>(
+          v5,
+          (IMaterial *)pRenderContext.m_pObject[4].__vftable,
+          v8,
+          SLODWORD(flLengthTexRate));
+        C_ProjectedWallEntity::PaintWallWithPaint<5>(
+          v5,
+          (IMaterial *)pRenderContext.m_pObject[8].__vftable,
+          v8,
+          SLODWORD(flLengthTexRate));
+        v12 = LODWORD(flLengthTexRate);
+      }
+      ++pRenderContext.m_pObject;
+      LODWORD(flLengthTexRate) = ++v12;
+    }
+    while ( v12 < 4 );
+    if ( bHasPaintPower[0] && bHasPaintPower[2] )
+    {
+      C_ProjectedWallEntity::PaintWallWithPaint<6>(v5, this->m_pPaintMaterialsSing[3], v8, SPEED_POWER);
+      C_ProjectedWallEntity::PaintWallWithPaint<7>(v5, this->m_pPaintMaterialBounceLSpeed, v8, SPEED_POWER);
+      C_ProjectedWallEntity::PaintWallWithPaint<8>(v5, this->m_pPaintMaterialBounceRSpeed, v8, SPEED_POWER);
+      C_ProjectedWallEntity::PaintWallWithPaint<9>(v5, this->m_pPaintMaterialBounceLRSpeed, v8, SPEED_POWER);
+      C_ProjectedWallEntity::PaintWallWithPaint<10>(v5, this->m_pPaintMaterialRBounceLSpeed, v8, SPEED_POWER);
+    }
+    if ( v8 )
+    {
+      v8->EndRender(v8);
+      v8->Release(v8);
+      return 1;
+    }
+  }
+  else
+  {
+    NetworkAngles = C_BaseEntity::GetNetworkAngles(v5);
+    AngleVectors(NetworkAngles, &vForward, &vRight, &vUp);
+    v14 = *(float *)&this->m_hColorPortal.m_Index;
+    GetStartPoint = v5->GetStartPoint;
+    vHalfWidth.x = (float)(vForward.x * v14) * 0.5;
+    vHalfWidth.y = (float)(vForward.y * v14) * 0.5;
+    vHalfWidth.z = (float)(vForward.z * v14) * 0.5;
+    v16 = (float *)((int (__thiscall *)(C_ProjectedWallEntity *, int))GetStartPoint)(v5, a2);
+    vOrigin.x = *v16 + vHalfWidth.x;
+    vOrigin.y = v16[1] + vHalfWidth.y;
+    GetRenderContext = materials->GetRenderContext;
+    vOrigin.z = v16[2] + vHalfWidth.z;
+    v18 = GetRenderContext(materials);
+    pRenderContext.m_pObject = v18;
+    if ( v18 )
+      v18->BeginRender(v18);
+    v19 = v18->GetDynamicMesh(v18, 1, 0, 0, (IMaterial *)this->IProjectedWallEntityAutoList::__vftable);
+    CMeshBuilder::CMeshBuilder(&meshBuilder);
+    g_pGameRules->IsMultiplayer(g_pGameRules);
+    m_flLength = this->m_flLength;
+    v21 = *(float *)&this->m_hColorPortal.m_Index;
+    v22 = v21 * 0.0078125;
+    v23 = (float)(v21 * 0.5) + 0.1;
+    vHalfLength.x = v23 * vForward.x;
+    vHalfLength.y = vForward.y * v23;
+    vHalfLength.z = vForward.z * v23;
+    v24 = vRight.x * m_flLength;
+    v25 = vRight.y * m_flLength;
+    v26 = vRight.z * m_flLength;
+    m_flWidth = this->m_flWidth;
+    vHalfWidth.x = v24 * 0.5;
+    vHalfWidth.y = v25 * 0.5;
+    vHalfWidth.z = v26 * 0.5;
+    meshBuilder.m_pMesh = v19;
+    meshBuilder.m_bGenerateIndices = 1;
+    meshBuilder.m_Type = MATERIAL_QUADS;
+    SetPrimitiveType = v19->SetPrimitiveType;
+    vHalfHeight.x = (float)(vUp.x * m_flWidth) * 0.5;
+    vHalfHeight.y = (float)(vUp.y * m_flWidth) * 0.5;
+    vHalfHeight.z = (float)(vUp.z * m_flWidth) * 0.5;
+    flLengthTexRate = v22;
+    SetPrimitiveType(v19, MATERIAL_TRIANGLES);
+    meshBuilder.m_pMesh->LockMesh(meshBuilder.m_pMesh, 20, 30, &meshBuilder, 0);
+    meshBuilder.m_IndexBuilder.m_pIndexBuffer = &v19->IIndexBuffer;
+    meshBuilder.m_IndexBuilder.m_nIndexCount = 0;
+    meshBuilder.m_IndexBuilder.m_nMaxIndexCount = 30;
+    meshBuilder.m_IndexBuilder.m_bModify = 0;
+    meshBuilder.m_IndexBuilder.m_nCurrentIndex = 0;
+    meshBuilder.m_IndexBuilder.m_nIndexOffset = meshBuilder.m_nFirstVertex;
+    meshBuilder.m_IndexBuilder.m_pIndices = meshBuilder.m_pIndices;
+    meshBuilder.m_IndexBuilder.m_nIndexSize = meshBuilder.m_nIndexSize;
+    CVertexBuilder::AttachBegin(&meshBuilder.m_VertexBuilder, v19, 20, &meshBuilder);
+    meshBuilder.m_IndexBuilder.m_nCurrentIndex = 0;
+    CVertexBuilder::Reset(&meshBuilder.m_VertexBuilder);
+    v39.x = vHalfHeight.x + vOrigin.x;
+    v39.y = vHalfHeight.y + vOrigin.y;
+    v39.z = vHalfHeight.z + vOrigin.z;
+    C_ProjectedWallEntity::DrawQuadHelper<0>(v5, &meshBuilder, &v39, &vHalfLength, &vHalfWidth, 1.0, flLengthTexRate);
+    if ( meshBuilder.m_bGenerateIndices )
+    {
+      switch ( meshBuilder.m_Type )
+      {
+        case MATERIAL_LINE_STRIP:
+          m_nVertexCount = 2 * meshBuilder.m_VertexBuilder.m_nVertexCount - 2;
+          break;
+        case MATERIAL_LINE_LOOP:
+          m_nVertexCount = 2 * meshBuilder.m_VertexBuilder.m_nVertexCount;
+          break;
+        case MATERIAL_POLYGON:
+          m_nVertexCount = 3 * meshBuilder.m_VertexBuilder.m_nVertexCount - 6;
+          break;
+        case MATERIAL_QUADS:
+          m_nVertexCount = 6 * meshBuilder.m_VertexBuilder.m_nVertexCount / 4;
+          break;
+        case MATERIAL_INSTANCED_QUADS:
+          m_nVertexCount = 0;
+          break;
+        default:
+          m_nVertexCount = meshBuilder.m_VertexBuilder.m_nVertexCount;
+          break;
+      }
+      CIndexBuilder::GenerateIndices(&meshBuilder.m_IndexBuilder, meshBuilder.m_Type, m_nVertexCount);
+    }
+    meshBuilder.m_pMesh->UnlockMesh(
+      meshBuilder.m_pMesh,
+      meshBuilder.m_VertexBuilder.m_nVertexCount,
+      meshBuilder.m_IndexBuilder.m_nIndexCount,
+      &meshBuilder);
+    meshBuilder.m_IndexBuilder.m_pIndexBuffer = 0;
+    meshBuilder.m_IndexBuilder.m_nMaxIndexCount = 0;
+    meshBuilder.m_VertexBuilder.m_nMaxVertexCount = 0;
+    meshBuilder.m_VertexBuilder.m_pVertexBuffer = 0;
+    meshBuilder.m_pMesh = 0;
+    meshBuilder.m_VertexBuilder.m_CompressionType = VERTEX_COMPRESSION_INVALID;
+    v19->Draw(v19, -1, 0);
+    m_pObject = pRenderContext.m_pObject;
+    v31 = pRenderContext.m_pObject->GetDynamicMesh(pRenderContext.m_pObject, 1, 0, 0, this->m_pPaintColorSing);
+    meshBuilder.m_pMesh = v31;
+    meshBuilder.m_bGenerateIndices = 1;
+    meshBuilder.m_Type = MATERIAL_QUADS;
+    v31->SetPrimitiveType(v31, MATERIAL_TRIANGLES);
+    meshBuilder.m_pMesh->LockMesh(meshBuilder.m_pMesh, 8, 12, &meshBuilder, 0);
+    meshBuilder.m_IndexBuilder.m_nIndexCount = 0;
+    meshBuilder.m_IndexBuilder.m_bModify = 0;
+    meshBuilder.m_IndexBuilder.m_nCurrentIndex = 0;
+    meshBuilder.m_IndexBuilder.m_pIndexBuffer = &v31->IIndexBuffer;
+    meshBuilder.m_IndexBuilder.m_nIndexOffset = meshBuilder.m_nFirstVertex;
+    meshBuilder.m_IndexBuilder.m_pIndices = meshBuilder.m_pIndices;
+    meshBuilder.m_IndexBuilder.m_nMaxIndexCount = 12;
+    meshBuilder.m_IndexBuilder.m_nIndexSize = meshBuilder.m_nIndexSize;
+    CVertexBuilder::AttachBegin(&meshBuilder.m_VertexBuilder, v31, 8, &meshBuilder);
+    meshBuilder.m_IndexBuilder.m_nCurrentIndex = 0;
+    CVertexBuilder::Reset(&meshBuilder.m_VertexBuilder);
+    vHalfHeight.x = vUp.x * 6.0;
+    vHalfHeight.y = vUp.y * 6.0;
+    v39.x = vHalfWidth.x + vOrigin.x;
+    v39.y = vHalfWidth.y + vOrigin.y;
+    v39.z = vHalfWidth.z + vOrigin.z;
+    vHalfHeight.z = vUp.z * 6.0;
+    C_ProjectedWallEntity::DrawQuadHelper<0>(v5, &meshBuilder, &v39, &vHalfLength, &vHalfHeight, 1.0, flLengthTexRate);
+    v39.x = vOrigin.x - vHalfWidth.x;
+    v39.y = vOrigin.y - vHalfWidth.y;
+    v39.z = vOrigin.z - vHalfWidth.z;
+    C_ProjectedWallEntity::DrawQuadHelper<0>(v5, &meshBuilder, &v39, &vHalfLength, &vHalfHeight, 1.0, flLengthTexRate);
+    if ( meshBuilder.m_bGenerateIndices )
+    {
+      switch ( meshBuilder.m_Type )
+      {
+        case MATERIAL_LINE_STRIP:
+          v32 = 2 * meshBuilder.m_VertexBuilder.m_nVertexCount - 2;
+          break;
+        case MATERIAL_LINE_LOOP:
+          v32 = 2 * meshBuilder.m_VertexBuilder.m_nVertexCount;
+          break;
+        case MATERIAL_POLYGON:
+          v32 = 3 * meshBuilder.m_VertexBuilder.m_nVertexCount - 6;
+          break;
+        case MATERIAL_QUADS:
+          v32 = 6 * meshBuilder.m_VertexBuilder.m_nVertexCount / 4;
+          break;
+        case MATERIAL_INSTANCED_QUADS:
+          v32 = 0;
+          break;
+        default:
+          v32 = meshBuilder.m_VertexBuilder.m_nVertexCount;
+          break;
+      }
+      CIndexBuilder::GenerateIndices(&meshBuilder.m_IndexBuilder, meshBuilder.m_Type, v32);
+    }
+    ((void (__thiscall *)(IMesh *, int, int))meshBuilder.m_pMesh->UnlockMesh)(
+      meshBuilder.m_pMesh,
+      meshBuilder.m_VertexBuilder.m_nVertexCount,
+      meshBuilder.m_IndexBuilder.m_nIndexCount);
+    meshBuilder.m_IndexBuilder.m_pIndexBuffer = 0;
+    meshBuilder.m_IndexBuilder.m_nMaxIndexCount = 0;
+    meshBuilder.m_VertexBuilder.m_nMaxVertexCount = 0;
+    meshBuilder.m_VertexBuilder.m_pVertexBuffer = 0;
+    meshBuilder.m_pMesh = 0;
+    meshBuilder.m_VertexBuilder.m_CompressionType = VERTEX_COMPRESSION_INVALID;
+    v31->Draw(v31, -1, 0);
+    CMeshBuilder::~CMeshBuilder(&meshBuilder);
+    m_pObject->EndRender(m_pObject);
+    m_pObject->Release(m_pObject);
+  }
+  return 1;
+}

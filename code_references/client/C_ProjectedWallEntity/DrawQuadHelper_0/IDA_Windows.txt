@@ -1,0 +1,94 @@
+void __thiscall C_ProjectedWallEntity::DrawQuadHelper<0>(
+        C_ProjectedWallEntity *this,
+        CMeshBuilder *meshBuilder,
+        const Vector *vOrigin,
+        const Vector *vRight,
+        const Vector *vUp,
+        float flTextureScaleU,
+        float flTextureScaleV)
+{
+  float x; // xmm3_4
+  float v8; // xmm4_4
+  float y; // xmm5_4
+  float z; // xmm6_4
+  float v11; // xmm0_4
+  float v12; // xmm1_4
+  float *v13; // eax
+  float v14; // xmm2_4
+  float v15; // xmm3_4
+  float v16; // xmm0_4
+  float v17; // xmm1_4
+  float *v18; // eax
+  float *m_pCurrPosition; // eax
+  float v20; // xmm2_4
+  float v21; // xmm3_4
+  float v22; // xmm0_4
+  float v23; // xmm1_4
+  float *v24; // eax
+  float *v25; // eax
+  float v26; // xmm0_4
+  float v27; // xmm1_4
+  float v28; // xmm2_4
+  float *v29; // eax
+  float *v30; // esi
+  Vector vNormal; // [esp+0h] [ebp-18h] BYREF
+  Vector vert; // [esp+Ch] [ebp-Ch]
+
+  x = vRight->x;
+  v8 = vUp->x;
+  y = vUp->y;
+  z = vUp->z;
+  vert.x = (float)(vUp->x + vOrigin->x) - vRight->x;
+  v11 = vRight->y;
+  vert.y = (float)(y + vOrigin->y) - v11;
+  v12 = vRight->z;
+  vert.z = (float)(z + vOrigin->z) - v12;
+  vNormal.x = (float)(v12 * y) - (float)(v11 * z);
+  vNormal.y = (float)(x * z) - (float)(v12 * v8);
+  vNormal.z = (float)(v11 * v8) - (float)(x * y);
+  VectorNormalize(&vNormal);
+  *(_DWORD *)meshBuilder->m_VertexBuilder.m_pCurrColor = g_nWhite[2] | ((g_nWhite[1] | ((g_nWhite[0] | (g_nWhite[3] << 8)) << 8)) << 8);
+  v13 = meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0];
+  *v13 = 0.0;
+  v13[1] = flTextureScaleV;
+  *(Vector *)meshBuilder->m_VertexBuilder.m_pCurrPosition = vert;
+  CVertexBuilder::AdvanceVertex(&meshBuilder->m_VertexBuilder);
+  v14 = vUp->z + vOrigin->z;
+  v15 = vRight->x + (float)(vUp->x + vOrigin->x);
+  v16 = vRight->y + (float)(vUp->y + vOrigin->y);
+  v17 = vRight->z;
+  *(_DWORD *)meshBuilder->m_VertexBuilder.m_pCurrColor = g_nWhite[2] | ((g_nWhite[1] | ((g_nWhite[0] | (g_nWhite[3] << 8)) << 8)) << 8);
+  v18 = meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0];
+  *v18 = 0.0;
+  v18[1] = 0.0;
+  m_pCurrPosition = meshBuilder->m_VertexBuilder.m_pCurrPosition;
+  *m_pCurrPosition = v15;
+  m_pCurrPosition[1] = v16;
+  m_pCurrPosition[2] = v17 + v14;
+  CVertexBuilder::AdvanceVertex(&meshBuilder->m_VertexBuilder);
+  v20 = vOrigin->z - vUp->z;
+  v21 = vRight->x + (float)(vOrigin->x - vUp->x);
+  v22 = vRight->y + (float)(vOrigin->y - vUp->y);
+  v23 = vRight->z;
+  *(_DWORD *)meshBuilder->m_VertexBuilder.m_pCurrColor = g_nWhite[2] | ((g_nWhite[1] | ((g_nWhite[0] | (g_nWhite[3] << 8)) << 8)) << 8);
+  v24 = meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0];
+  *v24 = flTextureScaleU;
+  v24[1] = 0.0;
+  v25 = meshBuilder->m_VertexBuilder.m_pCurrPosition;
+  *v25 = v21;
+  v25[1] = v22;
+  v25[2] = v23 + v20;
+  CVertexBuilder::AdvanceVertex(&meshBuilder->m_VertexBuilder);
+  v26 = (float)(vOrigin->x - vUp->x) - vRight->x;
+  v27 = (float)(vOrigin->y - vUp->y) - vRight->y;
+  v28 = (float)(vOrigin->z - vUp->z) - vRight->z;
+  *(_DWORD *)meshBuilder->m_VertexBuilder.m_pCurrColor = g_nWhite[2] | ((g_nWhite[1] | ((g_nWhite[0] | (g_nWhite[3] << 8)) << 8)) << 8);
+  v29 = meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0];
+  v30 = meshBuilder->m_VertexBuilder.m_pCurrPosition;
+  *v29 = flTextureScaleU;
+  v29[1] = flTextureScaleV;
+  *v30 = v26;
+  v30[1] = v27;
+  v30[2] = v28;
+  CVertexBuilder::AdvanceVertex(&meshBuilder->m_VertexBuilder);
+}

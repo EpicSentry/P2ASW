@@ -1,0 +1,6 @@
+void __cdecl C_ProjectedWallEntity::OnProjected(C_ProjectedWallEntity *const this)
+{
+  C_BaseProjectedEntity::OnProjected(this);
+  C_ProjectedWallEntity::ProjectWall(this);
+  C_ProjectedWallEntity::SetupWallParticles(this);
+}

@@ -1,0 +1,33 @@
+void __thiscall C_BaseProjectedEntity::~C_BaseProjectedEntity(C_BaseProjectedEntity *this)
+{
+  int m_Size; // edx
+  int v2; // eax
+
+  this->C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable = (C_BaseProjectedEntity_vtbl *)&C_BaseProjectedEntity::`vftable'{for `IClientUnknown'};
+  this->C_BaseEntity::IClientEntity::IClientRenderable::__vftable = (IClientRenderable_vtbl *)&C_BaseProjectedEntity::`vftable'{for `IClientRenderable'};
+  this->C_BaseEntity::IClientEntity::IClientNetworkable::__vftable = (IClientNetworkable_vtbl *)&C_BaseProjectedEntity::`vftable'{for `IClientNetworkable'};
+  this->C_BaseEntity::IClientEntity::IClientThinkable::__vftable = (IClientThinkable_vtbl *)&C_BaseProjectedEntity::`vftable'{for `IClientThinkable'};
+  this->C_BaseEntity::IClientModelRenderable::__vftable = (IClientModelRenderable_vtbl *)&C_BaseProjectedEntity::`vftable';
+  m_Size = s_AllProjectedEntities.m_Size;
+  v2 = 0;
+  if ( s_AllProjectedEntities.m_Size > 0 )
+  {
+    while ( s_AllProjectedEntities.m_Memory.m_pMemory[v2] != this )
+    {
+      if ( ++v2 >= s_AllProjectedEntities.m_Size )
+        goto LABEL_10;
+    }
+    if ( v2 != -1 && s_AllProjectedEntities.m_Size > 0 )
+    {
+      if ( v2 != s_AllProjectedEntities.m_Size - 1 )
+      {
+        s_AllProjectedEntities.m_Memory.m_pMemory[v2] = s_AllProjectedEntities.m_Memory.m_pMemory[s_AllProjectedEntities.m_Size
+                                                                                                - 1];
+        m_Size = s_AllProjectedEntities.m_Size;
+      }
+      s_AllProjectedEntities.m_Size = m_Size - 1;
+    }
+  }
+LABEL_10:
+  C_BaseEntity::~C_BaseEntity(this);
+}

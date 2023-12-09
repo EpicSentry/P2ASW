@@ -1,0 +1,38 @@
+bool __cdecl C_ProjectedWallEntity::SetPaintSurfaceColor(
+        C_ProjectedWallEntity *const this,
+        const PaintPowerType *const power)
+{
+  bool v2; // di
+  Color v4; // [esp+1Ch] [ebp-2Ch] BYREF
+  float flColors[3]; // [esp+24h] [ebp-24h] BYREF
+
+  v2 = 0;
+  flColors[0] = 1.0;
+  flColors[1] = 1.0;
+  flColors[2] = 1.0;
+  if ( *power != NO_POWER )
+  {
+    v2 = 1;
+    MapPowerToVisualColor(&v4, *power);
+    flColors[0] = (float)v4._color[0] / 255.0;
+    flColors[1] = (float)v4._color[1] / 255.0;
+    flColors[2] = (float)v4._color[2] / 255.0;
+  }
+  (*(void (__cdecl **)(IMaterialVar *, float *, int))(*(_DWORD *)this->m_pPaintColorMid + 40))(
+    this->m_pPaintColorMid,
+    flColors,
+    3);
+  (*(void (__cdecl **)(IMaterialVar *, float *, int))(*(_DWORD *)this->m_pPaintColorEnd1 + 40))(
+    this->m_pPaintColorEnd1,
+    flColors,
+    3);
+  (*(void (__cdecl **)(IMaterialVar *, float *, int))(*(_DWORD *)this->m_pPaintColorEnd2 + 40))(
+    this->m_pPaintColorEnd2,
+    flColors,
+    3);
+  (*(void (__cdecl **)(IMaterialVar *, float *, int))(*(_DWORD *)this->m_pPaintColorSing + 40))(
+    this->m_pPaintColorSing,
+    flColors,
+    3);
+  return v2;
+}

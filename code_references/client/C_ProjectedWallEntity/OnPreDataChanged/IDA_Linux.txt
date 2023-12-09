@@ -1,0 +1,5 @@
+void __cdecl C_ProjectedWallEntity::OnPreDataChanged(C_ProjectedWallEntity *const this, DataUpdateType_t type)
+{
+  C_BaseProjectedEntity::OnPreDataChanged(this, type);
+  this->m_flPrevParticleUpdateTime = this->m_flParticleUpdateTime;
+}

@@ -1,0 +1,320 @@
+// local variable allocation has failed, the output may be wrong!
+// bad sp value at call has been detected, the output may be wrong!
+void __usercall C_ProjectedWallEntity::ProjectWall(
+        C_ProjectedWallEntity *this@<ecx>,
+        int a2@<ebp>,
+        int a3@<edi>,
+        int a4@<esi>)
+{
+  int v5; // eax
+  __int64 v6; // xmm0_8
+  C_ProjectedWallEntity_vtbl *v7; // edx
+  const Vector *(__thiscall *GetEndPoint)(C_BaseProjectedEntity *); // eax
+  int v9; // eax
+  __int64 v10; // xmm0_8
+  bool (__thiscall *InPrediction)(CPrediction *); // eax
+  double v12; // st7
+  float y; // xmm0_4
+  int v14; // ecx
+  int v15; // eax
+  float *v16; // edi
+  const QAngle *NetworkAngles; // ecx
+  float *v18; // edi
+  const Vector *v19; // ecx
+  float *v20; // edi
+  const Vector *v21; // ecx
+  const QAngle *v22; // eax
+  float v23; // xmm6_4
+  float v24; // xmm7_4
+  float v25; // xmm3_4
+  struct CPhysCollide *(__thiscall *ConvertConvexToCollide)(IPhysicsCollision *, struct CPhysConvex **, int); // eax
+  const struct CPhysCollide *v27; // eax
+  float v28; // xmm1_4
+  float v29; // xmm7_4
+  float v30; // xmm4_4
+  const CPolyhedron *PolyhedronFromPlanes; // edi
+  struct CPhysCollide *(__thiscall *v32)(IPhysicsCollision *, struct CPhysConvex **, int); // edx
+  float v33; // edi
+  const Vector *v34; // eax
+  C_ProjectedWallEntity_vtbl *v35; // edx
+  float v36; // xmm0_4
+  const Vector *(__thiscall *v37)(C_BaseProjectedEntity *); // eax
+  const QAngle *v38; // eax
+  float v39; // xmm0_4
+  int m_Size; // eax
+  unsigned int y_low; // edi
+  Vector *p_vWorldMins; // eax
+  C_ProjectedWallEntity::WallCollideableAtTime_t *m_pMemory; // edx
+  float v44; // xmm0_4
+  float v45; // xmm1_4
+  float z; // xmm0_4
+  bool v47; // zf
+  void (__thiscall *SetNextClientThink)(C_BaseEntity *, float); // eax
+  __int128 v49; // xmm0
+  float v51[3]; // [esp+34h] [ebp-144h] BYREF
+  float flWallPlanes[24]; // [esp+40h] [ebp-138h] BYREF
+  Vector vecUp; // [esp+A0h] [ebp-D8h] BYREF
+  Vector vWorldMaxs; // [esp+ACh] [ebp-CCh] BYREF
+  Vector vecForward; // [esp+B8h] [ebp-C0h] BYREF
+  Vector vSetMaxs; // [esp+C4h] [ebp-B4h] BYREF
+  Vector vVerts[4]; // [esp+D0h] [ebp-A8h] BYREF
+  float v58; // [esp+100h] [ebp-78h]
+  float v59; // [esp+104h] [ebp-74h]
+  float v60; // [esp+110h] [ebp-68h] BYREF
+  float v61; // [esp+114h] [ebp-64h]
+  float v62; // [esp+118h] [ebp-60h]
+  __int128 vecRight; // [esp+11Ch] [ebp-5Ch] OVERLAPPED BYREF
+  Vector v64; // [esp+134h] [ebp-44h] BYREF
+  Vector vWorldMins; // [esp+140h] [ebp-38h]
+  __int128 vWallEndPoint; // [esp+14Ch] [ebp-2Ch] OVERLAPPED
+  float v67; // [esp+15Ch] [ebp-1Ch]
+  Vector vWallStartPoint; // [esp+160h] [ebp-18h] BYREF
+  int i; // [esp+16Ch] [ebp-Ch]
+  struct CPhysConvex *pTempConvex; // [esp+170h] [ebp-8h]
+  struct CPhysConvex *retaddr; // [esp+178h] [ebp+0h]
+
+  i = a2;
+  pTempConvex = retaddr;
+  C_BaseEntity::AddEffects(this, 8);
+  v5 = ((int (__thiscall *)(C_ProjectedWallEntity *, int, int))this->GetStartPoint)(this, a3, a4);
+  v6 = *(_QWORD *)v5;
+  v7 = this->CPaintableEntity<C_BaseProjectedEntity>::C_BaseProjectedEntity::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable;
+  v67 = *(float *)(v5 + 8);
+  GetEndPoint = v7->GetEndPoint;
+  *((_QWORD *)&vWallEndPoint + 1) = v6;
+  v9 = (int)GetEndPoint(this);
+  v10 = *(_QWORD *)v9;
+  vWorldMins.z = *(float *)(v9 + 8);
+  InPrediction = prediction->InPrediction;
+  *(_QWORD *)&vWorldMins.x = v10;
+  if ( InPrediction(prediction) )
+    vWallStartPoint.y = CPrediction::GetSavedTime(prediction);
+  else
+    vWallStartPoint.y = *(float *)(gpGlobals.m_Index + 12);
+  v12 = ((double (__thiscall *)(IVEngineClient *))engine->GetLastTimeStamp)(engine);
+  *(float *)&vWallEndPoint = v12;
+  if ( vWallStartPoint.y <= v12 )
+    y = *(float *)&vWallEndPoint;
+  else
+    y = vWallStartPoint.y;
+  v14 = this->m_WallCollideables.m_Size - 1;
+  *(float *)&vWallEndPoint = y;
+  HIBYTE(vWallStartPoint.z) = 1;
+  vWallStartPoint.y = NAN;
+  LODWORD(vWallStartPoint.x) = v14;
+  if ( v14 >= 0 )
+  {
+    v15 = 68 * v14;
+    for ( DWORD1(vWallEndPoint) = 68 * v14; ; v15 = DWORD1(vWallEndPoint) )
+    {
+      v16 = (float *)((char *)&this->m_WallCollideables.m_Memory.m_pMemory->vStart.x + v15);
+      NetworkAngles = C_BaseEntity::GetNetworkAngles(this);
+      if ( NetworkAngles->x == v16[12] && NetworkAngles->y == v16[13] && NetworkAngles->z == v16[14] )
+      {
+        v18 = (float *)((char *)&this->m_WallCollideables.m_Memory.m_pMemory->vStart.x + DWORD1(vWallEndPoint));
+        v19 = this->GetStartPoint(this);
+        if ( v19->x == *v18 && v19->y == v18[1] && v19->z == v18[2] )
+        {
+          v20 = (float *)((char *)&this->m_WallCollideables.m_Memory.m_pMemory->vStart.x + DWORD1(vWallEndPoint));
+          v21 = this->GetEndPoint(this);
+          if ( v21->x == v20[3] && v21->y == v20[4] && v21->z == v20[5] )
+            break;
+        }
+      }
+      if ( *(struct CPhysCollide **)((char *)&this->m_WallCollideables.m_Memory.m_pMemory->pCollideable
+                                   + DWORD1(vWallEndPoint)) == this->m_pActiveCollideable )
+        goto LABEL_22;
+      DWORD1(vWallEndPoint) -= 68;
+      --LODWORD(vWallStartPoint.x);
+      if ( vWallStartPoint.x < 0.0 )
+        goto LABEL_22;
+    }
+    HIBYTE(vWallStartPoint.z) = 0;
+    vWallStartPoint.y = vWallStartPoint.x;
+  }
+LABEL_22:
+  LODWORD(vWallStartPoint.y) = &flWallPlanes[21];
+  LODWORD(vWallStartPoint.x) = &v60;
+  v67 = COERCE_FLOAT(&vWorldMaxs);
+  v22 = C_BaseEntity::GetNetworkAngles(this);
+  AngleVectors(v22, (Vector *)LODWORD(v67), (Vector *)LODWORD(vWallStartPoint.x), (Vector *)LODWORD(vWallStartPoint.y));
+  v23 = v67;
+  v24 = *((float *)&vWallEndPoint + 3);
+  if ( !HIBYTE(vWallStartPoint.z) )
+  {
+LABEL_31:
+    y_low = LODWORD(vWallStartPoint.y);
+    p_vWorldMins = &this->m_WallCollideables.m_Memory.m_pMemory[LODWORD(vWallStartPoint.y)].vWorldMins;
+    this->m_vWorldSpace_WallMins.x = p_vWorldMins->x;
+    this->m_vWorldSpace_WallMins.y = p_vWorldMins->y;
+    this->m_vWorldSpace_WallMins.z = p_vWorldMins->z;
+    m_pMemory = this->m_WallCollideables.m_Memory.m_pMemory;
+    this->m_vWorldSpace_WallMaxs.x = m_pMemory[y_low].vWorldMaxs.x;
+    this->m_vWorldSpace_WallMaxs.y = m_pMemory[y_low].vWorldMaxs.y;
+    this->m_vWorldSpace_WallMaxs.z = m_pMemory[y_low].vWorldMaxs.z;
+    v44 = this->m_vWorldSpace_WallMaxs.y;
+    *((float *)&vecRight + 1) = this->m_vWorldSpace_WallMins.x - *((float *)&vWallEndPoint + 2);
+    *((float *)&vecRight + 2) = this->m_vWorldSpace_WallMins.y - v24;
+    *((float *)&vecRight + 3) = this->m_vWorldSpace_WallMins.z - v23;
+    v45 = this->m_vWorldSpace_WallMaxs.x - *((float *)&vWallEndPoint + 2);
+    vecForward.y = v44 - v24;
+    z = this->m_vWorldSpace_WallMaxs.z;
+    vecForward.x = v45;
+    vecForward.z = z - v23;
+    C_BaseEntity::SetSize(this, (const Vector *)((char *)&vecRight + 4), &vecForward);
+    v47 = HIBYTE(vWallStartPoint.z) == 0;
+    this->m_pActiveCollideable = this->m_WallCollideables.m_Memory.m_pMemory[y_low].pCollideable;
+    if ( !v47 )
+    {
+      SetNextClientThink = this->SetNextClientThink;
+      this->m_flCurDisplayLength = 0.0;
+      ((void (__thiscall *)(C_ProjectedWallEntity *, _DWORD))SetNextClientThink)(this, LODWORD(FLOAT_N1293_0));
+    }
+    v49 = 0i64;
+    *(float *)&v49 = fsqrt(
+                       (float)((float)((float)(*((float *)&vWallEndPoint + 3) - vWorldMins.y)
+                                     * (float)(*((float *)&vWallEndPoint + 3) - vWorldMins.y))
+                             + (float)((float)(v67 - vWorldMins.z) * (float)(v67 - vWorldMins.z)))
+                     + (float)((float)(*((float *)&vWallEndPoint + 2) - vWorldMins.x)
+                             * (float)(*((float *)&vWallEndPoint + 2) - vWorldMins.x)));
+    vecRight = v49;
+    LODWORD(this->m_flLength) = v49;
+    CCollisionProperty::MarkSurroundingBoundsDirty(&this->m_Collision);
+    CCollisionProperty::MarkPartitionHandleDirty(&this->m_Collision);
+    if ( prediction->InPrediction(prediction) )
+    {
+      C_ProjectedWallEntity::CheckForPlayersOnBridge(this);
+      C_ProjectedWallEntity::DisplaceObstructingEntities(this);
+    }
+    LODWORD(vWallStartPoint.y) = (int)ceil((float)(this->m_flLength / this->m_flSegmentLength));
+    this->m_nNumSegments = LODWORD(vWallStartPoint.y);
+    vWallStartPoint.x = 0.0;
+    this->m_PaintPowers.m_Size = 0;
+    CUtlVector<char *,CUtlMemory<char *,int>>::InsertMultipleBefore(
+      (CUtlVector<CParticleSystemDefinition *,CUtlMemory<CParticleSystemDefinition *,int> > *)&this->m_PaintPowers,
+      SLODWORD(vWallStartPoint.x),
+      SLODWORD(vWallStartPoint.y));
+    this->CleansePaint(&this->IPaintableEntity);
+    return;
+  }
+  if ( sv_thinnerprojectedwalls.m_pParent->m_Value.m_nValue )
+  {
+    v25 = this->m_flWidth * 0.5;
+    vVerts[0].z = *((float *)&vWallEndPoint + 2) + (float)(v60 * v25);
+    vVerts[1].z = *((float *)&vWallEndPoint + 2) - (float)(v60 * v25);
+    vVerts[1].x = *((float *)&vWallEndPoint + 3) + (float)(v61 * v25);
+    vVerts[1].y = v67 + (float)(v62 * v25);
+    vVerts[2].z = vWorldMins.x - (float)(v60 * v25);
+    vVerts[2].x = *((float *)&vWallEndPoint + 3) - (float)(v61 * v25);
+    vVerts[2].y = v67 - (float)(v62 * v25);
+    LODWORD(vecRight) = &vVerts[0].z;
+    DWORD1(vecRight) = &vVerts[1].z;
+    DWORD2(vecRight) = &vVerts[2].z;
+    HIDWORD(vecRight) = &vVerts[3].z;
+    vVerts[3].x = vWorldMins.y - (float)(v61 * v25);
+    vVerts[3].y = vWorldMins.z - (float)(v62 * v25);
+    vVerts[3].z = vWorldMins.x + (float)(v60 * v25);
+    v58 = vWorldMins.y + (float)(v61 * v25);
+    v59 = vWorldMins.z + (float)(v62 * v25);
+    LODWORD(vWallStartPoint.y) = physcollision->ConvexFromVerts(physcollision, &vecRight, 4);
+    ConvertConvexToCollide = physcollision->ConvertConvexToCollide;
+    LODWORD(vWallStartPoint.y) = 1;
+    v27 = (const struct CPhysCollide *)((int (__thiscall *)(IPhysicsCollision *, float *))ConvertConvexToCollide)(
+                                         physcollision,
+                                         &vWallStartPoint.y);
+LABEL_29:
+    v33 = *(float *)&v27;
+    if ( !v27 )
+      return;
+    physcollision->CollideGetAABB(physcollision, &v64, &vecUp, v27, &vec3_origin, &vec3_angle);
+    v34 = this->GetStartPoint(this);
+    v35 = this->CPaintableEntity<C_BaseProjectedEntity>::C_BaseProjectedEntity::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable;
+    vSetMaxs.x = v34->x;
+    vSetMaxs.y = v34->y;
+    v36 = v34->z;
+    v37 = v35->GetEndPoint;
+    vSetMaxs.z = v36;
+    vVerts[0] = *v37(this);
+    vVerts[1] = v64;
+    vVerts[2] = vecUp;
+    v38 = C_BaseEntity::GetNetworkAngles(this);
+    vVerts[3].x = v38->x;
+    vVerts[3].y = v38->y;
+    v39 = v38->z;
+    m_Size = this->m_WallCollideables.m_Size;
+    vVerts[3].z = v39;
+    v58 = *(float *)&vWallEndPoint;
+    v59 = v33;
+    CUtlVector<C_ProjectedWallEntity::WallCollideableAtTime_t,CUtlMemory<C_ProjectedWallEntity::WallCollideableAtTime_t,int>>::InsertBefore(
+      &this->m_WallCollideables,
+      m_Size,
+      (const C_ProjectedWallEntity::WallCollideableAtTime_t *)&vSetMaxs);
+    v23 = v67;
+    v24 = *((float *)&vWallEndPoint + 3);
+    goto LABEL_31;
+  }
+  LODWORD(v51[0]) = LODWORD(vWorldMaxs.x) ^ _mask__NegFloat_;
+  LODWORD(v51[1]) = LODWORD(vWorldMaxs.y) ^ _mask__NegFloat_;
+  LODWORD(v64.x) = LODWORD(vWorldMaxs.x) ^ _mask__NegFloat_;
+  LODWORD(v64.y) = LODWORD(vWorldMaxs.y) ^ _mask__NegFloat_;
+  LODWORD(v51[2]) = LODWORD(vWorldMaxs.z) ^ _mask__NegFloat_;
+  *(Vector *)&flWallPlanes[1] = vWorldMaxs;
+  flWallPlanes[4] = (float)((float)(vWorldMins.x * vWorldMaxs.x) + (float)(vWorldMins.y * vWorldMaxs.y))
+                  + (float)(vWorldMins.z * vWorldMaxs.z);
+  v28 = this->m_flWidth * 0.5;
+  flWallPlanes[0] = (float)((float)(*((float *)&vWallEndPoint + 3)
+                                  * COERCE_FLOAT(LODWORD(vWorldMaxs.y) ^ _mask__NegFloat_))
+                          + (float)(*((float *)&vWallEndPoint + 2)
+                                  * COERCE_FLOAT(LODWORD(vWorldMaxs.x) ^ _mask__NegFloat_)))
+                  + (float)(v67 * COERCE_FLOAT(LODWORD(vWorldMaxs.z) ^ _mask__NegFloat_));
+  v29 = v28;
+  LODWORD(v64.z) = LODWORD(vWorldMaxs.z) ^ _mask__NegFloat_;
+  vWallStartPoint.x = v28;
+  flWallPlanes[8] = (float)((float)((float)((float)(v29 * v60) + *((float *)&vWallEndPoint + 2)) * v60)
+                          + (float)((float)((float)(v61 * v29) + *((float *)&vWallEndPoint + 3)) * v61))
+                  + (float)((float)((float)(v62 * v29) + v67) * v62);
+  flWallPlanes[5] = v60;
+  flWallPlanes[6] = v61;
+  flWallPlanes[7] = v62;
+  LODWORD(flWallPlanes[9]) = LODWORD(v60) ^ _mask__NegFloat_;
+  LODWORD(flWallPlanes[10]) = LODWORD(v61) ^ _mask__NegFloat_;
+  LODWORD(flWallPlanes[11]) = LODWORD(v62) ^ _mask__NegFloat_;
+  flWallPlanes[12] = (float)((float)(COERCE_FLOAT(LODWORD(v61) ^ _mask__NegFloat_)
+                                   * (float)(*((float *)&vWallEndPoint + 3) - (float)(v61 * v29)))
+                           + (float)(COERCE_FLOAT(LODWORD(v60) ^ _mask__NegFloat_)
+                                   * (float)(*((float *)&vWallEndPoint + 2) - (float)(v29 * v60))))
+                   + (float)(COERCE_FLOAT(LODWORD(v62) ^ _mask__NegFloat_) * (float)(v67 - (float)(v62 * v29)));
+  v30 = this->m_flHeight * 0.5;
+  flWallPlanes[16] = (float)((float)((float)((float)(flWallPlanes[22] * v30) + *((float *)&vWallEndPoint + 3))
+                                   * flWallPlanes[22])
+                           + (float)((float)((float)(flWallPlanes[21] * v30) + *((float *)&vWallEndPoint + 2))
+                                   * flWallPlanes[21]))
+                   + (float)((float)((float)(flWallPlanes[23] * v30) + v67) * flWallPlanes[23]);
+  *(_QWORD *)&flWallPlanes[13] = *(_QWORD *)&flWallPlanes[21];
+  flWallPlanes[15] = flWallPlanes[23];
+  LODWORD(flWallPlanes[17]) = LODWORD(flWallPlanes[21]) ^ _mask__NegFloat_;
+  LODWORD(flWallPlanes[19]) = LODWORD(flWallPlanes[23]) ^ _mask__NegFloat_;
+  LODWORD(flWallPlanes[18]) = LODWORD(flWallPlanes[22]) ^ _mask__NegFloat_;
+  flWallPlanes[20] = (float)((float)(COERCE_FLOAT(LODWORD(flWallPlanes[22]) ^ _mask__NegFloat_)
+                                   * (float)(*((float *)&vWallEndPoint + 3) - (float)(flWallPlanes[22] * v30)))
+                           + (float)(COERCE_FLOAT(LODWORD(flWallPlanes[21]) ^ _mask__NegFloat_)
+                                   * (float)(*((float *)&vWallEndPoint + 2) - (float)(flWallPlanes[21] * v30))))
+                   + (float)(COERCE_FLOAT(LODWORD(flWallPlanes[23]) ^ _mask__NegFloat_)
+                           * (float)(v67 - (float)(flWallPlanes[23] * v30)));
+  PolyhedronFromPlanes = GeneratePolyhedronFromPlanes(v51, 6, 0.00000011920929, 0);
+  if ( !PolyhedronFromPlanes )
+  {
+    _Warning("CProjectedWallEntity: GeneratePolyhedronFromPlanes failed! Get a save game for me!.\n");
+    return;
+  }
+  LODWORD(vWallStartPoint.x) = physcollision->ConvexFromConvexPolyhedron(physcollision, PolyhedronFromPlanes);
+  PolyhedronFromPlanes->Release((CPolyhedron *)PolyhedronFromPlanes);
+  if ( LODWORD(vWallStartPoint.x) )
+  {
+    v32 = physcollision->ConvertConvexToCollide;
+    LODWORD(vWallStartPoint.y) = 1;
+    LODWORD(vWallStartPoint.x) = &vWallStartPoint;
+    v27 = (const struct CPhysCollide *)((int (__thiscall *)(IPhysicsCollision *))v32)(physcollision);
+    goto LABEL_29;
+  }
+}

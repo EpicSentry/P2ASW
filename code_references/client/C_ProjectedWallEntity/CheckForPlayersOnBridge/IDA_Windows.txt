@@ -1,0 +1,22 @@
+void __thiscall C_ProjectedWallEntity::CheckForPlayersOnBridge(C_ProjectedWallEntity *this)
+{
+  int i; // edi
+  C_BasePlayer *LocalPlayer; // eax
+  C_Portal_Player *v4; // esi
+
+  for ( i = C_PropRocketTripwire::YouForgotToImplementOrDeclareClientClass((vgui::CTreeViewListControl *)this);
+        i != -1;
+        i = NextValidSplitScreenSlot(i) )
+  {
+    LocalPlayer = C_BasePlayer::GetLocalPlayer(i);
+    v4 = (C_Portal_Player *)LocalPlayer;
+    if ( LocalPlayer )
+    {
+      if ( C_BaseEntity::GetGroundEntity(LocalPlayer) == this )
+      {
+        C_BaseEntity::SetGroundEntity(v4, 0);
+        C_Portal_Player::BridgeRemovedFromUnder(v4);
+      }
+    }
+  }
+}

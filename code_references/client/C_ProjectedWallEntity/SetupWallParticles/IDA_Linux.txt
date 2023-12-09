@@ -1,0 +1,101 @@
+void __cdecl C_ProjectedWallEntity::SetupWallParticles(C_ProjectedWallEntity *const this)
+{
+  C_Portal_Base2D *v1; // esi
+  unsigned int m_Index; // eax
+  char *v3; // ecx
+  unsigned int v4; // eax
+  C_Portal_Base2D *v5; // edi
+  char *v6; // edx
+  float *v7; // eax
+  float *v8; // eax
+  void *v9; // eax
+  void *v10; // eax
+  float v11; // [esp+48h] [ebp-90h]
+  float v12; // [esp+4Ch] [ebp-8Ch]
+  float v13; // [esp+50h] [ebp-88h]
+  float vWallEndPoint; // [esp+54h] [ebp-84h]
+  float vWallEndPoint_4; // [esp+58h] [ebp-80h]
+  float vWallEndPoint_8; // [esp+5Ch] [ebp-7Ch]
+  long double vecPortalPos; // [esp+6Ch] [ebp-6Ch]
+  long double vecPortalPosa; // [esp+6Ch] [ebp-6Ch]
+  QAngle qAngles; // [esp+78h] [ebp-60h] BYREF
+  Vector vecForward; // [esp+84h] [ebp-54h] BYREF
+  Vector vecRight; // [esp+90h] [ebp-48h] BYREF
+  Vector vecUp; // [esp+9Ch] [ebp-3Ch] BYREF
+  Vector vecOrigin; // [esp+A8h] [ebp-30h]
+  Vector v24; // [esp+B4h] [ebp-24h]
+
+  v1 = 0;
+  StopParticleEffects(this);
+  m_Index = this->m_hSourcePortal.m_Index;
+  if ( m_Index != -1 )
+  {
+    v3 = (char *)g_pEntityList + 16 * (unsigned __int16)m_Index;
+    if ( *((_DWORD *)v3 + 2) == HIWORD(m_Index) )
+      v1 = (C_Portal_Base2D *)*((_DWORD *)v3 + 1);
+  }
+  v4 = this->m_hHitPortal.m_Index;
+  v5 = 0;
+  if ( v4 != -1 )
+  {
+    v6 = (char *)g_pEntityList + 16 * (unsigned __int16)v4;
+    if ( *((_DWORD *)v6 + 2) == HIWORD(v4) )
+      v5 = (C_Portal_Base2D *)*((_DWORD *)v6 + 1);
+  }
+  v7 = (float *)(*((int (__cdecl **)(C_ProjectedWallEntity *const))this->_vptr_IHandleEntity + 237))(this);
+  vWallEndPoint = *v7;
+  vWallEndPoint_4 = v7[1];
+  vWallEndPoint_8 = v7[2];
+  v8 = (float *)(*((int (__cdecl **)(C_ProjectedWallEntity *const))this->_vptr_IHandleEntity + 236))(this);
+  v11 = *v8;
+  v12 = v8[1];
+  v13 = v8[2];
+  qAngles = *C_BaseEntity::GetNetworkAngles(this);
+  AngleVectors(&qAngles, &vecForward, &vecRight, &vecUp);
+  if ( v1 && C_ProjectedWallEntity::ShouldSpawnParticles(this, v1) )
+  {
+    v9 = _dynamic_cast(
+           v1,
+           (const struct __class_type_info *)&`typeinfo for'C_Portal_Base2D,
+           (const struct __class_type_info *)&`typeinfo for'C_Prop_Portal,
+           0);
+    if ( v9 )
+    {
+      vecPortalPos = *(long double *)(*(int (__cdecl **)(void *))(*(_DWORD *)v9 + 48))(v9);
+    }
+    else
+    {
+      *(float *)&vecPortalPos = v11 + 0.0;
+      *((float *)&vecPortalPos + 1) = v12 + 0.0;
+      *((float *)&vecPortalPos + 2) = v13 + 512.0;
+    }
+    vecOrigin.x = (float)(3.125 * vecForward.x) + v11;
+    vecOrigin.y = (float)(vecForward.y * 3.125) + v12;
+    vecOrigin.z = (float)(vecForward.z * 3.125) + v13;
+    DispatchParticleEffect("projected_wall_impact", vecOrigin, *(Vector *)&vecPortalPos, qAngles, this, -1, 0);
+  }
+  if ( !v5 )
+    goto LABEL_18;
+  if ( !C_ProjectedWallEntity::ShouldSpawnParticles(this, v5) )
+    return;
+  v10 = _dynamic_cast(
+          v5,
+          (const struct __class_type_info *)&`typeinfo for'C_Portal_Base2D,
+          (const struct __class_type_info *)&`typeinfo for'C_Prop_Portal,
+          0);
+  if ( v10 )
+  {
+    vecPortalPosa = *(long double *)(*(int (__cdecl **)(void *))(*(_DWORD *)v10 + 48))(v10);
+  }
+  else
+  {
+LABEL_18:
+    *(float *)&vecPortalPosa = vWallEndPoint + 0.0;
+    *((float *)&vecPortalPosa + 1) = vWallEndPoint_4 + 0.0;
+    *((float *)&vecPortalPosa + 2) = vWallEndPoint_8 + 512.0;
+  }
+  v24.x = vWallEndPoint - (float)(3.125 * vecForward.x);
+  v24.y = vWallEndPoint_4 - (float)(vecForward.y * 3.125);
+  v24.z = vWallEndPoint_8 - (float)(vecForward.z * 3.125);
+  DispatchParticleEffect("projected_wall_impact", v24, *(Vector *)&vecPortalPosa, qAngles, this, -1, 0);
+}

@@ -1,0 +1,5 @@
+void __thiscall C_ProjectedWallEntity::OnPreDataChanged(C_ProjectedWallEntity *this, DataUpdateType_t type)
+{
+  C_BaseProjectedEntity::OnPreDataChanged(this, type);
+  this->m_PaintPowers.m_pElements = (PaintPowerType *)this->m_PaintPowers.m_Size;
+}

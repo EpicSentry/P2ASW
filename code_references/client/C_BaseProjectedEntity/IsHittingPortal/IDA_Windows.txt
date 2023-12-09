@@ -1,0 +1,142 @@
+// local variable allocation has failed, the output may be wrong!
+// bad sp value at call has been detected, the output may be wrong!
+char __userpurge C_BaseProjectedEntity::IsHittingPortal@<al>(
+        C_BaseProjectedEntity *this@<ecx>,
+        float a2@<ebp>,
+        int a3@<edi>,
+        int a4@<esi>,
+        Vector *pOutOrigin,
+        QAngle *pOutAngles,
+        C_Portal_Base2D **pOutPortal)
+{
+  const Vector *NetworkOrigin; // eax
+  float z; // ecx
+  float v10; // xmm0_4
+  float v11; // xmm1_4
+  float v12; // xmm2_4
+  float v13; // xmm5_4
+  float v14; // xmm3_4
+  void (__thiscall *TraceRay)(IEngineTrace *, const Ray_t *, unsigned int, ITraceFilter *, CGameTrace *); // edx
+  C_Portal_Base2D *AlongRay; // esi
+  float v18; // xmm0_4
+  float v19; // xmm3_4
+  float v20; // xmm1_4
+  _BYTE v22[65]; // [esp+2Ch] [ebp-18Ch] OVERLAPPED BYREF
+  CGameTrace worldTrace; // [esp+78h] [ebp-140h] BYREF
+  CTraceFilterSimpleClassnameList traceFilter; // [esp+D0h] [ebp-E8h] BYREF
+  Vector vForward; // [esp+F4h] [ebp-C4h] BYREF
+  Vector vHitPoint; // [esp+100h] [ebp-B8h] BYREF
+  Vector vNewForward; // [esp+10Ch] [ebp-ACh] BYREF
+  Ray_t ray; // [esp+118h] [ebp-A0h]
+  Vector vStart; // [esp+168h] [ebp-50h] BYREF
+  QAngle vNewAngles; // [esp+174h] [ebp-44h] BYREF
+  Vector mins; // [esp+180h] [ebp-38h] BYREF
+  float flIntersectionFraction; // [esp+18Ch] [ebp-2Ch]
+  Vector vNewWallOrigin; // [esp+190h] [ebp-28h] BYREF
+  QAngle qAngles; // [esp+19Ch] [ebp-1Ch] BYREF
+  Vector maxs; // [esp+1A8h] [ebp-10h] BYREF
+  float retaddr; // [esp+1B8h] [ebp+0h]
+
+  maxs.y = a2;
+  maxs.z = retaddr;
+  vNewWallOrigin = (Vector)*C_BaseEntity::GetNetworkAngles(this);
+  AngleVectors((const QAngle *)&vNewWallOrigin, (Vector *)&traceFilter.m_PassClassnames.m_Memory.m_nGrowSize);
+  ((void (__thiscall *)(C_BaseProjectedEntity *, QAngle *, QAngle *, int, int))this->GetProjectionExtents)(
+    this,
+    &vNewAngles,
+    &qAngles,
+    a3,
+    a4);
+  NetworkOrigin = C_BaseEntity::GetNetworkOrigin(this);
+  z = NetworkOrigin->z;
+  *(_QWORD *)&ray.m_IsRay = *(_QWORD *)&NetworkOrigin->x;
+  v10 = (float)(*(float *)&traceFilter.m_PassClassnames.m_Memory.m_nGrowSize * 25.0) + *(float *)&ray.m_IsRay;
+  v11 = *(float *)(&ray.m_IsSwept + 3) + (float)(*(float *)&traceFilter.m_PassClassnames.m_Size * 25.0);
+  *(float *)(&ray.m_IsSwept + 7) = z;
+  v12 = z + (float)(*(float *)&traceFilter.m_PassClassnames.m_pElements * 25.0);
+  ray.m_Start.z = (float)((float)(*(float *)&traceFilter.m_PassClassnames.m_Size * 56755.84) + v11) - v11;
+  ray.m_Start.y = (float)((float)(*(float *)&traceFilter.m_PassClassnames.m_Memory.m_nGrowSize * 56755.84) + v10) - v10;
+  ray.m_Start.w = (float)((float)(*(float *)&traceFilter.m_PassClassnames.m_pElements * 56755.84) + v12) - v12;
+  ray.m_Extents.y = 0.0;
+  BYTE1(ray.m_Extents.z) = (float)((float)((float)(ray.m_Start.z * ray.m_Start.z)
+                                         + (float)(ray.m_Start.y * ray.m_Start.y))
+                                 + (float)(ray.m_Start.w * ray.m_Start.w)) != 0.0;
+  ray.m_StartOffset.y = (float)(qAngles.x - vNewAngles.x) * 0.5;
+  ray.m_StartOffset.z = (float)(qAngles.y - vNewAngles.y) * 0.5;
+  ray.m_StartOffset.w = (float)(qAngles.z - vNewAngles.z) * 0.5;
+  LOBYTE(ray.m_Extents.z) = (float)((float)((float)(ray.m_StartOffset.z * ray.m_StartOffset.z)
+                                          + (float)(ray.m_StartOffset.y * ray.m_StartOffset.y))
+                                  + (float)(ray.m_StartOffset.w * ray.m_StartOffset.w)) < 0.000001;
+  v13 = (float)(vNewAngles.y + qAngles.y) * 0.5;
+  v14 = 0.5 * (float)(vNewAngles.z + qAngles.z);
+  vNewForward.y = v13 + v11;
+  vNewForward.z = v14 + v12;
+  vNewForward.x = (float)((float)(vNewAngles.x + qAngles.x) * 0.5) + v10;
+  ray.m_Delta.y = (float)((float)(vNewAngles.x + qAngles.x) * 0.5) * -1.0;
+  ray.m_Delta.z = v13 * -1.0;
+  ray.m_Delta.w = v14 * -1.0;
+  CTraceFilterSimpleClassnameList::CTraceFilterSimpleClassnameList(
+    (CTraceFilterSimpleClassnameList *)&worldTrace.m_pEnt,
+    this,
+    (int)FLOAT_1_0);
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore(
+    (CTraceFilterSimpleClassnameList *)&worldTrace.m_pEnt,
+    "prop_physics");
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore(
+    (CTraceFilterSimpleClassnameList *)&worldTrace.m_pEnt,
+    "func_physbox");
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore(
+    (CTraceFilterSimpleClassnameList *)&worldTrace.m_pEnt,
+    "simple_physics_brush");
+  TraceRay = enginetrace->TraceRay;
+  LODWORD(maxs.x) = &v22[64];
+  ((void (__thiscall *)(IEngineTrace *, Vector *, int, struct CBaseEntity **))TraceRay)(
+    enginetrace,
+    &vNewForward,
+    16395,
+    &worldTrace.m_pEnt);
+  if ( r_visualizetraces.m_pParent->m_Value.m_nValue )
+    DebugDrawLine((const Vector *)&v22[64], &worldTrace.startpos, 255, 0, 0, 1, -1.0);
+  AlongRay = UTIL_Portal_FirstAlongRay((const Ray_t *)&vNewForward, &maxs.x);
+  if ( pOutOrigin )
+    *pOutOrigin = worldTrace.startpos;
+  if ( pOutAngles )
+    *(Vector *)pOutAngles = vNewWallOrigin;
+  if ( (float)(maxs.x - worldTrace.plane.normal.z) > 0.000099999997 )
+    goto LABEL_8;
+  if ( pOutPortal )
+    *pOutPortal = AlongRay;
+  if ( AlongRay && C_Portal_Base2D::IsActivedAndLinked(AlongRay) )
+  {
+    mins.x = UTIL_IntersectRayWithPortal((const Ray_t *)&vNewForward, AlongRay);
+    vForward.x = (float)(ray.m_Start.y * mins.x) + vNewForward.x;
+    vForward.y = (float)(ray.m_Start.z * mins.x) + vNewForward.y;
+    vForward.z = (float)(ray.m_Start.w * mins.x) + vNewForward.z;
+    qmemcpy(v22, &AlongRay->m_matrixThisToLinked, 0x40u);
+    UTIL_Portal_PointTransform((const VMatrix *)v22, &vForward, (Vector *)&mins.y);
+    UTIL_Portal_AngleTransform((const VMatrix *)v22, (const QAngle *)&vNewWallOrigin, (QAngle *)&vStart);
+    AngleVectors((const QAngle *)&vStart, &vHitPoint, 0, 0);
+    v18 = (float)(vHitPoint.x * 0.1) + mins.y;
+    v19 = mins.z + (float)(vHitPoint.y * 0.1);
+    v20 = flIntersectionFraction + (float)(vHitPoint.z * 0.1);
+    mins.y = v18;
+    mins.z = v19;
+    flIntersectionFraction = v20;
+    if ( pOutAngles )
+      *(Vector *)pOutAngles = vStart;
+    if ( pOutOrigin )
+    {
+      pOutOrigin->x = v18;
+      pOutOrigin->y = v19;
+      pOutOrigin->z = v20;
+    }
+    CUtlVector<VideoPanel *,CUtlMemory<VideoPanel *,int>>::~CUtlVector<VideoPanel *,CUtlMemory<VideoPanel *,int>>((CUtlVector<vgui::CTreeViewListControl::CColumnInfo,CUtlMemory<vgui::CTreeViewListControl::CColumnInfo,int> > *)&traceFilter.m_pPassEnt);
+    return 1;
+  }
+  else
+  {
+LABEL_8:
+    CUtlVector<VideoPanel *,CUtlMemory<VideoPanel *,int>>::~CUtlVector<VideoPanel *,CUtlMemory<VideoPanel *,int>>((CUtlVector<vgui::CTreeViewListControl::CColumnInfo,CUtlMemory<vgui::CTreeViewListControl::CColumnInfo,int> > *)&traceFilter.m_pPassEnt);
+    return 0;
+  }
+}

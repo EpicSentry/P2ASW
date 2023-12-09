@@ -1,0 +1,95 @@
+void __thiscall C_ProjectedWallEntity::PostDataUpdate(C_ProjectedWallEntity *this, int updateType)
+{
+  int v3; // esi
+  const datamap_t *v4; // eax
+  const typedescription_t *FlatFieldByName; // eax
+  char *PredictedFrame; // eax
+  int v7; // eax
+  int v8; // eax
+  struct CPhysCollide *pReferencedCollideables[150]; // [esp+4h] [ebp-264h]
+  struct CPhysCollide *pPredictedCollide; // [esp+25Ch] [ebp-Ch] BYREF
+  int iPredictedFramesStart; // [esp+260h] [ebp-8h] BYREF
+  int iPredictedFramesEnd; // [esp+264h] [ebp-4h] BYREF
+  int i; // [esp+270h] [ebp+8h]
+
+  C_BaseEntity::PostDataUpdate(this, (DataUpdateType_t)updateType);
+  if ( this->m_WallCollideables.m_Memory.m_nAllocationCount > 1
+    && *(_DWORD *)(LODWORD(this->m_vWorldSpace_WallMaxs.y) + 64) != this->m_WallCollideables.m_Size )
+  {
+    v3 = 0;
+    if ( !C_BaseEntity::GetPredictable((C_ProjectedWallEntity *)((char *)this - 8))
+      || !C_BaseEntity::IsIntermediateDataAllocated((C_ProjectedWallEntity *)((char *)this - 8)) )
+    {
+      goto LABEL_18;
+    }
+    if ( s_iActiveCollideableFlatFieldOffset == -1 )
+    {
+      v4 = (const datamap_t *)(*(int (__thiscall **)(float *))(LODWORD(this[-1].m_flParticleUpdateTime) + 68))(&this[-1].m_flParticleUpdateTime);
+      FlatFieldByName = CPredictionCopy::FindFlatFieldByName("m_pActiveCollideable", v4);
+      if ( FlatFieldByName )
+        s_iActiveCollideableFlatFieldOffset = FlatFieldByName->flatOffset[1];
+      if ( s_iActiveCollideableFlatFieldOffset == -1 )
+        goto LABEL_18;
+    }
+    C_BaseEntity::GetUnacknowledgedPredictedFrameRange(
+      (C_ProjectedWallEntity *)((char *)this - 8),
+      &iPredictedFramesStart,
+      &iPredictedFramesEnd);
+    i = iPredictedFramesStart;
+    if ( iPredictedFramesStart > iPredictedFramesEnd )
+      goto LABEL_18;
+    do
+    {
+      PredictedFrame = (char *)C_BaseEntity::GetPredictedFrame((C_ProjectedWallEntity *)((char *)this - 8), i);
+      _V_memcpy(&pPredictedCollide, &PredictedFrame[s_iActiveCollideableFlatFieldOffset], 4);
+      if ( pPredictedCollide )
+      {
+        v7 = 0;
+        if ( !v3 )
+          goto LABEL_16;
+        while ( pReferencedCollideables[v7] != pPredictedCollide )
+        {
+          if ( ++v7 == v3 )
+            goto LABEL_16;
+        }
+        if ( v7 == v3 )
+LABEL_16:
+          pReferencedCollideables[v3++] = pPredictedCollide;
+      }
+      ++i;
+    }
+    while ( i <= iPredictedFramesEnd );
+LABEL_18:
+    while ( 1 )
+    {
+      v8 = 0;
+      if ( v3 )
+      {
+        while ( *(struct CPhysCollide **)(LODWORD(this->m_vWorldSpace_WallMaxs.y) + 64) != pReferencedCollideables[v8] )
+        {
+          if ( ++v8 == v3 )
+            goto LABEL_23;
+        }
+        if ( v8 != v3 )
+          break;
+      }
+LABEL_23:
+      physcollision->DestroyCollide(
+        physcollision,
+        *(struct CPhysCollide **)(LODWORD(this->m_vWorldSpace_WallMaxs.y) + 64));
+      if ( this->m_WallCollideables.m_Memory.m_nAllocationCount - 1 > 0 )
+        _V_memmove(
+          (void *)LODWORD(this->m_vWorldSpace_WallMaxs.y),
+          (const void *)(LODWORD(this->m_vWorldSpace_WallMaxs.y) + 68),
+          68 * (this->m_WallCollideables.m_Memory.m_nAllocationCount - 1));
+      if ( --this->m_WallCollideables.m_Memory.m_nAllocationCount <= 1
+        || *(_DWORD *)(LODWORD(this->m_vWorldSpace_WallMaxs.y) + 64) == this->m_WallCollideables.m_Size )
+      {
+        return;
+      }
+    }
+    _Warning(
+      "C_ProjectedWallEntity::PostDataUpdate() Theoretical predicted deletion case detected, please give Dave K details o"
+      "n what you were doing.\n");
+  }
+}

@@ -1,0 +1,96 @@
+// local variable allocation has failed, the output may be wrong!
+// bad sp value at call has been detected, the output may be wrong!
+void __usercall C_BaseProjectedEntity::FindProjectedEndpoints(
+        C_BaseProjectedEntity *this@<ecx>,
+        float a2@<ebp>,
+        int a3@<esi>)
+{
+  const Vector *NetworkOrigin; // eax
+  __int64 v5; // xmm0_8
+  float z; // eax
+  float v7; // xmm1_4
+  float v8; // xmm2_4
+  float v9; // xmm5_4
+  float v10; // xmm3_4
+  float y; // xmm1_4
+  float v12; // xmm2_4
+  float v13; // xmm0_4
+  float v14; // xmm1_4
+  Vector v16; // [esp+24h] [ebp-134h] BYREF
+  Vector vecUp; // [esp+30h] [ebp-128h] BYREF
+  Vector vecRight; // [esp+3Ch] [ebp-11Ch] BYREF
+  CGameTrace tr; // [esp+48h] [ebp-110h] BYREF
+  CTraceFilterSimpleClassnameList traceFilter; // [esp+A4h] [ebp-B4h] BYREF
+  Ray_t ray_4; // [esp+CCh] [ebp-8Ch] OVERLAPPED BYREF
+  QAngle qAngles; // [esp+11Ch] [ebp-3Ch] BYREF
+  Vector vecForward; // [esp+128h] [ebp-30h] BYREF
+  Vector mins; // [esp+134h] [ebp-24h] BYREF
+  Vector maxs; // [esp+140h] [ebp-18h]
+  Vector vStart; // [esp+14Ch] [ebp-Ch]
+  float retaddr; // [esp+158h] [ebp+0h]
+
+  vStart.x = a2;
+  vStart.y = retaddr;
+  *(QAngle *)&ray_4.m_IsRay = *C_BaseEntity::GetNetworkAngles(this);
+  AngleVectors((const QAngle *)&ray_4.m_IsRay, (Vector *)&qAngles, &vecUp, &v16);
+  ((void (__thiscall *)(C_BaseProjectedEntity *, Vector *, Vector *, int))this->GetProjectionExtents)(
+    this,
+    &vecForward,
+    &mins,
+    a3);
+  NetworkOrigin = C_BaseEntity::GetNetworkOrigin(this);
+  v5 = *(_QWORD *)&NetworkOrigin->x;
+  z = NetworkOrigin->z;
+  *(_QWORD *)&maxs.x = v5;
+  *(float *)&v5 = (float)(qAngles.x * 25.0) + *(float *)&v5;
+  v7 = maxs.y + (float)(qAngles.y * 25.0);
+  v8 = z + (float)(qAngles.z * 25.0);
+  ray_4.m_Start.y = (float)((float)(qAngles.y * 4096.0) + v7) - v7;
+  ray_4.m_Start.x = (float)((float)(qAngles.x * 4096.0) + *(float *)&v5) - *(float *)&v5;
+  ray_4.m_Start.z = (float)((float)(qAngles.z * 4096.0) + v8) - v8;
+  ray_4.m_Extents.x = 0.0;
+  BYTE1(ray_4.m_Extents.y) = (float)((float)((float)(ray_4.m_Start.y * ray_4.m_Start.y)
+                                           + (float)(ray_4.m_Start.x * ray_4.m_Start.x))
+                                   + (float)(ray_4.m_Start.z * ray_4.m_Start.z)) != 0.0;
+  ray_4.m_StartOffset.x = (float)(mins.x - vecForward.x) * 0.5;
+  ray_4.m_StartOffset.y = (float)(mins.y - vecForward.y) * 0.5;
+  ray_4.m_StartOffset.z = (float)(mins.z - vecForward.z) * 0.5;
+  LOBYTE(ray_4.m_Extents.y) = (float)((float)((float)(ray_4.m_StartOffset.y * ray_4.m_StartOffset.y)
+                                            + (float)(ray_4.m_StartOffset.x * ray_4.m_StartOffset.x))
+                                    + (float)(ray_4.m_StartOffset.z * ray_4.m_StartOffset.z)) < 0.000001;
+  v9 = (float)(vecForward.y + mins.y) * 0.5;
+  v10 = 0.5 * (float)(vecForward.z + mins.z);
+  *(float *)&traceFilter.m_PassClassnames.m_Size = v9 + v7;
+  *(float *)&traceFilter.m_PassClassnames.m_pElements = v10 + v8;
+  *(float *)&traceFilter.m_PassClassnames.m_Memory.m_nGrowSize = (float)((float)(vecForward.x + mins.x) * 0.5)
+                                                               + *(float *)&v5;
+  ray_4.m_Delta.x = (float)((float)(vecForward.x + mins.x) * 0.5) * -1.0;
+  ray_4.m_Delta.y = v9 * -1.0;
+  ray_4.m_Delta.z = v10 * -1.0;
+  CTraceFilterSimpleClassnameList::CTraceFilterSimpleClassnameList(
+    (CTraceFilterSimpleClassnameList *)&tr.hitbox,
+    this,
+    0);
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore((CTraceFilterSimpleClassnameList *)&tr.hitbox, "prop_physics");
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore((CTraceFilterSimpleClassnameList *)&tr.hitbox, "func_physbox");
+  CTraceFilterSimpleClassnameList::AddClassnameToIgnore(
+    (CTraceFilterSimpleClassnameList *)&tr.hitbox,
+    "simple_physics_brush");
+  enginetrace->TraceRay(
+    enginetrace,
+    (const Ray_t *)&traceFilter.m_PassClassnames.m_Memory.m_nGrowSize,
+    16395u,
+    (ITraceFilter *)&tr.hitbox,
+    (CGameTrace *)&vecRight);
+  if ( r_visualizetraces.m_pParent->m_Value.m_nValue )
+    DebugDrawLine(&vecRight, &tr.startpos, 255, 0, 0, 1, -1.0);
+  y = tr.endpos.y;
+  v12 = tr.endpos.z;
+  this->m_vecStartPoint = maxs;
+  v13 = tr.startpos.y + (float)(y * 0.1);
+  v14 = tr.startpos.z + (float)(v12 * 0.1);
+  this->m_vecEndPoint.x = tr.startpos.x + (float)(tr.endpos.x * 0.1);
+  this->m_vecEndPoint.y = v13;
+  this->m_vecEndPoint.z = v14;
+  CUtlVector<VideoPanel *,CUtlMemory<VideoPanel *,int>>::~CUtlVector<VideoPanel *,CUtlMemory<VideoPanel *,int>>((CUtlVector<vgui::CTreeViewListControl::CColumnInfo,CUtlMemory<vgui::CTreeViewListControl::CColumnInfo,int> > *)&traceFilter.m_pPassEnt);
+}

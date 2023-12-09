@@ -1,0 +1,6 @@
+void __usercall C_ProjectedWallEntity::OnProjected(C_ProjectedWallEntity *this@<ecx>, int a2@<ebp>, int a3@<edi>)
+{
+  C_BaseProjectedEntity::OnProjected(this);
+  C_ProjectedWallEntity::ProjectWall(this, a2, a3, (int)this);
+  C_ProjectedWallEntity::SetupWallParticles(this);
+}

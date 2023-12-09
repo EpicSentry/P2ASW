@@ -1,0 +1,27 @@
+int __cdecl C_ProjectedWallEntity::ComputeSegmentIndex(
+        const C_ProjectedWallEntity *const this,
+        const Vector *const vWorldPositionOnWall)
+{
+  float v2; // xmm0_4
+  int result; // eax
+  int v4; // ecx
+
+  v2 = (float)((float)((float)((float)((float)(this->m_vecEndPoint.x - this->m_vecStartPoint.x)
+                                     * (float)(vWorldPositionOnWall->x - this->m_vecStartPoint.x))
+                             + (float)((float)(this->m_vecEndPoint.y - this->m_vecStartPoint.y)
+                                     * (float)(vWorldPositionOnWall->y - this->m_vecStartPoint.y)))
+                     + (float)((float)(this->m_vecEndPoint.z - this->m_vecStartPoint.z)
+                             * (float)(vWorldPositionOnWall->z - this->m_vecStartPoint.z)))
+             / this->m_flLength)
+     / this->m_flSegmentLength;
+  result = 0;
+  if ( v2 >= 0.0 )
+  {
+    v4 = this->m_nNumSegments - 1;
+    if ( v2 <= (float)v4 )
+      return (int)v2;
+    else
+      return (int)(float)v4;
+  }
+  return result;
+}

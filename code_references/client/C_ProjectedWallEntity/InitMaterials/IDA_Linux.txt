@@ -1,0 +1,264 @@
+bool __cdecl C_ProjectedWallEntity::InitMaterials(C_ProjectedWallEntity *const this)
+{
+  C_ProjectedWallEntity *v1; // ebx
+  int i; // esi
+  char *v3; // edi
+  unsigned int v4; // edx
+  char *v5; // edi
+  IMaterialVar *m_pPaintColorMid; // eax
+  IMaterialVar *m_pPaintColorEnd1; // edi
+  IMaterialVar *m_pPaintColorEnd2; // ebx
+  IMaterialVar *m_pPaintColorSing; // ecx
+  bool result; // al
+  int v11; // eax
+  int v12; // eax
+  int v13; // eax
+  int v14; // eax
+  IMaterial *v15; // edx
+  IMaterial *v16; // edx
+  IMaterial *v17; // edx
+  IMaterial *v18; // edx
+  IMaterial *v19; // edx
+  IMaterial *v20; // edx
+  IMaterial *v21; // edx
+  char materialName[128]; // [esp+3Fh] [ebp-99h] BYREF
+  bool bFound[25]; // [esp+BFh] [ebp-19h] BYREF
+
+  if ( !this->m_pBodyMaterial )
+  {
+    v15 = (IMaterial *)(*(int (__cdecl **)(IMaterialSystem *, const char *, _DWORD, _DWORD, _DWORD))(*(_DWORD *)materials + 328))(
+                         materials,
+                         "effects/projected_wall",
+                         0,
+                         0,
+                         0);
+    this->m_pBodyMaterial = v15;
+    result = 0;
+    if ( !v15 )
+      return result;
+  }
+  if ( !this->m_pSideRailMaterial )
+  {
+    v16 = (IMaterial *)(*(int (__cdecl **)(IMaterialSystem *, const char *, _DWORD, _DWORD, _DWORD))(*(_DWORD *)materials + 328))(
+                         materials,
+                         "effects/projected_wall_rail",
+                         0,
+                         0,
+                         0);
+    this->m_pSideRailMaterial = v16;
+    result = 0;
+    if ( !v16 )
+      return result;
+  }
+  v1 = this;
+  for ( i = 0; i != 4; ++i )
+  {
+    v3 = &materialName[4];
+    v4 = 124;
+    *(_DWORD *)materialName = 0;
+    if ( ((unsigned int)&materialName[4] & 1) != 0 )
+    {
+      v3 = &materialName[5];
+      materialName[4] = 0;
+      LOBYTE(v4) = 123;
+      if ( ((unsigned int)&materialName[5] & 2) == 0 )
+        goto LABEL_6;
+    }
+    else if ( ((unsigned int)&materialName[4] & 2) == 0 )
+    {
+      goto LABEL_6;
+    }
+    *(_WORD *)v3 = 0;
+    v4 -= 2;
+    v3 += 2;
+LABEL_6:
+    memset(v3, 0, 4 * (v4 >> 2));
+    v5 = &v3[4 * (v4 >> 2)];
+    if ( (v4 & 2) != 0 )
+    {
+      *(_WORD *)v5 = 0;
+      v5 += 2;
+    }
+    if ( (v4 & 1) != 0 )
+      *v5 = 0;
+    if ( !v1->m_pPaintMaterialsMid[0] )
+    {
+      _V_strcpy(materialName, "paint/bridge_paint_tile");
+      V_strncat(materialName, C_ProjectedWallEntity::InitMaterials(void)::paintMaterialNameStrings[i], 0x80u, -1);
+      v11 = (*(int (__cdecl **)(IMaterialSystem *, char *, _DWORD, _DWORD, _DWORD))(*(_DWORD *)materials + 328))(
+              materials,
+              materialName,
+              0,
+              0,
+              0);
+      v1->m_pPaintMaterialsMid[0] = (IMaterial *)v11;
+      if ( !v11 )
+        return 0;
+    }
+    if ( v1->m_pPaintMaterialsEnd1[0] )
+    {
+      if ( !v1->m_pPaintMaterialsEnd2[0] )
+        goto LABEL_31;
+    }
+    else
+    {
+      _V_memset(materialName, 0, 128);
+      _V_strcpy(materialName, "paint/bridge_paint_end_right");
+      V_strncat(materialName, C_ProjectedWallEntity::InitMaterials(void)::paintMaterialNameStrings[i], 0x80u, -1);
+      v12 = (*(int (__cdecl **)(IMaterialSystem *, char *, _DWORD, _DWORD, _DWORD))(*(_DWORD *)materials + 328))(
+              materials,
+              materialName,
+              0,
+              0,
+              0);
+      v1->m_pPaintMaterialsEnd1[0] = (IMaterial *)v12;
+      if ( !v12 )
+        return 0;
+      if ( !v1->m_pPaintMaterialsEnd2[0] )
+      {
+LABEL_31:
+        _V_memset(materialName, 0, 128);
+        _V_strcpy(materialName, "paint/bridge_paint_end_left");
+        V_strncat(materialName, C_ProjectedWallEntity::InitMaterials(void)::paintMaterialNameStrings[i], 0x80u, -1);
+        v13 = (*(int (__cdecl **)(IMaterialSystem *, char *, _DWORD, _DWORD, _DWORD))(*(_DWORD *)materials + 328))(
+                materials,
+                materialName,
+                0,
+                0,
+                0);
+        v1->m_pPaintMaterialsEnd2[0] = (IMaterial *)v13;
+        if ( !v13 )
+          return 0;
+        if ( v1->m_pPaintMaterialsSing[0] )
+          goto LABEL_14;
+        goto LABEL_33;
+      }
+    }
+    if ( v1->m_pPaintMaterialsSing[0] )
+      goto LABEL_14;
+LABEL_33:
+    _V_memset(materialName, 0, 128);
+    _V_strcpy(materialName, "paint/bridge_paint_single");
+    V_strncat(materialName, C_ProjectedWallEntity::InitMaterials(void)::paintMaterialNameStrings[i], 0x80u, -1);
+    v14 = (*(int (__cdecl **)(IMaterialSystem *, char *, _DWORD, _DWORD, _DWORD))(*(_DWORD *)materials + 328))(
+            materials,
+            materialName,
+            0,
+            0,
+            0);
+    v1->m_pPaintMaterialsSing[0] = (IMaterial *)v14;
+    if ( !v14 )
+      return 0;
+LABEL_14:
+    v1 = (C_ProjectedWallEntity *)((char *)v1 + 4);
+  }
+  if ( this->m_pPaintMaterialRBounceLSpeed
+    || (v17 = (IMaterial *)(*(int (__cdecl **)(IMaterialSystem *, const char *, _DWORD, _DWORD, _DWORD))(*(_DWORD *)materials + 328))(
+                             materials,
+                             "paint/bridge_paint_bounce_l_speed",
+                             0,
+                             0,
+                             0),
+        this->m_pPaintMaterialRBounceLSpeed = v17,
+        result = 0,
+        v17) )
+  {
+    if ( this->m_pPaintMaterialLBounceRSpeed
+      || (v19 = (IMaterial *)(*(int (__cdecl **)(IMaterialSystem *, const char *, _DWORD, _DWORD, _DWORD))(*(_DWORD *)materials + 328))(
+                               materials,
+                               "paint/bridge_paint_bounce_r_speed",
+                               0,
+                               0,
+                               0),
+          this->m_pPaintMaterialLBounceRSpeed = v19,
+          result = 0,
+          v19) )
+    {
+      if ( this->m_pPaintMaterialBounceRSpeed
+        || (v18 = (IMaterial *)(*(int (__cdecl **)(IMaterialSystem *, const char *, _DWORD, _DWORD, _DWORD))(*(_DWORD *)materials + 328))(
+                                 materials,
+                                 "paint/bridge_paint_end_right_bounce_l_speed",
+                                 0,
+                                 0,
+                                 0),
+            this->m_pPaintMaterialBounceRSpeed = v18,
+            result = 0,
+            v18) )
+      {
+        if ( this->m_pPaintMaterialBounceLSpeed
+          || (v20 = (IMaterial *)(*(int (__cdecl **)(IMaterialSystem *, const char *, _DWORD, _DWORD, _DWORD))(*(_DWORD *)materials + 328))(
+                                   materials,
+                                   "paint/bridge_paint_end_left_bounce_r_speed",
+                                   0,
+                                   0,
+                                   0),
+              this->m_pPaintMaterialBounceLSpeed = v20,
+              result = 0,
+              v20) )
+        {
+          if ( this->m_pPaintMaterialBounceLRSpeed
+            || (v21 = (IMaterial *)(*(int (__cdecl **)(IMaterialSystem *, const char *, _DWORD, _DWORD, _DWORD))(*(_DWORD *)materials + 328))(
+                                     materials,
+                                     "paint/bridge_paint_bounce_l_r_speed",
+                                     0,
+                                     0,
+                                     0),
+                this->m_pPaintMaterialBounceLRSpeed = v21,
+                result = 0,
+                v21) )
+          {
+            m_pPaintColorMid = this->m_pPaintColorMid;
+            bFound[0] = 0;
+            if ( m_pPaintColorMid
+              || (this->m_pPaintColorMid = (IMaterialVar *)(*(int (__cdecl **)(IMaterial *, const char *, bool *, int))(*(_DWORD *)this->m_pPaintMaterialsMid[0] + 44))(
+                                                             this->m_pPaintMaterialsMid[0],
+                                                             "$color",
+                                                             bFound,
+                                                             1),
+                  result = 0,
+                  bFound[0]) )
+            {
+              m_pPaintColorEnd1 = this->m_pPaintColorEnd1;
+              bFound[0] = 0;
+              if ( m_pPaintColorEnd1
+                || (this->m_pPaintColorEnd1 = (IMaterialVar *)(*(int (__cdecl **)(IMaterial *, const char *, bool *, int))(*(_DWORD *)this->m_pPaintMaterialsEnd1[0] + 44))(
+                                                                this->m_pPaintMaterialsEnd1[0],
+                                                                "$color",
+                                                                bFound,
+                                                                1),
+                    result = 0,
+                    bFound[0]) )
+              {
+                m_pPaintColorEnd2 = this->m_pPaintColorEnd2;
+                bFound[0] = 0;
+                if ( m_pPaintColorEnd2
+                  || (this->m_pPaintColorEnd2 = (IMaterialVar *)(*(int (__cdecl **)(IMaterial *, const char *, bool *, int))(*(_DWORD *)this->m_pPaintMaterialsEnd2[0] + 44))(
+                                                                  this->m_pPaintMaterialsEnd2[0],
+                                                                  "$color",
+                                                                  bFound,
+                                                                  1),
+                      result = 0,
+                      bFound[0]) )
+                {
+                  m_pPaintColorSing = this->m_pPaintColorSing;
+                  bFound[0] = 0;
+                  result = 1;
+                  if ( !m_pPaintColorSing )
+                  {
+                    this->m_pPaintColorSing = (IMaterialVar *)(*(int (__cdecl **)(IMaterial *, const char *, bool *, int))(*(_DWORD *)this->m_pPaintMaterialsSing[0] + 44))(
+                                                                this->m_pPaintMaterialsSing[0],
+                                                                "$color",
+                                                                bFound,
+                                                                1);
+                    return bFound[0];
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return result;
+}

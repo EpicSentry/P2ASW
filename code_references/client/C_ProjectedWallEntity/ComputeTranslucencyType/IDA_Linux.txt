@@ -1,0 +1,4 @@
+RenderableTranslucencyType_t __cdecl C_ProjectedWallEntity::ComputeTranslucencyType(C_ProjectedWallEntity *const this)
+{
+  return 1;
+}

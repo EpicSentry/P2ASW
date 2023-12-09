@@ -1,0 +1,25 @@
+char __thiscall C_ProjectedWallEntity::SetPaintSurfaceColor(C_ProjectedWallEntity *this, const PaintPowerType *power)
+{
+  int v2; // eax
+  char v3; // bl
+  float flColors[3]; // [esp+0h] [ebp-Ch] BYREF
+
+  v2 = *power;
+  v3 = 0;
+  LODWORD(flColors[0]) = FLOAT_1_0;
+  LODWORD(flColors[1]) = FLOAT_1_0;
+  LODWORD(flColors[2]) = FLOAT_1_0;
+  if ( v2 != 4 )
+  {
+    MapPowerToVisualColor((Color *)&power, v2);
+    flColors[0] = (float)(unsigned __int8)power * 0.0039215689;
+    flColors[1] = (float)BYTE1(power) * 0.0039215689;
+    flColors[2] = (float)BYTE2(power) * 0.0039215689;
+    v3 = 1;
+  }
+  this->m_pPaintColorMid->SetVecValue(this->m_pPaintColorMid, flColors, 3);
+  this->m_pPaintColorEnd1->SetVecValue(this->m_pPaintColorEnd1, flColors, 3);
+  this->m_pPaintColorEnd2->SetVecValue(this->m_pPaintColorEnd2, flColors, 3);
+  this->m_pPaintColorSing->SetVecValue(this->m_pPaintColorSing, flColors, 3);
+  return v3;
+}

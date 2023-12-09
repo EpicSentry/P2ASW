@@ -1,0 +1,33 @@
+void __thiscall C_ProjectedWallEntity::GetToolRecordingState(C_ProjectedWallEntity *this, KeyValues *msg)
+{
+  KeyValues *NonConformantKeyValues; // esi
+  const char *HandlerIDKeyString; // eax
+  const Vector *v5; // eax
+  const QAngle *NetworkAngles; // eax
+  __int64 vStart; // [esp+Ch] [ebp-Ch]
+  float vStart_8; // [esp+14h] [ebp-4h]
+  float vStart_8a; // [esp+14h] [ebp-4h]
+
+  C_BaseEntity::GetToolRecordingState(this, msg);
+  NonConformantKeyValues = CIFM_EntityKeyValuesHandler_AutoRegister::FindOrCreateNonConformantKeyValues(msg);
+  HandlerIDKeyString = CIFM_EntityKeyValuesHandler_AutoRegister::GetHandlerIDKeyString();
+  KeyValues::SetString(NonConformantKeyValues, HandlerIDKeyString, "C_ProjectedWallEntity");
+  KeyValues::SetInt(NonConformantKeyValues, "entIndex", this->index);
+  KeyValues::SetFloat(NonConformantKeyValues, "width", this->m_flWidth);
+  KeyValues::SetFloat(NonConformantKeyValues, "height", this->m_flHeight);
+  KeyValues::SetInt(NonConformantKeyValues, "numSegments", this->m_nNumSegments);
+  KeyValues::SetFloat(NonConformantKeyValues, "segLength", this->m_flSegmentLength);
+  KeyValues::SetFloat(NonConformantKeyValues, "dispLength", this->m_flCurDisplayLength);
+  v5 = this->GetStartPoint(this);
+  vStart = *(_QWORD *)&v5->x;
+  vStart_8 = v5->z;
+  KeyValues::SetFloat(NonConformantKeyValues, "sp_x", v5->x);
+  KeyValues::SetFloat(NonConformantKeyValues, "sp_y", *((float *)&vStart + 1));
+  KeyValues::SetFloat(NonConformantKeyValues, "sp_z", vStart_8);
+  NetworkAngles = C_BaseEntity::GetNetworkAngles(this);
+  *(float *)&vStart = NetworkAngles->x;
+  vStart_8a = NetworkAngles->z;
+  KeyValues::SetFloat(NonConformantKeyValues, "na_y", NetworkAngles->y);
+  KeyValues::SetFloat(NonConformantKeyValues, "na_p", *(float *)&vStart);
+  KeyValues::SetFloat(NonConformantKeyValues, "na_r", vStart_8a);
+}

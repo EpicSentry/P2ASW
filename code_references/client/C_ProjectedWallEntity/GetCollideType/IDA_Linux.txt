@@ -1,0 +1,4 @@
+CollideType_t __cdecl C_ProjectedWallEntity::GetCollideType(C_ProjectedWallEntity *const this)
+{
+  return 1;
+}

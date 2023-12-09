@@ -1,0 +1,122 @@
+void __thiscall C_ProjectedWallEntity::DrawQuadHelper<1>(
+        C_ProjectedWallEntity *this,
+        CMeshBuilder *meshBuilder,
+        const Vector *vOrigin,
+        const Vector *vRight,
+        const Vector *vUp,
+        float flTextureScaleU,
+        float flTextureScaleV)
+{
+  float x; // xmm4_4
+  float v8; // xmm3_4
+  float y; // xmm0_4
+  float z; // xmm1_4
+  float *v12; // eax
+  _QWORD *v13; // eax
+  float *m_pCurrPosition; // eax
+  float v15; // xmm3_4
+  float v16; // xmm0_4
+  float v17; // xmm1_4
+  float *v18; // eax
+  _QWORD *v19; // eax
+  float *v20; // eax
+  float v21; // xmm3_4
+  float v22; // xmm0_4
+  float v23; // xmm1_4
+  float *v24; // eax
+  _QWORD *v25; // eax
+  float *v26; // eax
+  float v27; // xmm0_4
+  float v28; // xmm1_4
+  float v29; // xmm2_4
+  float *v30; // eax
+  _QWORD *v31; // eax
+  float *v32; // esi
+  __int64 vTangent; // [esp+Ch] [ebp-28h]
+  __int64 vTangent_8; // [esp+14h] [ebp-20h]
+  float vert; // [esp+1Ch] [ebp-18h]
+  float vert_4; // [esp+20h] [ebp-14h]
+  float vert_8; // [esp+24h] [ebp-10h]
+  Vector vNormal; // [esp+28h] [ebp-Ch] BYREF
+
+  x = vUp->x;
+  v8 = vRight->x;
+  vert = (float)(vUp->x + vOrigin->x) - vRight->x;
+  y = vRight->y;
+  vert_4 = (float)(vUp->y + vOrigin->y) - y;
+  z = vRight->z;
+  vert_8 = (float)(vUp->z + vOrigin->z) - z;
+  HIDWORD(vTangent) = LODWORD(vUp->y);
+  *(float *)&vTangent_8 = vUp->z;
+  HIDWORD(vTangent_8) = FLOAT_1_0;
+  vNormal.x = (float)(z * *((float *)&vTangent + 1)) - (float)(y * *(float *)&vTangent_8);
+  *(float *)&vTangent = x;
+  vNormal.y = (float)(v8 * *(float *)&vTangent_8) - (float)(z * x);
+  vNormal.z = (float)(y * x) - (float)(v8 * *((float *)&vTangent + 1));
+  VectorNormalize(&vNormal);
+  *(_DWORD *)meshBuilder->m_VertexBuilder.m_pCurrColor = g_nWhite[2] | ((g_nWhite[1] | ((g_nWhite[0] | (g_nWhite[3] << 8)) << 8)) << 8);
+  v12 = meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0];
+  *v12 = 0.0;
+  v12[1] = flTextureScaleV;
+  v13 = (_QWORD *)((char *)meshBuilder->m_VertexBuilder.m_pUserData
+                 + meshBuilder->m_VertexBuilder.m_nCurrentVertex * meshBuilder->m_VertexBuilder.m_VertexSize_UserData);
+  *v13 = vTangent;
+  v13[1] = vTangent_8;
+  *(Vector *)meshBuilder->m_VertexBuilder.m_pCurrNormal = vNormal;
+  m_pCurrPosition = meshBuilder->m_VertexBuilder.m_pCurrPosition;
+  *m_pCurrPosition = vert;
+  m_pCurrPosition[1] = vert_4;
+  m_pCurrPosition[2] = vert_8;
+  CVertexBuilder::AdvanceVertex(&meshBuilder->m_VertexBuilder);
+  v15 = vRight->x + (float)(vUp->x + vOrigin->x);
+  v16 = vRight->y + (float)(vUp->y + vOrigin->y);
+  v17 = vRight->z + (float)(vUp->z + vOrigin->z);
+  *(_DWORD *)meshBuilder->m_VertexBuilder.m_pCurrColor = g_nWhite[2] | ((g_nWhite[1] | ((g_nWhite[0] | (g_nWhite[3] << 8)) << 8)) << 8);
+  v18 = meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0];
+  *v18 = 0.0;
+  v18[1] = 0.0;
+  v19 = (_QWORD *)((char *)meshBuilder->m_VertexBuilder.m_pUserData
+                 + meshBuilder->m_VertexBuilder.m_nCurrentVertex * meshBuilder->m_VertexBuilder.m_VertexSize_UserData);
+  *v19 = vTangent;
+  v19[1] = vTangent_8;
+  *(Vector *)meshBuilder->m_VertexBuilder.m_pCurrNormal = vNormal;
+  v20 = meshBuilder->m_VertexBuilder.m_pCurrPosition;
+  *v20 = v15;
+  v20[1] = v16;
+  v20[2] = v17;
+  CVertexBuilder::AdvanceVertex(&meshBuilder->m_VertexBuilder);
+  v21 = vRight->x + (float)(vOrigin->x - vUp->x);
+  v22 = vRight->y + (float)(vOrigin->y - vUp->y);
+  v23 = vRight->z + (float)(vOrigin->z - vUp->z);
+  *(_DWORD *)meshBuilder->m_VertexBuilder.m_pCurrColor = g_nWhite[2] | ((g_nWhite[1] | ((g_nWhite[0] | (g_nWhite[3] << 8)) << 8)) << 8);
+  v24 = meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0];
+  *v24 = flTextureScaleU;
+  v24[1] = 0.0;
+  v25 = (_QWORD *)((char *)meshBuilder->m_VertexBuilder.m_pUserData
+                 + meshBuilder->m_VertexBuilder.m_nCurrentVertex * meshBuilder->m_VertexBuilder.m_VertexSize_UserData);
+  *v25 = vTangent;
+  v25[1] = vTangent_8;
+  *(Vector *)meshBuilder->m_VertexBuilder.m_pCurrNormal = vNormal;
+  v26 = meshBuilder->m_VertexBuilder.m_pCurrPosition;
+  *v26 = v21;
+  v26[1] = v22;
+  v26[2] = v23;
+  CVertexBuilder::AdvanceVertex(&meshBuilder->m_VertexBuilder);
+  v27 = (float)(vOrigin->x - vUp->x) - vRight->x;
+  v28 = (float)(vOrigin->y - vUp->y) - vRight->y;
+  v29 = (float)(vOrigin->z - vUp->z) - vRight->z;
+  *(_DWORD *)meshBuilder->m_VertexBuilder.m_pCurrColor = g_nWhite[2] | ((g_nWhite[1] | ((g_nWhite[0] | (g_nWhite[3] << 8)) << 8)) << 8);
+  v30 = meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0];
+  *v30 = flTextureScaleU;
+  v30[1] = flTextureScaleV;
+  v31 = (_QWORD *)((char *)meshBuilder->m_VertexBuilder.m_pUserData
+                 + meshBuilder->m_VertexBuilder.m_nCurrentVertex * meshBuilder->m_VertexBuilder.m_VertexSize_UserData);
+  *v31 = vTangent;
+  v31[1] = vTangent_8;
+  v32 = meshBuilder->m_VertexBuilder.m_pCurrPosition;
+  *(Vector *)meshBuilder->m_VertexBuilder.m_pCurrNormal = vNormal;
+  *v32 = v27;
+  v32[1] = v28;
+  v32[2] = v29;
+  CVertexBuilder::AdvanceVertex(&meshBuilder->m_VertexBuilder);
+}

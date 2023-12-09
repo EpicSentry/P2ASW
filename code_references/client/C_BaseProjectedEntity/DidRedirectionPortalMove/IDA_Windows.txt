@@ -1,0 +1,42 @@
+bool __thiscall C_BaseProjectedEntity::DidRedirectionPortalMove(C_BaseProjectedEntity *this, C_Portal_Base2D *pPortal)
+{
+  unsigned int m_Index; // ecx
+  C_Portal_Base2D *m_pEntity; // eax
+  unsigned int v6; // ecx
+  CEntInfo *v7; // eax
+  IHandleEntity *v8; // esi
+  const Vector *v9; // eax
+  const Vector *v10; // eax
+
+  if ( !pPortal || !C_Portal_Base2D::IsActivedAndLinked(pPortal) )
+    return 1;
+  m_Index = this->m_hHitPortal.m_Index;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+    m_pEntity = 0;
+  else
+    m_pEntity = (C_Portal_Base2D *)g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+  if ( pPortal != m_pEntity )
+    return 1;
+  v6 = this->m_hChildSegment.m_Index;
+  if ( v6 == -1 )
+    return 1;
+  v7 = &g_pEntityList->m_EntPtrArray[(unsigned __int16)v6];
+  if ( g_pEntityList->m_EntPtrArray[(unsigned __int16)v6].m_SerialNumber != HIWORD(v6) )
+    return 1;
+  v8 = v7->m_pEntity;
+  if ( !v7->m_pEntity )
+    return 1;
+  if ( COERCE_FLOAT(COERCE_UNSIGNED_INT(*(float *)&v8[686].__vftable - pPortal->m_ptOrigin.x) & _mask__AbsFloat_) > 0.0 )
+    return 1;
+  if ( COERCE_FLOAT(COERCE_UNSIGNED_INT(*(float *)&v8[687].__vftable - pPortal->m_ptOrigin.y) & _mask__AbsFloat_) > 0.0 )
+    return 1;
+  if ( COERCE_FLOAT(COERCE_UNSIGNED_INT(*(float *)&v8[688].__vftable - pPortal->m_ptOrigin.z) & _mask__AbsFloat_) > 0.0 )
+    return 1;
+  if ( !VectorsAreEqual((const Vector *)&v8[692], (const Vector *)&pPortal->m_qAbsAngle, 0.0) )
+    return 1;
+  v9 = (const Vector *)CHandle<C_PointCommentaryNode>::operator C_PointCommentaryNode *((CHandle<C_BaseCombatWeapon> *)&pPortal->m_hLinkedPortal);
+  if ( !VectorsAreEqual((const Vector *)&v8[683], v9 + 343, 0.0) )
+    return 1;
+  v10 = (const Vector *)CHandle<C_PointCommentaryNode>::operator C_PointCommentaryNode *((CHandle<C_BaseCombatWeapon> *)&pPortal->m_hLinkedPortal);
+  return !VectorsAreEqual((const Vector *)&v8[689], v10 + 347, 0.0);
+}

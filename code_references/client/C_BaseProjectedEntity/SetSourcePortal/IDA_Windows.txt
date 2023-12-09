@@ -1,0 +1,63 @@
+void __thiscall C_BaseProjectedEntity::SetSourcePortal(C_BaseProjectedEntity *this, C_Portal_Base2D *pPortal)
+{
+  unsigned int m_Index; // ecx
+  float *m_pEntity; // eax
+  unsigned int v5; // ecx
+  float *v6; // eax
+  unsigned int v7; // ecx
+  int v8; // eax
+  CEntInfo *v9; // edx
+  unsigned int v10; // ecx
+  int v11; // eax
+  bool v12; // zf
+  C_BasePlayer **v13; // eax
+
+  if ( pPortal )
+    this->m_hSourcePortal.m_Index = pPortal->GetRefEHandle(pPortal)->m_Index;
+  else
+    this->m_hSourcePortal.m_Index = -1;
+  C_BaseEntity::SetPredictionEligible(this, pPortal != 0);
+  if ( !pPortal )
+  {
+    this->m_vecSourcePortalCenter = vec3_origin;
+    this->m_vecSourcePortalRemoteCenter = vec3_origin;
+    this->m_vecSourcePortalAngle = vec3_angle;
+    this->m_vecSourcePortalRemoteAngle = vec3_angle;
+LABEL_19:
+    C_BaseEntity::UnsetPlayerSimulated(this);
+    return;
+  }
+  this->m_vecSourcePortalCenter = pPortal->m_ptOrigin;
+  m_Index = pPortal->m_hLinkedPortal.m_Index;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+    m_pEntity = 0;
+  else
+    m_pEntity = (float *)g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+  this->m_vecSourcePortalRemoteCenter.x = m_pEntity[1029];
+  this->m_vecSourcePortalRemoteCenter.y = m_pEntity[1030];
+  this->m_vecSourcePortalRemoteCenter.z = m_pEntity[1031];
+  this->m_vecSourcePortalAngle = pPortal->m_qAbsAngle;
+  v5 = pPortal->m_hLinkedPortal.m_Index;
+  if ( v5 == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)v5].m_SerialNumber != HIWORD(v5) )
+    v6 = 0;
+  else
+    v6 = (float *)g_pEntityList->m_EntPtrArray[(unsigned __int16)v5].m_pEntity;
+  this->m_vecSourcePortalRemoteAngle.x = v6[1041];
+  this->m_vecSourcePortalRemoteAngle.y = v6[1042];
+  this->m_vecSourcePortalRemoteAngle.z = v6[1043];
+  v7 = pPortal->m_hPlayerSimulationOwner.m_Index;
+  if ( v7 == -1 )
+    goto LABEL_19;
+  v8 = (unsigned __int16)v7;
+  v9 = &g_pEntityList->m_EntPtrArray[(unsigned __int16)v7];
+  v10 = HIWORD(v7);
+  if ( v9->m_SerialNumber != v10 || !v9->m_pEntity )
+    goto LABEL_19;
+  v11 = v8;
+  v12 = g_pEntityList->m_EntPtrArray[v11].m_SerialNumber == v10;
+  v13 = (C_BasePlayer **)&g_pEntityList->m_EntPtrArray[v11];
+  if ( v12 )
+    C_BaseEntity::SetPlayerSimulated(this, *v13);
+  else
+    C_BaseEntity::SetPlayerSimulated(this, 0);
+}

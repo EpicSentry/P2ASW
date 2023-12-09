@@ -1,0 +1,16 @@
+void C_BaseProjectedEntity::TestAllForProjectionChanges()
+{
+  int v0; // ebx
+  C_BaseProjectedEntity *v1; // eax
+
+  if ( s_AllProjectedEntities.m_Size > 0 )
+  {
+    v0 = 0;
+    do
+    {
+      v1 = s_AllProjectedEntities.m_Memory.m_pMemory[v0++];
+      (*((void (__cdecl **)(C_BaseProjectedEntity *))v1->_vptr_IHandleEntity + 240))(v1);
+    }
+    while ( s_AllProjectedEntities.m_Size > v0 );
+  }
+}

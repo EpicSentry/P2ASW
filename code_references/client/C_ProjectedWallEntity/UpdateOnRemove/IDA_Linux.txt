@@ -1,0 +1,26 @@
+void __cdecl C_ProjectedWallEntity::UpdateOnRemove(C_ProjectedWallEntity *const this)
+{
+  int v1; // edi
+  int v2; // esi
+  CPhysCollide *pCollideable; // ecx
+
+  if ( (*((unsigned __int8 (__cdecl **)(CPrediction *))prediction->_vptr_IPrediction + 15))(prediction) )
+    C_ProjectedWallEntity::CheckForPlayersOnBridge(this);
+  StopParticleEffects(this);
+  if ( this->m_WallCollideables.m_Size )
+  {
+    v1 = 0;
+    v2 = 0;
+    do
+    {
+      ++v2;
+      pCollideable = this->m_WallCollideables.m_Memory.m_pMemory[v1++].pCollideable;
+      (*((void (__cdecl **)(IPhysicsCollision *, CPhysCollide *))physcollision->_vptr_IPhysicsCollision + 17))(
+        physcollision,
+        pCollideable);
+    }
+    while ( this->m_WallCollideables.m_Size != v2 );
+  }
+  this->m_WallCollideables.m_Size = 0;
+  C_BaseEntity::UpdateOnRemove(this);
+}

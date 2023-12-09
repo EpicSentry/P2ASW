@@ -1,0 +1,14 @@
+bool __thiscall C_ProjectedWallEntity::TestCollision(
+        C_ProjectedWallEntity *this,
+        const Ray_t *ray,
+        unsigned int mask,
+        CGameTrace *trace)
+{
+  struct CPhysCollide *m_pActiveCollideable; // eax
+
+  m_pActiveCollideable = this->m_pActiveCollideable;
+  if ( !m_pActiveCollideable )
+    return 0;
+  physcollision->TraceBox(physcollision, ray, mask, 0, m_pActiveCollideable, &vec3_origin, &vec3_angle, trace);
+  return trace->fraction < 1.0 || trace->allsolid || trace->startsolid;
+}

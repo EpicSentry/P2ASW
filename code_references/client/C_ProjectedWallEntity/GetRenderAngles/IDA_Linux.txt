@@ -1,0 +1,4 @@
+const QAngle *__cdecl C_ProjectedWallEntity::GetRenderAngles(C_ProjectedWallEntity *const this)
+{
+  return &vec3_angle;
+}

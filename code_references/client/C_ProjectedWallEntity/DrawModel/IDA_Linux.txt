@@ -1,0 +1,266 @@
+int __cdecl C_ProjectedWallEntity::DrawModel(
+        C_ProjectedWallEntity *const this,
+        int flags,
+        const RenderableInstance_t *const instance)
+{
+  const QAngle *NetworkAngles; // eax
+  float m_flCurDisplayLength; // xmm0_4
+  float *v6; // eax
+  vec_t v7; // xmm1_4
+  vec_t v8; // xmm0_4
+  IMatRenderContext *v9; // eax
+  float m_flWidth; // xmm2_4
+  float v11; // xmm0_4
+  float m_flHeight; // xmm0_4
+  IMatRenderContext *v13; // eax
+  IMatRenderContext *m_pObject; // eax
+  int m_nNumSegments; // ecx
+  PaintPowerType *m_pMemory; // esi
+  int i; // eax
+  PaintPowerType v18; // edx
+  PaintPowerType v19; // esi
+  C_ProjectedWallEntity *v20; // edi
+  float v21; // [esp+20h] [ebp-2A8h]
+  float v22; // [esp+30h] [ebp-298h]
+  float v23; // [esp+40h] [ebp-288h]
+  float z; // [esp+58h] [ebp-270h]
+  float y; // [esp+5Ch] [ebp-26Ch]
+  float x; // [esp+60h] [ebp-268h]
+  IMesh *pMesh; // [esp+68h] [ebp-260h]
+  IMesh *pMesha; // [esp+68h] [ebp-260h]
+  float flTextureScaleVa; // [esp+6Ch] [ebp-25Ch]
+  float flTextureScaleVb; // [esp+6Ch] [ebp-25Ch]
+  char flTextureScaleV; // [esp+6Ch] [ebp-25Ch]
+  CMeshBuilder meshBuilder; // [esp+70h] [ebp-258h] BYREF
+  Vector vForward; // [esp+258h] [ebp-70h] BYREF
+  Vector vRight; // [esp+264h] [ebp-64h] BYREF
+  Vector vUp; // [esp+270h] [ebp-58h] BYREF
+  Vector vOrigin; // [esp+27Ch] [ebp-4Ch] BYREF
+  Vector vHalfLength; // [esp+288h] [ebp-40h] BYREF
+  PaintPowerType paintType; // [esp+294h] [ebp-34h] BYREF
+  float v39; // [esp+298h] [ebp-30h]
+  float v40; // [esp+29Ch] [ebp-2Ch]
+  Vector v41; // [esp+2A0h] [ebp-28h] BYREF
+  CMatRenderContextPtr pRenderContext; // [esp+2ACh] [ebp-1Ch]
+
+  if ( !(*((unsigned __int8 (__cdecl **)(C_ProjectedWallEntity *const))this->_vptr_IHandleEntity + 254))(this) )
+    return 0;
+  if ( (*(unsigned __int8 (__cdecl **)(IVEngineClient *))(*(_DWORD *)engine + 728))(engine)
+    && cl_draw_projected_wall_with_paint.m_pParent->m_Value.m_nValue
+    && this->m_PaintPowers.m_Size == this->m_nNumSegments )
+  {
+    v13 = (IMatRenderContext *)(*(int (__cdecl **)(IMaterialSystem *))(*(_DWORD *)materials + 452))(materials);
+    pRenderContext.m_pObject = v13;
+    if ( v13 )
+    {
+      (*(void (__cdecl **)(IMatRenderContext *))(*(_DWORD *)v13 + 8))(v13);
+      m_pObject = pRenderContext.m_pObject;
+    }
+    else
+    {
+      m_pObject = 0;
+    }
+    C_ProjectedWallEntity::PaintWallWithPaint<(ProjectedWallSegmentType)0>(
+      this,
+      this->m_pBodyMaterial,
+      m_pObject,
+      NO_POWER);
+    C_ProjectedWallEntity::PaintWallWithPaint<(ProjectedWallSegmentType)1>(
+      this,
+      this->m_pSideRailMaterial,
+      pRenderContext.m_pObject,
+      NO_POWER);
+    m_nNumSegments = this->m_nNumSegments;
+    *(float *)&paintType = 0.0;
+    LOBYTE(v39) = 0;
+    flTextureScaleV = 0;
+    if ( m_nNumSegments > 0 )
+    {
+      m_pMemory = this->m_PaintPowers.m_Memory.m_pMemory;
+      for ( i = 0; i != m_nNumSegments; ++i )
+      {
+        v18 = m_pMemory[i];
+        *((_BYTE *)&paintType + v18) = 1;
+      }
+      flTextureScaleV = paintType;
+    }
+    v19 = BOUNCE_POWER;
+    v20 = this;
+    if ( flTextureScaleV )
+      goto LABEL_27;
+    while ( 1 )
+    {
+      ++v19;
+      v20 = (C_ProjectedWallEntity *)((char *)v20 + 4);
+      if ( v19 == NO_POWER )
+        break;
+      while ( *((_BYTE *)&paintType + v19) )
+      {
+LABEL_27:
+        C_ProjectedWallEntity::PaintWallWithPaint<(ProjectedWallSegmentType)4>(
+          this,
+          v20->m_pPaintMaterialsMid[0],
+          pRenderContext.m_pObject,
+          v19);
+        C_ProjectedWallEntity::PaintWallWithPaint<(ProjectedWallSegmentType)2>(
+          this,
+          v20->m_pPaintMaterialsEnd1[0],
+          pRenderContext.m_pObject,
+          v19);
+        C_ProjectedWallEntity::PaintWallWithPaint<(ProjectedWallSegmentType)3>(
+          this,
+          v20->m_pPaintMaterialsEnd2[0],
+          pRenderContext.m_pObject,
+          v19);
+        C_ProjectedWallEntity::PaintWallWithPaint<(ProjectedWallSegmentType)5>(
+          this,
+          v20->m_pPaintMaterialsSing[0],
+          pRenderContext.m_pObject,
+          v19++);
+        v20 = (C_ProjectedWallEntity *)((char *)v20 + 4);
+        if ( v19 == NO_POWER )
+          goto LABEL_28;
+      }
+    }
+LABEL_28:
+    if ( flTextureScaleV && BYTE2(paintType) )
+    {
+      C_ProjectedWallEntity::PaintWallWithPaint<(ProjectedWallSegmentType)6>(
+        this,
+        this->m_pPaintMaterialBounceLSpeed,
+        pRenderContext.m_pObject,
+        SPEED_POWER);
+      C_ProjectedWallEntity::PaintWallWithPaint<(ProjectedWallSegmentType)7>(
+        this,
+        this->m_pPaintMaterialBounceRSpeed,
+        pRenderContext.m_pObject,
+        SPEED_POWER);
+      C_ProjectedWallEntity::PaintWallWithPaint<(ProjectedWallSegmentType)8>(
+        this,
+        this->m_pPaintMaterialBounceLRSpeed,
+        pRenderContext.m_pObject,
+        SPEED_POWER);
+      C_ProjectedWallEntity::PaintWallWithPaint<(ProjectedWallSegmentType)9>(
+        this,
+        this->m_pPaintMaterialRBounceLSpeed,
+        pRenderContext.m_pObject,
+        SPEED_POWER);
+      C_ProjectedWallEntity::PaintWallWithPaint<(ProjectedWallSegmentType)10>(
+        this,
+        this->m_pPaintMaterialLBounceRSpeed,
+        pRenderContext.m_pObject,
+        SPEED_POWER);
+    }
+    if ( !pRenderContext.m_pObject )
+      return 1;
+    (*(void (__cdecl **)(IMatRenderContext *))(*(_DWORD *)pRenderContext.m_pObject + 12))(pRenderContext.m_pObject);
+  }
+  else
+  {
+    NetworkAngles = C_BaseEntity::GetNetworkAngles(this);
+    AngleVectors(NetworkAngles, &vForward, &vRight, &vUp);
+    m_flCurDisplayLength = this->m_flCurDisplayLength;
+    v23 = (float)(vForward.x * m_flCurDisplayLength) * 0.5;
+    v22 = (float)(vForward.y * m_flCurDisplayLength) * 0.5;
+    v21 = (float)(m_flCurDisplayLength * vForward.z) * 0.5;
+    v6 = (float *)(*((int (__cdecl **)(C_ProjectedWallEntity *const))this->_vptr_IHandleEntity + 236))(this);
+    v7 = v22 + v6[1];
+    v8 = v21 + v6[2];
+    vOrigin.x = v23 + *v6;
+    vOrigin.y = v7;
+    vOrigin.z = v8;
+    v9 = (IMatRenderContext *)(*(int (__cdecl **)(IMaterialSystem *))(*(_DWORD *)materials + 452))(materials);
+    pRenderContext.m_pObject = v9;
+    if ( v9 )
+    {
+      (*(void (__cdecl **)(IMatRenderContext *))(*(_DWORD *)v9 + 8))(v9);
+      v9 = pRenderContext.m_pObject;
+    }
+    pMesh = (IMesh *)(*(int (__cdecl **)(IMatRenderContext *, int, _DWORD, _DWORD, IMaterial *))(*(_DWORD *)v9 + 228))(
+                       v9,
+                       1,
+                       0,
+                       0,
+                       this->m_pBodyMaterial);
+    meshBuilder.m_pMesh = 0;
+    meshBuilder.m_bGenerateIndices = 0;
+    memset(&meshBuilder.m_IndexBuilder.m_pIndexBuffer, 0, 12);
+    meshBuilder.m_IndexBuilder.m_nCurrentIndex = 0;
+    meshBuilder.m_IndexBuilder.m_nTotalIndexCount = 0;
+    meshBuilder.m_IndexBuilder.m_nBufferOffset = -1;
+    meshBuilder.m_IndexBuilder.m_nBufferFirstIndex = 0;
+    meshBuilder.m_VertexBuilder.m_pVertexBuffer = 0;
+    meshBuilder.m_VertexBuilder.m_nBufferOffset = -1;
+    meshBuilder.m_VertexBuilder.m_nBufferFirstVertex = 0;
+    memset(&meshBuilder.m_VertexBuilder.m_nMaxVertexCount, 0, 12);
+    meshBuilder.m_VertexBuilder.m_nTotalVertexCount = 0;
+    meshBuilder.m_VertexBuilder.m_CompressionType = VERTEX_COMPRESSION_INVALID;
+    (*((void (__cdecl **)(C_GameRules *))g_pGameRules->_vptr_IGameSystem + 34))(g_pGameRules);
+    flTextureScaleVa = this->m_flCurDisplayLength;
+    m_flWidth = this->m_flWidth;
+    v11 = (float)(0.5 * flTextureScaleVa) + 0.1;
+    vHalfLength.x = vForward.x * v11;
+    vHalfLength.y = vForward.y * v11;
+    vHalfLength.z = v11 * vForward.z;
+    v39 = (float)(vRight.y * m_flWidth) * 0.5;
+    v40 = (float)(vRight.z * m_flWidth) * 0.5;
+    m_flHeight = this->m_flHeight;
+    *(float *)&paintType = (float)(m_flWidth * vRight.x) * 0.5;
+    x = vUp.x;
+    y = vUp.y;
+    z = vUp.z;
+    CMeshBuilder::Begin(&meshBuilder, pMesh, MATERIAL_QUADS, 5);
+    flTextureScaleVb = flTextureScaleVa * 0.0078125;
+    v41.x = (float)((float)(m_flHeight * x) * 0.5) + vOrigin.x;
+    v41.y = (float)((float)(m_flHeight * y) * 0.5) + vOrigin.y;
+    v41.z = (float)((float)(m_flHeight * z) * 0.5) + vOrigin.z;
+    C_ProjectedWallEntity::DrawQuadHelper<false>(
+      this,
+      &meshBuilder,
+      &v41,
+      &vHalfLength,
+      (const Vector *const)&paintType,
+      1.0,
+      flTextureScaleVb);
+    CMeshBuilder::End(&meshBuilder, 0, 0);
+    (*(void (__cdecl **)(IMesh *, int, _DWORD))(*(_DWORD *)pMesh + 44))(pMesh, -1, 0);
+    pMesha = (IMesh *)(*(int (__cdecl **)(IMatRenderContext *, int, _DWORD, _DWORD, IMaterial *))(*(_DWORD *)pRenderContext.m_pObject
+                                                                                                + 228))(
+                        pRenderContext.m_pObject,
+                        1,
+                        0,
+                        0,
+                        this->m_pSideRailMaterial);
+    CMeshBuilder::Begin(&meshBuilder, pMesha, MATERIAL_QUADS, 2);
+    C_ProjectedWallEntity::PaintWallSideRails(
+      this,
+      &meshBuilder,
+      &vOrigin,
+      &vHalfLength,
+      (const Vector *const)&paintType,
+      &vUp,
+      1.0,
+      flTextureScaleVb);
+    CMeshBuilder::End(&meshBuilder, 0, 0);
+    (*(void (__cdecl **)(IMesh *, int, _DWORD))(*(_DWORD *)pMesha + 44))(pMesha, -1, 0);
+    if ( meshBuilder.m_VertexBuilder.m_pVertexBuffer
+      && (*(unsigned __int8 (__cdecl **)(IVertexBuffer *))(*(_DWORD *)meshBuilder.m_VertexBuilder.m_pVertexBuffer + 8))(meshBuilder.m_VertexBuilder.m_pVertexBuffer) )
+    {
+      (*(void (__cdecl **)(IVertexBuffer *))(*(_DWORD *)meshBuilder.m_VertexBuilder.m_pVertexBuffer + 16))(meshBuilder.m_VertexBuilder.m_pVertexBuffer);
+    }
+    if ( meshBuilder.m_IndexBuilder.m_pIndexBuffer )
+    {
+      if ( (*(unsigned __int8 (__cdecl **)(IIndexBuffer *))(*(_DWORD *)meshBuilder.m_IndexBuilder.m_pIndexBuffer + 8))(meshBuilder.m_IndexBuilder.m_pIndexBuffer) )
+        (*(void (__cdecl **)(IIndexBuffer *))(*(_DWORD *)meshBuilder.m_IndexBuilder.m_pIndexBuffer + 16))(meshBuilder.m_IndexBuilder.m_pIndexBuffer);
+    }
+    if ( !pRenderContext.m_pObject )
+      return 1;
+    (*(void (__cdecl **)(IMatRenderContext *))(*(_DWORD *)pRenderContext.m_pObject + 12))(pRenderContext.m_pObject);
+  }
+  if ( pRenderContext.m_pObject )
+  {
+    (*(void (__cdecl **)(IMatRenderContext *))(*(_DWORD *)pRenderContext.m_pObject + 4))(pRenderContext.m_pObject);
+    return 1;
+  }
+  return 1;
+}

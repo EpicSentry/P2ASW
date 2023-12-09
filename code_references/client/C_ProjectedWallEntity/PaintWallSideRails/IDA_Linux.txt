@@ -1,0 +1,468 @@
+void __cdecl C_ProjectedWallEntity::PaintWallSideRails(
+        C_ProjectedWallEntity *const this,
+        CMeshBuilder *const meshBuilder,
+        const Vector *const vecOrigin,
+        const Vector *const vecForward,
+        const Vector *const vecRight,
+        const Vector *const vUp,
+        float flWidthTextRate,
+        float flLengthTexRate)
+{
+  float x; // xmm3_4
+  float z; // xmm5_4
+  float y; // xmm4_4
+  float *v11; // edx
+  float *m_pCurrPosition; // edx
+  int v13; // edx
+  bool v14; // cc
+  int m_VertexSize_Position; // edx
+  int v16; // ecx
+  int m_VertexSize_Normal; // edx
+  int v18; // ecx
+  unsigned __int8 *m_pCurrColor; // edx
+  unsigned __int8 *v20; // edx
+  int v21; // ecx
+  float v22; // xmm5_4
+  float v23; // xmm4_4
+  float v24; // xmm3_4
+  float *v25; // edx
+  float *v26; // edx
+  int v27; // edx
+  int v28; // edx
+  int v29; // ecx
+  int v30; // edx
+  int v31; // ecx
+  unsigned __int8 *v32; // edx
+  unsigned __int8 *v33; // edx
+  int v34; // ecx
+  float v35; // xmm5_4
+  float v36; // xmm4_4
+  float v37; // xmm3_4
+  float *v38; // edx
+  int v39; // edx
+  int v40; // edx
+  int v41; // ecx
+  int v42; // edx
+  int v43; // ecx
+  unsigned __int8 *v44; // edx
+  unsigned __int8 *v45; // edx
+  int v46; // ecx
+  float v47; // xmm2_4
+  float v48; // xmm1_4
+  float v49; // xmm0_4
+  float *v50; // edx
+  float *v51; // edx
+  int v52; // edx
+  float v53; // xmm4_4
+  float v54; // xmm3_4
+  float v55; // xmm5_4
+  float *v56; // eax
+  float *v57; // eax
+  int v58; // eax
+  int v59; // eax
+  int v60; // edx
+  int v61; // eax
+  int v62; // edx
+  unsigned __int8 *v63; // eax
+  unsigned __int8 *v64; // eax
+  int v65; // edx
+  float v66; // xmm5_4
+  float v67; // xmm4_4
+  float v68; // xmm3_4
+  float *v69; // eax
+  float *v70; // eax
+  int v71; // eax
+  int v72; // eax
+  int v73; // edx
+  int v74; // eax
+  int v75; // edx
+  unsigned __int8 *v76; // eax
+  unsigned __int8 *v77; // eax
+  int v78; // edx
+  float v79; // xmm5_4
+  float v80; // xmm4_4
+  float v81; // xmm3_4
+  float *v82; // eax
+  int v83; // eax
+  int v84; // eax
+  int v85; // edx
+  int v86; // eax
+  int v87; // edx
+  unsigned __int8 *v88; // eax
+  unsigned __int8 *v89; // eax
+  int v90; // edx
+  float v91; // xmm2_4
+  float v92; // xmm1_4
+  float v93; // xmm0_4
+  float *v94; // eax
+  float *v95; // eax
+  int v96; // eax
+  float v97; // [esp+20h] [ebp-88h]
+  float v98; // [esp+20h] [ebp-88h]
+  float v99; // [esp+30h] [ebp-78h]
+  float v100; // [esp+30h] [ebp-78h]
+  float v101; // [esp+40h] [ebp-68h]
+  float v102; // [esp+40h] [ebp-68h]
+  float v103; // [esp+64h] [ebp-44h]
+  float v104; // [esp+64h] [ebp-44h]
+  float v105; // [esp+68h] [ebp-40h]
+  float v106; // [esp+68h] [ebp-40h]
+  float v107; // [esp+6Ch] [ebp-3Ch]
+  float v108; // [esp+6Ch] [ebp-3Ch]
+  float v109; // [esp+70h] [ebp-38h]
+  float v110; // [esp+70h] [ebp-38h]
+  float v111; // [esp+74h] [ebp-34h]
+  float v112; // [esp+78h] [ebp-30h]
+  float v113; // [esp+7Ch] [ebp-2Ch]
+  Vector vec; // [esp+84h] [ebp-24h] BYREF
+
+  v113 = vUp->x * 6.0;
+  v112 = vUp->y * 6.0;
+  v111 = 6.0 * vUp->z;
+  v109 = v113 + (float)(vecOrigin->x + vecRight->x);
+  v107 = v112 + (float)(vecOrigin->y + vecRight->y);
+  x = vecForward->x;
+  v105 = v111 + (float)(vecOrigin->z + vecRight->z);
+  z = vecForward->z;
+  v103 = v109 - vecForward->x;
+  y = vecForward->y;
+  v97 = vecOrigin->z + vecRight->z;
+  v99 = vecOrigin->y + vecRight->y;
+  v101 = vecOrigin->x + vecRight->x;
+  vec.x = (float)(v112 * z) - (float)(v111 * y);
+  vec.y = (float)(v111 * x) - (float)(z * v113);
+  vec.z = (float)(y * v113) - (float)(x * v112);
+  VectorNormalize(&vec);
+  *(_DWORD *)meshBuilder->m_VertexBuilder.m_pCurrColor = -1;
+  v11 = meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0];
+  *v11 = 0.0;
+  v11[1] = flLengthTexRate;
+  m_pCurrPosition = meshBuilder->m_VertexBuilder.m_pCurrPosition;
+  *m_pCurrPosition = v103;
+  m_pCurrPosition[1] = v107 - y;
+  m_pCurrPosition[2] = v105 - z;
+  v13 = meshBuilder->m_VertexBuilder.m_nCurrentVertex + 1;
+  v14 = v13 <= meshBuilder->m_VertexBuilder.m_nVertexCount;
+  meshBuilder->m_VertexBuilder.m_nCurrentVertex = v13;
+  if ( !v14 )
+    meshBuilder->m_VertexBuilder.m_nVertexCount = v13;
+  m_VertexSize_Position = meshBuilder->m_VertexBuilder.m_VertexSize_Position;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[0]);
+  v16 = meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[1];
+  meshBuilder->m_VertexBuilder.m_pCurrPosition = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrPosition
+                                                         + m_VertexSize_Position);
+  m_VertexSize_Normal = meshBuilder->m_VertexBuilder.m_VertexSize_Normal;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1]
+                                                            + v16);
+  v18 = meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[2];
+  meshBuilder->m_VertexBuilder.m_pCurrNormal = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrNormal
+                                                       + m_VertexSize_Normal);
+  m_pCurrColor = meshBuilder->m_VertexBuilder.m_pCurrColor;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2]
+                                                            + v18);
+  v20 = &m_pCurrColor[meshBuilder->m_VertexBuilder.m_VertexSize_Color];
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[3]);
+  v21 = meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[4];
+  meshBuilder->m_VertexBuilder.m_pCurrColor = v20;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4]
+                                                            + v21);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[5]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[6]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[7]);
+  v22 = v109 + vecForward->x;
+  v23 = v107 + vecForward->y;
+  v24 = v105 + vecForward->z;
+  *(_DWORD *)v20 = -1;
+  v25 = meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0];
+  *v25 = 0.0;
+  v25[1] = 0.0;
+  v26 = meshBuilder->m_VertexBuilder.m_pCurrPosition;
+  *v26 = v22;
+  v26[1] = v23;
+  v26[2] = v24;
+  v27 = meshBuilder->m_VertexBuilder.m_nCurrentVertex + 1;
+  v14 = v27 <= meshBuilder->m_VertexBuilder.m_nVertexCount;
+  meshBuilder->m_VertexBuilder.m_nCurrentVertex = v27;
+  if ( !v14 )
+    meshBuilder->m_VertexBuilder.m_nVertexCount = v27;
+  v28 = meshBuilder->m_VertexBuilder.m_VertexSize_Position;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[0]);
+  v29 = meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[1];
+  meshBuilder->m_VertexBuilder.m_pCurrPosition = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrPosition + v28);
+  v30 = meshBuilder->m_VertexBuilder.m_VertexSize_Normal;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1]
+                                                            + v29);
+  v31 = meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[2];
+  meshBuilder->m_VertexBuilder.m_pCurrNormal = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrNormal + v30);
+  v32 = meshBuilder->m_VertexBuilder.m_pCurrColor;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2]
+                                                            + v31);
+  v33 = &v32[meshBuilder->m_VertexBuilder.m_VertexSize_Color];
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[3]);
+  v34 = meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[4];
+  meshBuilder->m_VertexBuilder.m_pCurrColor = v33;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4]
+                                                            + v34);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[5]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[6]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[7]);
+  v35 = vecForward->x;
+  v36 = vecForward->y;
+  v37 = vecForward->z;
+  *(_DWORD *)v33 = -1;
+  *(_QWORD *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0] = LODWORD(flWidthTextRate);
+  v38 = meshBuilder->m_VertexBuilder.m_pCurrPosition;
+  *v38 = v35 + (float)(v101 - v113);
+  v38[1] = v36 + (float)(v99 - v112);
+  v38[2] = v37 + (float)(v97 - v111);
+  v39 = meshBuilder->m_VertexBuilder.m_nCurrentVertex + 1;
+  v14 = v39 <= meshBuilder->m_VertexBuilder.m_nVertexCount;
+  meshBuilder->m_VertexBuilder.m_nCurrentVertex = v39;
+  if ( !v14 )
+    meshBuilder->m_VertexBuilder.m_nVertexCount = v39;
+  v40 = meshBuilder->m_VertexBuilder.m_VertexSize_Position;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[0]);
+  v41 = meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[1];
+  meshBuilder->m_VertexBuilder.m_pCurrPosition = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrPosition + v40);
+  v42 = meshBuilder->m_VertexBuilder.m_VertexSize_Normal;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1]
+                                                            + v41);
+  v43 = meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[2];
+  meshBuilder->m_VertexBuilder.m_pCurrNormal = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrNormal + v42);
+  v44 = meshBuilder->m_VertexBuilder.m_pCurrColor;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2]
+                                                            + v43);
+  v45 = &v44[meshBuilder->m_VertexBuilder.m_VertexSize_Color];
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[3]);
+  v46 = meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[4];
+  meshBuilder->m_VertexBuilder.m_pCurrColor = v45;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4]
+                                                            + v46);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[5]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[6]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[7]);
+  v47 = (float)(v101 - v113) - vecForward->x;
+  v48 = (float)(v99 - v112) - vecForward->y;
+  v49 = (float)(v97 - v111) - vecForward->z;
+  *(_DWORD *)v45 = -1;
+  v50 = meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0];
+  *v50 = flWidthTextRate;
+  v50[1] = flLengthTexRate;
+  v51 = meshBuilder->m_VertexBuilder.m_pCurrPosition;
+  *v51 = v47;
+  v51[1] = v48;
+  v51[2] = v49;
+  v52 = meshBuilder->m_VertexBuilder.m_nCurrentVertex + 1;
+  v14 = v52 <= meshBuilder->m_VertexBuilder.m_nVertexCount;
+  meshBuilder->m_VertexBuilder.m_nCurrentVertex = v52;
+  if ( !v14 )
+    meshBuilder->m_VertexBuilder.m_nVertexCount = v52;
+  meshBuilder->m_VertexBuilder.m_pCurrPosition = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrPosition
+                                                         + meshBuilder->m_VertexBuilder.m_VertexSize_Position);
+  meshBuilder->m_VertexBuilder.m_pCurrNormal = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrNormal
+                                                       + meshBuilder->m_VertexBuilder.m_VertexSize_Normal);
+  meshBuilder->m_VertexBuilder.m_pCurrColor += meshBuilder->m_VertexBuilder.m_VertexSize_Color;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[0]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[1]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[2]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[3]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[4]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[5]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[6]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[7]);
+  v110 = v113 + (float)(vecOrigin->x - vecRight->x);
+  v53 = vecForward->y;
+  v106 = v111 + (float)(vecOrigin->z - vecRight->z);
+  v54 = vecForward->x;
+  v108 = v112 + (float)(vecOrigin->y - vecRight->y);
+  v104 = v110 - vecForward->x;
+  v55 = vecForward->z;
+  v98 = vecOrigin->z - vecRight->z;
+  v100 = vecOrigin->y - vecRight->y;
+  v102 = vecOrigin->x - vecRight->x;
+  vec.x = (float)(v112 * v55) - (float)(v111 * v53);
+  vec.y = (float)(v111 * v54) - (float)(v55 * v113);
+  vec.z = (float)(v53 * v113) - (float)(v54 * v112);
+  VectorNormalize(&vec);
+  *(_DWORD *)meshBuilder->m_VertexBuilder.m_pCurrColor = -1;
+  v56 = meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0];
+  *v56 = 0.0;
+  v56[1] = flLengthTexRate;
+  v57 = meshBuilder->m_VertexBuilder.m_pCurrPosition;
+  *v57 = v104;
+  v57[1] = v108 - v53;
+  v57[2] = v106 - v55;
+  v58 = meshBuilder->m_VertexBuilder.m_nCurrentVertex + 1;
+  v14 = v58 <= meshBuilder->m_VertexBuilder.m_nVertexCount;
+  meshBuilder->m_VertexBuilder.m_nCurrentVertex = v58;
+  if ( !v14 )
+    meshBuilder->m_VertexBuilder.m_nVertexCount = v58;
+  v59 = meshBuilder->m_VertexBuilder.m_VertexSize_Position;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[0]);
+  v60 = meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[1];
+  meshBuilder->m_VertexBuilder.m_pCurrPosition = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrPosition + v59);
+  v61 = meshBuilder->m_VertexBuilder.m_VertexSize_Normal;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1]
+                                                            + v60);
+  v62 = meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[2];
+  meshBuilder->m_VertexBuilder.m_pCurrNormal = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrNormal + v61);
+  v63 = meshBuilder->m_VertexBuilder.m_pCurrColor;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2]
+                                                            + v62);
+  v64 = &v63[meshBuilder->m_VertexBuilder.m_VertexSize_Color];
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[3]);
+  v65 = meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[4];
+  meshBuilder->m_VertexBuilder.m_pCurrColor = v64;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4]
+                                                            + v65);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[5]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[6]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[7]);
+  v66 = v110 + vecForward->x;
+  v67 = v108 + vecForward->y;
+  v68 = v106 + vecForward->z;
+  *(_DWORD *)v64 = -1;
+  v69 = meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0];
+  *v69 = 0.0;
+  v69[1] = 0.0;
+  v70 = meshBuilder->m_VertexBuilder.m_pCurrPosition;
+  *v70 = v66;
+  v70[1] = v67;
+  v70[2] = v68;
+  v71 = meshBuilder->m_VertexBuilder.m_nCurrentVertex + 1;
+  v14 = v71 <= meshBuilder->m_VertexBuilder.m_nVertexCount;
+  meshBuilder->m_VertexBuilder.m_nCurrentVertex = v71;
+  if ( !v14 )
+    meshBuilder->m_VertexBuilder.m_nVertexCount = v71;
+  v72 = meshBuilder->m_VertexBuilder.m_VertexSize_Position;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[0]);
+  v73 = meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[1];
+  meshBuilder->m_VertexBuilder.m_pCurrPosition = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrPosition + v72);
+  v74 = meshBuilder->m_VertexBuilder.m_VertexSize_Normal;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1]
+                                                            + v73);
+  v75 = meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[2];
+  meshBuilder->m_VertexBuilder.m_pCurrNormal = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrNormal + v74);
+  v76 = meshBuilder->m_VertexBuilder.m_pCurrColor;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2]
+                                                            + v75);
+  v77 = &v76[meshBuilder->m_VertexBuilder.m_VertexSize_Color];
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[3]);
+  v78 = meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[4];
+  meshBuilder->m_VertexBuilder.m_pCurrColor = v77;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4]
+                                                            + v78);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[5]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[6]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[7]);
+  v79 = vecForward->x;
+  v80 = vecForward->y;
+  v81 = vecForward->z;
+  *(_DWORD *)v77 = -1;
+  *(_QWORD *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0] = LODWORD(flWidthTextRate);
+  v82 = meshBuilder->m_VertexBuilder.m_pCurrPosition;
+  *v82 = v79 + (float)(v102 - v113);
+  v82[1] = v80 + (float)(v100 - v112);
+  v82[2] = v81 + (float)(v98 - v111);
+  v83 = meshBuilder->m_VertexBuilder.m_nCurrentVertex + 1;
+  v14 = v83 <= meshBuilder->m_VertexBuilder.m_nVertexCount;
+  meshBuilder->m_VertexBuilder.m_nCurrentVertex = v83;
+  if ( !v14 )
+    meshBuilder->m_VertexBuilder.m_nVertexCount = v83;
+  v84 = meshBuilder->m_VertexBuilder.m_VertexSize_Position;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[0]);
+  v85 = meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[1];
+  meshBuilder->m_VertexBuilder.m_pCurrPosition = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrPosition + v84);
+  v86 = meshBuilder->m_VertexBuilder.m_VertexSize_Normal;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1]
+                                                            + v85);
+  v87 = meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[2];
+  meshBuilder->m_VertexBuilder.m_pCurrNormal = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrNormal + v86);
+  v88 = meshBuilder->m_VertexBuilder.m_pCurrColor;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2]
+                                                            + v87);
+  v89 = &v88[meshBuilder->m_VertexBuilder.m_VertexSize_Color];
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[3]);
+  v90 = meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[4];
+  meshBuilder->m_VertexBuilder.m_pCurrColor = v89;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4]
+                                                            + v90);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[5]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[6]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[7]);
+  v91 = (float)(v102 - v113) - vecForward->x;
+  v92 = (float)(v100 - v112) - vecForward->y;
+  v93 = (float)(v98 - v111) - vecForward->z;
+  *(_DWORD *)v89 = -1;
+  v94 = meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0];
+  *v94 = flWidthTextRate;
+  v94[1] = flLengthTexRate;
+  v95 = meshBuilder->m_VertexBuilder.m_pCurrPosition;
+  *v95 = v91;
+  v95[1] = v92;
+  v95[2] = v93;
+  v96 = meshBuilder->m_VertexBuilder.m_nCurrentVertex + 1;
+  v14 = v96 <= meshBuilder->m_VertexBuilder.m_nVertexCount;
+  meshBuilder->m_VertexBuilder.m_nCurrentVertex = v96;
+  if ( !v14 )
+    meshBuilder->m_VertexBuilder.m_nVertexCount = v96;
+  meshBuilder->m_VertexBuilder.m_pCurrPosition = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrPosition
+                                                         + meshBuilder->m_VertexBuilder.m_VertexSize_Position);
+  meshBuilder->m_VertexBuilder.m_pCurrNormal = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrNormal
+                                                       + meshBuilder->m_VertexBuilder.m_VertexSize_Normal);
+  meshBuilder->m_VertexBuilder.m_pCurrColor += meshBuilder->m_VertexBuilder.m_VertexSize_Color;
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[0]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[0]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[1]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[1]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[2]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[2]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[3]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[3]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[4]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[4]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[5]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[5]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[6]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[6]);
+  meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7] = (float *)((char *)meshBuilder->m_VertexBuilder.m_pCurrTexCoord[7]
+                                                            + meshBuilder->m_VertexBuilder.m_VertexSize_TexCoord[7]);
+}

@@ -1,0 +1,162 @@
+char __thiscall C_ProjectedWallEntity::InitMaterials(C_ProjectedWallEntity *this)
+{
+  IMaterial *v2; // eax
+  IMaterial *v4; // eax
+  const char **v5; // edi
+  IMaterial **m_pPaintMaterialsEnd1; // esi
+  IMaterial *v7; // eax
+  IMaterial *v8; // eax
+  IMaterial *v9; // eax
+  IMaterial *v10; // eax
+  IMaterial *v11; // eax
+  IMaterial *v12; // eax
+  IMaterial *v13; // eax
+  IMaterial *v14; // eax
+  IMaterial *v15; // eax
+  bool v16; // zf
+  IMaterialVar *v17; // eax
+  IMaterialVar *v18; // eax
+  IMaterialVar *v19; // eax
+  IMaterialVar *v20; // eax
+  char materialName[128]; // [esp+4h] [ebp-84h] BYREF
+  bool bFound; // [esp+87h] [ebp-1h] BYREF
+
+  if ( !this->m_pBodyMaterial )
+  {
+    v2 = materials->FindMaterial(materials, "effects/projected_wall", 0, 0, 0);
+    this->m_pBodyMaterial = v2;
+    if ( !v2 )
+      return 0;
+  }
+  if ( !this->m_pSideRailMaterial )
+  {
+    v4 = materials->FindMaterial(materials, "effects/projected_wall_rail", 0, 0, 0);
+    this->m_pSideRailMaterial = v4;
+    if ( !v4 )
+      return 0;
+  }
+  v5 = (const char **)paintMaterialNameStrings;
+  m_pPaintMaterialsEnd1 = this->m_pPaintMaterialsEnd1;
+  do
+  {
+    memset(materialName, 0, sizeof(materialName));
+    if ( !*(m_pPaintMaterialsEnd1 - 4) )
+    {
+      _V_strcpy(materialName, "paint/bridge_paint_tile");
+      V_strncat(materialName, *v5, 0x80u, -1);
+      v7 = materials->FindMaterial(materials, materialName, 0, 0, 0);
+      *(m_pPaintMaterialsEnd1 - 4) = v7;
+      if ( !v7 )
+        return 0;
+    }
+    if ( !*m_pPaintMaterialsEnd1 )
+    {
+      _V_memset(materialName, 0, 128);
+      _V_strcpy(materialName, "paint/bridge_paint_end_right");
+      V_strncat(materialName, *v5, 0x80u, -1);
+      v8 = materials->FindMaterial(materials, materialName, 0, 0, 0);
+      *m_pPaintMaterialsEnd1 = v8;
+      if ( !v8 )
+        return 0;
+    }
+    if ( !m_pPaintMaterialsEnd1[4] )
+    {
+      _V_memset(materialName, 0, 128);
+      _V_strcpy(materialName, "paint/bridge_paint_end_left");
+      V_strncat(materialName, *v5, 0x80u, -1);
+      v9 = materials->FindMaterial(materials, materialName, 0, 0, 0);
+      m_pPaintMaterialsEnd1[4] = v9;
+      if ( !v9 )
+        return 0;
+    }
+    if ( !m_pPaintMaterialsEnd1[8] )
+    {
+      _V_memset(materialName, 0, 128);
+      _V_strcpy(materialName, "paint/bridge_paint_single");
+      V_strncat(materialName, *v5, 0x80u, -1);
+      v10 = materials->FindMaterial(materials, materialName, 0, 0, 0);
+      m_pPaintMaterialsEnd1[8] = v10;
+      if ( !v10 )
+        return 0;
+    }
+    ++v5;
+    ++m_pPaintMaterialsEnd1;
+  }
+  while ( (int)v5 < (int)&CPaintableEntity<C_BaseProjectedEntity> `RTTI Type Descriptor' );
+  if ( !this->m_pPaintMaterialRBounceLSpeed )
+  {
+    v11 = materials->FindMaterial(materials, "paint/bridge_paint_bounce_l_speed", 0, 0, 0);
+    this->m_pPaintMaterialRBounceLSpeed = v11;
+    if ( !v11 )
+      return 0;
+  }
+  if ( !this->m_pPaintMaterialLBounceRSpeed )
+  {
+    v12 = materials->FindMaterial(materials, "paint/bridge_paint_bounce_r_speed", 0, 0, 0);
+    this->m_pPaintMaterialLBounceRSpeed = v12;
+    if ( !v12 )
+      return 0;
+  }
+  if ( !this->m_pPaintMaterialBounceRSpeed )
+  {
+    v13 = materials->FindMaterial(materials, "paint/bridge_paint_end_right_bounce_l_speed", 0, 0, 0);
+    this->m_pPaintMaterialBounceRSpeed = v13;
+    if ( !v13 )
+      return 0;
+  }
+  if ( !this->m_pPaintMaterialBounceLSpeed )
+  {
+    v14 = materials->FindMaterial(materials, "paint/bridge_paint_end_left_bounce_r_speed", 0, 0, 0);
+    this->m_pPaintMaterialBounceLSpeed = v14;
+    if ( !v14 )
+      return 0;
+  }
+  if ( !this->m_pPaintMaterialBounceLRSpeed )
+  {
+    v15 = materials->FindMaterial(materials, "paint/bridge_paint_bounce_l_r_speed", 0, 0, 0);
+    this->m_pPaintMaterialBounceLRSpeed = v15;
+    if ( !v15 )
+      return 0;
+  }
+  v16 = this->m_pPaintColorMid == 0;
+  bFound = 0;
+  if ( v16 )
+  {
+    v17 = this->m_pPaintMaterialsMid[0]->FindVar(this->m_pPaintMaterialsMid[0], "$color", &bFound, 1);
+    v16 = !bFound;
+    this->m_pPaintColorMid = v17;
+    if ( v16 )
+      return 0;
+  }
+  v16 = this->m_pPaintColorEnd1 == 0;
+  bFound = 0;
+  if ( v16 )
+  {
+    v18 = this->m_pPaintMaterialsEnd1[0]->FindVar(this->m_pPaintMaterialsEnd1[0], "$color", &bFound, 1);
+    v16 = !bFound;
+    this->m_pPaintColorEnd1 = v18;
+    if ( v16 )
+      return 0;
+  }
+  v16 = this->m_pPaintColorEnd2 == 0;
+  bFound = 0;
+  if ( v16 )
+  {
+    v19 = this->m_pPaintMaterialsEnd2[0]->FindVar(this->m_pPaintMaterialsEnd2[0], "$color", &bFound, 1);
+    v16 = !bFound;
+    this->m_pPaintColorEnd2 = v19;
+    if ( v16 )
+      return 0;
+  }
+  v16 = this->m_pPaintColorSing == 0;
+  bFound = 0;
+  if ( v16 )
+  {
+    v20 = this->m_pPaintMaterialsSing[0]->FindVar(this->m_pPaintMaterialsSing[0], "$color", &bFound, 1);
+    v16 = !bFound;
+    this->m_pPaintColorSing = v20;
+    if ( v16 )
+      return 0;
+  }
+  return 1;
+}

@@ -1,0 +1,57 @@
+void __cdecl C_ProjectedWallEntity::C_ProjectedWallEntity(C_ProjectedWallEntity *const this)
+{
+  C_ProjectedWallEntity *v1; // eax
+  int v2; // edx
+
+  C_BaseProjectedEntity::C_BaseProjectedEntity(this);
+  this->_vptr_IHandleEntity = (int (**)(...))off_12E4E48;
+  this->_vptr_IClientRenderable = (int (**)(...))off_12E5244;
+  this->_vptr_IClientNetworkable = (int (**)(...))off_12E5300;
+  this->_vptr_IClientThinkable = (int (**)(...))off_12E5340;
+  this->_vptr_IClientModelRenderable = (int (**)(...))&off_12E535C;
+  this->_vptr_IPaintableEntity = (int (**)(...))off_12E5368;
+  this->m_iPaintPower = NO_POWER;
+  IProjectedWallEntityAutoList::IProjectedWallEntityAutoList(&this->IProjectedWallEntityAutoList, 1);
+  this->_vptr_IHandleEntity = (int (**)(...))off_12E4808;
+  v1 = this;
+  v2 = 0;
+  this->_vptr_IClientRenderable = (int (**)(...))off_12E4C0C;
+  this->_vptr_IClientNetworkable = (int (**)(...))off_12E4CC8;
+  this->_vptr_IClientThinkable = (int (**)(...))&off_12E4D08;
+  this->_vptr_IClientModelRenderable = (int (**)(...))&off_12E4D24;
+  this->_vptr_IPaintableEntity = (int (**)(...))off_12E4D30;
+  this->_vptr_IProjectedWallEntityAutoList = (int (**)(...))off_12E4D50;
+  this->m_WallCollideables.m_Memory.m_pMemory = 0;
+  this->m_WallCollideables.m_Memory.m_nAllocationCount = 0;
+  this->m_WallCollideables.m_Memory.m_nGrowSize = 0;
+  this->m_WallCollideables.m_Size = 0;
+  this->m_WallCollideables.m_pElements = 0;
+  this->m_hColorPortal.m_Index = -1;
+  this->m_PaintPowers.m_Memory.m_pMemory = 0;
+  this->m_PaintPowers.m_Memory.m_nAllocationCount = 0;
+  this->m_PaintPowers.m_Memory.m_nGrowSize = 0;
+  this->m_PaintPowers.m_Size = 0;
+  this->m_PaintPowers.m_pElements = 0;
+  this->m_pBodyMaterial = 0;
+  this->m_pSideRailMaterial = 0;
+  do
+  {
+    v1->m_pPaintMaterialsMid[0] = 0;
+    ++v2;
+    v1->m_pPaintMaterialsEnd1[0] = 0;
+    v1->m_pPaintMaterialsEnd2[0] = 0;
+    v1->m_pPaintMaterialsSing[0] = 0;
+    v1 = (C_ProjectedWallEntity *)((char *)v1 + 4);
+  }
+  while ( v2 != 4 );
+  this->m_pPaintMaterialRBounceLSpeed = 0;
+  this->m_pPaintMaterialLBounceRSpeed = 0;
+  this->m_pPaintMaterialBounceRSpeed = 0;
+  this->m_pPaintMaterialBounceLSpeed = 0;
+  this->m_pPaintMaterialBounceLRSpeed = 0;
+  this->m_flCurDisplayLength = 0.0;
+  this->m_nNumSegments = 0;
+  this->m_flSegmentLength = 0.0;
+  this->m_flParticleUpdateTime = 0.0;
+  this->m_flPrevParticleUpdateTime = 0.0;
+}

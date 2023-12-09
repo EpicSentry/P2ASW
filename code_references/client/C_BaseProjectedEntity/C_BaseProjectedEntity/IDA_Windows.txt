@@ -1,0 +1,43 @@
+void __thiscall C_BaseProjectedEntity::C_BaseProjectedEntity(C_BaseProjectedEntity *this)
+{
+  int m_Size; // eax
+  int v3; // edi
+  C_BaseProjectedEntity **m_pMemory; // ecx
+  int v5; // eax
+  C_BaseProjectedEntity **v6; // eax
+
+  C_BaseEntity::C_BaseEntity(this);
+  this->C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable = (C_BaseProjectedEntity_vtbl *)&C_BaseProjectedEntity::`vftable'{for `IClientUnknown'};
+  this->C_BaseEntity::IClientEntity::IClientRenderable::__vftable = (IClientRenderable_vtbl *)&C_BaseProjectedEntity::`vftable'{for `IClientRenderable'};
+  this->C_BaseEntity::IClientEntity::IClientNetworkable::__vftable = (IClientNetworkable_vtbl *)&C_BaseProjectedEntity::`vftable'{for `IClientNetworkable'};
+  this->C_BaseEntity::IClientEntity::IClientThinkable::__vftable = (IClientThinkable_vtbl *)&C_BaseProjectedEntity::`vftable'{for `IClientThinkable'};
+  this->C_BaseEntity::IClientModelRenderable::__vftable = (IClientModelRenderable_vtbl *)&C_BaseProjectedEntity::`vftable';
+  this->m_hHitPortal.m_Index = -1;
+  this->m_hSourcePortal.m_Index = -1;
+  this->m_hChildSegment.m_Index = -1;
+  this->m_hPlacementHelper.m_Index = -1;
+  m_Size = s_AllProjectedEntities.m_Size;
+  v3 = s_AllProjectedEntities.m_Size;
+  if ( s_AllProjectedEntities.m_Size + 1 > s_AllProjectedEntities.m_Memory.m_nAllocationCount )
+  {
+    CUtlMemory<CPortalLeaderboard *,int>::Grow(
+      (CUtlMemory<vgui::TreeNode *,int> *)&s_AllProjectedEntities,
+      s_AllProjectedEntities.m_Size - s_AllProjectedEntities.m_Memory.m_nAllocationCount + 1);
+    m_Size = s_AllProjectedEntities.m_Size;
+  }
+  m_pMemory = s_AllProjectedEntities.m_Memory.m_pMemory;
+  s_AllProjectedEntities.m_Size = m_Size + 1;
+  v5 = m_Size - v3;
+  s_AllProjectedEntities.m_pElements = s_AllProjectedEntities.m_Memory.m_pMemory;
+  if ( v5 > 0 )
+  {
+    _V_memmove(
+      &s_AllProjectedEntities.m_Memory.m_pMemory[v3 + 1],
+      &s_AllProjectedEntities.m_Memory.m_pMemory[v3],
+      4 * v5);
+    m_pMemory = s_AllProjectedEntities.m_Memory.m_pMemory;
+  }
+  v6 = &m_pMemory[v3];
+  if ( v6 )
+    *v6 = this;
+}

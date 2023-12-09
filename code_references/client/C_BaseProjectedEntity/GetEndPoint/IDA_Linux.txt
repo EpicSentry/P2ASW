@@ -1,0 +1,4 @@
+const Vector *__cdecl C_BaseProjectedEntity::GetEndPoint(const C_BaseProjectedEntity *const this)
+{
+  return &this->m_vecEndPoint;
+}
