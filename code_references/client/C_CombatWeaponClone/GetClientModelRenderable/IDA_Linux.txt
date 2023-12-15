@@ -1,0 +1,11 @@
+IClientModelRenderable *__cdecl C_CombatWeaponClone::GetClientModelRenderable(C_CombatWeaponClone *const this)
+{
+  if ( !this->m_bReadyToDraw
+    || C_BaseCombatWeapon::IsFirstPersonSpectated(this->m_pWeaponParent)
+    || !(*((int (__cdecl **)(C_BaseCombatWeapon *))this->m_pWeaponParent->_vptr_IHandleEntity + 53))(this->m_pWeaponParent) )
+  {
+    return 0;
+  }
+  C_CombatWeaponClone::UpdateClone(this);
+  return C_BaseAnimating::GetClientModelRenderable(this);
+}

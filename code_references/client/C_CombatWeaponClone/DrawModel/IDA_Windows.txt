@@ -1,0 +1,20 @@
+int __userpurge C_CombatWeaponClone::DrawModel@<eax>(
+        C_CombatWeaponClone *this@<ecx>,
+        int a2@<ebx>,
+        int a3@<edi>,
+        int flags,
+        const RenderableInstance_t *instance)
+{
+  C_CombatWeaponClone::UpdateClone((C_CombatWeaponClone *)((char *)this - 4), a2, a3);
+  if ( (_S8_20 & 1) == 0 )
+  {
+    _S8_20 |= 1u;
+    counter_0.m_pCounter = CVProfile::FindOrCreateCounter(
+                             *(CVProfile **)&_g_VProfCurrentProfile.m_bVTuneGroupEnabled,
+                             "PORTAL GUN",
+                             COUNTER_GROUP_DEFAULT);
+    atexit(C_CombatWeaponClone::DrawModel_::_4_::_dynamic_atexit_destructor_for___counter__);
+  }
+  ++*counter_0.m_pCounter;
+  return C_BaseAnimating::DrawModel(this, flags, instance);
+}

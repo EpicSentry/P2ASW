@@ -1,0 +1,16 @@
+bool __cdecl C_CombatWeaponClone::ShouldDraw(C_CombatWeaponClone *const this)
+{
+  C_BaseCombatCharacter *Owner; // eax
+  const C_BaseEntity *v2; // ebx
+
+  Owner = C_BaseCombatWeapon::GetOwner(this->m_pWeaponParent);
+  v2 = Owner;
+  return (!Owner
+       || !(*((unsigned __int8 (__cdecl **)(C_BaseCombatCharacter *))Owner->_vptr_IHandleEntity + 200))(Owner)
+       || !C_BasePlayer::IsLocalPlayer(v2)
+       || (*((unsigned __int8 (__cdecl **)(const C_BaseEntity *))v2->_vptr_IHandleEntity + 145))(v2))
+      && C_BaseCombatWeapon::ShouldDrawThisOrWorldModelClone(this->m_pWeaponParent)
+      && C_BaseCombatWeapon::GetOwner(this->m_pWeaponParent)
+      && !(*((unsigned __int8 (__cdecl **)(C_BaseCombatWeapon *))this->m_pWeaponParent->_vptr_IHandleEntity + 79))(this->m_pWeaponParent)
+      && C_BaseEntity::ShouldDraw(this);
+}

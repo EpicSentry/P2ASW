@@ -11,7 +11,7 @@
 #include "c_portal_player.h"
 #include "model_types.h"
 #include "c_basecombatweapon.h"
-//#include "c_combatweaponworldclone.h" // FIXME!
+#include "c_combatweaponworldclone.h"
 #include "toolframework_client.h"
 
 ConVar portal_ghosts_disable( "portal_ghosts_disable", "0", 0, "Disables rendering of ghosted objects in portal environments" );
@@ -105,8 +105,7 @@ C_PortalGhostRenderable::C_PortalGhostRenderable( C_Portal_Base2D *pOwningPortal
 	m_bCombatWeapon = (dynamic_cast<C_BaseCombatWeapon *>(pGhostSource) != NULL);
 	SetModelIndex( m_bCombatWeapon ? ((C_BaseCombatWeapon *)pGhostSource)->GetWorldModelIndex() : pGhostSource->GetModelIndex() );
 
-	// FIXME:
-	m_bCombatWeaponWorldClone = false;//( dynamic_cast< C_CombatWeaponClone* >( pGhostSource ) != NULL );
+	m_bCombatWeaponWorldClone = ( dynamic_cast< C_CombatWeaponClone* >( pGhostSource ) != NULL );
 
 	m_bPlayerHeldClone = ( dynamic_cast< C_PlayerHeldObjectClone* >( pGhostSource ) != NULL );
 

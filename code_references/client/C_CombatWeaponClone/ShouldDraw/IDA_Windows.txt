@@ -1,0 +1,29 @@
+int __thiscall C_CombatWeaponClone::ShouldDraw(C_CombatWeaponClone *this)
+{
+  C_BaseCombatCharacter *Owner; // esi
+  int result; // eax
+
+  Owner = C_BaseCombatWeapon::GetOwner(*(C_BaseCombatWeapon **)(&this->m_bDynamicModelPending + 3));
+  if ( !Owner )
+    return C_BaseCombatWeapon::ShouldDrawThisOrWorldModelClone(*(C_BaseCombatWeapon **)(&this->m_bDynamicModelPending + 3))
+        && C_BaseCombatWeapon::GetOwner(*(C_BaseCombatWeapon **)(&this->m_bDynamicModelPending + 3))
+        && !(*(unsigned __int8 (__thiscall **)(int))(*(_DWORD *)(*(_DWORD *)(&this->m_bDynamicModelPending + 3) + 8) + 36))(*(_DWORD *)(&this->m_bDynamicModelPending + 3) + 8)
+        && C_BaseEntity::ShouldDraw(this);
+  if ( !Owner->IsPlayer(Owner) )
+    return C_BaseCombatWeapon::ShouldDrawThisOrWorldModelClone(*(C_BaseCombatWeapon **)(&this->m_bDynamicModelPending + 3))
+        && C_BaseCombatWeapon::GetOwner(*(C_BaseCombatWeapon **)(&this->m_bDynamicModelPending + 3))
+        && !(*(unsigned __int8 (__thiscall **)(int))(*(_DWORD *)(*(_DWORD *)(&this->m_bDynamicModelPending + 3) + 8) + 36))(*(_DWORD *)(&this->m_bDynamicModelPending + 3) + 8)
+        && C_BaseEntity::ShouldDraw(this);
+  if ( !C_BasePlayer::IsLocalPlayer(Owner) )
+    return C_BaseCombatWeapon::ShouldDrawThisOrWorldModelClone(*(C_BaseCombatWeapon **)(&this->m_bDynamicModelPending + 3))
+        && C_BaseCombatWeapon::GetOwner(*(C_BaseCombatWeapon **)(&this->m_bDynamicModelPending + 3))
+        && !(*(unsigned __int8 (__thiscall **)(int))(*(_DWORD *)(*(_DWORD *)(&this->m_bDynamicModelPending + 3) + 8) + 36))(*(_DWORD *)(&this->m_bDynamicModelPending + 3) + 8)
+        && C_BaseEntity::ShouldDraw(this);
+  result = ((int (__thiscall *)(IClientRenderable *))Owner->ShouldDraw)(&Owner->IClientRenderable);
+  if ( (_BYTE)result )
+    return C_BaseCombatWeapon::ShouldDrawThisOrWorldModelClone(*(C_BaseCombatWeapon **)(&this->m_bDynamicModelPending + 3))
+        && C_BaseCombatWeapon::GetOwner(*(C_BaseCombatWeapon **)(&this->m_bDynamicModelPending + 3))
+        && !(*(unsigned __int8 (__thiscall **)(int))(*(_DWORD *)(*(_DWORD *)(&this->m_bDynamicModelPending + 3) + 8) + 36))(*(_DWORD *)(&this->m_bDynamicModelPending + 3) + 8)
+        && C_BaseEntity::ShouldDraw(this);
+  return result;
+}

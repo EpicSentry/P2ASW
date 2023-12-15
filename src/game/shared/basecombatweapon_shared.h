@@ -38,7 +38,9 @@ class CBasePlayer;
 class CBaseCombatCharacter;
 class IPhysicsConstraint;
 class CUserCmd;
-
+#ifdef CLIENT_DLL
+class C_CombatWeaponClone;
+#endif
 // How many times to display altfire hud hints (per weapon)
 #define WEAPON_ALTFIRE_HUD_HINT_COUNT	1
 #define WEAPON_RELOAD_HUD_HINT_COUNT	1
@@ -457,8 +459,31 @@ public:
 	virtual int				GetWorldModelIndex( void );
 
 	virtual void			GetToolRecordingState( KeyValues *msg );
+	bool					IsFirstPersonSpectated( void ); //true if the weapon is held by someone we're spectating in first person
 	void					EnsureCorrectRenderingModel();
+
+	// Combat Weapon Clone Code
+	//{
+	virtual void			UpdateOnRemove();
+	void					NotifyWorldModelCloneReleased();
+	bool					ShouldDrawThisOrWorldModelClone();
+	C_CombatWeaponClone *m_pWorldModelClone;
 	
+	virtual bool	GetAttachment( int number, Vector &origin );
+	virtual bool	GetAttachment( int number, Vector &origin, QAngle &angles );
+	virtual bool	GetAttachment( int number, matrix3x4_t &matrix );
+	
+	virtual bool	GetAttachmentVelocity( int number, Vector &originVel, Quaternion &angleVel );
+
+	virtual void	InvalidateAttachments( void );
+
+	virtual const Vector& GetRenderOrigin( void );
+	virtual const QAngle& GetRenderAngles( void );
+
+	virtual bool	ComputeStencilState( ShaderStencilState_t *pStencilState );
+
+	//}
+
 	virtual void			GetWeaponCrosshairScale( float &flScale ) { flScale = 1.f; }
 
 	virtual void			GetToolViewModelState( KeyValues *msg ) {} // this is just a stub for viewmodels to request recording of weapon-specific effects, etc

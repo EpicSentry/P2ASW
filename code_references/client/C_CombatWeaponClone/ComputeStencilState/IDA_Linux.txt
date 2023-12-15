@@ -1,0 +1,6 @@
+bool __cdecl C_CombatWeaponClone::ComputeStencilState(
+        C_CombatWeaponClone *const this,
+        ShaderStencilState_t *pStencilState)
+{
+  return (*((int (__cdecl **)(C_BaseCombatWeapon *))this->m_pWeaponParent->_vptr_IHandleEntity + 280))(this->m_pWeaponParent);
+}

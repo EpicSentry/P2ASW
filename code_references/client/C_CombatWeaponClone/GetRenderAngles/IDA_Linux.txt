@@ -1,0 +1,7 @@
+const QAngle *__cdecl C_CombatWeaponClone::GetRenderAngles(C_CombatWeaponClone *const this)
+{
+  if ( this->m_nWeaponBoneIndex < 0 )
+    return C_BaseAnimating::GetRenderAngles(this);
+  else
+    return &this->m_qWeaponBoneAngle;
+}

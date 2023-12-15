@@ -1,0 +1,22 @@
+int __cdecl C_CombatWeaponClone::DrawModel(
+        C_CombatWeaponClone *const this,
+        int flags,
+        const RenderableInstance_t *const instance)
+{
+  C_CombatWeaponClone::UpdateClone(this);
+  if ( !(_BYTE)`guard variable for'C_CombatWeaponClone::DrawModel(int,RenderableInstance_t const&)::_counter
+    && _cxa_guard_acquire(&`guard variable for'C_CombatWeaponClone::DrawModel(int,RenderableInstance_t const&)::_counter) )
+  {
+    C_CombatWeaponClone::DrawModel(int,RenderableInstance_t const&)::_counter.m_pCounter = (int *)CVProfile::FindOrCreateCounter(
+                                                                                                    &g_VProfCurrentProfile,
+                                                                                                    "PORTAL GUN",
+                                                                                                    COUNTER_GROUP_DEFAULT);
+    _cxa_guard_release(&`guard variable for'C_CombatWeaponClone::DrawModel(int,RenderableInstance_t const&)::_counter);
+    _cxa_atexit(
+      (void (__cdecl *)(void *))CVProfCounter::~CVProfCounter,
+      &C_CombatWeaponClone::DrawModel(int,RenderableInstance_t const&)::_counter,
+      &_dso_handle);
+  }
+  ++*C_CombatWeaponClone::DrawModel(int,RenderableInstance_t const&)::_counter.m_pCounter;
+  return C_BaseAnimating::DrawModel(this, flags, instance);
+}

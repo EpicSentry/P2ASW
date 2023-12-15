@@ -16,9 +16,13 @@
 #include "tier1/KeyValues.h"
 #include "toolframework/itoolframework.h"
 #include "toolframework_client.h"
+#include "c_combatweaponworldclone.h"
+#include "clientalphaproperty.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
+
+ConVar cl_viewmodelsclonedasworld( "cl_viewmodelsclonedasworld", "1", FCVAR_NONE );
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -136,6 +140,31 @@ void C_BaseCombatWeapon::OnDataChanged( DataUpdateType_t updateType )
 	m_iOldState = m_iState;
 
 	m_bJustRestored = false;
+
+	if (!cl_viewmodelsclonedasworld.GetInt()
+		|| ( GetWorldModelIndex() == GetModelIndex() )
+		|| GetClientAlphaProperty())
+	{
+		if (!m_pWorldModelClone)
+			return;
+		
+		//(*((void(__cdecl **)(C_CombatWeaponClone *))m_pWorldModelClone->_vptr_IHandleEntity + 11))(this->m_pWorldModelClone);
+		m_pWorldModelClone = NULL;
+		UpdateVisibility();
+	LABEL_9:
+		if (!m_pWorldModelClone)
+			return;
+		goto LABEL_10;
+	}
+	if (!m_pWorldModelClone)
+	{
+		m_pWorldModelClone = new C_CombatWeaponClone( this );
+		UpdateVisibility();
+		goto LABEL_9;
+	}
+LABEL_10:
+	m_pWorldModelClone->UpdateClone();
+	m_pWorldModelClone->UpdateVisibility();
 }
 
 //-----------------------------------------------------------------------------
@@ -443,7 +472,23 @@ bool C_BaseCombatWeapon::ShouldDrawPickup( void )
 
 	return true;
 }
-		   
+
+bool C_BaseCombatWeapon::IsFirstPersonSpectated( void )
+{
+	// check if local player chases owner of this weapon in first person
+	C_BasePlayer *localplayer = C_BasePlayer::GetLocalPlayer();
+	if ( localplayer && localplayer->IsObserver() && GetOwner() )
+	{
+		// don't draw weapon if chasing this guy as spectator
+		// we don't check that in ShouldDraw() since this may change
+		// without notification 
+		if ( localplayer->GetObserverMode() == OBS_MODE_IN_EYE &&
+			localplayer->GetObserverTarget() == GetOwner() )
+			return true;
+	}
+
+	return false;
+}
 
 //----------------------------------------------------------------------------
 // Hooks into the fast path render system
@@ -453,23 +498,23 @@ IClientModelRenderable*	C_BaseCombatWeapon::GetClientModelRenderable()
 	if ( !m_bReadyToDraw )
 		return 0;
 
-	// check if local player chases owner of this weapon in first person
-	C_BasePlayer *localplayer = C_BasePlayer::GetLocalPlayer();
-	if ( localplayer && localplayer->IsObserver() && GetOwner() )
-	{
-		// don't draw weapon if chasing this guy as spectator
-		// we don't check that in ShouldDraw() since this may change
-		// without notification 
-		if ( localplayer->GetObserverMode() == OBS_MODE_IN_EYE &&
-			localplayer->GetObserverTarget() == GetOwner() ) 
-			return NULL;
-	}
+	if ( IsFirstPersonSpectated() )
+		return NULL;
 
 	if ( !BaseClass::GetClientModelRenderable() )
 		return NULL;
 
 	EnsureCorrectRenderingModel();
 	return this;
+}
+
+void C_BaseCombatWeapon::UpdateOnRemove( void )
+{
+	if ( m_pWorldModelClone )
+		m_pWorldModelClone->Release();
+
+	m_pWorldModelClone = NULL;
+	BaseClass::UpdateOnRemove();
 }
 
 
@@ -485,25 +530,34 @@ int C_BaseCombatWeapon::DrawModel( int flags, const RenderableInstance_t &instan
 
 	if ( !IsVisible() )
 		return 0;
-
-	// check if local player chases owner of this weapon in first person
-	C_BasePlayer *localplayer = C_BasePlayer::GetLocalPlayer();
-
-	if ( localplayer && localplayer->IsObserver() && GetOwner() )
-	{
-		// don't draw weapon if chasing this guy as spectator
-		// we don't check that in ShouldDraw() since this may change
-		// without notification 
-		
-		if ( localplayer->GetObserverMode() == OBS_MODE_IN_EYE &&
-			 localplayer->GetObserverTarget() == GetOwner() ) 
-			return false;
-	}
+	
+	if( IsFirstPersonSpectated() )
+		return 0;
 
 	// See comment below
 	EnsureCorrectRenderingModel();
 
 	return BaseClass::DrawModel( flags, instance );
+}
+
+void C_BaseCombatWeapon::NotifyWorldModelCloneReleased( void )
+{
+	m_pWorldModelClone = NULL;
+}
+
+bool C_BaseCombatWeapon::ShouldDrawThisOrWorldModelClone( void )
+{	
+	if (!m_iWorldModelIndex|| (GetEffects() & 0x20) != 0)
+		return false;
+
+	C_BaseCombatCharacter *pOwner = GetOwner();
+	if ( !pOwner )
+		return true;
+
+	if ( !pOwner->IsPlayer() )
+		return true;
+
+	return m_iState == 2;
 }
 
 // If the local player is visible (thirdperson mode, tf2 taunts, etc., then make sure that we are using the 
@@ -569,5 +623,214 @@ void C_BaseCombatWeapon::GetToolRecordingState( KeyValues *msg )
 	if ( nModelIndex != nWorldModelIndex )
 	{
 		SetModelIndex( nModelIndex );
+	}
+}
+
+bool C_BaseCombatWeapon::GetAttachment( int number, Vector &origin )
+{
+	if (!m_pWorldModelClone)
+		return BaseClass::GetAttachment( number, origin );
+	m_pWorldModelClone->UpdateClone();
+	return m_pWorldModelClone->GetAttachment( number, origin );
+}
+
+bool C_BaseCombatWeapon::GetAttachment( int number, Vector &origin, QAngle &angles )
+{
+	if (!m_pWorldModelClone)
+		return BaseClass::GetAttachment( number, origin, angles );
+	m_pWorldModelClone->UpdateClone();
+	return m_pWorldModelClone->GetAttachment( number, origin, angles );
+}
+
+bool C_BaseCombatWeapon::GetAttachment( int number, matrix3x4_t &matrix )
+{
+	if (!m_pWorldModelClone)
+		return BaseClass::GetAttachment( number, matrix );
+	m_pWorldModelClone->UpdateClone();
+	return m_pWorldModelClone->GetAttachment( number, matrix );
+}
+
+bool C_BaseCombatWeapon::GetAttachmentVelocity( int number, Vector &originVel, Quaternion &angleVel )
+{
+	if (!m_pWorldModelClone)
+		return BaseClass::GetAttachmentVelocity( number, originVel, angleVel );
+	m_pWorldModelClone->UpdateClone();
+	return m_pWorldModelClone->GetAttachmentVelocity( number, originVel, angleVel );
+}
+
+void C_BaseCombatWeapon::InvalidateAttachments( void )
+{
+	if (m_pWorldModelClone)
+	{
+		m_pWorldModelClone->UpdateClone();
+		m_pWorldModelClone->InvalidateAttachments();
+	}
+	BaseClass::InvalidateAttachments();
+}
+
+const Vector &C_BaseCombatWeapon::GetRenderOrigin()
+{
+	if (!m_pWorldModelClone)
+		return BaseClass::GetRenderOrigin();
+	m_pWorldModelClone->UpdateClone();
+	return m_pWorldModelClone->GetRenderOrigin();
+}
+
+const QAngle &C_BaseCombatWeapon::GetRenderAngles()
+{
+	if (!m_pWorldModelClone)
+		return BaseClass::GetRenderAngles();
+	m_pWorldModelClone->UpdateClone();
+	return m_pWorldModelClone->GetRenderAngles();
+}
+
+bool C_BaseCombatWeapon::ComputeStencilState( ShaderStencilState_t *pStencilState )
+{
+	return BaseClass::ComputeStencilState( pStencilState );
+}
+
+C_CombatWeaponClone::C_CombatWeaponClone( C_BaseCombatWeapon *pWeaponParent )
+{
+	InitializeAsClientEntity( pWeaponParent->GetWorldModel(), false );
+}
+C_CombatWeaponClone::~C_CombatWeaponClone()
+{
+	m_pWeaponParent->NotifyWorldModelCloneReleased();
+}
+
+bool C_CombatWeaponClone::ShouldDraw( void )
+{
+	C_BaseCombatCharacter *pOwner = m_pWeaponParent->GetOwner();
+	return (!pOwner
+		|| !pOwner->IsPlayer()
+		|| !C_BasePlayer::IsLocalPlayer( pOwner )
+		|| pOwner->ShouldDraw()
+		&& m_pWeaponParent->ShouldDrawThisOrWorldModelClone()
+		&& m_pWeaponParent->GetOwner()
+		&& !m_pWeaponParent->ShouldDraw() // Best guess, probably inaccurate
+		&& C_BaseEntity::ShouldDraw() );
+}
+
+bool C_CombatWeaponClone::ShouldSuppressForSplitScreenPlayer( int nSlot )
+{
+	C_BaseCombatCharacter *pOwner = m_pWeaponParent->GetOwner();
+	return pOwner
+		&& pOwner->IsPlayer()
+		&& C_BasePlayer::IsLocalPlayer( pOwner )
+		&& pOwner->ShouldSuppressForSplitScreenPlayer( nSlot );
+}
+
+int C_CombatWeaponClone::DrawModel( int flags, const RenderableInstance_t &instance )
+{
+	UpdateClone();
+	return BaseClass::DrawModel( flags, instance );
+}
+
+C_BaseCombatWeapon *C_CombatWeaponClone::MyCombatWeaponPointer( void )
+{
+	return m_pWeaponParent;
+}
+
+bool C_CombatWeaponClone::SetupBones( matrix3x4a_t *pBoneToWorldOut, int nMaxBones, int boneMask, float currentTime )
+{
+	UpdateClone();
+	int nBoneIndex = m_nWeaponBoneIndex;
+	m_nWeaponBoneIndex = -1;
+	bool result = BaseClass::SetupBones( pBoneToWorldOut, nMaxBones, boneMask, currentTime );
+	m_nWeaponBoneIndex = nBoneIndex;
+	return result;
+}
+
+IClientModelRenderable *C_CombatWeaponClone::GetClientModelRenderable( void )
+{
+	if (!m_bReadyToDraw
+		|| m_pWeaponParent->IsFirstPersonSpectated()
+		|| !m_pWeaponParent->GetClientModelRenderable() )
+	{
+		return NULL;
+	}
+	UpdateClone();
+	return BaseClass::GetClientModelRenderable();
+}
+
+const Vector &C_CombatWeaponClone::GetRenderOrigin( void )
+{
+	if ( m_nWeaponBoneIndex < 0 )
+		return BaseClass::GetRenderOrigin();
+	else
+		return m_vWeaponBonePosition;
+}
+
+const QAngle &C_CombatWeaponClone::GetRenderAngles( void )
+{
+	if ( m_nWeaponBoneIndex < 0 )
+		return BaseClass::GetRenderAngles();
+	else
+		return m_qWeaponBoneAngle;
+}
+
+bool C_CombatWeaponClone::ComputeStencilState( ShaderStencilState_t *pStencilState )
+{
+	return m_pWeaponParent->ComputeStencilState( pStencilState );
+}
+
+void C_CombatWeaponClone::UpdateClone( void )
+{
+	int iTickCount = gpGlobals->tickcount;
+	if (m_nLastUpdatedWorldModelClone != iTickCount)
+	{
+		m_nLastUpdatedWorldModelClone = iTickCount;
+		m_pWeaponParent = m_pWeaponParent;
+
+		SetParent( GetMoveParent(), m_pWeaponParent->GetParentAttachment() );
+		SetLocalOrigin( m_pWeaponParent->GetLocalOrigin() );
+		SetLocalAngles( m_pWeaponParent->GetLocalAngles() );
+		SetCycle( m_pWeaponParent->GetCycle() );
+		SetEffects( m_pWeaponParent->GetEffects() );
+		m_flAnimTime = m_pWeaponParent->m_flAnimTime;
+		
+		SetBody( m_pWeaponParent->GetBody() );
+		SetSkin( m_pWeaponParent->GetSkin() );
+		float flFrozen = 1.0 - m_pWeaponParent->GetFrozenAmount();
+		if (flFrozen >= 0.0)
+		{
+			if (flFrozen > 1.0)
+				flFrozen = 1.0;
+		}
+		else
+		{
+			flFrozen = 0.0;
+		}
+		SetPlaybackRate( m_pWeaponParent->GetPlaybackRate() * flFrozen );
+		if ( GetModelIndex() != m_pWeaponParent->GetWorldModelIndex() )
+		{
+			SetModelIndex( m_pWeaponParent->GetWorldModelIndex() );
+			m_nWeaponBoneIndex = LookupBone( "weapon_bone" );
+		}
+#if 0
+		if ( GetModelPtr()
+			&& GetModelPtr()->GetRenderHdr()
+			&& ((m_nSequence = this->m_pWeaponParent->m_nSequence, !m_pStudioHdr->m_pVModel)
+			? (numlocalseq = m_pStudioHdr->m_pStudioHdr->numlocalseq)
+			: (numlocalseq = CStudioHdr::GetNumSeq_Internal(this->m_pStudioHdr)),
+			m_nSequence >= numlocalseq) )
+#else
+		if ( false )
+#endif
+		{
+			SetSequence( 0 );
+		}
+		else
+		{
+			SetSequence( m_pWeaponParent->GetSequence() );
+		}
+
+		AlphaProp()->SetAlphaModulation( m_pWeaponParent->AlphaProp()->GetAlphaModulation() );
+		AlphaProp()->SetFade( 
+			m_pWeaponParent->AlphaProp()->GetGlobalFadeScale(),
+			m_pWeaponParent->AlphaProp()->GetMinFadeDist(),
+			m_pWeaponParent->AlphaProp()->GetMaxFadeDist() );
+		if ( m_nWeaponBoneIndex >= 0 )
+			GetBonePosition( m_nWeaponBoneIndex, m_vWeaponBonePosition, m_qWeaponBoneAngle );
 	}
 }

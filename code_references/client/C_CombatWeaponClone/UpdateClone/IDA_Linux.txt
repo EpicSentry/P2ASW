@@ -1,0 +1,100 @@
+void __cdecl C_CombatWeaponClone::UpdateClone(C_CombatWeaponClone *const this)
+{
+  int tickcount; // eax
+  C_BaseCombatWeapon *m_pWeaponParent; // eax
+  C_BaseEntity *v3; // edi
+  int m_iParentAttachment; // ecx
+  unsigned int m_Index; // eax
+  char *v6; // edx
+  const Vector *LocalOrigin; // eax
+  const QAngle *LocalAngles; // eax
+  C_BaseCombatWeapon *v9; // eax
+  int v10; // eax
+  int v11; // eax
+  C_BaseCombatWeapon *v12; // eax
+  float v13; // xmm0_4
+  float v14; // xmm0_4
+  int ModelIndex; // esi
+  int v16; // eax
+  CStudioHdr *m_pStudioHdr; // eax
+  int m_nSequence; // esi
+  int numlocalseq; // eax
+  CClientAlphaProperty *m_pClientAlphaProperty; // esi
+  CClientAlphaProperty *v21; // edi
+
+  tickcount = gpGlobals->tickcount;
+  if ( this->m_nLastUpdatedWorldModelClone != tickcount )
+  {
+    this->m_nLastUpdatedWorldModelClone = tickcount;
+    m_pWeaponParent = this->m_pWeaponParent;
+    v3 = 0;
+    m_iParentAttachment = m_pWeaponParent->m_iParentAttachment;
+    m_Index = m_pWeaponParent->m_pMoveParent.m_Index;
+    if ( m_Index != -1 )
+    {
+      v6 = (char *)g_pEntityList + 16 * (unsigned __int16)m_Index;
+      if ( *((_DWORD *)v6 + 2) == HIWORD(m_Index) )
+        v3 = (C_BaseEntity *)*((_DWORD *)v6 + 1);
+    }
+    C_BaseEntity::SetParent(this, v3, m_iParentAttachment);
+    LocalOrigin = C_BaseEntity::GetLocalOrigin(this->m_pWeaponParent);
+    C_BaseEntity::SetLocalOrigin(this, LocalOrigin);
+    LocalAngles = C_BaseEntity::GetLocalAngles(this->m_pWeaponParent);
+    C_BaseEntity::SetLocalAngles(this, LocalAngles);
+    C_BaseAnimating::SetCycle(this, this->m_pWeaponParent->m_flCycle.m_Val);
+    C_BaseEntity::SetEffects(this, this->m_pWeaponParent->m_fEffects);
+    v9 = this->m_pWeaponParent;
+    this->m_flAnimTime = v9->m_flAnimTime;
+    v10 = (*((int (__cdecl **)(C_BaseCombatWeapon *))v9->_vptr_IHandleEntity + 219))(v9);
+    C_BaseAnimating::SetBody(this, v10);
+    v11 = (*((int (__cdecl **)(C_BaseCombatWeapon *))this->m_pWeaponParent->_vptr_IHandleEntity + 220))(this->m_pWeaponParent);
+    C_BaseAnimating::SetSkin(this, v11);
+    v12 = this->m_pWeaponParent;
+    v13 = 1.0 - v12->m_flFrozen;
+    if ( v13 < 0.0 )
+      v14 = 0.0;
+    else
+      v14 = fminf(1.0, v13);
+    this->m_flPlaybackRate = v14 * v12->m_flPlaybackRate;
+    ModelIndex = C_BaseEntity::GetModelIndex(this);
+    if ( ModelIndex != (*((int (__cdecl **)(C_BaseCombatWeapon *))this->m_pWeaponParent->_vptr_IHandleEntity + 417))(this->m_pWeaponParent) )
+    {
+      v16 = (*((int (__cdecl **)(C_BaseCombatWeapon *))this->m_pWeaponParent->_vptr_IHandleEntity + 417))(this->m_pWeaponParent);
+      C_BaseEntity::SetModelIndex(this, v16);
+      this->m_nWeaponBoneIndex = C_BaseAnimating::LookupBone(this, "weapon_bone");
+    }
+    if ( !this->m_pStudioHdr && (*((int (__cdecl **)(C_CombatWeaponClone *const))this->_vptr_IHandleEntity + 61))(this) )
+      C_BaseAnimating::LockStudioHdr(this);
+    m_pStudioHdr = this->m_pStudioHdr;
+    if ( m_pStudioHdr
+      && m_pStudioHdr->m_pStudioHdr
+      && ((m_nSequence = this->m_pWeaponParent->m_nSequence, !m_pStudioHdr->m_pVModel)
+        ? (numlocalseq = m_pStudioHdr->m_pStudioHdr->numlocalseq)
+        : (numlocalseq = CStudioHdr::GetNumSeq_Internal(this->m_pStudioHdr)),
+          m_nSequence >= numlocalseq) )
+    {
+      C_BaseAnimating::SetSequence(this, 0);
+    }
+    else
+    {
+      C_BaseAnimating::SetSequence(this, this->m_pWeaponParent->m_nSequence);
+    }
+    m_pClientAlphaProperty = this->m_pClientAlphaProperty;
+    v21 = this->m_pWeaponParent->m_pClientAlphaProperty;
+    (*((void (__cdecl **)(CClientAlphaProperty *, _DWORD))m_pClientAlphaProperty->_vptr_IClientAlphaProperty + 1))(
+      m_pClientAlphaProperty,
+      v21->m_nAlpha);
+    (*((void (__cdecl **)(CClientAlphaProperty *, _DWORD, _DWORD, _DWORD))m_pClientAlphaProperty->_vptr_IClientAlphaProperty
+     + 3))(
+      m_pClientAlphaProperty,
+      LODWORD(v21->m_flFadeScale),
+      (float)((float)0 * 65536.0) + (float)v21->m_nDistFadeStart,
+      (float)((float)0 * 65536.0) + (float)v21->m_nDistFadeEnd);
+    if ( this->m_nWeaponBoneIndex >= 0 )
+      C_BaseAnimating::GetBonePosition(
+        this,
+        this->m_nWeaponBoneIndex,
+        &this->m_vWeaponBonePosition,
+        &this->m_qWeaponBoneAngle);
+  }
+}

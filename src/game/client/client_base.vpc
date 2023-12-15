@@ -87,6 +87,7 @@ $Project
 		$File	"c_basetoggle.h"
 		$File	"c_beamspotlight.cpp"
 		$File	"c_colorcorrection.h"
+		$File	"c_combatweaponworldclone.h"
 		$File	"c_entityflame.cpp"
 		$File	"c_entityfreezing.cpp"
 		$File	"c_env_ambient_light.cpp"

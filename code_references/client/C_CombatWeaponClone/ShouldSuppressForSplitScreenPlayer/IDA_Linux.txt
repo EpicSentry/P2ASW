@@ -1,0 +1,18 @@
+bool __cdecl C_CombatWeaponClone::ShouldSuppressForSplitScreenPlayer(C_CombatWeaponClone *const this, int nSlot)
+{
+  C_BaseCombatCharacter *Owner; // eax
+  const C_BaseEntity *v3; // ebx
+
+  Owner = C_BaseCombatWeapon::GetOwner(this->m_pWeaponParent);
+  v3 = Owner;
+  if ( Owner
+    && (*((unsigned __int8 (__cdecl **)(C_BaseCombatCharacter *))Owner->_vptr_IHandleEntity + 200))(Owner)
+    && C_BasePlayer::IsLocalPlayer(v3) )
+  {
+    return (*((int (__cdecl **)(const C_BaseEntity *, int))v3->_vptr_IHandleEntity + 146))(v3, nSlot);
+  }
+  else
+  {
+    return 0;
+  }
+}

@@ -1,0 +1,23 @@
+class C_CombatWeaponClone : public C_BaseAnimating
+{
+public:
+	void C_CombatWeaponClone(class C_CombatWeaponClone & );
+    void C_CombatWeaponClone(class C_BaseCombatWeapon * );
+    void ~C_CombatWeaponClone();
+    class IClientModelRenderable * GetClientModelRenderable();
+    int DrawModel(int ,struct RenderableInstance_t & );
+    bool ShouldSuppressForSplitScreenPlayer(int );
+    bool ShouldDraw();
+    bool SetupBones(class matrix3x4a_t * ,int ,int ,float );
+    bool ComputeStencilState(struct ShaderStencilState_t * );
+    class Vector & GetRenderOrigin();
+    class QAngle & GetRenderAngles();
+    class C_BaseCombatWeapon * MyCombatWeaponPointer();
+    void UpdateClone();
+private:
+	C_BaseCombatWeapon * m_pWeaponParent;
+    int m_nLastUpdatedWorldModelClone;
+    int m_nWeaponBoneIndex;
+    Vector m_vWeaponBonePosition;
+    QAngle m_qWeaponBoneAngle;
+};

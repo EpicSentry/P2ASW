@@ -1,0 +1,10 @@
+bool __thiscall C_CombatWeaponClone::ShouldSuppressForSplitScreenPlayer(C_CombatWeaponClone *this, int nSlot)
+{
+  C_BaseCombatCharacter *Owner; // esi
+
+  Owner = C_BaseCombatWeapon::GetOwner(this->m_pWeaponParent);
+  return Owner
+      && Owner->IsPlayer(Owner)
+      && C_BasePlayer::IsLocalPlayer(Owner)
+      && Owner->ShouldSuppressForSplitScreenPlayer(Owner, nSlot);
+}

@@ -1,0 +1,7 @@
+const QAngle *__thiscall C_CombatWeaponClone::GetRenderAngles(C_CombatWeaponClone *this)
+{
+  if ( this->m_nLastUpdatedWorldModelClone < 0 )
+    return C_BaseAnimating::GetRenderAngles(this);
+  else
+    return (const QAngle *)&this->m_vWeaponBonePosition.z;
+}

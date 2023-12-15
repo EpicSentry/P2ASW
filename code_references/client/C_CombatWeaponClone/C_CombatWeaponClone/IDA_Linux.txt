@@ -1,0 +1,16 @@
+void __cdecl C_CombatWeaponClone::C_CombatWeaponClone(
+        C_CombatWeaponClone *const this,
+        C_BaseCombatWeapon *pWeaponParent)
+{
+  const char *v2; // eax
+
+  C_BaseAnimating::C_BaseAnimating(this);
+  this->_vptr_IHandleEntity = (int (**)(...))off_12101A8;
+  this->_vptr_IClientRenderable = (int (**)(...))&off_1210624;
+  this->_vptr_IClientNetworkable = (int (**)(...))&off_12106E0;
+  this->_vptr_IClientThinkable = (int (**)(...))off_1210720;
+  this->_vptr_IClientModelRenderable = (int (**)(...))&off_121073C;
+  this->m_pWeaponParent = pWeaponParent;
+  v2 = (const char *)(*((int (__cdecl **)(C_BaseCombatWeapon *))pWeaponParent->_vptr_IHandleEntity + 371))(pWeaponParent);
+  C_BaseEntity::InitializeAsClientEntity(this, v2, 0);
+}

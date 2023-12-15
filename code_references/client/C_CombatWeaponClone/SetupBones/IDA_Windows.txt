@@ -1,0 +1,19 @@
+bool __userpurge C_CombatWeaponClone::SetupBones@<al>(
+        C_CombatWeaponClone *this@<ecx>,
+        int a2@<ebx>,
+        int a3@<edi>,
+        matrix3x4a_t *pBoneToWorldOut,
+        int nMaxBones,
+        int boneMask,
+        float currentTime)
+{
+  int m_nLastUpdatedWorldModelClone; // edi
+  bool result; // al
+
+  C_CombatWeaponClone::UpdateClone((C_CombatWeaponClone *)((char *)this - 4), a2, a3);
+  m_nLastUpdatedWorldModelClone = this->m_nLastUpdatedWorldModelClone;
+  this->m_nLastUpdatedWorldModelClone = -1;
+  result = C_BaseAnimating::SetupBones(this, pBoneToWorldOut, nMaxBones, boneMask, currentTime);
+  this->m_nLastUpdatedWorldModelClone = m_nLastUpdatedWorldModelClone;
+  return result;
+}

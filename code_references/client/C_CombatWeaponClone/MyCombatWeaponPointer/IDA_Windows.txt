@@ -1,0 +1,4 @@
+C_BaseCombatWeapon *__thiscall C_CombatWeaponClone::MyCombatWeaponPointer(C_CombatWeaponClone *this)
+{
+  return this->m_pWeaponParent;
+}

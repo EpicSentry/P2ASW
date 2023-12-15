@@ -1,0 +1,78 @@
+void __thiscall C_BaseCombatWeapon::OnDataChanged(C_BaseCombatWeapon *this, DataUpdateType_t updateType)
+{
+  C_BaseCombatWeapon *v3; // edi
+  C_BaseCombatCharacter *Owner; // eax
+  C_BaseEntity *v5; // ebx
+  int SplitScreenSlotForPlayer; // eax
+  CBaseHudWeaponSelection *HudWeaponSelection; // eax
+  C_CombatWeaponClone *v8; // eax
+  float v9; // eax
+  float m_flHudHintMinDisplayTime; // ecx
+  float v11; // ecx
+  int soundtime; // [esp+4h] [ebp-34h]
+  CSetActiveSplitScreenPlayerGuard g_SSGuard; // [esp+18h] [ebp-20h] BYREF
+
+  v3 = (C_BaseCombatWeapon *)((char *)this - 8);
+  C_BaseEntity::UpdateVisibility((C_BaseCombatWeapon *)((char *)this - 8));
+  C_BaseAnimating::OnDataChanged(this, updateType);
+  Owner = C_BaseCombatWeapon::GetOwner(v3);
+  v5 = Owner;
+  if ( !Owner || !Owner->IsPlayer(Owner) )
+    v5 = 0;
+  if ( C_BasePlayer::IsLocalPlayer(v5) )
+  {
+    soundtime = engine->GetActiveSplitScreenPlayerSlot(engine);
+    SplitScreenSlotForPlayer = C_BasePlayer::GetSplitScreenSlotForPlayer(v5);
+    CSetActiveSplitScreenPlayerGuard::CSetActiveSplitScreenPlayerGuard(
+      &g_SSGuard,
+      "c_basecombatweapon.cpp",
+      135,
+      SplitScreenSlotForPlayer,
+      soundtime,
+      0);
+    if ( this->m_iViewModelIndex.m_Value && !*(_DWORD *)&this->m_bJustRestored && v3->ShouldDrawPickup(v3) )
+    {
+      HudWeaponSelection = GetHudWeaponSelection();
+      if ( HudWeaponSelection )
+        HudWeaponSelection->OnWeaponPickup(HudWeaponSelection, v3);
+      C_BaseEntity::EmitSound(v5, "Player.PickupWeapon", 0.0, 0);
+    }
+    CSetActiveSplitScreenPlayerGuard::~CSetActiveSplitScreenPlayerGuard(&g_SSGuard);
+  }
+  C_BaseEntity::UpdateVisibility(v3);
+  *(_DWORD *)&this->m_bJustRestored = this->m_iViewModelIndex.m_Value;
+  LOBYTE(this->m_flHudHintPollTime) = 0;
+  if ( !cl_viewmodelsclonedasworld.m_pParent->m_Value.m_nValue
+    || (v5 = (C_BaseEntity *)v3->GetWorldModelIndex(v3), (C_BaseEntity *)C_BaseEntity::GetModelIndex(v3) == v5)
+    || this->GetClientAlphaProperty(this) )
+  {
+    m_flHudHintMinDisplayTime = this->m_flHudHintMinDisplayTime;
+    if ( m_flHudHintMinDisplayTime == 0.0 )
+      goto LABEL_22;
+    (*(void (__thiscall **)(int))(*(_DWORD *)(LODWORD(m_flHudHintMinDisplayTime) + 8) + 4))(LODWORD(m_flHudHintMinDisplayTime) + 8);
+    this->m_flHudHintMinDisplayTime = 0.0;
+  }
+  else
+  {
+    if ( LODWORD(this->m_flHudHintMinDisplayTime) )
+      goto LABEL_22;
+    v8 = (C_CombatWeaponClone *)C_BaseEntity::operator new(0xDE0u);
+    if ( v8 )
+    {
+      C_CombatWeaponClone::C_CombatWeaponClone(v8, v3);
+      this->m_flHudHintMinDisplayTime = v9;
+    }
+    else
+    {
+      this->m_flHudHintMinDisplayTime = 0.0;
+    }
+  }
+  C_BaseEntity::UpdateVisibility(v3);
+LABEL_22:
+  v11 = this->m_flHudHintMinDisplayTime;
+  if ( v11 != 0.0 )
+  {
+    C_CombatWeaponClone::UpdateClone((C_CombatWeaponClone *)LODWORD(v11), (int)v5, (int)v3);
+    C_BaseEntity::UpdateVisibility((C_BaseEntity *)LODWORD(this->m_flHudHintMinDisplayTime));
+  }
+}

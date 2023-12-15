@@ -1,0 +1,13 @@
+void __cdecl C_CombatWeaponClone::~C_CombatWeaponClone(C_CombatWeaponClone *const this)
+{
+  C_BaseCombatWeapon *m_pWeaponParent; // eax
+
+  m_pWeaponParent = this->m_pWeaponParent;
+  this->_vptr_IHandleEntity = (int (**)(...))off_12101A8;
+  this->_vptr_IClientRenderable = (int (**)(...))&off_1210624;
+  this->_vptr_IClientNetworkable = (int (**)(...))&off_12106E0;
+  this->_vptr_IClientThinkable = (int (**)(...))off_1210720;
+  this->_vptr_IClientModelRenderable = (int (**)(...))&off_121073C;
+  C_BaseCombatWeapon::NotifyWorldModelCloneReleased(m_pWeaponParent);
+  C_BaseAnimating::~C_BaseAnimating(this);
+}

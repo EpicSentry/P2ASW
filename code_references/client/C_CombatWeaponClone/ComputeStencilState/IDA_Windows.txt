@@ -1,0 +1,6 @@
+int __thiscall C_CombatWeaponClone::ComputeStencilState(C_CombatWeaponClone *this, ShaderStencilState_t *pStencilState)
+{
+  return ((int (__thiscall *)(C_BaseCombatWeapon *, ShaderStencilState_t *))this->m_pWeaponParent->ComputeStencilState)(
+           this->m_pWeaponParent,
+           pStencilState);
+}

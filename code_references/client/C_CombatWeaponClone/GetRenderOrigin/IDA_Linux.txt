@@ -1,0 +1,7 @@
+const Vector *__cdecl C_CombatWeaponClone::GetRenderOrigin(C_CombatWeaponClone *const this)
+{
+  if ( this->m_nWeaponBoneIndex < 0 )
+    return C_BaseAnimating::GetRenderOrigin(this);
+  else
+    return &this->m_vWeaponBonePosition;
+}

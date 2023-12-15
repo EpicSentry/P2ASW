@@ -1,0 +1,14 @@
+void __thiscall C_CombatWeaponClone::C_CombatWeaponClone(C_CombatWeaponClone *this, C_BaseCombatWeapon *pWeaponParent)
+{
+  const char *v3; // eax
+
+  C_BaseAnimating::C_BaseAnimating(this);
+  this->C_BaseAnimating::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable = (C_CombatWeaponClone_vtbl *)&C_CombatWeaponClone::`vftable'{for `IClientUnknown'};
+  this->C_BaseAnimating::C_BaseEntity::IClientEntity::IClientRenderable::__vftable = (IClientRenderable_vtbl *)&C_CombatWeaponClone::`vftable'{for `IClientRenderable'};
+  this->C_BaseAnimating::C_BaseEntity::IClientEntity::IClientNetworkable::__vftable = (IClientNetworkable_vtbl *)&C_CombatWeaponClone::`vftable'{for `IClientNetworkable'};
+  this->C_BaseAnimating::C_BaseEntity::IClientEntity::IClientThinkable::__vftable = (IClientThinkable_vtbl *)&C_CombatWeaponClone::`vftable'{for `IClientThinkable'};
+  this->C_BaseAnimating::C_BaseEntity::IClientModelRenderable::__vftable = (IClientModelRenderable_vtbl *)&C_CombatWeaponClone::`vftable';
+  this->m_pWeaponParent = pWeaponParent;
+  v3 = pWeaponParent->GetWorldModel(pWeaponParent);
+  C_BaseEntity::InitializeAsClientEntity(this, v3, 0);
+}

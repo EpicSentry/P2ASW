@@ -1,0 +1,14 @@
+IClientModelRenderable *__usercall C_CombatWeaponClone::GetClientModelRenderable@<eax>(
+        C_CombatWeaponClone *this@<ecx>,
+        int a2@<ebx>,
+        int a3@<edi>)
+{
+  if ( !LOBYTE(this->m_VisibilityBits.m_Ints[0])
+    || C_BaseCombatWeapon::IsFirstPersonSpectated(*(C_BaseCombatWeapon **)(&this->m_bDynamicModelPending + 3))
+    || !(*(int (__thiscall **)(int))(*(_DWORD *)(*(_DWORD *)(&this->m_bDynamicModelPending + 3) + 4) + 176))(*(_DWORD *)(&this->m_bDynamicModelPending + 3) + 4) )
+  {
+    return 0;
+  }
+  C_CombatWeaponClone::UpdateClone((C_CombatWeaponClone *)((char *)this - 4), a2, a3);
+  return C_BaseAnimating::GetClientModelRenderable(this);
+}

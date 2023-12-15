@@ -1,0 +1,99 @@
+void __usercall C_CombatWeaponClone::UpdateClone(C_CombatWeaponClone *this@<ecx>, int a2@<ebx>, int a3@<edi>)
+{
+  int v3; // eax
+  C_BaseCombatWeapon *m_pWeaponParent; // eax
+  unsigned __int8 m_iParentAttachment; // dl
+  unsigned int m_Index; // eax
+  C_BaseEntity *m_pEntity; // eax
+  const Vector *LocalOrigin; // eax
+  const QAngle *LocalAngles; // eax
+  C_BaseCombatWeapon *v11; // eax
+  int v12; // eax
+  int v13; // eax
+  C_BaseCombatWeapon *v14; // ecx
+  float v15; // xmm0_4
+  int v16; // edi
+  int v17; // eax
+  CStudioHdr *m_pStudioHdr; // ecx
+  int m_nSequence; // edi
+  int NumSeq_Internal; // eax
+  CClientAlphaProperty *m_pClientAlphaProperty; // ebx
+  CClientAlphaProperty *v22; // edi
+  int m_nWeaponBoneIndex; // eax
+
+  v3 = *(_DWORD *)(gpGlobals.m_Index + 24);
+  if ( this->m_nLastUpdatedWorldModelClone != v3 )
+  {
+    this->m_nLastUpdatedWorldModelClone = v3;
+    m_pWeaponParent = this->m_pWeaponParent;
+    m_iParentAttachment = m_pWeaponParent->m_iParentAttachment;
+    m_Index = m_pWeaponParent->m_pMoveParent.m_Index;
+    if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+      m_pEntity = 0;
+    else
+      m_pEntity = (C_BaseEntity *)g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+    C_BaseEntity::SetParent(this, m_pEntity, m_iParentAttachment);
+    LocalOrigin = C_BaseEntity::GetLocalOrigin(this->m_pWeaponParent);
+    C_BaseEntity::SetLocalOrigin(this, LocalOrigin);
+    LocalAngles = C_BaseEntity::GetLocalAngles(this->m_pWeaponParent);
+    C_BaseEntity::SetLocalAngles(this, LocalAngles);
+    C_BaseAnimating::SetCycle(this, this->m_pWeaponParent->m_flCycle.m_Val);
+    C_BaseEntity::SetEffects(this, this->m_pWeaponParent->m_fEffects);
+    v11 = this->m_pWeaponParent;
+    this->m_flAnimTime = v11->m_flAnimTime;
+    v12 = ((int (__thiscall *)(IClientRenderable *, int, int))v11->GetBody)(&v11->IClientRenderable, a3, a2);
+    C_BaseAnimating::SetBody(this, v12);
+    v13 = this->m_pWeaponParent->GetSkin(&this->m_pWeaponParent->IClientRenderable);
+    C_BaseAnimating::SetSkin(this, v13);
+    v14 = this->m_pWeaponParent;
+    v15 = 1.0 - v14->m_flFrozen;
+    if ( v15 >= 0.0 )
+    {
+      if ( v15 > 1.0 )
+        v15 = *(float *)&FLOAT_1_0;
+    }
+    else
+    {
+      v15 = 0.0;
+    }
+    this->m_flPlaybackRate = v14->m_flPlaybackRate * v15;
+    v16 = v14->GetWorldModelIndex(v14);
+    if ( C_BaseEntity::GetModelIndex(this) != v16 )
+    {
+      v17 = this->m_pWeaponParent->GetWorldModelIndex(this->m_pWeaponParent);
+      C_BaseEntity::SetModelIndex(this, v17);
+      this->m_nWeaponBoneIndex = C_BaseAnimating::LookupBone(this, "weapon_bone");
+    }
+    if ( !this->m_pStudioHdr && this->GetModel(&this->IClientRenderable) )
+      C_BaseAnimating::LockStudioHdr(this);
+    m_pStudioHdr = this->m_pStudioHdr;
+    if ( m_pStudioHdr
+      && m_pStudioHdr->m_pStudioHdr
+      && ((m_nSequence = this->m_pWeaponParent->m_nSequence, m_pStudioHdr->m_pVModel)
+        ? (NumSeq_Internal = CStudioHdr::GetNumSeq_Internal(m_pStudioHdr))
+        : (NumSeq_Internal = m_pStudioHdr->m_pStudioHdr->numlocalseq),
+          m_nSequence >= NumSeq_Internal) )
+    {
+      C_BaseAnimating::SetSequence(this, 0);
+    }
+    else
+    {
+      C_BaseAnimating::SetSequence(this, this->m_pWeaponParent->m_nSequence);
+    }
+    m_pClientAlphaProperty = this->m_pWeaponParent->m_pClientAlphaProperty;
+    v22 = this->m_pClientAlphaProperty;
+    v22->SetAlphaModulation(v22, m_pClientAlphaProperty->m_nAlpha);
+    ((void (__thiscall *)(CClientAlphaProperty *, _DWORD, float, float))v22->SetFade)(
+      v22,
+      LODWORD(m_pClientAlphaProperty->m_flFadeScale),
+      (float)m_pClientAlphaProperty->m_nDistFadeStart,
+      (float)m_pClientAlphaProperty->m_nDistFadeEnd);
+    m_nWeaponBoneIndex = this->m_nWeaponBoneIndex;
+    if ( m_nWeaponBoneIndex >= 0 )
+      C_BaseAnimating::GetBonePosition(
+        this,
+        m_nWeaponBoneIndex,
+        &this->m_vWeaponBonePosition,
+        &this->m_qWeaponBoneAngle);
+  }
+}

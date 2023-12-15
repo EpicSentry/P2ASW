@@ -1,0 +1,17 @@
+bool __cdecl C_CombatWeaponClone::SetupBones(
+        C_CombatWeaponClone *const this,
+        matrix3x4a_t *pBoneToWorldOut,
+        int nMaxBones,
+        int boneMask,
+        float currentTime)
+{
+  int m_nWeaponBoneIndex; // esi
+  bool result; // al
+
+  C_CombatWeaponClone::UpdateClone(this);
+  m_nWeaponBoneIndex = this->m_nWeaponBoneIndex;
+  this->m_nWeaponBoneIndex = -1;
+  result = C_BaseAnimating::SetupBones(this, pBoneToWorldOut, nMaxBones, boneMask, currentTime);
+  this->m_nWeaponBoneIndex = m_nWeaponBoneIndex;
+  return result;
+}
