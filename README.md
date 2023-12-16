@@ -2,6 +2,7 @@
 ## Portal 2 In The Alien Swarm Engine
 What is P2ASW?<br>
 P2ASW is a free and open source project aiming to recreate most of Portal 2's entities and functions in the ASW engine SDK.<br>
+This mod is uses leaked Portal & CSGO code and reverse engineered code.<br>
 See more [here](https://epicteleporter.xyz/p2asw/)<br>
 P2ASW is **not** finished, certain features/entities might not exist or work properly. 
 
@@ -19,4 +20,12 @@ Open the newly created `Game_Portal2-2013.sln` and have fun!
 1. Download Alien Swarm [here](http://store.steampowered.com/app/620/) and Portal 2 [here](https://store.steampowered.com/app/620/Portal_2).<br>
 ### YOU MUST OWN PORTAL 2 ON STEAM TO USE P2ASW.
 2. Copy the `portal2asw` folder from `game\` into your SourceMods folder and restart Steam.<br>
-The mod should now show up in your Steam library.
+The mod should now show up in your Steam library.<br>
+
+## This mod is made possible thanks to:
+- [MinHook](https://github.com/TsudaKageyu/minhook)<br>
+- [Silver-Bun](https://github.com/IcePixelx/silver-bun)<br>
+- [RubberWar](https://github.com/RubberWar/Portal-2)<br>
+All of our contributors.<br>
+
+P2ASW is not affiliated with Valve Corporation.<br>
