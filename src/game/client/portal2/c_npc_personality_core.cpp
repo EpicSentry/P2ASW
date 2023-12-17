@@ -31,6 +31,11 @@ private:
 	dlight_t* m_pELight;
 };
 
+
+// FIXME: Setting this at 0.0 temporarily, but what is this true value??
+// Setting it to 0.0 because wheatley's dimmer value is set to 0.0 by default.
+float s_GLaDOS_flDimmer = 0.0;
+
 IMPLEMENT_CLIENTCLASS_DT(C_NPC_Personality_Core, DT_NPC_Personality_Core, CNPC_PersonalityCore)
 RecvPropBool( RECVINFO ( m_bFlashlightEnabled) ),
 END_RECV_TABLE()
@@ -64,7 +69,7 @@ float MouthDecay(float mouthopen, float& flInvDim, float flBaseLight)
 {
 	float v3 = 0.0;
 	float v4 = 0.015625 * mouthopen;
-	if ((0.015625 * mouthopen) < 0.0)
+	if ((float)(0.015625 * mouthopen) < 0.0)
 	{
 		v4 = 0.0;
 		goto LABEL_7;
@@ -75,28 +80,24 @@ float MouthDecay(float mouthopen, float& flInvDim, float flBaseLight)
 		v3 = 1.0;
 		goto LABEL_7;
 	}
-
-	float v5 = 0.0;
 	if (v4 < 0.2)
 	{
 		v4 = 0.0;
 	LABEL_7:
-		v5 = flInvDim;
 		if (v3 <= flInvDim)
 			goto LABEL_5;
 	LABEL_8:
 		flInvDim = v3;
-		return fmaxf(v4, flBaseLight * (1.0 - v3));
+		return fmaxf(v4, flBaseLight * (float)(1.0 - v3));
 	}
-	v5 = flInvDim;
 	v3 = fminf(3.0 * v4, 1.0);
 	if (v3 > flInvDim)
 		goto LABEL_8;
 LABEL_5:
 	float v7 = expf(-0.61220264 * gpGlobals->frametime);
-	v3 = v7 * v5;
-	flInvDim = v7 * v5;
-	return fmaxf(v4, flBaseLight * (1.0 - v3));
+	v3 = v7 * flInvDim;
+	flInvDim = v7 * flInvDim;
+	return fmaxf(v4, flBaseLight * (float)(1.0 - v3));
 }
 
 void C_NPC_Personality_Core::UpdateOnRemove()
@@ -124,7 +125,7 @@ void C_NPC_Personality_Core::ControlMouth(CStudioHdr* pStudioHdr)
 	if (!pStudioHdr)
 		return;
 
-	m_flMouthAmount = MouthDecay(GetMouth()->mouthopen, m_flInvDim, 0.8f);
+	m_flMouthAmount = MouthDecay( GetMouth()->mouthopen, m_flInvDim, 0.8f);
 }
 
 void C_NPC_Personality_Core::OnDataChanged(DataUpdateType_t updateType)
@@ -132,7 +133,7 @@ void C_NPC_Personality_Core::OnDataChanged(DataUpdateType_t updateType)
 	BaseClass::OnDataChanged(updateType);
 	if (updateType == DATA_UPDATE_CREATED)
 	{
-		MouthInfo().NeedsEnvelope();
+		MouthInfo().ActivateEnvelope();
 		m_flMouthAmount = 0.0f;
 		m_flInvDim = 0.0f;
 	}
@@ -200,16 +201,13 @@ void C_NPC_Wheatley_Boss::OnDataChanged(DataUpdateType_t updateType)
 	BaseClass::OnDataChanged(updateType);
 	if (updateType == DATA_UPDATE_CREATED)
 	{
-		MouthInfo().NeedsEnvelope();
+		MouthInfo().ActivateEnvelope();
 		m_flMouthAmount = 0.0;
 		m_flInvDim = 0.0;
 	}
 }
 
 extern C_BaseAnimating *GetGLaDOSActor( void );
-
-// FIXME: Setting this at 2.0 temporarily, but what is this true value??
-static float s_GLaDOS_flDimmer = 2.0;
 
 class CLightedMouthProxy : public CResultProxy
 {
@@ -234,7 +232,6 @@ void CLightedMouthProxy::OnBind( void *pC_BaseEntity )
 		C_BaseEntity *pEntity = BindArgToEntity( pC_BaseEntity );
 		if ( pEntity )
 		{
-
 			if ( ( pActor = dynamic_cast<C_NPC_Personality_Core*>( pEntity ) ) != NULL )
 			{
 				flFlashResult = ((C_NPC_Personality_Core*)pEntity)->GetMouthAmount();
@@ -243,25 +240,22 @@ void CLightedMouthProxy::OnBind( void *pC_BaseEntity )
 			{
 				flFlashResult = ((C_NPC_Wheatley_Boss*)pEntity)->GetMouthAmount();
 			}
-		}
-		else
-		{
-			C_BaseAnimating *GLaDOSActor = GetGLaDOSActor();
-			if ( GLaDOSActor )
+			else
 			{
-				C_BaseAnimating *pAnimating = GLaDOSActor->GetBaseAnimating();
-
-				if ( pAnimating )
+				C_BaseAnimating *GLaDOSActor = GetGLaDOSActor();
+				if ( GLaDOSActor )
 				{
-					float flBase;
-					C_Portal_Player *LocalPlayer = (C_Portal_Player *)C_BasePlayer::GetLocalPlayer();
-					if (!LocalPlayer || LocalPlayer->IsPotatosOn())
-						flBase = 0.2;
-					else
-						flBase = 0.0;
+					C_BaseAnimating *pAnimating = GLaDOSActor->GetBaseAnimating();
+					if ( pAnimating )
+					{
+						float flBase = 0.0;
+						C_Portal_Player *pLocalPlayer = (C_Portal_Player *)C_BasePlayer::GetLocalPlayer();
+						if ( pLocalPlayer && pLocalPlayer->IsPotatosOn() )
+							flBase = 0.2;
 
-					float flOpenAmount = pAnimating->GetMouth()->mouthopen;
-					flFlashResult = MouthDecay( flOpenAmount, s_GLaDOS_flDimmer, flBase );
+						float flOpenAmount = pAnimating->GetMouth()->mouthopen;
+						flFlashResult = MouthDecay( flOpenAmount, s_GLaDOS_flDimmer, flBase );
+					}
 				}
 			}
 		}

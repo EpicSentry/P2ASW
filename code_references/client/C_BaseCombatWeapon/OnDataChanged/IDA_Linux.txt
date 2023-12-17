@@ -1,0 +1,79 @@
+void __cdecl C_BaseCombatWeapon::OnDataChanged(C_BaseCombatWeapon *const this, DataUpdateType_t updateType)
+{
+  C_BaseCombatCharacter *Owner; // eax
+  C_BaseEntity *v3; // esi
+  int v4; // edi
+  int SplitScreenSlotForPlayer; // eax
+  int m_Value; // eax
+  C_CombatWeaponClone *m_pWorldModelClone; // eax
+  C_CombatWeaponClone *v8; // eax
+  CBaseHudWeaponSelection *HudWeaponSelection; // eax
+  int ModelIndex; // esi
+  C_CombatWeaponClone *v11; // esi
+  CSetActiveSplitScreenPlayerGuard g_SSGuard; // [esp+20h] [ebp-38h] BYREF
+
+  C_BaseEntity::UpdateVisibility(this);
+  C_BaseAnimating::OnDataChanged(this, updateType);
+  Owner = C_BaseCombatWeapon::GetOwner(this);
+  v3 = Owner;
+  if ( !Owner || !(*((unsigned __int8 (__cdecl **)(C_BaseCombatCharacter *))Owner->_vptr_IHandleEntity + 200))(Owner) )
+    v3 = 0;
+  if ( C_BasePlayer::IsLocalPlayer(v3) )
+  {
+    v4 = (*(int (__cdecl **)(IVEngineClient *))(*(_DWORD *)engine + 508))(engine);
+    SplitScreenSlotForPlayer = C_BasePlayer::GetSplitScreenSlotForPlayer(v3);
+    CSetActiveSplitScreenPlayerGuard::CSetActiveSplitScreenPlayerGuard(
+      &g_SSGuard,
+      "/home/buildbot/buildslave/portal2_rel_pc_ubuntu12_linux/build/src/game/client/c_basecombatweapon.cpp",
+      135,
+      SplitScreenSlotForPlayer,
+      v4,
+      0);
+    if ( this->m_iState.m_Value
+      && !this->m_iOldState
+      && (*((unsigned __int8 (__cdecl **)(C_BaseCombatWeapon *const))this->_vptr_IHandleEntity + 411))(this) )
+    {
+      HudWeaponSelection = GetHudWeaponSelection();
+      if ( HudWeaponSelection )
+        (*((void (__cdecl **)(CBaseHudWeaponSelection *, C_BaseCombatWeapon *const))HudWeaponSelection->_vptr_IGameEventListener2
+         + 33))(
+          HudWeaponSelection,
+          this);
+      C_BaseEntity::EmitSound(v3, "Player.PickupWeapon", 0.0, 0);
+    }
+    CSetActiveSplitScreenPlayerGuard::~CSetActiveSplitScreenPlayerGuard(&g_SSGuard);
+  }
+  C_BaseEntity::UpdateVisibility(this);
+  m_Value = this->m_iState.m_Value;
+  this->m_bJustRestored = 0;
+  this->m_iOldState = m_Value;
+  if ( !cl_viewmodelsclonedasworld.m_pParent->m_Value.m_nValue
+    || (ModelIndex = C_BaseEntity::GetModelIndex(this),
+        ModelIndex == (*((int (__cdecl **)(C_BaseCombatWeapon *const))this->_vptr_IHandleEntity + 417))(this))
+    || (*((unsigned __int8 (__cdecl **)(C_BaseCombatWeapon *const))this->_vptr_IHandleEntity + 79))(this) )
+  {
+    m_pWorldModelClone = this->m_pWorldModelClone;
+    if ( !m_pWorldModelClone )
+      return;
+    (*((void (__cdecl **)(C_CombatWeaponClone *))m_pWorldModelClone->_vptr_IHandleEntity + 11))(this->m_pWorldModelClone);
+    this->m_pWorldModelClone = 0;
+    C_BaseEntity::UpdateVisibility(this);
+LABEL_9:
+    v8 = this->m_pWorldModelClone;
+    if ( !v8 )
+      return;
+    goto LABEL_10;
+  }
+  v8 = this->m_pWorldModelClone;
+  if ( !v8 )
+  {
+    v11 = (C_CombatWeaponClone *)C_BaseEntity::operator new(0xDC4u);
+    C_CombatWeaponClone::C_CombatWeaponClone(v11, this);
+    this->m_pWorldModelClone = v11;
+    C_BaseEntity::UpdateVisibility(this);
+    goto LABEL_9;
+  }
+LABEL_10:
+  C_CombatWeaponClone::UpdateClone(v8);
+  C_BaseEntity::UpdateVisibility(this->m_pWorldModelClone);
+}

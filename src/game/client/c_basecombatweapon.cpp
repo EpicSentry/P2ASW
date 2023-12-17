@@ -473,23 +473,6 @@ bool C_BaseCombatWeapon::ShouldDrawPickup( void )
 	return true;
 }
 
-bool C_BaseCombatWeapon::IsFirstPersonSpectated( void )
-{
-	// check if local player chases owner of this weapon in first person
-	C_BasePlayer *localplayer = C_BasePlayer::GetLocalPlayer();
-	if ( localplayer && localplayer->IsObserver() && GetOwner() )
-	{
-		// don't draw weapon if chasing this guy as spectator
-		// we don't check that in ShouldDraw() since this may change
-		// without notification 
-		if ( localplayer->GetObserverMode() == OBS_MODE_IN_EYE &&
-			localplayer->GetObserverTarget() == GetOwner() )
-			return true;
-	}
-
-	return false;
-}
-
 //----------------------------------------------------------------------------
 // Hooks into the fast path render system
 //----------------------------------------------------------------------------
@@ -687,6 +670,24 @@ const QAngle &C_BaseCombatWeapon::GetRenderAngles()
 bool C_BaseCombatWeapon::ComputeStencilState( ShaderStencilState_t *pStencilState )
 {
 	return BaseClass::ComputeStencilState( pStencilState );
+}
+
+
+bool C_BaseCombatWeapon::IsFirstPersonSpectated( void )
+{
+	// check if local player chases owner of this weapon in first person
+	C_BasePlayer *localplayer = C_BasePlayer::GetLocalPlayer();
+	if ( localplayer && localplayer->IsObserver() && GetOwner() )
+	{
+		// don't draw weapon if chasing this guy as spectator
+		// we don't check that in ShouldDraw() since this may change
+		// without notification 
+		if ( localplayer->GetObserverMode() == OBS_MODE_IN_EYE &&
+			localplayer->GetObserverTarget() == GetOwner() )
+			return true;
+	}
+
+	return false;
 }
 
 C_CombatWeaponClone::C_CombatWeaponClone( C_BaseCombatWeapon *pWeaponParent )
