@@ -162,7 +162,7 @@ void C_FizzlerVortexProxy::OnBind( C_BaseEntity *pC_BaseEntity )
 			float flIntensity;
 			pCleanser->GetCurrentState( flIntensity, flPower);
 			
-			Msg("flIntensity: %f flPower: %f\n", flIntensity, flPower );
+			//Msg("flIntensity: %f flPower: %f\n", flIntensity, flPower );
 			m_pIntensityVar->SetFloatValue( flIntensity );
 			m_pPowerUpVar->SetFloatValue( flPower );
 		}
