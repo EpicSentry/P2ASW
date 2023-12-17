@@ -23,6 +23,9 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
+#undef FCVAR_DEVELOPMENTONLY
+#define FCVAR_DEVELOPMENTONLY FCVAR_NONE
+
 ConVar cl_portal_cleanser_powerup_time( "cl_portal_cleanser_powerup_time", "1.0f", FCVAR_DEVELOPMENTONLY, "The amount of time the power up sequence takes to complete." );
 ConVar cl_portal_cleanser_default_intensity( "cl_portal_cleanser_default_intensity", "1.0f", FCVAR_DEVELOPMENTONLY, "The default intensity of the cleanser field effect." );
 ConVar cl_portal_cleanser_shot_pulse_time( "cl_portal_cleanser_shot_pulse_time", "0.1f", FCVAR_DEVELOPMENTONLY, "The amount of time to pulse the cleanser field for when it is shot at." ); 
@@ -96,7 +99,7 @@ bool C_FizzlerVortexProxy::Init( IMaterial *pMaterial, KeyValues *pKeyValues )
 					}
 					else
 					{
-						this->m_pIntensityVar = NULL;
+						m_pIntensityVar = NULL;
 						return false;
 					}
 				}
@@ -159,7 +162,7 @@ void C_FizzlerVortexProxy::OnBind( C_BaseEntity *pC_BaseEntity )
 			float flIntensity;
 			pCleanser->GetCurrentState( flIntensity, flPower);
 			
-			//Msg("flIntensity: %f flPower: %f\n", flIntensity, flPower );
+			Msg("flIntensity: %f flPower: %f\n", flIntensity, flPower );
 			m_pIntensityVar->SetFloatValue( flIntensity );
 			m_pPowerUpVar->SetFloatValue( flPower );
 		}
@@ -209,88 +212,64 @@ void C_TriggerPortalCleanser::OnDataChanged( DataUpdateType_t updateType )
 		m_flLastUpdateTime = gpGlobals->curtime;
 }
 
+#define MAX_FIZZLER_POWER 1.0
+
 void C_TriggerPortalCleanser::GetCurrentState( float &flIntensity, float &flPower )
-{	
+{
 	float flTime = gpGlobals->curtime - m_flLastUpdateTime;
-	
 	m_flLastUpdateTime = gpGlobals->curtime;
 	flIntensity = cl_portal_cleanser_default_intensity.GetFloat();
-	if (m_flPortalShotTime > m_flLastShotTime)
+	if ( m_flPortalShotTime > m_flLastShotTime)
 	{
 		m_flLastShotTime = m_flPortalShotTime;
 		m_flShotPulseTimer = 0.0;
 	}
 	if (m_flPortalShotTime != 0.0)
 	{
-		m_flShotPulseTimer = m_flShotPulseTimer;
 		if ((cl_portal_cleanser_shot_pulse_time.GetFloat() * 2.0) >= m_flShotPulseTimer)
 		{
-			float flIntensityMultiplier;
-			float v9 = m_flShotPulseTimer + flTime;
-			m_flShotPulseTimer = v9;
-			if (cl_portal_cleanser_shot_pulse_time.GetFloat() <= v9)
-				flIntensityMultiplier = 1.0
-				- ((v9 - cl_portal_cleanser_shot_pulse_time.GetFloat())
+			float flShotPulseMultiplier;
+			m_flShotPulseTimer = m_flShotPulseTimer + flTime;
+			float flShotPulseTime = cl_portal_cleanser_shot_pulse_time.GetFloat();
+
+			if (flShotPulseTime <= m_flShotPulseTimer)
+				flShotPulseMultiplier = 1.0
+				- ((m_flShotPulseTimer - cl_portal_cleanser_shot_pulse_time.GetFloat())
 				/ cl_portal_cleanser_shot_pulse_time.GetFloat());
 			else
-				flIntensityMultiplier = v9 / cl_portal_cleanser_shot_pulse_time.GetFloat();
-			if (flIntensityMultiplier >= 0.0)
-			{
-				if (flIntensityMultiplier > 1.0)
-					flIntensityMultiplier = 1.0;
-			}
-			else
-			{
-				flIntensityMultiplier = 0.0;
-			}
+				flShotPulseMultiplier = m_flShotPulseTimer / flShotPulseTime;
+
+			flShotPulseMultiplier = clamp( flShotPulseMultiplier, 0.0, 1.0 );
+						
 			flIntensity = ((cl_portal_cleanser_shot_pulse_intensity.GetFloat()
 				- cl_portal_cleanser_default_intensity.GetFloat())
-				* flIntensityMultiplier)
+				* flShotPulseMultiplier)
 				+ cl_portal_cleanser_default_intensity.GetFloat();
 		}
 	}
-	float flMaxPower = 1.0;
-	if (m_bDisabled)
+
+	if ( !IsEnabled() )
 	{
 		if (m_flPowerUpTimer > 0.0)
 			m_flPowerUpTimer = m_flPowerUpTimer - flTime;
-		if (m_hCleanserFX)
+
+		if ( m_hCleanserFX )
 		{
 			m_hCleanserFX->StopEmission( false, false, true, true );
 			m_hCleanserFX = NULL;
-			flMaxPower = 1.0;
 		}
 	}
 	else if (cl_portal_cleanser_powerup_time.GetFloat() > m_flPowerUpTimer)
 	{
 		m_flPowerUpTimer = m_flPowerUpTimer + flTime;
 	}
-	float flPowerUpTimer = m_flPowerUpTimer;
-	if (flPowerUpTimer >= 0.0)
-	{
-		if (flPowerUpTimer > cl_portal_cleanser_powerup_time.GetFloat())
-			flPowerUpTimer = cl_portal_cleanser_powerup_time.GetFloat();
-	}
-	else
-	{
-		flPowerUpTimer = 0.0;
-	}
-	m_flPowerUpTimer = flPowerUpTimer;
 
-	float flNewPower = flPowerUpTimer / cl_portal_cleanser_powerup_time.GetFloat();
-	flPower = flNewPower;
-	if (flNewPower >= 0.0)
-	{
-		if ( flNewPower > flMaxPower )
-			flNewPower = flMaxPower;
-		flPower = flNewPower;
-		UpdateParticles();
-	}
-	else
-	{
-		flPower = 0.0;
-		UpdateParticles();
-	}
+	m_flPowerUpTimer = clamp( m_flPowerUpTimer, 0.0, cl_portal_cleanser_powerup_time.GetFloat() );
+
+	float flNewPower = m_flPowerUpTimer / cl_portal_cleanser_powerup_time.GetFloat();
+	flPower = clamp( flNewPower, 0.0, MAX_FIZZLER_POWER );
+
+	UpdateParticles();
 }
 
 void C_TriggerPortalCleanser::UpdateParticles( void )
