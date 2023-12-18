@@ -111,10 +111,10 @@ void CTriggerPortalCleanser::Disable( void )
 
 void CTriggerPortalCleanser::ClearVortexObjects( void )
 {
-	this->m_VortexObjects[0].m_flDistanceSq = FLT_MAX;
-	this->m_VortexObjects[0].m_hEnt = NULL;
-	this->m_VortexObjects[1].m_flDistanceSq = FLT_MAX;
-	this->m_VortexObjects[1].m_hEnt = NULL;
+	m_VortexObjects[0].m_flDistanceSq = FLT_MAX;
+	m_VortexObjects[0].m_hEnt = NULL;
+	m_VortexObjects[1].m_flDistanceSq = FLT_MAX;
+	m_VortexObjects[1].m_hEnt = NULL;
 }
 
 void FizzlerMultiOriginSoundPlayer::RemoveThink( void )
@@ -256,6 +256,7 @@ BEGIN_DATADESC( CTriggerPortalCleanser )
 	DEFINE_INPUTFUNC( FIELD_VOID, "FizzleTouchingPortals", InputFizzleTouchingPortals ),
 
 	DEFINE_THINKFUNC( SearchThink ),
+	DEFINE_THINKFUNC( PlayerPassesTriggerFiltersThink ),
 
 END_DATADESC()
 
@@ -324,12 +325,18 @@ void CTriggerPortalCleanser::Spawn( void )
 
 	if (m_bVisible)
 	{
-		RemoveEffects(EF_NODRAW);
+		RemoveEffects( EF_NODRAW );		
+		
+		DispatchUpdateTransmitState();
+		SetTransmitState( 32 );
+
+		SetThink( &CTriggerPortalCleanser::SearchThink );
+		SetNextThink( gpGlobals->curtime + sv_portal_cleanser_think_rate.GetFloat() );
+		
+		StartAmbientSounds();
 	}
 	
-    SetTransmitState( 32 );
-	SetThink( &CTriggerPortalCleanser::SearchThink );
-    SetNextThink( sv_portal_cleanser_think_rate.GetFloat() + gpGlobals->curtime );
+	SetContextThink( &CTriggerPortalCleanser::PlayerPassesTriggerFiltersThink, gpGlobals->curtime + 1.0, s_szPlayerPassesTriggerFiltersThinkContext );
 }
 
 void CTriggerPortalCleanser::Precache( void )
@@ -363,7 +370,7 @@ bool CTriggerPortalCleanser::IsCloserThanExistingObjects( FizzlerVortexObjectInf
 	else
 	{
 		index = 1;
-		if ( this->m_VortexObjects[1].m_flDistanceSq < info.m_flDistanceSq )
+		if ( m_VortexObjects[1].m_flDistanceSq < info.m_flDistanceSq )
 			return false;
 	}
 	iIndex = index;
@@ -392,14 +399,41 @@ void CTriggerPortalCleanser::FizzleTouchingPortals( void )
 	}
 }
 
+void CTriggerPortalCleanser::PlayerPassesTriggerFiltersThink( void )
+{
+	int i = 1;
+	if (gpGlobals->maxClients == 1)
+	{
+	LABEL_5:
+		SetContextThink( &CTriggerPortalCleanser::PlayerPassesTriggerFiltersThink, gpGlobals->curtime + 1.0, s_szPlayerPassesTriggerFiltersThinkContext );
+	}
+	else
+	{
+		CBasePlayer *pPlayer = UTIL_PlayerByIndex( i );
+		while (1)
+		{
+			if ( pPlayer && pPlayer->IsAlive() )
+			{
+				break;
+			}
+
+			if (++i == gpGlobals->maxClients)
+				goto LABEL_5;
+		}
+		
+		m_bPlayersPassTriggerFilters = PassesTriggerFilters( pPlayer );
+		SetContextThink( NULL, -1.0, s_szPlayerPassesTriggerFiltersThinkContext );
+	}
+}
+
 void CTriggerPortalCleanser::SearchThink( void )
 {
 	CUtlSortVector<FizzlerVortexObjectInfo_t, CFizzlerVortexObjectInfoLess > vortexEntsSorted; // [esp+CCh] [ebp-4Ch] BYREF
 	FizzlerVortexObjectInfo_t vortexObjectInfo;
-	float flVortexRange;
+	float flVortexRange = sv_portal_cleanser_vortex_distance.GetFloat();
 
 	Vector vecCenter = WorldSpaceCenter();
-	flVortexRange = sv_portal_cleanser_vortex_distance.GetFloat();
+	
 	memset(&vortexEntsSorted, 0, 25);
 
 	Vector vMaxs;
@@ -418,18 +452,17 @@ void CTriggerPortalCleanser::SearchThink( void )
 
 	flVortexRange = flVortexRange * flVortexRange;
 	partition->EnumerateElementsInBox( 16, vMins, vMaxs, 0, &vortexEnum );
-	int v6 = 0;
-
+	
 	int count = vortexEnum.GetCount();
-	int i = 0;
-
 
 	int nSize = 0;
 	if (vortexEnum.GetCount() > 0)
 	{
+		int i = 0;
+		int j = 0;
 		do
 		{
-			CBaseEntity *pEntity = pList[v6];
+			CBaseEntity *pEntity = pList[j];
 			if (pEntity)
 			{
 				vortexObjectInfo.m_flDistanceSq = CollisionProp()->CalcSqrDistanceFromPoint( pEntity->WorldSpaceCenter() );
@@ -444,31 +477,29 @@ void CTriggerPortalCleanser::SearchThink( void )
 					vortexEntsSorted[nSize].m_hEnt = vortexObjectInfo.m_hEnt;
 				}
 			}
-			v6 = i + 1;
-			i = v6;
-		} while (v6 < count);
+			j = i + 1;
+			i = j;
+		} while (j < count);
 
 		//vortexEntsSorted.RedoSort();
 	}
-	//m_VortexObjects[0].m_flDistanceSq = 3.4028235e38;
+	m_VortexObjects[0].m_flDistanceSq = FLT_MAX;
 	m_VortexObjects[0].m_hEnt = NULL;
+		
+	m_VortexObjects[1].m_flDistanceSq = FLT_MAX;
+	m_VortexObjects[1].m_hEnt = NULL;
 
-	int v13 = 0;
-	//m_VortexObjects[1].m_flDistanceSq = 3.4028235e38;
-
-	int v14;
-	for ( m_VortexObjects[1].m_hEnt = NULL; v13 < nSize; ++v13)
+	for ( int i = 0; i < nSize; ++i )
 	{
-		v14 = 0;
-		while ( m_VortexObjects[0].m_flDistanceSq < vortexEntsSorted[v13].m_flDistanceSq)
+		for ( int j = 0; m_VortexObjects[0].m_flDistanceSq < vortexEntsSorted[i].m_flDistanceSq; ++j )
 		{
-			++v14;
 			m_VortexObjects[0].m_flDistanceSq += 2;
-			if (v14 >= 2)
-				goto LABEL_19; //continue; ?
+			if ( j >= 2 )
+				goto LABEL_19; //continue? break?
 		}
-		m_VortexObjects[v14].m_flDistanceSq = vortexEntsSorted[v13].m_flDistanceSq;
-		m_VortexObjects[v14].m_hEnt = vortexEntsSorted[v13].m_hEnt;
+
+		m_VortexObjects[i].m_flDistanceSq = vortexEntsSorted[i].m_flDistanceSq;
+		m_VortexObjects[i].m_hEnt = vortexEntsSorted[i].m_hEnt;
 	LABEL_19:
 		;
 	}
@@ -532,7 +563,7 @@ void CTriggerPortalCleanser::Touch( CBaseEntity *pOther )
 
 				if ( pPortalgun->CanFirePortal1() )
 				{
-					CProp_Portal *pPortal = CProp_Portal::FindPortal( pPortalgun->GetLinkageGroupID(), false );
+					CProp_Portal *pPortal = pPortalgun->GetAssociatedPortal( false );
 
 					if ( pPortal && pPortal->IsActive() )
 					{
@@ -544,11 +575,19 @@ void CTriggerPortalCleanser::Touch( CBaseEntity *pOther )
 
 						bFizzledPortal = true;
 					}
+					
+					// Cancel portals that are still mid flight
+					if ( pPortal && pPortal->GetNextThink( CProp_Portal::s_szDelayedPlacementThinkContext ) > gpGlobals->curtime )
+					{
+						pPortal->SetContextThink( NULL, gpGlobals->curtime, CProp_Portal::s_szDelayedPlacementThinkContext ); 
+						pPortalgun->m_fEffectsMaxSize2 = 50.0f;
+						bFizzledPortal = true;
+					}
 				}
 
 				if ( pPortalgun->CanFirePortal2() )
 				{
-					CProp_Portal *pPortal = CProp_Portal::FindPortal( pPortalgun->GetLinkageGroupID(), true );
+					CProp_Portal *pPortal = pPortalgun->GetAssociatedPortal( true );
 
 					if ( pPortal && pPortal->IsActive() )
 					{
@@ -560,6 +599,14 @@ void CTriggerPortalCleanser::Touch( CBaseEntity *pOther )
 
 						bFizzledPortal = true;
 					}
+					
+					// Cancel portals that are still mid flight
+					if ( pPortal && pPortal->GetNextThink( CProp_Portal::s_szDelayedPlacementThinkContext ) > gpGlobals->curtime )
+					{
+						pPortal->SetContextThink( NULL, gpGlobals->curtime, CProp_Portal::s_szDelayedPlacementThinkContext ); 
+						pPortalgun->m_fEffectsMaxSize2 = 50.0f;
+						bFizzledPortal = true;
+					}
 				}
 
 				if ( bFizzledPortal )
@@ -567,6 +614,7 @@ void CTriggerPortalCleanser::Touch( CBaseEntity *pOther )
 					pPortalgun->SendWeaponAnim( ACT_VM_FIZZLE );
 
 					pPortalgun->SetLastFiredPortal( 0 );
+					pPortalgun->ClearPortalPositions();
 					m_OnFizzle.FireOutput( pOther, this );
 					pPlayer->RumbleEffect( RUMBLE_RPG_MISSILE, 0, RUMBLE_FLAG_RESTART );
 				}

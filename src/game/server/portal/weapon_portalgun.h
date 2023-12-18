@@ -139,12 +139,13 @@ public:
 	void UseDeny( void );
 	
 	virtual void	ChangeTeam( int iTeamNum );
+	
+	
+	void	ClearPortalPositions( void );
 
 	int m_nStartingTeamNum;
 
 protected:
-	
-	void	ClearPortalPositions( void );
 
 	void	StartEffects( void );	// Initialize all sprites and beams
 	void	StopEffects( bool stopSound = true );	// Hide all effects temporarily

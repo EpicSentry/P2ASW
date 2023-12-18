@@ -30,6 +30,7 @@ ConVar cl_portal_cleanser_powerup_time( "cl_portal_cleanser_powerup_time", "1.0f
 ConVar cl_portal_cleanser_default_intensity( "cl_portal_cleanser_default_intensity", "1.0f", FCVAR_DEVELOPMENTONLY, "The default intensity of the cleanser field effect." );
 ConVar cl_portal_cleanser_shot_pulse_time( "cl_portal_cleanser_shot_pulse_time", "0.1f", FCVAR_DEVELOPMENTONLY, "The amount of time to pulse the cleanser field for when it is shot at." ); 
 ConVar cl_portal_cleanser_shot_pulse_intensity( "cl_portal_cleanser_shot_pulse_intensity", "10.0f", FCVAR_DEVELOPMENTONLY, "The intensity of the cleanser field when it gets shot at." );
+ConVar cl_portal_cleanser_scanline( "cl_portal_cleanser_scanline", "1", FCVAR_DEVELOPMENTONLY, "Use particle scanline." );
 
 #undef CTriggerPortalCleanser
 
@@ -219,11 +220,12 @@ void C_TriggerPortalCleanser::GetCurrentState( float &flIntensity, float &flPowe
 	float flTime = gpGlobals->curtime - m_flLastUpdateTime;
 	m_flLastUpdateTime = gpGlobals->curtime;
 	flIntensity = cl_portal_cleanser_default_intensity.GetFloat();
-	if ( m_flPortalShotTime > m_flLastShotTime)
+	if ( m_flLastShotTime < m_flPortalShotTime )
 	{
 		m_flLastShotTime = m_flPortalShotTime;
 		m_flShotPulseTimer = 0.0;
 	}
+
 	if (m_flPortalShotTime != 0.0)
 	{
 		if ((cl_portal_cleanser_shot_pulse_time.GetFloat() * 2.0) >= m_flShotPulseTimer)
@@ -233,13 +235,13 @@ void C_TriggerPortalCleanser::GetCurrentState( float &flIntensity, float &flPowe
 			float flShotPulseTime = cl_portal_cleanser_shot_pulse_time.GetFloat();
 
 			if (flShotPulseTime <= m_flShotPulseTimer)
-				flShotPulseMultiplier = 1.0
+				flShotPulseMultiplier = MAX_FIZZLER_POWER
 				- ((m_flShotPulseTimer - cl_portal_cleanser_shot_pulse_time.GetFloat())
 				/ cl_portal_cleanser_shot_pulse_time.GetFloat());
 			else
 				flShotPulseMultiplier = m_flShotPulseTimer / flShotPulseTime;
 
-			flShotPulseMultiplier = clamp( flShotPulseMultiplier, 0.0, 1.0 );
+			flShotPulseMultiplier = clamp( flShotPulseMultiplier, 0.0, MAX_FIZZLER_POWER );
 						
 			flIntensity = ((cl_portal_cleanser_shot_pulse_intensity.GetFloat()
 				- cl_portal_cleanser_default_intensity.GetFloat())
@@ -274,7 +276,84 @@ void C_TriggerPortalCleanser::GetCurrentState( float &flIntensity, float &flPowe
 
 void C_TriggerPortalCleanser::UpdateParticles( void )
 {
-	// FIXME: Undone
+	if ( IsEnabled() && cl_portal_cleanser_scanline.GetInt() && m_bUseScanline )
+	{
+		//if (this != (C_TriggerPortalCleanser *)-1040)
+		{
+			Vector vecMins;
+			Vector vecMaxs;
+			if ( m_hCleanserFX )
+				goto LB_UPDATEPOS;
+
+			CollisionProp()->CollisionToWorldSpace( CollisionProp()->OBBMins(), &vecMins );
+
+			CollisionProp()->CollisionToWorldSpace( CollisionProp()->OBBMaxs(), &vecMaxs );
+			if ((float)(vecMaxs.z - vecMins.z) >= 32.0)
+			{
+
+				CNewParticleEffect *pCleanserFX = ParticleProp()->Create( "cleanser_scanline", PATTACH_CUSTOMORIGIN, -1, vec3_origin, 0 );
+			
+				if ( m_hCleanserFX != pCleanserFX )
+				{
+					m_hCleanserFX = pCleanserFX;
+				}
+
+				if ( pCleanserFX )
+				{
+					Vector vecPos1 = vecMaxs;
+					Vector vecPos2;
+					vecPos2.x = vecMins.x;
+
+					Vector vecPosition2;
+					vecPosition2.x = vecMaxs.x;
+					vecPos2.y = vecMins.y;
+					vecPos2.z = vecMaxs.z;
+					vecPosition2.y = vecMaxs.y;
+					vecPosition2.z = vecMins.z;
+					pCleanserFX->SetControlPoint( 0, vecPos1 );
+					pCleanserFX->SetControlPoint( 1, vecPos2 );
+					pCleanserFX->SetControlPoint( 2, vecPosition2 );
+				}
+				if ( m_hCleanserFX )
+				{
+				LB_UPDATEPOS:
+					CollisionProp()->CollisionToWorldSpace( CollisionProp()->OBBMins(), &vecMins );
+					vecMins.z = vecMins.z - 512.0;
+					
+					if ( m_bObject1InRange && m_hObject1 )
+					{
+						m_hCleanserFX->SetControlPoint( 4, m_hObject1->WorldSpaceCenter() );
+					}
+					else
+					{
+						m_hCleanserFX->SetControlPoint( 4, vecMins );
+					}
+					
+					if ( m_bObject2InRange && m_hObject2 )
+					{
+						m_hCleanserFX->SetControlPoint( 5,  m_hObject2->WorldSpaceCenter() );
+					}
+					else
+					{
+						m_hCleanserFX->SetControlPoint( 5, vecMins );
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		DestroyParticles();
+	}
+}
+
+void C_TriggerPortalCleanser::DestroyParticles( void )
+{
+	if ( m_hCleanserFX )
+	{
+		m_hCleanserFX->StopEmission( false, false, true, true );
+		m_hCleanserFX = NULL;
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -341,7 +420,7 @@ void C_TriggerPortalCleanser::Touch( C_BaseEntity *pOther )
 
 void C_TriggerPortalCleanser::UpdatePartitionListEntry( void )
 {
-	partition->RemoveAndInsert( PARTITION_CLIENT_NON_STATIC_EDICTS | PARTITION_CLIENT_STATIC_PROPS , // remove
+	partition->RemoveAndInsert( PARTITION_CLIENT_NON_STATIC_EDICTS | PARTITION_CLIENT_SOLID_EDICTS | PARTITION_CLIENT_RESPONSIVE_EDICTS , // remove
 		PARTITION_CLIENT_TRIGGER_ENTITIES, // Add
 		CollisionProp()->GetPartitionHandle());
 }
