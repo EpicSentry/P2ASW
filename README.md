@@ -4,6 +4,7 @@ What is P2ASW?<br>
 P2ASW is a free and open source project aiming to recreate most of Portal 2's entities and functions in the ASW engine SDK.<br>
 This mod is uses leaked Portal & CSGO code and reverse engineered code.<br>
 See more [here](https://epicteleporter.xyz/p2asw/)<br>
+Or join our [Discord Server](https://discord.gg/QpwSdUQRax).<br>
 P2ASW is **not** finished, certain features/entities might not exist or work properly. 
 
 ## Contributing
@@ -12,8 +13,8 @@ Anyone is free to contribute to the project!
 ## Building
 ### Windows
 Follow the instructions [here](https://developer.valvesoftware.com/wiki/Source_SDK_2013) for setting up Visual Studio 2013.<br>
-Once complete, clone the repo and execute `create-portal2-2013.bat` inside `src\` to generate the Visual Studio project.<br>
-Open the newly created `Game_Portal2-2013.sln` and have fun!
+Once complete, clone the repo and execute `creategameprojects.bat` inside `src\` to generate the Visual Studio project.<br>
+Open the newly created `game.sln` and have fun!
 ### Linux/MacOS are not officially tested. If anyone has succeeded in building for either platform, please open a PR stating how.
 
 ## Installing/Running the mod
@@ -21,6 +22,11 @@ Open the newly created `Game_Portal2-2013.sln` and have fun!
 ### YOU MUST OWN PORTAL 2 ON STEAM TO USE P2ASW.
 2. Copy the `portal2asw` folder from `game\` into your SourceMods folder and restart Steam.<br>
 The mod should now show up in your Steam library.<br>
+
+## Usage guidelines
+1. You are not allowed to use any code from P2ASW for commercial purposes.
+2. You are free to modify and redistribute P2ASW in both closed and open source form, but you must credit P2ASW if you do.
+3. Follow the Source 1 SDK guidelines when working with the project.
 
 ## This mod is made possible thanks to:
 - [MinHook](https://github.com/TsudaKageyu/minhook)<br>
