@@ -8,7 +8,8 @@
 
 #include "cbase.h"
 #include <cstdint>
-#include "MinHook.h"
+// having issues with minhook/external symbols on compile? reinstall the nuget package, right click server -> Manage nuget packages -> search minhook and install
+#include "../packages/minhook.1.3.3/lib/native/include/MinHook.h"
 #include "../silver-bun/memaddr.h"
 #include "../silver-bun/module.h"
 #include "../silver-bun/utils.h"
