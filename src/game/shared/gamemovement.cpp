@@ -43,11 +43,6 @@ extern IFileSystem *filesystem;
 #include "portal_player.h"
 #endif 
 
-// Double jumping doesn't seem necessary - Wonderland_War
-#if 0
-ConVar portal2_doublejump("portal2_doublejump", "1", FCVAR_REPLICATED | FCVAR_ARCHIVE, "Enables doublejump and slide");
-#endif
-
 // tickcount currently isn't set during prediction, although gpGlobals->curtime and
 // gpGlobals->frametime are. We should probably set tickcount (to player->m_nTickBase),
 // but we're REALLY close to shipping, so we can change that later and people can use
@@ -2599,16 +2594,6 @@ bool CGameMovement::CheckJumpButton( void )
 	// No more effect
 	if (player->GetGroundEntity() == NULL)
 	{
-#if 0
-		if (portal2_doublejump.GetBool() && !player->hasDoubleJumped)
-		{
-			//dunno why i need this, but without it diving is janky so i need it
-			player->m_Local.m_bInDuckJump = false;
-			mv->m_vecVelocity[2] = sqrt(2 * sv_gravity.GetFloat() * 42 * 0.85);
-			player->SetMoveType(MOVETYPE_WALK);
-			player->hasDoubleJumped = true;
-		}
-#else
 		mv->m_nOldButtons |= IN_JUMP;
 #endif
 		return true;
