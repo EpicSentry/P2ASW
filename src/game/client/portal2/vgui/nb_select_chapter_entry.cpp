@@ -61,43 +61,43 @@ void CNB_Select_Chapter_Entry::OnThink()
 	const char *labelText = m_szLevelName;
 	if (!Q_stricmp(labelText, "The Courtesy Call"))
 	{
-		imagename = "vgui/portal2/chapter1";
+		imagename = "vgui/chapters/chapter1";
 	}
 	else if (!Q_stricmp(labelText, "The Cold Boot"))
 	{
-		imagename = "vgui/portal2/chapter2";
+		imagename = "vgui/chapters/chapter2";
 	}
 	else if (!Q_stricmp(labelText, "The Return"))
 	{
-		imagename = "vgui/portal2/chapter3";
+		imagename = "vgui/chapters/chapter3";
 	}
 	else if (!Q_stricmp(labelText, "The Surprise"))
 	{
-		imagename = "vgui/portal2/chapter4";
+		imagename = "vgui/chapters/chapter4";
 	}
 	else if (!Q_stricmp(labelText, "The Escape"))
 	{
-		imagename = "vgui/portal2/chapter5";
+		imagename = "vgui/chapters/chapter5";
 	}
 	else if (!Q_stricmp(labelText, "The Fall"))
 	{
-		imagename = "vgui/portal2/chapter6";
+		imagename = "vgui/chapters/chapter6";
 	}
 	else if (!Q_stricmp(labelText, "The Reunion"))
 	{
-		imagename = "vgui/portal2/chapter7";
+		imagename = "vgui/chapters/chapter7";
 	}
 	else if (!Q_stricmp(labelText, "The Itch"))
 	{
-		imagename = "vgui/portal2/chapter8";
+		imagename = "vgui/chapters/chapter8";
 	}
 	else if (!Q_stricmp(labelText, "The Part Where He Kills You"))
 	{
-		imagename = "vgui/portal2/chapter9";
+		imagename = "vgui/chapters/chapter9";
 	}
 	else if (!Q_stricmp(labelText, "The Credits"))
 	{
-		imagename = "vgui/portal2/chapter10";
+		imagename = "vgui/chapters/chapter10";
 	}
 
 	m_pImage->SetImage(CBitmapButton::BUTTON_ENABLED, imagename, white);

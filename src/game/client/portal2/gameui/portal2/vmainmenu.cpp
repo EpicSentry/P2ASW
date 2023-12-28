@@ -104,14 +104,8 @@ void MainMenu::ShowBlogPanel(bool show)
 }
 void MainMenu::DefaultLayout()
 {
-	ShowBlogPanel(1);
+	ShowBlogPanel(0);
 };
-/*
-CP2ASWBlog::CP2ASWBlog(vgui::Panel* parent, const char *panelName) : CBaseModFrame(parent, panelName, true, true, false, false)
-{
-	m_pHTMLPanel = new vgui::HTML(this, "HTMLPanel");
-}
-*/
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
@@ -131,7 +125,7 @@ void CP2ASWBlog::ApplySchemeSettings(vgui::IScheme *pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
 
-	LoadControlSettings("resource/UI/main_menu/BlogPanel.res");
+	//LoadControlSettings("resource/UI/main_menu/BlogPanel.res");
 }
 
 void CP2ASWBlog::PerformLayout()
@@ -145,7 +139,7 @@ void CP2ASWBlog::LoadBlogPost(const char* URL)
 {
 	if (m_pHTMLPanel)
 	{
-		m_pHTMLPanel->SetVisible(true);
+		m_pHTMLPanel->SetVisible(false);
 		m_pHTMLPanel->OpenURL(URL, NULL);
 	}
 }
