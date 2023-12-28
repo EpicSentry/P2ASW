@@ -231,7 +231,6 @@ public:
 	void					FinishUserMessageThrottling();
 
 	bool					ShouldThrottleUserMessage( char const *pchMessageName );
-	bool hasDoubleJumped;
 
 	
 	// IPlayerInfo passthrough (because we can't do multiple inheritance)

@@ -2297,7 +2297,6 @@ void CGameMovement::FullWalkMove( )
 		if (player->GetGroundEntity() != NULL)
 		{
 			WalkMove();
-			player->hasDoubleJumped = false;
 		}
 		else
 		{
@@ -2595,7 +2594,6 @@ bool CGameMovement::CheckJumpButton( void )
 	if (player->GetGroundEntity() == NULL)
 	{
 		mv->m_nOldButtons |= IN_JUMP;
-#endif
 		return true;
 	}
 

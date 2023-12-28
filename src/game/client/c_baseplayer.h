@@ -81,7 +81,6 @@ public:
 	virtual void	Spawn( void );
 	virtual void	SharedSpawn(); // Shared between client and server.
 	Class_T		Classify( void ) { return CLASS_PLAYER; }
-	bool hasDoubleJumped;
 
 	// IClientEntity overrides.
 	virtual void	OnPreDataChanged( DataUpdateType_t updateType );
