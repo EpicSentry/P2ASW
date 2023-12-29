@@ -18,7 +18,7 @@ Open the newly created `game.sln` and have fun!
 ### Linux/MacOS are not officially tested. If anyone has succeeded in building for either platform, please open a PR stating how.
 
 ## Installing/Running the mod
-1. Download Alien Swarm [here](http://store.steampowered.com/app/620/) and Portal 2 [here](https://store.steampowered.com/app/620/Portal_2).<br>
+1. Download Alien Swarm [here](http://store.steampowered.com/app/630/) and Portal 2 [here](https://store.steampowered.com/app/620/Portal_2).<br>
 ### YOU MUST OWN PORTAL 2 ON STEAM TO USE P2ASW.
 2. Copy the `portal2asw` folder from `game\` into your SourceMods folder and restart Steam.<br>
 The mod should now show up in your Steam library.<br>
