@@ -33,10 +33,16 @@ BEGIN_DATADESC( CFuncPortalDetector )
 	DEFINE_INPUTFUNC( FIELD_VOID, "Enable", InputEnable ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "Toggle", InputToggle ),
 
+	DEFINE_OUTPUT( m_OnStartTouchPortal, "OnStartTouchPortal" ),
 	DEFINE_OUTPUT( m_OnStartTouchPortal1, "OnStartTouchPortal1" ),
 	DEFINE_OUTPUT( m_OnStartTouchPortal2, "OnStartTouchPortal2" ),
 	DEFINE_OUTPUT( m_OnStartTouchLinkedPortal, "OnStartTouchLinkedPortal" ),
 	DEFINE_OUTPUT( m_OnStartTouchBothLinkedPortals, "OnStartTouchBothLinkedPortals" ),
+	DEFINE_OUTPUT( m_OnEndTouchPortal, "OnEndTouchPortal" ),
+	DEFINE_OUTPUT( m_OnEndTouchPortal1, "OnEndTouchPortal1" ),
+	DEFINE_OUTPUT( m_OnEndTouchPortal2, "OnEndTouchPortal2" ),
+	DEFINE_OUTPUT( m_OnEndTouchLinkedPortal, "OnEndTouchLinkedPortal" ),
+	DEFINE_OUTPUT( m_OnEndTouchBothLinkedPortals, "OnEndTouchBothLinkedPortals" ),
 
 	DEFINE_FUNCTION( IsActive ),
 
@@ -63,8 +69,10 @@ void CFuncPortalDetector::Spawn()
 	AddSolidFlags( FSOLID_NOT_SOLID );
 }
 
-void CFuncPortalDetector::OnActivate( void )
+void CFuncPortalDetector::SetActive( bool bActive )
 {
+	m_bActive = bActive;
+
 	Vector vMin, vMax;
 	CollisionProp()->WorldSpaceAABB( &vMin, &vMax );
 
@@ -73,6 +81,23 @@ void CFuncPortalDetector::OnActivate( void )
 
 	bool bTouchedPortal1 = false;
 	bool bTouchedPortal2 = false;
+
+	if (bActive)
+	{
+		m_OnStartTouchPortal = m_OnStartTouchPortal;
+		m_OnStartTouchPortal2 = m_OnStartTouchPortal2;
+		m_OnStartTouchPortal1 = m_OnStartTouchPortal1;
+		m_OnStartTouchLinkedPortal = m_OnStartTouchLinkedPortal;
+		m_OnStartTouchBothLinkedPortals = m_OnStartTouchBothLinkedPortals;
+	}
+	else
+	{
+		m_OnStartTouchPortal = m_OnEndTouchPortal;
+		m_OnStartTouchPortal2 = m_OnEndTouchPortal2;
+		m_OnStartTouchPortal1 = m_OnEndTouchPortal1;
+		m_OnStartTouchLinkedPortal = m_OnEndTouchLinkedPortal;
+		m_OnStartTouchBothLinkedPortals = m_OnEndTouchBothLinkedPortals;
+	}
 
 	int iPortalCount = CProp_Portal_Shared::AllPortals.Count();
 	if( iPortalCount != 0 )
@@ -86,6 +111,7 @@ void CFuncPortalDetector::OnActivate( void )
 
 			if( pTempPortal->GetLinkageGroup() == m_iLinkageGroupID && UTIL_IsBoxIntersectingPortal( vBoxCenter, vBoxExtents, pTempPortal ) )
 			{
+				m_OnStartTouchPortal.FireOutput(pTempPortal, this);
 				if( pTempPortal->IsPortal2() )
 				{
 					m_OnStartTouchPortal2.FireOutput( pTempPortal, this );
@@ -118,22 +144,17 @@ void CFuncPortalDetector::OnActivate( void )
 
 void CFuncPortalDetector::InputDisable( inputdata_t &inputdata )
 {
-	m_bActive = false;
+	SetActive(false);
 }
 
 void CFuncPortalDetector::InputEnable( inputdata_t &inputdata )
 {
-	m_bActive = true;
-
-	OnActivate();
+	SetActive(true);
 }
 
 void CFuncPortalDetector::InputToggle( inputdata_t &inputdata )
 {
 	m_bActive = !m_bActive;
 
-	if ( m_bActive )
-	{
-		OnActivate();
-	}
+	SetActive(m_bActive);
 }
