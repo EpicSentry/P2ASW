@@ -1,0 +1,24 @@
+char __thiscall CFuncPortalDetector::IsPortalTouchingDetector(CFuncPortalDetector *this, const CProp_Portal *pPortal)
+{
+  int v3; // esi
+  CHandle<CBaseEntity> *i; // edi
+  unsigned int m_Index; // eax
+  IHandleEntity *m_pEntity; // ecx
+
+  if ( !pPortal )
+    return 0;
+  v3 = 0;
+  for ( i = this->m_phTouchingPortals; ; ++i )
+  {
+    m_Index = i->m_Index;
+    if ( i->m_Index == -1 || g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_SerialNumber != HIWORD(m_Index) )
+      m_pEntity = 0;
+    else
+      m_pEntity = g_pEntityList->m_EntPtrArray[(unsigned __int16)m_Index].m_pEntity;
+    if ( __RTDynamicCast(m_pEntity, 0, &CBaseEntity `RTTI Type Descriptor', &CProp_Portal `RTTI Type Descriptor', 0) == pPortal )
+      break;
+    if ( ++v3 >= 2 )
+      return 0;
+  }
+  return 1;
+}

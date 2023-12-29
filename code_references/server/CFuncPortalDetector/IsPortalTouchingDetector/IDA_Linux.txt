@@ -1,0 +1,43 @@
+bool __cdecl CFuncPortalDetector::IsPortalTouchingDetector(
+        CFuncPortalDetector *const this,
+        const CProp_Portal *pPortal)
+{
+  bool result; // al
+  int v3; // ebx
+  unsigned int m_Index; // eax
+  char *v5; // edx
+  const void *v6; // eax
+  CBaseEntityList *v7; // [esp+1Ch] [ebp-1Ch]
+
+  result = 0;
+  if ( pPortal )
+  {
+    v3 = 0;
+    v7 = g_pEntityList;
+    while ( 1 )
+    {
+      m_Index = this->m_phTouchingPortals[v3].m_Index;
+      if ( m_Index != -1 )
+      {
+        v5 = (char *)v7 + 24 * (unsigned __int16)m_Index;
+        if ( *((_DWORD *)v5 + 2) == HIWORD(m_Index) )
+        {
+          v6 = (const void *)*((_DWORD *)v5 + 1);
+          if ( v6 )
+          {
+            if ( pPortal == _dynamic_cast(
+                              v6,
+                              (const struct __class_type_info *)&`typeinfo for'CBaseEntity,
+                              (const struct __class_type_info *)&`typeinfo for'CProp_Portal,
+                              0) )
+              break;
+          }
+        }
+      }
+      if ( ++v3 == 2 )
+        return 0;
+    }
+    return 1;
+  }
+  return result;
+}

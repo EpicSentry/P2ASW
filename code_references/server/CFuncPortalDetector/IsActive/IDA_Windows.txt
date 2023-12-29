@@ -1,0 +1,4 @@
+bool __thiscall CFuncPortalDetector::IsActive(CFuncPortalDetector *this)
+{
+  return this->m_bActive;
+}

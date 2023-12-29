@@ -1,0 +1,19 @@
+void __cdecl CFuncPortalDetector::NotifyPortalEvent(
+        CFuncPortalDetector *const this,
+        PortalEvent_t nEventType,
+        CPortal_Base2D *pNotifier)
+{
+  void *v3; // eax
+
+  if ( nEventType == PORTALEVENT_FIZZLE )
+  {
+    v3 = 0;
+    if ( pNotifier )
+      v3 = _dynamic_cast(
+             pNotifier,
+             (const struct __class_type_info *)&`typeinfo for'CPortal_Base2D,
+             (const struct __class_type_info *)&`typeinfo for'CProp_Portal,
+             0);
+    (*((void (__cdecl **)(CFuncPortalDetector *const, void *))this->_vptr_IHandleEntity + 199))(this, v3);
+  }
+}

@@ -1,0 +1,4 @@
+void __thiscall CFuncPortalDetector::InputEnable(CFuncPortalDetector *this, inputdata_t *inputdata)
+{
+  this->SetActive(this, 1);
+}

@@ -1,0 +1,83 @@
+void __cdecl CFuncPortalDetector::Spawn(CFuncPortalDetector *const this)
+{
+  int (**vptr_IHandleEntity)(...); // eax
+  int (*v2)(...); // esi
+  edict_t *m_pPev; // esi
+  IChangeInfoAccessor *v4; // eax
+  unsigned __int16 m_nChangeInfos; // dx
+  CSharedEdictChangeInfo *v6; // edx
+  char *v7; // eax
+  char *v8; // ecx
+  int v9; // edx
+  char *v10; // [esp+14h] [ebp-24h]
+  unsigned __int16 v11; // [esp+1Ah] [ebp-1Eh]
+  int v12[7]; // [esp+1Ch] [ebp-1Ch] BYREF
+
+  CBaseEntity::Spawn(this);
+  vptr_IHandleEntity = this->_vptr_IHandleEntity;
+  this->m_bActive = (this->m_spawnflags.m_Value & 1) == 0;
+  v2 = vptr_IHandleEntity[27];
+  vptr_IHandleEntity[8](v12, this);
+  v2(this);
+  if ( this->m_nRenderMode.m_Value != 10 )
+  {
+    if ( !this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( !m_pPev || (m_pPev->m_fStateFlags & 0x100) != 0 )
+        goto LABEL_9;
+      m_pPev->m_fStateFlags |= 1u;
+      v4 = CBaseEdict::GetChangeAccessor(m_pPev);
+      if ( v4->m_iChangeInfoSerialNumber == g_pSharedChangeInfo->m_iSerialNumber )
+      {
+        v10 = (char *)g_pSharedChangeInfo + 40 * v4->m_iChangeInfo;
+        v8 = v10 + 2;
+        v11 = *((_WORD *)v10 + 20);
+        if ( !v11 )
+          goto LABEL_17;
+        if ( *((_WORD *)v10 + 1) == 193 )
+          goto LABEL_9;
+        v9 = 0;
+        while ( v9 != 2 * (unsigned __int16)(v11 - 1) )
+        {
+          v9 += 2;
+          if ( *(_WORD *)&v8[v9] == 193 )
+            goto LABEL_9;
+        }
+        if ( v11 != 19 )
+        {
+LABEL_17:
+          *(_WORD *)&v8[2 * v11] = 193;
+          *((_WORD *)v10 + 20) = v11 + 1;
+          goto LABEL_9;
+        }
+      }
+      else
+      {
+        m_nChangeInfos = g_pSharedChangeInfo->m_nChangeInfos;
+        if ( m_nChangeInfos != 100 )
+        {
+          v4->m_iChangeInfo = m_nChangeInfos;
+          v6 = g_pSharedChangeInfo;
+          ++g_pSharedChangeInfo->m_nChangeInfos;
+          v4->m_iChangeInfoSerialNumber = v6->m_iSerialNumber;
+          v7 = (char *)g_pSharedChangeInfo + 40 * v4->m_iChangeInfo;
+          *((_WORD *)v7 + 1) = 193;
+          *((_WORD *)v7 + 20) = 1;
+LABEL_9:
+          this->m_nRenderMode.m_Value = 10;
+          goto LABEL_10;
+        }
+      }
+      v4->m_iChangeInfoSerialNumber = 0;
+      m_pPev->m_fStateFlags |= 0x100u;
+      goto LABEL_9;
+    }
+    *((_BYTE *)&this->m_Network + 76) |= 1u;
+    goto LABEL_9;
+  }
+LABEL_10:
+  CCollisionProperty::SetSolid(&this->m_Collision, SOLID_VPHYSICS);
+  CCollisionProperty::SetSolidFlags(&this->m_Collision, this->m_Collision.m_usSolidFlags.m_Value | 4);
+  CBaseEntity::SetTransmitState(this, 16);
+}

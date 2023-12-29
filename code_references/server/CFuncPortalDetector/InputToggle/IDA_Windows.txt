@@ -1,0 +1,10 @@
+void __thiscall CFuncPortalDetector::InputToggle(CFuncPortalDetector *this, inputdata_t *inputdata)
+{
+  CFuncPortalDetector_vtbl *v2; // edx
+  bool v3; // al
+
+  v2 = this->__vftable;
+  v3 = !this->m_bActive;
+  this->m_bActive = v3;
+  ((void (__stdcall *)(bool))v2->SetActive)(v3);
+}

@@ -1,0 +1,9 @@
+void __thiscall CFuncPortalDetector::UpdateOnPortalActivated(CFuncPortalDetector *this, CProp_Portal *pPortal)
+{
+  if ( this->IsPortalTouchingDetector(this, pPortal) )
+  {
+    COutputEvent::FireOutput(&this->m_OnStartTouchLinkedPortal, pPortal, this, 0.0);
+    if ( this->m_iTouchingPortalCount == 2 )
+      COutputEvent::FireOutput(&this->m_OnStartTouchBothLinkedPortals, pPortal, this, 0.0);
+  }
+}

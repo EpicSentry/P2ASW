@@ -1,0 +1,62 @@
+void __thiscall CFuncPortalDetector::UpdateOnPortalMoved(CFuncPortalDetector *this, CProp_Portal *pPortal)
+{
+  bool v4; // al
+  unsigned __int8 m_iLinkageGroupID; // bl
+  int (__thiscall *GetLinkageGroupID)(CFuncPortalDetector *); // edx
+  bool v7; // bl
+  bool v8; // cl
+  bool v9; // al
+  CFuncPortalDetector_vtbl *v10; // edx
+  CHandle<CBaseEntity> *v11; // ebx
+  void (__thiscall *PortalPlacedInsideBounds)(CFuncPortalDetector *, CProp_Portal *); // eax
+  Vector vBoxCenter; // [esp+14h] [ebp-34h] BYREF
+  Vector vBoxExtents; // [esp+20h] [ebp-28h] BYREF
+  Vector vMax; // [esp+2Ch] [ebp-1Ch] BYREF
+  Vector vMin; // [esp+38h] [ebp-10h] BYREF
+  bool bIsTouchingPortalDetector; // [esp+47h] [ebp-1h]
+  bool bWasTouchingPortalDetector_3; // [esp+53h] [ebp+Bh]
+
+  if ( this->m_bActive )
+  {
+    v4 = this->IsPortalTouchingDetector(this, pPortal);
+    m_iLinkageGroupID = pPortal->m_iLinkageGroupID;
+    bWasTouchingPortalDetector_3 = v4;
+    GetLinkageGroupID = this->GetLinkageGroupID;
+    bIsTouchingPortalDetector = 0;
+    if ( GetLinkageGroupID(this) != m_iLinkageGroupID && !this->m_bCheckAllIDs )
+      goto LABEL_5;
+    CCollisionProperty::CollisionAABBToWorldAABB(
+      &this->m_Collision,
+      &this->m_Collision.m_vecMins.m_Value,
+      &this->m_Collision.m_vecMaxs.m_Value,
+      &vMin,
+      &vMax);
+    vBoxCenter.x = (float)(vMax.x + vMin.x) * 0.5;
+    vBoxCenter.y = (float)(vMax.y + vMin.y) * 0.5;
+    vBoxCenter.z = (float)(vMin.z + vMax.z) * 0.5;
+    vBoxExtents.x = (float)(vMax.x - vMin.x) * 0.5;
+    vBoxExtents.y = (float)(vMax.y - vMin.y) * 0.5;
+    vBoxExtents.z = (float)(vMax.z - vMin.z) * 0.5;
+    v7 = 1;
+    if ( !UTIL_IsBoxIntersectingPortal(&vBoxCenter, &vBoxExtents, pPortal, 0.0) )
+LABEL_5:
+      v7 = bIsTouchingPortalDetector;
+    v8 = bWasTouchingPortalDetector_3 && !pPortal->IsActive(pPortal);
+    v9 = bWasTouchingPortalDetector_3 && !v7;
+    if ( v8 || v9 )
+    {
+      this->m_phTouchingPortals[pPortal->m_bIsPortal2.m_Value].m_Index = -1;
+      v10 = this->__vftable;
+      --this->m_iTouchingPortalCount;
+      v10->PortalRemovedFromInsideBounds(this, pPortal);
+    }
+    if ( v7 && !bWasTouchingPortalDetector_3 )
+    {
+      v11 = &this->m_phTouchingPortals[pPortal->m_bIsPortal2.m_Value];
+      v11->m_Index = pPortal->GetRefEHandle(pPortal)->m_Index;
+      PortalPlacedInsideBounds = this->PortalPlacedInsideBounds;
+      ++this->m_iTouchingPortalCount;
+      PortalPlacedInsideBounds(this, pPortal);
+    }
+  }
+}

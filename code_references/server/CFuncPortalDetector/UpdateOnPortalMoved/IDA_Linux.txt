@@ -1,0 +1,57 @@
+void __cdecl CFuncPortalDetector::UpdateOnPortalMoved(CFuncPortalDetector *const this, CProp_Portal *pPortal)
+{
+  char v2; // di
+  bool *v3; // edi
+  bool IsBoxIntersectingPortal; // [esp+2Fh] [ebp-49h]
+  Vector pWorldMins; // [esp+30h] [ebp-48h] BYREF
+  Vector pWorldMaxs; // [esp+3Ch] [ebp-3Ch] BYREF
+  Vector vecBoxCenter; // [esp+48h] [ebp-30h] BYREF
+  Vector vecBoxExtents; // [esp+54h] [ebp-24h] BYREF
+
+  if ( !this->m_bActive )
+    return;
+  v2 = (*((int (__cdecl **)(CFuncPortalDetector *const, CProp_Portal *))this->_vptr_IHandleEntity + 203))(this, pPortal);
+  if ( (*((int (__cdecl **)(CFuncPortalDetector *const))this->_vptr_IHandleEntity + 202))(this) != pPortal->m_iLinkageGroupID )
+  {
+    IsBoxIntersectingPortal = 0;
+    if ( !this->m_bCheckAllIDs )
+    {
+      if ( !v2 )
+        goto LABEL_6;
+LABEL_10:
+      if ( !(*((unsigned __int8 (__cdecl **)(CProp_Portal *))pPortal->_vptr_IHandleEntity + 234))(pPortal)
+        || !IsBoxIntersectingPortal )
+      {
+        this->m_phTouchingPortals[(unsigned __int8)pPortal->m_bIsPortal2.m_Value].m_Index = -1;
+        --this->m_iTouchingPortalCount;
+        (*((void (__cdecl **)(CFuncPortalDetector *const, CProp_Portal *))this->_vptr_IHandleEntity + 205))(
+          this,
+          pPortal);
+      }
+      goto LABEL_6;
+    }
+  }
+  CCollisionProperty::CollisionAABBToWorldAABB(
+    &this->m_Collision,
+    &this->m_Collision.m_vecMins.m_Value,
+    &this->m_Collision.m_vecMaxs.m_Value,
+    &pWorldMins,
+    &pWorldMaxs);
+  vecBoxCenter.x = (float)(pWorldMins.x + pWorldMaxs.x) * 0.5;
+  vecBoxExtents.x = (float)(pWorldMaxs.x - pWorldMins.x) * 0.5;
+  vecBoxCenter.y = (float)(pWorldMins.y + pWorldMaxs.y) * 0.5;
+  vecBoxExtents.y = (float)(pWorldMaxs.y - pWorldMins.y) * 0.5;
+  vecBoxCenter.z = (float)(pWorldMins.z + pWorldMaxs.z) * 0.5;
+  vecBoxExtents.z = (float)(pWorldMaxs.z - pWorldMins.z) * 0.5;
+  IsBoxIntersectingPortal = UTIL_IsBoxIntersectingPortal(&vecBoxCenter, &vecBoxExtents, pPortal, 0.0);
+  if ( v2 )
+    goto LABEL_10;
+LABEL_6:
+  if ( IsBoxIntersectingPortal && !v2 )
+  {
+    v3 = &this->m_bCheckAllIDs + 4 * pPortal->m_bIsPortal2.m_Value;
+    *((_DWORD *)v3 + 1) = *(_DWORD *)(*((int (__cdecl **)(CProp_Portal *))pPortal->_vptr_IHandleEntity + 3))(pPortal);
+    ++this->m_iTouchingPortalCount;
+    (*((void (__cdecl **)(CFuncPortalDetector *const, CProp_Portal *))this->_vptr_IHandleEntity + 204))(this, pPortal);
+  }
+}

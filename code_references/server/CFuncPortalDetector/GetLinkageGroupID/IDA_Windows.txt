@@ -1,0 +1,4 @@
+int __thiscall CFuncPortalDetector::GetLinkageGroupID(CFuncPortalDetector *this)
+{
+  return this->m_iLinkageGroupID;
+}

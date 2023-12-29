@@ -1,0 +1,32 @@
+void __thiscall CFuncPortalDetector::Spawn(CFuncPortalDetector *this)
+{
+  string_t (__thiscall *GetModelName)(IServerEntity *); // edx
+  const char *v3; // eax
+  edict_t *m_pPev; // ecx
+  char v5[4]; // [esp+8h] [ebp-4h] BYREF
+
+  CFuncTank::FuncTankPreThink((vgui::BaseTooltip *)this);
+  GetModelName = this->GetModelName;
+  this->m_bActive = (this->m_spawnflags.m_Value & 1) == 0;
+  v3 = *(const char **)((int (__thiscall *)(CFuncPortalDetector *, char *))GetModelName)(this, v5);
+  if ( !v3 )
+    v3 = locale;
+  this->SetModel(this, v3);
+  if ( this->m_nRenderMode.m_Value != 10 )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0xB9u);
+    }
+    this->m_nRenderMode.m_Value = 10;
+  }
+  CCollisionProperty::SetSolid(&this->m_Collision, SOLID_VPHYSICS);
+  CCollisionProperty::SetSolidFlags(&this->m_Collision, this->m_Collision.m_usSolidFlags.m_Value | 4);
+  CBaseEntity::SetTransmitState(this, 16);
+}

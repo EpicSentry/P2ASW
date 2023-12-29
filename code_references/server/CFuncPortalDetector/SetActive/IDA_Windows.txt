@@ -1,0 +1,84 @@
+void __thiscall CFuncPortalDetector::SetActive(CFuncPortalDetector *this, bool bActive)
+{
+  int v3; // ebx
+  CProp_Portal *v4; // edi
+  Vector vBoxCenter; // [esp+10h] [ebp-50h] BYREF
+  Vector vBoxExtents; // [esp+1Ch] [ebp-44h] BYREF
+  Vector vMax; // [esp+28h] [ebp-38h] BYREF
+  Vector vMin; // [esp+34h] [ebp-2Ch] BYREF
+  int iPortalCount; // [esp+40h] [ebp-20h]
+  CProp_Portal **pPortals; // [esp+44h] [ebp-1Ch]
+  COutputEvent *p_m_OnStartTouchBothLinkedPortals; // [esp+48h] [ebp-18h]
+  COutputEvent *p_m_OnStartTouchPortal1; // [esp+4Ch] [ebp-14h]
+  COutputEvent *p_m_OnStartTouchPortal2; // [esp+50h] [ebp-10h]
+  COutputEvent *p_m_OnStartTouchPortal; // [esp+54h] [ebp-Ch]
+  COutputEvent *p_m_OnStartTouchLinkedPortal; // [esp+58h] [ebp-8h]
+  bool bTouchedPortal2; // [esp+5Fh] [ebp-1h]
+  bool bTouchedPortal1; // [esp+6Bh] [ebp+Bh]
+
+  this->m_bActive = bActive;
+  CCollisionProperty::CollisionAABBToWorldAABB(
+    &this->m_Collision,
+    &this->m_Collision.m_vecMins.m_Value,
+    &this->m_Collision.m_vecMaxs.m_Value,
+    &vMin,
+    &vMax);
+  vBoxCenter.x = (float)(vMax.x + vMin.x) * 0.5;
+  vBoxCenter.y = (float)(vMax.y + vMin.y) * 0.5;
+  vBoxCenter.z = (float)(vMax.z + vMin.z) * 0.5;
+  vBoxExtents.x = (float)(vMax.x - vMin.x) * 0.5;
+  vBoxExtents.y = (float)(vMax.y - vMin.y) * 0.5;
+  vBoxExtents.z = (float)(vMax.z - vMin.z) * 0.5;
+  bTouchedPortal1 = 0;
+  bTouchedPortal2 = 0;
+  if ( bActive )
+  {
+    p_m_OnStartTouchPortal = &this->m_OnStartTouchPortal;
+    p_m_OnStartTouchPortal2 = &this->m_OnStartTouchPortal2;
+    p_m_OnStartTouchPortal1 = &this->m_OnStartTouchPortal1;
+    p_m_OnStartTouchLinkedPortal = &this->m_OnStartTouchLinkedPortal;
+    p_m_OnStartTouchBothLinkedPortals = &this->m_OnStartTouchBothLinkedPortals;
+  }
+  else
+  {
+    p_m_OnStartTouchPortal = &this->m_OnEndTouchPortal;
+    p_m_OnStartTouchPortal2 = &this->m_OnEndTouchPortal2;
+    p_m_OnStartTouchPortal1 = &this->m_OnEndTouchPortal1;
+    p_m_OnStartTouchLinkedPortal = &this->m_OnEndTouchLinkedPortal;
+    p_m_OnStartTouchBothLinkedPortals = &this->m_OnEndTouchBothLinkedPortals;
+  }
+  iPortalCount = CProp_Portal_Shared::AllPortals.m_Size;
+  if ( !CProp_Portal_Shared::AllPortals.m_Size )
+    return;
+  pPortals = CProp_Portal_Shared::AllPortals.m_Memory.m_pMemory;
+  v3 = 0;
+  do
+  {
+    v4 = pPortals[v3];
+    if ( (v4->m_iLinkageGroupID == this->m_iLinkageGroupID || this->m_bCheckAllIDs)
+      && UTIL_IsBoxIntersectingPortal(&vBoxCenter, &vBoxExtents, v4, 0.0) )
+    {
+      COutputEvent::FireOutput(p_m_OnStartTouchPortal, v4, this, 0.0);
+      if ( v4->m_bIsPortal2.m_Value )
+      {
+        COutputEvent::FireOutput(p_m_OnStartTouchPortal2, v4, this, 0.0);
+        if ( !CPortal_Base2D::IsActivedAndLinked(v4) )
+          goto LABEL_15;
+        bTouchedPortal2 = 1;
+      }
+      else
+      {
+        COutputEvent::FireOutput(p_m_OnStartTouchPortal1, v4, this, 0.0);
+        if ( !CPortal_Base2D::IsActivedAndLinked(v4) )
+          goto LABEL_15;
+        bTouchedPortal1 = 1;
+      }
+      COutputEvent::FireOutput(p_m_OnStartTouchLinkedPortal, v4, this, 0.0);
+    }
+LABEL_15:
+    ++v3;
+  }
+  while ( v3 != iPortalCount );
+  if ( bTouchedPortal1 && bTouchedPortal2 )
+    COutputEvent::FireOutput(p_m_OnStartTouchBothLinkedPortals, this, this, 0.0);
+}

@@ -1,0 +1,26 @@
+void __cdecl CFuncPortalDetector::PortalPlacedInsideBounds(CFuncPortalDetector *const this, CProp_Portal *pPortal)
+{
+  EHANDLE p_hListener; // [esp+1Ch] [ebp-Ch] BYREF
+
+  COutputEvent::FireOutput(&this->m_OnStartTouchPortal, pPortal, this, 0.0);
+  if ( pPortal->m_bIsPortal2.m_Value )
+  {
+    COutputEvent::FireOutput(&this->m_OnStartTouchPortal2, pPortal, this, 0.0);
+    if ( !CPortal_Base2D::IsActivedAndLinked(pPortal) )
+      goto LABEL_3;
+  }
+  else
+  {
+    COutputEvent::FireOutput(&this->m_OnStartTouchPortal1, pPortal, this, 0.0);
+    if ( !CPortal_Base2D::IsActivedAndLinked(pPortal) )
+      goto LABEL_3;
+  }
+  COutputEvent::FireOutput(&this->m_OnStartTouchLinkedPortal, pPortal, this, 0.0);
+  if ( this->m_iTouchingPortalCount == 2 )
+    COutputEvent::FireOutput(&this->m_OnStartTouchBothLinkedPortals, pPortal, this, 0.0);
+LABEL_3:
+  p_hListener.m_Index = -1;
+  if ( this )
+    p_hListener.m_Index = *(_DWORD *)(*((int (__cdecl **)(CFuncPortalDetector *const))this->_vptr_IHandleEntity + 3))(this);
+  CPortal_Base2D::AddPortalEventListener(pPortal, &p_hListener);
+}

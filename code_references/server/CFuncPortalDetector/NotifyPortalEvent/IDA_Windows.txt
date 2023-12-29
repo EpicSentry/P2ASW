@@ -1,0 +1,18 @@
+void __thiscall CFuncPortalDetector::NotifyPortalEvent(
+        CFuncPortalDetector *this,
+        PortalEvent_t nEventType,
+        CPortal_Base2D *pNotifier)
+{
+  CProp_Portal *v4; // eax
+
+  if ( nEventType == PORTALEVENT_FIZZLE )
+  {
+    v4 = (CProp_Portal *)__RTDynamicCast(
+                           pNotifier,
+                           0,
+                           &CPortal_Base2D `RTTI Type Descriptor',
+                           &CProp_Portal `RTTI Type Descriptor',
+                           0);
+    this->UpdateOnPortalMoved(this, v4);
+  }
+}
