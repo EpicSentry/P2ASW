@@ -1717,23 +1717,33 @@ IClientModelRenderable*	C_Portal_Player::GetClientModelRenderable()
 // Purpose: 
 //-----------------------------------------------------------------------------
 ConVar cl_draw_player_model("cl_draw_player_model", "1", FCVAR_DEVELOPMENTONLY);
-int C_Portal_Player::DrawModel( int flags, const RenderableInstance_t &instance )
+int C_Portal_Player::DrawModel(int flags, const RenderableInstance_t &instance)
 {
-	if ( !m_bReadyToDraw )
+	if (!m_bReadyToDraw)
 		return 0;
 
-	if ( !cl_draw_player_model.GetBool() )
+	if (!cl_draw_player_model.GetBool())
 		return 0;
 
-	if( (GetSplitScreenViewPlayer() == this) && ShouldSkipRenderingViewpointPlayerForThisView() )
+	if ((GetSplitScreenViewPlayer() == this) && ShouldSkipRenderingViewpointPlayerForThisView())
 		return 0;
 
-	if( flags & STUDIO_RENDER )
+	if (flags & STUDIO_RENDER)
 	{
 		m_nLastFrameDrawn = gpGlobals->framecount;
 		m_nLastDrawnStudioFlags = flags;
 	}
-	return BaseClass::DrawModel( flags, instance );
+
+	if (IsLocalPlayer())
+	{
+		if (!C_BasePlayer::ShouldDrawLocalPlayer())
+		{
+			if (!g_pPortalRender->IsRenderingPortal())
+				return 0;
+		}
+	}
+
+	return BaseClass::DrawModel(flags, instance);
 }
 
 
@@ -1886,33 +1896,33 @@ ShadowType_t C_Portal_Player::ShadowCastType( void )
 	return SHADOWS_NONE;
 }
 
-bool C_Portal_Player::ShouldDraw( void )
+bool C_Portal_Player::ShouldDraw(void)
 {
-	if ( !BaseClass::ShouldDraw() )
-		return false;
+	//if ( !BaseClass::ShouldDraw() )
+	//    return false;
 
-	if ( !IsAlive() )
+	if (!IsAlive())
 	{
-		if ( m_Shared.InCond( PORTAL_COND_DEATH_CRUSH ) )
+		if (m_Shared.InCond(PORTAL_COND_DEATH_CRUSH))
 			return true;
 		else
 			return false;
 	}
 
-	if ( Util_PIP_ShouldDrawPlayer( this ) )
+	if (Util_PIP_ShouldDrawPlayer(this))
 	{
 		return true;
 	}
 
 	//return true;
 
-	//	if( GetTeamNumber() == TEAM_SPECTATOR )
-	//		return false;
+	//    if( GetTeamNumber() == TEAM_SPECTATOR )
+	//        return false;
 
-	if( IsLocalPlayer( this ) && IsRagdoll() )
+	if (IsLocalPlayer(this) && IsRagdoll())
 		return true;
 
-	if ( IsRagdoll() )
+	if (IsRagdoll())
 		return false;
 
 	return true;
