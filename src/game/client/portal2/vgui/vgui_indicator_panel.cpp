@@ -70,7 +70,7 @@ CIndicatorScreen::CIndicatorScreen( vgui::Panel *parent, const char *panelName )
 
 CIndicatorScreen::~CIndicatorScreen()
 {
-	if (vgui::surface())
+	if ( vgui::surface() )
 	{
 		if (m_nTimerBackgroundTextureID != -1)
 		{
@@ -78,15 +78,15 @@ CIndicatorScreen::~CIndicatorScreen()
 		}
 		if (m_nTimerBackgroundActiveTextureID != -1)
 		{
-			vgui::surface()->DestroyTextureID(m_nTimerBackgroundActiveTextureID);
+			vgui::surface()->DestroyTextureID( m_nTimerBackgroundActiveTextureID );
 		}
 		if (m_nTimerUpperSliceTextureID != -1)
 		{
-			vgui::surface()->DestroyTextureID(m_nTimerUpperSliceTextureID);
+			vgui::surface()->DestroyTextureID( m_nTimerUpperSliceTextureID );
 		}
 		if (m_nTimerLowerSliceTextureID != -1)
 		{
-			vgui::surface()->DestroyTextureID(m_nTimerLowerSliceTextureID);
+			vgui::surface()->DestroyTextureID( m_nTimerLowerSliceTextureID );
 		}
 		if (m_nCheckTextureID != -1)
 		{
@@ -94,14 +94,16 @@ CIndicatorScreen::~CIndicatorScreen()
 		}
 		if (m_nUncheckedTextureID != -1)
 		{
-			vgui::surface()->DestroyTextureID(m_nUncheckedTextureID);
+			vgui::surface()->DestroyTextureID( m_nUncheckedTextureID );
 		}
 		if (m_nXTextureID != -1)
 		{
-			vgui::surface()->DestroyTextureID(m_nXTextureID);
+			vgui::surface()->DestroyTextureID( m_nXTextureID );
 		}
 		if (m_nOTextureID != -1)
+		{
 			vgui::surface()->DestroyTextureID( m_nOTextureID );
+		}
 	}
 
 }
@@ -109,9 +111,9 @@ CIndicatorScreen::~CIndicatorScreen()
 bool CIndicatorScreen::Init( KeyValues *pKeyValues, VGuiScreenInitData_t *pInitData )
 {
 	// Make sure we get ticked...
-	vgui::ivgui()->AddTickSignal(GetVPanel());
+	vgui::ivgui()->AddTickSignal( GetVPanel() );
 	
-	if (!BaseClass::Init(pKeyValues, pInitData))
+	if ( !BaseClass::Init( pKeyValues, pInitData ) )
 		return false;
 	
 	CBaseEntity *pEntity = GetEntity();
@@ -131,43 +133,43 @@ bool CIndicatorScreen::Init( KeyValues *pKeyValues, VGuiScreenInitData_t *pInitD
 
 	if (m_nTimerBackgroundTextureID == -1)
 	{
-		m_nTimerBackgroundTextureID = vgui::surface()->CreateNewTextureID(false);
-		vgui::surface()->DrawSetTextureFile(m_nTimerBackgroundTextureID, "vgui/signage/vgui_countdown_background", 1, 0);
+		m_nTimerBackgroundTextureID = vgui::surface()->CreateNewTextureID( false );
+		vgui::surface()->DrawSetTextureFile( m_nTimerBackgroundTextureID, "vgui/signage/vgui_countdown_background", 1, false );
 	}
 	if (m_nTimerBackgroundActiveTextureID == -1)
 	{
-		m_nTimerBackgroundActiveTextureID = vgui::surface()->CreateNewTextureID(false);
-		vgui::surface()->DrawSetTextureFile(m_nTimerBackgroundActiveTextureID, "vgui/signage/vgui_countdown_background_on", 1, 0);
+		m_nTimerBackgroundActiveTextureID = vgui::surface()->CreateNewTextureID( false );
+		vgui::surface()->DrawSetTextureFile( m_nTimerBackgroundActiveTextureID, "vgui/signage/vgui_countdown_background_on", 1, false );
 	}
 	if (m_nTimerUpperSliceTextureID == -1)
 	{
-		m_nTimerUpperSliceTextureID = vgui::surface()->CreateNewTextureID(false);
-		vgui::surface()->DrawSetTextureFile(m_nTimerUpperSliceTextureID, "vgui/signage/vgui_countdown_slice1", 1, 0);
+		m_nTimerUpperSliceTextureID = vgui::surface()->CreateNewTextureID( false );
+		vgui::surface()->DrawSetTextureFile( m_nTimerUpperSliceTextureID, "vgui/signage/vgui_countdown_slice1", 1, false );
 	}
 	if (m_nTimerLowerSliceTextureID == -1)
 	{
-		m_nTimerLowerSliceTextureID = vgui::surface()->CreateNewTextureID(false);
-		vgui::surface()->DrawSetTextureFile(m_nTimerLowerSliceTextureID, "vgui/signage/vgui_countdown_slice2", 1, 0);
+		m_nTimerLowerSliceTextureID = vgui::surface()->CreateNewTextureID( false );
+		vgui::surface()->DrawSetTextureFile( m_nTimerLowerSliceTextureID, "vgui/signage/vgui_countdown_slice2", 1, false );
 	}
 	if ( m_nCheckTextureID == -1)
 	{
-		m_nCheckTextureID = vgui::surface()->CreateNewTextureID(false);
-		vgui::surface()->DrawSetTextureFile(m_nCheckTextureID, "vgui/signage/vgui_indicator_checked", 1, 0);
+		m_nCheckTextureID = vgui::surface()->CreateNewTextureID( false );
+		vgui::surface()->DrawSetTextureFile( m_nCheckTextureID, "vgui/signage/vgui_indicator_checked", 1, false );
 	}
 	if (m_nUncheckedTextureID == -1)
 	{
-		m_nUncheckedTextureID = vgui::surface()->CreateNewTextureID(false);
-		vgui::surface()->DrawSetTextureFile(m_nUncheckedTextureID, "vgui/signage/vgui_indicator_unchecked", 1, 0);
+		m_nUncheckedTextureID = vgui::surface()->CreateNewTextureID( false );
+		vgui::surface()->DrawSetTextureFile( m_nUncheckedTextureID, "vgui/signage/vgui_indicator_unchecked", 1, false );
 	}
 	if (m_nXTextureID == -1)
 	{
-		m_nXTextureID = vgui::surface()->CreateNewTextureID(false);
-		vgui::surface()->DrawSetTextureFile(m_nXTextureID, "vgui/signage/vgui_shape04", 1, 0);
+		m_nXTextureID = vgui::surface()->CreateNewTextureID( false );
+		vgui::surface()->DrawSetTextureFile( m_nXTextureID, "vgui/signage/vgui_shape04", 1, false );
 	}
 	if (m_nOTextureID == -1)
 	{
-		m_nOTextureID = vgui::surface()->CreateNewTextureID(false);
-		vgui::surface()->DrawSetTextureFile(m_nOTextureID, "vgui/signage/vgui_shape05", 1, 0);
+		m_nOTextureID = vgui::surface()->CreateNewTextureID( false );
+		vgui::surface()->DrawSetTextureFile( m_nOTextureID, "vgui/signage/vgui_shape05", 1, false );
 	}
 
 	return true;
@@ -210,7 +212,7 @@ void CIndicatorScreen::PaintIndicator( void )
 		else
 			nCurTextureID = m_nUncheckedTextureID;
 
-		vgui::surface()->DrawSetColor(255, 255, 255, 255);
+		vgui::surface()->DrawSetColor( 255, 255, 255, 255 );
 		vgui::surface()->DrawSetTexture( nCurTextureID );		
 		vgui::surface()->DrawTexturedRect( 0, 0, GetWide(), GetTall() );
 	}
@@ -303,26 +305,24 @@ void CIndicatorScreen::PaintCountdownTimer( void )
 		vgui::surface()->DrawSetTexture( m_nTimerUpperSliceTextureID );
 		vgui::surface()->DrawTexturedRect( GetWide() / 2, 0, iHalfWide + GetWide() / 2, GetTall() / 2 );
 	}
+
 	if (flPerc > 6.0 && 7.0 > flPerc)
 	{
 		vgui::surface()->DrawSetColor( 255, 255, 255, flAlpha );
 		vgui::surface()->DrawSetTexture( m_nTimerLowerSliceTextureID );
 		v57 = GetTall() / 2;
 
-	LABEL_36:
 		vgui::surface()->DrawTexturedRect( GetWide() / 2, 0, iHalfWide + GetWide() - ( GetWide() / 2 ) , 0 );
-		
-		goto LABEL_37;
 	}
-	if (flPerc > 7.0)
+	else if (flPerc > 7.0)
 	{
 		vgui::surface()->DrawSetColor( 255, 255, 255, flGlobalAlpha );
 		vgui::surface()->DrawSetTexture( m_nTimerLowerSliceTextureID );
 		v57 = GetTall() / 2;
-
-		goto LABEL_36;
+		
+		vgui::surface()->DrawTexturedRect( GetWide() / 2, 0, iHalfWide + GetWide() - ( GetWide() / 2 ) , 0 );
 	}
-LABEL_37:
+
 	if (flPerc > 5.0 && flPerc < 6.0)
 	{
 		vgui::surface()->DrawSetColor( 255, 255, 255, flAlpha );
@@ -331,12 +331,10 @@ LABEL_37:
 		flAlpha = 1.0;
 
 		v57 = iHalfTall;
-	LABEL_42:
+
 		vgui::surface()->DrawTexturedSubRect( 0, GetWide() / 2, 0, 0, 0, 0, 0, 0 );
-		
-		goto LABEL_43;
 	}
-	if (flPerc > 6.0)
+	else if (flPerc > 6.0)
 	{
 		vgui::surface()->DrawSetColor( 255, 255, 255, flGlobalAlpha );
 		vgui::surface()->DrawSetTexture( m_nTimerLowerSliceTextureID );
@@ -344,9 +342,10 @@ LABEL_37:
 		flAlpha = 1.0;
 
 		v57 = iHalfTall;
-		goto LABEL_42;
+
+		vgui::surface()->DrawTexturedSubRect( 0, GetWide() / 2, 0, 0, 0, 0, 0, 0 );
 	}
-LABEL_43:
+
 	if (flPerc > 4.0 && flPerc < 5.0)
 	{
 		vgui::surface()->DrawSetColor( 255, 255, 255, flAlpha );
@@ -355,12 +354,10 @@ LABEL_43:
 		flAlpha = 1.0;
 
 		v57 = iHalfTall;
-	LABEL_48:
-		vgui::surface()->DrawTexturedSubRect(0, GetWide() / 2, 0, 0, 0, 0, 0, 0);
-		
-		goto LABEL_49;
+
+		vgui::surface()->DrawTexturedSubRect( 0, GetWide() / 2, 0, 0, 0, 0, 0, 0 );
 	}
-	if (flPerc > 5.0)
+	else if (flPerc > 5.0)
 	{
 		vgui::surface()->DrawSetColor( 255, 255, 255, flGlobalAlpha );
 
@@ -369,67 +366,63 @@ LABEL_43:
 		flAlpha = 1.0;
 
 		v57 = iHalfTall;
-		goto LABEL_48;
+		
+		vgui::surface()->DrawTexturedSubRect( 0, GetWide() / 2, 0, 0, 0, 0, 0, 0 );
 	}
-LABEL_49:
+
 	if (flPerc > 3.0 && flPerc < 4.0)
 	{
 		vgui::surface()->DrawSetColor( 255, 255, 255, flAlpha );
 		vgui::surface()->DrawSetTexture( m_nTimerUpperSliceTextureID );
 		v57 = iHalfTall + GetTall() / 2;
-	LABEL_54:
+
 		vgui::surface()->DrawTexturedSubRect( 0, iHalfTall, GetWide() / 2, 0, 0, 0, 0, 0 );
-		
-		goto LABEL_55;
 	}
-	if (flPerc > 4.0)
+	else if (flPerc > 4.0)
 	{
 		vgui::surface()->DrawSetColor( 255, 255, 255, flGlobalAlpha );
 		vgui::surface()->DrawSetTexture( m_nTimerUpperSliceTextureID );
 		v57 = iHalfTall + GetTall() / 2;
-		goto LABEL_54;
+		
+		vgui::surface()->DrawTexturedSubRect( 0, iHalfTall, GetWide() / 2, 0, 0, 0, 0, 0 );
 	}
-LABEL_55:
+
 	if (flPerc > 2.0 && flPerc < 3.0)
 	{
 		vgui::surface()->DrawSetColor( 255, 255, 255, flAlpha );
 		vgui::surface()->DrawSetTexture( m_nTimerLowerSliceTextureID );
 		v57 = iHalfTall + GetTall() / 2;
-	LABEL_60:
+
 		vgui::surface()->DrawTexturedSubRect( 0, iHalfTall, GetWide() / 2, 0, 0, 0, 0, 0 );
-		
-		goto LABEL_61;
 	}
-	if (flPerc > 3.0)
+	else if (flPerc > 3.0)
 	{
 		vgui::surface()->DrawSetColor( 255, 255, 255, flGlobalAlpha );
 		vgui::surface()->DrawSetTexture( m_nTimerLowerSliceTextureID );
 		
 		v57 = iHalfTall + GetTall() / 2;
-		goto LABEL_60;
+		
+		vgui::surface()->DrawTexturedSubRect( 0, iHalfTall, GetWide() / 2, 0, 0, 0, 0, 0 );
 	}
-LABEL_61:
+
 	if (flPerc > 1.0 && flPerc < 2.0)
 	{
 		vgui::surface()->DrawSetColor( 255, 255, 255, flAlpha );
 		vgui::surface()->DrawSetTexture( m_nTimerLowerSliceTextureID );
 		v57 = 1.0;
 
-	LABEL_66:
 		vgui::surface()->DrawTexturedSubRect( 0, 0, GetWide() / 2, GetTall() - ( GetTall() / 2 ), 0, 0, 0, 0 );
-		
-		goto LABEL_67;
 	}
-	if (flPerc > 2.0)
+	else if (flPerc > 2.0)
 	{
 		vgui::surface()->DrawSetColor( 255, 255, 255, flGlobalAlpha );
 		vgui::surface()->DrawSetTexture( m_nTimerLowerSliceTextureID );
 		v57 = 1.0;
-		goto LABEL_66;
+		
+		vgui::surface()->DrawTexturedSubRect( 0, 0, GetWide() / 2, GetTall() - ( GetTall() / 2 ), 0, 0, 0, 0 );
 	}
-LABEL_67:
 
-	int v52; // eax
+	int v52;
 
 	if (flPerc <= 0.0 || flPerc >= 1.0)
 	{
