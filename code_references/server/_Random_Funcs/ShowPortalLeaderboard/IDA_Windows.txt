@@ -1,0 +1,35 @@
+void __cdecl ShowPortalLeaderboard(bool flTime)
+{
+  CBasePlayer *LocalPlayer; // eax
+  int i; // edi
+  CBasePlayer *v3; // eax
+  CBasePlayer *v4; // esi
+  char szCommand[32]; // [esp+0h] [ebp-20h] BYREF
+
+  if ( gpGlobals->maxClients <= 1 )
+  {
+    LocalPlayer = UTIL_GetLocalPlayer();
+  }
+  else if ( engine->IsDedicatedServer(engine) )
+  {
+    LocalPlayer = 0;
+  }
+  else
+  {
+    LocalPlayer = UTIL_GetListenServerHost();
+  }
+  if ( LocalPlayer->m_iBonusChallenge.m_Value > 0 )
+  {
+    V_snprintf(szCommand, 32, "leaderboard_open %i", flTime);
+    for ( i = 1; i <= gpGlobals->maxClients; ++i )
+    {
+      v3 = UTIL_PlayerByIndex(i);
+      v4 = v3;
+      if ( v3 && v3->IsPlayer(v3) )
+      {
+        if ( LOBYTE(v4[1].m_flexWeight.m_Value[34]) )
+          engine->ClientCommand(engine, v4->m_Network.m_pPev, "%s", szCommand);
+      }
+    }
+  }
+}

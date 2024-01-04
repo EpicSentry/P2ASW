@@ -130,11 +130,39 @@ protected:
 	Portal_Gamestats_LevelStats_t *FindOrAddMapStats( const char *szMapName );
 };
 
+class CPortalStatsController : public CPointEntity
+{
+public:
+	DECLARE_CLASS( CPortalStatsController, CPointEntity );
+	DECLARE_DATADESC();
+	CPortalStatsController();
+	~CPortalStatsController();
+	virtual void Spawn( void );
+	virtual void Think( void );
+	virtual int ObjectCaps( void );
+	void LevelStart(float );
+	void LevelEnd(float );
+	void SetPlayersReady();
+private:
+	void OnLevelStart( inputdata_t &inputdata );
+	void OnLevelEnd( inputdata_t &inputdata );
+	float m_flTransitionTime;
+	float m_flLeaderboardSpawnTime;
+	bool m_bPlayersReady;
+};
+
 extern CPortalGameStats g_PortalGameStats;
+
+extern CPortalStatsController *g_pPlayerPortalStatsController;
 
 
 void CreateLevelStatPointers( Portal_Gamestats_LevelStats_t *pFillIn );
 void DestroyLevelStatPointers( Portal_Gamestats_LevelStats_t *pDestroyFrom );
 
+
+void ChallengePlayersReady( void );
+void ShowPortalLeaderboard( float flTime );
+void WriteLeaderboard( void );
+void ReadLeaderboard( void );
 
 #endif // PORTAL_GAMESTATS_H

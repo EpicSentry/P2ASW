@@ -1,0 +1,64 @@
+void WriteLeaderboard()
+{
+  CBasePlayer *j; // eax
+  KeyValues *v1; // edi
+  const char *pszValue; // ebx
+  KeyValues *v3; // ebx
+  CBasePlayer *v4; // esi
+  int nTime; // [esp+10h] [ebp-268h]
+  int nPortals; // [esp+14h] [ebp-264h]
+  KeyValues *pBestTime; // [esp+18h] [ebp-260h]
+  int i; // [esp+1Ch] [ebp-25Ch]
+  CFmtStrN<256> v9; // [esp+28h] [ebp-250h] BYREF
+  CFmtStrN<256> v10; // [esp+134h] [ebp-144h] BYREF
+  CReliableBroadcastRecipientFilter player; // [esp+240h] [ebp-38h] BYREF
+
+  if ( gpGlobals->maxClients > 0 )
+  {
+    i = 1;
+    nTime = -1;
+    for ( j = UTIL_PlayerByIndex(1); ; j = UTIL_PlayerByIndex(i) )
+    {
+      v4 = j;
+      if ( j && (*((unsigned __int8 (__cdecl **)(CBasePlayer *))j->_vptr_IHandleEntity + 86))(j) )
+      {
+        if ( nTime == -1 )
+          nTime = (int)(float)(100.0 * v4[1].m_flPoseParameter.m_Value[21]);
+        if ( g_pPortalMPGameRules )
+          nPortals = g_pPortalMPGameRules->m_nNumPortalsPlaced.m_Value;
+        else
+          nPortals = LODWORD(v4[1].m_flPoseParameter.m_Value[19]);
+        v1 = (KeyValues *)KeyValues::operator new(0x24u);
+        KeyValues::KeyValues(v1, "write_leaderboard");
+        pszValue = gpGlobals->mapname.pszValue;
+        if ( !pszValue )
+          pszValue = "";
+        CFmtStrN<256>::CFmtStrN(&v9, "challenge_besttime_%s", pszValue);
+        pBestTime = (KeyValues *)KeyValues::operator new(0x24u);
+        KeyValues::KeyValues(pBestTime, v9.m_szBuf);
+        KeyValues::SetUint64(pBestTime, "besttime", nTime);
+        CFmtStrN<256>::CFmtStrN(&v10, "challenge_portals_%s", pszValue);
+        v3 = (KeyValues *)KeyValues::operator new(0x24u);
+        KeyValues::KeyValues(v3, v10.m_szBuf);
+        KeyValues::SetUint64(v3, "portals", nPortals);
+        KeyValues::AddSubKey(v1, pBestTime);
+        KeyValues::AddSubKey(v1, v3);
+        UTIL_SendClientCommandKVToPlayer(v1, v4);
+        CRecipientFilter::CRecipientFilter(&player);
+        player._vptr_IRecipientFilter = (int (**)(...))off_B986C8;
+        CRecipientFilter::AddAllPlayers(&player);
+        player._vptr_IRecipientFilter = (int (**)(...))off_BA41A8;
+        CRecipientFilter::MakeReliable(&player);
+        CRecipientFilter::AddRecipient(&player, v4);
+        UserMessageBegin(&player, "ScoreboardTempUpdate");
+        MessageWriteLong(nPortals);
+        MessageWriteLong(nTime);
+        MessageEnd();
+        player._vptr_IRecipientFilter = (int (**)(...))off_B986C8;
+        CRecipientFilter::~CRecipientFilter(&player);
+      }
+      if ( gpGlobals->maxClients < ++i )
+        break;
+    }
+  }
+}

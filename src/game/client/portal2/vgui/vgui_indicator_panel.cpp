@@ -263,7 +263,7 @@ void CIndicatorScreen::PaintCountdownTimer( void )
 			flNewAlpha = 0.0;
 			m_flFadeUpTime = gpGlobals->curtime;
 			flGlobalAlpha = 0.0;
-			m_bWasCounting = 0;
+			m_bWasCounting = false;
 		}
 		else
 		{

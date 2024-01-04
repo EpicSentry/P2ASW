@@ -8,6 +8,14 @@
 #include "portal_gamestats.h"
 #include "tier1/UtlBuffer.h"
 #include "portal_player.h"
+#include "matchmaking/imatchframework.h"
+#include "portal_gamerules.h"
+#include "portal_mp_gamerules.h"
+#include "eventqueue.h"
+
+const int LEADERBOARD_DELAY_SECONDS = 3.5;
+
+extern CPortalMPGameRules *g_pPortalMPGameRules;
 
 #define PORTALSTATS_TRIMEVENT( varName, varType )\
 	if( varName->Count() > varType::TRIMSIZE )\
@@ -684,4 +692,303 @@ bool CPortalGameStats::UserPlayedAllTheMaps( void )
 	return false;
 }
 
+BEGIN_DATADESC( CPortalStatsController )
 
+DEFINE_INPUTFUNC( FIELD_FLOAT, "OnLevelStart", OnLevelStart ),
+DEFINE_INPUTFUNC( FIELD_FLOAT, "OnLevelEnd", OnLevelEnd ),
+
+END_DATADESC()
+
+LINK_ENTITY_TO_CLASS( portal_stats_controller, CPortalStatsController );
+
+CPortalStatsController::CPortalStatsController()
+{
+	// This assert is in place because I don't know
+	// where else to assign g_pPlayerPortalStatsController
+	Assert( g_pPlayerPortalStatsController == NULL );
+
+	g_pPlayerPortalStatsController = this;
+	m_flTransitionTime = -1.0;
+	m_flLeaderboardSpawnTime = -1.0;
+	m_bPlayersReady = false;
+}
+
+CPortalStatsController::~CPortalStatsController()
+{
+	g_pPlayerPortalStatsController = NULL;
+}
+
+void CPortalStatsController::Spawn( void )
+{
+	BaseClass::Spawn();
+	m_flTransitionTime = -1.0;
+
+	const char *pszMapName = gpGlobals->mapname.ToCStr();
+
+	if ( !_V_strcmp( pszMapName, "sp_a4_speed_tb_catch" ) || !_V_strcmp( pszMapName, "sp_a2_intro" ) )
+	{
+		variant_t variant;
+		variant.SetFloat( 3.0 );
+		g_EventQueue.AddEvent( this, "OnLevelStart", variant, 3.0, this, this );
+	}
+}
+
+void CPortalStatsController::Think( void )
+{	
+	CBasePlayer *pLocalPlayer = UTIL_GetLocalPlayerOrListenServerHost();
+
+	if ( pLocalPlayer )
+	{
+		CBasePlayer *pListenServerHost = UTIL_GetLocalPlayerOrListenServerHost();
+
+		bool bNoTransition = false;
+		if ( pListenServerHost->GetBonusChallenge() > 0
+			|| ( m_flTransitionTime == -1.0 ) )
+		{
+		LABEL_9:
+			if (m_flLeaderboardSpawnTime < 0.0)
+			{
+				if ( !bNoTransition )
+					return;
+			}
+			else
+			{
+				if ( gpGlobals->curtime > m_flLeaderboardSpawnTime && m_bPlayersReady )
+				{
+					for ( int i = 1; i <= gpGlobals->maxClients; ++i )
+					{
+						CBasePlayer *pPlayer = ToBasePlayer( UTIL_PlayerByIndex( i ) );
+						if ( pPlayer )
+						{
+							//if ( LOBYTE(v13[1].m_flexWeight.m_Value[34]) ) // FixMe!!
+								engine->ClientCommand( pPlayer->edict(), "+leaderboard 4" );
+						}
+					}
+					m_flLeaderboardSpawnTime = -1.0;
+					return;
+				}
+			}
+			SetNextThink( gpGlobals->curtime + 0.1 );
+			return;
+		}
+		if (gpGlobals->curtime <= m_flTransitionTime)
+		{
+		ENT_NOT_FOUND:
+			bNoTransition = true;
+			goto LABEL_9;
+		}
+
+		CBaseEntity *pTransitionScriptEnt = gEntList.FindEntityByName( NULL, "@transition_script" );
+		if ( !pTransitionScriptEnt )
+		{
+			pTransitionScriptEnt = gEntList.FindEntityByName( NULL, "script_check_finish_game" );
+			if ( !pTransitionScriptEnt )
+			{
+				CBaseEntity *pScriptEnt = gEntList.FindEntityByClassname( NULL, "logic_script" );
+				if ( !pScriptEnt )
+					goto ENT_NOT_FOUND;
+				while (1)
+				{
+					if (V_stristr( pScriptEnt->GetEntityNameAsCStr(), "transition_script" ) )
+						break;
+
+					pScriptEnt = gEntList.FindEntityByClassname( pScriptEnt, "logic_script" );
+					if ( !pScriptEnt )
+						goto ENT_NOT_FOUND;
+				}
+				pTransitionScriptEnt = pScriptEnt;
+			}
+		}
+		pTransitionScriptEnt->RunScript( "RealTransitionFromMap()", "CBaseEntity::RunScript" );
+		m_flTransitionTime = -1.0;
+		UTIL_Remove( this );
+	}
+}
+
+int CPortalStatsController::ObjectCaps( void )
+{
+	return BaseClass::ObjectCaps() & 0x7F;
+}
+
+void CPortalStatsController::LevelStart( float flDisplayTime )
+{
+	CBasePlayer *pPlayer = UTIL_GetLocalPlayerOrListenServerHost();
+
+	if ( pPlayer->GetBonusChallenge() > 0 )
+		ReadLeaderboard();
+	m_flLeaderboardSpawnTime = LEADERBOARD_DELAY_SECONDS;
+	SetNextThink( gpGlobals->curtime + 0.1 );
+	if ( !g_pGameRules->IsSavingAllowed() )
+	{
+#if 0
+		if ((_S12_34 & 1) == 0)
+		{
+			_S12_34 |= 1u;
+			ConVarRef::ConVarRef(&map_wants_save_disable_1, "map_wants_save_disable");
+		}
+#endif
+		ConVarRef map_wants_save_disable( "map_wants_save_disable" );
+		map_wants_save_disable.SetValue( 1 );
+	}
+	m_flTransitionTime = -1.0;
+}
+
+void CPortalStatsController::LevelEnd( float flDisplayTime )
+{
+	CBasePlayer *pLocalPlayer = UTIL_GetLocalPlayerOrListenServerHost();
+
+	if (pLocalPlayer->GetBonusChallenge() <= 0)
+	{
+		flDisplayTime = 0.0;
+		goto EndSpot;
+	}
+	IMatchSession *pSession = g_pMatchFramework->GetMatchSession();
+	if (pSession)
+	{
+		KeyValues *pSettings = pSession->GetSessionSettings();
+		if ( pSettings )
+		{
+			if (pSettings->GetInt("game/sv_cheats", 0))
+			{
+				CReliableBroadcastRecipientFilter filter;
+				filter.AddAllPlayers();
+				UserMessageBegin(filter, "ChallengeModeCheatSession");
+				MessageEnd();
+				goto EndSpot;
+			}
+		}
+		WriteLeaderboard();
+	}
+	ShowPortalLeaderboard( 1 );
+EndSpot:
+	m_flTransitionTime = gpGlobals->curtime + flDisplayTime;
+	SetNextThink( gpGlobals->curtime + 0.1 );
+}
+
+void CPortalStatsController::OnLevelStart( inputdata_t &inputdata )
+{
+	CBasePlayer *pPlayer = UTIL_GetLocalPlayerOrListenServerHost();
+
+	if ( pPlayer->GetBonusChallenge() > 0)
+	{
+		CBaseEntity *pTransitionEnt = gEntList.FindEntityByName( NULL, "@transition_script" );
+		if ( pTransitionEnt )
+			pTransitionEnt->RunScript( "TransitionReady ()", " TransitionReady" );
+	}
+
+	if (inputdata.value.FieldType() == FIELD_FLOAT)
+	{
+		CPortalStatsController::LevelStart( inputdata.value.Float() );
+	}
+	else
+	{
+		LevelStart( 0.0 );
+	}
+}
+
+void CPortalStatsController::OnLevelEnd( inputdata_t &inputdata )
+{
+	if ( inputdata.value.FieldType() == FIELD_FLOAT )
+		CPortalStatsController::LevelEnd( inputdata.value.Float() );
+	else
+		CPortalStatsController::LevelEnd( 0.0 );
+}
+
+void CPortalStatsController::SetPlayersReady()
+{
+	m_bPlayersReady = true;
+}
+
+void ChallengePlayersReady( void )
+{
+	g_pPlayerPortalStatsController->SetPlayersReady();
+}
+
+void ShowPortalLeaderboard( float flTime )
+{
+	CBasePlayer *pLocalPlayer = UTIL_GetLocalPlayerOrListenServerHost();
+
+	if ( pLocalPlayer->GetBonusChallenge() > 0 )
+	{
+		char szCommand[32];
+		V_snprintf( szCommand, 32, "leaderboard_open %i", flTime );
+		for ( int i = 1; i <= gpGlobals->maxClients; ++i )
+		{
+			CBasePlayer *pPlayer = ToBasePlayer( UTIL_PlayerByIndex( i ) );
+
+			if ( pPlayer )
+			{
+				//if (LOBYTE(pPlayer[1].m_flexWeight.m_Value[34]))
+					engine->ClientCommand( pPlayer->edict(), "%s", szCommand );
+			}
+		}
+	}
+}
+
+void WriteLeaderboard( void )
+{
+	int nTime = -1;
+	for ( int i = 1; i < gpGlobals->maxClients; i++ )
+	{
+		CBasePlayer *pPlayer = ToBasePlayer( UTIL_PlayerByIndex( i ) );
+
+		if ( pPlayer )
+		{
+			if ( nTime == -1 )
+				nTime = pPlayer->GetBonusProgress(); // Best guess! Could be inaccurate
+
+			int nPortals;
+			if ( g_pPortalMPGameRules )
+				nPortals = g_pPortalMPGameRules->GetNumPortalsPlaced();
+			else
+				nPortals = pPlayer->GetBonusProgress(); // Best guess! Could be inaccurate
+
+			KeyValues *pMasterKey = new KeyValues( "write_leaderboard" );
+
+			const char *pszMapName = gpGlobals->mapname.ToCStr();
+
+			CFmtStrN<256> besttime( "challenge_besttime_%s", pszMapName );
+
+			KeyValues *pBestTime = new KeyValues( besttime.Access() );
+			pBestTime->SetUint64( "besttime", nTime );
+			CFmtStrN<256> challenge_portals( "challenge_portals_%s", pszMapName );
+
+			KeyValues *pPortalKey = new KeyValues( challenge_portals.Access() );
+			pPortalKey->SetUint64( "portals", nPortals );
+			pMasterKey->AddSubKey( pBestTime );
+			pMasterKey->AddSubKey( pPortalKey );
+			UTIL_SendClientCommandKVToPlayer( pMasterKey, pPlayer );
+
+			CReliableBroadcastRecipientFilter filter;
+			filter.AddAllPlayers();
+			filter.MakeReliable();
+			filter.AddRecipient( pPlayer );
+			UserMessageBegin( filter, "ScoreboardTempUpdate" );
+			MessageWriteLong( nPortals );
+			MessageWriteLong( nTime );
+			MessageEnd();
+		}
+	}
+}
+
+void ReadLeaderboard()
+{
+	const char *pszMapName = gpGlobals->mapname.ToCStr();
+
+	CFmtStrN<256> challenge_besttime( "challenge_besttime_%s", pszMapName );
+	KeyValues *pBestTimeKV = new KeyValues( challenge_besttime.Access() );
+	pBestTimeKV->SetInt( ":refresh", 1 );
+	pBestTimeKV->SetUint64( "besttime", 0xFFFFFFFFFFFFFFFFui64 );
+
+	CFmtStrN<256> challenge_portals;( "challenge_portals_%s", pszMapName );
+	KeyValues *pPortalsKV = new KeyValues( challenge_portals.Access() );
+	pPortalsKV->SetInt( ":refresh", 1 );
+	pPortalsKV->SetUint64( "portals", 0xFFFFFFFFFFFFFFFFui64 );
+	
+	KeyValues *pReadLeaderboardKV = new KeyValues( "read_leaderboard" );
+	pReadLeaderboardKV->AddSubKey( pBestTimeKV );
+	pReadLeaderboardKV->AddSubKey( pPortalsKV );
+	UTIL_SendClientCommandKVToPlayer( pReadLeaderboardKV );
+}
+
+CPortalStatsController *g_pPlayerPortalStatsController = NULL;

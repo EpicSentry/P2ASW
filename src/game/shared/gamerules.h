@@ -395,6 +395,11 @@ public:
 	virtual void UpdateGameplayStatsFromSteam( void ) { return; }
 
 	virtual edict_t *DoFindClientInPVS( edict_t *pEdict, unsigned char *pvs, unsigned pvssize );
+
+	// Saving
+
+	virtual bool IsSavingAllowed( void ) { return true; }
+
 #endif
 
 	virtual const char *GetGameTypeName( void ){ return NULL; }

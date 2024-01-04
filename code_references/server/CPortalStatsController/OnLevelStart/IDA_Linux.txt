@@ -1,0 +1,29 @@
+void __cdecl CPortalStatsController::OnLevelStart(CPortalStatsController *const this, inputdata_t *const inputdata)
+{
+  char v2; // al
+  CBasePlayer *LocalPlayer; // edx
+  CBaseEntity *EntityByName; // eax
+  const char *pszValue; // eax
+
+  if ( gpGlobals->maxClients <= 1 )
+  {
+    LocalPlayer = UTIL_GetLocalPlayer();
+  }
+  else
+  {
+    v2 = (*((int (__cdecl **)(CUtlCachedFileData<CModelSoundsCache> *))engine->_vptr_CUtlCachedFileData + 2))(engine);
+    LocalPlayer = 0;
+    if ( !v2 )
+      LocalPlayer = UTIL_GetListenServerHost();
+  }
+  if ( LocalPlayer->m_iBonusChallenge.m_Value > 0 )
+  {
+    EntityByName = CGlobalEntityList::FindEntityByName(&gEntList, 0, "@transition_script", 0, 0, 0, 0);
+    if ( EntityByName )
+      CBaseEntity::RunScript(EntityByName, "TransitionReady ()", " TransitionReady");
+  }
+  pszValue = inputdata->value._anon_0.iszVal.pszValue;
+  if ( inputdata->value.fieldType != FIELD_FLOAT )
+    pszValue = 0;
+  CPortalStatsController::LevelStart(this, *(float *)&pszValue);
+}

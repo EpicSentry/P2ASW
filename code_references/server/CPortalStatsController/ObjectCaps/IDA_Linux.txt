@@ -1,0 +1,8 @@
+int __cdecl CPortalStatsController::ObjectCaps(CPortalStatsController *const this)
+{
+  int result; // eax
+
+  result = CBaseEntity::ObjectCaps(this);
+  LOBYTE(result) = result & 0x7F;
+  return result;
+}

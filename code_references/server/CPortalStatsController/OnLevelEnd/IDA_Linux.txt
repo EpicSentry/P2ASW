@@ -1,0 +1,9 @@
+void __cdecl CPortalStatsController::OnLevelEnd(CPortalStatsController *const this, inputdata_t *const inputdata)
+{
+  const char *pszValue; // edx
+
+  pszValue = inputdata->value._anon_0.iszVal.pszValue;
+  if ( inputdata->value.fieldType != FIELD_FLOAT )
+    pszValue = 0;
+  CPortalStatsController::LevelEnd(this, *(float *)&pszValue);
+}

@@ -1,0 +1,35 @@
+void __cdecl CPortalStatsController::LevelStart(CPortalStatsController *const this, float flDisplayTime)
+{
+  char v2; // al
+  CBasePlayer *LocalPlayer; // edx
+
+  if ( gpGlobals->maxClients <= 1 )
+  {
+    LocalPlayer = UTIL_GetLocalPlayer();
+  }
+  else
+  {
+    v2 = (*((int (__cdecl **)(CUtlCachedFileData<CModelSoundsCache> *))engine->_vptr_CUtlCachedFileData + 2))(engine);
+    LocalPlayer = 0;
+    if ( !v2 )
+      LocalPlayer = UTIL_GetListenServerHost();
+  }
+  if ( LocalPlayer->m_iBonusChallenge.m_Value > 0 )
+    ReadLeaderboard();
+  this->m_flLeaderboardSpawnTime = 3.5;
+  CBaseEntity::SetNextThink(this, gpGlobals->curtime + 0.1, 0);
+  if ( !(*((unsigned __int8 (__cdecl **)(CGameRules *))g_pGameRules->_vptr_IGameSystem + 58))(g_pGameRules) )
+  {
+    if ( !(_BYTE)`guard variable for'CPortalStatsController::LevelStart(float)::map_wants_save_disable
+      && _cxa_guard_acquire(&`guard variable for'CPortalStatsController::LevelStart(float)::map_wants_save_disable) )
+    {
+      ConVarRef::ConVarRef(&CPortalStatsController::LevelStart(float)::map_wants_save_disable, "map_wants_save_disable");
+      _cxa_guard_release(&`guard variable for'CPortalStatsController::LevelStart(float)::map_wants_save_disable);
+    }
+    (*((void (__cdecl **)(IConVar *, int))CPortalStatsController::LevelStart(float)::map_wants_save_disable.m_pConVar->_vptr_IConVar
+     + 2))(
+      CPortalStatsController::LevelStart(float)::map_wants_save_disable.m_pConVar,
+      1);
+  }
+  this->m_flTransitionTime = -1.0;
+}

@@ -62,7 +62,7 @@
 // undefined
 //{
 
-#define ChallengePlayersReady()
+//#define ChallengePlayersReady()
 
 //}
 

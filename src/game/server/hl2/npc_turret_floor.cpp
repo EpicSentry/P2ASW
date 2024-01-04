@@ -352,10 +352,6 @@ void CNPC_FloorTurret::Spawn( void )
 	CreateVPhysics();
 
 	SetState(NPC_STATE_IDLE);
-
-
-	//HACK: The activate function isn't being called for some reason, so just do this:
-	Activate();
 }
 
 //-----------------------------------------------------------------------------

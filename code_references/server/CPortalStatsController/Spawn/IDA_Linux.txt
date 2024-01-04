@@ -1,0 +1,27 @@
+void __cdecl CPortalStatsController::Spawn(CPortalStatsController *const this)
+{
+  CGlobalVars *v1; // eax
+  const char *pszValue; // eax
+  const char *v3; // eax
+  variant_t p_Value; // [esp+2Ch] [ebp-1Ch] BYREF
+
+  CPointEntity::Spawn(this);
+  v1 = gpGlobals;
+  this->m_flTransitionTime = -1.0;
+  pszValue = v1->mapname.pszValue;
+  if ( !pszValue )
+    pszValue = "";
+  if ( !_V_strcmp(pszValue, "sp_a2_intro") )
+    goto LABEL_4;
+  v3 = gpGlobals->mapname.pszValue;
+  if ( !v3 )
+    v3 = "";
+  if ( !_V_strcmp(v3, "sp_a4_speed_tb_catch") )
+  {
+LABEL_4:
+    p_Value._anon_0.iVal = 1077936128;
+    p_Value.eVal.m_Index = -1;
+    p_Value.fieldType = FIELD_FLOAT;
+    CEventQueue::AddEvent(&g_EventQueue, this, "OnLevelStart", &p_Value, 3.0, this, this, 0);
+  }
+}

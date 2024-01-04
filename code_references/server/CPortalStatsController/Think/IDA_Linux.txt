@@ -1,0 +1,117 @@
+void __cdecl CPortalStatsController::Think(CPortalStatsController *const this)
+{
+  CBasePlayer *LocalPlayer; // eax
+  char v2; // al
+  CBasePlayer *ListenServerHost; // edx
+  char v4; // al
+  float m_flLeaderboardSpawnTime; // xmm0_4
+  float curtime; // xmm1_4
+  int v7; // esi
+  CBasePlayer *v8; // eax
+  CBasePlayer *v9; // ebx
+  float m_flTransitionTime; // xmm0_4
+  CBaseEntity *EntityByName; // eax
+  CBaseEntity *EntityByClassname; // ebx
+  const char *pszValue; // eax
+
+  if ( gpGlobals->maxClients <= 1 )
+  {
+    LocalPlayer = UTIL_GetLocalPlayer();
+  }
+  else
+  {
+    if ( (*((unsigned __int8 (__cdecl **)(CUtlCachedFileData<CModelSoundsCache> *))engine->_vptr_CUtlCachedFileData + 2))(engine) )
+      return;
+    LocalPlayer = UTIL_GetListenServerHost();
+  }
+  if ( LocalPlayer )
+  {
+    if ( gpGlobals->maxClients <= 1 )
+    {
+      ListenServerHost = UTIL_GetLocalPlayer();
+    }
+    else
+    {
+      v2 = (*((int (__cdecl **)(CUtlCachedFileData<CModelSoundsCache> *))engine->_vptr_CUtlCachedFileData + 2))(engine);
+      ListenServerHost = 0;
+      if ( !v2 )
+        ListenServerHost = UTIL_GetListenServerHost();
+    }
+    v4 = 0;
+    if ( ListenServerHost->m_iBonusChallenge.m_Value > 0
+      || (m_flTransitionTime = this->m_flTransitionTime, m_flTransitionTime == -1.0) )
+    {
+LABEL_9:
+      m_flLeaderboardSpawnTime = this->m_flLeaderboardSpawnTime;
+      if ( m_flLeaderboardSpawnTime < 0.0 )
+      {
+        if ( !v4 )
+          return;
+        curtime = gpGlobals->curtime;
+      }
+      else
+      {
+        curtime = gpGlobals->curtime;
+        if ( curtime > m_flLeaderboardSpawnTime && this->m_bPlayersReady )
+        {
+          if ( gpGlobals->maxClients > 0 )
+          {
+            v7 = 1;
+            do
+            {
+              v8 = UTIL_PlayerByIndex(v7);
+              v9 = v8;
+              if ( v8 && (*((unsigned __int8 (__cdecl **)(CBasePlayer *))v8->_vptr_IHandleEntity + 86))(v8) )
+              {
+                if ( LOBYTE(v9[1].m_flexWeight.m_Value[28]) )
+                  (*((void (__cdecl **)(CUtlCachedFileData<CModelSoundsCache> *, edict_t *, const char *))engine->_vptr_CUtlCachedFileData
+                   + 39))(
+                    engine,
+                    v9->m_Network.m_pPev,
+                    "+leaderboard 4");
+              }
+              ++v7;
+            }
+            while ( gpGlobals->maxClients >= v7 );
+          }
+          this->m_flLeaderboardSpawnTime = -1.0;
+          return;
+        }
+      }
+      CBaseEntity::SetNextThink(this, curtime + 0.1, 0);
+      return;
+    }
+    if ( gpGlobals->curtime <= m_flTransitionTime )
+    {
+LABEL_27:
+      v4 = 1;
+      goto LABEL_9;
+    }
+    EntityByName = CGlobalEntityList::FindEntityByName(&gEntList, 0, "@transition_script", 0, 0, 0, 0);
+    if ( !EntityByName )
+    {
+      EntityByName = CGlobalEntityList::FindEntityByName(&gEntList, 0, "script_check_finish_game", 0, 0, 0, 0);
+      if ( !EntityByName )
+      {
+        EntityByClassname = CGlobalEntityList::FindEntityByClassname(&gEntList, 0, "logic_script");
+        if ( !EntityByClassname )
+          goto LABEL_27;
+        while ( 1 )
+        {
+          pszValue = EntityByClassname->m_iName.m_Value.pszValue;
+          if ( !pszValue )
+            pszValue = "";
+          if ( V_stristr(pszValue, "transition_script") )
+            break;
+          EntityByClassname = CGlobalEntityList::FindEntityByClassname(&gEntList, EntityByClassname, "logic_script");
+          if ( !EntityByClassname )
+            goto LABEL_27;
+        }
+        EntityByName = EntityByClassname;
+      }
+    }
+    CBaseEntity::RunScript(EntityByName, "RealTransitionFromMap()", "CBaseEntity::RunScript");
+    this->m_flTransitionTime = -1.0;
+    UTIL_Remove(this);
+  }
+}

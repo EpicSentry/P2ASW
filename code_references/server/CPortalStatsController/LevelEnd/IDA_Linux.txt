@@ -1,0 +1,106 @@
+void __cdecl CPortalStatsController::LevelEnd(CPortalStatsController *const this, float flDisplayTime)
+{
+  CPortalStatsController *v2; // esi
+  char v3; // al
+  CBasePlayer *LocalPlayer; // edx
+  float v5; // xmm0_4
+  CGlobalVars *v6; // eax
+  int v7; // eax
+  int v8; // ebx
+  KeyValues *v9; // eax
+  char v10; // al
+  CBasePlayer *ListenServerHost; // edx
+  int v12; // ebx
+  CBasePlayer *v13; // eax
+  CBasePlayer *v14; // edi
+  CReliableBroadcastRecipientFilter filter; // [esp+20h] [ebp-38h] BYREF
+
+  v2 = this;
+  if ( gpGlobals->maxClients <= 1 )
+  {
+    LocalPlayer = UTIL_GetLocalPlayer();
+  }
+  else
+  {
+    v3 = (*((int (__cdecl **)(CUtlCachedFileData<CModelSoundsCache> *))engine->_vptr_CUtlCachedFileData + 2))(engine);
+    LocalPlayer = 0;
+    if ( !v3 )
+      LocalPlayer = UTIL_GetListenServerHost();
+  }
+  v5 = 0.0;
+  v6 = gpGlobals;
+  if ( LocalPlayer->m_iBonusChallenge.m_Value > 0 )
+  {
+    v7 = (*(int (__cdecl **)(IMatchFramework *))(*(_DWORD *)g_pMatchFramework + 48))(g_pMatchFramework);
+    v8 = v7;
+    if ( v7 )
+    {
+      if ( (*(int (__cdecl **)(int))(*(_DWORD *)v7 + 4))(v7) )
+      {
+        v9 = (KeyValues *)(*(int (__cdecl **)(int))(*(_DWORD *)v8 + 4))(v8);
+        if ( KeyValues::GetInt(v9, "game/sv_cheats", 0) )
+        {
+          CRecipientFilter::CRecipientFilter(&filter);
+          filter._vptr_IRecipientFilter = (int (**)(...))off_B986C8;
+          CRecipientFilter::AddAllPlayers(&filter);
+          filter._vptr_IRecipientFilter = (int (**)(...))off_BA41A8;
+          CRecipientFilter::MakeReliable(&filter);
+          CRecipientFilter::AddAllPlayers(&filter);
+          UserMessageBegin(&filter, "ChallengeModeCheatSession");
+          MessageEnd();
+          filter._vptr_IRecipientFilter = (int (**)(...))off_B986C8;
+          CRecipientFilter::~CRecipientFilter(&filter);
+LABEL_9:
+          v6 = gpGlobals;
+          v5 = flDisplayTime;
+          goto LABEL_10;
+        }
+      }
+      WriteLeaderboard();
+    }
+    if ( gpGlobals->maxClients <= 1 )
+    {
+      ListenServerHost = UTIL_GetLocalPlayer();
+    }
+    else
+    {
+      v10 = (*((int (__cdecl **)(CUtlCachedFileData<CModelSoundsCache> *))engine->_vptr_CUtlCachedFileData + 2))(engine);
+      ListenServerHost = 0;
+      if ( !v10 )
+        ListenServerHost = UTIL_GetListenServerHost();
+    }
+    if ( ListenServerHost->m_iBonusChallenge.m_Value <= 0 )
+      goto LABEL_9;
+    V_snprintf((char *)&filter, 32, "leaderboard_open %i", 1);
+    v6 = gpGlobals;
+    v5 = flDisplayTime;
+    if ( gpGlobals->maxClients > 0 )
+    {
+      v12 = 1;
+      do
+      {
+        v13 = UTIL_PlayerByIndex(v12);
+        v14 = v13;
+        if ( v13
+          && (*((unsigned __int8 (__cdecl **)(CBasePlayer *))v13->_vptr_IHandleEntity + 86))(v13)
+          && LOBYTE(v14[1].m_flexWeight.m_Value[28]) )
+        {
+          (*((void (**)(CUtlCachedFileData<CModelSoundsCache> *, edict_t *, const char *, ...))engine->_vptr_CUtlCachedFileData
+           + 39))(
+            engine,
+            v14->m_Network.m_pPev,
+            "%s",
+            (const char *)&filter);
+        }
+        v6 = gpGlobals;
+        ++v12;
+      }
+      while ( v12 <= gpGlobals->maxClients );
+      v2 = this;
+      v5 = flDisplayTime;
+    }
+  }
+LABEL_10:
+  v2->m_flTransitionTime = v5 + v6->curtime;
+  CBaseEntity::SetNextThink(v2, v6->curtime + 0.1, 0);
+}

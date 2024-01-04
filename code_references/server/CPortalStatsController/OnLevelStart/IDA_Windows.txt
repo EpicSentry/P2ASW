@@ -1,0 +1,28 @@
+void __thiscall CPortalStatsController::OnLevelStart(CPortalStatsController *this, inputdata_t *inputdata)
+{
+  CBasePlayer *LocalPlayer; // eax
+  CBaseEntity *EntityByName; // eax
+
+  if ( gpGlobals->maxClients <= 1 )
+  {
+    LocalPlayer = UTIL_GetLocalPlayer();
+  }
+  else if ( engine->IsDedicatedServer(engine) )
+  {
+    LocalPlayer = 0;
+  }
+  else
+  {
+    LocalPlayer = UTIL_GetListenServerHost();
+  }
+  if ( LocalPlayer->m_iBonusChallenge.m_Value > 0 )
+  {
+    EntityByName = CGlobalEntityList::FindEntityByName(&gEntList, 0, "@transition_script", 0, 0, 0, 0);
+    if ( EntityByName )
+      CBaseEntity::RunScript(EntityByName, "TransitionReady ()", " TransitionReady");
+  }
+  if ( inputdata->value.fieldType == FIELD_FLOAT )
+    CPortalStatsController::LevelStart(this, inputdata->value.flVal);
+  else
+    CPortalStatsController::LevelStart(this, 0.0);
+}

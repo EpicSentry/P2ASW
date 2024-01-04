@@ -1,0 +1,27 @@
+void __thiscall CPortalStatsController::Spawn(CPortalStatsController *this)
+{
+  const char *pszValue; // eax
+  const char *v3; // eax
+  variant_t v4; // [esp-14h] [ebp-3Ch]
+  unsigned int value_4; // [esp+18h] [ebp-10h]
+  float value_8; // [esp+1Ch] [ebp-Ch]
+
+  CPointEntity::Spawn(this);
+  this->m_flTransitionTime = FLOAT_N1_0;
+  pszValue = gpGlobals->mapname.pszValue;
+  if ( !pszValue )
+    pszValue = locale;
+  if ( !_V_strcmp(pszValue, "sp_a2_intro") )
+    goto LABEL_7;
+  v3 = gpGlobals->mapname.pszValue;
+  if ( !v3 )
+    v3 = locale;
+  if ( !_V_strcmp(v3, "sp_a4_speed_tb_catch") )
+  {
+LABEL_7:
+    v4.vecVal[2] = value_8;
+    *(_QWORD *)&v4.bVal = __PAIR64__(value_4, LODWORD(FLOAT_3_0));
+    *(_QWORD *)&v4.eVal.m_Index = 0x1FFFFFFFFi64;
+    CEventQueue::AddEvent(&g_EventQueue, this, "OnLevelStart", v4, 3.0, this, this, 0);
+  }
+}

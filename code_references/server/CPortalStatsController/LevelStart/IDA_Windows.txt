@@ -1,0 +1,31 @@
+void __thiscall CPortalStatsController::LevelStart(CPortalStatsController *this, float flDisplayTime)
+{
+  CBasePlayer *LocalPlayer; // eax
+
+  if ( gpGlobals->maxClients <= 1 )
+  {
+    LocalPlayer = UTIL_GetLocalPlayer();
+  }
+  else if ( engine->IsDedicatedServer(engine) )
+  {
+    LocalPlayer = 0;
+  }
+  else
+  {
+    LocalPlayer = UTIL_GetListenServerHost();
+  }
+  if ( LocalPlayer->m_iBonusChallenge.m_Value > 0 )
+    ReadLeaderboard();
+  this->m_flLeaderboardSpawnTime = LEADERBOARD_DELAY_SECONDS;
+  CBaseEntity::SetNextThink(this, gpGlobals->curtime + 0.1, 0);
+  if ( !g_pGameRules->IsSavingAllowed(g_pGameRules) )
+  {
+    if ( (_S12_34 & 1) == 0 )
+    {
+      _S12_34 |= 1u;
+      ConVarRef::ConVarRef(&map_wants_save_disable_1, "map_wants_save_disable");
+    }
+    map_wants_save_disable_1.m_pConVar->SetValue(map_wants_save_disable_1.m_pConVar, 1);
+  }
+  this->m_flTransitionTime = FLOAT_N1_0;
+}

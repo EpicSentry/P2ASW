@@ -1,0 +1,58 @@
+void __userpurge CPortalStatsController::LevelEnd(
+        CPortalStatsController *this@<ecx>,
+        bool a2@<dil>,
+        float flDisplayTime)
+{
+  CBasePlayer *LocalPlayer; // eax
+  IMatchSession *v5; // eax
+  IMatchSession *v6; // esi
+  KeyValues *v7; // eax
+  CGlobalVars *v8; // eax
+  CReliableBroadcastRecipientFilter filter; // [esp+10h] [ebp-20h] BYREF
+
+  if ( gpGlobals->maxClients <= 1 )
+  {
+    LocalPlayer = UTIL_GetLocalPlayer();
+  }
+  else if ( engine->IsDedicatedServer(engine) )
+  {
+    LocalPlayer = 0;
+  }
+  else
+  {
+    LocalPlayer = UTIL_GetListenServerHost();
+  }
+  if ( LocalPlayer->m_iBonusChallenge.m_Value <= 0 )
+  {
+    flDisplayTime = 0.0;
+    goto LABEL_14;
+  }
+  v5 = g_pMatchFramework->GetMatchSession(g_pMatchFramework);
+  v6 = v5;
+  if ( v5 )
+  {
+    if ( v5->GetSessionSettings(v5) )
+    {
+      v7 = v6->GetSessionSettings(v6);
+      if ( KeyValues::GetInt(v7, "game/sv_cheats", 0) )
+      {
+        CRecipientFilter::CRecipientFilter(&filter);
+        filter.__vftable = (CReliableBroadcastRecipientFilter_vtbl *)&CBroadcastRecipientFilter::`vftable';
+        CRecipientFilter::AddAllPlayers(&filter);
+        filter.__vftable = (CReliableBroadcastRecipientFilter_vtbl *)&CReliableBroadcastRecipientFilter::`vftable';
+        CRecipientFilter::MakeReliable((CFmtStrN<256> *)&filter);
+        CRecipientFilter::AddAllPlayers(&filter);
+        UserMessageBegin(&filter, "ChallengeModeCheatSession");
+        MessageEnd();
+        CRecipientFilter::~CRecipientFilter(&filter);
+        goto LABEL_14;
+      }
+    }
+    WriteLeaderboard();
+  }
+  ShowPortalLeaderboard(COERCE_FLOAT(1), a2);
+LABEL_14:
+  v8 = gpGlobals;
+  this->m_flTransitionTime = gpGlobals->curtime + flDisplayTime;
+  CBaseEntity::SetNextThink(this, v8->curtime + 0.1, 0);
+}

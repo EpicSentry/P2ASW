@@ -1,0 +1,10 @@
+void __userpurge CPortalStatsController::OnLevelEnd(
+        CPortalStatsController *this@<ecx>,
+        bool a2@<dil>,
+        inputdata_t *inputdata)
+{
+  if ( inputdata->value.fieldType == FIELD_FLOAT )
+    CPortalStatsController::LevelEnd(this, a2, inputdata->value.flVal);
+  else
+    CPortalStatsController::LevelEnd(this, a2, 0.0);
+}

@@ -1,0 +1,60 @@
+void ReadLeaderboard()
+{
+  KeyValues *v0; // eax
+  KeyValues *v1; // eax
+  KeyValues *v2; // ebx
+  KeyValues *v3; // esi
+  int v4; // eax
+  KeyValues *v5; // eax
+  KeyValues *v6; // edi
+  KeyValues *v7; // esi
+  int v8; // eax
+  KeyValues *v9; // eax
+  KeyValues *v10; // esi
+  CFmtStrN<256> v11; // [esp+Ch] [ebp-21Ch] BYREF
+  CFmtStrN<256> v12; // [esp+118h] [ebp-110h] BYREF
+  const char *mapName; // [esp+224h] [ebp-4h]
+
+  v0 = (KeyValues *)KeyValues::operator new(0x24u);
+  if ( v0 )
+  {
+    KeyValues::KeyValues(v0, "read_leaderboard");
+    v2 = v1;
+  }
+  else
+  {
+    v2 = 0;
+  }
+  mapName = gpGlobals->mapname.pszValue;
+  if ( !mapName )
+    mapName = locale;
+  v3 = (KeyValues *)KeyValues::operator new(0x24u);
+  if ( v3 )
+  {
+    CFmtStrN<256>::CFmtStrN<256>(&v12, "challenge_besttime_%s", mapName);
+    KeyValues::KeyValues(v3, (const char *)(v4 + 5));
+    v6 = v5;
+  }
+  else
+  {
+    v6 = 0;
+  }
+  KeyValues::SetInt(v6, ":refresh", 1);
+  KeyValues::SetUint64(v6, "besttime", 0xFFFFFFFFFFFFFFFFui64);
+  v7 = (KeyValues *)KeyValues::operator new(0x24u);
+  if ( v7 )
+  {
+    CFmtStrN<256>::CFmtStrN<256>(&v11, "challenge_portals_%s", mapName);
+    KeyValues::KeyValues(v7, (const char *)(v8 + 5));
+    v10 = v9;
+  }
+  else
+  {
+    v10 = 0;
+  }
+  KeyValues::SetInt(v10, ":refresh", 1);
+  KeyValues::SetUint64(v10, "portals", 0xFFFFFFFFFFFFFFFFui64);
+  KeyValues::AddSubKey(v2, v6);
+  KeyValues::AddSubKey(v2, v10);
+  UTIL_SendClientCommandKVToPlayer(v2, 0);
+}

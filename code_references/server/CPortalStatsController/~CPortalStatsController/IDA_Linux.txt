@@ -1,0 +1,6 @@
+void __cdecl CPortalStatsController::~CPortalStatsController(CPortalStatsController *const this)
+{
+  g_pPlayerPortalStatsController = 0;
+  this->_vptr_IHandleEntity = (int (**)(...))off_CB5348;
+  CBaseEntity::~CBaseEntity(this);
+}

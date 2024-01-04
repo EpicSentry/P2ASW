@@ -1,0 +1,111 @@
+void __thiscall CPortalStatsController::Think(CPortalStatsController *this)
+{
+  CBasePlayer *LocalPlayer; // eax
+  char v3; // bl
+  CBasePlayer *ListenServerHost; // eax
+  float m_flTransitionTime; // xmm0_4
+  CGlobalVars *v6; // eax
+  CBaseEntity *EntityByName; // eax
+  CBaseEntity *EntityByClassname; // esi
+  const char *pszValue; // eax
+  float m_flLeaderboardSpawnTime; // xmm0_4
+  int v11; // edi
+  CBasePlayer *v12; // eax
+  CBasePlayer *v13; // esi
+
+  if ( gpGlobals->maxClients <= 1 )
+  {
+    LocalPlayer = UTIL_GetLocalPlayer();
+  }
+  else
+  {
+    if ( engine->IsDedicatedServer(engine) )
+      return;
+    LocalPlayer = UTIL_GetListenServerHost();
+  }
+  if ( LocalPlayer )
+  {
+    v3 = 0;
+    if ( gpGlobals->maxClients <= 1 )
+    {
+      ListenServerHost = UTIL_GetLocalPlayer();
+    }
+    else if ( engine->IsDedicatedServer(engine) )
+    {
+      ListenServerHost = 0;
+    }
+    else
+    {
+      ListenServerHost = UTIL_GetListenServerHost();
+    }
+    if ( ListenServerHost->m_iBonusChallenge.m_Value <= 0 )
+    {
+      m_flTransitionTime = this->m_flTransitionTime;
+      if ( m_flTransitionTime != -1.0 )
+      {
+        v6 = gpGlobals;
+        v3 = 1;
+        if ( gpGlobals->curtime <= m_flTransitionTime )
+          goto LABEL_22;
+        EntityByName = CGlobalEntityList::FindEntityByName(&gEntList, 0, "@transition_script", 0, 0, 0, 0);
+        if ( EntityByName
+          || (EntityByName = CGlobalEntityList::FindEntityByName(&gEntList, 0, "script_check_finish_game", 0, 0, 0, 0)) != 0 )
+        {
+LABEL_33:
+          CBaseEntity::RunScript(EntityByName, "RealTransitionFromMap()", "CBaseEntity::RunScript");
+          this->m_flTransitionTime = FLOAT_N1_0;
+          UTIL_Remove(this);
+          return;
+        }
+        EntityByClassname = CGlobalEntityList::FindEntityByClassname(&gEntList, 0, "logic_script");
+        if ( EntityByClassname )
+        {
+          while ( 1 )
+          {
+            pszValue = EntityByClassname->m_iName.m_Value.pszValue;
+            if ( !pszValue )
+              pszValue = locale;
+            if ( V_stristr(pszValue, "transition_script") )
+              break;
+            EntityByClassname = CGlobalEntityList::FindEntityByClassname(&gEntList, EntityByClassname, "logic_script");
+            if ( !EntityByClassname )
+              goto LABEL_21;
+          }
+          EntityByName = EntityByClassname;
+          goto LABEL_33;
+        }
+      }
+    }
+LABEL_21:
+    v6 = gpGlobals;
+LABEL_22:
+    m_flLeaderboardSpawnTime = this->m_flLeaderboardSpawnTime;
+    if ( m_flLeaderboardSpawnTime < 0.0 )
+    {
+      if ( !v3 )
+        return;
+    }
+    else if ( v6->curtime > m_flLeaderboardSpawnTime && this->m_bPlayersReady )
+    {
+      v11 = 1;
+      if ( v6->maxClients >= 1 )
+      {
+        do
+        {
+          v12 = UTIL_PlayerByIndex(v11);
+          v13 = v12;
+          if ( v12 && v12->IsPlayer(v12) )
+          {
+            if ( LOBYTE(v13[1].m_flexWeight.m_Value[34]) )
+              engine->ClientCommand(engine, v13->m_Network.m_pPev, "+leaderboard 4");
+          }
+          ++v11;
+        }
+        while ( v11 <= gpGlobals->maxClients );
+      }
+      this->m_flLeaderboardSpawnTime = FLOAT_N1_0;
+      return;
+    }
+    CBaseEntity::SetNextThink(this, v6->curtime + 0.1, 0);
+  }
+}

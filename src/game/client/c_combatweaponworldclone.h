@@ -5,6 +5,7 @@
 
 class C_CombatWeaponClone : public C_BaseAnimating
 {
+	DECLARE_CLASS( C_CombatWeaponClone, C_BaseAnimating );
 public:
     C_CombatWeaponClone( C_BaseCombatWeapon *pWeaponParent );
 	~C_CombatWeaponClone();

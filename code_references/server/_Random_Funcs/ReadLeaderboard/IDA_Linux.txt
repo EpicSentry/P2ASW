@@ -1,0 +1,28 @@
+void ReadLeaderboard()
+{
+  KeyValues *v0; // esi
+  const char *pszValue; // ebx
+  KeyValues *v2; // edi
+  KeyValues *v3; // ebx
+  CFmtStrN<256> v4; // [esp+18h] [ebp-230h] BYREF
+  CFmtStrN<256> v5; // [esp+124h] [ebp-124h] BYREF
+
+  v0 = (KeyValues *)KeyValues::operator new(0x24u);
+  KeyValues::KeyValues(v0, "read_leaderboard");
+  pszValue = gpGlobals->mapname.pszValue;
+  if ( !pszValue )
+    pszValue = "";
+  CFmtStrN<256>::CFmtStrN(&v4, "challenge_besttime_%s", pszValue);
+  v2 = (KeyValues *)KeyValues::operator new(0x24u);
+  KeyValues::KeyValues(v2, v4.m_szBuf);
+  KeyValues::SetInt(v2, ":refresh", 1);
+  KeyValues::SetUint64(v2, "besttime", 0xFFFFFFFFFFFFFFFFLL);
+  CFmtStrN<256>::CFmtStrN(&v5, "challenge_portals_%s", pszValue);
+  v3 = (KeyValues *)KeyValues::operator new(0x24u);
+  KeyValues::KeyValues(v3, v5.m_szBuf);
+  KeyValues::SetInt(v3, ":refresh", 1);
+  KeyValues::SetUint64(v3, "portals", 0xFFFFFFFFFFFFFFFFLL);
+  KeyValues::AddSubKey(v0, v2);
+  KeyValues::AddSubKey(v0, v3);
+  UTIL_SendClientCommandKVToPlayer(v0, 0);
+}

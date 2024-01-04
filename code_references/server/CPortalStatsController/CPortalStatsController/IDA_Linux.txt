@@ -1,0 +1,8 @@
+void __cdecl CPortalStatsController::CPortalStatsController(CPortalStatsController *const this)
+{
+  CBaseEntity::CBaseEntity(this, 0);
+  this->_vptr_IHandleEntity = (int (**)(...))off_C91AA8;
+  this->m_flTransitionTime = -1.0;
+  this->m_flLeaderboardSpawnTime = -1.0;
+  this->m_bPlayersReady = 0;
+}

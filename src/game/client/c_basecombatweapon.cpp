@@ -151,7 +151,7 @@ void C_BaseCombatWeapon::OnDataChanged( DataUpdateType_t updateType )
 		//(*((void(__cdecl **)(C_CombatWeaponClone *))m_pWorldModelClone->_vptr_IHandleEntity + 11))(this->m_pWorldModelClone);
 		m_pWorldModelClone = NULL;
 		UpdateVisibility();
-	LABEL_9:
+
 		if (!m_pWorldModelClone)
 			return;
 		goto LABEL_10;
@@ -160,7 +160,9 @@ void C_BaseCombatWeapon::OnDataChanged( DataUpdateType_t updateType )
 	{
 		m_pWorldModelClone = new C_CombatWeaponClone( this );
 		UpdateVisibility();
-		goto LABEL_9;
+		
+		if (!m_pWorldModelClone)
+			return;
 	}
 LABEL_10:
 	m_pWorldModelClone->UpdateClone();
