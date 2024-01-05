@@ -1,0 +1,46 @@
+void __cdecl CFuncPortalDetector::CFuncPortalDetector(CFuncPortalDetector *const this)
+{
+  CFuncPortalDetector *v1; // eax
+
+  CBaseEntity::CBaseEntity(this, 0);
+  this->_vptr_IHandleEntity = (int (**)(...))off_C6EB88;
+  this->m_OnStartTouchPortal.m_Value._anon_0.iVal = 0;
+  this->m_OnStartTouchPortal.m_Value.eVal.m_Index = -1;
+  this->m_OnStartTouchPortal.m_Value.fieldType = FIELD_VOID;
+  this->m_OnStartTouchPortal1.m_Value._anon_0.iVal = 0;
+  this->m_OnStartTouchPortal1.m_Value.eVal.m_Index = -1;
+  this->m_OnStartTouchPortal1.m_Value.fieldType = FIELD_VOID;
+  this->m_OnStartTouchPortal2.m_Value._anon_0.iVal = 0;
+  this->m_OnStartTouchPortal2.m_Value.eVal.m_Index = -1;
+  this->m_OnStartTouchPortal2.m_Value.fieldType = FIELD_VOID;
+  this->m_OnStartTouchLinkedPortal.m_Value._anon_0.iVal = 0;
+  this->m_OnStartTouchLinkedPortal.m_Value.eVal.m_Index = -1;
+  this->m_OnStartTouchLinkedPortal.m_Value.fieldType = FIELD_VOID;
+  this->m_OnStartTouchBothLinkedPortals.m_Value._anon_0.iVal = 0;
+  this->m_OnStartTouchBothLinkedPortals.m_Value.eVal.m_Index = -1;
+  this->m_OnStartTouchBothLinkedPortals.m_Value.fieldType = FIELD_VOID;
+  this->m_OnEndTouchPortal.m_Value._anon_0.iVal = 0;
+  this->m_OnEndTouchPortal.m_Value.eVal.m_Index = -1;
+  this->m_OnEndTouchPortal.m_Value.fieldType = FIELD_VOID;
+  this->m_OnEndTouchPortal1.m_Value._anon_0.iVal = 0;
+  this->m_OnEndTouchPortal1.m_Value.eVal.m_Index = -1;
+  this->m_OnEndTouchPortal1.m_Value.fieldType = FIELD_VOID;
+  this->m_OnEndTouchPortal2.m_Value._anon_0.iVal = 0;
+  this->m_OnEndTouchPortal2.m_Value.eVal.m_Index = -1;
+  this->m_OnEndTouchPortal2.m_Value.fieldType = FIELD_VOID;
+  this->m_OnEndTouchLinkedPortal.m_Value._anon_0.iVal = 0;
+  this->m_OnEndTouchLinkedPortal.m_Value.eVal.m_Index = -1;
+  this->m_OnEndTouchLinkedPortal.m_Value.fieldType = FIELD_VOID;
+  this->m_OnEndTouchBothLinkedPortals.m_Value._anon_0.iVal = 0;
+  this->m_OnEndTouchBothLinkedPortals.m_Value.eVal.m_Index = -1;
+  this->m_OnEndTouchBothLinkedPortals.m_Value.fieldType = FIELD_VOID;
+  this->m_bActive = 0;
+  this->m_iLinkageGroupID = 0;
+  this->m_phTouchingPortals[0].m_Index = -1;
+  v1 = CEntityClassList<CFuncPortalDetector>::m_pClassList;
+  this->m_phTouchingPortals[1].m_Index = -1;
+  this->m_iTouchingPortalCount = 0;
+  this->m_bCheckAllIDs = 0;
+  this->m_pNext = v1;
+  CEntityClassList<CFuncPortalDetector>::m_pClassList = this;
+}

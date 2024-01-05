@@ -1,0 +1,21 @@
+void __thiscall CWeaponPortalgun::OpenProngs(CWeaponPortalgun *this, bool bOpenProngs)
+{
+  edict_t *m_pPev; // ecx
+
+  if ( this->m_bOpenProngs.m_Value != bOpenProngs )
+  {
+    if ( this->m_Network.m_TimerEvent.m_bRegistered )
+    {
+      *((_BYTE *)&this->m_Network + 76) |= 1u;
+    }
+    else
+    {
+      m_pPev = this->m_Network.m_pPev;
+      if ( m_pPev )
+        CBaseEdict::StateChanged(m_pPev, 0x5E4u);
+    }
+    this->m_bOpenProngs.m_Value = bOpenProngs;
+    CWeaponPortalgun::DoEffect(this, bOpenProngs + 1, 0);
+    this->SendWeaponAnim(this, !this->m_bOpenProngs.m_Value + 216);
+  }
+}

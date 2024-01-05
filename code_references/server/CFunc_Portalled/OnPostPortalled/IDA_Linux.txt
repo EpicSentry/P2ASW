@@ -1,0 +1,14 @@
+void __cdecl CFunc_Portalled::OnPostPortalled(CFunc_Portalled *const this, CBaseEntity *pOther, bool bDeparting)
+{
+  if ( bDeparting )
+  {
+    if ( !this->m_bFireOnDeparture || !this->m_bFireOnPlayer )
+      return;
+LABEL_7:
+    if ( (*((unsigned __int8 (__cdecl **)(CBaseEntity *))pOther->_vptr_IHandleEntity + 86))(pOther) )
+      COutputEvent::FireOutput(&this->m_OnEntityPostPortalled, pOther, this, 0.0);
+    return;
+  }
+  if ( this->m_bFireOnArrival && this->m_bFireOnPlayer )
+    goto LABEL_7;
+}

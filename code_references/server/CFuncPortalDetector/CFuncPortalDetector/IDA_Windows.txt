@@ -1,0 +1,43 @@
+void __thiscall CFuncPortalDetector::CFuncPortalDetector(CFuncPortalDetector *this)
+{
+  CBaseEntity::CBaseEntity(this, 0);
+  this->__vftable = (CFuncPortalDetector_vtbl *)&CFuncPortalDetector::`vftable';
+  this->m_OnStartTouchPortal.m_Value.iVal = 0;
+  this->m_OnStartTouchPortal.m_Value.eVal.m_Index = -1;
+  this->m_OnStartTouchPortal.m_Value.fieldType = FIELD_VOID;
+  this->m_OnStartTouchPortal1.m_Value.iVal = 0;
+  this->m_OnStartTouchPortal1.m_Value.eVal.m_Index = -1;
+  this->m_OnStartTouchPortal1.m_Value.fieldType = FIELD_VOID;
+  this->m_OnStartTouchPortal2.m_Value.iVal = 0;
+  this->m_OnStartTouchPortal2.m_Value.eVal.m_Index = -1;
+  this->m_OnStartTouchPortal2.m_Value.fieldType = FIELD_VOID;
+  this->m_OnStartTouchLinkedPortal.m_Value.iVal = 0;
+  this->m_OnStartTouchLinkedPortal.m_Value.eVal.m_Index = -1;
+  this->m_OnStartTouchLinkedPortal.m_Value.fieldType = FIELD_VOID;
+  this->m_OnStartTouchBothLinkedPortals.m_Value.iVal = 0;
+  this->m_OnStartTouchBothLinkedPortals.m_Value.eVal.m_Index = -1;
+  this->m_OnStartTouchBothLinkedPortals.m_Value.fieldType = FIELD_VOID;
+  this->m_OnEndTouchPortal.m_Value.iVal = 0;
+  this->m_OnEndTouchPortal.m_Value.eVal.m_Index = -1;
+  this->m_OnEndTouchPortal.m_Value.fieldType = FIELD_VOID;
+  this->m_OnEndTouchPortal1.m_Value.iVal = 0;
+  this->m_OnEndTouchPortal1.m_Value.eVal.m_Index = -1;
+  this->m_OnEndTouchPortal1.m_Value.fieldType = FIELD_VOID;
+  this->m_OnEndTouchPortal2.m_Value.iVal = 0;
+  this->m_OnEndTouchPortal2.m_Value.eVal.m_Index = -1;
+  this->m_OnEndTouchPortal2.m_Value.fieldType = FIELD_VOID;
+  this->m_OnEndTouchLinkedPortal.m_Value.iVal = 0;
+  this->m_OnEndTouchLinkedPortal.m_Value.eVal.m_Index = -1;
+  this->m_OnEndTouchLinkedPortal.m_Value.fieldType = FIELD_VOID;
+  this->m_OnEndTouchBothLinkedPortals.m_Value.iVal = 0;
+  this->m_OnEndTouchBothLinkedPortals.m_Value.eVal.m_Index = -1;
+  this->m_OnEndTouchBothLinkedPortals.m_Value.fieldType = FIELD_VOID;
+  this->m_bActive = 0;
+  this->m_iLinkageGroupID = 0;
+  this->m_phTouchingPortals[0].m_Index = -1;
+  this->m_phTouchingPortals[1].m_Index = -1;
+  this->m_iTouchingPortalCount = 0;
+  this->m_pNext = CEntityClassList<CFuncPortalDetector>::m_pClassList;
+  CEntityClassList<CFuncPortalDetector>::m_pClassList = this;
+  this->m_bCheckAllIDs = 0;
+}

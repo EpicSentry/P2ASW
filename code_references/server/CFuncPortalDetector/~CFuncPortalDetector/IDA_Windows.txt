@@ -1,0 +1,32 @@
+void __thiscall CFuncPortalDetector::~CFuncPortalDetector(CFuncPortalDetector *this)
+{
+  CFuncPortalDetector *v2; // eax
+  CFuncPortalDetector **p_m_pNext; // ecx
+
+  this->__vftable = (CFuncPortalDetector_vtbl *)&CFuncPortalDetector::`vftable';
+  v2 = CEntityClassList<CFuncPortalDetector>::m_pClassList;
+  p_m_pNext = &CEntityClassList<CFuncPortalDetector>::m_pClassList;
+  if ( CEntityClassList<CFuncPortalDetector>::m_pClassList )
+  {
+    while ( v2 != this )
+    {
+      p_m_pNext = &v2->m_pNext;
+      v2 = v2->m_pNext;
+      if ( !v2 )
+        goto LABEL_6;
+    }
+    *p_m_pNext = v2->m_pNext;
+  }
+LABEL_6:
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_OnEndTouchBothLinkedPortals);
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_OnEndTouchLinkedPortal);
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_OnEndTouchPortal2);
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_OnEndTouchPortal1);
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_OnEndTouchPortal);
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_OnStartTouchBothLinkedPortals);
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_OnStartTouchLinkedPortal);
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_OnStartTouchPortal2);
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_OnStartTouchPortal1);
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_OnStartTouchPortal);
+  CBaseEntity::~CBaseEntity(this);
+}

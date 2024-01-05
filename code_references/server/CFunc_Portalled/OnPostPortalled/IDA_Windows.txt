@@ -1,0 +1,11 @@
+void __thiscall CFunc_Portalled::OnPostPortalled(CFunc_Portalled *this, CBaseEntity *pOther, bool bDeparting)
+{
+  bool v4; // zf
+
+  if ( bDeparting )
+    v4 = !this->m_bFireOnDeparture;
+  else
+    v4 = !this->m_bFireOnArrival;
+  if ( !v4 && this->m_bFireOnPlayer && pOther->IsPlayer(pOther) )
+    COutputEvent::FireOutput(&this->m_OnEntityPostPortalled, pOther, this, 0.0);
+}

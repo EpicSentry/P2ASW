@@ -1,0 +1,12 @@
+void __cdecl CWeaponPortalgun::OpenProngs(CWeaponPortalgun *const this, bool bOpenProngs)
+{
+  if ( this->m_bOpenProngs.m_Value != bOpenProngs )
+  {
+    CBaseEntity::NetworkStateChanged(this, &this->m_bOpenProngs);
+    this->m_bOpenProngs.m_Value = bOpenProngs;
+    CWeaponPortalgun::DoEffect(this, 2 - !bOpenProngs, 0);
+    (*((void (__cdecl **)(CWeaponPortalgun *const, int))this->_vptr_IHandleEntity + 254))(
+      this,
+      !this->m_bOpenProngs.m_Value - 1 + 217);
+  }
+}

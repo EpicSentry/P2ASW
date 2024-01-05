@@ -1,0 +1,19 @@
+class CFunc_Portalled : public CFuncPortalDetector
+{
+public:
+	DECLARE_DATADESC();
+	CFunc_Portalled();
+	~CFunc_Portalled();
+	
+	COutputEvent m_OnEntityPrePortalled;
+	COutputEvent m_OnEntityPostPortalled;
+	
+	void OnPrePortalled( CBaseEntity *, bool );
+	void OnPostPortalled( CBaseEntity *, bool );
+
+protected:
+	void PortalPlacedInsideBounds( CProp_Portal * );
+	bool m_bFireOnPlayer;
+	bool m_bFireOnDeparture;
+	bool m_bFireOnArrival;
+};

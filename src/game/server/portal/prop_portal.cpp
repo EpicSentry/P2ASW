@@ -57,7 +57,7 @@ BEGIN_DATADESC( CProp_Portal )
 	DEFINE_KEYFIELD( m_bOldActivatedState,		FIELD_BOOLEAN,		"OldActivated" ),	
 	DEFINE_KEYFIELD( m_bIsPortal2,		FIELD_BOOLEAN,		"PortalTwo" ),
 
-	//DEFINE_FIELD( m_NotifyOnPortalled, FIELD_EHANDLE ),
+	DEFINE_FIELD( m_NotifyOnPortalled, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_hFiredByPlayer, FIELD_EHANDLE ),
 
 	DEFINE_SOUNDPATCH( m_pAmbientSound ),
@@ -522,24 +522,18 @@ void CProp_Portal::Activate( void )
 //-----------------------------------------------------------------------------
 void CProp_Portal::UpdatePortalDetectorsOnPortalMoved( void )
 {
-	//FIXME:
-	/*
 	for ( CFuncPortalDetector *pDetector = GetPortalDetectorList(); pDetector != NULL; pDetector = pDetector->m_pNext )
 	{
 		pDetector->UpdateOnPortalMoved( this );
 	}
-	*/
 }
 
 void CProp_Portal::UpdatePortalDetectorsOnPortalActivated( void )
 {
-	//FIXME:
-	/*
 	for ( CFuncPortalDetector *pDetector = GetPortalDetectorList(); pDetector != NULL; pDetector = pDetector->m_pNext )
 	{
 		pDetector->UpdateOnPortalActivated( this );
 	}
-	*/
 }
 
 void CProp_Portal::UpdatePortalLinkage( void )
@@ -646,8 +640,8 @@ void CProp_Portal::NewLocation( const Vector &vOrigin, const QAngle &qAngles )
 		((CProp_Portal *)m_hLinkedPortal.Get())->UpdatePortalDetectorsOnPortalActivated();
 	}
 
-	//if( m_NotifyOnPortalled && !m_NotifyOnPortalled->IsPortalTouchingDetector( this ) )
-	//	m_NotifyOnPortalled = NULL;
+	if( m_NotifyOnPortalled && !m_NotifyOnPortalled->IsPortalTouchingDetector( this ) )
+		m_NotifyOnPortalled = NULL;
 
 	if ( m_pAmbientSound )
 	{
@@ -673,27 +667,27 @@ void CProp_Portal::NewLocation( const Vector &vOrigin, const QAngle &qAngles )
 
 void CProp_Portal::PreTeleportTouchingEntity( CBaseEntity *pOther )
 {
-	/*
+
 	if( m_NotifyOnPortalled )
 		m_NotifyOnPortalled->OnPrePortalled( pOther, true );
 
 	CProp_Portal *pLinked = (CProp_Portal *)m_hLinkedPortal.Get();
 	if( pLinked->m_NotifyOnPortalled )
 		pLinked->m_NotifyOnPortalled->OnPrePortalled( pOther, false );
-		*/
+
 	BaseClass::PreTeleportTouchingEntity( pOther );
 }
 
 void CProp_Portal::PostTeleportTouchingEntity( CBaseEntity *pOther )
 {
-	/*
+
 	if( m_NotifyOnPortalled )
 		m_NotifyOnPortalled->OnPostPortalled( pOther, true );
 
 	CProp_Portal *pLinked = (CProp_Portal *)m_hLinkedPortal.Get();
 	if( pLinked->m_NotifyOnPortalled )
 		pLinked->m_NotifyOnPortalled->OnPostPortalled( pOther, false );
-		*/
+
 	BaseClass::PostTeleportTouchingEntity( pOther );
 }
 

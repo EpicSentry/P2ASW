@@ -1,0 +1,8 @@
+void __cdecl CFunc_Portalled::PortalPlacedInsideBounds(CFunc_Portalled *const this, CProp_Portal *pPortal)
+{
+  if ( this )
+    pPortal->m_NotifyOnPortalled.m_Index = *(_DWORD *)(*((int (__cdecl **)(CFunc_Portalled *const))this->_vptr_IHandleEntity
+                                                       + 3))(this);
+  else
+    pPortal->m_NotifyOnPortalled.m_Index = -1;
+}

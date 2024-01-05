@@ -14,10 +14,7 @@
 #include "baseanimating.h"
 #include "PortalSimulation.h"
 #include "portal_base2d.h"
-// FIXME:
-#if 0
 #include "../portal2/func_portalled.h"
-#endif
 
 // FIX ME
 #include "portal_shareddefs.h"
@@ -92,7 +89,7 @@ private:
 	PortalFizzleType_t		m_FizzleEffect;
 
 	CNetworkHandle( CBaseEntity, m_hFiredByPlayer );
-	//CHandle<CFunc_Portalled> m_NotifyOnPortalled; //an entity that forwards notifications of teleports to map logic entities
+	CHandle<CFunc_Portalled> m_NotifyOnPortalled; //an entity that forwards notifications of teleports to map logic entities
 
 public:
 	friend class CPropPortalTunnel;
@@ -101,7 +98,7 @@ public:
 	void SetFiredByPlayer( CBasePlayer *pPlayer );
 	inline CBasePlayer *GetFiredByPlayer( void ) const { return (CBasePlayer *)m_hFiredByPlayer.Get(); }
 
-	//inline void SetFuncPortalled( CFunc_Portalled *pPortalledEnt = NULL ) { m_NotifyOnPortalled = pPortalledEnt; }
+	inline void SetFuncPortalled( CFunc_Portalled *pPortalledEnt = NULL ) { m_NotifyOnPortalled = pPortalledEnt; }
 
 	static float			ms_DefaultPortalHalfWidth;
 	static float			ms_DefaultPortalHalfHeight;

@@ -17,6 +17,14 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
+CEntityClassList<CFuncPortalDetector> g_FuncPortalDetectorList;
+template <> CFuncPortalDetector *CEntityClassList<CFuncPortalDetector>::m_pClassList = NULL;
+
+CFuncPortalDetector* GetPortalDetectorList()
+{
+	return g_FuncPortalDetectorList.m_pClassList;
+}
+
 // Spawnflags
 #define SF_START_INACTIVE			0x01
 
@@ -27,6 +35,7 @@ BEGIN_DATADESC( CFuncPortalDetector )
 
 	DEFINE_FIELD( m_bActive, FIELD_BOOLEAN ),
 	DEFINE_KEYFIELD( m_iLinkageGroupID, FIELD_INTEGER, "LinkageGroupID" ),
+	DEFINE_KEYFIELD( m_bCheckAllIDs, FIELD_BOOLEAN, "CheckAllIDs" ),
 
 	// Inputs
 	DEFINE_INPUTFUNC( FIELD_VOID, "Disable", InputDisable ),
@@ -48,6 +57,22 @@ BEGIN_DATADESC( CFuncPortalDetector )
 
 END_DATADESC()
 
+
+CFuncPortalDetector::CFuncPortalDetector()
+{
+	m_bActive = false;
+	m_iLinkageGroupID = 0;
+	m_phTouchingPortals[0] = NULL;
+	m_phTouchingPortals[1] = NULL;
+	m_iTouchingPortalCount = 0;
+	m_bCheckAllIDs = false;
+	g_FuncPortalDetectorList.Insert( this );
+}
+
+CFuncPortalDetector::~CFuncPortalDetector()
+{
+	g_FuncPortalDetectorList.Remove( this );
+}
 
 void CFuncPortalDetector::Spawn()
 {
@@ -157,4 +182,134 @@ void CFuncPortalDetector::InputToggle( inputdata_t &inputdata )
 	m_bActive = !m_bActive;
 
 	SetActive(m_bActive);
+}
+
+
+void CFuncPortalDetector::NotifyPortalEvent( PortalEvent_t nEventType, CPortal_Base2D *pNotifier )
+{
+	if (nEventType == PORTALEVENT_FIZZLE)
+	{
+		CProp_Portal *pPropPortal = dynamic_cast<CProp_Portal*>( pNotifier );
+
+		UpdateOnPortalMoved( pPropPortal );
+	}
+}
+
+void CFuncPortalDetector::UpdateOnPortalMoved( CProp_Portal *pPortal )
+{
+
+	if ( m_bActive )
+	{
+		m_iLinkageGroupID = pPortal->GetLinkageGroup();
+
+		bool bIsTouchingPortalDetector = IsPortalTouchingDetector( pPortal );
+
+		Vector vMax, vMin;
+		Vector vBoxCenter;
+		Vector vBoxExtents;
+
+		if ( GetLinkageGroupID() != m_iLinkageGroupID && !m_bCheckAllIDs )
+			goto SKIP_BOX_CHECK;
+
+		CollisionProp()->WorldSpaceAABB( &vMin, &vMax );
+
+		vBoxCenter = vMax + vMin * 0.5;
+		vBoxExtents = vMax - vMin * 0.5;
+		
+		bool bWasTouchingPortalDetector = true;
+
+		if ( !UTIL_IsBoxIntersectingPortal( vBoxCenter, vBoxExtents, pPortal ) )
+		SKIP_BOX_CHECK:
+		bWasTouchingPortalDetector = false;
+
+		if ( ( bIsTouchingPortalDetector && !pPortal->IsActive() ) 
+			|| ( bIsTouchingPortalDetector && !bWasTouchingPortalDetector ) )
+		{
+			m_phTouchingPortals[pPortal->m_bIsPortal2] = NULL;
+			
+			--m_iTouchingPortalCount;
+			PortalRemovedFromInsideBounds( pPortal );
+		}
+		if ( bWasTouchingPortalDetector && !bIsTouchingPortalDetector )
+		{
+			m_phTouchingPortals[pPortal->m_bIsPortal2] = pPortal;
+
+			++m_iTouchingPortalCount;
+			PortalPlacedInsideBounds( pPortal );
+		}
+	}
+}
+
+void CFuncPortalDetector::PortalPlacedInsideBounds( CProp_Portal *pPortal )
+{
+	m_OnStartTouchPortal.FireOutput( pPortal, this );
+	if ( pPortal->m_bIsPortal2 )
+	{
+		m_OnStartTouchPortal2.FireOutput( pPortal, this );
+		if ( !pPortal->IsActivedAndLinked() )
+			goto ADD_LISTENER;
+	}
+	else
+	{
+		m_OnStartTouchPortal1.FireOutput( pPortal, this );
+		if ( !pPortal->IsActivedAndLinked() )
+			goto ADD_LISTENER;
+	}
+	m_OnStartTouchLinkedPortal.FireOutput( pPortal, this );
+	if ( m_iTouchingPortalCount == 2 )
+		m_OnStartTouchBothLinkedPortals.FireOutput( pPortal, this );
+ADD_LISTENER:
+	pPortal->AddPortalEventListener( this );
+}
+
+bool CFuncPortalDetector::IsPortalTouchingDetector( const CProp_Portal *pPortal )
+{
+	if ( !pPortal )
+		return false;
+
+	for ( int i = 0; i >= 2; i++ )
+	{
+		if ( i == 2 )
+			return false;
+
+		CBaseEntity *pTouchingPortal = m_phTouchingPortals[i];
+		if ( dynamic_cast<CProp_Portal*>( pTouchingPortal ) == pPortal )
+			break;
+	}
+
+	return true;
+}
+
+void CFuncPortalDetector::UpdateOnPortalActivated( CProp_Portal *pPortal )
+{
+	if ( IsPortalTouchingDetector( pPortal ) )
+	{
+		m_OnStartTouchLinkedPortal.FireOutput( pPortal, this );
+		if ( m_iTouchingPortalCount == 2 )
+			m_OnStartTouchBothLinkedPortals.FireOutput( pPortal, this );
+	}
+}
+
+void CFuncPortalDetector::PortalRemovedFromInsideBounds( CProp_Portal *pPortal )
+{
+	EHANDLE p_hListener; // [esp+1Ch] [ebp-Ch] BYREF
+
+	m_OnEndTouchPortal.FireOutput( pPortal, this );
+	if ( pPortal->m_bIsPortal2 )
+	{
+		m_OnEndTouchPortal2.FireOutput( pPortal, this );
+		if ( !pPortal->IsActivedAndLinked() )
+			goto REMOVE_LISTENER;
+	}
+	else
+	{
+		m_OnEndTouchPortal1.FireOutput( pPortal, this );
+		if ( !pPortal->IsActivedAndLinked() )
+			goto REMOVE_LISTENER;
+	}
+	m_OnEndTouchLinkedPortal.FireOutput( pPortal, this );
+	if ( !m_iTouchingPortalCount )
+		m_OnEndTouchBothLinkedPortals.FireOutput( pPortal, this );
+REMOVE_LISTENER:
+	pPortal->RemovePortalEventListener( this );
 }

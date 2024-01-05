@@ -151,6 +151,8 @@ $Project "Server (Portal 2)"
 				$File "portal2/point_laser_target.h"
 				$File "portal2\prop_tractorbeam.h"
 				$File "portal2\prop_tractorbeam.cpp"
+				$File "portal2\func_portalled.cpp"
+				$File "portal2\func_portalled.h"
 				
 				$File "$SRCDIR\game\shared\portal2\trigger_catapult_shared.cpp"
 				

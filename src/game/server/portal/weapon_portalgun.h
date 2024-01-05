@@ -98,13 +98,8 @@ public:
 
 	void InputChargePortal1( inputdata_t &inputdata );
 	void InputChargePortal2( inputdata_t &inputdata );
-	void InputFirePortal1( inputdata_t &inputdata );
-	void InputFirePortal2( inputdata_t &inputdata );
 	void FirePortalDirection1( inputdata_t &inputdata );
 	void FirePortalDirection2( inputdata_t &inputdata );
-
-	CNetworkHandle( CProp_Portal, m_hPrimaryPortal );
-	CNetworkHandle( CProp_Portal, m_hSecondaryPortal );
 
 	bool TraceFirePortal( const Vector &vTraceStart, const Vector &vDirection, bool bPortal2, PortalPlacedBy_t ePlacedBy, TracePortalPlacementInfo_t &placementInfo );
 	PortalPlacementResult_t FirePortal( bool bPortal2, Vector *pVector = 0 );
@@ -145,6 +140,8 @@ public:
 
 	int m_nStartingTeamNum;
 
+	bool	m_bShowingPotatos;
+
 protected:
 
 	void	StartEffects( void );	// Initialize all sprites and beams
@@ -159,9 +156,10 @@ protected:
 	void	DoEffectHolding( void );
 	void	DoEffectNone( void );
 
-	bool	m_bShowingPotatos;
-
 	CNetworkVar( int,	m_EffectState );		// Current state of the effects on the gun
+	
+	CNetworkHandle( CProp_Portal, m_hPrimaryPortal );
+	CNetworkHandle( CProp_Portal, m_hSecondaryPortal );
 
 public:
 

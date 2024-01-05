@@ -67,8 +67,6 @@ BEGIN_DATADESC( CWeaponPortalgun )
 
 	DEFINE_INPUTFUNC( FIELD_VOID, "ChargePortal1", InputChargePortal1 ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "ChargePortal2", InputChargePortal2 ),
-	DEFINE_INPUTFUNC( FIELD_VOID, "FirePortal1", InputFirePortal1 ),
-	DEFINE_INPUTFUNC( FIELD_VOID, "FirePortal2", InputFirePortal2 ),
 	DEFINE_INPUTFUNC( FIELD_VECTOR, "FirePortalDirection1", FirePortalDirection1 ),
 	DEFINE_INPUTFUNC( FIELD_VECTOR, "FirePortalDirection2", FirePortalDirection2 ),
 
@@ -306,15 +304,16 @@ void CWeaponPortalgun::SetPotatosOnPortalgun( bool bShowPotatos )
 
 void CWeaponPortalgun::OpenProngs( bool bOpenProngs )
 {
-	if ( m_bOpenProngs != bOpenProngs )
+	if ( m_bOpenProngs == bOpenProngs )
 	{
-		NetworkStateChanged();
-
-		m_bOpenProngs = bOpenProngs;
-		DoEffect( ( m_bOpenProngs ) ? ( EFFECT_HOLDING ) : ( EFFECT_READY ) );
-		// TODO:
-		SendWeaponAnim( ( m_bOpenProngs ) ? ( ACT_VM_PICKUP ) : ( ACT_VM_RELEASE ) );
+		return;
 	}
+
+	m_bOpenProngs = bOpenProngs;
+
+	DoEffect( ( m_bOpenProngs ) ? ( EFFECT_HOLDING ) : ( EFFECT_READY ) );
+
+	SendWeaponAnim( ( m_bOpenProngs ) ? ( ACT_VM_PICKUP ) : ( ACT_VM_RELEASE ) );
 }
 
 void CWeaponPortalgun::InputChargePortal1( inputdata_t &inputdata )
@@ -325,40 +324,6 @@ void CWeaponPortalgun::InputChargePortal1( inputdata_t &inputdata )
 void CWeaponPortalgun::InputChargePortal2( inputdata_t &inputdata )
 {
 	DispatchParticleEffect( "portal_2_charge", PATTACH_POINT_FOLLOW, this, "muzzle" );
-}
-
-void CWeaponPortalgun::InputFirePortal1( inputdata_t &inputdata )
-{
-	FirePortal( false );
-	m_iLastFiredPortal = 1;
-
-	CBaseCombatCharacter *pOwner = GetOwner();
-
-	if( pOwner && pOwner->IsPlayer() )
-	{
-		WeaponSound( SINGLE );
-	}
-	else
-	{
-		WeaponSound( SINGLE_NPC );
-	}
-}
-
-void CWeaponPortalgun::InputFirePortal2( inputdata_t &inputdata )
-{
-	FirePortal( true );
-	m_iLastFiredPortal = 2;
-
-	CBaseCombatCharacter *pOwner = GetOwner();
-
-	if( pOwner && pOwner->IsPlayer() )
-	{
-		WeaponSound( WPN_DOUBLE );
-	}
-	else
-	{
-		WeaponSound( DOUBLE_NPC );
-	}
 }
 
 void CWeaponPortalgun::FirePortalDirection1( inputdata_t &inputdata )
@@ -524,17 +489,7 @@ void CWeaponPortalgun::PortalPlaced( void )
 {
 	if ( PortalMPGameRules() )
 	{
-#if 0
-		int nNumPortalsPlaced = PortalMPGameRules()->GetNumPortalsPlaced();
-		int nNewValue = nNumPortalsPlaced + 1;
-
-		if ( nNumPortalsPlaced != nNewValue )
-		{
-			PortalMPGameRules()->PortalPlaced();
-		}
-#else
 		PortalMPGameRules()->PortalPlaced();
-#endif
 	}
 }
 
