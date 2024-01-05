@@ -33,6 +33,7 @@ You must compile the DLL's yourself. P2ASW is not a game, it is an SDK.
 - [MinHook](https://github.com/TsudaKageyu/minhook)<br>
 - [Silver-Bun](https://github.com/IcePixelx/silver-bun)<br>
 - [RubberWar](https://github.com/RubberWar/Portal-2)<br>
-All of our contributors.<br>
+- Wendy - Weaponizer model & textures<br>
+- All of our contributors.<br>
 
 P2ASW is not affiliated with Valve Corporation.<br>
