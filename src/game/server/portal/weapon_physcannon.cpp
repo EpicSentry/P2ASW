@@ -19,7 +19,9 @@
 #include "ndebugoverlay.h"
 #include "shake.h"
 #include "portal_player.h"
+#ifndef PORTAL2
 #include "hl2_player.h"
+#endif
 #include "beam_shared.h"
 #include "sprite.h"
 #include "util.h"
@@ -46,6 +48,8 @@
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
+
+#ifndef PORTAL2
 
 static const char *s_pWaitForUpgradeContext = "WaitForUpgrade";
 
@@ -1065,6 +1069,7 @@ void CGrabController::SetPortalPenetratingEntity( CBaseEntity *pPenetrated )
 {
 	m_PenetratedEntity = pPenetrated;
 }
+
 
 //-----------------------------------------------------------------------------
 // Player pickup controller
@@ -4742,18 +4747,21 @@ float PhysCannonGetHeldObjectMass( CBaseCombatWeapon *pActiveWeapon, IPhysicsObj
 	return mass;
 }
 
+#endif // PORTAL2
+
 CBaseEntity *PhysCannonGetHeldEntity( CBaseCombatWeapon *pActiveWeapon )
 {
+#ifndef PORTAL2
 	CWeaponPhysCannon *pCannon = dynamic_cast<CWeaponPhysCannon *>(pActiveWeapon);
 	if ( pCannon )
 	{
 		CGrabController &grab = pCannon->GetGrabController();
 		return grab.GetAttached();
 	}
-
+#endif
 	return NULL;
 }
-
+#ifndef PORTAL2
 CBaseEntity *GetPlayerHeldEntity( CBasePlayer *pPlayer )
 {
 	CBaseEntity *pObject = NULL;
@@ -4767,7 +4775,7 @@ CBaseEntity *GetPlayerHeldEntity( CBasePlayer *pPlayer )
 	return pObject;
 }
 
-CBasePlayer *GetPlayerHoldingEntity( CBaseEntity *pEntity )
+CBasePlayer *GetPlayerHoldingEntity( const CBaseEntity *pEntity )
 {
 	for( int i = 1; i <= gpGlobals->maxClients; ++i )
 	{
@@ -4789,18 +4797,19 @@ CGrabController *GetGrabControllerForPlayer( CBasePlayer *pPlayer )
 
 	return NULL;
 }
-
+#endif
 CGrabController *GetGrabControllerForPhysCannon( CBaseCombatWeapon *pActiveWeapon )
 {
+#ifndef PORTAL2
 	CWeaponPhysCannon *pCannon = dynamic_cast<CWeaponPhysCannon *>(pActiveWeapon);
 	if ( pCannon )
 	{
 		return &(pCannon->GetGrabController());
 	}
-
+#endif
 	return NULL;
 }
-
+#ifndef PORTAL2
 void GetSavedParamsForCarriedPhysObject( CGrabController *pGrabController, IPhysicsObject *pObject, float *pSavedMassOut, float *pSavedRotationalDampingOut )
 {
 	CBaseEntity *pHeld = pGrabController->m_attachedEntity;
@@ -4846,7 +4855,6 @@ void UpdateGrabControllerTargetPosition( CBasePlayer *pPlayer, Vector *vPosition
 	pGrabController->GetTargetPosition( vPosition, qAngles );
 }
 
-
 bool PhysCannonAccountableForObject( CBaseCombatWeapon *pPhysCannon, CBaseEntity *pObject )
 {
 	CWeaponPhysCannon *pCannon = dynamic_cast<CWeaponPhysCannon *>(pPhysCannon);
@@ -4875,3 +4883,4 @@ void GrabController_SetPortalPenetratingEntity( CGrabController *pController, CB
 {
 	pController->SetPortalPenetratingEntity( pPenetrated );
 }
+#endif

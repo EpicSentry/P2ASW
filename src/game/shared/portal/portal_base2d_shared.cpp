@@ -12,14 +12,12 @@
 #include "tier1/callqueue.h"
 #include "debugoverlay_shared.h"
 #include "collisionutils.h"
-#include "portal_grabcontroller_shared.h"
 
 #if defined( CLIENT_DLL )
 #include "c_portal_player.h"
 #else
 #include "portal_player.h"
 #include "portal_physics_collisionevent.h"
-#include "projectedwallentity.h"
 #endif
 
 #ifdef CLIENT_DLL
@@ -27,9 +25,9 @@
 #include "prediction.h"
 #else
 #include "env_debughistory.h"
+#include "portal/weapon_physcannon.h"
 #include "physics_bone_follower.h"
-//TODO
-//#include "projectedwallentity.h"
+#include "projectedwallentity.h"
 #include "portal_physics_collisionevent.h"
 #endif
 

@@ -30,7 +30,7 @@
 	#include "portal_player.h"
 	#include "globalstate.h"
 	#include "ai_basenpc.h"
-	#include "portal_grabcontroller_shared.h"
+	#include "portal/weapon_physcannon.h"
 	#include "props.h"		// For props flags used in making the portal weight box
 	#include "datacache/imdlcache.h"	// For precaching box model
 	#include "vscript_server.h"

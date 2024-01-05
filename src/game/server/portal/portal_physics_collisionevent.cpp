@@ -10,7 +10,7 @@
 #include "physicsshadowclone.h"
 #include "prop_combine_ball.h"
 #include "portal_player.h"
-#include "portal_grabcontroller_shared.h" //grab controller
+#include "portal/weapon_physcannon.h" //grab controller
 
 
 #define DEBUG_COLLISION_RULES 0
@@ -274,8 +274,8 @@ int CPortal_CollisionEvent::ShouldSolvePenetration( IPhysicsObject *pObj0, IPhys
 		{
 			CGrabController *pGrabController = GetGrabControllerForPlayer( pHoldingPlayer );
 
-			//if ( !pGrabController )
-			//	pGrabController = GetGrabControllerForPhysCannon( pHoldingPlayer->GetActiveWeapon() );
+			if ( !pGrabController )
+				pGrabController = GetGrabControllerForPhysCannon( pHoldingPlayer->GetActiveWeapon() );
 
 			Assert( pGrabController );
 			if( pGrabController )

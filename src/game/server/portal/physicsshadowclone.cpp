@@ -12,7 +12,7 @@
 #include "trains.h"
 #include "props.h"
 #include "model_types.h"
-#include "portal_grabcontroller_shared.h" //grab controllers
+#include "portal/weapon_physcannon.h" //grab controllers
 
 #include "PortalSimulation.h"
 
@@ -427,8 +427,8 @@ static void FullSyncPhysicsObject( IPhysicsObject *pSource, IPhysicsObject *pDes
 		{
 			pGrabController = GetGrabControllerForPlayer( pHoldingPlayer );
 
-			//if ( !pGrabController )
-			//	pGrabController = GetGrabControllerForPhysCannon( pHoldingPlayer->GetActiveWeapon() );
+			if ( !pGrabController )
+				pGrabController = GetGrabControllerForPhysCannon( pHoldingPlayer->GetActiveWeapon() );
 		}
 
 		AssertMsg( pGrabController, "Physics object is held, but we can't find the holding controller." );

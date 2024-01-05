@@ -28,7 +28,7 @@ float PhysCannonGetHeldObjectMass( CBaseCombatWeapon *pActiveWeapon, IPhysicsObj
 
 CBaseEntity *PhysCannonGetHeldEntity( CBaseCombatWeapon *pActiveWeapon );
 CBaseEntity *GetPlayerHeldEntity( CBasePlayer *pPlayer );
-CBasePlayer *GetPlayerHoldingEntity( CBaseEntity *pEntity );
+CBasePlayer *GetPlayerHoldingEntity( const CBaseEntity *pEntity );
 
 CGrabController *GetGrabControllerForPlayer( CBasePlayer *pPlayer );
 CGrabController *GetGrabControllerForPhysCannon( CBaseCombatWeapon *pActiveWeapon );

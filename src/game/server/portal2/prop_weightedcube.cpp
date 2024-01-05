@@ -10,8 +10,8 @@
 #include "ai_utils.h"
 #include "physics_saverestore.h"
 #include "phys_controller.h"
-#include "prop_portal.h"
-#include "portal_grabcontroller_shared.h"
+#include "portal_base2d.h"
+#include "portal/weapon_physcannon.h"
 #include "datacache/imdlcache.h"
 #include "prop_weightedcube.h"
 #include "portal_player.h"
@@ -21,9 +21,7 @@
 #include "portal_gamestats.h"
 #include "saverestore_utlvector.h"
 #include "trigger_portal_cleanser.h"
-#ifdef PORTAL_MP
 #include "portal_mp_gamerules.h"
-#endif
 #include "cvisibilitymonitor.h"
 
 ConVar reflector_cube_disabled_think_rate( "reflector_cube_disabled_think_rate", "0.1f", FCVAR_DEVELOPMENTONLY, "The rate at which the cube should think when it is disabled." );

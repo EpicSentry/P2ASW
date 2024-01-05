@@ -44,7 +44,7 @@
 #endif // HL2_EPISODIC
 
 #ifdef PORTAL2
-#include "portal_grabcontroller_shared.h"
+#include "portal/weapon_physcannon.h"
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!

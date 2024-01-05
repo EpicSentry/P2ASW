@@ -13,8 +13,8 @@
 #endif
 #include "paintable_entity.h"
 
-#if !defined( CLIENT_DLL ) && defined( PORTAL2 )
-#include "portal_grabcontroller_shared.h"
+#ifndef CLIENT_DLL
+#include "portal/weapon_physcannon.h"
 #endif
 
 #ifdef PORTAL2

@@ -2872,27 +2872,11 @@ float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoi
 
 	Vector vEntitySpaceContactPoint;
 	pBrushEntity->WorldToEntitySpace( contactPoint, &vEntitySpaceContactPoint );
-
-	// Doesn't exist in Alien Swarm engine
-	//if ( !engine->SpherePaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, power, flPaintRadius, flAlphaPercent ) )
-	//	return 0.0f;
 	
 	Color color = MapPowerToColor( power );
 
-	//engine->TracePaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, flPaintRadius, color );
-	
-	// We need to run this twice to make sure we have 2 color values.
 	engine->PaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, color, flPaintRadius );
 
-#if 0
-#ifdef GAME_DLL
-	Warning("(server)Pre Painted Color: %i %i %i %i\n", preColor.r(), preColor.b(), preColor.g(), preColor.a());
-	Warning("(server)Post Painted Color: %i %i %i %i\n", color.r(), preColor.b(), color.g(), color.a());
-#else
-	Warning("(client)Pre Painted Color: %i %i %i %i\n", preColor.r(), preColor.b(), preColor.g(), preColor.a());
-	Warning("(client)Post Painted Color: %i %i %i %i\n", color.r(), preColor.b(), color.g(), color.a());
-#endif
-#endif
 #ifdef GAME_DLL
 	if ( pTraceData )
 		AddPaintDataToMemory( *pTraceData );
@@ -2902,9 +2886,9 @@ float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoi
 }
 
 
-Color GetAveragePaintColorFromVector( CUtlVector<Color> &color )
+Color GetAveragePaintColorFromVector( CUtlVector<Color> &colors )
 {
-	if ( color.Count() == 0 )
+	if ( colors.Count() == 0 )
 		return Color( 0, 0, 0, 0 );
 
 	int r = 0;
@@ -2913,22 +2897,22 @@ Color GetAveragePaintColorFromVector( CUtlVector<Color> &color )
 	int a = 0;
 	
 	// We really need to get these power colors
-	for (int i = 0; i < color.Count(); ++i)
+	for (int i = 0; i < colors.Count(); ++i)
 	{
-		Color tColor = color.Element(i);
+		Color color = colors.Element(i);
 		// Add up all values
-		r += tColor.r();
-		g += tColor.g();
-		b += tColor.b();
-		a += tColor.a();
+		r += color.r();
+		g += color.g();
+		b += color.b();
+		a += color.a();
 		
 	}
 
 	// Get the average
-	r = r / color.Count();
-	g = g / color.Count();
-	b = b / color.Count();
-	a = a / color.Count();
+	r = r / colors.Count();
+	g = g / colors.Count();
+	b = b / colors.Count();
+	a = a / colors.Count();
 	
 	Assert( r >= 0 && r <= 255 );
 	Assert( b >= 0 && b <= 255 );
