@@ -197,18 +197,18 @@ void CFuncPortalDetector::NotifyPortalEvent( PortalEvent_t nEventType, CPortal_B
 
 void CFuncPortalDetector::UpdateOnPortalMoved( CProp_Portal *pPortal )
 {
-
 	if ( m_bActive )
 	{
+		Msg( "UpdateOnPortalMoved: %s\n", GetDebugName() );
 		m_iLinkageGroupID = pPortal->GetLinkageGroup();
 
-		bool bIsTouchingPortalDetector = IsPortalTouchingDetector( pPortal );
+		bool bWasTouchingPortalDetector = IsPortalTouchingDetector( pPortal );
 
 		Vector vMax, vMin;
 		Vector vBoxCenter;
 		Vector vBoxExtents;
 
-		if ( GetLinkageGroupID() != m_iLinkageGroupID && !m_bCheckAllIDs )
+		if ( GetLinkageGroupID() != pPortal->GetLinkageGroup() && !m_bCheckAllIDs )
 			goto SKIP_BOX_CHECK;
 
 		CollisionProp()->WorldSpaceAABB( &vMin, &vMax );
@@ -216,24 +216,25 @@ void CFuncPortalDetector::UpdateOnPortalMoved( CProp_Portal *pPortal )
 		vBoxCenter = vMax + vMin * 0.5;
 		vBoxExtents = vMax - vMin * 0.5;
 		
-		bool bWasTouchingPortalDetector = true;
+		bool bIsTouchingPortalDetector = true;
 
 		if ( !UTIL_IsBoxIntersectingPortal( vBoxCenter, vBoxExtents, pPortal ) )
-		SKIP_BOX_CHECK:
-		bWasTouchingPortalDetector = false;
+		{
+			SKIP_BOX_CHECK:
+			bIsTouchingPortalDetector = false;
+		}
 
-		if ( ( bIsTouchingPortalDetector && !pPortal->IsActive() ) 
-			|| ( bIsTouchingPortalDetector && !bWasTouchingPortalDetector ) )
+		if ( ( bWasTouchingPortalDetector && !pPortal->IsActive() ) 
+			|| ( bWasTouchingPortalDetector && !bIsTouchingPortalDetector ) )
 		{
 			m_phTouchingPortals[pPortal->m_bIsPortal2] = NULL;
 			
 			--m_iTouchingPortalCount;
 			PortalRemovedFromInsideBounds( pPortal );
 		}
-		if ( bWasTouchingPortalDetector && !bIsTouchingPortalDetector )
+		if ( bIsTouchingPortalDetector && !bWasTouchingPortalDetector )
 		{
 			m_phTouchingPortals[pPortal->m_bIsPortal2] = pPortal;
-
 			++m_iTouchingPortalCount;
 			PortalPlacedInsideBounds( pPortal );
 		}
@@ -260,6 +261,8 @@ void CFuncPortalDetector::PortalPlacedInsideBounds( CProp_Portal *pPortal )
 		m_OnStartTouchBothLinkedPortals.FireOutput( pPortal, this );
 ADD_LISTENER:
 	pPortal->AddPortalEventListener( this );
+
+	Msg( "PortalPlacedInsideBounds: %s\n", GetDebugName() );
 }
 
 bool CFuncPortalDetector::IsPortalTouchingDetector( const CProp_Portal *pPortal )
