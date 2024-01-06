@@ -199,7 +199,6 @@ void CFuncPortalDetector::UpdateOnPortalMoved( CProp_Portal *pPortal )
 {
 	if ( m_bActive )
 	{
-		Msg( "UpdateOnPortalMoved: %s\n", GetDebugName() );
 		m_iLinkageGroupID = pPortal->GetLinkageGroup();
 
 		bool bWasTouchingPortalDetector = IsPortalTouchingDetector( pPortal );
@@ -213,8 +212,8 @@ void CFuncPortalDetector::UpdateOnPortalMoved( CProp_Portal *pPortal )
 
 		CollisionProp()->WorldSpaceAABB( &vMin, &vMax );
 
-		vBoxCenter = vMax + vMin * 0.5;
-		vBoxExtents = vMax - vMin * 0.5;
+		vBoxCenter = ( vMax + vMin ) * 0.5;
+		vBoxExtents = ( vMax - vMin ) * 0.5;
 		
 		bool bIsTouchingPortalDetector = true;
 
@@ -232,6 +231,7 @@ void CFuncPortalDetector::UpdateOnPortalMoved( CProp_Portal *pPortal )
 			--m_iTouchingPortalCount;
 			PortalRemovedFromInsideBounds( pPortal );
 		}
+
 		if ( bIsTouchingPortalDetector && !bWasTouchingPortalDetector )
 		{
 			m_phTouchingPortals[pPortal->m_bIsPortal2] = pPortal;
@@ -261,8 +261,6 @@ void CFuncPortalDetector::PortalPlacedInsideBounds( CProp_Portal *pPortal )
 		m_OnStartTouchBothLinkedPortals.FireOutput( pPortal, this );
 ADD_LISTENER:
 	pPortal->AddPortalEventListener( this );
-
-	Msg( "PortalPlacedInsideBounds: %s\n", GetDebugName() );
 }
 
 bool CFuncPortalDetector::IsPortalTouchingDetector( const CProp_Portal *pPortal )
@@ -270,17 +268,13 @@ bool CFuncPortalDetector::IsPortalTouchingDetector( const CProp_Portal *pPortal 
 	if ( !pPortal )
 		return false;
 
-	for ( int i = 0; i >= 2; i++ )
+	for ( int i = 0; i < 2; i++ )
 	{
-		if ( i == 2 )
-			return false;
-
-		CBaseEntity *pTouchingPortal = m_phTouchingPortals[i];
-		if ( dynamic_cast<CProp_Portal*>( pTouchingPortal ) == pPortal )
-			break;
+		if ( dynamic_cast<CProp_Portal*>( m_phTouchingPortals[i].Get() ) == pPortal )
+			return true;
 	}
 
-	return true;
+	return false;
 }
 
 void CFuncPortalDetector::UpdateOnPortalActivated( CProp_Portal *pPortal )
