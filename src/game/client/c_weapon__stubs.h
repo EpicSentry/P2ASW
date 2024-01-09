@@ -32,8 +32,8 @@
 	private:														\
 		C_##className( const C_##className & );						\
 	};																\
-	STUB_WEAPON_CLASS_IMPLEMENT( entityName, C_##className );		\
 	IMPLEMENT_CLIENTCLASS_DT( C_##className, DT_##className, C##className )	\
-	END_RECV_TABLE()
+	END_RECV_TABLE()														\
+	STUB_WEAPON_CLASS_IMPLEMENT( entityName, C_##className );
 
 #endif // C_WEAPON__STUBS_H
