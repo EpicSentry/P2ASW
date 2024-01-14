@@ -1,0 +1,25 @@
+void __thiscall CWeaponPortalgun::OnPickedUp(CWeaponPortalgun *this, CBaseCombatCharacter *pNewOwner)
+{
+  edict_t *m_pPev; // eax
+  const CProp_Portal *Portal; // eax
+  const CProp_Portal *v5; // eax
+  CWeaponPortalgun_vtbl *v6; // ebx
+  int TeamNumber; // eax
+
+  if ( g_pGameRules->IsMultiplayer(g_pGameRules) && pNewOwner && pNewOwner->IsPlayer(pNewOwner) )
+  {
+    m_pPev = pNewOwner->m_Network.m_pPev;
+    if ( m_pPev )
+      m_pPev -= (int)gpGlobals->pEdicts;
+    this->m_iPortalLinkageGroupID = (unsigned __int8)m_pPev;
+  }
+  Portal = CProp_Portal::FindPortal(this->m_iPortalLinkageGroupID, 0, 1);
+  CNetworkHandleBase<CProp_Portal,CWeaponPortalgun::NetworkVar_m_hPrimaryPortal>::Set(&this->m_hPrimaryPortal, Portal);
+  v5 = CProp_Portal::FindPortal(this->m_iPortalLinkageGroupID, 1, 1);
+  CNetworkHandleBase<CProp_Portal,CWeaponPortalgun::NetworkVar_m_hSecondaryPortal>::Set(&this->m_hSecondaryPortal, v5);
+  v6 = this->__vftable;
+  TeamNumber = CBaseEntity::GetTeamNumber(pNewOwner);
+  v6->ChangeTeam(this, TeamNumber);
+  CBaseEntity::EmitSound(this, "Portal.PortalgunActivate", 0.0, 0);
+  CBaseCombatWeapon::OnPickedUp(this, pNewOwner);
+}

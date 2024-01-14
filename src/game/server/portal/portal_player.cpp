@@ -3910,8 +3910,6 @@ void CPortal_Player::UpdateVMGrab( CBaseEntity *pEntity )
 						m_bUseVMGrab = false;
 						return;
 					}
-					// TODO: Fully implement laser code
-#if 0
 					else
 					{
 						// Check it's distance to each laser line so the depth renders properly when the laser is between the player and cube
@@ -3936,7 +3934,6 @@ void CPortal_Player::UpdateVMGrab( CBaseEntity *pEntity )
 							}
 						}
 					}
-#endif
 				}
 
 				// Multiplayer uses VM otherwise

@@ -1,0 +1,153 @@
+void __thiscall CWeaponPortalgun::GunEffectsThink(CWeaponPortalgun *this)
+{
+  CBaseCombatCharacter *Owner; // eax
+  CBasePlayer *pPlayer; // edi
+  CNetworkVarBase<int,CBaseAnimating::NetworkVar_m_nSkin> *p_m_nSkin; // esi
+  edict_t *m_pPev; // ecx
+  edict_t *v6; // ecx
+  int m_Value; // esi
+  float fEffectsMaxSize1; // xmm0_4
+  float fEffectsMinSize; // xmm2_4
+  float iNewMaxSize1; // xmm0_4
+  edict_t *v11; // ecx
+  edict_t *v12; // ecx
+  float v13; // xmm0_4
+  float iNewMaxSize2; // xmm0_4
+  edict_t *v15; // ecx
+  edict_t *v16; // ecx
+
+  if ( !this->PreThink(this) )
+  {
+    CBaseEntity::ThinkSet(
+      this,
+      (void (__thiscall *)(CBaseEntity *))CWeaponPortalgun::GunEffectsThink,
+      gpGlobals->curtime + 0.1,
+      CWeaponPortalgun::s_szGunEffectsThinkContext);
+    Owner = CBaseCombatWeapon::GetOwner(this);
+    pPlayer = (CBasePlayer *)Owner;
+    if ( Owner )
+    {
+      if ( Owner->IsPlayer(Owner) )
+      {
+        if ( CBasePlayer::GetViewModel(pPlayer, 0) && g_pGameRules->IsMultiplayer(g_pGameRules) )
+        {
+          p_m_nSkin = &this->m_nSkin;
+          if ( CBaseEntity::GetTeamNumber(pPlayer) == 2 )
+          {
+            if ( p_m_nSkin->m_Value != 2 )
+            {
+              if ( this->m_Network.m_TimerEvent.m_bRegistered )
+              {
+                *((_BYTE *)&this->m_Network + 76) |= 1u;
+                p_m_nSkin->m_Value = 2;
+              }
+              else
+              {
+                m_pPev = this->m_Network.m_pPev;
+                if ( m_pPev )
+                  CBaseEdict::StateChanged(m_pPev, 0x37Cu);
+                p_m_nSkin->m_Value = 2;
+              }
+            }
+          }
+          else if ( p_m_nSkin->m_Value != 1 )
+          {
+            if ( this->m_Network.m_TimerEvent.m_bRegistered )
+            {
+              *((_BYTE *)&this->m_Network + 76) |= 1u;
+            }
+            else
+            {
+              v6 = this->m_Network.m_pPev;
+              if ( v6 )
+                CBaseEdict::StateChanged(v6, 0x37Cu);
+            }
+            p_m_nSkin->m_Value = 1;
+          }
+          m_Value = p_m_nSkin->m_Value;
+          CBasePlayer::GetViewModel(pPlayer, 0)->m_nSkin.m_Value = m_Value;
+        }
+        fEffectsMaxSize1 = this->m_fEffectsMaxSize1.m_Value;
+        fEffectsMinSize = FLOAT_4_0;
+        if ( fEffectsMaxSize1 > 4.0 )
+        {
+          iNewMaxSize1 = fEffectsMaxSize1 - (float)(gpGlobals->frametime * 400.0);
+          if ( this->m_fEffectsMaxSize1.m_Value != iNewMaxSize1 )
+          {
+            if ( this->m_Network.m_TimerEvent.m_bRegistered )
+            {
+              *((_BYTE *)&this->m_Network + 76) |= 1u;
+            }
+            else
+            {
+              v11 = this->m_Network.m_pPev;
+              if ( v11 )
+              {
+                CBaseEdict::StateChanged(v11, 0x608u);
+                fEffectsMinSize = FLOAT_4_0;
+              }
+            }
+            this->m_fEffectsMaxSize1.m_Value = iNewMaxSize1;
+          }
+          if ( fEffectsMinSize > this->m_fEffectsMaxSize1.m_Value )
+          {
+            if ( this->m_Network.m_TimerEvent.m_bRegistered )
+            {
+              *((_BYTE *)&this->m_Network + 76) |= 1u;
+            }
+            else
+            {
+              v12 = this->m_Network.m_pPev;
+              if ( v12 )
+              {
+                CBaseEdict::StateChanged(v12, 0x608u);
+                fEffectsMinSize = FLOAT_4_0;
+              }
+            }
+            this->m_fEffectsMaxSize1.m_Value = fEffectsMinSize;
+          }
+        }
+        v13 = this->m_fEffectsMaxSize2.m_Value;
+        if ( v13 > fEffectsMinSize )
+        {
+          iNewMaxSize2 = v13 - (float)(gpGlobals->frametime * 400.0);
+          if ( this->m_fEffectsMaxSize2.m_Value != iNewMaxSize2 )
+          {
+            if ( this->m_Network.m_TimerEvent.m_bRegistered )
+            {
+              *((_BYTE *)&this->m_Network + 76) |= 1u;
+            }
+            else
+            {
+              v15 = this->m_Network.m_pPev;
+              if ( v15 )
+              {
+                CBaseEdict::StateChanged(v15, 0x60Cu);
+                fEffectsMinSize = FLOAT_4_0;
+              }
+            }
+            this->m_fEffectsMaxSize2.m_Value = iNewMaxSize2;
+          }
+          if ( fEffectsMinSize > this->m_fEffectsMaxSize2.m_Value )
+          {
+            if ( this->m_Network.m_TimerEvent.m_bRegistered )
+            {
+              *((_BYTE *)&this->m_Network + 76) |= 1u;
+              this->m_fEffectsMaxSize2.m_Value = fEffectsMinSize;
+            }
+            else
+            {
+              v16 = this->m_Network.m_pPev;
+              if ( v16 )
+              {
+                CBaseEdict::StateChanged(v16, 0x60Cu);
+                fEffectsMinSize = FLOAT_4_0;
+              }
+              this->m_fEffectsMaxSize2.m_Value = fEffectsMinSize;
+            }
+          }
+        }
+      }
+    }
+  }
+}

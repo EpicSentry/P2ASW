@@ -85,13 +85,14 @@ public:
 
 	void DelayAttack( float fDelay );
 
-	virtual bool PreThink( void );
-	virtual void Think( void );
-	
+	virtual bool PreThink( void );	
 	void GunEffectsThink( void );
-	void TogglePotatosThink( void );
+    static char *s_szGunEffectsThinkContext;
 
 	void OpenProngs( bool bOpenProngs );
+
+	void TogglePotatosThink( void );
+    static char *s_szTogglePotatosThinkContext;
 	
 	void FirePortal1( void );
 	void FirePortal2( void );

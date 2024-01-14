@@ -28,7 +28,7 @@ public:
     void UpdateOnRemove();
     bool CreateVPhysics();
     int UpdateTransmitState();
-    Vector ClosestPointOnLineSegment( Vector &vPos );
+    Vector ClosestPointOnLineSegment( const Vector &vPos );
     void InputTurnOn( inputdata_t &inputdata );
     void InputTurnOff( inputdata_t &inputdata );
     void InputToggle( inputdata_t &inputdata );

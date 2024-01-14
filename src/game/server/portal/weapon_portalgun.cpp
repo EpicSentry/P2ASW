@@ -28,7 +28,8 @@
 #define BLAST_SPEED_NON_PLAYER 1000.0f
 #define BLAST_SPEED 3000.0f
 
-static const char *s_szTogglePotatosThinkContext = "TogglePotatosThinkContext";
+char *CWeaponPortalgun::s_szTogglePotatosThinkContext = "TogglePotatosThinkContext";
+char *CWeaponPortalgun::s_szGunEffectsThinkContext = "GunEffectsThinkContext";
 
 CON_COMMAND(give_portalgun, "Give a portalgun... Portal 2 script fix.")
 {
@@ -95,8 +96,8 @@ void CWeaponPortalgun::Spawn( void )
 
 	BaseClass::Spawn();
 
-	SetThink( &CWeaponPortalgun::GunEffectsThink );
-	SetNextThink( gpGlobals->curtime + 0.1 );
+	SetThink( NULL );
+	SetContextThink( &CWeaponPortalgun::GunEffectsThink, gpGlobals->curtime + 0.1, s_szGunEffectsThinkContext );
 
 	if( GameRules()->IsMultiplayer() )
 	{
@@ -108,7 +109,6 @@ void CWeaponPortalgun::Spawn( void )
 	}
 
 	ChangeTeam( m_nStartingTeamNum );
-
 }
 
 void CWeaponPortalgun::Activate()
@@ -131,11 +131,11 @@ void CWeaponPortalgun::Activate()
 		Assert( (m_iPortalLinkageGroupID >= 0) && (m_iPortalLinkageGroupID < 256) );
 	}
 
+	UpdatePortalAssociation();
+
 	// HACK HACK! Used to make the gun visually change when going through a cleanser!
 	m_fEffectsMaxSize1 = 4.0f;
 	m_fEffectsMaxSize2 = 4.0f;
-
-	m_bShowingPotatos = false;
 }
 
 void CWeaponPortalgun::OnPickedUp( CBaseCombatCharacter *pNewOwner )
@@ -143,10 +143,13 @@ void CWeaponPortalgun::OnPickedUp( CBaseCombatCharacter *pNewOwner )
 	if( GameRules()->IsMultiplayer() )
 	{
 		if( pNewOwner && pNewOwner->IsPlayer() )
-			SetLinkageGroupID( pNewOwner->entindex() );
+			m_iPortalLinkageGroupID = pNewOwner->entindex();
 
 		Assert( (m_iPortalLinkageGroupID >= 0) && (m_iPortalLinkageGroupID < 256) );
 	}
+	
+	m_hPrimaryPortal = CProp_Portal::FindPortal( m_iPortalLinkageGroupID, false, true );
+	m_hSecondaryPortal = CProp_Portal::FindPortal( m_iPortalLinkageGroupID, true, true );
 
 	ChangeTeam( pNewOwner->GetTeamNumber() );
 
@@ -190,38 +193,6 @@ bool CWeaponPortalgun::PreThink( void )
 	return false;
 }
 
-void CWeaponPortalgun::Think( void )
-{
-	//Allow descended classes a chance to do something before the think function
-	if ( PreThink() )
-		return;
-
-	SetNextThink( gpGlobals->curtime + 0.1f );
-
-	CPortal_Player *pPlayer = ToPortalPlayer( GetOwner() );
-
-	if ( !pPlayer || pPlayer->GetActiveWeapon() != this )
-	{
-		return;
-	}
-
-
-	// HACK HACK! Used to make the gun visually change when going through a cleanser!
-	if ( m_fEffectsMaxSize1 > 4.0f )
-	{
-		m_fEffectsMaxSize1 -= gpGlobals->frametime * 400.0f;
-		if ( m_fEffectsMaxSize1 < 4.0f )
-			m_fEffectsMaxSize1 = 4.0f;
-	}
-
-	if ( m_fEffectsMaxSize2 > 4.0f )
-	{
-		m_fEffectsMaxSize2 -= gpGlobals->frametime * 400.0f;
-		if ( m_fEffectsMaxSize2 < 4.0f )
-			m_fEffectsMaxSize2 = 4.0f;
-	}
-}
-
 void CWeaponPortalgun::TogglePotatosThink( void )
 {
 	SetContextThink( NULL, TICK_NEVER_THINK, s_szTogglePotatosThinkContext );
@@ -245,50 +216,37 @@ void CWeaponPortalgun::GunEffectsThink( void )
 	if ( PreThink() )
 		return;
 
-	SetContextThink( &CWeaponPortalgun::GunEffectsThink, gpGlobals->curtime + 0.1, "GunEffectsThinkContext" );
+	SetContextThink( &CWeaponPortalgun::GunEffectsThink, gpGlobals->curtime + 0.1, s_szGunEffectsThinkContext );
 	
 	CBasePlayer *pPlayer = ToBasePlayer( GetOwner() );
-	if ( pPlayer )
+	if ( !pPlayer )
+		return;
+
+	CBaseViewModel *vm = pPlayer->GetViewModel();
+
+	if ( vm && g_pGameRules->IsMultiplayer() )
 	{
-		if ( g_pGameRules->IsMultiplayer() )
-		{
-			int iSkin = 0;
+		if ( pPlayer->GetTeamNumber() == 2 )
+			m_nSkin = 2;
+		else
+			m_nSkin = 1;
 
-			if ( pPlayer->GetTeamNumber() == 2 )
-				iSkin = 2;
-			else
-				iSkin = 1;
+		vm->m_nSkin = m_nSkin;
+	}
+		
+	// HACK HACK! Used to make the gun visually change when going through a cleanser!
+	if ( m_fEffectsMaxSize1 > 4.0f )
+	{
+		m_fEffectsMaxSize1 -= gpGlobals->frametime * 400.0f;
+		if ( m_fEffectsMaxSize1 < 4.0f )
+			m_fEffectsMaxSize1 = 4.0f;
+	}
 
-			m_nSkin = iSkin;
-			if ( pPlayer->GetViewModel() )
-				pPlayer->GetViewModel()->m_nSkin = iSkin;
-		}
-
-		float flMinEffectsSize = 4.0;
-
-		if ( m_fEffectsMaxSize1 > flMinEffectsSize )
-		{
-			float fNewMaxSize1 = m_fEffectsMaxSize1 - (gpGlobals->frametime * 400.0);
-			
-			m_fEffectsMaxSize1 = fNewMaxSize1;
-		}
-
-		if ( flMinEffectsSize > m_fEffectsMaxSize1 )
-		{
-			m_fEffectsMaxSize1 = flMinEffectsSize;
-		}
-
-		if ( m_fEffectsMaxSize2 > flMinEffectsSize )
-		{
-			float fNewMaxSize1 = m_fEffectsMaxSize2 - (gpGlobals->frametime * 400.0);
-			
-			m_fEffectsMaxSize2 = fNewMaxSize1;
-		}
-
-		if ( flMinEffectsSize > m_fEffectsMaxSize2 )
-		{
-			m_fEffectsMaxSize2 = flMinEffectsSize;
-		}
+	if ( m_fEffectsMaxSize2 > 4.0f )
+	{
+		m_fEffectsMaxSize2 -= gpGlobals->frametime * 400.0f;
+		if ( m_fEffectsMaxSize2 < 4.0f )
+			m_fEffectsMaxSize2 = 4.0f;
 	}
 }
 
@@ -500,7 +458,7 @@ void CWeaponPortalgun::UpdatePortalAssociation( void )
 	{
 		m_vecBluePortalPos = vec3_invalid;
 		
-		if ( m_iLastFiredPortal.m_Value == 1 )
+		if ( m_iLastFiredPortal == 1 )
 		{
 			m_iLastFiredPortal = 0;
 		}

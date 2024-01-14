@@ -149,7 +149,6 @@ void CProjectedWallEntity::ProjectWall( void )
 	float v18; // xmm5_4
 	float v19; // xmm4_4
 	float v20; // xmm3_4
-	float v21; // xmm5_4
 	float v22; // xmm4_4
 	float v24; // xmm3_4
 	solid_t solid; // [esp+64h] [ebp-724h] BYREF
@@ -174,14 +173,14 @@ void CProjectedWallEntity::ProjectWall( void )
 	AddEffects( 8 );
 	CheckForPlayersOnBridge();
 
-	Vector vStartPoint = GetStartPoint();
-	float flStartPointX = vStartPoint.x;
-	float flStartPointY = vStartPoint.y;
-	float flStartPointZ = vStartPoint.z;
-	Vector vEndPoint = GetEndPoint();
-	float flEndPointX = vEndPoint.x;
-	float flEndPointY = vEndPoint.y;
-	float flEndPointZ = vEndPoint.z;
+	const Vector vStartPoint = GetStartPoint();
+	const float flStartPointX = vStartPoint.x;
+	const float flStartPointY = vStartPoint.y;
+	const float flStartPointZ = vStartPoint.z;
+	const Vector vEndPoint = GetEndPoint();
+	const float flEndPointX = vEndPoint.x;
+	const float flEndPointY = vEndPoint.y;
+	const float flEndPointZ = vEndPoint.z;
 	GetVectors( &vecForward, &vecRight, &vecUp );
 
 	Vector *vVerts[4];
@@ -320,7 +319,7 @@ void CProjectedWallEntity::ProjectWall( void )
 	v41 = (((flStartPointX + v18) * vecRight.x) + ((flStartPointY + v19) * vecRight.y))
 		+ ((flStartPointZ + v20) * vecRight.z);
 
-	v21 = ((flStartPointX - v18) * (vecRight.x))
+	float v21 = ((flStartPointX - v18) * (vecRight.x))
 		+ ((flStartPointY - v19) * (vecRight.y));
 
 	v45 = v21 + ((flStartPointZ - v20) * (vecRight.z));
@@ -341,34 +340,37 @@ void CProjectedWallEntity::ProjectWall( void )
 	fPlanes[(0 * 4) + 0] = vecForward.x;
 	fPlanes[(0 * 4) + 1] = vecForward.y;
 	fPlanes[(0 * 4) + 2] = vecForward.z;
-	fPlanes[(0 * 4) + 3] = v37;
+	fPlanes[(0 * 4) + 3] = v37 + m_flLength;
 
+	// Back plane
 	fPlanes[(1 * 4) + 0] = -vecForward.x;
 	fPlanes[(1 * 4) + 1] = -vecForward.y;
 	fPlanes[(1 * 4) + 2] = -vecForward.z;
-	fPlanes[(1 * 4) + 3] = v39;
+	fPlanes[(1 * 4) + 3] = v39 + m_flLength;
 
 	// Up plane
 	fPlanes[(2 * 4) + 0] = vecUp.x;
 	fPlanes[(2 * 4) + 1] = vecUp.y;
 	fPlanes[(2 * 4) + 2] = vecUp.z;
-	fPlanes[(2 * 4) + 3] = v47;
+	fPlanes[(2 * 4) + 3] = v47 + m_flHeight;
 
+	// Down plane
 	fPlanes[(3 * 4) + 0] = -vecUp.x;
 	fPlanes[(3 * 4) + 1] = -vecUp.y;
 	fPlanes[(3 * 4) + 2] = -vecUp.z;
-	fPlanes[(3 * 4) + 3] = v51;
+	fPlanes[(3 * 4) + 3] = v51 + m_flHeight;
 	
 	// Right plane
 	fPlanes[(4 * 4) + 0] = vecRight.x;
 	fPlanes[(4 * 4) + 1] = vecRight.y;
 	fPlanes[(4 * 4) + 2] = vecRight.z;
-	fPlanes[(4 * 4) + 3] = v41;
+	fPlanes[(4 * 4) + 3] = v41 + m_flWidth;
 
+	// Left plane
 	fPlanes[(5 * 4) + 0] = -vecRight.x;
 	fPlanes[(5 * 4) + 1] = -vecRight.y;
 	fPlanes[(5 * 4) + 2] = -vecRight.z;
-	fPlanes[(5 * 4) + 3] = v45;
+	fPlanes[(5 * 4) + 3] = v45 + m_flWidth;
 
 	CPolyhedron *pPolyhedron = GeneratePolyhedronFromPlanes( fPlanes, 6, 0.0 );
 	if (!pPolyhedron)

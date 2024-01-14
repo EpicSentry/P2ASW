@@ -488,7 +488,7 @@ LABEL_11:
 		engine->Con_NPrintf( 0, "num lasers = %d", AutoList().Count());
 }
 
-Vector CPortalLaser::ClosestPointOnLineSegment( Vector &vPos )
+Vector CPortalLaser::ClosestPointOnLineSegment( const Vector &vPos )
 {
 	Vector vResult;
 	CalcClosestPointOnLineSegment( vPos, m_vStartPoint, m_vEndPoint, vResult );	

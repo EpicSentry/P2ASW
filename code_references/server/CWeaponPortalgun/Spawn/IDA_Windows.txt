@@ -1,0 +1,41 @@
+void __thiscall CWeaponPortalgun::Spawn(CWeaponPortalgun *this)
+{
+  CBaseCombatCharacter *Owner; // eax
+  CBaseCombatCharacter *v3; // edi
+  signed int m_pPev; // eax
+  const CProp_Portal *Portal; // eax
+  const CProp_Portal *v6; // eax
+
+  this->Precache(this);
+  CWeaponPortalBase::Spawn(this);
+  CBaseEntity::ThinkSet(this, 0, 0.0, 0);
+  CBaseEntity::ThinkSet(
+    this,
+    (void (__thiscall *)(CBaseEntity *))CWeaponPortalgun::GunEffectsThink,
+    gpGlobals->curtime + 0.1,
+    CWeaponPortalgun::s_szGunEffectsThinkContext);
+  if ( g_pGameRules->IsMultiplayer(g_pGameRules) )
+  {
+    Owner = CBaseCombatWeapon::GetOwner(this);
+    v3 = Owner;
+    if ( Owner )
+    {
+      if ( Owner->IsPlayer(Owner) )
+      {
+        m_pPev = (signed int)v3->m_Network.m_pPev;
+        if ( m_pPev )
+          m_pPev = (signed int)(m_pPev - (unsigned int)gpGlobals->pEdicts) >> 4;
+        this->m_iPortalLinkageGroupID = m_pPev;
+        Portal = CProp_Portal::FindPortal(m_pPev, 0, 1);
+        CNetworkHandleBase<CProp_Portal,CWeaponPortalgun::NetworkVar_m_hPrimaryPortal>::Set(
+          &this->m_hPrimaryPortal,
+          Portal);
+        v6 = CProp_Portal::FindPortal(this->m_iPortalLinkageGroupID, 1, 1);
+        CNetworkHandleBase<CProp_Portal,CWeaponPortalgun::NetworkVar_m_hSecondaryPortal>::Set(
+          &this->m_hSecondaryPortal,
+          v6);
+      }
+    }
+  }
+  this->ChangeTeam(this, this->m_nStartingTeamNum);
+}

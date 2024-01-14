@@ -1,0 +1,81 @@
+void __cdecl CWeaponPortalgun::GunEffectsThink(CWeaponPortalgun *const this)
+{
+  __m128d v1; // xmm0
+  CBaseCombatCharacter *Owner; // eax
+  CBasePlayer *v3; // esi
+  float m_Value; // xmm0_4
+  float v5; // xmm2_4
+  float v6; // xmm0_4
+  float v7; // xmm2_4
+  BASEPTR v8; // [esp+38h] [ebp-10h] BYREF
+
+  if ( !(*((unsigned __int8 (__cdecl **)(CWeaponPortalgun *const))this->_vptr_IHandleEntity + 376))(this) )
+  {
+    v1 = _mm_cvtps_pd((__m128)LODWORD(gpGlobals->curtime));
+    v1.m128d_f64[0] = v1.m128d_f64[0] + 0.1;
+    CBaseEntity::ThinkSet(
+      &v8,
+      this,
+      (BASEPTR)(unsigned int)CWeaponPortalgun::GunEffectsThink,
+      _mm_unpacklo_pd(v1, v1).m128d_f64[0],
+      CWeaponPortalgun::s_szGunEffectsThinkContext);
+    Owner = CBaseCombatWeapon::GetOwner(this);
+    v3 = (CBasePlayer *)Owner;
+    if ( Owner )
+    {
+      if ( (*((unsigned __int8 (__cdecl **)(CBaseCombatCharacter *))Owner->_vptr_IHandleEntity + 86))(Owner) )
+      {
+        if ( CBasePlayer::GetViewModel(v3, 0)
+          && (*((unsigned __int8 (__cdecl **)(CGameRules *))g_pGameRules->_vptr_IGameSystem + 34))(g_pGameRules) )
+        {
+          if ( CBaseEntity::GetTeamNumber(v3) == 2 )
+          {
+            if ( this->m_nSkin.m_Value != 2 )
+            {
+              CBaseEntity::NetworkStateChanged(this, &this->m_nSkin);
+              this->m_nSkin.m_Value = 2;
+            }
+          }
+          else if ( this->m_nSkin.m_Value != 1 )
+          {
+            CBaseEntity::NetworkStateChanged(this, &this->m_nSkin);
+            this->m_nSkin.m_Value = 1;
+          }
+          CBasePlayer::GetViewModel(v3, 0)->m_nSkin.m_Value = this->m_nSkin.m_Value;
+        }
+        m_Value = this->m_fEffectsMaxSize1.m_Value;
+        if ( m_Value > 4.0 )
+        {
+          v5 = m_Value - (float)(400.0 * gpGlobals->frametime);
+          if ( m_Value != v5 )
+          {
+            CBaseEntity::NetworkStateChanged(this, &this->m_fEffectsMaxSize1);
+            this->m_fEffectsMaxSize1.m_Value = v5;
+            m_Value = v5;
+          }
+          if ( m_Value < 4.0 )
+          {
+            CBaseEntity::NetworkStateChanged(this, &this->m_fEffectsMaxSize1);
+            this->m_fEffectsMaxSize1.m_Value = 4.0;
+          }
+        }
+        v6 = this->m_fEffectsMaxSize2.m_Value;
+        if ( v6 > 4.0 )
+        {
+          v7 = v6 - (float)(400.0 * gpGlobals->frametime);
+          if ( v6 != v7 )
+          {
+            CBaseEntity::NetworkStateChanged(this, &this->m_fEffectsMaxSize2);
+            this->m_fEffectsMaxSize2.m_Value = v7;
+            v6 = v7;
+          }
+          if ( v6 < 4.0 )
+          {
+            CBaseEntity::NetworkStateChanged(this, &this->m_fEffectsMaxSize2);
+            this->m_fEffectsMaxSize2.m_Value = 4.0;
+          }
+        }
+      }
+    }
+  }
+}
