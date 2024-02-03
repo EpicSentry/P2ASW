@@ -1399,6 +1399,19 @@ void CBasePlayer::SmoothViewOnStairs( Vector& eyeOrigin )
 	float flCurrentPlayerZ = GetLocalOrigin().z;
 	float flCurrentPlayerViewOffsetZ = GetViewOffset().z;
 
+#if defined( CLIENT_DLL )
+	{
+		matrix3x4_t matOriginDisontinuity;
+		if( GetOriginInterpolator().GetDiscontinuityTransform( GetEffectiveInterpolationCurTime( gpGlobals->curtime ), matOriginDisontinuity ) )
+		{
+			//if the origin has a discontinuity, assume that m_flOldPlayerZ is in the new space. Therefore, we need to transform the local origin into the new space for comparisons
+			Vector vCurrentSpaceLocalOrigin;
+			VectorITransform( GetLocalOrigin(), matOriginDisontinuity, vCurrentSpaceLocalOrigin ); //inverse transform because the matrix goes from new space to old space
+			flCurrentPlayerZ = vCurrentSpaceLocalOrigin.z;
+		}
+	}
+#endif
+
 	// Smooth out stair step ups
 	// NOTE: Don't want to do this when the ground entity is moving the player
 	if ( ( pGroundEntity != NULL && pGroundEntity->GetMoveType() == MOVETYPE_NONE ) && ( flCurrentPlayerZ != m_flOldPlayerZ ) && smoothstairs.GetBool() &&
