@@ -727,9 +727,9 @@ void CViewRender::SetUpView()
 
 	// Disable spatial partition access
 	partition->SuppressLists( PARTITION_ALL_CLIENT_EDICTS, true );
-
+	
 	//Find the offset our current FOV is from the default value
-	float flFOVOffset = default_fov.GetFloat() - view.fov;
+	float flFOVOffset = pPlayer ? ( pPlayer->GetDefaultFOV() - view.fov ) : 0.0f;
 
 	//Adjust the viewmodel's FOV to move with any FOV offsets on the viewer's end
 	view.fovViewmodel = GetClientMode()->GetViewModelFOV() - flFOVOffset;

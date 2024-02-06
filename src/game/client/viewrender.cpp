@@ -1358,28 +1358,58 @@ void CViewRender::DrawViewModels( const CViewSetup &view, bool drawViewmodel )
 	CViewModelRenderablesList::RenderGroups_t &opaqueList = list.m_RenderGroups[ CViewModelRenderablesList::VM_GROUP_OPAQUE ];
 	CViewModelRenderablesList::RenderGroups_t &translucentList = list.m_RenderGroups[ CViewModelRenderablesList::VM_GROUP_TRANSLUCENT ];
 
-	if ( ToolsEnabled() && ( !bShouldDrawPlayerViewModel || !bShouldDrawToolViewModels ) )
+	CViewModelRenderablesList listNormalFOV;
+	CViewModelRenderablesList::RenderGroups_t &opaqueNormalFOVList = listNormalFOV.m_RenderGroups[ CViewModelRenderablesList::VM_GROUP_OPAQUE ];
+	CViewModelRenderablesList::RenderGroups_t &translucentNormalFOVList = listNormalFOV.m_RenderGroups[ CViewModelRenderablesList::VM_GROUP_TRANSLUCENT ];
+	
+	// Remove objects from the list that tools don't want
+	// Move objects that aren't actually of the view model class into a different list so we can render them with normal FOV
+	bool bRemove = ToolsEnabled() && ( !bShouldDrawPlayerViewModel || !bShouldDrawToolViewModels );
+
+	int nOpaque = opaqueList.Count();
+	for ( int i = nOpaque-1; i >= 0; --i )
 	{
-		int nOpaque = opaqueList.Count();
-		for ( int i = nOpaque-1; i >= 0; --i )
+		IClientRenderable *pRenderable = opaqueList[ i ].m_pRenderable;
+		bool bEntity = pRenderable->GetIClientUnknown()->GetBaseEntity() ? true : false;
+		if ( bRemove )
 		{
-			IClientRenderable *pRenderable = opaqueList[ i ].m_pRenderable;
-			bool bEntity = pRenderable->GetIClientUnknown()->GetBaseEntity() ? true : false;
 			if ( ( bEntity && !bShouldDrawPlayerViewModel ) || ( !bEntity && !bShouldDrawToolViewModels ) )
 			{
+				// Remove it
 				opaqueList.FastRemove( i );
+				continue;
 			}
 		}
 
-		int nTranslucent = translucentList.Count();
-		for ( int i = nTranslucent-1; i >= 0; --i )
+		if ( !dynamic_cast<C_BaseViewModel*>( pRenderable ) )
 		{
-			IClientRenderable *pRenderable = translucentList[ i ].m_pRenderable;
-			bool bEntity = pRenderable->GetIClientUnknown()->GetBaseEntity() ? true : false;
+			// Copy into the no VM FOV list
+			opaqueNormalFOVList.AddToTail( opaqueList[ i ] );
+			opaqueList.FastRemove( i );
+		}
+	}
+	
+	int nTranslucent = translucentList.Count();
+	for ( int i = nTranslucent-1; i >= 0; --i )
+	{
+		IClientRenderable *pRenderable = translucentList[ i ].m_pRenderable;
+		bool bEntity = pRenderable->GetIClientUnknown()->GetBaseEntity() ? true : false;
+
+		if ( bRemove )
+		{
 			if ( ( bEntity && !bShouldDrawPlayerViewModel ) || ( !bEntity && !bShouldDrawToolViewModels ) )
 			{
+				// Remove it
 				translucentList.FastRemove( i );
+				continue;
 			}
+		}
+
+		if ( !dynamic_cast<C_BaseViewModel*>( pRenderable ) )
+		{
+			// Copy into the no VM FOV list
+			translucentNormalFOVList.AddToTail( translucentList[ i ] );
+			translucentList.FastRemove( i );
 		}
 	}
 
@@ -1399,6 +1429,35 @@ void CViewRender::DrawViewModels( const CViewSetup &view, bool drawViewmodel )
 		pRenderContext->DepthRange( depthmin, depthmax );
 
 	render->PopView( GetFrustum() );
+	
+	// Render objects that use normal FOV
+	if ( (opaqueNormalFOVList.Count() > 0 || translucentNormalFOVList.Count() > 0) )
+	{
+		viewModelSetup.fov = view.fov;
+		render->Push3DView( viewModelSetup, 0, NULL, GetFrustum() );
+
+		// HACK HACK:  Munge the depth range to prevent view model from poking into walls, etc.
+		// Force clipped down range
+		if( bUseDepthHack )
+			pRenderContext->DepthRange( 0.0f, 0.1f );
+
+		// Update refract for opaque models & draw
+		bool bUpdatedRefractForOpaque = UpdateRefractIfNeededByList( opaqueNormalFOVList );
+		DrawRenderablesInList( opaqueNormalFOVList );
+
+		// Update refract for translucent models (if we didn't already update it above) & draw
+		if ( !bUpdatedRefractForOpaque ) // Only do this once for better perf
+		{
+			UpdateRefractIfNeededByList( translucentNormalFOVList );
+		}
+		DrawRenderablesInList( translucentNormalFOVList, STUDIO_TRANSPARENCY );
+
+		// Reset the depth range to the original values
+		if( bUseDepthHack )
+			pRenderContext->DepthRange( depthmin, depthmax );
+
+		render->PopView( GetFrustum() );
+	}
 
 	// Restore the matrices
 	pRenderContext->MatrixMode( MATERIAL_PROJECTION );
