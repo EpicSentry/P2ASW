@@ -11,9 +11,6 @@
 #endif
 
 #include "GameEventListener.h"
-#ifdef PORTAL
-#include "hl2orange.spa.h"
-#endif
 #include "iachievementmgr.h"
 
 class CAchievementMgr;

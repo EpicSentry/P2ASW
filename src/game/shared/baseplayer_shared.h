@@ -90,6 +90,12 @@ enum PlayerPhysFlag_e
 	// overwriting phys flags in the HL2 of TF2 player classes
 };
 
+enum
+{
+	VPHYS_WALK = 0,
+	VPHYS_CROUCH,
+	VPHYS_NOCLIP,
+};
 
 // useful cosines
 #define DOT_1DEGREE   0.9998476951564

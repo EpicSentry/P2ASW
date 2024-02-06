@@ -32,6 +32,7 @@
 #endif
 #include "tier1/fmtstr.h"
 #include "vphysics/friction.h"
+#include "prediction.h"
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -41,6 +42,7 @@ extern IFileSystem *filesystem;
 static ConVar	cl_phys_timescale( "cl_phys_timescale", "1.0", FCVAR_CHEAT, "Sets the scale of time for client-side physics (ragdolls)" );
 static ConVar	cl_phys_maxticks( "cl_phys_maxticks", IsX360() ? "2" : "0", FCVAR_NONE, "Sets the max number of physics ticks allowed for client-side physics (ragdolls)" );
 ConVar	cl_ragdoll_gravity( "cl_ragdoll_gravity", "386", FCVAR_CHEAT, "Sets the gravity client-side ragdolls" );
+ConVar phys_debug_check_contacts("phys_debug_check_contacts", "0", FCVAR_CHEAT|FCVAR_REPLICATED);
 
 // blocked entity detecting
 static ConVar cl_phys_block_fraction("cl_phys_block_fraction", "0.1");
@@ -49,6 +51,22 @@ static ConVar cl_phys_block_dist("cl_phys_block_dist","1.0");
 void PrecachePhysicsSounds( void );
 
 //FIXME: Replicated from server end, consolidate?
+
+
+CUtlLinkedList<C_BaseEntity *> g_ShadowEntities;
+
+void PhysAddShadow( C_BaseEntity *pEntity )
+{
+	if( g_ShadowEntities.Find( pEntity ) == g_ShadowEntities.InvalidIndex() )
+	{
+		g_ShadowEntities.AddToTail( pEntity );
+	}
+}
+
+void PhysRemoveShadow( C_BaseEntity *pEntity )
+{
+	g_ShadowEntities.FindAndRemove( pEntity );
+}
 
 
 extern IVEngineClient *engine;
@@ -192,10 +210,18 @@ bool PhysicsDLLInit( CreateInterfaceFn physicsFactory )
 	return true;
 }
 
+extern ConVar_ServerBounded *cl_predict;
+ConVar cl_predictphysics( "cl_predictphysics", "0", 0, "Use a prediction-friendly physics interface on the client" );
+
 void PhysicsLevelInit( void )
 {
 	physenv = physics->CreateEnvironment();
 	assert( physenv );
+	//if( g_pGameRules->IsMultiplayer() && cl_predictphysics.GetBool() )
+	//{
+	//	physenv->SetPredicted( true );
+	//}
+
 #ifdef PORTAL
 	physenv_main = physenv;
 #endif
@@ -594,10 +620,67 @@ void CPhysicsSystem::PhysicsSimulate()
 
 	if ( physenv )
 	{
-		g_Collisions.BufferTouchEvents( true );
-#ifdef _DEBUG
-		physenv->DebugCheckContacts();
+#if 0
+		if( physenv->IsPredicted() )
+#else
+		if ( false )
 #endif
+		{
+			if( !prediction->InPrediction() )
+				return;
+			if( !prediction->IsFirstTimePredicted() )
+			{
+				//Don't actually simulate. Fake it while restoring results from the first time
+#if 0
+				physenv->RestorePredictedSimulation();
+#endif
+
+				int activeCount = physenv->GetActiveObjectCount();
+				if ( activeCount )
+				{
+					IPhysicsObject **pActiveList = NULL;
+					pActiveList = (IPhysicsObject **)stackalloc( sizeof(IPhysicsObject *)*activeCount );
+					physenv->GetActiveObjects( pActiveList );
+
+					for ( int i = 0; i < activeCount; i++ )
+					{
+						CBaseEntity *pEntity = reinterpret_cast<CBaseEntity *>(pActiveList[i]->GetGameData());
+						if ( pEntity )
+						{
+							if ( pEntity->CollisionProp()->DoesVPhysicsInvalidateSurroundingBox() )
+							{
+								pEntity->CollisionProp()->MarkSurroundingBoundsDirty();
+							}
+							pEntity->VPhysicsUpdate( pActiveList[i] );
+						}
+					}
+					stackfree( pActiveList );
+				}
+
+				if( g_ShadowEntities.Count() > 0 )
+				{
+					VPROF( "PhysFrame VPhysicsShadowUpdate" );
+					for ( int i = g_ShadowEntities.Head(); i != g_ShadowEntities.InvalidIndex(); i = g_ShadowEntities.Next(i) )
+					{
+						CBaseEntity *pEntity = g_ShadowEntities[i];
+
+						IPhysicsObject *pPhysics = pEntity->VPhysicsGetObject();
+						// apply updates
+						if ( pPhysics && !pPhysics->IsAsleep() )
+						{
+							pEntity->VPhysicsShadowUpdate( pPhysics );
+						}
+					}
+				}
+
+				return;
+			}
+		}
+		g_Collisions.BufferTouchEvents( true );
+		if( phys_debug_check_contacts.GetBool() && physenv )
+		{
+			physenv->DebugCheckContacts();
+		}
 		frametime *= cl_phys_timescale.GetFloat();
 
 		int maxTicks = cl_phys_maxticks.GetInt();
@@ -686,7 +769,22 @@ void CPhysicsSystem::PhysicsSimulate()
 				}
 			}
 		}
-
+		
+		if( g_ShadowEntities.Count() > 0 )
+		{
+			VPROF( "PhysFrame VPhysicsShadowUpdate" );
+			for ( int i = g_ShadowEntities.Head(); i != g_ShadowEntities.InvalidIndex(); i = g_ShadowEntities.Next(i) )
+			{
+				CBaseEntity *pEntity = g_ShadowEntities[i];
+				
+				IPhysicsObject *pPhysics = pEntity->VPhysicsGetObject();
+				// apply updates
+				if ( pPhysics && !pPhysics->IsAsleep() )
+				{
+					pEntity->VPhysicsShadowUpdate( pPhysics );
+				}
+			}
+		}
 #if 0
 		if ( cl_visualize_physics_shadows.GetBool() )
 		{

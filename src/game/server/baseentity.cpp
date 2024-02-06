@@ -374,27 +374,6 @@ void SendProxy_OriginZ( const SendProp *pProp, const void *pStruct, const void *
 
 static float const cellEpsilon = 0.001f;
 
-//---------------------------------------------------------
-// Remove paint from entity with BSP model.
-//---------------------------------------------------------
-void CBaseEntity::InputRemovePaint(inputdata_t &inputdata)
-{
-	// TODO: RemovePaint isn't an engine function, so we need to set the paint power of the entity to NO_POWER instead.
-	/*
-	if (engine->HasPaintMap() && IsBSPModel())
-	{
-		engine->RemovePaint(GetModel());
-
-		CBroadcastRecipientFilter filter;
-		filter.MakeReliable();
-		UserMessageBegin(filter, "RemovePaint");
-		WRITE_EHANDLE(this);
-		MessageEnd();
-	}
-	*/
-}
-
-
 void CBaseEntity::SendProxy_CellX( const SendProp *pProp, const void *pStruct, const void *pData, DVariant *pOut, int iElement, int objectID)
 {
 	CBaseEntity *entity = (CBaseEntity*)pStruct;
@@ -3229,22 +3208,6 @@ void CBaseEntity::VPhysicsFriction( IPhysicsObject *pObject, float energy, int s
 {
 	PhysFrictionSound( this, pObject, energy, surfaceProps, surfacePropsHit );
 }
-
-
-void CBaseEntity::VPhysicsSwapObject( IPhysicsObject *pSwap )
-{
-	if ( !pSwap )
-	{
-		PhysRemoveShadow(this);
-	}
-
-	if ( !m_pPhysicsObject )
-	{
-		Warning( "Bad vphysics swap for %s\n", STRING(m_iClassname) );
-	}
-	m_pPhysicsObject = pSwap;
-}
-
 
 // Tells the physics shadow to update it's target to the current position
 void CBaseEntity::UpdatePhysicsShadowToCurrentPosition( float deltaTime )
@@ -7206,6 +7169,26 @@ void CBaseEntity::InputRunScript( inputdata_t& inputdata )
 void CBaseEntity::InputCallScriptFunction( inputdata_t& inputdata )
 {
 	CallScriptFunction( inputdata.value.String(), NULL );
+}
+
+//---------------------------------------------------------
+// Remove paint from entity with BSP model.
+//---------------------------------------------------------
+void CBaseEntity::InputRemovePaint(inputdata_t &inputdata)
+{
+	// TODO: RemovePaint isn't an engine function, so we need to set the paint power of the entity to NO_POWER instead.
+	/*
+	if (engine->HasPaintMap() && IsBSPModel())
+	{
+		engine->RemovePaint(GetModel());
+
+		CBroadcastRecipientFilter filter;
+		filter.MakeReliable();
+		UserMessageBegin(filter, "RemovePaint");
+		WRITE_EHANDLE(this);
+		MessageEnd();
+	}
+	*/
 }
 
 // #define VMPROFILE	// define to profile vscript calls

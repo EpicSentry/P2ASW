@@ -1181,6 +1181,7 @@ private:
 	IMaterialVar *m_pMaterialParam_ColCorrectLookupWeights;
 	IMaterialVar *m_pMaterialParam_LocalContrastStrength;
 	IMaterialVar *m_pMaterialParam_LocalContrastEdgeStrength;
+	IMaterialVar* m_pMaterialParam_VignetteEnable;
 	IMaterialVar *m_pMaterialParam_VignetteStart;
 	IMaterialVar *m_pMaterialParam_VignetteEnd;
 	IMaterialVar *m_pMaterialParam_VignetteBlurEnable;
@@ -1229,6 +1230,7 @@ CEnginePostMaterialProxy::CEnginePostMaterialProxy()
 	m_pMaterialParam_ColCorrectLookupWeights	= NULL;
 	m_pMaterialParam_LocalContrastStrength		= NULL;
 	m_pMaterialParam_LocalContrastEdgeStrength	= NULL;
+	m_pMaterialParam_VignetteEnable				= NULL;
 	m_pMaterialParam_VignetteStart				= NULL;
 	m_pMaterialParam_VignetteEnd				= NULL;
 	m_pMaterialParam_VignetteBlurEnable			= NULL;
@@ -1260,6 +1262,7 @@ bool CEnginePostMaterialProxy::Init( IMaterial *pMaterial, KeyValues *pKeyValues
 	m_pMaterialParam_ColCorrectLookupWeights = pMaterial->FindVar( "$colCorrect_LookupWeights", &bFoundVar, false );
 	m_pMaterialParam_LocalContrastStrength = pMaterial->FindVar( "$localContrastScale", &bFoundVar, false );
 	m_pMaterialParam_LocalContrastEdgeStrength = pMaterial->FindVar( "$localContrastEdgeScale", &bFoundVar, false );
+	m_pMaterialParam_VignetteEnable = pMaterial->FindVar("$vignetteEnable", &bFoundVar, false);
 	m_pMaterialParam_VignetteStart = pMaterial->FindVar( "$localContrastVignetteStart", &bFoundVar, false );
 	m_pMaterialParam_VignetteEnd = pMaterial->FindVar( "$localContrastVignetteEnd", &bFoundVar, false );
 	m_pMaterialParam_VignetteBlurEnable = pMaterial->FindVar( "$blurredVignetteEnable", &bFoundVar, false );
@@ -1301,6 +1304,9 @@ void CEnginePostMaterialProxy::OnBind( C_BaseEntity *pEnt )
 
 	if ( m_pMaterialParam_LocalContrastEdgeStrength )
 		m_pMaterialParam_LocalContrastEdgeStrength->SetFloatValue( s_LocalPostProcessParameters[ nSplitScreenSlot ].m_flParameters[ PPPN_LOCAL_CONTRAST_EDGE_STRENGTH ] );
+
+	if ( m_pMaterialParam_VignetteEnable )
+		m_pMaterialParam_VignetteEnable->SetIntValue( mat_vignette_enable.GetInt() );
 
 	if ( m_pMaterialParam_VignetteStart )
 		m_pMaterialParam_VignetteStart->SetFloatValue( s_LocalPostProcessParameters[ nSplitScreenSlot ].m_flParameters[ PPPN_VIGNETTE_START ] );

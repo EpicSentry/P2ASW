@@ -115,6 +115,7 @@ private:
 	bool			PerformPrediction( int nSlot, C_BasePlayer *localPlayer, bool received_new_world_update, int incoming_acknowledged, int outgoing_command );
 
 	void			ShiftIntermediateDataForward( int nSlot, int slots_to_remove, int previous_last_slot );
+	void			ShiftFirstPredictedIntermediateDataForward( int nSlot, int slots_to_remove );
 	void			RestoreEntityToPredictedFrame( int nSlot, int predicted_frame );
 	int				ComputeFirstCommandToExecute( int nSlot, bool received_new_world_update, int incoming_acknowledged, int outgoing_command );
 

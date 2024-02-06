@@ -126,14 +126,6 @@ struct surfacedata_t;
 #define AUTOAIM_10DEGREES 0.1736481776669
 #define AUTOAIM_20DEGREES 0.3490658503989
 
-enum
-{
-	VPHYS_WALK = 0,
-	VPHYS_CROUCH,
-	VPHYS_NOCLIP,
-};
-
-
 enum PlayerConnectedState
 {
 	PlayerConnected,
@@ -961,9 +953,9 @@ protected:
 	int						m_nPoisonRestored;		// track poison damage restored
 	// NOTE: bits damage type appears to only be used for time-based damage
 	BYTE					m_rgbTimeBasedDamage[CDMG_TIMEBASED];
-
+	
 	// Player Physics Shadow
-	int						m_vphysicsCollisionState;
+	CNetworkVar( int, m_vphysicsCollisionState );
 
 	virtual int SpawnArmorValue( void ) const { return 0; }
 
@@ -992,7 +984,7 @@ protected: //used to be private, but need access for portal mod (Dave Kircher)
 	IPhysicsObject				*m_pShadowCrouch;
 	Vector						m_oldOrigin;
 	Vector						m_vecSmoothedVelocity;
-	bool						m_touchedPhysObject;
+	bool						m_bTouchedPhysObject;
 	bool						m_bPhysicsWasFrozen;
 
 private:
@@ -1352,12 +1344,12 @@ inline bool CBasePlayer::IsInAVehicle( void ) const
 
 inline void CBasePlayer::SetTouchedPhysics( bool bTouch ) 
 { 
-	m_touchedPhysObject = bTouch; 
+	m_bTouchedPhysObject = bTouch; 
 }
 
 inline bool CBasePlayer::TouchedPhysics( void )			
 { 
-	return m_touchedPhysObject; 
+	return m_bTouchedPhysObject; 
 }
 
 //-----------------------------------------------------------------------------

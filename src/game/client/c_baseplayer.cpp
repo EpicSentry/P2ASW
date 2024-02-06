@@ -44,7 +44,7 @@
 #include "voice_status.h"
 #include "fx.h"
 #include "cellcoord.h"
-
+#include "vphysics/player_controller.h"
 #include "debugoverlay_shared.h"
 
 #ifdef DEMOPOLISH_ENABLED
@@ -273,6 +273,8 @@ END_RECV_TABLE()
 		// fog data
 		RecvPropEHandle( RECVINFO( m_PlayerFog.m_hCtrl ) ),
 
+		RecvPropInt( RECVINFO( m_vphysicsCollisionState ) ),
+
 	END_RECV_TABLE()
 
 BEGIN_PREDICTION_DATA_NO_BASE( CPlayerState )
@@ -328,6 +330,10 @@ BEGIN_PREDICTION_DATA( C_BasePlayer )
 	DEFINE_PRED_FIELD( m_hZoomOwner, FIELD_EHANDLE, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD( m_flFOVTime, FIELD_FLOAT, 0 ),
 	DEFINE_PRED_FIELD( m_iFOVStart, FIELD_INTEGER, 0 ),
+	
+	DEFINE_FIELD( m_oldOrigin, FIELD_VECTOR ),
+	DEFINE_FIELD( m_bTouchedPhysObject, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_bPhysicsWasFrozen, FIELD_BOOLEAN ),
 
 	DEFINE_PRED_FIELD( m_hVehicle, FIELD_EHANDLE, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD_TOL( m_flMaxspeed, FIELD_FLOAT, FTYPEDESC_INSENDTABLE, 0.5f ),
@@ -370,6 +376,10 @@ BEGIN_PREDICTION_DATA( C_BasePlayer )
 	DEFINE_PRED_ARRAY( m_hViewModel, FIELD_EHANDLE, MAX_VIEWMODELS, FTYPEDESC_INSENDTABLE ),
 
 	DEFINE_FIELD( m_surfaceFriction, FIELD_FLOAT ),
+	
+	DEFINE_FIELD( m_vecPreviouslyPredictedOrigin, FIELD_VECTOR ),
+
+	DEFINE_PRED_FIELD( m_vphysicsCollisionState, FIELD_INTEGER, FTYPEDESC_INSENDTABLE ),
 
 END_PREDICTION_DATA()
 
@@ -471,6 +481,33 @@ void C_BasePlayer::Spawn( void )
 	SharedSpawn();
 
 	m_bWasFreezeFraming = false;
+}
+
+void C_BasePlayer::UpdateOnRemove( void )
+{
+
+
+	if ( m_pPhysicsController )
+	{
+		physenv->DestroyPlayerController( m_pPhysicsController );
+		m_pPhysicsController = NULL;
+	}
+	PhysRemoveShadow( this );
+
+	VPhysicsSetObject( NULL );
+	if( m_pShadowStand )
+	{
+		physenv->DestroyObject( m_pShadowStand );
+		m_pShadowStand = NULL;
+	}
+
+	if( m_pShadowCrouch )
+	{
+		physenv->DestroyObject( m_pShadowCrouch );
+		m_pShadowCrouch = NULL;
+	}
+
+	BaseClass::UpdateOnRemove();
 }
 
 //-----------------------------------------------------------------------------
@@ -978,6 +1015,82 @@ void C_BasePlayer::OnDataChanged( DataUpdateType_t updateType )
 			FogControllerChanged( updateType == DATA_UPDATE_CREATED );
 		}
 	}
+
+	
+#if 0 // p2asw: IsPredicted isn't available in Swarm
+	if( (updateType == DATA_UPDATE_CREATED) && physenv->IsPredicted() )
+#else
+	if( (updateType == DATA_UPDATE_CREATED) && false )
+#endif
+	{
+		if( engine->GetLocalPlayer() == index ) //C_BasePlayer::IsLocalPlayer() doesn't work this early when created. This works just as well
+		{
+			//create physics objects
+			Vector vecAbsOrigin = GetAbsOrigin();
+			Vector vecAbsVelocity = GetAbsVelocity();
+
+			solid_t solid;
+			Q_strncpy( solid.surfaceprop, "player", sizeof(solid.surfaceprop) );
+			solid.params = g_PhysDefaultObjectParams;
+			solid.params.mass = 85.0f;
+			solid.params.inertia = 1e24f;
+			solid.params.enableCollisions = false;
+			//disable drag
+			solid.params.dragCoefficient = 0;
+			// create standing hull
+			m_pShadowStand = PhysModelCreateCustom( this, PhysCreateBbox( VEC_HULL_MIN, VEC_HULL_MAX ), GetLocalOrigin(), GetLocalAngles(), "player_stand", false, &solid );
+			m_pShadowStand->SetCallbackFlags( CALLBACK_GLOBAL_COLLISION | CALLBACK_SHADOW_COLLISION );
+
+			// create crouchig hull
+			m_pShadowCrouch = PhysModelCreateCustom( this, PhysCreateBbox( VEC_DUCK_HULL_MIN, VEC_DUCK_HULL_MAX ), GetLocalOrigin(), GetLocalAngles(), "player_crouch", false, &solid );
+			m_pShadowCrouch->SetCallbackFlags( CALLBACK_GLOBAL_COLLISION | CALLBACK_SHADOW_COLLISION );
+
+			// default to stand
+			VPhysicsSetObject( m_pShadowStand );
+
+			// tell physics lists I'm a shadow controller object
+			PhysAddShadow( this );	
+			m_pPhysicsController = physenv->CreatePlayerController( m_pShadowStand );
+			m_pPhysicsController->SetPushMassLimit( 350.0f );
+			m_pPhysicsController->SetPushSpeedLimit( 50.0f );
+
+			// Give the controller a valid position so it doesn't do anything rash.
+			UpdatePhysicsShadowToPosition( vecAbsOrigin );
+
+			// init state
+			if ( GetFlags() & FL_DUCKING )
+			{
+				SetVCollisionState( vecAbsOrigin, vecAbsVelocity, VPHYS_CROUCH );
+			}
+			else
+			{
+				SetVCollisionState( vecAbsOrigin, vecAbsVelocity, VPHYS_WALK );
+			}
+		}
+	}
+
+	if( IsLocalPlayer() )
+	{
+		IPhysicsObject *pObject = VPhysicsGetObject();
+		if ((pObject != NULL) &&
+			(
+				((m_vphysicsCollisionState == VPHYS_CROUCH) && (pObject == m_pShadowStand)) ||
+				((m_vphysicsCollisionState == VPHYS_WALK) && (pObject == m_pShadowCrouch))
+			) )
+		{
+			//apply networked changes to collision state
+			SetVCollisionState( GetAbsOrigin(), GetAbsVelocity(), m_vphysicsCollisionState );
+		}
+
+		// [msmith] We want to disable prediction while spectating in first person because the server forcibly sets certain predicted fields on players while
+		// they are spectating other players (viewOffset for example).  Keeping prediction enabled modifies these values and causes severe jitter.
+		// This is most noticable while playing on a dedicated server and the specated player ducks (causing changes to viewOffset).
+		int observationMode = GetObserverMode();
+		bool isSpectating = GetObserverTarget() != NULL && ( observationMode == OBS_MODE_IN_EYE || observationMode == OBS_MODE_CHASE );
+		extern bool g_bSpectatingForceCLPredictOff;
+		g_bSpectatingForceCLPredictOff = isSpectating;
+	}
+
 }
 
 
@@ -2022,6 +2135,7 @@ void C_BasePlayer::PostThink( void )
 		}
 
 		StudioFrameAdvance();
+		PostThinkVPhysics();
 	}
 
 	// Even if dead simulate entities
@@ -2289,6 +2403,8 @@ void C_BasePlayer::PhysicsSimulate( void )
 
 	ctx->needsprocessing = false;
 
+	m_bTouchedPhysObject = false;
+
 	// Handle FL_FROZEN.
 	if(GetFlags() & FL_FROZEN)
 	{
@@ -2306,8 +2422,22 @@ void C_BasePlayer::PhysicsSimulate( void )
 		this, 
 		&ctx->cmd, 
 		MoveHelper() );
+	
+	UpdateVPhysicsPosition( m_vNewVPhysicsPosition, m_vNewVPhysicsVelocity, TICK_INTERVAL );
+
 	MoveHelper()->SetHost( NULL );
 #endif
+}
+
+void C_BasePlayer::PhysicsTouchTriggers( const Vector *pPrevAbsOrigin )
+{
+	C_BaseCombatCharacter::PhysicsTouchTriggers( pPrevAbsOrigin );
+
+	if ( this == GetLocalPlayer() )
+	{
+		extern void TouchTriggerSoundOperator( C_BaseEntity *pEntity );
+		TouchTriggerSoundOperator( this );
+	}
 }
 
 const QAngle& C_BasePlayer::GetPunchAngle()

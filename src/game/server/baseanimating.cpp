@@ -2784,7 +2784,25 @@ void CBaseAnimating::SetModel( const char *szModelName )
 
 	PopulatePoseParameters();
 
-
+/*
+#if defined ( PORTAL2 )
+	// After we set our bounds based on the model's default size,
+	// scale the bounds based on any starting scale value set in the map.
+	if ( GetObjectScaleLevel() != 0 )
+	{	
+		CaptureInfo_t captureInfo;
+		UTIL_InitCaptureInfo( captureInfo, this );
+		float flModelScale = 1.0f;
+		if ( captureInfo.pPlacementQuery )
+		{
+			flModelScale = captureInfo.pPlacementQuery->GetScaleForStep( GetObjectScaleLevel(), &captureInfo );
+		}
+		
+		// Scale by this amount to reach our target scale
+		SetModelScale( flModelScale );
+	}
+#endif // PORTAL2 
+*/
 }
 
 //-----------------------------------------------------------------------------

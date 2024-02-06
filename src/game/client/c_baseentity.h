@@ -545,9 +545,9 @@ public:
 	virtual IClientEntity*			GetIClientEntity()		{ return this; }
 	virtual C_BaseEntity*			GetBaseEntity()			{ return this; }
 	virtual IClientThinkable*		GetClientThinkable()	{ return this; }
-	virtual IClientModelRenderable*	GetClientModelRenderable()	{ return NULL; }
+	virtual IClientModelRenderable*	GetClientModelRenderable() { return NULL; }
 	virtual IClientAlphaProperty*	GetClientAlphaProperty();
-// Methods of IClientRenderable
+	// Methods of IClientRenderable
 public:
 
 	virtual const Vector&			GetRenderOrigin( void );
@@ -694,14 +694,18 @@ private:
 public:
 
 	void			VPhysicsSetObject( IPhysicsObject *pPhysics );
+	void			VPhysicsSwapObject( IPhysicsObject *pSwap );
 	// destroy and remove the physics object for this entity
 	virtual void	VPhysicsDestroyObject( void );
 
 	// Purpose: My physics object has been updated, react or extract data
 	virtual void					VPhysicsUpdate( IPhysicsObject *pPhysics );
+	virtual void					VPhysicsShadowUpdate( IPhysicsObject *pPhysics ) {}
 	inline IPhysicsObject			*VPhysicsGetObject( void ) const { return m_pPhysicsObject; }
 	virtual int						VPhysicsGetObjectList( IPhysicsObject **pList, int listMax );
 	virtual bool					VPhysicsIsFlesh( void );
+	virtual void					VPhysicsCompensateForPredictionErrors( const byte *predictedFrame ); //compare your predictive data vs the server data and do something about any discrepancies.
+	float							VPhysicsGetNonShadowMass( void ) const { return m_flNonShadowMass; }
 
 // IClientEntity implementation.
 public:
@@ -1091,8 +1095,10 @@ public:
 	void							AllocateIntermediateData( void );
 	void							DestroyIntermediateData( void );
 	void							ShiftIntermediateDataForward( int slots_to_remove, int previous_last_slot );
+	void							ShiftFirstPredictedIntermediateDataForward( int slots_to_remove );
 
 	void							*GetPredictedFrame( int framenumber );
+	void							*GetFirstPredictedFrame( int framenumber ); //similar to GetPredictedFrame() but only stores the results from the first prediction of each command
 	void							*GetOriginalNetworkDataObject( void );
 	bool							IsIntermediateDataAllocated( void ) const;
 
@@ -1826,6 +1832,7 @@ private:
 protected:
 	// pointer to the entity's physics object (vphysics.dll)
 	IPhysicsObject					*m_pPhysicsObject;	
+	float							m_flNonShadowMass;	// cached mass (shadow controllers set mass to VPHYSICS_MAX_MASS, or 50000)
 
 #if !defined( NO_ENTITY_PREDICTION )
 	bool							m_bPredictionEligible;
@@ -2008,8 +2015,11 @@ private:
 #if !defined( NO_ENTITY_PREDICTION )
 	// For storing prediction results and pristine network state
 	byte							*m_pIntermediateData[ MULTIPLAYER_BACKUP ];
+	byte							*m_pIntermediateData_FirstPredicted[ MULTIPLAYER_BACKUP + 1 ]; //we store just as much as m_pIntermediateData, but also hold onto the frame from our last received packet
 	byte							*m_pOriginalData;
 	int								m_nIntermediateDataCount;
+	int								m_nIntermediateData_FirstPredictedShiftMarker; //can't use predicted commands to optimize first predicted version of ShiftIntermediateDataForward(). Use this instead for its longer lifetime
+	bool							m_bEverHadPredictionErrorsForThisCommand;
 
 	bool							m_bIsPlayerSimulated;
 #endif

@@ -50,7 +50,7 @@
 #include "portal_physics_collisionevent.h"
 #include "physicsshadowclone.h"
 #include "PortalSimulation.h"
-void PortalPhysFrame(float deltaTime); //small wrapper for PhysFrame that simulates all 3 environments at once
+void PortalPhysFrame( float deltaTime ); //small wrapper for PhysFrame that simulates all 3 environments at once
 #endif
 
 void PrecachePhysicsSounds(void);
@@ -58,7 +58,10 @@ void PrecachePhysicsSounds(void);
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-ConVar phys_speeds("phys_speeds", "0");
+ConVar phys_speeds( "phys_speeds", "0" );
+ConVar phys_show_active( "phys_show_active", "0", FCVAR_CHEAT );
+
+ConVar phys_debug_check_contacts("phys_debug_check_contacts", "0", FCVAR_CHEAT|FCVAR_REPLICATED);
 
 // defined in phys_constraint
 extern IPhysicsConstraintEvent *g_pConstraintEvents;
@@ -1650,8 +1653,8 @@ CON_COMMAND(physics_budget, "Times the cost of each active object")
 }
 
 #ifdef PORTAL
-ConVar sv_fullsyncclones("sv_fullsyncclones", "1", FCVAR_CHEAT);
-void PortalPhysFrame(float deltaTime) //small wrapper for PhysFrame that simulates all environments at once
+ConVar sv_fullsyncclones("sv_fullsyncclones", "1", FCVAR_CHEAT );
+void PortalPhysFrame( float deltaTime ) //small wrapper for PhysFrame that simulates all environments at once
 {
 	CPortalSimulator::PrePhysFrame();
 
@@ -1672,30 +1675,30 @@ void PortalPhysFrame(float deltaTime) //small wrapper for PhysFrame that simulat
 #endif
 
 // Advance physics by time (in seconds)
-void PhysFrame(float deltaTime)
+void PhysFrame( float deltaTime )
 {
 	static int lastObjectCount = 0;
 	entitem_t *pItem;
-
-	if (!g_PhysicsHook.ShouldSimulate())
+	
+	if ( !g_PhysicsHook.ShouldSimulate() )
 		return;
-
+	
 	// Trap interrupts and clock changes
-	if (deltaTime > 1.0f || deltaTime < 0.0f)
+	if ( deltaTime > 1.0f || deltaTime < 0.0f )
 	{
 		deltaTime = 0;
-		Msg("Reset physics clock\n");
+		Msg( "Reset physics clock\n" );
 	}
-	else if (deltaTime > 0.1f)	// limit incoming time to 100ms
+	else if ( deltaTime > 0.1f )	// limit incoming time to 100ms
 	{
 		deltaTime = 0.1f;
 	}
 	float simRealTime = 0;
-
+	
 	deltaTime *= phys_timescale.GetFloat();
 	// !!!HACKHACK -- hard limit scaled time to avoid spending too much time in here
 	// Limit to 100 ms
-	if (deltaTime > 0.100f)
+	if ( deltaTime > 0.100f )
 		deltaTime = 0.100f;
 
 	bool bProfile = phys_speeds.GetBool();
@@ -1704,85 +1707,98 @@ void PhysFrame(float deltaTime)
 	{
 		simRealTime = Plat_FloatTime();
 	}
-
-#ifdef _DEBUG
-	physenv->DebugCheckContacts();
+	
+	if ( phys_debug_check_contacts.GetBool() )
+	{
+		physenv->DebugCheckContacts();
+	}
+		
+#ifndef PORTAL //instead of wrapping 1 simulation with this, portal needs to wrap 3
+	g_Collisions.BufferTouchEvents( true );
 #endif
-
-
-	g_Collisions.BufferTouchEvents(true);
-
-
+	
 	{
 		//CMiniProfilerGuard mpg3(&g_mp_ServerPhysicsSimulate);
-		VPROF("physenv->Simulate()");
-		physenv->Simulate(deltaTime);
+		VPROF( "physenv->Simulate()" );
+		physenv->Simulate( deltaTime );
 	}
 
 	int activeCount = physenv->GetActiveObjectCount();
 	IPhysicsObject **pActiveList = NULL;
-	if (activeCount)
+	if ( activeCount )
 	{
-		VPROF("physenv->GetActiveObjects->VPhysicsUpdate");
+		VPROF( "physenv->GetActiveObjects->VPhysicsUpdate" );
 
-		pActiveList = (IPhysicsObject **)stackalloc(sizeof(IPhysicsObject *)*activeCount);
-		physenv->GetActiveObjects(pActiveList);
+		pActiveList = (IPhysicsObject **)stackalloc( sizeof(IPhysicsObject *)*activeCount );
+		physenv->GetActiveObjects( pActiveList );
 
-		for (int i = 0; i < activeCount; i++)
+		for ( int i = 0; i < activeCount; i++ )
 		{
 			CBaseEntity *pEntity = reinterpret_cast<CBaseEntity *>(pActiveList[i]->GetGameData());
-			if (pEntity)
+			if ( pEntity )
 			{
-				if (pEntity->CollisionProp()->DoesVPhysicsInvalidateSurroundingBox())
+				if ( pEntity->CollisionProp()->DoesVPhysicsInvalidateSurroundingBox() )
 				{
 					pEntity->CollisionProp()->MarkSurroundingBoundsDirty();
 				}
-				pEntity->VPhysicsUpdate(pActiveList[i]);
+				pEntity->VPhysicsUpdate( pActiveList[i] );
 			}
 		}
-		stackfree(pActiveList);
+		if ( phys_show_active.GetBool() )
+		{
+			for ( int i = 0; i < activeCount; i++ )
+			{
+				CBaseEntity *pEntity = reinterpret_cast<CBaseEntity *>(pActiveList[i]->GetGameData());
+				if ( pEntity )
+				{
+					NDebugOverlay::Cross3D( pEntity->GetAbsOrigin(), 12, 255, 0, 0, false, 0 );
+					NDebugOverlay::BoxAngles( pEntity->GetAbsOrigin(), pEntity->CollisionProp()->OBBMins(), pEntity->CollisionProp()->OBBMaxs(), pEntity->GetAbsAngles(), 255, 255, 0, 8, 0 );
+				}
+			}
+		}
+		stackfree( pActiveList );
 	}
 
 	{
-		VPROF("PhysFrame VPhysicsShadowUpdate");
-		for (pItem = g_pShadowEntities->m_pItemList; pItem; pItem = pItem->pNext)
+	VPROF( "PhysFrame VPhysicsShadowUpdate" );
+	for ( pItem = g_pShadowEntities->m_pItemList; pItem; pItem = pItem->pNext )
+	{
+		CBaseEntity *pEntity = pItem->hEnt.Get();
+		if ( !pEntity )
 		{
-			CBaseEntity *pEntity = pItem->hEnt.Get();
-			if (!pEntity)
-			{
-				Msg("Dangling pointer to physics entity!!!\n");
-				continue;
-			}
+			Msg( "Dangling pointer to physics entity!!!\n" );
+			continue;
+		}
 
-			IPhysicsObject *pPhysics = pEntity->VPhysicsGetObject();
-			// apply updates
-			if (pPhysics && !pPhysics->IsAsleep())
-			{
-				pEntity->VPhysicsShadowUpdate(pPhysics);
-			}
+		IPhysicsObject *pPhysics = pEntity->VPhysicsGetObject();
+		// apply updates
+		if ( pPhysics && !pPhysics->IsAsleep() )
+		{
+			pEntity->VPhysicsShadowUpdate( pPhysics );
 		}
 	}
-
-	if (bProfile)
+	}
+	
+	if ( bProfile )
 	{
 		simRealTime = Plat_FloatTime() - simRealTime;
 
-		if (simRealTime < 0)
+		if ( simRealTime < 0 )
 			simRealTime = 0;
 		g_PhysAverageSimTime *= 0.8;
 		g_PhysAverageSimTime += (simRealTime * 0.2);
-		if (lastObjectCount != 0 || activeCount != 0)
+		if ( lastObjectCount != 0 || activeCount != 0 )
 		{
-			Msg("Physics: %3d objects, %4.1fms / AVG: %4.1fms\n", activeCount, simRealTime * 1000, g_PhysAverageSimTime * 1000);
+			Msg( "Physics: %3d objects, %4.1fms / AVG: %4.1fms\n", activeCount, simRealTime * 1000, g_PhysAverageSimTime * 1000 );
 		}
 
 		lastObjectCount = activeCount;
 	}
-
-
-	g_Collisions.BufferTouchEvents(false);
+	
+#ifndef PORTAL //instead of wrapping 1 simulation with this, portal needs to wrap 3
+	g_Collisions.BufferTouchEvents( false );
 	g_Collisions.FrameUpdate();
-
+#endif
 }
 
 

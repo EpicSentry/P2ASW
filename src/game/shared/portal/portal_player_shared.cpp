@@ -510,9 +510,7 @@ void CPortal_Player::ForceDuckThisFrame( void )
 		AddFlag( FL_DUCKING );
 		SetCollisionBounds( VEC_DUCK_HULL_MIN, VEC_DUCK_HULL_MAX );
 		SetViewOffset( VEC_DUCK_VIEW );
-
-		// TODO: Move this to client
-#if defined( GAME_DLL )
+//#if defined( GAME_DLL )
 		SetVCollisionState( GetAbsOrigin() + Vector( 0.0f, 0.0f, 18.0f ), GetAbsVelocity(), VPHYS_CROUCH ); //+18 on z to maintain centered state
 		if( m_pPhysicsController )
 		{
@@ -520,7 +518,7 @@ void CPortal_Player::ForceDuckThisFrame( void )
 			m_pPhysicsController->Jump();
 		}
 		SetTouchedPhysics( true );
-#endif
+//#endif
 	}
 }
 

@@ -728,11 +728,7 @@ Vector CNPC_Portal_FloorTurret::GetAttackSpread( CBaseCombatWeapon *pWeapon, CBa
 		}
 	}
 
-#ifndef PORTAL2_DLL
 	return VECTOR_CONE_4DEGREES * ((CBaseHLCombatWeapon::GetDefaultProficiencyValues())[ weaponProficiency ].spreadscale);
-#else
-	return VECTOR_CONE_4DEGREES;
-#endif
 }
 
 void CNPC_Portal_FloorTurret::Retire( void )

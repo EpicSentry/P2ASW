@@ -76,7 +76,7 @@ bool ShaderEditorHandler::Init()
 
 	char modulePath[MAX_PATH*4];
 	// This used to be SWARM_DLL but since we've removed the definition we want to use the swarm dll anyway
-#ifdef PORTAL2_DLL
+#ifdef PORTAL2
 	Q_snprintf( modulePath, sizeof( modulePath ), "%s/bin/shadereditor_swarm.dll\0", engine->GetGameDirectory() );
 #elif SOURCE_2006
 	Q_snprintf( modulePath, sizeof( modulePath ), "%s/bin/shadereditor_2006.dll\0", engine->GetGameDirectory() );

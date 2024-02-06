@@ -1288,6 +1288,7 @@ void CBaseEntity::VPhysicsSetObject( IPhysicsObject *pPhysics )
 #endif
 	if ( m_pPhysicsObject )
 	{
+		m_flNonShadowMass = m_pPhysicsObject->GetMass();
 #ifndef CLIENT_DLL
 		if ( m_pPhysicsObject->IsStatic() )
 		{
@@ -1299,6 +1300,20 @@ void CBaseEntity::VPhysicsSetObject( IPhysicsObject *pPhysics )
 	{
 		CollisionRulesChanged();
 	}
+}
+
+void CBaseEntity::VPhysicsSwapObject( IPhysicsObject *pSwap )
+{
+	if ( !pSwap )
+	{
+		PhysRemoveShadow(this);
+	}
+
+	if ( !m_pPhysicsObject )
+	{
+		Warning( "Bad vphysics swap for %s\n", STRING(m_iClassname) );
+	}
+	m_pPhysicsObject = pSwap;
 }
 
 //-----------------------------------------------------------------------------
@@ -1330,6 +1345,8 @@ bool CBaseEntity::VPhysicsInitSetup()
 	// If this entity already has a physics object, then it should have been deleted prior to making this call.
 	Assert(!m_pPhysicsObject);
 	VPhysicsDestroyObject();
+
+	m_flNonShadowMass = -1.0f;
 
 	// make sure absorigin / absangles are correct
 	return true;
@@ -1788,23 +1805,23 @@ void CBaseEntity::FireBullets( const FireBulletsInfo_t &info )
 			// Half of the shotgun pellets are hulls that make it easier to hit targets with the shotgun.
 #ifdef PORTAL
 			Ray_t rayBullet;
-			rayBullet.Init(info.m_vecSrc, vecEnd);
-			pShootThroughPortal = UTIL_Portal_FirstAlongRay(rayBullet, fPortalFraction);
-			if (!UTIL_Portal_TraceRay_Bullets(pShootThroughPortal, rayBullet, MASK_SHOT, &traceFilter, &tr))
+			rayBullet.Init( info.m_vecSrc, vecEnd );
+			pShootThroughPortal = UTIL_Portal_FirstAlongRay( rayBullet, fPortalFraction );
+			if ( !UTIL_Portal_TraceRay_Bullets( pShootThroughPortal, rayBullet, MASK_SHOT, &traceFilter, &tr ) )
 			{
 				pShootThroughPortal = NULL;
 			}
 #else
-			AI_TraceHull(info.m_vecSrc, vecEnd, Vector(-3, -3, -3), Vector(3, 3, 3), MASK_SHOT, &traceFilter, &tr);
+			AI_TraceHull( info.m_vecSrc, vecEnd, Vector( -3, -3, -3 ), Vector( 3, 3, 3 ), MASK_SHOT, &traceFilter, &tr );
 #endif //#ifdef PORTAL
 		}
 		else
 		{
 #ifdef PORTAL
 			Ray_t rayBullet;
-			rayBullet.Init(info.m_vecSrc, vecEnd);
-			pShootThroughPortal = UTIL_Portal_FirstAlongRay(rayBullet, fPortalFraction);
-			if (!UTIL_Portal_TraceRay_Bullets(pShootThroughPortal, rayBullet, MASK_SHOT, &traceFilter, &tr))
+			rayBullet.Init( info.m_vecSrc, vecEnd );
+			pShootThroughPortal = UTIL_Portal_FirstAlongRay( rayBullet, fPortalFraction );
+			if ( !UTIL_Portal_TraceRay_Bullets( pShootThroughPortal, rayBullet, MASK_SHOT, &traceFilter, &tr ) )
 			{
 				pShootThroughPortal = NULL;
 			}
@@ -1823,13 +1840,14 @@ void CBaseEntity::FireBullets( const FireBulletsInfo_t &info )
 			tr.endpos = tr.startpos;
 			tr.fraction = 0.0f;
 		}
-
+		
+	// bullet's final direction can be changed by passing through a portal
 #ifdef PORTAL
-		if (!tr.startsolid)
+		if ( !tr.startsolid && tr.fraction > 0.0f )
 		{
 			vecDir = tr.endpos - tr.startpos;
-			VectorNormalize(vecDir);
-	}
+			VectorNormalize( vecDir );
+		}
 #endif
 
 #ifdef GAME_DLL
@@ -1842,24 +1860,23 @@ void CBaseEntity::FireBullets( const FireBulletsInfo_t &info )
 #ifdef GAME_DLL
 			Vector vBubbleStart = info.m_vecSrc;
 			Vector vBubbleEnd = tr.endpos;
-
-
+			
 #ifdef PORTAL
-			if (pShootThroughPortal)
+			if ( pShootThroughPortal )
 			{
-				vBubbleEnd = info.m_vecSrc + (vecEnd - info.m_vecSrc) * fPortalFraction;
+				vBubbleEnd = info.m_vecSrc + ( vecEnd - info.m_vecSrc ) * fPortalFraction;
 			}
 #endif //#ifdef PORTAL
 
 			CreateBubbleTrailTracer( vBubbleStart, vBubbleEnd, vecDir );
 			
 #ifdef PORTAL
-			if (pShootThroughPortal)
+			if ( pShootThroughPortal )
 			{
 				Vector vTransformedIntersection;
-				UTIL_Portal_PointTransform(pShootThroughPortal->MatrixThisToLinked(), vBubbleEnd, vTransformedIntersection);
+				UTIL_Portal_PointTransform( pShootThroughPortal->MatrixThisToLinked(), vBubbleEnd, vTransformedIntersection );
 
-				CreateBubbleTrailTracer(vTransformedIntersection, tr.endpos, vecDir);
+				CreateBubbleTrailTracer( vTransformedIntersection, tr.endpos, vecDir );
 			}
 #endif //#ifdef PORTAL
 
@@ -2009,34 +2026,34 @@ void CBaseEntity::FireBullets( const FireBulletsInfo_t &info )
 				Tracer.endpos = vecTracerDest;
 
 #ifdef PORTAL
-				if (pShootThroughPortal)
+				if ( pShootThroughPortal )
 				{
-					Tracer.endpos = info.m_vecSrc + (vecEnd - info.m_vecSrc) * fPortalFraction;
+					Tracer.endpos = info.m_vecSrc + ( vecEnd - info.m_vecSrc ) * fPortalFraction;
 				}
 #endif //#ifdef PORTAL
 
 				MakeTracer( vecTracerSrc, Tracer, pAmmoDef->TracerType(info.m_iAmmoType) );
-
+				
 #ifdef PORTAL
-				if (pShootThroughPortal)
+				if ( pShootThroughPortal )
 				{
 					Vector vTransformedIntersection;
-					UTIL_Portal_PointTransform(pShootThroughPortal->MatrixThisToLinked(), Tracer.endpos, vTransformedIntersection);
-					ComputeTracerStartPosition(vTransformedIntersection, &vecTracerSrc);
+					UTIL_Portal_PointTransform( pShootThroughPortal->MatrixThisToLinked(), Tracer.endpos, vTransformedIntersection );
+					ComputeTracerStartPosition( vTransformedIntersection, &vecTracerSrc );
 
 					Tracer.endpos = vecTracerDest;
 
-					MakeTracer(vecTracerSrc, Tracer, pAmmoDef->TracerType(info.m_iAmmoType));
+					MakeTracer( vecTracerSrc, Tracer, pAmmoDef->TracerType(info.m_iAmmoType) );
 
 					// Shooting through a portal, the damage direction is translated through the passed-through portal
 					// so the damage indicator hud animation is correct
 					Vector vDmgOriginThroughPortal;
-					UTIL_Portal_PointTransform(pShootThroughPortal->MatrixThisToLinked(), info.m_vecSrc, vDmgOriginThroughPortal);
-					g_MultiDamage.SetDamagePosition(vDmgOriginThroughPortal);
+					UTIL_Portal_PointTransform( pShootThroughPortal->MatrixThisToLinked(), info.m_vecSrc, vDmgOriginThroughPortal );
+					g_MultiDamage.SetDamagePosition ( vDmgOriginThroughPortal );
 				}
 				else
 				{
-					g_MultiDamage.SetDamagePosition(info.m_vecSrc);
+					g_MultiDamage.SetDamagePosition ( info.m_vecSrc );
 				}
 #endif //#ifdef PORTAL
 			}

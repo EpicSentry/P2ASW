@@ -592,7 +592,7 @@ bool CNPC_FloorTurret::OnAttemptPhysGunPickup( CBasePlayer *pPhysGunUser, PhysGu
 //-----------------------------------------------------------------------------
 bool CNPC_FloorTurret::HandleInteraction(int interactionType, void *data, CBaseCombatCharacter *sourceEnt)
 {
-#ifndef PORTAL2_DLL
+#ifndef PORTAL2
 	if ( interactionType == g_interactionCombineBash )
 	{
 		// We've been bashed by a combine soldier. Remember who it was, if we haven't got an active kicker
@@ -1959,11 +1959,7 @@ Vector CNPC_FloorTurret::GetAttackSpread( CBaseCombatWeapon *pWeapon, CBaseEntit
 		}
 	}
 
-#ifndef PORTAL2_DLL
 	return VECTOR_CONE_10DEGREES * ((CBaseHLCombatWeapon::GetDefaultProficiencyValues())[ weaponProficiency ].spreadscale);
-#else
-	return VECTOR_CONE_10DEGREES;
-#endif
 
 }
 

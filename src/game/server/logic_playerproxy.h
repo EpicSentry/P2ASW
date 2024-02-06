@@ -18,7 +18,14 @@ class CLogicPlayerProxy : public CLogicalEntity
 
 public:
 	// FIXME: Subclass
+#ifdef PORTAL2
+	COutputEvent m_OnStartSlowingTime;
+	COutputEvent m_OnStopSlowingTime;
+	COutputEvent m_OnCoopPing;
 
+	COutputEvent m_OnPrimaryPortalPlaced;
+	COutputEvent m_OnSecondaryPortalPlaced;
+#endif // PORTAL2
 
 #if defined( HL2_DLL )
 	COutputEvent m_OnFlashlightOn;

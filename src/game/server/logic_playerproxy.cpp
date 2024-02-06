@@ -41,10 +41,10 @@ DEFINE_INPUTFUNC( FIELD_VOID,				"ForcePhysicsGrabController", InputForcePhysics
 DEFINE_INPUTFUNC( FIELD_VOID,				"ResetGrabControllerBehavior", InputResetGrabControllerBehavior ),
 DEFINE_INPUTFUNC( FIELD_VOID,				"PaintPlayerWithPortalPaint", InputPaintPlayerWithPortalPaint ),
 DEFINE_INPUTFUNC( FIELD_FLOAT,				"SetMotionBlurAmount", InputSetMotionBlurAmount ),
-#endif
+#endif // PORTAL2
 
 // HL2 / Episodic
-#if defined HL2_EPISODIC
+#if defined HL2_EPISODIC && !defined( PORTAL2 )
 DEFINE_OUTPUT( m_OnFlashlightOn,			"OnFlashlightOn" ),
 DEFINE_OUTPUT( m_OnFlashlightOff,			"OnFlashlightOff" ),
 DEFINE_OUTPUT( m_PlayerMissedAR2AltFire,	"PlayerMissedAR2AltFire" ),
@@ -102,7 +102,7 @@ void CLogicPlayerProxy::InputRequestPlayerHealth( inputdata_t &inputdata )
 	m_RequestedPlayerHealth.Set( m_hPlayer->GetHealth(), inputdata.pActivator, inputdata.pCaller );
 }
 
-#if defined HL2_EPISODIC
+#if defined HL2_EPISODIC && !defined( PORTAL2 )
 
 extern ConVar hl2_darkness_flashlight_factor;
 

@@ -192,10 +192,6 @@ BEGIN_NETWORK_TABLE_NOBASE( CBeam, DT_Beam )
 	SendPropInt		(SENDINFO(m_clrRender),		32,	SPROP_UNSIGNED | SPROP_CHANGES_OFTEN, SendProxy_Color32ToInt32 ),
 	SendPropInt		(SENDINFO(m_nClipStyle), CBeam::kBEAMCLIPSTYLE_NUMBITS+1, SPROP_UNSIGNED ),
 	SendPropVector	(SENDINFO(m_vecEndPos),		-1,	SPROP_COORD ),
-#ifdef PORTAL
-	SendPropBool(SENDINFO(m_bDrawInMainRender)),
-	SendPropBool(SENDINFO(m_bDrawInPortalRender)),
-#endif
 	SendPropModelIndex(SENDINFO(m_nModelIndex) ),
 	SendPropVector (SENDINFO(m_vecOrigin), 19, SPROP_CHANGES_OFTEN,	MIN_COORD_INTEGER, MAX_COORD_INTEGER),
 	SendPropEHandle(SENDINFO_NAME(m_hMoveParent, moveparent) ),
@@ -233,10 +229,6 @@ BEGIN_NETWORK_TABLE_NOBASE( CBeam, DT_Beam )
 	RecvPropFloat(RECVINFO(m_flFrame)),
 	RecvPropInt(RECVINFO(m_nClipStyle)),
 	RecvPropVector(RECVINFO(m_vecEndPos)),
-#ifdef PORTAL
-	RecvPropBool(RECVINFO(m_bDrawInMainRender)),
-	RecvPropBool(RECVINFO(m_bDrawInPortalRender)),
-#endif
 	RecvPropInt(RECVINFO(m_nModelIndex)),
 
 	RecvPropVector(RECVINFO_NAME(m_vecNetworkOrigin, m_vecOrigin)),
@@ -280,11 +272,6 @@ BEGIN_DATADESC( CBeam )
 
 	DEFINE_KEYFIELD( m_nDissolveType, FIELD_INTEGER, "dissolvetype" ),
 
-#ifdef PORTAL
-		DEFINE_FIELD(m_bDrawInMainRender, FIELD_BOOLEAN),
-		DEFINE_FIELD(m_bDrawInPortalRender, FIELD_BOOLEAN),
-#endif
-
 	// Inputs
 	DEFINE_INPUTFUNC( FIELD_FLOAT, "Width", InputWidth ),
 	DEFINE_INPUTFUNC( FIELD_FLOAT, "Noise", InputNoise ),
@@ -321,10 +308,6 @@ BEGIN_PREDICTION_DATA( CBeam )
 	DEFINE_PRED_FIELD( m_flFrame, FIELD_FLOAT, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD( m_clrRender, FIELD_INTEGER, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD_TOL( m_vecEndPos, FIELD_VECTOR, FTYPEDESC_INSENDTABLE, 0.125f ),
-#ifdef PORTAL
-		DEFINE_PRED_FIELD(m_bDrawInMainRender, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE),
-		DEFINE_PRED_FIELD(m_bDrawInPortalRender, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE),
-#endif
 	DEFINE_PRED_FIELD( m_nModelIndex, FIELD_INTEGER, FTYPEDESC_INSENDTABLE | FTYPEDESC_MODELINDEX ),
 	DEFINE_PRED_FIELD_TOL( m_vecOrigin, FIELD_VECTOR, FTYPEDESC_INSENDTABLE, 0.125f ),
 	
@@ -352,11 +335,6 @@ CBeam::CBeam( void )
 #else
 	m_queryHandleHalo = 0;
 	AddToEntityList(ENTITY_LIST_SIMULATE);
-#endif
-
-#ifdef PORTAL
-	m_bDrawInMainRender = true;
-	m_bDrawInPortalRender = true;
 #endif
 }
 
@@ -980,14 +958,6 @@ int CBeam::DrawModel( int flags, const RenderableInstance_t &instance )
 
 	if ( CurrentViewID() == VIEW_SHADOW_DEPTH_TEXTURE )
 		return 0;
-
-#ifdef PORTAL
-	if ((!g_pPortalRender->IsRenderingPortal() && !m_bDrawInMainRender) ||
-		(g_pPortalRender->IsRenderingPortal() && !m_bDrawInPortalRender))
-	{
-		return 0;
-	}
-#endif //#ifdef PORTAL
 
 	// Tracker 16432:  If rendering a savegame screenshot don't draw beams 
 	//   who have viewmodels as their attached entity

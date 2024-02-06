@@ -494,6 +494,8 @@ $Project
 		$File	"maprules.h"
 		$File	"MaterialModifyControl.cpp"
 		$File	"$SRCDIR\public\mathlib\mathlib.h"
+		$File	"memorylog.cpp"
+		$File	"memorylog.h"
 		$File	"message_entity.cpp"
 		$File	"$SRCDIR\public\model_types.h"
 		$File	"modelentities.cpp"

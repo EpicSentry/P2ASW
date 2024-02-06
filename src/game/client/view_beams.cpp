@@ -286,11 +286,6 @@ bool ComputeBeamEntPosition( C_BaseEntity *pEnt, int nAttachment, bool bInterpre
 
 Beam_t::Beam_t()
 {
-#ifdef PORTAL
-	m_bDrawInMainRender = true;
-	m_bDrawInPortalRender = true;
-#endif
-
 	Reset();
 }
 
@@ -429,14 +424,6 @@ extern ConVar r_drawviewmodel;
 
 int Beam_t::DrawModel( int flags, const RenderableInstance_t &instance )
 {
-#ifdef PORTAL
-	if ((!g_pPortalRender->IsRenderingPortal() && !m_bDrawInMainRender) ||
-		(g_pPortalRender->IsRenderingPortal() && !m_bDrawInPortalRender))
-	{
-		return 0;
-	}
-#endif //#ifdef PORTAL
-
 	// Tracker 16432:  If rendering a savegame screenshot don't draw beams 
 	//   who have viewmodels as their attached entity
 	if ( g_bRenderingScreenshot || !r_drawviewmodel.GetBool() )
@@ -2189,115 +2176,13 @@ void CViewRenderBeams::DrawBeam( C_Beam* pbeam, const RenderableInstance_t &inst
 	beamInfo.m_flAmplitude = pbeam->GetNoise();
 	beamInfo.m_flBrightness = instance.m_nAlpha;
 	beamInfo.m_flSpeed = pbeam->GetScrollRate();
+	beamInfo.m_nFlags = pbeam->GetBeamFlags();
 
-#ifdef PORTAL	// Beams need to recursively draw through portals
-	// Trace to see if we've intersected a portal
-	float fEndFraction;
-	Ray_t rayBeam;
-
-	bool bIsReversed = (pbeam->GetBeamFlags() & FBEAM_REVERSED) != 0x0;
-
-	Vector vRayStartPoint, vRayEndPoint;
-
-	vRayStartPoint = beamInfo.m_vecStart;
-	vRayEndPoint = beamInfo.m_vecEnd;
-
-	if (beamType == BEAM_ENTPOINT || beamType == BEAM_ENTS || beamType == BEAM_LASER)
+	if ( pbeam->GetBeamFlags() & FBEAM_REVERSED )
 	{
-		ComputeBeamEntPosition(pbeam->m_hAttachEntity[0], pbeam->m_nAttachIndex[0], false, vRayStartPoint);
-		ComputeBeamEntPosition(pbeam->m_hAttachEntity[1], pbeam->m_nAttachIndex[1], false, vRayEndPoint);
+		V_swap( beamInfo.m_vecStart, beamInfo.m_vecEnd );
+		V_swap( beamInfo.m_flWidth, beamInfo.m_flEndWidth );
 	}
-
-	if (!bIsReversed)
-		rayBeam.Init(vRayStartPoint, vRayEndPoint);
-	else
-		rayBeam.Init(vRayEndPoint, vRayStartPoint);
-
-	CBaseEntity *pStartEntity = pbeam->GetStartEntityPtr();
-
-	CTraceFilterSkipClassname traceFilter(pStartEntity, "prop_energy_ball", COLLISION_GROUP_NONE);
-
-	if (!pEntityBeamTraceFilter && pStartEntity)
-		pEntityBeamTraceFilter = pStartEntity->GetBeamTraceFilter();
-
-	CTraceFilterChain traceFilterChain(&traceFilter, pEntityBeamTraceFilter);
-
-	C_Portal_Base2D *pPortal = UTIL_Portal_TraceRay_Beam(rayBeam, MASK_SHOT, &traceFilterChain, &fEndFraction);
-
-	// Get the point that we hit a portal or wall
-	Vector vEndPoint = rayBeam.m_Start + rayBeam.m_Delta * fEndFraction;
-
-	if (pPortal)
-	{
-		// Prevent infinite recursion by lower the brightness each call
-		int iOldBrightness = pbeam->GetBrightness();
-
-		if (iOldBrightness > 16)
-		{
-			// Remember the old values of the beam before changing it for the next call
-			Vector vOldStart = pbeam->GetAbsStartPos();
-			Vector vOldEnd = pbeam->GetAbsEndPos();
-			//float fOldWidth = pbeam->GetEndWidth();
-			C_BaseEntity *pOldStartEntity = pbeam->GetStartEntityPtr();
-			C_BaseEntity *pOldEndEntity = pbeam->GetEndEntityPtr();
-			int iOldStartAttachment = pbeam->GetStartAttachment();
-			int iOldEndAttachment = pbeam->GetEndAttachment();
-			int iOldType = pbeam->GetType();
-
-			// Get the transformed positions of the sub beam in the other portal's space
-			Vector vTransformedStart, vTransformedEnd;
-			VMatrix matThisToLinked = pPortal->MatrixThisToLinked();
-			UTIL_Portal_PointTransform(matThisToLinked, vEndPoint, vTransformedStart);
-			UTIL_Portal_PointTransform(matThisToLinked, rayBeam.m_Start + rayBeam.m_Delta, vTransformedEnd);
-
-			// Set up the sub beam for the next call
-			pbeam->SetBrightness(iOldBrightness - 16);
-			if (bIsReversed)
-				pbeam->PointsInit(vTransformedEnd, vTransformedStart);
-			else
-				pbeam->PointsInit(vTransformedStart, vTransformedEnd);
-			if (bIsReversed)
-				pbeam->SetEndWidth(pbeam->GetWidth());
-			pbeam->SetStartEntity(pPortal->m_hLinkedPortal);
-
-			// Draw the sub beam
-			bBeamDrawingThroughPortal = true;
-			DrawBeam(pbeam, instance, pEntityBeamTraceFilter);
-			bBeamDrawingThroughPortal = true;
-
-			// Restore the original values
-			pbeam->SetBrightness(iOldBrightness);
-			pbeam->SetStartPos(vOldStart);
-			pbeam->SetEndPos(vOldEnd);
-			//if ( bIsReversed )
-			//	pbeam->SetEndWidth( fOldWidth );
-			if (pOldStartEntity)
-				pbeam->SetStartEntity(pOldStartEntity);
-			if (pOldEndEntity)
-				pbeam->SetEndEntity(pOldEndEntity);
-			pbeam->SetStartAttachment(iOldStartAttachment);
-			pbeam->SetEndAttachment(iOldEndAttachment);
-			pbeam->SetType(iOldType);
-
-			// Doesn't use a hallow or taper the beam because we recursed
-			beamInfo.m_nHaloIndex = 0;
-			if (!bIsReversed)
-				beamInfo.m_flEndWidth = beamInfo.m_flWidth;
-		}
-	}
-
-	// Clip to the traced end point (portal or wall)
-	if (bBeamDrawingThroughPortal)
-	{
-		if (bIsReversed)
-			beamInfo.m_vecStart = vEndPoint;
-		else
-			beamInfo.m_vecEnd = vEndPoint;
-	}
-
-	bBeamDrawingThroughPortal = false;
-#endif
-
 
 	SetupBeam( &beam, beamInfo );
 

@@ -959,6 +959,11 @@ bool CNavMesh::Save( void ) const
 	{
 		return false;
 	}
+	
+#if defined( PORTAL2 )
+	// Nav mesh unused in Portal2, don't want to allocate the 1MB fileBuffer.
+	return false;
+#endif
 
 	CUtlBuffer fileBuffer( 4096, 1024*1024 );
 
@@ -1177,6 +1182,11 @@ const CUtlVector< Place > *CNavMesh::GetPlacesFromNavFile( bool *hasUnnamedPlace
 	char filename[256];
 	Q_snprintf( filename, sizeof( filename ), FORMAT_NAVFILE, STRING( gpGlobals->mapname ) );
 
+#if defined( PORTAL2 )
+	// Nav mesh unused in Portal2, don't want to allocate the 1MB fileBuffer.
+	return NULL;
+#endif
+
 	CUtlBuffer fileBuffer( 4096, 1024*1024, CUtlBuffer::READ_ONLY );
 	if ( !filesystem->ReadFile( filename, "GAME", fileBuffer ) )	// this ignores .nav files embedded in the .bsp ...
 	{
@@ -1267,6 +1277,11 @@ NavErrorType CNavMesh::Load( void )
 	// nav filename is derived from map filename
 	char filename[256];
 	Q_snprintf( filename, sizeof( filename ), FORMAT_NAVFILE, STRING( gpGlobals->mapname ) );
+
+#if defined( PORTAL2 )
+	// Nav mesh unused in Portal2, don't want to allocate the 1MB fileBuffer.
+	return NAV_CANT_ACCESS_FILE;
+#endif
 
 	bool navIsInBsp = false;
 	CUtlBuffer fileBuffer( 4096, 1024*1024, CUtlBuffer::READ_ONLY );

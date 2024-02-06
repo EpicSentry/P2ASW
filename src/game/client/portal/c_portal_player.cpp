@@ -3674,16 +3674,17 @@ void C_Portal_Player::ApplyPredictedPortalTeleportation( C_Portal_Base2D *pEnter
 	}
 	
 	// p2asw: This fixes an issue where the viewmodel's last facing doesn't reorient in multiplayer when teleporting
-	//{
-	for ( int i = 0; i < MAX_VIEWMODELS; i++ )
+	if ( prediction->IsFirstTimePredicted() )
 	{
-		CBaseViewModel *pViewModel = GetViewModel( i );
-		if ( !pViewModel )
-			continue;
+		for ( int i = 0; i < MAX_VIEWMODELS; i++ )
+		{
+			CBaseViewModel *pViewModel = GetViewModel( i );
+			if ( !pViewModel )
+				continue;
 
-		pViewModel->m_vecLastFacing = pEnteredPortal->m_matrixThisToLinked.ApplyRotation( pViewModel->m_vecLastFacing );
+			pViewModel->m_vecLastFacing = pEnteredPortal->m_matrixThisToLinked.ApplyRotation( pViewModel->m_vecLastFacing );
+		}
 	}
-	//}
 
 	//Warning( "C_Portal_Player::ApplyPredictedPortalTeleportation() ent:%i slot:%i\n", entindex(), engine->GetActiveSplitScreenPlayerSlot() );
 	ApplyTransformToInterpolators( pEnteredPortal->m_matrixThisToLinked, gpGlobals->curtime, false, bForcedDuck );

@@ -47,7 +47,7 @@
 #ifdef GAMEUI_EMBEDDED
 #if defined( PORTAL2 )
 //#include "gameui/basemodpanel.h"
-#include "swarm/gameui/swarm/basemodpanel.h"
+#include "portal2/gameui/portal2/basemodpanel.h"
 #elif defined( SWARM_DLL )
 #include "swarm/gameui/swarm/basemodpanel.h"
 #elif defined( CSTRIKE15 )
@@ -113,11 +113,7 @@ static ConVar v_centerspeed( "v_centerspeed","500" );
 
 // 54 degrees approximates a 35mm camera - we determined that this makes the viewmodels
 // and motions look the most natural.
-#ifdef PORTAL2
-ConVar v_viewmodel_fov( "viewmodel_fov", "50", FCVAR_CHEAT );
-#else
-ConVar v_viewmodel_fov( "viewmodel_fov", "54", FCVAR_CHEAT );
-#endif
+ConVar v_viewmodel_fov( "viewmodel_fov", "54", FCVAR_ARCHIVE );
 
 static ConVar mat_viewportscale( "mat_viewportscale", "1.0", FCVAR_CHEAT, "Scale down the main viewport (to reduce GPU impact on CPU profiling)",
 								  true, (1.0f / 640.0f), true, 1.0f );

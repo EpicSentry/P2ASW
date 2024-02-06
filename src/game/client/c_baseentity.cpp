@@ -671,6 +671,8 @@ BEGIN_PREDICTION_DATA_NO_BASE( C_BaseEntity )
 //	DEFINE_FIELD( m_ModelInstance, FIELD_SHORT ),
 	DEFINE_FIELD( m_flProxyRandomValue, FIELD_FLOAT ),
 
+	DEFINE_FIELD( m_bEverHadPredictionErrorsForThisCommand, FIELD_BOOLEAN ),
+
 #if defined( USE_PREDICTABLEID )
 	DEFINE_PRED_FIELD( m_hPlayerSimulationOwner, FIELD_EHANDLE, FTYPEDESC_INSENDTABLE ),	
 //	DEFINE_FIELD( m_PredictableID, FIELD_INTEGER ),
@@ -1548,6 +1550,85 @@ bool C_BaseEntity::VPhysicsIsFlesh( void )
 	}
 	return false;
 }
+
+void C_BaseEntity::VPhysicsCompensateForPredictionErrors( const byte *predicted_state_data )
+{
+	Assert( GetPredictable() );
+#if 0
+#if defined( DBGFLAG_ASSERT )
+	const byte *networked_state_data = (const byte *)GetOriginalNetworkDataObject();
+#endif
+
+#if 0
+	{
+		int iSavedCommand;
+		int iNetworkedCommand;
+		{
+			const typedescription_t *tdSavedCommand = CPredictionCopy::FindFlatFieldByName( "m_SavedCommandNum", GetPredDescMap() );
+			Assert( tdSavedCommand );
+			Q_memcpy( &iSavedCommand, predicted_state_data + tdSavedCommand->flatOffset[ TD_OFFSET_PACKED ], sizeof( int ) );
+			Q_memcpy( &iNetworkedCommand, networked_state_data + tdSavedCommand->flatOffset[ TD_OFFSET_PACKED ], sizeof( int ) );
+		}
+		Assert( iNetworkedCommand == iSavedCommand );
+	}
+#endif
+
+	IPhysicsObject *pPhysicsObject = VPhysicsGetObject();
+	IPredictedPhysicsObject *pPredictedObject = pPhysicsObject ? pPhysicsObject->GetPredictedInterface() : NULL;
+	if( pPredictedObject )
+	{
+		Vector vPredictedOrigin;
+		
+		{
+			const typedescription_t *tdOrigin = CPredictionCopy::FindFlatFieldByName( "m_vecNetworkOrigin", GetPredDescMap() );
+			Assert( tdOrigin );
+			Q_memcpy( &vPredictedOrigin, predicted_state_data + tdOrigin->flatOffset[ TD_OFFSET_PACKED ], sizeof( Vector ) );
+
+#if defined( DBGFLAG_ASSERT )
+			Vector vNetworkedOrigin;
+			Q_memcpy( &vNetworkedOrigin, networked_state_data + tdOrigin->flatOffset[ TD_OFFSET_PACKED ], sizeof( Vector ) );
+			Assert( vNetworkedOrigin == m_vecNetworkOrigin );
+#endif
+		}
+
+		Vector vOriginDelta = m_vecNetworkOrigin - vPredictedOrigin;
+
+		
+
+		Vector vPredictedVelocity;
+		{
+			const typedescription_t *tdVelocity = CPredictionCopy::FindFlatFieldByName( "m_vecAbsVelocity", GetPredDescMap() );			
+			Assert( tdVelocity );
+			Q_memcpy( &vPredictedVelocity, predicted_state_data + tdVelocity->flatOffset[ TD_OFFSET_PACKED ], sizeof( Vector ) );
+		}
+
+		Vector vVelocityDelta = m_vecAbsVelocity - vPredictedVelocity;
+
+#if defined( DEBUG_MOTION_CONTROLLERS )
+		extern void DebugVelocity( const char *szString, const Vector &vStart, const Vector &vEnd, uint8 iRed, uint8 iGreen, uint8 iBlue );
+		extern void DebugBox( const char *szString, const Vector &vPos, const Vector &vSize, uint8 iRed, uint8 iGreen, uint8 iBlue, uint8 iAlpha );
+		if( (GetFlags() & FL_ONGROUND) == 0 )
+		{
+			DebugVelocity( "Compensate", vPredictedOrigin, m_vecNetworkOrigin, 0, 0, 255 );
+			DebugBox( "Compensate", m_vecNetworkOrigin, Vector( 0.25f, 0.25f, 0.25f ), 0, 255, 0, 100 );
+		}
+#endif
+
+#if 0
+		const float kMaxVelocityDelta = 50.0f;
+		float fVelocityLengthSqr = vVelocityDelta.LengthSqr();
+		if( vVelocityDelta.LengthSqr() > (kMaxVelocityDelta * kMaxVelocityDelta) )
+		{
+			vVelocityDelta *= (kMaxVelocityDelta / sqrtf(fVelocityLengthSqr));
+		}
+#endif
+		
+		pPredictedObject->SetErrorDelta_Position( vOriginDelta );
+		pPredictedObject->SetErrorDelta_Velocity( vVelocityDelta );
+	}	
+#endif
+}
+
 
 //-----------------------------------------------------------------------------
 // Returns the health fraction
@@ -5319,6 +5400,21 @@ void C_BaseEntity::AllocateIntermediateData( void )
 		Q_memset( m_pIntermediateData[ i ], 0, allocsize );
 	}
 
+#if 0
+	if( !physenv || physenv->IsPredicted() ) //either predicted physics or don't know if we're predicting physics
+#else
+	if ( false )
+#endif
+	{
+		for ( int i = 0; i < ARRAYSIZE( m_pIntermediateData_FirstPredicted ); i++ )
+		{
+			m_pIntermediateData_FirstPredicted[i] = new unsigned char[ allocsize ];
+			Q_memset( m_pIntermediateData_FirstPredicted[ i ], 0, allocsize );
+		}
+
+		m_nIntermediateData_FirstPredictedShiftMarker = -1;
+	}
+
 	m_nIntermediateDataCount = 0;
 #endif
 }
@@ -5336,6 +5432,16 @@ void C_BaseEntity::DestroyIntermediateData( void )
 		delete[] m_pIntermediateData[ i ];
 		m_pIntermediateData[ i ] = NULL;
 	}
+
+	if( m_pIntermediateData_FirstPredicted[0] != NULL )
+	{
+		for ( int i = 0; i < ARRAYSIZE( m_pIntermediateData_FirstPredicted ); i++ )
+		{
+			delete[] m_pIntermediateData_FirstPredicted[ i ];
+			m_pIntermediateData_FirstPredicted[ i ] = NULL;
+		}		
+	}
+
 	delete[] m_pOriginalData;
 	m_pOriginalData = NULL;
 
@@ -5383,6 +5489,55 @@ void C_BaseEntity::ShiftIntermediateDataForward( int slots_to_remove, int number
 #endif
 }
 
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+// Input  : slots_to_remove -  
+//-----------------------------------------------------------------------------
+void C_BaseEntity::ShiftFirstPredictedIntermediateDataForward( int slots_to_remove )
+{
+#if !defined( NO_ENTITY_PREDICTION )
+	if ( !m_pIntermediateData_FirstPredicted[0] || m_nIntermediateData_FirstPredictedShiftMarker == -1 )
+		return;
+
+	if( m_nIntermediateData_FirstPredictedShiftMarker <= slots_to_remove ) //acknowledged more commands than we predicted, early out
+	{
+		m_nIntermediateData_FirstPredictedShiftMarker = 0;
+		return;
+	}
+
+	// Just moving pointers, yeah
+	byte *saved_FirstPredicted[ ARRAYSIZE( m_pIntermediateData_FirstPredicted ) ];
+
+	// Remember first slots
+	int i = 0;
+	for ( ; i < slots_to_remove; i++ )
+	{
+		saved_FirstPredicted[ i ] = m_pIntermediateData_FirstPredicted[ i ];
+	}
+
+	// Move rest of slots forward up to last slot
+	for ( ; i <= m_nIntermediateData_FirstPredictedShiftMarker; i++ )
+	{
+		m_pIntermediateData_FirstPredicted[ i - slots_to_remove ] = m_pIntermediateData_FirstPredicted[ i ];
+	}
+
+	int iEndBase = (m_nIntermediateData_FirstPredictedShiftMarker + 1) - slots_to_remove;
+
+	Assert( iEndBase >= 0 );
+
+	// Put remembered slots onto end
+	for ( i = 0; i < slots_to_remove; i++ )
+	{
+		m_pIntermediateData_FirstPredicted[ iEndBase + i ] = saved_FirstPredicted[ i ];
+	}
+
+	m_nIntermediateData_FirstPredictedShiftMarker -= slots_to_remove;
+	
+#endif
+}
+
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 // Input  : framenumber - 
@@ -5398,6 +5553,18 @@ void *C_BaseEntity::GetPredictedFrame( int framenumber )
 		return NULL;
 	}
 	return (void *)m_pIntermediateData[ framenumber % MULTIPLAYER_BACKUP ];
+#else
+	return NULL;
+#endif
+}
+
+void *C_BaseEntity::GetFirstPredictedFrame( int framenumber )
+{
+#if !defined( NO_ENTITY_PREDICTION )
+	Assert( framenumber >= 0 );
+	Assert( m_pIntermediateData_FirstPredicted[0] != 0 );
+
+	return (void *)m_pIntermediateData_FirstPredicted[ framenumber % ARRAYSIZE( m_pIntermediateData_FirstPredicted ) ];
 #else
 	return NULL;
 #endif

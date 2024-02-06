@@ -1477,6 +1477,13 @@ void CPrediction::StorePredictionResults( int nSlot, int predicted_frame )
 		// FIXME: The lack of this call inexplicably actually creates prediction errors
 		InvalidateEFlagsRecursive( entity, EFL_DIRTY_ABSTRANSFORM | EFL_DIRTY_ABSVELOCITY | EFL_DIRTY_ABSANGVELOCITY );
 		entity->SaveData( "StorePredictionResults", predicted_frame, PC_EVERYTHING );
+		
+		//if we're keeping first frame results, copy them now
+		if( m_Split[ nSlot ].m_bFirstTimePredicted && (entity->m_pIntermediateData_FirstPredicted[0] != NULL) )
+		{
+			entity->m_nIntermediateData_FirstPredictedShiftMarker = predicted_frame + 1;
+			memcpy( entity->m_pIntermediateData_FirstPredicted[predicted_frame + 1], entity->m_pIntermediateData[predicted_frame], entity->GetPredDescMap()->m_nPackedSize );
+		}
 	}
 #endif
 }
@@ -1512,6 +1519,43 @@ void CPrediction::ShiftIntermediateDataForward( int nSlot, int slots_to_remove, 
 			continue;
 
 		ent->ShiftIntermediateDataForward( slots_to_remove, number_of_commands_run );
+	}
+#endif
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+// Input  : slots_to_remove - 
+//-----------------------------------------------------------------------------
+void CPrediction::ShiftFirstPredictedIntermediateDataForward( int nSlot, int slots_to_remove )
+{
+#if !defined( NO_ENTITY_PREDICTION )
+	if( (slots_to_remove == 0) || (slots_to_remove >= MULTIPLAYER_BACKUP)  )
+		return;
+
+	VPROF( "CPrediction::ShiftFirstPredictedIntermediateDataForward" );
+	PREDICTION_TRACKVALUECHANGESCOPE( "shift" );
+
+	if ( !C_BasePlayer::HasAnyLocalPlayer() )
+		return;
+
+	// Don't screw up memory of current player from history buffers if not filling in history buffers
+	//  during prediction!!!
+	if ( !cl_predict->GetInt() )
+		return;
+
+	int c = GetPredictables( nSlot )->GetPredictableCount();
+	int i;
+	for ( i = 0; i < c; i++ )
+	{
+		C_BaseEntity *ent = GetPredictables( nSlot )->GetPredictable( i );
+		if ( !ent )
+			continue;
+
+		if ( !ent->GetPredictable() )
+			continue;
+
+		ent->ShiftFirstPredictedIntermediateDataForward( slots_to_remove );
 	}
 #endif
 }
@@ -1620,6 +1664,19 @@ int CPrediction::ComputeFirstCommandToExecute( int nSlot, bool received_new_worl
 		}
 		else
 		{
+			if( split.m_bPreviousAckHadErrors )
+			{
+				int count = GetPredictables( nSlot )->GetPredictableCount();
+				for ( int i = 0; i < count; i++ )
+				{
+					C_BaseEntity *ent = GetPredictables( nSlot )->GetPredictable( i );
+					if ( !ent )
+						continue;
+
+					ent->m_bEverHadPredictionErrorsForThisCommand = true; //this bool will get pulled forward until a new command is predicted for the first time
+				}
+			}
+
 			if ( ( split.m_bPreviousAckHadErrors && cl_pred_doresetlatch.GetBool() ) || 
 				cl_pred_doresetlatch.GetInt() == 2 )
 			{
@@ -1647,6 +1704,8 @@ int CPrediction::ComputeFirstCommandToExecute( int nSlot, bool received_new_worl
 			}
 		}
 	}
+
+	ShiftFirstPredictedIntermediateDataForward( nSlot, split.m_nServerCommandsAcknowledged );
 
 	destination_slot += skipahead;
 
@@ -1733,6 +1792,51 @@ bool CPrediction::PerformPrediction( int nSlot, C_BasePlayer *localPlayer, bool 
 
 		// Set globals appropriately
 		float curtime		= ( localPlayer->m_nTickBase ) * TICK_INTERVAL;
+		
+#if 0
+		if( physenv->IsPredicted() )
+#else
+		if ( false )
+#endif
+		{
+			//physenv->SetPredictionCommandNum( current_command );
+
+			if( (m_Split[ nSlot ].m_nCommandsPredicted == 0) && (i == 1) )
+			{
+				if( !m_Split[ nSlot ].m_bFirstTimePredicted )
+				{
+					for ( int j = 0; j < GetPredictables( nSlot )->GetPredictableCount(); j++ )
+					{
+						C_BaseEntity *entity = GetPredictables( nSlot )->GetPredictable( j );
+
+						if( entity->m_bEverHadPredictionErrorsForThisCommand )
+						{
+							// Always reset
+							gpGlobals->curtime		= curtime;
+							gpGlobals->frametime	= m_bEnginePaused ? 0 : TICK_INTERVAL;				
+
+							const byte *predictedFrame = (const byte *)entity->GetFirstPredictedFrame( 0 );
+							entity->VPhysicsCompensateForPredictionErrors( predictedFrame );
+						}
+					}
+				}
+				//else - if lag is so low that we only predict every command once, do we need to keep around old data to base our corrections on?
+			}
+		}
+
+		if( !cmd->hasbeenpredicted )
+		{
+			int count = GetPredictables( nSlot )->GetPredictableCount();
+			for ( int i = 0; i < count; ++i )
+			{
+				C_BaseEntity *entity = GetPredictables( nSlot )->GetPredictable( i );
+
+				if( entity )
+				{
+					entity->m_bEverHadPredictionErrorsForThisCommand = false;
+				}
+			}
+		}
 
 		RunSimulation( current_command, curtime, cmd, localPlayer );
 

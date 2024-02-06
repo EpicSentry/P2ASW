@@ -242,12 +242,6 @@ private:
 #if !defined( CLIENT_DLL )
 	int			m_nDissolveType;
 #endif
-
-public:
-#ifdef PORTAL
-	CNetworkVar(bool, m_bDrawInMainRender);
-	CNetworkVar(bool, m_bDrawInPortalRender);
-#endif //#ifdef PORTAL
 };
 
 #if !defined( CLIENT_DLL )

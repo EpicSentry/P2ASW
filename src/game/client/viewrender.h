@@ -480,6 +480,10 @@ protected:
 	void			Draw3dSkyboxworld_Portal(const CViewSetup &view, int &nClearFlags, bool &bDrew3dSkybox, SkyboxVisibility_t &nSkyboxVisible, ITexture *pRenderTarget = NULL);
 #endif // PORTAL
 
+#ifdef PORTAL2
+	void			ViewDrawPhoto( ITexture *pRenderTarget, C_BaseEntity *pEnt ); //need a photo of an entity
+#endif
+
 	// Determines what kind of water we're going to use
 	void			DetermineWaterRenderInfo( const VisibleFogVolumeInfo_t &fogVolumeInfo, WaterRenderInfo_t &info );
 
@@ -492,6 +496,8 @@ protected:
 
 	void			GetLetterBoxRectangles( int nSlot, const CViewSetup &view, CUtlVector< vrect_t >& vecLetterBoxRectangles );
 	void			DrawLetterBoxRectangles( int nSlot, const CUtlVector< vrect_t >& vecLetterBoxRectangles );
+
+	void			EnableWaterDepthFeathing( IMaterial *pWaterMaterial, bool bEnable );
 
 	// This stores the current view
  	CViewSetup		m_CurrentView;

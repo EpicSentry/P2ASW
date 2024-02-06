@@ -818,10 +818,8 @@ void CWorld::Precache( void )
 	// Create the player resource
 	g_pGameRules->CreateStandardEntities();
 
-#ifndef PORTAL2_DLL
 	COM_TimestampedLog( "InitBodyQue()" );
 	InitBodyQue();
-#endif
 	
 	COM_TimestampedLog( "SENTENCEG_Init()" );
 	// init sentence group playback stuff from sentences.txt.

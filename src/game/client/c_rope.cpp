@@ -28,9 +28,6 @@
 //Precache the rope shadowdepth material
 PRECACHE_REGISTER_BEGIN( GLOBAL, PrecacheRopes )
 	PRECACHE( MATERIAL, "cable/rope_shadowdepth" )
-#ifdef PORTAL2_DLL
-	PRECACHE( MATERIAL, "cable/cable" )
-#endif
 PRECACHE_REGISTER_END()
 
 void RecvProxy_RecomputeSprings( const CRecvProxyData *pData, void *pStruct, void *pOut )

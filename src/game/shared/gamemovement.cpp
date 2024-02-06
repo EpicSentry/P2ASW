@@ -2666,9 +2666,11 @@ bool CGameMovement::CheckJumpButton( void )
 
 	// Add a little forward velocity based on your current forward velocity - if you are not sprinting.
 #if defined( HL2_DLL ) || defined( HL2_CLIENT_DLL )
-
+#ifdef PORTAL
+	const bool bAllowBunnyHopperSpeedBoost = true;
+#else
 	bool bAllowBunnyHopperSpeedBoost = ( gpGlobals->maxClients == 1 );
-
+#endif
 
 	if ( bAllowBunnyHopperSpeedBoost )
 	{

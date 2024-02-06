@@ -80,6 +80,7 @@ public:
 
 	virtual void	Spawn( void );
 	virtual void	SharedSpawn(); // Shared between client and server.
+	virtual void	UpdateOnRemove( void );
 	Class_T		Classify( void ) { return CLASS_PLAYER; }
 
 	// IClientEntity overrides.
@@ -278,9 +279,21 @@ public:
 #endif
 
 	virtual void				PhysicsSimulate( void );
+	virtual void				VPhysicsShadowUpdate( IPhysicsObject *pPhysics );
+	virtual bool				IsFollowingPhysics( void ) { return false; }
+	bool						IsRideablePhysics( IPhysicsObject *pPhysics );
+	IPhysicsObject				*GetGroundVPhysics();
+	void						UpdatePhysicsShadowToCurrentPosition( void );
+	void						UpdateVPhysicsPosition( const Vector &position, const Vector &velocity, float secondsToArrival );
+	void						UpdatePhysicsShadowToPosition( const Vector &vecAbsOrigin );
+	void						PostThinkVPhysics( void );
+	void						SetTouchedPhysics( bool bTouch );
+	bool						TouchedPhysics( void );
 	void						SetPhysicsFlag( int nFlag, bool bSet );
 	bool						HasPhysicsFlag( unsigned int flag ) { return (m_afPhysicsFlags & flag) != 0; }
+	void						SetVCollisionState( const Vector &vecAbsOrigin, const Vector &vecAbsVelocity, int collisionState );
 	virtual unsigned int	PhysicsSolidMaskForEntity( void ) const { return MASK_PLAYERSOLID; }
+	void						PhysicsTouchTriggers( const Vector *pPrevAbsOrigin = NULL ); // prediction calls it on C_BasePlayer object
 
 	// Prediction stuff
 	virtual bool				ShouldPredict( void );
@@ -522,7 +535,16 @@ private:
 public:
 	EHANDLE					m_hZoomOwner;		// This is a pointer to the entity currently controlling the player's zoom
 protected:
-
+	//HACKHACK: these 9 are only partially ported from server counterpart
+	IPhysicsPlayerController	*m_pPhysicsController;
+	IPhysicsObject				*m_pShadowStand;
+	IPhysicsObject				*m_pShadowCrouch;
+	int							m_vphysicsCollisionState;
+	Vector						m_oldOrigin;
+	bool						m_bTouchedPhysObject;
+	bool						m_bPhysicsWasFrozen;
+	Vector						m_vNewVPhysicsPosition;
+	Vector						m_vNewVPhysicsVelocity;
 	CUserCmd					m_LastCmd;
 
 	unsigned int			m_afPhysicsFlags;
@@ -831,6 +853,16 @@ inline bool C_BasePlayer::IsHLTV() const
 inline bool	C_BasePlayer::IsLocalPlayer( void ) const
 {
 	return m_bIsLocalPlayer;
+}
+
+inline void CBasePlayer::SetTouchedPhysics( bool bTouch ) 
+{ 
+	m_bTouchedPhysObject = bTouch; 
+}
+
+inline bool C_BasePlayer::TouchedPhysics( void )			
+{ 
+	return m_bTouchedPhysObject; 
 }
 
 inline CUserCmd const *C_BasePlayer::GetLastUserCommand( void )

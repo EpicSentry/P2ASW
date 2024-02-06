@@ -15,6 +15,7 @@
 
 
 bool g_bForceCLPredictOff = false;
+bool g_bSpectatingForceCLPredictOff = false;
 
 // ------------------------------------------------------------------------------------------ //
 // cl_predict.
@@ -38,7 +39,7 @@ public:
 	  virtual float GetFloat() const
 	  {
 		  // Used temporarily for CS kill cam.
-		  if ( g_bForceCLPredictOff )
+		  if ( g_bForceCLPredictOff || g_bSpectatingForceCLPredictOff )
 			  return 0;
 
 		  static const ConVar *pClientPredict = dynamic_cast< const ConVar* >( g_pCVar->FindCommandBase( "sv_client_predict" ) );

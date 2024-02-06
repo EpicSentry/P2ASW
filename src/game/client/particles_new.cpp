@@ -594,6 +594,18 @@ int CNewParticleEffect::DrawModel( int flags, const RenderableInstance_t &instan
 
 	if ( m_hOwner && m_hOwner->IsDormant() )
 		return 0;
+
+	int nViewRecursionLevel = 0;
+#ifdef PORTAL
+	nViewRecursionLevel = g_pPortalRender->GetViewRecursionLevel();
+#if 0 // Stupid Swarm particles!!
+	if ( m_pDef->GetMaxRecursionDepth() < nViewRecursionLevel )
+	{
+		//DevMsg( "---Aborted at Particle Portal Recursion Level : %d - Max : %d\n", g_pPortalRender->GetViewRecursionLevel(), m_pDef->GetMaxRecursionDepth() );
+		return 0;
+	}
+#endif
+#endif
 	
 	/*
 	int nViewRecursionLevel = 0;
@@ -637,17 +649,36 @@ int CNewParticleEffect::DrawModel( int flags, const RenderableInstance_t &instan
 		{
 			pCameraObject = ((C_BasePlayer *)pCameraObject)->GetViewEntity();
 		}
-		Assert( pCameraObject );
+
+		C_BaseEntity *pSkipRenderObject = ( m_pDef->m_nSkipRenderControlPoint != -1 ) ? GetControlPointEntity( m_pDef->m_nSkipRenderControlPoint ).Get() : nullptr;
+		C_BaseEntity *pAllowRenderObject = ( m_pDef->m_nAllowRenderControlPoint != -1 ) ? GetControlPointEntity( m_pDef->m_nAllowRenderControlPoint ).Get() : nullptr;
+		if ( pSkipRenderObject && ( pSkipRenderObject->IsBaseCombatWeapon() || ( pSkipRenderObject->GetBaseAnimating() && pSkipRenderObject->GetBaseAnimating()->IsViewModel() ) ) )
+			pSkipRenderObject = pSkipRenderObject->GetOwnerEntity();
+		if ( pAllowRenderObject && ( pAllowRenderObject->IsBaseCombatWeapon() || ( pAllowRenderObject->GetBaseAnimating() && pAllowRenderObject->GetBaseAnimating()->IsViewModel() ) ) )
+			pAllowRenderObject = pAllowRenderObject->GetOwnerEntity();
+		
 		// apply logic that lets you skip rendering a system if the camera is attached to its entity
-		if   ( ( ( pCameraObject &&
-			 ( m_pDef->m_nSkipRenderControlPoint != -1 ) &&
-			 ( m_pDef->m_nSkipRenderControlPoint <= m_nHighestCP ) &&
-			 ( GetControlPointEntity( m_pDef->m_nSkipRenderControlPoint ) == pCameraObject ) ) ) ||
-			 ( ( pCameraObject &&
-			 ( m_pDef->m_nAllowRenderControlPoint != -1 ) &&
-			 ( m_pDef->m_nAllowRenderControlPoint <= m_nHighestCP ) &&
-			 ( GetControlPointEntity( m_pDef->m_nAllowRenderControlPoint ) != pCameraObject ) ) ) )
-			return 0;
+		if ( pCameraObject )
+		{
+			if ( pCameraObject == pSkipRenderObject )
+			{
+#if defined( PORTAL )
+				if ( pSkipRenderObject->IsPlayer() )
+				{
+					if ( ((C_Portal_Player *)pSkipRenderObject)->ShouldSkipRenderingViewpointPlayerForThisView() )
+						return 0;
+				}
+				else
+#endif
+				{
+					if ( nViewRecursionLevel == 0 )
+						return 0;
+				}
+			}
+
+			if ( pAllowRenderObject && (pCameraObject != pAllowRenderObject) )
+				return 0;
+		}
 
 		Vector4D vecDiffuseModulation( 1.0f, 1.0f, 1.0f, 1.0f ); //instance.m_nAlpha / 255.0f );
 		pRenderContext->MatrixMode( MATERIAL_MODEL );

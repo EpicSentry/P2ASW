@@ -331,8 +331,11 @@ void CAchievementMgr::Update( float frametime )
 void CAchievementMgr::LevelInitPreEntity()
 {
 	m_bCheatsEverOn = false;
-
-#ifndef PORTAL2_DLL
+	
+#if defined( PORTAL2 )
+	// portal 2 can run in both single player and multiplayer modes
+	// achievement manager is on the client
+#else
 #	ifdef GAME_DLL
 		// For single-player games, achievement mgr must live on the server.  (Only the server has detailed knowledge of game state.)
 		Assert( !GameRules()->IsMultiplayer() );
