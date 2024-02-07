@@ -22,7 +22,6 @@ extern void ComputePlayerMatrix( CBasePlayer *pPlayer, matrix3x4_t &out );
 
 QAngle C_PropWeightedCube::PreferredCarryAngles( void )
 {
-#if 0
 	static QAngle s_prefAngles;
 	s_prefAngles = (m_qPreferredPlayerCarryAngles.x < FLT_MAX) ? m_qPreferredPlayerCarryAngles : vec3_angle;
 
@@ -49,9 +48,6 @@ QAngle C_PropWeightedCube::PreferredCarryAngles( void )
 	}
 
 	return s_prefAngles;
-#else
-	return BaseClass::PreferredCarryAngles();
-#endif
 }
 
 const Vector& C_PropWeightedCube::GetRenderOrigin( void )
