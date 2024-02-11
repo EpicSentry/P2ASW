@@ -23,7 +23,7 @@ ConVar portal_laser_normal_update( "portal_laser_normal_update", "0.05f", FCVAR_
 ConVar portal_laser_high_precision_update( "portal_laser_high_precision_update", "0.03f", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
 ConVar sv_debug_laser( "sv_debug_laser", "0", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
 ConVar new_portal_laser( "new_portal_laser", "1", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
-ConVar sv_laser_cube_autoaim( "sv_laser_cube_autoaim", "1", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
+ConVar sv_laser_cube_autoaim( "sv_laser_cube_autoaim", "0", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
 ConVar sv_laser_tight_box( "sv_laser_tight_box", "1.25f", FCVAR_DEVELOPMENTONLY );
 
 ConVar reflector_cube_disable_when_on_laser( "reflector_cube_disable_when_on_laser", "1", FCVAR_DEVELOPMENTONLY, "If the reflector cube should get disabled when left on the ground with a laser going through it." );
@@ -929,24 +929,43 @@ void CPortalLaser::DamageEntitiesAlongLaser( const PortalLaserInfoList_t &infoLi
 		
 		CBaseEntity *list[1024];
 
-		CFlaggedEntitiesEnum rayEnum( list, 1024, 0 );
+#if 1
+		const int FLAGS = FL_NPC | FL_CLIENT | FL_OBJECT;
+#else
+		const int FLAGS = 33562752;
+#endif
+		CFlaggedEntitiesEnum rayEnum( list, 1024, FLAGS );
 
 		Ray_t ray;
 		ray.Init( vecStart, vecEnd );
-		
+
 		int nCount = UTIL_EntitiesAlongRay( ray, &rayEnum );
+		
+		if ( nCount == 0 ) // p2asw: HACK HACK!!
+			return;
+
+		Msg( "nCount: %i\n", nCount );
 
 		int j = 0;
+
 		while (1)
 		{
-			CBaseEntity *pEntity = list[i];
+			if ( j == nCount ) // p2asw: HACK HACK!!
+				break;
+			CBaseEntity *pEntity = list[j];
+
+			if ( !pEntity ) // p2asw: HACK HACK!!
+				goto LABEL_25;
+
 			if ( sv_debug_laser.GetInt() )
 			{	
 				NDebugOverlay::BoxAngles( vecStart, pEntity->CollisionProp()->OBBMins(), pEntity->CollisionProp()->OBBMaxs(), pEntity->CollisionProp()->GetCollisionAngles(), 255, 255, 0, 0, 0.1);
 			}
 			
 			vecPlayerVelocity = pEntity->GetAbsVelocity();
-			Assert( pEntity );
+
+			Msg( "pEntity: %s\n", pEntity->GetClassname() );
+
 			//if (pEntity) // Useless check? Investigate later
 			{
 				if ( pEntity->ClassMatches("point_laser_target") && !bBlockTarget )
@@ -1086,7 +1105,7 @@ CBaseEntity *CPortalLaser::GetEntitiesAlongLaser( Vector &vecStart, Vector &vecE
 	ray.Init( vecStart, vecEnd, vecMins, vecMaxs );
 
 #if 1
-	const int FLAGS = 0;
+	const int FLAGS = FL_NPC | FL_CLIENT | FL_OBJECT;
 #else
 	const int FLAGS = 33562752;
 #endif
@@ -1111,7 +1130,7 @@ CBaseEntity *CPortalLaser::GetEntitiesAlongLaser( Vector &vecStart, Vector &vecE
 				&& (v16->ClassMatches( "point_laser_target" )
 				|| v16->ClassMatches("npc_portal_turret_floor")
 				|| v16->IsPlayer())
-				/*&& v16->IsAlive()*/) )
+				&& v16->IsAlive() ) )
 			{
 				CalcClosestPointOnLineSegment( v16->WorldSpaceCenter(), vecStart, vecEnd, vecDirection, &flFraction );
 				if ((!v16->IsPlayer() || sv_player_collide_with_laser.GetInt())

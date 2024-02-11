@@ -38,7 +38,11 @@ LINK_ENTITY_TO_CLASS( point_laser_target, CPortalLaserTarget );
 #define LASER_CATCHER_CENTER_NAME "models/props/laser_catcher_center.mdl"
 #define LASER_RELAY_NAME "models/props/laser_receptacle.mdl"
 
-Vector vLaserCatcherExtents( 16.0, 16.0, 16.0 );    // Vector vLaserCatcherExtents( 11.0, 11.0, 11.0 ); // TODO: This is the original value for CLaserCatcher default extent
+#if 1
+Vector vLaserCatcherExtents( 11.0, 11.0, 11.0 );    // CLaserCatcher default extent
+#else
+Vector vLaserCatcherExtents( 16.0, 16.0, 16.0 );	// CLaserCatcher default extent
+#endif
 Vector vRelayExtents( 10.0, 10.0, 17.0 );           // CLaserRelay default extent
 
 //-----------------------------------------------------------------------------
@@ -53,18 +57,22 @@ void CPortalLaserTarget::Spawn()
 
     if ( IsTerminalPoint() ) // Replaced with optimized function "IsTerminalPoint" (Line 54)
     {
-		/*CLaserCatcher *pLaserCatcher = (CLaserCatcher *)GetParent(); // Line 56
+#if 1
+		CLaserCatcher *pLaserCatcher = (CLaserCatcher *)GetParent(); // Line 56
 
         if ( pLaserCatcher && !Q_strcmp( pLaserCatcher->GetCatcherModelName(), LASER_CATCHER_CENTER_NAME ) ) // Line 58
         {
             Vector vForward, vRight, vUp;
             pLaserCatcher->GetVectors( &vForward, &vRight, &vUp ); // Line 61
-			vExtents = vUp; // Note: This is the correct logic that runs from lines 62-65, but there is no way to know how it is written
-			vExtents = vExtents + vRight;
-			vExtents = vExtents * 20.0;
-			vExtents = vExtents + ( vForward * 15.0 );
+			
+			vExtents = ( ( vUp + vRight ) * 20.0 ) + ( vForward * 15.0 ); // Note: This is the correct logic that runs from lines 62-65, but there is no way to know how it is written
+
+			vExtents.x = fabs( vExtents.x );
+			vExtents.y = fabs( vExtents.y );
+			vExtents.z = fabs( vExtents.z );
         }
-        else*/
+        else
+#endif
         {
             vExtents = vLaserCatcherExtents; // Line 69
         }
