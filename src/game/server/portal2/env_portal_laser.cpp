@@ -636,84 +636,86 @@ void CPortalLaser::FireLaser( Vector &vecStart, Vector &vecDirection, CPropWeigh
 		{
 		LABEL_NOENTITY:
 			RemoveChildLaser();
-			if ( !pTracedTarget || pTracedTarget->ClassMatches( "point_laser_target" ) )
+			if ( !pTracedTarget || !pTracedTarget->ClassMatches( "point_laser_target" ) )
 			{
 				if ( m_pPlacementHelper )
 					UTIL_SetOrigin( m_pPlacementHelper, tr.endpos );
 				BeamDamage( tr );
 			}
 		}
-		return;
 	}
-	CTraceFilterSimpleClassnameList traceFilter( pReflector, COLLISION_GROUP_NONE );
-	
-	traceFilter.AddClassnameToIgnore("projected_wall_entity");
-	traceFilter.AddClassnameToIgnore("player");
-	traceFilter.AddClassnameToIgnore("point_laser_target");
-
-	ray.Init( vecStart, vecStart + ( vecDirection * MAX_TRACE_LENGTH ) );
-	enginetrace->TraceRay( ray, 1174421505, &traceFilter, &tr );
-
-	UpdateSoundPosition( tr.startpos, tr.endpos );
-	flOtherBeamLength = 0.0;
-	
-	CPortal_Base2D *pFirstPortal;
-	if ( UTIL_DidTraceTouchPortals(ray, tr, &pFirstPortal, 0)
-		&& flOtherBeamLength != 0.0
-		&& pFirstPortal->IsActivedAndLinked() )
+	else // UNDONE: Use the old laser method Portal 2 had
 	{
-		if ( StrikeEntitiesAlongLaser( tr.startpos, tr.endpos, &vDir ) )
+		CTraceFilterSimpleClassnameList traceFilter( pReflector, COLLISION_GROUP_NONE );
+	
+		traceFilter.AddClassnameToIgnore("projected_wall_entity");
+		traceFilter.AddClassnameToIgnore("player");
+		traceFilter.AddClassnameToIgnore("point_laser_target");
+
+		ray.Init( vecStart, vecStart + ( vecDirection * MAX_TRACE_LENGTH ) );
+		enginetrace->TraceRay( ray, 1174421505, &traceFilter, &tr );
+
+		UpdateSoundPosition( tr.startpos, tr.endpos );
+		flOtherBeamLength = 0.0;
+	
+		CPortal_Base2D *pFirstPortal;
+		if ( UTIL_DidTraceTouchPortals(ray, tr, &pFirstPortal, 0)
+			&& flOtherBeamLength != 0.0
+			&& pFirstPortal->IsActivedAndLinked() )
 		{
-			m_vStartPoint = vecStart;
-			m_vEndPoint = vDir;
-		}
-		else
-		{
-			m_vStartPoint = vecStart;
-			m_vEndPoint = tr.endpos;
+			if ( StrikeEntitiesAlongLaser( tr.startpos, tr.endpos, &vDir ) )
+			{
+				m_vStartPoint = vecStart;
+				m_vEndPoint = vDir;
+			}
+			else
+			{
+				m_vStartPoint = vecStart;
+				m_vEndPoint = tr.endpos;
 			
-			BeamDamage( tr );
+				BeamDamage( tr );
 
-			Ray_t rayTransformed;
-			rayTransformed.m_pWorldAxisTransform = 0;
-			UTIL_Portal_RayTransform( pFirstPortal->m_matrixThisToLinked, ray, rayTransformed );
-			vecDirection_0 = rayTransformed.m_Delta;
-			VectorNormalize(vecDirection_0);
-			UTIL_Portal_PointTransform( pFirstPortal->m_matrixThisToLinked, tr.endpos, vecStartPos );
-			UpdateNextLaser( vecStartPos, vecDirection_0, 0 );
-		}
-		return;
-	}
-	if ( StrikeEntitiesAlongLaser( tr.startpos, tr.endpos, &vecNewTermPoint ) )
-	{
-		m_vStartPoint = vecStart;
-		m_vEndPoint = vecNewTermPoint;
-		return;
-	}
-
-	m_vStartPoint = vecStart;
-	m_vEndPoint = tr.endpos;
-
-	CBaseEntity *pHitEntity = tr.m_pEnt;
-	if ( pHitEntity )
-	{
-		if ( CPhysicsShadowClone::IsShadowClone( pHitEntity ) )
-		{
-			pHitEntity = ((CPhysicsShadowClone*)pHitEntity)->GetClonedEntity();
-		}
-		CPropWeightedCube *pTwin = UTIL_GetSchrodingerTwin( pHitEntity );
-		if ( pTwin )
-			pHitEntity = pTwin;
-		if ( ReflectLaserFromEntity( pHitEntity ) )
-		{
+				Ray_t rayTransformed;
+				rayTransformed.m_pWorldAxisTransform = 0;
+				UTIL_Portal_RayTransform( pFirstPortal->m_matrixThisToLinked, ray, rayTransformed );
+				vecDirection_0 = rayTransformed.m_Delta;
+				VectorNormalize(vecDirection_0);
+				UTIL_Portal_PointTransform( pFirstPortal->m_matrixThisToLinked, tr.endpos, vecStartPos );
+				UpdateNextLaser( vecStartPos, vecDirection_0, 0 );
+			}
 			return;
 		}
-	}
-	RemoveChildLaser();
+		if ( StrikeEntitiesAlongLaser( tr.startpos, tr.endpos, &vecNewTermPoint ) )
+		{
+			m_vStartPoint = vecStart;
+			m_vEndPoint = vecNewTermPoint;
+			return;
+		}
+
+		m_vStartPoint = vecStart;
+		m_vEndPoint = tr.endpos;
+
+		CBaseEntity *pHitEntity = tr.m_pEnt;
+		if ( pHitEntity )
+		{
+			if ( CPhysicsShadowClone::IsShadowClone( pHitEntity ) )
+			{
+				pHitEntity = ((CPhysicsShadowClone*)pHitEntity)->GetClonedEntity();
+			}
+			CPropWeightedCube *pTwin = UTIL_GetSchrodingerTwin( pHitEntity );
+			if ( pTwin )
+				pHitEntity = pTwin;
+			if ( ReflectLaserFromEntity( pHitEntity ) )
+			{
+				return;
+			}
+		}
+		RemoveChildLaser();
 	
-	if ( m_pPlacementHelper )
-		UTIL_SetOrigin( m_pPlacementHelper, tr.endpos );
-	BeamDamage( tr );
+		if ( m_pPlacementHelper )
+			UTIL_SetOrigin( m_pPlacementHelper, tr.endpos );
+		BeamDamage( tr );
+	}
 }
 
 CBaseEntity *CPortalLaser::TraceLaser( bool bIsFirstTrace, Vector &vecStart, Vector &vecDirection, float &flTotalBeamLength, trace_t &tr, PortalLaserInfoList_t &infoList, Vector *pVecAutoAimOffset )
@@ -962,8 +964,6 @@ void CPortalLaser::DamageEntitiesAlongLaser( const PortalLaserInfoList_t &infoLi
 			
 			vecPlayerVelocity = pEntity->GetAbsVelocity();
 
-			Msg( "pEntity: %s\n", pEntity->GetClassname() );
-
 			//if (pEntity) // Useless check? Investigate later
 			{
 				if ( pEntity->ClassMatches("point_laser_target") && !bBlockTarget )
@@ -1056,7 +1056,7 @@ void CPortalLaser::DamageEntitiesAlongLaser( const PortalLaserInfoList_t &infoLi
 				goto LABEL_29;
 		}
 
-		if (fabs(vecDirection.z) < 0.2000000029802322)
+		if ( fabs(vecDirection.z) < 0.2 )
 			goto LABEL_25;
 	}
 }
@@ -1206,11 +1206,11 @@ bool CPortalLaser::ShouldAutoAim( CBaseEntity *pEntity )
 	// because there is already a check above for point_laser_target, saves a few cycles I suppose.
 	CPortalLaserTarget *pTarget = assert_cast<CPortalLaserTarget*>(pEntity);
 
-	bool bCond = pTarget->IsTerminalPoint(); // Was pTarget[909], but wtf does this mean?
+	bool bTerminalPoint = pTarget->IsTerminalPoint(); // Was pTarget[909], but wtf does this mean?
 	if (!m_bFromReflectedCube)
-		return bCond;
+		return bTerminalPoint;
 
-	return ( sv_laser_cube_autoaim.GetInt() || g_pGameRules->IsMultiplayer() ) && bCond;
+	return ( sv_laser_cube_autoaim.GetInt() || g_pGameRules->IsMultiplayer() ) && bTerminalPoint;
 }
 
 bool CPortalLaser::IsOn( void )

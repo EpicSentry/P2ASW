@@ -135,8 +135,8 @@
 #define FL_AFFECTED_BY_PAINT	(1<<20)
 #else
 #define FL_GRAPHED				(1<<20) // worldgraph has this ent listed as something that blocks a connection
+#define FL_GRENADE				(1<<21)
 #endif
-//#define FL_GRENADE				(1<<21)
 #define FL_STEPMOVEMENT			(1<<22)	// Changes the SV_Movestep() behavior to not do any processing
 #define FL_DONTTOUCH			(1<<23)	// Doesn't generate touch functions, generates Untouch() for anything it was touching when this flag was set
 #define FL_BASEVELOCITY			(1<<24)	// Base velocity has been applied this frame (used to convert base velocity into momentum)

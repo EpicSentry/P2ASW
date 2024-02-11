@@ -100,7 +100,7 @@ public:
     virtual void CreateHelperEntities();
     virtual const char *GetCatcherModelName();
 
-    bool IsTerminalPoint(); // TODO: Virtual?
+    virtual bool IsTerminalPoint(); // TODO: Virtual?
 
     virtual float SpinUp( float flSpinRate );
     virtual float SpinDown( float flSpinRate );
@@ -136,7 +136,7 @@ class CLaserRelay : public CLaserCatcher
 
     virtual const char *GetCatcherModelName();
 
-    bool IsTerminalPoint(); // TODO: Virtual?
+    virtual bool IsTerminalPoint();
 };
 
 #endif // POINT_LASER_TARGET_H
