@@ -944,8 +944,6 @@ void CPortalLaser::DamageEntitiesAlongLaser( const PortalLaserInfoList_t &infoLi
 		if ( nCount == 0 ) // p2asw: HACK HACK!!
 			return;
 
-		Msg( "nCount: %i\n", nCount );
-
 		int j = 0;
 
 		while (1)
