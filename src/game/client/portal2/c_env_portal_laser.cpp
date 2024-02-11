@@ -175,7 +175,7 @@ void C_PortalLaser::ClientThink( void )
 		}
 		else
 		{
-			AngleVectors( GetAbsAngles(), &vDir );
+			AngleVectors( pReflector->GetAbsAngles(), &vDir );
 		}
 		
 		vStart = (vDir * 22.0) + pReflector->WorldSpaceCenter();

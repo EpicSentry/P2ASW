@@ -179,6 +179,7 @@ void CPortalLaser::Precache( void )
 			PrecacheModel("models/props/laser_emitter.mdl");
 	}
 }
+
 void CPortalLaser::UpdateOnRemove( void )
 {
 	if ( m_pPlacementHelper )
@@ -196,7 +197,7 @@ void CPortalLaser::UpdateOnRemove( void )
 bool CPortalLaser::CreateVPhysics( void )
 {
 	VPhysicsInitStatic();
-	return 1;
+	return true;
 }
 
 void CPortalLaser::CreateSoundProxies( void )
@@ -396,17 +397,12 @@ void CPortalLaser::StrikeThink(void)
 		m_vecNearestSoundSource[i].z = vec3_invalid.z;
 	}
 	
-	if ( !m_hReflector )
+	if ( !m_hReflector || !m_bFromReflectedCube )
 	{
-	LABEL_10:
 		GetAttachment( m_iLaserAttachment, vecOrigin, &vecDir, 0, 0 );
 		SetNextThink(gpGlobals->curtime + portal_laser_normal_update.GetFloat(), 0);
 		goto LABEL_11;
 	}
-
-
-	if (!m_hReflector || !m_bFromReflectedCube)
-		goto LABEL_10;
 
 	if (UTIL_GetSchrodingerTwin(m_hReflector) )
 	{
