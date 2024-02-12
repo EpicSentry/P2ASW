@@ -619,8 +619,7 @@ protected:
 	float			m_flFreezeFrameDistance;
 	bool			m_bWasFreezeFraming; 
 	float			m_flDeathTime;		// last time player died
-
-	CDiscontinuousInterpolatedVar< Vector >	m_iv_vecViewOffset; // Needs to be protected for Portal 2
+	CDiscontinuousInterpolatedVar< Vector >	m_iv_vecViewOffset;
 
 private:
 	// Make sure no one calls this...

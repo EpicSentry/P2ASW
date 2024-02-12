@@ -8582,6 +8582,8 @@ void CC_Ent_Create( const CCommand& args )
 				entity->Teleport( &tr.endpos, NULL, NULL );
 				UTIL_DropToFloor( entity, MASK_SOLID );
 			}
+
+			entity->Activate();
 		}
 	}
 	CBaseEntity::SetAllowPrecache( allowPrecache );
