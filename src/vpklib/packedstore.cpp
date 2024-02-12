@@ -606,10 +606,6 @@ void V_RemoveFirstExtension(char* path)
 	memmove(src2, src, strlen(src) + 1);
 }
 
-
-bool recursive = false;
-
-
 CPackedStoreFileHandle CPackedStore::OpenFile(char const *pFileName)
 {
 	char dirName[MAX_PATH];
@@ -619,22 +615,22 @@ CPackedStoreFileHandle CPackedStore::OpenFile(char const *pFileName)
 	// Fix up the filename first
 	char tempFileName[MAX_PATH];
 
-	V_strncpy(tempFileName, pFileName, sizeof(tempFileName));
-	V_FixSlashes(tempFileName, CORRECT_PATH_SEPARATOR);
-	//	V_RemoveDotSlashes( tempFileName, CORRECT_PATH_SEPARATOR, true );
-	V_FixDoubleSlashes(tempFileName);
-	if (!V_IsAbsolutePath(tempFileName))
+	V_strncpy( tempFileName, pFileName, sizeof( tempFileName ) );
+	V_FixSlashes( tempFileName, CORRECT_PATH_SEPARATOR );
+//	V_RemoveDotSlashes( tempFileName, CORRECT_PATH_SEPARATOR, true );
+	V_FixDoubleSlashes( tempFileName );
+	if ( !V_IsAbsolutePath( tempFileName ) )
 	{
-		V_strlower(tempFileName);
+		V_strlower( tempFileName );
 	}
-
-	SplitFileComponents(tempFileName, dirName, baseName, extName);
+	
+	SplitFileComponents( tempFileName, dirName, baseName, extName );
 
 	CPackedStoreFileHandle ret;
 
-	CFileHeaderFixedData *pHeader = FindFileEntry(dirName, baseName, extName, NULL, &(ret.m_pDirFileNamePtr));
-
-	if (pHeader)
+	CFileHeaderFixedData *pHeader = FindFileEntry( dirName, baseName, extName, NULL, &( ret.m_pDirFileNamePtr ) );
+	
+	if ( pHeader )
 	{
 		ret.m_nFileNumber = pHeader->m_PartDescriptors[0].m_nFileNumber;
 		ret.m_nFileOffset = pHeader->m_PartDescriptors[0].m_nFileDataOffset;
@@ -642,23 +638,14 @@ CPackedStoreFileHandle CPackedStore::OpenFile(char const *pFileName)
 		ret.m_nCurrentFileOffset = 0;
 		ret.m_pMetaData = pHeader->MetaData();
 		ret.m_nMetaDataSize = pHeader->m_nMetaDataSize;
-		ret.m_pHeaderData = pHeader;
+  		ret.m_pHeaderData = pHeader;
 		ret.m_pOwner = this;
-		//	Msg("CPackedStore::OpenFile: %s found, dirName %s, baseName %s, extName %s\n", pFileName, dirName, baseName, extName);
 	}
 	else
 	{
 		ret.m_nFileNumber = -1;
 		ret.m_pOwner = NULL;
-		//Warning("CPackedStore::OpenFile: %s NOT found, dirName %s, baseName %s, extName %s\n", pFileName, dirName, baseName, extName);
-		if (!recursive) {
-			recursive = true;
-			if (V_strlen(pFileName) > 0)
-				V_RemoveFirstExtension((char*)pFileName);
-			OpenFile(pFileName);
-		}
 	}
-	recursive = false;
 	return ret;
 
 }
