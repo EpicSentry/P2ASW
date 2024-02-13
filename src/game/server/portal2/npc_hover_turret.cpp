@@ -7,7 +7,13 @@
 #include "ai_memory.h"
 #include "ai_senses.h"
 #include "collisionproperty.h"
+#include "portal_base2d.h"
+#include "props.h"
+#include "explode.h"
+#include "world.h"
 #include "tier0/memdbgon.h"
+
+#define HOVER_TURRET_GLOW_SPRITE	"sprites/light_glow03.vmt"
 
 extern ConVar sv_gravity;
 
@@ -65,10 +71,13 @@ public:
 	Class_T Classify(void) { return CLASS_COMBINE; }
 	void Event_Killed(const CTakeDamageInfo& info);
 	void TraceAttack(const CTakeDamageInfo& info, const Vector& vecDir, trace_t* ptr) { return BaseClass::TraceAttack(info, vecDir, ptr); }
+	void ShootLaser(Vector& vecSrc, Vector& vecDirToEnemy);
 	void TalkThink();
 	void FindTargetThink();
 	void AimThink();
+	void SetFiringState(hoverTurretAttackState_e state);
 	void UpdateOnRemove();
+	bool OverrideMove(float flInterval);
 	void MoveToTarget(float flInterval, const Vector& vMoveTarget);
 	void MoveExecute_Alive(float flInterval);
 	void MoveExecute_Dead(float flInterval);
@@ -89,12 +98,26 @@ public:
 	void RunTask(const Task_t* pTask);
 	void Spawn();
 	void StartTask(const Task_t* pTask);
+	void GatherConditions() { return BaseClass::GatherConditions(); }
+	void PrescheduleThink();
+	void Explode();
 	void StartDeathSequence();
+	void VPhysicsCollision(int index, gamevcollisionevent_t* pEvent);
 	void ClampMotorForces(Vector& linear, AngularImpulse& angular);
+	void OnPhysGunPickup(CBasePlayer* pPhysGunUser, PhysGunPickup_t reason);
+	bool HasPreferredCarryAnglesForPlayer(CBasePlayer* pPlayer);
+	QAngle PreferredCarryAngles();
+	int ObjectCaps() { return BaseClass::ObjectCaps() | FCAP_IMPULSE_USE; }
+	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
+	CBasePlayer* HasPhysicsAttacker(float dt) { return 0; }
+	float GetMaxEnginePower() { return 1.0f; }
+	bool IsMovementDisabled();
 
 	DEFINE_CUSTOM_AI;
 	DECLARE_DATADESC();
 private:
+	void TakeDamageFromPhysicsImpact(int index, gamevcollisionevent_t* pEvent);
+	bool OnBurning();
 	//CNetworkVar(int, m_sLaserHaloSprite);
 	float m_fNextTalk;
 
@@ -210,6 +233,49 @@ void CNPC_HoverTurret::Event_Killed(const CTakeDamageInfo& info)
 	m_OnDeath.FireOutput(this, this);
 }
 
+void CNPC_HoverTurret::ShootLaser(Vector& vecSrc, Vector& vecDirToEnemy)
+{
+	trace_t tr;
+	Vector dir;
+	UTIL_TraceLine(vecSrc + (vecDirToEnemy * 8192.0), dir = vecSrc + (vecDirToEnemy * 8192.0), MASK_SHOT, this, COLLISION_GROUP_NONE, &tr);
+
+	if (tr.fraction != 1.0f)
+	{
+		if (tr.m_pEnt)
+		{
+			ClearMultiDamage();
+			dir = tr.endpos - GetAbsOrigin();
+			VectorNormalize(dir);
+
+			float flDamage = (gpGlobals->curtime - GetLastThink() * 150.0f);
+			CTakeDamageInfo info(this, this, flDamage, DMG_ENERGYBEAM);
+		
+			float flScale = 1.0;
+
+			if (m_bCanPushPlayer)
+			{
+				flScale = 5.0f;
+			}
+			else
+			{
+				flScale = 0.0f;
+			}
+
+			UTIL_DecalTrace(&tr, "RedGlowFade");
+		
+			CalculateMeleeDamageForce(&info, dir, tr.endpos, flScale);
+			tr.m_pEnt->DispatchTraceAttack(info, dir, &tr);
+			ApplyMultiDamage();
+
+			if (tr.m_pEnt->IsPlayer())
+			{
+				EmitSound("HL2Player.BurnPain");
+			}
+		}
+		g_pEffects->Sparks(tr.endpos);
+	}
+}
+
 void CNPC_HoverTurret::TalkThink()
 {
 	if (IsDissolving() || IsOnFire())
@@ -302,16 +368,90 @@ void CNPC_HoverTurret::AimThink()
 		m_vecGoalAngles = GetAbsAngles();
 		UpdateFacing();
 		if (m_bAimingAtTarget)
+		{
 			return;
+		}
 	}
 	else
 	{
 		if (!GetEnemy())
 		{
+			m_vecTargetPos = GetClosestVisibleEnemyPosition();
 		}
-	UpdateFacing();
-	if (GetActivity() != ACT_HOVER_TURRET_ALERT)
-		SetActivity(ACT_HOVER_TURRET_ALERT); 
+
+		UpdateFacing();
+		if (GetActivity() != ACT_HOVER_TURRET_ALERT)
+		{
+			SetActivity(ACT_HOVER_TURRET_ALERT);
+		}
+
+		if (gpGlobals->curtime > (m_flAimStartTime + 1.5f))
+		{
+			if (GetEnemy()->IsAlive())
+			{
+				FInViewCone(GetEnemy());
+				FVisible(GetEnemy());
+
+				CPortal_Base2D* pPortal = NULL;
+				pPortal = FInViewConeThroughPortal(GetEnemy());
+
+				Vector vecMuzzle, vecMuzzleDir;
+
+				UpdateMuzzleMatrix();
+				MatrixGetColumn(m_muzzleToWorld, 3, vecMuzzle);
+				MatrixGetColumn(m_muzzleToWorld, 0, vecMuzzleDir);
+
+				ShootLaser(vecMuzzle, vecMuzzleDir);
+			}
+		}
+	}
+}
+
+void CNPC_HoverTurret::SetFiringState(hoverTurretAttackState_e state)
+{
+	if (!IsAlive() && state != HOVER_TURRET_SHOT_DISABLED)
+	{
+		return;
+	}
+
+	if (!m_hEyeGlow)
+	{
+		m_hEyeGlow = CSprite::SpriteCreate(HOVER_TURRET_GLOW_SPRITE, GetLocalOrigin(), false);
+		if (!m_hEyeGlow)
+			return;
+
+		m_hEyeGlow->SetTransparency(kRenderWorldGlow, 255, 0, 0, 128, kRenderFxNoDissipation);
+		m_hEyeGlow->SetAttachment(this, 1);
+	}
+
+	if (state == HOVER_TURRET_AIM_TARGET)
+	{
+		m_iDesiredState = HOVER_TURRET_TARGETING;
+		m_bAimingAtTarget = true;
+		m_vecTargetPos = GetClosestVisibleEnemyPosition();
+		m_iFiringState = HOVER_TURRET_AIM_TARGET;
+		m_flAimStartTime = gpGlobals->curtime;
+		SetActivity(ACT_HOVER_TURRET_ALERT);
+		m_nSkin = 1;
+		m_hEyeGlow->SetBrightness(196,0.1f);
+	}
+
+	if (state == HOVER_TURRET_SHOT_DISABLED)
+	{
+		m_iFiringState = HOVER_TURRET_SHOT_DISABLED;
+		m_iDesiredState = HOVER_TURRET_PICKUP;
+		SetActivity(ACT_HOVER_TURRET_ANGRY);
+		m_nSkin = 2;
+		m_hEyeGlow->SetScale(0.1f,3.0f);
+		m_hEyeGlow->SetBrightness(0,3.0f);
+	}
+
+	if (state == HOVER_TURRET_HIT_WITH_PHYSICS)
+	{
+		m_iFiringState = HOVER_TURRET_FIND_TARGET;
+		m_iDesiredState = HOVER_TURRET_DESTRUCTING;
+		SetActivity(ACT_HOVER_TURRET_ANGRY);
+		m_nSkin = 2;
 	}
 }
 
@@ -321,13 +461,50 @@ void CNPC_HoverTurret::UpdateOnRemove()
 	BaseClass::UpdateOnRemove();
 }
 
+bool CNPC_HoverTurret::OverrideMove(float flInterval)
+{
+	if (m_iHealth > 0)
+	{
+		if (!m_bInitialPositionSet)
+		{
+			m_vForceMoveTarget = GetAbsOrigin();
+			m_vForceMoveTarget.z = m_vForceMoveTarget.z + 52.0f;
+			m_bInitialPositionSet = true;
+		}
+
+		if (m_pPhysicsObject)
+			m_pPhysicsObject->Wake();
+
+		if (m_flEngineStallTime > gpGlobals->curtime || m_iFiringState == HOVER_TURRET_SHOT_DISABLED)
+		{
+			return false;
+		}
+		else
+		{
+			if (m_flEngineStallTime <= gpGlobals->curtime && !m_pMotionController)
+			{
+				m_pMotionController = physenv->CreateMotionController((IMotionEvent*)this);
+				m_pMotionController->AttachObject(m_pPhysicsObject, true);
+			}
+			MoveToTarget(flInterval, m_vForceMoveTarget);
+			MoveExecute_Alive(flInterval);
+			return true;
+		}
+	}
+	else
+	{
+		MoveExecute_Dead(flInterval);
+		return true;
+	}
+}
+
 void CNPC_HoverTurret::MoveToTarget(float flInterval, const Vector& vMoveTarget)
 {
 	if (flInterval > 0.0f && m_flEngineStallTime <= gpGlobals->curtime && m_iFiringState != HOVER_TURRET_SHOT_DISABLED)
 	{
 		if ( GetEnemy() && BaseClass::HasCondition(COND_SEE_ENEMY) )
 		{
-
+			TurnHeadToTarget(flInterval, GetClosestVisibleEnemyPosition());
 		}
 
 		float yawSpeedPerSec = m_flSentryTurnSpeed;
@@ -341,6 +518,13 @@ void CNPC_HoverTurret::MoveToTarget(float flInterval, const Vector& vMoveTarget)
 			AngleVectors(m_vInitialLookAngles,&vecLookDir);
 
 			vecLookDir* (vecLookDir * 5.0) + vecMoveDir;
+		}
+
+		float newYaw = AI_ClampYaw(yawSpeedPerSec, m_fHeadYaw, (yawSpeedPerSec * flInterval) + m_fHeadYaw, gpGlobals->curtime - GetLastThink());
+
+		if (newYaw != m_fHeadYaw)
+		{
+			m_fHeadYaw = newYaw;
 		}
 	}
 }
@@ -452,20 +636,54 @@ void CNPC_HoverTurret::UpdateMuzzleMatrix()
 
 Vector CNPC_HoverTurret::GetClosestVisibleEnemyPosition()
 {
-	//this will need serious fixing up. idk why tf the decompilations for this always look weird for me.
-
 	CBaseEntity* pEnemy = GetEnemy();
+
 	UpdateMuzzleMatrix();
 
-	Vector vecMuzzlePos, vecMidEnemyTransformed, vecDirToEnemyTransformed;
+	Vector vecMuzzlePos, vecMidEnemyTransformed;
 	MatrixGetColumn(m_muzzleToWorld, 3, vecMuzzlePos);
 
-	Vector v7 = pEnemy->BodyTarget(vecMidEnemyTransformed, &vecMuzzlePos);
-	vecDirToEnemyTransformed = v7 * 0.65f;
-	
-	Vector flDistToEnemyTransformed = AllocTempVector();
-	Vector v8 = AllocTempVector();
-	CollisionProp()->CollisionToWorldSpace(v8, &flDistToEnemyTransformed);
+	Vector vecMidEnemy = pEnemy->BodyTarget(vecMidEnemyTransformed, &vecMuzzlePos);
+
+	//Calculate dir and dist to enemy
+	Vector	vecDirToEnemyTransformed = vecMidEnemy * 0.65;
+	float	flDistToEnemyTransformed = VectorNormalize(vecDirToEnemyTransformed);
+
+	Vector vecCenter;
+	CollisionProp()->CollisionToWorldSpace(Vector(0, 0, 52), &vecCenter);
+
+	Vector vecMid = EyePosition();
+	pEnemy->BodyTarget(vecMid);
+
+	//Look for our current enemy
+	bool bEnemyInFOV = FInViewCone(pEnemy);
+	bool bEnemyVisible = FVisible(pEnemy);
+
+	Vector	vecDirToEnemy = vecMidEnemy - vecMid;
+	float	flDistToEnemy = VectorNormalize(vecDirToEnemy);
+
+	CPortal_Base2D* pPortal = NULL;
+
+	if (pEnemy->IsAlive())
+	{
+		pPortal = FInViewConeThroughPortal(pEnemy);
+
+		if (pPortal && FVisibleThroughPortal(pPortal, pEnemy))
+		{
+			UTIL_Portal_PointTransform(pPortal->m_hLinkedPortal->MatrixThisToLinked(), vecMidEnemy, vecDirToEnemyTransformed);
+			vecDirToEnemyTransformed = vecMidEnemyTransformed - vecMuzzlePos;
+			VectorNormalize(vecDirToEnemyTransformed);
+			if (!bEnemyInFOV || !bEnemyVisible || flDistToEnemy > flDistToEnemyTransformed)
+			{
+				vecDirToEnemy = vecDirToEnemyTransformed;
+			}
+		}
+	}
+
+	VectorNormalize(vecDirToEnemy);
+	QAngle vecAnglesToEnemy;
+	VectorAngles(vecDirToEnemy, vecAnglesToEnemy);
+	m_vecGoalAngles = vecAnglesToEnemy;
 }
 
 void CNPC_HoverTurret::CreateSmokeTrail()
@@ -592,6 +810,109 @@ void CNPC_HoverTurret::StartTask(const Task_t* pTask)
 	}
 }
 
+void CNPC_HoverTurret::PrescheduleThink()
+{
+	if (IsOnFire())
+	{
+		OnBurning();
+	}
+	else if (m_iHealth < 0)
+	{
+		if (m_flDeathTime != 0.0f && gpGlobals->curtime > m_flDeathTime)
+			Explode();
+	}
+	else
+	{
+		switch (m_iFiringState)
+		{
+		case HOVER_TURRET_AIM_TARGET:
+			AimThink();
+			break;
+		case HOVER_TURRET_SHOT_DISABLED:
+			return;
+		case HOVER_TURRET_FIND_TARGET:
+			FindTargetThink();
+			break;
+		}
+	}
+	TalkThink();
+	BaseClass::PrescheduleThink();
+}
+
+void CNPC_HoverTurret::Explode()
+{
+	Vector vecVelocity;
+
+	CBreakableProp* pEntity = (CBreakableProp*)CBaseEntity::Create("prop_glass_futbol", GetAbsOrigin(), GetAbsAngles());
+	if (pEntity)
+	{
+		GetVelocity(&vecVelocity, NULL);
+		pEntity->SetAbsVelocity(vecVelocity);
+		CTakeDamageInfo info(this, this, 200.0f, DMG_BLAST);
+		pEntity->Break(this, info);
+	}
+
+	string_t strTurretName = AllocPooledString("npc_hover_turret");
+	string_t strPropName = AllocPooledString("prop_weighted_cube");
+
+	Vector maxs;
+
+	maxs.x = GetAbsOrigin().x + 128.0f;
+	maxs.y = GetAbsOrigin().y + 128.0f;
+	maxs.z = GetAbsOrigin().z + 128.0f;
+
+	vecVelocity.x = GetAbsOrigin().x - 128.0f;
+	vecVelocity.y = GetAbsOrigin().y - 128.0f;
+	vecVelocity.z = GetAbsOrigin().z - 128.0f;
+
+	CBaseEntity* pEnts[128];
+	int nNumFound = UTIL_EntitiesInBox(pEnts, 128, vecVelocity, maxs, 0);
+
+	for (int i = 0; i < nNumFound; i++)
+	{
+		if (pEnts[i] == NULL)
+			continue;
+
+		if ( ClassMatches(strTurretName) || ClassMatches(strPropName) || IsPlayer() )
+		{
+			trace_t tr;
+			UTIL_TraceLine(GetAbsOrigin(), pEnts[i]->WorldSpaceCenter(), (MASK_WATER | MASK_SOLID_BRUSHONLY), this, COLLISION_GROUP_NONE, &tr);
+
+			if (tr.fraction >= 1.0f)
+			{
+				CTakeDamageInfo info(this, this, 50.0f, DMG_ENERGYBEAM);
+				info.GetDamagePosition() = GetAbsOrigin();
+
+				vecVelocity = GetAbsOrigin() - GetAbsOrigin();
+				CalculateExplosiveDamageForce(&info, vecVelocity, GetAbsOrigin());
+				pEnts[i]->DispatchTraceAttack(info, vec3_origin, &tr);
+				ApplyMultiDamage();
+			}
+		}
+	}
+
+	ExplosionCreate(WorldSpaceCenter(), vec3_angle, this, 200, 100, (SF_ENVEXPLOSION_NODAMAGE | SF_ENVEXPLOSION_NOSPARKS | SF_ENVEXPLOSION_NODLIGHTS | SF_ENVEXPLOSION_NOSMOKE | SF_ENVEXPLOSION_NOFIREBALLSMOKE));
+	UTIL_ScreenShake(WorldSpaceCenter(), 5.0f, 150.0f, 1.0f, 750.0f, SHAKE_START);
+	
+	Vector origin;
+	CPVSFilter filter(origin);
+
+	Vector gibVelocity = RandomVector(-30.0, 30.0);
+	int iModelIndex = modelinfo->GetModelIndex(g_PropDataSystem.GetRandomChunkModel("MetalChunks"));
+
+	for (int i = 0; i < 16; i++)
+	{
+		vecVelocity.x = 16.0f;
+		vecVelocity.y = 16.0f;
+		vecVelocity.z = 16.0f;
+		te->BreakModel(filter, 0.0, GetAbsOrigin(), GetAbsAngles(), Vector(40, 40, 40), gibVelocity, iModelIndex, 400, 1, 2.5, BREAK_METAL);
+	}
+
+	AddEffects(EF_NODRAW);
+	SetThink(SUB_Remove);
+	SetNextThink(gpGlobals->curtime + 0.1f);
+}
+
 void CNPC_HoverTurret::StartDeathSequence()
 {
 	if (m_flDeathTime == 0.0)
@@ -602,6 +923,38 @@ void CNPC_HoverTurret::StartDeathSequence()
 		EmitSound("NPC_RocketTurret.LockingBeep", gpGlobals->curtime + 1.0f);
 		EmitSound("NPC_RocketTurret.LockingBeep", gpGlobals->curtime + 1.5f);
 		EmitSound("NPC_FloorTurret.LockedBeep", gpGlobals->curtime + 2.0f);
+	}
+}
+
+void CNPC_HoverTurret::VPhysicsCollision(int index, gamevcollisionevent_t* pEvent)
+{
+	if (m_iHealth > 0)
+	{
+		BaseClass::VPhysicsCollision(index, pEvent);
+		m_flFieldOfView = -1.0f;
+
+		CWorld* pHitEntity = (CWorld *)pEvent->pEntities[!index];
+
+		if (pHitEntity->IsPlayer())
+		{
+			if (m_iFiringState != HOVER_TURRET_AIM_TARGET)
+			{
+				SetFiringState(HOVER_TURRET_FIND_TARGET);
+				m_flEngineStallTime = gpGlobals->curtime + 0.5f;
+			}
+		}
+		else
+		{
+			if (pHitEntity != GetWorldEntity())
+			{
+				bool bDisabled = m_iFiringState == HOVER_TURRET_SHOT_DISABLED;
+				m_flEngineStallTime = gpGlobals->curtime + 4.0f;
+
+				if (!bDisabled)
+					SetFiringState(HOVER_TURRET_HIT_WITH_PHYSICS);
+			}
+			TakeDamageFromPhysicsImpact(index, pEvent);
+		}
 	}
 }
 
@@ -633,4 +986,104 @@ void CNPC_HoverTurret::ClampMotorForces(Vector& linear, AngularImpulse& angular)
 		angular.y = 0.0f;
 		angular.z = 0.0f;
 	}
+}
+
+void CNPC_HoverTurret::OnPhysGunPickup(CBasePlayer* pPhysGunUser, PhysGunPickup_t reason)
+{
+	if (IsAlive())
+	{
+		if (m_pMotionController)
+		{
+			physenv->DestroyMotionController(m_pMotionController);
+			m_pMotionController = NULL;
+		}
+		m_bCarriedByPlayer = true;
+		SetFiringState(HOVER_TURRET_SHOT_DISABLED);
+	}
+}
+
+bool CNPC_HoverTurret::HasPreferredCarryAnglesForPlayer(CBasePlayer* pPlayer)
+{
+	if (IsAlive())
+		return m_bUseCarryAngles;
+
+	return false;
+}
+
+QAngle CNPC_HoverTurret::PreferredCarryAngles()
+{
+	static QAngle g_prefAngles;
+
+	Vector vecUserForward;
+	CBasePlayer* pPlayer = AI_GetSinglePlayer();
+	pPlayer->EyeVectors(&vecUserForward);
+
+	// If we're looking up, then face directly forward
+	if (vecUserForward.z >= 0.0f)
+		return vec3_angle;
+
+	// Otherwise, stay "upright"
+	g_prefAngles.Init();
+	g_prefAngles.x = -pPlayer->EyeAngles().x;
+
+	return g_prefAngles;
+}
+
+void CNPC_HoverTurret::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
+{
+	CBasePlayer *pPlayer = ToBasePlayer( pActivator );
+	if ( pPlayer )
+	{
+		pPlayer->PickupObject( this, false );
+	}
+}
+
+bool CNPC_HoverTurret::IsMovementDisabled()
+{
+	if (m_flEngineStallTime <= gpGlobals->curtime)
+		return m_iFiringState == HOVER_TURRET_SHOT_DISABLED;
+
+	return true;
+}
+
+void CNPC_HoverTurret::TakeDamageFromPhysicsImpact(int index, gamevcollisionevent_t* pEvent)
+{
+	int damageType;
+	float damage = CalculateDefaultPhysicsDamage(index, pEvent, 20.0f * m_impactEnergyScale, true, damageType);
+
+	if (pEvent->pEntities[index == 0] && ClassMatches("prop_energy_ball"))
+	{
+		damage = 100.0f;
+	}
+	else if (damage == 0.0f)
+	{
+		return;
+	}
+
+	Vector damagePos;
+	pEvent->pInternalData->GetContactPoint(damagePos);
+
+	Vector damageForce = pEvent->postVelocity[index] * pEvent->pObjects[index]->GetMass();
+
+	if (vec3_origin == damageForce)
+	{
+		damageForce = pEvent->postVelocity[index] * pEvent->pObjects[index]->GetMass();
+	}
+
+	if (damage > 50.0f)
+	{
+
+		CTakeDamageInfo info(pEvent->pEntities[index == 0], pEvent->pEntities[index == 0], damageForce, damagePos, damage, damageType);
+		Event_Killed(info);
+	}
+}
+
+bool CNPC_HoverTurret::OnBurning()
+{
+	if (m_iHealth <= 0)
+	{
+		Explode();
+		return false;
+	}
+	return true;
 }
