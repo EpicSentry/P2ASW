@@ -1091,7 +1091,6 @@ void CHudIcons::Init()
 
 	LoadHudTextures( textureList, "scripts/instructor_textures", NULL );
 	LoadHudTextures( textureList, "scripts/instructor_modtextures", NULL );
-	
 #ifdef PORTAL2
 	LoadHudTextures( textureList, "scripts/signifier_textures", NULL );
 #endif

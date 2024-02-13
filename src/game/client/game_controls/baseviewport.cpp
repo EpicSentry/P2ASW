@@ -50,9 +50,7 @@
 #include "iclientmode.h"
 #include "vgui_int.h"
 
-#define DISABLERADIALMENU
-
-#if defined ( PORTAL2 ) && !defined( DISABLERADIALMENU )
+#if defined ( PORTAL2 )
 #include "radialmenu.h"
 //#include "vgui/portal_stats_panel.h"
 #endif // PORTAL2
@@ -226,7 +224,7 @@ void CBaseViewport::OnScreenSizeChanged(int iOldWide, int iOldTall)
 
 void CBaseViewport::CreateDefaultPanels( void )
 {
-#if defined ( PORTAL2 ) && !defined( DISABLERADIALMENU )
+#if defined ( PORTAL2 )
 	AddNewPanel( CreatePanelByName( PANEL_RADIAL_MENU ), "PANEL_RADIAL_MENU" );
 #endif // PORTAL2
 
@@ -287,7 +285,7 @@ IViewPortPanel* CBaseViewport::CreatePanelByName(const char *szPanelName)
 	{
 		newpanel = new CNavProgress( this );
 	}
-#if defined ( PORTAL2 ) && !defined( DISABLERADIALMENU )
+#if defined ( PORTAL2 )
 	else if ( Q_strcmp( PANEL_RADIAL_MENU, szPanelName ) == 0 )
 	{
 		newpanel = new CRadialMenuPanel( this );

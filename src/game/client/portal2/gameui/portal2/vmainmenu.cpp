@@ -976,7 +976,8 @@ void MainMenu::OnOpen()
 
 	SetFooterState();
 
-#ifndef _X360
+#if !defined( _GAMECONSOLE ) && !defined( PORTAL2 )
+	// Portal 2 clouds config by default
 	bool bSteamCloudVisible = false;
 
 	{

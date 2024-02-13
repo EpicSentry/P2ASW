@@ -398,7 +398,11 @@ void CHudMessage::SetFont( HScheme scheme, const char *pFontName )
 
 	if ( pScheme )
 	{
-		vgui::HFont font = pScheme->GetFont( pFontName );
+		bool bProportional = false;
+#ifdef PORTAL2
+		bProportional = true;
+#endif
+		vgui::HFont font = pScheme->GetFont( pFontName, bProportional );
 		textmessage->SetFont( font );
 		m_parms.font = font;
 	}

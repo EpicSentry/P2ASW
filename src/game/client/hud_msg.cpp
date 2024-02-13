@@ -33,6 +33,12 @@ void CHud::ResetHUD()
 
 	for ( int i = 0; i < GetHudList().Count(); i++ )
 	{
+#if defined ( PORTAL2 )
+		// 78342: We don't want to clear hud chat every spawn as our 
+		// MP re-spawns players every death... losing chat is a big deal in p2 coop.
+		if ( V_strcmp( GetHudList()[i]->GetName(), "CHudChat" ) == 0 )
+			continue;
+#endif
 		GetHudList()[i]->Reset();
 	}
 
