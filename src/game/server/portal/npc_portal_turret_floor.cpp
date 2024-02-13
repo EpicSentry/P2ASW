@@ -141,7 +141,7 @@ CNPC_Portal_FloorTurret::CNPC_Portal_FloorTurret( void )
 
 void CNPC_Portal_FloorTurret::Precache( void )
 {
-	if (this->m_bLoadAlternativeModels)
+	if (m_bLoadAlternativeModels)
 	{
 		PrecacheModel(BOX_TURRET_MODEL);
 		PrecacheModel(BACKWARDS_TURRET_MODEL);
@@ -275,7 +275,7 @@ void CNPC_Portal_FloorTurret::OnRestore(void)
 
 void CNPC_Portal_FloorTurret::UpdateOnRemove( void )
 {
-	if ( IsDissolving() && !this->m_bGagged )
+	if ( IsDissolving() && !m_bGagged )
 		EmitSound( GetTurretTalkName( PORTAL_TURRET_DISSOLVED ) );
 
 	LaserOff();
@@ -292,7 +292,7 @@ int CNPC_Portal_FloorTurret::OnTakeDamage( const CTakeDamageInfo &info )
 	{
 		if ( gpGlobals->curtime > m_fNextTalk )
 		{
-			if (!this->m_bGagged)
+			if (!m_bGagged)
 				EmitSound( GetTurretTalkName( PORTAL_TURRET_SHOTAT ) );
 			m_fNextTalk = gpGlobals->curtime + 3.0f;
 		}
@@ -345,7 +345,7 @@ bool CNPC_Portal_FloorTurret::PreThink( turretState_e state )
 {
 	if (IsOnFire())
 	{
-		m_flBurnExplodeTime = random->RandomFloat(sv_portal_turret_burn_time_min.GetFloat(), sv_portal_turret_burn_time_max.GetFloat());
+		m_flBurnExplodeTime = random->RandomFloat(sv_portal_turret_burn_time_min.GetFloat(), sv_portal_turret_burn_time_max.GetFloat()) + gpGlobals->curtime;
 		
 		if (!random->RandomInt(0, 3))
 		{
@@ -360,10 +360,13 @@ bool CNPC_Portal_FloorTurret::PreThink( turretState_e state )
 
 	m_bIsFiring = state == TURRET_ACTIVE;
 
-	if (IsMovingSuddenly())
-		if (!this->m_bGagged)
-			EmitSound(GetTurretTalkName(PORTAL_TURRET_FLUNG));
+	if ( IsMovingSuddenly() )
+	{
+		if ( !m_bGagged )
+			EmitSound( GetTurretTalkName( PORTAL_TURRET_FLUNG ) );
+
 		m_fNextTalk = gpGlobals->curtime + 1.0;
+	}
 
 	// Working 2 enums into one integer
 	int iNewState = state;
@@ -394,57 +397,57 @@ bool CNPC_Portal_FloorTurret::PreThink( turretState_e state )
 		switch ( iNewState )
 		{
 			case TURRET_SEARCHING:
-				EmitSound( pchScriptName );
+				TryEmitSound( pchScriptName );
 				m_fNextTalk = gpGlobals->curtime + 1.75f;
 				break;
 
 			case TURRET_AUTO_SEARCHING:
-				EmitSound( pchScriptName );
+				TryEmitSound( pchScriptName );
 				m_fNextTalk = gpGlobals->curtime + 1.75f;
 				break;
 
 			/*case TURRET_ACTIVE:
-				EmitSound( pchScriptName );
+				TryEmitSound( pchScriptName );
 				m_fNextTalk = gpGlobals->curtime + 2.5f;
 				break;*/
 
 			// Suppress is too fleeting for a message
 			/*case TURRET_SUPPRESSING:
-				EmitSound( pchScriptName );
+				TryEmitSound( pchScriptName );
 				m_fNextTalk = gpGlobals->curtime + 1.5f;
 				break;*/
 
 			case TURRET_DEPLOYING:
-				EmitSound( pchScriptName );
+				TryEmitSound( pchScriptName );
 				m_fNextTalk = gpGlobals->curtime + 1.75f;
 				break;
 
 			case TURRET_RETIRING:
-				EmitSound( pchScriptName );
+				TryEmitSound( pchScriptName );
 				m_fNextTalk = gpGlobals->curtime + 3.5f;
 				break;
 
 			case TURRET_TIPPED:
-				EmitSound( pchScriptName );
+				TryEmitSound( pchScriptName );
 				m_fNextTalk = gpGlobals->curtime + 1.15f;
 				break;
 
 			case PORTAL_TURRET_PICKUP:
-				EmitSound( GetTurretTalkName( PORTAL_TURRET_PICKUP ) );
+				TryEmitSound( GetTurretTalkName( PORTAL_TURRET_PICKUP ) );
 				m_fNextTalk = gpGlobals->curtime + 2.25f;
 				break;
 
 			case PORTAL_TURRET_DISSOLVED:
-				EmitSound( pchScriptName );
+				TryEmitSound( pchScriptName );
 				m_fNextTalk = gpGlobals->curtime + 10.0f;	// Never going to talk again
 				break;
 
 			case PORTAL_TURRET_STARTBURNING:
-				EmitSound( pchScriptName );
+				TryEmitSound( pchScriptName );
 				m_fNextTalk = gpGlobals->curtime + 1.0f;
 				break;
 			case PORTAL_TURRET_BURNED:
-				EmitSound( pchScriptName );
+				TryEmitSound( pchScriptName );
 				m_fNextTalk = gpGlobals->curtime + 1.0f;
 				break;
 		}
@@ -455,7 +458,7 @@ bool CNPC_Portal_FloorTurret::PreThink( turretState_e state )
 		iNewState != TURRET_TIPPED &&
 		iNewState < TURRET_STATE_TOTAL )
 		return BaseClass::PreThink( (turretState_e)iNewState );
-
+	
 	return true;
 }
 
@@ -556,7 +559,7 @@ void CNPC_Portal_FloorTurret::Shoot( const Vector &vecSrc, const Vector &vecDirT
 
 	if ( m_iLastState == TURRET_ACTIVE && gpGlobals->curtime > m_fNextTalk )
 	{
-		if (!this->m_bGagged)
+		if (!m_bGagged)
 			EmitSound( GetTurretTalkName( m_iLastState ) );
 		m_fNextTalk = gpGlobals->curtime + 2.5f;
 	}
@@ -637,7 +640,7 @@ void CNPC_Portal_FloorTurret::SetEyeState( eyeState_t state )
 
 void CNPC_Portal_FloorTurret::TryEmitSound(const char* soundname)
 {
-	if (!this->m_bGagged)
+	if (!m_bGagged)
 		CBaseEntity::EmitSound(soundname);
 }
 
@@ -700,7 +703,7 @@ float CNPC_Portal_FloorTurret::GetAttackDamageScale( CBaseEntity *pVictim )
 		}
 	}
 
-	if (this->m_bUseSuperDamageScale)
+	if (m_bUseSuperDamageScale)
 		return TURRET_FLOOR_DAMAGE_MULTIPLIER * 4.0;
 
 	return BaseClass::GetAttackDamageScale( pVictim );
@@ -1057,7 +1060,7 @@ void CNPC_Portal_FloorTurret::SearchThink( void )
 
 		if ( gpGlobals->curtime > m_flNextActivateSoundTime )
 		{
-			if (!this->m_bGagged)
+			if (!m_bGagged)
 				EmitSound( "NPC_FloorTurret.Activate" );
 			m_flNextActivateSoundTime = gpGlobals->curtime + 3.0;
 		}
@@ -1153,18 +1156,18 @@ void CNPC_Portal_FloorTurret::TippedThink( void )
 			//If we're done moving to our desired facing, close up
 			if ( UpdateFacing() == false )
 			{
-				if (!this->m_bGagged)
+				if (!m_bGagged)
 				{
 					EmitSound("NPC_FloorTurret.Die");
 				}
-				if (!this->m_bGagged)
+				if (!m_bGagged)
 				{
 					EmitSound(GetTurretTalkName(PORTAL_TURRET_DISABLED));
 				}
 				SpinDown();
 
 				SetActivity( (Activity) ACT_FLOOR_TURRET_CLOSE );
-				if (!this->m_bGagged)
+				if (!m_bGagged)
 					EmitSound( "NPC_FloorTurret.Retract" );
 
 				CTakeDamageInfo	info;
@@ -1326,7 +1329,7 @@ void CNPC_Portal_FloorTurret::DisabledThink(void)
 
 	LaserOff();
 
-	if (this->m_bUsedAsActor)
+	if (m_bUsedAsActor)
 	{
 		NPCThink();
 		thinkTime = gpGlobals->curtime + 0.1;
@@ -1386,11 +1389,11 @@ void CNPC_Portal_FloorTurret::BreakThink(void)
 
 void CNPC_Portal_FloorTurret::BurnThink(void)
 {
-	if (gpGlobals->curtime <= this->m_flBurnExplodeTime)
+	if (gpGlobals->curtime <= m_flBurnExplodeTime)
 	{
 		if (gpGlobals->curtime > m_fNextTalk)
 		{
-			if (!this->m_bGagged)
+			if (!m_bGagged)
 				EmitSound(GetTurretTalkName(PORTAL_TURRET_BURNED ) );
 			m_fNextTalk = random->RandomFloat(0.5f, 0.75f);
 		}
@@ -1575,7 +1578,7 @@ void CNPC_Portal_FloorTurret::FireBullet( const char *pTargetName )
 		//Turn to face
 		UpdateFacing();
 
-		if(!this->m_bGagged)
+		if(!m_bGagged)
 			EmitSound( "NPC_FloorTurret.Alert" );
 		SetThink( &CNPC_FloorTurret::SuppressThink );
 	}
@@ -1626,7 +1629,7 @@ void CNPC_Portal_FloorTurret::Use(CBaseEntity* pActivator, CBaseEntity* pCaller,
 {
 	CBasePlayer* pPlayer = ToBasePlayer(pActivator);
 
-	if ( this->m_bPickupEnabled && pActivator)
+	if ( m_bPickupEnabled && pActivator)
 		pPlayer->PickupObject(this, false);
 }
 

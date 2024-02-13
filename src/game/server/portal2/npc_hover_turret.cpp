@@ -363,7 +363,7 @@ void CHoverTurretTether::Spawn()
 	if (m_hAttachPoint)
 	{
 		SetNextThink(gpGlobals->curtime);
-		SetThink(PullThink);
+		SetThink(&CHoverTurretTether::PullThink);
 		PullThink();
 	}
 }
@@ -815,7 +815,7 @@ Vector CNPC_HoverTurret::GetClosestVisibleEnemyPosition()
 	Vector vecMuzzlePos, vecMidEnemyTransformed;
 	MatrixGetColumn(m_muzzleToWorld, 3, vecMuzzlePos);
 
-	Vector vecMidEnemy = pEnemy->BodyTarget(vecMidEnemyTransformed, &vecMuzzlePos);
+	Vector vecMidEnemy = pEnemy->BodyTarget(vecMidEnemyTransformed, false);
 
 	//Calculate dir and dist to enemy
 	Vector	vecDirToEnemyTransformed = vecMidEnemy * 0.65;
@@ -856,6 +856,8 @@ Vector CNPC_HoverTurret::GetClosestVisibleEnemyPosition()
 	QAngle vecAnglesToEnemy;
 	VectorAngles(vecDirToEnemy, vecAnglesToEnemy);
 	m_vecGoalAngles = vecAnglesToEnemy;
+
+	return vecMidEnemyTransformed;
 }
 
 void CNPC_HoverTurret::CreateSmokeTrail()
@@ -1081,7 +1083,7 @@ void CNPC_HoverTurret::Explode()
 	}
 
 	AddEffects(EF_NODRAW);
-	SetThink(SUB_Remove);
+	SetThink(&CNPC_HoverTurret::SUB_Remove);
 	SetNextThink(gpGlobals->curtime + 0.1f);
 }
 
