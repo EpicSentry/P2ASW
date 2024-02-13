@@ -11,6 +11,8 @@
 #include "props.h"
 #include "explode.h"
 #include "world.h"
+#include "physics_saverestore.h"
+#include "rope.h"
 #include "tier0/memdbgon.h"
 
 #define HOVER_TURRET_GLOW_SPRITE	"sprites/light_glow03.vmt"
@@ -56,11 +58,34 @@ enum hoverTurretAttackState_e
 };
 
 ConVar sk_hover_turret_health("sk_hover_turret_health", "150", FCVAR_NONE);
+ConVar hover_turret_break_dist("hover_turret_break_dist", "10", FCVAR_NONE);
 
 Activity ACT_HOVER_TURRET_SEARCH;
 Activity ACT_HOVER_TURRET_ALERT;
 Activity ACT_HOVER_TURRET_ANGRY;
 Activity ACT_HOVER_TURRET_DISABLED;
+
+class CHoverTurretTether : public CBaseAnimating
+{
+public:
+	DECLARE_CLASS(CHoverTurretTether, CBaseAnimating);
+
+	void UpdateOnRemove();
+	void AttachEntities(CHandle<CBaseEntity> p_hTurret, CHandle<CBaseEntity> p_hAttachPoint);
+	void ToggleThroughPortal(CPortal_Base2D* pEnteredPortal);
+	void ReleaseTether();
+
+	DECLARE_DATADESC();
+private:
+	void PullThink();
+	void Spawn();
+	float m_flNaturalDistance;
+
+	CHandle<CBaseEntity> m_hAttachPoint;
+	CHandle<CBaseEntity> m_hTurret;
+	IPhysicsSpring* m_pSpring;
+	CHandle<CRopeKeyframe> m_hRope;
+};
 
 class CNPC_HoverTurret : public CNPCBaseInteractive<CAI_BasePhysicsFlyingBot>, public CDefaultPlayerPickupVPhysics
 {
@@ -70,6 +95,7 @@ public:
 
 	Class_T Classify(void) { return CLASS_COMBINE; }
 	void Event_Killed(const CTakeDamageInfo& info);
+	void NotifySystemEvent(CBaseEntity* pNotify, notify_system_event_t eventType, const notify_system_event_params_t& params);
 	void TraceAttack(const CTakeDamageInfo& info, const Vector& vecDir, trace_t* ptr) { return BaseClass::TraceAttack(info, vecDir, ptr); }
 	void ShootLaser(Vector& vecSrc, Vector& vecDirToEnemy);
 	void TalkThink();
@@ -168,6 +194,21 @@ private:
 	QAngle m_vInitialLookAngles;
 };
 
+
+LINK_ENTITY_TO_CLASS(ent_hover_turret_tether, CHoverTurretTether);
+
+BEGIN_DATADESC(CHoverTurretTether)
+	DEFINE_PHYSPTR(m_pSpring),
+	
+	DEFINE_FIELD(m_hRope, FIELD_EHANDLE),
+	DEFINE_FIELD(m_hAttachPoint, FIELD_EHANDLE),
+	DEFINE_FIELD(m_hTurret, FIELD_EHANDLE),
+	
+	DEFINE_FIELD(m_flNaturalDistance, FIELD_FLOAT),
+	
+	DEFINE_THINKFUNC(PullThink),
+END_DATADESC()
+
 LINK_ENTITY_TO_CLASS(npc_hover_turret, CNPC_HoverTurret);
 
 BEGIN_DATADESC(CNPC_HoverTurret)
@@ -212,6 +253,122 @@ AI_END_CUSTOM_NPC()
 
 //END_SEND_TABLE()
 
+void CHoverTurretTether::UpdateOnRemove()
+{
+	if (m_pSpring)
+	{
+		physenv->DestroySpring(m_pSpring);
+		m_pSpring = NULL;
+	}
+
+	BaseClass::UpdateOnRemove();
+
+	if (m_hRope)
+	{
+		m_hRope->DetachPoint(1);
+	}
+}
+
+void CHoverTurretTether::AttachEntities(CHandle<CBaseEntity> p_hTurret, CHandle<CBaseEntity> p_hAttachPoint)
+{
+	m_hTurret = p_hTurret;
+	m_hAttachPoint = p_hAttachPoint;
+}
+
+void CHoverTurretTether::ToggleThroughPortal(CPortal_Base2D* pEnteredPortal)
+{
+	if (m_hTurret)
+	{
+		CTakeDamageInfo info(this, this, 200.0f, DMG_BLAST);
+	}
+}
+
+void CHoverTurretTether::ReleaseTether()
+{
+	if (m_pSpring)
+	{
+		physenv->DestroySpring(m_pSpring);
+		m_pSpring = NULL;
+	}
+
+	BaseClass::UpdateOnRemove();
+
+	if (m_hRope)
+	{
+		m_hRope->DetachPoint(1);
+	}
+}
+
+void CHoverTurretTether::PullThink()
+{
+	Vector vecStart, vecEnd;
+	if (m_hTurret)
+	{
+		if (!m_pSpring)
+		{
+			m_flNaturalDistance = sqrt(m_hTurret->GetAbsOrigin().x - GetAbsOrigin().x * m_hTurret->GetAbsOrigin().x - GetAbsOrigin().x + m_hTurret->GetAbsOrigin().y - GetAbsOrigin().y * m_hTurret->GetAbsOrigin().y - GetAbsOrigin().y);
+
+			springparams_t spring;
+			spring.naturalLength = m_flNaturalDistance;
+			spring.constant = 10000.0f;
+			spring.damping = 16.0f;
+
+			GetVectors(NULL, NULL, &vecStart);
+
+			spring.startPosition = vecStart * 20.0f;
+			spring.useLocalPositions = false;
+			spring.onlyStretch = true;
+			spring.endPosition = GetAbsOrigin();
+
+			m_pSpring = physenv->CreateSpring(m_pPhysicsObject, m_pPhysicsObject, &spring);
+
+			m_hRope = CRopeKeyframe::Create(this, m_hTurret, 0, 0, 1);
+			if (m_hRope)
+			{
+				m_hRope->EnableWind(true);
+			}
+		}
+		m_pSpring->GetEndpoints(&vecStart, &vecEnd);
+		vecStart = vecStart - vecEnd;
+
+		if ((sqrt((vecStart.x * vecStart.x) + (vecStart.y * vecStart.y) + (vecStart.z * vecStart.z)) - m_flNaturalDistance) > hover_turret_break_dist.GetFloat())
+		{
+			CTakeDamageInfo info(this, this, 200.0f, DMG_BLAST);
+		}
+
+		Ray_t ray;
+		ray.Init(m_hTurret->GetAbsOrigin(), GetAbsOrigin());
+		trace_t tr;
+		UTIL_TraceRay(ray, MASK_SOLID_BRUSHONLY, NULL, COLLISION_GROUP_NONE, &tr);
+
+		if (tr.DidHitWorld())
+		{
+			CTakeDamageInfo info(this, this, 200.0f, DMG_BLAST);
+		}
+		SetNextThink(gpGlobals->curtime);
+	}
+}
+
+void CHoverTurretTether::Spawn()
+{
+	BaseClass::Precache();
+	SetModel("models/npcs/hover_turret.mdl");
+	AddEffects(EF_NODRAW);
+	SetSolid(SOLID_VPHYSICS);
+	AddSolidFlags(FSOLID_NOT_SOLID);
+	VPhysicsInitShadow(false, false);
+	SetMoveType(MOVETYPE_NONE, MOVECOLLIDE_DEFAULT);
+	BaseClass::Spawn();
+
+	if (m_hAttachPoint)
+	{
+		SetNextThink(gpGlobals->curtime);
+		SetThink(PullThink);
+		PullThink();
+	}
+}
+
+
 void CNPC_HoverTurret::Event_Killed(const CTakeDamageInfo& info)
 {
 	if (m_hSmokeTrail)
@@ -231,6 +388,21 @@ void CNPC_HoverTurret::Event_Killed(const CTakeDamageInfo& info)
 	m_iHealth = 0;
 
 	m_OnDeath.FireOutput(this, this);
+}
+
+void CNPC_HoverTurret::NotifySystemEvent(CBaseEntity* pNotify, notify_system_event_t eventType, const notify_system_event_params_t& params)
+{
+	if (eventType == NOTIFY_EVENT_TELEPORT && IsAlive())
+	{
+		if (m_hTether)
+		{
+			CHoverTurretTether* pTether = NULL;
+
+			CPortal_Base2D* pEnteredPortal = dynamic_cast<CPortal_Base2D*>(pNotify);
+			if (pEnteredPortal)
+				pTether->ToggleThroughPortal(pEnteredPortal);
+		}
+	}
 }
 
 void CNPC_HoverTurret::ShootLaser(Vector& vecSrc, Vector& vecDirToEnemy)
