@@ -124,6 +124,8 @@ $Project "Client (Portal 2)"
 			$File "portal2\c_baseprojector.h"
 			$File "portal2\c_baseprojector.cpp"
 			
+			$File "portal2\c_npc_hover_turret.cpp"
+			
 			$File "portal2\c_prop_tractorbeam.cpp"
 			
 			$File "$SRCDIR\game\shared\portal\baseprojectedentity_shared.h"

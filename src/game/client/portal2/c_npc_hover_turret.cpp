@@ -38,7 +38,7 @@ END_RECV_TABLE()
 
 void C_NPC_Hover_Turret::Spawn()
 {
-	SetThink(C_NPC_Hover_Turret::ClientThink);
+	SetThink( &C_NPC_Hover_Turret::ClientThink );
 	m_pBeam = NULL;
 	m_fPulseOffset = RandomFloat(0.0f, 6.2831855f);
 	m_bBeamFlickerOff = 0.0f;
