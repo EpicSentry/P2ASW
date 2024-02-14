@@ -13,6 +13,8 @@
 #include "world.h"
 #include "physics_saverestore.h"
 #include "rope.h"
+
+// memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 #define HOVER_TURRET_GLOW_SPRITE	"sprites/light_glow03.vmt"
@@ -90,7 +92,7 @@ private:
 class CNPC_HoverTurret : public CNPCBaseInteractive<CAI_BasePhysicsFlyingBot>, public CDefaultPlayerPickupVPhysics
 {
 public:
-	//DECLARE_SERVERCLASS();
+	DECLARE_SERVERCLASS();
 	DECLARE_CLASS(CNPC_HoverTurret, CNPCBaseInteractive<CAI_BasePhysicsFlyingBot>);
 
 	Class_T Classify(void) { return CLASS_COMBINE; }
@@ -142,9 +144,12 @@ public:
 	DEFINE_CUSTOM_AI;
 	DECLARE_DATADESC();
 private:
+	void MaintainGroundHeight() { return; }
 	void TakeDamageFromPhysicsImpact(int index, gamevcollisionevent_t* pEvent);
+	bool AllowedToIgnite(void) { return true; }
 	bool OnBurning();
-	//CNetworkVar(int, m_sLaserHaloSprite);
+	CNetworkVar(int, m_iLaserState);
+	CNetworkVar(int, m_sLaserHaloSprite);
 	float m_fNextTalk;
 
 	int m_iDesiredState;
@@ -247,11 +252,12 @@ AI_BEGIN_CUSTOM_NPC(npc_hover_turret, CNPC_HoverTurret)
 	DECLARE_TASK(TASK_HOVER_TURRET_HOVER)
 AI_END_CUSTOM_NPC()
 
-//IMPLEMENT_SERVERCLASS_ST(CNPC_HoverTurret, DT_NPC_HoverTurret)
+IMPLEMENT_SERVERCLASS_ST(CNPC_HoverTurret, DT_NPC_HoverTurret)
 
-//SendPropInt(SENDINFO(m_sLaserHaloSprite)),
+SendPropInt(SENDINFO(m_iLaserState)),
+SendPropInt(SENDINFO(m_sLaserHaloSprite)),
 
-//END_SEND_TABLE()
+END_SEND_TABLE()
 
 void CHoverTurretTether::UpdateOnRemove()
 {
@@ -612,6 +618,7 @@ void CNPC_HoverTurret::SetFiringState(hoverTurretAttackState_e state)
 	{
 		m_iFiringState = HOVER_TURRET_SHOT_DISABLED;
 		m_iDesiredState = HOVER_TURRET_PICKUP;
+		m_iLaserState = 0;
 		SetActivity(ACT_HOVER_TURRET_ANGRY);
 		m_nSkin = 2;
 		m_hEyeGlow->SetScale(0.1f,3.0f);
@@ -623,7 +630,19 @@ void CNPC_HoverTurret::SetFiringState(hoverTurretAttackState_e state)
 		m_iFiringState = HOVER_TURRET_FIND_TARGET;
 		m_iDesiredState = HOVER_TURRET_DESTRUCTING;
 		SetActivity(ACT_HOVER_TURRET_ANGRY);
+		m_iLaserState = 0;
 		m_nSkin = 2;
+	}
+	else
+	{
+		m_bAimingAtTarget = false;
+		m_flAimStartTime = 0.0f;
+		m_iDesiredState = HOVER_TURRET_SEARCHING;
+		m_iLaserState = 1;
+		m_nSkin = 3;
+		SetActivity(ACT_HOVER_TURRET_SEARCH);
+		m_hEyeGlow->SetScale(0.1f, 3.0f);
+		m_hEyeGlow->SetBrightness(0, 3.0f);
 	}
 }
 
@@ -914,7 +933,7 @@ void CNPC_HoverTurret::Precache()
 	PrecacheModel("models/props_bts/rocket_sentry.mdl");
 	PrecacheModel("effects/bluelaser1.vmt");
 
-	//m_sLaserHaloSprite = PrecacheModel("sprites/redlaserglow.vmt");
+	m_sLaserHaloSprite = PrecacheModel("sprites/light_glow03.vmt");
 
 	UTIL_PrecacheOther("prop_glass_futbol");
 
