@@ -22,13 +22,13 @@
 #include <vgui_controls/ImageList.h>
 #include "vgui_avatarimage.h"
 
+#ifdef PORTAL2_PUZZLEMAKER
 #include "gc_clientsystem.h"
 #include "econ_gcmessages.h"
 #include "vratemapdialog.h"
 #include "imageutils.h"
 #include "rtime.h"
 
-#ifdef PORTAL2_PUZZLEMAKER
 #include "c_community_coop.h"
 #endif // PORTAL2_PUZZLEMAKER
 

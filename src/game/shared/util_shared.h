@@ -900,6 +900,7 @@ int UTIL_CountNumBitsSet( unsigned int nVar );
 int UTIL_CountNumBitsSet( uint64 nVar );
 
 bool UTIL_GetModDir( char *lpszTextOut, unsigned int nSize );
+const char* UTIL_GetSaveDir(void);
 
 /*UTIL_CalcFrustumThroughPolygon - Given a frustum and a polygon, calculate how the current frustum would clip the polygon, then generate a new frustum that runs along the edge of the clipped polygon.
 -returns number of planes in the output frustum, 0 if the polygon was completely clipped by the input frustum

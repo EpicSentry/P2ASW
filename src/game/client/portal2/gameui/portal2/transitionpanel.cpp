@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve Corporation, All rights reserved. ============//
+//========= Copyright ï¿½ 1996-2008, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -98,8 +98,11 @@ void CBaseModTransitionPanel::BuildTiles()
 	int screenWide, screenTall;
 	surface()->GetScreenSize( screenWide, screenTall );
 
-	const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
-	float flInverseAspect = 1.0f/aspectRatioInfo.m_flFrameBufferAspectRatio;
+	// The AspectRatioInfo system does not exist in Swarm
+	//const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
+	//float flInverseAspect = 1.0f/aspectRatioInfo.m_flFrameBufferAspectRatio;
+
+	float flInverseAspect = screenTall / screenWide;
 
 	m_nNumColumns = ( screenWide + m_nTileWidth - 1 ) / m_nTileWidth;
 	m_nNumRows = ( screenTall + m_nTileHeight - 1 ) / m_nTileHeight;
@@ -427,7 +430,9 @@ void CBaseModTransitionPanel::ScanTilesForTransition()
 			m_nNumTransitions++;
 
 			vgui::input()->SetModalSubTree( GetVPanel(), GetVPanel(), true );
-			vgui::input()->SetModalSubTreeShowMouse( true );
+			// Removed for p2asw, not sure what this is for...
+			// Did the tileflip transitions originally hide the mouse?
+			// vgui::input()->SetModalSubTreeShowMouse( true );
 
 			// snap off the current expected direction
 			m_flDirection = m_bForwardHint ? 1.0f : -1.0f;
@@ -483,8 +488,8 @@ bool CBaseModTransitionPanel::IsEffectEnabled()
 		GameUI().IsInLevel() || 
 		engine->IsConnected() ||
 		CBaseModPanel::GetSingleton().IsLevelLoading() ||
-		( !IsGameConsole() && GameConsole().IsConsoleVisible() ) ||
-		materials->IsStereoActiveThisFrame() ) // Disable effect when in nvidia's stereo mode
+		( !IsGameConsole() && GameConsole().IsConsoleVisible() ) /*||
+		materials->IsStereoActiveThisFrame()*/ ) // Disable effect when in nvidia's stereo mode - removed for p2asw
 	{
 		// effect not allowed in game or loading into game
 		if ( m_bTransitionActive )
@@ -626,8 +631,14 @@ void CBaseModTransitionPanel::StartPaint3D()
 	pRenderContext->PushMatrix();
 	pRenderContext->LoadIdentity();
 
-	const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
-	pRenderContext->PerspectiveX( 90, aspectRatioInfo.m_flFrameBufferAspectRatio, TILE_NEAR_PLANE, TILE_FAR_PLANE );
+	//const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
+
+	// The AspectRatioInfo system does not exist in Swarm
+	int screenWide, screenTall;
+	surface()->GetScreenSize( screenWide, screenTall );
+	float aspectRatio = (float)screenWide/(float)screenTall;
+
+	pRenderContext->PerspectiveX( 90, aspectRatio, TILE_NEAR_PLANE, TILE_FAR_PLANE );
 
 	pRenderContext->CullMode( MATERIAL_CULLMODE_CCW );
 
@@ -637,7 +648,7 @@ void CBaseModTransitionPanel::StartPaint3D()
 	pRenderContext->SetStencilState( state );
 
 	pRenderContext->ClearBuffers( false, true, true );
-	pRenderContext->OverrideDepthEnable( true, true, true );
+	pRenderContext->OverrideDepthEnable( true, true/*, true*/ );
 }
 
 void CBaseModTransitionPanel::EndPaint3D()
@@ -647,7 +658,7 @@ void CBaseModTransitionPanel::EndPaint3D()
 
 	if ( !IsGameConsole() )
 	{
-		pRenderContext->OverrideDepthEnable( false, true, true );
+		pRenderContext->OverrideDepthEnable( false, true/*, true*/ );
 	}
 
 	ShaderStencilState_t state;

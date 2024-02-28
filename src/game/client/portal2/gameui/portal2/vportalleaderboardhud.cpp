@@ -4,6 +4,9 @@
 //
 //=======================================================================================//
 
+// FIXME: This won't work until portal2_leaderboard_manager.cpp/h is RE'd
+#if 0
+
 #include "cbase.h"
 #include "vportalleaderboardhud.h"
 #include "VFooterPanel.h"
@@ -1390,3 +1393,5 @@ bool CPortalHUDLeaderboard::IsMapLocked( int nChapterNumber, int nMapNumber, boo
 		return !PortalMPGameRules()->IsLevelInBranchComplete( nChapterNumber-1, nMapNumber-1 );
 	}
 }
+
+#endif // 0

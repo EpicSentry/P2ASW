@@ -88,22 +88,25 @@ void OptionsCloud::OnKeyCodePressed( vgui::KeyCode code )
 	{
 	case KEY_XBUTTON_B:
 		{
-			GameSteamCloudPreferences_t gscp;
-			g_pGameSteamCloudSync->GetPreferences( gscp );
-			if ( m_numSavesSelected != gscp.m_numSaveGamesToSync )
-			{
-				TitleDataFieldsDescription_t const *fields = g_pMatchFramework->GetMatchTitle()->DescribeTitleDataStorage();
-				if ( TitleDataFieldsDescription_t const *pCloudSaves = TitleDataFieldsDescriptionFindByString( fields, "CFG.sys.cloud_saves" ) )
-				{
-					TitleDataFieldsDescriptionSetValue<uint8>( pCloudSaves, g_pMatchFramework->GetMatchSystem()
-						->GetPlayerManager()->GetLocalPlayer( XBX_GetPrimaryUserId() ), m_numSavesSelected + 1 );
+			// Disabled for p2asw - some of these functions do not exist
+			// and this entire dialog is PS3 only anyway
+			
+			//GameSteamCloudPreferences_t gscp;
+			//g_pGameSteamCloudSync->GetPreferences( gscp );
+			//if ( m_numSavesSelected != gscp.m_numSaveGamesToSync )
+			//{
+			//	TitleDataFieldsDescription_t const *fields = g_pMatchFramework->GetMatchTitle()->DescribeTitleDataStorage();
+			//	if ( TitleDataFieldsDescription_t const *pCloudSaves = TitleDataFieldsDescriptionFindByString( fields, "CFG.sys.cloud_saves" ) )
+			//	{
+			//		TitleDataFieldsDescriptionSetValue<uint8>( pCloudSaves, g_pMatchFramework->GetMatchSystem()
+			//			->GetPlayerManager()->GetLocalPlayer( XBX_GetPrimaryUserId() ), m_numSavesSelected + 1 );
 
-					// Force the Steam cloud manager to update with latest setting
-					KeyValues *kvUpdate = new KeyValues( "OnProfileDataLoaded" );
-					KeyValues::AutoDelete autodelete( kvUpdate );
-					g_pGameSteamCloudSync->OnEvent( kvUpdate );
-				}
-			}
+			//		// Force the Steam cloud manager to update with latest setting
+			//		KeyValues *kvUpdate = new KeyValues( "OnProfileDataLoaded" );
+			//		KeyValues::AutoDelete autodelete( kvUpdate );
+			//		g_pGameSteamCloudSync->OnEvent( kvUpdate );
+			//	}
+			//}
 		}
 		break;
 	}

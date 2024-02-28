@@ -1199,27 +1199,26 @@ void PvpLobby::MsgNoValidMissionChapter( KeyValues *pSettings )
 {
 	LeaveLobbyImpl();	// Lobby is no valid at this point
 
-	if ( IsX360() )
-	{
-		// The required DLC is missing on the client, fire a notification that would
-		// allow us to download the DLC from the marketplace
-		uint64 uiDlcMask = pSettings->GetUint64( "game/dlcrequired" );
-		uint64 uiDlcInstalled = g_pMatchFramework->GetMatchSystem()->GetDlcManager()->GetDataInfo()->GetUint64( "@info/installed" );
+#ifdef _X360
+	// The required DLC is missing on the client, fire a notification that would
+	// allow us to download the DLC from the marketplace
+	uint64 uiDlcMask = pSettings->GetUint64( "game/dlcrequired" );
+	uint64 uiDlcInstalled = g_pMatchFramework->GetMatchSystem()->GetDlcManager()->GetDataInfo()->GetUint64( "@info/installed" );
 
-		uint64 uiDlcNotify = ( uiDlcMask &~uiDlcInstalled );
+	uint64 uiDlcNotify = ( uiDlcMask &~uiDlcInstalled );
 
-		KeyValues *kvDlcNotify = new KeyValues( "OnMatchSessionUpdate" );
-		KeyValues::AutoDelete autodelete_kvDlcNotify( kvDlcNotify );
+	KeyValues *kvDlcNotify = new KeyValues( "OnMatchSessionUpdate" );
+	KeyValues::AutoDelete autodelete_kvDlcNotify( kvDlcNotify );
 
-		kvDlcNotify->SetString( "state", "error" );
-		kvDlcNotify->SetString( "error", "dlcrequired" );
-		kvDlcNotify->SetUint64( "dlcrequired", uiDlcNotify );
-		kvDlcNotify->SetUint64( "dlcmask", uiDlcMask );
-		kvDlcNotify->SetString( "action", "kicked" );
+	kvDlcNotify->SetString( "state", "error" );
+	kvDlcNotify->SetString( "error", "dlcrequired" );
+	kvDlcNotify->SetUint64( "dlcrequired", uiDlcNotify );
+	kvDlcNotify->SetUint64( "dlcmask", uiDlcMask );
+	kvDlcNotify->SetString( "action", "kicked" );
 
-		CUIGameData::Get()->OnEvent( kvDlcNotify );
-		return;
-	}
+	CUIGameData::Get()->OnEvent( kvDlcNotify );
+	return;
+#endif
 
 	const char *szCampaignWebsite = pSettings->GetString( "game/missioninfo/website", NULL );
 
@@ -1610,6 +1609,7 @@ void PvpLobby::ApplyUpdatedSettings( KeyValues *kvUpdate )
 		*/
 	}
 
+#if 0
 	// Check the DLC required setting if it changed
 	if ( uint64 uiDlcRequiredMask = kvUpdate->GetUint64( "game/dlcrequired" ) )
 	{
@@ -1623,6 +1623,7 @@ void PvpLobby::ApplyUpdatedSettings( KeyValues *kvUpdate )
 			return;
 		}
 	}
+#endif
 }
 
 void PvpLobby::SetLobbyLeaderText()

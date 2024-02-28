@@ -21,14 +21,18 @@
 using namespace vgui;
 using namespace BaseModUI;
 
+#if 0 // FIXME: Bring these back when leaderboards are working
 extern int g_nPortalScoreTempUpdate;
 extern int g_nTimeScoreTempUpdate;
+#endif
 
 //=============================================================================
 static void LeaveGameOkCallback()
 {
 	COM_TimestampedLog( "Exit Game" );
 
+	// FIXME: Bring this back when leaderboards are working
+#if 0
 	CUIGameData::Get()->GameStats_ReportAction( "challenge_quit", engine->GetLevelNameShort(), g_nTimeScoreTempUpdate );
 
 	CPortalLeaderboardPanel* self = 
@@ -38,6 +42,7 @@ static void LeaveGameOkCallback()
 	{
 		self->Close();
 	}
+#endif
 
 	GameUI().HideGameUI();
 
@@ -69,6 +74,8 @@ static void LeaveGameOkCallback()
 static void GoToHubOkCallback()
 {
 	GameUI().AllowEngineHideGameUI();
+	// FIXME: Bring this back when leaderboards are working
+#if 0
 	CPortalLeaderboardPanel* pSelf = 
 		static_cast< CPortalLeaderboardPanel* >( CBaseModPanel::GetSingleton().GetWindow( WT_COOPEXITCHOICE ) );
 
@@ -77,6 +84,7 @@ static void GoToHubOkCallback()
 		bool bWaitScreen =  CUIGameData::Get()->OpenWaitScreen( "#PORTAL2_WaitScreen_GoingToHub", 0.0f, NULL );
 		pSelf->PostMessage( pSelf, new KeyValues( "MsgPreGoToHub" ), bWaitScreen ? 2.0f : 0.0f );
 	}
+#endif
 }
 
 
@@ -163,7 +171,8 @@ void CCoopExitChoice::OnCommand(const char *command)
 	}
 	else if ( !V_stricmp( "BtnGoToHub", command ) )
 	{
-		CUIGameData::Get()->GameStats_ReportAction( "challenge_hub", engine->GetLevelNameShort(), g_nTimeScoreTempUpdate );
+		// FIXME: Bring this back when leaderboards are working
+		//CUIGameData::Get()->GameStats_ReportAction( "challenge_hub", engine->GetLevelNameShort(), g_nTimeScoreTempUpdate );
 		
 		GenericConfirmation* confirmation = 
 			static_cast< GenericConfirmation* >( CBaseModPanel::GetSingleton().OpenWindow( WT_GENERICCONFIRMATION, this, true ) );

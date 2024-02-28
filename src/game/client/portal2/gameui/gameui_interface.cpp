@@ -138,8 +138,10 @@ vgui::VPANEL g_hLoadingBackgroundDialog = NULL;
 
 static CGameUI g_GameUI;
 
+# if 0 // FIXME: Some video related things need to be ported
 extern void VGui_ClearTransitionVideoPanels();
 extern bool VGui_IsPlayingFullScreenVideo();
+#endif
 
 static IGameClientExports *g_pGameClientExports = NULL;
 IGameClientExports *GameClientExports()
@@ -749,7 +751,8 @@ void CGameUI::OnDisconnectFromServer( uint8 eSteamLoginFailure )
 	m_iGameConnectionPort = 0;
 	m_iGameQueryPort = 0;
 
-	VGui_ClearTransitionVideoPanels();
+	// FIXME
+	//VGui_ClearTransitionVideoPanels();
 
 	if ( g_hLoadingBackgroundDialog )
 	{
@@ -1072,7 +1075,9 @@ bool CGameUI::LoadingProgressWantsIsolatedRender( bool bContextValid )
 
 bool CGameUI::IsPlayingFullScreenVideo()
 {
-	return VGui_IsPlayingFullScreenVideo();
+	// FIXME
+	//return VGui_IsPlayingFullScreenVideo();
+	return false;
 }
 
 bool CGameUI::IsTransitionEffectEnabled()

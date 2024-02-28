@@ -32,12 +32,11 @@
 #include "portal_gamerules.h"
 #include "portal_mp_gamerules.h"
 
-#include "puzzlemaker/puzzlemaker.h"
-
 #include "gameui_util.h"
 
 #ifdef PORTAL2_PUZZLEMAKER
 
+#include "puzzlemaker/puzzlemaker.h"
 #include "c_community_coop.h"
 
 #endif // PORTAL2_PUZZLEMAKER
@@ -332,7 +331,7 @@ static void LoadLastSaveOkCallback()
 			pSelf->Close();
 		}
 
-		const char *szMostRecentSave = engine->GetMostRecentSaveGame( true );
+		const char *szMostRecentSave = engine->GetMostRecentSaveGame( /*true*/ );
 		CUIGameData::Get()->GameStats_ReportAction( "loadlast", engine->GetLevelNameShort(), !!( szMostRecentSave && szMostRecentSave[0] ) );
 
 		engine->ExecuteClientCmd( "load_recent_checkpoint" );
@@ -699,6 +698,8 @@ void InGameMainMenu::OnCommand( const char *command )
 	else if ( char const *szLeaderboards = StringAfterPrefix( command, "Leaderboards_" ) )
 	{
 #ifdef PORTAL2
+		// FIXME: Bring this back when leaderboards are working
+#if 0
 		if ( CheckAndDisplayErrorIfNotLoggedIn() ||
 			CUIGameData::Get()->CheckAndDisplayErrorIfOffline( this,
 			"#PORTAL2_LeaderboardOnlineWarning" ) )
@@ -733,7 +734,7 @@ void InGameMainMenu::OnCommand( const char *command )
 			pLeaderboardValues->SetInt( "LevelState", (int)STATE_PAUSE_MENU );
 			BASEMODPANEL_SINGLETON.OpenWindow( BaseModUI::WT_PORTALLEADERBOARDHUD, this, true, pLeaderboardValues );
 		}
-
+#endif
 		
 #else
 

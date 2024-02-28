@@ -7,6 +7,9 @@
 #ifndef __VPORTALLEADERBOARD_H__
 #define __VPORTALLEADERBOARD_H__
 
+// FIXME: This won't work until portal2_leaderboard_manager.cpp/h is RE'd
+#if 0
+
 #include "basemodui.h"
 #include "VGenericPanelList.h"
 #include "portal2_leaderboard_manager.h"
@@ -274,5 +277,7 @@ private:
 void AddAvatarPanelItem( CPortalLeaderboard *pLeaderboard, BaseModUI::GenericPanelList *pStatLists, const PortalLeaderboardItem_t *pData, int nScore, LeaderboardType nType, int nPlayerType, int nAvatarIndex, int nHeight, int nSlot, bool bHUDElement = false );
 
 };
+
+#endif // 0
 
 #endif // __VPORTALLEADERBOARD_H__

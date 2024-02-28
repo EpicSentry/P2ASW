@@ -18,6 +18,7 @@
 #include "datamap.h"
 #include "tier1/bitbuf.h"
 #include "inputsystem/ButtonCode.h"
+#include "modes.h"
 #include "string_t.h"
 #include "toolframework/itoolentity.h"
 

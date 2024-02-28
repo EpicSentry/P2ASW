@@ -113,8 +113,17 @@ void Video::ApplySchemeSettings( vgui::IScheme *pScheme )
 
 	if ( m_drpSplitScreenDirection )
 	{
-		const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
-		bool bWidescreen = aspectRatioInfo.m_bIsWidescreen;
+		//const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
+		//bool bWidescreen = aspectRatioInfo.m_bIsWidescreen;
+
+		// Alternate method for checking for widescreen
+		// The AspectRatioInfo system does not exist in Swarm
+		int screenWide, screenTall;
+		surface()->GetScreenSize( screenWide, screenTall );
+
+		bool bWidescreen;
+		float aspectRatio = (float)screenWide/(float)screenTall;
+		bWidescreen = aspectRatio >= 1.5999f;
 
 		if ( !bWidescreen )
 		{

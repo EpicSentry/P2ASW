@@ -7,6 +7,9 @@
 #ifndef __VPORTALLEADERBOARDHUD_H__
 #define __VPORTALLEADERBOARDHUD_H__
 
+// FIXME: This won't work until portal2_leaderboard.cpp/h is RE'd
+#if 0
+
 #include "basemodui.h"
 #include "portal2_leaderboard.h"
 #include "vportalleaderboard.h"
@@ -92,5 +95,7 @@ private:
 };
 
 };
+
+#endif // 0
 
 #endif // __VSOUNDTEST_H__

@@ -4,6 +4,9 @@
 //
 //============================================================================//
 
+// FIXME: This won't work until some additional workshop related code is RE'd
+#if 0
+
 #include "cbase.h"
 
 #include "vquickplay.h"
@@ -920,3 +923,5 @@ void CQuickPlay::LaunchQuickPlayMap( PublishedFileId_t unFileID )
 
 	m_eState = IDLE;
 }
+
+#endif // 0

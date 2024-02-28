@@ -8,7 +8,8 @@
 #define __VDIALOGLISTBUTTON_H__
 
 #include "basemodui.h"
-#include "portal2_leaderboard_manager.h"
+// FIXME: Re-enable this when leaderboard manager is RE'd
+//#include "portal2_leaderboard_manager.h"
 
 
 class CDialogListButton : public vgui::Button

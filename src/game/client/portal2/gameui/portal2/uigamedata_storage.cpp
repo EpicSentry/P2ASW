@@ -837,15 +837,16 @@ void CUIGameData::GameStats_ReportAction( char const *szReportAction, char const
 	kv->SetInt( "game_mapid", GameStats_GetReportMapNameIndex( szMapName ) );
 	kv->SetUint64( "game_flags", uiFlags );
 
-	IDatacenterCmdBatch *pBatch = g_pMatchFramework->GetMatchSystem()->GetDatacenter()->CreateCmdBatch();
-	pBatch->SetDestroyWhenFinished( true );
-	pBatch->SetRetryCmdTimeout( 30.0f );
-	pBatch->AddCommand( kv );
-
-#if !defined( _GAMECONSOLE ) && !defined( NO_STEAM )
-	// Send these stats to OGS
-	g_PortalGameStats.Event_UIEvent( xuid, szReportAction, uiFlags, szMapName );
-#endif //!defined( _GAMECONSOLE )
+	// Not in Swarm and not useful anyway
+//	IDatacenterCmdBatch *pBatch = g_pMatchFramework->GetMatchSystem()->GetDatacenter()->CreateCmdBatch();
+//	pBatch->SetDestroyWhenFinished( true );
+//	pBatch->SetRetryCmdTimeout( 30.0f );
+//	pBatch->AddCommand( kv );
+//
+//#if !defined( _GAMECONSOLE ) && !defined( NO_STEAM )
+//	// Send these stats to OGS
+//	g_PortalGameStats.Event_UIEvent( xuid, szReportAction, uiFlags, szMapName );
+//#endif //!defined( _GAMECONSOLE )
 }
 
 

@@ -54,7 +54,8 @@ bool CGameUiAvatarImage::SetAvatarXUID( XUID xuid, AvatarSize_t nSize /*= MEDIUM
 {
 	ClearAvatarXUID();
 
-#ifndef NO_STEAM
+	// FIXME: need an alternative way to get avatars (check what Swarm does)
+#if !defined( NO_STEAM ) && 0
 	if ( steamapicontext->SteamFriends() && steamapicontext->SteamUtils() )
 	{
 		m_nAvatarSize = nSize;

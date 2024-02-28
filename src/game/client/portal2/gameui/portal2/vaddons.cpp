@@ -311,17 +311,17 @@ void Addons::Activate()
 
 				// Make the addon types string based on the flags
 				addonInfo.szTypes[0] = NULL;
-				bCampaign ? Q_wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Campaign" ), sizeof( addonInfo.szTypes ) ) : NULL;
-				bMaps ? Q_wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Map" ), sizeof( addonInfo.szTypes ) ) : NULL;
-				bSkin ? Q_wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Skin" ), sizeof( addonInfo.szTypes ) ) : NULL;
-				bWeapon ? Q_wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Weapon" ), sizeof( addonInfo.szTypes ) ) : NULL;
-				bBoss ? Q_wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Boss" ), sizeof( addonInfo.szTypes ) ) : NULL;
-				bCommon ? Q_wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Common" ), sizeof( addonInfo.szTypes ) ) : NULL;
-				bSurvivor ? Q_wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Survivor" ), sizeof( addonInfo.szTypes ) ) : NULL;
-				bSound ? Q_wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Sound" ), sizeof( addonInfo.szTypes ) ) : NULL;
-				bScript ? Q_wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Script" ), sizeof( addonInfo.szTypes ) ) : NULL;
-				bMusic ? Q_wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Music" ), sizeof( addonInfo.szTypes ) ) : NULL;
-				bProp ? Q_wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Props" ), sizeof( addonInfo.szTypes ) ) : NULL;
+				bCampaign ? wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Campaign" ), sizeof( addonInfo.szTypes ) ) : NULL;
+				bMaps ? wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Map" ), sizeof( addonInfo.szTypes ) ) : NULL;
+				bSkin ? wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Skin" ), sizeof( addonInfo.szTypes ) ) : NULL;
+				bWeapon ? wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Weapon" ), sizeof( addonInfo.szTypes ) ) : NULL;
+				bBoss ? wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Boss" ), sizeof( addonInfo.szTypes ) ) : NULL;
+				bCommon ? wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Common" ), sizeof( addonInfo.szTypes ) ) : NULL;
+				bSurvivor ? wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Survivor" ), sizeof( addonInfo.szTypes ) ) : NULL;
+				bSound ? wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Sound" ), sizeof( addonInfo.szTypes ) ) : NULL;
+				bScript ? wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Script" ), sizeof( addonInfo.szTypes ) ) : NULL;
+				bMusic ? wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Music" ), sizeof( addonInfo.szTypes ) ) : NULL;
+				bProp ? wcsncat( addonInfo.szTypes, g_pVGuiLocalize->Find( "#L4D360UI_Addon_Type_Props" ), sizeof( addonInfo.szTypes ) ) : NULL;
 
 				// Remove trailing ','
 				if ( wcslen( addonInfo.szTypes ) )
@@ -599,7 +599,7 @@ void Addons::SetDetailsUIForAddon( int nIndex )
 	wchar_t wsAuthorLabel[130];
 
 	V_wcsncpy( wsAuthorLabel, g_pVGuiLocalize->Find( "#L4D360UI_Addon_By" ), sizeof( wsAuthorLabel ) );
-	Q_wcsncat( wsAuthorLabel, m_addonInfoList[nIndex].szAuthor, sizeof( wsAuthorLabel ) );
+	wcsncat( wsAuthorLabel, m_addonInfoList[nIndex].szAuthor, sizeof( wsAuthorLabel ) );
 
 	m_LblName->SetText( m_addonInfoList[nIndex].szName );
 	m_LblType->SetText( m_addonInfoList[nIndex].szTypes );

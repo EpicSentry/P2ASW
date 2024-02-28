@@ -63,9 +63,13 @@ void CCoopMode::OnCommand( char const *pCommand )
 	}
 	else if ( !V_stricmp( pCommand, "OpenChallengeModeDialog" ) )
 	{
+		// FIXME: Bring this back when the leaderboard manager is RE'd
+		Assert(0);
+#if 0
 		KeyValues *pSettings = new KeyValues( "Setting" );
 		pSettings->SetInt( "state", STATE_MAIN_MENU );
 		CBaseModPanel::GetSingleton().OpenWindow( WT_PORTALCOOPLEADERBOARD, this, true, KeyValues::AutoDeleteInline( pSettings ) );
+#endif
 		return;
 	}
 	else if ( !V_stricmp( pCommand, "Back" ) )

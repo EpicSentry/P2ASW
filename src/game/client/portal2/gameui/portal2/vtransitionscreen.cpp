@@ -47,8 +47,10 @@ void CTransitionScreen::ApplySchemeSettings( vgui::IScheme *pScheme )
 	int screenWide, screenTall;
 	surface()->GetScreenSize( screenWide, screenTall );
 
-	char filename[MAX_PATH];
-	engine->GetStartupImage( filename, sizeof( filename ) );
+	// Not in Swarm
+	//char filename[MAX_PATH];
+	//engine->GetStartupImage( filename, sizeof( filename ) );
+	const char* filename = "console/background_menu";
 	m_iImageID = surface()->CreateNewTextureID();
 	surface()->DrawSetTextureFile( m_iImageID, filename, true, false );
 

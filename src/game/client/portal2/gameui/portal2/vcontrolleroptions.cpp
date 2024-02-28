@@ -15,6 +15,7 @@
 #include "gameui_util.h"
 #include "vgui/ILocalize.h"
 #include "VControllerOptionsButtons.h"
+#include "tier0/platform.h" // For PLATFORM_EXT
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"

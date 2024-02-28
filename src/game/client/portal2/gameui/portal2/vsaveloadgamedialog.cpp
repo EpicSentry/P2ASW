@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2010, Valve Corporation, All rights reserved. ============//
+//========= Copyright ï¿½ 1996-2010, Valve Corporation, All rights reserved. ============//
 //
 //
 //=============================================================================//
@@ -1161,7 +1161,7 @@ void SaveLoadGameDialog::ScreenshotLoaded( const FileAsyncRequest_t &asyncReques
 
 	// compare only the filename portion
 	// the path portion could be different because we play games with containers and this makes the logic simpler
-	if ( V_stricmp( V_GetFileName( asyncRequest.pszFilename ), V_GetFileName( pSaveGameInfo->m_ScreenshotFilename.Get() ) ) )
+	if ( V_stricmp( V_UnqualifiedFileName( asyncRequest.pszFilename ), V_UnqualifiedFileName( pSaveGameInfo->m_ScreenshotFilename.Get() ) ) )
 	{
 		// this isn't the screenshot we are expecting, there could have been more than 1 in flight
 		// ignore it
@@ -1196,7 +1196,8 @@ void SaveLoadGameDialog::ScreenshotLoaded( const FileAsyncRequest_t &asyncReques
 				m_nSaveGameScreenshotId = vgui::surface()->CreateNewTextureID( true );
 			}
 
-			surface()->DrawSetTextureRGBALinear( m_nSaveGameScreenshotId, rawBuffer.Base(), nWidth, nHeight );
+			// Was DrawSetTextureRGBALinear - not in Swarm
+			surface()->DrawSetTextureRGBA( m_nSaveGameScreenshotId, rawBuffer.Base(), nWidth, nHeight );
 			nSaveGameImageId = m_nSaveGameScreenshotId;
 		}
 	}
@@ -1705,13 +1706,22 @@ void SaveLoadGameDialog::ConfirmOverwriteSaveGame()
 		char fullSaveFilename[MAX_PATH];
 		char comment[MAX_PATH];
 
-		m_bSaveInProgress = engine->SaveGame( 
-			savename.Get(), 
-			IsX360(), 
-			fullSaveFilename, 
-			sizeof( fullSaveFilename ),
-			comment,
-			sizeof( comment ) );
+		// Not in Swarm
+		//m_bSaveInProgress = engine->SaveGame( 
+		//	savename.Get(), 
+		//	IsX360(), 
+		//	fullSaveFilename, 
+		//	sizeof( fullSaveFilename ),
+		//	comment,
+		//	sizeof( comment ) );
+
+		char sz[ 256 ];
+		Q_snprintf(sz, sizeof( sz ), "save %s\n", savename.Get() );
+
+		engine->ClientCmd_Unrestricted( sz );
+
+		// Hack hack
+		m_bSaveInProgress = true;
 
 		// use the full savename to determin the full screenshot name
 		char screenshotFilename[MAX_PATH];

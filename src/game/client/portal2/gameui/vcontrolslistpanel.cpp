@@ -392,41 +392,41 @@ void VControlsListPanel::PerformLayout()
 {
 	BaseClass::PerformLayout();
 
-	if ( IsGameConsole() )
-	{
-		int wide, tall;
-		m_pLblDownArrow->GetContentSize( wide, tall );
-		m_pLblDownArrow->SetSize( wide, tall );
+	// GetItemBounds not in Swarm
+#ifdef _GAMECONSOLE
+	int wide, tall;
+	m_pLblDownArrow->GetContentSize( wide, tall );
+	m_pLblDownArrow->SetSize( wide, tall );
 
-		m_pLblUpArrow->GetContentSize( wide, tall );
-		m_pLblUpArrow->SetSize( wide, tall );
+	m_pLblUpArrow->GetContentSize( wide, tall );
+	m_pLblUpArrow->SetSize( wide, tall );
 
-		int xPos = GetWide() - wide - m_nScrollArrowInset;
-		int yPos = 0;
-		m_pLblUpArrow->SetPos( xPos, yPos );
-		m_pLblUpArrow->SetAlpha( 100 );
+	int xPos = GetWide() - wide - m_nScrollArrowInset;
+	int yPos = 0;
+	m_pLblUpArrow->SetPos( xPos, yPos );
+	m_pLblUpArrow->SetAlpha( 100 );
 
-		yPos = GetTall() - m_pLblDownArrow->GetTall();
-		m_pLblDownArrow->SetPos( xPos, yPos );	
-		m_pLblDownArrow->SetAlpha( 100 );
+	yPos = GetTall() - m_pLblDownArrow->GetTall();
+	m_pLblDownArrow->SetPos( xPos, yPos );	
+	m_pLblDownArrow->SetAlpha( 100 );
 		
-		int x, y;
-		if ( GetItemBounds( GetItemIDFromRow( 0 ), x, y, wide, tall ) )
+	int x, y;
+	if ( GetItemBounds( GetItemIDFromRow( 0 ), x, y, wide, tall ) )
+	{
+		if ( y < 0 )
 		{
-			if ( y < 0 )
-			{
-				m_pLblUpArrow->SetAlpha( 255 );
-			}
-		}
-
-		if ( GetItemBounds( GetItemIDFromRow( GetItemCount() - 1 ), x, y, wide, tall ) )
-		{
-			if ( y + tall > GetTall() )
-			{
-				m_pLblDownArrow->SetAlpha( 255 );
-			}
+			m_pLblUpArrow->SetAlpha( 255 );
 		}
 	}
+
+	if ( GetItemBounds( GetItemIDFromRow( GetItemCount() - 1 ), x, y, wide, tall ) )
+	{
+		if ( y + tall > GetTall() )
+		{
+			m_pLblDownArrow->SetAlpha( 255 );
+		}
+	}
+#endif
 }
 
 void VControlsListPanel::ResetToTop()

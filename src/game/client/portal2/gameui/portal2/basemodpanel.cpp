@@ -137,7 +137,8 @@ using namespace vgui;
 
 //setup in GameUI_Interface.cpp
 extern class IMatchSystem *matchsystem;
-extern IGameConsole *IGameConsole();
+// this was causing a compile error...?
+//extern IGameConsole *IGameConsole();
 
 extern CBaseModFrame *OpenPortal2EconUI( vgui::Panel *pParent );
 
@@ -223,7 +224,7 @@ ConVar ui_fadecloud_time( "ui_fadecloud_time", "1.5", FCVAR_DEVELOPMENTONLY );
 
 ConVar ui_lastact_played( "ui_lastact_played", "0", FCVAR_HIDDEN | FCVAR_ARCHIVE, "", true, 0, true, 99 );
 
-#if !defined( NO_STEAM )
+#if !defined( NO_STEAM ) && defined( PORTAL2_PUZZLEMAKER )
 class CPortal2WorkshopManagerCallbackInterface : public CBaseWorkshopManagerCallbackInterface
 {
 public:
@@ -328,7 +329,8 @@ CBaseModPanel::CBaseModPanel(): BaseClass(0, "CBaseModPanel"),
 	m_FooterPanel = new CBaseModFooterPanel( this, "FooterPanel" );
 
 	m_pTransitionPanel = new CBaseModTransitionPanel( "TransitionPanel" );
-	m_pTransitionPanel->SetParent( enginevguifuncs->GetPanel( PANEL_TRANSITIONEFFECT ) );
+	// Originally was PANEL_TRANSITIONEFFECT, but that doesn't exist in Swarm
+	m_pTransitionPanel->SetParent( enginevguifuncs->GetPanel( PANEL_GAMEUIDLL ) );
 
 	m_hOptionsDialog = NULL;
 
@@ -418,7 +420,7 @@ CBaseModPanel::CBaseModPanel(): BaseClass(0, "CBaseModPanel"),
 		m_flAttractDemoTimeout = 0;
 	}
 
-#if !defined( NO_STEAM )	
+#if !defined( NO_STEAM ) && defined( PORTAL2_PUZZLEMAKER )
 	
 	m_bUGCRequestsPaused = false;
 	
@@ -450,9 +452,6 @@ CBaseModPanel::CBaseModPanel(): BaseClass(0, "CBaseModPanel"),
 	// Start out in an invalid state to ensure that this is being set properly in all cases
 	SetCommunityMapQueueMode( QUEUEMODE_INVALID );
 
-#endif // !NO_STEAM
-
-#if !defined(_GAMECONSOLE )
 	m_eCurrentQuickPlayEnumerationType = k_EWorkshopEnumerationTypeRankedByVote;
 #endif 
 }
@@ -874,15 +873,21 @@ CBaseModFrame* CBaseModPanel::OpenWindow( const WINDOW_TYPE & wt, CBaseModFrame 
 			break;
 
 		case WT_PORTALLEADERBOARD:
-			m_Frames[wt] = new CPortalLeaderboardPanel( this, "PortalLeaderboard", true );
+			// FIXME: Bring this back when leaderboard stuff is RE'd
+			Assert(0);
+			//m_Frames[wt] = new CPortalLeaderboardPanel( this, "PortalLeaderboard", true );
 			break;
 
 		case WT_PORTALCOOPLEADERBOARD:
-			m_Frames[wt] = new CPortalLeaderboardPanel( this, "PortalLeaderboard", false );
+			// FIXME: Bring this back when leaderboard stuff is RE'd
+			Assert(0);
+			//m_Frames[wt] = new CPortalLeaderboardPanel( this, "PortalLeaderboard", false );
 			break;
 
 		case  WT_PORTALLEADERBOARDHUD:
-			m_Frames[wt] = new CPortalHUDLeaderboard( this, "PortalHUDLeaderboard" );
+			// FIXME: Bring this back when leaderboard stuff is RE'd
+			Assert(0);
+			//m_Frames[wt] = new CPortalHUDLeaderboard( this, "PortalHUDLeaderboard" );
 			break;
 
 		case WT_COOPEXITCHOICE:
@@ -1678,7 +1683,7 @@ void CBaseModPanel::SetupBackgroundPresentation()
 		m_iFadeOutOverlayImageID = -1;
 	}
 
-#if !defined( NO_STEAM )	
+#if !defined( NO_STEAM ) && defined( PORTAL2_PUZZLEMAKER )
 	// Reset this
 	ClearCurrentCommunityMapID();
 #endif // !NO_STEAM
@@ -1890,7 +1895,8 @@ CEG_NOINLINE void CBaseModPanel::OnLevelLoadingStarted( char const *levelName, b
 	if ( g_pGameSteamCloudSync )
 		g_pGameSteamCloudSync->AbortAll();
 
-	SpewInstallStatus();
+	// Xbox only
+	//SpewInstallStatus();
 
 #if defined( _X360 )
 	// If the installer has finished while we are in the menus, then this is the ONLY place we
@@ -2537,7 +2543,7 @@ void CBaseModPanel::OnEvent( KeyValues *pEvent )
 			}
 		}
 	}
-#if !defined( NO_STEAM )
+#if !defined( NO_STEAM ) && defined( PORTAL2_PUZZLEMAKER )
 	else if ( !V_stricmp( "CommunityMap_Added", szEvent ) )
 	{
 #if !defined( _PS3 )		
@@ -2756,8 +2762,11 @@ void CBaseModPanel::ApplySchemeSettings(IScheme *pScheme)
 	SetBgColor( pScheme->GetColor( "Blank", Color( 0, 0, 0, 0 ) ) );
 
 	// need the startup image instantly to take over from the non-interactive refresh on first paint
-	char filename[MAX_PATH];
-	engine->GetStartupImage( filename, sizeof( filename ) );
+	// Not in Swarm
+	//char filename[MAX_PATH];
+	//engine->GetStartupImage( filename, sizeof( filename ) );
+	const char* filename = "console/background_menu";
+
 	m_iStartupImageID = surface()->CreateNewTextureID();
 	surface()->DrawSetTextureFile( m_iStartupImageID, filename, true, false );
 
@@ -3006,8 +3015,14 @@ void CBaseModPanel::CalculateMovieParameters( BIKMaterial_t hBIKMaterial, bool b
 		return;
 	}
 
-	const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
-	float flPhysicalFrameRatio = aspectRatioInfo.m_flFrameBuffertoPhysicalScalar * ( ( float ) GetWide() / ( float ) GetTall() );
+
+	// The AspectRatioInfo system does not exist in Swarm
+	// This seems to just be here to account for anamorphic widescreen on PS3
+	// On PC the scalar is always 1.0
+	//const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
+	//float flPhysicalFrameRatio = aspectRatioInfo.m_flFrameBuffertoPhysicalScalar * ( ( float ) GetWide() / ( float ) GetTall() );
+
+	float flPhysicalFrameRatio = ( ( float ) GetWide() / ( float ) GetTall() );
 
 	// Assume that the video is authored for square pixels.
 	float flVideoRatio = ( ( float ) nWidth / ( float ) nHeight );
@@ -3021,12 +3036,12 @@ void CBaseModPanel::CalculateMovieParameters( BIKMaterial_t hBIKMaterial, bool b
 		{
 			m_nMoviePlaybackWidth = GetWide();
 			// Have to account for the difference between physical and pixel aspect ratios.
-			m_nMoviePlaybackHeight = ( ( float )GetWide() / aspectRatioInfo.m_flPhysicalToFrameBufferScalar ) / flVideoRatio;
+			m_nMoviePlaybackHeight = ( ( float )GetWide() /*/ aspectRatioInfo.m_flPhysicalToFrameBufferScalar*/ ) / flVideoRatio;
 		}
 		else if ( flVideoRatio < flPhysicalFrameRatio )
 		{
 			// Have to account for the difference between physical and pixel aspect ratios.
-			m_nMoviePlaybackWidth = ( float )GetTall() * flVideoRatio * aspectRatioInfo.m_flPhysicalToFrameBufferScalar;
+			m_nMoviePlaybackWidth = ( float )GetTall() * flVideoRatio /** aspectRatioInfo.m_flPhysicalToFrameBufferScalar*/;
 			m_nMoviePlaybackHeight = GetTall();
 		}
 		else
@@ -3043,7 +3058,7 @@ void CBaseModPanel::CalculateMovieParameters( BIKMaterial_t hBIKMaterial, bool b
 		// Width must be adjusted.  Lop of the left and right.
 		float flImageWidth = ( float )GetTall() * flVideoRatio;
 		// convert from physical to pixels
-		flImageWidth *= aspectRatioInfo.m_flPhysicalToFrameBufferScalar;
+		//flImageWidth *= aspectRatioInfo.m_flPhysicalToFrameBufferScalar;
 		const float flSpanScaled = ( m_flU1 - m_flU0 ) * GetWide() / flImageWidth;
 		m_flU0 = ( m_flU1 - flSpanScaled ) / 2.0f;
 		m_flU1 = m_flU0 + flSpanScaled;
@@ -3054,7 +3069,7 @@ void CBaseModPanel::CalculateMovieParameters( BIKMaterial_t hBIKMaterial, bool b
 		float flImageHeight = ( float )GetWide() * ( ( float )nHeight / ( float )nWidth );
 		// convert from physical to pixels
 		// ( would divide by m_flPhysicalToFrameBufferScalar, but m_flFrameBuffertoPhysicalScalar = 1.0f / m_flPhysicalToFrameBufferScalar
-		flImageHeight *= aspectRatioInfo.m_flFrameBuffertoPhysicalScalar;
+		//flImageHeight *= aspectRatioInfo.m_flFrameBuffertoPhysicalScalar;
 		const float flSpanScaled = ( m_flV1 - m_flV0 ) * GetTall() / flImageHeight;
 		m_flV0 = ( m_flV1 - flSpanScaled ) / 2.0f;
 		m_flV1 = m_flV0 + flSpanScaled;
@@ -3153,19 +3168,19 @@ void CBaseModPanel::ShutdownBackgroundMovie( void )
 //=============================================================================
 bool CBaseModPanel::RenderBackgroundMovie()
 {
-	if ( IsGameConsole() )
+	// GameHasShutdownAndFlushedMemory not in Swarm
+#ifdef _GAMECONSOLE
+	if ( !m_bAllowMovie )
 	{
-		if ( !m_bAllowMovie )
-		{
-			return false;
-		}
-		else if ( !engine->GameHasShutdownAndFlushedMemory() )
-		{
-			// Do not actually start the movie until the engine has fully finished unloading the previous map's assets from memory
-			// (this will take several frames, and the total duration is unpredictable - it completes in HostState_GameShutdown).
-			return false;
-		}
+		return false;
 	}
+	else if ( !engine->GameHasShutdownAndFlushedMemory() )
+	{
+		// Do not actually start the movie until the engine has fully finished unloading the previous map's assets from memory
+		// (this will take several frames, and the total duration is unpredictable - it completes in HostState_GameShutdown).
+		return false;
+	}
+#endif
 
 	// Bring up the video if we haven't before or Alt+Tab has made it invalid
 	if ( !ActivateBackgroundEffects() )
@@ -3565,11 +3580,21 @@ void CBaseModPanel::PostChildPaint()
 		// only the background images (first frame movie snap) that overlay the movies need to adjust their texcoords to match the movie
 		if ( m_iBackgroundImageID != -1 && m_iFadeOutOverlayImageID == m_iBackgroundImageID )
 		{
-			const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
+			//const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
+
+			// Alternate method for checking for widescreen
+			// The AspectRatioInfo system does not exist in Swarm
+			int screenWide, screenTall;
+			surface()->GetScreenSize( screenWide, screenTall );
+
+			bool bIsWidescreen;
+			float aspectRatio = (float)screenWide/(float)screenTall;
+			bIsWidescreen = aspectRatio >= 1.5999f;
+
 			float sMin, tMin, sMax, tMax;
 
 			// needs to match image aspect ratio (known to be either 16:9 or 4:3), resolved in SelectBackgroundPresentation()
-			ComputeCroppedTexcoords( aspectRatioInfo.m_bIsWidescreen ? 16.0f/9.0f : 4.0f/3.0f, ( float )GetWide() / ( float )GetTall(), sMin, tMin, sMax, tMax );
+			ComputeCroppedTexcoords( bIsWidescreen ? 16.0f/9.0f : 4.0f/3.0f, ( float )GetWide() / ( float )GetTall(), sMin, tMin, sMax, tMax );
 			surface()->DrawTexturedSubRect( 0, 0, GetWide(), GetTall(), sMin, tMin, sMax, tMax );
 		}
 		else
@@ -3743,7 +3768,8 @@ bool CBaseModPanel::StartBackgroundMusic( float fVol )
 	if ( m_ExitingFrameCount )
 		return false;
 	
-	m_nBackgroundMusicGUID = enginesound->EmitAmbientSound( m_BackgroundMusicString, BACKGROUND_MUSIC_DUCK * fVol );
+	enginesound->EmitAmbientSound( m_BackgroundMusicString, BACKGROUND_MUSIC_DUCK * fVol );
+	m_nBackgroundMusicGUID = enginesound->GetGuidForLastSoundEmitted();
 	return ( m_nBackgroundMusicGUID != 0 );
 }
 
@@ -3766,7 +3792,7 @@ void CBaseModPanel::ReleaseBackgroundMusic()
 
 	// need to stop the sound now, do not queue the stop
 	// we must release the 2-5 MB held by this resource
-	enginesound->StopSoundByGuid( m_nBackgroundMusicGUID, true );
+	enginesound->StopSoundByGuid( m_nBackgroundMusicGUID/*, true*/ );
 #if defined( _GAMECONSOLE )
 	enginesound->UnloadSound( m_BackgroundMusicString );
 #endif
@@ -4064,18 +4090,32 @@ int CBaseModPanel::GetChapterProgress()
 		// Check if player has unlocked "ACH.SHOOT_THE_MOON", then all chapters should be available
 		KeyValues *kvAwards = new KeyValues( "read_awards", "ACH.SHOOT_THE_MOON", int(0) );
 		KeyValues::AutoDelete autodelete_kvAwards( kvAwards );
-		pPlayer->GetAwardsData( kvAwards );
+		// Not in Swarm
+		//pPlayer->GetAwardsData( kvAwards );
 		if ( kvAwards->GetInt( "ACH.SHOOT_THE_MOON" ) )
 			return nNumChapters; // player has unlocked all chapters
 
 		// Read players progress
-		TitleData1 const *pTitleData = ( TitleData1 const * )pPlayer->GetPlayerTitleData( 0 );
-		if ( pTitleData && nNumChapters )
+		// 
+		// This is normally done through "title data", which on PC gets mapped to Steam stats.
+		// Swarm doesn't have those stats, which means chapters would never stay unlocked.
+		// I just hooked it up to the old sv_unlockedchapters cvar, that should be better for mods anyway.
+		
+		static ConVarRef sv_unlockedchapters("sv_unlockedchapters");
+		if ( sv_unlockedchapters.IsValid() && nNumChapters )
 		{			
-			nNumChapters = MIN( (unsigned int)nNumChapters, pTitleData->uiSinglePlayerProgressChapter );
+			nNumChapters = MIN( nNumChapters, sv_unlockedchapters.GetInt() );
 			nNumChapters = MAX( nNumChapters, 0 );
 			return nNumChapters;
 		}
+
+		//TitleData1 const *pTitleData = ( TitleData1 const * )pPlayer->GetPlayerTitleData( 0 );
+		//if ( pTitleData && nNumChapters )
+		//{			
+		//	nNumChapters = MIN( (unsigned int)nNumChapters, pTitleData->uiSinglePlayerProgressChapter );
+		//	nNumChapters = MAX( nNumChapters, 0 );
+		//	return nNumChapters;
+		//}
 	}
 
 	// no progress
@@ -4150,8 +4190,17 @@ void CBaseModPanel::SelectBackgroundPresentation()
 	nAct = clamp( nAct, 1, nMaxActs );
 	m_nCurrentActPresentation = nAct;
 
-	const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
-	bool bIsWidescreen = aspectRatioInfo.m_bIsWidescreen;
+	//const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
+	//bool bIsWidescreen = aspectRatioInfo.m_bIsWidescreen;
+
+	// Alternate method for checking for widescreen
+	// The AspectRatioInfo system does not exist in Swarm
+	int screenWide, screenTall;
+	surface()->GetScreenSize( screenWide, screenTall );
+
+	bool bIsWidescreen;
+	float aspectRatio = (float)screenWide/(float)screenTall;
+	bIsWidescreen = aspectRatio >= 1.5999f;
 
 	// get the substitute movie image, matched to the movie chosen
 	// used to hide long i/o on loading entire menu movie, blends away to reveal movie
@@ -4307,7 +4356,8 @@ bool CBaseModPanel::GetSaveGameInfos( CUtlVector< SaveGameInfo_t > &saveGameInfo
 	}
 #else
 	{
-		const char *pSaveDir = engine->GetSaveDirName();
+		// Originally engine->GetSaveDirName()
+		const char *pSaveDir = UTIL_GetSaveDir();
 		V_snprintf( path, sizeof( path ), pSaveDir );
 		V_snprintf( directory, sizeof( directory ), "%s*.sav", pSaveDir );
 	}
@@ -4571,7 +4621,7 @@ char const * CBaseModPanel::GetPartnerDescKey()
 	return szResult;
 }
 
-#if !defined( NO_STEAM )
+#if !defined( NO_STEAM ) && defined( PORTAL2_PUZZLEMAKER )
 
 //-----------------------------------------------------------------------------
 // Purpose: Callback for completion of enumerating the subscribed puzzles for the user

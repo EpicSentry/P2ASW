@@ -7,6 +7,9 @@
 #ifndef __VQUICKPLAY_H__
 #define __VQUICKPLAY_H__
 
+// FIXME: This won't work until some additional workshop related code is RE'd
+#if 0
+
 #include "basemodui.h"
 #include "vgui_controls/ImagePanel.h"
 #include "VGenericPanelList.h"
@@ -148,5 +151,7 @@ namespace BaseModUI {
 	};
 
 };
+
+#endif // 0
 
 #endif // __VQUICKPLAY_H__

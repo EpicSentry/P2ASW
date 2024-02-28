@@ -4,6 +4,9 @@
 //
 //=======================================================================================//
 
+// FIXME: This won't work until other leaderboard code is RE'd
+#if 0
+
 #include "cbase.h"
 #include "vportalleaderboard.h"
 #include "vportalleaderboardhud.h"
@@ -2913,3 +2916,5 @@ void cc_leaderboard_open( const CCommand &args )
 	}
 }
 static ConCommand leaderboard_open("leaderboard_open", cc_leaderboard_open, "Activate main leaderboard");
+
+#endif // 0

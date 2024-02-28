@@ -433,19 +433,29 @@ void LoadingProgress::SetupControlStates()
 		if ( filenamePrefix.IsEmpty() )
 		{
 			// unrecognized portal2 map, default to single product screen
-			char startupImage[MAX_PATH];
-			engine->GetStartupImage( startupImage, sizeof( startupImage ) );
-			imageNames.AddToTail( startupImage );
+			//char startupImage[MAX_PATH];
+			// Not in Swarm
+			//engine->GetStartupImage( startupImage, sizeof( startupImage ) );
+			//imageNames.AddToTail( startupImage );
+			imageNames.AddToTail( "console/background_menu" );
 		}
 		else
 		{
-			const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
+			//const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
+
+			int screenWide, screenTall;
+			surface()->GetScreenSize( screenWide, screenTall );
+
+			bool bIsWidescreen;
+			float aspectRatio = (float)screenWide/(float)screenTall;
+			bIsWidescreen = aspectRatio >= 1.5999f;
+
 			// determine image sequence
 			CUtlString filename;
 			while ( 1 )
 			{
 				int nImageIndex = imageNames.Count();
-				filename = CFmtStr( "%s_%d%s", filenamePrefix.Get(), nImageIndex + 1, ( aspectRatioInfo.m_bIsWidescreen ? "_widescreen" : "" ) );
+				filename = CFmtStr( "%s_%d%s", filenamePrefix.Get(), nImageIndex + 1, ( bIsWidescreen ? "_widescreen" : "" ) );
 				if ( !g_pFullFileSystem->FileExists( CFmtStr( "materials/%s.vmt", filename.Get() ), "GAME" ) )
 				{
 					// end of list

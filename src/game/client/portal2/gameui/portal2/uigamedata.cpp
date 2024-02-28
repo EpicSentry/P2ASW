@@ -51,7 +51,8 @@
 	#include "econ_ui.h"
 #endif
 
-#include "netmessages.h"
+// Not in Swarm
+//#include "netmessages.h"
 #include "cegclientwrapper.h"
 
 #ifndef NO_STEAM
@@ -82,6 +83,8 @@ using namespace vgui;
 
 //setup in GameUI_Interface.cpp
 extern void OnStorageDevicesChangedSelectNewDevice();
+
+const char *COM_GetModDirectory();
 
 ConVar demo_ui_enable( "demo_ui_enable", "", FCVAR_DEVELOPMENTONLY, "Suffix for the demo UI" );
 ConVar demo_connect_string( "demo_connect_string", "", FCVAR_DEVELOPMENTONLY, "Connect string for demo UI" );
@@ -231,7 +234,8 @@ CUIGameData::CUIGameData() :
 #if !defined( NO_STEAM )
 	m_CallbackGameOverlayActivated( this, &CUIGameData::Steam_OnGameOverlayActivated ),
 	m_CallbackPersonaStateChanged( this, &CUIGameData::Steam_OnPersonaStateChanged ),
-	m_CallbackAvatarImageLoaded( this, &CUIGameData::Steam_OnAvatarImageLoaded ),
+	// Not in Swarm
+	//m_CallbackAvatarImageLoaded( this, &CUIGameData::Steam_OnAvatarImageLoaded ),
 	m_CallbackUserStatsStored( this, &CUIGameData::Steam_OnUserStatsStored ),
 	m_CallbackUserStatsReceived( this, &CUIGameData::Steam_OnUserStatsReceived ),
 #endif
@@ -325,7 +329,7 @@ void CUIGameData::OnSetStorageDeviceId( int iController, uint nDeviceId )
 		m_pSelectStorageClient->OnDeviceFail( ISelectStorageDeviceClient::FAIL_NOT_SELECTED );
 		m_pSelectStorageClient = NULL;
 	}
-	else if ( IsX360() && xboxsystem && !xboxsystem->DeviceCapacityAdequate( iController, nDeviceId, engine->GetModDirectory() ) )
+	else if ( IsX360() && xboxsystem && !xboxsystem->DeviceCapacityAdequate( iController, nDeviceId, COM_GetModDirectory() ) )
 	{
 		CloseWaitScreen( NULL, "ReportDeviceFull" );
 		m_pSelectStorageClient->OnDeviceFail( ISelectStorageDeviceClient::FAIL_FULL );

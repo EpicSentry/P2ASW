@@ -460,14 +460,26 @@ void FlyoutMenu::LoadControlSettings( const char *dialogResourceName, const char
 			if( !button )
 				continue;
 
-			if ( button->m_sNavLeftName.IsEmpty() )
+			// In Swarm m_sNavLeftName etc. are private
+			// Hopefully this works instead...?
+			// I don't know if P2 even uses this code
+			if ( !button->GetNavLeftPanel() )
 			{
-				button->m_sNavLeftName = button->m_sNavUpName;
+				button->SetNavLeft(button->GetNavUpPanel());
 			}
-			if ( button->m_sNavRightName.IsEmpty() )
+			if ( !button->GetNavRightPanel() )
 			{
-				button->m_sNavRightName = button->m_sNavDownName;
+				button->SetNavRight(button->GetNavDownPanel());
 			}
+
+			//if ( button->m_sNavLeftName.IsEmpty() )
+			//{
+			//	button->m_sNavLeftName = button->m_sNavUpName;
+			//}
+			//if ( button->m_sNavRightName.IsEmpty() )
+			//{
+			//	button->m_sNavRightName = button->m_sNavDownName;
+			//}
 		}
 	}
 
