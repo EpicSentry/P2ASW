@@ -5,7 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-
+#include <tier0/platform.h> // For IS_WINDOWS_PC
 #include <stdio.h>
 #ifdef IS_WINDOWS_PC
 #include <memory.h>

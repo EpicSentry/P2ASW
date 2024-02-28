@@ -571,7 +571,7 @@ void CGameUI::OnGameUIActivated()
 {
 	bool bWasActive = m_bActivatedUI;
 	m_bActivatedUI = true;
-	materials->OnDebugEvent( "CGameUI::OnGameUIActivated" );
+	//materials->OnDebugEvent( "CGameUI::OnGameUIActivated" );
 
 	// Lock the UI to a particular player
 	if ( !bWasActive )

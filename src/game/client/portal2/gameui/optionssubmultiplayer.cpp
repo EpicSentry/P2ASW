@@ -7,6 +7,7 @@
 
 #undef fopen
 
+#include <tier0/platform.h> // For IS_WINDOWS_PC
 #ifdef IS_WINDOWS_PC
 #include <windows.h> // SRC only!!
 #endif
