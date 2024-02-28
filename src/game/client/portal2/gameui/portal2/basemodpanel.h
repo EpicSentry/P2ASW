@@ -20,15 +20,15 @@
 #include "ixboxsystem.h"
 #include "matchmaking/imatchframework.h"
 #include "utlmap.h"
+#if defined( PORTAL2_PUZZLEMAKER )
 #include "ugc_workshop_manager.h"
 
-#if defined( PORTAL2_PUZZLEMAKER )
 extern ConVar cm_current_community_map;
 #endif // PORTAL2_PUZZLEMAKER
 
 #define BASEMODPANEL_SINGLETON BaseModUI::CBaseModPanel::GetSingleton()
 
-#if !defined( NO_STEAM )
+#if !defined( NO_STEAM ) && defined( PORTAL2_PUZZLEMAKER )
 extern CWorkshopManager &WorkshopManager( void );
 #endif // 
 
@@ -63,7 +63,7 @@ enum ECommunityMapQueueMode {
 	QUEUEMODE_COOP_QUICK_PLAY,	// User is quick playing coop maps
 };
 
-#if !defined( NO_STEAM )
+#if !defined( NO_STEAM ) && defined( PORTAL2_PUZZLEMAKER )
 
 // Handle file requests for community maps (downloads thumbnail / content)
 class CBaseCommunityRequest : public CBasePublishedFileRequest
@@ -463,7 +463,7 @@ namespace BaseModUI
 		void MoveToCommunityMapQueue( void ) { m_bMoveToCommunityMapQueue = true; }
 		void MoveToEditorMainMenu( void ) { m_bMoveToEditorMainMenu = true; }
 
-#if !defined( NO_STEAM )
+#if !defined( NO_STEAM ) && defined( PORTAL2_PUZZLEMAKER )
 
 		// 
 		// Community map queue methods
@@ -601,7 +601,7 @@ namespace BaseModUI
 		void			GetBackgroundMusicName( char *pOutBuffer, int nOutBufferSize, bool bMono );
 		void			TransitionToNewBackgroundMovie( void );
 
-#if !defined( NO_STEAM )
+#if !defined( NO_STEAM ) && defined( PORTAL2_PUZZLEMAKER )
 
 		//
 		// Community map files
