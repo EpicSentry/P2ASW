@@ -14,7 +14,7 @@ $Configuration
 	$Compiler
 	{
 		$AdditionalIncludeDirectories	".\hl2;.\hl2\elements;.\portal;.\portal2;.\portal\vgui;.\portal2\gameui;.\portal2\vgui;$SRCDIR\game\shared\hl2;$SRCDIR\game\shared\multiplayer;$SRCDIR\game\shared\portal;$SRCDIR\game\shared\portal2;$BASE"
-		$PreprocessorDefinitions		"$BASE;PORTAL;PORTAL2;GAMEUI_EMBEDDED;GAMEUI_EXPORTS" // USE_PARTICLE_BLOBULATOR
+		$PreprocessorDefinitions		"$BASE;PORTAL;PORTAL2;GAMEUI_EMBEDDED;GAMEUI_EXPORTS;NO_STEAM_GAMECOORDINATOR" // USE_PARTICLE_BLOBULATOR
 		$PreprocessorDefinitions		"$BASE;USE_CEG"								[ $WIN32 && !$NO_CEG ]
 	}
 	
