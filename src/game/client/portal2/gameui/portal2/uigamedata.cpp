@@ -985,24 +985,25 @@ void CUIGameData::Steam_OnGameOverlayActivated( GameOverlayActivated_t *pParam )
 	m_bSteamOverlayActive = !!pParam->m_bActive;
 }
 
-void CUIGameData::Steam_OnAvatarImageLoaded( AvatarImageLoaded_t *pParam )
-{
-	if ( !pParam->m_steamID.IsValid() )
-		return;
-
-	CGameUiAvatarImage *pImage = NULL;
-	int iIndex = m_mapUserXuidToAvatar.Find( pParam->m_steamID.ConvertToUint64() );
-	if ( iIndex != m_mapUserXuidToAvatar.InvalidIndex() )
-	{
-		pImage = m_mapUserXuidToAvatar.Element( iIndex );
-	}
-
-	// Re-fetch the image if we have it cached
-	if ( pImage )
-	{
-		pImage->SetAvatarXUID( pParam->m_steamID.ConvertToUint64() );
-	}
-}
+// Not in Swarm
+//void CUIGameData::Steam_OnAvatarImageLoaded( AvatarImageLoaded_t *pParam )
+//{
+//	if ( !pParam->m_steamID.IsValid() )
+//		return;
+//
+//	CGameUiAvatarImage *pImage = NULL;
+//	int iIndex = m_mapUserXuidToAvatar.Find( pParam->m_steamID.ConvertToUint64() );
+//	if ( iIndex != m_mapUserXuidToAvatar.InvalidIndex() )
+//	{
+//		pImage = m_mapUserXuidToAvatar.Element( iIndex );
+//	}
+//
+//	// Re-fetch the image if we have it cached
+//	if ( pImage )
+//	{
+//		pImage->SetAvatarXUID( pParam->m_steamID.ConvertToUint64() );
+//	}
+//}
 
 void CUIGameData::Steam_OnPersonaStateChanged( PersonaStateChange_t *pParam )
 {
