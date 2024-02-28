@@ -35,6 +35,19 @@ public:
 	virtual void	OnMousePressed(vgui::MouseCode code);
 	virtual void	OnMouseDoublePressed(vgui::MouseCode code);
 
+	virtual void	OnKeyCodePressed( vgui::KeyCode code );
+
+	virtual void	PerformLayout();
+
+	virtual void	PostChildPaint();
+
+	void			ResetToTop();
+
+	void			SetInternalItemFont( vgui::HFont hFont );
+
+	bool			IsLeftArrowHighlighted() { return m_bLeftArrowHighlighted; }
+	bool			IsRightArrowHighlighted() { return m_bRightArrowHighlighted; }
+
 private:
 	void ApplySchemeSettings(vgui::IScheme *pScheme );
 
@@ -49,6 +62,24 @@ private:
 	int m_iMouseX, m_iMouseY;
 
 	typedef vgui::SectionedListPanel BaseClass;
+
+	vgui::Label		*m_pLblDownArrow;
+	vgui::Label		*m_pLblUpArrow;
+	vgui::ScrollBar	*m_pSectionedScrollBar;
+
+	int				m_nScrollArrowInset;
+	int				m_nButtonOffset;
+
+	vgui::HFont		m_hButtonFont;
+	vgui::HFont		m_hItemFont;
+	vgui::HFont		m_hSymbolFont;
+
+	Color			m_SelectedTextColor;
+	Color			m_ListButtonActiveColor;
+	Color			m_ListButtonInactiveColor;
+
+	bool			m_bLeftArrowHighlighted;
+	bool			m_bRightArrowHighlighted;
 };
 
 #endif // VCONTROLSLISTPANEL_H

@@ -22,12 +22,12 @@ BaseClass(parent, panelName)
 	SetTitle("#L4D360UI_Downloads", false);
 
 	SetUpperGarnishEnabled(true);
-	SetLowerGarnishEnabled(true);
+	SetFooterEnabled(true);
 
 	CBaseModFooterPanel *footer = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
 	if ( footer )
 	{
-		footer->SetButtons( 0, FF_NONE, true );
+		footer->SetButtons( FF_NONE );
 	}
 
 	m_ActiveControl = NULL;

@@ -28,6 +28,15 @@ CBitmapImagePanel::CBitmapImagePanel( Panel *parent, char const *panelName,
 	}
 }
 
+CBitmapImagePanel::~CBitmapImagePanel()
+{
+	if ( vgui::surface() && m_nTextureId != -1 )
+	{
+		vgui::surface()->DestroyTextureID( m_nTextureId );
+		m_nTextureId = -1;
+	}
+}
+
 void CBitmapImagePanel::PaintBackground()
 {
 	if (!m_szTexture[0])

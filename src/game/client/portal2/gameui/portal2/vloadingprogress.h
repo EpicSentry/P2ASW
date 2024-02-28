@@ -19,24 +19,7 @@ class LoadingProgress : public CBaseModFrame
 	DECLARE_CLASS_SIMPLE( LoadingProgress, CBaseModFrame );
 
 public:
-	enum LoadingType
-	{
-		LT_UNDEFINED = 0,
-		LT_MAINMENU,
-		LT_TRANSITION,
-		LT_POSTER,
-	};
-
-	enum LoadingWindowType
-	{
-		LWT_LOADINGPLAQUE,
-		LWT_BKGNDSCREEN,
-	};
-
-#define	NUM_LOADING_CHARACTERS	4
-
-public:
-	LoadingProgress( vgui::Panel *parent, const char *panelName, LoadingWindowType eLoadingType );
+	LoadingProgress( vgui::Panel *parent, const char *panelName );
 	~LoadingProgress();
 
 	virtual void		Close();
@@ -44,62 +27,68 @@ public:
 	void				SetProgress( float progress );
 	float				GetProgress();
 
-	void				SetLoadingType( LoadingType loadingType );
-	LoadingType			GetLoadingType();
-
 	bool				ShouldShowPosterForLevel( KeyValues *pMissionInfo, KeyValues *pChapterInfo );
-	void				SetPosterData( KeyValues *pMissionInfo, KeyValues *pChapterInfo, const char **pPlayerNames, unsigned int botFlags, const char *pszGameMode );
+	void				SetPosterData( KeyValues *pChapterInfo, const char *pszGameMode );
 
 	bool				IsDrawingProgressBar( void ) { return m_bDrawProgress; }
 
-	void				UpdateBackground(int progressQuartile);
+	bool				LoadingProgressWantsIsolatedRender( bool bContextValid );
 
 protected:
 	virtual void		OnThink();
-	virtual void		OnCommand(const char *command);
 	virtual void		ApplySchemeSettings( vgui::IScheme *pScheme );
 	virtual void		PaintBackground();
+	virtual void		PostChildPaint();
 
 private:
 	void				SetupControlStates( void );
-	void				SetupPoster( void );
 	void				UpdateWorkingAnim();
-	void				RearrangeNames( const char *pszCharacterOrder, const char **pPlayerNames );
+	void				StopTransitionEffect();
+	void				DrawLoadingBar();
+	void				EvictImages();
+	void				SetupPartnerInScience();
+	void				SetupCommunityMapLoad();
+	void				ShowEmployeeBadge( bool bState );
 
-	vgui::ProgressBar	*m_pProTotalProgress;
 	vgui::ImagePanel	*m_pWorkingAnim;
-	vgui::ImagePanel	*m_pBGImage;
-	vgui::ImagePanel	*m_pPoster; 
-	vgui::EditablePanel *m_pFooter;
-	LoadingType			m_LoadingType;
-	LoadingWindowType	m_LoadingWindowType;
 
-	bool				m_bFullscreenPoster;
-
-	// Poster Data
-	char				m_PlayerNames[NUM_LOADING_CHARACTERS][MAX_PLAYER_NAME_LENGTH];
-	KeyValues			*m_pMissionInfo;
-	KeyValues			*m_pChapterInfo;
-	KeyValues			*m_pDefaultPosterDataKV;
-	int					m_botFlags;
 	bool				m_bValid;
 
-	int					m_textureID_LoadingBar;
-	int					m_textureID_LoadingBarBG;
-	int					m_textureID_DefaultPosterImage;
+	int					m_textureID_LoadingDots;
 
 	bool				m_bDrawBackground;
-	bool				m_bDrawPoster;
 	bool				m_bDrawProgress;
 	bool				m_bDrawSpinner;
 
 	float				m_flPeakProgress;
-
 	float				m_flLastEngineTime;
 
-	char				m_szGameMode[MAX_PATH];
+	KeyValues			*m_pChapterInfo;
 
-	CLoadingTipPanel			*m_pTipPanel;
+	struct BackgroundImage_t
+	{
+		int m_nTextureID;
+		bool m_bOwnedByPanel;
+	};
+	CUtlVector< BackgroundImage_t >	m_BackgroundImages;
+
+	bool				m_bUseAutoTransition;
+
+	int					m_nCurrentImage;
+	int					m_nNextImage;
+	int					m_nTargetImage;
+
+	float				m_flTransitionStartTime;
+	float				m_flLastTransitionTime;
+	float				m_flAutoTransitionTime;
+	float				m_flFadeInStartTime;
+
+	int					m_nProgressX;
+	int					m_nProgressY;
+	int					m_nProgressNumDots;
+	int					m_nProgressDotGap;
+	int					m_nProgressDotWidth;
+	int					m_nProgressDotHeight;
 };
 
 };

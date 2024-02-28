@@ -108,7 +108,6 @@ protected:
 	vgui::Label			*m_pLblEmptySlotAd;
 
 	vgui::HFont	m_hTextFont;
-	vgui::HFont	m_hTextBlurFont;
 	
 	Color m_bkFadeColor;
 	Color m_OutOfFocusBgColor;
@@ -265,13 +264,13 @@ void CPlayerItem::OnCommand( const char *command )
 	else if ( !Q_strcmp( command, "#L4D360UI_SendMessage" ) )
 	{
 		char steamCmd[64];
-		Q_snprintf( steamCmd, sizeof( steamCmd ), "chat/%I64u", xuidPlayer );
+		Q_snprintf( steamCmd, sizeof( steamCmd ), "chat/%llu", xuidPlayer );
 		CUIGameData::Get()->ExecuteOverlayCommand( steamCmd );
 	}
 	else if ( !Q_strcmp( command, "#L4D360UI_ViewSteamID" ) )
 	{
 		char steamCmd[64];
-		Q_snprintf( steamCmd, sizeof( steamCmd ), "steamid/%I64u", xuidPlayer );
+		Q_snprintf( steamCmd, sizeof( steamCmd ), "steamid/%llu", xuidPlayer );
 		CUIGameData::Get()->ExecuteOverlayCommand( steamCmd );
 	}
 	else if ( !Q_strcmp( command, "#L4D360UI_MutePlayer" ) )
@@ -347,7 +346,7 @@ void CPlayerItem::SetPlayerInfo( KeyValues *pPlayer )
 
 	if ( m_pImgGamerPic && IsPC() )
 	{
-		IImage *pSteamImage = CUIGameData::Get()->GetAvatarImage( xuid );
+		IImage *pSteamImage = CUIGameData::Get()->AccessAvatarImage( xuid, CUIGameData::kAvatarImageNull );  // this doesn't have proper image resource tracking! <<unused code from l4d>>
 
 		if ( pSteamImage )
 		{
@@ -482,7 +481,6 @@ void CPlayerItem::ApplySchemeSettings( IScheme *pScheme )
 	SetBgColor( m_OutOfFocusBgColor );
 
 	m_hTextFont = pScheme->GetFont( "DefaultBold", true );
-	m_hTextBlurFont = pScheme->GetFont( "DefaultBoldBlur", true );
 
 	//
 	// Find all our controls
@@ -672,16 +670,6 @@ void CPlayerItem::PaintBackground()
 			vgui::surface()->DrawSetTextPos( x, y );
 			vgui::surface()->DrawSetTextColor( col );
 			vgui::surface()->DrawPrintText( szUnicode, len );
-
-			if ( HasFocus() )
-			{
-				// draw glow
-				int alpha = 60.0f + 30.0f * sin( Plat_FloatTime() * 4.0f );
-				vgui::surface()->DrawSetTextColor( Color( 255, 255, 255, alpha ) );
-				vgui::surface()->DrawSetTextFont( m_hTextBlurFont );
-				vgui::surface()->DrawSetTextPos( x, y );
-				vgui::surface()->DrawPrintText( szUnicode, len );
-			}
 		}
 	}
 }
@@ -796,7 +784,7 @@ GameLobby::GameLobby(vgui::Panel *parent, const char *panelName) :
 	SetProportional( true );
 	SetPaintBackgroundEnabled( true );
 
-	SetLowerGarnishEnabled( true );
+	SetFooterEnabled( true );
 
 	//
 	// Add players list control
@@ -880,7 +868,6 @@ void GameLobby::OnCommand(const  char *command )
 		{
 			char const * arrAction[2] = { "Stop", "Start" };
 			voiceButton->SetText( CFmtStr( "#L4D360UI_Lobby_%sVoiceChat", arrAction[!bRecording] ) );
-			voiceButton->SetHelpText( CFmtStr( "#L4D360UI_Lobby_%sVoiceChat_Tip", arrAction[!bRecording] ) );
 		}
 	}
 	else if ( char const *szNewAccess = StringAfterPrefix( command, "GameAccess_" ) )
@@ -1126,7 +1113,7 @@ void GameLobby::MsgNoValidMissionChapter( KeyValues *pSettings )
 		// The required DLC is missing on the client, fire a notification that would
 		// allow us to download the DLC from the marketplace
 		uint64 uiDlcMask = pSettings->GetUint64( "game/dlcrequired" );
-		uint64 uiDlcInstalled = GetDlcInstalledMask();
+		uint64 uiDlcInstalled = g_pMatchFramework->GetMatchSystem()->GetDlcManager()->GetDataInfo()->GetUint64( "@info/installed" );
 
 		uint64 uiDlcNotify = ( uiDlcMask &~uiDlcInstalled );
 
@@ -1185,7 +1172,7 @@ void GameLobby::PaintBackground()
 	if ( !m_pSettings )
 		return;
 
-	char const *szGameMode = m_pSettings->GetString( "game/mode", "campaign" );
+	char const *szGameMode = m_pSettings->GetString( "game/mode", "coop" );
 
 	CFmtStr szDlgCaption( "#L4D360UI_Lobby_Title_%s", szGameMode );
 
@@ -1346,7 +1333,7 @@ void GameLobby::UpdateFooterButtons()
 	if ( !bCanKick )
 	{
 		// They don't own the lobby or are in an offline game
-		footer->SetButtons( iAButton | FB_BBUTTON | ( !bIsLiveGame ? FB_NONE : FB_YBUTTON ), FF_A_GAMERCARD_BY, false );
+		footer->SetButtons( iAButton | FB_BBUTTON | ( !bIsLiveGame ? FB_NONE : FB_YBUTTON ) );
 		footer->SetButtonText( FB_YBUTTON, "#L4D360UI_ReviewPlayer" );
 	}
 	else
@@ -1355,12 +1342,12 @@ void GameLobby::UpdateFooterButtons()
 		if ( !bShouldShowGamerCard || !bIsLiveGame )
 		{
 			// We don't show the review button while they're not hovering over a player or they're not in a live game
-			footer->SetButtons( iAButton | FB_BBUTTON | FB_XBUTTON, FF_A_GAMERCARD_BX, false );
+			footer->SetButtons( iAButton | FB_BBUTTON | FB_XBUTTON );
 		}
 		else
 		{
 			// Need to show kick and review
-			footer->SetButtons( iAButton | FB_BBUTTON | FB_XBUTTON | FB_YBUTTON, FF_A_GAMERCARD_BY__X_HIGH, false );
+			footer->SetButtons( iAButton | FB_BBUTTON | FB_XBUTTON | FB_YBUTTON );
 			footer->SetButtonText( FB_YBUTTON, "#L4D360UI_ReviewPlayer" );
 		}
 
@@ -1430,6 +1417,7 @@ void GameLobby::LeaveLobby()
 
 	data.bOkButtonEnabled = true;
 	data.bCancelButtonEnabled = true;
+	data.pOkButtonText = "#PORTAL2_ButtonAction_Quit";
 	data.pfnOkCallback = LeaveLobbyImpl;
 
 	GenericConfirmation* confirmation = 
@@ -1592,7 +1580,7 @@ void GameLobby::UpdateAvatars( void )
 	if ( !pMembers )
 		return;
 
-	char const *szGameMode = m_pSettings->GetString( "game/mode", "campaign" );
+	char const *szGameMode = m_pSettings->GetString( "game/mode", "coop" );
 	char const *szCharacterSelectorNames[] = { "DrpCharacter", "DrpVersusCharacter" };
 	int iActiveCharacterSelector = 0;
 	if ( !Q_stricmp( "versus", szGameMode ) || !Q_stricmp( "scavenge", szGameMode ) )
@@ -1864,7 +1852,7 @@ void GameLobby::ApplyUpdatedSettings( KeyValues *kvUpdate )
 	if ( uint64 uiDlcRequiredMask = kvUpdate->GetUint64( "game/dlcrequired" ) )
 	{
 		// Get client's dlc mask
-		uint64 uiDlcInstalledMask = GetDlcInstalledMask();
+		uint64 uiDlcInstalledMask = g_pMatchFramework->GetMatchSystem()->GetDlcManager()->GetDataInfo()->GetUint64( "@info/installed" );
 		if ( ( uiDlcRequiredMask & uiDlcInstalledMask ) != uiDlcRequiredMask )
 		{
 			KeyValues *pLeaveLobbyMsg = m_pSettings ? m_pSettings->MakeCopy() : new KeyValues( "" );
@@ -1875,8 +1863,7 @@ void GameLobby::ApplyUpdatedSettings( KeyValues *kvUpdate )
 	}
 
 	KeyValues *pInfoMission = NULL;
-	// TODO:
-	KeyValues *pInfoChapter = NULL;		//GetMapInfoRespectingAnyChapter( m_pSettings, &pInfoMission );
+	KeyValues *pInfoChapter = GetMapInfoRespectingAnyChapter( m_pSettings, &pInfoMission );
 
 	// If we do not have a valid chapter/mission, then we need to quit
 	if ( !pInfoChapter || !pInfoMission ||
@@ -1922,7 +1909,7 @@ void GameLobby::ApplyUpdatedSettings( KeyValues *kvUpdate )
 	{
 		if ( vgui::Label * difficultyLabel = GetSettingsSummaryLabel( "difficulty" ) )
 		{
-			char const *szGameMode = m_pSettings->GetString( "game/mode", "campaign" );
+			char const *szGameMode = m_pSettings->GetString( "game/mode", "coop" );
 			if( !GameModeHasDifficulty( szGameMode ) )
 			{
 				difficultyLabel->SetText( CFmtStr( "#L4D360UI_Mode_%s", szGameMode ) );
@@ -1938,7 +1925,7 @@ void GameLobby::ApplyUpdatedSettings( KeyValues *kvUpdate )
 	{
 		if ( vgui::Label * pLabel = GetSettingsSummaryLabel( "maxrounds" ) )
 		{
-			char const *szGameMode = m_pSettings->GetString( "game/mode", "campaign" );
+			char const *szGameMode = m_pSettings->GetString( "game/mode", "coop" );
 			if( !GameModeHasRoundLimit( szGameMode ) )
 			{
 				pLabel->SetText( "" );

@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright (c) 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -7,8 +7,13 @@
 
 #undef fopen
 
-#if !defined( _X360 )
+#ifdef IS_WINDOWS_PC
 #include <windows.h> // SRC only!!
+#endif
+
+#if defined( POSIX ) && !defined( _PS3 )
+#include <copyfile.h>
+#define DeleteFile unlink
 #endif
 
 #include "OptionsSubMultiplayer.h"
@@ -57,11 +62,18 @@
 
 #include "bitmap/tgawriter.h"
 #include "ivtex.h"
+#ifdef IS_WINDOWS_PC
 #include <io.h>
+#endif
 
 #if defined( _X360 )
 #include "xbox/xbox_win32stubs.h"
 #endif
+
+#ifdef _PS3
+#include "ps3/ps3_core.h"
+#include "ps3/ps3_win32stubs.h"
+#endif // _GAMECONSOLE
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
@@ -109,6 +121,7 @@ class CrosshairImagePanel : public ImagePanel
 	typedef ImagePanel BaseClass;
 public:
 	CrosshairImagePanel( Panel *parent, const char *name, CCvarToggleCheckButton *pAdditive );
+	virtual ~CrosshairImagePanel();
 
 	virtual void Paint();
 
@@ -130,6 +143,15 @@ CrosshairImagePanel::CrosshairImagePanel( Panel *parent, const char *name, CCvar
 
 	m_iCrosshairTextureID = vgui::surface()->CreateNewTextureID();
 	vgui::surface()->DrawSetTextureFile( m_iCrosshairTextureID, "vgui/white_additive" , true, false);
+}
+
+CrosshairImagePanel::~CrosshairImagePanel()
+{
+	if ( vgui::surface() && m_iCrosshairTextureID != -1 )
+	{
+		vgui::surface()->DestroyTextureID( m_iCrosshairTextureID );
+		m_iCrosshairTextureID = -1;
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -278,6 +300,12 @@ AdvancedCrosshairImagePanel::~AdvancedCrosshairImagePanel()
 	{
 		delete m_pAdvCrosshair;
 		m_pAdvCrosshair = NULL;
+	}
+
+	if ( vgui::surface() && m_iCrosshairTextureID != -1 )
+	{
+		vgui::surface()->DestroyTextureID( m_iCrosshairTextureID );
+		m_iCrosshairTextureID = -1;
 	}
 }
 
@@ -568,13 +596,11 @@ void COptionsSubMultiplayer::OnCommand( const char *command )
 {
 	if ( !stricmp( command, "Advanced" ) )
 	{
-#ifndef _XBOX
 		if (!m_hMultiplayerAdvancedDialog.Get())
 		{
 			m_hMultiplayerAdvancedDialog = new CMultiplayerAdvancedDialog( this );
 		}
 		m_hMultiplayerAdvancedDialog->Activate();
-#endif
 	}
 	else if (!stricmp( command, "ImportSprayImage" ) )
 	{
@@ -598,7 +624,7 @@ void COptionsSubMultiplayer::OnCommand( const char *command )
 // file selected.  This can only happen when someone selects an image to be imported as a spray logo.
 void COptionsSubMultiplayer::OnFileSelected(const char *fullpath)
 {
-#ifndef _XBOX
+#ifndef _GAMECONSOLE
 	if ((fullpath == NULL) || (fullpath[0] == 0))
 	{
 		return;
@@ -872,7 +898,11 @@ void COptionsSubMultiplayer::OnFileSelected(const char *fullpath)
 		if (!failed)
 		{
 			// copy vtf file to the final location.
+#ifdef OSX
+			copyfile( vtfPath, finalPath, 0, 0 );
+#else
 			CopyFile(vtfPath, finalPath, true);
+#endif
 
 			// refresh the logo list so the new spray shows up.
 			InitLogoList(m_pLogoList);
@@ -944,7 +974,7 @@ static void ValveJpegErrorHandler( j_common_ptr cinfo )
 // convert the JPEG file given to a TGA file at the given output path.
 ConversionErrorType COptionsSubMultiplayer::ConvertJPEGToTGA(const char *jpegpath, const char *tgaPath)
 {
-#if !defined( _X360 )
+#if !defined( _GAMECONSOLE )
 	struct jpeg_decompress_struct jpegInfo;
 	struct ValveJpegErrorHandler_t jerr;
 	JSAMPROW row_pointer[1];
@@ -1067,6 +1097,9 @@ ConversionErrorType COptionsSubMultiplayer::ConvertJPEGToTGA(const char *jpegpat
 // convert the bmp file given to a TGA file at the given destination path.
 ConversionErrorType COptionsSubMultiplayer::ConvertBMPToTGA(const char *bmpPath, const char *tgaPath)
 {
+#if !defined( _WIN32 )
+	return CE_SOURCE_FILE_FORMAT_NOT_SUPPORTED;
+#else
 	if ( !IsPC() )
 		return CE_SOURCE_FILE_FORMAT_NOT_SUPPORTED;
 
@@ -1287,6 +1320,7 @@ ConversionErrorType COptionsSubMultiplayer::ConvertBMPToTGA(const char *bmpPath,
 	}
 	DeleteObject(hBitmap);
 	return retval ? CE_SUCCESS : CE_ERROR_WRITING_OUTPUT_FILE;
+#endif
 }
 
 // read a TGA header from the current point in the file stream.
@@ -1650,10 +1684,10 @@ ConversionErrorType COptionsSubMultiplayer::StretchRGBAImage(const unsigned char
 			}
 
 			// assign the computed color to the destination pixel, round to the nearest value.  Make sure the value doesn't exceed 255.
-			destBuf[(destRow * destWidth * 4) + (destColumn * 4)] = min((int)(destRed + 0.5f), 255);
-			destBuf[(destRow * destWidth * 4) + (destColumn * 4) + 1] = min((int)(destGreen + 0.5f), 255);
-			destBuf[(destRow * destWidth * 4) + (destColumn * 4) + 2] = min((int)(destBlue + 0.5f), 255);
-			destBuf[(destRow * destWidth * 4) + (destColumn * 4) + 3] = min((int)(destAlpha + 0.5f), 255);
+			destBuf[(destRow * destWidth * 4) + (destColumn * 4)] = MIN((int)(destRed + 0.5f), 255);
+			destBuf[(destRow * destWidth * 4) + (destColumn * 4) + 1] = MIN((int)(destGreen + 0.5f), 255);
+			destBuf[(destRow * destWidth * 4) + (destColumn * 4) + 2] = MIN((int)(destBlue + 0.5f), 255);
+			destBuf[(destRow * destWidth * 4) + (destColumn * 4) + 3] = MIN((int)(destAlpha + 0.5f), 255);
 		} // column loop
 	} // row loop
 
@@ -2339,6 +2373,15 @@ void COptionsSubMultiplayer::OnApplyButtonEnable()
 #define PLATE_HUE_START 160
 #define PLATE_HUE_END 191
 
+#if !defined( _WIN32 ) && !defined( _PS3 )
+typedef struct RGBQUAD { 
+	BYTE rgbBlue;
+	BYTE rgbGreen;
+	BYTE rgbRed;
+	BYTE rgbReserved;
+};
+#endif
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -2357,8 +2400,8 @@ static void PaletteHueReplace( RGBQUAD *palSrc, int newHue, int Start, int end )
 		g = palSrc[ i ].rgbGreen;
 		r = palSrc[ i ].rgbRed;
 		
-		maxcol = max( max( r, g ), b ) / 255.0f;
-		mincol = min( min( r, g ), b ) / 255.0f;
+		maxcol = MAX( MAX( r, g ), b ) / 255.0f;
+		mincol = MIN( MIN( r, g ), b ) / 255.0f;
 		
 		val = maxcol;
 		sat = (maxcol - mincol) / maxcol;
@@ -2419,6 +2462,7 @@ static void PaletteHueReplace( RGBQUAD *palSrc, int newHue, int Start, int end )
 //-----------------------------------------------------------------------------
 void COptionsSubMultiplayer::RemapPalette( char *filename, int topcolor, int bottomcolor )
 {
+#ifdef _WIN32
 	char infile[ 256 ];
 	char outfile[ 256 ];
 
@@ -2476,6 +2520,7 @@ void COptionsSubMultiplayer::RemapPalette( char *filename, int topcolor, int bot
 		g_pFullFileSystem->Write( outbuffer.Base(), outbuffer.TellPut(), file );
 		g_pFullFileSystem->Close( file );
 	}
+#endif
 }
 
 //-----------------------------------------------------------------------------

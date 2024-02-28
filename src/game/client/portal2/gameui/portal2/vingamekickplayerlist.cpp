@@ -28,13 +28,12 @@ BaseClass(parent, panelName)
 	SetProportional( true );
 
 	SetUpperGarnishEnabled(true);
-	SetLowerGarnishEnabled(true);
-
+	SetFooterEnabled(true);
 
 	CBaseModFooterPanel *footer = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
 	if ( footer )
 	{
-		footer->SetButtons( 0, FF_NONE, true );
+		footer->SetButtons( FF_NONE );
 	}
 }
 

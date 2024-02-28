@@ -35,7 +35,7 @@ SteamCloudConfirmation::SteamCloudConfirmation( Panel *parent, const char *panel
 
 	SetTitle( "", false );
 	SetDeleteSelfOnClose( true );
-	SetLowerGarnishEnabled( false );
+	SetFooterEnabled( false );
 	SetMoveable( false );
 }
 

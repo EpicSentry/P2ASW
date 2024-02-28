@@ -3,7 +3,9 @@
 // Purpose: 
 //
 //=====================================================================================//
+
 #include "cbase.h"
+
 #include "VLoadingProgress.h"
 #include "EngineInterface.h"
 #include "vgui_controls/Label.h"
@@ -23,20 +25,15 @@
 using namespace vgui;
 using namespace BaseModUI;
 
-static bool IsAvatarFemale( int iAvatar )
-{
-	return ( iAvatar == 1 ); // Zoey or Producer
-}
+ConVar ui_loadingscreen_transition_time( "ui_loadingscreen_transition_time", "1.0", FCVAR_DEVELOPMENTONLY, "" );
+ConVar ui_loadingscreen_fadein_time( "ui_loadingscreen_fadein_time", "1.0", FCVAR_DEVELOPMENTONLY, "" );
+ConVar ui_loadingscreen_mintransition_time( "ui_loadingscreen_mintransition_time", "0.5", FCVAR_DEVELOPMENTONLY, "" );
+ConVar ui_loadingscreen_autotransition_time( "ui_loadingscreen_autotransition_time", "5.0", FCVAR_DEVELOPMENTONLY, "" );
 
-//=============================================================================
-LoadingProgress::LoadingProgress(Panel *parent, const char *panelName, LoadingWindowType eLoadingType ):
-	BaseClass( parent, panelName, false, false, false ),
-	m_pDefaultPosterDataKV( NULL ),
-	m_LoadingWindowType( eLoadingType )
+LoadingProgress::LoadingProgress(Panel *parent, const char *panelName ):
+	BaseClass( parent, panelName, false, false, false )
 {
-	memset( m_szGameMode, 0, sizeof( m_szGameMode ) );
-
-	if ( IsPC() && eLoadingType == LWT_LOADINGPLAQUE )
+	if ( IsPC() )
 	{
 		MakePopup( false );
 	}
@@ -44,150 +41,116 @@ LoadingProgress::LoadingProgress(Panel *parent, const char *panelName, LoadingWi
 	SetDeleteSelfOnClose( true );
 	SetProportional( true );
 
+	m_pChapterInfo = NULL;
+
 	m_flPeakProgress = 0.0f;
-	m_pProTotalProgress = NULL;
+
 	m_pWorkingAnim = NULL;
-	m_LoadingType = LT_UNDEFINED;
-
-	m_pBGImage = NULL;
-	m_pPoster = NULL;
-
-	m_pFooter = NULL;
-
+	
 	// purposely not pre-caching the poster images
 	// as they do not appear in-game, and are 1MB each, we will demand load them and ALWAYS discard them
-	m_pMissionInfo = NULL;
-	m_pChapterInfo = NULL;
-	m_botFlags = 0xFF;
-	
-	memset( m_PlayerNames, 0, sizeof( m_PlayerNames ) );
-	// const char *pPlayerNames[NUM_LOADING_CHARACTERS] = { "#L4D360UI_NamVet", "#L4D360UI_TeenGirl", "#L4D360UI_Biker", "#L4D360UI_Manager" };
-	const char *pPlayerNames[NUM_LOADING_CHARACTERS] = { "", "", "", "" };
-	for ( int k = 0; k < NUM_LOADING_CHARACTERS; ++ k )
-		Q_strncpy( m_PlayerNames[k], pPlayerNames[k], MAX_PLAYER_NAME_LENGTH );
-
-	m_textureID_LoadingBar = -1;
-	m_textureID_LoadingBarBG = -1;
-	m_textureID_DefaultPosterImage = -1;
+	m_textureID_LoadingDots = -1;
 
 	m_bDrawBackground = false;
-	m_bDrawPoster = false;
 	m_bDrawProgress = false;
 	m_bDrawSpinner = false;
-	m_bFullscreenPoster = true;
 
 	m_flLastEngineTime = 0;
+
+	m_nCurrentImage = 0;
+	m_nNextImage = 0;
+	m_nTargetImage = 0;
+	m_flTransitionStartTime = 0;
+	m_flLastTransitionTime = 0;
+
+	m_bUseAutoTransition = false;
+	m_flAutoTransitionTime = 0;
+
+	m_flFadeInStartTime = 0;
+
+	m_nProgressX = 0;
+	m_nProgressY = 0;
+	m_nProgressNumDots = 0;
+	m_nProgressDotGap = 0;
+	m_nProgressDotWidth = 0;
+	m_nProgressDotHeight = 0;
 
 	// marked to indicate the controls exist
 	m_bValid = false;
 
-	MEM_ALLOC_CREDIT();
-	m_pDefaultPosterDataKV = new KeyValues( "DefaultPosterData" );
-	if ( !m_pDefaultPosterDataKV->LoadFromFile( g_pFullFileSystem, "resource/UI/BaseModUI/LoadingPosterDefault.res", "MOD" ) )
-	{
-		DevWarning( "Failed to load default poster information!\n" );
-		m_pDefaultPosterDataKV->deleteThis();
-		m_pDefaultPosterDataKV = NULL;
-	}
-
-	m_pTipPanel = NULL;
-	if ( IsX360() )
-	{
-		m_pTipPanel = new CLoadingTipPanel( this );
-	}
+	MEM_ALLOC_CREDIT();	
 }
 
-//=============================================================================
 LoadingProgress::~LoadingProgress()
 {
-	if ( m_pDefaultPosterDataKV )
-		m_pDefaultPosterDataKV->deleteThis();
-	m_pDefaultPosterDataKV = NULL;
+	EvictImages();
 }
 
-//=============================================================================
 void LoadingProgress::OnThink()
 {
+	// Need to call this periodically to collect sign in and sign out notifications,
+	// do NOT dispatch events here in the middle of loading and rendering!
+	if ( ThreadInMainThread() )
+	{
+		XBX_ProcessEvents();
+	}
+
 	UpdateWorkingAnim();
 }
 
-//=============================================================================
-void LoadingProgress::OnCommand(const char *command)
-{
-}
-
-//=============================================================================
 void LoadingProgress::ApplySchemeSettings( IScheme *pScheme )
 {
 	// will cause the controls to be instanced
 	BaseClass::ApplySchemeSettings( pScheme );
 
 	SetPaintBackgroundEnabled( true );
+	SetPostChildPaintEnabled( true );
 	
 	// now have controls, can now do further initing
 	m_bValid = true;
 
-	// find or create pattern
-	// purposely not freeing these, not worth the i/o hitch for something so small
-	const char *pImageName = "vgui/loadbar_dots";
-	m_textureID_LoadingBar = vgui::surface()->DrawGetTextureId( pImageName );
-	if ( m_textureID_LoadingBar == -1 )
+	m_textureID_LoadingDots = CBaseModPanel::GetSingleton().GetImageId( "vgui/loadbar_dots" );
+
+	vgui::Label *pLoadingProgress = dynamic_cast< vgui::Label* >( FindChildByName( "LoadingProgess" ) );
+	if ( pLoadingProgress )
 	{
-		m_textureID_LoadingBar = vgui::surface()->CreateNewTextureID();
-		vgui::surface()->DrawSetTextureFile( m_textureID_LoadingBar, pImageName, true, false );	
+		pLoadingProgress->GetPos( m_nProgressX, m_nProgressY );
 	}
 
-	// need to get the default image loaded now
-	// find or create pattern
-	// Purposely not freeing these, need this image to be resident always. We flip to
-	// this image on a sign out during loading and cannot bring it into	existence then.
-#if defined ( SUPPORT_DEFAULT_LOADING_POSTER )
-	if ( m_pDefaultPosterDataKV )
-	{
-		static ConVarRef mat_xbox_iswidescreen( "mat_xbox_iswidescreen" );
-		bool bIsWidescreen = mat_xbox_iswidescreen.GetBool();
-		bool bFullscreenPoster = m_pDefaultPosterDataKV->GetBool( "fullscreen", false );
-		const char *pszPosterImage = ( bFullscreenPoster && bIsWidescreen ) ? m_pDefaultPosterDataKV->GetString( "posterImage_widescreen" ) : m_pDefaultPosterDataKV->GetString( "posterImage" );
+	m_nProgressNumDots = atoi( pScheme->GetResourceString( "LoadingProgress.NumDots" ) );
+	m_nProgressDotGap = vgui::scheme()->GetProportionalScaledValue( atoi( pScheme->GetResourceString( "LoadingProgress.DotGap" ) ) );
+	m_nProgressDotWidth = vgui::scheme()->GetProportionalScaledValue( atoi( pScheme->GetResourceString( "LoadingProgress.DotWidth" ) ) );
+	m_nProgressDotHeight = vgui::scheme()->GetProportionalScaledValue( atoi( pScheme->GetResourceString( "LoadingProgress.DotHeight" ) ) );
 
-		// have to do this to mimic what the bowels of the scheme manager does with bitmaps
-		bool bPrependVguiFix = V_strnicmp( pszPosterImage, "vgui", 4 ) != 0;
-		CFmtStr sPosterImageFmt( "%s%s", ( bPrependVguiFix ? "vgui/" : "" ), pszPosterImage );
-		pszPosterImage = sPosterImageFmt;
-
-		m_textureID_DefaultPosterImage = vgui::surface()->DrawGetTextureId( pszPosterImage );
-		if ( m_textureID_DefaultPosterImage == -1 )
-		{
-			m_textureID_DefaultPosterImage = vgui::surface()->CreateNewTextureID();
-			vgui::surface()->DrawSetTextureFile( m_textureID_DefaultPosterImage, pszPosterImage, true, false );	
-		}
-	}
-#endif
+	m_nProgressX = m_nProgressX - ( m_nProgressNumDots * m_nProgressDotWidth ) - ( m_nProgressNumDots - 1 ) * m_nProgressDotGap;
+	m_nProgressY = m_nProgressY - m_nProgressDotHeight;
 
 	SetupControlStates();
 }
 
 void LoadingProgress::Close()
 {
-	// hint to force any of the movie posters out of memory (purposely ignoring specific map search)
-	// if the image is unreferenced (as it should be), it will evict, if already evicted or empty, then harmless
-	if ( m_pPoster )
-	{
-		m_pPoster->EvictImage();
-	}
+	EvictImages();
 
-	if ( m_pBGImage && ( m_LoadingType == LT_POSTER ) )
-	{
-		m_pBGImage->EvictImage();
-	}
-		
 	BaseClass::Close();
 }
 
-//=============================================================================
-// this is where the spinner gets updated.
+void LoadingProgress::EvictImages()
+{
+	// hint to force any of the expensive presentation images out of memory 
+	for ( int i = 0; i < m_BackgroundImages.Count(); i++ )
+	{
+		if ( m_BackgroundImages[i].m_bOwnedByPanel )
+		{
+			vgui::surface()->DestroyTextureID( m_BackgroundImages[i].m_nTextureID );
+		}
+	}
+	m_BackgroundImages.Purge();
+}
+
 void LoadingProgress::UpdateWorkingAnim()
 {
-	if ( m_pWorkingAnim && ( m_bDrawSpinner || m_LoadingType == LT_TRANSITION ) )
+	if ( m_pWorkingAnim && m_bDrawSpinner )
 	{
 		// clock the anim at 10hz
 		float time = Plat_FloatTime();
@@ -199,37 +162,25 @@ void LoadingProgress::UpdateWorkingAnim()
 	}
 }
 
-//=============================================================================
 void LoadingProgress::SetProgress( float progress )
 {
-	if ( m_pProTotalProgress && m_bDrawProgress )
+	if ( progress > m_flPeakProgress )
 	{
-		if ( progress > m_flPeakProgress )
+		m_flPeakProgress = progress;
+		if ( !m_bUseAutoTransition && m_BackgroundImages.Count() )
 		{
-			m_flPeakProgress = progress;
+			// sequence based on progress
+			m_nTargetImage = m_flPeakProgress * m_BackgroundImages.Count();
+			m_nTargetImage = clamp( m_nTargetImage, 0, m_BackgroundImages.Count() - 1 );
 		}
-		m_pProTotalProgress->SetProgress( m_flPeakProgress );
 	}
 	
-	if ( m_pTipPanel )
-	{
-		m_pTipPanel->NextTip();
-	}
-
 	UpdateWorkingAnim();
 }
 
-//=============================================================================
 float LoadingProgress::GetProgress()
 {
-	float retVal = -1.0f;
-
-	if ( m_pProTotalProgress )
-	{
-		retVal = m_pProTotalProgress->GetProgress();
-	}
-
-	return retVal;
+	return m_flPeakProgress;
 }
 
 void LoadingProgress::PaintBackground()
@@ -237,63 +188,59 @@ void LoadingProgress::PaintBackground()
 	int screenWide, screenTall;
 	surface()->GetScreenSize( screenWide, screenTall );
 
-
-	if ( m_bDrawBackground && m_pBGImage )
+	if ( m_bDrawBackground && m_BackgroundImages.Count() )
 	{
-		int x, y, wide, tall;
-		m_pBGImage->GetBounds( x, y, wide, tall );
 		surface()->DrawSetColor( Color( 255, 255, 255, 255 ) );
-		surface()->DrawSetTexture( m_pBGImage->GetImage()->GetID() );
-		surface()->DrawTexturedRect( x, y, x+wide, y+tall );
-	}
-
-	if ( m_bDrawPoster && m_pPoster && m_pPoster->GetImage() )
-	{
-		if ( m_bFullscreenPoster )
+		surface()->DrawSetTexture( m_BackgroundImages[m_nCurrentImage].m_nTextureID );
+		surface()->DrawTexturedRect( 0, 0, screenWide, screenTall );
+	
+		if ( m_flTransitionStartTime )
 		{
-			surface()->DrawSetColor( Color( 255, 255, 255, 255 ) );
-			surface()->DrawSetTexture( m_pPoster->GetImage()->GetID() );
+			float flLerp = RemapValClamped( Plat_FloatTime(), m_flTransitionStartTime, m_flTransitionStartTime + ui_loadingscreen_transition_time.GetFloat(), 0.0f, 1.0f );
+			
+			surface()->DrawSetColor( Color( 255, 255, 255, flLerp * 255.0f ) );
+			surface()->DrawSetTexture( m_BackgroundImages[m_nNextImage].m_nTextureID );
 			surface()->DrawTexturedRect( 0, 0, screenWide, screenTall );
-		}
-		else
-		{
-			// fill black
-			surface()->DrawSetColor( Color( 0, 0, 0, 255 ) );
-			surface()->DrawFilledRect( 0, 0, screenWide, screenTall );
 
-			// overlay poster
-			int x, y, wide, tall;
-			m_pPoster->GetBounds( x, y, wide, tall );
-			surface()->DrawSetColor( Color( 255, 255, 255, 255 ) );
-			surface()->DrawSetTexture( m_pPoster->GetImage()->GetID() );
-			surface()->DrawTexturedRect( x, y, x+wide, y+tall );
-		}		
+			if ( flLerp >= 1.0f )
+			{
+				// terminate effect
+				StopTransitionEffect();
+
+				if ( !IsGameConsole() && !m_bUseAutoTransition && !m_flTransitionStartTime && m_nCurrentImage != m_nTargetImage )
+				{
+					// PC moves through loading too fast
+					// hold on this image and restart the transitioning context until we catch up with the sequence
+					m_nNextImage = m_nCurrentImage + 1;
+					m_nNextImage = clamp( m_nNextImage, 0, m_BackgroundImages.Count() - 1 );
+					m_flTransitionStartTime = Plat_FloatTime() + ui_loadingscreen_transition_time.GetFloat();
+				}
+			}
+		}
+
+		if ( m_bUseAutoTransition && !m_flTransitionStartTime )
+		{
+			// safe to auto transition to another image
+			if ( m_flAutoTransitionTime && Plat_FloatTime() > m_flAutoTransitionTime + ui_loadingscreen_autotransition_time.GetFloat() )
+			{
+				m_nTargetImage = ( m_nTargetImage + 1 ) % m_BackgroundImages.Count();
+				m_flAutoTransitionTime = Plat_FloatTime();
+			}
+		}
 	}
 
-	/*if ( m_bDrawPoster && m_pFooter )
-	{
-		int screenWidth, screenHeight;
-		CBaseModPanel::GetSingleton().GetSize( screenWidth, screenHeight );
-
-		int x, y, wide, tall;
-		m_pFooter->GetBounds( x, y, wide, tall );
-		surface()->DrawSetColor( m_pFooter->GetBgColor() );
-		surface()->DrawFilledRect( 0, y, x+screenWidth, y+tall );
-	}*/
-
-	// this is where the spinner draws
-	bool bRenderSpinner = ( m_bDrawSpinner && m_pWorkingAnim );
 	Panel *pWaitscreen = CBaseModPanel::GetSingleton().GetWindow( WT_GENERICWAITSCREEN );
-	if ( pWaitscreen && pWaitscreen->IsVisible() && ( m_LoadingWindowType == LWT_BKGNDSCREEN ) )
-		bRenderSpinner = false;	// Don't render spinner if the progress screen is displaying progress
-	if ( bRenderSpinner  )
+	bool bRenderSpinner = m_bDrawSpinner && m_pWorkingAnim;
+	if ( pWaitscreen && pWaitscreen->IsVisible() )
+	{
+		// Don't render spinner if the progress screen is displaying progress
+		bRenderSpinner = false;
+	}
+	if ( bRenderSpinner )
 	{
 		int x, y, wide, tall;
 
-		wide = tall = scheme()->GetProportionalScaledValue( 64 );
-		x = screenWide - scheme()->GetProportionalScaledValue( 64 ) - wide/2;
-		y = scheme()->GetProportionalScaledValue( 48 ) - tall/2;
-
+		m_pWorkingAnim->GetBounds( x, y, wide, tall );
 		m_pWorkingAnim->GetImage()->SetFrame( m_pWorkingAnim->GetFrame() );
 
 		surface()->DrawSetColor( Color( 255, 255, 255, 255 ) );
@@ -301,97 +248,37 @@ void LoadingProgress::PaintBackground()
 		surface()->DrawTexturedRect( x, y, x+wide, y+tall );
 	}
 
-	if (!m_pProTotalProgress)
-		return;
-	float f = m_pProTotalProgress->GetProgress();
-	f = clamp(f, 0, 1.0f);
-
-	UpdateBackground(ceil(f / 0.25f));
-
-	if ( m_bDrawProgress && m_pProTotalProgress )
+	if ( m_bDrawProgress )
 	{
-		int iScreenWide, iScreenTall;
-		surface()->GetScreenSize( iScreenWide, iScreenTall );
+		DrawLoadingBar();
+	}
+}
 
-		// Textured bar
-		surface()->DrawSetColor( Color( 255, 255, 255, 255 ) );
+void LoadingProgress::PostChildPaint()
+{
+	BaseClass::PostChildPaint();
 
-		// Texture BG
-		/*surface()->DrawSetTexture( m_textureID_LoadingBarBG );
-		surface()->DrawTexturedRect( x, y, x + wide, y + tall );
+	if ( m_flFadeInStartTime )
+	{
+		int screenWide, screenTall;
+		surface()->GetScreenSize( screenWide, screenTall );
 
-		surface()->DrawSetTexture( m_textureID_LoadingBar );
-
-		// YWB 10/13/2009:  If we don't crop the texture coordinate down then we will see a jitter of the texture as the texture coordinate and the rounded width 
-		//  alias
-
-		int nIntegerWide = f * wide;		
-		float flUsedFrac = (float)nIntegerWide / (float)wide;
-		
-		DrawTexturedRectParms_t params;
-		params.x0 = x;
-		params.y0 = y;
-		params.x1 = x + nIntegerWide;
-		params.y1 = y + tall;
-		params.s0 = 0;
-		params.s1 = flUsedFrac;
-		surface()->DrawTexturedRectEx( &params );		*/
-
-		int loadedDots = floor(f * 15);
-		int x = iScreenWide - (16 * 26);
-		int y = 0.95 * iScreenTall;
-
-		for (int i = 0; i < 15; i++)
+		float flLerp = RemapValClamped( Plat_FloatTime(), m_flFadeInStartTime, m_flFadeInStartTime + ui_loadingscreen_fadein_time.GetFloat(), 1.0f, 0.0f );
+		if ( flLerp == 0 )
 		{
-			int offsetX = i * 26;
-			surface()->DrawSetTexture(m_textureID_LoadingBar);
-			DrawTexturedRectParms_t params;
-			params.x0 = x + offsetX;
-			params.y0 = y;
-			params.x1 = x + 20 + offsetX;
-			params.y1 = y + 20;
-			if (i <= loadedDots)
-			{
-				params.s0 = 0.25f;
-				params.s1 = 0.5f;
-			}
-			else
-			{
-				params.s0 = 0.0f;
-				params.s1 = 0.25f;
-			}
-			//params.
-			surface()->DrawTexturedRectEx(&params);
+			m_flFadeInStartTime = 0;
 		}
-	}
 
-	// Need to call this periodically to collect sign in and sign out notifications,
-	// do NOT dispatch events here in the middle of loading and rendering!
-	if ( ThreadInMainThread() )
-	{
-		XBX_ProcessEvents();
+		surface()->DrawSetColor( Color( 0, 0, 0, flLerp * 255.0f ) );
+		surface()->DrawFilledRect( 0, 0, screenWide, screenTall );
 	}
 }
 
-//=============================================================================
-// Must be called first. Establishes the loading style
-//=============================================================================
-void LoadingProgress::SetLoadingType( LoadingProgress::LoadingType loadingType )
+void LoadingProgress::SetPosterData( KeyValues *pChapterInfo, const char *pszGameMode )
 {
-	m_LoadingType = loadingType;
-
-	// the first time initing occurs during ApplySchemeSettings() or if the panel is deleted
-	// if the panel is re-used, this is for the second time the panel gets used
-	SetupControlStates();
+	m_pChapterInfo = pChapterInfo;
 }
 
-//=============================================================================
-LoadingProgress::LoadingType LoadingProgress::GetLoadingType()
-{
-	return m_LoadingType;
-}
-
-//=============================================================================
 void LoadingProgress::SetupControlStates()
 {
 	m_flPeakProgress = 0.0f;
@@ -403,67 +290,190 @@ void LoadingProgress::SetupControlStates()
 		return;
 	}
 
-	m_bDrawBackground = false;
-	m_bDrawPoster = false;
-	m_bDrawSpinner = false;
-	m_bDrawProgress = false;
+	m_bDrawBackground = true;
+	m_bDrawSpinner = true;
+	m_bDrawProgress = true;
+	m_bUseAutoTransition = false;
 
-	switch( m_LoadingType )
+	const char *pCoopNetworkString = "";
+
+	// set the correct background image
+
+	CUtlString filenamePrefix;
+	if ( m_pChapterInfo )
 	{
-	case LT_MAINMENU:
-		m_bDrawBackground = true;
-		m_bDrawProgress = true;
-		m_bDrawSpinner = true;
-		break;
-	case LT_TRANSITION:
-		// the transition screen shows stats and owns all the drawing
-		// spinner needs to be drawn as child of the window that is shown while loading
-		break;
-	case LT_POSTER:
-		m_bDrawBackground = false;
-		m_bDrawPoster = true;
-		m_bDrawProgress = true;
-		m_bDrawSpinner = true;
-		break;
-	default:
-		break;
-	}
+		// need to know if we are transitioning from the main menu or map-to-map
+		bool bTransitionFromMainMenu = ( GameUI().IsInLevel() == false );
 
-	m_pFooter = dynamic_cast< vgui::EditablePanel* >( FindChildByName( "CampaignFooter" ) );
-
-	m_pBGImage = dynamic_cast< vgui::ImagePanel* >( FindChildByName( "BGImage" ) );
-	if ( m_pBGImage )
-	{
-		// set the correct background image
-		if ( m_LoadingType == LT_POSTER )
+		const char *pMapNameToLoad = m_pChapterInfo->GetString( "map" );
+		const char *pActPrefix = V_stristr( pMapNameToLoad, "sp_a" );
+		//Get the name of the current map
+		//For cases where pMapNameToLoad doesn't get the entire path of the map
+		//We need the entire path of the map to detect if we're loading a workshop or puzzlemaker map
+		const char *pszCurrentMapName = engine->GetLevelNameShort();
+		char szFixedCurrentMapName[MAX_PATH];
+		V_strncpy( szFixedCurrentMapName, pszCurrentMapName, ARRAYSIZE( szFixedCurrentMapName ) );
+		V_FixSlashes( szFixedCurrentMapName );
+		if ( pActPrefix )
 		{
-			//m_pBGImage->SetImage( "../vgui/LoadingScreen_background" );
+			// single player
+			// use the act transition when going from menu into any sp map due to length of load
+			// otherwise use the alternate map-to-map presentation
+			bool bUseActTransition = bTransitionFromMainMenu;
+			int nAct = atoi( pActPrefix + 4 );
+
+			// the presentation chosen for act 3 turned out to be a spoiler
+			if ( V_stristr( pActPrefix, "sp_a3_00" ) ||  V_stristr( pActPrefix, "sp_a3_01" ) )
+			{
+				// use the prior act presentation for the first two maps
+				nAct = 2;
+			}
+			else if ( V_stristr( pActPrefix, "sp_a3_03" ) )
+			{
+				// treat the third map as the true first map of the act
+				nAct = 3;
+				bUseActTransition = true;
+			}
+		
+			if ( nAct && !bUseActTransition )
+			{
+				const char *pFirstMapOfAct = CBaseModPanel::GetSingleton().ActToMapName( nAct );
+				if ( !V_stricmp( pMapNameToLoad, pFirstMapOfAct ) )
+				{
+					// use the act transition when going into the first map of the act
+					bUseActTransition = true;
+				}
+			}
+
+			if ( !bTransitionFromMainMenu && bUseActTransition )
+			{
+				const char *pLastMapName = m_pChapterInfo->GetString( "lastmap" );
+				if ( !V_stricmp( pLastMapName, pMapNameToLoad ) )
+				{
+					// on death or re-loading the same map, use the default transition
+					bUseActTransition = false;
+				}
+			}
+
+			if ( V_stristr( pActPrefix, "sp_a5_credits" ) )
+			{
+				// the credits changed late, no time to do a matched act presentation
+				// use the default transition
+				bUseActTransition = false;
+			}
+
+			if ( !nAct || !bUseActTransition )
+			{
+				int nSubChapter = CBaseModPanel::GetSingleton().MapNameToSubChapter( pMapNameToLoad );
+				if ( !nSubChapter )
+				{
+					// map not known
+					nSubChapter = 1;
+				}
+				filenamePrefix = CFmtStr( "vgui/loading_screens/loadingscreen_default_%c", 'a' + nSubChapter - 1 );
+			}
+			else
+			{
+				filenamePrefix = CFmtStr( "vgui/loading_screens/loadingscreen_a%d", nAct );
+			}
+		}
+		else if ( pMapNameToLoad && V_stristr( pMapNameToLoad, "e1912" ) )
+		{
+			m_bDrawSpinner = false;
+			filenamePrefix = "vgui/loading_screens/loadingscreen_e1912";
+		}
+		else if ( ( pMapNameToLoad && V_stristr( pMapNameToLoad, "puzzlemaker/preview" ) ) ||
+				  !V_strnicmp( szFixedCurrentMapName, "puzzlemaker\\", V_strlen( "puzzlemaker\\" ) ) ||
+				  !V_strnicmp( szFixedCurrentMapName, "workshop\\", V_strlen( "workshop\\" ) ) )
+		{
+			filenamePrefix = "vgui/loading_screens/loadingscreen_default_b";
 		}
 		else
 		{
-			int screenWide, screenTall;
-			surface()->GetScreenSize( screenWide, screenTall );
-			char filename[MAX_PATH];
-			V_snprintf( filename, sizeof( filename ), "console/background01" ); // TODO: engine->GetStartupImage( filename, sizeof( filename ), screenWide, screenTall );
-			m_pBGImage->SetImage( CFmtStr( "../%s", filename ) );
+			// coop
+			// the special coop movies allowed in commentary mode aren't supposed to transition, but exit to main menu
+			if ( !bTransitionFromMainMenu && !engine->IsInCommentaryMode() )
+			{
+				// coop has a modal movie player, none of this presentation is desired
+				// prevent all the data load and rendering
+				m_bDrawBackground = false;
+				m_bDrawSpinner = false;
+				m_bDrawProgress = false;
+			}
+			else
+			{
+				const char *pCoopPrefix = V_stristr( pMapNameToLoad, "mp_coop" );
+				if ( pCoopPrefix )
+				{
+					filenamePrefix = "vgui/loading_screens/loadingscreen_coop";
+
+					IMatchSession *pSession = g_pMatchFramework->GetMatchSession();
+					if ( pSession )
+					{
+						pCoopNetworkString = pSession->GetSessionSettings()->GetString( "system/network" );
+					}
+				}
+			}
+		}
+	}
+
+	bool bIsOnlineCoop = !V_stricmp( pCoopNetworkString, "live" ) || !V_stricmp( pCoopNetworkString, "lan" );
+
+#ifdef _GAMECONSOLE
+	if ( XBX_GetNumGameUsers() > 1 )
+	{
+		// HACK: Splitscreen games are always offline! This was a fake session for challenge mode!
+		bIsOnlineCoop = false;
+	}
+#endif
+
+	if ( m_bDrawBackground )
+	{
+		CUtlVector< CUtlString > imageNames;
+		if ( filenamePrefix.IsEmpty() )
+		{
+			// unrecognized portal2 map, default to single product screen
+			char startupImage[MAX_PATH];
+			engine->GetStartupImage( startupImage, sizeof( startupImage ) );
+			imageNames.AddToTail( startupImage );
+		}
+		else
+		{
+			const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
+			// determine image sequence
+			CUtlString filename;
+			while ( 1 )
+			{
+				int nImageIndex = imageNames.Count();
+				filename = CFmtStr( "%s_%d%s", filenamePrefix.Get(), nImageIndex + 1, ( aspectRatioInfo.m_bIsWidescreen ? "_widescreen" : "" ) );
+				if ( !g_pFullFileSystem->FileExists( CFmtStr( "materials/%s.vmt", filename.Get() ), "GAME" ) )
+				{
+					// end of list
+					break;
+				}
+				imageNames.AddToTail( filename );
+			}
 		}
 
-		// we will custom draw
-		m_pBGImage->SetVisible( false );
-	}
+		// get all the images
+		for ( int i = 0; i < imageNames.Count(); i++ )
+		{
+			BackgroundImage_t &image = m_BackgroundImages[m_BackgroundImages.AddToTail()];
 
-	m_pPoster = dynamic_cast< vgui::ImagePanel* >( FindChildByName( "Poster" ) );
-	if ( m_pPoster )
-	{
-		// we will custom draw
-		m_pPoster->SetVisible( false );
-	}
-	
-	m_pProTotalProgress = dynamic_cast< vgui::ProgressBar* >( FindChildByName( "ProTotalProgress" ) );
-	if ( m_pProTotalProgress )
-	{
-		// we will custom draw
-		m_pProTotalProgress->SetVisible( false );
+			const char *pImageName = imageNames[i].Get();
+			int nTextureID = vgui::surface()->DrawGetTextureId( pImageName );
+			if ( nTextureID == -1 )
+			{
+				image.m_bOwnedByPanel = true;
+				image.m_nTextureID = vgui::surface()->CreateNewTextureID();
+				vgui::surface()->DrawSetTextureFile( image.m_nTextureID, pImageName, true, false );	
+			}
+			else
+			{
+				image.m_bOwnedByPanel = false;
+				image.m_nTextureID = nTextureID;
+			}
+		}
 	}
 
 	m_pWorkingAnim = dynamic_cast< vgui::ImagePanel* >( FindChildByName( "WorkingAnim" ) );
@@ -473,211 +483,258 @@ void LoadingProgress::SetupControlStates()
 		m_pWorkingAnim->SetVisible( false );
 	}
 
-	vgui::Label *pLoadingLabel = dynamic_cast< vgui::Label *>( FindChildByName( "LoadingText" ) );
-	if ( pLoadingLabel )
-	{
-		pLoadingLabel->SetVisible( false );
-	}
+	// Used for the initial coop transition where the end of loading
+	// is unknown (due to network unplugged) and therefore needs to transition
+	// based on time and cycle
+	m_bUseAutoTransition = bIsOnlineCoop;
 
-	SetControlVisible( "PlayerNames", m_bDrawPoster );
-	SetControlVisible( "StarringLabel", m_bDrawPoster );
-	SetControlVisible( "GameModeLabel", false );
+	// Hide the employee badge by default
+	ShowEmployeeBadge( false );
 
-	if ( m_LoadingType == LT_POSTER )
+	if ( bIsOnlineCoop )
 	{
-		SetupPoster();
+		BASEMODPANEL_SINGLETON.SetupPartnerInScience();
+		SetupPartnerInScience();
 	}
+#if defined( PORTAL2_PUZZLEMAKER )
+	else if ( BASEMODPANEL_SINGLETON.GetCurrentCommunityMapID() != 0 && BASEMODPANEL_SINGLETON.GetCommunityMapQueueMode() != QUEUEMODE_INVALID )
+	{
+		BASEMODPANEL_SINGLETON.SetupCommunityMapLoad();
+		SetupCommunityMapLoad();
+	}
+#endif // PORTAL2_PUZZLEMAKER
 
 	// Hold on to start frame slightly
 	m_flLastEngineTime = Plat_FloatTime() + 0.2f;
-}
+	m_flLastTransitionTime = Plat_FloatTime();
 
-void LoadingProgress::SetPosterData( KeyValues *pMissionInfo, KeyValues *pChapterInfo, const char **pPlayerNames, unsigned int botFlags, const char *pszGameMode )
-{
-	m_botFlags = botFlags;
-	m_pMissionInfo = pMissionInfo;
-	m_pChapterInfo = pChapterInfo;
-
-	RearrangeNames( pMissionInfo->GetString( "poster/character_order", NULL ), pPlayerNames );
-
-	Q_snprintf( m_szGameMode, sizeof( m_szGameMode ), "#L4D360UI_Loading_GameMode_%s", pszGameMode );
-}
-
-//rearrange names to match the poster character order... sigh..
-void LoadingProgress::RearrangeNames( const char *pszCharacterOrder, const char **pPlayerNames )
-{
-	int iNewOrder[NUM_LOADING_CHARACTERS]; 
-	char m_SortPlayerNames[NUM_LOADING_CHARACTERS][MAX_PLAYER_NAME_LENGTH];
-
-	for ( int k = 0; k < NUM_LOADING_CHARACTERS; ++ k )
+	if ( m_bUseAutoTransition )
 	{
-		iNewOrder[k] = k;
-		if ( pPlayerNames[k] )
-			Q_strncpy( m_PlayerNames[k], pPlayerNames[k], MAX_PLAYER_NAME_LENGTH );
-
-		Q_strncpy( m_SortPlayerNames[k], m_PlayerNames[k], MAX_PLAYER_NAME_LENGTH );
+		m_flAutoTransitionTime = Plat_FloatTime();
 	}
 
-	if ( pszCharacterOrder )
+	if ( m_bDrawBackground )
 	{
-		char szOrder[MAX_PATH];
-		Q_strncpy( szOrder, pszCharacterOrder, sizeof( szOrder ) );
+		// run a transition to fade in
+		m_flFadeInStartTime = Plat_FloatTime();
+	}
+}
 
-		char	*p = szOrder;
-		int i = 0;
-
-		p = strtok( p, ";" );
-
-		const char * const arrCharacterNamesInConfig[ NUM_LOADING_CHARACTERS ] = { "gambler", "producer", "coach", "mechanic" };
-
-		while ( p != NULL && *p )
+void LoadingProgress::SetupPartnerInScience()
+{
+	vgui::ImagePanel *pPnlGamerPic = dynamic_cast< vgui::ImagePanel* >( FindChildByName( "PnlGamerPic" ) );
+	if ( pPnlGamerPic )
+	{
+		vgui::IImage *pAvatarImage = CBaseModPanel::GetSingleton().GetPartnerImage();
+		if ( pAvatarImage )
 		{
-			for ( int k = 0; k < NUM_LOADING_CHARACTERS; ++ k )
-			{
-				if ( !Q_stricmp( p, arrCharacterNamesInConfig[k] ) )
-				{
-					iNewOrder[k] = i;
-					break;
-				}
-			}
-
-			i++;
-
-			p = strtok( NULL, ";" );
-		}
-	}
-
-	for ( int k = 0; k < NUM_LOADING_CHARACTERS; ++ k )
-	{
-		Q_strncpy( m_PlayerNames[k], m_SortPlayerNames[iNewOrder[k]], MAX_PLAYER_NAME_LENGTH );
-	}
-}
-
-//=============================================================================
-bool LoadingProgress::ShouldShowPosterForLevel( KeyValues *pMissionInfo, KeyValues *pChapterInfo )
-{
-	// Do not show loading poster for credits
-	if ( pMissionInfo && !Q_stricmp( pMissionInfo->GetString( "name" ), "credits" ) )
-		return false;
-
-	if ( pMissionInfo )
-	{
-		char const *szPosterImage = pMissionInfo->GetString( "poster/posterImage", NULL );
-		if ( szPosterImage && *szPosterImage )
-			// If the campaign specifies a valid poster, then we'll use it
-			return true;
-	}
-
-	// All other campaigns can fall back to a default poster
-	return ( m_pDefaultPosterDataKV != NULL );
-}
-
-extern ConVar portal2_current_act;
-
-void LoadingProgress::UpdateBackground(int progressQuartile)
-{
-	vgui::ImagePanel *pPoster = dynamic_cast< vgui::ImagePanel* >(FindChildByName("Poster"));
-
-#if !defined( _X360 )
-	int screenWide, screenTall;
-	surface()->GetScreenSize(screenWide, screenTall);
-	float aspectRatio = (float)screenWide / (float)screenTall;
-	bool bIsWidescreen = aspectRatio >= 1.5999f;
-#else
-	static ConVarRef mat_xbox_iswidescreen("mat_xbox_iswidescreen");
-	bool bIsWidescreen = mat_xbox_iswidescreen.GetBool();
-#endif
-
-	char *pszPosterImage = new char[256];
-	int currentAct = portal2_current_act.GetInt();
-	const char* widescreenStr = "";
-	if (bIsWidescreen)
-		widescreenStr = "_widescreen";
-
-	Q_snprintf(pszPosterImage, 256, "loading_screens/loadingscreen_a%d_%d%s", currentAct, progressQuartile, widescreenStr);
-
-	// if the image was cached this will just hook it up, otherwise it will load it
-	if (pPoster)
-		pPoster->SetImage(pszPosterImage);
-}
-
-
-//=============================================================================
-void LoadingProgress::SetupPoster( void )
-{
-	int i;
-	
-	//bool bNamesVisible = false;
-	UpdateBackground(1);
-
-	bool bIsLocalized = false;
-#ifdef _X360
-	bIsLocalized = XBX_IsLocalized();
-#else
-	char uilanguage[ 64 ];
-	engine->GetUILanguage( uilanguage, sizeof( uilanguage ) );
-	if ( Q_stricmp( uilanguage, "english" ) )
-	{
-		bIsLocalized = true;
-	}
-#endif
-
-	SetControlVisible( "LocalizedCampaignName", false );
-	SetControlVisible( "LocalizedCampaignTagline", false );
-
-	wchar_t szPlayerNames[MAX_PATH];
-	Q_memset( szPlayerNames, 0, sizeof( szPlayerNames ) );
-
-	int nNumNames = 0;
-	for ( i=0;i<NUM_LOADING_CHARACTERS;i++ )
-	{
-		if ( !m_PlayerNames[i] || !m_PlayerNames[i][0] )
-		{
-			continue;
-		}
-
-		if ( nNumNames != 0 )
-		{
-			wcsncat( szPlayerNames, L", ", sizeof( szPlayerNames ) );
-		}
-		wchar_t szName[64];
-
-		if ( m_PlayerNames[i] && m_PlayerNames[i][0] == '#' )
-		{
-			wchar_t *pName = g_pVGuiLocalize->Find( m_PlayerNames[i] );
-
-			if ( pName == NULL )
-			{
-				g_pVGuiLocalize->ConvertANSIToUnicode( m_PlayerNames[i], szName, sizeof( szPlayerNames ) );
-			}
-			else
-			{
-				Q_wcsncpy( szName, pName, sizeof( szName ) );
-			}
-			nNumNames++;
+			pPnlGamerPic->SetImage( pAvatarImage );
 		}
 		else
 		{
-			g_pVGuiLocalize->ConvertANSIToUnicode( m_PlayerNames[i], szName, sizeof( szPlayerNames ) );
-			nNumNames++;
+			pPnlGamerPic->SetImage( "icon_lobby" );
+		}		
+
+		pPnlGamerPic->SetVisible( true );
+	}
+
+	vgui::Label *pLblGamerTag = dynamic_cast< vgui::Label* >( FindChildByName( "LblGamerTag" ) );
+	if ( pLblGamerTag )
+	{
+		CUtlString partnerName = CBaseModPanel::GetSingleton().GetPartnerName();
+		pLblGamerTag->SetText( partnerName.Get() );
+		pLblGamerTag->SetVisible( true );
+	}
+
+	vgui::Label *pLblGamerTagStatus = dynamic_cast< vgui::Label* >( FindChildByName( "LblGamerTagStatus" ) );
+	if ( pLblGamerTagStatus )
+	{
+		pLblGamerTagStatus->SetVisible( true );
+		pLblGamerTagStatus->SetText( CBaseModPanel::GetSingleton().GetPartnerDescKey() );
+	}
+}
+
+void LoadingProgress::ShowEmployeeBadge( bool bState )
+{
+	vgui::ImagePanel *pBadgeBackground = dynamic_cast< vgui::ImagePanel* >( FindChildByName( "ImgEmployeeBadge" ) );
+	if ( pBadgeBackground )
+	{
+		pBadgeBackground->SetVisible( bState );
+	}
+	
+	vgui::ImagePanel *pBadgeOverlay = dynamic_cast< vgui::ImagePanel* >( FindChildByName( "ImgBadgeOverlay" ) );
+	if ( pBadgeOverlay )
+	{
+		pBadgeOverlay->SetVisible( bState );
+	}
+
+	/*
+	vgui::ImagePanel *pBadgeUpgrade = dynamic_cast< vgui::ImagePanel* >( FindChildByName( "ImgBadgeUpgrade" ) );
+	if ( pBadgeUpgrade )
+	{
+		pBadgeUpgrade->SetVisible( bState );
+	}
+	*/
+	
+	vgui::ImagePanel *pBadgeLogo = dynamic_cast< vgui::ImagePanel* >( FindChildByName( "ImgBadgeLogo" ) );
+	if ( pBadgeLogo )
+	{
+		pBadgeLogo->SetVisible( bState );
+	}
+}
+
+void LoadingProgress::SetupCommunityMapLoad()
+{
+	vgui::ImagePanel *pPnlGamerPic = dynamic_cast< vgui::ImagePanel* >( FindChildByName( "PnlGamerPic" ) );
+	if ( pPnlGamerPic )
+	{
+		vgui::IImage *pAvatarImage = BASEMODPANEL_SINGLETON.GetPartnerImage();
+		if ( pAvatarImage )
+		{
+			pPnlGamerPic->SetImage( pAvatarImage );
+			pPnlGamerPic->SetVisible( true );
+		}
+	}
+
+#if defined( PORTAL2_PUZZLEMAKER )
+	// Get the avatar for the author of this map
+	const PublishedFileInfo_t *pInfo = WorkshopManager().GetPublishedFileInfoByID( BASEMODPANEL_SINGLETON.GetCurrentCommunityMapID() );
+	if ( pInfo )
+	{	
+		// Setup the name of the author
+		vgui::Label *pLblAuthorName = dynamic_cast< vgui::Label* >( FindChildByName( "LblMapTitleDesc" ) );
+		if ( pLblAuthorName )
+		{
+			CSteamID steamID( pInfo->m_ulSteamIDOwner, steamapicontext->SteamUtils()->GetConnectedUniverse(), k_EAccountTypeIndividual );
+			wchar_t convertedString[MAX_PATH] = L"";
+
+			const wchar_t *authorFormat = g_pVGuiLocalize->Find( "#PORTAL2_CommunityPuzzle_Author" );
+			g_pVGuiLocalize->ConvertANSIToUnicode( steamapicontext->SteamFriends()->GetFriendPersonaName( steamID ), convertedString, sizeof( convertedString ) );
+			if ( authorFormat )
+			{
+				wchar_t	authorSteamNameString[256];
+				g_pVGuiLocalize->ConstructString( authorSteamNameString, ARRAYSIZE( authorSteamNameString ), authorFormat, 1, convertedString );
+				pLblAuthorName->SetText( authorSteamNameString );
+				pLblAuthorName->SetVisible( true );
+			}
+			
+		}
+	
+		// Setup the name of the map
+		vgui::Label *pLblMapName = dynamic_cast< vgui::Label* >( FindChildByName( "LblMapTitle" ) );
+		if ( pLblMapName )
+		{
+			wchar_t mapName[k_cchPublishedDocumentTitleMax];
+			g_pVGuiLocalize->ConvertANSIToUnicode( pInfo->m_rgchTitle, mapName, sizeof( mapName ) );
+
+			pLblMapName->SetVisible( true );
+			pLblMapName->SetText( mapName );
 		}
 
-		wcsncat( szPlayerNames, szName, sizeof( szPlayerNames ) );
+		ShowEmployeeBadge( true );
 	}
-
-	if ( nNumNames != 0 )
-	{
-		wcsncat( szPlayerNames, L".", sizeof( szPlayerNames ) );
-	}
-
-	SetControlString( "GameModeLabel", m_szGameMode );
-
-	SetControlVisible( "PlayerNames", ( nNumNames > 1 ) );
-
-	SetControlVisible( "StarringLabel", ( nNumNames > 1 ) );
-	SetControlVisible( "GameModeLabel", false );
-
-	SetControlString( "playernames", szPlayerNames );
-
-	SetControlEnabled( "LoadingTipPanel", false );
+#endif // PORTAL2_PUZZLEMAKER
 }
+
+bool LoadingProgress::LoadingProgressWantsIsolatedRender( bool bContextValid )
+{
+	bool bWantsTransition = ( m_nTargetImage != m_nCurrentImage );
+	if ( IsGameConsole() && bWantsTransition && Plat_FloatTime() < m_flLastTransitionTime + ui_loadingscreen_mintransition_time.GetFloat() )
+	{
+		// transitions were meant for slow loading only,
+		// post shipping consoles, now decided the PC will always do them, regardless of loading speed
+		bWantsTransition = false;
+	}
+
+	if ( bWantsTransition && bContextValid && !m_flTransitionStartTime )
+	{
+		// caller has given us an isolated rendering context
+		// run the effect
+		m_flTransitionStartTime = Plat_FloatTime();
+
+		if ( m_bUseAutoTransition )
+		{
+			// forever cycles
+			m_nNextImage = m_nTargetImage;
+		}
+		else
+		{
+			// we want to move through the images regardless of how fast the progress is
+			// and hold on the last image
+			m_nNextImage = m_nCurrentImage + 1;
+			m_nNextImage = clamp( m_nNextImage, 0, m_BackgroundImages.Count() - 1 );
+		}
+	}
+	else if ( !bContextValid && m_flTransitionStartTime )
+	{
+		// caller has ended isolated rendering
+		// abort the effect
+		StopTransitionEffect();
+		bWantsTransition = false;
+	}
+
+	if ( m_flFadeInStartTime )
+	{
+		// allow the isolated render so fade up is smooth
+		bWantsTransition = true;
+	}
+
+	return bWantsTransition;
+}
+
+void LoadingProgress::StopTransitionEffect()
+{
+	m_nCurrentImage = m_nNextImage;
+	m_flTransitionStartTime = 0;
+	m_flLastTransitionTime = Plat_FloatTime();
+}
+
+void LoadingProgress::DrawLoadingBar()
+{
+	float flProgress = clamp( m_flPeakProgress, 0, 1.0f );
+	if ( flProgress >= 0.97f )
+	{
+		// ensure we show the full row
+		flProgress = 1.0;
+	}
+
+	surface()->DrawSetTexture( m_textureID_LoadingDots );
+
+	float flWhiteDotS0 = 0.0f/64.0f;
+	float flBlueDotS0 = 16.0f/64.0f;
+	float flYellowDotS0 = 32.0f/64.0f;
+	float flDotWidth = 16.0f/64.0f;
+
+	DrawTexturedRectParms_t params;
+	params.y0 = m_nProgressY;
+	params.y1 = params.y0 + m_nProgressDotHeight;
+
+	// background
+	surface()->DrawSetColor( Color( 255, 255, 255, IsX360() ? 20 : 80 ) );
+	int dotX = m_nProgressX;
+	for ( int i = 0; i < m_nProgressNumDots; i++ )
+	{
+		params.x0 = dotX;
+		params.x1 = params.x0 + m_nProgressDotWidth;
+		params.s0 = flWhiteDotS0;
+		params.s1 = params.s0 + flDotWidth;
+		surface()->DrawTexturedRectEx( &params );
+		dotX += m_nProgressDotWidth + m_nProgressDotGap;
+	}
+
+	// foreground
+	int nProgressDots = flProgress * m_nProgressNumDots;
+	surface()->DrawSetColor( Color( 255, 255, 255, 255 ) );
+	dotX = m_nProgressX;
+	for ( int i = 0; i < nProgressDots; i++ )
+	{
+		params.x0 = dotX;
+		params.x1 = params.x0 + m_nProgressDotWidth;
+		params.s0 = ( nProgressDots == m_nProgressNumDots ) ? flYellowDotS0 : flBlueDotS0;
+		params.s1 = params.s0 + flDotWidth;
+		surface()->DrawTexturedRectEx( &params );
+		dotX += m_nProgressDotWidth + m_nProgressDotGap;
+	}
+}
+
+

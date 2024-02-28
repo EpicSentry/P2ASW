@@ -30,12 +30,12 @@ InGameChapterSelect::InGameChapterSelect(Panel *parent, const char *panelName):
 	SetProportional( true );
 
 	SetUpperGarnishEnabled(true);
-	SetLowerGarnishEnabled(true);
+	SetFooterEnabled(true);
 
 	CBaseModFooterPanel *footer = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
 	if ( footer )
 	{
-		footer->SetButtons( FB_ABUTTON | FB_BBUTTON, FF_AB_ONLY, true );
+		footer->SetButtons( FB_ABUTTON | FB_BBUTTON );
 		footer->SetButtonText( FB_ABUTTON, "#L4D360UI_Select" );
 		footer->SetButtonText( FB_BBUTTON, "#L4D360UI_Cancel" );
 	}
@@ -49,7 +49,6 @@ InGameChapterSelect::InGameChapterSelect(Panel *parent, const char *panelName):
 //=============================================================================
 InGameChapterSelect::~InGameChapterSelect()
 {
-	GameUI().AllowEngineHideGameUI();
 }
 
 //=============================================================================
@@ -75,14 +74,14 @@ void InGameChapterSelect::ApplySchemeSettings(vgui::IScheme *pScheme)
 	KeyValues *pGameSettings = g_pMatchFramework->GetMatchNetworkMsgController()->GetActiveServerGameDetails( NULL );
 	KeyValues::AutoDelete autodelete_pGameSettings( pGameSettings );
 
-	char const *szGameMode = pGameSettings->GetString( "game/mode", "campaign" );
+	char const *szGameMode = pGameSettings->GetString( "game/mode", "coop" );
 
 	if ( !GameModeIsSingleChapter( szGameMode ) )
 		pGameSettings->SetInt( "game/chapter", 1 );
 
 	// Get mission and campaign info
 	KeyValues *pInfoMission = NULL;
-	KeyValues *pInfoChapter = g_pMatchExtSwarm->GetMapInfo( pGameSettings, &pInfoMission );
+	KeyValues *pInfoChapter = g_pMatchExt->GetMapInfo( pGameSettings, &pInfoMission );
 
 	// Check if this is a custom mission?
 	if ( pInfoMission && !pInfoMission->GetBool( "builtin" ) )
@@ -90,7 +89,7 @@ void InGameChapterSelect::ApplySchemeSettings(vgui::IScheme *pScheme)
 
 	if ( !pInfoMission || !pInfoChapter )
 	{
-		KeyValues *pAllMissions = g_pMatchExtSwarm->GetAllMissions();
+		KeyValues *pAllMissions = g_pMatchExt->GetAllMissions();
 		for ( pInfoMission = pAllMissions ? pAllMissions->GetFirstTrueSubKey() : NULL;
 			  pInfoMission; pInfoMission = pInfoMission->GetNextTrueSubKey() )
 		{
@@ -195,7 +194,7 @@ void InGameChapterSelect::OnCommand(const char *command)
 							{
 								pGameSettings->SetString( "game/campaign", szMissionName );
 								pGameSettings->SetInt( "game/chapter", 1 );
-								if ( !g_pMatchExtSwarm->GetMapInfo( pGameSettings ) )
+								if ( !g_pMatchExt->GetMapInfo( pGameSettings ) )
 								{
 									button->SetEnabled( false );
 								}
@@ -206,6 +205,20 @@ void InGameChapterSelect::OnCommand(const char *command)
 			}
 		}
 
+		DropDownMenu *pChapterDropDown = dynamic_cast< DropDownMenu* >( FindChildByName( "DrpChapter" ) );
+		if( pChapterDropDown ) //missions change what the available campaigns are, we should listen on that flyout as well
+		{
+			pGameSettings->SetString( "game/campaign", m_chCampaign );
+			UpdateChapterFlyout( pGameSettings, this, pChapterDropDown );
+			
+			// Chapters are directly selectable only in some game modes
+			pChapterDropDown->SetEnabled( GameModeIsSingleChapter( pGameSettings->GetString( "game/mode" ) ) );
+			
+			m_nChapter = 1;
+			CFmtStr strSelection( "#L4D360UI_Chapter_%d", m_nChapter );
+			pChapterDropDown->SetCurrentSelection( strSelection );
+			UpdateChapterImage( m_chCampaign, m_nChapter );
+		}
 	}
 	else if ( char const *szChapterSelected = StringAfterPrefix( command, "#L4D360UI_Chapter_" ) )
 	{
@@ -236,7 +249,7 @@ void InGameChapterSelect::OnCommand(const char *command)
 
 			engine->ClientCmd( CFmtStr( "callvote %s %s;", szVoteCommand, m_chCampaign ) );
 		}
-		else if ( KeyValues *pInfoMap = g_pMatchExtSwarm->GetMapInfo( pGameSettings ) )
+		else if ( KeyValues *pInfoMap = g_pMatchExt->GetMapInfo( pGameSettings ) )
 		{
 			engine->ClientCmd( CFmtStr( "callvote %s %s;", szVoteCommand, pInfoMap->GetString( "map" ) ) );
 		}
@@ -292,5 +305,36 @@ void InGameChapterSelect::OnFlyoutMenuCancelled()
 
 void InGameChapterSelect::UpdateChapterImage( char const *szMission, int nChapter, char const *szForceImage /* = NULL */ )
 {
+	vgui::ImagePanel* imgLevelImage = dynamic_cast< vgui::ImagePanel* >( FindChildByName( "ImgLevelImage" ) );
+	if( !imgLevelImage )
+		return;
 	
+	if ( szForceImage )
+	{
+		imgLevelImage->SetImage( szForceImage );
+		return;
+	}
+
+	KeyValues *pGameSettings = g_pMatchFramework->GetMatchNetworkMsgController()->GetActiveServerGameDetails( NULL );
+	KeyValues::AutoDelete autodelete_pGameSettings( pGameSettings );
+	if ( !pGameSettings )
+		return;
+
+	if ( szMission )
+		pGameSettings->SetString( "game/campaign", szMission );
+
+	if ( nChapter && GameModeIsSingleChapter( pGameSettings->GetString( "game/mode" ) ) )
+		pGameSettings->SetInt( "game/chapter", nChapter );
+	else
+		pGameSettings->SetInt( "game/chapter", 0 );
+
+	KeyValues *pMissionInfo = NULL;
+	if ( KeyValues *pMapInfo = GetMapInfoRespectingAnyChapter( pGameSettings, &pMissionInfo ) )
+	{
+		imgLevelImage->SetImage( pMapInfo->GetString( "image" ) );
+	}
+	else
+	{
+		imgLevelImage->SetImage( "maps/any" );
+	}
 }

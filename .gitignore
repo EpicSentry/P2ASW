@@ -114,6 +114,8 @@ ipch
 *.opensdf
 *.pdb
 *.VC.db
+src/.vs/
+*.vcxproj.FileListAbsolute.txt
 
 game/srcds.exe
 game/srcds_run

@@ -33,7 +33,11 @@ BaseClass( parent, panelName, true, true )
 
 CTransitionScreen::~CTransitionScreen()
 {
-	surface()->DestroyTextureID( m_iImageID );
+	if ( surface() && m_iImageID != -1 )
+	{
+		surface()->DestroyTextureID( m_iImageID );
+		m_iImageID = -1;
+	}
 }
 
 void CTransitionScreen::ApplySchemeSettings( vgui::IScheme *pScheme )
@@ -44,7 +48,7 @@ void CTransitionScreen::ApplySchemeSettings( vgui::IScheme *pScheme )
 	surface()->GetScreenSize( screenWide, screenTall );
 
 	char filename[MAX_PATH];
-	V_snprintf( filename, sizeof( filename ), "console/background01" ); // TODO: engine->GetStartupImage( filename, sizeof( filename ), screenWide, screenTall );
+	engine->GetStartupImage( filename, sizeof( filename ) );
 	m_iImageID = surface()->CreateNewTextureID();
 	surface()->DrawSetTextureFile( m_iImageID, filename, true, false );
 

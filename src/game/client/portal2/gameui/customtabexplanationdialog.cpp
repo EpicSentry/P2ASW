@@ -89,5 +89,4 @@ void CCustomTabExplanationDialog::OnCommand( const char *command )
 void CCustomTabExplanationDialog::OnClose( void )
 {
 	BaseClass::OnClose();
-	GameUI().AllowEngineHideGameUI();
 }

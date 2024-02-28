@@ -9,13 +9,9 @@
 
 #include "vgui/IImage.h"
 
-#ifdef _X360
-
-typedef vgui::IImage CGameUiAvatarImage;
-
-#else
-
+#ifndef NO_STEAM
 #include "steam/steam_api.h"
+#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -24,10 +20,19 @@ class CGameUiAvatarImage : public vgui::IImage
 {
 public:
 	CGameUiAvatarImage( void );
+	virtual ~CGameUiAvatarImage( void );
+
+	enum AvatarSize_t
+	{
+		SMALL = 0,
+		MEDIUM,
+		LARGE
+	};
 
 	// Call this to set the steam ID associated with the avatar
-	bool SetAvatarSteamID( CSteamID steamIDUser );
-	void ClearAvatarSteamID( void );
+	bool SetAvatarXUID( XUID xuid, AvatarSize_t nSize = MEDIUM );
+	void ClearAvatarXUID( void );
+	AvatarSize_t GetAvatarSize( void ) const { return m_nAvatarSize; }
 
 	// Call to Paint the image
 	// Image will draw within the current panel context at the specified position
@@ -82,6 +87,16 @@ public:
 
 	float	GetFetchedTime() const { return m_flFetchedTime; }
 
+	int		AdjustRefCount( int nAdjustment )
+	{
+		m_nRefcount += nAdjustment;
+		int nReturnValue = m_nRefcount;
+		if ( nReturnValue <= 0 )
+			OnFinalRelease();
+		return nReturnValue;
+	}
+	virtual void OnFinalRelease();
+
 protected:
 	void InitFromRGBA( const byte *rgba, int width, int height );
 
@@ -91,9 +106,29 @@ private:
 	int m_nX, m_nY, m_nWide, m_nTall;
 	bool m_bValid;
 	float m_flFetchedTime;
-};
+	float m_flPaintedTime;
+	int m_nRefcount;
+	CUtlBuffer m_bufRgbaBuffer;
+	AvatarSize_t m_nAvatarSize;
 
-#endif // !_X360
+#ifdef _X360
+	enum AsyncState_t
+	{
+		STATE_DEFAULT,
+		STATE_AWAITING_KEY,
+		STATE_AWAITING_RGBA,
+		STATE_COMPLETE
+	}
+	m_eAsyncState;
+	XOVERLAPPED m_xOverlapped;
+	CUtlBuffer m_xBufKey;
+	XUID m_xXUID;
+	DWORD m_xSetting;
+	DWORD m_xCbResult;
+	void X360_UpdateImageState();
+	void X360_ResetAsyncImageState();
+#endif
+};
 
 
 
