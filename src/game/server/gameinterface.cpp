@@ -661,10 +661,6 @@ void __fastcall CBaseFileSystem__AddVPKFile(struct_this* thisptr, void* edx, cha
 		for (int i = 0; i < m_VPKPaths.Count(); ++i) {
 			CBaseFileSystem__AddVPKFile(thisptr, 0, m_VPKPaths.Element(i), PATH_ADD_TO_TAIL_ATINDEX);
 		}
-		char path[260];
-		filesystem->GetSearchPath("MOD", false, path, 260);
-		V_strcat(path, "portal2asw.vpk", 260);
-		CBaseFileSystem__AddVPKFile(thisptr, 0, path, PATH_ADD_TO_HEAD);
 	}
 
 	bHasBeenCalled = true;
@@ -957,6 +953,14 @@ bool CServerGameDLL::DLLInit(CreateInterfaceFn appSystemFactory,
 	{
 		scriptmanager = (IScriptManager *)appSystemFactory(VSCRIPT_INTERFACE_VERSION, NULL);
 	}
+
+	// HACK: Now that we have the filesystem interface, add a new VPK as soon as possible
+	// so that the patched AddVPKFile runs and flushes the VPK list.
+	// If we don't do this, we get crashes later
+	char path[MAX_PATH];
+	filesystem->GetSearchPath("MOD", false, path, MAX_PATH);
+	V_strcat(path, "portal2asw.vpk", MAX_PATH);
+	filesystem->AddVPKFile(path, PATH_ADD_TO_HEAD);
 
 
 #ifdef SERVER_USES_VGUI
