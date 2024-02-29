@@ -4357,7 +4357,8 @@ bool CBaseModPanel::GetSaveGameInfos( CUtlVector< SaveGameInfo_t > &saveGameInfo
 #else
 	{
 		// Originally engine->GetSaveDirName()
-		const char *pSaveDir = UTIL_GetSaveDir();
+		// Swarm doesn't use the steam id subfolders
+		const char *pSaveDir = "SAVE/";
 		V_snprintf( path, sizeof( path ), pSaveDir );
 		V_snprintf( directory, sizeof( directory ), "%s*.sav", pSaveDir );
 	}

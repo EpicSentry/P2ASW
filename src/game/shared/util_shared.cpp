@@ -2016,24 +2016,6 @@ bool UTIL_GetModDir( char *lpszTextOut, unsigned int nSize )
 	return true;
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Returns the save game directory for the current player profile
-//-----------------------------------------------------------------------------
-const char* UTIL_GetSaveDir(void)
-{
-	static char szDirectory[MAX_PATH] = {0};
-	if ( !szDirectory[0] )
-	{
-#if defined( _GAMECONSOLE ) || defined( DEDICATED ) || defined( NO_STEAM )
-		Q_strncpy( szDirectory, "SAVE/", sizeof( szDirectory ) );
-#else
-		Q_snprintf( szDirectory, sizeof( szDirectory ), "SAVE/%llu/", steamapicontext->SteamUser() ? steamapicontext->SteamUser()->GetSteamID().ConvertToUint64() : 0ull );
-		filesystem->CreateDirHierarchy( szDirectory, "DEFAULT_WRITE_PATH" );
-#endif
-	}
-	return szDirectory;
-}
-
 //#define FRUSTUM_DEBUGGING //for dumping some clipping information in UTIL_CalcFrustumThroughConvexPolygon
 
 int UTIL_CalcFrustumThroughConvexPolygon( const Vector *pPolyVertices, int iPolyVertCount, const Vector &vFrustumOrigin, const VPlane *pInputFrustumPlanes, int iInputFrustumPlanes, VPlane *pOutputFrustumPlanes, int iMaxOutputPlanes, int iPreserveCount )
