@@ -43,6 +43,7 @@ $Project "Client (Portal 2)"
 		-$File	"hud_numericdisplay.cpp"
 		-$File	"hud_vehicle.cpp"
 		//-$File	"c_mod_lesson_stubs.cpp"
+		$File	"hud_chat.cpp"
 			
 		$File	"c_team_objectiveresource.cpp"
 		$File	"c_team_objectiveresource.h"
@@ -156,20 +157,6 @@ $Project "Client (Portal 2)"
 		
 			$Folder	"VGUI"
 			{
-				$File	"portal2\vgui\nb_button.cpp"
-				$File	"portal2\vgui\nb_header_footer.cpp"
-				$File	"portal2\vgui\nb_horiz_list.cpp"
-				$File	"portal2\vgui\nb_select_level_entry.cpp"
-				$File	"portal2\vgui\nb_select_level_panel.cpp"
-				$File	"portal2\vgui\nb_select_chapter_entry.cpp"
-				$File	"portal2\vgui\nb_select_chapter_panel.cpp"
-				$File	"portal2\vgui\sdk_hud_chat.cpp"
-				$File	"portal2\vgui\sdk_loading_panel.cpp"
-				$File	"portal2\vgui\sdk_logo_panel.cpp"
-				$File	"portal2\vgui\sdk_vgui_music_importer.cpp"
-				$File	"portal2\vgui\portal2_vgui_ingame_panel.cpp"
-				$File	"portal2\vgui\portal2_vgui_ingame_panel.h"
-				
 				$File	"portal2\vgui\vgui_indicator_panel.cpp"
 			}
 
