@@ -157,6 +157,8 @@ $Project "Client (Portal 2)"
 		
 			$Folder	"VGUI"
 			{
+				$File	"portal2\vgui\portal2_vgui_ingame_panel.cpp"
+				$File	"portal2\vgui\portal2_vgui_ingame_panel.h"
 				$File	"portal2\vgui\vgui_indicator_panel.cpp"
 			}
 
