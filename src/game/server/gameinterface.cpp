@@ -860,6 +860,13 @@ void Studio_BuildMatricesHook(
 	}
 }
 
+void LanguageCvarChangeCallback( IConVar *pConVar, char const *pOldString, float flOldValue )
+{
+	ConVarRef var(pConVar);
+	bool bLangIsTurkish = !V_strcmp( var.GetString(), "turkish" );
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "TURKISH", bLangIsTurkish );
+}
+
 bool CServerGameDLL::DLLInit(CreateInterfaceFn appSystemFactory,
 	CreateInterfaceFn physicsFactory, CreateInterfaceFn fileSystemFactory,
 	CGlobalVars *pGlobals)
@@ -985,6 +992,13 @@ bool CServerGameDLL::DLLInit(CreateInterfaceFn appSystemFactory,
 	// Used to swap cross and circle on Japanese PS3s, not supported on PC or in Swarm
 	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "INPUTSWAPAB", false );
 
+	// Extra language conditional added in Portal 2 (Turkish), others are handled already
+	// We hook a callback to the language cvar so this always reflects its current value
+	ConVar* cl_language = g_pCVar->FindVar("cl_language");
+	if (cl_language)
+	{
+		cl_language->InstallChangeCallback( LanguageCvarChangeCallback );
+	}
 
 #ifdef SERVER_USES_VGUI
 	// If not running dedicated, grab the engine vgui interface
