@@ -329,8 +329,8 @@ CBaseModPanel::CBaseModPanel(): BaseClass(0, "CBaseModPanel"),
 	m_FooterPanel = new CBaseModFooterPanel( this, "FooterPanel" );
 
 	m_pTransitionPanel = new CBaseModTransitionPanel( "TransitionPanel" );
-	// Originally was PANEL_TRANSITIONEFFECT, but that doesn't exist in Swarm
-	m_pTransitionPanel->SetParent( enginevguifuncs->GetPanel( PANEL_GAMEUIDLL ) );
+	// PANEL_TRANSITIONEFFECT not in Swarm
+	m_pTransitionPanel->SetParent( this->GetVPanel() ); // enginevguifuncs->GetPanel( PANEL_TRANSITIONEFFECT )
 
 	m_hOptionsDialog = NULL;
 

@@ -87,6 +87,11 @@ void CBaseModTransitionPanel::ApplySchemeSettings( vgui::IScheme *pScheme )
 
 	SetPos( 0, 0 );
 	SetSize( screenWide, screenTall );
+
+	// Disable all input so it passes through to the actual UI (p2asw change)
+	// Otherwise after we move it to the front it keeps absorbing input and you can't click anything
+	vgui::ipanel()->SetMouseInputEnabled(this->GetVPanel(), false);
+	vgui::ipanel()->SetKeyBoardInputEnabled(this->GetVPanel(), false);
 }
 
 void CBaseModTransitionPanel::OnKeyCodePressed( KeyCode keycode )
@@ -102,7 +107,7 @@ void CBaseModTransitionPanel::BuildTiles()
 	//const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
 	//float flInverseAspect = 1.0f/aspectRatioInfo.m_flFrameBufferAspectRatio;
 
-	float flInverseAspect = screenTall / screenWide;
+	float flInverseAspect = (float)screenTall / (float)screenWide;
 
 	m_nNumColumns = ( screenWide + m_nTileWidth - 1 ) / m_nTileWidth;
 	m_nNumRows = ( screenTall + m_nTileHeight - 1 ) / m_nTileHeight;
@@ -601,6 +606,9 @@ void CBaseModTransitionPanel::Paint()
 	if ( m_bTransitionActive )
 	{
 		SaveCurrentScreen( m_pCurrentScreenRT );
+		// Move to front every frame
+		// Needed in p2asw due to being a child of BaseModPanel instead of separate
+		MoveToFront();
 		DrawEffect();
 	}
 }
