@@ -2765,7 +2765,12 @@ void CBaseModPanel::ApplySchemeSettings(IScheme *pScheme)
 	// Not in Swarm
 	//char filename[MAX_PATH];
 	//engine->GetStartupImage( filename, sizeof( filename ) );
-	const char* filename = "console/background_menu";
+	int screenWide, screenTall;
+	surface()->GetScreenSize( screenWide, screenTall );
+
+	bool bIsWidescreen = ( (float)screenWide / (float)screenTall ) >= 1.5999f;
+
+	const char* filename = bIsWidescreen ? "console/portal2_product_1_widescreen" : "console/portal2_product_1";
 
 	m_iStartupImageID = surface()->CreateNewTextureID();
 	surface()->DrawSetTextureFile( m_iStartupImageID, filename, true, false );

@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve Corporation, All rights reserved. ============//
+//========= Copyright ï¿½ 1996-2008, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -429,6 +429,15 @@ void LoadingProgress::SetupControlStates()
 
 	if ( m_bDrawBackground )
 	{
+		//const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
+
+		int screenWide, screenTall;
+		surface()->GetScreenSize( screenWide, screenTall );
+
+		bool bIsWidescreen;
+		float aspectRatio = (float)screenWide/(float)screenTall;
+		bIsWidescreen = aspectRatio >= 1.5999f;
+
 		CUtlVector< CUtlString > imageNames;
 		if ( filenamePrefix.IsEmpty() )
 		{
@@ -437,19 +446,10 @@ void LoadingProgress::SetupControlStates()
 			// Not in Swarm
 			//engine->GetStartupImage( startupImage, sizeof( startupImage ) );
 			//imageNames.AddToTail( startupImage );
-			imageNames.AddToTail( "console/background_menu" );
+			imageNames.AddToTail( bIsWidescreen ? "console/portal2_product_1_widescreen" : "console/portal2_product_1" );
 		}
 		else
 		{
-			//const AspectRatioInfo_t &aspectRatioInfo = materials->GetAspectRatioInfo();
-
-			int screenWide, screenTall;
-			surface()->GetScreenSize( screenWide, screenTall );
-
-			bool bIsWidescreen;
-			float aspectRatio = (float)screenWide/(float)screenTall;
-			bIsWidescreen = aspectRatio >= 1.5999f;
-
 			// determine image sequence
 			CUtlString filename;
 			while ( 1 )
