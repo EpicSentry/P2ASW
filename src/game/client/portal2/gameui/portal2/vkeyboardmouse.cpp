@@ -81,6 +81,7 @@ void KeyboardMouse::ApplySchemeSettings( vgui::IScheme *pScheme )
 		m_sldMouseSensitivity->Reset();
 	}
 
+#if 0 // Not in Swarm, prevents ConVarRef console spam
 	if ( m_drpRawMouse )
 	{
 		CGameUIConVarRef m_rawinput( "m_rawinput" );
@@ -93,6 +94,7 @@ void KeyboardMouse::ApplySchemeSettings( vgui::IScheme *pScheme )
 			m_drpRawMouse->SetCurrentSelection( "#L4D360UI_Enabled" );
 		}
 	}
+#endif
 
 	if ( m_drpMouseAcceleration )
 	{
@@ -204,6 +206,7 @@ void KeyboardMouse::OnCommand( const char *pCommand )
 			m_bDirtyConfig = true;
 		}
 	}
+#if 0 // Not in Swarm, prevents ConVarRef console spam
 	else if ( !V_stricmp( "RawMouseEnabled", pCommand ) )
 	{
 		CGameUIConVarRef m_rawinput( "m_rawinput" );
@@ -216,6 +219,7 @@ void KeyboardMouse::OnCommand( const char *pCommand )
 		m_rawinput.SetValue( false );
 		m_bDirtyConfig = true;
 	}
+#endif
 	else if ( !V_stricmp( "MouseAccelerationEnabled", pCommand ) )
 	{
 		CGameUIConVarRef m_customaccel( "m_customaccel" );

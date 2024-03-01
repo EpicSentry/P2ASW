@@ -248,8 +248,10 @@ void Video::SetupState( bool bUseRecommendedSettings )
 #else
 		m_bNoBorder = false;
 #endif
+#if 0 // Not in Swarm, prevents ConVarRef console spam
 		CGameUIConVarRef mat_powersavingsmode( "mat_powersavingsmode" );
 		m_nPowerSavingsMode = clamp( mat_powersavingsmode.GetInt(), 0, 1 );
+#endif
 	}
 	else
 	{
@@ -802,8 +804,10 @@ void Video::ApplyChanges()
 			engine->ClientCmd_Unrestricted( szCmd );
 		}
 	
+#if 0 // Not in Swarm, prevents ConVarRef console spam
 		CGameUIConVarRef mat_powersavingsmode( "mat_powersavingsmode" );
 		mat_powersavingsmode.SetValue( m_nPowerSavingsMode );
+#endif
 
 		// save changes
 		engine->ClientCmd_Unrestricted( "mat_savechanges\n" );

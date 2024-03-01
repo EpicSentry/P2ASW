@@ -278,6 +278,7 @@ void Audio::OnCommand(const char *command)
 
 		m_nSelectedAudioLanguage = m_nAudioLanguages[ iSelectedLanguage ].languageCode;
 	}
+#ifdef PORTAL2_PUZZLEMAKER // So we don't get ConVarRef console spam
 	else if ( !Q_strcmp( command, "PuzzlemakerSoundsEnabled" ) )
 	{
 		CGameUIConVarRef puzzlemaker_play_sounds( "puzzlemaker_play_sounds" );
@@ -288,6 +289,7 @@ void Audio::OnCommand(const char *command)
 		CGameUIConVarRef puzzlemaker_play_sounds( "puzzlemaker_play_sounds" );
 		puzzlemaker_play_sounds.SetValue( false );
 	}
+#endif
 	else if ( !V_stricmp( "BtnSetupMicrophone", command ) )
 	{
 		CUIGameData::Get()->ExecuteOverlayCommand( "VoiceSettings", "#HL2_SetupMicrophoneSteam" );
@@ -641,6 +643,7 @@ void Audio::ApplySchemeSettings( vgui::IScheme *pScheme )
 		}
 	}
 
+#ifdef PORTAL2_PUZZLEMAKER // So we don't get ConVarRef console spam
 	if ( m_drpPuzzlemakerSounds )
 	{
 		CGameUIConVarRef puzzlemaker_play_sounds( "puzzlemaker_play_sounds" );
@@ -654,6 +657,7 @@ void Audio::ApplySchemeSettings( vgui::IScheme *pScheme )
 			m_drpPuzzlemakerSounds->SetCurrentSelection( "#L4D360UI_Disabled" );
 		}
 	}
+#endif
 
 	if ( m_drpVoiceCommunication )
 	{
