@@ -3199,6 +3199,12 @@ void CHLClient::OnScreenSizeChanged( int nOldWidth, int nOldHeight )
 {
 	// Tell split screen system
 	VGui_OnScreenSizeChanged();
+
+	// These were renamed, update them to new values when the game resolution changes.
+	// Since p2asw isn't on consoles this isn't really necessary, but might as well do it
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "GAMECONSOLEWIDE", KeyValuesSystem()->GetKeyValuesExpressionSymbol("X360WIDE") );
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "GAMECONSOLEHIDEF", KeyValuesSystem()->GetKeyValuesExpressionSymbol("X360HIDEF") );
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "GAMECONSOLELODEF", KeyValuesSystem()->GetKeyValuesExpressionSymbol("X360LODEF") );
 }
 
 IMaterialProxy *CHLClient::InstantiateMaterialProxy( const char *proxyName )

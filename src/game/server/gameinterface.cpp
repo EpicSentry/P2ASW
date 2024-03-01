@@ -962,6 +962,29 @@ bool CServerGameDLL::DLLInit(CreateInterfaceFn appSystemFactory,
 	V_strcat(path, "portal2asw.vpk", MAX_PATH);
 	filesystem->AddVPKFile(path, PATH_ADD_TO_HEAD);
 
+	// Register extra keyvalue conditionals that aren't present in Swarm
+	// We also need to do this early, before we start loading keyvalue files
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "GAMECONSOLE", IsConsole() );
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "PS3", IsPS3() );
+
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "WINDOWS", IsPlatformWindowsPC() );
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "OSX", IsOSX() );
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "POSIX", IsPosix() );
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "LINUX", IsLinux() );
+
+	// Used to change the size of some UI elements
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "DECK", !!CommandLine()->FindParm( "-gamepadui" ) );
+
+	// These were renamed
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "GAMECONSOLEWIDE", KeyValuesSystem()->GetKeyValuesExpressionSymbol("X360WIDE") );
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "GAMECONSOLEHIDEF", KeyValuesSystem()->GetKeyValuesExpressionSymbol("X360HIDEF") );
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "GAMECONSOLELODEF", KeyValuesSystem()->GetKeyValuesExpressionSymbol("X360LODEF") );
+
+	// Anamorphic is only used on PS3 and not supported in Swarm
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "ANAMORPHIC", false );
+	// Used to swap cross and circle on Japanese PS3s, not supported on PC or in Swarm
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "INPUTSWAPAB", false );
+
 
 #ifdef SERVER_USES_VGUI
 	// If not running dedicated, grab the engine vgui interface
