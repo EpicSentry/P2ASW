@@ -21,12 +21,10 @@
 using namespace BaseModUI;
 using namespace vgui;
 
-// Valve made all of these devonly, but there's no real good reason for that
-// Since the transition is pretty broken right now, it's good to have this option
-ConVar ui_transition_debug( "ui_transition_debug", "0", FCVAR_NONE, "" );
-ConVar ui_transition_time( "ui_transition_time", IsGameConsole() ? "0.25" : "0.20", FCVAR_NONE, "" );
-ConVar ui_transition_delay( "ui_transition_delay", "0.3", FCVAR_NONE, "" );
-ConVar ui_transition_effect( "ui_transition_effect", "1", FCVAR_NONE, "" );
+ConVar ui_transition_debug( "ui_transition_debug", "0", FCVAR_DEVELOPMENTONLY, "" );
+ConVar ui_transition_time( "ui_transition_time", IsGameConsole() ? "0.25" : "0.20", FCVAR_DEVELOPMENTONLY, "" );
+ConVar ui_transition_delay( "ui_transition_delay", "0.3", FCVAR_DEVELOPMENTONLY, "" );
+ConVar ui_transition_effect( "ui_transition_effect", "1", FCVAR_DEVELOPMENTONLY, "" );
 
 #define TILE_NEAR_PLANE		1.0f
 #define TILE_FAR_PLANE		257.0f

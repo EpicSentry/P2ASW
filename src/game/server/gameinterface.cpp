@@ -1100,6 +1100,31 @@ bool CServerGameDLL::DLLInit(CreateInterfaceFn appSystemFactory,
 	g_pGameSaveRestoreBlockSet->AddBlockHandler( GetPaintSaveRestoreBlockHandler() );
 #endif
 
+#ifdef DEBUG
+	// debug builds always allow dev-only cvars
+	bool bAllowDevCvars = true;
+#else
+	// not allowing devonly cvars in release to match Valve's games.
+	// uncomment the line below to enable them when running with -insecure
+	// or on dedicated servers (where they could be changed with plugins anyway)
+	bool bAllowDevCvars = false;
+	//bool bAllowDevCvars = (engine->IsDedicatedServer() || CommandLine()->FindParm("-insecure"));
+#endif
+
+	// remove dev-only and hidden flags if applicable
+	if (bAllowDevCvars)
+	{
+		ICvar::Iterator iter(g_pCVar);
+
+		for (iter.SetFirst(); iter.IsValid(); iter.Next())
+		{
+			ConCommandBase* command = iter.Get();
+			command->RemoveFlags(FCVAR_DEVELOPMENTONLY | FCVAR_HIDDEN);
+		}
+
+		ConMsg("Development-only and hidden cvars have been enabled.\n");
+	}
+
 	bool bInitSuccess = false;
 	if ( sv_threaded_init.GetBool() )
 	{
