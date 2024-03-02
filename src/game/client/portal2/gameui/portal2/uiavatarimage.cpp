@@ -54,23 +54,26 @@ bool CGameUiAvatarImage::SetAvatarXUID( XUID xuid, AvatarSize_t nSize /*= MEDIUM
 {
 	ClearAvatarXUID();
 
-	// FIXME: need an alternative way to get avatars (check what Swarm does)
-#if !defined( NO_STEAM ) && 0
+#if !defined( NO_STEAM )
 	if ( steamapicontext->SteamFriends() && steamapicontext->SteamUtils() )
 	{
 		m_nAvatarSize = nSize;
 		int iAvatar;
 		if ( nSize == SMALL )
 		{
-			iAvatar = steamapicontext->SteamFriends()->GetSmallFriendAvatar( xuid );
+			iAvatar = steamapicontext->SteamFriends()->GetFriendAvatar( xuid, k_EAvatarSize32x32 );
+			//iAvatar = steamapicontext->SteamFriends()->GetSmallFriendAvatar( xuid );
 		}
 		else if ( nSize == MEDIUM )
 		{
-			iAvatar = steamapicontext->SteamFriends()->GetMediumFriendAvatar( xuid );
+			iAvatar = steamapicontext->SteamFriends()->GetFriendAvatar( xuid, k_EAvatarSize64x64 );
+			//iAvatar = steamapicontext->SteamFriends()->GetMediumFriendAvatar( xuid );
 		}
 		else // nSize == LARGE
 		{
-			iAvatar = steamapicontext->SteamFriends()->GetLargeFriendAvatar( xuid );
+			// Swarm doesn't have the large size available
+			iAvatar = steamapicontext->SteamFriends()->GetFriendAvatar( xuid, k_EAvatarSize64x64 );
+			//iAvatar = steamapicontext->SteamFriends()->GetLargeFriendAvatar( xuid );
 		}
 
 		/*
