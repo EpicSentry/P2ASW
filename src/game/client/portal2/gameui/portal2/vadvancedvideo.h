@@ -24,20 +24,6 @@ struct AAMode_t
 	int m_nQualityLevel;
 };
 
-enum VideoWarning_e
-{
-	VW_NONE = 0,
-	VW_ANTIALIASING,
-	VW_FILTERING,
-	VW_VSYNC,
-	VW_MULTICORE,
-	VW_SHADERDETAIL,
-	VW_CPUDETAIL,
-	VW_MODELDETAIL,
-	VW_PAGEDPOOL,
-	VW_MAXWARNINGS
-};
-
 class CAdvancedVideo : public CBaseModFrame
 {
 	DECLARE_CLASS_SIMPLE( CAdvancedVideo, CBaseModFrame );
@@ -46,7 +32,6 @@ public:
 	CAdvancedVideo(vgui::Panel *parent, const char *panelName);
 	~CAdvancedVideo();
 
-	void AcceptWarningCallback( void );
 	void SetDefaults();
 	void DiscardChangesAndClose();
 
@@ -57,6 +42,8 @@ protected:
 	virtual void	OnCommand( const char *pCommand );
 	virtual void	OnThink();
 
+	MESSAGE_FUNC_HANDLE( OnHybridButtonNavigatedTo, "OnHybridButtonNavigatedTo", button );
+
 private:
 	void	GetCurrentSettings( void );
 	bool	GetRecommendedSettings( void );
@@ -65,7 +52,6 @@ private:
 	void	ProcessAAList();
 	int		FindMSAAMode( int nAASamples, int nAAQuality );
 	void	ApplyChanges();
-	void	ShowWarning( VideoWarning_e videoWarning );
 	void	SetPagedPoolState();
 	void	SetAntiAliasingState();
 	void	SetFilteringState();
@@ -88,6 +74,9 @@ private:
 	BaseModHybridButton		*m_drpShaderDetail;
 	BaseModHybridButton		*m_drpCPUDetail;
 
+	vgui::Label* m_lblDescriptionTitle;
+	vgui::Label* m_lblDescription;
+
 	bool	m_bDirtyValues;
 	bool	m_bEnableApply;
 	int		m_iModelTextureDetail;
@@ -101,9 +90,6 @@ private:
 	int		m_iQueuedMode;
 	int		m_iGPUDetail;
 	int		m_iCPUDetail;
-
-	VideoWarning_e	m_VideoWarning;
-	bool			m_bAcceptWarning[VW_MAXWARNINGS];
 };
 
 };
