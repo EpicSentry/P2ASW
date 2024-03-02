@@ -1571,10 +1571,12 @@ void InGameMainMenu::SetFooterState()
 			visibleButtons |= FB_ABUTTON;
 		}
 
+#if !defined(NO_STEAM) && !defined(NO_STEAM_GAMECOORDINATOR)
 		if ( !IsGameConsole() && IsInCoopGame() )
 		{
 			visibleButtons |= FB_LSHOULDER;
 		}
+#endif
 
 		pFooter->SetButtons( visibleButtons );
 		pFooter->SetButtonText( FB_ABUTTON, "#L4D360UI_Select" );

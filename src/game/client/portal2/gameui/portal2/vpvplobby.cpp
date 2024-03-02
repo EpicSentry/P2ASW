@@ -1380,10 +1380,12 @@ void PvpLobby::UpdateFooterButtons()
 	}
 
 	int iExtraButtons = FB_NONE;
+#if !defined(NO_STEAM) && !defined(NO_STEAM_GAMECOORDINATOR)
 	if ( !IsGameConsole() )
 	{
 		iExtraButtons = FB_LSHOULDER;
 	}
+#endif
 
 	footer->SetButtons( iAButton | iXButton | FB_BBUTTON | iYButton | iExtraButtons );
 
@@ -1407,10 +1409,12 @@ void PvpLobby::UpdateFooterButtons()
 		footer->SetButtonText( PVP_VIEWGAMERCARD_FB, "#L4D360UI_Select" );
 	}
 
+#if !defined(NO_STEAM) && !defined(NO_STEAM_GAMECOORDINATOR)
 	if ( !IsGameConsole() )
 	{
 		footer->SetButtonText( FB_LSHOULDER, "#PORTAL2_ItemManagement" );
 	}
+#endif
 
 	footer->SetButtonText( FB_BBUTTON, "#L4D360UI_Back" );
 }
