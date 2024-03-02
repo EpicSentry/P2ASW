@@ -873,21 +873,27 @@ CBaseModFrame* CBaseModPanel::OpenWindow( const WINDOW_TYPE & wt, CBaseModFrame 
 			break;
 
 		case WT_PORTALLEADERBOARD:
-			// FIXME: Bring this back when leaderboard stuff is RE'd
-			Assert(0);
-			//m_Frames[wt] = new CPortalLeaderboardPanel( this, "PortalLeaderboard", true );
+#ifdef P2ASW_LEADERBOARDS
+			m_Frames[wt] = new CPortalLeaderboardPanel( this, "PortalLeaderboard", true );
+#else
+			Assert(!"Leaderboards are not currently implemented");
+#endif
 			break;
 
 		case WT_PORTALCOOPLEADERBOARD:
-			// FIXME: Bring this back when leaderboard stuff is RE'd
-			Assert(0);
-			//m_Frames[wt] = new CPortalLeaderboardPanel( this, "PortalLeaderboard", false );
+#ifdef P2ASW_LEADERBOARDS
+			m_Frames[wt] = new CPortalLeaderboardPanel( this, "PortalLeaderboard", false );
+#else
+			Assert(!"Leaderboards are not currently implemented");
+#endif
 			break;
 
 		case  WT_PORTALLEADERBOARDHUD:
-			// FIXME: Bring this back when leaderboard stuff is RE'd
-			Assert(0);
-			//m_Frames[wt] = new CPortalHUDLeaderboard( this, "PortalHUDLeaderboard" );
+#ifdef P2ASW_LEADERBOARDS
+			m_Frames[wt] = new CPortalHUDLeaderboard( this, "PortalHUDLeaderboard" );
+#else
+			Assert(!"Leaderboards are not currently implemented");
+#endif
 			break;
 
 		case WT_COOPEXITCHOICE:

@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve Corporation, All rights reserved. ============//
+//========= Copyright ï¿½ 1996-2008, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -8,8 +8,9 @@
 #define __VDIALOGLISTBUTTON_H__
 
 #include "basemodui.h"
-// FIXME: Re-enable this when leaderboard manager is RE'd
-//#include "portal2_leaderboard_manager.h"
+#ifdef P2ASW_LEADERBOARDS
+#include "portal2_leaderboard_manager.h"
+#endif
 
 
 class CDialogListButton : public vgui::Button

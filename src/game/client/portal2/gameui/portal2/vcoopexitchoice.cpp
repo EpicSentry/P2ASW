@@ -21,7 +21,7 @@
 using namespace vgui;
 using namespace BaseModUI;
 
-#if 0 // FIXME: Bring these back when leaderboards are working
+#ifdef P2ASW_LEADERBOARDS
 extern int g_nPortalScoreTempUpdate;
 extern int g_nTimeScoreTempUpdate;
 #endif
@@ -31,8 +31,7 @@ static void LeaveGameOkCallback()
 {
 	COM_TimestampedLog( "Exit Game" );
 
-	// FIXME: Bring this back when leaderboards are working
-#if 0
+#ifdef P2ASW_LEADERBOARDS
 	CUIGameData::Get()->GameStats_ReportAction( "challenge_quit", engine->GetLevelNameShort(), g_nTimeScoreTempUpdate );
 
 	CPortalLeaderboardPanel* self = 
@@ -74,8 +73,7 @@ static void LeaveGameOkCallback()
 static void GoToHubOkCallback()
 {
 	GameUI().AllowEngineHideGameUI();
-	// FIXME: Bring this back when leaderboards are working
-#if 0
+#ifdef P2ASW_LEADERBOARDS
 	CPortalLeaderboardPanel* pSelf = 
 		static_cast< CPortalLeaderboardPanel* >( CBaseModPanel::GetSingleton().GetWindow( WT_COOPEXITCHOICE ) );
 
@@ -171,8 +169,9 @@ void CCoopExitChoice::OnCommand(const char *command)
 	}
 	else if ( !V_stricmp( "BtnGoToHub", command ) )
 	{
-		// FIXME: Bring this back when leaderboards are working
-		//CUIGameData::Get()->GameStats_ReportAction( "challenge_hub", engine->GetLevelNameShort(), g_nTimeScoreTempUpdate );
+#ifdef P2ASW_LEADERBOARDS
+		CUIGameData::Get()->GameStats_ReportAction( "challenge_hub", engine->GetLevelNameShort(), g_nTimeScoreTempUpdate );
+#endif
 		
 		GenericConfirmation* confirmation = 
 			static_cast< GenericConfirmation* >( CBaseModPanel::GetSingleton().OpenWindow( WT_GENERICCONFIRMATION, this, true ) );

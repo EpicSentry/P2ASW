@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve Corporation, All rights reserved. ============//
+//========= Copyright ï¿½ 1996-2008, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -698,8 +698,7 @@ void InGameMainMenu::OnCommand( const char *command )
 	else if ( char const *szLeaderboards = StringAfterPrefix( command, "Leaderboards_" ) )
 	{
 #ifdef PORTAL2
-		// FIXME: Bring this back when leaderboards are working
-#if 0
+#ifdef P2ASW_LEADERBOARDS
 		if ( CheckAndDisplayErrorIfNotLoggedIn() ||
 			CUIGameData::Get()->CheckAndDisplayErrorIfOffline( this,
 			"#PORTAL2_LeaderboardOnlineWarning" ) )
@@ -734,6 +733,8 @@ void InGameMainMenu::OnCommand( const char *command )
 			pLeaderboardValues->SetInt( "LevelState", (int)STATE_PAUSE_MENU );
 			BASEMODPANEL_SINGLETON.OpenWindow( BaseModUI::WT_PORTALLEADERBOARDHUD, this, true, pLeaderboardValues );
 		}
+#else
+		Assert(!"Leaderboards are not currently implemented");
 #endif
 		
 #else

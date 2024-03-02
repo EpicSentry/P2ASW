@@ -4,8 +4,7 @@
 //
 //=======================================================================================//
 
-// FIXME: This won't work until other leaderboard code is RE'd
-#if 0
+#ifdef P2ASW_LEADERBOARDS
 
 #include "cbase.h"
 #include "vportalleaderboard.h"

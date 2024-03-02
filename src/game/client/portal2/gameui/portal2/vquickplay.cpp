@@ -4,8 +4,8 @@
 //
 //============================================================================//
 
-// FIXME: This won't work until some additional workshop related code is RE'd
-#if 0
+// NOTE: This won't work unless some additional workshop related code is RE'd
+#ifdef PORTAL2_PUZZLEMAKER
 
 #include "cbase.h"
 

@@ -8,7 +8,7 @@
 #define __VPORTALLEADERBOARDHUD_H__
 
 // FIXME: This won't work until portal2_leaderboard.cpp/h is RE'd
-#if 0
+#ifdef P2ASW_LEADERBOARDS
 
 #include "basemodui.h"
 #include "portal2_leaderboard.h"

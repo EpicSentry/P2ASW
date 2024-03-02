@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve Corporation, All rights reserved. ============//
+//========= Copyright ï¿½ 1996-2008, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -108,12 +108,12 @@ CEG_NOINLINE void CSinglePlayer::OnCommand( char const *pCommand )
 	}
 	else if ( !V_stricmp( pCommand, "OpenChallengeMode" ) )
 	{
-		// FIXME: Bring this back when the leaderboard manager is RE'd
-		Assert(0);
-#if 0
+#ifdef P2ASW_LEADERBOARDS
 		KeyValues *pSettings = new KeyValues( "Setting" );
 		pSettings->SetInt( "state", STATE_MAIN_MENU );
 		CBaseModPanel::GetSingleton().OpenWindow( WT_PORTALLEADERBOARD, this, true, KeyValues::AutoDeleteInline( pSettings ) );
+#else
+		Assert(!"Leaderboards are not currently implemented");
 #endif
 		return;
 	}
