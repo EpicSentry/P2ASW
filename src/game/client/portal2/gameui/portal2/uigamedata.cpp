@@ -1774,6 +1774,7 @@ CEG_NOINLINE void CUIGameData::InitiateOnlineCoopPlay( CBaseModFrame *pCaller, c
 
 CEG_NOINLINE void CUIGameData::InitiateSinglePlayerPlay( const char *pMapName, const char *pSaveName, const char *szPlayType )
 {
+#ifdef P2ASW_USE_SESSIONS_FOR_SINGLEPLAYER
 	// Portal 2 single player server is still driven by session
 	KeyValues *pSettings = KeyValues::FromString(
 		"settings",
@@ -1823,6 +1824,35 @@ CEG_NOINLINE void CUIGameData::InitiateSinglePlayerPlay( const char *pMapName, c
 	{
 		pMatchSession->Command( KeyValues::AutoDeleteInline( new KeyValues( "Start" ) ) );
 	}
+#else
+	// Not using sessions for singleplayer in P2ASW because it's buggy with save games.
+	// Just execute the relevant console commands instead, should be fine.
+	engine->ClientCmd_Unrestricted("maxplayers 1\n");
+	if (pSaveName && *pSaveName)
+	{
+		engine->ClientCmd_Unrestricted( CFmtStr("load %s\n", pSaveName) );
+	}
+	else
+	{
+		ConVarRef sv_bonus_challenge("sv_bonus_challenge");
+		if (sv_bonus_challenge.IsValid())
+		{
+			if ( !V_stricmp( szPlayType, "challenge" ) )
+				sv_bonus_challenge.SetValue(1);
+			else
+				sv_bonus_challenge.SetValue(0);
+		}
+
+		if ( !V_stricmp( szPlayType, "commentary" ) )
+		{
+			engine->ClientCmd_Unrestricted( CFmtStr("map_commentary %s\n", pMapName) );
+		}
+		else
+		{
+			engine->ClientCmd_Unrestricted( CFmtStr("map %s\n", pMapName) );
+		}
+	}
+#endif
 }
 
 CEG_NOINLINE void CUIGameData::InitiateSplitscreenPlay()
