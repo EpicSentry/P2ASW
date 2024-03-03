@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve Corporation, All rights reserved. ============//
+//========= Copyright ï¿½ 1996-2008, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -13,6 +13,7 @@
 #include "filesystem.h"
 #include "vportalleaderboard.h"
 #include "uigamedata.h"
+#include "inputsystem/iinputsystem.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -116,7 +117,8 @@ void CCoopMode::OnKeyCodePressed( vgui::KeyCode code )
 		switch ( GetBaseButtonCode( code ) )
 		{
 		case KEY_XBUTTON_X:
-			if ( GetJoystickForCode( code ) == 1 )
+			// Later updates removed the controller 2 requirement
+			//if ( GetJoystickForCode( code ) == 1 )
 			{
 				engine->ClientCmd( "ss_map mp_coop_lobby_3" );
 				return;
@@ -138,9 +140,13 @@ void CCoopMode::UpdateFooter()
 			visibleButtons |= FB_ABUTTON;
 		}
 
+		if (g_pInputSystem->GetJoystickCount() > 0)
+			visibleButtons |= FB_XBUTTON;
+
 		pFooter->SetButtons( visibleButtons );
 		pFooter->SetButtonText( FB_ABUTTON, "#L4D360UI_Select" );
 		pFooter->SetButtonText( FB_BBUTTON, "#L4D360UI_Back" );
+		pFooter->SetButtonText( FB_XBUTTON, "#PORTAL2_Local_Coop" );
 	}
 }
 
