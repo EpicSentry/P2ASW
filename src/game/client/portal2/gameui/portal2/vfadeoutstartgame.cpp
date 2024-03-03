@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve Corporation, All rights reserved. ============//
+//========= Copyright ï¿½ 1996-2008, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: Transition from the menu into the game, cannot be stopped
 //
@@ -124,7 +124,7 @@ void CFadeOutStartGame::StartGame()
 
 		IMatchSession *pSession = g_pMatchFramework->GetMatchSession();
 		char const *szSessionMapName;
-		szSessionMapName = pSession ? pSession->GetSessionSettings()->GetString( "game/map" ) : "";
+		szSessionMapName = pSession ? pSession->GetSessionSettings()->GetString( "game/mission" ) : "";
 
 		if ( !IsGameConsole() && 
 			!m_LoadFilename.IsEmpty() && 

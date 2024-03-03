@@ -244,7 +244,7 @@
 		" } " \
 		" game { " \
 			" mode coop " \
-			" map default " \
+			" mission default " \
 		" } "
 
 

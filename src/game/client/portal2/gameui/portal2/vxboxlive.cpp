@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve Corporation, All rights reserved. ============//
+//========= Copyright ï¿½ 1996-2008, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -83,7 +83,7 @@ static void QuickMatchImpl()
 	if ( !pMatchSession )
 		return;
 	V_strncpy( s_szGameMode, pMatchSession->GetSessionSettings()->GetString( "game/mode", "coop" ), sizeof( s_szGameMode ) );
-	V_strncpy( s_szMapName, pMatchSession->GetSessionSettings()->GetString( "game/map", "default" ), sizeof( s_szMapName ) );
+	V_strncpy( s_szMapName, pMatchSession->GetSessionSettings()->GetString( "game/mission", "default" ), sizeof( s_szMapName ) );
 	CUIGameData::Get()->InitiateOnlineCoopPlay( NULL, "quickmatch", s_szGameMode, s_szMapName );
 }
 

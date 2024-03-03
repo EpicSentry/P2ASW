@@ -1654,7 +1654,7 @@ void CUIGameData::InitiateSplitscreenPartnerDetection( const char* szGameMode, c
 	pSettings->SetString( "game/mode", szGameMode );
 	if ( !V_stricmp( szGameMode, "coop_challenge" ) )
 	{
-		pSettings->SetString( "game/map", szMapName );
+		pSettings->SetString( "game/mission", szMapName );
 	}
 	OpenWaitScreen( IsPS3() ? "#L4D360UI_PressStartBothForSplitscreen" : "#L4D360UI_PressStartToBeginSplitscreen", 0.0f, pSettings );
 }
@@ -1683,13 +1683,13 @@ CEG_NOINLINE void CUIGameData::InitiateOnlineCoopPlay( CBaseModFrame *pCaller, c
 		KeyValues::AutoDelete autodelete( pSettings );
 	#ifndef _CERT
 		if ( ui_coop_map_default.GetString()[0] )
-			pSettings->SetString( "game/map", ui_coop_map_default.GetString() );
+			pSettings->SetString( "game/mission", ui_coop_map_default.GetString() );
 	#endif
 		pSettings->SetString( "game/type", "quickmatch" );
 		pSettings->SetString( "game/mode", szGameMode );
 		if ( bShouldSetMapName && szMapName )
 		{
-			pSettings->SetString( "game/map", szMapName );
+			pSettings->SetString( "game/mission", szMapName );
 		}
 		pSettings->SetString( "game/platform", IsPS3() ? "ps3" : "default" );
 		g_pMatchFramework->MatchSession( pSettings );
@@ -1754,12 +1754,12 @@ CEG_NOINLINE void CUIGameData::InitiateOnlineCoopPlay( CBaseModFrame *pCaller, c
 	pSettings->SetString( "game/mode", szGameMode );
 	if ( bShouldSetMapName )
 	{
-		pSettings->SetString( "game/map", szMapName );
+		pSettings->SetString( "game/mission", szMapName );
 	}
 
 #ifndef _CERT
 	if ( ui_coop_map_default.GetString()[0] )
-		pSettings->SetString( "game/map", ui_coop_map_default.GetString() );
+		pSettings->SetString( "game/mission", ui_coop_map_default.GetString() );
 #endif
 #ifdef _X360
 	if ( !bOnline )
@@ -1799,7 +1799,7 @@ CEG_NOINLINE void CUIGameData::InitiateSinglePlayerPlay( const char *pMapName, c
 	}
 
 	pSettings->SetString( "game/mode", "sp" );
-	pSettings->SetString( "game/map", pMapName );
+	pSettings->SetString( "game/mission", pMapName );
 	if ( pSaveName && *pSaveName )
 	{
 		pSettings->SetString( "game/save", pSaveName );
@@ -1852,13 +1852,13 @@ CEG_NOINLINE void CUIGameData::InitiateSplitscreenPlay()
 				pSettings->SetString( "system/network", "lan" );
 				bImmediateStart = false;
 			}
-			pSettings->SetString( "game/map", pchChallengeMap );
+			pSettings->SetString( "game/mission", pchChallengeMap );
 		}
 	}
 
 #ifndef _CERT
 	if ( ui_coop_map_default.GetString()[0] )
-		pSettings->SetString( "game/map", ui_coop_map_default.GetString() );
+		pSettings->SetString( "game/mission", ui_coop_map_default.GetString() );
 #endif
 
 	if ( bImmediateStart )
