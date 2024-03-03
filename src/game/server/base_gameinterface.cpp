@@ -48,6 +48,10 @@ void CServerGameDLL::ApplyGameSettings( KeyValues *pKV )
 {
 	if ( !pKV )
 		return;
+
+	DevMsg("\nApplyGameSettings() called.\nSession settings:\n\n");
+	KeyValuesDumpAsDevMsg( pKV );
+	DevMsg( "\n" );
 	
 	// NOTE: I am assuming all code not present in Swarm SDK was originally under a #ifdef PORTAL2
 #ifdef PORTAL2
@@ -229,8 +233,12 @@ void CServerGameDLL::ApplyGameSettings( KeyValues *pKV )
 		map_wants_save_disable.SetValue(0);
 
 		// handle loading savegames
-		const char* szSaveName = pKV->GetString("game/save", 0);
-		if (szSaveName)
+		// "game/save" is not passed through either, so "game/campaign" is used instead
+		const char* szSaveName = pKV->GetString("game/campaign", 0);
+
+		// Ignore if the save name is "jacob", this is the default value set by Swarm matchmaking.dll if none is specified
+		// (if the user actually has a save with this name, it will be passed in as "jacob.sav")
+		if (szSaveName && V_stricmp(szSaveName, "jacob"))
 		{
 			DevMsg("            loading savegame: %s %s (map %s)...\n", "load", szSaveName, szBspName);
 			engine->ServerCommand("maxplayers 1\n");

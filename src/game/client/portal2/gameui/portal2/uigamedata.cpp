@@ -1802,7 +1802,7 @@ CEG_NOINLINE void CUIGameData::InitiateSinglePlayerPlay( const char *pMapName, c
 	pSettings->SetString( "game/mission", pMapName );
 	if ( pSaveName && *pSaveName )
 	{
-		pSettings->SetString( "game/save", pSaveName );
+		pSettings->SetString( "game/campaign", pSaveName );
 	}
 
 	KeyValues::AutoDelete autodelete( pSettings );
