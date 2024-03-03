@@ -77,13 +77,8 @@ bool ToolFramework_SetupEngineMicrophone( Vector &origin, QAngle &angles );
 extern ConVar default_fov;
 extern bool g_bRenderingScreenshot;
 
-#if !defined( _X360 )
-#define SAVEGAME_SCREENSHOT_WIDTH	180
-#define SAVEGAME_SCREENSHOT_HEIGHT	100
-#else
-#define SAVEGAME_SCREENSHOT_WIDTH	128
-#define SAVEGAME_SCREENSHOT_HEIGHT	128
-#endif
+#define SAVEGAME_SCREENSHOT_WIDTH	256
+#define SAVEGAME_SCREENSHOT_HEIGHT	256
 
 #ifndef _XBOX
 extern ConVar sensitivity;
@@ -767,38 +762,74 @@ void CViewRender::SetUpView()
 
 void CViewRender::WriteSaveGameScreenshotOfSize( const char *pFilename, int width, int height )
 {
-	CMatRenderContextPtr pRenderContext( materials );
-	pRenderContext->MatrixMode( MATERIAL_PROJECTION );
-	pRenderContext->PushMatrix();
-	
-	pRenderContext->MatrixMode( MATERIAL_VIEW );
-	pRenderContext->PushMatrix();
-
 	g_bRenderingScreenshot = true;
 	m_bAllowViewAccess = true;
 
-	// Push back buffer on the stack with small viewport
-	pRenderContext->PushRenderTargetAndViewport( NULL, 0, 0, width, height );
+	{
+		CMatRenderContextPtr pRenderContext( materials );
+		pRenderContext->MatrixMode( MATERIAL_PROJECTION );
+		pRenderContext->PushMatrix();
+	
+		pRenderContext->MatrixMode( MATERIAL_VIEW );
+		pRenderContext->PushMatrix();
+				
+		// Push back buffer on the stack with small viewport
+		pRenderContext->PushRenderTargetAndViewport( NULL, 0, 0, width, height );
 
-	// render out to the backbuffer
-	CViewSetup viewSetup = GetView();
-	viewSetup.x = 0;
-	viewSetup.y = 0;
-	viewSetup.width = width;
-	viewSetup.height = height;
-	viewSetup.fov = ScaleFOVByWidthRatio( GetView().fov, ( (float)width / (float)height ) / ( 4.0f / 3.0f ) );
-	viewSetup.m_bRenderToSubrectOfLargerScreen = true;
+		// render out to the backbuffer
+		CViewSetup viewSetup = GetView();
+		viewSetup.x = 0;
+		viewSetup.y = 0;
+		viewSetup.width = width;
+		viewSetup.height = height;
+		viewSetup.fov = ScaleFOVByWidthRatio( GetView().fov, ( (float)width / (float)height ) / ( 4.0f / 3.0f ) );
+		viewSetup.m_bRenderToSubrectOfLargerScreen = true;
 
-	// draw out the scene
-	// Don't draw the HUD or the viewmodel
-	RenderView( viewSetup, viewSetup, VIEW_CLEAR_DEPTH | VIEW_CLEAR_COLOR, 0 );
+		float flSavedBlurFade = GetClientMode()->GetBlurFade();
+		GetClientMode()->SetBlurFade( 0.0f );
+	
+		// draw out the scene
+		// Don't draw the HUD or the viewmodel
+		// Note: The original code here just cleared DEPTH and COLOR, but this was somehow failing to clear the depth buffer before the Z-Prepass in non-water views on X360, corrupting the screenshot.
+		RenderView( viewSetup, viewSetup, VIEW_CLEAR_DEPTH | VIEW_CLEAR_STENCIL, 0 );
 
+		GetClientMode()->SetBlurFade( flSavedBlurFade );
+
+		// restore our previous state
+		pRenderContext->PopRenderTargetAndViewport();
+
+		pRenderContext->MatrixMode( MATERIAL_PROJECTION );
+		pRenderContext->PopMatrix();
+
+		pRenderContext->MatrixMode( MATERIAL_VIEW );
+		pRenderContext->PopMatrix();
+
+		// Not in Swarm
+		//pRenderContext->AntiAliasingHint( AA_HINT_MESHES );
+	}
+	
+	// FIXME: Disable material system threading, to better emulate how regular screenshots are made.
+	// The API requires us to know the nMaterialSystemThread index, which is only available in engine, and I don't 
+	// want to modify IMaterialSystem just to get savegame screenshots to work. Find another way.
+	int nMaterialSystemThread = 0;
+	if ( CommandLine()->FindParm( "-swapcores" ) && !IsPS3() )
+	{
+		nMaterialSystemThread = 1;
+	}
+	bool bThreadingEnabled = materials->AllowThreading( false, nMaterialSystemThread );
+		
 	// get the data from the backbuffer and save to disk
 	// bitmap bits
 	unsigned char *pImage = ( unsigned char * )malloc( width * 3 * height );
 
-	// Get Bits from the material system
-	pRenderContext->ReadPixels( 0, 0, width, height, pImage, IMAGE_FORMAT_RGB888 );
+	{
+		CMatRenderContextPtr pRenderContext( materials );
+
+		// Get Bits from the material system
+		pRenderContext->ReadPixels( 0, 0, width, height, pImage, IMAGE_FORMAT_RGB888 );
+	}
+
+	materials->AllowThreading( bThreadingEnabled, nMaterialSystemThread );
 
 	// allocate a buffer to write the tga into
 	int iMaxTGASize = 1024 + (width * height * 4);
@@ -814,18 +845,12 @@ void CViewRender::WriteSaveGameScreenshotOfSize( const char *pFilename, int widt
 
 	// async write to disk (this will take ownership of the memory)
 	char szPathedFileName[_MAX_PATH];
-	Q_snprintf( szPathedFileName, sizeof(szPathedFileName), "//MOD/%s", pFilename );
+	if ( !IsGameConsole() )
+	{
+		Q_snprintf( szPathedFileName, sizeof(szPathedFileName), "//MOD/%s", pFilename );
+	}
 
-	filesystem->AsyncWrite( szPathedFileName, buffer.Base(), buffer.TellPut(), true );
-
-	// restore our previous state
-	pRenderContext->PopRenderTargetAndViewport();
-	
-	pRenderContext->MatrixMode( MATERIAL_PROJECTION );
-	pRenderContext->PopMatrix();
-	
-	pRenderContext->MatrixMode( MATERIAL_VIEW );
-	pRenderContext->PopMatrix();
+	filesystem->AsyncWrite( !IsGameConsole() ? szPathedFileName : pFilename, buffer.Base(), buffer.TellPut(), true );
 
 	g_bRenderingScreenshot = false;
 	m_bAllowViewAccess = false;
