@@ -12,6 +12,7 @@
 #include "vgui/keycode.h"
 #include "LoadingDialog.h"
 #include "igameuifuncs.h"
+#include "gameconsole.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -73,6 +74,14 @@ void CGameConsoleDialog::OnKeyCodeTyped(KeyCode code)
 	}
 }
 
+void CGameConsoleDialog::OnKeyCodePressed( KeyCode code )
+{
+	// Allow controller B button to close the console (portal 2 parity)
+	if (code == KEY_XBUTTON_B)
+	{
+		GameConsole().Hide();
+	}
+}
 
 //-----------------------------------------------------------------------------
 // Submits a command

@@ -33,6 +33,7 @@ private:
 	MESSAGE_FUNC_CHARPTR( OnCommandSubmitted, "CommandSubmitted", command );
 
 	virtual void OnKeyCodeTyped( vgui::KeyCode code );
+	virtual void OnKeyCodePressed( vgui::KeyCode code );
 	virtual void OnCommand( const char *command );
 };
 
