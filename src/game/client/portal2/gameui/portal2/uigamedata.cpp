@@ -2603,6 +2603,13 @@ void CUIGameData::RunFrame()
 		m_bNeedUpdateMatchMutelist = false;
 	}
 
+	// Added for p2asw since the engine doesn't call NeedConnectionProblemWaitScreen() in Swarm
+	if ( engine->GetNetChannelInfo() && engine->GetNetChannelInfo()->IsTimingOut() 
+		 && !engine->IsPlayingDemo() && engine->IsInGame())
+	{
+		m_flShowConnectionProblemTimer = 1.0f;
+	}
+
 	if ( m_flShowConnectionProblemTimer > 0.0f )
 	{
 		float flCurrentTime = Plat_FloatTime();
