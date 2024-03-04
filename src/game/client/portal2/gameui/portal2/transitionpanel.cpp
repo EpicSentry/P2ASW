@@ -14,6 +14,7 @@
 #include "materialsystem/IMesh.h"
 #include "shaderapi/ishaderapi.h"
 #include "gameconsole.h"
+#include "IGameUIFuncs.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -341,9 +342,10 @@ void CBaseModTransitionPanel::TerminateEffect()
 
 	m_Sounds.Purge();
 
-	if ( GetVPanel() == vgui::input()->GetModalSubTree() )
+	//Changed for p2asw
+	if ( GetVPanel() == vgui::input()->GetAppModalSurface() )
 	{
-		vgui::input()->ReleaseModalSubTree();
+		vgui::input()->ReleaseAppModalSurface();
 	}
 }
 
@@ -434,9 +436,8 @@ void CBaseModTransitionPanel::ScanTilesForTransition()
 		{
 			m_nNumTransitions++;
 
-			vgui::input()->SetModalSubTree( GetVPanel(), GetVPanel(), true );
-			// Removed for p2asw, not sure what this is for...
-			// Did the tileflip transitions originally hide the mouse?
+			// SetModalSubTreeShowMouse() isn't in Swarm, do this a different way
+			vgui::input()->SetAppModalSurface( GetVPanel() );
 			// vgui::input()->SetModalSubTreeShowMouse( true );
 
 			// snap off the current expected direction
@@ -504,6 +505,15 @@ bool CBaseModTransitionPanel::IsEffectEnabled()
 		}
 
 		return false;
+	}
+
+	// P2ASW HACK: Due to different modal input functions used, opening the console during the transition
+	// no longer works. This is expected behavior for some users, so do it manually here instead.
+	// NOTE: I tried using OnKeyCodePressed for this but it didn't work even after re-enabling keyboard input
+	KeyCode consoleKey = gameuifuncs->GetButtonCodeForBind("toggleconsole");
+	if (m_bTransitionActive && vgui::input()->IsKeyDown(consoleKey))
+	{
+		GameConsole().Activate();
 	}
 
 	return true;
@@ -592,9 +602,10 @@ void CBaseModTransitionPanel::DrawEffect()
 
 		m_Sounds.Purge();
 
-		if ( GetVPanel() == vgui::input()->GetModalSubTree() )
+		//Changed for p2asw
+		if ( GetVPanel() == vgui::input()->GetAppModalSurface() )
 		{
-			vgui::input()->ReleaseModalSubTree();
+			vgui::input()->ReleaseAppModalSurface();
 		}
 	}
 }
