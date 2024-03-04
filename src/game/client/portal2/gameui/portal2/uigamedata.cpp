@@ -987,6 +987,9 @@ void CUIGameData::Steam_OnUserStatsReceived( UserStatsReceived_t *pParam )
 void CUIGameData::Steam_OnGameOverlayActivated( GameOverlayActivated_t *pParam )
 {
 	m_bSteamOverlayActive = !!pParam->m_bActive;
+	// Portal 2 activates gameui when the overlay is opened
+	if (m_bSteamOverlayActive)
+		GameUI().ActivateGameUI();
 }
 
 // Not in Swarm
