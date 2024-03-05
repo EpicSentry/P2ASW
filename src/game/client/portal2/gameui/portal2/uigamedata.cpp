@@ -1830,6 +1830,16 @@ CEG_NOINLINE void CUIGameData::InitiateSinglePlayerPlay( const char *pMapName, c
 #else
 	// Not using sessions for singleplayer in P2ASW because it's buggy with save games.
 	// Just execute the relevant console commands instead, should be fine.
+
+	// Turn off cheats unless devonly cvars are available (matches session behavior)
+	ConVarRef sv_cheats("sv_cheats");
+	ConVarRef sv_force_transmit_ents("sv_force_transmit_ents");
+	if ( sv_force_transmit_ents.IsFlagSet( FCVAR_DEVELOPMENTONLY ) &&
+		 sv_cheats.IsValid() && sv_cheats.GetBool())
+	{
+		sv_cheats.SetValue( 0 );
+	}
+
 	if (pSaveName && *pSaveName)
 	{
 		engine->ClientCmd_Unrestricted( CFmtStr("load %s\n", pSaveName) );
