@@ -7,7 +7,7 @@
 		"xpos"				"0"
 		"ypos"				"0"
 		"wide"				"7"
-		"tall"				"4"
+		"tall"				"5"
 		"visible"			"1"
 		"enabled"			"1"
 		"tabPosition"		"0"
@@ -28,7 +28,7 @@
 		"visible"					"1"		[!$GAMECONSOLE]
 		"enabled"					"1"		[!$GAMECONSOLE]
 		"tabPosition"				"0"
-		"navUp"						"BtnDefaults"
+		"navUp"						"DrpHorizontalLookType"
 		"navDown"					"BtnEditButtons"
 		"labelText"					"#L4D360UI_Controller"
 		"style"						"DialogListButton"
@@ -198,6 +198,31 @@
 		{
 			"#L4D360UI_Controller_Normal"	"VerticalNormal"
 			"#L4D360UI_Controller_Inverted"	"VerticalInverted"
+		}
+	}
+
+	"DrpHorizontalLookType"
+	{
+		"ControlName"		"BaseModHybridButton"
+		"fieldName"			"DrpHorizontalLookType"
+		"xpos"				"0"
+		"ypos"				"150"	[$GAMECONSOLE]
+		"ypos"				"175"	[!$GAMECONSOLE]
+		"zpos"				"3"
+		"wide"				"0"
+		"tall"				"20"
+		"visible"			"1"
+		"enabled"			"1"
+		"tabPosition"		"0"
+		"navUp"				"DrpVerticalLookType"
+		"navDown"			"DrpController"
+		"labelText"			"#PORTAL2_Controller_HorizontalLookType"
+		"style"				"DialogListButton"
+		"OnlyActiveUser"	"1"
+		"list"
+		{
+			"#L4D360UI_Controller_Normal"	"HorizontalNormal"
+			"#L4D360UI_Controller_Inverted"	"HorizontalInverted"
 		}
 	}
 

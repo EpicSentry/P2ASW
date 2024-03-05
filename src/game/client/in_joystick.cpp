@@ -100,6 +100,7 @@ static ConVar joy_display_input("joy_display_input", "0", FCVAR_ARCHIVE);
 static ConVar joy_wwhack2( "joy_wingmanwarrior_turnhack", "0", FCVAR_ARCHIVE, "Wingman warrior hack related to turn axes." );
 ConVar joy_autosprint("joy_autosprint", "0", 0, "Automatically sprint when moving with an analog joystick" );
 
+static ConVar joy_invertx("joy_invertx", "0", FCVAR_ARCHIVE | FCVAR_ARCHIVE_XBOX | FCVAR_SS, "Whether to invert the X axis of the joystick for looking." );
 static ConVar joy_inverty("joy_inverty", "0", FCVAR_ARCHIVE | FCVAR_ARCHIVE_XBOX | FCVAR_SS, "Whether to invert the Y axis of the joystick for looking." );
 
 // XBox Defaults
@@ -115,6 +116,7 @@ void joy_movement_stick_Callback( IConVar *var, const char *pOldString, float fl
 	engine->ClientCmd( "joyadvancedupdate silent\n" );
 }
 static ConVar joy_movement_stick("joy_movement_stick", "0", FCVAR_ARCHIVE | FCVAR_ARCHIVE_XBOX | FCVAR_SS, "Which stick controls movement (0 is left stick)", joy_movement_stick_Callback );
+static ConVar joy_legacy("joy_legacy", "0", FCVAR_ARCHIVE | FCVAR_ARCHIVE_XBOX | FCVAR_SS, "Turn on/off 'Legacy' mapping for control sticks");
 
 static ConVar joy_xcontroller_cfg_loaded( "joy_xcontroller_cfg_loaded", "0", 0, "If 0, the 360controller.cfg file will be executed on startup & option changes." );
 
@@ -859,6 +861,14 @@ void CInput::JoyStickSampleAxes( float &forward, float &side, float &pitch, floa
 		gameAxes[GAME_AXIS_YAW].value = 0;
 	}
 
+	static SplitScreenConVarRef joy_legacy("joy_legacy");
+	if( joy_legacy.IsValid() && joy_legacy.GetBool( nSlot ) )
+	{
+		axis_t swap = gameAxes[GAME_AXIS_YAW];
+		gameAxes[GAME_AXIS_YAW] = gameAxes[GAME_AXIS_SIDE];
+		gameAxes[GAME_AXIS_SIDE] = swap;
+	}
+
 	forward	= ScaleAxisValue( gameAxes[GAME_AXIS_FORWARD].value, MAX_BUTTONSAMPLE * joy_forwardthreshold.GetFloat() );
 	side	= ScaleAxisValue( gameAxes[GAME_AXIS_SIDE].value, MAX_BUTTONSAMPLE * joy_sidethreshold.GetFloat()  );
 	pitch	= ScaleAxisValue( gameAxes[GAME_AXIS_PITCH].value, MAX_BUTTONSAMPLE * joy_pitchthreshold.GetFloat()  );
@@ -872,6 +882,12 @@ void CInput::JoyStickSampleAxes( float &forward, float &side, float &pitch, floa
 	if ( s_joy_inverty.IsValid() && s_joy_inverty.GetBool( nSlot ) )
 	{
 		pitch *= -1.0f;
+	}
+
+	static SplitScreenConVarRef s_joy_invertx( "joy_invertx" );
+	if ( s_joy_invertx.IsValid() && s_joy_invertx.GetBool( nSlot ) )
+	{
+		yaw *= -1.0f;
 	}
 }
 

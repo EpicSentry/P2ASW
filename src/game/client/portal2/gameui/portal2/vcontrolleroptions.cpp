@@ -185,14 +185,12 @@ void ControllerOptions::ResetControlValues( void )
 		m_pHorizontalSensitivity->Reset();
 	}
 
-#if 0 // Not in Swarm, prevents ConVarRef console spam
 	if ( m_pHorizontalLookType )
 	{
 		CGameUIConVarRef joy_invertx( "joy_invertx" );
 		int iInvert = ( joy_invertx.GetInt() > 0 ) ? CONTROLLER_LOOK_TYPE_INVERTED : CONTROLLER_LOOK_TYPE_NORMAL;
 		m_pHorizontalLookType->SetCurrentSelection( pszLookTypes[iInvert] );
 	}
-#endif
 
 	if ( m_pVerticalLookType )
 	{
@@ -402,7 +400,6 @@ void ControllerOptions::OnCommand(const char *command)
 			m_bDirty = true;
 		}
 	}	
-#if 0 // Not in Swarm, prevents ConVarRef console spam
 	else if ( !V_stricmp( command, "HorizontalNormal" ) )
 	{
 		CGameUIConVarRef joy_invertx( "joy_invertx" );
@@ -421,7 +418,6 @@ void ControllerOptions::OnCommand(const char *command)
 			m_bDirty = true;
 		}
 	}
-#endif
 	else if ( !Q_strcmp( command, "VerticalNormal" ) )
 	{
 		CGameUIConVarRef joy_inverty( "joy_inverty" );

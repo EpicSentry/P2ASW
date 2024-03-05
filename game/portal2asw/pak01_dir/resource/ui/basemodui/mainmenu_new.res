@@ -35,7 +35,7 @@
 		"enabled"					"1"
 		"tabPosition"				"0"
 		"navUp"						"BtnOptions"	[$GAMECONSOLE]
-		"navUp"						"BtnEconUI"		[!$GAMECONSOLE]
+		"navUp"						"BtnQuit"		[!$GAMECONSOLE]
 		"navDown"					"BtnCoOp"
 		"labelText"					"#PORTAL2_MainMenu_Solo"
 		"style"						"MainMenuButton"
@@ -132,7 +132,7 @@
 		"enabled"					"1"
 		"tabPosition"				"0"
 		"navUp"						"BtnExtras"
-		"navDown"					"BtnEconUI"
+		"navDown"					"BtnPlaySolo"
 		"labelText"					"#PORTAL2_MainMenu_Quit"
 		"style"						"MainMenuButton"
 		"command"					"QuitGame"

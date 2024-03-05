@@ -71,7 +71,7 @@
 		"maxValue"				"20.0f"
 		"stepSize"				"1.0"
 		"navUp"					"DrpMouseYInvert"
-		"navDown"				"DrpRawMouse"
+		"navDown"				"DrpMouseAcceleration"
 		"conCommand"			"sensitivity"
 		"inverseFill"			"0"
 				
@@ -109,7 +109,7 @@
 		"visible"			"1"
 		"enabled"			"1"
 		"tabPosition"		"0"
-		"navUp"				"DrpRawMouse"
+		"navUp"				"SldMouseSensitivity"
 		"navDown"			"SldMouseAcceleration"
 		"labelText"			"#GameUI_MouseAcceleration"
 		"style"				"DialogListButton"
