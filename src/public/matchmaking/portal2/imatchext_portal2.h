@@ -236,7 +236,8 @@
 //};
 
 
-
+// FIXME: Shouldn't hardcode mp_coop_lobby_3 here, need to handle mp_coop_start
+// too once co-op progress saving is reimplemented in a different way.
 #define PORTAL2_LOBBY_CONFIG_COOP( szNetwork, szAccess ) \
 		" system { " \
 			" network " szNetwork " " \
@@ -244,7 +245,7 @@
 		" } " \
 		" game { " \
 			" mode coop " \
-			" mission default " \
+			" mission mp_coop_lobby_3 " \
 		" } "
 
 
