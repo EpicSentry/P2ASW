@@ -388,6 +388,9 @@ CBaseModPanel::CBaseModPanel(): BaseClass(0, "CBaseModPanel"),
 
 	m_bForceUseAlternateTileSet = false;
 
+	// accouting for consoles here in case anyone ever gets p2asw running on xbox/ps3
+	m_bControllerActive = IsGameConsole();
+
 	// Subscribe to event notifications
 	g_pMatchFramework->GetEventsSubscription()->Subscribe( this );
 
@@ -2585,6 +2588,12 @@ void CBaseModPanel::OnKeyCodePressed( KeyCode code )
 {
 	// any key activity anywhere resets the attract timeout
 	ResetAttractDemoTimeout();
+
+	// Swap controller active state (used for footer buttons) depending on what was detected
+	// This misses a lot of cases, like scrolling up and down lists and mouse clicks, but no
+	// other way I could find worked reliably or at all. At this point I'm getting tired of trying
+	// to figure it out so I'm just settling for this. Feel free to change this if you know how to make it work.
+	m_bControllerActive = IsJoystickCode( (ButtonCode_t)code );
 
 	BaseClass::OnKeyCodePressed( code );
 }

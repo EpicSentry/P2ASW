@@ -569,6 +569,9 @@ namespace BaseModUI
 		bool						QueryForQuickPlayMaps();
 #endif // !_GAMECONSOLE
 
+		bool IsControllerActive() const { return m_bControllerActive; }
+		void SetControllerActive( bool active ) { m_bControllerActive = active; }
+
 		// --------------------------------------
 
 	protected:
@@ -765,6 +768,8 @@ namespace BaseModUI
 		bool			m_bForceUseAlternateTileSet;
 
 		CUtlVector< int >	m_CommonImages;
+
+		bool m_bControllerActive;
 	};
 };
 

@@ -1490,6 +1490,13 @@ void CHLClient::HudText( const char * message )
 //-----------------------------------------------------------------------------
 bool CHLClient::HandleGameUIEvent( const InputEvent_t &inputEvent )
 {
+	// this SHOULD allow us to switch between controller and keyboard input prompts...
+	// except for some reason it only gets called when gameui isn't activated??????
+	// I added some extra code in CBaseModPanel that kinda makes it work but it's still not great
+	if (inputEvent.m_nType == IE_ButtonPressed)
+	{
+		BASEMODPANEL_SINGLETON.SetControllerActive( IsJoystickCode((ButtonCode_t)inputEvent.m_nData) );
+	}
 #ifdef GAMEUI_UISYSTEM2_ENABLED
 	// TODO: when embedded UI will be used for HUD, we will need it to maintain
 	// a separate screen for HUD and a separate screen stack for pause menu & main menu.

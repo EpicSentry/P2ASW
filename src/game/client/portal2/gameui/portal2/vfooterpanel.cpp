@@ -36,6 +36,7 @@ public:
 
 protected:
 	virtual void PaintBackground( void );
+	virtual void Paint( void );
 	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );
 
 private:
@@ -96,8 +97,21 @@ void CFooterBitmapButton::ApplySchemeSettings( vgui::IScheme *pScheme )
 	m_AltBorderDepressedColor = GetSchemeColor( "FooterPanel.BorderDepressedColorAlt", pScheme );
 }
 
+void CFooterBitmapButton::Paint()
+{
+	// don't draw if controller is active
+	if (BASEMODPANEL_SINGLETON.IsControllerActive())
+		return;
+
+	BaseClass::Paint();
+}
+
 void CFooterBitmapButton::PaintBackground( void )
 {
+	// don't draw if controller is active
+	if (BASEMODPANEL_SINGLETON.IsControllerActive())
+		return;
+
 	int x, y, wide, tall;
 	GetBounds( x, y, wide, tall );
 
@@ -240,18 +254,15 @@ void CBaseModFooterPanel::ApplySchemeSettings( vgui::IScheme *pScheme )
 	m_nButtonPaddingX = atoi( pScheme->GetResourceString( "FooterPanel.ButtonPaddingX" ) );
 	m_nButtonPaddingX = vgui::scheme()->GetProportionalScaledValue( m_nButtonPaddingX );
 
-	if ( !IsGameConsole() )
+	for ( int i = 0; i < MAX_FOOTER_BUTTONS; i++ )
 	{
-		for ( int i = 0; i < MAX_FOOTER_BUTTONS; i++ )
-		{
-			m_pButtons[i]->SetFont( m_hButtonTextFont );
-			m_pButtons[i]->SetArmedSound( CBaseModPanel::GetSingleton().GetUISoundName( UISOUND_FOCUS ) );
-			m_pButtons[i]->SetCommand( CFmtStr( "Btn%d", i ) );
+		m_pButtons[i]->SetFont( m_hButtonTextFont );
+		m_pButtons[i]->SetArmedSound( CBaseModPanel::GetSingleton().GetUISoundName( UISOUND_FOCUS ) );
+		m_pButtons[i]->SetCommand( CFmtStr( "Btn%d", i ) );
 
-			if ( m_nTextOffsetX || m_nTextOffsetY )
-			{
-				m_pButtons[i]->SetTextInset( m_nTextOffsetX, m_nTextOffsetY );
-			}
+		if ( m_nTextOffsetX || m_nTextOffsetY )
+		{
+			m_pButtons[i]->SetTextInset( m_nTextOffsetX, m_nTextOffsetY );
 		}
 	}
 
@@ -301,76 +312,68 @@ void CBaseModFooterPanel::FixLayout()
 	CBaseModFrame *pFrame = BASEMODPANEL_SINGLETON.GetWindow( BASEMODPANEL_SINGLETON.GetActiveWindowType() );
 	m_bUsesAlternateTiles = ( pFrame && pFrame->UsesAlternateTiles() );	
 
-	if ( !IsGameConsole() )
+	Button_t buttonOrder[MAX_FOOTER_BUTTONS] = { FB_NONE };
+	GetButtonOrder( pFooterData->m_Format, buttonOrder );
+
+	for ( int i = 0; i < ARRAYSIZE( buttonOrder ); i++ )
 	{
-		Button_t buttonOrder[MAX_FOOTER_BUTTONS] = { FB_NONE };
-		GetButtonOrder( pFooterData->m_Format, buttonOrder );
+		CFooterBitmapButton *pButton = m_pButtons[i];
+		if ( !pButton )
+			continue;
 
-		for ( int i = 0; i < ARRAYSIZE( buttonOrder ); i++ )
+		Button_t nButton = buttonOrder[i];
+		pButton->SetVisible( ( nButton & pFooterData->m_Buttons ) != 0 );
+		pButton->SetUsesAlternateTiles( m_bUsesAlternateTiles );
+
+		if ( !( nButton & pFooterData->m_Buttons ) )
+			continue;
+
+		if ( nButton & FB_ABUTTON )
 		{
-			CFooterBitmapButton *pButton = m_pButtons[i];
-			if ( !pButton )
-				continue;
-
-			Button_t nButton = buttonOrder[i];
-			pButton->SetVisible( ( nButton & pFooterData->m_Buttons ) != 0 );
-			pButton->SetUsesAlternateTiles( m_bUsesAlternateTiles );
-
-			if ( !( nButton & pFooterData->m_Buttons ) )
-				continue;
-
-			if ( nButton & FB_ABUTTON )
-			{
-				pButton->SetText( pFooterData->m_AButtonText.Get() );
-			}
-			else if ( nButton & FB_BBUTTON )
-			{
-				pButton->SetText( pFooterData->m_BButtonText.Get() );
-			}
-			else if ( nButton & FB_XBUTTON )
-			{
-				pButton->SetText( pFooterData->m_XButtonText.Get() );
-			}
-			else if ( nButton & FB_YBUTTON )
-			{
-				pButton->SetText( pFooterData->m_YButtonText.Get() );
-			}
-			else if ( nButton & FB_DPAD )
-			{
-				pButton->SetText( pFooterData->m_DPadButtonText.Get() );
-			}
-			else if ( nButton & FB_LSHOULDER )
-			{
-				pButton->SetText( pFooterData->m_LShoulderButtonText.Get() );
-			}
-
-			pButton->GetContentSize( nButtonWide, nButtonTall );
-			pButton->SetBounds( x, pFooterData->m_nY, nButtonWide + m_nButtonPaddingX, nButtonTall );
-
-			pButton->SetContentAlignment( vgui::Label::a_center );
-			if ( bIsEnglish )
-			{
-				pButton->SetAllCaps( true );
-			}
-
-			// Setup our text color (and all of our other items)
-			Color textColor = ( m_bUsesAlternateTiles ) ? m_TextColorAlt : m_TextColor;
-			pButton->SetDefaultColor( textColor, Color(0,0,0,0) );
-			pButton->SetDepressedColor( textColor, Color(0,0,0,0) );
-			pButton->SetArmedColor( textColor, Color(0,0,0,0) );
-
-			x += nButtonWide + m_nButtonPaddingX + m_nButtonGapX;
+			pButton->SetText( pFooterData->m_AButtonText.Get() );
 		}
+		else if ( nButton & FB_BBUTTON )
+		{
+			pButton->SetText( pFooterData->m_BButtonText.Get() );
+		}
+		else if ( nButton & FB_XBUTTON )
+		{
+			pButton->SetText( pFooterData->m_XButtonText.Get() );
+		}
+		else if ( nButton & FB_YBUTTON )
+		{
+			pButton->SetText( pFooterData->m_YButtonText.Get() );
+		}
+		else if ( nButton & FB_DPAD )
+		{
+			pButton->SetText( pFooterData->m_DPadButtonText.Get() );
+		}
+		else if ( nButton & FB_LSHOULDER )
+		{
+			pButton->SetText( pFooterData->m_LShoulderButtonText.Get() );
+		}
+
+		pButton->GetContentSize( nButtonWide, nButtonTall );
+		pButton->SetBounds( x, pFooterData->m_nY, nButtonWide + m_nButtonPaddingX, nButtonTall );
+
+		pButton->SetContentAlignment( vgui::Label::a_center );
+		if ( bIsEnglish )
+		{
+			pButton->SetAllCaps( true );
+		}
+
+		// Setup our text color (and all of our other items)
+		Color textColor = ( m_bUsesAlternateTiles ) ? m_TextColorAlt : m_TextColor;
+		pButton->SetDefaultColor( textColor, Color(0,0,0,0) );
+		pButton->SetDepressedColor( textColor, Color(0,0,0,0) );
+		pButton->SetArmedColor( textColor, Color(0,0,0,0) );
+
+		x += nButtonWide + m_nButtonPaddingX + m_nButtonGapX;
 	}
 }
 
 void CBaseModFooterPanel::DetermineFooterFont()
 {
-	if ( !IsGameConsole() )
-	{
-		return;
-	}
-	
 	if ( !m_bInitialized )
 	{
 		return;
@@ -623,8 +626,9 @@ void CBaseModFooterPanel::DrawButtonAndText( int &x, int &y, const char *pButton
 			yText += -( textTall / 2 ) + m_nTextOffsetY;
 		}
 
-		Color textColor = ( m_bUsesAlternateTiles ) ? m_TextColorAlt : m_TextColor;
-		Color inGameTextColor = ( m_bUsesAlternateTiles ) ? m_InGameTextColorAlt : m_InGameTextColor;
+		// Current Portal 2 swaps these when using a controller so they contrast better
+		Color textColor = ( m_bUsesAlternateTiles ) ? m_TextColor : m_TextColorAlt;
+		Color inGameTextColor = ( m_bUsesAlternateTiles ) ? m_InGameTextColor : m_InGameTextColorAlt;
 
 		vgui::surface()->DrawSetTextPos( xText, yText );
 		vgui::surface()->DrawSetTextColor( GameUI().IsInLevel() ? inGameTextColor : textColor );
@@ -670,7 +674,7 @@ void CBaseModFooterPanel::PaintBackground()
 		return;
 	}
 
-	if ( IsPC() )
+	if ( !BASEMODPANEL_SINGLETON.IsControllerActive() )
 	{
 		WINDOW_TYPE wt = CBaseModPanel::GetSingleton().GetActiveWindowType();
 		CBaseModFrame *pWindow = CBaseModPanel::GetSingleton().GetWindow( wt );
@@ -713,8 +717,7 @@ void CBaseModFooterPanel::PaintBackground()
 			}
 		}
 	}
-
-	if ( IsGameConsole() )
+	else
 	{
 		Button_t buttonOrder[MAX_FOOTER_BUTTONS] = { FB_NONE };
 		GetButtonOrder( pFooterData->m_Format, buttonOrder );
@@ -932,7 +935,7 @@ void CBaseModFooterPanel::SetButtonText( Button_t button, const char *pText, boo
 
 void CBaseModFooterPanel::OnCommand( const char *pCommand )
 {
-	if ( IsGameConsole() )
+	if ( BASEMODPANEL_SINGLETON.IsControllerActive() )
 		return;
 
 	CBaseModFrame *pWindow = CBaseModPanel::GetSingleton().GetWindow( CBaseModPanel::GetSingleton().GetActiveWindowType() );
