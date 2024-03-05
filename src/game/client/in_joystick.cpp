@@ -109,7 +109,9 @@ static ConVar joy_pitchsensitivity_default( "joy_pitchsensitivity_default", "-1.
 static ConVar sv_stickysprint_default( "sv_stickysprint_default", "0", FCVAR_NONE );
 static ConVar joy_lookspin_default( "joy_lookspin_default", "0.35", FCVAR_NONE );
 
-static ConVar joy_cfg_preset( "joy_cfg_preset", "0", FCVAR_ARCHIVE_XBOX | FCVAR_SS );
+static ConVar joy_cfg_preset( "joy_cfg_preset", "0", FCVAR_ARCHIVE | FCVAR_ARCHIVE_XBOX | FCVAR_SS );
+static ConVar joy_cfg_custom_bindingsA( "joy_cfg_custom_bindingsA", "0", FCVAR_ARCHIVE | FCVAR_ARCHIVE_XBOX | FCVAR_SS );
+static ConVar joy_cfg_custom_bindingsB( "joy_cfg_custom_bindingsB", "0", FCVAR_ARCHIVE | FCVAR_ARCHIVE_XBOX | FCVAR_SS );
 
 void joy_movement_stick_Callback( IConVar *var, const char *pOldString, float flOldValue )
 {

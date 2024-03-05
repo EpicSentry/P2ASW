@@ -76,8 +76,10 @@ void CGameConsoleDialog::OnKeyCodeTyped(KeyCode code)
 
 void CGameConsoleDialog::OnKeyCodePressed( KeyCode code )
 {
+	vgui::KeyCode basecode = GetBaseButtonCode( code );
+
 	// Allow controller B button to close the console (portal 2 parity)
-	if (code == KEY_XBUTTON_B)
+	if (basecode == KEY_XBUTTON_B)
 	{
 		GameConsole().Hide();
 	}
