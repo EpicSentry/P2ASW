@@ -143,6 +143,12 @@ bool CHudSaveStatus::ShouldDraw()
 	}
 #endif
 
+	// Once the save hud is turned on by the hack, keep it visible as long as the engine says it's saving
+	if ( m_flSaveStartedTime && engine->IsSaveInProgress() )
+	{
+		bNeedsDraw = true;
+	}
+
 #if defined( _PS3 )
 	bool bIsSteamProfileSave = false;
 	bool bPS3SaveUtilBusy = ps3saveuiapi->IsSaveUtilBusy();
@@ -258,7 +264,9 @@ void CHudSaveStatus::SaveStarted()
 {
 	// external event to force the hud element to draw
 	// will automatically time out and go away
-	if ( !m_flSaveStartedTime )
+	// The hud message still fires if save_disable is turned on, so check that here
+	ConVarRef save_disable("save_disable");
+	if ( !m_flSaveStartedTime && !save_disable.GetBool() )
 	{
 		m_flSaveStartedTime = Plat_FloatTime();
 	}

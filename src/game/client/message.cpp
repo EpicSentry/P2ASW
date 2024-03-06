@@ -157,10 +157,14 @@ void DispatchHudText( const char *pszText )
 	// P2ASW HACK: Work around missing save access functions by redirecting
 	// the old HL2 style save message to the save status element
 	// (As a side effect, this makes save_console 1 work correctly, it doesn't in portal 2)
-	if ( pszText && !V_stricmp("GAMESAVED", pszText) )
+	if (pszText && (!V_stricmp( "GAMESAVED", pszText ) || !V_stricmp( "GAMESAVING", pszText )) )
 	{
-		(GET_HUDELEMENT( CHudSaveStatus ))->SaveStarted();
-		return;
+		CHudSaveStatus *pSaveStatus = GET_FULLSCREEN_HUDELEMENT( CHudSaveStatus );
+		if ( pSaveStatus )
+		{
+			pSaveStatus->SaveStarted();
+			return;
+		}
 	}
 #endif
 
