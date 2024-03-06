@@ -867,6 +867,21 @@ void LanguageCvarChangeCallback( IConVar *pConVar, char const *pOldString, float
 	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "TURKISH", bLangIsTurkish );
 }
 
+// We also hook save_disable to this in DLLInit()
+void UpdateSavesDisabledCallback( IConVar *pConVar, const char *pOldString, float flOldValue )
+{
+	// Update 2nd bit of save_disable to our state
+	ConVarRef map_disable("map_wants_save_disable");
+	ConVarRef save_disable("save_disable");
+	if (save_disable.IsValid() && map_disable.IsValid())
+	{
+		int mapDisableBit = map_disable.GetInt() << 1;
+		save_disable.SetValue( save_disable.GetInt() | mapDisableBit );
+	}
+}
+
+ConVar map_wants_save_disable("map_wants_save_disable", "0", FCVAR_CHEAT, "Same as save_disable, but is cleared on disconnect", UpdateSavesDisabledCallback);
+
 bool CServerGameDLL::DLLInit(CreateInterfaceFn appSystemFactory,
 	CreateInterfaceFn physicsFactory, CreateInterfaceFn fileSystemFactory,
 	CGlobalVars *pGlobals)
@@ -1123,6 +1138,13 @@ bool CServerGameDLL::DLLInit(CreateInterfaceFn appSystemFactory,
 		}
 
 		ConMsg("Development-only and hidden cvars have been enabled.\n");
+	}
+
+	// Hook callback to save_disable for map_wants_save_disable
+	ConVar* save_disable = g_pCVar->FindVar("save_disable");
+	if (save_disable)
+	{
+		save_disable->InstallChangeCallback( UpdateSavesDisabledCallback );
 	}
 
 	bool bInitSuccess = false;
