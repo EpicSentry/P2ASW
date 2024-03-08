@@ -1492,6 +1492,14 @@ void CBaseModPanel::OnGameUIActivated()
 		}
 	}
 
+	// snap cursor when opening gameui with a controller so it's not briefly visible
+	if (m_bControllerActive)
+	{
+		int screenWide, screenTall;
+		surface()->GetScreenSize( screenWide, screenTall );
+		g_pInputSystem->SetCursorPosition(screenWide, screenTall);
+	}
+
 	SetupBackgroundPresentation();
 }
 
@@ -2593,7 +2601,17 @@ void CBaseModPanel::OnKeyCodePressed( KeyCode code )
 	// This misses a lot of cases, like scrolling up and down lists and mouse clicks, but no
 	// other way I could find worked reliably or at all. At this point I'm getting tired of trying
 	// to figure it out so I'm just settling for this. Feel free to change this if you know how to make it work.
-	m_bControllerActive = IsJoystickCode( (ButtonCode_t)code );
+	bool bIsController = IsJoystickCode( (ButtonCode_t)code );
+	m_bControllerActive = bIsController;
+
+	// snap cursor to corner of screen when using a controller so it doesn't interfere with menu navigation
+	// Portal 2 does this only on the main menu but I'm intentionally changing it because it's annoying
+	if (bIsController)
+	{
+		int screenWide, screenTall;
+		surface()->GetScreenSize( screenWide, screenTall );
+		g_pInputSystem->SetCursorPosition(screenWide, screenTall);
+	}
 
 	BaseClass::OnKeyCodePressed( code );
 }
