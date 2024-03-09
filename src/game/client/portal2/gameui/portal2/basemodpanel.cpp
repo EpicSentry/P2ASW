@@ -224,6 +224,8 @@ ConVar ui_fadecloud_time( "ui_fadecloud_time", "1.5", FCVAR_DEVELOPMENTONLY );
 
 ConVar ui_lastact_played( "ui_lastact_played", "0", FCVAR_HIDDEN | FCVAR_ARCHIVE, "", true, 0, true, 99 );
 
+ConVar ui_force_controller_mode("ui_force_controller_mode", "-1", FCVAR_ARCHIVE, "Force UI controller mode (mainly affects footer buttons). 0 = mouse, 1 = controller.");
+
 #if !defined( NO_STEAM ) && defined( PORTAL2_PUZZLEMAKER )
 class CPortal2WorkshopManagerCallbackInterface : public CBaseWorkshopManagerCallbackInterface
 {
@@ -4658,6 +4660,16 @@ char const * CBaseModPanel::GetPartnerDescKey()
 	}
 #endif
 	return szResult;
+}
+
+bool CBaseModPanel::IsControllerActive() const
+{
+	if (ui_force_controller_mode.GetInt() >= 0)
+	{
+		return ui_force_controller_mode.GetBool();
+	}
+
+	return m_bControllerActive;
 }
 
 #if !defined( NO_STEAM ) && defined( PORTAL2_PUZZLEMAKER )

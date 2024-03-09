@@ -127,7 +127,7 @@ extern ConVar breakable_multiplayer;
 ConVar mp_server_player_team( "mp_server_player_team", "0", FCVAR_DEVELOPMENTONLY );
 ConVar mp_wait_for_other_player_timeout( "mp_wait_for_other_player_timeout", "100", FCVAR_CHEAT, "Maximum time that we wait in the transition loading screen for the other player." );
 ConVar mp_wait_for_other_player_notconnecting_timeout( "mp_wait_for_other_player_notconnecting_timeout", "10", FCVAR_CHEAT, "Maximum time that we wait in the transition loading screen after we fully loaded for partner to start loading." );
-ConVar mp_dev_wait_for_other_player( "mp_dev_wait_for_other_player", "1", FCVAR_DEVELOPMENTONLY, "Force waiting for the other player." );
+ConVar mp_dev_wait_for_other_player( "mp_dev_wait_for_other_player", "1", FCVAR_CHEAT, "Force waiting for the other player." );
 
 extern ConVar sv_speed_normal;
 extern ConVar sv_post_teleportation_box_time;

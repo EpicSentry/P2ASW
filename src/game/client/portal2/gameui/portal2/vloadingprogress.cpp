@@ -25,10 +25,10 @@
 using namespace vgui;
 using namespace BaseModUI;
 
-ConVar ui_loadingscreen_transition_time( "ui_loadingscreen_transition_time", "1.0", FCVAR_DEVELOPMENTONLY, "" );
-ConVar ui_loadingscreen_fadein_time( "ui_loadingscreen_fadein_time", "1.0", FCVAR_DEVELOPMENTONLY, "" );
-ConVar ui_loadingscreen_mintransition_time( "ui_loadingscreen_mintransition_time", "0.5", FCVAR_DEVELOPMENTONLY, "" );
-ConVar ui_loadingscreen_autotransition_time( "ui_loadingscreen_autotransition_time", "5.0", FCVAR_DEVELOPMENTONLY, "" );
+ConVar ui_loadingscreen_transition_time( "ui_loadingscreen_transition_time", "1.0", FCVAR_NONE, "" );
+ConVar ui_loadingscreen_fadein_time( "ui_loadingscreen_fadein_time", "1.0", FCVAR_NONE, "" );
+ConVar ui_loadingscreen_mintransition_time( "ui_loadingscreen_mintransition_time", "0.5", FCVAR_NONE, "" );
+ConVar ui_loadingscreen_autotransition_time( "ui_loadingscreen_autotransition_time", "5.0", FCVAR_NONE, "" );
 
 LoadingProgress::LoadingProgress(Panel *parent, const char *panelName ):
 	BaseClass( parent, panelName, false, false, false )

@@ -569,7 +569,7 @@ namespace BaseModUI
 		bool						QueryForQuickPlayMaps();
 #endif // !_GAMECONSOLE
 
-		bool IsControllerActive() const { return m_bControllerActive; }
+		bool IsControllerActive() const;
 		void SetControllerActive( bool active ) { m_bControllerActive = active; }
 
 		// --------------------------------------
