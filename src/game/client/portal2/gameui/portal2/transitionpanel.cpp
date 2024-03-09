@@ -223,10 +223,6 @@ void CBaseModTransitionPanel::TouchTile( int nTile, WINDOW_TYPE wt, bool bForce 
 	m_Tiles[nTile].m_nCurrentWindow = wt;
 	m_Tiles[nTile].m_nFrameCount = m_nFrameCount;
 
-	// In Swarm we need to keep updating the frame count even while the effect is turned off...no idea why
-	if ( !IsEffectEnabled() )
-		return;
-
 	if ( !m_nNumTransitions && wt == WT_MAINMENU )
 	{
 		// A special case due to mainmenu not being tile based, but floating text,
@@ -272,16 +268,16 @@ void CBaseModTransitionPanel::TouchTile( int nTile, WINDOW_TYPE wt, bool bForce 
 
 void CBaseModTransitionPanel::MarkTile( int x, int y, WINDOW_TYPE wt, bool bForce )
 {
-	//if ( !IsEffectEnabled() )
-	//	return;
+	if ( !IsEffectEnabled() )
+		return;
 
 	TouchTile( GetTileIndex( x, y ), wt, bForce );
 }
 
 void CBaseModTransitionPanel::MarkTilesInRect( int x, int y, int wide, int tall, WINDOW_TYPE wt, bool bForce )
 {
-	//if ( !IsEffectEnabled() )
-	//	return;
+	if ( !IsEffectEnabled() )
+		return;
 
 	if ( wide == -1 && tall == -1 )
 	{
