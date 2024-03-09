@@ -927,11 +927,9 @@ void MainMenu::OnThink()
 		}
 	}
 
-	if ( IsGameConsole() )
-	{
-		// Need to keep updating since attract movie panel can change state
-		SetFooterState();
-	}
+	// Need to keep updating since attract movie and controller mode can change state
+	// this is kind of stinky but they got away with it on xbox so I guess it's fine
+	SetFooterState();
 
 	BaseClass::OnThink();
 }
@@ -1030,7 +1028,7 @@ void MainMenu::SetFooterState()
 
 		FooterButtons_t buttons = 0;
 			
-		if ( IsGameConsole() )
+		if ( BASEMODPANEL_SINGLETON.IsControllerActive() )
 		{
 			buttons |= FB_ABUTTON;
 		}
