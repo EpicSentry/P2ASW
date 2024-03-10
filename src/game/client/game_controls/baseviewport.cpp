@@ -193,9 +193,6 @@ void CBaseViewport::OnScreenSizeChanged(int iOldWide, int iOldTall)
 {
 	BaseClass::OnScreenSizeChanged(iOldWide, iOldTall);
 
-	// reload the script file, so the screen positions in it are correct for the new resolution
-	ReloadScheme( NULL );
-
 	// recreate all the default panels
 	RemoveAllPanels();
 #ifndef _XBOX
@@ -212,6 +209,12 @@ void CBaseViewport::OnScreenSizeChanged(int iOldWide, int iOldTall)
 #ifndef _XBOX
 	vgui::ipanel()->MoveToBack( m_pBackGround->GetVPanel() ); // really send it to the back 
 #endif
+
+	// reload the script file, so the screen positions in it are correct for the new resolution
+	// Moving this down here fixes a crash in the scoreboard code and seems like the more correct
+	// order to do this in (deleting and re-creating hud elements before applying scheme settings)
+	// But no other game seems to do it this way...?
+	ReloadScheme( NULL );
 
 	// hide all panels when reconnecting 
 	ShowPanel( PANEL_ALL, false );
