@@ -659,7 +659,7 @@ void __fastcall CBaseFileSystem__AddVPKFile(struct_this* thisptr, void* edx, cha
 		}
 		thisptr->m_VPKFiles.RemoveAll();
 		for (int i = 0; i < m_VPKPaths.Count(); ++i) {
-			CBaseFileSystem__AddVPKFile(thisptr, 0, m_VPKPaths.Element(i), PATH_ADD_TO_TAIL_ATINDEX);
+			CBaseFileSystem__AddVPKFile(thisptr, 0, m_VPKPaths.Element(i), PATH_ADD_TO_TAIL);
 		}
 	}
 
