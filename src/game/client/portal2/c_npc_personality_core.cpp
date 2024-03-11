@@ -65,7 +65,7 @@ END_RECV_TABLE()
 LINK_ENTITY_TO_CLASS(npc_wheatley_boss, C_NPC_Wheatley_Boss);
 
 // TODO: Optimize
-float MouthDecay(float mouthopen, float& flInvDim, float flBaseLight)
+float MouthDecay( float mouthopen, float& flInvDim, float flBaseLight )
 {
 	float v3 = 0.0;
 	float v4 = 0.015625 * mouthopen;
@@ -234,11 +234,11 @@ void CLightedMouthProxy::OnBind( void *pC_BaseEntity )
 		{
 			if ( ( pActor = dynamic_cast<C_NPC_Personality_Core*>( pEntity ) ) != NULL )
 			{
-				flFlashResult = ((C_NPC_Personality_Core*)pEntity)->GetMouthAmount();
+				flFlashResult = ((C_NPC_Personality_Core*)pActor)->GetMouthAmount();
 			}
 			else if ( ( pActor = dynamic_cast<C_NPC_Wheatley_Boss*>( pEntity ) ) != NULL )
 			{
-				flFlashResult = ((C_NPC_Wheatley_Boss*)pEntity)->GetMouthAmount();
+				flFlashResult = ((C_NPC_Wheatley_Boss*)pActor)->GetMouthAmount();
 			}
 			else
 			{
@@ -248,10 +248,10 @@ void CLightedMouthProxy::OnBind( void *pC_BaseEntity )
 					C_BaseAnimating *pAnimating = GLaDOSActor->GetBaseAnimating();
 					if ( pAnimating )
 					{
-						float flBase = 0.0;
+						float flBase = 0.2;
 						C_Portal_Player *pLocalPlayer = (C_Portal_Player *)C_BasePlayer::GetLocalPlayer();
-						if ( pLocalPlayer && pLocalPlayer->IsPotatosOn() )
-							flBase = 0.2;
+						if ( pLocalPlayer && !pLocalPlayer->IsPotatosOn() )
+							flBase = 0.0;
 
 						float flOpenAmount = pAnimating->GetMouth()->mouthopen;
 						flFlashResult = MouthDecay( flOpenAmount, s_GLaDOS_flDimmer, flBase );
