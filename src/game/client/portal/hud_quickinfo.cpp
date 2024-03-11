@@ -17,6 +17,7 @@
 #include "c_portal_player.h"
 #include "c_weapon_portalgun.h"
 #include "igameuifuncs.h"
+#include "iinput.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -41,8 +42,6 @@ CHUDQuickInfo
 ==================================================
 */
 
-using namespace vgui;
-
 class CHUDQuickInfo : public CHudElement, public vgui::Panel
 {
 	DECLARE_CLASS_SIMPLE( CHUDQuickInfo, vgui::Panel );
@@ -55,7 +54,7 @@ public:
 	//virtual void OnThink();
 	virtual void Paint();
 	
-	virtual void ApplySchemeSettings( IScheme *scheme );	
+	virtual void ApplySchemeSettings( vgui::IScheme *scheme );	
 private:
 
 	void 	DrawCrosshair(class Color ,float );
@@ -107,7 +106,7 @@ CHUDQuickInfo::~CHUDQuickInfo()
 	}
 }
 
-void CHUDQuickInfo::ApplySchemeSettings( IScheme *scheme )
+void CHUDQuickInfo::ApplySchemeSettings( vgui::IScheme *scheme )
 {
 	BaseClass::ApplySchemeSettings( scheme );
 
@@ -323,7 +322,8 @@ void CHUDQuickInfo::Paint()
 		bPortalPlacability[1] = bPortalPlacability[0];
 	}
 		
-	if ( !hud_quickinfo_swap.GetBool() )
+	// Matches Portal 2 behavior
+	if ( hud_quickinfo_swap.GetBool() == input->ControllerModeActive() )
 	{
 		if ( bPortalPlacability[0] )
 			m_icon_lb->DrawSelf(xCenter - (m_icon_lb->Width() * 0.64f ), yCenter - ( m_icon_rb->Height() * 0.17f ), portal1Color);

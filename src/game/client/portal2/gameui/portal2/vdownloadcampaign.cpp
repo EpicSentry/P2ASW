@@ -31,7 +31,7 @@ DownloadCampaign::DownloadCampaign( Panel *parent, const char *panelName )
 	SetProportional( true );
 
 	SetDeleteSelfOnClose( true );
-	SetLowerGarnishEnabled( false );
+	SetFooterEnabled( false );
 	SetMoveable( false );
 
 	m_fromLobby = false;

@@ -31,9 +31,12 @@ using namespace vgui;
 
 #define MAX_LISTED_SAVE_GAMES	128
 
+// Dead, basemod ui trumps...
+#if 0
 PRECACHE_REGISTER_BEGIN( GLOBAL, BaseSaveGameDialog )
 PRECACHE( MATERIAL, "vgui/resource/autosave.vmt" )
 PRECACHE_REGISTER_END()
+#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: Describes the layout of a same game pic

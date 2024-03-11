@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve Corporation, All rights reserved. ============//
+//========= Copyright (c) 1996-2008, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -24,7 +24,7 @@ using namespace vgui;
 using namespace BaseModUI;
 
 //=============================================================================
-ConVar cl_support_vpk_assocation( "cl_support_vpk_assocation", "1", FCVAR_ARCHIVE, "Whether vpk associations are enabled for this mod" );
+ConVar cl_support_vpk_assocation( "cl_support_vpk_assocation", "0", FCVAR_ARCHIVE, "Whether vpk associations are enabled for this mod" );
 ConVar cl_ignore_vpk_assocation( "cl_ignore_vpk_assocation", "0", FCVAR_ARCHIVE, "Do not ask to set vpk assocation" );
 
 static bool s_checkedNoShow = false;
@@ -47,7 +47,7 @@ AddonAssociation::AddonAssociation( Panel *parent, const char *panelName )
 
 	SetTitle( "", false );
 	SetDeleteSelfOnClose( true );
-	SetLowerGarnishEnabled( false );
+	SetFooterEnabled( false );
 	SetMoveable( false );
 }
 
@@ -64,6 +64,7 @@ void AddonAssociation::OnThink()
 //=============================================================================
 static void GetAddonInstallerUtilityPath( char path[MAX_PATH] )
 {
+#ifdef IS_WINDOWS_PC
 	char p[MAX_PATH];
 	GetModuleFileName( ( HINSTANCE )GetModuleHandle( NULL ), p, sizeof( p ) );
 	Q_StripLastDir( p, sizeof( p ) );	// Get rid of the filename.
@@ -71,6 +72,7 @@ static void GetAddonInstallerUtilityPath( char path[MAX_PATH] )
 	Q_strncat( p, "\\bin\\addoninstaller.exe", sizeof( p ) );
 
 	Q_strncpy( path, p, MAX_PATH );
+#endif
 }
 
 //=============================================================================

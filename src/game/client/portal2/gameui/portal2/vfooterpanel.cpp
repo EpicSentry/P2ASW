@@ -10,59 +10,145 @@
 #include "vgui_controls/Controls.h"
 #include "vgui/ISurface.h"
 #include "vgui/ilocalize.h"
+#include "tier1/fmtstr.h"
+#include "transitionpanel.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 using namespace BaseModUI;
+using namespace vgui;
 
-// the xbox shrinks its footer when there is not help text
-#define MINIMAL_FOOTER_SCALE	0.75f
 
-struct buttonLayout_t
+ConVar cl_footer_no_auto_shrink( "cl_footer_no_auto_shrink", "0", FCVAR_NONE, "Prevents shrinking the font when it would wrap." );
+ConVar cl_footer_no_auto_wrap( "cl_footer_no_auto_wrap", "0", FCVAR_NONE, "Prevents shrinking the font when it would wrap." );
+
+
+class CFooterBitmapButton : public vgui::Button
 {
-	bool	A_rAlight;
-	int		A_x;
-	int		A_y;
+	DECLARE_CLASS_SIMPLE( CFooterBitmapButton, vgui::Button );
 
-	bool	B_rAlight;
-	int		B_x;
-	int		B_y;
+public:
+	CFooterBitmapButton( vgui::Panel *pParent, const char *pName, const char *pText );
+	~CFooterBitmapButton();
 
-	bool	X_rAlight;
-	int		X_x;
-	int		X_y;
+	void SetUsesAlternateTiles( bool bUseAlternate ) { m_bUsesAlternateTiles = bUseAlternate; }
 
-	bool	Y_rAlight;
-	int		Y_x;
-	int		Y_y;
+protected:
+	virtual void PaintBackground( void );
+	virtual void Paint( void );
+	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );
 
-	bool	DPad_rAlight;
-	int		DPad_x;
-	int		DPad_y;
+private:
+	Color				m_BorderColor;
+	Color				m_BorderArmedColor;
+	Color				m_BorderDepressedColor;
 
-	CBaseModFooterPanel::FooterButtons_t buttons;
+	Color				m_AltBorderColor;
+	Color				m_AltBorderArmedColor;
+	Color				m_AltBorderDepressedColor;
+
+	bool				m_bUsesAlternateTiles;
+
+	int					m_nButtonImageId;	
+	int					m_nButtonOverImageId;
+	int					m_nButtonClickImageId;	
+
+	int					m_nAltButtonImageId;	
+	int					m_nAltButtonOverImageId;
+	int					m_nAltButtonClickImageId;	
 };
 
-buttonLayout_t g_ButtonLayouts[FF_MAX] =
+CFooterBitmapButton::CFooterBitmapButton( vgui::Panel *pParent, const char *pName, const char *pText ) :
+	BaseClass( pParent, pName, pText ),
+	m_bUsesAlternateTiles( false ),
+	m_nButtonImageId( -1 ),
+	m_nButtonOverImageId( -1 ),
+	m_nButtonClickImageId( -1 ),
+	m_nAltButtonImageId( -1 ),
+	m_nAltButtonOverImageId( -1 ),
+	m_nAltButtonClickImageId( -1 )
 {
-	{ false,0,0,	false,0,0,		false,0,0,		false,0,0,		false,0,0,	0 },											// FF_NONE
-	{ false,100,50,	false,0,0,		true,240,50,	false,0,0,		false,0,0,	FB_ABUTTON|FB_XBUTTON },						// FF_MAINMENU
-	{ false,100,50,	false,225,50,	false,0,0,		false,0,0,		false,0,0,	FB_ABUTTON|FB_BBUTTON },						// FF_MAINMENU_FLYOUT,
-	{ false,100,50,	false,225,50,	false,0,0,		false,0,0,		false,0,0,	FB_ABUTTON|FB_BBUTTON },						// FF_CONTROLLER,
-	{ false,100,50,	false,225,50,	false,0,0,		false,0,0,		false,0,0,	FB_ABUTTON|FB_BBUTTON },						// FF_AB_ONLY
-	{ false,100,50,	false,225,50,	true,240,50,	false,0,0,		false,0,0,	FB_ABUTTON|FB_BBUTTON|FB_XBUTTON },				// FF_ABX_ONLY
-	{ false,100,50,	false,225,50,	false,0,0,		true,240,50,	false,0,0,	FB_ABUTTON|FB_BBUTTON|FB_YBUTTON },				// FF_ABY_ONLY
-	{ false,225,50,	false,100,50,	false,0,0,		true,240,50,	false,0,0,	FB_ABUTTON|FB_BBUTTON|FB_YBUTTON },				// FF_A_GAMERCARD_BY
-	{ false,225,50,	false,100,50,	true,240,50,	false,0,0,		false,0,0,	FB_ABUTTON|FB_BBUTTON|FB_XBUTTON },				// FF_A_GAMERCARD_BX
-	{ false,225,50,	false,100,50,	true,240,38,	true,240,58,	false,0,0,	FB_ABUTTON|FB_BBUTTON|FB_XBUTTON|FB_YBUTTON },	// FF_A_GAMERCARD_BY__X_HIGH
-	{ false,0,0,	false,100,50,	false,0,0,		false,0,0,		false,0,0,	FB_BBUTTON },									// FF_B_ONLY
-	{ false,100,60,	false,0,0,		false,0,0,		true,240,60,	false,0,0,	FB_ABUTTON|FB_YBUTTON },						// FF_CONTROLLER_STICKS,
-	{ false,0,0,	false,100,50,	false,0,0,		false,225,50,	false,0,0,	FB_BBUTTON|FB_YBUTTON },						// FF_ACHIEVEMENTS,
-};
+	SetPaintBackgroundEnabled( true );
+}
+
+CFooterBitmapButton::~CFooterBitmapButton()
+{
+}
+
+void CFooterBitmapButton::ApplySchemeSettings( vgui::IScheme *pScheme )
+{
+	BaseClass::ApplySchemeSettings( pScheme );
+
+	m_nButtonImageId = CBaseModPanel::GetSingleton().GetImageId( "vgui/btn_bg" );
+	m_nButtonOverImageId = CBaseModPanel::GetSingleton().GetImageId( "vgui/btn_bg_over" );
+	m_nButtonClickImageId = CBaseModPanel::GetSingleton().GetImageId( "vgui/btn_bg_click" );
+
+	m_nAltButtonImageId = CBaseModPanel::GetSingleton().GetImageId( "vgui/btn_bg_alt" );
+	m_nAltButtonOverImageId = CBaseModPanel::GetSingleton().GetImageId( "vgui/btn_bg_over_alt" );
+	m_nAltButtonClickImageId = CBaseModPanel::GetSingleton().GetImageId( "vgui/btn_bg_click_alt" );
+
+	m_BorderColor = GetSchemeColor( "FooterPanel.BorderColor", pScheme );
+	m_BorderArmedColor = GetSchemeColor( "FooterPanel.BorderArmedColor", pScheme );
+	m_BorderDepressedColor = GetSchemeColor( "FooterPanel.BorderDepressedColor", pScheme );
+	
+	m_AltBorderColor = GetSchemeColor( "FooterPanel.BorderColorAlt", pScheme );
+	m_AltBorderArmedColor = GetSchemeColor( "FooterPanel.BorderArmedColorAlt", pScheme );
+	m_AltBorderDepressedColor = GetSchemeColor( "FooterPanel.BorderDepressedColorAlt", pScheme );
+}
+
+void CFooterBitmapButton::Paint()
+{
+	// don't draw if controller is active
+	if (BASEMODPANEL_SINGLETON.IsControllerActive())
+		return;
+
+	BaseClass::Paint();
+}
+
+void CFooterBitmapButton::PaintBackground( void )
+{
+	// don't draw if controller is active
+	if (BASEMODPANEL_SINGLETON.IsControllerActive())
+		return;
+
+	int x, y, wide, tall;
+	GetBounds( x, y, wide, tall );
+
+	// Pick our options based on our tile type
+	int nButtonImageId = ( m_bUsesAlternateTiles ) ? m_nAltButtonImageId : m_nButtonImageId;
+	int nButtonOverImageId = ( m_bUsesAlternateTiles ) ? m_nAltButtonOverImageId : m_nButtonOverImageId;
+	int nButtonClickImageId = ( m_bUsesAlternateTiles ) ? m_nAltButtonClickImageId : m_nButtonClickImageId;
+
+	Color borderColor = ( m_bUsesAlternateTiles ) ? m_AltBorderColor : m_BorderColor;
+	Color borderDepressedColor = ( m_bUsesAlternateTiles ) ? m_AltBorderDepressedColor : m_BorderDepressedColor;
+	Color borderArmedColor = ( m_bUsesAlternateTiles ) ? m_AltBorderArmedColor : m_BorderArmedColor;
+
+	surface()->DrawSetColor( 255, 255, 255, 255 );
+	if ( IsDepressed() )
+	{
+		surface()->DrawSetTexture( nButtonClickImageId );
+	}
+	else
+	{
+		surface()->DrawSetTexture( IsArmed() ? nButtonOverImageId : nButtonImageId );
+	}
+	surface()->DrawTexturedRect( 0, 0, wide, tall );
+
+	if ( IsDepressed() )
+	{
+		surface()->DrawSetColor( borderDepressedColor );
+	}
+	else
+	{
+		surface()->DrawSetColor( IsArmed() ? borderArmedColor : borderColor );
+	}
+	surface()->DrawOutlinedRect( 0, 0, wide, tall );
+}
 
 CBaseModFooterPanel::CBaseModFooterPanel( vgui::Panel *parent, const char *panelName ) :
-BaseClass( parent, panelName, false, false, false, false )
+	BaseClass( parent, panelName, false, false, false, false ),
+	m_bUsesAlternateTiles( false )
 {
 	vgui::ipanel()->SetTopmostPopup( GetVPanel(), true );
 
@@ -71,28 +157,61 @@ BaseClass( parent, panelName, false, false, false, false )
 
 	SetUpperGarnishEnabled( false );
 
-	m_AButtonText[0] = '\0';
-	m_BButtonText[0] = '\0';
-	m_XButtonText[0] = '\0';
-	m_YButtonText[0] = '\0';
-	m_DPadButtonText[0] = '\0';
-	m_HelpText[0] = '\0';
-	m_szconverted[0] = L'\0';
-
-	m_Format = FF_NONE;
-	m_Buttons = 0;
-
-	m_hHelpTextFont = vgui::INVALID_FONT;
 	m_hButtonFont = vgui::INVALID_FONT;
 	m_hButtonTextFont = vgui::INVALID_FONT;
+	m_hButtonTextLargeFont = vgui::INVALID_FONT;
+	m_hButtonTextSmallFont = vgui::INVALID_FONT;
+	m_nTextOffsetX = 0;
+	m_nTextOffsetY = 0;
+	m_nButtonGapX = 0;
+	m_nFullButtonGapX = 0;
+	m_nButtonGapY = 0;
+	m_nButtonPaddingX = 0;
+
+	m_TextColor = Color( 255, 255, 255, 255 );
+	m_TextColorAlt = Color( 255, 255, 255, 255 );
+
+	m_InGameTextColor = Color( 255, 255, 255, 255 );
+	m_InGameTextColorAlt = Color( 255, 255, 255, 255 );
+
+	m_nFooterType = FOOTER_MENUS;
+
+	COMPILE_TIME_ASSERT( ARRAYSIZE( m_pButtons ) == MAX_FOOTER_BUTTONS );
+	for ( int i = 0; i < MAX_FOOTER_BUTTONS; i++ )
+	{
+		m_pButtons[i] = new CFooterBitmapButton( this, CFmtStr( "Btn%d", i ), CFmtStr( "Btn%d", i ) );
+		m_pButtons[i]->SetVisible( false );
+	}
+
+	m_LastDrawnButtonBounds.Init();
 
 	m_bInitialized = false;
 
-	m_fFadeHelpTextStart = 0.0f;
+	m_bUsesAlternateTiles = false;
+
+#ifdef _PS3
+	m_pAvatarImage = NULL;
+	m_xuidAvatarImage = 0ull;
+	m_iAvatarFrameTexture = -1;
+	m_nAvatarSize = 0;
+	m_nAvatarBorderSize = 0;
+	m_nAvatarNameY = 0;
+	m_nAvatarFriendsY = 0;
+	m_nAvatarOffsetY = 0;
+	m_hAvatarTextFont = vgui::INVALID_FONT;
+#endif
 }
 
 CBaseModFooterPanel::~CBaseModFooterPanel()
 {
+#ifdef _PS3
+	if ( m_pAvatarImage )
+	{
+		CUIGameData::Get()->AccessAvatarImage( m_xuidAvatarImage, CUIGameData::kAvatarImageRelease );
+		m_pAvatarImage = NULL;
+		m_xuidAvatarImage = 0ull;
+	}
+#endif
 }
 
 void CBaseModFooterPanel::ApplySchemeSettings( vgui::IScheme *pScheme )
@@ -100,164 +219,431 @@ void CBaseModFooterPanel::ApplySchemeSettings( vgui::IScheme *pScheme )
 	BaseClass::ApplySchemeSettings( pScheme );
 
 	SetPaintBackgroundEnabled( true );
-	SetBgColor( Color ( 0, 0, 0, 200 ) );
 
-	m_hHelpTextFont = pScheme->GetFont( "DefaultMedium", true );	
-	m_hButtonTextFont = pScheme->GetFont( "DefaultBold", true );
-	m_hButtonFont = pScheme->GetFont( "GameUIButtonsTiny", true );
+	const char *pButtonFont = pScheme->GetResourceString( "FooterPanel.ButtonFont" );
+	m_hButtonFont = pScheme->GetFont( pButtonFont, true );
+
+	const char *pTextFont = pScheme->GetResourceString( "FooterPanel.TextFont" );
+	m_hButtonTextLargeFont = pScheme->GetFont( pTextFont, true );
+
+	m_hButtonTextSmallFont = pScheme->GetFont( "InstructorKeyBindings", true );
+
+	// make sure the default font is set
+	m_hButtonTextFont = m_hButtonTextLargeFont;
+
+	m_TextColor = GetSchemeColor( "FooterPanel.TextColor", pScheme );
+	m_TextColorAlt = GetSchemeColor( "FooterPanel.TextColorAlt", pScheme );
+
+	m_InGameTextColor = GetSchemeColor( "FooterPanel.InGameTextColor", pScheme );
+	m_InGameTextColorAlt = GetSchemeColor( "FooterPanel.InGameTextColorAlt", pScheme );
+
+	m_nTextOffsetX = atoi( pScheme->GetResourceString( "FooterPanel.TextOffsetX" ) );
+	m_nTextOffsetX = vgui::scheme()->GetProportionalScaledValue( m_nTextOffsetX );
+
+	m_nTextOffsetY = atoi( pScheme->GetResourceString( "FooterPanel.TextOffsetY" ) );
+	m_nTextOffsetY = vgui::scheme()->GetProportionalScaledValue( m_nTextOffsetY );
+
+	m_nFullButtonGapX = atoi( pScheme->GetResourceString( "FooterPanel.ButtonGapX" ) );
+	m_nFullButtonGapX = vgui::scheme()->GetProportionalScaledValue( m_nFullButtonGapX );
+
+	m_nButtonGapX = m_nFullButtonGapX;
+
+	m_nButtonGapY = atoi( pScheme->GetResourceString( "FooterPanel.ButtonGapY" ) );
+	m_nButtonGapY = vgui::scheme()->GetProportionalScaledValue( m_nButtonGapY );
+
+	m_nButtonPaddingX = atoi( pScheme->GetResourceString( "FooterPanel.ButtonPaddingX" ) );
+	m_nButtonPaddingX = vgui::scheme()->GetProportionalScaledValue( m_nButtonPaddingX );
+
+	for ( int i = 0; i < MAX_FOOTER_BUTTONS; i++ )
+	{
+		m_pButtons[i]->SetFont( m_hButtonTextFont );
+		m_pButtons[i]->SetArmedSound( CBaseModPanel::GetSingleton().GetUISoundName( UISOUND_FOCUS ) );
+		m_pButtons[i]->SetCommand( CFmtStr( "Btn%d", i ) );
+
+		if ( m_nTextOffsetX || m_nTextOffsetY )
+		{
+			m_pButtons[i]->SetTextInset( m_nTextOffsetX, m_nTextOffsetY );
+		}
+	}
+
+#if defined( _PS3 )
+	m_nAvatarSize = atoi( pScheme->GetResourceString( "FooterPanel.AvatarSize" ) );
+	m_nAvatarSize = vgui::scheme()->GetProportionalScaledValue( m_nAvatarSize );
+
+	m_nAvatarBorderSize = atoi( pScheme->GetResourceString( "FooterPanel.AvatarBorderSize" ) );
+	m_nAvatarBorderSize = vgui::scheme()->GetProportionalScaledValue( m_nAvatarBorderSize );
+
+	m_nAvatarOffsetY = atoi( pScheme->GetResourceString( "FooterPanel.AvatarOffsetY" ) );
+	m_nAvatarOffsetY = vgui::scheme()->GetProportionalScaledValue( m_nAvatarOffsetY );
+
+	m_nAvatarNameY = atoi( pScheme->GetResourceString( "FooterPanel.AvatarNameY" ) );
+	m_nAvatarNameY = vgui::scheme()->GetProportionalScaledValue( m_nAvatarNameY );
+
+	m_nAvatarFriendsY = atoi( pScheme->GetResourceString( "FooterPanel.AvatarFriendsY" ) );
+	m_nAvatarFriendsY = vgui::scheme()->GetProportionalScaledValue( m_nAvatarFriendsY );
+
+	m_iAvatarFrameTexture = CBaseModPanel::GetSingleton().GetImageId( "vgui/steam_avatar_border_ingame" );
+
+	const char *pAvatarTextFont = pScheme->GetResourceString( "FooterPanel.AvatarTextFont" );
+	m_hAvatarTextFont = pScheme->GetFont( pAvatarTextFont, true );
+#endif
 
 	m_bInitialized = true;
 }
 
-void CBaseModFooterPanel::UpdateHelp()
+void CBaseModFooterPanel::FixLayout()
 {
 	if ( !m_bInitialized )
-	{
 		return;
-	}
 
-	if ( m_hHelpTextFont == vgui::INVALID_FONT )
+	char uilanguage[64];
+	engine->GetUILanguage( uilanguage, sizeof( uilanguage ) );
+	bool bIsEnglish = ( uilanguage[0] == 0 ) || !V_stricmp( uilanguage, "english" );
+
+	FooterData_t *pFooterData = &m_FooterData[m_nFooterType];
+
+	int x = pFooterData->m_nX;
+
+	int nButtonWide, nButtonTall;
+
+	DetermineFooterFont();
+
+	// Determine if we're an alternate tile type
+	CBaseModFrame *pFrame = BASEMODPANEL_SINGLETON.GetWindow( BASEMODPANEL_SINGLETON.GetActiveWindowType() );
+	m_bUsesAlternateTiles = ( pFrame && pFrame->UsesAlternateTiles() );	
+
+	Button_t buttonOrder[MAX_FOOTER_BUTTONS] = { FB_NONE };
+	GetButtonOrder( pFooterData->m_Format, buttonOrder );
+
+	for ( int i = 0; i < ARRAYSIZE( buttonOrder ); i++ )
 	{
-		// Fonts aren't initialized yet!
-		DevWarning( "UI Footer: Help fonts not initialized!\n" );
-		return;
-	}
+		CFooterBitmapButton *pButton = m_pButtons[i];
+		if ( !pButton )
+			continue;
 
-	vgui::Label *pLblHelpText = dynamic_cast< vgui::Label* >( FindChildByName( "LblHelpText" ) );
-	if ( pLblHelpText )
-	{
-		// Use the text from last frame
-		pLblHelpText->SetText( m_szconverted );
+		Button_t nButton = buttonOrder[i];
+		pButton->SetVisible( ( nButton & pFooterData->m_Buttons ) != 0 );
+		pButton->SetUsesAlternateTiles( m_bUsesAlternateTiles );
 
-		// Get the centered text position for the next frame
-		wchar_t *pUnicodeString = g_pVGuiLocalize->Find( m_HelpText );
-		if ( pUnicodeString )
+		if ( !( nButton & pFooterData->m_Buttons ) )
+			continue;
+
+		if ( nButton & FB_ABUTTON )
 		{
-			Q_wcsncpy( m_szconverted, pUnicodeString, sizeof( m_szconverted ) );
+			pButton->SetText( pFooterData->m_AButtonText.Get() );
 		}
-		else
+		else if ( nButton & FB_BBUTTON )
 		{
-			g_pVGuiLocalize->ConvertANSIToUnicode( m_HelpText, m_szconverted, sizeof( m_szconverted ) );
+			pButton->SetText( pFooterData->m_BButtonText.Get() );
 		}
-
-		int textWide, textTall;
-		vgui::surface()->GetTextSize( m_hHelpTextFont, m_szconverted, textWide, textTall );
-
-		int wide, tall;
-		GetSize( wide, tall );
-
-		int iPanelWide = pLblHelpText->GetWide();
-
-		// Center about either the wrapping width or the string width (whichever is smaller)
-		int helpX, helpY;
-		pLblHelpText->GetPos( helpX, helpY );
-		
-		if ( IsX360() )
+		else if ( nButton & FB_XBUTTON )
 		{
-			helpY = vgui::scheme()->GetProportionalScaledValue( 25 );
+			pButton->SetText( pFooterData->m_XButtonText.Get() );
+		}
+		else if ( nButton & FB_YBUTTON )
+		{
+			pButton->SetText( pFooterData->m_YButtonText.Get() );
+		}
+		else if ( nButton & FB_DPAD )
+		{
+			pButton->SetText( pFooterData->m_DPadButtonText.Get() );
+		}
+		else if ( nButton & FB_LSHOULDER )
+		{
+			pButton->SetText( pFooterData->m_LShoulderButtonText.Get() );
 		}
 
-		pLblHelpText->SetPos( ( wide - MIN( iPanelWide, textWide ) )/2, helpY );
+		pButton->GetContentSize( nButtonWide, nButtonTall );
+		pButton->SetBounds( x, pFooterData->m_nY, nButtonWide + m_nButtonPaddingX, nButtonTall );
 
-		int iAlpha = 255;
-
-		if ( m_fFadeHelpTextStart != 0.0f )
+		pButton->SetContentAlignment( vgui::Label::a_center );
+		if ( bIsEnglish )
 		{
-			iAlpha = MAX( static_cast<int>( 255.0f - ( Plat_FloatTime() - m_fFadeHelpTextStart ) * 255.0f ), 0 );
+			pButton->SetAllCaps( true );
 		}
 
-		pLblHelpText->SetAlpha( iAlpha );
+		// Setup our text color (and all of our other items)
+		Color textColor = ( m_bUsesAlternateTiles ) ? m_TextColorAlt : m_TextColor;
+		pButton->SetDefaultColor( textColor, Color(0,0,0,0) );
+		pButton->SetDepressedColor( textColor, Color(0,0,0,0) );
+		pButton->SetArmedColor( textColor, Color(0,0,0,0) );
+
+		x += nButtonWide + m_nButtonPaddingX + m_nButtonGapX;
 	}
 }
 
-void CBaseModFooterPanel::DrawButtonAndText( bool bRightAligned, int x, int y, const char *pButton, const char *pText )
+void CBaseModFooterPanel::DetermineFooterFont()
 {
 	if ( !m_bInitialized )
 	{
 		return;
 	}
 
-	if ( m_hButtonFont == vgui::INVALID_FONT || m_hButtonTextFont == vgui::INVALID_FONT )
+	if ( m_hButtonFont == vgui::INVALID_FONT || m_hButtonTextLargeFont == vgui::INVALID_FONT || m_hButtonTextSmallFont == vgui::INVALID_FONT )
 	{
 		// Fonts aren't initialized yet!
 		DevWarning( "UI Footer: Button fonts not initialized!\n" );
 		return;
 	}
 
-	int buttonLen;
-	wchar_t szButtonConverted[32];
-	wchar_t *pButtonString = g_pVGuiLocalize->Find( pButton );
-	if ( !pButtonString )
+	FooterData_t *pFooterData = &m_FooterData[m_nFooterType];
+
+	if ( !HasContent() )
 	{
-		buttonLen = g_pVGuiLocalize->ConvertANSIToUnicode( pButton, szButtonConverted, sizeof( szButtonConverted ) );
-		pButtonString = szButtonConverted;
+		return;
 	}
-	else
+
+	if ( cl_footer_no_auto_shrink.GetBool() )
 	{
-		buttonLen = V_wcslen( pButtonString );
+		m_hButtonTextFont = m_hButtonTextLargeFont;
+		m_nButtonGapX = m_nFullButtonGapX;
+		return;
+	}
+	
+	Button_t buttonOrder[MAX_FOOTER_BUTTONS] = { FB_NONE };
+	GetButtonOrder( pFooterData->m_Format, buttonOrder );
+
+	int nTotalFooterWidth = pFooterData->m_nX;
+
+	for ( int i = 0; i < ARRAYSIZE( buttonOrder ); i++ )
+	{
+		Button_t nButton = buttonOrder[i];
+		if ( !( nButton & pFooterData->m_Buttons ) )
+			continue;
+
+		if ( nButton & FB_ABUTTON )
+		{
+			nTotalFooterWidth += CalculateButtonWidth( "#GameUI_Icons_A_3DButton", pFooterData->m_AButtonText.Get() );
+		}
+		else if ( nButton & FB_BBUTTON )
+		{
+			nTotalFooterWidth += CalculateButtonWidth( "#GameUI_Icons_B_3DButton", pFooterData->m_BButtonText.Get() );
+		}
+		else if ( nButton & FB_XBUTTON )
+		{
+			nTotalFooterWidth += CalculateButtonWidth( "#GameUI_Icons_X_3DButton", pFooterData->m_XButtonText.Get() );
+		}
+		else if ( nButton & FB_YBUTTON )
+		{
+			nTotalFooterWidth += CalculateButtonWidth( "#GameUI_Icons_Y_3DButton", pFooterData->m_YButtonText.Get() );
+		}
+		else if ( nButton & FB_DPAD )
+		{
+			nTotalFooterWidth += CalculateButtonWidth( "#GameUI_Icons_CENTER_DPAD", pFooterData->m_DPadButtonText.Get() );
+		}
+	}
+
+	nTotalFooterWidth -= m_nFullButtonGapX; // Subtract off final gap at the end
+
+	int screenWide, screenTall;
+	vgui::surface()->GetScreenSize( screenWide, screenTall );
+	int nTitlesafeInset = screenWide * 0.075f;
+
+	if ( nTotalFooterWidth > (screenWide - nTitlesafeInset) )
+	{
+		// use the smaller font
+		m_hButtonTextFont = m_hButtonTextSmallFont;
+		m_nButtonGapX = m_nFullButtonGapX * 0.5f;
+	}
+	else // use the standard (larger) font
+	{
+		m_hButtonTextFont = m_hButtonTextLargeFont;
+		m_nButtonGapX = m_nFullButtonGapX;
+	}
+}
+
+int CBaseModFooterPanel::CalculateButtonWidth( const char *pButton, const char *pText )
+{
+	int buttonLen = 0;
+	wchar_t szButtonConverted[128] = {0};
+	wchar_t *pButtonString = NULL;
+	if ( pButton )
+	{
+		pButtonString = g_pVGuiLocalize->Find( pButton );
+		if ( !pButtonString )
+		{
+			buttonLen = g_pVGuiLocalize->ConvertANSIToUnicode( pButton, szButtonConverted, sizeof( szButtonConverted ) );
+			pButtonString = szButtonConverted;
+		}
+		else
+		{
+			buttonLen = V_wcslen( pButtonString );
+		}
+	}
+
+	int buttonWide = 0, buttonTall = 0;
+	if ( pButtonString )
+	{
+		vgui::surface()->GetTextSize( m_hButtonFont, pButtonString, buttonWide, buttonTall );
+	}
+
+	int nTotalWidth = buttonWide + m_nTextOffsetX;
+
+	int textWide = 0;
+	int textTall = 0;
+	int labelLen = 0;
+	wchar_t szLabelConverted[256];
+	wchar_t const *pLabelString = NULL;
+	if ( pText && pText[0] )
+	{
+		pLabelString = g_pVGuiLocalize->Find( pText );
+		if ( !pLabelString )
+		{
+			labelLen = g_pVGuiLocalize->ConvertANSIToUnicode( pText, szLabelConverted, sizeof( szLabelConverted ) );
+			pLabelString = szLabelConverted;
+		}
+		labelLen = V_wcslen( pLabelString );
+
+		vgui::surface()->GetTextSize( m_hButtonTextLargeFont, pLabelString, textWide, textTall );
+
+		nTotalWidth += textWide + m_nFullButtonGapX;
+	}
+
+	return nTotalWidth;
+}
+
+void CBaseModFooterPanel::DrawButtonAndText( int &x, int &y, const char *pButton, const char *pText, bool bNeedsUniqueLine, DrawButtonParams_t *pParams /* = NULL */ )
+{
+	if ( !m_bInitialized )
+	{
+		return;
+	}
+
+	FooterData_t *pFooterData = &m_FooterData[m_nFooterType];
+
+	vgui::HFont hTextFont = m_hButtonTextFont;
+
+#if defined( _PS3 )
+	if ( pParams && pParams->hTextFont != vgui::INVALID_FONT )
+	{
+		hTextFont = pParams->hTextFont;
+	}
+#endif
+
+	int buttonLen = 0;
+	wchar_t szButtonConverted[128] = {0};
+	wchar_t *pButtonString = NULL;
+	if ( pButton )
+	{
+		pButtonString = g_pVGuiLocalize->Find( pButton );
+		if ( !pButtonString )
+		{
+			buttonLen = g_pVGuiLocalize->ConvertANSIToUnicode( pButton, szButtonConverted, sizeof( szButtonConverted ) );
+			pButtonString = szButtonConverted;
+		}
+		else
+		{
+			buttonLen = V_wcslen( pButtonString );
+		}
 	}
 
 	int screenWide, screenTall;
 	vgui::surface()->GetScreenSize( screenWide, screenTall );
 
-	x = vgui::scheme()->GetProportionalScaledValue( x );
-	y = vgui::scheme()->GetProportionalScaledValue( y );
-
-	if ( bRightAligned )
+	int buttonWide = 0, buttonTall = 0;
+	if ( pButtonString )
 	{
-		x = screenWide - x;
+		vgui::surface()->GetTextSize( m_hButtonFont, pButtonString, buttonWide, buttonTall );
 	}
 
-	int buttonWide, buttonTall;
-	vgui::surface()->GetTextSize( m_hButtonFont, pButtonString, buttonWide, buttonTall );
+	int nTotalWidth = buttonWide + m_nTextOffsetX;
 
-	int labelLen;
-	wchar_t szLabelConverted[32];
-	wchar_t *pLabelString = g_pVGuiLocalize->Find( pText );
-	if ( !pLabelString )
+	bool bAddGap = false;
+	int textWide = 0;
+	int textTall = 0;
+	int labelLen = 0;
+	wchar_t szLabelConverted[256];
+	wchar_t const *pLabelString = NULL;
+	if ( pText && pText[0] )
 	{
-		labelLen = g_pVGuiLocalize->ConvertANSIToUnicode( pText, szLabelConverted, sizeof( szLabelConverted ) );
-		pLabelString = szLabelConverted;
-	}
-	else
-	{
+		pLabelString = ( pParams && pParams->pwszText ) ? pParams->pwszText : g_pVGuiLocalize->Find( pText );
+		if ( !pLabelString )
+		{
+			labelLen = g_pVGuiLocalize->ConvertANSIToUnicode( pText, szLabelConverted, sizeof( szLabelConverted ) );
+			pLabelString = szLabelConverted;
+		}
 		labelLen = V_wcslen( pLabelString );
+
+		vgui::surface()->GetTextSize( hTextFont, pLabelString, textWide, textTall );
+
+		nTotalWidth += textWide;
+		bAddGap = true;
 	}
 
-	int textWide, textTall;
-	vgui::surface()->GetTextSize( m_hButtonTextFont, pLabelString, textWide, textTall );
+	int nTitlesafeInset = screenWide * 0.075f;
 
-	int iTitleSafeRightEdge = screenWide * 0.95;
-	if ( bRightAligned && ( x + textWide ) > iTitleSafeRightEdge )
+	if ( !cl_footer_no_auto_wrap.GetBool() )
 	{
-		// This will go out of title safe, move to the left
-		x = iTitleSafeRightEdge - textWide;
+		if ( x != pFooterData->m_nX && ( bNeedsUniqueLine || x + nTotalWidth > ( screenWide - nTitlesafeInset ) ) && ( !pParams || !pParams->bRightAlign ) )
+		{
+			// not enough room, drop to next line
+			x = pFooterData->m_nX;
+			y += m_nButtonGapY;
+		}
 	}
 
-	vgui::surface()->DrawSetTextFont( m_hButtonFont );
-	vgui::surface()->DrawSetTextPos( x - buttonWide - 5, y - (buttonTall/2) );
-	vgui::surface()->DrawSetTextColor( 255, 255, 255, 255 );
-	vgui::surface()->DrawPrintText( pButtonString, buttonLen );
+	if ( bAddGap )
+	{
+		nTotalWidth += m_nButtonGapX;
+	}
 
-	vgui::surface()->DrawSetTextFont( m_hButtonTextFont );
-	vgui::surface()->DrawSetTextPos( x, y - (textTall/2) );
-	vgui::surface()->DrawPrintText( pLabelString, labelLen );
+	// draw button
+	if ( pButtonString )
+	{
+		vgui::surface()->DrawSetTextFont( m_hButtonFont );
+		vgui::surface()->DrawSetTextPos( x, y - ( buttonTall / 2 ) );
+		vgui::surface()->DrawSetTextColor( 255, 255, 255, 255 );
+		vgui::surface()->DrawPrintText( pButtonString, buttonLen );
+	}
+
+	if ( pLabelString )
+	{
+		int xText = x + buttonWide + m_nTextOffsetX;
+		if ( pParams )
+		{
+			if ( pParams->bRightAlign )
+			{
+				xText = x - textWide;
+				x -= nTotalWidth;
+			}
+
+			pParams->x = xText;
+			pParams->y = y;
+			if ( pParams->bVerticalAlign )
+			{
+				pParams->y += -( textTall / 2 ) + m_nTextOffsetY;
+			}
+
+			pParams->w = textWide;
+			pParams->h = textTall;
+		}
+
+		vgui::surface()->DrawSetTextFont( hTextFont );
+
+		int yText = y;
+		if ( !pParams || pParams->bVerticalAlign )
+		{
+			yText += -( textTall / 2 ) + m_nTextOffsetY;
+		}
+
+		// Current Portal 2 swaps these when using a controller so they contrast better
+		Color textColor = ( m_bUsesAlternateTiles ) ? m_TextColor : m_TextColorAlt;
+		Color inGameTextColor = ( m_bUsesAlternateTiles ) ? m_InGameTextColor : m_InGameTextColorAlt;
+
+		vgui::surface()->DrawSetTextPos( xText, yText );
+		vgui::surface()->DrawSetTextColor( GameUI().IsInLevel() ? inGameTextColor : textColor );
+		vgui::surface()->DrawPrintText( pLabelString, labelLen );
+	}
+
+	x += nTotalWidth;
 }
-
 
 bool CBaseModFooterPanel::HasContent( void )
 {
-	vgui::Label *pLblHelpText = dynamic_cast< vgui::Label* >( FindChildByName( "LblHelpText" ) );
-	bool bHasVisibleHelp = pLblHelpText && pLblHelpText->IsVisible();
+	FooterData_t *pFooterData = &m_FooterData[m_nFooterType];
 
-	if ( bHasVisibleHelp )
+	if ( pFooterData->m_Buttons )
 		return true;
-
-	if ( IsX360() )
-	{
-		if ( m_Buttons )
-			return true;
-	}
 
 	if ( IsPC() )
 	{
@@ -272,95 +658,233 @@ bool CBaseModFooterPanel::HasContent( void )
 }
 
 void CBaseModFooterPanel::PaintBackground()
-{	
+{
+	FooterData_t *pFooterData = &m_FooterData[m_nFooterType];
+
 	if ( !HasContent() )
 		return;
 
-	int x, y, wide, tall;
-	GetBounds( x, y, wide, tall );
+	int x = pFooterData->m_nX;
+	int y = pFooterData->m_nY;
 
-	y = 0;
-
-	if ( IsX360() )
+	if ( !x || !y )
 	{
-		vgui::Label *pLblHelpText = dynamic_cast< vgui::Label* >( FindChildByName( "LblHelpText" ) );
-		bool bHasVisibleHelp = pLblHelpText && pLblHelpText->IsVisible();
-
-		if ( !bHasVisibleHelp )
-		{
-			// shrink and move the footer down
-			y = tall * ( 1.0f - MINIMAL_FOOTER_SCALE );
-			tall = tall * MINIMAL_FOOTER_SCALE;
-		}
-	}
-
-	DrawSmearBackground( 0, y, wide, tall, true );
-
-	if ( IsX360() )
-	{
-		buttonLayout_t *pLayout = &g_ButtonLayouts[m_Format];
-
-		int yOffset = IsX360() ? 8 : 0;
-
-		if ( m_Buttons & FB_ABUTTON )
-		{
-			DrawButtonAndText( pLayout->A_rAlight, pLayout->A_x, pLayout->A_y + yOffset, "#GameUI_Icons_A_3DButton", m_AButtonText );
-		}
-		if ( m_Buttons & FB_BBUTTON )
-		{
-			DrawButtonAndText( pLayout->B_rAlight, pLayout->B_x, pLayout->B_y + yOffset, "#GameUI_Icons_B_3DButton", m_BButtonText );
-		}
-		if ( m_Buttons & FB_XBUTTON )
-		{
-			DrawButtonAndText( pLayout->X_rAlight, pLayout->X_x, pLayout->X_y + yOffset, "#GameUI_Icons_X_3DButton", m_XButtonText );
-		}
-		if ( m_Buttons & FB_YBUTTON )
-		{
-			DrawButtonAndText( pLayout->Y_rAlight, pLayout->Y_x, pLayout->Y_y + yOffset, "#GameUI_Icons_Y_3DButton", m_YButtonText );
-		}
-		if ( m_Buttons & FB_DPAD )
-		{
-			DrawButtonAndText( pLayout->DPad_rAlight, pLayout->DPad_x, pLayout->DPad_y + yOffset, "#GameUI_Icons_CENTER_DPAD", m_DPadButtonText );
-		}
-	}
-
-	UpdateHelp();
-}
-
-void CBaseModFooterPanel::GetPosition( int &x, int &y )
-{
-	int wide, tall;
-	GetBounds( x, y, wide, tall );
-
-	if ( IsPC() )
-	{
+		// no buttons can be at edge of screen
+		// skip drawing until position established
 		return;
 	}
 
-	vgui::Label *pLblHelpText = dynamic_cast< vgui::Label* >( FindChildByName( "LblHelpText" ) );
-	bool bHasVisibleHelp = pLblHelpText && pLblHelpText->IsVisible();
-
-	if ( !bHasVisibleHelp )
+	if ( !BASEMODPANEL_SINGLETON.IsControllerActive() )
 	{
-		// shrink and move the footer down
-		y += tall * ( 1.0f - MINIMAL_FOOTER_SCALE );
+		WINDOW_TYPE wt = CBaseModPanel::GetSingleton().GetActiveWindowType();
+		CBaseModFrame *pWindow = CBaseModPanel::GetSingleton().GetWindow( wt );
+		if ( pWindow )
+		{
+			Button_t buttonOrder[MAX_FOOTER_BUTTONS] = { FB_NONE };
+			GetButtonOrder( pFooterData->m_Format, buttonOrder );
+
+			Vector mins, maxs;
+			ClearBounds( mins, maxs );
+			for ( int i = 0; i < ARRAYSIZE( buttonOrder ); i++ )
+			{
+				CFooterBitmapButton *pButton = m_pButtons[i];
+				if ( !pButton || !pButton->IsVisible() )
+					continue;
+
+				Button_t nButton = buttonOrder[i];
+				if ( !( nButton & pFooterData->m_Buttons ) )
+					continue;
+
+				int nButtonX, nButtonY, nButtonWide, nButtonTall;
+				pButton->GetBounds( nButtonX, nButtonY, nButtonWide, nButtonTall );
+				AddPointToBounds( Vector( nButtonX, nButtonY, 0 ), mins, maxs );
+				AddPointToBounds( Vector( nButtonX + nButtonWide, nButtonY + nButtonTall, 0 ), mins, maxs );
+			}
+
+			if ( AreBoundsValid( mins, maxs ) )
+			{
+				Vector2D buttonBounds;
+				buttonBounds.x = maxs.x - mins.x;
+				buttonBounds.y = maxs.y - mins.y;
+				bool bForce = ( buttonBounds != m_LastDrawnButtonBounds );
+				m_LastDrawnButtonBounds = buttonBounds;
+
+				CBaseModPanel::GetSingleton().GetTransitionEffectPanel()->MarkTilesInRect( mins.x, mins.y, buttonBounds.x, buttonBounds.y, wt, bForce );
+			}
+			else
+			{
+				m_LastDrawnButtonBounds.Init();
+			}
+		}
+	}
+	else
+	{
+		Button_t buttonOrder[MAX_FOOTER_BUTTONS] = { FB_NONE };
+		GetButtonOrder( pFooterData->m_Format, buttonOrder );
+
+		for ( int i = 0; i < ARRAYSIZE( buttonOrder ); i++ )
+		{
+			Button_t nButton = buttonOrder[i];
+			if ( !( nButton & pFooterData->m_Buttons ) )
+				continue;
+
+			if ( nButton & FB_ABUTTON )
+			{
+				DrawButtonAndText( x, y, "#GameUI_Icons_A_3DButton", pFooterData->m_AButtonText.Get(), ( pFooterData->m_nNeedsUniqueLine & FB_ABUTTON ) != 0 );
+			}
+			else if ( nButton & FB_BBUTTON )
+			{
+				DrawButtonAndText( x, y, "#GameUI_Icons_B_3DButton", pFooterData->m_BButtonText.Get(), ( pFooterData->m_nNeedsUniqueLine & FB_BBUTTON ) != 0 );
+			}
+			else if ( nButton & FB_XBUTTON )
+			{
+				DrawButtonAndText( x, y, "#GameUI_Icons_X_3DButton", pFooterData->m_XButtonText.Get(), ( pFooterData->m_nNeedsUniqueLine & FB_XBUTTON ) != 0 );
+			}
+			else if ( nButton & FB_YBUTTON )
+			{
+				DrawButtonAndText( x, y, "#GameUI_Icons_Y_3DButton", pFooterData->m_YButtonText.Get(), ( pFooterData->m_nNeedsUniqueLine & FB_YBUTTON ) != 0 );
+			}
+			else if ( nButton & FB_DPAD )
+			{
+				DrawButtonAndText( x, y, "#GameUI_Icons_CENTER_DPAD", pFooterData->m_DPadButtonText.Get(), ( pFooterData->m_nNeedsUniqueLine & FB_DPAD ) != 0 );
+			}
+		}
+
+#if defined(_PS3) && !defined(NO_STEAM) 
+		if ( ( pFooterData->m_Buttons & FB_STEAM_SELECT ) || !( pFooterData->m_Buttons & FB_STEAM_NOPROFILE ) )
+		{
+			if ( pFooterData->m_Buttons & FB_STEAM_SELECT )
+				DrawButtonAndText( x, y, NULL, "#L4D360UI_SteamFooterInstr", false );
+
+			// if we are logged on, then we have a Steam user ID
+			if ( steamapicontext && steamapicontext->SteamUser() && steamapicontext->SteamUser()->BLoggedOn() &&
+				!( pFooterData->m_Buttons & FB_STEAM_NOPROFILE ) )
+			{
+				CSteamID sID = steamapicontext->SteamUser()->GetSteamID();
+				if ( sID.IsValid() )
+				{
+					if ( m_pAvatarImage && ( sID.ConvertToUint64() != m_xuidAvatarImage ) )
+					{
+						CUIGameData::Get()->AccessAvatarImage( m_xuidAvatarImage, CUIGameData::kAvatarImageRelease );
+						m_xuidAvatarImage = 0ull;
+						m_pAvatarImage = NULL;
+					}
+
+					if ( !m_pAvatarImage )
+					{
+						m_pAvatarImage = CUIGameData::Get()->AccessAvatarImage( sID.ConvertToUint64(), CUIGameData::kAvatarImageRequest );
+						if ( m_pAvatarImage )
+						{
+							m_xuidAvatarImage = sID.ConvertToUint64();
+						}
+					}
+
+					if ( m_pAvatarImage )
+					{
+						int screenWide, screenTall;
+						vgui::surface()->GetScreenSize( screenWide, screenTall );
+
+						// anchor to top RHS of TCR critical title safe 85% 7.5% each side
+						x = 0.925f * (float)screenWide;
+						y = m_nAvatarOffsetY;
+		
+						int x0 = x - m_nAvatarBorderSize;
+						int y0 = y;
+
+						// avatar image, center within border
+						int nAvatarX = x0 + ( m_nAvatarBorderSize - m_nAvatarSize ) / 2;
+						int nAvatarY = y0 + ( m_nAvatarBorderSize - m_nAvatarSize ) / 2;
+						m_pAvatarImage->SetPos( nAvatarX, nAvatarY );
+						m_pAvatarImage->SetSize( m_nAvatarSize, m_nAvatarSize );
+						m_pAvatarImage->Paint();
+
+						if ( m_iAvatarFrameTexture != -1 )
+						{
+							// avatar border frame
+							vgui::surface()->DrawSetColor( Color( 255, 255, 255, 255 ) );
+							vgui::surface()->DrawSetTexture( m_iAvatarFrameTexture );
+							vgui::surface()->DrawTexturedRect( x0, y0, x0 + m_nAvatarBorderSize, y0 + m_nAvatarBorderSize );
+						}
+
+						// text about friends online
+						DrawButtonParams_t dbp;
+						dbp.bRightAlign = true;
+						dbp.hTextFont = m_hAvatarTextFont;
+
+						wchar_t wszText[128];
+						int numOnlineFriendsSteam = CUIGameData::Get()->GetNumOnlineFriends();
+						Q_snwprintf( wszText, ARRAYSIZE( wszText ), L"%u ", numOnlineFriendsSteam );
+						if ( wchar_t *pSteamFooterFriends = g_pVGuiLocalize->Find( (numOnlineFriendsSteam == 1) ? "#L4D360UI_SteamFooter_Friend1" : "#L4D360UI_SteamFooter_Friends" ) )
+						{
+							Q_wcsncpy( wszText + Q_wcslen( wszText ), pSteamFooterFriends, ARRAYSIZE( wszText ) );
+						}
+						dbp.pwszText = wszText;
+						int nAvatarFriendsX = x0 - ( m_nAvatarBorderSize - m_nAvatarSize ) / 2;
+						int nAvatarFriendsY = m_nAvatarFriendsY;
+						DrawButtonAndText( nAvatarFriendsX, nAvatarFriendsY, NULL, " ", false, &dbp );
+					
+						dbp.pwszText = NULL;
+						const char *pName = steamapicontext->SteamFriends()->GetFriendPersonaName( sID );
+						int nAvatarNameX = x0 - ( m_nAvatarBorderSize - m_nAvatarSize ) / 2;
+						int nAvatarNameY = m_nAvatarNameY;
+						DrawButtonAndText( nAvatarNameX, nAvatarNameY, NULL, pName, false, &dbp );
+					}
+				}
+			}
+		}
+#endif
 	}
 }
 
-void CBaseModFooterPanel::SetButtons( CBaseModFooterPanel::FooterButtons_t flags, FooterFormat_t format, bool bEnableHelp )
+FooterButtons_t CBaseModFooterPanel::GetButtons( FooterType_t footerType )
 {
+	FooterData_t *pFooterData = &m_FooterData[footerType];
+
+	return pFooterData->m_Buttons;
+}
+
+FooterFormat_t CBaseModFooterPanel::GetFormat( FooterType_t footerType )
+{
+	FooterData_t *pFooterData = &m_FooterData[footerType];
+
+	return pFooterData->m_Format;
+}
+
+void CBaseModFooterPanel::GetPosition( int &x, int &y, FooterType_t footerType )
+{
+	FooterData_t *pFooterData = &m_FooterData[footerType];
+
+	x = pFooterData->m_nX;
+	y = pFooterData->m_nY;
+}
+
+void CBaseModFooterPanel::SetPosition( int x, int y, FooterType_t footerType )
+{
+	FooterData_t *pFooterData = &m_FooterData[footerType];
+
+	pFooterData->m_nX = x;
+	pFooterData->m_nY = y;
+
+	FixLayout();
+}
+
+void CBaseModFooterPanel::SetButtons( FooterButtons_t flags, FooterFormat_t format, FooterType_t footerType )
+{
+	FooterData_t *pFooterData = &m_FooterData[footerType];
+
 	// this state must stay locked to the button layout as we lack a stack
 	// the stupid ui code already constantly slams the button state to maintain it's view of the global footer
-	SetHelpTextEnabled( bEnableHelp );
+	pFooterData->m_Format = format;
+	pFooterData->m_Buttons = flags;
 
-	m_Format = format;
-
-	// caller can only enable/disable what is allowed by the format
-	m_Buttons = flags & g_ButtonLayouts[m_Format].buttons;	
+	FixLayout();
 }
 
 void CBaseModFooterPanel::SetShowCloud( bool bShow )
 {
+	// currently disabled
+	return;
+
 	if ( IsPC() )
 	{
 		SetControlVisible( "ImageCloud", bShow );
@@ -368,69 +892,156 @@ void CBaseModFooterPanel::SetShowCloud( bool bShow )
 	}
 }
 
-CBaseModFooterPanel::FooterButtons_t CBaseModFooterPanel::GetButtons()
+void CBaseModFooterPanel::SetButtonText( Button_t button, const char *pText, bool bNeedsUniqueLine, FooterType_t footerType )
 {
-	return m_Buttons;
-}
+	FooterData_t *pFooterData = &m_FooterData[footerType];
 
-FooterFormat_t CBaseModFooterPanel::GetFormat()
-{
-	return m_Format;
-}
-
-bool CBaseModFooterPanel::GetHelpTextEnabled()
-{
-	vgui::Label *pLblHelpText = dynamic_cast< vgui::Label* >( FindChildByName( "LblHelpText" ) );
-	return ( pLblHelpText && pLblHelpText->IsVisible() );
-}
-
-void CBaseModFooterPanel::SetButtonText( Button_t button, const char *pText )
-{
-	char *pButtonText;
-	switch( button )
+	switch ( button )
 	{
 	default:
 	case FB_NONE:
 		return;
 	case FB_ABUTTON:
-		pButtonText = m_AButtonText;
+		pFooterData->m_AButtonText = pText;
 		break;
 	case FB_BBUTTON:
-		pButtonText = m_BButtonText;
+		pFooterData->m_BButtonText = pText;
 		break;
 	case FB_XBUTTON:
-		pButtonText = m_XButtonText;
+		pFooterData->m_XButtonText = pText;
 		break;
 	case FB_YBUTTON:
-		pButtonText = m_YButtonText;
+		pFooterData->m_YButtonText = pText;
 		break;
 	case FB_DPAD:
-		pButtonText = m_DPadButtonText;
+		pFooterData->m_DPadButtonText = pText;
+		break;
+	case FB_LSHOULDER:
+		pFooterData->m_LShoulderButtonText = pText;
 		break;
 	}
 
-	V_strncpy( pButtonText, pText, FOOTERPANEL_TEXTLEN );
+	if ( bNeedsUniqueLine )
+	{
+		pFooterData->m_nNeedsUniqueLine |= button;
+	}
+	else
+	{
+		pFooterData->m_nNeedsUniqueLine &= ~button;
+	}
+
+	FixLayout();
 }
 
-void CBaseModFooterPanel::SetHelpTextEnabled( bool bEnabled )
+void CBaseModFooterPanel::OnCommand( const char *pCommand )
 {
-	vgui::Label *pLblHelpText = dynamic_cast< vgui::Label* >( FindChildByName( "LblHelpText" ) );
-	if ( pLblHelpText )
+	if ( BASEMODPANEL_SINGLETON.IsControllerActive() )
+		return;
+
+	CBaseModFrame *pWindow = CBaseModPanel::GetSingleton().GetWindow( CBaseModPanel::GetSingleton().GetActiveWindowType() );
+	if ( pWindow )
 	{
-		pLblHelpText->SetVisible( bEnabled );
+		FooterData_t *pFooterData = &m_FooterData[m_nFooterType];
+
+		Button_t buttonOrder[MAX_FOOTER_BUTTONS] = { FB_NONE };
+		GetButtonOrder( pFooterData->m_Format, buttonOrder );
+
+		if ( !V_strnicmp( pCommand, "Btn", 3 ) )
+		{
+			int nWhich = atoi( pCommand + 3 );
+			Button_t nButton = buttonOrder[nWhich];
+
+			ButtonCode_t keyCode = KEY_NONE;
+			switch ( nButton )
+			{
+			case FB_ABUTTON:
+				keyCode = KEY_XBUTTON_A;
+				break;
+			case FB_BBUTTON:
+				keyCode = KEY_XBUTTON_B;
+				break;
+			case FB_XBUTTON:
+				keyCode = KEY_XBUTTON_X;
+				break;
+			case FB_YBUTTON:
+				keyCode = KEY_XBUTTON_Y;
+				break;
+			case FB_LSHOULDER:
+				keyCode = KEY_XBUTTON_LEFT_SHOULDER;
+				break;
+			default:
+				return;
+			}
+
+			pWindow->OnKeyCodePressed( ButtonCodeToJoystickButtonCode( keyCode, CBaseModPanel::GetSingleton().GetLastActiveUserId() ) );
+		}
 	}
 }
 
-void CBaseModFooterPanel::SetHelpText( const char *pText )
+#ifndef _GAMECONSOLE
+void CBaseModFooterPanel::OnKeyCodeTyped( vgui::KeyCode code )
 {
-	if ( pText )
+	// keypresses in the footer really belong to the active window
+	CBaseModFrame *pWindow = CBaseModPanel::GetSingleton().GetWindow( CBaseModPanel::GetSingleton().GetActiveWindowType() );
+	if ( pWindow )
 	{
-		Q_strncpy( m_HelpText, pText, sizeof( m_HelpText ) );
-		m_fFadeHelpTextStart = 0.0f;
+		pWindow->OnKeyCodeTyped( code );
+	}
+}
+#endif
+
+void CBaseModFooterPanel::SetFooterType( FooterType_t nFooterType )
+{
+	if ( nFooterType == m_nFooterType )
+	{
+		// no change
+		return;
+	}
+
+	m_nFooterType = nFooterType;
+	FixLayout();
+}
+
+FooterType_t CBaseModFooterPanel::GetFooterType()
+{
+	return m_nFooterType;
+}
+
+void CBaseModFooterPanel::GetButtonOrder( FooterFormat_t format, Button_t buttonOrder[MAX_FOOTER_BUTTONS] )
+{
+	// format specifies order
+	switch ( format )
+	{
+	case FF_ABYXDL_ORDER:
+		buttonOrder[0] = FB_ABUTTON;
+		buttonOrder[1] = FB_BBUTTON;
+		buttonOrder[2] = FB_YBUTTON;
+		buttonOrder[3] = FB_XBUTTON;
+		buttonOrder[4] = FB_DPAD;
+		buttonOrder[5] = FB_LSHOULDER;
+		break;
+
+	default:
+		// FF_ABXYDL_ORDER
+		buttonOrder[0] = FB_ABUTTON;
+		buttonOrder[1] = FB_BBUTTON;
+		buttonOrder[2] = FB_XBUTTON;
+		buttonOrder[3] = FB_YBUTTON;
+		buttonOrder[4] = FB_DPAD;
+		buttonOrder[5] = FB_LSHOULDER;
+		break;
 	}
 }
 
-void CBaseModFooterPanel::FadeHelpText( void )
+#if !defined( _GAMECONSOLE )
+void CBaseModFooterPanel::OnMousePressed( vgui::MouseCode code )
 {
-	m_fFadeHelpTextStart = Plat_FloatTime();
+	BaseClass::OnMousePressed( code );
+
+	CBaseModFrame *pWindow = CBaseModPanel::GetSingleton().GetWindow( CBaseModPanel::GetSingleton().GetActiveWindowType() );
+	if ( pWindow )
+	{
+		pWindow->RestoreFocusToActiveControl();
+	}
 }
+#endif

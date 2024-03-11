@@ -22,6 +22,7 @@
 #include "vgui/ISurface.h"
 #include "client_textmessage.h"
 #include "VguiMatSurface/IMatSystemSurface.h"
+#include "hud_savestatus.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -152,6 +153,21 @@ private:
 //-----------------------------------------------------------------------------
 void DispatchHudText( const char *pszText )
 {
+#ifdef PORTAL2
+	// P2ASW HACK: Work around missing save access functions by redirecting
+	// the old HL2 style save message to the save status element
+	// (As a side effect, this makes save_console 1 work correctly, it doesn't in portal 2)
+	if (pszText && (!V_stricmp( "GAMESAVED", pszText ) || !V_stricmp( "GAMESAVING", pszText )) )
+	{
+		CHudSaveStatus *pSaveStatus = GET_FULLSCREEN_HUDELEMENT( CHudSaveStatus );
+		if ( pSaveStatus )
+		{
+			pSaveStatus->SaveStarted();
+			return;
+		}
+	}
+#endif
+
 	if ( pszText == NULL )
 	{
 		(GET_HUDELEMENT( CHudMessage ))->Reset();

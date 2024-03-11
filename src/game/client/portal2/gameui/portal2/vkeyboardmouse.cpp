@@ -25,86 +25,54 @@
 using namespace vgui;
 using namespace BaseModUI;
 
-
-int GetScreenAspectMode( int width, int height );
-
-
-//=============================================================================
-KeyboardMouse::KeyboardMouse(Panel *parent, const char *panelName):
-BaseClass(parent, panelName)
+KeyboardMouse::KeyboardMouse( Panel *parent, const char *panelName ):
+BaseClass( parent, panelName )
 {
-	GameUI().PreventEngineHideGameUI();
-
-	SetDeleteSelfOnClose(true);
-
+	SetDeleteSelfOnClose( true );
 	SetProportional( true );
 
-	SetUpperGarnishEnabled(true);
-	SetLowerGarnishEnabled(true);
+	SetDialogTitle( "#L4D360UI_KeyboardMouse" );
 
 	m_btnEditBindings = NULL;
 	m_drpMouseYInvert = NULL;
-	m_drpMouseFilter = NULL;
 	m_sldMouseSensitivity = NULL;
 	m_drpDeveloperConsole = NULL;
-	m_drpGamepadEnable = NULL;
-	m_sldGamepadHSensitivity = NULL;
-	m_sldGamepadVSensitivity = NULL;
-	m_drpGamepadYInvert = NULL;
-	m_drpGamepadSwapSticks = NULL;
+	m_drpRawMouse = NULL;
+	m_drpMouseAcceleration = NULL;
+	m_sldMouseAcceleration = NULL;
 
-	m_btnCancel = NULL;
+	m_bDirtyConfig = false;
+
+	SetFooterEnabled( true );
+	UpdateFooter( true );
 }
 
-//=============================================================================
 KeyboardMouse::~KeyboardMouse()
 {
-	GameUI().AllowEngineHideGameUI();
-	UpdateFooter( false );
 }
 
-//=============================================================================
-void KeyboardMouse::Activate()
+void KeyboardMouse::ApplySchemeSettings( vgui::IScheme *pScheme )
 {
-	BaseClass::Activate();
+	BaseClass::ApplySchemeSettings( pScheme );
 
+	m_btnEditBindings = dynamic_cast< BaseModHybridButton* >( FindChildByName( "BtnEditBindings" ) );
+	m_drpMouseYInvert = dynamic_cast< BaseModHybridButton* >( FindChildByName( "DrpMouseYInvert" ) );
+	m_sldMouseSensitivity = dynamic_cast< SliderControl* >( FindChildByName( "SldMouseSensitivity" ) );
+	m_drpRawMouse = dynamic_cast< BaseModHybridButton* >( FindChildByName( "DrpRawMouse" ) );
+	m_drpMouseAcceleration = dynamic_cast< BaseModHybridButton* >( FindChildByName( "DrpMouseAcceleration" ) );
+	m_sldMouseAcceleration = dynamic_cast< SliderControl* >( FindChildByName( "SldMouseAcceleration" ) );
+	m_drpDeveloperConsole = dynamic_cast< BaseModHybridButton* >( FindChildByName( "DrpDeveloperConsole" ) );
+	
 	if ( m_drpMouseYInvert )
 	{
-		CGameUIConVarRef m_pitch("m_pitch");
-
+		CGameUIConVarRef m_pitch( "m_pitch" );
 		if ( m_pitch.GetFloat() > 0.0f )
 		{
-			m_drpMouseYInvert->SetCurrentSelection( "MouseYInvertDisabled" );
+			m_drpMouseYInvert->SetCurrentSelection( "#L4D360UI_Disabled" );
 		}
 		else
 		{
-			m_drpMouseYInvert->SetCurrentSelection( "MouseYInvertEnabled" );
-		}
-
-		FlyoutMenu *pFlyout = m_drpMouseYInvert->GetCurrentFlyout();
-		if ( pFlyout )
-		{
-			pFlyout->SetListener( this );
-		}
-	}
-
-	if ( m_drpMouseFilter )
-	{
-		CGameUIConVarRef m_filter("m_filter");
-
-		if ( !m_filter.GetBool() )
-		{
-			m_drpMouseFilter->SetCurrentSelection( "MouseFilterDisabled" );
-		}
-		else
-		{
-			m_drpMouseFilter->SetCurrentSelection( "MouseFilterEnabled" );
-		}
-
-		FlyoutMenu *pFlyout = m_drpMouseFilter->GetCurrentFlyout();
-		if ( pFlyout )
-		{
-			pFlyout->SetListener( this );
+			m_drpMouseYInvert->SetCurrentSelection( "#L4D360UI_Enabled" );
 		}
 	}
 
@@ -113,206 +81,82 @@ void KeyboardMouse::Activate()
 		m_sldMouseSensitivity->Reset();
 	}
 
+#if 0 // Not in Swarm, prevents ConVarRef console spam
+	if ( m_drpRawMouse )
+	{
+		CGameUIConVarRef m_rawinput( "m_rawinput" );
+		if ( !m_rawinput.GetBool() || !IsPlatformWindowsPC() )
+		{
+			m_drpRawMouse->SetCurrentSelection( "#L4D360UI_Disabled" );
+		}
+		else
+		{
+			m_drpRawMouse->SetCurrentSelection( "#L4D360UI_Enabled" );
+		}
+	}
+#endif
+
+	if ( m_drpMouseAcceleration )
+	{
+		CGameUIConVarRef m_customaccel( "m_customaccel" );
+		if ( m_customaccel.GetInt() > 0 )
+		{
+			m_drpMouseAcceleration->SetCurrentSelection( "#L4D360UI_Enabled" );
+//			SetControlEnabled( "SldMouseAcceleration", true );
+		}
+		else
+		{
+			m_drpMouseAcceleration->SetCurrentSelection( "#L4D360UI_Disabled" );
+//			SetControlEnabled( "SldMouseAcceleration", false );
+		}
+	}
+
+	if ( m_sldMouseAcceleration )
+	{
+		m_sldMouseAcceleration->Reset();
+	}
+
 	if ( m_drpDeveloperConsole )
 	{
-		CGameUIConVarRef con_enable("con_enable");
-
+		CGameUIConVarRef con_enable( "con_enable" );
 		if ( !con_enable.GetBool() )
 		{
-			m_drpDeveloperConsole->SetCurrentSelection( "DeveloperConsoleDisabled" );
+			m_drpDeveloperConsole->SetCurrentSelection( "#L4D360UI_Disabled" );
 		}
 		else
 		{
-			m_drpDeveloperConsole->SetCurrentSelection( "DeveloperConsoleEnabled" );
-		}
-
-		FlyoutMenu *pFlyout = m_drpDeveloperConsole->GetCurrentFlyout();
-		if ( pFlyout )
-		{
-			pFlyout->SetListener( this );
+			m_drpDeveloperConsole->SetCurrentSelection( "#L4D360UI_Enabled" );
 		}
 	}
-
-	CGameUIConVarRef joystick("joystick");
-
-	if ( m_drpGamepadEnable )
-	{
-		if ( !joystick.GetBool() )
-		{
-			m_drpGamepadEnable->SetCurrentSelection( "GamepadDisabled" );
-		}
-		else
-		{
-			m_drpGamepadEnable->SetCurrentSelection( "GamepadEnabled" );
-		}
-
-		FlyoutMenu *pFlyout = m_drpGamepadEnable->GetCurrentFlyout();
-		if ( pFlyout )
-		{
-			pFlyout->SetListener( this );
-		}
-	}
-
-	if ( m_sldGamepadHSensitivity )
-	{
-		m_sldGamepadHSensitivity->Reset();
-
-		m_sldGamepadHSensitivity->SetEnabled( joystick.GetBool() );
-	}
-
-	if ( m_sldGamepadVSensitivity )
-	{
-		m_sldGamepadVSensitivity->Reset();
-
-		m_sldGamepadVSensitivity->SetEnabled( joystick.GetBool() );
-	}
-
-	if ( m_drpGamepadYInvert )
-	{
-		CGameUIConVarRef joy_inverty("joy_inverty");
-
-		if ( !joy_inverty.GetBool() )
-		{
-			m_drpGamepadYInvert->SetCurrentSelection( "GamepadYInvertDisabled" );
-		}
-		else
-		{
-			m_drpGamepadYInvert->SetCurrentSelection( "GamepadYInvertEnabled" );
-		}
-
-		m_drpGamepadYInvert->SetEnabled( joystick.GetBool() );
-
-		FlyoutMenu *pFlyout = m_drpGamepadYInvert->GetCurrentFlyout();
-		if ( pFlyout )
-		{
-			pFlyout->SetListener( this );
-		}
-	}
-
-	if ( m_drpGamepadSwapSticks )
-	{
-		CGameUIConVarRef joy_movement_stick("joy_movement_stick");
-
-		if ( !joy_movement_stick.GetBool() )
-		{
-			m_drpGamepadSwapSticks->SetCurrentSelection( "GamepadSwapSticksDisabled" );
-		}
-		else
-		{
-			m_drpGamepadSwapSticks->SetCurrentSelection( "GamepadSwapSticksEnabled" );
-		}
-
-		m_drpGamepadSwapSticks->SetEnabled( joystick.GetBool() );
-
-		FlyoutMenu *pFlyout = m_drpGamepadSwapSticks->GetCurrentFlyout();
-		if ( pFlyout )
-		{
-			pFlyout->SetListener( this );
-		}
-	}
-
-	UpdateFooter( true );
 
 	if ( m_btnEditBindings )
 	{
 		if ( m_ActiveControl )
-			m_ActiveControl->NavigateFrom( );
+		{
+			m_ActiveControl->NavigateFrom();
+		}
 		m_btnEditBindings->NavigateTo();
 		m_ActiveControl = m_btnEditBindings;
 	}
+
+	UpdateFooter( true );
+}
+
+void KeyboardMouse::Activate()
+{
+	BaseClass::Activate();
+	UpdateFooter( true );
 }
 
 void KeyboardMouse::UpdateFooter( bool bEnableCloud )
 {
-	if ( !BaseModUI::CBaseModPanel::GetSingletonPtr() )
-		return;
-
-	CBaseModFooterPanel *footer = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
-	if ( footer )
+	CBaseModFooterPanel *pFooter = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
+	if ( pFooter )
 	{
-		footer->SetButtons( FB_ABUTTON | FB_BBUTTON, FF_AB_ONLY, false );
-		footer->SetButtonText( FB_ABUTTON, "#L4D360UI_Select" );
-		footer->SetButtonText( FB_BBUTTON, "#L4D360UI_Controller_Done" );
+		pFooter->SetButtons( FB_BBUTTON );
+		pFooter->SetButtonText( FB_BBUTTON, "#L4D360UI_Controller_Done" );
 
-		footer->SetShowCloud( bEnableCloud );
-	}
-}
-
-void KeyboardMouse::OnThink()
-{
-	BaseClass::OnThink();
-
-	bool needsActivate = false;
-
-	if( !m_btnEditBindings )
-	{
-		m_btnEditBindings = dynamic_cast< BaseModHybridButton* >( FindChildByName( "BtnEditBindings" ) );
-		needsActivate = true;
-	}
-
-	if( !m_drpMouseYInvert )
-	{
-		m_drpMouseYInvert = dynamic_cast< DropDownMenu* >( FindChildByName( "DrpMouseYInvert" ) );
-		needsActivate = true;
-	}
-
-	if( !m_drpMouseFilter )
-	{
-		m_drpMouseFilter = dynamic_cast< DropDownMenu* >( FindChildByName( "DrpMouseFilter" ) );
-		needsActivate = true;
-	}
-
-	if( !m_sldMouseSensitivity )
-	{
-		m_sldMouseSensitivity = dynamic_cast< SliderControl* >( FindChildByName( "SldMouseSensitivity" ) );
-		needsActivate = true;
-	}
-
-	if( !m_drpDeveloperConsole )
-	{
-		m_drpDeveloperConsole = dynamic_cast< DropDownMenu* >( FindChildByName( "DrpDeveloperConsole" ) );
-		needsActivate = true;
-	}
-
-	if( !m_drpGamepadEnable )
-	{
-		m_drpGamepadEnable = dynamic_cast< DropDownMenu* >( FindChildByName( "DrpGamepadEnable" ) );
-		needsActivate = true;
-	}
-
-	if( !m_sldGamepadHSensitivity )
-	{
-		m_sldGamepadHSensitivity = dynamic_cast< SliderControl* >( FindChildByName( "SldGamepadHSensitivity" ) );
-		needsActivate = true;
-	}
-
-	if( !m_sldGamepadVSensitivity )
-	{
-		m_sldGamepadVSensitivity = dynamic_cast< SliderControl* >( FindChildByName( "SldGamepadVSensitivity" ) );
-		needsActivate = true;
-	}
-
-	if( !m_drpGamepadYInvert )
-	{
-		m_drpGamepadYInvert = dynamic_cast< DropDownMenu* >( FindChildByName( "DrpGamepadYInvert" ) );
-		needsActivate = true;
-	}
-
-	if( !m_drpGamepadSwapSticks )
-	{
-		m_drpGamepadSwapSticks = dynamic_cast< DropDownMenu* >( FindChildByName( "DrpGamepadSwapSticks" ) );
-		needsActivate = true;
-	}
-
-	if( !m_btnCancel )
-	{
-		m_btnCancel = dynamic_cast< BaseModHybridButton* >( FindChildByName( "BtnCancel" ) );
-		needsActivate = true;
-	}
-
-	if( needsActivate )
-	{
-		Activate();
+		pFooter->SetShowCloud( bEnableCloud );
 	}
 }
 
@@ -329,176 +173,99 @@ void KeyboardMouse::OnKeyCodePressed(KeyCode code)
 	{
 	case KEY_XBUTTON_B:
 		// Ready to write that data... go ahead and nav back
-		BaseClass::OnKeyCodePressed(code);
+		BaseClass::OnKeyCodePressed( code );
 		break;
 
 	default:
-		BaseClass::OnKeyCodePressed(code);
+		BaseClass::OnKeyCodePressed( code );
 		break;
 	}
 }
 
-//=============================================================================
-void KeyboardMouse::OnCommand(const char *command)
+void KeyboardMouse::OnCommand( const char *pCommand )
 {
-	if( Q_stricmp( "#L4D360UI_Controller_Edit_Keys_Buttons", command ) == 0 )
+	if ( !V_stricmp( "#L4D360UI_Controller_Edit_Keys_Buttons", pCommand ) )
 	{
-		FlyoutMenu::CloseActiveMenu();
-		CBaseModPanel::GetSingleton().OpenKeyBindingsDialog( this );
+		CBaseModPanel::GetSingleton().OpenWindow( WT_KEYBINDINGS, this, true );
 	}
-	else if( Q_stricmp( "MouseYInvertEnabled", command ) == 0 )
+	else if ( !V_stricmp( "MouseYInvertEnabled", pCommand ) )
 	{
-		CGameUIConVarRef m_pitch("m_pitch");
+		CGameUIConVarRef m_pitch( "m_pitch" );
 		if ( m_pitch.GetFloat() > 0.0f )
 		{
 			m_pitch.SetValue( -1.0f * m_pitch.GetFloat() );
+			m_bDirtyConfig = true;
 		}
 	}
-	else if( Q_stricmp( "MouseYInvertDisabled", command ) == 0 )
+	else if ( !V_stricmp( "MouseYInvertDisabled", pCommand ) )
 	{
-		CGameUIConVarRef m_pitch("m_pitch");
+		CGameUIConVarRef m_pitch( "m_pitch" );
 		if ( m_pitch.GetFloat() < 0.0f )
 		{
 			m_pitch.SetValue( -1.0f * m_pitch.GetFloat() );
+			m_bDirtyConfig = true;
 		}
 	}
-	else if( Q_stricmp( "MouseFilterEnabled", command ) == 0 )
+#if 0 // Not in Swarm, prevents ConVarRef console spam
+	else if ( !V_stricmp( "RawMouseEnabled", pCommand ) )
 	{
-		CGameUIConVarRef m_filter("m_filter");
-		m_filter.SetValue( true );
+		CGameUIConVarRef m_rawinput( "m_rawinput" );
+		m_rawinput.SetValue( true );
+		m_bDirtyConfig = true;
 	}
-	else if( Q_stricmp( "MouseFilterDisabled", command ) == 0 )
+	else if ( !V_stricmp( "RawMouseDisabled", pCommand ) )
 	{
-		CGameUIConVarRef m_filter("m_filter");
-		m_filter.SetValue( false );
+		CGameUIConVarRef m_rawinput( "m_rawinput" );
+		m_rawinput.SetValue( false );
+		m_bDirtyConfig = true;
 	}
-	else if( Q_stricmp( "DeveloperConsoleEnabled", command ) == 0 )
+#endif
+	else if ( !V_stricmp( "MouseAccelerationEnabled", pCommand ) )
 	{
-		CGameUIConVarRef con_enable("con_enable");
+		CGameUIConVarRef m_customaccel( "m_customaccel" );
+		m_customaccel.SetValue( 3 );
+//		SetControlEnabled( "SldMouseAcceleration", true );
+		m_bDirtyConfig = true;
+	}
+	else if ( !V_stricmp( "MouseAccelerationDisabled", pCommand ) )
+	{
+		CGameUIConVarRef m_customaccel( "m_customaccel" );
+		m_customaccel.SetValue( 0 );
+//		SetControlEnabled( "SldMouseAcceleration", false );
+		m_bDirtyConfig = true;
+	}
+	else if ( !V_stricmp( "DeveloperConsoleEnabled", pCommand ) )
+	{
+		CGameUIConVarRef con_enable( "con_enable" );
 		con_enable.SetValue( true );
+		m_bDirtyConfig = true;
 	}
-	else if( Q_stricmp( "DeveloperConsoleDisabled", command ) == 0 )
+	else if ( !V_stricmp( "DeveloperConsoleDisabled", pCommand ) )
 	{
-		CGameUIConVarRef con_enable("con_enable");
+		CGameUIConVarRef con_enable( "con_enable" );
 		con_enable.SetValue( false );
+		m_bDirtyConfig = true;
 	}
-	else if( Q_stricmp( "GamepadEnabled", command ) == 0 )
-	{
-		CGameUIConVarRef joystick("joystick");
-
-		if( joystick.GetBool() == false )
-		{
-			// The joystick is being enabled, and this is a state change
-			// rather than a redundant execution of this code. Enable
-			// the gamepad controls by execing a config file.
-			if ( IsPC() )
-			{
-				engine->ClientCmd_Unrestricted( "exec 360controller_pc.cfg" );
-			}
-			else if ( IsX360() )
-			{
-				engine->ClientCmd_Unrestricted( "exec 360controller_xbox.cfg" );
-			}
-		}
-
-		joystick.SetValue( true );
-
-		SetControlEnabled( "SldGamepadHSensitivity", true );
-		SetControlEnabled( "SldGamepadVSensitivity", true );
-		SetControlEnabled( "DrpGamepadYInvert", true );
-		SetControlEnabled( "DrpGamepadSwapSticks", true );
-	}
-	else if( Q_stricmp( "GamepadDisabled", command ) == 0 )
-	{
-		CGameUIConVarRef joystick("joystick");
-
-		if( joystick.GetBool() == true )
-		{
-			// The gamepad is being disabled, and this is a state change
-			// rather than a redundant execution of this code. Disable
-			// the gamepad by execing a config file.
-			char const *szConfigFile = "exec undo360controller.cfg";
-			engine->ClientCmd_Unrestricted(szConfigFile);
-		}
-
-		joystick.SetValue( false );
-
-		SetControlEnabled( "SldGamepadHSensitivity", false );
-		SetControlEnabled( "SldGamepadVSensitivity", false );
-
-		if ( m_drpGamepadYInvert )
-		{
-			m_drpGamepadYInvert->CloseDropDown();
-			m_drpGamepadYInvert->SetEnabled( false );
-		}
-
-		if ( m_drpGamepadSwapSticks )
-		{
-			m_drpGamepadSwapSticks->CloseDropDown();
-			m_drpGamepadSwapSticks->SetEnabled( false );
-		}
-	}
-	else if( Q_stricmp( "GamepadYInvertEnabled", command ) == 0 )
-	{
-		CGameUIConVarRef joy_inverty("joy_inverty");
-		joy_inverty.SetValue( true );
-	}
-	else if( Q_stricmp( "GamepadYInvertDisabled", command ) == 0 )
-	{
-		CGameUIConVarRef joy_inverty("joy_inverty");
-		joy_inverty.SetValue( false );
-	}
-	else if( Q_stricmp( "GamepadSwapSticksEnabled", command ) == 0 )
-	{
-		CGameUIConVarRef joy_movement_stick("joy_movement_stick");
-		joy_movement_stick.SetValue( true );
-	}
-	else if( Q_stricmp( "GamepadSwapSticksDisabled", command ) == 0 )
-	{
-		CGameUIConVarRef joy_movement_stick("joy_movement_stick");
-		joy_movement_stick.SetValue( false );
-	}
-	else if( Q_stricmp( "Back", command ) == 0 )
+	else if ( !V_stricmp( "Back", pCommand ) )
 	{
 		OnKeyCodePressed( KEY_XBUTTON_B );
 	}
 	else
 	{
-		BaseClass::OnCommand( command );
+		BaseClass::OnCommand( pCommand );
 	}
 }
 
-void KeyboardMouse::OnNotifyChildFocus( vgui::Panel* child )
+Panel *KeyboardMouse::NavigateBack()
 {
-}
+	if ( m_bDirtyConfig ||
+		( m_sldMouseSensitivity && m_sldMouseSensitivity->IsDirty() ) ||
+		( m_sldMouseAcceleration && m_sldMouseAcceleration->IsDirty() ) )
+	{
+		engine->ClientCmd_Unrestricted( VarArgs( "host_writeconfig_ss %d", XBX_GetPrimaryUserId() ) );
+	}
 
-void KeyboardMouse::OnFlyoutMenuClose( vgui::Panel* flyTo )
-{
-	UpdateFooter( true );
-}
-
-void KeyboardMouse::OnFlyoutMenuCancelled()
-{
-}
-
-//=============================================================================
-Panel* KeyboardMouse::NavigateBack()
-{
-	engine->ClientCmd_Unrestricted( VarArgs( "host_writeconfig_ss %d", XBX_GetPrimaryUserId() ) );
+	UpdateFooter( false );
 
 	return BaseClass::NavigateBack();
-}
-
-void KeyboardMouse::PaintBackground()
-{
-	BaseClass::DrawDialogBackground( "#L4D360UI_KeyboardMouse", NULL, "#L4D360UI_Controller_Desc", NULL, NULL, true );
-}
-
-void KeyboardMouse::ApplySchemeSettings( vgui::IScheme *pScheme )
-{
-	BaseClass::ApplySchemeSettings( pScheme );
-
-	// required for new style
-	SetPaintBackgroundEnabled( true );
-	SetupAsDialogStyle();
 }

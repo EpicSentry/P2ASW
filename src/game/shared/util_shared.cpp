@@ -18,7 +18,8 @@
 #include "icommandline.h"
 #include "mathlib/mathlib.h"
 #include "mathlib/ssemath.h"
-
+#include "filesystem.h"
+#include "steam/steam_api.h"
 
 #ifdef CLIENT_DLL
 	#include "clientleafsystem.h"

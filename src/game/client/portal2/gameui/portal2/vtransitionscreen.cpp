@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2008, Valve Corporation, All rights reserved. ============//
+//========= Copyright ï¿½ 1996-2008, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: Transition presentation.
 //
@@ -33,7 +33,11 @@ BaseClass( parent, panelName, true, true )
 
 CTransitionScreen::~CTransitionScreen()
 {
-	surface()->DestroyTextureID( m_iImageID );
+	if ( surface() && m_iImageID != -1 )
+	{
+		surface()->DestroyTextureID( m_iImageID );
+		m_iImageID = -1;
+	}
 }
 
 void CTransitionScreen::ApplySchemeSettings( vgui::IScheme *pScheme )
@@ -43,8 +47,12 @@ void CTransitionScreen::ApplySchemeSettings( vgui::IScheme *pScheme )
 	int screenWide, screenTall;
 	surface()->GetScreenSize( screenWide, screenTall );
 
-	char filename[MAX_PATH];
-	V_snprintf( filename, sizeof( filename ), "console/background01" ); // TODO: engine->GetStartupImage( filename, sizeof( filename ), screenWide, screenTall );
+	bool bIsWidescreen = ( (float)screenWide / (float)screenTall ) >= 1.5999f;
+
+	// Not in Swarm
+	//char filename[MAX_PATH];
+	//engine->GetStartupImage( filename, sizeof( filename ) );
+	const char* filename = bIsWidescreen ? "console/portal2_product_1_widescreen" : "console/portal2_product_1";
 	m_iImageID = surface()->CreateNewTextureID();
 	surface()->DrawSetTextureFile( m_iImageID, filename, true, false );
 

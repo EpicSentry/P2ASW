@@ -14,7 +14,9 @@
 #include "tier1/KeyValues.h"
 #include "tier1/convar.h"
 #include "vgui/IInput.h"
+#ifndef NO_STEAM
 #include "steam/steam_api.h"
+#endif
 #include "tier1/strtools.h"
 #include "gameui_util.h"
 
@@ -369,9 +371,9 @@ COptionsSubAudioThirdPartyCreditsDlg::COptionsSubAudioThirdPartyCreditsDlg( vgui
 {
 	SetProportional( true );
 
-#ifdef SDK_CLIENT_DLL
+#ifdef GAMEUI_BASEMODPANEL_VGUI
 	// parent is ignored, since we want look like we're steal focus from the parent (we'll become modal below)
-	SetScheme( "SwarmFrameScheme" );
+	SetScheme( GAMEUI_BASEMODPANEL_SCHEME );
 #endif
 
 	SetTitle( "#GameUI_ThirdPartyAudio_Title", true );

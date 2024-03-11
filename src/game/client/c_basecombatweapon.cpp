@@ -402,7 +402,7 @@ bool C_BaseCombatWeapon::ShouldSuppressForSplitScreenPlayer( int nSlot )
 
 	// Carried by local player?
 	// Only draw the weapon if we're in some kind of 3rd person mode because the viewmodel will do that otherwise.
-	if ( pOwner == pLocalPlayer && !pLocalPlayer->ShouldDrawLocalPlayer() )
+	if ( pLocalPlayer && pOwner == pLocalPlayer && !pLocalPlayer->ShouldDrawLocalPlayer() )
 	{
 		return true;
 	}

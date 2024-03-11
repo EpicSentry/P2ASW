@@ -1490,6 +1490,13 @@ void CHLClient::HudText( const char * message )
 //-----------------------------------------------------------------------------
 bool CHLClient::HandleGameUIEvent( const InputEvent_t &inputEvent )
 {
+	// this SHOULD allow us to switch between controller and keyboard input prompts...
+	// except for some reason it only gets called when gameui isn't activated??????
+	// I added some extra code in CBaseModPanel that kinda makes it work but it's still not great
+	if (inputEvent.m_nType == IE_ButtonPressed)
+	{
+		BASEMODPANEL_SINGLETON.SetControllerActive( IsJoystickCode((ButtonCode_t)inputEvent.m_nData) );
+	}
 #ifdef GAMEUI_UISYSTEM2_ENABLED
 	// TODO: when embedded UI will be used for HUD, we will need it to maintain
 	// a separate screen for HUD and a separate screen stack for pause menu & main menu.
@@ -1938,257 +1945,6 @@ void CHLClient::LevelInitPreEntity(char const* pMapName)
 		CReplayRagdollRecorder::Instance().Init();
 	}
 #endif
-
-	// Check if the current map is one of the specific maps
-	if (V_strcmp(pMapName, "sp_a1_intro1") == 0)
-	{
-		// map is a part of act one
-		engine->ClientCmd("portal2_current_act 1");
-	}
-	else if (V_strcmp(pMapName, "sp_a1_intro2") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 1");
-	}
-	else if (V_strcmp(pMapName, "sp_a1_intro3") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 1");
-	}
-	else if (V_strcmp(pMapName, "sp_a1_intro4") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 1");
-	}
-	else if (V_strcmp(pMapName, "sp_a1_intro5") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 1");
-	}
-	else if (V_strcmp(pMapName, "sp_a1_intro6") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 1");
-	}
-	else if (V_strcmp(pMapName, "sp_a1_intro7") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 1");
-	}
-	else if (V_strcmp(pMapName, "sp_a1_wakeup") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 1");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_intro") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_laser_intro") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_laser_stairs") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_dual_lasers") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_laser_over_goo") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_catapult_intro") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_trust_fling") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_pit_flings") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_fizzler_intro") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_sphere_peek") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_ricochet") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_bridge_intro") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_bridge_the_gap") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_turret_intro") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_laser_relays") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_turret_blocker") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_laser_vs_turret") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_pull_the_rug") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_column_blocker") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_laser_chaining") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_triple_laser") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_bts1") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_bts2") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_bts3") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_bts4") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_bts5") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_bts6") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a2_core") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 2");
-	}
-	else if (V_strcmp(pMapName, "sp_a3_00") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 3");
-	}
-	else if (V_strcmp(pMapName, "sp_a3_01") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 3");
-	}
-	else if (V_strcmp(pMapName, "sp_a3_03") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 3");
-	}
-	else if (V_strcmp(pMapName, "sp_a3_jump_intro") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 3");
-	}
-	else if (V_strcmp(pMapName, "sp_a3_bomb_flings") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 3");
-	}
-	else if (V_strcmp(pMapName, "sp_a3_crazy_box") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 3");
-	}
-	else if (V_strcmp(pMapName, "sp_a3_transition01") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 3");
-	}
-	else if (V_strcmp(pMapName, "sp_a3_speed_ramp") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 3");
-	}
-	else if (V_strcmp(pMapName, "sp_a3_speed_flings") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 3");
-	}
-	else if (V_strcmp(pMapName, "sp_a3_portal_intro") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 3");
-	}
-	else if (V_strcmp(pMapName, "sp_a3_end") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 3");
-	}
-	else if (V_strcmp(pMapName, "sp_a4_intro") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 4");
-	}
-	else if (V_strcmp(pMapName, "sp_a4_tb_intro") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 4");
-	}
-	else if (V_strcmp(pMapName, "sp_a4_tb_trust_drop") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 4");
-	}
-	else if (V_strcmp(pMapName, "sp_a4_tb_wall_button") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 4");
-	}
-	else if (V_strcmp(pMapName, "sp_a4_tb_polarity") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 4");
-	}
-	else if (V_strcmp(pMapName, "sp_a4_tb_catch") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 4");
-	}
-	else if (V_strcmp(pMapName, "sp_a4_stop_the_box") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 4");
-	}
-	else if (V_strcmp(pMapName, "sp_a4_laser_catapult") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 4");
-	}
-	else if (V_strcmp(pMapName, "sp_a4_laser_platform") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 4");
-	}
-	else if (V_strcmp(pMapName, "sp_a4_speed_catch") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 4");
-	}
-	else if (V_strcmp(pMapName, "sp_a4_jump_polarity") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 4");
-	}
-	else if (V_strcmp(pMapName, "sp_a4_finale1") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 4");
-	}
-	else if (V_strcmp(pMapName, "sp_a4_finale2") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 4");
-	}
-	else if (V_strcmp(pMapName, "sp_a4_finale3") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 4");
-	}
-	else if (V_strcmp(pMapName, "sp_a4_finale4") == 0)
-	{
-		engine->ClientCmd("portal2_current_act 5");
-	}
 }
 
 
@@ -3199,6 +2955,12 @@ void CHLClient::OnScreenSizeChanged( int nOldWidth, int nOldHeight )
 {
 	// Tell split screen system
 	VGui_OnScreenSizeChanged();
+
+	// These were renamed, update them to new values when the game resolution changes.
+	// Since p2asw isn't on consoles this isn't really necessary, but might as well do it
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "GAMECONSOLEWIDE", KeyValuesSystem()->GetKeyValuesExpressionSymbol("X360WIDE") );
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "GAMECONSOLEHIDEF", KeyValuesSystem()->GetKeyValuesExpressionSymbol("X360HIDEF") );
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "GAMECONSOLELODEF", KeyValuesSystem()->GetKeyValuesExpressionSymbol("X360LODEF") );
 }
 
 IMaterialProxy *CHLClient::InstantiateMaterialProxy( const char *proxyName )

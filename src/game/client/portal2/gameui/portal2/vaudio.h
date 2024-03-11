@@ -7,17 +7,13 @@
 #ifndef __VAUDIO_H__
 #define __VAUDIO_H__
 
-
 #include "basemodui.h"
 #include "VFlyoutMenu.h"
 #include "OptionsSubAudio.h"
 
-
 #define MAX_DYNAMIC_AUDIO_LANGUAGES 15
 
-
 typedef struct IVoiceTweak_s IVoiceTweak;
-class CNB_Header_Footer;
 
 namespace BaseModUI {
 
@@ -30,8 +26,7 @@ struct AudioLangauge_t
 	ELanguage languageCode;
 };
 
-
-class Audio : public CBaseModFrame, public FlyoutMenuListener
+class Audio : public CBaseModFrame
 {
 	DECLARE_CLASS_SIMPLE( Audio, CBaseModFrame );
 
@@ -39,72 +34,46 @@ public:
 	Audio(vgui::Panel *parent, const char *panelName);
 	~Audio();
 
-	//FloutMenuListener
-	virtual void OnNotifyChildFocus( vgui::Panel* child );
-	virtual void OnFlyoutMenuClose( vgui::Panel* flyTo );
-	virtual void OnFlyoutMenuCancelled();
-	virtual void PerformLayout();
-
-	Panel* NavigateBack();
-	void UseSelectedLanguage();
 	void ResetLanguage();
 
 	static const char* GetUpdatedAudioLanguage() { return m_pchUpdatedAudioLanguage; }
 
 protected:
 	virtual void Activate();
-	virtual void OnThink();
-	virtual void PaintBackground();
 	virtual void ApplySchemeSettings( vgui::IScheme* pScheme );
 	virtual void OnKeyCodePressed(vgui::KeyCode code);
 	virtual void OnCommand( const char *command );
-
-	void UpdateEnhanceStereo( void );
+	virtual Panel *NavigateBack();
 
 private:
-	void		StartTestMicrophone();
-	void		EndTestMicrophone();
-	void		UpdateFooter( bool bEnableCloud );
-
-	void OpenThirdPartySoundCreditsDialog();
+	void	UpdateFooter( bool bEnableCloud );
+	void	UpdateEnhanceStereo( void );
+	void	PrepareLanguageList();
+	void	UseSelectedLanguage();
+	void	DiscoverAudioLanguages();
+	void	UpdatePttBinding();
 
 	static void AcceptLanguageChangeCallback();
 	static void CancelLanguageChangeCallback();
 
 private:
-	CNB_Header_Footer *m_pHeaderFooter;
+	IVoiceTweak			*m_pVoiceTweak;
 
-	IVoiceTweak		*m_pVoiceTweak;		// Engine voice tweak API.
+	KeyValues::AutoDelete m_autodelete_pResourceLoadConditions;
 
-	SliderControl	*m_sldGameVolume;
-	SliderControl	*m_sldMusicVolume;
-	SliderControl	*m_sldVoiceThreshold;
-	DropDownMenu	*m_drpSpeakerConfiguration;
-	DropDownMenu	*m_drpSoundQuality;
-	DropDownMenu	*m_drpLanguage;
-	DropDownMenu	*m_drpCaptioning;
-
-	DropDownMenu	*m_drpVoiceCommunication;
-	DropDownMenu	*m_drpVoiceCommunicationStyle;
-	SliderControl	*m_sldTransmitVolume;
-	SliderControl	*m_sldRecieveVolume;
-	DropDownMenu	*m_drpBoostMicrophoneGain;
-	BaseModHybridButton	*m_btnTestMicrophone;
-
-	vgui::ImagePanel	*m_pMicMeter;
-	vgui::ImagePanel	*m_pMicMeter2;
-	vgui::ImagePanel	*m_pMicMeterIndicator;
-
-	BaseModHybridButton	*m_btnCancel;
-
-	BaseModHybridButton	*m_btn3rdPartyCredits;
-
-	ELanguage		m_nSelectedAudioLanguage;
-	ELanguage		m_nCurrentAudioLanguage;
-	int				m_nNumAudioLanguages;
-	AudioLangauge_t	m_nAudioLanguages[ MAX_DYNAMIC_AUDIO_LANGUAGES ];
-
-	vgui::DHANDLE<class COptionsSubAudioThirdPartyCreditsDlg> m_OptionsSubAudioThirdPartyCreditsDlg;
+	SliderControl		*m_sldGameVolume;
+	SliderControl		*m_sldMusicVolume;
+	BaseModHybridButton	*m_drpSpeakerConfiguration;
+	BaseModHybridButton	*m_drpSoundQuality;
+	BaseModHybridButton	*m_drpLanguage;
+	BaseModHybridButton	*m_drpCaptioning;
+	BaseModHybridButton	*m_drpVoiceCommunication;
+	BaseModHybridButton *m_drpPuzzlemakerSounds;
+	
+	ELanguage			m_nSelectedAudioLanguage;
+	ELanguage			m_nCurrentAudioLanguage;
+	int					m_nNumAudioLanguages;
+	AudioLangauge_t		m_nAudioLanguages[ MAX_DYNAMIC_AUDIO_LANGUAGES ];
 
 	static const char	*m_pchUpdatedAudioLanguage;
 };

@@ -1,8 +1,6 @@
-"chapters"
-{
-	1	"background_menu"
-}
 "BackgroundMaps"
 {
-	1	"background_menu"
+	1	"portal2_product_1"
+	// Can't randomize startup screens - no way for game code to know which was used
+	// 2	"portal2_product_2"
 }

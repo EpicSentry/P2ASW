@@ -1,0 +1,3460 @@
+"Resource/HudLayout.res"
+{
+	HudIndicator
+	{
+		"fieldName" "HudIndicator"
+		"visible" "1"
+		"enabled" "1"
+		"wide"	 "640"
+		"tall"	 "480"
+	}
+
+	SlowTime
+	{
+		"fieldName" "SlowTime"
+		"visible" "1"
+		"enabled" "1"
+		"wide"	 "640"
+		"tall"	 "480"
+	}
+
+	HudCrosshair
+	{
+		"fieldName" "HudCrosshair"
+		"visible" "1"
+		"enabled" "1"
+		"wide"	 "640"
+		"tall"	 "480"
+	}
+
+	ScorePanel
+	{
+		"fieldName" "ScorePanel"
+		"visible" "1"
+		"enabled" "1"
+		"wide"	 "640"
+		"tall"	 "480"
+	}
+
+	HudMOTD
+	{
+		"fieldName" "HudMOTD"
+		"visible" "1"
+		"enabled" "1"
+		"wide"	 "640"
+		"tall"	 "480"
+	}
+
+	HudMessage
+	{
+		"fieldName" "HudMessage"
+		"visible" "1"
+		"enabled" "1"
+		"wide"	 "640"
+		"tall"	 "480"
+	}
+
+	HudMenu
+	{
+		"fieldName" "HudMenu"
+		"visible" "1"
+		"enabled" "1"
+		"wide"	 "640"
+		"tall"	 "480"
+	}
+
+	HudCloseCaption
+	{
+		"fieldName" "HudCloseCaption"
+		"visible"	"1"
+		"enabled"	"1"
+		"xpos"		"c-250"
+		"ypos"		"276"	[$WIN32]
+		"ypos"		"236"	[$GAMECONSOLE]
+		"wide"		"500"
+		"tall"		"136"	[$WIN32]
+		"tall"		"176"	[$GAMECONSOLE]
+
+		"BgAlpha"	"128"
+
+		"GrowTime"		"0.25"
+		"ItemHiddenTime"	"0.2"  // Nearly same as grow time so that the item doesn't start to show until growth is finished
+		"ItemFadeInTime"	"0.15"	// Once ItemHiddenTime is finished, takes this much longer to fade in
+		"ItemFadeOutTime"	"0.3"
+		"topoffset"		"0"		[$WIN32]
+		"topoffset"		"0"	[$GAMECONSOLE]
+	}
+
+	HudChat
+	{
+		"fieldName" "HudChat"
+		"visible" "0"
+		"enabled" "1"
+		"xpos"	"0"
+		"ypos"	"0"
+		"wide"	 "4"
+		"tall"	 "4"
+	}
+
+	HUDQuickInfo
+	{
+		"fieldName" "HUDQuickInfo"
+		"visible" "1"
+		"enabled" "1"
+		"wide"	 "640"		[$GAMECONSOLE]
+		"tall"	 "480"		[$GAMECONSOLE]
+		"wide"	 "f0"		[!$GAMECONSOLE]
+		"tall"	 "f0"		[!$GAMECONSOLE]
+	}
+
+	HudAnimationInfo
+	{
+		"fieldName" "HudAnimationInfo"
+		"visible" "1"
+		"enabled" "1"
+		"wide"	 "640"
+		"tall"	 "480"
+	}
+
+	HudPortalCrosshair
+	{
+		"fieldName" "HudPortalCrosshair"
+		"visible" "1"
+		"enabled" "1"
+		"wide"	 "640"
+		"tall"	 "480"
+	}
+
+	HudPredictionDump
+	{
+		"fieldName" "HudPredictionDump"
+		"visible" "1"
+		"enabled" "1"
+		"wide"	 "640"
+		"tall"	 "480"
+	}
+
+	HudHintDisplay
+	{
+		"fieldName"				"HudHintDisplay"
+		"visible"				"0"
+		"enabled"				"1"
+		"xpos"					"c-240"
+		"ypos"					"c60"
+		"xpos"	"r148"	[$GAMECONSOLE]
+		"ypos"	"r338"	[$GAMECONSOLE]
+		"wide"					"480"
+		"tall"					"100"
+		"HintSize"				"1"
+		"text_xpos"				"8"
+		"text_ypos"				"8"
+		"center_x"				"0"	// center text horizontally
+		"center_y"				"-1"	// align text on the bottom
+		"paintbackground"		"0"
+	}	
+
+	HudHintKeyDisplay
+	{
+		"fieldName"	"HudHintKeyDisplay"
+		"visible"	"0"
+		"enabled" 	"1"
+		"xpos"		"r120"	[$WIN32]
+		"ypos"		"r340"	[$WIN32]
+		"xpos"		"r148"	[$GAMECONSOLE]
+		"ypos"		"r338"	[$GAMECONSOLE]
+		"wide"		"100"
+		"tall"		"200"
+		"text_xpos"	"8"
+		"text_ypos"	"8"
+		"text_xgap"	"8"
+		"text_ygap"	"8"
+		"TextColor"	"255 170 0 220"
+
+		"PaintBackgroundType"	"2"
+	}
+
+	HudCredits
+	{
+		"fieldName"	"HudCredits"
+		"TextFont"	"Default"
+		"visible"	"1"
+		"xpos"	"0"
+		"ypos"	"0"
+		"wide"	"640"
+		"tall"	"480"
+		"TextColor"	"255 255 255 192"
+
+	}
+	
+	HudCommentary
+	{
+		"fieldName" "HudCommentary"
+		"xpos"	"c-190"
+		"ypos"	"350"
+		"wide"	"380"
+		"tall"  "40"
+		"visible" "1"
+		"enabled" "1"
+		
+		"PaintBackgroundType"	"2"
+		
+		"bar_xpos"		"50"
+		"bar_ypos"		"20"
+		"bar_height"	"8"
+		"bar_width"		"320"
+		"speaker_xpos"	"50"
+		"speaker_ypos"	"6"
+		"count_xpos_from_right"	"10"	// Counts from the right side
+		"count_ypos"	"6"
+		
+		"icon_texture"	"vgui/hud/icon_commentary"
+		"icon_xpos"		"0"
+		"icon_ypos"		"0"		
+		"icon_width"	"40"
+		"icon_height"	"40"
+	}
+	
+	HudHDRDemo
+	{
+		"fieldName" "HudHDRDemo"
+		"xpos"	"0"
+		"ypos"	"0"
+		"wide"	"640"
+		"tall"  "480"
+		"visible" "1"
+		"enabled" "1"
+		
+		"Alpha"	"255"
+		"PaintBackgroundType"	"2"
+		
+		"BorderColor"	"0 0 0 255"
+		"BorderLeft"	"16"
+		"BorderRight"	"16"
+		"BorderTop"		"16"
+		"BorderBottom"	"64"
+		"BorderCenter"	"0"
+		
+		"TextColor"		"255 255 255 255"
+		"LeftTitleY"	"422"
+		"RightTitleY"	"422"
+	}
+
+	AchievementNotificationPanel	
+	{
+		"fieldName"				"AchievementNotificationPanel"
+		"visible"				"1"
+		"enabled"				"1"
+		"xpos"					"0"
+		"ypos"					"180"
+		"wide"					"f10"	[$WIN32]
+		"wide"					"f60"	[$GAMECONSOLE]
+		"tall"					"100"
+	}
+	
+	CHudCoopPingIndicator
+	{
+		"fieldName" "CHudCoopPingIndicator"
+		"visible" "0"
+		"enabled" "1"
+		"wide"	 "640"
+		"tall"	 "480"
+	}
+	
+	HudControlHelper
+	{
+		"fieldName" "HudControlHelper"
+		"visible" "1"
+		"enabled" "1"
+		"wide"	 "640"
+		"tall"	 "480"
+	}
+	
+	HudViewfinder
+	{
+		"fieldName" "HudViewfinder"
+		"visible" "1"
+		"enabled" "1"
+		"wide"	 "640"
+		"tall"	 "480"
+	}
+
+	MultiplayerBasicInfo
+	{
+		"fieldName" "MultiplayerBasicInfo"
+		"visible" "1"
+		"enabled" "1"
+		"wide"	 "640"
+		"tall"	 "480"
+	}
+	
+	HudTrain
+	{
+		"fieldName" "HudTrain"
+		"visible" "1"
+		"enabled" "1"
+		"wide"	 "640"
+		"tall"	 "480"
+	}
+	
+	HudVehicle
+	{
+		"fieldName" "HudVehicle"
+		"visible" "1"
+		"enabled" "1"
+		"wide"	 "640"
+		"tall"	 "480"
+	}
+	
+	HudWeapon
+	{
+		"fieldName" "HudWeapon"
+		"visible" "1"
+		"enabled" "1"
+		"wide"	 "640"
+		"tall"	 "480"
+	}
+
+	HUDAutoAim
+	{
+		"fieldName" "HUDAutoAim"
+		"visible" "1"
+		"enabled" "1"
+		"wide"	 "640"	[$WIN32]
+		"tall"	 "480"	[$WIN32]
+		"wide"	 "960"	[$GAMECONSOLE]
+		"tall"	 "720"	[$GAMECONSOLE]
+	}
+	
+	HudHistoryResource	[$WIN32]
+	{
+		"fieldName" "HudHistoryResource"
+		"visible" "1"
+		"enabled" "1"
+		"xpos"	"r252"
+		"ypos"	"40"
+		"wide"	 "248"
+		"tall"	 "320"
+
+		"history_gap"	"56"
+		"icon_inset"	"38"
+		"text_inset"	"36"
+		"text_inset"	"26"
+		"NumberFont"	"HudNumbersSmall"
+	}
+	HudHistoryResource	[$GAMECONSOLE]
+	{
+		"fieldName" "HudHistoryResource"
+		"visible" "1"
+		"enabled" "1"
+		"xpos"	"r300"
+		"ypos"	"40" 
+		"wide"	 "248"
+		"tall"	 "240"
+
+		"history_gap"	"50"
+		"icon_inset"	"38"
+		"text_inset"	"36"
+		"NumberFont"	"HudNumbersSmall"
+	}
+	
+	HudGeiger
+	{
+		"fieldName" "HudGeiger"
+		"visible" "1"
+		"enabled" "1"
+		"wide"	 "640"
+		"tall"	 "480"
+	}
+	
+	TauntEarned
+	{
+		"fieldName"				"TauntEarned"
+		"visible"				"1"
+		"enabled"				"1"
+		"xpos"					"0"
+		"ypos"					"r50"
+		"wide"					"250"
+		"tall"					"50"
+	}
+	
+	RadialMenu
+	{
+		"fieldName"				"RadialMenu"
+		"visible"				"0"
+		"enabled"				"0"
+		"xpos"					"0"
+		"ypos"					"0"
+		"zpos"					"1"
+		"wide"					"f0"
+		"tall"					"f0"
+	}
+	
+	PaintIcon	
+	{
+		"fieldName"				"PaintIcon"
+		"visible"				"0"
+		"enabled"				"0"
+		"xpos"					"50"
+		"ypos"					"r200"
+		"wide"					"50"
+		"tall"					"150"
+		"bgcolor_override"		"0 0 0 0"
+	}
+	
+	PaintGunPowersIndicator
+	{
+		"fieldName"				"PaintGunPowersIndicator"
+		"visible"				"1"
+		"enabled"				"1"
+		"xpos"					"c-30"
+		"ypos"					"r25"
+		"wide"					"90"
+		"tall"					"20"
+		"bgcolor_override"		"0 0 0 0"
+	}
+	
+	PaintSwapGuns
+	{
+		"fieldName"				"PaintSwapGuns"
+		"visible"				"1"
+		"enabled"				"1"
+		"xpos"					"c-25"
+		"ypos"					"c-25"
+		"wide"					"50"
+		"tall"					"50"
+		"bgcolor_override"		"0 0 0 0"
+	}
+	
+	PaintIndicator
+	{
+		"fieldName"				"PaintIndicator"
+		"visible"				"1"
+		"enabled"				"1"
+		"xpos"					"c-50"
+		"ypos"					"c-50"
+		"wide"					"100"
+		"tall"					"100"
+	}
+}
+///////////////////////////////////////////////////////////
+// Tracker scheme resource file
+//
+// sections:
+//		Colors			- all the colors used by the scheme
+//		BaseSettings	- contains settings for app to use to draw controls
+//		Fonts			- list of all the fonts used by app
+//		Borders			- description of all the borders
+//
+///////////////////////////////////////////////////////////
+Scheme
+{
+	//////////////////////// COLORS ///////////////////////////
+	// color details
+	// this is a list of all the colors used by the scheme
+	Colors
+	{
+		// base colors
+		"White"				"255 255 255 255"
+		"OffWhite"			"216 216 216 255"
+		"DullWhite"			"142 142 142 255"
+		"Orange"			"255 155 0 255"
+		"TransparentBlack"	"0 0 0 128"
+		"Black"				"0 0 0 255"
+
+		"Blank"				"0 0 0 0"
+		
+		"SteamLightGreen"	"157 194 80 255"
+		"AchievementsLightGrey"		"79 79 79 255"
+		"AchievementsDarkGrey"		"55 55 55 255"
+		"AchievementsInactiveFG"	"130 130 130 255"
+		
+		"ScrollBarGrey"		"51 51 51 255"
+		"ScrollBarHilight"	"110 110 110 255"
+		"ScrollBarDark"		"38 38 38 255"
+	}
+
+	///////////////////// BASE SETTINGS ////////////////////////
+	//
+	// default settings for all panels
+	// controls use these to determine their settings
+	BaseSettings
+	{
+		// vgui_controls color specifications
+		Border.Bright					"200 200 200 196"	// the lit side of a control
+		Border.Dark						"40 40 40 196"		// the dark/unlit side of a control
+		Border.Selection				"0 0 0 196"			// the additional border color for displaying the default/selected button
+
+		Button.TextColor				"White"
+		Button.BgColor					"Blank"
+		Button.ArmedTextColor			"White"
+		Button.ArmedBgColor				"Blank"				[$WIN32]
+		Button.ArmedBgColor				"190 115 0 255"		[$GAMECONSOLE]
+		Button.DepressedTextColor		"White"
+		Button.DepressedBgColor			"Blank"
+		Button.FocusBorderColor			"Black"
+		
+		CheckButton.TextColor			"OffWhite"
+		CheckButton.SelectedTextColor	"White"
+		CheckButton.BgColor				"TransparentBlack"
+		CheckButton.Border1  			"Border.Dark" 		// the left checkbutton border
+		CheckButton.Border2  			"Border.Bright"		// the right checkbutton border
+		CheckButton.Check				"White"				// color of the check itself
+
+		ComboBoxButton.ArrowColor		"DullWhite"
+		ComboBoxButton.ArmedArrowColor	"White"
+		ComboBoxButton.BgColor			"Blank"
+		ComboBoxButton.DisabledBgColor	"Blank"
+
+		Frame.TitleTextInsetX			16
+		Frame.ClientInsetX				8
+		Frame.ClientInsetY				6
+		Frame.BgColor					"160 160 160 128"	[$WIN32]
+		Frame.BgColor					"80 80 80 192"		[$GAMECONSOLE]
+		Frame.OutOfFocusBgColor			"160 160 160 32"	[$WIN32]
+		Frame.OutOfFocusBgColor			"80 80 80 192"		[$GAMECONSOLE]
+		Frame.FocusTransitionEffectTime	"0.3"							// time it takes for a window to fade in/out on focus/out of focus
+		Frame.TransitionEffectTime		"0.3"				[$WIN32]	// time it takes for a window to fade in/out on open/close
+		Frame.TransitionEffectTime		"0.2"				[$GAMECONSOLE]		// time it takes for a window to fade in/out on open/close
+		Frame.AutoSnapRange				"0"
+		FrameGrip.Color1				"200 200 200 196"
+		FrameGrip.Color2				"0 0 0 196"
+		FrameTitleButton.FgColor		"200 200 200 196"
+		FrameTitleButton.BgColor		"Blank"
+		FrameTitleButton.DisabledFgColor	"255 255 255 192"
+		FrameTitleButton.DisabledBgColor	"Blank"
+		FrameSystemButton.FgColor		"Blank"
+		FrameSystemButton.BgColor		"Blank"
+		FrameSystemButton.Icon			""
+		FrameSystemButton.DisabledIcon	""
+		FrameTitleBar.Font				"UiBold"		[$WIN32]
+		FrameTitleBar.Font				"DefaultLarge"	[$WIN32]
+		FrameTitleBar.TextColor			"White"
+		FrameTitleBar.BgColor			"Blank"
+		FrameTitleBar.DisabledTextColor	"255 255 255 192"
+		FrameTitleBar.DisabledBgColor	"Blank"
+
+		GraphPanel.FgColor				"White"
+		GraphPanel.BgColor				"TransparentBlack"
+
+		Label.TextDullColor				"DullWhite"
+		Label.TextColor					"OffWhite"
+		Label.TextBrightColor			"White"
+		Label.SelectedTextColor			"White"
+		Label.BgColor					"Blank"
+		Label.DisabledFgColor1			"117 117 117 255"
+		Label.DisabledFgColor2			"30 30 30 255"
+
+		ListPanel.TextColor					"OffWhite"
+		ListPanel.TextBgColor				"Blank"
+		ListPanel.BgColor					"TransparentBlack"
+		ListPanel.SelectedTextColor			"Black"
+		ListPanel.SelectedBgColor			"Orange"
+		ListPanel.SelectedOutOfFocusBgColor	"255 155 0 128"
+		ListPanel.EmptyListInfoTextColor	"OffWhite"
+
+		Menu.TextColor					"White"
+		Menu.BgColor					"160 160 160 64"
+		Menu.ArmedTextColor				"Black"
+		Menu.ArmedBgColor				"Orange"
+		Menu.TextInset					"6"
+
+		Panel.FgColor					"DullWhite"
+		Panel.BgColor					"Blank"
+
+		ProgressBar.FgColor				"White"
+		ProgressBar.BgColor				"TransparentBlack"
+
+		PropertySheet.TextColor			"OffWhite"
+		PropertySheet.SelectedTextColor	"White"
+		PropertySheet.TransitionEffectTime	"0.25"	// time to change from one tab to another
+
+		RadioButton.TextColor			"DullWhite"
+		RadioButton.SelectedTextColor	"White"
+
+		RichText.TextColor				"OffWhite"
+		RichText.BgColor				"TransparentBlack"
+		RichText.SelectedTextColor		"Black"
+		RichText.SelectedBgColor		"Orange"
+
+		ScrollBar.Wide					17
+	  	ScrollBarNobBorder.Outer 			"ScrollBarDark"
+		ScrollBarNobBorder.Inner 			"ScrollBarGrey"
+		ScrollBarNobBorderHover.Inner 			"ScrollBarGrey"
+		ScrollBarNobBorderDragging.Inner 		"ScrollBarHilight"
+
+		ScrollBarButton.FgColor				"ScrollBarHilight"
+		ScrollBarButton.BgColor				"ScrollBarGrey"
+		ScrollBarButton.ArmedFgColor			"ScrollBarHilight"
+		ScrollBarButton.ArmedBgColor			"ScrollBarGrey"
+		ScrollBarButton.DepressedFgColor		"ScrollBarHilight"
+		ScrollBarButton.DepressedBgColor		"ScrollBarGrey"
+
+		ScrollBarSlider.Inset				1			// Number of pixels to inset scroll bar nob
+		ScrollBarSlider.FgColor				"ScrollBarGrey"			// nob color
+		ScrollBarSlider.BgColor				"ScrollBarDark"	// slider background color
+		ScrollBarSlider.NobFocusColor			"ScrollBarHilight"		// nob mouseover color
+		ScrollBarSlider.NobDragColor			"ScrollBarHilight"		// nob active drag color
+
+		SectionedListPanel.HeaderTextColor	"White"
+		SectionedListPanel.HeaderBgColor	"Blank"
+		SectionedListPanel.DividerColor		"Black"
+		SectionedListPanel.TextColor		"DullWhite"
+		SectionedListPanel.BrightTextColor	"White"
+		SectionedListPanel.BgColor			"TransparentBlack"
+		SectionedListPanel.SelectedTextColor			"Black"
+		SectionedListPanel.SelectedBgColor				"Orange"
+		SectionedListPanel.OutOfFocusSelectedTextColor	"Black"
+		SectionedListPanel.OutOfFocusSelectedBgColor	"255 155 0 128"
+
+		Slider.NobColor				"108 108 108 255"
+		Slider.NobFocusColor			"200 200 200 255"
+		Slider.TextColor			"180 180 180 255"
+		Slider.TrackColor			"31 31 31 255"
+		Slider.DisabledTextColor1	"117 117 117 255"
+		Slider.DisabledTextColor2	"30 30 30 255"
+
+		TextEntry.TextColor			"OffWhite"
+		TextEntry.BgColor			"TransparentBlack"
+		TextEntry.CursorColor		"OffWhite"
+		TextEntry.DisabledTextColor	"DullWhite"
+		TextEntry.DisabledBgColor	"Blank"
+		TextEntry.SelectedTextColor	"Black"
+		TextEntry.SelectedBgColor	"Orange"
+		TextEntry.OutOfFocusSelectedBgColor	"255 155 0 128"
+		TextEntry.FocusEdgeColor	"0 0 0 196"
+
+		ToggleButton.SelectedTextColor	"White"
+
+		Tooltip.TextColor			"0 0 0 196"
+		Tooltip.BgColor				"Orange"
+
+		TreeView.BgColor			"TransparentBlack"
+
+		WizardSubPanel.BgColor		"Blank"
+
+		// scheme-specific colors
+		MainMenu.TextColor			"White"				[$WIN32]
+		MainMenu.TextColor			"200 200 200 255"	[$GAMECONSOLE]
+		MainMenu.ArmedTextColor		"200 200 200 255"	[$WIN32]
+		MainMenu.ArmedTextColor		"White"				[$GAMECONSOLE]
+		MainMenu.DepressedTextColor	"192 186 80 255"
+		MainMenu.MenuItemHeight		"30"				[$WIN32]
+		MainMenu.MenuItemHeight			"22"				[$GAMECONSOLE]
+		MainMenu.MenuItemHeight_hidef	"32"				[$GAMECONSOLE]
+		MainMenu.Inset				"32"
+		MainMenu.Backdrop			"0 0 0 156"
+
+		Console.TextColor			"OffWhite"
+		Console.DevTextColor		"White"
+
+		NewGame.TextColor			"White"
+		NewGame.FillColor			"0 0 0 255"
+		NewGame.SelectionColor		"Orange"			[$WIN32]
+		NewGame.SelectionColor		"0 0 0 255"			[$GAMECONSOLE]
+		NewGame.DisabledColor		"128 128 128 196"
+
+		MessageDialog.MatchmakingBG			"46 43 42 255"	[$GAMECONSOLE]
+		MessageDialog.MatchmakingBGBlack			"22 22 22 255"	[$GAMECONSOLE]
+		
+		MatchmakingMenuItemTitleColor			"200 184 151 255"	[$GAMECONSOLE]
+		MatchmakingMenuItemDescriptionColor		"200 184 151 255"	[$GAMECONSOLE]
+	}
+
+	//////////////////////// FONTS /////////////////////////////
+	//
+	// describes all the fonts
+	Fonts
+	{
+		// fonts are used in order that they are listed
+		// fonts listed later in the order will only be used if they fulfill a range not already filled
+		// if a font fails to load then the subsequent fonts will replace
+
+		"DebugFixed"
+		{
+			"1"
+			{
+				"name"		"Courier New"
+				"tall"		"11" [$POSIX]
+				"tall"		"10"
+				"weight"	"400"
+				"antialias" "1"
+			}
+		}
+
+		"DebugFixedSmall" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Courier New"
+				"tall"		"7"	
+				"weight"	"400"
+				"antialias" "1"
+			}
+		}
+
+		"DefaultFixedOutline" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		 "Lucida Console"
+				"tall"		 "14" [$LINUX]
+				"tall"		 "10"
+				"weight"	 "0"
+				"outline"	 "1"
+			}
+		}
+
+		"DefaultFixed" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Lucida Console"
+				"tall"		"11" [$POSIX]
+				"tall"		"10"
+				"weight"	"0"
+			}
+		}
+
+		"DefaultFixedDropShadow" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Lucida Console"
+				"tall"		"14" [$LINUX]
+				"tall"		"11" [$POSIX]
+				"weight"	"0"
+				"dropshadow" "1"
+			}
+		}
+
+		"Default" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Tahoma"
+				"tall"		"16" [!$LINUX]
+				"tall"		"18" [$LINUX]
+				"weight"	"500"
+			}
+		}
+		
+		"DefaultBold" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Tahoma"
+				"tall"		"16" [!$LINUX]
+				"tall"		"18" [$LINUX]
+				"weight"	"1000"
+			}
+		}
+		
+		"DefaultUnderline" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Tahoma"
+				"tall"		"16" [!$LINUX]
+				"tall"		"18" [$LINUX]
+				"weight"	"500"
+				"underline" "1"
+			}
+		}
+		
+		"DefaultSmall" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Tahoma"
+				"tall"		"12" [!$POSIX]
+				"tall"		"13" [$POSIX]
+				"weight"	"0"
+			}
+		}
+		
+		"DefaultSmallDropShadow" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Tahoma"
+				"tall"		"13"
+				"weight"	"0"
+				"dropshadow" "1"
+			}
+		}
+
+		"DefaultVerySmall" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Tahoma"
+				"tall"		"12"
+				"weight"	"0"
+			}
+		}
+
+		"DefaultLarge" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Tahoma"
+				"tall"		"18"
+				"weight"	"0"
+			}
+		}
+		
+		"UiBold" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Tahoma"
+				"tall"		"12" [!$LINUX]
+				"tall"		"15" [$LINUX]
+				"weight"	"1000"
+			}
+		}
+		
+		"MenuLarge" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Verdana"
+				"tall"		"24" [$LINUX]
+				"tall"		"16"
+				"weight"	"600"
+				"antialias" "1"
+			}
+		}
+		
+		"AchievementTitleFont" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Verdana"
+				"tall"		"20"
+				"weight"	"1200"
+				"antialias" "1"
+				"outline" "1"
+			}
+		}
+		
+		"AchievementDescriptionFont" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Verdana"
+				"tall"		"15"
+				"weight"	"1200"
+				"antialias" "1"
+				"outline"	"1"
+				"yres"		"0 480"
+			}
+			
+			"2"
+			{
+				"name"		"Verdana"
+				"tall"		"20"
+				"weight"	"1200"
+				"antialias" "1"
+				"outline"	 "1"
+				"yres"		"481 10000"
+			}
+		}
+			
+		"ConsoleText" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Lucida Console" [!$OSX]
+				"name"		"Lucida Grande" [$OSX]
+				"tall"		"14" [$LINUX]
+				"tall"		"12" [$OSX]
+				"tall"		"10" [!$OSX]
+				"weight"	"500"
+			}
+		}
+
+		// this is the symbol font
+		"Marlett" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Marlett"
+				"tall"		"14"
+				"weight"	"0"
+				"symbol"	"1"
+			}
+		}
+
+		"Trebuchet24" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Trebuchet MS"
+				"tall"		"24"
+				"weight"	"900"
+			}
+		}
+
+		"Trebuchet20" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Trebuchet MS"
+				"tall"		"20"
+				"weight"	"900"
+			}
+		}
+
+		"Trebuchet18" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Trebuchet MS"
+				"tall"		"18"
+				"weight"	"900"
+			}
+		}
+
+		// HUD numbers
+		// We use multiple fonts to 'pulse' them in the HUD, hence the need for many of near size
+		"HUDNumber" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Trebuchet MS"
+				"tall"		"40"
+				"weight"	"900"
+			}
+		}
+		
+		"HUDNumber1" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Trebuchet MS"
+				"tall"		"41"
+				"weight"	"900"
+			}
+		}
+		
+		"HUDNumber2" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Trebuchet MS"
+				"tall"		"42"
+				"weight"	"900"
+			}
+		}
+
+		"HUDNumber3" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Trebuchet MS"
+				"tall"		"43"
+				"weight"	"900"
+			}
+		}
+
+		"HUDNumber4" [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"Trebuchet MS"
+				"tall"		"44"
+				"weight"	"900"
+			}
+		}
+
+		"HUDNumber5" [!$GAMECONSOLE]
+		{
+			"1" 
+			{
+				"name"		"Trebuchet MS"
+				"tall"		"45"
+				"weight"	"900"
+			}
+		}
+
+		TitleFont [!$GAMECONSOLE]
+		{
+			"1" 
+			{
+				"name"		"HalfLife2"
+				"tall"		"72"
+				"weight"	"400"
+				"antialias"	"1"
+				"custom"	"1"
+			}
+		}
+
+		TitleFont2 [!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"		"HalfLife2"
+				"tall"		"120"
+				"weight"	"400"
+				"antialias"	"1"
+				"custom"	"1"
+			}
+		}
+		
+		AchievementItemTitle	[!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"			"Arial"
+				"weight"		"1500"
+				"tall"			"16"
+				"antialias"		"1"
+			}
+		}
+		
+		AchievementItemDescription	[!$GAMECONSOLE]
+		{
+			"1"
+			{
+				"name"			"Arial"
+				"weight"		"1000"
+				"tall"			"14"
+				"antialias"		"1"
+			}
+		}
+	}
+
+	//
+	//////////////////// BORDERS //////////////////////////////
+	//
+	// describes all the border types
+	Borders
+	{
+		BaseBorder		DepressedBorder
+		ButtonBorder	RaisedBorder
+		ComboBoxBorder	DepressedBorder
+		MenuBorder		RaisedBorder
+		BrowserBorder	DepressedBorder
+		PropertySheetBorder	RaisedBorder
+
+		FrameBorder
+		{
+			// rounded corners for frames
+			"backgroundtype" "2"
+		}
+
+		DepressedBorder
+		{
+			"inset" "0 0 1 1"
+			Left
+			{
+				"1"
+				{
+					"color" "Border.Dark"
+					"offset" "0 1"
+				}
+			}
+
+			Right
+			{
+				"1"
+				{
+					"color" "Border.Bright"
+					"offset" "1 0"
+				}
+			}
+
+			Top
+			{
+				"1"
+				{
+					"color" "Border.Dark"
+					"offset" "0 0"
+				}
+			}
+
+			Bottom
+			{
+				"1"
+				{
+					"color" "Border.Bright"
+					"offset" "0 0"
+				}
+			}
+		}
+		RaisedBorder
+		{
+			"inset" "0 0 1 1"
+			Left
+			{
+				"1"
+				{
+					"color" "Border.Bright"
+					"offset" "0 1"
+				}
+			}
+
+			Right
+			{
+				"1"
+				{
+					"color" "Border.Dark"
+					"offset" "0 0"
+				}
+			}
+
+			Top
+			{
+				"1"
+				{
+					"color" "Border.Bright"
+					"offset" "0 1"
+				}
+			}
+
+			Bottom
+			{
+				"1"
+				{
+					"color" "Border.Dark"
+					"offset" "0 0"
+				}
+			}
+		}
+		
+		TitleButtonBorder
+		{
+			"backgroundtype" "0"
+		}
+
+		TitleButtonDisabledBorder
+		{
+			"backgroundtype" "0"
+		}
+
+		TitleButtonDepressedBorder
+		{
+			"backgroundtype" "0"
+		}
+
+		ScrollBarButtonBorder
+		{
+			"inset" "2 2 0 0"
+			Left
+			{
+				"1"
+				{
+					"color" "Border.Dark"
+					"offset" "0 1"
+				}
+			}
+
+			Right
+			{
+				"1"
+				{
+					"color" "Border.Dark"
+					"offset" "1 0"
+				}
+			}
+
+			Top
+			{
+				"1"
+				{
+					"color" "Border.Dark"
+					"offset" "0 0"
+				}
+			}
+
+			Bottom
+			{
+				"1"
+				{
+					"color" "Border.Dark"
+					"offset" "0 0"
+				}
+			}
+		}
+		
+		ScrollBarButtonDepressedBorder
+		{
+			"inset" "2 2 0 0"
+			Left
+			{
+				"1"
+				{
+					"color" "Border.Dark"
+					"offset" "0 1"
+				}
+			}
+
+			Right
+			{
+				"1"
+				{
+					"color" "Border.Bright"
+					"offset" "1 0"
+				}
+			}
+
+			Top
+			{
+				"1"
+				{
+					"color" "Border.Dark"
+					"offset" "0 0"
+				}
+			}
+
+			Bottom
+			{
+				"1"
+				{
+					"color" "Border.Bright"
+					"offset" "0 0"
+				}
+			}
+		}
+
+		ScrollBarSliderBorder
+		{
+			"inset" "2 2 0 0"
+			Left
+			{
+				"1"
+				{
+					"color" "ScrollBarHilight"
+					"offset" "0 1"
+				}
+			}
+
+			Right
+			{
+				"1"
+				{
+					"color" "ScrollBarDark"
+					"offset" "1 0"
+				}
+			}
+
+			Top
+			{
+				"1"
+				{
+					"color" "ScrollBarHilight"
+					"offset" "0 0"
+				}
+			}
+
+			Bottom
+			{
+				"1"
+				{
+					"color" "ScrollBarDark"
+					"offset" "0 0"
+				}
+			}
+		}
+		
+		ScrollBarSliderBorderHover ScrollBarSliderBorder
+		ScrollBarSliderBorderDragging ScrollBarSliderBorder
+		
+		TabBorder
+		{
+			"inset" "0 0 1 1"
+			Left
+			{
+				"1"
+				{
+					"color" "Border.Bright"
+					"offset" "0 1"
+				}
+			}
+
+			Right
+			{
+				"1"
+				{
+					"color" "Border.Dark"
+					"offset" "1 0"
+				}
+			}
+
+			Top
+			{
+				"1"
+				{
+					"color" "Border.Bright"
+					"offset" "0 0"
+				}
+			}
+
+		}
+
+		TabActiveBorder
+		{
+			"inset" "0 0 1 0"
+			Left
+			{
+				"1"
+				{
+					"color" "Border.Bright"
+					"offset" "0 0"
+				}
+			}
+
+			Right
+			{
+				"1"
+				{
+					"color" "Border.Dark"
+					"offset" "1 0"
+				}
+			}
+
+			Top
+			{
+				"1"
+				{
+					"color" "Border.Bright"
+					"offset" "0 0"
+				}
+			}
+
+		}
+
+
+		ToolTipBorder
+		{
+			"inset" "0 0 1 0"
+			Left
+			{
+				"1"
+				{
+					"color" "Border.Dark"
+					"offset" "0 0"
+				}
+			}
+
+			Right
+			{
+				"1"
+				{
+					"color" "Border.Dark"
+					"offset" "1 0"
+				}
+			}
+
+			Top
+			{
+				"1"
+				{
+					"color" "Border.Dark"
+					"offset" "0 0"
+				}
+			}
+
+			Bottom
+			{
+				"1"
+				{
+					"color" "Border.Dark"
+					"offset" "0 0"
+				}
+			}
+		}
+
+		// this is the border used for default buttons (the button that gets pressed when you hit enter)
+		ButtonKeyFocusBorder
+		{
+			"inset" "0 0 1 1"
+			Left
+			{
+				"1"
+				{
+					"color" "Border.Selection"
+					"offset" "0 0"
+				}
+				"2"
+				{
+					"color" "Border.Bright"
+					"offset" "0 1"
+				}
+			}
+			Top
+			{
+				"1"
+				{
+					"color" "Border.Selection"
+					"offset" "0 0"
+				}
+				"2"
+				{
+					"color" "Border.Bright"
+					"offset" "1 0"
+				}
+			}
+			Right
+			{
+				"1"
+				{
+					"color" "Border.Selection"
+					"offset" "0 0"
+				}
+				"2"
+				{
+					"color" "Border.Dark"
+					"offset" "1 0"
+				}
+			}
+			Bottom
+			{
+				"1"
+				{
+					"color" "Border.Selection"
+					"offset" "0 0"
+				}
+				"2"
+				{
+					"color" "Border.Dark"
+					"offset" "0 0"
+				}
+			}
+		}
+
+		ButtonDepressedBorder
+		{
+			"inset" "2 1 1 1"
+			Left
+			{
+				"1"
+				{
+					"color" "Border.Dark"
+					"offset" "0 1"
+				}
+			}
+
+			Right
+			{
+				"1"
+				{
+					"color" "Border.Bright"
+					"offset" "1 0"
+				}
+			}
+
+			Top
+			{
+				"1"
+				{
+					"color" "Border.Dark"
+					"offset" "0 0"
+				}
+			}
+
+			Bottom
+			{
+				"1"
+				{
+					"color" "Border.Bright"
+					"offset" "0 0"
+				}
+			}
+		}
+	}
+
+	//////////////////////// CUSTOM FONT FILES /////////////////////////////
+	//
+	// specifies all the custom (non-system) font files that need to be loaded to service the above described fonts
+	CustomFontFiles [!$GAMECONSOLE]
+	{
+		"1"		"resource/HALFLIFE2.vfont"	
+		"2"		"vgui/fonts/marlett.ttf"	[$OSX||$LINUX]
+
+		"7"		"resource/linux_fonts/DejaVuSans.ttf"
+		"8"		"resource/linux_fonts/DejaVuSans-Bold.ttf"
+		"9"		"resource/linux_fonts/DejaVuSans-BoldOblique.ttf"
+		"10"		"resource/linux_fonts/DejaVuSans-Oblique.ttf"
+		"11"		"resource/linux_fonts/LiberationSans-Regular.ttf"
+		"12"		"resource/linux_fonts/LiberationSans-Bold.ttf"
+		"13"		"resource/linux_fonts/LiberationMono-Regular.ttf"
+	}
+}
+"Resource/UI/Audio.res"
+{
+	"Audio"
+	{
+		"ControlName"		"Frame"
+		"fieldName"			"Audio"
+		"xpos"				"0"
+		"ypos"				"0"
+		"wide"				"7"
+		"tall"				"5"
+		"autoResize"		"0"
+		"visible"			"1"
+		"enabled"			"1"
+		"tabPosition"		"0"
+		"dialogstyle"		"1"
+	}
+	
+	"SldGameVolume"
+	{
+		"ControlName"			"SliderControl"
+		"fieldName"				"SldGameVolume"
+		"xpos"					"0"
+		"ypos"					"0"
+		"wide"					"0"
+		"tall"					"25"
+		"visible"				"1"
+		"enabled"				"1"
+		"tabPosition"			"0"
+		"minValue"				"0.0"
+		"maxValue"				"1.0"
+		"stepSize"				"0.05"
+		"navUp"					"BtnSetupMicrophone"
+		"navDown"				"SldMusicVolume"
+		"conCommand"			"volume"
+		"inverseFill"			"0"
+				
+		//button and label
+		"BtnDropButton"
+		{
+			"ControlName"			"BaseModHybridButton"
+			"fieldName"				"BtnDropButton"
+			"xpos"					"0"
+			"ypos"					"0"
+			"zpos"					"0"
+			"wide"					"0"
+			"tall"					"0"
+			"autoResize"			"1"
+			"pinCorner"				"0"
+			"visible"				"1"
+			"enabled"				"1"
+			"tabPosition"			"0"
+			"labelText"				"#L4D360UI_AudioOptions_Volume"
+			"style"					"LeftDialogButton"
+			"command"				""
+			"ActivationType"		"1"
+			"usablePlayerIndex"		"nobody"
+		}
+	}
+	
+	"SldMusicVolume"
+	{
+		"ControlName"			"SliderControl"
+		"fieldName"				"SldMusicVolume"
+		"xpos"					"0"
+		"ypos"					"25"
+		"wide"					"0"
+		"tall"					"25"
+		"visible"				"1"
+		"enabled"				"1"
+		"tabPosition"			"0"
+		"minValue"				"0.0"
+		"maxValue"				"1.0"
+		"stepSize"				"0.05"
+		"navUp"					"SldGameVolume"
+		"navDown"				"DrpSpeakerConfiguration"
+		"conCommand"			"snd_musicvolume"
+		"inverseFill"			"0"
+		
+		//button and label
+		"BtnDropButton"
+		{
+			"ControlName"			"BaseModHybridButton"
+			"fieldName"				"BtnDropButton"
+			"xpos"					"0"
+			"ypos"					"0"
+			"zpos"					"0"
+			"wide"					"0"
+			"tall"					"0"
+			"autoResize"			"1"
+			"pinCorner"				"0"
+			"visible"				"1"
+			"enabled"				"1"
+			"tabPosition"			"0"
+			"labelText"				"#L4D360UI_AudioOptions_MusicVolume"
+			"style"					"LeftDialogButton"
+			"command"				""
+			"ActivationType"		"1"
+			"usablePlayerIndex"		"nobody"
+		}
+	}
+	
+	"DrpSpeakerConfiguration"
+	{
+		"ControlName"		"BaseModHybridButton"
+		"fieldName"			"DrpSpeakerConfiguration"
+		"xpos"				"0"
+		"ypos"				"50"
+		"wide"				"0"
+		"tall"				"20"
+		"visible"			"1"
+		"enabled"			"1"
+		"tabPosition"		"0"
+		"navUp"				"SldMusicVolume"
+		"navDown"			"DrpSoundQuality"
+		"labelText"			"#GameUI_SpeakerConfiguration"
+		"style"				"DialogListButton"
+		"list"
+		{
+			"#GameUI_Headphones"	"#GameUI_Headphones"
+			"#GameUI_2Speakers"		"#GameUI_2Speakers"
+			"#GameUI_4Speakers"		"#GameUI_4Speakers"
+			"#GameUI_5Speakers"		"#GameUI_5Speakers"
+		}
+	}
+	
+	"DrpSoundQuality"
+	{
+		"ControlName"		"BaseModHybridButton"
+		"fieldName"			"DrpSoundQuality"
+		"xpos"				"0"
+		"ypos"				"75"
+		"wide"				"0"
+		"tall"				"20"
+		"visible"			"1"
+		"enabled"			"1"
+		"tabPosition"		"0"
+		"navUp"				"DrpSpeakerConfiguration"
+		"navDown"			"DrpCaptioning"
+		"labelText"			"#GameUI_SoundQuality"
+		"style"				"DialogListButton"
+		"list"
+		{
+			"#GameUI_Low"		"#GameUI_Low"
+			"#GameUI_Medium"	"#GameUI_Medium"
+			"#GameUI_High"		"#GameUI_High"
+		}
+	}
+
+	"DrpCaptioning"
+	{
+		"ControlName"		"BaseModHybridButton"
+		"fieldName"			"DrpCaptioning"
+		"xpos"				"0"
+		"ypos"				"100"
+		"wide"				"0"
+		"tall"				"20"
+		"visible"			"1"
+		"enabled"			"1"
+		"tabPosition"		"0"
+		"navUp"				"DrpSoundQuality"
+		"navDown"			"DrpCaptionLanguage"
+		"labelText"			"#L4D360UI_AudioOptions_Caption"
+		"style"				"DialogListButton"
+		"list"
+		{
+			"#L4D360UI_AudioOptions_CaptionOff"			"#L4D360UI_AudioOptions_CaptionOff"
+			"#L4D360UI_AudioOptions_CaptionSubtitles"	"#L4D360UI_AudioOptions_CaptionSubtitles"
+			"#L4D360UI_AudioOptions_CaptionOn"			"#L4D360UI_AudioOptions_CaptionOn"
+		}
+	}
+	
+	"DrpCaptionLanguage"
+	{
+		"ControlName"			"BaseModHybridButton"
+		"fieldName"				"DrpCaptionLanguage"
+		"xpos"					"0"
+		"ypos"					"125"
+		"wide"					"0"
+		"tall"					"20"
+		"visible"				"1"
+		"enabled"				"1"
+		"?localizedaudio"
+		{
+			"visible"				"1"
+			"enabled"				"1"
+		}
+		"usetitlesafe"			"0"
+		"tabPosition"			"0"
+		"navUp"					"DrpCaptioning"
+		"navDown"				"DrpLanguage"
+		"labelText"				"#L4D360UI_AudioOptions_CCLanguage"
+		"style"					"DialogListButton"
+		"list"
+		{
+			"#L4D360UI_AudioOptions_UI"						"cclang_"
+			"#L4D360UI_AudioOptions_English"				"cclang_english"
+			"#L4D360UI_AudioOptions_French"					"cclang_french"
+			"#L4D360UI_AudioOptions_German"					"cclang_german"
+			"#L4D360UI_AudioOptions_Spanish"                "cclang_spanish"
+			"#L4D360UI_AudioOptions_Czech"                  "cclang_czech"
+			"#L4D360UI_AudioOptions_Danish"                 "cclang_danish"
+			"#L4D360UI_AudioOptions_Dutch"                  "cclang_dutch"
+			"#L4D360UI_AudioOptions_Finnish"                "cclang_finnish"
+			"#L4D360UI_AudioOptions_Hungarian"              "cclang_hungarian"
+			"#L4D360UI_AudioOptions_Italian"                "cclang_italian"
+			"#L4D360UI_AudioOptions_Japanese"               "cclang_japanese"
+			"#L4D360UI_AudioOptions_Korean"                 "cclang_koreana"
+			"#L4D360UI_AudioOptions_Norwegian"              "cclang_norwedgian"
+			"#L4D360UI_AudioOptions_Polish"                 "cclang_polish"
+			"#L4D360UI_AudioOptions_Portuguese"             "cclang_portuguese"
+			"#L4D360UI_AudioOptions_Romanian"               "cclang_romanian"
+			"#L4D360UI_AudioOptions_Russian"                "cclang_russian"
+			"#L4D360UI_AudioOptions_SimplifiedChinese"      "cclang_schinese"
+			"#L4D360UI_AudioOptions_Swedish"                "cclang_swedish"
+			"#L4D360UI_AudioOptions_Thai"                   "cclang_thai"
+			"#L4D360UI_AudioOptions_TraditionalChinese"     "cclang_tchinese"
+			"#L4D360UI_AudioOptions_Turkish"                "cclang_turkish"
+		}
+	}
+
+	"DrpLanguage"
+	{
+		"ControlName"			"BaseModHybridButton"
+		"fieldName"				"DrpLanguage"
+		"xpos"					"0"
+		"ypos"					"150"
+		"wide"					"0"
+		"tall"					"20"
+		"visible"				"0"
+		"enabled"				"0"
+		"?localizedaudio"
+		{
+			"visible"				"1"
+			"enabled"				"1"
+		}
+		"usetitlesafe"			"0"
+		"tabPosition"			"0"
+		"navUp"					"DrpCaptionLanguage"
+		"navDown"				"DrpVoiceCommunication"
+		"labelText"				"#L4D360UI_AudioOptions_Language"
+		"style"					"DialogListButton"
+		"list"
+		{
+			"_language0"		"_language0"
+			"_language1"		"_language1"
+			"_language2"		"_language2"
+			"_language3"		"_language3"
+			"_language4"		"_language4"
+			"_language5"		"_language5"
+			"_language6"		"_language6"
+			"_language7"		"_language7"
+			"_language8"		"_language8"
+			"_language9"		"_language9"
+			"_language:"		"_language:"
+			"_language;"		"_language;"
+			"_language<"		"_language<"
+			"_language="		"_language="
+			"_language>"		"_language>"
+		}
+	}
+	
+	"DrpVoiceCommunication"
+	{
+		"ControlName"		"BaseModHybridButton"
+		"fieldName"			"DrpVoiceCommunication"
+		"xpos"				"0"
+		"ypos"				"150"
+		"wide"				"0"
+		"tall"				"20"
+		"visible"			"1"
+		"enabled"			"1"
+		"?localizedaudio"
+		{
+			"ypos"				"175"
+		}
+		"usetitlesafe"		"0"
+		"tabPosition"		"0"
+		"navUp"				"DrpLanguage"
+		"navDown"			"DrpVoicePTT"
+		"labelText"			"#GameUI_EnableVoice"
+		"style"				"DialogListButton"
+		"list"
+		{
+			"#L4D360UI_Disabled"	"VoiceCommunicationDisabled"
+			"#L4D360UI_PushToTalk"	"VoiceCommunicationPushToTalk"
+			"#L4D360UI_OpenMic"		"VoiceCommunicationOpenMic"
+		}
+	}
+
+	"DrpVoicePTT"
+	{
+		"ControlName"		"BaseModHybridButton"
+		"fieldName"			"DrpVoicePTT"
+		"xpos"				"0"
+		"ypos"				"175"
+		"wide"				"0"
+		"tall"				"20"
+		"visible"			"1"
+		"enabled"			"1"
+		"?localizedaudio"
+		{
+			"ypos"				"200"
+		}
+		"usetitlesafe"		"0"
+		"tabPosition"		"0"
+		"navUp"				"DrpVoiceCommunication"
+		"navDown"			"BtnSetupMicrophone"
+		"labelText"			"#Valve_Use_Voice_Communication"
+		"style"				"LeftDialogButton"
+		"command"			"DrpVoicePTT"
+		"ActivationType"			"1"
+		"FocusDisabledBorderSize"	"1"
+	}
+
+	"BtnSetupMicrophone"
+	{
+		"ControlName"			"BaseModHybridButton"
+		"fieldName"				"BtnSetupMicrophone"
+		"xpos"					"0"
+		"ypos"					"200"
+		"wide"					"0"
+		"tall"					"20"
+		"visible"				"1"
+		"enabled"				"1"
+		"?localizedaudio"
+		{
+			"ypos"				"225"
+		}
+		"tabPosition"			"0"
+		"wrap"					"1"
+		"navUp"					"DrpVoicePTT"
+		"navDown"				"SldGameVolume"
+		"labelText"				"#PORTAL2_SetupMicrophone"
+		"style"					"DefaultButton"
+		"command"				"BtnSetupMicrophone"
+	}
+}
+"Resource/UI/ControllerOptions.res"
+{
+	"ControllerOptions"
+	{
+		"ControlName"		"Frame"
+		"fieldName"			"ControllerOptions"
+		"xpos"				"0"
+		"ypos"				"0"
+		"wide"				"7"
+		"tall"				"5"
+		"visible"			"1"
+		"enabled"			"1"
+		"tabPosition"		"0"
+		"dialogstyle"		"1"
+	}
+	
+	"DrpController"
+	{
+		"ControlName"				"BaseModHybridButton"
+		"fieldName"					"DrpController"
+		"xpos"						"0"
+		"ypos"						"25"
+		"zpos"						"3"
+		"wide"						"0"
+		"tall"						"20"
+		"visible"					"0"		[$GAMECONSOLE]
+		"enabled"					"0"		[$GAMECONSOLE]
+		"visible"					"1"		[!$GAMECONSOLE]
+		"enabled"					"1"		[!$GAMECONSOLE]
+		"tabPosition"				"0"
+		"navUp"						"DrpHorizontalLookType"
+		"navDown"					"BtnEditButtons"
+		"labelText"					"#L4D360UI_Controller"
+		"style"						"DialogListButton"
+		"OnlyActiveUser"			"1"
+		"list"
+		{
+			"#L4D360UI_Disabled"	"ControllerDisabled"
+			"#L4D360UI_Enabled"		"ControllerEnabled"
+		}
+	}		
+		
+	"BtnEditButtons"
+	{
+		"ControlName"				"BaseModHybridButton"
+		"fieldName"					"BtnEditButtons"
+		"xpos"						"0"
+		"ypos"						"25"	[$GAMECONSOLE]
+		"ypos"						"50"	[!$GAMECONSOLE]
+		"zpos"						"3"
+		"wide"						"0"
+		"tall"						"20"
+		"visible"					"1"
+		"enabled"					"1"
+		"tabPosition"				"0"
+		"navUp"						"DrpController"
+		"navDown"					"BtnEditSticks"
+		"labelText"					"#L4D360UI_Controller_Edit_Buttons"
+		"style"						"LeftDialogButton"
+		"command" 					"EditButtons"
+		"ActivationType"			"1"
+		"OnlyActiveUser"			"1"
+		"FocusDisabledBorderSize"	"1"
+	}	
+		
+	"BtnEditSticks"
+	{
+		"ControlName"				"BaseModHybridButton"
+		"fieldName"					"BtnEditSticks"
+		"xpos"						"0"
+		"ypos"						"50"	[$GAMECONSOLE]
+		"ypos"						"75"	[!$GAMECONSOLE]
+		"zpos"						"3"
+		"wide"						"0"
+		"tall"						"20"
+		"visible"					"1"
+		"enabled"					"1"
+		"tabPosition"				"0"
+		"navUp"						"BtnEditButtons"
+		"navDown"					"SldVertSens"
+		"labelText"					"#L4D360UI_Controller_Edit_Sticks"
+		"style"						"LeftDialogButton"
+		"command" 					"EditSticks"
+		"ActivationType"			"1"
+		"OnlyActiveUser"			"1"
+		"FocusDisabledBorderSize"	"1"
+	}	
+		
+	"SldVertSens"
+	{
+		"ControlName"			"SliderControl"
+		"fieldName"				"SldVertSens"
+		"xpos"					"0"
+		"ypos"					"75"	[$GAMECONSOLE]
+		"ypos"					"100"	[!$GAMECONSOLE]
+		"zpos"					"3"
+		"wide"					"0"
+		"tall"					"20"
+		"visible"				"1"
+		"enabled"				"1"
+		"tabPosition"			"0"
+		"minValue"				"0.3"
+		"maxValue"				"3.05"
+		"inverseFill"			"0"
+		"stepSize"				"0.25"
+		"navUp"					"BtnEditSticks"
+		"navDown"				"SldHorizSens"
+		"conCommand"			"joy_pitchsensitivity"
+		"conCommandDefault"		"joy_pitchsensitivity_default"
+		
+		//button and label
+		"BtnDropButton"
+		{
+			"ControlName"			"BaseModHybridButton"
+			"fieldName"				"BtnDropButton"
+			"xpos"					"0"
+			"ypos"					"0"
+			"zpos"					"0"
+			"wide"					"0"
+			"tall"					"20"
+			"autoResize"			"1"
+			"visible"				"1"
+			"enabled"				"1"
+			"tabPosition"			"0"
+			"labelText"				"#L4D360UI_Controller_Pitch"
+			"style"					"LeftDialogButton"
+			"command"				""
+			"ActivationType"		"1"	
+			"OnlyActiveUser"		"1"
+			"usablePlayerIndex"		"nobody"
+		}
+	}	
+	
+	"SldHorizSens"
+	{
+		"ControlName"			"SliderControl"
+		"fieldName"				"SldHorizSens"
+		"xpos"					"0"
+		"ypos"					"100"	[$GAMECONSOLE]
+		"ypos"					"125"	[!$GAMECONSOLE]
+		"zpos"					"3"
+		"wide"					"0"
+		"tall"					"20"
+		"visible"				"1"
+		"enabled"				"1"
+		"tabPosition"			"0"
+		"minValue"				"-3.0"
+		"maxValue"				"-0.3"
+		"stepSize"				"0.25"
+		"inverseFill"			"1"
+		"navUp"					"SldVertSens"
+		"navDown"				"DrpVerticalLookType"
+		"conCommand"			"joy_yawsensitivity"
+		"conCommandDefault"		"joy_yawsensitivity_default"
+		
+		//button and label
+		"BtnDropButton"
+		{
+			"ControlName"			"BaseModHybridButton"
+			"fieldName"				"BtnDropButton"
+			"xpos"					"0"
+			"ypos"					"0"
+			"zpos"					"0"
+			"wide"					"0"
+			"tall"					"20"
+			"autoResize"			"1"
+			"visible"				"1"
+			"enabled"				"1"
+			"tabPosition"			"0"
+			"labelText"				"#L4D360UI_Controller_Yaw"
+			"style"					"LeftDialogButton"
+			"command"				""
+			"ActivationType"		"1"
+			"OnlyActiveUser"		"1"
+			"usablePlayerIndex"		"nobody"
+		}
+	}
+	
+	"DrpVerticalLookType"
+	{
+		"ControlName"		"BaseModHybridButton"
+		"fieldName"			"DrpVerticalLookType"
+		"xpos"				"0"
+		"ypos"				"125"	[$GAMECONSOLE]
+		"ypos"				"150"	[!$GAMECONSOLE]
+		"zpos"				"3"
+		"wide"				"0"
+		"tall"				"20"
+		"visible"			"1"
+		"enabled"			"1"
+		"tabPosition"		"0"
+		"navUp"				"SldHorizSens"
+		"navDown"			"DrpHorizontalLookType"
+		"labelText"			"#PORTAL2_Controller_VerticalLookType"
+		"style"				"DialogListButton"
+		"OnlyActiveUser"	"1"
+		"list"
+		{
+			"#L4D360UI_Controller_Normal"	"VerticalNormal"
+			"#L4D360UI_Controller_Inverted"	"VerticalInverted"
+		}
+	}
+
+	"DrpHorizontalLookType"
+	{
+		"ControlName"		"BaseModHybridButton"
+		"fieldName"			"DrpHorizontalLookType"
+		"xpos"				"0"
+		"ypos"				"150"	[$GAMECONSOLE]
+		"ypos"				"175"	[!$GAMECONSOLE]
+		"zpos"				"3"
+		"wide"				"0"
+		"tall"				"20"
+		"visible"			"1"
+		"enabled"			"1"
+		"tabPosition"		"0"
+		"navUp"				"DrpVerticalLookType"
+		"navDown"			"DrpController"
+		"labelText"			"#PORTAL2_Controller_HorizontalLookType"
+		"style"				"DialogListButton"
+		"OnlyActiveUser"	"1"
+		"list"
+		{
+			"#L4D360UI_Controller_Normal"	"HorizontalNormal"
+			"#L4D360UI_Controller_Inverted"	"HorizontalInverted"
+		}
+	}
+
+	"BtnDefaults"
+	{
+		"ControlName"				"BaseModHybridButton"
+		"fieldName"					"BtnDefaults"
+		"xpos"						"0"
+		"ypos"						"150"
+		"zpos"						"3"
+		"wide"						"0"
+		"tall"						"20"
+		"visible"					"1"		[$GAMECONSOLE]
+		"visible"					"0"		[!$GAMECONSOLE]
+		"enabled"					"1"
+		"tabPosition"				"0"
+		"navUp"						"SldAcceleration"
+		"navDown"					"DrpController"
+		"labelText"					"#L4D360UI_Controller_Default"
+		"style"						"LeftDialogButton"
+		"command" 					"Defaults"
+		"ActivationType"			"1"
+		"OnlyActiveUser"			"1"
+		"FocusDisabledBorderSize"	"1"
+	}
+}
+"Resource/UI/ControllerOptionsButtons.res"
+{
+	"ControllerOptionsButtons"
+	{
+		"ControlName"		"Frame"
+		"fieldName"			"ControllerOptionsButtons"
+		"xpos"				"0"
+		"ypos"				"0"
+		"wide"				"10"
+		"tall"				"5"
+		"autoResize"		"0"
+		"pinCorner"			"0"
+		"visible"			"1"
+		"enabled"			"1"
+		"tabPosition"		"0"
+		"dialogstyle"		"1"
+	}
+		
+	"BtnSpec1"
+	{
+		"ControlName"				"BaseModHybridButton"
+		"fieldName"					"BtnSpec1"
+		"xpos"						"0"
+		"ypos"						"25"
+		"wide"						"100"
+		"tall"						"20"
+		"autoResize"				"0"
+		"visible"					"1"
+		"enabled"					"1"
+		"tabPosition"				"0"
+		"navUp"						"BtnSpecCustom"
+		"navDown"					"BtnSpec2"
+		"labelText"					"#L4D360UI_Controller_Buttons_Config1"
+		"style"						"LeftDialogButton"
+		"command" 					"BtnSpec1"
+		"ActivationType"			"1"
+		"OnlyActiveUser"			"1"
+		"IgnoreButtonA"				"1"
+		"FocusDisabledBorderSize"	"1"
+	}	
+	
+	"BtnSpec2"
+	{
+		"ControlName"				"BaseModHybridButton"
+		"fieldName"					"BtnSpec2"
+		"xpos"						"0"
+		"ypos"						"50"
+		"wide"						"100"
+		"tall"						"20"
+		"autoResize"				"0"
+		"visible"					"1"
+		"enabled"					"1"
+		"tabPosition"				"0"
+		"navUp"						"BtnSpec1"
+		"navDown"					"BtnSpec3"
+		"labelText"					"#L4D360UI_Controller_Buttons_Config2"
+		"style"						"LeftDialogButton"
+		"command" 					"BtnSpec2"
+		"ActivationType"			"1"
+		"OnlyActiveUser"			"1"
+		"IgnoreButtonA"				"1"
+		"FocusDisabledBorderSize"	"1"
+	}	
+	
+	"BtnSpec3"
+	{
+		"ControlName"				"BaseModHybridButton"
+		"fieldName"					"BtnSpec3"
+		"xpos"						"0"
+		"ypos"						"75"
+		"wide"						"100"
+		"tall"						"20"
+		"autoResize"				"0"
+		"visible"					"1"
+		"enabled"					"1"
+		"tabPosition"				"0"
+		"navUp"						"BtnSpec2"
+		"navDown"					"BtnSpec4"
+		"labelText"					"#L4D360UI_Controller_Buttons_Config3"
+		"style"						"LeftDialogButton"
+		"command" 					"BtnSpec3"
+		"ActivationType"			"1"
+		"OnlyActiveUser"			"1"
+		"IgnoreButtonA"				"1"
+		"FocusDisabledBorderSize"	"1"
+	}
+	
+	"BtnSpec4"
+	{
+		"ControlName"				"BaseModHybridButton"
+		"fieldName"					"BtnSpec4"
+		"xpos"						"0"
+		"ypos"						"100"
+		"wide"						"100"
+		"tall"						"20"
+		"autoResize"				"0"
+		"visible"					"1"
+		"enabled"					"1"
+		"tabPosition"				"0"
+		"navUp"						"BtnSpec3"
+		"navDown"					"BtnSpecCustom"
+		"labelText"					"#L4D360UI_Controller_Buttons_Config4"
+		"style"						"LeftDialogButton"
+		"command" 					"BtnSpec4"
+		"ActivationType"			"1"
+		"OnlyActiveUser"			"1"
+		"IgnoreButtonA"				"1"
+		"FocusDisabledBorderSize"	"1"
+	}
+	
+	"BtnSpecCustom"
+	{
+		"ControlName"				"BaseModHybridButton"
+		"fieldName"					"BtnSpecCustom"
+		"xpos"						"0"
+		"ypos"						"125"
+		"wide"						"100"
+		"tall"						"20"
+		"autoResize"				"0"
+		"visible"					"1"
+		"enabled"					"1"
+		"tabPosition"				"0"
+		"navUp"						"BtnSpec4"
+		"navDown"					"BtnSpec1"
+		"labelText"					"#PORTAL2_Controller_Buttons_Custom"
+		"style"						"LeftDialogButton"
+		"command" 					"BtnSpecCustom"
+		"ActivationType"			"1"
+		"OnlyActiveUser"			"1"
+		"IgnoreButtonA"				"1"
+		"FocusDisabledBorderSize"	"1"
+	}	
+
+	"bgpanel"
+	{
+		"ControlName"			"ImagePanel"
+		"fieldName"				"bgpanel"
+		"xpos"					"100"
+		"ypos"					"0"
+		"zpos"					"-999"	// otherwise it eats focus
+		"wide"					"400"
+		"tall"					"250"
+		"visible"				"1"
+		"enabled"				"1"
+		"tabPosition"			"0"
+		"drawcolor_override"	"0 0 0 50"
+		"scaleImage"			"1"
+		"image"					"white"
+	}
+
+	"listpanel_custombindlist"
+	{
+		"ControlName"		"SectionedListPanel"
+		"fieldName"			"listpanel_custombindlist"
+		"xpos"				"100"
+		"ypos"				"0"
+		"wide"				"400"
+		"tall"				"250"
+		"autoResize"		"0"
+		"visible"			"0"
+		"enabled"			"1"
+		"tabPosition"		"0"
+		"bgcolor_override"	"0 0 0 0"
+		"linespacing"		"25"
+	}	
+		
+	"LabelContainer"
+	{
+		"ControlName"		"EditablePanel"
+		"fieldName"			"LabelContainer"
+		"xpos"				"50"
+		"ypos"				"25"
+		"wide"				"550"
+		"tall"				"270"
+		"visible"			"1"
+		"enabled"			"1"
+		
+		"ControllerImage"
+		{
+			"ControlName"			"ImagePanel"
+			"fieldName"				"ControllerImage"
+			"xpos"					"110"
+			"ypos"					"0"
+			"wide"					"200"
+			"tall"					"200"
+			"autoResize"			"0"
+			"visible"				"1"
+			"enabled"				"1"		
+			"scaleImage"			"1"
+			"image"					"controller_layout_buttons" [!$PS3]
+			"image"					"controller_layout_buttons_ps3" [$PS3]
+		}
+		
+		"ControllerImageCallouts"
+		{
+			"ControlName"			"ImagePanel"
+			"fieldName"				"ControllerImageCallouts"
+			"xpos"					"110"
+			"ypos"					"0"
+			"wide"					"200"
+			"tall"					"200"
+			"autoResize"			"0"
+			"visible"				"1"
+			"enabled"				"1"		
+			"scaleImage"			"1"
+			"image"					"controller_stick_callouts_360" [!$PS3]
+			"image"					"controller_stick_callouts_ps3" [$PS3]
+		}
+
+		// Xbox 360: Left Stick - Ping - Gesture
+		// PS3 : Ping - Gesture - Left Stick
+		
+		"LblDPadPing"
+		{
+			"ControlName"				"Label"
+			"fieldName"					"LblDPadPing"
+			"xpos"						"-22"	[!$GAMECONSOLE]
+			"ypos"						"164"	[!$GAMECONSOLE]
+			"xpos"						"-22"	[$X360 && $GAMECONSOLEHIDEF]
+			"ypos"						"166"	[$X360 && $GAMECONSOLEHIDEF]
+			"xpos"						"-22"	[$X360 && $GAMECONSOLELODEF]
+			"ypos"						"163"	[$X360 && $GAMECONSOLELODEF]
+			"xpos"						"-22"	[$PS3 && $GAMECONSOLEHIDEF]
+			"ypos"						"166"	[$PS3 && $GAMECONSOLEHIDEF]
+			"xpos"						"-22"	[$PS3 && $GAMECONSOLELODEF]
+			"ypos"						"162"	[$PS3 && $GAMECONSOLELODEF]
+			"wide"						"160"
+			"tall"						"20"	[!$GAMECONSOLE]
+			"wrap"						"0"
+			"autoResize"				"0"
+			"visible"					"1"
+			"enabled"					"1"
+			"tabPosition"				"0"
+			"textAlignment"				"east"	[!$PS3]
+			"textAlignment"				"east"	[$PS3]
+			"Font"						"ControllerLayout"
+			"LabelText"					"Ping"
+		}
+		
+		"LblDPadGest"
+		{
+			"ControlName"				"Label"
+			"fieldName"					"LblDPadGest"
+			"xpos"						"178"	[!$GAMECONSOLE]
+			"ypos"						"167"	[!$GAMECONSOLE]
+			"xpos"						"178"	[$X360 && $GAMECONSOLEHIDEF]
+			"ypos"						"170"	[$X360 && $GAMECONSOLEHIDEF]
+			"xpos"						"178"	[$X360 && $GAMECONSOLELODEF]
+			"ypos"						"166"	[$X360 && $GAMECONSOLELODEF]
+			"xpos"						"-50"	[$PS3 && $GAMECONSOLEHIDEF]
+			"ypos"						"131"	[$PS3 && $GAMECONSOLEHIDEF]
+			"xpos"						"-50"	[$PS3 && $GAMECONSOLELODEF]
+			"ypos"						"127"	[$PS3 && $GAMECONSOLELODEF]
+			"wide"						"160"
+			"tall"						"20"	[!$GAMECONSOLE]
+			"wrap"						"0"
+			"autoResize"				"0"
+			"visible"					"1"
+			"enabled"					"1"
+			"tabPosition"				"0"
+			"textAlignment"				"west"	[!$PS3]
+			"textAlignment"				"east"	[$PS3]
+			"Font"						"ControllerLayout"
+			"LabelText"					"Gesture"
+		}
+		
+		"LblLStick"
+		{
+			"ControlName"				"Label"
+			"fieldName"					"LblLStick"
+			"xpos"						"-50"	[!$GAMECONSOLE]
+			"ypos"						"129"	[!$GAMECONSOLE]
+			"xpos"						"-50"	[$X360 && $GAMECONSOLEHIDEF]
+			"ypos"						"133"	[$X360 && $GAMECONSOLEHIDEF]
+			"xpos"						"-50"	[$X360 && $GAMECONSOLELODEF]
+			"ypos"						"128"	[$X360 && $GAMECONSOLELODEF]
+			"xpos"						"178"	[$PS3 && $GAMECONSOLEHIDEF]
+			"ypos"						"168"	[$PS3 && $GAMECONSOLEHIDEF]
+			"xpos"						"178"	[$PS3 && $GAMECONSOLELODEF]
+			"ypos"						"165"	[$PS3 && $GAMECONSOLELODEF]
+			"wide"						"160"
+			"tall"						"20"	[!$GAMECONSOLE]
+			"wrap"						"0"
+			"autoResize"				"0"
+			"visible"					"1"
+			"enabled"					"1"
+			"tabPosition"				"0"
+			"textAlignment"				"east"	[!$PS3]
+			"textAlignment"				"west"	[$PS3]
+			"Font"						"ControllerLayout"
+			"LabelText"					"LeftStick"
+		}
+	
+		"LblRStick"
+		{
+			"ControlName"				"Label"
+			"fieldName"					"LblRStick"
+			"xpos"						"235"	[!$GAMECONSOLE]
+			"ypos"						"157"	[!$GAMECONSOLE]
+			"xpos"						"235"	[$X360 && $GAMECONSOLEHIDEF]
+			"ypos"						"160"	[$X360 && $GAMECONSOLEHIDEF]
+			"xpos"						"235"	[$X360 && $GAMECONSOLELODEF]
+			"ypos"						"156"	[$X360 && $GAMECONSOLELODEF]
+			"xpos"						"235"	[$PS3 && $GAMECONSOLEHIDEF]
+			"ypos"						"159"	[$PS3 && $GAMECONSOLEHIDEF]
+			"xpos"						"235"	[$PS3 && $GAMECONSOLELODEF]
+			"ypos"						"154"	[$PS3 && $GAMECONSOLELODEF]
+			"wide"						"215"
+			"tall"						"20"	[!$GAMECONSOLE]
+			"wrap"						"0"
+			"autoResize"				"0"
+			"visible"					"1"
+			"enabled"					"1"
+			"tabPosition"				"0"
+			"textAlignment"				"west"
+			"Font"						"ControllerLayout"
+			"LabelText"					"Sniper Rifle Zoom*"
+		}
+		
+		"LblAButton"
+		{
+			"ControlName"				"Label"
+			"fieldName"					"LblAButton"
+			"xpos"						"310"	[!$GAMECONSOLE]
+			"ypos"						"112"	[!$GAMECONSOLE]
+			"xpos"						"310"	[$X360 && $GAMECONSOLEHIDEF]
+			"ypos"						"114"	[$X360 && $GAMECONSOLEHIDEF]
+			"xpos"						"310"	[$X360 && $GAMECONSOLELODEF]
+			"ypos"						"110"	[$X360 && $GAMECONSOLELODEF]
+			"xpos"						"309"	[$PS3 && $GAMECONSOLEHIDEF]
+			"ypos"						"113"	[$PS3 && !$INPUTSWAPAB && $GAMECONSOLEHIDEF]
+			"ypos"						"94"	[$PS3 && $INPUTSWAPAB && $GAMECONSOLEHIDEF]
+			"xpos"						"309"	[$PS3 && $GAMECONSOLELODEF]
+			"ypos"						"109"	[$PS3 && !$INPUTSWAPAB && $GAMECONSOLELODEF]
+			"ypos"						"90"	[$PS3 && $INPUTSWAPAB && $GAMECONSOLELODEF]
+			"wide"						"200"
+			"tall"						"20"	[!$GAMECONSOLE]
+			"wrap"						"0"
+			"autoResize"				"0"
+			"visible"					"1"
+			"enabled"					"1"
+			"tabPosition"				"0"
+			"textAlignment"				"west"
+			"Font"						"ControllerLayout"
+			"LabelText"					"Jump*"
+		}
+		
+		"LblBButton"
+		{
+			"ControlName"				"Label"
+			"fieldName"					"LblBButton"
+			"xpos"						"310"	[!$GAMECONSOLE]
+			"ypos"						"93"	[!$GAMECONSOLE]
+			"xpos"						"310"	[$X360 && $GAMECONSOLEHIDEF]
+			"ypos"						"94"	[$X360 && $GAMECONSOLEHIDEF]
+			"xpos"						"310"	[$X360 && $GAMECONSOLELODEF]
+			"ypos"						"90"	[$X360 && $GAMECONSOLELODEF]
+			"xpos"						"309"	[$PS3 && $GAMECONSOLEHIDEF]
+			"ypos"						"94"	[$PS3 && !$INPUTSWAPAB && $GAMECONSOLEHIDEF]
+			"ypos"						"113"	[$PS3 && $INPUTSWAPAB && $GAMECONSOLEHIDEF]
+			"xpos"						"309"	[$PS3 && $GAMECONSOLELODEF]
+			"ypos"						"90"	[$PS3 && !$INPUTSWAPAB && $GAMECONSOLELODEF]
+			"ypos"						"109"	[$PS3 && $INPUTSWAPAB && $GAMECONSOLELODEF]
+			"wide"						"200"
+			"tall"						"20"	[!$GAMECONSOLE]
+			"wrap"						"0"
+			"autoResize"				"0"
+			"visible"					"1"
+			"enabled"					"1"
+			"tabPosition"				"0"
+			"textAlignment"				"west"
+			"Font"						"ControllerLayout"
+			"LabelText"					"Reload*"
+		}
+		
+		"LblYButton"
+		{
+			"ControlName"				"Label"
+			"fieldName"					"LblYButton"
+			"xpos"						"310"	[!$GAMECONSOLE]
+			"ypos"						"74"	[!$GAMECONSOLE]
+			"xpos"						"310"	[$X360 && $GAMECONSOLEHIDEF]
+			"ypos"						"75"	[$X360 && $GAMECONSOLEHIDEF]
+			"xpos"						"310"	[$X360 && $GAMECONSOLELODEF]
+			"ypos"						"71"	[$X360 && $GAMECONSOLELODEF]
+			"xpos"						"309"	[$PS3 && $GAMECONSOLEHIDEF]
+			"ypos"						"75"	[$PS3 && $GAMECONSOLEHIDEF]
+			"xpos"						"309"	[$PS3 && $GAMECONSOLELODEF]
+			"ypos"						"71"	[$PS3 && $GAMECONSOLELODEF]
+			"wide"						"200"
+			"tall"						"20"	[!$GAMECONSOLE]
+			"wrap"						"0"
+			"autoResize"				"0"
+			"visible"					"1"
+			"enabled"					"1"
+			"tabPosition"				"0"
+			"textAlignment"				"west"
+			"Font"						"ControllerLayout"
+			"LabelText"					"Switch Weapons*"
+		}
+		
+		"LblXButton"
+		{
+			"ControlName"				"Label"
+			"fieldName"					"LblXButton"
+			"xpos"						"310"	[!$GAMECONSOLE]
+			"ypos"						"131"	[!$GAMECONSOLE]
+			"xpos"						"310"	[$X360 && $GAMECONSOLEHIDEF]
+			"ypos"						"132"	[$X360 && $GAMECONSOLEHIDEF]
+			"xpos"						"310"	[$X360 && $GAMECONSOLELODEF]
+			"ypos"						"128"	[$X360 && $GAMECONSOLELODEF]
+			"xpos"						"309"	[$PS3 && $GAMECONSOLEHIDEF]
+			"ypos"						"132"	[$PS3 && $GAMECONSOLEHIDEF]
+			"xpos"						"309"	[$PS3 && $GAMECONSOLELODEF]
+			"ypos"						"128"	[$PS3 && $GAMECONSOLELODEF]
+			"wide"						"200"
+			"tall"						"20"	[!$GAMECONSOLE]
+			"wrap"						"0"
+			"autoResize"				"0"
+			"visible"					"1"
+			"enabled"					"1"
+			"tabPosition"				"0"
+			"textAlignment"				"west"
+			"Font"						"ControllerLayout"
+			"LabelText"					"Interact / Pick Up*"
+		}
+		
+		"LblRShoulder"
+		{
+			"ControlName"				"Label"
+			"fieldName"					"LblRShoulder"
+			"xpos"						"310"	[!$GAMECONSOLE]
+			"ypos"						"55"	[!$GAMECONSOLE]
+			"xpos"						"310"	[$X360 && $GAMECONSOLEHIDEF]
+			"ypos"						"57"	[$X360 && $GAMECONSOLEHIDEF]
+			"xpos"						"310"	[$X360 && $GAMECONSOLELODEF]
+			"ypos"						"53"	[$X360 && $GAMECONSOLELODEF]
+			"xpos"						"329"	[$PS3 && $GAMECONSOLEHIDEF]
+			"ypos"						"37"	[$PS3 && $GAMECONSOLEHIDEF]
+			"xpos"						"329"	[$PS3 && $GAMECONSOLELODEF]
+			"ypos"						"33"	[$PS3 && $GAMECONSOLELODEF]
+			"wide"						"200"
+			"tall"						"20"	[!$GAMECONSOLE]
+			"wrap"						"0"
+			"autoResize"				"0"
+			"visible"					"1"
+			"enabled"					"1"
+			"tabPosition"				"0"
+			"textAlignment"				"west"
+			"Font"						"ControllerLayout"
+			"LabelText"					"Look Spin*"
+		}
+		
+		"LblRShoulderHintPS3" [$PS3]
+		{
+			"ControlName"				"Label"
+			"fieldName"					"LblRShoulderHintPS3"
+			"xpos"						"309"	[$PS3 && $GAMECONSOLEHIDEF]
+			"ypos"						"37"	[$PS3 && $GAMECONSOLEHIDEF]
+			"xpos"						"309"	[$PS3 && $GAMECONSOLELODEF]
+			"ypos"						"33"	[$PS3 && $GAMECONSOLELODEF]
+			"wide"						"200"
+			"wrap"						"0"
+			"autoResize"				"0"
+			"visible"					"1"
+			"enabled"					"1"
+			"tabPosition"				"0"
+			"textAlignment"				"west"
+			"Font"						"ControllerLayout"
+			"LabelText"					"R1:"
+		}
+		
+		"LblRTrigger"
+		{
+			"ControlName"				"Label"
+			"fieldName"					"LblRTrigger"
+			"xpos"						"310"	[!$GAMECONSOLE]
+			"ypos"						"36"	[!$GAMECONSOLE]
+			"xpos"						"310"	[$X360 && $GAMECONSOLEHIDEF]
+			"ypos"						"38"	[$X360 && $GAMECONSOLEHIDEF]
+			"xpos"						"310"	[$X360 && $GAMECONSOLELODEF]
+			"ypos"						"34"	[$X360 && $GAMECONSOLELODEF]
+			"xpos"						"329"	[$PS3 && $GAMECONSOLEHIDEF]
+			"ypos"						"56"	[$PS3 && $GAMECONSOLEHIDEF]
+			"xpos"						"329"	[$PS3 && $GAMECONSOLELODEF]
+			"ypos"						"52"	[$PS3 && $GAMECONSOLELODEF]
+			"wide"						"220"
+			"tall"						"20"	[!$GAMECONSOLE]
+			"wrap"						"0"
+			"autoResize"				"0"
+			"visible"					"1"
+			"enabled"					"1"
+			"tabPosition"				"0"
+			"textAlignment"				"west"
+			"Font"						"ControllerLayout"
+			"LabelText"					"Fire*"
+		}				
+		
+		"LblRTriggerHintPS3" [$PS3]
+		{
+			"ControlName"				"Label"
+			"fieldName"					"LblRTriggerHintPS3"
+			"xpos"						"309"	[$PS3 && $GAMECONSOLEHIDEF]
+			"ypos"						"56"	[$PS3 && $GAMECONSOLEHIDEF]
+			"xpos"						"309"	[$PS3 && $GAMECONSOLELODEF]
+			"ypos"						"52"	[$PS3 && $GAMECONSOLELODEF]
+			"wide"						"200"
+			"wrap"						"0"
+			"autoResize"				"0"
+			"visible"					"1"
+			"enabled"					"1"
+			"tabPosition"				"0"
+			"textAlignment"				"west"
+			"Font"						"ControllerLayout"
+			"LabelText"					"R2:"
+		}				
+		
+		"LblLTrigger"
+		{
+			"ControlName"				"Label"
+			"fieldName"					"LblLTrigger"
+			"xpos"						"155"	[!$GAMECONSOLE]
+			"ypos"						"8"	[!$GAMECONSOLE]
+			"xpos"						"155"	[$X360 && $GAMECONSOLEHIDEF]
+			"ypos"						"11"	[$X360 && $GAMECONSOLEHIDEF]
+			"xpos"						"155"	[$X360 && $GAMECONSOLELODEF]
+			"ypos"						"7"		[$X360 && $GAMECONSOLELODEF]
+			"xpos"						"187"	[$PS3 && $GAMECONSOLEHIDEF]
+			"ypos"						"26"	[$PS3 && $GAMECONSOLEHIDEF]
+			"xpos"						"187"	[$PS3 && $GAMECONSOLELODEF]
+			"ypos"						"22"	[$PS3 && $GAMECONSOLELODEF]
+			"wide"						"220"
+			"tall"						"20"	[!$GAMECONSOLE]
+			"wrap"						"0"
+			"autoResize"				"0"
+			"visible"					"1"
+			"enabled"					"1"
+			"tabPosition"				"0"
+			"textAlignment"				"west"
+			"Font"						"ControllerLayout"
+			"LabelText"					"Melee Shove*"
+		}
+				
+		"LblLTriggerHintPS3" [$PS3]
+		{
+			"ControlName"				"Label"
+			"fieldName"					"LblLTriggerHintPS3"
+			"xpos"						"86"	[$PS3 && $GAMECONSOLEHIDEF]
+			"ypos"						"26"	[$PS3 && $GAMECONSOLEHIDEF]
+			"xpos"						"86"	[$PS3 && $GAMECONSOLELODEF]
+			"ypos"						"22"	[$PS3 && $GAMECONSOLELODEF]
+			"wide"						"100"
+			"wrap"						"0"
+			"autoResize"				"0"
+			"visible"					"1"
+			"enabled"					"1"
+			"tabPosition"				"0"
+			"textAlignment"				"east"
+			"Font"						"ControllerLayout"
+			"LabelText"					"L2: "
+		}
+				
+		"LblLShoulder"
+		{
+			"ControlName"				"Label"
+			"fieldName"					"LblLShoulder"
+			"xpos"						"187"	[!$GAMECONSOLE]
+			"ypos"						"24"	[!$GAMECONSOLE]
+			"xpos"						"187"	[$X360 && $GAMECONSOLEHIDEF]
+			"ypos"						"27"	[$X360 && $GAMECONSOLEHIDEF]
+			"xpos"						"187"	[$X360 && $GAMECONSOLELODEF]
+			"ypos"						"24"	[$X360 && $GAMECONSOLELODEF]
+			"xpos"						"155"	[$PS3 && $GAMECONSOLEHIDEF]
+			"ypos"						"11"	[$PS3 && $GAMECONSOLEHIDEF]
+			"xpos"						"155"	[$PS3 && $GAMECONSOLELODEF]
+			"ypos"						"7"		[$PS3 && $GAMECONSOLELODEF]
+			"wide"						"197"
+			"tall"						"20"	[!$GAMECONSOLE]
+			"wrap"						"0"
+			"autoResize"				"0"
+			"visible"					"1"
+			"enabled"					"1"
+			"tabPosition"				"0"
+			"textAlignment"				"west"
+			"Font"						"ControllerLayout"
+			"LabelText"					"Crouch*"
+		}
+		
+		"LblLShoulderHintPS3" [$PS3]
+		{
+			"ControlName"				"Label"
+			"fieldName"					"LblLShoulderHintPS3"
+			"xpos"						"54"	[$PS3 && $GAMECONSOLEHIDEF]
+			"ypos"						"11"	[$PS3 && $GAMECONSOLEHIDEF]
+			"xpos"						"54"	[$PS3 && $GAMECONSOLELODEF]
+			"ypos"						"7"		[$PS3 && $GAMECONSOLELODEF]
+			"wide"						"100"
+			"wrap"						"0"
+			"autoResize"				"0"
+			"visible"					"1"
+			"enabled"					"1"
+			"tabPosition"				"0"
+			"textAlignment"				"east"
+			"Font"						"ControllerLayout"
+			"LabelText"					"L1: "
+		}
+	}
+}
+"Resource/UI/ControllerOptionsSticks.res"
+{
+	"ControllerOptionsSticks"
+	{
+		"ControlName"		"Frame"
+		"fieldName"			"ControllerOptionsSticks"
+		"xpos"				"0" 
+		"ypos"				"0"
+		"wide"				"8" 
+		"tall"				"4"
+		"autoResize"		"0"
+		"pinCorner"			"0"
+		"visible"			"1"
+		"enabled"			"1"
+		"tabPosition"		"0"
+		"dialogstyle"		"1"
+	}
+		
+	"BtnDefault"
+	{
+		"ControlName"				"BaseModHybridButton"
+		"fieldName"					"BtnDefault"
+		"xpos"						"0"
+		"ypos"						"25"
+		"zpos"						"3"
+		"wide"						"150"
+		"tall"						"20"
+		"autoResize"				"0"
+		"visible"					"1"
+		"enabled"					"1"
+		"tabPosition"				"0"
+		"navUp"						"BtnSouthpaw"
+		"navDown"					"BtnSouthpaw"
+		"labelText"					"#L4D360UI_Controller_Sticks_Default"
+		"style"						"LeftDialogButton"
+		"command" 					"BtnDefault"
+		"navToCommand"				"BtnDefault"
+		"ActivationType"			"1"
+		"OnlyActiveUser"			"1"
+		"IgnoreButtonA"				"1"
+		"FocusDisabledBorderSize"	"1"
+	}	
+	
+	"BtnSouthpaw"
+	{
+		"ControlName"				"BaseModHybridButton"
+		"fieldName"					"BtnSouthpaw"
+		"xpos"						"0"
+		"ypos"						"50"
+		"zpos"						"3"
+		"wide"						"150"
+		"tall"						"20"
+		"autoResize"				"0"
+		"visible"					"1"
+		"enabled"					"1"
+		"tabPosition"				"0"
+		"navUp"						"BtnDefault"
+		"navDown"					"BtnDefault"
+		"labelText"					"#L4D360UI_Controller_Sticks_Southpaw"
+		"style"						"LeftDialogButton"
+		"command" 					"BtnSouthpaw"
+		"navToCommand"				"BtnSouthpaw"
+		"ActivationType"			"1"
+		"OnlyActiveUser"			"1"
+		"IgnoreButtonA"				"1"
+		"FocusDisabledBorderSize"	"1"
+	}	
+	
+	"ControllerImage"
+	{
+		"ControlName"			"ImagePanel"
+		"fieldName"				"ControllerImage"
+		"xpos"					"162"
+		"ypos"					"40"
+		"zpos"					"3"
+		"wide"					"320"
+		"tall"					"140"
+		"autoResize"			"0"
+		"visible"				"1"
+		"enabled"				"1"		
+		"scaleImage"			"1"
+		"image"					"controller_layout_sticks" [!$PS3]
+		"image"					"controller_layout_sticks_ps3" [$PS3]
+	}
+	
+	"Normal_Move"
+	{
+		"ControlName"			"ImagePanel"
+		"fieldName"				"Normal_Move"
+		"xpos"					"174"	[!$PS3]
+		"ypos"					"40"	[!$PS3]
+		"xpos"					"204"	[$PS3]
+		"ypos"					"62"	[$PS3]
+		"zpos"					"4"
+		"wide"					"75"
+		"tall"					"75"
+		"autoResize"			"0"
+		"visible"				"0"
+		"enabled"				"1"		
+		"scaleImage"			"1"
+		"image"					"controller_layout_sticks_move"
+	}
+
+	"Normal_Look"
+	{
+		"ControlName"			"ImagePanel"
+		"fieldName"				"Normal_Look"
+		"xpos"					"270"	[!$PS3]
+		"ypos"					"72"	[!$PS3]
+		"xpos"					"271"	[$PS3]
+		"ypos"					"60"	[$PS3]
+		"zpos"					"4"
+		"wide"					"75"
+		"tall"					"75"
+		"autoResize"			"0"
+		"visible"				"0"
+		"enabled"				"1"		
+		"scaleImage"			"1"
+		"image"					"controller_layout_sticks_look"
+	}
+
+	"Southpaw_Move"
+	{
+		"ControlName"			"ImagePanel"
+		"fieldName"				"Southpaw_Move"
+		"xpos"					"270"	[!$PS3]
+		"ypos"					"75"	[!$PS3]
+		"xpos"					"271"	[$PS3]
+		"ypos"					"60"	[$PS3]
+		"zpos"					"4"
+		"wide"					"75"
+		"tall"					"75"
+		"autoResize"			"0"
+		"visible"				"0"
+		"enabled"				"1"		
+		"scaleImage"			"1"
+		"image"					"controller_layout_sticks_move"
+	}
+
+	"Southpaw_Look"
+	{
+		"ControlName"			"ImagePanel"
+		"fieldName"				"Southpaw_Look"
+		"xpos"					"174"	[!$PS3]
+		"ypos"					"38"	[!$PS3]
+		"xpos"					"204"	[$PS3]
+		"ypos"					"62"	[$PS3]
+		"zpos"					"4"
+		"wide"					"75"
+		"tall"					"75"
+		"autoResize"			"0"
+		"visible"				"0"
+		"enabled"				"1"		
+		"scaleImage"			"1"
+		"image"					"controller_layout_sticks_look"
+	}	
+
+	"LegacyExplanation" [$PS3]
+	{
+		"ControlName"				"Label"
+		"fieldName"					"LegacyExplanation"
+		"xpos"						"177"
+		"ypos"						"133"
+		"zpos"						"5"
+		"wide"						"200"
+		"wrap"						"0"
+		"autoResize"				"0"
+		"visible"					"0"
+		"enabled"					"1"
+		"tabPosition"				"0"
+		"textAlignment"				"center"
+		"Font"						"ControllerLayout"
+		"LabelText"					"#L4D360UI_Controller_Sticks_Legacy"
+	}
+}
+"Resource/UI/KeyboardMouse.res"
+{
+	"KeyboardMouse"
+	{
+		"ControlName"		"Frame"
+		"fieldName"			"KeyboardMouse"
+		"xpos"				"0"
+		"ypos"				"0"
+		"wide"				"7"
+		"tall"				"4"
+		"autoResize"		"0"
+		"visible"			"1"
+		"enabled"			"1"
+		"tabPosition"		"0"
+		"dialogstyle"		"1"
+	}
+	
+	"BtnEditBindings"
+	{
+		"ControlName"			"BaseModHybridButton"
+		"fieldName"				"BtnEditBindings"
+		"xpos"					"0"
+		"ypos"					"25"
+		"wide"					"0"
+		"tall"					"20"
+		"visible"				"1"
+		"enabled"				"1"
+		"tabPosition"			"0"
+		"wrap"					"1"
+		"navUp"					"DrpDeveloperConsole"
+		"navDown"				"DrpMouseYInvert"
+		"labelText"				"#L4D360UI_Controller_Edit_Keys_Buttons"
+		"style"					"DefaultButton"
+		"command"				"#L4D360UI_Controller_Edit_Keys_Buttons"
+	}
+	
+	"DrpMouseYInvert"
+	{
+		"ControlName"		"BaseModHybridButton"
+		"fieldName"			"DrpMouseYInvert"
+		"xpos"				"0"
+		"ypos"				"50"
+		"wide"				"0"
+		"tall"				"20"
+		"visible"			"1"
+		"enabled"			"1"
+		"tabPosition"		"0"
+		"navUp"				"BtnEditBindings"
+		"navDown"			"SldMouseSensitivity"
+		"labelText"			"#GameUI_ReverseMouse"
+		"style"				"DialogListButton"
+		"list"
+		{
+			"#L4D360UI_Disabled"	"MouseYInvertDisabled"
+			"#L4D360UI_Enabled"		"MouseYInvertEnabled"
+		}
+	}
+	
+	"SldMouseSensitivity"
+	{
+		"ControlName"			"SliderControl"
+		"fieldName"				"SldMouseSensitivity"
+		"xpos"					"0"
+		"ypos"					"75"
+		"wide"					"0"
+		"tall"					"20"
+		"visible"				"1"
+		"enabled"				"1"
+		"tabPosition"			"0"
+		"minValue"				"1.0f"
+		"maxValue"				"20.0f"
+		"stepSize"				"1.0"
+		"navUp"					"DrpMouseYInvert"
+		"navDown"				"DrpMouseAcceleration"
+		"conCommand"			"sensitivity"
+		"inverseFill"			"0"
+				
+		//button and label
+		"BtnDropButton"
+		{
+			"ControlName"			"BaseModHybridButton"
+			"fieldName"				"BtnDropButton"
+			"xpos"					"0"
+			"ypos"					"0"
+			"zpos"					"0"
+			"wide"					"0"
+			"tall"					"0"
+			"autoResize"			"1"
+			"pinCorner"				"0"
+			"visible"				"1"
+			"enabled"				"1"
+			"tabPosition"			"0"
+			"labelText"				"#GameUI_MouseSensitivity"
+			"style"					"LeftDialogButton"
+			"command"				""
+			"ActivationType"		"1"
+			"usablePlayerIndex"		"nobody"
+		}
+	}
+
+	"DrpMouseAcceleration"
+	{
+		"ControlName"		"BaseModHybridButton"
+		"fieldName"			"DrpMouseAcceleration"
+		"xpos"				"0"
+		"ypos"				"100"
+		"wide"				"0"
+		"tall"				"20"
+		"visible"			"1"
+		"enabled"			"1"
+		"tabPosition"		"0"
+		"navUp"				"SldMouseSensitivity"
+		"navDown"			"SldMouseAcceleration"
+		"labelText"			"#GameUI_MouseAcceleration"
+		"style"				"DialogListButton"
+		"list"
+		{
+			"#L4D360UI_Disabled"	"MouseAccelerationDisabled"
+			"#L4D360UI_Enabled"		"MouseAccelerationEnabled"
+		}
+	}
+
+	"SldMouseAcceleration"
+	{
+		"ControlName"			"SliderControl"
+		"fieldName"				"SldMouseAcceleration"
+		"xpos"					"0"
+		"ypos"					"125"
+		"wide"					"0"
+		"tall"					"20"
+		"visible"				"1"
+		"enabled"				"1"
+		"tabPosition"			"0"
+		"minValue"				"1.0f"
+		"maxValue"				"1.4f"
+		"stepSize"				"0.01"
+		"navUp"					"DrpMouseAcceleration"
+		"navDown"				"DrpDeveloperConsole"
+		"conCommand"			"m_customaccel_exponent"
+		"inverseFill"			"0"
+				
+		//button and label
+		"BtnDropButton"
+		{
+			"ControlName"			"BaseModHybridButton"
+			"fieldName"				"BtnDropButton"
+			"xpos"					"0"
+			"ypos"					"0"
+			"zpos"					"0"
+			"wide"					"0"
+			"tall"					"0"
+			"autoResize"			"1"
+			"pinCorner"				"0"
+			"visible"				"1"
+			"enabled"				"1"
+			"tabPosition"			"0"
+			"labelText"				"#GameUI_MouseAccelerationAmount"
+			"style"					"LeftDialogButton"
+			"command"				""
+			"ActivationType"		"1"
+			"usablePlayerIndex"		"nobody"
+		}
+	}
+
+	"DrpDeveloperConsole"
+	{
+		"ControlName"		"BaseModHybridButton"
+		"fieldName"			"DrpDeveloperConsole"
+		"xpos"				"0"
+		"ypos"				"150"
+		"wide"				"0"
+		"tall"				"20"
+		"visible"			"1"
+		"enabled"			"1"
+		"tabPosition"		"0"
+		"navUp"				"SldMouseAcceleration"
+		"navDown"			"BtnEditBindings"
+		"labelText"			"#L4D360UI_KeyboardOptions_Developer"
+		"style"				"DialogListButton"
+		"list"
+		{
+			"#L4D360UI_Disabled"	"DeveloperConsoleDisabled"
+			"#L4D360UI_Enabled"		"DeveloperConsoleEnabled"
+		}
+	}
+}
+"Resource/UI/MainMenu.res"
+{
+	"MainMenu"
+	{
+		"ControlName"				"Frame"
+		"fieldName"					"MainMenu"
+		"xpos"						"0"
+		"ypos"						"0"
+		"wide"						"f0"
+		"tall"						"f0"
+		"autoResize"				"0"
+		"pinCorner"					"0"
+		"visible"					"1"
+		"enabled"					"1"
+		"tabPosition"				"0"
+		"PaintBackgroundType"		"0"
+	}
+						
+	// Single player
+	"BtnPlaySolo"
+	{
+		"ControlName"				"BaseModHybridButton"
+		"fieldName"					"BtnPlaySolo"
+		"xpos"						"88"		[$GAMECONSOLE && ($GAMECONSOLEWIDE && !$ANAMORPHIC)]
+		"xpos"						"63"		[$GAMECONSOLE && (!$GAMECONSOLEWIDE || $ANAMORPHIC)]	
+		"xpos"						"88"		[!$GAMECONSOLE && $WIN32WIDE]
+		"xpos"						"63"		[!$GAMECONSOLE && !$WIN32WIDE]	
+		"ypos"						"280"		[$GAMECONSOLE]  
+		"ypos"						"258"		[!$GAMECONSOLE] 	
+		"wide"						"220"
+		"tall"						"20"
+		"autoResize"				"1"
+		"pinCorner"					"0"
+		"visible"					"1"
+		"enabled"					"1"
+		"tabPosition"				"0"
+		"navUp"						"BtnOptions"	[$GAMECONSOLE]
+		"navUp"						"BtnQuit"		[!$GAMECONSOLE]
+		"navDown"					"BtnCoOp"
+		"labelText"					"#PORTAL2_MainMenu_Solo"
+		"style"						"MainMenuButton"
+		"command"					"SoloPlay"
+		"ActivationType"			"1"
+		"FocusDisabledBorderSize"	"1"
+	}
+	
+	"BtnCoOp"
+	{
+		"ControlName"				"BaseModHybridButton"
+		"fieldName"					"BtnCoOp"
+		"xpos"						"88"	[$GAMECONSOLE && ($GAMECONSOLEWIDE && !$ANAMORPHIC)]
+		"xpos"						"63"	[$GAMECONSOLE && (!$GAMECONSOLEWIDE || $ANAMORPHIC)]	
+		"xpos"						"88"	[!$GAMECONSOLE && $WIN32WIDE]
+		"xpos"						"63"	[!$GAMECONSOLE && !$WIN32WIDE]	
+		"ypos"						"310"	[$GAMECONSOLE]  
+		"ypos"						"288"	[!$GAMECONSOLE] 
+		"wide"						"220"	
+		"tall"						"20"
+		"autoResize"				"1"
+		"pinCorner"					"0"
+		"visible"					"1"
+		"enabled"					"1"
+		"tabPosition"				"0"
+		"navUp"						"BtnPlaySolo"
+		"navDown"					"BtnOptions"
+		"labelText"					"#PORTAL2_MainMenu_CoOp"
+		"style"						"MainMenuButton"
+		"command"					"CoopPlay"
+		"ActivationType"			"1"
+	}
+	
+	"BtnOptions"
+	{
+		"ControlName"				"BaseModHybridButton"
+		"fieldName"					"BtnOptions"
+		"xpos"						"88"	[$GAMECONSOLE && ($GAMECONSOLEWIDE && !$ANAMORPHIC)]
+		"xpos"						"63"	[$GAMECONSOLE && (!$GAMECONSOLEWIDE || $ANAMORPHIC)]	
+		"xpos"						"88"	[!$GAMECONSOLE && $WIN32WIDE]
+		"xpos"						"63"	[!$GAMECONSOLE && !$WIN32WIDE]	
+		"ypos"						"340"	[$GAMECONSOLE]  
+		"ypos"						"318"	[!$GAMECONSOLE]   
+		"wide"						"220"
+		"tall"						"20"
+		"autoResize"				"1"
+		"pinCorner"					"0"
+		"visible"					"1"
+		"enabled"					"1"
+		"tabPosition"				"0"
+		"navUp"						"BtnCoOp"
+		"navDown"					"BtnPlaySolo"	[$GAMECONSOLE]
+		"navDown"					"BtnExtras"		[!$GAMECONSOLE]
+		"labelText"					"#PORTAL2_MainMenu_Options"
+		"style"						"MainMenuButton"
+		"command"					"Options"
+		"ActivationType"			"1"
+	}
+	
+	"BtnExtras" [!$GAMECONSOLE]
+	{
+		"ControlName"				"BaseModHybridButton"
+		"fieldName"					"BtnExtras"
+		"xpos"						"88"	[$WIN32WIDE]
+		"xpos"						"63"	[!$WIN32WIDE]	
+		"ypos"						"348"
+		"wide"						"220"
+		"tall"						"20"
+		"autoResize"				"1"
+		"pinCorner"					"0"
+		"visible"					"1"
+		"enabled"					"1"
+		"tabPosition"				"0"
+		"navUp"						"BtnOptions"
+		"navDown"					"BtnQuit"
+		"labelText"					"#L4D360UI_MainMenu_Extras"
+		"style"						"MainMenuButton"
+		"command"					"Extras"
+		"ActivationType"			"1"
+	}
+
+	"BtnQuit" [!$GAMECONSOLE]
+	{
+		"ControlName"				"BaseModHybridButton"
+		"fieldName"					"BtnQuit"
+		"xpos"						"88"	[$WIN32WIDE]
+		"xpos"						"63"	[!$WIN32WIDE]	
+		"ypos"						"378"
+		"wide"						"220"
+		"tall"						"20"
+		"autoResize"				"1"
+		"pinCorner"					"0"
+		"visible"					"1"
+		"enabled"					"1"
+		"tabPosition"				"0"
+		"navUp"						"BtnExtras"
+		"navDown"					"BtnPlaySolo"
+		"labelText"					"#PORTAL2_MainMenu_Quit"
+		"style"						"MainMenuButton"
+		"command"					"QuitGame"
+		"ActivationType"			"1"
+	}
+
+	// Not in P2ASW
+	// "BtnEconUI" [!$GAMECONSOLE]
+	// {
+	// 	"ControlName"				"BaseModHybridButton"
+	// 	"fieldName"					"BtnEconUI"
+	// 	"xpos"						"97"	[$WIN32WIDE]
+	// 	"xpos"						"72"	[!$WIN32WIDE]	
+	// 	"ypos"						"420"   
+	// 	"wide"						"220"
+	// 	"tall"						"20"
+	// 	"autoResize"				"1"
+	// 	"pinCorner"					"0"
+	// 	"visible"					"1"
+	// 	"enabled"					"1"
+	// 	"tabPosition"				"0"
+	// 	"navUp"						"BtnQuit"
+	// 	"navDown"					"BtnPlaySolo"
+	// 	"labelText"					"#PORTAL2_MainMenu_Econ"
+	// 	"style"						"BitmapButton"
+	// 	"command"					"EconUI"
+	// 	"ActivationType"			"1"
+	// 	"bitmap_enabled"			"vgui/store/store_button"
+	// 	"bitmap_focus"				"vgui/store/store_button_focus_anim"
+	// }
+}
+"Resource/UI/Video.res"
+{
+	"Video"
+	{
+		"ControlName"		"Frame"
+		"fieldName"			"Video"
+		"xpos"				"0"
+		"ypos"				"0"
+		"wide"				"7"
+		"tall"				"4"
+		"autoResize"		"0"
+		"visible"			"1"
+		"enabled"			"1"
+		"tabPosition"		"0"
+		"dialogstyle"		"1"
+		"IgnoreButtonA"		"1"
+	}
+	
+	"SldBrightness"
+	{
+		"ControlName"			"SliderControl"
+		"fieldName"				"SldBrightness"
+		"xpos"					"0"
+		"ypos"					"25"
+		"wide"					"0"
+		"tall"					"20"
+		"visible"				"1"
+		"enabled"				"1"
+		"IgnoreButtonA"			"1"
+		"?windowed"
+		{
+			"visible"				"0"
+			"enabled"				"0"
+		}
+		"usetitlesafe"			"0"
+		"tabPosition"			"0"
+		"minValue"				"1.8"
+		"maxValue"				"2.6"
+		"stepSize"				"0.05"
+		"navUp"					"BtnAdvanced"
+		"navDown"				"DrpAspectRatio"
+		"conCommand"			"mat_monitorgamma"
+		"inverseFill"			"1"
+
+		//button and label
+		"BtnDropButton"
+		{
+			"ControlName"			"BaseModHybridButton"
+			"fieldName"				"BtnDropButton"
+			"xpos"					"0"
+			"ypos"					"0"
+			"zpos"					"0"
+			"wide"					"0"
+			"tall"					"0"
+			"autoResize"			"1"
+			"pinCorner"				"0"
+			"visible"				"1"
+			"enabled"				"1"
+			"IgnoreButtonA"			"1"
+			"tabPosition"			"0"
+			"labelText"				"#L4D360UI_VideoOptions_Brightness"
+			"style"					"LeftDialogButton"
+			"command"				""
+			"ActivationType"		"1"
+			"usablePlayerIndex"		"nobody"
+		}
+	}
+
+	"DrpAspectRatio"
+	{
+		"ControlName"		"BaseModHybridButton"
+		"fieldName"			"DrpAspectRatio"
+		"xpos"				"0"
+		"ypos"				"50"
+		"?windowed"
+		{
+			"ypos"				"25"
+		}
+		"wide"				"0"
+		"tall"				"20"
+		"visible"			"1"
+		"enabled"			"1"
+		"IgnoreButtonA"		"1"
+		"tabPosition"		"0"
+		"navUp"				"SldBrightness"
+		"navDown"			"DrpResolution"
+		"labelText"			"#GameUI_AspectRatio"
+		"style"				"DialogListButton"
+		"list"
+		{
+			"#GameUI_AspectNormal"		"#GameUI_AspectNormal"
+			"#GameUI_AspectWide16x9"	"#GameUI_AspectWide16x9"
+			"#GameUI_AspectWide16x10"	"#GameUI_AspectWide16x10"
+		}
+	}
+	
+	"DrpResolution"
+	{
+		"ControlName"		"BaseModHybridButton"
+		"fieldName"			"DrpResolution"
+		"xpos"				"0"
+		"ypos"				"75"
+		"?windowed"
+		{
+			"ypos"				"50"
+		}
+		"wide"				"0"
+		"tall"				"20"
+		"visible"			"1"
+		"enabled"			"1"
+		"IgnoreButtonA"		"1"
+		"tabPosition"		"0"
+		"navUp"				"DrpAspectRatio"
+		"navDown"			"DrpDisplayMode"
+		"labelText"			"#GameUI_Resolution"
+		"style"				"DialogListButton"
+		"list"
+		{
+			"_res0"		"_res0"
+			"_res1"		"_res1"
+			"_res2"		"_res2"
+			"_res3"		"_res3"
+			"_res4"		"_res4"
+			"_res5"		"_res5"
+			"_res6"		"_res6"
+			"_res7"		"_res7"
+			"_res8"		"_res8"
+			"_res9"		"_res9"
+			"_res:"		"_res:"
+			"_res;"		"_res;"
+			"_res<"		"_res<"
+			"_res="		"_res="
+			"_res>"		"_res>"
+			"_res?"		"_res?"
+			"_res@"		"_res@"
+			"_resA"		"_resA"
+			"_resB"		"_resB"	
+			"_resC"		"_resC"
+			"_resD"		"_resD"
+			"_resE"		"_resE"
+			"_resF"		"_resF"
+			"_resG"		"_resG"
+			"_resH"		"_resH"
+			"_resI"		"_resI"
+			"_resJ"		"_resJ"
+			"_resK"		"_resK"
+			"_resL"		"_resL"
+			"_resM"		"_resM"
+			"_resN"		"_resN"
+			"_resO"		"_resO"
+			"_resP"		"_resP"
+			"_resQ"		"_resQ"
+			"_resR"		"_resR"
+			"_resS"		"_resS"
+			"_resT"		"_resT"
+			"_resU"		"_resU"
+			"_resV"		"_resV"
+			"_resW"		"_resW"
+			"_resX"		"_resX"
+			"_resY"		"_resY"
+			"_resZ"		"_resZ" 
+		}
+	}
+	
+	"DrpDisplayMode"
+	{
+		"ControlName"		"BaseModHybridButton"
+		"fieldName"			"DrpDisplayMode"
+		"xpos"				"0"
+		"ypos"				"100"
+		"?windowed"
+		{
+			"ypos"				"75"
+		}
+		"wide"				"0"
+		"tall"				"20"
+		"visible"			"1"
+		"enabled"			"1"
+		"IgnoreButtonA"		"1"
+		"tabPosition"		"0"
+		"navUp"				"DrpResolution"
+		"navDown"			"DrpSplitScreenDirection"
+		"labelText"			"#GameUI_DisplayMode"
+		"style"				"DialogListButton"
+		"list"
+		{
+			"#GameUI_Fullscreen"						"#GameUI_Fullscreen"
+			"#GameUI_Windowed"							"#GameUI_Windowed"
+			"#L4D360UI_VideoOptions_Windowed_NoBorder"	"#L4D360UI_VideoOptions_Windowed_NoBorder"	[!$OSX]
+		}
+	}
+
+	"DrpSplitScreenDirection"
+	{
+		"ControlName"		"BaseModHybridButton"
+		"fieldName"			"DrpSplitScreenDirection"
+		"xpos"				"0"
+		"ypos"				"125"
+		"?windowed"
+		{
+			"ypos"				"100"
+		}
+		"zpos"				"1"
+		"wide"				"0"
+		"tall"				"20"
+		"visible"			"1"
+		"enabled"			"1"
+		"usetitlesafe"		"0"
+		"tabPosition"		"0"
+		"IgnoreButtonA"		"1"
+		"navUp"				"DrpDisplayMode"
+		"navDown"			"BtnAdvanced"
+		"labelText"			"#L4D360UI_VideoOptions_SplitScreenDirection"
+		"style"				"DialogListButton"
+		"list"
+		{
+			"#L4D360UI_SplitScreenDirection_Default"	"#L4D360UI_SplitScreenDirection_Default"
+			"#L4D360UI_SplitScreenDirection_Horizontal"	"#L4D360UI_SplitScreenDirection_Horizontal"
+			"#L4D360UI_SplitScreenDirection_Vertical"	"#L4D360UI_SplitScreenDirection_Vertical"
+		}
+	}
+
+	"BtnAdvanced"
+	{
+		"ControlName"			"BaseModHybridButton"
+		"fieldName"				"BtnAdvanced"
+		"xpos"					"0"
+		"ypos"					"150"
+		"?windowed"
+		{
+			"ypos"				"125"
+		}
+		"wide"					"0"
+		"tall"					"20"
+		"visible"				"1"
+		"enabled"				"1"
+		"tabPosition"			"0"
+		"navUp"					"DrpSplitScreenDirection"
+		"navDown"				"SldBrightness"
+		"labelText"				"#PORTAL2_AdvancedVideo"
+		"style"					"DefaultButton"
+		"command"				"ShowAdvanced"
+	}
+}
+	
+UnlitGeneric
+{
+$basetexture "logo\logo"
+$translucent 1
+$ignorez 1
+}
+VTF       h                                  €?                        h   0   p   LOD
+     UUUU          UWWW          UUUU

@@ -14,6 +14,7 @@
 #include "vgui/IVgui.h"
 #include "tier1/KeyValues.h"
 #include "vgui/ilocalize.h"
+#include "vgui/IInput.h"
 #include "VDropDownMenu.h"
 #include "VSliderControl.h"
 #include "gamemodes.h"
@@ -27,6 +28,8 @@
 
 using namespace BaseModUI;
 using namespace vgui;
+
+ConVar ui_virtualnav_render( "ui_virtualnav_render", "0", FCVAR_DEVELOPMENTONLY );
 
 DECLARE_BUILD_FACTORY_DEFAULT_TEXT( BaseModHybridButton, HybridButton );
 
@@ -44,8 +47,6 @@ void Demo_DisableButton( Button *pButton )
 			wUnicode = L"";
 
 		g_pVGuiLocalize->ConvertUnicodeToANSI( wUnicode, szTooltip, sizeof( szTooltip ) );
-
-		pHybridButton->SetHelpText( szTooltip , false );
 	}
 }
 
@@ -53,7 +54,7 @@ void Dlc1_DisableButton( Button *pButton )
 {
 	BaseModHybridButton *pHybridButton = dynamic_cast<BaseModHybridButton *>(pButton);
 
-	if(pHybridButton)
+	if (pHybridButton)
 	{
 		pHybridButton->SetEnabled( false );
 
@@ -64,8 +65,6 @@ void Dlc1_DisableButton( Button *pButton )
 			wUnicode = L"";
 
 		g_pVGuiLocalize->ConvertUnicodeToANSI( wUnicode, szTooltip, sizeof( szTooltip ) );
-
-		pHybridButton->SetHelpText( szTooltip , false );
 	}
 }
 
@@ -78,7 +77,7 @@ struct HybridEnableStates
 HybridEnableStates sHybridStates[] = 
 {
 	{ BaseModUI::BaseModHybridButton::EC_LIVE_REQUIRED,	"LiveRequired" },
-	{ BaseModUI::BaseModHybridButton::EC_NOTFORDEMO,		"Never" }
+	{ BaseModUI::BaseModHybridButton::EC_NOTFORDEMO,	"Never" }
 };
 
 //=============================================================================
@@ -86,7 +85,8 @@ HybridEnableStates sHybridStates[] =
 //=============================================================================
 
 BaseModUI::BaseModHybridButton::BaseModHybridButton( Panel *parent, const char *panelName, const char *text, Panel *pActionSignalTarget, const char *pCmd )
-	: BaseClass( parent, panelName, text, pActionSignalTarget, pCmd )
+	: BaseClass( parent, panelName, text, pActionSignalTarget, pCmd ),
+	m_clrEnabledOverride( 0, 0, 0, 0 )
 {
 	SetPaintBorderEnabled( false );
 	SetPaintBackgroundEnabled( false );
@@ -95,31 +95,48 @@ BaseModUI::BaseModHybridButton::BaseModHybridButton( Panel *parent, const char *
 	SetButtonActivationType( ACTIVATE_ONRELEASED );
 	SetConsoleStylePanel( true );
 
+	m_iUsablePlayerIndex = USE_EVERYBODY;
 	m_isNavigateTo = false;
 	m_bOnlyActiveUser = false;
 	m_bIgnoreButtonA = false;
 
 	mEnableCondition = EC_ALWAYS;
 
-	m_nStyle = BUTTON_SIMPLE;
-	m_hTextFont = 0;
-	m_hTextBlurFont = 0;
-	m_hHintTextFont = 0;
-	m_hSelectionFont = 0;
-	m_hSelectionBlurFont = 0;
+	m_nStyle = BUTTON_DEFAULT;
+
+	m_hTextFont = vgui::INVALID_FONT;
+	m_hSymbolFont = vgui::INVALID_FONT;
 
 	m_originalTall = 0;
 	m_textInsetX = 0;
 	m_textInsetY = 0;
+	m_nListInsetX = 0;
 
 	m_iSelectedArrow = -1;
 	m_iUnselectedArrow = -1;
 
 	m_nWideAtOpen = 0;
+
+	m_bAllCaps = false;
+	m_bPostCheckMark = false;
+	m_bUseAlternateTiles = false;
+
+	m_nCursorHeight = 0;
+	m_nMultiline = 0;
+
+	m_nDialogListCurrentIndex = 0;
+
+	m_nEnabledImageId = -1;
+	m_nFocusImageId = -1;
+
+	m_flLastBitmapAnimTime = 0;
+	m_nBitmapFrame = 0;
+	m_nBitmapFrameCache = 0;
 }
 
 BaseModUI::BaseModHybridButton::BaseModHybridButton( Panel *parent, const char *panelName, const wchar_t *text, Panel *pActionSignalTarget, const char *pCmd )
-	: BaseClass( parent, panelName, text, pActionSignalTarget, pCmd )
+	: BaseClass( parent, panelName, text, pActionSignalTarget, pCmd ),
+	m_clrEnabledOverride( 0, 0, 0, 0 )
 {
 	SetPaintBorderEnabled( false );
 	SetPaintBackgroundEnabled( false );
@@ -127,24 +144,39 @@ BaseModUI::BaseModHybridButton::BaseModHybridButton( Panel *parent, const char *
 	SetClosed();
 	SetButtonActivationType( ACTIVATE_ONRELEASED );
 
+	m_iUsablePlayerIndex = USE_EVERYBODY;
 	m_isNavigateTo = false;
 	m_iUsablePlayerIndex = -1;
 
 	mEnableCondition = EC_ALWAYS;
 
-	m_nStyle = BUTTON_SIMPLE;
-	m_hTextFont = 0;
-	m_hTextBlurFont = 0;
-	m_hHintTextFont = 0;
-	m_hSelectionFont = 0;
-	m_hSelectionBlurFont = 0;
+	m_nStyle = BUTTON_DEFAULT;
+
+	m_hTextFont = vgui::INVALID_FONT;
+	m_hSymbolFont = vgui::INVALID_FONT;
 
 	m_originalTall = 0;
 	m_textInsetX = 0;
 	m_textInsetY = 0;
+	m_nListInsetX = 0;
 
 	m_iSelectedArrow = -1;
 	m_iUnselectedArrow = -1;
+
+	m_bAllCaps = false;
+	m_bPostCheckMark = false;
+
+	m_nCursorHeight = 0;
+	m_nMultiline = 0;
+
+	m_nDialogListCurrentIndex = 0;
+
+	m_nEnabledImageId = -1;
+	m_nFocusImageId = -1;
+
+	m_flLastBitmapAnimTime = 0;
+	m_nBitmapFrame = 0;
+	m_nBitmapFrameCache = 0;
 }
 
 BaseModUI::BaseModHybridButton::~BaseModHybridButton()
@@ -163,13 +195,13 @@ BaseModHybridButton::State BaseModHybridButton::GetCurrentState()
 			curState = IsEnabled() ? Focus : FocusDisabled;
 		}
 	}
-	if( m_isOpen )
+	if ( m_isOpen )
 	{
 		curState = Open;
 	}
-	else if( IsArmed() || m_isNavigateTo ) //NavigateTo doesn't instantly give focus to the control
+	else if ( IsArmed() || m_isNavigateTo ) //NavigateTo doesn't instantly give focus to the control
 	{										//so this little boolean value is meant to let us know we should have focus for the "focus state"
-		if( IsEnabled() )					//until vgui catches up and registers us as having focus.
+		if ( IsEnabled() )					//until vgui catches up and registers us as having focus.
 		{
 			curState = Focus;
 		}
@@ -178,12 +210,12 @@ BaseModHybridButton::State BaseModHybridButton::GetCurrentState()
 			curState = FocusDisabled;
 		}
 
-		if( IsArmed() )
+		if ( IsArmed() )
 		{
 			m_isNavigateTo = false;
 		}
 	}
-	else if( !IsEnabled() )
+	else if ( !IsEnabled() )
 	{
 		curState = Disabled;
 	}
@@ -238,47 +270,94 @@ void BaseModHybridButton::OnSiblingHybridButtonOpened()
 	m_isNavigateTo = false;
 }
 
-char const *BaseModHybridButton::GetHelpText( bool bEnabled ) const
-{
-	return bEnabled ? m_enabledToolText.String() : m_disabledToolText.String();
-}
-
-void BaseModHybridButton::UpdateFooterHelpText()
-{
-	CBaseModFooterPanel *footer = BaseModUI::CBaseModPanel::GetSingleton().GetFooterPanel();
-	if ( footer )
-	{
-		//Directly set the new tooltips
-		footer->SetHelpText( IsEnabled() ? m_enabledToolText.String() : m_disabledToolText.String() );
-	}
-}
-
 void BaseModHybridButton::OnMousePressed( vgui::MouseCode code )
 {
 	BaseClass::OnMousePressed( code );
 	if ( IsPC() )
 	{
-		if( code == MOUSE_RIGHT )
+		if ( code == MOUSE_RIGHT )
 		{
 			FlyoutMenu::CloseActiveMenu( this );
 		}
 		else
 		{
-			if( (code == MOUSE_LEFT) && (IsEnabled() == false) && (dynamic_cast<FlyoutMenu *>( GetParent() ) == NULL) )
+			if ( ( code == MOUSE_LEFT ) && !IsEnabled() && ( dynamic_cast<FlyoutMenu *>( GetParent() ) == NULL ) )
 			{
-				//when trying to use an inactive item that isn't part of a flyout. Close any open flyouts.
+				// when trying to use an inactive item that isn't part of a flyout. Close any open flyouts.
 				FlyoutMenu::CloseActiveMenu( this );
 			}
+
+			if ( code == MOUSE_LEFT && m_nStyle == BUTTON_DIALOGLIST )
+			{
+				ListSelectionChange_t selectionDir = SELECT_NEXT;
+
+				int nButtonX, nButtonY;
+				if ( GetDialogListButtonCenter( nButtonX, nButtonY ) )
+				{
+					int iPosX;
+					int iPosY;
+					input()->GetCursorPos( iPosX, iPosY );
+					ScreenToLocal( iPosX, iPosY );
+					if ( iPosX < nButtonX )
+					{
+						selectionDir = SELECT_PREV;
+					}
+				}
+
+				ChangeDialogListSelection( selectionDir );
+			}
+
 			RequestFocus( 0 );			
 		}
 	}
 }
 
-void BaseModHybridButton::NavigateTo( )
+void BaseModHybridButton::NavigateTo()
 {
-	BaseClass::NavigateTo( );
+	if ( !IsEnabled() )
+	{
+		vgui::Panel *pPanel = NULL;
+		Panel::NAV_DIRECTION lastNavDirection = GetLastNavDirection();
+		switch ( lastNavDirection )
+		{
+		case ND_UP:
+			pPanel = this;
+			do
+			{
+				pPanel = pPanel->GetNavUp();
+				if ( !pPanel || ( pPanel->IsEnabled() && pPanel->IsVisible() ) )
+				{
+					break;
+				}
+			} 
+			while ( pPanel != this );
+			break;
 
-	UpdateFooterHelpText();
+		case ND_DOWN:
+		default:
+			pPanel = this;
+			do
+			{
+				pPanel = pPanel->GetNavDown();
+				if ( !pPanel || ( pPanel->IsEnabled() && pPanel->IsVisible() ) )
+				{
+					break;
+				}
+			}
+			while ( pPanel != this );
+			break;
+		}
+
+		if ( pPanel )
+		{
+			NavigateFrom();
+			pPanel->NavigateTo();
+		}
+
+		return;
+	}
+
+	BaseClass::NavigateTo();
 
 	FlyoutMenu* parentMenu = dynamic_cast< FlyoutMenu* >( GetParent() );
 	if( parentMenu )
@@ -301,229 +380,370 @@ void BaseModHybridButton::NavigateTo( )
 	}
 }
 
-void BaseModHybridButton::NavigateFrom( )
+void BaseModHybridButton::NavigateFrom()
 {
-	BaseClass::NavigateFrom( );
-
-	if ( IsPC() && CBaseModPanel::GetSingleton().GetFooterPanel() )
-	{
-		// Show no help text if they left the button
-		CBaseModPanel::GetSingleton().GetFooterPanel()->FadeHelpText();
-	}
+	BaseClass::NavigateFrom();
 
 	m_isNavigateTo = false;
 }
 
-void BaseModHybridButton::SetHelpText( const char* tooltip, bool enabled )
+bool BaseModHybridButton::GetDialogListButtonCenter( int &x, int &y )
 {
-	if ( enabled )
+	if ( m_nStyle != BUTTON_DIALOGLIST || !m_DialogListItems.IsValidIndex( m_nDialogListCurrentIndex ) )
+		return false;
+
+	wchar_t szUnicode[512];
+	wchar_t *pLocalizedString = g_pVGuiLocalize->Find( m_DialogListItems[m_nDialogListCurrentIndex].m_String.Get() );
+	if ( !pLocalizedString )
 	{
-		m_enabledToolText = tooltip;
+		if ( !m_DialogListItems[m_nDialogListCurrentIndex].m_StringParm1.IsEmpty() )
+		{
+			wchar_t szTempUnicode[512];
+			g_pVGuiLocalize->ConvertANSIToUnicode( m_DialogListItems[m_nDialogListCurrentIndex].m_String.Get(), szTempUnicode, sizeof( szTempUnicode ) );
+
+			wchar_t *pParm1String = g_pVGuiLocalize->Find( m_DialogListItems[m_nDialogListCurrentIndex].m_StringParm1.Get() );
+			if ( !pParm1String )
+			{
+				pParm1String = L"";
+			}
+
+			V_snwprintf( szUnicode, ARRAYSIZE( szUnicode ), szTempUnicode, pParm1String );
+		}
+		else
+		{
+			g_pVGuiLocalize->ConvertANSIToUnicode( m_DialogListItems[m_nDialogListCurrentIndex].m_String.Get(), szUnicode, sizeof( szUnicode ) );
+		}
 	}
 	else
 	{
-		m_disabledToolText = tooltip;
+		Q_wcsncpy( szUnicode, pLocalizedString, sizeof( szUnicode ) );
 	}
 
-	// if we have the focus update the footer
-	if ( HasFocus() )
+	int textWide, textTall;
+	surface()->GetTextSize( m_hTextFont, szUnicode, textWide, textTall );
+
+	x = ( GetWide() - m_textInsetX - textWide );
+
+	if ( IsPC() && m_hSymbolFont != vgui::INVALID_FONT )
 	{
-		UpdateFooterHelpText();
+		int nArrowWide, nArrowTall;
+		vgui::surface()->GetTextSize( m_hSymbolFont, L"3", nArrowWide, nArrowTall );
+		x -= nArrowWide;
+	}
+	else
+	{
+		int nArrowSize = vgui::surface()->GetCharacterWidth( m_hTextFont, L'<' );
+		x -= 2 * nArrowSize;
+	}
+
+	x += textWide/2;
+	y = GetTall()/2;
+
+	return true;
+}
+
+void BaseModHybridButton::DrawDialogListButton( Color textColor )
+{
+	if ( !m_DialogListItems.IsValidIndex( m_nDialogListCurrentIndex ) )
+		return;
+
+	wchar_t szUnicode[512];
+	wchar_t *pLocalizedString = g_pVGuiLocalize->Find( m_DialogListItems[m_nDialogListCurrentIndex].m_String.Get() );
+	if ( !pLocalizedString )
+	{
+		if ( !m_DialogListItems[m_nDialogListCurrentIndex].m_StringParm1.IsEmpty() )
+		{
+			wchar_t szTempUnicode[512];
+			g_pVGuiLocalize->ConvertANSIToUnicode( m_DialogListItems[m_nDialogListCurrentIndex].m_String.Get(), szTempUnicode, sizeof( szTempUnicode ) );
+
+			wchar_t *pParm1String = g_pVGuiLocalize->Find( m_DialogListItems[m_nDialogListCurrentIndex].m_StringParm1.Get() );
+			if ( !pParm1String )
+			{
+				pParm1String = L"";
+			}
+
+			V_snwprintf( szUnicode, ARRAYSIZE( szUnicode ), szTempUnicode, pParm1String );
+		}
+		else
+		{
+			g_pVGuiLocalize->ConvertANSIToUnicode( m_DialogListItems[m_nDialogListCurrentIndex].m_String.Get(), szUnicode, sizeof( szUnicode ) );
+		}
+	}
+	else
+	{
+		Q_wcsncpy( szUnicode, pLocalizedString, sizeof( szUnicode ) );
+	}
+
+	int len = V_wcslen( szUnicode );
+
+	int textWide, textTall;
+	surface()->GetTextSize( m_hTextFont, szUnicode, textWide, textTall );
+	
+	int x = GetWide() - m_textInsetX - textWide;
+
+	Color leftCursorColor = IsGameConsole() ? textColor : m_ListButtonInactiveColor;
+	Color rightCursorColor = IsGameConsole() ? textColor : m_ListButtonInactiveColor;
+
+	if ( GetCurrentState() == Focus && m_DialogListItems.Count() )
+	{
+		if ( IsPC() )
+		{
+			if ( m_nStyle == BUTTON_DIALOGLIST )
+			{
+				// dialog list buttons highlight their L/R depending on mouse position
+				int nCursorPosX;
+				int nCursorPosY;
+				input()->GetCursorPos( nCursorPosX, nCursorPosY );
+				ScreenToLocal( nCursorPosX, nCursorPosY );
+				if ( nCursorPosY >= 0 && nCursorPosY <= GetTall() )
+				{
+					int nButtonCenterX, nButtonCenterY;
+					if ( GetDialogListButtonCenter( nButtonCenterX, nButtonCenterY ) )
+					{
+						if ( nCursorPosX < nButtonCenterX )
+						{
+							leftCursorColor = m_ListButtonActiveColor;
+						}
+						else
+						{
+							rightCursorColor = m_ListButtonActiveColor;
+						}
+					}
+				}
+			}
+			else
+			{
+				rightCursorColor = m_ListButtonActiveColor;
+			}
+		}
+
+		if ( IsPC() && m_hSymbolFont != vgui::INVALID_FONT )
+		{
+			// pc can support a symbol font and use real arrows
+			int nArrowWide, nArrowTall;
+			vgui::surface()->GetTextSize( m_hSymbolFont, L"3", nArrowWide, nArrowTall );
+
+			x -= nArrowWide;
+			int nArrowInsetY = ( GetTall() - nArrowTall ) / 2;
+
+			vgui::surface()->DrawSetTextFont( m_hSymbolFont );
+
+			if ( m_nStyle == BUTTON_DIALOGLIST )
+			{
+				vgui::surface()->DrawSetTextColor( leftCursorColor );
+				vgui::surface()->DrawSetTextPos( x - nArrowWide, nArrowInsetY );
+				vgui::surface()->DrawUnicodeString( L"3" );
+			}
+
+			vgui::surface()->DrawSetTextColor( rightCursorColor );
+			vgui::surface()->DrawSetTextPos( x + textWide, nArrowInsetY );
+			vgui::surface()->DrawUnicodeString( L"4" );
+		}
+		else
+		{
+			int nArrowSize = vgui::surface()->GetCharacterWidth( m_hTextFont, L'<' );
+			x -= 2 * nArrowSize;
+
+			vgui::surface()->DrawSetTextFont( m_hTextFont );
+
+			if ( m_nStyle == BUTTON_DIALOGLIST )
+			{
+				vgui::surface()->DrawSetTextColor( leftCursorColor );
+				vgui::surface()->DrawSetTextPos( x - 2 * nArrowSize, m_textInsetY );
+				vgui::surface()->DrawUnicodeString( L"<" );
+			}
+
+			vgui::surface()->DrawSetTextColor( rightCursorColor );
+			vgui::surface()->DrawSetTextPos( x + textWide + nArrowSize, m_textInsetY );
+			vgui::surface()->DrawUnicodeString( L">" );
+		}
+	}
+
+	vgui::surface()->DrawSetTextFont( m_hTextFont );
+	vgui::surface()->DrawSetTextPos( x, m_textInsetY  );
+	vgui::surface()->DrawSetTextColor( textColor );
+
+	int availableWidth = textWide + m_textInsetX;
+	if ( textWide > availableWidth )
+	{
+		// length of 3 dots
+		int ellipsesLen = 3 * vgui::surface()->GetCharacterWidth( m_hTextFont, L'.' );
+		availableWidth -= ellipsesLen;
+
+		// draw as much as possible
+		for ( int i = 0; i < len; i++ )
+		{
+			vgui::surface()->DrawUnicodeChar( szUnicode[i] );
+			availableWidth -= vgui::surface()->GetCharacterWidth( m_hTextFont, szUnicode[i] );
+			if ( availableWidth <= 0 )
+				break;
+		}
+		
+		// finish with ...
+		vgui::surface()->DrawPrintText( L"...", 3 );
+	}
+	else
+	{
+		vgui::surface()->DrawUnicodeString( szUnicode );
 	}
 }
 
-// 0 = Deprecated CA buttons
-// 1 = Normal Button
-// 2 = MainMenu Button or InGameMenu Butto
-// 3 = Flyout button
 void BaseModHybridButton::PaintButtonEx()
 {
-	vgui::IScheme *pScheme = vgui::scheme()->GetIScheme( GetScheme() );
-	Color blotchColor = pScheme->GetColor( "HybridButton.BlotchColor", Color( 0, 0, 0, 255 ) );
-	Color borderColor = pScheme->GetColor( "HybridButton.BorderColor", Color( 0, 0, 0, 255 ) );
+	if ( m_nStyle == BUTTON_VIRTUALNAV && !ui_virtualnav_render.GetBool() )
+	{
+		// this is invisible button simply driving the virtual navigation
+		return;
+	}
 
-	int x, y;
 	int wide, tall;
 	GetSize( wide, tall );
 
-	x = 0;
-
 	// due to vertical resizing, center within the control
-	y = ( tall - m_originalTall ) / 2;
-	tall = m_originalTall;
-
-	if ( m_nStyle == BUTTON_GAMEMODE )
-	{
-		y = 0;
-	}
+	int x = 0;
+	int y = 0; //( tall - m_originalTall ) / 2;
+//	tall = m_originalTall;
 
 	if ( ( m_nStyle == BUTTON_DROPDOWN || m_nStyle == BUTTON_GAMEMODE ) && GetCurrentState() == Open && m_nWideAtOpen )
 	{
 		wide = m_nWideAtOpen;
 	}
 
-	bool bAnimateGlow = false;
-	bool bDrawGlow = false;
 	bool bDrawCursor = false;
-	bool bDrawText = true;
-	Color col;
+	Color textColor;
+
 	State curState = GetCurrentState();
 	switch ( curState )
 	{
-		case Enabled:
-			// selectable, just not highlighted
-			if ( m_nStyle == BUTTON_RED || m_nStyle == BUTTON_REDMAIN )
-			{
-				//col.SetColor( 0, 128, 128, 255 );
-				//col.SetColor( 169, 213, 255, 255 );
-				col.SetColor( 255, 255, 255, 255 );
-			}
-			else if ( m_nStyle == BUTTON_ALIENSWARMMENUBUTTON || m_nStyle == BUTTON_ALIENSWARMMENUBUTTONSMALL )
-			{
-				m_textInsetX = 20;
-				m_textInsetY = 2;
-				col.SetColor( 121, 121, 121, 255 );
-			}
-			else
-			{
-				//col.SetColor( 125, 125, 125, 255 );
-				col.SetColor(121, 121, 121, 255);
-			}
-			break;
-		case Disabled:
-			//col.SetColor( 88, 97, 104, 255 );
-			//col.SetColor( 65, 74, 96, 255 );
-			col.SetColor(60, 60, 60, 255);
-			bDrawText = true;
-			bDrawGlow = false;
-			break;
-		case FocusDisabled:
-			col.SetColor( 182, 189, 194, 255 );
-			bDrawText = false;
-			bDrawGlow = true;
-			break;
-		case Open:
-			// flyout menu is attached
-			//col.SetColor( 200, 200, 200, 255 );
-			col.SetColor( 255, 255, 255, 255 );
-			bDrawGlow = true;
-			bDrawCursor = true;
-			break;
-		case Focus:
-			// active item
-			col.SetColor( 255, 255, 255, 255 );
-			bDrawGlow = true;
-			bAnimateGlow = true;
-			if ( m_nStyle == BUTTON_SIMPLE ||
-				 m_nStyle == BUTTON_DROPDOWN ||
-				 m_nStyle == BUTTON_DIALOG ||
-				 m_nStyle == BUTTON_RED )
-			{
-				bDrawCursor = true;
-			}
-			surface()->DrawSetColor(Color(121, 121, 121, 128));
-			surface()->DrawFilledRectFade(x, y, x + wide, y + tall, 128, 128, true);
-			break;
+	case Enabled:
+		// selectable, just not highlighted
+		textColor = m_TextColor;
+		if ( m_clrEnabledOverride.GetRawColor() )
+		{
+			textColor = m_clrEnabledOverride;
+		}
+		bDrawCursor = false;
+		break;
+
+	case Disabled:
+		textColor = m_DisabledColor;
+		bDrawCursor = false;
+		break;
+
+	case FocusDisabled:
+		textColor = m_FocusDisabledColor;
+		bDrawCursor = false;
+		break;
+
+	case Open:
+		// flyout menu is attached
+		textColor = m_TextColor;
+		bDrawCursor = true;
+		break;
+
+	case Focus:
+		// active item
+		textColor = m_FocusColor;
+		bDrawCursor = true;
+		break;
+	}
+
+	if ( m_nStyle == BUTTON_BITMAP )
+	{
+		surface()->DrawSetColor( Color( 255, 255, 255, 255 ) );
+		if ( curState == Focus )
+		{
+			surface()->DrawSetTextureFrame( m_nFocusImageId, m_nBitmapFrame, &m_nBitmapFrameCache );
+			surface()->DrawSetTexture( m_nFocusImageId );
+		}
+		else
+		{
+			surface()->DrawSetTexture( m_nEnabledImageId );
+		}
+
+		vgui::surface()->DrawTexturedRect( 0, 0, tall, tall );
+
+		x += tall;
+
+		bDrawCursor = false;
 	}
 
 	wchar_t szUnicode[512];
 	GetText( szUnicode, sizeof( szUnicode ) );
 	int len = V_wcslen( szUnicode );
 
+	if ( m_bAllCaps )
+	{
+		for ( int i = len - 1; i >= 0; --i )
+		{
+			szUnicode[ i ] = towupper( szUnicode[ i ] );
+		}
+	}
+
 	int textWide, textTall;
 	surface()->GetTextSize( m_hTextFont, szUnicode, textWide, textTall );
-
 	textWide = clamp( textWide, 0, wide - m_textInsetX * 2 );
-	textTall = clamp( textTall, 0, tall - m_textInsetX * 2 );
-
-	int textInsetX = m_textInsetX;
-	if ( m_nStyle == BUTTON_DIALOG )
-	{
-		// dialog buttons are centered
-		textInsetX = ( wide - textWide ) / 2;
-	}
-
-	if ( FlyoutMenu::GetActiveMenu() && FlyoutMenu::GetActiveMenu()->GetNavFrom() != this )
-	{
-		bDrawCursor = false;
-	}
+	textTall = clamp( textTall, 0, tall - m_textInsetY * 2 );
 
 	if ( bDrawCursor )
 	{
-		// draw backing rectangle
-		if ( curState == Open )
-		{
-			surface()->DrawSetColor(Color(80, 80, 80, 128));
-			surface()->DrawFilledRectFade(x, y, x + wide, y + tall, 128, 128, true);
-		}
+		surface()->DrawSetColor( m_CursorColor );
+		int cursorY = ( tall - m_nCursorHeight ) / 2;
+		surface()->DrawFilledRect( x, cursorY, x+wide, cursorY + m_nCursorHeight );
 	}
 
-	// assume drawn, unless otherwise shortened with ellipsis
-	int iLabelCharsDrawn = len;
-
-	// draw the text
-	if ( bDrawText )
+	if ( m_nStyle == BUTTON_LEFTINDIALOG && m_bPostCheckMark && m_hSymbolFont != vgui::INVALID_FONT )
 	{
-		int availableWidth = GetWide() - x - textInsetX;
+		int nCheckWide, nCheckTall;
+		vgui::surface()->GetTextSize( m_hSymbolFont, L"a", nCheckWide, nCheckTall );
 
-		if ( m_bShowDropDownIndicator )
+		int nArrowInsetY = ( tall - nCheckTall ) / 2;
+
+		vgui::surface()->DrawSetTextFont( m_hSymbolFont );
+		vgui::surface()->DrawSetTextColor( textColor );
+		vgui::surface()->DrawSetTextPos( x + m_textInsetX + textWide + nCheckWide/4, nArrowInsetY );
+		vgui::surface()->DrawUnicodeString( L"a" );
+	}
+
+	vgui::surface()->DrawSetTextFont( m_hTextFont );
+	vgui::surface()->DrawSetTextPos( x + m_textInsetX, y + m_textInsetY  );
+	vgui::surface()->DrawSetTextColor( textColor );
+
+	if ( m_nStyle == BUTTON_MIXEDCASE )
+	{
+		wchar_t *pwszLine = szUnicode;
+		int nLine = 0;
+		while ( wchar_t *pwszNewLine = wcschr( pwszLine, L'\n' ) )
 		{
-			int textTall = vgui::surface()->GetFontTall( m_hTextFont );
-			int textLen = 0;
-
-			int len = wcslen( szUnicode );
-			for ( int i=0;i<len;i++ )
-			{
-				textLen += vgui::surface()->GetCharacterWidth( m_hTextFont, szUnicode[i] );
-			}
-
-			int imageX = x + textInsetX + textLen + m_iSelectedArrowSize / 2;
-			int imageY = y + ( textTall - m_iSelectedArrowSize ) / 2;
-
-			if ( ( imageX + m_iSelectedArrowSize ) > GetWide() )
-			{
-				imageX = GetWide() - m_iSelectedArrowSize;
-			}
-
-			if ( curState == Open || m_bOverrideDropDownIndicator )
-			{
-				vgui::surface()->DrawSetTexture( m_iSelectedArrow );
-			}
-			else
-			{
-				vgui::surface()->DrawSetTexture( m_iUnselectedArrow );
-			}
-
-			vgui::surface()->DrawSetColor( col );
-			vgui::surface()->DrawTexturedRect( imageX, imageY, imageX + m_iSelectedArrowSize, imageY + m_iSelectedArrowSize );
-			vgui::surface()->DrawSetTexture( 0 );
-
-			availableWidth -= m_iSelectedArrowSize * 2;
+			*pwszNewLine = 0;
+			vgui::surface()->DrawSetTextPos( x + m_textInsetX, y + m_textInsetY + nLine*m_nMultiline );
+			vgui::surface()->DrawUnicodeString( pwszLine );
+			pwszLine = pwszNewLine + 1;
+			++ nLine;
 		}
-
-		vgui::surface()->DrawSetTextFont( m_hTextFont );
-		vgui::surface()->DrawSetTextPos( x + textInsetX, y + m_textInsetY  );
-		vgui::surface()->DrawSetTextColor( col );
-
+		vgui::surface()->DrawSetTextPos( x + m_textInsetX, y + m_textInsetY + nLine*m_nMultiline );
+		vgui::surface()->DrawUnicodeString( pwszLine );
+	}
+	else
+	{
+		// assume drawn, unless otherwise shortened with ellipsis
+		int availableWidth = GetWide() - x - m_textInsetX;
 		if ( textWide > availableWidth )
 		{
 			// length of 3 dots
 			int ellipsesLen = 3 * vgui::surface()->GetCharacterWidth( m_hTextFont, L'.' );
-
 			availableWidth -= ellipsesLen;
 
-			iLabelCharsDrawn = 0;
-			int charX = x + textInsetX;
-			for ( int i=0; i < len; i++ )
+			// draw as much as possible
+			for ( int i = 0; i < len; i++ )
 			{
 				vgui::surface()->DrawUnicodeChar( szUnicode[i] );
-				iLabelCharsDrawn++;
-
-				charX += vgui::surface()->GetCharacterWidth( m_hTextFont, szUnicode[i] );
-				if ( charX >= ( x + textInsetX + availableWidth ) )
+				availableWidth -= vgui::surface()->GetCharacterWidth( m_hTextFont, szUnicode[i] );
+				if ( availableWidth <= 0 )
 					break;
 			}
-			
+
+			// finish with ...
 			vgui::surface()->DrawPrintText( L"...", 3 );
 		}
 		else
@@ -531,93 +751,10 @@ void BaseModHybridButton::PaintButtonEx()
 			vgui::surface()->DrawUnicodeString( szUnicode );
 		}
 	}
-	else if ( GetCurrentState() == Disabled || GetCurrentState() == FocusDisabled )
+
+	if ( m_nStyle == BUTTON_LEFTINDIALOG || m_nStyle == BUTTON_DIALOGLIST )
 	{
-		Color textcol = col;
-		textcol[ 3 ] = 64;
-
-		vgui::surface()->DrawSetTextFont( m_hTextFont );
-		vgui::surface()->DrawSetTextPos( x + textInsetX, y + m_textInsetY  );
-		vgui::surface()->DrawSetTextColor( textcol );
-		vgui::surface()->DrawPrintText( szUnicode, len );
-	}
-
-	// draw the help text
-	if ( m_nStyle == BUTTON_GAMEMODE && curState != Open )
-	{
-		const char *pHelpText = GetHelpText( IsEnabled() );
-		wchar_t szHelpUnicode[512];
-		wchar_t *pUnicodeString;
-		if ( pHelpText && pHelpText[0] == '#' )
-		{
-			pUnicodeString = g_pVGuiLocalize->Find( pHelpText );
-		}
-		else
-		{
-			g_pVGuiLocalize->ConvertANSIToUnicode( pHelpText, szHelpUnicode, sizeof( szHelpUnicode ) );
-			pUnicodeString = szHelpUnicode;
-		}	
-		vgui::surface()->DrawSetTextFont( m_hHintTextFont );
-		vgui::surface()->DrawSetTextPos( x + textInsetX, y + m_textInsetY + m_nTextFontHeight );
-		vgui::surface()->DrawSetTextColor( col );
-		vgui::surface()->DrawPrintText( pUnicodeString, wcslen( pUnicodeString ) );
-	}
-
-	// draw the pulsing glow
-	if ( bDrawGlow )
-	{
-		if ( !bDrawText )
-		{
-			vgui::surface()->DrawSetTextColor( col );
-		}
-		else
-		{
-			int alpha = bAnimateGlow ? 60.0f + 30.0f * sin( Plat_FloatTime() * 4.0f ) : 30;
-			Color glowColor( 255, 255, 255, alpha );
-			vgui::surface()->DrawSetTextColor( glowColor );
-		}
-		vgui::surface()->DrawSetTextFont( m_hTextBlurFont );
-		vgui::surface()->DrawSetTextPos( x + textInsetX, y + m_textInsetY );
-
-		for ( int i=0; i<len && i < iLabelCharsDrawn; i++ )
-		{
-			vgui::surface()->DrawUnicodeChar( szUnicode[i] );
-		}
-	}
-
-	if ( m_nStyle == BUTTON_DROPDOWN && curState != Open )
-	{
-		// draw right justified item
-		wchar_t *pUnicodeString = g_pVGuiLocalize->Find( m_DropDownSelection.String() );
-		if ( !pUnicodeString )
-		{
-			g_pVGuiLocalize->ConvertANSIToUnicode( m_DropDownSelection.String(), szUnicode, sizeof( szUnicode ) );
-			pUnicodeString = szUnicode;
-		}
-		int len = V_wcslen( pUnicodeString );
-
-		int textWide, textTall;
-		surface()->GetTextSize( m_hSelectionFont, pUnicodeString, textWide, textTall );
-
-		// horizontal right justify
-		int xx = wide - textWide - textInsetX;
-		// vertical center within
-		int yy = ( tall - textTall )/2;
-
-		// draw the drop down selection text
-		vgui::surface()->DrawSetTextFont( m_hSelectionFont );
-		vgui::surface()->DrawSetTextPos( xx, yy );
-		vgui::surface()->DrawSetTextColor( col );
-		vgui::surface()->DrawPrintText( pUnicodeString, len );
-
-		if ( bDrawGlow )
-		{
-			int alpha = bAnimateGlow ? 60.0f + 30.0f * sin( Plat_FloatTime() * 4.0f ) : 30;
-			vgui::surface()->DrawSetTextColor( Color( 255, 255, 255, alpha ) );
-			vgui::surface()->DrawSetTextFont( m_hSelectionBlurFont );
-			vgui::surface()->DrawSetTextPos( xx, yy );
-			vgui::surface()->DrawPrintText( pUnicodeString, len );
-		}
+		DrawDialogListButton( textColor );
 	}
 }
 
@@ -637,7 +774,7 @@ void BaseModHybridButton::OnThink()
 	{
 	case EC_LIVE_REQUIRED:
 		{
-#ifdef _X360 
+#ifdef _GAMECONSOLE
 			SetEnabled( CUIGameData::Get()->SignedInToLive() );
 #else
 			SetEnabled( true );
@@ -652,172 +789,163 @@ void BaseModHybridButton::OnThink()
 			}
 		}
 		break;
+	}
 
+	if ( m_nStyle == BUTTON_BITMAP && GetCurrentState() == Focus )
+	{
+		// clock the anim at 10hz
+		float time = Plat_FloatTime();
+		if ( ( m_flLastBitmapAnimTime + 0.08f ) < time )
+		{
+			m_flLastBitmapAnimTime = time;
+			m_nBitmapFrame++;
+		}
 	}
 
 	BaseClass::OnThink();
 }
 
-void BaseModHybridButton::ApplySettings( KeyValues * inResourceData )
+void BaseModHybridButton::ApplySettings( KeyValues *pInResourceData )
 {
-	BaseClass::ApplySettings( inResourceData );
+	BaseClass::ApplySettings( pInResourceData );
 
-	vgui::IScheme *scheme = vgui::scheme()->GetIScheme( GetScheme() );
-	if( !scheme )
+	vgui::IScheme *pScheme = vgui::scheme()->GetIScheme( GetScheme() );
+	if ( !pScheme )
 		return;
 
-	char keyString[128];
+	m_TextColor = GetSchemeColor( "HybridButton.TextColor", pScheme );
+	m_FocusColor = GetSchemeColor( "HybridButton.FocusColor", pScheme );
+	m_CursorColor = GetSchemeColor( "HybridButton.CursorColor", pScheme );
+	m_DisabledColor = GetSchemeColor( "HybridButton.DisabledColor", pScheme );
+	m_FocusDisabledColor = GetSchemeColor( "HybridButton.FocusDisabledColor", pScheme );
+	m_ListButtonActiveColor = GetSchemeColor( "HybridButton.ListButtonActiveColor", pScheme );
+	m_ListButtonInactiveColor = GetSchemeColor( "HybridButton.ListButtonInactiveColor", pScheme );
+
+	const char *pDefaultFontString = pScheme->GetResourceString( "HybridButton.Font" );
+	const char *pDefaultSymbolFontString = pScheme->GetResourceString( "HybridButton.SymbolFont" );
+
+	m_bAllCaps = atoi( pScheme->GetResourceString( "HybridButton.AllCaps" ) ) != 0;
+
+	m_textInsetX = atoi( pScheme->GetResourceString( "HybridButton.TextInsetX" ) );
+	m_textInsetX = vgui::scheme()->GetProportionalScaledValue( m_textInsetX );
+
+	m_textInsetY = atoi( pScheme->GetResourceString( "HybridButton.TextInsetY" ) );
+	m_textInsetY = vgui::scheme()->GetProportionalScaledValue( m_textInsetY );
+
+	m_nCursorHeight = atoi( pScheme->GetResourceString( "HybridButton.CursorHeight" ) );
+	m_nCursorHeight = vgui::scheme()->GetProportionalScaledValue( m_nCursorHeight );
+
+	m_nMultiline = atoi( pScheme->GetResourceString( "HybridButton.MultiLine" ) );
+	m_nMultiline = vgui::scheme()->GetProportionalScaledValue( m_nMultiline );
 
 	// if a style is specified attempt to load values in from the SCHEME file
-	const char *style = inResourceData->GetString( "Style", NULL );
-	if ( !style )
+	const char *pStyle = pInResourceData->GetString( "Style", NULL );
+	if ( !pStyle )
 	{
-		style = "DefaultButton";
+		pStyle = "DefaultButton";
 	}
 
-	// this is a total bypass of the CA look
-	m_nStyle = BUTTON_SIMPLE;
-	V_snprintf( keyString, sizeof( keyString ), "%s.Style", style );
-	const char *pFormatString = scheme->GetResourceString( keyString );
+	m_nStyle = BUTTON_DEFAULT;
+	const char *pFormatString = pScheme->GetResourceString( CFmtStr( "%s.Style", pStyle ) );
 	if ( pFormatString && pFormatString[0] )
 	{
 		m_nStyle = (ButtonStyle_t)atoi( pFormatString );
 	}
-	if ( m_nStyle == BUTTON_MAINMENU )
+
+	m_TextColor = GetSchemeColor( CFmtStr( "%s.TextColor", pStyle ), m_TextColor, pScheme );
+	m_FocusColor = GetSchemeColor( CFmtStr( "%s.FocusColor", pStyle ), m_FocusColor, pScheme );
+	m_CursorColor = GetSchemeColor( CFmtStr( "%s.CursorColor", pStyle ), m_CursorColor, pScheme );
+	m_DisabledColor = GetSchemeColor( CFmtStr( "%s.DisabledColor", pStyle ), m_DisabledColor, pScheme );
+	m_FocusDisabledColor = GetSchemeColor( CFmtStr( "%s.FocusDisabledColor", pStyle ), m_FocusDisabledColor, pScheme );
+	m_ListButtonActiveColor = GetSchemeColor( CFmtStr( "%s.ListButtonActiveColor", pStyle ), m_ListButtonActiveColor, pScheme );
+	m_ListButtonInactiveColor = GetSchemeColor( CFmtStr( "%s.ListButtonInactiveColor", pStyle ), m_ListButtonInactiveColor, pScheme );
+
+	// If the parent is an alternate style, change our colors to conform
+	CBaseModFrame *pParent = dynamic_cast<CBaseModFrame *>(GetParent());
+	if ( m_bUseAlternateTiles || ( pParent && pParent->UsesAlternateTiles() ) )
 	{
-		m_hTextFont = scheme->GetFont( "MainBold", true );
-		m_hTextBlurFont = scheme->GetFont( "MainBoldBlur", true );
+		// set the alternate colors
+		m_TextColor = GetSchemeColor( "HybridButton.TextColorAlt", pScheme );
+		m_FocusColor = GetSchemeColor( "HybridButton.FocusColorAlt", pScheme );
+		m_CursorColor = GetSchemeColor( "HybridButton.MouseOverCursorColorAlt", pScheme );
 	}
-	else if ( m_nStyle == BUTTON_FLYOUTITEM )
-	{
-		m_hTextFont = scheme->GetFont( "DefaultMedium", true );
-		m_hTextBlurFont = scheme->GetFont( "DefaultMediumBlur", true );
-	}
-	else if ( m_nStyle == BUTTON_DROPDOWN )
-	{
-		m_hTextFont = scheme->GetFont( "DefaultBold", true );
-		m_hTextBlurFont = scheme->GetFont( "DefaultBoldBlur", true );
-		m_hSelectionFont = scheme->GetFont( "DefaultMedium", true );
-		m_hSelectionBlurFont = scheme->GetFont( "DefaultMediumBlur", true );
-		m_nWideAtOpen = vgui::scheme()->GetProportionalScaledValue( inResourceData->GetInt( "wideatopen", 0 ) );
-	}
-	else if ( m_nStyle == BUTTON_DIALOG )
-	{
-		m_hTextFont = scheme->GetFont( "DefaultBold", true );
-		m_hTextBlurFont = scheme->GetFont( "DefaultBoldBlur", true );
-	}
-	else if ( m_nStyle == BUTTON_RED || m_nStyle == BUTTON_REDMAIN )
-	{
-		m_hTextFont = scheme->GetFont( "DefaultBold", true );
-		m_hTextBlurFont = scheme->GetFont( "DefaultBoldBlur", true );
-	}
-	else if ( m_nStyle == BUTTON_SMALL )
-	{
-		m_hTextFont = scheme->GetFont( "DefaultVerySmall", true );
-		m_hTextBlurFont = scheme->GetFont( "DefaultVerySmall", true );
-	}
-	else if ( m_nStyle == BUTTON_MEDIUM )
-	{
-		m_hTextFont = scheme->GetFont( "DefaultMedium", true );
-		m_hTextBlurFont = scheme->GetFont( "DefaultMediumBlur", true );
-	}
-	else if ( m_nStyle == BUTTON_GAMEMODE )
-	{
-		m_hTextFont = scheme->GetFont( "MainBold", true );
-		m_hTextBlurFont = scheme->GetFont( "MainBoldBlur", true );
-		m_hHintTextFont = scheme->GetFont( "Default", true );
-		m_nWideAtOpen = vgui::scheme()->GetProportionalScaledValue( inResourceData->GetInt( "wideatopen", 0 ) );
-	}
-	else if ( m_nStyle == BUTTON_MAINMENUSMALL )
-	{
-		m_hTextFont = scheme->GetFont( "DefaultBold", true );
-		m_hTextBlurFont = scheme->GetFont( "DefaultBoldBlur", true );
-	}
-	else if ( m_nStyle == BUTTON_ALIENSWARMMENUBUTTON )
-	{
-		m_hTextFont = scheme->GetFont( "DefaultBold", true );
-		m_hTextBlurFont = scheme->GetFont( "DefaultBoldBlur", true );
-	}
-	else if ( m_nStyle == BUTTON_ALIENSWARMMENUBUTTONSMALL )
-	{
-		m_hTextFont = scheme->GetFont( "DefaultMedium", true );
-		m_hTextBlurFont = scheme->GetFont( "DefaultMediumBlur", true );
-	}
-	else if ( m_nStyle == BUTTON_ALIENSWARMDEFAULT )
-	{
-		m_hTextFont = scheme->GetFont( "Default", true );
-		m_hTextBlurFont = scheme->GetFont( "DefaultBlur", true );
-	}
-	else
-	{
-		m_nStyle = BUTTON_SIMPLE;
-		m_hTextFont = scheme->GetFont( "DefaultBold", true );
-		m_hTextBlurFont = scheme->GetFont( "DefaultBoldBlur", true );
-	}
-	
+
+	const char *pFontString = pScheme->GetResourceString( CFmtStr( "%s.Font", pStyle ) );
+	m_hTextFont = pScheme->GetFont( pFontString[0] ? pFontString : pDefaultFontString, true );
 	m_nTextFontHeight = vgui::surface()->GetFontTall( m_hTextFont );
-	m_nHintTextFontHeight = vgui::surface()->GetFontTall( m_hHintTextFont );
-
-	// tooltips
-	const char* enabledToolTipText = inResourceData->GetString( "tooltiptext" , NULL );
-	if ( enabledToolTipText )
-	{
-		SetHelpText( enabledToolTipText, true );
-	}
-
-	const char* disabledToolTipText = inResourceData->GetString( "disabled_tooltiptext", NULL );
-	if ( disabledToolTipText )
-	{
-		SetHelpText( disabledToolTipText, false );
-	}
-
-	//vgui's standard handling of the tabPosition tag doesn't properly navigate for the X360
-	if ( inResourceData->GetInt( "tabPosition", 0 ) == 1 )
-	{
-		NavigateTo();
-	}
-
 	SetFont( m_hTextFont );
 
-	//Get the x text inset
-	V_snprintf( keyString, sizeof( keyString ), "%s.%s", style, "TextInsetX" );
-	const char *result = scheme->GetResourceString( keyString );
-	if ( *result != 0 )
+	const char *pSymbolFontString = pScheme->GetResourceString( CFmtStr( "%s.SymbolFont", pStyle ) );
+	m_hSymbolFont = pScheme->GetFont( pSymbolFontString[0] ? pSymbolFontString : pDefaultSymbolFontString, true );
+
+	// get the cursor height
+	const char *pResult = pScheme->GetResourceString( CFmtStr( "%s.%s", pStyle, "CursorHeight" ) );
+	if ( pResult[0] )
 	{
-		m_textInsetX = atoi( result );
-		m_textInsetX = vgui::scheme()->GetProportionalScaledValueEx( GetScheme(), m_textInsetX );
+		m_nCursorHeight = vgui::scheme()->GetProportionalScaledValue( atoi( pResult ) );
 	}
 
-	//Get the y text inset
-	V_snprintf( keyString, sizeof( keyString ), "%s.%s", style, "TextInsetY" );
-	result = scheme->GetResourceString( keyString );
-	if( *result != 0 )
+	pResult = pScheme->GetResourceString( CFmtStr( "%s.%s", pStyle, "MultiLine" ) );
+	if ( pResult[0] )
 	{
-		m_textInsetY = atoi( result );
-		m_textInsetY = vgui::scheme()->GetProportionalScaledValueEx( GetScheme(), m_textInsetY );
+		m_nMultiline = vgui::scheme()->GetProportionalScaledValue( atoi( pResult ) );
+	}
+
+	pResult = pScheme->GetResourceString( CFmtStr( "%s.%s", pStyle, "AllCaps" ) );
+	if ( pResult[0] )
+	{
+		m_bAllCaps = atoi( pResult ) != 0;
+	}
+
+	pResult = pScheme->GetResourceString( CFmtStr( "%s.%s", pStyle, "ListInsetX" ) );
+	if ( pResult[0] )
+	{
+		m_nListInsetX = vgui::scheme()->GetProportionalScaledValue( atoi( pResult ) );
+	}
+
+	m_nWideAtOpen = vgui::scheme()->GetProportionalScaledValue( pInResourceData->GetInt( "wideatopen", 0 ) );
+
+	// Get the x text inset
+	pResult = pScheme->GetResourceString( CFmtStr( "%s.%s", pStyle, "TextInsetX" ) );
+	if ( pResult[0] )
+	{
+		m_textInsetX = vgui::scheme()->GetProportionalScaledValue( atoi( pResult ) );
+	}
+
+	// Get the y text inset
+	pResult = pScheme->GetResourceString( CFmtStr( "%s.%s", pStyle, "TextInsetY" ) );
+	if ( pResult[0] )
+	{
+		m_textInsetY = vgui::scheme()->GetProportionalScaledValue( atoi( pResult ) );
+	}
+
+	// vgui's standard handling of the tabPosition tag doesn't properly navigate for the X360
+	if ( pInResourceData->GetInt( "tabPosition", 0 ) == 1 )
+	{
+		NavigateTo();
 	}
 
 	//0 = press and release
 	//1 = press
 	//2 = release
-	int activationType = inResourceData->GetInt( "ActivationType", IsPC() ? 1 : 2 );
+	int activationType = pInResourceData->GetInt( "ActivationType", IsPC() ? 1 : 2 );
 	clamp( activationType, 0, 2 );
 	SetButtonActivationType( static_cast< vgui::Button::ActivationType_t >( activationType ) );
 
+	// it's a pain to specify all the button sizes when we don't need to
+	// force the button height to be derived from the font
 	int x, y, wide, tall;
 	GetBounds( x, y, wide, tall );
 	m_originalTall = tall;
 
-	if ( m_nStyle == BUTTON_GAMEMODE )
+	if ( m_nStyle != BUTTON_BITMAP )
 	{
-		// needs to be exact height sized
-		tall = m_nTextFontHeight + m_nHintTextFontHeight;
+		tall = MAX( m_nTextFontHeight, m_nCursorHeight );
 		SetSize( wide, tall );
-		m_originalTall = m_nTextFontHeight;
 	}
 
 	m_iUsablePlayerIndex = USE_EVERYBODY;
-	if ( const char *pszValue = inResourceData->GetString( "usablePlayerIndex", "" ) )
+	if ( const char *pszValue = pInResourceData->GetString( "usablePlayerIndex", "" ) )
 	{
 		if ( !stricmp( "primary", pszValue ) )
 		{
@@ -833,11 +961,11 @@ void BaseModHybridButton::ApplySettings( KeyValues * inResourceData )
 		}
 	}
 
-	//handle different conditions to allow the control to be enabled and disabled automatically
-	const char * condition = inResourceData->GetString( "EnableCondition" );
+	// handle different conditions to allow the control to be enabled and disabled automatically
+	const char *pCondition = pInResourceData->GetString( "EnableCondition" );
 	for ( int index = 0; index < ( sizeof( sHybridStates ) / sizeof( HybridEnableStates ) ); ++index )
 	{
-		if ( Q_stricmp( condition, sHybridStates[ index ].mConditionName ) == 0 )
+		if ( Q_stricmp( pCondition, sHybridStates[ index ].mConditionName ) == 0 )
 		{
 			mEnableCondition = sHybridStates[ index ].mCondition;
 			break;
@@ -852,15 +980,42 @@ void BaseModHybridButton::ApplySettings( KeyValues * inResourceData )
 		}
 	}
 
-	m_bOnlyActiveUser = ( inResourceData->GetInt( "OnlyActiveUser", 0 ) != 0 );
-	m_bIgnoreButtonA = ( inResourceData->GetInt( "IgnoreButtonA", 0 ) != 0 );
+	m_bOnlyActiveUser = ( pInResourceData->GetInt( "OnlyActiveUser", 0 ) != 0 );
+	m_bIgnoreButtonA = ( pInResourceData->GetInt( "IgnoreButtonA", 0 ) != 0 );
 
-	m_bShowDropDownIndicator = ( inResourceData->GetInt( "ShowDropDownIndicator", 0 ) != 0 );
+	m_bShowDropDownIndicator = ( pInResourceData->GetInt( "ShowDropDownIndicator", 0 ) != 0 );
 	m_bOverrideDropDownIndicator = false;
 
-	m_iSelectedArrowSize = vgui::scheme()->GetProportionalScaledValue( inResourceData->GetInt( "DropDownIndicatorSize", 8 ) );
-}
+	m_iSelectedArrowSize = vgui::scheme()->GetProportionalScaledValue( pInResourceData->GetInt( "DropDownIndicatorSize", 8 ) );
 
+	if ( m_nStyle == BUTTON_DIALOGLIST )
+	{
+		KeyValues *pList = pInResourceData->FindKey( "list", false );
+		if ( pList )
+		{
+			for ( KeyValues *pKey = pList->GetFirstSubKey(); pKey; pKey = pKey->GetNextKey() )
+			{
+				int iIndex = m_DialogListItems.AddToTail();
+				m_DialogListItems[iIndex].m_String = pKey->GetName();
+				m_DialogListItems[iIndex].m_CommandString = pKey->GetString();
+			}
+		}
+	}
+	else if ( m_nStyle == BUTTON_BITMAP )
+	{
+		const char *pImageName = pInResourceData->GetString( "bitmap_enabled", "" );
+		if ( pImageName[0] )
+		{
+			m_nEnabledImageId = CBaseModPanel::GetSingleton().GetImageId( pImageName );
+		}
+
+		pImageName = pInResourceData->GetString( "bitmap_focus", "" );
+		if ( pImageName[0] )
+		{
+			m_nFocusImageId = CBaseModPanel::GetSingleton().GetImageId( pImageName );
+		}
+	}
+}
 
 void BaseModHybridButton::ApplySchemeSettings( vgui::IScheme *pScheme )
 {
@@ -916,7 +1071,7 @@ void BaseModHybridButton::OnKeyCodePressed( vgui::KeyCode code )
 		if ( m_bIgnoreButtonA )
 		{
 			// Don't swallow the a key... our parent wants it
-			CallParentFunction(new KeyValues("KeyCodePressed", "code", code));
+			CallParentFunction( new KeyValues( "KeyCodePressed", "code", code ) );
 			return;
 		}
 
@@ -956,33 +1111,29 @@ void BaseModHybridButton::OnKeyCodePressed( vgui::KeyCode code )
 		}
 	}
 
-	if ( IsX360() && m_nStyle == BUTTON_GAMEMODE )
+	if ( m_nStyle == BUTTON_DIALOGLIST )
 	{
-		GameModes *pGameModes = dynamic_cast< GameModes * >( GetParent() );
-		if ( pGameModes )
+		switch ( localCode )
 		{
-			switch ( localCode )
-			{
-			case KEY_XBUTTON_A:
-				if ( pGameModes->IsScrollBusy() )
-				{
-					// swallow it
-					return;
-				}
-				break;
+		case KEY_XBUTTON_A:
+			ChangeDialogListSelection( SELECT_NEXT );
+			break;
 
-			case KEY_XBUTTON_LEFT:
-			case KEY_XSTICK1_LEFT:
-			case KEY_XSTICK2_LEFT:
-				pGameModes->ScrollLeft();
-				break;
+		case KEY_XSTICK1_LEFT:
+		case KEY_XSTICK2_LEFT:
+		case KEY_XBUTTON_LEFT:
+		case KEY_XBUTTON_LEFT_SHOULDER:
+		case KEY_LEFT:
+			ChangeDialogListSelection( SELECT_PREV );
+			break;
 
-			case KEY_XBUTTON_RIGHT:
-			case KEY_XSTICK1_RIGHT:
-			case KEY_XSTICK2_RIGHT:
-				pGameModes->ScrollRight();
-				break;
-			}
+		case KEY_XSTICK1_RIGHT:
+		case KEY_XSTICK2_RIGHT:
+		case KEY_XBUTTON_RIGHT:
+		case KEY_XBUTTON_RIGHT_SHOULDER:
+		case KEY_RIGHT:
+			ChangeDialogListSelection( SELECT_NEXT );
+			break;
 		}
 	}
 
@@ -997,18 +1148,116 @@ void BaseModHybridButton::OnKeyCodeReleased( KeyCode keycode )
 
 	BaseClass::OnKeyCodeReleased( keycode );
 
-	if( bOldArmedState && !IsArmed() )
+	if ( bOldArmedState && !IsArmed() )
 		SetArmed( true );
 }
 
-void BaseModHybridButton::SetDropdownSelection( const char *pText )
+void BaseModHybridButton::SetCurrentSelection( const char *pText )
 {
-	m_DropDownSelection = pText;
+	if ( m_nStyle == BUTTON_LEFTINDIALOG )
+	{
+		m_nDialogListCurrentIndex = 0;
+		m_DialogListItems.Purge();
+
+		if ( pText && pText[0] )
+		{
+			// optional RHS value
+			int i = m_DialogListItems.AddToTail();
+			m_DialogListItems[i].m_String = pText;
+		}
+	}
+	else if ( m_nStyle == BUTTON_DIALOGLIST )
+	{
+		for ( int i = 0; i < m_DialogListItems.Count(); i++ )
+		{
+			if ( m_DialogListItems[i].m_bEnabled && !V_stricmp( m_DialogListItems[i].m_String.Get(), pText ) )
+			{
+				m_nDialogListCurrentIndex = i;
+				break;
+			}
+		}
+	}
 }
 
-void BaseModHybridButton::EnableDropdownSelection( bool bEnable )
+void BaseModHybridButton::ModifySelectionString( const char *pCommand, const char *pNewText )
 {
-	m_bDropDownSelection = bEnable;
+	for ( int i = 0; i < m_DialogListItems.Count(); i++ )
+	{
+		if ( !V_stricmp( m_DialogListItems[i].m_CommandString.Get(), pCommand ) )
+		{
+			m_DialogListItems[i].m_String = pNewText;
+			break;
+		}
+	}
+}
+
+void BaseModHybridButton::ModifySelectionStringParms( const char *pCommand, const char *pParm1 )
+{
+	for ( int i = 0; i < m_DialogListItems.Count(); i++ )
+	{
+		if ( !V_stricmp( m_DialogListItems[i].m_CommandString.Get(), pCommand ) )
+		{
+			m_DialogListItems[i].m_StringParm1 = pParm1;
+			break;
+		}
+	}
+}
+
+bool BaseModHybridButton::GetListSelectionString( const char *pCommand, char *pOutBuff, int nOutBuffSize )
+{
+	for ( int i = 0; i < m_DialogListItems.Count(); i++ )
+	{
+		if ( !V_stricmp( m_DialogListItems[i].m_CommandString.Get(), pCommand ) )
+		{
+			V_strncpy( pOutBuff, m_DialogListItems[i].m_String.Get(), nOutBuffSize );
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void BaseModHybridButton::ChangeDialogListSelection( ListSelectionChange_t eNext )
+{
+	int nIncrementDir = ( eNext == SELECT_PREV ) ? -1 : 1; 
+
+	int nNumAttempts = 0;
+	int nNewIndex = m_nDialogListCurrentIndex;
+	do
+	{
+		nNewIndex = ( nNewIndex + m_DialogListItems.Count() + nIncrementDir ) % m_DialogListItems.Count();
+		if ( m_DialogListItems[nNewIndex].m_bEnabled )
+			break;
+		nNumAttempts++;
+	}
+	while ( nNumAttempts < m_DialogListItems.Count() );
+
+	if ( m_nDialogListCurrentIndex != nNewIndex )
+	{
+		m_nDialogListCurrentIndex = nNewIndex;
+		CBaseModPanel::GetSingleton().PlayUISound( UISOUND_CLICK );
+
+		PostActionSignal( new KeyValues( "Command", "command", m_DialogListItems[m_nDialogListCurrentIndex].m_CommandString.Get() ) );
+	}
+	else
+	{
+		CBaseModPanel::GetSingleton().PlayUISound( UISOUND_INVALID );
+	}
+}
+
+void BaseModHybridButton::EnableListItem( const char *pText, bool bEnable )
+{
+	if ( m_nStyle == BUTTON_DIALOGLIST )
+	{
+		for ( int i = 0; i < m_DialogListItems.Count(); i++ )
+		{
+			if ( !V_stricmp( m_DialogListItems[i].m_String.Get(), pText ) )
+			{
+				m_DialogListItems[i].m_bEnabled = bEnable;
+				break;
+			}
+		}
+	}
 }
 
 void BaseModHybridButton::OnCursorEntered()
@@ -1023,7 +1272,7 @@ void BaseModHybridButton::OnCursorEntered()
 				CBaseModPanel::GetSingleton().PlayUISound( UISOUND_FOCUS );
 			}
 
-			if( GetParent() )
+			if ( GetParent() )
 			{
 				GetParent()->NavigateToChild( this );
 			}

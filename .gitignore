@@ -29,7 +29,6 @@ ipch
 copy.bat
 demoheader.tmp
 maplist.txt
-pak01_dir\*
 pakfiles.bat
 run_mod.bat
 stats.txt
@@ -67,9 +66,6 @@ config.cfg
 # shader files
 *.tmp
 
-# built vpks
-*.vpk
-
 # crash dumps
 *.mdmp
 *.dmp
@@ -89,7 +85,6 @@ config.cfg
 *.dmp
 *.log
 *.mdmp
-*.vpk
 voice_ban.dt
 demoheader.tmp
 stats.txt
@@ -114,6 +109,8 @@ ipch
 *.opensdf
 *.pdb
 *.VC.db
+src/.vs/
+*.vcxproj.FileListAbsolute.txt
 
 game/srcds.exe
 game/srcds_run
@@ -154,8 +151,8 @@ game/platform
 Debug_*
 Release_*
 !src/common/debug_dll_check.cpp
-!game/portal2asw/portal2asw.vpk
 game/portal2asw/bin/game_shader_dx9.dll
 game/portal2asw/cfg/video.txt
 src/portal2_client_vpc.lnk
 src/portal2_server_vpc.lnk
+src/.vscode

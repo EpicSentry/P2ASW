@@ -161,17 +161,17 @@ void CMultiplayerAdvancedDialog::GatherCurrentValues()
 		{
 		case O_BOOL:
 			pBox = (CheckButton *)pList->pControl;
-			sprintf( szValue, "%s", pBox->IsSelected() ? "1" : "0" );
+			Q_snprintf( szValue, ARRAYSIZE( szValue ), "%s", pBox->IsSelected() ? "1" : "0" );
 			break;
 		case O_NUMBER:
 			pEdit = ( TextEntry * )pList->pControl;
 			pEdit->GetText( strValue, sizeof( strValue ) );
-			sprintf( szValue, "%s", strValue );
+			Q_snprintf( szValue, ARRAYSIZE( szValue ), "%s", strValue );
 			break;
 		case O_STRING:
 			pEdit = ( TextEntry * )pList->pControl;
 			pEdit->GetText( strValue, sizeof( strValue ) );
-			sprintf( szValue, "%s", strValue );
+			Q_snprintf( szValue, ARRAYSIZE( szValue ), "%s", strValue );
 			break;
 		case O_LIST:
 			pCombo = (ComboBox *)pList->pControl;
@@ -191,12 +191,12 @@ void CMultiplayerAdvancedDialog::GatherCurrentValues()
 
 			if ( pItem )
 			{
-				sprintf( szValue, "%s", pItem->szValue );
+				Q_snprintf( szValue, ARRAYSIZE( szValue ), "%s", pItem->szValue );
 			}
 			else  // Couln't find index
 			{
 				//assert(!("Couldn't find string in list, using default value"));
-				sprintf( szValue, "%s", pObj->defValue );
+				Q_snprintf( szValue, ARRAYSIZE( szValue ), "%s", pObj->defValue );
 			}
 			break;
 		}

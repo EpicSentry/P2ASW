@@ -6,7 +6,8 @@
 //
 //=============================================================================//
 
-#if !defined( _X360 )
+#include <tier0/platform.h> // For IS_WINDOWS_PC
+#ifdef IS_WINDOWS_PC
 #include <windows.h>
 #endif
 #include <stdio.h>
@@ -17,6 +18,11 @@
 
 #if defined( _X360 )
 #include "xbox/xbox_win32stubs.h"
+#endif
+
+#ifdef _PS3
+#include "ps3/ps3_core.h"
+#include "ps3/ps3_win32stubs.h"
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -80,6 +86,9 @@ must be multiples of sixteen
 */
 int GrabMip ( HANDLE hdib, unsigned char *lump_p, char *lumpname, COLORREF crf, int *width, int *height)
 {
+#ifndef _WIN32
+	return 0;
+#else
 	int             i,x,y,xl,yl,xh,yh,w,h;
 	unsigned char   *screen_p, *source;
 	miptex_t		*qtex;
@@ -192,6 +201,7 @@ int GrabMip ( HANDLE hdib, unsigned char *lump_p, char *lumpname, COLORREF crf, 
 	*lump_p++  = (unsigned char)((crf >> 16) & 0xFF);
 
 	return lump_p - lump_start;
+#endif
 }
 
 
@@ -213,7 +223,7 @@ void UpdateLogoWAD( void *phdib, int r, int g, int b )
 
 	CUtlBuffer buffer( 0, 16384 );
 
-	int width, height;
+	int width = 0, height = 0;
 	
 	int length = GrabMip (hdib, buf, pszName, crf, &width, &height);
 	if ( length == 0 )

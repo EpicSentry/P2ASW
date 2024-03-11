@@ -91,6 +91,8 @@ extern IUploadGameStats *gamestatsuploader;
 extern CSteamAPIContext *steamapicontext;
 extern ISoundEmitterSystemBase *soundemitterbase;
 
+#include "CegClientWrapper.h"
+
 #ifdef INFESTED_DLL
 class IASW_Mission_Chooser;
 extern IASW_Mission_Chooser *missionchooser;

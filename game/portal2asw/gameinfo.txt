@@ -16,9 +16,12 @@
 		"SearchPaths"
 		{
 			"Game"	"|gameinfo_path|."
-			"Game"	"|all_source_engine_paths|../Portal 2/portal2_dlc2"
-			"Game"	"|all_source_engine_paths|../Portal 2/portal2_dlc1"
-			"Game"	"|all_source_engine_paths|../Portal 2/portal2"
+			// Portal 2 code mounts this, but it isn't used by Valve
+			"Game"	"../Portal 2/xlsppatch"
+			"Game"	"../Portal 2/update"
+			"Game"	"../Portal 2/portal2_dlc2"
+			"Game"	"../Portal 2/portal2_dlc1"
+			"Game"	"../Portal 2/portal2"
 			"Game"	"platform"
 		}
 	}

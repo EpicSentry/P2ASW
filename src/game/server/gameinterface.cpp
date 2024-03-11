@@ -659,12 +659,8 @@ void __fastcall CBaseFileSystem__AddVPKFile(struct_this* thisptr, void* edx, cha
 		}
 		thisptr->m_VPKFiles.RemoveAll();
 		for (int i = 0; i < m_VPKPaths.Count(); ++i) {
-			CBaseFileSystem__AddVPKFile(thisptr, 0, m_VPKPaths.Element(i), PATH_ADD_TO_TAIL_ATINDEX);
+			CBaseFileSystem__AddVPKFile(thisptr, 0, m_VPKPaths.Element(i), PATH_ADD_TO_TAIL);
 		}
-		char path[260];
-		filesystem->GetSearchPath("MOD", false, path, 260);
-		V_strcat(path, "portal2asw.vpk", 260);
-		CBaseFileSystem__AddVPKFile(thisptr, 0, path, PATH_ADD_TO_HEAD);
 	}
 
 	bHasBeenCalled = true;
@@ -864,6 +860,28 @@ void Studio_BuildMatricesHook(
 	}
 }
 
+void LanguageCvarChangeCallback( IConVar *pConVar, char const *pOldString, float flOldValue )
+{
+	ConVarRef var(pConVar);
+	bool bLangIsTurkish = !V_strcmp( var.GetString(), "turkish" );
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "TURKISH", bLangIsTurkish );
+}
+
+// We also hook save_disable to this in DLLInit()
+void UpdateSavesDisabledCallback( IConVar *pConVar, const char *pOldString, float flOldValue )
+{
+	// Update 2nd bit of save_disable to our state
+	ConVarRef map_disable("map_wants_save_disable");
+	ConVarRef save_disable("save_disable");
+	if (save_disable.IsValid() && map_disable.IsValid())
+	{
+		int mapDisableBit = map_disable.GetInt() << 1;
+		save_disable.SetValue( save_disable.GetInt() | mapDisableBit );
+	}
+}
+
+ConVar map_wants_save_disable("map_wants_save_disable", "0", FCVAR_CHEAT, "Same as save_disable, but is cleared on disconnect", UpdateSavesDisabledCallback);
+
 bool CServerGameDLL::DLLInit(CreateInterfaceFn appSystemFactory,
 	CreateInterfaceFn physicsFactory, CreateInterfaceFn fileSystemFactory,
 	CGlobalVars *pGlobals)
@@ -958,6 +976,44 @@ bool CServerGameDLL::DLLInit(CreateInterfaceFn appSystemFactory,
 		scriptmanager = (IScriptManager *)appSystemFactory(VSCRIPT_INTERFACE_VERSION, NULL);
 	}
 
+	// HACK: Now that we have the filesystem interface, add a new VPK as soon as possible
+	// so that the patched AddVPKFile runs and flushes the VPK list.
+	// If we don't do this, we get crashes later
+	char path[MAX_PATH];
+	filesystem->GetSearchPath("MOD", false, path, MAX_PATH);
+	V_strcat(path, "portal2asw.vpk", MAX_PATH);
+	filesystem->AddVPKFile(path, PATH_ADD_TO_HEAD);
+
+	// Register extra keyvalue conditionals that aren't present in Swarm
+	// We also need to do this early, before we start loading keyvalue files
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "GAMECONSOLE", IsConsole() );
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "PS3", IsPS3() );
+
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "WINDOWS", IsPlatformWindowsPC() );
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "OSX", IsOSX() );
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "POSIX", IsPosix() );
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "LINUX", IsLinux() );
+
+	// Used to change the size of some UI elements
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "DECK", !!CommandLine()->FindParm( "-gamepadui" ) );
+
+	// These were renamed
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "GAMECONSOLEWIDE", KeyValuesSystem()->GetKeyValuesExpressionSymbol("X360WIDE") );
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "GAMECONSOLEHIDEF", KeyValuesSystem()->GetKeyValuesExpressionSymbol("X360HIDEF") );
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "GAMECONSOLELODEF", KeyValuesSystem()->GetKeyValuesExpressionSymbol("X360LODEF") );
+
+	// Anamorphic is only used on PS3 and not supported in Swarm
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "ANAMORPHIC", false );
+	// Used to swap cross and circle on Japanese PS3s, not supported on PC or in Swarm
+	KeyValuesSystem()->SetKeyValuesExpressionSymbol( "INPUTSWAPAB", false );
+
+	// Extra language conditional added in Portal 2 (Turkish), others are handled already
+	// We hook a callback to the language cvar so this always reflects its current value
+	ConVar* cl_language = g_pCVar->FindVar("cl_language");
+	if (cl_language)
+	{
+		cl_language->InstallChangeCallback( LanguageCvarChangeCallback );
+	}
 
 #ifdef SERVER_USES_VGUI
 	// If not running dedicated, grab the engine vgui interface
@@ -1058,6 +1114,38 @@ bool CServerGameDLL::DLLInit(CreateInterfaceFn appSystemFactory,
 #if defined( PORTAL2 )
 	g_pGameSaveRestoreBlockSet->AddBlockHandler( GetPaintSaveRestoreBlockHandler() );
 #endif
+
+#ifdef DEBUG
+	// debug builds always allow dev-only cvars
+	bool bAllowDevCvars = true;
+#else
+	// not allowing devonly cvars in release to match Valve's games.
+	// uncomment the line below to enable them when running with -insecure
+	// or on dedicated servers (where they could be changed with plugins anyway)
+	bool bAllowDevCvars = false;
+	//bool bAllowDevCvars = (engine->IsDedicatedServer() || CommandLine()->FindParm("-insecure"));
+#endif
+
+	// remove dev-only and hidden flags if applicable
+	if (bAllowDevCvars)
+	{
+		ICvar::Iterator iter(g_pCVar);
+
+		for (iter.SetFirst(); iter.IsValid(); iter.Next())
+		{
+			ConCommandBase* command = iter.Get();
+			command->RemoveFlags(FCVAR_DEVELOPMENTONLY | FCVAR_HIDDEN);
+		}
+
+		ConMsg("Development-only and hidden cvars have been enabled.\n");
+	}
+
+	// Hook callback to save_disable for map_wants_save_disable
+	ConVar* save_disable = g_pCVar->FindVar("save_disable");
+	if (save_disable)
+	{
+		save_disable->InstallChangeCallback( UpdateSavesDisabledCallback );
+	}
 
 	bool bInitSuccess = false;
 	if ( sv_threaded_init.GetBool() )
@@ -2396,6 +2484,21 @@ ConVar sv_unlockedchapters( "sv_unlockedchapters", "1", FCVAR_ARCHIVE | FCVAR_AR
 //-----------------------------------------------------------------------------
 void UpdateChapterRestrictions( const char *mapname )
 {
+#ifdef PORTAL2
+
+	// P2ASW: Use the Portal 2 SP map list to unlock chapters
+	// Portal 2 itself does this using title data through code in matchmaking.dll
+	int currentChapter = 0;
+#define CFG( spmap, chapternum, ... ) if ( !V_stricmp( mapname, #spmap ) ) currentChapter = chapternum;
+#include "xlast_portal2/inc_sp_maps.inc"
+#undef CFG
+
+	if (currentChapter > sv_unlockedchapters.GetInt())
+	{
+		sv_unlockedchapters.SetValue(currentChapter);
+		engine->ServerCommand( "host_writeconfig\n" );
+	}
+#else
 	// look at the chapter for this map
 	char chapterTitle[64];
 	chapterTitle[0] = 0;
@@ -2481,6 +2584,7 @@ void UpdateChapterRestrictions( const char *mapname )
 
 		g_nCurrentChapterIndex = nNewChapter;
 	}
+#endif
 }
 
 //-----------------------------------------------------------------------------

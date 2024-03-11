@@ -1221,9 +1221,17 @@ PLATFORM_INTERFACE bool Is64BitOS();
 #define WM_XMP_PLAYBACKBEHAVIORCHANGED		(WM_USER + 122)
 #define WM_XMP_PLAYBACKCONTROLLERCHANGED	(WM_USER + 123)
 
+#if defined( _PS3 )
+#define PLATFORM_EXT ".ps3"
+#elif defined( PLATFORM_X360 )
+#define PLATFORM_EXT ".360"
+#else
+#define PLATFORM_EXT ""
+#endif
+
 inline const char *GetPlatformExt( void )
 {
-	return IsPlatformX360() ? ".360" : "";
+	return PLATFORM_EXT;
 }
 
 // flat view, 6 hw threads

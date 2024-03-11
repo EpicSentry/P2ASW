@@ -65,8 +65,9 @@ public:
 	bool GetPanelItemIndex(vgui::Panel* panelItem, unsigned short& panelItemIndex);
 
 	enum SEARCH_DIRECTION { SD_UP, SD_DOWN };
-	virtual bool SelectPanelItem(unsigned short index, SEARCH_DIRECTION direction = SD_DOWN, bool scrollToItem = true, bool bAllowStealFocus = true);
+	virtual bool SelectPanelItem(unsigned short index, SEARCH_DIRECTION direction = SD_DOWN, bool scrollToItem = true, bool bAllowStealFocus = true, bool bSuppressSelectionSound = false);
 	virtual bool SelectPanelItemByPanel( Panel *pPanelItem );
+	virtual void ClearPanelSelection();
 	virtual void ScrollToPanelItem(unsigned short index);
 
 	virtual void NavigateTo();
@@ -85,8 +86,8 @@ public:
 	unsigned short GetLastItemAdded();
 
 	int GetFirstVisibleItemNumber( bool bRequireFullyVisible = false ); //returns -1 if it can't find one
-	int GetLastVisibleItemNumber( bool bRequireFullyVisible = IsX360() );  //returns -1 if it can't find one
-	bool IsPanelItemVisible( Panel *pPanelItem, bool bRequireFullyVisible = IsX360() );
+	int GetLastVisibleItemNumber( bool bRequireFullyVisible = IsGameConsole() );  //returns -1 if it can't find one
+	bool IsPanelItemVisible( Panel *pPanelItem, bool bRequireFullyVisible = IsGameConsole() );
 
 	MESSAGE_FUNC_CHARPTR( OnItemSelected, "OnItemSelected", panelName );
 	MESSAGE_FUNC_CHARPTR( OnItemAdded, "OnItemAdded", panelName );
@@ -97,6 +98,8 @@ public:
 	MESSAGE_FUNC( OnChildResized, "ChildResized" );
 
 	void RelinkNavigation( void ); //re-links all the NavUp()/NavDown() links for panel items
+
+	vgui::ScrollBar *GetScrollBar() { return m_ScrVerticalScroll; }
 
 protected:	
 
