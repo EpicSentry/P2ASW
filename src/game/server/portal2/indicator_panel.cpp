@@ -292,7 +292,7 @@ BEGIN_DATADESC( CPropIndicatorPanel )
 	DEFINE_FIELD( m_bStopped, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_bCountingDown, FIELD_BOOLEAN ),
 
-	DEFINE_FIELD( m_flTimerStart, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_flTimerStart, FIELD_FLOAT ),
 
 	DEFINE_FIELD( m_hIndicatorPanel, FIELD_EHANDLE ),
 
