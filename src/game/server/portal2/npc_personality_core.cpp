@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright © Valve Corporation, All rights reserved. ===============//
 //
 // Purpose: Recreation of the Personality Core entity from Portal 2
 // Recreated by Jordon (JordyPorgie)
@@ -77,6 +77,7 @@ public:
 	void VPhysicsCollision(int index, gamevcollisionevent_t* pEvent);
 	QAngle PreferredCarryAngles();
 	bool HasPreferredCarryAnglesForPlayer(CBasePlayer* pPlayer) { return true; }
+	void ModifyOrAppendCriteria(AI_CriteriaSet& set);
 	CAI_Expresser* CreateExpresser();
 	void NotifySystemEvent(CBaseEntity *pNotify, notify_system_event_t eventType, const notify_system_event_params_t &params);
 	bool IsOkToSpeakInResponseToPlayer(void);
@@ -85,6 +86,9 @@ public:
 protected:
 	bool TestRemarkingUpon(CInfoRemarkable* pRemarkable);
 	bool IsBeingHeldByPlayer();
+	float GetPlayerSpeed();
+	CBasePlayer* GetFirstPlayer();
+	const char* GetPlayerHeldEntityName();
 	float m_flNextIdleSoundTime;
 	float m_flLastPhysicsImpactTime;
 	bool m_bHasBeenPickedUp;
@@ -139,6 +143,8 @@ AI_END_CUSTOM_NPC()
 IMPLEMENT_SERVERCLASS_ST(CNPC_PersonalityCore, DT_NPC_Personality_Core)
 	SendPropBool( SENDINFO (m_bFlashlightEnabled) ),
 END_SEND_TABLE()
+
+static const char *pDefaultHeldItemName = "None";
 
 void CNPC_PersonalityCore::Precache(void)
 {
@@ -444,6 +450,30 @@ QAngle CNPC_PersonalityCore::PreferredCarryAngles()
 	return QAngle(sv_personality_core_pca_pitch.GetFloat(), sv_personality_core_pca_yaw.GetFloat(), sv_personality_core_pca_roll.GetFloat());
 }
 
+void CNPC_PersonalityCore::ModifyOrAppendCriteria(AI_CriteriaSet& set)
+{
+	const char* coreheldvalue;
+	const char* pickupvalue;
+
+	BaseClass::ModifyOrAppendCriteria(set);
+
+	bool heldbyplayer = IsBeingHeldByPlayer() == false;
+	coreheldvalue = "true";
+
+	if (heldbyplayer)
+		coreheldvalue = "false";
+
+	set.AppendCriteria("core_held", coreheldvalue);
+
+	pickupvalue = "true";
+	if (!m_bHasBeenPickedUp)
+		pickupvalue = "false";
+
+	set.AppendCriteria("core_picked_up", pickupvalue);
+
+	set.AppendCriteria("player_speed", GetPlayerSpeed());
+}
+
 CAI_Expresser* CNPC_PersonalityCore::CreateExpresser()
 {
 	return BaseClass::CreateExpresser();
@@ -548,5 +578,54 @@ bool CNPC_PersonalityCore::IsBeingHeldByPlayer()
 		}
 	}
 	return true;
+}
+
+float CNPC_PersonalityCore::GetPlayerSpeed()
+{
+	CBasePlayer* pPlayer = GetFirstPlayer();
+
+	if (pPlayer)
+	{
+		return sqrt(pPlayer->GetAbsVelocity().Length());
+	}
+	return 0.0f;
+}
+
+CBasePlayer* CNPC_PersonalityCore::GetFirstPlayer()
+{
+	CBasePlayer* result;
+	int v2;
+
+	result = 0;
+	if (gpGlobals->maxClients > 0)
+	{
+		v2 = 1;
+		do
+		{
+			result = UTIL_PlayerByIndex(v2);
+			if (result)
+				break;
+			++v2;
+		}
+		while (gpGlobals->maxClients >= v2);
+	}
+	return result;
+}
+
+const char* CNPC_PersonalityCore::GetPlayerHeldEntityName()
+{
+	CBasePlayer* pPlayer = GetFirstPlayer();
+
+	if (pPlayer)
+	{
+		CBaseEntity* pHeld = GetPlayerHeldEntity(pPlayer);
+
+		if (pHeld)
+		{
+			pDefaultHeldItemName = pHeld->GetClassname();
+		}
+	}
+
+	return pDefaultHeldItemName;
 }
 
