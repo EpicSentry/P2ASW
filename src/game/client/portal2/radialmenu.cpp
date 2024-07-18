@@ -40,12 +40,8 @@
 #include "vgui/IVgui.h"
 #include <game/client/iviewport.h>
 
-//#define TAUNTMENU
-
 #include "radialmenu.h"
-#ifdef TAUNTMENU
 #include "radialmenu_taunt.h"
-#endif
 #include "radialbutton.h"
 
 #include "cegclientwrapper.h"
@@ -513,7 +509,7 @@ void CRadialMenu::EndDrag( void )
 			}
 		}
 	}
-#ifdef TAUNTMENU
+
 	if ( nSwap != -1 && nSwap != CENTER )
 	{
 		CUtlVector< TauntStatusData > *pTauntData = GetClientMenuManagerTaunt().GetTauntData();
@@ -565,7 +561,7 @@ void CRadialMenu::EndDrag( void )
 			SetData( menuKey );
 		}
 	}
-#endif
+
 	m_bDragging = false;
 	m_nDraggingTaunt = -1;
 }
@@ -1460,10 +1456,9 @@ void CRadialMenu::SendCommand( const char *commandStr )
 		if ( pchTaunt[ 0 ] == ' ' && pchTaunt[ 1 ] != '\0' )
 		{
 			pchTaunt++;
-#ifdef TAUNTMENU
+
 			GetClientMenuManagerTaunt().IsTauntTeam( pchTaunt );
 			GetClientMenuManagerTaunt().SetTauntUsed( pchTaunt );
-#endif
 		}
 	}
 	else
@@ -1751,12 +1746,11 @@ void FlushClientMenus( void )
 	TheClientMenuManager.Flush();
 
 	TheClientMenuManagerPlaytest.Flush();
-#ifdef TAUNTMENU
+
 	for ( int i = 0; i < MAX_SPLITSCREEN_PLAYERS; ++i )
 	{
 		GetClientMenuManagerTaunt( i ).Flush();
 	}
-#endif
 }
 
 
@@ -1803,14 +1797,11 @@ void OpenRadialMenu( const char *lpszTargetClassification, EHANDLE hTargetEntity
 	// Msg("Hit: %s\n", pchTarget );
 
 	ClientMenuManager *pMM;
-#ifdef TAUNTMENU
 	if ( menuType == MENU_TAUNT )
 	{
 		pMM = &GetClientMenuManagerTaunt();
 	}
-	else
-#endif
-	if ( menuType == MENU_PING )
+	else if ( menuType == MENU_PING )
 	{
 		pMM = &TheClientMenuManager;
 	}

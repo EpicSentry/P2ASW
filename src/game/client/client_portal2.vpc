@@ -132,11 +132,11 @@ $Project "Client (Portal 2)"
 			$File "$SRCDIR\game\shared\portal\baseprojectedentity_shared.h"
 			$File "$SRCDIR\game\shared\portal\baseprojectedentity_shared.cpp"
 			$File "$SRCDIR\game\shared\portal\projectedwallentity_shared.cpp"
-
-			// Radial Menu preparations for when we get to work on coop.
 			
 			$File "portal2/radialmenu.cpp"
 			$File "portal2/radialmenu.h"
+			$File "portal2/radialmenu_taunt.cpp"
+			$File "portal2/radialmenu_taunt.h"
 			$File "portal2/polygonbutton.cpp"
 			$File "portal2/polygonbutton.h"
 			$File "portal2/radialbutton.cpp"
