@@ -1294,3 +1294,170 @@ void UTIL_ClearTrace( trace_t &trace )
 	trace.fractionleftsolid = 0;
 	trace.surface = g_NullSurface;
 }
+
+// p2asw: engine->Key_CodeForBinding doesn't exist in Swarm so we need a replacement, but this is also quite expensive!
+ButtonCode_t UTIL_KeyCodeForBinding( const char *cmd )
+{
+	for ( int i = KEY_FIRST; i < KEY_XSTICK2_UP; ++i )
+	{
+		ButtonCode_t key = (ButtonCode_t)i;
+		const char *bindedcmd = engine->Key_BindingForKey( key );
+		if ( !bindedcmd )
+			continue;
+		
+		if ( !Q_stricmp( bindedcmd, cmd ) )
+			return key;
+	}
+
+	return BUTTON_CODE_INVALID;
+}
+
+
+extern int ScreenTransform( const Vector& point, Vector& screen );
+
+void UTIL_WorldToScreenCoords( const Vector &vecWorld, int *pScreenX, int *pScreenY )
+{
+	Vector vecTransform;
+
+	*pScreenX = 0;
+	*pScreenY = 0;
+	if ( !ScreenTransform( vecWorld, vecTransform ) )
+	{
+		int v3 = ScreenWidth();
+		float v5 = 0.5 * vecTransform.x;
+		*pScreenX = (int)(float)((float)((float)(v3 / 2) + (float)((float)ScreenWidth() * v5)) + 0.5);
+		int v4 = ScreenHeight();
+		float v6 = 0.5 * vecTransform.y;
+		*pScreenY = (int)(float)((float)((float)(v4 / 2) - (float)((float)ScreenHeight() * v6)) + 0.5);
+	}
+}
+
+void UTIL_GenerateBoxVertices( const Vector &vOrigin, const Vector &vMins, const Vector &vMaxs, Vector *pVerts )
+{
+	float x; // xmm2_4
+	float y; // xmm1_4
+	float z; // xmm0_4
+	vec_t v9; // xmm0_4
+	vec_t v10; // xmm2_4
+
+	int v4 = 0;
+	do
+	{
+		if ((v4 & 1) != 0)
+		{
+			x = vMaxs.x;
+			if ((v4 & 2) != 0)
+				goto LABEL_3;
+		}
+		else
+		{
+			x = vMins.x;
+			if ((v4 & 2) != 0)
+			{
+			LABEL_3:
+				y = vMaxs.y;
+				if ((v4 & 4) != 0)
+					goto LABEL_4;
+				goto LABEL_9;
+			}
+		}
+		y = vMins.y;
+		if ((v4 & 4) != 0)
+		{
+		LABEL_4:
+			z = vMaxs.z;
+			goto LABEL_5;
+		}
+	LABEL_9:
+		z = vMins.z;
+	LABEL_5:
+		++v4;
+		v9 = z + vOrigin.z;
+		v10 = x + vOrigin.x;
+		pVerts->y = y + vOrigin.y;
+		pVerts->z = v9;
+		pVerts->x = v10;
+		++pVerts;
+	} while (v4 != 8);
+}
+
+
+bool UTIL_WorldSpaceToScreensSpaceBounds( const Vector &vecCenter, const Vector &mins, const Vector &maxs, Vector2D *pMins, Vector2D *pMaxs )
+{
+	int v9;
+	Vector vecBoxVerts[8];
+	int nX;
+	int nY[7];
+
+	int v5 = 0;
+	UTIL_GenerateBoxVertices( vecCenter, mins, maxs, vecBoxVerts );
+	int v6 = ScreenWidth();
+	int nMaxY = 0;
+	int nMinY = ScreenHeight();
+	int v7 = v6;
+	int v8 = 0;
+	do
+	{
+		while (1)
+		{
+			UTIL_WorldToScreenCoords( vecBoxVerts[v5], &nX, nY );
+			if (nX <= v8)
+				break;
+			v8 = nX;
+			v9 = nY[0];
+			if (nY[0] <= nMaxY)
+				goto LABEL_5;
+		LABEL_10:
+			++v5;
+			nMaxY = v9;
+			if (v5 == 8)
+				goto LABEL_11;
+		}
+		if (nX < v7)
+			v7 = nX;
+		v9 = nY[0];
+		if (nY[0] > nMaxY)
+			goto LABEL_10;
+	LABEL_5:
+		if (v9 >= nMinY)
+			v9 = nMinY;
+		++v5;
+		nMinY = v9;
+	} while (v5 != 8);
+LABEL_11:
+	if (pMins)
+	{
+		pMins->x = (float)v7;
+		pMins->y = (float)nMinY;
+	}
+	if (pMaxs)
+	{
+		pMaxs->x = (float)v8;
+		pMaxs->y = (float)nMaxY;
+	}
+	return true;
+}
+
+bool UTIL_EntityBoundsToSizes( C_BaseEntity *pTarget, int *pMinX, int *pMinY, int *pMaxX, int *pMaxY )
+{
+	Vector vOBBMins;
+	Vector vOBBMaxs;
+	Vector2D maxs;
+	Vector2D mins;
+
+	Vector vOrigin = pTarget->GetAbsOrigin();
+	pTarget->CollisionProp()->WorldSpaceSurroundingBounds( &vOBBMins, &vOBBMaxs);
+	vOBBMaxs = vOBBMaxs - vOrigin;
+	vOBBMins = vOBBMins - vOrigin;
+
+	UTIL_WorldSpaceToScreensSpaceBounds( vOrigin, vOBBMins, vOBBMaxs, &mins, &maxs);
+	if (pMinX)
+		*pMinX = mins.x;
+	if (pMinY)
+		*pMinY = mins.y;
+	if (pMaxX)
+		*pMaxX = maxs.x;
+	if (pMaxY)
+		*pMaxY = maxs.y;
+	return true;
+}

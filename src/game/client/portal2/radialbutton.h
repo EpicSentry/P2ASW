@@ -28,41 +28,35 @@ class CRadialButton : public CPolygonButton
 	DECLARE_CLASS_SIMPLE( CRadialButton, CPolygonButton );
 
 public:
+		
+	CRadialButton( vgui::Panel *parent, const char *panelName );
+	~CRadialButton();
 
 	//RadialMenu required functions
 
+	void ShowSubmenuIndicator( bool state );
+
+	void SetPassthru( CRadialButton *button );
+	void SetImage( const char* lpszImage );
+
+	void GetImagePos( int &, int & );
+
 	// Return the icon image panel of the button
 	vgui::ImagePanel *GetIcon() { return m_pIcon; }
-
-	// Set the maximum scale of the button
-	void SetMaxScale(float flMaxScale) { m_flMaxScale = flMaxScale; }
-
-	// Stub for GetGLaDOSResponse, implement this whenever you can, this isnt a very important function atm
-	int GetGLaDOSResponse();
-
-	// Stub for SetGLaDOSResponse
-	void SetGLaDOSResponse( int nResponse );
-
-	// Set whether the button should pulse
-	void SetPulse(bool bPulse) { m_bPulse = bPulse; }
-
-	CRadialButton( vgui::Panel *parent, const char *panelName );
-
-	void ShowSubmenuIndicator( bool state );
-	void SetPassthru( CRadialButton *button );
-
+	
 	CRadialButton *GetPassthru( void );
 
 	void UpdateHotspots( KeyValues *data );
-	void CRadialButton::PerformLayout( void );
-
+	
 	Color GetRadialFgColor( void );
 	Color GetRadialBgColor( void );	
 
-	void SetImage( const char* lpszImage );
-
-	void GetHotspotBounds( int *minX, int *minY, int *maxX, int *maxY );
+	// Set the maximum scale of the button
+	void SetMaxScale(float flMaxScale) { m_fMaxScale = flMaxScale; }
 	
+	void GetHotspotBounds( int *minX, int *minY, int *maxX, int *maxY );
+		
+	void CRadialButton::PerformLayout( void );	
 	virtual void PaintBackground( void );
 	virtual void PaintBorder( void );
 	virtual void Paint( void );
@@ -70,6 +64,8 @@ public:
 
 	void SetChosen( bool chosen );
 	void SetFakeArmed( bool armed );
+
+	bool IsFakedArmed( void ) { return m_fakeArmed; }
 
 	virtual void OnCursorEntered( void );
 
@@ -79,41 +75,50 @@ public:
 	 */
 	virtual void OnMousePressed( vgui::MouseCode code );
 
-	virtual bool MouseClick( int x, int y, bool bRightClick, bool bDown );
+	bool IsChosen( void ) { return m_chosen; }	
+
+	// Set whether the button should pulse
+	void SetPulse(bool bPulse) { m_bPulse = bPulse; }
+
+	// Stub for GetGLaDOSResponse, implement this whenever you can, this isnt a very important function atm
+	int GetGLaDOSResponse();
+
+	// Stub for SetGLaDOSResponse
+	void SetGLaDOSResponse( int nResponse );
 
 private:
 	CUtlVector< Vector2D > m_unscaledSubmenuPoints;
-	vgui::Vertex_t *m_submenuPoints;
-	int m_numSubmenuPoints;
+	vgui::Vertex_t *m_submenuPoints; // 154
+	int m_numSubmenuPoints; // 155
 
 	int m_nMainMaterial;
 	bool m_hasBorders;
-
+	
 	Color m_disabledBgColor;
 	Color m_disabledFgColor;
 
 	Color m_chosenBgColor;
 	Color m_chosenFgColor;
-	bool m_chosen;
+	bool m_chosen; // 645
 
 	Color m_armedBgColor;
 	Color m_armedFgColor;
-	bool m_fakeArmed;
+	bool m_fakeArmed; // 654
 
-	vgui::ImagePanel *m_pIcon;
-	float m_flMaxScale;
-	bool m_bPulse;
+	bool m_hasSubmenu; // 655?
 
-	bool m_hasSubmenu;
+	float m_fMaxScale; // 164
+	bool m_bPulse; // 660
 
-	vgui::HFont m_armedFont;
-	vgui::HFont m_defaultFont;
+	int m_nGLaDOSResponse; // 166
 
-	CRadialButton *m_passthru;
-	CRadialMenu *m_parent;
+	vgui::HFont m_armedFont; // 167
+	vgui::HFont m_defaultFont; // 168
 
-	int m_nGladosResponse;
+	CRadialButton *m_passthru; // 169
+	CRadialMenu *m_parent; // 170
 
+	vgui::ImagePanel *m_pIcon; // 171
 };
 
 

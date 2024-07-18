@@ -48,17 +48,17 @@ public:
 	virtual void UpdateHotspots( KeyValues *data );
 
 protected:
-	int m_nWhiteMaterial;
+	int m_nWhiteMaterial; // 129
 
-	CUtlVector< Vector2D > m_unscaledHotspotPoints;
-	CUtlVector< Vector2D > m_unscaledVisibleHotspotPoints;
-	vgui::Vertex_t *m_hotspotPoints;
-	int m_numHotspotPoints;
-	vgui::Vertex_t *m_visibleHotspotPoints;
-	int m_numVisibleHotspotPoints;
+	CUtlVector< Vector2D > m_unscaledHotspotPoints; // 130-134
+	CUtlVector< Vector2D > m_unscaledVisibleHotspotPoints; // 135-139
+	vgui::Vertex_t *m_hotspotPoints; // 140
+	int m_numHotspotPoints; // 141
+	vgui::Vertex_t *m_visibleHotspotPoints; // 142
+	int m_numVisibleHotspotPoints; // 143
 
-	Vector2D m_hotspotMins;
-	Vector2D m_hotspotMaxs;
+	Vector2D m_hotspotMins; // 144-145
+	Vector2D m_hotspotMaxs; // 146-147
 };
 
 

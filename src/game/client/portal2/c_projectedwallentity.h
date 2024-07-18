@@ -11,7 +11,7 @@
 
 DECLARE_AUTO_LIST( IProjectedWallEntityAutoList )
 
-class C_ProjectedWallEntity : public CPaintableEntity<C_BaseProjectedEntity>, IProjectedWallEntityAutoList
+class C_ProjectedWallEntity : public CPaintableEntity<C_BaseProjectedEntity>, public IProjectedWallEntityAutoList
 {
 public:
 	DECLARE_CLASS( C_ProjectedWallEntity, CPaintableEntity<C_BaseProjectedEntity> );

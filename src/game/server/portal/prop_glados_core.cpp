@@ -10,7 +10,7 @@
 #include "props.h"				// CPhysicsProp base class
 #include "saverestore_utlvector.h"
 
-#define GLADOS_CORE_MODEL_NAME "models/props_bts/glados_ball_reference.mdl" 
+#define GLADOS_CORE_MODEL_NAME "models/npcs/personality_sphere/personality_sphere.mdl" 
 
 static const char *s_pAnimateThinkContext = "Animate";
 

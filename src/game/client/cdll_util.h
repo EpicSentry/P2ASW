@@ -22,6 +22,7 @@
 #include "bitmap/imageformat.h"
 #include "ispatialpartition.h"
 #include "materialsystem/materialsystemutil.h"
+#include "inputsystem/ButtonCode.h"
 
 class Vector;
 class QAngle;
@@ -180,5 +181,7 @@ wchar_t *UTIL_GetLocalizedKeyString( const char *command, const char *fmt, const
 class CGameTrace;
 typedef CGameTrace trace_t;
 void		UTIL_ClearTrace			( trace_t &trace );
+
+ButtonCode_t UTIL_KeyCodeForBinding( const char *cmd );
 
 #endif // !CDLL_UTIL_H

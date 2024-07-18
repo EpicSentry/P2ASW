@@ -18,7 +18,7 @@ ConVar glow_outline_effect_width( "glow_outline_width", "6.0f", FCVAR_CHEAT, "Wi
 
 CGlowObjectManager g_GlowObjectManager;
 
-void CGlowObjectManager::RenderGlowEffects( const CViewSetup *pSetup, int nSplitScreenSlot )
+void CGlowObjectManager::RenderGlowEffects( const CViewSetup *pSetup, int nSplitScreenSlot, bool bPuzzleMakerPath )
 {
 	if ( glow_outline_effect_enable.GetBool() )
 	{
@@ -28,7 +28,7 @@ void CGlowObjectManager::RenderGlowEffects( const CViewSetup *pSetup, int nSplit
 		pRenderContext->GetViewport( nX, nY, nWidth, nHeight );
 
 		PIXEvent _pixEvent( pRenderContext, "EntityGlowEffects" );
-		ApplyEntityGlowEffects( pSetup, nSplitScreenSlot, pRenderContext, glow_outline_effect_width.GetFloat(), nX, nY, nWidth, nHeight );
+		ApplyEntityGlowEffects( pSetup, nSplitScreenSlot, pRenderContext, glow_outline_effect_width.GetFloat(), nX, nY, nWidth, nHeight, bPuzzleMakerPath );
 	}
 }
 
@@ -45,7 +45,7 @@ static void SetRenderTargetAndViewPort( ITexture *rt, int w, int h )
 #define GLOW_360_RT_WIDTH ( MIN( 1120, pSetup->width ) )
 #define GLOW_360_RT_HEIGHT ( MIN( 624, pSetup->height ) )
 
-void CGlowObjectManager::RenderGlowModels( const CViewSetup *pSetup, int nSplitScreenSlot, CMatRenderContextPtr &pRenderContext )
+void CGlowObjectManager::RenderGlowModels( const CViewSetup *pSetup, int nSplitScreenSlot, CMatRenderContextPtr &pRenderContext, bool bPuzzleMakerPath )
 {
 	//==========================================================================================//
 	// This renders solid pixels with the correct coloring for each object that needs the glow.	//
@@ -74,7 +74,18 @@ void CGlowObjectManager::RenderGlowModels( const CViewSetup *pSetup, int nSplitS
 	
 	pRenderContext->ClearColor3ub( 0, 0, 0 );
 	pRenderContext->ClearBuffers( true, false, false );
-
+	
+	ShaderStencilState_t stencilState;
+	stencilState.m_nWriteMask = 0xFFFFFFFF;
+	stencilState.m_nTestMask = 0xFFFFFFFF;
+	stencilState.m_ZFailOp = SHADER_STENCILOP_KEEP;
+	stencilState.m_FailOp = SHADER_STENCILOP_KEEP;
+	stencilState.m_PassOp = SHADER_STENCILOP_KEEP;
+	stencilState.m_CompareFunc = SHADER_STENCILFUNC_ALWAYS;
+	stencilState.m_nReferenceValue = 0;
+	stencilState.m_bEnable = false;
+	pRenderContext->SetStencilState( stencilState );
+	
 	// Set override material for glow color
 	IMaterial *pMatGlowColor = NULL;
 
@@ -83,78 +94,34 @@ void CGlowObjectManager::RenderGlowModels( const CViewSetup *pSetup, int nSplitS
 	//==================//
 	// Draw the objects //
 	//==================//
-	for ( int i = 0; i < m_GlowObjectDefinitions.Count(); ++ i )
+	if ( bPuzzleMakerPath )
 	{
-		if ( m_GlowObjectDefinitions[i].IsUnused() || !m_GlowObjectDefinitions[i].ShouldDraw( nSplitScreenSlot ) )
-			continue;
-
-		g_pStudioRender->ForcedMaterialOverride( pMatGlowColor );
-
-		if ( m_GlowObjectDefinitions[i].m_bFullBloomRender )
+		//g_pPuzzleMaker->RenderPuzzleMakerGlow();
+	}
+	else
+	{
+		for ( int i = 0; i < m_GlowObjectDefinitions.Count(); ++ i )
 		{
-			
-			// Disabled because stencil test on off-screen buffers doesn't work with MSAA on.
-			// Also, the normal model render does not seem to work on the off-screen buffer
+			if ( m_GlowObjectDefinitions[i].IsUnused() || !m_GlowObjectDefinitions[i].ShouldDraw( nSplitScreenSlot ) )
+				continue;
 
-			//g_pStudioRender->ForcedMaterialOverride( NULL );
+			g_pStudioRender->ForcedMaterialOverride( pMatGlowColor );
+			render->SetBlend( m_GlowObjectDefinitions[i].m_flGlowAlpha );
+			Vector vGlowColor = m_GlowObjectDefinitions[i].m_vGlowColor * m_GlowObjectDefinitions[i].m_flGlowAlpha;
+			render->SetColorModulation( &vGlowColor[0] ); // This only sets rgb, not alpha
 
-// 			ShaderStencilState_t stencilState;
-// 			stencilState.m_bEnable = true;
-// 			stencilState.m_nReferenceValue = m_GlowObjectDefinitions[i].m_nFullBloomStencilTestValue;
-// 			stencilState.m_nTestMask = 0xFF;
-// 			stencilState.m_CompareFunc = SHADER_STENCILFUNC_EQUAL;
-// 			stencilState.m_PassOp = SHADER_STENCILOP_KEEP;
-// 			stencilState.m_FailOp = SHADER_STENCILOP_KEEP;
-// 			stencilState.m_ZFailOp = SHADER_STENCILOP_KEEP;
-// 
-// 			pRenderContext->SetStencilState( stencilState );
+			m_GlowObjectDefinitions[i].DrawModel();
 		}
-		else
-		{
-			
-			// Disabled because stencil test on off-screen buffers doesn't work with MSAA on
-			// Most features still work, but some (e.g. partial occlusion) don't
-// 			ShaderStencilState_t stencilState;
-// 			stencilState.m_bEnable = true;
-// 			stencilState.m_nReferenceValue = 1;
-// 			stencilState.m_nTestMask = 0x1;
-// 			stencilState.m_CompareFunc = SHADER_STENCILFUNC_EQUAL;
-// 			stencilState.m_PassOp = SHADER_STENCILOP_KEEP;
-// 			stencilState.m_FailOp = SHADER_STENCILOP_KEEP;
-// 			stencilState.m_ZFailOp = SHADER_STENCILOP_KEEP;
-// 
-// 			pRenderContext->SetStencilState( stencilState );
-		}
-		
-		render->SetBlend( m_GlowObjectDefinitions[i].m_flGlowAlpha );
-		Vector vGlowColor = m_GlowObjectDefinitions[i].m_vGlowColor * m_GlowObjectDefinitions[i].m_flGlowAlpha;
-		render->SetColorModulation( &vGlowColor[0] ); // This only sets rgb, not alpha
-
-		m_GlowObjectDefinitions[i].DrawModel();
-	}	
+	}
 
 	g_pStudioRender->ForcedMaterialOverride( NULL );
 	render->SetColorModulation( vOrigColor.Base() );
 	render->SetBlend( flOrigBlend );
 	
-	ShaderStencilState_t stencilStateDisable;
-	stencilStateDisable.m_bEnable = false;
-	pRenderContext->SetStencilState( stencilStateDisable );
-
-	if ( IsX360() )
-	{
-		Rect_t rect;
-		rect.x = rect.y = 0;
-		rect.width = GLOW_360_RT_WIDTH;
-		rect.height = GLOW_360_RT_HEIGHT;
-
-		pRenderContext->CopyRenderTargetToTextureEx( pRtFullFrame, 0, &rect, &rect );
-	}
-
 	pRenderContext->PopRenderTargetAndViewport();
 }
 
-void CGlowObjectManager::ApplyEntityGlowEffects( const CViewSetup *pSetup, int nSplitScreenSlot, CMatRenderContextPtr &pRenderContext, float flBloomScale, int x, int y, int w, int h )
+void CGlowObjectManager::ApplyEntityGlowEffects( const CViewSetup *pSetup, int nSplitScreenSlot, CMatRenderContextPtr &pRenderContext, float flBloomScale, int x, int y, int w, int h, bool bPuzzleMakerPath )
 {
 	static bool s_bFirstPass = true;
 
@@ -166,110 +133,37 @@ void CGlowObjectManager::ApplyEntityGlowEffects( const CViewSetup *pSetup, int n
 	IMaterial *pMatGlowColor = materials->FindMaterial( "dev/glow_color", TEXTURE_GROUP_OTHER, true );
 	g_pStudioRender->ForcedMaterialOverride( pMatGlowColor );
 
+	ShaderStencilState_t stencilStateEnable;
+	stencilStateEnable.m_PassOp = SHADER_STENCILOP_SET_TO_REFERENCE;
+	stencilStateEnable.m_ZFailOp = SHADER_STENCILOP_SET_TO_REFERENCE;
+	stencilStateEnable.m_bEnable = true;
+	stencilStateEnable.m_nReferenceValue = 1;
+	pRenderContext->SetStencilState( stencilStateEnable );
+	pRenderContext->OverrideDepthEnable( true, false );
+	pRenderContext->OverrideColorWriteEnable( true, false );
+	
+	int iNumGlowObjects = 0;
+	if ( bPuzzleMakerPath )
+	{
+		//g_pPuzzleMaker->RenderPuzzleMakerGlow();
+	}
+	else
+	{
+		for ( int i = 0; i < m_GlowObjectDefinitions.Count(); ++ i )
+		{
+			if ( m_GlowObjectDefinitions[i].IsUnused() || !m_GlowObjectDefinitions[i].ShouldDraw( nSplitScreenSlot ) )
+				continue;
+			
+			m_GlowObjectDefinitions[i].DrawModel();
+			iNumGlowObjects++;
+		}
+	}
+
 	ShaderStencilState_t stencilStateDisable;
 	stencilStateDisable.m_bEnable = false;
-	float flSavedBlend = render->GetBlend();
-
-	// Set alpha to 0 so we don't touch any color pixels
-	render->SetBlend( 0.0f );
-	pRenderContext->OverrideDepthEnable( true, false );
-
-	RenderableInstance_t instance;
-	instance.m_nAlpha = 255;
-
-	int iNumGlowObjects = 0;
-
-	for ( int i = 0; i < m_GlowObjectDefinitions.Count(); ++ i )
-	{
-		if ( m_GlowObjectDefinitions[i].IsUnused() || !m_GlowObjectDefinitions[i].ShouldDraw( nSplitScreenSlot ) )
-			continue;
-
-		// Full bloom rendered objects should not be stenciled out here
-		if ( m_GlowObjectDefinitions[i].m_bFullBloomRender )
-		{
-			++ iNumGlowObjects;
-			continue;
-		}
-
-		if ( m_GlowObjectDefinitions[i].m_bRenderWhenOccluded || m_GlowObjectDefinitions[i].m_bRenderWhenUnoccluded )
-		{
-			if ( m_GlowObjectDefinitions[i].m_bRenderWhenOccluded && m_GlowObjectDefinitions[i].m_bRenderWhenUnoccluded )
-			{
-				ShaderStencilState_t stencilState;
-				stencilState.m_bEnable = true;
-				stencilState.m_nReferenceValue = 1;
-				stencilState.m_CompareFunc = SHADER_STENCILFUNC_ALWAYS;
-				stencilState.m_PassOp = SHADER_STENCILOP_SET_TO_REFERENCE;
-				stencilState.m_FailOp = SHADER_STENCILOP_KEEP;
-				stencilState.m_ZFailOp = SHADER_STENCILOP_SET_TO_REFERENCE;
-
-				pRenderContext->SetStencilState( stencilState );
-
-				m_GlowObjectDefinitions[i].DrawModel();
-			}
-			else if ( m_GlowObjectDefinitions[i].m_bRenderWhenOccluded )
-			{
-				ShaderStencilState_t stencilState;
-				stencilState.m_bEnable = true;
-				stencilState.m_nReferenceValue = 1;
-				stencilState.m_CompareFunc = SHADER_STENCILFUNC_ALWAYS;
-				stencilState.m_PassOp = SHADER_STENCILOP_KEEP;
-				stencilState.m_FailOp = SHADER_STENCILOP_KEEP;
-				stencilState.m_ZFailOp = SHADER_STENCILOP_SET_TO_REFERENCE;
-
-				pRenderContext->SetStencilState( stencilState );
-
-				m_GlowObjectDefinitions[i].DrawModel();
-			}
-			else if ( m_GlowObjectDefinitions[i].m_bRenderWhenUnoccluded )
-			{
-				ShaderStencilState_t stencilState;
-				stencilState.m_bEnable = true;
-				stencilState.m_nReferenceValue = 2;
-				stencilState.m_nTestMask = 0x1;
-				stencilState.m_nWriteMask = 0x3;
-				stencilState.m_CompareFunc = SHADER_STENCILFUNC_EQUAL;
-				stencilState.m_PassOp = SHADER_STENCILOP_INCREMENT_CLAMP;
-				stencilState.m_FailOp = SHADER_STENCILOP_KEEP;
-				stencilState.m_ZFailOp = SHADER_STENCILOP_SET_TO_REFERENCE;
-
-				pRenderContext->SetStencilState( stencilState );
-
-				m_GlowObjectDefinitions[i].DrawModel();
-			}
-		}
-
-		iNumGlowObjects++;
-	}
-
-	// Need to do a 2nd pass to warm stencil for objects which are rendered only when occluded
-	for ( int i = 0; i < m_GlowObjectDefinitions.Count(); ++ i )
-	{
-		if ( m_GlowObjectDefinitions[i].IsUnused() || !m_GlowObjectDefinitions[i].ShouldDraw( nSplitScreenSlot ) )
-			continue;
-
-		// Full bloom rendered objects should not be stenciled out here
-		if ( m_GlowObjectDefinitions[i].m_bFullBloomRender )
-			continue;
-
-		if ( m_GlowObjectDefinitions[i].m_bRenderWhenOccluded && !m_GlowObjectDefinitions[i].m_bRenderWhenUnoccluded )
-		{
-			ShaderStencilState_t stencilState;
-			stencilState.m_bEnable = true;
-			stencilState.m_nReferenceValue = 2;
-			stencilState.m_CompareFunc = SHADER_STENCILFUNC_ALWAYS;
-			stencilState.m_PassOp = SHADER_STENCILOP_SET_TO_REFERENCE;
-			stencilState.m_FailOp = SHADER_STENCILOP_KEEP;
-			stencilState.m_ZFailOp = SHADER_STENCILOP_KEEP;
-			pRenderContext->SetStencilState( stencilState );
-
-			m_GlowObjectDefinitions[i].DrawModel();
-		}
-	}
-
-	pRenderContext->OverrideDepthEnable( false, false );
-	render->SetBlend( flSavedBlend );
 	pRenderContext->SetStencilState( stencilStateDisable );
+	pRenderContext->OverrideDepthEnable( false, true );
+	pRenderContext->OverrideColorWriteEnable( false, false );	
 	g_pStudioRender->ForcedMaterialOverride( NULL );
 
 	// If there aren't any objects to glow, don't do all this other stuff
@@ -283,7 +177,7 @@ void CGlowObjectManager::ApplyEntityGlowEffects( const CViewSetup *pSetup, int n
 	//=============================================
 	{
 		PIXEvent pixEvent( pRenderContext, "RenderGlowModels" );
-		RenderGlowModels( pSetup, nSplitScreenSlot, pRenderContext );
+		RenderGlowModels( pSetup, nSplitScreenSlot, pRenderContext, bPuzzleMakerPath );
 	}
 	
 	//===================================
@@ -445,8 +339,8 @@ void CGlowObjectManager::GlowObjectDefinition_t::DrawModel()
 	RenderableInstance_t instance;
 	instance.m_nAlpha = (uint8)( m_flGlowAlpha * 255.0f );
 
-	m_pEntity->DrawModel( STUDIO_RENDER | STUDIO_SKIP_FLEXES | STUDIO_DONOTMODIFYSTENCILSTATE | STUDIO_NOLIGHTING_OR_CUBEMAP | STUDIO_SKIP_DECALS, instance );
-	C_BaseEntity *pAttachment = m_pEntity->FirstMoveChild();
+	m_hEntity->DrawModel( STUDIO_RENDER | STUDIO_SKIP_FLEXES | STUDIO_DONOTMODIFYSTENCILSTATE | STUDIO_NOLIGHTING_OR_CUBEMAP | STUDIO_SKIP_DECALS, instance );
+	C_BaseEntity *pAttachment = m_hEntity->FirstMoveChild();
 
 	while ( pAttachment != NULL )
 	{

@@ -22,7 +22,7 @@
 #include "input.h"
 #include "c_portal_player.h"
 
-#include "swarm/polygonbutton.h"
+#include "polygonbutton.h"
 
 #include "radialmenu.h"
 #include "radialbutton.h"
@@ -64,6 +64,11 @@ CRadialButton::CRadialButton( vgui::Panel *parent, const char *panelName )
 	m_pIcon->SetZPos( 2 );
 	m_pIcon->SetShouldScaleImage( true );
 	m_pIcon->SetSize( 128, 128 );
+}
+
+CRadialButton::~CRadialButton()
+{
+
 }
 
 void CRadialButton::ShowSubmenuIndicator( bool state )
@@ -156,6 +161,46 @@ void CRadialButton::PerformLayout( void )
 	}
 
 	BaseClass::PerformLayout();
+
+	float flScale = 0.5;
+	if ( isArmed || m_bPulse )
+	{
+		if ( isArmed )
+			flScale = 1.0;
+
+		if ( flScale > m_fMaxScale )
+			flScale = m_fMaxScale;
+	}
+	else
+	{
+		flScale = m_fMaxScale;
+
+		float flNewScale = sinf( gpGlobals->curtime * 5.0 );
+		if ( ( flNewScale * 0.25 ) + 0.5 <= flScale )
+			flScale = flNewScale;
+	}
+	
+	float height = 128;
+	if ( YRES( 80 ) < height )
+		height = YRES( 80 );
+	
+	float center = ( m_hotspotMaxs.x + m_hotspotMins.x ) * 0.5;
+	float centerY = ( m_hotspotMaxs.y + m_hotspotMins.y ) * 0.5;
+
+	m_pIcon->GetSize( wide, tall );
+	tall *= flScale;
+	wide *= flScale;
+
+	m_pIcon->SetPos( center - (wide / 2), centerY - (tall / 2) );
+	m_pIcon->SetScaleAmount( flScale );
+
+	int alpha = isArmed ? 255 : 160;
+	
+	// There is a call here needed, but IsFullyVisible() is probably incorrect
+	//if ( IsFullyVisible() )
+	//	alpha = 16;
+
+	m_pIcon->SetAlpha( alpha );
 }
 
 Color CRadialButton::GetRadialFgColor( void )
@@ -430,29 +475,11 @@ void CRadialButton::OnMousePressed( vgui::MouseCode code )
 	{
 		SetChosen( true );
 	}
+
+	if ( m_parent )
+		m_parent->OnMousePressed( code );
+
 	BaseClass::OnMousePressed( code );
-}
-
-bool CRadialButton::MouseClick(int x, int y, bool bRightClick, bool bDown)
-{
-	if ( !m_fakeArmed )
-		return false;
-
-	vgui::Panel *pParent = GetParent();
-	if ( !pParent )
-		return false;
-
-	if ( pParent->GetAlpha() <= 0 )
-		return false;
-
-	if ( bRightClick )
-	{
-		SetCommand( "done" );
-	}
-
-	BaseClass::OnMousePressed( bRightClick ? MOUSE_RIGHT : MOUSE_LEFT );
-
-	return true;
 }
 
 void CRadialButton::SetImage( const char *lpszImage )
@@ -463,10 +490,10 @@ void CRadialButton::SetImage( const char *lpszImage )
 
 void CRadialButton::SetGLaDOSResponse( int nResponse )
 {
-	m_nGladosResponse = nResponse;
+	m_nGLaDOSResponse = nResponse;
 }
 
 int CRadialButton::GetGLaDOSResponse( void )
 {
-	return m_nGladosResponse;
+	return m_nGLaDOSResponse;
 }

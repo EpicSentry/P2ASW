@@ -1509,8 +1509,8 @@ void CLocatorPanel::ComputeTargetIconPosition( CLocatorTarget *pTarget, bool bSe
 		AnimateIconSize( pTarget->GetIconEffectsFlags(), &wide, &tall, pTarget->m_pulseStart, pTarget->m_distFromPlayer );
 		AnimateIconPosition( pTarget->GetIconEffectsFlags(), &iconX, &iconY );
 		AnimateIconAlpha( pTarget->GetIconEffectsFlags(), &pTarget->m_alpha, pTarget->m_fadeStart );
-
-		if( pTarget->m_distFromPlayer > ICON_DIST_TOO_FAR && !locator_topdown_style.GetBool() )
+		
+		if( !(pTarget->GetIconEffectsFlags() & LOCATOR_ICON_FX_SCALE_BY_DIST) && !(pTarget->GetIconEffectsFlags() & LOCATOR_ICON_FX_SCALE_LARGE) && pTarget->m_distFromPlayer > ICON_DIST_TOO_FAR && !locator_topdown_style.GetBool() )
 		{
 			// Make the icon smaller
 			wide = wide >> 1;
