@@ -227,15 +227,15 @@ void CTrigger_TractorBeam::OnRestore( void )
 
 void CTrigger_TractorBeam::UpdateOnRemove( void )
 {
-	if (m_pController)
+	if ( m_pController )
 	{
 		int objectcount = m_pController->CountObjects();
 
 		IPhysicsObject *pPhysObjects[1024];
 		m_pController->GetObjects( pPhysObjects );
-		for (int i = 0; i < objectcount; ++i)
+		for ( int i = 0; i < objectcount; ++i )
 		{
-			if (pPhysObjects[i])
+			if ( pPhysObjects[i] )
 				pPhysObjects[i]->Wake();
 		}
 		
@@ -245,7 +245,7 @@ void CTrigger_TractorBeam::UpdateOnRemove( void )
 		//free(pPhysObjects);
 	}
 
-	StopParticleEffects(this);
+	StopParticleEffects( this );
 	StopLoopingSounds();
 	BaseClass::UpdateOnRemove();
 }
@@ -393,14 +393,10 @@ void CTrigger_TractorBeam::WakeTouchingObjects( void )
 
 void CTrigger_TractorBeam::TractorThink( void )
 {
-	// NOTE: This function is supposed to set the m_bToPortal and m_bFromPortal values
-	// Look at the decompiled code and be prepared to think to yourself WTF??
-	
-	// Anyways this is my best guess as to what the function is calling:
 	if ( m_hProxyEntity )
 	{
-		m_bToPortal = m_hProxyEntity->GetHitPortal() != NULL;
 		m_bFromPortal = m_hProxyEntity->GetSourcePortal() != NULL;
+		m_bToPortal = m_hProxyEntity->GetHitPortal() != NULL;
 	}
 	SetNextThink( gpGlobals->curtime );
 }
@@ -454,7 +450,6 @@ void CTrigger_TractorBeam::SetLinearForce( Vector vDir, float flLinearForce )
 
 	VectorAngles( vDir, qDirection );
 
-	// NOTE: This is just a best guess since IDA didn't decompile this function.
 	m_linearForceAngles = qDirection;
 }
 
@@ -485,7 +480,7 @@ CTrigger_TractorBeam *CTrigger_TractorBeam::CreateTractorBeam( const Vector &vSt
 	CTrigger_TractorBeam *pBeam = (CTrigger_TractorBeam *)CreateEntityByName( "trigger_tractorbeam" );
 
 	pBeam->Precache();						
-	pBeam->UpdateBeam( vStart, vEnd, pOwner->GetLinearForce() );
+	pBeam->UpdateBeam( pOwner->GetStartPoint(), pOwner->GetEndPoint(), pOwner->GetLinearForce() );
 	pBeam->SetOwnerEntity( pOwner );
 	pBeam->m_hProxyEntity = pOwner;
 

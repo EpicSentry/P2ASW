@@ -119,11 +119,11 @@ void C_Trigger_TractorBeam::Spawn( void )
 {
 	BaseClass::Spawn();
 	if (!m_pMaterial1)
-		m_pMaterial1 = materials->FindMaterial("effects/tractor_beam", 0, 0, 0);
+		m_pMaterial1 = materials->FindMaterial( "effects/tractor_beam", NULL, false );
 	if (!m_pMaterial2)
-		m_pMaterial2 = materials->FindMaterial("effects/tractor_beam2", 0, 0, 0);
+		m_pMaterial2 = materials->FindMaterial( "effects/tractor_beam2", NULL, false );
 	if (!m_pMaterial3)
-		m_pMaterial3 = materials->FindMaterial("effects/tractor_beam3", 0, 0, 0);
+		m_pMaterial3 = materials->FindMaterial( "effects/tractor_beam3", NULL, false );
 
 	SetNextClientThink( CLIENT_THINK_ALWAYS );
 
@@ -138,8 +138,8 @@ void C_Trigger_TractorBeam::UpdateOnRemove( void )
 		m_pController->GetObjects( pList );
 		for ( int i = 0; i < objectcount; ++i)
 		{
-			if (pList[i])
-				m_pController->DetachObject(pList[i]); // NOTE: This is just a best guess.
+			if ( pList[i] )
+				pList[i]->Wake();
 		}
 
 		physenv->DestroyMotionController( m_pController );
@@ -151,23 +151,17 @@ void C_Trigger_TractorBeam::UpdateOnRemove( void )
 		ParticleProp()->StopEmission( m_hCoreEffect, 0, 0, 0, 1 );
 	}
 
-	// Was MAX_PLAYERS, but gpGlobals->maxClients is more efficient.
-	for ( int i = 1; i <= gpGlobals->maxClients; ++i)
+	for ( int i = 1; i <= MAX_PLAYERS; ++i)
 	{
 		C_Portal_Player* pPlayer = (C_Portal_Player *)UTIL_PlayerByIndex( i );
 		
-		if (!pPlayer)
+		if ( !pPlayer )
 			continue;
 
-		if (pPlayer)
-		{
-			pPlayer->IsPlayer();
-			
-			C_Trigger_TractorBeam *pTrigger = pPlayer->GetPortalPlayerLocalData().m_hTractorBeam;
+		C_Trigger_TractorBeam *pTrigger = pPlayer->GetPortalPlayerLocalData().m_hTractorBeam;
 
-			if (pTrigger == this)
-				pPlayer->SetLeaveTractorBeam( this, false );
-		}
+		if ( pTrigger == this )
+			pPlayer->SetLeaveTractorBeam( this, false );
 	}
 	BaseClass::UpdateOnRemove();
 }
