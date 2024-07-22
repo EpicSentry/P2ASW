@@ -68,13 +68,16 @@ void CBaseProjector::UpdateOnRemove( void )
 
 void CBaseProjector::Cleanup( void )
 {
-	UTIL_Remove( m_hFirstChild.Get() );
-	m_hFirstChild = NULL;
+	if ( m_hFirstChild )
+	{
+		UTIL_Remove( m_hFirstChild.Get() );
+		m_hFirstChild = NULL;
+	}
 }
 
 void CBaseProjector::Shutdown( void )
 {
-  // FixMe?
+
 }
 
 int CBaseProjector::DrawDebugTextOverlays( void )
@@ -99,9 +102,6 @@ void CBaseProjector::EnableProjection( bool bEnable )
 
 void CBaseProjector::TestAllForProjectionChanges( void )
 {
-	// TODO: Add code after the continue, but what code!?
-	// NOTE: Doing a best guess here:
-#if 1
 	for ( int i = 0; i < s_AllProjectors.Count(); ++i )
 	{		
 		Assert( s_AllProjectors[i] );
@@ -110,10 +110,8 @@ void CBaseProjector::TestAllForProjectionChanges( void )
 		if ( !pProjectedEnt )
 			continue;
 	
-		pProjectedEnt->TestForProjectionChanges();
-	
+		pProjectedEnt->TestForProjectionChanges();	
 	}
-#endif
 }
 
 void CBaseProjector::TestProjectionChangesThink( void )
@@ -135,11 +133,6 @@ void CBaseProjector::Project( void )
 	Assert( m_hFirstChild );
 
 	m_hFirstChild->RecursiveProjection( bCreateNew, this, NULL, GetAbsOrigin(), GetAbsAngles(), 16, m_bDisablePlacementHelper );
-}
-
-CBaseProjectedEntity *CBaseProjector::CreateNewProjectedEntity( void )
-{
-	return CBaseProjectedEntity::CreateNewProjectedEntity();
 }
 
 void CBaseProjector::SetTransmit( CCheckTransmitInfo *pInfo, bool bAlways )

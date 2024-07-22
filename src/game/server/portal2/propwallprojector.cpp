@@ -127,7 +127,7 @@ void CPropWallProjector::Shutdown( void )
 
 CBaseProjectedEntity *CPropWallProjector::CreateNewProjectedEntity( void )
 {
-	 return CProjectedWallEntity::CreateNewProjectedEntity();
+	 return CProjectedWallEntity::CreateNewInstance();
 }
 
 #endif // NO_PROJECTED_WALL

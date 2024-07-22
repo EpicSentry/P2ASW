@@ -14,7 +14,6 @@ class CPaintBlob;
 
 class CProjectedTractorBeamEntity : public CBaseProjectedEntity
 {
-
 public:
 
 	DECLARE_CLASS( CProjectedTractorBeamEntity, CBaseProjectedEntity );
@@ -32,7 +31,7 @@ public:
 	float GetLinearForce();
 
     static CProjectedTractorBeamEntity *CreateNewInstance();
-    static CProjectedTractorBeamEntity *CreateNewProjectedEntity();
+    virtual CBaseProjectedEntity *CreateNewProjectedEntity();
 
 private:
 	
@@ -86,7 +85,7 @@ public:
 
 	float GetBeamRadius() { return m_flRadius; }
 
-	bool HasGravityScale() { return m_gravityScale > 0.0; }
+	bool HasGravityScale() { return m_gravityScale != 0.0; }
 	bool HasAirDensity();
 	bool HasLinearLimit();
 	bool HasLinearScale();

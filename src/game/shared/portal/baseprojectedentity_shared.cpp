@@ -165,7 +165,7 @@ void CBaseProjectedEntity::RecursiveProjection( bool bShouldSpawn, CBaseProjecto
 
 	AddEffects( EF_NOINTERP );
 
-#if 0
+#if 1
 	Vector vFlooredPosition; //HACKHACK: the inputs vary just ever so slightly from client/server. Hopefully flooring them will keep them in sync
 	vFlooredPosition.x = floor( vProjectOrigin.x * 512.0f ) / 512.0f;
 	vFlooredPosition.y = floor( vProjectOrigin.y * 512.0f ) / 512.0f;

@@ -39,8 +39,6 @@ IMPLEMENT_SERVERCLASS_ST( CBaseProjectedEntity, DT_BaseProjectedEntity )
 
 END_SEND_TABLE()
 
-LINK_ENTITY_TO_CLASS( projected_entity, CBaseProjectedEntity )
-
 CBaseProjectedEntity::CBaseProjectedEntity( void )
 {
 	m_hHitPortal = NULL;
@@ -108,7 +106,7 @@ void CBaseProjectedEntity::PlacePlacementHelper( CInfoPlacementHelper *pHelper )
 
 void CBaseProjectedEntity::OnPreProjected( void )
 {
-	// FixMe?
+
 }
 
 void CBaseProjectedEntity::SetTransmit( CCheckTransmitInfo *pInfo, bool bAlways )
@@ -140,9 +138,3 @@ Vector CBaseProjectedEntity::GetLengthVector( void )
 {
 	return m_vecEndPoint - m_vecStartPoint;
 }
-
-CBaseProjectedEntity *CBaseProjectedEntity::CreateNewProjectedEntity(void)
-{
-	return (CBaseProjectedEntity*)CreateEntityByName("projected_entity");
-}
-

@@ -114,7 +114,7 @@ void CPropTractorBeamProjector::Spawn()
 
 	SetFadeDistance( -1.0, 0.0 );
 	SetGlobalFadeScale( 0.0 );
-	AddEffects( 16 );
+	AddEffects( EF_NOSHADOW );
 }
 
 void CPropTractorBeamProjector::Precache()
@@ -147,7 +147,6 @@ void CPropTractorBeamProjector::Project( void )
 	m_vEndPos = m_hFirstChild->GetEndPoint();
 
 	CSoundEnvelopeController &controller = CSoundEnvelopeController::GetController();
-	CReliableBroadcastRecipientFilter filter; // [esp+C0h] [ebp-28h] BYREF
 	if ( !m_sndMechanical )
 	{
 		EmitSound_t ep;
@@ -166,6 +165,7 @@ void CPropTractorBeamProjector::Project( void )
 		ep.m_SoundLevel = SNDLVL_NORM;
 		ep.m_pOrigin = &GetAbsOrigin();
 
+		CReliableBroadcastRecipientFilter filter;
 		filter.AddRecipientsByPAS( GetAbsOrigin() );
 
 		m_sndMechanical = controller.SoundCreate( filter, entindex(), ep );
@@ -176,6 +176,7 @@ void CPropTractorBeamProjector::Project( void )
 	controller.SoundChangeVolume( m_sndMechanical, 1.0, 0.75 );
 	if ( !m_sndAmbientMusic )
 	{
+		CReliableBroadcastRecipientFilter filter;
 		filter.AddAllPlayers();
 		filter.MakeReliable();
 		
@@ -183,25 +184,27 @@ void CPropTractorBeamProjector::Project( void )
 	}
 	controller.Play( m_sndAmbientMusic, 1.0, 100.0 );
 
-	const char *soundName = "VFX.TBeamPosPolarity";
-	if ( IsReversed() )
-		soundName = "VFX.TBeamNegPolarity";
+	const char *soundName = IsReversed() ? "VFX.TBeamNegPolarity" : "VFX.TBeamPosPolarity";
 
-	if ( !m_sndAmbientSound )
-		goto LABEL_37;
-
-	const char *pszAmbientSoundName = controller.SoundGetScriptName( m_sndAmbientSound ).ToCStr();
-	if (!pszAmbientSoundName)
-		pszAmbientSoundName = "";
-
-	if (V_strcmp(pszAmbientSoundName, soundName))
+	bool bIsSameSound = false;
+	if ( m_sndAmbientSound )
 	{
-		controller.Shutdown( m_sndAmbientSound );
-		controller.SoundDestroy( m_sndAmbientSound );
-		m_sndAmbientSound = NULL;
+		const char *pszAmbientSoundName = controller.SoundGetScriptName( m_sndAmbientSound ).ToCStr();
+		if (!pszAmbientSoundName)
+			pszAmbientSoundName = "";
+	
+		bIsSameSound = V_strcmp(pszAmbientSoundName, soundName) != 0;
+	}
+	if ( !m_sndAmbientSound || bIsSameSound )
+	{
+		if ( !m_sndAmbientSound )
+		{
+			controller.Shutdown( m_sndAmbientSound );
+			controller.SoundDestroy( m_sndAmbientSound );
+			m_sndAmbientSound = NULL;
+		}
 
-	LABEL_37:
-
+		CReliableBroadcastRecipientFilter filter;
 		filter.AddAllPlayers();
 		filter.MakeReliable();
 
@@ -213,19 +216,20 @@ void CPropTractorBeamProjector::Project( void )
 
 void CPropTractorBeamProjector::Shutdown( void )
 {
+	BaseClass::Shutdown();
+	
 	CSoundEnvelopeController &controller = CSoundEnvelopeController::GetController();
 
-	BaseClass::Shutdown();
-
-	if (m_sndMechanical)
+	if ( m_sndMechanical )
 		controller.SoundFadeOut( m_sndMechanical, 1.5 );
+
 	if ( m_sndAmbientMusic )
 	{
 		controller.Shutdown( m_sndAmbientMusic );
 		controller.SoundDestroy( m_sndAmbientMusic );
 		m_sndAmbientMusic = NULL;
 	}
-	if (this->m_sndAmbientSound)
+	if ( m_sndAmbientSound )
 	{
 		controller.Shutdown( m_sndAmbientSound );
 		controller.SoundDestroy( m_sndAmbientSound );
@@ -241,7 +245,7 @@ bool CPropTractorBeamProjector::IsReversed( void )
 
 CBaseProjectedEntity *CPropTractorBeamProjector::CreateNewProjectedEntity( void )
 {
-	return CProjectedTractorBeamEntity::CreateNewProjectedEntity();
+	return CProjectedTractorBeamEntity::CreateNewInstance();
 }
 
 void CPropTractorBeamProjector::InputSetLinearForce( inputdata_t &inputdata )

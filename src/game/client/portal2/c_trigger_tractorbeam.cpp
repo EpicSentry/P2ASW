@@ -40,7 +40,6 @@ void C_ProjectedTractorBeamEntity::OnProjected( void )
 	BaseClass::OnProjected();
 	if ( m_hTractorBeamTrigger )
 	{
-
 		m_hTractorBeamTrigger->SetPredictionEligible( GetPredictionEligible() );
 
 		if ( IsPlayerSimulated() )
@@ -55,9 +54,7 @@ void C_ProjectedTractorBeamEntity::OnProjected( void )
 			m_hTractorBeamTrigger->UnsetPlayerSimulated();
 		}
 		
-		m_hTractorBeamTrigger->UpdateBeam( GetStartPoint(), GetEndPoint(), m_hTractorBeamTrigger->GetLinearForce() );	
-
-		DebugDrawLine( GetStartPoint(), GetEndPoint(), 0, 0, 255, true, gpGlobals->frametime );
+		m_hTractorBeamTrigger->UpdateBeam( GetStartPoint(), GetEndPoint(), m_hTractorBeamTrigger->GetLinearForce() );
 	}
 }
 
@@ -569,7 +566,7 @@ float C_Trigger_TractorBeam::GetLinearForce( void )
 
 bool C_Trigger_TractorBeam::HasLinearLimit( void )
 {
-	return m_linearLimit > 0.0;
+	return m_linearLimit != 0.0;
 }
 
 bool C_Trigger_TractorBeam::HasLinearScale( void )
@@ -584,10 +581,10 @@ bool C_Trigger_TractorBeam::HasAngularScale( void )
 
 bool C_Trigger_TractorBeam::HasAngularLimit( void )
 {
-	return m_angularLimit > 0.0;
+	return m_angularLimit != 0.0;
 }
 
 bool C_Trigger_TractorBeam::HasAirDensity( void )
 {
-	return m_addAirDensity > 0.0;
+	return m_addAirDensity != 0.0;
 }

@@ -59,7 +59,7 @@ public:
     virtual PaintPowerType GetPaintPowerAtPoint( const Vector& worldContactPt ) const;
 	
     static CProjectedWallEntity *CreateNewInstance();
-    static CBaseProjectedEntity *CreateNewProjectedEntity();
+    virtual CBaseProjectedEntity *CreateNewProjectedEntity();
 	
 	virtual CBaseEntity *GetEntity() { return this; }
 	

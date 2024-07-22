@@ -95,7 +95,7 @@ void CProjectedTractorBeamEntity::Spawn( void )
 	BaseClass::Spawn();
 	m_hTractorBeamTrigger = CTrigger_TractorBeam::CreateTractorBeam( m_vecStartPoint, m_vecEndPoint, this );
 	
-	SetTransmitState( FL_EDICT_FULL ); // 8
+	SetTransmitState( FL_EDICT_ALWAYS ); // 8
 }
 
 void CProjectedTractorBeamEntity::UpdateOnRemove( void )
@@ -113,6 +113,7 @@ void CProjectedTractorBeamEntity::GetProjectionExtents( Vector &outMins, Vector 
 	outMins.x = -2.0;
 	outMins.y = -2.0;
 	outMins.z = 0.0;
+
 	outMaxs.x = 2.0;
 	outMaxs.y = 2.0;
 	outMaxs.z = 0.0;
@@ -136,8 +137,6 @@ void CProjectedTractorBeamEntity::OnProjected( void )
 		}
 		
 		m_hTractorBeamTrigger->UpdateBeam( GetStartPoint(), GetEndPoint(), GetLinearForce() );	
-
-		DebugDrawLine( GetStartPoint(), GetEndPoint(), 0, 0, 255, true, gpGlobals->frametime );
 	}
 }
 
@@ -165,7 +164,7 @@ CProjectedTractorBeamEntity *CProjectedTractorBeamEntity::CreateNewInstance(void
 	return (CProjectedTractorBeamEntity*)CreateEntityByName("projected_tractor_beam_entity");
 }
 
-CProjectedTractorBeamEntity *CProjectedTractorBeamEntity::CreateNewProjectedEntity()
+CBaseProjectedEntity *CProjectedTractorBeamEntity::CreateNewProjectedEntity()
 {
 	return CreateNewInstance();
 }
@@ -193,6 +192,7 @@ void CTrigger_TractorBeam::Spawn( void )
 
 	SetMoveType( MOVETYPE_NONE, MOVECOLLIDE_DEFAULT );
 	
+	CreateVPhysics();
 	
 	SetTransmitState( FL_EDICT_PVSCHECK );
 	SetThink( &CTrigger_TractorBeam::TractorThink );
@@ -269,37 +269,37 @@ bool CTrigger_TractorBeam::CreateVPhysics( void )
 
 void CTrigger_TractorBeam::StartTouch( CBaseEntity *pOther )
 {
+	BaseClass::StartTouch( pOther );
+
 	if ( !PassesTriggerFilters( pOther ) )
 		return;
-
-	CPortal_Player *pPlayer = ToPortalPlayer( pOther );
-
-	//CAI_ActBusyGoal::NPCMovingToBusy((vgui::TreeView *)this, (int)pOther);
-
-	if (pOther && /*( pOther->GetClassname() == "npc_portal_turret_floor" ) ||*/ pOther->ClassMatches( "npc_portal_turret_floor"))
+	
+	if ( pOther && pOther->ClassMatches( "npc_portal_turret_floor") )
 	{
 		assert_cast<CNPC_Portal_FloorTurret*>( pOther )->OnEnteredTractorBeam();
 	}
-	else if (UTIL_IsReflectiveCube(pOther) && pOther)
+	else if ( UTIL_IsReflectiveCube( pOther ) && pOther )
 	{
 		assert_cast<CPropWeightedCube*>( pOther )->OnEnteredTractorBeam();
 	}
+	
+	CPortal_Player *pPlayer = ToPortalPlayer( pOther );
 	if ( pPlayer )
 	{
 		pPlayer->SetInTractorBeam( this );
 		
-		CSoundEnvelopeController &Controller = CSoundEnvelopeController::GetController(); // ebx
+		CSoundEnvelopeController &controller = CSoundEnvelopeController::GetController();
 
 		if ( m_sndPlayerInBeam )
 		{
-			Controller.Shutdown( m_sndPlayerInBeam );
-			Controller.SoundDestroy( m_sndPlayerInBeam );
+			controller.Shutdown( m_sndPlayerInBeam );
+			controller.SoundDestroy( m_sndPlayerInBeam );
 			m_sndPlayerInBeam = NULL;
 		}
 
 		EmitSound_t ep;
-		ep.m_nChannel = 6;
-		if ( gpGlobals->maxClients > 1 && pPlayer->HasAttachedSplitScreenPlayers() || pPlayer->IsSplitScreenPlayer() )
+		ep.m_nChannel = CHAN_STATIC;
+		if ( gpGlobals->maxClients > 1 && (pPlayer->HasAttachedSplitScreenPlayers() || pPlayer->IsSplitScreenPlayer()) )
 			ep.m_pSoundName = "VFX.PlayerEnterTbeam_SS";
 		else
 			ep.m_pSoundName = "VFX.PlayerEnterTbeam";		
@@ -307,55 +307,29 @@ void CTrigger_TractorBeam::StartTouch( CBaseEntity *pOther )
 		ep.m_flVolume = 1.0;
 		ep.m_SoundLevel = SNDLVL_NORM;
 
+		CPASAttenuationFilter filter( GetAbsOrigin() );
+		filter.AddRecipient( pPlayer );
 
-		// This if check is a remnant from the GetAbsOrigin function, probably unnecessary.
-		//if ( GetEFlags() & EFL_DIRTY_ABSTRANSFORM == 0 )
-		//{
-			CRecipientFilter filter;
-			CPASAttenuationFilter PasFilter;
-
-			filter.AddRecipientsByPAS(GetAbsOrigin());
-
-			//event.pTriggerEntity = (CBaseEntity *)&CPASAttenuationFilter::`vftable';
-			PasFilter.Filter( GetAbsOrigin() );
-			filter.MakeReliable();
-			filter.RemoveAllRecipients();
-			filter.AddRecipient( pPlayer );
-
-			m_sndPlayerInBeam = Controller.SoundCreate( filter, entindex(), ep );
-
-			Controller.Play( m_sndPlayerInBeam, 1.0, 100.0, 0 );
-
-			//CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&event);
-			//CUtlVector<ITriggerTractorBeamAutoList *, CUtlMemory<ITriggerTractorBeamAutoList *, int>>::~CUtlVector<ITriggerTractorBeamAutoList *, CUtlMemory<ITriggerTractorBeamAutoList *, int>>((CUtlVector<__m128, CUtlMemory<__m128, int> > *)&ep.m_UtlVecSoundOrigin);
-		//}
-		//else
+		m_sndPlayerInBeam = controller.SoundCreate( filter, entindex(), ep );
+		controller.Play( m_sndPlayerInBeam, 1.0, 100 );
+	}
+	else
+	{
+		EntityBeamHistory_t &history = g_TractorBeamManager.GetHistoryFromEnt( pOther );
+		if ( history.IsDifferentBeam( this ) )
 		{
-			//pOther = (CNPC_Portal_FloorTurret *)pOther->GetRefEHandle(pOther)->m_Index;
-
-			EntityBeamHistory_t HistoryFromEnt = g_TractorBeamManager.GetHistoryFromEnt( pOther );
-
-			if ( HistoryFromEnt.IsDifferentBeam(this) )
+			triggerevent_t event;
+			if ( m_pController && PhysGetTriggerEvent( &event, this ) && event.pObject )
 			{
-				triggerevent_t event;
-				event.pTriggerEntity = this;
-				
-				if ( m_pController && PhysGetTriggerEvent( &event, this ) )
-				{
-					IPhysicsObject *pPhys = event.pObject;
-					pPhys->Wake();
-					m_pController->AttachObject( pPhys, true );
-				}
-				//if (HistoryFromEnt[12].m_Index)
-				{
-					// FIXME:
-
-					//CTrigger_TractorBeam *pOtherBeam = (CTrigger_TractorBeam *)CHandle<CPortal_Base2D>::operator CPortal_Base2D *(HistoryFromEnt);
-					//pOtherBeam->ForceDetachEntity( pOther );
-				}
-				HistoryFromEnt.UpdateBeam( this );
+				event.pObject->Wake();
+				m_pController->AttachObject( event.pObject, true );
 			}
-		}	
+			if ( history.m_beams.Count() )
+			{
+				ForceDetachEntity( pOther );
+			}
+			history.UpdateBeam( this );
+		}
 	}
 }
 
@@ -375,7 +349,7 @@ void CTrigger_TractorBeam::ForceAttachEntity( CBaseEntity *pEntity )
 void CTrigger_TractorBeam::ForceDetachEntity( CBaseEntity *pEntity )
 {
 	IPhysicsObject *m_pPhysicsObject = pEntity->VPhysicsGetObject();
-	if (m_pPhysicsObject)
+	if ( m_pPhysicsObject )
 	{
 		if ( m_pController )
 		{
@@ -401,9 +375,8 @@ void CTrigger_TractorBeam::WakeTouchingObjects( void )
 	{
 		CBaseEntity *pEntity = pList[i];
 
-		if (!pEntity)
+		if ( !pEntity )
 			continue;
-
 		
 		// Cubes in a disabled state don't move, se we force it
 		if ( UTIL_IsReflectiveCube( pEntity ) || UTIL_IsSchrodinger( pEntity ) )
@@ -440,7 +413,7 @@ float CTrigger_TractorBeam::GetLinearForce( void )
 
 bool CTrigger_TractorBeam::HasLinearLimit( void )
 {
-	return m_linearLimit > 0.0;
+	return m_linearLimit != 0.0;
 }
 
 bool CTrigger_TractorBeam::HasLinearScale( void )
@@ -455,12 +428,12 @@ bool CTrigger_TractorBeam::HasAngularScale( void )
 
 bool CTrigger_TractorBeam::HasAngularLimit( void )
 {
-	return m_angularLimit > 0.0;
+	return m_angularLimit != 0.0;
 }
 
 bool CTrigger_TractorBeam::HasAirDensity( void )
 {
-	return m_addAirDensity > 0.0;
+	return m_addAirDensity != 0.0;
 }
 
 void CTrigger_TractorBeam::SetLinearLimit( float flLinearLimit )
