@@ -253,7 +253,7 @@ void C_Trigger_TractorBeam::DrawColumn( IMaterial *pMaterial, Vector &vecStart, 
 	IMesh* pMesh = pRenderContext->GetDynamicMesh();
 
 	CMeshBuilder meshBuilder;
-	meshBuilder.Begin(pMesh, MATERIAL_POLYGON, 1);
+	meshBuilder.Begin( pMesh, MATERIAL_QUADS, 256 );
 	
 	DrawColumnSegment( meshBuilder, vecStart, vDir, flLength, vecXAxis, vecYAxis, flRadius, flAlpha, flTextureOffset, pMaterial->GetVertexFormat() );
 	
