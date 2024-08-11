@@ -875,8 +875,10 @@ void UpdateSavesDisabledCallback( IConVar *pConVar, const char *pOldString, floa
 	ConVarRef save_disable("save_disable");
 	if (save_disable.IsValid() && map_disable.IsValid())
 	{
-		int mapDisableBit = map_disable.GetInt() << 1;
-		save_disable.SetValue( save_disable.GetInt() | mapDisableBit );
+		if (map_disable.GetBool())
+			save_disable.SetValue( save_disable.GetInt() | 0x2 );
+		else
+			save_disable.SetValue( save_disable.GetInt() & ~0x2 );
 	}
 }
 
@@ -1509,6 +1511,10 @@ bool CServerGameDLL::LevelInit( const char *pMapName, char const *pMapEntities, 
 
 	// ask for the latest game rules
 	GameRules()->UpdateGameplayStatsFromSteam();
+
+	// in the CSGO code this only happens when transitioning, unsure why
+	// it seems to be done on new game and save/load in other places anyway
+	map_wants_save_disable.SetValue( 0 );
 
 	return true;
 }
