@@ -17,15 +17,13 @@ public:
     C_Beam *GetBeam( int i );
     C_Beam *GetFirstBeam();
     C_Beam *GetLastBeam();
-    void UpdatePoints( Vector &vStartPoint, Vector &vEndPoint, unsigned int fMask, ITraceFilter *pTraceFilter, trace_t &tr );
-    void UpdatePointDirection( Vector &vStartPoint, Vector &vDirection, unsigned int fMask, ITraceFilter *pTraceFilter, trace_t &tr );
-    //void * __vecDelDtor(unsigned int );
+    void UpdatePoints( Vector &vStartPoint, Vector &vEndPoint, unsigned int fMask, ITraceFilter *pTraceFilter, trace_t *tr );
+    void UpdatePointDirection( Vector &vStartPoint, Vector &vDirection, unsigned int fMask, ITraceFilter *pTraceFilter, trace_t *tr );
 
 private:
     C_Beam *m_pBeamTemplate;
     C_Beam *CreateBeam();
-    CUtlVector<C_Beam *,CUtlMemory<C_Beam *,int> > m_beams;
-	//CUtlVector<C_Beam*> m_beams;
+	CUtlVector<C_Beam*> m_beams;
 };
 
 #endif // PORTAL_BEAM_HELPER_H

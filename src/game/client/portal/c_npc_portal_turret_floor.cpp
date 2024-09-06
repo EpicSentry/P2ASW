@@ -136,7 +136,7 @@ void C_NPC_Portal_FloorTurret::UpdateBeam(Vector& vecMuzzle, Vector& vecMuzzleDi
 	CTraceFilterSkipClassname traceFilter(this, "prop_energy_ball", COLLISION_GROUP_NONE);
 	
 	vEndPoint = vecMuzzle + vecMuzzleDir * 8192.0f;
-	m_beamHelper.UpdatePoints(vecMuzzle, vEndPoint, MASK_SHOT, &traceFilter, tr);
+	m_beamHelper.UpdatePoints(vecMuzzle, vEndPoint, MASK_SHOT, &traceFilter, &tr);
 	m_vLastMuzzle = vecMuzzle;
 	m_vLastMuzzleDir = vecMuzzleDir;
 }

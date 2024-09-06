@@ -43,7 +43,7 @@ FizzlerEffects* FizzlerEffects::Create( CBaseEntity* pAttachTo ) // Purpose: Com
         CBaseAnimating* pDissolvingAnimating = pAttachTo->GetBaseAnimating();
         if ( pDissolvingAnimating )
         {
-            pDissolvingAnimating->AddFlag( FL_ONFIRE );
+            pDissolvingAnimating->AddFlag( FL_DISSOLVING );
             pDissolvingAnimating->SetEffectEntity( pFizzlerEffects );
             pDissolvingAnimating->ResetSequence( 1 );
         }

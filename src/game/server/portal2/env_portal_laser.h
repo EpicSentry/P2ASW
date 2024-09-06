@@ -28,10 +28,13 @@ public:
     void UpdateOnRemove();
     bool CreateVPhysics();
     int UpdateTransmitState();
+
     Vector ClosestPointOnLineSegment( const Vector &vPos );
+
     void InputTurnOn( inputdata_t &inputdata );
     void InputTurnOff( inputdata_t &inputdata );
     void InputToggle( inputdata_t &inputdata );
+
     CPortalLaser *m_pParentLaser;
     CPortalLaser *m_pChildLaser;
 	
@@ -69,9 +72,10 @@ private:
 	
 	CBaseEntity *TraceLaser( bool bIsFirstTrace, Vector &vecStart, Vector &vecDirection, float &flTotalBeamLength, trace_t &tr, PortalLaserInfoList_t &infoList, Vector *pVecAutoAimOffset );
 
-    CBaseEntity *GetEntitiesAlongLaser( Vector &vecStart, Vector &vecEnd, Vector &vecOut, PortalLaserInfoList_t &infoList, bool bIsFirstTrace );
+    CBaseEntity *GetEntitiesAlongLaser( Vector &vecStart, Vector &vecEnd, Vector *pVecOut, PortalLaserInfoList_t &infoList, bool bIsFirstTrace );
     void DamageEntitiesAlongLaser( const PortalLaserInfoList_t &infoList , bool bAutoAim );
-	Vector m_vecNearestSoundSource[MAX_PLAYERS];
+
+    Vector m_vecNearestSoundSource[MAX_PLAYERS];
     CBaseEntity *m_pSoundProxy[MAX_PLAYERS];
 	CSoundPatch *m_pAmbientSound[MAX_PLAYERS];
     CInfoPlacementHelper *m_pPlacementHelper;

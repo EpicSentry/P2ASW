@@ -5,6 +5,7 @@
 #include "util_shared.h"
 #include "c_prop_weightedcube.h"
 
+#define	MASK_PORTAL_LASER (CONTENTS_SOLID|CONTENTS_MOVEABLE|CONTENTS_MONSTER|CONTENTS_DEBRIS|CONTENTS_HITBOX)
 const char *LASER_SPARK_EFFECT_NAME = "discouragement_beam_sparks";
 
 class C_PortalLaser : public C_BaseAnimating
@@ -184,37 +185,11 @@ void C_PortalLaser::ClientThink( void )
 		if (pSimulator)
 		{
 			if (pSimulator->EntityIsInPortalHole( pReflector )
-				&& ((((vStart.x * pSimulator->GetInternalData().Placement.PortalPlane.m_Normal.x)
-				+ (vStart.y * pSimulator->GetInternalData().Placement.PortalPlane.m_Normal.y))
-				+ (vStart.z * pSimulator->GetInternalData().Placement.PortalPlane.m_Normal.z))
-				- pSimulator->GetInternalData().Placement.PortalPlane.m_Dist) < 0.0)
+				&& (DotProduct( vStart, pSimulator->GetInternalData().Placement.PortalPlane.m_Normal ) -
+				pSimulator->GetInternalData().Placement.PortalPlane.m_Dist) < 0.0)
 			{
-#if 0
-				float v27 = pSimulator->GetInternalData().Placement.matThisToLinked.m[1][0];
-				float v25 = pSimulator->GetInternalData().Placement.matThisToLinked.m[1][1];
-				float v24 = pSimulator->GetInternalData().Placement.matThisToLinked.m[1][2];
-				float v12 = pSimulator->GetInternalData().Placement.matThisToLinked.m[0][0];
-				float v13 = pSimulator->GetInternalData().Placement.matThisToLinked.m[0][1];
-				float v14 = pSimulator->GetInternalData().Placement.matThisToLinked.m[0][2];
-				float v23 = pSimulator->GetInternalData().Placement.matThisToLinked.m[2][0];
-				float v22 = pSimulator->GetInternalData().Placement.matThisToLinked.m[2][1];
-				float v21 = pSimulator->GetInternalData().Placement.matThisToLinked.m[2][2];
-
-				vStart.y = (((v27 * vStart.x) + (v25 * vStart.y)) + (vStart.z * v24))
-					+ pSimulator->GetInternalData().Placement.matThisToLinked.m[1][3];
-				vStart.z = (((v23 * vStart.x) + (v22 * vStart.y)) + (vStart.z * v21))
-					+ pSimulator->GetInternalData().Placement.matThisToLinked.m[2][3];				
-				vStart.x = ((vStart.x * v12) + (vStart.y * v13)) + (vStart.z * v14)
-					+ pSimulator->GetInternalData().Placement.matThisToLinked.m[0][3];
-					
-
-				vDir.x = ((v12 * vDir.x) + (v13 * vDir.y)) + (v14 * vDir.z);
-				vDir.y = ((v27 * vDir.x) + (v25 * vDir.y)) + (v24 * vDir.z);
-				vDir.z = ((vDir.x * v23) + (vDir.y * v22)) + (vDir.z * v21);
-#else
-				vStart = pSimulator->GetInternalData().Placement.matThisToLinked * vStart;
+				UTIL_Portal_PointTransform( pSimulator->GetInternalData().Placement.matThisToLinked, vStart, vStart );
 				vDir = pSimulator->GetInternalData().Placement.matThisToLinked * vDir;
-#endif
 			}
 		}
 
@@ -229,12 +204,11 @@ void C_PortalLaser::ClientThink( void )
 			UTIL_Portal_Laser_Prevent_Tilting(vDir);
 		}
 
-		// MASK: 0x46004001u
-		m_beamHelper.UpdatePointDirection( vStart, vDir, 0x46004001u, &traceFilter, tr );
+		m_beamHelper.UpdatePointDirection( vStart, vDir, MASK_PORTAL_LASER, &traceFilter, &tr );
 	}
 	else
 	{
-		m_beamHelper.UpdatePoints( m_vStartPoint, m_vEndPoint, 0x46004001u, &traceFilter, tr );
+		m_beamHelper.UpdatePoints( m_vStartPoint, m_vEndPoint, MASK_PORTAL_LASER, &traceFilter, &tr );
 	}
 
 	if (m_bShouldSpark)
