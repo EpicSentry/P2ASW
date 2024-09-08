@@ -894,7 +894,7 @@ void CPortalLaser::DamageEntitiesAlongLaser( const PortalLaserInfoList_t &infoLi
 						vecBounce.z = vecPlayerVelocity.z;
 						VectorNormalize( vecBounce );
 						vecBounce.z = 0;
-						bDoDamage = (vecPlayerVelocity.x * vecLineToLaser.x) + (vecPlayerVelocity.y * vecLineToLaser.y) >= 0.0;
+						bDoDamage = (vecBounce.x * vecLineToLaser.x) + (vecBounce.y * vecLineToLaser.y) >= 0.0;
 					}
 
 					if ( bDoDamage )
