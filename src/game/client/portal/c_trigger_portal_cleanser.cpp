@@ -361,7 +361,10 @@ void C_TriggerPortalCleanser::DestroyParticles( void )
 //-----------------------------------------------------------------------------
 void C_TriggerPortalCleanser::Touch( C_BaseEntity *pOther )
 {
-	if ( !IsEnabled() && !m_bPlayersPassTriggerFilters )
+	if ( !IsEnabled() )
+		return;
+
+	if ( !m_bPlayersPassTriggerFilters )
 		return;
 
 	if ( pOther->IsPlayer() )
