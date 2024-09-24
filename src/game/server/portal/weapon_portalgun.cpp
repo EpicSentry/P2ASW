@@ -489,8 +489,7 @@ void CWeaponPortalgun::ChangeTeam( int iTeamNum )
 
 void CWeaponPortalgun::ClearPortalPositions( void )
 {
-	m_vecOrangePortalPos = vec3_invalid;
-	m_vecBluePortalPos = m_vecOrangePortalPos;
+	m_vecBluePortalPos = m_vecOrangePortalPos = vec3_invalid;
 }
 
 ConCommand change_portalgun_linkage_id( "change_portalgun_linkage_id", change_portalgun_linkage_id_f, "Changes the portal linkage ID for the portal gun held by the commanding player.", FCVAR_CHEAT );

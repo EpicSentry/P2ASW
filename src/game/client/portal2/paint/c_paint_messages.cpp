@@ -49,7 +49,7 @@ void __MsgFunc_PaintWorld( bf_read &msg )
 			vContactPoint.y = vCenter.y + msg.ReadShort();
 			vContactPoint.z = vCenter.z + msg.ReadShort();
 
-			UTIL_PaintBrushEntity( pBrushEntity, vContactPoint, power, flPaintRadius, flAlphaPercent, NULL );
+			UTIL_PaintBrushEntity( pBrushEntity, vContactPoint, power, flPaintRadius, flAlphaPercent );
 		}
 	}
 }

@@ -606,18 +606,6 @@ int CNewParticleEffect::DrawModel( int flags, const RenderableInstance_t &instan
 	}
 #endif
 #endif
-	
-	/*
-	int nViewRecursionLevel = 0;
-#ifdef PORTAL
-	nViewRecursionLevel = g_pPortalRender->GetViewRecursionLevel();
-	if ( m_pDef->GetMaxRecursionDepth() < nViewRecursionLevel )
-	{
-		//DevMsg( "---Aborted at Particle Portal Recursion Level : %d - Max : %d\n", g_pPortalRender->GetViewRecursionLevel(), m_pDef->GetMaxRecursionDepth() );
-		return 0;
-	}
-#endif
-	*/
 
 	// do distance cull check here. We do it here instead of in particles so we can easily only do
 	// it for root objects, not bothering to cull children individually

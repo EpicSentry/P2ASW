@@ -10,14 +10,12 @@
 #include "paint/paintable_entity.h"
 #include "world.h"
 #include "isaverestore.h"
-#include "paint_database.h"
 
 #ifdef PORTAL2
 #include "weapon_paintgun.h"
 #include "projectedwallentity.h"
 #include "portal_player.h"
 #include "prop_weightedcube.h"
-#include "paint/paint_savelogic.h"
 #endif
 #include "cegclientwrapper.h"
 
@@ -86,7 +84,6 @@ void CPaintDatabase::AddPaint( CBaseEntity* pPaintedEntity, const Vector& vecPai
 		data.flPaintRadius = flPaintRadius;
 		data.flPaintAlphaPercent = flAlphaPercent;
 		data.location = vPushedContactPoint;
-		data.normal = vecNormal;
 
 		for ( int i=0; i<brushEnum.m_BrushEntitiesToPaint.Count(); ++i )
 		{
@@ -101,10 +98,9 @@ void CPaintDatabase::AddPaint( CBaseEntity* pPaintedEntity, const Vector& vecPai
 		m_PaintThisFrame.AddToTail( data );
 	}
 	// Not the world
-	else if ( !( pPaintedEntity->GetFlags() & FL_UNPAINTABLE ) ) //If this entity is not flagged as unpaintable
+	else if( !( pPaintedEntity->GetFlags() & FL_UNPAINTABLE ) ) //If this entity is not flagged as unpaintable
 	{
-		
-#if defined ( PORTAL2 ) && !defined ( NO_PROJECTED_WALL )
+#ifdef PORTAL2
 		// If this hit a paintable projected wall
 		CProjectedWallEntity *pPaintableWall = dynamic_cast< CProjectedWallEntity* >( pPaintedEntity );
 		if( pPaintableWall )
@@ -193,8 +189,7 @@ void CPaintDatabase::PaintEntity( CBaseEntity *pPaintedEntity, PaintPowerType ne
 	}
 }
 
-// Projected Walls aren't implemented yet
-#if defined (PORTAL2) && !defined ( NO_PROJECTED_WALL )
+#ifdef PORTAL2
 void CPaintDatabase::PaintProjectedWall( CProjectedWallEntity *pWall, PaintPowerType powerType, const Vector &vecPosition )
 {
 	const bool bWallPainted = pWall->IsWallPainted( vecPosition );
@@ -225,8 +220,8 @@ void CPaintDatabase::RemoveAllPaint()
 			RemovePaintedEntity( i, false);
 		}
 	}
-	// No projected walls yet
-#if defined (PORTAL2) && 1
+
+#ifdef PORTAL2
 	//Remove the paint from all the painted projected walls
 	const int nPaintedProjectedWallCount = m_PaintedProjectedWalls.Count();
 	for( int i = 0; i < nPaintedProjectedWallCount; ++i )
@@ -307,8 +302,7 @@ void CPaintDatabase::RemovePaintedEntity( int index, bool bDeleteData )
 	}
 }
 
-// No projected walls yet
-#if defined ( PORTAL2 ) && 1
+#ifdef PORTAL2
 void CPaintDatabase::RemovePaintedWall( CProjectedWallEntity *pWall, bool bDeleteData )
 {
 	//Get the paint gun to give back the ammo to
@@ -537,27 +531,9 @@ void CPaintDatabase::PreClientUpdate()
 	for ( int i=0; i<count; ++i )
 	{
 		const PaintLocationData_t& data = m_PaintThisFrame[i];
-	
+
 		CBaseEntity *pPaintBrush = ( data.hBrushEntity.Get() != NULL ) ? EntityFromEntityHandle( data.hBrushEntity.Get() ) : NULL;
-
-		bool bSave = false;
-
-		PaintTraceData_t *pTraceData = NULL;
-		if ( !g_pGameRules->IsMultiplayer() )
-		{
-			bSave = true;
-			PaintTraceData_t traceData;
-			traceData.pBrushEntity = pPaintBrush;
-			traceData.contactPoint = data.location;
-			traceData.flPaintRadius = data.flPaintRadius;
-			traceData.power = data.type;
-			traceData.normal = data.normal;
-			AddPaintDataToMemory( traceData );
-			
-			pTraceData = &traceData;
-
-		}
-		float flChangedPaintRadius = UTIL_PaintBrushEntity( pPaintBrush, data.location, data.type, data.flPaintRadius, data.flPaintAlphaPercent, pTraceData );
+		float flChangedPaintRadius = UTIL_PaintBrushEntity( pPaintBrush, data.location, data.type, data.flPaintRadius, data.flPaintAlphaPercent );
 		boundsCache.AddChangedBounds( data.location, flChangedPaintRadius );
 		//DevMsg("paint pos = %f %f %f\n", XYZ(data.location) );
 	}
@@ -716,13 +692,11 @@ CON_COMMAND_F( cast_ray_paint, "Test paint", FCVAR_CHEAT )
 
 void CPaintDatabase::SavePaintmapData( ISave* pSave )
 {
-	// Engine function doesn't exist
-#if 0
 	if ( !HASPAINTMAP )
 		return;
 
 	CUtlVector< uint32 > data;
-	engine->GetPaintmapDataRLE( data );
+	//engine->GetPaintmapDataRLE( data );
 
 	pSave->StartBlock();
 	{
@@ -731,7 +705,6 @@ void CPaintDatabase::SavePaintmapData( ISave* pSave )
 		pSave->WriteData( (const char *)data.Base(), count * sizeof(data.Base()[0]) );
 	}
 	pSave->EndBlock();
-#endif
 }
 
 
@@ -752,43 +725,35 @@ void CPaintDatabase::RestorePaintmapData( IRestore* pRestore )
 
 void CPaintDatabase::SendPaintDataTo( CBasePlayer* pPlayer )
 {
-	// Engine function doesn't exist
-#if 0
 	if ( !HASPAINTMAP )
 		return;
 
 	if ( pPlayer->IsConnected() )
 	{
-		engine->SendPaintmapDataToClient( pPlayer->edict() );
+		//engine->SendPaintmapDataToClient( pPlayer->edict() );
 	}
-#endif
 }
 
 
 // this is for save/restore
 void CPaintDatabase::SendPaintDataToEngine()
 {
-	// Engine function doesn't exist
-#if 0
 	if ( !HASPAINTMAP )
 		return;
 
 	if ( m_PaintRestoreData.m_PaintmapData.Count() > 0 )
 	{
-		engine->LoadPaintmapDataRLE( m_PaintRestoreData.m_PaintmapData );
+		//engine->LoadPaintmapDataRLE( m_PaintRestoreData.m_PaintmapData );
 	}
 
 	// clean up after load
 	m_PaintRestoreData.m_PaintmapData.Purge();
-#endif
 }
 
 
 #ifndef TI_REL
 void CC_PaintAllSurfaces( const CCommand& args )
 {
-	// Engine function doesn't exist
-#if 0
 	PaintPowerType power = SPEED_POWER;
 
 	if ( args.ArgC() == 2 )
@@ -796,7 +761,7 @@ void CC_PaintAllSurfaces( const CCommand& args )
 		power = static_cast< PaintPowerType >( atoi( args[1] ) );
 	}
 
-	engine->PaintAllSurfaces( power );
+	//engine->PaintAllSurfaces( power );
 
 	CBroadcastRecipientFilter filter;
 	filter.MakeReliable();
@@ -806,7 +771,6 @@ void CC_PaintAllSurfaces( const CCommand& args )
 	WRITE_BYTE( power );
 
 	MessageEnd();
-#endif
 }
 
 static ConCommand paintallsurfaces( "paintallsurfaces", CC_PaintAllSurfaces );

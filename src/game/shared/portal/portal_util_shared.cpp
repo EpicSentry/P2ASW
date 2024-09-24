@@ -22,7 +22,6 @@
 	#include "NDebugOverlay.h"
 	#include "env_debughistory.h"
 	#include "world.h"
-	#include "paint/paint_savelogic.h"
 #else
 	#include "c_portal_player.h"
 	#include "c_prop_portal.h"
@@ -2857,7 +2856,7 @@ CEG_NOINLINE bool UTIL_IsPaintableSurface( const csurface_t& surface )
 
 
 
-float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoint, PaintPowerType power, float flPaintRadius, float flAlphaPercent, PaintTraceData_t *pTraceData )
+float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoint, PaintPowerType power, float flPaintRadius, float flAlphaPercent )
 {
 	if ( !pBrushEntity )
 	{
@@ -2876,11 +2875,6 @@ float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoi
 	Color color = MapPowerToColor( power );
 
 	engine->PaintSurface( pBrushEntity->GetModel(), vEntitySpaceContactPoint, color, flPaintRadius );
-
-#ifdef GAME_DLL
-	if ( pTraceData )
-		AddPaintDataToMemory( *pTraceData );
-#endif
 
 	return flPaintRadius;
 }
