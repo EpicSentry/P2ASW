@@ -163,7 +163,7 @@ void CRadialButton::PerformLayout( void )
 	BaseClass::PerformLayout();
 
 	float flScale = 0.5;
-	if ( isArmed || m_bPulse )
+	if ( isArmed || !m_bPulse )
 	{
 		if ( isArmed )
 			flScale = 1.0;
@@ -176,6 +176,7 @@ void CRadialButton::PerformLayout( void )
 		flScale = m_fMaxScale;
 
 		float flNewScale = sinf( gpGlobals->curtime * 5.0 );
+		flNewScale = fabs( flNewScale );
 		if ( ( flNewScale * 0.25 ) + 0.5 <= flScale )
 			flScale = flNewScale;
 	}
