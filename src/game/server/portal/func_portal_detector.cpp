@@ -207,20 +207,21 @@ void CFuncPortalDetector::UpdateOnPortalMoved( CProp_Portal *pPortal )
 		Vector vBoxCenter;
 		Vector vBoxExtents;
 
-		if ( GetLinkageGroupID() != pPortal->GetLinkageGroup() && !m_bCheckAllIDs )
-			goto SKIP_BOX_CHECK;
-
-		CollisionProp()->WorldSpaceAABB( &vMin, &vMax );
-
-		vBoxCenter = ( vMax + vMin ) * 0.5;
-		vBoxExtents = ( vMax - vMin ) * 0.5;
-		
 		bool bIsTouchingPortalDetector = true;
-
-		if ( !UTIL_IsBoxIntersectingPortal( vBoxCenter, vBoxExtents, pPortal ) )
+		if ( GetLinkageGroupID() != pPortal->GetLinkageGroup() && !m_bCheckAllIDs )
 		{
-			SKIP_BOX_CHECK:
 			bIsTouchingPortalDetector = false;
+		}
+		else
+		{
+			CollisionProp()->WorldSpaceAABB( &vMin, &vMax );
+			vBoxCenter = ( vMax + vMin ) * 0.5;
+			vBoxExtents = ( vMax - vMin ) * 0.5;
+
+			if ( !UTIL_IsBoxIntersectingPortal( vBoxCenter, vBoxExtents, pPortal ) )
+			{
+				bIsTouchingPortalDetector = false;
+			}
 		}
 
 		if ( ( bWasTouchingPortalDetector && !pPortal->IsActive() ) 
@@ -247,20 +248,24 @@ void CFuncPortalDetector::PortalPlacedInsideBounds( CProp_Portal *pPortal )
 	if ( pPortal->m_bIsPortal2 )
 	{
 		m_OnStartTouchPortal2.FireOutput( pPortal, this );
-		if ( !pPortal->IsActivedAndLinked() )
-			goto ADD_LISTENER;
 	}
 	else
 	{
 		m_OnStartTouchPortal1.FireOutput( pPortal, this );
-		if ( !pPortal->IsActivedAndLinked() )
-			goto ADD_LISTENER;
 	}
-	m_OnStartTouchLinkedPortal.FireOutput( pPortal, this );
-	if ( m_iTouchingPortalCount == 2 )
-		m_OnStartTouchBothLinkedPortals.FireOutput( pPortal, this );
-ADD_LISTENER:
-	pPortal->AddPortalEventListener( this );
+	
+	if ( pPortal->IsActivedAndLinked() )
+	{
+		m_OnStartTouchLinkedPortal.FireOutput( pPortal, this );
+		if ( m_iTouchingPortalCount == 2 )
+		{
+			m_OnStartTouchBothLinkedPortals.FireOutput( pPortal, this );
+		}
+	}
+	else
+	{
+		pPortal->AddPortalEventListener( this );
+	}
 }
 
 bool CFuncPortalDetector::IsPortalTouchingDetector( const CProp_Portal *pPortal )
@@ -289,24 +294,24 @@ void CFuncPortalDetector::UpdateOnPortalActivated( CProp_Portal *pPortal )
 
 void CFuncPortalDetector::PortalRemovedFromInsideBounds( CProp_Portal *pPortal )
 {
-	EHANDLE p_hListener; // [esp+1Ch] [ebp-Ch] BYREF
-
 	m_OnEndTouchPortal.FireOutput( pPortal, this );
 	if ( pPortal->m_bIsPortal2 )
 	{
 		m_OnEndTouchPortal2.FireOutput( pPortal, this );
-		if ( !pPortal->IsActivedAndLinked() )
-			goto REMOVE_LISTENER;
 	}
 	else
 	{
 		m_OnEndTouchPortal1.FireOutput( pPortal, this );
-		if ( !pPortal->IsActivedAndLinked() )
-			goto REMOVE_LISTENER;
 	}
-	m_OnEndTouchLinkedPortal.FireOutput( pPortal, this );
-	if ( !m_iTouchingPortalCount )
-		m_OnEndTouchBothLinkedPortals.FireOutput( pPortal, this );
-REMOVE_LISTENER:
-	pPortal->RemovePortalEventListener( this );
+	
+	if ( pPortal->IsActivedAndLinked() )
+	{
+		m_OnEndTouchLinkedPortal.FireOutput( pPortal, this );
+		if ( m_iTouchingPortalCount == 0 )
+			m_OnEndTouchBothLinkedPortals.FireOutput( pPortal, this );
+	}
+	else
+	{
+		pPortal->RemovePortalEventListener( this );
+	}
 }
