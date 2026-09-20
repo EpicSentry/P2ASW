@@ -107,21 +107,27 @@ void CFuncPortalDetector::SetActive( bool bActive )
 	bool bTouchedPortal1 = false;
 	bool bTouchedPortal2 = false;
 
-	if (bActive)
+	COutputEvent *pOutputTouchPortal;
+	COutputEvent *pOutputTouchPortal1;
+	COutputEvent *pOutputTouchPortal2;
+	COutputEvent *pOutputTouchLinkedPortal;
+	COutputEvent *pOutputTouchBothLinkedPortals;
+
+	if ( bActive )
 	{
-		m_OnStartTouchPortal = m_OnStartTouchPortal;
-		m_OnStartTouchPortal2 = m_OnStartTouchPortal2;
-		m_OnStartTouchPortal1 = m_OnStartTouchPortal1;
-		m_OnStartTouchLinkedPortal = m_OnStartTouchLinkedPortal;
-		m_OnStartTouchBothLinkedPortals = m_OnStartTouchBothLinkedPortals;
+		pOutputTouchPortal = &m_OnStartTouchPortal;
+		pOutputTouchPortal2 = &m_OnStartTouchPortal2;
+		pOutputTouchPortal1 = &m_OnStartTouchPortal1;
+		pOutputTouchLinkedPortal = &m_OnStartTouchLinkedPortal;
+		pOutputTouchBothLinkedPortals = &m_OnStartTouchBothLinkedPortals;
 	}
 	else
 	{
-		m_OnStartTouchPortal = m_OnEndTouchPortal;
-		m_OnStartTouchPortal2 = m_OnEndTouchPortal2;
-		m_OnStartTouchPortal1 = m_OnEndTouchPortal1;
-		m_OnStartTouchLinkedPortal = m_OnEndTouchLinkedPortal;
-		m_OnStartTouchBothLinkedPortals = m_OnEndTouchBothLinkedPortals;
+		pOutputTouchPortal = &m_OnEndTouchPortal;
+		pOutputTouchPortal2 = &m_OnEndTouchPortal2;
+		pOutputTouchPortal1 = &m_OnEndTouchPortal1;
+		pOutputTouchLinkedPortal = &m_OnEndTouchLinkedPortal;
+		pOutputTouchBothLinkedPortals = &m_OnEndTouchBothLinkedPortals;
 	}
 
 	int iPortalCount = CProp_Portal_Shared::AllPortals.Count();
@@ -136,25 +142,25 @@ void CFuncPortalDetector::SetActive( bool bActive )
 
 			if( pTempPortal->GetLinkageGroup() == m_iLinkageGroupID && UTIL_IsBoxIntersectingPortal( vBoxCenter, vBoxExtents, pTempPortal ) )
 			{
-				m_OnStartTouchPortal.FireOutput(pTempPortal, this);
+				pOutputTouchPortal->FireOutput(pTempPortal, this);
 				if( pTempPortal->IsPortal2() )
 				{
-					m_OnStartTouchPortal2.FireOutput( pTempPortal, this );
+					pOutputTouchPortal2->FireOutput( pTempPortal, this );
 
 					if ( pTempPortal->IsActivedAndLinked() )
 					{
 						bTouchedPortal2 = true;
-						m_OnStartTouchLinkedPortal.FireOutput( pTempPortal, this );
+						pOutputTouchLinkedPortal->FireOutput( pTempPortal, this );
 					}
 				}
 				else
 				{
-					m_OnStartTouchPortal1.FireOutput( pTempPortal, this );
+					pOutputTouchPortal1->FireOutput( pTempPortal, this );
 
 					if ( pTempPortal->IsActivedAndLinked() )
 					{
 						bTouchedPortal1 = true;
-						m_OnStartTouchLinkedPortal.FireOutput( pTempPortal, this );
+						pOutputTouchLinkedPortal->FireOutput( pTempPortal, this );
 					}
 				}
 			}
@@ -163,7 +169,7 @@ void CFuncPortalDetector::SetActive( bool bActive )
 
 	if ( bTouchedPortal1 && bTouchedPortal2 )
 	{
-		m_OnStartTouchBothLinkedPortals.FireOutput( this, this );
+		pOutputTouchBothLinkedPortals->FireOutput( this, this );
 	}
 }
 
